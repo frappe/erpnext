@@ -33,6 +33,7 @@ class SalesOrder(SellingController):
 		self.validate_proj_cust()
 		self.validate_po()
 		self.validate_uom_is_integer("stock_uom", "qty")
+		self.validate_uom_is_integer("uom", "qty")
 		self.validate_for_items()
 		self.validate_warehouse()
 		self.validate_drop_ship()
@@ -50,7 +51,9 @@ class SalesOrder(SellingController):
 		# validate transaction date v/s delivery date
 		if self.delivery_date:
 			if getdate(self.transaction_date) > getdate(self.delivery_date):
-				frappe.throw(_("Expected Delivery Date cannot be before Sales Order Date"))
+				frappe.msgprint(_("Expected Delivery Date is be before Sales Order Date"),
+					indicator='orange',
+					title=_('Warning'))
 
 	def validate_po(self):
 		# validate p.o date v/s delivery date
@@ -81,7 +84,8 @@ class SalesOrder(SellingController):
 		unique_chk_list = set(check_list)
 		if len(unique_chk_list) != len(check_list) and \
 			not cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
-			frappe.msgprint(_("Warning: Same item has been entered multiple times."))
+			frappe.msgprint(_("Same item has been entered multiple times"),
+				title=_("Warning"), indicator='orange')
 
 	def product_bundle_has_stock_item(self, product_bundle):
 		"""Returns true if product bundle has stock item"""
@@ -157,7 +161,7 @@ class SalesOrder(SellingController):
 		self.update_reserved_qty()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.base_grand_total, self)
-
+		self.update_project()
 		self.update_prevdoc_status('submit')
 
 	def on_cancel(self):
@@ -167,10 +171,19 @@ class SalesOrder(SellingController):
 
 		self.check_nextdoc_docstatus()
 		self.update_reserved_qty()
-
+		self.update_project()
 		self.update_prevdoc_status('cancel')
 
 		frappe.db.set(self, 'status', 'Cancelled')
+		
+	def update_project(self):
+		project_list = []
+		if self.project:
+				project = frappe.get_doc("Project", self.project)
+				project.flags.dont_sync_tasks = True
+				project.update_sales_costing()
+				project.save()
+				project_list.append(self.project)				
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
@@ -304,6 +317,24 @@ class SalesOrder(SellingController):
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
 
+	def get_production_order_items(self):
+		'''Returns items with BOM that already do not have a linked production order'''
+		items = []
+		for i in self.packed_items or self.items:
+			bom = frappe.get_all('BOM', dict(item=i.item_code, is_active=True),
+					order_by='is_default desc')
+			bom = bom[0].name if bom else None
+			items.append(dict(
+				item_code= i.item_code,
+				bom = bom,
+				warehouse = i.warehouse,
+				pending_qty= i.stock_qty - flt(frappe.db.sql('''select sum(qty) from `tabProduction Order`
+					where production_item=%s and sales_order=%s''', (i.item_code, self.name))[0][0])
+			))
+
+		return items
+
+
 	def on_recurring(self, reference_doc):
 		mcount = month_map[reference_doc.recurring_type]
 		self.set("delivery_date", get_next_date(reference_doc.delivery_date, mcount,
@@ -366,7 +397,8 @@ def make_material_request(source_name, target_doc=None):
 			"doctype": "Material Request Item",
 			"field_map": {
 				"parent": "sales_order",
-				"stock_uom": "uom"
+				"stock_uom": "uom",
+				"stock_qty": "qty"
 			},
 			"condition": lambda doc: not frappe.db.exists('Product Bundle', doc.item_code),
 			"postprocess": update_item
@@ -442,7 +474,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.amount = flt(source.amount) - flt(source.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = target.amount / flt(source.rate) if (source.rate and source.billed_amt) else source.qty
-		
+
 		item = frappe.db.get_value("Item", target.item_code, ["item_group", "selling_cost_center"], as_dict=1)
 		target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
 			or item.selling_cost_center \
@@ -589,6 +621,7 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 	def update_item(source, target, source_parent):
 		target.schedule_date = source_parent.delivery_date
 		target.qty = flt(source.qty) - flt(source.ordered_qty)
+		target.stock_qty = (flt(source.qty) - flt(source.ordered_qty)) * flt(source.conversion_factor)
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -609,7 +642,9 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 			"field_map":  [
 				["name", "sales_order_item"],
 				["parent", "sales_order"],
-				["uom", "stock_uom"],
+				["stock_uom", "stock_uom"],
+				["uom", "uom"],
+				["conversion_factor", "conversion_factor"],
 				["delivery_date", "schedule_date"]
 			],
 			"field_no_map": [
@@ -651,6 +686,29 @@ def get_supplier(doctype, txt, searchfield, start, page_len, filters):
 			'page_len': page_len,
 			'parent': filters.get('parent')
 		})
+
+@frappe.whitelist()
+def make_production_orders(items, sales_order, company, project=None):
+	'''Make Production Orders against the given Sales Order for the given `items`'''
+	items = json.loads(items).get('items')
+	out = []
+
+	for i in items:
+		production_order = frappe.get_doc(dict(
+			doctype='Production Order',
+			production_item=i['item_code'],
+			bom_no=i['bom'],
+			qty=i['pending_qty'],
+			company=company,
+			sales_order=sales_order,
+			project=project,
+			fg_warehouse=i['warehouse']
+		)).insert()
+		production_order.set_production_order_operations()
+		production_order.save()
+		out.append(production_order)
+
+	return [p.name for p in out]
 
 @frappe.whitelist()
 def update_status(status, name):

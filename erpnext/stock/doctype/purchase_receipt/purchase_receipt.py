@@ -46,22 +46,22 @@ class PurchaseReceipt(BuyingController):
 		}]
 
 	def validate(self):
+		self.validate_posting_time()
 		super(PurchaseReceipt, self).validate()
-		
+
 		if not self._action=="submit":
 			self.set_status()
 		self.po_required()
 		self.validate_with_previous_doc()
-		self.validate_inspection()
 		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 
 		pc_obj = frappe.get_doc('Purchase Common')
 		self.check_for_closed_status(pc_obj)
-		
+
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
-		
+
 
 	def validate_with_previous_doc(self):
 		super(PurchaseReceipt, self).validate_with_previous_doc({
@@ -96,13 +96,6 @@ class PurchaseReceipt(BuyingController):
 		po_qty, po_warehouse = frappe.db.get_value("Purchase Order Item", po_detail,
 			["qty", "warehouse"])
 		return po_qty, po_warehouse
-
-	def validate_inspection(self):
-		for d in self.get('items'):		 #Enter inspection date for all items that require inspection
-			if frappe.db.get_value("Item", d.item_code, "inspection_required") and not d.qa_no:
-				frappe.msgprint(_("Quality Inspection required for Item {0}").format(d.item_code))
-				if self.docstatus==1:
-					raise frappe.ValidationError
 
 	# Check for Closed status
 	def check_for_closed_status(self, pc_obj):

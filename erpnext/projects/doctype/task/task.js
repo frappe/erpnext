@@ -6,6 +6,18 @@ frappe.provide("erpnext.projects");
 cur_frm.add_fetch("project", "company", "company");
 
 frappe.ui.form.on("Task", {
+	onload: function(frm) {
+		frm.set_query("task", "depends_on", function() {
+			var filters = {
+				name: ["!=", frm.doc.name]
+			};
+			if(frm.doc.project) filters["project"] = frm.doc.project;
+			return {
+				filters: filters
+			};
+		})
+	},
+
 	refresh: function(frm) {
 		var doc = frm.doc;
 		if(doc.__islocal) {
@@ -13,7 +25,6 @@ frappe.ui.form.on("Task", {
 				frm.set_value("exp_end_date", frappe.datetime.add_days(new Date(), 7));
 			}
 		}
-
 
 		if(!doc.__islocal) {
 			if(frappe.model.can_read("Timesheet")) {
@@ -68,3 +79,4 @@ frappe.ui.form.on("Task", {
 });
 
 cur_frm.add_fetch('task', 'subject', 'subject');
+cur_frm.add_fetch('task', 'project', 'project');

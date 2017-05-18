@@ -8,11 +8,9 @@ def get_notification_config():
 		{
 			"Issue": {"status": "Open"},
 			"Warranty Claim": {"status": "Open"},
-			"Task": {"status": "Overdue"},
+			"Task": {"status": ("in", ("Open", "Overdue"))},
 			"Project": {"status": "Open"},
 			"Item": {"total_projected_qty": ("<", 0)},
-			"Customer": {"status": "Open"},
-			"Supplier": {"status": "Open"},
 			"Lead": {"status": "Open"},
 			"Contact": {"status": "Open"},
 			"Opportunity": {"status": "Open"},
@@ -23,13 +21,14 @@ def get_notification_config():
 			},
 			"Journal Entry": {"docstatus": 0},
 			"Sales Invoice": {
-				"outstanding_amount": (">", 0), 
-				"docstatus": ("<", 2) 
-			},
-			"Purchase Invoice": {
-				"outstanding_amount": (">", 0), 
+				"outstanding_amount": (">", 0),
 				"docstatus": ("<", 2)
 			},
+			"Purchase Invoice": {
+				"outstanding_amount": (">", 0),
+				"docstatus": ("<", 2)
+			},
+			"Payment Entry": {"docstatus": 0},
 			"Leave Application": {"status": "Open"},
 			"Expense Claim": {"approval_status": "Draft"},
 			"Job Applicant": {"status": "Open"},

@@ -18,8 +18,10 @@ class TransactionBase(StatusUpdater):
 				frappe.db.get_value("Notification Control", None, dt + "_message"))
 
 	def validate_posting_time(self):
-		if not self.posting_time:
-			self.posting_time = now_datetime().strftime('%H:%M:%S')
+		if not getattr(self, 'set_posting_time', None):
+			now = now_datetime()
+			self.posting_date = now.strftime('%Y-%m-%d')
+			self.posting_time = now.strftime('%H:%M:%S')
 
 	def add_calendar_event(self, opts, force=False):
 		if cstr(self.contact_by) != cstr(self._prev.contact_by) or \
@@ -33,9 +35,6 @@ class TransactionBase(StatusUpdater):
 			where ref_type=%s and ref_name=%s""", (self.doctype, self.name))
 		if events:
 			frappe.db.sql("delete from `tabEvent` where name in (%s)"
-				.format(", ".join(['%s']*len(events))), tuple(events))
-
-			frappe.db.sql("delete from `tabEvent Role` where parent in (%s)"
 				.format(", ".join(['%s']*len(events))), tuple(events))
 
 	def _add_calendar_event(self, opts):
@@ -110,7 +109,7 @@ class TransactionBase(StatusUpdater):
 	def get_link_filters(self, for_doctype):
 		if hasattr(self, "prev_link_mapper") and self.prev_link_mapper.get(for_doctype):
 			fieldname = self.prev_link_mapper[for_doctype]["fieldname"]
-			
+
 			values = filter(None, tuple([item.as_dict()[fieldname] for item in self.items]))
 
 			if values:
@@ -123,22 +122,8 @@ class TransactionBase(StatusUpdater):
 				ret = None
 		else:
 			ret = None
-		
+
 		return ret
-	
-	def delink_advance_entries(self, jv):
-		total_allocated_amount = 0
-		for adv in self.advances:
-			consider_for_total_advance = True
-			if adv.reference_name == jv:
-				frappe.db.sql("""delete from `tab{0} Advance`
-					where name = %s""".format(self.doctype), adv.name)
-				consider_for_total_advance = False
-
-			if consider_for_total_advance:
-				total_allocated_amount += flt(adv.allocated_amount, adv.precision("allocated_amount"))
-
-		frappe.db.set_value(self.doctype, self.name, "total_advance", total_allocated_amount, update_modified=False)
 
 def delete_events(ref_type, ref_name):
 	frappe.delete_doc("Event", frappe.db.sql_list("""select name from `tabEvent`

@@ -25,6 +25,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 	refresh: function() {
 		var doc = this.frm.doc;
 		erpnext.toggle_naming_series();
+		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'name', doctype: 'Lead'}
 
 		if(!this.frm.doc.__islocal && this.frm.doc.__onload && !this.frm.doc.__onload.is_customer) {
 			this.frm.add_custom_button(__("Customer"), this.create_customer, __("Make"));
@@ -34,9 +35,9 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		}
 
 		if(!this.frm.doc.__islocal) {
-			erpnext.utils.render_address_and_contact(cur_frm);
+			frappe.geo.render_address_and_contact(cur_frm);
 		} else {
-			erpnext.utils.clear_address_and_contact(cur_frm);
+			frappe.geo.clear_address_and_contact(cur_frm);
 		}
 	},
 

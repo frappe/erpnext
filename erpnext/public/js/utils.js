@@ -47,6 +47,7 @@ $.extend(erpnext, {
 				fields: [
 					{
 						"fieldtype": "Link",
+						"fieldname": "serial_no",
 						"options": "Serial No",
 						"label": __("Serial No"),
 						"get_query": function () {
@@ -60,6 +61,7 @@ $.extend(erpnext, {
 					},
 					{
 						"fieldtype": "Button",
+						"fieldname": "add",
 						"label": __("Add")
 					}
 				]
@@ -82,39 +84,13 @@ $.extend(erpnext, {
 
 
 $.extend(erpnext.utils, {
-	clear_address_and_contact: function(frm) {
-		$(frm.fields_dict['address_html'].wrapper).html("");
-		frm.fields_dict['contact_html'] && $(frm.fields_dict['contact_html'].wrapper).html("");
-	},
-
-	render_address_and_contact: function(frm) {
-		// render address
-		$(frm.fields_dict['address_html'].wrapper)
-			.html(frappe.render_template("address_list",
-				cur_frm.doc.__onload))
-			.find(".btn-address").on("click", function() {
-				frappe.new_doc("Address");
-			});
-
-		// render contact
-		if(frm.fields_dict['contact_html']) {
-			$(frm.fields_dict['contact_html'].wrapper)
-				.html(frappe.render_template("contact_list",
-					cur_frm.doc.__onload))
-				.find(".btn-contact").on("click", function() {
-					frappe.new_doc("Contact");
-				}
-			);
-		}
-	},
-
 	set_party_dashboard_indicators: function(frm) {
 		if(frm.doc.__onload && frm.doc.__onload.dashboard_info) {
 			var info = frm.doc.__onload.dashboard_info;
 			frm.dashboard.add_indicator(__('Annual Billing: {0}',
-				[format_currency(info.billing_this_year, frm.doc.default_currency)]), 'blue');
+				[format_currency(info.billing_this_year, info.currency)]), 'blue');
 			frm.dashboard.add_indicator(__('Total Unpaid: {0}',
-				[format_currency(info.total_unpaid, frm.doc.default_currency)]),
+				[format_currency(info.total_unpaid, info.currency)]),
 				info.total_unpaid ? 'orange' : 'green');
 		}
 	},
@@ -143,7 +119,49 @@ erpnext.utils.map_current_doc = function(opts) {
 			if(!cur_frm.doc.items[0].item_code) {
 				cur_frm.doc.items = cur_frm.doc.items.splice(1);
 			}
+
+			// find the doctype of the items table
+			var items_doctype = frappe.meta.get_docfield(cur_frm.doctype, 'items').options;
+			
+			// find the link fieldname from items table for the given
+			// source_doctype
+			var link_fieldname = null;
+			frappe.get_meta(items_doctype).fields.forEach(function(d) { 
+				if(d.options===opts.source_doctype) link_fieldname = d.fieldname; });
+
+			// search in existing items if the source_name is already set and full qty fetched
+			var already_set = false;
+			var item_qty_map = {};
+			
+			$.each(cur_frm.doc.items, function(i, d) {
+				if(d[link_fieldname]==opts.source_name) {
+					already_set = true;
+					if (item_qty_map[d.item_code])
+						item_qty_map[d.item_code] += flt(d.qty);
+					else
+						item_qty_map[d.item_code] = flt(d.qty);
+				}
+			});
+			
+			if(already_set) {
+				frappe.model.with_doc(opts.source_doctype, opts.source_name, function(r) {
+					var source_doc = frappe.model.get_doc(opts.source_doctype, opts.source_name);
+					$.each(source_doc.items || [], function(i, row) {
+						if(row.qty > flt(item_qty_map[row.item_code])) {
+							already_set = false;
+							return false;
+						}
+					})
+				})
+
+				if(already_set) {
+					frappe.msgprint(__("You have already selected items from {0} {1}", 
+						[opts.source_doctype, opts.source_name]));
+					return;
+				}
+			}
 		}
+
 
 		return frappe.call({
 			// Sometimes we hit the limit for URL length of a GET request
@@ -192,7 +210,7 @@ erpnext.utils.map_current_doc = function(opts) {
 
 frappe.form.link_formatters['Item'] = function(value, doc) {
 	if(doc && doc.item_name && doc.item_name !== value) {
-		return value + ': ' + doc.item_name;
+		return value? value + ': ' + doc.item_name: doc.item_name;
 	} else {
 		return value;
 	}
@@ -200,7 +218,7 @@ frappe.form.link_formatters['Item'] = function(value, doc) {
 
 frappe.form.link_formatters['Employee'] = function(value, doc) {
 	if(doc && doc.employee_name && doc.employee_name !== value) {
-		return value + ': ' + doc.employee_name;
+		return value? value + ': ' + doc.employee_name: doc.employee_name;
 	} else {
 		return value;
 	}

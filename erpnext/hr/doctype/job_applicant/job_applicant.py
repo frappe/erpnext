@@ -20,7 +20,7 @@ class JobApplicant(Document):
 			self.get("__onload").offer_letter = offer_letter[0].name
 
 	def autoname(self):
-		keys = filter(None, (self.applicant_name, self.email_id))
+		keys = filter(None, (self.applicant_name, self.email_id, self.job_title))
 		if not keys:
 			frappe.throw(_("Name or Email is mandatory"), frappe.NameError)
 		self.name = " - ".join(keys)
@@ -36,8 +36,8 @@ class JobApplicant(Document):
 	def check_email_id_is_unique(self):
 		if self.email_id:
 			names = frappe.db.sql_list("""select name from `tabJob Applicant`
-				where email_id=%s and name!=%s""", (self.email_id, self.name))
+				where email_id=%s and name!=%s and job_title=%s""", (self.email_id, self.name, self.job_title))
 
 			if names:
-				frappe.throw(_("Email id must be unique, already exists for {0}").format(comma_and(names)), frappe.DuplicateEntryError)
+				frappe.throw(_("Email Address must be unique, already exists for {0}").format(comma_and(names)), frappe.DuplicateEntryError)
 

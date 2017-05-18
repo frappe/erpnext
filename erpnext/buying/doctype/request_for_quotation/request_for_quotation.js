@@ -8,10 +8,15 @@ cur_frm.add_fetch('contact', 'email_id', 'email_id')
 
 frappe.ui.form.on("Request for Quotation",{
 	setup: function(frm) {
+		frm.custom_make_buttons = {
+			'Supplier Quotation': 'Supplier Quotation'
+		}
+
 		frm.fields_dict["suppliers"].grid.get_field("contact").get_query = function(doc, cdt, cdn){
 			var d =locals[cdt][cdn];
 			return {
-				filters: {'supplier': d.supplier}
+				query: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_supplier_contacts",
+				filters: {'supplier': doc.supplier}
 			}
 		}
 	},
@@ -43,6 +48,7 @@ frappe.ui.form.on("Request for Quotation",{
 				});
 			});
 		}
+		
 	},
 
 	make_suppplier_quotation: function(frm) {
@@ -134,6 +140,42 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 						}
 					})
 				}, __("Get items from"));
+				// Get items from open Material Requests based on supplier
+				cur_frm.add_custom_button(__('Possible Supplier'), function() {
+					// Create a dialog window for the user to pick their supplier
+					var d = new frappe.ui.Dialog({
+						title: __('Select Possible Supplier'),
+						fields: [
+						{fieldname: 'supplier', fieldtype:'Link', options:'Supplier', label:'Supplier', reqd:1},
+						{fieldname: 'ok_button', fieldtype:'Button', label:'Get Items from Material Requests'},
+						]
+					});
+					
+					// On the user clicking the ok button
+					d.fields_dict.ok_button.input.onclick = function() {
+						var btn = d.fields_dict.ok_button.input;
+						var v = d.get_values();
+						if(v) {
+							$(btn).set_working();
+							
+							erpnext.utils.map_current_doc({
+								method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_item_from_material_requests_based_on_supplier",
+								source_name: v.supplier,
+								get_query_filters: {
+									material_request_type: "Purchase",
+									docstatus: 1,
+									status: ["!=", "Stopped"],
+									per_ordered: ["<", 99.99],
+									company: cur_frm.doc.company
+								}
+							});
+							$(btn).done_working();
+							d.hide();
+						}
+					}	
+					d.show();
+				}, __("Get items from"));
+				
 		}
 	},
 

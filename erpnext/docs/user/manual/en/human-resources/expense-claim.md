@@ -9,6 +9,10 @@ To make a new Expense Claim, go to:
 Set the Employee ID, date and the list of expenses that are to be claimed and
 “Submit” the record.
 
+### Set Account for Employee
+Set employee's expense account on the employee form, system books an expense amount of an employee under this account.
+<img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/employee_account.png">
+
 ### Approving Expenses
 
 Approver for the Expense Claim is selected by an Employee himself. Users to whom `Expense Approver` role is assigned will shown in the Expense Claim Approver field.
@@ -18,11 +22,25 @@ After saving Expense Claim, Employee should [Assign document to Approver]({{docs
 Expense Claim Approver can update the “Sanctioned Amounts” against Claimed Amount of an Employee. If submitting, Approval Status should be submitted to Approved or Rejected. If Approved, then Expense Claim gets submitted. If rejected, then Expen
 Comments can be added in the Comments section explaining why the claim was approved or rejected.
 
-### Booking the Expense and Reimbursement
+### Booking the Expense
 
-The approved Expense Claim must then be converted into a Journal Entry and a
-payment must be made. Note: This amount should not be clubbed with Salary
-because the amount will then be taxable to the Employee.
+On submission of Expense Claim, system books an expense against the expense account and the employee account
+<img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/expense_claim_book.png">
+
+User can view unpaid expense claim using report "Unclaimed Expense Claims"
+<img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/unclaimed_expense_claims.png">
+
+### Payment for Expense Claim
+
+To make payment against the expense claim, user has to click on Make > Bank Entry
+#### Expense Claim
+<img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/payment.png">
+
+#### Payment Entry
+<img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/payment_entry.png">
+
+
+Note: This amount should not be clubbed with Salary because the amount will then be taxable to the Employee.
 
 ### Linking with Task & Project
 

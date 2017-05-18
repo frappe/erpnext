@@ -3,12 +3,10 @@
 
 from __future__ import unicode_literals
 import frappe
-import math
 from frappe import _
-from frappe.utils import (flt, getdate, get_first_day, get_last_day, date_diff,
-	add_months, add_days, formatdate, cint)
+from frappe.utils import flt, getdate, get_first_day, add_months, add_days, formatdate
 
-def get_period_list(from_fiscal_year, to_fiscal_year, periodicity):
+def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, company):
 	"""Get a list of dict {"from_date": from_date, "to_date": to_date, "key": key, "label": label}
 		Periodicity can be (Yearly, Quarterly, Monthly)"""
 
@@ -42,9 +40,6 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity):
 		if to_date == get_first_day(to_date):
 			# if to_date is the first day, get the last day of previous month
 			to_date = add_days(to_date, -1)
-		else:
-			# to_date should be the last day of the new to_date's month
-			to_date = get_last_day(to_date)
 
 		if to_date <= year_end_date:
 			# the normal case
@@ -53,7 +48,7 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity):
 			# if a fiscal year ends before a 12 month period
 			period.to_date = year_end_date
 
-		period.to_date_fiscal_year = get_date_fiscal_year(period.to_date)
+		period.to_date_fiscal_year = get_date_fiscal_year(period.to_date, company)
 
 		period_list.append(period)
 
@@ -144,16 +139,15 @@ def calculate_values(accounts_by_name, gl_entries_by_account, period_list, accum
 
 				if entry.posting_date <= period.to_date:
 					if (accumulated_values or entry.posting_date >= period.from_date) and \
-						(entry.fiscal_year == period.to_date_fiscal_year or not ignore_accumulated_values_for_fy):
+						(not ignore_accumulated_values_for_fy or entry.fiscal_year == period.to_date_fiscal_year):
 						d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
 
 			if entry.posting_date < period_list[0].year_start_date:
 				d["opening_balance"] = d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)
 				
-def get_date_fiscal_year(date):
+def get_date_fiscal_year(date, company):
 	from erpnext.accounts.utils import get_fiscal_year
-	
-	return get_fiscal_year(date)[0]
+	return get_fiscal_year(date, company=company)[0]
 
 def accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_values):
 	"""accumulate children's values in parent accounts"""
@@ -222,7 +216,7 @@ def filter_out_zero_value_rows(data, parent_children_map, show_zero_values=False
 def add_total_row(out, root_type, balance_must_be, period_list, company_currency):
 	total_row = {
 		"account_name": "'" + _("Total {0} ({1})").format(root_type, balance_must_be) + "'",
-		"account": None,
+		"account": "'" + _("Total {0} ({1})").format(root_type, balance_must_be) + "'",
 		"currency": company_currency
 	}
 
@@ -324,11 +318,16 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 		additional_conditions.append("posting_date >= %(from_date)s")
 
 	if filters:
-		for key in ['cost_center', 'project']:
-			if filters.get(key):
-				additional_conditions.append("%s = '%s'"%(key, filters.get(key)))
+		if filters.get("project"):
+			additional_conditions.append("project = '%s'"%(frappe.db.escape(filters.get("project"))))
+		if filters.get("cost_center"):
+			additional_conditions.append(get_cost_center_cond(filters.get("cost_center")))
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
+
+def get_cost_center_cond(cost_center):
+	lft, rgt = frappe.db.get_value("Cost Center", cost_center, ["lft", "rgt"])
+	return (""" cost_center in (select name from `tabCost Center` where lft >=%s and rgt <=%s)"""%(lft, rgt))
 
 def get_columns(periodicity, period_list, accumulated_values=1, company=None):
 	columns = [{

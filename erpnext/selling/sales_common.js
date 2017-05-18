@@ -26,15 +26,16 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		this.frm.add_fetch("sales_partner", "commission_rate", "commission_rate");
 
-		$.each([["customer_address", "customer_filter"],
-			["shipping_address_name", "customer_filter"],
-			["contact_person", "customer_filter"],
-			["customer", "customer"],
+		$.each([["customer", "customer"],
 			["lead", "lead"]],
 			function(i, opts) {
 				if(me.frm.fields_dict[opts[0]])
 					me.frm.set_query(opts[0], erpnext.queries[opts[1]]);
 			});
+
+		me.frm.set_query('contact_person', erpnext.queries.contact_query);
+		me.frm.set_query('customer_address', erpnext.queries.address_query);
+		me.frm.set_query('shipping_address_name', erpnext.queries.address_query);
 
 		if(this.frm.fields_dict.taxes_and_charges) {
 			this.frm.set_query("taxes_and_charges", function() {
@@ -66,29 +67,47 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 		}
 
+		if(this.frm.fields_dict["packed_items"] &&
+			this.frm.fields_dict["packed_items"].grid.get_field('batch_no')) {
+			this.frm.set_query("batch_no", "packed_items", function(doc, cdt, cdn) {
+				return me.set_query_for_batch(doc, cdt, cdn)
+			});
+		}
+
 		if(this.frm.fields_dict["items"].grid.get_field('batch_no')) {
 			this.frm.set_query("batch_no", "items", function(doc, cdt, cdn) {
-				var item = frappe.get_doc(cdt, cdn);
-				if(!item.item_code) {
-					frappe.throw(__("Please enter Item Code to get batch no"));
-				} else {
-					filters = {
-						'item_code': item.item_code,
-						'posting_date': me.frm.doc.posting_date || frappe.datetime.nowdate(),
-					}
-					if(item.warehouse) filters["warehouse"] = item.warehouse
-
-					return {
-						query : "erpnext.controllers.queries.get_batch_no",
-						filters: filters
-					}
-				}
+				return me.set_query_for_batch(doc, cdt, cdn)
 			});
+		}
+	},
+
+	set_query_for_batch: function(doc, cdt, cdn) {
+		// Show item's batches in the dropdown of batch no
+
+		var me = this;
+		var item = frappe.get_doc(cdt, cdn);
+
+		if(!item.item_code) {
+			frappe.throw(__("Please enter Item Code to get batch no"));
+		} else {
+			filters = {
+				'item_code': item.item_code,
+				'posting_date': me.frm.doc.posting_date || frappe.datetime.nowdate(),
+			}
+			if(item.warehouse) filters["warehouse"] = item.warehouse
+
+			return {
+				query : "erpnext.controllers.queries.get_batch_no",
+				filters: filters
+			}
 		}
 	},
 
 	refresh: function() {
 		this._super();
+
+		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
+
 		this.frm.toggle_display("customer_name",
 			(this.frm.doc.customer_name && this.frm.doc.customer_name!==this.frm.doc.customer));
 		if(this.frm.fields_dict.packed_items) {
@@ -191,11 +210,13 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
-				method: "erpnext.stock.get_item_details.get_bin_details",
+				method: "erpnext.stock.get_item_details.get_bin_details_and_serial_nos",
 				child: item,
 				args: {
 					item_code: item.item_code,
 					warehouse: item.warehouse,
+					stock_qty: item.stock_qty,
+					serial_no: item.serial_no || ""
 				},
 				callback:function(r){
 					if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {

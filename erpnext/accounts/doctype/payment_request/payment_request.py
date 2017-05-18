@@ -10,7 +10,7 @@ from frappe.utils import flt, nowdate, get_url
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry, get_company_defaults
-from frappe.integration_broker.doctype.integration_service.integration_service import get_integration_controller
+from frappe.integrations.utils import get_payment_gateway_controller
 
 class PaymentRequest(Document):
 	def validate(self):
@@ -26,7 +26,7 @@ class PaymentRequest(Document):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 		if self.payment_account and ref_doc.currency != frappe.db.get_value("Account", self.payment_account, "account_currency"):
 			frappe.throw(_("Transaction currency must be same as Payment Gateway currency"))
-		
+
 	def on_submit(self):
 		send_mail = True
 		self.make_communication_entry()
@@ -54,22 +54,22 @@ class PaymentRequest(Document):
 	def set_payment_request_url(self):
 		if self.payment_account:
 			self.payment_url = self.get_payment_url()
-		
+
 		if self.payment_url:
 			self.db_set('payment_url', self.payment_url)
-			
+
 		if self.payment_url or not self.payment_gateway_account:
 			self.db_set('status', 'Initiated')
-	
+
 	def get_payment_url(self):
 		data = frappe.db.get_value(self.reference_doctype, self.reference_name,
 			["company", "customer_name"], as_dict=1)
-		
-		controller = get_integration_controller(self.payment_gateway)
+
+		controller = get_payment_gateway_controller(self.payment_gateway)
 		controller.validate_transaction_currency(self.currency)
-		
+
 		return controller.get_payment_url(**{
-			"amount": self.grand_total,
+			"amount": flt(self.grand_total, self.precision("grand_total")),
 			"title": data.company,
 			"description": self.subject,
 			"reference_doctype": "Payment Request",
@@ -83,7 +83,7 @@ class PaymentRequest(Document):
 	def set_as_paid(self):
 		if frappe.session.user == "Guest":
 			frappe.set_user("Administrator")
-		
+
 		payment_entry = self.create_payment_entry()
 		self.make_invoice()
 
@@ -157,7 +157,7 @@ class PaymentRequest(Document):
 
 	def set_as_cancelled(self):
 		self.db_set("status", "Cancelled")
-	
+
 	def check_if_payment_entry_exists(self):
 		if self.status == "Paid":
 			payment_entry = frappe.db.sql_list("""select parent from `tabPayment Entry Reference`
@@ -179,11 +179,11 @@ class PaymentRequest(Document):
 
 	def get_payment_success_url(self):
 		return self.payment_success_url
-	
+
 	def on_payment_authorized(self, status=None):
 		if not status:
 			return
-		
+
 		shopping_cart_settings = frappe.get_doc("Shopping Cart Settings")
 
 		if status in ["Authorized", "Completed"]:
@@ -203,9 +203,9 @@ class PaymentRequest(Document):
 					}).get(success_url, "me")
 				else:
 					redirect_to = get_url("/orders/{0}".format(self.reference_name))
-			
+
 			return redirect_to
-			
+
 @frappe.whitelist(allow_guest=True)
 def make_payment_request(**args):
 	"""Make payment request"""
@@ -234,7 +234,7 @@ def make_payment_request(**args):
 			"grand_total": grand_total,
 			"email_to": args.recipient_id or "",
 			"subject": "Payment Request for %s"%args.dn,
-			"message": gateway_account.get("message") or get_dummy_message(args.use_dummy_message),
+			"message": gateway_account.get("message") or get_dummy_message(ref_doc),
 			"reference_doctype": args.dt,
 			"reference_name": args.dn
 		})
@@ -319,19 +319,24 @@ def make_status_as_paid(doc, method):
 		payment_request_name = frappe.db.get_value("Payment Request",
 			{"reference_doctype": ref.reference_doctype, "reference_name": ref.reference_name,
 			"docstatus": 1})
-		
+
 		if payment_request_name:
 			doc = frappe.get_doc("Payment Request", payment_request_name)
 			if doc.status != "Paid":
 				doc.db_set('status', 'Paid')
 				frappe.db.commit()
 
-def get_dummy_message(use_dummy_message=True):
-	return """
-		<p> Hope you are enjoying a service. Please consider bank details for payment </p>
-		<p> Bank Details <p><br>
-		<p> Bank Name : National Bank </p>
-		<p> Account Number : 123456789000872 </p>
-		<p> IFSC code : NB000001 </p>
-		<p> Account Name : Wind Power LLC </p>
-	"""
+def get_dummy_message(doc):
+	return frappe.render_template("""{% if doc.contact_person -%}
+<p>Dear {{ doc.contact_person }},</p>
+{%- else %}<p>Hello,</p>{% endif %}
+
+<p>{{ _("Requesting payment against {0} {1} for amount {2}").format(doc.doctype,
+	doc.name, doc.get_formatted("grand_total")) }}</p>
+
+<a href="{{ payment_url }}">{{ _("Make Payment") }}</a>
+
+<p>{{ _("If you have any questions, please get back to us.") }}</p>
+
+<p>{{ _("Thank you for your business!") }}</p>
+""", dict(doc=doc, payment_url = '{{ payment_url }}'))

@@ -32,11 +32,7 @@ erpnext.selling.InstallationNote = frappe.ui.form.Controller.extend({
 			}
 		});
 
-		this.frm.set_query("contact_person", function() {
-			return {
-				filters: {'customer': me.frm.doc.customer }
-			}
-		});
+		this.frm.set_query('contact_person', erpnext.queries.contact_query);
 
 		this.frm.set_query("customer", function() {
 			return {
@@ -60,7 +56,7 @@ erpnext.selling.InstallationNote = frappe.ui.form.Controller.extend({
 							company: cur_frm.doc.company
 						}
 					})
-				}, "icon-download", "btn-default"
+				}, "fa fa-download", "btn-default"
 			);
 		}
 	},

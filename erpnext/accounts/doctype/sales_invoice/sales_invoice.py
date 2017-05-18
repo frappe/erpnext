@@ -138,7 +138,7 @@ class SalesInvoice(SellingController):
 
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 		if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
-			unlink_ref_doc_from_payment_entries(self.doctype, self.name)
+			unlink_ref_doc_from_payment_entries(self)
 
 		if self.is_return:
 			# NOTE status updating bypassed for is_return
@@ -403,9 +403,9 @@ class SalesInvoice(SellingController):
 	def validate_warehouse(self):
 		super(SalesInvoice, self).validate_warehouse()
 
-		for d in self.get('items'):
+		for d in self.get_item_list():
 			if not d.warehouse and frappe.db.get_value("Item", d.item_code, "is_stock_item"):
-				frappe.throw(_("Warehouse required at Row No {0}").format(d.idx))
+				frappe.throw(_("Warehouse required for stock Item {0}").format(d.item_code))
 
 	def validate_delivery_note(self):
 		for d in self.get("items"):
@@ -532,10 +532,12 @@ class SalesInvoice(SellingController):
 			if d.delivery_note and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus") != 1:
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
-	def make_gl_entries(self, repost_future_gle=True):
+	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if not self.grand_total:
 			return
-		gl_entries = self.get_gl_entries()
+			
+		if not gl_entries:
+			gl_entries = self.get_gl_entries()
 
 		if gl_entries:
 			from erpnext.accounts.general_ledger import make_gl_entries
@@ -651,32 +653,34 @@ class SalesInvoice(SellingController):
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.is_pos):
 			for payment_mode in self.payments:
-				# POS, make payment entries
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": self.debit_to,
-						"party_type": "Customer",
-						"party": self.customer,
-						"against": payment_mode.account,
-						"credit": payment_mode.base_amount,
-						"credit_in_account_currency": payment_mode.base_amount \
-							if self.party_account_currency==self.company_currency \
-							else payment_mode.amount,
-						"against_voucher": self.return_against if cint(self.is_return) else self.name,
-						"against_voucher_type": self.doctype,
-					}, self.party_account_currency)
-				)
+				if payment_mode.amount:
+					# POS, make payment entries
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": self.debit_to,
+							"party_type": "Customer",
+							"party": self.customer,
+							"against": payment_mode.account,
+							"credit": payment_mode.base_amount,
+							"credit_in_account_currency": payment_mode.base_amount \
+								if self.party_account_currency==self.company_currency \
+								else payment_mode.amount,
+							"against_voucher": self.return_against if cint(self.is_return) else self.name,
+							"against_voucher_type": self.doctype,
+						}, self.party_account_currency)
+					)
 
-				payment_mode_account_currency = get_account_currency(payment_mode.account)
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": payment_mode.account,
-						"against": self.customer,
-						"debit": payment_mode.base_amount,
-						"debit_in_account_currency": payment_mode.base_amount \
-							if payment_mode_account_currency==self.company_currency else payment_mode.amount
-					}, payment_mode_account_currency)
-				)
+					payment_mode_account_currency = get_account_currency(payment_mode.account)
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": payment_mode.account,
+							"against": self.customer,
+							"debit": payment_mode.base_amount,
+							"debit_in_account_currency": payment_mode.base_amount \
+								if payment_mode_account_currency==self.company_currency \
+								else payment_mode.amount
+						}, payment_mode_account_currency)
+					)
 				
 	def make_gle_for_change_amount(self, gl_entries):
 		if cint(self.is_pos) and self.change_amount:
@@ -786,11 +790,11 @@ def make_delivery_note(source_name, target_doc=None):
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source_doc, target_doc, source_parent):
-		target_doc.base_amount = (flt(source_doc.qty) - flt(source_doc.delivered_qty)) * \
-			flt(source_doc.base_rate)
-		target_doc.amount = (flt(source_doc.qty) - flt(source_doc.delivered_qty)) * \
-			flt(source_doc.rate)
 		target_doc.qty = flt(source_doc.qty) - flt(source_doc.delivered_qty)
+		target_doc.stock_qty = target_doc.qty * flt(source_doc.conversion_factor)
+		
+		target_doc.base_amount = target_doc.qty * flt(source_doc.base_rate)
+		target_doc.amount = target_doc.qty * flt(source_doc.rate)
 
 	doclist = get_mapped_doc("Sales Invoice", source_name, 	{
 		"Sales Invoice": {

@@ -51,7 +51,7 @@ monthly, quarterly, half-yearly or annual basis, you can check the “Recurring
 Invoice” box. Here you can fill in the details of how frequently you want to
 bill this Invoice and the period for which the contract is valid.
 
-ERPNext will automatically create new Invoices and mail it to the email ids
+ERPNext will automatically create new Invoices and mail it to the Email Addresses
 you set.
 
 #### POS Invoices
@@ -63,6 +63,15 @@ Also, if you check the **Update Stock** the stock will also update automatically
 without the need of a Delivery Note.
 
 <img class="screenshot" alt="POS Invoice" src="{{docs_base_url}}/assets/img/accounts/pos-sales-invoice.png">
+
+#### Billing Timesheet with Project
+
+If you want to bill employees working on Projects on hourly basis (contract based),
+they can fill out Timesheets which consists their billing rate. When you make a new
+Sales Invoice, select the Project for which the billing is to be made, and the
+corresponding Timesheet entries for that Project will be fetched.
+
+<img class="screenshot" alt="POS Invoice" src="{{docs_base_url}}/assets/img/accounts/billing-timesheet-sales-invoice.png">
 
 * * *
 
@@ -80,5 +89,4 @@ Customer wants an “Invoice”, you could give the Customer a Quotation (in
 ERPNext) titled as “Pro Forma Invoice”. This way everyone is happy.
 
 This is a fairly common practice. We follow this at Frappe too.
-
 {next}

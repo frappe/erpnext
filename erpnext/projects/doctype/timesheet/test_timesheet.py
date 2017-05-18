@@ -7,7 +7,7 @@ import frappe
 import unittest
 import datetime
 from frappe.utils.make_random import get_random
-from frappe.utils import now_datetime, nowdate
+from frappe.utils import now_datetime, nowdate, add_days, add_months
 from erpnext.projects.doctype.timesheet.timesheet import OverlapError
 from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_sales_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -76,7 +76,7 @@ def make_salary_structure(employee):
 		salary_structure = frappe.new_doc("Salary Structure")
 		salary_structure.name = "Timesheet Salary Structure Test"
 		salary_structure.salary_slip_based_on_timesheet = 1
-		salary_structure.from_date = nowdate()
+		salary_structure.from_date = add_days(nowdate(), -30)
 		salary_structure.salary_component = "Basic"
 		salary_structure.hour_rate = 50.0
 		salary_structure.company = "_Test Company"
@@ -88,7 +88,8 @@ def make_salary_structure(employee):
 
 		es = salary_structure.append('employees', {
 			"employee": employee,
-			"base": 1200 
+			"base": 1200,
+			"from_date": add_months(nowdate(),-1)
 		})
 		
 		

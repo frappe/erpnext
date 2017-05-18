@@ -60,7 +60,7 @@ def setup_complete(args=None):
 
 	if args.get("add_sample_data"):
 		try:
-			make_sample_data()
+			make_sample_data(args)
 			frappe.clear_cache()
 		except:
 			# clear message
@@ -88,6 +88,7 @@ def create_fiscal_year_and_company(args):
 			'abbr':args.get('company_abbr'),
 			'default_currency':args.get('currency'),
 			'country': args.get('country'),
+			'create_chart_of_accounts_based_on': 'Standard Template',
 			'chart_of_accounts': args.get(('chart_of_accounts')),
 			'domain': args.get('domain')
 		}).insert()
@@ -406,7 +407,7 @@ def create_customers(args):
 
 				if args.get("customer_contact_" + str(i)):
 					create_contact(args.get("customer_contact_" + str(i)),
-						"customer", doc.name)
+						"Customer", doc.name)
 			except frappe.NameError:
 				pass
 
@@ -424,7 +425,7 @@ def create_suppliers(args):
 
 				if args.get("supplier_contact_" + str(i)):
 					create_contact(args.get("supplier_contact_" + str(i)),
-						"supplier", doc.name)
+						"Supplier", doc.name)
 			except frappe.NameError:
 				pass
 
@@ -432,12 +433,13 @@ def create_contact(contact, party_type, party):
 	"""Create contact based on given contact name"""
 	contact = contact.strip().split(" ")
 
-	frappe.get_doc({
+	contact = frappe.get_doc({
 		"doctype":"Contact",
-		party_type: party,
 		"first_name":contact[0],
 		"last_name": len(contact) > 1 and contact[1] or ""
-	}).insert()
+	})
+	contact.append('links', dict(link_doctype=party_type, link_name=party))
+	contact.insert()
 
 def create_letter_head(args):
 	if args.get("attach_letterhead"):

@@ -41,12 +41,12 @@ frappe.ui.form.on("Timesheet", {
 		if(frm.doc.docstatus==1) {
 			if(frm.doc.per_billed < 100){
 				frm.add_custom_button(__("Make Sales Invoice"), function() { frm.trigger("make_invoice") },
-					"icon-file-alt");
+					"fa fa-file-alt");
 			}
 
 			if(!frm.doc.salary_slip && frm.doc.employee){
 				frm.add_custom_button(__("Make Salary Slip"), function() { frm.trigger("make_salary_slip") },
-					"icon-file-alt");
+					"fa fa-file-alt");
 			}
 		}
 
@@ -136,7 +136,7 @@ calculate_end_time = function(frm, cdt, cdn){
 	frappe.model.set_value(cdt, cdn, "to_time", d.format(moment.defaultDatetimeFormat));
 	frm._setting_hours = false;
 
-	if(frm.doc.__islocal && !child.billing_hours && child.hours){
+	if((frm.doc.__islocal || frm.doc.__onload.maintain_bill_work_hours_same) && child.hours){
 		frappe.model.set_value(cdt, cdn, "billing_hours", child.hours);
 	}
 }

@@ -16,7 +16,7 @@ class PackedItem(Document):
 def get_product_bundle_items(item_code):
 	return frappe.db.sql("""select t1.item_code, t1.qty, t1.uom, t1.description
 		from `tabProduct Bundle Item` t1, `tabProduct Bundle` t2
-		where t2.new_item_code=%s and t1.parent = t2.name""", item_code, as_dict=1)
+		where t2.new_item_code=%s and t1.parent = t2.name order by t1.idx""", item_code, as_dict=1)
 
 def get_packing_item_details(item):
 	return frappe.db.sql("""select item_name, description, stock_uom from `tabItem`
@@ -67,7 +67,7 @@ def make_packing_list(doc):
 	for d in doc.get("items"):
 		if frappe.db.get_value("Product Bundle", {"new_item_code": d.item_code}):
 			for i in get_product_bundle_items(d.item_code):
-				update_packing_list_item(doc, i.item_code, flt(i.qty)*flt(d.qty), d, i.description)
+				update_packing_list_item(doc, i.item_code, flt(i.qty)*flt(d.stock_qty), d, i.description)
 
 			if [d.item_code, d.name] not in parent_items:
 				parent_items.append([d.item_code, d.name])

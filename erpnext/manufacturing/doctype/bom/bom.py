@@ -5,7 +5,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, cstr, flt
 from frappe import _
-from frappe.model.document import Document
+from erpnext.setup.utils import get_exchange_rate
+from frappe.website.website_generator import WebsiteGenerator
 
 from operator import itemgetter
 
@@ -13,7 +14,13 @@ form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
 
-class BOM(Document):
+class BOM(WebsiteGenerator):
+	website = frappe._dict(
+		# page_title_field = "item_name",
+		condition_field = "show_in_website",
+		template = "templates/generators/bom.html"
+	)
+
 	def autoname(self):
 		names = frappe.db.sql_list("""select name from `tabBOM` where item=%s""", self.item)
 
@@ -33,8 +40,12 @@ class BOM(Document):
 		self.name = 'BOM-' + self.item + ('-%.3i' % idx)
 
 	def validate(self):
+		# if not self.route:
+		self.route = frappe.scrub(self.name).replace('_', '-')
 		self.clear_operations()
 		self.validate_main_item()
+		self.validate_currency()
+		self.set_conversion_rate()
 
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
 		validate_uom_is_integer(self, "stock_uom", "qty", "BOM Item")
@@ -43,6 +54,9 @@ class BOM(Document):
 		self.set_bom_material_details()
 		self.validate_operations()
 		self.calculate_cost()
+
+	def get_context(self, context):
+		context.parents = [{'name': 'boms', 'title': _('All BOMs') }]
 
 	def on_update(self):
 		self.check_recursion()
@@ -85,6 +99,8 @@ class BOM(Document):
 				if not item.get(r):
 					item.set(r, ret[r])
 
+			self.validate_bom_currecny(item)
+
 	def get_bom_material_detail(self, args=None):
 		""" Get raw material details like uom, desc and rate"""
 		if not args:
@@ -102,19 +118,27 @@ class BOM(Document):
 
 		rate = self.get_rm_rate(args)
 		ret_item = {
-			'item_name'	: item and args['item_name'] or '',
-			'description'  : item and args['description'] or '',
-			'image'		: item and args['image'] or '',
-			'stock_uom'	: item and args['stock_uom'] or '',
-			'bom_no'	: args['bom_no'],
-			'rate'		: rate
+			 'item_name'	: item and args['item_name'] or '',
+			 'description'  : item and args['description'] or '',
+			 'image'		: item and args['image'] or '',
+			 'stock_uom'	: item and args['stock_uom'] or '',
+			 'bom_no'		: args['bom_no'],
+			 'rate'			: rate,
+			 'base_rate'	: rate if self.company_currency() == self.currency else rate * self.conversion_rate
 		}
 		return ret_item
+
+	def validate_bom_currecny(self, item):
+		if item.get('bom_no') and frappe.db.get_value('BOM', item.get('bom_no'), 'currency') != self.currency:
+			frappe.throw(_("Row {0}: Currency of the BOM #{1} should be equal to the selected currency {2}").format(item.idx, item.bom_no, self.currency))
 
 	def get_rm_rate(self, arg):
 		"""	Get raw material rate as per selected method, if bom exists takes bom cost """
 		rate = 0
-		if arg['bom_no']:
+
+		if arg.get('scrap_items'):
+			rate = self.get_valuation_rate(arg)
+		elif arg['bom_no']:
 			rate = self.get_bom_unitcost(arg['bom_no'])
 		elif arg:
 			if self.rm_cost_as_per == 'Valuation Rate':
@@ -210,6 +234,14 @@ class BOM(Document):
 		if not self.quantity:
 			frappe.throw(_("Quantity should be greater than 0"))
 
+	def validate_currency(self):
+		if self.rm_cost_as_per == 'Price List' and \
+			frappe.db.get_value('Price List', self.buying_price_list, 'currency') != self.currency:
+			frappe.throw(_("Currency of the price list {0} is not similar with the selected currency {1}").format(self.buying_price_list, self.currency))
+
+	def set_conversion_rate(self):
+		self.conversion_rate = get_exchange_rate(self.currency, self.company_currency())
+
 	def validate_materials(self):
 		""" Validate raw material entries """
 		if not self.get('items'):
@@ -270,11 +302,14 @@ class BOM(Document):
 		"""Calculate bom totals"""
 		self.calculate_op_cost()
 		self.calculate_rm_cost()
-		self.total_cost = self.operating_cost + self.raw_material_cost
+		self.calculate_sm_cost()
+		self.total_cost = self.operating_cost + self.raw_material_cost - self.scrap_material_cost
+		self.base_total_cost = self.base_operating_cost + self.base_raw_material_cost - self.base_scrap_material_cost
 
 	def calculate_op_cost(self):
 		"""Update workstation rate and calculates totals"""
 		self.operating_cost = 0
+		self.base_operating_cost = 0
 		for d in self.get('operations'):
 			if d.workstation:
 				if not d.hour_rate:
@@ -282,20 +317,45 @@ class BOM(Document):
 
 			if d.hour_rate and d.time_in_mins:
 				d.operating_cost = flt(d.hour_rate) * flt(d.time_in_mins) / 60.0
+				d.base_hour_rate = flt(d.hour_rate) * flt(self.conversion_rate)
+				d.base_operating_cost = flt(d.base_hour_rate) * flt(d.time_in_mins) / 60.0
 
 			self.operating_cost += flt(d.operating_cost)
+			self.base_operating_cost += flt(d.base_operating_cost)
 
 	def calculate_rm_cost(self):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""
 		total_rm_cost = 0
+		base_total_rm_cost = 0
+
 		for d in self.get('items'):
 			if d.bom_no:
 				d.rate = self.get_bom_unitcost(d.bom_no)
+
+			d.base_rate = flt(d.rate) * flt(self.conversion_rate)
 			d.amount = flt(d.rate, self.precision("rate", d)) * flt(d.qty, self.precision("qty", d))
+			d.base_amount = d.amount * flt(self.conversion_rate)
 			d.qty_consumed_per_unit = flt(d.qty, self.precision("qty", d)) / flt(self.quantity, self.precision("quantity"))
 			total_rm_cost += d.amount
+			base_total_rm_cost += d.base_amount
 
 		self.raw_material_cost = total_rm_cost
+		self.base_raw_material_cost = base_total_rm_cost
+
+	def calculate_sm_cost(self):
+		"""Fetch RM rate as per today's valuation rate and calculate totals"""
+		total_sm_cost = 0
+		base_total_sm_cost = 0
+
+		for d in self.get('scrap_items'):
+			d.base_rate = d.rate * self.conversion_rate
+			d.amount = flt(d.rate, self.precision("rate", d)) * flt(d.qty, self.precision("qty", d))
+			d.base_amount = d.amount * self.conversion_rate
+			total_sm_cost += d.amount
+			base_total_sm_cost += d.base_amount
+
+		self.scrap_material_cost = total_sm_cost
+		self.base_scrap_material_cost = base_total_sm_cost
 
 	def update_exploded_items(self):
 		""" Update Flat BOM, following will be correct data"""
@@ -316,8 +376,11 @@ class BOM(Document):
 					'image'			: d.image,
 					'stock_uom'		: d.stock_uom,
 					'qty'			: flt(d.qty),
-					'rate'			: flt(d.rate),
+					'rate'			: d.base_rate,
 				}))
+
+	def company_currency(self):
+		return frappe.db.get_value('Company', self.company, 'default_currency')
 
 	def add_to_cur_exploded_items(self, args):
 		if self.cur_exploded_items.get(args.item_code):
@@ -375,6 +438,10 @@ class BOM(Document):
 			for d in self.operations:
 				if not d.description:
 					d.description = frappe.db.get_value('Operation', d.operation, 'description')
+
+def get_list_context(context):
+	context.title = _("Bill of Materials")
+	# context.introduction = _('Boms')
 
 def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_items=0):
 	item_dict = {}
@@ -446,12 +513,17 @@ def validate_bom_no(item, bom_no):
 		frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
 
 @frappe.whitelist()
-def get_children(parent=None):
-	if parent:
-		return frappe.db.sql("""select item_code,
-			bom_no as value, qty,
-			if(ifnull(bom_no, "")!="", 1, 0) as expandable
-			from `tabBOM Item`
-			where parent=%s
-			order by idx
-			""", parent, as_dict=True)
+def get_children():
+	if frappe.form_dict.parent:
+		return frappe.db.sql("""select
+			bom_item.item_code,
+			bom_item.bom_no as value,
+			bom_item.qty,
+			if(ifnull(bom_item.bom_no, "")!="", 1, 0) as expandable,
+			item.image,
+			item.description
+			from `tabBOM Item` bom_item, tabItem item
+			where bom_item.parent=%s
+			and bom_item.item_code = item.name
+			order by bom_item.idx
+			""", frappe.form_dict.parent, as_dict=True)

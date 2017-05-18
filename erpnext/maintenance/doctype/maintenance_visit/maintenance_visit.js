@@ -2,20 +2,31 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.maintenance");
+me.frm.set_query('contact_person', erpnext.queries.contact_query);
 
 
-frappe.ui.form.on_change("Maintenance Visit", "customer", function(frm) {
-	erpnext.utils.get_party_details(frm) });
-frappe.ui.form.on_change("Maintenance Visit", "customer_address", function(frm){
-	erpnext.utils.get_address_display(frm, 'customer_address', 'address_display')
-});
-frappe.ui.form.on_change("Maintenance Visit", "contact_person", function(frm){
-	erpnext.utils.get_contact_details(frm)
-});
+frappe.ui.form.on('Maintenance Visit', {
+	setup: function(frm) {
+		frm.set_query('contact_person', erpnext.queries.contact_query);
+		frm.set_query('customer_address', erpnext.queries.address_query);
+	},
+	customer: function(frm) {
+		erpnext.utils.get_party_details(frm)
+	},
+	customer_address: function(frm) {
+		erpnext.utils.get_address_display(frm, 'customer_address', 'address_display');
+	},
+	contact_person: function(frm) {
+		erpnext.utils.get_contact_details(frm);
+	}
+
+})
 
 // TODO commonify this code
 erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 	refresh: function() {
+		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
+
 		if (this.frm.doc.docstatus===0) {
 			cur_frm.add_custom_button(__('Maintenance Schedule'),
 				function() {
@@ -67,18 +78,6 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 	// set add fetch for item_code's item_name and description
 	cur_frm.add_fetch('item_code', 'item_name', 'item_name');
 	cur_frm.add_fetch('item_code', 'description', 'description');
-}
-
-cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
-	return{
-    	filters:{'customer': doc.customer}
-  	}
-}
-
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-  	return{
-    	filters:{'customer': doc.customer}
-  	}
 }
 
 cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {

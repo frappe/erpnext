@@ -10,7 +10,8 @@ from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):
-	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, filters.periodicity)
+	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, 
+		filters.periodicity, filters.company)
 
 	operation_accounts = {
 		"section_name": "Operations",
@@ -103,7 +104,7 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 	data = {}
 	total = 0
 	for period in period_list:
-		start_date = get_start_date(period, accumulated_values)
+		start_date = get_start_date(period, accumulated_values, company)
 		gl_sum = frappe.db.sql_list("""
 			select sum(credit) - sum(debit)
 			from `tabGL Entry`
@@ -126,10 +127,10 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 	data["total"] = total
 	return data
 
-def get_start_date(period, accumulated_values):
+def get_start_date(period, accumulated_values, company):
 	start_date = period["year_start_date"]
 	if accumulated_values:
-		start_date = get_fiscal_year(period.to_date)[1]
+		start_date = get_fiscal_year(period.to_date, company=company)[1]
 
 	return start_date
 

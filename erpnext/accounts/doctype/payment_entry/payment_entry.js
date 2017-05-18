@@ -11,9 +11,8 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	setup: function(frm) {
-		var party_account_type = frm.doc.party_type=="Customer" ? "Receivable" : "Payable";
-
 		frm.set_query("paid_from", function() {
+			var party_account_type = frm.doc.party_type=="Customer" ? "Receivable" : "Payable";
 			var account_types = in_list(["Pay", "Internal Transfer"], frm.doc.payment_type) ?
 				["Bank", "Cash"] : party_account_type;
 
@@ -26,7 +25,16 @@ frappe.ui.form.on('Payment Entry', {
 			}
 		});
 
+		frm.set_query("party_type", function() {
+			return{
+				"filters": {
+					"name": ["in",["Customer","Supplier"]],
+				}
+			}
+		});
+
 		frm.set_query("paid_to", function() {
+			var party_account_type = frm.doc.party_type=="Customer" ? "Receivable" : "Payable";
 			var account_types = in_list(["Receive", "Internal Transfer"], frm.doc.payment_type) ?
 	 			["Bank", "Cash"] : party_account_type;
 
@@ -79,8 +87,13 @@ frappe.ui.form.on('Payment Entry', {
 		frm.events.show_general_ledger(frm);
 	},
 
+	company: function(frm) {
+		frm.events.hide_unhide_fields(frm);
+		frm.events.set_dynamic_labels(frm);
+	},
+
 	hide_unhide_fields: function(frm) {
-		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+		var company_currency = frm.doc.company? frappe.get_doc(":Company", frm.doc.company).default_currency: "";
 
 		frm.toggle_display("source_exchange_rate",
 			(frm.doc.paid_amount && frm.doc.paid_from_account_currency != company_currency));
@@ -118,52 +131,27 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	set_dynamic_labels: function(frm) {
-		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+		var company_currency = frm.doc.company? frappe.get_doc(":Company", frm.doc.company).default_currency: "";
 
-		var field_label_map = {};
-		var grid_field_label_map = {};
-
-		var setup_field_label_map = function(fields_list, currency, parentfield) {
-			var doctype = parentfield ? frm.fields_dict[parentfield].grid.doctype : frm.doc.doctype;
-			$.each(fields_list, function(i, fname) {
-				var docfield = frappe.meta.docfield_map[doctype][fname];
-				if(docfield) {
-					var label = __(docfield.label || "").replace(/\([^\)]*\)/g, "");
-					if(parentfield) {
-						grid_field_label_map[doctype + "-" + fname] =
-							label.trim() + " (" + __(currency) + ")";
-					} else {
-						field_label_map[fname] = label.trim() + " (" + currency + ")";
-					}
-				}
-			});
-		}
-
-		setup_field_label_map(["base_paid_amount", "base_received_amount", "base_total_allocated_amount",
+		frm.set_currency_labels(["base_paid_amount", "base_received_amount", "base_total_allocated_amount",
 			"difference_amount"], company_currency);
 
-		setup_field_label_map(["paid_amount"], frm.doc.paid_from_account_currency);
-		setup_field_label_map(["received_amount"], frm.doc.paid_to_account_currency);
+		frm.set_currency_labels(["paid_amount"], frm.doc.paid_from_account_currency);
+		frm.set_currency_labels(["received_amount"], frm.doc.paid_to_account_currency);
 
 		var party_account_currency = frm.doc.payment_type=="Receive" ?
 			frm.doc.paid_from_account_currency : frm.doc.paid_to_account_currency;
 
-		setup_field_label_map(["total_allocated_amount", "unallocated_amount"], party_account_currency);
+		frm.set_currency_labels(["total_allocated_amount", "unallocated_amount"], party_account_currency);
 
-		$.each(field_label_map, function(fname, label) {
-			me.frm.fields_dict[fname].set_label(label);
-		});
+		var currency_field = (frm.doc.payment_type=="Receive") ? "paid_from_account_currency" : "paid_to_account_currency"
+		frm.set_df_property("total_allocated_amount", "options", currency_field);
+		frm.set_df_property("unallocated_amount", "options", currency_field);
 
-		setup_field_label_map(["total_amount", "outstanding_amount", "allocated_amount"],
+		frm.set_currency_labels(["total_amount", "outstanding_amount", "allocated_amount"],
 			party_account_currency, "references");
 
-		setup_field_label_map(["amount"], company_currency, "deductions");
-
-		$.each(grid_field_label_map, function(fname, label) {
-			fname = fname.split("-");
-			var df = frappe.meta.get_docfield(fname[0], fname[1], me.frm.doc.name);
-			if(df) df.label = label;
-		});
+		frm.set_currency_labels(["amount"], company_currency, "deductions");
 
 		cur_frm.set_df_property("source_exchange_rate", "description",
 			("1 " + frm.doc.paid_from_account_currency + " = [?] " + company_currency));
@@ -185,7 +173,7 @@ frappe.ui.form.on('Payment Entry', {
 					group_by_voucher: 0
 				};
 				frappe.set_route("query-report", "General Ledger");
-			}, "icon-table");
+			}, "fa fa-table");
 		}
 	},
 
@@ -356,6 +344,7 @@ frappe.ui.form.on('Payment Entry', {
 		frappe.call({
 			method: "erpnext.setup.utils.get_exchange_rate",
 			args: {
+				transaction_date: frm.doc.posting_date,
 				from_currency: from_currency,
 				to_currency: to_currency
 			},
@@ -363,6 +352,10 @@ frappe.ui.form.on('Payment Entry', {
 				frm.set_value(exchange_rate_field, r.message);
 			}
 		})
+	},
+	
+	posting_date: function(frm) {
+		frm.events.paid_from_account_currency(frm);
 	},
 
 	source_exchange_rate: function(frm) {
@@ -454,6 +447,7 @@ frappe.ui.form.on('Payment Entry', {
 			method: 'erpnext.accounts.doctype.payment_entry.payment_entry.get_outstanding_reference_documents',
 			args: {
 				args: {
+					"posting_date": frm.doc.posting_date,
 					"company": frm.doc.company,
 					"party_type": frm.doc.party_type,
 					"payment_type": frm.doc.payment_type,

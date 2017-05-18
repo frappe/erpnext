@@ -28,7 +28,6 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 	def on_update(self):
 		NestedSet.on_update(self)
-		WebsiteGenerator.on_update(self)
 		invalidate_cache_for(self)
 		self.validate_name_with_item()
 		self.validate_one_root()
@@ -68,7 +67,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 			start = 0
 		context.update({
 			"items": get_product_list_for_group(product_group = self.name, start=start,
-				limit=context.page_length, search=frappe.form_dict.get("search")),
+				limit=context.page_length + 1, search=frappe.form_dict.get("search")),
 			"parent_groups": get_parent_item_groups(self.name),
 			"title": self.name,
 			"products_as_list": cint(frappe.db.get_single_value('Website Settings', 'products_as_list'))

@@ -285,7 +285,9 @@ def make_prod_order_test_record(**args):
 	pro_order.scrap_warehouse = args.fg_warehouse or "_Test Scrap Warehouse - _TC"
 	pro_order.company = args.company or "_Test Company"
 	pro_order.stock_uom = args.stock_uom or "_Test UOM"
+	pro_order.use_multi_level_bom=0
 	pro_order.set_production_order_operations()
+
 
 	if args.source_warehouse:
 		pro_order.source_warehouse = args.source_warehouse

@@ -146,19 +146,67 @@ def get_data():
 					"name": "Appraisal Template",
 					"description": _("Template for performance appraisals.")
 				},
+				{
+					"type": "page",
+					"name": "team-updates",
+					"label": _("Team Updates")
+				},
+			]
+		},
+		{
+			"label": _("Employee Loan Management"),
+			"icon": "icon-list",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Loan Type",
+					"description": _("Define various loan types")
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Loan Application",
+					"description": _("Employee Loan Application")
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Loan"
+				},
+			]
+		},
+		{
+			"label": _("Training"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Training Event"
+				},
+				{
+					"type": "doctype",
+					"name": "Training Result"
+				},
+				{
+					"type": "doctype",
+					"name": "Training Feedback"
+				},
 			]
 		},
 
 		{
-			"label": _("Tools"),
-			"icon": "icon-wrench",
+			"label": _("Fleet Management"),
 			"items": [
-
+				{
+					"type": "doctype",
+					"name": "Vehicle"
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Log"
+				},
 			]
 		},
 		{
 			"label": _("Setup"),
-			"icon": "icon-cog",
+			"icon": "fa fa-cog",
 			"items": [
 				{
 					"type": "doctype",
@@ -185,11 +233,15 @@ def get_data():
 					"name": "Designation",
 					"description": _("Employee designation (e.g. CEO, Director etc.).")
 				},
+				{
+					"type": "doctype",
+					"name": "Daily Work Summary Settings"
+				},
 			]
 		},
 		{
 			"label": _("Reports"),
-			"icon": "icon-list",
+			"icon": "fa fa-list",
 			"items": [
 				{
 					"type": "report",
@@ -217,7 +269,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Monthly Salary Register",
+					"name": "Salary Register",
 					"doctype": "Salary Slip"
 				},
 				{
@@ -226,12 +278,18 @@ def get_data():
 					"name": "Monthly Attendance Sheet",
 					"doctype": "Attendance"
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Expenses",
+					"doctype": "Vehicle"
+				},
 
 			]
 		},
 		{
 			"label": _("Help"),
-			"icon": "icon-facetime-video",
+			"icon": "fa fa-facetime-video",
 			"items": [
 				{
 					"type": "help",

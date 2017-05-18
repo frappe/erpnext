@@ -13,9 +13,9 @@
 {%- if description -%}
 <div>{{ description }}</div>
 {% endif %}
-<p>
+<p style='margin-top: 30px'>
 	<a class='btn btn-primary'
-	href='/job_application?job_title={{ doc.name }}'>
+	href='/job_application?new=1&job_title={{ doc.name }}'>
 	{{ _("Apply Now") }}</a>
 </p>
 

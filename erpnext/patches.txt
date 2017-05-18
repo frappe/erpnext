@@ -143,6 +143,7 @@ erpnext.patches.v5_0.update_time_log_title
 erpnext.patches.v7_0.create_warehouse_nestedset
 erpnext.patches.v7_0.merge_account_type_stock_and_warehouse_to_stock
 erpnext.patches.v7_0.set_is_group_for_warehouse
+erpnext.patches.v7_2.stock_uom_in_selling
 erpnext.patches.v4_2.repost_sle_for_si_with_no_warehouse
 erpnext.patches.v5_0.newsletter
 execute:frappe.delete_doc("DocType", "Chart of Accounts")
@@ -343,9 +344,41 @@ erpnext.patches.v7_1.set_prefered_contact_email
 execute:frappe.reload_doc('accounts', 'doctype', 'accounts_settings')
 execute:frappe.db.set_value("Accounts Settings", "Accounts Settings", "unlink_payment_on_cancellation_of_invoice", 0)
 execute:frappe.db.sql("update `tabStock Entry` set total_amount = null where purpose in('Repack', 'Manufacture')")
+erpnext.patches.v7_1.save_stock_settings
 erpnext.patches.v7_0.repost_gle_for_pi_with_update_stock #2016-11-01
 erpnext.patches.v7_1.add_account_user_role_for_timesheet
 erpnext.patches.v7_0.set_base_amount_in_invoice_payment_table
 erpnext.patches.v7_1.update_invoice_status
 erpnext.patches.v7_0.po_status_issue_for_pr_return
 erpnext.patches.v7_1.update_missing_salary_component_type
+erpnext.patches.v7_1.rename_quality_inspection_field
+erpnext.patches.v7_0.update_autoname_field
+erpnext.patches.v7_1.update_bom_base_currency
+erpnext.patches.v7_0.update_status_of_po_so
+erpnext.patches.v7_1.set_budget_against_as_cost_center
+erpnext.patches.v7_1.set_currency_exchange_date
+erpnext.patches.v7_1.set_sales_person_status
+erpnext.patches.v7_1.repost_stock_for_deleted_bins_for_merging_items
+execute:frappe.delete_doc('Desktop Icon', {'module_name': 'Profit and Loss Statment'})
+erpnext.patches.v7_2.update_website_for_variant
+erpnext.patches.v7_2.update_assessment_modules
+erpnext.patches.v7_2.update_doctype_status
+erpnext.patches.v7_2.update_salary_slips
+erpnext.patches.v7_2.delete_fleet_management_module_def
+erpnext.patches.v7_2.contact_address_links
+erpnext.patches.v7_2.mark_students_active
+erpnext.patches.v7_2.set_null_value_to_fields
+erpnext.patches.v7_2.update_guardian_name_in_student_master
+erpnext.patches.v7_2.update_abbr_in_salary_slips
+erpnext.patches.v7_2.rename_evaluation_criteria
+erpnext.patches.v7_2.update_party_type
+erpnext.patches.v7_2.setup_auto_close_settings
+erpnext.patches.v7_2.empty_supplied_items_for_non_subcontracted
+erpnext.patches.v7_2.arrear_leave_encashment_as_salary_component
+erpnext.patches.v7_2.rename_att_date_attendance
+erpnext.patches.v7_2.update_attendance_docstatus
+erpnext.patches.v7_2.move_dates_from_salary_structure_to_employee
+erpnext.patches.v7_2.make_all_assessment_group
+erpnext.patches.v8_0.manufacturer_childtable_migrate
+erpnext.patches.v8_0.repost_reserved_qty_for_multiple_sales_uom
+erpnext.patches.v8_0.addresses_linked_to_lead

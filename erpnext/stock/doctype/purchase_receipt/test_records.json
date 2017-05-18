@@ -67,10 +67,10 @@
    {
     "base_amount": 250.0,
     "conversion_factor": 1.0,
-    "description": "_Test Item",
+    "description": "_Test Item Home Desktop 100",
     "doctype": "Purchase Receipt Item",
-    "item_code": "_Test Item",
-    "item_name": "_Test Item",
+    "item_code": "_Test Item Home Desktop 100",
+    "item_name": "_Test Item Home Desktop 100",
     "parentfield": "items",
     "qty": 5.0,
     "rate": 50.0,

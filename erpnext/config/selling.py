@@ -5,7 +5,7 @@ def get_data():
 	return [
 		{
 			"label": _("Sales"),
-			"icon": "icon-star",
+			"icon": "fa fa-star",
 			"items": [
 				{
 					"type": "doctype",
@@ -31,7 +31,7 @@ def get_data():
 					"type": "doctype",
 					"label": _("Customer Group"),
 					"name": "Customer Group",
-					"icon": "icon-sitemap",
+					"icon": "fa fa-sitemap",
 					"link": "Tree/Customer Group",
 					"description": _("Manage Customer Group Tree."),
 				},
@@ -69,7 +69,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Item Group",
-					"icon": "icon-sitemap",
+					"icon": "fa fa-sitemap",
 					"label": _("Item Group"),
 					"link": "Tree/Item Group",
 					"description": _("Tree of Item Groups."),
@@ -100,7 +100,7 @@ def get_data():
 					"type": "doctype",
 					"label": _("Territory"),
 					"name": "Territory",
-					"icon": "icon-sitemap",
+					"icon": "fa fa-sitemap",
 					"link": "Tree/Territory",
 					"description": _("Manage Territory Tree."),
 				},
@@ -113,9 +113,19 @@ def get_data():
 					"type": "doctype",
 					"label": _("Sales Person"),
 					"name": "Sales Person",
-					"icon": "icon-sitemap",
+					"icon": "fa fa-sitemap",
 					"link": "Tree/Sales Person",
 					"description": _("Manage Sales Person Tree."),
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Addresses And Contacts",
+					"label": "Sales Partner Addresses And Contacts",
+					"doctype": "Address",
+					"route_options": {
+						"party_type": "Sales Partner"
+					}
 				},
 				{
 					"type": "report",
@@ -135,7 +145,7 @@ def get_data():
 		},
 		{
 			"label": _("Setup"),
-			"icon": "icon-cog",
+			"icon": "fa fa-cog",
 			"items": [
 				{
 					"type": "doctype",
@@ -167,26 +177,26 @@ def get_data():
 		},
 		{
 			"label": _("Analytics"),
-			"icon": "icon-table",
+			"icon": "fa fa-table",
 			"items": [
 				{
 					"type": "page",
 					"name": "sales-analytics",
 					"label": _("Sales Analytics"),
-					"icon": "icon-bar-chart",
+					"icon": "fa fa-bar-chart",
 				},
 				{
 					"type": "page",
 					"name": "sales-funnel",
 					"label": _("Sales Funnel"),
-					"icon": "icon-bar-chart",
+					"icon": "fa fa-bar-chart",
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Customer Acquisition and Loyalty",
 					"doctype": "Customer",
-					"icon": "icon-bar-chart",
+					"icon": "fa fa-bar-chart",
 				},
 				{
 					"type": "report",
@@ -204,7 +214,7 @@ def get_data():
 		},
 		{
 			"label": _("Other Reports"),
-			"icon": "icon-list",
+			"icon": "fa fa-list",
 			"items": [
 				{
 					"type": "report",
@@ -215,8 +225,12 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Customer Addresses And Contacts",
-					"doctype": "Contact"
+					"name": "Addresses And Contacts",
+					"label": "Customer Addresses And Contacts",
+					"doctype": "Address",
+					"route_options": {
+						"party_type": "Customer"
+					}
 				},
 				{
 					"type": "report",
@@ -270,7 +284,7 @@ def get_data():
 		},
 		{
 			"label": _("SMS"),
-			"icon": "icon-wrench",
+			"icon": "fa fa-wrench",
 			"items": [
 				{
 					"type": "doctype",

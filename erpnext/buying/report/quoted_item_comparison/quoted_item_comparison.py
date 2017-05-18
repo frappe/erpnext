@@ -3,11 +3,10 @@
 
 from __future__ import unicode_literals
 from erpnext.setup.utils import get_exchange_rate
-
+from frappe.utils import flt, cint
 import frappe
 
 def execute(filters=None):
-	
 	qty_list = get_quantity_list(filters.item)
 	
 	data = get_quote_list(filters.item, qty_list)
@@ -15,16 +14,14 @@ def execute(filters=None):
 	columns = get_columns(qty_list)
 	
 	return columns, data
-
 	
 def get_quote_list(item, qty_list):
-	
 	out = []
-	
 	if item:
 		price_data = []
 		suppliers = []
 		company_currency = frappe.db.get_default("currency")
+		float_precision = cint(frappe.db.get_default("float_precision")) or 2 
 		# Get the list of suppliers
 		for root in frappe.db.sql("""select parent, qty, rate from `tabSupplier Quotation Item` where item_code=%s and docstatus < 2""", item, as_dict=1):
 			for splr in frappe.db.sql("""SELECT supplier from `tabSupplier Quotation` where name =%s and docstatus < 2""", root.parent, as_dict=1):
@@ -38,8 +35,11 @@ def get_quote_list(item, qty_list):
 			
 		#Add a row for each supplier
 		for root in set(suppliers):
-			supplier_currency = frappe.db.get_value("Supplier",root,"default_currency")
-			exg = get_exchange_rate(supplier_currency,company_currency)
+			supplier_currency = frappe.db.get_value("Supplier", root, "default_currency")
+			if supplier_currency:
+				exchange_rate = get_exchange_rate(supplier_currency, company_currency)
+			else:
+				exchange_rate = 1
 
 			row = frappe._dict({
 				"supplier_name": root
@@ -48,7 +48,7 @@ def get_quote_list(item, qty_list):
 				# Get the quantity for this row
 				for item_price in price_data:
 					if str(item_price.qty) == col.key and item_price.supplier == root:
-						row[col.key] = item_price.rate * exg
+						row[col.key] = flt(item_price.rate * exchange_rate, float_precision)
 						row[col.key + "QUOTE"] = item_price.parent
 						break
 					else:
@@ -56,15 +56,11 @@ def get_quote_list(item, qty_list):
 						row[col.key + "QUOTE"] = ""
 			out.append(row)
 			
-
-	
 	return out
 	
 def get_quantity_list(item):
-	
 	out = []
 	
-			
 	if item:
 		qty_list = frappe.db.sql("""select distinct qty from `tabSupplier Quotation Item` where ifnull(item_code,'')=%s and docstatus < 2""", item, as_dict=1)
 		qty_list.sort(reverse=False)
@@ -101,6 +97,5 @@ def get_columns(qty_list):
 			"options": "Supplier Quotation",
 			"width": 90
 		})
-
 
 	return columns

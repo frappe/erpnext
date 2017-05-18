@@ -7,9 +7,9 @@ import frappe
 import datetime
 from frappe import _, msgprint, scrub
 from frappe.defaults import get_user_permissions
-from frappe.utils import add_days, getdate, formatdate, get_first_day, date_diff, add_years
-from erpnext.utilities.doctype.address.address import get_address_display
-from erpnext.utilities.doctype.contact.contact import get_contact_details
+from frappe.utils import add_days, getdate, formatdate, get_first_day, date_diff, add_years, get_timestamp
+from frappe.geo.doctype.address.address import get_address_display, get_default_address
+from frappe.email.doctype.contact.contact import get_contact_details, get_default_contact
 from erpnext.exceptions import PartyFrozen, InvalidCurrency, PartyDisabled, InvalidAccountCurrency
 
 class DuplicatePartyAccountError(frappe.ValidationError): pass
@@ -60,21 +60,18 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 def set_address_details(out, party, party_type):
 	billing_address_field = "customer_address" if party_type == "Lead" \
 		else party_type.lower() + "_address"
-	out[billing_address_field] = frappe.db.get_value("Address",
-		{party_type.lower(): party.name, "is_primary_address":1}, "name")
+	out[billing_address_field] = get_default_address(party_type, party.name)
 
 	# address display
 	out.address_display = get_address_display(out[billing_address_field])
 
 	# shipping address
 	if party_type in ["Customer", "Lead"]:
-		out.shipping_address_name = frappe.db.get_value("Address",
-			{party_type.lower(): party.name, "is_shipping_address":1}, "name")
+		out.shipping_address_name = get_default_address(party_type, party.name, 'is_shipping_address')
 		out.shipping_address = get_address_display(out["shipping_address_name"])
 
 def set_contact_details(out, party, party_type):
-	out.contact_person = frappe.db.get_value("Contact",
-		{party_type.lower(): party.name, "is_primary_contact":1}, "name")
+	out.contact_person = get_default_contact(party_type, party.name)
 
 	if not out.contact_person:
 		out.update({
@@ -174,17 +171,17 @@ def get_party_account(party_type, party, company):
 		account = frappe.db.get_value("Party Account",
 			{"parenttype": party_type, "parent": party, "company": company}, "account")
 
-		if not account:
+		if not account and party_type in ['Customer', 'Supplier']:
 			party_group_doctype = "Customer Group" if party_type=="Customer" else "Supplier Type"
 			group = frappe.db.get_value(party_type, party, scrub(party_group_doctype))
 			account = frappe.db.get_value("Party Account",
 				{"parenttype": party_group_doctype, "parent": group, "company": company}, "account")
 
-		if not account:
+		if not account and party_type in ['Customer', 'Supplier']:
 			default_account_name = "default_receivable_account" \
 				if party_type=="Customer" else "default_payable_account"
 			account = frappe.db.get_value("Company", company, default_account_name)
-			
+
 		existing_gle_currency = get_party_gle_currency(party_type, party, company)
 		if existing_gle_currency:
 			if account:
@@ -211,7 +208,7 @@ def get_party_gle_currency(party_type, party, company):
 
 	return frappe.local_cache("party_gle_currency", (party_type, party, company), generator,
 		regenerate_if_none=True)
-		
+
 def get_party_gle_account(party_type, party, company):
 	def generator():
 		existing_gle_account = frappe.db.sql("""select account from `tabGL Entry`
@@ -252,7 +249,7 @@ def validate_party_accounts(doc):
 		if existing_gle_currency and party_account_currency != existing_gle_currency:
 			frappe.throw(_("Accounting entries have already been made in currency {0} for company {1}. Please select a receivable or payable account with currency {0}.").format(existing_gle_currency, account.company))
 
-		if doc.default_currency and party_account_currency and company_default_currency:
+		if doc.get("default_currency") and party_account_currency and company_default_currency:
 			if doc.default_currency != party_account_currency and doc.default_currency != company_default_currency:
 				frappe.throw(_("Billing currency must be equal to either default comapany's currency or party account currency"))
 
@@ -340,19 +337,33 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 
 def validate_party_frozen_disabled(party_type, party_name):
 	if party_type and party_name:
-		party = frappe.db.get_value(party_type, party_name, ["is_frozen", "disabled"], as_dict=True)
-		if party.disabled:
-			frappe.throw(_("{0} {1} is disabled").format(party_type, party_name), PartyDisabled)
-		elif party.is_frozen:
-			frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
-			if not frozen_accounts_modifier in frappe.get_roles():
-				frappe.throw(_("{0} {1} is frozen").format(party_type, party_name), PartyFrozen)
+		if party_type in ("Customer", "Supplier"):
+			party = frappe.db.get_value(party_type, party_name, ["is_frozen", "disabled"], as_dict=True)
+			if party.disabled:
+				frappe.throw(_("{0} {1} is disabled").format(party_type, party_name), PartyDisabled)
+			elif party.get("is_frozen"):
+				frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
+				if not frozen_accounts_modifier in frappe.get_roles():
+					frappe.throw(_("{0} {1} is frozen").format(party_type, party_name), PartyFrozen)
+
+		elif party_type == "Employee":
+			if frappe.db.get_value("Employee", party_name, "status") == "Left":
+				frappe.msgprint(_("{0} {1} is not active").format(party_type, party_name), PartyDisabled, alert=True)
 
 def get_timeline_data(doctype, name):
 	'''returns timeline data for the past one year'''
 	from frappe.desk.form.load import get_communication_data
+
+	out = {}
 	data = get_communication_data(doctype, name,
-		fields = 'unix_timestamp(date(creation)), count(name)',
+		fields = 'date(creation), count(name)',
 		after = add_years(None, -1).strftime('%Y-%m-%d'),
 		group_by='group by date(creation)', as_dict=False)
-	return dict(data)
+
+	timeline_items = dict(data)
+
+	for date, count in timeline_items.iteritems():
+		timestamp = get_timestamp(date)
+		out.update({ timestamp: count })
+
+	return out

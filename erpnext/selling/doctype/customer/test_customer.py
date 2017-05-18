@@ -10,12 +10,20 @@ from frappe.test_runner import make_test_records
 from erpnext.exceptions import PartyFrozen, PartyDisabled
 from frappe.utils import flt
 from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
+from erpnext.tests.utils import create_test_contact_and_address
 
 test_ignore = ["Price List"]
 
 test_records = frappe.get_test_records('Customer')
 
 class TestCustomer(unittest.TestCase):
+	def setUp(self):
+		if not frappe.get_value('Item', '_Test Item'):
+			make_test_records('Item')
+
+	def tearDown(self):
+		frappe.db.set_value("Customer", '_Test Customer', 'credit_limit', 0.0)
+
 	def test_party_details(self):
 		from erpnext.accounts.party import get_party_details
 
@@ -23,21 +31,21 @@ class TestCustomer(unittest.TestCase):
 			'selling_price_list': None,
 			'customer_group': '_Test Customer Group',
 			'contact_designation': None,
-			'customer_address': '_Test Address-Office',
+			'customer_address': '_Test Address for Customer-Office',
 			'contact_department': None,
 			'contact_email': 'test_contact_customer@example.com',
 			'contact_mobile': None,
 			'sales_team': [],
-			'contact_display': '_Test Contact For _Test Customer',
-			'contact_person': '_Test Contact For _Test Customer-_Test Customer',
+			'contact_display': '_Test Contact for _Test Customer',
+			'contact_person': '_Test Contact for _Test Customer-_Test Customer',
 			'territory': u'_Test Territory',
 			'contact_phone': '+91 0000000000',
 			'customer_name': '_Test Customer'
 		}
 
-		make_test_records("Address")
-		make_test_records("Contact")
-		frappe.db.set_value("Contact", "_Test Contact For _Test Customer-_Test Customer",
+		create_test_contact_and_address()
+
+		frappe.db.set_value("Contact", "_Test Contact for _Test Customer-_Test Customer",
 			"is_primary_contact", 1)
 
 		details = get_party_details("_Test Customer")
@@ -114,6 +122,7 @@ class TestCustomer(unittest.TestCase):
 		self.assertEquals(test_customer_1.customer_name, duplicate_customer.customer_name)
 
 	def get_customer_outstanding_amount(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 		outstanding_amt = get_customer_outstanding('_Test Customer', '_Test Company')
 
 		# If outstanding is negative make a transaction to get positive outstanding amount
@@ -121,7 +130,7 @@ class TestCustomer(unittest.TestCase):
 			return outstanding_amt
 
 		item_qty = int((abs(outstanding_amt) + 200)/100)
-		make_sales_order({'qty':item_qty})
+		make_sales_order(qty=item_qty)
 		return get_customer_outstanding('_Test Customer', '_Test Company')
 
 	def test_customer_credit_limit(self):
@@ -135,7 +144,7 @@ class TestCustomer(unittest.TestCase):
 
 		if outstanding_amt <= 0.0:
 			item_qty = int((abs(outstanding_amt) + 200)/100)
-			make_sales_order({'qty':item_qty})
+			make_sales_order(qty=item_qty)
 
 		if credit_limit == 0.0:
 			frappe.db.set_value("Customer", '_Test Customer', 'credit_limit', outstanding_amt - 50.0)
@@ -162,11 +171,7 @@ class TestCustomer(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, make_sales_order)
 
 	def test_customer_credit_limit_on_change(self):
-		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-
 		outstanding_amt = self.get_customer_outstanding_amount()
-		credit_limit = get_credit_limit('_Test Customer', '_Test Company')
-
 		customer = frappe.get_doc("Customer", '_Test Customer')
 		customer.credit_limit = flt(outstanding_amt - 100)
 		self.assertRaises(frappe.ValidationError, customer.save)

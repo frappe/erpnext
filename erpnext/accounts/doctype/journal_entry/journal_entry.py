@@ -9,6 +9,8 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_account_currency
 from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.party import get_party_account
+from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
+from erpnext.hr.doctype.employee_loan.employee_loan import update_disbursement_status
 
 class JournalEntry(AccountsController):
 	def __init__(self, arg1, arg2=None):
@@ -45,6 +47,7 @@ class JournalEntry(AccountsController):
 		self.make_gl_entries()
 		self.update_advance_paid()
 		self.update_expense_claim()
+		self.update_employee_loan()
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
@@ -63,11 +66,12 @@ class JournalEntry(AccountsController):
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 		from erpnext.hr.doctype.salary_slip.salary_slip import unlink_ref_doc_from_salary_slip
-		unlink_ref_doc_from_payment_entries(self.doctype, self.name)
+		unlink_ref_doc_from_payment_entries(self)
 		unlink_ref_doc_from_salary_slip(self.name)
 		self.make_gl_entries(1)
 		self.update_advance_paid()
 		self.update_expense_claim()
+		self.update_employee_loan()
 		self.unlink_advance_entry_reference()
 
 	def unlink_advance_entry_reference(self):
@@ -321,9 +325,12 @@ class JournalEntry(AccountsController):
 			if d.account_currency == self.company_currency:
 				d.exchange_rate = 1
 			elif not d.exchange_rate or d.exchange_rate == 1 or \
-				(d.reference_type in ("Sales Invoice", "Purchase Invoice") and d.reference_name):
-					d.exchange_rate = get_exchange_rate(d.account, d.account_currency, self.company,
-						d.reference_type, d.reference_name, d.debit, d.credit, d.exchange_rate)
+				(d.reference_type in ("Sales Invoice", "Purchase Invoice") 
+				and d.reference_name and self.posting_date):
+				
+					# Modified to include the posting date for which to retreive the exchange rate
+					d.exchange_rate = get_exchange_rate(self.posting_date, d.account, d.account_currency, 
+						self.company, d.reference_type, d.reference_name, d.debit, d.credit, d.exchange_rate)
 
 			if not d.exchange_rate:
 				frappe.throw(_("Row {0}: Exchange Rate is mandatory").format(d.idx))
@@ -367,7 +374,7 @@ class JournalEntry(AccountsController):
 		bank_amount = party_amount = total_amount = 0.0
 		currency = bank_account_currency = party_account_currency = pay_to_recd_from= None
 		for d in self.get('accounts'):
-			if d.party_type and d.party:
+			if d.party_type in ['Customer', 'Supplier'] and d.party:
 				if not pay_to_recd_from:
 					pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
 						"customer_name" if d.party_type=="Customer" else "supplier_name")
@@ -428,7 +435,7 @@ class JournalEntry(AccountsController):
 		if not self.get('accounts'):
 			msgprint(_("'Entries' cannot be empty"), raise_exception=True)
 		else:
-			flag, self.total_debit, self.total_credit = 0, 0, 0
+			self.total_debit, self.total_credit = 0, 0
 			diff = flt(self.difference, self.precision("difference"))
 
 			# If any row without amount, set the diff on that row
@@ -495,11 +502,15 @@ class JournalEntry(AccountsController):
 
 	def update_expense_claim(self):
 		for d in self.accounts:
-			if d.reference_type=="Expense Claim":
-				amt = frappe.db.sql("""select sum(debit) as amt from `tabJournal Entry Account`
-					where reference_type = "Expense Claim" and
-					reference_name = %s and docstatus = 1""", d.reference_name ,as_dict=1)[0].amt
-				frappe.db.set_value("Expense Claim", d.reference_name , "total_amount_reimbursed", amt)
+			if d.reference_type=="Expense Claim" and d.party:
+				doc = frappe.get_doc("Expense Claim", d.reference_name)
+				update_reimbursed_amount(doc)
+
+	def update_employee_loan(self):
+		for d in self.accounts:
+			if d.reference_type=="Employee Loan" and flt(d.debit) > 0:
+				doc = frappe.get_doc("Employee Loan", d.reference_name)
+				update_disbursement_status(doc)
 
 	def validate_expense_claim(self):
 		for d in self.accounts:
@@ -558,7 +569,7 @@ def get_default_bank_cash_account(company, account_type=None, mode_of_payment=No
 	if account:
 		account_details = frappe.db.get_value("Account", account,
 			["account_currency", "account_type"], as_dict=1)
-			
+
 		return frappe._dict({
 			"account": account,
 			"balance": get_balance_on(account),
@@ -643,7 +654,10 @@ def get_payment_entry(ref_doc, args):
 	cost_center = frappe.db.get_value("Company", ref_doc.company, "cost_center")
 	exchange_rate = 1
 	if args.get("party_account"):
-		exchange_rate = get_exchange_rate(args.get("party_account"), args.get("party_account_currency"),
+		# Modified to include the posting date for which the exchange rate is required.
+		# Assumed to be the posting date in the reference document
+		exchange_rate = get_exchange_rate(ref_doc.get("posting_date") or ref_doc.get("transaction_date"), 
+			args.get("party_account"), args.get("party_account_currency"),
 			ref_doc.company, ref_doc.doctype, ref_doc.name)
 
 	je = frappe.new_doc("Journal Entry")
@@ -676,7 +690,10 @@ def get_payment_entry(ref_doc, args):
 	bank_account = get_default_bank_cash_account(ref_doc.company, "Bank", account=args.get("bank_account"))
 	if bank_account:
 		bank_row.update(bank_account)
-		bank_row.exchange_rate = get_exchange_rate(bank_account["account"],
+		# Modified to include the posting date for which the exchange rate is required.
+		# Assumed to be the posting date of the reference date
+		bank_row.exchange_rate = get_exchange_rate(ref_doc.get("posting_date") 
+			or ref_doc.get("transaction_date"), bank_account["account"], 
 			bank_account["account_currency"], ref_doc.company)
 
 	bank_row.cost_center = cost_center
@@ -701,8 +718,14 @@ def get_payment_entry(ref_doc, args):
 @frappe.whitelist()
 def get_opening_accounts(company):
 	"""get all balance sheet accounts for opening entry"""
-	accounts = frappe.db.sql_list("""select name from tabAccount
-		where is_group=0 and report_type='Balance Sheet' and company=%s""", company)
+	accounts = frappe.db.sql_list("""select
+			name from tabAccount
+		where
+			is_group=0 and
+			report_type='Balance Sheet' and
+			ifnull(warehouse, '') = '' and
+			company=%s
+		order by name asc""", company)
 
 	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
 
@@ -800,7 +823,10 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 		"party_type": party_type,
 		"account_type": account_details.account_type,
 		"account_currency": account_details.account_currency or company_currency,
-		"exchange_rate": get_exchange_rate(account, account_details.account_currency,
+
+		# The date used to retreive the exchange rate here is the date passed in
+		# as an argument to this function. It is assumed to be the date on which the balance is sought
+		"exchange_rate": get_exchange_rate(date, account, account_details.account_currency,
 			company, debit=debit, credit=credit, exchange_rate=exchange_rate)
 	}
 
@@ -810,8 +836,9 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 
 	return grid_values
 
+# Added posting_date as one of the parameters of get_exchange_rate
 @frappe.whitelist()
-def get_exchange_rate(account, account_currency=None, company=None,
+def get_exchange_rate(posting_date, account=None, account_currency=None, company=None,
 		reference_type=None, reference_name=None, debit=None, credit=None, exchange_rate=None):
 	from erpnext.setup.utils import get_exchange_rate
 	account_details = frappe.db.get_value("Account", account,
@@ -837,9 +864,10 @@ def get_exchange_rate(account, account_currency=None, company=None,
 				(account_details.root_type == "Liability" and debit)):
 			exchange_rate = get_average_exchange_rate(account)
 
-		if not exchange_rate and account_currency:
-			exchange_rate = get_exchange_rate(account_currency, company_currency)
-
+		# The date used to retreive the exchange rate here is the date passed
+		# in as an argument to this function.
+		if not exchange_rate and account_currency and posting_date:
+			exchange_rate = get_exchange_rate(account_currency, company_currency, posting_date)
 	else:
 		exchange_rate = 1
 

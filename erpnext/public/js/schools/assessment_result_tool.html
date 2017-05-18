@@ -1,0 +1,44 @@
+<table class="table table-bordered assessment-result-tool">
+    <thead>
+        <tr>
+            <th style="width: 100px" rowspan="2">Student</th>
+            <th style="width: 200px" rowspan="2">Student Name</th>
+            {% for c in criteria %}
+            <th class="score" style="width: 100px">{{ c.assessment_criteria }}</th>
+            {% endfor %}
+            <th class="score" style="width: 100px">Total Marks</th>
+            <!--criteria-->
+        </tr>
+        <tr>
+            {% for c in criteria %}
+            <th class="score" style="width: 100px">{{ c.maximum_score }}</th>
+            {% endfor %}
+            <th class="score" style="width: 100px">{{max_total_score}}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in students %}
+        <tr 
+            {% if(s.assessment_details) { %} class="text-muted" {% } %}
+            data-student="{{s.student}}">
+            <td>{{ s.student }}</td>
+            <td>{{ s.student_name }}</td>
+            {% for c in criteria %}
+            <td>
+                <input type="text"
+                    data-max-score="{{c.maximum_score}}"
+                    data-criteria="{{c.assessment_criteria}}"
+                    data-student="{{s.student}}"
+                    {% if(s.assessment_details) { %}
+                        disabled
+                        value="{{s.assessment_details[c.assessment_criteria]}}"
+                    {% } %}/>
+            </td>
+            {% endfor %}
+            <td data-student="{{s.student}}" class="total-score">
+                {% if(s.assessment_details) { %} {{s.assessment_details.total_score}} {% } %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

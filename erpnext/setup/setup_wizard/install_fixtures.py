@@ -31,8 +31,11 @@ def install(country=None):
 			'is_group': 0, 'parent_item_group': _('All Item Groups') },
 
 		# salary component
-		{'doctype': 'Salary Component', 'salary_component': _('Income Tax'), 'description': _('Income Tax')},
-		{'doctype': 'Salary Component', 'salary_component': _('Basic'), 'description': _('Basic')},
+		{'doctype': 'Salary Component', 'salary_component': _('Income Tax'), 'description': _('Income Tax'), 'type': 'Deduction'},
+		{'doctype': 'Salary Component', 'salary_component': _('Basic'), 'description': _('Basic'), 'type': 'Earning'},
+		{'doctype': 'Salary Component', 'salary_component': _('Arrear'), 'description': _('Arrear'), 'type': 'Earning'},
+		{'doctype': 'Salary Component', 'salary_component': _('Leave Encashment'), 'description': _('Leave Encashment'), 'type': 'Earning'},
+		
 
 		# expense claim type
 		{'doctype': 'Expense Claim Type', 'name': _('Calls'), 'expense_type': _('Calls')},
@@ -171,6 +174,10 @@ def install(country=None):
 		{'doctype': "Email Account", "email_id": "support@example.com", "append_to": "Issue"},
 		{'doctype': "Email Account", "email_id": "jobs@example.com", "append_to": "Job Applicant"},
 
+		{'doctype': "Party Type", "party_type": "Customer"},
+		{'doctype': "Party Type", "party_type": "Supplier"},
+		{'doctype': "Party Type", "party_type": "Employee"},
+
 		{"doctype": "Offer Term", "offer_term": _("Date of Joining")},
 		{"doctype": "Offer Term", "offer_term": _("Annual Salary")},
 		{"doctype": "Offer Term", "offer_term": _("Probationary Period")},
@@ -187,8 +194,10 @@ def install(country=None):
 		{'doctype': "Print Heading", 'print_heading': _("Credit Note")},
 		{'doctype': "Print Heading", 'print_heading': _("Debit Note")},
 
-		{"doctype": "Salary Component", "salary_component": _("Basic")},
-		{"doctype": "Salary Component", "salary_component": _("Income Tax")},
+		# Assessment Group
+		{'doctype': 'Assessment Group', 'assessment_group_name': _('All Assessment Groups'),
+			'is_group': 1, 'parent_assessment_group': ''},
+	
 	]
 
 	from erpnext.setup.setup_wizard.industry_type import get_industry_types

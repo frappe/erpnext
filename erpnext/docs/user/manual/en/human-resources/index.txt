@@ -7,9 +7,13 @@ appraisal
 job-applicant
 job-opening
 offer-letter
+training
 tools
 human-resources-reports
 setup
 holiday-list
 human-resource-setup
+daily-work-summary
+fleet-management
+employee-loan-management
 articles

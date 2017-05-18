@@ -4,7 +4,7 @@
 frappe.ui.form.on("Pricing Rule", "refresh", function(frm) {
 	var help_content = ['<table class="table table-bordered" style="background-color: #f9f9f9;">',
 		'<tr><td>',
-			'<h4><i class="icon-hand-right"></i> ',
+			'<h4><i class="fa fa-hand-right"></i> ',
 				__('Notes'),
 			':</h4>',
 			'<ul>',
@@ -23,7 +23,7 @@ frappe.ui.form.on("Pricing Rule", "refresh", function(frm) {
 			'</ul>',
 		'</td></tr>',
 		'<tr><td>',
-			'<h4><i class="icon-question-sign"></i> ',
+			'<h4><i class="fa fa-question-sign"></i> ',
 				__('How Pricing Rule is applied?'),
 			'</h4>',
 			'<ol>',
@@ -91,8 +91,8 @@ cur_frm.cscript.buying = function() {
 }
 
 //Dynamically change the description based on type of margin
-cur_frm.cscript.type = function(doc){
-	cur_frm.set_df_property('rate', 'description', doc.type=='Percentage'?'In Percentage %':'In Amount')
+cur_frm.cscript.margin_type = function(doc){
+	cur_frm.set_df_property('margin_rate_or_amount', 'description', doc.margin_type=='Percentage'?'In Percentage %':'In Amount')
 }
 
 frappe.ui.form.on('Pricing Rule', 'price_or_discount', function(frm){

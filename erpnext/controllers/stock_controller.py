@@ -9,9 +9,14 @@ import frappe.defaults
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, process_gl_map
 from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.stock.stock_ledger import get_valuation_rate
 
 class StockController(AccountsController):
-	def make_gl_entries(self, repost_future_gle=True):
+	def validate(self):
+		super(StockController, self).validate()
+		self.validate_inspection()
+
+	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if self.docstatus == 2:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
@@ -19,8 +24,9 @@ class StockController(AccountsController):
 			warehouse_account = get_warehouse_account()
 
 			if self.docstatus==1:
-				gl_entries = self.get_gl_entries(warehouse_account)
-				make_gl_entries(gl_entries)
+				if not gl_entries:
+					gl_entries = self.get_gl_entries(warehouse_account)
+				make_gl_entries(gl_entries, from_repost=from_repost)
 
 			if repost_future_gle:
 				items, warehouses = self.get_items_and_warehouses()
@@ -38,32 +44,43 @@ class StockController(AccountsController):
 
 		gl_list = []
 		warehouse_with_no_account = []
-		
-		for detail in voucher_details:
-			sle_list = sle_map.get(detail.name)
+
+		for item_row in voucher_details:
+			sle_list = sle_map.get(item_row.name)
 			if sle_list:
 				for sle in sle_list:
 					if warehouse_account.get(sle.warehouse):
 						# from warehouse account
 
-						self.check_expense_account(detail)
+						self.check_expense_account(item_row)
+
+						# If item is not a sample item 
+						# and ( valuation rate not mentioned in an incoming entry
+						# or incoming entry not found while delivering the item), 
+						# try to pick valuation rate from previous sle or Item master and update in SLE
+						# Otherwise, throw an exception
+
+						if not sle.stock_value_difference and self.doctype != "Stock Reconciliation" \
+							and not item_row.get("is_sample_item"):
+
+							sle = self.update_stock_ledger_entries(sle)
 
 						gl_list.append(self.get_gl_dict({
 							"account": warehouse_account[sle.warehouse]["name"],
-							"against": detail.expense_account,
-							"cost_center": detail.cost_center,
+							"against": item_row.expense_account,
+							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"debit": flt(sle.stock_value_difference, 2),
 						}, warehouse_account[sle.warehouse]["account_currency"]))
 
 						# to target warehouse / expense account
 						gl_list.append(self.get_gl_dict({
-							"account": detail.expense_account,
+							"account": item_row.expense_account,
 							"against": warehouse_account[sle.warehouse]["name"],
-							"cost_center": detail.cost_center,
+							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, 2),
-							"project": detail.get("project") or self.get("project")
+							"project": item_row.get("project") or self.get("project")
 						}))
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
@@ -72,12 +89,32 @@ class StockController(AccountsController):
 			for wh in warehouse_with_no_account:
 				if frappe.db.get_value("Warehouse", wh, "company"):
 					frappe.throw(_("Warehouse {0} is not linked to any account, please create/link the corresponding (Asset) account for the warehouse.").format(wh))
-					
+
 			msgprint(_("No accounting entries for the following warehouses") + ": \n" +
 				"\n".join(warehouse_with_no_account))
 
 		return process_gl_map(gl_list)
 
+	def update_stock_ledger_entries(self, sle):
+		sle.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse, 
+			self.doctype, self.name)
+
+		sle.stock_value = flt(sle.qty_after_transaction) * flt(sle.valuation_rate)
+		sle.stock_value_difference = flt(sle.actual_qty) * flt(sle.valuation_rate)
+		
+		if sle.name:
+			frappe.db.sql("""
+				update 
+					`tabStock Ledger Entry` 
+				set 
+					stock_value = %(stock_value)s,
+					valuation_rate = %(valuation_rate)s, 
+					stock_value_difference = %(stock_value_difference)s 
+				where 
+					name = %(name)s""", (sle))
+					
+		return sle
+					
 	def get_voucher_details(self, default_expense_account, default_cost_center, sle_map):
 		if self.doctype == "Stock Reconciliation":
 			return [frappe._dict({ "name": voucher_detail_no, "expense_account": default_expense_account,
@@ -125,10 +162,18 @@ class StockController(AccountsController):
 
 	def get_stock_ledger_details(self):
 		stock_ledger = {}
-		for sle in frappe.db.sql("""select warehouse, stock_value_difference,
-			voucher_detail_no, item_code, posting_date, actual_qty
-			from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""",
-			(self.doctype, self.name), as_dict=True):
+		stock_ledger_entries = frappe.db.sql("""
+			select 
+				name, warehouse, stock_value_difference, valuation_rate,
+				voucher_detail_no, item_code, posting_date, posting_time, 
+				actual_qty, qty_after_transaction
+			from
+				`tabStock Ledger Entry`
+			where
+				voucher_type=%s and voucher_no=%s
+		""", (self.doctype, self.name), as_dict=True)
+
+		for sle in stock_ledger_entries:
 				stock_ledger.setdefault(sle.voucher_detail_no, []).append(sle)
 		return stock_ledger
 
@@ -211,7 +256,7 @@ class StockController(AccountsController):
 	def make_gl_entries_on_cancel(self, repost_future_gle=True):
 		if frappe.db.sql("""select name from `tabGL Entry` where voucher_type=%s
 			and voucher_no=%s""", (self.doctype, self.name)):
-				self.make_gl_entries(repost_future_gle)
+				self.make_gl_entries(repost_future_gle=repost_future_gle)
 
 	def get_serialized_items(self):
 		serialized_items = []
@@ -234,7 +279,7 @@ class StockController(AccountsController):
 			incoming_rate = incoming_rate[0][0] if incoming_rate else 0.0
 
 		return incoming_rate
-		
+
 	def validate_warehouse(self):
 		from erpnext.stock.utils import validate_warehouse_company
 
@@ -243,7 +288,7 @@ class StockController(AccountsController):
 
 		for w in warehouses:
 			validate_warehouse_company(w, self.company)
-			
+
 	def update_billing_percentage(self, update_modified=True):
 		self._update_percent_field({
 			"target_dt": self.doctype + " Item",
@@ -253,6 +298,28 @@ class StockController(AccountsController):
 			"target_field": "billed_amt",
 			"name": self.name,
 		}, update_modified)
+
+	def validate_inspection(self):
+		'''Checks if quality inspection is set for Items that require inspection.
+		On submit, throw an exception'''
+
+		inspection_required_fieldname = None
+		if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
+			inspection_required_fieldname = "inspection_required_before_purchase"
+		elif self.doctype in ["Delivery Note", "Sales Invoice"]:
+			inspection_required_fieldname = "inspection_required_before_delivery"
+
+		if not inspection_required_fieldname or \
+			(self.doctype in ["Sales Invoice", "Purchase Invoice"] and not self.update_stock):
+				return
+
+		for d in self.get('items'):
+			if (frappe.db.get_value("Item", d.item_code, inspection_required_fieldname)
+				and not d.quality_inspection):
+
+				frappe.msgprint(_("Quality Inspection required for Item {0}").format(d.item_code))
+				if self.docstatus==1:
+					raise frappe.ValidationError
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None):
@@ -265,7 +332,7 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 
 	future_stock_vouchers = get_future_stock_vouchers(posting_date, posting_time, for_warehouses, for_items)
 	gle = get_voucherwise_gl_entries(future_stock_vouchers, posting_date)
-	
+
 	for voucher_type, voucher_no in future_stock_vouchers:
 		existing_gle = gle.get((voucher_type, voucher_no), [])
 		voucher_obj = frappe.get_doc(voucher_type, voucher_no)
@@ -273,7 +340,7 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 		if expected_gle:
 			if not existing_gle or not compare_existing_and_expected_gle(existing_gle, expected_gle):
 				_delete_gl_entries(voucher_type, voucher_no)
-				voucher_obj.make_gl_entries(repost_future_gle=False)
+				voucher_obj.make_gl_entries(gl_entries=expected_gle, repost_future_gle=False, from_repost=True)
 		else:
 			_delete_gl_entries(voucher_type, voucher_no)
 
@@ -328,10 +395,19 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 	return gl_entries
 
 def get_warehouse_account():
-	warehouse_account = frappe._dict()
+	if not frappe.flags.warehouse_account_map or frappe.flags.in_test:
+		warehouse_account = frappe._dict()
 
-	for d in frappe.db.sql("""select warehouse, name, account_currency from tabAccount
-		where account_type = 'Stock' and (warehouse is not null and warehouse != ''
-		and is_group != 1) and is_group=0 """, as_dict=1):
+		for d in frappe.db.sql("""select
+				warehouse, name, account_currency
+			from
+				tabAccount
+			where
+				account_type = 'Stock'
+				and (warehouse is not null and warehouse != '')
+				and is_group=0 """, as_dict=1):
 			warehouse_account.setdefault(d.warehouse, d)
-	return warehouse_account
+
+		frappe.flags.warehouse_account_map = warehouse_account
+
+	return frappe.flags.warehouse_account_map

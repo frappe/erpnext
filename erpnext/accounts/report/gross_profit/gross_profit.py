@@ -4,6 +4,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
+from erpnext.stock.utils import get_incoming_rate
+from erpnext.controllers.queries import get_match_cond
+from erpnext.stock.stock_ledger import get_valuation_rate
 from frappe.utils import flt
 
 
@@ -208,21 +211,21 @@ class GrossProfitGenerator(object):
 								flt(my_sle[i+1].stock_value) or 0.0
 							return  previous_stock_value - flt(sle.stock_value)
 			else:
-				return flt(row.qty) * self.get_average_buying_rate(item_code)
-
+				return flt(row.qty) * self.get_average_buying_rate(row, item_code)
 
 		return 0.0
 
-	def get_average_buying_rate(self, item_code):
+	def get_average_buying_rate(self, row, item_code):
 		if not item_code in self.average_buying_rate:
 			if item_code in self.non_stock_items:
 				self.average_buying_rate[item_code] = flt(frappe.db.sql("""select sum(base_net_amount) / sum(qty * conversion_factor)
 					from `tabPurchase Invoice Item`
 					where item_code = %s and docstatus=1""", item_code)[0][0])
 			else:
-				self.average_buying_rate[item_code] = flt(frappe.db.sql("""select avg(valuation_rate)
-					from `tabStock Ledger Entry`
-					where item_code = %s and qty_after_transaction > 0""", item_code)[0][0])
+				average_buying_rate = get_incoming_rate(row)
+				if not average_buying_rate:
+					average_buying_rate = get_valuation_rate(item_code, row.warehouse, allow_zero_rate=True)
+				self.average_buying_rate[item_code] =  average_buying_rate
 
 		return self.average_buying_rate[item_code]
 
@@ -250,21 +253,32 @@ class GrossProfitGenerator(object):
 			conditions += " and posting_date >= %(from_date)s"
 		if self.filters.to_date:
 			conditions += " and posting_date <= %(to_date)s"
+					
+		if self.filters.group_by=="Sales Person":
+			sales_person_cols = ", sales.sales_person, sales.allocated_amount, sales.incentives"
+			sales_team_table = "left join `tabSales Team` sales on sales.parent = `tabSales Invoice`.name"
+		else:
+			sales_person_cols = ""
+			sales_team_table = ""
 
-		self.si_list = frappe.db.sql("""select item.parenttype, item.parent,
-				si.posting_date, si.posting_time, si.project, si.update_stock,
-				si.customer, si.customer_group, si.territory,
-				item.item_code, item.item_name, item.description, item.warehouse,
-				item.item_group, item.brand, item.dn_detail, item.delivery_note,
-				item.qty, item.base_net_rate, item.base_net_amount, item.name as "item_row",
-				sales.sales_person, sales.allocated_amount, sales.incentives
-			from `tabSales Invoice` si
-			inner join `tabSales Invoice Item` item on item.parent = si.name
-			left join `tabSales Team` sales on sales.parent = si.name
+		self.si_list = frappe.db.sql("""select `tabSales Invoice Item`.parenttype, `tabSales Invoice Item`.parent,
+				`tabSales Invoice`.posting_date, `tabSales Invoice`.posting_time, `tabSales Invoice`.project, `tabSales Invoice`.update_stock,
+				`tabSales Invoice`.customer, `tabSales Invoice`.customer_group, `tabSales Invoice`.territory,
+				`tabSales Invoice Item`.item_code, `tabSales Invoice Item`.item_name, `tabSales Invoice Item`.description,
+				`tabSales Invoice Item`.warehouse, `tabSales Invoice Item`.item_group, `tabSales Invoice Item`.brand,
+				`tabSales Invoice Item`.dn_detail, `tabSales Invoice Item`.delivery_note, `tabSales Invoice Item`.stock_qty as qty,
+				`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount, `tabSales Invoice Item`.name as "item_row"
+				{sales_person_cols}
+			from 
+				`tabSales Invoice`
+				inner join `tabSales Invoice Item` on `tabSales Invoice Item`.parent = `tabSales Invoice`.name
+				{sales_team_table}
 			where
-				si.docstatus = 1 and si.is_return != 1 %s
+				`tabSales Invoice`.docstatus = 1 and `tabSales Invoice`.is_return != 1 {conditions} {match_cond}
 			order by
-				si.posting_date desc, si.posting_time desc""" % (conditions,), self.filters, as_dict=1)
+				`tabSales Invoice`.posting_date desc, `tabSales Invoice`.posting_time desc"""
+			.format(conditions=conditions, sales_person_cols=sales_person_cols, 
+				sales_team_table=sales_team_table, match_cond = get_match_cond('Sales Invoice')), self.filters, as_dict=1)
 
 	def load_stock_ledger_entries(self):
 		res = frappe.db.sql("""select item_code, voucher_type, voucher_no,

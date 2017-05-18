@@ -2,9 +2,193 @@
 
 frappe.provide("erpnext.stock");
 
+frappe.ui.form.on('Stock Entry', {
+	setup: function(frm) {
+		$.extend(frm.cscript, new erpnext.stock.StockEntry({frm: frm}));
+
+		frm.set_query('production_order', function() {
+			return {
+				filters: [
+					['Production Order', 'docstatus', '=', 1],
+					['Production Order', 'qty', '>','`tabProduction Order`.produced_qty'],
+					['Production Order', 'company', '=', frm.doc.company]
+				]
+			}
+		});
+	// },
+	// onload_post_render: function(frm) {
+
+		frm.set_query('batch_no', 'items', function(doc, cdt, cdn) {
+			var item = locals[cdt][cdn];
+			if(!item.item_code) {
+				frappe.throw(__("Please enter Item Code to get Batch Number"));
+			} else {
+				if (in_list(["Material Transfer for Manufacture", "Manufacture", "Repack", "Subcontract"], doc.purpose)) {
+					var filters = {
+						'item_code': item.item_code,
+						'posting_date': frm.doc.posting_date || nowdate()
+					}
+				} else {
+					var filters = {
+						'item_code': item.item_code
+					}
+				}
+
+				if(item.s_warehouse) filters["warehouse"] = item.s_warehouse;
+				return {
+					query : "erpnext.controllers.queries.get_batch_no",
+					filters: filters
+				}
+			}
+		});
+	},
+	refresh: function(frm) {
+		if(!frm.doc.docstatus) {
+			frm.add_custom_button(__('Make Material Request'), function() {
+				frappe.model.with_doctype('Material Request', function() {
+					var mr = frappe.model.get_new_doc('Material Request');
+					var items = frm.get_field('items').grid.get_selected_children();
+					if(!items.length) {
+						items = frm.doc.items;
+					}
+					items.forEach(function(item) {
+						var mr_item = frappe.model.add_child(mr, 'items');
+						mr_item.item_code = item.item_code;
+						mr_item.item_name = item.item_name;
+						mr_item.uom = item.uom;
+						mr_item.item_group = item.item_group;
+						mr_item.description = item.description;
+						mr_item.image = item.image;
+						mr_item.qty = item.qty;
+						mr_item.warehouse = item.s_warehouse;
+						mr_item.required_date = frappe.datetime.nowdate();
+					});
+					frappe.set_route('Form', 'Material Request', mr.name);
+				});
+			});
+		}
+	},
+	purpose: function(frm) {
+		frm.fields_dict.items.grid.refresh();
+		frm.cscript.toggle_related_fields(frm.doc);
+	},
+	company: function(frm) {
+		if(frm.doc.company) {
+			var company_doc = frappe.get_doc(":Company", frm.doc.company);
+			if(company_doc.default_letter_head) {
+				frm.set_value("letter_head", company_doc.default_letter_head);
+			}
+		}
+	},
+	set_serial_no: function(frm, cdt, cdn) {
+		var d = frappe.model.get_doc(cdt, cdn);
+		if(!d.item_code && !d.s_warehouse && !d.qty) return;
+		var	args = {
+			'item_code'	: d.item_code,
+			'warehouse'	: cstr(d.s_warehouse),
+			'stock_qty'		: d.transfer_qty
+		};
+		frappe.call({
+			method: "erpnext.stock.get_item_details.get_serial_no",
+			args: {"args": args},
+			callback: function(r) {
+				if (!r.exe){
+					frappe.model.set_value(cdt, cdn, "serial_no", r.message);
+				}
+			}
+		});
+	},
+})
+
+frappe.ui.form.on('Stock Entry Detail', {
+	qty: function(frm, cdt, cdn) {
+		frm.events.set_serial_no(frm, cdt, cdn);
+	},
+
+	s_warehouse: function(frm, cdt, cdn) {
+		frm.events.set_serial_no(frm, cdt, cdn);
+	},
+	barcode: function(doc, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		if (d.barcode) {
+			frappe.call({
+				method: "erpnext.stock.get_item_details.get_item_code",
+				args: {"barcode": d.barcode },
+				callback: function(r) {
+					if (!r.exe){
+						frappe.model.set_value(cdt, cdn, "item_code", r.message);
+					}
+				}
+			});
+		}
+	},
+	uom: function(doc, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		if(d.uom && d.item_code){
+			return frappe.call({
+				method: "erpnext.stock.doctype.stock_entry.stock_entry.get_uom_details",
+				args: {
+					item_code: d.item_code,
+					uom: d.uom,
+					qty: d.qty
+				},
+				callback: function(r) {
+					if(r.message) {
+						frappe.model.set_value(cdt, cdn, r.message);
+					}
+				}
+			});
+		}
+	},
+	item_code: function(frm, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		if(d.item_code) {
+			args = {
+				'item_code'			: d.item_code,
+				'warehouse'			: cstr(d.s_warehouse) || cstr(d.t_warehouse),
+				'transfer_qty'		: d.transfer_qty,
+				'serial_no	'		: d.serial_no,
+				'bom_no'			: d.bom_no,
+				'expense_account'	: d.expense_account,
+				'cost_center'		: d.cost_center,
+				'company'			: frm.doc.company,
+				'qty'				: d.qty
+			};
+			return frappe.call({
+				doc: frm.doc,
+				method: "get_item_details",
+				args: args,
+				callback: function(r) {
+					if(r.message) {
+						var d = locals[cdt][cdn];
+						$.each(r.message, function(k, v) {
+							d[k] = v;
+						});
+						refresh_field("items");
+					}
+				}
+			});
+		}
+	},
+	expense_account: function(frm, cdt, cdn) {
+		erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "expense_account");
+	},
+	cost_center: function(doc, cdt, cdn) {
+		erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "cost_center");
+	}
+});
+
+frappe.ui.form.on('Landed Cost Taxes and Charges', {
+	amount: function(frm) {
+		frm.events.calculate_amount();
+	}
+});
+
 erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	setup: function() {
 		var me = this;
+
+		this.setup_posting_date_time_check();
 
 		this.frm.fields_dict.bom_no.get_query = function() {
 			return {
@@ -41,13 +225,17 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				}
 			}
 		}
+
+		this.frm.set_indicator_formatter('item_code',
+			function(doc) { return (doc.qty<=doc.actual_qty) ? "green" : "orange" })
+
 	},
 
 	onload_post_render: function() {
 		var me = this;
 		this.set_default_account(function() {
 			if(me.frm.doc.__islocal && me.frm.doc.company && !me.frm.doc.amended_from) {
-				cur_frm.script_manager.trigger("company");
+				me.frm.trigger("company");
 			}
 		});
 
@@ -66,6 +254,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			this.show_general_ledger();
 		}
 		erpnext.hide_company();
+		erpnext.utils.add_item(this.frm);
 	},
 
 	on_submit: function() {
@@ -176,7 +365,6 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				excise.voucher_type = 'Excise Entry';
 				frappe.set_route('Form', 'Journal Entry', excise.name);
 			}, __("Make"));
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 	},
 
 	items_add: function(doc, cdt, cdn) {
@@ -305,194 +493,32 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 		this.frm.set_value("total_additional_costs", flt(total_additional_costs, precision("total_additional_costs")));
 	},
-});
 
-cur_frm.script_manager.make(erpnext.stock.StockEntry);
+	toggle_related_fields: function(doc) {
+		this.frm.toggle_enable("from_warehouse", doc.purpose!='Material Receipt');
+		this.frm.toggle_enable("to_warehouse", doc.purpose!='Material Issue');
 
-cur_frm.cscript.toggle_related_fields = function(doc) {
-	cur_frm.toggle_enable("from_warehouse", doc.purpose!='Material Receipt');
-	cur_frm.toggle_enable("to_warehouse", doc.purpose!='Material Issue');
+		this.frm.fields_dict["items"].grid.set_column_disp("s_warehouse", doc.purpose!='Material Receipt');
+		this.frm.fields_dict["items"].grid.set_column_disp("t_warehouse", doc.purpose!='Material Issue');
 
-	cur_frm.fields_dict["items"].grid.set_column_disp("s_warehouse", doc.purpose!='Material Receipt');
-	cur_frm.fields_dict["items"].grid.set_column_disp("t_warehouse", doc.purpose!='Material Issue');
+		this.frm.cscript.toggle_enable_bom();
 
-	cur_frm.cscript.toggle_enable_bom();
-
-	if (doc.purpose == 'Subcontract') {
-		doc.customer = doc.customer_name = doc.customer_address =
-			doc.delivery_note_no = doc.sales_invoice_no = null;
-	} else {
-		doc.customer = doc.customer_name = doc.customer_address =
-			doc.delivery_note_no = doc.sales_invoice_no = doc.supplier =
-			doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no = null;
-	}
-	if(doc.purpose == "Material Receipt") {
-		cur_frm.set_value("from_bom", 0);
-	}
-
-	// Addition costs based on purpose
-	cur_frm.toggle_display(["additional_costs", "total_additional_costs", "additional_costs_section"],
-		doc.purpose!='Material Issue');
-
-	cur_frm.fields_dict["items"].grid.set_column_disp("additional_cost", doc.purpose!='Material Issue');
-}
-
-cur_frm.fields_dict['production_order'].get_query = function(doc) {
-	return {
-		filters: [
-			['Production Order', 'docstatus', '=', 1],
-			['Production Order', 'qty', '>','`tabProduction Order`.produced_qty'],
-			['Production Order', 'company', '=', cur_frm.doc.company]
-		]
-	}
-}
-
-cur_frm.cscript.purpose = function(doc, cdt, cdn) {
-	cur_frm.fields_dict.items.grid.refresh();
-	cur_frm.cscript.toggle_related_fields(doc);
-}
-
-// Overloaded query for link batch_no
-cur_frm.fields_dict['items'].grid.get_field('batch_no').get_query = function(doc, cdt, cdn) {
-	var item = locals[cdt][cdn];
-	if(!item.item_code) {
-		frappe.throw(__("Please enter Item Code to get batch no"));
-	}
-	else {
-		if (in_list(["Material Transfer for Manufacture", "Manufacture", "Repack", "Subcontract"], doc.purpose)) {
-			var filters = {
-				'item_code': item.item_code,
-				'posting_date': me.frm.doc.posting_date || nowdate()
-			}
+		if (doc.purpose == 'Subcontract') {
+			doc.customer = doc.customer_name = doc.customer_address =
+				doc.delivery_note_no = doc.sales_invoice_no = null;
 		} else {
-			var filters = {
-				'item_code': item.item_code
-			}
+			doc.customer = doc.customer_name = doc.customer_address =
+				doc.delivery_note_no = doc.sales_invoice_no = doc.supplier =
+				doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no = null;
+		}
+		if(doc.purpose == "Material Receipt") {
+			this.frm.set_value("from_bom", 0);
 		}
 
+		// Addition costs based on purpose
+		this.frm.toggle_display(["additional_costs", "total_additional_costs", "additional_costs_section"],
+			doc.purpose!='Material Issue');
 
-		if(item.s_warehouse) filters["warehouse"] = item.s_warehouse
-		return {
-			query : "erpnext.controllers.queries.get_batch_no",
-			filters: filters
-		}
+		this.frm.fields_dict["items"].grid.set_column_disp("additional_cost", doc.purpose!='Material Issue');
 	}
-}
-
-cur_frm.cscript.validate = function(doc, cdt, cdn) {
-	cur_frm.cscript.validate_items(doc);
-}
-
-cur_frm.cscript.validate_items = function(doc) {
-	cl = doc.items || [];
-	if (!cl.length) {
-		msgprint(__("Item table can not be blank"));
-		validated = false;
-	}
-}
-
-cur_frm.cscript.expense_account = function(doc, cdt, cdn) {
-	erpnext.utils.copy_value_in_all_row(doc, cdt, cdn, "items", "expense_account");
-}
-
-cur_frm.cscript.cost_center = function(doc, cdt, cdn) {
-	erpnext.utils.copy_value_in_all_row(doc, cdt, cdn, "items", "cost_center");
-}
-
-
-frappe.ui.form.on('Landed Cost Taxes and Charges', {
-	amount: function(frm) {
-		frm.cscript.calculate_amount();
-	}
-})
-
-frappe.ui.form.on('Stock Entry Detail', {
-	qty: function(frm, cdt, cdn) {
-		frm.events.set_serial_no(frm, cdt, cdn);
-	},
-
-	s_warehouse: function(frm, cdt, cdn) {
-		frm.events.set_serial_no(frm, cdt, cdn);
-	},
-	barcode: function(doc, cdt, cdn) {
-		var d = locals[cdt][cdn];
-		if (d.barcode) {
-			frappe.call({
-				method: "erpnext.stock.get_item_details.get_item_code",
-				args: {"barcode": d.barcode },
-				callback: function(r) {
-					if (!r.exe){
-						frappe.model.set_value(cdt, cdn, "item_code", r.message);
-					}
-				}
-			});
-		}
-	},
-	uom: function(doc, cdt, cdn) {
-		var d = locals[cdt][cdn];
-		if(d.uom && d.item_code){
-			var arg = {'item_code':d.item_code, 'uom':d.uom, 'qty':d.qty}
-			return get_server_fields('get_uom_details', JSON.stringify(arg),
-				'items', doc, cdt, cdn, 1);
-		}
-	},
-	item_code: function(doc, cdt, cdn) {
-		var d = locals[cdt][cdn];
-		if(d.item_code) {
-			args = {
-				'item_code'			: d.item_code,
-				'warehouse'			: cstr(d.s_warehouse) || cstr(d.t_warehouse),
-				'transfer_qty'		: d.transfer_qty,
-				'serial_no	'		: d.serial_no,
-				'bom_no'			: d.bom_no,
-				'expense_account'	: d.expense_account,
-				'cost_center'		: d.cost_center,
-				'company'			: cur_frm.doc.company,
-				'qty'				: d.qty
-			};
-			return frappe.call({
-				doc: cur_frm.doc,
-				method: "get_item_details",
-				args: args,
-				callback: function(r) {
-					if(r.message) {
-						var d = locals[cdt][cdn];
-						$.each(r.message, function(k, v) {
-							d[k] = v;
-						});
-						refresh_field("items");
-					}
-				}
-			});
-		}
-	}
-})
-
-frappe.ui.form.on('Stock Entry', {
-	company: function(doc, cdt, cdn) {
-		if(doc.company) {
-			var company_doc = frappe.get_doc(":Company", doc.company);
-			if(company_doc.default_letter_head) {
-				cur_frm.set_value("letter_head", company_doc.default_letter_head);
-			}
-		}
-	},
-	set_serial_no: function(doc, cdt, cdn) {
-		var d = frappe.model.get_doc(cdt, cdn);
-		if(!d.item_code && !d.s_warehouse && !d.qty) return;
-		var	args = {
-				'item_code'	: d.item_code,
-				'warehouse'	: cstr(d.s_warehouse),
-				'qty'		: d.qty
-			};
-			frappe.call({
-				method: "erpnext.stock.doctype.stock_entry.stock_entry.get_serial_no",
-				args: {"args": args},
-				callback: function(r) {
-					if (!r.exe){
-						frappe.model.set_value(cdt, cdn, "serial_no", r.message);
-					}
-				}
-			});
-		},
-})
+});

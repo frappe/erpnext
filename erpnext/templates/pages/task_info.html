@@ -4,7 +4,7 @@
 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
 	<ul class="breadcrumb">
 		<li>
-			<span class="icon icon-angle-left"></span>
+			<span class="fa fa-angle-left"></span>
 			<a href="/projects?project={{ doc.project }}">{{ doc.project }}</a>
 		</li>
 	</ul>
@@ -86,7 +86,8 @@
 	<h3>Comments</h3>
 	<div class="no-comment">
 		{% for comment in comments %}
-			<p class="text-muted">{{comment.sender_full_name}} : {{comment.subject}} on 									   									{{comment.communication_date.strftime('%Y-%m-%d')}}</p>
+			<p class="text-muted">{{comment.sender_full_name}}:
+				{{comment.subject}} on 									   				{{comment.creation.strftime('%Y-%m-%d')}}</p>
 		{% endfor %}
 	</div>
 	<div class="comment-form-wrapper">

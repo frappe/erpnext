@@ -50,6 +50,11 @@ def get_data():
 					"doctype": "Item",
 				},
 				{
+					"type": "page",
+					"name": "stock-balance",
+					"label": _("Stock Summary")
+				},
+				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Stock Ageing",
@@ -79,7 +84,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Item Group",
-					"icon": "icon-sitemap",
+					"icon": "fa fa-sitemap",
 					"label": _("Item Group"),
 					"link": "Tree/Item Group",
 					"description": _("Tree of Item Groups."),
@@ -140,7 +145,7 @@ def get_data():
 		},
 		{
 			"label": _("Tools"),
-			"icon": "icon-wrench",
+			"icon": "fa fa-wrench",
 			"items": [
 				{
 					"type": "doctype",
@@ -166,7 +171,7 @@ def get_data():
 		},
 		{
 			"label": _("Setup"),
-			"icon": "icon-cog",
+			"icon": "fa fa-cog",
 			"items": [
 				{
 					"type": "doctype",
@@ -198,7 +203,7 @@ def get_data():
 		},
 		{
 			"label": _("Analytics"),
-			"icon": "icon-table",
+			"icon": "fa fa-table",
 			"items": [
 				{
 					"type": "report",
@@ -210,7 +215,7 @@ def get_data():
 					"type": "page",
 					"name": "stock-analytics",
 					"label": _("Stock Analytics"),
-					"icon": "icon-bar-chart"
+					"icon": "fa fa-bar-chart"
 				},
 				{
 					"type": "report",
@@ -229,7 +234,7 @@ def get_data():
 		},
 		{
 			"label": _("Reports"),
-			"icon": "icon-list",
+			"icon": "fa fa-list",
 			"items": [
 				{
 					"type": "report",
@@ -264,6 +269,12 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Batch Item Expiry Status",
+					"doctype": "Stock Ledger Entry"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Item Prices",
 					"doctype": "Price List"
 				},
@@ -277,7 +288,7 @@ def get_data():
 		},
 		{
 			"label": _("Help"),
-			"icon": "icon-facetime-video",
+			"icon": "fa fa-facetime-video",
 			"items": [
 				{
 					"type": "help",

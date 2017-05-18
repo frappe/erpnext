@@ -50,6 +50,16 @@ Warehouse here.
 This “reserved” quantity will help you project what is the quantity you need
 to purchase based on all your commitments.
 
+### Taxes
+
+To add taxes to your Quotation, you can select a **Sales Taxes and Charges Template** or add the taxes on your own.
+
+For e.g
+
+<img class="screenshot" alt="Taxes and Charges" src="{{docs_base_url}}/assets/img/selling/taxes-and-charges.gif">
+
+To understand taxes in detail visit [Taxes]({{docs_base_url}}/user/manual/en/setting-up/setting-up-taxes.html).
+
 ### Sales Team
 
 **Sales Partner:** If this Sale was booked via a Sales Partner, you can update the Sales Partner’s details with commission and other info that you can aggregate.
@@ -70,7 +80,7 @@ Here you can fill in the details like; of how frequently you want to generate an
 
 On updating the Sales Order, a Recurring ID will be generated which will be same for all recurring orders generated from this particular Sales Order.
 
-ERPNext will automatically create new Order and mail a notification to the email IDs you set in the 'Notification Email Address'field.
+ERPNext will automatically create new Order and mail a notification to the Email Addresses you set in the 'Notification Email Address'field.
 
 <img class="screenshot" alt="Reccuring Sales Order" src="{{docs_base_url}}/assets/img/selling/recurring-sales-order.png">
 

@@ -6,7 +6,7 @@ def get_data():
 	data = [
 		{
 			"label": _("Settings"),
-			"icon": "icon-wrench",
+			"icon": "fa fa-wrench",
 			"items": [
 				{
 					"type": "doctype",
@@ -19,7 +19,7 @@ def get_data():
 		},
 		{
 			"label": _("Printing"),
-			"icon": "icon-print",
+			"icon": "fa fa-print",
 			"items": [
 				{
 					"type": "doctype",
@@ -75,7 +75,7 @@ def get_data():
 		},
 		{
 			"label": _("Customize"),
-			"icon": "icon-glass",
+			"icon": "fa fa-glass",
 			"items": [
 				{
 					"type": "doctype",
@@ -92,8 +92,14 @@ def get_data():
 		},
 		{
 			"label": _("Email"),
-			"icon": "icon-envelope",
+			"icon": "fa fa-envelope",
 			"items": [
+				{
+					"type": "doctype",
+					"name": "Feedback Trigger",
+					"label": _("Feedback Trigger"),
+					"description": _("Automatically triggers the feedback request based on conditions.")
+				},
 				{
 					"type": "doctype",
 					"name": "Email Digest",
@@ -109,12 +115,12 @@ def get_data():
 	]
 
 	for module, label, icon in (
-		("accounts", _("Accounts"), "icon-money"),
-		("stock", _("Stock"), "icon-truck"),
-		("selling", _("Selling"), "icon-tag"),
-		("buying", _("Buying"), "icon-shopping-cart"),
-		("hr", _("Human Resources"), "icon-group"),
-		("support", _("Support"), "icon-phone")):
+		("accounts", _("Accounts"), "fa fa-money"),
+		("stock", _("Stock"), "fa fa-truck"),
+		("selling", _("Selling"), "fa fa-tag"),
+		("buying", _("Buying"), "fa fa-shopping-cart"),
+		("hr", _("Human Resources"), "fa fa-group"),
+		("support", _("Support"), "fa fa-phone")):
 
 		add_setup_section(data, "erpnext", module, label, icon)
 

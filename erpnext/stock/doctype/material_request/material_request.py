@@ -46,7 +46,7 @@ class MaterialRequest(BuyingController):
 					docstatus = 1 and parent != %s""", (item, so_no, self.name))
 				already_indented = already_indented and flt(already_indented[0][0]) or 0
 
-				actual_so_qty = frappe.db.sql("""select sum(qty) from `tabSales Order Item`
+				actual_so_qty = frappe.db.sql("""select sum(stock_qty) from `tabSales Order Item`
 					where parent = %s and item_code = %s and docstatus = 1""", (so_no, item))
 				actual_so_qty = actual_so_qty and flt(actual_so_qty[0][0]) or 0
 
@@ -372,6 +372,7 @@ def raise_production_orders(material_request):
 	mr= frappe.get_doc("Material Request", material_request)
 	errors =[]
 	production_orders = []
+	default_wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
 	for d in mr.items:
 		if (d.qty - d.ordered_qty) >0:
 			if frappe.db.get_value("BOM", {"item": d.item_code, "is_default": 1}):
@@ -379,6 +380,7 @@ def raise_production_orders(material_request):
 				prod_order.production_item = d.item_code
 				prod_order.qty = d.qty - d.ordered_qty
 				prod_order.fg_warehouse = d.warehouse
+				prod_order.wip_warehouse = default_wip_warehouse
 				prod_order.description = d.description
 				prod_order.stock_uom = d.uom
 				prod_order.expected_delivery_date = d.schedule_date
@@ -391,11 +393,11 @@ def raise_production_orders(material_request):
 				prod_order.save()
 				production_orders.append(prod_order.name)
 			else:
-				errors.append(d.item_code + " in Row " + cstr(d.idx))
+				errors.append(_("Row {0}: Bill of Materials not found for the Item {1}").format(d.idx, d.item_code))
 	if production_orders:
 		message = ["""<a href="#Form/Production Order/%s" target="_blank">%s</a>""" % \
 			(p, p) for p in production_orders]
-		msgprint(_("The following Production Orders were created:" + '\n' + new_line_sep(message)))
+		msgprint(_("The following Production Orders were created:") + '\n' + new_line_sep(message))
 	if errors:
-		msgprint(_("Productions Orders cannot be raised for:" + '\n' + new_line_sep(errors)))
+		frappe.throw(_("Productions Orders cannot be raised for:") + '\n' + new_line_sep(errors))
 	return production_orders

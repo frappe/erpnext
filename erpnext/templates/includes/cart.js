@@ -24,9 +24,17 @@ $.extend(shopping_cart, {
 			if($(this).prop("checked")) {
 				var me = this;
 
+				// uncheck other shipping or billing addresses:
+				if ( $(this).is('input[data-fieldname=customer_address]') ) {
+					$('input[data-fieldname=customer_address]').not(this).prop('checked', false);
+				} else {
+					$('input[data-fieldname=shipping_address_name]').not(this).prop('checked', false);
+				}
+
 				return frappe.call({
 					type: "POST",
 					method: "erpnext.shopping_cart.cart.update_cart_address",
+					freeze: true,
 					args: {
 						address_fieldname: $(this).attr("data-fieldname"),
 						address_name: $(this).attr("data-address-name")

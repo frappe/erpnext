@@ -258,7 +258,14 @@ class update_entries_after(object):
 
 			if not self.valuation_rate and actual_qty > 0:
 				self.valuation_rate = sle.incoming_rate
-
+				
+			# Get valuation rate from previous SLE or Item master, if item is not a sample item
+			if not self.valuation_rate and sle.voucher_detail_no:
+				is_sample_item = self.check_if_sample_item(sle.voucher_type, sle.voucher_detail_no)
+				if not is_sample_item:
+					self.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse, 
+						sle.voucher_type, sle.voucher_no, self.allow_zero_rate)
+		
 	def get_fifo_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
 		actual_qty = flt(sle.actual_qty)
@@ -281,10 +288,14 @@ class update_entries_after(object):
 			qty_to_pop = abs(actual_qty)
 			while qty_to_pop:
 				if not self.stock_queue:
-					if self.qty_after_transaction > 0:
-						_rate = get_valuation_rate(sle.item_code, sle.warehouse, self.allow_zero_rate)
+					# Get valuation rate from last sle if exists or from valuation rate field in item master
+					is_sample_item = self.check_if_sample_item(sle.voucher_type, sle.voucher_detail_no)
+					if not is_sample_item:
+						_rate = get_valuation_rate(sle.item_code, sle.warehouse, 
+							sle.voucher_type, sle.voucher_no, self.allow_zero_rate)
 					else:
 						_rate = 0
+						
 					self.stock_queue.append([0, _rate])
 
 				index = None
@@ -330,7 +341,11 @@ class update_entries_after(object):
 
 		if not self.stock_queue:
 			self.stock_queue.append([0, sle.incoming_rate or sle.outgoing_rate or self.valuation_rate])
-
+			
+	def check_if_sample_item(self, voucher_type, voucher_detail_no):
+		ref_item_dt = voucher_type + (" Detail" if voucher_type == "Stock Entry" else " Item")
+		return frappe.db.get_value(ref_item_dt, voucher_detail_no, "is_sample_item")
+		
 	def get_sle_before_datetime(self):
 		"""get previous stock ledger entry before current time-bucket"""
 		return get_stock_ledger_entries(self.args, "<", "desc", "limit 1", for_update=False)
@@ -404,7 +419,8 @@ def get_stock_ledger_entries(previous_sle, operator=None, order="desc", limit=No
 			"order": order
 		}, previous_sle, as_dict=1, debug=debug)
 
-def get_valuation_rate(item_code, warehouse, allow_zero_rate=False):
+def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no, allow_zero_rate=False):
+	# Get valuation rate from last sle for the same item and warehouse
 	last_valuation_rate = frappe.db.sql("""select valuation_rate
 		from `tabStock Ledger Entry`
 		where item_code = %s and warehouse = %s
@@ -412,6 +428,7 @@ def get_valuation_rate(item_code, warehouse, allow_zero_rate=False):
 		order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, warehouse))
 
 	if not last_valuation_rate:
+		# Get valuation rate from last sle for the item against any warehouse
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
 			from `tabStock Ledger Entry`
 			where item_code = %s and valuation_rate > 0
@@ -420,9 +437,13 @@ def get_valuation_rate(item_code, warehouse, allow_zero_rate=False):
 	valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
 
 	if not valuation_rate:
-		valuation_rate = frappe.db.get_value("Item Price", {"item_code": item_code, "buying": 1}, "price_list_rate")
+		# If negative stock allowed, and item delivered without any incoming entry,
+		# syste does not found any SLE, then take valuation rate from Item
+		valuation_rate = frappe.db.get_value("Item", item_code, "valuation_rate")
 
-	if not allow_zero_rate and not valuation_rate and cint(frappe.db.get_value("Accounts Settings", None, "auto_accounting_for_stock")):
-		frappe.throw(_("Purchase rate for item: {0} not found, which is required to book accounting entry (expense). Please mention item price against a buying price list.").format(item_code))
+	if not allow_zero_rate and not valuation_rate \
+			and cint(frappe.db.get_value("Accounts Settings", None, "auto_accounting_for_stock")):
+		frappe.local.message_log = []
+		frappe.throw(_("Valuation rate not found for the Item {0}, which is required to do accounting entries for {1} {2}. If the item is transacting as a sample item in the {1}, please mention that in the {1} Item table. Otherwise, please create an incoming stock transaction for the item or mention valuation rate in the Item record, and then try submiting/cancelling this entry").format(item_code, voucher_type, voucher_no))
 
 	return valuation_rate

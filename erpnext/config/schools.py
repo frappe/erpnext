@@ -6,10 +6,13 @@ def get_data():
 		{
 			"label": _("Student"),
 			"items": [
-
 				{
 					"type": "doctype",
 					"name": "Student"
+				},
+				{
+					"type": "doctype",
+					"name": "Guardian"
 				},
 				{
 					"type": "doctype",
@@ -26,7 +29,14 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Student Group Creation Tool"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Student and Guardian Contact Details",
+					"doctype": "Program Enrollment"
 				}
+
 			]
 		},
 		{
@@ -48,6 +58,45 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Program Enrollment Tool"
+				},
+				{
+					"type": "doctype",
+					"name": "Student Batch Creation Tool"
+				}
+			]
+		},
+		{
+			"label": _("Attendance"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Student Attendance"
+				},
+				{
+					"type": "doctype",
+					"name": "Student Leave Application"
+				},
+				{
+					"type": "doctype",
+					"name": "Student Attendance Tool"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Absent Student Report",
+					"doctype": "Student Attendance"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Student Batch-Wise Attendance",
+					"doctype": "Student Attendance"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Student Monthly Attendance Sheet",
+					"doctype": "Student Attendance"
 				}
 			]
 		},
@@ -61,19 +110,41 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Student Attendance"
+					"name": "Course Scheduling Tool"
+				}
+			]
+		},
+		{
+			"label": _("Assessment"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Assessment Plan"
 				},
 				{
 					"type": "doctype",
-					"name": "Assessment"
+					"name": "Assessment Group",
+					"link": "Tree/Assessment Group",
 				},
 				{
 					"type": "doctype",
-					"name": "Assessment Group"
+					"name": "Assessment Result"
 				},
 				{
 					"type": "doctype",
-					"name": "Scheduling Tool"
+					"name": "Grading Scale"
+				},
+				{
+					"type": "doctype",
+					"name": "Assessment Criteria"
+				},
+				{
+					"type": "doctype",
+					"name": "Assessment Criteria Group"
+				},
+				{
+					"type": "doctype",
+					"name": "Assessment Result Tool"
 				}
 			]
 		},
@@ -101,23 +172,6 @@ def get_data():
 			]
 		},
 		{
-			"label": _("LMS"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Announcement"
-				},
-				{
-					"type": "doctype",
-					"name": "Topic"
-				},
-				{
-					"type": "doctype",
-					"name": "Discussion"
-				}
-			]
-		},
-		{
 			"label": _("Setup"),
 			"items": [
 				{
@@ -130,19 +184,19 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Student Category"
-				},
-				{
-					"type": "doctype",
-					"name": "Grading Structure"
-				},
-				{
-					"type": "doctype",
 					"name": "Instructor"
 				},
 				{
 					"type": "doctype",
 					"name": "Room"
+				},
+				{
+					"type": "doctype",
+					"name": "Student Category"
+				},
+				{
+					"type": "doctype",
+					"name": "Student Batch Name"
 				},
 				{
 					"type": "doctype",

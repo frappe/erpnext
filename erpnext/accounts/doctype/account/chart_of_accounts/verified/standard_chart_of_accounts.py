@@ -107,7 +107,7 @@ def get():
 	            _("Office Maintenance Expenses"): {},
 	            _("Office Rent"): {},
 	            _("Postal Expenses"): {},
-	            _("Print and Stationary"): {},
+	            _("Print and Stationery"): {},
 	            _("Round Off"): {
 	                "account_type": "Round Off"
 	            },
@@ -137,7 +137,8 @@ def get():
 			    _("Accounts Payable"): {
 			        _("Creditors"): {
 			            "account_type": "Payable"
-			        }
+			        },
+			        _("Payroll Payable"): {},
 			    },
 			    _("Stock Liabilities"): {
 				    _("Stock Received But Not Billed"): {

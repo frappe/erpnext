@@ -22,7 +22,7 @@ On submitting a document against which Payment Entry can be made, you will find 
 
 <img class="screenshot" alt="Making Payment" src="{{docs_base_url}}/assets/img/accounts/payment-entry-9.png">
 
-For more details about payment entry [check here.](https://frappe.github.io/erpnext/user/manual/en/accounts/payment-entry)
+For more details about payment entry [check here.]({{docs_base_url}}/user/manual/en/accounts/payment-entry)
 
 ## Journal Entry
 
@@ -45,4 +45,6 @@ On submitting a document against which Journal Entry can be made, you will find 
 Save and submit the journal entry to record the payament against the invoice
 <img class="screenshot" alt="Making Payment" src="{{docs_base_url}}/assets/img/accounts/journal-entry.png">
 
-For more details about journal entry [check here.](https://frappe.github.io/erpnext/user/manual/en/accounts/journal-entry)
+For more details about journal entry [check here.]({{docs_base_url}}/user/manual/en/accounts/journal-entry)
+
+{next}

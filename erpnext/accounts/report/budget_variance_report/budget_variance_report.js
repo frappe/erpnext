@@ -31,6 +31,14 @@ frappe.query_reports["Budget Variance Report"] = {
 			options: "Company",
 			default: frappe.defaults.get_user_default("Company"),
 			reqd: 1
+		},
+		{
+			fieldname: "budget_against",
+			label: __("Budget Against"),
+			fieldtype: "Select",
+			options: ["Cost Center", "Project"],
+			default: "Cost Center",
+			reqd: 1
 		}
 	]
 }

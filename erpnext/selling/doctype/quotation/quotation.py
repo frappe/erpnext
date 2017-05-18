@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import flt
 from frappe import _
 
 from erpnext.controllers.selling_controller import SellingController
@@ -16,6 +17,7 @@ class Quotation(SellingController):
 	def validate(self):
 		super(Quotation, self).validate()
 		self.set_status()
+		self.update_opportunity()
 		self.validate_order_type()
 		self.validate_uom_is_integer("stock_uom", "qty")
 		self.validate_quotation_to()
@@ -35,6 +37,10 @@ class Quotation(SellingController):
 		elif self.lead:
 			self.quotation_to = "Lead"
 
+	def update_lead(self):
+		if self.lead:
+			frappe.get_doc("Lead", self.lead).set_status(update=True)
+
 	def update_opportunity(self):
 		for opportunity in list(set([d.prevdoc_docname for d in self.get("items")])):
 			if opportunity:
@@ -45,6 +51,7 @@ class Quotation(SellingController):
 			frappe.db.set(self, 'status', 'Lost')
 			frappe.db.set(self, 'order_lost_reason', arg)
 			self.update_opportunity()
+			self.update_lead()
 		else:
 			frappe.throw(_("Cannot set as Lost as Sales Order is made."))
 
@@ -60,11 +67,13 @@ class Quotation(SellingController):
 
 		#update enquiry status
 		self.update_opportunity()
+		self.update_lead()
 
 	def on_cancel(self):
 		#update enquiry status
 		self.set_status(update=True)
 		self.update_opportunity()
+		self.update_lead()
 
 	def print_other_charges(self,docname):
 		print_lst = []
@@ -92,6 +101,9 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
+	def update_item(obj, target, source_parent):
+		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)	
+
 	doclist = get_mapped_doc("Quotation", source_name, {
 			"Quotation": {
 				"doctype": "Sales Order",
@@ -103,7 +115,8 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 				"doctype": "Sales Order Item",
 				"field_map": {
 					"parent": "prevdoc_docname"
-				}
+				},
+				"postprocess": update_item
 			},
 			"Sales Taxes and Charges": {
 				"doctype": "Sales Taxes and Charges",
