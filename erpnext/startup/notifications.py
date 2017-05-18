@@ -2,9 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+import frappe
 
 def get_notification_config():
-	return { "for_doctype":
+	notification_for_doctype =  { "for_doctype":
 		{
 			"Issue": {"status": "Open"},
 			"Warranty Claim": {"status": "Open"},
@@ -57,3 +58,10 @@ def get_notification_config():
 			"Timesheet": {"status": "Draft"}
 		}
 	}
+
+	doctype = [d for d in notification_for_doctype.get('for_doctype')]
+	for doc in frappe.get_all('DocType',
+		fields= ["name"], filters = {"name": ("not in", doctype), 'is_submittable': 1}):
+		notification_for_doctype["for_doctype"][doc.name] = {"docstatus": 0}
+
+	return notification_for_doctype

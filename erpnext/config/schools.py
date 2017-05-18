@@ -20,10 +20,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Student Batch"
-				},
-				{
-					"type": "doctype",
 					"name": "Student Group"
 				},
 				{
@@ -58,10 +54,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Program Enrollment Tool"
-				},
-				{
-					"type": "doctype",
-					"name": "Student Batch Creation Tool"
 				}
 			]
 		},
@@ -106,7 +98,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Course Schedule",
-					"route": "Calendar/Course Schedule"
+					"route": "List/Course Schedule/Calendar"
 				},
 				{
 					"type": "doctype",
@@ -205,6 +197,10 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Academic Year"
+				},
+				{
+					"type": "doctype",
+					"name": "School Settings"
 				}
 			]
 		},

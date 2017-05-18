@@ -12,7 +12,7 @@ app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
-develop_version = '8.0.0-beta'
+develop_version = '8.x.x-beta'
 
 error_report_email = "support@erpnext.com"
 
@@ -148,8 +148,8 @@ doc_events = {
 	"User": {
 		"after_insert": "frappe.email.doctype.contact.contact.update_contact",
 		"validate": "erpnext.hr.doctype.employee.employee.validate_employee_role",
-		"on_update": "erpnext.hr.doctype.employee.employee.update_user_permissions",
-		"on_update": "frappe.geo.address_and_contact.set_default_role"
+		"on_update": ["erpnext.hr.doctype.employee.employee.update_user_permissions",
+			"erpnext.portal.utils.set_default_role"]
 	},
 	("Sales Taxes and Charges Template", 'Price List'): {
 		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"

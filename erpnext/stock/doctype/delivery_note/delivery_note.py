@@ -11,7 +11,7 @@ import frappe.defaults
 from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.selling_controller import SellingController
 from frappe.desk.notifications import clear_doctype_notifications
-
+from erpnext.stock.doctype.batch.batch import set_batch_nos
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -106,6 +106,9 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
 
+		if self._action != 'submit' and not self.is_return:
+			set_batch_nos(self, 'warehouse', True)
+
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
 
@@ -114,18 +117,31 @@ class DeliveryNote(SellingController):
 		if not self.installation_status: self.installation_status = 'Not Installed'
 
 	def validate_with_previous_doc(self):
-		for fn in (("Sales Order", "against_sales_order", "so_detail"),
-				("Sales Invoice", "against_sales_invoice", "si_detail")):
-			if filter(None, [getattr(d, fn[1], None) for d in self.get("items")]):
-				super(DeliveryNote, self).validate_with_previous_doc({
-					fn[0]: {
-						"ref_dn_field": fn[1],
-						"compare_fields": [["customer", "="], ["company", "="], ["project", "="],
-							["currency", "="]],
-					},
-				})
+		super(DeliveryNote, self).validate_with_previous_doc({
+			"Sales Order": {
+				"ref_dn_field": "against_sales_order",
+				"compare_fields": [["customer", "="], ["company", "="], ["project", "="], ["currency", "="]]
+			},
+			"Sales Order Item": {
+				"ref_dn_field": "so_detail",
+				"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="]],
+				"is_child_table": True,
+				"allow_duplicate_prev_row_id": True
+			},
+			"Sales Invoice": {
+				"ref_dn_field": "against_sales_invoice",
+				"compare_fields": [["customer", "="], ["company", "="], ["project", "="], ["currency", "="]]
+			},
+			"Sales Invoice Item": {
+				"ref_dn_field": "si_detail",
+				"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="]],
+				"is_child_table": True,
+				"allow_duplicate_prev_row_id": True
+			},
+		})
 
-		if cint(frappe.db.get_single_value('Selling Settings', 'maintain_same_sales_rate')) and not self.is_return:
+		if cint(frappe.db.get_single_value('Selling Settings', 'maintain_same_sales_rate')) \
+				and not self.is_return:
 			self.validate_rate_with_reference_doc([["Sales Order", "against_sales_order", "so_detail"],
 				["Sales Invoice", "against_sales_invoice", "si_detail"]])
 
@@ -382,7 +398,8 @@ def make_sales_invoice(source_name, target_doc=None):
 				"parent": "delivery_note",
 				"so_detail": "so_detail",
 				"against_sales_order": "sales_order",
-				"serial_no": "serial_no"
+				"serial_no": "serial_no",
+				"cost_center": "cost_center"
 			},
 			"postprocess": update_item,
 			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0

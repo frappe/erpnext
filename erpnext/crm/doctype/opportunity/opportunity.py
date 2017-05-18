@@ -84,20 +84,31 @@ class Opportunity(TransactionBase):
 	def on_trash(self):
 		self.delete_events()
 
-	def has_quotation(self):
-		return frappe.db.get_value("Quotation Item", {"prevdoc_docname": self.name, "docstatus": 1})
+	def has_active_quotation(self):
+		return frappe.db.sql("""
+			select q.name 
+			from `tabQuotation` q, `tabQuotation Item` qi
+			where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s 
+			and q.status not in ('Lost', 'Closed')""", self.name)
 
 	def has_ordered_quotation(self):
-		return frappe.db.sql("""select q.name from `tabQuotation` q, `tabQuotation Item` qi
-			where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s and q.status = 'Ordered'""", self.name)
+		return frappe.db.sql("""
+			select q.name 
+			from `tabQuotation` q, `tabQuotation Item` qi
+			where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s 
+			and q.status = 'Ordered'""", self.name)
 
 	def has_lost_quotation(self):
-		return frappe.db.sql("""
+		lost_quotation = frappe.db.sql("""
 			select q.name
 			from `tabQuotation` q, `tabQuotation Item` qi
 			where q.name = qi.parent and q.docstatus=1
 				and qi.prevdoc_docname =%s and q.status = 'Lost'
 			""", self.name)
+		if lost_quotation:
+			if self.has_active_quotation():
+				return False
+			return True
 
 	def validate_cust_name(self):
 		if self.customer:
@@ -194,11 +205,12 @@ def make_quotation(source_name, target_doc=None):
 				quotation.transaction_date)
 
 		quotation.conversion_rate = exchange_rate
-		
+
 		# get default taxes
 		taxes = get_default_taxes_and_charges("Sales Taxes and Charges Template")
-		quotation.extend("taxes", taxes)
-		
+		if taxes:
+			quotation.extend("taxes", taxes)
+
 		quotation.run_method("set_missing_values")
 		quotation.run_method("calculate_taxes_and_totals")
 

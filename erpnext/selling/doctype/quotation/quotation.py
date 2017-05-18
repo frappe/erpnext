@@ -44,7 +44,9 @@ class Quotation(SellingController):
 	def update_opportunity(self):
 		for opportunity in list(set([d.prevdoc_docname for d in self.get("items")])):
 			if opportunity:
-				frappe.get_doc("Opportunity", opportunity).set_status(update=True)
+				opp = frappe.get_doc("Opportunity", opportunity)
+				opp.status = None
+				opp.set_status(update=True)
 
 	def declare_order_lost(self, arg):
 		if not self.has_sales_order():
@@ -102,7 +104,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(obj, target, source_parent):
-		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)	
+		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
 
 	doclist = get_mapped_doc("Quotation", source_name, {
 			"Quotation": {

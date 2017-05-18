@@ -64,7 +64,7 @@ On submission of the invoice, the "Fixed Asset Account" will be debited and paya
 
 ## Sell an Asset
 
-To sale an asset, open the asset record and create a Sales Invoice by clicking on "Sale Asset". On submission of the Sales Invoice, following entries will take place:
+To sell an asset, open the asset record and create a Sales Invoice by clicking on "Sell Asset". On submission of the Sales Invoice, following entries will take place:
 
 - "Receivable Account" (Debtors) will be debited by the sales amount.
 - "Fixed Asset Account" will be credited by the purchase amount of asset.

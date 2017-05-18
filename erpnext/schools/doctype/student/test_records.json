@@ -3,7 +3,7 @@
 		"first_name": "_Test",
 		"middle_name": "Student",
 		"last_name": "Name",
-		"program": "_Test Program",
+		"program": "TC101",
 		"date_of_birth": "2000-01-01",
 		"gender": "Male",
 		"blood_group": "A+"
@@ -13,7 +13,7 @@
 		"first_name": "_Test",
 		"middle_name": "Student",
 		"last_name": "Name 1",
-		"program": "_Test Program",
+		"program": "TC101",
 		"date_of_birth": "2000-01-01",
 		"gender": "Male",
 		"blood_group": "A+"
@@ -23,7 +23,7 @@
 		"first_name": "_Test",
 		"middle_name": "Student",
 		"last_name": "Name 2",
-		"program": "_Test Program",
+		"program": "TC101",
 		"date_of_birth": "2000-01-01",
 		"gender": "Male",
 		"blood_group": "A+"

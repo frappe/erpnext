@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
-import frappe
+import frappe, erpnext
 from frappe import _
 from frappe.utils import cint, flt, cstr, now
 from erpnext.stock.utils import get_valuation_method
@@ -258,14 +258,16 @@ class update_entries_after(object):
 
 			if not self.valuation_rate and actual_qty > 0:
 				self.valuation_rate = sle.incoming_rate
-				
-			# Get valuation rate from previous SLE or Item master, if item is not a sample item
+
+			# Get valuation rate from previous SLE or Item master, if item does not have the 
+			# allow zero valuration rate flag set
 			if not self.valuation_rate and sle.voucher_detail_no:
-				is_sample_item = self.check_if_sample_item(sle.voucher_type, sle.voucher_detail_no)
-				if not is_sample_item:
-					self.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse, 
-						sle.voucher_type, sle.voucher_no, self.allow_zero_rate)
-		
+				allow_zero_valuation_rate = self.check_if_allow_zero_valuation_rate(sle.voucher_type, sle.voucher_detail_no)
+				if not allow_zero_valuation_rate:
+					self.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
+						sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
+						currency=erpnext.get_company_currency(sle.company))
+
 	def get_fifo_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
 		actual_qty = flt(sle.actual_qty)
@@ -289,13 +291,14 @@ class update_entries_after(object):
 			while qty_to_pop:
 				if not self.stock_queue:
 					# Get valuation rate from last sle if exists or from valuation rate field in item master
-					is_sample_item = self.check_if_sample_item(sle.voucher_type, sle.voucher_detail_no)
-					if not is_sample_item:
-						_rate = get_valuation_rate(sle.item_code, sle.warehouse, 
-							sle.voucher_type, sle.voucher_no, self.allow_zero_rate)
+					allow_zero_valuation_rate = self.check_if_allow_zero_valuation_rate(sle.voucher_type, sle.voucher_detail_no)
+					if not allow_zero_valuation_rate:
+						_rate = get_valuation_rate(sle.item_code, sle.warehouse,
+							sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
+							currency=erpnext.get_company_currency(sle.company))
 					else:
 						_rate = 0
-						
+
 					self.stock_queue.append([0, _rate])
 
 				index = None
@@ -341,11 +344,11 @@ class update_entries_after(object):
 
 		if not self.stock_queue:
 			self.stock_queue.append([0, sle.incoming_rate or sle.outgoing_rate or self.valuation_rate])
-			
-	def check_if_sample_item(self, voucher_type, voucher_detail_no):
+
+	def check_if_allow_zero_valuation_rate(self, voucher_type, voucher_detail_no):
 		ref_item_dt = voucher_type + (" Detail" if voucher_type == "Stock Entry" else " Item")
-		return frappe.db.get_value(ref_item_dt, voucher_detail_no, "is_sample_item")
-		
+		return frappe.db.get_value(ref_item_dt, voucher_detail_no, "allow_zero_valuation_rate")
+
 	def get_sle_before_datetime(self):
 		"""get previous stock ledger entry before current time-bucket"""
 		return get_stock_ledger_entries(self.args, "<", "desc", "limit 1", for_update=False)
@@ -419,7 +422,8 @@ def get_stock_ledger_entries(previous_sle, operator=None, order="desc", limit=No
 			"order": order
 		}, previous_sle, as_dict=1, debug=debug)
 
-def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no, allow_zero_rate=False):
+def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
+	allow_zero_rate=False, currency=None):
 	# Get valuation rate from last sle for the same item and warehouse
 	last_valuation_rate = frappe.db.sql("""select valuation_rate
 		from `tabStock Ledger Entry`
@@ -440,6 +444,11 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no, allow_zer
 		# If negative stock allowed, and item delivered without any incoming entry,
 		# syste does not found any SLE, then take valuation rate from Item
 		valuation_rate = frappe.db.get_value("Item", item_code, "valuation_rate")
+
+	if not valuation_rate:
+		# try in price list
+		valuation_rate = frappe.db.get_value('Item Price',
+			dict(item_code=item_code, buying=1, currency=currency), 'price_list_rate')
 
 	if not allow_zero_rate and not valuation_rate \
 			and cint(frappe.db.get_value("Accounts Settings", None, "auto_accounting_for_stock")):

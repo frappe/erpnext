@@ -33,26 +33,26 @@ def enroll_student(source_name):
 	return program_enrollment
 
 @frappe.whitelist()
-def check_attendance_records_exist(course_schedule=None, student_batch=None, date=None):
-	"""Check if Attendance Records are made against the specified Course Schedule or Student Batch for given date.
+def check_attendance_records_exist(course_schedule=None, student_group=None, date=None):
+	"""Check if Attendance Records are made against the specified Course Schedule or Student Group for given date.
 
 	:param course_schedule: Course Schedule.
-	:param student_batch: Student Batch.
+	:param student_group: Student Group.
 	:param date: Date.
 	"""
 	if course_schedule:
 		return frappe.get_list("Student Attendance", filters={"course_schedule": course_schedule})
 	else:
-		return frappe.get_list("Student Attendance", filters={"student_batch": student_batch, "date": date})
+		return frappe.get_list("Student Attendance", filters={"student_group": student_group, "date": date})
 
 @frappe.whitelist()
-def mark_attendance(students_present, students_absent, course_schedule=None, student_batch=None, date=None):
+def mark_attendance(students_present, students_absent, course_schedule=None, student_group=None, date=None):
 	"""Creates Multiple Attendance Records.
 
 	:param students_present: Students Present JSON.
 	:param students_absent: Students Absent JSON.
 	:param course_schedule: Course Schedule.
-	:param student_batch: Student Batch.
+	:param student_group: Student Group.
 	:param date: Date.
 	"""
 	 
@@ -60,15 +60,15 @@ def mark_attendance(students_present, students_absent, course_schedule=None, stu
 	absent = json.loads(students_absent)
 	
 	for d in present:
-		make_attendance_records(d["student"], d["student_name"], "Present", course_schedule, student_batch, date)
+		make_attendance_records(d["student"], d["student_name"], "Present", course_schedule, student_group, date)
 
 	for d in absent:
-		make_attendance_records(d["student"], d["student_name"], "Absent", course_schedule, student_batch, date)
+		make_attendance_records(d["student"], d["student_name"], "Absent", course_schedule, student_group, date)
 
 	frappe.db.commit()
 	frappe.msgprint(_("Attendance has been marked successfully."))
 
-def make_attendance_records(student, student_name, status, course_schedule=None, student_batch=None, date=None):
+def make_attendance_records(student, student_name, status, course_schedule=None, student_group=None, date=None):
 	"""Creates/Update Attendance Record.
 
 	:param student: Student.
@@ -79,7 +79,7 @@ def make_attendance_records(student, student_name, status, course_schedule=None,
 	student_attendance_list = frappe.get_list("Student Attendance", fields = ['name'], filters = {
 		"student": student,
 		"course_schedule": course_schedule,
-		"student_batch": student_batch,
+		"student_group": student_group,
 		"date": date
 	})
 		
@@ -90,7 +90,7 @@ def make_attendance_records(student, student_name, status, course_schedule=None,
 	student_attendance.student = student
 	student_attendance.student_name = student_name
 	student_attendance.course_schedule = course_schedule
-	student_attendance.student_batch = student_batch
+	student_attendance.student_group = student_group
 	student_attendance.date = date
 	student_attendance.status = status
 	student_attendance.save()
@@ -106,23 +106,13 @@ def get_student_guardians(student):
 	return guardians
 
 @frappe.whitelist()
-def get_student_batch_students(student_batch):
-	"""Returns List of student, student_name, idx in Student Batch.
-
-	:param student_batch: Student Batch.
-	"""
-	students = frappe.get_list("Student Batch Student", fields=["student", "student_name", "idx"] , 
-		filters={"parent": student_batch, "active": 1}, order_by= "idx")
-	return students
-
-@frappe.whitelist()
 def get_student_group_students(student_group):
 	"""Returns List of student, student_name in Student Group.
 
 	:param student_group: Student Group.
 	"""
 	students = frappe.get_list("Student Group Student", fields=["student", "student_name"] , 
-		filters={"parent": student_group, "active": 1}, order_by= "idx")
+		filters={"parent": student_group, "active": 1}, order_by= "group_roll_number")
 	return students
 
 @frappe.whitelist()
@@ -199,12 +189,9 @@ def get_assessment_criteria(course):
 		fields=["assessment_criteria", "weightage"], filters={"parent": course}, order_by= "idx")
 
 @frappe.whitelist()
-def get_assessment_students(assessment_plan, student_group=None, student_batch=None):
-	student_list = []
-	if student_group:
-		student_list = get_student_group_students(student_group)
-	elif student_batch:
-		student_list = get_student_batch_students(student_batch)
+def get_assessment_students(assessment_plan, student_group):
+	
+	student_list = get_student_group_students(student_group)
 	for i, student in enumerate(student_list):
 		result = get_result(student.student, assessment_plan)
 		if result:
@@ -286,8 +273,6 @@ def update_email_group(doctype, name):
 		email_group.save()
 	email_list = []
 	students = []
-	if doctype == "Student Batch":
-		students = get_student_batch_students(name)
 	if doctype == "Student Group":
 		students = get_student_group_students(name)
 	for stud in students:

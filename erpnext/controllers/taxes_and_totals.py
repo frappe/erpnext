@@ -3,10 +3,9 @@
 
 from __future__ import unicode_literals
 import json
-import frappe
+import frappe, erpnext
 from frappe import _, scrub
 from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
-from erpnext.setup.utils import get_company_currency
 from erpnext.controllers.accounts_controller import validate_conversion_rate, \
 	validate_taxes_and_charges, validate_inclusive_tax
 
@@ -38,7 +37,7 @@ class calculate_taxes_and_totals(object):
 
 	def validate_conversion_rate(self):
 		# validate conversion rate
-		company_currency = get_company_currency(self.doc.company)
+		company_currency = erpnext.get_company_currency(self.doc.company)
 		if not self.doc.currency or self.doc.currency == company_currency:
 			self.doc.currency = company_currency
 			self.doc.conversion_rate = 1.0
@@ -60,9 +59,10 @@ class calculate_taxes_and_totals(object):
 						(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
 
 				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item']:
-					item.total_margin = self.calculate_margin(item)
-					item.rate = flt(item.total_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))\
-						if item.total_margin > 0 else item.rate
+					item.rate_with_margin = self.calculate_margin(item)
+
+					item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))\
+						if item.rate_with_margin > 0 else item.rate
 
 				item.net_rate = item.rate
 				item.amount = flt(item.rate * item.qty,	item.precision("amount"))
@@ -327,7 +327,7 @@ class calculate_taxes_and_totals(object):
 			self.doc.rounded_total = round_based_on_smallest_currency_fraction(self.doc.grand_total,
 				self.doc.currency, self.doc.precision("rounded_total"))
 		if self.doc.meta.get_field("base_rounded_total"):
-			company_currency = get_company_currency(self.doc.company)
+			company_currency = erpnext.get_company_currency(self.doc.company)
 
 			self.doc.base_rounded_total = \
 				round_based_on_smallest_currency_fraction(self.doc.base_grand_total,
@@ -405,11 +405,14 @@ class calculate_taxes_and_totals(object):
 			self.doc.total_advance = flt(total_allocated_amount, self.doc.precision("total_advance"))
 
 			if self.doc.party_account_currency == self.doc.currency:
-				invoice_total = self.doc.grand_total
-			else:
-				invoice_total = flt(self.doc.grand_total * self.doc.conversion_rate,
+				invoice_total = flt(self.doc.grand_total - flt(self.doc.write_off_amount), 
 					self.doc.precision("grand_total"))
-
+			else:
+				base_write_off_amount = flt(flt(self.doc.write_off_amount) * self.doc.conversion_rate, 
+					self.doc.precision("base_write_off_amount"))
+				invoice_total = flt(self.doc.grand_total * self.doc.conversion_rate, 
+					self.doc.precision("grand_total")) - base_write_off_amount
+				
 			if invoice_total > 0 and self.doc.total_advance > invoice_total:
 				frappe.throw(_("Advance amount cannot be greater than {0} {1}")
 					.format(self.doc.party_account_currency, invoice_total))
@@ -462,6 +465,8 @@ class calculate_taxes_and_totals(object):
 				payment.base_amount = flt(payment.amount * self.doc.conversion_rate)
 				paid_amount += payment.amount
 				base_paid_amount += payment.base_amount
+		elif not self.doc.is_return:
+			self.doc.set('payments', [])
 
 		self.doc.paid_amount = flt(paid_amount, self.doc.precision("paid_amount"))
 		self.doc.base_paid_amount = flt(base_paid_amount, self.doc.precision("base_paid_amount"))
@@ -484,7 +489,7 @@ class calculate_taxes_and_totals(object):
 				self.doc.precision("base_write_off_amount"))
 
 	def calculate_margin(self, item):
-		total_margin = 0.0
+		rate_with_margin = 0.0
 		if item.price_list_rate:
 			if item.pricing_rule and not self.doc.ignore_pricing_rule:
 				pricing_rule = frappe.get_doc('Pricing Rule', item.pricing_rule)
@@ -493,6 +498,6 @@ class calculate_taxes_and_totals(object):
 
 			if item.margin_type and item.margin_rate_or_amount:
 				margin_value = item.margin_rate_or_amount if item.margin_type == 'Amount' else flt(item.price_list_rate) * flt(item.margin_rate_or_amount) / 100
-				total_margin = flt(item.price_list_rate) + flt(margin_value)
+				rate_with_margin = flt(item.price_list_rate) + flt(margin_value)
 
-		return total_margin
+		return rate_with_margin

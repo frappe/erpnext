@@ -123,10 +123,10 @@ def round_off_debit_credit(gl_map):
 
 	debit_credit_diff = flt(debit_credit_diff, precision)
 	
-	if gl_map[0]["voucher_type"] == "Journal Entry":
+	if gl_map[0]["voucher_type"] in ("Journal Entry", "Payment Entry"):
 		allowance = 5.0 / (10**precision)
 	else:
-		allowance = 1
+		allowance = .5
 	
 	if abs(debit_credit_diff) >= allowance:
 		frappe.throw(_("Debit and Credit not equal for {0} #{1}. Difference is {2}.")

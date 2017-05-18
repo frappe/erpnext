@@ -3,18 +3,9 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _, throw
+from frappe import _
 from frappe.utils import flt
 from frappe.utils import get_datetime_str, nowdate
-
-def get_company_currency(company):
-	currency = frappe.db.get_value("Company", company, "default_currency", cache=True)
-	if not currency:
-		currency = frappe.db.get_default("currency")
-	if not currency:
-		throw(_('Please specify Default Currency in Company Master and Global Defaults'))
-
-	return currency
 
 def get_root_of(doctype):
 	"""Get root element of a DocType with a tree structure"""

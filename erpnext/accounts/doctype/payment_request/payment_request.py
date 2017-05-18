@@ -14,8 +14,13 @@ from frappe.integrations.utils import get_payment_gateway_controller
 
 class PaymentRequest(Document):
 	def validate(self):
+		self.validate_reference_document()
 		self.validate_payment_request()
 		self.validate_currency()
+
+	def validate_reference_document(self):
+		if not self.reference_doctype or not self.reference_name:
+			frappe.throw(_("To create a Payment Request reference document is required"))
 
 	def validate_payment_request(self):
 		if frappe.db.get_value("Payment Request", {"reference_name": self.reference_name,

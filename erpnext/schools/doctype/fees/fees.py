@@ -18,7 +18,7 @@ class Fees(Document):
 			self.total_amount += d.amount
 		self.outstanding_amount = self.total_amount
 
-def get_fee_list(doctype, txt, filters, limit_start, limit_page_length=20):
+def get_fee_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"):
 	user = frappe.session.user
 	student = frappe.db.sql("select name from `tabStudent` where student_email_id= %s", user)
 	if student:

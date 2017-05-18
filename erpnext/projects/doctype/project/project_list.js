@@ -1,5 +1,5 @@
 frappe.listview_settings['Project'] = {
-	add_fields: ["status", "priority", "is_active", "percent_complete", "expected_end_date"],
+	add_fields: ["status", "priority", "is_active", "percent_complete", "expected_end_date", "project_name"],
 	filters:[["status","=", "Open"]],
 	get_indicator: function(doc) {
 		if(doc.status=="Open" && doc.percent_complete) {

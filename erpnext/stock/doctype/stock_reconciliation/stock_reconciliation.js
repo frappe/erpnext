@@ -152,7 +152,6 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 
 	setup: function() {
 		var me = this;
-		this.frm.get_docfield("items").allow_bulk_edit = 1;
 
 		this.setup_posting_date_time_check();
 

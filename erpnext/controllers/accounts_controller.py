@@ -2,10 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _, throw
 from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate
-from erpnext.setup.utils import get_company_currency, get_exchange_rate
+from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
@@ -22,7 +22,7 @@ class AccountsController(TransactionBase):
 	@property
 	def company_currency(self):
 		if not hasattr(self, "__company_currency"):
-			self.__company_currency = get_company_currency(self.company)
+			self.__company_currency = erpnext.get_company_currency(self.company)
 
 		return self.__company_currency
 
@@ -186,14 +186,18 @@ class AccountsController(TransactionBase):
 
 					ret = get_item_details(args)
 
-
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
 							if (item.get(fieldname) is None or fieldname in force_item_fields):
 								item.set(fieldname, value)
 
-							elif fieldname == "cost_center" and not item.get("cost_center"):
+							elif fieldname in ['cost_center', 'conversion_factor'] and not item.get(fieldname):
 								item.set(fieldname, value)
+
+							elif fieldname == "serial_no":
+								stock_qty = item.get("stock_qty") * -1 if item.get("stock_qty") < 0 else item.get("stock_qty")
+								if stock_qty != len(item.get('serial_no').split('\n')):
+									item.set(fieldname, value)
 
 							elif fieldname == "conversion_factor" and not item.get("conversion_factor"):
 								item.set(fieldname, value)

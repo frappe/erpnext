@@ -3,8 +3,6 @@
 
 {% include 'erpnext/selling/sales_common.js' %}
 
-cur_frm.add_fetch('customer', 'tax_id', 'tax_id');
-
 frappe.ui.form.on("Sales Order", {
 	setup: function(frm) {
 		$.extend(frm.cscript, new erpnext.selling.SalesOrderController({frm: frm}));
@@ -14,6 +12,7 @@ frappe.ui.form.on("Sales Order", {
 			'Material Request': 'Material Request',
 			'Purchase Order': 'Purchase Order'
 		}
+		frm.add_fetch('customer', 'tax_id', 'tax_id');
 	},
 	onload: function(frm) {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
@@ -137,12 +136,15 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
 						source_doctype: "Quotation",
+						target: me.frm,
+						setters: {
+							customer: me.frm.doc.customer || undefined,
+							order_type: me.frm.doc.order_type,
+						},
 						get_query_filters: {
+							company: me.frm.doc.company,
 							docstatus: 1,
 							status: ["!=", "Lost"],
-							order_type: me.frm.doc.order_type,
-							customer: me.frm.doc.customer || undefined,
-							company: me.frm.doc.company
 						}
 					})
 				}, __("Get items from"));

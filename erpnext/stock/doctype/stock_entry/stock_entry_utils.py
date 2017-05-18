@@ -6,6 +6,20 @@ from frappe.utils import cint, flt
 
 @frappe.whitelist()
 def make_stock_entry(**args):
+	'''Helper function to make a Stock Entry
+
+	:item_code: Item to be moved
+	:qty: Qty to be moved
+	:from_warehouse: Optional
+	:to_warehouse: Optional
+	:rate: Optional
+	:serial_no: Optional
+	:batch_no: Optional
+	:posting_date: Optional
+	:posting_time: Optional
+	:do_not_save: Optional flag
+	:do_not_submit: Optional flag
+	'''
 	s = frappe.new_doc("Stock Entry")
 	args = frappe._dict(args)
 
@@ -71,6 +85,7 @@ def make_stock_entry(**args):
 		"basic_rate": args.rate or args.basic_rate,
 		"conversion_factor": 1.0,
 		"serial_no": args.serial_no,
+		'batch_no': args.batch_no,
 		'cost_center': args.cost_center,
 		'expense_account': args.expense_account
 	})

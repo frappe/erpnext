@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-{% include 'erpnext/buying/doctype/purchase_common/purchase_common.js' %};
+{% include 'erpnext/public/js/controllers/buying.js' %};
 
 frappe.ui.form.on('Material Request', {
 	setup: function(frm) {
@@ -95,16 +95,19 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		}
 
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(__('Sales Order'),
+			this.frm.add_custom_button(__('Sales Order'),
 				function() {
 					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
 						source_doctype: "Sales Order",
+						target: me.frm,
+						setters: {
+							company: me.frm.doc.company
+						},
 						get_query_filters: {
 							docstatus: 1,
 							status: ["!=", "Closed"],
 							per_delivered: ["<", 99.99],
-							company: cur_frm.doc.company
 						}
 					})
 				}, __("Get items from"));

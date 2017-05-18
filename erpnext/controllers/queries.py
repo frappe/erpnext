@@ -222,19 +222,21 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 				"_txt": txt.replace('%', '')
 			})
 
-def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql("""select `tabDelivery Note`.name, `tabDelivery Note`.customer_name
+def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters, as_dict):
+	return frappe.db.sql("""
+		select `tabDelivery Note`.name, `tabDelivery Note`.customer, `tabDelivery Note`.posting_date
 		from `tabDelivery Note`
 		where `tabDelivery Note`.`%(key)s` like %(txt)s and
-			`tabDelivery Note`.docstatus = 1 and status not in ("Stopped", "Closed") %(fcond)s
+			`tabDelivery Note`.docstatus = 1 and `tabDelivery Note`.is_return = 0 
+			and status not in ("Stopped", "Closed") %(fcond)s
 			and (`tabDelivery Note`.per_billed < 100 or `tabDelivery Note`.grand_total = 0)
 			%(mcond)s order by `tabDelivery Note`.`%(key)s` asc
-			limit %(start)s, %(page_len)s""" % {
-				"key": searchfield,
-				"fcond": get_filters_cond(doctype, filters, []),
-				"mcond": get_match_cond(doctype),
-				"start": "%(start)s", "page_len": "%(page_len)s", "txt": "%(txt)s"
-			}, { "start": start, "page_len": page_len, "txt": ("%%%s%%" % txt) })
+	""" % {
+		"key": searchfield,
+		"fcond": get_filters_cond(doctype, filters, []),
+		"mcond": get_match_cond(doctype),
+		"txt": "%(txt)s"
+	}, { "txt": ("%%%s%%" % txt) }, as_dict=as_dict)
 
 def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	cond = ""
@@ -360,7 +362,8 @@ def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
 	sub_query = """ select round(`tabBin`.actual_qty, 2) from `tabBin`
 		where `tabBin`.warehouse = `tabWarehouse`.name
 		{bin_conditions} """.format(
-		bin_conditions=get_filters_cond(doctype, filter_dict.get("Bin"), bin_conditions))
+		bin_conditions=get_filters_cond(doctype, filter_dict.get("Bin"), 
+			bin_conditions, ignore_permissions=True))
 
 	response = frappe.db.sql("""select `tabWarehouse`.name,
 		CONCAT_WS(" : ", "Actual Qty", ifnull( ({sub_query}), 0) ) as actual_qty

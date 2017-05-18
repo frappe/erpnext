@@ -23,6 +23,8 @@ class PricingRule(Document):
 		self.validate_price_or_discount()
 		self.validate_max_discount()
 
+		if not self.margin_type: self.margin_rate_or_amount = 0.0
+
 	def validate_mandatory(self):
 		for field in ["apply_on", "applicable_for"]:
 			tocheck = frappe.scrub(self.get(field) or "")
@@ -144,7 +146,7 @@ def get_pricing_rule_for_item(args):
 	
 	if args.ignore_pricing_rule or not args.item_code:
 		if frappe.db.exists(args.doctype, args.name) and args.get("pricing_rule"):
-			item_details = remove_pricing_rule(args, item_details)
+			item_details = remove_pricing_rule_for_item(args.get("pricing_rule"), item_details)
 		return item_details
 
 	if not (args.item_group and args.brand):
@@ -178,19 +180,20 @@ def get_pricing_rule_for_item(args):
 		item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 		if pricing_rule.price_or_discount == "Price":
 			item_details.update({
-				"price_list_rate": pricing_rule.price/flt(args.conversion_rate) \
+				"price_list_rate": (pricing_rule.price/flt(args.conversion_rate)) * args.conversion_factor or 1.0 \
 					if args.conversion_rate else 0.0,
 				"discount_percentage": 0.0
 			})
 		else:
 			item_details.discount_percentage = pricing_rule.discount_percentage
 	elif args.get('pricing_rule'):
-		item_details = remove_pricing_rule(args, item_details)
+		item_details = remove_pricing_rule_for_item(args.get("pricing_rule"), item_details)
 
 	return item_details
 
-def remove_pricing_rule(args, item_details):
-	pricing_rule = frappe.db.get_value('Pricing Rule', args.get('pricing_rule'), ['price_or_discount', 'margin_type'], as_dict=1)
+def remove_pricing_rule_for_item(pricing_rule, item_details):
+	pricing_rule = frappe.db.get_value('Pricing Rule', pricing_rule, 
+		['price_or_discount', 'margin_type'], as_dict=1)
 	if pricing_rule and pricing_rule.price_or_discount == 'Discount Percentage':
 		item_details.discount_percentage = 0.0
 
@@ -198,8 +201,22 @@ def remove_pricing_rule(args, item_details):
 		item_details.margin_rate_or_amount = 0.0
 		item_details.margin_type = None
 
+	if item_details.pricing_rule:
+		item_details.pricing_rule = None
 	return item_details
 
+@frappe.whitelist()
+def remove_pricing_rules(item_list):
+	if isinstance(item_list, basestring):
+		item_list = json.loads(item_list)
+	
+	out = []	
+	for item in item_list:
+		item = frappe._dict(item)
+		out.append(remove_pricing_rule_for_item(item.get("pricing_rule"), item))
+		
+	return out
+	
 def get_pricing_rules(args):
 	def _get_tree_conditions(parenttype, allow_blank=True):
 		field = frappe.scrub(parenttype)
@@ -268,9 +285,10 @@ def get_pricing_rules(args):
 
 def filter_pricing_rules(args, pricing_rules):
 	# filter for qty
+	stock_qty = args.get('qty') * args.get('conversion_factor', 1)
 	if pricing_rules:
-		pricing_rules = filter(lambda x: (flt(args.get("qty"))>=flt(x.min_qty)
-			and (flt(args.get("qty"))<=x.max_qty if x.max_qty else True)), pricing_rules)
+		pricing_rules = filter(lambda x: (flt(stock_qty)>=flt(x.min_qty)
+			and (flt(stock_qty)<=x.max_qty if x.max_qty else True)), pricing_rules)
 
 		# add variant_of property in pricing rule
 		for p in pricing_rules:

@@ -6,12 +6,31 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this._super();
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
+			var has_margin_field = frappe.meta.has_field(cdt, 'margin_type');
+
 			frappe.model.round_floats_in(item, ["rate", "price_list_rate"]);
 
 			if(item.price_list_rate) {
-				item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0, precision("discount_percentage", item));
+				if(item.rate > item.price_list_rate && has_margin_field) {
+					// if rate is greater than price_list_rate, set margin
+					// or set discount
+					item.discount_percentage = 0;
+					item.margin_type = 'Percentage';
+					item.margin_rate_or_amount = flt(Math.abs(1 - item.rate / item.price_list_rate) * 100.0, 
+						precision("discount_percentage", item));
+					item.rate_with_margin = item.rate; 
+				} else {
+					item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0, 
+						precision("discount_percentage", item));
+					item.margin_type = '';
+					item.margin_rate_or_amount = 0;
+					item.rate_with_margin = 0;
+				}
 			} else {
 				item.discount_percentage = 0.0;
+				item.margin_type = '';
+				item.margin_rate_or_amount = 0;
+				item.rate_with_margin = 0;
 			}
 
 			cur_frm.cscript.set_gross_profit(item);
@@ -97,7 +116,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			});
 
 			if(this.frm.doc.company && !this.frm.doc.amended_from) {
-				this.frm.script_manager.trigger("company");
+				this.frm.trigger("company");
 			}
 		}
 
@@ -260,6 +279,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							customer: me.frm.doc.customer,
 							supplier: me.frm.doc.supplier,
 							currency: me.frm.doc.currency,
+							update_stock: in_list(['Sales Invoice', 'Purchase Invoice'], me.frm.doc.doctype) ? cint(me.frm.doc.update_stock) : 0,
 							conversion_rate: me.frm.doc.conversion_rate,
 							price_list: me.frm.doc.selling_price_list ||
 								 me.frm.doc.buying_price_list,
@@ -274,14 +294,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							doctype: me.frm.doc.doctype,
 							name: me.frm.doc.name,
 							project: item.project || me.frm.doc.project,
-							qty: item.qty,
-							stock_qty: item.stock_qty
+							qty: item.qty || 1,
+							stock_qty: item.stock_qty,
+							conversion_factor: item.conversion_factor
 						}
 					},
 
 					callback: function(r) {
 						if(!r.exc) {
 							me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
+							me.toggle_conversion_factor(item);
 						}
 					}
 				});
@@ -295,7 +317,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		if (item.serial_no) {
 			if (!item.item_code) {
-				this.frm.script_manager.trigger("item_code", cdt, cdn);
+				this.frm.trigger("item_code", cdt, cdn);
 			}
 			else {
 				var sr_no = [];
@@ -497,6 +519,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	get_exchange_rate: function(transaction_date, from_currency, to_currency, callback) {
+		if (!transaction_date || !from_currency || !to_currency) return;
 		return frappe.call({
 			method: "erpnext.setup.utils.get_exchange_rate",
 			args: {
@@ -560,18 +583,26 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
-	conversion_factor: function(doc, cdt, cdn) {
+	conversion_factor: function(doc, cdt, cdn, dont_fetch_price_list_rate) {
 		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
 			var item = frappe.get_doc(cdt, cdn);
 			frappe.model.round_floats_in(item, ["qty", "conversion_factor"]);
 			item.stock_qty = flt(item.qty * item.conversion_factor, precision("stock_qty", item));
 			refresh_field("stock_qty", item.name, item.parentfield);
+			this.toggle_conversion_factor(item);
+			if(!dont_fetch_price_list_rate) this.apply_price_list(item, true);
 		}
 	},
 
+	toggle_conversion_factor: function(item) {
+		// toggle read only property for conversion factor field if the uom and stock uom are same
+		this.frm.fields_dict.items.grid.toggle_enable("conversion_factor",
+			(item.uom != item.stock_uom)? true: false)
+	},
+
 	qty: function(doc, cdt, cdn) {
+		this.conversion_factor(doc, cdt, cdn, true);
 		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
-		this.conversion_factor(doc, cdt, cdn);
 	},
 
 	set_dynamic_labels: function() {
@@ -716,7 +747,33 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	ignore_pricing_rule: function() {
-		this.apply_pricing_rule();
+		if(this.frm.doc.ignore_pricing_rule) {
+			var me = this;
+			var item_list = [];
+			
+			$.each(this.frm.doc["items"] || [], function(i, d) {
+				if (d.item_code) {
+					item_list.push({
+						"doctype": d.doctype,
+						"name": d.name,
+						"pricing_rule": d.pricing_rule
+					})
+				}
+			});
+			return this.frm.call({
+				method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.remove_pricing_rules",
+				args: { item_list: item_list },
+				callback: function(r) {
+					if (!r.exc && r.message) {
+						me._set_values_for_item_list(r.message);
+						me.calculate_taxes_and_totals();
+						if(me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on")
+					}
+				}
+			});
+		} else {
+			this.apply_pricing_rule();
+		}
 	},
 
 	apply_pricing_rule: function(item, calculate_taxes_and_totals) {
@@ -726,7 +783,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			if(calculate_taxes_and_totals) me.calculate_taxes_and_totals();
 			return;
 		}
-
 		return this.frm.call({
 			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.apply_pricing_rule",
 			args: {	args: args },
@@ -762,7 +818,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"ignore_pricing_rule": me.frm.doc.ignore_pricing_rule,
 			"doctype": me.frm.doc.doctype,
 			"name": me.frm.doc.name,
-			"is_return": cint(me.frm.doc.is_return)
+			"is_return": cint(me.frm.doc.is_return),
+			"update_stock": in_list(['Sales Invoice', 'Purchase Invoice'], me.frm.doc.doctype) ? cint(me.frm.doc.update_stock) : 0,
+			"conversion_factor": me.frm.doc.conversion_factor
 		};
 	},
 
@@ -781,7 +839,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"parent": d.parent,
 					"pricing_rule": d.pricing_rule,
 					"warehouse": d.warehouse,
-					"serial_no": d.serial_no
+					"serial_no": d.serial_no,
+					"conversion_factor": d.conversion_factor || 1.0
 				});
 
 				// if doctype is Quotation Item / Sales Order Iten then add Margin Type and rate in item_list
@@ -808,16 +867,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		for(var i=0, l=children.length; i<l; i++) {
 			var d = children[i];
 			var existing_pricing_rule = frappe.model.get_value(d.doctype, d.name, "pricing_rule");
-
 			for(var k in d) {
 				var v = d[k];
 				if (["doctype", "name"].indexOf(k)===-1) {
 					if(k=="price_list_rate") {
 						if(flt(v) != flt(d.price_list_rate)) price_list_rate_changed = true;
 					}
-					if(v) {
-						frappe.model.set_value(d.doctype, d.name, k, v);
-					}
+					frappe.model.set_value(d.doctype, d.name, k, v);
 				}
 			}
 

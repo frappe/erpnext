@@ -147,9 +147,9 @@
     "price_list_rate": 50,
     "qty": 10,
     "rate": 50,
-	"uom": "_Test UOM",
+	"uom": "_Test UOM 1",
 	"conversion_factor": 1,
-    "stock_uom": "_Test UOM"
+    "stock_uom": "_Test UOM 1"
    },
    {
     "cost_center": "_Test Cost Center - _TC",
@@ -273,9 +273,9 @@
     "parentfield": "items",
     "price_list_rate": 62.5,
     "qty": 10,
-	"uom": "_Test UOM",
-	"conversion_factor": 1,
-    "stock_uom": "_Test UOM"
+	  "uom": "_Test UOM 1",
+	  "conversion_factor": 1,
+    "stock_uom": "_Test UOM 1"
 	
    },
    {

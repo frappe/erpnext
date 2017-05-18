@@ -157,7 +157,7 @@ class Employee(Document):
 		delete_events(self.doctype, self.name)
 
 	def validate_prefered_email(self):
-		if not self.get(scrub(self.prefered_contact_email)):
+		if self.prefered_contact_email and not self.get(scrub(self.prefered_contact_email)):
 			frappe.msgprint(_("Please enter " + self.prefered_contact_email))
 
 

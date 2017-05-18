@@ -38,6 +38,12 @@ frappe.query_reports["Stock Ledger"] = {
 			"options": "Item"
 		},
 		{
+			"fieldname":"batch_no",
+			"label": __("Batch No"),
+			"fieldtype": "Link",
+			"options": "Batch"
+		},
+		{
 			"fieldname":"brand",
 			"label": __("Brand"),
 			"fieldtype": "Link",

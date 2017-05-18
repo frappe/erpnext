@@ -23,9 +23,9 @@
     "parentfield": "items", 
     "qty": 10.0, 
     "rate": 100.0,
-	"uom": "_Test UOM",
-    "stock_uom": "_Test UOM",
-	"conversion_factor": 1.0
+	  "uom": "_Test UOM 1",
+    "stock_uom": "_Test UOM 1",
+	  "conversion_factor": 1.0
    }
   ], 
   "quotation_to": "Customer", 

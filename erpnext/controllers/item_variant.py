@@ -42,10 +42,8 @@ def make_variant_based_on_manufacturer(template, manufacturer, manufacturer_part
 
 	copy_attributes_to_variant(template, variant)
 
-	variant.append("manufacturers", {
-		"manufacturer": manufacturer,
-		"manufacturer_part_no": manufacturer_part_no
-	})
+	variant.manufacturer = manufacturer
+	variant.manufacturer_part_no = manufacturer_part_no
 
 	variant.item_code = append_number_if_name_exists('Item', template.name)
 

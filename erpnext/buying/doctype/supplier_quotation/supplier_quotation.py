@@ -8,6 +8,7 @@ from frappe.utils import flt
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.buying.utils import validate_for_items
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -24,7 +25,7 @@ class SupplierQuotation(BuyingController):
 		validate_status(self.status, ["Draft", "Submitted", "Stopped",
 			"Cancelled"])
 
-		self.validate_common()
+		validate_for_items(self)
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
 
@@ -49,11 +50,6 @@ class SupplierQuotation(BuyingController):
 				"is_child_table": True
 			}
 		})
-
-
-	def validate_common(self):
-		pc = frappe.get_doc('Purchase Common')
-		pc.validate_for_items(self)
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

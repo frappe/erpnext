@@ -2,13 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 
 from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words
 from frappe.model.naming import make_autoname
 
 from frappe import msgprint, _
-from erpnext.setup.utils import get_company_currency
 from erpnext.hr.doctype.process_payroll.process_payroll import get_start_end_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.utilities.transaction_base import TransactionBase
@@ -33,7 +32,7 @@ class SalarySlip(TransactionBase):
 		# if self.salary_slip_based_on_timesheet or not self.net_pay:
 		self.calculate_net_pay()
 
-		company_currency = get_company_currency(self.company)
+		company_currency = erpnext.get_company_currency(self.company)
 		self.total_in_words = money_in_words(self.rounded_total, company_currency)
 
 		if frappe.db.get_single_value("HR Settings", "max_working_hours_against_timesheet"):
@@ -55,7 +54,7 @@ class SalarySlip(TransactionBase):
 		for key in ('earnings', 'deductions'):
 			for struct_row in self._salary_structure_doc.get(key):
 				amount = self.eval_condition_and_formula(struct_row, data)
-				if amount:
+				if amount and struct_row.statistical_component == 0:
 					self.update_component_row(struct_row, amount, key)
 
 	def update_component_row(self, struct_row, amount, key):
@@ -77,30 +76,31 @@ class SalarySlip(TransactionBase):
 	def eval_condition_and_formula(self, d, data):
 		try:
 			if d.condition:
-				if not eval(d.condition, None, data):
+				if not frappe.safe_eval(d.condition, None, data):
 					return None
 			amount = d.amount
 			if d.amount_based_on_formula:
 				if d.formula:
-					amount = eval(d.formula, None, data)
+					amount = frappe.safe_eval(d.formula, None, data)
 			if amount:
 				data[d.abbr] = amount
 
 			return amount
 
 		except NameError as err:
-		    frappe.throw(_("Name error: {0}".format(err)))
+			frappe.throw(_("Name error: {0}".format(err)))
 		except SyntaxError as err:
-		    frappe.throw(_("Syntax error in formula or condition: {0}".format(err)))
+			frappe.throw(_("Syntax error in formula or condition: {0}".format(err)))
 		except Exception, e:
-		    frappe.throw(_("Error in formula or condition: {0}".format(e)))
-		    raise
+			frappe.throw(_("Error in formula or condition: {0}".format(e)))
+			raise
 
 	def get_data_for_eval(self):
 		'''Returns data for evaluating formula'''
 		data = frappe._dict()
 
-		data.update(frappe.get_doc("Salary Structure Employee", {"employee": self.employee}).as_dict())
+		data.update(frappe.get_doc("Salary Structure Employee",
+			{"employee": self.employee, "parent": self.salary_structure}).as_dict())
 
 		data.update(frappe.get_doc("Employee", self.employee).as_dict())
 		data.update(self.as_dict())
@@ -322,11 +322,15 @@ class SalarySlip(TransactionBase):
 	def sum_components(self, component_type, total_field):
 		joining_date, relieving_date = frappe.db.get_value("Employee", self.employee,
 			["date_of_joining", "relieving_date"])
+		
 		if not relieving_date:
 			relieving_date = getdate(self.end_date)
 
+		if not joining_date:
+			frappe.throw(_("Please set the Date Of Joining for employee {0}").format(frappe.bold(self.employee_name)))
+
 		for d in self.get(component_type):
-			if ((cint(d.depends_on_lwp) == 1 and not self.salary_slip_based_on_timesheet) or\
+			if self.salary_structure and ((cint(d.depends_on_lwp) == 1 and not self.salary_slip_based_on_timesheet) or\
 			getdate(self.start_date) < joining_date or getdate(self.end_date) > relieving_date):
 
 				d.amount = rounded((flt(d.default_amount) * flt(self.payment_days)
@@ -348,7 +352,7 @@ class SalarySlip(TransactionBase):
 
 		self.sum_components('earnings', 'gross_pay')
 		self.sum_components('deductions', 'total_deduction')
-		
+
 		self.set_loan_repayment()
 
 		self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
@@ -356,11 +360,11 @@ class SalarySlip(TransactionBase):
 			self.precision("net_pay") if disable_rounded_total else 0)
 
 	def set_loan_repayment(self):
-		employee_loan = frappe.db.sql("""select sum(principal_amount) as principal_amount, sum(interest_amount) as interest_amount, 
+		employee_loan = frappe.db.sql("""select sum(principal_amount) as principal_amount, sum(interest_amount) as interest_amount,
 						sum(total_payment) as total_loan_repayment from `tabRepayment Schedule`
 						where payment_date between %s and %s and parent in (select name from `tabEmployee Loan`
 						where employee = %s and repay_from_salary = 1 and docstatus = 1)""",
-						(self.start_date, self.end_date, self.employee), as_dict=True)				
+						(self.start_date, self.end_date, self.employee), as_dict=True)
 		if employee_loan:
 			self.principal_amount = employee_loan[0].principal_amount
 			self.interest_amount = employee_loan[0].interest_amount

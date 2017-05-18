@@ -34,14 +34,16 @@ def work():
 		process_payroll.salary_slip_based_on_timesheet = 0
 		process_payroll.create_salary_slips()
 		process_payroll.submit_salary_slips()
-		process_payroll.make_journal_entry(reference_date=frappe.flags.current_date,
-			reference_number=random_string(10))
+		process_payroll.make_accural_jv_entry()
+		# process_payroll.make_journal_entry(reference_date=frappe.flags.current_date,
+		# 	reference_number=random_string(10))
 
 		process_payroll.salary_slip_based_on_timesheet = 1
 		process_payroll.create_salary_slips()
 		process_payroll.submit_salary_slips()
-		process_payroll.make_journal_entry(reference_date=frappe.flags.current_date,
-			reference_number=random_string(10))
+		process_payroll.make_accural_jv_entry()
+		# process_payroll.make_journal_entry(reference_date=frappe.flags.current_date,
+		# 	reference_number=random_string(10))
 
 	if frappe.db.get_global('demo_hr_user'):
 		make_timesheet_records()

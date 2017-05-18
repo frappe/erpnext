@@ -19,7 +19,7 @@ status_map = {
 		["Converted", "has_customer"],
 	],
 	"Opportunity": [
-		["Quotation", "has_quotation"],
+		["Quotation", "has_active_quotation"],
 		["Converted", "has_ordered_quotation"],
 		["Lost", "eval:self.status=='Lost'"],
 		["Lost", "has_lost_quotation"],
@@ -46,8 +46,8 @@ status_map = {
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
 		["Return", "eval:self.is_return==1 and self.docstatus==1"],
-		["Credit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1"],
-		["Paid", "eval:self.outstanding_amount==0 and self.docstatus==1 and self.is_return==0"],
+		["Paid", "eval:self.outstanding_amount<=0 and self.docstatus==1 and self.is_return==0"],
+		["Credit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1 and self.is_return==0 and get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1})"],
 		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
 		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
 		["Cancelled", "eval:self.docstatus==2"],
@@ -56,8 +56,8 @@ status_map = {
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
 		["Return", "eval:self.is_return==1 and self.docstatus==1"],
-		["Debit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1"],
-		["Paid", "eval:self.outstanding_amount==0 and self.docstatus==1 and self.is_return==0"],
+		["Paid", "eval:self.outstanding_amount<=0 and self.docstatus==1 and self.is_return==0"],
+		["Debit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1 and self.is_return==0 and get_value('Purchase Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1})"],
 		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
 		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
 		["Cancelled", "eval:self.docstatus==2"],
@@ -119,7 +119,8 @@ class StatusUpdater(Document):
 					self.status = s[0]
 					break
 				elif s[1].startswith("eval:"):
-					if eval(s[1][5:]):
+					if frappe.safe_eval(s[1][5:], None, { "self": self.as_dict(), "getdate": getdate, 
+							"nowdate": nowdate, "get_value": frappe.db.get_value }):
 						self.status = s[0]
 						break
 				elif getattr(self, s[1])():

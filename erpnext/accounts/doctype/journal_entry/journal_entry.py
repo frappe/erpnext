@@ -2,12 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
+import frappe, erpnext, json
 from frappe.utils import cstr, flt, fmt_money, formatdate
 from frappe import msgprint, _, scrub
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_account_currency
-from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.party import get_party_account
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.hr.doctype.employee_loan.employee_loan import update_disbursement_status
@@ -73,6 +72,7 @@ class JournalEntry(AccountsController):
 		self.update_expense_claim()
 		self.update_employee_loan()
 		self.unlink_advance_entry_reference()
+		self.unlink_asset_reference()
 
 	def unlink_advance_entry_reference(self):
 		for d in self.get("accounts"):
@@ -82,6 +82,18 @@ class JournalEntry(AccountsController):
 				d.reference_type = ''
 				d.reference_name = ''
 				d.db_update()
+				
+	def unlink_asset_reference(self):
+		for d in self.get("accounts"):
+			if d.reference_type=="Asset" and d.reference_name:
+				asset = frappe.get_doc("Asset", d.reference_name)
+				for s in asset.get("schedules"):
+					if s.journal_entry == self.name:
+						s.db_set("journal_entry", None)
+						asset.value_after_depreciation += s.depreciation_amount
+
+						asset.db_set("value_after_depreciation", asset.value_after_depreciation)
+						asset.set_status()
 
 	def validate_party(self):
 		for d in self.get("accounts"):
@@ -325,11 +337,11 @@ class JournalEntry(AccountsController):
 			if d.account_currency == self.company_currency:
 				d.exchange_rate = 1
 			elif not d.exchange_rate or d.exchange_rate == 1 or \
-				(d.reference_type in ("Sales Invoice", "Purchase Invoice") 
+				(d.reference_type in ("Sales Invoice", "Purchase Invoice")
 				and d.reference_name and self.posting_date):
-				
+
 					# Modified to include the posting date for which to retreive the exchange rate
-					d.exchange_rate = get_exchange_rate(self.posting_date, d.account, d.account_currency, 
+					d.exchange_rate = get_exchange_rate(self.posting_date, d.account, d.account_currency,
 						self.company, d.reference_type, d.reference_name, d.debit, d.credit, d.exchange_rate)
 
 			if not d.exchange_rate:
@@ -502,7 +514,7 @@ class JournalEntry(AccountsController):
 
 	def update_expense_claim(self):
 		for d in self.accounts:
-			if d.reference_type=="Expense Claim" and d.party:
+			if d.reference_type=="Expense Claim" and d.reference_name:
 				doc = frappe.get_doc("Expense Claim", d.reference_name)
 				update_reimbursed_amount(doc)
 
@@ -656,7 +668,7 @@ def get_payment_entry(ref_doc, args):
 	if args.get("party_account"):
 		# Modified to include the posting date for which the exchange rate is required.
 		# Assumed to be the posting date in the reference document
-		exchange_rate = get_exchange_rate(ref_doc.get("posting_date") or ref_doc.get("transaction_date"), 
+		exchange_rate = get_exchange_rate(ref_doc.get("posting_date") or ref_doc.get("transaction_date"),
 			args.get("party_account"), args.get("party_account_currency"),
 			ref_doc.company, ref_doc.doctype, ref_doc.name)
 
@@ -692,8 +704,8 @@ def get_payment_entry(ref_doc, args):
 		bank_row.update(bank_account)
 		# Modified to include the posting date for which the exchange rate is required.
 		# Assumed to be the posting date of the reference date
-		bank_row.exchange_rate = get_exchange_rate(ref_doc.get("posting_date") 
-			or ref_doc.get("transaction_date"), bank_account["account"], 
+		bank_row.exchange_rate = get_exchange_rate(ref_doc.get("posting_date")
+			or ref_doc.get("transaction_date"), bank_account["account"],
 			bank_account["account_currency"], ref_doc.company)
 
 	bank_row.cost_center = cost_center
@@ -746,7 +758,7 @@ def get_outstanding(args):
 	if isinstance(args, basestring):
 		args = json.loads(args)
 
-	company_currency = get_company_currency(args.get("company"))
+	company_currency = erpnext.get_company_currency(args.get("company"))
 
 	if args.get("doctype") == "Journal Entry":
 		condition = " and party=%(party)s" if args.get("party") else ""
@@ -805,7 +817,7 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 	if not frappe.has_permission("Account"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 
-	company_currency = get_company_currency(company)
+	company_currency = erpnext.get_company_currency(company)
 	account_details = frappe.db.get_value("Account", account, ["account_type", "account_currency"], as_dict=1)
 
 	if not account_details:
@@ -853,7 +865,7 @@ def get_exchange_rate(posting_date, account=None, account_currency=None, company
 	if not account_currency:
 		account_currency = account_details.account_currency
 
-	company_currency = get_company_currency(company)
+	company_currency = erpnext.get_company_currency(company)
 
 	if account_currency != company_currency:
 		if reference_type in ("Sales Invoice", "Purchase Invoice") and reference_name:

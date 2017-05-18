@@ -1675,7 +1675,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-03-14 17:12:48.816644", 
+ "modified": "2017-04-10 12:06:22.176045", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Entry", 
@@ -1730,6 +1730,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "title_field": "title", 
- "track_changes": 0, 
+ "track_changes": 1, 
  "track_seen": 0
 }

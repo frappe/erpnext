@@ -5,17 +5,17 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	setup: function() {},
 	apply_pricing_rule_on_item: function(item){
 		if(item.margin_type == "Percentage"){
-			item.total_margin = flt(item.price_list_rate) 
+			item.rate_with_margin = flt(item.price_list_rate) 
 				+ flt(item.price_list_rate) * ( flt(item.margin_rate_or_amount) / 100);
-		}else{
-			item.total_margin = flt(item.price_list_rate) + flt(item.margin_rate_or_amount);
+		} else {
+			item.rate_with_margin = flt(item.price_list_rate) + flt(item.margin_rate_or_amount);
 		}
 
-		item.rate = flt(item.total_margin , precision("rate", item));
+		item.rate = flt(item.rate_with_margin , precision("rate", item));
 
 		if(item.discount_percentage){
-			discount_value = flt(item.total_margin) * flt(item.discount_percentage) / 100;
-			item.rate = flt((item.total_margin) - (discount_value), precision('rate', item));
+			discount_value = flt(item.rate_with_margin) * flt(item.discount_percentage) / 100;
+			item.rate = flt((item.rate_with_margin) - (discount_value), precision('rate', item));
 		}
 	},
 
@@ -594,6 +594,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				paid_amount += data.amount;
 				base_paid_amount += data.base_amount;
 			})
+		} else if(!this.frm.doc.is_return){
+			this.frm.doc.payments = [];
 		}
 
 		this.frm.doc.paid_amount = flt(paid_amount, precision("paid_amount"));

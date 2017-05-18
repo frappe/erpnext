@@ -151,13 +151,6 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 	}
 	return out
 
-def get_company_currency():
-	company_currency = frappe._dict()
-	for d in frappe.get_all("Company", fields=["name", "default_currency"]):
-		company_currency.setdefault(d.name, d.default_currency)
-
-	return company_currency
-
 @frappe.whitelist()
 def get_party_account(party_type, party, company):
 	"""Returns the account for the given `party`.
@@ -348,7 +341,7 @@ def validate_party_frozen_disabled(party_type, party_name):
 
 		elif party_type == "Employee":
 			if frappe.db.get_value("Employee", party_name, "status") == "Left":
-				frappe.msgprint(_("{0} {1} is not active").format(party_type, party_name), PartyDisabled, alert=True)
+				frappe.msgprint(_("{0} {1} is not active").format(party_type, party_name), alert=True)
 
 def get_timeline_data(doctype, name):
 	'''returns timeline data for the past one year'''

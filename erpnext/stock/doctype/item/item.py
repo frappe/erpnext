@@ -7,7 +7,8 @@ import erpnext
 import json
 import itertools
 from frappe import msgprint, _
-from frappe.utils import cstr, flt, cint, getdate, now_datetime, formatdate, strip, get_timestamp
+from frappe.utils import (cstr, flt, cint, getdate, now_datetime, formatdate,
+	strip, get_timestamp, random_string)
 from frappe.website.website_generator import WebsiteGenerator
 from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for, get_parent_item_groups
 from frappe.website.render import clear_cache
@@ -85,6 +86,7 @@ class Item(WebsiteGenerator):
 		self.validate_has_variants()
 		self.validate_attributes()
 		self.validate_variant_attributes()
+		self.copy_variant_attributes()
 		self.validate_website_image()
 		self.make_thumbnail()
 		self.validate_fixed_asset()
@@ -142,7 +144,8 @@ class Item(WebsiteGenerator):
 
 	def make_route(self):
 		if not self.route:
-			return cstr(frappe.db.get_value('Item Group', self.item_group, 'route')) + '/' + self.scrub(self.item_name)
+			return cstr(frappe.db.get_value('Item Group', self.item_group,
+				'route')) + '/' + self.scrub(self.item_name + '-' + random_string(5))
 
 	def get_parents(self, context):
 		item_group, route = frappe.db.get_value('Item Group', self.item_group, ['name', 'route'])
@@ -323,7 +326,7 @@ class Item(WebsiteGenerator):
 
 	def set_disabled_attributes(self, context):
 		"""Disable selection options of attribute combinations that do not result in a variant"""
-		if not self.attributes:
+		if not self.attributes or not self.has_variants:
 			return
 
 		context.disabled_attributes = {}
@@ -614,7 +617,9 @@ class Item(WebsiteGenerator):
 				template_item.save()
 
 	def update_variants(self):
-		if self.has_variants and not self.flags.dont_update_variants:
+		if self.flags.dont_update_variants: 
+			return
+		if self.has_variants:
 			updated = []
 			variants = frappe.db.get_all("Item", fields=["item_code"], filters={"variant_of": self.name })
 			for d in variants:
@@ -623,7 +628,7 @@ class Item(WebsiteGenerator):
 				variant.save()
 				updated.append(d.item_code)
 			if updated:
-				frappe.msgprint(_("Item Variants {0} updated").format(", ".join(updated)))
+				frappe.msgprint(_("Item Variants {0} updated").format(", ".join(updated)))			
 
 	def validate_has_variants(self):
 		if not self.has_variants and frappe.db.get_value("Item", self.name, "has_variants"):
@@ -667,6 +672,12 @@ class Item(WebsiteGenerator):
 					.format(variant), ItemVariantExistsError)
 
 			validate_item_variant_attributes(self, args)
+
+	def copy_variant_attributes(self):
+		'''Copy attributes from template (if they have been changed before saving)'''
+		if self.variant_of:
+			template = frappe.get_doc('Item', self.variant_of)
+			copy_attributes_to_variant(template, self)
 
 def get_timeline_data(doctype, name):
 	'''returns timeline data based on stock ledger entry'''

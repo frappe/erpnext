@@ -35,11 +35,7 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 				item_key: "supplier",
 				parent_field: "parent_supplier_type",
 				formatter: function(item) {
-					// return repl('<a href="#Report/stock-invoices/customer=%(enc_value)s">%(value)s</a>', {
-					// 		value: item.name,
-					// 		enc_value: encodeURIComponent(item.name)
-					// 	});
-					return item.name;
+					return item.supplier_name ? item.supplier_name + " (" + item.name + ")" : item.name;
 				}
 			},
 			"Supplier": {
@@ -47,7 +43,7 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 				show: false,
 				item_key: "supplier",
 				formatter: function(item) {
-					return item.name;
+					return item.supplier_name ? item.supplier_name + " (" + item.name + ")" : item.name;
 				}
 			},
 			"Item Group": {

@@ -270,6 +270,11 @@ body[data-route="pos"] .item-cart-items {
   border: 1px solid #d1d8dd;
   border-top: none;
 }
+@media (max-width: 767px) {
+  body[data-route="pos"] .item-cart-items {
+    height: 30vh;
+  }
+}
 body[data-route="pos"] .no-items-message {
   min-height: 200px;
   display: flex;
@@ -296,6 +301,9 @@ body[data-route="pos"] .item-list {
 }
 body[data-route="pos"] .item-list .image-field {
   height: 140px;
+}
+body[data-route="pos"] .item-list .image-field .placeholder-text {
+  font-size: 50px;
 }
 body[data-route="pos"] .item-list .pos-item-wrapper {
   position: relative;

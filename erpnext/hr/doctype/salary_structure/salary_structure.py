@@ -33,7 +33,8 @@ class SalaryStructure(Document):
 		for employee in self.get('employees'):
 			joining_date, relieving_date = frappe.db.get_value("Employee", employee.employee,
 				["date_of_joining", "relieving_date"])
-			if employee.from_date and getdate(employee.from_date) < joining_date:
+
+			if employee.from_date and joining_date and getdate(employee.from_date) < joining_date:
 				frappe.throw(_("From Date {0} for Employee {1} cannot be before employee's joining Date {2}")
 					    .format(employee.from_date, employee.employee, joining_date))
 

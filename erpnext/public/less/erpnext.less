@@ -321,6 +321,10 @@ body[data-route="pos"] {
 		overflow: auto;
 		border: 1px solid @border-color;
 		border-top: none;
+
+		@media (max-width: @screen-xs) {
+			height: 30vh;
+		}
 	}
 
 	.no-items-message {
@@ -351,6 +355,10 @@ body[data-route="pos"] {
 
 		.image-field {
 			height: 140px;
+			
+			.placeholder-text {
+				font-size: 50px;
+			}
 		}
 
 		.pos-item-wrapper {
