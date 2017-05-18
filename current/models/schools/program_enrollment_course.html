@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Student Batch</title>
+	<title>Program Enrollment Course</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -22,7 +22,7 @@
     
 
 		</head>
-<body data-path="current/models/schools/student_batch">
+<body data-path="current/models/schools/program_enrollment_course">
 	<div class="main-section">
 		<div>
 					<nav class="navbar navbar-default navbar-main" role="navigation">
@@ -103,14 +103,14 @@
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
-<div class="page-container" id="page-current/models/schools/student_batch" data-path="{{ pathname }}"
+<div class="page-container" id="page-current/models/schools/program_enrollment_course" data-path="{{ pathname }}"
 	>
 	<div class="row ">
 		
 		<div class=" page-content col-sm-12 ">
 			<div class="page-content-wrapper">
 				<div class="row page-head">
-					<div class='col-sm-12'>
+					<div class='col-sm-12 hidden-xs'>
 						
 						<div class="page-breadcrumbs">
 							
@@ -129,7 +129,7 @@
 						
 					</div>
 					<div class="col-sm-8 col-xs-6">
-						<h1>Student Batch</h1>
+						<h1>Program Enrollment Course</h1>
 					</div>
 					<div class="col-sm-4 col-xs-6">
 						
@@ -139,7 +139,7 @@
 				</div>
 			</div>
 			<div class="page_content">
-<!-- title: Student Batch -->
+<!-- title: Program Enrollment Course -->
 
 
 
@@ -151,16 +151,16 @@
 	Version 7.x.x</a>
 
 
-	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/schools/doctype/student_batch"
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/schools/doctype/program_enrollment_course"
 		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
 
 </div>
 
 
+<span class="label label-info">Child Table</span>
 
 
-
-    <p><b>Table Name:</b> <code>tabStudent Batch</code></p>
+    <p><b>Table Name:</b> <code>tabProgram Enrollment Course</code></p>
 
 
 
@@ -181,11 +181,11 @@
         
         <tr >
             <td>1</td>
-            <td class="danger" title="Mandatory"><code>student_batch_name</code></td>
+            <td class="danger" title="Mandatory"><code>course</code></td>
             <td >
                 Link</td>
             <td >
-                Student Batch Name
+                Course
                 
             </td>
             <td>
@@ -193,7 +193,7 @@
                 
 
 
-<a href="https://frappe.github.io/erpnext/current/models/schools/student_batch_name">Student Batch Name</a>
+<a href="https://frappe.github.io/erpnext/current/models/schools/course">Course</a>
 
 
                 
@@ -202,154 +202,15 @@
         
         <tr >
             <td>2</td>
-            <td class="danger" title="Mandatory"><code>academic_year</code></td>
+            <td ><code>course_name</code></td>
             <td >
-                Link</td>
+                Data</td>
             <td >
-                Academic Year
+                Course Name
                 
             </td>
             <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/schools/academic_year">Academic Year</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr >
-            <td>3</td>
-            <td ><code>enabled</code></td>
-            <td >
-                Check</td>
-            <td >
-                Active
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>4</td>
-            <td ><code>column_break_2</code></td>
-            <td class="info">
-                Column Break</td>
-            <td >
-                
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>5</td>
-            <td class="danger" title="Mandatory"><code>program</code></td>
-            <td >
-                Link</td>
-            <td >
-                Program
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/schools/program">Program</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr >
-            <td>6</td>
-            <td ><code>academic_term</code></td>
-            <td >
-                Link</td>
-            <td >
-                Academic Term
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/schools/academic_term">Academic Term</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr class="info">
-            <td>7</td>
-            <td ><code>section_break_6</code></td>
-            <td >
-                Section Break</td>
-            <td >
-                Students
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>8</td>
-            <td ><code>students</code></td>
-            <td >
-                Table</td>
-            <td >
-                Students
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/schools/student_batch_student">Student Batch Student</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr class="info">
-            <td>9</td>
-            <td ><code>section_break_8</code></td>
-            <td >
-                Section Break</td>
-            <td >
-                Instructors
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>10</td>
-            <td ><code>instructors</code></td>
-            <td >
-                Table</td>
-            <td >
-                Instructors
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/schools/student_batch_instructor">Student Batch Instructor</a>
-
-
-                
+                <pre>course.course_name</pre>
             </td>
         </tr>
         
@@ -357,141 +218,19 @@
 </table>
 
 
-    <hr>
-    <h3>Controller</h3>
-    <h4>erpnext.schools.doctype.student_batch.student_batch</h4>
-
-    
-
-
-
-	
-        
-	<h3 style="font-weight: normal;">Class <b>StudentBatch</b></h3>
-    
-    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
-    
-    <div class="docs-attr-desc"><p></p>
-</div>
-    <div style="padding-left: 30px;">
-        
-        
     
     
-	<p class="docs-attr-name">
-        <a name="autoname" href="#autoname" class="text-muted small">
-            <i class="fa fa-link small" style="color: #ccc;"></i></a>
-		<b>autoname</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
+    <h4>Child Table Of</h4>
+    <ul>
     
-    
-	<p class="docs-attr-name">
-        <a name="validate" href="#validate" class="text-muted small">
-            <i class="fa fa-link small" style="color: #ccc;"></i></a>
-		<b>validate</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="validate_name" href="#validate_name" class="text-muted small">
-            <i class="fa fa-link small" style="color: #ccc;"></i></a>
-		<b>validate_name</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-    </div>
-    <hr>
-
-	
+        <li>
 
 
-    
-    
-        <h4>Linked In:</h4>
-        <ul>
-        
-			
-            <li>
-
-
-<a href="https://frappe.github.io/erpnext/current/models/schools/assessment_plan">Assessment Plan</a>
+<a href="https://frappe.github.io/erpnext/current/models/schools/program_enrollment">Program Enrollment</a>
 
 </li>
-			
-        
-			
-            <li>
-
-
-<a href="https://frappe.github.io/erpnext/current/models/schools/assessment_result_tool">Assessment Result Tool</a>
-
-</li>
-			
-        
-			
-            <li>
-
-
-<a href="https://frappe.github.io/erpnext/current/models/schools/course_schedule">Course Schedule</a>
-
-</li>
-			
-        
-			
-            <li>
-
-
-<a href="https://frappe.github.io/erpnext/current/models/schools/course_scheduling_tool">Course Scheduling Tool</a>
-
-</li>
-			
-        
-			
-            <li>
-
-
-<a href="https://frappe.github.io/erpnext/current/models/schools/student_attendance">Student Attendance</a>
-
-</li>
-			
-        
-			
-            <li>
-
-
-<a href="https://frappe.github.io/erpnext/current/models/schools/student_attendance_tool">Student Attendance Tool</a>
-
-</li>
-			
-        
-			
-            <li>
-
-
-<a href="https://frappe.github.io/erpnext/current/models/schools/student_group">Student Group</a>
-
-</li>
-			
-        
-        </ul>
+    
+    </ul>
     
 
 

@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Item Manufacturer</title>
+	<title>Setting up Stripe</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -22,7 +22,7 @@
     
 
 		</head>
-<body data-path="current/models/stock/item_manufacturer">
+<body data-path="user/manual/en/setting-up/integrations/stripe-integration">
 	<div class="main-section">
 		<div>
 					<nav class="navbar navbar-default navbar-main" role="navigation">
@@ -103,14 +103,14 @@
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
-<div class="page-container" id="page-current/models/stock/item_manufacturer" data-path="{{ pathname }}"
+<div class="page-container" id="page-user/manual/en/setting-up/integrations/stripe-integration" data-path="{{ pathname }}"
 	>
 	<div class="row ">
 		
 		<div class=" page-content col-sm-12 ">
 			<div class="page-content-wrapper">
 				<div class="row page-head">
-					<div class='col-sm-12'>
+					<div class='col-sm-12 hidden-xs'>
 						
 						<div class="page-breadcrumbs">
 							
@@ -118,8 +118,8 @@
 <ul class="breadcrumb">
 	<li>
 		<span class="fa fa-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext//current/models/stock">
-		Module stock</a>
+		<a href="https://frappe.github.io/erpnext//user/manual/en/setting-up/integrations">
+		Integrations</a>
 	</li>
 	
 </ul>
@@ -129,7 +129,7 @@
 						
 					</div>
 					<div class="col-sm-8 col-xs-6">
-						<h1>Item Manufacturer</h1>
+						
 					</div>
 					<div class="col-sm-4 col-xs-6">
 						
@@ -139,108 +139,55 @@
 				</div>
 			</div>
 			<div class="page_content">
-<!-- title: Item Manufacturer -->
+<h1>Setting up Stripe</h1>
 
+<p>To setup Stripe,
+<code>Explore &gt; Integrations &gt; Stripe Settings</code></p>
 
+<h4>Setup  Stripe</h4>
 
+<p>To enable Stripe payment service, you need to configure parameters like Publishable Key, Secret Key
+<img class="screenshot" alt="Razorpay Settings" src="https://frappe.github.io/erpnext/assets/img/setup/integrations/stripe_setting.png"></p>
 
+<p>On enabling service, the system will create Payment Gateway record and Account head in chart of account with account type as Bank.</p>
 
-<div class="dev-header">
+<p><img class="screenshot" alt="Stripe COA" src="https://frappe.github.io/erpnext/assets/img/setup/integrations/stripe_coa.png"></p>
 
-<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 7.x.x</a>
+<p>Also it will create Payment Gateway Account entry. Payment Gateway Account is configuration hub from this you can set account head from existing COA, default Payment Request email body template.</p>
 
+<p><img class="screenshot" alt="Payment Gateway Account" src="https://frappe.github.io/erpnext/assets/img/setup/integrations/payment_gateway_account_stripe.png"></p>
 
-	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/stock/doctype/item_manufacturer"
-		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+<p>After configuring Payment Gateway Account your system is able to accept online payments.</p>
 
-</div>
+<h4>Supporting transaction currencies</h4>
 
+<pre><code>"AED", "ALL", "ANG", "ARS", "AUD", "AWG", "BBD", "BDT", "BIF", "BMD", "BND",
+"BOB", "BRL", "BSD", "BWP", "BZD", "CAD", "CHF", "CLP", "CNY", "COP", "CRC", "CVE", "CZK", "DJF",
+"DKK", "DOP", "DZD", "EGP", "ETB", "EUR", "FJD", "FKP", "GBP", "GIP", "GMD", "GNF", "GTQ", "GYD",
+"HKD", "HNL", "HRK", "HTG", "HUF", "IDR", "ILS", "INR", "ISK", "JMD", "JPY", "KES", "KHR", "KMF",
+"KRW", "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "MAD", "MDL", "MNT", "MOP", "MRO", "MUR", "MVR",
+"MWK", "MXN", "MYR", "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "PAB", "PEN", "PGK", "PHP", "PKR",
+"PLN", "PYG", "QAR", "RUB", "SAR", "SBD", "SCR", "SEK", "SGD", "SHP", "SLL", "SOS", "STD", "SVC",
+"SZL", "THB", "TOP", "TTD", "TWD", "TZS", "UAH", "UGX", "USD", "UYU", "UZS", "VND", "VUV", "WST",
+"XAF", "XOF", "XPF", "YER", "ZAR"
+</code></pre>
 
-<span class="label label-info">Child Table</span>
-
-
-    <p><b>Table Name:</b> <code>tabItem Manufacturer</code></p>
-
-
-
-
-<h3>Fields</h3>
-
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th style="width: 5%">Sr</th>
-            <th style="width: 25%">Fieldname</th>
-            <th style="width: 20%">Type</th>
-            <th style="width: 25%">Label</th>
-            <th style="width: 25%">Options</th>
-        </tr>
-    </thead>
-    <tbody>
-        
-        <tr >
-            <td>1</td>
-            <td class="danger" title="Mandatory"><code>manufacturer</code></td>
-            <td >
-                Link</td>
-            <td >
-                Manufacturer
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/stock/manufacturer">Manufacturer</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr >
-            <td>2</td>
-            <td ><code>manufacturer_part_no</code></td>
-            <td >
-                Data</td>
-            <td >
-                Manufacturer Part Number
-                
-            </td>
-            <td></td>
-        </tr>
-        
-    </tbody>
-</table>
-
-
-    
-    
-    <h4>Child Table Of</h4>
-    <ul>
-    
-        <li>
-
-
-<a href="https://frappe.github.io/erpnext/current/models/stock/item">Item</a>
-
-</li>
-    
-    </ul>
-    
-
-
-<!-- autodoc -->
-<!-- jinja -->
-<!-- static -->
 </div>
 		</div>
 	</div>
 </div>
 
-				<!-- edit-link -->
+				
+<div class="page-container">
+	<div class="page-content">
+	<div class="edit-container text-center">
+		<i class="fa fa-smile"></i>
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/setting-up/integrations/stripe-integration.md">
+			Improve this page
+		</a>
+	</div>
+	</div>
+</div>
                 </div>
             </div>
 			<footer class="docs-footer">
