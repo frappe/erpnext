@@ -45,7 +45,7 @@ frappe.ui.form.on('Asset', {
 					erpnext.asset.scrap_asset(frm);
 				});
 				
-				frm.add_custom_button("Sale Asset", function() {
+				frm.add_custom_button("Sell Asset", function() {
 					erpnext.asset.make_sales_invoice(frm);
 				});
 				

@@ -17,7 +17,7 @@
 						<div class="no-items-message text-extra-muted">
 							<span class="text-center">
 								<i class="fa fa-2x fa-shopping-cart"></i>
-								<p>Tap items to add them here</p>
+								<p>{{ __("Tap items to add them here") }}</p>
 							</span>
 						</div>
 						<div class="items">
@@ -68,7 +68,7 @@
 
 				</div>
 				<div class="col-xs-6 numeric_keypad hidden-xs" style="display:none">
-					{% var chartData = ["Qty", "Disc", "Price"] %} {% for(var i=0; i
+					{% var chartData = [__("Qty"), __("Disc"), __("Price")] %} {% for(var i=0; i
 					<3; i++) { %} <div class="row text-right">
 						{% for(var j=i*3; j
 						<(i+1)*3; j++) { %} <button type="button" class="btn btn-default numeric-keypad" val="{{j+1}}">{{j+1}}</button>
@@ -77,10 +77,10 @@
 				</div>
 				{% } %}
 				<div class="row text-right">
-					<button type="button" class="btn btn-default numeric-keypad numeric-del">Del</button>
+					<button type="button" class="btn btn-default numeric-keypad numeric-del">{{ __("Del") }}</button>
 					<button type="button" class="btn btn-default numeric-keypad" val="0">0</button>
 					<button type="button" class="btn btn-default numeric-keypad" val=".">.</button>
-					<button type="button" class="btn btn-primary numeric-keypad pos-pay">Pay</button>
+					<button type="button" class="btn btn-primary numeric-keypad pos-pay">{{ __("Pay") }}</button>
 				</div>
 			</div>
 		</div>
@@ -97,7 +97,7 @@
 			<div class="no-items-message text-extra-muted">
 				<span class="text-center">
 					<i class="fa fa-2x fa-user"></i>
-					<p>No Customers yet!</p>
+					<p>{{ __("No Customers yet!") }}</p>
 				</span>
 			</div>
 		</div>
@@ -112,7 +112,7 @@
 			<div class="pos-list-row pos-bill-header text-muted h6">
 				<div class="cell subject search-item-group">
 					<div class="dropdown">
-						<a class="text-muted dropdown-toggle" data-toggle="dropdown"><span class="dropdown-text">All Item Groups</span><i class="caret"></i></a>
+						<a class="text-muted dropdown-toggle" data-toggle="dropdown"><span class="dropdown-text">{{ __("All Item Groups") }}</span><i class="caret"></i></a>
 						<ul class="dropdown-menu">
 						</ul>
 					</div>
