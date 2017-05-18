@@ -86,7 +86,6 @@ class Item(WebsiteGenerator):
 		self.validate_has_variants()
 		self.validate_attributes()
 		self.validate_variant_attributes()
-		self.copy_variant_attributes()
 		self.validate_website_image()
 		self.make_thumbnail()
 		self.validate_fixed_asset()
@@ -672,12 +671,6 @@ class Item(WebsiteGenerator):
 					.format(variant), ItemVariantExistsError)
 
 			validate_item_variant_attributes(self, args)
-
-	def copy_variant_attributes(self):
-		'''Copy attributes from template (if they have been changed before saving)'''
-		if self.variant_of:
-			template = frappe.get_doc('Item', self.variant_of)
-			copy_attributes_to_variant(template, self)
 
 def get_timeline_data(doctype, name):
 	'''returns timeline data based on stock ledger entry'''
