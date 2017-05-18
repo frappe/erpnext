@@ -315,7 +315,8 @@ def get_party(user=None):
 
 	else:
 		if not cart_settings.enabled:
-			return None
+			frappe.local.flags.redirect_location = "/contact"
+			raise frappe.Redirect
 		customer = frappe.new_doc("Customer")
 		fullname = get_fullname(user)
 		customer.update({
