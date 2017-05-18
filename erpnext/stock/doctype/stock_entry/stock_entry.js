@@ -76,7 +76,7 @@ frappe.ui.form.on('Stock Entry', {
 		frm.fields_dict.items.grid.refresh();
 		frm.cscript.toggle_related_fields(frm.doc);
 	},
-	validate: function(frm) {
+	after_save: function(frm) {
 		erpnext.select_batch_and_serial_no(frm);
 	},
 	company: function(frm) {
@@ -547,6 +547,63 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 });
 
 erpnext.select_batch_and_serial_no = (frm) => {
+	let get_warehouse = (item) => {
+		return cstr(item.s_warehouse) ? cstr(item.s_warehouse) : cstr(item.t_warehouse);
+	}
+
+	let show_modal_with_oldest_batch = (item, item_code, total_qty, warehouse, has_batch) => {
+		frappe.call({
+			method: 'erpnext.stock.doctype.batch.batch.get_batches_by_oldest',
+			args: {
+				warehouse: warehouse,
+				item_code: item_code
+			},
+			callback: (r) => {
+				if (r.message) {
+					batch_rows_by_oldest = [];
+					if(cstr(item.s_warehouse)) {
+						qty = total_qty;
+						for(var i = 0; i < r.message.length; i++) {
+							batch_row = {name: 'batch 1'};
+							batch_row.batch_no = r.message[i].batch_no;
+							batch_row.available_qty = r.message[i].qty;
+							if (parseInt(qty) <= parseInt(r.message[i].qty)) {
+								batch_row.selected_qty = qty;
+								batch_rows_by_oldest.push(batch_row);
+								break;
+							} else {
+								batch_row.selected_qty = r.message[i].qty;
+								qty -= r.message[i].qty;
+								batch_rows_by_oldest.push(batch_row);
+							}
+						}
+					}
+					erpnext.show_batch_serial_modal(frm, item, item_code, total_qty, warehouse, has_batch, batch_rows_by_oldest);
+				}
+			}
+		});
+	}
+
+	frm.doc.items.forEach(function(d) {
+		if(d.has_batch_no && !d.batch_no) {
+			show_modal_with_oldest_batch(d, d.item_code, d.qty, get_warehouse(d), 1);
+		} else if(d.has_serial_no && !d.serial_no) {
+			erpnext.show_batch_serial_modal(frm, d, d.item_code, d.qty, get_warehouse(d), 0);
+		}
+	});
+
+
+}
+
+erpnext.show_batch_serial_modal = (frm, item, item_code, qty, warehouse, has_batch, oldest = undefined) => {
+	let data = oldest ? oldest : []
+	let title = "";
+	let fields = [
+		{fieldname: 'item_code', read_only: 1, fieldtype:'Link', options: 'Item',
+			label: __('Item Code'), 'default': item_code},
+		{fieldtype:'Column Break'},
+		{fieldname: 'qty', read_only: 1, fieldtype:'Float', label: __('Qty'), 'default': qty},
+	];
 
 	let set_available_qty = (item_code, batch_no, warehouse, field) => {
 		frappe.call({
@@ -565,163 +622,170 @@ erpnext.select_batch_and_serial_no = (frm) => {
 		});
 	}
 
-	let get_warehouse = (i) => {
-		// console.log("i", i);
-		// console.log("cstr(i.s_warehouse) || cstr(i.t_warehouse)", cstr(i.s_warehouse) || cstr(i.t_warehouse));
-		return cstr(i.s_warehouse) ? cstr(i.s_warehouse) : cstr(i.t_warehouse);
+	if(has_batch) {
+		title = __("Select Batch Numbers");
+		fields = fields.concat([
+			{fieldtype:'Section Break', label: __('Batch No')},
+			{fieldname: 'batches', fieldtype: 'Table',
+				fields: [
+					{fieldtype:'Link', fieldname:'batch_no', options: 'Batch',
+						label: __('Select Batch'), in_list_view:1, get_query: function(doc) {
+							return {filters: {item: item_code }};
+						}},
+					{fieldtype:'Float', read_only: 1, fieldname:'available_qty',
+						label: __('Available'), in_list_view:1},
+					{fieldtype:'Float', fieldname:'selected_qty',
+						label: __('Qty'), in_list_view:1},
+				],
+				data: data,
+				get_data: function() {
+					return this.data;
+				},
+				on_setup: function(grid) {
+					var me = this;
+					grid.wrapper.on('change', 'input[data-fieldname="batch_no"]', function(e) {
+						let $row = $(this).closest('.grid-row');
+						let name = $row.attr('data-name');
+						let row = grid.grid_rows_by_docname[name];
+						row.on_grid_fields[2].set_value('0');
+						row.on_grid_fields[2].$input.trigger('change');
+						set_available_qty(item_code, row.doc.batch_no, warehouse, row.on_grid_fields[1]);
+					});
+				}
+			}
+		]);
+	} else {
+		title = __("Select Serial Numbers");
+		fields = fields.concat([
+			{fieldtype: 'Section Break', label: __('Serial No')},
+			{
+				fieldtype: 'Link', fieldname: 'serial_no_select', options: 'Serial No',
+				label: __('Select'),
+				get_query: function(doc) {
+					return { filters: {item_code: item_code}};
+				}
+			},
+			{fieldtype: 'Column Break'},
+			{fieldname: 'serial_no', fieldtype: 'Small Text'}
+		])
 	}
-	// console.log("available_qty", get_available_qty("_Test FG Item", 'tfi', 'Stores - A'));
 
-	// get_warehouse();
+	let dialog = new frappe.ui.Dialog({
+		title: title,
+		fields: fields
+	});
 
-	let show_modal = (item, item_code, qty, warehouse, has_batch, has_serial, oldest = undefined) => {
-		let data = oldest ? [oldest] : []
-		let fields = [
-			{fieldname: 'item_code', read_only: 1, fieldtype:'Link', options: 'Item',
-				label: __('Item Code'), 'default': item_code},
-			{fieldtype:'Column Break'},
-			{fieldname: 'qty', fieldtype:'Float', label: __('Qty'), 'default': qty},
-			{fieldtype:'Section Break'}
-		];
-		if(has_batch) {
-			fields.push(
-				{fieldname: 'batches', fieldtype: 'Table',
-					fields: [
-						{fieldtype:'Link', fieldname:'batch_no', options: 'Batch',
-							label: __('Select Batch'), in_list_view:1, get_query: function(doc) {
-								return {filters: {item: item_code }};
-							}},
-						{fieldtype:'Float', read_only: 1, fieldname:'available_qty',
-							label: __('Available'), in_list_view:1},
-						{fieldtype:'Float', fieldname:'selected_qty',
-							label: __('Qty'), in_list_view:1},
-					],
-					data: data,
-					get_data: function() {
-						return this.data;
-					},
-					bind_events: function(grid) {
-						var me = this;
-						grid.wrapper.on('change', 'input[data-fieldname="batch_no"]', function(e) {
-							let $row = $(this).closest('.grid-row');
-							let name = $row.attr('data-name');
-							let row = grid.grid_rows_by_docname[name];
-							// console.log("bind changed: ", $(this), name, row.doc.batch_no, row.doc.idx);
-							// console.log(grid.grid_rows_by_docname);
-							set_available_qty(item_code, row.doc.batch_no, warehouse, row.on_grid_fields[1]);
-						});
-					}
-			});
-		}
-		if(has_serial) {
-			fields.push(
-				{fieldname: 'serial_no', fieldtype: 'Small Text', label: __('Serial No')}
-			)
-		}
-		let dialog = new frappe.ui.Dialog({
-			title: __("Select Batches"),
-			fields: fields
+	let serial_no_link = dialog.fields_dict.serial_no_select;
+	if(serial_no_link) {
+		serial_no_link.$input.on('change', function(e) {
+			let serial_no_list = dialog.fields_dict.serial_no;
+			if(serial_no_link.get_value()) {
+				let new_line = '\n';
+				if(!serial_no_list.get_value()) {
+					new_line = '';
+				}
+				serial_no_list.set_value(serial_no_list.get_value() + new_line + serial_no_link.get_value());
+				serial_no_link.$input.val('');
+				serial_no_link.set_value('');
+			}
+		});
+	}
+
+	item_temp = {};
+	Object.assign(item_temp, item);
+	delete item_temp['batch_no'];
+	delete item_temp['qty'];
+	delete item_temp['idx'];
+
+	let validate_batch_dialog = (values) => {
+		var sum = 0;
+
+		values.batches.map((batch) => {
+			sum += parseInt(batch.selected_qty);
+			if(batch.batch_no && batch.selected_qty) {
+				if(parseInt(batch.selected_qty) > parseInt(batch.available_qty)
+					&& cstr(item.s_warehouse)) {
+					frappe.throw(__("Cannot select more than the available qty"));
+					return false;
+				}
+			} else {
+				if(!batch.batch_no) {
+					frappe.throw(__("Please select batch_no"));
+					return false;
+				} else {
+					frappe.throw(__("Please select qty"));
+					return false;
+				}
+			}
 		});
 
-		item_temp = {};
-		Object.assign(item_temp, item);
-
-		let validate_dialog_values = () => {
-			var values = dialog.get_values();
-
-			values.batches.map((batch) => {
-				if (batch.batch_no && batch.selected_qty) {
-					if (parseInt(batch.selected_qty) > parseInt(batch.available_qty)) {
-						frappe.throw(__("Cannot select more than the available qty"));
-						return false;
-					}
-				} else {
-					if (!batch.batch_no) {
-						frappe.throw(__("Please select batch_no"));
-						return false;
-					} else {
-						frappe.throw(__("Please select qty"));
-						return false;
-					}
-				}
+		// validate total_qty
+		if(sum > values.qty) {
+			frappe.confirm(__(`Total of selected quantities is greater than the previously
+				set item quantity. Update?`), function(){
+				return true;
 			});
-
-			// validate total_qty
+		} else if (sum < values.qty){
+			frappe.confirm(__(`Total of selected quantities is less than the previously
+				set item quantity. Update?`), function(){
+				return true;
+			});
+		} else {
 			return true;
 		}
-
-		dialog.set_primary_action(__('Get Items'), function() {
-
-			if (!validate_dialog_values()) {
-				return;
-			}
-
-			var values = dialog.get_values();
-
-			values.batches.map((batch, i) => {
-				if (i === 0) {
-					item.batch_no = batch.batch_no;
-					item.qty = batch.selected_qty;
-					console.log("item", item, frm.doc.items);
-				} else {
-					var row = frappe.model.add_child(frm.doc, "Stock Entry Detail", "items");
-					Object.assign(row, item_temp);
-					row.idx = i+1;
-					row.batch_no = batch.batch_no;
-					row.qty = batch.selected_qty;
-					console.log("row", row, frm.doc.items);
-				}
-				refresh_field("items");
-			});
-
-
-			refresh_field("items");
-			dialog.hide();
-		})
-
-		dialog.show();
 	}
 
-	// show_modal("_Test FG Item", 10, 'Stores - A', 1, 0);
+	let set_batched_items = () => {
+		var values = dialog.get_values();
+		if(!validate_batch_dialog(values)) {
+			return;
+		}
 
-	let show_modal_with_oldest_batch = (item, item_code, qty, warehouse, has_batch, has_serial_no) => {
-		frappe.call({
-			method: 'erpnext.stock.doctype.batch.batch.get_oldest_batch_qty',
-			args: {
-				warehouse: warehouse,
-				item_code: item_code
-			},
-			callback: (r) => {
-				if (r.message) {
-					oldest = {name: 'batch 1'};
-					oldest.batch_no = r.message.batch_no;
-					oldest.available_qty = r.message.qty;
-					// if required overall qty is less than available qty in oldest batch, preselect
-					if (parseInt(qty) < parseInt(r.message.qty)) {
-						oldest.selected_qty = qty;
-					}
-					show_modal(item, item_code, qty, warehouse, has_batch, has_serial_no, oldest);
-				}
+		values.batches.map((batch, i) => {
+			if(i === 0) {
+				item.batch_no = batch.batch_no;
+				item.qty = batch.selected_qty;
+				console.log("item", item, frm.doc.items);
+			} else {
+				var row = frm.add_child("items");
+				Object.assign(row, item_temp);
+				console.log("item", item_temp);
+
+				row.item_code = item_temp.item_code;
+				row.batch_no = batch.batch_no;
+				row.qty = batch.selected_qty;
+				console.log("row", row, frm.doc.items);
 			}
+			refresh_field("items");
 		});
 	}
 
-	frm.doc.items.forEach(function(d){
-		if(d.has_batch_no && !d.batch_no) {
-			console.log("item code, ");
+	let validate_serial_no_dialog = (values) => {
+		var serial_nos = values.serial_no || '';
+		if (!serial_nos || !serial_nos.replace(/\s/g, '').length) {
+			frappe.throw(__("Please enter serial numbers"));
+			return false;
 		}
-	});
+		return true;
+	}
 
-	frm.doc.items.forEach(function(d) {
-		if(d.has_batch_no && !d.batch_no) {
-			// console.log(d.item_code, get_warehouse(d));
-			show_modal_with_oldest_batch(d, d.item_code, d.qty, get_warehouse(d), 1, 0);
-			// show_modal(d, d.item_code, d.qty, get_warehouse(d), 1, 0 , oldest);
+	let set_serialized_items = () => {
+		var values = dialog.get_values();
+		if (!validate_serial_no_dialog(values)) {
+			return;
 		}
-		if(d.has_serial_no && !d.serial_no) {
-			show_modal(d, d.item_code, d.qty, get_warehouse(d), 0, 1);
+		item.serial_no = values.serial_no;
+	}
+
+	dialog.set_primary_action(__('Get Items'), function() {
+		if(has_batch) {
+			set_batched_items();
+		} else {
+			set_serialized_items();
 		}
-	});
 
-
+		refresh_field("items");
+		dialog.hide();
+	})
+	dialog.show();
 }
