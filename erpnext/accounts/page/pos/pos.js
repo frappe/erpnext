@@ -402,6 +402,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.frm = {}
 		this.frm.doc = this.doc
 		this.set_transaction_defaults("Customer");
+		this.frm.doc["allow_user_to_edit_rate"] = this.pos_profile_data["allow_user_to_edit_rate"] ? true : false,
 		this.wrapper.html(frappe.render_template("pos", this.frm.doc));
 		this.make_search();
 		this.make_customer();
@@ -1179,6 +1180,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.child_doc = this.get_child_item(this.item_code);
 		$(this.wrapper).find('.selected-item').empty();
 		if(this.child_doc.length) {
+			this.child_doc[0]["allow_user_to_edit_rate"] = this.pos_profile_data["allow_user_to_edit_rate"] ? true : false,
 			this.selected_row = $(frappe.render_template("pos_selected_item", this.child_doc[0]))
 			$(this.wrapper).find('.selected-item').html(this.selected_row)
 		}
@@ -1387,7 +1389,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				actual_qty: me.actual_qty_dict[d.item_code] || 0.0,
 				projected_qty: d.projected_qty,
 				rate: format_currency(d.rate, me.frm.doc.currency),
-				enabled: me.pos_profile_data["allow_user_to_edit_rate"] ? true : false,
 				amount: format_currency(d.amount, me.frm.doc.currency),
 				selected_class: (me.item_code == d.item_code) ? "active" : ""
 			})).appendTo($items);
