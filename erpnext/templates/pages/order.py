@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe import _
+from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import show_attachments
 
 def get_context(context):
 	context.no_cache = 1
@@ -13,10 +14,8 @@ def get_context(context):
 	if hasattr(context.doc, "set_indicator"):
 		context.doc.set_indicator()
 
-	for portal_menu_item in frappe.get_all("Portal Menu Item", filters={'reference_doctype': frappe.form_dict.doctype}, fields=['view_attachments\
-']):
-                if portal_menu_item.view_attachments == 1:
-                        context.attachments = get_attachments(frappe.form_dict.doctype, frappe.form_dict.name)
+	if show_attachments():
+                context.attachments = get_attachments(frappe.form_dict.doctype, frappe.form_dict.name)
 
 	context.parents = frappe.form_dict.parents
 	context.payment_ref = frappe.db.get_value("Payment Request",
