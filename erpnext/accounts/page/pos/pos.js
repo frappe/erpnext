@@ -1758,13 +1758,13 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 		if (this.items[0].has_batch_no && !this.item_batch_no[this.items[0].item_code]) {
 			frappe.prompt([
-             {'fieldname': 'batch', 'fieldtype': 'Select', 'label': __('Batch No'), 'reqd': 1, 'options':this.batch_no_data[this.items[0].item_code]}
-                ],
-             function(values){
-             me.item_batch_no[me.items[0].item_code] = values.batch;
-                },
-             __('Select Batch No'))
-		}
+				{'fieldname': 'batch', 'fieldtype': 'Select', 'label': __('Batch No'), 'reqd': 1, 'options':this.batch_no_data[this.items[0].item_code]}
+				],
+				function(values){
+					me.item_batch_no[me.items[0].item_code] = values.batch;
+				},
+				__('Select Batch No'))
+			}
 	},
 
 	apply_pricing_rule: function () {
