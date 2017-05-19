@@ -86,6 +86,24 @@
 			{% endif %}
 		{% endif %}
 	</div>
+	
+{% if attachments %}
+<div class="order-item-table">
+	<div class="row order-items order-item-header text-muted">
+		<div class="col-sm-12 h6 text-uppercase">
+			{{ _("Attachments") }}
+		</div>
+	</div>
+	<div class="row order-items">
+		<div class="col-sm-12">
+			{% for attachment in attachments %}
+			<p class="small">
+				<a href="{{ attachment.file_url }}" target="blank"> {{ attachment.file_name }} </a>
+			</p>
+			{% endfor %}
+		</div>
+	</div>
 </div>
-
+{% endif %}
+</div>
 {% endblock %}
