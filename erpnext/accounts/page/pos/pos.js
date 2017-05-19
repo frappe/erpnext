@@ -392,7 +392,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.make_item_list();
 		this.make_discount_field()
 	},
-	
+
 	make_control: function() {
 		this.frm = {}
 		this.frm.doc = this.doc
@@ -537,7 +537,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.toggle_totals_area();
 		});
 	},
-	
+
 	bind_numeric_keypad: function() {
 		var me = this;
 		$(this.numeric_keypad).find('.pos-operation').on('click', function(){
@@ -566,7 +566,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				me.selected_field.closest('.pos-list-row').addClass('active');
 			}
 		})
-		
+
 		$(this.numeric_keypad).find('.numeric-del').click(function(){
 			me.selected_field = $(me.wrapper).find('.selected-item').find('.' + me.numeric_id)
 			me.numeric_val = cstr(flt(me.selected_field.val())).slice(0, -1);
@@ -574,7 +574,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.selected_field.trigger("change")
 			// me.render_selected_item()
 		})
-		
+
 		$(this.numeric_keypad).find('.pos-pay').click(function(){
 			me.validate();
 			me.update_paid_amount_status(true);
@@ -982,7 +982,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					})).tooltip().appendTo($wrap);
 				}
 			});
-			
+
 			$wrap.append(`
 				<div class="image-view-item btn-more text-muted text-center">
 					<div class="image-view-body">
@@ -1064,7 +1064,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			});
 		}
 	},
-	
+
 	bind_items_event: function() {
 		var me = this;
 		$(this.wrapper).on('click', '.pos-bill-item', function() {
@@ -1101,7 +1101,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			var qty = flt($(this).parents(".pos-bill-item").find('.pos-item-qty').val()) - 1;
 			me.update_qty(item_code, qty)
 		})
-		
+
 		$(this.wrapper).on("change", ".pos-item-disc", function () {
 			var item_code = $(this).parents(".pos-selected-item-action").attr("data-item-code");
 			var discount = $(this).val();
@@ -1757,10 +1757,14 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	mandatory_batch_no: function () {
 		var me = this;
 		if (this.items[0].has_batch_no && !this.item_batch_no[this.items[0].item_code]) {
-			frappe.throw(__(repl("Error: Batch no is mandatory for item %(item)s", {
-				'item': this.items[0].item_code
-			})))
-		}
+			frappe.prompt([
+				{'fieldname': 'batch', 'fieldtype': 'Select', 'label': __('Batch No'), 'reqd': 1, 'options':this.batch_no_data[this.items[0].item_code]}
+				],
+				function(values){
+					me.item_batch_no[me.items[0].item_code] = values.batch;
+				},
+				__('Select Batch No'))
+			}
 	},
 
 	apply_pricing_rule: function () {
@@ -1782,7 +1786,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				item.pricing_rule = null;
 				me.apply_pricing_rule_on_item(item)
 			}
-			
+
 			if(item.discount_percentage > 0) {
 				me.apply_pricing_rule_on_item(item)
 			}
