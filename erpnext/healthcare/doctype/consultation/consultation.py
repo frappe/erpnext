@@ -34,7 +34,7 @@ def set_sales_invoice_fields(company, patient):
 	# patient is custom field in sales inv.
 	sales_invoice.due_date = getdate()
 	sales_invoice.is_pos = '0'
-	sales_invoice.debit_to = get_receivable_account(patient, company)
+	sales_invoice.debit_to = get_receivable_account(company)
 
 	return sales_invoice
 

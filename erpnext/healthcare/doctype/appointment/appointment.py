@@ -117,7 +117,7 @@ def create_invoice(company, patient, appointments):
 	sales_invoice.due_date = getdate()
 	validity_list = []
 	sales_invoice.is_pos = '0'
-	sales_invoice.debit_to = get_receivable_account(patient, company)
+	sales_invoice.debit_to = get_receivable_account(company)
 
 	for appointment_id in appointments:
 		appointment = frappe.get_doc("Appointment",appointment_id)
