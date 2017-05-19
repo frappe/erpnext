@@ -303,6 +303,7 @@ def make_invoice(doc_list={}, email_queue_list={}, customers_list={}):
 				si_doc = frappe.new_doc('Sales Invoice')
 				si_doc.offline_pos_name = name
 				si_doc.update(doc)
+				si_doc.customer = customers.get(doc.get('customer')) or doc.get('customer')
 				si_doc.due_date = doc.get('posting_date')
 				submit_invoice(si_doc, name, doc)
 				name_list.append(name)
@@ -313,23 +314,24 @@ def make_invoice(doc_list={}, email_queue_list={}, customers_list={}):
 	return {
 		'invoice': name_list,
 		'email_queue': email_queue,
-		'customers': customers
+		'customers': [customer for customer in customers]
 	}
 
 def validate_records(doc):
 	validate_item(doc)
 
 def make_customer_and_address(customers):
-	customer_list = []
+	customer_dict = {}
 	for name, data in customers.items():
+		cust_id = name
 		if not frappe.db.exists('Customer', name):
-			name = add_customer(name)
+			cust_id = add_customer(name)
 		data = json.loads(data)
-		make_contact(data, name)
-		make_address(data, name)
-		customer_list.append(name)
+		make_contact(data, cust_id)
+		make_address(data, cust_id)
+		customer_dict.setdefault(name, cust_id)
 	frappe.db.commit()
-	return customer_list
+	return customer_dict
 
 def add_customer(name):
 	customer_doc = frappe.new_doc('Customer')

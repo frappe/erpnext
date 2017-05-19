@@ -72,6 +72,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	onload: function () {
 		var me = this;
 		this.get_data_from_server(function () {
+			me.make_control();
 			me.create_new();
 		});
 	},
@@ -96,7 +97,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.page.add_menu_item(__("Sync Master Data"), function () {
 			me.get_data_from_server(function () {
 				me.load_data(false);
-				me.make_customer();
 				me.make_item_list();
 				me.set_missing_values();
 			})
@@ -320,7 +320,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.default_customer = r.message.default_customer || null;
 		this.print_settings = locals[":Print Settings"]["Print Settings"];
 		this.letter_head = (this.pos_profile_data.length > 0) ? frappe.boot.letter_heads[this.pos_profile_data[letter_head]] : {};
-		this.make_control()
 	},
 
 	save_previous_entry: function () {
