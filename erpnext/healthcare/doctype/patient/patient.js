@@ -2,21 +2,15 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Patient', {
-  setup: function(frm) {
-		frm.set_query('account', 'accounts', function(doc, cdt, cdn) {
-			var d  = locals[cdt][cdn];
-			return {
-				filters: {
-					'account_type': 'Receivable',
-					'company': d.company,
-				}
-			}
-		});
-	},
- 	refresh: function(frm) {
-    if(frappe.defaults.get_default("register_patient") && frm.doc.disabled == 1){
-      frm.add_custom_button(__('Register Patient'), function() {
-				btn_register_patient(frm);
+  refresh: function(frm) {
+    if(frappe.defaults.get_default("patient_master_name")!="Naming Series") {
+			frm.toggle_display("naming_series", false);
+    } else {
+			erpnext.toggle_naming_series();
+    }
+    if(frappe.defaults.get_default("collect_registration_fee") && frm.doc.disabled == 1){
+      frm.add_custom_button(__('Invoice Patient Registration'), function() {
+				btn_invoice_registration(frm);
 			 });
     }
  		if(frm.doc.patient_name && (frappe.user.has_role("IP Physician")||frappe.user.has_role("OP Physician"))){
@@ -123,10 +117,10 @@ var btn_create_consultation = function (frm) {
 	frappe.new_doc("Consultation")
 }
 
-var btn_register_patient= function(frm){
+var btn_invoice_registration= function(frm){
 	frappe.call({
-		method:"erpnext.healthcare.doctype.patient.patient.register_patient",
-		args: {patient: frm.doc.name, company: frappe.defaults.get_user_default("company")},
+		doc: frm.doc,
+    method: "invoice_patient_registration",
 		callback: function(data){
 			if(!data.exc){
 				cur_frm.reload_doc();

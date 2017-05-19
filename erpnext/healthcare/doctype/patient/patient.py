@@ -8,29 +8,34 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, flt, cstr, getdate, get_time
 import time, dateutil
-from erpnext.accounts.party import validate_party_accounts
-from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account,generate_patient_id
+from frappe.model.naming import make_autoname
+from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account,send_registration_sms
 
 class Patient(Document):
-	def validate(self):
-		validate_party_accounts(self)
-
 	def after_insert(self):
-		generate_patient_id(self)
 		if(frappe.db.get_value("Healthcare Settings", None, "manage_customer") == '1' and not self.customer):
 			create_customer(self)
-		if(frappe.db.get_value("Healthcare Settings", None, "register_patient") == '1'):
+		if(frappe.db.get_value("Healthcare Settings", None, "collect_registration_fee") == '1'):
 			frappe.db.set_value("Patient", self.name, "disabled", 1)
-			self.reload()
+		else:
+			send_registration_sms(self)
+		self.reload()
+
 	def autoname(self):
-		self.name = self.get_patient_name()
+		patient_master_name = frappe.defaults.get_global_default('patient_master_name')
+		if patient_master_name == 'Patient Name':
+			self.name = self.get_patient_name()
+		else:
+			if not self.naming_series:
+				frappe.throw(_("Series is mandatory"), frappe.MandatoryError)
+
+			self.name = make_autoname(self.naming_series+'.#####')
 
 	def on_trash(self):
 		frappe.throw("""Not permitted. Please disable Patient""")
 
 	def get_patient_name(self):
-		name = " ".join(filter(None,
-			[cstr(self.get(f)).strip() for f in ["patient_name","middle_name","last_name"]]))
+		name = self.patient_name
 		if frappe.db.get_value("Patient", name):
 			count = frappe.db.sql("""select ifnull(MAX(CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED)), 0) from tabPatient
 				 where name like %s""", "%{0} - %".format(name), as_list=1)[0][0]
@@ -49,6 +54,14 @@ class Patient(Document):
 			age_str = str(self.age) + " as on " + str(self.age_as_on)
 		return age_str
 
+	def invoice_patient_registration(self):
+		frappe.db.set_value("Patient", self.name, "disabled", 0)
+		send_registration_sms(self)
+		if(frappe.get_value("Healthcare Settings", None, "registration_fee")>0):
+			sales_invoice = make_invoice(self.name, self.company)
+			sales_invoice.save(ignore_permissions=True)
+			return {'invoice': sales_invoice.name}
+
 def create_customer(doc):
 	customer_group = frappe.get_value("Selling Settings", None, "customer_group")
 	territory = frappe.get_value("Selling Settings", None, "territory")
@@ -62,15 +75,6 @@ def create_customer(doc):
 	}).insert(ignore_permissions=True)
 	frappe.db.set_value("Patient", doc.name, "customer", customer.name)
 	frappe.msgprint(_("Customer {0} is created.").format(customer.name), alert=True)
-	#doc.reload()
-
-@frappe.whitelist()
-def register_patient(patient, company=None):
-	frappe.db.set_value("Patient", patient, "disabled", 0)
-	if(frappe.get_value("Healthcare Settings", None, "registration_fee")>0):
-		sales_invoice = make_invoice(patient, company)
-		sales_invoice.save(ignore_permissions=True)
-		return {'invoice': sales_invoice.name}
 
 def make_invoice(patient, company):
 	sales_invoice = frappe.new_doc("Sales Invoice")
@@ -78,7 +82,7 @@ def make_invoice(patient, company):
 	sales_invoice.due_date = getdate()
 	sales_invoice.company = company
 	sales_invoice.is_pos = '0'
-	sales_invoice.debit_to = get_receivable_account(patient, company)
+	sales_invoice.debit_to = get_receivable_account(company)
 
 	item_line = sales_invoice.append("items")
 	item_line.item_name = "Registeration Fee"
