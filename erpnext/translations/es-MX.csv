@@ -1,7 +1,5 @@
 DocType: Delivery Note,% Installed,% Instalado
-apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +150,Source and target warehouse must be different,El almacén de origen debe ser diferente al de destino
-DocType: Item,Standard Selling Rate,Tarifa de venta estándar
-DocType: Currency Exchange,Specify Exchange Rate to convert one currency into another,Especificar el tipo de cambio para convertir de una moneda a otra
+DocType: Sales Order,SO-,OV-
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +437,Show Salary Slip,Mostrar recibo de nómina
 DocType: Purchase Taxes and Charges Template,"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
 
@@ -44,5 +42,7 @@ La tasa impositiva que se defina aquí será la tasa de gravamen predeterminada 
  8. Línea de referencia: Si se basa en ""Línea anterior al total"" se puede seleccionar el número de la fila que será tomado como base para este cálculo (por defecto es la fila anterior).
  9. Considerar impuesto o cargo para: En esta sección se puede especificar si el impuesto / cargo es sólo para la valoración (no una parte del total) o sólo para el total (no agrega valor al elemento) o para ambos.
  10. Añadir o deducir: Si usted quiere añadir o deducir el impuesto."
+DocType: Currency Exchange,Specify Exchange Rate to convert one currency into another,Especificar el tipo de cambio para convertir de una moneda a otra
+apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +150,Source and target warehouse must be different,El almacén de origen debe ser diferente al de destino
 DocType: Stock Entry,Customer or Supplier Details,Detalle de cliente o proveedor
-DocType: Sales Order,SO-,OV-
+DocType: Item,Standard Selling Rate,Tarifa de venta estándar
