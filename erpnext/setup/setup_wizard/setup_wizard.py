@@ -199,8 +199,7 @@ def set_defaults(args):
 	hr_settings.save()
 
 	domain_settings = frappe.get_doc("Domain Settings")
-	row = domain_settings.append('active_domains', {})
-	row.domain = args.domain
+	domain_settings.append('active_domain', dict(domain=args.domain))
 	domain_settings.save()
 
 def create_feed_and_todo():

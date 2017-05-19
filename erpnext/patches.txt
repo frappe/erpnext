@@ -392,3 +392,4 @@ erpnext.patches.v8_0.update_status_as_paid_for_completed_expense_claim
 erpnext.patches.v7_2.stock_uom_in_selling
 erpnext.patches.v8_0.revert_manufacturers_table_from_item
 erpnext.patches.v8_0.disable_instructor_role
+erpnext.patches.v8_0.create_domain_docs
