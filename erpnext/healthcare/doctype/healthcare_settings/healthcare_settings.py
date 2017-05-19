@@ -11,18 +11,11 @@ from erpnext.setup.doctype.sms_settings.sms_settings import send_sms
 
 class HealthcareSettings(Document):
 	def validate(self):
-		for key in ["register_patient","manage_customer","require_test_result_approval","require_sample_collection"]:
+		for key in ["collect_registration_fee","manage_customer","patient_master_name","require_test_result_approval","require_sample_collection"]:
 			frappe.db.set_default(key, self.get(key, ""))
-		if(self.register_patient):
+		if(self.collect_registration_fee):
 			if self.registration_fee <= 0 :
 				frappe.throw("Registration fee can not be Zero")
-
-def generate_patient_id(doc):
-	if (frappe.db.get_value("Healthcare Settings", None, "patient_id")=='1'):
-		pid = make_autoname(frappe.db.get_value("Healthcare Settings", None, "id_series"), "", doc)
-		doc.patient_id = pid
-		doc.save()
-	send_registration_sms(doc)
 
 @frappe.whitelist()
 def get_sms_text(doc):
@@ -38,13 +31,17 @@ def get_sms_text(doc):
 
 def send_registration_sms(doc):
 	if (frappe.db.get_value("Healthcare Settings", None, "reg_sms")=='1'):
-		context = {"doc": doc, "alert": doc, "comments": None}
-		if doc.get("_comments"):
-			context["comments"] = json.loads(doc.get("_comments"))
-		messages = frappe.db.get_value("Healthcare Settings", None, "reg_msg")
-		messages = frappe.render_template(messages, context)
-		number = [doc.mobile]
-		send_sms(number,messages)
+		if doc.mobile:
+			context = {"doc": doc, "alert": doc, "comments": None}
+			if doc.get("_comments"):
+				context["comments"] = json.loads(doc.get("_comments"))
+			messages = frappe.db.get_value("Healthcare Settings", None, "reg_msg")
+			messages = frappe.render_template(messages, context)
+			number = [doc.mobile]
+			send_sms(number,messages)
+		else:
+			frappe.msgprint(doc.name + " Has no mobile number to send registration SMS", alert=True)
+
 
 def get_receivable_account(patient, company):
 	if(patient):
