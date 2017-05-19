@@ -165,7 +165,7 @@ def create_variant(item, args):
 
 	variant.set("attributes", variant_attributes)
 	copy_attributes_to_variant(template, variant)
-	make_variant_item_code(template.item_code, variant)
+	make_variant_item_code(template.item_code, template.item_name, variant)
 
 	return variant
 
@@ -194,7 +194,7 @@ def copy_attributes_to_variant(item, variant):
 			for d in variant.attributes:
 				variant.description += "<p>" + d.attribute + ": " + cstr(d.attribute_value) + "</p>"
 
-def make_variant_item_code(template_item_code, variant):
+def make_variant_item_code(template_item_code, template_item_name, variant):
 	"""Uses template's item code and abbreviations to make variant's item code"""
 	if variant.item_code:
 		return
@@ -220,6 +220,4 @@ def make_variant_item_code(template_item_code, variant):
 
 	if abbreviations:
 		variant.item_code = "{0}-{1}".format(template_item_code, "-".join(abbreviations))
-
-	if variant.item_code:
-		variant.item_name = variant.item_code
+		variant.item_name = "{0}-{1}".format(template_item_name, "-".join(abbreviations))
