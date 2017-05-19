@@ -9,12 +9,12 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Sales Invoice",
-					"description": _("Bills raised to Customers.")
+					"description": _("Invoices raised to Customers.")
 				},
 				{
 					"type": "doctype",
 					"name": "Purchase Invoice",
-					"description": _("Bills raised by Suppliers.")
+					"description": _("Invoices raised by Suppliers.")
 				},
 				{
 					"type": "doctype",
