@@ -72,11 +72,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Physician",
 					"label": "Physician",
-				},
-				{
-					"type": "doctype",
-					"name": "Referring Physician",
-					"description": _("Referring Physician"),
 				}
 			]
 		},
