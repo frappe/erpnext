@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import re
 from frappe import _
 from frappe.utils import (flt, getdate, get_first_day, get_last_day, date_diff,
 	add_months, add_days, formatdate, cint)
@@ -277,6 +278,9 @@ def sort_root_accounts(roots):
 	"""Sort root types as Asset, Liability, Equity, Income, Expense"""
 
 	def compare_roots(a, b):
+		if re.split('\W+', a.value)[0].isdigit():
+			# if chart of accounts is numbered, then sort by number
+			return cmp(a.value, b.value)
 		if a.report_type != b.report_type and a.report_type == "Balance Sheet":
 			return -1
 		if a.root_type != b.root_type and a.root_type == "Asset":
