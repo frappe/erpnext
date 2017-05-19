@@ -20,6 +20,13 @@ frappe.ui.form.on('Physician', {
         if (validate_schedule(schedules, schedules[j]) == false) return false;
       }
     };
+  },
+  type: function(frm){
+    if(frm.doc.type == "Physician"){
+      frm.set_df_property("user_id", "reqd", 1);
+    }else{
+      frm.set_df_property("user_id", "reqd", 0);
+    }
   }
 });
 
