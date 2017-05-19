@@ -138,8 +138,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						source_doctype: "Quotation",
 						target: me.frm,
 						setters: {
-							customer: me.frm.doc.customer || undefined,
-							order_type: me.frm.doc.order_type,
+							customer: me.frm.doc.customer || undefined
 						},
 						get_query_filters: {
 							company: me.frm.doc.company,
