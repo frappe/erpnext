@@ -23,7 +23,7 @@ def execute():
 		sales_invoice = item.get("parent", None)
 		serial_nos = item.get("serial_no", "")
 
-		if not sales_invoice and not serial_no:
+		if not sales_invoice or not serial_nos:
 			continue
 
 		serial_nos = ["'%s'"%no for no in serial_nos.split("\n")]

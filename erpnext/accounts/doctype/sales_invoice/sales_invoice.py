@@ -83,7 +83,8 @@ class SalesInvoice(SellingController):
 		self.validate_c_form()
 		self.validate_time_sheets_are_submitted()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
-		self.validate_serial_numbers()
+		if not self.is_return:
+			self.validate_serial_numbers()
 		self.update_packing_list()
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
@@ -121,12 +122,12 @@ class SalesInvoice(SellingController):
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 			self.check_credit_limit()
+			self.update_serial_no()
 
 		if not cint(self.is_pos) == 1 and not self.is_return:
 			self.update_against_document_in_jv()
 
 		self.update_time_sheet(self.name)
-		self.update_serial_no()
 
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:
@@ -152,6 +153,7 @@ class SalesInvoice(SellingController):
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
+			self.update_serial_no(in_cancel=True)
 
 		self.validate_c_form_on_cancel()
 
@@ -162,7 +164,6 @@ class SalesInvoice(SellingController):
 
 		self.make_gl_entries_on_cancel()
 		frappe.db.set(self, 'status', 'Cancelled')
-		self.update_serial_no(in_cancel=True)
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
@@ -809,7 +810,7 @@ class SalesInvoice(SellingController):
 		"""
 
 		for item in self.items:
-			if not item.delivery_note and not item.dn_detail:
+			if not item.delivery_note or not item.dn_detail:
 				continue
 
 			serial_nos = frappe.db.get_value("Delivery Note Item", item.dn_detail, "serial_no") or ""
