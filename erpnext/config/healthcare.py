@@ -7,7 +7,7 @@ def get_data():
 
 	return [
 		{
-			"label": _("Documents"),
+			"label": _("Consultation"),
 			"icon": "icon-star",
 			"items": [
 				{
@@ -17,14 +17,35 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Consultation",
+					"label": _("Consultation"),
+				},
+				{
+					"type": "doctype",
 					"name": "Vital Signs",
 					"label": _("Vital Signs"),
 					"description": _("Record Patient Vitals"),
 				},
 				{
+					"type": "page",
+					"name": "medical_record",
+					"label": _("Patient Medical Record"),
+				},
+				{
+					"type": "page",
+					"name": "appointment-analytic",
+					"label": _("Appointment Analytics"),
+				}
+			]
+		},
+		{
+			"label": _("Laboratory"),
+			"icon": "icon-list",
+			"items": [
+				{
 					"type": "doctype",
-					"name": "Consultation",
-					"label": _("Consultation"),
+					"name": "Lab Test",
+					"description": _("Results"),
 				},
 				{
 					"type": "doctype",
@@ -33,35 +54,9 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Lab Test",
-					"description": _("Results"),
-				},
-			]
-		},
-		{
-			"label": _("Tools"),
-			"icon": "icon-list",
-			"items": [
-				{
-					"type": "page",
-					"name": "medical_record",
-					"label": _("Patient Medical Record"),
-				},
-				{
-					"type": "page",
-					"name": "appointment-desk",
-					"label": _("Appointment Desk"),
-				},
-				{
-					"type": "page",
-					"name": "service-desk",
-					"label": _("Service Desk"),
-				},
-				{
-					"type": "doctype",
 					"name": "Invoice Test Report",
 					"description": _("Invoiced Results."),
-				},
+				}
 			]
 		},
 		{
@@ -82,37 +77,18 @@ def get_data():
 					"type": "doctype",
 					"name": "Referring Physician",
 					"description": _("Referring Physician"),
-				},
-				{
-					"type": "doctype",
-					"name": "Service Unit",
-					"label": _("Service Unit"),
-
-				},
+				}
 			]
 		},
 		{
-			"label": _("Reports"),
-			"icon": "icon-list",
-			"items": [
-				{
-					"type": "page",
-					"name": "appointment-analytic",
-					"label": _("Appointment Analytics"),
-				},
-				{
-					"type": "report",
-					"name": "Lab Test Report",
-					"is_query_report": True,
-					"doctype": "Lab Test"
-				},
-
-			]
-		},
-		{
-			"label": _("OP Setup"),
+			"label": _("Setup"),
 			"icon": "icon-cog",
 			"items": [
+				{
+					"type": "doctype",
+					"name": "Healthcare Settings",
+					"label": _("Healthcare Settings"),
+				},
 				{
 					"type": "doctype",
 					"name": "Medical Department",
@@ -120,8 +96,19 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Appointment Type",
+					"description": _("Appointment Type Master"),
+				},
+				{
+					"type": "doctype",
 					"name": "Service Type",
 					"label": _("Service Type"),
+				},
+				{
+					"type": "doctype",
+					"name": "Service Unit",
+					"label": _("Service Unit"),
+
 				},
 				{
 					"type": "doctype",
@@ -143,17 +130,6 @@ def get_data():
 					"name": "Diagnosis",
 					"description": _("Diagnosis")
 				},
-				{
-					"type": "doctype",
-					"name": "Appointment Type",
-					"description": _("Appointment Type Master"),
-				},
-			]
-		},
-		{
-			"label": _("Laboratory Setup"),
-			"icon": "icon-cog",
-			"items": [
 				{
 					"type": "doctype",
 					"name": "Lab Test Samples",
@@ -180,17 +156,5 @@ def get_data():
 					"description": _("Lab Test Configurations.")
 				}
 			]
-		},
-		{
-			"label": _("Settings"),
-			"icon": "icon-star",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Healthcare Settings",
-					"label": _("Healthcare Settings"),
-				}
-			]
-		},
-
+		}
 	]
