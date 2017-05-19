@@ -168,9 +168,6 @@ class SalarySlip(TransactionBase):
 			"""% ('%s', '%s', '%s','%s','%s', cond),(self.employee, self.start_date, joining_date, self.end_date, relieving_date))
 
 		if st_name:
-			if len(st_name) > 1:
-				frappe.msgprint(_("Multiple active Salary Structures found for employee {0} for the given dates")
-					.format(self.employee), title=_('Warning'))
 			return st_name and st_name[0][0] or ''
 		else:
 			self.salary_structure = None
@@ -376,12 +373,14 @@ class SalarySlip(TransactionBase):
 		else:
 			self.set_status()
 			self.update_status(self.name)
+			self.update_payroll_status()
 			if(frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee")):
 				self.email_salary_slip()
 
 	def on_cancel(self):
 		self.set_status()
 		self.update_status()
+		self.update_payroll_status()
 
 	def email_salary_slip(self):
 		receiver = frappe.db.get_value("Employee", self.employee, "prefered_email")
@@ -416,11 +415,8 @@ class SalarySlip(TransactionBase):
 		elif self.docstatus == 2:
 			status = "Cancelled"
 		return status
-
-def unlink_ref_doc_from_salary_slip(ref_no):
-	linked_ss = frappe.db.sql_list("""select name from `tabSalary Slip`
-	where journal_entry=%s and docstatus < 2""", (ref_no))
-	if linked_ss:
-		for ss in linked_ss:
-			ss_doc = frappe.get_doc("Salary Slip", ss)
-			frappe.db.set_value("Salary Slip", ss_doc.name, "journal_entry", "")
+	
+	def update_payroll_status(self):
+		salary_slip = frappe.get_all("Payroll Salary Slip", filters = {"parent": self.name})
+		if salary_slip:
+			frappe.db.set_value("Payroll Salary Slip", self.name, "salary_slip_status", self.status)

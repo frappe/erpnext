@@ -133,13 +133,12 @@ You can also create salary slip for multiple employees using Process Payroll:
 
 In Process Payroll,
 
-  1. Select the Company for which you want to create the Salary Slips.
+  1. Select the Company and other filters for which you want to create the Salary Slips.
   2. Check "Salary Slip based on Timesheet" if you want to process timesheet based Salary Slips.
-  3. Select the From Date and To Date or Fiscal year and month for which you want to create the Salary Slips.
-  3. Select the Payment Account.
-  3. Click on “Create Salary Slips”. This will create Salary Slip records for each active Employee for the time period selected. If the Salary Slips are created, the system will not create any more Salary Slips. All updates will be shown in the “Activity Log” section.
-  4. Once all Salary Slips are created, you can check if they are created correctly or edit it if you want to deduct Leave Without Pay (LWP).
-  5. After checking, you can “Submit” them all together by clicking on “Submit Salary Slips”. 1. If you want them to be automatically emailed to the Employee, make sure to check the “Send Email” box.
+  3. Select the From Date and To Date for which you want to create the Salary Slips.
+  4. Click on “Create Salary Slips” button given on top right side. This will create Salary Slip records for each active Employee for the time period selected. If the Salary Slips are created, the system will not create any more Salary Slips. All updates will be shown in the “Salary Slips” section.
+  5. Once all Salary Slips are created, you can check if they are created correctly or edit it if you want to deduct Leave Without Pay (LWP).
+  6. After checking, you can submit them all together by clicking on “Submit Salary Slips”. If you want them to be automatically emailed to the Employee, make sure to check the “Send Email” box.
 
 ### Booking Salaries in Accounts
 
@@ -158,9 +157,8 @@ component of all Employees to the default account set at Salary Component level
 for each component.
 
 To generate your salary payment voucher from Process Payroll, click on
-“Make Bank Entry”. It will ask to enter the Bank Transaction Reference Number and date.
-Click on "Make" and a new Journal Entry with the total salary components will be
-created.
+“Make Payment Entry”. In the same way you can create Accrual Entry by clicking
+on "Make Accrual Entry".
 
 #### Figure 3.1: Make Bank Entry
 

@@ -10,6 +10,7 @@ from erpnext.accounts.utils import get_balance_on, get_account_currency
 from erpnext.accounts.party import get_party_account
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.hr.doctype.employee_loan.employee_loan import update_disbursement_status
+from erpnext.hr.doctype.payroll.payroll import update_payment_status
 
 class JournalEntry(AccountsController):
 	def __init__(self, arg1, arg2=None):
@@ -47,6 +48,7 @@ class JournalEntry(AccountsController):
 		self.update_advance_paid()
 		self.update_expense_claim()
 		self.update_employee_loan()
+		self.update_payroll()
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
@@ -64,13 +66,12 @@ class JournalEntry(AccountsController):
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
-		from erpnext.hr.doctype.salary_slip.salary_slip import unlink_ref_doc_from_salary_slip
 		unlink_ref_doc_from_payment_entries(self)
-		unlink_ref_doc_from_salary_slip(self.name)
 		self.make_gl_entries(1)
 		self.update_advance_paid()
 		self.update_expense_claim()
 		self.update_employee_loan()
+		self.update_payroll()
 		self.unlink_advance_entry_reference()
 		self.unlink_asset_reference()
 
@@ -523,6 +524,13 @@ class JournalEntry(AccountsController):
 			if d.reference_type=="Employee Loan" and flt(d.debit) > 0:
 				doc = frappe.get_doc("Employee Loan", d.reference_name)
 				update_disbursement_status(doc)
+
+	def update_payroll(self):
+		for d in self.accounts:
+			if d.reference_type=="Payroll" and flt(d.debit) > 0:
+				print "update payroll"
+				doc = frappe.get_doc("Payroll", d.reference_name)
+				update_payment_status(doc)		
 
 	def validate_expense_claim(self):
 		for d in self.accounts:
