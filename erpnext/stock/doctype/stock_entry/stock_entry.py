@@ -375,10 +375,18 @@ class StockEntry(StockController):
 	def validate_finished_goods(self):
 		"""validation: finished good quantity should be same as manufacturing quantity"""
 		items_with_target_warehouse = []
+		op_allowance = flt(frappe.db.get_single_value("Manufacturing Settings", "over_production_allowance_percentage"))/100
+
 		for d in self.get('items'):
-			if d.bom_no and flt(d.transfer_qty) != flt(self.fg_completed_qty) and (d.t_warehouse != getattr(self, "pro_doc", frappe._dict()).scrap_warehouse):
-				frappe.throw(_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}"). \
-					format(d.idx, d.transfer_qty, self.fg_completed_qty))
+			total_qty_allowed = flt(d.transfer_qty) + (op_allowance * flt(d.transfer_qty))
+			if d.bom_no and (d.t_warehouse != getattr(self, "pro_doc", frappe._dict()).scrap_warehouse):
+				if (op_allowance == 0 and flt(d.transfer_qty) != flt(self.fg_completed_qty)):
+					frappe.throw(_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}"). \
+						format(d.idx, d.transfer_qty, self.fg_completed_qty))
+				elif (op_allowance != 0 and flt(self.fg_completed_qty) > total_qty_allowed):
+					frappe.throw(_("Quantity in row {0} ({1}) must be within the allowed manufactured quantity {2}"). \
+						format(d.idx, d.transfer_qty, total_qty_allowed))
+
 
 			if self.production_order and self.purpose == "Manufacture" and d.t_warehouse:
 				items_with_target_warehouse.append(d.item_code)
