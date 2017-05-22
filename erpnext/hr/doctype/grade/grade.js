@@ -3,8 +3,32 @@
 
 frappe.ui.form.on('Grade', {
   refresh: function(frm) {
-
-  }
+		frm.trigger("toggle_fields");
+		frm.fields_dict['earnings'].grid.set_column_disp("default_amount", false);
+		frm.fields_dict['deductions'].grid.set_column_disp("default_amount", false);
+  },
+  	onload: function(frm) {
+		
+		frm.set_query("salary_component", "earnings", function() {
+			return {
+				filters: {
+					type: "earning"
+				}
+			}
+		});
+		frm.set_query("salary_component", "deductions", function() {
+			return {
+				filters: {
+					type: "deduction"
+				}
+			}
+		});
+	},
+	toggle_fields: function(frm) {
+		frm.toggle_display(['salary_component', 'hour_rate'], frm.doc.salary_slip_based_on_timesheet);
+		frm.toggle_reqd(['salary_component', 'hour_rate'], frm.doc.salary_slip_based_on_timesheet);
+		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet);
+	}
 });
 $('[data-fieldname="main_earning"]').on('keypress', numbersonly);
 $('[data-fieldname="accommodation"]').on('keypress', numbersonly);
@@ -34,6 +58,17 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 };
 
 
-cur_frm.cscript.employee = function(doc, dt, dn) {
+cur_frm.cscript.custom_level_value = function(doc, dt, dn) {
+	if (doc.base >0)
+	{
+		cur_frm.set_value("level_percent",doc.level_value*100/doc.base)
+	}
+
+};
+cur_frm.cscript.custom_level_percent = function(doc, dt, dn) {
+	if (doc.base >0)
+	{
+		cur_frm.set_value("level_value",doc.level_percent*doc.base/100)
+	}
 
 };

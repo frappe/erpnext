@@ -104,6 +104,8 @@ frappe.ui.form.on("Leave Application", {
 					callback: function(r) {
 						if (r && r.message) {
 							frm.set_value('total_leave_days', r.message);
+							frm.set_value('remaining_leave_days', parseFloat(frm.doc.leave_balance)-parseFloat(r.message));
+							
 							frm.trigger("get_leave_balance");
 						}
 					}

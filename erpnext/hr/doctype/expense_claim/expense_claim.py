@@ -23,8 +23,16 @@ class ExpenseClaim(Document):
 		self.set_expense_account()
 		if self.task and not self.project:
 			self.project = frappe.db.get_value("Task", self.task, "project")
+		if self.reference_type and self.referance_name and self.reference_type == "Leave Application":
+			doc =frappe.get_doc(self.reference_type,self.referance_name)
+			doc.expense_claim = self.name
+			doc.save(ignore_permissions=True)
 
 	def on_submit(self):
+		if self.reference_type and self.referance_name and self.reference_type == "Leave Application":
+			doc =frappe.get_doc(self.reference_type,self.referance_name)
+			doc.expense_claim = self.name
+			doc.save(ignore_permissions=True)
 		if self.approval_status=="Draft":
 			frappe.throw(_("""Approval Status must be 'Approved' or 'Rejected'"""))
 		self.update_task_and_project()

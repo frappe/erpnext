@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
@@ -10,6 +11,7 @@ from erpnext.hr.utils import set_employee_name
 from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.hr.doctype.employee_leave_approver.employee_leave_approver import get_approver_list
+from erpnext.setup.doctype.sms_settings.sms_settings import send_sms
 
 
 class LeaveDayBlockedError(frappe.ValidationError): pass
@@ -24,6 +26,7 @@ class LeaveApplication(Document):
 		return _("{0}: From {0} of type {1}").format(self.status, self.employee_name, self.leave_type)
 
 	def validate(self):
+		user_roles = frappe.get_roles()
 		if not getattr(self, "__islocal", None) and frappe.db.exists(self.doctype, self.name):
 			self.previous_doc = frappe.db.get_value(self.doctype, self.name, "*", as_dict=True)
 		else:
@@ -38,31 +41,50 @@ class LeaveApplication(Document):
 		self.show_block_day_warning()
 		self.validate_block_days()
 		self.validate_salary_processed_days()
-		self.validate_leave_approver()
+		if not "HR Manager" in user_roles:
+			self.validate_leave_approver()
 		self.validate_attendance()
+		self.validate_back_days()
+		if self.leave_approver != frappe.session.user and self.docstatus ==1 and not "HR Manager" in user_roles:
+			frappe.throw(_("You are not The Direct Manger"))
+		if self.leave_approver != frappe.session.user and self.docstatus ==0 and not "HR Manager" in user_roles and self.workflow_state != "Pending":
+			frappe.throw(_("You are not The Direct Manger"))
 
+	def validate_back_days(self):
+		from frappe.utils import getdate, nowdate
+		user = frappe.session.user
+		if getdate(self.from_date) < getdate(nowdate()) and ("HR User" not in frappe.get_roles(user)):
+			if user != self.leave_approver:
+				frappe.throw(_("Application can not be marked for past of the day"))
+			
 	def on_update(self):
 		if (not self.previous_doc and self.leave_approver) or (self.previous_doc and \
 				self.status == "Open" and self.previous_doc.leave_approver != self.leave_approver):
 			# notify leave approver about creation
-			self.notify_leave_approver()
-		elif self.previous_doc and \
-				self.previous_doc.status == "Open" and self.status == "Rejected":
+			if self.half_day != 1 :
+				self.notify_leave_approver()
+		elif self.previous_doc and self.workflow_state and self.previous_doc.status != self.workflow_state and self.status == "Rejected":
 			# notify employee about rejection
+			if self.half_day != 1 :
+				self.notify_employee(self.status)
+		
+		
+	
+	def on_submit(self):
+		if self.half_day != 1 :
+			self.notify_exec_manager()
+			self.notify_employee(self.status)
+	
+	def on_update_after_submit(self):
+		if self.half_day != 1 :
+			self.notify_exec_manager()
 			self.notify_employee(self.status)
 
-	def on_submit(self):
-		if self.status != "Approved":
-			frappe.throw(_("Only Leave Applications with status 'Approved' can be submitted"))
-
-		self.validate_back_dated_application()
-
-		# notify leave applier about approval
-		self.notify_employee(self.status)
 
 	def on_cancel(self):
 		# notify leave applier about cancellation
-		self.notify_employee("cancelled")
+		if self.half_day != 1 :
+			self.notify_employee("cancelled")
 
 	def validate_dates(self):
 		if self.from_date and self.to_date and (getdate(self.to_date) < getdate(self.from_date)):
@@ -132,8 +154,10 @@ class LeaveApplication(Document):
 
 	def validate_balance_leaves(self):
 		if self.from_date and self.to_date:
-			self.total_leave_days = get_number_of_leave_days(self.employee, self.leave_type,
-				self.from_date, self.to_date, self.half_day)
+			if self.half_day != 1:
+				self.total_leave_days = get_number_of_leave_days(self.employee, self.leave_type,
+					self.from_date, self.to_date, self.half_day)
+				self.remaining_leave_days = flt(self.leave_balance)-flt(self.total_leave_days)
 
 			if self.total_leave_days == 0:
 				frappe.throw(_("The day(s) on which you are applying for leave are holidays. You need not apply for leave."))
@@ -234,15 +258,37 @@ class LeaveApplication(Document):
 			else:
 				name = self.name
 
-			return (_("Leave Application") + ": %s - %s") % (name, _(status))
-
-		self.notify({
-			# for post in messages
-			"message": _get_message(url=True),
-			"message_to": employee.user_id,
-			"subject": _get_message(),
-		})
-
+			message = "Leave Application: {name}".format(name=name)+"<br>"
+			if self.workflow_state:
+				message += "Workflow State: {workflow_state}".format(workflow_state=self.workflow_state)+"<br>"
+			message += "Leave Type: {leave_type}".format(leave_type=self.leave_type)+"<br>"
+			message += "From Date: {from_date}".format(from_date=self.from_date)+"<br>"
+			message += "To Date: {to_date}".format(to_date=self.to_date)+"<br>"
+			message += "Status: {status}".format(status=_(status))
+			return message
+		
+		def _get_sms(url=False):
+			name = self.name
+			employee_name = cstr(employee.employee_name)
+			message = (_("%s") % (name))
+			if self.workflow_state:
+				message += "{workflow_state}".format(workflow_state=self.workflow_state)+"\n"
+			message += (_("%s") % (employee_name))+"\n"
+			message += (_("%s") % (self.leave_type))+"\n"
+			message += (_("%s") % (self.from_date))+"\n"
+			return message
+		
+		try:	
+			self.notify({
+				# for post in messages
+				"message": _get_message(url=True),
+				"message_to": employee.prefered_email,
+				"subject": (_("Leave Application") + ": %s - %s") % (self.name, _(status))
+			})
+		except:
+			frappe.throw("could not send")
+		send_sms([employee.cell_number], cstr(_get_sms(url=False)))
+		
 	def notify_leave_approver(self):
 		employee = frappe.get_doc("Employee", self.employee)
 
@@ -252,17 +298,92 @@ class LeaveApplication(Document):
 			if url:
 				name = get_link_to_form(self.doctype, self.name)
 				employee_name = get_link_to_form("Employee", self.employee, label=employee_name)
-
-			return (_("New Leave Application") + ": %s - " + _("Employee") + ": %s") % (name, employee_name)
-
+			message = (_("Leave Application") + ": %s") % (name)+"<br>"
+			if self.workflow_state:
+				message += "Workflow State: {workflow_state}".format(workflow_state=self.workflow_state)+"<br>"
+			message += (_("Employee") + ": %s") % (employee_name)+"<br>"
+			message += (_("Leave Type") + ": %s") % (self.leave_type)+"<br>"
+			message += (_("From Date") + ": %s") % (self.from_date)+"<br>"
+			message += (_("To Date") + ": %s") % (self.to_date)
+			return message
+		def _get_sms(url=False):
+			name = self.name
+			employee_name = cstr(employee.employee_name)
+			message = (_("%s") % (name))
+			if self.workflow_state:
+				message += "{workflow_state}".format(workflow_state=self.workflow_state)+"\n"
+			message += (_("%s") % (employee_name))+"\n"
+			message += (_("%s") % (self.leave_type))+"\n"
+			message += (_("%s") % (self.from_date))+"\n"
+			return message
+		
 		self.notify({
 			# for post in messages
 			"message": _get_message(url=True),
 			"message_to": self.leave_approver,
 
 			# for email
-			"subject": _get_message()
+			"subject": (_("New Leave Application") + ": %s - " + _("Employee") + ": %s") % (self.name, cstr(employee.employee_name))
 		})
+		try :
+			la = frappe.get_doc("Employee", {"user_id":self.leave_approver})
+			send_sms([la.cell_number], cstr(_get_sms(url=False)))
+		except:
+			pass
+		
+	def notify_exec_manager(self):
+		employee = frappe.get_doc("Employee", self.employee)
+		super_emp_list = []
+		supers =frappe.get_all('UserRole', fields = ["parent"], filters={'role' : 'Executive Manager'})
+		
+		for s in supers:
+			super_emp_list.append(s.parent)
+		try:super_emp_list.remove('Administrator')
+		except : pass
+		
+		def _get_message(url=False):
+			name = self.name
+			employee_name = cstr(employee.employee_name)
+			if url:
+				name = get_link_to_form(self.doctype, self.name)
+				employee_name = get_link_to_form("Employee", self.employee, label=employee_name)
+			message = (_("Leave Application") + ": %s") % (name)+"<br>"
+			if self.workflow_state:
+				message += "Workflow State: {workflow_state}".format(workflow_state=self.workflow_state)+"<br>"
+			message += (_("Employee") + ": %s") % (employee_name)+"<br>"
+			message += (_("Leave Type") + ": %s") % (self.leave_type)+"<br>"
+			message += (_("From Date") + ": %s") % (self.from_date)+"<br>"
+			message += (_("To Date") + ": %s") % (self.to_date)
+			return message
+		def _get_sms(url=False):
+			name = self.name
+			employee_name = cstr(employee.employee_name)
+			message = (_("%s") % (name))
+			if self.workflow_state:
+				message += "{workflow_state}".format(workflow_state=self.workflow_state)+"\n"
+			message += (_("%s") % (employee_name))+"\n"
+			message += (_("%s") % (self.leave_type))+"\n"
+			message += (_("%s") % (self.from_date))+"\n"
+			return message
+		
+		cells = []
+		emp_result =frappe.get_all('Employee', fields = ["cell_number"], filters = [["user_id", "in", super_emp_list]])
+		self.description = str(super_emp_list)
+		for emp in emp_result:
+			cells.append(emp.cell_number)
+			 
+		if emp_result:
+			send_sms(cells, cstr(_get_sms(url=False)))
+		 
+		self.description = str(employee.employee_name)
+		for s in super_emp_list:
+			self.notify({
+				# for post in messages
+				"message": _get_message(url=True),
+				"message_to": s,
+				# for email
+				"subject": (_("New Leave Application") + ": %s - " + _("Employee") + ": %s") % (self.name, cstr(employee.employee_name))
+			})
 
 	def notify(self, args):
 		args = frappe._dict(args)
@@ -283,14 +404,14 @@ def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 		and user.name like %s
 		and approver.leave_approver=user.name""", (filters.get("employee"), "%" + txt + "%"))
 
-	if not approvers_list:
-		approvers_list = get_approver_list(employee_user)
+	#~ if not approvers_list:
+		#~ approvers_list = get_approver_list(employee_user)
 	return approvers_list
 
 @frappe.whitelist()
 def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day=None):
 	if half_day==1:
-		return 0.5
+		return 
 	number_of_days = date_diff(to_date, from_date) + 1
 	if not frappe.db.get_value("Leave Type", leave_type, "include_holiday"):
 		number_of_days = flt(number_of_days) - flt(get_holidays(employee, from_date, to_date))

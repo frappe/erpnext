@@ -28,7 +28,45 @@ class SalaryStructure(Document):
 	def validate_amount(self):
 		if flt(self.net_pay) < 0 and self.salary_slip_based_on_timesheet:
 			frappe.throw(_("Net pay cannot be negative"))
-			
+	
+	def get_grade_info(self,employee,cdn):
+		import copy
+		self.deductions = []
+		self.earnings = []
+		if employee:
+			emp_doc = frappe.get_doc("Employee",employee)
+			grade_doc = frappe.get_doc("Grade",emp_doc.grade)
+			#~ self.earnings = grade_doc.earnings
+			self.earnings = []
+			for e in  grade_doc.earnings:
+				child = self.append('earnings', {})
+				child.salary_component= e.salary_component
+				child.abbr= e.abbr
+				child.condition= e.condition
+				child.amount_based_on_formula= e.amount_based_on_formula
+				child.formula= e.formula
+				child.amount= e.amount
+				child.depends_on_lwp= e.depends_on_lwp
+				child.default_amount= e.default_amount
+				
+			#~ self.deductions = grade_doc.deductions	
+			self.deductions = []
+			for e in  grade_doc.deductions:
+				child = self.append('deductions', {})
+				child.salary_component= e.salary_component
+				child.abbr= e.abbr
+				child.condition= e.condition
+				child.amount_based_on_formula= e.amount_based_on_formula
+				child.formula= e.formula
+				child.amount= e.amount
+				child.depends_on_lwp= e.depends_on_lwp
+				child.default_amount= e.default_amount
+							
+			for value in self.get("employees"):
+				if value.name == cdn : 
+					value.base = grade_doc.base + (int(emp_doc.level)-1)*grade_doc.level_value
+					
+	
 	def validate_joining_date(self):
 		for e in self.get('employees'):
 			joining_date = getdate(frappe.db.get_value("Employee", e.employee, "date_of_joining"))

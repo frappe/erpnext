@@ -37,15 +37,31 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Level",
-					"description":_("Level"),
+					"name": "May Concern Letter",
+					"description":_("May Concern Letter"),
 					"hide_count": True
 				},
 				{
 					"type": "doctype",
-					"name": "May Concern Letter",
-					"description":_("May Concern Letter"),
-					"hide_count": True
+					"name": "Job Assignment",
+					"description":_("Job Assignment"),
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Loan",
+					"description":_("Employee Loan"),
+				},
+				{
+					"type": "doctype",
+					"name": "Financial Custody",
+					"description":_("Financial Custody"),
+				},
+				{
+					"type": "report",
+					"name": "Financial Custody Report",
+					"description":_("Financial Custody"),
+					"is_query_report": False,
+					"doctype": "Financial Custody"
 				},
 			]
 		},
@@ -213,6 +229,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Designation",
 					"description": _("Employee designation (e.g. CEO, Director etc.).")
+				},
+				{
+					"type": "doctype",
+					"name": "Loan Type",
+					"description": _("Loan Type")
 				},
 				{
 					"type": "doctype",

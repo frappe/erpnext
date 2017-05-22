@@ -32,7 +32,7 @@ def make_depreciation_entry(asset_name, date=None):
 	fixed_asset_account, accumulated_depreciation_account, depreciation_expense_account = \
 		get_depreciation_accounts(asset)
 
-	depreciation_cost_center = frappe.db.get_value("Company", asset.company, "depreciation_cost_center")
+	#~ depreciation_cost_center = frappe.db.get_value("Company", asset.company, "depreciation_cost_center")
 
 	for d in asset.get("schedules"):
 		if not d.journal_entry and getdate(d.schedule_date) <= getdate(date):
@@ -46,7 +46,9 @@ def make_depreciation_entry(asset_name, date=None):
 				"account": accumulated_depreciation_account,
 				"credit_in_account_currency": d.depreciation_amount,
 				"reference_type": "Asset",
-				"reference_name": asset.name
+				"reference_name": asset.name,
+				"cost_center": asset.depreciation_cost_center
+				
 			})
 
 			je.append("accounts", {
@@ -54,11 +56,11 @@ def make_depreciation_entry(asset_name, date=None):
 				"debit_in_account_currency": d.depreciation_amount,
 				"reference_type": "Asset",
 				"reference_name": asset.name,
-				"cost_center": depreciation_cost_center
+				"cost_center": asset.depreciation_cost_center
 			})
 
 			je.flags.ignore_permissions = True
-			je.submit()
+			je.save()
 
 			d.db_set("journal_entry", je.name)
 			asset.value_after_depreciation -= d.depreciation_amount
@@ -119,7 +121,7 @@ def scrap_asset(asset_name):
 		je.append("accounts", entry)
 
 	je.flags.ignore_permissions = True
-	je.submit()
+	je.save()
 	
 	frappe.db.set_value("Asset", asset_name, "disposal_date", today())
 	frappe.db.set_value("Asset", asset_name, "journal_entry_for_scrap", je.name)
@@ -144,6 +146,7 @@ def restore_asset(asset_name):
 def get_gl_entries_on_asset_disposal(asset, selling_amount=0):
 	fixed_asset_account, accumulated_depr_account, depr_expense_account = get_depreciation_accounts(asset)
 	disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(asset.company)
+	depreciation_cost_center=asset.depreciation_cost_center
 	accumulated_depr_amount = flt(asset.gross_purchase_amount) - flt(asset.value_after_depreciation)
 
 	gl_entries = [

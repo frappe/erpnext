@@ -1,5 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
+cur_frm.add_fetch('grade', 'level_value', 'level_value');
 
 frappe.provide("erpnext.hr");
 erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
@@ -59,6 +60,22 @@ frappe.ui.form.on('Employee',{
 	},
 	user_id:function(frm){
 		frm.events.update_contact(frm)
+	},
+	employment_type:function(frm){
+		if(frm.doc.employment_type =="Full-time")
+		{
+			frm.set_value("naming_series","EMP/1");
+		}
+		else
+		if(frm.doc.employment_type =="Consalteant")
+		{
+			frm.set_value("naming_series","EMP/2");
+		}
+		else
+		if(frm.doc.employment_type =="Contractor")
+		{
+			frm.set_value("naming_series","EMP/3");
+		}
 	},
 	update_contact:function(frm){
 		var prefered_email_fieldname = frappe.model.scrub(frm.doc.prefered_contact_email) || 'user_id';

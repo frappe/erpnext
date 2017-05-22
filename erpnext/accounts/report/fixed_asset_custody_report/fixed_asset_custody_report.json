@@ -8,12 +8,12 @@
  "idx": 0, 
  "is_standard": "Yes", 
  "json": "{\"add_total_row\": 0, \"sort_by\": \"Fixed Asset Custody.modified\", \"sort_order\": \"desc\", \"sort_by_next\": null, \"filters\": [], \"sort_order_next\": \"desc\", \"columns\": [[\"asset_category\", \"Fixed Asset Custody\"], [\"fixed_asset\", \"Fixed Asset Custody\"], [\"employee\", \"Fixed Asset Custody\"], [\"employee_name\", \"Fixed Asset Custody\"], [\"employee_department\", \"Fixed Asset Custody\"], [\"employee_designation\", \"Fixed Asset Custody\"]]}", 
- "modified": "2017-04-14 13:40:39.308943", 
+ "modified": "2017-04-25 20:09:26.872071", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Fixed Asset Custody Report", 
  "owner": "Administrator", 
  "ref_doctype": "Fixed Asset Custody", 
  "report_name": "Fixed Asset Custody Report", 
- "report_type": "Script Report"
+ "report_type": "Report Builder"
 }

@@ -1,5 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
+cur_frm.add_fetch('leave_type', 'max_days_allowed', 'no_of_days');
 
 cur_frm.cscript.onload = function(doc, dt, dn){
 	if(!doc.posting_date)

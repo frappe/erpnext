@@ -7,4 +7,5 @@ import frappe
 from frappe.model.document import Document
 
 class Level(Document):
-	pass
+	def autoname(self):
+			self.name = self.grade+"-"+self.level_name

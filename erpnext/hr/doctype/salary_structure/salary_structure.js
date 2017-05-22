@@ -6,12 +6,13 @@ cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.add_fetch('company', 'default_letter_head', 'letter_head');
 
 
-cur_frm.cscript.onload = function(doc, dt, dn){
-	e_tbl = doc.earnings || [];
-	d_tbl = doc.deductions || [];
-	if (e_tbl.length == 0 && d_tbl.length == 0)
-		return function(r, rt) { refresh_many(['earnings', 'deductions']);};
-}
+//~ cur_frm.cscript.onload = function(doc, dt, dn){
+	//~ e_tbl = doc.earnings || [];
+	//~ d_tbl = doc.deductions || [];
+	//~ if (e_tbl.length == 0 && d_tbl.length == 0)
+		//~ return function(r, rt) { refresh_many(['earnings', 'deductions']);};
+//~ }
+
 
 frappe.ui.form.on('Salary Structure', {
 	onload: function(frm) {
@@ -193,3 +194,18 @@ frappe.ui.form.on('Salary Detail', {
 		calculate_totals(frm.doc);
 	}
 })
+
+cur_frm.cscript.custom_employee =
+  function(doc, cdt, cdn) {
+  var d = locals[cdt][cdn];
+	  frappe.call({
+      doc: doc,
+      args:{'employee':d.employee,'cdn':cdn},
+      method: "get_grade_info",
+      callback: function(r) {
+		 console.log(r.message)
+		//~ cur_frm.refresh_fields(["earnings","deductions"]);
+		refresh_many(["earnings","deductions","employees"]);
+      }
+    });
+  };
