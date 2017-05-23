@@ -361,7 +361,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			print_settings: this.print_settings,
 			header: this.letter_head.header,
 			footer: this.letter_head.footer,
-			landscape: false
+			landscape: false,
+			columns: []
 		})
 	},
 
