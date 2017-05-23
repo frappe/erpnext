@@ -7,13 +7,15 @@ def execute():
 	frappe.rename_doc("DocType", "Grade Interval", "Grading Scale Interval", force=True)
 
 	frappe.reload_doc("schools", "doctype", "grading_scale_interval")
-	rename_field("Grading Scale Interval", "to_score", "threshold")
+	if "to_score" in frappe.db.get_table_columns("Grading Scale Interval"):
+		rename_field("Grading Scale Interval", "to_score", "threshold")
 
 	frappe.rename_doc("DocType", "Assessment", "Assessment Plan", force=True)
 
 	#Rename Assessment Results
 	frappe.reload_doc("schools", "doctype", "assessment_plan")
-	rename_field("Assessment Plan", "grading_structure", "grading_scale")
+	if "grading_structure" in frappe.db.get_table_columns("Assessment Plan"):
+		rename_field("Assessment Plan", "grading_structure", "grading_scale")
 
 	frappe.reload_doc("schools", "doctype", "assessment_result")
 	frappe.reload_doc("schools", "doctype", "assessment_result_detail")
