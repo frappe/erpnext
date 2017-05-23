@@ -41,6 +41,8 @@ frappe.ui.form.on('Stock Entry', {
 				}
 			}
 		});
+
+
 	},
 	refresh: function(frm) {
 		if(!frm.doc.docstatus) {
@@ -71,9 +73,6 @@ frappe.ui.form.on('Stock Entry', {
 	purpose: function(frm) {
 		frm.fields_dict.items.grid.refresh();
 		frm.cscript.toggle_related_fields(frm.doc);
-	},
-	after_save: function(frm) {
-		erpnext.select_batch_and_serial_no(frm);
 	},
 	company: function(frm) {
 		if(frm.doc.company) {
@@ -168,6 +167,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 							d[k] = v;
 						});
 						refresh_field("items");
+						erpnext.select_batch_and_serial_no(frm, d);
 					}
 				}
 			});
@@ -535,22 +535,23 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	}
 });
 
-erpnext.select_batch_and_serial_no = (frm) => {
+erpnext.select_batch_and_serial_no = (frm, d = undefined) => {
 	let get_warehouse = (item) => {
-		return cstr(item.s_warehouse) ? cstr(item.s_warehouse) : cstr(item.t_warehouse);
+		return cstr(item.s_warehouse) ? ['Source Warehouse', cstr(item.s_warehouse)]
+			: ['Target Warehouse', cstr(item.t_warehouse)];
 	}
 
-	let show_modal_with_oldest_batch = (item, item_code, total_qty, warehouse, has_batch) => {
+	let show_modal_with_oldest_batch = (item, item_code, total_qty, warehouse_details, has_batch) => {
 		frappe.call({
 			method: 'erpnext.stock.doctype.batch.batch.get_batches_by_oldest',
 			args: {
-				warehouse: warehouse,
+				warehouse: warehouse_details[1],
 				item_code: item_code
 			},
 			callback: (r) => {
 				if (r.message) {
 					batch_rows_by_oldest = [];
-					if(cstr(item.s_warehouse)) {
+					if(warehouse_details[0] === 'Source Warehouse') {
 						qty = total_qty;
 						for(var i = 0; i < r.message.length; i++) {
 							batch_row = {name: 'batch 1'};
@@ -567,54 +568,47 @@ erpnext.select_batch_and_serial_no = (frm) => {
 							}
 						}
 					}
-					erpnext.show_batch_serial_modal(frm, item, item_code, total_qty, warehouse, has_batch, batch_rows_by_oldest);
+					erpnext.show_batch_serial_modal(frm, item, item_code, total_qty,
+						warehouse_details, has_batch, batch_rows_by_oldest);
 				}
 			}
 		});
 	}
 
-	frm.doc.items.forEach(function(d) {
+	if(d) {
 		if(d.has_batch_no && !d.batch_no) {
-			show_modal_with_oldest_batch(d, d.item_code, d.qty, get_warehouse(d), 1);
+			if(get_warehouse(d)) {
+				show_modal_with_oldest_batch(d, d.item_code, d.qty, get_warehouse(d), 1);
+			} else {
+				d.item_code = '';
+				refresh_field('items');
+				frappe.throw("Please select a warehouse.");
+			}
 		} else if(d.has_serial_no && !d.serial_no) {
 			erpnext.show_batch_serial_modal(frm, d, d.item_code, d.qty, get_warehouse(d), 0);
 		}
-	});
-
-
+	}
 }
 
-erpnext.show_batch_serial_modal = (frm, item, item_code, qty, warehouse, has_batch, oldest = undefined) => {
+erpnext.show_batch_serial_modal = (frm, item, item_code, qty, warehouse_details,
+	has_batch, oldest = undefined) => {
+
 	let data = oldest ? oldest : []
 	let title = "";
 	let fields = [
+		{fieldname: frappe.model.scrub(warehouse_details[0]), read_only: 1, fieldtype:'Link',
+			options: 'Warehouse', label: __(warehouse_details[0]), 'default': warehouse_details[1]},
+		{fieldtype:'Column Break'},
 		{fieldname: 'item_code', read_only: 1, fieldtype:'Link', options: 'Item',
 			label: __('Item Code'), 'default': item_code},
 		{fieldtype:'Column Break'},
-		{fieldname: 'qty', read_only: 1, fieldtype:'Float', label: __('Qty'), 'default': qty},
+		{fieldname: 'qty', fieldtype:'Float', label: __(has_batch ? 'Total Qty' : 'Qty'), 'default': qty},
 	];
-
-	let set_available_qty = (item_code, batch_no, warehouse, field) => {
-		frappe.call({
-			method: 'erpnext.stock.doctype.batch.batch.get_batch_qty',
-			args: {
-				batch_no: batch_no,
-				warehouse: warehouse,
-				item_code: item_code
-			},
-			callback: (r) => {
-				if (r.message) {
-					field.set_value(r.message);
-					field.$input.trigger('change');
-				}
-			}
-		});
-	}
 
 	if(has_batch) {
 		title = __("Select Batch Numbers");
 		fields = fields.concat([
-			{fieldtype:'Section Break', label: __('Batch No')},
+			{fieldtype:'Section Break', label: __('Batches')},
 			{fieldname: 'batches', fieldtype: 'Table',
 				fields: [
 					{fieldtype:'Link', fieldname:'batch_no', options: 'Batch',
@@ -622,10 +616,11 @@ erpnext.show_batch_serial_modal = (frm, item, item_code, qty, warehouse, has_bat
 							return {filters: {item: item_code }};
 						}},
 					{fieldtype:'Float', read_only: 1, fieldname:'available_qty',
-						label: __('Available'), in_list_view:1},
+						label: __('Available'), in_list_view:1, 'default': 0},
 					{fieldtype:'Float', fieldname:'selected_qty',
-						label: __('Qty'), in_list_view:1},
+						label: __('Qty'), in_list_view:1, 'default': 0},
 				],
+				in_place_edit: true,
 				data: data,
 				get_data: function() {
 					return this.data;
@@ -638,11 +633,37 @@ erpnext.show_batch_serial_modal = (frm, item, item_code, qty, warehouse, has_bat
 						let row = grid.grid_rows_by_docname[name];
 						row.on_grid_fields[2].set_value('0');
 						row.on_grid_fields[2].$input.trigger('change');
-						set_available_qty(item_code, row.doc.batch_no, warehouse, row.on_grid_fields[1]);
+						set_available_qty(item_code, row.doc.batch_no, warehouse_details[1], row.on_grid_fields[1]);
+					});
+
+					grid.wrapper.on('change', 'input[data-fieldname="selected_qty"]', function(e) {
+						// check if batch is selected
+						if($(this).val().length !== 0) {
+							let $row = $(this).closest('.grid-row');
+
+							let $batch = $row.find('input[data-fieldname="batch_no"]');
+							if($batch.val() === '') {
+								$(this).val('').trigger('change');
+								frappe.throw(__("Please select a batch"));
+							} else {
+								// check if greater than available if source
+								let $available = $row.find('input[data-fieldname="available_qty"]');
+								if(warehouse_details[0] === 'Source Warehouse' &&
+									parseInt($available.val()) < parseInt($(this).val())) {
+
+									$(this).val('').trigger('change');
+									frappe.throw(__(`For transfer from source, selected quantity cannot be
+										greater than available quantity`));
+								}
+							}
+						}
+
 					});
 				}
+
 			}
 		]);
+
 	} else {
 		title = __("Select Serial Numbers");
 		fields = fields.concat([
@@ -664,68 +685,24 @@ erpnext.show_batch_serial_modal = (frm, item, item_code, qty, warehouse, has_bat
 		fields: fields
 	});
 
-	let serial_no_link = dialog.fields_dict.serial_no_select;
-	if(serial_no_link) {
-		serial_no_link.$input.on('change', function(e) {
-			let serial_no_list = dialog.fields_dict.serial_no;
-			if(serial_no_link.get_value()) {
-				let new_line = '\n';
-				if(!serial_no_list.get_value()) {
-					new_line = '';
-				}
-				serial_no_list.set_value(serial_no_list.get_value() + new_line + serial_no_link.get_value());
-				serial_no_link.$input.val('');
-				serial_no_link.set_value('');
-			}
-		});
-	}
-
-	item_temp = {};
-	Object.assign(item_temp, item);
-	delete item_temp['batch_no'];
-	delete item_temp['qty'];
-	delete item_temp['idx'];
+	erpnext.bind_dialog_events(dialog);
 
 	let validate_batch_dialog = (values) => {
-		var sum = 0;
-
-		values.batches.map((batch) => {
-			sum += parseInt(batch.selected_qty);
-			if(batch.batch_no && batch.selected_qty) {
-				if(parseInt(batch.selected_qty) > parseInt(batch.available_qty)
-					&& cstr(item.s_warehouse)) {
-					frappe.throw(__("Cannot select more than the available qty"));
-					return false;
-				}
-			} else {
-				if(!batch.batch_no) {
-					frappe.throw(__("Please select batch_no"));
-					return false;
-				} else {
-					frappe.throw(__("Please select qty"));
-					return false;
-				}
+		if(values.batches.length === 0 || !values.batches) {
+			frappe.throw(__("Please select batches for batched item " + values.item_code));
+			return false;
+		}
+		values.batches.map((batch, i) => {
+			if(!batch.selected_qty || batch.selected_qty === 0 ) {
+				frappe.throw(__("Please select quantity on row " + (i+1)));
+				return false;
 			}
 		});
-
-		// validate total_qty
-		if(sum > values.qty) {
-			frappe.confirm(__(`Total of selected quantities is greater than the previously
-				set item quantity. Update?`), function(){
-				return true;
-			});
-		} else if (sum < values.qty){
-			frappe.confirm(__(`Total of selected quantities is less than the previously
-				set item quantity. Update?`), function(){
-				return true;
-			});
-		} else {
-			return true;
-		}
+		return true;
 	}
 
 	let set_batched_items = () => {
-		var values = dialog.get_values();
+		let values = dialog.get_values();
 		if(!validate_batch_dialog(values)) {
 			return;
 		}
@@ -734,47 +711,103 @@ erpnext.show_batch_serial_modal = (frm, item, item_code, qty, warehouse, has_bat
 			if(i === 0) {
 				item.batch_no = batch.batch_no;
 				item.qty = batch.selected_qty;
-				console.log("item", item, frm.doc.items);
 			} else {
 				var row = frm.add_child("items");
-				Object.assign(row, item_temp);
-				console.log("item", item_temp);
-
-				row.item_code = item_temp.item_code;
+				row.item_code = item.item_code;
+				if(item.s_warehouse) {
+					row.s_warehouse = item.s_warehouse;
+				} else {
+					row.t_warehouse = item.t_warehouse;
+				}
 				row.batch_no = batch.batch_no;
 				row.qty = batch.selected_qty;
-				console.log("row", row, frm.doc.items);
 			}
-			refresh_field("items");
 		});
 	}
 
 	let validate_serial_no_dialog = (values) => {
-		var serial_nos = values.serial_no || '';
+		let serial_nos = values.serial_no || '';
 		if (!serial_nos || !serial_nos.replace(/\s/g, '').length) {
-			frappe.throw(__("Please enter serial numbers"));
+			frappe.throw(__("Please enter serial numbers for serialized item " + values.item_code));
 			return false;
 		}
 		return true;
 	}
 
 	let set_serialized_items = () => {
-		var values = dialog.get_values();
+		let values = dialog.get_values();
 		if (!validate_serial_no_dialog(values)) {
 			return;
 		}
 		item.serial_no = values.serial_no;
+		item.qty = values.qty;
+	}
+
+	function set_available_qty(item_code, batch_no, warehouse, field) {
+		frappe.call({
+			method: 'erpnext.stock.doctype.batch.batch.get_batch_qty',
+			args: {
+				batch_no: batch_no,
+				warehouse: warehouse,
+				item_code: item_code
+			},
+			callback: (r) => {
+				if (r.message) {
+					field.set_value(r.message);
+					field.$input.trigger('change');
+				}
+			}
+		});
 	}
 
 	dialog.set_primary_action(__('Get Items'), function() {
-		if(has_batch) {
-			set_batched_items();
-		} else {
-			set_serialized_items();
-		}
-
+		has_batch ? set_batched_items() : set_serialized_items();
 		refresh_field("items");
 		dialog.hide();
 	})
 	dialog.show();
+}
+
+erpnext.bind_dialog_events = (dialog) => {
+	let serial_no_link = dialog.fields_dict.serial_no_select;
+	let serial_no_list = dialog.fields_dict.serial_no;
+	let batches_field = dialog.fields_dict.batches;
+	let qty_field = dialog.fields_dict.qty;
+
+	let update_quantity = (batch) => {
+		if(batch) {
+			let total_qty = 0;
+			batches_field.grid.wrapper.find('input[data-fieldname="selected_qty"]').each(function() {
+				total_qty += Number($(this).val());
+			});
+			qty_field.set_input(total_qty);
+		} else {
+			serial_numbers = serial_no_list.get_value().replace(/\n/g, ' ').match(/\S+/g) || [];
+			qty_field.set_input(serial_numbers.length);
+		}
+	}
+
+	if(serial_no_link) {
+		serial_no_link.$input.on('change', function(e) {
+			if(serial_no_link.get_value()) {
+				let new_line = '\n';
+				if(!serial_no_list.get_value()) {
+					new_line = '';
+				}
+				serial_no_list.set_value(serial_no_list.get_value() + new_line + serial_no_link.get_value());
+				update_quantity(0);
+			}
+			serial_no_link.set_value('');
+		});
+
+		serial_no_list.$input.on('input', function() {
+			update_quantity(0);
+		});
+	}
+
+	if(batches_field) {
+		batches_field.grid.wrapper.on('change', function(e) {
+			update_quantity(1);
+		});
+	}
 }
