@@ -209,9 +209,9 @@ def get_assessment_students(assessment_plan, student_group):
 		if result:
 			student_result = {}
 			for d in result.details:
-				student_result.update({d.assessment_criteria: cstr(d.score) + " ("+ d.grade + ")"})
-			student_result.update({"total_score": cstr(result.total_score) + " (" + result.grade + ")"})
-			student.update({'assessment_details': student_result})
+				student_result.update({d.assessment_criteria: [cstr(d.score), d.grade]})
+			student_result.update({"total_score": [cstr(result.total_score), result.grade]})
+			student.update({'assessment_details':student_result, 'docstatus':result.docstatus})			
 		else:
 			student.update({'assessment_details': None})
 	return student_list
@@ -223,7 +223,7 @@ def get_assessment_details(assessment_plan):
 	:param Assessment Plan: Assessment Plan
 	"""
 	return frappe.get_list("Assessment Plan Criteria", \
-		fields=["assessment_criteria", "maximum_score"], filters={"parent": assessment_plan}, order_by= "idx")
+		fields=["assessment_criteria", "maximum_score", "docstatus"], filters={"parent": assessment_plan}, order_by= "idx")
 
 @frappe.whitelist()
 def get_result(student, assessment_plan):
@@ -232,7 +232,7 @@ def get_result(student, assessment_plan):
 	:param Student: Student
 	:param Assessment Plan: Assessment Plan
 	"""
-	results = frappe.get_all("Assessment Result", filters={"student": student, "assessment_plan": assessment_plan, "docstatus": 1})
+	results = frappe.get_all("Assessment Result", filters={"student": student, "assessment_plan": assessment_plan})
 	if results:
 		return frappe.get_doc("Assessment Result", results[0])
 	else:
@@ -257,25 +257,51 @@ def get_grade(grading_scale, percentage):
 			grade = ""
 	return grade
 
+
+
 @frappe.whitelist()
-def mark_assessment_result(student, assessment_plan, scores):
-	student_score = json.loads(scores)
-	details = []
-	for s in student_score.keys():
-		details.append({
-			"assessment_criteria": s,
-			"score": flt(student_score[s])
+def mark_assessment_result(assessment_plan, scores):
+	student_score = json.loads(scores);
+
+	for s in student_score:
+		print s
+		assessment_result = get_assessment_result_doc(s, assessment_plan)
+		print assessment_result
+		details = []
+		for d in student_score[s]:
+			details.append({
+				"assessment_criteria": s,
+				"score": flt(student_score[s])
+			})
+		print details
+
+	frappe.throw("we got it man");
+
+
+	assessment_result_list = frappe.get_list("Assessment Result", filters={"student": student, "assessment_plan": assessment_plan})
+	if assessment_result_list:
+		assessment_result = frappe.get_doc("Assessment Result", assessment_result_list[0].name)
+	else:
+		assessment_result = frappe.new_doc("Assessment Result")
+		assessment_result.update({
+			"student": student,
+			"student_name": frappe.db.get_value("Student", student, "title"),
+			"assessment_plan": assessment_plan,
 		})
-	assessment_result = frappe.new_doc("Assessment Result")
-	assessment_result.update({
-		"student": student,
-		"student_name": frappe.db.get_value("Student", student, "title"),
-		"assessment_plan": assessment_plan,
-		"details": details
-	})
+	assessment_result.update({"details": details})
 	assessment_result.save()
-	assessment_result.submit()	
+	# assessment_result.submit()
 	return assessment_result
+
+
+def get_assessment_result_doc(student, assessment_plan):
+	assessment_result = frappe.get_all("Assessment Result", filters={"student": student, "assessment_plan": assessment_plan})
+	print assessment_result
+	if assessment_result:
+		return frappe.get_doc("Assessment Result", assessment_result[0])
+	else:
+		return frappe.new_doc("Assessment Result")
+
 
 @frappe.whitelist()
 def update_email_group(doctype, name):
