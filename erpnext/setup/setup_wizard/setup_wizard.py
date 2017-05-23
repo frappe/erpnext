@@ -18,7 +18,7 @@ from erpnext.setup.setup_wizard.domainify import setup_domain
 
 def setup_complete(args=None):
 	if frappe.db.sql("select name from tabCompany"):
-		frappe.throw(_("Setup Already Complete!!"))
+		frappe.throw(_("Setup Already Complete!"), frappe.SetupWizardComplete)
 
 	install_fixtures.install(args.get("country"))
 
