@@ -75,7 +75,7 @@ class Opportunity(TransactionBase):
 			self.lead = lead_name
 
 	def declare_enquiry_lost(self,arg):
-		if not self.has_lost_quotation():
+		if not self.has_active_quotation():
 			frappe.db.set(self, 'status', 'Lost')
 			frappe.db.set(self, 'order_lost_reason', arg)
 		else:
