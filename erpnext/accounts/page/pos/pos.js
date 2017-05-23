@@ -355,8 +355,13 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		this.print_template_data = frappe.render_template("print_template", {
 			content: this.print_template,
-			title: "POS", base_url: frappe.urllib.get_base_url(), print_css: frappe.boot.print_css,
-			print_settings: this.print_settings, header: this.letter_head.header, footer: this.letter_head.footer
+			title: "POS",
+			base_url: frappe.urllib.get_base_url(),
+			print_css: frappe.boot.print_css,
+			print_settings: this.print_settings,
+			header: this.letter_head.header,
+			footer: this.letter_head.footer,
+			landscape: false
 		})
 	},
 
