@@ -110,7 +110,7 @@
 		<div class=" page-content col-sm-12 ">
 			<div class="page-content-wrapper">
 				<div class="row page-head">
-					<div class='col-sm-12'>
+					<div class='col-sm-12 hidden-xs'>
 						
 						<div class="page-breadcrumbs">
 							
@@ -200,12 +200,13 @@
         
         <tr >
             <td>2</td>
-            <td class="danger" title="Mandatory"><code>academic_term</code></td>
+            <td ><code>academic_term</code></td>
             <td >
                 Link</td>
             <td >
                 Academic Term
-                
+                <p class="text-muted small">
+                    Leave blank if you make students groups per year</p>
             </td>
             <td>
                 
@@ -245,13 +246,12 @@
         
         <tr >
             <td>5</td>
-            <td ><code>program</code></td>
+            <td class="danger" title="Mandatory"><code>program</code></td>
             <td >
                 Link</td>
             <td >
                 Program
-                <p class="text-muted small">
-                    Leave blank if you wish to fetch all courses for selected academic term</p>
+                
             </td>
             <td>
                 
@@ -265,8 +265,21 @@
             </td>
         </tr>
         
-        <tr class="info">
+        <tr >
             <td>6</td>
+            <td ><code>separate_groups</code></td>
+            <td >
+                Check</td>
+            <td >
+                Separate course based Group for every Batch
+                <p class="text-muted small">
+                    Leave unchecked if you don't want to consider batch while making course based groups. </p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>7</td>
             <td ><code>section_break_4</code></td>
             <td >
                 Section Break</td>
@@ -278,7 +291,7 @@
         </tr>
         
         <tr >
-            <td>7</td>
+            <td>8</td>
             <td class="danger" title="Mandatory"><code>courses</code></td>
             <td >
                 Table</td>
