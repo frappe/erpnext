@@ -176,7 +176,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 							d[k] = v;
 						});
 						refresh_field("items");
-						erpnext.select_batch_and_serial_no(frm, d);
+						erpnext.stock.select_batch_and_serial_no(frm, d);
 					}
 				}
 			});
@@ -546,7 +546,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	}
 });
 
-erpnext.select_batch_and_serial_no = (frm, d = undefined) => {
+erpnext.stock.select_batch_and_serial_no = (frm, d = undefined) => {
 	let get_warehouse = (item) => {
 		if(cstr(item.s_warehouse)) return ['Source Warehouse', cstr(item.s_warehouse)];
 		if(cstr(item.t_warehouse)) return ['Target Warehouse', cstr(item.t_warehouse)];
@@ -580,7 +580,7 @@ erpnext.select_batch_and_serial_no = (frm, d = undefined) => {
 							}
 						}
 					}
-					erpnext.show_batch_serial_modal(frm, item, item_code, total_qty,
+					erpnext.stock.show_batch_serial_modal(frm, item, item_code, total_qty,
 						warehouse_details, has_batch, batch_rows_by_oldest);
 				}
 			}
@@ -602,7 +602,7 @@ erpnext.select_batch_and_serial_no = (frm, d = undefined) => {
 	}
 }
 
-erpnext.show_batch_serial_modal = (frm, item, item_code, qty, warehouse_details,
+erpnext.stock.show_batch_serial_modal = (frm, item, item_code, qty, warehouse_details,
 	has_batch, oldest = undefined) => {
 
 	let data = oldest ? oldest : []
@@ -697,7 +697,7 @@ erpnext.show_batch_serial_modal = (frm, item, item_code, qty, warehouse_details,
 		fields: fields
 	});
 
-	erpnext.bind_dialog_events(dialog);
+	erpnext.stock.bind_batch_serial_dialog_qty(dialog);
 
 	let validate_batch_dialog = (values) => {
 		if(values.batches.length === 0 || !values.batches) {
@@ -780,7 +780,7 @@ erpnext.show_batch_serial_modal = (frm, item, item_code, qty, warehouse_details,
 	dialog.show();
 }
 
-erpnext.bind_dialog_events = (dialog) => {
+erpnext.stock.bind_batch_serial_dialog_qty = (dialog) => {
 	let serial_no_link = dialog.fields_dict.serial_no_select;
 	let serial_no_list = dialog.fields_dict.serial_no;
 	let batches_field = dialog.fields_dict.batches;
