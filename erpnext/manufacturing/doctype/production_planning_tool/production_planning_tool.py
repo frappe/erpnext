@@ -348,7 +348,7 @@ class ProductionPlanningTool(Document):
 			SELECT
 				bom_item.item_code,
 				default_material_request_type,
-				ifnull(%(parent_qty)s * sum(bom_item.qty/ifnull(bom.quantity, 1)), 0) as qty,
+				ifnull(%(parent_qty)s * sum(bom_item.stock_qty/ifnull(bom.quantity, 1)), 0) as qty,
 				item.is_sub_contracted_item as is_sub_contracted,
 				item.default_bom as default_bom,
 				bom_item.description as description,
