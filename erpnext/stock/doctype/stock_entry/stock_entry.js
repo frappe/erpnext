@@ -537,8 +537,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 erpnext.select_batch_and_serial_no = (frm, d = undefined) => {
 	let get_warehouse = (item) => {
-		return cstr(item.s_warehouse) ? ['Source Warehouse', cstr(item.s_warehouse)]
-			: ['Target Warehouse', cstr(item.t_warehouse)];
+		if(cstr(item.s_warehouse)) return ['Source Warehouse', cstr(item.s_warehouse)];
+		if(cstr(item.t_warehouse)) return ['Target Warehouse', cstr(item.t_warehouse)];
+		return 0;
 	}
 
 	let show_modal_with_oldest_batch = (item, item_code, total_qty, warehouse_details, has_batch) => {
@@ -576,16 +577,16 @@ erpnext.select_batch_and_serial_no = (frm, d = undefined) => {
 	}
 
 	if(d) {
-		if(d.has_batch_no && !d.batch_no) {
-			if(get_warehouse(d)) {
+		if(get_warehouse(d)) {
+			if(d.has_batch_no && !d.batch_no) {
 				show_modal_with_oldest_batch(d, d.item_code, d.qty, get_warehouse(d), 1);
-			} else {
-				d.item_code = '';
-				refresh_field('items');
-				frappe.throw("Please select a warehouse.");
+			} else if(d.has_serial_no && !d.serial_no) {
+				erpnext.show_batch_serial_modal(frm, d, d.item_code, d.qty, get_warehouse(d), 0);
 			}
-		} else if(d.has_serial_no && !d.serial_no) {
-			erpnext.show_batch_serial_modal(frm, d, d.item_code, d.qty, get_warehouse(d), 0);
+		} else {
+			d.item_code = '';
+			refresh_field('items');
+			frappe.throw("Please select a warehouse.");
 		}
 	}
 }
@@ -789,7 +790,7 @@ erpnext.bind_dialog_events = (dialog) => {
 
 	if(serial_no_link) {
 		serial_no_link.$input.on('change', function(e) {
-			if(serial_no_link.get_value()) {
+			if(serial_no_link.get_value().length > 0) {
 				let new_line = '\n';
 				if(!serial_no_list.get_value()) {
 					new_line = '';
@@ -797,7 +798,7 @@ erpnext.bind_dialog_events = (dialog) => {
 				serial_no_list.set_value(serial_no_list.get_value() + new_line + serial_no_link.get_value());
 				update_quantity(0);
 			}
-			serial_no_link.set_value('');
+			serial_no_link.set_input('');
 		});
 
 		serial_no_list.$input.on('input', function() {
