@@ -43,7 +43,8 @@ class Lead(SellingController):
 			if self.email_id == self.contact_by:
 				frappe.throw(_("Next Contact By cannot be same as the Lead Email Address"))
 
-			self.image = has_gravatar(self.email_id)
+			if self.is_new() or not self.image:
+				self.image = has_gravatar(self.email_id)
 
 		if self.contact_date and getdate(self.contact_date) < getdate(nowdate()):
 			frappe.throw(_("Next Contact Date cannot be in the past"))
