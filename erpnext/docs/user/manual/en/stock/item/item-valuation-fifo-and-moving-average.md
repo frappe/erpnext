@@ -24,5 +24,3 @@ There are two major ways in which ERPNext values your items.
   * **Moving Average:** In this method, ERPNext assumes that the value of the item at any point is the average price of the units of that Item in stock. For example, if the value of an Item is X in a Warehouse with quantity Y and another quantity Y1 is added to the Warehouse at cost X1, the new value X2 would be:
 
 > New Value X2 = (X * Y + X1 * Y1) / (Y + Y1)
-
-{next}
