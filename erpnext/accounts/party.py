@@ -382,14 +382,17 @@ def get_dashboard_info(party_type, party):
 		where {2}=%s and docstatus=1 and posting_date between %s and %s
 	""".format(total_field, doctype, party_type.lower()), 
 	(party, current_fiscal_year.year_start_date, current_fiscal_year.year_end_date))
-
-	total_unpaid = frappe.db.sql("""select sum(outstanding_amount)
-		from `tab{0}`
-		where {1}=%s and docstatus = 1""".format(doctype, party_type.lower()), party)
+		
+	total_unpaid = frappe.db.sql("""
+		select sum(debit_in_account_currency) - sum(credit_in_account_currency)
+		from `tabGL Entry`
+		where party_type = %s and party=%s""", (party_type, party))
 
 	info = {}
 	info["billing_this_year"] = billing_this_year[0][0] if billing_this_year else 0
 	info["currency"] = party_account_currency
 	info["total_unpaid"] = total_unpaid[0][0] if total_unpaid else 0
+	if party_type == "Supplier":
+		info["total_unpaid"] = -1 * info["total_unpaid"]
 	
 	return info
