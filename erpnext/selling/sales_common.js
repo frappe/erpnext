@@ -348,9 +348,13 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	margin_type: function(doc, cdt, cdn){
 		// calculate the revised total margin and rate on margin type changes
 		item = locals[cdt][cdn];
-		this.apply_pricing_rule_on_item(item, doc,cdt, cdn)
-		this.calculate_taxes_and_totals();
-		cur_frm.refresh_fields();
+		if(!item.margin_type) {
+			frappe.model.set_value(cdt, cdn, "margin_rate_or_amount", 0);
+		} else {
+			this.apply_pricing_rule_on_item(item, doc,cdt, cdn)
+			this.calculate_taxes_and_totals();
+			cur_frm.refresh_fields();
+		}
 	}
 });
 
