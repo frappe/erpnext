@@ -4,12 +4,6 @@ frappe.provide("schools")
 
 frappe.ui.form.on('Student Attendance Tool', {
 	refresh: function(frm) {
-		if (frappe.route_options) {
-			frm.set_value("based_on", frappe.route_options.based_on);
-			frm.set_value("student_group", frappe.route_options.student_group);
-			frm.set_value("course_schedule", frappe.route_options.course_schedule);
-			frappe.route_options = null;
-		}
 		frm.disable_save();
 	},
 
