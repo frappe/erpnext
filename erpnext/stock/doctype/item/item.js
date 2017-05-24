@@ -44,8 +44,6 @@ frappe.ui.form.on("Item", {
 			}, __("View"));
 		}
 
-		// make sensitive fields(has_serial_no, is_stock_item, valuation_method)
-		// read only if any stock ledger entry exists
 		if(!frm.doc.is_fixed_asset) {
 			erpnext.item.make_dashboard(frm);
 		}
@@ -77,6 +75,8 @@ frappe.ui.form.on("Item", {
 
 		erpnext.item.edit_prices_button(frm);
 
+		// make sensitive fields(has_serial_no, is_stock_item, valuation_method, has_batch_no)
+		// read only if any stock ledger entry exists
 		if (!frm.doc.__islocal && frm.doc.is_stock_item) {
 			frm.toggle_enable(['has_serial_no', 'is_stock_item', 'valuation_method', 'has_batch_no'],
 				(frm.doc.__onload && frm.doc.__onload.sle_exists=="exists") ? false : true);
