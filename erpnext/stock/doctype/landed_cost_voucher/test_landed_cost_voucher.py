@@ -146,8 +146,11 @@ class TestLandedCostVoucher(unittest.TestCase):
 		})
 		pr.submit()
 
-		submit_landed_cost_voucher("Purchase Receipt", pr.name, 123.22)
-
+		lcv = submit_landed_cost_voucher("Purchase Receipt", pr.name, 123.22)
+		
+		self.assertEquals(lcv.items[0].applicable_charges, 41.07)
+		self.assertEquals(lcv.items[2].applicable_charges, 41.07999999999999)		
+		
 		set_perpetual_inventory(0)
 
 def submit_landed_cost_voucher(receipt_document_type, receipt_document, charges=50):
@@ -176,6 +179,8 @@ def submit_landed_cost_voucher(receipt_document_type, receipt_document, charges=
 	distribute_landed_cost_on_items(lcv)
 	
 	lcv.submit()
+
+	return lcv
 		
 def distribute_landed_cost_on_items(lcv):
 	based_on = lcv.distribute_charges_based_on.lower()
