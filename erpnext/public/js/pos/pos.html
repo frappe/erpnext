@@ -68,12 +68,12 @@
 
 				</div>
 				<div class="col-xs-6 numeric_keypad hidden-xs" style="display:none">
-					{% var chartData = [__("Qty"), __("Disc"), __("Price")] %} {% for(var i=0; i
+					{% var chartData = ["Qty", "Disc", "Price"] %} {% for(var i=0; i
 					<3; i++) { %} <div class="row text-right">
 						{% for(var j=i*3; j
 						<(i+1)*3; j++) { %} <button type="button" class="btn btn-default numeric-keypad" val="{{j+1}}">{{j+1}}</button>
 							{% } %}
-							<button type="button" id="pos-item-{{ chartData[i].toLowerCase() }}" class="btn text-center btn-default numeric-keypad pos-operation">{{ chartData[i] }}</button>
+							<button type="button" id="pos-item-{{ chartData[i].toLowerCase() }}" class="btn text-center btn-default numeric-keypad pos-operation">{{ __(chartData[i]) }}</button>
 				</div>
 				{% } %}
 				<div class="row text-right">
@@ -120,7 +120,7 @@
 				<div class="cell search-item"></div>
 			</div>
 			<div class="app-listing item-list image-view-container">
-				
+
 			</div>
 		</div>
 	</div>
