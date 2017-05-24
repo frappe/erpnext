@@ -26,3 +26,19 @@ class StockSettings(Document):
 		# show/hide barcode field
 		frappe.make_property_setter({'fieldname': 'barcode', 'property': 'hidden',
 			'value': 0 if self.show_barcode_field else 1})
+			
+		self.cant_change_valuation_method()
+		
+	def cant_change_valuation_method(self):
+		db_valuation_method = frappe.db.get_single_value("Stock Settings", "valuation_method")
+		
+		if db_valuation_method and db_valuation_method != self.valuation_method:
+			# check if there are any stock ledger entries against items 
+			# which does not have it's own valuation method
+			sle = frappe.db.sql("""select name from `tabStock Ledger Entry` sle
+				where exists(select name from tabItem 
+					where name=sle.item_code and (valuation_method is null or valuation_method=''))
+			""")
+			
+			if sle:
+				frappe.throw(_("Can't change valuation method, as there are transactions against some items which does not have it's own valuation method"))
