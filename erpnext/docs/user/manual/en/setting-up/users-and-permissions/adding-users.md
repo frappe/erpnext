@@ -20,10 +20,7 @@ To add a new user, click on "New"
 
 Add user details such as First Name, Last Name, Email etc.
 
-The user's Email will become the user id. Mobile No can also be used to log in if you check the Allow Login using Mobile No checkbox under the Security section in System Settings. While Mobile No will be unique, it will not be treated as a user id.
-
-<img class="screenshot" src="{{docs_base_url}}/assets/img/setup/users/user-login-email.png" alt="Email Login">
-<img class="screenshot" src="{{docs_base_url}}/assets/img/setup/users/user-login-mobile.png" alt="Mobile No Login">
+The user's Email will become the user id.
 
 After adding these details, save the user.
 
