@@ -397,3 +397,4 @@ erpnext.patches.v8_0.rename_total_margin_to_rate_with_margin # 11-05-2017
 erpnext.patches.v8_0.fix_status_for_invoices_with_negative_outstanding
 erpnext.patches.v8_0.make_payments_table_blank_for_non_pos_invoice
 erpnext.patches.v8_0.set_sales_invoice_serial_number_from_delivery_note
+erpnext.patches.v8_0.delete_schools_depricated_doctypes

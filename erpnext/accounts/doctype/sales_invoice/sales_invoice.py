@@ -415,10 +415,10 @@ class SalesInvoice(SellingController):
 				throw(_("Customer {0} does not belong to project {1}").format(self.customer,self.project))
 
 	def validate_pos(self):
-		if flt(self.paid_amount) + flt(self.write_off_amount) \
-				- flt(self.grand_total) > 1/(10**(self.precision("grand_total") + 1)) and self.is_return:
-			frappe.throw(_("""Paid amount + Write Off Amount can not be greater than Grand Total"""))
-
+		if self.is_return:
+			if flt(self.paid_amount) + flt(self.write_off_amount) - flt(self.grand_total) < \
+				1/(10**(self.precision("grand_total") + 1)):
+					frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
 
 	def validate_item_code(self):
 		for d in self.get('items'):
