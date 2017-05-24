@@ -7,10 +7,13 @@ import frappe
 import datetime
 from frappe import _, msgprint, scrub
 from frappe.defaults import get_user_permissions
-from frappe.utils import add_days, getdate, formatdate, get_first_day, date_diff, add_years, get_timestamp
+from frappe.utils import add_days, getdate, formatdate, get_first_day, date_diff, \
+	add_years, get_timestamp, nowdate
 from frappe.geo.doctype.address.address import get_address_display, get_default_address
 from frappe.email.doctype.contact.contact import get_contact_details, get_default_contact
 from erpnext.exceptions import PartyFrozen, InvalidCurrency, PartyDisabled, InvalidAccountCurrency
+from erpnext.accounts.utils import get_fiscal_year
+from erpnext import get_default_currency
 
 class DuplicatePartyAccountError(frappe.ValidationError): pass
 
@@ -360,3 +363,33 @@ def get_timeline_data(doctype, name):
 		out.update({ timestamp: count })
 
 	return out
+	
+def get_dashboard_info(party_type, party):
+	current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
+	party_account_currency = get_party_account_currency(party_type, party, frappe.db.get_default("company"))
+	company_default_currency = get_default_currency()
+		
+	if party_account_currency==company_default_currency:
+		total_field = "base_grand_total"
+	else:
+		total_field = "grand_total"
+		
+	doctype = "Sales Invoice" if party_type=="Customer" else "Purchase Invoice"
+	
+	billing_this_year = frappe.db.sql("""
+		select sum({0})
+		from `tab{1}`
+		where {2}=%s and docstatus=1 and posting_date between %s and %s
+	""".format(total_field, doctype, party_type.lower()), 
+	(party, current_fiscal_year.year_start_date, current_fiscal_year.year_end_date))
+
+	total_unpaid = frappe.db.sql("""select sum(outstanding_amount)
+		from `tab{0}`
+		where {1}=%s and docstatus = 1""".format(doctype, party_type.lower()), party)
+
+	info = {}
+	info["billing_this_year"] = billing_this_year[0][0] if billing_this_year else 0
+	info["currency"] = party_account_currency
+	info["total_unpaid"] = total_unpaid[0][0] if total_unpaid else 0
+	
+	return info
