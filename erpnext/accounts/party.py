@@ -8,7 +8,7 @@ import datetime
 from frappe import _, msgprint, scrub
 from frappe.defaults import get_user_permissions
 from frappe.utils import add_days, getdate, formatdate, get_first_day, date_diff, \
-	add_years, get_timestamp, nowdate
+	add_years, get_timestamp, nowdate, flt
 from frappe.geo.doctype.address.address import get_address_display, get_default_address
 from frappe.email.doctype.contact.contact import get_contact_details, get_default_contact
 from erpnext.exceptions import PartyFrozen, InvalidCurrency, PartyDisabled, InvalidAccountCurrency
@@ -389,9 +389,9 @@ def get_dashboard_info(party_type, party):
 		where party_type = %s and party=%s""", (party_type, party))
 
 	info = {}
-	info["billing_this_year"] = billing_this_year[0][0] if billing_this_year else 0
+	info["billing_this_year"] = flt(billing_this_year[0][0]) if billing_this_year else 0
 	info["currency"] = party_account_currency
-	info["total_unpaid"] = total_unpaid[0][0] if total_unpaid else 0
+	info["total_unpaid"] = flt(total_unpaid[0][0]) if total_unpaid else 0
 	if party_type == "Supplier":
 		info["total_unpaid"] = -1 * info["total_unpaid"]
 	
