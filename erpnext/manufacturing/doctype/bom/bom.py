@@ -252,15 +252,6 @@ class BOM(WebsiteGenerator):
 				if item.item_code in seen or seen_add(item.item_code):
 					yield item
 
-		def get_duplicate_item(lst):
-			try:
-				item = get_duplicates(lst).next()
-				if item:
-					return item
-			except StopIteration:
-				pass
-			return []
-
 		if not self.get('items'):
 			frappe.throw(_("Raw Materials cannot be blank."))
 		check_list = []
@@ -271,9 +262,14 @@ class BOM(WebsiteGenerator):
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 			check_list.append(m)
 
-		duplicate_item = get_duplicate_item(check_list)
-		if duplicate_item:
-			frappe.throw(_("Item - {0} has been entered multiple times. Check row {1}.").format(duplicate_item.item_code, duplicate_item.idx))
+		duplicate_items = list(get_duplicates(check_list))
+		if duplicate_items:
+			li = []
+			for i in duplicate_items:
+				li.append("<li>{0} on row {1}".format(i.item_code, i.idx))
+			duplicate_list = "<ol>{0}</ol>".format(''.join(li))
+
+			frappe.throw(_("Same item has been entered multiple times. {list}").format(list=duplicate_list))
 
 	def check_recursion(self):
 		""" Check whether recursion occurs in any bom"""
