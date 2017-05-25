@@ -2,22 +2,30 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, requests, json
+import frappe, requests, json, cryptography, os
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
+
 from frappe.model.document import Document
 from frappe.utils import cint, expand_relative_urls, fmt_money, flt, add_years, add_to_date, now, get_datetime, get_datetime_str
 from frappe import _
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
 
+pem_pub = ''
 
 class HubSettings(Document):
 	hub_url = "http://erpnext.hub:8000"
 	# hub_url = "http://hub.erpnext.org"
 	def validate(self):
+		if not self.publish and self.password:
+			self.unpublish()
+
 		if self.enabled:
 			if not self.password:
 				self.register()
-			else:
-				self.update_user_details()
+			# else:
+			# 	self.update_user_details()
 
 			if self.publish and self.password:
 				self.publish_selling_items()
@@ -25,18 +33,59 @@ class HubSettings(Document):
 		if not self.enabled and self.password:
 			self.update_user_details()
 
-		if not self.publish and self.password:
-			self.unpublish()
-
 		if not self.last_sync_datetime:
 			self.last_sync_datetime = add_years(now(), -10)
 
 	def register(self):
-		"""Register at hub.erpnext.org, save auto generated `password`"""
+		"""Register at hub.erpnext.org"""
+		(public_key, private_key, pem_priv, pem_pub) = self.generate_keys()
+		print "=========pempub========="
+		print pem_pub
 		response = requests.post(self.hub_url + "/api/method/hub.hub.api.register", data=self.get_args())
 		response.raise_for_status()
 		response = response.json()
 		self.password = response.get("message").get("password")
+		print "=================================="
+		print response.get("message")
+		self.hub_public_key_pem = response.get("message").get("hub_public_key_pem")
+
+	def generate_keys(self):
+		"""Generate RSA public and private keys and write to files"""
+
+		print '=============gen_keys================='
+		private_key = None
+		public_key = None
+
+		key_path = ''
+
+		#
+		if os.path.exists(key_path + "hub_client_rsa"):
+			with open(key_path + "hub_client_rsa", "rb") as private_key_file, open("hub_client_rsa.pub", "rb") as public_key_file:
+				 private_key = serialization.load_pem_private_key(private_key_file.read(), password=None, backend=default_backend())
+				 public_key = private_key.public_key()
+
+				 pem_priv = private_key_file.read()
+				 pem_pub = public_key_file.read()
+				 return (public_key, private_key, pem_priv, pem_pub)
+
+		private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048, backend=default_backend())
+		public_key = private_key.public_key()
+		pem_priv = private_key.private_bytes(
+			encoding=serialization.Encoding.PEM,
+			format=serialization.PrivateFormat.TraditionalOpenSSL,
+			encryption_algorithm=serialization.NoEncryption()
+		)
+		with open(key_path + 'hub_client_rsa', 'w') as priv:
+			priv.write(pem_priv)
+
+		pem_pub = public_key.public_bytes(
+			encoding=serialization.Encoding.PEM,
+			format=serialization.PublicFormat.SubjectPublicKeyInfo
+		)
+		with open(key_path + 'hub_client_rsa.pub', 'w') as pub:
+			pub.write(pem_pub)
+
+		return (public_key, private_key, pem_pub, pem_priv)
 
 	def publish_selling_items(self):
 		"""Set `publish_in_hub`=1 for all Sales Items"""
@@ -69,6 +118,7 @@ class HubSettings(Document):
 			"country": self.country,
 			"email": self.email,
 			"publish": self.publish,
+			"public_key_pem": pem_pub,
 			"seller_city": self.seller_city,
 			"seller_website": self.seller_website,
 			"seller_description": self.seller_description,
