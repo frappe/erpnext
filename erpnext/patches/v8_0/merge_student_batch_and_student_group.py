@@ -8,7 +8,6 @@ from frappe.model.mapper import get_mapped_doc
 
 
 def execute():
-
 	# for converting student batch into student group
 	frappe.reload_doctype("Student Group")
 
@@ -32,7 +31,7 @@ def execute():
 			else:
 				cond = " "
 			student_list = frappe.db.sql('''select student, student_name {cond} from `tabStudent Batch Student`
-				where parent=%s'''.format(cond=cond), (doc.name), as_dict=1)
+				where parent=%s'''.format(cond=cond), (doc.student_group_name), as_dict=1)
 
 			if student_list:
 				for i, student in enumerate(student_list):
@@ -40,7 +39,7 @@ def execute():
 				doc.extend("students", student_list)
 
 			instructor_list = frappe.db.sql('''select instructor, instructor_name from `tabStudent Batch Instructor`
-				where parent=%s''', (doc.name), as_dict=1)
+				where parent=%s''', (doc.student_group_name), as_dict=1)
 			if instructor_list:
 				doc.extend("instructors", instructor_list)
 			doc.save()
