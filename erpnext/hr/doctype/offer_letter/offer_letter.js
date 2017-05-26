@@ -5,8 +5,10 @@ frappe.provide("erpnext.offer_letter");
 
 frappe.ui.form.on("Offer Letter", {
 	select_terms: function(frm) {
-		frappe.model.get_value("Terms and Conditions", frm.doc.select_terms, "terms", function(value) {
-			frm.set_value("terms", value.terms);
+		erpnext.utils.get_terms(frm.doc.select_terms, frm.doc, function(r) {
+			if(!r.exc) {
+				me.frm.set_value("terms", r.message);
+			}
 		});
 	},
 
