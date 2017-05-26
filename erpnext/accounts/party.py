@@ -366,8 +366,10 @@ def get_timeline_data(doctype, name):
 	
 def get_dashboard_info(party_type, party):
 	current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
-	party_account_currency = get_party_account_currency(party_type, party, frappe.db.get_default("company"))
-	company_default_currency = get_default_currency()
+	company = frappe.db.get_default("company") or frappe.get_all("Company")[0].name
+	party_account_currency = get_party_account_currency(party_type, party, company)
+	company_default_currency = get_default_currency() \
+		or frappe.db.get_value('Company', company, 'default_currency')
 		
 	if party_account_currency==company_default_currency:
 		total_field = "base_grand_total"

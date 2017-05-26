@@ -7,7 +7,7 @@ import unittest
 import frappe
 from frappe.utils import flt
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
-	import set_perpetual_inventory, get_gl_entries, test_records as pr_test_records
+	import set_perpetual_inventory, get_gl_entries, test_records as pr_test_records, make_purchase_receipt
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 
 class TestLandedCostVoucher(unittest.TestCase):
@@ -133,7 +133,29 @@ class TestLandedCostVoucher(unittest.TestCase):
 
 		set_perpetual_inventory(0)
 
-def submit_landed_cost_voucher(receipt_document_type, receipt_document):
+	def test_landed_cost_voucher_for_odd_numbers (self):
+		set_perpetual_inventory(1)
+
+		pr = make_purchase_receipt(do_not_save=True)
+		pr.items[0].cost_center = "_Test Company - _TC"
+		for x in range(2):
+			pr.append("items", {
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC",
+				"cost_center": "_Test Company - _TC",
+				"qty": 5,
+				"rate": 50
+			})
+		pr.submit()
+
+		lcv = submit_landed_cost_voucher("Purchase Receipt", pr.name, 123.22)
+		
+		self.assertEquals(lcv.items[0].applicable_charges, 41.07)
+		self.assertEquals(lcv.items[2].applicable_charges, 41.08)		
+		
+		set_perpetual_inventory(0)
+
+def submit_landed_cost_voucher(receipt_document_type, receipt_document, charges=50):
 	ref_doc = frappe.get_doc(receipt_document_type, receipt_document)
 	
 	lcv = frappe.new_doc("Landed Cost Voucher")
@@ -151,7 +173,7 @@ def submit_landed_cost_voucher(receipt_document_type, receipt_document):
 	lcv.set("taxes", [{
 		"description": "Insurance Charges",
 		"account": "_Test Account Insurance Charges - _TC",
-		"amount": 50
+		"amount": charges
 	}])
 
 	lcv.insert()
@@ -159,11 +181,15 @@ def submit_landed_cost_voucher(receipt_document_type, receipt_document):
 	distribute_landed_cost_on_items(lcv)
 	
 	lcv.submit()
+
+	return lcv
 		
 def distribute_landed_cost_on_items(lcv):
 	based_on = lcv.distribute_charges_based_on.lower()
 	total = sum([flt(d.get(based_on)) for d in lcv.get("items")])
+
 	for item in lcv.get("items"):
 		item.applicable_charges = flt(item.get(based_on)) * flt(lcv.total_taxes_and_charges) / flt(total)
+		item.applicable_charges = flt(item.applicable_charges, lcv.precision("applicable_charges", item))
 
 test_records = frappe.get_test_records('Landed Cost Voucher')
