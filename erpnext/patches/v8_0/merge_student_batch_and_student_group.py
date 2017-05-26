@@ -3,15 +3,15 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.model.utils.rename_field import *
-from frappe.model.mapper import get_mapped_doc
+from frappe.model.utils.rename_field import rename_field
 
 
 def execute():
 
 	# for converting student batch into student group
-	frappe.reload_doctype("Student Group")
-
+	for doctype in ("student_group", "student_group_student", "student_group_instructor"):
+		frappe.reload_doc("schools", "doctype", doctype)
+	
 	if frappe.db.table_exists("Student Batch"):
 		student_batches = frappe.db.sql('''select name as student_group_name, student_batch_name as batch,
 			program, academic_year, academic_term from `tabStudent Batch`''', as_dict=1)
