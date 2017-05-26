@@ -137,10 +137,12 @@ class TestLandedCostVoucher(unittest.TestCase):
 		set_perpetual_inventory(1)
 
 		pr = make_purchase_receipt(do_not_save=True)
+		pr.items[0].cost_center = "_Test Company - _TC"
 		for x in range(2):
 			pr.append("items", {
 				"item_code": "_Test Item",
 				"warehouse": "_Test Warehouse - _TC",
+				"cost_center": "_Test Company - _TC",
 				"qty": 5,
 				"rate": 50
 			})
