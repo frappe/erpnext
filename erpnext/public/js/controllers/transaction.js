@@ -993,20 +993,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	get_terms: function() {
 		var me = this;
-		if(this.frm.doc.tc_name) {
-			return frappe.call({
-				method: 'erpnext.setup.doctype.terms_and_conditions.terms_and_conditions.get_terms_and_conditions',
-				args: {
-					template_name: this.frm.doc.tc_name,
-					doc: this.frm.doc
-				},
-				callback: function(r) {
-					if(!r.exc) {
-						me.frm.set_value("terms", r.message);
-					}
-				}
-			});
-		}
+
+		erpnext.utils.get_terms(this.frm.doc.tc_name, this.frm.doc, function(r) {
+			if(!r.exc) {
+				me.frm.set_value("terms", r.message);
+			}
+		});
 	},
 
 	taxes_and_charges: function() {
