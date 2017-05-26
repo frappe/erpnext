@@ -104,6 +104,21 @@ $.extend(erpnext.utils, {
 			}
 		}
 		refresh_field(table_fieldname);
+	},
+
+	get_terms: function(tc_name, doc, callback) {
+		if(tc_name) {
+			return frappe.call({
+				method: 'erpnext.setup.doctype.terms_and_conditions.terms_and_conditions.get_terms_and_conditions',
+				args: {
+					template_name: tc_name,
+					doc: doc
+				},
+				callback: function(r) {
+					callback(r)
+				}
+			});
+		}
 	}
 });
 

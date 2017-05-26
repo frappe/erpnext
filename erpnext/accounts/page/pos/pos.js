@@ -709,7 +709,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				filter: function (item, input) {
 					var value = item.value.toLowerCase();
 					if (value.indexOf('is_action') !== -1 ||
-						value.indexOf(input) !== -1) {
+						value.indexOf(input.toLowerCase()) !== -1) {
 						return true;
 					}
 				},
