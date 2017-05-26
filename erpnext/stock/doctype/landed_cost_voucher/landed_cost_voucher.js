@@ -102,9 +102,17 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 				total_item_cost += flt(d[based_on])
 			});
 
+			var total_charges = 0.0;
 			$.each(this.frm.doc.items || [], function(i, item) {
 				item.applicable_charges = flt(item[based_on]) * flt(me.frm.doc.total_taxes_and_charges) / flt(total_item_cost)			
+				item.applicable_charges = flt(item.applicable_charges, precision("applicable_charges", item))
+				total_charges += item.applicable_charges
 			});
+
+			if (total_charges != this.frm.doc.total_taxes_and_charges){
+				var diff = this.frm.doc.total_taxes_and_charges - flt(total_charges)
+				this.frm.doc.items.slice(-1)[0].applicable_charges += diff
+			}
 			refresh_field("items");
 		}
 	},
