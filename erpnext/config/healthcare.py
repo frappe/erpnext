@@ -96,8 +96,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Dosage",
-					"description": _("Drug Prescription Dosage")
+					"name": "Prescription Dosage",
+					"description": _("Prescription Dosage")
 				},
 				{
 					"type": "doctype",

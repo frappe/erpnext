@@ -13,7 +13,7 @@ class DrugPrescription(Document):
 		period = None
 
 		if(self.dosage):
-			dosage = frappe.get_doc("Dosage",self.dosage)
+			dosage = frappe.get_doc("Prescription Dosage",self.dosage)
 			for item in dosage.dosage_strength:
 				quantity += item.strength
 			if(self.period and self.interval):
