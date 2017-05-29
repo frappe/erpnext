@@ -75,10 +75,10 @@ frappe.ui.form.on('Patient Appointment', {
 		console.log(physician, appointment_date)
 		// show booking modal
 		frm.call({
-			method: 'check_appointment_availability',
+			method: 'get_availability_data',
 			args: {
 				physician: physician,
-				date:appointment_date
+				date: appointment_date
 			},
 			callback: (r) => {
 				console.log(r);
