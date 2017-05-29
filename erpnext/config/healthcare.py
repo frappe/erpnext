@@ -12,7 +12,7 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Appointment",
+					"name": "Patient Appointment",
 					"description": _("Patient Appointment"),
 				},
 				{

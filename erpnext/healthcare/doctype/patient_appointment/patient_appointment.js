@@ -1,7 +1,7 @@
 // Copyright (c) 2016, ESS LLP and contributors
 // For license information, please see license.txt
 frappe.provide("erpnext.queries");
-frappe.ui.form.on('Appointment', {
+frappe.ui.form.on('Patient Appointment', {
 	refresh: function(frm) {
 		frm.set_query("patient", function () {
 			return {
@@ -67,11 +67,31 @@ frappe.ui.form.on('Appointment', {
 			 },__("Check Availability") );
 		};
 	},
+	before_save: function(frm) {
+		var { physician, appointment_date } = frm.doc;
+		if(!(physician && appointment_date)) {
+			frappe.throw(__("Please select Physician and Date"));
+		}
+		console.log(physician, appointment_date)
+		// show booking modal
+		frm.call({
+			method: 'check_appointment_availability',
+			args: {
+				physician: physician,
+				date:appointment_date
+			},
+			callback: (r) => {
+				console.log(r);
+			}
+		});
+
+		throw 'test';
+		// return false;
+	},
 	onload:function(frm){
 		if(frm.doc.__islocal){
 			frappe.model.set_value(frm.doctype,frm.docname,"appointment_time", null);
 		}
-
 	},
 	appointment_date: function(frm){
 		frappe.model.set_value(frm.doctype,frm.docname, 'start_dt', new Date(frm.doc.appointment_date + ' ' + frm.doc.appointment_time))
@@ -84,7 +104,7 @@ frappe.ui.form.on('Appointment', {
 var btn_create_consultation = function(frm){
 	var doc = frm.doc;
 	frappe.call({
-		method:"erpnext.healthcare.doctype.appointment.appointment.create_consultation",
+		method:"erpnext.healthcare.doctype.patient_appointment.patient_appointment.create_consultation",
 		args: {appointment: doc.name},
 		callback: function(data){
 			if(!data.exc){
@@ -108,7 +128,7 @@ var btn_create_vital_signs = function (frm) {
 var check_availability_by_dept = function(frm){
 	if(frm.doc.department && frm.doc.appointment_date){
 		frappe.call({
-			method: "erpnext.healthcare.doctype.appointment.appointment.check_availability_by_dept",
+			method: "erpnext.healthcare.doctype.patient_appointment.patient_appointment.check_availability_by_dept",
 			args: {department: frm.doc.department, date: frm.doc.appointment_date, time: frm.doc.appointment_time},
 			callback: function(r){
 				if(r.message) show_availability(frm, r.message)
@@ -123,7 +143,7 @@ var check_availability_by_dept = function(frm){
 var check_availability_by_physician = function(frm){
 	if(frm.doc.physician && frm.doc.appointment_date){
 		frappe.call({
-			method: "erpnext.healthcare.doctype.appointment.appointment.check_availability_by_physician",
+			method: "erpnext.healthcare.doctype.patient_appointment.patient_appointment.check_availability_by_physician",
 			args: {physician: frm.doc.physician, date: frm.doc.appointment_date, time: frm.doc.appointment_time},
 			callback: function(r){
 				show_availability(frm, r.message)
@@ -196,7 +216,7 @@ var btn_update_status = function(frm, status){
 	var doc = frm.doc;
 	frappe.call({
 		method:
-		"erpnext.healthcare.doctype.appointment.appointment.update_status",
+		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.update_status",
 		args: {appointmentId: doc.name, status:status},
 		callback: function(data){
 			if(!data.exc){
@@ -210,7 +230,7 @@ var btn_invoice_consultation = function(frm){
 	var doc = frm.doc;
 	frappe.call({
 		method:
-		"erpnext.healthcare.doctype.appointment.appointment.create_invoice",
+		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.create_invoice",
 		args: {company: doc.company, patient: doc.patient, appointments: [doc.name] },
 		callback: function(data){
 			if(!data.exc){
@@ -223,7 +243,7 @@ var btn_invoice_consultation = function(frm){
 	});
 }
 
-frappe.ui.form.on("Appointment", "physician",
+frappe.ui.form.on("Patient Appointment", "physician",
     function(frm) {
 	if(frm.doc.physician){
 		frappe.call({
@@ -239,7 +259,7 @@ frappe.ui.form.on("Appointment", "physician",
 	}
 });
 
-frappe.ui.form.on("Appointment", "patient",
+frappe.ui.form.on("Patient Appointment", "patient",
     function(frm) {
         if(frm.doc.patient){
 		frappe.call({
