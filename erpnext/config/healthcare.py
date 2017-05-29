@@ -96,17 +96,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Service Type",
-					"label": _("Service Type"),
-				},
-				{
-					"type": "doctype",
-					"name": "Service Unit",
-					"label": _("Service Unit"),
-
-				},
-				{
-					"type": "doctype",
 					"name": "Dosage",
 					"description": _("Drug Prescription Dosage")
 				},
