@@ -13,6 +13,7 @@
  "editable_grid": 0, 
  "fields": [
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -42,6 +43,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -82,10 +84,10 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-05-08 16:46:13.580627", 
+ "modified": "2017-05-29 12:28:12.245311", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
- "name": "Drug Prescription Duration", 
+ "name": "Prescription Duration", 
  "name_case": "", 
  "owner": "Administrator", 
  "permissions": [

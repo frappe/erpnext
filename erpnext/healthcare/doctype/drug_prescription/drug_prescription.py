@@ -17,12 +17,12 @@ class DrugPrescription(Document):
 			for item in dosage.dosage_strength:
 				quantity += item.strength
 			if(self.period and self.interval):
-				period = frappe.get_doc("Drug Prescription Duration",self.period)
+				period = frappe.get_doc("Prescription Duration",self.period)
 				if(self.interval < period.get_days()):
 					quantity = quantity*(period.get_days()/self.interval)
 
 		elif(self.interval and self.in_every and self.period):
-			period = frappe.get_doc("Drug Prescription Duration",self.period)
+			period = frappe.get_doc("Prescription Duration",self.period)
 			interval_in = self.in_every
 			if(interval_in == 'Day' and (self.interval < period.get_days())):
 				quantity = period.get_days()/self.interval
