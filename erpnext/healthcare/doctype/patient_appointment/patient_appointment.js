@@ -58,21 +58,21 @@ frappe.ui.form.on('Patient Appointment', {
 				 },__("Create") );
 			}
 		};
-		if(frm.doc.__islocal){
-			frm.add_custom_button(__('By Physician'), function() {
-				check_availability_by_physician(frm);
-			 },__("Check Availability") );
-			frm.add_custom_button(__('By Department'), function() {
-				check_availability_by_dept(frm);
-			 },__("Check Availability") );
-		};
+		// if(frm.doc.__islocal){
+		// 	frm.add_custom_button(__('By Physician'), function() {
+		// 		check_availability_by_physician(frm);
+		// 	 },__("Check Availability") );
+		// 	frm.add_custom_button(__('By Department'), function() {
+		// 		check_availability_by_dept(frm);
+		// 	 },__("Check Availability") );
+		// };
 	},
-	before_save: function(frm) {
+	check_availability: function(frm) {
 		var { physician, appointment_date } = frm.doc;
 		if(!(physician && appointment_date)) {
 			frappe.throw(__("Please select Physician and Date"));
 		}
-		console.log(physician, appointment_date)
+
 		// show booking modal
 		frm.call({
 			method: 'get_availability_data',
@@ -81,16 +81,81 @@ frappe.ui.form.on('Patient Appointment', {
 				date: appointment_date
 			},
 			callback: (r) => {
-				console.log(r);
+				// console.log(r);
+				var data = r.message;
+				if(data.available_slots.length > 0) {
+					show_availability(data);
+				} else {
+					show_empty_state()
+				}
 			}
 		});
 
-		throw 'test';
-		// return false;
+		function show_empty_state() {
+			frappe.msgprint({
+				title: __('Not Available'),
+				message: __("Physician {0} not available on {1}", [physician.bold(), appointment_date.bold()]),
+				indicator: 'red'
+			});
+		}
+
+		function show_availability(data) {
+			var d = new frappe.ui.Dialog({
+				title: __("Available slots"),
+				fields: [{ fieldtype: 'HTML', fieldname: 'available_slots'}],
+				primary_action_label: __("Book"),
+				primary_action: function() {
+					// book slot
+					frm.set_value('appointment_time', selected_slot)
+					d.hide();
+					frm.save();
+				}
+			});
+			var $wrapper = d.fields_dict.available_slots.$wrapper;
+			var selected_slot = null;
+
+			// disable dialog action initially
+			d.get_primary_btn().attr('disabled', true);
+
+			// make buttons for each slot
+			var slot_html = data.available_slots.map(slot => {
+				return `<button class="btn btn-default"
+					data-name=${slot.from_time}
+					style="margin: 0 10px 10px 0; width: 72px">
+					${slot.from_time.substring(0, slot.from_time.length - 3)}
+				</button>`
+			}).join("");
+
+			$wrapper
+				.css('margin-bottom', 0)
+				.addClass('text-center')
+				.html(slot_html);
+
+			// disable buttons for which appointments are booked
+			data.appointments.map(slot => {
+				$wrapper
+					.find(`button[data-name="${slot.appointment_time}"]`)
+					.attr('disabled', true);
+			})
+
+			// blue button when clicked
+			$wrapper.on('click', 'button', function() {
+				var $btn = $(this);
+				$wrapper.find('button').removeClass('btn-primary');
+				$btn.addClass('btn-primary');
+				selected_slot = $btn.attr('data-name');
+
+				// enable dialog action
+				d.get_primary_btn().attr('disabled', null);
+			});
+
+			d.show();
+		}
 	},
 	onload:function(frm){
-		if(frm.doc.__islocal){
-			frappe.model.set_value(frm.doctype,frm.docname,"appointment_time", null);
+		if(frm.is_new()) {
+			frm.set_value("appointment_time", null);
+			frm.disable_save();
 		}
 	},
 	appointment_date: function(frm){

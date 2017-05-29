@@ -96,42 +96,44 @@ def check_appointment_availability(physician, date):
 		"Physician", physician, date, None, None)
 	return payload
 
-# @frappe.whitelist()
-# def get_availability_data(date, physician):
-# 	# get availability data of 'physician' on 'date'
-# 	date = getdate(date)
-# 	weekday = date.strftime("%A")
+@frappe.whitelist()
+def get_availability_data(date, physician):
+	# get availability data of 'physician' on 'date'
+	date = getdate(date)
+	weekday = date.strftime("%A")
 
-# 	available_slots = []
-# 	# get physicians schedule
-# 	physician_schedule_name = frappe.db.get_value("Physician", physician, "physician_schedule")
-# 	physician_schedule = frappe.get_doc("Physician Schedule", physician_schedule_name)
-# 	time_per_appointment = frappe.db.get_value("Physician", physician, "time_per_appointment")
+	available_slots = []
+	# get physicians schedule
+	physician_schedule_name = frappe.db.get_value("Physician", physician, "physician_schedule")
+	physician_schedule = frappe.get_doc("Physician Schedule", physician_schedule_name)
+	time_per_appointment = frappe.db.get_value("Physician", physician, "time_per_appointment")
 
-# 	for t in physician_schedule.time_slots:
-# 		if weekday == t.day:
-# 			available_slots.append(t)
+	for t in physician_schedule.time_slots:
+		if weekday == t.day:
+			available_slots.append(t)
 
-# 	# if physician not available return 
-# 	if not available_slots:
-# 		frappe.throw(_("Physician not available on {0}").format(weekday))
+	# if physician not available return 
+	if not available_slots:
+		# TODO: return available slots in nearby dates
+		pass
+		# frappe.throw(_("Physician not available on {0}").format(weekday))
 	
-# 	# if physician on leave return
+	# if physician on leave return
 
-# 	# if holiday return
-# 	# if is_holiday(weekday):
+	# if holiday return
+	# if is_holiday(weekday):
 
-# 	# get appointments on that day for physician
-# 	appointments = frappe.get_all(
-# 		"Patient Appointment",
-# 		filters={"physician": physician, "appointment_date": date},
-# 		fields=["name", "appointment_time", "duration"])
+	# get appointments on that day for physician
+	appointments = frappe.get_all(
+		"Patient Appointment",
+		filters={"physician": physician, "appointment_date": date},
+		fields=["name", "appointment_time", "duration"])
 	
-# 	return {
-# 		"available_slots": available_slots,
-# 		"appointments": appointments,
-# 		"time_per_appointment": time_per_appointment
-# 	}
+	return {
+		"available_slots": available_slots,
+		"appointments": appointments,
+		"time_per_appointment": time_per_appointment
+	}
 
 @frappe.whitelist()
 def update_status(appointmentId, status):
