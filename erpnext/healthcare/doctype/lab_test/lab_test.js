@@ -210,10 +210,13 @@ var make_invoice = function(frm){
 		method: "erpnext.healthcare.doctype.lab_test.lab_test.create_invoice",
 		args: {company:doc.company, patient:doc.patient, lab_tests: [doc.name], prescriptions:[]},
 		callback: function(r){
-			cur_frm.reload_doc();
-			if(r.message){
-				frappe.show_alert(__('Sales Invoice {0} created',
-					['<a href="#Form/Sales Invoice/'+r.message+'">' + r.message+ '</a>']));
+			if(!r.exc){
+				if(r.message){
+					/*frappe.show_alert(__('Sales Invoice {0} created',
+						['<a href="#Form/Sales Invoice/'+r.message+'">' + r.message+ '</a>']));*/
+					frappe.set_route("Form", "Sales Invoice", r.message);
+				}
+				cur_frm.reload_doc();
 			}
 		}
 	});
