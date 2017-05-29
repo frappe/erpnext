@@ -123,11 +123,12 @@ var btn_invoice_registration= function(frm){
     method: "invoice_patient_registration",
 		callback: function(data){
 			if(!data.exc){
-				cur_frm.reload_doc();
         if(data.message.invoice){
-          frappe.show_alert(__('Sales Invoice {0} created',
-  					['<a href="#Form/Sales Invoice/'+data.message.invoice+'">' + data.message.invoice+ '</a>']));
+          /*frappe.show_alert(__('Sales Invoice {0} created',
+  					['<a href="#Form/Sales Invoice/'+data.message.invoice+'">' + data.message.invoice+ '</a>']));*/
+            frappe.set_route("Form", "Sales Invoice", data.message.invoice);
         }
+        cur_frm.reload_doc();
 			}
 		}
 	});
