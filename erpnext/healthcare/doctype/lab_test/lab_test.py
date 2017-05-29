@@ -39,8 +39,22 @@ class LabTest(Document):
 		if(self.prescription):
 			frappe.db.set_value("Lab Prescription", self.prescription, "test_created", 1)
 		if not self.test_name and self.template:
-			load_test_from_template(self)
+			self.load_test_from_template()
 			self.reload()
+
+	def load_test_from_template(self):
+		lab_test = self
+		template = frappe.get_doc("Lab Test Template", lab_test.template)
+		patient = frappe.get_doc("Patient", lab_test.patient)
+
+		lab_test.test_name = template.test_name
+		lab_test.result_date = getdate()
+		lab_test.department = template.department
+		lab_test.test_group = template.test_group
+
+		lab_test = create_sample_collection(lab_test, template, patient, None)
+		lab_test = load_result_format(lab_test, template, None, None)
+		self.reload()
 
 def lab_test_result_status(lab_test,status):
 	frappe.db.sql("""update `tabInvoice Test Item` set workflow=%s where lab_test=%s""",(status, lab_test))
@@ -85,7 +99,6 @@ def create_lab_test_doc(invoice, consultation, patient, template):
 	lab_test.patient_sex = patient.sex
 	lab_test.email = patient.email
 	lab_test.mobile = patient.mobile
-	lab_test.service_type = template.service_type
 	lab_test.department = template.department
 	lab_test.test_name = template.test_name
 	lab_test.template = template.name
@@ -177,19 +190,6 @@ def create_lab_test_from_desk(patient, template, prescription, invoice=None):
 	consultation = frappe.get_doc("Consultation", consultation_id)
 	lab_test = create_lab_test(patient, template, prescription, consultation, invoice)
 	return lab_test.name
-
-def load_test_from_template(lab_test):
-	template = frappe.get_doc("Lab Test Template", lab_test.template)
-	patient = frappe.get_doc("Patient", lab_test.patient)
-
-	lab_test.test_name = template.test_name
-	lab_test.result_date = getdate()
-	lab_test.service_type = template.service_type
-	lab_test.department = template.department
-	lab_test.test_group = template.test_group
-
-	create_sample_collection(lab_test, template, patient, None)
-	load_result_format(lab_test, template, None, None)
 
 def create_sample_collection(lab_test, template, patient, invoice):
 	if(frappe.db.get_value("Healthcare Settings", None, "require_sample_collection") == "1"):
@@ -295,7 +295,7 @@ def create_invoice(company, patient, lab_tests, prescriptions):
 	sales_invoice.customer = frappe.get_value("Patient", patient, "customer")
 	sales_invoice.due_date = getdate()
 	sales_invoice.is_pos = '0'
-	sales_invoice.debit_to = get_receivable_account(patient, company)
+	sales_invoice.debit_to = get_receivable_account(company)
 	for line in line_ids:
 		test_code = frappe.get_value("Lab Prescription", line, "test_code")
 		create_item_line(test_code, sales_invoice)
