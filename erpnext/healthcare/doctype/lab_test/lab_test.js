@@ -93,11 +93,6 @@ frappe.ui.form.on("Lab Test", "patient",
 					age = ""
 					if(data.message.dob){
 						age = calculate_age(data.message.dob)
-					}else if (data.message.age){
-						age = data.message.age
-						if(data.message.age_as_on){
-							age = age+" as on "+data.message.age_as_on
-						}
 					}
 					frappe.model.set_value(frm.doctype,frm.docname, "patient_age", age)
 					frappe.model.set_value(frm.doctype,frm.docname, "patient_sex", data.message.sex)

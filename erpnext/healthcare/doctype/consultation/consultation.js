@@ -26,11 +26,6 @@ frappe.ui.form.on('Consultation', {
 						age = ""
 						if(data.message.dob){
 							age = calculate_age(data.message.dob)
-						}else if (data.message.age){
-							age = data.message.age
-							if(data.message.age_as_on){
-								age = age+" as on "+data.message.age_as_on
-							}
 						}
 						frappe.model.set_value(frm.doctype,frm.docname, "patient_age", age)
 						show_details(data.message);
@@ -125,12 +120,6 @@ var show_details = function(data){
 	age = ""
 	if(data.dob){
 		age = calculate_age(data.dob)
-		personal_details += "<br><b>Age :</b> " + age;
-	}else if (data.age){
-		age = data.age
-		if(data.age_as_on){
-			age = age+" as on "+data.age_as_on
-		}
 		personal_details += "<br><b>Age :</b> " + age;
 	}
 	if(data.sex) personal_details += "<br><b>Gender :</b> " + data.sex;
@@ -245,11 +234,6 @@ frappe.ui.form.on("Consultation", "patient",
 					age = ""
 					if(data.message.dob){
 						age = calculate_age(data.message.dob)
-					}else if (data.message.age){
-						age = data.message.age
-						if(data.message.age_as_on){
-							age = age+" as on "+data.message.age_as_on
-						}
 					}
 					frappe.model.set_value(frm.doctype,frm.docname, "patient_age", age)
 					frappe.model.set_value(frm.doctype,frm.docname, "patient_sex", data.message.sex)

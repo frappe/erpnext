@@ -50,8 +50,6 @@ class Patient(Document):
 			born = getdate(self.dob)
 			age = dateutil.relativedelta.relativedelta(getdate(), born)
 			age_str = str(age.years) + " year(s) " + str(age.months) + " month(s) " + str(age.days) + " day(s)"
-		elif self.age:
-			age_str = str(self.age) + " as on " + str(self.age_as_on)
 		return age_str
 
 	def invoice_patient_registration(self):
