@@ -62,6 +62,11 @@ frappe.ui.form.on('Consultation', {
 				filters: {"disabled": 0}
 			}
 		});
+		if(!frm.doc.__islocal && !frm.doc.invoice){
+			frm.add_custom_button(__('Invoice'), function() {
+				btn_invoice_consultation(frm);
+			},__("Create") );
+		};
 		frm.set_df_property("appointment", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("patient", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("patient_age", "read_only", frm.doc.__islocal ? 0:1);
@@ -74,6 +79,23 @@ frappe.ui.form.on('Consultation', {
 		frm.set_df_property("consultation_time", "read_only", frm.doc.__islocal ? 0:1);
 	}
 });
+
+var btn_invoice_consultation = function(frm){
+	var doc = frm.doc;
+	frappe.call({
+		method:
+		"erpnext.healthcare.doctype.consultation.consultation.create_invoice",
+		args: {company: doc.company, patient: doc.patient, consultations: [doc.name] },
+		callback: function(data){
+			if(!data.exc){
+				if(data.message){
+					frappe.set_route("Form", "Sales Invoice", data.message);
+				}
+				cur_frm.reload_doc();
+			}
+		}
+	});
+}
 
 var create_medical_record = function (frm) {
 	if(!frm.doc.patient){
