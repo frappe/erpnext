@@ -78,6 +78,15 @@ frappe.ui.form.on('Payment Entry', {
 				filters: { "name": ["in", doctypes] }
 			};
 		});
+
+		frm.set_query("reference_name", "references", function () {
+			return {
+				filters: {
+					docstatus: 1,
+					title: frm.doc.party
+				}
+			}
+		});
 	},
 
 	refresh: function(frm) {
