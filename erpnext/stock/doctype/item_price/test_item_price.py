@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
+from erpnext.stock.get_item_details import get_price_list_rate_for
 
 
 class TestItem(unittest.TestCase):
@@ -26,6 +27,49 @@ class TestItem(unittest.TestCase):
 		# Valid Upto Date can not be less/equal than Valid From Date
 		self.assertRaises(frappe.ValidationError, doc.save)
 
+	def test_invalid_item(self):
+		doc = frappe.copy_doc(test_records[1])
+		# Enter invalid item code
+		doc.item_code = "This is not an item code"
+		# Valid item codes must already exist
+		self.assertRaises(frappe.ValidationError, doc.save)
 
-
+	def test_price_list(self):
+		doc = frappe.copy_doc(test_records[1])
+		# Check for invalid price list
+		doc.price_list = "This is not a price list"
+		# Valid price list must already exist
+		self.assertRaises(frappe.ValidationError, doc.save)
+		
+		
+		# Check for disabled price list
+		doc = frappe.copy_doc(test_records[1])
+		# Enter invalid price list
+		pr = frappe.get_doc("Price List", doc.price_list)
+		pr.enabled = 0
+		pr.save()
+		
+		doc.price_list = pr.name
+		# Valid price list must already exist
+		self.assertRaises(frappe.ValidationError, doc.save)
+		pr.enabled = 1
+		pr.save()
+		
+	def test_price(self):
+		doc = frappe.copy_doc(test_records[0])
+		doc.min_qty = 5
+		doc.save()
+		
+		#Check correct price at this quantity
+		price = get_price_list_rate_for(doc.price_list, doc.item_code, doc.min_qty)
+		self.assertEqual(price, doc.price_list_rate)
+		
+		#Check correct price at this quantity + 1
+		price = get_price_list_rate_for(doc.price_list, doc.item_code, doc.min_qty + 1)
+		self.assertEqual(price, doc.price_list_rate)
+		
+		#Check correct price at this quantity - 1
+		price = get_price_list_rate_for(doc.price_list, doc.item_code, doc.min_qty - 1)
+		self.assertEqual(price, None)
+		
 test_records = frappe.get_test_records('Item Price')
