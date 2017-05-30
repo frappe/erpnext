@@ -324,3 +324,12 @@ def update_serial_nos_after_submit(controller, parentfield):
 						update_rejected_serial_nos = False
 						if accepted_serial_nos_updated:
 							break
+
+def update_maintenance_status():
+	serial_nos = frappe.db.sql('''select name from `tabSerial No` where (amc_expiry_date<%s or
+		warranty_expiry_date<%s) and maintenance_status not in ('Out of Warranty', 'Out of AMC')''',
+		(nowdate(), nowdate()))
+	for serial_no in serial_nos:
+		doc = frappe.get_doc("Serial No", serial_no[0])
+		doc.set_maintenance_status()
+		frappe.db.set_value('Serial No', doc.name, 'maintenance_status', doc.maintenance_status)
