@@ -8,13 +8,13 @@ cur_frm.add_fetch("student_group", "academic_term", "academic_term");
 
 frappe.ui.form.on("Course Scheduling Tool", {
 
-    refresh: function(frm) {
-        frm.disable_save();
-        frm.page.set_primary_action(__("Schedule Course"), function() {
-            frappe.call({
-                method: "schedule_course",
-                doc: frm.doc
-            })
-        });
-    }
+	refresh: function(frm) {
+		frm.disable_save();
+		frm.page.set_primary_action(__("Schedule Course"), function() {
+			frappe.call({
+				method: "schedule_course",
+				doc: frm.doc
+			})
+		});
+	}
 });

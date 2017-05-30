@@ -71,7 +71,7 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 
 		if (item.start_date && item.end_date && item.periodicity) {
 			if(item.start_date > item.end_date) {
-				msgprint(__("Row {0}:Start Date must be before End Date", [item.idx]));
+				frappe.msgprint(__("Row {0}:Start Date must be before End Date", [item.idx]));
 				return;
 			}
 
@@ -97,7 +97,7 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(!doc.status) set_multiple(dt,dn,{status:'Draft'});
 
 	if(doc.__islocal){
-		set_multiple(dt,dn,{transaction_date:get_today()});
+		set_multiple(dt,dn,{transaction_date: frappe.datetime.get_today()});
 	}
 
 	// set add fetch for item_code's item_name and description
@@ -108,12 +108,12 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 
 cur_frm.cscript.generate_schedule = function(doc, cdt, cdn) {
 	if (!doc.__islocal) {
-		return $c('runserverobj', args={'method':'generate_schedule', 'docs':doc},
+		return $c('runserverobj', {'method':'generate_schedule', 'docs':doc},
 			function(r, rt) {
 				refresh_field('schedules');
 			});
 	} else {
-		msgprint(__("Please save the document before generating maintenance schedule"));
+		frappe.msgprint(__("Please save the document before generating maintenance schedule"));
 	}
 }
 

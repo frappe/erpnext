@@ -38,7 +38,7 @@ frappe.ui.form.on("Delivery Note", {
 			}
 		});
 
-		if (sys_defaults.auto_accounting_for_stock) {
+		if (frappe.sys_defaults.auto_accounting_for_stock) {
 			frm.set_query('expense_account', 'items', function(doc, cdt, cdn) {
 				return {
 					filters: {
@@ -166,7 +166,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		erpnext.stock.delivery_note.set_print_hide(doc, dt, dn);
 
 		// unhide expense_account and cost_center is auto_accounting_for_stock enabled
-		var aii_enabled = cint(sys_defaults.auto_accounting_for_stock)
+		var aii_enabled = cint(frappe.sys_defaults.auto_accounting_for_stock)
 		this.frm.fields_dict["items"].grid.set_column_disp(["expense_account", "cost_center"], aii_enabled);
 	},
 

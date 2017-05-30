@@ -1,7 +1,7 @@
 frappe.provide("erpnext.wiz");
 
 frappe.pages['setup-wizard'].on_page_load = function(wrapper) {
-	if(sys_defaults.company) {
+	if(frappe.sys_defaults.company) {
 		frappe.set_route("desk");
 		return;
 	}
@@ -38,17 +38,17 @@ function load_erpnext_slides() {
 			fields: [
 				{fieldname:'company_name',
 					label: frappe.wiz.domain==='Education' ?
-					 	__('Institute Name') : __('Company Name'),
+						__('Institute Name') : __('Company Name'),
 					fieldtype:'Data', reqd:1},
 				{fieldname:'company_abbr',
 					label: frappe.wiz.domain==='Education' ?
-					 	__('Institute Abbreviation') : __('Company Abbreviation'),
+						__('Institute Abbreviation') : __('Company Abbreviation'),
 					fieldtype:'Data'},
 				{fieldname:'company_tagline',
 					label: __('What does it do?'),
 					fieldtype:'Data',
 					placeholder: frappe.wiz.domain==='Education' ?
-					 	__('e.g. "Primary School" or "University"') :
+						__('e.g. "Primary School" or "University"') :
 						__('e.g. "Build tools for builders"'),
 					reqd:1},
 				{fieldname:'bank_account', label: __('Bank Name'), fieldtype:'Data', reqd:1},
@@ -75,12 +75,12 @@ function load_erpnext_slides() {
 			validate: function() {
 				// validate fiscal year start and end dates
 				if (this.values.fy_start_date=='Invalid date' || this.values.fy_end_date=='Invalid date') {
-					msgprint(__("Please enter valid Financial Year Start and End Dates"));
+					frappe.msgprint(__("Please enter valid Financial Year Start and End Dates"));
 					return false;
 				}
 
 				if ((this.values.company_name || "").toLowerCase() == "company") {
-					msgprint(__("Company Name cannot be Company"));
+					frappe.msgprint(__("Company Name cannot be Company"));
 					return false;
 				}
 
@@ -102,7 +102,7 @@ function load_erpnext_slides() {
 					}
 					
 					var year_start_date = current_year + "-" + fy[0];
-					if(year_start_date > get_today()) {
+					if(year_start_date > frappe.datetime.get_today()) {
 						next_year = current_year
 						current_year -= 1;
 					}
@@ -145,7 +145,7 @@ function load_erpnext_slides() {
 
 				slide.get_input("company_abbr").on("change", function() {
 					if(slide.get_input("company_abbr").val().length > 5) {
-						msgprint("Company Abbreviation cannot have more than 5 characters");
+						frappe.msgprint("Company Abbreviation cannot have more than 5 characters");
 						slide.get_field("company_abbr").set_input("");
 					}
 				});
@@ -420,7 +420,7 @@ function load_erpnext_slides() {
 		"Thailand": ["10-01", "09-30"],
 		"United Kingdom": ["04-01", "03-31"],
 	};
-};
+}
 
 frappe.wiz.on("before_load", function() {
 	load_erpnext_slides();
@@ -447,7 +447,7 @@ frappe.wiz.on("before_load", function() {
 	}
 });
 
-test_values_edu = {
+var test_values_edu = {
 	"language":"english",
 	"domain":"Education",
 	"country":"India",

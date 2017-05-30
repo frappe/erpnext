@@ -63,7 +63,7 @@ erpnext.bom.BomController = erpnext.TransactionController.extend({
 	
 	item_code: function(doc, cdt, cdn){
 		var scrap_items = false;
-		child = locals[cdt][cdn];
+		var child = locals[cdt][cdn];
 		if(child.doctype == 'BOM Scrap Item') {
 			scrap_items = true;
 		}
@@ -132,12 +132,12 @@ cur_frm.cscript.rate = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	var scrap_items = false;
 
-	if(child.doctype == 'BOM Scrap Item') {
+	if(cdt == 'BOM Scrap Item') {
 		scrap_items = true;
 	}
 
 	if (d.bom_no) {
-		msgprint(__("You can not change rate if BOM mentioned agianst any item"));
+		frappe.msgprint(__("You can not change rate if BOM mentioned agianst any item"));
 		get_bom_material_detail(doc, cdt, cdn, scrap_items);
 	} else {
 		erpnext.bom.calculate_rm_cost(doc);
@@ -159,8 +159,8 @@ erpnext.bom.calculate_op_cost = function(doc) {
 	doc.base_operating_cost = 0.0;
 
 	for(var i=0;i<op.length;i++) {
-		operating_cost = flt(flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60, 2);
-		base_operating_cost = flt(flt(op[i].base_hour_rate) * flt(op[i].time_in_mins) / 60, 2);
+		var operating_cost = flt(flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60, 2);
+		var base_operating_cost = flt(flt(op[i].base_hour_rate) * flt(op[i].time_in_mins) / 60, 2);
 		frappe.model.set_value('BOM Operation',op[i].name, "operating_cost", operating_cost);
 		frappe.model.set_value('BOM Operation',op[i].name, "base_operating_cost", base_operating_cost);
 
@@ -173,11 +173,11 @@ erpnext.bom.calculate_op_cost = function(doc) {
 // rm : raw material
 erpnext.bom.calculate_rm_cost = function(doc) {
 	var rm = doc.items || [];
-	total_rm_cost = 0;
-	base_total_rm_cost = 0;
+	var total_rm_cost = 0;
+	var base_total_rm_cost = 0;
 	for(var i=0;i<rm.length;i++) {
-		amount = flt(rm[i].rate) * flt(rm[i].qty);
-		base_amount = flt(rm[i].rate) * flt(doc.conversion_rate) * flt(rm[i].qty);
+		var amount = flt(rm[i].rate) * flt(rm[i].qty);
+		var base_amount = flt(rm[i].rate) * flt(doc.conversion_rate) * flt(rm[i].qty);
 		frappe.model.set_value('BOM Item', rm[i].name, 'base_rate', flt(rm[i].rate) * flt(doc.conversion_rate))
 		frappe.model.set_value('BOM Item', rm[i].name, 'amount', amount)
 		frappe.model.set_value('BOM Item', rm[i].name, 'qty_consumed_per_unit', flt(rm[i].qty)/flt(doc.quantity))
@@ -192,13 +192,13 @@ erpnext.bom.calculate_rm_cost = function(doc) {
 //sm : scrap material
 erpnext.bom.calculate_scrap_materials_cost = function(doc) {
 	var sm = doc.scrap_items || [];
-	total_sm_cost = 0;
-	base_total_sm_cost = 0;
+	var total_sm_cost = 0;
+	var base_total_sm_cost = 0;
 
 	for(var i=0;i<sm.length;i++) {
-		base_rate = flt(sm[i].rate) * flt(doc.conversion_rate);
-		amount =	flt(sm[i].rate) * flt(sm[i].qty);
-		base_amount =	flt(sm[i].rate) * flt(sm[i].qty) * flt(doc.conversion_rate);
+		var base_rate = flt(sm[i].rate) * flt(doc.conversion_rate);
+		var amount =	flt(sm[i].rate) * flt(sm[i].qty);
+		var base_amount =	flt(sm[i].rate) * flt(sm[i].qty) * flt(doc.conversion_rate);
 		frappe.model.set_value('BOM Scrap Item',sm[i].name, 'base_rate', base_rate);
 		frappe.model.set_value('BOM Scrap Item',sm[i].name, 'amount', amount);
 		frappe.model.set_value('BOM Scrap Item',sm[i].name, 'base_amount', base_amount);
@@ -213,15 +213,15 @@ erpnext.bom.calculate_scrap_materials_cost = function(doc) {
 
 // Calculate Total Cost
 erpnext.bom.calculate_total = function(doc) {
-	total_cost = flt(doc.operating_cost) + flt(doc.raw_material_cost) - flt(doc.scrap_material_cost);
-	base_total_cost = flt(doc.base_operating_cost) + flt(doc.base_raw_material_cost) - flt(doc.base_scrap_material_cost);
+	var total_cost = flt(doc.operating_cost) + flt(doc.raw_material_cost) - flt(doc.scrap_material_cost);
+	var base_total_cost = flt(doc.base_operating_cost) + flt(doc.base_raw_material_cost) - flt(doc.base_scrap_material_cost);
 	cur_frm.set_value("total_cost", total_cost);
 	cur_frm.set_value("base_total_cost", base_total_cost);
 }
 
 
 cur_frm.fields_dict['item'].get_query = function(doc) {
- 	return{
+	return{
 		query: "erpnext.controllers.queries.item_query"
 	}
 }

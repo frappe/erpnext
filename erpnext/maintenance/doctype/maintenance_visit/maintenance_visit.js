@@ -2,8 +2,6 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.maintenance");
-me.frm.set_query('contact_person', erpnext.queries.contact_query);
-
 
 frappe.ui.form.on('Maintenance Visit', {
 	setup: function(frm) {
@@ -85,7 +83,7 @@ $.extend(cur_frm.cscript, new erpnext.maintenance.MaintenanceVisit({frm: cur_frm
 
 cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(!doc.status) set_multiple(dt,dn,{status:'Draft'});
-	if(doc.__islocal) set_multiple(dt,dn,{mntc_date:get_today()});
+	if(doc.__islocal) set_multiple(dt,dn,{mntc_date: frappe.datetime.get_today()});
 
 	// set add fetch for item_code's item_name and description
 	cur_frm.add_fetch('item_code', 'item_name', 'item_name');

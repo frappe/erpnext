@@ -2,7 +2,7 @@
 cur_frm.add_fetch("student", "title", "student_name");
 
 frappe.ui.form.on("Fees", {
-	
+
 	onload: function(frm){
 		cur_frm.set_query("academic_term",function(){
 			return{
@@ -11,7 +11,7 @@ frappe.ui.form.on("Fees", {
 				}
 			};
 		});
-		
+
 		cur_frm.set_query("fee_structure",function(){
 			return{
 				"filters":{
@@ -20,7 +20,7 @@ frappe.ui.form.on("Fees", {
 			};
 		});
 	},
-	
+
 	refresh: function(frm) {
 		if (frm.doc.docstatus === 1 && (frm.doc.total_amount > frm.doc.paid_amount)) {
 			frm.add_custom_button(__("Collect Fees"), function() {
@@ -42,7 +42,7 @@ frappe.ui.form.on("Fees", {
 			});
 		}
 	},
-	
+
 	program: function(frm) {
 		if (frm.doc.program && frm.doc.academic_term) {
 			frappe.call({
@@ -86,9 +86,9 @@ frappe.ui.form.on("Fees", {
 			});
 		}
 	},
-	
+
 	calculate_total_amount: function(frm) {
-		total_amount = 0;
+		var total_amount = 0;
 		for(var i=0;i<frm.doc.components.length;i++) {
 			total_amount += frm.doc.components[i].amount;
 		}

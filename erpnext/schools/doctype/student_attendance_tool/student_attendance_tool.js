@@ -98,17 +98,6 @@ schools.StudentsEditor = Class.extend({
 				});
 			});
 
-		var get_present_student = function(student) {
-			return students.filter(function(s) {
-				return s.group_roll_number === group_roll_number;
-			})
-		}
-		var get_absent_student = function(group_roll_number) {
-			return students.filter(function(s) {
-				return s.group_roll_number === group_roll_number;
-			})
-		}
-
 		student_toolbar.find(".btn-mark-att")
 			.html(__('Mark Attendence'))
 			.on("click", function() {

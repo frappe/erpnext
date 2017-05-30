@@ -7,7 +7,7 @@ frappe.ui.form.on("Program Enrollment Tool", {
 	"refresh": function(frm) {
 		frm.disable_save();
 	},
-	
+
 	"get_students": function(frm) {
 		frm.set_value("students",[]);
 		frappe.call({
@@ -20,13 +20,13 @@ frappe.ui.form.on("Program Enrollment Tool", {
 			}
 		})
 	},
-	
+
 	"enroll_students": function(frm) {
 		frappe.call({
 			method: "enroll_students",
 			doc:frm.doc,
 			callback: function(r) {
-					frm.set_value("students", []);
+				frm.set_value("students", []);
 			}
 		})
 	}

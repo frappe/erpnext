@@ -30,14 +30,13 @@ frappe.ui.form.on('Material Request', {
 });
 
 frappe.ui.form.on("Material Request Item", {
-	"qty": function(frm, doctype, name) {
-			var d = locals[doctype][name];
-			if (flt(d.qty) < flt(d.min_order_qty)) {
-				frappe.msgprint(__("Warning: Material Requested Qty is less than Minimum Order Qty"));
-			}
+	"qty": function (frm, doctype, name) {
+		var d = locals[doctype][name];
+		if (flt(d.qty) < flt(d.min_order_qty)) {
+			frappe.msgprint(__("Warning: Material Requested Qty is less than Minimum Order Qty"));
 		}
 	}
-);
+});
 
 erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.extend({
 	onload: function(doc) {
@@ -140,7 +139,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 						return {filters: { docstatus:1 }}
 					}},
 				{"fieldname":"warehouse", "fieldtype":"Link", "label":__("Warehouse"),
-					options:"Warehouse", reqd: 1, label:"For Warehouse"},
+					options:"Warehouse", reqd: 1},
 				{"fieldname":"fetch_exploded", "fieldtype":"Check",
 					"label":__("Fetch exploded BOM (including sub-assemblies)"), "default":1},
 				{fieldname:"fetch", "label":__("Get Items from BOM"), "fieldtype":"Button"}

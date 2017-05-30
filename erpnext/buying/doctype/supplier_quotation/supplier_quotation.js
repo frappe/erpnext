@@ -5,7 +5,7 @@
 {% include 'erpnext/public/js/controllers/buying.js' %};
 
 frappe.ui.form.on('Suppier Quotation', {
-	setup: function() {
+	setup: function(frm) {
 		frm.custom_make_buttons = {
 			'Purchase Order': 'Purchase Order'
 		}

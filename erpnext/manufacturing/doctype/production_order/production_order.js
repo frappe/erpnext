@@ -65,10 +65,10 @@ frappe.ui.form.on("Production Order", {
 			'width': (frm.doc.produced_qty / frm.doc.qty * 100) + '%',
 			'progress_class': 'progress-bar-success'
 		});
-		if(bars[0].width=='0%') {
-			 bars[0].width = '0.5%';
-			 added_min = 0.5;
-		 }
+		if (bars[0].width == '0%') {
+			bars[0].width = '0.5%';
+			added_min = 0.5;
+		}
 		message = title;
 
 		// pending qty
@@ -126,10 +126,10 @@ erpnext.production_order = {
 
 			if(!frm.doc.skip_transfer){
 				if ((flt(doc.material_transferred_for_manufacturing) < flt(doc.qty)) && frm.doc.status != 'Stopped') {
-				frm.has_start_btn = true;
-				var btn = frm.add_custom_button(__('Start'),
-					cur_frm.cscript['Transfer Raw Materials']);
-				btn.addClass('btn-primary');
+					frm.has_start_btn = true;
+					var btn = frm.add_custom_button(__('Start'),
+						cur_frm.cscript['Transfer Raw Materials']);
+					btn.addClass('btn-primary');
 				}
 			}
 
@@ -161,7 +161,7 @@ erpnext.production_order = {
 			var op = doc.operations;
 			doc.planned_operating_cost = 0.0;
 			for(var i=0;i<op.length;i++) {
-				planned_operating_cost = flt(flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60, 2);
+				var planned_operating_cost = flt(flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60, 2);
 				frappe.model.set_value('Production Order Operation',op[i].name, "planned_operating_cost", planned_operating_cost);
 
 				doc.planned_operating_cost += planned_operating_cost;
@@ -198,7 +198,7 @@ erpnext.production_order = {
 					query: "erpnext.controllers.queries.bom",
 					filters: {item: cstr(doc.production_item)}
 				}
-			} else msgprint(__("Please enter Production Item first"));
+			} else frappe.msgprint(__("Please enter Production Item first"));
 		});
 	},
 
@@ -227,9 +227,9 @@ $.extend(cur_frm.cscript, {
 		frappe.call({
 			method: "erpnext.manufacturing.doctype.production_order.production_order.get_item_details",
 			args: {
-					item: doc.production_item,
-					project: doc.project
-					},
+				item: doc.production_item,
+				project: doc.project
+			},
 			callback: function(r) {
 				$.each(["description", "stock_uom", "project", "bom_no"], function(i, field) {
 					cur_frm.set_value(field, r.message[field]);

@@ -7,7 +7,7 @@ frappe.query_reports["Salary Register"] = {
 			"fieldname":"date_range",
 			"label": __("Date Range"),
 			"fieldtype": "DateRange",
-			"default": [frappe.datetime.add_months(get_today(),-1), frappe.datetime.get_today()],
+			"default": [frappe.datetime.add_months(frappe.datetime.get_today(),-1), frappe.datetime.get_today()],
 			"reqd": 1
 		},
 		{

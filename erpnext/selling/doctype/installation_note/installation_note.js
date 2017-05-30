@@ -16,9 +16,13 @@ frappe.provide("erpnext.selling");
 // TODO commonify this code
 erpnext.selling.InstallationNote = frappe.ui.form.Controller.extend({
 	onload: function() {
-		if(!this.frm.doc.status) set_multiple(dt,dn,{ status:'Draft'});
-		if(this.frm.doc.__islocal) set_multiple(this.frm.doc.doctype, this.frm.doc.name,
-				{inst_date: get_today()});
+		if(!this.frm.doc.status) {
+			set_multiple(this.frm.doc.doctype, this.frm.doc.name, { status:'Draft'});
+		}
+		if(this.frm.doc.__islocal) {
+			set_multiple(this.frm.doc.doctype, this.frm.doc.name,
+				{inst_date: frappe.datetime.get_today()});
+		}
 
 		this.setup_queries();
 	},

@@ -57,7 +57,7 @@ erpnext.utils.add_item = function(frm) {
 		var prev_route = frappe.get_prev_route();
 		if(prev_route[1]==='Item' && !(frm.doc.items && frm.doc.items.length)) {
 			// add row
-			item = frm.add_child('items');
+			var item = frm.add_child('items');
 			frm.refresh_field('items');
 
 			// set item
@@ -98,8 +98,8 @@ erpnext.utils.set_taxes = function(frm, address_field, display_field, is_your_co
 	if(frappe.meta.get_docfield(frm.doc.doctype, "taxes") && !is_your_company_address) {
 		if(!erpnext.utils.validate_mandatory(frm, "Lead/Customer/Supplier",
 			frm.doc.customer || frm.doc.supplier || frm.doc.lead, address_field)) {
-				return;
-			}
+			return;
+		}
 
 		if(!erpnext.utils.validate_mandatory(frm, "Posting/Transaction Date",
 			frm.doc.posting_date || frm.doc.transaction_date, address_field)) {
