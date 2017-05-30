@@ -54,7 +54,7 @@ frappe.ui.form.on("Opportunity", {
 				frm.add_custom_button(__('Lost'),
 					cur_frm.cscript['Declare Opportunity Lost']);
 			}
-		},
+		}
 
 		if(!frm.doc.__islocal && frm.perm[0].write && frm.doc.docstatus==0) {
 			if(frm.doc.status==="Open") {
