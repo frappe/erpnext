@@ -13,7 +13,7 @@ class TrainingResult(Document):
 	
 	def send_result(self):
 		for emp in self.employees:
-			message = "Thank You for attending {0}. You grade is {1}".format(self.training_event, emp.grade)
+			message = "Thank You for attending {0}. Your grade: {1}".format(self.training_event, emp.grade)
 			frappe.sendmail(frappe.db.get_value("Employee", emp.employee, "company_email"), \
 				subject=_("{0} Results".format(self.training_event)), \
 				content=message)
