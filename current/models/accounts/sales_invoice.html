@@ -110,7 +110,7 @@
 		<div class=" page-content col-sm-12 ">
 			<div class="page-content-wrapper">
 				<div class="row page-head">
-					<div class='col-sm-12'>
+					<div class='col-sm-12 hidden-xs'>
 						
 						<div class="page-breadcrumbs">
 							
@@ -1777,7 +1777,7 @@ Net Total</pre>
                 
 
 
-<a href="https://frappe.github.io/erpnext/current/models/print/letter_head">Letter Head</a>
+<a href="https://frappe.github.io/erpnext/current/models/printing/letter_head">Letter Head</a>
 
 
                 
@@ -2307,7 +2307,7 @@ Yearly</pre>
                 
 
 
-<a href="https://frappe.github.io/erpnext/current/models/print/print_format">Print Format</a>
+<a href="https://frappe.github.io/erpnext/current/models/printing/print_format">Print Format</a>
 
 
                 
@@ -2876,6 +2876,20 @@ Yearly</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="update_serial_no" href="#update_serial_no" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>update_serial_no</b>
+        <i class="text-muted">(self, in_cancel=False)</i>
+    </p>
+	<div class="docs-attr-desc"><p>update Sales Invoice refrence in Serial No </p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="update_status_updater_args" href="#update_status_updater_args" class="text-muted small">
             <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>update_status_updater_args</b>
@@ -2949,6 +2963,20 @@ Yearly</pre>
         <a name="validate_account_for_change_amount" href="#validate_account_for_change_amount" class="text-muted small">
             <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>validate_account_for_change_amount</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_auto_set_posting_time" href="#validate_auto_set_posting_time" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>validate_auto_set_posting_time</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -3078,6 +3106,51 @@ Yearly</pre>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p>check for does customer belong to same project as entered..</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_serial_against_delivery_note" href="#validate_serial_against_delivery_note" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>validate_serial_against_delivery_note</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><pre><code>        validate if the serial numbers in Sales Invoice Items are same as in
+        Delivery Note Item
+</code></pre>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_serial_against_sales_invoice" href="#validate_serial_against_sales_invoice" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>validate_serial_against_sales_invoice</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>check if serial number is already used in other sales invoice </p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_serial_numbers" href="#validate_serial_numbers" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>validate_serial_numbers</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><pre><code>        validate serial number agains Delivery Note and Sales Invoice
+</code></pre>
 </div>
 	<br>
 
@@ -3258,6 +3331,15 @@ Yearly</pre>
 
 
 <a href="https://frappe.github.io/erpnext/current/models/accounts/sales_invoice">Sales Invoice</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/serial_no">Serial No</a>
 
 </li>
 			
