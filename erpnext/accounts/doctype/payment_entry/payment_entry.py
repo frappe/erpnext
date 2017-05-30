@@ -75,7 +75,7 @@ class PaymentEntry(AccountsController):
 	
 	def validate_allocated_amount(self):
 		for d in self.get("references"):
-			if d.outstanding_amount > 0:
+			if (flt(d.allocated_amount))> 0:
 				if d.allocated_amount > d.outstanding_amount:
 					frappe.throw(_("Allocated Amount cannot be greater than outstanding amount."))
 
