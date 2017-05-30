@@ -33,6 +33,7 @@ def setup_complete(args=None):
 	create_letter_head(args)
 	create_taxes(args)
 	create_items(args)
+	create_state_code(args)
 	create_customers(args)
 	create_suppliers(args)
 
@@ -254,6 +255,25 @@ def create_sales_tax(args):
 		for sales_tax, tax_data in country_wise_tax.items():
 			make_tax_account_and_template(args.get("company_name").strip(),
 				tax_data.get('account_name'), tax_data.get('tax_rate'), sales_tax)
+
+def create_state_code(args):
+	country_state_code= get_state_code(args.get("country"))
+	if country_state_code and len(country_state_code) > 0:
+		for sc in country_state_code:
+			if sc:
+				frappe.get_doc({
+					"doctype":"State Code",
+					"state_code":sc["state_code"],
+					"state_name": sc["state_name"],
+					"number": sc["number"],
+				}).insert(ignore_permissions=True)
+
+def get_state_code(country):
+	data = {}
+	with open (os.path.join(os.path.dirname(__file__), "data", "state_code.json")) as state_code:
+		data = json.load(state_code).get(country)
+		
+	return data
 
 def get_country_wise_tax(country):
 	data = {}
