@@ -20,6 +20,7 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 from erpnext.stock.utils import get_bin
+from frappe.utils.csvutils import getlink
 
 class OverProductionError(frappe.ValidationError): pass
 class StockOverProductionError(frappe.ValidationError): pass
@@ -311,7 +312,7 @@ class ProductionOrder(Document):
 
 		if timesheet and timesheet.get("time_logs"):
 			timesheet.save()
-			timesheets.append(timesheet.name)
+			timesheets.append(getlink("Timesheet", timesheet.name))
 
 		self.planned_end_date = self.operations[-1].planned_end_time
 		if timesheets:

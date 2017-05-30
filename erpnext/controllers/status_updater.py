@@ -19,10 +19,10 @@ status_map = {
 		["Converted", "has_customer"],
 	],
 	"Opportunity": [
-		["Quotation", "has_active_quotation"],
-		["Converted", "has_ordered_quotation"],
 		["Lost", "eval:self.status=='Lost'"],
 		["Lost", "has_lost_quotation"],
+		["Quotation", "has_active_quotation"],
+		["Converted", "has_ordered_quotation"],
 		["Closed", "eval:self.status=='Closed'"]
 	],
 	"Quotation": [
