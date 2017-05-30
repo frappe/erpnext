@@ -12,13 +12,11 @@ apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +654,
 apps/erpnext/erpnext/schools/doctype/fees/fees.js +26,Collect Fees,Cobrar Tarifas
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +879,BOM does not contain any stock item,BOM no contiene ningún ítem de stock
 DocType: Homepage,Company Tagline for website homepage,Lema de la empresa para la página de inicio del sitio web
-DocType: Grading Structure,Grading Structure,Estructura de Calificación
 DocType: Delivery Note,% Installed,% Instalado
 DocType: Student,Guardian Details,Detalles del Guardián
 apps/erpnext/erpnext/schools/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +53,Guardian1 Name,Nombre de Guardián 1
-DocType: Grade Interval,Grade Code,Grado de Código
-apps/erpnext/erpnext/accounts/party.py +247,Billing currency must be equal to either default comapany's currency or party account currency,La moneda de facturación debe ser igual a la moneda por defecto de la compañía o la moneda de la cuenta de la parte
-DocType: Grading Structure,Grade Intervals,intervalos de Grado
+DocType: Grading Scale Interval,Grade Code,Grado de Código
+apps/erpnext/erpnext/accounts/party.py +250,Billing currency must be equal to either default comapany's currency or party account currency,La moneda de facturación debe ser igual a la moneda por defecto de la compañía o la moneda de la cuenta de la parte
 DocType: Fee Structure,Fee Structure,Estructura de Tarifas
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +108,Last purchase rate not found,Última tasa de compra no encontrada
 apps/erpnext/erpnext/schools/doctype/course_scheduling_tool/course_scheduling_tool.py +50,Course Schedules created:,Calendario de Cursos creado:
@@ -35,14 +33,11 @@ apps/erpnext/erpnext/schools/report/student_and_guardian_contact_details/student
 DocType: Grading Scale Interval,Grading Scale Interval,Intervalo de Escala de Calificación
 DocType: Stock Entry,Customer or Supplier Details,Detalle de cliente o proveedor
 DocType: Course Scheduling Tool,Course Scheduling Tool,Herramienta de Programación de cursos
-DocType: Grade Interval,Grade Description,Descripción de Grado
+DocType: Grading Scale Interval,Grade Description,Descripción de Grado
 DocType: Shopping Cart Settings,Checkout Settings,Ajustes de Finalización de Pedido
 DocType: Guardian Interest,Guardian Interest,Interés del Guardián
-DocType: Grading Structure,Grading Intervals,Intervalos de Calificación
 apps/erpnext/erpnext/public/js/setup_wizard.js +383,Classrooms/ Laboratories etc where lectures can be scheduled.,"Aulas / laboratorios, etc., donde las lecturas se pueden programar."
 apps/erpnext/erpnext/templates/includes/cart/cart_dropdown.html +18,Checkout,Finalizando pedido
 DocType: Sales Invoice,Change Amount,Importe de Cambio
 DocType: Guardian Student,Guardian Student,Guardián del Estudiante
-DocType: Grading Structure,Grading System Name,Nombre de Sistema de Calificación
-DocType: Grade Interval,Grade Interval,Intervalo de Grado
 DocType: BOM Operation,Base Hour Rate(Company Currency),Tarifa Base por Hora (Divisa de Compañía)
