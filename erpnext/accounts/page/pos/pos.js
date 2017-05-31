@@ -707,15 +707,28 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				autoFirst: true,
 				list: [],
 				filter: function (item, input) {
-					var value = item.value.toLowerCase();
-					if (value.indexOf('is_action') !== -1 ||
-						value.indexOf(input.toLowerCase()) !== -1) {
+					if (item.value.includes('is_action')) {
 						return true;
 					}
+
+					input = input.toLowerCase();
+					item = this.get_item(item.value);
+					var searchtext =
+						Object.keys(item)
+							.filter(key => ['customer_name', 'customer_group', 'value', 'label'].includes(key))
+							.map(key => item[key])
+							.join(" ")
+							.toLowerCase();
+
+					return searchtext.includes(input)
 				},
 				item: function (item, input) {
-					var d = item;
+					var d = this.get_item(item.value);
 					var html = "<span>" + __(d.label || d.value) + "</span>";
+					if(d.customer_name) {
+						html += '<br><span class="text-muted ellipsis">' + __(d.customer_name) + '</span>';
+					}
+
 					return $('<li></li>')
 						.data('item.autocomplete', d)
 						.html('<a><p>' + html + '</p></a>')
@@ -723,28 +736,12 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				}
 			});
 
-		this.customers_mapper = this.customers.map(function (c) {
-			return {
-				label: c.name,
-				value: c.name,
-				customer_group: c.customer_group,
-				territory: c.territory
-			}
-		});
-
-		this.customers_mapper.push({
-			label: "<span class='text-primary link-option'>"
-			+ "<i class='fa fa-plus' style='margin-right: 5px;'></i> "
-			+ __("Create a new Customer")
-			+ "</span>",
-			value: 'is_action',
-			action: me.add_customer
-		});
+		this.prepare_customer_mapper()
 		this.autocomplete_customers();
 
 		this.party_field.$input
 			.on('input', function (e) {
-				me.party_field.awesomeplete.list = this.customers_mapper;
+				me.party_field.awesomeplete.list = me.customers_mapper;
 			})
 			.on('awesomplete-select', function (e) {
 				var customer = me.party_field.awesomeplete
@@ -782,6 +779,28 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					$(this).val("");
 				}
 			});
+	},
+
+	prepare_customer_mapper: function() {
+		var me = this;
+		this.customers_mapper = this.customers.map(function (c) {
+			return {
+				label: c.name,
+				value: c.name,
+				customer_name: c.customer_name,
+				customer_group: c.customer_group,
+				territory: c.territory
+			}
+		});
+
+		this.customers_mapper.push({
+			label: "<span class='text-primary link-option'>"
+			+ "<i class='fa fa-plus' style='margin-right: 5px;'></i> "
+			+ __("Create a new Customer")
+			+ "</span>",
+			value: 'is_action',
+			action: me.add_customer
+		});
 	},
 
 	autocomplete_customers: function() {
@@ -923,7 +942,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			});
 		}
 
-		this.address[this.frm.doc.customer] = this.customer_doc.get_values();
+		this.address[this.frm.doc.customer] = JSON.parse(this.get_prompt_details())
 	},
 
 	get_prompt_details: function() {
@@ -940,26 +959,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.frm.doc.territory = doc.territory;
 		this.pos_bill.show();
 		this.numeric_keypad.show();
-	},
-
-	get_customers: function (key) {
-		var me = this;
-		key = key.toLowerCase().trim()
-		var re = new RegExp('%', 'g');
-		var reg = new RegExp(key.replace(re, '\\w*\\s*[a-zA-Z0-9]*'))
-
-		if (key) {
-			return $.grep(this.customers, function (data) {
-				if (reg.test(data.name.toLowerCase())
-					|| reg.test(data.customer_name.toLowerCase())
-					|| (data.customer_group && reg.test(data.customer_group.toLowerCase()))) {
-					return data
-				}
-			})
-		} else {
-			customers = this.customers.sort(function (a, b) { return a.idx < b.idx })
-			return customers.slice(0, 20)
-		}
 	},
 
 	make_item_list: function () {
@@ -1619,12 +1618,15 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				},
 				callback: function (r) {
 					if (r.message) {
+						me.customers = r.message.synced_customers_list;
 						me.removed_items = r.message.invoice;
 						me.removed_email = r.message.email_queue
 						me.removed_customers = r.message.customers
 						me.remove_doc_from_localstorage();
 						me.remove_email_queue_from_localstorage();
 						me.remove_customer_from_localstorage();
+						me.prepare_customer_mapper()
+						me.autocomplete_customers()
 					}
 				}
 			})
