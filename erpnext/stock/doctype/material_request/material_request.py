@@ -103,6 +103,8 @@ class MaterialRequest(BuyingController):
 		self.set_status(update=True)
 
 	def before_cancel(self):
+		# if MRQ is already closed, no point saving the document
+		check_for_closed_status(self.doctype, self.name)
 		self.set_status(update=True)
 
 	def check_modified_date(self):
@@ -120,11 +122,7 @@ class MaterialRequest(BuyingController):
 		self.update_requested_qty()
 
 	def on_cancel(self):
-		check_for_closed_status(self.doctype, self.name)
-
 		self.update_requested_qty()
-
-		frappe.db.set(self,'status','Cancelled')
 
 	def update_completed_qty(self, mr_items=None, update_modified=True):
 		if self.material_request_type == "Purchase":
