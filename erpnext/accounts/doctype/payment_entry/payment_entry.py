@@ -67,17 +67,16 @@ class PaymentEntry(AccountsController):
 	def validate_duplicate_entry(self):
 		reference_names = []
 		for d in self.get("references"):
-			print d.reference_name
-			if d.reference_name in reference_names:
-				frappe.throw(_("Duplicate entry in References {0} {1}").format(d.reference_doctype, d.reference_name))
-			reference_names.append(d.reference_name)
+			if (d.reference_doctype, d.reference_name) in reference_names:
+				frappe.throw(_("Row #{0}: Duplicate entry in References {1} {2}").format(d.idx, d.reference_doctype, d.reference_name))
+			reference_names.append((d.reference_doctype, d.reference_name))
 	
 	
 	def validate_allocated_amount(self):
 		for d in self.get("references"):
 			if (flt(d.allocated_amount))> 0:
-				if d.allocated_amount > d.outstanding_amount:
-					frappe.throw(_("Allocated Amount cannot be greater than outstanding amount."))
+				if flt(d.allocated_amount) > flt(d.outstanding_amount):
+					frappe.throw(_("Row #{0}: Allocated Amount cannot be greater than outstanding amount.").format(d.idx))
 
 
 	def delink_advance_entry_references(self):
