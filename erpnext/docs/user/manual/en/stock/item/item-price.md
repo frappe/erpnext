@@ -40,4 +40,14 @@ Stock >> Main Report >> Itemwise Price List Rate
 
 You will find option to create new Item Price record (+) in this report as well.
 
+
+Other fields that you can add are:
+1. If Selling select the related Customer. This can lead to each Customer have a special selling price.
+2. Unit of Measument (UOM) you can specify UOM differently in Item Price from Item for example you keep a stock in Boxes but you need a Item Price per single box unit.
+3. Mininum Qty of Item Price, for example 0.002 rate stand only if order are 1000 pieces etc.
+4. Lead Time in Days
+5. Packing unit, quantity that must be bought or sold per UOM
+6. Valid From and Valid Upto. For example an Item Price is Valid that period due a offer period (Christmas)
+7. Note is a free text.
+
 {next}
