@@ -90,10 +90,10 @@ status_map = {
 		["Draft", None],
 		["Stopped", "eval:self.status == 'Stopped'"],
 		["Pending", "eval:self.per_ordered == 0 and self.docstatus == 1"],
-		["Partially Ordered", "eval:self.per_ordered < 100 and self.docstatus == 1"],
-		["Ordered", "eval:self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase"],
-		["Transferred", "eval:self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Transfer"],
-		["Issued", "eval:self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Issue"]
+		["Partially Ordered", "eval:self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1"],
+		["Ordered", "eval:self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
+		["Transferred", "eval:self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Transfer'"],
+		["Issued", "eval:self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Issue'"]
 	]
 }
 
@@ -114,12 +114,11 @@ class StatusUpdater(Document):
 			if self.get('amended_from'):
 				self.status = 'Draft'
 			return
-		print("doctype is", self.doctype)
+
 		if self.doctype in status_map:
 			_status = self.status
 
 			if status and update:
-				print("status is", status)
 				self.db_set("status", status)
 
 			sl = status_map[self.doctype][:]
