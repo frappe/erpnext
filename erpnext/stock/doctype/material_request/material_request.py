@@ -93,8 +93,17 @@ class MaterialRequest(BuyingController):
 		self.title = ', '.join(items)
 
 	def on_submit(self):
-		frappe.db.set(self, 'status', 'Submitted')
+		#frappe.db.set(self, 'status', 'Submitted')
 		self.update_requested_qty()
+
+	def before_save(self):
+		self.set_status(update=True)
+
+	def before_submit(self):
+		self.set_status(update=True)
+
+	def before_cancel(self):
+		self.set_status(update=True)
 
 	def check_modified_date(self):
 		mod_db = frappe.db.sql("""select modified from `tabMaterial Request` where name = %s""",
