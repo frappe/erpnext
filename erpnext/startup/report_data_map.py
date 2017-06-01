@@ -269,7 +269,7 @@ data_map = {
 	},
 	"Purchase Receipt": {
 		"columns": ["name", "supplier", "posting_date", "company"],
-		"conditions": ["docstatus=1"], 
+		"conditions": ["docstatus=1"],
 		"order_by": "posting_date",
 		"links": {
 			"supplier": ["Supplier", "name"],
@@ -278,7 +278,7 @@ data_map = {
 	},
 	"Purchase Receipt Item[Purchase Analytics]": {
 		"columns": ["name", "parent", "item_code", "stock_qty as qty", "base_net_amount"],
-		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"], 
+		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
 			"parent": ["Purchase Receipt", "name"],
@@ -308,7 +308,7 @@ data_map = {
 			"owner" : ["User", "name"]
 		}
 	},
-	"Appointment": {
+	"Patient Appointment": {
 		"columns": ["name", "appointment_type", "patient", "physician", "start_dt", "department", "status"],
 		"order_by": "name",
 		"links": {

@@ -74,7 +74,7 @@ def get_domain(domain):
 			'default_portal_role': 'Student'
 		},
 		'Healthcare': {
-			'desktop_icons': ['Patient', 'Appointment', 'Consultation', 'Lab Test', 'Healthcare',
+			'desktop_icons': ['Patient', 'Patient Appointment', 'Consultation', 'Lab Test', 'Healthcare',
 				'Accounts',  'Buying', 'Stock', 'HR', 'ToDo'],
 			'remove_roles': ['Manufacturing User', 'Manufacturing Manager', 'Projects User', 'Projects Manager',
 				'Academics User', 'Instructor'],

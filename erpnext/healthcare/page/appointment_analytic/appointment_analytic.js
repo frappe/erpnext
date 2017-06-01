@@ -17,7 +17,7 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			page: wrapper.page,
-			doctypes: ["Appointment", "Physician", "Medical Department", "Appointment Type", "Patient"],
+			doctypes: ["Patient Appointment", "Physician", "Medical Department", "Appointment Type", "Patient"],
 			tree_grid: { show: true }
 		});
 
@@ -100,7 +100,7 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 	prepare_data: function() {
 		var me = this;
 		if (!this.tl) {
-			this.tl = frappe.report_dump.data["Appointment"]
+			this.tl = frappe.report_dump.data["Patient Appointment"]
 		}
 		if(!this.data || me.item_type != me.tree_type) {
 			if(me.tree_type=='Physician') {
