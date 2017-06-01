@@ -14,7 +14,7 @@ from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import g
 class Consultation(Document):
 	def on_update(self):
 		if(self.appointment):
-			frappe.db.set_value("Appointment",self.appointment,"status","Closed")
+			frappe.db.set_value("Patient Appointment",self.appointment,"status","Closed")
 		update_consultation_to_medical_record(self)
 
 	def after_insert(self):
@@ -74,55 +74,17 @@ def create_invoice(company, patient, consultations):
 	sales_invoice = frappe.new_doc("Sales Invoice")
 	sales_invoice.customer = frappe.get_value("Patient", patient, "customer")
 	sales_invoice.due_date = getdate()
-	validity_list = []
 	sales_invoice.is_pos = '0'
 	sales_invoice.debit_to = get_receivable_account(company)
 
 	for consultation_id in consultations:
 		consultation = frappe.get_doc("Consultation",consultation_id)
-		validity_exist = validity_exists(consultation.physician, consultation.patient)
-		if validity_exist :
-			fee_validity = frappe.get_doc("Fee Validity",validity_exist[0][0])
-			fee_validity = update_fee_validity(fee_validity, consultation)
-		else:
-			fee_validity = create_fee_validity(consultation)
-		validity_list.append(fee_validity.name)
 		create_invoice_items(consultation, sales_invoice)
 
 	sales_invoice.save(ignore_permissions=True)
 	for consultation in consultations:
 		frappe.db.sql(_("""update tabConsultation set invoice='{0}' where name='{1}'""").format(sales_invoice.name, consultation))
-	for validity in validity_list:
-		frappe.db.set_value("Fee Validity", validity, "ref_invoice", sales_invoice.name)
 	return sales_invoice.name
-
-def validity_exists(physician, patient):
-	return frappe.db.exists({
-			"doctype": "Fee Validity",
-			"physician": physician,
-			"patient": patient})
-
-def update_fee_validity(fee_validity, consultation):
-	max_visit = frappe.db.get_value("Healthcare Settings", None, "max_visit")
-	valid_days = frappe.db.get_value("Healthcare Settings", None, "valid_days")
-	if not valid_days:
-		valid_days = 1
-	if not max_visit:
-		max_visit = 1
-	date = consultation.consultation_date
-	valid_till = date + datetime.timedelta(days=int(valid_days))
-	fee_validity.max_visit = max_visit
-	fee_validity.visited = 1
-	fee_validity.valid_till = valid_till
-	fee_validity.save(ignore_permissions=True)
-	return fee_validity
-
-def create_fee_validity(consultation):
-	fee_validity = frappe.new_doc("Fee Validity")
-	fee_validity.physician = consultation.physician
-	fee_validity.patient = consultation.patient
-	fee_validity = update_fee_validity(fee_validity, consultation)
-	return fee_validity
 
 def create_invoice_items(consultation, invoice):
 	physician = frappe.get_doc("Physician",consultation.physician)
