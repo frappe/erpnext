@@ -50,10 +50,7 @@ class Project(Document):
 		if self.name is None:
 			return {}
 		else:
-			print("--------------------- {0}".format(self.name))
-			get = frappe.get_all("Task", "*", {"project": self.name}, order_by="exp_start_date asc")
-			print(get)
-			return get
+			return frappe.get_all("Task", "*", {"project": self.name}, order_by="exp_start_date asc")
 
 	def validate(self):
 		self.validate_dates()
