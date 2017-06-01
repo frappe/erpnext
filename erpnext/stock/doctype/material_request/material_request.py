@@ -118,13 +118,13 @@ class MaterialRequest(BuyingController):
 
 	def update_status(self, status):
 		self.check_modified_date()
-		self.check_draft_status(status)
+		self.status_can_change(status)
 		self.set_status(update=True, status=status)
 		self.update_requested_qty()
 
-	def check_draft_status(self, status):
+	def status_can_change(self, status):
 		"""
-		validates that `status` is acceptable when the controller's status is 'Draft'
+		validates that `status` is acceptable for the present controller status
 		and throws an Exception if otherwise.
 		"""
 		if self.status and self.status == 'Draft':
