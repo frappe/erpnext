@@ -7,4 +7,10 @@ import frappe
 from frappe.model.document import Document
 
 class SupplierScorecardSetup(Document):
-	pass
+	
+	def validate(self):
+		self.validate_standings()
+
+	def validate_standings(self):
+		# Check that all possible scores are covered
+		pass

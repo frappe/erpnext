@@ -8,7 +8,3 @@ from frappe.model.document import Document
 
 class SupplierScorecardScoringCriteria(Document):
 	pass
-
-@frappe.whitelist()
-def get_scoring_criteria(criteria_name):
-	pass

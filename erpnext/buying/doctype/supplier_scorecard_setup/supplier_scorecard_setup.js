@@ -2,36 +2,58 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Supplier Scorecard Setup', {
-	on_load: function(frm) {
-		frm.fields_dict['variable'].grid.get_field('bom').get_query = function(doc, cdt, cdn) {
-			var d = locals[cdt][cdn]
-			return {
-				filters: [
-					['BOM', 'item', '=', d.item_code],
-					['BOM', 'is_active', '=', '1'],
-					['BOM', 'docstatus', '=', '1']
-				]
+	refresh: function(frm) {
+		frm.add_custom_button(__('Generate Scorecard'),
+			function() {
+				frappe.model.open_mapped_doc({
+					method: "erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.make_supplier_scorecard",
+					frm: cur_frm
+				})
+			});
+
+	}
+	
+});
+
+frappe.ui.form.on('Supplier Scorecard Scoring Standing', {
+
+	standing_name: function(frm, cdt, cdn) {
+		var d = frappe.get_doc(cdt, cdn);
+		return frm.call({
+			method: "erpnext.buying.doctype.supplier_scorecard_standing.supplier_scorecard_standing.get_scoring_standing",
+			child: d,
+			args: {
+				standing_name: d.standing_name	
 			}
-		}
+		});
 	}
 });
 
+frappe.ui.form.on('Supplier Scorecard Scoring Variable', {
+
+	variable_label: function(frm, cdt, cdn) {
+		var d = frappe.get_doc(cdt, cdn);
+		return frm.call({
+			method: "erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable.get_scoring_variable",
+			child: d,
+			args: {
+				variable_label: d.variable_label	
+			}
+		});
+	}
+});
 
 frappe.ui.form.on('Supplier Scorecard Scoring Criteria', {
-	form_render: function(frm) {
-		
-		
-		
-	}
-	criteria_label: function(frm, cdt, cdn) {
+
+	criteria_name: function(frm, cdt, cdn) {
 		var d = frappe.get_doc(cdt, cdn);
-		erpnext.utils.map_current_doc({
-			method: "erpnext.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_criteria.make_scoring_criteria",
-			source_doctype: "Supplier Scorecard Criteria",
-			get_query_filters: {
-				name: d.criteria_label
+		return frm.call({
+			method: "erpnext.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_criteria.get_scoring_criteria",
+			child: d,
+			args: {
+				criteria_name: d.criteria_name	
 			}
-		})
+		});
 	}
 });
 

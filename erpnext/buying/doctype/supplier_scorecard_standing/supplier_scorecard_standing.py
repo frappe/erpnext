@@ -8,3 +8,11 @@ from frappe.model.document import Document
 
 class SupplierScorecardStanding(Document):
 	pass
+
+	
+@frappe.whitelist()
+def get_scoring_standing(standing_name):
+	standing = frappe.get_doc("Supplier Scorecard Standing", standing_name)
+	
+	return standing
+	
