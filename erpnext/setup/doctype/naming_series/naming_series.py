@@ -14,6 +14,7 @@ from frappe.permissions import get_doctypes_with_read
 class NamingSeriesNotSetError(frappe.ValidationError): pass
 
 class NamingSeries(Document):
+	x=""
 	def get_transactions(self, arg=None):
 		doctypes = list(set(frappe.db.sql_list("""select parent
 				from `tabDocField` df where fieldname='naming_series'""")
@@ -49,6 +50,10 @@ class NamingSeries(Document):
 
 	def update_series(self, arg=None):
 		"""update series list"""
+		
+		if ((not self.set_options) and (not x)):
+			frappe.throw("List already emtpy can't be update to empty ")
+
 		self.check_duplicate()
 		series_list = self.set_options.split("\n")
 
@@ -131,9 +136,13 @@ class NamingSeries(Document):
 			throw(_('Special Characters except "-", "#", "." and "/" not allowed in naming series'))
 
 	def get_options(self, arg=None):
+		global x
 		if frappe.get_meta(arg or self.select_doc_for_series).get_field("naming_series"):
+			x= frappe.get_meta(arg or self.select_doc_for_series).get_field("naming_series").options
 			return frappe.get_meta(arg or self.select_doc_for_series).get_field("naming_series").options
-
+		else:
+			x=""
+			
 	def get_current(self, arg=None):
 		"""get series current"""
 		if self.prefix:
