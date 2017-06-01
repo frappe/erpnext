@@ -120,6 +120,12 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						function() { me.make_maintenance_schedule() }, __("Make"));
 				}
 
+				// project
+				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
+						this.frm.add_custom_button(__('Project'),
+							function() { me.make_project() }, __("Make"));
+				}
+
 			} else {
 				if (this.frm.has_perm("submit")) {
 					// un-close
@@ -260,6 +266,13 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	make_maintenance_schedule: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_schedule",
+			frm: this.frm
+		})
+	},
+
+	make_project: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_project",
 			frm: this.frm
 		})
 	},

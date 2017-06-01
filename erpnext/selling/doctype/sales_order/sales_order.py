@@ -408,6 +408,39 @@ def make_material_request(source_name, target_doc=None):
 	return doc
 
 @frappe.whitelist()
+def make_project(source_name, target_doc=None):
+	def postprocess(source, doc):
+		doc.project_type = "External"
+		doc.project_name = source.name
+
+	def update_item(source, target, source_parent):
+		print("-------------item____________-")
+		print(source.name)
+
+	doc = get_mapped_doc("Sales Order", source_name, {
+		"Sales Order": {
+			"doctype": "Project",
+			"validation": {
+				"docstatus": ["=", 1]
+			},
+			"field_map":{
+				"name" : "sales_order",
+				"delivery_date" : "expected_end_date",
+				"base_ground_total" : "estimated_costing",
+			}
+		},
+		"Sales Order Item": {
+			"doctype": "Task",
+			"field_map": {
+				"description": "title",
+			},
+			"postprocess": update_item,
+		}
+	}, target_doc, postprocess)
+
+	return doc
+
+@frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		if source.po_no:
