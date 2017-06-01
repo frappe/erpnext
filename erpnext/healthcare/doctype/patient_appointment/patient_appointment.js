@@ -125,7 +125,7 @@ frappe.ui.form.on('Patient Appointment', {
 
 			// disable buttons for which appointments are booked
 			data.appointments.map(slot => {
-				if(slot.status == "Scheduled" || slot.status == "Open"){
+				if(slot.status == "Scheduled" || slot.status == "Open" || slot.status == "Closed"){
 					$wrapper
 						.find(`button[data-name="${slot.appointment_time}"]`)
 						.attr('disabled', true);
