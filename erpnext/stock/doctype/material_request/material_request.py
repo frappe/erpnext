@@ -118,7 +118,7 @@ class MaterialRequest(BuyingController):
 
 	def update_status(self, status):
 		self.check_modified_date()
-		frappe.db.set(self, 'status', cstr(status))
+		self.set_status(update=True, status=status)
 		self.update_requested_qty()
 
 	def on_cancel(self):
