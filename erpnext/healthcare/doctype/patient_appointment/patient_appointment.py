@@ -113,9 +113,8 @@ def confirm_sms(doc):
 		send_message(doc, message)
 
 @frappe.whitelist()
-def create_invoice(company, patient, appointments):
-	appointments = json.loads(appointments)
-	if not appointments:
+def create_invoice(company, physician, patient, appointment_id, appointment_date):
+	if not appointment_id:
 		return False
 	sales_invoice = frappe.new_doc("Sales Invoice")
 	sales_invoice.customer = frappe.get_value("Patient", patient, "customer")
@@ -124,20 +123,17 @@ def create_invoice(company, patient, appointments):
 	sales_invoice.is_pos = '0'
 	sales_invoice.debit_to = get_receivable_account(company)
 
-	for appointment_id in appointments:
-		appointment = frappe.get_doc("Patient Appointment",appointment_id)
-		validity_exist = validity_exists(appointment.physician, appointment.patient)
-		if validity_exist :
-			fee_validity = frappe.get_doc("Fee Validity",validity_exist[0][0])
-			fee_validity = update_fee_validity(fee_validity, appointment)
-		else:
-			fee_validity = create_fee_validity(appointment)
-		validity_list.append(fee_validity.name)
-		create_invoice_items(appointment, sales_invoice)
+	validity_exist = validity_exists(physician, patient)
+	if validity_exist :
+		fee_validity = frappe.get_doc("Fee Validity",validity_exist[0][0])
+		fee_validity = update_fee_validity(fee_validity, appointment_date)
+	else:
+		fee_validity = create_fee_validity(physician, patient, appointment_date)
+	validity_list.append(fee_validity.name)
+	create_invoice_items(appointment_id, physician, company, sales_invoice)
 
 	sales_invoice.save(ignore_permissions=True)
-	for appointment in appointments:
-		frappe.db.sql(_("""update `tabPatient Appointment` set sales_invoice='{0}' where name='{1}'""").format(sales_invoice.name, appointment))
+	frappe.db.sql(_("""update `tabPatient Appointment` set sales_invoice='{0}' where name='{1}'""").format(sales_invoice.name, appointment_id))
 	for validity in validity_list:
 		frappe.db.set_value("Fee Validity", validity, "ref_invoice", sales_invoice.name)
 	return sales_invoice.name
@@ -148,14 +144,14 @@ def validity_exists(physician, patient):
 			"physician": physician,
 			"patient": patient})
 
-def update_fee_validity(fee_validity, appointment):
+def update_fee_validity(fee_validity, appointment_date):
 	max_visit = frappe.db.get_value("Healthcare Settings", None, "max_visit")
 	valid_days = frappe.db.get_value("Healthcare Settings", None, "valid_days")
 	if not valid_days:
 		valid_days = 1
 	if not max_visit:
 		max_visit = 1
-	date = appointment.appointment_date
+	date = getdate(appointment_date)
 	valid_till = date + datetime.timedelta(days=int(valid_days))
 	fee_validity.max_visit = max_visit
 	fee_validity.visited = 1
@@ -163,24 +159,25 @@ def update_fee_validity(fee_validity, appointment):
 	fee_validity.save(ignore_permissions=True)
 	return fee_validity
 
-def create_fee_validity(appointment):
+def create_fee_validity(physician, patient, appointment_date):
 	fee_validity = frappe.new_doc("Fee Validity")
-	fee_validity.physician = appointment.physician
-	fee_validity.patient = appointment.patient
-	fee_validity = update_fee_validity(fee_validity, appointment)
+	fee_validity.physician = physician
+	fee_validity.patient = patient
+	fee_validity = update_fee_validity(fee_validity, appointment_date)
 	return fee_validity
 
-def create_invoice_items(appointment, invoice):
-	physician = frappe.get_doc("Physician",appointment.physician)
+def create_invoice_items(appointment_id, physician, company, invoice):
 	item_line = invoice.append("items")
 	item_line.item_name = "Consulting Charges"
-	item_line.description = "Consulting Charges:  " + appointment.physician
+	item_line.description = "Consulting Charges:  " + physician
 	item_line.qty = 1
 	item_line.uom = "Nos"
 	item_line.conversion_factor = 1
-	item_line.income_account = get_income_account(appointment.physician,appointment.company)
-	item_line.rate = physician.op_consulting_charge
-	item_line.amount = physician.op_consulting_charge
+	item_line.income_account = get_income_account(physician,company)
+	op_consulting_charge = frappe.db.get_value("Physician", physician, "op_consulting_charge")
+	if op_consulting_charge:
+		item_line.rate = op_consulting_charge
+		item_line.amount = op_consulting_charge
 	return invoice
 
 @frappe.whitelist()

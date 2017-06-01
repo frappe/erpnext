@@ -67,9 +67,8 @@ def create_drug_invoice(company, patient, prescriptions):
 	return sales_invoice.as_dict()
 
 @frappe.whitelist()
-def create_invoice(company, patient, consultations):
-	consultations = json.loads(consultations)
-	if not consultations:
+def create_invoice(company, patient, physician, consultation_id):
+	if not consultation_id:
 		return False
 	sales_invoice = frappe.new_doc("Sales Invoice")
 	sales_invoice.customer = frappe.get_value("Patient", patient, "customer")
@@ -77,26 +76,25 @@ def create_invoice(company, patient, consultations):
 	sales_invoice.is_pos = '0'
 	sales_invoice.debit_to = get_receivable_account(company)
 
-	for consultation_id in consultations:
-		consultation = frappe.get_doc("Consultation",consultation_id)
-		create_invoice_items(consultation, sales_invoice)
+	consultation = frappe.get_doc("Consultation",consultation_id)
+	create_invoice_items(physician, sales_invoice, company)
 
 	sales_invoice.save(ignore_permissions=True)
-	for consultation in consultations:
-		frappe.db.sql(_("""update tabConsultation set invoice='{0}' where name='{1}'""").format(sales_invoice.name, consultation))
+	frappe.db.sql(_("""update tabConsultation set invoice='{0}' where name='{1}'""").format(sales_invoice.name, consultation_id))
 	return sales_invoice.name
 
-def create_invoice_items(consultation, invoice):
-	physician = frappe.get_doc("Physician",consultation.physician)
+def create_invoice_items(physician, invoice, company):
 	item_line = invoice.append("items")
 	item_line.item_name = "Consulting Charges"
-	item_line.description = "Consulting Charges:  " + consultation.physician
+	item_line.description = "Consulting Charges:  " + physician
 	item_line.qty = 1
 	item_line.uom = "Nos"
 	item_line.conversion_factor = 1
-	item_line.income_account = get_income_account(consultation.physician,consultation.company)
-	item_line.rate = physician.op_consulting_charge
-	item_line.amount = physician.op_consulting_charge
+	item_line.income_account = get_income_account(physician,company)
+	op_consulting_charge = frappe.get_value("Physician",physician,"op_consulting_charge")
+	if op_consulting_charge:
+		item_line.rate = op_consulting_charge
+		item_line.amount = op_consulting_charge
 	return invoice
 
 def insert_consultation_to_medical_record(doc):

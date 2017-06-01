@@ -197,7 +197,8 @@ var btn_invoice_consultation = function(frm){
 	frappe.call({
 		method:
 		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.create_invoice",
-		args: {company: doc.company, patient: doc.patient, appointments: [doc.name] },
+		args: {company: doc.company, physician:doc.physician, patient: doc.patient,
+			appointment_id: doc.name, appointment_date:doc.appointment_date },
 		callback: function(data){
 			if(!data.exc){
 				if(data.message){
