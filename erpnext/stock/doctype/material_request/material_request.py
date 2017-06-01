@@ -118,8 +118,23 @@ class MaterialRequest(BuyingController):
 
 	def update_status(self, status):
 		self.check_modified_date()
+		self.check_draft_status(status)
 		self.set_status(update=True, status=status)
 		self.update_requested_qty()
+
+	def check_draft_status(self, status):
+		"""
+		validates that `status` is acceptable when the controller's status is 'Draft'
+		and throws an Exception if otherwise.
+		"""
+		if self.status and self.status == 'Draft':
+			# draft document to pending only
+			if status != 'Pending':
+				frappe.throw(
+					_("{0} {1} has not been submitted so the action cannot be completed").
+						format(_(self.doctype), self.name),
+					frappe.InvalidStatusError
+				)
 
 	def on_cancel(self):
 		self.update_requested_qty()
