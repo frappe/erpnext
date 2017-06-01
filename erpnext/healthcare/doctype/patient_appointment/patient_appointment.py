@@ -12,7 +12,6 @@ import datetime
 from datetime import timedelta
 import calendar
 from erpnext.setup.doctype.sms_settings.sms_settings import send_sms
-from erpnext.healthcare.scheduler import check_availability
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account
 
 class PatientAppointment(Document):
@@ -23,15 +22,6 @@ class PatientAppointment(Document):
 		if(today == appointment_date):
 			frappe.db.set_value("Patient Appointment",self.name,"status","Open")
 			self.reload()
-
-	def validate(self):
-		pass
-		# if not self.appointment_date:
-		# 	frappe.throw(_("Please select date of appointment"))
-		# if not self.end_dt:
-		# 	physician = frappe.get_doc("Physician", self.physician)
-		# 	if physician.schedule:
-		# 		frappe.throw(_("Please use Check Availabilty to create Appointment"))
 
 	def after_insert(self):
 		#Check fee validity exists
@@ -45,56 +35,23 @@ class PatientAppointment(Document):
 				visited = fee_validity.visited + 1
 				frappe.db.set_value("Fee Validity",fee_validity.name,"visited",visited)
 				if(fee_validity.ref_invoice):
-					frappe.db.set_value("Patient Appointment",appointment.name,"invoiced",True)
-					frappe.db.set_value("Patient Appointment",appointment.name,"invoice",fee_validity.ref_invoice)
+					frappe.db.set_value("Patient Appointment",appointment.name,"sales_invoice",fee_validity.ref_invoice)
 				frappe.msgprint(_("{0} has fee validity till {1}").format(appointment.patient, fee_validity.valid_till))
 		confirm_sms(self)
 
-@frappe.whitelist()
 def appointment_cancel(appointmentId):
-	pass
-	# appointment = frappe.get_doc("Patient Appointment",appointmentId)  
-	#If invoiced --> fee_validity update with -1 visit
-	# if(appointment.invoiced):
-	# 	if (appointment.invoice):
-	# 		validity = frappe.db.exists({"doctype": "Fee Validity","ref_invoice": appointment.invoice})
-	# 		if(validity):
-	# 			fee_validity = frappe.get_doc("Fee Validity",validity[0][0])
-	# 			visited = fee_validity.visited - 1
-	# 			frappe.db.set_value("Fee Validity",fee_validity.name,"visited",visited)
-	# 			if visited <= 0:
-	# 				frappe.msgprint(_("Appointment cancelled, Please review and cancel the invoice {0}".format(appointment.invoice)))
-	# 			else:
-	# 				frappe.msgprint(_("Appointment cancelled"))
-
-@frappe.whitelist()
-def check_availability_by_dept(department, date, time=None, end_dt=None):
-	if not (department or date):
-		frappe.msgprint(_("Please select Department and Date"))
-	resources = frappe.db.sql(""" select name from `tabPhysician` where department= '%s' """ %(department))
-	if resources:
-		payload = {}
-		for res in resources:
-			payload[res[0]] = check_availability("Patient Appointment", "physician", True, "Physician", res[0], date, time, end_dt)
-		return payload
-	else:
-		msgprint(_("No Physicians available for Department {0}").format(department))
-
-@frappe.whitelist()
-def check_availability_by_physician(physician, date, time=None, end_dt=None):
-	if not (physician or date):
-		frappe.throw(_("Please select Physician and Date"))
-	payload = {}
-	payload[physician] = check_availability("Patient Appointment", "physician", True, "Physician", physician, date, time, end_dt)
-	return payload
-
-@frappe.whitelist()
-def check_appointment_availability(physician, date):
-	print physician, date
-	payload = {}
-	payload[physician] = check_availability("Patient Appointment", "physician", True,
-		"Physician", physician, date, None, None)
-	return payload
+	appointment = frappe.get_doc("Patient Appointment",appointmentId)
+	#If invoice --> fee_validity update with -1 visit
+	if (appointment.sales_invoice):
+ 		validity = frappe.db.exists({"doctype": "Fee Validity","ref_invoice": appointment.sales_invoice})
+ 		if(validity):
+ 			fee_validity = frappe.get_doc("Fee Validity",validity[0][0])
+ 			visited = fee_validity.visited - 1
+ 			frappe.db.set_value("Fee Validity",fee_validity.name,"visited",visited)
+ 			if visited <= 0:
+ 				frappe.msgprint(_("Appointment cancelled, Please review and cancel the invoice {0}".format(appointment.sales_invoice)))
+ 			else:
+ 				frappe.msgprint(_("Appointment cancelled"))
 
 @frappe.whitelist()
 def get_availability_data(date, physician):
@@ -112,12 +69,11 @@ def get_availability_data(date, physician):
 		if weekday == t.day:
 			available_slots.append(t)
 
-	# if physician not available return 
+	# if physician not available return
 	if not available_slots:
 		# TODO: return available slots in nearby dates
-		pass
-		# frappe.throw(_("Physician not available on {0}").format(weekday))
-	
+		frappe.throw(_("Physician not available on {0}").format(weekday))
+
 	# if physician on leave return
 
 	# if holiday return
@@ -127,8 +83,8 @@ def get_availability_data(date, physician):
 	appointments = frappe.get_all(
 		"Patient Appointment",
 		filters={"physician": physician, "appointment_date": date},
-		fields=["name", "appointment_time", "duration"])
-	
+		fields=["name", "appointment_time", "duration", "status"])
+
 	return {
 		"available_slots": available_slots,
 		"appointments": appointments,
@@ -181,7 +137,7 @@ def create_invoice(company, patient, appointments):
 
 	sales_invoice.save(ignore_permissions=True)
 	for appointment in appointments:
-		frappe.db.sql(_("""update `tabPatient Appointment` set invoiced=1, invoice='{0}' where name='{1}'""").format(sales_invoice.name, appointment))
+		frappe.db.sql(_("""update `tabPatient Appointment` set sales_invoice='{0}' where name='{1}'""").format(sales_invoice.name, appointment))
 	for validity in validity_list:
 		frappe.db.set_value("Fee Validity", validity, "ref_invoice", sales_invoice.name)
 	return sales_invoice.name
@@ -234,7 +190,6 @@ def create_consultation(appointment):
 	consultation.appointment = appointment.name
 	consultation.patient = appointment.patient
 	consultation.physician = appointment.physician
-	consultation.ref_physician = appointment.ref_physician
 	consultation.visit_department = appointment.department
 	consultation.patient_sex = appointment.patient_sex
 	consultation.consultation_date = appointment.appointment_date

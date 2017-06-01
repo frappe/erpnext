@@ -47,9 +47,9 @@ frappe.ui.form.on('Patient Appointment', {
 		}
 
 		if(!frm.doc.__islocal){
-			if(frm.doc.invoiced == '1'){
+			if(frm.doc.sales_invoice){
 				frm.add_custom_button(__('Invoice'), function() {
-					frappe.set_route("Form", "Sales Invoice", frm.doc.invoice);
+					frappe.set_route("Form", "Sales Invoice", frm.doc.sales_invoice);
 				 },__("View") );
 			}
 			else if(frm.doc.status != "Cancelled"){
@@ -58,14 +58,6 @@ frappe.ui.form.on('Patient Appointment', {
 				 },__("Create") );
 			}
 		};
-		// if(frm.doc.__islocal){
-		// 	frm.add_custom_button(__('By Physician'), function() {
-		// 		check_availability_by_physician(frm);
-		// 	 },__("Check Availability") );
-		// 	frm.add_custom_button(__('By Department'), function() {
-		// 		check_availability_by_dept(frm);
-		// 	 },__("Check Availability") );
-		// };
 	},
 	check_availability: function(frm) {
 		var { physician, appointment_date } = frm.doc;
@@ -133,9 +125,11 @@ frappe.ui.form.on('Patient Appointment', {
 
 			// disable buttons for which appointments are booked
 			data.appointments.map(slot => {
-				$wrapper
-					.find(`button[data-name="${slot.appointment_time}"]`)
-					.attr('disabled', true);
+				if(slot.status == "Scheduled" || slot.status == "Open"){
+					$wrapper
+						.find(`button[data-name="${slot.appointment_time}"]`)
+						.attr('disabled', true);
+				}
 			})
 
 			// blue button when clicked
@@ -157,12 +151,6 @@ frappe.ui.form.on('Patient Appointment', {
 			frm.set_value("appointment_time", null);
 			frm.disable_save();
 		}
-	},
-	appointment_date: function(frm){
-		frappe.model.set_value(frm.doctype,frm.docname, 'start_dt', new Date(frm.doc.appointment_date + ' ' + frm.doc.appointment_time))
-	},
-	appointment_time: function(frm){
-		frappe.model.set_value(frm.doctype,frm.docname, 'start_dt', new Date(frm.doc.appointment_date + ' ' + frm.doc.appointment_time))
 	},
 });
 
@@ -188,93 +176,6 @@ var btn_create_vital_signs = function (frm) {
 		"patient": frm.doc.patient,
 	}
 	frappe.new_doc("Vital Signs")
-}
-
-var check_availability_by_dept = function(frm){
-	if(frm.doc.department && frm.doc.appointment_date){
-		frappe.call({
-			method: "erpnext.healthcare.doctype.patient_appointment.patient_appointment.check_availability_by_dept",
-			args: {department: frm.doc.department, date: frm.doc.appointment_date, time: frm.doc.appointment_time},
-			callback: function(r){
-				if(r.message) show_availability(frm, r.message)
-				else msgprint("Error in checking availability");
-			}
-		});
-	}else{
-		msgprint("Please select Department and Date");
-	}
-}
-
-var check_availability_by_physician = function(frm){
-	if(frm.doc.physician && frm.doc.appointment_date){
-		frappe.call({
-			method: "erpnext.healthcare.doctype.patient_appointment.patient_appointment.check_availability_by_physician",
-			args: {physician: frm.doc.physician, date: frm.doc.appointment_date, time: frm.doc.appointment_time},
-			callback: function(r){
-				show_availability(frm, r.message)
-			}
-		});
-	}else{
-		msgprint("Please select Physician and Date");
-	}
-}
-
-
-var show_availability = function(frm, result){
-	var d = new frappe.ui.Dialog({
-		title: __("Appointment Availability (Time - Token)"),
-		fields: [
-			{
-				fieldtype: "HTML", fieldname: "availability"
-			}
-		]
-	});
-	var html_field = d.fields_dict.availability.$wrapper;
-	html_field.empty();
-	var list = ''
-	$.each(result, function(i, v) {
-		if(!v[0]){
-			$(repl('<div class="col-xs-12" style="padding-top:20px;" >%(physician)s not available</div></div>', {physician: i})).appendTo(html_field);
-			return
-		}
-		if(v[0]["msg"]){
-			var message = $(repl('<div class="col-xs-12" style="padding-top:20px;" >%(msg)s</div></div>', {msg: v[0]["msg"]})).appendTo(html_field);
-			return
-		}
-		$(repl('<div class="col-xs-12" style="padding-top:20px;"><b> %(physician)s</b></div>', {physician: i})).appendTo(html_field);
-		$.each(result[i], function(x, y){
-			if(y["msg"]){
-				var message = $(repl('<div class="col-xs-12" style="padding-top:12px; text-align:center;">%(msg)s</div></div>', {msg: y["msg"]})).appendTo(html_field);
-				return
-			}
-			else{
-				var row = $(repl('<div class="col-xs-12" style="padding-top:12px; text-align:center;" ><div class="col-xs-4"> %(start)s </div><div class="col-xs-4"> %(token)s </div><div class="col-xs-4"><a data-start="%(start)s" data-end="%(end)s" data-token="%(token)s" data-physician="%(physician)s"  href="#"><button class="btn btn-default btn-xs">Book</button></a></div></div>', {start: y["start"], end: y["end"], token: y["token"], physician: i})).appendTo(html_field);
-			}
-			row.find("a").click(function() {
-				var date_obj = frappe.datetime.str_to_obj($(this).attr("data-start"))
-				frm.doc.appointment_time = date_obj.toLocaleTimeString();
-				frm.doc.physician = $(this).attr("data-physician");
-				frm.doc.start_dt = $(this).attr("data-start");
-				frm.doc.end_dt = $(this).attr("data-end");
-				frm.doc.token = $(this).attr("data-token");
-				frm.set_df_property("patient", "read_only", 1);
-				frm.set_df_property("token", "read_only", 1);
-				frm.set_df_property("appointment_type", "read_only", 1);
-				frm.set_df_property("physician", "read_only", 1);
-				frm.set_df_property("ref_physician", "read_only", 1);
-				frm.set_df_property("department", "read_only", 1);
-				frm.set_df_property("appointment_date", "read_only", 1);
-				frm.set_df_property("appointment_time", "hidden", 0);
-				frm.set_df_property("appointment_time", "read_only", 1);
-				refresh_field("physician");refresh_field("token");refresh_field("start_dt");
-				refresh_field("appointment_time");refresh_field("end_dt")
-				d.hide();
-				return false;
-			});
-		})
-
-	});
-	d.show();
 }
 
 var btn_update_status = function(frm, status){
