@@ -93,7 +93,7 @@ class MaterialRequest(BuyingController):
 		self.title = ', '.join(items)
 
 	def on_submit(self):
-		#frappe.db.set(self, 'status', 'Submitted')
+		# frappe.db.set(self, 'status', 'Submitted')
 		self.update_requested_qty()
 
 	def before_save(self):
@@ -105,7 +105,7 @@ class MaterialRequest(BuyingController):
 	def before_cancel(self):
 		# if MRQ is already closed, no point saving the document
 		check_for_closed_status(self.doctype, self.name)
-		self.set_status(update=True)
+		self.set_status(update=True, status='Cancelled')
 
 	def check_modified_date(self):
 		mod_db = frappe.db.sql("""select modified from `tabMaterial Request` where name = %s""",
@@ -127,7 +127,16 @@ class MaterialRequest(BuyingController):
 		validates that `status` is acceptable for the present controller status
 		and throws an Exception if otherwise.
 		"""
-		if self.status and self.status == 'Draft':
+		if self.status and self.status == 'Cancelled':
+			# cancelled documents cannot change
+			if status != self.status:
+				frappe.throw(
+					_("{0} {1} is cancelled so the action cannot be completed").
+						format(_(self.doctype), self.name),
+					frappe.InvalidStatusError
+				)
+
+		elif self.status and self.status == 'Draft':
 			# draft document to pending only
 			if status != 'Pending':
 				frappe.throw(
