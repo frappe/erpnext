@@ -47,7 +47,13 @@ class Project(Document):
 			self.append("tasks", task_map)
 
 	def get_tasks(self):
-		return frappe.get_all("Task", "*", {"project": self.name}, order_by="exp_start_date asc")
+		if self.name is None:
+			return {}
+		else:
+			print("--------------------- {0}".format(self.name))
+			get = frappe.get_all("Task", "*", {"project": self.name}, order_by="exp_start_date asc")
+			print(get)
+			return get
 
 	def validate(self):
 		self.validate_dates()

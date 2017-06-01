@@ -413,10 +413,6 @@ def make_project(source_name, target_doc=None):
 		doc.project_type = "External"
 		doc.project_name = source.name
 
-	def update_item(source, target, source_parent):
-		print("-------------item____________-")
-		print(source.name)
-
 	doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Project",
@@ -426,15 +422,14 @@ def make_project(source_name, target_doc=None):
 			"field_map":{
 				"name" : "sales_order",
 				"delivery_date" : "expected_end_date",
-				"base_ground_total" : "estimated_costing",
+				"base_grand_total" : "estimated_costing",
 			}
 		},
 		"Sales Order Item": {
-			"doctype": "Task",
+			"doctype": "Project Task",
 			"field_map": {
 				"description": "title",
 			},
-			"postprocess": update_item,
 		}
 	}, target_doc, postprocess)
 
