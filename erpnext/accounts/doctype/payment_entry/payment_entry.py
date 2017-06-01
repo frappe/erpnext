@@ -48,6 +48,8 @@ class PaymentEntry(AccountsController):
 		self.validate_transaction_reference()
 		self.set_title()
 		self.set_remarks()
+		self.validate_duplicate_entry()
+		self.validate_allocated_amount()
 		
 	def on_submit(self):
 		self.setup_party_account_field()
@@ -61,7 +63,22 @@ class PaymentEntry(AccountsController):
 		self.make_gl_entries(cancel=1)
 		self.update_advance_paid()
 		self.delink_advance_entry_references()
+
+	def validate_duplicate_entry(self):
+		reference_names = []
+		for d in self.get("references"):
+			if (d.reference_doctype, d.reference_name) in reference_names:
+				frappe.throw(_("Row #{0}: Duplicate entry in References {1} {2}").format(d.idx, d.reference_doctype, d.reference_name))
+			reference_names.append((d.reference_doctype, d.reference_name))
 	
+	
+	def validate_allocated_amount(self):
+		for d in self.get("references"):
+			if (flt(d.allocated_amount))> 0:
+				if flt(d.allocated_amount) > flt(d.outstanding_amount):
+					frappe.throw(_("Row #{0}: Allocated Amount cannot be greater than outstanding amount.").format(d.idx))
+
+
 	def delink_advance_entry_references(self):
 		for reference in self.references:
 			if reference.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
