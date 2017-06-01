@@ -89,11 +89,11 @@ status_map = {
 	"Material Request": [
 		["Draft", None],
 		["Stopped", "eval:self.status == 'Stopped'"],
-		["Pending", "eval:self.per_ordered == 0 and self.docstatus == 1"],
-		["Partially Ordered", "eval:self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1"],
-		["Ordered", "eval:self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
-		["Transferred", "eval:self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Transfer'"],
-		["Issued", "eval:self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Issue'"]
+		["Pending", "eval:self.status != 'Stopped' and self.per_ordered == 0 and self.docstatus == 1"],
+		["Partially Ordered", "eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1"],
+		["Ordered", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
+		["Transferred", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Transfer'"],
+		["Issued", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Issue'"]
 	]
 }
 
