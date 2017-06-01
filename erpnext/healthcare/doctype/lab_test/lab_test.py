@@ -93,7 +93,6 @@ def create_lab_test_doc(invoice, consultation, patient, template):
 		lab_test.invoice = invoice
 	if(consultation):
 		lab_test.physician = consultation.physician
-		lab_test.ref_physician = consultation.ref_physician
 	lab_test.patient = patient.name
 	lab_test.patient_age = patient.get_age()
 	lab_test.patient_sex = patient.sex

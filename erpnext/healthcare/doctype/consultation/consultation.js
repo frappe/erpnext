@@ -68,7 +68,6 @@ frappe.ui.form.on('Consultation', {
 		frm.set_df_property("patient_sex", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("type", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("physician", "read_only", frm.doc.__islocal ? 0:1);
-		frm.set_df_property("ref_physician", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("visit_department", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("consultation_date", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("consultation_time", "read_only", frm.doc.__islocal ? 0:1);
