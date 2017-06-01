@@ -25,11 +25,10 @@ def get_columns():
 	]
 
 def get_employees(filters):
-	holiday_filter = {"holiday_date": (">=", filters.from_date),
-				"holiday_date": ("<=", filters.to_date)}
+	holiday_filter = [["holiday_date", ">=", filters.from_date], ["holiday_date", "<=", filters.to_date]]
 	if filters.holiday_list:
-		holiday_filter["parent"] = filters.holiday_list
-		
+		holiday_filter.append(["parent", "=", filters.holiday_list])
+
 	holidays = frappe.get_all("Holiday", fields=["holiday_date", "description"],
 				filters=holiday_filter)
 
