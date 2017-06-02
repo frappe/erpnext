@@ -50,7 +50,7 @@ def get_total_cost_of_shipments(scorecard):
 	# Look up all PO Items with delivery dates between our dates
 	data = frappe.db.sql("""
 			SELECT
-				SUM(po_item.base_amount) as total_cost
+				SUM(po_item.base_amount)
 			FROM
 				`tabPurchase Order Item` po_item,
 				`tabPurchase Order` po
@@ -105,7 +105,7 @@ def get_total_days_late(scorecard):
 	supplier = frappe.get_doc('Supplier', scorecard.supplier)
 	total_delivered_late_days = frappe.db.sql("""
 			SELECT
-				SUM((pr.posting_date - po_item.schedule_date)* pr_item.qty)
+				SUM(DATEDIFF(pr.posting_date,po_item.schedule_date)* pr_item.qty)
 			FROM
 				`tabPurchase Order Item` po_item,
 				`tabPurchase Receipt Item` pr_item,
@@ -148,7 +148,7 @@ def get_on_time_shipments(scorecard):
 	# Look up all PO Items with delivery dates between our dates
 	total_items_delivered_on_time = frappe.db.sql("""
 			SELECT
-				COUNT(pr_item.qty) as total_items_delivered
+				COUNT(pr_item.qty)
 			FROM
 				`tabPurchase Order Item` po_item,
 				`tabPurchase Receipt Item` pr_item,
@@ -173,15 +173,168 @@ def get_late_shipments(scorecard):
 	""" Gets the number of late shipments (counting each item) in the period (based on Purchase Receipts vs POs)"""		
 	return get_total_shipments(scorecard) - get_on_time_shipments(scorecard)
 	
-	
-def get_total_shipments(scorecard):
-	""" Gets the total number of shipments in the period (based on Purchase Receipts)"""
+def get_total_received(scorecard):
+	""" Gets the total number of received shipments in the period (based on Purchase Receipts)"""
 	supplier = frappe.get_doc('Supplier', scorecard.supplier)
 	
 	# Look up all PO Items with delivery dates between our dates
 	data = frappe.db.sql("""
 			SELECT
-				COUNT(po_item.base_amount) as total_cost
+				COUNT(pr_item.base_amount)
+			FROM
+				`tabPurchase Receipt Item` pr_item,
+				`tabPurchase Receipt` pr
+			WHERE
+				pr.supplier = %(supplier)s
+				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
+				AND pr_item.docstatus = 1
+				AND pr_item.parent = pr.name""", 
+				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
+
+	if not data:
+		data = 0
+	return data
+
+def get_total_received_amount(scorecard):
+	""" Gets the total amount (in company currency) received in the period (based on Purchase Receipts)"""
+	supplier = frappe.get_doc('Supplier', scorecard.supplier)
+	
+	# Look up all PO Items with delivery dates between our dates
+	data = frappe.db.sql("""
+			SELECT
+				SUM(pr_item.received_qty * pr_item.base_rate)
+			FROM
+				`tabPurchase Receipt Item` pr_item,
+				`tabPurchase Receipt` pr
+			WHERE
+				pr.supplier = %(supplier)s
+				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
+				AND pr_item.docstatus = 1
+				AND pr_item.parent = pr.name""", 
+				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
+
+	if not data:
+		data = 0
+	return data
+	
+def get_total_received_items(scorecard):
+	""" Gets the total number of received shipments in the period (based on Purchase Receipts)"""
+	supplier = frappe.get_doc('Supplier', scorecard.supplier)
+	
+	# Look up all PO Items with delivery dates between our dates
+	data = frappe.db.sql("""
+			SELECT
+				SUM(pr_item.received_qty)
+			FROM
+				`tabPurchase Receipt Item` pr_item,
+				`tabPurchase Receipt` pr
+			WHERE
+				pr.supplier = %(supplier)s
+				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
+				AND pr_item.docstatus = 1
+				AND pr_item.parent = pr.name""", 
+				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
+
+	if not data:
+		data = 0
+	return data
+
+def get_total_rejected_amount(scorecard):
+	""" Gets the total amount (in company currency) rejected in the period (based on Purchase Receipts)"""
+	supplier = frappe.get_doc('Supplier', scorecard.supplier)
+	
+	# Look up all PO Items with delivery dates between our dates
+	data = frappe.db.sql("""
+			SELECT
+				SUM(pr_item.rejected_qty * pr_item.base_rate)
+			FROM
+				`tabPurchase Receipt Item` pr_item,
+				`tabPurchase Receipt` pr
+			WHERE
+				pr.supplier = %(supplier)s
+				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
+				AND pr_item.docstatus = 1
+				AND pr_item.parent = pr.name""", 
+				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
+
+	if not data:
+		data = 0
+	return data
+	
+def get_total_rejected_items(scorecard):
+	""" Gets the total number of rejected items in the period (based on Purchase Receipts)"""
+	supplier = frappe.get_doc('Supplier', scorecard.supplier)
+	
+	# Look up all PO Items with delivery dates between our dates
+	data = frappe.db.sql("""
+			SELECT
+				SUM(pr_item.rejected_qty)
+			FROM
+				`tabPurchase Receipt Item` pr_item,
+				`tabPurchase Receipt` pr
+			WHERE
+				pr.supplier = %(supplier)s
+				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
+				AND pr_item.docstatus = 1
+				AND pr_item.parent = pr.name""", 
+				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
+
+	if not data:
+		data = 0
+	return data
+
+def get_total_accepted_amount(scorecard):
+	""" Gets the total amount (in company currency) accepted in the period (based on Purchase Receipts)"""
+	supplier = frappe.get_doc('Supplier', scorecard.supplier)
+	
+	# Look up all PO Items with delivery dates between our dates
+	data = frappe.db.sql("""
+			SELECT
+				SUM(pr_item.qty * pr_item.base_rate)
+			FROM
+				`tabPurchase Receipt Item` pr_item,
+				`tabPurchase Receipt` pr
+			WHERE
+				pr.supplier = %(supplier)s
+				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
+				AND pr_item.docstatus = 1
+				AND pr_item.parent = pr.name""", 
+				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
+
+	if not data:
+		data = 0
+	return data
+	
+def get_total_accepted_items(scorecard):
+	""" Gets the total number of rejected items in the period (based on Purchase Receipts)"""
+	supplier = frappe.get_doc('Supplier', scorecard.supplier)
+	
+	# Look up all PO Items with delivery dates between our dates
+	data = frappe.db.sql("""
+			SELECT
+				SUM(pr_item.qty)
+			FROM
+				`tabPurchase Receipt Item` pr_item,
+				`tabPurchase Receipt` pr
+			WHERE
+				pr.supplier = %(supplier)s
+				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
+				AND pr_item.docstatus = 1
+				AND pr_item.parent = pr.name""", 
+				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
+
+	if not data:
+		data = 0
+	return data
+	
+def get_total_shipments(scorecard):
+	""" Gets the total number of ordered shipments to arrive in the period (based on Purchase Receipts)"""
+	supplier = frappe.get_doc('Supplier', scorecard.supplier)
+	
+	# Look up all PO Items with delivery dates between our dates
+	data = frappe.db.sql("""
+			SELECT
+				COUNT(po_item.base_amount)
 			FROM
 				`tabPurchase Order Item` po_item,
 				`tabPurchase Order` po
@@ -197,7 +350,7 @@ def get_total_shipments(scorecard):
 	return data
 	
 def get_rfq_total_number(scorecard):
-	""" Gets the total number of RFQ items sent to supplier"""
+	""" Gets the total number of RFQs sent to supplier"""
 	supplier = frappe.get_doc('Supplier', scorecard.supplier)
 	
 	# Look up all PO Items with delivery dates between our dates
@@ -210,7 +363,7 @@ def get_rfq_total_number(scorecard):
 				`tabRequest for Quotation` rfq
 			WHERE
 				rfq_sup.supplier = %(supplier)s
-				AND rfq_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
+				AND rfq.transaction_date BETWEEN %(start_date)s AND %(end_date)s
 				AND rfq_item.docstatus = 1
 				AND rfq_item.parent = rfq.name
 				AND rfq_sup.parent = rfq.name""", 
@@ -234,7 +387,7 @@ def get_rfq_total_items(scorecard):
 				`tabRequest for Quotation` rfq
 			WHERE
 				rfq_sup.supplier = %(supplier)s
-				AND rfq_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
+				AND rfq.transaction_date BETWEEN %(start_date)s AND %(end_date)s
 				AND rfq_item.docstatus = 1
 				AND rfq_item.parent = rfq.name
 				AND rfq_sup.parent = rfq.name""", 
@@ -244,7 +397,7 @@ def get_rfq_total_items(scorecard):
 	return data
 
 	
-def get_sq_total(scorecard):
+def get_sq_total_number(scorecard):
 	""" Gets the total number of RFQ items sent to supplier"""
 	supplier = frappe.get_doc('Supplier', scorecard.supplier)
 	
@@ -256,14 +409,15 @@ def get_sq_total(scorecard):
 				`tabRequest for Quotation Item` rfq_item,
 				`tabSupplier Quotation Item` sq_item,
 				`tabRequest for Quotation Supplier` rfq_sup,
-				`tabRequest for Quotation` rfq
+				`tabRequest for Quotation` rfq,
 				`tabSupplier Quotation` sq
 			WHERE
 				rfq_sup.supplier = %(supplier)s
-				AND rfq_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
+				AND rfq.transaction_date BETWEEN %(start_date)s AND %(end_date)s
 				AND sq_item.request_for_quotation_item = rfq_item.name
 				AND sq_item.docstatus = 1
 				AND rfq_item.docstatus = 1
+				AND sq.supplier = %(supplier)s
 				AND sq_item.parent = sq.name
 				AND rfq_item.parent = rfq.name
 				AND rfq_sup.parent = rfq.name""", 
@@ -283,13 +437,16 @@ def get_sq_total_items(scorecard):
 			FROM
 				`tabRequest for Quotation Item` rfq_item,
 				`tabSupplier Quotation Item` sq_item,
+				`tabSupplier Quotation` sq,
 				`tabRequest for Quotation Supplier` rfq_sup,
 				`tabRequest for Quotation` rfq
 			WHERE
 				rfq_sup.supplier = %(supplier)s
-				AND rfq_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
+				AND rfq.transaction_date BETWEEN %(start_date)s AND %(end_date)s
 				AND sq_item.request_for_quotation_item = rfq_item.name
 				AND sq_item.docstatus = 1
+				AND sq.supplier = %(supplier)s
+				AND sq_item.parent = sq.name
 				AND rfq_item.docstatus = 1
 				AND rfq_item.parent = rfq.name
 				AND rfq_sup.parent = rfq.name""", 
@@ -298,3 +455,31 @@ def get_sq_total_items(scorecard):
 		data = 0
 	return data
 	
+def get_rfq_response_days(scorecard):
+	""" Gets the total number of days it has taken a supplier to respond to rfqs in the period"""
+	supplier = frappe.get_doc('Supplier', scorecard.supplier)
+	total_sq_days = frappe.db.sql("""
+			SELECT
+				SUM(DATEDIFF(sq.transaction_date, rfq.transaction_date))
+			FROM
+				`tabRequest for Quotation Item` rfq_item,
+				`tabSupplier Quotation Item` sq_item,
+				`tabSupplier Quotation` sq,
+				`tabRequest for Quotation Supplier` rfq_sup,
+				`tabRequest for Quotation` rfq
+			WHERE
+				rfq_sup.supplier = %(supplier)s
+				AND rfq.transaction_date BETWEEN %(start_date)s AND %(end_date)s
+				AND sq_item.request_for_quotation_item = rfq_item.name
+				AND sq_item.docstatus = 1
+				AND sq.supplier = %(supplier)s
+				AND sq_item.parent = sq.name
+				AND rfq_item.docstatus = 1
+				AND rfq_item.parent = rfq.name
+				AND rfq_sup.parent = rfq.name""", 
+				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
+	if not total_sq_days:
+		total_sq_days = 0
+		
+
+	return total_sq_days
