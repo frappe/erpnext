@@ -1145,7 +1145,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		if(!item.item_code) {
 			frappe.throw(__("Please enter Item Code to get batch no"));
-		} else if (doc.doctype == "Purchase Receipt") {
+		} else if (doc.doctype == "Purchase Receipt" || 
+			(doc.doctype == "Purchase Invoice" && doc.update_stock)) {
+
 			return {
 				filters: {'item': item.item_code}
 			}
