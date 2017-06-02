@@ -80,10 +80,19 @@ frappe.ui.form.on('Payment Entry', {
 		});
 
 		frm.set_query("reference_name", "references", function () {
-			return {
-				filters: {
-					docstatus: 1,
-					title: frm.doc.party
+			if (frm.doc.party_type=="Customer") {
+				return {
+					filters: {
+						docstatus: 1,
+						customer: frm.doc.party
+					}
+				}
+			} else if (frm.doc.party_type=="Supplier") {
+				return {
+					filters: {
+						docstatus: 1,
+						supplier: frm.doc.party
+					}
 				}
 			}
 		});
