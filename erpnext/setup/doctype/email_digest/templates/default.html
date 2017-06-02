@@ -1,6 +1,6 @@
 {% macro show_card(card) %}
 <div style="width: 50%; float:left; min-height: 80px; padding-top: 20px;">
-    <h6 style="color: {{ text_muted }}; font-size: 12px; margin-bottom: 0px; margin-top: 0px;">{{ card.label }}
+    <h6 style="color: {{ text_muted }}; font-size: 12px; margin-bottom: 0px; margin-top: 0px;">{{ _(card.label) }}
     {% if card.count %}
     <span class="badge">({{ card.count }})</span>
     {% endif %}</h6>
