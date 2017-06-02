@@ -35,6 +35,7 @@ def make(domain='Manufacturing'):
 	frappe.destroy()
 	frappe.init(site)
 	frappe.connect()
+
 	simulate(domain)
 
 def simulate(domain='Manufacturing'):
@@ -73,7 +74,7 @@ def simulate(domain='Manufacturing'):
 			stock.work()
 			accounts.work()
 			projects.run_projects(current_date)
-			#run_messages()
+			# run_messages()
 
 			if domain=='Manufacturing':
 				sales.work()

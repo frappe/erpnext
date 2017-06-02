@@ -15,6 +15,7 @@ def setup_data():
 	make_student_group()
 	make_fees_category()
 	make_fees_structure()
+	make_assessment_groups()
 	frappe.db.commit()
 	frappe.clear_cache()
 
@@ -24,6 +25,9 @@ def make_masters():
 	import_json("Instructor")
 	import_json("Course")
 	import_json("Program")
+	import_json("Student Batch Name")
+	import_json("Assessment Criteria")
+	import_json("Grading Scale")
 	frappe.db.commit()
 
 def setup_item():
@@ -81,13 +85,24 @@ def make_student_applicants():
 			count+=1
 
 def make_student_group():
-	for d in frappe.db.get_list("Academic Term"):
-		sg_tool = frappe.new_doc("Student Group Creation Tool")
-		sg_tool.academic_year = "2016-17"
-		sg_tool.academic_term = d.name
-		sg_tool.courses = sg_tool.get_courses()
-		sg_tool.create_student_groups()
-		frappe.db.commit()
+	for term in frappe.db.get_list("Academic Term"):
+		for program in frappe.db.get_list("Program"):
+			sg_tool = frappe.new_doc("Student Group Creation Tool")
+			sg_tool.academic_year = "2017-18"
+			sg_tool.academic_term = term.name
+			sg_tool.program = program.name
+			for d in sg_tool.get_courses():
+				d = frappe._dict(d)
+				student_group = frappe.new_doc("Student Group")
+				student_group.student_group_name = d.student_group_name
+				student_group.group_based_on = d.group_based_on
+				student_group.program = program.name
+				student_group.course = d.course
+				student_group.batch = d.batch
+				student_group.academic_term = term.name
+				student_group.academic_year = "2017-18"
+				student_group.save()
+			frappe.db.commit()
 
 def make_fees_category():
 	fee_type = ["Tuition Fee", "Hostel Fee", "Logistics Fee",
@@ -111,7 +126,7 @@ def make_fees_category():
 def make_fees_structure():
 	for d in frappe.db.get_list("Program"):
 		program = frappe.get_doc("Program", d.name)
-		for academic_term in ["Semester 1", "Semester 2", "Semester 3"]:
+		for academic_term in ["2017-18 (Semester 1)", "2017-18 (Semester 2)", "2017-18 (Semester 3)"]:
 			fee_structure = frappe.new_doc("Fee Structure")
 			fee_structure.program = d.name
 			fee_structure.academic_term = random.choice(frappe.db.get_list("Academic Term")).name
@@ -122,6 +137,27 @@ def make_fees_structure():
 			program.append("fees", {"academic_term": academic_term, "fee_structure": fee_structure.name, "amount": fee_structure.total_amount})
 		program.save()
 	frappe.db.commit()
+
+def make_assessment_groups():
+	for year in frappe.db.get_list("Academic Year"):
+		ag = frappe.new_doc('Assessment Group')
+		ag.assessment_group_name = year.name
+		ag.parent_assessment_group = "All Assessment Groups"
+		ag.is_group = 1
+		ag.insert()
+		for term in frappe.db.get_list("Academic Term", filters = {"academic_year": year.name}):
+			ag1 = frappe.new_doc('Assessment Group')
+			ag1.assessment_group_name = term.name
+			ag1.parent_assessment_group = ag.name
+			ag1.is_group = 1
+			ag1.insert()
+			for assessment_group in ['Term I', 'Term II']:
+				ag2 = frappe.new_doc('Assessment Group')
+				ag2.assessment_group_name = ag1.name + " " + assessment_group
+				ag2.parent_assessment_group = ag1.name
+				ag2.insert()
+	frappe.db.commit()
+
 
 def get_json_path(doctype):
 		return frappe.get_app_path('erpnext', 'demo', 'data', frappe.scrub(doctype) + '.json')
