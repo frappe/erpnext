@@ -33,7 +33,9 @@ class ReceivablePayableReport(object):
 		if args.get("party_type") == "Supplier":
 			columns += [_("Bill No") + "::80", _("Bill Date") + ":Date:80"]
 
-		for label in ("Invoiced Amount", "Paid Amount", "Outstanding Amount"):
+		credit_or_debit_note = "Credit Note" if args.get("party_type") == "Customer" else "Debit Note"
+
+		for label in ("Invoiced Amount", "Paid Amount", credit_or_debit_note, "Outstanding Amount"):
 			columns.append({
 				"label": label,
 				"fieldtype": "Currency",
@@ -95,13 +97,14 @@ class ReceivablePayableReport(object):
 			self.filters["company"] = frappe.db.get_single_value('Global Defaults', 'default_company')
 
 		company_currency = frappe.db.get_value("Company", self.filters.get("company"), "default_currency")
+		
+		return_entries = self.get_return_entries(args.get("party_type"))
 
 		data = []
 		for gle in self.get_entries_till(self.filters.report_date, args.get("party_type")):
 			if self.is_receivable_or_payable(gle, dr_or_cr, future_vouchers):
-				outstanding_amount = flt(self.get_outstanding_amount(gle, 
-					self.filters.report_date, dr_or_cr), currency_precision)
-					
+				outstanding_amount, credit_note_amount = self.get_outstanding_amount(gle, 
+					self.filters.report_date, dr_or_cr, return_entries, currency_precision)
 				if abs(outstanding_amount) > 0.1/10**currency_precision:
 					row = [gle.posting_date, gle.party]
 
@@ -123,8 +126,8 @@ class ReceivablePayableReport(object):
 
 					# invoiced and paid amounts
 					invoiced_amount = gle.get(dr_or_cr) if (gle.get(dr_or_cr) > 0) else 0
-					paid_amt = invoiced_amount - outstanding_amount
-					row += [invoiced_amount, paid_amt, outstanding_amount]
+					paid_amt = invoiced_amount - outstanding_amount - credit_note_amount
+					row += [invoiced_amount, paid_amt, credit_note_amount, outstanding_amount]
 
 					# ageing data
 					entry_date = due_date if self.filters.ageing_based_on == "Due Date" else gle.posting_date
@@ -132,7 +135,8 @@ class ReceivablePayableReport(object):
 						cint(self.filters.range3), self.age_as_on, entry_date, outstanding_amount)
 
 					# issue 6371-Ageing buckets should not have amounts if due date is not reached
-					if self.filters.ageing_based_on == "Due Date" and getdate(due_date) > getdate(self.filters.report_date):
+					if self.filters.ageing_based_on == "Due Date" \
+							and getdate(due_date) > getdate(self.filters.report_date):
 						row[-1]=row[-2]=row[-3]=row[-4]=0
 
 					if self.filters.get(scrub(args.get("party_type"))):
@@ -175,14 +179,28 @@ class ReceivablePayableReport(object):
 			# entries adjusted with future vouchers
 			((gle.against_voucher_type, gle.against_voucher) in future_vouchers)
 		)
+		
+	def get_return_entries(self, party_type):
+		doctype = "Sales Invoice" if party_type=="Customer" else "Purchase Invoice"
+		return [d.name for d in frappe.get_all(doctype, filters={"is_return": 1, "docstatus": 1})]	
 
-	def get_outstanding_amount(self, gle, report_date, dr_or_cr):
-		payment_amount = 0.0
+	def get_outstanding_amount(self, gle, report_date, dr_or_cr, return_entries, currency_precision):
+		payment_amount, credit_note_amount = 0.0, 0.0
+		reverse_dr_or_cr = "credit" if dr_or_cr=="debit" else "debit"
+		
 		for e in self.get_gl_entries_for(gle.party, gle.party_type, gle.voucher_type, gle.voucher_no):
 			if getdate(e.posting_date) <= report_date and e.name!=gle.name:
-				payment_amount += (flt(e.credit if gle.party_type == "Customer" else e.debit) - flt(e.get(dr_or_cr)))
-
-		return flt(gle.get(dr_or_cr)) - flt(gle.credit if gle.party_type == "Customer" else gle.debit) - payment_amount
+				amount = flt(e.get(reverse_dr_or_cr)) - flt(e.get(dr_or_cr))
+				if e.voucher_no not in return_entries:
+					payment_amount += amount
+				else:
+					credit_note_amount += amount
+					
+		outstanding_amount = flt((flt(gle.get(dr_or_cr)) - flt(gle.get(reverse_dr_or_cr)) \
+			- payment_amount - credit_note_amount), currency_precision)
+		credit_note_amount = flt(credit_note_amount, currency_precision)
+		
+		return outstanding_amount, credit_note_amount
 
 	def get_party_name(self, party_type, party_name):
 		return self.get_party_map(party_type).get(party_name, {}).get("customer_name" if party_type == "Customer" else "supplier_name") or ""
