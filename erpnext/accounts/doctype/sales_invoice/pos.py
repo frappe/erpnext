@@ -35,6 +35,7 @@ def get_pos_data():
 		'item_groups': get_item_groups(pos_profile),
 		'customers': customers,
 		'address': get_customers_address(customers),
+		'contacts': get_contacts(customers),
 		'serial_no_data': get_serial_no_data(pos_profile, doc.company),
 		'batch_no_data': get_batch_no_data(),
 		'tax_data': get_item_tax_data(),
@@ -170,7 +171,7 @@ def get_customers_list(pos_profile={}):
 		cond = "customer_group in (%s)"%(', '.join(['%s']*len(customer_groups)))
 
 	return frappe.db.sql(""" select name, customer_name, customer_group,
-		territory from tabCustomer where disabled = 0
+		territory, customer_pos_id from tabCustomer where disabled = 0
 		and {cond}""".format(cond=cond), tuple(customer_groups), as_dict=1) or {}
 
 def get_customers_address(customers):
@@ -186,10 +187,25 @@ def get_customers_address(customers):
 		address_data = {}
 		if address: address_data = address[0]
 
-		address_data.update({'full_name': data.customer_name})
+		address_data.update({'full_name': data.customer_name, 'customer_pos_id': data.customer_pos_id})
 		customer_address[data.name] = address_data
 
 	return customer_address
+
+def get_contacts(customers):
+	customer_contact = {}
+	if isinstance(customers, basestring):
+		customers = [frappe._dict({'name': customers})]
+
+	for data in customers:
+		contact = frappe.db.sql(""" select email_id, phone from `tabContact` 
+			where is_primary_contact =1 and name in
+			(select parent from `tabDynamic Link` where link_doctype = 'Customer' and link_name = %s
+			and parenttype = 'Contact')""", data.name, as_dict=1)
+		if contact: 
+			customer_contact[data.name] = contact[0]
+
+	return customer_contact
 
 def get_child_nodes(group_type, root):
 	lft, rgt = frappe.db.get_value(group_type, root, ["lft", "rgt"])
@@ -304,7 +320,7 @@ def make_invoice(doc_list={}, email_queue_list={}, customers_list={}):
 				si_doc = frappe.new_doc('Sales Invoice')
 				si_doc.offline_pos_name = name
 				si_doc.update(doc)
-				si_doc.customer = customers_list.get(doc.get('customer')) or doc.get('customer')
+				si_doc.customer = get_customer_id(doc)
 				si_doc.due_date = doc.get('posting_date')
 				submit_invoice(si_doc, name, doc)
 				name_list.append(name)
@@ -312,21 +328,39 @@ def make_invoice(doc_list={}, email_queue_list={}, customers_list={}):
 				name_list.append(name)
 
 	email_queue = make_email_queue(email_queue_list)
+	customers = get_customers_list()
 	return {
 		'invoice': name_list,
 		'email_queue': email_queue,
-		'customers': [customer for customer in customers_list],
-		'synced_customers_list': get_customers_list()
+		'customers': customers_list,
+		'synced_customers_list': customers,
+		'synced_address': get_customers_address(customers),
+		'synced_contacts': get_contacts(customers)
 	}
 
 def validate_records(doc):
 	validate_item(doc)
 
+def get_customer_id(doc, customer=None):
+	cust_id = None
+	if doc.get('customer_pos_id'):
+		cust_id = frappe.db.get_value('Customer',
+			{'customer_pos_id': doc.get('customer_pos_id')}, 'name')
+
+	if not cust_id:
+		customer = customer or doc.get('customer')
+		if frappe.db.exists('Customer', customer):
+			cust_id = customer
+		else:
+			cust_id = add_customer(doc)
+
+	return cust_id
+
 def make_customer_and_address(customers):
-	customers_list = {}
+	customers_list = []
 	for customer, data in customers.items():
 		data = json.loads(data)
-		cust_id = get_customer_id(customer, data)
+		cust_id = get_customer_id(data, customer)
 		if not cust_id:
 			cust_id = add_customer(data)
 		else:
@@ -334,20 +368,14 @@ def make_customer_and_address(customers):
 
 		make_contact(data, cust_id)
 		make_address(data, cust_id)
-		customers_list.setdefault(customer, cust_id)
+		customers_list.append(customer)
 	frappe.db.commit()
 	return customers_list
 
-def get_customer_id(customer, data):
-	if (frappe.db.get_single_value("Selling Settings", "cust_master_name") == 'Customer Name' \
-					and frappe.db.exists('Customer', customer)):
-		return customer
-	else:
-		return frappe.db.get_value('Customer', {'customer_name': data.get('full_name')}, 'name')
-
 def add_customer(data):
 	customer_doc = frappe.new_doc('Customer')
-	customer_doc.customer_name = data.get('full_name')
+	customer_doc.customer_name = data.get('full_name') or data.get('customer')
+	customer_doc.customer_pos_id = data.get('customer_pos_id')
 	customer_doc.customer_type = 'Company'
 	customer_doc.customer_group = frappe.db.get_single_value('Selling Settings', 'customer_group')
 	customer_doc.territory = frappe.db.get_single_value('Selling Settings', 'territory')
@@ -372,6 +400,7 @@ def make_contact(args,customer):
 			doc = frappe.get_doc('Contact', name)
 
 		doc.update(args)
+		doc.is_primary_contact = 1
 		if not name:
 			doc.append('links',{
 				'link_doctype': 'Customer',
