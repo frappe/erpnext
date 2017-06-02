@@ -321,7 +321,7 @@ class ProductionPlanningTool(Document):
 				# get all raw materials with sub assembly childs
 				# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 				for d in frappe.db.sql("""select fb.item_code,
-					ifnull(sum(fb.qty/ifnull(bom.quantity, 1)), 0) as qty,
+					ifnull(sum(fb.stock_qty/ifnull(bom.quantity, 1)), 0) as qty,
 					fb.description, fb.stock_uom, item.min_order_qty
 					from `tabBOM Explosion Item` fb, `tabBOM` bom, `tabItem` item
 					where bom.name = fb.parent and item.name = fb.item_code

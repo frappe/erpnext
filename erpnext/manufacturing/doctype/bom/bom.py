@@ -395,7 +395,7 @@ class BOM(WebsiteGenerator):
 					'description'	: d.description,
 					'image'			: d.image,
 					'stock_uom'		: d.stock_uom,
-					'qty'			: flt(d.stock_qty),
+					'stock_qty'			: flt(d.stock_qty),
 					'rate'			: d.base_rate,
 				}))
 
@@ -404,16 +404,16 @@ class BOM(WebsiteGenerator):
 
 	def add_to_cur_exploded_items(self, args):
 		if self.cur_exploded_items.get(args.item_code):
-			self.cur_exploded_items[args.item_code]["qty"] += args.qty
+			self.cur_exploded_items[args.item_code]["stock_qty"] += args.stock_qty
 		else:
 			self.cur_exploded_items[args.item_code] = args
 
-	def get_child_exploded_items(self, bom_no, qty):
+	def get_child_exploded_items(self, bom_no, stock_qty):
 		""" Add all items from Flat BOM of child BOM"""
 		# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 		child_fb_items = frappe.db.sql("""select bom_item.item_code, bom_item.item_name, bom_item.description,
-			bom_item.stock_uom, bom_item.qty, bom_item.rate,
-			bom_item.qty / ifnull(bom.quantity, 1) as qty_consumed_per_unit
+			bom_item.stock_uom, bom_item.stock_qty, bom_item.rate,
+			bom_item.stock_qty / ifnull(bom.quantity, 1) as qty_consumed_per_unit
 			from `tabBOM Explosion Item` bom_item, tabBOM bom
 			where bom_item.parent = bom.name and bom.name = %s and bom.docstatus = 1""", bom_no, as_dict = 1)
 
@@ -423,7 +423,7 @@ class BOM(WebsiteGenerator):
 				'item_name'				: d['item_name'],
 				'description'			: d['description'],
 				'stock_uom'				: d['stock_uom'],
-				'qty'					: d['qty_consumed_per_unit']*qty,
+				'stock_qty'					: d['qty_consumed_per_unit']*stock_qty,
 				'rate'					: flt(d['rate']),
 			}))
 
@@ -435,8 +435,8 @@ class BOM(WebsiteGenerator):
 			ch = self.append('exploded_items', {})
 			for i in self.cur_exploded_items[d].keys():
 				ch.set(i, self.cur_exploded_items[d][i])
-			ch.amount = flt(ch.qty) * flt(ch.rate)
-			ch.qty_consumed_per_unit = flt(ch.qty) / flt(self.quantity)
+			ch.amount = flt(ch.stock_qty) * flt(ch.rate)
+			ch.qty_consumed_per_unit = flt(ch.stock_qty) / flt(self.quantity)
 			ch.docstatus = self.docstatus
 			ch.db_insert()
 
@@ -480,13 +480,13 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 			from
 				`tab{table}` bom_item, `tabBOM` bom, `tabItem` item
 			where
-				bom_item.parent = bom.name
-				and bom_item.docstatus < 2
-				and bom_item.parent = %(bom)s
+				bom_item.docstatus < 2
+				and bom.name = %(bom)s
+				and bom_item.parent = bom.name
 				and item.name = bom_item.item_code
 				and is_stock_item = 1
 				{conditions}
-				group by item_code, stock_uom"""
+			group by item_code, stock_uom"""
 
 	if fetch_exploded:
 		query = query.format(table="BOM Explosion Item",

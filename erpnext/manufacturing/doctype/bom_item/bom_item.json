@@ -424,6 +424,8 @@
    "label": "Stock Qty", 
    "length": 0, 
    "no_copy": 0, 
+   "oldfieldname": "stock_qty", 
+   "oldfieldtype": "Currency", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
