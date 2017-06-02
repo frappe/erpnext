@@ -263,6 +263,7 @@ class SalesOrder(SellingController):
 		pass
 
 	def before_update_after_submit(self):
+		self.validate_po()
 		self.validate_drop_ship()
 		self.validate_supplier_after_submit()
 
