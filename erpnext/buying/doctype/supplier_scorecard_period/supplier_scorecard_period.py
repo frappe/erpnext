@@ -60,9 +60,11 @@ class SupplierScorecardPeriod(Document):
 					if var.param_name in my_eval_statement:
 						my_eval_statement = my_eval_statement.replace(var.param_name, '0.0')
 						
+			#frappe.msgprint(my_eval_statement )
+			
 			my_eval_statement = my_eval_statement.replace('&lt;','<').replace('&gt;','>')
-			frappe.msgprint(my_eval_statement + " = " + "{:.2f}".format(crit.score))
-			crit.score = frappe.safe_eval(my_eval_statement,  None, {'max':max, 'min': min})
+			
+			crit.score = min(crit.max_score, max( 0 ,frappe.safe_eval(my_eval_statement,  None, {'max':max, 'min': min})))
 			
 		
 	def calculate_score(self):
@@ -89,20 +91,7 @@ class SupplierScorecardPeriod(Document):
 		
 	
 	
-	def get_scorecard_dates(self, period):
-		
-		if period == 'Per Day':
-			self.end_date = getdate(add_days(nowdate(),-1))
-			self.start_date = getdate(add_days(nowdate(),-2))
-		elif period == 'Per Week':
-			self.end_date = getdate(add_days(nowdate(),-1))
-			self.start_date = getdate(add_days(nowdate(),-7))
-		elif period == 'Per Month':
-			self.start_date  = get_first_day(nowdate(), 0,-1)
-			self.end_date = get_last_day(self.start_date)
-		elif period == 'Per Year':
-			self.start_date  = get_first_day(nowdate(), -1,0)
-			self.end_date = add_days(add_years(self.start_date,1), -1)
+	
 			
 
 	
@@ -115,7 +104,7 @@ def import_string_path(path):
 
 
 def post_process(source, target):
-	target.get_scorecard_dates(source.period)
+	pass
 		
 
 @frappe.whitelist()
@@ -128,15 +117,15 @@ def make_supplier_scorecard(source_name, target_doc=None):
 	#		flt(obj.rate) * flt(source_parent.conversion_rate)
 
 	doc = get_mapped_doc("Supplier Scorecard", source_name,	{
-		"Supplier Scorecard Setup": {
+		"Supplier Scorecard": {
 			"doctype": "Supplier Scorecard Period"
 		},
 		"Supplier Scorecard Scoring Variable": {
 			"doctype": "Supplier Scorecard Scoring Variable",
 			"add_if_empty": True
 		},
-		"Supplier Scorecard Scoring Variable": {
-			"doctype": "Supplier Scorecard Scoring Variable",
+		"Supplier Scorecard Scoring Constraint": {
+			"doctype": "Supplier Scorecard Scoring Constraint",
 			"add_if_empty": True
 		}
 	}, target_doc, post_process)

@@ -12,18 +12,15 @@ frappe.ui.form.on('Supplier Scorecard', {
 		}
 	},
 	refresh: function(frm) {
-		/*frm.add_custom_button(__('Generate Scorecard'),
-			function() {
-				frappe.model.open_mapped_doc({
-					method: "erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.make_supplier_scorecard",
-					frm: cur_frm
-				})
-			});*/
-		cur_frm.dashboard.heatmap.setLegend([0,20,40,60,80,100],['#991600','#169900'])
+
+		cur_frm.dashboard.heatmap.setLegend([0,20,40,60,80,101],['#991600','#169900'])
 	},
 	generate_scorecards:function(frm) {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period.make_supplier_scorecard",
+		frappe.call({
+			method: "erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.make_all_scorecards",
+			args: {
+				'docname': frm.doc.name
+			},
 			frm: cur_frm
 		})
 	},

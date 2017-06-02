@@ -8,6 +8,8 @@ from frappe import throw, _
 from frappe.model.document import Document
 import time
 from datetime import timedelta, date
+from frappe.utils import nowdate, get_last_day, get_first_day, getdate, add_days, add_years
+from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import make_supplier_scorecard
 
 class SupplierScorecard(Document):
 	
@@ -33,7 +35,7 @@ class SupplierScorecard(Document):
 			for c2 in self.standings:
 				if c1.min_grade == score:
 					score = c1.max_grade
-		if score != 100:
+		if score < 100 :
 			frappe.throw(_('Unable to find score starting at ' + str(score) + '. You need to have standing scores covering 0 to 100'))
 			
 	def validate_criteria_weights(self):
@@ -74,7 +76,10 @@ class SupplierScorecard(Document):
 			total_score += score
 			total_max_score += max_score
 			period += 1
-		self.supplier_score = round(100.0 * (total_score / total_max_score) ,1)
+		if total_max_score > 0:
+			self.supplier_score = round(100.0 * (total_score / total_max_score) ,1)
+		else:
+			self.supplier_score =  100
 		
 	def update_standing(self):
 		# Get the setup document
@@ -122,3 +127,51 @@ def daterange(start_date, end_date):
     for n in range(int ((end_date - start_date).days)+1):
         yield start_date + timedelta(n)
 
+@frappe.whitelist()
+def make_all_scorecards(docname):
+	
+	sc = frappe.get_doc('Supplier Scorecard', docname)
+	supplier = frappe.get_doc('Supplier',sc.supplier)
+	
+	start_date = getdate(supplier.creation)
+	end_date = get_scorecard_date(sc.period, start_date)
+	todays = getdate(nowdate())
+
+	
+	while (start_date < todays) and (end_date <= todays):
+		# check to make sure there is no scorecard period already created
+		scorecards = frappe.db.sql("""
+			SELECT
+				scp.name
+			FROM
+				`tabSupplier Scorecard Period` scp
+			WHERE
+				scp.scorecard = %(sc)s
+				AND
+					(scp.start_date > %(end_date)s
+					AND scp.end_date < %(start_date)s)
+				OR
+					(scp.start_date < %(end_date)s
+					AND scp.end_date > %(start_date)s)
+			ORDER BY
+				scp.end_date DESC""", 
+				{"sc": docname,"start_date": start_date,"end_date": end_date}, as_dict=1)
+		if len(scorecards) == 0:
+			period_card = make_supplier_scorecard(docname, None)
+			period_card.start_date = start_date
+			period_card.end_date = end_date
+			period_card.save()
+			frappe.msgprint("Created scorecard for " + sc.supplier + " between " + str(start_date) + " and " + str(end_date))
+		start_date = getdate(add_days(end_date,1))
+		end_date = get_scorecard_date(sc.period, start_date)
+	
+def get_scorecard_date(period, start_date):
+	if period == 'Per Day':
+		end_date = getdate(add_days(start_date,1))
+	elif period == 'Per Week':
+		end_date = getdate(add_days(start_date,7))
+	elif period == 'Per Month':
+		end_date = get_last_day(start_date)
+	elif period == 'Per Year':
+		end_date = add_days(add_years(start_date,1), -1)
+	return end_date
