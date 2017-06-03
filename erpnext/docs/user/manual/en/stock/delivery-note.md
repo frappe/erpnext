@@ -28,7 +28,7 @@ create a “Packing List” table for you based on the sub-Items in that Item.
 If your Items are serialized, then for Product Bundle type of Items, you will have
 to update the Serial Number in the “Packing List” table.
 
-### Packing Items in to Cases, for Container Shipment
+### Packing Items into Cases, for Container Shipment
 
 If you are doing container shipment or by weight, then you can use the Packing
 Slip to breakup your Delivery Note into smaller units. To make a Packing Slip
