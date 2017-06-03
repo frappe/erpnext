@@ -7,8 +7,11 @@ import frappe.defaults
 from frappe import msgprint, _
 from frappe.model.naming import make_autoname
 from frappe.geo.address_and_contact import load_address_and_contact, delete_contact_and_address
-from erpnext.utilities.transaction_base import TransactionBase
+from erpnext.utilities.transaction_base import TransactionBase, validate_pan
 from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
+from erpnext.selling.doctype.customer.customer import validate_pan
+from erpnext.stock.doctype.item.item import validate_end_of_life
+
 
 class Supplier(TransactionBase):
 	def get_feed(self):
@@ -41,6 +44,7 @@ class Supplier(TransactionBase):
 				msgprint(_("Series is mandatory"), raise_exception=1)
 
 		validate_party_accounts(self)
+		validate_pan(self.pan)
 
 	def on_trash(self):
 		delete_contact_and_address('Supplier', self.name)

@@ -151,3 +151,8 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 				if qty:
 					if abs(int(qty) - float(qty)) > 0.0000001:
 						frappe.throw(_("Quantity ({0}) cannot be a fraction in row {1}").format(qty, d.idx), UOMMustBeIntegerError)
+
+def validate_pan(pan_no):
+		if pan_no:
+			if not pan_no.isalnum() or len(pan_no) != 10:
+				frappe.throw(_("PAN entered should have alpha numeric characters only. Length of PAN should be 10 only."))
