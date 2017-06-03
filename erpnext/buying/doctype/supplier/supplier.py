@@ -10,7 +10,6 @@ from frappe.geo.address_and_contact import load_address_and_contact, delete_cont
 from erpnext.utilities.transaction_base import TransactionBase, validate_pan
 from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
 from erpnext.selling.doctype.customer.customer import validate_pan
-from erpnext.stock.doctype.item.item import validate_end_of_life
 
 
 class Supplier(TransactionBase):
