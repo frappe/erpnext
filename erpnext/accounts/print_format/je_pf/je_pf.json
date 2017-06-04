@@ -1,0 +1,22 @@
+{
+ "align_labels_left": 1, 
+ "creation": "2017-05-30 12:55:21.035914", 
+ "custom_format": 0, 
+ "disabled": 0, 
+ "doc_type": "Journal Entry", 
+ "docstatus": 0, 
+ "doctype": "Print Format", 
+ "font": "Default", 
+ "format_data": "[{\"fieldname\": \"print_heading_template\", \"fieldtype\": \"Custom HTML\", \"options\": \"<div class=\\\"print-heading\\\">\\t\\t\\t\\t<h2>Journal Entry<br><small>{{ doc.name }}</small>\\t\\t\\t\\t</h2></div>\"}, {\"fieldtype\": \"Section Break\", \"label\": \"\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"voucher_type\", \"label\": \"Entry Type\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"posting_date\", \"label\": \"Posting Date\"}, {\"fieldtype\": \"Section Break\", \"label\": \"\"}, {\"fieldtype\": \"Column Break\"}, {\"visible_columns\": [{\"print_hide\": 0, \"fieldname\": \"account\", \"print_width\": \"250px\"}, {\"print_hide\": 0, \"fieldname\": \"party_type\", \"print_width\": \"\"}, {\"print_hide\": 0, \"fieldname\": \"party\", \"print_width\": \"\"}, {\"print_hide\": 0, \"fieldname\": \"debit_in_account_currency\", \"print_width\": \"\"}, {\"print_hide\": 0, \"fieldname\": \"credit_in_account_currency\", \"print_width\": \"\"}, {\"print_hide\": 0, \"fieldname\": \"reference_type\", \"print_width\": \"\"}, {\"print_hide\": 0, \"fieldname\": \"reference_name\", \"print_width\": \"\"}, {\"print_hide\": 0, \"fieldname\": \"project\", \"print_width\": \"\"}, {\"print_hide\": 0, \"fieldname\": \"description\", \"print_width\": \"\"}], \"print_hide\": 0, \"fieldname\": \"accounts\", \"label\": \"Accounting Entries\"}, {\"fieldtype\": \"Section Break\", \"label\": \"\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"cheque_no\", \"label\": \"Reference Number\"}, {\"print_hide\": 0, \"fieldname\": \"cheque_date\", \"label\": \"Reference Date\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"get_balance\", \"label\": \"Make Difference Entry\"}, {\"print_hide\": 0, \"fieldname\": \"total_amount\", \"label\": \"Total Amount\"}, {\"fieldtype\": \"Section Break\", \"label\": \"Reference\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"clearance_date\", \"label\": \"Clearance Date\"}, {\"print_hide\": 0, \"fieldname\": \"remark\", \"label\": \"Remark\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"due_date\", \"label\": \"Due Date\"}, {\"fieldtype\": \"Section Break\", \"label\": \"Printing\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"pay_to_recd_from\", \"label\": \"Pay To / Recd From\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"letter_head\", \"label\": \"Letter Head\"}, {\"fieldtype\": \"Section Break\", \"label\": \"More\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"stock_entry\", \"label\": \"Stock Entry\"}, {\"fieldtype\": \"Section Break\", \"label\": \"\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"options\": \"{{_(\\\"Employee Name\\\")}}:\\n{% set u = frappe.get_doc(\\\"User\\\", frappe.user) %} \\n{{u.full_name}}\", \"fieldname\": \"_custom_html\", \"fieldtype\": \"HTML\", \"label\": \"Custom HTML\"}]", 
+ "idx": 0, 
+ "line_breaks": 1, 
+ "modified": "2017-06-01 03:07:59.413079", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "JE-PF", 
+ "owner": "Administrator", 
+ "print_format_builder": 1, 
+ "print_format_type": "Client", 
+ "show_section_headings": 1, 
+ "standard": "Yes"
+}

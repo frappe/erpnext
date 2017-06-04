@@ -67,6 +67,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Bank Definition",
+					"description": _("Bank Definition")
+				},
+				{
+					"type": "doctype",
 					"name": "Account",
 					"icon": "fa fa-sitemap",
 					"label": _("Chart of Accounts"),

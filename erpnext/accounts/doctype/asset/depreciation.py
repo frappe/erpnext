@@ -101,7 +101,9 @@ def get_depreciation_accounts(asset):
 @frappe.whitelist()
 def scrap_asset(asset_name):
 	asset = frappe.get_doc("Asset", asset_name)
-
+	asset.freez=1
+	asset.flags.ignore_permissions=True
+	asset.save()
 	if asset.docstatus != 1:
 		frappe.throw(_("Asset {0} must be submitted").format(asset.name))
 	elif asset.status in ("Cancelled", "Sold", "Scrapped"):

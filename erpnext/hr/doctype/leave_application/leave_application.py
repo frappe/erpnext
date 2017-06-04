@@ -45,10 +45,12 @@ class LeaveApplication(Document):
 			self.validate_leave_approver()
 		self.validate_attendance()
 		self.validate_back_days()
-		if self.leave_approver != frappe.session.user and self.docstatus ==1 and not "HR Manager" in user_roles:
+		
+		if self.leave_approver and self.leave_approver != frappe.session.user and self.docstatus ==1 :
+			self.docstatus =0
+			self.workflow_state = "Pending"
 			frappe.throw(_("You are not The Direct Manger"))
-		if self.leave_approver != frappe.session.user and self.docstatus ==0 and not "HR Manager" in user_roles and self.workflow_state != "Pending":
-			frappe.throw(_("You are not The Direct Manger"))
+
 
 	def validate_back_days(self):
 		from frappe.utils import getdate, nowdate
@@ -181,7 +183,7 @@ class LeaveApplication(Document):
 
 		for d in frappe.db.sql("""select name, leave_type, posting_date, from_date, to_date, total_leave_days
 			from `tabLeave Application`
-			where employee = %(employee)s and docstatus < 2 and status in ("Open", "Approved")
+			where employee = %(employee)s and docstatus = 1 and status in ("Open", "Approved")
 			and to_date >= %(from_date)s and from_date <= %(to_date)s
 			and name != %(name)s""", {
 				"employee": self.employee,
@@ -230,12 +232,12 @@ class LeaveApplication(Document):
 			frappe.throw(_("Leave approver must be one of {0}")
 				.format(comma_or(leave_approvers)), InvalidLeaveApproverError)
 
-		elif self.leave_approver and not frappe.db.sql("""select name from `tabUserRole`
-			where parent=%s and role='Leave Approver'""", self.leave_approver):
-			frappe.throw(_("{0} ({1}) must have role 'Leave Approver'")\
-				.format(get_fullname(self.leave_approver), self.leave_approver), InvalidLeaveApproverError)
+		#~ elif self.leave_approver and not frappe.db.sql("""select name from `tabUserRole`
+			#~ where parent=%s and role='Leave Approver'""", self.leave_approver):
+			#~ frappe.throw(_("{0} ({1}) must have role 'Leave Approver'")\
+				#~ .format(get_fullname(self.leave_approver), self.leave_approver), InvalidLeaveApproverError)
 
-		elif self.docstatus==1 and len(leave_approvers) and self.leave_approver != frappe.session.user:
+		elif self.docstatus==1 and employee.reports_to and self.leave_approver != frappe.session.user:
 			frappe.throw(_("Only the selected Leave Approver can submit this Leave Application"),
 				LeaveApproverIdentityError)
 
@@ -287,7 +289,8 @@ class LeaveApplication(Document):
 			})
 		except:
 			frappe.throw("could not send")
-		send_sms([employee.cell_number], cstr(_get_sms(url=False)))
+		
+		#~ send_sms([employee.cell_number], cstr(_get_sms(url=False)))
 		
 	def notify_leave_approver(self):
 		employee = frappe.get_doc("Employee", self.employee)
@@ -327,7 +330,7 @@ class LeaveApplication(Document):
 		})
 		try :
 			la = frappe.get_doc("Employee", {"user_id":self.leave_approver})
-			send_sms([la.cell_number], cstr(_get_sms(url=False)))
+			#~ send_sms([la.cell_number], cstr(_get_sms(url=False)))
 		except:
 			pass
 		
@@ -368,14 +371,13 @@ class LeaveApplication(Document):
 		
 		cells = []
 		emp_result =frappe.get_all('Employee', fields = ["cell_number"], filters = [["user_id", "in", super_emp_list]])
-		self.description = str(super_emp_list)
 		for emp in emp_result:
 			cells.append(emp.cell_number)
 			 
 		if emp_result:
-			send_sms(cells, cstr(_get_sms(url=False)))
+			pass
+			#send_sms(cells, cstr(_get_sms(url=False)))
 		 
-		self.description = str(employee.employee_name)
 		for s in super_emp_list:
 			self.notify({
 				# for post in messages
@@ -437,7 +439,7 @@ def get_approved_leaves_for_period(employee, leave_type, from_date, to_date):
 		select employee, leave_type, from_date, to_date, total_leave_days
 		from `tabLeave Application`
 		where employee=%(employee)s and leave_type=%(leave_type)s
-			and status="Approved" and docstatus=1
+			and status="موافقة المدير التنفيذي" and docstatus=1
 			and (from_date between %(from_date)s and %(to_date)s
 				or to_date between %(from_date)s and %(to_date)s
 				or (from_date < %(from_date)s and to_date > %(to_date)s))

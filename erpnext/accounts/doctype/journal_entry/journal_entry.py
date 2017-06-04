@@ -9,6 +9,7 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_account_currency
 from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.party import get_party_account
+import datetime
 
 class JournalEntry(AccountsController):
 	def __init__(self, arg1, arg2=None):
@@ -45,6 +46,8 @@ class JournalEntry(AccountsController):
 		self.make_gl_entries()
 		self.update_advance_paid()
 		self.update_expense_claim()
+		#~ frappe.rename_doc("Journal Entry", self.name, self.name+" - ("+str(self.posting_date)+")", force=True)
+		self.title = self.title+" - ("+str(self.posting_date)+")"
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account

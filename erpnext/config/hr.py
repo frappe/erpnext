@@ -53,6 +53,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "End of Service Award",
+					"description":_("End Of Service Award"),
+				},
+				{
+					"type": "doctype",
 					"name": "Financial Custody",
 					"description":_("Financial Custody"),
 				},

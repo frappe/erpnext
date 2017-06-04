@@ -15,11 +15,14 @@ class OverlapError(frappe.ValidationError): pass
 
 class JobAssignment(Document):
 	def validate(self):
-		self.get_grade_info()
+		# self.get_grade_info()
 		self.validate_dates()
 		self.validate_leave_overlap()
 		self.validate_number_of_jobAssingment()
 		self.validate_city()
+		self.get_number_of_leave_days()
+		self.get_ja_cost()
+
 	def validate_dates(self):
 		if getdate(self.from_date) > getdate(self.to_date):
 			frappe.throw(_('To Date field must be less than To Date field'))
@@ -49,10 +52,15 @@ class JobAssignment(Document):
 			"Job Assignment", formatdate(d['from_date']), formatdate(d['to_date'])) \
 			+ """ <br><b><a href="#Form/Leave Application/{0}">{0}</a></b>""".format(d["name"])
 		frappe.throw(msg, OverlapError)
+	def before_insert(self):
+		pass
 
 	def on_submit(self):
 		self.insert_expense_claim()
-		self.notify()
+		if frappe.session.user != self.reports_to or "Executive Manager" not in frappe.get_roles():
+			frappe.throw(_("You are not permitted to submit"))
+		# if (frappe.session.user != self.reports_to) or ()
+		# self.notify()
 
 	def on_update_after_submit(self):
 		self.notify()
@@ -145,13 +153,12 @@ class JobAssignment(Document):
 			total = self.get_days_of_jobAssingment()
 			if grade :
 				if total>int(grade[0].max_job_assign):
-					frappe.throw(_('Max Job Assignment reashed for the year'))
+					frappe.throw(_('Max Job Assignment reached for the year'))
 				else:
 					frappe.msgprint(total)
 			else:
-				frappe.throw(_('Max Job Assignment reashed for the year'))
+				frappe.throw(_('Max Job Assignment reached for the year'))
 			#MONTH(from_date) <= MONTH(NOW()) and MONTH(to_date) >= MONTH(NOW())
-
 	def get_days_of_jobAssingment(self):
 		list =frappe.db.sql("""select sum(diff) as total from(select datediff(to_date, from_date)
 		 as diff from `tabJob Assignment` where employee = %(employee)s and docstatus =1 and YEAR(from_date) = YEAR(%(from_date)s)) as result;
@@ -181,7 +188,7 @@ class JobAssignment(Document):
 				self.days = 0
 				return 0
 			self.days=number_of_days
-			return number_of_days+1
+			# return number_of_days+1
 
 	def get_grade_info(self):
 		emp = frappe.get_doc("Employee",self.employee)
@@ -191,15 +198,15 @@ class JobAssignment(Document):
 		self.internal_ticket_class = grade.internal_ticket_class
 		self.external_ticket_class = grade.external_ticket_class
 
-	def get_ja_cost(self,grade):
+	def get_ja_cost(self):
 		total =0.0
 		emp = frappe.get_doc("Employee",self.employee)
 		grade_doc = frappe.get_doc("Grade",emp.grade)
 		if self.days:
 			if self.assignment_type=="Internal Assign":
-				total = flt(self.days)*flt(self.internal_per_diem_rate) +ticket_cost
+				total = flt(self.days)*flt(self.internal_per_diem_rate) +self.ticket_cost
 			if self.assignment_type=="External Assign":
-				total = flt(self.days)*flt(self.external_per_diem_rate)+ticket_cost
+				total = flt(self.days)*flt(self.external_per_diem_rate)+self.ticket_cost
 				
 		self.cost_total = total
 		self.get_total_cost()

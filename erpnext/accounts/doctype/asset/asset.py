@@ -93,6 +93,12 @@ class Asset(Document):
 				frappe.throw(_("Please set Next Depreciation Date"))
 
 	def make_depreciation_schedule(self):
+		import datetime
+		import time
+		from datetime import datetime
+		from datetime import timedelta
+		import dateutil.parser
+
 		if self.depreciation_method != 'Manual':
 			self.schedules = []
 			
@@ -101,9 +107,33 @@ class Asset(Document):
 			
 			number_of_pending_depreciations = cint(self.total_number_of_depreciations) - \
 				cint(self.number_of_depreciations_booked)
+
+			next_depre=datetime.strptime(self.next_depreciation_date,'%Y-%m-%d')
+			
+			dYear = next_depre.strftime("%Y")
+			dMonth = str(int(next_depre.strftime("%m"))%12+1)
+			dDay = "1"
+			nextMonth = datetime.strptime(dYear+"-"+dMonth+"-"+ dDay,'%Y-%m-%d')
+			delta = timedelta(seconds=1)
+			dt= nextMonth - delta
+			dd=datetime.combine(dt,datetime.min.time()).date() 
+			dayss= (int((dd-next_depre.date()).days))			         
+
 			if number_of_pending_depreciations:
-				for n in xrange(number_of_pending_depreciations):
-					schedule_date = add_months(self.next_depreciation_date,
+			
+
+				if number_of_pending_depreciations >0:
+					depreciation_amount = (self.get_depreciation_amount(value_after_depreciation))*(float(dayss)/30.0)
+					value_after_depreciation -= flt(depreciation_amount)
+					if dayss != 0:
+						self.append("schedules", {
+								"schedule_date": dd,
+								"depreciation_amount": depreciation_amount 
+							})
+
+
+				for n in xrange(1,number_of_pending_depreciations):
+					schedule_date = add_months(dd,
 						n * cint(self.frequency_of_depreciation))
 
 					depreciation_amount = self.get_depreciation_amount(value_after_depreciation)
@@ -113,6 +143,12 @@ class Asset(Document):
 						"schedule_date": schedule_date,
 						"depreciation_amount": depreciation_amount
 					})
+				if dayss==0:
+					self.append("schedules", {
+								"schedule_date": add_months(dd,number_of_pending_depreciations * cint(self.frequency_of_depreciation)),
+								"depreciation_amount": self.get_depreciation_amount(value_after_depreciation) 
+							})
+
 					
 	def set_accumulated_depreciation(self):
 		accumulated_depreciation = flt(self.opening_accumulated_depreciation)
@@ -142,9 +178,9 @@ class Asset(Document):
 		asset_value_after_full_schedule = (flt(self.gross_purchase_amount) - 
 			flt(accumulated_depreciation_after_full_schedule))
 		
-		if self.expected_value_after_useful_life < asset_value_after_full_schedule:
-			frappe.throw(_("Expected value after useful life must be greater than or equal to {0}")
-				.format(asset_value_after_full_schedule))
+		# if self.expected_value_after_useful_life < asset_value_after_full_schedule:
+		# 	frappe.throw(_("Expected value after useful life must be greater than or equal to {0}")
+		# 		.format(asset_value_after_full_schedule))
 
 	def validate_cancellation(self):
 		if self.status not in ("Submitted", "Partially Depreciated", "Fully Depreciated"):

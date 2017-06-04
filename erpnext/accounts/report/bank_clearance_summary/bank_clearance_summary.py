@@ -8,22 +8,69 @@ from frappe.utils import nowdate, getdate
 
 def execute(filters=None):
 	if not filters: filters = {}
-
+	from erpnext.accounts.utils import get_balance_on
+	balance_as_per_system = get_balance_on(filters["account"])
 	columns = get_columns()
+	#~ columns += ["Mad",[],balance_as_per_system]
 	data = get_entries(filters)
-
+	#~ print "MAdness",data
+	#~ data += ["mad",{_("Payment Entry"):[]},"","","",{_("Against Account"):filters["account"]},balance_as_per_system]
+	data.insert(0, {})
+	data.insert(0, {"payment_doc":_("Amount")+": "+str(balance_as_per_system)})
+	data.insert(0, {"payment_doc":filters["account"]})
+	data.insert(0,{})
 	return columns, data
 
 def get_columns():
 	return [
-		_("Payment Document") + "::130",
-		_("Payment Entry") + ":Dynamic Link/"+_("Payment Document")+":110",
-		_("Posting Date") + ":Date:100",
-		_("Cheque/Reference No") + "::120",
-		_("Clearance Date") + ":Date:100",
-		_("Against Account") + ":Link/Account:170",
-		_("Amount") + ":Currency:120"
+		{
+			"fieldname": "payment_doc",
+			"label": _("Payment Document"),
+			"fieldtype": "Data",
+			"width": 200
+		},
+		{
+			"fieldname": "payment_entry",
+			"label": _("Payment Entry"),
+			"fieldtype": "Dynamic Link",
+			"options": "payment_document",
+			"width": 150
+		},
+		{
+			"fieldname": "post_date",
+			"label": _("Posting Date"),
+			"fieldtype": "Date",
+			"width": 110
+		},
+		{
+			"fieldname": "ch_no",
+			"label": _("Cheque/Reference No"),
+			"fieldtype": "Data",
+			"width": 130
+		},
+		{
+			"fieldname": "clear_date",
+			"label": _("Clearance Date"),
+			"fieldtype": "Date",
+			"width": 110
+		},
+		{
+			"fieldname": "against_account",
+			"label": _("Against Account"),
+			"fieldtype": "Link",
+			"options": "Account",
+			"width": 200
+		},
+		{
+			"fieldname": "amount",
+			"label": _("Amount"),
+			"fieldtype": "Currency",
+			"options": "account_currency",
+			"width": 120
+		},
+
 	]
+
 
 def get_conditions(filters):
 	conditions = ""
