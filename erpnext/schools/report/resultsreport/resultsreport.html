@@ -9,13 +9,19 @@
 	{% if (filters.student_name) { %}
 		{%= filters.student_name %}
 	{% } %}
+</h4>
+<h5 class="text-right text-muted">
 	{% if (filters.academic_year) { %}
+		{%= __("Academic Year: ") %}
 		{%= filters.academic_year %}
 	{% } %}
+</h5>
+<h5 class="text-right text-muted">
 	{% if (filters.academic_term) { %}
+		{%= __("Term: ") %}
 		{%= filters.academic_term %}
 	{% } %}
-</h4>
+</h5>
 <hr>
 <table class="table table-bordered">
 	<thead>

@@ -49,8 +49,11 @@ def get_results(filters):
 def get_conditions(filters):
 	conditions = ""
 	if filters.get("student"): conditions += " and student = %(student)s"
-	if filters.get("academic_year"): conditions += " and academic_year = %(academic_year)s"
-	if filters.get("academic_term"): conditions += " and academic_term = %(academic_term)s"
+
+	# No results with academic year and term hence the comments below
+
+	# if filters.get("academic_year"): conditions += " and academic_year = %(academic_year)s"
+	# if filters.get("academic_term"): conditions += " and academic_term = %(academic_term)s"
 
 	return conditions, filters
 
