@@ -179,6 +179,7 @@ frappe.ui.form.on("Consultation", "appointment",
 				frappe.model.set_value(frm.doctype,frm.docname, "patient", data.message.patient)
 				frappe.model.set_value(frm.doctype,frm.docname, "type", data.message.appointment_type)
 				frappe.model.set_value(frm.doctype,frm.docname, "physician", data.message.physician)
+				frappe.model.set_value(frm.doctype,frm.docname, "invoice", data.message.sales_invoice)
 		    }
 		})
 	}

@@ -76,11 +76,13 @@ def create_invoice(company, patient, physician, consultation_id):
 	sales_invoice.is_pos = '0'
 	sales_invoice.debit_to = get_receivable_account(company)
 
-	consultation = frappe.get_doc("Consultation",consultation_id)
 	create_invoice_items(physician, sales_invoice, company)
 
 	sales_invoice.save(ignore_permissions=True)
 	frappe.db.sql(_("""update tabConsultation set invoice='{0}' where name='{1}'""").format(sales_invoice.name, consultation_id))
+	appointment = frappe.db.get_value("Consultation", consultation_id, "appointment")
+	if appointment:
+		frappe.db.set_value("Patient Appointment", appointment, "sales_invoice", sales_invoice.name)
 	return sales_invoice.name
 
 def create_invoice_items(physician, invoice, company):
