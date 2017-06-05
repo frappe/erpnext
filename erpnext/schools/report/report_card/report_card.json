@@ -1,0 +1,24 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2017-05-24 13:35:16.867911", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2017-05-24 17:00:14.441158", 
+ "modified_by": "Administrator", 
+ "module": "Schools", 
+ "name": "Report Card", 
+ "owner": "Administrator", 
+ "query": "SELECT \n    u.student_name as \"Student Name::200\",\n    t.course as \"Course::200\",\n    u.total_score as \"Total Score:Int:80\",\n    u.grade as \"Grade::80\" \nFROM \n\t(SELECT course,name from `tabAssessment Plan` WHERE name \n\t\tIN ( SELECT assessment_plan from `tabAssessment Result` )) t\nJOIN \n\t(SELECT student_name,assessment_plan,total_score,grade from `tabAssessment Result`) u \nWHERE \n\tt.name = u.assessment_plan;", 
+ "ref_doctype": "Assessment Result", 
+ "report_name": "Report Card", 
+ "report_type": "Query Report", 
+ "roles": [
+  {
+   "role": "Academics User"
+  }
+ ]
+}

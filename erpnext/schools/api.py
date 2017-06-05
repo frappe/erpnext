@@ -246,7 +246,7 @@ def get_grade(grading_scale, percentage):
 	return grade
 
 @frappe.whitelist()
-def mark_assessment_result(student, assessment_plan, scores):
+def mark_assessment_result(student, assessment_plan, scores, course=None):
 	student_score = json.loads(scores)
 	details = []
 	for s in student_score.keys():
@@ -261,6 +261,8 @@ def mark_assessment_result(student, assessment_plan, scores):
 		"assessment_plan": assessment_plan,
 		"details": details
 	})
+	if course:
+		assessment_result.update({"course": course})
 	assessment_result.save()
 	assessment_result.submit()	
 	return assessment_result
@@ -281,3 +283,48 @@ def update_email_group(doctype, name):
 			if email:
 				email_list.append(email)	
 	add_subscribers(name, email_list)
+
+@frappe.whitelist()
+def getstudentsresultinfo(student):
+	#*******Get students assessment results as list of dictionary
+	results = frappe.get_all("Assessment Result", filters={"student": student, "docstatus": 1})
+	#**** for each of the results create an object that contains the subject and the result details
+	results_obj = []
+	for i in results:
+		result_name = i.name
+		results_h = frappe.get_doc('Assessment Result',i)
+		course = frappe.get_doc("Assessment Plan",results_h.assessment_plan).course
+		total_score = results_h.total_sco
+		maximum_score = results_h.maximum_score
+		grade = results_h.grade
+		score_breakdown = []
+		for j in results_h.details:
+			score_breakdown.append({'criteria':j.assessment_criteria,'maximum_score':j.maximum_score,'score':j.score})
+		results_obj.append({
+			"result_name":result_name,
+			"course":course,
+			"grade":grade,
+			"score":total_score,
+			"score_breakdown":score_breakdown,
+			"maximum_score":maximum_score
+			})
+	return results_obj
+
+@frappe.whitelist()
+def get_courses(student_group):
+	ret_courses = []
+	# Get the program if posibble
+	# Get program name
+	program_name = frappe.db.get_value("Student Group",student_group,"program")
+	if frappe.db.exists("Program",program_name):
+		linked_program = frappe.get_doc("Program",program_name)
+	else:
+		frappe.throw("Sorry, no program found")
+
+	if not len(linked_program.courses) > 0:
+		frappe.throw("Sorry, no courses listed in the linked program")
+	else:
+		for i in linked_program.courses:
+			if {"course_link":i.course,"course_name":i.course} not in ret_courses:
+				ret_courses.append({"course_link":i.course,"course_name":i.course})
+		return ret_courses

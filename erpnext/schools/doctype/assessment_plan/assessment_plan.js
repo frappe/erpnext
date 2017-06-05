@@ -16,6 +16,7 @@ frappe.ui.form.on("Assessment Plan", {
                 frappe.set_route("Form", "Assessment Result Tool");
             });
         }
+        frm.set_df_property("courses_section", "hidden", frm.doc.multiple_courses == 0);
     },
 
     course: function(frm) {
@@ -43,5 +44,30 @@ frappe.ui.form.on("Assessment Plan", {
 
     maximum_assessment_score: function(frm) {
         frm.trigger("course");
+    },
+
+    multiple_courses: function(frm) {
+        frm.set_df_property("course", "hidden", frm.doc.multiple_courses==1);
+        frm.set_df_property("courses_section", "hidden", frm.doc.multiple_courses == 0);
+        frm.set_df_property("course", "reqd", frm.doc.multiple_courses==0);
+    },
+
+    get_courses: function(frm) {
+        console.log("######   CALLED    #########");
+        frm.set_value("courses_table",[]);
+        frappe.call({
+            method: "erpnext.schools.api.get_courses",
+            args: {"student_group": frm.doc.student_group},
+            callback: function(r) {
+                console.log("######   CALLBACK RESULT    #########");
+                console.log(r.message);
+                frm.set_value("courses_table",r.message)
+                frm.trigger("default_course");
+            }
+        })
+    },
+
+    default_course: function(frm) {
+        frm.set_value("course", frm.doc.courses_table[0].course_link);
     }
 });

@@ -137,7 +137,11 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Assessment Result Tool"
-				}
+				},
+				{
+					"type": "doctype",
+					"name": "Report Card"
+				}				
 			]
 		},
 		{

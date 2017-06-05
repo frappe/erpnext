@@ -1,0 +1,42 @@
+{% var letterhead= filters.letter_head || frappe.defaults.get_default("letter_head"); %}
+{% if(letterhead) { %} 
+<div style="margin-bottom: 7px;" class="text-center">
+	{%= frappe.boot.letter_heads[letterhead].header %}
+</div>
+{% } %}
+<h2 class="text-center">{%= __("Report Card") %}</h2>
+<h4 class="text-center">
+	{% if (filters.student_name) { %}
+		{%= filters.student_name %}
+	{% } %}
+	{% if (filters.academic_year) { %}
+		{%= filters.academic_year %}
+	{% } %}
+	{% if (filters.academic_term) { %}
+		{%= filters.academic_term %}
+	{% } %}
+</h4>
+<hr>
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			{% for(var j=0, m=Object.keys(data[0]).length-2; j<m; j++) { %}
+				<th>{%= Object.keys(data[0])[j] %}</th>
+			{% } %}
+		</tr>
+	</thead>
+	<tbody>
+		{% for(var j=0, m=data.length; j<m; j++) { %}
+			<tr>
+				{% for(var k=0, n=Object.keys(data[j]).length-2; k<n; k++) { %}
+					<td>{%= data[j][Object.keys(data[j])[k]] %}
+				{% } %}
+			</tr>
+		{% } %}
+	</tbody>
+</table>
+
+<footer>
+	<p class="text-right text-muted">Signature:______________</p>
+	<p class="text-right text-muted">Printed On {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>
+</footer>

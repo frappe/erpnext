@@ -6,11 +6,12 @@ cur_frm.add_fetch("assessment_plan", "student_group", "student_group");
 
 frappe.ui.form.on('Assessment Result Tool', {
 	refresh: function(frm) {
-		if (frappe.route_options) {
-			frm.set_value("student_group", frappe.route_options.student_group);
-			frm.set_value("assessment_plan", frappe.route_options.assessment_plan);
-			frappe.route_options = null;
-		}
+		//if (frappe.route_options) {
+		//	console.log(frappe.route_options);
+		//	frm.set_value("student_group", frappe.route_options.student_group);
+		//	frm.set_value("assessment_plan", frappe.route_options.assessment_plan);
+		//	frappe.route_options = null;
+		//}
 		frm.disable_save();
 		frm.page.clear_indicator();
 	},
@@ -24,9 +25,22 @@ frappe.ui.form.on('Assessment Result Tool', {
 				"student_group": frm.doc.student_group
 			},
 			callback: function(r) {
+				console.log("########-ASSESSMENT PLAN-##########")
+				console.log(r)
 				frm.events.render_table(frm, r.message);
 			}
 		});
+
+		frm.set_df_property("course","hidden",frm.doc.multiple_courses !== 1);
+
+		cur_frm.fields_dict['course'].get_query = function(doc) {
+            return {
+                filters: {
+                    "parent": cur_frm.doc.assessment_plan
+                }
+            }
+        }
+
 	},
 
 	render_table: function(frm, students) {
@@ -43,6 +57,8 @@ frappe.ui.form.on('Assessment Result Tool', {
 				assessment_plan: assessment_plan
 			},
 			callback: function(r) {
+				console.log("#######-RENDER TABLE-#######")
+				console.log(r)
 				var criteria_list = r.message;
 				var max_total_score = 0;
 				criteria_list.forEach(function(c) {
@@ -78,9 +94,12 @@ frappe.ui.form.on('Assessment Result Tool', {
 							args: {
 								"student": student,
 								"assessment_plan": assessment_plan,
-								"scores": student_scores[student]
+								"scores": student_scores[student],
+								"course": ((cur_frm.doc.multiple_courses == 1) ? cur_frm.doc.course : "")
 							},
 							callback: function(r) {
+								console.log("######-mark_assessment_result-##########")
+								console.log(r)
 								var doc = r.message;
 								var student = doc.student;
 								result_table.find(`[data-student=${student}].total-score`)
