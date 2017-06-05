@@ -51,7 +51,7 @@ def make_employee(user):
 			"doctype": "User",
 			"email": user,
 			"first_name": user,
-			"new_password": "password",
+			"new_password": "qwe!@#qwe123",
 			"roles": [{"doctype": "Has Role", "role": "Employee"}]
 		}).insert()
 		
