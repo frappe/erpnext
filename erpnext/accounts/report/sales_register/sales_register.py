@@ -32,6 +32,7 @@ def execute(filters=None):
 		delivery_note = list(set(invoice_so_dn_map.get(inv.name, {}).get("delivery_note", [])))
 
 		row = [inv.name, inv.posting_date, inv.customer, inv.customer_name,
+		customer_map.get(inv.customer, {}).get("pan"),
 		customer_map.get(inv.customer, {}).get("customer_group"), 
 		customer_map.get(inv.customer, {}).get("territory"),
 		inv.debit_to, ", ".join(mode_of_payments.get(inv.name, [])), inv.project, inv.remarks, 
@@ -68,6 +69,7 @@ def get_columns(invoice_list):
 	columns = [
 		_("Invoice") + ":Link/Sales Invoice:120", _("Posting Date") + ":Date:80", 
 		_("Customer Id") + "::120", _("Customer Name") + "::120", 
+		_("PAN Number") + "::120",
 		_("Customer Group") + ":Link/Customer Group:120", _("Territory") + ":Link/Territory:80", 
 		_("Receivable Account") + ":Link/Account:120", _("Mode of Payment") + "::120", 
 		_("Project") +":Link/Project:80", _("Remarks") + "::150", 
@@ -187,12 +189,11 @@ def get_invoice_so_dn_map(invoice_list):
 def get_customer_details(invoice_list):
 	customer_map = {}
 	customers = list(set([inv.customer for inv in invoice_list]))
-	for cust in frappe.db.sql("""select name, territory, customer_group from `tabCustomer`
+	for cust in frappe.db.sql("""select name, territory, customer_group, pan from `tabCustomer`
 		where name in (%s)""" % ", ".join(["%s"]*len(customers)), tuple(customers), as_dict=1):
 			customer_map.setdefault(cust.name, cust)
 
 	return customer_map
-
 
 def get_mode_of_payments(invoice_list):
 	mode_of_payments = {}

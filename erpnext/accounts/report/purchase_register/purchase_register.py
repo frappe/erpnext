@@ -30,9 +30,9 @@ def execute(filters=None):
 		purchase_order = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_order", [])))
 		purchase_receipt = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_receipt", [])))
 		project = list(set(invoice_po_pr_map.get(inv.name, {}).get("project", [])))
-
 		row = [inv.name, inv.posting_date, inv.supplier, inv.supplier_name,
-			supplier_details.get(inv.supplier),
+			supplier_details.get(inv.supplier, {}).get("pan"),
+			supplier_details.get(inv.supplier, {}).get("supplier_type"),
 			inv.credit_to, inv.mode_of_payment, ", ".join(project), inv.bill_no, inv.bill_date, inv.remarks,
 			", ".join(purchase_order), ", ".join(purchase_receipt), company_currency]
 
@@ -66,6 +66,7 @@ def get_columns(invoice_list):
 	columns = [
 		_("Invoice") + ":Link/Purchase Invoice:120", _("Posting Date") + ":Date:80", 
 		_("Supplier Id") + "::120", _("Supplier Name") + "::120", 
+		_("PAN Number") + "::120",
 		_("Supplier Type") + ":Link/Supplier Type:120", _("Payable Account") + ":Link/Account:120", 
 		_("Mode of Payment") + ":Link/Mode of Payment:80", _("Project") + ":Link/Project:80", 
 		_("Bill No") + "::120", _("Bill Date") + ":Date:80", _("Remarks") + "::150",
@@ -208,8 +209,8 @@ def get_account_details(invoice_list):
 def get_supplier_details(invoice_list):
 	supplier_details = {}
 	suppliers = list(set([inv.supplier for inv in invoice_list]))
-	for supp in frappe.db.sql("""select name, supplier_type from `tabSupplier`
+	for supp in frappe.db.sql("""select name, supplier_type, pan from `tabSupplier`
 		where name in (%s)""" % ", ".join(["%s"]*len(suppliers)), tuple(suppliers), as_dict=1):
-			supplier_details.setdefault(supp.name, supp.supplier_type)
+			supplier_details.setdefault(supp.name, supp)
 
 	return supplier_details

@@ -8,7 +8,7 @@ from frappe import _, msgprint, throw
 import frappe.defaults
 from frappe.utils import flt, cint, cstr
 from frappe.desk.reportview import build_match_conditions
-from erpnext.utilities.transaction_base import TransactionBase
+from erpnext.utilities.transaction_base import TransactionBase, validate_pan
 from frappe.geo.address_and_contact import load_address_and_contact, delete_contact_and_address
 from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
 
@@ -52,6 +52,7 @@ class Customer(TransactionBase):
 		self.flags.is_new_doc = self.is_new()
 		self.flags.old_lead = self.lead_name
 		validate_party_accounts(self)
+		validate_pan(self.pan)
 		self.validate_credit_limit_on_change()
 
 	def on_update(self):
