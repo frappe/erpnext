@@ -21,7 +21,8 @@ def execute(filters=None):
 		invoice_income_map, income_accounts)
 
 	invoice_so_dn_map = get_invoice_so_dn_map(invoice_list)
-	customer_map = get_customer_details(invoice_list)
+	customers = list(set([inv.customer for inv in invoice_list]))
+	customer_map = get_customer_details(customers)
 	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
 	mode_of_payments = get_mode_of_payments([inv.name for inv in invoice_list])
 
@@ -30,12 +31,16 @@ def execute(filters=None):
 		# invoice details
 		sales_order = list(set(invoice_so_dn_map.get(inv.name, {}).get("sales_order", [])))
 		delivery_note = list(set(invoice_so_dn_map.get(inv.name, {}).get("delivery_note", [])))
-
-		row = [inv.name, inv.posting_date, inv.customer, inv.customer_name,
-		customer_map.get(inv.customer, {}).get("customer_group"), 
-		customer_map.get(inv.customer, {}).get("territory"),
-		inv.debit_to, ", ".join(mode_of_payments.get(inv.name, [])), inv.project, inv.remarks, 
-		", ".join(sales_order), ", ".join(delivery_note), company_currency]
+		customer_details = customer_map.get(inv.customer, {})
+		row = [
+			inv.name, inv.posting_date, inv.customer, inv.customer_name, 
+			inv.customer_gstin, customer_details.get("tax_id"), inv.company_gstin,
+			customer_details.get("customer_group"), 
+			customer_details.get("territory"),
+			inv.debit_to, ", ".join(mode_of_payments.get(inv.name, [])), 
+			inv.project, inv.remarks, 
+			", ".join(sales_order), ", ".join(delivery_note), company_currency
+		]
 
 		# map income values
 		base_net_total = 0
@@ -67,7 +72,8 @@ def get_columns(invoice_list):
 	"""return columns based on filters"""
 	columns = [
 		_("Invoice") + ":Link/Sales Invoice:120", _("Posting Date") + ":Date:80", 
-		_("Customer Id") + "::120", _("Customer Name") + "::120", 
+		_("Customer") + ":Link/Customer:120", _("Customer Name") + "::120", 
+		_("Customer GSTIN") + "::130", _("Customer Tax Id") + "::120", _("Company GSTIN") + "::130", 
 		_("Customer Group") + ":Link/Customer Group:120", _("Territory") + ":Link/Territory:80", 
 		_("Receivable Account") + ":Link/Account:120", _("Mode of Payment") + "::120", 
 		_("Project") +":Link/Project:80", _("Remarks") + "::150", 
@@ -124,7 +130,8 @@ def get_conditions(filters):
 def get_invoices(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select name, posting_date, debit_to, project, customer, customer_name, remarks, 
-		base_net_total, base_grand_total, base_rounded_total, outstanding_amount
+		base_net_total, base_grand_total, base_rounded_total, outstanding_amount, 
+		customer_gstin, company_gstin
 		from `tabSales Invoice`
 		where docstatus = 1 %s order by posting_date desc, name desc""" %
 		conditions, filters, as_dict=1)
@@ -184,10 +191,9 @@ def get_invoice_so_dn_map(invoice_list):
 
 	return invoice_so_dn_map
 
-def get_customer_details(invoice_list):
+def get_customer_details(customers):
 	customer_map = {}
-	customers = list(set([inv.customer for inv in invoice_list]))
-	for cust in frappe.db.sql("""select name, territory, customer_group from `tabCustomer`
+	for cust in frappe.db.sql("""select name, territory, customer_group, tax_id from `tabCustomer`
 		where name in (%s)""" % ", ".join(["%s"]*len(customers)), tuple(customers), as_dict=1):
 			customer_map.setdefault(cust.name, cust)
 

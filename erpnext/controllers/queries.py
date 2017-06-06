@@ -395,3 +395,35 @@ def get_doctype_wise_filters(filters):
 	for row in filters:
 		filter_dict[row[0]].append(row)
 	return filter_dict
+
+def address_query(doctype, txt, searchfield, start, page_len, filters):
+	cond = ""
+	filters = frappe._dict(filters)
+	if filters:
+		if filters.link_name:
+			cond += """ and exists(select name from `tabDynamic Link` 
+				where parent=`tabAddress`.name and link_doctype='{0}' and link_name='{1}')
+			""".format(frappe.db.escape(filters.link_doctype), frappe.db.escape(filters.link_name))
+			
+		if filters.is_your_company_address:
+			cond += " and is_your_company_address=1"
+	
+	response = frappe.db.sql("""select `tabAddress`.name
+		from `tabAddress`
+		where
+		   `tabAddress`.`{key}` like %(txt)s
+			{cond}
+		order by
+			`tabAddress`.name desc
+		limit
+			%(start)s, %(page_len)s
+		""".format(
+			key=frappe.db.escape(searchfield),
+			cond=cond
+		),
+		{
+			"txt": "%%%s%%" % frappe.db.escape(txt),
+			"start": start,
+			"page_len": page_len
+		})
+	return response

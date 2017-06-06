@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt
-from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
+from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments, get_customer_details
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -23,6 +23,9 @@ def execute(filters=None):
 	})
 	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
 	mode_of_payments = get_mode_of_payments(set([d.parent for d in item_list]))
+	
+	customers = list(set([d.customer for d in item_list]))
+	customer_details = get_customer_details(customers)
 
 	data = []
 	for d in item_list:
@@ -34,8 +37,9 @@ def execute(filters=None):
 			from `tabDelivery Note Item` where docstatus=1 and so_detail=%s""", d.so_detail))
 		if not delivery_note and d.update_stock:
 			delivery_note = d.parent
-
+			
 		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date, d.customer, d.customer_name,
+			d.customer_gstin, customer_details.get(d.customer, frappe._dict()).tax_id, d.company_gstin,
 			d.customer_group, d.debit_to, ", ".join(mode_of_payments.get(d.parent, [])), 
 			d.territory, d.project, d.company, d.sales_order,
 			delivery_note, d.income_account, d.cost_center, d.qty, d.base_net_rate, d.base_net_amount]
@@ -54,8 +58,10 @@ def get_columns():
 	return [
 		_("Item Code") + ":Link/Item:120", _("Item Name") + "::120",
 		_("Item Group") + ":Link/Item Group:100", _("Invoice") + ":Link/Sales Invoice:120",
-		_("Posting Date") + ":Date:80", _("Customer") + ":Link/Customer:120",
-		_("Customer Name") + "::120", _("Customer Group") + ":Link/Customer Group:120",
+		_("Posting Date") + ":Date:80", 
+		_("Customer") + ":Link/Customer:120", _("Customer Name") + "::120", 
+		_("Customer GSTIN") + "::130", _("Customer Tax Id") + "::120", _("Company GSTIN") + "::130", 
+		_("Customer Group") + ":Link/Customer Group:120",
 		_("Receivable Account") + ":Link/Account:120",
 		_("Mode of Payment") + "::120", _("Territory") + ":Link/Territory:80",
 		_("Project") + ":Link/Project:80", _("Company") + ":Link/Company:100",
@@ -93,7 +99,8 @@ def get_items(filters):
 			si_item.item_code, si_item.item_name, si_item.item_group, si_item.sales_order,
 			si_item.delivery_note, si_item.income_account, si_item.cost_center, si_item.qty,
 			si_item.base_net_rate, si_item.base_net_amount, si.customer_name,
-			si.customer_group, si_item.so_detail, si.update_stock
+			si.customer_group, si_item.so_detail, si.update_stock,
+			si.customer_gstin, si.company_gstin
 		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
 		where si.name = si_item.parent and si.docstatus = 1 %s
 		order by si.posting_date desc, si_item.item_code desc""" % conditions, filters, as_dict=1)
