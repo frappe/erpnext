@@ -175,8 +175,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				account: this.frm.doc.debit_to,
 				price_list: this.frm.doc.selling_price_list,
 			}, function() {
-			me.apply_pricing_rule();
-		})
+				me.apply_pricing_rule();
+			})
 	},
 
 	debit_to: function() {
@@ -267,7 +267,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		if(this.frm.doc.is_pos) {
 			if(!this.frm.doc.company) {
 				this.frm.set_value("is_pos", 0);
-				msgprint(__("Please specify Company to proceed"));
+				frappe.msgprint(__("Please specify Company to proceed"));
 			} else {
 				var me = this;
 				return this.frm.call({
@@ -312,19 +312,19 @@ $.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_
 // Hide Fields
 // ------------
 cur_frm.cscript.hide_fields = function(doc) {
-	parent_fields = ['project', 'due_date', 'is_opening', 'source', 'total_advance', 'get_advances',
+	var parent_fields = ['project', 'due_date', 'is_opening', 'source', 'total_advance', 'get_advances',
 		'advances', 'sales_partner', 'commission_rate', 'total_commission', 'advances', 'from_date', 'to_date'];
 
 	if(cint(doc.is_pos) == 1) {
 		hide_field(parent_fields);
 	} else {
-		for (i in parent_fields) {
+		for (var i in parent_fields) {
 			var docfield = frappe.meta.docfield_map[doc.doctype][parent_fields[i]];
 			if(!docfield.hidden) unhide_field(parent_fields[i]);
 		}
 	}
 
-	item_fields_stock = ['batch_no', 'actual_batch_qty', 'actual_qty', 'expense_account',
+	var item_fields_stock = ['batch_no', 'actual_batch_qty', 'actual_qty', 'expense_account',
 		'warehouse', 'expense_account', 'quality_inspection']
 	cur_frm.fields_dict['items'].grid.set_column_disp(item_fields_stock,
 		(cint(doc.update_stock)==1 || cint(doc.is_return)==1 ? true : false));
@@ -401,7 +401,7 @@ cur_frm.set_query("income_account", "items", function(doc) {
 });
 
 // expense account
-if (sys_defaults.auto_accounting_for_stock) {
+if (frappe.sys_defaults.auto_accounting_for_stock) {
 	cur_frm.fields_dict['items'].grid.get_field('expense_account').get_query = function(doc) {
 		return {
 			filters: {
@@ -443,11 +443,12 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	})
 
 	if(cur_frm.doc.is_pos) {
-		cur_frm.msgbox = frappe.msgprint(format('<a class="btn btn-primary" \
-			onclick="cur_frm.print_preview.printit(true)" style="margin-right: 5px;">{0}</a>\
-			<a class="btn btn-default" href="javascript:frappe.new_doc(cur_frm.doctype);">{1}</a>', [
-			__('Print'), __('New')
-		]));
+		cur_frm.msgbox = frappe.msgprint(
+			`<a class="btn btn-primary" onclick="cur_frm.print_preview.printit(true)" style="margin-right: 5px;">
+				${__('Print')}</a>
+			<a class="btn btn-default" href="javascript:frappe.new_doc(cur_frm.doctype);">
+				${__('New')}</a>`
+			);
 
 	} else if(cint(frappe.boot.notification_settings.sales_invoice)) {
 		cur_frm.email_doc(frappe.boot.notification_settings.sales_invoice_message);

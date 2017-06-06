@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Vehicle Log", {
 	refresh: function(frm,cdt,cdn) {
-		vehicle_log=frappe.model.get_doc(cdt,cdn);
+		var vehicle_log=frappe.model.get_doc(cdt,cdn);
 		if (vehicle_log.license_plate) {
 			frappe.call({
 				method: "erpnext.hr.doctype.vehicle_log.vehicle_log.get_make_model",
@@ -26,16 +26,16 @@ frappe.ui.form.on("Vehicle Log", {
 	},
 
 	expense_claim: function(frm){
-			frappe.call({
-				method: "erpnext.hr.doctype.vehicle_log.vehicle_log.make_expense_claim",
-				args:{
-					docname: frm.doc.name
-				},
-				callback: function(r){
-					var doc = frappe.model.sync(r.message);
-					frappe.set_route('Form', 'Expense Claim', r.message.name);
-					}
-			})
+		frappe.call({
+			method: "erpnext.hr.doctype.vehicle_log.vehicle_log.make_expense_claim",
+			args:{
+				docname: frm.doc.name
+			},
+			callback: function(r){
+				var doc = frappe.model.sync(r.message);
+				frappe.set_route('Form', 'Expense Claim', r.message.name);
+			}
+		});
 	}
 });
 

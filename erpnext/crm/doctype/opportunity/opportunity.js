@@ -122,7 +122,8 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 
 		$.each([["lead", "lead"],
 			["customer", "customer"],
-			["contact_person", "contact_query"]], function(i, opts) {
+			["contact_person", "contact_query"]],
+			function(i, opts) {
 				me.frm.set_query(opts[0], erpnext.queries[opts[1]]);
 			});
 	},
@@ -153,7 +154,7 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 					$.each(r.message, function(k, v) {
 						frappe.model.set_value(cdt, cdn, k, v);
 					});
-				refresh_field('image_view', d.name, 'items');
+					refresh_field('image_view', d.name, 'items');
 				}
 			}
 		})
@@ -180,7 +181,7 @@ cur_frm.cscript['Declare Opportunity Lost'] = function() {
 	});
 
 	dialog.fields_dict.update.$input.click(function() {
-		args = dialog.get_values();
+		var args = dialog.get_values();
 		if(!args) return;
 		return cur_frm.call({
 			doc: cur_frm.doc,
@@ -188,7 +189,7 @@ cur_frm.cscript['Declare Opportunity Lost'] = function() {
 			args: args.reason,
 			callback: function(r) {
 				if(r.exc) {
-					msgprint(__("There were errors."));
+					frappe.msgprint(__("There were errors."));
 				} else {
 					dialog.hide();
 					cur_frm.refresh();

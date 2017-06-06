@@ -248,7 +248,7 @@ $(document).on('app_ready', function() {
 			"Delivery Note", "Purchase Receipt", "Sales Invoice"], function(i, d) {
 			frappe.ui.form.on(d, "onload", function(frm) {
 				cur_frm.set_df_property("posting_time", "description",
-					sys_defaults.time_zone);
+					frappe.sys_defaults.time_zone);
 			});
 		});
 	}

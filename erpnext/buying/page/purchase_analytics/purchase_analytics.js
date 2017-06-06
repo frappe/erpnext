@@ -10,7 +10,6 @@ frappe.pages['purchase-analytics'].on_page_load = function(wrapper) {
 
 	new erpnext.PurchaseAnalytics(wrapper);
 
-
 	frappe.breadcrumbs.add("Buying");
 }
 
@@ -18,7 +17,6 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 	init: function(wrapper) {
 		this._super({
 			title: __("Purchase Analytics"),
-			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			page: wrapper.page,
 			doctypes: ["Item", "Item Group", "Supplier", "Supplier Type", "Company", "Fiscal Year",
@@ -193,13 +191,13 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 	},
 	prepare_balances: function() {
 		var me = this;
-		var from_date = dateutil.str_to_obj(this.from_date);
-		var to_date = dateutil.str_to_obj(this.to_date);
+		var from_date = frappe.datetime.str_to_obj(this.from_date);
+		var to_date = frappe.datetime.str_to_obj(this.to_date);
 		var is_val = this.value_or_qty == 'Value';
 
 		$.each(this.tl[this.based_on], function(i, tl) {
 			if (me.is_default('company') ? true : tl.company === me.company) {
-				var posting_date = dateutil.str_to_obj(tl.posting_date);
+				var posting_date = frappe.datetime.str_to_obj(tl.posting_date);
 				if (posting_date >= from_date && posting_date <= to_date) {
 					var item = me.item_by_name[tl[me.tree_grid.item_key]] ||
 						me.item_by_name['Not Set'];

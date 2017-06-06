@@ -47,31 +47,32 @@ frappe.ui.form.on("Company", {
 				fieldname: "company_name",
 				label: __("Please re-type company name to confirm"),
 				reqd: 1,
-				description: __("Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone.")},
-					function(data) {
-						if(data.company_name !== frm.doc.name) {
-							frappe.msgprint("Company name not same");
-							return;
-						}
-						frappe.call({
-							method: "erpnext.setup.doctype.company.delete_company_transactions.delete_company_transactions",
-							args: {
-								company_name: data.company_name
-							},
-							freeze: true,
-							callback: function(r, rt) {
-								if(!r.exc)
-									frappe.msgprint(__("Successfully deleted all transactions related to this company!"));
-							},
-							onerror: function() {
-								frappe.msgprint(__("Wrong Password"));
-							}
-						});
-					}, __("Delete all the Transactions for this Company"), __("Delete")
-				);
-				d.get_primary_btn().addClass("btn-danger");
-			}
-		);
+				description: __("Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone.")
+			},
+			function(data) {
+				if(data.company_name !== frm.doc.name) {
+					frappe.msgprint("Company name not same");
+					return;
+				}
+				frappe.call({
+					method: "erpnext.setup.doctype.company.delete_company_transactions.delete_company_transactions",
+					args: {
+						company_name: data.company_name
+					},
+					freeze: true,
+					callback: function(r, rt) {
+						if(!r.exc)
+							frappe.msgprint(__("Successfully deleted all transactions related to this company!"));
+					},
+					onerror: function() {
+						frappe.msgprint(__("Wrong Password"));
+					}
+				});
+			},
+			__("Delete all the Transactions for this Company"), __("Delete")
+			);
+			d.get_primary_btn().addClass("btn-danger");
+		});
 	}
 });
 
@@ -106,7 +107,7 @@ cur_frm.cscript.change_abbr = function() {
 	});
 
 	dialog.fields_dict.update.$input.click(function() {
-		args = dialog.get_values();
+		var args = dialog.get_values();
 		if(!args) return;
 		return frappe.call({
 			method: "erpnext.setup.doctype.company.company.replace_abbr",
@@ -117,7 +118,7 @@ cur_frm.cscript.change_abbr = function() {
 			},
 			callback: function(r) {
 				if(r.exc) {
-					msgprint(__("There were errors."));
+					frappe.msgprint(__("There were errors."));
 					return;
 				} else {
 					cur_frm.set_value("abbr", args.new_abbr);
@@ -154,7 +155,7 @@ erpnext.company.setup_queries = function(frm) {
 		erpnext.company.set_custom_query(frm, v);
 	});
 
-	if (sys_defaults.auto_accounting_for_stock) {
+	if (frappe.sys_defaults.auto_accounting_for_stock) {
 		$.each([
 			["stock_adjustment_account", 
 				{"root_type": "Expense", "account_type": "Stock Adjustment"}],

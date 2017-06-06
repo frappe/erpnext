@@ -3,12 +3,11 @@
 
 frappe.query_reports["Production Order Stock Report"] = {
 	"filters": [
-	{
-		"fieldname":"warehouse",
-		"label": __("Warehouse"),
-		"fieldtype": "Link",
-		"options": "Warehouse"
-		
-	}
+		{
+			"fieldname": "warehouse",
+			"label": __("Warehouse"),
+			"fieldtype": "Link",
+			"options": "Warehouse"
+		}
 	]
 }

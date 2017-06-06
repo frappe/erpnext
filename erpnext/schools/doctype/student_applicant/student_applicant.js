@@ -28,7 +28,7 @@ frappe.ui.form.on("Student Applicant", {
 
 		frappe.realtime.on("enroll_student_progress", function(data) {
 			if(data.progress) {
-				frappe.hide_msgprint(true);
+				frappe.hide_frappe.msgprint(true);
 				frappe.show_progress(__("Enrolling student"), data.progress[0],data.progress[1]);
 			}
 		})
