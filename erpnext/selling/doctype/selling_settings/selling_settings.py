@@ -20,7 +20,7 @@ class SellingSettings(Document):
 			"maintain_same_sales_rate", "editable_price_list_rate", "selling_price_list"]:
 				frappe.db.set_default(key, self.get(key, ""))
 
-		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
+		from frappe.core.doctype.naming_series.naming_series import set_by_naming_series
 		set_by_naming_series("Customer", "customer_name",
 			self.get("cust_master_name")=="Naming Series", hide_name_field=False)
 
