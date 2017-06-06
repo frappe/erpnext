@@ -127,6 +127,9 @@ class NamingSeries(Document):
 
 	def validate_series_name(self, n):
 		import re
+		if re.findall(r'[^\S\n\t]+', n, re.UNICODE):
+			throw(_('Space  not allowed in naming series'))
+		
 		if not re.match("^[\w\- /.#]*$", n, re.UNICODE):
 			throw(_('Special Characters except "-", "#", "." and "/" not allowed in naming series'))
 
