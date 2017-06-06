@@ -1,16 +1,14 @@
 DocType: Assessment Plan,Grading Scale,Escala de Calificación
-DocType: Course Assessment Criteria,Course Assessment Criteria,Criterios de Evaluación del Curso
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +86,Cannot automatically create Account as there is already stock balance in the Account. You must create a matching account before you can make an entry on this warehouse,No se puede crear la Cuenta automáticamente pues ya hay balance de stock en la Cuenta. Debe crear una cuenta apropiada antes de poder hacer entradas en esta bodega.
-apps/erpnext/erpnext/schools/doctype/course_scheduling_tool/course_scheduling_tool.py +54,Course Schedules deleted:,Calendario de cursos eliminados:
 apps/erpnext/erpnext/schools/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +55,Guardian1 Mobile No,Número de Móvil de Guardián 1
 apps/erpnext/erpnext/accounts/report/profitability_analysis/profitability_analysis.py +152,Gross Profit / Loss,Ganancia / Pérdida Bruta
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +42,Cheques and Deposits incorrectly cleared,Los cheques y depósitos resueltos de forma incorrecta
 DocType: Assessment Group,Parent Assessment Group,Grupo de Evaluación Padre
 DocType: Student,Guardians,Guardianes
 DocType: Program,Fee Schedule,Programa de Tarifas
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +654,Get Items from Product Bundle,Obtener Ítems de Paquete de Productos
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +658,Get Items from Product Bundle,Obtener Ítems de Paquete de Productos
 apps/erpnext/erpnext/schools/doctype/fees/fees.js +26,Collect Fees,Cobrar Tarifas
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +879,BOM does not contain any stock item,BOM no contiene ningún ítem de stock
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +882,BOM does not contain any stock item,BOM no contiene ningún ítem de stock
 DocType: Homepage,Company Tagline for website homepage,Lema de la empresa para la página de inicio del sitio web
 DocType: Delivery Note,% Installed,% Instalado
 DocType: Student,Guardian Details,Detalles del Guardián
@@ -18,7 +16,6 @@ apps/erpnext/erpnext/schools/report/student_and_guardian_contact_details/student
 DocType: Grading Scale Interval,Grade Code,Grado de Código
 apps/erpnext/erpnext/accounts/party.py +250,Billing currency must be equal to either default comapany's currency or party account currency,La moneda de facturación debe ser igual a la moneda por defecto de la compañía o la moneda de la cuenta de la parte
 DocType: Fee Structure,Fee Structure,Estructura de Tarifas
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +108,Last purchase rate not found,Última tasa de compra no encontrada
 apps/erpnext/erpnext/schools/doctype/course_scheduling_tool/course_scheduling_tool.py +50,Course Schedules created:,Calendario de Cursos creado:
 DocType: Grading Scale,Grading Scale Intervals,Intervalos de Escala de Calificación
 DocType: Purchase Order,Get Items from Open Material Requests,Obtener Ítems de Solicitudes Abiertas de Materiales
@@ -33,7 +30,6 @@ apps/erpnext/erpnext/schools/report/student_and_guardian_contact_details/student
 DocType: Grading Scale Interval,Grading Scale Interval,Intervalo de Escala de Calificación
 DocType: Stock Entry,Customer or Supplier Details,Detalle de cliente o proveedor
 DocType: Course Scheduling Tool,Course Scheduling Tool,Herramienta de Programación de cursos
-DocType: Grading Scale Interval,Grade Description,Descripción de Grado
 DocType: Shopping Cart Settings,Checkout Settings,Ajustes de Finalización de Pedido
 DocType: Guardian Interest,Guardian Interest,Interés del Guardián
 apps/erpnext/erpnext/public/js/setup_wizard.js +383,Classrooms/ Laboratories etc where lectures can be scheduled.,"Aulas / laboratorios, etc., donde las lecturas se pueden programar."
