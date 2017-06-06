@@ -18,6 +18,9 @@ cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 cur_frm.cscript.update_selects = function(r) {
 	set_field_options('select_doc_for_series', r.message.transactions);
 	set_field_options('prefix', r.message.prefixes);
+	//refresh set option after updating it ..
+	refresh_field('set_options');
+
 }
 
 cur_frm.cscript.select_doc_for_series = function(doc, cdt, cdn) {
