@@ -266,8 +266,8 @@ class BOM(WebsiteGenerator):
 		if duplicate_items:
 			li = []
 			for i in duplicate_items:
-				li.append("<li>{0} on row {1}".format(i.item_code, i.idx))
-			duplicate_list = "<ol>{0}</ol>".format(''.join(li))
+				li.append("{0} on row {1}".format(i.item_code, i.idx))
+			duplicate_list = '<br>' + '<br>'.join(li)
 
 			frappe.throw(_("Same item has been entered multiple times. {list}").format(list=duplicate_list))
 
