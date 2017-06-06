@@ -594,11 +594,11 @@ erpnext.stock.show_batch_serial_modal = (frm, item, item_code, qty, warehouse_de
 	let data = oldest ? oldest : []
 	let title = "";
 	let fields = [
-		{fieldname: 'warehouse', fieldtype:'Link',
-			options: 'Warehouse', label: __(warehouse_details[0]), 'default': warehouse_details[1]},
-		{fieldtype:'Column Break'},
 		{fieldname: 'item_code', read_only: 1, fieldtype:'Link', options: 'Item',
 			label: __('Item Code'), 'default': item_code},
+		{fieldtype:'Column Break'},
+		{fieldname: 'warehouse', fieldtype:'Link',
+			options: 'Warehouse', label: __(warehouse_details[0]), 'default': warehouse_details[1]},
 		{fieldtype:'Column Break'},
 		{fieldname: 'qty', fieldtype:'Float', label: __(has_batch ? 'Total Qty' : 'Qty'), 'default': qty},
 	];
@@ -788,14 +788,24 @@ erpnext.stock.bind_batch_serial_dialog_qty = (dialog) => {
 	}
 
 	if(serial_no_link) {
-		serial_no_link.$input.on('change', function(e) {
+		serial_no_link.$input.on('awesomplete-selectcomplete', function(e) {
 			if(serial_no_link.get_value().length > 0) {
+				let new_no = serial_no_link.get_value();
+				let list_value = serial_no_list.get_value();
 				let new_line = '\n';
+				let list = [];
 				if(!serial_no_list.get_value()) {
 					new_line = '';
+				} else {
+					list = list_value.replace(/\s+/g, ' ').split(' ');
 				}
-				serial_no_list.set_value(serial_no_list.get_value() + new_line + serial_no_link.get_value());
-				update_quantity(0);
+				if(!list.includes(new_no)) {
+					serial_no_link.set_new_description('');
+					serial_no_list.set_value(list_value + new_line + new_no);
+					update_quantity(0);
+				} else {
+					serial_no_link.set_new_description(new_no + ' is already selected.');
+				}
 			}
 			serial_no_link.set_input('');
 		});
