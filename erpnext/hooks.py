@@ -134,7 +134,8 @@ has_website_permission = {
 
 permission_query_conditions = {
 	"Contact": "erpnext.utilities.address_and_contact.get_permission_query_conditions_for_contact",
-	"Address": "erpnext.utilities.address_and_contact.get_permission_query_conditions_for_address"
+	"Address": "erpnext.utilities.address_and_contact.get_permission_query_conditions_for_address",
+	"Leave Application": "erpnext.hr.doctype.leave_application.leave_application.get_permission_query_conditions",
 }
 
 has_permission = {

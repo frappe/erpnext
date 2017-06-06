@@ -132,7 +132,7 @@ class Asset(Document):
 							})
 
 
-				for n in xrange(1,number_of_pending_depreciations):
+				for n in xrange(1,number_of_pending_depreciations-1):
 					schedule_date = add_months(dd,
 						n * cint(self.frequency_of_depreciation))
 
@@ -143,6 +143,19 @@ class Asset(Document):
 						"schedule_date": schedule_date,
 						"depreciation_amount": depreciation_amount
 					})
+
+				schedule_date = add_months(dd,
+					(number_of_pending_depreciations-1) * cint(self.frequency_of_depreciation))
+				depreciation_amount2 = (self.get_depreciation_amount(value_after_depreciation))*((30.0-float(dayss))/30.0)
+
+				depreciation_amount = self.get_depreciation_amount(value_after_depreciation)
+				value_after_depreciation = value_after_depreciation -(flt(depreciation_amount)+depreciation_amount2)
+
+				self.append("schedules", {
+					"schedule_date": schedule_date,
+					"depreciation_amount": depreciation_amount+depreciation_amount2
+				})
+
 				if dayss==0:
 					self.append("schedules", {
 								"schedule_date": add_months(dd,number_of_pending_depreciations * cint(self.frequency_of_depreciation)),

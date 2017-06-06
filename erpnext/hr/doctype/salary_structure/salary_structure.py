@@ -64,7 +64,14 @@ class SalaryStructure(Document):
 							
 			for value in self.get("employees"):
 				if value.name == cdn : 
-					value.base = grade_doc.base + (int(emp_doc.level)-1)*grade_doc.level_value
+					level =int(emp_doc.level)
+					percent =float(emp_doc.lpercent)/100
+					salary = grade_doc.base 
+					for l in range(0, level+1):
+						salary += salary *percent
+					value.base = salary	
+
+					#~ value.base = grade_doc.base + (int(emp_doc.level)-1)*grade_doc.level_value
 					
 	
 	def validate_joining_date(self):

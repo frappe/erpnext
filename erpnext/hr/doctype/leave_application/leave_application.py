@@ -50,8 +50,14 @@ class LeaveApplication(Document):
 			self.docstatus =0
 			self.workflow_state = "Pending"
 			frappe.throw(_("You are not The Direct Manger"))
+		
 
-
+	def before_submit (self):
+		if self.leave_approver and self.leave_approver != frappe.session.user and self.docstatus ==1 :
+			self.docstatus =0
+			self.workflow_state = "Pending"
+			frappe.throw(_("You are not The Direct Manger"))
+			
 	def validate_back_days(self):
 		from frappe.utils import getdate, nowdate
 		user = frappe.session.user
@@ -593,3 +599,20 @@ def add_holidays(events, start, end, employee, company):
 				"title": _("Holiday") + ": " + cstr(holiday.description),
 				"name": holiday.name
 			})
+
+
+def get_permission_query_conditions(user):
+    if u'System Manager' in frappe.get_roles(user) or u'HR User' in frappe.get_roles(user):
+        return None
+
+    elif u'Leave Approver' in frappe.get_roles(user):
+        employee = frappe.get_doc('Employee', {'user_id': user})
+
+        return """(`tabLeave Application`.leave_approver = '{user}' or `tabLeave Application`.employee = '{employee}')""" \
+            .format(user=frappe.db.escape(user), employee=frappe.db.escape(employee.name))
+
+    elif u'Employee' in frappe.get_roles(user):
+        employee = frappe.get_doc('Employee', {'user_id': user})
+
+        return """(`tabLeave Application`.owner = '{user}' or `tabLeave Application`.employee = '{employee}')""" \
+            .format(user=frappe.db.escape(user), employee=frappe.db.escape(employee.name))

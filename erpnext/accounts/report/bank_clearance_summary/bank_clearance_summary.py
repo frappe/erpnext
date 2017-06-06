@@ -37,19 +37,19 @@ def get_columns():
 			"width": 150
 		},
 		{
-			"fieldname": "post_date",
+			"fieldname": "posting_date",
 			"label": _("Posting Date"),
 			"fieldtype": "Date",
 			"width": 110
 		},
 		{
-			"fieldname": "ch_no",
-			"label": _("Cheque/Reference No"),
+			"fieldname": "reference_no",
+			"label": _("Reference No"),
 			"fieldtype": "Data",
 			"width": 130
 		},
 		{
-			"fieldname": "clear_date",
+			"fieldname": "clearance_date",
 			"label": _("Clearance Date"),
 			"fieldtype": "Date",
 			"width": 110

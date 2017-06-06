@@ -3,8 +3,24 @@
 
 cur_frm.add_fetch('employee','employee_name','employee_name');
 cur_frm.add_fetch('employee','company','company');
+cur_frm.add_fetch('employee','reports_to','leave_approver');
 
 frappe.ui.form.on("Leave Application", {
+	validate: function(frm) {
+		if (!frm.doc.__islocal && frm.doc.owner != frappe.session.user){
+			if (frm.doc.leave_approver != frappe.session.user && frm.doc.docstatus !=1)
+			{
+				//~ frm.set_value("docstatus", 0);
+				cur_frm.doc.docstatus =0 
+				frm.set_value("workflow_state", "Pending");
+				alert("Hit");
+			}
+			else{
+				alert("No");
+			}
+		}
+		
+	},
 	onload: function(frm) {
 		if (!frm.doc.posting_date) {
 			frm.set_value("posting_date", get_today());
@@ -31,6 +47,7 @@ frappe.ui.form.on("Leave Application", {
 	},
 
 	leave_approver: function(frm) {
+
 		if(frm.doc.leave_approver){
 			frm.set_value("leave_approver_name", frappe.user.full_name(frm.doc.leave_approver));
 		}

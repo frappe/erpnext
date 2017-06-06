@@ -24,6 +24,8 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.kra_template = function(doc, dt, dn) {
+	cur_frm.clear_table("goals"); 
+	cur_frm.refresh_fields();
 	erpnext.utils.map_current_doc({
 		method: "erpnext.hr.doctype.appraisal.appraisal.fetch_appraisal_template",
 		source_name: cur_frm.doc.kra_template,
@@ -72,5 +74,6 @@ cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
 }
 
 cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {
+
 	return{	query: "erpnext.controllers.queries.employee_query" }
 }

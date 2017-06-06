@@ -1,7 +1,8 @@
+
 <div style="margin-bottom: 7px;">
 	{%= frappe.boot.letter_heads[frappe.defaults.get_default("letter_head")] %}
 </div>
-<h2 class="text-center">{%= __("Bank Clearance Summary") %}</h2>
+<h2 class="text-center">{%= __("Bank Reconciliation Statement") %}</h2>
 <h4 class="text-center">{%= filters.account && (filters.account + ", "+filters.report_date)  || "" %} {%= filters.company %}</h4>
 <hr>
 <table class="table table-bordered">
@@ -9,9 +10,9 @@
 		<tr>
 			<th style="width: 15%">{%= __("Posting Date") %}</th>
 			<th style="width: 15%">{%= __("Payment Entry") %}</th>
-			<th style="width: 40%">{%= __("Reference") %}</th>
-			<th style="width: 15%; text-align: right;">{%= __("Debit") %}</th>
-			<th style="width: 15%; text-align: right;">{%= __("Credit") %}</th>
+			<th style="width: 40%">{%= __("Cheque/Reference No") %}</th>
+			<th style="width: 15%">{%= __("Amount") %}</th>
+			<th style="width: 15%">{%= __("Clearance Date") %}</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -20,30 +21,20 @@
 			<tr>
 				<td>{%= dateutil.str_to_user(data[i]["posting_date"]) %}</td>
 				<td>{%= data[i]["payment_entry"] %}</td>
-				<td>{%= __("Against") %}: {%= data[i]["against_account"] %}
-					{% if (data[i]["reference_no"]) { %}
-						<br>{%= __("Reference") %}: {%= data[i]["reference_no"] %}
-						{% if (data[i]["ref_date"]) { %}
-							<br>{%= __("Reference Date") %}: {%= dateutil.str_to_user(data[i]["ref_date"]) %}
-						{% } %}
-					{% } %}
-					{% if (data[i]["clearance_date"]) { %}
-						<br>{%= __("Clearance Date") %}: {%= dateutil.str_to_user(data[i]["clearance_date"]) %}
-					{% } %}
-				</td>
-				<td style="text-align: right">{%= format_currency(data[i]["debit"]) %}</td>
-				<td style="text-align: right">{%= format_currency(data[i]["credit"]) %}</td>
-			</tr>
-			{% } else { %}
-			<tr>
-				<td></td>
-				<td></td>
-				<td>{%= data[i]["payment_entry"] %}</td>
-				<td style="text-align: right">{%= format_currency(data[i]["debit"]) %}</td>
-				<td style="text-align: right">{%= format_currency(data[i]["credit"]) %}</td>
+				<td>{%= data[i]["reference_no"] %}</td>
+				<td>{%= data[i]["amount"] %}</td>
+				<td>{%= data[i]["clearance_date"] %}</td>
 			</tr>
 			{% } %}
 		{% } %}
 	</tbody>
 </table>
 <p class="text-right text-muted">Printed On {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>
+<div style= "margin-top:15px;" class="row">
+<p class="col-md-6">{%= __("Printed By") %}: {%= frappe.boot.user.first_name %} {% if (frappe.boot.user.last_name) { %}
+{%= frappe.boot.user.last_name %}
+{% } %}
+ </p>
+ <p class="col-md-6 text-right">{%= __("Account Manager") %}: {%= frappe.boot.user_info["AccountManager@Tawari.sa"].fullname %}</p>
+</div>
+ 	
