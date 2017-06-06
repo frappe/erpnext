@@ -188,6 +188,157 @@ var erpnext_slides = [
 			});
 		}
 	},
+
+
+	{
+		// Taxes
+		domains: ['manufacturing', 'services', 'retail', 'distribution'],
+		icon: "fa fa-money",
+		title: __("Add Taxes"),
+		help: __("List your tax heads (e.g. VAT, Customs etc; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later."),
+		add_more: 1,
+		max_count: 4,
+		fields: [
+			{fieldtype:"Section Break"},
+			{fieldtype:"Data", fieldname:"tax", label:__("Tax"),
+				placeholder:__("e.g. VAT")},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Float", fieldname:"tax_rate", label:__("Rate (%)"), placeholder:__("e.g. 5")}
+		]
+	},
+
+	{
+		// Customers
+		domains: ['manufacturing', 'services', 'retail', 'distribution'],
+		icon: "fa fa-group",
+		title: __("Add Customers"),
+		help: __("List a few of your customers. They could be organizations or individuals."),
+		add_more: 1,
+		max_count: 6,
+		fields: [
+			{fieldtype:"Section Break"},
+			{fieldtype:"Data", fieldname:"customer", label:__("Customer"),
+				placeholder:__("Customer Name")},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Data", fieldname:"customer_contact",
+				label:__("Contact Name"), placeholder:__("Contact Name")}
+		],
+	},
+
+	{
+		// Suppliers
+		domains: ['manufacturing', 'services', 'retail', 'distribution'],
+		icon: "fa fa-group",
+		title: __("Your Suppliers"),
+		help: __("List a few of your suppliers. They could be organizations or individuals."),
+		add_more: 1,
+		max_count: 6,
+		fields: [
+			{fieldtype:"Section Break"},
+			{fieldtype:"Data", fieldname:"supplier", label:__("Supplier"),
+				placeholder:__("Supplier Name")},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Data", fieldname:"supplier_contact",
+				label:__("Contact Name"), placeholder:__("Contact Name")},
+		]
+	},
+
+	{
+		// Products
+		domains: ['manufacturing', 'services', 'retail', 'distribution'],
+		icon: "fa fa-barcode",
+		title: __("Your Products or Services"),
+		help: __("List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start."),
+		add_more: 1,
+		max_count: 6,
+		fields: [
+			{fieldtype:"Section Break", show_section_border: true},
+			{fieldtype:"Data", fieldname:"item", label:__("Item"),
+				placeholder:__("A Product or Service")},
+			{fieldtype:"Select", label:__("Group"), fieldname:"item_group",
+				options:[__("Products"), __("Services"),
+					__("Raw Material"), __("Consumable"), __("Sub Assemblies")],
+				"default": __("Products")},
+			{fieldtype:"Select", fieldname:"item_uom", label:__("UOM"),
+				options:[__("Unit"), __("Nos"), __("Box"), __("Pair"), __("Kg"), __("Set"),
+					__("Hour"), __("Minute"), __("Litre"), __("Meter"), __("Gram")],
+				"default": __("Unit")},
+			{fieldtype: "Check", fieldname: "is_sales_item", label:__("We sell this Item"), default: 1},
+			{fieldtype: "Check", fieldname: "is_purchase_item", label:__("We buy this Item")},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Currency", fieldname:"item_price", label:__("Rate")},
+			{fieldtype:"Attach Image", fieldname:"item_img", label:__("Attach Image"), is_private: 0},
+		],
+		get_item_count: function() {
+			return this.item_count
+		}
+	},
+
+	{
+		// Program
+		domains: ["education"],
+		title: __("Program"),
+		help: __("Example: Masters in Computer Science"),
+		add_more: 1,
+		max_count: 6,
+		fields: [
+			{fieldtype:"Section Break", show_section_border: true},
+			{fieldtype:"Data", fieldname:"program", label:__("Program"), placeholder: __("Program Name")},
+		],
+	},
+
+	{
+		// Course
+		domains: ["education"],
+		title: __("Course"),
+		help: __("Example: Basic Mathematics"),
+		add_more: 1,
+		max_count: 6,
+		fields: [
+			{fieldtype:"Section Break", show_section_border: true},
+			{fieldtype:"Data", fieldname:"course", label:__("Course"),  placeholder: __("Course Name")},
+		]
+	},
+
+	{
+		// Instructor
+		domains: ["education"],
+		title: __("Instructor"),
+		help: __("People who teach at your organisation"),
+		add_more: 1,
+		max_count: 6,
+		fields: [
+			{fieldtype:"Section Break", show_section_border: true},
+			{fieldtype:"Data", fieldname:"instructor", label:__("Instructor"),  placeholder: __("Instructor Name")},
+		]
+	},
+
+	{
+		// Room
+		domains: ["education"],
+		title: __("Room"),
+		help: __("Classrooms/ Laboratories etc where lectures can be scheduled."),
+		add_more: 1,
+		max_count: 4,
+		fields: [
+			{fieldtype:"Section Break", show_section_border: true},
+			{fieldtype:"Data", fieldname:"room", label:__("Room")},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Int", fieldname:"room_capacity", label:__("Room") + " Capacity"},
+		]
+	},
+
+	{
+		// last slide
+		domain: ["all"],
+		title: __("fin"),
+		fields: [{fieldtype: "Section Break"},
+			{fieldtype: "Check", fieldname: "add_sample_data",
+			label: __("Add a few sample records"), "default": 1},
+			{fieldtype: "Check", fieldname: "setup_website",
+			label: __("Setup a simple website for my organization"), "default": 1}
+		]
+	}
 ]
 
 // Source: https://en.wikipedia.org/wiki/Fiscal_year
@@ -215,8 +366,6 @@ erpnext.setup.fiscal_years = {
 
 frappe.setup.on("before_load", function () {
 	erpnext_slides.map(frappe.setup.add_slide);
-
-	// console.log(frappe.setup.slides);
 });
 
 test_values_edu = {
