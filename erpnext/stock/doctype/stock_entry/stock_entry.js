@@ -634,32 +634,6 @@ erpnext.stock.show_batch_serial_modal = (frm, item, item_code, qty, warehouse_de
 				get_data: function() {
 					return this.data;
 				},
-				on_setup: function(grid) {
-					grid.wrapper.on('change', 'input[data-fieldname="selected_qty"]', function(e) {
-						// check if batch is selected
-						if($(this).val().length !== 0) {
-							let $row = $(this).closest('.grid-row');
-
-							let $batch = $row.find('input[data-fieldname="batch_no"]');
-							if($batch.val() === '') {
-								$(this).val('').trigger('change');
-								frappe.throw(__("Please select a batch"));
-							} else {
-								// check if greater than available if source
-								let $available = $row.find('input[data-fieldname="available_qty"]');
-								if(warehouse_details[0] === 'Source Warehouse' &&
-									parseInt($available.val()) < parseInt($(this).val())) {
-
-									$(this).val('').trigger('change');
-									frappe.throw(__(`For transfer from source, selected quantity cannot be
-										greater than available quantity`));
-								}
-							}
-						}
-
-					});
-				}
-
 			}
 		]);
 
@@ -684,7 +658,7 @@ erpnext.stock.show_batch_serial_modal = (frm, item, item_code, qty, warehouse_de
 		fields: fields
 	});
 
-	erpnext.stock.bind_batch_serial_dialog_qty(dialog);
+	erpnext.stock.bind_batch_serial_dialog_qty(dialog, warehouse_details);
 
 	let map_item_values = (item, values, attribute) => {
 		item[attribute] = values[attribute];
@@ -755,7 +729,7 @@ erpnext.stock.show_batch_serial_modal = (frm, item, item_code, qty, warehouse_de
 	dialog.show();
 }
 
-erpnext.stock.bind_batch_serial_dialog_qty = (dialog) => {
+erpnext.stock.bind_batch_serial_dialog_qty = (dialog, warehouse_details) => {
 	let serial_no_link = dialog.fields_dict.serial_no_select;
 	let serial_no_list_field = dialog.fields_dict.serial_no;
 	let batches_field = dialog.fields_dict.batches;
@@ -777,7 +751,7 @@ erpnext.stock.bind_batch_serial_dialog_qty = (dialog) => {
 		}
 	}
 
-	function set_available_qty(item_code, batch_no, warehouse, field) {
+	function set_available_qty(item_code, batch_no, warehouse, fields) {
 		if(warehouse) {
 			frappe.call({
 				method: 'erpnext.stock.doctype.batch.batch.get_batch_qty',
@@ -788,9 +762,11 @@ erpnext.stock.bind_batch_serial_dialog_qty = (dialog) => {
 				},
 				callback: (r) => {
 					let value = r.message ? r.message : '0';
-					field.set_value(value);
-					field.$input.val(value);
-					field.$input.trigger('change');
+					fields[1].set_value(value);
+					fields[1].$input.trigger('change');
+					fields[2].set_value('0');
+					fields[2].$input.trigger('change');
+
 				}
 			});
 		} else {
@@ -829,15 +805,36 @@ erpnext.stock.bind_batch_serial_dialog_qty = (dialog) => {
 
 	if(batches_field) {
 		batches_field.grid.add_new_row(null, null, true);
+		batches_field.grid.wrapper.on('change', 'input[data-fieldname="selected_qty"]', function(e) {
+			// check if batch is selected
+			if($(this).val().length !== 0) {
+				let $row = $(this).closest('.grid-row');
+
+				let $batch = $row.find('input[data-fieldname="batch_no"]');
+				if($batch.val() === '') {
+					$(this).val('').trigger('change');
+					frappe.throw(__("Please select a batch"));
+				} else {
+					// check if greater than available if source
+					let $available = $row.find('input[data-fieldname="available_qty"]');
+					if(warehouse_details[0] === 'Source Warehouse' &&
+						parseInt($available.val()) < parseInt($(this).val())) {
+
+						$(this).val('').trigger('change');
+						frappe.throw(__(`For transfer from source, selected quantity cannot be
+							greater than available quantity`));
+					}
+				}
+			}
+
+		});
 		batches_field.grid.wrapper.on('change', 'input[data-fieldname="batch_no"]', function(e) {
 			let $row = $(this).closest('.grid-row');
 			let name = $row.attr('data-name');
 			let row = batches_field.grid.grid_rows_by_docname[name];
 			if(row.doc.batch_no) {
-				row.on_grid_fields[2].set_value('0');
-				row.on_grid_fields[2].$input.trigger('change');
 				if(warehouse_field.get_value().length > 0) {
-					set_available_qty(item_code, row.doc.batch_no, warehouse_field.get_value(), row.on_grid_fields[1]);
+					set_available_qty(item_code, row.doc.batch_no, warehouse_field.get_value(), row.on_grid_fields);
 				} else {
 					frappe.throw(__("Please select a warehouse to get available quantities"));
 				}
