@@ -7,7 +7,7 @@ from frappe.utils import cint, cstr, flt
 from frappe import _
 from erpnext.setup.utils import get_exchange_rate
 from frappe.website.website_generator import WebsiteGenerator
-
+from erpnext.stock.get_item_details import get_conversion_factor
 from operator import itemgetter
 
 form_grid_templates = {
@@ -60,6 +60,7 @@ class BOM(WebsiteGenerator):
 
 	def on_update(self):
 		self.check_recursion()
+		self.update_stock_qty()
 		self.update_exploded_items()
 
 	def on_submit(self):
@@ -122,6 +123,8 @@ class BOM(WebsiteGenerator):
 			 'description'  : item and args['description'] or '',
 			 'image'		: item and args['image'] or '',
 			 'stock_uom'	: item and args['stock_uom'] or '',
+			 'uom'	: item and args['stock_uom'] or '',
+			 'conversion_factor'	: 1,
 			 'bom_no'		: args['bom_no'],
 			 'rate'			: rate,
 			 'base_rate'	: rate if self.company_currency() == self.currency else rate * self.conversion_rate
@@ -242,6 +245,16 @@ class BOM(WebsiteGenerator):
 	def set_conversion_rate(self):
 		self.conversion_rate = get_exchange_rate(self.currency, self.company_currency())
 
+	def update_stock_qty(self):
+		for m in self.get('items'):
+			if m.uom and m.unit_qty:
+				m.conversion_factor = flt(get_conversion_factor(m.item_code, m.uom)['conversion_factor'])
+				m.qty = flt(m.conversion_factor)*flt(m.unit_qty)
+			if not m.uom and m.stock_uom:
+				m.uom = m.stock_uom
+				m.unit_qty = m.qty
+				
+							
 	def validate_materials(self):
 		""" Validate raw material entries """
 		if not self.get('items'):
@@ -377,8 +390,8 @@ class BOM(WebsiteGenerator):
 					'item_name'		: d.item_name,
 					'description'	: d.description,
 					'image'			: d.image,
-					'stock_uom'		: d.stock_uom,
-					'qty'			: flt(d.qty),
+					'stock_uom'			: d.stock_uom,
+					'qty'			: flt(d.qty),				
 					'rate'			: d.base_rate,
 				}))
 
