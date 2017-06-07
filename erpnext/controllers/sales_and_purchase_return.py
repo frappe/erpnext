@@ -144,7 +144,8 @@ def get_ref_item_dict(valid_items, ref_item_row):
 	}))
 	item_dict = valid_items[ref_item_row.item_code]
 	item_dict["qty"] += ref_item_row.qty
-	item_dict["rate"] = ref_item_row.get("rate", 0)
+	if ref_item_row.get("rate", 0) > item_dict["rate"]:
+		item_dict["rate"] = ref_item_row.get("rate", 0)
 
 	if ref_item_row.parenttype in ['Purchase Invoice', 'Purchase Receipt']:
 		item_dict["received_qty"] += ref_item_row.received_qty

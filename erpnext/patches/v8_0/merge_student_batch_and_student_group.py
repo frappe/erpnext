@@ -8,9 +8,9 @@ from frappe.model.mapper import get_mapped_doc
 
 
 def execute():
-
 	# for converting student batch into student group
-	frappe.reload_doctype("Student Group")
+	for doctype in ["Student Group", "Student Group Student", "Student Group Instructor", "Student Attendance"]:
+		frappe.reload_doc("schools", "doctype", doctype)
 
 	if frappe.db.table_exists("Student Batch"):
 		student_batches = frappe.db.sql('''select name as student_group_name, student_batch_name as batch,
@@ -32,7 +32,7 @@ def execute():
 			else:
 				cond = " "
 			student_list = frappe.db.sql('''select student, student_name {cond} from `tabStudent Batch Student`
-				where parent=%s'''.format(cond=cond), (doc.name), as_dict=1)
+				where parent=%s'''.format(cond=cond), (doc.student_group_name), as_dict=1)
 
 			if student_list:
 				for i, student in enumerate(student_list):
@@ -40,7 +40,7 @@ def execute():
 				doc.extend("students", student_list)
 
 			instructor_list = frappe.db.sql('''select instructor, instructor_name from `tabStudent Batch Instructor`
-				where parent=%s''', (doc.name), as_dict=1)
+				where parent=%s''', (doc.student_group_name), as_dict=1)
 			if instructor_list:
 				doc.extend("instructors", instructor_list)
 			doc.save()
@@ -62,8 +62,6 @@ def execute():
 		frappe.delete_doc("DocType", "Attendance Tool Student", force=1)
 
 	# change the student batch to student group in the student attendance
-	frappe.reload_doctype("Student Attendance")
-
 	table_columns = frappe.db.get_table_columns("Student Attendance")
 	if "student_batch" in table_columns:
 		rename_field("Student Attendance", "student_batch", "student_group")
