@@ -1,6 +1,6 @@
 DocType: Delivery Note,% Installed,% Instalado
 DocType: Sales Order,SO-,OV-
-apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +437,Show Salary Slip,Mostrar recibo de nómina
+apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +438,Show Salary Slip,Mostrar recibo de nómina
 DocType: Purchase Taxes and Charges Template,"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
 
 #### Note
