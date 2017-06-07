@@ -27,6 +27,17 @@ frappe.ui.form.on('Assessment Result Tool', {
 				frm.events.render_table(frm, r.message);
 			}
 		});
+
+		frm.set_df_property("course","hidden",frm.doc.multiple_courses !== 1);
+
+		cur_frm.fields_dict['course'].get_query = function(doc) {
+            return {
+                filters: {
+                    "parent": cur_frm.doc.assessment_plan
+                }
+            }
+        }
+
 	},
 
 	render_table: function(frm, students) {
@@ -78,7 +89,8 @@ frappe.ui.form.on('Assessment Result Tool', {
 							args: {
 								"student": student,
 								"assessment_plan": assessment_plan,
-								"scores": student_scores[student]
+								"scores": student_scores[student],
+								"course": ((cur_frm.doc.multiple_courses == 1) ? cur_frm.doc.course : "")
 							},
 							callback: function(r) {
 								var doc = r.message;
