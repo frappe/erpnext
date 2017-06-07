@@ -7,7 +7,7 @@ frappe.help.help_links['Form/Rename Tool'] = [
 //Setup
 
 frappe.help.help_links['List/User'] = [
-	{ label: 'New User', url: 'httphttps://frappe.github.io/erpnext/user/manual/en/setting-up/users-and-permissions/adding-users' },
+	{ label: 'New User', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/users-and-permissions/adding-users' },
 	{ label: 'Rename User', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/articles/rename-user' },
 ]
 
