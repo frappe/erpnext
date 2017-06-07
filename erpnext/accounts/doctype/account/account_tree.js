@@ -21,9 +21,18 @@ frappe.treeview_settings["Account"] = {
 			condition: 'frappe.boot.user.can_create.indexOf("Company") !== -1'
 		}
 	],
+	get_label: function(node) {
+		if (node.data.account_number){
+			return node.data.account_number + " - " + node.data.value
+		} else {
+			return node.data.value
+		}
+	},
 	fields: [
 		{fieldtype:'Data', fieldname:'account_name', label:__('New Account Name'), reqd:true,
 			description: __("Name of new Account. Note: Please don't create accounts for Customers and Suppliers")},
+		{fieldtype:'Data', fieldname:'account_number', label:__('New Account Number'), reqd:false,
+			description: __("Code of new Account")},
 		{fieldtype:'Check', fieldname:'is_group', label:__('Is Group'),
 			description: __('Further accounts can be made under Groups, but entries can be made against non-Groups')},
 		{fieldtype:'Select', fieldname:'root_type', label:__('Root Type'),
