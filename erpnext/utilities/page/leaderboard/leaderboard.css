@@ -16,3 +16,33 @@
 .select-time:focus, .select-doctype:focus, .select-filter:focus, .select-sort:focus {
 	background: #f0f4f7;
 }
+
+.header-btn-base{
+	border:none;
+	outline:0;
+	vertical-align:middle;
+	overflow:hidden;
+	text-decoration:none;
+	color:inherit;
+	background-color:inherit;
+	cursor:pointer;
+	white-space:nowrap;
+}
+
+.header-btn-grey,.header-btn-grey:hover{
+	color:#000!important;
+	background-color:#bbb!important
+}
+
+.header-btn-round{
+	border-radius:4px
+}
+
+.item-title-bold{
+	font-weight: bold;
+}
+
+/*
+.header-btn-base:hover {
+	box-shadow:0 8px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19)
+}*/

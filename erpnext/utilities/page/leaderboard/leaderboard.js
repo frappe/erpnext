@@ -106,15 +106,17 @@ frappe.Leaderboard = Class.extend({
 			$leaderboard.find('.leaderboard-item')
 				.click(function(){
 					const field = this.innerText.trim().toLowerCase().replace(new RegExp(' ', 'g'), '_');
-					if(field){
+					if(field && field != "title"){
 						const _selected_filter_item = me.options.selected_filter.filter(i=> i.field === field)
 						if(_selected_filter_item.length > 0){
 							me.options.selected_filter_item = _selected_filter_item[0]
 							me.options.selected_filter_item.value = _selected_filter_item[0].value === "ASC" ? "DESC" : "ASC" 
+							
 							const new_class_name = `icon-${me.options.selected_filter_item.field} fa fa-chevron-${me.options.selected_filter_item.value === "ASC" ? "up" : "down"}`
 							$leaderboard.find(`.icon-${me.options.selected_filter_item.field}`)
 								.attr("class", new_class_name)
-							//class sort by right away
+							
+							//now make request to web
 							me.make_request($leaderboard);
 						}
 					}
@@ -150,7 +152,7 @@ frappe.Leaderboard = Class.extend({
 	render_list_header: function () {
 		var me = this;
 
-		const _selected_filter = me.options.selected_filter.map(i => i.field.replace(new RegExp('_', 'g'), ' ').replace(/(^|\s)[a-z]/g, f => f.toUpperCase()) || " ").slice(1);
+		const _selected_filter = me.options.selected_filter.map(i => me.map_field(i.field)).slice(1);
 
 		const html =
 			`<div class="list-headers">
@@ -158,11 +160,11 @@ frappe.Leaderboard = Class.extend({
 					${
 						me.options.selected_filter
 							.map(filter => {
-								const col = filter.field.replace(new RegExp('_', 'g'), ' ').replace(/(^|\s)[a-z]/g, f => f.toUpperCase())
+								const col = me.map_field(filter.field)
 								return (
 									`<div class="leaderboard-item list-item__content ellipsis text-muted list-item__content--flex-2
-											${(col !== "Title" && col !== "Modified") ? "hidden-xs" : ""}
-											${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}>
+											header-btn-base ${(col !== "Title" && col !== "Modified") ? "hidden-xs" : ""}
+											${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}">
 											<span class="list-col-title ellipsis">
 												${col}
 												<i class="${"icon-" + filter.field} fa ${filter.value === "ASC" ? "fa-chevron-up" : "fa-chevron-down"}"
@@ -211,24 +213,34 @@ frappe.Leaderboard = Class.extend({
 
 	get_item_html: function (item) {
 		var me = this;
-		const _selected_filter = me.options.selected_filter.map(i => i.field.replace(new RegExp('_', 'g'), ' ').replace(/(^|\s)[a-z]/g, f => f.toUpperCase()) || " ").slice(1);
+		const _selected_filter = me.options.selected_filter.map(i => me.map_field(i.field)).slice(1);
 
 		const html =
 			`<div class="list-item">
 				${
 					me.options.selected_filter
 						.map(filter => {
-							const col = filter.field.replace(new RegExp('_', 'g'), ' ').replace(/(^|\s)[a-z]/g, f => f.toUpperCase())
+							const col = me.map_field(filter.field)
 							let val = item[filter.field]
 							if (col === "Modified") {
-								val = val.split(' ')[0]
+								val = comment_when(val)
 							}
 
 							return (
 								`<div class="list-item__content ellipsis list-item__content--flex-2
 									${(col !== "Title" && col !== "Modified") ? "hidden-xs" : ""}
-									${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}>
-									<span class="list-col-title ellipsis">${val}</span>
+									${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}">
+									
+									${
+										col === 'Title' ? 
+											`<a class="list-col-title ellipsis item-title-bold"
+												href="${item['href']}">
+												${val}
+											</a>` : 
+											`<span class="list-col-title ellipsis">
+												${val}
+											</span>`
+									}
 								</div>`)
 						}).join("")
 				}
@@ -237,8 +249,8 @@ frappe.Leaderboard = Class.extend({
 		return html;
 	},
 
-	on_div_click: function () {
-		console.log(this);
+	map_field: function(field){
+		return field.replace(new RegExp('_', 'g'), ' ').replace(/(^|\s)[a-z]/g, f => f.toUpperCase())
 	}
 })
 
