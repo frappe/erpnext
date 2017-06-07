@@ -98,6 +98,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 			frm.cscript.calculate_taxes_and_totals();
 		});
+
+		var me = this;
+		if(this.frm.fields_dict["items"].grid.get_field('batch_no')) {
+			this.frm.set_query("batch_no", "items", function(doc, cdt, cdn) {
+				return me.set_query_for_batch(doc, cdt, cdn)
+			});
+		}
 	},
 	onload: function() {
 		var me = this;
@@ -1127,5 +1134,33 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		return method
+	},
+
+	set_query_for_batch: function(doc, cdt, cdn) {
+		// Show item's batches in the dropdown of batch no
+
+		var me = this;
+		var item = frappe.get_doc(cdt, cdn);
+
+		if(!item.item_code) {
+			frappe.throw(__("Please enter Item Code to get batch no"));
+		} else if (doc.doctype == "Purchase Receipt" || 
+			(doc.doctype == "Purchase Invoice" && doc.update_stock)) {
+
+			return {
+				filters: {'item': item.item_code}
+			}
+		} else {
+			filters = {
+				'item_code': item.item_code,
+				'posting_date': me.frm.doc.posting_date || frappe.datetime.nowdate(),
+			}
+			if(item.warehouse) filters["warehouse"] = item.warehouse
+
+			return {
+				query : "erpnext.controllers.queries.get_batch_no",
+				filters: filters
+			}
+		}
 	},
 });

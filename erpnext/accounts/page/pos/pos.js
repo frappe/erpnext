@@ -20,6 +20,7 @@ frappe.pages['pos'].refresh = function (wrapper) {
 erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	init: function (wrapper) {
 		this.page_len = 20;
+		this.freeze = false;
 		this.page = wrapper.page;
 		this.wrapper = $(wrapper).find('.page-content');
 		this.set_indicator();
@@ -72,6 +73,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	onload: function () {
 		var me = this;
 		this.get_data_from_server(function () {
+			me.make_control();
 			me.create_new();
 		});
 	},
@@ -96,7 +98,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.page.add_menu_item(__("Sync Master Data"), function () {
 			me.get_data_from_server(function () {
 				me.load_data(false);
-				me.make_customer();
 				me.make_item_list();
 				me.set_missing_values();
 			})
@@ -311,6 +312,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.serial_no_data = r.message.serial_no_data;
 		this.batch_no_data = r.message.batch_no_data;
 		this.tax_data = r.message.tax_data;
+		this.contacts = r.message.contacts;
 		this.address = r.message.address || {};
 		this.price_list_data = r.message.price_list_data;
 		this.bin_data = r.message.bin_data;
@@ -320,7 +322,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.default_customer = r.message.default_customer || null;
 		this.print_settings = locals[":Print Settings"]["Print Settings"];
 		this.letter_head = (this.pos_profile_data.length > 0) ? frappe.boot.letter_heads[this.pos_profile_data[letter_head]] : {};
-		this.make_control()
 	},
 
 	save_previous_entry: function () {
@@ -403,6 +404,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.frm = {}
 		this.frm.doc = this.doc
 		this.set_transaction_defaults("Customer");
+		this.frm.doc["allow_user_to_edit_rate"] = this.pos_profile_data["allow_user_to_edit_rate"] ? true : false,
 		this.wrapper.html(frappe.render_template("pos", this.frm.doc));
 		this.make_search();
 		this.make_customer();
@@ -707,15 +709,28 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				autoFirst: true,
 				list: [],
 				filter: function (item, input) {
-					var value = item.value.toLowerCase();
-					if (value.indexOf('is_action') !== -1 ||
-						value.indexOf(input.toLowerCase()) !== -1) {
+					if (item.value.includes('is_action')) {
 						return true;
 					}
+
+					input = input.toLowerCase();
+					item = this.get_item(item.value);
+					var searchtext =
+						Object.keys(item)
+							.filter(key => ['customer_name', 'customer_group', 'value', 'label', 'email_id', 'phone'].includes(key))
+							.map(key => item[key])
+							.join(" ")
+							.toLowerCase();
+
+					return searchtext.includes(input)
 				},
 				item: function (item, input) {
-					var d = item;
+					var d = this.get_item(item.value);
 					var html = "<span>" + __(d.label || d.value) + "</span>";
+					if(d.customer_name) {
+						html += '<br><span class="text-muted ellipsis">' + __(d.customer_name) + '</span>';
+					}
+
 					return $('<li></li>')
 						.data('item.autocomplete', d)
 						.html('<a><p>' + html + '</p></a>')
@@ -723,28 +738,12 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				}
 			});
 
-		this.customers_mapper = this.customers.map(function (c) {
-			return {
-				label: c.name,
-				value: c.name,
-				customer_group: c.customer_group,
-				territory: c.territory
-			}
-		});
-
-		this.customers_mapper.push({
-			label: "<span class='text-primary link-option'>"
-			+ "<i class='fa fa-plus' style='margin-right: 5px;'></i> "
-			+ __("Create a new Customer")
-			+ "</span>",
-			value: 'is_action',
-			action: me.add_customer
-		});
+		this.prepare_customer_mapper()
 		this.autocomplete_customers();
 
 		this.party_field.$input
 			.on('input', function (e) {
-				me.party_field.awesomeplete.list = this.customers_mapper;
+				me.party_field.awesomeplete.list = me.customers_mapper;
 			})
 			.on('awesomplete-select', function (e) {
 				var customer = me.party_field.awesomeplete
@@ -782,6 +781,32 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					$(this).val("");
 				}
 			});
+	},
+
+	prepare_customer_mapper: function() {
+		var me = this;
+
+		this.customers_mapper = this.customers.map(function (c) {
+			contact = me.contacts[c.name];
+			return {
+				label: c.name,
+				value: c.name,
+				customer_name: c.customer_name,
+				customer_group: c.customer_group,
+				territory: c.territory,
+				phone: contact ? contact["phone"] : '',
+				email_id: contact ? contact["email_id"] : ''
+			}
+		});
+
+		this.customers_mapper.push({
+			label: "<span class='text-primary link-option'>"
+			+ "<i class='fa fa-plus' style='margin-right: 5px;'></i> "
+			+ __("Create a new Customer")
+			+ "</span>",
+			value: 'is_action',
+			action: me.add_customer
+		});
 	},
 
 	autocomplete_customers: function() {
@@ -871,10 +896,15 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					"label": __("ZIP Code"),
 					"fieldname": "pincode",
 					"fieldtype": "Data"
+				},
+				{
+					"label": __("Customer POS Id"),
+					"fieldname": "customer_pos_id",
+					"fieldtype": "Data",
+					"hidden": 1
 				}
 			]
 		})
-
 		this.customer_doc.show()
 		this.render_address_data()
 
@@ -887,11 +917,18 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	render_address_data: function() {
 		var me = this;
-		this.address_data = this.address[this.frm.doc.customer];
-		this.customer_doc.set_values(this.address_data)
+		this.address_data = this.address[this.frm.doc.customer] || {};
+		if(!this.address_data.email_id || !this.address_data.phone) {
+			this.address_data = this.contacts[this.frm.doc.customer];
+		}
 
+		this.customer_doc.set_values(this.address_data)
 		if(!this.customer_doc.fields_dict.full_name.$input.val()) {
 			this.customer_doc.set_value("full_name", this.frm.doc.customer)
+		}
+
+		if(!this.customer_doc.fields_dict.customer_pos_id.value) {
+			this.customer_doc.set_value("customer_pos_id", $.now())
 		}
 	},
 
@@ -902,6 +939,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	make_offline_customer: function(new_customer) {
 		this.frm.doc.customer = this.frm.doc.customer || this.customer_doc.get_values().full_name;
+		this.frm.doc.customer_pos_id = this.customer_doc.fields_dict.customer_pos_id.value;
 		this.customer_details = this.get_customers_details();
 		this.customer_details[this.frm.doc.customer] = this.get_prompt_details();
 		this.party_field.$input.val(this.frm.doc.customer);
@@ -923,12 +961,13 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			});
 		}
 
-		this.address[this.frm.doc.customer] = this.customer_doc.get_values();
+		this.address[this.frm.doc.customer] = JSON.parse(this.get_prompt_details())
 	},
 
 	get_prompt_details: function() {
 		this.prompt_details = this.customer_doc.get_values();
 		this.prompt_details['country'] = this.pos_profile_data.country;
+		this.prompt_details['customer_pos_id'] = this.customer_doc.fields_dict.customer_pos_id.value;
 		return JSON.stringify(this.prompt_details)
 	},
 
@@ -940,26 +979,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.frm.doc.territory = doc.territory;
 		this.pos_bill.show();
 		this.numeric_keypad.show();
-	},
-
-	get_customers: function (key) {
-		var me = this;
-		key = key.toLowerCase().trim()
-		var re = new RegExp('%', 'g');
-		var reg = new RegExp(key.replace(re, '\\w*\\s*[a-zA-Z0-9]*'))
-
-		if (key) {
-			return $.grep(this.customers, function (data) {
-				if (reg.test(data.name.toLowerCase())
-					|| reg.test(data.customer_name.toLowerCase())
-					|| (data.customer_group && reg.test(data.customer_group.toLowerCase()))) {
-					return data
-				}
-			})
-		} else {
-			customers = this.customers.sort(function (a, b) { return a.idx < b.idx })
-			return customers.slice(0, 20)
-		}
 	},
 
 	make_item_list: function () {
@@ -1180,6 +1199,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.child_doc = this.get_child_item(this.item_code);
 		$(this.wrapper).find('.selected-item').empty();
 		if(this.child_doc.length) {
+			this.child_doc[0]["allow_user_to_edit_rate"] = this.pos_profile_data["allow_user_to_edit_rate"] ? true : false,
 			this.selected_row = $(frappe.render_template("pos_selected_item", this.child_doc[0]))
 			$(this.wrapper).find('.selected-item').html(this.selected_row)
 		}
@@ -1388,7 +1408,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				actual_qty: me.actual_qty_dict[d.item_code] || 0.0,
 				projected_qty: d.projected_qty,
 				rate: format_currency(d.rate, me.frm.doc.currency),
-				enabled: me.pos_profile_data["allow_user_to_edit_rate"] ? true : false,
 				amount: format_currency(d.amount, me.frm.doc.currency),
 				selected_class: (me.item_code == d.item_code) ? "active" : ""
 			})).appendTo($items);
@@ -1607,8 +1626,11 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.si_docs = this.get_submitted_invoice() || [];
 		this.email_queue_list = this.get_email_queue() || {};
 		this.customers_list = this.get_customers_details() || {};
+		if(this.customer_doc) {
+			this.freeze = this.customer_doc.display
+		}
 
-		if (this.si_docs.length || this.email_queue_list || this.customers_list) {
+		if ((this.si_docs.length || this.email_queue_list || this.customers_list) && !this.freeze) {
 			frappe.call({
 				method: "erpnext.accounts.doctype.sales_invoice.pos.make_invoice",
 				args: {
@@ -1618,12 +1640,17 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				},
 				callback: function (r) {
 					if (r.message) {
+						me.customers = r.message.synced_customers_list;
+						me.address = r.message.synced_address;
+						me.contacts = r.message.synced_contacts;
 						me.removed_items = r.message.invoice;
 						me.removed_email = r.message.email_queue
 						me.removed_customers = r.message.customers
 						me.remove_doc_from_localstorage();
 						me.remove_email_queue_from_localstorage();
 						me.remove_customer_from_localstorage();
+						me.prepare_customer_mapper()
+						me.autocomplete_customers()
 					}
 				}
 			})

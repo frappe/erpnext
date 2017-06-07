@@ -6,17 +6,27 @@ cur_frm.add_fetch("examiner", "instructor_name", "examiner_name");
 cur_frm.add_fetch("supervisor", "instructor_name", "supervisor_name");
 
 frappe.ui.form.on("Assessment Plan", {
-	refresh: function(frm) {
-		if (frm.doc.docstatus == 1) {
-			frm.add_custom_button(__("Assessment Result"), function() {
-				frappe.route_options = {
-					assessment_plan: frm.doc.name,
-					student_group: frm.doc.student_group
-				}
-				frappe.set_route("Form", "Assessment Result Tool");
-			});
-		}
-	},
+    onload: function(frm) {
+        frm.set_query("assessment_group", function(doc, cdt, cdn) {
+            return{
+                filters: {
+                    'is_group': 0
+                }
+            }
+        });
+    },
+
+    refresh: function(frm) {
+        if (frm.doc.docstatus == 1) {
+            frm.add_custom_button(__("Assessment Result"), function() {
+                frappe.route_options = {
+                    assessment_plan: frm.doc.name,
+                    student_group: frm.doc.student_group
+                }
+                frappe.set_route("Form", "Assessment Result Tool");
+            });
+        }
+    },
 
 	course: function(frm) {
 		if (frm.doc.course && frm.doc.maximum_assessment_score) {
