@@ -22,13 +22,14 @@ def execute(filters=None):
 	if not student_list:
 		return  columns, []
 
+	group_roll_no_map = get_student_roll_no(academic_year, program, student_batch_name)
 	student_map = get_student_details(student_list)
 	guardian_map = get_guardian_map(student_list)
 
 	for d in program_enrollments:
 		student_details = student_map.get(d.student)
-		row = [d.student, d.student_name, student_details.get("student_mobile_number"), student_details.get("student_email_id"),
-				student_details.get("address")]
+		row = [group_roll_no_map.get(d.student), d.student, d.student_name, student_details.get("student_mobile_number"),\
+				student_details.get("student_email_id"), student_details.get("address")]
 
 		student_guardians = guardian_map.get(d.student)
 
@@ -44,7 +45,8 @@ def execute(filters=None):
 
 
 def get_columns():
-	columns = [ 
+	columns = [
+		_(" Group Roll No") + "::60",  
 		_("Student ID") + ":Link/Student:90", 
 		_("Student Name") + "::150", 
 		_("Student Mobile No.") + "::110",
@@ -94,3 +96,12 @@ def get_guardian_map(student_list):
 		guardian_map.setdefault(guardian.parent, []).append(guardian)
 
 	return guardian_map
+
+def get_student_roll_no(academic_year, program, batch):
+	student_group = frappe.get_all("Student Group",
+		filters={"academic_year":academic_year, "program":program, "batch":batch})
+	if student_group:
+		roll_no_dict = dict(frappe.db.sql('''select student, group_roll_number from `tabStudent Group Student` where parent=%s''',
+			(student_group[0].name)))
+		return roll_no_dict
+	return {}

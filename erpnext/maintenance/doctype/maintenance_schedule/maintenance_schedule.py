@@ -66,8 +66,7 @@ class MaintenanceSchedule(TransactionBase):
 				parent=%s""", (d.sales_person, d.item_code, self.name), as_dict=1)
 
 			for key in scheduled_date:
-				description = frappe._("Reference: %s, Item Code: %s and Customer: %s") % \
-					(self.name, d.item_code, self.customer)
+				description =frappe._("Reference: {0}, Item Code: {1} and Customer: {2}").format(self.name, d.item_code, self.customer)	
 				frappe.get_doc({
 					"doctype": "Event",
 					"owner": email_map.get(d.sales_person, self.owner),

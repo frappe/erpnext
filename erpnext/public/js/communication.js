@@ -8,7 +8,7 @@ frappe.ui.form.on("Communication", {
 			}, "Make");
 		}
 
-		if(!inList(["Lead", "Opportunity"], frm.doc.reference_doctype)) {
+		if(!in_list(["Lead", "Opportunity"], frm.doc.reference_doctype)) {
 			frm.add_custom_button(__("Lead"), function() {
 				frappe.confirm("Are you sure you want to create Lead from this email", function(){
 					frm.trigger('make_lead_from_communication');	

@@ -55,7 +55,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 
 	show_payment_details: function(){
 		var me = this;
-		multimode_payments = $(this.$body).find('.multimode-payments').empty();
+		var multimode_payments = $(this.$body).find('.multimode-payments').empty();
 		if(this.frm.doc.payments.length){
 			$.each(this.frm.doc.payments, function(index, data){
 				$(frappe.render_template('payment_details', {
@@ -126,7 +126,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 
 	highlight_selected_row: function(){
 		var me = this;
-		selected_row = $(this.$body).find(repl(".pos-payment-row[idx='%(idx)s']",{'idx': this.idx}));
+		var selected_row = $(this.$body).find(repl(".pos-payment-row[idx='%(idx)s']",{'idx': this.idx}));
 		$(this.$body).find('.pos-payment-row').removeClass('selected-payment-mode')
 		selected_row.addClass('selected-payment-mode')
 		$(this.$body).find('.amount').attr('disabled', true);
@@ -195,7 +195,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 	update_paid_amount: function(update_write_off) {
 		var me = this;
 		if(in_list(['change_amount', 'write_off_amount'], this.idx)){
-			value = me.selected_mode.val();
+			var value = me.selected_mode.val();
 			if(me.idx == 'change_amount'){
 				me.change_amount(value)
 			} else{

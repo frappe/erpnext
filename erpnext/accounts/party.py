@@ -8,7 +8,7 @@ import datetime
 from frappe import _, msgprint, scrub
 from frappe.defaults import get_user_permissions
 from frappe.utils import add_days, getdate, formatdate, get_first_day, date_diff, \
-	add_years, get_timestamp, nowdate
+	add_years, get_timestamp, nowdate, flt
 from frappe.geo.doctype.address.address import get_address_display, get_default_address
 from frappe.email.doctype.contact.contact import get_contact_details, get_default_contact
 from erpnext.exceptions import PartyFrozen, InvalidCurrency, PartyDisabled, InvalidAccountCurrency
@@ -366,8 +366,10 @@ def get_timeline_data(doctype, name):
 	
 def get_dashboard_info(party_type, party):
 	current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
-	party_account_currency = get_party_account_currency(party_type, party, frappe.db.get_default("company"))
-	company_default_currency = get_default_currency()
+	company = frappe.db.get_default("company") or frappe.get_all("Company")[0].name
+	party_account_currency = get_party_account_currency(party_type, party, company)
+	company_default_currency = get_default_currency() \
+		or frappe.db.get_value('Company', company, 'default_currency')
 		
 	if party_account_currency==company_default_currency:
 		total_field = "base_grand_total"
@@ -389,9 +391,9 @@ def get_dashboard_info(party_type, party):
 		where party_type = %s and party=%s""", (party_type, party))
 
 	info = {}
-	info["billing_this_year"] = billing_this_year[0][0] if billing_this_year else 0
+	info["billing_this_year"] = flt(billing_this_year[0][0]) if billing_this_year else 0
 	info["currency"] = party_account_currency
-	info["total_unpaid"] = total_unpaid[0][0] if total_unpaid else 0
+	info["total_unpaid"] = flt(total_unpaid[0][0]) if total_unpaid else 0
 	if party_type == "Supplier":
 		info["total_unpaid"] = -1 * info["total_unpaid"]
 	

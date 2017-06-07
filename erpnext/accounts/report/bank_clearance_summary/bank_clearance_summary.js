@@ -14,7 +14,7 @@ frappe.query_reports["Bank Clearance Summary"] = {
 			"fieldname":"to_date",
 			"label": __("To Date"),
 			"fieldtype": "Date",
-			"default": get_today()
+			"default": frappe.datetime.get_today()
 		},
 		{
 			"fieldname":"account",

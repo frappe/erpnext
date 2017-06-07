@@ -4,7 +4,7 @@ frappe.listview_settings['Stock Entry'] = {
 	column_render: {
 		"from_warehouse": function(doc) {
 			var html = "";
-	 		if(doc.from_warehouse) {
+			if(doc.from_warehouse) {
 				html += '<span class="filterable h6"\
 					data-filter="from_warehouse,=,'+doc.from_warehouse+'">'+doc.from_warehouse+' </span>';
 			}

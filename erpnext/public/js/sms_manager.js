@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-function SMSManager(doc) {
+erpnext.SMSManager = function SMSManager(doc) {
 	var me = this;
 	this.setup = function() {
 		var default_msg = {
@@ -42,7 +42,7 @@ function SMSManager(doc) {
 				ref_name: ref_name
 			},
 			callback: function(r) {
-				if(r.exc) { msgprint(r.exc); return; }
+				if(r.exc) { frappe.msgprint(r.exc); return; }
 				me.number = r.message;
 				me.show_dialog();
 			}
@@ -92,7 +92,7 @@ function SMSManager(doc) {
 					},
 					callback: function(r) {
 						$(btn).done_working();
-						if(r.exc) {msgprint(r.exc); return; }
+						if(r.exc) {frappe.msgprint(r.exc); return; }
 						me.dialog.hide();
 					}
 				});

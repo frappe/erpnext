@@ -55,7 +55,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 			if(is_drop_ship && doc.status!="Delivered"){
 				cur_frm.add_custom_button(__('Delivered'),
-					 this.delivered_by_supplier, __("Status"));
+					this.delivered_by_supplier, __("Status"));
 
 				cur_frm.page.set_inner_btn_group_as_primary(__("Status"));
 			}

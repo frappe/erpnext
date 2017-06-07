@@ -52,7 +52,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn) {
 		cur_frm.set_value("approval_status", "Draft")
 
 	if (doc.__islocal) {
-		cur_frm.set_value("posting_date", dateutil.get_today());
+		cur_frm.set_value("posting_date", frappe.datetime.get_today());
 		if(doc.amended_from)
 			cur_frm.set_value("approval_status", "Draft");
 		cur_frm.cscript.clear_sanctioned(doc);
@@ -81,15 +81,15 @@ cur_frm.cscript.clear_sanctioned = function(doc) {
 	refresh_many(['sanctioned_amount', 'total_sanctioned_amount']);
 }
 
-cur_frm.cscript.refresh = function(doc,cdt,cdn){
+cur_frm.cscript.refresh = function(doc,cdt,cdn) {
 	cur_frm.cscript.set_help(doc);
 
 	if(!doc.__islocal) {
 		cur_frm.toggle_enable("exp_approver", doc.approval_status=="Draft");
-		cur_frm.toggle_enable("approval_status", (doc.exp_approver==user && doc.docstatus==0));
+		cur_frm.toggle_enable("approval_status", (doc.exp_approver==frappe.session.user && doc.docstatus==0));
 
-		if (doc.docstatus==0 && doc.exp_approver==user && doc.approval_status=="Approved")
-			 cur_frm.savesubmit();
+		if (doc.docstatus==0 && doc.exp_approver==frappe.session.user && doc.approval_status=="Approved")
+			cur_frm.savesubmit();
 
 		if (doc.docstatus===1 && doc.approval_status=="Approved") {
 			if (cint(doc.total_amount_reimbursed) < cint(doc.total_sanctioned_amount) && frappe.model.can_create("Journal Entry")) {
@@ -97,6 +97,8 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 			}
 
+			/* eslint-disable */
+			// no idea how `me` works here 
 			if (cint(doc.total_amount_reimbursed) > 0 && frappe.model.can_read("Journal Entry")) {
 				cur_frm.add_custom_button(__('Bank Entries'), function() {
 					frappe.route_options = {
@@ -107,17 +109,18 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 					frappe.set_route("List", "Journal Entry");
 				}, __("View"));
 			}
+			/* eslint-enable */
 		}
 	}
 }
 
 cur_frm.cscript.set_help = function(doc) {
 	cur_frm.set_intro("");
-	if(doc.__islocal && !in_list(roles, "HR User")) {
+	if(doc.__islocal && !in_list(frappe.user_roles, "HR User")) {
 		cur_frm.set_intro(__("Fill the form and save it"))
 	} else {
 		if(doc.docstatus==0 && doc.approval_status=="Draft") {
-			if(user==doc.exp_approver) {
+			if(frappe.session.user==doc.exp_approver) {
 				cur_frm.set_intro(__("You are the Expense Approver for this record. Please Update the 'Status' and Save"));
 			} else {
 				cur_frm.set_intro(__("Expense Claim is pending approval. Only the Expense Approver can update status."));

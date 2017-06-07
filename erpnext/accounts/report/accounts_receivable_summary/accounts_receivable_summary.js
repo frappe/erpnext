@@ -26,7 +26,7 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			"fieldname":"credit_days_based_on",
 			"label": __("Credit Days Based On"),
 			"fieldtype": "Select",
-			"options": "" + NEWLINE + "Fixed Days" + NEWLINE + "Last Day of the Next Month"
+			"options": "\nFixed Days\nLast Day of the Next Month"
 		},
 		{
 			"fieldtype": "Break",
@@ -35,13 +35,13 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			"fieldname":"report_date",
 			"label": __("Date"),
 			"fieldtype": "Date",
-			"default": get_today()
+			"default": frappe.datetime.get_today()
 		},
 		{
 			"fieldname":"ageing_based_on",
 			"label": __("Ageing Based On"),
 			"fieldtype": "Select",
-			"options": 'Posting Date' + NEWLINE + 'Due Date',
+			"options": 'Posting Date\nDue Date',
 			"default": "Posting Date"
 		},
 		{
@@ -70,7 +70,7 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 	onload: function(report) {
 		report.page.add_inner_button(__("Accounts Receivable"), function() {
 			var filters = report.get_values();
-			frappe.set_route('query-report', 'Accounts Receivable', {company: filters.company});
+			frappe.set_route('query-report', 'Accounts Receivable', { company: filters.company });
 		});
 	}
 }
