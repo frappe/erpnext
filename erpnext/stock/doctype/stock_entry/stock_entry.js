@@ -583,7 +583,7 @@ erpnext.stock.select_batch_and_serial_no = (frm, d = undefined) => {
 	if(d && d.has_batch_no && !d.batch_no) {
 		// show_modal_with_oldest_batch(d, d.item_code, d.qty, get_warehouse(d), 1);
 		erpnext.stock.show_batch_serial_modal(frm, d, d.item_code, d.qty, get_warehouse(d), 1);
-	} else if(d && d.has_serial_no && !d.serial_no) {
+	} else if(d && d.has_serial_no && !d.serial_no && frm.doc.purpose !== 'Material Receipt') {
 		erpnext.stock.show_batch_serial_modal(frm, d, d.item_code, d.qty, get_warehouse(d), 0);
 	}
 }
@@ -613,7 +613,7 @@ erpnext.stock.show_batch_serial_modal = (frm, item, item_code, qty, warehouse_de
 						label: __('Select Batch'), in_list_view:1, get_query: function(doc) {
 							return {filters: {item: item_code }};
 						}},
-					{fieldtype:'Float', read_only: 1, fieldname:'available_qty',
+					{fieldtype:'Float', read_only:1, fieldname:'available_qty',
 						label: __('Available'), in_list_view:1, 'default': 0},
 					{fieldtype:'Float', fieldname:'selected_qty',
 						label: __('Qty'), in_list_view:1, 'default': 0},
@@ -746,12 +746,12 @@ erpnext.stock.show_batch_serial_modal = (frm, item, item_code, qty, warehouse_de
 
 erpnext.stock.bind_batch_serial_dialog_qty = (dialog) => {
 	let serial_no_link = dialog.fields_dict.serial_no_select;
-	let serial_no_list = dialog.fields_dict.serial_no;
+	let serial_no_list_field = dialog.fields_dict.serial_no;
 	let batches_field = dialog.fields_dict.batches;
 
 	let warehouse_field = dialog.fields_dict.warehouse;
 	let qty_field = dialog.fields_dict.qty;
-	let item_code = dialog.fields_dict.item_code.get_value();
+	let item_code = dialog.get_value('item_code');
 
 	let update_quantity = (batch) => {
 		if(batch) {
@@ -761,7 +761,7 @@ erpnext.stock.bind_batch_serial_dialog_qty = (dialog) => {
 			});
 			qty_field.set_input(total_qty);
 		} else {
-			serial_numbers = serial_no_list.get_value().replace(/\n/g, ' ').match(/\S+/g) || [];
+			serial_numbers = serial_no_list_field.get_value().replace(/\n/g, ' ').match(/\S+/g) || [];
 			qty_field.set_input(serial_numbers.length);
 		}
 	}
@@ -788,20 +788,20 @@ erpnext.stock.bind_batch_serial_dialog_qty = (dialog) => {
 	}
 
 	if(serial_no_link) {
+		let serial_list = [];
 		serial_no_link.$input.on('awesomplete-selectcomplete', function(e) {
 			if(serial_no_link.get_value().length > 0) {
 				let new_no = serial_no_link.get_value();
-				let list_value = serial_no_list.get_value();
+				let list_value = serial_no_list_field.get_value();
 				let new_line = '\n';
-				let list = [];
-				if(!serial_no_list.get_value()) {
+				if(!serial_no_list_field.get_value()) {
 					new_line = '';
 				} else {
-					list = list_value.replace(/\s+/g, ' ').split(' ');
+					serial_list = list_value.replace(/\s+/g, ' ').split(' ');
 				}
-				if(!list.includes(new_no)) {
+				if(!serial_list.includes(new_no)) {
 					serial_no_link.set_new_description('');
-					serial_no_list.set_value(list_value + new_line + new_no);
+					serial_no_list_field.set_value(list_value + new_line + new_no);
 					update_quantity(0);
 				} else {
 					serial_no_link.set_new_description(new_no + ' is already selected.');
@@ -810,22 +810,27 @@ erpnext.stock.bind_batch_serial_dialog_qty = (dialog) => {
 			serial_no_link.set_input('');
 		});
 
-		serial_no_list.$input.on('input', function() {
+		serial_no_list_field.$input.on('input', function() {
+			serial_list = $(this).get_value().replace(/\s+/g, ' ').split(' ');
 			update_quantity(0);
 		});
 	}
 
 	if(batches_field) {
+		batches_field.grid.add_new_row(null, null, true);
 		batches_field.grid.wrapper.on('change', 'input[data-fieldname="batch_no"]', function(e) {
 			let $row = $(this).closest('.grid-row');
 			let name = $row.attr('data-name');
 			let row = batches_field.grid.grid_rows_by_docname[name];
-			row.on_grid_fields[2].set_value('0');
-			row.on_grid_fields[2].$input.trigger('change');
-			if(warehouse_field.get_value().length > 0) {
-				set_available_qty(item_code, row.doc.batch_no, warehouse_field.get_value(), row.on_grid_fields[1]);
-			} else {
-				frappe.throw(__("Please select a warehouse to get available quantities"));
+			if(row.doc.batch_no) {
+				row.on_grid_fields[2].set_value('0');
+				row.on_grid_fields[2].$input.trigger('change');
+				if(warehouse_field.get_value().length > 0) {
+					set_available_qty(item_code, row.doc.batch_no, warehouse_field.get_value(), row.on_grid_fields[1]);
+				} else {
+					frappe.throw(__("Please select a warehouse to get available quantities"));
+				}
+
 			}
 		});
 
@@ -836,6 +841,7 @@ erpnext.stock.bind_batch_serial_dialog_qty = (dialog) => {
 		warehouse_field.$input.on('change', function() {
 			batches_field.grid.df.data = [];
 			batches_field.grid.refresh();
+			batches_field.grid.add_new_row(null, null, true);
 		});
 	}
 }
