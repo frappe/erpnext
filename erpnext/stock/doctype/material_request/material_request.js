@@ -61,11 +61,11 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		if(doc.docstatus == 1 && doc.status != 'Stopped') {
 			if(flt(doc.per_ordered, 2) < 100) {
 				// make
-				if(doc.material_request_type === "Material Transfer" && doc.status === "Submitted")
+				if(doc.material_request_type === "Material Transfer")
 					cur_frm.add_custom_button(__("Transfer Material"),
 					this.make_stock_entry, __("Make"));
 
-				if(doc.material_request_type === "Material Issue" && doc.status === "Submitted")
+				if(doc.material_request_type === "Material Issue")
 					cur_frm.add_custom_button(__("Issue Material"),
 					this.make_stock_entry, __("Make"));
 
@@ -81,7 +81,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 					cur_frm.add_custom_button(__("Supplier Quotation"),
 					this.make_supplier_quotation, __("Make"));
 
-				if(doc.material_request_type === "Manufacture" && doc.status === "Submitted")
+				if(doc.material_request_type === "Manufacture")
 					cur_frm.add_custom_button(__("Production Order"),
 					function() { me.raise_production_orders() }, __("Make"));
 
