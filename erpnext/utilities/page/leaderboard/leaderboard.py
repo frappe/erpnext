@@ -30,7 +30,6 @@ def get_leaderboard(obj):
 	elif  doctype == "Sales Partner":		
 		items = get_all_sales_partner(doctype, filters, [])
 	
-	print(items)
 	if len(items) > 0:
 		return filter_leaderboard_items(obj, items)
 	return []
@@ -45,6 +44,7 @@ def filter_leaderboard_items(obj, items):
 
 	# key : (x[field1], x[field2]) while sorting on 2 values
 	filtered_list = []
+
 	if obj.selected_filter_item and obj.selected_filter_item["field"]:
 		filtered_list  = filtered_list + sorted(items, key=itemgetter(obj.selected_filter_item["field"]), reverse=reverse)
 	else:
@@ -72,7 +72,7 @@ def get_date_from_string(seleted_timeline):
 		years = -1
 	else:
 		days = -7
-	
+
 	return add_to_date(None, years=years, months=months, days=days, as_string=True, as_datetime=True)
 
 def get_filter_list(selected_filter):
@@ -102,6 +102,7 @@ def get_all_customers(doctype, filters, items, start=0, limit=100):
 			item_count = frappe.db.sql('''select count(name) from `tabSales Invoice Item` where parent in (%s)''' % ", ".join(
 				['%s'] * len(invoice_list)), tuple(invoice_list))
 			items.append({"title": val.name, "total_amount": sum(y.values()), 
+				"href":"#Form/Customer/" + val.name, 
 				"total_item_purchased": sum(destructure_tuple_of_tuples(item_count)), 
 				"modified": str(val.modified)})
 	if len(x) > 99:
@@ -122,7 +123,8 @@ def get_all_items(doctype, filters, items, start=0, limit=100):
 		avg_price = get_avg(destructure_tuple_of_tuples(y))
 		y = frappe.db.sql('''select item_code from `tabPurchase Invoice Item` where item_code = %s''', (val.name), as_list=1)
 		purchases = destructure_tuple_of_tuples(y)
-		items.append({"title": val.name, "total_request":len(requests), "total_purchase": len(purchases), 
+		items.append({"title": val.name, "total_request":len(requests), 
+			"total_purchase": len(purchases), "href":"#Form/Item/" + val.name,  
 			"avg_price": avg_price, "modified": val.modified})
 	if len(x) > 99:
 		return get_all_items(doctype, filters, items, start=start)
@@ -137,7 +139,8 @@ def get_all_suppliers(doctype, filters, items, start=0, limit=100):
 	for val in x:
 		info = get_dashboard_info(doctype, val.name)
 		items.append({"title": val.name, "annual_billing": info["billing_this_year"], 
-		"total_unpaid": info["total_unpaid"], "modified": val.modified})
+		"total_unpaid": info["total_unpaid"], 
+		"href":"#Form/Supplier/" + val.name, "modified": val.modified})
 
 	if len(x) > 99:
 		return get_all_suppliers(doctype, filters, items, start=start)
@@ -153,7 +156,8 @@ def get_all_sales_partner(doctype, filters, items, start=0, limit=100):
 		target_qty = sum([f["target_qty"] for f in y])
 		target_amount = sum([f["target_amount"] for f in y])
 		items.append({"title": val.name, "commission_rate":val.commission_rate,
-			"target_qty": target_qty, "target_amount":target_amount, "modified": val.modified})
+			"target_qty": target_qty, "target_amount":target_amount, 
+			"href":"#Form/Sales Partner/" + val.name, "modified": val.modified})
 	if len(x) > 99:
 		return get_all_sales_partner(doctype, filters, items, start=start)
 	else:
