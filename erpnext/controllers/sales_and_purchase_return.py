@@ -192,6 +192,10 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		doc.is_return = 1
 		doc.return_against = source.name
 		doc.ignore_pricing_rule = 1
+		if source.update_stock:
+			doc.update_stock = source.update_stock
+		else:
+			doc.update_stock = 0
 		if doctype == "Sales Invoice":
 			doc.is_pos = source.is_pos
 
