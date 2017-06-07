@@ -833,7 +833,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	update_customer: function (new_customer) {
 		var me = this;
-		if (!this.connection_status) return;
 
 		this.customer_doc = new frappe.ui.Dialog({
 			'title': 'Customer',
