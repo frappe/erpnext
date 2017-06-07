@@ -91,7 +91,7 @@ class SalarySlip(TransactionBase):
 			frappe.throw(_("Name error: {0}".format(err)))
 		except SyntaxError as err:
 			frappe.throw(_("Syntax error in formula or condition: {0}".format(err)))
-		except Exception, e:
+		except Exception as e:
 			frappe.throw(_("Error in formula or condition: {0}".format(e)))
 			raise
 
@@ -330,11 +330,18 @@ class SalarySlip(TransactionBase):
 			frappe.throw(_("Please set the Date Of Joining for employee {0}").format(frappe.bold(self.employee_name)))
 
 		for d in self.get(component_type):
-			if self.salary_structure and ((cint(d.depends_on_lwp) == 1 and not self.salary_slip_based_on_timesheet) or\
-			getdate(self.start_date) < joining_date or getdate(self.end_date) > relieving_date):
+			if (self.salary_structure and
+				cint(d.depends_on_lwp) and
+				(not
+				    self.salary_slip_based_on_timesheet or
+					getdate(self.start_date) < joining_date or
+					getdate(self.end_date) > relieving_date
+				)):
 
-				d.amount = rounded((flt(d.default_amount) * flt(self.payment_days)
-					/ cint(self.total_working_days)), self.precision("amount", component_type))
+				d.amount = rounded(
+					(flt(d.default_amount) * flt(self.payment_days)
+					/ cint(self.total_working_days)), self.precision("amount", component_type)
+				)
 			elif not self.payment_days and not self.salary_slip_based_on_timesheet:
 				d.amount = 0
 			elif not d.amount:

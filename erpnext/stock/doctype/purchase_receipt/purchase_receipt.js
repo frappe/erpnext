@@ -145,17 +145,6 @@ cur_frm.fields_dict['items'].grid.get_field('project').get_query = function(doc,
 	}
 }
 
-cur_frm.fields_dict['items'].grid.get_field('batch_no').get_query= function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if(d.item_code) {
-		return {
-			filters: {'item': d.item_code}
-		}
-	}
-	else
-		msgprint(__("Please enter Item Code."));
-}
-
 cur_frm.cscript.select_print_heading = function(doc, cdt, cdn) {
 	if(doc.select_print_heading)
 		cur_frm.pformat.print_heading = doc.select_print_heading;
