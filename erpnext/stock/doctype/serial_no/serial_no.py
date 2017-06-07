@@ -160,7 +160,7 @@ class SerialNo(StockController):
 	def after_rename(self, old, new, merge=False):
 		"""rename serial_no text fields"""
 		for dt in frappe.db.sql("""select parent from tabDocField
-			where fieldname='serial_no' and fieldtype='Text'"""):
+			where fieldname='serial_no' and fieldtype in ('Text', 'Small Text')"""):
 
 			for item in frappe.db.sql("""select name, serial_no from `tab%s`
 				where serial_no like '%%%s%%'""" % (dt[0], frappe.db.escape(old))):
