@@ -72,10 +72,9 @@ class Bin(Document):
 		self.reserved_qty = flt(self.reserved_qty) + flt(args.get("reserved_qty"))
 		self.indented_qty = flt(self.indented_qty) + flt(args.get("indented_qty"))
 		self.planned_qty = flt(self.planned_qty) + flt(args.get("planned_qty"))
-		
-		self.set_projected_qty()
 
-		self.db_save()
+		self.set_projected_qty()
+		self.db_update()
 
 	def set_projected_qty(self):
 		self.projected_qty = (flt(self.actual_qty) + flt(self.ordered_qty)
