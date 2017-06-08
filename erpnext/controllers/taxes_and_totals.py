@@ -174,12 +174,19 @@ class calculate_taxes_and_totals(object):
 		actual_tax_dict = dict([[tax.idx, flt(tax.tax_amount, tax.precision("tax_amount"))]
 			for tax in self.doc.get("taxes") if tax.charge_type == "Actual"])
 
+		current_tax_amount_acc, raw_current_tax_amount_acc = 0, 0   # use to accumulate current tax amount
+
 		for n, item in enumerate(self.doc.get("items")):
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
 
 			for i, tax in enumerate(self.doc.get("taxes")):
 				# tax_amount represents the amount of tax for the current step
-				current_tax_amount = self.get_current_tax_amount(item, tax, item_tax_map)
+				current_tax_amount = self.get_current_tax_amount(item, tax, item_tax_map, True)
+				raw_current_tax_amount = self.get_current_tax_amount(item, tax, item_tax_map, False)
+
+				# keep track of any rounding error that might crop up
+				current_tax_amount_acc += current_tax_amount
+				raw_current_tax_amount_acc += raw_current_tax_amount
 
 				# Adjust divisional loss to the last item
 				if tax.charge_type == "Actual":
@@ -190,7 +197,13 @@ class calculate_taxes_and_totals(object):
 				# accumulate tax amount into tax.tax_amount
 				if tax.charge_type != "Actual" and \
 					not (self.discount_amount_applied and self.doc.apply_discount_on=="Grand Total"):
-						tax.tax_amount += current_tax_amount
+					tax.tax_amount += current_tax_amount
+
+					if current_tax_amount_acc - raw_current_tax_amount_acc != 0.0:
+						if n == len(self.doc.get("items")) - 1:
+							# adjust for rounding difference
+							tax.tax_amount -= current_tax_amount_acc - raw_current_tax_amount_acc
+							current_tax_amount -= current_tax_amount_acc - raw_current_tax_amount_acc
 
 				# store tax_amount for current item as it will be used for
 				# charge type = 'On Previous Row Amount'
@@ -226,11 +239,9 @@ class calculate_taxes_and_totals(object):
 					# adjust Discount Amount loss in last tax iteration
 					if i == (len(self.doc.get("taxes")) - 1) and self.discount_amount_applied \
 						and self.doc.discount_amount and self.doc.apply_discount_on == "Grand Total":
-							self.adjust_discount_amount_loss(tax)
+						self.adjust_discount_amount_loss(tax)
 
-
-
-	def get_current_tax_amount(self, item, tax, item_tax_map):
+	def get_current_tax_amount(self, item,tax, item_tax_map, use_precision=True):
 		tax_rate = self._get_tax_rate(tax, item_tax_map)
 		current_tax_amount = 0.0
 
@@ -248,7 +259,7 @@ class calculate_taxes_and_totals(object):
 			current_tax_amount = (tax_rate / 100.0) * \
 				self.doc.get("taxes")[cint(tax.row_id) - 1].grand_total_for_current_item
 
-		current_tax_amount = flt(current_tax_amount, tax.precision("tax_amount"))
+		current_tax_amount = flt(current_tax_amount, tax.precision("tax_amount") if use_precision != False else None)
 
 		self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
 
