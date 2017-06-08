@@ -12,7 +12,7 @@ frappe.Leaderboard = Class.extend({
 
 		//const list of doctypes
 		this.doctypes = ["Customer", "Item", "Supplier", "Sales Partner"];
-		this.timelines = ["This Week", "This Month", "This Quarter", "This Year"];
+		this.timelines = ["Week", "Month", "Quarter", "Year"];
 
 		this.filters = {
 			"Customer": [{ field: "title", value: "ASC" },

@@ -64,11 +64,11 @@ def destructure_tuple_of_tuples(tup_of_tup):
 def get_date_from_string(seleted_timeline):
 	"""return string for ex:this week as date:string"""
 	days = months = years = 0 
-	if "this month" == seleted_timeline.lower():
+	if "month" == seleted_timeline.lower():
 		months = -1
-	elif "this quarter" == seleted_timeline.lower():
+	elif "quarter" == seleted_timeline.lower():
 		months = -3
-	elif "this year" == seleted_timeline.lower():
+	elif "year" == seleted_timeline.lower():
 		years = -1
 	else:
 		days = -7
