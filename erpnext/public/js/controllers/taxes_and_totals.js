@@ -566,9 +566,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
 				flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
 
-		} else if(this.frm.doc.doctype == "Purchase Invoice") {
-			this.frm.doc.outstanding_amount = flt(total_amount_to_pay, precision("outstanding_amount"));
-		}		
+		}	
 	},
 
 	set_default_payment: function(total_amount_to_pay, update_paid_amount){
@@ -576,7 +574,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		var payment_status = true;
 		if(this.frm.doc.is_pos && (update_paid_amount===undefined || update_paid_amount)){
 			$.each(this.frm.doc['payments'] || [], function(index, data){
-				if(data.type == "Cash" && payment_status && total_amount_to_pay > 0) {
+				if(data.type == "Cash" && payment_status && Math.abs(total_amount_to_pay) > 0) {
 					data.base_amount = flt(total_amount_to_pay, precision("base_amount"));
 					data.amount = flt(total_amount_to_pay / me.frm.doc.conversion_rate, precision("amount"));
 					payment_status = false;
