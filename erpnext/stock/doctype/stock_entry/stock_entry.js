@@ -787,7 +787,7 @@ erpnext.stock.bind_batch_serial_dialog_qty = (dialog, warehouse_details) => {
 		});
 
 		serial_no_list_field.$input.on('input', function() {
-			serial_list = $(this).get_value().replace(/\s+/g, ' ').split(' ');
+			serial_list = serial_no_list_field.get_value().replace(/\s+/g, ' ').split(' ');
 			update_quantity(0);
 		});
 	}
