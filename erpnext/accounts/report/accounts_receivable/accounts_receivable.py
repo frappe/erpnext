@@ -92,7 +92,7 @@ class ReceivablePayableReport(object):
 		voucher_details = self.get_voucher_details(args.get("party_type"))
 
 		future_vouchers = self.get_entries_after(self.filters.report_date, args.get("party_type"))
-
+		store_data = self.get_party_map(args.get("party_type"))
 		if not self.filters.get("company"):
 			self.filters["company"] = frappe.db.get_single_value('Global Defaults', 'default_company')
 
@@ -110,7 +110,7 @@ class ReceivablePayableReport(object):
 
 					# customer / supplier name
 					if party_naming_by == "Naming Series":
-						row += [self.get_party_name(gle.party_type, gle.party)]
+						row += [store_data.get(gle.party, {}).get("customer_name" if gle.party_type == "Customer" else "supplier_name") or ""
 
 					# get due date
 					due_date = voucher_details.get(gle.voucher_no, {}).get("due_date", "")
@@ -146,9 +146,9 @@ class ReceivablePayableReport(object):
 
 					# customer territory / supplier type
 					if args.get("party_type") == "Customer":
-						row += [self.get_territory(gle.party), self.get_customer_group(gle.party)]
+						row += [stored_data.get(gle.party, {}).get("territory") or "", stored_data.get(gle.party, {}).get("customer_group") or ""]
 					if args.get("party_type") == "Supplier":
-						row += [self.get_supplier_type(gle.party)]
+						row += [stored_data.get(gle.party, {}).get("supplier_type") or ""]
 
 					row.append(gle.remarks)
 					data.append(row)
@@ -201,18 +201,6 @@ class ReceivablePayableReport(object):
 		credit_note_amount = flt(credit_note_amount, currency_precision)
 		
 		return outstanding_amount, credit_note_amount
-
-	def get_party_name(self, party_type, party_name):
-		return self.get_party_map(party_type).get(party_name, {}).get("customer_name" if party_type == "Customer" else "supplier_name") or ""
-
-	def get_territory(self, party_name):
-		return self.get_party_map("Customer").get(party_name, {}).get("territory") or ""
-		
-	def get_customer_group(self, party_name):
-		return self.get_party_map("Customer").get(party_name, {}).get("customer_group") or ""
-
-	def get_supplier_type(self, party_name):
-		return self.get_party_map("Supplier").get(party_name, {}).get("supplier_type") or ""
 
 	def get_party_map(self, party_type):
 		if not hasattr(self, "party_map"):
