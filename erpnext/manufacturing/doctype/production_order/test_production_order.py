@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from pprint import pprint
 from frappe.utils import flt, time_diff_in_hours, now, add_days, cint
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.manufacturing.doctype.production_order.production_order \
