@@ -235,9 +235,9 @@ def create_test_records():
 		"is_active": 1,
 		"is_default": 1,
 		"docstatus": 1,
-		"with_operations": 0}, [{"item_code": "_Test PPT Item Raw B", "doctype":"BOM Item", "stock_qty":1,  
+		"with_operations": 0}, [{"item_code": "_Test PPT Item Raw B", "doctype":"BOM Item", "stock_qty":1,
 				"rate":100, "amount": 100, "stock_uom": "_Test UOM"},
-			{"item_code": "_Test PPT Item Raw C", "doctype":"BOM Item", "stock_qty":4, "rate":100,  
+			{"item_code": "_Test PPT Item Raw C", "doctype":"BOM Item", "stock_qty":4, "rate":100,
 				"amount": 400,"stock_uom": "_Test UOM"}])
 	
 	bom_subC = make_bom("BOM-_Test PPT Item Sub C-001",{"quantity":1,
@@ -249,7 +249,7 @@ def create_test_records():
 			{"item_code": "_Test PPT Item Raw A","item_name": "_Test PPT Item Raw A",   
 				"doctype":"BOM Item", "stock_qty":6, "rate":100, "amount": 600},
 			{"item_code": "_Test PPT Item Sub B","item_name": "_Test PPT Item Sub B",   
-				"bom_no":"BOM-_Test PPT Item Sub B-001", "doctype":"BOM Item", "stock_qty":2,  
+				"bom_no":"BOM-_Test PPT Item Sub B-001", "doctype":"BOM Item", "stock_qty":2,
 				"rate":100, "amount": 200}])
 		
 	bom_sCA = make_bom("BOM-_Test PPT Item SC A-001",{"quantity":1,
@@ -278,11 +278,11 @@ def create_test_records():
 		"is_default": 1,
 		"docstatus": 1,
 		"with_operations": 0}, [
-			{"item_code": "_Test PPT Item Sub C","item_name": "_Test PPT Item Sub C",   
+			{"item_code": "_Test PPT Item Sub C","item_name": "_Test PPT Item Sub C",
 				"bom_no":"BOM-_Test PPT Item Sub C-001", "doctype":"BOM Item",  
 				"stock_qty":1, "rate":100, "amount": 100},
 			{"item_code": "_Test PPT Item SC B","item_name": "_Test PPT Item SC B",  
-				"bom_no":"BOM-_Test PPT Item SC B-001", "doctype":"BOM Item", "stock_qty":2,  
+				"bom_no":"BOM-_Test PPT Item SC B-001", "doctype":"BOM Item", "stock_qty":2,
 				"rate":100, "amount": 200}])		
 				
 	bom_master = make_bom("BOM-_Test PPT Item Master-001",{"quantity":1,
@@ -298,7 +298,7 @@ def create_test_records():
 				"bom_no":"BOM-_Test PPT Item Sub B-001", 
 				"doctype":"BOM Item", "stock_qty":1, "rate":100, "amount": 100},
 			{"item_code": "_Test PPT Item Raw A","item_name": "_Test PPT Item Raw A",  
-				"doctype":"BOM Item", "stock_qty":2, "rate":100,  
+				"doctype":"BOM Item", "stock_qty":2, "rate":100,
 				"amount": 200},
 			{"item_code": "_Test PPT Item SC A","item_name": "_Test PPT Item SC A",   
 				"bom_no":"BOM-_Test PPT Item SC A-001",  
