@@ -17,7 +17,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		if party_naming_by == "Naming Series":
 			columns += [ args.get("party_type") + " Name::140"]
 
-		credit_debit_label = _("Total Credit Amt") if args.get('party_type') == 'Customer' else _("Total Debit Amt")
+		credit_debit_label = _("Credit Note Amt") if args.get('party_type') == 'Customer' else _("Debit Note Amt")
 		columns += [
 			_("Total Invoiced Amt") + ":Currency/currency:140",
 			_("Total Paid Amt") + ":Currency/currency:140",
