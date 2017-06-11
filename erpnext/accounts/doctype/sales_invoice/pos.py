@@ -198,7 +198,7 @@ def get_contacts(customers):
 		customers = [frappe._dict({'name': customers})]
 
 	for data in customers:
-		contact = frappe.db.sql(""" select email_id, phone from `tabContact` 
+		contact = frappe.db.sql(""" select email_id, phone, mobile_no from `tabContact` 
 			where is_primary_contact =1 and name in
 			(select parent from `tabDynamic Link` where link_doctype = 'Customer' and link_name = %s
 			and parenttype = 'Contact')""", data.name, as_dict=1)
