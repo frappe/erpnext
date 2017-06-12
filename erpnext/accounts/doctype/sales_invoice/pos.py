@@ -320,6 +320,7 @@ def make_invoice(doc_list={}, email_queue_list={}, customers_list={}):
 				si_doc = frappe.new_doc('Sales Invoice')
 				si_doc.offline_pos_name = name
 				si_doc.update(doc)
+				si_doc.set_posting_time = 1
 				si_doc.customer = get_customer_id(doc)
 				si_doc.due_date = doc.get('posting_date')
 				submit_invoice(si_doc, name, doc)
