@@ -46,6 +46,7 @@ frappe.ui.form.on("Program Enrollment", {
 					}
 				}
 			});
+			frm.events.get_courses(frm);
 		}
 	},
 
@@ -62,9 +63,6 @@ frappe.ui.form.on("Program Enrollment", {
 				callback: function(r) {
 					if(r.message) {
 						frm.set_value("courses", r.message);
-					}
-					else {
-						frappe.msgprint(__("There is no mandatory course for the program {0}",[frm.doc.program]));
 					}
 				}
 			})
