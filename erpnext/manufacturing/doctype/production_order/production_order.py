@@ -16,7 +16,7 @@ from erpnext.stock.doctype.stock_entry.stock_entry import get_additional_costs
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 from frappe.utils.csvutils import getlink
-from erpnext.stock.utils import get_bin, validate_warehouse_company
+from erpnext.stock.utils import get_bin, validate_warehouse_company, get_latest_stock_qty
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
 class OverProductionError(frappe.ValidationError): pass
@@ -45,7 +45,8 @@ class ProductionOrder(Document):
 
 		if not self.get("required_items"):
 			self.set_required_items()
-		
+		else:
+			self.set_available_qty()
 
 	def validate_sales_order(self):
 		if self.sales_order:
@@ -416,6 +417,14 @@ class ProductionOrder(Document):
 		self.set_production_order_operations()
 		
 		return check_if_scrap_warehouse_mandatory(self.bom_no)
+		
+	def set_available_qty(self):
+		for d in self.get("required_items"):
+			if d.source_warehouse:
+				d.available_qty_at_source_warehouse = get_latest_stock_qty(d.item_code, d.source_warehouse)
+				
+			if self.wip_warehouse:
+				d.available_qty_at_wip_warehouse = get_latest_stock_qty(d.item_code, self.wip_warehouse)
 
 	def set_required_items(self):
 		'''set required_items for production to keep track of reserved qty'''
@@ -430,6 +439,8 @@ class ProductionOrder(Document):
 					'required_qty': item.qty,
 					'source_warehouse': item.source_warehouse or item.default_warehouse
 				})
+			
+			self.set_available_qty()
 
 	def update_transaferred_qty_for_required_items(self):
 		'''update transferred qty from submitted stock entries for that item against
