@@ -708,13 +708,11 @@ class StockEntry(StockController):
 			issue (item quantity) that is pending to issue or desire to transfer,
 			whichever is less
 		"""
-		item_dict = self.get_bom_raw_materials(1)
-		issued_item_qty = self.get_issued_qty()
-
+		item_dict = self.get_pro_order_required_items()
 		max_qty = flt(self.pro_doc.qty)
-		for item in item_dict:
-			pending_to_issue = (max_qty * item_dict[item]["qty"]) - issued_item_qty.get(item, 0)
-			desire_to_transfer = flt(self.fg_completed_qty) * item_dict[item]["qty"]
+		for item, item_details in item_dict.items():
+			pending_to_issue = flt(item_details.required_qty) - flt(item_details.transferred_qty)
+			desire_to_transfer = flt(self.fg_completed_qty) * flt(item_details.required_qty) / max_qty
 
 			if desire_to_transfer <= pending_to_issue:
 				item_dict[item]["qty"] = desire_to_transfer
@@ -733,35 +731,44 @@ class StockEntry(StockController):
 			frappe.msgprint(_("""All items have already been transferred for this Production Order."""))
 
 		return item_dict
-
-	def get_issued_qty(self):
-		issued_item_qty = {}
-		result = frappe.db.sql("""select t1.item_code, sum(t1.qty)
-			from `tabStock Entry Detail` t1, `tabStock Entry` t2
-			where t1.parent = t2.name and t2.production_order = %s and t2.docstatus = 1
-			and t2.purpose = 'Material Transfer for Manufacture'
-			group by t1.item_code""", self.production_order)
-		for t in result:
-			issued_item_qty[t[0]] = flt(t[1])
-
-		return issued_item_qty
+		
+	def get_pro_order_required_items(self):
+		item_dict = frappe._dict()
+		pro_order = frappe.get_doc("Production Order", self.production_order)
+		if not frappe.db.get_value("Warehouse", pro_order.wip_warehouse, "is_group"):
+			wip_warehouse = pro_order.wip_warehouse
+		else:
+			wip_warehouse = None
+			
+		for d in pro_order.get("required_items"):
+			if flt(d.required_qty) > flt(d.transferred_qty):
+				item_row = d.as_dict()
+				if d.source_warehouse and not frappe.db.get_value("Warehouse", d.source_warehouse, "is_group"):
+					item_row["from_warehouse"] = d.source_warehouse
+				
+				item_row["to_warehouse"] = wip_warehouse
+				item_dict.setdefault(d.item_code, item_row)
+			
+		return item_dict
 
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None):
 		expense_account, cost_center = frappe.db.get_values("Company", self.company, \
 			["default_expense_account", "cost_center"])[0]
-
+				
 		for d in item_dict:
+			stock_uom = item_dict[d].get("stock_uom") or frappe.db.get_value("Item", d, "stock_uom")
+			
 			se_child = self.append('items')
 			se_child.s_warehouse = item_dict[d].get("from_warehouse")
 			se_child.t_warehouse = item_dict[d].get("to_warehouse")
 			se_child.item_code = cstr(d)
 			se_child.item_name = item_dict[d]["item_name"]
 			se_child.description = item_dict[d]["description"]
-			se_child.uom = item_dict[d]["stock_uom"]
-			se_child.stock_uom = item_dict[d]["stock_uom"]
+			se_child.uom = stock_uom
+			se_child.stock_uom = stock_uom
 			se_child.qty = flt(item_dict[d]["qty"])
-			se_child.expense_account = item_dict[d]["expense_account"] or expense_account
-			se_child.cost_center = item_dict[d]["cost_center"] or cost_center
+			se_child.expense_account = item_dict[d].get("expense_account") or expense_account
+			se_child.cost_center = item_dict[d].get("cost_center") or cost_center
 
 			if se_child.s_warehouse==None:
 				se_child.s_warehouse = self.from_warehouse

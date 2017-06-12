@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
 from frappe.utils import flt, nowdate
 import frappe.defaults
 from frappe.model.document import Document
@@ -15,7 +14,6 @@ class Bin(Document):
 
 		self.validate_mandatory()
 		self.set_projected_qty()
-		self.block_transactions_against_group_warehouse()
 
 	def on_update(self):
 		update_item_projected_qty(self.item_code)
@@ -25,10 +23,6 @@ class Bin(Document):
 		for f in qf:
 			if (not getattr(self, f, None)) or (not self.get(f)):
 				self.set(f, 0.0)
-
-	def block_transactions_against_group_warehouse(self):
-		from erpnext.stock.utils import is_group_warehouse
-		is_group_warehouse(self.warehouse)
 
 	def update_stock(self, args, allow_negative_stock=False, via_landed_cost_voucher=False):
 		'''Called from erpnext.stock.utils.update_bin'''
@@ -91,7 +85,8 @@ class Bin(Document):
 				item.item_code = %s
 				and item.parent = pro.name
 				and pro.docstatus = 1
-				and pro.source_warehouse = %s''', (self.item_code, self.warehouse))[0][0]
+				and item.source_warehouse = %s
+				and pro.status not in ("Stopped", "Completed")''', (self.item_code, self.warehouse))[0][0]
 
 		self.set_projected_qty()
 
