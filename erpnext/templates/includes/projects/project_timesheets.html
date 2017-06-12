@@ -5,7 +5,7 @@
 			<div class='col-xs-9'>
 				<span class="indicator {{ "blue" if timesheet.info.status=="Submitted" else "red" if timesheet.info.status=="Draft" else "darkgrey" }}" title="{{ timesheet.info.status }}"  > {{ timesheet.info.name }} </span> 
 				<div class="small text-muted item-timestamp">
-				{{ __("From") }} {{ frappe.format_date(timesheet.from_time) }} {{ __("to") }} {{ frappe.format_date(timesheet.to_time) }}
+				{{ _("From") }} {{ frappe.format_date(timesheet.from_time) }} {{ _("to") }} {{ frappe.format_date(timesheet.to_time) }}
 			</div>
 			</div>
 				<div class='col-xs-1 gravatar-top'>
