@@ -717,7 +717,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					item = this.get_item(item.value);
 					var searchtext =
 						Object.keys(item)
-							.filter(key => ['customer_name', 'customer_group', 'value', 'label', 'email_id', 'phone'].includes(key))
+							.filter(key => ['customer_name', 'customer_group', 'value', 'label', 'email_id', 'phone', 'mobile_no'].includes(key))
 							.map(key => item[key])
 							.join(" ")
 							.toLowerCase();
@@ -795,6 +795,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				customer_group: c.customer_group,
 				territory: c.territory,
 				phone: contact ? contact["phone"] : '',
+				mobile_no: contact ? contact["mobile_no"] : '',
 				email_id: contact ? contact["email_id"] : ''
 			}
 		});
