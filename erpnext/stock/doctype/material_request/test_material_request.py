@@ -98,6 +98,94 @@ class TestMaterialRequest(unittest.TestCase):
 		se.insert()
 		se.submit()
 
+	def test_cannot_stop_cancelled_material_request(self):
+		mr = frappe.copy_doc(test_records[0])
+		mr.insert()
+		mr.submit()
+
+		mr.load_from_db()
+		mr.cancel()
+		self.assertRaises(frappe.ValidationError, mr.update_status, 'Stopped')
+
+	def test_mr_changes_from_stopped_to_pending_after_reopen(self):
+		mr = frappe.copy_doc(test_records[0])
+		mr.insert()
+		mr.submit()
+		self.assertEqual('Pending', mr.status)
+
+		mr.update_status('Stopped')
+		self.assertEqual('Stopped', mr.status)
+
+		mr.update_status('Submitted')
+		self.assertEqual('Pending', mr.status)
+
+	def test_cannot_submit_cancelled_mr(self):
+		mr = frappe.copy_doc(test_records[0])
+		mr.insert()
+		mr.submit()
+		mr.load_from_db()
+		mr.cancel()
+		self.assertRaises(frappe.ValidationError, mr.submit)
+
+	def test_mr_changes_from_pending_to_cancelled_after_cancel(self):
+		mr = frappe.copy_doc(test_records[0])
+		mr.insert()
+		mr.submit()
+		mr.cancel()
+		self.assertEqual('Cancelled', mr.status)
+
+	def test_cannot_change_cancelled_mr(self):
+		mr = frappe.copy_doc(test_records[0])
+		mr.insert()
+		mr.submit()
+		mr.load_from_db()
+		mr.cancel()
+
+		self.assertRaises(frappe.InvalidStatusError, mr.update_status, 'Draft')
+		self.assertRaises(frappe.InvalidStatusError, mr.update_status, 'Stopped')
+		self.assertRaises(frappe.InvalidStatusError, mr.update_status, 'Ordered')
+		self.assertRaises(frappe.InvalidStatusError, mr.update_status, 'Issued')
+		self.assertRaises(frappe.InvalidStatusError, mr.update_status, 'Transferred')
+		self.assertRaises(frappe.InvalidStatusError, mr.update_status, 'Pending')
+
+	def test_cannot_submit_deleted_material_request(self):
+		mr = frappe.copy_doc(test_records[0])
+		mr.insert()
+		mr.delete()
+
+		self.assertRaises(frappe.ValidationError, mr.submit)
+
+	def test_cannot_delete_submitted_mr(self):
+		mr = frappe.copy_doc(test_records[0])
+		mr.insert()
+		mr.submit()
+
+		self.assertRaises(frappe.ValidationError, mr.delete)
+
+	def test_stopped_mr_changes_to_pending_after_reopen(self):
+		mr = frappe.copy_doc(test_records[0])
+		mr.insert()
+		mr.submit()
+		mr.load_from_db()
+
+		mr.update_status('Stopped')
+		mr.update_status('Submitted')
+		self.assertEqual(mr.status, 'Pending')
+
+	def test_pending_mr_changes_to_stopped_after_stop(self):
+		mr = frappe.copy_doc(test_records[0])
+		mr.insert()
+		mr.submit()
+		mr.load_from_db()
+
+		mr.update_status('Stopped')
+		self.assertEqual(mr.status, 'Stopped')
+
+	def test_cannot_stop_unsubmitted_mr(self):
+		mr = frappe.copy_doc(test_records[0])
+		mr.insert()
+		self.assertRaises(frappe.InvalidStatusError, mr.update_status, 'Stopped')
+
 	def test_completed_qty_for_purchase(self):
 		existing_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		existing_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")

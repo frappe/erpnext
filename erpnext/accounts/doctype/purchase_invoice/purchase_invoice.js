@@ -78,7 +78,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 					},
 					get_query_filters: {
 						docstatus: 1,
-						status: ["!=", "Closed"],
+						status: ["not in", ["Closed", "Completed"]],
 						company: me.frm.doc.company,
 						is_return: 0
 					}

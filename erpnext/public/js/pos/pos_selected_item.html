@@ -13,7 +13,7 @@
 	</div>
 	<div class="pos-list-row">
 		<div class="cell">{{ __("Price") }}:</div>
-		<input type="tel" class="form-control cell pos-item-price" value="{%= rate %}"/>
+		<input type="tel" class="form-control cell pos-item-price" {% if !allow_user_to_edit_rate %} disabled {% endif %} value="{%= rate %}"/>
 	</div> 
 	<div class="pos-list-row">
 		<div class="cell">{{ __("Amount") }}:</div>
