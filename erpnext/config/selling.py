@@ -121,7 +121,7 @@ def get_data():
 					"type": "report",
 					"is_query_report": True,
 					"name": "Addresses And Contacts",
-					"label": "Sales Partner Addresses And Contacts",
+					"label": _("Sales Partner Addresses And Contacts"),
 					"doctype": "Address",
 					"route_options": {
 						"party_type": "Sales Partner"
@@ -226,7 +226,7 @@ def get_data():
 					"type": "report",
 					"is_query_report": True,
 					"name": "Addresses And Contacts",
-					"label": "Customer Addresses And Contacts",
+					"label": _("Customer Addresses And Contacts"),
 					"doctype": "Address",
 					"route_options": {
 						"party_type": "Customer"

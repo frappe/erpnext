@@ -59,10 +59,10 @@ class calculate_taxes_and_totals(object):
 						(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
 
 				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item']:
-					item.total_margin = self.calculate_margin(item)
+					item.rate_with_margin = self.calculate_margin(item)
 
-					item.rate = flt(item.total_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))\
-						if item.total_margin > 0 else item.rate
+					item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))\
+						if item.rate_with_margin > 0 else item.rate
 
 				item.net_rate = item.rate
 				item.amount = flt(item.rate * item.qty,	item.precision("amount"))
@@ -440,16 +440,16 @@ class calculate_taxes_and_totals(object):
 				self.doc.conversion_rate, self.doc.precision("grand_total")) - self.doc.total_advance
 					- flt(self.doc.base_write_off_amount), self.doc.precision("grand_total"))
 
-		if self.doc.doctype == "Sales Invoice":
+		if self.doc.doctype == "Sales Invoice":			
 			self.doc.round_floats_in(self.doc, ["paid_amount"])
-			paid_amount = self.doc.paid_amount \
-				if self.doc.party_account_currency == self.doc.currency else self.doc.base_paid_amount
-
-			change_amount = self.doc.change_amount \
-				if self.doc.party_account_currency == self.doc.currency else self.doc.base_change_amount
-
 			self.calculate_write_off_amount()
 			self.calculate_change_amount()
+			
+			paid_amount = self.doc.paid_amount \
+				if self.doc.party_account_currency == self.doc.currency else self.doc.base_paid_amount
+			
+			change_amount = self.doc.change_amount \
+				if self.doc.party_account_currency == self.doc.currency else self.doc.base_change_amount
 
 			self.doc.outstanding_amount = flt(total_amount_to_pay - flt(paid_amount) +
 				flt(change_amount), self.doc.precision("outstanding_amount"))
@@ -462,9 +462,12 @@ class calculate_taxes_and_totals(object):
 
 		if self.doc.is_pos:
 			for payment in self.doc.get('payments'):
-				payment.base_amount = flt(payment.amount * self.doc.conversion_rate)
+				payment.amount = flt(payment.amount)
+				payment.base_amount = payment.amount * flt(self.doc.conversion_rate)
 				paid_amount += payment.amount
 				base_paid_amount += payment.base_amount
+		elif not self.doc.is_return:
+			self.doc.set('payments', [])
 
 		self.doc.paid_amount = flt(paid_amount, self.doc.precision("paid_amount"))
 		self.doc.base_paid_amount = flt(base_paid_amount, self.doc.precision("base_paid_amount"))
@@ -472,7 +475,9 @@ class calculate_taxes_and_totals(object):
 	def calculate_change_amount(self):
 		self.doc.change_amount = 0.0
 		self.doc.base_change_amount = 0.0
-		if self.doc.paid_amount > self.doc.grand_total:
+		if self.doc.paid_amount > self.doc.grand_total and not self.doc.is_return \
+			and any([d.type == "Cash" for d in self.doc.payments]):
+
 			self.doc.change_amount = flt(self.doc.paid_amount - self.doc.grand_total +
 				self.doc.write_off_amount, self.doc.precision("change_amount"))
 
@@ -487,7 +492,7 @@ class calculate_taxes_and_totals(object):
 				self.doc.precision("base_write_off_amount"))
 
 	def calculate_margin(self, item):
-		total_margin = 0.0
+		rate_with_margin = 0.0
 		if item.price_list_rate:
 			if item.pricing_rule and not self.doc.ignore_pricing_rule:
 				pricing_rule = frappe.get_doc('Pricing Rule', item.pricing_rule)
@@ -496,6 +501,6 @@ class calculate_taxes_and_totals(object):
 
 			if item.margin_type and item.margin_rate_or_amount:
 				margin_value = item.margin_rate_or_amount if item.margin_type == 'Amount' else flt(item.price_list_rate) * flt(item.margin_rate_or_amount) / 100
-				total_margin = flt(item.price_list_rate) + flt(margin_value)
+				rate_with_margin = flt(item.price_list_rate) + flt(margin_value)
 
-		return total_margin
+		return rate_with_margin

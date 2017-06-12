@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt
+from frappe.model.meta import get_field_precision
 from frappe.model.document import Document
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -71,7 +72,17 @@ class LandedCostVoucher(Document):
 		if not total:
 			frappe.throw(_("Total {0} for all items is zero, may be you should change 'Distribute Charges Based On'").format(based_on))
 		
-		if self.total_taxes_and_charges != sum([flt(d.applicable_charges) for d in self.get("items")]):
+		total_applicable_charges = sum([flt(d.applicable_charges) for d in self.get("items")])
+
+		precision = get_field_precision(frappe.get_meta("Landed Cost Item").get_field("applicable_charges"),
+		currency=frappe.db.get_value("Company", self.company, "default_currency", cache=True))
+
+		diff = flt(self.total_taxes_and_charges) - flt(total_applicable_charges)
+		diff = flt(diff, precision)
+
+		if abs(diff) < (2.0 / (10**precision)):
+			self.items[-1].applicable_charges += diff
+		else:
 			frappe.throw(_("Total Applicable Charges in Purchase Receipt Items table must be same as Total Taxes and Charges"))
 
 

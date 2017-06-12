@@ -19,7 +19,8 @@ class Asset(Document):
 		self.validate_asset_values()
 		self.make_depreciation_schedule()
 		self.set_accumulated_depreciation()
-		self.validate_expected_value_after_useful_life()
+		if self.get("schedules"):
+			self.validate_expected_value_after_useful_life()
 		# Validate depreciation related accounts
 		get_depreciation_accounts(self)
 

@@ -59,6 +59,15 @@ class TestWarehouse(unittest.TestCase):
 		self.assertTrue(frappe.db.get_value("Account",
 			filters={"warehouse": "Test Warehouse for Renaming 3 - _TC"}))
 
+		# Another rename with multiple dashes
+		if frappe.db.exists("Warehouse", "Test - Warehouse - Company - _TC"):
+			frappe.delete_doc("Warehouse", "Test - Warehouse - Company - _TC")
+		rename_doc("Warehouse", "Test Warehouse for Renaming 3 - _TC", "Test - Warehouse - Company")
+
+		self.assertTrue(frappe.db.exists("Account", "Test - Warehouse - Company - _TC"))
+		self.assertTrue(frappe.db.get_value("Account", filters={"warehouse": "Test - Warehouse - Company - _TC"}))
+		self.assertFalse(frappe.db.get_value("Account", filters={"warehouse": "Test Warehouse for Renaming 3 - _TC"}))
+
 	def test_warehouse_merging(self):
 		set_perpetual_inventory(1)
 

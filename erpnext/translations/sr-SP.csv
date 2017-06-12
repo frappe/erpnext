@@ -1,5 +1,5 @@
 DocType: Request for Quotation Item,Project Name,Naziv Projekta
-DocType: Budget,Project,Projekat
+DocType: Bank Guarantee,Project,Projekat
 DocType: Journal Entry Account,Sales Invoice,Fakture
 apps/erpnext/erpnext/config/learn.py +263,Managing Projects,Upravljanje projektima
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +28,Project Status,Status Projekta

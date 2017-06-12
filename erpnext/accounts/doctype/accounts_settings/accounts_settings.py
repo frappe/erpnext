@@ -21,10 +21,13 @@ class AccountsSettings(Document):
 				company.save()
 
 			# Create account head for warehouses
-			warehouse_list = frappe.db.sql("select name, company from tabWarehouse", as_dict=1)
+			warehouse_list = frappe.db.sql("""select name, company from tabWarehouse 
+				where disabled=0""", as_dict=1)
 			warehouse_with_no_company = [d.name for d in warehouse_list if not d.company]
 			if warehouse_with_no_company:
-				frappe.throw(_("Company is missing in warehouses {0}").format(comma_and(warehouse_with_no_company)))
+				frappe.throw(_("Company is missing in warehouses {0}")
+					.format(comma_and(warehouse_with_no_company)))
+					
 			for wh in warehouse_list:
 				wh_doc = frappe.get_doc("Warehouse", wh.name)
 				wh_doc.flags.ignore_permissions = True

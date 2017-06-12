@@ -37,7 +37,7 @@ class TestQuotation(unittest.TestCase):
 		from erpnext.selling.doctype.sales_order.sales_order \
 			import make_delivery_note, make_sales_invoice
 
-		total_margin = flt((1500*18.75)/100 + 1500)
+		rate_with_margin = flt((1500*18.75)/100 + 1500)
 
 		test_records[0]['items'][0]['price_list_rate'] = 1500
 		test_records[0]['items'][0]['margin_type'] = 'Percentage'
@@ -46,7 +46,7 @@ class TestQuotation(unittest.TestCase):
 		quotation = frappe.copy_doc(test_records[0])
 		quotation.insert()
 
-		self.assertEquals(quotation.get("items")[0].rate, total_margin)
+		self.assertEquals(quotation.get("items")[0].rate, rate_with_margin)
 		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
 		quotation.submit()
 
@@ -56,16 +56,16 @@ class TestQuotation(unittest.TestCase):
 		sales_order.transaction_date = "2016-01-01"
 		sales_order.insert()
 
-		self.assertEquals(quotation.get("items")[0].rate, total_margin)
+		self.assertEquals(quotation.get("items")[0].rate, rate_with_margin)
 
 		sales_order.submit()
 
 		dn = make_delivery_note(sales_order.name)
-		self.assertEquals(quotation.get("items")[0].rate, total_margin)
+		self.assertEquals(quotation.get("items")[0].rate, rate_with_margin)
 		dn.save()
 
 		si = make_sales_invoice(sales_order.name)
-		self.assertEquals(quotation.get("items")[0].rate, total_margin)
+		self.assertEquals(quotation.get("items")[0].rate, rate_with_margin)
 		si.save()
 
 test_records = frappe.get_test_records('Quotation')

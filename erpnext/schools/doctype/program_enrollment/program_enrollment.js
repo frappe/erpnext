@@ -3,7 +3,7 @@
 
 cur_frm.add_fetch('fee_structure', 'total_amount', 'amount');
 
-frappe.ui.form.on("Program Enrollment", {	
+frappe.ui.form.on("Program Enrollment", {
 	onload: function(frm, cdt, cdn){
 		frm.set_query("academic_term", "fees", function(){
 			return{
@@ -12,7 +12,7 @@ frappe.ui.form.on("Program Enrollment", {
 				}
 			};
 		});
-				
+
 		frm.fields_dict['fees'].grid.get_field('fee_structure').get_query = function(doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
 			return {
@@ -25,7 +25,7 @@ frappe.ui.form.on("Program Enrollment", {
 				return{
 					query: "erpnext.schools.doctype.program_enrollment.program_enrollment.get_program_courses",
 					filters: {
-						'program': frm.doc.program	
+						'program': frm.doc.program
 					}
 				}
 			});
@@ -48,7 +48,7 @@ frappe.ui.form.on("Program Enrollment", {
 			});
 		}
 	},
-	
+
 	student_category: function() {
 		frappe.ui.form.trigger("Program Enrollment", "program");
 	},

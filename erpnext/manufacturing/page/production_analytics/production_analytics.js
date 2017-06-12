@@ -9,7 +9,6 @@ frappe.pages['production-analytics'].on_page_load = function(wrapper) {
 	});
 
 	new erpnext.ProductionAnalytics(wrapper);
-		
 
 	frappe.breadcrumbs.add("Manufacturing");
 }
@@ -18,7 +17,6 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 	init: function(wrapper) {
 		this._super({
 			title: __("Production Analytics"),
-			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			page: wrapper.page,
 			doctypes: ["Item", "Company", "Fiscal Year", "Production Order"]
@@ -73,8 +71,8 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 	},
 	set_default_values: function() {
 		var values = {
-			from_date: dateutil.str_to_user(dateutil.add_months(dateutil.now_datetime(),-12) ),
-			to_date: dateutil.str_to_user(dateutil.add_months(dateutil.now_datetime(),1))
+			from_date: frappe.datetime.str_to_user(frappe.datetime.add_months(frappe.datetime.now_datetime(),-12) ),
+			to_date: frappe.datetime.str_to_user(frappe.datetime.add_months(frappe.datetime.now_datetime(),1))
 		}
 
 		var me = this;
@@ -100,17 +98,17 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 			checked:true};	
 
 		$.each(frappe.report_dump.data["Production Order"], function(i, d) {
-			var dateobj = dateutil.str_to_obj(d.creation);
-			var date = dateutil.str_to_user(d.creation.split(" ")[0]);
+			var dateobj = frappe.datetime.str_to_obj(d.creation);
+			var date = frappe.datetime.str_to_user(d.creation.split(" ")[0]);
 
 			$.each(me.columns, function(i,col) {
 				if (i > 1){
-					var start_period = dateutil.user_to_obj(dateutil.str_to_user(col.id));
-					var end_period = dateutil.user_to_obj(dateutil.str_to_user(col.name));
-					var astart_date = dateutil.user_to_obj(dateutil.str_to_user(d.actual_start_date));
-					var planned_start_date = dateutil.user_to_obj(dateutil.str_to_user(d.planned_start_date));
-					var aend_date = dateutil.user_to_obj(dateutil.str_to_user(d.actual_end_date));
-					var modified = dateutil.user_to_obj(dateutil.str_to_user(d.modified));
+					var start_period = frappe.datetime.user_to_obj(frappe.datetime.str_to_user(col.id));
+					var end_period = frappe.datetime.user_to_obj(frappe.datetime.str_to_user(col.name));
+					var astart_date = frappe.datetime.user_to_obj(frappe.datetime.str_to_user(d.actual_start_date));
+					var planned_start_date = frappe.datetime.user_to_obj(frappe.datetime.str_to_user(d.planned_start_date));
+					var aend_date = frappe.datetime.user_to_obj(frappe.datetime.str_to_user(d.actual_end_date));
+					var modified = frappe.datetime.user_to_obj(frappe.datetime.str_to_user(d.modified));
 					
 					if (dateobj <= start_period || dateobj <= end_period) {
 						all_open_orders[col.field] = flt(all_open_orders[col.field]) + 1;

@@ -22,20 +22,10 @@
                 }, 
                 "1120.000 Bank ": {
                     "1121.000 Bank Rupiah": {
-                        "1121.0010 Bank 1": {
-                            "account_type": "Bank"
-                        }, 
-                        "1121.0020 Bank 2": {
-                            "account_type": "Bank"
-                        }
+						"is_group": 1
                     }, 
                     "1122.000 Bank Other Currency": {
-                        "1122.0010 Bank 1": {
-                            "account_type": "Bank"
-                        }, 
-                        "1122.0020 Bank 2": {
-                            "account_type": "Bank"
-                        }
+						"is_group": 1
                     }, 
                     "account_type": "Bank"
                 }, 

@@ -11,6 +11,7 @@ from erpnext.accounts.party import get_party_account
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 from erpnext.controllers.accounts_controller import AccountsController
+from frappe.utils.csvutils import getlink
 
 class InvalidExpenseApproverError(frappe.ValidationError): pass
 
@@ -146,7 +147,7 @@ class ExpenseClaim(AccountsController):
 			frappe.throw(_("Cost center is required to book an expense claim"))
 
 		if not self.payable_account:
-			frappe.throw(_("Please set default payable account in the employee {0}").format(self.employee))
+			frappe.throw(_("Please set default payable account for the company {0}").format(getlink("Company",self.company)))
 
 		if self.is_paid:
 			if not self.mode_of_payment:

@@ -4,7 +4,7 @@
 frappe.ui.form.on('Asset Movement', {
 	onload: function(frm) {
 		frm.add_fetch("asset", "warehouse", "source_warehouse");
-		
+
 		frm.set_query("target_warehouse", function() {
 			return {
 				filters: [

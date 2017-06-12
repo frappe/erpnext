@@ -8,7 +8,7 @@ frappe.query_reports["Sales Person Target Variance Item Group-Wise"] = {
 			label: __("Fiscal Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: sys_defaults.fiscal_year
+			default: frappe.sys_defaults.fiscal_year
 		},
 		{
 			fieldname: "period",

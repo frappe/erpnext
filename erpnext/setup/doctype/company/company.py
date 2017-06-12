@@ -10,9 +10,11 @@ import frappe.defaults
 
 
 from frappe.model.document import Document
+from frappe.geo.address_and_contact import load_address_and_contact
 
 class Company(Document):
 	def onload(self):
+		load_address_and_contact(self, "company")
 		self.get("__onload")["transactions_exist"] = self.check_if_transactions_exist()
 
 	def check_if_transactions_exist(self):
@@ -168,7 +170,8 @@ class Company(Document):
 
 	def set_mode_of_payment_account(self):
 		cash = frappe.db.get_value('Mode of Payment', {'type': 'Cash'}, 'name')
-		if cash and not frappe.db.get_value('Mode of Payment Account', {'company': self.name}):
+		if cash and self.default_cash_account \
+				and not frappe.db.get_value('Mode of Payment Account', {'company': self.name}):
 			mode_of_payment = frappe.get_doc('Mode of Payment', cash)
 			mode_of_payment.append('accounts', {
 				'company': self.name,
@@ -282,7 +285,7 @@ def replace_abbr(company, old, new):
 			if len(parts) == 1 or parts[1].lower() == old.lower():
 				frappe.rename_doc(dt, d[0], parts[0] + " - " + new)
 
-	for dt in ["Account", "Cost Center", "Warehouse"]:
+	for dt in ["Warehouse", "Account", "Cost Center"]:
 		_rename_record(dt)
 		frappe.db.commit()
 

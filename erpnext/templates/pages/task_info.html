@@ -19,9 +19,9 @@
 	<div class="col-sm-4">
 		<div class="page-header-actions-block" data-html-block="header-actions">
 			<button type="submit" class="btn btn-primary btn-sm btn-form-submit">
-	    		Update</button>
+	    		{{ __("Update") }}</button>
 	    		<a href="tasks" class="btn btn-default btn-sm">
-	    		Cancel</a>
+	    		{{ __("Cancel") }}</a>
 		</div>
     </div>
 </div>
@@ -36,45 +36,45 @@
 		<div class="row">
 			<div class="col-sm-12" style="max-width: 500px;">
 				<div class="form-group">
-					<label for="project" class="control-label text-muted small">Project</label>
+					<label for="project" class="control-label text-muted small">{{ __("Project") }}</label>
 						<input type="text" class="form-control" name="project" readonly value= "{{ doc.project }}">
 				</div>
 
 				<div class="form-group">
-					<label for="subject" class="control-label text-muted small">Subject</label>
+					<label for="subject" class="control-label text-muted small">{{ __("Subject") }}</label>
 					<input type="text" class="form-control" name="subject" readonly value="{{ doc.subject }}">
 				</div>
 
 				<div class="form-group">
-					<label for="description" class="control-label text-muted small">Details</label>
+					<label for="description" class="control-label text-muted small">{{ __("Details") }}</label>
 					<textarea class="form-control" style="height: 200px;" name="description">{{ doc.description }}</textarea>
 				</div>
 
 				<div class="form-group">
-					<label for="priority" class="control-label text-muted small">Priority</label>
+					<label for="priority" class="control-label text-muted small">{{ __("Priority") }}</label>
 					<input type="text" class="form-control" name="priority" readonly value="{{ doc.priority }}">
 				</div>
 
 				<div class="form-group">
-					<label for="exp_start_date" class="control-label text-muted small">Expected Start Date</label>
+					<label for="exp_start_date" class="control-label text-muted small">{{ __("Expected Start Date") }}</label>
 					<input type="text" class="form-control hasDatepicker" name="exp_start_date" readonly value="{{ doc.exp_start_date }}">
 				</div>
 
 				<div class="form-group">
-					<label for="exp_end_date" class="control-label text-muted small">Expected End Date</label>
+					<label for="exp_end_date" class="control-label text-muted small">{{ __("Expected End Date") }}</label>
 					<input type="text" class="form-control hasDatepicker" name="exp_end_date" readonly value="{{ doc.exp_end_date }}">
 				</div>
 
 				<div class="form-group">
-					<label for="status" class="control-label text-muted small">Status</label>
+					<label for="status" class="control-label text-muted small">{{ __("Status") }}</label>
 					<select class="form-control" name="status" id="status" data-label="Status" data-fieldtype="Select">
 						<option value="Open" selected="selected">
-							Open</option><option value="Working">
-							Working</option><option value="Pending Review">
-							Pending Review</option><option value="Overdue">
-							Overdue</option><option value="Closed">
-							Closed</option><option value="Cancelled">
-							Cancelled</option>
+							{{ __("Open") }}</option><option value="Working">
+							{{ __("Working") }}</option><option value="Pending Review">
+							{{ __("Pending Review") }}</option><option value="Overdue">
+							{{ __("Overdue") }}</option><option value="Closed">
+							{{ __("Closed") }}</option><option value="Cancelled">
+							{{ __("Cancelled") }}</option>
 					</select>
 				</div>
 			</div>
@@ -83,22 +83,22 @@
 </div>
 
 <div class="comments">
-	<h3>Comments</h3>
+	<h3>{{ __("Comments") }}</h3>
 	<div class="no-comment">
 		{% for comment in comments %}
 			<p class="text-muted">{{comment.sender_full_name}}:
-				{{comment.subject}} on 									   				{{comment.creation.strftime('%Y-%m-%d')}}</p>
+				{{comment.subject}} {{ __("on") }} 									   				{{comment.creation.strftime('%Y-%m-%d')}}</p>
 		{% endfor %}
 	</div>
 	<div class="comment-form-wrapper">
-		<a class="add-comment btn btn-default btn-sm">Add Comment</a>
+		<a class="add-comment btn btn-default btn-sm">{{ __("Add Comment") }}</a>
 		<div style="display: none;" id="comment-form">
-			<p>Add Comment</p>
+			<p>{{ __("Add Comment") }}</p>
 			<form>
 				<fieldset>
 					<textarea class="form-control" name="comment" rows="5" placeholder="Comment"></textarea>
 					<p>
-						<button class="btn btn-primary btn-sm" id="submit-comment">Submit</button>
+						<button class="btn btn-primary btn-sm" id="submit-comment">{{ __("Submit") }}</button>
 					</p>
 				</fieldset>
 			</form>

@@ -13,6 +13,7 @@ before_install:
 
 install:
   - sudo apt-get purge -y mysql-common mysql-server mysql-client
+  - nvm install v7.10.0
   # - wget https://raw.githubusercontent.com/frappe/bench/master/install_scripts/setup_frappe.sh
   # - sudo bash setup_frappe.sh --skip-setup-bench --mysql-root-password travis --bench-branch develop
   - wget https://raw.githubusercontent.com/frappe/bench/master/playbooks/install.py

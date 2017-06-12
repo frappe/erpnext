@@ -7,7 +7,6 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 from erpnext.schools.utils import validate_duplicate_student
-from erpnext.schools.api import get_student_batch_students
 
 class StudentGroup(Document):
 	def validate(self):
@@ -15,6 +14,7 @@ class StudentGroup(Document):
 		self.validate_strength()
 		if frappe.defaults.get_defaults().student_validation_setting: 
 			self.validate_students()
+		self.validate_and_set_child_table_fields()
 		validate_duplicate_student(self.students)
 
 	def validate_mandatory_fields(self):
@@ -33,10 +33,25 @@ class StudentGroup(Document):
 		program_enrollment = get_program_enrollment(self.academic_year, self.academic_term, self.program, self.batch, self.course)
 		students = [d.student for d in program_enrollment] if program_enrollment else None
 		for d in self.students:
-			if self.group_based_on != "Activity" and d.student not in students and d.active == 1:
+			if self.group_based_on != "Activity" and students and d.student not in students and d.active == 1:
 				frappe.throw(_("{0} - {1} is not enrolled in the given {2}".format(d.group_roll_number, d.student_name, self.group_based_on)))
 			if not frappe.db.get_value("Student", d.student, "enabled") and d.active:
 				frappe.throw(_("{0} - {1} is inactive student".format(d.group_roll_number, d.student_name)))
+
+	def validate_and_set_child_table_fields(self):
+		roll_numbers = [d.group_roll_number for d in self.students if d.group_roll_number]
+		max_roll_no = max(roll_numbers) if roll_numbers else 0
+		roll_no_list = []
+		for d in self.students:
+			if not d.student_name:
+				d.student_name = frappe.db.get_value("Student", d.student, "title")
+			if not d.group_roll_number:
+				max_roll_no += 1
+				d.group_roll_number = max_roll_no
+			if d.group_roll_number in roll_no_list:
+				frappe.throw(_("Duplicate roll number for student {0}".format(d.student_name)))
+			else:
+				roll_no_list.append(d.group_roll_number)
 
 @frappe.whitelist()
 def get_students(academic_year, group_based_on, academic_term=None, program=None, batch=None, course=None):

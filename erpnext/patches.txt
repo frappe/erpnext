@@ -392,4 +392,12 @@ erpnext.patches.v8_0.update_status_as_paid_for_completed_expense_claim
 erpnext.patches.v7_2.stock_uom_in_selling
 erpnext.patches.v8_0.revert_manufacturers_table_from_item
 erpnext.patches.v8_0.disable_instructor_role
+erpnext.patches.v8_0.merge_student_batch_and_student_group
+erpnext.patches.v8_0.rename_total_margin_to_rate_with_margin # 11-05-2017
+erpnext.patches.v8_0.fix_status_for_invoices_with_negative_outstanding
+erpnext.patches.v8_0.make_payments_table_blank_for_non_pos_invoice
+erpnext.patches.v8_0.set_sales_invoice_serial_number_from_delivery_note
+erpnext.patches.v8_0.delete_schools_depricated_doctypes
+erpnext.patches.v8_0.update_customer_pos_id
+erpnext.patches.v8_0.rename_items_in_status_field_of_material_request
 erpnext.patches.v8_0.create_domain_docs

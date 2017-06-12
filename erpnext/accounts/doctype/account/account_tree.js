@@ -72,8 +72,8 @@ frappe.treeview_settings["Account"] = {
 			click: function(node, btn) {
 				frappe.route_options = {
 					"account": node.label,
-					"from_date": sys_defaults.year_start_date,
-					"to_date": sys_defaults.year_end_date,
+					"from_date": frappe.sys_defaults.year_start_date,
+					"to_date": frappe.sys_defaults.year_end_date,
 					"company": frappe.defaults.get_default('company') ? frappe.defaults.get_default('company'): ""
 				};
 				frappe.set_route("query-report", "General Ledger");

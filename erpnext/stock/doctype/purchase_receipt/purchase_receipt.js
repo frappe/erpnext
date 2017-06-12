@@ -43,6 +43,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 	},
 
 	refresh: function() {
+		var me = this;
 		this._super();
 		if(this.frm.doc.docstatus===1) {
 			this.show_stock_ledger();
@@ -52,21 +53,24 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		}
 
 		if(!this.frm.doc.is_return && this.frm.doc.status!="Closed") {
-			if(this.frm.doc.docstatus==0) {
-				cur_frm.add_custom_button(__('Purchase Order'),
-					function() {
+			if (this.frm.doc.docstatus == 0) {
+				this.frm.add_custom_button(__('Purchase Order'),
+					function () {
 						erpnext.utils.map_current_doc({
 							method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
 							source_doctype: "Purchase Order",
+							target: me.frm,
+							setters: {
+								supplier: me.frm.doc.supplier || undefined,
+							},
 							get_query_filters: {
-								supplier: cur_frm.doc.supplier || undefined,
 								docstatus: 1,
 								status: ["!=", "Closed"],
 								per_received: ["<", 99.99],
-								company: cur_frm.doc.company
+								company: me.frm.doc.company
 							}
 						})
-				}, __("Get items from"));
+					}, __("Get items from"));
 			}
 
 			if(this.frm.doc.docstatus == 1 && this.frm.doc.status!="Closed") {
@@ -139,17 +143,6 @@ cur_frm.fields_dict['items'].grid.get_field('project').get_query = function(doc,
 			['Project', 'status', 'not in', 'Completed, Cancelled']
 		]
 	}
-}
-
-cur_frm.fields_dict['items'].grid.get_field('batch_no').get_query= function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if(d.item_code) {
-		return {
-			filters: {'item': d.item_code}
-		}
-	}
-	else
-		msgprint(__("Please enter Item Code."));
 }
 
 cur_frm.cscript.select_print_heading = function(doc, cdt, cdn) {
