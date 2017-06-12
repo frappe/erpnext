@@ -43,7 +43,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 cur_frm.cscript.parent_cost_center = function(doc, cdt, cdn) {
 	if(!doc.company){
-		msgprint(__('Please enter company name first'));
+		frappe.msgprint(__('Please enter company name first'));
 	}
 }
 

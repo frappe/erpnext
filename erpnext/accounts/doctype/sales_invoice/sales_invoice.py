@@ -17,6 +17,7 @@ from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amou
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.accounts.doctype.asset.depreciation \
 	import get_disposal_account_and_cost_center, get_gl_entries_on_asset_disposal
+from erpnext.stock.doctype.batch.batch import set_batch_nos
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -78,16 +79,22 @@ class SalesInvoice(SellingController):
 
 		if not self.is_opening:
 			self.is_opening = 'No'
+			
+		if self._action != 'submit' and self.update_stock and not self.is_return:
+			set_batch_nos(self, 'warehouse', True)
+			
 
 		self.set_against_income_account()
 		self.validate_c_form()
 		self.validate_time_sheets_are_submitted()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
+		if not self.is_return:
+			self.validate_serial_numbers()
 		self.update_packing_list()
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
 		self.set_status()
-
+	
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
 
@@ -120,6 +127,7 @@ class SalesInvoice(SellingController):
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 			self.check_credit_limit()
+			self.update_serial_no()
 
 		if not cint(self.is_pos) == 1 and not self.is_return:
 			self.update_against_document_in_jv()
@@ -150,6 +158,7 @@ class SalesInvoice(SellingController):
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
+			self.update_serial_no(in_cancel=True)
 
 		self.validate_c_form_on_cancel()
 
@@ -238,7 +247,6 @@ class SalesInvoice(SellingController):
 				(not self.project and not data.sales_invoice) or \
 				(not sales_invoice and data.sales_invoice == self.name):
 				data.sales_invoice = sales_invoice
-				if self.project: return
 
 	def on_update(self):
 		self.set_paid_amount()
@@ -330,7 +338,7 @@ class SalesInvoice(SellingController):
 			frappe.throw(_("Debit To account must be a Receivable account"))
 
 		self.party_account_currency = account.account_currency
-		
+
 	def clear_unallocated_mode_of_payments(self):
 		self.set("payments", self.get("payments", {"amount": ["not in", [0, None, ""]]}))
 
@@ -406,10 +414,10 @@ class SalesInvoice(SellingController):
 				throw(_("Customer {0} does not belong to project {1}").format(self.customer,self.project))
 
 	def validate_pos(self):
-		if flt(self.paid_amount) + flt(self.write_off_amount) \
-				- flt(self.grand_total) > 1/(10**(self.precision("grand_total") + 1)) and self.is_return:
-			frappe.throw(_("""Paid amount + Write Off Amount can not be greater than Grand Total"""))
-
+		if self.is_return:
+			if flt(self.paid_amount) + flt(self.write_off_amount) - flt(self.grand_total) < \
+				1/(10**(self.precision("grand_total") + 1)):
+					frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
 
 	def validate_item_code(self):
 		for d in self.get('items'):
@@ -478,13 +486,14 @@ class SalesInvoice(SellingController):
 			self.set('packed_items', [])
 
 	def set_billing_hours_and_amount(self):
-		for timesheet in self.timesheets:
-			ts_doc = frappe.get_doc('Timesheet', timesheet.time_sheet)
-			if not timesheet.billing_hours and ts_doc.total_billable_hours:
-				timesheet.billing_hours = ts_doc.total_billable_hours
+		if not self.project:
+			for timesheet in self.timesheets:
+				ts_doc = frappe.get_doc('Timesheet', timesheet.time_sheet)
+				if not timesheet.billing_hours and ts_doc.total_billable_hours:
+					timesheet.billing_hours = ts_doc.total_billable_hours
 
-			if not timesheet.billing_amount and ts_doc.total_billable_amount:
-				timesheet.billing_amount = ts_doc.total_billable_amount
+				if not timesheet.billing_amount and ts_doc.total_billable_amount:
+					timesheet.billing_amount = ts_doc.total_billable_amount
 
 	def update_timesheet_billing_for_project(self):
 		if not self.timesheets and self.project:
@@ -551,7 +560,7 @@ class SalesInvoice(SellingController):
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if not self.grand_total:
 			return
-			
+
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
 
@@ -697,7 +706,7 @@ class SalesInvoice(SellingController):
 								else payment_mode.amount
 						}, payment_mode_account_currency)
 					)
-				
+
 	def make_gle_for_change_amount(self, gl_entries):
 		if cint(self.is_pos) and self.change_amount:
 			if self.account_for_change_amount:
@@ -714,7 +723,7 @@ class SalesInvoice(SellingController):
 						"against_voucher_type": self.doctype
 					}, self.party_account_currency)
 				)
-				
+
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": self.account_for_change_amount,
@@ -724,7 +733,7 @@ class SalesInvoice(SellingController):
 				)
 			else:
 				frappe.throw(_("Select change amount account"), title="Mandatory Field")
-		
+
 	def make_write_off_gl_entry(self, gl_entries):
 		# write off entries, applicable if only pos
 		if self.write_off_account and self.write_off_amount:
@@ -776,6 +785,61 @@ class SalesInvoice(SellingController):
 
 		self.due_date = None
 
+	def update_serial_no(self, in_cancel=False):
+		""" update Sales Invoice refrence in Serial No """
+
+		for item in self.items:
+			if not item.serial_no:
+				continue
+
+			serial_nos = ["'%s'"%serial_no for serial_no in item.serial_no.split("\n")]
+
+			frappe.db.sql(""" update `tabSerial No` set sales_invoice='{invoice}'
+				where name in ({serial_nos})""".format(
+					invoice='' if in_cancel else self.name,
+					serial_nos=",".join(serial_nos)
+				)
+			)
+
+	def validate_serial_numbers(self):
+		"""
+			validate serial number agains Delivery Note and Sales Invoice
+		"""
+		self.validate_serial_against_delivery_note()
+		self.validate_serial_against_sales_invoice()
+
+	def validate_serial_against_delivery_note(self):
+		""" 
+			validate if the serial numbers in Sales Invoice Items are same as in
+			Delivery Note Item
+		"""
+
+		for item in self.items:
+			if not item.delivery_note or not item.dn_detail:
+				continue
+
+			serial_nos = frappe.db.get_value("Delivery Note Item", item.dn_detail, "serial_no") or ""
+			dn_serial_nos = set(serial_nos.split("\n"))
+
+			serial_nos = item.serial_no or ""
+			si_serial_nos = set(serial_nos.split("\n"))
+
+			if si_serial_nos - dn_serial_nos:
+				frappe.throw(_("Serial Numbers in row {0} does not match with Delivery Note".format(item.idx)))
+
+	def validate_serial_against_sales_invoice(self):
+		""" check if serial number is already used in other sales invoice """
+		for item in self.items:
+			if not item.serial_no:
+				continue
+
+			for serial_no in item.serial_no.split("\n"):
+				sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
+				if sales_invoice and self.name != sales_invoice:
+					frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}".format(
+						serial_no, sales_invoice
+					)))
+
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
@@ -808,7 +872,7 @@ def make_delivery_note(source_name, target_doc=None):
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = flt(source_doc.qty) - flt(source_doc.delivered_qty)
 		target_doc.stock_qty = target_doc.qty * flt(source_doc.conversion_factor)
-		
+
 		target_doc.base_amount = target_doc.qty * flt(source_doc.base_rate)
 		target_doc.amount = target_doc.qty * flt(source_doc.rate)
 
@@ -826,7 +890,8 @@ def make_delivery_note(source_name, target_doc=None):
 				"parent": "against_sales_invoice",
 				"serial_no": "serial_no",
 				"sales_order": "against_sales_order",
-				"so_detail": "so_detail"
+				"so_detail": "so_detail",
+				"cost_center": "cost_center"
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.delivered_by_supplier!=1

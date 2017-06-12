@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Period Closing Voucher', {
 	onload: function(frm) {
-		if (!frm.doc.transaction_date) frm.doc.transaction_date = dateutil.obj_to_str(new Date());
+		if (!frm.doc.transaction_date) frm.doc.transaction_date = frappe.datetime.obj_to_str(new Date());
 	},
 	
 	setup: function(frm) {

@@ -8,50 +8,60 @@ from frappe.model.mapper import get_mapped_doc
 
 
 def execute():
-
 	# for converting student batch into student group
-	frappe.reload_doctype("Student Group")
-	student_batches = frappe.db.sql('''select name as student_group_name, student_batch_name as batch,
-		program, academic_year, academic_term from `tabStudent Batch`''', as_dict=1)
+	for doctype in ["Student Group", "Student Group Student", "Student Group Instructor", "Student Attendance"]:
+		frappe.reload_doc("schools", "doctype", doctype)
 
-	for student_batch in student_batches:
-		# create student batch name if does not exists !!
-		if student_batch.get("batch") and not frappe.db.exists("Student Batch Name", student_batch.get("batch")):
-			frappe.get_doc({
-				"doctype": "Student Batch Name",
-				"batch_name": student_batch.get("batch")
-			}).insert(ignore_permissions=True)
+	if frappe.db.table_exists("Student Batch"):
+		student_batches = frappe.db.sql('''select name as student_group_name, student_batch_name as batch,
+			program, academic_year, academic_term from `tabStudent Batch`''', as_dict=1)
 
-		student_batch.update({"doctype":"Student Group", "group_based_on": "Batch"})
-		doc = frappe.get_doc(student_batch)
-		student_list = frappe.db.sql('''select student, student_name, active from `tabStudent Batch Student`
-			where parent=%s''', (doc.name), as_dict=1)
-		for i, student in enumerate(student_list):
-			student.update({"group_roll_number": i+1})
+		for student_batch in student_batches:
+			# create student batch name if does not exists !!
+			if student_batch.get("batch") and not frappe.db.exists("Student Batch Name", student_batch.get("batch")):
+				frappe.get_doc({
+					"doctype": "Student Batch Name",
+					"batch_name": student_batch.get("batch")
+				}).insert(ignore_permissions=True)
 
-		if student_list:
-			doc.extend("students", student_list)
+			student_batch.update({"doctype":"Student Group", "group_based_on": "Batch"})
+			doc = frappe.get_doc(student_batch)
 
-		instructor_list = frappe.db.sql('''select instructor, instructor_name from `tabStudent Batch Instructor`
-			where parent=%s''', (doc.name), as_dict=1)
-		if instructor_list:
-			doc.extend("instructors", instructor_list)
-		doc.save()
+			if frappe.db.sql("SHOW COLUMNS FROM `tabStudent Batch Student` LIKE 'active'"):
+				cond = ", active"
+			else:
+				cond = " "
+			student_list = frappe.db.sql('''select student, student_name {cond} from `tabStudent Batch Student`
+				where parent=%s'''.format(cond=cond), (doc.student_group_name), as_dict=1)
+
+			if student_list:
+				for i, student in enumerate(student_list):
+					student.update({"group_roll_number": i+1})
+				doc.extend("students", student_list)
+
+			instructor_list = frappe.db.sql('''select instructor, instructor_name from `tabStudent Batch Instructor`
+				where parent=%s''', (doc.student_group_name), as_dict=1)
+			if instructor_list:
+				doc.extend("instructors", instructor_list)
+			doc.save()
 
 	# delete the student batch and child-table
-	frappe.delete_doc("DocType", "Student Batch", force=1)
-	frappe.delete_doc("DocType", "Student Batch Student", force=1)
-	frappe.delete_doc("DocType", "Student Batch Instructor", force=1)
+	if frappe.db.table_exists("Student Batch"):
+		frappe.delete_doc("DocType", "Student Batch", force=1)
+	if frappe.db.table_exists("Student Batch Student"):
+		frappe.delete_doc("DocType", "Student Batch Student", force=1)
+	if frappe.db.table_exists("Student Batch Instructor"):
+		frappe.delete_doc("DocType", "Student Batch Instructor", force=1)
 
 	# delete the student batch creation tool
-	frappe.delete_doc("DocType", "Student Batch Creation Tool", force=1)
+	if frappe.db.table_exists("Student Batch Creation Tool"):
+		frappe.delete_doc("DocType", "Student Batch Creation Tool", force=1)
 
 	# delete the student batch creation tool
-	frappe.delete_doc("DocType", "Attendance Tool Student", force=1)
+	if frappe.db.table_exists("Attendance Tool Student"):
+		frappe.delete_doc("DocType", "Attendance Tool Student", force=1)
 
 	# change the student batch to student group in the student attendance
-	frappe.reload_doctype("Student Attendance")
-
 	table_columns = frappe.db.get_table_columns("Student Attendance")
 	if "student_batch" in table_columns:
 		rename_field("Student Attendance", "student_batch", "student_group")

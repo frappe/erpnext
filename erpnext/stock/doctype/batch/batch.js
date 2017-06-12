@@ -66,31 +66,31 @@ frappe.ui.form.on('Batch', {
 					rows.find('.btn-move').on('click', function() {
 						var $btn = $(this);
 						frappe.prompt({
-								fieldname: 'to_warehouse',
-								label: __('To Warehouse'),
-								fieldtype: 'Link',
-								options: 'Warehouse'
-							},
-							(data) => {
-								frappe.call({
-									method: 'erpnext.stock.doctype.stock_entry.stock_entry_utils.make_stock_entry',
-									args: {
-										item_code: frm.doc.item,
-										batch_no: frm.doc.name,
-										qty: $btn.attr('data-qty'),
-										from_warehouse: $btn.attr('data-warehouse'),
-										to_warehouse: data.to_warehouse
-									},
-									callback: (r) => {
-										frappe.show_alert(__('Stock Entry {0} created',
-											['<a href="#Form/Stock Entry/'+r.message.name+'">' + r.message.name+ '</a>']));
-										frm.refresh();
-									},
-								});
-							},
-							__('Select Target Warehouse'),
-							__('Move')
-						)
+							fieldname: 'to_warehouse',
+							label: __('To Warehouse'),
+							fieldtype: 'Link',
+							options: 'Warehouse'
+						},
+						(data) => {
+							frappe.call({
+								method: 'erpnext.stock.doctype.stock_entry.stock_entry_utils.make_stock_entry',
+								args: {
+									item_code: frm.doc.item,
+									batch_no: frm.doc.name,
+									qty: $btn.attr('data-qty'),
+									from_warehouse: $btn.attr('data-warehouse'),
+									to_warehouse: data.to_warehouse
+								},
+								callback: (r) => {
+									frappe.show_alert(__('Stock Entry {0} created',
+										['<a href="#Form/Stock Entry/'+r.message.name+'">' + r.message.name+ '</a>']));
+									frm.refresh();
+								},
+							});
+						},
+						__('Select Target Warehouse'),
+						__('Move')
+						);
 					});
 
 					// split - ask for new qty and batch ID (optional)
@@ -98,34 +98,34 @@ frappe.ui.form.on('Batch', {
 					rows.find('.btn-split').on('click', function() {
 						var $btn = $(this);
 						frappe.prompt([{
-								fieldname: 'qty',
-								label: __('New Batch Qty'),
-								fieldtype: 'Float',
-								'default': $btn.attr('data-qty')
-							},
-							{
-								fieldname: 'new_batch_id',
-								label: __('New Batch ID (Optional)'),
-								fieldtype: 'Data',
-							}],
-							(data) => {
-								frappe.call({
-									method: 'erpnext.stock.doctype.batch.batch.split_batch',
-									args: {
-										item_code: frm.doc.item,
-										batch_no: frm.doc.name,
-										qty: data.qty,
-										warehouse: $btn.attr('data-warehouse'),
-										new_batch_id: data.new_batch_id
-									},
-									callback: (r) => {
-										frm.refresh();
-									},
-								});
-							},
-							__('Split Batch'),
-							__('Split')
-						)
+							fieldname: 'qty',
+							label: __('New Batch Qty'),
+							fieldtype: 'Float',
+							'default': $btn.attr('data-qty')
+						},
+						{
+							fieldname: 'new_batch_id',
+							label: __('New Batch ID (Optional)'),
+							fieldtype: 'Data',
+						}],
+						(data) => {
+							frappe.call({
+								method: 'erpnext.stock.doctype.batch.batch.split_batch',
+								args: {
+									item_code: frm.doc.item,
+									batch_no: frm.doc.name,
+									qty: data.qty,
+									warehouse: $btn.attr('data-warehouse'),
+									new_batch_id: data.new_batch_id
+								},
+								callback: (r) => {
+									frm.refresh();
+								},
+							});
+						},
+						__('Split Batch'),
+						__('Split')
+						);
 					})
 
 					frm.dashboard.show();

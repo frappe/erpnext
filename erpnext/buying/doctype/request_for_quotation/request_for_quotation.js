@@ -56,17 +56,17 @@ frappe.ui.form.on("Request for Quotation",{
 		var dialog = new frappe.ui.Dialog({
 			title: __("For Supplier"),
 			fields: [
-				{"fieldtype": "Select", "label": __("Supplier"),
-					"fieldname": "supplier", "options":"Supplier",
-					"options": $.map(doc.suppliers,
-						function(d) { return d.supplier }), "reqd": 1 },
-				{"fieldtype": "Button", "label": __("Make Supplier Quotation"),
-					"fieldname": "make_supplier_quotation", "cssClass": "btn-primary"},
+				{	"fieldtype": "Select", "label": __("Supplier"),
+					"fieldname": "supplier",
+					"options": doc.suppliers.map(d => d.supplier),
+					"reqd": 1 },
+				{	"fieldtype": "Button", "label": __("Make Supplier Quotation"),
+					"fieldname": "make_supplier_quotation", "cssClass": "btn-primary" },
 			]
 		});
 
 		dialog.fields_dict.make_supplier_quotation.$input.click(function() {
-			args = dialog.get_values();
+			var args = dialog.get_values();
 			if(!args) return;
 			dialog.hide();
 			return frappe.call({
@@ -117,7 +117,7 @@ frappe.ui.form.on("Request for Quotation Supplier",{
 			+"&supplier_idx="+encodeURIComponent(child.idx)
 			+"&no_letterhead=0"));
 		if(!w) {
-			msgprint(__("Please enable pop-ups")); return;
+			frappe.msgprint(__("Please enable pop-ups")); return;
 		}
 	}
 })
@@ -144,44 +144,44 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 						}
 					})
 				}, __("Get items from"));
-				// Get items from open Material Requests based on supplier
-				this.frm.add_custom_button(__('Possible Supplier'), function() {
-					// Create a dialog window for the user to pick their supplier
-					var d = new frappe.ui.Dialog({
-						title: __('Select Possible Supplier'),
-						fields: [
-						{fieldname: 'supplier', fieldtype:'Link', options:'Supplier', label:'Supplier', reqd:1},
-						{fieldname: 'ok_button', fieldtype:'Button', label:'Get Items from Material Requests'},
-						]
-					});
+			// Get items from open Material Requests based on supplier
+			this.frm.add_custom_button(__('Possible Supplier'), function() {
+				// Create a dialog window for the user to pick their supplier
+				var d = new frappe.ui.Dialog({
+					title: __('Select Possible Supplier'),
+					fields: [
+					{fieldname: 'supplier', fieldtype:'Link', options:'Supplier', label:'Supplier', reqd:1},
+					{fieldname: 'ok_button', fieldtype:'Button', label:'Get Items from Material Requests'},
+					]
+				});
 
-					// On the user clicking the ok button
-					d.fields_dict.ok_button.input.onclick = function() {
-						var btn = d.fields_dict.ok_button.input;
-						var v = d.get_values();
-						if(v) {
-							$(btn).set_working();
+				// On the user clicking the ok button
+				d.fields_dict.ok_button.input.onclick = function() {
+					var btn = d.fields_dict.ok_button.input;
+					var v = d.get_values();
+					if(v) {
+						$(btn).set_working();
 
-							erpnext.utils.map_current_doc({
-								method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_item_from_material_requests_based_on_supplier",
-								source_name: v.supplier,
-								target: me.frm,
-								setters: {
-									company: me.frm.doc.company
-								},
-								get_query_filters: {
-									material_request_type: "Purchase",
-									docstatus: 1,
-									status: ["!=", "Stopped"],
-									per_ordered: ["<", 99.99]
-								}
-							});
-							$(btn).done_working();
-							d.hide();
-						}
+						erpnext.utils.map_current_doc({
+							method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_item_from_material_requests_based_on_supplier",
+							source_name: v.supplier,
+							target: me.frm,
+							setters: {
+								company: me.frm.doc.company
+							},
+							get_query_filters: {
+								material_request_type: "Purchase",
+								docstatus: 1,
+								status: ["!=", "Stopped"],
+								per_ordered: ["<", 99.99]
+							}
+						});
+						$(btn).done_working();
+						d.hide();
 					}
-					d.show();
-				}, __("Get items from"));
+				}
+				d.show();
+			}, __("Get items from"));
 
 		}
 	},

@@ -738,6 +738,12 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"))
 		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0],
 			"delivery_document_no"), si.name)
+		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "sales_invoice"),
+			si.name)
+
+		# check if the serial number is already linked with any other Sales Invoice
+		_si = frappe.copy_doc(si.as_dict())
+		self.assertRaises(frappe.ValidationError, _si.insert)
 
 		return si
 
@@ -751,6 +757,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC")
 		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0],
 			"delivery_document_no"))
+		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], "sales_invoice"))
 
 	def test_serialize_status(self):
 		serial_no = frappe.get_doc({
@@ -768,6 +775,27 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 
 		self.assertRaises(SerialNoWarehouseError, si.submit)
+
+	def test_serial_numbers_against_delivery_note(self):
+		""" 
+			check if the sales invoice item serial numbers and the delivery note items
+			serial numbers are same
+		"""
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		se = make_serialized_item()
+		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
+
+		dn = create_delivery_note(item=se.get("items")[0].item_code, serial_no=serial_nos[0])
+		dn.submit()
+
+		si = make_sales_invoice(dn.name)
+		si.save()
+
+		self.assertEquals(si.get("items")[0].serial_no, dn.get("items")[0].serial_no)
 
 	def test_invoice_due_date_against_customers_credit_days(self):
 		# set customer's credit days

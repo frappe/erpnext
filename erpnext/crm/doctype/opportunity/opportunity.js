@@ -35,6 +35,7 @@ frappe.ui.form.on("Opportunity", {
 		var doc = frm.doc;
 		frm.events.enquiry_from(frm);
 		frm.trigger('set_contact_link');
+		erpnext.toggle_naming_series();
 
 		if(!doc.__islocal && doc.status!=="Lost") {
 			if(doc.with_items){
@@ -52,6 +53,20 @@ frappe.ui.form.on("Opportunity", {
 			if(doc.status!=="Quotation") {
 				frm.add_custom_button(__('Lost'),
 					cur_frm.cscript['Declare Opportunity Lost']);
+			}
+		}
+
+		if(!frm.doc.__islocal && frm.perm[0].write && frm.doc.docstatus==0) {
+			if(frm.doc.status==="Open") {
+				frm.add_custom_button(__("Close"), function() {
+					frm.set_value("status", "Closed");
+					frm.save();
+				});
+			} else {
+				frm.add_custom_button(__("Reopen"), function() {
+					frm.set_value("status", "Open");
+					frm.save();
+				});
 			}
 		}
 	},
@@ -107,7 +122,8 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 
 		$.each([["lead", "lead"],
 			["customer", "customer"],
-			["contact_person", "contact_query"]], function(i, opts) {
+			["contact_person", "contact_query"]],
+			function(i, opts) {
 				me.frm.set_query(opts[0], erpnext.queries[opts[1]]);
 			});
 	},
@@ -121,25 +137,6 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 });
 
 $.extend(cur_frm.cscript, new erpnext.crm.Opportunity({frm: cur_frm}));
-
-cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-	erpnext.toggle_naming_series();
-
-	var frm = cur_frm;
-	if(!doc.__islocal && frm.perm[0].write && doc.docstatus==0) {
-		if(frm.doc.status==="Open") {
-			frm.add_custom_button(__("Close"), function() {
-				frm.set_value("status", "Closed");
-				frm.save();
-			});
-		} else {
-			frm.add_custom_button(__("Reopen"), function() {
-				frm.set_value("status", "Open");
-				frm.save();
-			});
-		}
-	}
-}
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 	if(doc.enquiry_from == 'Lead' && doc.lead)
@@ -157,7 +154,7 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 					$.each(r.message, function(k, v) {
 						frappe.model.set_value(cdt, cdn, k, v);
 					});
-				refresh_field('image_view', d.name, 'items');
+					refresh_field('image_view', d.name, 'items');
 				}
 			}
 		})
@@ -184,7 +181,7 @@ cur_frm.cscript['Declare Opportunity Lost'] = function() {
 	});
 
 	dialog.fields_dict.update.$input.click(function() {
-		args = dialog.get_values();
+		var args = dialog.get_values();
 		if(!args) return;
 		return cur_frm.call({
 			doc: cur_frm.doc,
@@ -192,7 +189,7 @@ cur_frm.cscript['Declare Opportunity Lost'] = function() {
 			args: args.reason,
 			callback: function(r) {
 				if(r.exc) {
-					msgprint(__("There were errors."));
+					frappe.msgprint(__("There were errors."));
 				} else {
 					dialog.hide();
 					cur_frm.refresh();

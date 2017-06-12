@@ -104,6 +104,21 @@ $.extend(erpnext.utils, {
 			}
 		}
 		refresh_field(table_fieldname);
+	},
+
+	get_terms: function(tc_name, doc, callback) {
+		if(tc_name) {
+			return frappe.call({
+				method: 'erpnext.setup.doctype.terms_and_conditions.terms_and_conditions.get_terms_and_conditions',
+				args: {
+					template_name: tc_name,
+					doc: doc
+				},
+				callback: function(r) {
+					callback(r)
+				}
+			});
+		}
 	}
 });
 
@@ -233,7 +248,7 @@ $(document).on('app_ready', function() {
 			"Delivery Note", "Purchase Receipt", "Sales Invoice"], function(i, d) {
 			frappe.ui.form.on(d, "onload", function(frm) {
 				cur_frm.set_df_property("posting_time", "description",
-					sys_defaults.time_zone);
+					frappe.sys_defaults.time_zone);
 			});
 		});
 	}

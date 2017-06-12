@@ -10,8 +10,7 @@ from frappe.utils import flt, cint, cstr
 from frappe.desk.reportview import build_match_conditions
 from erpnext.utilities.transaction_base import TransactionBase
 from frappe.geo.address_and_contact import load_address_and_contact, delete_contact_and_address
-from erpnext.accounts.party import validate_party_accounts, get_timeline_data # keep this
-from erpnext import get_default_currency
+from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
 
 class Customer(TransactionBase):
 	def get_feed(self):
@@ -23,24 +22,8 @@ class Customer(TransactionBase):
 		self.load_dashboard_info()
 
 	def load_dashboard_info(self):
-		billing_this_year = frappe.db.sql("""
-			select sum(debit_in_account_currency) - sum(credit_in_account_currency), account_currency
-			from `tabGL Entry`
-			where voucher_type='Sales Invoice' and party_type = 'Customer'
-				and party=%s and fiscal_year = %s""",
-			(self.name, frappe.db.get_default("fiscal_year")))
-
-		total_unpaid = frappe.db.sql("""select sum(outstanding_amount)
-			from `tabSales Invoice`
-			where customer=%s and docstatus = 1""", self.name)
-
-		info = {}
-		info["billing_this_year"] = billing_this_year[0][0] if billing_this_year else 0
-		info["currency"] = billing_this_year[0][1] if billing_this_year else get_default_currency()
-		info["total_unpaid"] = total_unpaid[0][0] if total_unpaid else 0
-
+		info = get_dashboard_info(self.doctype, self.name)
 		self.set_onload('dashboard_info', info)
-
 
 	def autoname(self):
 		cust_master_name = frappe.defaults.get_global_default('cust_master_name')

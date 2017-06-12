@@ -57,6 +57,7 @@
  },
  {
   "is_stock_item": 0,
+  "default_warehouse": "Stores",
   "description": "Computer",
   "item_code": "Computer",
   "item_name": "Computer",
@@ -64,6 +65,7 @@
  },
  {
   "is_stock_item": 0,
+  "default_warehouse": "Stores",
   "description": "Mobile",
   "item_code": "Mobile",
   "item_name": "Mobile",
@@ -71,6 +73,7 @@
  },
  {
   "is_stock_item": 0,
+  "default_warehouse": "Stores",
   "description": "ERP",
   "item_code": "ERP",
   "item_name": "ERP",
@@ -78,12 +81,14 @@
  },
  {
   "is_stock_item": 0,
+  "default_warehouse": "Stores",
   "description": "Autocad",
   "item_code": "Autocad",
   "item_name": "Autocad",
   "item_group": "All Item Groups"
  },
  {
+  "default_warehouse": "Stores",
   "default_warehouse": "Stores",
   "item_code": "Service",
   "item_group": "Services",

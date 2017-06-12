@@ -31,7 +31,6 @@ class Opportunity(TransactionBase):
 		if not self.enquiry_from:
 			frappe.throw(_("Opportunity From field is mandatory"))
 
-		self.set_status()
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_lead_cust()
@@ -75,7 +74,7 @@ class Opportunity(TransactionBase):
 			self.lead = lead_name
 
 	def declare_enquiry_lost(self,arg):
-		if not self.has_quotation():
+		if not self.has_active_quotation():
 			frappe.db.set(self, 'status', 'Lost')
 			frappe.db.set(self, 'order_lost_reason', arg)
 		else:
@@ -84,20 +83,31 @@ class Opportunity(TransactionBase):
 	def on_trash(self):
 		self.delete_events()
 
-	def has_quotation(self):
-		return frappe.db.get_value("Quotation Item", {"prevdoc_docname": self.name, "docstatus": 1})
+	def has_active_quotation(self):
+		return frappe.db.sql("""
+			select q.name 
+			from `tabQuotation` q, `tabQuotation Item` qi
+			where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s 
+			and q.status not in ('Lost', 'Closed')""", self.name)
 
 	def has_ordered_quotation(self):
-		return frappe.db.sql("""select q.name from `tabQuotation` q, `tabQuotation Item` qi
-			where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s and q.status = 'Ordered'""", self.name)
+		return frappe.db.sql("""
+			select q.name 
+			from `tabQuotation` q, `tabQuotation Item` qi
+			where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s 
+			and q.status = 'Ordered'""", self.name)
 
 	def has_lost_quotation(self):
-		return frappe.db.sql("""
+		lost_quotation = frappe.db.sql("""
 			select q.name
 			from `tabQuotation` q, `tabQuotation Item` qi
 			where q.name = qi.parent and q.docstatus=1
 				and qi.prevdoc_docname =%s and q.status = 'Lost'
 			""", self.name)
+		if lost_quotation:
+			if self.has_active_quotation():
+				return False
+			return True
 
 	def validate_cust_name(self):
 		if self.customer:

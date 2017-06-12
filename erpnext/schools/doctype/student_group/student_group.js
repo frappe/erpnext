@@ -13,11 +13,23 @@ frappe.ui.form.on("Student Group", {
 
 	refresh: function(frm) {
 		if (!frm.doc.__islocal) {
+			frm.add_custom_button(__("Attendance"), function() {
+				frappe.route_options = {
+					based_on: "Student Group",
+					student_group: frm.doc.name
+				}
+				frappe.set_route("List", "Student Attendance Tool");
+			});
 			frm.add_custom_button(__("Course Schedule"), function() {
+				frappe.route_options = {
+					student_group: frm.doc.name
+				}
 				frappe.set_route("List", "Course Schedule");
 			});
-
 			frm.add_custom_button(__("Assessment Plan"), function() {
+				frappe.route_options = {
+					student_group: frm.doc.name
+				}
 				frappe.set_route("List", "Assessment Plan");
 			});
 			frm.add_custom_button(__("Update Email Group"), function() {
@@ -30,6 +42,9 @@ frappe.ui.form.on("Student Group", {
 				});
 			});
 			frm.add_custom_button(__("Newsletter"), function() {
+				frappe.route_options = {
+					"Newsletter Email Group.email_group": frm.doc.name
+				}
 				frappe.set_route("List", "Newsletter");
 			});
 		}

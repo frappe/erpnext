@@ -26,7 +26,7 @@ frappe.ui.form.on('Stock Entry', {
 				if (in_list(["Material Transfer for Manufacture", "Manufacture", "Repack", "Subcontract"], doc.purpose)) {
 					var filters = {
 						'item_code': item.item_code,
-						'posting_date': frm.doc.posting_date || nowdate()
+						'posting_date': frm.doc.posting_date || frappe.datetime.nowdate()
 					}
 				} else {
 					var filters = {
@@ -143,7 +143,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 	item_code: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		if(d.item_code) {
-			args = {
+			var args = {
 				'item_code'			: d.item_code,
 				'warehouse'			: cstr(d.s_warehouse) || cstr(d.t_warehouse),
 				'transfer_qty'		: d.transfer_qty,
@@ -173,7 +173,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 	expense_account: function(frm, cdt, cdn) {
 		erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "expense_account");
 	},
-	cost_center: function(doc, cdt, cdn) {
+	cost_center: function(frm, cdt, cdn) {
 		erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "cost_center");
 	}
 });
@@ -216,14 +216,14 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
 			this.frm.fields_dict.items.grid.get_field('expense_account').get_query =
-					function() {
-				return {
-					filters: {
-						"company": me.frm.doc.company,
-						"is_group": 0
+				function() {
+					return {
+						filters: {
+							"company": me.frm.doc.company,
+							"is_group": 0
+						}
 					}
 				}
-			}
 		}
 
 		this.frm.set_indicator_formatter('item_code',
@@ -243,9 +243,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			}
 		});
 
-		if(!this.item_selector && false) {
-			this.item_selector = new erpnext.ItemSelector({frm: this.frm});
-		}
+		// if(!this.item_selector && false) {
+		// 	this.item_selector = new erpnext.ItemSelector({frm: this.frm});
+		// }
 	},
 
 	refresh: function() {

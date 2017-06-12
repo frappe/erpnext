@@ -33,14 +33,14 @@
 		</div>
 		<div class="text-center item-group-nav-buttons">
 			{% if frappe.form_dict.start|int > 0 %}
-			<a class="btn btn-default" href="/{{ pathname }}?start={{ frappe.form_dict.start|int - page_length }}">Prev</a>
+			<a class="btn btn-default" href="/{{ pathname }}?start={{ frappe.form_dict.start|int - page_length }}">{{ _("Prev") }}</a>
 			{% endif %}
 			{% if items|length > page_length %}
-			<a class="btn btn-default" href="/{{ pathname }}?start={{ frappe.form_dict.start|int + page_length }}">Next</a>
+			<a class="btn btn-default" href="/{{ pathname }}?start={{ frappe.form_dict.start|int + page_length }}">{{ _("Next") }}</a>
 			{% endif %}
 		</div>
 		{% else %}
-			<div class="text-muted">No items listed.</div>
+			<div class="text-muted">{{ _("No items listed") }}.</div>
 		{% endif %}
 	</div>
 </div>

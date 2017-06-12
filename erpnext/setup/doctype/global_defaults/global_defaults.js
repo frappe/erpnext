@@ -4,7 +4,7 @@
 $.extend(cur_frm.cscript, {
 	validate: function(doc, cdt, cdn) {
 		return $c_obj(doc, 'get_defaults', '', function(r, rt){
-			sys_defaults = r.message;
+			frappe.sys_defaults = r.message;
 		});
 	}
 });

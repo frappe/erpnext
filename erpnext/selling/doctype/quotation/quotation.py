@@ -44,7 +44,9 @@ class Quotation(SellingController):
 	def update_opportunity(self):
 		for opportunity in list(set([d.prevdoc_docname for d in self.get("items")])):
 			if opportunity:
-				frappe.get_doc("Opportunity", opportunity).set_status(update=True)
+				opp = frappe.get_doc("Opportunity", opportunity)
+				opp.status = None
+				opp.set_status(update=True)
 
 	def declare_order_lost(self, arg):
 		if not self.has_sales_order():
