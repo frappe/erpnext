@@ -200,6 +200,25 @@ frappe.ui.form.on("Production Order", {
 	}
 });
 
+frappe.ui.form.on("Production Order Item", {
+	source_warehouse: function(frm, cdt, cdn) {
+		var row = locals[cdt][cdn];
+		if(row.source_warehouse) {
+			frappe.call({
+				"method": "erpnext.stock.utils.get_latest_stock_qty",
+				args: {
+					item_code: row.item_code,
+					warehouse: row.source_warehouse
+				},
+				callback: function (r) {					
+					frappe.model.set_value(row.doctype, row.name, 
+						"available_qty_at_source_warehouse", r.message);
+				}
+			})
+		}
+	}
+})
+
 frappe.ui.form.on("Production Order Operation", {
 	workstation: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
