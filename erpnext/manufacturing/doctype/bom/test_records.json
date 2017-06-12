@@ -8,7 +8,8 @@
     "parentfield": "items",
     "qty": 1.0,
     "rate": 5000.0,
-    "stock_uom": "_Test UOM"
+    "stock_uom": "_Test UOM",
+	"source_warehouse": "_Test Warehouse - _TC"
    },
    {
     "amount": 2000.0,
@@ -17,7 +18,8 @@
     "parentfield": "items",
     "qty": 2.0,
     "rate": 1000.0,
-    "stock_uom": "_Test UOM"
+    "stock_uom": "_Test UOM",
+	"source_warehouse": "_Test Warehouse - _TC"
    }
   ],
   "docstatus": 1,
@@ -48,7 +50,8 @@
     "parentfield": "items",
     "qty": 1.0,
     "rate": 5000.0,
-    "stock_uom": "_Test UOM"
+    "stock_uom": "_Test UOM",
+	"source_warehouse": "_Test Warehouse - _TC"
    },
    {
     "amount": 2000.0,
@@ -57,7 +60,8 @@
     "parentfield": "items",
     "qty": 2.0,
     "rate": 1000.0,
-    "stock_uom": "_Test UOM"
+    "stock_uom": "_Test UOM",
+	"source_warehouse": "_Test Warehouse - _TC"
    }
   ],
   "docstatus": 1,
@@ -86,7 +90,8 @@
     "parentfield": "items",
     "qty": 1.0,
     "rate": 5000.0,
-    "stock_uom": "_Test UOM"
+    "stock_uom": "_Test UOM",
+	"source_warehouse": "_Test Warehouse - _TC"
    },
    {
     "amount": 2000.0,
@@ -96,7 +101,8 @@
     "parentfield": "items",
     "qty": 3.0,
     "rate": 1000.0,
-    "stock_uom": "_Test UOM"
+    "stock_uom": "_Test UOM",
+	"source_warehouse": "_Test Warehouse - _TC"
    }
   ],
   "docstatus": 1,
@@ -126,7 +132,8 @@
     "parentfield": "items",
     "qty": 2.0,
     "rate": 3000.0,
-    "stock_uom": "_Test UOM"
+    "stock_uom": "_Test UOM",
+	"source_warehouse": "_Test Warehouse - _TC"
    }
   ],
   "docstatus": 1,
