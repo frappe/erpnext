@@ -21,13 +21,13 @@
 				<th style="width: 40%">{%= __("Party") %}</th>
 				<th style="width: 15%">{%= __("Invoiced Amount") %}</th>
 				<th style="width: 15%">{%= __("Paid Amount") %}</th>
-				<th style="width: 15%">{%= report.report_name === "Accounts Receivable" ? 'Credit Note' : 'Debit Note' %}</th>
+				<th style="width: 15%">{%= report.report_name === "Accounts Receivable" ? (__('Credit Note')) : (__('Debit Note')) %}</th>
 				<th style="width: 15%">{%= __("Outstanding Amount") %}</th>
 			{% } else { %}
 				<th style="width: 40%">{%= __("Party") %}</th>
 				<th style="width: 15%">{%= __("Total Invoiced Amount") %}</th>
 				<th style="width: 15%">{%= __("Total Paid Amount") %}</th>
-				<th style="width: 15%">{%= report.report_name === "Accounts Receivable Summary" ? 'Credit Note Amount' : 'Debit Note Amount' %}</th>
+				<th style="width: 15%">{%= report.report_name === "Accounts Receivable Summary" ? __('Credit Note Amount') : __('Debit Note Amount') %}</th>
 				<th style="width: 15%">{%= __("Total Outstanding Amount") %}</th>
 			{% } %}
 		</tr>
