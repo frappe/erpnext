@@ -622,7 +622,7 @@ DocType: Process Payroll,Select Payment Account to make Bank Entry,Wählen Sie Z
 apps/erpnext/erpnext/utilities/activation.py +134,"Create Employee records to manage leaves, expense claims and payroll","Erstellen Sie Mitarbeiterdaten Blätter, Spesenabrechnung und Gehaltsabrechnung zu verwalten"
 apps/erpnext/erpnext/support/doctype/issue/issue.js +24,Add to Knowledge Base,Zur Knowledge Base hinzufügen
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +152,Proposal Writing,Verfassen von Angeboten
-DocType: Payment Entry Deduction,Payment Entry Deduction,Zahlung Eintrag Abzug
+DocType: Payment Entry Deduction,Payment Entry Deduction,Zahlungsabzug
 apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.py +35,Another Sales Person {0} exists with the same Employee id,Ein weiterer Vertriebsmitarbeiter {0} existiert bereits mit der gleichen Mitarbeiter ID
 DocType: Production Planning Tool,"If checked, raw materials for items that are sub-contracted will be included in the Material Requests","Wenn diese Option aktiviert, Rohstoffe für Gegenstände, die Unteraufträge sind in den Materialwünsche aufgenommen werden"
 apps/erpnext/erpnext/config/accounts.py +80,Masters,Stämme
@@ -659,7 +659,7 @@ apps/erpnext/erpnext/config/hr.py +157,Employee Loan Management,Mitarbeiter Darl
 DocType: Employee,Passport Number,Passnummer
 apps/erpnext/erpnext/schools/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +58,Relation with Guardian2,Beziehung mit Guardian2
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +86,Manager,Leiter
-DocType: Payment Entry,Payment From / To,Die Zahlung von / bis
+DocType: Payment Entry,Payment From / To,Zahlung von / an
 apps/erpnext/erpnext/selling/doctype/customer/customer.py +117,New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0},Neue Kreditlimit ist weniger als die aktuellen ausstehenden Betrag für den Kunden. Kreditlimit hat atleast sein {0}
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +258,Same item has been entered multiple times.,Gleicher Artikel wurde mehrfach eingetragen.
 DocType: SMS Settings,Receiver Parameter,Empfängerparameter
@@ -907,7 +907,7 @@ apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +130,Open
 DocType: Notification Control,Delivery Note Message,Lieferschein-Nachricht
 DocType: Expense Claim,Expenses,Ausgaben
 DocType: Item Variant Attribute,Item Variant Attribute,Artikelvariantenattribut
-,Purchase Receipt Trends,Trandanalyse Kaufbelege
+,Purchase Receipt Trends,Trendanalyse Kaufbelege
 DocType: Process Payroll,Bimonthly,Zweimonatlich
 DocType: Vehicle Service,Brake Pad,Bremsklotz
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +81,Research & Development,Forschung & Entwicklung
@@ -923,7 +923,7 @@ DocType: SMS Log,Requested Numbers,Angeforderte Nummern
 DocType: Production Planning Tool,Only Obtain Raw Materials,Erhalten Sie nur Rohstoffe
 apps/erpnext/erpnext/config/hr.py +142,Performance appraisal.,Mitarbeiterbeurteilung
 apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py +95,"Enabling 'Use for Shopping Cart', as Shopping Cart is enabled and there should be at least one Tax Rule for Shopping Cart","Aktivieren &quot;Verwendung für Einkaufswagen&quot;, wie Einkaufswagen aktiviert ist und es sollte mindestens eine Steuerregel für Einkaufswagen sein"
-apps/erpnext/erpnext/controllers/accounts_controller.py +357,"Payment Entry {0} is linked against Order {1}, check if it should be pulled as advance in this invoice.","Zahlung Eintrag {0} ist gegen die Ordnung verknüpft {1}, überprüfen, ob es als Fortschritt in dieser Rechnung gezogen werden sollte."
+apps/erpnext/erpnext/controllers/accounts_controller.py +357,"Payment Entry {0} is linked against Order {1}, check if it should be pulled as advance in this invoice.","Zahlung {0} ist mit der Bestellung {1} verknüpft, überprüfen Sie bitte, ob es als Anteil in dieser Rechnung gezogen werden sollte."
 DocType: Sales Invoice Item,Stock Details,Lagerdetails
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +29,Project Value,Projektwert
 apps/erpnext/erpnext/config/selling.py +321,Point-of-Sale,Verkaufsstelle
@@ -1435,7 +1435,7 @@ DocType: Vehicle,License Plate,Nummernschild
 DocType: Appraisal,Goals,Ziele
 DocType: Warranty Claim,Warranty / AMC Status,Status der Garantie / des jährlichen Wartungsvertrags
 ,Accounts Browser,Kontenbrowser
-DocType: Payment Entry Reference,Payment Entry Reference,Zahlung Eintrag Referenz
+DocType: Payment Entry Reference,Payment Entry Reference,Zahlungsreferenz
 DocType: GL Entry,GL Entry,Buchung zum Hauptbuch
 DocType: HR Settings,Employee Settings,Mitarbeitereinstellungen
 ,Batch-Wise Balance History,Chargenbezogener Bestandsverlauf
@@ -2335,7 +2335,7 @@ apps/erpnext/erpnext/config/manufacturing.py +46,Tree of Bill of Materials,Stüc
 DocType: Student,Joining Date,Beitrittsdatum
 ,Employees working on a holiday,Die Mitarbeiter an einem Feiertag arbeiten
 apps/erpnext/erpnext/hr/doctype/employee_attendance_tool/employee_attendance_tool.js +152,Mark Present,Anwesend setzen
-DocType: Project,% Complete Method,% Abgeschlossen Methode
+DocType: Project,% Complete Method,% abgeschlossene Methode
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +200,Maintenance start date can not be before delivery date for Serial No {0},Startdatum der Wartung kann nicht vor dem Liefertermin für Seriennummer {0} liegen
 DocType: Production Order,Actual End Date,Tatsächliches Enddatum
 DocType: BOM,Operating Cost (Company Currency),Betriebskosten (Gesellschaft Währung)
@@ -2459,10 +2459,10 @@ DocType: Payment Entry,Payment Type,Zahlungsart
 apps/erpnext/erpnext/stock/doctype/batch/batch.py +122,Please select a Batch for Item {0}. Unable to find a single batch that fulfills this requirement,"Bitte wählen Sie einen Batch für Item {0}. Es ist nicht möglich, eine einzelne Charge zu finden, die diese Anforderung erfüllt"
 DocType: Process Payroll,Select Employees,Mitarbeiter auswählen
 DocType: Opportunity,Potential Sales Deal,Möglicher Verkaufsabschluss
-DocType: Payment Entry,Cheque/Reference Date,Scheck-/ Referenztag
+DocType: Payment Entry,Cheque/Reference Date,Scheck-/ Referenzdatum
 DocType: Purchase Invoice,Total Taxes and Charges,Gesamte Steuern und Gebühren
 DocType: Employee,Emergency Contact,Notfallkontakt
-DocType: Bank Reconciliation Detail,Payment Entry,Zahlung Eintrag
+DocType: Bank Reconciliation Detail,Payment Entry,Zahlung
 DocType: Item,Quality Parameters,Qualitätsparameter
 ,sales-browser,Umsatz-Browser
 apps/erpnext/erpnext/accounts/doctype/account/account.js +56,Ledger,Hauptbuch
@@ -2504,7 +2504,7 @@ DocType: BOM Item,"See ""Rate Of Materials Based On"" in Costing Section",Siehe 
 apps/erpnext/erpnext/templates/generators/item_group.html +36,Prev,Vorherige
 DocType: Appraisal Goal,Key Responsibility Area,Entscheidender Verantwortungsbereich
 apps/erpnext/erpnext/utilities/activation.py +125,"Student Batches help you track attendance, assessments and fees for students","Studenten Batches helfen Ihnen die Teilnahme, Einschätzungen und Gebühren für Studenten verfolgen"
-DocType: Payment Entry,Total Allocated Amount,Insgesamt Geschätzter Betrag
+DocType: Payment Entry,Total Allocated Amount,Insgesamt geschätzter Betrag
 DocType: Item Reorder,Material Request Type,Materialanfragetyp
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +273,Accural Journal Entry for salaries from {0} to {1},Accural Journaleintrag für die Gehälter von {0} {1}
 apps/erpnext/erpnext/accounts/page/pos/pos.js +788,"LocalStorage is full, did not save","Localstorage voll ist, nicht speichern"
@@ -3446,7 +3446,7 @@ DocType: Budget Account,Budget Amount,Budgetbetrag
 DocType: Appraisal Template,Appraisal Template Title,Bezeichnung der Bewertungsvorlage
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py +38,From Date {0} for Employee {1} cannot be before employee's joining Date {2},"Mitarbeiter Von Datum {0} für {1} kann nicht sein, bevor Mitarbeiter-Beitritt Datum {2}"
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +107,Commercial,Werbung
-DocType: Payment Entry,Account Paid To,Konto zu über
+DocType: Payment Entry,Account Paid To,Eingangskonto
 apps/erpnext/erpnext/selling/doctype/product_bundle/product_bundle.py +24,Parent Item {0} must not be a Stock Item,Übergeordneter Artikel {0} darf kein Lagerartikel sein
 apps/erpnext/erpnext/config/selling.py +57,All Products or Services.,Alle Produkte oder Dienstleistungen
 DocType: Expense Claim,More Details,Weitere Details
@@ -3492,7 +3492,7 @@ DocType: Upload Attendance,Download Template,Vorlage herunterladen
 DocType: Timesheet,TS-,TS-
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +61,{0} {1}: Either debit or credit amount is required for {2},{0} {1}: Entweder Debit- oder Kreditbetrag ist erforderlich für {2}
 DocType: GL Entry,Remarks,Bemerkungen
-DocType: Payment Entry,Account Paid From,Konto einzuzahlen Aus
+DocType: Payment Entry,Account Paid From,Ausgangskonto
 DocType: Purchase Order Item Supplied,Raw Material Item Code,Rohmaterial-Artikelnummer
 DocType: Journal Entry,Write Off Based On,Abschreibung basierend auf
 apps/erpnext/erpnext/utilities/activation.py +63,Make Lead,neue Verkaufsanfrage
@@ -3634,7 +3634,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +45,Company Abbreviation,Firmenk�
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +136,User {0} does not exist,Benutzer {0} existiert nicht
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +92,Raw material cannot be same as main Item,Rohmaterial kann nicht dasselbe sein wie der Hauptartikel
 DocType: Item Attribute Value,Abbreviation,Abkürzung
-apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +171,Payment Entry already exists,Zahlung Eintrag existiert bereits
+apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +171,Payment Entry already exists,Zahlung existiert bereits
 apps/erpnext/erpnext/setup/doctype/authorization_control/authorization_control.py +36,Not authroized since {0} exceeds limits,Keine Berechtigung da {0} die Höchstgrenzen überschreitet
 apps/erpnext/erpnext/config/hr.py +110,Salary template master.,Stammdaten zur Gehaltsvorlage
 DocType: Leave Type,Max Days Leave Allowed,Maximal zulässige Urlaubstage
@@ -4232,7 +4232,7 @@ DocType: Fees,Program Enrollment,Programm Einschreibung
 DocType: Landed Cost Voucher,Landed Cost Voucher,Beleg über Einstandskosten
 apps/erpnext/erpnext/public/js/queries.js +39,Please set {0},Bitte {0} setzen
 DocType: Purchase Invoice,Repeat on Day of Month,Wiederholen an Tag des Monats
-apps/erpnext/erpnext/schools/doctype/student_group/student_group.py +39,{0} - {1} is inactive student,{0} - {1} ist inaktiver Schüler
+apps/erpnext/erpnext/schools/doctype/student_group/student_group.py +39,{0} - {1} is inactive student,{0} - {1} ist ein inaktiver Schüler
 DocType: Employee,Health Details,Gesundheitsdaten
 DocType: Offer Letter,Offer Letter Terms,Gültigkeit des Angebotsschreibens
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +23,To create a Payment Request reference document is required,Zur Erstellung eines Zahlungsauftrags ist ein Referenzdokument erforderlich
@@ -4424,7 +4424,7 @@ DocType: Timesheet,Total Billable Hours,Insgesamt abrechenbare Stunden
 apps/erpnext/erpnext/accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html +4,Payment Receipt Note,Zahlungsnachweis
 apps/erpnext/erpnext/selling/doctype/customer/customer_dashboard.py +6,This is based on transactions against this Customer. See timeline below for details,Dies basiert auf Transaktionen gegen diesen Kunden. Siehe Zeitleiste unten für Details
 DocType: Supplier,Credit Days Based On,Zahlungsziel basierend auf
-apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +161,Row {0}: Allocated amount {1} must be less than or equals to Payment Entry amount {2},Row {0}: Geschätzter Betrag {1} muss kleiner als oder gleich zu Zahlung Eintrag Menge {2}
+apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +161,Row {0}: Allocated amount {1} must be less than or equals to Payment Entry amount {2},Zeile {0}: Zugewiesener Betrag {1} muss kleiner oder gleich der Zahlungsmenge {2} sein
 DocType: Tax Rule,Tax Rule,Steuer-Regel
 DocType: Selling Settings,Maintain Same Rate Throughout Sales Cycle,Gleiche Preise während des gesamten Verkaufszyklus beibehalten
 DocType: Manufacturing Settings,Plan time logs outside Workstation Working Hours.,Zeiten außerhalb der normalen Arbeitszeiten am Arbeitsplatz zulassen.

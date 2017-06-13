@@ -63,7 +63,7 @@ apps/erpnext/erpnext/projects/doctype/project/project_dashboard.py +14,Material,
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +669,Quantity,Кількість
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +546,Accounts table cannot be blank.,Облікові записи таблиці не може бути порожнім.
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +152,Loans (Liabilities),Кредити (зобов&#39;язання)
-DocType: Employee Education,Year of Passing,Рік Passing
+DocType: Employee Education,Year of Passing,Рік проходження
 DocType: Item,Country of Origin,Країна народження
 apps/erpnext/erpnext/templates/form_grid/stock_entry_grid.html +26,In Stock,В наявності
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +46,Open Issues,відкриті питання
@@ -1108,7 +1108,7 @@ apps/erpnext/erpnext/patches/v4_0/create_price_list_if_missing.py +18,Standard B
 DocType: GL Entry,Against,Проти
 DocType: Item,Default Selling Cost Center,Центр витрат продажу за замовчуванням
 DocType: Sales Partner,Implementation Partner,Реалізація Партнер
-apps/erpnext/erpnext/accounts/page/pos/pos.js +1509,ZIP Code,ЗІП код
+apps/erpnext/erpnext/accounts/page/pos/pos.js +1509,ZIP Code,Поштовий індекс
 apps/erpnext/erpnext/controllers/selling_controller.py +265,Sales Order {0} is {1},Замовлення клієнта {0} {1}
 DocType: Opportunity,Contact Info,Контактна інформація
 apps/erpnext/erpnext/config/stock.py +310,Making Stock Entries,Створення Руху ТМЦ
