@@ -55,6 +55,7 @@ class PaymentEntry(AccountsController):
 			frappe.throw(_("Difference Amount must be zero"))
 		self.make_gl_entries()
 		self.update_advance_paid()
+		self.update_paid_amount_on_sales_invoice()
 		
 	def on_cancel(self):
 		self.setup_party_account_field()
@@ -169,7 +170,7 @@ class PaymentEntry(AccountsController):
 			valid_reference_doctypes = ("Sales Order", "Sales Invoice", "Journal Entry")
 		else:
 			valid_reference_doctypes = ("Purchase Order", "Purchase Invoice", "Journal Entry")
-			
+
 		for d in self.get("references"):
 			if not d.allocated_amount:
 				continue
@@ -457,6 +458,26 @@ class PaymentEntry(AccountsController):
 			for d in self.get("references"):
 				if d.allocated_amount and d.reference_doctype in ("Sales Order", "Purchase Order"):
 					frappe.get_doc(d.reference_doctype, d.reference_name).set_total_advance_paid()
+
+	def update_paid_amount_on_sales_invoice(self):
+		"""Updates paid_amount and base_paid_amount field in referenced Sales Invoice."""
+
+		checked = set()
+
+		for d in self.get("references"):
+			if d.reference_doctype != "Sales Invoice" or d.reference_name in checked:
+				continue
+			else:
+				payment_dt = frappe.get_doc(d.reference_doctype, d.reference_name)
+				paid_amount = payment_dt.paid_amount + d.allocated_amount
+				base_paid_amount = payment_dt.base_paid_amount
+				base_paid_amount += flt(flt(d.allocated_amount) * flt(d.exchange_rate),
+					self.precision("base_paid_amount"))
+				frappe.db.set_value(d.reference_doctype, d.reference_name, 'paid_amount', paid_amount)
+				frappe.db.set_value(d.reference_doctype, d.reference_name, 'base_paid_amount', base_paid_amount)
+
+			checked.add(d.reference_name)
+
 
 @frappe.whitelist()
 def get_outstanding_reference_documents(args):
