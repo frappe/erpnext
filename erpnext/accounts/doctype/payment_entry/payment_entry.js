@@ -78,6 +78,24 @@ frappe.ui.form.on('Payment Entry', {
 				filters: { "name": ["in", doctypes] }
 			};
 		});
+
+		frm.set_query("reference_name", "references", function () {
+			if (frm.doc.party_type=="Customer") {
+				return {
+					filters: {
+						docstatus: 1,
+						customer: frm.doc.party
+					}
+				}
+			} else if (frm.doc.party_type=="Supplier") {
+				return {
+					filters: {
+						docstatus: 1,
+						supplier: frm.doc.party
+					}
+				}
+			}
+		});
 	},
 
 	refresh: function(frm) {
