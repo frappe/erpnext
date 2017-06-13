@@ -56,15 +56,6 @@ class Bin(Document):
 		if args.get("voucher_type")=="Stock Reconciliation":
 			if args.get('is_cancelled') == 'No':
 				self.actual_qty = args.get("qty_after_transaction")
-			else:
-				qty_after_transaction = frappe.db.get_value("""select qty_after_transaction
-					from `tabStock Ledger Entry`
-					where item_code=%s and warehouse=%s
-					and not (voucher_type='Stock Reconciliation' and voucher_no=%s)
-					order by posting_date desc limit 1""",
-					(self.item_code, self.warehouse, args.get('voucher_no')))
-
-				self.actual_qty = flt(qty_after_transaction[0][0]) if qty_after_transaction else 0.0
 		else:
 			self.actual_qty = flt(self.actual_qty) + flt(args.get("actual_qty"))
 
