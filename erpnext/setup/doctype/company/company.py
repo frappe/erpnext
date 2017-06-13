@@ -10,7 +10,7 @@ import frappe.defaults
 
 
 from frappe.model.document import Document
-from frappe.geo.address_and_contact import load_address_and_contact
+from frappe.contacts.address_and_contact import load_address_and_contact
 
 class Company(Document):
 	def onload(self):
