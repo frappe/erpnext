@@ -261,6 +261,14 @@ class BOM(WebsiteGenerator):
 
 	def validate_materials(self):
 		""" Validate raw material entries """
+
+		def get_duplicates(lst):
+			seen = set()
+			seen_add = seen.add
+			for item in lst:
+				if item.item_code in seen or seen_add(item.item_code):
+					yield item
+
 		if not self.get('items'):
 			frappe.throw(_("Raw Materials cannot be blank."))
 		check_list = []
@@ -269,10 +277,16 @@ class BOM(WebsiteGenerator):
 				validate_bom_no(m.item_code, m.bom_no)
 			if flt(m.stock_qty) <= 0:
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
-			check_list.append(cstr(m.item_code))
-		unique_chk_list = set(check_list)
-		if len(unique_chk_list)	!= len(check_list):
-			frappe.throw(_("Same item has been entered multiple times."))
+			check_list.append(m)
+
+		duplicate_items = list(get_duplicates(check_list))
+		if duplicate_items:
+			li = []
+			for i in duplicate_items:
+				li.append("{0} on row {1}".format(i.item_code, i.idx))
+			duplicate_list = '<br>' + '<br>'.join(li)
+
+			frappe.throw(_("Same item has been entered multiple times. {list}").format(list=duplicate_list))
 
 	def check_recursion(self):
 		""" Check whether recursion occurs in any bom"""

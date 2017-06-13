@@ -22,7 +22,7 @@ bench --site demo.erpnext.dev execute erpnext.demo.demo.simulate
 
 """
 
-def make(domain='Manufacturing'):
+def make(domain='Manufacturing', days=100):
 	frappe.flags.domain = domain
 	frappe.flags.mute_emails = True
 	setup_data.setup(domain)
@@ -36,16 +36,17 @@ def make(domain='Manufacturing'):
 	frappe.init(site)
 	frappe.connect()
 
-	simulate(domain)
+	simulate(domain, days)
 
-def simulate(domain='Manufacturing'):
-	runs_for = frappe.flags.runs_for or 150
+def simulate(domain='Manufacturing', days=100):
+	runs_for = frappe.flags.runs_for or days
 	frappe.flags.company = erpnext.get_default_company()
 	frappe.flags.mute_emails = True
 
 	if not frappe.flags.start_date:
 		# start date = 100 days back
-		frappe.flags.start_date = frappe.utils.add_days(frappe.utils.nowdate(), -1 * runs_for)
+		frappe.flags.start_date = frappe.utils.add_days(frappe.utils.nowdate(),
+			-1 * runs_for)
 
 	current_date = frappe.utils.getdate(frappe.flags.start_date)
 

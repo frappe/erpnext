@@ -25,12 +25,12 @@ frappe.ui.form.on("Supplier", {
 		}
 
 		if (frm.doc.__islocal) {
-			hide_field(['address_html', 'contact_html']);
-			frappe.geo.clear_address_and_contact(frm);
+			hide_field(['address_html','contact_html']);
+			frappe.contacts.clear_address_and_contact(frm);
 		}
 		else {
-			unhide_field(['address_html', 'contact_html']);
-			frappe.geo.render_address_and_contact(frm);
+			unhide_field(['address_html','contact_html']);
+			frappe.contacts.render_address_and_contact(frm);
 
 			// custom buttons
 			frm.add_custom_button(__('Accounting Ledger'), function () {

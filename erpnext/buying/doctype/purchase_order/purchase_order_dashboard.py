@@ -10,7 +10,7 @@ def get_data():
 		'internal_links': {
 			'Material Request': ['items', 'material_request'],
 			'Supplier Quotation': ['items', 'supplier_quotation'],
-			'Project': ['project'],
+			'Project': ['items', 'project'],
 		},
 		'transactions': [
 			{

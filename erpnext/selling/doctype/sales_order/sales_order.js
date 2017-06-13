@@ -314,12 +314,13 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	},
 	update_status: function(label, status){
 		var doc = this.frm.doc;
+		var me = this;
 		frappe.ui.form.is_saving = true;
 		frappe.call({
 			method: "erpnext.selling.doctype.sales_order.sales_order.update_status",
 			args: {status: status, name: doc.name},
 			callback: function(r){
-				this.frm.reload_doc();
+				me.frm.reload_doc();
 			},
 			always: function() {
 				frappe.ui.form.is_saving = false;
