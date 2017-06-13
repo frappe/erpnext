@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cstr, cint
-from frappe.geo.doctype.address.address import get_default_address
+from frappe.contacts.doctype.address.address import get_default_address
 
 class IncorrectCustomerGroup(frappe.ValidationError): pass
 class IncorrectSupplierType(frappe.ValidationError): pass
