@@ -389,7 +389,12 @@ Manufacture</pre>
 Draft
 Submitted
 Stopped
-Cancelled</pre>
+Cancelled
+Pending
+Partially Ordered
+Ordered
+Issued
+Transferred</pre>
             </td>
         </tr>
         
@@ -532,6 +537,48 @@ Cancelled</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="before_cancel" href="#before_cancel" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>before_cancel</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="before_save" href="#before_save" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>before_save</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="before_submit" href="#before_submit" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>before_submit</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="check_if_already_pulled" href="#check_if_already_pulled" class="text-muted small">
             <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>check_if_already_pulled</b>
@@ -608,6 +655,22 @@ Cancelled</pre>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p>Set title as comma separated list of items</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="status_can_change" href="#status_can_change" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>status_can_change</b>
+        <i class="text-muted">(self, status)</i>
+    </p>
+	<div class="docs-attr-desc"><pre><code>    validates that `status` is acceptable for the present controller status
+    and throws an Exception if otherwise.
+</code></pre>
 </div>
 	<br>
 

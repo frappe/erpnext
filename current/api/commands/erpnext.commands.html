@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Bank Reconciliation</title>
+	<title>erpnext.commands</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -22,7 +22,7 @@
     
 
 		</head>
-<body data-path="user/manual/en/accounts/tools/bank-reconciliation">
+<body data-path="current/api/commands/erpnext.commands">
 	<div class="main-section">
 		<div>
 					<nav class="navbar navbar-default navbar-main" role="navigation">
@@ -103,7 +103,7 @@
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
-<div class="page-container" id="page-user/manual/en/accounts/tools/bank-reconciliation" data-path="{{ pathname }}"
+<div class="page-container" id="page-current/api/commands/erpnext.commands" data-path="{{ pathname }}"
 	>
 	<div class="row ">
 		
@@ -118,8 +118,8 @@
 <ul class="breadcrumb">
 	<li>
 		<span class="fa fa-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext//user/manual/en/accounts/tools">
-		Tools</a>
+		<a href="https://frappe.github.io/erpnext//current/api/commands">
+		commands</a>
 	</li>
 	
 </ul>
@@ -129,7 +129,7 @@
 						
 					</div>
 					<div class="col-sm-8 col-xs-6">
-						<h1>Bank Reconciliation</h1>
+						<h1>erpnext.commands</h1>
 					</div>
 					<div class="col-sm-4 col-xs-6">
 						
@@ -139,74 +139,46 @@
 				</div>
 			</div>
 			<div class="page_content">
-<h3>Bank Reconciliation Statement</h3>
+<!-- title: erpnext.commands --><div class="dev-header">
 
-<p>If you are receiving payments or making payments via cheques, the bank statements will not accurately match the dates of your entry, this is because the bank usually takes time to “clear” these payments. Also you may have
-mailed a cheque to your Supplier and it may be a few days before it is received and deposited by the Supplier. In ERPNext you can synchronise your bank statements and your Journal Entries using the “Bank Reconciliation”
-tool.</p>
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 7.x.x</a>
 
-<p>The Bank Reconciliation Report provide the difference between the bank balance shown in an organisation's bank statement, as provided by the ban against amount shown in the companies Chart of Accounts.</p>
 
-<h4>Bank Reconciliation Statement</h4>
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/blob/develop/erpnext/commands/__init__.py"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/bank-reconciliation-2.png" alt="" />  </p>
+</div>
 
-<p>In the report, check whether the field 'Balance as per bank' matches the Bank Account Statement. If it is matching, it means that Clearance Date is correctly updated for all the bank entries. If there is a mismatch, Its because of bank entries for which Cleanrane Date is not yet updated.</p>
 
-<p>To add clearance entries go to:</p>
 
-<blockquote>
-  <p>Accounts &gt; Tools &gt; Bank Reconciliation</p>
-</blockquote>
 
-<h3>Bank Reconciliation Tool</h3>
 
-<p>o use this, go to:</p>
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.commands.call_command" href="#erpnext.commands.call_command" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.commands.<b>call_command</b>
+        <i class="text-muted">(cmd, context)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
 
-<blockquote>
-  <p>Accounts &gt; Tools &gt; Bank Reconciliation</p>
-</blockquote>
+	
 
-<p>Select your “Bank” Account and enter the dates of your statement. Here you
-will get all the “Bank Voucher” type entries. In each of the entry on the
-right most column, update the “Clearance Date” and click on “Update”.</p>
 
-<p>By doing this you will be able to sync your bank statements and entries into
-the system.</p>
 
-<p><strong>Step 1:</strong> Select the Bank Account against which you intend to reconcile. For
-example; HDFC Bank, ICICI Bank, or Citibank etc.</p>
-
-<p><strong>Step 2:</strong> Select the Date range that you wish to reconcile for.</p>
-
-<p><strong>Step 3:</strong> Click on 'Get Reconciled Entries'</p>
-
-<p>All the entries in the specified date range will be shown in a table below.</p>
-
-<p><strong>Step 4:</strong> Click on the JV from the table and update clearance date.</p>
-
-<p><img class="screenshot" alt="Bank Reconciliation" src="https://frappe.github.io/erpnext/assets/img/accounts/bank-reconciliation.png"></p>
-
-<p><strong>Step 5:</strong> Click on the button 'Update Clearance Date'.</p>
-
-<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="https://frappe.github.io/erpnext/user/manual/en/accounts/tools/payment-reconciliation">Payment Reconciliation</a></p></p>
-
+<!-- autodoc -->
 </div>
 		</div>
 	</div>
 </div>
 
-				
-<div class="page-container">
-	<div class="page-content">
-	<div class="edit-container text-center">
-		<i class="fa fa-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/accounts/tools/bank-reconciliation.md">
-			Improve this page
-		</a>
-	</div>
-	</div>
-</div>
+				<!-- edit-link -->
                 </div>
             </div>
 			<footer class="docs-footer">
