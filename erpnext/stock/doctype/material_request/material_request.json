@@ -160,7 +160,7 @@
    "report_hide": 0, 
    "reqd": 1, 
    "search_index": 0, 
-   "set_only_once": 0, 
+   "set_only_once": 1, 
    "unique": 0
   }, 
   {
@@ -686,7 +686,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2017-05-31 15:06:44.611826", 
+ "modified": "2017-06-13 14:29:18.032657", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Material Request", 
