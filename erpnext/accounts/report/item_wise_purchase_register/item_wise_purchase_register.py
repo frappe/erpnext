@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt
+from erpnext.accounts.report.purchase_register.purchase_register import get_supplier_details
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -24,6 +25,9 @@ def execute(filters=None):
 	})
 	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
 	
+	suppliers = list(set([d.supplier for d in item_list]))
+	supplier_details = get_supplier_details(suppliers)
+	
 	data = []
 	for d in item_list:
 		purchase_receipt = None
@@ -35,7 +39,8 @@ def execute(filters=None):
 
 		expense_account = d.expense_account or aii_account_map.get(d.company)
 		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date, d.supplier,
-			d.supplier_name, d.credit_to, d.mode_of_payment, d.project, d.company, d.purchase_order,
+			d.supplier_name, d.supplier_gstin, supplier_details.get(d.supplier, frappe._dict()).tax_id,
+			d.company_gstin, d.credit_to, d.mode_of_payment, d.project, d.company, d.purchase_order,
 			purchase_receipt, expense_account, d.qty, d.base_net_rate, d.base_net_amount]
 
 		for tax in tax_accounts:
@@ -52,8 +57,10 @@ def execute(filters=None):
 def get_columns():
 	return [_("Item Code") + ":Link/Item:120", _("Item Name") + "::120",
 		_("Item Group") + ":Link/Item Group:100", _("Invoice") + ":Link/Purchase Invoice:120",
-		_("Posting Date") + ":Date:80", _("Supplier") + ":Link/Supplier:120",
-		"Supplier Name::120", "Payable Account:Link/Account:120", 
+		_("Posting Date") + ":Date:80", 
+		_("Supplier") + ":Link/Supplier:120", "Supplier Name::120", 
+		_("Supplier GSTIN") + "::130", _("Supplier Tax Id") + "::120", _("Company GSTIN") + "::130", 
+		"Payable Account:Link/Account:120", 
 		_("Mode of Payment") + ":Link/Mode of Payment:80", _("Project") + ":Link/Project:80",
 		_("Company") + ":Link/Company:100", _("Purchase Order") + ":Link/Purchase Order:100",
 		_("Purchase Receipt") + ":Link/Purchase Receipt:100", _("Expense Account") + ":Link/Account:140",
@@ -84,7 +91,8 @@ def get_items(filters):
 			pi.supplier, pi.remarks, pi.base_net_total, pi_item.item_code, pi_item.item_name, 
 			pi_item.item_group, pi_item.project, pi_item.purchase_order, pi_item.purchase_receipt, 
 			pi_item.po_detail, pi_item.expense_account, pi_item.qty, pi_item.base_net_rate, 
-			pi_item.base_net_amount, pi.supplier_name, pi.mode_of_payment
+			pi_item.base_net_amount, pi.supplier_name, pi.mode_of_payment,
+			pi.supplier_gstin, pi.company_gstin
 		from `tabPurchase Invoice` pi, `tabPurchase Invoice Item` pi_item
 		where pi.name = pi_item.parent and pi.docstatus = 1 %s %s
 		order by pi.posting_date desc, pi_item.item_code desc

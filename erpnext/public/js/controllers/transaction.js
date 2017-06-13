@@ -160,6 +160,20 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 			});
 		}
+		
+		if(frappe.meta.get_docfield(this.frm.doc.doctype, "company_address")) {
+			this.frm.set_query("company_address", function(doc) {
+				return {
+					query: "erpnext.controllers.queries.address_query",
+					filters: {
+						"is_your_company_address": 1,
+						"link_doctype": "Company",
+						"link_name": doc.company
+					}
+				}
+			})
+		};
+		
 
 		this.setup_quality_inspection();
 	},

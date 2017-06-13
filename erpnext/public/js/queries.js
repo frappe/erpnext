@@ -64,7 +64,11 @@ $.extend(erpnext.queries, {
 
 			return {
 				query: 'frappe.geo.doctype.address.address.address_query',
-				filters: { link_doctype: frappe.dynamic_link.doctype, link_name: doc[frappe.dynamic_link.fieldname] } };
+				filters: {
+					link_doctype: frappe.dynamic_link.doctype, 
+					link_name: doc[frappe.dynamic_link.fieldname]
+				}
+			};
 		}
 	},
 
