@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate
+from frappe.utils import flt, cint, getdate
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -158,8 +158,9 @@ def filter_items_with_no_transactions(iwb_map):
 		qty_dict = iwb_map[(company, item, warehouse)]
 		
 		no_transactions = True
+		float_precision = cint(frappe.db.get_default("float_precision")) or 3
 		for key, val in qty_dict.items():
-			val = flt(val, 3)
+			val = flt(val, float_precision)
 			qty_dict[key] = val
 			if key != "val_rate" and val:
 				no_transactions = False
