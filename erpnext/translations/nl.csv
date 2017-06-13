@@ -58,7 +58,7 @@ apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +282,New 
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +146,Bank Draft,Bankcheque
 DocType: Mode of Payment Account,Mode of Payment Account,Modus van Betaalrekening
 apps/erpnext/erpnext/stock/doctype/item/item.js +56,Show Variants,Toon Varianten
-DocType: Academic Term,Academic Term,academische Term
+DocType: Academic Term,Academic Term,Academisch semester
 apps/erpnext/erpnext/projects/doctype/project/project_dashboard.py +14,Material,Materiaal
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +669,Quantity,Hoeveelheid
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +546,Accounts table cannot be blank.,Accounts tabel mag niet leeg zijn.
@@ -737,7 +737,7 @@ apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +369,Previe
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +54,Account {0} has been entered multiple times,Account {0} is meerdere keren ingevoerd
 DocType: Account,Expenses Included In Valuation,Kosten inbegrepen in waardering
 DocType: Hub Settings,Seller City,Verkoper Stad
-,Absent Student Report,Absent Student Report
+,Absent Student Report,Studenten afwezigheidsrapport
 DocType: Email Digest,Next email will be sent on:,Volgende e-mail wordt verzonden op:
 DocType: Offer Letter Term,Offer Letter Term,Aanbod Letter Term
 apps/erpnext/erpnext/stock/doctype/item/item.py +619,Item has variants.,Item heeft varianten.
@@ -2762,7 +2762,7 @@ DocType: Assessment Plan Criteria,Assessment Plan Criteria,Assessment Plan Crite
 DocType: Training Event,Scheduled,Geplande
 apps/erpnext/erpnext/config/buying.py +18,Request for quotation.,Aanvraag voor een offerte.
 apps/erpnext/erpnext/selling/doctype/product_bundle/product_bundle.js +13,"Please select Item where ""Is Stock Item"" is ""No"" and ""Is Sales Item"" is ""Yes"" and there is no other Product Bundle","Selecteer Item, waar &quot;Is Stock Item&quot; is &quot;Nee&quot; en &quot;Is Sales Item&quot; is &quot;Ja&quot; en er is geen enkel ander product Bundle"
-DocType: Student Log,Academic,Academic
+DocType: Student Log,Academic,Academisch
 apps/erpnext/erpnext/controllers/accounts_controller.py +486,Total advance ({0}) against Order {1} cannot be greater than the Grand Total ({2}),Totaal vooraf ({0}) tegen Orde {1} kan niet groter zijn dan de Grand totaal zijn ({2})
 DocType: Sales Partner,Select Monthly Distribution to unevenly distribute targets across months.,Selecteer Maandelijkse Distribution om ongelijk te verdelen doelen in heel maanden.
 DocType: Purchase Invoice Item,Valuation Rate,Waardering Tarief
@@ -3680,7 +3680,7 @@ apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +235,Quantity should be gr
 DocType: Journal Entry,Cash Entry,Cash Entry
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse_tree.js +17,Child nodes can be only created under 'Group' type nodes,Child nodes kunnen alleen worden gemaakt op grond van het type nodes &#39;Groep&#39;
 DocType: Leave Application,Half Day Date,Halve dag Date
-DocType: Academic Year,Academic Year Name,Academisch Jaar Naam
+DocType: Academic Year,Academic Year Name,Academisch jaar naam
 DocType: Sales Partner,Contact Desc,Contact Omschr
 apps/erpnext/erpnext/config/hr.py +65,"Type of leaves like casual, sick etc.","Type verloven zoals, buitengewoon, ziekte, etc."
 DocType: Email Digest,Send regular summary reports via Email.,Stuur regelmatige samenvattende rapporten via e-mail.
