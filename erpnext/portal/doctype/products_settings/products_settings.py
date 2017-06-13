@@ -16,7 +16,9 @@ class ProductsSettings(Document):
 
 def home_page_is_products(doc, method):
 	'''Called on saving Website Settings'''
-	home_page_is_products = cint(frappe.db.get_single_value('Products Settings', 'home_page_is_products'))
-	if home_page_is_products:
-		doc.home_page = 'products'
+	if doc.home_page != 'products':
+		frappe.db.set_value('Products Settings', None, 'home_page_is_products', 0)
+	else:
+		frappe.db.set_value('Products Settings', None, 'home_page_is_products', 1)
+
 
