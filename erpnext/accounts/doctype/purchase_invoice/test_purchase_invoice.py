@@ -118,6 +118,19 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEquals(expected_values[gle.account][1], gle.debit)
 			self.assertEquals(expected_values[gle.account][2], gle.credit)
 
+	def test_purchase_invoice_change_naming_series(self):
+		pi = frappe.copy_doc(test_records[1])
+		pi.insert()
+		pi.naming_series = 'TEST-'
+
+		self.assertRaises(frappe.CannotChangeConstantError, pi.save)
+
+		pi = frappe.copy_doc(test_records[0])
+		pi.insert()
+		pi.naming_series = 'TEST-'
+
+		self.assertRaises(frappe.CannotChangeConstantError, pi.save)
+
 	def test_gl_entries_with_aia_for_non_stock_items(self):
 		set_perpetual_inventory()
 		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)

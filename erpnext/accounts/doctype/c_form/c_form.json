@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "naming_series:", 
@@ -11,6 +12,7 @@
  "editable_grid": 0, 
  "fields": [
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -21,6 +23,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "length": 0, 
@@ -39,6 +42,7 @@
    "width": "50%"
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -49,6 +53,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Series", 
@@ -63,10 +68,11 @@
    "report_hide": 0, 
    "reqd": 1, 
    "search_index": 0, 
-   "set_only_once": 0, 
+   "set_only_once": 1, 
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -77,6 +83,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
    "in_standard_filter": 0, 
    "label": "C-Form No", 
@@ -94,6 +101,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -104,6 +112,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
    "in_standard_filter": 0, 
    "label": "Received Date", 
@@ -121,6 +130,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -131,6 +141,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
    "in_standard_filter": 0, 
    "label": "Customer", 
@@ -149,6 +160,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -159,6 +171,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "length": 0, 
@@ -177,6 +190,7 @@
    "width": "50%"
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -187,6 +201,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 1, 
    "label": "Company", 
@@ -205,6 +220,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -215,6 +231,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 1, 
    "label": "Quarter", 
@@ -233,6 +250,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -243,6 +261,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Total Amount", 
@@ -261,6 +280,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -271,6 +291,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "State", 
@@ -288,6 +309,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -298,6 +320,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "length": 0, 
@@ -314,6 +337,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -324,6 +348,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Invoices", 
@@ -342,6 +367,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -352,6 +378,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Total Invoiced Amount", 
@@ -370,6 +397,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -380,6 +408,7 @@
    "ignore_user_permissions": 1, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Amended From", 
@@ -398,18 +427,18 @@
    "unique": 0
   }
  ], 
+ "has_web_view": 0, 
  "hide_heading": 0, 
  "hide_toolbar": 0, 
  "icon": "fa fa-file-text", 
  "idx": 1, 
  "image_view": 0, 
  "in_create": 0, 
- "in_dialog": 0, 
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 3, 
- "modified": "2016-11-07 05:51:03.273512", 
+ "modified": "2017-06-13 14:28:56.667292", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "C-Form", 
@@ -425,7 +454,6 @@
    "export": 0, 
    "if_owner": 0, 
    "import": 0, 
-   "is_custom": 0, 
    "permlevel": 0, 
    "print": 1, 
    "read": 1, 
@@ -446,7 +474,6 @@
    "export": 0, 
    "if_owner": 0, 
    "import": 0, 
-   "is_custom": 0, 
    "permlevel": 0, 
    "print": 1, 
    "read": 1, 
@@ -467,7 +494,6 @@
    "export": 0, 
    "if_owner": 0, 
    "import": 0, 
-   "is_custom": 0, 
    "permlevel": 1, 
    "print": 0, 
    "read": 1, 
@@ -482,7 +508,9 @@
  "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 0, 
+ "show_name_in_global_search": 0, 
  "sort_order": "DESC", 
  "timeline_field": "customer", 
+ "track_changes": 0, 
  "track_seen": 0
 }
