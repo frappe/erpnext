@@ -71,7 +71,7 @@ def validate_returned_items(doc):
 	already_returned_items = get_already_returned_items(doc)
 
 	# ( not mandatory when it is Purchase Invoice or a Sales Invoice without Update Stock )
-	warehouse_mandatory = not (doc.doctype=="Purchase Invoice" or (doc.doctype=="Sales Invoice" and not doc.update_stock))
+	warehouse_mandatory = not ((doc.doctype=="Purchase Invoice" or doc.doctype=="Sales Invoice") and not doc.update_stock))
 
 	items_returned = False
 	for d in doc.get("items"):
