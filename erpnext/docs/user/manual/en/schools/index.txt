@@ -3,3 +3,4 @@ admission
 schedule
 fees
 setup
+assessment
