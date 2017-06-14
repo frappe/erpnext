@@ -8,7 +8,7 @@ from frappe.utils import (cstr, validate_email_add, cint, comma_and, has_gravata
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
-from frappe.contacts.address_and_contact import load_address_and_contact
+from frappe.geo.address_and_contact import load_address_and_contact
 from erpnext.accounts.party import set_taxes
 
 sender_field = "email_id"
