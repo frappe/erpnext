@@ -35,15 +35,13 @@ class TestWarehouse(unittest.TestCase):
 		set_perpetual_inventory(1)
 		create_warehouse("Test Warehouse for Renaming 1")
 		account = get_inventory_account("_Test Company", "Test Warehouse for Renaming 1 - _TC")
-		self.assertTrue(frappe.db.get_value("Warehouse",
-			filters={"account": account}))
+		self.assertTrue(frappe.db.get_value("Warehouse", filters={"account": account}))
 
 		# Rename with abbr
 		if frappe.db.exists("Warehouse", "Test Warehouse for Renaming 2 - _TC"):
 			frappe.delete_doc("Warehouse", "Test Warehouse for Renaming 2 - _TC")
 		rename_doc("Warehouse", "Test Warehouse for Renaming 1 - _TC", "Test Warehouse for Renaming 2 - _TC")
 
-		self.assertTrue(frappe.db.exists("Account", "Test Warehouse for Renaming 1 - _TC"))
 		self.assertTrue(frappe.db.get_value("Warehouse",
 			filters={"account": "Test Warehouse for Renaming 1 - _TC"}))
 
@@ -53,7 +51,6 @@ class TestWarehouse(unittest.TestCase):
 
 		rename_doc("Warehouse", "Test Warehouse for Renaming 2 - _TC", "Test Warehouse for Renaming 3")
 
-		self.assertTrue(frappe.db.exists("Account", "Test Warehouse for Renaming 1 - _TC"))
 		self.assertTrue(frappe.db.get_value("Warehouse",
 			filters={"account": "Test Warehouse for Renaming 1 - _TC"}))
 
@@ -61,10 +58,6 @@ class TestWarehouse(unittest.TestCase):
 		if frappe.db.exists("Warehouse", "Test - Warehouse - Company - _TC"):
 			frappe.delete_doc("Warehouse", "Test - Warehouse - Company - _TC")
 		rename_doc("Warehouse", "Test Warehouse for Renaming 3 - _TC", "Test - Warehouse - Company")
-
-		self.assertTrue(frappe.db.exists("Account", "Test - Warehouse - Company - _TC"))
-		self.assertTrue(frappe.db.get_value("Account", filters={"warehouse": "Test - Warehouse - Company - _TC"}))
-		self.assertFalse(frappe.db.get_value("Account", filters={"warehouse": "Test Warehouse for Renaming 3 - _TC"}))
 
 	def test_warehouse_merging(self):
 		set_perpetual_inventory(1)
@@ -94,8 +87,6 @@ class TestWarehouse(unittest.TestCase):
 
 		self.assertEqual(bin_qty, existing_bin_qty)
 
-		# self.assertFalse(frappe.db.exists("Account", "Test Warehouse for Merging 1 - _TC"))
-		self.assertTrue(frappe.db.exists("Account", "Test Warehouse for Merging 2 - _TC"))
 		self.assertTrue(frappe.db.get_value("Warehouse",
 			filters={"account": "Test Warehouse for Merging 2 - _TC"}))
 

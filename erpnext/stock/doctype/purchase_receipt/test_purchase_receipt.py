@@ -63,12 +63,19 @@ class TestPurchaseReceipt(unittest.TestCase):
 		stock_in_hand_account = get_inventory_account(pr.company, pr.get("items")[0].warehouse)
 		fixed_asset_account = get_inventory_account(pr.company, pr.get("items")[1].warehouse)
 
-		expected_values = {
-			stock_in_hand_account: [375.0, 0.0],
-			fixed_asset_account: [375.0, 0.0],
-			"Stock Received But Not Billed - _TC": [0.0, 500.0],
-			"Expenses Included In Valuation - _TC": [0.0, 250.0]
-		}
+		if stock_in_hand_account == fixed_asset_account:
+			expected_values = {
+				stock_in_hand_account: [750.0, 0.0],
+				"Stock Received But Not Billed - _TC": [0.0, 500.0],
+				"Expenses Included In Valuation - _TC": [0.0, 250.0]
+			}
+		else:
+			expected_values = {
+				stock_in_hand_account: [375.0, 0.0],
+				fixed_asset_account: [375.0, 0.0],
+				"Stock Received But Not Billed - _TC": [0.0, 500.0],
+				"Expenses Included In Valuation - _TC": [0.0, 250.0]
+			}
 
 		for gle in gl_entries:
 			self.assertEquals(expected_values[gle.account][0], gle.debit)

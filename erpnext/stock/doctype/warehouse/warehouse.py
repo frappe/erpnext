@@ -4,9 +4,9 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe.utils import cint, validate_email_add
-from frappe import throw, msgprint, _
+from frappe import throw, _
 from frappe.utils.nestedset import NestedSet
-from erpnext.controllers.stock_controller import get_parent_warehouse_account
+from erpnext.stock import get_warehouse_account
 
 class Warehouse(NestedSet):
 	nsm_parent_field = 'parent_warehouse'
@@ -21,10 +21,7 @@ class Warehouse(NestedSet):
 
 	def onload(self):
 		'''load account name for General Ledger Report'''
-		account = self.account or get_parent_warehouse_account(self.name, self.company)
-		if not account:
-			account = frappe.db.get_value('Company',
-				self.company, 'default_inventory_account')
+		account = self.account or get_warehouse_account(self.name, self.company)
 
 		if account:
 			self.set_onload('account', account)
@@ -76,8 +73,6 @@ class Warehouse(NestedSet):
 
 			if self.company != frappe.db.get_value("Warehouse", new_warehouse, "company"):
 				frappe.throw(_("Both Warehouse must belong to same Company"))
-
-		# self.rename_account_for(old_name, new_warehouse, merge)
 
 		return new_warehouse
 

@@ -10,6 +10,7 @@ from erpnext.accounts.utils import get_fiscal_year
 from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, process_gl_map
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock.stock_ledger import get_valuation_rate
+from erpnext.stock import get_warehouse_account_map
 
 class StockController(AccountsController):
 	def validate(self):
@@ -21,7 +22,7 @@ class StockController(AccountsController):
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
-			warehouse_account = get_warehouse_account()
+			warehouse_account = get_warehouse_account_map()
 
 			if self.docstatus==1:
 				if not gl_entries:
@@ -37,7 +38,7 @@ class StockController(AccountsController):
 			default_cost_center=None):
 
 		if not warehouse_account:
-			warehouse_account = get_warehouse_account()
+			warehouse_account = get_warehouse_account_map()
 
 		sle_map = self.get_stock_ledger_details()
 		voucher_details = self.get_voucher_details(default_expense_account, default_cost_center, sle_map)
@@ -88,10 +89,7 @@ class StockController(AccountsController):
 		if warehouse_with_no_account:
 			for wh in warehouse_with_no_account:
 				if frappe.db.get_value("Warehouse", wh, "company"):
-					frappe.throw(_("Warehouse {0} is not linked to any account, please create/link the corresponding (Asset) account for the warehouse.").format(wh))
-
-			msgprint(_("No accounting entries for the following warehouses") + ": \n" +
-				"\n".join(warehouse_with_no_account))
+					frappe.throw(_("Warehouse {0} is not linked to any account, please mention the account in  the warehouse record or set default inventory account in company {1}.").format(wh, self.company))
 
 		return process_gl_map(gl_list)
 
@@ -341,7 +339,7 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
 
 	if not warehouse_account:
-		warehouse_account = get_warehouse_account()
+		warehouse_account = get_warehouse_account_map()
 
 	future_stock_vouchers = get_future_stock_vouchers(posting_date, posting_time, for_warehouses, for_items)
 	gle = get_voucherwise_gl_entries(future_stock_vouchers, posting_date)
@@ -406,36 +404,3 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 				gl_entries.setdefault((d.voucher_type, d.voucher_no), []).append(d)
 
 	return gl_entries
-
-def get_warehouse_account():
-	if not frappe.flags.warehouse_account_map or frappe.flags.in_test:
-		warehouse_account = frappe._dict()
-
-		for d in frappe.get_all('Warehouse', filters = {"is_group": 0},
-			fields = ["name", "account", "parent_warehouse", "company"]):
-			if not d.account:
-				d.account = get_parent_warehouse_account(d.name, d.company)
-
-			if not d.account:
-				d.account = get_company_default_inventory_account(d.company)
-
-			d.account_currency = frappe.db.get_value('Account', d.account, 'account_currency')
-			warehouse_account.setdefault(d.name, d)
-		frappe.flags.warehouse_account_map = warehouse_account
-	return frappe.flags.warehouse_account_map
-
-def get_parent_warehouse_account(warehouse, company):
-	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
-	acccount = frappe.db.sql("""
-		select
-			account from `tabWarehouse`
-		where
-			lft < %s and rgt > %s and is_group=1 and company = %s
-			and account is not null and ifnull(account, '') !=''
-		order by lft desc limit 1""", (lft, rgt, company), as_list=1)
-
-	return acccount[0][0] if acccount else None
-
-def get_company_default_inventory_account(company):
-	return frappe.db.get_value('Company',
-				company, 'default_inventory_account')

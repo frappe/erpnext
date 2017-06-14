@@ -2,9 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
-from erpnext.controllers.stock_controller import (get_parent_warehouse_account,
-	 get_company_default_inventory_account)
+import frappe
+from erpnext.stock import get_warehouse_account, get_company_default_inventory_account
 
 
 def _make_test_records(verbose):
@@ -70,11 +69,8 @@ def _make_test_records(verbose):
 def get_inventory_account(company, warehouse=None):
 	account = None
 	if warehouse:
-		account = frappe.db.get_value("Warehouse", warehouse, 'account')
-		if not account:
-			account = get_parent_warehouse_account(warehouse, company)
-
-	if not account:
+		account = get_warehouse_account(warehouse, company)
+	else:
 		account = get_company_default_inventory_account(company)
 
 	return account

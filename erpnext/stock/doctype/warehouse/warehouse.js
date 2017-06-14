@@ -42,7 +42,8 @@ frappe.ui.form.on("Warehouse", {
 			return {
 				filters: {
 					"is_group": 0,
-					"account_type": "Stock"
+					"account_type": "Stock",
+					"company": frm.doc.company
 				}
 			}
 		}
