@@ -22,4 +22,6 @@ Select DocType which you want to rename. Here DocType will be Item. Then Browse 
 
 ![Upload Data]({{docs_base_url}}/assets/img/articles/Selection_0173436a8.png) 
 
+{next}
+
 <!-- markdown -->

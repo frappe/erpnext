@@ -3358,7 +3358,7 @@ apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +193,
 DocType: BOM,Website Description,Hjemmesidebeskrivelse
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +42,Net Change in Equity,Nettoændring i Equity
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +162,Please cancel Purchase Invoice {0} first,Annullér købsfaktura {0} først
-apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +43,"Email Address must be unique, already exists for {0}","E-mail adresse skal være unikt, findes allerede for {0}"
+apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +43,"Email Address must be unique, already exists for {0}","E-mailadresse skal være unik, findes allerede for {0}"
 DocType: Serial No,AMC Expiry Date,AMC Udløbsdato
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +799,Receipt,Kvittering
 ,Sales Register,Salgs Register
@@ -3834,7 +3834,7 @@ apps/erpnext/erpnext/schools/report/student_and_guardian_contact_details/student
 DocType: Employee,Notice (days),Varsel (dage)
 DocType: Tax Rule,Sales Tax Template,Salg Afgift Skabelon
 apps/erpnext/erpnext/accounts/page/pos/pos.js +2343,Select items to save the invoice,Vælg elementer for at gemme fakturaen
-DocType: Employee,Encashment Date,Indløsning Dato
+DocType: Employee,Encashment Date,Indløsningsdato
 DocType: Training Event,Internet,Internet
 DocType: Account,Stock Adjustment,Stock Justering
 apps/erpnext/erpnext/projects/doctype/activity_cost/activity_cost.py +34,Default Activity Cost exists for Activity Type - {0},Standard Aktivitets Omkostninger findes for Aktivitets Type - {0}
@@ -4478,7 +4478,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +207,Purchaser,Indkøber
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py +30,Net pay cannot be negative,Nettoløn kan ikke være negativ
 DocType: SMS Settings,Static Parameters,Statiske parametre
 DocType: Assessment Plan,Room,Værelse
-DocType: Purchase Order,Advance Paid,Advance Betalt
+DocType: Purchase Order,Advance Paid,Forudbetalt
 DocType: Item,Item Tax,Varemoms
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +802,Material to Supplier,Materiale til leverandøren
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +366,Excise Invoice,Skattestyrelsen Faktura

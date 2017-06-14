@@ -35,10 +35,10 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 
-		if(!doc.__islocal) {
-			frappe.geo.render_address_and_contact(cur_frm);
+		if(!this.frm.doc.__islocal) {
+			frappe.contacts.render_address_and_contact(cur_frm);
 		} else {
-			frappe.geo.clear_address_and_contact(cur_frm);
+			frappe.contacts.clear_address_and_contact(cur_frm);
 		}
 	},
 

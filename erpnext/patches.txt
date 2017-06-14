@@ -401,3 +401,4 @@ erpnext.patches.v8_0.delete_schools_depricated_doctypes
 erpnext.patches.v8_0.update_customer_pos_id
 erpnext.patches.v8_0.rename_items_in_status_field_of_material_request
 erpnext.patches.v8_0.move_account_head_from_account_to_warehouse_for_inventory
+erpnext.patches.v8_0.delete_bin_indexes
