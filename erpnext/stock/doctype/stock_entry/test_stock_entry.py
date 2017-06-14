@@ -189,9 +189,25 @@ class TestStockEntry(unittest.TestCase):
 		self.check_stock_ledger_entries("Stock Entry", mtn.name,
 			[["_Test Item", "_Test Warehouse - _TC", -45.0], ["_Test Item", "_Test Warehouse 1 - _TC", 45.0]])
 
-		# no gl entry as both source and target warehouse has linked to same account.
-		self.assertFalse(frappe.db.sql("""select * from `tabGL Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""", mtn.name))
+		stock_in_hand_account = get_inventory_account(mtn.company, mtn.get("items")[0].s_warehouse)
+		
+		fixed_asset_account = get_inventory_account(mtn.company, mtn.get("items")[0].t_warehouse)
+			
+		if stock_in_hand_account == fixed_asset_account:
+			# no gl entry as both source and target warehouse has linked to same account.
+			self.assertFalse(frappe.db.sql("""select * from `tabGL Entry`
+				where voucher_type='Stock Entry' and voucher_no=%s""", mtn.name))
+			
+		else:
+			stock_value_diff = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Stock Entry",
+				"voucher_no": mtn.name, "warehouse": "_Test Warehouse - _TC"}, "stock_value_difference"))
+		
+			self.check_gl_entries("Stock Entry", mtn.name,
+				sorted([
+					[stock_in_hand_account, 0.0, stock_value_diff],
+					[fixed_asset_account, stock_value_diff, 0.0],
+				])
+			)
 
 		mtn.cancel()
 		self.assertFalse(frappe.db.sql("""select * from `tabStock Ledger Entry`
