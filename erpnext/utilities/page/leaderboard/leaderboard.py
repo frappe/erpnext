@@ -117,12 +117,15 @@ def get_all_items(doctype, filters, items, start=0, limit=100):
 
 	x = frappe.get_list(doctype, fields=["name", "modified"], filters=filters, limit_start=start, limit_page_length=limit)
 	for val in x:
-		y = frappe.db.sql('''select item_code from `tabMaterial Request Item` where item_code = %s''', (val.name), as_list=1)
-		requests = destructure_tuple_of_tuples(y)
-		y = frappe.db.sql('''select price_list_rate from `tabItem Price` where item_code = %s''', (val.name), as_list=1)
-		avg_price = get_avg(destructure_tuple_of_tuples(y))
-		y = frappe.db.sql('''select item_code from `tabPurchase Invoice Item` where item_code = %s''', (val.name), as_list=1)
-		purchases = destructure_tuple_of_tuples(y)
+		data = frappe.db.sql('''select item_code from `tabMaterial Request Item` where item_code = %s''', (val.name), as_list=1)
+		requests = destructure_tuple_of_tuples(data)
+		
+		data = frappe.db.sql('''select price_list_rate from `tabItem Price` where item_code = %s''', (val.name), as_list=1)
+		avg_price = get_avg(destructure_tuple_of_tuples(data))
+		
+		data = frappe.db.sql('''select item_code from `tabPurchase Invoice Item` where item_code = %s''', (val.name), as_list=1)
+		purchases = destructure_tuple_of_tuples(data)
+		
 		items.append({"title": val.name, "total_request":len(requests), 
 			"total_purchase": len(purchases), "href":"#Form/Item/" + val.name,  
 			"avg_price": avg_price, "modified": val.modified})
