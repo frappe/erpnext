@@ -7,11 +7,11 @@ frappe.ui.form.on('Sales Partner', {
 
 		if(frm.doc.__islocal){
 			hide_field(['address_html', 'contact_html', 'address_contacts']);
-			frappe.contacts.clear_address_and_contact(frm);
+			frappe.geo.clear_address_and_contact(frm);
 		}
 		else{
 			unhide_field(['address_html', 'contact_html', 'address_contacts']);
-			frappe.contacts.render_address_and_contact(frm);
+			frappe.geo.render_address_and_contact(frm);
 		}
 	}
 });
