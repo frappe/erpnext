@@ -31,6 +31,8 @@ def get_data(item_code=None, warehouse=None, item_group=None,
 		tabBin b, tabItem i
 	where
 		b.item_code = i.name
+		and
+		(b.projected_qty != 0 or b.reserved_qty != 0 or b.reserved_qty_for_production != 0 or b.actual_qty != 0)
 		{conditions}
 	order by
 		{sort_by} {sort_order}
