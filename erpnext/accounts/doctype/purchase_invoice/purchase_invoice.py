@@ -185,7 +185,7 @@ class PurchaseInvoice(BuyingController):
 					not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")):
 
 				if self.update_stock:
-					item.expense_account = warehouse_account[item.warehouse]["name"]
+					item.expense_account = warehouse_account[item.warehouse]["account"]
 				else:
 					item.expense_account = stock_not_billed_account
 

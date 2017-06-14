@@ -519,20 +519,19 @@ def fix_total_debit_credit():
 
 def get_stock_and_account_difference(account_list=None, posting_date=None):
 	from erpnext.stock.utils import get_stock_value_on
+	from erpnext.controllers.stock_controller import get_warehouse_account
 
 	if not posting_date: posting_date = nowdate()
 
 	difference = {}
+	warehouse_account = get_warehouse_account()
 
-	account_warehouse = dict(frappe.db.sql("""select name, warehouse from tabAccount
-		where account_type = 'Stock' and (warehouse is not null and warehouse != '') and is_group=0
-		and name in (%s)""" % ', '.join(['%s']*len(account_list)), account_list))
-
-	for account, warehouse in account_warehouse.items():
-		account_balance = get_balance_on(account, posting_date, in_account_currency=False)
-		stock_value = get_stock_value_on(warehouse, posting_date)
-		if abs(flt(stock_value) - flt(account_balance)) > 0.005:
-			difference.setdefault(account, flt(stock_value) - flt(account_balance))
+	for warehouse, account_data in warehouse_account.items():
+		if account_data.get('account') in account_list:
+			account_balance = get_balance_on(account_data.get('account'), posting_date, in_account_currency=False)
+			stock_value = get_stock_value_on(warehouse, posting_date)
+			if abs(flt(stock_value) - flt(account_balance)) > 0.005:
+				difference.setdefault(account, flt(stock_value) - flt(account_balance))
 
 	return difference
 
