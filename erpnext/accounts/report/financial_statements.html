@@ -13,7 +13,7 @@
 		height: 37px;
 	}
 </style>
-{% var letterhead= filters.letter_head || frappe.get_doc(":Company", filters.company).default_letter_head || frappe.defaults.get_default("letter_head"); %}
+{% var letterhead= filters.letter_head || (frappe.get_doc(":Company", filters.company) && frappe.get_doc(":Company", filters.company).default_letter_head) || frappe.defaults.get_default("letter_head"); %}
 {% if(letterhead) { %} 
 <div style="margin-bottom: 7px;" class="text-center">
 	{%= frappe.boot.letter_heads[letterhead].header %}
