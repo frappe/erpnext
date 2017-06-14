@@ -58,7 +58,7 @@
 						{%= format_currency(data[i]["Invoiced Amount"], data[i]["currency"] ) %}</td>
 					<td style="text-align: right">
 						{%= format_currency(data[i]["Paid Amount"], data[i]["currency"]) %}</td>
-					<td style="text-align: right">{% report.report_name === "Accounts Receivable" ? format_currency(data[i][__("Credit Note Amt")], data[i]["currency"])  : format_currency(data[i][__("Debit Note Amt")], data[i]["currency"])  %} </td>
+					<td style="text-align: right">{%= report.report_name === "Accounts Receivable" ? format_currency(data[i]["Credit Note"], data[i]["currency"])  : format_currency(data[i]["Debit Note"], data[i]["currency"])  %} </td>
 					<td style="text-align: right">
 						{%= format_currency(data[i]["Outstanding Amount"], data[i]["currency"]) %}</td>
 				{% } %}
