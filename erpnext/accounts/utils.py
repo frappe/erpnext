@@ -216,7 +216,8 @@ def get_count_on(account, fieldname, date):
 			else:
 				dr_or_cr = "debit" if fieldname == "invoiced_amount" else "credit"
 				cr_or_dr = "credit" if fieldname == "invoiced_amount" else "debit"
-				select_fields = "ifnull(sum(credit-debit),0)" if fieldname == "invoiced_amount" else "ifnull(sum(debit-credit),0)"
+				select_fields = "ifnull(sum(credit-debit),0)" \
+					if fieldname == "invoiced_amount" else "ifnull(sum(debit-credit),0)"
 
 				if ((not gle.against_voucher) or (gle.against_voucher_type in ["Sales Order", "Purchase Order"]) or
 				(gle.against_voucher==gle.voucher_no and gle.get(dr_or_cr) > 0)):
@@ -224,8 +225,10 @@ def get_count_on(account, fieldname, date):
 						SELECT {0}
 						FROM `tabGL Entry` gle
 						WHERE docstatus < 2 and posting_date <= %(date)s and against_voucher = %(voucher_no)s
-						and party = %(party)s and name != %(name)s""".format(select_fields),
-						{"date": date, "voucher_no": gle.voucher_no, "party": gle.party, "name": gle.name})[0][0]
+						and party = %(party)s and name != %(name)s"""
+						.format(select_fields),
+						{"date": date, "voucher_no": gle.voucher_no, 
+							"party": gle.party, "name": gle.name})[0][0]
 
 					outstanding_amount = flt(gle.get(dr_or_cr)) - flt(gle.get(cr_or_dr)) - payment_amount
 					currency_precision = get_currency_precision() or 2
@@ -519,20 +522,19 @@ def fix_total_debit_credit():
 
 def get_stock_and_account_difference(account_list=None, posting_date=None):
 	from erpnext.stock.utils import get_stock_value_on
+	from erpnext.stock import get_warehouse_account_map
 
 	if not posting_date: posting_date = nowdate()
 
 	difference = {}
+	warehouse_account = get_warehouse_account_map()
 
-	account_warehouse = dict(frappe.db.sql("""select name, warehouse from tabAccount
-		where account_type = 'Stock' and (warehouse is not null and warehouse != '') and is_group=0
-		and name in (%s)""" % ', '.join(['%s']*len(account_list)), account_list))
-
-	for account, warehouse in account_warehouse.items():
-		account_balance = get_balance_on(account, posting_date, in_account_currency=False)
-		stock_value = get_stock_value_on(warehouse, posting_date)
-		if abs(flt(stock_value) - flt(account_balance)) > 0.005:
-			difference.setdefault(account, flt(stock_value) - flt(account_balance))
+	for warehouse, account_data in warehouse_account.items():
+		if account_data.get('account') in account_list:
+			account_balance = get_balance_on(account_data.get('account'), posting_date, in_account_currency=False)
+			stock_value = get_stock_value_on(warehouse, posting_date)
+			if abs(flt(stock_value) - flt(account_balance)) > 0.005:
+				difference.setdefault(account, flt(stock_value) - flt(account_balance))
 
 	return difference
 

@@ -166,8 +166,6 @@ class PaymentEntry(AccountsController):
 		if self.paid_from and not self.source_exchange_rate:
 			if self.paid_from_account_currency == self.company_currency:
 				self.source_exchange_rate = 1
-			elif self.payment_type in ("Pay", "Internal Transfer"):
-				self.source_exchange_rate = get_average_exchange_rate(self.paid_from)
 			else:
 				self.source_exchange_rate = get_exchange_rate(self.paid_from_account_currency, 
 					self.company_currency, self.posting_date)

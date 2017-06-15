@@ -19,8 +19,19 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, SerialNoWa
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation \
 	import create_stock_reconciliation, set_valuation_method
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order, create_dn_against_so
+from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
 
 class TestDeliveryNote(unittest.TestCase):
+	def tearDown(self):
+		target_warehouse = "_Test Warehouse 1 - _TC"
+		company = "_Test Company"
+		if not frappe.db.exists("Account", target_warehouse):
+			parent_account = frappe.db.get_value('Account', 
+				{'company': company, 'is_group':1, 'account_type': 'Stock'},'name')
+			account = create_account(account_name="_Test Warehouse 1", \
+				account_type="Stock", parent_account= parent_account, company=company)
+			frappe.db.set_value('Warehouse', target_warehouse, 'account', account)
+
 	def test_over_billing_against_dn(self):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
@@ -63,7 +74,7 @@ class TestDeliveryNote(unittest.TestCase):
 
 		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
 
-		stock_in_hand_account = frappe.db.get_value("Account", {"warehouse": "_Test Warehouse - _TC"})
+		stock_in_hand_account = get_inventory_account('_Test Company')
 		prev_bal = get_balance_on(stock_in_hand_account)
 
 		dn = create_delivery_note()
@@ -113,7 +124,7 @@ class TestDeliveryNote(unittest.TestCase):
 		make_stock_entry(item_code="_Test Item Home Desktop 100",
 			target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 
-		stock_in_hand_account = frappe.db.get_value("Account", {"warehouse": "_Test Warehouse - _TC"})
+		stock_in_hand_account = get_inventory_account('_Test Company')
 		prev_bal = get_balance_on(stock_in_hand_account)
 
 		dn = create_delivery_note(item_code="_Test Product Bundle Item")
@@ -212,9 +223,10 @@ class TestDeliveryNote(unittest.TestCase):
 			["incoming_rate", "stock_value_difference"])
 
 		self.assertEquals(flt(incoming_rate, 3), abs(flt(outgoing_rate, 3)))
+		stock_in_hand_account = get_inventory_account('_Test Company', dn1.items[0].warehouse)
 
 		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Delivery Note",
-			"voucher_no": dn1.name, "account": "_Test Warehouse - _TC"}, "debit")
+			"voucher_no": dn1.name, "account": stock_in_hand_account}, "debit")
 
 		self.assertEquals(gle_warehouse_amount, stock_value_difference)
 
@@ -250,10 +262,11 @@ class TestDeliveryNote(unittest.TestCase):
 			["incoming_rate", "stock_value_difference"])
 
 		self.assertEquals(flt(incoming_rate, 3), abs(flt(outgoing_rate, 3)))
+		stock_in_hand_account = get_inventory_account('_Test Company', dn1.items[0].warehouse)
 
 		# Check gl entry for warehouse
 		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Delivery Note",
-			"voucher_no": dn1.name, "account": "_Test Warehouse - _TC"}, "debit")
+			"voucher_no": dn1.name, "account": stock_in_hand_account}, "debit")
 
 		self.assertEquals(gle_warehouse_amount, stock_value_difference)
 
@@ -282,10 +295,11 @@ class TestDeliveryNote(unittest.TestCase):
 			["incoming_rate", "stock_value_difference"])
 
 		self.assertEquals(incoming_rate, 100)
+		stock_in_hand_account = get_inventory_account('_Test Company', dn1.items[0].warehouse)
 
 		# Check gl entry for warehouse
 		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Delivery Note",
-			"voucher_no": dn1.name, "account": "_Test Warehouse - _TC"}, "debit")
+			"voucher_no": dn1.name, "account": stock_in_hand_account}, "debit")
 
 		self.assertEquals(gle_warehouse_amount, 1400)
 
@@ -339,7 +353,6 @@ class TestDeliveryNote(unittest.TestCase):
 				target=warehouse, qty=100, rate=100)
 
 		opening_qty_test_warehouse_1 = get_qty_after_transaction(warehouse="_Test Warehouse 1 - _TC")
-
 		dn = create_delivery_note(item_code="_Test Product Bundle Item",
 			qty=5, rate=500, target_warehouse="_Test Warehouse 1 - _TC", do_not_submit=True)
 
@@ -390,7 +403,7 @@ class TestDeliveryNote(unittest.TestCase):
 			and warehouse='_Test Warehouse - _TC'""", dn.name)[0][0])
 
 		expected_values = {
-			"_Test Warehouse - _TC": [0.0, stock_value_difference],
+			"Stock In Hand - _TC": [0.0, stock_value_difference],
 			"_Test Warehouse 1 - _TC": [stock_value_difference, 0.0]
 		}
 		for i, gle in enumerate(gl_entries):

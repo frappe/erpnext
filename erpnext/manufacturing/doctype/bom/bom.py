@@ -142,8 +142,6 @@ class BOM(WebsiteGenerator):
 
 		if arg.get('scrap_items'):
 			rate = self.get_valuation_rate(arg)
-		elif arg['bom_no']:
-			rate = self.get_bom_unitcost(arg['bom_no'])
 		elif arg:
 			if self.rm_cost_as_per == 'Valuation Rate':
 				rate = self.get_valuation_rate(arg)
@@ -154,6 +152,9 @@ class BOM(WebsiteGenerator):
 					frappe.throw(_("Please select Price List"))
 				rate = frappe.db.get_value("Item Price", {"price_list": self.buying_price_list,
 					"item_code": arg["item_code"]}, "price_list_rate") or 0
+
+		if not rate and arg['bom_no']:
+			rate = self.get_bom_unitcost(arg['bom_no'])
 
 		return rate
 
