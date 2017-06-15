@@ -43,6 +43,7 @@ frappe.ui.form.on("Program Enrollment", {
 				callback: function(r) {
 					if(r.message) {
 						frm.set_value("fees" ,r.message);
+						frm.events.get_courses(frm);
 					}
 				}
 			});
@@ -54,23 +55,15 @@ frappe.ui.form.on("Program Enrollment", {
 	},
 
 	get_courses: function(frm) {
-		if (frm.doc.program) {
-			frm.set_value("courses",[]);
-			frappe.call({
-				method: "get_courses",
-				doc:frm.doc,
-				callback: function(r) {
-					if(r.message) {
-						frm.set_value("courses", r.message);
-					}
-					else {
-						frappe.msgprint(__("There is no mandatory course for the program {0}",[frm.doc.program]));
-					}
+		frm.set_value("courses",[]);
+		frappe.call({
+			method: "get_courses",
+			doc:frm.doc,
+			callback: function(r) {
+				if(r.message) {
+					frm.set_value("courses", r.message);
 				}
-			})
-		}
-		else {
-			frappe.throw(__("Select the Program to fetch mandatory courses."))
-		}
+			}
+		})
 	}
 });

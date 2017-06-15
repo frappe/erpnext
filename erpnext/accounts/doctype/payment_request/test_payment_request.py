@@ -87,8 +87,8 @@ class TestPaymentRequest(unittest.TestCase):
 		
 		expected_gle = dict((d[0], d) for d in [
 			["_Test Receivable USD - _TC", 0, 5000, si_usd.name],
-			[pr.payment_account, 6000.0, 0, None],
-			["_Test Exchange Gain/Loss - _TC", 0, 1000, None]
+			[pr.payment_account, 6290.0, 0, None],
+			["_Test Exchange Gain/Loss - _TC", 0, 1290, None]
 		])
 		
 		gl_entries = frappe.db.sql("""select account, debit, credit, against_voucher

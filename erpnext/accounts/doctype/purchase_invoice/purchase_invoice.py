@@ -11,7 +11,7 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billed_amount_based_on_po
-from erpnext.controllers.stock_controller import get_warehouse_account
+from erpnext.stock import get_warehouse_account_map
 from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entries, delete_gl_entries
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.buying.utils import check_for_closed_status
@@ -172,7 +172,7 @@ class PurchaseInvoice(BuyingController):
 		if self.update_stock:
 			self.validate_item_code()
 			self.validate_warehouse()
-			warehouse_account = get_warehouse_account()
+			warehouse_account = get_warehouse_account_map()
 
 		for item in self.get("items"):
 			# in case of auto inventory accounting,
@@ -185,7 +185,7 @@ class PurchaseInvoice(BuyingController):
 					not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")):
 
 				if self.update_stock:
-					item.expense_account = warehouse_account[item.warehouse]["name"]
+					item.expense_account = warehouse_account[item.warehouse]["account"]
 				else:
 					item.expense_account = stock_not_billed_account
 
@@ -377,7 +377,7 @@ class PurchaseInvoice(BuyingController):
 		# item gl entries
 		stock_items = self.get_stock_items()
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
-		warehouse_account = get_warehouse_account()
+		warehouse_account = get_warehouse_account_map()
 
 		for item in self.get("items"):
 			if flt(item.base_net_amount):

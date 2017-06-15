@@ -12,6 +12,7 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_per
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
 from frappe.model.naming import make_autoname
+from erpnext.accounts.doctype.account.test_account import get_inventory_account
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
@@ -41,6 +42,19 @@ class TestSalesInvoice(unittest.TestCase):
 		import time
 		time.sleep(1)
 		self.assertRaises(frappe.TimestampMismatchError, w2.save)
+
+	def test_sales_invoice_change_naming_series(self):
+		si = frappe.copy_doc(test_records[2])
+		si.insert()
+		si.naming_series = 'TEST-'
+
+		self.assertRaises(frappe.CannotChangeConstantError, si.save)
+
+		si = frappe.copy_doc(test_records[1])
+		si.insert()
+		si.naming_series = 'TEST-'
+
+		self.assertRaises(frappe.CannotChangeConstantError, si.save)
 
 	def test_sales_invoice_calculation_base_currency(self):
 		si = frappe.copy_doc(test_records[2])
@@ -582,7 +596,7 @@ class TestSalesInvoice(unittest.TestCase):
 			order by account asc, debit asc""", si.name, as_dict=1)
 		self.assertTrue(gl_entries)
 
-		stock_in_hand = frappe.db.get_value("Account", {"warehouse": "_Test Warehouse - _TC"})
+		stock_in_hand = get_inventory_account('_Test Company')
 
 		expected_gl_entries = sorted([
 			[si.debit_to, 630.0, 0.0],
@@ -837,11 +851,11 @@ class TestSalesInvoice(unittest.TestCase):
 			["incoming_rate", "stock_value_difference"])
 
 		self.assertEquals(flt(incoming_rate, 3), abs(flt(outgoing_rate, 3)))
-
+		stock_in_hand_account = get_inventory_account('_Test Company', si1.items[0].warehouse)
 
 		# Check gl entry
 		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Sales Invoice",
-			"voucher_no": si1.name, "account": "_Test Warehouse - _TC"}, "debit")
+			"voucher_no": si1.name, "account": stock_in_hand_account}, "debit")
 
 		self.assertEquals(gle_warehouse_amount, stock_value_difference)
 

@@ -70,7 +70,7 @@
    "report_hide": 0, 
    "reqd": 1, 
    "search_index": 0, 
-   "set_only_once": 0, 
+   "set_only_once": 1, 
    "unique": 0
   }, 
   {
@@ -1358,7 +1358,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-05-15 18:17:47.812227", 
+ "modified": "2017-06-13 14:29:00.457874", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order", 
