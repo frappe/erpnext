@@ -26,8 +26,9 @@
 	                "Earnest Money": {}
 	            },
 	            "Stock Assets": {
-	                "account_type": "Stock",
-					"is_group": 1
+					"Stock in Hand": {
+		                "account_type": "Stock"							
+					}
 	            },
 	            "Tax Assets": {
 					"is_group": 1

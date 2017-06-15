@@ -6,6 +6,7 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from frappe.utils import cint
 from erpnext import set_perpetual_inventory
 from frappe.test_runner import make_test_records
+from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
 
 import frappe
 import unittest
@@ -33,21 +34,16 @@ class TestWarehouse(unittest.TestCase):
 	def test_warehouse_renaming(self):
 		set_perpetual_inventory(1)
 		create_warehouse("Test Warehouse for Renaming 1")
-
-		self.assertTrue(frappe.db.exists("Account", "Test Warehouse for Renaming 1 - _TC"))
-		self.assertTrue(frappe.db.get_value("Account",
-			filters={"warehouse": "Test Warehouse for Renaming 1 - _TC"}))
+		account = get_inventory_account("_Test Company", "Test Warehouse for Renaming 1 - _TC")
+		self.assertTrue(frappe.db.get_value("Warehouse", filters={"account": account}))
 
 		# Rename with abbr
 		if frappe.db.exists("Warehouse", "Test Warehouse for Renaming 2 - _TC"):
 			frappe.delete_doc("Warehouse", "Test Warehouse for Renaming 2 - _TC")
 		rename_doc("Warehouse", "Test Warehouse for Renaming 1 - _TC", "Test Warehouse for Renaming 2 - _TC")
 
-		self.assertTrue(frappe.db.exists("Account", "Test Warehouse for Renaming 2 - _TC"))
-		self.assertTrue(frappe.db.get_value("Account",
-			filters={"warehouse": "Test Warehouse for Renaming 2 - _TC"}))
-		self.assertFalse(frappe.db.get_value("Account",
-			filters={"warehouse": "Test Warehouse for Renaming 1 - _TC"}))
+		self.assertTrue(frappe.db.get_value("Warehouse",
+			filters={"account": "Test Warehouse for Renaming 1 - _TC"}))
 
 		# Rename without abbr
 		if frappe.db.exists("Warehouse", "Test Warehouse for Renaming 3 - _TC"):
@@ -55,18 +51,13 @@ class TestWarehouse(unittest.TestCase):
 
 		rename_doc("Warehouse", "Test Warehouse for Renaming 2 - _TC", "Test Warehouse for Renaming 3")
 
-		self.assertTrue(frappe.db.exists("Account", "Test Warehouse for Renaming 3 - _TC"))
-		self.assertTrue(frappe.db.get_value("Account",
-			filters={"warehouse": "Test Warehouse for Renaming 3 - _TC"}))
+		self.assertTrue(frappe.db.get_value("Warehouse",
+			filters={"account": "Test Warehouse for Renaming 1 - _TC"}))
 
 		# Another rename with multiple dashes
 		if frappe.db.exists("Warehouse", "Test - Warehouse - Company - _TC"):
 			frappe.delete_doc("Warehouse", "Test - Warehouse - Company - _TC")
 		rename_doc("Warehouse", "Test Warehouse for Renaming 3 - _TC", "Test - Warehouse - Company")
-
-		self.assertTrue(frappe.db.exists("Account", "Test - Warehouse - Company - _TC"))
-		self.assertTrue(frappe.db.get_value("Account", filters={"warehouse": "Test - Warehouse - Company - _TC"}))
-		self.assertFalse(frappe.db.get_value("Account", filters={"warehouse": "Test Warehouse for Renaming 3 - _TC"}))
 
 	def test_warehouse_merging(self):
 		set_perpetual_inventory(1)
@@ -96,10 +87,8 @@ class TestWarehouse(unittest.TestCase):
 
 		self.assertEqual(bin_qty, existing_bin_qty)
 
-		self.assertFalse(frappe.db.exists("Account", "Test Warehouse for Merging 1 - _TC"))
-		self.assertTrue(frappe.db.exists("Account", "Test Warehouse for Merging 2 - _TC"))
-		self.assertTrue(frappe.db.get_value("Account",
-			filters={"warehouse": "Test Warehouse for Merging 2 - _TC"}))
+		self.assertTrue(frappe.db.get_value("Warehouse",
+			filters={"account": "Test Warehouse for Merging 2 - _TC"}))
 
 def create_warehouse(warehouse_name):
 	if not frappe.db.exists("Warehouse", warehouse_name + " - _TC"):
@@ -107,8 +96,13 @@ def create_warehouse(warehouse_name):
 		w.warehouse_name = warehouse_name
 		w.parent_warehouse = "_Test Warehouse Group - _TC"
 		w.company = "_Test Company"
+		make_account_for_warehouse(warehouse_name, w)
+		w.account = warehouse_name + " - _TC"
 		w.save()
 
-	if not frappe.get_value('Account', dict(warehouse=warehouse_name + ' - _TC')):
-		print 'Warehouse {0} not linked'.format(warehouse_name)
-
+def make_account_for_warehouse(warehouse_name, warehouse_obj):
+	if not frappe.db.exists("Account", warehouse_name + " - _TC"):
+		parent_account = frappe.db.get_value('Account', 
+			{'company': warehouse_obj.company, 'is_group':1, 'account_type': 'Stock'},'name')
+		account = create_account(account_name=warehouse_name, \
+				account_type="Stock", parent_account= parent_account, company=warehouse_obj.company)

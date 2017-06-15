@@ -88,7 +88,6 @@
                         "Items Delivered to Customs on temprary Base": {}
                     }, 
                     "Stock in Hand": {
-						"is_group": 1,
                         "account_type": "Stock"
                     }
                 }, 

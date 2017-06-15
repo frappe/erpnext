@@ -12,6 +12,7 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_per
 	test_records as pr_test_records
 from erpnext.exceptions import InvalidCurrency
 from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
+from erpnext.accounts.doctype.account.test_account import get_inventory_account
 
 test_dependencies = ["Item", "Cost Center"]
 test_ignore = ["Serial No"]
@@ -357,10 +358,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 			order by account asc""", pi.name, as_dict=1)
 
 		self.assertTrue(gl_entries)
+		stock_in_hand_account = get_inventory_account(pi.company, pi.get("items")[0].warehouse)
 
 		expected_gl_entries = dict((d[0], d) for d in [
 			[pi.credit_to, 0.0, 250.0],
-			[pi.items[0].warehouse, 250.0, 0.0]
+			[stock_in_hand_account, 250.0, 0.0]
 		])
 
 		for i, gle in enumerate(gl_entries):
@@ -377,12 +379,13 @@ class TestPurchaseInvoice(unittest.TestCase):
 				sum(credit) as credit, debit_in_account_currency, credit_in_account_currency
 			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
 			group by account, voucher_no order by account asc;""", pi.name, as_dict=1)
-
+		
+		stock_in_hand_account = get_inventory_account(pi.company, pi.get("items")[0].warehouse)
 		self.assertTrue(gl_entries)
 
 		expected_gl_entries = dict((d[0], d) for d in [
 			[pi.credit_to, 250.0, 250.0],
-			[pi.items[0].warehouse, 250.0, 0.0],
+			[stock_in_hand_account, 250.0, 0.0],
 			["Cash - _TC", 0.0, 250.0]
 		])
 

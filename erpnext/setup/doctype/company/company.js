@@ -15,7 +15,7 @@ frappe.ui.form.on("Company", {
 
 		frm.toggle_display('address_html', !frm.doc.__islocal);
 		if(!frm.doc.__islocal) {
-			frappe.geo.render_address_and_contact(frm);
+			frappe.contacts.render_address_and_contact(frm);
 
 			frm.toggle_enable("default_currency", (frm.doc.__onload &&
 				!frm.doc.__onload.transactions_exist));
@@ -148,6 +148,7 @@ erpnext.company.setup_queries = function(frm) {
 			{"root_type": "Asset", "account_type": "Accumulated Depreciation"}],
 		["depreciation_expense_account", {"root_type": "Expense", "account_type": "Depreciation"}],
 		["disposal_account", {"report_type": "Profit and Loss"}],
+		["default_inventory_account", {"account_type": "Stock"}],
 		["cost_center", {}],
 		["round_off_cost_center", {}],
 		["depreciation_cost_center", {}]

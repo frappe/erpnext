@@ -9,6 +9,7 @@ from frappe.utils import flt
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
 	import set_perpetual_inventory, get_gl_entries, test_records as pr_test_records, make_purchase_receipt
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.accounts.doctype.account.test_account import get_inventory_account
 
 class TestLandedCostVoucher(unittest.TestCase):
 	def test_landed_cost_voucher(self):
@@ -46,16 +47,23 @@ class TestLandedCostVoucher(unittest.TestCase):
 
 		self.assertTrue(gl_entries)
 
-		stock_in_hand_account = pr.get("items")[0].warehouse
-		fixed_asset_account = pr.get("items")[1].warehouse
+		stock_in_hand_account = get_inventory_account(pr.company, pr.get("items")[0].warehouse)
+		fixed_asset_account = get_inventory_account(pr.company, pr.get("items")[1].warehouse)  
 
-
-		expected_values = {
-			stock_in_hand_account: [400.0, 0.0],
-			fixed_asset_account: [400.0, 0.0],
-			"Stock Received But Not Billed - _TC": [0.0, 500.0],
-			"Expenses Included In Valuation - _TC": [0.0, 300.0]
-		}
+		if stock_in_hand_account == fixed_asset_account:
+			expected_values = {
+				stock_in_hand_account: [800.0, 0.0],
+				"Stock Received But Not Billed - _TC": [0.0, 500.0],
+				"Expenses Included In Valuation - _TC": [0.0, 300.0]
+			}
+			
+		else:
+			expected_values = {
+				stock_in_hand_account: [400.0, 0.0],
+				fixed_asset_account: [400.0, 0.0],
+				"Stock Received But Not Billed - _TC": [0.0, 500.0],
+				"Expenses Included In Valuation - _TC": [0.0, 300.0]
+			}
 
 		for gle in gl_entries:
 			self.assertEquals(expected_values[gle.account][0], gle.debit)
@@ -99,9 +107,10 @@ class TestLandedCostVoucher(unittest.TestCase):
 		gl_entries = get_gl_entries("Purchase Invoice", pi.name)
 
 		self.assertTrue(gl_entries)
+		stock_in_hand_account = get_inventory_account(pi.company, pi.get("items")[0].warehouse)
 
 		expected_values = {
-			pi.get("items")[0].warehouse: [300.0, 0.0],
+			stock_in_hand_account: [300.0, 0.0],
 			"Creditors - _TC": [0.0, 250.0],
 			"Expenses Included In Valuation - _TC": [0.0, 50.0]
 		}

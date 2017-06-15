@@ -40,8 +40,9 @@
                     "Rental Deposits": {}
                 }, 
                 "Stock Assets": {
-					"is_group": 1,
-                    "account_type": "Stock"
+                    "Stock in Hand": {
+                        "account_type": "Stock"
+                    }
                 }, 
                 "Tax Assets": {
                     "GST-Input": {}

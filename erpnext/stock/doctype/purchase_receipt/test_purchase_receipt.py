@@ -9,6 +9,7 @@ import frappe.defaults
 from frappe.utils import cint, flt, cstr, today
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext import set_perpetual_inventory
+from erpnext.accounts.doctype.account.test_account import get_inventory_account
 
 class TestPurchaseReceipt(unittest.TestCase):
 	def setUp(self):
@@ -59,17 +60,22 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		self.assertTrue(gl_entries)
 
-		stock_in_hand_account = frappe.db.get_value("Account",
-			{"warehouse": pr.get("items")[0].warehouse})
-		fixed_asset_account = frappe.db.get_value("Account",
-			{"warehouse": pr.get("items")[1].warehouse})
+		stock_in_hand_account = get_inventory_account(pr.company, pr.get("items")[0].warehouse)
+		fixed_asset_account = get_inventory_account(pr.company, pr.get("items")[1].warehouse)
 
-		expected_values = {
-			stock_in_hand_account: [375.0, 0.0],
-			fixed_asset_account: [375.0, 0.0],
-			"Stock Received But Not Billed - _TC": [0.0, 500.0],
-			"Expenses Included In Valuation - _TC": [0.0, 250.0]
-		}
+		if stock_in_hand_account == fixed_asset_account:
+			expected_values = {
+				stock_in_hand_account: [750.0, 0.0],
+				"Stock Received But Not Billed - _TC": [0.0, 500.0],
+				"Expenses Included In Valuation - _TC": [0.0, 250.0]
+			}
+		else:
+			expected_values = {
+				stock_in_hand_account: [375.0, 0.0],
+				fixed_asset_account: [375.0, 0.0],
+				"Stock Received But Not Billed - _TC": [0.0, 500.0],
+				"Expenses Included In Valuation - _TC": [0.0, 250.0]
+			}
 
 		for gle in gl_entries:
 			self.assertEquals(expected_values[gle.account][0], gle.debit)
@@ -141,9 +147,10 @@ class TestPurchaseReceipt(unittest.TestCase):
 		gl_entries = get_gl_entries("Purchase Receipt", return_pr.name)
 
 		self.assertTrue(gl_entries)
+		stock_in_hand_account = get_inventory_account(return_pr.company)
 
 		expected_values = {
-			"_Test Warehouse - _TC": [0.0, 100.0],
+			stock_in_hand_account: [0.0, 100.0],
 			"Stock Received But Not Billed - _TC": [100.0, 0.0],
 		}
 

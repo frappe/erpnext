@@ -74,7 +74,7 @@ class TestCompany(unittest.TestCase):
 							"company": template,
 							"account_type": account_type
 						}
-						if account_type in ["Bank", "Cash", "Stock"]:
+						if account_type in ["Bank", "Cash"]:
 							filters["is_group"] = 1
 
 						self.assertTrue(frappe.get_all("Account", filters))

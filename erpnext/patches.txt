@@ -8,7 +8,7 @@ erpnext.patches.v4_0.apply_user_permissions
 erpnext.patches.v4_0.move_warehouse_user_to_restrictions
 erpnext.patches.v4_0.global_defaults_to_system_settings
 erpnext.patches.v4_0.update_incharge_name_to_sales_person_in_maintenance_schedule
-execute:frappe.reload_doc('stock', 'doctype', 'warehouse')
+execute:frappe.reload_doc('stock', 'doctype', 'warehouse') # 2017-04-24
 execute:frappe.reload_doc('accounts', 'doctype', 'sales_invoice') # 2016-08-31
 execute:frappe.reload_doc('selling', 'doctype', 'sales_order') # 2014-01-29
 execute:frappe.reload_doc('selling', 'doctype', 'quotation') # 2014-01-29
@@ -401,3 +401,4 @@ erpnext.patches.v8_0.delete_schools_depricated_doctypes
 erpnext.patches.v8_0.update_customer_pos_id
 erpnext.patches.v8_0.rename_items_in_status_field_of_material_request
 erpnext.patches.v8_0.delete_bin_indexes
+erpnext.patches.v8_0.move_account_head_from_account_to_warehouse_for_inventory
