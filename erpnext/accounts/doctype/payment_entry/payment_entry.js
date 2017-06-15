@@ -78,6 +78,20 @@ frappe.ui.form.on('Payment Entry', {
 				filters: { "name": ["in", doctypes] }
 			};
 		});
+
+		frm.set_query("reference_name", "references", function(doc, cdt, cdn) {
+			child = locals[cdt][cdn];
+			filters = {"docstatus": 1, "company": doc.company};
+			party_type_doctypes = ['Sales Invoice', 'Sales Order', 'Purchase Invoice', 'Purchase Order'];
+
+			if (in_list(party_type_doctypes, child.reference_doctype)) {
+				filters[doc.party_type.toLowerCase()] = doc.party;
+			}
+
+			return {
+				filters: filters
+			};
+		});
 	},
 
 	refresh: function(frm) {

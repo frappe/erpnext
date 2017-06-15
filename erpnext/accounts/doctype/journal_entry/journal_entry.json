@@ -135,7 +135,7 @@
    "report_hide": 0, 
    "reqd": 1, 
    "search_index": 0, 
-   "set_only_once": 0, 
+   "set_only_once": 1, 
    "unique": 0
   }, 
   {
@@ -1382,7 +1382,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2017-06-07 18:13:25.808427", 
+ "modified": "2017-06-13 14:29:09.794076", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Entry", 

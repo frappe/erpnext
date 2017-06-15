@@ -55,12 +55,12 @@
 					<td></td>
 					<td><b>{%= __("Total") %}</b></td>
 					<td style="text-align: right">
-						{%= format_currency(data[i]["Invoiced Amount"]) %}</td>
+						{%= format_currency(data[i]["Invoiced Amount"], data[i]["currency"] ) %}</td>
 					<td style="text-align: right">
-						{%= format_currency(data[i]["Paid Amount"]) %}</td>
-					<td style="text-align: right">{% report.report_name === "Accounts Receivable" ? format_currency(data[i][__("Credit Note Amt")])  : format_currency(data[i][__("Debit Note Amt")])  %} </td>
+						{%= format_currency(data[i]["Paid Amount"], data[i]["currency"]) %}</td>
+					<td style="text-align: right">{%= report.report_name === "Accounts Receivable" ? format_currency(data[i]["Credit Note"], data[i]["currency"])  : format_currency(data[i]["Debit Note"], data[i]["currency"])  %} </td>
 					<td style="text-align: right">
-						{%= format_currency(data[i]["Outstanding Amount"]) %}</td>
+						{%= format_currency(data[i]["Outstanding Amount"], data[i]["currency"]) %}</td>
 				{% } %}
 			{% } else { %}
 				{% if(data[i][__("Customer")] || data[i][__("Supplier")]|| "&nbsp;") { %}
@@ -70,10 +70,10 @@
 					{% } else { %}
 						<td><b>{%= __("Total") %}</b></td>
 					{% } %}
-					<td style="text-align: right">{%= format_currency(data[i][__("Total Invoiced Amt")]) %}</td>
-					<td style="text-align: right">{%= format_currency(data[i][__("Total Paid Amt")]) %}</td>
-					<td style="text-align: right">{%= report.report_name === "Accounts Receivable Summary" ? format_currency(data[i][__("Credit Note Amt")]) : format_currency(data[i][__("Debit Note Amt")]) %}</td>
-					<td style="text-align: right">{%= format_currency(data[i][__("Total Outstanding Amt")]) %}</td>
+					<td style="text-align: right">{%= format_currency(data[i][__("Total Invoiced Amt")], data[i]["currency"]) %}</td>
+					<td style="text-align: right">{%= format_currency(data[i][__("Total Paid Amt")], data[i]["currency"]) %}</td>
+					<td style="text-align: right">{%= report.report_name === "Accounts Receivable Summary" ? format_currency(data[i][__("Credit Note Amt")], data[i]["currency"]) : format_currency(data[i][__("Debit Note Amt")], data[i]["currency"]) %}</td>
+					<td style="text-align: right">{%= format_currency(data[i][__("Total Outstanding Amt")], data[i]["currency"]) %}</td>
 				{% } %}
 			{% } %}
 			</tr>
