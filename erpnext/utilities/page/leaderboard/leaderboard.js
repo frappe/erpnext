@@ -141,21 +141,21 @@ frappe.Leaderboard = Class.extend({
 			`<div class="list-headers">
 				<div class="list-item list-item--head" data-list-renderer="${"List"}">
 					${
-			me.options.selected_filter
-				.map(filter => {
-					const col = me.map_field(filter.field)
-					return (
-						`<div class="leaderboard-item list-item__content ellipsis text-muted list-item__content--flex-2
-											header-btn-base ${(col !== "Title" && col !== "Modified") ? "hidden-xs" : ""}
-											${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}">
-											<span class="list-col-title ellipsis">
-												${col}
-												<i class="${"icon-" + filter.field} fa ${filter.value === "ASC" ? "fa-chevron-up" : "fa-chevron-down"}"
-													style="${col === "Title" ? "display:none;" : ""}"></i>
-											</span>
-									</div>`)
-				}).join("")
-			}
+					me.options.selected_filter
+						.map(filter => {
+							const col = me.map_field(filter.field)
+							return (
+								`<div class="leaderboard-item list-item__content ellipsis text-muted list-item__content--flex-2
+									header-btn-base ${(col !== "Title" && col !== "Modified") ? "hidden-xs" : ""}
+									${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}">
+									<span class="list-col-title ellipsis">
+										${col}
+										<i class="${"icon-" + filter.field} fa ${filter.value === "ASC" ? "fa-chevron-up" : "fa-chevron-down"}"
+											style="${col === "Title" ? "display:none;" : ""}"></i>
+									</span>
+								</div>`)
+						}).join("")
+					}
 				</div>
 			</div>`;
 
@@ -208,25 +208,21 @@ frappe.Leaderboard = Class.extend({
 					if (col === "Modified") {
 						val = comment_when(val)
 					}
-
 					return (
 						`<div class="list-item__content ellipsis list-item__content--flex-2
-									${(col !== "Title" && col !== "Modified") ? "hidden-xs" : ""}
-									${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}">
-									
-									${
-						col === 'Title' ?
-							`<a class="list-col-title ellipsis item-title-bold"
-												href="${item['href']}">
-												${val}
-											</a>` :
-							`<span class="list-col-title ellipsis">
-												${val}
-											</span>`
-						}
-								</div>`)
-				}).join("")
-			}
+							${(col !== "Title" && col !== "Modified") ? "hidden-xs" : ""}
+							${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}">
+							${
+								col === 'Title'	?
+									`<a class="list-col-title ellipsis item-title-bold"
+										href="${item['href']}">
+										${val}
+									</a>` :
+									`<span class="list-col-title ellipsis"> ${val}</span>`
+							}
+						</div>`)
+					}).join("")
+				}
 			</div>`;
 
 		return html;
