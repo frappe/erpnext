@@ -90,7 +90,7 @@ def get_avg(items):
 
 # get data
 def get_all_customers(doctype, filters, items, start=0, limit=100):
-	"""return all customers based on seleted doctype"""
+	"""return all customers"""
 
 	x = frappe.get_list(doctype, fields=["name", "modified"], filters=filters, limit_start=start, limit_page_length=limit)
 	
@@ -113,16 +113,14 @@ def get_all_customers(doctype, filters, items, start=0, limit=100):
 		return items 
 
 def get_all_items(doctype, filters, items, start=0, limit=100):
-	"""return all items based on seleted doctype"""
+	"""return all items"""
 
 	x = frappe.get_list(doctype, fields=["name", "modified"], filters=filters, limit_start=start, limit_page_length=limit)
 	for val in x:
 		data = frappe.db.sql('''select item_code from `tabMaterial Request Item` where item_code = %s''', (val.name), as_list=1)
 		requests = destructure_tuple_of_tuples(data)
-		
 		data = frappe.db.sql('''select price_list_rate from `tabItem Price` where item_code = %s''', (val.name), as_list=1)
 		avg_price = get_avg(destructure_tuple_of_tuples(data))
-		
 		data = frappe.db.sql('''select item_code from `tabPurchase Invoice Item` where item_code = %s''', (val.name), as_list=1)
 		purchases = destructure_tuple_of_tuples(data)
 		
@@ -135,7 +133,7 @@ def get_all_items(doctype, filters, items, start=0, limit=100):
 		return items
 
 def get_all_suppliers(doctype, filters, items, start=0, limit=100):
-	"""return all items based on seleted doctype"""
+	"""return all suppliers"""
 
 	x = frappe.get_list(doctype, fields=["name", "modified"], filters=filters, limit_start=start, limit_page_length=limit)
 	
@@ -151,7 +149,7 @@ def get_all_suppliers(doctype, filters, items, start=0, limit=100):
 		return items
 
 def get_all_sales_partner(doctype, filters, items, start=0, limit=100):
-	"""return all items based on seleted doctype"""
+	"""return all sales partner"""
 	
 	x = frappe.get_list(doctype, fields=["name", "commission_rate", "modified"], filters=filters, limit_start=start, limit_page_length=limit)
 	for val in x:
