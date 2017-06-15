@@ -6,6 +6,8 @@ import frappe
 
 def execute():
 	frappe.reload_doc('manufacturing', 'doctype', 'bom_item')
+	frappe.reload_doc('manufacturing', 'doctype', 'bom_explosion_item')
+	frappe.reload_doc('manufacturing', 'doctype', 'bom_scrap_item')
 	frappe.db.sql("update `tabBOM Item` set stock_qty = qty, uom = stock_uom")
 	frappe.db.sql("update `tabBOM Explosion Item` set stock_qty = qty")
 	frappe.db.sql("update `tabBOM Scrap Item` set stock_qty = qty")
