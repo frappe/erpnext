@@ -8,34 +8,15 @@ frappe.Leaderboard = Class.extend({
 			single_column: true
 		});
 
-
-
 		//const list of doctypes
 		this.doctypes = ["Customer", "Item", "Supplier", "Sales Partner"];
 		this.timelines = ["Week", "Month", "Quarter", "Year"];
-
+		this.desc_fields = ["total_amount", "total_request", "annual_billing", "commission_rate"];
 		this.filters = {
-			"Customer": [{ field: "title", value: "ASC" },
-			{ field: "total_amount", value: "DESC" },
-			{ field: "total_item_purchased", value: "ASC" },
-			{ field: "modified", value: "ASC" }],
-
-			"Item": [{ field: "title", value: "ASC" },
-			{ field: "total_request", value: "DESC" },
-			{ field: "total_purchase", value: "ASC" },
-			{ field: "avg_price", value: "ASC" },
-			{ field: "modified", value: "ASC" }],
-
-			"Supplier": [{ field: "title", value: "ASC" },
-			{ field: "annual_billing", value: "DESC" },
-			{ field: "total_unpaid", value: "ASC" },
-			{ field: "modified", value: "ASC" }],
-
-			"Sales Partner": [{ field: "title", value: "ASC" },
-			{ field: "commission_rate", value: "DESC" },
-			{ field: "target_qty", value: "ASC" },
-			{ field: "target_amount", value: "ASC" },
-			{ field: "modified", value: "ASC" }],
+			"Customer": this.map_array(["title", "total_amount", "total_item_purchased", "modified"]),
+			"Item": this.map_array(["title", "total_request", "total_purchase", "avg_price", "modified"]),
+			"Supplier": this.map_array(["title", "annual_billing", "total_unpaid", "modified"]),
+			"Sales Partner": this.map_array(["title", "commission_rate", "target_qty", "target_amount", "modified"]),
 		}
 
 		// for saving current selected filters
@@ -50,6 +31,8 @@ frappe.Leaderboard = Class.extend({
 		this.message = null;
 		this.make();
 	},
+
+
 
 	make: function () {
 		var me = this;
@@ -101,21 +84,21 @@ frappe.Leaderboard = Class.extend({
 		if (res && res.message) {
 			me.message = null;
 			$leaderboard.find(".leaderboard").html(me.render_list_view(res.message));
-			
+
 			//event to change arrow
 			$leaderboard.find('.leaderboard-item')
-				.click(function(){
+				.click(function () {
 					const field = this.innerText.trim().toLowerCase().replace(new RegExp(' ', 'g'), '_');
-					if(field && field != "title"){
-						const _selected_filter_item = me.options.selected_filter.filter(i=> i.field === field)
-						if(_selected_filter_item.length > 0){
+					if (field && field != "title") {
+						const _selected_filter_item = me.options.selected_filter.filter(i => i.field === field)
+						if (_selected_filter_item.length > 0) {
 							me.options.selected_filter_item = _selected_filter_item[0]
-							me.options.selected_filter_item.value = _selected_filter_item[0].value === "ASC" ? "DESC" : "ASC" 
-							
+							me.options.selected_filter_item.value = _selected_filter_item[0].value === "ASC" ? "DESC" : "ASC"
+
 							const new_class_name = `icon-${me.options.selected_filter_item.field} fa fa-chevron-${me.options.selected_filter_item.value === "ASC" ? "up" : "down"}`
 							$leaderboard.find(`.icon-${me.options.selected_filter_item.field}`)
 								.attr("class", new_class_name)
-							
+
 							//now make request to web
 							me.make_request($leaderboard);
 						}
@@ -158,11 +141,11 @@ frappe.Leaderboard = Class.extend({
 			`<div class="list-headers">
 				<div class="list-item list-item--head" data-list-renderer="${"List"}">
 					${
-						me.options.selected_filter
-							.map(filter => {
-								const col = me.map_field(filter.field)
-								return (
-									`<div class="leaderboard-item list-item__content ellipsis text-muted list-item__content--flex-2
+			me.options.selected_filter
+				.map(filter => {
+					const col = me.map_field(filter.field)
+					return (
+						`<div class="leaderboard-item list-item__content ellipsis text-muted list-item__content--flex-2
 											header-btn-base ${(col !== "Title" && col !== "Modified") ? "hidden-xs" : ""}
 											${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}">
 											<span class="list-col-title ellipsis">
@@ -171,8 +154,8 @@ frappe.Leaderboard = Class.extend({
 													style="${col === "Title" ? "display:none;" : ""}"></i>
 											</span>
 									</div>`)
-						}).join("")
-					}
+				}).join("")
+			}
 				</div>
 			</div>`;
 
@@ -218,39 +201,50 @@ frappe.Leaderboard = Class.extend({
 		const html =
 			`<div class="list-item">
 				${
-					me.options.selected_filter
-						.map(filter => {
-							const col = me.map_field(filter.field)
-							let val = item[filter.field]
-							if (col === "Modified") {
-								val = comment_when(val)
-							}
+			me.options.selected_filter
+				.map(filter => {
+					const col = me.map_field(filter.field)
+					let val = item[filter.field]
+					if (col === "Modified") {
+						val = comment_when(val)
+					}
 
-							return (
-								`<div class="list-item__content ellipsis list-item__content--flex-2
+					return (
+						`<div class="list-item__content ellipsis list-item__content--flex-2
 									${(col !== "Title" && col !== "Modified") ? "hidden-xs" : ""}
 									${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}">
 									
 									${
-										col === 'Title' ? 
-											`<a class="list-col-title ellipsis item-title-bold"
+						col === 'Title' ?
+							`<a class="list-col-title ellipsis item-title-bold"
 												href="${item['href']}">
 												${val}
-											</a>` : 
-											`<span class="list-col-title ellipsis">
+											</a>` :
+							`<span class="list-col-title ellipsis">
 												${val}
 											</span>`
-									}
+						}
 								</div>`)
-						}).join("")
-				}
+				}).join("")
+			}
 			</div>`;
 
 		return html;
 	},
 
-	map_field: function(field){
+	map_field: function (field) {
 		return field.replace(new RegExp('_', 'g'), ' ').replace(/(^|\s)[a-z]/g, f => f.toUpperCase())
+	},
+
+	map_array: function (_array) {
+		var me = this;
+		return _array.map((str) => {
+			let value = me.desc_fields.indexOf(str) > -1 ? 'DESC' : 'ASC'
+			return {
+				field: str,
+				value: value
+			}
+		});
 	}
 })
 
