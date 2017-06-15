@@ -400,3 +400,4 @@ erpnext.patches.v8_0.delete_schools_depricated_doctypes
 erpnext.patches.v8_0.update_customer_pos_id
 erpnext.patches.v8_0.rename_items_in_status_field_of_material_request
 erpnext.patches.v8_0.delete_bin_indexes
+erpnext.patches.v8_0.change_in_words_varchar_length
