@@ -113,7 +113,7 @@ class BOM(WebsiteGenerator):
 		item = self.get_item_det(args['item_code'])
 		self.validate_rm_item(item)
 
-		args['bom_no'] = args['bom_no'] or item and cstr(item[0]['default_bom']) or ''
+		args['bom_no'] = item and cstr(item[0]['default_bom']) or ''
 		args.update(item[0])
 
 		rate = self.get_rm_rate(args)
