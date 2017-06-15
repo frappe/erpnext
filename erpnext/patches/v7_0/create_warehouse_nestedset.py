@@ -90,8 +90,7 @@ def create_default_warehouse_group(company=None, stock_account_group=None, ignor
 		"warehouse_name": _("All Warehouses"),
 		"is_group": 1,
 		"company": company.name if company else "",
-		"parent_warehouse": "",
-		"create_account_under": stock_account_group
+		"parent_warehouse": ""
 	})
 
 	if ignore_mandatory:

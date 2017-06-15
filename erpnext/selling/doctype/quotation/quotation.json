@@ -102,7 +102,7 @@
    "report_hide": 0, 
    "reqd": 1, 
    "search_index": 0, 
-   "set_only_once": 0, 
+   "set_only_once": 1, 
    "unique": 0
   }, 
   {
@@ -2542,7 +2542,7 @@
  "istable": 0, 
  "max_attachments": 1, 
  "menu_index": 0, 
- "modified": "2017-05-15 13:05:39.469590", 
+ "modified": "2017-06-13 14:29:18.553722", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation", 

@@ -13,9 +13,13 @@ def execute(filters=None):
 		msgprint(_("Please select date"), raise_exception=1)
 	
 	columns = get_columns(filters)
+	date = filters.get("date")
 
-	absent_students = get_absent_students(filters.get("date"))
-	leave_applicants = get_leave_applications(filters.get("date"))
+	absent_students = get_absent_students(date)
+	leave_applicants = get_leave_applications(date)
+	if absent_students:
+		student_list = [d["student"] for d in absent_students]
+		transportation_details = get_transportation_details(date, student_list)
 
 	data = []
 	for student in absent_students:
@@ -32,6 +36,8 @@ def execute(filters=None):
 				row+=[stud_details.student_mobile_number]
 			else:
 				row+= [""]
+			if transportation_details.get(student.student):
+				row += transportation_details.get(student.student)
 				
 			data.append(row)
 	
@@ -44,6 +50,8 @@ def get_columns(filters):
 		_("Student Group") + "::180",
 		_("Student Email Address") + "::180",
 		_("Student Mobile No.") + "::150",
+		_("Mode of Transportation") + "::150",
+		_("Vehicle/Bus Number") + "::150",
 	]
 	return columns
 
@@ -58,3 +66,19 @@ def get_leave_applications(date):
 	where docstatus = 1 and from_date <= %s and to_date >= %s""", (date, date)):
 		leave_applicants.append(student[0])
 	return leave_applicants
+
+def get_transportation_details(date, student_list):
+	academic_year = frappe.get_all("Academic Year", filters=[["year_start_date", "<=", date],["year_end_date", ">=", date]])
+	if academic_year:
+		academic_year = academic_year[0].name
+	elif frappe.defaults.get_defaults().academic_year:
+		academic_year = frappe.defaults.get_defaults().academic_year
+	else:
+		return {}
+
+	transportation_details = frappe.get_all("Program Enrollment", fields=["student", "mode_of_transportation", "vehicle_no"],
+		filters={"student": ("in", student_list), "academic_year": academic_year, "docstatus": ("not in", ["2"])})
+	transportation_map = {}
+	for d in transportation_details:
+		transportation_map[d.student] = [d.mode_of_transportation, d.vehicle_no]
+	return transportation_map

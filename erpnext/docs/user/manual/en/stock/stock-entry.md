@@ -23,7 +23,7 @@ Warehouse” or both (if you are recording a movement).
 
 **Additional Costs:**
 
-If the stock entry is an incoming entry i.e any item is receiving at a target warehouse, you can add related additional costs (like Shipping Charges, Customs Duty, Operating Costs etc) assotiated with the process. The additional costs will be considered to calculate valuation rate of the items.
+If the stock entry is an incoming entry i.e any item is receiving at a target warehouse, you can add related additional costs (like Shipping Charges, Customs Duty, Operating Costs etc) associated with the process. The additional costs will be considered to calculate valuation rate of the items.
 
 To add additional costs, enter the description and amount of the cost in the Additional Costs table.
 

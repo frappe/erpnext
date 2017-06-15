@@ -78,6 +78,20 @@ frappe.ui.form.on('Payment Entry', {
 				filters: { "name": ["in", doctypes] }
 			};
 		});
+
+		frm.set_query("reference_name", "references", function(doc, cdt, cdn) {
+			child = locals[cdt][cdn];
+			filters = {"docstatus": 1, "company": doc.company};
+			party_type_doctypes = ['Sales Invoice', 'Sales Order', 'Purchase Invoice', 'Purchase Order'];
+
+			if (in_list(party_type_doctypes, child.reference_doctype)) {
+				filters[doc.party_type.toLowerCase()] = doc.party;
+			}
+
+			return {
+				filters: filters
+			};
+		});
 	},
 
 	refresh: function(frm) {
@@ -318,10 +332,12 @@ frappe.ui.form.on('Payment Entry', {
 			frm.set_value("source_exchange_rate", 1);
 		} else if (frm.doc.paid_from){
 			if (in_list(["Internal Transfer", "Pay"], frm.doc.payment_type)) {
+				var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 				frappe.call({
-					method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_average_exchange_rate",
+					method: "erpnext.setup.utils.get_exchange_rate",
 					args: {
-						account: frm.doc.paid_from
+						from_currency: frm.doc.paid_from_account_currency,
+						to_currency: company_currency
 					},
 					callback: function(r, rt) {
 						frm.set_value("source_exchange_rate", r.message);
