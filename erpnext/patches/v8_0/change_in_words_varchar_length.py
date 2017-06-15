@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	doctypes = frappe.db.sql_list(""""select parent from tabDocField where fieldname = 'in_words'""")
+	doctypes = frappe.db.sql_list("""select parent from tabDocField where fieldname = 'in_words'""")
 		
 	for dt in doctypes:
 		for fieldname in ("in_words", "base_in_words"):
