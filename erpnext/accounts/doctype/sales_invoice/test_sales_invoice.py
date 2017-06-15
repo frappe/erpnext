@@ -42,6 +42,19 @@ class TestSalesInvoice(unittest.TestCase):
 		time.sleep(1)
 		self.assertRaises(frappe.TimestampMismatchError, w2.save)
 
+	def test_sales_invoice_change_naming_series(self):
+		si = frappe.copy_doc(test_records[2])
+		si.insert()
+		si.naming_series = 'TEST-'
+
+		self.assertRaises(frappe.CannotChangeConstantError, si.save)
+
+		si = frappe.copy_doc(test_records[1])
+		si.insert()
+		si.naming_series = 'TEST-'
+
+		self.assertRaises(frappe.CannotChangeConstantError, si.save)
+
 	def test_sales_invoice_calculation_base_currency(self):
 		si = frappe.copy_doc(test_records[2])
 		si.insert()
