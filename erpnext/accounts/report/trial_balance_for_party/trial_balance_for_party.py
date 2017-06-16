@@ -19,7 +19,7 @@ def execute(filters=None):
 	return columns, data
 	
 def get_data(filters, show_party_name):
-	party_name_field = "customer_name" if filters.get("party_type")=="Customer" else "supplier_name"
+	party_name_field = "customer_name" if filters.get("party_type")=="Customer" else "supplier_name" if filters.get("party_type")=="Supplier" else "Employee"
 	party_filters = {"name": filters.get("party")} if filters.get("party") else {}
 	parties = frappe.get_all(filters.get("party_type"), fields = ["name", party_name_field], 
 		filters = party_filters, order_by="name")
