@@ -134,7 +134,6 @@ frappe.Leaderboard = Class.extend({
 
 	render_list_header: function () {
 		var me = this;
-
 		const _selected_filter = me.options.selected_filter.map(i => me.map_field(i.field)).slice(1);
 
 		const html =
@@ -158,7 +157,6 @@ frappe.Leaderboard = Class.extend({
 					}
 				</div>
 			</div>`;
-
 		return html;
 	},
 
@@ -206,7 +204,7 @@ frappe.Leaderboard = Class.extend({
 					const col = me.map_field(filter.field)
 					let val = item[filter.field]
 					if (col === "Modified") {
-						val = comment_when(val)
+						val = comment_when(val);
 					}
 					return (
 						`<div class="list-item__content ellipsis list-item__content--flex-2
@@ -214,11 +212,11 @@ frappe.Leaderboard = Class.extend({
 							${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}">
 							${
 								col === 'Title'	?
-									`<a class="list-col-title ellipsis item-title-bold"
+									`<a class="grey list-id ellipsis"
 										href="${item['href']}">
 										${val}
 									</a>` :
-									`<span class="list-col-title ellipsis"> ${val}</span>`
+									`<span class="text-muted ellipsis"> ${val}</span>`
 							}
 						</div>`)
 					}).join("")
