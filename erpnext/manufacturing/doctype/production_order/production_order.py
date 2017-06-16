@@ -140,10 +140,12 @@ class ProductionOrder(Document):
 					group by purpose""", self.name))
 
 				status = "Not Started"
+				op_allowance = flt(frappe.db.get_single_value("Manufacturing Settings", "over_production_allowance_percentage"))/100
+				total_qty_allowed = self.qty + (op_allowance * self.qty)
 				if stock_entries:
 					status = "In Process"
 					produced_qty = stock_entries.get("Manufacture")
-					if flt(produced_qty) == flt(self.qty):
+					if flt(produced_qty) == flt(self.qty) or (op_allowance != 0 and flt(produced_qty) < total_qty_allowed):
 						status = "Completed"
 		else:
 			status = 'Cancelled'
@@ -154,15 +156,18 @@ class ProductionOrder(Document):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Production Order
 			based on Stock Entry"""
 
+		op_allowance = flt(frappe.db.get_single_value("Manufacturing Settings", "over_production_allowance_percentage"))/100
+		total_qty_allowed = self.qty + (op_allowance * self.qty)
+
 		for purpose, fieldname in (("Manufacture", "produced_qty"),
 			("Material Transfer for Manufacture", "material_transferred_for_manufacturing")):
 			qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
 				from `tabStock Entry` where production_order=%s and docstatus=1
 				and purpose=%s""", (self.name, purpose))[0][0])
 
-			if qty > self.qty:
+			if qty > total_qty_allowed:
 				frappe.throw(_("{0} ({1}) cannot be greater than planned quanitity ({2}) in Production Order {3}").format(\
-					self.meta.get_label(fieldname), qty, self.qty, self.name), StockOverProductionError)
+					self.meta.get_label(fieldname), qty, total_qty_allowed, self.name), StockOverProductionError)
 
 			self.db_set(fieldname, qty)
 
