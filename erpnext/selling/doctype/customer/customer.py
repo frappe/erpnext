@@ -9,8 +9,8 @@ import frappe.defaults
 from frappe.utils import flt, cint, cstr
 from frappe.desk.reportview import build_match_conditions
 from erpnext.utilities.transaction_base import TransactionBase
-from frappe.geo.address_and_contact import load_address_and_contact, delete_contact_and_address
-from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
+from erpnext.accounts.party import validate_party_accounts, get_dashboard_info # keep this
+from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
 
 class Customer(TransactionBase):
 	def get_feed(self):
@@ -88,11 +88,18 @@ class Customer(TransactionBase):
 					address.append('links', dict(link_doctype='Customer', link_name=self.name))
 					address.save()
 
-			lead = frappe.db.get_value("Lead", self.lead_name, ["lead_name", "email_id", "phone", "mobile_no"], as_dict=True)
+			lead = frappe.db.get_value("Lead", self.lead_name, ["lead_name", "email_id", "phone", "mobile_no", "gender", "salutation"], as_dict=True)
+
+			lead.lead_name = lead.lead_name.split(" ")
+			lead.first_name = lead.lead_name[0]
+			lead.last_name = " ".join(lead.lead_name[1:])
 
 			# create contact from lead
 			contact = frappe.new_doc('Contact')
-			contact.first_name = lead.lead_name
+			contact.first_name = lead.first_name
+			contact.last_name = lead.last_name
+			contact.gender = lead.gender
+			contact.salutation = lead.salutation
 			contact.email_id = lead.email_id
 			contact.phone = lead.phone
 			contact.mobile_no = lead.mobile_no

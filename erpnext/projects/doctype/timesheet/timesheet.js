@@ -13,7 +13,7 @@ frappe.ui.form.on("Timesheet", {
 		}
 
 		frm.fields_dict['time_logs'].grid.get_field('task').get_query = function(frm, cdt, cdn) {
-			child = locals[cdt][cdn];
+			var child = locals[cdt][cdn];
 			return{
 				filters: {
 					'project': child.project,
@@ -109,7 +109,7 @@ frappe.ui.form.on("Timesheet Detail", {
 	},
 
 	activity_type: function(frm, cdt, cdn) {
-		child = locals[cdt][cdn];
+		var child = locals[cdt][cdn];
 		frappe.call({
 			method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
 			args: {
@@ -127,7 +127,7 @@ frappe.ui.form.on("Timesheet Detail", {
 	}
 });
 
-calculate_end_time = function(frm, cdt, cdn){
+var calculate_end_time = function(frm, cdt, cdn) {
 	var child = locals[cdt][cdn];
 
 	var d = moment(child.from_time);
@@ -142,8 +142,9 @@ calculate_end_time = function(frm, cdt, cdn){
 }
 
 var calculate_billing_costing_amount = function(frm, cdt, cdn){
-	child = locals[cdt][cdn]
-	billing_amount = costing_amount = 0.0;
+	var child = locals[cdt][cdn]
+	var billing_amount = 0.0;
+	var costing_amount = 0.0;
 
 	if(child.billing_hours && child.billable){
 		billing_amount = (child.billing_hours * child.billing_rate);
@@ -157,10 +158,10 @@ var calculate_billing_costing_amount = function(frm, cdt, cdn){
 
 var calculate_time_and_amount = function(frm) {
 	var tl = frm.doc.time_logs || [];
-	total_working_hr = 0;
-	total_billing_hr = 0;
-	total_billable_amount = 0;
-	total_costing_amount = 0;
+	var total_working_hr = 0;
+	var total_billing_hr = 0;
+	var total_billable_amount = 0;
+	var total_costing_amount = 0;
 	for(var i=0; i<tl.length; i++) {
 		if (tl[i].hours) {
 			total_working_hr += tl[i].hours;

@@ -13,7 +13,6 @@ window.get_product_list = function() {
 	$.ajax({
 		method: "GET",
 		url: "/",
-		dataType: "json",
 		data: {
 			cmd: "erpnext.templates.pages.product_search.get_product_list",
 			start: window.start,

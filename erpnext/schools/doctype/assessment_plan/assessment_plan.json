@@ -3,7 +3,7 @@
  "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 0, 
- "autoname": "field:assessment_name", 
+ "autoname": "ASP.#####", 
  "beta": 0, 
  "creation": "2015-11-12 16:34:34.658092", 
  "custom": 0, 
@@ -38,7 +38,7 @@
    "read_only": 0, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
-   "reqd": 1, 
+   "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -633,7 +633,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2017-05-02 12:54:11.991616", 
+ "modified": "2017-06-05 23:40:30.434741", 
  "modified_by": "Administrator", 
  "module": "Schools", 
  "name": "Assessment Plan", 
@@ -667,6 +667,7 @@
  "show_name_in_global_search": 0, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
+ "title_field": "assessment_name", 
  "track_changes": 0, 
  "track_seen": 0
 }

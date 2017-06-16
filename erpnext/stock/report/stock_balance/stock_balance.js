@@ -9,7 +9,7 @@ frappe.query_reports["Stock Balance"] = {
 			"fieldtype": "Date",
 			"width": "80",
 			"reqd": 1,
-			"default": sys_defaults.year_start_date,
+			"default": frappe.sys_defaults.year_start_date,
 		},
 		{
 			"fieldname":"to_date",

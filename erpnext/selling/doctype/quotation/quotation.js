@@ -94,7 +94,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 	validate_company_and_party: function(party_field) {
 		if(!this.frm.doc.quotation_to) {
-			msgprint(__("Please select a value for {0} quotation_to {1}", [this.frm.doc.doctype, this.frm.doc.name]));
+			frappe.msgprint(__("Please select a value for {0} quotation_to {1}", [this.frm.doc.doctype, this.frm.doc.name]));
 			return false;
 		} else if (this.frm.doc.quotation_to == "Lead") {
 			return true;
@@ -149,7 +149,7 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 	});
 
 	dialog.fields_dict.update.$input.click(function() {
-		args = dialog.get_values();
+		var args = dialog.get_values();
 		if(!args) return;
 		return cur_frm.call({
 			method: "declare_order_lost",
@@ -157,7 +157,7 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 			args: args.reason,
 			callback: function(r) {
 				if(r.exc) {
-					msgprint(__("There were errors."));
+					frappe.msgprint(__("There were errors."));
 					return;
 				}
 				dialog.hide();

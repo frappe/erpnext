@@ -129,3 +129,5 @@ def on_doctype_update():
 		frappe.db.commit()
 		frappe.db.sql("""alter table `tabStock Ledger Entry`
 			add index posting_sort_index(posting_date, posting_time, name)""")
+
+	frappe.db.add_index("Stock Ledger Entry", ["voucher_no", "voucher_type"])

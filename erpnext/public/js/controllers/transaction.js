@@ -98,11 +98,18 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 			frm.cscript.calculate_taxes_and_totals();
 		});
+
+		var me = this;
+		if(this.frm.fields_dict["items"].grid.get_field('batch_no')) {
+			this.frm.set_query("batch_no", "items", function(doc, cdt, cdn) {
+				return me.set_query_for_batch(doc, cdt, cdn)
+			});
+		}
 	},
 	onload: function() {
 		var me = this;
 		if(this.frm.doc.__islocal) {
-			var today = get_today(),
+			var today = frappe.datetime.get_today(),
 				currency = frappe.defaults.get_user_default("currency");
 
 			$.each({
@@ -195,10 +202,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		if(this.frm.doc.__islocal && !(this.frm.doc.taxes || []).length
 			&& !(this.frm.doc.__onload ? this.frm.doc.__onload.load_after_mapping : false)) {
-				this.apply_default_taxes();
+			this.apply_default_taxes();
 		} else if(this.frm.doc.__islocal && this.frm.doc.company && this.frm.doc["items"]
 			&& !this.frm.doc.is_pos) {
-				me.calculate_taxes_and_totals();
+			me.calculate_taxes_and_totals();
 		}
 		if(frappe.meta.get_docfield(this.frm.doc.doctype + " Item", "item_code")) {
 			this.setup_item_selector();
@@ -243,7 +250,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	send_sms: function() {
-		var sms_man = new SMSManager(this.frm.doc);
+		var sms_man = new erpnext.SMSManager(this.frm.doc);
 	},
 
 	barcode: function(doc, cdt, cdn) {
@@ -281,8 +288,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							currency: me.frm.doc.currency,
 							update_stock: in_list(['Sales Invoice', 'Purchase Invoice'], me.frm.doc.doctype) ? cint(me.frm.doc.update_stock) : 0,
 							conversion_rate: me.frm.doc.conversion_rate,
-							price_list: me.frm.doc.selling_price_list ||
-								 me.frm.doc.buying_price_list,
+							price_list: me.frm.doc.selling_price_list || me.frm.doc.buying_price_list,
 							price_list_currency: me.frm.doc.price_list_currency,
 							plc_conversion_rate: me.frm.doc.plc_conversion_rate,
 							company: me.frm.doc.company,
@@ -423,10 +429,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		if (frappe.meta.get_docfield(this.frm.doctype, "shipping_address") &&
 			in_list(['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'], this.frm.doctype)){
-				erpnext.utils.get_shipping_address(this.frm, function(){
-					set_party_account(set_pricing);
-				})
-		}else{
+			erpnext.utils.get_shipping_address(this.frm, function(){
+				set_party_account(set_pricing);
+			})
+		} else {
 			set_party_account(set_pricing);
 		}
 
@@ -505,7 +511,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 		if(this.frm.doc.currency === this.frm.doc.price_list_currency &&
 			this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
-				this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
+			this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
 		}
 
 		if(flt(this.frm.doc.conversion_rate)>0.0) {
@@ -555,7 +561,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		} else if(this.frm.doc.price_list_currency === this.frm.doc.currency
 			&& this.frm.doc.plc_conversion_rate && cint(this.frm.doc.plc_conversion_rate) != 1 &&
 			cint(this.frm.doc.plc_conversion_rate) != cint(this.frm.doc.conversion_rate)) {
-				this.frm.set_value("conversion_rate", this.frm.doc.plc_conversion_rate);
+			this.frm.set_value("conversion_rate", this.frm.doc.plc_conversion_rate);
 		}
 
 		if(!this.in_apply_price_list) {
@@ -979,12 +985,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var valid = true;
 
 		$.each(["company", "customer"], function(i, fieldname) {
-			if(frappe.meta.has_field(me.frm.doc.doctype, fieldname && me.frm.doc.doctype != "Purchase Order")) {
+			if(frappe.meta.has_field(me.frm.doc.doctype, fieldname) && me.frm.doc.doctype != "Purchase Order") {
 				if (!me.frm.doc[fieldname]) {
-					msgprint(__("Please specify") + ": " +
+					frappe.msgprint(__("Please specify") + ": " +
 						frappe.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) +
 						". " + __("It is needed to fetch Item Details."));
-						valid = false;
+					valid = false;
 				}
 			}
 		});
@@ -1076,7 +1082,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	set_gross_profit: function(item) {
 		if (this.frm.doc.doctype == "Sales Order" && item.valuation_rate) {
-			rate = flt(item.rate) * flt(this.frm.doc.conversion_rate || 1);
+			var rate = flt(item.rate) * flt(this.frm.doc.conversion_rate || 1);
 			item.gross_profit = flt(((rate - item.valuation_rate) * item.stock_qty), precision("amount", item));
 		}
 	},
@@ -1085,9 +1091,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		// TODO: remove item selector
 
 		return;
-		if(!this.item_selector) {
-			this.item_selector = new erpnext.ItemSelector({frm: this.frm});
-		}
+		// if(!this.item_selector) {
+		// 	this.item_selector = new erpnext.ItemSelector({frm: this.frm});
+		// }
 	},
 
 	get_advances: function() {
@@ -1118,7 +1124,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	get_method_for_payment: function(){
-		method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry"
+		var method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry"
 		if(cur_frm.doc.__onload && cur_frm.doc.__onload.make_payment_via_journal_entry){
 			if(in_list(['Sales Invoice', 'Purchase Invoice'],  cur_frm.doc.doctype)){
 				method = "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_invoice"
@@ -1128,5 +1134,33 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		return method
+	},
+
+	set_query_for_batch: function(doc, cdt, cdn) {
+		// Show item's batches in the dropdown of batch no
+
+		var me = this;
+		var item = frappe.get_doc(cdt, cdn);
+
+		if(!item.item_code) {
+			frappe.throw(__("Please enter Item Code to get batch no"));
+		} else if (doc.doctype == "Purchase Receipt" || 
+			(doc.doctype == "Purchase Invoice" && doc.update_stock)) {
+
+			return {
+				filters: {'item': item.item_code}
+			}
+		} else {
+			filters = {
+				'item_code': item.item_code,
+				'posting_date': me.frm.doc.posting_date || frappe.datetime.nowdate(),
+			}
+			if(item.warehouse) filters["warehouse"] = item.warehouse
+
+			return {
+				query : "erpnext.controllers.queries.get_batch_no",
+				filters: filters
+			}
+		}
 	},
 });

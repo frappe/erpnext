@@ -8,7 +8,7 @@ frappe.query_reports["Absent Student Report"] = {
 			"fieldname":"date",
 			"label": __("Date"),
 			"fieldtype": "Date",
-			"default": get_today(),
+			"default": frappe.datetime.get_today(),
 			"reqd": 1
 		}
 	]

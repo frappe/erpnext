@@ -16,5 +16,3 @@ Sie können Ihre Lieferanten aus einem breiten Angebot verfügbarer Typen in ERP
 Wenn Sie Ihre Lieferanten in verschiedene Typen unterteilen, erleichtert Ihnen das die Buchhaltung und die Rechnungslegung.
 
 Geben Sie Ihre neue Lieferantenkategorie ein und speichern Sie.
-
-{next}

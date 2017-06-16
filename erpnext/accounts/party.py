@@ -9,8 +9,8 @@ from frappe import _, msgprint, scrub
 from frappe.defaults import get_user_permissions
 from frappe.utils import add_days, getdate, formatdate, get_first_day, date_diff, \
 	add_years, get_timestamp, nowdate, flt
-from frappe.geo.doctype.address.address import get_address_display, get_default_address
-from frappe.email.doctype.contact.contact import get_contact_details, get_default_contact
+from frappe.contacts.doctype.address.address import get_address_display, get_default_address
+from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
 from erpnext.exceptions import PartyFrozen, InvalidCurrency, PartyDisabled, InvalidAccountCurrency
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext import get_default_currency

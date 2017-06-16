@@ -6,7 +6,17 @@ cur_frm.add_fetch("examiner", "instructor_name", "examiner_name");
 cur_frm.add_fetch("supervisor", "instructor_name", "supervisor_name");
 
 frappe.ui.form.on("Assessment Plan", {
-        refresh: function(frm) {
+    onload: function(frm) {
+        frm.set_query("assessment_group", function(doc, cdt, cdn) {
+            return{
+                filters: {
+                    'is_group': 0
+                }
+            }
+        });
+    },
+
+    refresh: function(frm) {
         if (frm.doc.docstatus == 1) {
             frm.add_custom_button(__("Assessment Result"), function() {
                 frappe.route_options = {
@@ -18,30 +28,30 @@ frappe.ui.form.on("Assessment Plan", {
         }
     },
 
-    course: function(frm) {
-        if (frm.doc.course && frm.doc.maximum_assessment_score) {
-            frappe.call({
-                method: "erpnext.schools.api.get_assessment_criteria",
-                args: {
-                    course: frm.doc.course
-                },
-                callback: function(r) {
-                    if (r.message) {
-                        frm.doc.assessment_criteria = [];
-                        $.each(r.message, function(i, d) {
-                            var row = frappe.model.add_child(frm.doc, "Assessment Plan Criteria", "assessment_criteria");
-                            row.assessment_criteria = d.assessment_criteria;
-                            row.maximum_score = d.weightage / 100 * frm.doc.maximum_assessment_score;
-                        });
-                    }
-                    refresh_field("assessment_criteria");
+	course: function(frm) {
+		if (frm.doc.course && frm.doc.maximum_assessment_score) {
+			frappe.call({
+				method: "erpnext.schools.api.get_assessment_criteria",
+				args: {
+					course: frm.doc.course
+				},
+				callback: function(r) {
+					if (r.message) {
+						frm.doc.assessment_criteria = [];
+						$.each(r.message, function(i, d) {
+							var row = frappe.model.add_child(frm.doc, "Assessment Plan Criteria", "assessment_criteria");
+							row.assessment_criteria = d.assessment_criteria;
+							row.maximum_score = d.weightage / 100 * frm.doc.maximum_assessment_score;
+						});
+					}
+					refresh_field("assessment_criteria");
 
-                }
-            });
-        }
-    },
+				}
+			});
+		}
+	},
 
-    maximum_assessment_score: function(frm) {
-        frm.trigger("course");
-    }
+	maximum_assessment_score: function(frm) {
+		frm.trigger("course");
+	}
 });

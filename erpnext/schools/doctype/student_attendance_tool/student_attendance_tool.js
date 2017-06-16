@@ -3,6 +3,16 @@
 frappe.provide("schools")
 
 frappe.ui.form.on('Student Attendance Tool', {
+	onload: function(frm) {
+		frm.set_query("student_group", function() {
+			return {
+				"filters": {
+					"group_based_on": frm.doc.group_based_on
+				}
+			};
+		});
+	},
+
 	refresh: function(frm) {
 		if (frappe.route_options) {
 			frm.set_value("based_on", frappe.route_options.based_on);
@@ -97,17 +107,6 @@ schools.StudentsEditor = Class.extend({
 					}
 				});
 			});
-
-		var get_present_student = function(student) {
-			return students.filter(function(s) {
-				return s.group_roll_number === group_roll_number;
-			})
-		}
-		var get_absent_student = function(group_roll_number) {
-			return students.filter(function(s) {
-				return s.group_roll_number === group_roll_number;
-			})
-		}
 
 		student_toolbar.find(".btn-mark-att")
 			.html(__('Mark Attendence'))

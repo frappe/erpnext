@@ -50,7 +50,7 @@ $.extend(erpnext.queries, {
 			}
 
 			return {
-				query: 'frappe.email.doctype.contact.contact.contact_query',
+				query: 'frappe.contacts.doctype.contact.contact.contact_query',
 				filters: { link_doctype: frappe.dynamic_link.doctype, link_name: doc[frappe.dynamic_link.fieldname] } };
 		}
 	},
@@ -63,14 +63,14 @@ $.extend(erpnext.queries, {
 			}
 
 			return {
-				query: 'frappe.geo.doctype.address.address.address_query',
+				query: 'frappe.contacts.doctype.address.address.address_query',
 				filters: { link_doctype: frappe.dynamic_link.doctype, link_name: doc[frappe.dynamic_link.fieldname] } };
 		}
 	},
 
 	company_address_query: function(doc) {
 		return {
-			query: 'frappe.geo.doctype.address.address.address_query',
+			query: 'frappe.contacts.doctype.address.address.address_query',
 			filters: { is_your_company_address: 1, link_doctype: 'Company', link_name: doc.company || '' }
 		};
 	},

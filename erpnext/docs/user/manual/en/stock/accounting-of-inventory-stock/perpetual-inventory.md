@@ -6,20 +6,27 @@ On receipt of items in a particular warehouse, the balance in the Warehouse Acco
 
 ##Activation
 
-  1. Setup the following default accounts for each Company. These accounts are created automatically in the new ERPNext accounts.
-
-    * Stock Received But Not Billed
-    * Stock Adjustment Account
-    * Expenses Included In Valuation
-    * Cost Center
-	
-  2. Ensure each Warehouse is an Account in the Chart of Accounts master. As per the default configuration, Accounts for Warehouse are created under `Assets > Current Asset > Stock Assets > (Warehouse)`
-
-  3. Activate Perpetual Inventory
+  * Activate Perpetual Inventory
 
 	 > Explore > Accounts > Accounts Settings > "Make Accounting Entry For Every Stock Movement"
 
 <img class="screenshot" alt="Perpetual Inventory" src="{{docs_base_url}}/assets/img/accounts/perpetual-1.png">
+
+  * Setup the following default accounts for each Company. These accounts are created automatically in the new ERPNext accounts.
+
+	* Default Inventory Account
+    * Stock Received But Not Billed
+    * Stock Adjustment Account
+    * Expenses Included In Valuation
+    * Cost Center
+
+<img class="screenshot" alt="Perpetual Inventory" src="{{docs_base_url}}/assets/img/accounts/company_default_inventory_account.png">
+
+  * If user wants to set an individual account for each warehouse, create account head for each account under `Assets > Current Asset > Stock Assets > (Warehouse)` and set it on the respective warehouse under field 'Account'.
+
+<img class="screenshot" alt="Perpetual Inventory" src="{{docs_base_url}}/assets/img/accounts/inventory_account.png">
+
+  * For stock transactions, general ledger entries made against the account head set on the warehouse, if user had not set the account for the warhouse then system gets the account head from the parent warehouse. If account had not set for parent warehouse then system gets the account(Default Inventory Account) from the company master.
 
 * * *
 

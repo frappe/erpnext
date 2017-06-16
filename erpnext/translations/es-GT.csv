@@ -4,4 +4,4 @@ apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_re
 apps/erpnext/erpnext/selling/report/customer_credit_balance/customer_credit_balance.py +39,Outstanding Amt,Saldo Pendiente
 DocType: Payment Reconciliation Invoice,Outstanding Amount,Saldo Pendiente
 DocType: Payment Entry Reference,Outstanding,Pendiente
-apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +156,Lead must be set if Opportunity is made from Lead,La Iniciativa se debe establecer si la Oportunidad está hecha desde una Iniciativa
+apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +166,Lead must be set if Opportunity is made from Lead,La Iniciativa se debe establecer si la Oportunidad está hecha desde una Iniciativa

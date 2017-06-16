@@ -57,7 +57,8 @@ class SalesInvoice(SellingController):
 		self.so_dn_required()
 		self.validate_proj_cust()
 		self.validate_with_previous_doc()
-		self.validate_uom_is_integer("stock_uom", "qty")
+		self.validate_uom_is_integer("stock_uom", "stock_qty")
+		self.validate_uom_is_integer("uom", "qty")
 		self.check_close_sales_order("sales_order")
 		self.validate_debit_to_acc()
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
@@ -247,7 +248,6 @@ class SalesInvoice(SellingController):
 				(not self.project and not data.sales_invoice) or \
 				(not sales_invoice and data.sales_invoice == self.name):
 				data.sales_invoice = sales_invoice
-				if self.project: return
 
 	def on_update(self):
 		self.set_paid_amount()
@@ -487,13 +487,14 @@ class SalesInvoice(SellingController):
 			self.set('packed_items', [])
 
 	def set_billing_hours_and_amount(self):
-		for timesheet in self.timesheets:
-			ts_doc = frappe.get_doc('Timesheet', timesheet.time_sheet)
-			if not timesheet.billing_hours and ts_doc.total_billable_hours:
-				timesheet.billing_hours = ts_doc.total_billable_hours
+		if not self.project:
+			for timesheet in self.timesheets:
+				ts_doc = frappe.get_doc('Timesheet', timesheet.time_sheet)
+				if not timesheet.billing_hours and ts_doc.total_billable_hours:
+					timesheet.billing_hours = ts_doc.total_billable_hours
 
-			if not timesheet.billing_amount and ts_doc.total_billable_amount:
-				timesheet.billing_amount = ts_doc.total_billable_amount
+				if not timesheet.billing_amount and ts_doc.total_billable_amount:
+					timesheet.billing_amount = ts_doc.total_billable_amount
 
 	def update_timesheet_billing_for_project(self):
 		if not self.timesheets and self.project:

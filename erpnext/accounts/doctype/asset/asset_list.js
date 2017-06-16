@@ -1,3 +1,3 @@
 frappe.listview_settings['Asset'] = {
-    add_fields: ['image']
+	add_fields: ['image']
 }
