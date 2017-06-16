@@ -231,7 +231,7 @@ class StockReconciliation(StockController):
 			self.expense_account, self.cost_center)
 
 	def validate_expense_account(self):
-		if not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
+		if not cint(frappe.db.get_value("Company", self.company, 'enable_perpetual_inventory')):
 			return
 
 		if not self.expense_account:

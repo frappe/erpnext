@@ -85,6 +85,7 @@ def create_fiscal_year_and_company(args):
 		frappe.get_doc({
 			"doctype":"Company",
 			'company_name':args.get('company_name').strip(),
+			'enable_perpetual_inventory': 1,
 			'abbr':args.get('company_abbr'),
 			'default_currency':args.get('currency'),
 			'country': args.get('country'),
@@ -158,10 +159,6 @@ def set_defaults(args):
 	global_defaults.save()
 
 	frappe.db.set_value("System Settings", None, "email_footer_address", args.get("company"))
-
-	accounts_settings = frappe.get_doc("Accounts Settings")
-	accounts_settings.auto_accounting_for_stock = 1
-	accounts_settings.save()
 
 	stock_settings = frappe.get_doc("Stock Settings")
 	stock_settings.item_naming_by = "Item Code"
