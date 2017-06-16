@@ -21,9 +21,9 @@ def execute():
 	condition = ""
 	company = erpnext.get_default_company()
 	if company:
-		condition = " where name='{0}'".format(company)
+		condition = " and name='{0}'".format(company)
 
-	domains = frappe.db.sql_list("select distinct domain from `tabCompany` {0}".format(condition))
+	domains = frappe.db.sql_list("select distinct domain from `tabCompany` where domain != 'Other' {0}".format(condition))
 
 	if not domains:
 		return
