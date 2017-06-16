@@ -12,4 +12,4 @@ def execute():
 		set 
 			account = (select name from `tabAccount` 
 				where account_type = 'Stock' and 
-				warehouse = `tabWarehouse`.name and is_group = 0)""")
+				warehouse = `tabWarehouse`.name and is_group = 0 limit 1)""")

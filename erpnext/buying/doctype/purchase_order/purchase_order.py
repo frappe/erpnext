@@ -43,7 +43,7 @@ class PurchaseOrder(BuyingController):
 		self.check_for_closed_status()
 
 		self.validate_uom_is_integer("uom", "qty")
-		self.validate_uom_is_integer("stock_uom", ["qty", "required_qty"])
+		self.validate_uom_is_integer("stock_uom", "stock_qty")
 
 		self.validate_with_previous_doc()
 		self.validate_for_subcontracting()

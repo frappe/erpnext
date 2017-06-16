@@ -13,6 +13,13 @@ default_lead_sources = ["Existing Customer", "Reference", "Advertisement",
 
 def install(country=None):
 	records = [
+		# domains
+		{ 'doctype': 'Domain', 'domain': _('Distribution')},
+		{ 'doctype': 'Domain', 'domain': _('Manufacturing')},
+		{ 'doctype': 'Domain', 'domain': _('Retail')},
+		{ 'doctype': 'Domain', 'domain': _('Services')},
+		{ 'doctype': 'Domain', 'domain': _('Education')},
+
 		# address template
 		{'doctype':"Address Template", "country": country},
 
@@ -35,7 +42,7 @@ def install(country=None):
 		{'doctype': 'Salary Component', 'salary_component': _('Basic'), 'description': _('Basic'), 'type': 'Earning'},
 		{'doctype': 'Salary Component', 'salary_component': _('Arrear'), 'description': _('Arrear'), 'type': 'Earning'},
 		{'doctype': 'Salary Component', 'salary_component': _('Leave Encashment'), 'description': _('Leave Encashment'), 'type': 'Earning'},
-		
+
 
 		# expense claim type
 		{'doctype': 'Expense Claim Type', 'name': _('Calls'), 'expense_type': _('Calls')},
@@ -197,7 +204,7 @@ def install(country=None):
 		# Assessment Group
 		{'doctype': 'Assessment Group', 'assessment_group_name': _('All Assessment Groups'),
 			'is_group': 1, 'parent_assessment_group': ''},
-	
+
 	]
 
 	from erpnext.setup.setup_wizard.industry_type import get_industry_types

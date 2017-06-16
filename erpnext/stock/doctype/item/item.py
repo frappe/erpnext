@@ -248,7 +248,7 @@ class Item(WebsiteGenerator):
 		self.set_attribute_context(context)
 		self.set_disabled_attributes(context)
 
-		context.parents = self.get_parents(context)
+		self.get_parents(context)
 
 		return context
 

@@ -198,6 +198,10 @@ def set_defaults(args):
 	hr_settings.emp_created_by = "Naming Series"
 	hr_settings.save()
 
+	domain_settings = frappe.get_doc("Domain Settings")
+	domain_settings.append('active_domains', dict(domain=args.domain))
+	domain_settings.save()
+
 def create_feed_and_todo():
 	"""update Activity feed and create todo for creation of item, customer, vendor"""
 	add_info_comment(**{
