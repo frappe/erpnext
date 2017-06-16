@@ -170,7 +170,6 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
 			this.frm.add_fetch("company", "cost_center", "cost_center");
 		}
-		
 		this.frm.fields_dict["expense_account"].get_query = function() {
 			if(frappe.get_doc(":Company", me.frm.doc.company).enable_perpetual_inventory) {
 				return {

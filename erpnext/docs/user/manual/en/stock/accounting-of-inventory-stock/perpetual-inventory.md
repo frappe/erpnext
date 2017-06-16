@@ -8,7 +8,7 @@ On receipt of items in a particular warehouse, the balance in the Warehouse Acco
 
   * Activate Perpetual Inventory
 
-	 > Explore > Accounts > Accounts Settings > "Make Accounting Entry For Every Stock Movement"
+	 > Setup > Company > Stock Settings > "Enable Perpetual Inventory"
 
 <img class="screenshot" alt="Perpetual Inventory" src="{{docs_base_url}}/assets/img/accounts/perpetual-1.png">
 
