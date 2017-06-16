@@ -559,6 +559,8 @@ class SalesInvoice(SellingController):
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
+		self.auto_accounting_for_stock = self.get_company_default("enable_perpetual_inventory")
+
 		if not self.grand_total:
 			return
 
@@ -580,11 +582,11 @@ class SalesInvoice(SellingController):
 					self.doctype, self.return_against if cint(self.is_return) else self.name)
 
 			if repost_future_gle and cint(self.update_stock) \
-				and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
+				and cint(self.auto_accounting_for_stock):
 					items, warehouses = self.get_items_and_warehouses()
 					update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items)
 		elif self.docstatus == 2 and cint(self.update_stock) \
-			and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
+			and cint(self.auto_accounting_for_stock):
 				from erpnext.accounts.general_ledger import delete_gl_entries
 				delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
@@ -672,7 +674,7 @@ class SalesInvoice(SellingController):
 					)
 
 		# expense account gl entries
-		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")) \
+		if cint(self.auto_accounting_for_stock) \
 				and cint(self.update_stock):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
 

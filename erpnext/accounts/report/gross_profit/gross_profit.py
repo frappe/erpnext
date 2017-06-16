@@ -227,7 +227,7 @@ class GrossProfitGenerator(object):
 				if not average_buying_rate:
 					average_buying_rate = get_valuation_rate(item_code, row.warehouse,
 						row.parenttype, row.parent, allow_zero_rate=True, 
-						currency=self.filters.currency)
+						currency=self.filters.currency, company=self.filters.company)
 
 				self.average_buying_rate[item_code] =  flt(average_buying_rate)
 

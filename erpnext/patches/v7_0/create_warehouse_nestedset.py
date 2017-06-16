@@ -51,7 +51,8 @@ def check_is_warehouse_associated_with_company():
 def make_warehouse_nestedset(company=None):
 	validate_parent_account_for_warehouse(company)
 	stock_account_group = get_stock_account_group(company.name)
-	if not stock_account_group and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
+	enable_perpetual_inventory = cint(frappe.db.get_value("Company", company, 'enable_perpetual_inventory')) or 0
+	if not stock_account_group and enable_perpetual_inventory:
 		return
 
 	if company:
@@ -65,14 +66,14 @@ def make_warehouse_nestedset(company=None):
 		create_default_warehouse_group(company, stock_account_group, ignore_mandatory)
 
 	set_parent_to_warehouse(warehouse_group, company)
-	if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
+	if enable_perpetual_inventory:
 		set_parent_to_warehouse_account(company)
 
 def validate_parent_account_for_warehouse(company=None):
 	if not company:
 		return
 
-	if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
+	if cint(frappe.db.get_value("Company", company, 'enable_perpetual_inventory')):
 		parent_account = frappe.db.sql("""select name from tabAccount
 			where account_type='Stock' and company=%s and is_group=1
 			and (warehouse is null or warehouse = '')""", company.name)
