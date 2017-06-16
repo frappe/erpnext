@@ -7,6 +7,7 @@ import erpnext
 
 def execute():
 	"""Create domain documents"""
+	frappe.reload_doctype("Domain")
 
 	for domain in ("Distribution", "Manufacturing", "Retail", "Services", "Education"):
 		if not frappe.db.exists({'doctype': 'Domain', 'domain': domain}):
