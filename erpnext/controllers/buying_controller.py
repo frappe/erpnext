@@ -79,8 +79,7 @@ class BuyingController(StockController):
 			if tax_for_valuation:
 				for d in tax_for_valuation:
 					d.db_set("category", 'Total')
-				msgprint("Tax Category has been changed to \"Total\" because all Items in the Purchase Order "
-							"are non-stock items")
+				msgprint(_('Tax Category has been changed to "Total" because all the Items are non-stock items'))
 
 	def set_landed_cost_voucher_amount(self):
 		for d in self.get("items"):
