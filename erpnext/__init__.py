@@ -39,6 +39,9 @@ def get_company_currency(company):
 def set_perpetual_inventory(enable=1, company=None):
 	if not company:
 		company = get_default_company()
+	
+	if frappe.flags.in_test:
+		company = "_Test Company"
 
 	company = frappe.get_doc("Company", company)
 	company.enable_perpetual_inventory = enable
