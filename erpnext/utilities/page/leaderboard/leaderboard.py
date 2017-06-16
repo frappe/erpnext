@@ -7,8 +7,9 @@ import os
 import json
 from operator import itemgetter
 import ast
-from frappe.utils import add_to_date
-from erpnext.accounts.party import get_dashboard_info
+from frappe.utils import add_to_date, flt
+from erpnext.accounts.party import get_dashboard_info, get_party_account_currency
+from erpnext.accounts.utils import get_currency_precision
 
 @frappe.whitelist()
 def get_leaderboard(obj):
@@ -39,9 +40,7 @@ def get_leaderboard(obj):
 def filter_leaderboard_items(obj, items):
 	"""return items based on seleted filters"""
 
-	print(obj)
 	reverse = False if obj.selected_filter_item and obj.selected_filter_item["value"] == "ASC" else True
-
 	# key : (x[field1], x[field2]) while sorting on 2 values
 	filtered_list = []
 
@@ -85,6 +84,18 @@ def get_avg(items):
 	if length > 0:
 		return sum(items) / length
 	return 0
+
+def get_amount_in_currency_symbol(doctype, name, value):
+	"""return amount string with currency symbol"""
+	value = flt(value)
+
+	company = frappe.db.get_default("company") or frappe.get_all("Company")[0].name
+	currency = frappe.get_doc("Company", company).default_currency or frappe.boot.sysdefaults.currency;
+
+	currency_symbol = frappe.db.get_value("Currency", currency, "symbol")
+	currency_precision = get_currency_precision() or 2
+	return  currency_symbol + '{:.{pre}f}'.format(value, pre=currency_precision)
+
 #utils end
 
 
@@ -101,7 +112,8 @@ def get_all_customers(doctype, filters, items, start=0, limit=100):
 		if len(invoice_list) > 0:
 			item_count = frappe.db.sql('''select count(name) from `tabSales Invoice Item` where parent in (%s)''' % ", ".join(
 				['%s'] * len(invoice_list)), tuple(invoice_list))
-			items.append({"title": val.name, "total_amount": sum(y.values()), 
+			items.append({"title": val.name, 
+				"total_amount": get_amount_in_currency_symbol(doctype, val.name, sum(y.values())), 
 				"href":"#Form/Customer/" + val.name, 
 				"total_item_purchased": sum(destructure_tuple_of_tuples(item_count)), 
 				"modified": str(val.modified)})
@@ -109,7 +121,6 @@ def get_all_customers(doctype, filters, items, start=0, limit=100):
 		start = start + 1
 		return get_all_customers(doctype, filters, items, start=start)
 	else:
-		print([x["title"] for x in items])
 		return items 
 
 def get_all_items(doctype, filters, items, start=0, limit=100):
@@ -124,9 +135,11 @@ def get_all_items(doctype, filters, items, start=0, limit=100):
 		data = frappe.db.sql('''select item_code from `tabPurchase Invoice Item` where item_code = %s''', (val.name), as_list=1)
 		purchases = destructure_tuple_of_tuples(data)
 		
-		items.append({"title": val.name, "total_request":len(requests), 
-			"total_purchase": len(purchases), "href":"#Form/Item/" + val.name,  
-			"avg_price": avg_price, "modified": val.modified})
+		items.append({"title": val.name,
+			"total_request":len(requests),
+			"total_purchase": len(purchases), "href":"#Form/Item/" + val.name,
+			"avg_price": get_amount_in_currency_symbol('Item Price', val.name, avg_price),
+			"modified": val.modified})
 	if len(x) > 99:
 		return get_all_items(doctype, filters, items, start=start)
 	else:
@@ -139,8 +152,9 @@ def get_all_suppliers(doctype, filters, items, start=0, limit=100):
 	
 	for val in x:
 		info = get_dashboard_info(doctype, val.name)
-		items.append({"title": val.name, "annual_billing": info["billing_this_year"], 
-		"total_unpaid": info["total_unpaid"], 
+		items.append({"title": val.name, 
+		"annual_billing":get_amount_in_currency_symbol(doctype, val.name, info["billing_this_year"]), 
+		"total_unpaid": get_amount_in_currency_symbol(doctype, val.name, info["total_unpaid"]), 
 		"href":"#Form/Supplier/" + val.name, "modified": val.modified})
 
 	if len(x) > 99:
@@ -157,7 +171,8 @@ def get_all_sales_partner(doctype, filters, items, start=0, limit=100):
 		target_qty = sum([f["target_qty"] for f in y])
 		target_amount = sum([f["target_amount"] for f in y])
 		items.append({"title": val.name, "commission_rate":val.commission_rate,
-			"target_qty": target_qty, "target_amount":target_amount, 
+			"target_qty": target_qty, 
+			"target_amount": get_amount_in_currency_symbol(doctype, val.name, target_amount),
 			"href":"#Form/Sales Partner/" + val.name, "modified": val.modified})
 	if len(x) > 99:
 		return get_all_sales_partner(doctype, filters, items, start=start)
