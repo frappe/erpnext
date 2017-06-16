@@ -36,6 +36,6 @@ def execute():
 		if domain in checked_domains:
 			continue
 
-		row = domain_settings.append("active_domains", dict(domain=args.domain))
+		row = domain_settings.append("active_domains", dict(domain=domain))
 
 	domain_settings.save(ignore_permissions=True)
