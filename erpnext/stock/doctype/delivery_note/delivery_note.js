@@ -79,6 +79,10 @@ frappe.ui.form.on("Delivery Note Item", {
 	cost_center: function(frm, dt, dn) {
 		var d = locals[dt][dn];
 		frm.update_in_all_rows('items', 'cost_center', d.cost_center);
+	},
+	item_code: function(frm, dt, dn) {
+		refresh_field("items");
+		erpnext.stock.select_batch_and_serial_no(frm, d);
 	}
 });
 
