@@ -17,10 +17,10 @@ frappe.Leaderboard = Class.extend({
 			"Item": this.map_array(["title", "total_request", "total_purchase", "avg_price", "modified"]),
 			"Supplier": this.map_array(["title", "annual_billing", "total_unpaid", "modified"]),
 			"Sales Partner": this.map_array(["title", "commission_rate", "target_qty", "target_amount", "modified"]),
-		}
+		};
 
 		// for saving current selected filters
-		_selected_filter = this.filters[this.doctypes[0]];
+		const _selected_filter = this.filters[this.doctypes[0]];
 		this.options = {
 			selected_doctype: this.doctypes[0],
 			selected_filter: _selected_filter,
@@ -40,16 +40,16 @@ frappe.Leaderboard = Class.extend({
 		var $leaderboard = $(frappe.render_template("leaderboard", this)).appendTo(this.page.main);
 
 		//events
-		$leaderboard.find('.select-doctype')
-			.on('change', function () {
+		$leaderboard.find(".select-doctype")
+			.on("change", function () {
 				me.options.selected_doctype = this.value;
 				me.options.selected_filter = me.filters[this.value];
 				me.options.selected_filter_item = me.filters[this.value][1];
 				me.make_request($leaderboard);
 			});
 
-		$leaderboard.find('.select-time')
-			.on('change', function () {
+		$leaderboard.find(".select-time")
+			.on("change", function () {
 				me.options.selected_timeline = this.value;
 				me.make_request($leaderboard);
 			});
@@ -86,18 +86,19 @@ frappe.Leaderboard = Class.extend({
 			$leaderboard.find(".leaderboard").html(me.render_list_view(res.message));
 
 			//event to change arrow
-			$leaderboard.find('.leaderboard-item')
+			$leaderboard.find(".leaderboard-item")
 				.click(function () {
-					const field = this.innerText.trim().toLowerCase().replace(new RegExp(' ', 'g'), '_');
-					if (field && field != "title") {
-						const _selected_filter_item = me.options.selected_filter.filter(i => i.field === field)
+					const field = this.innerText.trim().toLowerCase().replace(new RegExp(" ", "g"), "_");
+					if (field && field !== "title") {
+						const _selected_filter_item = me.options.selected_filter
+							.filter(i => i.field === field);
 						if (_selected_filter_item.length > 0) {
-							me.options.selected_filter_item = _selected_filter_item[0]
-							me.options.selected_filter_item.value = _selected_filter_item[0].value === "ASC" ? "DESC" : "ASC"
+							me.options.selected_filter_item = _selected_filter_item[0];
+							me.options.selected_filter_item.value = _selected_filter_item[0].value === "ASC" ? "DESC" : "ASC";
 
-							const new_class_name = `icon-${me.options.selected_filter_item.field} fa fa-chevron-${me.options.selected_filter_item.value === "ASC" ? "up" : "down"}`
+							const new_class_name = `icon-${me.options.selected_filter_item.field} fa fa-chevron-${me.options.selected_filter_item.value === "ASC" ? "up" : "down"}`;
 							$leaderboard.find(`.icon-${me.options.selected_filter_item.field}`)
-								.attr("class", new_class_name)
+								.attr("class", new_class_name);
 
 							//now make request to web
 							me.make_request($leaderboard);
@@ -134,7 +135,8 @@ frappe.Leaderboard = Class.extend({
 
 	render_list_header: function () {
 		var me = this;
-		const _selected_filter = me.options.selected_filter.map(i => me.map_field(i.field)).slice(1);
+		const _selected_filter = me.options.selected_filter
+			.map(i => me.map_field(i.field)).slice(1);
 
 		const html =
 			`<div class="list-headers">
@@ -165,7 +167,7 @@ frappe.Leaderboard = Class.extend({
 
 		let _html = items.map((item) => {
 			const $value = $(me.get_item_html(item));
-			const $item_container = $('<div class="list-item-container">').append($value);
+			const $item_container = $(`<div class="list-item-container">`).append($value);
 			return $item_container[0].outerHTML;
 		}).join("");
 
@@ -194,7 +196,8 @@ frappe.Leaderboard = Class.extend({
 
 	get_item_html: function (item) {
 		var me = this;
-		const _selected_filter = me.options.selected_filter.map(i => me.map_field(i.field)).slice(1);
+		const _selected_filter = me.options.selected_filter
+			.map(i => me.map_field(i.field)).slice(1);
 
 		const html =
 			`<div class="list-item">
@@ -211,9 +214,9 @@ frappe.Leaderboard = Class.extend({
 							${(col !== "Title" && col !== "Modified") ? "hidden-xs" : ""}
 							${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}">
 							${
-								col === 'Title'	?
+								col === "Title"	?
 									`<a class="grey list-id ellipsis"
-										href="${item['href']}">
+										href="${item["href"]}">
 										${val}
 									</a>` :
 									`<span class="text-muted ellipsis"> ${val}</span>`
@@ -227,13 +230,13 @@ frappe.Leaderboard = Class.extend({
 	},
 
 	map_field: function (field) {
-		return field.replace(new RegExp('_', 'g'), ' ').replace(/(^|\s)[a-z]/g, f => f.toUpperCase())
+		return field.replace(new RegExp("_", "g"), " ").replace(/(^|\s)[a-z]/g, f => f.toUpperCase())
 	},
 
 	map_array: function (_array) {
 		var me = this;
 		return _array.map((str) => {
-			let value = me.desc_fields.indexOf(str) > -1 ? 'DESC' : 'ASC'
+			let value = me.desc_fields.indexOf(str) > -1 ? "DESC" : "ASC"
 			return {
 				field: str,
 				value: value
@@ -242,6 +245,6 @@ frappe.Leaderboard = Class.extend({
 	}
 })
 
-frappe.pages['leaderboard'].on_page_load = function (wrapper) {
+frappe.pages["leaderboard"].on_page_load = function (wrapper) {
 	frappe.leaderboard = new frappe.Leaderboard(wrapper);
 }
