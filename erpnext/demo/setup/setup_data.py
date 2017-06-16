@@ -116,7 +116,7 @@ def setup_user():
 	for u in json.loads(open(frappe.get_app_path('erpnext', 'demo', 'data', 'user.json')).read()):
 		user = frappe.new_doc("User")
 		user.update(u)
-		user.flags.no_welcome_mail
+		user.flags.no_welcome_mail = True
 		user.new_password = 'demo'
 		user.insert()
 
