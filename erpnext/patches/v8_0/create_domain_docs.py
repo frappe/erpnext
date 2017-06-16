@@ -7,14 +7,13 @@ import erpnext
 
 def execute():
 	"""Create domain documents"""
-	frappe.reload_doctype("Domain")
+	frappe.reload_doc("core", "doctype", "domain")
+	frappe.reload_doc("core", "doctype", "domain_settings")
+	frappe.reload_doc("core", "doctype", "has_domain")
 
 	for domain in ("Distribution", "Manufacturing", "Retail", "Services", "Education"):
-		if not frappe.db.exists({'doctype': 'Domain', 'domain': domain}):
-			doc = frappe.new_doc("Domain")
-			doc.domain = domain
-			doc.save()
-
+		if not frappe.db.exists({"doctype": "Domain", "domain": domain}):
+			create_domain(domain)
 
 	# set domain in domain settings based on company domain
 
@@ -37,6 +36,17 @@ def execute():
 		if domain in checked_domains:
 			continue
 
+		if not frappe.db.get_value("Domain", domain):
+			# user added custom domain in companies domain field
+			create_domain(domain)
+
 		row = domain_settings.append("active_domains", dict(domain=domain))
 
 	domain_settings.save(ignore_permissions=True)
+
+def create_domain(domain):
+	# create new domain
+
+	doc = frappe.new_doc("Domain")
+	doc.domain = domain
+	doc.db_update()
