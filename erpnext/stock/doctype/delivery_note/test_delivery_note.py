@@ -47,9 +47,8 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, frappe.get_doc(si).insert)
 
 	def test_delivery_note_no_gl_entry(self):
-		set_perpetual_inventory(0)
-		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 0)
-
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(0, company)
 		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
 
 		stock_queue = json.loads(get_previous_sle({
@@ -68,8 +67,9 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertFalse(get_gl_entries("Delivery Note", dn.name))
 
 	def test_delivery_note_gl_entry(self):
-		set_perpetual_inventory()
-		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
+
 		set_valuation_method("_Test Item", "FIFO")
 
 		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
@@ -115,10 +115,11 @@ class TestDeliveryNote(unittest.TestCase):
 
 		dn.cancel()
 		self.assertFalse(get_gl_entries("Delivery Note", dn.name))
-		set_perpetual_inventory(0)
+		set_perpetual_inventory(0, company)
 
 	def test_delivery_note_gl_entry_packing_item(self):
-		set_perpetual_inventory()
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
 
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 		make_stock_entry(item_code="_Test Item Home Desktop 100",
@@ -156,7 +157,7 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.cancel()
 		self.assertFalse(get_gl_entries("Delivery Note", dn.name))
 
-		set_perpetual_inventory(0)
+		set_perpetual_inventory(0, company)
 
 	def test_serialized(self):
 		se = make_serialized_item()
@@ -196,7 +197,8 @@ class TestDeliveryNote(unittest.TestCase):
 			self.assertEquals(cstr(serial_no.get(field)), value)
 
 	def test_sales_return_for_non_bundled_items(self):
-		set_perpetual_inventory()
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
 
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
 
@@ -230,10 +232,11 @@ class TestDeliveryNote(unittest.TestCase):
 
 		self.assertEquals(gle_warehouse_amount, stock_value_difference)
 
-		set_perpetual_inventory(0)
+		set_perpetual_inventory(0, company)
 
 	def test_return_single_item_from_bundled_items(self):
-		set_perpetual_inventory()
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
 
 		create_stock_reconciliation(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, rate=100)
 		create_stock_reconciliation(item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC",
@@ -270,10 +273,11 @@ class TestDeliveryNote(unittest.TestCase):
 
 		self.assertEquals(gle_warehouse_amount, stock_value_difference)
 
-		set_perpetual_inventory(0)
+		set_perpetual_inventory(0, company)
 
 	def test_return_entire_bundled_items(self):
-		set_perpetual_inventory()
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
 
 		create_stock_reconciliation(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, rate=100)
 		create_stock_reconciliation(item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC",
@@ -303,7 +307,7 @@ class TestDeliveryNote(unittest.TestCase):
 
 		self.assertEquals(gle_warehouse_amount, 1400)
 
-		set_perpetual_inventory(0)
+		set_perpetual_inventory(0, company)
 
 	def test_return_for_serialized_items(self):
 		se = make_serialized_item()
@@ -341,7 +345,8 @@ class TestDeliveryNote(unittest.TestCase):
 		})
 
 	def test_delivery_of_bundled_items_to_target_warehouse(self):
-		set_perpetual_inventory()
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
 
 		set_valuation_method("_Test Item", "FIFO")
 		set_valuation_method("_Test Item Home Desktop 100", "FIFO")
@@ -409,7 +414,7 @@ class TestDeliveryNote(unittest.TestCase):
 		for i, gle in enumerate(gl_entries):
 			self.assertEquals([gle.debit, gle.credit], expected_values.get(gle.account))
 
-		set_perpetual_inventory(0)
+		set_perpetual_inventory(0, company)
 
 	def test_closed_delivery_note(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import update_delivery_note_status

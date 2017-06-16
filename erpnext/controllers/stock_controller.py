@@ -21,7 +21,7 @@ class StockController(AccountsController):
 		if self.docstatus == 2:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
-		if cint(self.get_company_default("enable_perpetual_inventory")):
+		if cint(frappe.db.get_value('Company', self.company, 'enable_perpetual_inventory')):
 			warehouse_account = get_warehouse_account_map()
 
 			if self.docstatus==1:

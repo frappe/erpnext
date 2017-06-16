@@ -30,7 +30,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, frappe.get_doc(pi).submit)
 
 	def test_purchase_receipt_no_gl_entry(self):
-		set_perpetual_inventory(0)
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(0, company)
 
 		existing_bin_stock_value = frappe.db.get_value("Bin", {"item_code": "_Test Item",
 			"warehouse": "_Test Warehouse - _TC"}, "stock_value")
@@ -50,9 +51,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertFalse(get_gl_entries("Purchase Receipt", pr.name))
 
 	def test_purchase_receipt_gl_entry(self):
-		set_perpetual_inventory()
-		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		pr = frappe.copy_doc(test_records[0])
+		set_perpetual_inventory(1, pr.company)
+		self.assertEqual(cint(frappe.db.get_value("Company", pr.company, 'enable_perpetual_inventory')), 1)
 		pr.insert()
 		pr.submit()
 
@@ -84,7 +85,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.cancel()
 		self.assertFalse(get_gl_entries("Purchase Receipt", pr.name))
 
-		set_perpetual_inventory(0)
+		set_perpetual_inventory(0, pr.company)
 
 	def test_subcontracting(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry

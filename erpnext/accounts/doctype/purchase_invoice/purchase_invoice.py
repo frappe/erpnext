@@ -164,7 +164,7 @@ class PurchaseInvoice(BuyingController):
 				frappe.msgprint(_("Item Code required at Row No {0}").format(d.idx), raise_exception=True)
 
 	def set_expense_account(self, for_validate=False):
-		auto_accounting_for_stock = self.get_company_default("enable_perpetual_inventory")
+		auto_accounting_for_stock = frappe.db.get_value('Company', self.company, 'enable_perpetual_inventory')
 
 		if auto_accounting_for_stock:
 			stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
@@ -335,9 +335,7 @@ class PurchaseInvoice(BuyingController):
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 	def get_gl_entries(self, warehouse_account=None):
-		self.auto_accounting_for_stock = \
-			cint(self.get_company_default("enable_perpetual_inventory"))
-
+		self.auto_accounting_for_stock = frappe.db.get_value('Company', self.company, 'enable_perpetual_inventory')
 		self.stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
 		self.expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 		self.negative_expense_to_be_booked = 0.0
