@@ -7,27 +7,8 @@ import frappe
 def execute():
 	"""Create domain documents"""
 
-	if not frappe.db.exists({'doctype': 'Domain', 'domain': 'Distribution'}):
-		doc = frappe.new_doc("Domain")
-		doc.domain = "Distribution"
-		doc.save()
-
-	if not frappe.db.exists({'doctype': 'Domain', 'domain': 'Manufacturing'}):
-		doc = frappe.new_doc("Domain")
-		doc.domain = "Manufacturing"
-		doc.save()
-
-	if not frappe.db.exists({'doctype': 'Domain', 'domain': 'Retail'}):
-		doc = frappe.new_doc("Domain")
-		doc.domain = "Retail"
-		doc.save()
-
-	if not frappe.db.exists({'doctype': 'Domain', 'domain': 'Services'}):
-		doc = frappe.new_doc("Domain")
-		doc.domain = "Services"
-		doc.save()
-
-	if not frappe.db.exists({'doctype': 'Domain', 'domain': 'Education'}):
-		doc = frappe.new_doc("Domain")
-		doc.domain = "Education"
-		doc.save()
+	for domain in ("Distribution", "Manufacturing", "Retail", "Services", "Education"):
+		if not frappe.db.exists({'doctype': 'Domain', 'domain': domain}):
+			doc = frappe.new_doc("Domain")
+			doc.domain = "Distribution"
+			doc.save()
