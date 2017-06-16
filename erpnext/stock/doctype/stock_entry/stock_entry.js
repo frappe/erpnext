@@ -67,7 +67,7 @@ frappe.ui.form.on('Stock Entry', {
 				});
 			});
 		}
-		
+
 		if(frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
 		}
@@ -103,9 +103,8 @@ frappe.ui.form.on('Stock Entry', {
 			}
 		});
 	},
-	
 	toggle_display_account_head: function(frm) {
-		var enabled = frappe.get_doc(":Company", frm.doc.company).enable_perpetual_inventory
+		var enabled = frappe.get_doc(":Company", frm.doc.company).enable_perpetual_inventory;
 		frm.fields_dict["items"].grid.set_column_disp(["cost_center", "expense_account"], enabled);
 	}
 })
