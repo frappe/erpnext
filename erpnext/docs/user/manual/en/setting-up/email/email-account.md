@@ -1,8 +1,8 @@
 # Email Accounts
 
-You can manage multiple incoming and outgoing Email Accounts in ERPNext. There has to be atleast one default outgoing account and one default incoming account. If you are on the ERPNext cloud, the default outgoing email is set by us.
+You can manage multiple incoming and outgoing Email Accounts in ERPNext. There has to be at-least one default outgoing account and one default incoming account. If you are on the ERPNext cloud, the default outgoing email is set by us.
 
-> **Note for self implementers:** For outgoing emails, you should setup your own SMTP server or sign up with an SMTP relay service like mandrill.com or sendgrid.com that allows a larger number of transactional emails to be sent. Regular email services like GMail will restrict you to a limited number of emails per day.
+> **Note for self implementers:** For outgoing emails, you should setup your own SMTP server or sign up with an SMTP relay service like mandrill.com or sendgrid.com that allows a larger number of transactional emails to be sent. Regular email services like Gmail will restrict you to a limited number of emails per day.
 
 ### Default Email Accounts
 
