@@ -5,7 +5,7 @@ accrue expenses to your Supplier.
 To make a new Purchase Invoice, type "Purchase Invoice" in the global search bar
 and select "New Purchase Invoice".
 
-<img class="screenshot" alt="Purchase Invoice" src="{{docs_base_url}}/assets/img/accounts/purchase-invoice.png">
+<img class="screenshot" alt="Purchase Invoice" src="{{docs_base_url}}/assets/img/accounts/purchase-invoice-navigate.png">
 
 or click on “Make Purchase Invoice” in Purchase Order or Purchase Receipt.
 
