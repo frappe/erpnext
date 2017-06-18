@@ -36,7 +36,6 @@ $.extend(shopping_cart, {
 	},
 
 	update_cart: function(opts) {
-		var full_name = frappe.session.user_fullname;
 		if(!full_name || full_name==="Guest") {
 			if(localStorage) {
 				localStorage.setItem("last_visited", window.location.pathname);

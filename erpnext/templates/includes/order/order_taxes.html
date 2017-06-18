@@ -6,11 +6,13 @@
 </div>
 {% endif %}
 {% for d in doc.taxes %}
+{% if d.base_tax_amount > 0 %}
 <div class="row tax-row">
     <div class="col-xs-8 text-right">{{ d.description }}</div>
     <div class="col-xs-4 text-right">
         {{ d.get_formatted("base_tax_amount") }}</div>
 </div>
+{% endif %}
 {% endfor %}
 <div class="row tax-grand-total-row">
     <div class="col-xs-8 text-right text-uppercase h6 text-muted">{{ _("Grand Total") }}</div>
