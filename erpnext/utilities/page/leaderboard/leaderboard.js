@@ -8,7 +8,7 @@ frappe.Leaderboard = Class.extend({
 			single_column: true
 		});
 
-		//const list of doctypes
+		// const list of doctypes
 		this.doctypes = ["Customer", "Item", "Supplier", "Sales Partner"];
 		this.timelines = ["Week", "Month", "Quarter", "Year"];
 		this.desc_fields = ["total_amount", "total_request", "annual_billing", "commission_rate"];
@@ -39,7 +39,7 @@ frappe.Leaderboard = Class.extend({
 
 		var $leaderboard = $(frappe.render_template("leaderboard", this)).appendTo(this.page.main);
 
-		//events
+		// events
 		$leaderboard.find(".select-doctype")
 			.on("change", function () {
 				me.options.selected_doctype = this.value;
@@ -54,7 +54,7 @@ frappe.Leaderboard = Class.extend({
 				me.make_request($leaderboard);
 			});
 
-		//now get leaderboard
+		// now get leaderboard
 		me.make_request($leaderboard);
 	},
 
@@ -75,6 +75,7 @@ frappe.Leaderboard = Class.extend({
 				obj: JSON.stringify(me.options)
 			},
 			callback: function (res) {
+				console.log(res)
 				notify(me, res, $leaderboard);
 			}
 		});
@@ -85,7 +86,7 @@ frappe.Leaderboard = Class.extend({
 			me.message = null;
 			$leaderboard.find(".leaderboard").html(me.render_list_view(res.message));
 
-			//event to change arrow
+			// event to change arrow
 			$leaderboard.find(".leaderboard-item")
 				.click(function () {
 					const field = this.innerText.trim().toLowerCase().replace(new RegExp(" ", "g"), "_");
@@ -100,14 +101,14 @@ frappe.Leaderboard = Class.extend({
 							$leaderboard.find(`.icon-${me.options.selected_filter_item.field}`)
 								.attr("class", new_class_name);
 
-							//now make request to web
+							// now make request to web
 							me.make_request($leaderboard);
 						}
 					}
 				});
 		} else {
 			me.message = "No items found.";
-			$leaderboard.find(".leaderboard").html(me.render_list_view())
+			$leaderboard.find(".leaderboard").html(me.render_list_view());
 		}
 	},
 
@@ -144,9 +145,9 @@ frappe.Leaderboard = Class.extend({
 					${
 					me.options.selected_filter
 						.map(filter => {
-							const col = me.map_field(filter.field)
+							const col = me.map_field(filter.field);
 							return (
-								`<div class="leaderboard-item list-item__content ellipsis text-muted list-item__content--flex-2
+								`<div class="leaderboard-item list-item_content ellipsis text-muted list-item__content--flex-2
 									header-btn-base ${(col !== "Title" && col !== "Modified") ? "hidden-xs" : ""}
 									${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}">
 									<span class="list-col-title ellipsis">
@@ -154,7 +155,7 @@ frappe.Leaderboard = Class.extend({
 										<i class="${"icon-" + filter.field} fa ${filter.value === "ASC" ? "fa-chevron-up" : "fa-chevron-down"}"
 											style="${col === "Title" ? "display:none;" : ""}"></i>
 									</span>
-								</div>`)
+								</div>`);
 						}).join("")
 					}
 				</div>
@@ -204,24 +205,21 @@ frappe.Leaderboard = Class.extend({
 				${
 			me.options.selected_filter
 				.map(filter => {
-					const col = me.map_field(filter.field)
-					let val = item[filter.field]
+					const col = me.map_field(filter.field);
+					let val = item[filter.field];
 					if (col === "Modified") {
 						val = comment_when(val);
 					}
 					return (
-						`<div class="list-item__content ellipsis list-item__content--flex-2
+						`<div class="list-item_content ellipsis list-item__content--flex-2
 							${(col !== "Title" && col !== "Modified") ? "hidden-xs" : ""}
 							${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}">
 							${
-								col === "Title"	?
-									`<a class="grey list-id ellipsis"
-										href="${item["href"]}">
-										${val}
-									</a>` :
-									`<span class="text-muted ellipsis"> ${val}</span>`
+								col === "Title"	
+									? `<a class="grey list-id ellipsis" href="${item["href"]}"> ${val} </a>` 
+									: `<span class="text-muted ellipsis"> ${val}</span>`
 							}
-						</div>`)
+						</div>`);
 					}).join("")
 				}
 			</div>`;
@@ -236,11 +234,11 @@ frappe.Leaderboard = Class.extend({
 	map_array: function (_array) {
 		var me = this;
 		return _array.map((str) => {
-			let value = me.desc_fields.indexOf(str) > -1 ? "DESC" : "ASC"
+			let value = me.desc_fields.indexOf(str) > -1 ? "DESC" : "ASC";
 			return {
 				field: str,
 				value: value
-			}
+			};
 		});
 	}
 })

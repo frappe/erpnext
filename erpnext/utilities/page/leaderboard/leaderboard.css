@@ -9,6 +9,12 @@
 	margin:5px;
 }
 
+.list-item_content{
+	flex: 1;
+	padding-right: 15px;
+	align-items: center;
+}
+
 .select-time, .select-doctype, .select-filter, .select-sort {
 	background: #f0f4f7;
 }
