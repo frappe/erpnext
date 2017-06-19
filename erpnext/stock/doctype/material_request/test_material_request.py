@@ -5,13 +5,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, unittest
+import frappe, unittest, erpnext
 from frappe.utils import flt
 from erpnext.stock.doctype.material_request.material_request import raise_production_orders
 
 class TestMaterialRequest(unittest.TestCase):
 	def setUp(self):
-		frappe.defaults.set_global_default("auto_accounting_for_stock", 0)
+		erpnext.set_perpetual_inventory(0)
 
 	def test_make_purchase_order(self):
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order

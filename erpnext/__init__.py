@@ -36,12 +36,16 @@ def get_company_currency(company):
 		frappe.flags.company_currency[company] = frappe.db.get_value('Company', company, 'default_currency')
 	return frappe.flags.company_currency[company]
 
+def set_perpetual_inventory(enable=1, company=None):
+	if not company:
+		company = get_default_company()
 
-def set_perpetual_inventory(enable=1):
-	accounts_settings = frappe.get_doc("Accounts Settings")
-	accounts_settings.auto_accounting_for_stock = enable
-	accounts_settings.save()
+	if frappe.flags.in_test:
+		company = "_Test Company"
 
+	company = frappe.get_doc("Company", company)
+	company.enable_perpetual_inventory = enable
+	company.save()
 
 def encode_company_abbr(name, company):
 	'''Returns name encoded with company abbreviation'''

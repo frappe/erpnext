@@ -146,7 +146,7 @@ class Company(Document):
 		self._set_default_account("accumulated_depreciation_account", "Accumulated Depreciation")
 		self._set_default_account("depreciation_expense_account", "Depreciation")
 
-		if cint(frappe.db.get_single_value("Accounts Settings", "auto_accounting_for_stock")):
+		if self.enable_perpetual_inventory:
 			self._set_default_account("stock_received_but_not_billed", "Stock Received But Not Billed")
 			self._set_default_account("default_inventory_account", "Stock")
 			self._set_default_account("stock_adjustment_account", "Stock Adjustment")

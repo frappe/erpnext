@@ -26,6 +26,23 @@ frappe.ui.form.on("POS Profile", "onload", function(frm) {
 	});
 });
 
+frappe.ui.form.on('POS Profile', {
+	refresh: function(frm) {
+		if(frm.doc.company) {
+			frm.trigger("toggle_display_account_head");
+		}
+	},
+	
+	company: function(frm) {
+		frm.trigger("toggle_display_account_head");
+	},
+	
+	toggle_display_account_head: function(frm) {
+		frm.toggle_display('expense_account',
+			frappe.get_doc(":Company", frm.doc.company).enable_perpetual_inventory);
+	}
+})
+
 // Income Account
 // --------------------------------
 cur_frm.fields_dict['income_account'].get_query = function(doc,cdt,cdn) {
