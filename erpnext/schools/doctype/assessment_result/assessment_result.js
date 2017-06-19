@@ -5,7 +5,9 @@ cur_frm.add_fetch("student", "title", "student_name");
 cur_frm.add_fetch("assessment_plan", "grading_scale", "grading_scale");
 cur_frm.add_fetch("assessment_plan", "maximum_assessment_score", "maximum_score");
 
+
 frappe.ui.form.on("Assessment Result", {
+
 	assessment_plan: function(frm) {
 		frappe.call({
 			method: "erpnext.schools.api.get_assessment_details",
@@ -24,7 +26,26 @@ frappe.ui.form.on("Assessment Result", {
 				refresh_field("details");
 			}
 		});
-	}
+
+        cur_frm.fields_dict['course'].get_query = function(doc) {
+            return {
+                filters: {
+                    "parent": cur_frm.doc.assessment_plan
+                }
+            }
+        }
+	},
+
+    course: function(frm, cdt, cdn) {
+        frm.fields_dict['course'].get_query = function(doc) {
+            return {
+                filters: {
+                    "parent": frm.doc.assessment_plan
+                }
+            }
+        }
+    }
+
 });
 
 frappe.ui.form.on("Assessment Result Detail", {
