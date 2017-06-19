@@ -1,0 +1,8 @@
+<div class="list-item__content ellipsis text-muted list-item__content--flex-2
+	{% if(col !== "Title" && col !== "Modified") { %}
+		hidden-xs
+	{% } %}
+	{% if(col && selected_filter.indexOf(col) !== -1) { %}text-right{% } %}">
+	
+	<span class="list-col-title ellipsis">{{col}}</span>
+</div>
