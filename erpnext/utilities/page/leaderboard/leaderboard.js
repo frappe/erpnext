@@ -241,7 +241,7 @@ frappe.Leaderboard = Class.extend({
 			};
 		});
 	}
-})
+});
 
 frappe.pages["leaderboard"].on_page_load = function (wrapper) {
 	frappe.leaderboard = new frappe.Leaderboard(wrapper);

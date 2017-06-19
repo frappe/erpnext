@@ -5,7 +5,7 @@ from __future__ import unicode_literals, print_function
 import frappe
 import json
 from operator import itemgetter
-from frappe.utils import add_to_date, flt
+from frappe.utils import add_to_date
 from erpnext.accounts.party import get_dashboard_info
 from erpnext.accounts.utils import get_currency_precision
 
@@ -16,10 +16,8 @@ def get_leaderboard(obj):
 
 	doctype = obj.selected_doctype
 	timeline = obj.selected_timeline
-	
 	filters = {"modified":(">=", get_date_from_string(timeline))}
 	items = []
-	
 	if doctype == "Customer":
 		items = get_all_customers(doctype, filters, [])
 	elif  doctype == "Item":
@@ -44,9 +42,9 @@ def filter_leaderboard_items(obj, items):
 	selected_field = obj.selected_filter_item and obj.selected_filter_item["field"]
 	if selected_field:
 		filtered_list  = sorted(items, key=itemgetter(selected_field), reverse=reverse)
-		
 		value = items[0].get(selected_field)
-		allowed = type(value) is unicode or type(value) is str
+
+		allowed = isinstance(value, unicode) or isinstance(value, str)
 		# now sort by length
 		if allowed and '$' in value:
 			filtered_list.sort(key= lambda x: len(x[selected_field]), reverse=reverse)
@@ -155,8 +153,8 @@ def get_all_suppliers(doctype, filters, items, start=0, limit=100):
 		info = get_dashboard_info(doctype, val.name)
 		items.append({"title": val.name,
 		"annual_billing":  get_formatted_value(info["billing_this_year"]),
-		"total_unpaid": get_formatted_value(info["total_unpaid"]),
-		"href":"#Form/Supplier/" + val.name, 
+		"total_unpaid": get_formatted_value(abs(info["total_unpaid"])),
+		"href":"#Form/Supplier/" + val.name,
 		"modified": val.modified})
 
 	if len(x) > 99:
@@ -172,11 +170,11 @@ def get_all_sales_partner(doctype, filters, items, start=0, limit=100):
 		y = frappe.db.sql('''select target_qty, target_amount from `tabTarget Detail` where parent = %s''', (val.name), as_dict=1)
 		target_qty = sum([f["target_qty"] for f in y])
 		target_amount = sum([f["target_amount"] for f in y])
-		items.append({"title": val.name, 
+		items.append({"title": val.name,
 			"commission_rate": get_formatted_value(val.commission_rate, False),
 			"target_qty": target_qty,
 			"target_amount": get_formatted_value(target_amount),
-			"href":"#Form/Sales Partner/" + val.name, 
+			"href":"#Form/Sales Partner/" + val.name,
 			"modified": val.modified})
 	if len(x) > 99:
 		return get_all_sales_partner(doctype, filters, items, start=start)
