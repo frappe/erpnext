@@ -3,9 +3,9 @@ that your Supplier sends you for products or services delivered. Here you
 accrue expenses to your Supplier. Making a Purchase Invoice is very similar to
 making a Purchase Order.
 
-To make a new Purchase Invoice, go to:
-
-> Accounts > Documents > Purchase Invoice > New Purchase Invoice
+To make a new Purchase Invoice:
+> type "new purchase invoice" into the search bar then select "New Purchase 
+Invoice from the drop down"
 
 or click on “Make Purchase Invoice” in Purchase Order or Purchase Receipt.
 
@@ -14,6 +14,14 @@ or click on “Make Purchase Invoice” in Purchase Order or Purchase Receipt.
 The concept of “Posting Date” is again same as Sales Invoice. “Bill No” and
 “Bill Date” helps to track the bill number as set by your Supplier for
 reference.
+
+#### Is Paid option
+The **Is Paid** checkbox should be checked if there is a part or full payment 
+on the invoice at posting date.
+
+#### Update Stock
+The **Update Stock** checkbox should be checked if you want ERPNext to automatically
+ update your inventory. Consequently, there will be no need for a Delivery Note.
 
 #### Accounting Impact
 
@@ -34,7 +42,18 @@ Debits:
 Credits:
 
   * Supplier
+  
+##### Accounting Treatment When **Is Paid** is checked
+If **Is Paid** is checked, ERPNext will also make the following
+accounting entries:
 
+Debits:
+
+  * Supplier
+  
+Credits:
+  * Bank/Cash Account
+  
 To see entries in your Purchase Invoice after you “Submit”, click on “View
 Ledger”.
 
