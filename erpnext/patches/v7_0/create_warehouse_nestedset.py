@@ -1,6 +1,6 @@
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
 from frappe.utils import cint
 from frappe.utils.nestedset import rebuild_tree
@@ -51,7 +51,7 @@ def check_is_warehouse_associated_with_company():
 def make_warehouse_nestedset(company=None):
 	validate_parent_account_for_warehouse(company)
 	stock_account_group = get_stock_account_group(company.name)
-	enable_perpetual_inventory = cint(frappe.db.get_value("Company", company, 'enable_perpetual_inventory')) or 0
+	enable_perpetual_inventory = cint(erpnext.is_perpetual_inventory_enabled(company)) or 0
 	if not stock_account_group and enable_perpetual_inventory:
 		return
 
@@ -73,7 +73,7 @@ def validate_parent_account_for_warehouse(company=None):
 	if not company:
 		return
 
-	if cint(frappe.db.get_value("Company", company, 'enable_perpetual_inventory')):
+	if cint(erpnext.is_perpetual_inventory_enabled(company)):
 		parent_account = frappe.db.sql("""select name from tabAccount
 			where account_type='Stock' and company=%s and is_group=1
 			and (warehouse is null or warehouse = '')""", company.name)

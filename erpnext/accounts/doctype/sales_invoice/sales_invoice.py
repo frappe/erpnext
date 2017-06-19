@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 import frappe.defaults
 from frappe.utils import cint, flt
 from frappe import _, msgprint, throw
@@ -559,7 +559,7 @@ class SalesInvoice(SellingController):
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
-		auto_accounting_for_stock = frappe.db.get_value('Company', self.company, 'enable_perpetual_inventory')
+		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
 
 		if not self.grand_total:
 			return
@@ -675,7 +675,7 @@ class SalesInvoice(SellingController):
 
 		# expense account gl entries
 		if cint(self.update_stock) and \
-			frappe.db.get_value('Company', self.company, 'enable_perpetual_inventory'):
+			erpnext.is_perpetual_inventory_enabled(self.company):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
 
 	def make_pos_gl_entries(self, gl_entries):

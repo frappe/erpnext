@@ -33,6 +33,7 @@ class Company(Document):
 		self.validate_default_accounts()
 		self.validate_currency()
 		self.validate_coa_input()
+		self.validate_perpetual_inventory()
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -138,6 +139,17 @@ class Company(Document):
 			self.create_chart_of_accounts_based_on = "Standard Template"
 			if not self.chart_of_accounts:
 				self.chart_of_accounts = "Standard"
+
+	def validate_perpetual_inventory(self):
+		if not self.get("__islocal"):
+			if cint(self.enable_perpetual_inventory) == 1 and not self.default_inventory_account:
+				frappe.msgprint(_("Warning: Set default inventory account for perpetual inventory"), alert=True)
+
+			enable_perpetual_inventory = frappe.db.get_value('Company', self.name, 'enable_perpetual_inventory')
+			if enable_perpetual_inventory != self.enable_perpetual_inventory:
+				if hasattr(frappe.local, 'enable_perpetual_inventory') and \
+					self.name in frappe.local.enable_perpetual_inventory:
+					del frappe.local.enable_perpetual_inventory[self.name]
 
 	def set_default_accounts(self):
 		self._set_default_account("default_cash_account", "Cash")

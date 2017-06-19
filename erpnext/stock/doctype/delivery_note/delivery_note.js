@@ -40,7 +40,7 @@ frappe.ui.form.on("Delivery Note", {
 
 		
 		frm.set_query('expense_account', 'items', function(doc, cdt, cdn) {
-			if (frappe.get_doc(":Company", doc.company).enable_perpetual_inventory) {
+			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
 				return {
 					filters: {
 						"report_type": "Profit and Loss",
@@ -52,7 +52,7 @@ frappe.ui.form.on("Delivery Note", {
 		});
 
 		frm.set_query('cost_center', 'items', function(doc, cdt, cdn) {
-			if (frappe.get_doc(":Company", doc.company).enable_perpetual_inventory) {
+			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
 				return {
 					filters: {
 						'company': doc.company,
@@ -141,7 +141,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 
 		if (doc.docstatus==1) {
 			this.show_stock_ledger();
-			if (frappe.get_doc(":Company", doc.company).enable_perpetual_inventory) {
+			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
 				this.show_general_ledger();
 			}
 			if (this.frm.has_perm("submit") && doc.status !== "Closed") {
@@ -238,7 +238,7 @@ frappe.ui.form.on('Delivery Note', {
 	
 	unhide_account_head: function(frm) {
 		// unhide expense_account and cost_center if perpetual inventory is enabled in the company
-		var aii_enabled = frappe.get_doc(":Company", frm.doc.company).enable_perpetual_inventory
+		var aii_enabled = erpnext.is_perpetual_inventory_enabled(frm.doc.company)
 		frm.fields_dict["items"].grid.set_column_disp(["expense_account", "cost_center"], aii_enabled);
 	}
 })

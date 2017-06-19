@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe.utils import flt, cstr, cint
 from frappe import _
 from frappe.model.meta import get_field_precision
@@ -101,7 +101,7 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle.submit()
 
 def validate_account_for_perpetual_inventory(gl_map):
-	if cint(frappe.db.get_value("Company", gl_map[0].company, 'enable_perpetual_inventory')) \
+	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)) \
 		and gl_map[0].voucher_type=="Journal Entry":
 			aii_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
 				where account_type = 'Stock' and is_group=0""")]

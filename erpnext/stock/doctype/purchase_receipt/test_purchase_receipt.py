@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import unittest
-import frappe
+import frappe, erpnext
 import frappe.defaults
 from frappe.utils import cint, flt, cstr, today
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
@@ -53,7 +53,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 	def test_purchase_receipt_gl_entry(self):
 		pr = frappe.copy_doc(test_records[0])
 		set_perpetual_inventory(1, pr.company)
-		self.assertEqual(cint(frappe.db.get_value("Company", pr.company, 'enable_perpetual_inventory')), 1)
+		self.assertEqual(cint(erpnext.is_perpetual_inventory_enabled(pr.company)), 1)
 		pr.insert()
 		pr.submit()
 

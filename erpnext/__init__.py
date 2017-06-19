@@ -38,10 +38,7 @@ def get_company_currency(company):
 
 def set_perpetual_inventory(enable=1, company=None):
 	if not company:
-		company = get_default_company()
-
-	if frappe.flags.in_test:
-		company = "_Test Company"
+		company = "_Test Company" if frappe.flags.in_test else get_default_company()
 
 	company = frappe.get_doc("Company", company)
 	company.enable_perpetual_inventory = enable
@@ -57,4 +54,23 @@ def encode_company_abbr(name, company):
 
 	return " - ".join(parts)
 
+def is_perpetual_inventory_enabled(company):
+	if not company:
+		company = "_Test Company" if frappe.flags.in_test else get_default_company()
 
+	if not hasattr(frappe.local, 'enable_perpetual_inventory'):
+		perpetual_inventory = get_company_wise_perptual_inventory()
+		frappe.local.enable_perpetual_inventory = perpetual_inventory
+
+	if not frappe.local.enable_perpetual_inventory.get(company):
+		is_enabled = frappe.db.get_value("Company", company, "enable_perpetual_inventory") or 0
+		frappe.local.enable_perpetual_inventory.setdefault(company, is_enabled)
+
+	return frappe.local.enable_perpetual_inventory.get(company)
+
+def get_company_wise_perptual_inventory():
+	company_dict = {}
+	for data in frappe.get_all('Company', fields = ["name", "enable_perpetual_inventory"]):
+		company_dict[data.name] = data.enable_perpetual_inventory
+
+	return company_dict

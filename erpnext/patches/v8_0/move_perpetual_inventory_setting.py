@@ -7,4 +7,7 @@ import frappe
 def execute():
 	frappe.reload_doctype('Company')
 	enabled = frappe.db.get_single_value("Accounts Settings", "auto_accounting_for_stock") or 0
-	frappe.db.sql("""update tabCompany set enable_perpetual_inventory = {0}""".format(enabled))
+	for data in frappe.get_all('Company', fields = ["name"]):
+		doc = frappe.get_doc('Company', data.name)
+		doc.enable_perpetual_inventory = enabled
+		doc.save(ignore_permissions=True)

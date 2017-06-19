@@ -104,7 +104,7 @@ frappe.ui.form.on('Stock Entry', {
 		});
 	},
 	toggle_display_account_head: function(frm) {
-		var enabled = frappe.get_doc(":Company", frm.doc.company).enable_perpetual_inventory;
+		var enabled = erpnext.is_perpetual_inventory_enabled(frm.doc.company);
 		frm.fields_dict["items"].grid.set_column_disp(["cost_center", "expense_account"], enabled);
 	}
 })
@@ -222,12 +222,12 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			};
 		});
 
-		if(me.frm.doc.company && frappe.get_doc(":Company", me.frm.doc.company).enable_perpetual_inventory) {
+		if(me.frm.doc.company && erpnext.is_perpetual_inventory_enabled(me.frm.doc.company)) {
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
 		}
 
 		this.frm.fields_dict.items.grid.get_field('expense_account').get_query = function() {
-			if (frappe.get_doc(":Company", me.frm.doc.company).enable_perpetual_inventory) {
+			if (erpnext.is_perpetual_inventory_enabled(me.frm.doc.company)) {
 				return {
 					filters: {
 						"company": me.frm.doc.company,
@@ -265,7 +265,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		this.toggle_related_fields(this.frm.doc);
 		this.toggle_enable_bom();
 		this.show_stock_ledger();
-		if (this.frm.doc.docstatus===1 && frappe.get_doc(":Company", this.frm.doc.company).enable_perpetual_inventory) {
+		if (this.frm.doc.docstatus===1 && erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 			this.show_general_ledger();
 		}
 		erpnext.hide_company();
@@ -283,7 +283,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	set_default_account: function(callback) {
 		var me = this;
 
-		if(this.frm.doc.company && frappe.get_doc(":Company", this.frm.doc.company).enable_perpetual_inventory) {
+		if(this.frm.doc.company && erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 			return this.frm.call({
 				method: "erpnext.accounts.utils.get_company_default",
 				args: {

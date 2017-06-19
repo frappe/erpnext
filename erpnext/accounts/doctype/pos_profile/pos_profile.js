@@ -39,7 +39,7 @@ frappe.ui.form.on('POS Profile', {
 	
 	toggle_display_account_head: function(frm) {
 		frm.toggle_display('expense_account',
-			frappe.get_doc(":Company", frm.doc.company).enable_perpetual_inventory);
+			erpnext.is_perpetual_inventory_enabled(frm.doc.company));
 	}
 })
 

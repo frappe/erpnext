@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe.utils import cint, flt, cstr
 from frappe import msgprint, _
 import frappe.defaults
@@ -21,7 +21,7 @@ class StockController(AccountsController):
 		if self.docstatus == 2:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
-		if cint(frappe.db.get_value('Company', self.company, 'enable_perpetual_inventory')):
+		if cint(erpnext.is_perpetual_inventory_enabled(self.company)):
 			warehouse_account = get_warehouse_account_map()
 
 			if self.docstatus==1:

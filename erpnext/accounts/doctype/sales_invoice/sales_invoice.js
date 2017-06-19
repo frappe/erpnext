@@ -492,7 +492,7 @@ frappe.ui.form.on('Sales Invoice', {
 
 		// expense account
 		frm.fields_dict['items'].grid.get_field('expense_account').get_query = function(doc) {
-			if (frappe.get_doc(":Company", doc.company).enable_perpetual_inventory) {
+			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
 				return {
 					filters: {
 						'report_type': 'Profit and Loss',

@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import unittest
-import frappe
+import frappe, erpnext
 import frappe.model
 from frappe.utils import cint, flt, today, nowdate
 import frappe.defaults
@@ -28,7 +28,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 	def test_gl_entries_without_perpetual_inventory(self):
 		wrapper = frappe.copy_doc(test_records[0])
 		set_perpetual_inventory(0, wrapper.company)
-		self.assertTrue(not cint(frappe.db.get_value('Company', wrapper.company, 'enable_perpetual_inventory')))
+		self.assertTrue(not cint(erpnext.is_perpetual_inventory_enabled(wrapper.company)))
 		wrapper.insert()
 		wrapper.submit()
 		wrapper.load_from_db()
@@ -53,7 +53,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 	def test_gl_entries_with_perpetual_inventory(self):
 		pi = frappe.copy_doc(test_records[1])
 		set_perpetual_inventory(1, pi.company)
-		self.assertTrue(cint(frappe.db.get_value('Company', pi.company, 'enable_perpetual_inventory')), 1)
+		self.assertTrue(cint(erpnext.is_perpetual_inventory_enabled(pi.company)), 1)
 		pi.insert()
 		pi.submit()
 
@@ -85,7 +85,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 	def test_gl_entries_with_perpetual_inventory_against_pr(self):
 		pr = frappe.copy_doc(pr_test_records[0])
 		set_perpetual_inventory(1, pr.company)
-		self.assertTrue(cint(frappe.db.get_value('Company', pr.company, 'enable_perpetual_inventory')), 1)
+		self.assertTrue(cint(erpnext.is_perpetual_inventory_enabled(pr.company)), 1)
 		pr.submit()
 
 		pi = frappe.copy_doc(test_records[1])
@@ -132,7 +132,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 	def test_gl_entries_with_aia_for_non_stock_items(self):
 		pi = frappe.copy_doc(test_records[1])
 		set_perpetual_inventory(1, pi.company)
-		self.assertTrue(cint(frappe.db.get_value('Company', pi.company, 'enable_perpetual_inventory')), 1)
+		self.assertTrue(cint(erpnext.is_perpetual_inventory_enabled(pi.company)), 1)
 		pi.get("items")[0].item_code = "_Test Non Stock Item"
 		pi.get("items")[0].expense_account = "_Test Account Cost for Goods Sold - _TC"
 		pi.get("taxes").pop(0)

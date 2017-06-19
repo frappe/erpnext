@@ -113,7 +113,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 	},
 	toggle_display_account_head: function(frm) {
 		frm.toggle_display(['expense_account', 'cost_center'],
-			frappe.get_doc(":Company", frm.doc.company).enable_perpetual_inventory);
+			erpnext.is_perpetual_inventory_enabled(frm.doc.company));
 	}
 });
 
@@ -144,7 +144,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	set_default_expense_account: function() {
 		var me = this;
 		if(this.frm.doc.company) {
-			if (frappe.get_doc(":Company", this.frm.doc.company).enable_perpetual_inventory && !this.frm.doc.expense_account) {
+			if (erpnext.is_perpetual_inventory_enabled(this.frm.doc.company) && !this.frm.doc.expense_account) {
 				return this.frm.call({
 					method: "erpnext.accounts.utils.get_company_default",
 					args: {
@@ -166,12 +166,12 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 
 		this.setup_posting_date_time_check();
 
-		if (me.frm.doc.company && frappe.get_doc(":Company", me.frm.doc.company).enable_perpetual_inventory) {
+		if (me.frm.doc.company && erpnext.is_perpetual_inventory_enabled(me.frm.doc.company)) {
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
 			this.frm.add_fetch("company", "cost_center", "cost_center");
 		}
 		this.frm.fields_dict["expense_account"].get_query = function() {
-			if(frappe.get_doc(":Company", me.frm.doc.company).enable_perpetual_inventory) {
+			if(erpnext.is_perpetual_inventory_enabled(me.frm.doc.company)) {
 				return {
 					"filters": {
 						'company': me.frm.doc.company,
@@ -181,7 +181,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 			}
 		}
 		this.frm.fields_dict["cost_center"].get_query = function() {
-			if(frappe.get_doc(":Company", me.frm.doc.company).enable_perpetual_inventory) {
+			if(erpnext.is_perpetual_inventory_enabled(me.frm.doc.company)) {
 				return {
 					"filters": {
 						'company': me.frm.doc.company,
@@ -195,7 +195,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	refresh: function() {
 		if(this.frm.doc.docstatus==1) {
 			this.show_stock_ledger();
-			if (frappe.get_doc(":Company", this.frm.doc.company).enable_perpetual_inventory) {
+			if (erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 				this.show_general_ledger();
 			}
 		}
