@@ -752,10 +752,7 @@ erpnext.stock.bind_batch_serial_dialog_qty = (dialog, warehouse_details) => {
 				callback: (r) => {
 					let value = r.message ? r.message : '0';
 					fields[1].set_value(value);
-					fields[1].$input.trigger('change');
 					fields[2].set_value('0');
-					fields[2].$input.trigger('change');
-
 				}
 			});
 		} else {
@@ -833,6 +830,18 @@ erpnext.stock.bind_batch_serial_dialog_qty = (dialog, warehouse_details) => {
 
 		batches_field.grid.wrapper.on('change', function(e) {
 			update_quantity(1);
+		});
+
+		batches_field.grid.wrapper.on('change', 'input', function(e) {
+			let fieldname = $(this).attr('data-fieldname');
+			let $row = $(this).closest('.grid-row');
+			let name = $row.attr('data-name');
+			let row = batches_field.grid.grid_rows_by_docname[name];
+
+			field = row.on_grid_fields_dict[fieldname];
+			field.$input.trigger('blur');
+			row.doc[fieldname] = field.get_value();
+			batches_field.grid.set_value(fieldname, row.doc[fieldname], row.doc)
 		});
 
 		warehouse_field.$input.on('change', function() {
