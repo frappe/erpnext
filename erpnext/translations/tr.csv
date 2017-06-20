@@ -57,7 +57,7 @@ DocType: Pricing Rule,Apply On,Uygula
 DocType: Item Price,Multiple Item prices.,Çoklu Ürün fiyatları.
 DocType: Item Price,Multiple Item prices.,Çoklu Ürün fiyatları.
 ,Purchase Order Items To Be Received,AlınacakSatınalma Siparişi Kalemleri
-DocType: SMS Center,All Supplier Contact,Bütün Tedarikçi Kişiler
+DocType: SMS Center,All Supplier Contact,Bütün Tedarikçiler
 DocType: Support Settings,Support Settings,Destek Ayarları
 DocType: SMS Parameter,Parameter,Parametre
 DocType: SMS Parameter,Parameter,Parametre
@@ -868,7 +868,7 @@ apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +369,Previe
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +54,Account {0} has been entered multiple times,Hesap {0} birden çok kez girilmiş
 DocType: Account,Expenses Included In Valuation,Değerlemeye dahil giderler
 DocType: Hub Settings,Seller City,Satıcı Şehri
-,Absent Student Report,Yok Öğrenci Raporu
+,Absent Student Report,Olmayan Öğrenci Raporu
 DocType: Email Digest,Next email will be sent on:,Sonraki e-posta gönderilecek:
 DocType: Offer Letter Term,Offer Letter Term,Mektubu Dönem Teklif
 apps/erpnext/erpnext/stock/doctype/item/item.py +619,Item has variants.,Öğe varyantları vardır.
@@ -2445,7 +2445,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js +146,Cannot
 apps/erpnext/erpnext/selling/doctype/product_bundle/product_bundle.py +29,Child Item should not be a Product Bundle. Please remove item `{0}` and save,Çocuk Ürün Ürün Paketi olmamalıdır. öğeyi kaldırmak `{0}` ve saklayın
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +12,Banking,Bankacılık
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +12,Banking,Bankacılık
-apps/erpnext/erpnext/utilities/activation.py +106,Add Timesheets,Timesheets ekle
+apps/erpnext/erpnext/utilities/activation.py +106,Add Timesheets,Zaman Çizelgesi ekle
 DocType: Vehicle Service,Service Item,servis Öğe
 DocType: Bank Guarantee,Bank Guarantee,Banka garantisi
 DocType: Bank Guarantee,Bank Guarantee,Banka garantisi
@@ -3206,7 +3206,7 @@ DocType: Quality Inspection,Inspection Type,Muayene Türü
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +237,Warehouses with existing transaction can not be converted to group.,Mevcut işlem ile depolar grubuna dönüştürülemez.
 DocType: Assessment Result Tool,Result HTML,Sonuç HTML
 apps/erpnext/erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py +35,Expires On,Tarihinde sona eriyor
-apps/erpnext/erpnext/utilities/activation.py +115,Add Students,Öğrenciler ekle
+apps/erpnext/erpnext/utilities/activation.py +115,Add Students,Öğrenci ekle
 apps/erpnext/erpnext/controllers/recurring_document.py +169,Please select {0},Lütfen  {0} seçiniz
 DocType: C-Form,C-Form No,C-Form No
 DocType: C-Form,C-Form No,C-Form No
@@ -3677,8 +3677,8 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +78,Purpose must b
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +120,Fill the form and save it,Formu doldurun ve kaydedin
 DocType: Production Planning Tool,Download a report containing all raw materials with their latest inventory status,En son stok durumu ile bütün ham maddeleri içeren bir rapor indir
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +26,Community Forum,Forum
-apps/erpnext/erpnext/stock/page/stock_balance/stock_balance.js +51,Actual qty in stock,Gerçek adet
-apps/erpnext/erpnext/stock/page/stock_balance/stock_balance.js +51,Actual qty in stock,Gerçek adet
+apps/erpnext/erpnext/stock/page/stock_balance/stock_balance.js +51,Actual qty in stock,Stokdaki gerçek adet
+apps/erpnext/erpnext/stock/page/stock_balance/stock_balance.js +51,Actual qty in stock,Stoktaki Gerçek adet
 DocType: Homepage,"URL for ""All Products""",&quot;Tüm Ürünler&quot; URL
 DocType: Leave Application,Leave Balance Before Application,Uygulamadan Önce Kalan İzin
 DocType: SMS Center,Send SMS,SMS Gönder
@@ -3806,7 +3806,7 @@ DocType: Purchase Invoice,Price List Exchange Rate,Fiyat Listesi Döviz Kuru
 DocType: Purchase Invoice Item,Rate,Birim Fiyat
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +66,Intern,Stajyer
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +66,Intern,Stajyer
-apps/erpnext/erpnext/accounts/page/pos/pos.js +1480,Address Name,Adres adı
+apps/erpnext/erpnext/accounts/page/pos/pos.js +1480,Address Name,Adres Adı
 DocType: Stock Entry,From BOM,BOM Gönderen
 DocType: Assessment Code,Assessment Code,Değerlendirme Kodu
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +35,Basic,Temel

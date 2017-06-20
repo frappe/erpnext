@@ -2183,7 +2183,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +242,Your Customers,Vos clients
 apps/erpnext/erpnext/utilities/activation.py +117,Make Student,Créer un Étudiant
 apps/erpnext/erpnext/projects/doctype/project/project.py +190,You have been invited to collaborate on the project: {0},Vous avez été invité à collaborer sur le projet : {0}
 DocType: Leave Block List Date,Block Date,Bloquer la Date
-apps/erpnext/erpnext/templates/generators/student_admission.html +23,Apply Now,Appliquer Maintenant
+apps/erpnext/erpnext/templates/generators/student_admission.html +23,Apply Now,Postuler
 apps/erpnext/erpnext/stock/dashboard/item_dashboard_list.html +25,Actual Qty {0} / Waiting Qty {1},Qté Réelle {0} / Quantité en Attente {1}
 DocType: Sales Order,Not Delivered,Non Livré
 ,Bank Clearance Summary,Bilan des Compensations Bancaires
@@ -3938,7 +3938,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +278,Row #{0}: N
 DocType: Accounts Settings,Role that is allowed to submit transactions that exceed credit limits set.,Rôle qui est autorisé à soumettre des transactions qui dépassent les limites de crédit fixées.
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +902,Select Items to Manufacture,Sélectionner les Articles à Fabriquer
 apps/erpnext/erpnext/accounts/page/pos/pos.js +929,"Master data syncing, it might take some time","Données de base en cours de synchronisation, cela peut prendre un certain temps"
-DocType: Item,Material Issue,Problème Matériel
+DocType: Item,Material Issue,Sortie de Matériel
 DocType: Hub Settings,Seller Description,Description du Vendeur
 DocType: Employee Education,Qualification,Qualification
 DocType: Item Price,Item Price,Prix de l'Article
