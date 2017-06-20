@@ -759,6 +759,7 @@ erpnext.stock.bind_batch_serial_dialog_qty = (dialog, warehouse_details) => {
 				}
 			}
 			serial_no_link.set_input('');
+			serial_no_link.$input.blur();
 		});
 
 		serial_no_list_field.$input.on('input', function() {
@@ -802,7 +803,6 @@ erpnext.stock.bind_batch_serial_dialog_qty = (dialog, warehouse_details) => {
 				} else {
 					frappe.throw(__("Please select a warehouse to get available quantities"));
 				}
-
 			}
 		});
 
