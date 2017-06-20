@@ -549,11 +549,11 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 erpnext.stock.select_batch_and_serial_no = (frm, d = undefined) => {
 	let get_warehouse = (item) => {
 		if(frm.fields_dict.from_warehouse.disp_status === "Write") {
-			value = cstr(item.s_warehouse) || ''
-			return ['Source Warehouse', value]
+			var value = cstr(item.s_warehouse) || '';
+			return ['Source Warehouse', value];
 		} else {
-			value = cstr(item.t_warehouse) || ''
-			return ['Target Warehouse', value]
+			var value = cstr(item.t_warehouse) || '';
+			return ['Target Warehouse', value];
 		}
 	}
 
@@ -566,11 +566,11 @@ erpnext.stock.select_batch_and_serial_no = (frm, d = undefined) => {
 			},
 			callback: (r) => {
 				if (r.message) {
-					batch_rows_by_oldest = [];
+					var batch_rows_by_oldest = [];
 					if(warehouse_details[0] === 'Source Warehouse') {
-						qty = total_qty;
+						var qty = total_qty;
 						for(var i = 0; i < r.message.length; i++) {
-							batch_row = {name: 'batch 1'};
+							var batch_row = {name: 'batch 1'};
 							batch_row.batch_no = r.message[i].batch_no;
 							batch_row.available_qty = r.message[i].qty;
 							if (parseInt(qty) <= parseInt(r.message[i].qty)) {
@@ -602,7 +602,7 @@ erpnext.stock.select_batch_and_serial_no = (frm, d = undefined) => {
 erpnext.stock.show_batch_serial_modal = (frm, item, item_code, qty, warehouse_details,
 	has_batch, oldest = undefined) => {
 
-	let data = oldest ? oldest : []
+	let data = oldest ? oldest : [];
 	let title = "";
 	let fields = [
 		{fieldname: 'item_code', read_only: 1, fieldtype:'Link', options: 'Item',
@@ -650,7 +650,7 @@ erpnext.stock.show_batch_serial_modal = (frm, item, item_code, qty, warehouse_de
 			},
 			{fieldtype: 'Column Break'},
 			{fieldname: 'serial_no', fieldtype: 'Small Text'}
-		])
+		]);
 	}
 
 	let dialog = new frappe.ui.Dialog({
@@ -746,7 +746,7 @@ erpnext.stock.bind_batch_serial_dialog_qty = (dialog, warehouse_details) => {
 			});
 			qty_field.set_input(total_qty);
 		} else {
-			serial_numbers = serial_no_list_field.get_value().replace(/\n/g, ' ').match(/\S+/g) || [];
+			var serial_numbers = serial_no_list_field.get_value().replace(/\n/g, ' ').match(/\S+/g) || [];
 			qty_field.set_input(serial_numbers.length);
 		}
 	}
@@ -773,7 +773,7 @@ erpnext.stock.bind_batch_serial_dialog_qty = (dialog, warehouse_details) => {
 
 	if(serial_no_link) {
 		let serial_list = [];
-		serial_no_link.$input.on('awesomplete-selectcomplete', function(e) {
+		serial_no_link.$input.on('awesomplete-selectcomplete', function() {
 			if(serial_no_link.get_value().length > 0) {
 				let new_no = serial_no_link.get_value();
 				let list_value = serial_no_list_field.get_value();
@@ -802,7 +802,7 @@ erpnext.stock.bind_batch_serial_dialog_qty = (dialog, warehouse_details) => {
 
 	if(batches_field) {
 		batches_field.grid.add_new_row(null, null, true);
-		batches_field.grid.wrapper.on('change', 'input[data-fieldname="selected_qty"]', function(e) {
+		batches_field.grid.wrapper.on('change', 'input[data-fieldname="selected_qty"]', function() {
 			// check if batch is selected
 			if($(this).val().length !== 0) {
 				let $row = $(this).closest('.grid-row');
@@ -825,7 +825,7 @@ erpnext.stock.bind_batch_serial_dialog_qty = (dialog, warehouse_details) => {
 			}
 
 		});
-		batches_field.grid.wrapper.on('change', 'input[data-fieldname="batch_no"]', function(e) {
+		batches_field.grid.wrapper.on('change', 'input[data-fieldname="batch_no"]', function() {
 			let $row = $(this).closest('.grid-row');
 			let name = $row.attr('data-name');
 			let row = batches_field.grid.grid_rows_by_docname[name];
@@ -839,20 +839,20 @@ erpnext.stock.bind_batch_serial_dialog_qty = (dialog, warehouse_details) => {
 			}
 		});
 
-		batches_field.grid.wrapper.on('change', function(e) {
+		batches_field.grid.wrapper.on('change', function() {
 			update_quantity(1);
 		});
 
-		batches_field.grid.wrapper.on('change', 'input', function(e) {
+		batches_field.grid.wrapper.on('change', 'input', function() {
 			let fieldname = $(this).attr('data-fieldname');
 			let $row = $(this).closest('.grid-row');
 			let name = $row.attr('data-name');
 			let row = batches_field.grid.grid_rows_by_docname[name];
 
-			field = row.on_grid_fields_dict[fieldname];
+			var field = row.on_grid_fields_dict[fieldname];
 			field.$input.trigger('blur');
 			row.doc[fieldname] = field.get_value();
-			batches_field.grid.set_value(fieldname, row.doc[fieldname], row.doc)
+			batches_field.grid.set_value(fieldname, row.doc[fieldname], row.doc);
 		});
 
 		warehouse_field.$input.on('change', function() {

@@ -153,8 +153,6 @@ class TestBatch(unittest.TestCase):
 
 	def test_get_batch_qty(self):
 		'''Test getting batch quantities by batch_numbers, item_code or warehouse'''
-		from erpnext.stock.doctype.batch.batch import get_batch_qty
-
 		self.make_batch_item('ITEM-BATCH-2')
 		self.make_new_batch_and_entry('ITEM-BATCH-2', 'batch a', '_Test Warehouse - _TC')
 		self.make_new_batch_and_entry('ITEM-BATCH-2', 'batch b', '_Test Warehouse - _TC')
