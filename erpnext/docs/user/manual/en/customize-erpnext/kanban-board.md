@@ -40,5 +40,3 @@ You can also Archive and Restore the columns added in a Kanban board. To do so c
 
 +<img class="screenshot" alt="Add New Kanban Board" src="{{docs_base_url}}/assets/img/customize/kanban-board-7.gif">
  
-
- 
