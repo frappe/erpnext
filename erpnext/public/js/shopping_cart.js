@@ -35,8 +35,8 @@ $.extend(shopping_cart, {
 		});
 	},
 
-	update_cart: function(opts) {		
-		if(fraappe.session.user==="Guest") {
+	update_cart: function(opts) {
+		if(frappe.session.user==="Guest") {
 			if(localStorage) {
 				localStorage.setItem("last_visited", window.location.pathname);
 			}
