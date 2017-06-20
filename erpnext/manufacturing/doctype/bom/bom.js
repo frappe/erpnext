@@ -68,6 +68,10 @@ erpnext.bom.BomController = erpnext.TransactionController.extend({
 			scrap_items = true;
 		}
 
+		if (child.bom_no) {
+			child.bom_no = '';
+		}
+
 		get_bom_material_detail(doc, cdt, cdn, scrap_items);
 	},
 })
