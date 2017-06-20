@@ -21,6 +21,21 @@ class Patient(Document):
 			send_registration_sms(self)
 		self.reload()
 
+	def on_update(self):
+		self.add_as_website_user()
+
+	def add_as_website_user(self):
+		if(self.email):
+			if not frappe.db.exists ("User", self.email):
+				user = frappe.get_doc({
+					"doctype": "User",
+					"first_name": self.patient_name,
+					"email": self.email
+				})
+				user.flags.no_welcome_email = True
+				user.flags.ignore_permissions = True
+				user.add_roles("Patient")
+
 	def autoname(self):
 		patient_master_name = frappe.defaults.get_global_default('patient_master_name')
 		if patient_master_name == 'Patient Name':
