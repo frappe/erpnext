@@ -6,7 +6,7 @@ frappe.provide("erpnext.shopping_cart");
 var shopping_cart = erpnext.shopping_cart;
 
 frappe.ready(function() {
-	var full_name = frappe.session.user_fullname;
+	var full_name = frappe.session && frappe.session.user_fullname;
 	// update user
 	if(full_name) {
 		$('.navbar li[data-label="User"] a')
@@ -36,6 +36,8 @@ $.extend(shopping_cart, {
 	},
 
 	update_cart: function(opts) {
+		var full_name = frappe.session && frappe.session.user_fullname;
+		
 		if(!full_name || full_name==="Guest") {
 			if(localStorage) {
 				localStorage.setItem("last_visited", window.location.pathname);
