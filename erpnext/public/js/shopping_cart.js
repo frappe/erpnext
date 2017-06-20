@@ -35,10 +35,8 @@ $.extend(shopping_cart, {
 		});
 	},
 
-	update_cart: function(opts) {
-		var full_name = frappe.session && frappe.session.user_fullname;
-		
-		if(!full_name || full_name==="Guest") {
+	update_cart: function(opts) {		
+		if(fraappe.session.user==="Guest") {
 			if(localStorage) {
 				localStorage.setItem("last_visited", window.location.pathname);
 			}
