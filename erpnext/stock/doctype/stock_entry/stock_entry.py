@@ -52,7 +52,7 @@ class StockEntry(StockController):
 		if self._action == 'submit':
 			self.make_batches('t_warehouse')
 		else:
-			set_batch_nos(self, 's_warehouse', True)
+			set_batch_nos(self, 's_warehouse')
 
 		self.set_actual_qty()
 		self.calculate_rate_and_amount(update_finished_item_rate=False)
