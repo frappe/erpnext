@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Drittpartei-Datensicherungen</title>
+	<title>Assessment Group</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -22,7 +22,7 @@
     
 
 		</head>
-<body data-path="user/manual/de/setting-up/third-party-backups">
+<body data-path="user/manual/en/schools/Assessment/assessment_group">
 	<div class="main-section">
 		<div>
 					<nav class="navbar navbar-default navbar-main" role="navigation">
@@ -103,7 +103,7 @@
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
-<div class="page-container" id="page-user/manual/de/setting-up/third-party-backups" data-path="{{ pathname }}"
+<div class="page-container" id="page-user/manual/en/schools/Assessment/assessment_group" data-path="{{ pathname }}"
 	>
 	<div class="row ">
 		
@@ -118,8 +118,8 @@
 <ul class="breadcrumb">
 	<li>
 		<span class="fa fa-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext//user/manual/de/setting-up">
-		Einstellungen</a>
+		<a href="https://frappe.github.io/erpnext//user/manual/en/schools/Assessment">
+		Assessment</a>
 	</li>
 	
 </ul>
@@ -139,64 +139,19 @@
 				</div>
 			</div>
 			<div class="page_content">
-<h1>Drittpartei-Datensicherungen</h1>
+<h1>Assessment Group</h1>
 
-<p><span class="text-muted contributed-by">Beigetragen von CWT Connector &amp; Wire Technology GmbH</span></p>
+<p>Assessment Group tree is a master where you can define the hierarchy for examination conducted in your education institute.</p>
 
-<p>Wenn Sie Ihre Daten regelmäßig auf Dropbox sichern möchten, können Sie das direkt über ERPNext tun.</p>
+<p>For example, if you conduct two assessment in a academic year, then setup Assessment Group as following.</p>
 
-<blockquote>
-  <p>Einstellungen &gt; Einbindungen &gt; Dropbox-Datensicherung</p>
-</blockquote>
+<p><img class="screenshot" alt="Assessment Group Term" src="https://frappe.github.io/erpnext/assets/img/schools/assessment/assessment-group-term.png"></p>
 
-<p><strong>Schritt 1:</strong> Klicken Sie auf Einstellungen, dann auf Einbindungen</p>
+<p>On the same lines, you can also define multiple Assessment Group bases on assessment conducted in your institute.</p>
 
-<p><strong>Schritt 2:</strong> Klicken Sie auf Dropbox-Datensicherung</p>
+<p><img class="screenshot" alt="Assessment Group Term" src="https://frappe.github.io/erpnext/assets/img/schools/assessment/assessment-group-details.png"></p>
 
-<h3>Abbildung 1: Dropbox-Datensicherung</h3>
-
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/third-party-backups.png" alt="Drittparteien-Datensicherung" /></p>
-
-<p>Geben Sie auf der Seite "Dropbox-Datensicherung" die E-Mail-Adressen der Menschen ein, die über den Sicherungsstatus informiert werden sollen. Unter dem Punkt "Häufigkeit des Hochladens" geben Sie an, ob die Daten täglich oder wöchentlich gesichert werden sollen.</p>
-
-<p><strong>Schritt 3:</strong> Klicken Sie auf <strong>Dropbox-Zugang zulassen</strong></p>
-
-<blockquote>
-  <p>Tipp: Wenn Sie in der Zukunft keine Datensicherungen mehr auf Dropbox sichern wollen, dann demarkieren Sie das Feld "Datensicherungen zur Dropbox senden".</p>
-</blockquote>
-
-<h3>Abbildung 2: "Dropbox-Zugang zulassen"</h3>
-
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/backup-manager.png" alt="Backup Manager" /></p>
-
-<p>Sie müssen sich mit Ihrer ID und Ihrem Passwort an Ihrem Dropbox-Konto anmelden.</p>
-
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/dropbox-access.png" alt="Dropbox-Zugriff" /></p>
-
-<h2>Für OpenSource-Nutzer</h2>
-
-<p>Voreinstellungen:</p>
-
-<p>pip install dropbox</p>
-
-<p>pip install google-api-python-client</p>
-
-<h3>Erstellen Sie in der Dropbox eine Anwendung</h3>
-
-<p>Legen Sie zuerst ein Dropbox-Konto an und erstellen Sie dann eine neue Anwendung (https://www.dropbox.com/developers/apps). Wenn Sie das Konto erfolgreich angelegt haben, erhalten Sie app<em>key, app</em>secret und access<em>type. Bearbeiten Sie nun site</em>config.json Ihrer Seite (/frappe-bench/sites/your-site/) und fügen Sie die folgenden Zeilen hinzu: </p>
-
-<ul>
-<li>"dropbox<em>access</em>key": "app_key", und</li>
-<li>"dropbox<em>secret</em>key": "app_secret"</li>
-</ul>
-
-<p>Dann können Sie zum Modul "Einbindungen" gehen und "Dropbox-Zugang zulassen".</p>
-
-<blockquote>
-  <p>Hinweis: Bitte stellen Sie sicher, dass Ihr Browser Popups zulässt.</p>
-</blockquote>
-
-<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="https://frappe.github.io/erpnext/user/manual/de/setting-up/workflows">Workflows</a></p></p>
+<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="https://frappe.github.io/erpnext/user/manual/en/schools/Assessment/grading_scale">Grading Scale</a></p></p>
 
 </div>
 		</div>
@@ -208,7 +163,7 @@
 	<div class="page-content">
 	<div class="edit-container text-center">
 		<i class="fa fa-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/de/setting-up/third-party-backups.md">
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/schools/Assessment/assessment_group.md">
 			Improve this page
 		</a>
 	</div>

@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Third Party Backups</title>
+	<title>Assessment Criteria</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -22,7 +22,7 @@
     
 
 		</head>
-<body data-path="user/manual/en/setting-up/third-party-backups">
+<body data-path="user/manual/en/schools/Assessment/assessment_criteria">
 	<div class="main-section">
 		<div>
 					<nav class="navbar navbar-default navbar-main" role="navigation">
@@ -103,7 +103,7 @@
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
-<div class="page-container" id="page-user/manual/en/setting-up/third-party-backups" data-path="{{ pathname }}"
+<div class="page-container" id="page-user/manual/en/schools/Assessment/assessment_criteria" data-path="{{ pathname }}"
 	>
 	<div class="row ">
 		
@@ -118,8 +118,8 @@
 <ul class="breadcrumb">
 	<li>
 		<span class="fa fa-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext//user/manual/en/setting-up">
-		Setting Up</a>
+		<a href="https://frappe.github.io/erpnext//user/manual/en/schools/Assessment">
+		Assessment</a>
 	</li>
 	
 </ul>
@@ -129,7 +129,7 @@
 						
 					</div>
 					<div class="col-sm-8 col-xs-6">
-						<h1>Third Party Backups</h1>
+						
 					</div>
 					<div class="col-sm-4 col-xs-6">
 						
@@ -139,62 +139,19 @@
 				</div>
 			</div>
 			<div class="page_content">
-<p>If you wish to store your backups on a periodic basis,on Dropbox, you can do
-it directly through ERPNext.</p>
+<h1>Assessment Criteria</h1>
 
-<blockquote>
-  <p>Setup &gt; Manage 3rd Party Backups</p>
-</blockquote>
+<p>Assessment Criteria is the parameter based on which you assess the Student.</p>
 
-<p><strong>Step 1:</strong> Click on Setup.</p>
+<p><img class="screenshot" alt="Assessment Criteria" src="https://frappe.github.io/erpnext/assets/img/schools/assessment/assessment-criteria.png"></p>
 
-<p><strong>Step 2:</strong> Click on Manage Third Party Backup</p>
+<p>After assessment is conducted for a Course, marks earned are entered based on the Assessment Criteria. For example, if assessment was conducted for science subject, then you can evaluate Student in Science on various criteria like Writing, Practicals, Presentation etc.</p>
 
-<h4>Figure 1: Manage Third Party Backup</h4>
+<p>Assessment Criteria is be used when scheduling Assessment Plan for Student Group and Course.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/third-party-backups.png" alt="Third Party Backups" /></p>
+<p><img class="screenshot" alt="Assessment Plan Criteria" src="https://frappe.github.io/erpnext/assets/img/schools/assessment/assessment-plan-criteria.png"></p>
 
-<p>On the Backup Manager page, enter the email addresses of those people whom you
-wish to notify about the upload status. Under the topic 'Sync with Dropbox',
-select whether you wish to upload Daily, Weekly or Never. </p>
-
-<p><strong>Step 3</strong> Click on <strong>Allow Dropbox Access</strong>.</p>
-
-<blockquote>
-  <p>Tip: In future, if you wish to discontinue uploading backups to dropbox,
-  then select the Never option.</p>
-</blockquote>
-
-<h4>Figure 2: Allow Dropbox Access</h4>
-
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/backup-manager.png" alt="Backup Manager" /></p>
-
-<p>You need to login to your dropbox account, with your user id and password.</p>
-
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/dropbox-access.png" alt="Dropbox Access" /></p>
-
-<h2>Open Source Users</h2>
-
-<p>Installing Pre-Requisites</p>
-
-<pre><code>pip install dropbox
-pip install google-api-python-client
-</code></pre>
-
-<h4>Create an App in Dropbox</h4>
-
-<p>First create your Dropbox account and create a new app (https://www.dropbox.com/developers/apps).
-After successful creation of account you will receive <code>app_key</code>, <code>app_secret</code> and <code>access_type</code>. Now edit <code>site_config.json</code> of your site (/frappe-bench/sites/your-site/) and add the following lines:
-- <code>"dropbox_access_key": "app_key",</code> and 
-- <code>"dropbox_secret_key": "app_secret"</code></p>
-
-<p>Then you can go to the "Integrations" module and Allow Dropbox Access.</p>
-
-<blockquote>
-  <p>Note: Please ensure Allow Pop-ups are enabled in your browser.</p>
-</blockquote>
-
-<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="https://frappe.github.io/erpnext/user/manual/en/setting-up/workflows">Workflows</a></p></p>
+<p><p class="btn-next-wrapper">Next: <a class="btn-next" href="https://frappe.github.io/erpnext/user/manual/en/schools/Assessment/assessment_group">Assessment Group</a></p></p>
 
 </div>
 		</div>
@@ -206,7 +163,7 @@ After successful creation of account you will receive <code>app_key</code>, <cod
 	<div class="page-content">
 	<div class="edit-container text-center">
 		<i class="fa fa-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/setting-up/third-party-backups.md">
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/schools/Assessment/assessment_criteria.md">
 			Improve this page
 		</a>
 	</div>
