@@ -141,30 +141,35 @@
 			<div class="page_content">
 <p>As per the perpetual inventory system, accounts posting is done for every stock transaction.</p>
 
-<p>On creating new Warehouse, the system will automatically create an Account in the Chart of Accout, with the same name as Warehouse Name.</p>
+<p>On creating new Warehouse, the system will automatically create an Account in the Chart of Account, with the same name as Warehouse Name.</p>
 
 <p>On receipt of items in a particular warehouse, the balance in the Warehouse Account will increase. Similarly when items are delivered from the Warehouse, an expense will be booked, and balance in the Warehouse Account will reduce.</p>
 
 <h2>Activation</h2>
 
-<ol>
-<li><p>Setup the following default accounts for each Company. These accounts are created automatically in the new ERPNext accounts.</p>
-
 <ul>
-<li>Stock Received But Not Billed</li>
-<li>Stock Adjustment Account</li>
-<li>Expenses Included In Valuation</li>
-<li>Cost Center</li>
-</ul></li>
-<li><p>Ensure each Warehouse is an Account in the Chart of Accounts master. As per the default configuration, Accounts for Warehouse are created under <code>Assets &gt; Current Asset &gt; Stock Assets &gt; (Warehouse)</code></p></li>
 <li><p>Activate Perpetual Inventory</p>
 
 <blockquote>
   <p>Explore &gt; Accounts &gt; Accounts Settings &gt; "Make Accounting Entry For Every Stock Movement"</p>
 </blockquote></li>
-</ol>
+</ul>
 
 <p><img class="screenshot" alt="Perpetual Inventory" src="https://frappe.github.io/erpnext/assets/img/accounts/perpetual-1.png"></p>
+
+<ul>
+<li><p>Setup the following default accounts for each Company. These accounts are created automatically in the new ERPNext accounts.</p>
+
+<ul>
+<li>Default Inventory Account</li>
+<li>Stock Received But Not Billed</li>
+<li>Stock Adjustment Account</li>
+<li>Expenses Included In Valuation    </li>
+<li>Cost Center</li>
+</ul></li>
+<li><p>If user wants to set an individual account for each warehouse, create account head for each account under <code>Assets &gt; Current Asset &gt; Stock Assets &gt; (Warehouse)</code> and set it on the respective warehouse under field 'Account'.</p></li>
+<li><p>For stock transactions, general ledger entries made against the account head set on the warehouse, if user had not set the account for the warhouse then system gets the account head from the parent warehouse. If account had not set for parent warehouse then system gets the account(Default Inventory Account) from the company master.</p></li>
+</ul>
 
 <hr />
 
@@ -242,9 +247,9 @@
 
 <h3>Purchase Receipt</h3>
 
-<p>Suppose you have purchased <em>10 nos</em> of item "RM0001" at <em>$200</em> and <em>5 nos</em> of item "Base Plate" at <strong>$100</strong> from supplier "East Wind Inc". Following are the details of Purchase Receipt:</p>
+<p>Suppose you have purchased <em>10 nos</em> of item "RM0001" at <em>$200</em> and <em>5 nos</em> of item "Base Plate" at <strong>$100</strong> from supplier "Arcu Vel Quam Fabricators". Following are the details of Purchase Receipt:</p>
 
-<p><strong>Supplier:</strong> East Wind Inc.</p>
+<p><strong>Supplier:</strong> Arcu Vel Quam Fabricators</p>
 
 <p><strong>Items:</strong></p>
 
@@ -303,11 +308,11 @@
 
 <p><strong>Stock Ledger</strong></p>
 
-<p><img class="screenshot" alt="Perpetual Inventory" src="https://frappe.github.io/erpnext/assets/img/accounts/perpetual-2.png"></p>
+<p><img class="screenshot" alt="Perpetual Inventory" src="https://frappe.github.io/erpnext/assets/img/accounts/perpetual-receipt-sl-1.png"></p>
 
 <p><strong>General Ledger</strong></p>
 
-<p><img class="screenshot" alt="Perpetual Inventory" src="https://frappe.github.io/erpnext/assets/img/accounts/perpetual-3.png"></p>
+<p><img class="screenshot" alt="Perpetual Inventory" src="https://frappe.github.io/erpnext/assets/img/accounts/perpetual-receipt-gl-2.png"></p>
 
 <p>As stock balance increases through Purchase Receipt, "Store" accounts are debited and a temporary account "Stock Receipt But Not Billed" account is credited, to maintain double entry accounting system. At the same time, negative expense is booked in account "Expense included in Valuation" for the amount added for valuation purpose, to avoid double expense booking.</p>
 
@@ -319,7 +324,7 @@
 
 <p><strong>General Ledger</strong></p>
 
-<p><img alt="General" class="screenshot" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-4.png"></p>
+<p><img class="screenshot" alt="Perpetual Inventory" src="https://frappe.github.io/erpnext/assets/img/accounts/perpetual-pinv-gl-3.png"></p>
 
 <p>Here "Stock Received But Not Billed" account is debited and nullified the
 effect of Purchase Receipt.</p>
@@ -328,10 +333,10 @@ effect of Purchase Receipt.</p>
 
 <h3>Delivery Note</h3>
 
-<p>Lets say, you have an order from "Jane Doe" to deliver 5 nos of item "RM0001"
+<p>Lets say, you have an order from "Utah Automation Services" to deliver 5 nos of item "RM0001"
 at $300. Following are the details of Delivery Note:</p>
 
-<p><strong>Customer:</strong> Jane Doe</p>
+<p><strong>Customer:</strong> Utah Automation Services</p>
 
 <p><strong>Items:</strong></p>
 
@@ -380,16 +385,16 @@ at $300. Following are the details of Delivery Note:</p>
 
 <p><strong>Stock Ledger</strong></p>
 
-<p><img alt="Stock" class="screenshot" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-5.png"></p>
+<p><img class="screenshot" alt="Perpetual Inventory" src="https://frappe.github.io/erpnext/assets/img/accounts/perpetual-dn-sl-4.png"></p>
 
 <p><strong>General Ledger</strong></p>
 
-<p><img alt="General" class="screenshot" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-6.png"></p>
+<p><img class="screenshot" alt="Perpetual Inventory" src="https://frappe.github.io/erpnext/assets/img/accounts/perpetual-dn-gl-5.png"></p>
 
 <p>As item is delivered from "Stores" warehouse, "Stores" account is credited and
 equal amount is debited to the expense account "Cost of Goods Sold". The
 debit/credit amount is equal to the total valuation amount (buying cost) of
-the selling items. And valuation amount is calculated based on your prefferred
+the selling items. And valuation amount is calculated based on your preferred
 valuation method (FIFO / Moving Average) or actual cost of serialized items.</p>
 
 <pre><code>In this example, we have considered valuation method as FIFO. 
@@ -410,11 +415,11 @@ of the Sales Invoice are same as the above Delivery Note.</p>
 
 <p><strong>Stock Ledger</strong></p>
 
-<p><img alt="Stock" class="screenshot" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-7.png"></p>
+<p><img class="screenshot" alt="Perpetual Inventory" src="https://frappe.github.io/erpnext/assets/img/accounts/perpetual-inv-sl-6.png"></p>
 
 <p><strong>General Ledger</strong></p>
 
-<p><img alt="General" class="screenshot" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-8.png"></p>
+<p><img class="screenshot" alt="Perpetual Inventory" src="https://frappe.github.io/erpnext/assets/img/accounts/perpetual-inv-gl-7.png"></p>
 
 <p>Here, apart from normal account entries for invoice, "Stores" and "Cost of
 Goods Sold" accounts are also affected based on the valuation amount.</p>
@@ -448,11 +453,11 @@ Goods Sold" accounts are also affected based on the valuation amount.</p>
 
 <p><strong>Stock Ledger</strong></p>
 
-<p><img alt="Stock" class="screenshot" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-9.png"></p>
+<p><img class="screenshot" alt="Perpetual Inventory" src="https://frappe.github.io/erpnext/assets/img/accounts/perpetual-st-receipt-sl.png"></p>
 
 <p><strong>General Ledger</strong></p>
 
-<p><img alt="General" class="screenshot" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-10.png"></p>
+<p><img class="screenshot" alt="Perpetual Inventory" src="https://frappe.github.io/erpnext/assets/img/accounts/perpetual-st-receipt-gl.png"></p>
 
 <hr />
 
@@ -483,11 +488,11 @@ Goods Sold" accounts are also affected based on the valuation amount.</p>
 
 <p><strong>Stock Ledger</strong></p>
 
-<p><img alt="Stock" class="screenshot" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-11.png"></p>
+<p><img class="screenshot" alt="Perpetual Inventory" src="https://frappe.github.io/erpnext/assets/img/accounts/perpetual-st-issue-sl.png"></p>
 
 <p><strong>General Ledger</strong></p>
 
-<p><img alt="Stock" class="screenshot" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-12.png"></p>
+<p><img class="screenshot" alt="Perpetual Inventory" src="https://frappe.github.io/erpnext/assets/img/accounts/perpetual-st-issue-gl.png"></p>
 
 <hr />
 
@@ -520,11 +525,11 @@ Goods Sold" accounts are also affected based on the valuation amount.</p>
 
 <p><strong>Stock Ledger</strong></p>
 
-<p><img alt="Stock" class="screenshot" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-13.png"></p>
+<p><img class="screenshot" alt="Perpetual Inventory" src="https://frappe.github.io/erpnext/assets/img/accounts/perpetual-st-transfer-sl.png"></p>
 
 <p><strong>General Ledger</strong></p>
 
-<p><img alt="Stock" class="screenshot" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-14.png"></p>
+<p><img class="screenshot" alt="Perpetual Inventory" src="https://frappe.github.io/erpnext/assets/img/accounts/perpetual-st-transfer-gl.png"></p>
 
 <p><p class="btn-next-wrapper">Next: <a class="btn-next" href="https://frappe.github.io/erpnext/user/manual/en/stock/accounting-of-inventory-stock/migrate-to-perpetual-inventory">Migrate To Perpetual Inventory</a></p></p>
 

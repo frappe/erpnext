@@ -144,19 +144,36 @@ that your Supplier sends you for products or services delivered. Here you
 accrue expenses to your Supplier. Making a Purchase Invoice is very similar to
 making a Purchase Order.</p>
 
-<p>To make a new Purchase Invoice, go to:</p>
+<p>To make a new Purchase Invoice:</p>
 
 <blockquote>
-  <p>Accounts &gt; Documents &gt; Purchase Invoice &gt; New Purchase Invoice</p>
+  <p>type "new purchase invoice" into the search bar then select "New Purchase 
+  Invoice" from the drop down</p>
 </blockquote>
 
 <p>or click on “Make Purchase Invoice” in Purchase Order or Purchase Receipt.</p>
+
+<p>You can also create a Purchase Invoice from:</p>
+
+<blockquote>
+  <p>Accounts &gt; Billing &gt; Purchase Invoice &gt; New Purchase Invoice</p>
+</blockquote>
 
 <p><img class="screenshot" alt="Purchase Invoice" src="https://frappe.github.io/erpnext/assets/img/accounts/purchase-invoice.png"></p>
 
 <p>The concept of “Posting Date” is again same as Sales Invoice. “Bill No” and
 “Bill Date” helps to track the bill number as set by your Supplier for
 reference.</p>
+
+<h4>Is Paid option</h4>
+
+<p>The <strong>Is Paid</strong> checkbox should be checked if there is a part or full payment 
+on the invoice at posting date.</p>
+
+<h4>Update Stock</h4>
+
+<p>The <strong>Update Stock</strong> checkbox should be checked if you want ERPNext to automatically
+ update your inventory. Consequently, there will be no need for a Delivery Note.</p>
 
 <h4>Accounting Impact</h4>
 
@@ -181,6 +198,20 @@ Item master.</p>
 <ul>
 <li>Supplier</li>
 </ul>
+
+<h5>Accounting Treatment When <strong>Is Paid</strong> is checked</h5>
+
+<p>If <strong>Is Paid</strong> is checked, ERPNext will also make the following
+accounting entries:</p>
+
+<p>Debits:</p>
+
+<ul>
+<li>Supplier</li>
+</ul>
+
+<p>Credits:
+  * Bank/Cash Account</p>
 
 <p>To see entries in your Purchase Invoice after you “Submit”, click on “View
 Ledger”.</p>
