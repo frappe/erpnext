@@ -59,18 +59,10 @@ def is_perpetual_inventory_enabled(company):
 		company = "_Test Company" if frappe.flags.in_test else get_default_company()
 
 	if not hasattr(frappe.local, 'enable_perpetual_inventory'):
-		perpetual_inventory = get_company_wise_perptual_inventory()
-		frappe.local.enable_perpetual_inventory = perpetual_inventory
+		frappe.local.enable_perpetual_inventory = {}
 
-	if not frappe.local.enable_perpetual_inventory.get(company):
-		is_enabled = frappe.db.get_value("Company", company, "enable_perpetual_inventory") or 0
-		frappe.local.enable_perpetual_inventory.setdefault(company, is_enabled)
+	if not company in frappe.local.enable_perpetual_inventory:
+		frappe.local.enable_perpetual_inventory[company] = frappe.db.get_value("Company", 
+			company, "enable_perpetual_inventory") or 0
 
-	return frappe.local.enable_perpetual_inventory.get(company)
-
-def get_company_wise_perptual_inventory():
-	company_dict = {}
-	for data in frappe.get_all('Company', fields = ["name", "enable_perpetual_inventory"]):
-		company_dict[data.name] = data.enable_perpetual_inventory
-
-	return company_dict
+	return frappe.local.enable_perpetual_inventory[company]
