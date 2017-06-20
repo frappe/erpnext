@@ -17,10 +17,11 @@ class TestBatch(unittest.TestCase):
 			"item": "_Test Item"
 		}).save)
 
-	def make_batch_item(self, item_name):
+	@classmethod
+	def make_batch_item(cls, item_name):
 		from erpnext.stock.doctype.item.test_item import make_item
 		if not frappe.db.exists(item_name):
-			make_item(item_name, dict(has_batch_no = 1))
+			make_item(item_name, dict(has_batch_no = 1, create_new_batch = 1))
 
 	def test_purchase_receipt(self, batch_qty = 100):
 		'''Test automated batch creation from Purchase Receipt'''
@@ -162,7 +163,8 @@ class TestBatch(unittest.TestCase):
 
 		self.assertEquals(get_batch_qty('batch a', '_Test Warehouse - _TC'), 90)
 
-	def make_new_batch_and_entry(self, item_name, batch_name, warehouse):
+	@classmethod
+	def make_new_batch_and_entry(cls, item_name, batch_name, warehouse):
 		'''Make a new stock entry for given target warehouse and batch name of item'''
 
 		if not frappe.db.exists("Batch", batch_name):
