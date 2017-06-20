@@ -32,12 +32,12 @@ in the data below the column headings.
 
 <img alt="Download Template" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/import-file.png">
 
-Then export your template or save it as a **Comma Separated Values** (CSV)
-file.
+Then export your template or save it as a **Excel** or **Comma Separated Values** (CSV)
+file. To export te document in Excel check the box for Download in Excel File Format 
 
 <img alt="Download Template" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/import-csv.png">
 
-### 3\. Upload the .csv File
+### 3\. Upload the File ethier in .xls or .csv 
 
 Finally attach the .csv file in the section. Click on the "Upload and Import"
 button.
