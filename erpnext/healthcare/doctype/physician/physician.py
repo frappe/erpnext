@@ -8,7 +8,7 @@ from frappe.model.document import Document
 from frappe import throw, _
 from frappe.utils import cstr
 from erpnext.accounts.party import validate_party_accounts
-from frappe.geo.address_and_contact import load_address_and_contact, delete_contact_and_address
+from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
 
 class Physician(Document):
 	def onload(self):

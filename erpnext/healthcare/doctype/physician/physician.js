@@ -17,7 +17,7 @@ frappe.ui.form.on('Physician', {
 		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Physician'}
 
 		if(!frm.is_new()) {
-			frappe.geo.render_address_and_contact(frm);
+			frappe.contacts.render_address_and_contact(frm);
 		}
 	},
 	validate: function (frm) {
