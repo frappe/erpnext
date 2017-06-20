@@ -31,7 +31,6 @@ var erpnext_slides = [
 				frappe.wizard.refresh_slides();
 			});
 		},
-
 	},
 
 	{
@@ -330,8 +329,8 @@ var erpnext_slides = [
 
 	{
 		// last slide
-		domain: ["all"],
-		title: __("fin"),
+		domains: ["all"],
+		title: __("Fin"),
 		fields: [{fieldtype: "Section Break"},
 			{fieldtype: "Check", fieldname: "add_sample_data",
 			label: __("Add a few sample records"), "default": 1},
