@@ -71,9 +71,7 @@ def get_batches_by_oldest(item_code, warehouse):
 	batches = get_batch_qty(item_code = item_code, warehouse = warehouse)
 	batches_dates = [[batch, frappe.get_value('Batch', batch.batch_no, 'expiry_date')] for batch in batches]
 	batches_dates.sort(key=lambda tup: tup[1])
-
-	sorted_batches = [tup[0] for tup in batches_dates]
-	return sorted_batches
+	return batches_dates
 
 @frappe.whitelist()
 def split_batch(batch_no, item_code, warehouse, qty, new_batch_id = None):
