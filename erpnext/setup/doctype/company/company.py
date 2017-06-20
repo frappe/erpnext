@@ -143,13 +143,8 @@ class Company(Document):
 	def validate_perpetual_inventory(self):
 		if not self.get("__islocal"):
 			if cint(self.enable_perpetual_inventory) == 1 and not self.default_inventory_account:
-				frappe.msgprint(_("Warning: Set default inventory account for perpetual inventory"), alert=True)
-
-			enable_perpetual_inventory = frappe.db.get_value('Company', self.name, 'enable_perpetual_inventory')
-			if enable_perpetual_inventory != self.enable_perpetual_inventory:
-				if hasattr(frappe.local, 'enable_perpetual_inventory') and \
-					self.name in frappe.local.enable_perpetual_inventory:
-					del frappe.local.enable_perpetual_inventory[self.name]
+				frappe.msgprint(_("Set default inventory account for perpetual inventory"), 
+					alert=True, indicator='orange')
 
 	def set_default_accounts(self):
 		self._set_default_account("default_cash_account", "Cash")
