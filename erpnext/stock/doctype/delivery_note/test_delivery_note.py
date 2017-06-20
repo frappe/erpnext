@@ -26,7 +26,7 @@ class TestDeliveryNote(unittest.TestCase):
 		target_warehouse = "_Test Warehouse 1 - _TC"
 		company = "_Test Company"
 		if not frappe.db.exists("Account", target_warehouse):
-			parent_account = frappe.db.get_value('Account', 
+			parent_account = frappe.db.get_value('Account',
 				{'company': company, 'is_group':1, 'account_type': 'Stock'},'name')
 			account = create_account(account_name="_Test Warehouse 1", \
 				account_type="Stock", parent_account= parent_account, company=company)
@@ -275,11 +275,20 @@ class TestDeliveryNote(unittest.TestCase):
 	def test_return_entire_bundled_items(self):
 		set_perpetual_inventory()
 
-		create_stock_reconciliation(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, rate=100)
-		create_stock_reconciliation(item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC",
-			qty=50, rate=100)
+		create_stock_reconciliation(item_code="_Test Item",
+			target="_Test Warehouse - _TC", qty=50, rate=100)
+		create_stock_reconciliation(item_code="_Test Item Home Desktop 100",
+			target="_Test Warehouse - _TC", qty=50, rate=100)
 
-		dn = create_delivery_note(item_code="_Test Product Bundle Item", qty=5, rate=500)
+		actual_qty = get_qty_after_transaction()
+		self.assertEquals(actual_qty, 50)
+
+		dn = create_delivery_note(item_code="_Test Product Bundle Item",
+			qty=5, rate=500)
+
+		# qty after return
+		actual_qty = get_qty_after_transaction()
+		self.assertEquals(actual_qty, 25)
 
 		#  return bundled item
 		dn1 = create_delivery_note(item_code='_Test Product Bundle Item', is_return=1,
@@ -532,9 +541,9 @@ class TestDeliveryNote(unittest.TestCase):
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
 	args = frappe._dict(args)
-	dn.posting_date = args.posting_date or today()
-	if args.posting_time:
-		dn.posting_time = args.posting_time
+	dn.posting_date = args.posting_date or nowdate()
+	dn.posting_time = args.posting_time or nowtime()
+	dn.set_posting_time = 1
 
 	dn.company = args.company or "_Test Company"
 	dn.customer = args.customer or "_Test Customer"
