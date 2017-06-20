@@ -205,14 +205,14 @@ class PurchaseInvoice(BuyingController):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
 			for d in self.get('items'):
 				if not d.purchase_order:
-					throw(_("Purchase Order number required for Item {0}").format(d.item_code))
+					throw(_("As per the Buying Settings if Purchase Order Required == 'YES', then for creating Purchase Invoice, user need to create Purchase Order first for item {0}").format(d.item_code))
 
 	def pr_required(self):
 		stock_items = self.get_stock_items()
 		if frappe.db.get_value("Buying Settings", None, "pr_required") == 'Yes':
 			for d in self.get('items'):
 				if not d.purchase_receipt and d.item_code in stock_items:
-					throw(_("Purchase Receipt number required for Item {0}").format(d.item_code))
+					throw(_("As per the Buying Settings if Purchase Reciept Required == 'YES', then for creating Purchase Invoice, user need to create Purchase Receipt first for item {0}").format(d.item_code))
 
 	def validate_write_off_account(self):
 		if self.write_off_amount and not self.write_off_account:
