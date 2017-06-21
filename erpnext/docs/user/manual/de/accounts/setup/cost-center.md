@@ -22,7 +22,7 @@ Um Ihren Kostenstellenplan einzurichten, gehen Sie zu:
 
 >Rechnungswesen > Einstellungen > Kostenstellenplan
 
-![Kostenstellenplan]({{docs_base_url}}/assets/old_images/erpnext/chart-of-cost-centers.png)
+<img class="screenshot" alt="Kostenstellenplan" src="{{docs_base_url}}/assets/img/accounts/budgeting-cost-center.png">
 
 Kostenstellen helfen Ihnen bei der Erstellung von Budgets für Geschäftstätigkeiten.
 

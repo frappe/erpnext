@@ -64,6 +64,7 @@ apps/erpnext/erpnext/setup/doctype/company/company.py +44,Abbreviation cannot ha
 DocType: Payment Request,Payment Request,Pedido de Pagamento
 DocType: Asset,Value After Depreciation,Valor após Depreciação
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt_dashboard.py +17,Related,Relacionados
+DocType: Grading Scale,Grading Scale Name,Nome escala de avaliação
 apps/erpnext/erpnext/accounts/doctype/account/account.js +26,This is a root account and cannot be edited.,Esta é uma conta de root e não pode ser editada.
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +38,Cannot set authorization on basis of Discount for {0},Não é possível definir a autorização com base em desconto para {0}
 DocType: Rename Tool,"Attach .csv file with two columns, one for the old name and one for the new name","Anexar arquivo .csv com duas colunas, uma para o nome antigo e um para o novo nome"
@@ -608,7 +609,7 @@ DocType: Maintenance Visit,Completion Status,Status de Conclusão
 DocType: HR Settings,Enter retirement age in years,Insira a idade da aposentadoria em anos
 apps/erpnext/erpnext/accounts/doctype/asset/asset.js +263,Target Warehouse,Armazén de Destino
 DocType: Item,Allow over delivery or receipt upto this percent,Permitir entrega ou recebimento adicional até este percentual
-DocType: Upload Attendance,Import Attendance,Importação de Atendimento
+DocType: Upload Attendance,Import Attendance,Importação de Ponto
 apps/erpnext/erpnext/public/js/pos/pos.html +115,All Item Groups,Todos os grupos de itens
 DocType: Process Payroll,Activity Log,Log de Atividade
 apps/erpnext/erpnext/config/setup.py +89,Automatically compose message on submission of transactions.,Compor automaticamente mensagem no envio de transações.
@@ -1087,6 +1088,7 @@ DocType: HR Settings,Stop Birthday Reminders,Interromper lembretes de aniversár
 DocType: SMS Center,Receiver List,Lista de recebedores
 apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py +46,Consumed Amount,Quantidade Consumida
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +98,Net Change in Cash,Variação Líquida em Dinheiro
+DocType: Assessment Plan,Grading Scale,Escala de avaliação
 apps/erpnext/erpnext/stock/doctype/item/item.py +402,Unit of Measure {0} has been entered more than once in Conversion Factor Table,Unidade de Medida {0} foi inserida mais de uma vez na Tabela de Conversão de Fator
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +601,Already completed,Já concluído
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +28,Payment Request already exists {0},Pedido de Pagamento já existe {0}
@@ -1298,6 +1300,7 @@ DocType: Item Reorder,Check in (group),Entrada (grupo)
 apps/erpnext/erpnext/config/projects.py +25,Gantt chart of all tasks.,Gráfico de Gantt de todas as tarefas.
 DocType: Opportunity,Mins to First Response,Minutos para Primeira Resposta
 DocType: Pricing Rule,Margin Type,Tipo da Margem
+DocType: Course,Default Grading Scale,Escala de avaliação padrão
 DocType: Appraisal,For Employee Name,Para Nome do Colaborador
 DocType: C-Form Invoice Detail,Invoice No,Nota nº
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +342,Make Payment,Fazer Pagamento
@@ -1394,6 +1397,7 @@ DocType: Request for Quotation,Manufacturing Manager,Gerente de Fabricação
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +191,Serial No {0} is under warranty upto {1},Nº de Série {0} está na garantia até {1}
 apps/erpnext/erpnext/config/stock.py +158,Split Delivery Note into packages.,Dividir Guia de Remessa em pacotes.
 apps/erpnext/erpnext/hooks.py +87,Shipments,Entregas
+apps/erpnext/erpnext/accounts/doctype/account/account.py +191,Account balance ({0}) for {1} and stock value ({2}) for warehouse {3} must be same,O saldo da conta {1} ({0}) e o valor do estoque ({2}) para o armazém {3} devem ser os mesmos
 DocType: Payment Entry,Total Allocated Amount (Company Currency),Total alocado (moeda da empresa)
 DocType: Purchase Order Item,To be delivered to customer,Para ser entregue ao cliente
 DocType: BOM,Scrap Material Cost,Custo do Material Sucateado
@@ -1424,6 +1428,7 @@ DocType: Bank Guarantee,Bank Guarantee,Garantia Bancária
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +39,Please click on 'Generate Schedule' to get schedule,"Por favor, clique em ""Gerar Agenda"" para obter cronograma"
 DocType: Bin,Ordered Quantity,Quantidade Encomendada
 apps/erpnext/erpnext/public/js/setup_wizard.js +52,"e.g. ""Build tools for builders""","ex: ""Desenvolve ferramentas para construtores """
+DocType: Grading Scale,Grading Scale Intervals,Intervalos da escala de avaliação
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +125,{0} {1}: Accounting Entry for {2} can only be made in currency: {3},{0} {1}: Entradas contabeis para {2} só pode ser feito em moeda: {3}
 DocType: Production Order,In Process,Em Processo
 DocType: Authorization Rule,Itemwise Discount,Desconto relativo ao Item
@@ -2038,6 +2043,7 @@ apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +397,Pro
 DocType: Purchase Invoice,Purchase Taxes and Charges,Impostos e Encargos sobre Compras
 ,Qty to Receive,Qtde para Receber
 DocType: Leave Block List,Leave Block List Allowed,Deixe Lista de Bloqueios admitidos
+DocType: Grading Scale Interval,Grading Scale Interval,Intervalo da escala de avaliação
 apps/erpnext/erpnext/hr/doctype/vehicle_log/vehicle_log.py +49,Expense Claim for Vehicle Log {0},Reembolso de Despesa para o Log do Veículo {0}
 DocType: Sales Partner,Retailer,Varejista
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +107,Credit To account must be a Balance Sheet account,Para crédito de conta deve ser uma conta de Balanço
@@ -3186,7 +3192,7 @@ apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconcil
 DocType: Employee,Reason for Leaving,Motivo da saída
 DocType: BOM Operation,Operating Cost(Company Currency),Custo operacional (moeda da empresa)
 DocType: Employee Loan Application,Rate of Interest,Taxa de Juros
-DocType: Expense Claim Detail,Sanctioned Amount,Quantidade sancionada
+DocType: Expense Claim Detail,Sanctioned Amount,Valor Sancionado
 DocType: GL Entry,Is Opening,É Abertura
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +196,Row {0}: Debit entry can not be linked with a {1},Linha {0}: Lançamento de débito não pode ser relacionado a uma {1}
 apps/erpnext/erpnext/accounts/doctype/account/account.py +234,Account {0} does not exist,A Conta {0} não existe

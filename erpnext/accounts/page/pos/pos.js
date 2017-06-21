@@ -1577,6 +1577,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			this.frm.doc.offline_pos_name = this.name;
 			this.frm.doc.posting_date = frappe.datetime.get_today();
 			this.frm.doc.posting_time = frappe.datetime.now_time();
+			this.frm.doc.pos_profile = this.pos_profile_data['name'];
 			invoice_data[this.name] = this.frm.doc
 			this.si_docs.push(invoice_data)
 			this.update_localstorage();

@@ -364,9 +364,9 @@ class EmailDigest(Document):
 		balance = prev_balance = 0.0
 		count = 0
 		for account in accounts:
-			balance += get_balance_on(account, date=self.future_to_date)
+			balance += get_balance_on(account, date=self.future_to_date, in_account_currency=False)
 			count += get_count_on(account, fieldname, date=self.future_to_date)
-			prev_balance += get_balance_on(account, date=self.past_to_date)
+			prev_balance += get_balance_on(account, date=self.past_to_date, in_account_currency=False)
 
 		if fieldname in ("bank_balance","credit_balance"):
 			return {
