@@ -51,11 +51,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Sample Collection",
 					"label": _("Sample Collection"),
-				},
-				{
-					"type": "doctype",
-					"name": "Invoice Test Report",
-					"description": _("Invoiced Results."),
 				}
 			]
 		},

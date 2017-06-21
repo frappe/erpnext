@@ -12,8 +12,6 @@ from frappe import _
 
 class LabTest(Document):
 	def on_submit(self):
-		if exists_inv_test_item(self):
-			lab_test_result_status(self.name,"Submitted")
 		frappe.db.set_value(self.doctype,self.name,"submitted_date", getdate())
 		insert_lab_test_to_medical_record(self)
 		frappe.db.set_value("Lab Test", self.name, "status", "Completed")
@@ -22,8 +20,6 @@ class LabTest(Document):
 		frappe.throw("""Not permitted""")
 
 	def on_cancel(self):
-		if exists_inv_test_item(self):
-			lab_test_result_status(self.name,"Cancelled")
 		delete_lab_test_from_medical_record(self)
 		frappe.db.set_value("Lab Test", self.name, "status", "Cancelled")
 		self.reload()
@@ -56,36 +52,14 @@ class LabTest(Document):
 		lab_test = load_result_format(lab_test, template, None, None)
 		self.reload()
 
-def lab_test_result_status(lab_test,status):
-	frappe.db.sql("""update `tabInvoice Test Item` set workflow=%s where lab_test=%s""",(status, lab_test))
-
-def exists_inv_test_item(lab_test):
-	return frappe.db.exists({
-		"doctype": "Invoice Test Item",
-		"lab_test": lab_test.name})
-
 @frappe.whitelist()
 def update_status(status, name):
 	frappe.db.sql("""update `tabLab Test` set status=%s, approved_date=%s where name = %s""", (status, getdate(), name))
-	lab_test_result_status(name,status)
 
 @frappe.whitelist()
 def update_lab_test_print_sms_email_status(print_sms_email, name):
 	frappe.db.set_value("Lab Test",name,print_sms_email,1)
-	frappe.db.sql("""update `tabInvoice Test Item` set `%s`=1 where lab_test=%s"""\
-	 	% (frappe.db.escape(print_sms_email), '%s'), (name))
-
-def create_invoice_test_report(invoice, patient):
-	invoice_test_report = frappe.new_doc("Invoice Test Report")
-	invoice_test_report.invoice = invoice.name
-	invoice_test_report.patient = patient.name
-	invoice_test_report.patient_age = patient.get_age()
-	invoice_test_report.patient_sex = patient.sex
-	invoice_test_report.email = patient.email
-	invoice_test_report.mobile = patient.mobile
-	invoice_test_report.report_preference = patient.report_preference
-	return invoice_test_report
-
+	
 def create_lab_test_doc(invoice, consultation, patient, template):
 	#create Test Result for template, copy vals from Invoice
 	lab_test = frappe.new_doc("Lab Test")
