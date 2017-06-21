@@ -181,7 +181,7 @@ class Project(Document):
 		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
 		
 	def update_sales_costing(self):
-		total_sales_cost = frappe.db.sql("""select sum(grand_total)
+		total_sales_cost = frappe.db.sql("""select sum(base_grand_total)
 			from `tabSales Order` where project = %s and docstatus=1""", self.name)
 
 		self.total_sales_cost = total_sales_cost and total_sales_cost[0][0] or 0
