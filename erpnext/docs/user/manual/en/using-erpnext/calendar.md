@@ -1,14 +1,14 @@
 The Calendar is a tool where you can create and share Events and also see auto-generated events from the system.
 
-You can switch calender view based on Month, Week and Day.
+You can switch calendar view based on Month, Week and Day.
 
 <img class="screenshot" alt="Calendar" src="{{docs_base_url}}/assets/img/collaboration-tools/calendar-1.png">
 
-### Creating Events in Calender
+### Creating Events in Calendar
 
 #### Creating Event Manually
 
-To create event manually, you should first determine Calender View. If Event's start and end time will be within one day, then you should first switch to Day view.
+To create event manually, you should first determine Calendar View. If Event's start and end time will be within one day, then you should first switch to Day view.
 
 This view will 24 hours of a day broken in various slots. You should click on slot for Event Start Time, and drag it down till you reach event end time.
 
@@ -45,7 +45,7 @@ In the Event master, checking "Send an email reminder in the morning" will trigg
 
 #### Create Email Digest
 
-To get email reminders for event, you should set Email Digest for Calender Events.
+To get email reminders for event, you should set Email Digest for Calendar Events.
 
 Email Digest can be set from:
 
