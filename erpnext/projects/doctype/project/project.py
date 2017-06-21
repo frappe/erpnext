@@ -120,6 +120,11 @@ class Project(Document):
 		self.flags.dont_sync_tasks = True
 		self.save(ignore_permissions = True)
 
+	def after_insert(self):
+		if self.sales_order:
+			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
+
+
 	def update_percent_complete(self):
 		total = frappe.db.sql("""select count(name) from tabTask where project=%s""", self.name)[0][0]
 		if not total and self.percent_complete:
