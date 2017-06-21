@@ -89,6 +89,10 @@ class Company(Document):
 		if self.default_currency:
 			frappe.db.set_value("Currency", self.default_currency, "enabled", 1)
 
+		if hasattr(frappe.local, 'enable_perpetual_inventory') and \
+			self.name in frappe.local.enable_perpetual_inventory:
+			frappe.local.enable_perpetual_inventory[self.name] = self.enable_perpetual_inventory
+
 		frappe.clear_cache()
 
 	def install_country_fixtures(self):

@@ -62,7 +62,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		this._super();
 		if(this.frm.doc.docstatus===1) {
 			this.show_stock_ledger();
-			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
+			if (erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 				this.show_general_ledger();
 			}
 		}

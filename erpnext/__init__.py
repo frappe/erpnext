@@ -62,7 +62,7 @@ def is_perpetual_inventory_enabled(company):
 		frappe.local.enable_perpetual_inventory = {}
 
 	if not company in frappe.local.enable_perpetual_inventory:
-		frappe.local.enable_perpetual_inventory[company] = frappe.db.get_value("Company", 
+		frappe.local.enable_perpetual_inventory[company] = frappe.db.get_value("Company",
 			company, "enable_perpetual_inventory") or 0
 
 	return frappe.local.enable_perpetual_inventory[company]
