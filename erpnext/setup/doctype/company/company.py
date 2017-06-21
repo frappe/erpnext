@@ -51,10 +51,10 @@ class Company(Document):
 			frappe.throw(_("Abbreviation already used for another company"))
 
 	def validate_default_accounts(self):
-		for field in ["default_bank_account", "default_cash_account", 
-			"default_receivable_account", "default_payable_account", 
-			"default_expense_account", "default_income_account", 
-			"stock_received_but_not_billed", "stock_adjustment_account", 
+		for field in ["default_bank_account", "default_cash_account",
+			"default_receivable_account", "default_payable_account",
+			"default_expense_account", "default_income_account",
+			"stock_received_but_not_billed", "stock_adjustment_account",
 			"expenses_included_in_valuation", "default_payroll_payable_account"]:
 				if self.get(field):
 					for_company = frappe.db.get_value("Account", self.get(field), "company")
@@ -96,9 +96,9 @@ class Company(Document):
 		frappe.clear_cache()
 
 	def install_country_fixtures(self):
-		path = os.path.join(os.path.dirname(__file__), "fixtures", self.country.lower())
+		path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(self.country))
 		if os.path.exists(path.encode("utf-8")):
-			frappe.get_attr("erpnext.setup.doctype.company.fixtures.{0}.install"
+			frappe.get_attr("erpnext.regional.{0}.install.install"
 				.format(self.country.lower()))(self)
 
 	def create_default_warehouses(self):
