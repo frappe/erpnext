@@ -150,13 +150,13 @@ var show_details = function(data){
 
 	var vitals = ""
 	if(data.temperature) vitals += "<br><b>Temperature :</b> " + data.temperature;
-	if(data.pulse) vitals += " ,<b>Pulse :</b> " + data.pulse;
-	if(data.respiratory_rate) vitals += " ,<b>Respiratory Rate :</b> " + data.respiratory_rate;
-	if(data.bp) vitals += " ,<b>BP :</b> " + data.bp;
+	if(data.pulse) vitals += ", <b>Pulse :</b> " + data.pulse;
+	if(data.respiratory_rate) vitals += ", <b>Respiratory Rate :</b> " + data.respiratory_rate;
+	if(data.bp) vitals += ", <b>BP :</b> " + data.bp;
 	if(data.bmi) vitals += "<br><b>BMI :</b> " + data.bmi;
 	if(data.nutrition_note) vitals += " (" + data.nutrition_note + ")"
-	if(data.height) vitals += " ,<b>Height :</b> " + data.height;
-	if(data.weight) vitals += " ,<b>Weight :</b> " + data.weight;
+	if(data.height) vitals += ", <b>Height :</b> " + data.height;
+	if(data.weight) vitals += ", <b>Weight :</b> " + data.weight;
 	if(data.signs_date) vitals += "<br><b>Date :</b> " + data.signs_date;
 
 	if(vitals){
