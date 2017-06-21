@@ -32,6 +32,6 @@ To setup your Chart of Cost Centers go to:
 
 > Accounts > Setup > Chart of Cost Centers
 
-![Chart of Cost Center]({{docs_base_url}}/assets/old_images/erpnext/chart-of-cost-centers.png)
+<img class="screenshot" alt="Cost Center" src="{{docs_base_url}}/assets/img/chart-of-cost-center.png">
 
 {next}

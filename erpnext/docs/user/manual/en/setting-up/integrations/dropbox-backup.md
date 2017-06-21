@@ -43,12 +43,16 @@ With this, a folder called "ERPNext" will be created in your Dropbox account, an
 
 ####Step 3: Fill in details for the app
 
-<img class="screenshot" alt="Create new" src="{{docs_base_url}}/assets/img/setup/integrations/dropbox-open-1.png">
+<img class="screenshot" alt="Choose Dropbox API and type as APP Folder" src="{{docs_base_url}}/assets/img/setup/integrations/dropbox-open-1.png">
 
 -
-<img class="screenshot" alt="Create new" src="{{docs_base_url}}/assets/img/setup/integrations/dropbox-open-2.png">
+<img class="screenshot" alt="Setup APP Name" src="{{docs_base_url}}/assets/img/setup/integrations/dropbox-open-2.png">
 
-####Step 4: Settings in Site Config
+####Step  4: Setup Redirect URL in app
+
+<img class="screenshot" alt="Set Redirect URL" src="{{docs_base_url}}/assets/img/setup/integrations/dropbox_redirect_uri.png">
+
+####Step 5: Settings in Site Config
 
 After the app is created, note the app key and app secret on Dropbox Settings page or enter in `sites/{sitename}/site_config.json` as follows,
 

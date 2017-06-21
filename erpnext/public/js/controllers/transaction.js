@@ -16,11 +16,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					// or set discount
 					item.discount_percentage = 0;
 					item.margin_type = 'Amount';
-					item.margin_rate_or_amount = flt(item.rate - item.price_list_rate, 
+					item.margin_rate_or_amount = flt(item.rate - item.price_list_rate,
 						precision("margin_rate_or_amount", item));
 					item.rate_with_margin = item.rate;
 				} else {
-					item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0, 
+					item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0,
 						precision("discount_percentage", item));
 					item.margin_type = '';
 					item.margin_rate_or_amount = 0;
@@ -602,8 +602,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	toggle_conversion_factor: function(item) {
 		// toggle read only property for conversion factor field if the uom and stock uom are same
-		this.frm.fields_dict.items.grid.toggle_enable("conversion_factor",
-			(item.uom != item.stock_uom)? true: false)
+		if(this.frm.get_field('items').grid.fields_map.conversion_factor) {
+			this.frm.fields_dict.items.grid.toggle_enable("conversion_factor",
+				(item.uom != item.stock_uom)? true: false);
+		}
 	},
 
 	qty: function(doc, cdt, cdn) {
@@ -756,7 +758,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if(this.frm.doc.ignore_pricing_rule) {
 			var me = this;
 			var item_list = [];
-			
+
 			$.each(this.frm.doc["items"] || [], function(i, d) {
 				if (d.item_code) {
 					item_list.push({
@@ -1144,7 +1146,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		if(!item.item_code) {
 			frappe.throw(__("Please enter Item Code to get batch no"));
-		} else if (doc.doctype == "Purchase Receipt" || 
+		} else if (doc.doctype == "Purchase Receipt" ||
 			(doc.doctype == "Purchase Invoice" && doc.update_stock)) {
 
 			return {

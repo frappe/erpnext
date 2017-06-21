@@ -1,6 +1,6 @@
-An Item is your companys' product or a service. The term Item is applicable to things (products or services) you sell as well as raw materials or components of products yet to be produced (before they can be sold to customers). An Item can be a phyical product or a service that you buy/sell from your customers/suppliers. ERPNext allows you to manage all sorts of items like raw-materials, sub-assemblies, finished goods, item variants and service items.
+An Item is your companys' product or a service. The term Item is applicable to things (products or services) you sell as well as raw materials or components of products yet to be produced (before they can be sold to customers). An Item can be a physical product or a service that you buy/sell from your customers/suppliers. ERPNext allows you to manage all sorts of items like raw-materials, sub-assemblies, finished goods, item variants and service items.
 
-ERPNext is optimized for itemized management of your sales and purchase. If you are in services, you can create an Item for each services that your offer. Completing the Item Master is very essential for successful implementation of ERPNext.
+ERPNext is optimised for itemised management of your sales and purchase. If you are in services, you can create an Item for each services that your offer. Completing the Item Master is very essential for successful implementation of ERPNext.
 
 ## Item Properties
 
@@ -9,19 +9,15 @@ ERPNext is optimized for itemized management of your sales and purchase. If you 
   * **Item Group:** Item Group is used to categorize an Item under various criterias like products, raw materials, services, sub-assemblies, consumables or all Item groups. Create your default Item Group list under Setup> Item Group and pre-select the option while filling your New Item details under [Item Group]({{docs_base_url}}/user/manual/en/stock/setup/item-group.html)
   * **Default Unit of Measure:** This is the default measuring unit that you will use for your product. It could be in nos, kgs, meters, etc. You can store all the UOM’s that your product will require under Set Up> Master Data > UOM. These can be preselected while filling New Item by using % sign to get a pop up of the UOM list.
   * **Brand:** If you have more than one brand save them under Set Up> Master Data> Brand and pre-select them while filling a New Item.
-  * **Variant:** A Item Variant is a different version of a Item.To learn more about managing varaints see [Item Variants]({{docs_base_url}}/user/manual/en/stock/item/item-variants.html)
+  * **Variant:** A Item Variant is a different version of a Item.To learn more about managing variants see [Item Variants]({{docs_base_url}}/user/manual/en/stock/item/item-variants.html)
 
 ### Upload an Image
 
-To upload an image for your icon that will appear in all transactions, save
-the partially filled form. Only after your file is saved  the 'upload' button will
-work above the Image icon. Click on this sign and upload the image.
+To upload an image for your icon that will appear in all transactions, save the partially filled form. Only after your file is saved  the 'upload' button will work above the Image icon. Click on this sign and upload the image.
 
 ### Inventory : Warehouse and Stock Setting
 
-In ERPNext, you can select different type of Warehouses to stock your
-different Items. This can be selected based on Item types. It could be Fixed
-Asset Item, Stock Item or even Manufacturing Item.
+In ERPNext, you can select different type of Warehouses to stock your different Items. This can be selected based on Item types. It could be Fixed Asset Item, Stock Item or even Manufacturing Item.
 
   * **Stock Item:** If you are maintaining stock of this Item in your Inventory, ERPNext will make a stock ledger entry for each transaction of this item.
   * **Default Warehouse:** This is the Warehouse that is automatically selected in your transactions.
@@ -44,49 +40,51 @@ These numbers help to track individual units or batches of Items which you sell.
 
 ### Item Tax
 
-These settings are required only if a particular Item has a different tax rate
-than the rate defined in the standard tax Account. For example, If you have a
-tax Account, “VAT 10%” and this particular Item is exempted from tax, then you
-select “VAT 10%” in the first column, and set “0” as the tax rate in the
-second column.
+These settings are required only if a particular Item has a different tax rate than the rate defined in the standard tax Account. For example, If you have a tax Account, “VAT 10%” and this particular Item is exempted from tax, then you select “VAT 10%” in the first column, and set “0” as the tax rate in the second column.
 
 Go to [Setting Up Taxes]({{docs_base_url}}/user/manual/en/setting-up/setting-up-taxes.html) to understand this topic in detail.
 
 ### Inspection
 
-Inspection Required: If an incoming inspection (at the time of delivery from
-the Supplier) is mandatory for this Item, mention “Inspection Required” as
-“Yes”. The system will ensure that a Quality Inspection will be prepared and
-approved before a Purchase Receipt is submitted.
+Inspection Required: If an incoming inspection (at the time of delivery from the Supplier) is mandatory for this Item, mention “Inspection Required” as “Yes”. The system will ensure that a Quality Inspection will be prepared and approved before a Purchase Receipt is submitted.
 
-Inspection Criteria: If a Quality Inspection is prepared for this Item, then
-this template of criteria will automatically be updated in the Quality
-Inspection table of the Quality Inspection. Examples of Criteria are: Weight,
-Length, Finish etc.
+Inspection Criteria: If a Quality Inspection is prepared for this Item, then this template of criteria will automatically be updated in the Quality Inspection table of the Quality Inspection. Examples of Criteria are: Weight, Length, Finish etc.
 
 ### Purchase Details
 
-![Purchase Details]({{docs_base_url}}/assets/old_images/erpnext/item-purchase.png)
+<img alt="Item Purchase Details" class="screenshot" src="{{docs_base_url}}/assets/img/stock/item-purchase.png">
 
-**Lead time days:** Lead time days are the number of days required for the Item to reach the warehouse.
+* **Lead time days:** Lead time days are the number of days required for the Item to reach the warehouse.
 
-**Default Expense Account:** It is the account in which cost of the Item will be debited.
+* **Default Expense Account:** It is the account in which cost of the Item will be debited.
 
-**Default Cost Centre:** It is used for tracking expense for this Item.
+* **Default Cost Centre:** It is used for tracking expense for this Item.
+
+###Supplier Details
+
+<img alt="Item Supplier Details" class="screenshot" src="{{docs_base_url}}/assets/img/stock/item-supplier.png">
+
+* **Default Supplier:** Supplier from whom you generally purchase this item.
+
+* **Manufacturer Details:** Select Manufacturer and Part No. assigned by the Manufacturer for this item.
+
+* **Supplier Codes:** Track Item Code defined by the Suppliers for this Item. In the Purchase transactions, on selection and Supplier, Supplier Part No. will be fetched as well for the Supplier's reference.
 
 ### Sales Details
 
-![Sales Details]({{docs_base_url}}/assets/old_images/erpnext/item-sales.png)
+<img alt="Item Sales Details" class="screenshot" src="{{docs_base_url}}/assets/img/stock/item-sales.png">
 
-**Default Income Account:** Income account selected here will be fetched automatically in sales invoice for this item.
+* **Default Income Account:** Income account selected here will be fetched automatically in sales invoice for this item.
 
-**Cost Centre:** Cost center selected here will be fetched automatically in sales invoice for this item.
+* **Cost Centre:** Cost center selected here will be fetched automatically in sales invoice for this item.
+
+* **Customer Codes:** Track Item Code assigned by the Customers for this Item. This will help you in searching item while creating Sales Order based on the Item Code in the Customer's Purchase Order.
 
 ### Manufacturing And Website
 
-![Manufacturing]({{docs_base_url}}/assets/old_images/erpnext/item-manufacturing-website.png)
+<img alt="Item Manfacturing and Website Details" class="screenshot" src="{{docs_base_url}}/assets/img/stock/item-manufacturing-and-website.png">
 
-Visit [Manufacturing]({{docs_base_url}}/user/manual/en/manufacturing) and [Website ]({{docs_base_url}}/user/manual/en/website)to understand these topics in detail.
+Visit [Manufacturing]({{docs_base_url}}/user/manual/en/manufacturing.html) and [Website ]({{docs_base_url}}/user/manual/en/website.html)to understand these topics in detail.
 
 ### Learn more about Item
 
