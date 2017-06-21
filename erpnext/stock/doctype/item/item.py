@@ -37,7 +37,8 @@ class Item(WebsiteGenerator):
 		if frappe.db.get_default("item_naming_by")=="Naming Series":
 			if self.variant_of:
 				if not self.item_code:
-					self.item_code = make_variant_item_code(self.variant_of, self)
+					template_item_name = frappe.db.get_value("Item", self.variant_of, "item_name")
+					self.item_code = make_variant_item_code(self.variant_of, template_item_name, self)
 			else:
 				from frappe.model.naming import make_autoname
 				self.item_code = make_autoname(self.naming_series+'.#####')
