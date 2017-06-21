@@ -16,7 +16,7 @@ Sie können ein neues benutzerdefiniertes Feld auch über das [Werkzeug zum Anpa
 
 In einem benutzerdefinierten Formular finden Sie für jedes Feld die Plus(+)-Option. Wenn Sie auf dieses Symbol klicken, wird eine neue Zeile oberhalb dieses Feldes eingefügt. Sie können die Einstellungen für Ihr Feld in der neu eingefügten leeren Zeile eingeben.
 
-![Formular anpassen - benutzerdefiniertes Feld]({{docs_base_url}}/assets/old_images/erpnext/customize-form-custom-field.png)
+<img alt="Formular anpassen - benutzerdefiniertes Feld" class="screenshot" src="{{docs_base_url}}/assets/img/customize/custom-field-2.gif">
 
 Im Folgenden sind die Schritte aufgeführt, wie man ein benutzerdefiniertes Feld in ein bestehendes Formular einfügt.
 
@@ -55,8 +55,6 @@ Wenn Sie ein Verknüpfungsfeld erstellen,dann wird der Name des DocType, mit dem
 <img alt="Select Document Type" class="screenshot" src="{{docs_base_url}}/assets/img/customize/custom-field-5.png">
 
 Wenn der Feldtyp als Auswahlfeld (Drop Down-Feld) angegeben ist, dann sollten alle möglichen Ergebnisse für dieses Feld im Optionen-Feld aufgelistet werden. Die möglichen Ergebnisse sollten alle in einer eigenen Zeile stehen.
-
-![Optionen für benutzerdefinierte Felder]({{docs_base_url}}/assets/old_images/erpnext/custom-field-option.png)
 
 Bei anderen Feldtypen, wie Daten, Datum, Währung usw. lassen Sie das Optionen-Feld leer.
 
