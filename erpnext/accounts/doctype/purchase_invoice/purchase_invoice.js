@@ -224,7 +224,6 @@ cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
 	return {
 		filters: [
 			["Account", "account_type", "in", ["Cash", "Bank"]],
-			["Account", "root_type", "=", "Asset"],
 			["Account", "is_group", "=",0],
 			["Account", "company", "=", doc.company]
 		]
