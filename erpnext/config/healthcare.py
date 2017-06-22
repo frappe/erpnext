@@ -72,6 +72,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Physician Schedule",
 					"label": _("Physician Schedule"),
+				},
+				{
+					"type": "doctype",
+					"name": "Medical Code",
+					"label": _("Medical Code"),
 				}
 			]
 		},
