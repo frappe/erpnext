@@ -483,6 +483,5 @@ def save_invoice(e, si_doc, name):
 
 @frappe.whitelist()
 def end_pos_session(start, end):
-	print(end)
 	frappe.reload_doctype('Sales Invoice')
 	frappe.db.sql("""update `tabSales Invoice` set pos_session_end = %s where pos_session_start = %s""", (end, start))
