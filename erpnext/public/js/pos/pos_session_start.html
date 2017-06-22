@@ -1,0 +1,15 @@
+<div class="pos">
+	<div class="row">
+		<div class="pos-session-start col-xs-12 no-items-message">
+				<a class="pull-left avatar avatar-xl pos-profile-btn" style="margin-top: 1px">
+					{% if(data.image) { %}
+					<div class="avatar-frame" style="background-image: url({%= data.image %})"></div>
+					{% } else { %}
+					<div class="standard-image" style="background-color: {{ data.color }}">
+						{{ data.abbr }}</div>
+					{% } %}
+					<p>{{ __("New Session") }}</p>
+				</a>
+		</div>
+	</div>
+</div>
