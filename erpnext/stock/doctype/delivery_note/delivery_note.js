@@ -85,8 +85,41 @@ frappe.ui.form.on("Delivery Note Item", {
 		frm.update_in_all_rows('items', 'cost_center', d.cost_center);
 	},
 	item_code: function(frm, dt, dn) {
-		refresh_field("items");
-		erpnext.stock.select_batch_and_serial_no(frm, d);
+		var d = locals[dt][dn];
+		if(d.item_code) {
+			var args = {
+				'item_code': d.item_code,
+			};
+			frappe.call({
+				doc: frm.doc,
+				method: "get_batched_serialized_details",
+				args: args,
+				callback: function(r) {
+					if(r.message) {
+						$.each(r.message, function(k, v) {
+							d[k] = v;
+						});
+						let opts = {
+							frm: frm,
+							item: d,
+							warehouse_details: {
+								type: "From Warehouse",
+								name: d.warehouse
+							},
+						}
+						if(d && d.has_batch_no && !d.batch_no) {
+							opts.has_batch = 1;
+						} else if(d && d.has_serial_no && !d.serial_no) {
+							opts.has_batch = 0;
+						}
+						if(opts.hasOwnProperty("has_batch")) {
+							let serial_no_batch_selector = new erpnext.SerialNoBatchSelector(opts);
+						}
+						refresh_field("items");
+					}
+				}
+			});
+		}
 	}
 });
 

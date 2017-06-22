@@ -175,8 +175,8 @@ frappe.ui.form.on('Stock Entry Detail', {
 						$.each(r.message, function(k, v) {
 							d[k] = v;
 						});
-						refresh_field("items");
 						erpnext.stock.select_batch_and_serial_no(frm, d);
+						refresh_field("items");
 					}
 				}
 			});
@@ -578,6 +578,7 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 		opts.has_batch = 0;
 	}
 
-	let serial_no_batch_selector = new erpnext.SerialNoBatchSelector(opts);
-
+	if(opts.hasOwnProperty("has_batch")) {
+		let serial_no_batch_selector = new erpnext.SerialNoBatchSelector(opts);
+	}
 }

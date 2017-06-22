@@ -58,10 +58,11 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 		this.dialog.set_primary_action(__('Insert'), function() {
 			me.values = me.dialog.get_values();
-			if(!me.validate()) return;
-			me.set_items();
-			refresh_field("items");
-			me.dialog.hide();
+			if(me.validate()) {
+				me.set_items();
+				refresh_field("items");
+				me.dialog.hide();
+			}
 		});
 
 		this.dialog.show();
@@ -120,8 +121,10 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		item[attribute] = values[attribute];
 		if(this.warehouse_details.type === 'Source Warehouse') {
 			item.s_warehouse = values.warehouse || warehouse;
-		} else {
+		} else if(this.warehouse_details.type === 'Target Warehouse') {
 			item.t_warehouse = values.warehouse || warehouse;
+		} else {
+			item.warehouse = values.warehouse || warehouse;
 		}
 		item.qty = values[qty_field];
 	},
