@@ -38,7 +38,8 @@ file. To export the document in Excel tick the checkbox for Download in Excel Fi
 <img alt="Download Template" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/import-csv.png">
 
 ### Download in Excel
-<img alt="Download Template" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/import-excel.png">
+
+<img alt="Download Template" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/data-import-excel.png">
 
 ### 3\. Upload the File ethier in .xlsx or .csv 
 

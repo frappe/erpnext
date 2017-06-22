@@ -17,7 +17,8 @@ Example URL:
     http://instant.smses.com/web2sms.php?username=<USERNAME>&password;=<PASSWORD>&to;=<MOBILENUMBER>&sender;=<SENDERID>&message;=<MESSAGE>
     
 
-![SMS Settings]({{docs_base_url}}/assets/old_images/erpnext/sms-setting2.jpg)
+<img class="screenshot" alt="SMS Setting 2" src="{{docs_base_url}}/assets/img/setup/sms-settings2.jpg">
+
 
 > Note: the string up to the "?" is the SMS Gateway URL
 
@@ -35,6 +36,6 @@ Note that some parameters in the URL are static.You will get static values
 from your SMS Provider like username, password etc. These static values should
 be entered in the Static Parameters table.
 
-![SMS Setting]({{docs_base_url}}/assets/old_images/erpnext/sms-settings1.png)
+<img class="screenshot" alt="SMS Setting" src="{{docs_base_url}}/assets/img/setup/sms-settings1.png)">
 
 {next}

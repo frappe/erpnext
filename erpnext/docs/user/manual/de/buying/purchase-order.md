@@ -7,7 +7,7 @@ Ein Lieferantenauftrag kann automatisch aus einer Materialanfrage oder einem Lie
 
 ### Flußdiagramm der Lieferantenbestellung
 
-![Lieferantenauftrag]({{docs_base_url}}/assets/img/buying/purchase-order-f.jpg)
+<img class="screenshot" alt="Lieferantenauftrag" src="{{docs_base_url}}/assets/img/buying/purchase-order-f.jpg)">
 
 In ERPNext können Sie einen Lieferantenauftrag auch direkt erstellen über:
 

@@ -5,18 +5,18 @@ conversation.
 
 #### Empty Issue List
 
-![Ticket List]({{docs_base_url}}/assets/img/website/portal-ticket-list-empty.png)
+<img class="screenshot" alt="Issue List" src="{{docs_base_url}}/assets/img/website/portal-ticket-list-empty.png)">
 
 #### New Issue
 
-![New Ticket]({{docs_base_url}}/assets/img/website/portal-new-ticket.png)
+<img class="screenshot" alt="New Issue " src="{{docs_base_url}}/assets/img/website/portal-new-ticket.png)">
 
 #### Open Issue
 
-![Open Issue]({{docs_base_url}}/assets/img/website/portal-ticket-1.gif)
+<img class="screenshot" alt="Issue Raised" src="{{docs_base_url}}/assets/img/website/portal-ticket-1.gif)">
 
 #### Reply on Issue
 
-![Reply Issue]({{docs_base_url}}/assets/img/website/portal-ticket-reply.gif)
+<img class="screenshot" alt="Issue reply" src="{{docs_base_url}}/assets/img/website/portal-ticket-reply.gif)">
 
 {next}
