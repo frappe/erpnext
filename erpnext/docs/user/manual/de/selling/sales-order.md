@@ -9,7 +9,7 @@ Wenn Ihr Kunde das Angebot annimmt, können Sie das Angebot in einen Kundenauftr
 
 ### Flußdiagramm des Kundenauftrags
 
-<img class="screenshot" alt="Kundenauftrag aus Angebot erstellen" src="{{docs_base_url}}/assets/img/selling/sales-order-f.jpg)">
+<img class="screenshot" alt="Kundenauftrag aus Angebot erstellen" src="{{docs_base_url}}/assets/img/selling/sales-order-f.jpg">
 
 Um einen neuen Kundenauftrag zu erstellen gehen Sie zu: > Vertrieb > Kundenauftrag > Neuer Kundenauftrag
 

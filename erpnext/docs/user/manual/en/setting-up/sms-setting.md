@@ -36,6 +36,6 @@ Note that some parameters in the URL are static.You will get static values
 from your SMS Provider like username, password etc. These static values should
 be entered in the Static Parameters table.
 
-<img class="screenshot" alt="SMS Setting" src="{{docs_base_url}}/assets/img/setup/sms-settings1.png)">
+<img class="screenshot" alt="SMS Setting" src="{{docs_base_url}}/assets/img/setup/sms-settings1.png">
 
 {next}

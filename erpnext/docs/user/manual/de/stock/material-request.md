@@ -3,7 +3,7 @@
 
 Eine Materialanfrage ist ein einfaches Dokument, welches einen Bedarf an Artikeln (Produkte oder Dienstleistungen) für einen bestimmten Zweck erfasst.
 
-<img class="screenshot" alt="Materialanfrage" src="({{docs_base_url}}/assets/img/buying/material-request-workflow.jpg)">
+<img class="screenshot" alt="Materialanfrage" src="({{docs_base_url}}/assets/img/buying/material-request-workflow.jpg">
 
 Um eine Materialanfrage manuell zu erstellen, gehen Sie bitte zu: 
 

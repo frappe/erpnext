@@ -12,7 +12,7 @@ To allocate target, you should open specific Sales Person master.
 
 In the Sales Person master, you will find table called Sales Person Target.
 
-![Sales Person Target Item Group]({{docs_base_url}}/assets/img/selling/sales-person-target-item-group.png)
+<img class="screenshot" alt="Sales person target " src="{{docs_base_url}}/assets/img/selling/sales-person-target-item-group.png">
 
 In this table, you should select Item Group, Fiscal Year, Target Qty and Amount. 
 

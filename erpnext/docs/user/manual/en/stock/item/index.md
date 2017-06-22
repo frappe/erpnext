@@ -82,8 +82,12 @@ Inspection Criteria: If a Quality Inspection is prepared for this Item, then thi
 * **Default Income Account:** Income account selected here will be fetched automatically in sales invoice for this item.
 =======
 
+<<<<<<< HEAD
 <img class="screenshot" alt="Sales details" src="{{docs_base_url}}/assets/img/stock/item-sales.png)">
 >>>>>>> Edited help page
+=======
+<img class="screenshot" alt="Sales details" src="{{docs_base_url}}/assets/img/stock/item-sales.png">
+>>>>>>> Modified help pages
 
 * **Cost Centre:** Cost center selected here will be fetched automatically in sales invoice for this item.
 

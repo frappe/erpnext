@@ -7,7 +7,7 @@ Sie können ein Lieferantenangebot aus einer Materialanfrage heraus erstellen.
 
 ### Flußdiagramm zum Lieferantenangebot
 
-<img class="screenshot" alt="Lieferantenangebot" src="{{docs_base_url}}/assets/img/buying/supplier-quotation-f.jpg)">
+<img class="screenshot" alt="Lieferantenangebot" src="{{docs_base_url}}/assets/img/buying/supplier-quotation-f.jpg">
 
 Sie können ein Lieferantenangebot auch direkt erstellen über:
 
