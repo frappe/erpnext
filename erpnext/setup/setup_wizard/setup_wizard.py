@@ -345,7 +345,6 @@ def make_sales_and_purchase_tax_templates(accounts, template_name=None):
 	purchase_tax_template["doctype"] = "Purchase Taxes and Charges Template"
 
 	doc = frappe.get_doc(purchase_tax_template)
-	print frappe.as_json(doc)
 	doc.insert(ignore_permissions=True)
 
 def create_items(args):

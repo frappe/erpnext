@@ -32,8 +32,6 @@ def update_address_template():
 		).insert()
 
 def add_hsn_codes():
-	frappe.reload_doc('regional', 'doctype', 'gst_hsn_code')
-
 	if frappe.db.count('GST HSN Code') > 100:
 		return
 
@@ -54,8 +52,6 @@ def add_hsn_codes():
 def add_custom_roles_for_reports():
 	for report_name in ('GST Sales Register', 'GST Purchase Register',
 		'GST Itemised Sales Register', 'GST Itemised Purchase Register'):
-
-		frappe.reload_doc('regional', 'report', frappe.scrub(report_name))
 
 		if not frappe.db.get_value('Custom Role', dict(report=report_name)):
 			frappe.get_doc(dict(
