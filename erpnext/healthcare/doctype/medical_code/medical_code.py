@@ -7,4 +7,5 @@ import frappe
 from frappe.model.document import Document
 
 class MedicalCode(Document):
-	pass
+	def autoname(self):
+		self.name = self.medical_code_standard+" "+self.code

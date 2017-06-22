@@ -12,7 +12,7 @@ from erpnext.setup.doctype.sms_settings.sms_settings import send_sms
 class HealthcareSettings(Document):
 	def validate(self):
 		for key in ["collect_registration_fee","manage_customer","patient_master_name",
-		"require_test_result_approval","require_sample_collection", "default_medical_code"]:
+		"require_test_result_approval","require_sample_collection", "default_medical_code_standard"]:
 			frappe.db.set_default(key, self.get(key, ""))
 		if(self.collect_registration_fee):
 			if self.registration_fee <= 0 :

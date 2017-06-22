@@ -262,7 +262,7 @@ me.frm.set_query("test_code", "test_prescription", function(doc, cdt, cdn) {
 me.frm.set_query("medical_code", "codification_table", function(doc, cdt, cdn) {
 		return {
 			filters: {
-				parent: frappe.defaults.get_default("default_medical_code")
+				medical_code_standard: frappe.defaults.get_default("default_medical_code_standard")
 			}
 		};
 	});
