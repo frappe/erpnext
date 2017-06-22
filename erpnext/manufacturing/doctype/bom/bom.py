@@ -496,7 +496,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				item.default_warehouse,
 				item.expense_account as expense_account,
 				item.buying_cost_center as cost_center
-				{select_conditions}
+				{select_columns}
 			from
 				`tab{table}` bom_item, `tabBOM` bom, `tabItem` item
 			where
@@ -511,14 +511,14 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 	if fetch_exploded:
 		query = query.format(table="BOM Explosion Item",
 			where_conditions="""and item.is_sub_contracted_item = 0""",
-			select_conditions = ", bom_item.source_warehouse")
+			select_columns = ", bom_item.source_warehouse")
 		items = frappe.db.sql(query, { "qty": qty,	"bom": bom }, as_dict=True)
 	elif fetch_scrap_items:
-		query = query.format(table="BOM Scrap Item", where_conditions="", select_conditions="")
+		query = query.format(table="BOM Scrap Item", where_conditions="", select_columns="")
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
 	else:
 		query = query.format(table="BOM Item", where_conditions="", 
-			select_conditions = ", bom_item.source_warehouse")
+			select_columns = ", bom_item.source_warehouse")
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
 
 	for item in items:
