@@ -6,6 +6,7 @@ cur_frm.add_fetch("assessment_plan", "student_group", "student_group");
 
 frappe.ui.form.on('Assessment Result Tool', {
 	refresh: function(frm) {
+		frm.trigger("assessment_plan");
 		if (frappe.route_options) {
 			frm.set_value("student_group", frappe.route_options.student_group);
 			frm.set_value("assessment_plan", frappe.route_options.assessment_plan);

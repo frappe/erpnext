@@ -19,8 +19,19 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, SerialNoWa
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation \
 	import create_stock_reconciliation, set_valuation_method
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order, create_dn_against_so
+from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
 
 class TestDeliveryNote(unittest.TestCase):
+	def tearDown(self):
+		target_warehouse = "_Test Warehouse 1 - _TC"
+		company = "_Test Company"
+		if not frappe.db.exists("Account", target_warehouse):
+			parent_account = frappe.db.get_value('Account',
+				{'company': company, 'is_group':1, 'account_type': 'Stock'},'name')
+			account = create_account(account_name="_Test Warehouse 1", \
+				account_type="Stock", parent_account= parent_account, company=company)
+			frappe.db.set_value('Warehouse', target_warehouse, 'account', account)
+
 	def test_over_billing_against_dn(self):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
@@ -36,9 +47,8 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, frappe.get_doc(si).insert)
 
 	def test_delivery_note_no_gl_entry(self):
-		set_perpetual_inventory(0)
-		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 0)
-
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(0, company)
 		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
 
 		stock_queue = json.loads(get_previous_sle({
@@ -57,13 +67,14 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertFalse(get_gl_entries("Delivery Note", dn.name))
 
 	def test_delivery_note_gl_entry(self):
-		set_perpetual_inventory()
-		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
+
 		set_valuation_method("_Test Item", "FIFO")
 
 		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
 
-		stock_in_hand_account = frappe.db.get_value("Account", {"warehouse": "_Test Warehouse - _TC"})
+		stock_in_hand_account = get_inventory_account('_Test Company')
 		prev_bal = get_balance_on(stock_in_hand_account)
 
 		dn = create_delivery_note()
@@ -104,16 +115,17 @@ class TestDeliveryNote(unittest.TestCase):
 
 		dn.cancel()
 		self.assertFalse(get_gl_entries("Delivery Note", dn.name))
-		set_perpetual_inventory(0)
+		set_perpetual_inventory(0, company)
 
 	def test_delivery_note_gl_entry_packing_item(self):
-		set_perpetual_inventory()
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
 
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 		make_stock_entry(item_code="_Test Item Home Desktop 100",
 			target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 
-		stock_in_hand_account = frappe.db.get_value("Account", {"warehouse": "_Test Warehouse - _TC"})
+		stock_in_hand_account = get_inventory_account('_Test Company')
 		prev_bal = get_balance_on(stock_in_hand_account)
 
 		dn = create_delivery_note(item_code="_Test Product Bundle Item")
@@ -145,7 +157,7 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.cancel()
 		self.assertFalse(get_gl_entries("Delivery Note", dn.name))
 
-		set_perpetual_inventory(0)
+		set_perpetual_inventory(0, company)
 
 	def test_serialized(self):
 		se = make_serialized_item()
@@ -185,7 +197,8 @@ class TestDeliveryNote(unittest.TestCase):
 			self.assertEquals(cstr(serial_no.get(field)), value)
 
 	def test_sales_return_for_non_bundled_items(self):
-		set_perpetual_inventory()
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
 
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
 
@@ -212,16 +225,18 @@ class TestDeliveryNote(unittest.TestCase):
 			["incoming_rate", "stock_value_difference"])
 
 		self.assertEquals(flt(incoming_rate, 3), abs(flt(outgoing_rate, 3)))
+		stock_in_hand_account = get_inventory_account('_Test Company', dn1.items[0].warehouse)
 
 		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Delivery Note",
-			"voucher_no": dn1.name, "account": "_Test Warehouse - _TC"}, "debit")
+			"voucher_no": dn1.name, "account": stock_in_hand_account}, "debit")
 
 		self.assertEquals(gle_warehouse_amount, stock_value_difference)
 
-		set_perpetual_inventory(0)
+		set_perpetual_inventory(0, company)
 
 	def test_return_single_item_from_bundled_items(self):
-		set_perpetual_inventory()
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
 
 		create_stock_reconciliation(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, rate=100)
 		create_stock_reconciliation(item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC",
@@ -250,23 +265,34 @@ class TestDeliveryNote(unittest.TestCase):
 			["incoming_rate", "stock_value_difference"])
 
 		self.assertEquals(flt(incoming_rate, 3), abs(flt(outgoing_rate, 3)))
+		stock_in_hand_account = get_inventory_account('_Test Company', dn1.items[0].warehouse)
 
 		# Check gl entry for warehouse
 		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Delivery Note",
-			"voucher_no": dn1.name, "account": "_Test Warehouse - _TC"}, "debit")
+			"voucher_no": dn1.name, "account": stock_in_hand_account}, "debit")
 
 		self.assertEquals(gle_warehouse_amount, stock_value_difference)
 
-		set_perpetual_inventory(0)
+		set_perpetual_inventory(0, company)
 
 	def test_return_entire_bundled_items(self):
-		set_perpetual_inventory()
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
 
-		create_stock_reconciliation(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, rate=100)
-		create_stock_reconciliation(item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC",
-			qty=50, rate=100)
+		create_stock_reconciliation(item_code="_Test Item",
+			target="_Test Warehouse - _TC", qty=50, rate=100)
+		create_stock_reconciliation(item_code="_Test Item Home Desktop 100",
+			target="_Test Warehouse - _TC", qty=50, rate=100)
 
-		dn = create_delivery_note(item_code="_Test Product Bundle Item", qty=5, rate=500)
+		actual_qty = get_qty_after_transaction()
+		self.assertEquals(actual_qty, 50)
+
+		dn = create_delivery_note(item_code="_Test Product Bundle Item",
+			qty=5, rate=500)
+
+		# qty after return
+		actual_qty = get_qty_after_transaction()
+		self.assertEquals(actual_qty, 25)
 
 		#  return bundled item
 		dn1 = create_delivery_note(item_code='_Test Product Bundle Item', is_return=1,
@@ -282,14 +308,15 @@ class TestDeliveryNote(unittest.TestCase):
 			["incoming_rate", "stock_value_difference"])
 
 		self.assertEquals(incoming_rate, 100)
+		stock_in_hand_account = get_inventory_account('_Test Company', dn1.items[0].warehouse)
 
 		# Check gl entry for warehouse
 		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Delivery Note",
-			"voucher_no": dn1.name, "account": "_Test Warehouse - _TC"}, "debit")
+			"voucher_no": dn1.name, "account": stock_in_hand_account}, "debit")
 
 		self.assertEquals(gle_warehouse_amount, 1400)
 
-		set_perpetual_inventory(0)
+		set_perpetual_inventory(0, company)
 
 	def test_return_for_serialized_items(self):
 		se = make_serialized_item()
@@ -327,7 +354,8 @@ class TestDeliveryNote(unittest.TestCase):
 		})
 
 	def test_delivery_of_bundled_items_to_target_warehouse(self):
-		set_perpetual_inventory()
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
 
 		set_valuation_method("_Test Item", "FIFO")
 		set_valuation_method("_Test Item Home Desktop 100", "FIFO")
@@ -339,7 +367,6 @@ class TestDeliveryNote(unittest.TestCase):
 				target=warehouse, qty=100, rate=100)
 
 		opening_qty_test_warehouse_1 = get_qty_after_transaction(warehouse="_Test Warehouse 1 - _TC")
-
 		dn = create_delivery_note(item_code="_Test Product Bundle Item",
 			qty=5, rate=500, target_warehouse="_Test Warehouse 1 - _TC", do_not_submit=True)
 
@@ -390,13 +417,13 @@ class TestDeliveryNote(unittest.TestCase):
 			and warehouse='_Test Warehouse - _TC'""", dn.name)[0][0])
 
 		expected_values = {
-			"_Test Warehouse - _TC": [0.0, stock_value_difference],
+			"Stock In Hand - _TC": [0.0, stock_value_difference],
 			"_Test Warehouse 1 - _TC": [stock_value_difference, 0.0]
 		}
 		for i, gle in enumerate(gl_entries):
 			self.assertEquals([gle.debit, gle.credit], expected_values.get(gle.account))
 
-		set_perpetual_inventory(0)
+		set_perpetual_inventory(0, company)
 
 	def test_closed_delivery_note(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import update_delivery_note_status
@@ -519,9 +546,9 @@ class TestDeliveryNote(unittest.TestCase):
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
 	args = frappe._dict(args)
-	dn.posting_date = args.posting_date or today()
-	if args.posting_time:
-		dn.posting_time = args.posting_time
+	dn.posting_date = args.posting_date or nowdate()
+	dn.posting_time = args.posting_time or nowtime()
+	dn.set_posting_time = 1
 
 	dn.company = args.company or "_Test Company"
 	dn.customer = args.customer or "_Test Customer"

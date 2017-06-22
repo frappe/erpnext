@@ -30,8 +30,10 @@ def get():
 	                _("Earnest Money"): {}
 	            },
 	            _("Stock Assets"): {
+	                _("Stock In Hand"): {
+	                    "account_type": "Stock"
+	                },
 	                "account_type": "Stock",
-					"is_group": 1
 	            },
 	            _("Tax Assets"): {
 					"is_group": 1

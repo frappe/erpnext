@@ -7,10 +7,10 @@ frappe.ui.form.on("Student Group Creation Tool", "refresh", function(frm) {
 		})
 	});
 	frappe.realtime.on("student_group_creation_progress", function(data) {
-			if(data.progress) {
-				frappe.hide_msgprint(true);
-				frappe.show_progress(__("Creating student groups"), data.progress[0],data.progress[1]);
-			}
+		if(data.progress) {
+			frappe.hide_frappe.msgprint(true);
+			frappe.show_progress(__("Creating student groups"), data.progress[0],data.progress[1]);
+		}
 	});
 });
 

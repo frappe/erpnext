@@ -31,6 +31,12 @@ $.extend(erpnext, {
 		}
 	},
 
+	is_perpetual_inventory_enabled: function(company) {
+		if(company) {
+			return frappe.get_doc(":Company", company).enable_perpetual_inventory
+		}
+	},
+
 	setup_serial_no: function() {
 		var grid_row = cur_frm.open_grid_row();
 		if(!grid_row || !grid_row.grid_form.fields_dict.serial_no ||
@@ -248,7 +254,7 @@ $(document).on('app_ready', function() {
 			"Delivery Note", "Purchase Receipt", "Sales Invoice"], function(i, d) {
 			frappe.ui.form.on(d, "onload", function(frm) {
 				cur_frm.set_df_property("posting_time", "description",
-					sys_defaults.time_zone);
+					frappe.sys_defaults.time_zone);
 			});
 		});
 	}

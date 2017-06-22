@@ -1311,7 +1311,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "depends_on": "eval:inList([\"Credit Note\", \"Debit Note\"], doc.voucher_type)", 
+   "depends_on": "eval:in_list([\"Credit Note\", \"Debit Note\"], doc.voucher_type)", 
    "fieldname": "stock_entry", 
    "fieldtype": "Link", 
    "hidden": 0, 

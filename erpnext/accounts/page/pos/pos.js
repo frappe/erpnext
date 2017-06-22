@@ -114,7 +114,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	email_prompt: function() {
 		var me = this;
-		fields = [{label:__("To"), fieldtype:"Data", reqd: 0, fieldname:"recipients",length:524288},
+		var fields = [{label:__("To"), fieldtype:"Data", reqd: 0, fieldname:"recipients",length:524288},
 			{fieldtype: "Section Break", collapsible: 1, label: "CC & Standard Reply"},
 			{fieldtype: "Section Break"},
 			{label:__("Subject"), fieldtype:"Data", reqd: 1,
@@ -399,7 +399,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.make_item_list();
 		this.make_discount_field()
 	},
-	
+
 	make_control: function() {
 		this.frm = {}
 		this.frm.doc = this.doc
@@ -545,7 +545,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.toggle_totals_area();
 		});
 	},
-	
+
 	bind_numeric_keypad: function() {
 		var me = this;
 		$(this.numeric_keypad).find('.pos-operation').on('click', function(){
@@ -574,7 +574,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				me.selected_field.closest('.pos-list-row').addClass('active');
 			}
 		})
-		
+
 		$(this.numeric_keypad).find('.numeric-del').click(function(){
 			me.selected_field = $(me.wrapper).find('.selected-item').find('.' + me.numeric_id)
 			me.numeric_val = cstr(flt(me.selected_field.val())).slice(0, -1);
@@ -582,7 +582,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.selected_field.trigger("change")
 			// me.render_selected_item()
 		})
-		
+
 		$(this.numeric_keypad).find('.pos-pay').click(function(){
 			me.validate();
 			me.update_paid_amount_status(true);
@@ -604,7 +604,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var html = "";
 		if(this.si_docs.length) {
 			this.si_docs.forEach(function (data, i) {
-				for (key in data) {
+				for (var key in data) {
 					html += frappe.render_template("pos_invoice_list", {
 						sr: i + 1,
 						name: key,
@@ -984,7 +984,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	make_item_list: function () {
 		var me = this;
 		if (!this.price_list) {
-			msgprint(__("Price List not found or disabled"));
+			frappe.msgprint(__("Price List not found or disabled"));
 			return;
 		}
 
@@ -1007,7 +1007,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					})).tooltip().appendTo($wrap);
 				}
 			});
-			
+
 			$wrap.append(`
 				<div class="image-view-item btn-more text-muted text-center">
 					<div class="image-view-body">
@@ -1089,7 +1089,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			});
 		}
 	},
-	
+
 	bind_items_event: function() {
 		var me = this;
 		$(this.wrapper).on('click', '.pos-bill-item', function() {
@@ -1126,7 +1126,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			var qty = flt($(this).parents(".pos-bill-item").find('.pos-item-qty').val()) - 1;
 			me.update_qty(item_code, qty)
 		})
-		
+
 		$(this.wrapper).on("change", ".pos-item-disc", function () {
 			var item_code = $(this).parents(".pos-selected-item-action").attr("data-item-code");
 			var discount = $(this).val();
@@ -1252,7 +1252,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	remove_zero_qty_item: function () {
 		var me = this;
-		idx = 0
+		var idx = 0;
 		this.items = []
 		$.each(this.frm.doc["items"] || [], function (i, d) {
 			if (!in_list(me.remove_item, d.idx)) {
@@ -1270,7 +1270,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		this.wrapper.find('input.discount-percentage').on("change", function () {
 			me.frm.doc.additional_discount_percentage = flt($(this).val(), precision("additional_discount_percentage"));
-			total = me.frm.doc.grand_total
+			var total = me.frm.doc.grand_total
 
 			if (me.frm.doc.apply_discount_on == 'Net Total') {
 				total = me.frm.doc.net_total
@@ -1461,7 +1461,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		if (this.frm.doc.docstatus == 1) {
 			this.page.set_secondary_action(__("Print"), function () {
-				html = frappe.render(me.print_template_data, me.frm.doc)
+				var html = frappe.render(me.print_template_data, me.frm.doc)
 				me.print_document(html)
 			})
 			this.page.add_menu_item(__("Email"), function () {
@@ -1484,19 +1484,18 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	print_dialog: function () {
 		var me = this;
 
-		this.msgprint = frappe.msgprint(format('<a class="btn btn-primary print_doc" \
-			style="margin-right: 5px;">{0}</a>\
-			<a class="btn btn-default new_doc">{1}</a>', [
-				__('Print'), __('New')
-			]));
+		this.frappe.msgprint = frappe.msgprint(
+			`<a class="btn btn-primary print_doc"
+				style="margin-right: 5px;">${__('Print')}</a>
+			<a class="btn btn-default new_doc">${__('New')}</a>`);
 
 		$('.print_doc').click(function () {
-			html = frappe.render(me.print_template_data, me.frm.doc)
+			var html = frappe.render(me.print_template_data, me.frm.doc)
 			me.print_document(html)
 		})
 
 		$('.new_doc').click(function () {
-			me.msgprint.hide()
+			me.frappe.msgprint.hide()
 			me.make_new_cart()
 		})
 	},
@@ -1525,9 +1524,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		//Remove the sold serial no from the cache
 		$.each(this.frm.doc.items, function(index, data) {
-			sn = data.serial_no.split('\n')
+			var sn = data.serial_no.split('\n')
 			if(sn.length) {
-				serial_no_list = me.serial_no_data[data.item_code]
+				var serial_no_list = me.serial_no_data[data.item_code]
 				if(serial_no_list) {
 					$.each(sn, function(i, serial_no) {
 						if(in_list(Object.keys(serial_no_list), serial_no)) {
@@ -1550,7 +1549,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	toggle_input_field: function () {
 		var pointer_events = 'inherit'
-		disabled = this.frm.doc.docstatus == 1 ? true: false;
+		var disabled = this.frm.doc.docstatus == 1 ? true: false;
 		$(this.wrapper).find('input').attr("disabled", disabled);
 		$(this.wrapper).find('select').attr("disabled", disabled);
 		$(this.wrapper).find('input').attr("disabled", disabled);
@@ -1578,6 +1577,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			this.frm.doc.offline_pos_name = this.name;
 			this.frm.doc.posting_date = frappe.datetime.get_today();
 			this.frm.doc.posting_time = frappe.datetime.now_time();
+			this.frm.doc.pos_profile = this.pos_profile_data['name'];
 			invoice_data[this.name] = this.frm.doc
 			this.si_docs.push(invoice_data)
 			this.update_localstorage();
@@ -1590,7 +1590,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 		this.si_docs = this.get_doc_from_localstorage();
 		$.each(this.si_docs, function (index, data) {
-			for (key in data) {
+			for (var key in data) {
 				if (key == me.name) {
 					me.si_docs[index][key] = me.frm.doc;
 					me.update_localstorage();
@@ -1661,10 +1661,10 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	get_submitted_invoice: function () {
 		var invoices = [];
 		var index = 1;
-		docs = this.get_doc_from_localstorage();
+		var docs = this.get_doc_from_localstorage();
 		if (docs) {
 			invoices = $.map(docs, function (data) {
-				for (key in data) {
+				for (var key in data) {
 					if (data[key].docstatus == 1 && index < 50) {
 						index++
 						data[key].docstatus = 0;
@@ -1683,7 +1683,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.new_si_docs = [];
 		if (this.removed_items) {
 			$.each(this.si_docs, function (index, data) {
-				for (key in data) {
+				for (var key in data) {
 					if (!in_list(me.removed_items, key)) {
 						me.new_si_docs.push(data);
 					}
@@ -1742,8 +1742,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	validate_serial_no: function () {
 		var me = this;
-		var item_code = serial_no = '';
-		for (key in this.item_serial_no) {
+		var item_code = ''
+		var serial_no = '';
+		for (var key in this.item_serial_no) {
 			item_code = key;
 			serial_no = me.item_serial_no[key][0];
 		}
@@ -1790,16 +1791,24 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	mandatory_batch_no: function () {
 		var me = this;
 		if (this.items[0].has_batch_no && !this.item_batch_no[this.items[0].item_code]) {
-			frappe.throw(__(repl("Error: Batch no is mandatory for item %(item)s", {
-				'item': this.items[0].item_code
-			})))
+			frappe.prompt([{
+				'fieldname': 'batch',
+				'fieldtype': 'Select',
+				'label': __('Batch No'),
+				'reqd': 1,
+				'options': this.batch_no_data[this.items[0].item_code]
+			}],
+			function(values){
+				me.item_batch_no[me.items[0].item_code] = values.batch;
+			},
+			__('Select Batch No'))
 		}
 	},
 
 	apply_pricing_rule: function () {
 		var me = this;
 		$.each(this.frm.doc["items"], function (n, item) {
-			pricing_rule = me.get_pricing_rule(item)
+			var pricing_rule = me.get_pricing_rule(item)
 			me.validate_pricing_rule(pricing_rule)
 			if (pricing_rule.length) {
 				item.pricing_rule = pricing_rule[0].name;
@@ -1815,7 +1824,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				item.pricing_rule = null;
 				me.apply_pricing_rule_on_item(item)
 			}
-			
+
 			if(item.discount_percentage > 0) {
 				me.apply_pricing_rule_on_item(item)
 			}
@@ -1859,7 +1868,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	validate_condition: function (data) {
 		//This method check condition based on applicable for
-		condition = this.get_mapper_for_pricing_rule(data)[data.applicable_for]
+		var condition = this.get_mapper_for_pricing_rule(data)[data.applicable_for]
 		if (in_list(condition[1], condition[0])) {
 			return true
 		}
@@ -1892,7 +1901,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				}
 			})
 
-			count = 0
+			var count = 0
 			$.each(priority_list, function (index, value) {
 				if (value == priority) {
 					count++

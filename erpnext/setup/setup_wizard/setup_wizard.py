@@ -85,6 +85,7 @@ def create_fiscal_year_and_company(args):
 		frappe.get_doc({
 			"doctype":"Company",
 			'company_name':args.get('company_name').strip(),
+			'enable_perpetual_inventory': 1,
 			'abbr':args.get('company_abbr'),
 			'default_currency':args.get('currency'),
 			'country': args.get('country'),
@@ -159,10 +160,6 @@ def set_defaults(args):
 
 	frappe.db.set_value("System Settings", None, "email_footer_address", args.get("company"))
 
-	accounts_settings = frappe.get_doc("Accounts Settings")
-	accounts_settings.auto_accounting_for_stock = 1
-	accounts_settings.save()
-
 	stock_settings = frappe.get_doc("Stock Settings")
 	stock_settings.item_naming_by = "Item Code"
 	stock_settings.valuation_method = "FIFO"
@@ -197,6 +194,10 @@ def set_defaults(args):
 	hr_settings = frappe.get_doc("HR Settings")
 	hr_settings.emp_created_by = "Naming Series"
 	hr_settings.save()
+
+	domain_settings = frappe.get_doc("Domain Settings")
+	domain_settings.append('active_domains', dict(domain=args.domain))
+	domain_settings.save()
 
 def create_feed_and_todo():
 	"""update Activity feed and create todo for creation of item, customer, vendor"""

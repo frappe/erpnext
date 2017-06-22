@@ -40,7 +40,7 @@
    "report_hide": 0, 
    "reqd": 0, 
    "search_index": 0, 
-   "set_only_once": 0, 
+   "set_only_once": 1, 
    "unique": 0
   }, 
   {
@@ -1132,7 +1132,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "depends_on": "eval:cint(sys_defaults.auto_accounting_for_stock)", 
+   "depends_on": "", 
    "fieldname": "expense_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1201,7 +1201,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-06-13 14:29:06.317317", 
+ "modified": "2017-06-16 17:04:33.165676", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "POS Profile", 

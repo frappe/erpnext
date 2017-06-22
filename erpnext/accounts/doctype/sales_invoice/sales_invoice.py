@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 import frappe.defaults
 from frappe.utils import cint, flt
 from frappe import _, msgprint, throw
@@ -57,7 +57,8 @@ class SalesInvoice(SellingController):
 		self.so_dn_required()
 		self.validate_proj_cust()
 		self.validate_with_previous_doc()
-		self.validate_uom_is_integer("stock_uom", "qty")
+		self.validate_uom_is_integer("stock_uom", "stock_qty")
+		self.validate_uom_is_integer("uom", "qty")
 		self.check_close_sales_order("sales_order")
 		self.validate_debit_to_acc()
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
@@ -88,6 +89,8 @@ class SalesInvoice(SellingController):
 		self.validate_c_form()
 		self.validate_time_sheets_are_submitted()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
+		if not self.is_return:
+			self.validate_serial_numbers()
 		self.update_packing_list()
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
@@ -125,6 +128,7 @@ class SalesInvoice(SellingController):
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 			self.check_credit_limit()
+			self.update_serial_no()
 
 		if not cint(self.is_pos) == 1 and not self.is_return:
 			self.update_against_document_in_jv()
@@ -155,6 +159,7 @@ class SalesInvoice(SellingController):
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
+			self.update_serial_no(in_cancel=True)
 
 		self.validate_c_form_on_cancel()
 
@@ -554,6 +559,8 @@ class SalesInvoice(SellingController):
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
+		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
+
 		if not self.grand_total:
 			return
 
@@ -575,11 +582,11 @@ class SalesInvoice(SellingController):
 					self.doctype, self.return_against if cint(self.is_return) else self.name)
 
 			if repost_future_gle and cint(self.update_stock) \
-				and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
+				and cint(auto_accounting_for_stock):
 					items, warehouses = self.get_items_and_warehouses()
 					update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items)
 		elif self.docstatus == 2 and cint(self.update_stock) \
-			and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
+			and cint(auto_accounting_for_stock):
 				from erpnext.accounts.general_ledger import delete_gl_entries
 				delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
@@ -667,8 +674,8 @@ class SalesInvoice(SellingController):
 					)
 
 		# expense account gl entries
-		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")) \
-				and cint(self.update_stock):
+		if cint(self.update_stock) and \
+			erpnext.is_perpetual_inventory_enabled(self.company):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
 
 	def make_pos_gl_entries(self, gl_entries):
@@ -780,6 +787,61 @@ class SalesInvoice(SellingController):
 			self.set(fieldname, reference_doc.get(fieldname))
 
 		self.due_date = None
+
+	def update_serial_no(self, in_cancel=False):
+		""" update Sales Invoice refrence in Serial No """
+
+		for item in self.items:
+			if not item.serial_no:
+				continue
+
+			serial_nos = ["'%s'"%serial_no for serial_no in item.serial_no.split("\n")]
+
+			frappe.db.sql(""" update `tabSerial No` set sales_invoice='{invoice}'
+				where name in ({serial_nos})""".format(
+					invoice='' if in_cancel else self.name,
+					serial_nos=",".join(serial_nos)
+				)
+			)
+
+	def validate_serial_numbers(self):
+		"""
+			validate serial number agains Delivery Note and Sales Invoice
+		"""
+		self.validate_serial_against_delivery_note()
+		self.validate_serial_against_sales_invoice()
+
+	def validate_serial_against_delivery_note(self):
+		""" 
+			validate if the serial numbers in Sales Invoice Items are same as in
+			Delivery Note Item
+		"""
+
+		for item in self.items:
+			if not item.delivery_note or not item.dn_detail:
+				continue
+
+			serial_nos = frappe.db.get_value("Delivery Note Item", item.dn_detail, "serial_no") or ""
+			dn_serial_nos = set(serial_nos.split("\n"))
+
+			serial_nos = item.serial_no or ""
+			si_serial_nos = set(serial_nos.split("\n"))
+
+			if si_serial_nos - dn_serial_nos:
+				frappe.throw(_("Serial Numbers in row {0} does not match with Delivery Note".format(item.idx)))
+
+	def validate_serial_against_sales_invoice(self):
+		""" check if serial number is already used in other sales invoice """
+		for item in self.items:
+			if not item.serial_no:
+				continue
+
+			for serial_no in item.serial_no.split("\n"):
+				sales_invoice = frappe.db.get_value("Serial No", serial_no, "sales_invoice")
+				if sales_invoice and self.name != sales_invoice:
+					frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}".format(
+						serial_no, sales_invoice
+					)))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

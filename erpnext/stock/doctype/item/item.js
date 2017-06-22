@@ -121,7 +121,15 @@ frappe.ui.form.on("Item", {
 		if(!frm.doc.description)
 			frm.set_value("description", frm.doc.item_code);
 	},
-
+	
+	is_stock_item: function(frm) {
+		if(!frm.doc.is_stock_item) {
+			frm.set_value("has_batch_no", 0);
+			frm.set_value("create_new_batch", 0);
+			frm.set_value("has_serial_no", 0);
+		}
+	},
+	
 	copy_from_item_group: function(frm) {
 		return frm.call({
 			doc: frm.doc,
@@ -143,7 +151,7 @@ frappe.ui.form.on("Item", {
 frappe.ui.form.on('Item Reorder', {
 	reorder_levels_add: function(frm, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
-		type = frm.doc.default_material_request_type
+		var type = frm.doc.default_material_request_type
 		row.material_request_type = (type == 'Material Transfer')? 'Transfer' : type;
 	}
 })
@@ -254,8 +262,8 @@ $.extend(erpnext.item, {
 
 	weight_to_validate: function(frm){
 		if((frm.doc.nett_weight || frm.doc.gross_weight) && !frm.doc.weight_uom) {
-			msgprint(__('Weight is mentioned,\nPlease mention "Weight UOM" too'));
-			validated = 0;
+			frappe.msgprint(__('Weight is mentioned,\nPlease mention "Weight UOM" too'));
+			frappe.validated = 0;
 		}
 	},
 
@@ -326,7 +334,7 @@ $.extend(erpnext.item, {
 		});
 
 		d.set_primary_action(__("Make"), function() {
-			args = d.get_values();
+			var args = d.get_values();
 			if(!args) return;
 			frappe.call({
 				method:"erpnext.controllers.item_variant.get_variant",
@@ -338,14 +346,14 @@ $.extend(erpnext.item, {
 					// returns variant item
 					if (r.message) {
 						var variant = r.message;
-						var msgprint_dialog = frappe.msgprint(__("Item Variant {0} already exists with same attributes",
+						frappe.msgprint_dialog = frappe.msgprint(__("Item Variant {0} already exists with same attributes",
 							[repl('<a href="#Form/Item/%(item_encoded)s" class="strong variant-click">%(item)s</a>', {
 								item_encoded: encodeURIComponent(variant),
 								item: variant
 							})]
 						));
-						msgprint_dialog.hide_on_page_refresh = true;
-						msgprint_dialog.$wrapper.find(".variant-click").on("click", function() {
+						frappe.msgprint_dialog.hide_on_page_refresh = true;
+						frappe.msgprint_dialog.$wrapper.find(".variant-click").on("click", function() {
 							d.hide();
 						});
 					} else {

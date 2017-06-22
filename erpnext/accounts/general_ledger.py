@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe.utils import flt, cstr, cint
 from frappe import _
 from frappe.model.meta import get_field_precision
@@ -80,7 +80,7 @@ def check_if_in_list(gle, gl_map):
 
 def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 	if not from_repost:
-		validate_account_for_auto_accounting_for_stock(gl_map)
+		validate_account_for_perpetual_inventory(gl_map)
 		
 	round_off_debit_credit(gl_map)
 
@@ -100,11 +100,11 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle.run_method("on_update_with_args", adv_adj, update_outstanding, from_repost)
 	gle.submit()
 
-def validate_account_for_auto_accounting_for_stock(gl_map):
-	if cint(frappe.db.get_single_value("Accounts Settings", "auto_accounting_for_stock")) \
+def validate_account_for_perpetual_inventory(gl_map):
+	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)) \
 		and gl_map[0].voucher_type=="Journal Entry":
 			aii_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
-				where account_type = 'Stock' and (warehouse != '' and warehouse is not null) and is_group=0""")]
+				where account_type = 'Stock' and is_group=0""")]
 
 			for entry in gl_map:
 				if entry.account in aii_accounts:

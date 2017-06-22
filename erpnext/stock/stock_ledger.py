@@ -423,8 +423,11 @@ def get_stock_ledger_entries(previous_sle, operator=None, order="desc", limit=No
 		}, previous_sle, as_dict=1, debug=debug)
 
 def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
-	allow_zero_rate=False, currency=None):
+	allow_zero_rate=False, currency=None, company=None):
 	# Get valuation rate from last sle for the same item and warehouse
+	if not company:
+		company = erpnext.get_default_company()
+
 	last_valuation_rate = frappe.db.sql("""select valuation_rate
 		from `tabStock Ledger Entry`
 		where item_code = %s and warehouse = %s
@@ -451,7 +454,7 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 			dict(item_code=item_code, buying=1, currency=currency), 'price_list_rate')
 
 	if not allow_zero_rate and not valuation_rate \
-			and cint(frappe.db.get_value("Accounts Settings", None, "auto_accounting_for_stock")):
+			and cint(erpnext.is_perpetual_inventory_enabled(company)):
 		frappe.local.message_log = []
 		frappe.throw(_("Valuation rate not found for the Item {0}, which is required to do accounting entries for {1} {2}. If the item is transacting as a sample item in the {1}, please mention that in the {1} Item table. Otherwise, please create an incoming stock transaction for the item or mention valuation rate in the Item record, and then try submiting/cancelling this entry").format(item_code, voucher_type, voucher_no))
 

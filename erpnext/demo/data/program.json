@@ -1,102 +1,46 @@
 [
 	{
 		"doctype": "Program",
+		"name": "MCA",
 		"program_name": "Masters of Computer Applications",
 		"program_code": "MCA",
 		"department": "Information Technology",
 		"courses": [
-			{
-				"course": "Microprocessor",
-				"academic_term": "Semester 1"
-			},
-			{
-				"course": "Probability and Statistics",
-				"academic_term": "Semester 1"
-			},
-			{
-				"course": "Programing in Java",
-				"academic_term": "Semester 2"
-			}
+			{ "course": "MCA4010" },
+			{ "course": "MCA4020" },
+			{ "course": "MCA4030" }
 		]
 	},
 	{
 		"doctype": "Program",
+		"name": "BCA",
 		"program_name": "Bachelor of Computer Applications",
 		"program_code": "BCA",
 		"department": "Information Technology",
 		"courses": [
-			{
-				"course": "Communication Skiils",
-				"academic_term": "Semester 3"
-			},
-			{
-				"course": "Object Oriented Programing - C++",
-				"academic_term": "Semester 3"
-			},
-			{
-				"course": "Basic Mathematics",
-				"academic_term": "Semester 2"
-			},
-			{
-				"course": "Data Structures and Algorithm",
-				"academic_term": "Semester 2"
-			},
-			{
-				"course": "Digital Logic",
-				"academic_term": "Semester 2"
-			},
-			{
-				"course": "Fundamentals of IT & Programing",
-				"academic_term": "Semester 1"
-			},
-			{
-				"course": "Operating System",
-				"academic_term": "Semester 1"
-			},
-			{
-				"course": "Programing in C",
-				"academic_term": "Semester 1"
-			}
+			{ "course": "BCA2030" },
+			{ "course": "BCA1030" },
+			{ "course": "BCA2020" },
+			{ "course": "BCA1040" },
+			{ "course": "BCA1010" },
+			{ "course": "BCA2010" },
+			{ "course": "BCA1020" }
 		]
 	},
 	{
 		"doctype": "Program",
+		"name": "BBA",
 		"program_name": "Bachelor of Business Administration",
 		"program_code": "BBA",
 		"department": "Management Studies",
 		"courses": [
-			{
-				"course": "Organizational Behavior",
-				"academic_term": "Semester 1"
-			},
-			{
-				"course": "Management Development and Skills",
-				"academic_term": "Semester 1"
-			},
-			{
-				"course": "Legal and Regulatory Framework",
-				"academic_term": "Semester 1"
-			},
-			{
-				"course": "Human Resource Management",
-				"academic_term": "Semester 2"
-			},
-			{
-				"course": "Entrepreneurship Management",
-				"academic_term": "Semester 2"
-			},
-			{
-				"course": "Communication Skills",
-				"academic_term": "Semester 2"
-			},
-			{
-				"course": "Business Environment",
-				"academic_term": "Semester 3"
-			},
-			{
-				"course": "Advertising and Sales",
-				"academic_term": "Semester 3"
-			}
+			{ "course": "BBA 101" },
+			{ "course": "BBA 102" },
+			{ "course": "BBA 103" },
+			{ "course": "BBA 301" },
+			{ "course": "BBA 302" },
+			{ "course": "BBA 304" },
+			{ "course": "BBA 505" }
 		]
 	}
 ]

@@ -37,16 +37,6 @@ frappe.treeview_settings["Account"] = {
 		},
 		{fieldtype:'Float', fieldname:'tax_rate', label:__('Tax Rate'),
 			depends_on: 'eval:doc.is_group==0&&doc.account_type=="Tax"'},
-		{fieldtype:'Link', fieldname:'warehouse', label:__('Warehouse'), options:"Warehouse",
-			depends_on: 'eval:(!doc.is_group&&doc.account_type=="Stock")',
-			get_query: function() {
-				return {
-					filters:{
-						"company": frappe.treeview_settings.filters["company"]
-					}
-				}
-			}
-		},
 		{fieldtype:'Link', fieldname:'account_currency', label:__('Currency'), options:"Currency",
 			description: __("Optional. Sets company's default currency, if not specified.")}
 	],
@@ -72,8 +62,8 @@ frappe.treeview_settings["Account"] = {
 			click: function(node, btn) {
 				frappe.route_options = {
 					"account": node.label,
-					"from_date": sys_defaults.year_start_date,
-					"to_date": sys_defaults.year_end_date,
+					"from_date": frappe.sys_defaults.year_start_date,
+					"to_date": frappe.sys_defaults.year_end_date,
 					"company": frappe.defaults.get_default('company') ? frappe.defaults.get_default('company'): ""
 				};
 				frappe.set_route("query-report", "General Ledger");

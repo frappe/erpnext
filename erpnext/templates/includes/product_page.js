@@ -15,18 +15,18 @@ frappe.ready(function() {
 			$(".item-cart").toggleClass("hide", (!!!r.message.price || !!!r.message.in_stock));
 			if(r.message && r.message.price) {
 				$(".item-price")
-					.html(r.message.price.formatted_price + " per " + r.message.uom);
+					.html(r.message.price.formatted_price + " {{ _("per") }} " + r.message.uom);
 
 				if(r.message.in_stock==0) {
-					$(".item-stock").html("<div style='color: red'> <i class='fa fa-close'></i> Not in stock</div>");
+					$(".item-stock").html("<div style='color: red'> <i class='fa fa-close'></i> {{ _("Not in stock") }}</div>");
 				}
 				else if(r.message.in_stock==1) {
-					qty_display = "In stock"
+					var qty_display = "{{ _("In stock") }}";
 					if (r.message.show_stock_qty) {
-						qty_display = "Available ("+r.message.stock_qty+ " in stock)"
+						qty_display += " ("+r.message.stock_qty+")";
 					}
 					$(".item-stock").html("<div style='color: green'>\
-						<i class='fa fa-check'></i> "+__(qty_display)+"</div>");
+						<i class='fa fa-check'></i> "+qty_display+"</div>");
 				}
 
 				if(r.message.qty) {
@@ -40,7 +40,9 @@ frappe.ready(function() {
 	})
 
 	$("#item-add-to-cart button").on("click", function() {
-		shopping_cart.update_cart({
+		frappe.provide('erpnext.shopping_cart');
+
+		erpnext.shopping_cart.update_cart({
 			item_code: get_item_code(),
 			qty: 1,
 			callback: function(r) {
@@ -66,7 +68,7 @@ frappe.ready(function() {
 			var item_code = find_closest_match(attribute, attribute_value);
 
 			if (!item_code) {
-				msgprint(__("Cannot find a matching Item. Please select some other value for {0}.", [attribute]))
+				frappe.msgprint(__("Cannot find a matching Item. Please select some other value for {0}.", [attribute]))
 				throw e;
 			}
 		}
@@ -87,7 +89,8 @@ var toggle_update_cart = function(qty) {
 }
 
 function get_item_code() {
-	if(window.variant_info) {
+	var variant_info = window.variant_info;
+	if(variant_info) {
 		var attributes = get_selected_attributes();
 		var no_of_attributes = Object.keys(attributes).length;
 
@@ -102,9 +105,10 @@ function get_item_code() {
 			var match = true;
 			for(var j in variant.attributes) {
 				if(attributes[variant.attributes[j].attribute]
-					!= variant.attributes[j].attribute_value) {
-						match = false;
-						break;
+					!= variant.attributes[j].attribute_value
+				) {
+					match = false;
+					break;
 				}
 			}
 			if(match) {
@@ -113,7 +117,7 @@ function get_item_code() {
 		}
 		throw "Unable to match variant";
 	} else {
-		return item_code;
+		return window.item_code;
 	}
 }
 
@@ -126,6 +130,7 @@ function find_closest_match(selected_attribute, selected_attribute_value) {
 	var previous_no_of_attributes = 0;
 	var matched;
 
+	var variant_info = window.variant_info;
 	for(var i in variant_info) {
 		var variant = variant_info[i];
 		var match_score = 0;

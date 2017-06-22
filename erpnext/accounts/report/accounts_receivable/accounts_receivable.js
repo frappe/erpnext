@@ -26,7 +26,7 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldname":"credit_days_based_on",
 			"label": __("Credit Days Based On"),
 			"fieldtype": "Select",
-			"options": "" + NEWLINE + "Fixed Days" + NEWLINE + "Last Day of the Next Month"
+			"options": "\nFixed Days\nLast Day of the Next Month"
 		},
 		{
 			"fieldtype": "Break",
@@ -35,13 +35,13 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldname":"report_date",
 			"label": __("As on Date"),
 			"fieldtype": "Date",
-			"default": get_today()
+			"default": frappe.datetime.get_today()
 		},
 		{
 			"fieldname":"ageing_based_on",
 			"label": __("Ageing Based On"),
 			"fieldtype": "Select",
-			"options": 'Posting Date' + NEWLINE + 'Due Date',
+			"options": 'Posting Date\nDue Date',
 			"default": "Posting Date"
 		},
 		{

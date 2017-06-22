@@ -20,11 +20,11 @@ frappe.ui.form.on('Bank Guarantee', {
 		});
 	},
 	start_date: function(frm) {
-		end_date = frappe.datetime.add_days(cur_frm.doc.start_date, cur_frm.doc.validity - 1);
+		var end_date = frappe.datetime.add_days(cur_frm.doc.start_date, cur_frm.doc.validity - 1);
 		cur_frm.set_value("end_date", end_date);
 	},
 	validity: function(frm) {
-		end_date = frappe.datetime.add_days(cur_frm.doc.start_date, cur_frm.doc.validity - 1);
+		var end_date = frappe.datetime.add_days(cur_frm.doc.start_date, cur_frm.doc.validity - 1);
 		cur_frm.set_value("end_date", end_date);
 	}
 });
