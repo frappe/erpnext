@@ -259,6 +259,14 @@ me.frm.set_query("test_code", "test_prescription", function(doc, cdt, cdn) {
 		};
 	});
 
+me.frm.set_query("medical_code", "codification_table", function(doc, cdt, cdn) {
+		return {
+			filters: {
+				parent: frappe.defaults.get_default("default_medical_code")
+			}
+		};
+	});
+
 frappe.ui.form.on("Drug Prescription", {
 	drug_code:  function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn]
