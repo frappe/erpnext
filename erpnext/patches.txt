@@ -406,3 +406,4 @@ erpnext.patches.v8_0.change_in_words_varchar_length
 erpnext.patches.v8_0.create_domain_docs	#16-05-2017
 erpnext.patches.v8_0.update_sales_cost_in_project
 erpnext.patches.v8_0.save_system_settings
+erpnext.patches.v8_1.delete_deprecated_reports
