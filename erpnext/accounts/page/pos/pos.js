@@ -576,11 +576,15 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		})
 
 		$(this.numeric_keypad).find('.numeric-del').click(function(){
-			me.selected_field = $(me.wrapper).find('.selected-item').find('.' + me.numeric_id)
-			me.numeric_val = cstr(flt(me.selected_field.val())).slice(0, -1);
-			me.selected_field.val(me.numeric_val);
-			me.selected_field.trigger("change")
-			// me.render_selected_item()
+			if(me.numeric_id) {
+				me.selected_field = $(me.wrapper).find('.selected-item').find('.' + me.numeric_id)
+				me.numeric_val = cstr(flt(me.selected_field.val())).slice(0, -1);
+				me.selected_field.val(me.numeric_val);
+				me.selected_field.trigger("change")
+			} else {
+				//Remove an item from the cart, if focus is at selected item
+				me.remove_selected_item()
+			}
 		})
 
 		$(this.numeric_keypad).find('.pos-pay').click(function(){
@@ -589,6 +593,14 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.create_invoice();
 			me.make_payment();
 		})
+	},
+
+	remove_selected_item: function() {
+		this.remove_item = []
+		idx = $(this.wrapper).find(".pos-selected-item-action").attr("data-idx")
+		this.remove_item.push(idx)
+		this.remove_zero_qty_item()
+		this.update_paid_amount_status(false)
 	},
 
 	render_list_customers: function () {
