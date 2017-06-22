@@ -1,5 +1,5 @@
 execute:import unidecode # new requirement
-
+erpnext.patches.v8_0.move_perpetual_inventory_setting
 erpnext.patches.v4_0.validate_v3_patch
 erpnext.patches.v4_0.fix_employee_user_id
 erpnext.patches.v4_0.remove_employee_role_if_no_employee

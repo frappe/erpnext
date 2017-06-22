@@ -156,7 +156,7 @@ erpnext.company.setup_queries = function(frm) {
 		erpnext.company.set_custom_query(frm, v);
 	});
 
-	if (frappe.sys_defaults.auto_accounting_for_stock) {
+	if (frm.doc.enable_perpetual_inventory) {
 		$.each([
 			["stock_adjustment_account", 
 				{"root_type": "Expense", "account_type": "Stock Adjustment"}],

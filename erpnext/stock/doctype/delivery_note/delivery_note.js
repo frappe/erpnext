@@ -38,8 +38,9 @@ frappe.ui.form.on("Delivery Note", {
 			}
 		});
 
-		if (frappe.sys_defaults.auto_accounting_for_stock) {
-			frm.set_query('expense_account', 'items', function(doc, cdt, cdn) {
+		
+		frm.set_query('expense_account', 'items', function(doc, cdt, cdn) {
+			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
 				return {
 					filters: {
 						"report_type": "Profit and Loss",
@@ -47,17 +48,20 @@ frappe.ui.form.on("Delivery Note", {
 						"is_group": 0
 					}
 				}
-			});
+			}
+		});
 
-			frm.set_query('cost_center', 'items', function(doc, cdt, cdn) {
+		frm.set_query('cost_center', 'items', function(doc, cdt, cdn) {
+			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
 				return {
 					filters: {
 						'company': doc.company,
 						"is_group": 0
 					}
 				}
-			});
-		}
+			}
+		});
+		
 
 		$.extend(frm.cscript, new erpnext.stock.DeliveryNoteController({frm: frm}));
 	},
@@ -137,7 +141,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 
 		if (doc.docstatus==1) {
 			this.show_stock_ledger();
-			if (cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
+			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
 				this.show_general_ledger();
 			}
 			if (this.frm.has_perm("submit") && doc.status !== "Closed") {
@@ -164,10 +168,6 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 				__("Status"))
 		}
 		erpnext.stock.delivery_note.set_print_hide(doc, dt, dn);
-
-		// unhide expense_account and cost_center is auto_accounting_for_stock enabled
-		var aii_enabled = cint(frappe.sys_defaults.auto_accounting_for_stock)
-		this.frm.fields_dict["items"].grid.set_column_disp(["expense_account", "cost_center"], aii_enabled);
 	},
 
 	make_sales_invoice: function() {
@@ -224,6 +224,24 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	}
 
 });
+
+frappe.ui.form.on('Delivery Note', {
+	setup: function(frm) {
+		if(frm.doc.company) {
+			frm.trigger("unhide_account_head");
+		}
+	},
+
+	company: function(frm) {
+		frm.trigger("unhide_account_head");
+	},
+	
+	unhide_account_head: function(frm) {
+		// unhide expense_account and cost_center if perpetual inventory is enabled in the company
+		var aii_enabled = erpnext.is_perpetual_inventory_enabled(frm.doc.company)
+		frm.fields_dict["items"].grid.set_column_disp(["expense_account", "cost_center"], aii_enabled);
+	}
+})
 
 
 erpnext.stock.delivery_note.set_print_hide = function(doc, cdt, cdn){

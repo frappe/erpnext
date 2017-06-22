@@ -488,8 +488,8 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(frappe.db.get_value("Sales Invoice", w.name, "outstanding_amount"), 561.8)
 
 	def test_sales_invoice_gl_entry_without_perpetual_inventory(self):
-		set_perpetual_inventory(0)
 		si = frappe.copy_doc(test_records[1])
+		set_perpetual_inventory(0, si.company)
 		si.insert()
 		si.submit()
 
@@ -617,6 +617,7 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEquals(expected_gl_entries[i][2], gle.credit)
 
 		si.cancel()
+		frappe.delete_doc('Sales Invoice', si.name)
 		gle = frappe.db.sql("""select * from `tabGL Entry`
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 

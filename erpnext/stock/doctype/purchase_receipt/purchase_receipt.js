@@ -33,6 +33,21 @@ frappe.ui.form.on("Purchase Receipt", {
 			}
 		});
 
+	},
+
+	refresh: function(frm) {
+		if(frm.doc.company) {
+			frm.trigger("toggle_display_account_head");
+		}
+	},
+
+	company: function(frm) {
+		frm.trigger("toggle_display_account_head");
+	},
+
+	toggle_display_account_head: function(frm) {
+		var enabled = erpnext.is_perpetual_inventory_enabled(frm.doc.company)
+		frm.fields_dict["items"].grid.set_column_disp(["cost_center"], enabled);
 	}
 });
 
@@ -47,7 +62,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		this._super();
 		if(this.frm.doc.docstatus===1) {
 			this.show_stock_ledger();
-			if (cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
+			if (erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 				this.show_general_ledger();
 			}
 		}
