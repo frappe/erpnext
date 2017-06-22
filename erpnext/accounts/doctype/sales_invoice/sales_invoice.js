@@ -502,8 +502,20 @@ frappe.ui.form.on('Sales Invoice', {
 				}
 			}
 		}
-		
-		
+
+		frm.set_query('company_address', function(doc) {
+			if(!doc.company) {
+				frappe.throw(_('Please set Company'));
+			}
+
+			return {
+				query: 'frappe.contacts.doctype.address.address.address_query',
+				filters: {
+					link_doctype: 'Company',
+					link_name: doc.company
+				}
+			};
+		});
 	},
 
 	project: function(frm){

@@ -98,7 +98,7 @@ class Company(Document):
 	def install_country_fixtures(self):
 		path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(self.country))
 		if os.path.exists(path.encode("utf-8")):
-			frappe.get_attr("erpnext.regional.{0}.install.install"
+			frappe.get_attr("erpnext.regional.{0}.setup.setup"
 				.format(self.country.lower()))(self)
 
 	def create_default_warehouses(self):

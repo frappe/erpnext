@@ -584,10 +584,22 @@
 	},
 
 	"India": {
+		"In State GST": {
+			"account_name": ["SGST", "CGST"],
+			"tax_rate": [18.00, 9.00],
+			"default": 1
+		},
+		"Out State GST": {
+			"account_name": "IGST",
+			"tax_rate": 19.00
+		},
+		"SGST": {
+			"account_name": "IGST",
+			"tax_rate": 9.00
+		},
 		"India VAT 5%": {
 			"account_name": "VAT 5%",
-			"tax_rate": 5.00,
-			"default": 1
+			"tax_rate": 5.00
 		},
 		"India VAT 4%": {
 			"account_name": "VAT 4%",
