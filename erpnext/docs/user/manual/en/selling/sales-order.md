@@ -11,7 +11,7 @@ a Sales Order.
 
 ### Sales Order Flow-Chart
 
-![Sales Order]({{docs_base_url}}/assets/old_images/erpnext/sales-order-f.jpg)
+![Sales Order]({{docs_base_url}}/assets/img/buying/sales-order-f.jpg)
 
 To create a new Sales Order go to:
 

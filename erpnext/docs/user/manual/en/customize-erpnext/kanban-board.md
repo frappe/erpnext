@@ -2,7 +2,7 @@
  
 Kanban is a Japanese manufacturing system in which the supply of components is regulated through the use of an instruction card sent along the production line.
 
-In ERPNext Kanban board can be an laternative for the list views. It helps you in visualizing various documents (like Task, Projects, Quotatio etc.) based on some status on a virtual board. Also, you can easily update card status by dragging and dropping to required status column. Kanban Board helps to visualize, control and optimize workflow and collaborate in real-time with the entire team.
+In ERPNext Kanban board can be an alternative for the list views. It helps you in visualizing various documents (like Task, Projects, Quotatio etc.) based on some status on a virtual board. Also, you can easily update card status by dragging and dropping to required status column. Kanban Board helps to visualize, control and optimize workflow and collaborate in real-time with the entire team.
 
 ###Create new Kanban Board
 
