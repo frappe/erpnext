@@ -5,13 +5,11 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 
-
 def execute(filters=None):
     if not filters: filters = {}
     columns = get_columns()
     data = get_bom_stock(filters)
     return columns, data
-
 
 def get_columns():
     """return columns"""
@@ -24,7 +22,6 @@ def get_columns():
     ]
 
     return columns
-
 
 def get_bom_stock(filters):
     conditions = ""
@@ -57,5 +54,4 @@ def get_bom_stock(filters):
             WHERE
     	        bom_item.parent = '%s'
 
-            GROUP BY bom_item.item_code""" %
-                         (conditions, bom))
+            GROUP BY bom_item.item_code""" % (conditions, bom))
