@@ -564,21 +564,14 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 		}
 	}
 
-	let opts = {
+	if(item && item.has_serial_no
+		&& frm.doc.purpose === 'Material Receipt') {
+		return;
+	}
+
+	let serial_no_batch_selector = new erpnext.SerialNoBatchSelector({
 		frm: frm,
 		item: item,
 		warehouse_details: get_warehouse_type_and_name(item),
-	}
-
-	if(item && item.has_batch_no && !item.batch_no) {
-		opts.has_batch = 1;
-	} else if(item && item.has_serial_no && !item.serial_no
-		&& frm.doc.purpose !== 'Material Receipt') {
-
-		opts.has_batch = 0;
-	}
-
-	if(opts.hasOwnProperty("has_batch")) {
-		let serial_no_batch_selector = new erpnext.SerialNoBatchSelector(opts);
-	}
+	});
 }

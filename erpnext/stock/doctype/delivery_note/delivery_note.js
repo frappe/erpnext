@@ -38,7 +38,7 @@ frappe.ui.form.on("Delivery Note", {
 			}
 		});
 
-		
+
 		frm.set_query('expense_account', 'items', function(doc, cdt, cdn) {
 			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
 				return {
@@ -61,7 +61,7 @@ frappe.ui.form.on("Delivery Note", {
 				}
 			}
 		});
-		
+
 
 		$.extend(frm.cscript, new erpnext.stock.DeliveryNoteController({frm: frm}));
 	},
@@ -83,43 +83,6 @@ frappe.ui.form.on("Delivery Note Item", {
 	cost_center: function(frm, dt, dn) {
 		var d = locals[dt][dn];
 		frm.update_in_all_rows('items', 'cost_center', d.cost_center);
-	},
-	item_code: function(frm, dt, dn) {
-		var d = locals[dt][dn];
-		if(d.item_code) {
-			var args = {
-				'item_code': d.item_code,
-			};
-			frappe.call({
-				doc: frm.doc,
-				method: "get_batched_serialized_details",
-				args: args,
-				callback: function(r) {
-					if(r.message) {
-						$.each(r.message, function(k, v) {
-							d[k] = v;
-						});
-						let opts = {
-							frm: frm,
-							item: d,
-							warehouse_details: {
-								type: "From Warehouse",
-								name: d.warehouse
-							},
-						}
-						if(d && d.has_batch_no && !d.batch_no) {
-							opts.has_batch = 1;
-						} else if(d && d.has_serial_no && !d.serial_no) {
-							opts.has_batch = 0;
-						}
-						if(opts.hasOwnProperty("has_batch")) {
-							let serial_no_batch_selector = new erpnext.SerialNoBatchSelector(opts);
-						}
-						refresh_field("items");
-					}
-				}
-			});
-		}
 	}
 });
 
@@ -272,7 +235,7 @@ frappe.ui.form.on('Delivery Note', {
 	company: function(frm) {
 		frm.trigger("unhide_account_head");
 	},
-	
+
 	unhide_account_head: function(frm) {
 		// unhide expense_account and cost_center if perpetual inventory is enabled in the company
 		var aii_enabled = erpnext.is_perpetual_inventory_enabled(frm.doc.company)

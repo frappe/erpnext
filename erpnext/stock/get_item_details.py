@@ -74,10 +74,10 @@ def get_item_details(args):
 
 	out.update(get_pricing_rule_for_item(args))
 
-	if (args.get("doctype") == "Delivery Note" or 
+	if (args.get("doctype") == "Delivery Note" or
 		(args.get("doctype") == "Sales Invoice" and args.get('update_stock'))) \
 		and out.warehouse and out.stock_qty > 0:
-		
+
 		if out.has_serial_no:
 			out.serial_no = get_serial_no(out)
 
@@ -95,6 +95,16 @@ def get_item_details(args):
 	get_gross_profit(out)
 
 	return out
+
+	# print(frappe._dict({
+	# 	'has_serial_no'	: out.has_serial_no,
+	# 	'has_batch_no'	: out.has_batch_no
+	# }))
+
+	# return frappe._dict({
+	# 	'has_serial_no'	: out.has_serial_no,
+	# 	'has_batch_no'	: out.has_batch_no
+	# })
 
 def process_args(args):
 	if isinstance(args, basestring):

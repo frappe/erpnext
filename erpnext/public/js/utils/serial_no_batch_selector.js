@@ -3,7 +3,16 @@ erpnext.SerialNoBatchSelector = Class.extend({
 	init: function(opts) {
 		$.extend(this, opts);
 		// frm, item, warehouse_details, has_batch, oldest
-		this.setup();
+		let d = this.item;
+
+		// Don't show dialog if batch no or serial no already set
+		if(d && d.has_batch_no && !d.batch_no) {
+			this.has_batch = 1;
+			this.setup();
+		} else if(d && d.has_serial_no && !d.serial_no) {
+			this.has_batch = 0;
+			this.setup();
+		}
 	},
 
 	setup: function() {
@@ -60,7 +69,6 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			me.values = me.dialog.get_values();
 			if(me.validate()) {
 				me.set_items();
-				refresh_field("items");
 				me.dialog.hide();
 			}
 		});
@@ -100,33 +108,47 @@ erpnext.SerialNoBatchSelector = Class.extend({
 	},
 
 	set_items: function() {
+		var me = this;
+
+		function get_row_fields(index) {
+			index += me.item.idx - 1;
+			console.log(index, me.frm.fields_dict.items.grid.grid_rows);
+			return me.frm.fields_dict.items.grid
+				.grid_rows[index].on_grid_fields_dict;
+		}
+
 		if(this.has_batch) {
 			this.values.batches.map((batch, i) => {
-				if(i === 0) {
-					this.map_item_values(this.item, batch, 'batch_no',
-						'selected_qty', this.values.warehouse);
-				} else {
-					let row = this.frm.add_child("items");
-					row.item_code = this.item_code;
-					this.map_item_values(row, batch, 'batch_no',
-						'selected_qty', this.values.warehouse);
-				}
+				let row = (i !== 0) ? this.frm.add_child("items") : this.item;
+				refresh_field("items");
+				let fields = (i !== 0) ? get_row_fields(i) : null;
+				this.map_row_values(fields, row, batch, 'batch_no',
+					'selected_qty', this.values.warehouse);
 			});
 		} else {
-			this.map_item_values(this.item, this.values, 'serial_no', 'qty');
+			this.map_row_values(null, this.item, this.values, 'serial_no', 'qty');
 		}
 	},
 
-	map_item_values: function(item, values, attribute, qty_field, warehouse) {
-		item[attribute] = values[attribute];
+	map_row_values: function(row_fields, row, values, number, qty_field, warehouse) {
+		row.qty = values[qty_field];
+
 		if(this.warehouse_details.type === 'Source Warehouse') {
-			item.s_warehouse = values.warehouse || warehouse;
+			row.s_warehouse = values.warehouse || warehouse;
 		} else if(this.warehouse_details.type === 'Target Warehouse') {
-			item.t_warehouse = values.warehouse || warehouse;
+			row.t_warehouse = values.warehouse || warehouse;
 		} else {
-			item.warehouse = values.warehouse || warehouse;
+			row.warehouse = values.warehouse || warehouse;
 		}
-		item.qty = values[qty_field];
+
+		row[number] = values[number];
+		refresh_field("items");
+
+		// Set item_code after setting batch
+		// so that dialog does not fire for inserted rows
+		if(row_fields) {
+			row_fields.item_code.set_value(this.item_code);
+		}
 	},
 
 	bind_qty: function() {
@@ -208,6 +230,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 							return {filters: {item: me.item_code }};
 						},
 						onchange: function(e) {
+							console.log(this);
 							if(this.get_value().length === 0) {
 								this.grid_row.on_grid_fields_dict
 									.available_qty.set_value(0);

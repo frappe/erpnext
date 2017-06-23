@@ -301,24 +301,6 @@ class DeliveryNote(SellingController):
 
 		self.load_from_db()
 
-	def get_batched_serialized_details(self, item_code):
-		item = frappe.db.sql("""
-			select
-				has_serial_no,
-				has_batch_no
-			from
-				`tabItem`
-			where
-				name = %s""",
-			(item_code), as_dict = 1)
-
-		item = item[0]
-
-		return frappe._dict({
-			'has_serial_no'	: item.has_serial_no,
-			'has_batch_no'	: item.has_batch_no
-		})
-
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
 	# Billed against Sales Order directly
 	billed_against_so = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item`

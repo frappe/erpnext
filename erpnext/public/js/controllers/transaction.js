@@ -265,6 +265,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	item_code: function(doc, cdt, cdn, from_barcode) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
+		var update_stock = 0, show_batch_dialog = 1;
+
+		if(['Sales Invoice', 'Purchase Invoice'].includes(me.frm.doc.doctype)) {
+			update_stock = cint(me.frm.doc.update_stock);
+			show_batch_dialog = update_stock;
+		} else {
+			update_stock = 0;
+			show_batch_dialog = 1;
+		}
 
 		// clear barcode if setting item (else barcode will take priority)
 		if(!from_barcode) {
@@ -272,7 +281,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 		if(item.item_code || item.barcode || item.serial_no) {
 			if(!this.validate_company_and_party()) {
-				cur_frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
+				this.frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
 			} else {
 				return this.frm.call({
 					method: "erpnext.stock.get_item_details.get_item_details",
@@ -286,7 +295,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							customer: me.frm.doc.customer,
 							supplier: me.frm.doc.supplier,
 							currency: me.frm.doc.currency,
-							update_stock: in_list(['Sales Invoice', 'Purchase Invoice'], me.frm.doc.doctype) ? cint(me.frm.doc.update_stock) : 0,
+							update_stock: update_stock,
 							conversion_rate: me.frm.doc.conversion_rate,
 							price_list: me.frm.doc.selling_price_list || me.frm.doc.buying_price_list,
 							price_list_currency: me.frm.doc.price_list_currency,
@@ -310,6 +319,18 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						if(!r.exc) {
 							me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
 							me.toggle_conversion_factor(item);
+							if(show_batch_dialog) {
+								let d = r.message;
+								let serial_no_batch_selector = new erpnext.SerialNoBatchSelector({
+									frm: me.frm,
+									item: d,
+									warehouse_details: {
+										type: "Warehouse",
+										name: d.warehouse
+									},
+								});
+								refresh_field("items");
+							}
 						}
 					}
 				});
