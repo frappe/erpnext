@@ -68,14 +68,17 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 		fields = ["name", "customer_name", "customer_group", "territory"]
 
 	meta = frappe.get_meta("Customer")
-	fields = fields + [f for f in meta.get_search_fields() if not f in fields]
+	searchfields = meta.get_search_fields()
+	searchfields = searchfields + [f for f in [searchfield or "name", "customer_name"] \
+			if not f in searchfields]
+	fields = fields + [f for f in searchfields if not f in fields]
 
 	fields = ", ".join(fields)
+	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
 	return frappe.db.sql("""select {fields} from `tabCustomer`
 		where docstatus < 2
-			and ({key} like %(txt)s
-				or customer_name like %(txt)s) and disabled=0
+			and ({scond}) and disabled=0
 			{mcond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
@@ -84,7 +87,7 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 			name, customer_name
 		limit %(start)s, %(page_len)s""".format(**{
 			"fields": fields,
-			"key": searchfield,
+			"scond": searchfields,
 			"mcond": get_match_cond(doctype)
 		}), {
 			'txt': "%%%s%%" % txt,
