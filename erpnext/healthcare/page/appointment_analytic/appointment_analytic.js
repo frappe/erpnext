@@ -145,19 +145,19 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 	},
 	prepare_balances: function() {
 		var me = this;
-		var from_date = dateutil.str_to_obj(this.from_date);
+		var from_date = frappe.datetime.str_to_obj(this.from_date);
 		status = this.status;
 		type = this.type;
-		var to_date = dateutil.str_to_obj(this.to_date);
+		var to_date = frappe.datetime.str_to_obj(this.to_date);
 		$.each(this.tl, function(i, tl) {
-			//if (me.is_default('company') ? true : tl.company === me.company) {
+			if (me.is_default('company') ? true : tl.company === me.company) {
 
-				var date = dateutil.str_to_obj(tl.start_dt);
+				var date = frappe.datetime.str_to_obj(tl.appointment_date);
 				if (date >= from_date && date <= to_date) {
 					var item = me.item_by_name[tl[me.tree_grid.item_key]] ||
 						me.item_by_name['Not Set'];
 
-					var d = tl.start_dt.split(" ")[0];
+					var d = tl.appointment_date.split(" ")[0];
 					if(status == "Select Status..." && type=="Select Type...")
 					{
 						item[me.column_map[d].field] += 1;
@@ -170,7 +170,7 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 						if(type === tl.appointment_type && status === tl.status){item[me.column_map[d].field] += 1;}
 					}
 				}
-			//}
+			}
 		});
 	},
 	update_groups: function() {

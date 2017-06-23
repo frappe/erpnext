@@ -309,7 +309,7 @@ data_map = {
 		}
 	},
 	"Patient Appointment": {
-		"columns": ["name", "appointment_type", "patient", "physician", "start_dt", "department", "status"],
+		"columns": ["name", "appointment_type", "patient", "physician", "appointment_date", "department", "status", "company"],
 		"order_by": "name",
 		"links": {
 			"physician": ["Physician", "name"],
