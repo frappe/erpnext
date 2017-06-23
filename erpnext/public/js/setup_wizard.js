@@ -10,6 +10,7 @@ frappe.pages['setup-wizard'].on_page_load = function(wrapper) {
 var erpnext_slides = [
 	{
 		// Domain
+		name: 'domain',
 		domains: ["all"],
 		title: __('Select your Domain'),
 		fields: [
@@ -35,6 +36,7 @@ var erpnext_slides = [
 
 	{
 		// Brand
+		name: 'brand',
 		domains: ["all"],
 		icon: "fa fa-bookmark",
 		title: __("The Brand"),
@@ -79,6 +81,7 @@ var erpnext_slides = [
 	},
 	{
 		// Organisation
+		name: 'organisation',
 		domains: ["all"],
 		title: __("Your Organization"),
 		icon: "fa fa-building",
@@ -191,6 +194,7 @@ var erpnext_slides = [
 
 	{
 		// Taxes
+		name: 'taxes',
 		domains: ['manufacturing', 'services', 'retail', 'distribution'],
 		icon: "fa fa-money",
 		title: __("Add Taxes"),
@@ -208,6 +212,7 @@ var erpnext_slides = [
 
 	{
 		// Customers
+		name: 'customers',
 		domains: ['manufacturing', 'services', 'retail', 'distribution'],
 		icon: "fa fa-group",
 		title: __("Add Customers"),
@@ -226,6 +231,7 @@ var erpnext_slides = [
 
 	{
 		// Suppliers
+		name: 'suppliers',
 		domains: ['manufacturing', 'services', 'retail', 'distribution'],
 		icon: "fa fa-group",
 		title: __("Your Suppliers"),
@@ -244,6 +250,7 @@ var erpnext_slides = [
 
 	{
 		// Products
+		name: 'products',
 		domains: ['manufacturing', 'services', 'retail', 'distribution'],
 		icon: "fa fa-barcode",
 		title: __("Your Products or Services"),
@@ -275,6 +282,7 @@ var erpnext_slides = [
 
 	{
 		// Program
+		name: 'program',
 		domains: ["education"],
 		title: __("Program"),
 		help: __("Example: Masters in Computer Science"),
@@ -288,6 +296,7 @@ var erpnext_slides = [
 
 	{
 		// Course
+		name: 'course',
 		domains: ["education"],
 		title: __("Course"),
 		help: __("Example: Basic Mathematics"),
@@ -301,6 +310,7 @@ var erpnext_slides = [
 
 	{
 		// Instructor
+		name: 'instructor',
 		domains: ["education"],
 		title: __("Instructor"),
 		help: __("People who teach at your organisation"),
@@ -314,6 +324,7 @@ var erpnext_slides = [
 
 	{
 		// Room
+		name: 'room',
 		domains: ["education"],
 		title: __("Room"),
 		help: __("Classrooms/ Laboratories etc where lectures can be scheduled."),
@@ -329,8 +340,9 @@ var erpnext_slides = [
 
 	{
 		// last slide
+		name: 'bootstrap',
 		domains: ["all"],
-		title: __("Fin"),
+		title: __("Bootstrap"),
 		fields: [{fieldtype: "Section Break"},
 			{fieldtype: "Check", fieldname: "add_sample_data",
 			label: __("Add a few sample records"), "default": 1},
