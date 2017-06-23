@@ -5,17 +5,17 @@ Kunden können über das Kundenportal sehr einfach Fälle eröffnen. Eine einfac
 
 ### Ticketliste leeren
 
-<img class="screenshot" alt="Issue List" src="{{docs_base_url}}/assets/img/website/portal-ticket-list-empty.png">
+<img class="screenshot" alt="Ausgabeliste" src="{{docs_base_url}}/assets/img/website/portal-ticket-list-empty.png">
 ### Neuer Fall
 
-<img class="screenshot" alt="New Issue " src="{{docs_base_url}}/assets/img/website/portal-new-ticket.png">
+<img class="screenshot" alt="Neues Problem " src="{{docs_base_url}}/assets/img/website/portal-new-ticket.png">
 
 ### Fall öffnen
 
-<img class="screenshot" alt="Issue Raised" src="{{docs_base_url}}/assets/img/website/portal-ticket-1.gif">
+<img class="screenshot" alt="Ausgabe aufgehoben" src="{{docs_base_url}}/assets/img/website/portal-ticket-1.gif">
 
 ### Fall beantworten
 
-<img class="screenshot" alt="Issue reply" src="{{docs_base_url}}/assets/img/website/portal-ticket-reply.gif">
+<img class="screenshot" alt="Frage beantworten" src="{{docs_base_url}}/assets/img/website/portal-ticket-reply.gif">
 
 {next}
