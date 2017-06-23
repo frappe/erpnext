@@ -75,6 +75,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Medical Code Standard",
+					"label": _("Medical Code Standard"),
+				},
+				{
+					"type": "doctype",
 					"name": "Medical Code",
 					"label": _("Medical Code"),
 				}
