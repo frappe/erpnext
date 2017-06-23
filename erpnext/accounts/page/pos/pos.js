@@ -25,7 +25,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.wrapper = $(wrapper).find('.page-content');
 		this.set_indicator();
 		this.onload();
-		this.make_menu_list();
 		this.bind_events();
 		this.bind_items_event();
 		this.si_docs = this.get_doc_from_localstorage();
@@ -72,10 +71,35 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	onload: function () {
 		var me = this;
-		this.get_data_from_server(function () {
+		var user_info = frappe.user_info(frappe.session.user);
+		if (!localStorage.getItem('pos_session_start')) {
+			this.wrapper.html(frappe.render_template('pos_session_start',  {data:user_info}));
+			this.pos_profile_btn = this.wrapper.find('.pos-profile-btn');
+			this.pos_profile_btn.on('click', function() {
+				me.new_or_resumed_session();
+			});
+		} else {
+				me.new_or_resumed_session();
+		}
+	},
+
+	new_or_resumed_session: function() {
+		var me = this;
+		me.start_pos_session();
+		console.log(JSON.parse(localStorage.getItem('pos_profile')));
+		me.make_menu_list();
+		me.get_data_from_server(function () {
 			me.make_control();
 			me.create_new();
 		});
+	},
+
+	start_pos_session: function() {
+		try {
+			localStorage.setItem('pos_session_start', $.now());
+		} catch (e) {
+			frappe.throw(__("LocalStorage is full, did not save"))
+		}
 	},
 
 	make_menu_list: function () {
@@ -89,6 +113,35 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.create_invoice();
 			me.make_payment();
 		}).addClass('visible-xs');
+
+		this.page.add_menu_item(__("End Session"), function () {
+			var d = new frappe.ui.Dialog({
+				'title': __('End POS Session'),
+				fields: [
+					{fieldtype:"HTML", options:__("Do you really want to end this POS session ?")},
+				],
+				primary_action: function() {
+					return frappe.call({
+						method: "erpnext.accounts.doctype.sales_invoice.pos.end_pos_session",
+						args: {
+							start: JSON.parse(localStorage.getItem('pos_session_start')),
+							end: $.now()
+						},
+						callback: function(r) {
+							if(r.exc) {
+								frappe.msgprint(r.exc);
+							} else {
+								d.hide();
+								localStorage.removeItem('pos_session_start');
+								frappe.ui.toolbar.clear_cache();
+								frappe.set_route('pos');
+							}
+						}
+					});
+				}
+			});
+			d.show();
+		});
 
 		this.page.add_menu_item(__("New Sales Invoice"), function () {
 			me.save_previous_entry();
@@ -305,6 +358,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	init_master_data: function (r) {
 		var me = this;
 		this.doc = JSON.parse(localStorage.getItem('doc'));
+		this.pos_session_start = JSON.parse(localStorage.getItem('pos_session_start'));
 		this.meta = r.message.meta;
 		this.item_data = r.message.items;
 		this.item_groups = r.message.item_groups;
@@ -1586,6 +1640,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			this.update_invoice()
 		} else {
 			this.name = $.now();
+			this.frm.doc.pos_session_start = this.pos_session_start;
 			this.frm.doc.offline_pos_name = this.name;
 			this.frm.doc.posting_date = frappe.datetime.get_today();
 			this.frm.doc.posting_time = frappe.datetime.now_time();
