@@ -98,7 +98,8 @@ frappe.ui.form.on('Patient Appointment', {
 				primary_action_label: __("Book"),
 				primary_action: function() {
 					// book slot
-					frm.set_value('appointment_time', selected_slot)
+					frm.set_value('appointment_time', selected_slot);
+					frm.set_value('duration', data.time_per_appointment);
 					d.hide();
 					frm.save();
 				}
