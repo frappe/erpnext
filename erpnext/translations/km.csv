@@ -4,16 +4,16 @@ apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.py +96,Items alr
 DocType: Buying Settings,Allow Item to be added multiple times in a transaction,អនុញ្ញាតឱ្យធាតុនឹងត្រូវបានបន្ថែមជាច្រើនដងនៅក្នុងប្រតិបត្តិការ
 apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +33,Cancel Material Visit {0} before cancelling this Warranty Claim,បោះបង់ {0} ទស្សនកិច្ចនៅមុនពេលលុបចោលសំភារៈបណ្តឹងធានានេះ
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +19,Consumer Products,ផលិតផលទំនិញប្រើប្រាស់
-DocType: Item,Customer Items,ធាតុអតិថិជន
-DocType: Project,Costing and Billing,និងវិក័យប័ត្រមានតម្លៃ
+DocType: Item,Customer Items,សម្ភាររបស់អតិថិជន
+DocType: Project,Costing and Billing,ការចំណាយនិងវិក្កយបត្រ
 apps/erpnext/erpnext/accounts/doctype/account/account.py +53,Account {0}: Parent account {1} can not be a ledger,គណនី {0}: គណនីមាតាបិតា {1} មិនអាចជាសៀវភៅមួយ
-DocType: Item,Publish Item to hub.erpnext.com,បោះពុម្ពផ្សាយធាតុទៅ hub.erpnext.com
-apps/erpnext/erpnext/config/setup.py +88,Email Notifications,ការជូនដំណឹងអ៊ីមែល
+DocType: Item,Publish Item to hub.erpnext.com,បោះពុម្ពផ្សាយសម្ភារទៅកាន់ hub.erpnext.com
+apps/erpnext/erpnext/config/setup.py +88,Email Notifications,ការជូនដំណឹងតាមអ៊ីមែល
 apps/erpnext/erpnext/hr/doctype/employee/employee_dashboard.py +22,Evaluation,ការវាយតំលៃ
-DocType: Item,Default Unit of Measure,អង្គភាពលំនាំដើមនៃវិធានការ
-DocType: SMS Center,All Sales Partner Contact,ទាំងអស់ដៃគូទំនាក់ទំនងលក់
+DocType: Item,Default Unit of Measure,ឯកតារង្វាស់តាមលំនាំដើម
+DocType: SMS Center,All Sales Partner Contact,ទំនាក់ទំនងគ្រប់ដៃគូផ្នែកលក់ទាំងអស់
 DocType: Employee,Leave Approvers,ទុកឱ្យការអនុម័ត
-DocType: Sales Partner,Dealer,អ្នកចែកបៀ
+DocType: Sales Partner,Dealer,អ្នកចែកចាយ
 DocType: Employee,Rented,ជួល
 DocType: Purchase Order,PO-,PO-
 DocType: POS Profile,Applicable for User,អាចប្រើប្រាស់បានសំរាប់អ្នកប្រើប្រាស់
