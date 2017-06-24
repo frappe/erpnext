@@ -19,9 +19,9 @@ DocType: Purchase Order,PO-,PO-
 DocType: POS Profile,Applicable for User,អាចប្រើប្រាស់បានសំរាប់អ្នកប្រើប្រាស់
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +194,"Stopped Production Order cannot be cancelled, Unstop it first to cancel",បញ្ឈប់ការបញ្ជាទិញផលិតផលដែលមិនអាចត្រូវបានលុបចោលឮវាជាលើកដំបូងដើម្បីបោះបង់
 DocType: Vehicle Service,Mileage,mileage
-apps/erpnext/erpnext/accounts/doctype/asset/asset.js +231,Do you really want to scrap this asset?,តើអ្នកពិតជាចង់លុបចោលទ្រព្យសម្បត្តិនេះ?
-apps/erpnext/erpnext/buying/report/quoted_item_comparison/quoted_item_comparison.js +44,Select Default Supplier,ជ្រើសផ្គត់ផ្គង់លំនាំដើម
-apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +37,Currency is required for Price List {0},រូបិយប័ណ្ណត្រូវបានទាមទារសម្រាប់តារាងតម្លៃ {0}
+apps/erpnext/erpnext/accounts/doctype/asset/asset.js +231,Do you really want to scrap this asset?,តើអ្នកពិតជាចង់លុបចោលទ្រព្យសម្បត្តិនេះឬ?
+apps/erpnext/erpnext/buying/report/quoted_item_comparison/quoted_item_comparison.js +44,Select Default Supplier,ជ្រើសអ្នកផ្គត់ផ្គង់តាមលំនាំដើម
+apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +37,Currency is required for Price List {0},រូបិយប័ណ្ណនេះត្រូវបានទាមទារសម្រាប់តារាងតម្លៃ {0}
 DocType: Sales Taxes and Charges Template,* Will be calculated in the transaction.,* នឹងត្រូវបានគណនាក្នុងប្រតិបត្តិការនេះ។
 DocType: Purchase Order,Customer Contact,ទំនាក់ទំនងអតិថិជន
 DocType: Job Applicant,Job Applicant,ការងារដែលអ្នកដាក់ពាក្យសុំ
