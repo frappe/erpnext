@@ -23,6 +23,7 @@ class PricingRule(Document):
 		self.validate_price_or_discount()
 		self.validate_max_discount()
 
+		if self.price_or_discount != 'Price': self.currency = None
 		if not self.margin_type: self.margin_rate_or_amount = 0.0
 
 	def validate_mandatory(self):
@@ -179,9 +180,15 @@ def get_pricing_rule_for_item(args):
 		item_details.margin_type = pricing_rule.margin_type
 		item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 		if pricing_rule.price_or_discount == "Price":
+			if pricing_rule.get('currency') and \
+				pricing_rule.currency == args.currency:
+				price_list_rate = pricing_rule.price * (args.conversion_factor or 1.0)
+			else:
+				price_list_rate = (pricing_rule.price/flt(args.conversion_rate)) * args.conversion_factor or 1.0 \
+						if args.conversion_rate else 0.0
+
 			item_details.update({
-				"price_list_rate": (pricing_rule.price/flt(args.conversion_rate)) * args.conversion_factor or 1.0 \
-					if args.conversion_rate else 0.0,
+				"price_list_rate": price_list_rate,
 				"discount_percentage": 0.0
 			})
 		else:
@@ -240,7 +247,7 @@ def get_pricing_rules(args):
 	conditions = item_variant_condition = ""
 	values =  {"item_code": args.get("item_code"), "brand": args.get("brand")}
 
-	for field in ["company", "customer", "supplier", "supplier_type", "campaign", "sales_partner"]:
+	for field in ["company", "customer", "supplier", "supplier_type", "campaign", "sales_partner", "currency"]:
 		if args.get(field):
 			conditions += " and ifnull("+field+", '') in (%("+field+")s, '')"
 			values[field] = args.get(field)
