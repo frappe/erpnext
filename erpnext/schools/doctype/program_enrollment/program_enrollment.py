@@ -77,3 +77,21 @@ def get_program_courses(doctype, txt, searchfield, start, page_len, filters):
 					"_txt": txt.replace('%', ''),
 					"program": filters['program']
 				})
+
+
+@frappe.whitelist()
+def get_students(doctype, txt, searchfield, start, page_len, filters):
+	if not filters.get("academic_term"):
+		filters["academic_term"] = frappe.defaults.get_defaults().academic_term
+	if not filters.get("academic_year"):
+		filters["academic_year"] = frappe.defaults.get_defaults().academic_year
+	enrolled_students = frappe.get_list("Program Enrollment", fields=["student"], filters=
+		{"academic_term": filters.get('academic_term'), "academic_year": filters.get('academic_year')})
+	students = [d.student for d in enrolled_students] if enrolled_students else [""]
+	return frappe.db.sql("""select name, title	from tabStudent
+		where name not in (%s)
+			and `%s` LIKE %s
+		order by idx desc, name
+		limit %s, %s""" %
+		(", ".join(['%s']*len(students)), searchfield, "%s", "%s", "%s"),
+		tuple(students + ["%%%s%%" % txt, start, page_len]))
