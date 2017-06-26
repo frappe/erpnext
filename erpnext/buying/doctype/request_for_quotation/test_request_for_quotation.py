@@ -44,7 +44,7 @@ class TestRequestforQuotation(unittest.TestCase):
 		sq = make_supplier_quotation(rfq.name, supplier_wt_appos[0].get("supplier"))
 		sq.submit()
 
-		frappe.local.form_dict.name = rfq.name
+		frappe.local.form_dict = dict(name=rfq.name)
 
 		self.assertEqual(
 			check_supplier_has_docname_access(supplier_wt_appos[0].get('supplier')),
