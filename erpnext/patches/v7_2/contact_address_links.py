@@ -5,7 +5,7 @@ from frappe.utils import update_progress_bar
 def execute():
 	frappe.reload_doc('core', 'doctype', 'dynamic_link')
 	frappe.reload_doc('email', 'doctype', 'contact')
-	frappe.reload_doc('geo', 'doctype', 'address')
+	frappe.reload_doc('contact', 'doctype', 'address')
 	map_fields = (
 		('Customer', 'customer'),
 		('Supplier', 'supplier'),

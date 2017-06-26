@@ -54,7 +54,10 @@ class SalesInvoice(SellingController):
 	def validate(self):
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
-		self.so_dn_required()
+
+		if not self.is_pos:
+			self.so_dn_required()
+
 		self.validate_proj_cust()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
