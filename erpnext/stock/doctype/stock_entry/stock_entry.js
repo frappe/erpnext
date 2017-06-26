@@ -1,6 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.stock");
+frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js");
 
 frappe.ui.form.on('Stock Entry', {
 	setup: function(frm) {
@@ -176,7 +177,6 @@ frappe.ui.form.on('Stock Entry Detail', {
 							d[k] = v;
 						});
 						erpnext.stock.select_batch_and_serial_no(frm, d);
-						refresh_field("items");
 					}
 				}
 			});

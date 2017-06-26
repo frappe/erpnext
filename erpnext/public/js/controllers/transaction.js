@@ -1,6 +1,8 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js");
+
 erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	setup: function() {
 		this._super();
@@ -265,13 +267,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	item_code: function(doc, cdt, cdn, from_barcode) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
-		var update_stock = 0, show_batch_dialog = 1;
+		var update_stock = 0, show_batch_dialog = 0;
 
-		if(['Sales Invoice', 'Purchase Invoice'].includes(me.frm.doc.doctype)) {
+		if(['Sales Invoice', 'Purchase Invoice'].includes(this.frm.doc.doctype)) {
 			update_stock = cint(me.frm.doc.update_stock);
 			show_batch_dialog = update_stock;
-		} else {
-			update_stock = 0;
+		} else if(this.frm.doc.doctype === 'Delivery Note') {
 			show_batch_dialog = 1;
 		}
 
@@ -320,7 +321,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
 							me.toggle_conversion_factor(item);
 							if(show_batch_dialog) {
-								let d = r.message;
+								var d = locals[cdt][cdn];
+								$.each(r.message, function(k, v) {
+									if(!d[k]) {
+										d[k] = v;
+									}
+								});
 								let serial_no_batch_selector = new erpnext.SerialNoBatchSelector({
 									frm: me.frm,
 									item: d,
