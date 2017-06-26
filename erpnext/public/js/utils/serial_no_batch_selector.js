@@ -31,8 +31,14 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		this.data = this.oldest ? this.oldest : [];
 		let title = "";
 		let fields = [
-			{fieldname: 'item_code', read_only: 1, fieldtype:'Link', options: 'Item',
-				label: __('Item Code'), 'default': me.item_code},
+			{
+				fieldname: 'item_code',
+				read_only: 1,
+				fieldtype:'Link',
+				options: 'Item',
+				label: __('Item Code'),
+				default: me.item_code
+			},
 			{fieldtype:'Column Break'},
 			{
 				fieldname: 'warehouse',
@@ -51,7 +57,13 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				}
 			},
 			{fieldtype:'Column Break'},
-			{fieldname: 'qty', fieldtype:'Float', label: __(me.has_batch ? 'Total Qty' : 'Qty'), 'default': me.qty},
+			{
+				fieldname: 'qty',
+				fieldtype:'Float',
+				read_only: 1,
+				label: __(me.has_batch ? 'Total Qty' : 'Qty'),
+				default: me.qty
+			},
 		];
 
 		if(this.has_batch) {
@@ -226,9 +238,21 @@ erpnext.SerialNoBatchSelector = Class.extend({
 							return {filters: {item: me.item_code }};
 						},
 						onchange: function(e) {
-							if(this.get_value().length === 0) {
+							let val = this.get_value();
+							if(val.length === 0) {
 								this.grid_row.on_grid_fields_dict
 									.available_qty.set_value(0);
+								return;
+							}
+							let selected_batches = this.grid.grid_rows.map((row) => {
+								if(row === this.grid_row) {
+									return "";
+								}
+								return row.on_grid_fields_dict.batch_no.get_value();
+							});
+							if(selected_batches.includes(val)) {
+								this.set_value("");
+								frappe.throw(__(`Batch ${val} already selected.`));
 								return;
 							}
 							if(me.warehouse_details.name) {
@@ -246,6 +270,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 								});
 
 							} else {
+								this.set_value("");
 								frappe.throw(__(`Please select a warehouse to get available
 									quantities`));
 							}

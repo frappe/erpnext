@@ -1,8 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js");
-
 erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	setup: function() {
 		this._super();
@@ -272,8 +270,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if(['Sales Invoice', 'Purchase Invoice'].includes(this.frm.doc.doctype)) {
 			update_stock = cint(me.frm.doc.update_stock);
 			show_batch_dialog = update_stock;
-		} else if(this.frm.doc.doctype === 'Delivery Note') {
-			show_batch_dialog = 1;
+
+		} else if((this.frm.doc.doctype === 'Purchase Receipt' && me.frm.doc.is_return) ||
+			this.frm.doc.doctype === 'Delivery Note') {
+				show_batch_dialog = 1;
 		}
 
 		// clear barcode if setting item (else barcode will take priority)
@@ -323,19 +323,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							if(show_batch_dialog) {
 								var d = locals[cdt][cdn];
 								$.each(r.message, function(k, v) {
-									if(!d[k]) {
-										d[k] = v;
-									}
+									if(!d[k]) d[k] = v;
 								});
-								let serial_no_batch_selector = new erpnext.SerialNoBatchSelector({
-									frm: me.frm,
-									item: d,
-									warehouse_details: {
-										type: "Warehouse",
-										name: d.warehouse
-									},
-								});
-								refresh_field("items");
+								erpnext.show_serial_batch_selector(me.frm, d);
 							}
 						}
 					}
@@ -1193,3 +1183,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 });
+
+erpnext.show_serial_batch_selector = function(frm, d) {
+	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
+		let serial_no_batch_selector = new erpnext.SerialNoBatchSelector({
+			frm: frm,
+			item: d,
+			warehouse_details: {
+				type: "Warehouse",
+				name: d.warehouse
+			},
+		});
+	});
+}
