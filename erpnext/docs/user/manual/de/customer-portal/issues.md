@@ -5,18 +5,17 @@ Kunden können über das Kundenportal sehr einfach Fälle eröffnen. Eine einfac
 
 ### Ticketliste leeren
 
-![Ticketliste]({{docs_base_url}}/assets/old_images/erpnext/portal-ticket-list-empty.png)
-
+<img class="screenshot" alt="Ausgabeliste" src="{{docs_base_url}}/assets/img/website/portal-ticket-list-empty.png">
 ### Neuer Fall
 
-![Neues Ticket]({{docs_base_url}}/assets/old_images/erpnext/portal-new-ticket.png)
+<img class="screenshot" alt="Neues Problem " src="{{docs_base_url}}/assets/img/website/portal-new-ticket.png">
 
 ### Fall öffnen
 
-![Fall eröffnen]({{docs_base_url}}/assets/old_images/erpnext/portal-ticket-1.png)
+<img class="screenshot" alt="Ausgabe aufgehoben" src="{{docs_base_url}}/assets/img/website/portal-ticket-1.gif">
 
 ### Fall beantworten
 
-![Fall beantworten]({{docs_base_url}}/assets/old_images/erpnext/portal-ticket-reply.png)
+<img class="screenshot" alt="Frage beantworten" src="{{docs_base_url}}/assets/img/website/portal-ticket-reply.gif">
 
 {next}
