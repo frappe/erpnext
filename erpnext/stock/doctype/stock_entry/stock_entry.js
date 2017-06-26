@@ -67,6 +67,10 @@ frappe.ui.form.on('Stock Entry', {
 				});
 			});
 		}
+
+		if(frm.doc.company) {
+			frm.trigger("toggle_display_account_head");
+		}
 	},
 	purpose: function(frm) {
 		frm.fields_dict.items.grid.refresh();
@@ -78,6 +82,7 @@ frappe.ui.form.on('Stock Entry', {
 			if(company_doc.default_letter_head) {
 				frm.set_value("letter_head", company_doc.default_letter_head);
 			}
+			frm.trigger("toggle_display_account_head");
 		}
 	},
 	set_serial_no: function(frm, cdt, cdn) {
@@ -98,6 +103,10 @@ frappe.ui.form.on('Stock Entry', {
 			}
 		});
 	},
+	toggle_display_account_head: function(frm) {
+		var enabled = erpnext.is_perpetual_inventory_enabled(frm.doc.company);
+		frm.fields_dict["items"].grid.set_column_disp(["cost_center", "expense_account"], enabled);
+	}
 })
 
 frappe.ui.form.on('Stock Entry Detail', {
@@ -213,17 +222,19 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			};
 		});
 
-		if(cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
+		if(me.frm.doc.company && erpnext.is_perpetual_inventory_enabled(me.frm.doc.company)) {
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
-			this.frm.fields_dict.items.grid.get_field('expense_account').get_query =
-				function() {
-					return {
-						filters: {
-							"company": me.frm.doc.company,
-							"is_group": 0
-						}
+		}
+
+		this.frm.fields_dict.items.grid.get_field('expense_account').get_query = function() {
+			if (erpnext.is_perpetual_inventory_enabled(me.frm.doc.company)) {
+				return {
+					filters: {
+						"company": me.frm.doc.company,
+						"is_group": 0
 					}
 				}
+			}
 		}
 
 		this.frm.set_indicator_formatter('item_code',
@@ -254,7 +265,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		this.toggle_related_fields(this.frm.doc);
 		this.toggle_enable_bom();
 		this.show_stock_ledger();
-		if (cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
+		if (this.frm.doc.docstatus===1 && erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 			this.show_general_ledger();
 		}
 		erpnext.hide_company();
@@ -272,7 +283,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	set_default_account: function(callback) {
 		var me = this;
 
-		if(cint(frappe.defaults.get_default("auto_accounting_for_stock")) && this.frm.doc.company) {
+		if(this.frm.doc.company && erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 			return this.frm.call({
 				method: "erpnext.accounts.utils.get_company_default",
 				args: {

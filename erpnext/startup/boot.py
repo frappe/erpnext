@@ -27,8 +27,8 @@ def boot_session(bootinfo):
 			bootinfo.setup_complete = frappe.db.sql("""select name from
 				tabCompany limit 1""") and 'Yes' or 'No'
 
-		bootinfo.docs += frappe.db.sql("""select name, default_currency, cost_center,
-			default_terms, default_letter_head, default_bank_account from `tabCompany`""",
+		bootinfo.docs += frappe.db.sql("""select name, default_currency, cost_center, default_terms,
+			default_letter_head, default_bank_account, enable_perpetual_inventory from `tabCompany`""",
 			as_dict=1, update={"doctype":":Company"})
 
 def load_country_and_currency(bootinfo):
