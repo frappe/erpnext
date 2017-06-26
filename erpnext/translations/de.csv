@@ -161,7 +161,7 @@ DocType: Item,Copy From Item Group,Von Artikelgruppe kopieren
 DocType: Journal Entry,Opening Entry,Eröffnungsbuchung
 apps/erpnext/erpnext/accounts/doctype/cheque_print_template/cheque_print_template.js +25,Account Pay Only,Konto Pay Nur
 DocType: Employee Loan,Repay Over Number of Periods,Repay über Anzahl der Perioden
-apps/erpnext/erpnext/schools/doctype/student_group/student_group.py +37,{0} - {1} is not enrolled in the given {2},{0} - {1} ist nicht in der angegebenen {2}
+apps/erpnext/erpnext/schools/doctype/student_group/student_group.py +37,{0} - {1} is not enrolled in the given {2},{0} - {1} ist nicht für den angegebenen {2} eingeschrieben
 DocType: Stock Entry,Additional Costs,Zusätzliche Kosten
 apps/erpnext/erpnext/accounts/doctype/account/account.py +142,Account with existing transaction can not be converted to group.,Ein Konto mit bestehenden Transaktionen kann nicht in eine Gruppe umgewandelt werden
 DocType: Lead,Product Enquiry,Produktanfrage
@@ -582,7 +582,7 @@ apps/erpnext/erpnext/config/accounts.py +262,Financial / accounting year.,Finanz
 apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.js +9,Accumulated Values,Kumulierte Werte
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +158,"Sorry, Serial Nos cannot be merged","Verzeihung! Seriennummern können nicht zusammengeführt werden,"
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.js +737,Make Sales Order,Kundenauftrag erstellen
-DocType: Project Task,Project Task,Projekt-Teilaufgabe
+DocType: Project Task,Project Task,Projektvorgang
 ,Lead Id,Lead-ID
 DocType: C-Form Invoice Detail,Grand Total,Gesamtbetrag
 DocType: Training Event,Course,Kurs
@@ -867,7 +867,7 @@ apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +111,{0} {1}: Cost Ce
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +88,{0} {1}: Account {2} cannot be a Group,{0} {1}: Konto {2} darf keine Gruppe sein
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +61,Item Row {idx}: {doctype} {docname} does not exist in above '{doctype}' table,Artikel Row {idx}: {} {Doctype docname} existiert nicht in der oben &#39;{Doctype}&#39; Tisch
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +271,Timesheet {0} is already completed or cancelled,Timesheet {0} ist bereits abgeschlossen oder abgebrochen
-apps/erpnext/erpnext/templates/pages/projects.html +42,No tasks,Keine Aufgaben
+apps/erpnext/erpnext/templates/pages/projects.html +42,No tasks,keine Vorgänge
 DocType: Purchase Invoice,"The day of the month on which auto invoice will be generated e.g. 05, 28 etc","Der Tag des Monats, an welchem eine automatische Rechnung erstellt wird, z. B. 05, 28 usw."
 DocType: Asset,Opening Accumulated Depreciation,Öffnungs Kumulierte Abschreibungen
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.js +49,Score must be less than or equal to 5,Punktzahl muß kleiner oder gleich 5 sein
@@ -1466,7 +1466,7 @@ DocType: Course Schedule,SH,Sch
 DocType: BOM,Scrap Material Cost(Company Currency),Schrottmaterialkosten (Gesellschaft Währung)
 apps/erpnext/erpnext/public/js/setup_wizard.js +300,Sub Assemblies,Unterbaugruppen
 DocType: Asset,Asset Name,Asset-Name
-DocType: Project,Task Weight,Aufgabengewichtung
+DocType: Project,Task Weight,Vorgangsgewichtung
 DocType: Shipping Rule Condition,To Value,Bis-Wert
 DocType: Asset Movement,Stock Manager,Lagerleiter
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +143,Source warehouse is mandatory for row {0},Ausgangslager ist für Zeile {0} zwingend erforderlich
@@ -1586,10 +1586,10 @@ DocType: Opportunity,Contact Mobile No,Kontakt-Mobiltelefonnummer
 DocType: Student Group,Set 0 for no limit,Stellen Sie 0 für keine Grenze
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +141,The day(s) on which you are applying for leave are holidays. You need not apply for leave.,"Der Tag/die Tage, für den/die Sie Urlaub beantragen, sind Ferien. Deshalb müssen Sie keinen Urlaub beantragen."
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.js +20,Resend Payment Email,Erneut senden Zahlung per E-Mail
-apps/erpnext/erpnext/templates/pages/projects.html +27,New task,Neue Aufgabe
+apps/erpnext/erpnext/templates/pages/projects.html +27,New task,Neuer Vorgang
 apps/erpnext/erpnext/utilities/activation.py +72,Make Quotation,Angebot erstellen
 apps/erpnext/erpnext/config/selling.py +216,Other Reports,Weitere Berichte
-DocType: Dependent Task,Dependent Task,Abhängige Aufgabe
+DocType: Dependent Task,Dependent Task,Abhängiger Vorgang
 apps/erpnext/erpnext/stock/doctype/item/item.py +407,Conversion factor for default Unit of Measure must be 1 in row {0},Umrechnungsfaktor für Standardmaßeinheit muss in Zeile {0} 1 sein
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +208,Leave of type {0} cannot be longer than {1},Abwesenheit vom Typ {0} kann nicht länger sein als {1}
 DocType: Manufacturing Settings,Try planning operations for X days in advance.,Arbeitsgänge für X Tage im Voraus planen.
@@ -2136,7 +2136,7 @@ DocType: Job Applicant,Job Opening,Offene Stellen
 DocType: Payment Reconciliation,Payment Reconciliation,Zahlungsabgleich
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +153,Please select Incharge Person's name,Bitte den Namen der verantwortlichen Person auswählen
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +51,Technology,Technologie
-apps/erpnext/erpnext/public/js/utils.js +92,Total Unpaid: {0},Noch nicht ausgezahlten: {0}
+apps/erpnext/erpnext/public/js/utils.js +92,Total Unpaid: {0},Noch nicht bezahlt: {0}
 DocType: BOM Website Operation,BOM Website Operation,BOM Webseite Tätigkeits
 apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.js +13,Offer Letter,Angebotsschreiben
 apps/erpnext/erpnext/config/manufacturing.py +18,Generate Material Requests (MRP) and Production Orders.,Materialanfragen (MAF) und Fertigungsaufträge generieren
@@ -2322,7 +2322,7 @@ apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +785,Item or Warehouse for row {0} does not match Material Request,Artikel oder Lager in Zeile {0} stimmen nicht mit Materialanfrage überein
 apps/erpnext/erpnext/config/stock.py +189,Unit of Measure,Maßeinheit
 DocType: Fiscal Year,Year End Date,Enddatum des Geschäftsjahres
-DocType: Task Depends On,Task Depends On,Aufgabe hängt ab von
+DocType: Task Depends On,Task Depends On,Vorgang hängt ab von
 DocType: Supplier Quotation,Opportunity,Chance
 ,Completed Production Orders,Abgeschlossene Fertigungsaufträge
 DocType: Operation,Default Workstation,Standard-Arbeitsplatz
@@ -2534,7 +2534,7 @@ DocType: Vehicle,Electric,elektrisch
 DocType: Task,% Progress,% Fortschritt
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +121,Gain/Loss on Asset Disposal,Gewinn / Verlust aus der Veräußerung von Vermögenswerten
 DocType: Training Event,Will send an email about the event to employees with status 'Open',Wird eine E-Mail über das Ereignis senden an Mitarbeiter mit dem Status 'Offen'
-DocType: Task,Depends on Tasks,Hängt von Aufgaben
+DocType: Task,Depends on Tasks,Abhängig von Vorgang
 apps/erpnext/erpnext/config/selling.py +36,Manage Customer Group Tree.,Baumstruktur der Kundengruppen verwalten
 DocType: Shopping Cart Settings,Attachments can be shown without enabling the shopping cart,Anhänge können ohne Erlaubnis des Einkaufswagens angezeigt werden
 DocType: Supplier Quotation,SQTN-,SQTN-
@@ -3242,7 +3242,7 @@ apps/erpnext/erpnext/accounts/doctype/c_form/c_form.py +54,Please enter atleast 
 apps/erpnext/erpnext/public/js/setup_wizard.js +189,Add Users,Benutzer hinzufügen
 DocType: POS Item Group,Item Group,Artikelgruppe
 DocType: Item,Safety Stock,Sicherheitsbestand
-apps/erpnext/erpnext/projects/doctype/task/task.py +53,Progress % for a task cannot be more than 100.,Fortschritt% für eine Aufgabe kann nicht mehr als 100 sein.
+apps/erpnext/erpnext/projects/doctype/task/task.py +53,Progress % for a task cannot be more than 100.,Fortschritt-% eines Vorgangs darf nicht größer 100 sein.
 DocType: Stock Reconciliation Item,Before reconciliation,Vor Ausgleich
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +12,To {0},An {0}
 DocType: Purchase Invoice,Taxes and Charges Added (Company Currency),Steuern und Gebühren hinzugerechnet (Firmenwährung)
@@ -3642,7 +3642,7 @@ apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_
 DocType: Purchase Invoice,Taxes and Charges Added,Steuern und Gebühren hinzugefügt
 ,Sales Funnel,Verkaufstrichter
 apps/erpnext/erpnext/setup/doctype/company/company.py +47,Abbreviation is mandatory,Abkürzung ist zwingend erforderlich
-DocType: Project,Task Progress,Aufgabenfortschritt
+DocType: Project,Task Progress,Vorgangsentwicklung
 apps/erpnext/erpnext/templates/includes/navbar/navbar_items.html +7,Cart,Einkaufswagen
 ,Qty to Transfer,Zu versendende Menge
 apps/erpnext/erpnext/config/selling.py +13,Quotes to Leads or Customers.,Angebote an Leads oder Kunden
@@ -4217,7 +4217,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.py +682,Item {0} is disabled,Artike
 DocType: Stock Settings,Stock Frozen Upto,Bestand gesperrt bis
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +882,BOM does not contain any stock item,Stückliste enthält keine Lagerware
 apps/erpnext/erpnext/controllers/recurring_document.py +172,Period From and Period To dates mandatory for recurring {0},Ab-Zeitraum und Bis-Zeitraum sind zwingend erforderlich für wiederkehrende {0}
-apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,Projektaktivität/Aufgabe
+apps/erpnext/erpnext/config/projects.py +18,Project activity / task.,Projektaktivität/-vorgang.
 DocType: Vehicle Log,Refuelling Details,Betankungs Einzelheiten
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,Gehaltsabrechnungen generieren
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +44,"Buying must be checked, if Applicable For is selected as {0}","Einkauf muss ausgewählt sein, wenn ""Anwenden auf"" auf {0} gesetzt wurde"
@@ -4291,7 +4291,7 @@ DocType: Employee Loan,Repayment Period in Months,Rückzahlungsfrist in Monaten
 apps/erpnext/erpnext/templates/includes/footer/footer_extension.html +26,Error: Not a valid id?,Fehler: Keine gültige ID?
 DocType: Naming Series,Update Series Number,Nummernkreis-Wert aktualisieren
 DocType: Account,Equity,Eigenkapital
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +78,{0} {1}: 'Profit and Loss' type account {2} not allowed in Opening Entry,{0} {1}: &quot;Gewinn und Verlust&quot; Typ Konto {2} nicht in Öffnungs Eintrag erlaubt
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +78,{0} {1}: 'Profit and Loss' type account {2} not allowed in Opening Entry,"{0} {1}: ""Gewinn und Verlust"" Art Konto {2} nicht in Eröffnungs-Buchung erlaubt"
 DocType: Sales Order,Printing Details,Druckdetails
 DocType: Task,Closing Date,Abschlussdatum
 DocType: Sales Order Item,Produced Quantity,Produzierte Menge
@@ -4302,7 +4302,7 @@ apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +163,
 DocType: Sales Partner,Partner Type,Partnertyp
 DocType: Purchase Taxes and Charges,Actual,Tatsächlich
 DocType: Authorization Rule,Customerwise Discount,Kundenspezifischer Rabatt
-apps/erpnext/erpnext/config/projects.py +35,Timesheet for tasks.,Zeiterfassung für Aufgaben.
+apps/erpnext/erpnext/config/projects.py +35,Timesheet for tasks.,Zeitraport für Vorgänge.
 DocType: Purchase Invoice,Against Expense Account,Zu Aufwandskonto
 DocType: Production Order,Production Order,Fertigungsauftrag
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +270,Installation Note {0} has already been submitted,Installationshinweis {0} wurde bereits übertragen

@@ -1,0 +1,23 @@
+<div class="frappe-list-area">
+	<div class="frappe-list">
+		<div class="list-filters">
+			<div class="list-filter-item">
+				<select class="form-control select-doctype">
+					{% for (var i=0; i < doctypes.length; i++) { %}
+						<option value="{{doctypes[i]}}">{{ doctypes[i] }}</option>
+					{% } %}
+				</select>
+			</div>
+
+			<div class="list-filter-item">
+				<select class="form-control select-time">
+					{% for (var i=0; i < timelines.length; i++) { %}
+						<option value="{{timelines[i]}}">{{ timelines[i] }}</option>
+					{% } %}
+				</select>
+			</div>
+		</div>
+		<div class="leaderboard">
+		</div>
+	</div>
+</div>

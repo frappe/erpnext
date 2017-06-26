@@ -164,7 +164,7 @@ class PurchaseInvoice(BuyingController):
 				frappe.msgprint(_("Item Code required at Row No {0}").format(d.idx), raise_exception=True)
 
 	def set_expense_account(self, for_validate=False):
-		auto_accounting_for_stock = cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
+		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
 
 		if auto_accounting_for_stock:
 			stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
@@ -205,14 +205,14 @@ class PurchaseInvoice(BuyingController):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
 			for d in self.get('items'):
 				if not d.purchase_order:
-					throw(_("Purchase Order number required for Item {0}").format(d.item_code))
+					throw(_("As per the Buying Settings if Purchase Order Required == 'YES', then for creating Purchase Invoice, user need to create Purchase Order first for item {0}").format(d.item_code))
 
 	def pr_required(self):
 		stock_items = self.get_stock_items()
 		if frappe.db.get_value("Buying Settings", None, "pr_required") == 'Yes':
 			for d in self.get('items'):
 				if not d.purchase_receipt and d.item_code in stock_items:
-					throw(_("Purchase Receipt number required for Item {0}").format(d.item_code))
+					throw(_("As per the Buying Settings if Purchase Reciept Required == 'YES', then for creating Purchase Invoice, user need to create Purchase Receipt first for item {0}").format(d.item_code))
 
 	def validate_write_off_account(self):
 		if self.write_off_amount and not self.write_off_account:
@@ -335,9 +335,7 @@ class PurchaseInvoice(BuyingController):
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 	def get_gl_entries(self, warehouse_account=None):
-		self.auto_accounting_for_stock = \
-			cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
-
+		self.auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
 		self.stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
 		self.expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 		self.negative_expense_to_be_booked = 0.0

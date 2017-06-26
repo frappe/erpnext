@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import unittest
-import frappe
+import frappe, erpnext
 import frappe.model
 from frappe.utils import cint, flt, today, nowdate
 import frappe.defaults
@@ -25,11 +25,10 @@ class TestPurchaseInvoice(unittest.TestCase):
 	def tearDown(self):
 		unlink_payment_on_cancel_of_invoice(0)
 
-	def test_gl_entries_without_auto_accounting_for_stock(self):
-		set_perpetual_inventory(0)
-		self.assertTrue(not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")))
-
+	def test_gl_entries_without_perpetual_inventory(self):
 		wrapper = frappe.copy_doc(test_records[0])
+		set_perpetual_inventory(0, wrapper.company)
+		self.assertTrue(not cint(erpnext.is_perpetual_inventory_enabled(wrapper.company)))
 		wrapper.insert()
 		wrapper.submit()
 		wrapper.load_from_db()
@@ -51,17 +50,16 @@ class TestPurchaseInvoice(unittest.TestCase):
 		for d in gl_entries:
 			self.assertEqual([d.debit, d.credit], expected_gl_entries.get(d.account))
 
-	def test_gl_entries_with_auto_accounting_for_stock(self):
-		set_perpetual_inventory(1)
-		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
-
+	def test_gl_entries_with_perpetual_inventory(self):
 		pi = frappe.copy_doc(test_records[1])
+		set_perpetual_inventory(1, pi.company)
+		self.assertTrue(cint(erpnext.is_perpetual_inventory_enabled(pi.company)), 1)
 		pi.insert()
 		pi.submit()
 
 		self.check_gle_for_pi(pi.name)
 
-		set_perpetual_inventory(0)
+		set_perpetual_inventory(0, pi.company)
 
 	def test_payment_entry_unlink_against_purchase_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
@@ -84,11 +82,10 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		self.assertRaises(frappe.LinkExistsError, pi_doc.cancel)
 
-	def test_gl_entries_with_auto_accounting_for_stock_against_pr(self):
-		set_perpetual_inventory(1)
-		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
-
+	def test_gl_entries_with_perpetual_inventory_against_pr(self):
 		pr = frappe.copy_doc(pr_test_records[0])
+		set_perpetual_inventory(1, pr.company)
+		self.assertTrue(cint(erpnext.is_perpetual_inventory_enabled(pr.company)), 1)
 		pr.submit()
 
 		pi = frappe.copy_doc(test_records[1])
@@ -99,7 +96,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		self.check_gle_for_pi(pi.name)
 
-		set_perpetual_inventory(0)
+		set_perpetual_inventory(0, pr.company)
 
 	def check_gle_for_pi(self, pi):
 		gl_entries = frappe.db.sql("""select account, debit, credit
@@ -133,10 +130,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertRaises(frappe.CannotChangeConstantError, pi.save)
 
 	def test_gl_entries_with_aia_for_non_stock_items(self):
-		set_perpetual_inventory()
-		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
-
 		pi = frappe.copy_doc(test_records[1])
+		set_perpetual_inventory(1, pi.company)
+		self.assertTrue(cint(erpnext.is_perpetual_inventory_enabled(pi.company)), 1)
 		pi.get("items")[0].item_code = "_Test Non Stock Item"
 		pi.get("items")[0].expense_account = "_Test Account Cost for Goods Sold - _TC"
 		pi.get("taxes").pop(0)
@@ -159,7 +155,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEquals(expected_values[i][0], gle.account)
 			self.assertEquals(expected_values[i][1], gle.debit)
 			self.assertEquals(expected_values[i][2], gle.credit)
-		set_perpetual_inventory(0)
+		set_perpetual_inventory(0, pi.company)
 
 	def test_purchase_invoice_calculation(self):
 		pi = frappe.copy_doc(test_records[0])

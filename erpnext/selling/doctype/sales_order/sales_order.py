@@ -608,7 +608,7 @@ def get_events(start, end, filters=None):
 	from frappe.desk.calendar import get_event_conditions
 	conditions = get_event_conditions("Sales Order", filters)
 
-	data = frappe.db.sql("""select name, customer_name, delivery_status, billing_status, delivery_date
+	data = frappe.db.sql("""select name, customer_name, status, delivery_status, billing_status, delivery_date
 		from `tabSales Order`
 		where (ifnull(delivery_date, '0000-00-00')!= '0000-00-00') \
 				and (delivery_date between %(start)s and %(end)s)

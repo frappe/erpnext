@@ -400,19 +400,6 @@ cur_frm.set_query("income_account", "items", function(doc) {
 	}
 });
 
-// expense account
-if (frappe.sys_defaults.auto_accounting_for_stock) {
-	cur_frm.fields_dict['items'].grid.get_field('expense_account').get_query = function(doc) {
-		return {
-			filters: {
-				'report_type': 'Profit and Loss',
-				'company': doc.company,
-				"is_group": 0
-			}
-		}
-	}
-}
-
 
 // Cost Center in Details Table
 // -----------------------------
@@ -502,6 +489,21 @@ frappe.ui.form.on('Sales Invoice', {
 				filters: {'project': doc.project}
 			}
 		}
+
+		// expense account
+		frm.fields_dict['items'].grid.get_field('expense_account').get_query = function(doc) {
+			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
+				return {
+					filters: {
+						'report_type': 'Profit and Loss',
+						'company': doc.company,
+						"is_group": 0
+					}
+				}
+			}
+		}
+		
+		
 	},
 
 	project: function(frm){

@@ -1484,7 +1484,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	print_dialog: function () {
 		var me = this;
 
-		this.frappe.msgprint = frappe.msgprint(
+		this.msgprint = frappe.msgprint(
 			`<a class="btn btn-primary print_doc"
 				style="margin-right: 5px;">${__('Print')}</a>
 			<a class="btn btn-default new_doc">${__('New')}</a>`);
@@ -1495,7 +1495,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		})
 
 		$('.new_doc').click(function () {
-			me.frappe.msgprint.hide()
+			me.msgprint.hide()
 			me.make_new_cart()
 		})
 	},

@@ -33,6 +33,7 @@ class Company(Document):
 		self.validate_default_accounts()
 		self.validate_currency()
 		self.validate_coa_input()
+		self.validate_perpetual_inventory()
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -88,6 +89,10 @@ class Company(Document):
 		if self.default_currency:
 			frappe.db.set_value("Currency", self.default_currency, "enabled", 1)
 
+		if hasattr(frappe.local, 'enable_perpetual_inventory') and \
+			self.name in frappe.local.enable_perpetual_inventory:
+			frappe.local.enable_perpetual_inventory[self.name] = self.enable_perpetual_inventory
+
 		frappe.clear_cache()
 
 	def install_country_fixtures(self):
@@ -139,6 +144,12 @@ class Company(Document):
 			if not self.chart_of_accounts:
 				self.chart_of_accounts = "Standard"
 
+	def validate_perpetual_inventory(self):
+		if not self.get("__islocal"):
+			if cint(self.enable_perpetual_inventory) == 1 and not self.default_inventory_account:
+				frappe.msgprint(_("Set default inventory account for perpetual inventory"), 
+					alert=True, indicator='orange')
+
 	def set_default_accounts(self):
 		self._set_default_account("default_cash_account", "Cash")
 		self._set_default_account("default_bank_account", "Bank")
@@ -146,7 +157,7 @@ class Company(Document):
 		self._set_default_account("accumulated_depreciation_account", "Accumulated Depreciation")
 		self._set_default_account("depreciation_expense_account", "Depreciation")
 
-		if cint(frappe.db.get_single_value("Accounts Settings", "auto_accounting_for_stock")):
+		if self.enable_perpetual_inventory:
 			self._set_default_account("stock_received_but_not_billed", "Stock Received But Not Billed")
 			self._set_default_account("default_inventory_account", "Stock")
 			self._set_default_account("stock_adjustment_account", "Stock Adjustment")
