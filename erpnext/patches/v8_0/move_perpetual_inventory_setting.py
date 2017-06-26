@@ -10,4 +10,4 @@ def execute():
 	for data in frappe.get_all('Company', fields = ["name"]):
 		doc = frappe.get_doc('Company', data.name)
 		doc.enable_perpetual_inventory = enabled
-		doc.save(ignore_permissions=True)
+		doc.db_update()
