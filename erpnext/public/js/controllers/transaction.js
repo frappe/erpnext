@@ -273,7 +273,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		} else if((this.frm.doc.doctype === 'Purchase Receipt' && me.frm.doc.is_return) ||
 			this.frm.doc.doctype === 'Delivery Note') {
-				show_batch_dialog = 1;
+			show_batch_dialog = 1;
 		}
 
 		// clear barcode if setting item (else barcode will take priority)
@@ -1186,7 +1186,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 erpnext.show_serial_batch_selector = function(frm, d) {
 	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
-		let serial_no_batch_selector = new erpnext.SerialNoBatchSelector({
+		new erpnext.SerialNoBatchSelector({
 			frm: frm,
 			item: d,
 			warehouse_details: {

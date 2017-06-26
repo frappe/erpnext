@@ -124,8 +124,6 @@ erpnext.SerialNoBatchSelector = Class.extend({
 	},
 
 	set_items: function() {
-		var me = this;
-
 		if(this.has_batch) {
 			this.values.batches.map((batch, i) => {
 				let row = (i !== 0) ? this.frm.add_child("items") : this.item;
@@ -135,6 +133,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 					// let grid_row = me.frm.fields_dict.items.grid.grid_rows[index];
 					// grid_row.toggle_editable_row();
 					// grid_row.on_grid_fields_dict.item_code.set_value(this.item_code);
+
 					row.item_code = this.item_code;
 				}
 				this.map_row_values(row, batch, 'batch_no',
@@ -165,7 +164,6 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		let batches_field = this.dialog.fields_dict.batches;
 
 		let qty_field = this.dialog.fields_dict.qty;
-		let item_code = this.item_code;
 
 		let update_quantity = (batch) => {
 			if(batch) {
@@ -181,7 +179,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 					.replace(/\n/g, ' ').match(/\S+/g) || [];
 				qty_field.set_input(serial_numbers.length);
 			}
-		}
+		};
 
 		if(serial_no_link) {
 			let serial_list = [];
@@ -304,9 +302,10 @@ erpnext.SerialNoBatchSelector = Class.extend({
 							}
 							if(me.warehouse_details.type === 'Source Warehouse' &&
 								parseFloat(available_qty) < parseFloat(selected_qty)) {
-									this.set_value('0');
-									frappe.throw(__(`For transfer from source, selected quantity cannot be
-										greater than available quantity`));
+
+								this.set_value('0');
+								frappe.throw(__(`For transfer from source, selected quantity cannot be
+									greater than available quantity`));
 							} else {
 								this.grid.refresh();
 							}

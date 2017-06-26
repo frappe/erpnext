@@ -569,7 +569,7 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 	}
 
 	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
-		let serial_no_batch_selector = new erpnext.SerialNoBatchSelector({
+		new erpnext.SerialNoBatchSelector({
 			frm: frm,
 			item: item,
 			warehouse_details: get_warehouse_type_and_name(item),
