@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe.utils import cint, flt, cstr
 from frappe import msgprint, _
 import frappe.defaults
@@ -21,7 +21,7 @@ class StockController(AccountsController):
 		if self.docstatus == 2:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
-		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
+		if cint(erpnext.is_perpetual_inventory_enabled(self.company)):
 			warehouse_account = get_warehouse_account_map()
 
 			if self.docstatus==1:
@@ -95,7 +95,7 @@ class StockController(AccountsController):
 
 	def update_stock_ledger_entries(self, sle):
 		sle.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
-			self.doctype, self.name, currency=self.company_currency)
+			self.doctype, self.name, currency=self.company_currency, company=self.company)
 
 		sle.stock_value = flt(sle.qty_after_transaction) * flt(sle.valuation_rate)
 		sle.stock_value_difference = flt(sle.actual_qty) * flt(sle.valuation_rate)

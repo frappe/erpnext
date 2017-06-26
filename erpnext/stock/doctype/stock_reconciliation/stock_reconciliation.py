@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 import frappe.defaults
 from frappe import msgprint, _
 from frappe.utils import cstr, flt, cint
@@ -231,7 +231,7 @@ class StockReconciliation(StockController):
 			self.expense_account, self.cost_center)
 
 	def validate_expense_account(self):
-		if not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
+		if not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
 			return
 
 		if not self.expense_account:
