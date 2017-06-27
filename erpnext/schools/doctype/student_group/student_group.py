@@ -95,3 +95,25 @@ def get_program_enrollment(academic_year, academic_term=None, program=None, batc
 		'''.format(condition1=condition1, condition2=condition2),
 		({"academic_year": academic_year, "academic_term":academic_term, "program": program, "batch": batch, "course": course}), as_dict=1)
 
+
+@frappe.whitelist()
+def fetch_students(doctype, txt, searchfield, start, page_len, filters):
+	if filters.get("group_based_on") != "Activity":
+		enrolled_students = get_program_enrollment(filters.get('academic_year'), filters.get('academic_term'),
+			filters.get('program'), filters.get('batch'))
+		student_group_student = frappe.db.sql_list('''select student from `tabStudent Group Student` where parent=%s''',
+			(filters.get('student_group')))
+		students = ([d.student for d in enrolled_students if d.student not in student_group_student]
+			if enrolled_students else [""]) or [""]
+		return frappe.db.sql("""select name, title from tabStudent
+			where name in ({0}) and `{1}` LIKE %s
+			order by idx desc, name
+			limit %s, %s""".format(", ".join(['%s']*len(students)), searchfield),
+			tuple(students + ["%%%s%%" % txt, start, page_len]))
+	else:
+		return frappe.db.sql("""select name, title from tabStudent
+			where `{}` LIKE %s
+			order by idx desc, name
+			limit %s, %s""".format(searchfield),
+			tuple(["%%%s%%" % txt, start, page_len]))
+
