@@ -3,6 +3,7 @@ from frappe.core.doctype.dynamic_link.dynamic_link import deduplicate_dynamic_li
 from frappe.utils import update_progress_bar
 
 def execute():
+	frappe.reload_doc('core', 'doctype', 'feedback_trigger')
 	frappe.reload_doc('core', 'doctype', 'dynamic_link')
 	frappe.reload_doc('email', 'doctype', 'contact')
 	frappe.reload_doc('contact', 'doctype', 'address')
