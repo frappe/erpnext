@@ -8,13 +8,14 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe.permissions import add_permission
 from erpnext.regional.india import states
 
-def setup(company=None):
+def setup(company=None, patch=True):
 	make_custom_fields()
-	make_fixtures()
 	add_permissions()
 	add_custom_roles_for_reports()
 	add_hsn_codes()
 	update_address_template()
+	if not patch:
+		make_fixtures()
 
 def update_address_template():
 	with open(os.path.join(os.path.dirname(__file__), 'address_template.html'), 'r') as f:

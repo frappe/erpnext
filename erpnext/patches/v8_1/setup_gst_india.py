@@ -11,7 +11,7 @@ def execute():
 
 	if frappe.db.get_single_value('System Settings', 'country')=='India':
 		from erpnext.regional.india.setup import setup
-		setup()
+		setup(patch=True)
 		send_gst_update_email()
 
 def send_gst_update_email():
