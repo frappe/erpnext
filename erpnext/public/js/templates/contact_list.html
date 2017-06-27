@@ -1,38 +1,38 @@
-<p><button class="btn btn-xs btn-default btn-contact">
-    {{ __("New Contact") }}</button></p>
-    <div class="clearfix"></div>
-<ol>
+<div class="clearfix"></div>
 {% for(var i=0, l=contact_list.length; i<l; i++) { %}
-    <p class="h6">
-		<li>
-	        {%= contact_list[i].first_name %} {%= contact_list[i].last_name %}
-	        {% if(contact_list[i].is_primary_contact) { %}
-	            <span class="text-muted">({%= __("Primary") %})</span>
-	        {% } %}
-	        {% if(contact_list[i].designation){ %}
-	         <span class="text-muted">&ndash; {%= contact_list[i].designation %}</span>
-	        {% } %}
-	        <a href="#Form/Contact/{%= encodeURIComponent(contact_list[i].name) %}"
-	            class="btn btn-xs btn-default pull-right">
-	            {%= __("Edit") %}</a>
-		</li>
-	</p>
-
-    <div style="padding-left: 15px;">
-        <p style="padding-top: 5px; font-size: 12px;">
-        {% if(contact_list[i].phone) { %}
-            {%= __("Phone") %}: {%= contact_list[i].phone %}<br>
-        {% } %}
-        {% if(contact_list[i].mobile_no) { %}
-            {%= __("Mobile No.") %}: {%= contact_list[i].mobile_no %}<br>
-        {% } %}
-        {% if(contact_list[i].email_id) { %}
-            {%= __("Email Address") %}: {%= contact_list[i].email_id %}
-        {% } %}
-        </p>
-    </div>
+	<div class="address-box">
+		<p class="h6">
+			{%= contact_list[i].first_name %} {%= contact_list[i].last_name %}
+			{% if(contact_list[i].is_primary_contact) { %}
+				<span class="text-muted">({%= __("Primary") %})</span>
+			{% } %}
+			{% if(contact_list[i].designation){ %}
+			 <span class="text-muted">&ndash; {%= contact_list[i].designation %}</span>
+			{% } %}
+			<a href="#Form/Contact/{%= encodeURIComponent(contact_list[i].name) %}"
+				class="btn btn-xs btn-default pull-right"
+				style="margin-top:-3px; margin-right: -5px;">
+				{%= __("Edit") %}</a>
+		</p>
+		{% if (contact_list[i].phone || contact_list[i].mobile_no ||
+			contact_list[i].email_id) { %}
+		<p>
+		{% if(contact_list[i].phone) { %}
+			{%= __("Phone") %}: {%= contact_list[i].phone %}<br>
+		{% } %}
+		{% if(contact_list[i].mobile_no) { %}
+			{%= __("Mobile No.") %}: {%= contact_list[i].mobile_no %}<br>
+		{% } %}
+		{% if(contact_list[i].email_id) { %}
+			{%= __("Email Address") %}: {%= contact_list[i].email_id %}
+		{% } %}
+		</p>
+		{% endif %}
+	</div>
 {% } %}
-</ol>
 {% if(!contact_list.length) { %}
-<p class="text-muted">{%= __("No contacts added yet.") %}</p>
+<p class="text-muted small">{%= __("No contacts added yet.") %}</p>
 {% } %}
+<p><button class="btn btn-xs btn-default btn-contact">
+	{{ __("New Contact") }}</button>
+</p>

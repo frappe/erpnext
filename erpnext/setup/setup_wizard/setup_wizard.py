@@ -84,7 +84,7 @@ def create_fiscal_year_and_company(args):
 	if (args.get('company_name')):
 		frappe.get_doc({
 			"doctype":"Company",
-			'company_name':args.get('company_name').strip(),
+			'company_name':args.get('company_name'),
 			'enable_perpetual_inventory': 1,
 			'abbr':args.get('company_abbr'),
 			'default_currency':args.get('currency'),
@@ -104,7 +104,7 @@ def enable_shopping_cart(args):
 	frappe.get_doc({
 		"doctype": "Shopping Cart Settings",
 		"enabled": 1,
-		'company': args.get('company_name').strip(),
+		'company': args.get('company_name')	,
 		'price_list': frappe.db.get_value("Price List", {"selling": 1}),
 		'default_customer_group': _("Individual"),
 		'quotation_series': "QTN-",
@@ -112,7 +112,7 @@ def enable_shopping_cart(args):
 
 def create_bank_account(args):
 	if args.get("bank_account"):
-		company_name = args.get('company_name').strip()
+		company_name = args.get('company_name')
 		bank_account_group =  frappe.db.get_value("Account",
 			{"account_type": "Bank", "is_group": 1, "root_type": "Asset",
 				"company": company_name})
@@ -152,7 +152,7 @@ def set_defaults(args):
 	global_defaults.update({
 		'current_fiscal_year': args.curr_fiscal_year,
 		'default_currency': args.get('currency'),
-		'default_company':args.get('company_name').strip(),
+		'default_company':args.get('company_name')	,
 		"country": args.get("country"),
 	})
 
@@ -253,8 +253,10 @@ def create_sales_tax(args):
 	country_wise_tax = get_country_wise_tax(args.get("country"))
 	if country_wise_tax and len(country_wise_tax) > 0:
 		for sales_tax, tax_data in country_wise_tax.items():
-			make_tax_account_and_template(args.get("company_name").strip(),
-				tax_data.get('account_name'), tax_data.get('tax_rate'), sales_tax)
+			make_tax_account_and_template(
+				args.get("company_name"),
+				tax_data.get('account_name'),
+				tax_data.get('tax_rate'), sales_tax)
 
 def get_country_wise_tax(country):
 	data = {}
@@ -270,13 +272,20 @@ def create_taxes(args):
 			tax_rate = cstr(args.get("tax_rate_" + str(i)) or "").replace("%", "")
 			account_name = args.get("tax_" + str(i))
 
-			make_tax_account_and_template(args.get("company_name").strip(), account_name, tax_rate)
+			make_tax_account_and_template(args.get("company_name")	, account_name, tax_rate)
 
 def make_tax_account_and_template(company, account_name, tax_rate, template_name=None):
 	try:
-		account = make_tax_account(company, account_name, tax_rate)
-		if account:
-			make_sales_and_purchase_tax_templates(account, template_name)
+		if not isinstance(account_name, (list, tuple)):
+			account_name = [account_name]
+			tax_rate = [tax_rate]
+
+		accounts = []
+		for i, name in enumerate(account_name):
+			accounts.append(make_tax_account(company, account_name[i], tax_rate[i]))
+
+		if accounts:
+			make_sales_and_purchase_tax_templates(accounts, template_name)
 	except frappe.NameError, e:
 		if e.args[2][0]==1062:
 			pass
@@ -309,30 +318,34 @@ def make_tax_account(company, account_name, tax_rate):
 			"tax_rate": flt(tax_rate) if tax_rate else None
 		}).insert(ignore_permissions=True)
 
-def make_sales_and_purchase_tax_templates(account, template_name=None):
+def make_sales_and_purchase_tax_templates(accounts, template_name=None):
 	if not template_name:
-		template_name = account.name
+		template_name = accounts[0].name
 
 	sales_tax_template = {
 		"doctype": "Sales Taxes and Charges Template",
 		"title": template_name,
-		"company": account.company,
-		"taxes": [{
+		"company": accounts[0].company,
+		'taxes': []
+	}
+
+	for account in accounts:
+		sales_tax_template['taxes'].append({
 			"category": "Valuation and Total",
 			"charge_type": "On Net Total",
 			"account_head": account.name,
 			"description": "{0} @ {1}".format(account.account_name, account.tax_rate),
 			"rate": account.tax_rate
-		}]
-	}
-
+		})
 	# Sales
 	frappe.get_doc(copy.deepcopy(sales_tax_template)).insert(ignore_permissions=True)
 
 	# Purchase
 	purchase_tax_template = copy.deepcopy(sales_tax_template)
 	purchase_tax_template["doctype"] = "Purchase Taxes and Charges Template"
-	frappe.get_doc(purchase_tax_template).insert(ignore_permissions=True)
+
+	doc = frappe.get_doc(purchase_tax_template)
+	doc.insert(ignore_permissions=True)
 
 def create_items(args):
 	for i in xrange(1,6):
@@ -346,7 +359,7 @@ def create_items(args):
 			if is_stock_item:
 				default_warehouse = frappe.db.get_value("Warehouse", filters={
 					"warehouse_name": _("Finished Goods") if is_sales_item else _("Stores"),
-					"company": args.get("company_name").strip()
+					"company": args.get("company_name")
 				})
 
 			try:
@@ -405,7 +418,7 @@ def create_customers(args):
 					"customer_type": "Company",
 					"customer_group": _("Commercial"),
 					"territory": args.get("country"),
-					"company": args.get("company_name").strip()
+					"company": args.get("company_name")
 				}).insert()
 
 				if args.get("customer_contact_" + str(i)):
@@ -423,7 +436,7 @@ def create_suppliers(args):
 					"doctype":"Supplier",
 					"supplier_name": supplier,
 					"supplier_type": _("Local"),
-					"company": args.get("company_name").strip()
+					"company": args.get("company_name")
 				}).insert()
 
 				if args.get("supplier_contact_" + str(i)):
@@ -434,7 +447,7 @@ def create_suppliers(args):
 
 def create_contact(contact, party_type, party):
 	"""Create contact based on given contact name"""
-	contact = contact.strip().split(" ")
+	contact = contact	.split(" ")
 
 	contact = frappe.get_doc({
 		"doctype":"Contact",
@@ -466,7 +479,7 @@ def create_logo(args):
 			fileurl = save_file(filename, content, "Website Settings", "Website Settings",
 				decode=True).file_url
 			frappe.db.set_value("Website Settings", "Website Settings", "brand_html",
-				"<img src='{0}' style='max-width: 40px; max-height: 25px;'> {1}".format(fileurl, args.get("company_name").strip()))
+				"<img src='{0}' style='max-width: 40px; max-height: 25px;'> {1}".format(fileurl, args.get("company_name")	))
 
 def create_territories():
 	"""create two default territories, one for home country and one named Rest of the World"""
