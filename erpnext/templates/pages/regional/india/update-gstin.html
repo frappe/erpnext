@@ -28,7 +28,7 @@
 		<div class='bordered' style='max-width: 300px; margin-bottom: 15px;'>
 			{{ address.display }}
 			<p><input type='text' class='form-control'
-				value='{{ address.gstin }}' name='{{ address.name }}' placeholder='GSTIN'></p>
+				value='{{ address.gstin or "" }}' name='{{ address.name }}' placeholder='GSTIN'></p>
 		</div>
 		{% endfor %}
 		<p><input type='submit' class='btn btn-primary' value='Update'></p>
