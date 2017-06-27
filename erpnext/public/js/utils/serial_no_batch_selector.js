@@ -5,10 +5,6 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		// frm, item, warehouse_details, has_batch, oldest
 		let d = this.item;
 
-		if(frappe.flags.autofill_item_code) {
-			return;
-		}
-
 		// Don't show dialog if batch no or serial no already set
 		if(d && d.has_batch_no && !d.batch_no) {
 			this.has_batch = 1;
@@ -128,21 +124,9 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		if(this.has_batch) {
 			this.values.batches.map((batch, i) => {
 				let item_code_field = {};
-				let row = (i !== 0) ? this.frm.add_child("items") : this.item;
-				refresh_field("items");
-				if(i !== 0) {
-					let index = i + me.item.idx - 1;
-					let grid_row = me.frm.fields_dict.items.grid.grid_rows[index];
-					grid_row.toggle_editable_row();
-					item_code_field = grid_row.on_grid_fields_dict.item_code;
-
-					row.item_code = this.item_code;
-					this.map_row_values(row, batch, 'batch_no',
-						'selected_qty', this.values.warehouse, item_code_field);
-				} else {
-					this.map_row_values(row, batch, 'batch_no',
+				let row = (i !== 0) ? this.frm.add_child("items", this.item) : this.item;
+				this.map_row_values(row, batch, 'batch_no',
 					'selected_qty', this.values.warehouse);
-				}
 			});
 		} else {
 			this.map_row_values(this.item, this.values, 'serial_no', 'qty');
@@ -150,7 +134,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		refresh_field("items");
 	},
 
-	map_row_values: function(row, values, number, qty_field, warehouse, item_code_field) {
+	map_row_values: function(row, values, number, qty_field, warehouse) {
 		row.qty = values[qty_field];
 		row[number] = values[number];
 		if(this.warehouse_details.type === 'Source Warehouse') {
@@ -160,12 +144,6 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		} else {
 			row.warehouse = values.warehouse || warehouse;
 		}
-
-		if(item_code_field) {
-			item_code_field.set_value(this.item_code);
-			// frappe.model.set_value(row.doctype, row.name, 'item_code', this.item_code);
-		}
-
 	},
 
 	bind_qty: function() {

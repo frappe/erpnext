@@ -172,14 +172,10 @@ frappe.ui.form.on('Stock Entry Detail', {
 				callback: function(r) {
 					if(r.message) {
 						var d = locals[cdt][cdn];
-						// Properties set possibly via batch modal
-						var presets = ["batch_no", "qty", "s_warehouse", "t_warehouse"];
 						$.each(r.message, function(k, v) {
-							if(presets.includes(k) && d[k]) {
-								return;
-							}
 							d[k] = v;
 						});
+						refresh_field("items");
 						erpnext.stock.select_batch_and_serial_no(frm, d);
 					}
 				}
