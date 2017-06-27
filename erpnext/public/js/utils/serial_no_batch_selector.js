@@ -124,20 +124,25 @@ erpnext.SerialNoBatchSelector = Class.extend({
 	},
 
 	set_items: function() {
+		var me = this;
 		if(this.has_batch) {
 			this.values.batches.map((batch, i) => {
+				let item_code_field = {};
 				let row = (i !== 0) ? this.frm.add_child("items") : this.item;
 				refresh_field("items");
 				if(i !== 0) {
-					// let index = i + me.item.idx - 1;
-					// let grid_row = me.frm.fields_dict.items.grid.grid_rows[index];
-					// grid_row.toggle_editable_row();
-					// grid_row.on_grid_fields_dict.item_code.set_value(this.item_code);
+					let index = i + me.item.idx - 1;
+					let grid_row = me.frm.fields_dict.items.grid.grid_rows[index];
+					grid_row.toggle_editable_row();
+					item_code_field = grid_row.on_grid_fields_dict.item_code;
 
 					row.item_code = this.item_code;
-				}
-				this.map_row_values(row, batch, 'batch_no',
+					this.map_row_values(row, batch, 'batch_no',
+						'selected_qty', this.values.warehouse, item_code_field);
+				} else {
+					this.map_row_values(row, batch, 'batch_no',
 					'selected_qty', this.values.warehouse);
+				}
 			});
 		} else {
 			this.map_row_values(this.item, this.values, 'serial_no', 'qty');
@@ -145,7 +150,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		refresh_field("items");
 	},
 
-	map_row_values: function(row, values, number, qty_field, warehouse) {
+	map_row_values: function(row, values, number, qty_field, warehouse, item_code_field) {
 		row.qty = values[qty_field];
 		row[number] = values[number];
 		if(this.warehouse_details.type === 'Source Warehouse') {
@@ -154,6 +159,11 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			row.t_warehouse = values.warehouse || warehouse;
 		} else {
 			row.warehouse = values.warehouse || warehouse;
+		}
+
+		if(item_code_field) {
+			item_code_field.set_value(this.item_code);
+			// frappe.model.set_value(row.doctype, row.name, 'item_code', this.item_code);
 		}
 
 	},
