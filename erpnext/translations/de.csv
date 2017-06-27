@@ -1511,7 +1511,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: Homepage,Company Tagline for website homepage,Unternehmen Untertitel für Internet-Homepage
 DocType: Item Group,Item Group Name,Name der Artikelgruppe
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +27,Taken,Genommen
-DocType: Student,Date of Leaving,Datum Weggehen
+DocType: Student,Date of Leaving,Austrittsdatum
 DocType: Pricing Rule,For Price List,Für Preisliste
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +27,Executive Search,Direktsuche
 apps/erpnext/erpnext/utilities/activation.py +61,Create Leads,erstellen Leads
@@ -4468,7 +4468,7 @@ apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +261,Employee relieve
 DocType: Guardian,Guardian,Wächter
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +42,Appraisal {0} created for Employee {1} in the given date range,Bewertung {0} für Mitarbeiter {1} im angegebenen Datumsbereich erstellt
 DocType: Employee,Education,Bildung
-apps/erpnext/erpnext/public/js/pos/pos.html +80,Del,Del
+apps/erpnext/erpnext/public/js/pos/pos.html +80,Del,Entf
 DocType: Selling Settings,Campaign Naming By,Benennung der Kampagnen nach
 DocType: Employee,Current Address Is,Aktuelle Adresse ist
 apps/erpnext/erpnext/templates/includes/projects/project_tasks.html +9,modified,geändert

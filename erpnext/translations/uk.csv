@@ -75,7 +75,7 @@ apps/erpnext/erpnext/hr/report/vehicle_expenses/vehicle_expenses.py +26,Service 
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +839,Serial Number: {0} is already referenced in Sales Invoice: {1},Серійний номер: {0} вже згадується в продажу рахунку: {1}
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +808,Invoice,Рахунок-фактура
 DocType: Maintenance Schedule Item,Periodicity,Періодичність
-apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +21,Fiscal Year {0} is required,Фінансовий рік {0} вимагається
+apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +21,Fiscal Year {0} is required,Треба зазначити бюджетний період {0}
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +54,Expected Delivery Date is be before Sales Order Date,Очікувана дата поставки бути перед Sales Order Date
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +21,Defense,Захист
 DocType: Salary Component,Abbr,Абревіатура
@@ -106,7 +106,7 @@ apps/erpnext/erpnext/accounts/doctype/account/account.js +26,This is a root acco
 DocType: BOM,Operations,Операції
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +38,Cannot set authorization on basis of Discount for {0},Не вдається встановити дозвіл на основі Знижка на {0}
 DocType: Rename Tool,"Attach .csv file with two columns, one for the old name and one for the new name","Долучіть файл .csv з двома колонками, одна для старої назви і одна для нової назви"
-apps/erpnext/erpnext/accounts/utils.py +73,{0} {1} not in any active Fiscal Year.,{0} {1} не існує в жодному активному Фіскальному Році
+apps/erpnext/erpnext/accounts/utils.py +73,{0} {1} not in any active Fiscal Year.,{0} {1} не існує в жодному активному бюджетному періоді
 DocType: Packed Item,Parent Detail docname,Батько Подробиці DOCNAME
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +69,"Reference: {0}, Item Code: {1} and Customer: {2}","Посилання: {0}, Код товару: {1} і клієнта: {2}"
 apps/erpnext/erpnext/public/js/setup_wizard.js +303,Kg,Кг
@@ -196,7 +196,7 @@ DocType: SMS Center,All Contact,Всі контактні
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +878,Production Order already created for all items with BOM,Виробничий замовлення вже створений для всіх елементів з BOM
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +182,Annual Salary,Річна заробітна плата
 DocType: Daily Work Summary,Daily Work Summary,Щодня Резюме Робота
-DocType: Period Closing Voucher,Closing Fiscal Year,Закриття фінансового року
+DocType: Period Closing Voucher,Closing Fiscal Year,Закриття бюджетного періоду
 apps/erpnext/erpnext/accounts/party.py +343,{0} {1} is frozen,{0} {1} заблоковано
 apps/erpnext/erpnext/setup/doctype/company/company.py +133,Please select Existing Company for creating Chart of Accounts,"Будь ласка, виберіть існуючу компанію для створення плану рахунків"
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +78,Stock Expenses,Витрати на запаси
@@ -233,7 +233,7 @@ DocType: Serial No,Maintenance Status,Стан Технічного обслуг
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +56,{0} {1}: Supplier is required against Payable account {2},{0} {1}: Постачальник потрібно від розрахунковому рахунку {2}
 apps/erpnext/erpnext/config/selling.py +52,Items and Pricing,Товари та ціни
 apps/erpnext/erpnext/projects/doctype/project/project_dashboard.html +2,Total hours: {0},Загальна кількість годин: {0}
-apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +43,From Date should be within the Fiscal Year. Assuming From Date = {0},З дати повинні бути протягом фінансового року. Припускаючи З дати = {0}
+apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +43,From Date should be within the Fiscal Year. Assuming From Date = {0},"""Від дати"" має бути в межах бюджетного періоду. Припускаючи, що ""Від дати"" = {0}"
 DocType: Customer,Individual,Індивідуальний
 DocType: Interest,Academics User,академіки Користувач
 DocType: Cheque Print Template,Amount In Figure,Сума цифрами
@@ -1170,7 +1170,7 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +390,Finished Item
 apps/erpnext/erpnext/config/learn.py +87,Opening Accounting Balance,Бухгалтерський баланс на початок
 DocType: Sales Invoice Advance,Sales Invoice Advance,Передоплата по вихідному рахунку
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +548,Nothing to request,Нічого не просити
-apps/erpnext/erpnext/accounts/doctype/budget/budget.py +34,Another Budget record '{0}' already exists against {1} '{2}' for fiscal year {3},Ще один рекорд Бюджет &#39;{0}&#39; вже існує проти {1} {2} &#39;для фінансового року {3}
+apps/erpnext/erpnext/accounts/doctype/budget/budget.py +34,Another Budget record '{0}' already exists against {1} '{2}' for fiscal year {3},Бюджетний запис '{0}' вже існує проти {1} '{2}' для {3} бюджетного періоду
 apps/erpnext/erpnext/projects/doctype/task/task.py +40,'Actual Start Date' can not be greater than 'Actual End Date',"""Дата фактичного початку"" не може бути пізніше, ніж ""Дата фактичного завершення"""
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +79,Management,Управління
 DocType: Cheque Print Template,Payer Settings,Налаштування платника
@@ -1847,7 +1847,7 @@ DocType: Sales Person,Parent Sales Person,Батьківський Відпов�
 DocType: Purchase Invoice,Recurring Invoice,Періодичний рахунок
 apps/erpnext/erpnext/config/learn.py +263,Managing Projects,Управління проектами
 DocType: Supplier,Supplier of Goods or Services.,Постачальник товарів або послуг.
-DocType: Budget,Fiscal Year,Звітний рік
+DocType: Budget,Fiscal Year,Бюджетний період
 DocType: Vehicle Log,Fuel Price,паливо Ціна
 DocType: Budget,Budget,Бюджет
 apps/erpnext/erpnext/stock/doctype/item/item.py +235,Fixed Asset Item must be a non-stock item.,Основний засіб повинен бути нескладським .
@@ -2496,8 +2496,8 @@ apps/erpnext/erpnext/utilities/activation.py +99,Make User,зробити кор
 DocType: Packing Slip,Identification of the package for the delivery (for print),Ідентифікація пакета для доставки (для друку)
 DocType: Bin,Reserved Quantity,Зарезервовано Кількість
 apps/erpnext/erpnext/templates/includes/footer/footer_extension.html +34,Please enter valid email address,"Будь ласка, введіть адресу електронної пошти"
-apps/erpnext/erpnext/schools/doctype/program_enrollment/program_enrollment.js +67,There is no mandatory course for the program {0},Там не обов&#39;язковий курс для програми {0}
-apps/erpnext/erpnext/schools/doctype/program_enrollment/program_enrollment.js +67,There is no mandatory course for the program {0},Там не обов&#39;язковий курс для програми {0}
+apps/erpnext/erpnext/schools/doctype/program_enrollment/program_enrollment.js +67,There is no mandatory course for the program {0},Не вказано обов'язковий курс для програми {0}
+apps/erpnext/erpnext/schools/doctype/program_enrollment/program_enrollment.js +67,There is no mandatory course for the program {0},Не вказано обов'язковий курс для програми {0}
 DocType: Landed Cost Voucher,Purchase Receipt Items,Позиції прихідної накладної
 apps/erpnext/erpnext/config/learn.py +21,Customizing Forms,Налаштування форм
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +36,Arrear,заборгованість
@@ -3432,7 +3432,7 @@ DocType: Daily Work Summary Settings Company,Send Emails At,Електронна
 DocType: Quotation,Quotation Lost Reason,Причина втрати пропозиції
 apps/erpnext/erpnext/public/js/setup_wizard.js +14,Select your Domain,Виберіть домен
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +357,Transaction reference no {0} dated {1},Посилання на операцію № {0} від {1}
-apps/erpnext/erpnext/setup/doctype/supplier_type/supplier_type.js +5,There is nothing to edit.,Там немає нічого для редагування
+apps/erpnext/erpnext/setup/doctype/supplier_type/supplier_type.js +5,There is nothing to edit.,Нема що редагувати
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +117,Summary for this month and pending activities,Результати для цього місяця та незакінчена діяльність
 DocType: Customer Group,Customer Group Name,Група Ім&#39;я клієнта
 apps/erpnext/erpnext/public/js/pos/pos.html +100,No Customers yet!,Немає клієнтів ще!

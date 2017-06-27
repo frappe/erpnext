@@ -66,6 +66,14 @@ def get_batch_qty(batch_no=None, warehouse=None, item_code=None):
 	return out
 
 @frappe.whitelist()
+def get_batches_by_oldest(item_code, warehouse):
+	'''Returns the oldest batch and qty for the given item_code and warehouse'''
+	batches = get_batch_qty(item_code = item_code, warehouse = warehouse)
+	batches_dates = [[batch, frappe.get_value('Batch', batch.batch_no, 'expiry_date')] for batch in batches]
+	batches_dates.sort(key=lambda tup: tup[1])
+	return batches_dates
+
+@frappe.whitelist()
 def split_batch(batch_no, item_code, warehouse, qty, new_batch_id = None):
 	'''Split the batch into a new batch'''
 	batch = frappe.get_doc(dict(doctype='Batch', item=item_code, batch_id=new_batch_id)).insert()
@@ -107,7 +115,7 @@ def set_batch_nos(doc, warehouse_field, throw = False):
 
 def get_batch_no(item_code, warehouse, qty, throw=False):
 	'''get the smallest batch with for the given item_code, warehouse and qty'''
-	
+
 	batch_no = None
 	batches = get_batch_qty(item_code = item_code, warehouse = warehouse)
 	if batches:
@@ -117,7 +125,7 @@ def get_batch_no(item_code, warehouse, qty, throw=False):
 				batch_no = b.batch_no
 				# found!
 				break
-	
+
 	if not batch_no:
 		frappe.msgprint(_('Please select a Batch for Item {0}. Unable to find a single batch that fulfills this requirement').format(frappe.bold(item_code)))
 		if throw: raise UnableToSelectBatchError
