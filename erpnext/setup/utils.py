@@ -41,8 +41,7 @@ def before_tests():
 			"email"				:"test@erpnext.com",
 			"password"			:"test",
 			"chart_of_accounts" : "Standard",
-			"domain"			: "Manufacturing",
-
+			"domain"			: "Manufacturing"
 		})
 
 	frappe.db.sql("delete from `tabLeave Allocation`")
