@@ -20,6 +20,6 @@ frappe.ui.form.on('GST Settings', {
 				<td>Total Addresses with GST</td><td>${frm.doc.__onload.data.total_addresses_with_gstin}</td>
 				</tr>
 			</tbody></table>`
-		)
+		);
 	}
 });

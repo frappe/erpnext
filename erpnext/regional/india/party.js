@@ -21,5 +21,5 @@ erpnext.setup_gst_reminder_button = (doctype) => {
 				});
 			}
 		}
-	})
+	});
 };
