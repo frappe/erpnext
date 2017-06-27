@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Re-Order</title>
+	<title>Re-order Level &amp; Re-order Qty</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -139,35 +139,19 @@
 				</div>
 			</div>
 			<div class="page_content">
-<h1>Re-Order</h1>
+<h1>Re-order Level &amp; Re-order Qty</h1>
 
-<h1>How To Setup Re-order Level?</h1>
+<p>The <strong>Re-order Level</strong> is the point at which stock on a particular item has diminished to a point where it needs to be replenished. To order based on Re-order level can avoid shortages. Re-order level can be determined based on the lead time and the average daily consumption.</p>
 
-<p>Go to the Re-order section of the Item form in the Stock module.</p>
+<p>You can update Re-order Level and Re-order Qty for an Item in the Auto Re-order section.</p>
 
-<blockquote>
-  <p>Stock &gt; Item</p>
-</blockquote>
+<p>For example, you can set your reorder level of Motherboard at 10. When there are only 10 Motherboards remaining in stock, the system will either automatically create a Material Request in your ERPNext account.</p>
 
-<p>The Re-order level is the point at which stock on a particular item has diminished to a point where it needs to be replenished. To order based on Re-order level can avoid shortages. Re-order level can be determined based on the lead time and the average daily consumption.</p>
+<p><strong>Re-order quantity</strong> is the quantity to order, so that the sum of ordering cost and holding cost is at its minimum.The re-order quantity is based on the minimum order quantity specified by the supplier and many other factors.</p>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/faq-reorder-level.png" alt="Reorder Level" /></p>
+<p>For example, If reorder level is 100 items, your reorder quantity may not necessarily be 100 items. The Reorder quantity can be greater than or equal to reorder level. It may depend upon lead time, discount, transportation and average daily consumption.</p>
 
-<p><strong>For example:</strong> You can set your reorder level of bath towels at 10. When there are only 10 towels remaining in stock, the system will either send a mail or take action depending upon what you have selected in global settings.</p>
-
-<h1>How To Setup Reorder Quantity?</h1>
-
-<p>To setup Reorder quantity, go to the Re-order section of the Item form. In the field ‘Re-order Qty’ type the amount that is needed.</p>
-
-<blockquote>
-  <p>Stock> Item</p>
-</blockquote>
-
-<p>Re-order quantity is the quantity to order, so that the sum of ordering cost and holding cost is at its minimum.The re-order quantity is based on the minimum order quantity specified by the supplier and many other factors.</p>
-
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/faq-reorder-qty.png" alt="Reorder Quantity" /></p>
-
-<p><strong>For example:</strong> If reorder level is 100 items, your reorder quantity may not necessarily be 100 items. The Reorder quantity can be greater than or equal to reorder level. It may depend upon lead time, discount, transportation and average daily consumption.</p>
+<p><img alt="Item Reorder" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/stock/item-reorder.png"></p>
 
 </div>
 		</div>

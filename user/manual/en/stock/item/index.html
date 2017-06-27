@@ -139,9 +139,9 @@
 				</div>
 			</div>
 			<div class="page_content">
-<p>An Item is your companys' product or a service. The term Item is applicable to things (products or services) you sell as well as raw materials or components of products yet to be produced (before they can be sold to customers). An Item can be a phyical product or a service that you buy/sell from your customers/suppliers. ERPNext allows you to manage all sorts of items like raw-materials, sub-assemblies, finished goods, item variants and service items.</p>
+<p>An Item is your companys' product or a service. The term Item is applicable to things (products or services) you sell as well as raw materials or components of products yet to be produced (before they can be sold to customers). An Item can be a physical product or a service that you buy/sell from your customers/suppliers. ERPNext allows you to manage all sorts of items like raw-materials, sub-assemblies, finished goods, item variants and service items.</p>
 
-<p>ERPNext is optimized for itemized management of your sales and purchase. If you are in services, you can create an Item for each services that your offer. Completing the Item Master is very essential for successful implementation of ERPNext.</p>
+<p>ERPNext is optimised for itemised management of your sales and purchase. If you are in services, you can create an Item for each services that your offer. Completing the Item Master is very essential for successful implementation of ERPNext.</p>
 
 <h2>Item Properties</h2>
 
@@ -151,20 +151,16 @@
 <li><strong>Item Group:</strong> Item Group is used to categorize an Item under various criterias like products, raw materials, services, sub-assemblies, consumables or all Item groups. Create your default Item Group list under Setup> Item Group and pre-select the option while filling your New Item details under <a href="https://frappe.github.io/erpnext/user/manual/en/stock/setup/item-group.html">Item Group</a></li>
 <li><strong>Default Unit of Measure:</strong> This is the default measuring unit that you will use for your product. It could be in nos, kgs, meters, etc. You can store all the UOM’s that your product will require under Set Up> Master Data &gt; UOM. These can be preselected while filling New Item by using % sign to get a pop up of the UOM list.</li>
 <li><strong>Brand:</strong> If you have more than one brand save them under Set Up> Master Data> Brand and pre-select them while filling a New Item.</li>
-<li><strong>Variant:</strong> A Item Variant is a different version of a Item.To learn more about managing varaints see <a href="https://frappe.github.io/erpnext/user/manual/en/stock/item/item-variants.html">Item Variants</a></li>
+<li><strong>Variant:</strong> A Item Variant is a different version of a Item.To learn more about managing variants see <a href="https://frappe.github.io/erpnext/user/manual/en/stock/item/item-variants.html">Item Variants</a></li>
 </ul>
 
 <h3>Upload an Image</h3>
 
-<p>To upload an image for your icon that will appear in all transactions, save
-the partially filled form. Only after your file is saved  the 'upload' button will
-work above the Image icon. Click on this sign and upload the image.</p>
+<p>To upload an image for your icon that will appear in all transactions, save the partially filled form. Only after your file is saved  the 'upload' button will work above the Image icon. Click on this sign and upload the image.</p>
 
 <h3>Inventory : Warehouse and Stock Setting</h3>
 
-<p>In ERPNext, you can select different type of Warehouses to stock your
-different Items. This can be selected based on Item types. It could be Fixed
-Asset Item, Stock Item or even Manufacturing Item.</p>
+<p>In ERPNext, you can select different type of Warehouses to stock your different Items. This can be selected based on Item types. It could be Fixed Asset Item, Stock Item or even Manufacturing Item.</p>
 
 <ul>
 <li><strong>Stock Item:</strong> If you are maintaining stock of this Item in your Inventory, ERPNext will make a stock ledger entry for each transaction of this item.</li>
@@ -195,49 +191,53 @@ Asset Item, Stock Item or even Manufacturing Item.</p>
 
 <h3>Item Tax</h3>
 
-<p>These settings are required only if a particular Item has a different tax rate
-than the rate defined in the standard tax Account. For example, If you have a
-tax Account, “VAT 10%” and this particular Item is exempted from tax, then you
-select “VAT 10%” in the first column, and set “0” as the tax rate in the
-second column.</p>
+<p>These settings are required only if a particular Item has a different tax rate than the rate defined in the standard tax Account. For example, If you have a tax Account, “VAT 10%” and this particular Item is exempted from tax, then you select “VAT 10%” in the first column, and set “0” as the tax rate in the second column.</p>
 
 <p>Go to <a href="https://frappe.github.io/erpnext/user/manual/en/setting-up/setting-up-taxes.html">Setting Up Taxes</a> to understand this topic in detail.</p>
 
 <h3>Inspection</h3>
 
-<p>Inspection Required: If an incoming inspection (at the time of delivery from
-the Supplier) is mandatory for this Item, mention “Inspection Required” as
-“Yes”. The system will ensure that a Quality Inspection will be prepared and
-approved before a Purchase Receipt is submitted.</p>
+<p>Inspection Required: If an incoming inspection (at the time of delivery from the Supplier) is mandatory for this Item, mention “Inspection Required” as “Yes”. The system will ensure that a Quality Inspection will be prepared and approved before a Purchase Receipt is submitted.</p>
 
-<p>Inspection Criteria: If a Quality Inspection is prepared for this Item, then
-this template of criteria will automatically be updated in the Quality
-Inspection table of the Quality Inspection. Examples of Criteria are: Weight,
-Length, Finish etc.</p>
+<p>Inspection Criteria: If a Quality Inspection is prepared for this Item, then this template of criteria will automatically be updated in the Quality Inspection table of the Quality Inspection. Examples of Criteria are: Weight, Length, Finish etc.</p>
 
 <h3>Purchase Details</h3>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/item-purchase.png" alt="Purchase Details" /></p>
+<p><img class="screenshot" alt="Purchase details" src="https://frappe.github.io/erpnext/assets/img/stock/item-purchase.png"></p>
 
-<p><strong>Lead time days:</strong> Lead time days are the number of days required for the Item to reach the warehouse.</p>
+<ul>
+<li><p><strong>Lead time days:</strong> Lead time days are the number of days required for the Item to reach the warehouse.</p></li>
+<li><p><strong>Default Expense Account:</strong> It is the account in which cost of the Item will be debited.</p></li>
+<li><p><strong>Default Cost Centre:</strong> It is used for tracking expense for this Item.</p></li>
+</ul>
 
-<p><strong>Default Expense Account:</strong> It is the account in which cost of the Item will be debited.</p>
+<h3>Supplier Details</h3>
 
-<p><strong>Default Cost Centre:</strong> It is used for tracking expense for this Item.</p>
+<p><img alt="Item Supplier Details" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/stock/item-supplier.png"></p>
+
+<ul>
+<li><p><strong>Default Supplier:</strong> Supplier from whom you generally purchase this item.</p></li>
+<li><p><strong>Manufacturer Details:</strong> Select Manufacturer and Part No. assigned by the Manufacturer for this item.</p></li>
+<li><p><strong>Supplier Codes:</strong> Track Item Code defined by the Suppliers for this Item. In the Purchase transactions, on selection and Supplier, Supplier Part No. will be fetched as well for the Supplier's reference.</p></li>
+</ul>
 
 <h3>Sales Details</h3>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/item-sales.png" alt="Sales Details" /></p>
+<p><img alt="Item Sales Details" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/stock/item-sales.png"></p>
 
-<p><strong>Default Income Account:</strong> Income account selected here will be fetched automatically in sales invoice for this item.</p>
+<ul>
+<li><p><strong>Default Income Account:</strong> Income account selected here will be fetched automatically in sales invoice for this item.</p></li>
+<li><p><strong>Cost Centre:</strong> Cost center selected here will be fetched automatically in sales invoice for this item.</p></li>
+<li><p><strong>Customer Codes:</strong> Track Item Code assigned by the Customers for this Item. This will help you in searching item while creating Sales Order based on the Item Code in the Customer's Purchase Order.</p></li>
+</ul>
 
-<p><strong>Cost Centre:</strong> Cost center selected here will be fetched automatically in sales invoice for this item.</p>
+<p><img class="screenshot" alt="Sales details" src="https://frappe.github.io/erpnext/assets/img/stock/item-sales.png)"></p>
 
 <h3>Manufacturing And Website</h3>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/item-manufacturing-website.png" alt="Manufacturing" /></p>
+<p><img class="screenshot" alt="Manufaturing details" src="https://frappe.github.io/erpnext/assets/img/stock/item-manufacturing-website.png"></p>
 
-<p>Visit <a href="https://frappe.github.io/erpnext/user/manual/en/manufacturing">Manufacturing</a> and <a href="https://frappe.github.io/erpnext/user/manual/en/website">Website </a>to understand these topics in detail.</p>
+<p>Visit <a href="https://frappe.github.io/erpnext/user/manual/en/manufacturing.html">Manufacturing</a> and <a href="https://frappe.github.io/erpnext/user/manual/en/website.html">Website </a>to understand these topics in detail.</p>
 
 <h3>Learn more about Item</h3>
 
@@ -262,12 +262,12 @@ Length, Finish etc.</p>
         </li>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/user/manual/en/stock/item/purchase-details">Purchase Details</a>
+            <a href="https://frappe.github.io/erpnext/user/manual/en/stock/item/purchase-details">Item Warranty</a>
             
         </li>
     
         <li>
-            <a href="https://frappe.github.io/erpnext/user/manual/en/stock/item/reorder">Re-Order</a>
+            <a href="https://frappe.github.io/erpnext/user/manual/en/stock/item/reorder">Re-order Level &amp; Re-order Qty</a>
             
         </li>
     
