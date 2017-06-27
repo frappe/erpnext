@@ -8,7 +8,7 @@ frappe.ui.form.on('Patient Appointment', {
 				filters: {"disabled": 0}
 			}
 		});
-		if(frappe.user.has_role("IP Physician")||frappe.user.has_role("OP Physician")){
+		if(frappe.user.has_role("Physician")){
 			if(frm.doc.patient){
 				frm.add_custom_button(__('Medical Record'), function() {
 					frappe.route_options = {"patient": frm.doc.patient}
@@ -35,12 +35,12 @@ frappe.ui.form.on('Patient Appointment', {
 			};
 		}
 
-		if(!frm.doc.__islocal && (frappe.user.has_role("IP Physician")||frappe.user.has_role("OP Physician")) && frm.doc.status == "Open"){
+		if(!frm.doc.__islocal && frappe.user.has_role("Physician") && frm.doc.status == "Open"){
 			frm.add_custom_button(__("Consultation"),function(){
 				btn_create_consultation(frm);
 			},"Create");
 		}
-		if(!frm.doc.__islocal && (frappe.user.has_role("Nursing User")||frappe.user.has_role("IP Physician")||frappe.user.has_role("OP Physician")) && frm.doc.status == "Open"){
+		if(!frm.doc.__islocal && (frappe.user.has_role("Nursing User")||frappe.user.has_role("Physician")) && frm.doc.status == "Open"){
 			frm.add_custom_button(__('Vital Signs'), function() {
 				btn_create_vital_signs(frm);
 			 },"Create");

@@ -13,13 +13,13 @@ frappe.ui.form.on('Patient', {
 				btn_invoice_registration(frm);
 			});
 		}
-		if (frm.doc.patient_name && (frappe.user.has_role("IP Physician") || frappe.user.has_role("OP Physician"))) {
+		if (frm.doc.patient_name && frappe.user.has_role("Physician")) {
 			frm.add_custom_button(__('Medical Record'), function () {
 				frappe.route_options = { "patient": frm.doc.name }
 				frappe.set_route("medical_record");
 			});
 		};
-		if (!frm.doc.__islocal && (frappe.user.has_role("Nursing User") || frappe.user.has_role("IP Physician") || frappe.user.has_role("OP Physician"))) {
+		if (!frm.doc.__islocal && (frappe.user.has_role("Nursing User") || frappe.user.has_role("Physician"))) {
 			frm.add_custom_button(__('Vital Signs'), function () {
 				btn_create_vital_signs(frm);
 			}, "Create");
