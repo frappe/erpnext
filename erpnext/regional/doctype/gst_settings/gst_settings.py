@@ -70,7 +70,7 @@ def _send_gstin_reminder(party_type, party, default_email_id=None, sent_to=None)
 		email_id = default_email_id
 
 	if not email_id:
-		frappe.throw('Email not found in default contact', exception=EmailMissing)
+		frappe.throw('Email not found in default contact', exc=EmailMissing)
 
 	if sent_to and email_id in sent_to:
 		return
@@ -95,4 +95,3 @@ def _send_gstin_reminder(party_type, party, default_email_id=None, sent_to=None)
 	)
 
 	return email_id
-
