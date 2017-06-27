@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Selling in Different Unit (UoM)</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+    
+	<link rel="shortcut icon"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
+		type="image/x-icon">
+	<link rel="icon"
+		href="https://frappe.github.io/erpnext/assets/img/favicon.png"
+		type="image/x-icon">
+    
+
+		</head>
+<body data-path="user/manual/en/selling/articles/Selling-in-different-UOM">
+	<div class="main-section">
+		<div>
+					<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis"
+					 href="https://frappe.github.io/erpnext//">
+					<span><img class="brand-logo" src="https://frappe.github.io/erpnext/assets/img/erpnext-docs.png"> ERPNext</img></span>
+				</a>
+				<div class="dropdown">
+					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						<i class="octicon octicon-three-bars"></i>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right">
+<li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='API' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+
+<li class="divider"></li>
+
+<!-- post login tools -->
+
+</ul>
+				</div>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='API' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	API</a></li><li data-label='Forum' >
+	<a href="https://discuss.erpnext.com"
+		
+		>
+	Forum</a></li>
+	
+	
+	<!-- post login tools -->
+
+</ul>
+				
+			</div>
+		</div>
+	</nav><div class="hero-and-content">
+                <div data-html-block="hero"></div>
+                <div class="container" data-html-block="content">
+                
+<div class="page-container" id="page-user/manual/en/selling/articles/Selling-in-different-UOM" data-path="{{ pathname }}"
+	>
+	<div class="row ">
+		
+		<div class=" page-content col-sm-12 ">
+			<div class="page-content-wrapper">
+				<div class="row page-head">
+					<div class='col-sm-12 hidden-xs'>
+						
+						<div class="page-breadcrumbs">
+							
+							
+<ul class="breadcrumb">
+	<li>
+		<span class="fa fa-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext//user/manual/en/selling/articles">
+		Articles</a>
+	</li>
+	
+</ul>
+
+							
+						</div>
+						
+					</div>
+					<div class="col-sm-8 col-xs-6">
+						
+					</div>
+					<div class="col-sm-4 col-xs-6">
+						
+
+						
+					</div>
+				</div>
+			</div>
+			<div class="page_content">
+<h1>Selling in Different Unit (UoM)</h1>
+
+<p>A sell price unit of measure (UOM) is the UOM with which you price items. You can have multiple sell price UOMs for any inventory item.  However, when Customer places, UoM for an item could change. </p>
+
+<p>For example an Item Pen is stocked in Nos, but sold in Box. Hence we will make Sales Order for Pen in Box.</p>
+
+<h3>Step 1: In the Item master, under Unit of Measure section, you can list all the possible UoM of an item, with its UoM Conversion Factor. Update UoM Conversion Factors</h3>
+
+<p>In one Box, if you get 10 Nos. of Pen, UoM Conversion Factor would be 10.</p>
+
+<p><img class="screenshot" alt="Item Unit of Measure" src="https://frappe.github.io/erpnext/assets/img/selling/Item-UOM.png"></p>
+
+<h3>Setp 2: In the Sale Order, you will find two UoM fields</h3>
+
+<p>-UoM
+-Stock UoM</p>
+
+<p>In both the fields, default UoM of an item will be fetched by default. You should edit UoM field, and select Sale UoM (Box in this case).  Updating Sales UoM is mainly for the reference of the Customer. In the print format, you will see item quantity in the Sales UoM.</p>
+
+<p><img class="screenshot" alt="Sale order Unit of Measure" src="https://frappe.github.io/erpnext/assets/img/selling/Sale-Order-UOM.png"></p>
+
+<p>Based on the Qty and Conversion Factor, qty will be calculated in the Stock UoM of an item. If you sell just one Box, then Qty as per stock UoM will be set as 10.</p>
+
+<h3>Stock Ledger Posting</h3>
+
+<p>Irrespective of the Sales UoM selected in the Sale Order, stock ledger posting will be done in the Default UoM of an item. Hence you should ensure that conversion factor is entered correctly while selling item in different UoM.</p>
+
+<p><img class="screenshot" alt="Stock report in UOM" src="https://frappe.github.io/erpnext/assets/img/selling/stock ledger for as STOCK-UOM.png"></p>
+
+</div>
+		</div>
+	</div>
+</div>
+
+				
+<div class="page-container">
+	<div class="page-content">
+	<div class="edit-container text-center">
+		<i class="fa fa-smile"></i>
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/selling/articles/Selling-in-different-UOM.md">
+			Improve this page
+		</a>
+	</div>
+	</div>
+</div>
+                </div>
+            </div>
+			<footer class="docs-footer">
+				<div class="container"><div class="built-with-frappe text-center">
+                    <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                    <h3>By Frappe Technologies Pvt. Ltd.</h3>
+                </div>
+                <div class="text-center">
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="https://github.com/frappe/erpnext">
+                            Source</a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/frappe/erpnext/issues">
+                            Issues</a>
+                        </li>
+                        <li>
+                            <a href="https://frappe.github.io/erpnext/license.html">
+                            License</a>
+                        </li>
+                        <li>
+                            <a href="https://discuss.erpnext.com">
+                            Forum</a>
+                        </li>
+                        <li>
+                            <a href="https://community.erpnext.com/apps">
+                            Frappe Apps</a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+			</footer>
+		</div>
+	</div>
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+	<!-- js should be loaded in body! -->
+	<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";
+    </script>
+
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-8911157-22', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+	
+	<!-- csrf_token --></body>
+</html>

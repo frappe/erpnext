@@ -158,19 +158,27 @@ sub-contracting feature of ERPNext.  </p>
 <li>For the processed Item, in the Item master, set “Is Sub Contracted Item” to “Yes”.</li>
 </ol>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/subcontract.png" alt="Subcontract" /></p>
+<p><img class="screenshot" alt="Sub-Contracting" src="https://frappe.github.io/erpnext/assets/img/manufacturing/subcontract.png"></p>
 
 <p><strong>Step 1:</strong> Make a Bill of Materials for the processed Item, with the unprocessed
 Items as sub-items. For example, If you are manufacturing a pen, the processed
 pen will be named under Bill of Materials(BOM), whereas, the refill, knob, and
 other items which go into the making of pen, will be categorized as sub-items.</p>
 
+<p><img class="screenshot" alt="Sub-Contracting" src="https://frappe.github.io/erpnext/assets/img/manufacturing/subcontract2.png"></p>
+
 <p><strong>Step 2:</strong> Make a Purchase Order for the processed Item. When you “Save”, in the “Raw Materials Supplied”, all your un-processed Items will be updated based on your Bill of Materials.</p>
+
+<p><img class="screenshot" alt="Sub-Contracting" src="https://frappe.github.io/erpnext/assets/img/manufacturing/subcontract3.png"></p>
 
 <p><strong>Step 3:</strong> Make a Stock Entry to deliver the raw material Items to your Supplier.</p>
 
+<p><img class="screenshot" alt="Sub-Contracting" src="https://frappe.github.io/erpnext/assets/img/manufacturing/subcontract4.png"></p>
+
 <p><strong>Step 4:</strong> Receive the Items from your Supplier via Purchase Receipt. Make sure to check the “Consumed Quantity” in the “Raw Materials” table so that the
 correct stock is maintained at the Supplier’s end.</p>
+
+<p><img class="screenshot" alt="Sub-Contracting" src="https://frappe.github.io/erpnext/assets/img/manufacturing/subcontract5.png"></p>
 
 <blockquote>
   <p>Note 1: Make sure that the “Rate” of processed Item is the processing rate
