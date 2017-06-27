@@ -3,9 +3,13 @@ from frappe.core.doctype.dynamic_link.dynamic_link import deduplicate_dynamic_li
 from frappe.utils import update_progress_bar
 
 def execute():
+	frappe.utils.global_search.setup_global_search_table()
+	frappe.reload_doc("email", 'doctype', "email_alert")
+	frappe.reload_doc("core", 'doctype', "custom_docperm")
+	frappe.reload_doc('core', 'doctype', 'feedback_trigger')
 	frappe.reload_doc('core', 'doctype', 'dynamic_link')
 	frappe.reload_doc('email', 'doctype', 'contact')
-	frappe.reload_doc('contact', 'doctype', 'address')
+	frappe.reload_doc('contacts', 'doctype', 'address')
 	map_fields = (
 		('Customer', 'customer'),
 		('Supplier', 'supplier'),
