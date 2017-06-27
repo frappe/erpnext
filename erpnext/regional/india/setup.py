@@ -25,11 +25,11 @@ def update_address_template():
 		frappe.db.set_value('Address Template', 'India', 'template', html)
 	else:
 		# make new html template for India
-		frappe.get_doc(
+		frappe.get_doc(dict(
 			doctype='Address Template',
 			country='India',
 			template=html
-		).insert()
+		)).insert()
 
 def add_hsn_codes():
 	if frappe.db.count('GST HSN Code') > 100:
