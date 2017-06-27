@@ -17,9 +17,10 @@ def execute():
 def send_gst_update_email():
 	message = """Hello,
 
-<p>ERPNext is now GST Ready.</p>
+<p>ERPNext is now GST Ready!</p>
 
-<p>To start making GST Invoices from 1st of July, you just need to create new Tax Accounts, Templates and update your Customer's and Supplier's GST Numbers.</p>
+<p>To start making GST Invoices from 1st of July, you just need to create new Tax Accounts,
+Templates and update your Customer's and Supplier's GST Numbers.</p>
 
 <p>Please refer {gst_document_link} to know more about how to setup and implement GST in ERPNext.</p>
 

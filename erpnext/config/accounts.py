@@ -203,6 +203,10 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "GST Settings",
+				},
+				{
+					"type": "doctype",
 					"name": "GST HSN Code",
 				},
 				{
