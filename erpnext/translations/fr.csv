@@ -1373,7 +1373,7 @@ apps/erpnext/erpnext/accounts/doctype/shipping_rule/shipping_rule.py +80,Overlap
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +187,Against Journal Entry {0} is already adjusted against some other voucher,L'Écriture de Journal {0} est déjà ajustée par un autre bon
 apps/erpnext/erpnext/selling/report/inactive_customers/inactive_customers.py +68,Total Order Value,Total de la Valeur de la Commande
 apps/erpnext/erpnext/demo/setup/setup_data.py +322,Food,Alimentation
-apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +51,Ageing Range 3,Gamme de Vieillissement 3
+apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +51,Ageing Range 3,Balance Agée 3
 DocType: Maintenance Schedule Item,No of Visits,Nb de Visites
 apps/erpnext/erpnext/schools/doctype/student_attendance_tool/student_attendance_tool.js +102,Mark Attendence,Valider la Présence
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +165,Maintenance Schedule {0} exists against {1},Un Calendrier de Maintenance {0} existe pour {1}
@@ -2358,7 +2358,7 @@ DocType: Campaign,Campaign-.####,Campagne-.####
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +21,Next Steps,Prochaines Étapes
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js +753,Please supply the specified items at the best possible rates,Veuillez fournir les articles spécifiés aux meilleurs tarifs possibles
 DocType: Selling Settings,Auto close Opportunity after 15 days,Fermer automatiquement les Opportunités après 15 jours
-apps/erpnext/erpnext/public/js/financial_statements.js +83,End Year,Fin de l'Année
+apps/erpnext/erpnext/public/js/financial_statements.js +83,End Year,Année de Fin
 apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py +23,Quot/Lead %,Devis / Prospects %
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +119,Contract End Date must be greater than Date of Joining,La Date de Fin de Contrat doit être supérieure à la Date d'Embauche
 DocType: Delivery Note,DN-,DN-
@@ -2367,7 +2367,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +376,{0} ag
 DocType: SMS Settings,"Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)","Entrez les paramètres d'url statiques (par exemple ici sender = ERPNext, username = ERPNext, mot de passe = 1234 etc)"
 DocType: Task,Actual Start Date (via Time Sheet),Date de Début Réelle (via la feuille de temps)
 apps/erpnext/erpnext/portal/doctype/homepage/homepage.py +15,This is an example website auto-generated from ERPNext,Ceci est un exemple de site généré automatiquement à partir d’ERPNext
-apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +37,Ageing Range 1,Gamme de Vieillissement 1
+apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +37,Ageing Range 1,Balance Agée 1
 DocType: Purchase Taxes and Charges Template,"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
 
 #### Note
@@ -4258,7 +4258,7 @@ DocType: Item,"Example: ABCD.#####
 If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Exemple:. ABCD ##### Si la série est définie et que le N° de série n'est pas mentionné dans les transactions, alors un numéro de série automatique sera créé basé sur cette série. Si vous voulez toujours mentionner explicitement les numéros de série pour ce produit. laissez ce champ vide."
 DocType: Upload Attendance,Upload Attendance,Charger Fréquentation
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +306,BOM and Manufacturing Quantity are required,LDM et Quantité de Fabrication sont nécessaires
-apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +44,Ageing Range 2,Gamme de Vieillissement 2
+apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +44,Ageing Range 2,Balance Agée 2
 DocType: SG Creation Tool Course,Max Strength,Force Max
 apps/erpnext/erpnext/manufacturing/doctype/bom_replace_tool/bom_replace_tool.py +21,BOM replaced,LDM Remplacée
 ,Sales Analytics,Analyse des Ventes
@@ -4449,7 +4449,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +231,{0} {1} has
 DocType: Leave Block List,Stop users from making Leave Applications on following days.,Empêcher les utilisateurs de faire des Demandes de Congé les jours suivants.
 apps/erpnext/erpnext/accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py +63,Purchase Amount,Montant de l'Achat
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +212,Supplier Quotation {0} created,Devis Fournisseur {0} créé
-apps/erpnext/erpnext/accounts/report/financial_statements.py +97,End Year cannot be before Start Year,Fin de l'Année ne peut pas être avant Début de l'Année
+apps/erpnext/erpnext/accounts/report/financial_statements.py +97,End Year cannot be before Start Year,L'Année de Fin ne peut pas être avant l'Année de Début
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +184,Employee Benefits,Avantages de l'Employé
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +252,Packed quantity must equal quantity for Item {0} in row {1},La quantité emballée doit être égale à la quantité pour l'Article {0} à la ligne {1}
 DocType: Production Order,Manufactured Qty,Qté Fabriquée
