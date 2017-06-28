@@ -181,7 +181,7 @@
         
         <tr >
             <td>1</td>
-            <td ><code>batch_id</code></td>
+            <td class="danger" title="Mandatory"><code>batch_id</code></td>
             <td >
                 Data</td>
             <td >
@@ -512,6 +512,24 @@
 <li><strong><code>warehouse</code></strong> -  Optional - give qty for this warehouse</li>
 <li><strong><code>item_code</code></strong> -  Optional - give qty for this item</li>
 </ul>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.stock.doctype.batch.batch.get_batches_by_oldest</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.doctype.batch.batch.get_batches_by_oldest" href="#erpnext.stock.doctype.batch.batch.get_batches_by_oldest" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.doctype.batch.batch.<b>get_batches_by_oldest</b>
+        <i class="text-muted">(item_code, warehouse)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Returns the oldest batch and qty for the given item_code and warehouse</p>
 </div>
 	<br>
 

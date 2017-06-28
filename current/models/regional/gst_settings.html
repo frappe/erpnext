@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Regional</title>
+	<title>GST Settings</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -22,7 +22,7 @@
     
 
 		</head>
-<body data-path="user/manual/en/regional">
+<body data-path="current/models/regional/gst_settings">
 	<div class="main-section">
 		<div>
 					<nav class="navbar navbar-default navbar-main" role="navigation">
@@ -103,7 +103,7 @@
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
-<div class="page-container" id="page-user/manual/en/regional" data-path="{{ pathname }}"
+<div class="page-container" id="page-current/models/regional/gst_settings" data-path="{{ pathname }}"
 	>
 	<div class="row ">
 		
@@ -118,8 +118,8 @@
 <ul class="breadcrumb">
 	<li>
 		<span class="fa fa-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext//user/manual/en">
-		User Manual (English)</a>
+		<a href="https://frappe.github.io/erpnext//current/models/regional">
+		Module regional</a>
 	</li>
 	
 </ul>
@@ -129,7 +129,7 @@
 						
 					</div>
 					<div class="col-sm-8 col-xs-6">
-						<h1>Regional</h1>
+						<h1>GST Settings</h1>
 					</div>
 					<div class="col-sm-4 col-xs-6">
 						
@@ -139,59 +139,206 @@
 				</div>
 			</div>
 			<div class="page_content">
-<p>ERPNext aims to support local regulation for all the regions in the world. In most cases ERPNext is very flexible so you can easily add Custom Fields and make Custom Reports to support the regluation of your region.</p>
-
-<p>As of mid-2017, ERPNext aims to pre-set additional fields and forms required for companies to easily submit reports to the relevant authorities.</p>
-
-<p>This section is still under-development.</p>
-
-<h3>Regions</h3>
-
-<p>
+<!-- title: GST Settings -->
 
 
-    <ol>
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 7.x.x</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/regional/doctype/gst_settings"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+<span class="label label-info">Single</span>
+
+
+
+
+
+
+<h3>Fields</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr >
+            <td>1</td>
+            <td ><code>gst_summary</code></td>
+            <td >
+                HTML</td>
+            <td >
+                GST Summary
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td ><code>gstin_email_sent_on</code></td>
+            <td >
+                Date</td>
+            <td >
+                GSTIN Email Sent On
+                
+            </td>
+            <td></td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.regional.doctype.gst_settings.gst_settings</h4>
+
     
-        <li>
-            <a href="https://frappe.github.io/erpnext/user/manual/en/regional/india">Statutory Requirements for India</a>
-            
-				
-    <ol>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/user/manual/en/regional/india/gst-setup">GST Features in ERPNext</a>
-            
-        </li>
-    
-        <li>
-            <a href="https://frappe.github.io/erpnext/user/manual/en/regional/india/gst-remimders">Sending GST Reminders</a>
-            
-        </li>
-    
-    </ol>
 
-			
-        </li>
-    
-    </ol>
-</p>
 
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>EmailMissing</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.exceptions.ValidationError</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>GSTSettings</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="onload" href="#onload" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>onload</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.regional.doctype.gst_settings.gst_settings._send_gstin_reminder" href="#erpnext.regional.doctype.gst_settings.gst_settings._send_gstin_reminder" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.regional.doctype.gst_settings.gst_settings.<b>_send_gstin_reminder</b>
+        <i class="text-muted">(party_type, party, default_email_id=None, sent_to=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Send GST Reminder email</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.regional.doctype.gst_settings.gst_settings.send_gstin_reminder</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.regional.doctype.gst_settings.gst_settings.send_gstin_reminder" href="#erpnext.regional.doctype.gst_settings.gst_settings.send_gstin_reminder" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.regional.doctype.gst_settings.gst_settings.<b>send_gstin_reminder</b>
+        <i class="text-muted">(party_type, party)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Send GSTIN reminder to one party (called from Customer, Supplier form)</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.regional.doctype.gst_settings.gst_settings.send_gstin_reminder_to_all_parties" href="#erpnext.regional.doctype.gst_settings.gst_settings.send_gstin_reminder_to_all_parties" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.regional.doctype.gst_settings.gst_settings.<b>send_gstin_reminder_to_all_parties</b>
+        <i class="text-muted">()</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.regional.doctype.gst_settings.gst_settings.send_reminder</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.regional.doctype.gst_settings.gst_settings.send_reminder" href="#erpnext.regional.doctype.gst_settings.gst_settings.send_reminder" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.regional.doctype.gst_settings.gst_settings.<b>send_reminder</b>
+        <i class="text-muted">()</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+
+    
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->
 </div>
 		</div>
 	</div>
 </div>
 
-				
-<div class="page-container">
-	<div class="page-content">
-	<div class="edit-container text-center">
-		<i class="fa fa-smile"></i>
-		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/regional/index.md">
-			Improve this page
-		</a>
-	</div>
-	</div>
-</div>
+				<!-- edit-link -->
                 </div>
             </div>
 			<footer class="docs-footer">

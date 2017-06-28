@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Module fleet_management</title>
+	<title>GST Features in ERPNext</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -22,7 +22,7 @@
     
 
 		</head>
-<body data-path="current/models/fleet_management">
+<body data-path="user/manual/en/regional/india/gst-setup">
 	<div class="main-section">
 		<div>
 					<nav class="navbar navbar-default navbar-main" role="navigation">
@@ -103,7 +103,7 @@
                 <div data-html-block="hero"></div>
                 <div class="container" data-html-block="content">
                 
-<div class="page-container" id="page-current/models/fleet_management" data-path="{{ pathname }}"
+<div class="page-container" id="page-user/manual/en/regional/india/gst-setup" data-path="{{ pathname }}"
 	>
 	<div class="row ">
 		
@@ -118,8 +118,8 @@
 <ul class="breadcrumb">
 	<li>
 		<span class="fa fa-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext//current/models">
-		ERPNext: Models (DocTypes)</a>
+		<a href="https://frappe.github.io/erpnext//user/manual/en/regional/india">
+		Statutory Requirements for India</a>
 	</li>
 	
 </ul>
@@ -129,7 +129,7 @@
 						
 					</div>
 					<div class="col-sm-8 col-xs-6">
-						<h1>Module fleet_management</h1>
+						
 					</div>
 					<div class="col-sm-4 col-xs-6">
 						
@@ -139,37 +139,90 @@
 				</div>
 			</div>
 			<div class="page_content">
-<!-- title: Module fleet_management -->
+<h1>GST Features in ERPNext</h1>
 
+<h3>1. Setting up GSTIN</h3>
 
-<div class="dev-header">
+<p>GST Law requires that you maintain the GSTIN number for all your suppliers and vendors. In ERPNext, GSTIN is linked to the <strong>Address</strong></p>
 
-<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 7.x.x</a>
+<p><img class="screenshot" alt="GST in Customer" src="https://frappe.github.io/erpnext/assets/img/regional/india/gstin-customer.gif"></p>
 
+<p><strong>GST for your Company Address</strong></p>
 
-	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/fleet_management"
-		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+<p>You also need to set the Address for your own Company and your Company's GST Number</p>
 
-</div>
+<p>Go to the Company master and add the GSTIN to your default address.</p>
 
-<h3>DocTypes for fleet_management</h3>
+<p><img class="screenshot" alt="GST in Company" src="https://frappe.github.io/erpnext/assets/img/regional/india/gstin-company.gif"></p>
 
+<h3>2. Setting up HSN Codes</h3>
 
+<p>According to the GST Law, your itemised invoices must contain the HSN Code related to that Item. ERPNext comes pre-installed with all 12,000+ HSN Codes so that you can easily select the relevant HSN Code in your Item</p>
 
+<p><img class="screenshot" alt="HSN in Item" src="https://frappe.github.io/erpnext/assets/img/regional/india/hsn-item.gif"></p>
 
-    <ol>
-    
-    </ol>
+<h3>3. Making Tax Masters</h3>
 
+<p>To setup Billing in GST, you need to create 3 Tax Accounts for the various GST reporting heads CGST - Central GST, SGST - State GST, IGST - Inter-state GST</p>
 
-<!-- autodoc -->
+<p>Go to your <strong>Chart of Accounts</strong>, under the Duties and Taxes head of your account, create 3 Accounts</p>
+
+<p><strong>Note:</strong> Usually the rate in CGST and SGST is half of IGST. For example if most of your items are billed at 18%, then create IGST at 18%, CGST and SGST at 9% each.</p>
+
+<p><img class="screenshot" alt="GST in Customer" src="https://frappe.github.io/erpnext/assets/img/regional/india/gst-in-coa.png"></p>
+
+<h3>4. Make Tax Templates</h3>
+
+<p>You will have have to make two tax templates for both your sales and purchase, one for in state sales and other for out of state sales.</p>
+
+<p>In your <strong>In State GST</strong> template, select 2 accounts, SGST and CGST</p>
+
+<p><img class="screenshot" alt="GST in Customer" src="https://frappe.github.io/erpnext/assets/img/regional/india/gst-template-in-state.png"></p>
+
+<p>In your <strong>Out of State GST</strong> template, select IGST</p>
+
+<h3>5. Making GST Ready Invoices</h3>
+
+<p>If you have setup the GSTIN of your Customers and Suppliers, and your tax template, you are ready to go for making GST Ready Invoices!</p>
+
+<p>For <strong>Sales Invoice</strong>,</p>
+
+<ol>
+<li>Select the correct Customer and Item and the address where the transaction will happen.</li>
+<li>Check if the GSTIN of your Company and Supplier have been correctly set.</li>
+<li>Check if the HSN Number has been set in the Item</li>
+<li>Select the the <strong>In State GST</strong> or <strong>Out of State GST</strong> template that you have created based on the type of transaction</li>
+<li>Save and Submit the Invoice</li>
+</ol>
+
+<p><img class="screenshot" alt="GST Invoice" src="https://frappe.github.io/erpnext/assets/img/regional/india/gst-invoice.gif"></p>
+
+<h3>Reports</h3>
+
+<p>ERPNext comes with most of your reports you need to prepare your GST Returns. Go to Accounts &gt; GST India head for the list.</p>
+
+<p><img class="screenshot" alt="GST Menus" src="https://frappe.github.io/erpnext/assets/img/regional/india/gst-menu.png"></p>
+
+<p>You can check the impact of your invoice in the <strong>GST Sales Register</strong> and <strong>GST Itemised Sales Register</strong></p>
+
+<p><img class="screenshot" alt="GST Itemised Sales Register" src="https://frappe.github.io/erpnext/assets/img/regional/india/gst-itemised.png"></p>
+
 </div>
 		</div>
 	</div>
 </div>
 
-				<!-- edit-link -->
+				
+<div class="page-container">
+	<div class="page-content">
+	<div class="edit-container text-center">
+		<i class="fa fa-smile"></i>
+		<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/regional/india/gst-setup.md">
+			Improve this page
+		</a>
+	</div>
+	</div>
+</div>
                 </div>
             </div>
 			<footer class="docs-footer">
