@@ -403,6 +403,7 @@ erpnext.patches.v8_0.rename_items_in_status_field_of_material_request
 erpnext.patches.v8_0.delete_bin_indexes
 erpnext.patches.v8_0.move_account_head_from_account_to_warehouse_for_inventory
 erpnext.patches.v8_0.change_in_words_varchar_length
+erpnext.patches.v8_0.update_stock_qty_value_in_bom_item
 erpnext.patches.v8_0.create_domain_docs	#16-05-2017
 erpnext.patches.v8_0.update_sales_cost_in_project
 erpnext.patches.v8_0.save_system_settings
