@@ -255,7 +255,7 @@ class BuyingController(StockController):
 
 	def get_items_from_bom(self, item_code, bom):
 		bom_items = frappe.db.sql("""select t2.item_code,
-			t2.qty / ifnull(t1.quantity, 1) as qty_consumed_per_unit,
+			t2.stock_qty / ifnull(t1.quantity, 1) as qty_consumed_per_unit,
 			t2.rate, t2.stock_uom, t2.name, t2.description
 			from `tabBOM` t1, `tabBOM Item` t2, tabItem t3
 			where t2.parent = t1.name and t1.item = %s
