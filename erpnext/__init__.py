@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 import frappe
 
-__version__ = '8.1.4'
+__version__ = '8.1.5'
 
 
 def get_default_company(user=None):
