@@ -12,8 +12,15 @@ def execute():
 
 	if frappe.db.get_single_value('System Settings', 'country')=='India':
 		from erpnext.regional.india.setup import setup
+		delete_custom_field_tax_id_if_exists()
 		setup(patch=True)
 		send_gst_update_email()
+
+def delete_custom_field_tax_id_if_exists():
+	for field in frappe.db.sql_list("""select name from `tabCustom Field` where fieldname='tax_id'
+		and dt in ('Sales Order', 'Salse Invoice', 'Delivery Note')"""):
+		frappe.delete_doc("Custom Field", field, ignore_permissions=True)
+		frappe.db.commit()
 
 def send_gst_update_email():
 	message = """Hello,
