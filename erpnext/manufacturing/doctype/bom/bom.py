@@ -128,6 +128,7 @@ class BOM(WebsiteGenerator):
  			 'conversion_factor'	: 1,
 			 'bom_no'		: args['bom_no'],
 			 'rate'			: rate,
+			 'stock_qty'	: args.get("qty") or args.get("stock_qty") or 1,
 			 'base_rate'	: rate if self.company_currency() == self.currency else rate * self.conversion_rate
 		}
 		return ret_item
