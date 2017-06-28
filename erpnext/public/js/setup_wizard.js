@@ -73,7 +73,7 @@ var erpnext_slides = [
 
 			slide.get_input("company_abbr").on("change", function () {
 				if (slide.get_input("company_abbr").val().length > 5) {
-					msgprint("Company Abbreviation cannot have more than 5 characters");
+					frappe.msgprint("Company Abbreviation cannot have more than 5 characters");
 					slide.get_field("company_abbr").set_input("");
 				}
 			});
@@ -119,12 +119,12 @@ var erpnext_slides = [
 		validate: function () {
 			// validate fiscal year start and end dates
 			if (this.values.fy_start_date == 'Invalid date' || this.values.fy_end_date == 'Invalid date') {
-				msgprint(__("Please enter valid Financial Year Start and End Dates"));
+				frappe.msgprint(__("Please enter valid Financial Year Start and End Dates"));
 				return false;
 			}
 
 			if ((this.values.company_name || "").toLowerCase() == "company") {
-				msgprint(__("Company Name cannot be Company"));
+				frappe.msgprint(__("Company Name cannot be Company"));
 				return false;
 			}
 
@@ -276,7 +276,7 @@ var erpnext_slides = [
 			{fieldtype:"Attach Image", fieldname:"item_img", label:__("Attach Image"), is_private: 0},
 		],
 		get_item_count: function() {
-			return this.item_count
+			return this.item_count;
 		}
 	},
 
@@ -345,12 +345,12 @@ var erpnext_slides = [
 		title: __("Bootstrap"),
 		fields: [{fieldtype: "Section Break"},
 			{fieldtype: "Check", fieldname: "add_sample_data",
-			label: __("Add a few sample records"), "default": 1},
+				label: __("Add a few sample records"), "default": 1},
 			{fieldtype: "Check", fieldname: "setup_website",
-			label: __("Setup a simple website for my organization"), "default": 1}
+				label: __("Setup a simple website for my organization"), "default": 1}
 		]
 	}
-]
+];
 
 // Source: https://en.wikipedia.org/wiki/Fiscal_year
 // default 1st Jan - 31st Dec
@@ -388,7 +388,7 @@ frappe.setup.on("before_load", function () {
 	}
 });
 
-test_values_edu = {
+var test_values_edu = {
 	"language": "english",
 	"domain": "Education",
 	"country": "India",
