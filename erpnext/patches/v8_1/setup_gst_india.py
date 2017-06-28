@@ -2,6 +2,7 @@ import frappe
 from frappe.email import sendmail_to_system_managers
 
 def execute():
+	frappe.reload_doc('regional', 'doctype', 'gst_settings')
 	frappe.reload_doc('regional', 'doctype', 'gst_hsn_code')
 
 	for report_name in ('GST Sales Register', 'GST Purchase Register',
