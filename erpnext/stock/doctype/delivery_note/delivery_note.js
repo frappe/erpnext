@@ -38,7 +38,7 @@ frappe.ui.form.on("Delivery Note", {
 			}
 		});
 
-		
+
 		frm.set_query('expense_account', 'items', function(doc, cdt, cdn) {
 			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
 				return {
@@ -61,7 +61,7 @@ frappe.ui.form.on("Delivery Note", {
 				}
 			}
 		});
-		
+
 
 		$.extend(frm.cscript, new erpnext.stock.DeliveryNoteController({frm: frm}));
 	},
@@ -235,7 +235,7 @@ frappe.ui.form.on('Delivery Note', {
 	company: function(frm) {
 		frm.trigger("unhide_account_head");
 	},
-	
+
 	unhide_account_head: function(frm) {
 		// unhide expense_account and cost_center if perpetual inventory is enabled in the company
 		var aii_enabled = erpnext.is_perpetual_inventory_enabled(frm.doc.company)

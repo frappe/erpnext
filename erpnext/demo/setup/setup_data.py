@@ -316,6 +316,8 @@ def setup_account():
 		doc.parent_account = frappe.db.get_value('Account', {'account_name': doc.parent_account})
 		doc.insert()
 
+	frappe.flags.in_import = False
+
 def setup_account_to_expense_type():
 	company_abbr = frappe.db.get_value("Company", erpnext.get_default_company(), "abbr")
 	expense_types = [{'name': _('Calls'), "account": "Sales Expenses - "+ company_abbr},
@@ -379,5 +381,7 @@ def import_json(doctype, submit=False, values=None):
 			doc.submit()
 
 	frappe.db.commit()
+
+	frappe.flags.in_import = False
 
 

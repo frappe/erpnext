@@ -75,7 +75,7 @@ frappe.query_reports["General Ledger"] = {
 				}
 				return party_type;
 			},
-			change: function() {
+			on_change: function() {
 				var party_type = frappe.query_report_filters_by_name.party_type.get_value();
 				var party = frappe.query_report_filters_by_name.party.get_value();
 				if(!party_type || !party) {

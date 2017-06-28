@@ -20,8 +20,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 
 	setup_queries: function() {
-
-
 		var me = this;
 
 		this.frm.add_fetch("sales_partner", "commission_rate", "commission_rate");

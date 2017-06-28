@@ -12,4 +12,5 @@ human-resources
 customer-portal
 website
 using-erpnext
+regional
 customize-erpnext
