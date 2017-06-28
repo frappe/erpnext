@@ -130,8 +130,8 @@
    "share": 1,
    "submit": 0,
    "write": 1
-  },
-], 
+  }
+ ], 
  "quick_entry": 1,
  "read_only": 0,
  "read_only_onload": 0,
