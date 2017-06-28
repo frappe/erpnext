@@ -144,7 +144,7 @@ var erpnext_slides = [
 				}
 
 				var year_start_date = current_year + "-" + fy[0];
-				if (year_start_date > get_today()) {
+				if (year_start_date > frappe.datetime.get_today()) {
 					next_year = current_year
 					current_year -= 1;
 				}
@@ -339,7 +339,7 @@ var erpnext_slides = [
 	},
 
 	{
-		// last slide
+		// last slide: Bootstrap
 		name: 'bootstrap',
 		domains: ["all"],
 		title: __("Bootstrap"),
@@ -377,6 +377,15 @@ erpnext.setup.fiscal_years = {
 
 frappe.setup.on("before_load", function () {
 	erpnext_slides.map(frappe.setup.add_slide);
+
+	// change header brand
+	let $brand = $('header .setup-wizard-brand');
+	if($brand.find('.erpnext-icon').length === 0) {
+		$brand.find('.frappe-icon').hide();
+		$brand.append(`<span>
+			<img src="/assets/erpnext/images/erp-icon.svg" class="brand-icon erpnext-icon"
+			style="width:36px;"><span class="brand-name">ERPNext</span></span>`);
+	}
 });
 
 test_values_edu = {
