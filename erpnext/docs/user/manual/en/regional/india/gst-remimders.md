@@ -4,7 +4,7 @@ You can send email reminders to your Customers and Suppliers so that they can di
 
 To send GSTIN Reminders, you can either open the Customer / Supplier record or **GST Settings**
 
-<img class="screenshot" alt="GST Settings" src="{{docs_base_url}}/assets/img/regional/india/gstin-settings.png">
+<img class="screenshot" alt="GST Settings" src="{{docs_base_url}}/assets/img/regional/india/gst-settings.png">
 
 Here you can click on the "Send GSTIN Update Reminders" button to send email reminders to all your customers
 
