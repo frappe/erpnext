@@ -2,6 +2,7 @@ import frappe
 from frappe.email import sendmail_to_system_managers
 
 def execute():
+	frappe.reload_doc('regional', 'doctype', 'gst_settings')
 	frappe.reload_doc('regional', 'doctype', 'gst_hsn_code')
 
 	for report_name in ('GST Sales Register', 'GST Purchase Register',
@@ -30,5 +31,7 @@ Templates and update your Customer's and Supplier's GST Numbers.</p>
 ERPNext Team.
 	""".format(gst_document_link="<a href='http://frappe.github.io/erpnext/user/manual/en/regional/india/'> ERPNext GST Document </a>")
 
-	sendmail_to_system_managers("[Important] ERPNext GST updates", message)
-
+	try:
+		sendmail_to_system_managers("[Important] ERPNext GST updates", message)
+	except Exception as e:
+		pass
