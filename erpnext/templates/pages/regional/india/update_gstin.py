@@ -33,7 +33,7 @@ def update_gstin(context):
 			address_name = frappe.get_value('Address', key)
 			if address_name:
 				address = frappe.get_doc('Address', address_name)
-				address.gstin = value
+				address.gstin = value.upper()
 				address.save(ignore_permissions=True)
 				dirty = True
 
