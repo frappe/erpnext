@@ -12,8 +12,7 @@ class StudentGroup(Document):
 	def validate(self):
 		self.validate_mandatory_fields()
 		self.validate_strength()
-		if frappe.defaults.get_defaults().student_validation_setting: 
-			self.validate_students()
+		self.validate_students()
 		self.validate_and_set_child_table_fields()
 		validate_duplicate_student(self.students)
 
@@ -31,12 +30,14 @@ class StudentGroup(Document):
 
 	def validate_students(self):
 		program_enrollment = get_program_enrollment(self.academic_year, self.academic_term, self.program, self.batch, self.course)
-		students = [d.student for d in program_enrollment] if program_enrollment else None
+		students = [d.student for d in program_enrollment] if program_enrollment else []
 		for d in self.students:
-			if self.group_based_on != "Activity" and students and d.student not in students and d.active == 1:
-				frappe.throw(_("{0} - {1} is not enrolled in the given {2}".format(d.group_roll_number, d.student_name, self.group_based_on)))
 			if not frappe.db.get_value("Student", d.student, "enabled") and d.active:
 				frappe.throw(_("{0} - {1} is inactive student".format(d.group_roll_number, d.student_name)))
+			if self.group_based_on == "Batch" and d.student not in students and frappe.defaults.get_defaults().validate_batch:
+				frappe.throw(_("{0} - {1} is not enrolled in the Batch {2}".format(d.group_roll_number, d.student_name, self.batch)))
+			if self.group_based_on == "Course" and d.student not in students and frappe.defaults.get_defaults().validate_course:
+				frappe.throw(_("{0} - {1} is not enrolled in the Course {2}".format(d.group_roll_number, d.student_name, self.course)))
 
 	def validate_and_set_child_table_fields(self):
 		roll_numbers = [d.group_roll_number for d in self.students if d.group_roll_number]
