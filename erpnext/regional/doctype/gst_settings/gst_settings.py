@@ -83,7 +83,7 @@ def _send_gstin_reminder(party_type, party, default_email_id=None, sent_to=None)
 		<p>Please help us send you GST Ready Invoices.</p>
 		<p>
 			<a href="{0}?party={1}">
-			Click on the here to update your GSTIN Number in our system
+			Click here to update your GSTIN Number in our system
 			</a>
 		</p>
 		<p style="color: #aaa; font-size: 11px; margin-top: 30px;">
