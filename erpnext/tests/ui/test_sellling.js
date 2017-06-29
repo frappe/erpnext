@@ -1,7 +1,7 @@
 erpnext.selling_tests = {
 	new_quotation: (assert) => {
 		frappe.tests.require(['Customer', 'Item'])
-		return new Promise((resolve) => {
+		return new Promise(resolve => {
 			frappe.set_route('List', 'Quotation')
 				.then(() => {
 					return frappe.new_doc('Quotation')
@@ -31,14 +31,32 @@ erpnext.selling_tests = {
 	}
 };
 
-QUnit.test("test sales cycle", function(assert) {
+QUnit.module('sales');
+
+QUnit.test("test quotation", function(assert) {
+	assert.expect(2);
 	let done = assert.async();
-	frappe.test_data.customer_name = 'Test Customer ' + frappe.utils.get_random(10);
+	frappe.run_serially([
+		() => frappe.tests.setup_doctype('Customer'),
+		() => frappe.tests.setup_doctype('Item'),
+		() => {
+			return frappe.tests.make('Quotation', [
+				{customer: 'Test Customer 1'},
+				{items: [
+					[
+						{'item_code': 'Test Product 1'},
+						{'qty': 5}
+					]
+				]}
+			]);
+		},
+		() => {
+			// get_item_details
+			assert.ok(cur_frm.doc.items[0].item_name=='Test Product 1');
 
-	erpnext.selling_tests.new_customer(assert)
-		.then(() => {
-			return erpnext.selling_tests.new_quotation(assert);
-		})
-		.then(() => { done(); });
-
+			// calculate_taxes_and_totals
+			assert.ok(cur_frm.doc.grand_total==500);
+		},
+		() => done()
+	]);
 });
