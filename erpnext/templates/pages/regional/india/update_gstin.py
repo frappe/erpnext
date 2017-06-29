@@ -4,6 +4,7 @@ from frappe import _
 def get_context(context):
 	context.no_cache = 1
 	party = frappe.form_dict.party
+	context.party_name = party
 
 	try:
 		update_gstin(context)
@@ -18,7 +19,8 @@ def get_context(context):
 		party_name = frappe.db.get_value('Supplier', party)
 
 	if not party_name:
-		frappe.throw(_("Not Found"), frappe.DoesNotExistError)
+		context.not_found = 1
+		return
 
 	context.party = frappe.get_doc(party_type, party_name)
 	context.party.onload()
