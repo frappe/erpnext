@@ -95,12 +95,12 @@ Inspection Criteria: If a Quality Inspection is prepared for this Item, then thi
 
 ### Manufacturing And Website
 
-<<<<<<< HEAD
+
 <img alt="Item Manfacturing and Website Details" class="screenshot" src="{{docs_base_url}}/assets/img/stock/item-manufacturing-and-website.png">
 =======
 
 <img class="screenshot" alt="Manufaturing details" src="{{docs_base_url}}/assets/img/stock/item-manufacturing-website.png">
->>>>>>> Edited help page
+
 
 Visit [Manufacturing]({{docs_base_url}}/user/manual/en/manufacturing.html) and [Website ]({{docs_base_url}}/user/manual/en/website.html)to understand these topics in detail.
 
