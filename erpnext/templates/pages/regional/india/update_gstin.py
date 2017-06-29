@@ -22,7 +22,7 @@ def get_context(context):
 		context.not_found = 1
 		return
 
-	context.party = frappe.get_doc(party_type, party)
+	context.party = frappe.get_doc(party_type, party_name)
 	context.party.onload()
 
 
