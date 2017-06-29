@@ -94,8 +94,8 @@ def get_students(doctype, txt, searchfield, start, page_len, filters):
 
 	students = [d.student for d in enrolled_students] if enrolled_students else [""]
 
-	return frappe.db.sql("""select 
-			name, title	from tabStudent
+	return frappe.db.sql("""select
+			name, title from tabStudent
 		where 
 			name not in (%s)
 		and 
