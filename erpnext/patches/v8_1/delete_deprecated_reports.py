@@ -35,7 +35,7 @@ def check_and_update_desktop_icon_for_report(report):
 	elif report in ["Customer Addresses And Contacts", "Supplier Addresses And Contacts"]:
 		frappe.db.sql("""update `tabDesktop Icon` set _report='{value}'
 			where name in ({docnames})""".format(
-				value=report,
+				value="Addresses And Contacts",
 				docnames=",".join(["'%s'"%icon for icon in desktop_icons])
 			)
 		)
