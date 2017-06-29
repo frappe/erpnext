@@ -71,17 +71,19 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					});
 
 				if(!from_delivery_note && !is_delivered_by_supplier) {
-					cur_frm.add_custom_button(__('Delivery'), cur_frm.cscript['Make Delivery Note'],
-						__("Make"));
+					cur_frm.add_custom_button(__('Delivery'),
+						cur_frm.cscript['Make Delivery Note'], __("Make"));
 				}
 			}
 
 			if(doc.outstanding_amount!=0 && !cint(doc.is_return)) {
-				cur_frm.add_custom_button(__('Payment'), this.make_payment_entry, __("Make"));
+				cur_frm.add_custom_button(__('Payment'),
+					this.make_payment_entry, __("Make"));
 			}
 
 			if(doc.outstanding_amount>0 && !cint(doc.is_return)) {
-				cur_frm.add_custom_button(__('Payment Request'), this.make_payment_request, __("Make"));
+				cur_frm.add_custom_button(__('Payment Request'),
+					this.make_payment_request, __("Make"));
 			}
 
 
@@ -481,7 +483,7 @@ frappe.ui.form.on('Sales Invoice', {
 			'Delivery Note': 'Delivery',
 			'Sales Invoice': 'Sales Return',
 			'Payment Request': 'Payment Request',
-			'Payment': 'Payment Entry'
+			'Payment Entry': 'Payment'
 		},
 		frm.fields_dict["timesheets"].grid.get_field("time_sheet").get_query = function(doc, cdt, cdn){
 			return{
