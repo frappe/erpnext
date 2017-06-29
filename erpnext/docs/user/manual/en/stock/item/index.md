@@ -85,9 +85,18 @@ Inspection Criteria: If a Quality Inspection is prepared for this Item, then thi
 
 <img class="screenshot" alt="Sales details" src="{{docs_base_url}}/assets/img/stock/item-sales.png)">
 
+<<<<<<< HEAD
 ### Manufacturing And Website
 
 <img class="screenshot" alt="Manufaturing details" src="{{docs_base_url}}/assets/img/stock/item-manufacturing-website.png">
+=======
+
+<img alt="Item Manfacturing and Website Details" class="screenshot" src="{{docs_base_url}}/assets/img/stock/item-manufacturing-and-website.png">
+=======
+
+<img class="screenshot" alt="Manufaturing details" src="{{docs_base_url}}/assets/img/stock/item-manufacturing-website.png">
+
+>>>>>>> Deleted old Images and added Global Search Help page
 
 Visit [Manufacturing]({{docs_base_url}}/user/manual/en/manufacturing.html) and [Website ]({{docs_base_url}}/user/manual/en/website.html)to understand these topics in detail.
 
