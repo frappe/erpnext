@@ -266,9 +266,9 @@ class TestProductionOrder(unittest.TestCase):
 
 def get_scrap_item_details(bom_no):
 	scrap_items = {}
-	for item in frappe.db.sql("""select item_code, qty from `tabBOM Scrap Item`
+	for item in frappe.db.sql("""select item_code, stock_qty from `tabBOM Scrap Item`
 		where parent = %s""", bom_no, as_dict=1):
-		scrap_items[item.item_code] = item.qty
+		scrap_items[item.item_code] = item.stock_qty
 
 	return scrap_items
 
@@ -287,8 +287,7 @@ def make_prod_order_test_record(**args):
 	pro_order.stock_uom = args.stock_uom or "_Test UOM"
 	pro_order.use_multi_level_bom=0
 	pro_order.set_production_order_operations()
-
-
+	
 	if args.source_warehouse:
 		pro_order.source_warehouse = args.source_warehouse
 
@@ -297,6 +296,7 @@ def make_prod_order_test_record(**args):
 
 	if not args.do_not_save:
 		pro_order.insert()
+
 		if not args.do_not_submit:
 			pro_order.submit()
 	return pro_order

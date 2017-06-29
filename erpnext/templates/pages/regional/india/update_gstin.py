@@ -4,6 +4,7 @@ from frappe import _
 def get_context(context):
 	context.no_cache = 1
 	party = frappe.form_dict.party
+	context.party_name = party
 
 	try:
 		update_gstin(context)
@@ -11,16 +12,17 @@ def get_context(context):
 		context.invalid_gstin = 1
 
 	party_type = 'Customer'
-	party = frappe.db.get_value('Customer', party)
+	party_name = frappe.db.get_value('Customer', party)
 
-	if not party:
+	if not party_name:
 		party_type = 'Supplier'
-		party = frappe.db.get_value('Supplier', party)
+		party_name = frappe.db.get_value('Supplier', party)
 
-	if not party:
-		frappe.throw(_("Not Found"), frappe.DoesNotExistError)
+	if not party_name:
+		context.not_found = 1
+		return
 
-	context.party = frappe.get_doc(party_type, party)
+	context.party = frappe.get_doc(party_type, party_name)
 	context.party.onload()
 
 
@@ -31,7 +33,7 @@ def update_gstin(context):
 			address_name = frappe.get_value('Address', key)
 			if address_name:
 				address = frappe.get_doc('Address', address_name)
-				address.gstin = value
+				address.gstin = value.upper()
 				address.save(ignore_permissions=True)
 				dirty = True
 

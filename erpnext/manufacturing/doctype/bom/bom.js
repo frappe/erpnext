@@ -5,7 +5,7 @@ frappe.provide("erpnext.bom");
 
 frappe.ui.form.on("BOM", {
 	setup: function(frm) {
-		frm.add_fetch('buying_price_list', 'currency', 'currency')
+		frm.add_fetch('buying_price_list', 'currency', 'currency');
 		frm.fields_dict["items"].grid.get_field("bom_no").get_query = function(doc, cdt, cdn){
 			return {
 				filters: {'currency': frm.doc.currency}
@@ -73,6 +73,15 @@ erpnext.bom.BomController = erpnext.TransactionController.extend({
 		}
 
 		get_bom_material_detail(doc, cdt, cdn, scrap_items);
+	},
+	conversion_factor: function(doc, cdt, cdn, dont_fetch_price_list_rate) {
+		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
+			var item = frappe.get_doc(cdt, cdn);
+			frappe.model.round_floats_in(item, ["qty", "conversion_factor"]);
+			item.stock_qty = flt(item.qty * item.conversion_factor, precision("stock_qty", item));
+			refresh_field("stock_qty", item.name, item.parentfield);
+			this.toggle_conversion_factor(item);
+		}
 	},
 })
 
@@ -300,6 +309,13 @@ frappe.ui.form.on("BOM Operation", "workstation", function(frm, cdt, cdn) {
 	})
 });
 
+frappe.ui.form.on("BOM Item", "qty", function(frm, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	d.stock_qty = d.qty * d.conversion_factor;
+	refresh_field("items");
+});
+ 
+ 
 frappe.ui.form.on("BOM Operation", "operations_remove", function(frm) {
 	erpnext.bom.calculate_op_cost(frm.doc);
 	erpnext.bom.calculate_total(frm.doc);
