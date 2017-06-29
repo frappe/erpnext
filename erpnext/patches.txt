@@ -409,3 +409,4 @@ erpnext.patches.v8_0.update_sales_cost_in_project
 erpnext.patches.v8_0.save_system_settings
 erpnext.patches.v8_1.delete_deprecated_reports	#2017-06-28
 erpnext.patches.v8_1.setup_gst_india #2017-06-27
+erpnext.patches.v8_1.enable_allow_error_traceback_in_system_settings
