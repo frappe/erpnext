@@ -30,7 +30,6 @@ class StudentGroup(Document):
 
 	def validate_students(self):
 		program_enrollment = get_program_enrollment(self.academic_year, self.academic_term, self.program, self.batch, self.course)
-		print program_enrollment
 		students = [d.student for d in program_enrollment] if program_enrollment else []
 		for d in self.students:
 			if not frappe.db.get_value("Student", d.student, "enabled") and d.active:
