@@ -112,7 +112,7 @@ def fetch_students(doctype, txt, searchfield, start, page_len, filters):
 			tuple(students + ["%%%s%%" % txt, start, page_len]))
 	else:
 		return frappe.db.sql("""select name, title from tabStudent
-			where `{}` LIKE %s
+			where `{0}` LIKE %s
 			order by idx desc, name
 			limit %s, %s""".format(searchfield),
 			tuple(["%%%s%%" % txt, start, page_len]))
