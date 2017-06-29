@@ -15,17 +15,40 @@ def execute():
 	for report in reports:
 		if frappe.db.exists("Report", report):
 			check_and_update_desktop_icon_for_report(report)
+			check_and_update_auto_email_report(report)
+			frappe.db.commit()
+
 			frappe.delete_doc("Report", report, ignore_permissions=True)
 
 def check_and_update_desktop_icon_for_report(report):
-	""" delete desktop icon for deprecated desktop icon and update the _report for Addresses And Contacts"""
+	""" delete or update desktop icon"""
+	desktop_icons = frappe.db.sql_list("""select name from `tabDesktop Icon`
+		where _report='{0}'""".format(report))
+
+	if not desktop_icons:
+		return
 
 	if report == "Monthly Salary Register":
-		frappe.delete_doc("Desktop Icon", report)
+		for icon in desktop_icons:
+			frappe.delete_doc("Desktop Icon", icon)
 
 	elif report in ["Customer Addresses And Contacts", "Supplier Addresses And Contacts"]:
-		name = frappe.db.get_value("Desktop Icon", {"_report": report})
-		if name:
-			frappe.db.set_value("Desktop Icon", name, "_report", "Addresses And Contacts")
+		frappe.db.sql("""update `tabDesktop Icon` set _report='{value}'
+			where name in ({docnames})""".format(
+				value=report,
+				docnames=",".join(["'%s'"%icon for icon in desktop_icons])
+			)
+		)
 
-	frappe.db.commit()
+def check_and_update_auto_email_report(report):
+	""" delete or update auto email report for deprecated report """
+
+	auto_email_report = frappe.db.get_value("Auto Email Report", {"report": report})
+	if not auto_email_report:
+		return
+
+	if report == "Monthly Salary Register":
+		frappe.delete_doc("Auto Email Report", auto_email_report)
+
+	elif report in ["Customer Addresses And Contacts", "Supplier Addresses And Contacts"]:
+		frapppe.db.set_value("Auto Email Report", auto_email_report, "report", report)
