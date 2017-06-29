@@ -37,9 +37,9 @@ These numbers help to track individual units or batches of Items which you sell.
 
 ### Re Ordering
 
-  * **Re-order level** suggests the amount of stock balance in the Warehouse.
-  * **Re-order Qty** suggests the amount of stock to be ordered to maintain minimum stock levels.
-  * **Minimum Order Qty** is the minimum quantity for which a Material Request / Purchase Order must be made.
+  ***Re-order level** suggests the amount of stock balance in the Warehouse.
+  ***Re-order Qty** suggests the amount of stock to be ordered to maintain minimum stock levels.
+  ***Minimum Order Qty** is the minimum quantity for which a Material Request / Purchase Order must be made.
 
 ### Item Tax
 
@@ -55,7 +55,15 @@ Inspection Criteria: If a Quality Inspection is prepared for this Item, then thi
 
 ### Purchase Details
 
+<<<<<<< HEAD
 <img class="screenshot" alt="Purchase details" src="{{docs_base_url}}/assets/img/stock/item-purchase.png">
+=======
+
+<img alt="Item Purchase Details" class="screenshot" src="{{docs_base_url}}/assets/img/stock/item-purchase.png">
+
+<img class="screenshot" alt="Purchase details" src="{{docs_base_url}}/assets/img/stock/item-purchase.png">
+
+>>>>>>> Resolved conflicts in index.md
 
 * **Lead time days:** Lead time days are the number of days required for the Item to reach the warehouse.
 
@@ -75,28 +83,33 @@ Inspection Criteria: If a Quality Inspection is prepared for this Item, then thi
 
 ### Sales Details
 
+<<<<<<< HEAD
+<img alt="Item Sales Details" class="screenshot" src="{{docs_base_url}}/assets/img/stock/item-sales.png">
+
+* **Default Income Account:** Income account selected here will be fetched automatically in sales invoice for this item.
+=======
+
 <img alt="Item Sales Details" class="screenshot" src="{{docs_base_url}}/assets/img/stock/item-sales.png">
 
 * **Default Income Account:** Income account selected here will be fetched automatically in sales invoice for this item.
 
-* **Cost Centre:** Cost center selected here will be fetched automatically in sales invoice for this item.
-
-* **Customer Codes:** Track Item Code assigned by the Customers for this Item. This will help you in searching item while creating Sales Order based on the Item Code in the Customer's Purchase Order.
 
 <img class="screenshot" alt="Sales details" src="{{docs_base_url}}/assets/img/stock/item-sales.png)">
 
-<<<<<<< HEAD
+
+<img class="screenshot" alt="Sales details" src="{{docs_base_url}}/assets/img/stock/item-sales.png">
+>>>>>>> Resolved conflicts in index.md
+
+
+***Cost Centre:** Cost center selected here will be fetched automatically in sales invoice for this item.
+
+***Customer Codes:** Track Item Code assigned by the Customers for this Item. This will help you in searching item while creating Sales Order based on the Item Code in the Customer's Purchase Order.
+
+<img class="screenshot" alt="Sales details" src="{{docs_base_url}}/assets/img/stock/item-sales.png)">
+
 ### Manufacturing And Website
 
 <img class="screenshot" alt="Manufaturing details" src="{{docs_base_url}}/assets/img/stock/item-manufacturing-website.png">
-=======
-
-<img alt="Item Manfacturing and Website Details" class="screenshot" src="{{docs_base_url}}/assets/img/stock/item-manufacturing-and-website.png">
-=======
-
-<img class="screenshot" alt="Manufaturing details" src="{{docs_base_url}}/assets/img/stock/item-manufacturing-website.png">
-
->>>>>>> Deleted old Images and added Global Search Help page
 
 Visit [Manufacturing]({{docs_base_url}}/user/manual/en/manufacturing.html) and [Website ]({{docs_base_url}}/user/manual/en/website.html)to understand these topics in detail.
 
