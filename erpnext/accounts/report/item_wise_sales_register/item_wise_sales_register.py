@@ -24,7 +24,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		"fieldtype": "Data",
 		"width": 80
 	})
-	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	company_currency = frappe.db.get_value("Company", filters.get("company"), "default_currency")
 	mode_of_payments = get_mode_of_payments(set([d.parent for d in item_list]))
 
 	data = []
