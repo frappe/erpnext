@@ -84,7 +84,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-06-29 21:28:09.053351", 
+ "modified": "2017-06-30 20:12:57.903983", 
  "modified_by": "Administrator", 
  "module": "Regional", 
  "name": "GST HSN Code", 
@@ -94,10 +94,11 @@
  "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
- "search_fields": "description", 
+ "search_fields": "hsn_code, description", 
  "show_name_in_global_search": 0, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
+ "title_field": "hsn_code", 
  "track_changes": 1, 
  "track_seen": 0
 }
