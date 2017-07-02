@@ -33,7 +33,7 @@ get_help_messages = "erpnext.utilities.activation.get_help_messages"
 on_session_creation = "erpnext.shopping_cart.utils.set_cart_count"
 on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
 
-treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory', "BOM"]
+treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory', "BOM","Department","Asset Category"]
 
 # website
 update_website_context = "erpnext.shopping_cart.utils.update_website_context"
@@ -136,6 +136,10 @@ permission_query_conditions = {
 	"Contact": "erpnext.utilities.address_and_contact.get_permission_query_conditions_for_contact",
 	"Address": "erpnext.utilities.address_and_contact.get_permission_query_conditions_for_address",
 	"Leave Application": "erpnext.hr.doctype.leave_application.leave_application.get_permission_query_conditions",
+	"Job Assignment": "erpnext.hr.doctype.job_assignment.job_assignment.get_permission_query_conditions",
+	"Financial Custody": "erpnext.hr.doctype.financial_custody.financial_custody.get_permission_query_conditions",
+	"Over Time": "erpnext.hr.doctype.over_time.over_time.get_permission_query_conditions"
+
 }
 
 has_permission = {

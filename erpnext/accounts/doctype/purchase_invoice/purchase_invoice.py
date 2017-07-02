@@ -66,7 +66,14 @@ class PurchaseInvoice(BuyingController):
 		self.validate_fixed_asset_account()
 		self.create_remarks()
 		self.set_status()
-
+		if self.get("__islocal") :
+				self.title = self.get_title()
+				
+	def get_title(self):
+		from frappe.utils import getdate
+		title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ self.name[len(self.naming_series):]
+		return title
+		
 	def validate_cash(self):
 		if not self.cash_bank_account and flt(self.paid_amount):
 			frappe.throw(_("Cash or Bank Account is mandatory for making payment entry"))

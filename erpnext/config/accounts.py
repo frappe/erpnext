@@ -110,6 +110,11 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Asset Category",
+					"route": "Tree/Asset Category"
+				},
+				{
+					"type": "doctype",
+					"name": "Assets Setting",
 				},
 				{
 					"type": "doctype",

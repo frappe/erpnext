@@ -37,3 +37,16 @@
 </table>
 <p class="text-right text-muted">Printed On {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>
 
+
+
+<table class="text-left text-muted">
+        <tr >
+			<td>{%= __("Printed By") %}: </td>
+		</tr>
+		<tr style="margin-top:15px;">
+			<td>
+				{%= frappe.boot.user.first_name %} {% if (frappe.boot.user.last_name) { %} {%= frappe.boot.user.last_name %} {% } %}
+			</td>
+        </tr>
+		
+		</table>

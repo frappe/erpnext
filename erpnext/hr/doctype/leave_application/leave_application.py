@@ -601,18 +601,55 @@ def add_holidays(events, start, end, employee, company):
 			})
 
 
+# def get_permission_query_conditions(user):
+#     if u'System Manager' in frappe.get_roles(user) or u'HR User' in frappe.get_roles(user):
+#         return None
+
+#     elif u'Leave Approver' in frappe.get_roles(user):
+#         employee = frappe.get_doc('Employee', {'user_id': user})
+
+#         return """(`tabLeave Application`.leave_approver = '{user}' or `tabLeave Application`.employee = '{employee}')""" \
+#             .format(user=frappe.db.escape(user), employee=frappe.db.escape(employee.name))
+
+#     elif u'Employee' in frappe.get_roles(user):
+#         employee = frappe.get_doc('Employee', {'user_id': user})
+
+#         return """(`tabLeave Application`.owner = '{user}' or `tabLeave Application`.employee = '{employee}')""" \
+#             .format(user=frappe.db.escape(user), employee=frappe.db.escape(employee.name))
+
 def get_permission_query_conditions(user):
-    if u'System Manager' in frappe.get_roles(user) or u'HR User' in frappe.get_roles(user):
-        return None
+	if not user: user = frappe.session.user
+	employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
+	if employees:
+		employee = frappe.get_doc('Employee', {'name': employees[0].name})
 
-    elif u'Leave Approver' in frappe.get_roles(user):
-        employee = frappe.get_doc('Employee', {'user_id': user})
+		if employee:
+			query = ""
 
-        return """(`tabLeave Application`.leave_approver = '{user}' or `tabLeave Application`.employee = '{employee}')""" \
-            .format(user=frappe.db.escape(user), employee=frappe.db.escape(employee.name))
+			if u'System Manager' in frappe.get_roles(user) or u'HR User' in frappe.get_roles(user):
+				return ""
 
-    elif u'Employee' in frappe.get_roles(user):
-        employee = frappe.get_doc('Employee', {'user_id': user})
+			if u'Employee' in frappe.get_roles(user):
+				if query != "":
+					query+=" or "
+				query+="employee = '{0}'".format(employee.name)
 
-        return """(`tabLeave Application`.owner = '{user}' or `tabLeave Application`.employee = '{employee}')""" \
-            .format(user=frappe.db.escape(user), employee=frappe.db.escape(employee.name))
+			if u'Leave Approver' in frappe.get_roles(user):	
+				if query != "":
+					query+=" or "
+        		query+= """(`tabLeave Application`.leave_approver = '{user}' or `tabLeave Application`.employee = '{employee}')""" \
+            	.format(user=frappe.db.escape(user), employee=frappe.db.escape(employee.name))
+
+			if u'Sub Department Manager' in frappe.get_roles(user):
+				if query != "":
+					query+=" or "
+				department = frappe.get_value("Department" , filters= {"sub_department_manager": employee.name}, fieldname="name")
+				query+="""employee in (SELECT name from tabEmployee where tabEmployee.department = '{0}')) or employee = '{1}'""".format(department, employee.name)
+
+			if u'Department Manager' in frappe.get_roles(user):
+				if query != "":
+					query+=" or "
+				department = frappe.get_value("Department" , filters= {"department_manager": employee.name}, fieldname="name")
+				query+="""employee in (SELECT name from tabEmployee where tabEmployee.department in 
+				(SELECT name from tabDepartment where parent_department = '{0}')) or employee = '{1}'""".format(department, employee.name)
+			return query

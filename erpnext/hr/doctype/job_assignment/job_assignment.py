@@ -154,8 +154,8 @@ class JobAssignment(Document):
 			if grade :
 				if total>int(grade[0].max_job_assign):
 					frappe.throw(_('Max Job Assignment reached for the year'))
-				else:
-					frappe.msgprint(total)
+				# else:
+				# 	frappe.msgprint(total)
 			else:
 				frappe.throw(_('Max Job Assignment reached for the year'))
 			#MONTH(from_date) <= MONTH(NOW()) and MONTH(to_date) >= MONTH(NOW())
@@ -218,5 +218,45 @@ class JobAssignment(Document):
 		if self.assignment_type=="Internal Assign" or self.assignment_type=="External Assign":
 			total = flt(self.cost_total)
 		self.total = total
+
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+	employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
+	if employees:
+		employee = frappe.get_doc('Employee', {'name': employees[0].name})
+
+		if employee:
+			query = ""
+			if u'System Manager' in frappe.get_roles(user) or u'HR User' in frappe.get_roles(user):
+				return ""
+				
+			if u'Employee' in frappe.get_roles(user):
+				if query != "":
+					query+=" or "
+				query+="employee = '{0}'".format(employee.name)
+
+			if u'Sub Department Manager' in frappe.get_roles(user):
+				if query != "":
+					query+=" or "
+				department = frappe.get_value("Department" , filters= {"sub_department_manager": employee.name}, fieldname="name")
+				query+="""employee in (SELECT name from tabEmployee where tabEmployee.department = '{0}')) or employee = '{1}'""".format(department, employee.name)
+
+			if u'Department Manager' in frappe.get_roles(user):
+				if query != "":
+					query+=" or "
+				department = frappe.get_value("Department" , filters= {"department_manager": employee.name}, fieldname="name")
+				query+="""employee in (SELECT name from tabEmployee where tabEmployee.department in 
+				(SELECT name from tabDepartment where parent_department = '{0}')) or employee = '{1}'""".format(department, employee.name)
+			return query
+				# employee in (SELECT name from tabEmployee where tabEmployee.department in 
+				# (SELECT name from tabDepartment where parent_department = '{0}')) or employee = '{1}
+				 # "employee = '{0}'".format(employee.name)
+				# `tabJob Assignment`.owner in (SELECT user_id from tabEmployee where tabEmployee.department in 
+				# (SELECT name from tabDepartment where parent_department = 'Finance'))"""
+				# frappe.throw("fff")
+
+				# if query != "":
+				# 	query+=" or "
+				# query+= "`tabLeave Application`.next_stage ='Approved By GR Supervisor'"
 
 

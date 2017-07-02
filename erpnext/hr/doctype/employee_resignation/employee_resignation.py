@@ -19,4 +19,8 @@ class EmployeeResignation(Document):
 			emp.status ="Left"
 			emp.relieving_date =self.permission_date
 			emp.save(ignore_permissions=True)
-
+			eos_award=frappe.new_doc("End of Service Award")
+			eos_award.employee=self.employee
+			eos_award.end_date=self.permission_date
+			eos_award.reason="استقالة العامل"
+			eos_award.insert()

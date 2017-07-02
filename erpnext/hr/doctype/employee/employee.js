@@ -11,8 +11,8 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 				filters: {ignore_user_type: 1}
 			}
 		}
-		this.frm.fields_dict.reports_to.get_query = function(doc, cdt, cdn) {
-			return { query: "erpnext.controllers.queries.employee_query"} }
+		// this.frm.fields_dict.reports_to.get_query = function(doc, cdt, cdn) {
+		// 	return { query: "erpnext.controllers.queries.employee_query"} }
 	},
 
 	onload: function() {
@@ -58,6 +58,9 @@ frappe.ui.form.on('Employee',{
 	company_email:function(frm){
 		frm.events.update_contact(frm)
 	},
+	level:function(frm){
+		frm.events.update_level(frm)
+	},
 	user_id:function(frm){
 		frm.events.update_contact(frm)
 	},
@@ -81,6 +84,15 @@ frappe.ui.form.on('Employee',{
 		var prefered_email_fieldname = frappe.model.scrub(frm.doc.prefered_contact_email) || 'user_id';
 		frm.set_value("prefered_email",
 			frm.fields_dict[prefered_email_fieldname].value)
+	},
+	update_level:function(frm){
+		frappe.call({
+			  doc: frm.doc,
+			  method: "update_level",
+			  callback: function(r) {
+				 console.log(r.message)
+			  }
+			});
 	},
 	status: function(frm) {
 		return frm.call({

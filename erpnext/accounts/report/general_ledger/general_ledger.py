@@ -88,7 +88,9 @@ def get_columns(filters):
 		]
 
 	columns += [
-		_("Voucher Type") + "::120", _("Voucher No") + ":Dynamic Link/"+_("Voucher Type")+":160",
+		_("Voucher Type") + "::120",
+		_("Voucher No") + ":Dynamic Link/"+_("Voucher Type")+":160",
+		_("Title") + "::120",
 		_("Against Account") + "::120", _("Party Type") + "::80", _("Party") + "::150",
 		_("Project") + ":Link/Project:100", _("Cost Center") + ":Link/Cost Center:100",
 		_("Against Voucher Type") + "::120", _("Against Voucher") + ":Dynamic Link/"+_("Against Voucher Type")+":160",
@@ -118,7 +120,7 @@ def get_gl_entries(filters):
 		select
 			posting_date, account, party_type, party,
 			sum(debit) as debit, sum(credit) as credit,
-			voucher_type, voucher_no, cost_center, project,
+			voucher_type, voucher_no,title, cost_center, project,
 			against_voucher_type, against_voucher,
 			remarks, against, is_opening {select_fields}
 		from `tabGL Entry`
@@ -291,7 +293,7 @@ def get_result_as_list(data, filters):
 		if filters.get("show_in_account_currency"):
 			row += [d.get("debit_in_account_currency"), d.get("credit_in_account_currency")]
 
-		row += [d.get("voucher_type"), d.get("voucher_no"), d.get("against"),
+		row += [d.get("voucher_type"), d.get("voucher_no"), d.get("title"), d.get("against"),
 			d.get("party_type"), d.get("party"), d.get("project"), d.get("cost_center"), d.get("against_voucher_type"), d.get("against_voucher"), d.get("remarks")
 		]
 

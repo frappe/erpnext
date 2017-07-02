@@ -1,0 +1,43 @@
+<div style="margin-bottom: 7px;">
+    {%= frappe.boot.letter_heads[frappe.defaults.get_default("letter_head")] %}
+</div>
+<h2 class="text-center">{%= __("Asset Depreciation And Balances") %}</h2>
+<h4 class="text-center">{%= filters.account && (filters.account + ", "+filters.report_date)  || "" %} {%= filters.company %}</h4>
+<hr>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th style="width: 15%">{%= __("Asset Category") %}</th>
+            <th style="width: 15%">{%= __("Cost of Sold Asset") %}</th>
+            <th style="width: 15%">{%= __("Cost of Scrapped Asset") %}</th>
+            <th style="width: 15%">{%= __("Depreciation Eliminated due to disposal of assets") %}</th>
+            <th style="width: 40%">{%= __("Depreciation Amount during the period") %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for(var i=0, l=data.length; i
+        <l; i++) { %} {% if (data[i][ "asset_category"]) { %} <tr>
+            <td>{%= data[i]["asset_category"] %}</td>
+            <td>{%= data[i]["cost_of_sold_asset"] %}</td>
+            <td>{%= data[i]["cost_of_scrapped_asset"] %}</td>
+            <td>{%= data[i]["depreciation_eliminated_during_the_period"] %}</td>
+            <td>{%= data[i]["depreciation_amount_during_the_period"] %}</td>
+            </tr>
+            {% } %} {% } %}
+
+    </tbody>
+</table>
+<p class="text-right text-muted">Printed On {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>
+
+<br>
+
+    <table class="text-left text-muted">
+        <tr >
+			<td>{%= __("Printed By") %}: </td>
+		</tr>
+		<tr style="margin-top:15px;">
+			<td>
+				{%= frappe.boot.user.first_name %} {% if (frappe.boot.user.last_name) { %} {%= frappe.boot.user.last_name %} {% } %}
+			</td>
+        </tr>
+	</table>

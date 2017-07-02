@@ -45,6 +45,8 @@ class SalarySlip(TransactionBase):
 			frappe.throw(_("To date cannot be before From date"))
 
 	def calculate_component_amounts(self):
+		import math
+
 		if not getattr(self, '_salary_structure_doc', None):
 			self._salary_structure_doc = frappe.get_doc('Salary Structure', self.salary_structure)
 
@@ -53,6 +55,9 @@ class SalarySlip(TransactionBase):
 			for struct_row in self._salary_structure_doc.get(key):
 				amount = self.eval_condition_and_formula(struct_row, data)
 				if amount:
+					#~ amount = math.ceil(amount)'
+					if struct_row.salary_component == "GOSY":
+						amount = math.ceil(amount)
 					self.update_component_row(struct_row, amount, key)
 
 

@@ -117,7 +117,7 @@ class Asset(Document):
 			delta = timedelta(seconds=1)
 			dt= nextMonth - delta
 			dd=datetime.combine(dt,datetime.min.time()).date() 
-			dayss= (int((dd-next_depre.date()).days))			         
+			dayss= (int((dd-next_depre.date()).days))+1
 
 			if number_of_pending_depreciations:
 			
@@ -132,7 +132,7 @@ class Asset(Document):
 							})
 
 
-				for n in xrange(1,number_of_pending_depreciations-1):
+				for n in xrange(1,number_of_pending_depreciations):
 					schedule_date = add_months(dd,
 						n * cint(self.frequency_of_depreciation))
 
@@ -149,11 +149,11 @@ class Asset(Document):
 				depreciation_amount2 = (self.get_depreciation_amount(value_after_depreciation))*((30.0-float(dayss))/30.0)
 
 				depreciation_amount = self.get_depreciation_amount(value_after_depreciation)
-				value_after_depreciation = value_after_depreciation -(flt(depreciation_amount)+depreciation_amount2)
+				value_after_depreciation = value_after_depreciation -depreciation_amount2
 
 				self.append("schedules", {
 					"schedule_date": schedule_date,
-					"depreciation_amount": depreciation_amount+depreciation_amount2
+					"depreciation_amount": depreciation_amount2
 				})
 
 				if dayss==0:

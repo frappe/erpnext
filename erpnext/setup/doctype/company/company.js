@@ -133,6 +133,7 @@ erpnext.company.setup_queries = function(frm) {
 		["default_cash_account", {"account_type": "Cash"}],
 		["default_receivable_account", {"account_type": "Receivable"}],
 		["default_payable_account", {"account_type": "Payable"}],
+		["default_employee_payable_account", {"account_type": "Payable"}],
 		["default_expense_account", {"root_type": "Expense"}],
 		["default_income_account", {"root_type": "Income"}],
 		["round_off_account", {"root_type": "Expense"}],

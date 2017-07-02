@@ -51,6 +51,7 @@ class SalesInvoice(SellingController):
 			self.indicator_title = _("Paid")
 
 	def validate(self):
+		
 		super(SalesInvoice, self).validate()
 		self.validate_posting_time()
 		self.so_dn_required()
@@ -87,7 +88,14 @@ class SalesInvoice(SellingController):
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
 		self.set_status()
-	
+		if self.get("__islocal") :
+				self.title = self.get_title()
+				
+	def get_title(self):
+		from frappe.utils import getdate
+		title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ self.name[len(self.naming_series):]
+		return title	
+		
 	def set_items_by_project(self):
 		if self.total_from_project_cost and  self.payment_terms and  self.payment_term_unit:
 			payment_terms= frappe.get_doc("Payment Terms",{"name":self.payment_terms})
@@ -616,6 +624,7 @@ class SalesInvoice(SellingController):
 					"party": self.customer,
 					"against": self.against_income_account,
 					"debit": grand_total_in_company_currency,
+					"title": self.title,
 					"debit_in_account_currency": grand_total_in_company_currency \
 						if self.party_account_currency==self.company_currency else self.grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,

@@ -29,9 +29,10 @@ def execute(filters=None):
 
 	bank_bal = flt(balance_as_per_system) - flt(total_debit) + flt(total_credit) \
 		+ amounts_not_reflected_in_system
-
+	data.insert(0, {})
+	data.insert(0, get_balance_row(_("Bank Statement balance as per General Ledger"), balance_as_per_system, account_currency))
 	data += [
-		get_balance_row(_("Bank Statement balance as per General Ledger"), balance_as_per_system, account_currency),
+		
 		{},
 		{
 			"payment_entry": _("Outstanding Cheques and Deposits to clear"),

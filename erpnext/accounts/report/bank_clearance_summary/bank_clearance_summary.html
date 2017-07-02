@@ -1,40 +1,91 @@
-
-<div style="margin-bottom: 7px;">
-	{%= frappe.boot.letter_heads[frappe.defaults.get_default("letter_head")] %}
+<div class="Header">
+    <style type="text/css" scoped>
+    @media screen {
+        div.Header {
+            display: none;
+        }
+    }
+    
+    @media print {
+        div.Header {
+            position: fixed;
+            top: 0;
+        }
+    }
+    </style>
+    {%= frappe.boot.letter_heads[frappe.defaults.get_default("letter_head")] %}
+    <h2 class="text-center">{%= __("Bank Clearance Summary") %}</h2>
+    <h4 class="text-center">{%= filters.account && (filters.account + ", "+filters.report_date)  || "" %} {%= filters.company %}</h4>
+    <hr>
 </div>
-<h2 class="text-center">{%= __("Bank Reconciliation Statement") %}</h2>
-<h4 class="text-center">{%= filters.account && (filters.account + ", "+filters.report_date)  || "" %} {%= filters.company %}</h4>
-<hr>
 <table class="table table-bordered">
-	<thead>
-		<tr>
-			<th style="width: 15%">{%= __("Posting Date") %}</th>
-			<th style="width: 15%">{%= __("Payment Entry") %}</th>
-			<th style="width: 40%">{%= __("Cheque/Reference No") %}</th>
-			<th style="width: 15%">{%= __("Amount") %}</th>
-			<th style="width: 15%">{%= __("Clearance Date") %}</th>
-		</tr>
-	</thead>
-	<tbody>
-		{% for(var i=0, l=data.length; i<l; i++) { %}
-			{% if (data[i]["posting_date"]) { %}
-			<tr>
-				<td>{%= dateutil.str_to_user(data[i]["posting_date"]) %}</td>
-				<td>{%= data[i]["payment_entry"] %}</td>
-				<td>{%= data[i]["reference_no"] %}</td>
-				<td>{%= data[i]["amount"] %}</td>
-				<td>{%= data[i]["clearance_date"] %}</td>
-			</tr>
-			{% } %}
-		{% } %}
-	</tbody>
+    <thead>
+        <tr>
+            <th style="width: 15%">{%= __("Posting Date") %}</th>
+            <th style="width: 15%">{%= __("Payment Entry") %}</th>
+            <th style="width: 40%">{%= __("Cheque/Reference No") %}</th>
+            <th style="width: 15%">{%= __("Amount") %}</th>
+            <th style="width: 15%">{%= __("Clearance Date") %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for(var i=0, l=data.length; i
+        <l; i++) { %} {% if (data[i][ "posting_date"]) { %} <tr>
+            <td>{%= dateutil.str_to_user(data[i]["posting_date"]) %}</td>
+            <td>{%= data[i]["payment_entry"] %}</td>
+            <td>{%= data[i]["reference_no"] %}</td>
+            <td>{%= data[i]["amount"] %}</td>
+            <td>{%= data[i]["clearance_date"] %}</td>
+            </tr>
+            {% } %} {% } %}
+    </tbody>
 </table>
 <p class="text-right text-muted">Printed On {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>
-<div style= "margin-top:15px;" class="row">
-<p class="col-md-6">{%= __("Printed By") %}: {%= frappe.boot.user.first_name %} {% if (frappe.boot.user.last_name) { %}
-{%= frappe.boot.user.last_name %}
-{% } %}
- </p>
- <p class="col-md-6 text-right">{%= __("Account Manager") %}: {%= frappe.boot.user_info["AccountManager@Tawari.sa"].fullname %}</p>
-</div>
- 	
+<table class="text-center" style="margin-top:25px;">
+    <tr>
+        <td>
+            <table style="margin-top:15px;margin-left:50px;">
+                <tr>
+                    <td>{%= __("Account User") %}: </td>
+                </tr>
+                <tr style="margin-top:15px;">
+                    <td>
+                        {%= frappe.boot.user.first_name %} {% if (frappe.boot.user.last_name) { %} {%= frappe.boot.user.last_name %} {% } %}
+                    </td>
+                </tr>
+                <tr style="margin-top:15px;">
+                    <td>................................................</td>
+                </tr>
+            </table>
+        </td>
+        <td style=""></td>
+        <td style=""></td>
+        <td style=""></td>
+        <td>
+            <table style="margin-top:15px;margin-left:190px;">
+                <tr style="margin-top:15px;">
+                    <td>{%= __("Account Manage") %}: </td>
+                </tr>
+                <tr style="margin-top:15px;">
+                    <td>
+                        {%= frappe.boot.user_info["Sm.almahfouz@tawari.sa"].fullname %}
+                    </td>
+                </tr>
+                <tr style="margin-top:15px;">
+                    <td>................................................</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<br>
+<table class="text-left text-muted">
+    <tr>
+        <td>{%= __("Printed By") %}: </td>
+    </tr>
+    <tr style="margin-top:15px;">
+        <td>
+            {%= frappe.boot.user.first_name %} {% if (frappe.boot.user.last_name) { %} {%= frappe.boot.user.last_name %} {% } %}
+        </td>
+    </tr>
+</table>

@@ -27,7 +27,7 @@ def make_depreciation_entry(asset_name, date=None):
 	
 	if not date:
 		date = today()
-
+	frappe.msgprint(date)
 	asset = frappe.get_doc("Asset", asset_name)
 	fixed_asset_account, accumulated_depreciation_account, depreciation_expense_account = \
 		get_depreciation_accounts(asset)
@@ -60,7 +60,7 @@ def make_depreciation_entry(asset_name, date=None):
 			})
 
 			je.flags.ignore_permissions = True
-			je.save()
+			je.submit()
 
 			d.db_set("journal_entry", je.name)
 			asset.value_after_depreciation -= d.depreciation_amount
@@ -68,7 +68,7 @@ def make_depreciation_entry(asset_name, date=None):
 	asset.db_set("value_after_depreciation", asset.value_after_depreciation)
 	asset.set_status()
 
-	return asset
+	return je
 
 def get_depreciation_accounts(asset):
 	fixed_asset_account = accumulated_depreciation_account = depreciation_expense_account = None

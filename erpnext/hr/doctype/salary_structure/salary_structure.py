@@ -31,6 +31,7 @@ class SalaryStructure(Document):
 	
 	def get_grade_info(self,employee,cdn):
 		import copy
+		from math import ceil
 		self.deductions = []
 		self.earnings = []
 		if employee:
@@ -65,14 +66,12 @@ class SalaryStructure(Document):
 			for value in self.get("employees"):
 				if value.name == cdn : 
 					level =int(emp_doc.level)
-					percent =float(emp_doc.lpercent)/100
 					salary = grade_doc.base 
-					for l in range(0, level+1):
+					percent = float(grade_doc.level_percent)/100
+					for l in range(1, level):
 						salary += salary *percent
-					value.base = salary	
-
-					#~ value.base = grade_doc.base + (int(emp_doc.level)-1)*grade_doc.level_value
-					
+					value.base = ceil(salary)	
+	
 	
 	def validate_joining_date(self):
 		for e in self.get('employees'):

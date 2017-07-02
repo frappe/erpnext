@@ -259,8 +259,10 @@ class ProcessPayroll(Document):
 			journal_entry.cheque_no = reference_number
 			journal_entry.cheque_date = reference_date
 			journal_entry.multi_currency = 1
+			journal_entry.flags.ignore_permissions= True
 			journal_entry.save()
 			try:
+				journal_entry.flags.ignore_permissions= True
 				journal_entry.submit()
 				jv_name = journal_entry.name
 				self.update_salary_slip_status(jv_name = jv_name)

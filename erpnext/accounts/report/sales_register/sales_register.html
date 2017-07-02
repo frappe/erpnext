@@ -1,0 +1,51 @@
+<div style="margin-bottom: 7px;">
+    {%= frappe.boot.letter_heads[frappe.defaults.get_default("letter_head")] %}
+</div>
+<h2 class="text-center">{%= __("Sales Register") %}</h2>
+<h4 class="text-center">{%= filters.account && (filters.account + ", "+filters.report_date)  || "" %} {%= filters.company %}</h4>
+<hr>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th style="width: 10%">{%= __("Invoice") %}</th>
+            <th style="width: 10%">{%= __("Posting Date") %}</th>
+            <th style="width: 10%">{%= __("Customer Id") %}</th>
+            <th style="width: 15%">{%= __("Customer Name") %}</th>
+            <th style="width: 15%">{%= __("Receivable Account") %}</th>
+            <th style="width: 10%">{%= __("Net Total") %}</th>
+            <th style="width: 15%">{%= __("Grand Total") %}</th>
+            <th style="width: 15%">{%= __("Outstanding Amount") %}</th>
+
+        </tr>
+    </thead>
+    <tbody>
+     
+        {% for(var i=0, l=data.length; i
+        <l; i++) { %}  <tr>
+            <td>{%= data[i]["Invoice"] %}</td>
+            <td>{%= data[i]["Posting Date"] %}</td>
+            <td>{%= data[i]["Customer Id"] %}</td>
+            <td>{%= data[i]["Customer Name"] %}</td>
+            <td>{%= data[i]["Receivable Account"] %}</td>
+            <td>{%= data[i]["Net Total"] %}</td>
+            <td>{%= data[i]["Grand Total"] %}</td>
+            <td>{%= data[i]["Outstanding Amount"] %}</td>
+            </tr>
+           {% } %}
+
+    </tbody>
+</table>
+<p class="text-right text-muted">Printed On {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>
+
+<br>
+
+    <table class="text-left text-muted">
+        <tr >
+			<td>{%= __("Printed By") %}: </td>
+		</tr>
+		<tr style="margin-top:15px;">
+			<td>
+				{%= frappe.boot.user.first_name %} {% if (frappe.boot.user.last_name) { %} {%= frappe.boot.user.last_name %} {% } %}
+			</td>
+        </tr>
+	</table>

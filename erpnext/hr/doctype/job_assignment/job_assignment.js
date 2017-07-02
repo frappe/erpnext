@@ -10,14 +10,14 @@ cur_frm.add_fetch("grade", "external_ticket_class", "external_ticket_class");
 frappe.ui.form.on('Job Assignment', {
     refresh: function(frm) {},
     onload: function(frm) {
-        frm.set_query("reports_to", function() {
-            return {
-                query: "erpnext.hr.doctype.leave_application.leave_application.get_approvers",
-                filters: {
-                    employee: frm.doc.employee
-                }
-            };
-        });
+        // frm.set_query("reports_to", function() {
+        //     return {
+        //         query: "erpnext.hr.doctype.leave_application.leave_application.get_approvers",
+        //         filters: {
+        //             employee: frm.doc.employee
+        //         }
+        //     };
+        // });
     }
 });
 

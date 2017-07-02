@@ -176,13 +176,16 @@ def get_party_account(party_type, party, company):
 
 		if not account:
 			party_group_doctype = "Customer Group" if party_type=="Customer" else "Supplier Type"
-			group = frappe.db.get_value(party_type, party, scrub(party_group_doctype))
-			account = frappe.db.get_value("Party Account",
-				{"parenttype": party_group_doctype, "parent": group, "company": company}, "account")
+			if party_type in ["Customer","Supplier"]:
+				group = frappe.db.get_value(party_type, party, scrub(party_group_doctype))
+				account = frappe.db.get_value("Party Account",
+					{"parenttype": party_group_doctype, "parent": group, "company": company}, "account")
 
 		if not account:
 			default_account_name = "default_receivable_account" \
 				if party_type=="Customer" else "default_payable_account"
+			if party_type=="Employee" :
+				default_account_name = "default_employee_payable_account" 
 			account = frappe.db.get_value("Company", company, default_account_name)
 			
 		existing_gle_currency = get_party_gle_currency(party_type, party, company)
@@ -340,13 +343,20 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 
 def validate_party_frozen_disabled(party_type, party_name):
 	if party_type and party_name:
-		party = frappe.db.get_value(party_type, party_name, ["is_frozen", "disabled"], as_dict=True)
+		if party_type != "Employee":
+			party = frappe.db.get_value(party_type, party_name, ["is_frozen", "disabled"], as_dict=True)
+		elif party_type =="Employee":
+			party = frappe.db.get_value(party_type, party_name, ["status"], as_dict=True)
+
 		if party.disabled:
 			frappe.throw(_("{0} {1} is disabled").format(party_type, party_name), PartyDisabled)
 		elif party.is_frozen:
 			frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
 			if not frozen_accounts_modifier in frappe.get_roles():
 				frappe.throw(_("{0} {1} is frozen").format(party_type, party_name), PartyFrozen)
+		if party.status:
+			if party.status == "Left":
+				frappe.throw(_("{0} {1} is disabled").format(party_type, party_name), PartyDisabled)
 
 def get_timeline_data(doctype, name):
 	'''returns timeline data for the past one year'''

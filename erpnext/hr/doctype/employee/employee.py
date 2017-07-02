@@ -159,6 +159,26 @@ class Employee(Document):
 
 	def on_trash(self):
 		delete_events(self.doctype, self.name)
+	
+	def update_level(self):
+		from math import ceil
+		salary_list = frappe.get_list("Salary Structure Employee", fields=["*"], filters={"employee":self.name})
+		if salary_list : 
+			for salary in salary_list:
+				doc = frappe.get_doc("Salary Structure Employee",salary["name"])
+				grade =frappe.get_doc("Grade",self.grade)
+				level =int(self.level)
+				salary = grade.base 
+				percent = float(grade.level_percent)/100
+				for l in range(1, level):
+					salary += salary *percent
+				doc.base = ceil(salary)
+				doc.grade = self.grade
+				doc.level = self.level
+				doc.save(ignore_permissions=True)
+			return "Changed"
+		else:
+			return "No active salary structure"
 
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''

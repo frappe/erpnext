@@ -98,3 +98,6 @@ def get_permission_query_conditions(user):
 	if u'Employee' in frappe.get_roles(user) and not u'Department Manager' in frappe.get_roles(user) :
 		employee = frappe.get_doc('Employee',{'user_id' : user} )
 		return """employee ='{employee}'""".format( employee=frappe.db.escape(employee.name) )
+	if u'Department Manager' in frappe.get_roles(user):
+		return """`tabFinancial Custody`.owner in (SELECT user_id from tabEmployee where tabEmployee.department in 
+		(SELECT name from tabDepartment where parent_department = 'Finance'))"""

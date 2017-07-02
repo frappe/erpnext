@@ -46,8 +46,15 @@ class PaymentEntry(AccountsController):
 		self.clear_unallocated_reference_document_rows()
 		self.validate_payment_against_negative_invoice()
 		self.validate_transaction_reference()
-		self.set_title()
+		#~ self.set_title()
 		self.set_remarks()
+		if self.get("__islocal") :
+				self.title = self.get_title()
+				
+	def get_title(self):
+		from frappe.utils import getdate
+		title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ self.name[len(self.naming_series):]
+		return title
 		
 	def on_submit(self):
 		self.setup_party_account_field()
@@ -300,9 +307,10 @@ class PaymentEntry(AccountsController):
 			party_amount = self.paid_amount if self.payment_type=="Receive" else self.received_amount
 
 			if not total_negative_outstanding:
-				frappe.throw(_("Cannot {0} {1} {2} without any negative outstanding invoice")
-					.format(self.payment_type, ("to" if self.party_type=="Customer" else "from"), 
-						self.party_type), InvalidPaymentEntry)
+				if self.party_type != "Employee":
+					frappe.throw(_("Cannot {0} {1} {2} without any negative outstanding invoice")
+						.format(self.payment_type, ("to" if self.party_type=="Customer" else "from"), 
+							self.party_type), InvalidPaymentEntry)
 					
 			elif party_amount > total_negative_outstanding:
 				frappe.throw(_("Paid Amount cannot be greater than total negative outstanding amount {0}")
@@ -377,6 +385,7 @@ class PaymentEntry(AccountsController):
 				"party_type": self.party_type,
 				"party": self.party,
 				"against": against_account,
+				"title": self.title,
 				"account_currency": self.party_account_currency
 			})
 			
@@ -485,64 +494,71 @@ def get_outstanding_reference_documents(args):
 	orders_to_be_billed =  get_orders_to_be_billed(args.get("posting_date"),args.get("party_type"), args.get("party"), 
 		party_account_currency, company_currency)
 	
-	return negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
+	try : return negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
+	except : return {}
 	
 def get_orders_to_be_billed(posting_date, party_type, party, party_account_currency, company_currency):
-	voucher_type = 'Sales Order' if party_type == "Customer" else 'Purchase Order'
+	if party_type != "Employee":
+		voucher_type = 'Sales Order' if party_type == "Customer" else 'Purchase Order'
 
-	ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
+		ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
 
-	orders = frappe.db.sql("""
-		select
-			name as voucher_no,
-			{ref_field} as invoice_amount,
-			({ref_field} - advance_paid) as outstanding_amount,
-			transaction_date as posting_date
-		from
-			`tab{voucher_type}`
-		where
-			{party_type} = %s
-			and docstatus = 1
-			and ifnull(status, "") != "Closed"
-			and {ref_field} > advance_paid
-			and abs(100 - per_billed) > 0.01
-		order by
-			transaction_date, name
-		""".format(**{
-			"ref_field": ref_field,
-			"voucher_type": voucher_type,
-			"party_type": scrub(party_type)
-		}), party, as_dict = True)
+		orders = frappe.db.sql("""
+			select
+				name as voucher_no,
+				{ref_field} as invoice_amount,
+				({ref_field} - advance_paid) as outstanding_amount,
+				transaction_date as posting_date
+			from
+				`tab{voucher_type}`
+			where
+				{party_type} = %s
+				and docstatus = 1
+				and ifnull(status, "") != "Closed"
+				and {ref_field} > advance_paid
+				and abs(100 - per_billed) > 0.01
+			order by
+				transaction_date, name
+			""".format(**{
+				"ref_field": ref_field,
+				"voucher_type": voucher_type,
+				"party_type": scrub(party_type)
+			}), party, as_dict = True)
 
-	order_list = []
-	for d in orders:
-		d["voucher_type"] = voucher_type
-		# This assumes that the exchange rate required is the one in the SO
-		d["exchange_rate"] = get_exchange_rate(party_account_currency, 
-			company_currency, posting_date)
-		order_list.append(d)
+		order_list = []
+		for d in orders:
+			d["voucher_type"] = voucher_type
+			# This assumes that the exchange rate required is the one in the SO
+			d["exchange_rate"] = get_exchange_rate(party_account_currency, 
+				company_currency, posting_date)
+			order_list.append(d)
 
-	return order_list
+		return order_list
+	else : 
+		return []
 	
 def get_negative_outstanding_invoices(party_type, party, party_account, total_field):
-	voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
-	return frappe.db.sql("""
-		select
-			"{voucher_type}" as voucher_type, name as voucher_no, 
-			{total_field} as invoice_amount, outstanding_amount, posting_date, 
-			due_date, conversion_rate as exchange_rate
-		from
-			`tab{voucher_type}`
-		where
-			{party_type} = %s and {party_account} = %s and docstatus = 1 and outstanding_amount < 0
-		order by
-			posting_date, name
-		""".format(**{
-			"total_field": total_field,
-			"voucher_type": voucher_type,
-			"party_type": scrub(party_type),
-			"party_account": "debit_to" if party_type=="Customer" else "credit_to"
-		}), (party, party_account), as_dict = True)
+	if party_type != "Employee":
+		voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
+		return frappe.db.sql("""
+			select
+				"{voucher_type}" as voucher_type, name as voucher_no, 
+				{total_field} as invoice_amount, outstanding_amount, posting_date, 
+				due_date, conversion_rate as exchange_rate
+			from
+				`tab{voucher_type}`
+			where
+				{party_type} = %s and {party_account} = %s and docstatus = 1 and outstanding_amount < 0
+			order by
+				posting_date, name
+			""".format(**{
+				"total_field": total_field,
+				"voucher_type": voucher_type,
+				"party_type": scrub(party_type),
+				"party_account": "debit_to" if party_type=="Customer" else "credit_to"
+			}), (party, party_account), as_dict = True)
+	else :
+		return {}
 	
 @frappe.whitelist()
 def get_party_details(company, party_type, party, date):

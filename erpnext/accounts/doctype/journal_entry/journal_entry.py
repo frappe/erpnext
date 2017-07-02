@@ -10,6 +10,7 @@ from erpnext.accounts.utils import get_balance_on, get_account_currency
 from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.party import get_party_account
 import datetime
+from frappe.utils import getdate
 
 class JournalEntry(AccountsController):
 	def __init__(self, arg1, arg2=None):
@@ -47,10 +48,11 @@ class JournalEntry(AccountsController):
 		self.update_advance_paid()
 		self.update_expense_claim()
 		#~ frappe.rename_doc("Journal Entry", self.name, self.name+" - ("+str(self.posting_date)+")", force=True)
-		self.title = self.title+" - ("+str(self.posting_date)+")"
+		#~ self.title = self.title+" - ("+str(self.posting_date)+")"
 
 	def get_title(self):
-		return self.pay_to_recd_from or self.accounts[0].account
+		title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ self.name[len(self.naming_series):]
+		return title
 
 	def update_advance_paid(self):
 		advance_paid = frappe._dict()
@@ -375,8 +377,13 @@ class JournalEntry(AccountsController):
 		for d in self.get('accounts'):
 			if d.party_type and d.party:
 				if not pay_to_recd_from:
-					pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
-						"customer_name" if d.party_type=="Customer" else "supplier_name")
+					if d.party_type != "Employee":
+						pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
+							"customer_name" if d.party_type=="Customer" else "supplier_name")
+					elif d.party_type == "Employee":
+						pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
+							"employee_name")
+					
 
 				party_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
 				party_account_currency = d.account_currency
@@ -423,7 +430,8 @@ class JournalEntry(AccountsController):
 						"against_voucher": d.reference_name,
 						"remarks": self.remark,
 						"cost_center": d.cost_center,
-						"project": d.project
+						"project": d.project,
+						"title": self.title
 					})
 				)
 
@@ -800,16 +808,16 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 	if not account_details:
 		return
 
-	if account_details.account_type == "Receivable":
-		party_type = "Customer"
-	elif account_details.account_type == "Payable":
-		party_type = "Supplier"
-	else:
-		party_type = ""
+	#~ if account_details.account_type == "Receivable":
+		#~ party_type = "Customer"
+	#~ elif account_details.account_type == "Payable":
+		#~ party_type = "Supplier"
+	#~ else:
+		#~ party_type = ""
 
 	grid_values = {
 		"balance": get_balance_on(account, date),
-		"party_type": party_type,
+		#~ "party_type": party_type,
 		"account_type": account_details.account_type,
 		"account_currency": account_details.account_currency or company_currency,
 		
@@ -819,9 +827,9 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 			company, debit=debit, credit=credit, exchange_rate=exchange_rate)
 	}
 
-	# un-set party if not party type
-	if not party_type:
-		grid_values["party"] = ""
+	#~ # un-set party if not party type
+	#~ if not party_type:
+		#~ grid_values["party"] = ""
 
 	return grid_values
 

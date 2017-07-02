@@ -1,0 +1,55 @@
+<div style="margin-bottom: 7px;">
+    {%= frappe.boot.letter_heads[frappe.defaults.get_default("letter_head")] %}
+</div>
+<h2 class="text-center">{%= __("Purchase Register") %}</h2>
+<h4 class="text-center">{%= filters.account && (filters.account + ", "+filters.report_date)  || "" %} {%= filters.company %}</h4>
+<hr>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th style="width: 10%">{%= __("Invoice") %}</th>
+            <th style="width: 10%">{%= __("Supplier Id") %}</th>
+            <th style="width: 10%">{%= __("Supplier Type") %}</th>
+            <th style="width: 10%">{%= __("Mode of Payment") %}</th>
+            <th style="width: 10%">{%= __("Bill No") %}</th>
+            <th style="width: 10%">{%= __("Purchase Order") %}</th>
+            <th style="width: 10%">{%= __("Purchase Receipt") %}</th>
+            <th style="width: 10%">{%= __("Net Total") %}</th>
+            <th style="width: 10%">{%= __("Total Tax") %}</th>
+            <th style="width: 10%">{%= __("Outstanding Amount") %}</th>
+
+        </tr>
+    </thead>
+    <tbody>
+     
+        {% for(var i=0, l=data.length; i
+        <l; i++) { %}  <tr>
+            <td>{%= data[i]["Invoice"] %}</td>
+            <td>{%= data[i]["Supplier Id"] %}</td>
+            <td>{%= data[i]["Supplier Type"] %}</td>
+            <td>{%= data[i]["Mode of Payment"] %}</td>
+            <td>{%= data[i]["Bill No"] %}</td>
+            <td>{%= data[i]["Purchase Order"] %}</td>
+            <td>{%= data[i]["Purchase Receipt"] %}</td>
+            <td>{%= data[i]["Net Total"] %}</td>
+            <td>{%= data[i]["Total Tax"] %}</td>
+            <td>{%= data[i]["Outstanding Amount"] %}</td>
+            </tr>
+           {% } %}
+
+    </tbody>
+</table>
+<p class="text-right text-muted">Printed On {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>
+
+<br>
+
+    <table class="text-left text-muted">
+        <tr >
+			<td>{%= __("Printed By") %}: </td>
+		</tr>
+		<tr style="margin-top:15px;">
+			<td>
+				{%= frappe.boot.user.first_name %} {% if (frappe.boot.user.last_name) { %} {%= frappe.boot.user.last_name %} {% } %}
+			</td>
+        </tr>
+	</table>

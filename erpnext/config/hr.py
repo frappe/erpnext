@@ -53,13 +53,28 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Employee Loan Application",
+					"description":_("Employee Loan Application"),
+				},
+				{
+					"type": "doctype",
 					"name": "End of Service Award",
 					"description":_("End Of Service Award"),
 				},
 				{
 					"type": "doctype",
+					"name": "Over Time",
+					"description":_("Over Time"),
+				},
+				{
+					"type": "doctype",
 					"name": "Financial Custody",
 					"description":_("Financial Custody"),
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Resignation",
+					"description":_("Employee Resignation"),
 				},
 				{
 					"type": "report",
@@ -228,6 +243,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Department",
+					"route": "Tree/Department",
 					"description": _("Organization unit (department) master.")
 				},
 				{

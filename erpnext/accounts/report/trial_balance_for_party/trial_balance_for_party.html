@@ -1,0 +1,43 @@
+<div style="margin-bottom: 7px;">
+    {%= frappe.boot.letter_heads[frappe.defaults.get_default("letter_head")] %}
+</div>
+<h2 class="text-center">{%= __("Trial Balance For Party") %}</h2>
+<h4 class="text-center">{%= filters.account && (filters.account + ", "+filters.report_date)  || "" %} {%= filters.company %}</h4>
+<hr>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th style="width: 15%">{%= __("Party") %}</th>
+            <th style="width: 15%">{%= __("Debit") %}</th>
+            <th style="width: 15%">{%= __("Credit") %}</th>
+            <th style="width: 15%">{%= __("Party Name") %}</th>
+            <th style="width: 40%">{%= __("Currency") %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for(var i=0, l=data.length; i
+        <l; i++) { %} {% if (data[i][ "asset_category"]) { %} <tr>
+            <td>{%= data[i]["party"] %}</td>
+            <td>{%= data[i]["debit"] %}</td>
+            <td>{%= data[i]["credit"] %}</td>
+            <td>{%= data[i]["party_name"] %}</td>
+            <td>{%= data[i]["currency"] %}</td>
+            </tr>
+            {% } %} {% } %}
+
+    </tbody>
+</table>
+<p class="text-right text-muted">Printed On {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>
+
+<br>
+
+    <table class="text-left text-muted">
+        <tr >
+			<td>{%= __("Printed By") %}: </td>
+		</tr>
+		<tr style="margin-top:15px;">
+			<td>
+				{%= frappe.boot.user.first_name %} {% if (frappe.boot.user.last_name) { %} {%= frappe.boot.user.last_name %} {% } %}
+			</td>
+        </tr>
+	</table>
