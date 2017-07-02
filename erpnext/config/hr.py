@@ -115,12 +115,12 @@ def get_data():
 					"label": _("Salary Components"),
 					"description": _("Earnings, Deductions and other Salary components")
 				},
-				{
-					"type": "doctype",
-					"name": "Payroll Cycle",
-					"label": _("Payroll Cycle"),
-					"description": _("Set payroll cycle and frequency")
-				},
+				# {
+				# 	"type": "doctype",
+				# 	"name": "Payroll Cycle",
+				# 	"label": _("Payroll Cycle"),
+				# 	"description": _("Set payroll cycle and frequency")
+				# },
 
 			]
 		},
