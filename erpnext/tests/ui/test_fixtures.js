@@ -1,7 +1,7 @@
 $.extend(frappe.test_data, {
 	'Customer': {
 		'Test Customer 1': [
-			{customer_name: 'Test Customer 1'}
+			{customer_name: 'Test Customer 1'},
 		],
 		'Test Customer 2': [
 			{customer_name: 'Test Customer 2'}
@@ -43,6 +43,17 @@ $.extend(frappe.test_data, {
 			{item_group: 'Services'},
 			{is_stock_item: 0},
 			{standard_rate: 300}
+		]
+	},
+	'Lead':{
+		'LEAD-00001': [
+			{lead_name: 'Test Lead 1'}
+		],
+		'LEAD-00002': [
+			{lead_name: 'Test Lead 2'}
+		],
+		'LEAD-00003': [
+			{lead_name: 'Test Lead 3'}
 		]
 	}
 });
