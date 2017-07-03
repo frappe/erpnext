@@ -139,7 +139,7 @@ var erpnext_slides = [
 				var current_year = moment(new Date()).year();
 				var next_year = current_year + 1;
 				if (!fy) {
-					fy = ["01-01", "12-31"];
+					fy = ["01-01", "31-12"];
 					next_year = current_year;
 				}
 
