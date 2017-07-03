@@ -557,6 +557,15 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(si.grand_total, 630.0)
 		self.assertEquals(si.write_off_amount, -5)
 
+	def test_start_pos_session(self):
+		from erpnext.accounts.doctype.sales_invoice.pos import start_pos_session
+
+		pos_session = start_pos_session('1499091339408')
+		pos_session_start = frappe.get_doc('POS Session', pos_session).get('pos_session_start')
+		self.assertEquals(pos_session_start, '1499091339408')
+
+		return pos_session
+
 	def test_make_pos_invoice(self):
 		from erpnext.accounts.doctype.sales_invoice.pos import make_invoice
 
@@ -565,23 +574,28 @@ class TestSalesInvoice(unittest.TestCase):
 		make_pos_profile()
 		self._insert_purchase_receipt()
 
+		pos_session = self.test_start_pos_session()
 		pos = copy.deepcopy(test_records[1])
 		pos["is_pos"] = 1
+		pos["pos_session_name"] = pos_session
 		pos["update_stock"] = 1
 		pos["payments"] = [{'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 300},
 							{'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 330}]
 
-		invoice_data = [{'09052016142': pos}]
+		invoice_data = [{'09052016148': pos}]
 		si = make_invoice(invoice_data).get('invoice')
-		self.assertEquals(si[0], '09052016142')
+		self.assertEquals(si[0], '09052016148')
 
-		sales_invoice = frappe.get_all('Sales Invoice', fields =["*"], filters = {'offline_pos_name': '09052016142', 'docstatus': 1})
+		sales_invoice = frappe.get_all('Sales Invoice', fields =["*"], filters = {'offline_pos_name': '09052016148', 'docstatus': 1})
 		si = frappe.get_doc('Sales Invoice', sales_invoice[0].name)
 		self.assertEquals(si.grand_total, 630.0)
 
-		self.pos_gl_entry(si, pos, 330)
+		ps = frappe.get_all('POS Session', fields=['name'], filters = {'pos_session_invoice': si.name})
+		self.assertEquals(ps[0].name, pos_session)
 
-	def pos_gl_entry(self, si, pos, cash_amount):
+		self.pos_gl_entry(si, pos, 330, pos_session)
+
+	def pos_gl_entry(self, si, pos, cash_amount, pos_session = None):
 		# check stock ledger entries
 		sle = frappe.db.sql("""select * from `tabStock Ledger Entry`
 			where voucher_type = 'Sales Invoice' and voucher_no = %s""",
@@ -617,6 +631,7 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEquals(expected_gl_entries[i][2], gle.credit)
 
 		si.cancel()
+		frappe.delete_doc('POS Session', pos_session)
 		frappe.delete_doc('Sales Invoice', si.name)
 		gle = frappe.db.sql("""select * from `tabGL Entry`
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
@@ -791,7 +806,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertRaises(SerialNoWarehouseError, si.submit)
 
 	def test_serial_numbers_against_delivery_note(self):
-		""" 
+		"""
 			check if the sales invoice item serial numbers and the delivery note items
 			serial numbers are same
 		"""
