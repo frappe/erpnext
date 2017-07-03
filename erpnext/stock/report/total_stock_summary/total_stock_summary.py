@@ -55,6 +55,6 @@ def get_total_stock(filters):
 
 def validate_filters(filters):
 	if filters.get("group_by") == 'Company' and \
-		not filters.get("company"):
+		filters.get("company"):
 
-		frappe.throw(_("Please set Company filter Blank if Group By is 'Company'"))
+		frappe.throw(_("Please set Company filter blank if Group By is 'Company'"))
