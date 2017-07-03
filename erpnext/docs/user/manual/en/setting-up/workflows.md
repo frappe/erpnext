@@ -11,7 +11,7 @@ will get an indication that the HR department has Accepted or Rejected. The
 Manager, who is the approving authority, will either Approve or Reject this
 request. Accordingly,the user will get his Approved or Rejected status.
 
-![Workflow]({{docs_base_url}}/assets/old_images/erpnext/workflow-leave-fl.jpg)
+<img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-leave-fl.jpg">
 
 To make this Workflow and transition rules go to :
 
@@ -46,15 +46,15 @@ workflow transition step that says from submitted you can cancel.
 
 When a Leave Application is saved by Employee, the status of the document changes to "Applied"
 
-![Workflow Employee LA]({{docs_base_url}}/assets/img/setup/workflow-3.png)
+<img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-3.png">
 
 When the HR User logs in, he can either Approve or Reject. If approved the
 status of the document changes to "Approved by HR". However, it is yet to be approved by Leave Approver.
 
-![Leave Approver]({{docs_base_url}}/assets/img/setup/workflow-4.png)
+<img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-4.png">
 
 When the Leave Approver opens the Leave Application page, he can finally "Approve" or "Reject" the Leave Application.
 
-![Workflow Leave Approver]({{docs_base_url}}/assets/img/setup/workflow-5.png)
+<img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-5.png">
 
 {next}
