@@ -24,10 +24,11 @@ def get_document(dt, designatione):
 		designation.insert()
 	return designation
 
-get_document('Designation', designations)
-
 
 class TestPayrollCycle(unittest.TestCase):
+	def setUp(self):
+		get_document('Designation', designations)
+
 	def test_create_payment_cycle(self):
 		payroll_cycle = frappe.get_doc(cycle_dict)
 		payroll_cycle.append("payment_period", period)
