@@ -148,8 +148,8 @@ var erpnext_slides = [
 					next_year = current_year
 					current_year -= 1;
 				}
-				slide.get_field("fy_start_date").set_value(current_year + "-" + fy[0]);
-				slide.get_field("fy_end_date").set_value(next_year + "-" + fy[1]);
+				slide.get_field("fy_start_date").set_value(fy[0] + "-" + current_year);
+				slide.get_field("fy_end_date").set_value(fy[1] + "-" + next_year);
 			}
 
 		},
@@ -356,23 +356,23 @@ var erpnext_slides = [
 // default 1st Jan - 31st Dec
 
 erpnext.setup.fiscal_years = {
-	"Afghanistan": ["12-20", "12-21"],
-	"Australia": ["07-01", "06-30"],
-	"Bangladesh": ["07-01", "06-30"],
-	"Canada": ["04-01", "03-31"],
-	"Costa Rica": ["10-01", "09-30"],
-	"Egypt": ["07-01", "06-30"],
-	"Hong Kong": ["04-01", "03-31"],
-	"India": ["04-01", "03-31"],
-	"Iran": ["06-23", "06-22"],
-	"Italy": ["07-01", "06-30"],
-	"Myanmar": ["04-01", "03-31"],
-	"New Zealand": ["04-01", "03-31"],
-	"Pakistan": ["07-01", "06-30"],
-	"Singapore": ["04-01", "03-31"],
-	"South Africa": ["03-01", "02-28"],
-	"Thailand": ["10-01", "09-30"],
-	"United Kingdom": ["04-01", "03-31"],
+	"Afghanistan": ["20-12", "21-12"],
+	"Australia": ["01-07", "30-06"],
+	"Bangladesh": ["01-07", "30-06"],
+	"Canada": ["01-04", "31-03"],
+	"Costa Rica": ["01-10", "30-09"],
+	"Egypt": ["01-07", "30-06"],
+	"Hong Kong": ["01-04", "31-03"],
+	"India": ["01-04", "31-03"],
+	"Iran": ["23-06", "22-06"],
+	"Italy": ["01-07", "30-06"],
+	"Myanmar": ["01-04", "31-03"],
+	"New Zealand": ["01-04", "31-03"],
+	"Pakistan": ["01-07", "30-06"],
+	"Singapore": ["01-04", "31-03"],
+	"South Africa": ["01-03", "28-02"],
+	"Thailand": ["01-10", "30-09"],
+	"United Kingdom": ["01-04", "31-03"],
 };
 
 frappe.setup.on("before_load", function () {
