@@ -72,11 +72,58 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	onload: function () {
 		var me = this;
+		var user_info = frappe.user_info(frappe.session.user);
+		if (!localStorage.getItem('pos_session_start')) {
+			this.wrapper.html(frappe.render_template('pos_session_start',  {data:user_info}));
+			this.pos_profile_btn = this.wrapper.find('.pos-profile-btn');
+			this.pos_profile_btn.on('click', function() {
+				me.start_pos_session();
+				me.new_or_resumed_session();
+			});
+		} else {
+				me.new_or_resumed_session();
+		}
+	},
+
+	new_or_resumed_session: function() {
+		var me = this;
+		me.make_menu_list();
 		this.get_data_from_server(function () {
 			me.make_control();
 			me.create_new();
 		});
 	},
+
+	start_pos_session: function() {
+		var me = this;
+		me.init_pos_session();
+		me.create_new_pos_session();
+	},
+
+	init_pos_session: function() {
+			try {
+				localStorage.setItem('pos_session_start', $.now());
+			} catch (e) {
+				frappe.throw(__("LocalStorage is full, did not save"))
+			}
+	},
+
+	create_new_pos_session: function() {
+			frappe.call({
+				method: "erpnext.accounts.doctype.sales_invoice.pos.start_pos_session",
+				args: {
+					pos_session_start: JSON.parse(localStorage.getItem('pos_session_start'))
+				},
+				callback: function (r) {
+					if (r.message) {
+						localStorage.setItem('pos_session_name', JSON.stringify(r.message));
+					} else {
+						frappe.throw(_("POS Session creation impossible. Please check your network connectivity."));
+						localStorage.removeItem('pos_session_start');
+					}
+				}
+			});
+		},
 
 	make_menu_list: function () {
 		var me = this;
@@ -89,6 +136,36 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.create_invoice();
 			me.make_payment();
 		}).addClass('visible-xs');
+
+		this.page.add_menu_item(__("End Session"), function () {
+					var d = new frappe.ui.Dialog({
+						'title': __('End POS Session'),
+						fields: [
+							{fieldtype:"HTML", options:__("Do you really want to end this POS session ?")},
+						],
+						primary_action: function() {
+							return frappe.call({
+								method: "erpnext.accounts.doctype.sales_invoice.pos.end_pos_session",
+								args: {
+									name: JSON.parse(localStorage.getItem('pos_session_name')),
+									end: $.now()
+								},
+								callback: function(r) {
+									if(r.exc) {
+										frappe.msgprint(r.exc);
+									} else {
+										d.hide();
+										localStorage.removeItem('pos_session_start');
+										localStorage.removeItem('pos_session_name');
+										frappe.ui.toolbar.clear_cache();
+										frappe.set_route('pos');
+									}
+								}
+							});
+						}
+					});
+					d.show();
+				});
 
 		this.page.add_menu_item(__("New Sales Invoice"), function () {
 			me.save_previous_entry();
@@ -305,6 +382,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	init_master_data: function (r) {
 		var me = this;
 		this.doc = JSON.parse(localStorage.getItem('doc'));
+		this.pos_session_start = JSON.parse(localStorage.getItem('pos_session_start'));
+		this.pos_session_name = JSON.parse(localStorage.getItem('pos_session_name'));
 		this.meta = r.message.meta;
 		this.item_data = r.message.items;
 		this.item_groups = r.message.item_groups;
@@ -1575,11 +1654,13 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		} else {
 			this.name = $.now();
 			this.frm.doc.offline_pos_name = this.name;
+			this.frm.doc.pos_session_start = this.pos_session_start;
+			this.frm.doc.pos_session_name = this.pos_session_name;
 			this.frm.doc.posting_date = frappe.datetime.get_today();
 			this.frm.doc.posting_time = frappe.datetime.now_time();
 			this.frm.doc.pos_profile = this.pos_profile_data['name'];
 			invoice_data[this.name] = this.frm.doc
-			this.si_docs.push(invoice_data)
+			this.si_docs.push(invoice_data);
 			this.update_localstorage();
 			this.set_primary_action();
 		}
