@@ -55,15 +55,9 @@ Inspection Criteria: If a Quality Inspection is prepared for this Item, then thi
 
 ### Purchase Details
 
-<<<<<<< HEAD
-<img class="screenshot" alt="Purchase details" src="{{docs_base_url}}/assets/img/stock/item-purchase.png">
-=======
-
 <img alt="Item Purchase Details" class="screenshot" src="{{docs_base_url}}/assets/img/stock/item-purchase.png">
 
 <img class="screenshot" alt="Purchase details" src="{{docs_base_url}}/assets/img/stock/item-purchase.png">
-
->>>>>>> Resolved conflicts in index.md
 
 * **Lead time days:** Lead time days are the number of days required for the Item to reach the warehouse.
 
@@ -83,23 +77,13 @@ Inspection Criteria: If a Quality Inspection is prepared for this Item, then thi
 
 ### Sales Details
 
-<<<<<<< HEAD
 <img alt="Item Sales Details" class="screenshot" src="{{docs_base_url}}/assets/img/stock/item-sales.png">
 
 * **Default Income Account:** Income account selected here will be fetched automatically in sales invoice for this item.
-=======
-
-<img alt="Item Sales Details" class="screenshot" src="{{docs_base_url}}/assets/img/stock/item-sales.png">
-
-* **Default Income Account:** Income account selected here will be fetched automatically in sales invoice for this item.
-
 
 <img class="screenshot" alt="Sales details" src="{{docs_base_url}}/assets/img/stock/item-sales.png)">
 
-
 <img class="screenshot" alt="Sales details" src="{{docs_base_url}}/assets/img/stock/item-sales.png">
->>>>>>> Resolved conflicts in index.md
-
 
 ***Cost Centre:** Cost center selected here will be fetched automatically in sales invoice for this item.
 
