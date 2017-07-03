@@ -26,6 +26,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		this._super(doc, dt, dn);
 
 		var me = this;
+		this.frm.set_value('valid_through', frappe.datetime.add_months(doc.transaction_date, 1))
 
 		if(doc.docstatus == 1 && doc.status!=='Lost') {
 			cur_frm.add_custom_button(__('Make Sales Order'),
