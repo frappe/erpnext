@@ -1,0 +1,17 @@
+erpnext.config.setup
+erpnext.config.stock
+erpnext.config.desktop
+erpnext.config.maintenance
+erpnext.config.schools
+erpnext.config.website
+erpnext.config.projects
+erpnext.config.selling
+erpnext.config.support
+erpnext.config.docs
+erpnext.config.hr
+erpnext.config.accounts
+erpnext.config.crm
+erpnext.config.manufacturing
+erpnext.config
+erpnext.config.buying
+erpnext.config.learn

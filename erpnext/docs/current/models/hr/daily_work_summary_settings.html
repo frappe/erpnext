@@ -1,0 +1,190 @@
+<!-- title: Daily Work Summary Settings -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 7.x.x</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/hr/doctype/daily_work_summary_settings"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+<span class="label label-info">Single</span>
+
+
+
+
+
+
+<h3>Fields</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr class="info">
+            <td>1</td>
+            <td ><code>select_companies</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Select Companies
+                <p class="text-muted small">
+                    Emails will be sent to all Active Employees of the company at the given hour, if they do not have holiday. Summary of responses will be sent at midnight.</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td ><code>companies</code></td>
+            <td >
+                Table</td>
+            <td >
+                Companies
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/daily_work_summary_settings_company">Daily Work Summary Settings Company</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>3</td>
+            <td ><code>message_section</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Message
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td ><code>subject</code></td>
+            <td >
+                Data</td>
+            <td >
+                Subject
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>message</code></td>
+            <td >
+                Text Editor</td>
+            <td >
+                Message
+                
+            </td>
+            <td></td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings</h4>
+
+    
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>DailyWorkSummarySettings</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate" href="#validate" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>validate</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary" href="#erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.<b>send_summary</b>
+        <i class="text-muted">()</i>
+    </p>
+	<div class="docs-attr-desc"><p>Send summary to everyone</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.trigger_emails" href="#erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.trigger_emails" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.<b>trigger_emails</b>
+        <i class="text-muted">()</i>
+    </p>
+	<div class="docs-attr-desc"><p>Send emails to Employees of the enabled companies at the give hour asking
+    them what did they work on today</p>
+</div>
+	<br>
+
+	
+
+
+    
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->

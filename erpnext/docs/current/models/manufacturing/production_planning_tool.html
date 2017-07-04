@@ -1,0 +1,911 @@
+<!-- title: Production Planning Tool -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 7.x.x</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/manufacturing/doctype/production_planning_tool"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+<span class="label label-info">Single</span>
+
+
+
+
+
+
+<h3>Fields</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr >
+            <td>1</td>
+            <td ><code>get_items_from</code></td>
+            <td >
+                Select</td>
+            <td >
+                Get Items From
+                
+            </td>
+            <td>
+                <pre>
+Sales Order
+Material Request</pre>
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>2</td>
+            <td ><code>filters</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Filters
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td ><code>fg_item</code></td>
+            <td >
+                Link</td>
+            <td >
+                Item
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/item">Item</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td ><code>customer</code></td>
+            <td >
+                Link</td>
+            <td >
+                Customer
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/selling/customer">Customer</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>warehouse</code></td>
+            <td >
+                Link</td>
+            <td >
+                Warehouse
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/warehouse">Warehouse</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
+            <td ><code>company</code></td>
+            <td >
+                Link</td>
+            <td >
+                Company
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/company">Company</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>7</td>
+            <td ><code>column_break1</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
+            <td ><code>from_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                From Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>9</td>
+            <td ><code>to_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                To Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>10</td>
+            <td ><code>project</code></td>
+            <td >
+                Link</td>
+            <td >
+                Project
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/projects/project">Project</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>11</td>
+            <td ><code>section_break1</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>12</td>
+            <td ><code>get_sales_orders</code></td>
+            <td >
+                Button</td>
+            <td >
+                Get Sales Orders
+                <p class="text-muted small">
+                    Pull sales orders (pending to deliver) based on the above criteria</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>13</td>
+            <td ><code>sales_orders</code></td>
+            <td >
+                Table</td>
+            <td >
+                Sales Orders
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/production_plan_sales_order">Production Plan Sales Order</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>14</td>
+            <td ><code>section_break_16</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>15</td>
+            <td ><code>get_material_request</code></td>
+            <td >
+                Button</td>
+            <td >
+                Get Material Request
+                <p class="text-muted small">
+                    Pull Material Request of type Manufacture based on the above criteria</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>16</td>
+            <td ><code>material_requests</code></td>
+            <td >
+                Table</td>
+            <td >
+                Material Requests
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/production_plan_material_request">Production Plan Material Request</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>17</td>
+            <td ><code>items_for_production</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Select Items
+                <p class="text-muted small">
+                    Enter items and planned qty for which you want to raise production orders or download raw materials for analysis.</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>18</td>
+            <td ><code>get_items</code></td>
+            <td >
+                Button</td>
+            <td >
+                Get Items
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>19</td>
+            <td ><code>items</code></td>
+            <td >
+                Table</td>
+            <td >
+                Items
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/production_plan_item">Production Plan Item</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>20</td>
+            <td ><code>create_production_orders</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Production Orders
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>21</td>
+            <td ><code>create_production_order</code></td>
+            <td >
+                Button</td>
+            <td >
+                Create Production Orders
+                <p class="text-muted small">
+                    Separate production order will be created for each finished good item.</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>22</td>
+            <td ><code>sb5</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Material Requirement
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>23</td>
+            <td ><code>purchase_request_for_warehouse</code></td>
+            <td >
+                Link</td>
+            <td >
+                Material Request For Warehouse
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/warehouse">Warehouse</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>24</td>
+            <td ><code>create_material_requests_for_all_required_qty</code></td>
+            <td >
+                Check</td>
+            <td >
+                Create for full quantity, ignoring quantity already on order
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>25</td>
+            <td ><code>create_material_requests</code></td>
+            <td >
+                Button</td>
+            <td >
+                Create Material Requests
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>26</td>
+            <td ><code>download_materials_required</code></td>
+            <td >
+                Button</td>
+            <td >
+                Download Materials Required
+                <p class="text-muted small">
+                    Download a report containing all raw materials with their latest inventory status</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>27</td>
+            <td ><code>column_break_2</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>28</td>
+            <td ><code>create_material_requests_non_stock_request</code></td>
+            <td >
+                Check</td>
+            <td >
+                Include non-stock items
+                <p class="text-muted small">
+                    If checked, Will include non-stock items in the Material Requests.</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>29</td>
+            <td ><code>use_multi_level_bom</code></td>
+            <td >
+                Check</td>
+            <td >
+                Use Multi-Level BOM
+                <p class="text-muted small">
+                    If checked, all the children of each production item will be included in the Material Requests.</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>30</td>
+            <td ><code>only_raw_materials</code></td>
+            <td >
+                Check</td>
+            <td >
+                Only Obtain Raw Materials
+                <p class="text-muted small">
+                    If checked, only Purchase material requests for final raw materials will be included in the Material Requests. Otherwise, Material Requests for parent items will be created</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>31</td>
+            <td ><code>include_subcontracted</code></td>
+            <td >
+                Check</td>
+            <td >
+                Include sub-contracted raw materials
+                <p class="text-muted small">
+                    If checked, raw materials for items that are sub-contracted will be included in the Material Requests</p>
+            </td>
+            <td></td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.manufacturing.doctype.production_planning_tool.production_planning_tool</h4>
+
+    
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>ProductionPlanningTool</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="__init__" href="#__init__" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>__init__</b>
+        <i class="text-muted">(self, arg1, arg2=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="add_items" href="#add_items" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>add_items</b>
+        <i class="text-muted">(self, items)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="add_mr_in_table" href="#add_mr_in_table" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>add_mr_in_table</b>
+        <i class="text-muted">(self, pending_mr)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Add Material Requests in the table</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="add_so_in_table" href="#add_so_in_table" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>add_so_in_table</b>
+        <i class="text-muted">(self, open_so)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Add sales orders in the table</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="clear_table" href="#clear_table" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>clear_table</b>
+        <i class="text-muted">(self, table_name)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="create_material_request" href="#create_material_request" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>create_material_request</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="create_production_order" href="#create_production_order" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>create_production_order</b>
+        <i class="text-muted">(self, item_dict)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Create production order. Called from Production Planning Tool</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="download_raw_materials" href="#download_raw_materials" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>download_raw_materials</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Create csv data for required raw material to produce finished goods</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_csv" href="#get_csv" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_csv</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_item_projected_qty" href="#get_item_projected_qty" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_item_projected_qty</b>
+        <i class="text-muted">(self, item)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_items" href="#get_items" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_items</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_mr_items" href="#get_mr_items" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_mr_items</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_open_sales_orders" href="#get_open_sales_orders" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_open_sales_orders</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Pull sales orders  which are pending to deliver based on criteria selected</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_pending_material_requests" href="#get_pending_material_requests" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_pending_material_requests</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Pull Material Requests that are pending based on criteria selected</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_production_items" href="#get_production_items" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_production_items</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_projected_qty" href="#get_projected_qty" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_projected_qty</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_raw_materials" href="#get_raw_materials" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_raw_materials</b>
+        <i class="text-muted">(self, bom_dict, non_stock_item=0)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Get raw materials considering sub-assembly items
+            {
+                "item<em>code": [qty</em>required, description, stock<em>uom, min</em>order_qty]
+            }</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_requested_items" href="#get_requested_items" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_requested_items</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_so_items" href="#get_so_items" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_so_items</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_so_wise_planned_qty" href="#get_so_wise_planned_qty" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_so_wise_planned_qty</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><pre><code>        bom_dict {
+            bom_no: ['sales_order', 'qty']
+        }
+</code></pre>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_subitems" href="#get_subitems" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_subitems</b>
+        <i class="text-muted">(self, bom_wise_item_details, bom, parent_qty, include_sublevel, only_raw, supply_subs, non_stock_item=0)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="make_items_dict" href="#make_items_dict" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>make_items_dict</b>
+        <i class="text-muted">(self, item_list)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="raise_material_requests" href="#raise_material_requests" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>raise_material_requests</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><pre><code>        Raise Material Request if projected qty is less than qty required
+        Requested qty should be shortage qty considering minimum order qty
+</code></pre>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="raise_production_orders" href="#raise_production_orders" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>raise_production_orders</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>It will raise production order (Draft) for all distinct FG items</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_company" href="#validate_company" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>validate_company</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_data" href="#validate_data" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>validate_data</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+    </div>
+    <hr>
+
+	
+
+
+    
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->

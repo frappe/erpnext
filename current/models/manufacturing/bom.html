@@ -115,13 +115,11 @@
 						<div class="page-breadcrumbs">
 							
 							
-<ul class="breadcrumb">
-	<li>
-		<span class="fa fa-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext//current/models/manufacturing">
-		Module manufacturing</a>
-	</li>
+<ul class="breadcrumb" itemscope itemtype="http://data-vocabulary.org/Breadcrumb">
 	
+		<li><a href="/current/models/manufacturing" itemprop="url"><span itemprop="title">current/models/manufacturing</span></a></li>
+	
+	<li class="active"><span itemprop="title">BOM</span></li>
 </ul>
 
 							
@@ -1138,7 +1136,7 @@ Price List</pre>
         <a name="get_child_exploded_items" href="#get_child_exploded_items" class="text-muted small">
             <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_child_exploded_items</b>
-        <i class="text-muted">(self, bom_no, qty)</i>
+        <i class="text-muted">(self, bom_no, stock_qty)</i>
     </p>
 	<div class="docs-attr-desc"><p>Add all items from Flat BOM of child BOM</p>
 </div>
@@ -1367,6 +1365,20 @@ Price List</pre>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p>Update Flat BOM, following will be correct data</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="update_stock_qty" href="#update_stock_qty" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>update_stock_qty</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
 	<br>
 

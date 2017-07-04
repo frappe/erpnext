@@ -1,0 +1,1 @@
+erpnext.hr.print_format.salary_slip_standard
