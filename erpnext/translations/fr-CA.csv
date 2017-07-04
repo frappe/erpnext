@@ -1,7 +1,7 @@
 DocType: Sales Order Item,Ordered Qty,Quantité commandée
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +111,{0} {1}: Cost Center {2} does not belong to Company {3},{0} {1}: Le Centre de Coûts {2} ne fait pas partie de la Société {3}
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +61,{0} {1}: Either debit or credit amount is required for {2},{0} {1}: Soit un montant au débit ou crédit est nécessaire pour {2}
-apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +214,{0} {1} does not associated with Party Account {2},{0} {1} n'est pas associé à un Compte de Partie {2}
+apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +212,{0} {1} does not associated with Party Account {2},{0} {1} n'est pas associé à un Compte de Partie {2}
 DocType: Purchase Invoice Item,Price List Rate (Company Currency),Taux de la Liste de Prix (Devise de la Compagnie)
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +53,{0} {1}: Customer is required against Receivable account {2},{0} {1}: Client est requis envers un compte à recevoir {2}
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +125,{0} {1}: Accounting Entry for {2} can only be made in currency: {3},{0} {1}: L'entrée comptable pour {2} ne peut être faite qu'en devise: {3}
