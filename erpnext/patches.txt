@@ -334,6 +334,7 @@ execute:frappe.reload_doctype('Employee') #2016-10-18
 execute:frappe.db.sql("update `tabEmployee` set prefered_contact_email = IFNULL(prefered_contact_email,'') ")
 execute:frappe.reload_doctype("Salary Slip")
 execute:frappe.db.sql("update `tabSalary Slip` set posting_date=creation")
+execute:frappe.reload_doc('core', doctype, 'domain')
 erpnext.patches.v7_1.update_portal_roles
 erpnext.patches.v7_1.set_total_amount_currency_in_je
 finally:erpnext.patches.v7_0.update_timesheet_communications
