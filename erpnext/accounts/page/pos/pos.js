@@ -140,6 +140,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.page.add_menu_item(__("End Session"), function () {
 					var d = new frappe.ui.Dialog({
 						'title': __('End POS Session'),
+						primary_action_label: __("Yes"),
+						secondary_action_label: __("No"),
 						fields: [
 							{fieldtype:"HTML", options:__("Do you really want to end this POS session ?")},
 						],
