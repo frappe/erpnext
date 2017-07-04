@@ -1,0 +1,2 @@
+erpnext.projects.web_form.tasks
+erpnext.projects.web_form.tasks.tasks

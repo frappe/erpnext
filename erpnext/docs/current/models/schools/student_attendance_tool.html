@@ -1,0 +1,212 @@
+<!-- title: Student Attendance Tool -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 7.x.x</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/schools/doctype/student_attendance_tool"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+<span class="label label-info">Single</span>
+
+
+
+
+
+
+<h3>Fields</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr >
+            <td>1</td>
+            <td ><code>based_on</code></td>
+            <td >
+                Select</td>
+            <td >
+                Based On
+                
+            </td>
+            <td>
+                <pre>Student Group
+Course Schedule</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td ><code>group_based_on</code></td>
+            <td >
+                Select</td>
+            <td >
+                Group Based On
+                
+            </td>
+            <td>
+                <pre>Batch
+Course
+Activity</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td ><code>column_break_2</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td class="danger" title="Mandatory"><code>student_group</code></td>
+            <td >
+                Link</td>
+            <td >
+                Student Group
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/schools/student_group">Student Group</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td class="danger" title="Mandatory"><code>course_schedule</code></td>
+            <td >
+                Link</td>
+            <td >
+                Course Schedule
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/schools/course_schedule">Course Schedule</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
+            <td class="danger" title="Mandatory"><code>date</code></td>
+            <td >
+                Date</td>
+            <td >
+                Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>7</td>
+            <td ><code>attendance</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Attendance
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
+            <td ><code>students_html</code></td>
+            <td >
+                HTML</td>
+            <td >
+                Students HTML
+                
+            </td>
+            <td></td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.schools.doctype.student_attendance_tool.student_attendance_tool</h4>
+
+    
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>StudentAttendanceTool</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.schools.doctype.student_attendance_tool.student_attendance_tool.get_student_attendance_records</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.schools.doctype.student_attendance_tool.student_attendance_tool.get_student_attendance_records" href="#erpnext.schools.doctype.student_attendance_tool.student_attendance_tool.get_student_attendance_records" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.schools.doctype.student_attendance_tool.student_attendance_tool.<b>get_student_attendance_records</b>
+        <i class="text-muted">(based_on, date=None, student_group=None, course_schedule=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+
+    
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->

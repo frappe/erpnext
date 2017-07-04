@@ -1,0 +1,14 @@
+erpnext.controllers.buying_controller
+erpnext.controllers.item_variant
+erpnext.controllers.trends
+erpnext.controllers.sales_and_purchase_return
+erpnext.controllers.stock_controller
+erpnext.controllers.selling_controller
+erpnext.controllers.status_updater
+erpnext.controllers.website_list_for_contact
+erpnext.controllers.recurring_document
+erpnext.controllers.taxes_and_totals
+erpnext.controllers
+erpnext.controllers.queries
+erpnext.controllers.accounts_controller
+erpnext.controllers.print_settings

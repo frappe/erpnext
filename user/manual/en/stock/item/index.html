@@ -115,13 +115,11 @@
 						<div class="page-breadcrumbs">
 							
 							
-<ul class="breadcrumb">
-	<li>
-		<span class="fa fa-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext//user/manual/en/stock">
-		Stock</a>
-	</li>
+<ul class="breadcrumb" itemscope itemtype="http://data-vocabulary.org/Breadcrumb">
 	
+		<li><a href="/user/manual/en/stock" itemprop="url"><span itemprop="title">user/manual/en/stock</span></a></li>
+	
+	<li class="active"><span itemprop="title">Item</span></li>
 </ul>
 
 							
@@ -186,11 +184,9 @@
 
 <h3>Re Ordering</h3>
 
-<ul>
-<li><strong>Re-order level</strong> suggests the amount of stock balance in the Warehouse.</li>
-<li><strong>Re-order Qty</strong> suggests the amount of stock to be ordered to maintain minimum stock levels.</li>
-<li><strong>Minimum Order Qty</strong> is the minimum quantity for which a Material Request / Purchase Order must be made.</li>
-</ul>
+<p><strong><em>Re-order level</strong> suggests the amount of stock balance in the Warehouse.
+  <strong></em>Re-order Qty</strong> suggests the amount of stock to be ordered to maintain minimum stock levels.
+  <strong>*Minimum Order Qty</strong> is the minimum quantity for which a Material Request / Purchase Order must be made.</p>
 
 <h3>Item Tax</h3>
 
@@ -205,6 +201,8 @@
 <p>Inspection Criteria: If a Quality Inspection is prepared for this Item, then this template of criteria will automatically be updated in the Quality Inspection table of the Quality Inspection. Examples of Criteria are: Weight, Length, Finish etc.</p>
 
 <h3>Purchase Details</h3>
+
+<p><img alt="Item Purchase Details" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/stock/item-purchase.png"></p>
 
 <p><img class="screenshot" alt="Purchase details" src="https://frappe.github.io/erpnext/assets/img/stock/item-purchase.png"></p>
 
@@ -229,10 +227,16 @@
 <p><img alt="Item Sales Details" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/stock/item-sales.png"></p>
 
 <ul>
-<li><p><strong>Default Income Account:</strong> Income account selected here will be fetched automatically in sales invoice for this item.</p></li>
-<li><p><strong>Cost Centre:</strong> Cost center selected here will be fetched automatically in sales invoice for this item.</p></li>
-<li><p><strong>Customer Codes:</strong> Track Item Code assigned by the Customers for this Item. This will help you in searching item while creating Sales Order based on the Item Code in the Customer's Purchase Order.</p></li>
+<li><strong>Default Income Account:</strong> Income account selected here will be fetched automatically in sales invoice for this item.</li>
 </ul>
+
+<p><img class="screenshot" alt="Sales details" src="https://frappe.github.io/erpnext/assets/img/stock/item-sales.png)"></p>
+
+<p><img class="screenshot" alt="Sales details" src="https://frappe.github.io/erpnext/assets/img/stock/item-sales.png"></p>
+
+<p><strong>*Cost Centre:</strong> Cost center selected here will be fetched automatically in sales invoice for this item.</p>
+
+<p><strong>*Customer Codes:</strong> Track Item Code assigned by the Customers for this Item. This will help you in searching item while creating Sales Order based on the Item Code in the Customer's Purchase Order.</p>
 
 <p><img class="screenshot" alt="Sales details" src="https://frappe.github.io/erpnext/assets/img/stock/item-sales.png)"></p>
 

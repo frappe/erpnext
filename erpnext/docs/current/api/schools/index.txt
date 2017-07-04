@@ -1,0 +1,3 @@
+erpnext.schools
+erpnext.schools.api
+erpnext.schools.utils

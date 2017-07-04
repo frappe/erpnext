@@ -1,0 +1,565 @@
+<!-- title: Cheque Print Template -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 7.x.x</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/accounts/doctype/cheque_print_template"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+
+
+
+
+    <p><b>Table Name:</b> <code>tabCheque Print Template</code></p>
+
+
+
+
+<h3>Fields</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr >
+            <td>1</td>
+            <td ><code>settings</code></td>
+            <td >
+                HTML</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td ><code>has_print_format</code></td>
+            <td >
+                Check</td>
+            <td class="text-muted" title="Hidden">
+                Has Print Format
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>3</td>
+            <td ><code>primary_settings</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Primary Settings
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td class="danger" title="Mandatory"><code>bank_name</code></td>
+            <td >
+                Data</td>
+            <td >
+                Bank Name
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>cheque_size</code></td>
+            <td >
+                Select</td>
+            <td >
+                Cheque Size
+                
+            </td>
+            <td>
+                <pre>
+Regular
+A4</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
+            <td ><code>starting_position_from_top_edge</code></td>
+            <td >
+                Float</td>
+            <td >
+                Starting position from top edge
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>7</td>
+            <td ><code>cheque_width</code></td>
+            <td >
+                Float</td>
+            <td >
+                Cheque Width
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
+            <td ><code>cheque_height</code></td>
+            <td >
+                Float</td>
+            <td >
+                Cheque Height
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>9</td>
+            <td ><code>scanned_cheque</code></td>
+            <td >
+                Attach</td>
+            <td >
+                Scanned Cheque
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>10</td>
+            <td ><code>column_break_5</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>11</td>
+            <td ><code>is_account_payable</code></td>
+            <td >
+                Check</td>
+            <td >
+                Is Account Payable
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>12</td>
+            <td ><code>acc_pay_dist_from_top_edge</code></td>
+            <td >
+                Float</td>
+            <td >
+                Distance from top edge
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>13</td>
+            <td ><code>acc_pay_dist_from_left_edge</code></td>
+            <td >
+                Float</td>
+            <td >
+                Distance from left edge
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>14</td>
+            <td ><code>message_to_show</code></td>
+            <td >
+                Data</td>
+            <td >
+                Message to show
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>15</td>
+            <td ><code>date_and_payer_settings</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>16</td>
+            <td ><code>date_settings</code></td>
+            <td >
+                HTML</td>
+            <td >
+                Date Settings
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>17</td>
+            <td ><code>date_dist_from_top_edge</code></td>
+            <td >
+                Float</td>
+            <td >
+                Distance from top edge
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>18</td>
+            <td ><code>date_dist_from_left_edge</code></td>
+            <td >
+                Float</td>
+            <td >
+                Starting location from left edge
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>19</td>
+            <td ><code>payer_settings</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                Payer Settings
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>20</td>
+            <td ><code>payer_name_from_top_edge</code></td>
+            <td >
+                Float</td>
+            <td >
+                Distance from top edge
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>21</td>
+            <td ><code>payer_name_from_left_edge</code></td>
+            <td >
+                Float</td>
+            <td >
+                Starting location from left edge
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>22</td>
+            <td ><code>amount_in_words_and_figure_settings</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>23</td>
+            <td ><code>html_19</code></td>
+            <td >
+                HTML</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>24</td>
+            <td ><code>amt_in_words_from_top_edge</code></td>
+            <td >
+                Float</td>
+            <td >
+                Distance from top edge
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>25</td>
+            <td ><code>amt_in_words_from_left_edge</code></td>
+            <td >
+                Float</td>
+            <td >
+                Starting location from left edge
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>26</td>
+            <td ><code>amt_in_word_width</code></td>
+            <td >
+                Float</td>
+            <td >
+                Width of amount in word
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>27</td>
+            <td ><code>amt_in_words_line_spacing</code></td>
+            <td >
+                Float</td>
+            <td >
+                Line spacing for amount in words
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>28</td>
+            <td ><code>amount_in_figure</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                Amount In Figure
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>29</td>
+            <td ><code>amt_in_figures_from_top_edge</code></td>
+            <td >
+                Float</td>
+            <td >
+                Distance from top edge
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>30</td>
+            <td ><code>amt_in_figures_from_left_edge</code></td>
+            <td >
+                Float</td>
+            <td >
+                Starting location from left edge
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>31</td>
+            <td ><code>account_number_and_signatory_settings</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>32</td>
+            <td ><code>account_no_settings</code></td>
+            <td >
+                HTML</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>33</td>
+            <td ><code>acc_no_dist_from_top_edge</code></td>
+            <td >
+                Float</td>
+            <td >
+                Distance from top edge
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>34</td>
+            <td ><code>acc_no_dist_from_left_edge</code></td>
+            <td >
+                Float</td>
+            <td >
+                Starting location from left edge
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>35</td>
+            <td ><code>signatory_position</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                Signatory Position
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>36</td>
+            <td ><code>signatory_from_top_edge</code></td>
+            <td >
+                Float</td>
+            <td >
+                Distance from top edge
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>37</td>
+            <td ><code>signatory_from_left_edge</code></td>
+            <td >
+                Float</td>
+            <td >
+                Starting location from left edge
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>38</td>
+            <td ><code>preview</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Preview
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>39</td>
+            <td ><code>cheque_print_preview</code></td>
+            <td >
+                HTML</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.accounts.doctype.cheque_print_template.cheque_print_template</h4>
+
+    
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>ChequePrintTemplate</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.accounts.doctype.cheque_print_template.cheque_print_template.create_or_update_cheque_print_format</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.accounts.doctype.cheque_print_template.cheque_print_template.create_or_update_cheque_print_format" href="#erpnext.accounts.doctype.cheque_print_template.cheque_print_template.create_or_update_cheque_print_format" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.doctype.cheque_print_template.cheque_print_template.<b>create_or_update_cheque_print_format</b>
+        <i class="text-muted">(template_name)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+
+    
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->

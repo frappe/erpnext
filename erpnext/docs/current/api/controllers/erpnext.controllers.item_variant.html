@@ -1,0 +1,236 @@
+<!-- title: erpnext.controllers.item_variant --><div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 7.x.x</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/blob/develop/erpnext/controllers/item_variant.py"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>InvalidItemAttributeValueError</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.exceptions.ValidationError</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>ItemTemplateCannotHaveStock</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.exceptions.ValidationError</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>ItemVariantExistsError</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.exceptions.ValidationError</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.controllers.item_variant.copy_attributes_to_variant" href="#erpnext.controllers.item_variant.copy_attributes_to_variant" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.controllers.item_variant.<b>copy_attributes_to_variant</b>
+        <i class="text-muted">(item, variant)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.controllers.item_variant.create_variant</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.controllers.item_variant.create_variant" href="#erpnext.controllers.item_variant.create_variant" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.controllers.item_variant.<b>create_variant</b>
+        <i class="text-muted">(item, args)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.controllers.item_variant.find_variant" href="#erpnext.controllers.item_variant.find_variant" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.controllers.item_variant.<b>find_variant</b>
+        <i class="text-muted">(template, args, variant_item_code=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.controllers.item_variant.get_attribute_values" href="#erpnext.controllers.item_variant.get_attribute_values" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.controllers.item_variant.<b>get_attribute_values</b>
+        <i class="text-muted">()</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.controllers.item_variant.get_variant</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.controllers.item_variant.get_variant" href="#erpnext.controllers.item_variant.get_variant" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.controllers.item_variant.<b>get_variant</b>
+        <i class="text-muted">(template, args=None, variant=None, manufacturer=None, manufacturer_part_no=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Validates Attributes and their Values, then looks for an exactly
+        matching Item Variant</p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><strong><code>item</code></strong> -  Template Item</li>
+<li><strong><code>args</code></strong> -  A dictionary with "Attribute" as key and "Attribute Value" as value</li>
+</ul>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.controllers.item_variant.make_variant_based_on_manufacturer" href="#erpnext.controllers.item_variant.make_variant_based_on_manufacturer" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.controllers.item_variant.<b>make_variant_based_on_manufacturer</b>
+        <i class="text-muted">(template, manufacturer, manufacturer_part_no)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Make and return a new variant based on manufacturer and
+        manufacturer part no</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.controllers.item_variant.make_variant_item_code" href="#erpnext.controllers.item_variant.make_variant_item_code" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.controllers.item_variant.<b>make_variant_item_code</b>
+        <i class="text-muted">(template_item_code, template_item_name, variant)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Uses template's item code and abbreviations to make variant's item code</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.controllers.item_variant.validate_is_incremental" href="#erpnext.controllers.item_variant.validate_is_incremental" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.controllers.item_variant.<b>validate_is_incremental</b>
+        <i class="text-muted">(numeric_attribute, attribute, value, item)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.controllers.item_variant.validate_item_attribute_value" href="#erpnext.controllers.item_variant.validate_item_attribute_value" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.controllers.item_variant.<b>validate_item_attribute_value</b>
+        <i class="text-muted">(attributes_list, attribute, attribute_value, item)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.controllers.item_variant.validate_item_variant_attributes" href="#erpnext.controllers.item_variant.validate_item_variant_attributes" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.controllers.item_variant.<b>validate_item_variant_attributes</b>
+        <i class="text-muted">(item, args=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+
+
+<!-- autodoc -->
