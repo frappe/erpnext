@@ -85,12 +85,7 @@ class TestStockEntry(unittest.TestCase):
 		self._test_auto_material_request("_Test Item Warehouse Group Wise Reorder", warehouse="_Test Warehouse Group-C1 - _TC")
 
 	def _test_auto_material_request(self, item_code, material_request_type="Purchase", warehouse="_Test Warehouse - _TC"):
-		item = frappe.get_doc("Item", item_code)
-
-		if item.variant_of:
-			template = frappe.get_doc("Item", item.variant_of)
-		else:
-			template = item
+		variant = frappe.get_doc("Item", item_code)
 
 		projected_qty, actual_qty = frappe.db.get_value("Bin", {"item_code": item_code,
 			"warehouse": warehouse}, ["projected_qty", "actual_qty"]) or [0, 0]
@@ -105,10 +100,10 @@ class TestStockEntry(unittest.TestCase):
 		frappe.db.set_value("Stock Settings", None, "auto_indent", 1)
 
 		# update re-level qty so that it is more than projected_qty
-		if projected_qty >= template.reorder_levels[0].warehouse_reorder_level:
-			template.reorder_levels[0].warehouse_reorder_level += projected_qty
-			template.reorder_levels[0].material_request_type = material_request_type
-			template.save()
+		if projected_qty >= variant.reorder_levels[0].warehouse_reorder_level:
+			variant.reorder_levels[0].warehouse_reorder_level += projected_qty
+			variant.reorder_levels[0].material_request_type = material_request_type
+			variant.save()
 
 		from erpnext.stock.reorder_item import reorder_item
 		mr_list = reorder_item()

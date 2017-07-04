@@ -169,6 +169,7 @@ def create_variant(item, args):
 
 	return variant
 
+
 def copy_attributes_to_variant(item, variant):
 	from frappe.model import no_value_fields
 
@@ -181,8 +182,9 @@ def copy_attributes_to_variant(item, variant):
 		exclude_fields += ['manufacturer', 'manufacturer_part_no']
 
 	for field in item.meta.fields:
-		if field.fieldtype not in no_value_fields and (not field.no_copy)\
-			and field.fieldname not in exclude_fields:
+		# "Table" is part of `no_value_field` but we shouldn't ignore tables
+		if (field.fieldtype == 'Table' or field.fieldtype not in no_value_fields) \
+			and (not field.no_copy) and field.fieldname not in exclude_fields:
 			if variant.get(field.fieldname) != item.get(field.fieldname):
 				variant.set(field.fieldname, item.get(field.fieldname))
 	variant.variant_of = item.name
