@@ -253,3 +253,37 @@ def get_expense_claim_account(expense_claim_type, company):
 	return {
 		"account": account
 	}
+
+@frappe.whitelist()
+def make_advance_entry(docname):
+	from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+
+	expense_claim = frappe.get_doc("Expense Claim", docname)
+	default_bank_cash_account = get_default_bank_cash_account(expense_claim.company, "Bank")
+	if not default_bank_cash_account:
+		default_bank_cash_account = get_default_bank_cash_account(expense_claim.company, "Cash")
+
+	je = frappe.new_doc("Journal Entry")
+	je.voucher_type = 'Bank Entry'
+	je.company = expense_claim.company
+	je.remark = 'Advance Payment against Expense Claim: ' + docname;
+
+	je.append("accounts", {
+		"account": expense_claim.advance_account,
+		"debit_in_account_currency": flt(expense_claim.total_sanctioned_amount),
+		"reference_type": "Expense Claim",
+		"reference_name": expense_claim.name
+	})
+
+	je.append("accounts", {
+		"account": default_bank_cash_account.account,
+		"credit_in_account_currency": flt(expense_claim.total_sanctioned_amount),
+		"reference_type": "Expense Claim",
+		"reference_name": expense_claim.name,
+		"balance": default_bank_cash_account.balance,
+		"account_currency": default_bank_cash_account.account_currency,
+		"account_type": default_bank_cash_account.account_type
+	})
+
+	return je.as_dict()
+
