@@ -14,6 +14,7 @@ def setup(company=None, patch=True):
 	add_custom_roles_for_reports()
 	add_hsn_codes()
 	update_address_template()
+	add_print_formats()
 	if not patch:
 		make_fixtures()
 
@@ -68,6 +69,9 @@ def add_permissions():
 	for doctype in ('GST HSN Code', 'GST Settings'):
 		add_permission(doctype, 'Accounts Manager', 0)
 		add_permission(doctype, 'All', 0)
+		
+def add_print_formats():
+	frappe.reload_doc("regional", "print_format", "gst_tax_invoice")
 
 def make_custom_fields():
 	custom_fields = {
@@ -80,39 +84,39 @@ def make_custom_fields():
 		'Purchase Invoice': [
 			dict(fieldname='supplier_gstin', label='Supplier GSTIN',
 				fieldtype='Data', insert_after='supplier_address',
-				options='supplier_address.gstin'),
+				options='supplier_address.gstin', print_hide=1),
 			dict(fieldname='company_gstin', label='Company GSTIN',
 				fieldtype='Data', insert_after='shipping_address',
-				options='shipping_address.gstin'),
+				options='shipping_address.gstin', print_hide=1),
 		],
 		'Sales Invoice': [
 			dict(fieldname='customer_gstin', label='Customer GSTIN',
 				fieldtype='Data', insert_after='shipping_address',
-				options='shipping_address_name.gstin'),
+				options='shipping_address_name.gstin', print_hide=1),
 			dict(fieldname='company_gstin', label='Company GSTIN',
 				fieldtype='Data', insert_after='company_address',
-				options='company_address.gstin'),
+				options='company_address.gstin', print_hide=1),
 		],
 		'Item': [
-			dict(fieldname='gst_hsn_code', label='GST HSN Code',
+			dict(fieldname='gst_hsn_code', label='HSN/SAC Code',
 				fieldtype='Link', options='GST HSN Code', insert_after='item_group'),
 		],
 		'Sales Invoice Item': [
-			dict(fieldname='gst_hsn_code', label='GST HSN Code',
+			dict(fieldname='gst_hsn_code', label='HSN/SAC Code',
 				fieldtype='Data', options='item_code.gst_hsn_code',
-				insert_after='income_account'),
+				insert_after='description'),
 		],
 		'Purchase Invoice Item': [
-			dict(fieldname='gst_hsn_code', label='GST HSN Code',
+			dict(fieldname='gst_hsn_code', label='HSN/SAC Code',
 				fieldtype='Data', options='item_code.gst_hsn_code',
-				insert_after='expense_account'),
+				insert_after='description'),
 		]
 	}
 
 	for doctype, fields in custom_fields.items():
 		for df in fields:
 			create_custom_field(doctype, df)
-
+			
 def make_fixtures():
 	docs = [
 		{'doctype': 'Salary Component', 'salary_component': 'Professional Tax', 'description': 'Professional Tax', 'type': 'Deduction'},

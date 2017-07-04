@@ -14,6 +14,13 @@ Go to the Company master and add the GSTIN to your default address.
 
 <img class="screenshot" alt="GST in Company" src="{{docs_base_url}}/assets/img/regional/india/gstin-company.gif">
 
+**Include GSTIN number in the Address Template**
+
+Open Address Template record for India, and add GSTIN number there if not exists.
+
+<img class="screenshot" alt="GST in Company" src="{{docs_base_url}}/assets/img/regional/india/address-template-gstin.png">
+
+
 ### 2. Setting up HSN Codes
 
 According to the GST Law, your itemised invoices must contain the HSN Code related to that Item. ERPNext comes pre-installed with all 12,000+ HSN Codes so that you can easily select the relevant HSN Code in your Item
@@ -53,6 +60,12 @@ For **Sales Invoice**,
 5. Save and Submit the Invoice
 
 <img class="screenshot" alt="GST Invoice" src="{{docs_base_url}}/assets/img/regional/india/gst-invoice.gif">
+
+### 6. Print GST Tax Invoice
+
+To print Tax Invoice as per GSTN guidelines, please select **GST Tax Invoice** print format. This print format includes company address, GSTIN numbers, HSN/SAC Code and item-wise tax breakup.
+
+<img class="screenshot" alt="Sample GST Tax Invoice" src="{{docs_base_url}}/assets/img/regional/india/sample-gst-tax-invoice.png">
 
 ### Reports
 

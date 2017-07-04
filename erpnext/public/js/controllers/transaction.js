@@ -374,6 +374,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	validate: function() {
 		this.calculate_taxes_and_totals(false);
+		this.set_item_wise_tax_breakup();
 	},
 
 	company: function() {
@@ -936,69 +937,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		});
 	},
 
-	get_item_wise_taxes_html: function() {
-		var item_tax = {};
-		var tax_accounts = [];
-		var company_currency = this.get_company_currency();
-
-		$.each(this.frm.doc["taxes"] || [], function(i, tax) {
-			var tax_amount_precision = precision("tax_amount", tax);
-			var tax_rate_precision = precision("rate", tax);
-			$.each(JSON.parse(tax.item_wise_tax_detail || '{}'),
-				function(item_code, tax_data) {
-					if(!item_tax[item_code]) item_tax[item_code] = {};
-					if($.isArray(tax_data)) {
-						var tax_rate = "";
-						if(tax_data[0] != null) {
-							tax_rate = (tax.charge_type === "Actual") ?
-								format_currency(flt(tax_data[0], tax_amount_precision), company_currency, tax_amount_precision) :
-								(flt(tax_data[0], tax_rate_precision) + "%");
-						}
-						var tax_amount = format_currency(flt(tax_data[1], tax_amount_precision), company_currency,
-							tax_amount_precision);
-
-						item_tax[item_code][tax.name] = [tax_rate, tax_amount];
-					} else {
-						item_tax[item_code][tax.name] = [flt(tax_data, tax_rate_precision) + "%", ""];
-					}
-				});
-			tax_accounts.push([tax.name, tax.account_head]);
-		});
-
-		var headings = $.map([__("Item Name")].concat($.map(tax_accounts, function(head) { return head[1]; })),
-			function(head) { return '<th style="min-width: 100px;">' + (head || "") + "</th>" }).join("\n");
-
-		var distinct_item_names = [];
-		var distinct_items = [];
-		$.each(this.frm.doc["items"] || [], function(i, item) {
-			if(distinct_item_names.indexOf(item.item_code || item.item_name)===-1) {
-				distinct_item_names.push(item.item_code || item.item_name);
-				distinct_items.push(item);
-			}
-		});
-
-		var rows = $.map(distinct_items, function(item) {
-			var item_tax_record = item_tax[item.item_code || item.item_name];
-			if(!item_tax_record) { return null; }
-			return repl("<tr><td>%(item_name)s</td>%(taxes)s</tr>", {
-				item_name: item.item_name,
-				taxes: $.map(tax_accounts, function(head) {
-					return item_tax_record[head[0]] ?
-						"<td>(" + item_tax_record[head[0]][0] + ") " + item_tax_record[head[0]][1] + "</td>" :
-						"<td></td>";
-				}).join("\n")
-			});
-		}).join("\n");
-
-		if(!rows) return "";
-		return '<p><a class="h6 text-muted" href="#" onclick="$(\'.tax-break-up\').toggleClass(\'hide\'); return false;">'
-			+ __("Show tax break-up") + '</a></p>\
-		<div class="tax-break-up hide" style="overflow-x: auto;"><table class="table table-bordered table-hover">\
-			<thead><tr>' + headings + '</tr></thead> \
-			<tbody>' + rows + '</tbody> \
-		</table></div>';
-	},
-
 	validate_company_and_party: function() {
 		var me = this;
 		var valid = true;
@@ -1045,19 +983,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			});
 		}
 	},
-
-	show_item_wise_taxes: function() {
-		if(this.frm.fields_dict.other_charges_calculation) {
-			var html = this.get_item_wise_taxes_html();
-			if (html) {
-				this.frm.toggle_display("other_charges_calculation", true);
-				$(this.frm.fields_dict.other_charges_calculation.wrapper).html(html);
-			} else {
-				this.frm.toggle_display("other_charges_calculation", false);
-			}
-		}
-	},
-
+	
 	is_recurring: function() {
 		// set default values for recurring documents
 		if(this.frm.doc.is_recurring && this.frm.doc.__islocal) {
