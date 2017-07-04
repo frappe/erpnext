@@ -115,13 +115,11 @@
 						<div class="page-breadcrumbs">
 							
 							
-<ul class="breadcrumb">
-	<li>
-		<span class="fa fa-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext//current/models/manufacturing">
-		Module manufacturing</a>
-	</li>
+<ul class="breadcrumb" itemscope itemtype="http://data-vocabulary.org/Breadcrumb">
 	
+		<li><a href="/current/models/manufacturing" itemprop="url"><span itemprop="title">current/models/manufacturing</span></a></li>
+	
+	<li class="active"><span itemprop="title">BOM Item</span></li>
 </ul>
 
 							
@@ -321,7 +319,7 @@
         
         <tr >
             <td>11</td>
-            <td class="danger" title="Mandatory"><code>qty</code></td>
+            <td ><code>qty</code></td>
             <td >
                 Float</td>
             <td >
@@ -333,35 +331,27 @@
         
         <tr >
             <td>12</td>
-            <td class="danger" title="Mandatory"><code>rate</code></td>
+            <td ><code>uom</code></td>
             <td >
-                Currency</td>
+                Link</td>
             <td >
-                Rate
-                <p class="text-muted small">
-                    See "Rate Of Materials Based On" in Costing Section</p>
+                UOM
+                
             </td>
             <td>
-                <pre>currency</pre>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/uom">UOM</a>
+
+
+                
             </td>
         </tr>
         
         <tr >
             <td>13</td>
-            <td ><code>amount</code></td>
-            <td >
-                Currency</td>
-            <td >
-                Amount
-                
-            </td>
-            <td>
-                <pre>currency</pre>
-            </td>
-        </tr>
-        
-        <tr >
-            <td>14</td>
             <td ><code>col_break2</code></td>
             <td class="info">
                 Column Break</td>
@@ -373,7 +363,31 @@
         </tr>
         
         <tr >
+            <td>14</td>
+            <td class="danger" title="Mandatory"><code>stock_qty</code></td>
+            <td >
+                Float</td>
+            <td >
+                Stock Qty
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
             <td>15</td>
+            <td ><code>conversion_factor</code></td>
+            <td >
+                Float</td>
+            <td >
+                Conversion Factor
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>16</td>
             <td class="danger" title="Mandatory"><code>stock_uom</code></td>
             <td >
                 Link</td>
@@ -394,7 +408,36 @@
         </tr>
         
         <tr >
-            <td>16</td>
+            <td>17</td>
+            <td class="danger" title="Mandatory"><code>rate</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Rate
+                <p class="text-muted small">
+                    See "Rate Of Materials Based On" in Costing Section</p>
+            </td>
+            <td>
+                <pre>currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>18</td>
+            <td ><code>amount</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Amount
+                
+            </td>
+            <td>
+                <pre>currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>19</td>
             <td ><code>base_rate</code></td>
             <td >
                 Currency</td>
@@ -408,7 +451,7 @@
         </tr>
         
         <tr >
-            <td>17</td>
+            <td>20</td>
             <td ><code>base_amount</code></td>
             <td >
                 Currency</td>
@@ -422,7 +465,7 @@
         </tr>
         
         <tr class="info">
-            <td>18</td>
+            <td>21</td>
             <td ><code>section_break_18</code></td>
             <td >
                 Section Break</td>
@@ -434,7 +477,7 @@
         </tr>
         
         <tr >
-            <td>19</td>
+            <td>22</td>
             <td ><code>scrap</code></td>
             <td >
                 Float</td>
@@ -446,7 +489,7 @@
         </tr>
         
         <tr >
-            <td>20</td>
+            <td>23</td>
             <td ><code>qty_consumed_per_unit</code></td>
             <td >
                 Float</td>

@@ -115,13 +115,11 @@
 						<div class="page-breadcrumbs">
 							
 							
-<ul class="breadcrumb">
-	<li>
-		<span class="fa fa-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext//user/manual/de/setting-up">
-		Einstellungen</a>
-	</li>
+<ul class="breadcrumb" itemscope itemtype="http://data-vocabulary.org/Breadcrumb">
 	
+		<li><a href="/user/manual/de/setting-up" itemprop="url"><span itemprop="title">user/manual/de/setting-up</span></a></li>
+	
+	<li class="active"><span itemprop="title">Bestandsabgleich bei nichtserialisierten Artikeln</span></li>
 </ul>
 
 							
@@ -173,7 +171,7 @@
 
 <h4>Schritt 2: Geben Sie Daten in die CSV-Datei ein.</h4>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/stock-reco-data.png" alt="Lagerabgleichsdaten" /></p>
+<p><img class="screenshot" alt="Bestandsabgleich" src="https://frappe.github.io/erpnext/assets/img/setup/stock-reco-data.png"></p>
 
 <p>Das CSV-Format beachtet Groß- und Kleinschreibung. Verändern Sie nicht die Kopfbezeichnungen, die in der Vorlage vordefiniert wurden. In den Spalten "Artikelnummer" und "Lager" geben Sie bitte die richtige Artikelnummer und das Lager ein, so wie es in ERPNext bezeichnet wird. Für die Menge geben Sie den Lagerbestand, den Sie für diesen Artikel erfassen wollen, in einem bestimmten Lager ein. Wenn Sie die Menge oder den wertmäßigen Betrag eines Artikels nicht ändern wollen, dann lassen Sie den Eintrag leer.
 Anmerkung: Geben Sie keine "0" ein, wenn sie die Menge oder den wertmäßigen Betrag nicht ändern wollen. Sonst kalkuliert das System eine Menge von "0". Lassen Sie also das Feld leer!</p>
@@ -198,11 +196,11 @@ Anmerkung: Geben Sie keine "0" ein, wenn sie die Menge oder den wertmäßigen Be
 
 <h4>Schritt 4: Überprüfen Sie die Daten zum Bestandsabgleich</h4>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/stock-reco-upload.png" alt="Bestandsabgleich Überprüfung" /></p>
+<p><img class="screenshot" alt="Bestandsabgleich Überprüfung" src="https://frappe.github.io/erpnext/assets/img/setup/stock-reco-upload.gif"></p>
 
 <h3>Bericht zum Lagerbuch</h3>
 
-<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/stock-reco-ledger.png" alt="Bestandsabgleich Hauptbuch" /></p>
+<p><img class="screenshot" alt="Bestandsabgleich" src="https://frappe.github.io/erpnext/assets/img/setup/stock-reco-ledger.png"></p>
 
 <h5>So arbeitet der Bestandsabgleich</h5>
 
