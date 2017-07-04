@@ -38,15 +38,13 @@ Hinweis: Stellen Sie sicher, dass im Abschnitt "Weitere Informationen" "Ist Erö
 
 Vervollständigen Sie die Buchungssätze auf der Soll- und Haben-Seite.
 
-![Eröffnungsbuchung]({{docs_base_url}}/assets/old_images/erpnext/opening-entry-1.png)
+<img class="screenshot" alt="Opening Account" src="{{docs_base_url}}/assets/img/accounts/opening-6.png">
 
 Um einen Eröffnungsstand einzupflegen, erstellen Sie einen Buchungssatz für ein Konto oder eine Gruppe von Konten.
 
 Beispiel: Wenn Sie die Kontenstände von drei Bankkonten einpflegen möchten, dann erstellen Sie Buchungssätze der folgenden Art und Weise:
 
-![Eröffnungsbuchung]({{docs_base_url}}/assets/old_images/erpnext/image-temp-opening.png)
-
-![Eröffnungsbuchung]({{docs_base_url}}/assets/old_images/erpnext/opening-entry-2.png)
+<img class="screenshot" alt="Opening Account" src="{{docs_base_url}}/assets/img/accounts/opening-3.png">
 
 Um einen Ausgleich herzustellen, wird ein temporäres Konto für Vermögen und Verbindlichkeiten verwendet. Wenn Sie einen Anfangsbestand in einem Verbindlichkeitenkonto einpflegen, können Sie zum Ausgleich ein temporäres Vermögenskonto verwenden.
 
@@ -61,7 +59,8 @@ Sie können zwei Eröffnungsbuchungssätze erstellen:
 
 Wenn Sie die Buchungen erstellt haben, schaut der Bericht zur Probebilanz in etwa wie folgt aus:
 
-![Probebilanz]({{docs_base_url}}/assets/old_images/erpnext/trial-balance-1.png)
+<img class="screenshot" alt="Probebilanz" src="{{docs_base_url}}/assets/img/accounts/opening-4.png">
+
 
 ### Offene Rechnungen
 

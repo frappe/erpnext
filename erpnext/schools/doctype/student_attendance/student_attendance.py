@@ -35,9 +35,7 @@ class StudentAttendance(Document):
 			student_group = frappe.db.get_value("Course Schedule", self.course_schedule, "student_group")
 		else:
 			student_group = self.student_group
-		student_group_students = []
-		for d in get_student_group_students(student_group):
-			student_group_students.append(d.student)
+		student_group_students = [d.student for d in get_student_group_students(student_group)]
 		if student_group and self.student not in student_group_students:
 			frappe.throw(_('''Student {0}: {1} does not belong to Student Group {2}'''.format(self.student, self.student_name, student_group)))
 

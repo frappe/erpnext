@@ -137,7 +137,14 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Assessment Result Tool"
-				}
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Course wise Assessment Report",
+					"doctype": "Assessment Result"
+				},
+
 			]
 		},
 		{

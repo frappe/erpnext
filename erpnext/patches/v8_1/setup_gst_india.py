@@ -4,6 +4,7 @@ from frappe.email import sendmail_to_system_managers
 def execute():
 	frappe.reload_doc('regional', 'doctype', 'gst_settings')
 	frappe.reload_doc('regional', 'doctype', 'gst_hsn_code')
+	frappe.reload_doc('stock', 'doctype', 'item')
 
 	for report_name in ('GST Sales Register', 'GST Purchase Register',
 		'GST Itemised Sales Register', 'GST Itemised Purchase Register'):
@@ -18,7 +19,7 @@ def execute():
 
 def delete_custom_field_tax_id_if_exists():
 	for field in frappe.db.sql_list("""select name from `tabCustom Field` where fieldname='tax_id'
-		and dt in ('Sales Order', 'Salse Invoice', 'Delivery Note')"""):
+		and dt in ('Sales Order', 'Sales Invoice', 'Delivery Note')"""):
 		frappe.delete_doc("Custom Field", field, ignore_permissions=True)
 		frappe.db.commit()
 
