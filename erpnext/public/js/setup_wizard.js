@@ -145,11 +145,11 @@ var erpnext_slides = [
 
 				var year_start_date = current_year + "-" + fy[0];
 				if (year_start_date > frappe.datetime.get_today()) {
-					next_year = current_year
+					next_year = current_year;
 					current_year -= 1;
 				}
-				slide.get_field("fy_start_date").set_value(current_year + "-" + fy[0]);
-				slide.get_field("fy_end_date").set_value(next_year + "-" + fy[1]);
+				slide.get_field("fy_start_date").set_value(current_year + '-' + fy[0]);
+				slide.get_field("fy_end_date").set_value(next_year + '-' + fy[1]);
 			}
 
 		},
@@ -180,13 +180,11 @@ var erpnext_slides = [
 		},
 
 		bind_events: function (slide) {
-
-			// TODO remove this
 			slide.get_input("fy_start_date").on("change", function () {
+				var start_date = slide.form.fields_dict.fy_start_date.get_value();
 				var year_end_date =
-					frappe.datetime.add_days(frappe.datetime.add_months(
-						frappe.datetime.user_to_obj(slide.get_input("fy_start_date").val()), 12), -1);
-				slide.form.fields_dict.fy_end_date.set_value(frappe.datetime.obj_to_user(year_end_date));
+					frappe.datetime.add_days(frappe.datetime.add_months(start_date, 12), -1);
+				slide.form.fields_dict.fy_end_date.set_value(year_end_date);
 			});
 		}
 	},
