@@ -21,5 +21,7 @@ def execute():
 		where fieldname='gst_hsn_code' and dt in ('Sales Invoice Item', 'Purchase Invoice Item')
 	""")
 	
-	#reload gst print format
-	frappe.reload_doc("regional", "print_format", "gst_tax_invoice")
+	# reload gst print format for Indian users
+	company = frappe.get_all('Company', filters = {'country': 'India'})
+	if company:
+		frappe.reload_doc("regional", "print_format", "gst_tax_invoice")
