@@ -183,7 +183,7 @@ var erpnext_slides = [
 			slide.get_input("fy_start_date").on("change", function () {
 				var start_date = slide.form.fields_dict.fy_start_date.get_value();
 				var year_end_date =
-					frappe.datetime.add_days(frappe.datetime.add_months(start_date, 12), -1);
+					frappe.datetime.add_days(frappe.datetime.add_months(frappe.datetime.user_to_obj(start_date), 12), -1);
 				slide.form.fields_dict.fy_end_date.set_value(year_end_date);
 			});
 		}
