@@ -69,7 +69,7 @@ def add_permissions():
 	for doctype in ('GST HSN Code', 'GST Settings'):
 		add_permission(doctype, 'Accounts Manager', 0)
 		add_permission(doctype, 'All', 0)
-		
+
 def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "gst_tax_invoice")
 

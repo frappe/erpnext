@@ -983,7 +983,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			});
 		}
 	},
-	
+
 	is_recurring: function() {
 		// set default values for recurring documents
 		if(this.frm.doc.is_recurring && this.frm.doc.__islocal) {

@@ -666,11 +666,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 						var tax_rate = "";
 						if(tax_data[0] != null) {
 							tax_rate = (tax.charge_type === "Actual") ?
-								format_currency(flt(tax_data[0], tax_amount_precision), 
+								format_currency(flt(tax_data[0], tax_amount_precision),
 									company_currency, tax_amount_precision) :
 								(flt(tax_data[0], tax_rate_precision) + "%");
 						}
-						var tax_amount = format_currency(flt(tax_data[1], tax_amount_precision), 
+						var tax_amount = format_currency(flt(tax_data[1], tax_amount_precision),
 							company_currency, tax_amount_precision);
 
 						item_tax[item_code][tax.name] = [tax_rate, tax_amount];
@@ -681,15 +681,15 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			tax_accounts.push([tax.name, tax.account_head]);
 		});
 		
-		var headings = $.map([__("Item Name"), __("Taxable Amount")]
-		.concat($.map(tax_accounts, function(head) { return head[1]; })), function(head) {
-			if(head==__("Item Name")) {
-				return '<th style="min-width: 100px;" class="text-left">' + (head || "") + "</th>";
-			} else {
-				return '<th style="min-width: 80px;" class="text-right">' + (head || "") + "</th>";
+		var headings = $.map([__("Item Name"), __("Taxable Amount")].concat($.map(tax_accounts, 
+			function(head) { return head[1]; })), function(head) {
+				if(head==__("Item Name")) {
+					return '<th style="min-width: 100px;" class="text-left">' + (head || "") + "</th>";
+				} else {
+					return '<th style="min-width: 80px;" class="text-right">' + (head || "") + "</th>";
+				}	
 			}
-			
-		}).join("\n");
+		).join("\n");
 
 		var distinct_item_names = [];
 		var distinct_items = [];

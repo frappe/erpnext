@@ -1104,7 +1104,7 @@ class TestSalesInvoice(unittest.TestCase):
 		for d in si.get("items"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.item_code][i])
-				
+
 	def test_item_wise_tax_breakup(self):
 		si = create_sales_invoice(qty=100, rate=50, do_not_save=True)
 		si.append("taxes", {

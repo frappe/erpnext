@@ -514,11 +514,11 @@ class calculate_taxes_and_totals(object):
 		
 		item_tax, tax_accounts = self.get_item_tax(item_tax, tax_accounts)
 		
-		headings = self.get_table_column_headings(tax_accounts)
+		headings = get_table_column_headings(tax_accounts)
 		
 		distinct_items = self.get_distinct_items()
 		
-		rows = self.get_table_rows(distinct_items, item_tax, tax_accounts)
+		rows = get_table_rows(distinct_items, item_tax, tax_accounts)
 		
 		if not rows:
 			self.doc.other_charges_calculation = ""
@@ -550,12 +550,12 @@ class calculate_taxes_and_totals(object):
 					tax_rate = ""
 					if tax_data[0]:
 						if tax.charge_type == "Actual":
-							tax_rate = fmt_money(flt(tax_data[0], tax_amount_precision), 
+							tax_rate = fmt_money(flt(tax_data[0], tax_amount_precision),
 								tax_amount_precision, company_currency)
 						else:
 							tax_rate = cstr(flt(tax_data[0], tax_rate_precision)) + "%"
 							
-						tax_amount = fmt_money(flt(tax_data[1], tax_amount_precision), 
+						tax_amount = fmt_money(flt(tax_data[1], tax_amount_precision),
 							tax_amount_precision, company_currency)
 							
 						item_tax[item_code][tax.name] = [tax_rate, tax_amount]
@@ -564,18 +564,8 @@ class calculate_taxes_and_totals(object):
 			tax_accounts.append([tax.name, tax.account_head])
 		
 		return item_tax, tax_accounts
-		
-	def get_table_column_headings(self, tax_accounts):
-		headings_name = [_("Item Name"), _("Taxable Amount")] + [d[1] for d in tax_accounts]
-		headings = []
-		for head in headings_name:
-			if head == _("Item Name"):
-				headings.append('<th style="min-width: 120px;" class="text-left">' + (head or "") + "</th>")
-			else:
-				headings.append('<th style="min-width: 80px;" class="text-right">' + (head or "") + "</th>")
-				
-		return headings
-		
+
+	
 	def get_distinct_items(self):
 		distinct_item_names = []
 		distinct_items = []
@@ -586,26 +576,37 @@ class calculate_taxes_and_totals(object):
 				distinct_items.append(item)
 				
 		return distinct_items
+
+def get_table_column_headings(tax_accounts):
+	headings_name = [_("Item Name"), _("Taxable Amount")] + [d[1] for d in tax_accounts]
+	headings = []
+	for head in headings_name:
+		if head == _("Item Name"):
+			headings.append('<th style="min-width: 120px;" class="text-left">' + (head or "") + "</th>")
+		else:
+			headings.append('<th style="min-width: 80px;" class="text-right">' + (head or "") + "</th>")
+			
+	return headings
+
+def get_table_rows(distinct_items, item_tax, tax_accounts):
+	rows = []
+	for item in distinct_items:
+		item_tax_record = item_tax.get(item.item_code or item.item_name)
+		if not item_tax_record:
+			continue
 		
-	def get_table_rows(self, distinct_items, item_tax, tax_accounts):
-		rows = []	
-		for item in distinct_items:
-			item_tax_record = item_tax.get(item.item_code or item.item_name)
-			if not item_tax_record:
-				continue
-			
-			taxes = []
-			for head in tax_accounts:
-				if item_tax_record[head[0]]:
-					taxes.append("<td class='text-right'>(" + item_tax_record[head[0]][0] + ") "
-						 + item_tax_record[head[0]][1] + "</td>")
-				else:
-					taxes.append("<td></td>")
-			
-			rows.append("<tr><td>{item_name}</td><td class='text-right'>{taxable_amount}</td>{taxes}</tr>".format(**{
-				"item_name": item.item_name,
-				"taxable_amount": item.net_amount,
-				"taxes": "\n".join(taxes)
-			}))
-			
-		return rows
+		taxes = []
+		for head in tax_accounts:
+			if item_tax_record[head[0]]:
+				taxes.append("<td class='text-right'>(" + item_tax_record[head[0]][0] + ") "
+					 + item_tax_record[head[0]][1] + "</td>")
+			else:
+				taxes.append("<td></td>")
+		
+		rows.append("<tr><td>{item_name}</td><td class='text-right'>{taxable_amount}</td>{taxes}</tr>".format(**{
+			"item_name": item.item_name,
+			"taxable_amount": item.net_amount,
+			"taxes": "\n".join(taxes)
+		}))
+		
+	return rows
