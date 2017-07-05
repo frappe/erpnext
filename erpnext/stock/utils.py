@@ -84,7 +84,7 @@ def get_latest_stock_qty(item_code, warehouse=None):
 			values.append(warehouse)
 			condition += " AND warehouse = %s"
 	
-	actual_qty = frappe.db.sql("""select sum(actual_qty) from tabBin 
+	actual_qty = frappe.db.sql("""select sum(actual_qty) from tabBin
 		where item_code=%s {0}""".format(condition), values)[0][0]
 
 	return actual_qty

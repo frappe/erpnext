@@ -428,7 +428,7 @@ class BOM(WebsiteGenerator):
 	def get_child_exploded_items(self, bom_no, stock_qty):
 		""" Add all items from Flat BOM of child BOM"""
 		# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
-		child_fb_items = frappe.db.sql("""select bom_item.item_code, bom_item.item_name, 
+		child_fb_items = frappe.db.sql("""select bom_item.item_code, bom_item.item_name,
 			bom_item.description, bom_item.source_warehouse,
 			bom_item.stock_uom, bom_item.stock_qty, bom_item.rate,
 			bom_item.stock_qty / ifnull(bom.quantity, 1) as qty_consumed_per_unit
@@ -517,7 +517,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 		query = query.format(table="BOM Scrap Item", where_conditions="", select_columns="")
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
 	else:
-		query = query.format(table="BOM Item", where_conditions="", 
+		query = query.format(table="BOM Item", where_conditions="",
 			select_columns = ", bom_item.source_warehouse")
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
 

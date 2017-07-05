@@ -8,7 +8,7 @@ def execute():
 	# reload schema
 	for doctype in ("Production Order", "Production Order Item", "Production Order Operation"):
 		frappe.reload_doctype(doctype)
-		
+
 	# fetch all draft and submitted production orders
 	fields = ["name"]
 	if "source_warehouse" in frappe.db.get_table_columns("Production Order"):
@@ -32,7 +32,7 @@ def execute():
 			# update transferred qty based on Stock Entry, it also updates db
 			pro_order.update_transaferred_qty_for_required_items()
 			
-			# Set status where it was 'Unstopped', as it is deprecated	
+			# Set status where it was 'Unstopped', as it is deprecated
 			if pro_order.status == "Unstopped":
 				status = pro_order.get_status()
 				pro_order.db_set("status", status)

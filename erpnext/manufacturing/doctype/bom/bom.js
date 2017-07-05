@@ -7,7 +7,7 @@ frappe.ui.form.on("BOM", {
 	setup: function(frm) {
 		frm.add_fetch('buying_price_list', 'currency', 'currency')
 
-		frm.set_query("bom_no", "items", function(doc) {
+		frm.set_query("bom_no", "items", function() {
 			return {
 				filters: {
 					'currency': frm.doc.currency,
@@ -16,7 +16,7 @@ frappe.ui.form.on("BOM", {
 			}
 		});
 		
-		frm.set_query("source_warehouse", "items", function(doc) {
+		frm.set_query("source_warehouse", "items", function() {
 			return {
 				filters: {
 					'company': frm.doc.company,

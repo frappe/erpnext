@@ -731,7 +731,7 @@ class StockEntry(StockController):
 			frappe.msgprint(_("""All items have already been transferred for this Production Order."""))
 
 		return item_dict
-		
+
 	def get_pro_order_required_items(self):
 		item_dict = frappe._dict()
 		pro_order = frappe.get_doc("Production Order", self.production_order)

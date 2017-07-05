@@ -760,11 +760,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
-<<<<<<< HEAD
- "modified": "2017-05-23 15:59:37.946963", 
-=======
  "modified": "2017-05-29 17:42:37.216408", 
->>>>>>> Production Order Enhancements
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM Item", 

@@ -8,7 +8,7 @@ frappe.ui.form.on("Production Order", {
 			'Stock Entry': 'Make Stock Entry',
 		}
 		
-		// Set query for warehouses		
+		// Set query for warehouses
 		frm.set_query("wip_warehouse", function(doc) {
 			return {
 				filters: {
@@ -17,7 +17,7 @@ frappe.ui.form.on("Production Order", {
 			}
 		});
 		
-		frm.set_query("source_warehouse", "required_items", function(doc) {
+		frm.set_query("source_warehouse", "required_items", function() {
 			return {
 				filters: {
 					'company': frm.doc.company,
@@ -25,7 +25,7 @@ frappe.ui.form.on("Production Order", {
 			}
 		});
 		
-		frm.set_query("fg_warehouse", function(doc) {
+		frm.set_query("fg_warehouse", function() {
 			return {
 				filters: {
 					'company': frm.doc.company,
@@ -35,17 +35,17 @@ frappe.ui.form.on("Production Order", {
 		});
 		
 		// Set query for BOM
-		frm.set_query("bom_no", function(doc) {
-			if (doc.production_item) {
+		frm.set_query("bom_no", function() {
+			if (frm.doc.production_item) {
 				return{
 					query: "erpnext.controllers.queries.bom",
-					filters: {item: cstr(doc.production_item)}
+					filters: {item: cstr(frm.doc.production_item)}
 				}
 			} else msgprint(__("Please enter Production Item first"));
 		});
 		
 		// Set query for FG Item
-		frm.set_query("production_item", function(doc) {
+		frm.set_query("production_item", function() {
 			return {
 				query: "erpnext.controllers.queries.item_query",
 				filters:{
@@ -55,7 +55,7 @@ frappe.ui.form.on("Production Order", {
 		});
 
 		// Set query for FG Item
-		frm.set_query("project", function(doc) {
+		frm.set_query("project", function() {
 			return{
 				filters:[
 					['Project', 'status', 'not in', 'Completed, Cancelled']
@@ -210,8 +210,8 @@ frappe.ui.form.on("Production Order Item", {
 					item_code: row.item_code,
 					warehouse: row.source_warehouse
 				},
-				callback: function (r) {					
-					frappe.model.set_value(row.doctype, row.name, 
+				callback: function (r) {			
+					frappe.model.set_value(row.doctype, row.name,
 						"available_qty_at_source_warehouse", r.message);
 				}
 			})
@@ -258,35 +258,35 @@ erpnext.production_order = {
 			}
 			
 			if(!frm.doc.skip_transfer){
-				if ((flt(doc.material_transferred_for_manufacturing) < flt(doc.qty)) 
+				if ((flt(doc.material_transferred_for_manufacturing) < flt(doc.qty))
 					&& frm.doc.status != 'Stopped') {
-				frm.has_start_btn = true;
-				var btn = frm.add_custom_button(__('Start'), function() {
-					erpnext.production_order.make_se(frm, 'Material Transfer for Manufacture');
-				});
-				btn.addClass('btn-primary');
-				}
+					frm.has_start_btn = true;
+					var start_btn = frm.add_custom_button(__('Start'), function() {
+						erpnext.production_order.make_se(frm, 'Material Transfer for Manufacture');
+					});
+					start_btn.addClass('btn-primary');
+					}
 			}
 
 			if(!frm.doc.skip_transfer){
-				if ((flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing)) 
+				if ((flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing))
 						&& frm.doc.status != 'Stopped') {
 					frm.has_finish_btn = true;
-					var btn = frm.add_custom_button(__('Finish'), function() {
+					var finish_btn = frm.add_custom_button(__('Finish'), function() {
 						erpnext.production_order.make_se(frm, 'Manufacture');
 					});
 
 					if(doc.material_transferred_for_manufacturing==doc.qty) {
 						// all materials transferred for manufacturing, make this primary
-						btn.addClass('btn-primary');
+						finish_btn.addClass('btn-primary');
 					}
 				}
 			} else {
 				if ((flt(doc.produced_qty) < flt(doc.qty)) && frm.doc.status != 'Stopped') {
 					frm.has_finish_btn = true;
-					var btn = frm.add_custom_button(__('Finish'),
+					var finish_btn = frm.add_custom_button(__('Finish'),
 						cur_frm.cscript['Update Finished Goods']);
-					btn.addClass('btn-primary');
+					finish_btn.addClass('btn-primary');
 				}
 			}
 		}
@@ -298,7 +298,7 @@ erpnext.production_order = {
 			doc.planned_operating_cost = 0.0;
 			for(var i=0;i<op.length;i++) {
 				var planned_operating_cost = flt(flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60, 2);
-				frappe.model.set_value('Production Order Operation', op[i].name, 
+				frappe.model.set_value('Production Order Operation', op[i].name,
 					"planned_operating_cost", planned_operating_cost);
 				doc.planned_operating_cost += planned_operating_cost;
 			}

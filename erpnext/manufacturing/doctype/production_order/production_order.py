@@ -106,7 +106,7 @@ class ProductionOrder(Document):
 		# total qty in SO
 		so_qty = flt(so_item_qty) + flt(dnpi_qty)
 
-		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings", 
+		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
 			"over_production_allowance_percentage"))
 			
 		if total_qty > so_qty + (allowance_percentage/100 * so_qty):
