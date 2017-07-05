@@ -23,6 +23,30 @@ QUnit.test("test quotation", function(assert) {
 
 			// calculate_taxes_and_totals
 			assert.ok(cur_frm.doc.grand_total==500);
+			console.log(cur_frm.doc.items[0].get_item_details);
+		},
+		() => done()
+	]);
+});
+
+//QUnit.module('sales');
+
+QUnit.only("test lead", function(assert) {
+	assert.expect(2);
+	let done = assert.async();
+	frappe.run_serially([
+		() => {
+			return frappe.tests.make('Lead', [
+				{lead_name: 'Test Customer 1'},
+				{status: 'Lead'}
+			]);
+		},
+		() => {
+			// get_item_details
+			assert.ok(cur_frm.doc.lead_name=='Test Customer 1');
+
+			// calculate_taxes_and_totals
+			assert.ok(cur_frm.doc.status=='Lead');
 		},
 		() => done()
 	]);
