@@ -6,8 +6,9 @@ import frappe
 
 def execute():
 	# reload schema
-	for doctype in ("Production Order", "Production Order Item", "Production Order Operation"):
-		frappe.reload_doctype(doctype)
+	for doctype in ("Production Order", "Production Order Item", "Production Order Operation", 
+		"BOM Item", "BOM Explosion Item", "BOM"):
+			frappe.reload_doctype(doctype)
 
 	# fetch all draft and submitted production orders
 	fields = ["name"]
