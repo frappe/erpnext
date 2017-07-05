@@ -34,6 +34,15 @@ frappe.ui.form.on("Production Order", {
 			}
 		});
 		
+		frm.set_query("scrap_warehouse", function() {
+			return {
+				filters: {
+					'company': frm.doc.company,
+					'is_group': 0
+				}
+			}
+		});
+		
 		// Set query for BOM
 		frm.set_query("bom_no", function() {
 			if (frm.doc.production_item) {
