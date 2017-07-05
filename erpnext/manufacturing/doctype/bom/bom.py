@@ -408,6 +408,7 @@ class BOM(WebsiteGenerator):
 				self.add_to_cur_exploded_items(frappe._dict({
 					'item_code'		: d.item_code,
 					'item_name'		: d.item_name,
+					'source_warehouse': d.source_warehouse,
 					'description'	: d.description,
 					'image'			: d.image,
 					'stock_uom'		: d.stock_uom,
@@ -427,7 +428,8 @@ class BOM(WebsiteGenerator):
 	def get_child_exploded_items(self, bom_no, stock_qty):
 		""" Add all items from Flat BOM of child BOM"""
 		# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
-		child_fb_items = frappe.db.sql("""select bom_item.item_code, bom_item.item_name, bom_item.description,
+		child_fb_items = frappe.db.sql("""select bom_item.item_code, bom_item.item_name,
+			bom_item.description, bom_item.source_warehouse,
 			bom_item.stock_uom, bom_item.stock_qty, bom_item.rate,
 			bom_item.stock_qty / ifnull(bom.quantity, 1) as qty_consumed_per_unit
 			from `tabBOM Explosion Item` bom_item, tabBOM bom
@@ -437,9 +439,10 @@ class BOM(WebsiteGenerator):
 			self.add_to_cur_exploded_items(frappe._dict({
 				'item_code'				: d['item_code'],
 				'item_name'				: d['item_name'],
+				'source_warehouse'		: d['source_warehouse'],
 				'description'			: d['description'],
 				'stock_uom'				: d['stock_uom'],
-				'stock_qty'					: d['qty_consumed_per_unit']*stock_qty,
+				'stock_qty'				: d['qty_consumed_per_unit'] * stock_qty,
 				'rate'					: flt(d['rate']),
 			}))
 
@@ -493,6 +496,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				item.default_warehouse,
 				item.expense_account as expense_account,
 				item.buying_cost_center as cost_center
+				{select_columns}
 			from
 				`tab{table}` bom_item, `tabBOM` bom, `tabItem` item
 			where
@@ -501,18 +505,20 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				and bom_item.parent = bom.name
 				and item.name = bom_item.item_code
 				and is_stock_item = 1
-				{conditions}
-			group by item_code, stock_uom"""
+				{where_conditions}
+				group by item_code, stock_uom"""
 
 	if fetch_exploded:
 		query = query.format(table="BOM Explosion Item",
-			conditions="""and item.is_sub_contracted_item = 0""")
+			where_conditions="""and item.is_sub_contracted_item = 0""",
+			select_columns = ", bom_item.source_warehouse")
 		items = frappe.db.sql(query, { "qty": qty,	"bom": bom }, as_dict=True)
 	elif fetch_scrap_items:
-		query = query.format(table="BOM Scrap Item", conditions="")
+		query = query.format(table="BOM Scrap Item", where_conditions="", select_columns="")
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
 	else:
-		query = query.format(table="BOM Item", conditions="")
+		query = query.format(table="BOM Item", where_conditions="",
+			select_columns = ", bom_item.source_warehouse")
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
 
 	for item in items:

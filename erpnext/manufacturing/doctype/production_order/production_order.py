@@ -3,24 +3,21 @@
 
 from __future__ import unicode_literals
 import frappe
-
 import json
-from frappe.utils import flt, get_datetime, getdate, date_diff, cint, nowdate
 from frappe import _
-from frappe.utils import time_diff_in_seconds
+from frappe.utils import flt, get_datetime, getdate, date_diff, cint, nowdate
 from frappe.model.document import Document
-from frappe.model.mapper import get_mapped_doc
-from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
+from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_bom_items_as_dict
 from dateutil.relativedelta import relativedelta
 from erpnext.stock.doctype.item.item import validate_end_of_life
-from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError, NotInWorkingHoursError
+from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
 from erpnext.projects.doctype.timesheet.timesheet import OverlapError
 from erpnext.stock.doctype.stock_entry.stock_entry import get_additional_costs
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
-from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
-from erpnext.stock.utils import get_bin
 from frappe.utils.csvutils import getlink
+from erpnext.stock.utils import get_bin, validate_warehouse_company, get_latest_stock_qty
+from erpnext.utilities.transaction_base import validate_uom_is_integer
 
 class OverProductionError(frappe.ValidationError): pass
 class StockOverProductionError(frappe.ValidationError): pass
@@ -38,14 +35,18 @@ class ProductionOrder(Document):
 			validate_bom_no(self.production_item, self.bom_no)
 
 		self.validate_sales_order()
-		self.validate_warehouse()
+		self.validate_warehouse_belongs_to_company()
 		self.calculate_operating_cost()
 		self.validate_qty()
 		self.validate_operation_time()
 		self.status = self.get_status()
 
-		from erpnext.utilities.transaction_base import validate_uom_is_integer
 		validate_uom_is_integer(self, "stock_uom", ["qty", "produced_qty"])
+
+		if not self.get("required_items"):
+			self.set_required_items()
+		else:
+			self.set_available_qty()
 
 	def validate_sales_order(self):
 		if self.sales_order:
@@ -64,11 +65,14 @@ class ProductionOrder(Document):
 			else:
 				frappe.throw(_("Sales Order {0} is not valid").format(self.sales_order))
 
-	def validate_warehouse(self):
-		from erpnext.stock.utils import validate_warehouse_company
+	def validate_warehouse_belongs_to_company(self):
+		warehouses = [self.fg_warehouse, self.wip_warehouse]
+		for d in self.get("required_items"):
+			if d.source_warehouse not in warehouses:
+				warehouses.append(d.source_warehouse)
 
-		for w in [self.source_warehouse, self.fg_warehouse, self.wip_warehouse]:
-			validate_warehouse_company(w, self.company)
+		for wh in warehouses:
+			validate_warehouse_company(wh, self.company)
 
 	def calculate_operating_cost(self):
 		self.planned_operating_cost, self.actual_operating_cost = 0.0, 0.0
@@ -79,7 +83,8 @@ class ProductionOrder(Document):
 			self.planned_operating_cost += flt(d.planned_operating_cost)
 			self.actual_operating_cost += flt(d.actual_operating_cost)
 
-		variable_cost = self.actual_operating_cost if self.actual_operating_cost else self.planned_operating_cost
+		variable_cost = self.actual_operating_cost if self.actual_operating_cost \
+			else self.planned_operating_cost
 		self.total_operating_cost = flt(self.additional_operating_cost) + flt(variable_cost)
 
 	def validate_production_order_against_so(self):
@@ -101,22 +106,16 @@ class ProductionOrder(Document):
 		# total qty in SO
 		so_qty = flt(so_item_qty) + flt(dnpi_qty)
 
-		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings", "over_production_allowance_percentage"))
+		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
+			"over_production_allowance_percentage"))
+			
 		if total_qty > so_qty + (allowance_percentage/100 * so_qty):
-			frappe.throw(_("Cannot produce more Item {0} than Sales Order quantity {1}").format(self.production_item,
-				so_qty), OverProductionError)
-
-	def stop_unstop(self, status):
-		""" Called from client side on Stop/Unstop event"""
-		status = self.update_status(status)
-		self.update_planned_qty()
-		frappe.msgprint(_("Production Order status is {0}").format(status))
-		self.notify_update()
-
+			frappe.throw(_("Cannot produce more Item {0} than Sales Order quantity {1}")
+				.format(self.production_item, so_qty), OverProductionError)
 
 	def update_status(self, status=None):
 		'''Update status of production order if unknown'''
-		if not status:
+		if status != "Stopped":
 			status = self.get_status(status)
 
 		if status != self.status:
@@ -167,7 +166,6 @@ class ProductionOrder(Document):
 			self.db_set(fieldname, qty)
 
 	def before_submit(self):
-		self.set_required_items()
 		self.make_time_logs()
 
 	def on_submit(self):
@@ -184,10 +182,10 @@ class ProductionOrder(Document):
 		self.validate_cancel()
 
 		frappe.db.set(self,'status', 'Cancelled')
-		self.clear_required_items()
 		self.delete_timesheet()
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
+		self.update_reserved_qty_for_production()
 
 	def validate_cancel(self):
 		if self.status == "Stopped":
@@ -214,12 +212,11 @@ class ProductionOrder(Document):
 
 	def set_production_order_operations(self):
 		"""Fetch operations from BOM and set in 'Production Order'"""
+		self.set('operations', [])
 		
 		if not self.bom_no \
 			or cint(frappe.db.get_single_value("Manufacturing Settings", "disable_capacity_planning")):
 				return
-			
-		self.set('operations', [])
 		
 		if self.use_multi_level_bom:
 			bom_list = frappe.get_doc("BOM", self.bom_no).traverse_tree()
@@ -239,8 +236,6 @@ class ProductionOrder(Document):
 			
 		self.set('operations', operations)
 		self.calculate_time()
-
-		return check_if_scrap_warehouse_mandatory(self.bom_no)
 
 	def calculate_time(self):
 		bom_qty = frappe.db.get_value("BOM", self.bom_no, "quantity")
@@ -403,62 +398,60 @@ class ProductionOrder(Document):
 		update bin reserved_qty_for_production
 		called from Stock Entry for production, after submit, cancel
 		'''
-		if self.docstatus==1 and self.source_warehouse:
-			if self.material_transferred_for_manufacturing == self.produced_qty:
-				# clear required items table and save document
-				self.clear_required_items()
-			else:
-				# calculate transferred qty based on submitted
-				# stock entries
-				self.update_transaferred_qty_for_required_items()
+		if self.docstatus==1:
+			# calculate transferred qty based on submitted stock entries
+			self.update_transaferred_qty_for_required_items()
 
-				# update in bin
-				self.update_reserved_qty_for_production()
-
-	def clear_required_items(self):
-		'''Remove the required_items table and update the bins'''
-		items = [d.item_code for d in self.required_items]
-		self.required_items = []
-
-		self.update_child_table('required_items')
-
-		# completed, update reserved qty in bin
-		self.update_reserved_qty_for_production(items)
+			# update in bin
+			self.update_reserved_qty_for_production()
 
 	def update_reserved_qty_for_production(self, items=None):
 		'''update reserved_qty_for_production in bins'''
-		if not self.source_warehouse:
-			return
-
-		if not items:
-			items = [d.item_code for d in self.required_items]
-
-		for item in items:
-			stock_bin = get_bin(item, self.source_warehouse)
-			stock_bin.update_reserved_qty_for_production()
+		for d in self.required_items:
+			if d.source_warehouse:
+				stock_bin = get_bin(d.item_code, d.source_warehouse)
+				stock_bin.update_reserved_qty_for_production()
+			
+	def get_items_and_operations_from_bom(self):
+		self.set_required_items()
+		self.set_production_order_operations()
+		
+		return check_if_scrap_warehouse_mandatory(self.bom_no)
+		
+	def set_available_qty(self):
+		for d in self.get("required_items"):
+			if d.source_warehouse:
+				d.available_qty_at_source_warehouse = get_latest_stock_qty(d.item_code, d.source_warehouse)
+				
+			if self.wip_warehouse:
+				d.available_qty_at_wip_warehouse = get_latest_stock_qty(d.item_code, self.wip_warehouse)
 
 	def set_required_items(self):
 		'''set required_items for production to keep track of reserved qty'''
-		if self.source_warehouse:
+		self.required_items = []
+		if self.bom_no and self.qty:
 			item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=self.qty,
 				fetch_exploded = self.use_multi_level_bom)
 
 			for item in item_dict.values():
-				self.append('required_items', {'item_code': item.item_code,
-					'required_qty': item.qty})
-
-			#print frappe.as_json(self.required_items)
+				self.append('required_items', {
+					'item_code': item.item_code,
+					'required_qty': item.qty,
+					'source_warehouse': item.source_warehouse or item.default_warehouse
+				})
+			
+			self.set_available_qty()
 
 	def update_transaferred_qty_for_required_items(self):
 		'''update transferred qty from submitted stock entries for that item against
 			the production order'''
 
 		for d in self.required_items:
-			transferred_qty = frappe.db.sql('''select count(qty)
+			transferred_qty = frappe.db.sql('''select sum(qty)
 				from `tabStock Entry` entry, `tabStock Entry Detail` detail
 				where
 					entry.production_order = %s
-					entry.purpose = "Material Transfer for Manufacture"
+					and entry.purpose = "Material Transfer for Manufacture"
 					and entry.docstatus = 1
 					and detail.parent = entry.name
 					and detail.item_code = %s''', (self.name, d.item_code))[0][0]
@@ -496,10 +489,12 @@ def get_item_details(item, project = None):
 
 	if not res["bom_no"]:
 		if project:
-			frappe.throw(_("Default BOM for {0} not found for Project {1}").format(item, project))
-		frappe.throw(_("Default BOM for {0} not found").format(item))
+			res = get_item_details(item)
+			frappe.msgprint(_("Default BOM not found for Item {0} and Project {1}").format(item, project))
+		else:
+			frappe.throw(_("Default BOM for {0} not found").format(item))
 
-	res['project'] = frappe.db.get_value('BOM', res['bom_no'], 'project')
+	res['project'] = project or frappe.db.get_value('BOM', res['bom_no'], 'project')
 	res.update(check_if_scrap_warehouse_mandatory(res["bom_no"]))
 
 	return res
@@ -507,16 +502,21 @@ def get_item_details(item, project = None):
 @frappe.whitelist()
 def check_if_scrap_warehouse_mandatory(bom_no):
 	res = {"set_scrap_wh_mandatory": False }
-	bom = frappe.get_doc("BOM", bom_no)
+	if bom_no:
+		bom = frappe.get_doc("BOM", bom_no)
 
-	if len(bom.scrap_items) > 0:
-		res["set_scrap_wh_mandatory"] = True
+		if len(bom.scrap_items) > 0:
+			res["set_scrap_wh_mandatory"] = True
 
 	return res
 
 @frappe.whitelist()
 def make_stock_entry(production_order_id, purpose, qty=None):
 	production_order = frappe.get_doc("Production Order", production_order_id)
+	if not frappe.db.get_value("Warehouse", production_order.wip_warehouse, "is_group"):
+		wip_warehouse = production_order.wip_warehouse
+	else:
+		wip_warehouse = None
 
 	stock_entry = frappe.new_doc("Stock Entry")
 	stock_entry.purpose = purpose
@@ -528,12 +528,10 @@ def make_stock_entry(production_order_id, purpose, qty=None):
 	stock_entry.fg_completed_qty = qty or (flt(production_order.qty) - flt(production_order.produced_qty))
 
 	if purpose=="Material Transfer for Manufacture":
-		if production_order.source_warehouse:
-			stock_entry.from_warehouse = production_order.source_warehouse
-		stock_entry.to_warehouse = production_order.wip_warehouse
+		stock_entry.to_warehouse = wip_warehouse
 		stock_entry.project = production_order.project
 	else:
-		stock_entry.from_warehouse = production_order.wip_warehouse
+		stock_entry.from_warehouse = wip_warehouse
 		stock_entry.to_warehouse = production_order.fg_warehouse
 		additional_costs = get_additional_costs(production_order, fg_qty=stock_entry.fg_completed_qty)
 		stock_entry.project = production_order.project
@@ -601,3 +599,18 @@ def make_new_timesheet(source_name, target_doc=None):
 		frappe.throw(_("Already completed"))
 
 	return ts
+
+@frappe.whitelist()
+def stop_unstop(production_order, status):
+	""" Called from client side on Stop/Unstop event"""
+	
+	if not frappe.has_permission("Production Order", "write"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+		
+	pro_order = frappe.get_doc("Production Order", production_order)
+	pro_order.update_status(status)
+	pro_order.update_planned_qty()
+	frappe.msgprint(_("Production Order has been {0}").format(status))
+	pro_order.notify_update()
+	
+	return pro_order.status
