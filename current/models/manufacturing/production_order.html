@@ -117,7 +117,11 @@
 							
 <ul class="breadcrumb" itemscope itemtype="http://data-vocabulary.org/Breadcrumb">
 	
-		<li><a href="/current/models/manufacturing" itemprop="url"><span itemprop="title">current/models/manufacturing</span></a></li>
+		<li>
+			<a href="https://frappe.github.io/erpnext//current/models/manufacturing" itemprop="url">
+			<span itemprop="title">Module manufacturing</span>
+			</a>
+		</li>
 	
 	<li class="active"><span itemprop="title">Production Order</span></li>
 </ul>
@@ -991,20 +995,6 @@ Cancelled</pre>
     
     
 	<p class="docs-attr-name">
-        <a name="clear_required_items" href="#clear_required_items" class="text-muted small">
-            <i class="fa fa-link small" style="color: #ccc;"></i></a>
-		<b>clear_required_items</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p>Remove the required_items table and update the bins</p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
         <a name="delete_timesheet" href="#delete_timesheet" class="text-muted small">
             <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>delete_timesheet</b>
@@ -1023,6 +1013,20 @@ Cancelled</pre>
             <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>get_holidays</b>
         <i class="text-muted">(self, workstation)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_items_and_operations_from_bom" href="#get_items_and_operations_from_bom" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>get_items_and_operations_from_bom</b>
+        <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -1133,6 +1137,20 @@ Cancelled</pre>
     
     
 	<p class="docs-attr-name">
+        <a name="set_available_qty" href="#set_available_qty" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		<b>set_available_qty</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="set_production_order_operations" href="#set_production_order_operations" class="text-muted small">
             <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		<b>set_production_order_operations</b>
@@ -1168,20 +1186,6 @@ Cancelled</pre>
     </p>
 	<div class="docs-attr-desc"><p>Set start and end time for given operation. If first operation, set start as
         <code>planned_start_date</code>, else add time diff to end time of earlier operation.</p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="stop_unstop" href="#stop_unstop" class="text-muted small">
-            <i class="fa fa-link small" style="color: #ccc;"></i></a>
-		<b>stop_unstop</b>
-        <i class="text-muted">(self, status)</i>
-    </p>
-	<div class="docs-attr-desc"><p>Called from client side on Stop/Unstop event</p>
 </div>
 	<br>
 
@@ -1404,9 +1408,9 @@ Cancelled</pre>
     
     
 	<p class="docs-attr-name">
-        <a name="validate_warehouse" href="#validate_warehouse" class="text-muted small">
+        <a name="validate_warehouse_belongs_to_company" href="#validate_warehouse_belongs_to_company" class="text-muted small">
             <i class="fa fa-link small" style="color: #ccc;"></i></a>
-		<b>validate_warehouse</b>
+		<b>validate_warehouse_belongs_to_company</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -1581,6 +1585,24 @@ Cancelled</pre>
         <i class="text-muted">(production_order)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.manufacturing.doctype.production_order.production_order.stop_unstop</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.manufacturing.doctype.production_order.production_order.stop_unstop" href="#erpnext.manufacturing.doctype.production_order.production_order.stop_unstop" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.manufacturing.doctype.production_order.production_order.<b>stop_unstop</b>
+        <i class="text-muted">(production_order, status)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Called from client side on Stop/Unstop event</p>
 </div>
 	<br>
 
