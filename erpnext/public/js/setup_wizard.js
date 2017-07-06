@@ -116,6 +116,11 @@ var erpnext_slides = [
 			this.set_fy_dates(slide);
 		},
 
+		refresh: function(slide) {
+			this.load_chart_of_accounts(slide);
+			this.set_fy_dates(slide);
+		},
+
 		validate: function () {
 			// validate fiscal year start and end dates
 			if (this.values.fy_start_date == 'Invalid date' || this.values.fy_end_date == 'Invalid date') {
@@ -153,7 +158,6 @@ var erpnext_slides = [
 			}
 
 		},
-
 
 		load_chart_of_accounts: function (slide) {
 			var country = frappe.wizard.values.country;
