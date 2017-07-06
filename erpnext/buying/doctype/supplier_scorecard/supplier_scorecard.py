@@ -16,6 +16,7 @@ class SupplierScorecard(Document):
 	def validate(self):
 		self.validate_standings()
 		self.validate_criteria_weights()
+		make_all_scorecards(self.name)
 		self.calculate_total_score()
 		self.update_standing()
 		
@@ -129,6 +130,20 @@ def daterange(start_date, end_date):
     for n in range(int ((end_date - start_date).days)+1):
         yield start_date + timedelta(n)
 
+def refresh_scorecards():
+	scorecards = frappe.db.sql("""
+		SELECT
+			sc.name
+		FROM
+			`tabSupplier Scorecard` sc""", 
+			{}, as_dict=1)
+	for sc in scorecards:
+		# Check to see if any new scorecard periods are created
+		if make_all_scorecards(sc.name) > 0:
+			# Save the scorecard to update the score and standings
+			sc.save()
+		
+		
 @frappe.whitelist()
 def make_all_scorecards(docname):
 	
@@ -139,7 +154,7 @@ def make_all_scorecards(docname):
 	end_date = get_scorecard_date(sc.period, start_date)
 	todays = getdate(nowdate())
 
-	
+	scp_count = 0
 	while (start_date < todays) and (end_date <= todays):
 		# check to make sure there is no scorecard period already created
 		scorecards = frappe.db.sql("""
@@ -163,9 +178,11 @@ def make_all_scorecards(docname):
 			period_card.start_date = start_date
 			period_card.end_date = end_date
 			period_card.save()
+			scp_count = scp_count + 1
 			frappe.msgprint("Created scorecard for " + sc.supplier + " between " + str(start_date) + " and " + str(end_date))
 		start_date = getdate(add_days(end_date,1))
 		end_date = get_scorecard_date(sc.period, start_date)
+	return scp_count
 	
 def get_scorecard_date(period, start_date):
 	if period == 'Per Day':

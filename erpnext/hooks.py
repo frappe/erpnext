@@ -180,6 +180,7 @@ scheduler_events = {
 		"erpnext.accounts.doctype.asset.depreciation.post_depreciation_entries",
 		"erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary",
 		"erpnext.stock.doctype.serial_no.serial_no.update_maintenance_status"
+		"erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.refresh_scorecards"
 	]
 }
 
