@@ -97,8 +97,10 @@ class SupplierScorecard(Document):
 				self.notify_supplier = standing.notify_supplier
 				self.notify_employee = standing.notify_employee
 				self.employee_link = standing.employee_link
-		
-		
+				
+				#Update supplier standing info
+				frappe.db.set_value("Supplier", self.supplier, "prevent_pos", self.prevent_pos)
+				frappe.db.set_value("Supplier", self.supplier, "prevent_rfqs", self.prevent_rfqs)
 		
 @frappe.whitelist()	
 def timeline_data(doctype, name):

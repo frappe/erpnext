@@ -39,9 +39,11 @@ class PurchaseOrder(BuyingController):
 		super(PurchaseOrder, self).validate()
 
 		self.set_status()
+		
+		self.validate_supplier() 
 		validate_for_items(self)
 		self.check_for_closed_status()
-
+		
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 
@@ -50,7 +52,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_minimum_order_qty()
 		self.create_raw_materials_supplied("supplied_items")
 		self.set_received_qty_for_drop_ship_items()
-
+	
 	def validate_with_previous_doc(self):
 		super(PurchaseOrder, self).validate_with_previous_doc({
 			"Supplier Quotation": {
@@ -65,6 +67,12 @@ class PurchaseOrder(BuyingController):
 			}
 		})
 
+	def validate_supplier(self):
+		prevent_po = frappe.db.get_value("Supplier", self.supplier, 'prevent_pos')   
+		if prevent_po:
+			standing = frappe.db.get_value("Supplier Scorecard",self.supplier, 'status') 
+			frappe.throw(_("Purchase Orders are not allowed for {0} due to a scorecard standing of {1}").format(self.supplier, standing))
+	
 	def validate_minimum_order_qty(self):
 		items = list(set([d.item_code for d in self.get("items")]))
 

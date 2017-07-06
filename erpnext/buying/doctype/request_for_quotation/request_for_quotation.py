@@ -21,6 +21,7 @@ STANDARD_USERS = ("Guest", "Administrator")
 class RequestforQuotation(BuyingController):
 	def validate(self):
 		self.validate_duplicate_supplier()
+		self.validate_supplier_list()
 		validate_for_items(self)
 		self.update_email_id()
 
@@ -28,6 +29,13 @@ class RequestforQuotation(BuyingController):
 		supplier_list = [d.supplier for d in self.suppliers]
 		if len(supplier_list) != len(set(supplier_list)):
 			frappe.throw(_("Same supplier has been entered multiple times"))
+			
+	def validate_supplier_list(self):
+		for d in self.suppliers:
+			prevent_rfqs = frappe.db.get_value("Supplier", d.supplier, 'prevent_rfqs')   
+			if prevent_rfqs:
+				standing = frappe.db.get_value("Supplier Scorecard",d.supplier, 'status') 
+				frappe.throw(_("RFQs are not allowed for {0} due to a scorecard standing of {1}").format(d.supplier, standing))
 
 	def update_email_id(self):
 		for rfq_supplier in self.suppliers:
