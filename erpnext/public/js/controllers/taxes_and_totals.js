@@ -705,7 +705,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			if(!item_tax_record) { return null; }
 			return repl("<tr><td>%(item_name)s</td><td class='text-right'>%(taxable_amount)s</td>%(taxes)s</tr>", {
 				item_name: item.item_name,
-				taxable_amount: item.net_amount,
+				taxable_amount: format_currency(item.net_amount, 
+					company_currency, precision("net_amount", item)),
 				taxes: $.map(tax_accounts, function(head) {
 					return item_tax_record[head[0]] ?
 						"<td class='text-right'>(" + item_tax_record[head[0]][0] + ") " + item_tax_record[head[0]][1] + "</td>" :

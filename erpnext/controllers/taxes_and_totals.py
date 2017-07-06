@@ -511,14 +511,15 @@ class calculate_taxes_and_totals(object):
 	def set_item_wise_tax_breakup(self):
 		item_tax = {}
 		tax_accounts = []
+		company_currency = erpnext.get_company_currency(self.doc.company)
 		
-		item_tax, tax_accounts = self.get_item_tax(item_tax, tax_accounts)
+		item_tax, tax_accounts = self.get_item_tax(item_tax, tax_accounts, company_currency)
 		
 		headings = get_table_column_headings(tax_accounts)
 		
 		distinct_items = self.get_distinct_items()
 		
-		rows = get_table_rows(distinct_items, item_tax, tax_accounts)
+		rows = get_table_rows(distinct_items, item_tax, tax_accounts, company_currency)
 		
 		if not rows:
 			self.doc.other_charges_calculation = ""
@@ -534,9 +535,7 @@ class calculate_taxes_and_totals(object):
 	"rows": "\n".join(rows)
 })
 
-	def get_item_tax(self, item_tax, tax_accounts):
-		company_currency = erpnext.get_company_currency(self.doc.company)
-
+	def get_item_tax(self, item_tax, tax_accounts, company_currency):
 		for tax in self.doc.taxes:
 			tax_amount_precision = tax.precision("tax_amount")
 			tax_rate_precision = tax.precision("rate");
@@ -588,7 +587,7 @@ def get_table_column_headings(tax_accounts):
 			
 	return headings
 
-def get_table_rows(distinct_items, item_tax, tax_accounts):
+def get_table_rows(distinct_items, item_tax, tax_accounts, company_currency):
 	rows = []
 	for item in distinct_items:
 		item_tax_record = item_tax.get(item.item_code or item.item_name)
@@ -605,7 +604,7 @@ def get_table_rows(distinct_items, item_tax, tax_accounts):
 		
 		rows.append("<tr><td>{item_name}</td><td class='text-right'>{taxable_amount}</td>{taxes}</tr>".format(**{
 			"item_name": item.item_name,
-			"taxable_amount": item.net_amount,
+			"taxable_amount": fmt_money(item.net_amount, item.precision("net_amount"), company_currency),
 			"taxes": "\n".join(taxes)
 		}))
 		
