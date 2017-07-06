@@ -4,7 +4,6 @@ import frappe
 
 __version__ = '8.3.1'
 
-
 def get_default_company(user=None):
 	'''Get default company for user'''
 	from frappe.defaults import get_user_default_as_list
