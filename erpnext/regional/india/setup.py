@@ -74,12 +74,17 @@ def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "gst_tax_invoice")
 
 def make_custom_fields():
+	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
+		fieldtype='Data', options='item_code.gst_hsn_code', insert_after='description')
+	
 	custom_fields = {
 		'Address': [
 			dict(fieldname='gstin', label='Party GSTIN', fieldtype='Data',
 				insert_after='fax'),
 			dict(fieldname='gst_state', label='GST State', fieldtype='Select',
-				options='\n'.join(states), insert_after='gstin')
+				options='\n'.join(states), insert_after='gstin'),
+			dict(fieldname='gst_state_number', label='GST State Number',
+				fieldtype='Int', insert_after='gst_state'),
 		],
 		'Purchase Invoice': [
 			dict(fieldname='supplier_gstin', label='Supplier GSTIN',
@@ -96,21 +101,20 @@ def make_custom_fields():
 			dict(fieldname='company_gstin', label='Company GSTIN',
 				fieldtype='Data', insert_after='company_address',
 				options='company_address.gstin', print_hide=1),
+			dict(fieldname='invoice_copy', label='Invoice Copy',
+				fieldtype='Select', insert_after='project', print_hide=1,
+				options='ORIGINAL FOR RECIPIENT\nDUPLICATE FOR TRANSPORTER\nTRIPLICATE FOR SUPPLIER')
 		],
 		'Item': [
-			dict(fieldname='gst_hsn_code', label='HSN/SAC Code',
+			dict(fieldname='gst_hsn_code', label='HSN/SAC',
 				fieldtype='Link', options='GST HSN Code', insert_after='item_group'),
 		],
-		'Sales Invoice Item': [
-			dict(fieldname='gst_hsn_code', label='HSN/SAC Code',
-				fieldtype='Data', options='item_code.gst_hsn_code',
-				insert_after='description'),
-		],
-		'Purchase Invoice Item': [
-			dict(fieldname='gst_hsn_code', label='HSN/SAC Code',
-				fieldtype='Data', options='item_code.gst_hsn_code',
-				insert_after='description'),
-		]
+		'Sales Order Item': [hsn_sac_field],
+		'Delivery Note Item': [hsn_sac_field],
+		'Sales Invoice Item': [hsn_sac_field],
+		'Purchase Order Item': [hsn_sac_field],
+		'Purchase Receipt Item': [hsn_sac_field],
+		'Purchase Invoice Item': [hsn_sac_field]
 	}
 
 	for doctype, fields in custom_fields.items():
