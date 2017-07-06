@@ -36,7 +36,7 @@ def update_existing_custom_fields():
 def add_custom_fields():
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
 		fieldtype='Data', options='item_code.gst_hsn_code', insert_after='description')
-	
+
 	custom_fields = {
 		'Address': [
 			dict(fieldname='gst_state_number', label='GST State Number',
@@ -52,7 +52,7 @@ def add_custom_fields():
 		'Purchase Order Item': [hsn_sac_field],
 		'Purchase Receipt Item': [hsn_sac_field]
 	}
-	
+
 	for doctype, fields in custom_fields.items():
 		for df in fields:
 			create_custom_field(doctype, df)
