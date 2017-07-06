@@ -83,7 +83,7 @@ def make_custom_fields():
 				insert_after='fax'),
 			dict(fieldname='gst_state', label='GST State', fieldtype='Select',
 				options='\n'.join(states), insert_after='gstin'),
-			dict(fieldname='gst_state_number', label='GST State Number', 
+			dict(fieldname='gst_state_number', label='GST State Number',
 				fieldtype='Int', insert_after='gst_state'),
 		],
 		'Purchase Invoice': [
