@@ -1,9 +1,3 @@
-{% var letterhead= filters.letter_head || (frappe.get_doc(":Company", filters.company) && frappe.get_doc(":Company", filters.company).default_letter_head) || frappe.defaults.get_default("letter_head"); %}
-{% if(letterhead) { %} 
-<div style="margin-bottom: 7px;" class="text-center">
-	{%= frappe.boot.letter_heads[letterhead].header %}
-</div>
-{% } %}
 <h2 class="text-center">{%= __("Statement of Account") %}</h2>
 <h4 class="text-center">
 	{% if (filters.party_name) { %}
