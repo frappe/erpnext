@@ -50,6 +50,7 @@ def setup_complete(args=None):
 		create_test_uom()
 		create_duration()
 		create_dosage()
+		create_healthcare_item_groups()
 		create_lab_test_items()
 		create_lab_test_template()
 		create_sensitivity()
@@ -783,11 +784,17 @@ def create_dosage():
 	]
 	insert_record(records)
 
-def create_lab_test_items():
+def create_healthcare_item_groups():
 	records = [
 		{'doctype': 'Item Group', 'item_group_name': _('Laboratory'),
 			'is_group': 0, 'parent_item_group': _('All Item Groups') },
+		{'doctype': 'Item Group', 'item_group_name': _('Drug'),
+			'is_group': 0, 'parent_item_group': _('All Item Groups') }
+	]
+	insert_record(records)
 
+def create_lab_test_items():
+	records = [
 		{"doctype": "Item", "item_code": "MCH", "item_name": "MCH", "item_group": "Laboratory",
 			"stock_uom": "Unit", "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
 		{"doctype": "Item", "item_code": "LDL", "item_name": "LDL", "item_group": "Laboratory",
