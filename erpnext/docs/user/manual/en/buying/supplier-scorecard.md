@@ -42,8 +42,9 @@ Additional variables can be added through server-side customizations.
 The criteria formula should be customized to evaluate the suppliers in each criteria in a way that best fits the Company requirements.
 
 ### Evaluating the Supplier
- An evaluation is generated for each Supplier Scorecard Period by clicking the "Generate Missing Scorecard Periods" button. The supplier 
- current score can be seen, as well as a visual graphic showing the performance of the supplier over time. 
+An evaluation is generated for each Supplier Scorecard Period by clicking the "Generate Missing Scorecard Periods" button. The supplier 
+current score can be seen, as well as a visual graphic showing the performance of the supplier over time. Any actions against the supplier 
+are also noted here, including warnings when create RFQs and POs or locking out those features for this supplier altogether.
 
 
 

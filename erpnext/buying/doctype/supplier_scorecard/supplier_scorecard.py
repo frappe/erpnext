@@ -20,8 +20,6 @@ class SupplierScorecard(Document):
 		self.calculate_total_score()
 		self.update_standing()
 		
-		
-		
 	def validate_standings(self):
 		# Check that there are no overlapping scores
 		for c1 in self.standings:
@@ -93,6 +91,8 @@ class SupplierScorecard(Document):
 				(not standing.max_grade or (standing.max_grade > self.supplier_score)):
 				self.status = standing.standing_name
 				self.indicator_color = standing.standing_color
+				self.warn_pos = standing.warn_pos
+				self.warn_rfqs = standing.warn_rfqs
 				self.prevent_rfqs = standing.prevent_rfqs
 				self.prevent_pos = standing.prevent_pos
 				self.notify_supplier = standing.notify_supplier
@@ -102,6 +102,8 @@ class SupplierScorecard(Document):
 				#Update supplier standing info
 				frappe.db.set_value("Supplier", self.supplier, "prevent_pos", self.prevent_pos)
 				frappe.db.set_value("Supplier", self.supplier, "prevent_rfqs", self.prevent_rfqs)
+				frappe.db.set_value("Supplier", self.supplier, "warn_rfqs", self.warn_rfqs)
+				frappe.db.set_value("Supplier", self.supplier, "warn_pos", self.warn_pos)
 		
 @frappe.whitelist()	
 def timeline_data(doctype, name):
