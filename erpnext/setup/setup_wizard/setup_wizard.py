@@ -36,7 +36,7 @@ def setup_complete(args=None):
 	create_customers(args)
 	create_suppliers(args)
 
-	if args.domain.lower() == 'education':
+	if args.get('domain').lower() == 'education':
 		create_academic_year()
 		create_academic_term()
 		create_program(args)
@@ -73,10 +73,10 @@ def create_fiscal_year_and_company(args):
 	if (args.get('fy_start_date')):
 		curr_fiscal_year = get_fy_details(args.get('fy_start_date'), args.get('fy_end_date'))
 		frappe.get_doc({
-		"doctype":"Fiscal Year",
-		'year': curr_fiscal_year,
-		'year_start_date': args.get('fy_start_date'),
-		'year_end_date': args.get('fy_end_date'),
+			"doctype":"Fiscal Year",
+			'year': curr_fiscal_year,
+			'year_start_date': args.get('fy_start_date'),
+			'year_end_date': args.get('fy_end_date'),
 		}).insert()
 		args["curr_fiscal_year"] = curr_fiscal_year
 
@@ -150,7 +150,7 @@ def set_defaults(args):
 
 	global_defaults = frappe.get_doc("Global Defaults", "Global Defaults")
 	global_defaults.update({
-		'current_fiscal_year': args.curr_fiscal_year,
+		'current_fiscal_year': args.get('curr_fiscal_year'),
 		'default_currency': args.get('currency'),
 		'default_company':args.get('company_name')	,
 		"country": args.get("country"),
@@ -196,7 +196,7 @@ def set_defaults(args):
 	hr_settings.save()
 
 	domain_settings = frappe.get_doc("Domain Settings")
-	domain_settings.append('active_domains', dict(domain=_(args.domain)))
+	domain_settings.append('active_domains', dict(domain=_(args.get('domain'))))
 	domain_settings.save()
 
 def create_feed_and_todo():
