@@ -44,5 +44,128 @@ $.extend(frappe.test_data, {
 			{is_stock_item: 0},
 			{standard_rate: 300}
 		]
+	},
+	'Lead':{
+		'LEAD-00001': [
+			{lead_name: 'Test Lead 1'}
+		],
+		'LEAD-00002': [
+			{lead_name: 'Test Lead 2'}
+		],
+		'LEAD-00003': [
+			{lead_name: 'Test Lead 3'}
+		]
+	},
+	'Address': {
+		'Test1-Billing': [
+			{address_title:'Test1'},
+			{address_type: 'Billing'},
+			{address_line1: 'Billing Street 1'},
+			{city: 'Billing City 1'},
+			{links: [
+				[
+					{link_doctype: 'Customer'},
+					{link_name: 'Test Customer 1'}
+				]
+			]}
+		],
+		'Test1-Shipping': [
+			{address_title:'Test1'},
+			{address_type: 'Shipping'},
+			{address_line1: 'Shipping Street 1'},
+			{city: 'Shipping City 1'},
+			{links: [
+				[
+					{link_doctype: 'Customer'},
+					{link_name: 'Test Customer 1'}
+				]
+			]}
+		],
+		'Test1-Warehouse': [
+			{address_title:'Test1'},
+			{address_type: 'Warehouse'},
+			{address_line1: 'Warehouse Street 1'},
+			{city: 'Warehouse City 1'},
+			{links: [
+				[
+					{link_doctype: 'Customer'},
+					{link_name: 'Test Customer 1'}
+				]
+			]}
+		],
+		'Test2-Billing': [
+			{address_title:'Test2'},
+			{address_type: 'Billing'},
+			{address_line1: 'Billing Street 2'},
+			{city: 'Billing City 2'},
+			{links: [
+				[
+					{link_doctype: 'Customer'},
+					{link_name: 'Test Customer 2'}
+				]
+			]}
+		],
+		'Test2-Shipping': [
+			{address_title:'Test2'},
+			{address_type: 'Shipping'},
+			{address_line1: 'Shipping Street 2'},
+			{city: 'Shipping City 2'},
+			{links: [
+				[
+					{link_doctype: 'Customer'},
+					{link_name: 'Test Customer 2'}
+				]
+			]}
+		],
+		'Test2-Warehouse': [
+			{address_title:'Test2'},
+			{address_type: 'Warehouse'},
+			{address_line1: 'Warehouse Street 2'},
+			{city: 'Warehouse City 2'},
+			{links: [
+				[
+					{link_doctype: 'Customer'},
+					{link_name: 'Test Customer 2'}
+				]
+			]}
+		]
+	},
+	'Contact': {
+		'Contact 1-Test Customer 1': [
+			{first_name: 'Contact 1'},
+			{links: [
+				[
+					{link_doctype: 'Customer'},
+					{link_name: 'Test Customer 1'}
+				]
+			]}
+		],
+		'Contact 2-Test Customer 1': [
+			{first_name: 'Contact 2'},
+			{links: [
+				[
+					{link_doctype: 'Customer'},
+					{link_name: 'Test Customer 1'}
+				]
+			]}
+		],
+		'Contact 1-Test Customer 2': [
+			{first_name: 'Contact 1'},
+			{links: [
+				[
+					{link_doctype: 'Customer'},
+					{link_name: 'Test Customer 2'}
+				]
+			]}
+		],
+		'Contact 2-Test Customer 2': [
+			{first_name: 'Contact 2'},
+			{links: [
+				[
+					{link_doctype: 'Customer'},
+					{link_name: 'Test Customer 2'}
+				]
+			]}
+		],
 	}
 });
