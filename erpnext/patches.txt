@@ -413,3 +413,4 @@ execute:frappe.reload_doc('regional', 'doctype', 'gst_hsn_code')
 erpnext.patches.v8_1.removed_roles_from_gst_report_non_indian_account
 erpnext.patches.v8_1.gst_fixes #2017-07-06
 erpnext.patches.v8_0.update_production_orders
+erpnext.patches.v8_1.remove_serial_no_from_sales_invoice
