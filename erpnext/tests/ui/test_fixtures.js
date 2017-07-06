@@ -51,7 +51,11 @@ $.extend(frappe.test_data, {
 			{taxes:[
 				[
 				{charge_type:'On Net Total'},
-				{account_head:'CGST-'frappe.get_abbr(frappe.defaults.get_default('Company')) }
+				{account_head:'CGST - '+frappe.get_abbr(frappe.defaults.get_default('Company')) }
+				],
+				[
+				{charge_type:'On Net Total'},
+				{account_head:'SGST - '+frappe.get_abbr(frappe.defaults.get_default('Company')) }
 				]
 			]}
 		]
