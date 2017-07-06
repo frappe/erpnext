@@ -44,6 +44,11 @@ QUnit.test("test sales order", function(assert) {
 						{'item_code': 'Test Product 1'},
 						{'qty': 5}
 					]
+				]},
+				{taxes:[
+					[
+						{taxes_and_charges: frappe.db.set_value('Sales Order', 'Test Customer 1', 'In State GST')}
+					]
 				]}
 			]);
 		},
