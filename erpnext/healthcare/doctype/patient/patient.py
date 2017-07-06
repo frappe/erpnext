@@ -79,7 +79,9 @@ def create_customer(doc):
 	customer_group = frappe.get_value("Selling Settings", None, "customer_group")
 	territory = frappe.get_value("Selling Settings", None, "territory")
 	if not (customer_group and territory):
-		frappe.throw("Please set default customer group and territory in Selling Settings")
+		customer_group = "Commercial"
+		territory = "Rest Of The World"
+		frappe.msgprint(_("Please set default customer group and territory in Selling Settings"), alert=True)
 	customer = frappe.get_doc({"doctype": "Customer",
 	"customer_name": doc.name,
 	"customer_group": customer_group,

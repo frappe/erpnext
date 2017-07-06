@@ -40,17 +40,20 @@ class LabTest(Document):
 
 	def load_test_from_template(self):
 		lab_test = self
-		template = frappe.get_doc("Lab Test Template", lab_test.template)
-		patient = frappe.get_doc("Patient", lab_test.patient)
-
-		lab_test.test_name = template.test_name
-		lab_test.result_date = getdate()
-		lab_test.department = template.department
-		lab_test.test_group = template.test_group
-
-		lab_test = create_sample_collection(lab_test, template, patient, None)
-		lab_test = load_result_format(lab_test, template, None, None)
+		create_test_from_template(lab_test)
 		self.reload()
+
+def create_test_from_template(lab_test):
+	template = frappe.get_doc("Lab Test Template", lab_test.template)
+	patient = frappe.get_doc("Patient", lab_test.patient)
+
+	lab_test.test_name = template.test_name
+	lab_test.result_date = getdate()
+	lab_test.department = template.department
+	lab_test.test_group = template.test_group
+
+	lab_test = create_sample_collection(lab_test, template, patient, None)
+	lab_test = load_result_format(lab_test, template, None, None)
 
 @frappe.whitelist()
 def update_status(status, name):
@@ -59,7 +62,7 @@ def update_status(status, name):
 @frappe.whitelist()
 def update_lab_test_print_sms_email_status(print_sms_email, name):
 	frappe.db.set_value("Lab Test",name,print_sms_email,1)
-	
+
 def create_lab_test_doc(invoice, consultation, patient, template):
 	#create Test Result for template, copy vals from Invoice
 	lab_test = frappe.new_doc("Lab Test")
