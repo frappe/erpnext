@@ -90,9 +90,7 @@ frappe.ui.form.on("Production Order", {
 
 		// formatter for production order operation
 		frm.set_indicator_formatter('operation',
-			function(doc) { return (frm.doc.qty==doc.completed_qty) ? "green" : "orange" })
-
-		erpnext.production_order.set_custom_buttons(frm);
+			function(doc) { return (frm.doc.qty==doc.completed_qty) ? "green" : "orange" });
 	},
 	
 	refresh: function(frm) {
