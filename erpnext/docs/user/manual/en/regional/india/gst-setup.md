@@ -16,7 +16,7 @@ Go to the Company master and add the GSTIN to your default address.
 
 **Include GSTIN number in the Address Template**
 
-Open Address Template record for India, and add GSTIN number there if not exists.
+Open Address Template record for India, add GSTIN number and State Code there if not exists.
 
 <img class="screenshot" alt="GST in Company" src="{{docs_base_url}}/assets/img/regional/india/address-template-gstin.png">
 
@@ -63,7 +63,7 @@ For **Sales Invoice**,
 
 ### 6. Print GST Tax Invoice
 
-To print Tax Invoice as per GSTN guidelines, please select **GST Tax Invoice** print format. This print format includes company address, GSTIN numbers, HSN/SAC Code and item-wise tax breakup.
+To print Tax Invoice as per GSTN guidelines, please select **GST Tax Invoice** print format. This print format includes company address, GSTIN numbers, HSN/SAC Code and item-wise tax breakup. And while printing select correct value of Invoice Copy field, to mention whether it is for the Customer, Supplier or Transporter.
 
 <img class="screenshot" alt="Sample GST Tax Invoice" src="{{docs_base_url}}/assets/img/regional/india/sample-gst-tax-invoice.png">
 
