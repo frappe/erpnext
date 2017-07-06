@@ -1105,6 +1105,22 @@ class TestSalesInvoice(unittest.TestCase):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 
+	def test_item_wise_tax_breakup(self):
+		si = create_sales_invoice(qty=100, rate=50, do_not_save=True)
+		si.append("taxes", {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Service Tax - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Service Tax",
+			"rate": 10
+		})
+		si.insert()
+		
+		tax_breakup_html = '''\n<div class="tax-break-up" style="overflow-x: auto;">\n\t<table class="table table-bordered table-hover">\n\t\t<thead><tr><th class="text-left" style="min-width: 120px;">Item Name</th>\n<th class="text-right" style="min-width: 80px;">Taxable Amount</th>\n<th class="text-right" style="min-width: 80px;">_Test Account Service Tax - _TC</th></tr></thead>\n\t\t<tbody><tr><td>_Test Item</td><td class="text-right">\u20b9 5,000.00</td><td class="text-right">(10.0%) \u20b9 500.00</td></tr></tbody>\n\t</table>\n</div>'''
+		
+		self.assertEqual(si.other_charges_calculation, tax_breakup_html)
+		
+
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
 	args = frappe._dict(args)

@@ -5,12 +5,24 @@ frappe.provide("erpnext.bom");
 
 frappe.ui.form.on("BOM", {
 	setup: function(frm) {
-		frm.add_fetch('buying_price_list', 'currency', 'currency');
-		frm.fields_dict["items"].grid.get_field("bom_no").get_query = function(doc, cdt, cdn){
+		frm.add_fetch('buying_price_list', 'currency', 'currency')
+
+		frm.set_query("bom_no", "items", function() {
 			return {
-				filters: {'currency': frm.doc.currency}
+				filters: {
+					'currency': frm.doc.currency,
+					'company': frm.doc.company
+				}
 			}
-		}
+		});
+		
+		frm.set_query("source_warehouse", "items", function() {
+			return {
+				filters: {
+					'company': frm.doc.company,
+				}
+			}
+		});
 	},
 
 	onload_post_render: function(frm) {

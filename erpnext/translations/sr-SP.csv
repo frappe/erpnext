@@ -7,7 +7,7 @@ DocType: Project,Project will be accessible on the website to these users,Projek
 DocType: Project,Project Type,Tip Projekta
 DocType: Project User,Project User,Projektni user
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +30,Project Start Date,Datum početka projekta
-apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +95,Project Manager,Projektni menadzer
+apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +102,Project Manager,Projektni menadzer
 DocType: Project Task,Project Task,Projektni zadatak
 apps/erpnext/erpnext/config/projects.py +13,Project master.,Projektni master
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +26,Project Id,ID Projekta

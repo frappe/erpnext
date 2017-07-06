@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "field:assessment_criteria", 
@@ -13,6 +14,7 @@
  "engine": "InnoDB", 
  "fields": [
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -22,7 +24,9 @@
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
-   "in_list_view": 0, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
+   "in_list_view": 1, 
    "in_standard_filter": 0, 
    "label": "Assessment Criteria", 
    "length": 0, 
@@ -40,6 +44,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 1, 
    "collapsible": 0, 
@@ -49,6 +54,8 @@
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Assessment Criteria Group", 
@@ -68,17 +75,17 @@
    "unique": 0
   }
  ], 
+ "has_web_view": 0, 
  "hide_heading": 0, 
  "hide_toolbar": 0, 
  "idx": 0, 
  "image_view": 0, 
  "in_create": 0, 
- "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-02-03 05:53:39.248759", 
+ "modified": "2017-06-30 08:21:46.211641", 
  "modified_by": "Administrator", 
  "module": "Schools", 
  "name": "Assessment Criteria", 
@@ -109,6 +116,8 @@
  "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
+ "restrict_to_domain": "Education", 
+ "show_name_in_global_search": 0, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "track_changes": 0, 

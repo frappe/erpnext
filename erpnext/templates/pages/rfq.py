@@ -29,7 +29,7 @@ def get_supplier():
 def check_supplier_has_docname_access(supplier):
 	status = True
 	if frappe.form_dict.name not in frappe.db.sql_list("""select parent from `tabRequest for Quotation Supplier`
-		where supplier = '{supplier}'""".format(supplier=supplier)):
+		where supplier = %s""", (supplier,)):
 		status = False
 	return status
 

@@ -15,19 +15,24 @@ def execute(filters=None):
 	to_date = get_last_day(filters["month"] + '-' + filters["year"])
 	total_days_in_month = date_diff(to_date, from_date) +1
 	columns = get_columns(total_days_in_month)
-	students = get_student_group_students(filters.get("student_group"))
+	students = get_student_group_students(filters.get("student_group"),1)
 	students_list = get_students_list(students)
 	att_map = get_attendance_list(from_date, to_date, filters.get("student_group"), students_list)
 	data = []
 	for stud in students:
 		row = [stud.student, stud.student_name]
+		student_status = frappe.db.get_value("Student", stud.student, "enabled")
 		date = from_date
 		total_p = total_a = 0.0
 		for day in range(total_days_in_month):
 			status="None"
 			if att_map.get(stud.student):
 				status = att_map.get(stud.student).get(date, "None")
-			status_map = {"Present": "P", "Absent": "A", "None": ""}
+			elif not student_status:
+				status = "Inactive"
+			else:
+				status = "None"
+			status_map = {"Present": "P", "Absent": "A", "None": "", "Inactive":"-"}
 			row.append(status_map[status])
 			if status == "Present":
 				total_p += 1

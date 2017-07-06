@@ -11,6 +11,7 @@
  "doctype": "DocType", 
  "document_type": "Document", 
  "editable_grid": 1, 
+ "engine": "InnoDB", 
  "fields": [
   {
    "allow_bulk_edit": 0, 
@@ -1423,7 +1424,7 @@
    "collapsible": 1, 
    "collapsible_depends_on": "eval:doc.serial_no || doc.batch_no", 
    "columns": 0, 
-   "depends_on": "", 
+   "depends_on": "eval: parent.update_stock", 
    "fieldname": "warehouse_and_reference", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -2165,7 +2166,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2017-07-03 19:34:14.820285", 
+ "modified": "2017-07-06 17:54:03.347700", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice Item", 

@@ -56,7 +56,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 	def validate_name_with_item(self):
 		if frappe.db.exists("Item", self.name):
-			frappe.throw(frappe._("An item exists with same name ({0}), please change the item group name or rename the item").format(self.name))
+			frappe.throw(frappe._("An item exists with same name ({0}), please change the item group name or rename the item").format(self.name), frappe.NameError)
 
 	def get_context(self, context):
 		context.show_search=True

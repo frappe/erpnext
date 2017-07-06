@@ -524,7 +524,7 @@ class Item(WebsiteGenerator):
 
 	def before_rename(self, old_name, new_name, merge=False):
 		if self.item_name==old_name:
-			self.item_name=new_name
+			frappe.db.set_value("Item", old_name, "item_name", new_name)
 
 		if merge:
 			# Validate properties before merging
