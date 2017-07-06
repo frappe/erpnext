@@ -24,7 +24,7 @@ def get_ancestors_of(doctype, name):
 def before_tests():
 	frappe.clear_cache()
 	# complete setup if missing
-	from frappe.page.setup_wizard.setup_wizard import setup_complete
+	from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
 	if not frappe.get_list("Company"):
 		setup_complete({
 			"currency"			:"USD",
