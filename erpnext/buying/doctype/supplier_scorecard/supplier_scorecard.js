@@ -13,7 +13,7 @@ frappe.ui.form.on("Supplier Scorecard", {
 			});
 		}
 	},
-	refresh: function(frm) {
+	refresh: function() {
 
 		cur_frm.dashboard.heatmap.setLegend([0,20,40,60,80,101],["#991600","#169900"]);
 	},

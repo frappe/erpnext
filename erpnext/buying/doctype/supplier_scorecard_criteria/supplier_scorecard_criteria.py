@@ -54,8 +54,8 @@ def _get_variables(criteria):
 	regex = r"\{(.*?)\}"
 
 	mylist = re.finditer(regex, criteria.formula, re.MULTILINE | re.DOTALL)
-	for matchNum, match in enumerate(mylist):
-		for groupNum in range(0, len(match.groups())):
+	for dummy1, match in enumerate(mylist):
+		for dummy2 in range(0, len(match.groups())):
 			try:
 				#var = frappe.get_doc("Supplier Scorecard Variable", {'param_name' : d})
 				var = frappe.db.sql("""

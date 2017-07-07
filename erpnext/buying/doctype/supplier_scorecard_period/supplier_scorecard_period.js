@@ -10,8 +10,5 @@ frappe.ui.form.on("Supplier Scorecard Period", {
 		frm.get_field("criteria").grid.toggle_display("score", true);
 
 
-	},
-	refresh: function(frm) {
-		//cur_frm.reload_doc();
 	}
 });
