@@ -167,5 +167,50 @@ $.extend(frappe.test_data, {
 				]
 			]}
 		],
+	},
+	"Price List": {
+		"Test-Buying-USD": [
+			{price_list_name: "Test-Buying-USD"},
+			{currency: "USD"},
+			{buying: "1"}
+		],
+		"Test-Buying-EUR": [
+			{price_list_name: "Test-Buying-EUR"},
+			{currency: "EUR"},
+			{buying: "1"}
+		],
+		"Test-Selling-USD": [
+			{price_list_name: "Test-Selling-USD"},
+			{currency: "USD"},
+			{selling: "1"}
+		],
+		"Test-Selling-EUR": [
+			{price_list_name: "Test-Selling-EUR"},
+			{currency: "EUR"},
+			{selling: "1"}
+		],
+	},
+	"Terms and Conditions": {
+		"Test Term 1": [
+			{title: "Test Term 1"}
+		],
+		"Test Term 2": [
+			{title: "Test Term 2"}
+		]
+	},
+	'Sales Taxes and Charges Template': {
+		'TEST In State GST': [
+			{title: 'TEST In State GST'},
+			{taxes:[
+				[
+					{charge_type:'On Net Total'},
+					{account_head:'CGST - '+frappe.get_abbr(frappe.defaults.get_default('Company')) }
+				],
+				[
+					{charge_type:'On Net Total'},
+					{account_head:'SGST - '+frappe.get_abbr(frappe.defaults.get_default('Company')) }
+				]
+			]}
+		]
 	}
 });
