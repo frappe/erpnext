@@ -414,3 +414,4 @@ erpnext.patches.v8_1.removed_roles_from_gst_report_non_indian_account
 erpnext.patches.v8_1.gst_fixes #2017-07-06
 erpnext.patches.v8_0.update_production_orders
 erpnext.patches.v8_1.remove_sales_invoice_from_returned_serial_no
+erpnext.patches.v8_1.allow_invoice_copy_to_edit_after_submit

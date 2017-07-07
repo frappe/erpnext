@@ -689,7 +689,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 					return '<th style="min-width: 80px;" class="text-right">' + (head || "") + "</th>";
 				}	
 			}
-		).join("\n");
+		).join("");
 
 		var distinct_item_names = [];
 		var distinct_items = [];
@@ -711,9 +711,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 					return item_tax_record[head[0]] ?
 						"<td class='text-right'>(" + item_tax_record[head[0]][0] + ") " + item_tax_record[head[0]][1] + "</td>" :
 						"<td></td>";
-				}).join("\n")
+				}).join("")
 			});
-		}).join("\n");
+		}).join("");
 
 		if(!rows) return "";
 		return '<div class="tax-break-up" style="overflow-x: auto;">\

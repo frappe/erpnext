@@ -531,8 +531,8 @@ class calculate_taxes_and_totals(object):
 		<tbody>{rows}</tbody>
 	</table>
 </div>'''.format(**{
-	"headings": "\n".join(headings),
-	"rows": "\n".join(rows)
+	"headings": "".join(headings),
+	"rows": "".join(rows)
 })
 
 	def get_item_tax(self, item_tax, tax_accounts, company_currency):
@@ -605,7 +605,7 @@ def get_table_rows(distinct_items, item_tax, tax_accounts, company_currency):
 		rows.append("<tr><td>{item_name}</td><td class='text-right'>{taxable_amount}</td>{taxes}</tr>".format(**{
 			"item_name": item.item_name,
 			"taxable_amount": fmt_money(item.net_amount, item.precision("net_amount"), company_currency),
-			"taxes": "\n".join(taxes)
+			"taxes": "".join(taxes)
 		}))
 		
 	return rows

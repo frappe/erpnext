@@ -44,7 +44,7 @@ def add_custom_fields():
 		],
 		'Sales Invoice': [
 			dict(fieldname='invoice_copy', label='Invoice Copy',
-				fieldtype='Select', insert_after='project', print_hide=1,
+				fieldtype='Select', insert_after='project', print_hide=1, allow_on_submit=1,
 				options='ORIGINAL FOR RECIPIENT\nDUPLICATE FOR TRANSPORTER\nTRIPLICATE FOR SUPPLIER'),
 		],
 		'Sales Order Item': [hsn_sac_field],
