@@ -10,6 +10,3 @@ def execute():
 	frappe.db.sql("""update `tabCustom Field` set read_only=1
 		where fieldname='gst_state_number' and dt = 'Address'
 	""")
-	
-	
-	
