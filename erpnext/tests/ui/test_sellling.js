@@ -38,7 +38,7 @@ QUnit.test("test: opportunity", function (assert) {
 });
 
 QUnit.only("test: quotation", function (assert) {
-	assert.expect(10);
+	assert.expect(14);
 	let done = assert.async();
 	frappe.run_serially([
 		() => frappe.tests.setup_doctype("Customer"),
@@ -47,6 +47,7 @@ QUnit.only("test: quotation", function (assert) {
 		() => frappe.tests.setup_doctype("Contact"),
 		() => frappe.tests.setup_doctype("Price List"),
 		() => frappe.tests.setup_doctype("Terms and Conditions"),
+		() => frappe.tests.setup_doctype("Sales Taxes and Charges Template"),
 		() => {
 			return frappe.tests.make("Quotation", [{
 				customer: "Test Customer 1"
@@ -79,8 +80,9 @@ QUnit.only("test: quotation", function (assert) {
 		() => cur_frm.set_value("selling_price_list", "Test-Selling-USD"),
 		() => frappe.timeout(0.3),
 		() => cur_frm.doc.items[0].rate = 200,
+		() => cur_frm.set_value("tc_name", "Test Term 1"),
+		() => cur_frm.set_value("taxes_and_charges", "TEST In State GST"),
 		() => frappe.timeout(0.3),
-		() => cur_frm.set_value("terms", "Test Term 1"),
 		() => cur_frm.save(),
 		() => {
 			// Check Address
@@ -91,7 +93,11 @@ QUnit.only("test: quotation", function (assert) {
 			assert.ok(cur_frm.doc.selling_price_list == "Test-Selling-USD", "Price List Changed");
 			assert.ok(cur_frm.doc.items[0].rate == 200, "Price Changed Manually");
 			assert.ok(cur_frm.doc.total == 1000, "New Total Calculated");
-			assert.ok(cur_frm.doc.terms == "Test Term 1", "Terms and Conditions Checked");
+			assert.ok(cur_frm.doc.tc_name == "Test Term 1", "Terms and Conditions Checked");
+			assert.ok(cur_frm.doc.taxes[0].account_head.includes("CGST"));
+			assert.ok(cur_frm.doc.taxes[1].account_head.includes("SGST"));
+			assert.ok(cur_frm.doc.grand_total == 1180, "Tax Amount Added to Total");
+			assert.ok(cur_frm.doc.taxes_and_charges == "TEST In State GST", "Tax Template Selected");
 		},
 		() => done()
 	]);
