@@ -1116,7 +1116,7 @@ class TestSalesInvoice(unittest.TestCase):
 		})
 		si.insert()
 		
-		tax_breakup_html = '''\n<div class="tax-break-up" style="overflow-x: auto;">\n\t<table class="table table-bordered table-hover">\n\t\t<thead><tr><th class="text-left" style="min-width: 120px;">Item Name</th>\n<th class="text-right" style="min-width: 80px;">Taxable Amount</th>\n<th class="text-right" style="min-width: 80px;">_Test Account Service Tax - _TC</th></tr></thead>\n\t\t<tbody><tr><td>_Test Item</td><td class="text-right">\u20b9 5,000.00</td><td class="text-right">(10.0%) \u20b9 500.00</td></tr></tbody>\n\t</table>\n</div>'''
+		tax_breakup_html = '''\n<div class="tax-break-up" style="overflow-x: auto;">\n\t<table class="table table-bordered table-hover">\n\t\t<thead><tr><th class="text-left" style="min-width: 120px;">Item Name</th><th class="text-right" style="min-width: 80px;">Taxable Amount</th><th class="text-right" style="min-width: 80px;">_Test Account Service Tax - _TC</th></tr></thead>\n\t\t<tbody><tr><td>_Test Item</td><td class="text-right">\u20b9 5,000.00</td><td class="text-right">(10.0%) \u20b9 500.00</td></tr></tbody>\n\t</table>\n</div>'''
 		
 		self.assertEqual(si.other_charges_calculation, tax_breakup_html)
 		

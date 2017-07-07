@@ -102,7 +102,7 @@ def make_custom_fields():
 				fieldtype='Data', insert_after='company_address',
 				options='company_address.gstin', print_hide=1),
 			dict(fieldname='invoice_copy', label='Invoice Copy',
-				fieldtype='Select', insert_after='project', print_hide=1,
+				fieldtype='Select', insert_after='project', print_hide=1, allow_on_submit=1,
 				options='ORIGINAL FOR RECIPIENT\nDUPLICATE FOR TRANSPORTER\nTRIPLICATE FOR SUPPLIER')
 		],
 		'Item': [
