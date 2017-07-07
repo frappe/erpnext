@@ -151,26 +151,28 @@ frappe.ui.form.on("Production Order", {
 	},
 	
 	production_item: function(frm) {
-		frappe.call({
-			method: "erpnext.manufacturing.doctype.production_order.production_order.get_item_details",
-			args: {
-				item: frm.doc.production_item,
-				project: frm.doc.project
-			},
-			callback: function(r) {
-				if(r.message) {
-					erpnext.in_production_item_onchange = true;
-					$.each(["description", "stock_uom", "project", "bom_no"], function(i, field) {
-						frm.set_value(field, r.message[field]);
-					});
+		if (frm.doc.production_item) {
+			frappe.call({
+				method: "erpnext.manufacturing.doctype.production_order.production_order.get_item_details",
+				args: {
+					item: frm.doc.production_item,
+					project: frm.doc.project
+				},
+				callback: function(r) {
+					if(r.message) {
+						erpnext.in_production_item_onchange = true;
+						$.each(["description", "stock_uom", "project", "bom_no"], function(i, field) {
+							frm.set_value(field, r.message[field]);
+						});
 
-					if(r.message["set_scrap_wh_mandatory"]){
-						frm.toggle_reqd("scrap_warehouse", true);
+						if(r.message["set_scrap_wh_mandatory"]){
+							frm.toggle_reqd("scrap_warehouse", true);
+						}
+						erpnext.in_production_item_onchange = false;
 					}
-					erpnext.in_production_item_onchange = false;
 				}
-			}
-		});
+			});
+		}
 	},
 	
 	project: function(frm) {
