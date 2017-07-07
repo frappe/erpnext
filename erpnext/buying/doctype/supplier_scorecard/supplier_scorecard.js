@@ -15,7 +15,7 @@ frappe.ui.form.on("Supplier Scorecard", {
 	},
 	refresh: function(frm) {
 
-		cur_frm.dashboard.heatmap.setLegend([0,20,40,60,80,101],["#991600","#169900"])
+		cur_frm.dashboard.heatmap.setLegend([0,20,40,60,80,101],["#991600","#169900"]);
 	},
 	generate_scorecards:function(frm) {
 		frappe.call({

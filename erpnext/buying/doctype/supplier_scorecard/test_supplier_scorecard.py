@@ -9,25 +9,35 @@ import unittest
 class TestSupplierScorecard(unittest.TestCase):
 
 	def test_create_scorecard(self):
-		my_doc = make_supplier_scorecard()
 		delete_test_scorecards()
+		my_doc = make_supplier_scorecard()
 		my_doc.insert()
 
 	def test_criteria_weight(self):
-		my_doc = make_supplier_scorecard()
 		delete_test_scorecards()
+		my_doc = make_supplier_scorecard()
 		for d in my_doc.criteria:
 			d.weight = 0
 		self.assertRaises(frappe.ValidationError,my_doc.insert)
 
 	def test_missing_variable(self):
-		my_doc = make_supplier_scorecard()
 		delete_test_scorecards()
+		my_doc = make_supplier_scorecard()
 		del my_doc.variables
 		self.assertRaises(frappe.ValidationError,my_doc.insert)
 
 def make_supplier_scorecard():
-	return frappe.get_doc(valid_scorecard[0])
+	my_doc = frappe.get_doc(valid_scorecard[0])
+
+	# Make sure the criteria exist (making them)
+	for d in my_doc.criteria:
+		if not frappe.db.exists("Supplier Scorecard Criteria", d.criteria_name):
+			my_criteria = frappe.get_doc(d)
+			my_criteria.doctype = "Supplier Scorecard Criteria"
+			my_criteria.name = d.criteria_name
+			my_criteria.insert()
+	return my_doc	
+	
 
 def delete_test_scorecards():
 	my_doc = make_supplier_scorecard()
@@ -107,7 +117,6 @@ valid_scorecard = [
 		"variables": [
 			{
 				"param_name":"cost_of_on_time_shipments",
-				"parent":"Paramount Components",
 				"doctype":"Supplier Scorecard Scoring Variable",
 				"parenttype":"Supplier Scorecard",
 				"variable_label":"Cost of On Time Shipments",
@@ -116,7 +125,6 @@ valid_scorecard = [
 			},
 			{
 				"param_name":"tot_cost_shipments",
-				"parent":"Paramount Components",
 				"doctype":"Supplier Scorecard Scoring Variable",
 				"parenttype":"Supplier Scorecard",
 				"variable_label":"Total Cost of Shipments",
@@ -125,7 +133,6 @@ valid_scorecard = [
 			},
 			{
 				"param_name":"tot_days_late",
-				"parent":"Paramount Components",
 				"doctype":"Supplier Scorecard Scoring Variable",
 				"parenttype":"Supplier Scorecard",
 				"variable_label":"Total Days Late",
@@ -134,7 +141,6 @@ valid_scorecard = [
 			},
 			{
 				"param_name":"total_working_days",
-				"parent":"Paramount Components",
 				"doctype":"Supplier Scorecard Scoring Variable",
 				"parenttype":"Supplier Scorecard",
 				"variable_label":"Total Working Days",
@@ -143,7 +149,6 @@ valid_scorecard = [
 			},
 			{
 				"param_name":"on_time_shipment_num",
-				"parent":"Paramount Components",
 				"doctype":"Supplier Scorecard Scoring Variable",
 				"parenttype":"Supplier Scorecard",
 				"variable_label":"# of On Time Shipments",
@@ -152,7 +157,6 @@ valid_scorecard = [
 			},
 			{
 				"param_name":"total_shipments",
-				"parent":"Paramount Components",
 				"doctype":"Supplier Scorecard Scoring Variable",
 				"parenttype":"Supplier Scorecard",
 				"variable_label":"Total Shipments",
@@ -167,7 +171,6 @@ valid_scorecard = [
 		"notify_supplier":0,
 		"criteria":[
 			{
-				"parent":"Paramount Components",
 				"weight":100.0,
 				"doctype":"Supplier Scorecard Scoring Criteria",
 				"parenttype":"Supplier Scorecard",
