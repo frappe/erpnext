@@ -63,10 +63,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		});
 
 		frappe.ui.form.on(this.frm.doctype, "additional_discount_percentage", function(frm) {
-			if (frm.via_discount_amount) {
-				return;
-			}
-
 			if(!frm.doc.apply_discount_on) {
 				frappe.msgprint(__("Please set 'Apply Additional Discount On'"));
 				return;
