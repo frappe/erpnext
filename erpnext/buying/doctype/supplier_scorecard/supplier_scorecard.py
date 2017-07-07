@@ -7,18 +7,22 @@ import frappe
 from frappe import throw, _
 from frappe.model.document import Document
 import time
-from datetime import timedelta, date
-from frappe.utils import nowdate, get_last_day, get_first_day, getdate, add_days, add_years
+from datetime import timedelta
+from frappe.utils import nowdate, get_last_day, getdate, add_days, add_years
 from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import make_supplier_scorecard
 
 class SupplierScorecard(Document):
-	
+
 	def validate(self):
 		self.validate_standings()
 		self.validate_criteria_weights()
-		make_all_scorecards(self.name)
 		self.calculate_total_score()
 		self.update_standing()
+		
+	def on_update(self):
+		score = make_all_scorecards(self.name)
+		if score > 0:
+			self.save()
 		
 	def validate_standings(self):
 		# Check that there are no overlapping scores
@@ -26,7 +30,7 @@ class SupplierScorecard(Document):
 			for c2 in self.standings:
 				if c1 != c2:
 					if (c1.max_grade > c2.min_grade and c1.min_grade < c2.max_grade):
-						frappe.throw(_('Overlap in scoring between ' + c1.standing_name + ' and ' + c2.standing_name))
+						throw(_('Overlap in scoring between ' + c1.standing_name + ' and ' + c2.standing_name))
 		
 		# Check that there are no missing scores
 		score = 0
@@ -35,7 +39,7 @@ class SupplierScorecard(Document):
 				if c1.min_grade == score:
 					score = c1.max_grade
 		if score < 100 :
-			frappe.throw(_('Unable to find score starting at ' + str(score) + '. You need to have standing scores covering 0 to 100'))
+			throw(_('Unable to find score starting at ' + str(score) + '. You need to have standing scores covering 0 to 100'))
 			
 	def validate_criteria_weights(self):
 	
@@ -44,7 +48,7 @@ class SupplierScorecard(Document):
 			weight += c.weight
 		
 		if weight != 100:
-			frappe.throw(_('Criteria weights must add up to 100%'))
+			throw(_('Criteria weights must add up to 100%'))
 			
 	def calculate_total_score(self):
 		scorecards = frappe.db.sql("""
@@ -55,7 +59,7 @@ class SupplierScorecard(Document):
 			WHERE
 				scp.scorecard = %(sc)s
 			ORDER BY
-				scp.end_date DESC""", 
+				scp.end_date DESC""",
 				{"sc": self.name}, as_dict=1)
 		
 		period = 0
@@ -64,10 +68,10 @@ class SupplierScorecard(Document):
 		for scp in scorecards:
 			my_sc = frappe.get_doc('Supplier Scorecard Period', scp.name)
 			my_scp_weight = self.weighting_function
-			my_scp_weight = my_scp_weight.replace('period_number', str(period))
+			my_scp_weight = my_scp_weight.replace('{period_number}', str(period))
 			
-			my_scp_maxweight = my_scp_weight.replace('total_score', '100')
-			my_scp_weight = my_scp_weight.replace('total_score', str(my_sc.total_score))
+			my_scp_maxweight = my_scp_weight.replace('{total_score}', '100')
+			my_scp_weight = my_scp_weight.replace('{total_score}', str(my_sc.total_score))
 			
 			max_score = my_sc.calculate_weighted_score(my_scp_maxweight)
 			score = my_sc.calculate_weighted_score(my_scp_weight)
@@ -83,9 +87,6 @@ class SupplierScorecard(Document):
 	def update_standing(self):
 		# Get the setup document
 
-		mystanding = None
-		mymax = None
-		myscore = 0
 		for standing in self.standings:
 			if (not standing.min_grade or (standing.min_grade <= self.supplier_score)) and \
 				(not standing.max_grade or (standing.max_grade > self.supplier_score)):
@@ -105,7 +106,7 @@ class SupplierScorecard(Document):
 				frappe.db.set_value("Supplier", self.supplier, "warn_rfqs", self.warn_rfqs)
 				frappe.db.set_value("Supplier", self.supplier, "warn_pos", self.warn_pos)
 		
-@frappe.whitelist()	
+@frappe.whitelist()
 def timeline_data(doctype, name):
 	# Get a list of all the associated scorecards
 	scs = frappe.get_doc(doctype, name)
@@ -117,7 +118,7 @@ def timeline_data(doctype, name):
 		FROM
 			`tabSupplier Scorecard Period` sc
 		WHERE
-			sc.scorecard = %(scs)s""", 
+			sc.scorecard = %(scs)s""",
 			{"scs": scs.name}, as_dict=1)
 	
 	for sc in scorecards:
@@ -137,7 +138,7 @@ def refresh_scorecards():
 		SELECT
 			sc.name
 		FROM
-			`tabSupplier Scorecard` sc""", 
+			`tabSupplier Scorecard` sc""",
 			{}, as_dict=1)
 	for sc in scorecards:
 		# Check to see if any new scorecard periods are created
@@ -145,7 +146,7 @@ def refresh_scorecards():
 			# Save the scorecard to update the score and standings
 			sc.save()
 		
-		
+
 @frappe.whitelist()
 def make_all_scorecards(docname):
 	
@@ -196,3 +197,4 @@ def get_scorecard_date(period, start_date):
 	elif period == 'Per Year':
 		end_date = add_days(add_years(start_date,1), -1)
 	return end_date
+	

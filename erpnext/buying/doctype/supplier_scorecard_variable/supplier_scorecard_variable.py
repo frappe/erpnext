@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import nowdate, getdate
+from frappe.utils import getdate
 
 class SupplierScorecardVariable(Document):
 	pass
@@ -13,9 +13,9 @@ class SupplierScorecardVariable(Document):
 @frappe.whitelist()
 def get_scoring_variable(variable_label):
 	variable = frappe.get_doc("Supplier Scorecard Variable", variable_label)
-	
+
 	return variable
-	
+
 def get_total_workdays(scorecard):
 	""" Gets the number of days in this period"""
 	delta = getdate(scorecard.end_date) - getdate(scorecard.start_date)
@@ -34,7 +34,7 @@ def get_item_workdays(scorecard):
 				po.supplier = %(supplier)s
 				AND po_item.received_qty < po_item.qty
 				AND po_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
-				AND po_item.parent = po.name""", 
+				AND po_item.parent = po.name""",
 				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
 				
 	if not total_item_days:
@@ -58,7 +58,7 @@ def get_total_cost_of_shipments(scorecard):
 				po.supplier = %(supplier)s
 				AND po_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
 				AND po_item.docstatus = 1
-				AND po_item.parent = po.name""", 
+				AND po_item.parent = po.name""",
 				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
 
 	if data:
@@ -89,9 +89,9 @@ def get_cost_of_on_time_shipments(scorecard):
 				AND po_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
 				AND po_item.schedule_date >= pr.posting_date
 				AND pr_item.docstatus = 1
-				AND pr_item.purchase_order_item = po_item.name 
-				AND po_item.parent = po.name 
-				AND pr_item.parent = pr.name""", 
+				AND pr_item.purchase_order_item = po_item.name
+				AND po_item.parent = po.name
+				AND pr_item.parent = pr.name""",
 				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
 
 	if total_delivered_on_time_costs:
@@ -116,9 +116,9 @@ def get_total_days_late(scorecard):
 				AND po_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
 				AND po_item.schedule_date < pr.posting_date
 				AND pr_item.docstatus = 1
-				AND pr_item.purchase_order_item = po_item.name 
-				AND po_item.parent = po.name 
-				AND pr_item.parent = pr.name""", 
+				AND pr_item.purchase_order_item = po_item.name
+				AND po_item.parent = po.name
+				AND pr_item.parent = pr.name""",
 				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
 	if not total_delivered_late_days:
 		total_delivered_late_days = 0
@@ -133,7 +133,7 @@ def get_total_days_late(scorecard):
 				po.supplier = %(supplier)s
 				AND po_item.received_qty < po_item.qty
 				AND po_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
-				AND po_item.parent = po.name""", 
+				AND po_item.parent = po.name""",
 				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
 				
 	if not total_missed_late_days:
@@ -160,9 +160,9 @@ def get_on_time_shipments(scorecard):
 				AND po_item.schedule_date <= pr.posting_date
 				AND po_item.qty = pr_item.qty
 				AND pr_item.docstatus = 1
-				AND pr_item.purchase_order_item = po_item.name 
-				AND po_item.parent = po.name 
-				AND pr_item.parent = pr.name""", 
+				AND pr_item.purchase_order_item = po_item.name
+				AND po_item.parent = po.name
+				AND pr_item.parent = pr.name""",
 				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
 		
 	if not total_items_delivered_on_time:
@@ -170,7 +170,7 @@ def get_on_time_shipments(scorecard):
 	return total_items_delivered_on_time
 
 def get_late_shipments(scorecard):
-	""" Gets the number of late shipments (counting each item) in the period (based on Purchase Receipts vs POs)"""		
+	""" Gets the number of late shipments (counting each item) in the period (based on Purchase Receipts vs POs)"""
 	return get_total_shipments(scorecard) - get_on_time_shipments(scorecard)
 	
 def get_total_received(scorecard):
@@ -188,7 +188,7 @@ def get_total_received(scorecard):
 				pr.supplier = %(supplier)s
 				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
 				AND pr_item.docstatus = 1
-				AND pr_item.parent = pr.name""", 
+				AND pr_item.parent = pr.name""",
 				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
 
 	if not data:
@@ -210,7 +210,7 @@ def get_total_received_amount(scorecard):
 				pr.supplier = %(supplier)s
 				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
 				AND pr_item.docstatus = 1
-				AND pr_item.parent = pr.name""", 
+				AND pr_item.parent = pr.name""",
 				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
 
 	if not data:
@@ -232,7 +232,7 @@ def get_total_received_items(scorecard):
 				pr.supplier = %(supplier)s
 				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
 				AND pr_item.docstatus = 1
-				AND pr_item.parent = pr.name""", 
+				AND pr_item.parent = pr.name""",
 				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
 
 	if not data:
@@ -254,7 +254,7 @@ def get_total_rejected_amount(scorecard):
 				pr.supplier = %(supplier)s
 				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
 				AND pr_item.docstatus = 1
-				AND pr_item.parent = pr.name""", 
+				AND pr_item.parent = pr.name""",
 				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
 
 	if not data:
@@ -276,7 +276,7 @@ def get_total_rejected_items(scorecard):
 				pr.supplier = %(supplier)s
 				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
 				AND pr_item.docstatus = 1
-				AND pr_item.parent = pr.name""", 
+				AND pr_item.parent = pr.name""",
 				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
 
 	if not data:
@@ -298,7 +298,7 @@ def get_total_accepted_amount(scorecard):
 				pr.supplier = %(supplier)s
 				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
 				AND pr_item.docstatus = 1
-				AND pr_item.parent = pr.name""", 
+				AND pr_item.parent = pr.name""",
 				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
 
 	if not data:
@@ -320,7 +320,7 @@ def get_total_accepted_items(scorecard):
 				pr.supplier = %(supplier)s
 				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
 				AND pr_item.docstatus = 1
-				AND pr_item.parent = pr.name""", 
+				AND pr_item.parent = pr.name""",
 				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
 
 	if not data:
@@ -342,7 +342,7 @@ def get_total_shipments(scorecard):
 				po.supplier = %(supplier)s
 				AND po_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
 				AND po_item.docstatus = 1
-				AND po_item.parent = po.name""", 
+				AND po_item.parent = po.name""",
 				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
 
 	if not data:
@@ -366,7 +366,7 @@ def get_rfq_total_number(scorecard):
 				AND rfq.transaction_date BETWEEN %(start_date)s AND %(end_date)s
 				AND rfq_item.docstatus = 1
 				AND rfq_item.parent = rfq.name
-				AND rfq_sup.parent = rfq.name""", 
+				AND rfq_sup.parent = rfq.name""",
 				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
 
 	if not data:
@@ -390,7 +390,7 @@ def get_rfq_total_items(scorecard):
 				AND rfq.transaction_date BETWEEN %(start_date)s AND %(end_date)s
 				AND rfq_item.docstatus = 1
 				AND rfq_item.parent = rfq.name
-				AND rfq_sup.parent = rfq.name""", 
+				AND rfq_sup.parent = rfq.name""",
 				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
 	if not data:
 		data = 0
@@ -420,7 +420,7 @@ def get_sq_total_number(scorecard):
 				AND sq.supplier = %(supplier)s
 				AND sq_item.parent = sq.name
 				AND rfq_item.parent = rfq.name
-				AND rfq_sup.parent = rfq.name""", 
+				AND rfq_sup.parent = rfq.name""",
 				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
 	if not data:
 		data = 0
@@ -449,7 +449,7 @@ def get_sq_total_items(scorecard):
 				AND sq_item.parent = sq.name
 				AND rfq_item.docstatus = 1
 				AND rfq_item.parent = rfq.name
-				AND rfq_sup.parent = rfq.name""", 
+				AND rfq_sup.parent = rfq.name""",
 				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
 	if not data:
 		data = 0
@@ -476,7 +476,7 @@ def get_rfq_response_days(scorecard):
 				AND sq_item.parent = sq.name
 				AND rfq_item.docstatus = 1
 				AND rfq_item.parent = rfq.name
-				AND rfq_sup.parent = rfq.name""", 
+				AND rfq_sup.parent = rfq.name""",
 				{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date}, as_dict=0)[0][0]
 	if not total_sq_days:
 		total_sq_days = 0

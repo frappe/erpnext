@@ -7,7 +7,7 @@ import frappe
 from frappe import throw, _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import nowdate, get_last_day, get_first_day, getdate, add_days, add_years
+from frappe.utils import get_last_day, get_first_day, getdate, add_days, add_years
 import erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable as variable_functions
 
 class SupplierScorecardPeriod(Document):
@@ -17,8 +17,7 @@ class SupplierScorecardPeriod(Document):
 		self.calculate_variables()
 		self.calculate_criteria()
 		self.calculate_score()
-		
-		
+
 	def validate_criteria_weights(self):
 	
 		weight = 0
@@ -26,7 +25,7 @@ class SupplierScorecardPeriod(Document):
 			weight += c.weight
 		
 		if weight != 100:
-			frappe.throw(_('Criteria weights must add up to 100%'))
+			throw(_('Criteria weights must add up to 100%'))
 			
 	def calculate_variables(self):
 		for var in self.variables:
@@ -43,7 +42,7 @@ class SupplierScorecardPeriod(Document):
 		
 		
 	def calculate_criteria(self):
-		#Get the criteria 
+		#Get the criteria
 		for crit in self.criteria:
 			
 			#me = ""
@@ -55,10 +54,10 @@ class SupplierScorecardPeriod(Document):
 			for var in self.variables:
 				if var.value:
 					if var.param_name in my_eval_statement:
-						my_eval_statement = my_eval_statement.replace(var.param_name, "{:.2f}".format(var.value))
+						my_eval_statement = my_eval_statement.replace('{' + var.param_name + '}', "{:.2f}".format(var.value))
 				else:
 					if var.param_name in my_eval_statement:
-						my_eval_statement = my_eval_statement.replace(var.param_name, '0.0')
+						my_eval_statement = my_eval_statement.replace('{' + var.param_name + '}', '0.0')
 						
 			#frappe.msgprint(my_eval_statement )
 			
@@ -79,10 +78,10 @@ class SupplierScorecardPeriod(Document):
 		for var in self.variables:
 			if var.value:
 				if var.param_name in my_eval_statement:
-					my_eval_statement = my_eval_statement.replace(var.param_name, "{:.2f}".format(var.value))
+					my_eval_statement = my_eval_statement.replace('{' + var.param_name + '}', "{:.2f}".format(var.value))
 			else:
 				if var.param_name in my_eval_statement:
-					my_eval_statement = my_eval_statement.replace(var.param_name, '0.0')
+					my_eval_statement = my_eval_statement.replace('{' + var.param_name + '}', '0.0')
 					
 		my_eval_statement = my_eval_statement.replace('&lt;','<').replace('&gt;','>')
 		weighed_score = frappe.safe_eval(my_eval_statement,  None, {'max':max, 'min': min})

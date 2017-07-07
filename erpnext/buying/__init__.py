@@ -4,7 +4,7 @@ import frappe
 install_docs = [
 	{"param_name":"total_accepted_items","name":"Total Accepted Items","doctype":"Supplier Scorecard Variable","variable_label":"Total Accepted Items","path":"get_total_accepted_items"},
 	{"param_name":"total_accepted_amount","name":"Total Accepted Amount","doctype":"Supplier Scorecard Variable","variable_label":"Total Accepted Amount","path":"get_total_accepted_amount"},
-	{"param_name":"total_rejected_items","name":"Total Rejected Items","doctype":"Supplier Scorecard Variable","variable_label":"Total Rejected Items","path":"get_total_rejected_items"},	
+	{"param_name":"total_rejected_items","name":"Total Rejected Items","doctype":"Supplier Scorecard Variable","variable_label":"Total Rejected Items","path":"get_total_rejected_items"},
 	{"param_name":"total_rejected_amount","name":"Total Rejected Amount","doctype":"Supplier Scorecard Variable","variable_label":"Total Rejected Amount","path":"get_total_rejected_amount"},
 	{"param_name":"total_received_items","name":"Total Received Items","doctype":"Supplier Scorecard Variable","variable_label":"Total Received Items","path":"get_total_received_items"},
 	{"param_name":"total_received_amount","name":"Total Received Amount","doctype":"Supplier Scorecard Variable","variable_label":"Total Received Amount","path":"get_total_received_amount"},
@@ -22,8 +22,6 @@ install_docs = [
 	{"param_name":"tot_days_late","name":"Total Days Late","doctype":"Supplier Scorecard Variable","variable_label":"Total Days Late","path":"get_total_days_late"},
 	{"param_name":"average_days_late","name":"Average Days Late","doctype":"Supplier Scorecard Variable","variable_label":"Average Days Late","path":"get_avg_ship_days_late"},
 	{"param_name":"total_shipments","name":"Total Shipments","doctype":"Supplier Scorecard Variable","variable_label":"Total Shipments","path":"get_total_shipments"},
-
-	
 	{"min_grade":0.0,"name":"Very Poor","prevent_rfqs":1,"notify_supplier":0,"doctype":"Supplier Scorecard Standing","max_grade":30.0,"prevent_pos":1,"standing_color":"Red","notify_employee":0,"standing_name":"Very Poor"},
 	{"min_grade":30.0,"name":"Poor","prevent_rfqs":1,"notify_supplier":0,"doctype":"Supplier Scorecard Standing","max_grade":50.0,"prevent_pos":0,"standing_color":"Red","notify_employee":0,"standing_name":"Poor"},
 	{"min_grade":50.0,"name":"Average","prevent_rfqs":0,"notify_supplier":0,"doctype":"Supplier Scorecard Standing","max_grade":80.0,"prevent_pos":0,"standing_color":"Green","notify_employee":0,"standing_name":"Average"},
