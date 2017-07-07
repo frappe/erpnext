@@ -403,3 +403,4 @@ erpnext.patches.v8_0.rename_items_in_status_field_of_material_request
 erpnext.patches.v8_0.delete_bin_indexes
 erpnext.patches.v8_0.move_account_head_from_account_to_warehouse_for_inventory
 erpnext.patches.v8_0.change_in_words_varchar_length
+erpnext.patches.v8_4.make_scorecard_records

@@ -1,7 +1,9 @@
 // Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Supplier Scorecard Scoring Standing', {
+/* global frappe */
+
+frappe.ui.form.on("Supplier Scorecard Scoring Standing", {
 	refresh: function(frm) {
 
 	}

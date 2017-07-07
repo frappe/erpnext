@@ -1,12 +1,14 @@
 // Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
+/* global frappe, cur_frm, refresh_field */
+
 frappe.ui.form.on("Supplier Scorecard", {
-	
+
 	onload: function(frm) {
-		if (frm.doc.indicator_color != "")
+		if (frm.doc.indicator_color !== "")
 		{
-			frm.set_indicator_formatter("status", function(doc) { 
+			frm.set_indicator_formatter("status", function(doc) {
 				return doc.indicator_color.toLowerCase();
 			});
 		}
@@ -26,20 +28,19 @@ frappe.ui.form.on("Supplier Scorecard", {
 	},
 	start_date: function(frm)
 	{
-		debugger;
 		var sd = new Date(frm.doc.start_date);
 		if (frm.doc.period === "Per Day"){
 			frm.doc.end_date = new Date(sd.getFullYear(),sd.getMonth(),sd.getDate()+1).toISOString();
 		} else if (frm.doc.period === "Per Week"){
 			frm.doc.end_date = new Date(sd.getFullYear(),sd.getMonth(),sd.getDate()+7).toISOString();
-		} else if (frm.doc.period === "Per Year"){
-			frm.doc.end_date = new Date(sd.getFullYear()+1,sd.getMonth(),sd.getDate()).toISOString();
 		} else if (frm.doc.period === "Per Month"){
 			frm.doc.end_date = new Date(sd.getFullYear(),sd.getMonth()+1,sd.getDate()).toISOString();
+		}else {
+			frm.doc.end_date = new Date(sd.getFullYear()+1,sd.getMonth(),sd.getDate()).toISOString();
 		}
 		frm.refresh_field("end_date");
 	}
-	
+
 });
 
 frappe.ui.form.on("Supplier Scorecard Scoring Standing", {
@@ -50,7 +51,7 @@ frappe.ui.form.on("Supplier Scorecard Scoring Standing", {
 			method: "erpnext.buying.doctype.supplier_scorecard_standing.supplier_scorecard_standing.get_scoring_standing",
 			child: d,
 			args: {
-				standing_name: d.standing_name	
+				standing_name: d.standing_name
 			}
 		});
 	}
@@ -64,7 +65,7 @@ frappe.ui.form.on("Supplier Scorecard Scoring Variable", {
 			method: "erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable.get_scoring_variable",
 			child: d,
 			args: {
-				variable_label: d.variable_label	
+				variable_label: d.variable_label
 			}
 		});
 	}
@@ -77,23 +78,22 @@ frappe.ui.form.on("Supplier Scorecard Scoring Criteria", {
 		frm.call({
 			method: "erpnext.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_criteria.get_variables",
 			args: {
-				criteria_name: d.criteria_name	
+				criteria_name: d.criteria_name
 			},
 			callback: function(r) {
-				debugger;
-				for (d in r.message)
+				for (var i = 0; i < frm.doc.variables.length; i++)
 				{
 					var exists = false;
-					for (child in frm.doc.variables)
+					for (var j = 0; j < frm.doc.variables.length; j++)
 					{
-						if(frm.doc.variables[child].variable_label == r.message[d])
+						if(frm.doc.variables[j].variable_label === r.message[i])
 						{
 							exists = true;
 						}
 					}
 					if (!exists){
 						var new_row = frm.add_child("variables");
-						new_row.variable_label = r.message[d];
+						new_row.variable_label = r.message[i];
 						frm.script_manager.trigger("variable_label", new_row.doctype, new_row.name);
 					}
 
@@ -105,10 +105,10 @@ frappe.ui.form.on("Supplier Scorecard Scoring Criteria", {
 			method: "erpnext.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_criteria.get_scoring_criteria",
 			child: d,
 			args: {
-				criteria_name: d.criteria_name	
+				criteria_name: d.criteria_name
 			}
 		});
-		
+
 	}
 });
 

@@ -43,7 +43,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_supplier()
 		validate_for_items(self)
 		self.check_for_closed_status()
-		
+
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 
@@ -52,7 +52,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_minimum_order_qty()
 		self.create_raw_materials_supplied("supplied_items")
 		self.set_received_qty_for_drop_ship_items()
-	
+
 	def validate_with_previous_doc(self):
 		super(PurchaseOrder, self).validate_with_previous_doc({
 			"Supplier Quotation": {

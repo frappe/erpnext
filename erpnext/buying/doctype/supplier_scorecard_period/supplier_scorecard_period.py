@@ -7,7 +7,6 @@ import frappe
 from frappe import throw, _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import get_last_day, get_first_day, getdate, add_days, add_years
 import erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable as variable_functions
 
 class SupplierScorecardPeriod(Document):
@@ -19,38 +18,36 @@ class SupplierScorecardPeriod(Document):
 		self.calculate_score()
 
 	def validate_criteria_weights(self):
-	
+
 		weight = 0
 		for c in self.criteria:
 			weight += c.weight
-		
+
 		if weight != 100:
 			throw(_('Criteria weights must add up to 100%'))
-			
+
 	def calculate_variables(self):
 		for var in self.variables:
-			
+
 			if '.' in var.path:
 				method_to_call = import_string_path(var.path)
 				var.value = method_to_call(self)
-				#pass
 			else:
 				method_to_call = getattr(variable_functions, var.path)
 				var.value = method_to_call(self)
-				#pass
-			
-		
-		
+
+
+
 	def calculate_criteria(self):
 		#Get the criteria
 		for crit in self.criteria:
-			
+
 			#me = ""
 			my_eval_statement = crit.formula.replace("\r", "").replace("\n", "")
 			#for let in my_eval_statement:
 			#	me += let.encode('hex') + " "
 			#frappe.msgprint(me)
-			
+
 			for var in self.variables:
 				if var.value:
 					if var.param_name in my_eval_statement:
@@ -58,20 +55,20 @@ class SupplierScorecardPeriod(Document):
 				else:
 					if var.param_name in my_eval_statement:
 						my_eval_statement = my_eval_statement.replace('{' + var.param_name + '}', '0.0')
-						
+
 			#frappe.msgprint(my_eval_statement )
-			
+
 			my_eval_statement = my_eval_statement.replace('&lt;','<').replace('&gt;','>')
-			
+
 			crit.score = min(crit.max_score, max( 0 ,frappe.safe_eval(my_eval_statement,  None, {'max':max, 'min': min})))
-			
-		
+
+
 	def calculate_score(self):
 		myscore = 0
 		for crit in self.criteria:
 			myscore += crit.score * crit.weight/100.0
 		self.total_score = myscore
-		
+
 	def calculate_weighted_score(self, weighing_function):
 		my_eval_statement = weighing_function.replace("\r", "").replace("\n", "")
 
@@ -82,18 +79,14 @@ class SupplierScorecardPeriod(Document):
 			else:
 				if var.param_name in my_eval_statement:
 					my_eval_statement = my_eval_statement.replace('{' + var.param_name + '}', '0.0')
-					
+
 		my_eval_statement = my_eval_statement.replace('&lt;','<').replace('&gt;','>')
 		weighed_score = frappe.safe_eval(my_eval_statement,  None, {'max':max, 'min': min})
-		
-		return weighed_score
-		
-	
-	
-	
-			
 
-	
+		return weighed_score
+
+
+
 def import_string_path(path):
     components = path.split('.')
     mod = __import__(components[0])
@@ -104,7 +97,7 @@ def import_string_path(path):
 
 def post_process(source, target):
 	pass
-		
+
 
 @frappe.whitelist()
 def make_supplier_scorecard(source_name, target_doc=None):
@@ -130,5 +123,4 @@ def make_supplier_scorecard(source_name, target_doc=None):
 	}, target_doc, post_process)
 
 	return doc
-	
-	
+
