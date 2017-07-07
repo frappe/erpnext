@@ -803,9 +803,10 @@ class SalesInvoice(SellingController):
 				continue
 
 			for serial_no in item.serial_no.split("\n"):
-				sno = frappe.get_doc('Serial No', serial_no)
-				sno.sales_invoice = invoice
-				sno.db_update()
+				if serial_no and frappe.db.exists('Serial No', serial_no):
+					sno = frappe.get_doc('Serial No', serial_no)
+					sno.sales_invoice = invoice
+					sno.db_update()
 
 	def validate_serial_numbers(self):
 		"""
