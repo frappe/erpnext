@@ -372,8 +372,8 @@ def create_items(args):
 					"is_sales_item": is_sales_item,
 					"is_purchase_item": is_purchase_item,
 					"is_stock_item": is_stock_item and 1 or 0,
-					"item_group": item_group,
-					"stock_uom": args.get("item_uom_" + str(i)),
+					"item_group": _(item_group),
+					"stock_uom": _(args.get("item_uom_" + str(i))),
 					"default_warehouse": default_warehouse
 				}).insert()
 
