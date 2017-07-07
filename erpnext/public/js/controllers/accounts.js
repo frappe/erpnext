@@ -215,7 +215,7 @@ if(!erpnext.taxes.flags[cur_frm.cscript.tax_table]) {
 			erpnext.taxes.set_conditional_mandatory_rate_or_amount(open_form);
 		} else {
 			// apply in current row
-			erpnext.taxes.set_conditional_mandatory_rate_or_amount(frm.get_field('taxes').grid.get_grid_row(cdn));
+			erpnext.taxes.set_conditional_mandatory_rate_or_amount(frm.get_field('taxes').grid.get_row(cdn));
 		}
 	});
 

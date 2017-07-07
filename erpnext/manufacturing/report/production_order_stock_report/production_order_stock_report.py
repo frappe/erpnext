@@ -23,7 +23,7 @@ def get_item_list(prod_list, filters):
 		
 		item_list = frappe.db.sql("""SELECT 
 				bom_item.item_code as item_code,
-				ifnull(ledger.actual_qty*bom.quantity/bom_item.qty,0) as build_qty
+				ifnull(ledger.actual_qty*bom.quantity/bom_item.stock_qty,0) as build_qty
 			FROM
 				`tabBOM` as bom, `tabBOM Item` AS bom_item
 				LEFT JOIN `tabBin` AS ledger	

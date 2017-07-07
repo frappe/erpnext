@@ -7,10 +7,13 @@ from frappe.utils import flt
 from frappe import msgprint, _
 
 def execute(filters=None):
+	return _execute(filters)
+
+def _execute(filters, additional_table_columns=None, additional_query_columns=None):
 	if not filters: filters = frappe._dict({})
 
-	invoice_list = get_invoices(filters)
-	columns, income_accounts, tax_accounts = get_columns(invoice_list)
+	invoice_list = get_invoices(filters, additional_query_columns)
+	columns, income_accounts, tax_accounts = get_columns(invoice_list, additional_table_columns)
 
 	if not invoice_list:
 		msgprint(_("No record found"))
@@ -21,8 +24,9 @@ def execute(filters=None):
 		invoice_income_map, income_accounts)
 
 	invoice_so_dn_map = get_invoice_so_dn_map(invoice_list)
-	customer_map = get_customer_details(invoice_list)
-	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	customers = list(set([inv.customer for inv in invoice_list]))
+	customer_map = get_customer_details(customers)
+	company_currency = frappe.db.get_value("Company", filters.get("company"), "default_currency")
 	mode_of_payments = get_mode_of_payments([inv.name for inv in invoice_list])
 
 	data = []
@@ -31,12 +35,22 @@ def execute(filters=None):
 		sales_order = list(set(invoice_so_dn_map.get(inv.name, {}).get("sales_order", [])))
 		delivery_note = list(set(invoice_so_dn_map.get(inv.name, {}).get("delivery_note", [])))
 
-		row = [inv.name, inv.posting_date, inv.customer, inv.customer_name,
-		customer_map.get(inv.customer, {}).get("customer_group"), 
-		customer_map.get(inv.customer, {}).get("territory"),
-		inv.debit_to, ", ".join(mode_of_payments.get(inv.name, [])), inv.project, inv.remarks, 
-		", ".join(sales_order), ", ".join(delivery_note), company_currency]
+		customer_details = customer_map.get(inv.customer, {})
+		row = [
+			inv.name, inv.posting_date, inv.customer, inv.customer_name
+		]
 
+		if additional_query_columns:
+			for col in additional_query_columns:
+				row.append(inv.get(col))
+
+		row +=[
+			customer_details.get("customer_group"),
+			customer_details.get("territory"),
+			inv.debit_to, ", ".join(mode_of_payments.get(inv.name, [])),
+			inv.project, inv.remarks,
+			", ".join(sales_order), ", ".join(delivery_note), company_currency
+		]
 		# map income values
 		base_net_total = 0
 		for income_acc in income_accounts:
@@ -62,15 +76,20 @@ def execute(filters=None):
 
 	return columns, data
 
-
-def get_columns(invoice_list):
+def get_columns(invoice_list, additional_table_columns):
 	"""return columns based on filters"""
 	columns = [
-		_("Invoice") + ":Link/Sales Invoice:120", _("Posting Date") + ":Date:80", 
-		_("Customer Id") + "::120", _("Customer Name") + "::120", 
-		_("Customer Group") + ":Link/Customer Group:120", _("Territory") + ":Link/Territory:80", 
-		_("Receivable Account") + ":Link/Account:120", _("Mode of Payment") + "::120", 
-		_("Project") +":Link/Project:80", _("Remarks") + "::150", 
+		_("Invoice") + ":Link/Sales Invoice:120", _("Posting Date") + ":Date:80",
+		_("Customer") + ":Link/Customer:120", _("Customer Name") + "::120"
+	]
+
+	if additional_table_columns:
+		columns += additional_table_columns
+
+	columns +=[
+		_("Customer Group") + ":Link/Customer Group:120", _("Territory") + ":Link/Territory:80",
+		_("Receivable Account") + ":Link/Account:120", _("Mode of Payment") + "::120",
+		_("Project") +":Link/Project:80", _("Remarks") + "::150",
 		_("Sales Order") + ":Link/Sales Order:100", _("Delivery Note") + ":Link/Delivery Note:100",
 		{
 			"fieldname": "currency",
@@ -113,20 +132,23 @@ def get_conditions(filters):
 
 	if filters.get("from_date"): conditions += " and posting_date >= %(from_date)s"
 	if filters.get("to_date"): conditions += " and posting_date <= %(to_date)s"
-	
+
 	if filters.get("mode_of_payment"):
 		conditions += """ and exists(select name from `tabSales Invoice Payment`
-			 where parent=`tabSales Invoice`.name 
+			 where parent=`tabSales Invoice`.name
 			 	and ifnull(`tabSales Invoice Payment`.mode_of_payment, '') = %(mode_of_payment)s)"""
-				
+
 	return conditions
 
-def get_invoices(filters):
+def get_invoices(filters, additional_query_columns):
+	if additional_query_columns:
+		additional_query_columns = ', ' + ', '.join(additional_query_columns)
+
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select name, posting_date, debit_to, project, customer, customer_name, remarks, 
-		base_net_total, base_grand_total, base_rounded_total, outstanding_amount
+	return frappe.db.sql("""select name, posting_date, debit_to, project, customer, customer_name, remarks,
+		base_net_total, base_grand_total, base_rounded_total, outstanding_amount {0}
 		from `tabSales Invoice`
-		where docstatus = 1 %s order by posting_date desc, name desc""" %
+		where docstatus = 1 %s order by posting_date desc, name desc""".format(additional_query_columns or '') %
 		conditions, filters, as_dict=1)
 
 def get_invoice_income_map(invoice_list):
@@ -184,9 +206,8 @@ def get_invoice_so_dn_map(invoice_list):
 
 	return invoice_so_dn_map
 
-def get_customer_details(invoice_list):
+def get_customer_details(customers):
 	customer_map = {}
-	customers = list(set([inv.customer for inv in invoice_list]))
 	for cust in frappe.db.sql("""select name, territory, customer_group from `tabCustomer`
 		where name in (%s)""" % ", ".join(["%s"]*len(customers)), tuple(customers), as_dict=1):
 			customer_map.setdefault(cust.name, cust)

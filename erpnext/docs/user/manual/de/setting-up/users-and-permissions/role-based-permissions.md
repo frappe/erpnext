@@ -51,7 +51,7 @@ Der Urlaubsantrag ist ein gutes **Beispiel**, welches alle Bereiche des Berechti
 
 2\. **Ein Mitarbeiter sollte nur auf seine/Ihre eigenen Urlaubsanträge zugreifen können.** Daher sollte der Punkt "Benutzerberechtigungen anwenden" für die Rolle "Mitarbeiter" aktiviert sein und es sollte ein Datensatz "Benutzerberechtigung" für jede Kombination von Benutzer und Mitarbeiter erstellt werden. (Dieser Aufwand reduziert sich für den Dokumententyp, indem über das Programm Datensätze für Benutzerberechtigungen erstellt werden.)
 
-<img class="screenshot" alt="Den Zugriff für einen Benutzer mit der Rolle Mitarbeiter auf Urlaubsanträge über den Benutzerberechtigungen-Manager einschränken." src="{{docs_base_url}}/assets/old_images/erpnext/setting-up-permissions-employee-user-permissions.png">
+<img class="screenshot" alt="Den Zugriff für einen Benutzer mit der Rolle Mitarbeiter auf Urlaubsanträge über den Benutzerberechtigungen-Manager einschränken." src="{{docs_base_url}}/assets/img/users-and-permissions/setting-up-permissions-employee-user-permissions.png">
 
 3\. **Der Personalmanager sollte alle Urlaubsanträge sehen können.** Erstellen Sie für den Personalmanager eine Berechtigungsregel auf der Ebene 0 mit Lese-Rechten. Die Option "Benutzerberechtigungen anwenden" sollte deaktiviert sein.
 

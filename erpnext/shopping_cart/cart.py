@@ -75,9 +75,15 @@ def place_order():
 def update_cart(item_code, qty, with_items=False):
 	quotation = _get_cart_quotation()
 
+	empty_card = False
 	qty = flt(qty)
 	if qty == 0:
-		quotation.set("items", quotation.get("items", {"item_code": ["!=", item_code]}))
+		quotation_items = quotation.get("items", {"item_code": ["!=", item_code]})
+		if quotation_items:
+			quotation.set("items", quotation_items)
+		else:
+			empty_card = True
+
 	else:
 		quotation_items = quotation.get("items", {"item_code": item_code})
 		if not quotation_items:
@@ -92,7 +98,11 @@ def update_cart(item_code, qty, with_items=False):
 	apply_cart_settings(quotation=quotation)
 
 	quotation.flags.ignore_permissions = True
-	quotation.save()
+	if not empty_card:
+		quotation.save()
+	else:
+		quotation.delete()
+		quotation = None
 
 	set_cart_count(quotation)
 

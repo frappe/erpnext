@@ -62,13 +62,13 @@ class BankReconciliation(Document):
 
 		for d in entries:
 			row = self.append('payment_entries', {})
-
-			d.amount = fmt_money(d.debit if d.debit else d.credit, 2, d.account_currency) + " " + (_("Dr") if d.debit else _("Cr"))
+			amount = d.debit if d.debit else d.credit
+			d.amount = fmt_money(amount, 2, d.account_currency) + " " + (_("Dr") if d.debit else _("Cr"))
 			d.pop("credit")
 			d.pop("debit")
 			d.pop("account_currency")
 			row.update(d)
-			self.total_amount += flt(d.amount)
+			self.total_amount += flt(amount)
 
 	def update_clearance_date(self):
 		clearance_date_updated = False

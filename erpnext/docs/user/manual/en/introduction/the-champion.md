@@ -2,7 +2,7 @@
 
 <h1 class="white">The Champion</h1>
 
-<img class="cover" src="{{docs_base_url}}/assets/old_images/erpnext/implementation-image.png">
+<img alt="Champion" class="screenshot" src="{{docs_base_url}}/assets/img/setup/implementation-image.png">
 
 We have seen dozens of ERP implementations over the past few years and we
 realize that successful implementation is a lot about intangibles and

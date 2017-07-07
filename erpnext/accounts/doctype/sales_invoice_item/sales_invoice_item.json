@@ -11,6 +11,7 @@
  "doctype": "DocType", 
  "document_type": "Document", 
  "editable_grid": 1, 
+ "engine": "InnoDB", 
  "fields": [
   {
    "allow_bulk_edit": 0, 
@@ -2165,7 +2166,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2017-05-10 17:14:42.681757", 
+ "modified": "2017-07-06 17:54:03.347700", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice Item", 

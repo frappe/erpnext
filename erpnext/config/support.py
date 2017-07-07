@@ -49,6 +49,12 @@ def get_data():
 					"doctype": "Issue",
 					"is_query_report": True
 				},
+				{
+					"type": "report",
+					"name": "Support Hours",
+					"doctype": "Issue",
+					"is_query_report": True
+				},
 			]
 		},
 	]

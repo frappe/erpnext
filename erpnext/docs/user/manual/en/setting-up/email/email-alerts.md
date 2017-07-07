@@ -42,6 +42,7 @@ Email alerts allow you to set conditions according to the field data in your doc
 
 The above example will send an Email Alert when a Task is saved with the status "Open" and the Expected End Date for the Task is the date on or before the date on which it was saved on.
 
+
 ### Setting a Message
 
 You can use both Jinja Tags (`{% raw %}{{ doc.[field_name] }}{% endraw %}`) and HTML tags in the message textbox.
@@ -63,6 +64,17 @@ You can use both Jinja Tags (`{% raw %}{{ doc.[field_name] }}{% endraw %}`) and 
 	</ul>{% endraw %}
 
 ---
+
+### Setting a Value after the Alert is Set
+
+Sometimes to make sure that the email alert is not sent multiple times, you can
+define a custom property (via Customize Form) like "Email Alert Sent" and then
+set this property after the alert is sent by setting the **Set Property After Alert**
+field.
+
+Then you can use that as a condition in the **Condition** rules to ensure emails are not sent multiple times
+
+<img class="screenshot" alt="Setting Property in Email Alert" src="{{docs_base_url}}/assets/img/setup/email/email-alert-subject.png">
 
 ### Example
 

@@ -10,7 +10,7 @@ from frappe.utils import (flt, getdate, get_first_day, get_last_day, date_diff,
 from erpnext.accounts.utils import get_fiscal_year
 
 
-def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_values=False, 
+def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_values=False,
 	company=None, reset_period_on_fy_change=True):
 	"""Get a list of dict {"from_date": from_date, "to_date": to_date, "key": key, "label": label}
 		Periodicity can be (Yearly, Quarterly, Monthly)"""
@@ -85,8 +85,8 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_v
 	return period_list
 
 def get_fiscal_year_data(from_fiscal_year, to_fiscal_year):
-	fiscal_year = frappe.db.sql("""select min(year_start_date) as year_start_date, 
-		max(year_end_date) as year_end_date from `tabFiscal Year` where 
+	fiscal_year = frappe.db.sql("""select min(year_start_date) as year_start_date,
+		max(year_end_date) as year_end_date from `tabFiscal Year` where
 		name between %(from_fiscal_year)s and %(to_fiscal_year)s""",
 		{'from_fiscal_year': from_fiscal_year, 'to_fiscal_year': to_fiscal_year}, as_dict=1)
 
@@ -110,7 +110,7 @@ def get_label(periodicity, from_date, to_date):
 		label = formatdate(from_date, "MMM YY") + "-" + formatdate(to_date, "MMM YY")
 
 	return label
-	
+
 def get_data(company, root_type, balance_must_be, period_list, filters=None,
 		accumulated_values=1, only_current_fiscal_year=True, ignore_closing_entries=False,
 		ignore_accumulated_values_for_fy=False):
@@ -119,16 +119,16 @@ def get_data(company, root_type, balance_must_be, period_list, filters=None,
 		return None
 
 	accounts, accounts_by_name, parent_children_map = filter_accounts(accounts)
-	
+
 	company_currency = frappe.db.get_value("Company", company, "default_currency")
 
 	gl_entries_by_account = {}
 	for root in frappe.db.sql("""select lft, rgt from tabAccount
 			where root_type=%s and ifnull(parent_account, '') = ''""", root_type, as_dict=1):
-			
-		set_gl_entries_by_account(company, 
+
+		set_gl_entries_by_account(company,
 			period_list[0]["year_start_date"] if only_current_fiscal_year else None,
-			period_list[-1]["to_date"], 
+			period_list[-1]["to_date"],
 			root.lft, root.rgt, filters,
 			gl_entries_by_account, ignore_closing_entries=ignore_closing_entries)
 
@@ -136,7 +136,7 @@ def get_data(company, root_type, balance_must_be, period_list, filters=None,
 	accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_values)
 	out = prepare_data(accounts, balance_must_be, period_list, company_currency)
 	out = filter_out_zero_value_rows(out, parent_children_map)
-	
+
 	if out:
 		add_total_row(out, root_type, balance_must_be, period_list, company_currency)
 
@@ -151,13 +151,13 @@ def calculate_values(accounts_by_name, gl_entries_by_account, period_list, accum
 
 				if entry.posting_date <= period.to_date:
 					if (accumulated_values or entry.posting_date >= period.from_date) and \
-						(not ignore_accumulated_values_for_fy or 
+						(not ignore_accumulated_values_for_fy or
 							entry.fiscal_year == period.to_date_fiscal_year):
 						d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
 
 			if entry.posting_date < period_list[0].year_start_date:
 				d["opening_balance"] = d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)
-				
+
 def accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_values):
 	"""accumulate children's values in parent accounts"""
 	for d in reversed(accounts):
@@ -165,7 +165,7 @@ def accumulate_values_into_parents(accounts, accounts_by_name, period_list, accu
 			for period in period_list:
 				accounts_by_name[d.parent_account][period.key] = \
 					accounts_by_name[d.parent_account].get(period.key, 0.0) + d.get(period.key, 0.0)
-			
+
 			accounts_by_name[d.parent_account]["opening_balance"] = \
 				accounts_by_name[d.parent_account].get("opening_balance", 0.0) + d.get("opening_balance", 0.0)
 
@@ -173,15 +173,15 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency):
 	data = []
 	year_start_date = period_list[0]["year_start_date"].strftime("%Y-%m-%d")
 	year_end_date = period_list[-1]["year_end_date"].strftime("%Y-%m-%d")
-	
+
 	for d in accounts:
 		# add to output
 		has_value = False
 		total = 0
 		row = frappe._dict({
-			"account_name": d.account_name,
-			"account": d.name,
-			"parent_account": d.parent_account,
+			"account_name": _(d.account_name),
+			"account": _(d.name),
+			"parent_account": _(d.parent_account),
 			"indent": flt(d.indent),
 			"year_start_date": year_start_date,
 			"year_end_date": year_end_date,
@@ -192,7 +192,7 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency):
 			if d.get(period.key) and balance_must_be=="Credit":
 				# change sign based on Debit or Credit, since calculation is done using (debit - credit)
 				d[period.key] *= -1
-		
+
 			row[period.key] = flt(d.get(period.key, 0.0), 3)
 
 			if abs(row[period.key]) >= 0.005:
@@ -203,9 +203,9 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency):
 		row["has_value"] = has_value
 		row["total"] = total
 		data.append(row)
-		
+
 	return data
-	
+
 def filter_out_zero_value_rows(data, parent_children_map, show_zero_values=False):
 	data_with_value = []
 	for d in data:
@@ -224,8 +224,8 @@ def filter_out_zero_value_rows(data, parent_children_map, show_zero_values=False
 
 def add_total_row(out, root_type, balance_must_be, period_list, company_currency):
 	total_row = {
-		"account_name": "'" + _("Total {0} ({1})").format(root_type, balance_must_be) + "'",
-		"account": "'" + _("Total {0} ({1})").format(root_type, balance_must_be) + "'",
+		"account_name": "'" + _("Total {0} ({1})").format(_(root_type), _(balance_must_be)) + "'",
+		"account": "'" + _("Total {0} ({1})").format(_(root_type), _(balance_must_be)) + "'",
 		"currency": company_currency
 	}
 
@@ -235,11 +235,11 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 				total_row.setdefault(period.key, 0.0)
 				total_row[period.key] += row.get(period.key, 0.0)
 				row[period.key] = ""
-			
+
 			total_row.setdefault("total", 0.0)
 			total_row["total"] += flt(row["total"])
 			row["total"] = ""
-	
+
 	if total_row.has_key("total"):
 		out.append(total_row)
 

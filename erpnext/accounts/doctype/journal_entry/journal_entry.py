@@ -733,11 +733,10 @@ def get_opening_accounts(company):
 	accounts = frappe.db.sql_list("""select
 			name from tabAccount
 		where
-			is_group=0 and
-			report_type='Balance Sheet' and
-			ifnull(warehouse, '') = '' and
-			company=%s
-		order by name asc""", company)
+			is_group=0 and report_type='Balance Sheet' and company=%s and
+			name not in(select distinct account from tabWarehouse where
+			account is not null and account != '')
+		order by name asc""", frappe.db.escape(company))
 
 	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
 

@@ -37,7 +37,8 @@ class Item(WebsiteGenerator):
 		if frappe.db.get_default("item_naming_by")=="Naming Series":
 			if self.variant_of:
 				if not self.item_code:
-					self.item_code = make_variant_item_code(self.variant_of, self.item_name, self)
+					template_item_name = frappe.db.get_value("Item", self.variant_of, "item_name")
+					self.item_code = make_variant_item_code(self.variant_of, template_item_name, self)
 			else:
 				from frappe.model.naming import make_autoname
 				self.item_code = make_autoname(self.naming_series+'.#####')
@@ -248,7 +249,7 @@ class Item(WebsiteGenerator):
 		self.set_attribute_context(context)
 		self.set_disabled_attributes(context)
 
-		context.parents = self.get_parents(context)
+		self.get_parents(context)
 
 		return context
 
@@ -523,7 +524,7 @@ class Item(WebsiteGenerator):
 
 	def before_rename(self, old_name, new_name, merge=False):
 		if self.item_name==old_name:
-			self.item_name=new_name
+			frappe.db.set_value("Item", old_name, "item_name", new_name)
 
 		if merge:
 			# Validate properties before merging

@@ -114,13 +114,17 @@ def get_student_guardians(student):
 	return guardians
 
 @frappe.whitelist()
-def get_student_group_students(student_group):
+def get_student_group_students(student_group, include_inactive=0):
 	"""Returns List of student, student_name in Student Group.
 
 	:param student_group: Student Group.
 	"""
-	students = frappe.get_list("Student Group Student", fields=["student", "student_name"] , 
-		filters={"parent": student_group, "active": 1}, order_by= "group_roll_number")
+	if include_inactive:
+		students = frappe.get_list("Student Group Student", fields=["student", "student_name"] ,
+			filters={"parent": student_group}, order_by= "group_roll_number")
+	else:
+		students = frappe.get_list("Student Group Student", fields=["student", "student_name"] ,
+			filters={"parent": student_group, "active": 1}, order_by= "group_roll_number")
 	return students
 
 @frappe.whitelist()

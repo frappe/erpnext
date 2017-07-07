@@ -31,7 +31,7 @@ A predefined template of an spreadsheet file should be followed for importing it
 
 #### Step 2: Enter Data in csv file.
 
-![Stock Reco Data]({{docs_base_url}}/assets/old_images/erpnext/stock-reco-data.png)
+<img class="screenshot" alt="Stock Reconciliation" src="{{docs_base_url}}/assets/img/setup/stock-reco-data.png">
 
 The csv format is case-sensitive. Do not edit the headers which are preset in the template. In the Item Code and Warehouse column, enter exact Item Code and Warehouse as created in your ERPNext account. For quatity, enter stock level you wish to set for that item, in a specific warehouse.
 
@@ -59,11 +59,12 @@ report. The report will show you all types of rates.
 
 #### Step 4: Review the reconciliation data
 
-![Stock Reco Review]({{docs_base_url}}/assets/old_images/erpnext/stock-reco-upload.png)
+<img class="screenshot" alt="Stock Reconciliation" src="{{docs_base_url}}/assets/img/setup/stock-reco-upload.gif">
 
 ### Stock Ledger Report
 
-![Stock Reco Ledger]({{docs_base_url}}/assets/old_images/erpnext/stock-reco-ledger.png)
+<img class="screenshot" alt="Stock Reconciliation" src="{{docs_base_url}}/assets/img/setup//stock-reco-ledger.png">
+
 
 **How Stock Reconciliation Works**
 
