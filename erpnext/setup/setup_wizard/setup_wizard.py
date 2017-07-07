@@ -351,7 +351,7 @@ def create_items(args):
 	for i in xrange(1,6):
 		item = args.get("item_" + str(i))
 		if item:
-			item_group = args.get("item_group_" + str(i))
+			item_group = _(args.get("item_group_" + str(i)))
 			is_sales_item = args.get("is_sales_item_" + str(i))
 			is_purchase_item = args.get("is_purchase_item_" + str(i))
 			is_stock_item = item_group!=_("Services")
@@ -372,7 +372,7 @@ def create_items(args):
 					"is_sales_item": is_sales_item,
 					"is_purchase_item": is_purchase_item,
 					"is_stock_item": is_stock_item and 1 or 0,
-					"item_group": _(item_group),
+					"item_group": item_group,
 					"stock_uom": _(args.get("item_uom_" + str(i))),
 					"default_warehouse": default_warehouse
 				}).insert()
