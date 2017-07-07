@@ -72,5 +72,5 @@ state_numbers = {
  "Tripura": "16",
  "Uttar Pradesh": "35",
  "Uttarakhand": "36",
- "West Bengal": "37"
+ "West Bengal": "19"
 }
