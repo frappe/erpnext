@@ -576,11 +576,15 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		})
 
 		$(this.numeric_keypad).find('.numeric-del').click(function(){
-			me.selected_field = $(me.wrapper).find('.selected-item').find('.' + me.numeric_id)
-			me.numeric_val = cstr(flt(me.selected_field.val())).slice(0, -1);
-			me.selected_field.val(me.numeric_val);
-			me.selected_field.trigger("change")
-			// me.render_selected_item()
+			if(me.numeric_id) {
+				me.selected_field = $(me.wrapper).find('.selected-item').find('.' + me.numeric_id)
+				me.numeric_val = cstr(flt(me.selected_field.val())).slice(0, -1);
+				me.selected_field.val(me.numeric_val);
+				me.selected_field.trigger("change")
+			} else {
+				//Remove an item from the cart, if focus is at selected item
+				me.remove_selected_item()
+			}
 		})
 
 		$(this.numeric_keypad).find('.pos-pay').click(function(){
@@ -589,6 +593,14 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.create_invoice();
 			me.make_payment();
 		})
+	},
+
+	remove_selected_item: function() {
+		this.remove_item = []
+		idx = $(this.wrapper).find(".pos-selected-item-action").attr("data-idx")
+		this.remove_item.push(idx)
+		this.remove_zero_qty_item()
+		this.update_paid_amount_status(false)
 	},
 
 	render_list_customers: function () {
@@ -1484,7 +1496,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	print_dialog: function () {
 		var me = this;
 
-		this.frappe.msgprint = frappe.msgprint(
+		this.msgprint = frappe.msgprint(
 			`<a class="btn btn-primary print_doc"
 				style="margin-right: 5px;">${__('Print')}</a>
 			<a class="btn btn-default new_doc">${__('New')}</a>`);
@@ -1495,7 +1507,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		})
 
 		$('.new_doc').click(function () {
-			me.frappe.msgprint.hide()
+			me.msgprint.hide()
 			me.make_new_cart()
 		})
 	},
@@ -1577,6 +1589,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			this.frm.doc.offline_pos_name = this.name;
 			this.frm.doc.posting_date = frappe.datetime.get_today();
 			this.frm.doc.posting_time = frappe.datetime.now_time();
+			this.frm.doc.pos_profile = this.pos_profile_data['name'];
 			invoice_data[this.name] = this.frm.doc
 			this.si_docs.push(invoice_data)
 			this.update_localstorage();

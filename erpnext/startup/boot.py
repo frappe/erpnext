@@ -4,10 +4,10 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.utils.nestedset import get_root_of
 
 def boot_session(bootinfo):
 	"""boot session - send website info if guest"""
-	import frappe
 
 	bootinfo.custom_css = frappe.db.get_value('Style Settings', None, 'custom_css') or ''
 	bootinfo.website_settings = frappe.get_doc('Website Settings')
@@ -16,6 +16,8 @@ def boot_session(bootinfo):
 		update_page_info(bootinfo)
 
 		load_country_and_currency(bootinfo)
+		bootinfo.sysdefaults.territory = get_root_of('Territory')
+		bootinfo.sysdefaults.customer_group = get_root_of('Customer Group')
 
 		bootinfo.notification_settings = frappe.get_doc("Notification Control",
 			"Notification Control")
@@ -27,8 +29,8 @@ def boot_session(bootinfo):
 			bootinfo.setup_complete = frappe.db.sql("""select name from
 				tabCompany limit 1""") and 'Yes' or 'No'
 
-		bootinfo.docs += frappe.db.sql("""select name, default_currency, cost_center,
-			default_terms, default_letter_head, default_bank_account from `tabCompany`""",
+		bootinfo.docs += frappe.db.sql("""select name, default_currency, cost_center, default_terms,
+			default_letter_head, default_bank_account, enable_perpetual_inventory from `tabCompany`""",
 			as_dict=1, update={"doctype":":Company"})
 
 def load_country_and_currency(bootinfo):

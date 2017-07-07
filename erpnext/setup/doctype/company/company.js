@@ -17,6 +17,8 @@ frappe.ui.form.on("Company", {
 		if(!frm.doc.__islocal) {
 			frappe.contacts.render_address_and_contact(frm);
 
+			frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Company'}
+
 			frm.toggle_enable("default_currency", (frm.doc.__onload &&
 				!frm.doc.__onload.transactions_exist));
 
@@ -34,7 +36,7 @@ frappe.ui.form.on("Company", {
 	},
 
 	onload_post_render: function(frm) {
-		if(frm.get_field("delete_company_transactions").$input) 
+		if(frm.get_field("delete_company_transactions").$input)
 			frm.get_field("delete_company_transactions").$input.addClass("btn-danger");
 	},
 	country: function(frm) {
@@ -144,7 +146,7 @@ erpnext.company.setup_queries = function(frm) {
 		["round_off_account", {"root_type": "Expense"}],
 		["write_off_account", {"root_type": "Expense"}],
 		["exchange_gain_loss_account", {"root_type": "Expense"}],
-		["accumulated_depreciation_account", 
+		["accumulated_depreciation_account",
 			{"root_type": "Asset", "account_type": "Accumulated Depreciation"}],
 		["depreciation_expense_account", {"root_type": "Expense", "account_type": "Depreciation"}],
 		["disposal_account", {"report_type": "Profit and Loss"}],
@@ -156,13 +158,13 @@ erpnext.company.setup_queries = function(frm) {
 		erpnext.company.set_custom_query(frm, v);
 	});
 
-	if (frappe.sys_defaults.auto_accounting_for_stock) {
+	if (frm.doc.enable_perpetual_inventory) {
 		$.each([
-			["stock_adjustment_account", 
+			["stock_adjustment_account",
 				{"root_type": "Expense", "account_type": "Stock Adjustment"}],
-			["expenses_included_in_valuation", 
+			["expenses_included_in_valuation",
 				{"root_type": "Expense", "account_type": "Expenses Included in Valuation"}],
-			["stock_received_but_not_billed", 
+			["stock_received_but_not_billed",
 				{"root_type": "Liability", "account_type": "Stock Received But Not Billed"}]
 		], function(i, v) {
 			erpnext.company.set_custom_query(frm, v);

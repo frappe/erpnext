@@ -107,6 +107,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 1, 
    "collapsible": 0, 
@@ -168,10 +169,12 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "default": "Company", 
    "fieldname": "customer_type", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -186,7 +189,7 @@
    "no_copy": 0, 
    "oldfieldname": "customer_type", 
    "oldfieldtype": "Select", 
-   "options": "\nCompany\nIndividual", 
+   "options": "Company\nIndividual", 
    "permlevel": 0, 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
@@ -1197,7 +1200,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-06-13 14:29:11.114613", 
+ "modified": "2017-06-28 14:55:39.910819", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Customer", 

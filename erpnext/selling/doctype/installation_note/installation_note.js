@@ -30,12 +30,8 @@ erpnext.selling.InstallationNote = frappe.ui.form.Controller.extend({
 	setup_queries: function() {
 		var me = this;
 
-		this.frm.set_query("customer_address", function() {
-			return {
-				filters: {'customer': me.frm.doc.customer }
-			}
-		});
-
+		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
+		frm.set_query('customer_address', erpnext.queries.address_query);
 		this.frm.set_query('contact_person', erpnext.queries.contact_query);
 
 		this.frm.set_query("customer", function() {

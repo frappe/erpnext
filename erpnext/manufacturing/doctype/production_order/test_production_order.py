@@ -8,7 +8,7 @@ import frappe
 from frappe.utils import flt, time_diff_in_hours, now, add_days, cint
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.manufacturing.doctype.production_order.production_order \
-	import make_stock_entry, ItemHasVariantError
+	import make_stock_entry, ItemHasVariantError, stop_unstop
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.stock.doctype.item.test_item import get_total_projected_qty
 from erpnext.stock.utils import get_bin
@@ -228,10 +228,46 @@ class TestProductionOrder(unittest.TestCase):
 			cint(bin1_on_start_production.reserved_qty_for_production))
 		self.assertEqual(cint(bin1_on_end_production.projected_qty),
 			cint(bin1_on_end_production.projected_qty))
+			
+	def test_reserved_qty_for_stopped_production(self):
+		test_stock_entry.make_stock_entry(item_code="_Test Item",
+			target= self.warehouse, qty=100, basic_rate=100)
+		test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
+			target= self.warehouse, qty=100, basic_rate=100)
 
-		# required_items removed
-		self.pro_order.reload()
-		self.assertEqual(len(self.pro_order.required_items), 0)
+		# 	0 0 0
+		
+		self.test_reserved_qty_for_production_submit()
+		
+		#2 0 -2
+
+		s = frappe.get_doc(make_stock_entry(self.pro_order.name,
+			"Material Transfer for Manufacture", 1))
+
+		s.submit()
+		
+		#1 -1 0
+		
+		bin1_on_start_production = get_bin(self.item, self.warehouse)
+
+		# reserved_qty_for_producion updated
+		self.assertEqual(cint(self.bin1_at_start.reserved_qty_for_production) + 1,
+			cint(bin1_on_start_production.reserved_qty_for_production))
+
+		# projected qty will now be 2 less (becuase of item movement)
+		self.assertEqual(cint(self.bin1_at_start.projected_qty),
+			cint(bin1_on_start_production.projected_qty) + 2)
+			
+		# STOP
+		stop_unstop(self.pro_order.name, "Stopped")
+		
+		bin1_on_stop_production = get_bin(self.item, self.warehouse)
+
+		# no change in reserved / projected
+		self.assertEqual(cint(bin1_on_stop_production.reserved_qty_for_production),
+			cint(self.bin1_at_start.reserved_qty_for_production))
+		self.assertEqual(cint(bin1_on_stop_production.projected_qty) + 1,
+			cint(self.bin1_at_start.projected_qty))
 
 	def test_scrap_material_qty(self):
 		prod_order = make_prod_order_test_record(planned_start_date=now(), qty=2)
@@ -266,9 +302,9 @@ class TestProductionOrder(unittest.TestCase):
 
 def get_scrap_item_details(bom_no):
 	scrap_items = {}
-	for item in frappe.db.sql("""select item_code, qty from `tabBOM Scrap Item`
+	for item in frappe.db.sql("""select item_code, stock_qty from `tabBOM Scrap Item`
 		where parent = %s""", bom_no, as_dict=1):
-		scrap_items[item.item_code] = item.qty
+		scrap_items[item.item_code] = item.stock_qty
 
 	return scrap_items
 
@@ -286,17 +322,18 @@ def make_prod_order_test_record(**args):
 	pro_order.company = args.company or "_Test Company"
 	pro_order.stock_uom = args.stock_uom or "_Test UOM"
 	pro_order.use_multi_level_bom=0
-	pro_order.set_production_order_operations()
-
+	pro_order.get_items_and_operations_from_bom()
 
 	if args.source_warehouse:
-		pro_order.source_warehouse = args.source_warehouse
+		for item in pro_order.get("required_items"):
+			item.source_warehouse = args.source_warehouse
 
 	if args.planned_start_date:
 		pro_order.planned_start_date = args.planned_start_date
 
 	if not args.do_not_save:
 		pro_order.insert()
+
 		if not args.do_not_submit:
 			pro_order.submit()
 	return pro_order

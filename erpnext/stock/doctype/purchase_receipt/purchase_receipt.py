@@ -119,7 +119,8 @@ class PurchaseReceipt(BuyingController):
 		frappe.db.set(self, 'status', 'Submitted')
 
 		self.update_prevdoc_status()
-		self.update_billing_status()
+		if self.per_billed < 100:
+			self.update_billing_status()
 
 		if not self.is_return:
 			update_last_purchase_rate(self, 1)

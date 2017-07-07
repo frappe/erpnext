@@ -121,7 +121,15 @@ frappe.ui.form.on("Item", {
 		if(!frm.doc.description)
 			frm.set_value("description", frm.doc.item_code);
 	},
-
+	
+	is_stock_item: function(frm) {
+		if(!frm.doc.is_stock_item) {
+			frm.set_value("has_batch_no", 0);
+			frm.set_value("create_new_batch", 0);
+			frm.set_value("has_serial_no", 0);
+		}
+	},
+	
 	copy_from_item_group: function(frm) {
 		return frm.call({
 			doc: frm.doc,

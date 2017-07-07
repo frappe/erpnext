@@ -105,8 +105,9 @@ def setup_roles(data):
 
 	if data.allow_roles:
 		# remove all roles other than allowed roles
+		active_domains = frappe.get_active_domains()
 		data.allow_roles += ['Administrator', 'Guest', 'System Manager', 'All']
-		for role in frappe.get_all('Role'):
+		for role in frappe.get_all('Role', filters = {"restrict_to_domain": ("not in", active_domains)}):
 			if not (role.name in data.allow_roles):
 				remove_role(role.name)
 

@@ -37,10 +37,11 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		if not self.route:
 			self.route = ''
 			if self.parent_item_group:
-				parent_route = frappe.get_doc('Item Group', self.parent_item_group).route
+				parent_item_group = frappe.get_doc('Item Group', self.parent_item_group)
 
-				if parent_route:
-					self.route = parent_route + '/'
+				# make parent route only if not root
+				if parent_item_group.parent_item_group and parent_item_group.route:
+					self.route = parent_item_group.route + '/'
 
 			self.route += self.scrub(self.item_group_name)
 
@@ -55,7 +56,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 	def validate_name_with_item(self):
 		if frappe.db.exists("Item", self.name):
-			frappe.throw(frappe._("An item exists with same name ({0}), please change the item group name or rename the item").format(self.name))
+			frappe.throw(frappe._("An item exists with same name ({0}), please change the item group name or rename the item").format(self.name), frappe.NameError)
 
 	def get_context(self, context):
 		context.show_search=True
@@ -100,7 +101,7 @@ def get_product_list_for_group(product_group=None, start=0, limit=10, search=Non
 				or name like %(search)s)"""
 		search = "%" + cstr(search) + "%"
 
-	query += """order by weightage desc, modified desc limit %s, %s""" % (start, limit)
+	query += """order by weightage desc, item_name, modified desc limit %s, %s""" % (start, limit)
 
 	data = frappe.db.sql(query, {"product_group": product_group,"search": search, "today": nowdate()}, as_dict=1)
 

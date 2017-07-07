@@ -13,6 +13,13 @@ default_lead_sources = ["Existing Customer", "Reference", "Advertisement",
 
 def install(country=None):
 	records = [
+		# domains
+		{ 'doctype': 'Domain', 'domain': _('Distribution')},
+		{ 'doctype': 'Domain', 'domain': _('Manufacturing')},
+		{ 'doctype': 'Domain', 'domain': _('Retail')},
+		{ 'doctype': 'Domain', 'domain': _('Services')},
+		{ 'doctype': 'Domain', 'domain': _('Education')},
+
 		# address template
 		{'doctype':"Address Template", "country": country},
 

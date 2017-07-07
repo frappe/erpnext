@@ -488,8 +488,8 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(frappe.db.get_value("Sales Invoice", w.name, "outstanding_amount"), 561.8)
 
 	def test_sales_invoice_gl_entry_without_perpetual_inventory(self):
-		set_perpetual_inventory(0)
 		si = frappe.copy_doc(test_records[1])
+		set_perpetual_inventory(0, si.company)
 		si.insert()
 		si.submit()
 
@@ -617,6 +617,7 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEquals(expected_gl_entries[i][2], gle.credit)
 
 		si.cancel()
+		frappe.delete_doc('Sales Invoice', si.name)
 		gle = frappe.db.sql("""select * from `tabGL Entry`
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 
@@ -1103,6 +1104,22 @@ class TestSalesInvoice(unittest.TestCase):
 		for d in si.get("items"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.item_code][i])
+
+	def test_item_wise_tax_breakup(self):
+		si = create_sales_invoice(qty=100, rate=50, do_not_save=True)
+		si.append("taxes", {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Service Tax - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Service Tax",
+			"rate": 10
+		})
+		si.insert()
+		
+		tax_breakup_html = '''\n<div class="tax-break-up" style="overflow-x: auto;">\n\t<table class="table table-bordered table-hover">\n\t\t<thead><tr><th class="text-left" style="min-width: 120px;">Item Name</th><th class="text-right" style="min-width: 80px;">Taxable Amount</th><th class="text-right" style="min-width: 80px;">_Test Account Service Tax - _TC</th></tr></thead>\n\t\t<tbody><tr><td>_Test Item</td><td class="text-right">\u20b9 5,000.00</td><td class="text-right">(10.0%) \u20b9 500.00</td></tr></tbody>\n\t</table>\n</div>'''
+		
+		self.assertEqual(si.other_charges_calculation, tax_breakup_html)
+		
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")

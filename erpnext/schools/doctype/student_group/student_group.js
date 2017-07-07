@@ -9,6 +9,22 @@ frappe.ui.form.on("Student Group", {
 				}
 			};
 		});
+		if (!frm.__islocal) {
+			frm.set_query("student", "students", function() {
+				return{
+					query: "erpnext.schools.doctype.student_group.student_group.fetch_students",
+					filters: {
+						'academic_year': frm.doc.academic_year,
+						'group_based_on': frm.doc.group_based_on,
+						'academic_term': frm.doc.academic_term,
+						'program': frm.doc.program,
+						'batch': frm.doc.batch,
+						'course': frm.doc.course,
+						'student_group': frm.doc.name
+					}
+				}
+			});
+		}
 	},
 
 	refresh: function(frm) {

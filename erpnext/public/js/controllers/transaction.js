@@ -16,11 +16,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					// or set discount
 					item.discount_percentage = 0;
 					item.margin_type = 'Amount';
-					item.margin_rate_or_amount = flt(item.rate - item.price_list_rate, 
+					item.margin_rate_or_amount = flt(item.rate - item.price_list_rate,
 						precision("margin_rate_or_amount", item));
 					item.rate_with_margin = item.rate;
 				} else {
-					item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0, 
+					item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0,
 						precision("discount_percentage", item));
 					item.margin_type = '';
 					item.margin_rate_or_amount = 0;
@@ -63,37 +63,32 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		});
 
 		frappe.ui.form.on(this.frm.doctype, "additional_discount_percentage", function(frm) {
-			if (frm.via_discount_amount) {
-				return;
-			}
-
 			if(!frm.doc.apply_discount_on) {
 				frappe.msgprint(__("Please set 'Apply Additional Discount On'"));
-				return
+				return;
 			}
 
 			frm.via_discount_percentage = true;
 
 			if(frm.doc.additional_discount_percentage && frm.doc.discount_amount) {
 				// Reset discount amount and net / grand total
-				frm.set_value("discount_amount", 0);
+				frm.doc.discount_amount = 0;
+				frm.cscript.calculate_taxes_and_totals();
 			}
 
 			var total = flt(frm.doc[frappe.model.scrub(frm.doc.apply_discount_on)]);
 			var discount_amount = flt(total*flt(frm.doc.additional_discount_percentage) / 100,
 				precision("discount_amount"));
 
-			frm.set_value("discount_amount", discount_amount);
-			delete frm.via_discount_percentage;
+			frm.set_value("discount_amount", discount_amount)
+				.then(() => delete frm.via_discount_percentage);
 		});
 
 		frappe.ui.form.on(this.frm.doctype, "discount_amount", function(frm) {
 			frm.cscript.set_dynamic_labels();
 
 			if (!frm.via_discount_percentage) {
-				frm.via_discount_amount = true;
-				frm.set_value("additional_discount_percentage", 0);
-				delete frm.via_discount_amount;
+				frm.doc.additional_discount_percentage = 0;
 			}
 
 			frm.cscript.calculate_taxes_and_totals();
@@ -265,6 +260,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	item_code: function(doc, cdt, cdn, from_barcode) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
+		var update_stock = 0, show_batch_dialog = 0;
+
+		if(['Sales Invoice', 'Purchase Invoice'].includes(this.frm.doc.doctype)) {
+			update_stock = cint(me.frm.doc.update_stock);
+			show_batch_dialog = update_stock;
+
+		} else if((this.frm.doc.doctype === 'Purchase Receipt' && me.frm.doc.is_return) ||
+			this.frm.doc.doctype === 'Delivery Note') {
+			show_batch_dialog = 1;
+		}
 
 		// clear barcode if setting item (else barcode will take priority)
 		if(!from_barcode) {
@@ -272,7 +277,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 		if(item.item_code || item.barcode || item.serial_no) {
 			if(!this.validate_company_and_party()) {
-				cur_frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
+				this.frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
 			} else {
 				return this.frm.call({
 					method: "erpnext.stock.get_item_details.get_item_details",
@@ -286,7 +291,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							customer: me.frm.doc.customer,
 							supplier: me.frm.doc.supplier,
 							currency: me.frm.doc.currency,
-							update_stock: in_list(['Sales Invoice', 'Purchase Invoice'], me.frm.doc.doctype) ? cint(me.frm.doc.update_stock) : 0,
+							update_stock: update_stock,
 							conversion_rate: me.frm.doc.conversion_rate,
 							price_list: me.frm.doc.selling_price_list || me.frm.doc.buying_price_list,
 							price_list_currency: me.frm.doc.price_list_currency,
@@ -310,6 +315,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						if(!r.exc) {
 							me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
 							me.toggle_conversion_factor(item);
+							if(show_batch_dialog) {
+								var d = locals[cdt][cdn];
+								$.each(r.message, function(k, v) {
+									if(!d[k]) d[k] = v;
+								});
+								erpnext.show_serial_batch_selector(me.frm, d);
+							}
 						}
 					}
 				});
@@ -357,6 +369,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	validate: function() {
 		this.calculate_taxes_and_totals(false);
+		this.set_item_wise_tax_breakup();
 	},
 
 	company: function() {
@@ -602,8 +615,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	toggle_conversion_factor: function(item) {
 		// toggle read only property for conversion factor field if the uom and stock uom are same
-		this.frm.fields_dict.items.grid.toggle_enable("conversion_factor",
-			(item.uom != item.stock_uom)? true: false)
+		if(this.frm.get_field('items').grid.fields_map.conversion_factor) {
+			this.frm.fields_dict.items.grid.toggle_enable("conversion_factor",
+				(item.uom != item.stock_uom)? true: false);
+		}
 	},
 
 	qty: function(doc, cdt, cdn) {
@@ -756,7 +771,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if(this.frm.doc.ignore_pricing_rule) {
 			var me = this;
 			var item_list = [];
-			
+
 			$.each(this.frm.doc["items"] || [], function(i, d) {
 				if (d.item_code) {
 					item_list.push({
@@ -917,69 +932,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		});
 	},
 
-	get_item_wise_taxes_html: function() {
-		var item_tax = {};
-		var tax_accounts = [];
-		var company_currency = this.get_company_currency();
-
-		$.each(this.frm.doc["taxes"] || [], function(i, tax) {
-			var tax_amount_precision = precision("tax_amount", tax);
-			var tax_rate_precision = precision("rate", tax);
-			$.each(JSON.parse(tax.item_wise_tax_detail || '{}'),
-				function(item_code, tax_data) {
-					if(!item_tax[item_code]) item_tax[item_code] = {};
-					if($.isArray(tax_data)) {
-						var tax_rate = "";
-						if(tax_data[0] != null) {
-							tax_rate = (tax.charge_type === "Actual") ?
-								format_currency(flt(tax_data[0], tax_amount_precision), company_currency, tax_amount_precision) :
-								(flt(tax_data[0], tax_rate_precision) + "%");
-						}
-						var tax_amount = format_currency(flt(tax_data[1], tax_amount_precision), company_currency,
-							tax_amount_precision);
-
-						item_tax[item_code][tax.name] = [tax_rate, tax_amount];
-					} else {
-						item_tax[item_code][tax.name] = [flt(tax_data, tax_rate_precision) + "%", ""];
-					}
-				});
-			tax_accounts.push([tax.name, tax.account_head]);
-		});
-
-		var headings = $.map([__("Item Name")].concat($.map(tax_accounts, function(head) { return head[1]; })),
-			function(head) { return '<th style="min-width: 100px;">' + (head || "") + "</th>" }).join("\n");
-
-		var distinct_item_names = [];
-		var distinct_items = [];
-		$.each(this.frm.doc["items"] || [], function(i, item) {
-			if(distinct_item_names.indexOf(item.item_code || item.item_name)===-1) {
-				distinct_item_names.push(item.item_code || item.item_name);
-				distinct_items.push(item);
-			}
-		});
-
-		var rows = $.map(distinct_items, function(item) {
-			var item_tax_record = item_tax[item.item_code || item.item_name];
-			if(!item_tax_record) { return null; }
-			return repl("<tr><td>%(item_name)s</td>%(taxes)s</tr>", {
-				item_name: item.item_name,
-				taxes: $.map(tax_accounts, function(head) {
-					return item_tax_record[head[0]] ?
-						"<td>(" + item_tax_record[head[0]][0] + ") " + item_tax_record[head[0]][1] + "</td>" :
-						"<td></td>";
-				}).join("\n")
-			});
-		}).join("\n");
-
-		if(!rows) return "";
-		return '<p><a class="h6 text-muted" href="#" onclick="$(\'.tax-break-up\').toggleClass(\'hide\'); return false;">'
-			+ __("Show tax break-up") + '</a></p>\
-		<div class="tax-break-up hide" style="overflow-x: auto;"><table class="table table-bordered table-hover">\
-			<thead><tr>' + headings + '</tr></thead> \
-			<tbody>' + rows + '</tbody> \
-		</table></div>';
-	},
-
 	validate_company_and_party: function() {
 		var me = this;
 		var valid = true;
@@ -1024,18 +976,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					}
 				}
 			});
-		}
-	},
-
-	show_item_wise_taxes: function() {
-		if(this.frm.fields_dict.other_charges_calculation) {
-			var html = this.get_item_wise_taxes_html();
-			if (html) {
-				this.frm.toggle_display("other_charges_calculation", true);
-				$(this.frm.fields_dict.other_charges_calculation.wrapper).html(html);
-			} else {
-				this.frm.toggle_display("other_charges_calculation", false);
-			}
 		}
 	},
 
@@ -1144,7 +1084,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		if(!item.item_code) {
 			frappe.throw(__("Please enter Item Code to get batch no"));
-		} else if (doc.doctype == "Purchase Receipt" || 
+		} else if (doc.doctype == "Purchase Receipt" ||
 			(doc.doctype == "Purchase Invoice" && doc.update_stock)) {
 
 			return {
@@ -1164,3 +1104,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 });
+
+erpnext.show_serial_batch_selector = function(frm, d) {
+	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
+		new erpnext.SerialNoBatchSelector({
+			frm: frm,
+			item: d,
+			warehouse_details: {
+				type: "Warehouse",
+				name: d.warehouse
+			},
+		});
+	});
+}

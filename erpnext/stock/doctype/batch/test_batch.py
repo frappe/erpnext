@@ -9,6 +9,7 @@ import unittest
 from erpnext.stock.doctype.batch.batch import get_batch_qty, UnableToSelectBatchError
 
 class TestBatch(unittest.TestCase):
+
 	def test_item_has_batch_enabled(self):
 		self.assertRaises(ValidationError, frappe.get_doc({
 			"doctype": "Batch",
@@ -16,14 +17,15 @@ class TestBatch(unittest.TestCase):
 			"item": "_Test Item"
 		}).save)
 
-	def make_batch_item(self):
+	@classmethod
+	def make_batch_item(cls, item_name):
 		from erpnext.stock.doctype.item.test_item import make_item
-		if not frappe.db.exists('ITEM-BATCH-1'):
-			make_item('ITEM-BATCH-1', dict(has_batch_no = 1, create_new_batch = 1))
+		if not frappe.db.exists(item_name):
+			make_item(item_name, dict(has_batch_no = 1, create_new_batch = 1))
 
 	def test_purchase_receipt(self, batch_qty = 100):
 		'''Test automated batch creation from Purchase Receipt'''
-		self.make_batch_item()
+		self.make_batch_item('ITEM-BATCH-1')
 
 		receipt = frappe.get_doc(dict(
 			doctype = 'Purchase Receipt',
@@ -47,7 +49,7 @@ class TestBatch(unittest.TestCase):
 	def test_stock_entry_incoming(self):
 		'''Test batch creation via Stock Entry (Production Order)'''
 
-		self.make_batch_item()
+		self.make_batch_item('ITEM-BATCH-1')
 
 		stock_entry = frappe.get_doc(dict(
 			doctype = 'Stock Entry',
@@ -150,4 +152,43 @@ class TestBatch(unittest.TestCase):
 		self.assertEquals(get_batch_qty(receipt.items[0].batch_no, receipt.items[0].warehouse), 78)
 		self.assertEquals(get_batch_qty(new_batch, receipt.items[0].warehouse), 22)
 
+	def test_get_batch_qty(self):
+		'''Test getting batch quantities by batch_numbers, item_code or warehouse'''
+		self.make_batch_item('ITEM-BATCH-2')
+		self.make_new_batch_and_entry('ITEM-BATCH-2', 'batch a', '_Test Warehouse - _TC')
+		self.make_new_batch_and_entry('ITEM-BATCH-2', 'batch b', '_Test Warehouse - _TC')
 
+		self.assertEquals(get_batch_qty(item_code = 'ITEM-BATCH-2', warehouse = '_Test Warehouse - _TC'),
+			[{'batch_no': u'batch a', 'qty': 90.0}, {'batch_no': u'batch b', 'qty': 90.0}])
+
+		self.assertEquals(get_batch_qty('batch a', '_Test Warehouse - _TC'), 90)
+
+	@classmethod
+	def make_new_batch_and_entry(cls, item_name, batch_name, warehouse):
+		'''Make a new stock entry for given target warehouse and batch name of item'''
+
+		if not frappe.db.exists("Batch", batch_name):
+			batch = frappe.get_doc(dict(
+				doctype = 'Batch',
+				item = item_name,
+				batch_id = batch_name
+			)).insert(ignore_permissions=True)
+			batch.submit()
+
+		stock_entry = frappe.get_doc(dict(
+			doctype = 'Stock Entry',
+			purpose = 'Material Receipt',
+			company = '_Test Company',
+			items = [
+				dict(
+					item_code = item_name,
+					qty = 90,
+					t_warehouse = warehouse,
+					cost_center = 'Main - _TC',
+					rate = 10,
+					batch_no = batch_name,
+					allow_zero_valuation_rate = 1
+				)
+			]
+		)).insert()
+		stock_entry.submit()

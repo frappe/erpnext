@@ -1,8 +1,8 @@
-#Managing User Sign Up via Website
+#Customer / Supplier Signup
 
-Users can sign up for ERPNext account via the ERPNext Website.
+Your Customer and Suppliers can signup to your ERPNext account by following Signup option on the Login Page.
 
-<img src="{{docs_base_url}}/assets/img/website/website-login.png">
+<img class="screenshot" alt="Website User Signup" src="{{docs_base_url}}/assets/img/website/website-login.png">
 
 As seen above the login / sign-up button appears on the homepage of the website generated using ERPNext.
 

@@ -47,9 +47,14 @@ quantity box. These are mostly used if the same Item is purchased in bulk.
 If your product list is very long use the Search field, type the product name
 in Search box.
 
-### Removing an Item
+### Removing an Item from the Cart
 
-Set Qty as zero to remove Item from the POS invoice. There are two ways to remove an Item.
+1. Select row in the cart and clik on delete button in the numeric keypad
+  
+<img class="screenshot" alt="POS Item" src="{{docs_base_url}}/assets/img/accounts/pos_deleted_item.gif">
+
+
+2. Set Qty as zero to remove Item from the POS invoice. There are two ways to remove an Item.
 
   * If Item's Qty is 1, click on a minus sign to make it zero.
 

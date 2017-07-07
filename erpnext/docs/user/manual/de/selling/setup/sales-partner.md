@@ -27,10 +27,7 @@ Um eine Übersicht Ihrer Partner zu erhalten, gehen Sie zu:
 
 https://example.erpnext.com/Partners
 
-![Auflistung der Vertriebspartner]({{docs_base_url}}/assets/old_images/erpnext/sales-partner-listing.png)
+<img class="screenshot" alt="Auflistung der Vertriebspartner" src="{{docs_base_url}}/assets/img/crm/sales-partner-listing.png">
 
-Im Folgenden sehen Sie, wie die vollständigen Daten Ihres Partners auf der Webseite angezeigt werden.
-
-![Veröffentlichte Vertriebspartner]({{docs_base_url}}/assets/old_images/erpnext/sales-partner-published.png)
 
 {next}

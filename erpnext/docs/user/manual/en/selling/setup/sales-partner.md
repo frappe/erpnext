@@ -25,10 +25,7 @@ To see listing of partner, you should go to:
 
 https://example.erpnext.com/partners
 
-![Sales Partner Listing]({{docs_base_url}}/assets/old_images/erpnext/sales-partner-listing.png)
+<img class="screenshot" alt="Sales Partner" src="{{docs_base_url}}/assets/img/crm/sales-partner-listing.png">
 
-Following is the complete partners details published on the website.
-
-![Sales Partner Published]({{docs_base_url}}/assets/old_images/erpnext/sales-partner-published.png)
 
 {next}

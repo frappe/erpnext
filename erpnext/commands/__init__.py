@@ -16,8 +16,11 @@ def call_command(cmd, context):
 	help='Run the demo for so many days. Default 100')
 @click.option('--resume', default=False, is_flag=True,
 	help='Continue running the demo for given days')
+@click.option('--reinstall', default=False, is_flag=True,
+	help='Reinstall site before demo')
 @pass_context
-def make_demo(context, site, domain='Manufacturing', days=100, resume=False):
+def make_demo(context, site, domain='Manufacturing', days=100,
+	resume=False, reinstall=False):
 	"Reinstall site and setup demo"
 	from frappe.commands.site import _reinstall
 	from frappe.installer import install_app
@@ -30,7 +33,8 @@ def make_demo(context, site, domain='Manufacturing', days=100, resume=False):
 			from erpnext.demo import demo
 			demo.simulate(days=days)
 	else:
-		_reinstall(site, yes=True)
+		if reinstall:
+			_reinstall(site, yes=True)
 		with frappe.init_site(site=site):
 			frappe.connect()
 			if not 'erpnext' in frappe.get_installed_apps():

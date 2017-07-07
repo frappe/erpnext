@@ -32,17 +32,24 @@ in the data below the column headings.
 
 <img alt="Download Template" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/import-file.png">
 
-Then export your template or save it as a **Comma Separated Values** (CSV)
-file.
+Then export your template or save it as a Excel or Comma Separated Values (CSV)
+file. To export the document in Excel tick the checkbox for Download in Excel File Format 
 
 <img alt="Download Template" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/import-csv.png">
 
-### 3\. Upload the .csv File
+### Download in Excel
 
-Finally attach the .csv file in the section. Click on the "Upload and Import"
+<img alt="Download Template" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/data-import-excel.png">
+
+### 3\. Upload the File ethier in .xlsx or .csv 
+
+Finally attach the  file in the section. Click on the "Upload". Once the upload is successfull click Import"
 button.
 
 <img alt="Upload" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/data-import-3.png">
+
+
+<img alt="Upload" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/data-import-4.png">
 
 #### Notes:
 

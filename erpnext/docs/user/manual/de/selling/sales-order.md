@@ -9,11 +9,9 @@ Wenn Ihr Kunde das Angebot annimmt, können Sie das Angebot in einen Kundenauftr
 
 ### Flußdiagramm des Kundenauftrags
 
-![Kundenauftrag]({{docs_base_url}}/assets/old_images/erpnext/sales-order-f.jpg)
+<img class="screenshot" alt="Kundenauftrag aus Angebot erstellen" src="{{docs_base_url}}/assets/img/selling/sales-order-f.jpg">
 
-Um einen neuen Kundenauftrag zu erstellen gehen Sie zu:
-
-> Vertrieb > Kundenauftrag > Neuer Kundenauftrag
+Um einen neuen Kundenauftrag zu erstellen gehen Sie zu: > Vertrieb > Kundenauftrag > Neuer Kundenauftrag
 
 ### Einen Kundenauftrag aus einem Angebot erstellen
 

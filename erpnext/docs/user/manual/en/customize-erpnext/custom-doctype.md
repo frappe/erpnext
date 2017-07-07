@@ -1,4 +1,4 @@
-DocType or Document Type is a tool to insert form in ERPNext. The forms like Sales Order,
+DocType or a Document Type is a tool to insert form in ERPNext. The forms like Sales Order,
 Sales Invoices, Production Order are added as Doctype in the backend. Let's assume we are
 creating a Custom Doctype for a Book.
 
@@ -8,7 +8,7 @@ To create a new **DocType**, go to:
 
 `Setup > Customize > Doctype > New`
 
-#### Doctype Detail
+#### DocType Detail
 
 1. Module: Select module in which this Doctype should be placed.
 1. Document Type: Specify if this Doctype will be to carry master data, or to track transactions. Doctype
@@ -52,13 +52,13 @@ In this table, you should select roles and define permission roles for them for 
 
 <img alt="Doctype Permissions" class="screenshot" src="{{docs_base_url}}/assets/img/setup/customize/doctype-permissions.png">
 
-#### Save Doctype
+#### Save DocType
 
 On saving doctype, you will get pop-up to provide name for this Doctype.
 
-<img alt="Doctype Save" class="screenshot" src="{{docs_base_url}}/assets/img/setup/customize/Doctype-save.png">
+<img alt="Doctype Save" class="screenshot" src="{{docs_base_url}}/assets/img/setup/customize/doctype-save.png">
 
-#### Doctype in System
+#### DocType in System
 
 To check this Doctype, open Module defined for this doctype. Since we have added Books doctype in the
 Human Resource module, to access this doctype, go to:
@@ -71,6 +71,6 @@ Human Resource module, to access this doctype, go to:
 
 Using the fields entered, following is the master one book.
 
-<img alt="Doctype Form" class="screenshot" src="{{docs_base_url}}/assets/img/setup/customize/Doctype-book-added.png">
+<img alt="Doctype Form" class="screenshot" src="{{docs_base_url}}/assets/img/setup/customize/doctype-book-added.png">
 
 {next}

@@ -8,11 +8,14 @@ from frappe.utils import flt
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
 
 def execute(filters=None):
+	return _execute(filters)
+
+def _execute(filters=None, additional_table_columns=None, additional_query_columns=None):
 	if not filters: filters = {}
-	columns = get_columns()
+	columns = get_columns(additional_table_columns)
 	last_col = len(columns)
 
-	item_list = get_items(filters)
+	item_list = get_items(filters, additional_query_columns)
 	if item_list:
 		item_row_tax, tax_accounts = get_tax_accounts(item_list, columns)
 	columns.append({
@@ -21,7 +24,7 @@ def execute(filters=None):
 		"fieldtype": "Data",
 		"width": 80
 	})
-	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	company_currency = frappe.db.get_value("Company", filters.get("company"), "default_currency")
 	mode_of_payments = get_mode_of_payments(set([d.parent for d in item_list]))
 
 	data = []
@@ -35,10 +38,17 @@ def execute(filters=None):
 		if not delivery_note and d.update_stock:
 			delivery_note = d.parent
 
-		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date, d.customer, d.customer_name,
-			d.customer_group, d.debit_to, ", ".join(mode_of_payments.get(d.parent, [])), 
+		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date, d.customer, d.customer_name]
+
+		if additional_query_columns:
+			for col in additional_query_columns:
+				row.append(d.get(col))
+
+		row += [
+			d.customer_group, d.debit_to, ", ".join(mode_of_payments.get(d.parent, [])),
 			d.territory, d.project, d.company, d.sales_order,
-			delivery_note, d.income_account, d.cost_center, d.qty, d.base_net_rate, d.base_net_amount]
+			delivery_note, d.income_account, d.cost_center, d.qty, d.base_net_rate, d.base_net_amount
+		]
 
 		for tax in tax_accounts:
 			row.append(item_row_tax.get(d.name, {}).get(tax, 0))
@@ -50,12 +60,18 @@ def execute(filters=None):
 
 	return columns, data
 
-def get_columns():
-	return [
+def get_columns(additional_table_columns):
+	columns = [
 		_("Item Code") + ":Link/Item:120", _("Item Name") + "::120",
 		_("Item Group") + ":Link/Item Group:100", _("Invoice") + ":Link/Sales Invoice:120",
 		_("Posting Date") + ":Date:80", _("Customer") + ":Link/Customer:120",
-		_("Customer Name") + "::120", _("Customer Group") + ":Link/Customer Group:120",
+		_("Customer Name") + "::120"]
+
+	if additional_table_columns:
+		columns += additional_table_columns
+
+	columns += [
+		_("Customer Group") + ":Link/Customer Group:120",
 		_("Receivable Account") + ":Link/Account:120",
 		_("Mode of Payment") + "::120", _("Territory") + ":Link/Territory:80",
 		_("Project") + ":Link/Project:80", _("Company") + ":Link/Company:100",
@@ -65,6 +81,8 @@ def get_columns():
 		_("Rate") + ":Currency/currency:120",
 		_("Amount") + ":Currency/currency:120"
 	]
+
+	return columns
 
 def get_conditions(filters):
 	conditions = ""
@@ -76,15 +94,18 @@ def get_conditions(filters):
 		("to_date", " and si.posting_date<=%(to_date)s")):
 			if filters.get(opts[0]):
 				conditions += opts[1]
-				
+
 	if filters.get("mode_of_payment"):
 		conditions += """ and exists(select name from `tabSales Invoice Payment`
-			 where parent=si.name 
+			 where parent=si.name
 			 	and ifnull(`tabSales Invoice Payment`.mode_of_payment, '') = %(mode_of_payment)s)"""
 
 	return conditions
 
-def get_items(filters):
+def get_items(filters, additional_query_columns):
+	if additional_query_columns:
+		additional_query_columns = ', ' + ', '.join(additional_query_columns)
+
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
 		select
@@ -93,10 +114,11 @@ def get_items(filters):
 			si_item.item_code, si_item.item_name, si_item.item_group, si_item.sales_order,
 			si_item.delivery_note, si_item.income_account, si_item.cost_center, si_item.qty,
 			si_item.base_net_rate, si_item.base_net_amount, si.customer_name,
-			si.customer_group, si_item.so_detail, si.update_stock
+			si.customer_group, si_item.so_detail, si.update_stock {0}
 		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
 		where si.name = si_item.parent and si.docstatus = 1 %s
-		order by si.posting_date desc, si_item.item_code desc""" % conditions, filters, as_dict=1)
+		order by si.posting_date desc, si_item.item_code desc
+		""".format(additional_query_columns or '') % conditions, filters, as_dict=1)
 
 def get_tax_accounts(item_list, columns):
 	import json
