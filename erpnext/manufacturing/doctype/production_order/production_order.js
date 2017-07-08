@@ -265,7 +265,7 @@ erpnext.production_order = {
 					erpnext.production_order.stop_production_order(frm, "Resumed");
 				}, __("Status"));
 			}
-			
+
 			if(!frm.doc.skip_transfer){
 				if ((flt(doc.material_transferred_for_manufacturing) < flt(doc.qty))
 					&& frm.doc.status != 'Stopped') {
@@ -274,7 +274,7 @@ erpnext.production_order = {
 						erpnext.production_order.make_se(frm, 'Material Transfer for Manufacture');
 					});
 					start_btn.addClass('btn-primary');
-					}
+				}
 			}
 
 			if(!frm.doc.skip_transfer){
@@ -293,8 +293,9 @@ erpnext.production_order = {
 			} else {
 				if ((flt(doc.produced_qty) < flt(doc.qty)) && frm.doc.status != 'Stopped') {
 					frm.has_finish_btn = true;
-					var finish_btn = frm.add_custom_button(__('Finish'),
-						cur_frm.cscript['Update Finished Goods']);
+					var finish_btn = frm.add_custom_button(__('Finish'), function() {
+						erpnext.production_order.make_se(frm, 'Manufacture');
+					});
 					finish_btn.addClass('btn-primary');
 				}
 			}
