@@ -10,9 +10,10 @@ frappe.ui.form.on('Fiscal Year Pay Period', {
 		var pay_period_start_date = frm.doc.pay_period_start_date;
 		var pay_period_end_date = frm.doc.pay_period_end_date;
 		var payment_frequency = frm.doc.payment_frequency;
-
-		if(pay_period_start_date && pay_period_end_date && payment_frequency){
-			get_pay_period_dates(frm);
+		if(frm.doc.__islocal){
+			if(pay_period_start_date && pay_period_end_date && payment_frequency){
+				get_pay_period_dates(frm);
+			}
 		}
 	},
 
