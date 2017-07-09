@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Fiscal Year Pay Period', {
 	onload: function(frm) {
-		remove_first_empty_row(frm, 'dates');
+		remove_rows(frm, 'dates');
 	},
 
 	refresh: function(frm) {
@@ -12,6 +12,7 @@ frappe.ui.form.on('Fiscal Year Pay Period', {
 		var payment_frequency = frm.doc.payment_frequency;
 		if(frm.doc.__islocal){
 			if(pay_period_start_date && pay_period_end_date && payment_frequency){
+				remove_rows(frm, 'dates');
 				get_pay_period_dates(frm);
 			}
 		}
@@ -25,6 +26,12 @@ frappe.ui.form.on('Fiscal Year Pay Period', {
 
 	pay_period_end_date: function(frm) {
 		if (frm.doc.pay_period_end_date){
+			frm.refresh();
+		}
+	},
+
+	payment_frequency: function(frm) {
+		if (frm.doc.payment_frequency){
 			frm.refresh();
 		}
 	}
@@ -62,9 +69,9 @@ auto_populate_date_table = function(frm, dates_array){
 	}
 };
 
-remove_first_empty_row = function(frm, child_table_name) {
+remove_rows = function(frm, child_table_name) {
 	date_table = frm.doc.dates || [];
-	if (date_table.length === 1 && !date_table[0].end_date && !date_table[0].start_date){
+	$.each(date_table, function(){
 		frm.get_field(child_table_name).grid.grid_rows[0].remove();
-	}
+	});
 }
