@@ -19,8 +19,9 @@ def get_pay_period_dates(payroll_start, payroll_end, payroll_frequency):
 	payroll_frequency = payroll_frequency.lower()
 	start = getdate(payroll_start)
 
-	key = {'monthly': 12, 'bimonthly': 6, 'fortnightly': 27, 'weekly': 52, 'daily': 366}
-	for _ in range(key.get(payroll_frequency)):
+	# `frequency_key` contains the maximum number of iterations for each key in the dict
+	frequency_key = {'monthly': 12, 'bimonthly': 6, 'fortnightly': 27, 'weekly': 52, 'daily': 366}
+	for _ in range(frequency_key.get(payroll_frequency)):
 		end = getdate(add_months(start, 1))
 		dates.append(
 			{
