@@ -2,6 +2,10 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Fiscal Year Pay Period', {
+	onload: function(frm) {
+		remove_first_empty_row(frm, 'dates');
+	},
+
 	refresh: function(frm) {
 		var pay_period_start_date = frm.doc.pay_period_start_date;
 		var pay_period_end_date = frm.doc.pay_period_end_date;
@@ -47,12 +51,6 @@ auto_populate_date_table = function(frm, dates_array){
 	var date_table;
 
 	if(dates_array){
-		// Check if table is default empty table
-		if (!proceed){
-			remove_first_empty_row(frm, 'dates');
-			contnue = 1;
-		}
-
 		for(i=0; i < dates_array.length; i++){
 			var child = frm.add_child("dates");
 			date_obj = dates_array[i];
