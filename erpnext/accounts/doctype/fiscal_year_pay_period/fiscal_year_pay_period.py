@@ -20,9 +20,11 @@ def get_pay_period_dates(payroll_start, payroll_end, payroll_frequency):
 	start = getdate(payroll_start)
 
 	# `frequency_key` contains the maximum number of iterations for each key in the dict
-	frequency_key = {'monthly': 12, 'bimonthly': 6, 'fortnightly': 27, 'weekly': 52, 'daily': 366}
-	for _ in range(frequency_key.get(payroll_frequency)):
-		end = getdate(add_months(start, 1))
+	loop_keys = get_frequency_loop_values()
+	frequency_kwarg = get_frequency_kwargs()
+
+	for _ in range(loop_keys.get(payroll_frequency)):
+		end = add_to_date(start, **frequency_kwarg.get(payroll_frequency))
 		dates.append(
 			{
 				'start_date': start.strftime(DATE_FORMAT),
@@ -30,9 +32,27 @@ def get_pay_period_dates(payroll_start, payroll_end, payroll_frequency):
 			}
 		)
 
-		if end >= getdate(payroll_end):
+		if end > getdate(payroll_end):
 			break
 		else:
 			start = end
 
 	return dates
+
+
+def get_frequency_kwargs():
+	return {
+		'bimonthly': {'years': 0, 'months': 2, 'days': 0},
+		'monthly': {'years': 0, 'months': 1, 'days': 0},
+		'fortnightly': {'years': 0, 'months': 0, 'days': 14},
+		'weekly': {'years': 0, 'months': 0, 'days': 7},
+		'daily': {'years': 0, 'months': 0, 'days': 1}
+	}
+
+
+def get_frequency_loop_values():
+	return {
+		'monthly': 12, 'bimonthly': 6,
+		'fortnightly': 27, 'weekly': 52,
+		'daily': 366
+	}

@@ -39,6 +39,74 @@ class TestFiscalYearPayPeriod(unittest.TestCase):
 				getdate(fypp_record['dates'][i]['end_date'])
 			)
 
+	def test_get_pay_period_dates_daily(self):
+		pay_periods1 = [
+			{'start_date': '2017-07-03', 'end_date': '2017-07-03'},
+			{'start_date': '2017-07-04', 'end_date': '2017-07-04'},
+			{'start_date': '2017-07-05', 'end_date': '2017-07-05'},
+			{'start_date': '2017-07-06', 'end_date': '2017-07-06'},
+			{'start_date': '2017-07-07', 'end_date': '2017-07-07'},
+			{'start_date': '2017-07-08', 'end_date': '2017-07-08'},
+			{'start_date': '2017-07-09', 'end_date': '2017-07-09'},
+		]
+
+		self.assertEqual(
+			get_pay_period_dates('2017-07-03', '2017-07-09', 'Daily'),
+			pay_periods1
+		)
+
+	def test_get_pay_period_dates_bimonthly(self):
+		pay_periods1 = [
+			{'start_date': '2017-01-01', 'end_date': '2017-02-28'},
+			{'start_date': '2017-03-01', 'end_date': '2017-04-30'},
+			{'start_date': '2017-05-01', 'end_date': '2017-06-30'},
+			{'start_date': '2017-07-01', 'end_date': '2017-08-31'},
+			{'start_date': '2017-09-01', 'end_date': '2017-10-31'},
+			{'start_date': '2017-11-01', 'end_date': '2017-12-31'}
+		]
+
+		self.assertEqual(
+			get_pay_period_dates('2017-01-01', '2017-12-31', 'Bimonthly'),
+			pay_periods1
+		)
+
+	def test_get_pay_period_dates_weekly(self):
+		pay_periods1 = [
+			{'start_date': '2017-07-03', 'end_date': '2017-07-09'},
+			{'start_date': '2017-07-10', 'end_date': '2017-07-16'},
+			{'start_date': '2017-07-17', 'end_date': '2017-07-23'},
+			{'start_date': '2017-07-24', 'end_date': '2017-07-30'},
+			{'start_date': '2017-07-31', 'end_date': '2017-08-06'},
+		]
+
+		self.assertEqual(
+			get_pay_period_dates('2017-07-03', '2017-08-06', 'Weekly'),
+			pay_periods1
+		)
+
+	def test_get_pay_period_dates_fortnightly(self):
+		pay_periods1 = [
+			{'start_date': '2017-01-01', 'end_date': '2017-01-14'},
+			{'start_date': '2017-01-15', 'end_date': '2017-01-28'},
+		]
+
+		self.assertEqual(
+			get_pay_period_dates('2017-01-01', '2017-01-28', 'Fortnightly'),
+			pay_periods1
+		)
+
+		pay_periods2 = [
+			{'start_date': '2017-01-01', 'end_date': '2017-01-14'},
+			{'start_date': '2017-01-15', 'end_date': '2017-01-28'},
+			{'start_date': '2017-01-29', 'end_date': '2017-02-11'},
+			{'start_date': '2017-02-12', 'end_date': '2017-02-25'},
+		]
+
+		self.assertEqual(
+			get_pay_period_dates('2017-01-01', '2017-02-25', 'Fortnightly'),
+			pay_periods2
+		)
+
 	def test_get_pay_period_dates_monthly(self):
 		pay_periods1 = [
 			{'start_date': '2017-01-01', 'end_date': '2017-01-31'},
