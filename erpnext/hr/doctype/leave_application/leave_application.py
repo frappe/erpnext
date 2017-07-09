@@ -49,14 +49,14 @@ class LeaveApplication(Document):
 		if self.leave_approver and self.leave_approver != frappe.session.user and self.docstatus ==1 :
 			self.docstatus =0
 			self.workflow_state = "Pending"
-			frappe.throw(_("You are not The Direct Manger"))
+			frappe.throw(_("You are not The Direct Manager"))
 		
 
 	def before_submit (self):
 		if self.leave_approver and self.leave_approver != frappe.session.user and self.docstatus ==1 :
 			self.docstatus =0
 			self.workflow_state = "Pending"
-			frappe.throw(_("You are not The Direct Manger"))
+			frappe.throw(_("You are not The Direct Manager"))
 			
 	def validate_back_days(self):
 		from frappe.utils import getdate, nowdate
@@ -80,12 +80,12 @@ class LeaveApplication(Document):
 	
 	def on_submit(self):
 		if self.half_day != 1 :
-			self.notify_exec_manager()
+			# self.notify_exec_manager()
 			self.notify_employee(self.status)
 	
 	def on_update_after_submit(self):
 		if self.half_day != 1 :
-			self.notify_exec_manager()
+			# self.notify_exec_manager()
 			self.notify_employee(self.status)
 
 

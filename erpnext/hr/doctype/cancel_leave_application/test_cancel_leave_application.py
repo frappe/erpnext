@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 
-# test_records = frappe.get_test_records('Over Time')
+# test_records = frappe.get_test_records('Cancel Leave Application')
 
-class TestOverTime(unittest.TestCase):
+class TestCancelLeaveApplication(unittest.TestCase):
 	pass

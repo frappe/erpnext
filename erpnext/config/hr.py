@@ -77,6 +77,11 @@ def get_data():
 					"description":_("Employee Resignation"),
 				},
 				{
+					"type": "doctype",
+					"name": "Cancel Leave Application",
+					"description":_("Cancel Leave Application")
+				},
+				{
 					"type": "report",
 					"name": "Financial Custody Report",
 					"description":_("Financial Custody"),
