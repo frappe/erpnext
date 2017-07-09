@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from six.moves import range
+from erpnext.accounts.doctype.fiscal_year_pay_period.fiscal_year_pay_period import get_pay_period_dates
 
 test_records = frappe.get_test_records('Fiscal Year Pay Period')
 from frappe.utils import getdate
@@ -16,7 +17,6 @@ test_dependencies = ["Fiscal Year", "Company"]
 class TestFiscalYearPayPeriod(unittest.TestCase):
 	def test_create_fiscal_year_pay_period(self):
 		fypp_record = test_records[0]
-		# print fypp_record
 
 		if frappe.db.exists('Fiscal Year Pay Period', fypp_record['payroll_period_name']):
 			frappe.delete_doc('Fiscal Year Pay Period', fypp_record['payroll_period_name'])
@@ -39,6 +39,60 @@ class TestFiscalYearPayPeriod(unittest.TestCase):
 				getdate(fypp_record['dates'][i]['end_date'])
 			)
 
+	def test_get_pay_period_dates_monthly(self):
+		pay_periods1 = [
+			{'start_date': '2017-01-01', 'end_date': '2017-01-31'},
+			{'start_date': '2017-02-01', 'end_date': '2017-02-28'},
+			{'start_date': '2017-03-01', 'end_date': '2017-03-31'},
+			{'start_date': '2017-04-01', 'end_date': '2017-04-30'},
+			{'start_date': '2017-05-01', 'end_date': '2017-05-31'},
+			{'start_date': '2017-06-01', 'end_date': '2017-06-30'},
+			{'start_date': '2017-07-01', 'end_date': '2017-07-31'},
+			{'start_date': '2017-08-01', 'end_date': '2017-08-31'},
+			{'start_date': '2017-09-01', 'end_date': '2017-09-30'},
+			{'start_date': '2017-10-01', 'end_date': '2017-10-31'},
+			{'start_date': '2017-11-01', 'end_date': '2017-11-30'},
+			{'start_date': '2017-12-01', 'end_date': '2017-12-31'}
+		]
+		self.assertEqual(
+			get_pay_period_dates('2017-01-01', '2017-12-31', 'Monthly'),
+			pay_periods1
+		)
+
+		pay_periods2 = [
+			{'start_date': '2017-01-07', 'end_date': '2017-02-06'},
+			{'start_date': '2017-02-07', 'end_date': '2017-03-06'},
+			{'start_date': '2017-03-07', 'end_date': '2017-04-06'},
+			{'start_date': '2017-04-07', 'end_date': '2017-05-06'},
+			{'start_date': '2017-05-07', 'end_date': '2017-06-06'},
+			{'start_date': '2017-06-07', 'end_date': '2017-07-06'},
+			{'start_date': '2017-07-07', 'end_date': '2017-08-06'},
+			{'start_date': '2017-08-07', 'end_date': '2017-09-06'},
+			{'start_date': '2017-09-07', 'end_date': '2017-10-06'},
+			{'start_date': '2017-10-07', 'end_date': '2017-11-06'},
+			{'start_date': '2017-11-07', 'end_date': '2017-12-06'},
+			{'start_date': '2017-12-07', 'end_date': '2018-01-06'},
+		]
+
+		self.assertEqual(
+			get_pay_period_dates('2017-01-07', '2018-01-06', 'Monthly'),
+			pay_periods2
+		)
+
+		pay_periods3 = [
+			{'start_date': '2017-01-07', 'end_date': '2017-02-06'},
+			{'start_date': '2017-02-07', 'end_date': '2017-03-06'},
+			{'start_date': '2017-03-07', 'end_date': '2017-04-06'},
+			{'start_date': '2017-04-07', 'end_date': '2017-05-06'},
+			{'start_date': '2017-05-07', 'end_date': '2017-06-06'},
+		]
+
+		self.assertEqual(
+			get_pay_period_dates('2017-01-07', '2017-06-06', 'Monthly'),
+			pay_periods3
+		)
+
+		# self.assertRaises(Exception, get_pay_period_dates, '2017-01-07', '2017-06-11', 'Monthly')
 
 # 	def test_create_fiscal_year_with_pay_period(self):
 # 		print test_records
