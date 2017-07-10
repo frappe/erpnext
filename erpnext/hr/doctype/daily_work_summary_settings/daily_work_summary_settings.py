@@ -22,9 +22,11 @@ def trigger_emails():
 	settings = frappe.get_doc('Daily Work Summary Settings')
 	for d in settings.companies:
 		# if current hour
+		print frappe.utils.nowtime().split(':')[0], d.send_emails_at.split(':')[0]
 		if frappe.utils.nowtime().split(':')[0] == d.send_emails_at.split(':')[0]:
 			emails = get_employee_emails(d.company)
 			# find emails relating to a company
+			print emails
 			if emails:
 				daily_work_summary = frappe.get_doc(dict(doctype='Daily Work Summary',
 					company=d.company)).insert()
