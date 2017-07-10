@@ -590,9 +590,6 @@ class TestSalesInvoice(unittest.TestCase):
 		si = frappe.get_doc('Sales Invoice', sales_invoice[0].name)
 		self.assertEquals(si.grand_total, 630.0)
 
-		ps = frappe.get_all('POS Session', fields=['name'], filters = {'pos_session_invoice': si.name})
-		self.assertEquals(ps[0].name, pos_session)
-
 		self.pos_gl_entry(si, pos, 330, pos_session)
 
 	def pos_gl_entry(self, si, pos, cash_amount, pos_session = None):
