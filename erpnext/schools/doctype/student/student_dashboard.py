@@ -11,16 +11,20 @@ def get_data():
 				'items': ['Program Enrollment']
 			},
 			{
-				'label': _('Fee'),
-				'items': ['Fees']
+				'label': _('Student Activity'),
+				'items': ['Student Log', 'Student Group', ]
 			},
 			{
 				'label': _('Assessment'),
 				'items': ['Assessment Result']
 			},
 			{
-				'label': _('Student Activity'),
-				'items': ['Student Log', 'Student Group', 'Student Attendance', 'Student Leave Application']
+				'label': _('Attendance'),
+				'items': ['Student Attendance', 'Student Leave Application']
+			},
+			{
+				'label': _('Fee'),
+				'items': ['Fees']
 			}
 		]
 	}
