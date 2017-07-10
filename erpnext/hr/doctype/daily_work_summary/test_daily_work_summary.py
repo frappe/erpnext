@@ -44,6 +44,8 @@ class TestDailyWorkSummary(unittest.TestCase):
 		email_account.db_set('enable_incoming', 1)
 		email_account.receive(test_mails=test_mails)
 
+		print frappe.get_all('Daily Work Summary')
+
 		daily_work_summary = frappe.get_doc('Daily Work Summary',
 			frappe.get_all('Daily Work Summary')[0].name)
 
