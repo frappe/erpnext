@@ -6,7 +6,8 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from six.moves import range
-from erpnext.accounts.doctype.fiscal_year_pay_period.fiscal_year_pay_period import get_pay_period_dates
+from erpnext.accounts.doctype.fiscal_year_pay_period.fiscal_year_pay_period import get_pay_period_dates, \
+	dates_are_regular
 
 test_records = frappe.get_test_records('Fiscal Year Pay Period')
 from frappe.utils import getdate
@@ -38,6 +39,33 @@ class TestFiscalYearPayPeriod(unittest.TestCase):
 				saved_fy.dates[i].end_date,
 				getdate(fypp_record['dates'][i]['end_date'])
 			)
+
+	def test_create_fiscal_year_pay_period_wrong_dates_monthly(self):
+		fypp_record = test_records[1]
+
+		if frappe.db.exists('Fiscal Year Pay Period', fypp_record['payroll_period_name']):
+			frappe.delete_doc('Fiscal Year Pay Period', fypp_record['payroll_period_name'])
+
+		fy = frappe.get_doc(fypp_record)
+		self.assertRaises(frappe.ValidationError, fy.insert)
+
+	def test_create_fiscal_year_pay_period_wrong_dates_fortnightly(self):
+		fypp_record = test_records[3]
+
+		if frappe.db.exists('Fiscal Year Pay Period', fypp_record['payroll_period_name']):
+			frappe.delete_doc('Fiscal Year Pay Period', fypp_record['payroll_period_name'])
+
+		fy = frappe.get_doc(fypp_record)
+		self.assertRaises(frappe.ValidationError, fy.insert)
+
+	def test_create_fiscal_year_pay_period_wrong_dates_weekly(self):
+		fypp_record = test_records[4]
+
+		if frappe.db.exists('Fiscal Year Pay Period', fypp_record['payroll_period_name']):
+			frappe.delete_doc('Fiscal Year Pay Period', fypp_record['payroll_period_name'])
+
+		fy = frappe.get_doc(fypp_record)
+		self.assertRaises(frappe.ValidationError, fy.insert)
 
 	def test_get_pay_period_dates_daily(self):
 		pay_periods1 = [
@@ -160,7 +188,37 @@ class TestFiscalYearPayPeriod(unittest.TestCase):
 			pay_periods3
 		)
 
-		# self.assertRaises(Exception, get_pay_period_dates, '2017-01-07', '2017-06-11', 'Monthly')
+		self.assertRaises(frappe.ValidationError, get_pay_period_dates, '2017-01-07', '2017-06-11', 'Monthly')
+		self.assertRaises(frappe.ValidationError, get_pay_period_dates, '2017-01-07', '2018-01-01', 'Monthly')
+
+	def test_get_pay_period_dates_irregular_date(self):
+		pay_periods = [
+			{'start_date': '2017-01-07', 'end_date': '2017-02-06'},
+			{'start_date': '2017-02-07', 'end_date': '2017-03-06'},
+			{'start_date': '2017-03-07', 'end_date': '2017-04-06'},
+			{'start_date': '2017-04-07', 'end_date': '2017-05-06'},
+			{'start_date': '2017-05-07', 'end_date': '2017-06-06'},
+		]
+
+		# self.assertEqual(
+		# 	get_pay_period_dates('2017-01-07', '2017-06-06', 'Monthly'),
+		# 	pay_periods
+		# )
+
+		self.assertRaises(frappe.ValidationError, get_pay_period_dates, '2017-01-07', '2017-06-11', 'Monthly')
+
+	def test_date_is_regular(self):
+		self.assertTrue(dates_are_regular(getdate('2017-01-01'), getdate('2017-01-14'), 'Fortnightly'))
+		self.assertFalse(dates_are_regular(getdate('2017-01-01'),getdate('2017-01-15'), 'Fortnightly'))
+		self.assertTrue(dates_are_regular(getdate('2017-01-07'), getdate('2017-02-06'), 'Monthly'))
+		self.assertFalse(dates_are_regular(getdate('2017-01-07'), getdate('2017-02-15'), 'Monthly'))
+		self.assertTrue(dates_are_regular(getdate('2017-01-07'), getdate('2017-03-06'), 'Bimonthly'))
+		self.assertFalse(dates_are_regular(getdate('2017-01-07'), getdate('2017-02-15'), 'Bimonthly'))
+		self.assertFalse(dates_are_regular(getdate('2017-01-07'), getdate('2017-03-15'), 'Bimonthly'))
+		self.assertTrue(dates_are_regular(getdate('2017-01-07'), getdate('2017-01-13'), 'Weekly'))
+		self.assertFalse(dates_are_regular(getdate('2017-01-07'), getdate('2017-01-22'), 'Weekly'))
+		self.assertTrue(dates_are_regular(getdate('2017-03-06'), getdate('2017-03-06'), 'Daily'))
+		self.assertTrue(dates_are_regular(getdate('2017-03-06'), getdate('2017-03-07'), 'Daily'))
 
 # 	def test_create_fiscal_year_with_pay_period(self):
 # 		print test_records
