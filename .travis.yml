@@ -45,6 +45,7 @@ before_script:
   - bench use test_site
   - bench reinstall --yes
   - bench build
+  - bench scheduler disable
   - bench start &
   - sleep 10
 
