@@ -103,5 +103,20 @@
     "payment_frequency": "Weekly",
     "pay_period_start_date": "2017-01-01",
     "payroll_period_name": "_Test 2017 - Weekly"
+  },
+  {
+    "pay_period_end_date": "2017-01-02",
+    "dates":[
+      {
+        "end_date": "2017-01-07",
+        "doctype": "Fiscal Year Pay Date",
+        "start_date": "2017-01-01"
+      }
+    ],
+    "is_active": "Yes",
+    "doctype": "Fiscal Year Pay Period",
+    "payment_frequency": "Weekly",
+    "pay_period_start_date": "2017-12-01",
+    "payroll_period_name": "_Test 2017 - Weekly"
   }
 ]

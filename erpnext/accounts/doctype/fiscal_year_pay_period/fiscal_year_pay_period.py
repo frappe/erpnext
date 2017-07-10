@@ -13,6 +13,7 @@ from six.moves import range
 
 class FiscalYearPayPeriod(Document):
 	def validate(self):
+		self.validate_dates()
 		self.validate_payment_frequency()
 		self.validate_period_start_end_dates()
 
@@ -29,6 +30,8 @@ class FiscalYearPayPeriod(Document):
 	def validate_payment_frequency(self):
 		_validate_payment_frequency(self.payment_frequency)
 
+	def validate_dates(self):
+		_validate_dates(self.pay_period_start_date, self.pay_period_end_date)
 
 
 @frappe.whitelist()
@@ -86,6 +89,8 @@ def dates_interval_valid(start, end, frequency):
 	diff = relativedelta(add_days(end, 1), start)
 	diff_td = add_days(end, 1) - start
 
+	_validate_dates(start, end)
+
 	if frequency == 'monthly':
 		return (diff.months and not diff.days) or \
 			(diff.years and not diff.months and not diff.days)
@@ -105,4 +110,17 @@ def _validate_payment_frequency(payment_frequency):
 	if payment_frequency.lower() not in ['monthly', 'fortnightly', 'weekly', 'bimonthly', 'daily']:
 		frappe.throw(
 			translate('{0} is not a valid Payment Frequency'.format(payment_frequency))
+		)
+
+
+def _validate_dates(start_date, end_date):
+	"""
+	Checks that `start_date` is earlier than `end_date`.
+	Throws `frappe.ValidationError` is otherwise is the case
+	"""
+	start_date = getdate(start_date)
+	end_date = getdate(end_date)
+	if getdate(start_date) > getdate(end_date):
+		frappe.throw(
+			translate('{0} cannot be earlier than {1}'.format(end_date, start_date))
 		)

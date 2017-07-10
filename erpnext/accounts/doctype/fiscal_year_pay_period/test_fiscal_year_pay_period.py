@@ -7,7 +7,7 @@ import frappe
 import unittest
 from six.moves import range
 from erpnext.accounts.doctype.fiscal_year_pay_period.fiscal_year_pay_period import get_pay_period_dates, \
-	dates_interval_valid, _validate_payment_frequency
+	dates_interval_valid, _validate_payment_frequency, _validate_dates
 
 test_records = frappe.get_test_records('Fiscal Year Pay Period')
 from frappe.utils import getdate
@@ -39,6 +39,24 @@ class TestFiscalYearPayPeriod(unittest.TestCase):
 				saved_fy.dates[i].end_date,
 				getdate(fypp_record['dates'][i]['end_date'])
 			)
+
+	def test_create_fiscal_year_pay_period_bad_dates(self):
+		fypp_record = test_records[5]
+
+		if frappe.db.exists('Fiscal Year Pay Period', fypp_record['payroll_period_name']):
+			frappe.delete_doc('Fiscal Year Pay Period', fypp_record['payroll_period_name'])
+
+		fy = frappe.get_doc(fypp_record)
+		self.assertRaises(frappe.ValidationError, fy.insert)
+
+		fy.pay_period_start_date = '2017-01-01'
+		fy.pay_period_end_date = '2017-12-01'
+		fy.payment_frequency = 'Monthly'
+		fy.payroll_period_name = '_Test 1 Monthly'
+		self.assertRaises(frappe.ValidationError, fy.insert)
+
+		fy.pay_period_end_date = '2017-12-31'
+		fy.insert()
 
 	def test_create_fiscal_year_pay_period_wrong_dates_monthly(self):
 		fypp_record = test_records[1]
@@ -216,10 +234,10 @@ class TestFiscalYearPayPeriod(unittest.TestCase):
 			{'start_date': '2017-05-07', 'end_date': '2017-06-06'},
 		]
 
-		# self.assertEqual(
-		# 	get_pay_period_dates('2017-01-07', '2017-06-06', 'Monthly'),
-		# 	pay_periods
-		# )
+		self.assertEqual(
+			get_pay_period_dates('2017-01-07', '2017-06-06', 'Monthly'),
+			pay_periods
+		)
 
 		self.assertRaises(frappe.ValidationError, get_pay_period_dates, '2017-01-07', '2017-06-11', 'Monthly')
 
@@ -238,6 +256,12 @@ class TestFiscalYearPayPeriod(unittest.TestCase):
 
 	def test_validate_payment_frequency(self):
 		self.assertRaises(frappe.ValidationError, _validate_payment_frequency, 'fail')
+
+	def test_validate_dates(self):
+		self.assertRaises(frappe.ValidationError, _validate_dates, '2017-12-01', '2017-01-01')
+		self.assertRaises(frappe.ValidationError, _validate_dates, '2018-01-01', '2017-12-31')
+		self.assertEqual(_validate_dates('2017-12-01', '2017-12-01'), None)
+		self.assertEqual(_validate_dates('2017-01-01', '2017-12-01'), None)
 
 # 	def test_create_fiscal_year_with_pay_period(self):
 # 		print test_records
