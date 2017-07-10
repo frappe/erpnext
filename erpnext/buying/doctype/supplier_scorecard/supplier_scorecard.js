@@ -1,7 +1,7 @@
 // Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-/* global frappe, cur_frm, refresh_field */
+/* global frappe, refresh_field */
 
 frappe.ui.form.on("Supplier Scorecard", {
 
@@ -13,9 +13,8 @@ frappe.ui.form.on("Supplier Scorecard", {
 			});
 		}
 	},
-	refresh: function() {
-
-		cur_frm.dashboard.heatmap.setLegend([0,20,40,60,80,101],["#991600","#169900"]);
+	refresh: function(frm) {
+		frm.dashboard.heatmap.setLegend([0,20,40,60,80,101],["#991600","#169900"]);
 	},
 	generate_scorecards:function(frm) {
 		frappe.call({
@@ -29,9 +28,7 @@ frappe.ui.form.on("Supplier Scorecard", {
 	start_date: function(frm)
 	{
 		var sd = new Date(frm.doc.start_date);
-		if (frm.doc.period === "Per Day"){
-			frm.doc.end_date = new Date(sd.getFullYear(),sd.getMonth(),sd.getDate()+1).toISOString();
-		} else if (frm.doc.period === "Per Week"){
+		if (frm.doc.period === "Per Week"){
 			frm.doc.end_date = new Date(sd.getFullYear(),sd.getMonth(),sd.getDate()+7).toISOString();
 		} else if (frm.doc.period === "Per Month"){
 			frm.doc.end_date = new Date(sd.getFullYear(),sd.getMonth()+1,sd.getDate()).toISOString();
@@ -81,12 +78,16 @@ frappe.ui.form.on("Supplier Scorecard Scoring Criteria", {
 				criteria_name: d.criteria_name
 			},
 			callback: function(r) {
-				for (var i = 0; i < frm.doc.variables.length; i++)
+				for (var i = 0; i < r.message.length; i++)
 				{
 					var exists = false;
 					for (var j = 0; j < frm.doc.variables.length; j++)
 					{
-						if(frm.doc.variables[j].variable_label === r.message[i])
+						if(!frm.doc.variables[j].hasOwnProperty("variable_label"))
+						{
+							frm.get_field("variables").grid.grid_rows[j].remove();
+						}
+						else if(frm.doc.variables[j].variable_label === r.message[i])
 						{
 							exists = true;
 						}

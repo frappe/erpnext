@@ -167,15 +167,15 @@ def make_all_scorecards(docname):
 				`tabSupplier Scorecard Period` scp
 			WHERE
 				scp.scorecard = %(sc)s
-				AND
+				AND (
 					(scp.start_date > %(end_date)s
 					AND scp.end_date < %(start_date)s)
 				OR
 					(scp.start_date < %(end_date)s
-					AND scp.end_date > %(start_date)s)
+					AND scp.end_date > %(start_date)s))
 			ORDER BY
 				scp.end_date DESC""",
-				{"sc": docname,"start_date": start_date,"end_date": end_date}, as_dict=1)
+				{"sc": docname,"start_date": start_date,"end_date": end_date, "supplier": supplier}, as_dict=1)
 		if len(scorecards) == 0:
 			period_card = make_supplier_scorecard(docname, None)
 			period_card.start_date = start_date
@@ -188,9 +188,7 @@ def make_all_scorecards(docname):
 	return scp_count
 
 def get_scorecard_date(period, start_date):
-	if period == 'Per Day':
-		end_date = getdate(add_days(start_date,1))
-	elif period == 'Per Week':
+	if period == 'Per Week':
 		end_date = getdate(add_days(start_date,7))
 	elif period == 'Per Month':
 		end_date = get_last_day(start_date)

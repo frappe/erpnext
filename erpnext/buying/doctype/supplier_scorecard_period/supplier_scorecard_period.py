@@ -60,8 +60,11 @@ class SupplierScorecardPeriod(Document):
 
 			my_eval_statement = my_eval_statement.replace('&lt;','<').replace('&gt;','>')
 
-			crit.score = min(crit.max_score, max( 0 ,frappe.safe_eval(my_eval_statement,  None, {'max':max, 'min': min})))
-
+			try:
+				crit.score = min(crit.max_score, max( 0 ,frappe.safe_eval(my_eval_statement,  None, {'max':max, 'min': min})))
+			except Exception:
+				frappe.throw(_("Could not solve criteria score function for {0}. Make sure the formula is valid.".format(crit.criteria_name)),frappe.ValidationError)
+				crit.score = 0
 
 	def calculate_score(self):
 		myscore = 0
@@ -81,8 +84,12 @@ class SupplierScorecardPeriod(Document):
 					my_eval_statement = my_eval_statement.replace('{' + var.param_name + '}', '0.0')
 
 		my_eval_statement = my_eval_statement.replace('&lt;','<').replace('&gt;','>')
-		weighed_score = frappe.safe_eval(my_eval_statement,  None, {'max':max, 'min': min})
 
+		try:
+			weighed_score = frappe.safe_eval(my_eval_statement,  None, {'max':max, 'min': min})
+		except Exception:
+			frappe.throw(_("Could not solve weighted score function. Make sure the formula is valid."),frappe.ValidationError)
+			weighed_score = 0
 		return weighed_score
 
 
