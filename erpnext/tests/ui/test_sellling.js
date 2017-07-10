@@ -92,6 +92,7 @@ QUnit.test("test building report", function(assert) {
 	]);
 });
 
+
 //Test for generating report with the help of writing query
 
 QUnit.test("test query report", function(assert) {
