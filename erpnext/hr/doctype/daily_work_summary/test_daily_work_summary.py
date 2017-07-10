@@ -42,6 +42,9 @@ class TestDailyWorkSummary(unittest.TestCase):
 		# pull the mail
 		email_account = frappe.get_doc("Email Account", "_Test Email Account 1")
 		email_account.db_set('enable_incoming', 1)
+
+		frappe.db.commit()
+
 		email_account.receive(test_mails=test_mails)
 
 		frappe.db.commit()
