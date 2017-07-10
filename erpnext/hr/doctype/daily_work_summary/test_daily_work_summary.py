@@ -80,4 +80,6 @@ class TestDailyWorkSummary(unittest.TestCase):
 
 		emails = frappe.db.sql("""select r.recipient, q.message, q.message_id from `tabEmail Queue` as q, `tabEmail Queue Recipient` as r where q.name = r.parent""", as_dict=1)
 
+		frappe.db.commit()
+
 		return settings, employees, emails
