@@ -13,6 +13,7 @@ from six.moves import range
 
 class FiscalYearPayPeriod(Document):
 	def validate(self):
+		self.validate_payment_frequency()
 		self.validate_period_start_end_dates()
 
 	def validate_period_start_end_dates(self):
@@ -24,6 +25,10 @@ class FiscalYearPayPeriod(Document):
 			frappe.throw(
 				translate('The end date selected is not valid for {0} frequency.'.format(payment_frequency))
 			)
+
+	def validate_payment_frequency(self):
+		_validate_payment_frequency(self.payment_frequency)
+
 
 
 @frappe.whitelist()
@@ -93,4 +98,11 @@ def dates_interval_valid(start, end, frequency):
 	elif frequency == 'daily':
 		return True
 	else:
-		frappe.throw(translate('Invalid Payment Frequency'))
+		_validate_payment_frequency(frequency)
+
+
+def _validate_payment_frequency(payment_frequency):
+	if payment_frequency.lower() not in ['monthly', 'fortnightly', 'weekly', 'bimonthly', 'daily']:
+		frappe.throw(
+			translate('{0} is not a valid Payment Frequency'.format(payment_frequency))
+		)

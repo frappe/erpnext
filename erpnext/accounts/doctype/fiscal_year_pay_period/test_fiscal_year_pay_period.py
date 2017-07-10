@@ -7,7 +7,7 @@ import frappe
 import unittest
 from six.moves import range
 from erpnext.accounts.doctype.fiscal_year_pay_period.fiscal_year_pay_period import get_pay_period_dates, \
-	dates_are_regular
+	dates_interval_valid, _validate_payment_frequency
 
 test_records = frappe.get_test_records('Fiscal Year Pay Period')
 from frappe.utils import getdate
@@ -66,6 +66,22 @@ class TestFiscalYearPayPeriod(unittest.TestCase):
 
 		fy = frappe.get_doc(fypp_record)
 		self.assertRaises(frappe.ValidationError, fy.insert)
+
+	def test_fypp_payment_frequency(self):
+		fypp_record = test_records[0]
+
+		if frappe.db.exists('Fiscal Year Pay Period', fypp_record['payroll_period_name']):
+			frappe.delete_doc('Fiscal Year Pay Period', fypp_record['payroll_period_name'])
+
+		fy = frappe.get_doc(fypp_record)
+		fy.payment_frequency = 'Fail'
+		self.assertRaises(frappe.ValidationError, fy.insert)
+
+		fy.payment_frequency = 'Monthly'
+		fy.insert()
+
+		saved_fy = frappe.get_doc('Fiscal Year Pay Period', fypp_record['payroll_period_name'])
+		self.assertEqual(saved_fy.payment_frequency, fy.payment_frequency)
 
 	def test_get_pay_period_dates_daily(self):
 		pay_periods1 = [
@@ -208,17 +224,20 @@ class TestFiscalYearPayPeriod(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, get_pay_period_dates, '2017-01-07', '2017-06-11', 'Monthly')
 
 	def test_date_is_regular(self):
-		self.assertTrue(dates_are_regular(getdate('2017-01-01'), getdate('2017-01-14'), 'Fortnightly'))
-		self.assertFalse(dates_are_regular(getdate('2017-01-01'),getdate('2017-01-15'), 'Fortnightly'))
-		self.assertTrue(dates_are_regular(getdate('2017-01-07'), getdate('2017-02-06'), 'Monthly'))
-		self.assertFalse(dates_are_regular(getdate('2017-01-07'), getdate('2017-02-15'), 'Monthly'))
-		self.assertTrue(dates_are_regular(getdate('2017-01-07'), getdate('2017-03-06'), 'Bimonthly'))
-		self.assertFalse(dates_are_regular(getdate('2017-01-07'), getdate('2017-02-15'), 'Bimonthly'))
-		self.assertFalse(dates_are_regular(getdate('2017-01-07'), getdate('2017-03-15'), 'Bimonthly'))
-		self.assertTrue(dates_are_regular(getdate('2017-01-07'), getdate('2017-01-13'), 'Weekly'))
-		self.assertFalse(dates_are_regular(getdate('2017-01-07'), getdate('2017-01-22'), 'Weekly'))
-		self.assertTrue(dates_are_regular(getdate('2017-03-06'), getdate('2017-03-06'), 'Daily'))
-		self.assertTrue(dates_are_regular(getdate('2017-03-06'), getdate('2017-03-07'), 'Daily'))
+		self.assertTrue(dates_interval_valid(getdate('2017-01-01'), getdate('2017-01-14'), 'Fortnightly'))
+		self.assertFalse(dates_interval_valid(getdate('2017-01-01'),getdate('2017-01-15'), 'Fortnightly'))
+		self.assertTrue(dates_interval_valid(getdate('2017-01-07'), getdate('2017-02-06'), 'Monthly'))
+		self.assertFalse(dates_interval_valid(getdate('2017-01-07'), getdate('2017-02-15'), 'Monthly'))
+		self.assertTrue(dates_interval_valid(getdate('2017-01-07'), getdate('2017-03-06'), 'Bimonthly'))
+		self.assertFalse(dates_interval_valid(getdate('2017-01-07'), getdate('2017-02-15'), 'Bimonthly'))
+		self.assertFalse(dates_interval_valid(getdate('2017-01-07'), getdate('2017-03-15'), 'Bimonthly'))
+		self.assertTrue(dates_interval_valid(getdate('2017-01-07'), getdate('2017-01-13'), 'Weekly'))
+		self.assertFalse(dates_interval_valid(getdate('2017-01-07'), getdate('2017-01-22'), 'Weekly'))
+		self.assertTrue(dates_interval_valid(getdate('2017-03-06'), getdate('2017-03-06'), 'Daily'))
+		self.assertTrue(dates_interval_valid(getdate('2017-03-06'), getdate('2017-03-07'), 'Daily'))
+
+	def test_validate_payment_frequency(self):
+		self.assertRaises(frappe.ValidationError, _validate_payment_frequency, 'fail')
 
 # 	def test_create_fiscal_year_with_pay_period(self):
 # 		print test_records
