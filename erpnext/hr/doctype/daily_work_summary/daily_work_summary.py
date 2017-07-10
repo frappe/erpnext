@@ -44,6 +44,8 @@ class DailyWorkSummary(Document):
 
 		did_not_reply = self.email_sent_to.split()
 
+		print replies
+
 		for d in replies:
 			d.sender_name = frappe.db.get_value("Employee", {"user_id": d.sender},
 				"employee_name") or d.sender
