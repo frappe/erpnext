@@ -25,14 +25,17 @@ class NamingSeries(Document):
 		prefixes = ""
 		for d in doctypes:
 			options = ""
+			exist_flag = True
 			try:
 				options = self.get_options(d)
 			except frappe.DoesNotExistError:
+				exist_flag = False
 				frappe.msgprint('Unable to find DocType {0}'.format(d))
+				doctypes.remove(d)
 				#frappe.pass_does_not_exist_error()
 				continue
 
-			if options:
+			if options and exist_flag:
 				prefixes = prefixes + "\n" + options
 
 		prefixes.replace("\n\n", "\n")
