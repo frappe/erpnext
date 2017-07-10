@@ -324,7 +324,6 @@ def make_invoice(doc_list={}, email_queue_list={}, customers_list={}):
 				si_doc.customer = get_customer_id(doc)
 				si_doc.due_date = doc.get('posting_date')
 				submit_invoice(si_doc, name, doc)
-				update_pos_session(name, doc)
 				name_list.append(name)
 			else:
 				name_list.append(name)
@@ -481,15 +480,6 @@ def save_invoice(e, si_doc, name):
 		si_doc.flags.ignore_mandatory = True
 		si_doc.due_date = si_doc.posting_date
 		si_doc.insert()
-
-def update_pos_session(name, doc):
-	pos_session = frappe.get_doc("POS Session", doc.get('pos_session_name'))
-	sales_invoice = frappe.get_all('Sales Invoice', fields =["name"], filters = {'offline_pos_name': name})
-	pos_session.append("pos_session_invoices", {
-						"pos_session_invoice" : sales_invoice[0].name,
-						"sync_time" : now_datetime()
-						})
-	pos_session.save(ignore_permissions=True)
 
 @frappe.whitelist()
 def start_pos_session(pos_session_start):

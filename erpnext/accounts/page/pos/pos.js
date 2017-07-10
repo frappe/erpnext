@@ -138,36 +138,36 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		}).addClass('visible-xs');
 
 		this.page.add_menu_item(__("End Session"), function () {
-					var d = new frappe.ui.Dialog({
-						'title': __('End POS Session'),
-						primary_action_label: __("Yes"),
-						secondary_action_label: __("No"),
-						fields: [
-							{fieldtype:"HTML", options:__("Do you really want to end this POS session ?")},
-						],
-						primary_action: function() {
-							return frappe.call({
-								method: "erpnext.accounts.doctype.sales_invoice.pos.end_pos_session",
-								args: {
-									name: JSON.parse(localStorage.getItem('pos_session_name')),
-									end: $.now()
-								},
-								callback: function(r) {
-									if(r.exc) {
-										frappe.msgprint(r.exc);
-									} else {
-										d.hide();
-										localStorage.removeItem('pos_session_start');
-										localStorage.removeItem('pos_session_name');
-										frappe.ui.toolbar.clear_cache();
-										frappe.set_route('pos');
-									}
-								}
-							});
+			var d = new frappe.ui.Dialog({
+				'title': __('End POS Session'),
+				primary_action_label: __("Yes"),
+				secondary_action_label: __("No"),
+				fields: [
+					{fieldtype:"HTML", options:__("Do you really want to end this POS session ?")},
+				],
+				primary_action: function() {
+					return frappe.call({
+						method: "erpnext.accounts.doctype.sales_invoice.pos.end_pos_session",
+						args: {
+							name: JSON.parse(localStorage.getItem('pos_session_name')),
+							end: $.now()
+						},
+						callback: function(r) {
+							if(r.exc) {
+								frappe.msgprint(r.exc);
+							} else {
+								d.hide();
+								localStorage.removeItem('pos_session_start');
+								localStorage.removeItem('pos_session_name');
+								frappe.ui.toolbar.clear_cache();
+								frappe.set_route('pos');
+							}
 						}
 					});
-					d.show();
-				});
+				}
+			});
+			d.show();
+		});
 
 		this.page.add_menu_item(__("New Sales Invoice"), function () {
 			me.save_previous_entry();
