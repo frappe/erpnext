@@ -10,7 +10,8 @@ frappe.ui.form.on("Sales Order", {
 			'Delivery Note': 'Delivery',
 			'Sales Invoice': 'Invoice',
 			'Material Request': 'Material Request',
-			'Purchase Order': 'Purchase Order'
+			'Purchase Order': 'Purchase Order',
+			'Project': 'Project'
 		}
 		frm.add_fetch('customer', 'tax_id', 'tax_id');
 	},
@@ -69,9 +70,9 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				if (this.frm.has_perm("submit")) {
 					// close
 					if(flt(doc.per_delivered, 2) < 100 || flt(doc.per_billed) < 100) {
-							this.frm.add_custom_button(__('Close'),
-								function() { me.close_sales_order() }, __("Status"))
-						}
+						this.frm.add_custom_button(__('Close'),
+							function() { me.close_sales_order() }, __("Status"))
+					}
 				}
 
 				// delivery note
@@ -93,8 +94,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				// material request
 				if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1
 					&& flt(doc.per_delivered, 2) < 100) {
-						this.frm.add_custom_button(__('Material Request'),
-							function() { me.make_material_request() }, __("Make"));
+					this.frm.add_custom_button(__('Material Request'),
+						function() { me.make_material_request() }, __("Make"));
 				}
 
 				// make purchase order
@@ -120,6 +121,12 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						function() { me.make_maintenance_schedule() }, __("Make"));
 				}
 
+				// project
+				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
+						this.frm.add_custom_button(__('Project'),
+							function() { me.make_project() }, __("Make"));
+				}
+
 			} else {
 				if (this.frm.has_perm("submit")) {
 					// un-close
@@ -136,12 +143,14 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
 						source_doctype: "Quotation",
+						target: me.frm,
+						setters: {
+							customer: me.frm.doc.customer || undefined
+						},
 						get_query_filters: {
+							company: me.frm.doc.company,
 							docstatus: 1,
 							status: ["!=", "Lost"],
-							order_type: me.frm.doc.order_type,
-							customer: me.frm.doc.customer || undefined,
-							company: me.frm.doc.company
 						}
 					})
 				}, __("Get items from"));
@@ -194,7 +203,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						title: __('Select Items to Manufacture'),
 						fields: fields,
 						primary_action: function() {
-							data = d.get_values();
+							var data = d.get_values();
 							me.frm.call({
 								method: 'make_production_orders',
 								args: {
@@ -262,6 +271,13 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		})
 	},
 
+	make_project: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_project",
+			frm: this.frm
+		})
+	},
+
 	make_maintenance_visit: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_visit",
@@ -286,7 +302,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		});
 
 		dialog.fields_dict.make_purchase_order.$input.click(function() {
-			args = dialog.get_values();
+			var args = dialog.get_values();
 			if(!args) return;
 			dialog.hide();
 			return frappe.call({
@@ -312,12 +328,13 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	},
 	update_status: function(label, status){
 		var doc = this.frm.doc;
+		var me = this;
 		frappe.ui.form.is_saving = true;
 		frappe.call({
 			method: "erpnext.selling.doctype.sales_order.sales_order.update_status",
 			args: {status: status, name: doc.name},
 			callback: function(r){
-				this.frm.reload_doc();
+				me.frm.reload_doc();
 			},
 			always: function() {
 				frappe.ui.form.is_saving = false;

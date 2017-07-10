@@ -2,9 +2,11 @@
 // License: GNU General Public License v3. See license.txt
 
 // shopping cart
-frappe.provide("shopping_cart");
+frappe.provide("erpnext.shopping_cart");
+var shopping_cart = erpnext.shopping_cart;
 
 frappe.ready(function() {
+	var full_name = frappe.session && frappe.session.user_fullname;
 	// update user
 	if(full_name) {
 		$('.navbar li[data-label="User"] a')
@@ -34,7 +36,7 @@ $.extend(shopping_cart, {
 	},
 
 	update_cart: function(opts) {
-		if(!full_name || full_name==="Guest") {
+		if(frappe.session.user==="Guest") {
 			if(localStorage) {
 				localStorage.setItem("last_visited", window.location.pathname);
 			}
@@ -110,19 +112,19 @@ $.extend(shopping_cart, {
 	},
 
 
-	bind_dropdown_cart_buttons: function() {
+	bind_dropdown_cart_buttons: function () {
 		$(".cart-icon").on('click', '.number-spinner button', function () {
 			var btn = $(this),
 				input = btn.closest('.number-spinner').find('input'),
 				oldValue = input.val().trim(),
 				newVal = 0;
 
-				if (btn.attr('data-dir') == 'up') {
-					newVal = parseInt(oldValue) + 1;
-				} else {
-					if (oldValue > 1) {
-						newVal = parseInt(oldValue) - 1;
-					}
+			if (btn.attr('data-dir') == 'up') {
+				newVal = parseInt(oldValue) + 1;
+			} else {
+				if (oldValue > 1) {
+					newVal = parseInt(oldValue) - 1;
+				}
 			}
 			input.val(newVal);
 			var item_code = input.attr("data-item-code");

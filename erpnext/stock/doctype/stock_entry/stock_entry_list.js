@@ -4,13 +4,14 @@ frappe.listview_settings['Stock Entry'] = {
 	column_render: {
 		"from_warehouse": function(doc) {
 			var html = "";
-	 		if(doc.from_warehouse) {
+			if(doc.from_warehouse) {
 				html += '<span class="filterable h6"\
-					data-filter="from_warehouse,=,'+doc.from_warehouse+'">'+doc.from_warehouse+' </span>';
+					data-filter="from_warehouse,=,'+doc.from_warehouse+'">'
+						+doc.from_warehouse+' </span>';
 			}
-			if(doc.from_warehouse || doc.to_warehouse) {
-				html += '<i class="octicon octfa fa-arrow-right text-muted"></i> ';
-			}
+			// if(doc.from_warehouse || doc.to_warehouse) {
+			// 	html += '<i class="fa fa-arrow-right text-muted"></i> ';
+			// }
 			if(doc.to_warehouse) {
 				html += '<span class="filterable h6"\
 				data-filter="to_warehouse,=,'+doc.to_warehouse+'">'+doc.to_warehouse+'</span>';

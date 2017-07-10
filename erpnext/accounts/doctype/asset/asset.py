@@ -19,7 +19,8 @@ class Asset(Document):
 		self.validate_asset_values()
 		self.make_depreciation_schedule()
 		self.set_accumulated_depreciation()
-		self.validate_expected_value_after_useful_life()
+		if self.get("schedules"):
+			self.validate_expected_value_after_useful_life()
 		# Validate depreciation related accounts
 		get_depreciation_accounts(self)
 
@@ -114,8 +115,17 @@ class Asset(Document):
 
 	def set_accumulated_depreciation(self):
 		accumulated_depreciation = flt(self.opening_accumulated_depreciation)
-		for d in self.get("schedules"):
-			accumulated_depreciation  += flt(d.depreciation_amount, d.precision("depreciation_amount"))
+		value_after_depreciation = flt(self.value_after_depreciation)
+		for i, d in enumerate(self.get("schedules")):
+			depreciation_amount = flt(d.depreciation_amount, d.precision("depreciation_amount"))
+			value_after_depreciation -= flt(depreciation_amount)
+
+			if i==len(self.get("schedules"))-1 and self.depreciation_method == "Straight Line":
+				depreciation_amount += flt(value_after_depreciation - flt(self.expected_value_after_useful_life),
+					d.precision("depreciation_amount"))
+
+			d.depreciation_amount = depreciation_amount
+			accumulated_depreciation += d.depreciation_amount
 			d.accumulated_depreciation_amount = flt(accumulated_depreciation, d.precision("accumulated_depreciation_amount"))
 
 	def get_depreciation_amount(self, depreciable_value):

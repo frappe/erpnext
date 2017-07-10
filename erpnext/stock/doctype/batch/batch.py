@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
 
 class UnableToSelectBatchError(frappe.ValidationError): pass
 
@@ -65,6 +66,14 @@ def get_batch_qty(batch_no=None, warehouse=None, item_code=None):
 	return out
 
 @frappe.whitelist()
+def get_batches_by_oldest(item_code, warehouse):
+	'''Returns the oldest batch and qty for the given item_code and warehouse'''
+	batches = get_batch_qty(item_code = item_code, warehouse = warehouse)
+	batches_dates = [[batch, frappe.get_value('Batch', batch.batch_no, 'expiry_date')] for batch in batches]
+	batches_dates.sort(key=lambda tup: tup[1])
+	return batches_dates
+
+@frappe.whitelist()
 def split_batch(batch_no, item_code, warehouse, qty, new_batch_id = None):
 	'''Split the batch into a new batch'''
 	batch = frappe.get_doc(dict(doctype='Batch', item=item_code, batch_id=new_batch_id)).insert()
@@ -96,18 +105,21 @@ def set_batch_nos(doc, warehouse_field, throw = False):
 	for d in doc.items:
 		has_batch_no = frappe.db.get_value('Item', d.item_code, 'has_batch_no')
 		warehouse = d.get(warehouse_field, None)
-		if has_batch_no and not d.batch_no and warehouse:
-			d.batch_no = get_batch_no(d.item_code, warehouse, d.qty, throw)
+		if has_batch_no and warehouse and d.qty > 0:
+			if not d.batch_no:
+				d.batch_no = get_batch_no(d.item_code, warehouse, d.qty, throw)
+			else:
+				batch_qty = get_batch_qty(batch_no=d.batch_no, warehouse=warehouse)
+				if flt(batch_qty) < flt(d.qty):
+					frappe.throw(_("Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches").format(d.idx, d.batch_no, batch_qty, d.qty))
 
 def get_batch_no(item_code, warehouse, qty, throw=False):
 	'''get the smallest batch with for the given item_code, warehouse and qty'''
-	
+
 	batch_no = None
-	
 	batches = get_batch_qty(item_code = item_code, warehouse = warehouse)
 	if batches:
 		batches = sorted(batches, lambda a, b: 1 if a.qty > b.qty else -1)
-
 		for b in batches:
 			if b.qty >= qty:
 				batch_no = b.batch_no

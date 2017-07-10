@@ -91,7 +91,7 @@ class SalarySlip(TransactionBase):
 			frappe.throw(_("Name error: {0}".format(err)))
 		except SyntaxError as err:
 			frappe.throw(_("Syntax error in formula or condition: {0}".format(err)))
-		except Exception, e:
+		except Exception as e:
 			frappe.throw(_("Error in formula or condition: {0}".format(e)))
 			raise
 
@@ -99,7 +99,8 @@ class SalarySlip(TransactionBase):
 		'''Returns data for evaluating formula'''
 		data = frappe._dict()
 
-		data.update(frappe.get_doc("Salary Structure Employee", {"employee": self.employee}).as_dict())
+		data.update(frappe.get_doc("Salary Structure Employee",
+			{"employee": self.employee, "parent": self.salary_structure}).as_dict())
 
 		data.update(frappe.get_doc("Employee", self.employee).as_dict())
 		data.update(self.as_dict())
@@ -321,15 +322,26 @@ class SalarySlip(TransactionBase):
 	def sum_components(self, component_type, total_field):
 		joining_date, relieving_date = frappe.db.get_value("Employee", self.employee,
 			["date_of_joining", "relieving_date"])
+		
 		if not relieving_date:
 			relieving_date = getdate(self.end_date)
 
-		for d in self.get(component_type):
-			if ((cint(d.depends_on_lwp) == 1 and not self.salary_slip_based_on_timesheet) or\
-			getdate(self.start_date) < joining_date or getdate(self.end_date) > relieving_date):
+		if not joining_date:
+			frappe.throw(_("Please set the Date Of Joining for employee {0}").format(frappe.bold(self.employee_name)))
 
-				d.amount = rounded((flt(d.default_amount) * flt(self.payment_days)
-					/ cint(self.total_working_days)), self.precision("amount", component_type))
+		for d in self.get(component_type):
+			if (self.salary_structure and
+				cint(d.depends_on_lwp) and
+				(not
+				    self.salary_slip_based_on_timesheet or
+					getdate(self.start_date) < joining_date or
+					getdate(self.end_date) > relieving_date
+				)):
+
+				d.amount = rounded(
+					(flt(d.default_amount) * flt(self.payment_days)
+					/ cint(self.total_working_days)), self.precision("amount", component_type)
+				)
 			elif not self.payment_days and not self.salary_slip_based_on_timesheet:
 				d.amount = 0
 			elif not d.amount:

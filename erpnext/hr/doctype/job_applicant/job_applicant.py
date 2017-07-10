@@ -27,7 +27,8 @@ class JobApplicant(Document):
 
 	def validate(self):
 		self.check_email_id_is_unique()
-		validate_email_add(self.email_id, True)
+		if self.email_id:
+			validate_email_add(self.email_id, True)
 
 		if not self.applicant_name and self.email_id:
 			guess = self.email_id.split('@')[0]

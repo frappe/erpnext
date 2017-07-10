@@ -163,6 +163,10 @@ erpnext.SalesFunnel = Class.extend({
 	draw_legend: function(x_mid, y_mid, width, height, title) {
 		var context = this.elements.context;
 
+		if(y_mid == 0) {
+			y_mid = 7;
+		}
+
 		// draw line
 		context.beginPath();
 		context.moveTo(x_mid, y_mid);

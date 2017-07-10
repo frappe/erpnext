@@ -12,7 +12,7 @@ app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
-develop_version = '8.0.0-beta'
+develop_version = '8.x.x-beta'
 
 error_report_email = "support@erpnext.com"
 
@@ -146,7 +146,7 @@ doc_events = {
 		"on_cancel": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty"
 	},
 	"User": {
-		"after_insert": "frappe.email.doctype.contact.contact.update_contact",
+		"after_insert": "frappe.contacts.doctype.contact.contact.update_contact",
 		"validate": "erpnext.hr.doctype.employee.employee.validate_employee_role",
 		"on_update": ["erpnext.hr.doctype.employee.employee.update_user_permissions",
 			"erpnext.portal.utils.set_default_role"]
@@ -160,6 +160,9 @@ doc_events = {
 	},
 	"Payment Entry": {
 		"on_submit": "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"
+	},
+	'Address': {
+		'validate': 'erpnext.regional.india.utils.validate_gstin_for_india'
 	}
 }
 
@@ -178,7 +181,8 @@ scheduler_events = {
 		"erpnext.hr.doctype.employee.employee.send_birthday_reminders",
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
 		"erpnext.accounts.doctype.asset.depreciation.post_depreciation_entries",
-		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary'
+		"erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary",
+		"erpnext.stock.doctype.serial_no.serial_no.update_maintenance_status"
 	]
 }
 

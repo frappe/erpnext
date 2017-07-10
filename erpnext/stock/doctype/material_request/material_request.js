@@ -30,14 +30,17 @@ frappe.ui.form.on('Material Request', {
 });
 
 frappe.ui.form.on("Material Request Item", {
-	"qty": function(frm, doctype, name) {
-			var d = locals[doctype][name];
-			if (flt(d.qty) < flt(d.min_order_qty)) {
-				alert(__("Warning: Material Requested Qty is less than Minimum Order Qty"));
-			}
+	qty: function (frm, doctype, name) {
+		var d = locals[doctype][name];
+		if (flt(d.qty) < flt(d.min_order_qty)) {
+			frappe.msgprint(__("Warning: Material Requested Qty is less than Minimum Order Qty"));
 		}
+	},
+	item_code: function(frm, doctype, name) {
+		frm.script_manager.copy_from_first_row('items', frm.selected_doc,
+			'schedule_date');
 	}
-);
+});
 
 erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.extend({
 	onload: function(doc) {
@@ -61,11 +64,11 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		if(doc.docstatus == 1 && doc.status != 'Stopped') {
 			if(flt(doc.per_ordered, 2) < 100) {
 				// make
-				if(doc.material_request_type === "Material Transfer" && doc.status === "Submitted")
+				if(doc.material_request_type === "Material Transfer")
 					cur_frm.add_custom_button(__("Transfer Material"),
 					this.make_stock_entry, __("Make"));
 
-				if(doc.material_request_type === "Material Issue" && doc.status === "Submitted")
+				if(doc.material_request_type === "Material Issue")
 					cur_frm.add_custom_button(__("Issue Material"),
 					this.make_stock_entry, __("Make"));
 
@@ -81,7 +84,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 					cur_frm.add_custom_button(__("Supplier Quotation"),
 					this.make_supplier_quotation, __("Make"));
 
-				if(doc.material_request_type === "Manufacture" && doc.status === "Submitted")
+				if(doc.material_request_type === "Manufacture")
 					cur_frm.add_custom_button(__("Production Order"),
 					function() { me.raise_production_orders() }, __("Make"));
 
@@ -95,16 +98,19 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		}
 
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(__('Sales Order'),
+			this.frm.add_custom_button(__('Sales Order'),
 				function() {
 					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
 						source_doctype: "Sales Order",
+						target: me.frm,
+						setters: {
+							company: me.frm.doc.company
+						},
 						get_query_filters: {
 							docstatus: 1,
 							status: ["!=", "Closed"],
 							per_delivered: ["<", 99.99],
-							company: cur_frm.doc.company
 						}
 					})
 				}, __("Get items from"));
@@ -116,18 +122,6 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 
 	},
 
-	schedule_date: function(doc, cdt, cdn) {
-		var val = locals[cdt][cdn].schedule_date;
-		if(val) {
-			$.each((doc.items || []), function(i, d) {
-				if(!d.schedule_date) {
-					d.schedule_date = val;
-				}
-			});
-			refresh_field("items");
-		}
-	},
-
 	get_items_from_bom: function() {
 		var d = new frappe.ui.Dialog({
 			title: __("Get Items from BOM"),
@@ -137,7 +131,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 						return {filters: { docstatus:1 }}
 					}},
 				{"fieldname":"warehouse", "fieldtype":"Link", "label":__("Warehouse"),
-					options:"Warehouse", reqd: 1, label:"For Warehouse"},
+					options:"Warehouse", reqd: 1},
 				{"fieldname":"fetch_exploded", "fieldtype":"Check",
 					"label":__("Fetch exploded BOM (including sub-assemblies)"), "default":1},
 				{fieldname:"fetch", "label":__("Get Items from BOM"), "fieldtype":"Button"}

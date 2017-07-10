@@ -116,7 +116,7 @@ def setup_user():
 	for u in json.loads(open(frappe.get_app_path('erpnext', 'demo', 'data', 'user.json')).read()):
 		user = frappe.new_doc("User")
 		user.update(u)
-		user.flags.no_welcome_mail
+		user.flags.no_welcome_mail = True
 		user.new_password = 'demo'
 		user.insert()
 
@@ -316,6 +316,8 @@ def setup_account():
 		doc.parent_account = frappe.db.get_value('Account', {'account_name': doc.parent_account})
 		doc.insert()
 
+	frappe.flags.in_import = False
+
 def setup_account_to_expense_type():
 	company_abbr = frappe.db.get_value("Company", erpnext.get_default_company(), "abbr")
 	expense_types = [{'name': _('Calls'), "account": "Sales Expenses - "+ company_abbr},
@@ -379,5 +381,7 @@ def import_json(doctype, submit=False, values=None):
 			doc.submit()
 
 	frappe.db.commit()
+
+	frappe.flags.in_import = False
 
 

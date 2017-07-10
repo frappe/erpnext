@@ -9,15 +9,43 @@ frappe.ui.form.on("Student Group", {
 				}
 			};
 		});
+		if (!frm.__islocal) {
+			frm.set_query("student", "students", function() {
+				return{
+					query: "erpnext.schools.doctype.student_group.student_group.fetch_students",
+					filters: {
+						'academic_year': frm.doc.academic_year,
+						'group_based_on': frm.doc.group_based_on,
+						'academic_term': frm.doc.academic_term,
+						'program': frm.doc.program,
+						'batch': frm.doc.batch,
+						'course': frm.doc.course,
+						'student_group': frm.doc.name
+					}
+				}
+			});
+		}
 	},
 
 	refresh: function(frm) {
 		if (!frm.doc.__islocal) {
+			frm.add_custom_button(__("Attendance"), function() {
+				frappe.route_options = {
+					based_on: "Student Group",
+					student_group: frm.doc.name
+				}
+				frappe.set_route("List", "Student Attendance Tool");
+			});
 			frm.add_custom_button(__("Course Schedule"), function() {
+				frappe.route_options = {
+					student_group: frm.doc.name
+				}
 				frappe.set_route("List", "Course Schedule");
 			});
-
 			frm.add_custom_button(__("Assessment Plan"), function() {
+				frappe.route_options = {
+					student_group: frm.doc.name
+				}
 				frappe.set_route("List", "Assessment Plan");
 			});
 			frm.add_custom_button(__("Update Email Group"), function() {
@@ -30,6 +58,9 @@ frappe.ui.form.on("Student Group", {
 				});
 			});
 			frm.add_custom_button(__("Newsletter"), function() {
+				frappe.route_options = {
+					"Newsletter Email Group.email_group": frm.doc.name
+				}
 				frappe.set_route("List", "Newsletter");
 			});
 		}
@@ -39,40 +70,10 @@ frappe.ui.form.on("Student Group", {
 		if (frm.doc.group_based_on == "Batch") {
 			frm.doc.course = null;
 		}
-		else if (frm.doc.group_based_on == "Course") {
-			frm.doc.program = null;
-			frm.doc.batch = null;
-		}
-		frm.trigger("set_name");
-	},
-
-	set_name: function(frm) {
-		var name;
-		if (frm.doc.group_based_on == "Course") {
-			name = "Course-" + frm.doc.course + "-" + (frm.doc.academic_term?frm.doc.academic_term:frm.doc.academic_year);
-		} else if (frm.doc.group_based_on == "Batch") {
-			name = "Batch-" + frm.doc.program + "-" + frm.doc.batch + "-"
-				+ (frm.doc.academic_term?frm.doc.academic_term:frm.doc.academic_year); 
-		} else if (frm.doc.group_based_on == "Activity") {
-			name = "Activity" + "-" + (frm.doc.academic_term?frm.doc.academic_term:frm.doc.academic_year);
-		}
-		frm.set_value("student_group_name", name);
-	},
-
-	program:function(frm) {
-		frm.trigger("set_name");
-	},
-
-	batch:function(frm) {
-		frm.trigger("set_name");
-	},
-
-	course:function(frm) {
-		frm.trigger("set_name");
 	},
 
 	get_students: function(frm) {
-		if (frm.doc.group_based_on != "Activity") {
+		if (frm.doc.group_based_on == "Batch" || frm.doc.group_based_on == "Course") {
 			var student_list = [];
 			var max_roll_no = 0;
 			$.each(frm.doc.students, function(i,d) {
@@ -85,6 +86,7 @@ frappe.ui.form.on("Student Group", {
 				method: "erpnext.schools.doctype.student_group.student_group.get_students",
 				args: {
 					"academic_year": frm.doc.academic_year,
+					"academic_term": frm.doc.academic_term,
 					"group_based_on": frm.doc.group_based_on,
 					"program": frm.doc.program,
 					"batch" : frm.doc.batch,
@@ -103,6 +105,7 @@ frappe.ui.form.on("Student Group", {
 								s.group_roll_number = ++max_roll_no;
 							}
 						});
+						refresh_field("students");
 						frm.save();
 					} else {
 						frappe.msgprint(__("Student Group is already updated."))
@@ -113,5 +116,4 @@ frappe.ui.form.on("Student Group", {
 			frappe.msgprint(__("Select students manually for the Activity based Group"));
 		}
 	}
-
 });

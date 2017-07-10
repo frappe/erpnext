@@ -20,10 +20,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Student Batch"
-				},
-				{
-					"type": "doctype",
 					"name": "Student Group"
 				},
 				{
@@ -58,10 +54,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Program Enrollment Tool"
-				},
-				{
-					"type": "doctype",
-					"name": "Student Batch Creation Tool"
 				}
 			]
 		},
@@ -145,7 +137,14 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Assessment Result Tool"
-				}
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Course wise Assessment Report",
+					"doctype": "Assessment Result"
+				},
+
 			]
 		},
 		{

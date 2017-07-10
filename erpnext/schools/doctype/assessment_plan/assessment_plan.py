@@ -9,21 +9,16 @@ from frappe import _
 
 class AssessmentPlan(Document):
 	def validate(self):
-		if not (self.student_batch or self.student_group):
-			frappe.throw(_("Please select Student Group or Student Batch"))
-		self.validate_student_batch()
 		self.validate_overlap()
 		self.validate_max_score()
+		self.validate_assessment_criteria()
 
 	def validate_overlap(self):
-		"""Validates overlap for Student Group/Student Batch, Instructor, Room"""
+		"""Validates overlap for Student Group, Instructor, Room"""
 		
 		from erpnext.schools.utils import validate_overlap_for
 
 		#Validate overlapping course schedules.
-		if self.student_batch:
-			validate_overlap_for(self, "Course Schedule", "student_batch")
-
 		if self.student_group:
 			validate_overlap_for(self, "Course Schedule", "student_group")
 		
@@ -31,18 +26,11 @@ class AssessmentPlan(Document):
 		validate_overlap_for(self, "Course Schedule", "room")
 
 		#validate overlapping assessment schedules.
-		if self.student_batch:
-			validate_overlap_for(self, "Assessment Plan", "student_batch")
-		
 		if self.student_group:
 			validate_overlap_for(self, "Assessment Plan", "student_group")
 		
 		validate_overlap_for(self, "Assessment Plan", "room")
 		validate_overlap_for(self, "Assessment Plan", "supervisor", self.supervisor)
-
-	def validate_student_batch(self):
-		if self.student_group:
-			self.student_batch = frappe.db.get_value("Student Group", self.student_group, "student_batch")
 
 	def validate_max_score(self):
 		max_score = 0
@@ -50,3 +38,13 @@ class AssessmentPlan(Document):
 			max_score += d.maximum_score
 		if self.maximum_assessment_score != max_score:
 			frappe.throw(_("Sum of Scores of Assessment Criteria needs to be {0}.".format(self.maximum_assessment_score)))
+
+	def validate_assessment_criteria(self):
+		assessment_criteria_list = frappe.db.sql_list(''' select apc.assessment_criteria
+			from `tabAssessment Plan` ap , `tabAssessment Plan Criteria` apc
+			where ap.name = apc.parent and ap.course=%s and ap.student_group=%s and ap.assessment_group=%s
+			and ap.name != %s''', (self.course, self.student_group, self.assessment_group, self.name))
+		for d in self.assessment_criteria:
+			if d.assessment_criteria in assessment_criteria_list:
+				frappe.throw(_("You have already assessed for the assessment criteria {}.")
+					.format(frappe.bold(d.assessment_criteria)))

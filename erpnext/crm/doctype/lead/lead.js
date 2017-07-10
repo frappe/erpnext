@@ -7,27 +7,28 @@ cur_frm.email_field = "email_id";
 erpnext.LeadController = frappe.ui.form.Controller.extend({
 	setup: function() {
 		this.frm.fields_dict.customer.get_query = function(doc, cdt, cdn) {
-				return { query: "erpnext.controllers.queries.customer_query" } }
+			return { query: "erpnext.controllers.queries.customer_query" } }
 	},
 
 	onload: function() {
 		if(cur_frm.fields_dict.lead_owner.df.options.match(/^User/)) {
 			cur_frm.fields_dict.lead_owner.get_query = function(doc, cdt, cdn) {
-				return { query:"frappe.core.doctype.user.user.user_query" } }
+				return { query: "frappe.core.doctype.user.user.user_query" }
+			}
 		}
 
 		if(cur_frm.fields_dict.contact_by.df.options.match(/^User/)) {
 			cur_frm.fields_dict.contact_by.get_query = function(doc, cdt, cdn) {
-				return { query:"frappe.core.doctype.user.user.user_query" } }
+				return { query: "frappe.core.doctype.user.user.user_query" } }
 		}
 	},
 
 	refresh: function() {
 		var doc = this.frm.doc;
 		erpnext.toggle_naming_series();
-		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'name', doctype: 'Lead'}
+		frappe.dynamic_link = {doc: doc, fieldname: 'name', doctype: 'Lead'}
 
-		if(!this.frm.doc.__islocal && this.frm.doc.__onload && !this.frm.doc.__onload.is_customer) {
+		if(!doc.__islocal && doc.__onload && !doc.__onload.is_customer) {
 			this.frm.add_custom_button(__("Customer"), this.create_customer, __("Make"));
 			this.frm.add_custom_button(__("Opportunity"), this.create_opportunity, __("Make"));
 			this.frm.add_custom_button(__("Quotation"), this.make_quotation, __("Make"));
@@ -35,9 +36,9 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		}
 
 		if(!this.frm.doc.__islocal) {
-			frappe.geo.render_address_and_contact(cur_frm);
+			frappe.contacts.render_address_and_contact(cur_frm);
 		} else {
-			frappe.geo.clear_address_and_contact(cur_frm);
+			frappe.contacts.clear_address_and_contact(cur_frm);
 		}
 	},
 

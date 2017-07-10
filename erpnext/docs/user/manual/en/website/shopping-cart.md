@@ -39,7 +39,7 @@ Click on "Add to Cart" to add item to shopping cart.
 
 #### Goto Checkout
 
-Click on "Goto Cart" to checkout or on "Cart" which is on upper right side
+Click on "Go to Cart" to checkout or on "Cart" which is on upper right side
 of the screen.
 
 <img class="screenshot" alt="Website Specifications" src="{{docs_base_url}}/assets/img/website/checkout.png">

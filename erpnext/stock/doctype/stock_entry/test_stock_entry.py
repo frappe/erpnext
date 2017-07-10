@@ -13,6 +13,7 @@ from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from frappe.tests.test_permissions import set_user_permission_doctypes
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.accounts.doctype.account.test_account import get_inventory_account
 
 def get_sle(**args):
 	condition, values = "", []
@@ -84,12 +85,7 @@ class TestStockEntry(unittest.TestCase):
 		self._test_auto_material_request("_Test Item Warehouse Group Wise Reorder", warehouse="_Test Warehouse Group-C1 - _TC")
 
 	def _test_auto_material_request(self, item_code, material_request_type="Purchase", warehouse="_Test Warehouse - _TC"):
-		item = frappe.get_doc("Item", item_code)
-
-		if item.variant_of:
-			template = frappe.get_doc("Item", item.variant_of)
-		else:
-			template = item
+		variant = frappe.get_doc("Item", item_code)
 
 		projected_qty, actual_qty = frappe.db.get_value("Bin", {"item_code": item_code,
 			"warehouse": warehouse}, ["projected_qty", "actual_qty"]) or [0, 0]
@@ -104,10 +100,10 @@ class TestStockEntry(unittest.TestCase):
 		frappe.db.set_value("Stock Settings", None, "auto_indent", 1)
 
 		# update re-level qty so that it is more than projected_qty
-		if projected_qty >= template.reorder_levels[0].warehouse_reorder_level:
-			template.reorder_levels[0].warehouse_reorder_level += projected_qty
-			template.reorder_levels[0].material_request_type = material_request_type
-			template.save()
+		if projected_qty >= variant.reorder_levels[0].warehouse_reorder_level:
+			variant.reorder_levels[0].warehouse_reorder_level += projected_qty
+			variant.reorder_levels[0].material_request_type = material_request_type
+			variant.save()
 
 		from erpnext.stock.reorder_item import reorder_item
 		mr_list = reorder_item()
@@ -122,14 +118,13 @@ class TestStockEntry(unittest.TestCase):
 		self.assertTrue(item_code in items)
 
 	def test_material_receipt_gl_entry(self):
-		set_perpetual_inventory()
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
 
 		mr = make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
 			qty=50, basic_rate=100, expense_account="Stock Adjustment - _TC")
 
-		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Stock",
-			"warehouse": mr.get("items")[0].t_warehouse})
-
+		stock_in_hand_account = get_inventory_account(mr.company, mr.get("items")[0].t_warehouse)
 		self.check_stock_ledger_entries("Stock Entry", mr.name,
 			[["_Test Item", "_Test Warehouse - _TC", 50.0]])
 
@@ -149,7 +144,8 @@ class TestStockEntry(unittest.TestCase):
 			where voucher_type='Stock Entry' and voucher_no=%s""", mr.name))
 
 	def test_material_issue_gl_entry(self):
-		set_perpetual_inventory()
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
 
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
 			qty=50, basic_rate=100, expense_account="Stock Adjustment - _TC")
@@ -160,9 +156,7 @@ class TestStockEntry(unittest.TestCase):
 		self.check_stock_ledger_entries("Stock Entry", mi.name,
 			[["_Test Item", "_Test Warehouse - _TC", -40.0]])
 
-		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Stock",
-			"warehouse": "_Test Warehouse - _TC"})
-
+		stock_in_hand_account = get_inventory_account(mi.company, "_Test Warehouse - _TC")
 		stock_value_diff = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Stock Entry",
 			"voucher_no": mi.name}, "stock_value_difference"))
 
@@ -182,7 +176,8 @@ class TestStockEntry(unittest.TestCase):
 			where voucher_type='Stock Entry' and voucher_no=%s""", mi.name))
 
 	def test_material_transfer_gl_entry(self):
-		set_perpetual_inventory()
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
 
 		create_stock_reconciliation(qty=100, rate=100)
 
@@ -192,21 +187,25 @@ class TestStockEntry(unittest.TestCase):
 		self.check_stock_ledger_entries("Stock Entry", mtn.name,
 			[["_Test Item", "_Test Warehouse - _TC", -45.0], ["_Test Item", "_Test Warehouse 1 - _TC", 45.0]])
 
-		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Stock",
-			"warehouse": mtn.get("items")[0].s_warehouse})
-
-		fixed_asset_account = frappe.db.get_value("Account", {"account_type": "Stock",
-			"warehouse": mtn.get("items")[0].t_warehouse})
-
-		stock_value_diff = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Stock Entry",
-			"voucher_no": mtn.name, "warehouse": "_Test Warehouse - _TC"}, "stock_value_difference"))
-
-		self.check_gl_entries("Stock Entry", mtn.name,
-			sorted([
-				[stock_in_hand_account, 0.0, stock_value_diff],
-				[fixed_asset_account, stock_value_diff, 0.0],
-			])
-		)
+		stock_in_hand_account = get_inventory_account(mtn.company, mtn.get("items")[0].s_warehouse)
+		
+		fixed_asset_account = get_inventory_account(mtn.company, mtn.get("items")[0].t_warehouse)
+			
+		if stock_in_hand_account == fixed_asset_account:
+			# no gl entry as both source and target warehouse has linked to same account.
+			self.assertFalse(frappe.db.sql("""select * from `tabGL Entry`
+				where voucher_type='Stock Entry' and voucher_no=%s""", mtn.name))
+			
+		else:
+			stock_value_diff = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Stock Entry",
+				"voucher_no": mtn.name, "warehouse": "_Test Warehouse - _TC"}, "stock_value_difference"))
+		
+			self.check_gl_entries("Stock Entry", mtn.name,
+				sorted([
+					[stock_in_hand_account, 0.0, stock_value_diff],
+					[fixed_asset_account, stock_value_diff, 0.0],
+				])
+			)
 
 		mtn.cancel()
 		self.assertFalse(frappe.db.sql("""select * from `tabStock Ledger Entry`
@@ -216,7 +215,8 @@ class TestStockEntry(unittest.TestCase):
 			where voucher_type='Stock Entry' and voucher_no=%s""", mtn.name))
 
 	def test_repack_no_change_in_valuation(self):
-		set_perpetual_inventory(0)
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(0, company)
 
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
 		make_stock_entry(item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC",
@@ -237,10 +237,11 @@ class TestStockEntry(unittest.TestCase):
 			order by account desc""", repack.name, as_dict=1)
 		self.assertFalse(gl_entries)
 
-		set_perpetual_inventory(0)
+		set_perpetual_inventory(0, repack.company)
 
 	def test_repack_with_additional_costs(self):
-		set_perpetual_inventory()
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+		set_perpetual_inventory(1, company)
 
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
 		repack = frappe.copy_doc(test_records[3])
@@ -260,9 +261,7 @@ class TestStockEntry(unittest.TestCase):
 		repack.insert()
 		repack.submit()
 
-		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Stock",
-			"warehouse": repack.get("items")[1].t_warehouse})
-
+		stock_in_hand_account = get_inventory_account(repack.company, repack.get("items")[1].t_warehouse)
 		rm_stock_value_diff = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Stock Entry",
 			"voucher_no": repack.name, "item_code": "_Test Item"}, "stock_value_difference"))
 
@@ -279,7 +278,7 @@ class TestStockEntry(unittest.TestCase):
 				["Expenses Included In Valuation - _TC", 0.0, 1200.0]
 			])
 		)
-		set_perpetual_inventory(0)
+		set_perpetual_inventory(0, repack.company)
 
 	def check_stock_ledger_entries(self, voucher_type, voucher_no, expected_sle):
 		expected_sle.sort(key=lambda x: x[0])
@@ -453,7 +452,8 @@ class TestStockEntry(unittest.TestCase):
 		self.assertFalse(frappe.db.get_value("Serial No", serial_no, "warehouse"))
 
 	def test_warehouse_company_validation(self):
-		set_perpetual_inventory(0)
+		company = frappe.db.get_value('Warehouse', '_Test Warehouse 2 - _TC1', 'company')
+		set_perpetual_inventory(0, company)
 		frappe.get_doc("User", "test2@example.com")\
 			.add_roles("Sales User", "Sales Manager", "Stock User", "Stock Manager")
 		frappe.set_user("test2@example.com")
@@ -466,8 +466,6 @@ class TestStockEntry(unittest.TestCase):
 
 	# permission tests
 	def test_warehouse_user(self):
-		set_perpetual_inventory(0)
-
 		for role in ("Stock User", "Sales User"):
 			set_user_permission_doctypes(doctype="Stock Entry", role=role,
 				apply_user_permissions=1, user_permission_doctypes=["Warehouse"])
@@ -484,6 +482,7 @@ class TestStockEntry(unittest.TestCase):
 		frappe.set_user("test@example.com")
 		st1 = frappe.copy_doc(test_records[0])
 		st1.company = "_Test Company 1"
+		set_perpetual_inventory(0, st1.company)
 		st1.get("items")[0].t_warehouse="_Test Warehouse 2 - _TC1"
 		self.assertRaises(frappe.PermissionError, st1.insert)
 
@@ -491,6 +490,8 @@ class TestStockEntry(unittest.TestCase):
 		st1 = frappe.copy_doc(test_records[0])
 		st1.company = "_Test Company 1"
 		st1.get("items")[0].t_warehouse="_Test Warehouse 2 - _TC1"
+		st1.get("items")[0].expense_account = "Stock Adjustment - _TC1"
+		st1.get("items")[0].cost_center = "Main - _TC1"
 		st1.insert()
 		st1.submit()
 

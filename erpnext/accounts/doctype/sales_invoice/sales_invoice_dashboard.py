@@ -12,7 +12,7 @@ def get_data():
 		},
 		'internal_links': {
 			'Sales Order': ['items', 'sales_order'],
-			'Delivery Note': ['items', 'delivery_note'],
+			'Delivery Note': ['items', 'delivery_note']
 		},
 		'transactions': [
 			{

@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe.utils import cint, flt, cstr
 from frappe import msgprint, _
 import frappe.defaults
@@ -10,6 +10,7 @@ from erpnext.accounts.utils import get_fiscal_year
 from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, process_gl_map
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock.stock_ledger import get_valuation_rate
+from erpnext.stock import get_warehouse_account_map
 
 class StockController(AccountsController):
 	def validate(self):
@@ -20,8 +21,8 @@ class StockController(AccountsController):
 		if self.docstatus == 2:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
-		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
-			warehouse_account = get_warehouse_account()
+		if cint(erpnext.is_perpetual_inventory_enabled(self.company)):
+			warehouse_account = get_warehouse_account_map()
 
 			if self.docstatus==1:
 				if not gl_entries:
@@ -37,7 +38,7 @@ class StockController(AccountsController):
 			default_cost_center=None):
 
 		if not warehouse_account:
-			warehouse_account = get_warehouse_account()
+			warehouse_account = get_warehouse_account_map()
 
 		sle_map = self.get_stock_ledger_details()
 		voucher_details = self.get_voucher_details(default_expense_account, default_cost_center, sle_map)
@@ -66,7 +67,7 @@ class StockController(AccountsController):
 							sle = self.update_stock_ledger_entries(sle)
 
 						gl_list.append(self.get_gl_dict({
-							"account": warehouse_account[sle.warehouse]["name"],
+							"account": warehouse_account[sle.warehouse]["account"],
 							"against": item_row.expense_account,
 							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
@@ -76,7 +77,7 @@ class StockController(AccountsController):
 						# to target warehouse / expense account
 						gl_list.append(self.get_gl_dict({
 							"account": item_row.expense_account,
-							"against": warehouse_account[sle.warehouse]["name"],
+							"against": warehouse_account[sle.warehouse]["account"],
 							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, 2),
@@ -88,16 +89,13 @@ class StockController(AccountsController):
 		if warehouse_with_no_account:
 			for wh in warehouse_with_no_account:
 				if frappe.db.get_value("Warehouse", wh, "company"):
-					frappe.throw(_("Warehouse {0} is not linked to any account, please create/link the corresponding (Asset) account for the warehouse.").format(wh))
-
-			msgprint(_("No accounting entries for the following warehouses") + ": \n" +
-				"\n".join(warehouse_with_no_account))
+					frappe.throw(_("Warehouse {0} is not linked to any account, please mention the account in  the warehouse record or set default inventory account in company {1}.").format(wh, self.company))
 
 		return process_gl_map(gl_list)
 
 	def update_stock_ledger_entries(self, sle):
 		sle.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
-			self.doctype, self.name, currency=self.company_currency)
+			self.doctype, self.name, currency=self.company_currency, company=self.company)
 
 		sle.stock_value = flt(sle.qty_after_transaction) * flt(sle.valuation_rate)
 		sle.stock_value_difference = flt(sle.actual_qty) * flt(sle.valuation_rate)
@@ -341,7 +339,7 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
 
 	if not warehouse_account:
-		warehouse_account = get_warehouse_account()
+		warehouse_account = get_warehouse_account_map()
 
 	future_stock_vouchers = get_future_stock_vouchers(posting_date, posting_time, for_warehouses, for_items)
 	gle = get_voucherwise_gl_entries(future_stock_vouchers, posting_date)
@@ -406,21 +404,3 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 				gl_entries.setdefault((d.voucher_type, d.voucher_no), []).append(d)
 
 	return gl_entries
-
-def get_warehouse_account():
-	if not frappe.flags.warehouse_account_map or frappe.flags.in_test:
-		warehouse_account = frappe._dict()
-
-		for d in frappe.db.sql("""select
-				warehouse, name, account_currency
-			from
-				tabAccount
-			where
-				account_type = 'Stock'
-				and (warehouse is not null and warehouse != '')
-				and is_group=0 """, as_dict=1):
-			warehouse_account.setdefault(d.warehouse, d)
-
-		frappe.flags.warehouse_account_map = warehouse_account
-
-	return frappe.flags.warehouse_account_map

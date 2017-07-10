@@ -19,13 +19,13 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
         and c.email_id='{email_id}'""".format(email_id=sender))
 
     if not customer:
-    	lead = frappe.db.get_value('Lead', dict(email_id=sender))
-    if not lead:
-    	new_lead = frappe.get_doc(dict(
-    		doctype='Lead',
-    		email_id = sender,
-    		lead_name = sender.split('@')[0].title()
-    	)).insert(ignore_permissions=True)
+		lead = frappe.db.get_value('Lead', dict(email_id=sender))
+		if not lead:
+			new_lead = frappe.get_doc(dict(
+				doctype='Lead',
+				email_id = sender,
+				lead_name = sender.split('@')[0].title()
+			)).insert(ignore_permissions=True)
 
     opportunity = frappe.get_doc(dict(
     	doctype='Opportunity',

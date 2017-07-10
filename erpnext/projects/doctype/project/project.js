@@ -13,12 +13,12 @@ frappe.ui.form.on("Project", {
 		}
 
 		frm.set_query('customer', 'erpnext.controllers.queries.customer_query');
-		
+
 		frm.set_query("user", "users", function() {
-					return {
-						query:"erpnext.projects.doctype.project.project.get_users_for_project"
-					}
-				});
+			return {
+				query:"erpnext.projects.doctype.project.project.get_users_for_project"
+			}
+		});
 
 		// sales order
 		frm.set_query('sales_order', function() {
@@ -89,7 +89,7 @@ frappe.ui.form.on("Project Task", {
 		if(doc.task_id) {
 			frappe.set_route("Form", "Task", doc.task_id);
 		} else {
-			msgprint(__("Save the document first."));
+			frappe.msgprint(__("Save the document first."));
 		}
 	},
 	status: function(frm, doctype, name) {

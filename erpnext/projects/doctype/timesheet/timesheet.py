@@ -368,7 +368,8 @@ def get_events(start, end, filters=None):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select `tabTimesheet Detail`.name as name, 
 			`tabTimesheet Detail`.docstatus as status, `tabTimesheet Detail`.parent as parent,
-			from_time as start_date, hours, activity_type, project, to_time as end_date, 
+			from_time as start_date, hours, activity_type, 
+			`tabTimesheet Detail`.project, to_time as end_date, 
 			CONCAT(`tabTimesheet Detail`.parent, ' (', ROUND(hours,2),' hrs)') as title 
 		from `tabTimesheet Detail`, `tabTimesheet` 
 		where `tabTimesheet Detail`.parent = `tabTimesheet`.name 
@@ -382,9 +383,13 @@ def get_events(start, end, filters=None):
 
 def get_conditions(filters):
 	conditions = []
-	abbr = {'employee': 'tabTimesheet', 'project': 'tabTimesheet Detail'}
 	for key in filters:
 		if filters.get(key):
-			conditions.append("`%s`.%s = '%s'"%(abbr.get(key), key, filters.get(key)))
+			if frappe.get_meta("Timesheet").has_field(key):
+				dt = 'tabTimesheet'
+			elif frappe.get_meta("Timesheet Detail").has_field(key):
+				dt = 'tabTimesheet Detail'
+				
+			conditions.append("`%s`.%s = '%s'"%(dt, key, filters.get(key)))
 
 	return " and {}".format(" and ".join(conditions)) if conditions else ""

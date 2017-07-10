@@ -1,6 +1,6 @@
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
 from frappe.utils import cint
 from frappe.utils.nestedset import rebuild_tree
@@ -51,7 +51,8 @@ def check_is_warehouse_associated_with_company():
 def make_warehouse_nestedset(company=None):
 	validate_parent_account_for_warehouse(company)
 	stock_account_group = get_stock_account_group(company.name)
-	if not stock_account_group and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
+	enable_perpetual_inventory = cint(erpnext.is_perpetual_inventory_enabled(company)) or 0
+	if not stock_account_group and enable_perpetual_inventory:
 		return
 
 	if company:
@@ -65,14 +66,14 @@ def make_warehouse_nestedset(company=None):
 		create_default_warehouse_group(company, stock_account_group, ignore_mandatory)
 
 	set_parent_to_warehouse(warehouse_group, company)
-	if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
+	if enable_perpetual_inventory:
 		set_parent_to_warehouse_account(company)
 
 def validate_parent_account_for_warehouse(company=None):
 	if not company:
 		return
 
-	if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
+	if cint(erpnext.is_perpetual_inventory_enabled(company.name)):
 		parent_account = frappe.db.sql("""select name from tabAccount
 			where account_type='Stock' and company=%s and is_group=1
 			and (warehouse is null or warehouse = '')""", company.name)
@@ -90,8 +91,7 @@ def create_default_warehouse_group(company=None, stock_account_group=None, ignor
 		"warehouse_name": _("All Warehouses"),
 		"is_group": 1,
 		"company": company.name if company else "",
-		"parent_warehouse": "",
-		"create_account_under": stock_account_group
+		"parent_warehouse": ""
 	})
 
 	if ignore_mandatory:

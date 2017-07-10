@@ -33,7 +33,7 @@ class BOMReplaceTool(Document):
 			from `tabBOM` where name = %s""", self.current_bom)
 		current_bom_unitcost = current_bom_unitcost and flt(current_bom_unitcost[0][0]) or 0
 		frappe.db.sql("""update `tabBOM Item` set bom_no=%s,
-			rate=%s, amount=qty*%s where bom_no = %s and docstatus < 2""",
+			rate=%s, amount=stock_qty*%s where bom_no = %s and docstatus < 2""",
 			(self.new_bom, current_bom_unitcost, current_bom_unitcost, self.current_bom))
 
 	def get_parent_boms(self):

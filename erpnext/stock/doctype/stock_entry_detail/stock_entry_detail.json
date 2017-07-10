@@ -14,6 +14,7 @@
  "engine": "InnoDB",
  "fields": [
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -43,6 +44,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -71,6 +73,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -102,6 +105,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -129,6 +133,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -160,6 +165,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -187,6 +193,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 1,
    "collapsible": 0,
@@ -218,6 +225,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -245,6 +253,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -273,6 +282,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 1,
@@ -302,6 +312,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -334,6 +345,7 @@
    "width": "300px"
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -362,6 +374,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -391,6 +404,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -421,6 +435,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -449,6 +464,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 1,
    "collapsible": 0,
@@ -479,6 +495,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 1,
    "collapsible": 0,
@@ -510,6 +527,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -540,6 +558,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -570,6 +589,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -601,6 +621,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -631,6 +652,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -658,6 +680,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -689,6 +712,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -719,6 +743,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -750,6 +775,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -780,6 +806,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -795,7 +822,7 @@
    "in_standard_filter": 0,
    "label": "Serial No / Batch",
    "length": 0,
-   "no_copy": 0,
+   "no_copy": 1,
    "permlevel": 0,
    "print_hide": 0,
    "print_hide_if_no_value": 0,
@@ -808,6 +835,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -838,6 +866,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -865,6 +894,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -880,7 +910,7 @@
    "in_standard_filter": 0,
    "label": "Batch No",
    "length": 0,
-   "no_copy": 0,
+   "no_copy": 1,
    "oldfieldname": "batch_no",
    "oldfieldtype": "Link",
    "options": "Batch",
@@ -896,6 +926,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -924,11 +955,12 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
    "columns": 0,
-   "depends_on": "eval:cint(sys_defaults.auto_accounting_for_stock)",
+   "depends_on": "eval:cint(frappe.sys_defaults.auto_accounting_for_stock)",
    "fieldname": "expense_account",
    "fieldtype": "Link",
    "hidden": 0,
@@ -954,6 +986,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -981,12 +1014,13 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
    "columns": 0,
    "default": ":Company",
-   "depends_on": "eval:cint(sys_defaults.auto_accounting_for_stock)",
+   "depends_on": "eval:cint(frappe.sys_defaults.auto_accounting_for_stock)",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "hidden": 0,
@@ -1012,6 +1046,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1040,6 +1075,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 1,
    "bold": 0,
    "collapsible": 0,
@@ -1069,6 +1105,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 1,
    "bold": 0,
    "collapsible": 0,
@@ -1099,6 +1136,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1129,6 +1167,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1156,6 +1195,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1186,6 +1226,7 @@
    "unique": 0
   },
   {
+   "allow_bulk_edit": 0,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -1225,7 +1266,7 @@
  "issingle": 0,
  "istable": 1,
  "max_attachments": 0,
- "modified": "2017-04-21 02:56:48.306627",
+ "modified": "2017-06-16 17:32:56.989049",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

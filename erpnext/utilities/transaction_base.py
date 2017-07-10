@@ -18,6 +18,10 @@ class TransactionBase(StatusUpdater):
 				frappe.db.get_value("Notification Control", None, dt + "_message"))
 
 	def validate_posting_time(self):
+		# set Edit Posting Date and Time to 1 while data import
+		if frappe.flags.in_import and self.posting_date:
+			self.set_posting_time = 1
+
 		if not getattr(self, 'set_posting_time', None):
 			now = now_datetime()
 			self.posting_date = now.strftime('%Y-%m-%d')
@@ -145,5 +149,5 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 			for f in qty_fields:
 				qty = d.get(f)
 				if qty:
-					if abs(int(qty) - float(qty)) > 0.0000001:
+					if abs(cint(qty) - flt(qty)) > 0.0000001:
 						frappe.throw(_("Quantity ({0}) cannot be a fraction in row {1}").format(qty, d.idx), UOMMustBeIntegerError)

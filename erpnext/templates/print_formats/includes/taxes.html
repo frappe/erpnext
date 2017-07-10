@@ -1,7 +1,7 @@
 {%- macro render_discount_amount(doc) -%}
 	{%- if doc.discount_amount -%}
 		<div class="row">
-			<div class="col-xs-5 text-right">
+			<div class="col-xs-5 {%- if not doc._align_labels_left %} text-right{%- endif -%}">
 				<label>{{ _("Discount Amount") }}</label></div>
 			<div class="col-xs-7 text-right">
 				- {{ doc.get_formatted("discount_amount", doc) }}
@@ -19,7 +19,7 @@
 		{%- for charge in data -%}
 			{%- if not charge.included_in_print_rate -%}
 			<div class="row">
-				<div class="col-xs-5 text-right">
+				<div class="col-xs-5 {%- if not doc._align_labels_left %} text-right{%- endif -%}">
 					<label>{{ charge.get_formatted("description") }}</label></div>
 				<div class="col-xs-7 text-right">
 					{{ frappe.format_value(frappe.utils.flt(charge.tax_amount),

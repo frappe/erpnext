@@ -1,9 +1,9 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
-cur_frm.add_fetch('employee', 'employee_name', 'employee_name');
 
 frappe.ui.form.on("Timesheet", {
 	setup: function(frm) {
+		frm.add_fetch('employee', 'employee_name', 'employee_name');
 		frm.fields_dict.employee.get_query = function() {
 			return {
 				filters:{
@@ -13,7 +13,7 @@ frappe.ui.form.on("Timesheet", {
 		}
 
 		frm.fields_dict['time_logs'].grid.get_field('task').get_query = function(frm, cdt, cdn) {
-			child = locals[cdt][cdn];
+			var child = locals[cdt][cdn];
 			return{
 				filters: {
 					'project': child.project,
@@ -51,8 +51,8 @@ frappe.ui.form.on("Timesheet", {
 		}
 
 		if(frm.doc.per_billed > 0) {
-			cur_frm.fields_dict["time_logs"].grid.toggle_enable("billing_hours", false);
-			cur_frm.fields_dict["time_logs"].grid.toggle_enable("billable", false);
+			frm.fields_dict["time_logs"].grid.toggle_enable("billing_hours", false);
+			frm.fields_dict["time_logs"].grid.toggle_enable("billable", false);
 		}
 	},
 
@@ -77,7 +77,7 @@ frappe.ui.form.on("Timesheet Detail", {
 	},
 
 	from_time: function(frm, cdt, cdn) {
-		calculate_end_time(frm, cdt, cdn)
+		calculate_end_time(frm, cdt, cdn);
 	},
 
 	to_time: function(frm, cdt, cdn) {
@@ -109,25 +109,27 @@ frappe.ui.form.on("Timesheet Detail", {
 	},
 
 	activity_type: function(frm, cdt, cdn) {
-		child = locals[cdt][cdn];
+		frm.script_manager.copy_from_first_row('time_logs', frm.selected_doc,
+			'project');
+
 		frappe.call({
 			method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
 			args: {
 				employee: frm.doc.employee,
-				activity_type: child.activity_type
+				activity_type: frm.selected_doc.activity_type
 			},
 			callback: function(r){
 				if(r.message){
 					frappe.model.set_value(cdt, cdn, 'billing_rate', r.message['billing_rate']);
 					frappe.model.set_value(cdt, cdn, 'costing_rate', r.message['costing_rate']);
-					calculate_billing_costing_amount(frm, cdt, cdn)
+					calculate_billing_costing_amount(frm, cdt, cdn);
 				}
 			}
 		})
 	}
 });
 
-calculate_end_time = function(frm, cdt, cdn){
+var calculate_end_time = function(frm, cdt, cdn) {
 	var child = locals[cdt][cdn];
 
 	var d = moment(child.from_time);
@@ -142,8 +144,9 @@ calculate_end_time = function(frm, cdt, cdn){
 }
 
 var calculate_billing_costing_amount = function(frm, cdt, cdn){
-	child = locals[cdt][cdn]
-	billing_amount = costing_amount = 0.0;
+	var child = locals[cdt][cdn]
+	var billing_amount = 0.0;
+	var costing_amount = 0.0;
 
 	if(child.billing_hours && child.billable){
 		billing_amount = (child.billing_hours * child.billing_rate);
@@ -157,10 +160,10 @@ var calculate_billing_costing_amount = function(frm, cdt, cdn){
 
 var calculate_time_and_amount = function(frm) {
 	var tl = frm.doc.time_logs || [];
-	total_working_hr = 0;
-	total_billing_hr = 0;
-	total_billable_amount = 0;
-	total_costing_amount = 0;
+	var total_working_hr = 0;
+	var total_billing_hr = 0;
+	var total_billable_amount = 0;
+	var total_costing_amount = 0;
 	for(var i=0; i<tl.length; i++) {
 		if (tl[i].hours) {
 			total_working_hr += tl[i].hours;
@@ -173,8 +176,8 @@ var calculate_time_and_amount = function(frm) {
 		}
 	}
 
-	cur_frm.set_value("total_billable_hours", total_billing_hr);
-	cur_frm.set_value("total_hours", total_working_hr);
-	cur_frm.set_value("total_billable_amount", total_billable_amount);
-	cur_frm.set_value("total_costing_amount", total_costing_amount);
+	frm.set_value("total_billable_hours", total_billing_hr);
+	frm.set_value("total_hours", total_working_hr);
+	frm.set_value("total_billable_amount", total_billable_amount);
+	frm.set_value("total_costing_amount", total_costing_amount);
 }

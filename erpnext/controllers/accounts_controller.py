@@ -54,7 +54,7 @@ class AccountsController(TransactionBase):
 		self.validate_currency()
 
 		if self.meta.get_field("is_recurring"):
-			if self.amended_from and self.recurring_id:
+			if self.amended_from and self.recurring_id == self.amended_from:
 				self.recurring_id = None
 			if not self.get("__islocal"):
 				validate_recurring_document(self)
@@ -274,7 +274,9 @@ class AccountsController(TransactionBase):
 		if not account_currency:
 			account_currency = get_account_currency(gl_dict.account)
 
-		if self.doctype not in ["Journal Entry", "Period Closing Voucher", "Payment Entry"]:
+		if gl_dict.account and self.doctype not in ["Journal Entry", 
+			"Period Closing Voucher", "Payment Entry"]:
+			
 			self.validate_account_currency(gl_dict.account, account_currency)
 			set_balance_in_account_currency(gl_dict, account_currency, self.get("conversion_rate"), self.company_currency)
 

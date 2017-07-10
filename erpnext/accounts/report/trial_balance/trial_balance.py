@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
 from frappe.utils import flt, getdate, formatdate, cstr
 from erpnext.accounts.report.financial_statements \
@@ -53,6 +53,7 @@ def validate_filters(filters):
 def get_data(filters):
 	accounts = frappe.db.sql("""select name, parent_account, account_name, root_type, report_type, lft, rgt
 		from `tabAccount` where company=%s order by lft""", filters.company, as_dict=True)
+	company_currency = erpnext.get_company_currency(filters.company)
 
 	if not accounts:
 		return None
@@ -69,10 +70,10 @@ def get_data(filters):
 
 	opening_balances = get_opening_balances(filters)
 
-	total_row = calculate_values(accounts, gl_entries_by_account, opening_balances, filters)
+	total_row = calculate_values(accounts, gl_entries_by_account, opening_balances, filters, company_currency)
 	accumulate_values_into_parents(accounts, accounts_by_name)
 
-	data = prepare_data(accounts, filters, total_row, parent_children_map)
+	data = prepare_data(accounts, filters, total_row, parent_children_map, company_currency)
 	data = filter_out_zero_value_rows(data, parent_children_map, 
 		show_zero_values=filters.get("show_zero_values"))
 		
@@ -119,7 +120,7 @@ def get_rootwise_opening_balances(filters, report_type):
 
 	return opening
 
-def calculate_values(accounts, gl_entries_by_account, opening_balances, filters):
+def calculate_values(accounts, gl_entries_by_account, opening_balances, filters, company_currency):
 	init = {
 		"opening_debit": 0.0,
 		"opening_credit": 0.0,
@@ -137,7 +138,8 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters)
 		"credit": 0.0,
 		"parent_account": None,
 		"indent": 0,
-		"has_value": True
+		"has_value": True,
+		"currency": company_currency
 	}
 
 	for d in accounts:
@@ -164,9 +166,8 @@ def accumulate_values_into_parents(accounts, accounts_by_name):
 			for key in value_fields:
 				accounts_by_name[d.parent_account][key] += d[key]
 
-def prepare_data(accounts, filters, total_row, parent_children_map):
+def prepare_data(accounts, filters, total_row, parent_children_map, company_currency):
 	data = []
-	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
 	
 	for d in accounts:
 		has_value = False

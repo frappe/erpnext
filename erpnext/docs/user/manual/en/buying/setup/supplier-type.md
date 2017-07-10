@@ -24,5 +24,3 @@ Classifying your supplier into different types facilitates accounting and
 payments.
 
 Type your new supplier category and Save.
-
-{next}

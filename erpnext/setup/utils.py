@@ -41,8 +41,7 @@ def before_tests():
 			"email"				:"test@erpnext.com",
 			"password"			:"test",
 			"chart_of_accounts" : "Standard",
-			"domain"			: "Manufacturing",
-
+			"domain"			: "Manufacturing"
 		})
 
 	frappe.db.sql("delete from `tabLeave Allocation`")
@@ -91,8 +90,7 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None):
 			response.raise_for_status()
 			value = response.json()["rates"][to_currency]
 			cache.setex(key, value, 6 * 60 * 60)
-
 		return flt(value)
 	except:
-		frappe.msgprint(_("Unable to find exchange rate for {0} to {1} for key date {2}").format(from_currency, to_currency, transaction_date))
+		frappe.msgprint(_("Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually").format(from_currency, to_currency, transaction_date))
 		return 0.0

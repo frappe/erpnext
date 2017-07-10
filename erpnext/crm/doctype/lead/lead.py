@@ -4,11 +4,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import (cstr, validate_email_add, cint, comma_and, has_gravatar, now)
+from frappe.utils import (cstr, validate_email_add, cint, comma_and, has_gravatar, now, getdate, nowdate)
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
-from frappe.geo.address_and_contact import load_address_and_contact
+from frappe.contacts.address_and_contact import load_address_and_contact
 from erpnext.accounts.party import set_taxes
 
 sender_field = "email_id"
@@ -43,9 +43,10 @@ class Lead(SellingController):
 			if self.email_id == self.contact_by:
 				frappe.throw(_("Next Contact By cannot be same as the Lead Email Address"))
 
-			self.image = has_gravatar(self.email_id)
+			if self.is_new() or not self.image:
+				self.image = has_gravatar(self.email_id)
 
-		if self.contact_date and self.contact_date < now():
+		if self.contact_date and getdate(self.contact_date) < getdate(nowdate()):
 			frappe.throw(_("Next Contact Date cannot be in the past"))
 
 	def on_update(self):
@@ -149,8 +150,7 @@ def make_quotation(source_name, target_doc=None):
 		{"Lead": {
 			"doctype": "Quotation",
 			"field_map": {
-				"name": "lead",
-				"lead_name": "customer_name",
+				"name": "lead"
 			}
 		}}, target_doc)
 	target_doc.quotation_to = "Lead"

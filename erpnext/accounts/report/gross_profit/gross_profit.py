@@ -227,7 +227,7 @@ class GrossProfitGenerator(object):
 				if not average_buying_rate:
 					average_buying_rate = get_valuation_rate(item_code, row.warehouse,
 						row.parenttype, row.parent, allow_zero_rate=True, 
-						currency=self.filters.currency)
+						currency=self.filters.currency, company=self.filters.company)
 
 				self.average_buying_rate[item_code] =  flt(average_buying_rate)
 
@@ -278,7 +278,7 @@ class GrossProfitGenerator(object):
 				inner join `tabSales Invoice Item` on `tabSales Invoice Item`.parent = `tabSales Invoice`.name
 				{sales_team_table}
 			where
-				`tabSales Invoice`.docstatus = 1 and `tabSales Invoice`.is_return != 1 {conditions} {match_cond}
+				`tabSales Invoice`.docstatus = 1 {conditions} {match_cond}
 			order by
 				`tabSales Invoice`.posting_date desc, `tabSales Invoice`.posting_time desc"""
 			.format(conditions=conditions, sales_person_cols=sales_person_cols,

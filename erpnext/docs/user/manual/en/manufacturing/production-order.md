@@ -17,9 +17,15 @@ by:
 
   * Select the Item to be produced.
   * The default BOM for that item will be fetched by the system. You can also change BOM.
+  * Enter the Qty to manufacture.
   * If the selected BOM has operartion mentioned in it, the system shall fetch all operations from BOM.
   * Mention the Planned Start Date (an Estimated Date at which you want the Production to begin.)
-  * Select Warehouses. Work-in-Progress Warehouse is where your Items will be transferred when you begin production and Target Warehouse is  where you store finished Items before they are shipped.
+  * Select Warehouses:
+    * Source Warehouses: The warehouse where you store your raw materials. Each required item can have separate source warehouse. Group warehouse also can be selected as source warehouse. On submission of Production Order, the raw mateirals will be reserved in these warehouses for production usage.
+    * Work-in-Progress Warehouse: The warehouse where your Items will be transferred when you begin production. Group Warehouse can also be selected as Work-in-Progress warehouse.
+    * Target Warehouse: The warehouse where you store finished Items before they are shipped.
+	* Scrap Warehouse: Scrap Items will be stored in this warehouse.
+  * Required Items: All the required items (raw materials) will be fetched from BOM and populated in this table. Here you can also change the default source warehouse for any item. And during the production, you can track transferred raw materials from this table.
 
 > Note : You can save a Production Order without selecting the warehouses, but warehouses are mandatory for submitting a Production Order
 

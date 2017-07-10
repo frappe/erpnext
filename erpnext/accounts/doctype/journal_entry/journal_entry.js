@@ -62,11 +62,10 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		if(this.frm.doc.__islocal && this.frm.doc.company) {
 			frappe.model.set_default_values(this.frm.doc);
 			$.each(this.frm.doc.accounts || [], function(i, jvd) {
-					frappe.model.set_default_values(jvd);
-				}
-			);
+				frappe.model.set_default_values(jvd);
+			});
 
-			if(!this.frm.doc.amended_from) this.frm.doc.posting_date = this.frm.posting_date || get_today();
+			if(!this.frm.doc.amended_from) this.frm.doc.posting_date = this.frm.posting_date || frappe.datetime.get_today();
 		}
 	},
 
@@ -124,7 +123,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 				// account filter
 				frappe.model.validate_missing(jvd, "account");
 
-				party_account_field = jvd.reference_type==="Sales Invoice" ? "debit_to": "credit_to";
+				var party_account_field = jvd.reference_type==="Sales Invoice" ? "debit_to": "credit_to";
 				out.filters.push([jvd.reference_type, party_account_field, "=", jvd.account]);
 			} else {
 				// party_type and party mandatory
@@ -243,7 +242,7 @@ cur_frm.cscript.update_totals = function(doc) {
 cur_frm.cscript.get_balance = function(doc,dt,dn) {
 	cur_frm.cscript.update_totals(doc);
 	return $c_obj(cur_frm.doc, 'get_balance', '', function(r, rt){
-	cur_frm.refresh();
+		cur_frm.refresh();
 	});
 }
 

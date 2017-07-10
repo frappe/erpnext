@@ -37,9 +37,6 @@ def get_level():
 	if frappe.db.count('Student') > 5:
 		activation_level += 1
 
-	if frappe.db.count('Student Batch') > 5:
-		activation_level += 1
-
 	if frappe.db.count('Instructor') > 5:
 		activation_level += 1
 

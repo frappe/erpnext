@@ -7,7 +7,8 @@ import erpnext
 import json
 import itertools
 from frappe import msgprint, _
-from frappe.utils import cstr, flt, cint, getdate, now_datetime, formatdate, strip, get_timestamp
+from frappe.utils import (cstr, flt, cint, getdate, now_datetime, formatdate,
+	strip, get_timestamp, random_string)
 from frappe.website.website_generator import WebsiteGenerator
 from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for, get_parent_item_groups
 from frappe.website.render import clear_cache
@@ -36,7 +37,8 @@ class Item(WebsiteGenerator):
 		if frappe.db.get_default("item_naming_by")=="Naming Series":
 			if self.variant_of:
 				if not self.item_code:
-					self.item_code = make_variant_item_code(self.variant_of, self)
+					template_item_name = frappe.db.get_value("Item", self.variant_of, "item_name")
+					self.item_code = make_variant_item_code(self.variant_of, template_item_name, self)
 			else:
 				from frappe.model.naming import make_autoname
 				self.item_code = make_autoname(self.naming_series+'.#####')
@@ -99,7 +101,6 @@ class Item(WebsiteGenerator):
 		invalidate_cache_for_item(self)
 		self.validate_name_with_item_group()
 		self.update_item_price()
-		self.update_variants()
 		self.update_template_item()
 
 	def add_price(self, price_list=None):
@@ -142,7 +143,8 @@ class Item(WebsiteGenerator):
 
 	def make_route(self):
 		if not self.route:
-			return cstr(frappe.db.get_value('Item Group', self.item_group, 'route')) + '/' + self.scrub(self.item_name)
+			return cstr(frappe.db.get_value('Item Group', self.item_group,
+				'route')) + '/' + self.scrub(self.item_name + '-' + random_string(5))
 
 	def get_parents(self, context):
 		item_group, route = frappe.db.get_value('Item Group', self.item_group, ['name', 'route'])
@@ -247,7 +249,7 @@ class Item(WebsiteGenerator):
 		self.set_attribute_context(context)
 		self.set_disabled_attributes(context)
 
-		context.parents = self.get_parents(context)
+		self.get_parents(context)
 
 		return context
 
@@ -323,7 +325,7 @@ class Item(WebsiteGenerator):
 
 	def set_disabled_attributes(self, context):
 		"""Disable selection options of attribute combinations that do not result in a variant"""
-		if not self.attributes:
+		if not self.attributes or not self.has_variants:
 			return
 
 		context.disabled_attributes = {}
@@ -522,7 +524,7 @@ class Item(WebsiteGenerator):
 
 	def before_rename(self, old_name, new_name, merge=False):
 		if self.item_name==old_name:
-			self.item_name=new_name
+			frappe.db.set_value("Item", old_name, "item_name", new_name)
 
 		if merge:
 			# Validate properties before merging
@@ -610,20 +612,7 @@ class Item(WebsiteGenerator):
 			if not template_item.show_in_website:
 				template_item.show_in_website = 1
 				template_item.flags.ignore_permissions = True
-				template_item.flags.dont_update_variants = True
 				template_item.save()
-
-	def update_variants(self):
-		if self.has_variants and not self.flags.dont_update_variants:
-			updated = []
-			variants = frappe.db.get_all("Item", fields=["item_code"], filters={"variant_of": self.name })
-			for d in variants:
-				variant = frappe.get_doc("Item", d)
-				copy_attributes_to_variant(self, variant)
-				variant.save()
-				updated.append(d.item_code)
-			if updated:
-				frappe.msgprint(_("Item Variants {0} updated").format(", ".join(updated)))
 
 	def validate_has_variants(self):
 		if not self.has_variants and frappe.db.get_value("Item", self.name, "has_variants"):
