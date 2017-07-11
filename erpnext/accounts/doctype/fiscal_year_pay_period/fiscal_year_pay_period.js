@@ -3,7 +3,9 @@
 
 frappe.ui.form.on('Fiscal Year Pay Period', {
 	onload: function(frm) {
-		remove_rows(frm, 'dates');
+		if(frm.doc.__islocal){
+			remove_rows(frm, 'dates');
+		}
 	},
 
 	refresh: function(frm) {
