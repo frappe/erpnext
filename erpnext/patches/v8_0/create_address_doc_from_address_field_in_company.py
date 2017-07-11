@@ -9,7 +9,8 @@ def execute():
 	# so here is the patch for moving the address details in the address doc
 	company_list = []
 	if 'address' in frappe.db.get_table_columns('Company'):
-		company_list = frappe.db.sql('''select name, address from `tabCompany` where address is not null''', as_dict=1)
+		company_list = frappe.db.sql('''select name, address from `tabCompany` 
+			where address is not null and address != ""''', as_dict=1)
 
 	for company in company_list:
 		add_list = company.address.split(" ")
