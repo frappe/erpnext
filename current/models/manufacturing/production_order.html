@@ -223,10 +223,9 @@
 Draft
 Submitted
 Not Started
-Stopped
-Unstopped
 In Process
 Completed
+Stopped
 Cancelled</pre>
             </td>
         </tr>
@@ -254,27 +253,6 @@ Cancelled</pre>
         
         <tr >
             <td>5</td>
-            <td ><code>project</code></td>
-            <td >
-                Link</td>
-            <td >
-                Project
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/projects/project">Project</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr >
-            <td>6</td>
             <td class="danger" title="Mandatory"><code>bom_no</code></td>
             <td >
                 Link</td>
@@ -295,7 +273,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>7</td>
+            <td>6</td>
             <td ><code>use_multi_level_bom</code></td>
             <td >
                 Check</td>
@@ -308,7 +286,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>8</td>
+            <td>7</td>
             <td ><code>column_break1</code></td>
             <td class="info">
                 Column Break</td>
@@ -320,7 +298,43 @@ Cancelled</pre>
         </tr>
         
         <tr >
+            <td>8</td>
+            <td class="danger" title="Mandatory"><code>qty</code></td>
+            <td >
+                Float</td>
+            <td >
+                Qty To Manufacture
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
             <td>9</td>
+            <td ><code>material_transferred_for_manufacturing</code></td>
+            <td >
+                Float</td>
+            <td >
+                Material Transferred for Manufacturing
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>10</td>
+            <td ><code>produced_qty</code></td>
+            <td >
+                Float</td>
+            <td >
+                Manufactured Qty
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>11</td>
             <td ><code>sales_order</code></td>
             <td >
                 Link</td>
@@ -341,19 +355,28 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>10</td>
-            <td class="danger" title="Mandatory"><code>qty</code></td>
+            <td>12</td>
+            <td ><code>project</code></td>
             <td >
-                Float</td>
+                Link</td>
             <td >
-                Qty To Manufacture
+                Project
                 
             </td>
-            <td></td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/projects/project">Project</a>
+
+
+                
+            </td>
         </tr>
         
         <tr >
-            <td>11</td>
+            <td>13</td>
             <td ><code>skip_transfer</code></td>
             <td >
                 Check</td>
@@ -361,30 +384,6 @@ Cancelled</pre>
                 Skip Material Transfer
                 <p class="text-muted small">
                     Check if material transfer entry is not required</p>
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>12</td>
-            <td ><code>material_transferred_for_manufacturing</code></td>
-            <td >
-                Float</td>
-            <td >
-                Material Transferred for Manufacturing
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>13</td>
-            <td ><code>produced_qty</code></td>
-            <td >
-                Float</td>
-            <td >
-                Manufactured Qty
-                
             </td>
             <td></td>
         </tr>
@@ -405,11 +404,11 @@ Cancelled</pre>
         
         <tr >
             <td>15</td>
-            <td ><code>source_warehouse</code></td>
+            <td ><code>wip_warehouse</code></td>
             <td >
                 Link</td>
             <td >
-                Source Warehouse (for reserving Items)
+                Work-in-Progress Warehouse
                 
             </td>
             <td>
@@ -426,11 +425,11 @@ Cancelled</pre>
         
         <tr >
             <td>16</td>
-            <td ><code>wip_warehouse</code></td>
+            <td ><code>fg_warehouse</code></td>
             <td >
                 Link</td>
             <td >
-                Work-in-Progress Warehouse
+                Target Warehouse
                 
             </td>
             <td>
@@ -459,27 +458,6 @@ Cancelled</pre>
         
         <tr >
             <td>18</td>
-            <td ><code>fg_warehouse</code></td>
-            <td >
-                Link</td>
-            <td >
-                Target Warehouse
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/stock/warehouse">Warehouse</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr >
-            <td>19</td>
             <td ><code>scrap_warehouse</code></td>
             <td >
                 Link</td>
@@ -500,208 +478,7 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>20</td>
-            <td ><code>time</code></td>
-            <td >
-                Section Break</td>
-            <td >
-                Time
-                
-            </td>
-            <td>
-                <pre>fa fa-time</pre>
-            </td>
-        </tr>
-        
-        <tr >
-            <td>21</td>
-            <td ><code>expected_delivery_date</code></td>
-            <td >
-                Date</td>
-            <td >
-                Expected Delivery Date
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>22</td>
-            <td class="danger" title="Mandatory"><code>planned_start_date</code></td>
-            <td >
-                Datetime</td>
-            <td >
-                Planned Start Date
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>23</td>
-            <td ><code>planned_end_date</code></td>
-            <td >
-                Datetime</td>
-            <td >
-                Planned End Date
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>24</td>
-            <td ><code>column_break_13</code></td>
-            <td class="info">
-                Column Break</td>
-            <td >
-                
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>25</td>
-            <td ><code>actual_start_date</code></td>
-            <td >
-                Datetime</td>
-            <td >
-                Actual Start Date
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>26</td>
-            <td ><code>actual_end_date</code></td>
-            <td >
-                Datetime</td>
-            <td >
-                Actual End Date
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr class="info">
-            <td>27</td>
-            <td ><code>operations_section</code></td>
-            <td >
-                Section Break</td>
-            <td >
-                Operations
-                
-            </td>
-            <td>
-                <pre>fa fa-wrench</pre>
-            </td>
-        </tr>
-        
-        <tr >
-            <td>28</td>
-            <td ><code>operations</code></td>
-            <td >
-                Table</td>
-            <td >
-                Operations
-                
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/manufacturing/production_order_operation">Production Order Operation</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr class="info">
-            <td>29</td>
-            <td ><code>section_break_22</code></td>
-            <td >
-                Section Break</td>
-            <td >
-                Operation Cost
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>30</td>
-            <td ><code>planned_operating_cost</code></td>
-            <td >
-                Currency</td>
-            <td >
-                Planned Operating Cost
-                
-            </td>
-            <td>
-                <pre>Company:company:default_currency</pre>
-            </td>
-        </tr>
-        
-        <tr >
-            <td>31</td>
-            <td ><code>actual_operating_cost</code></td>
-            <td >
-                Currency</td>
-            <td >
-                Actual Operating Cost
-                
-            </td>
-            <td>
-                <pre>Company:company:default_currency</pre>
-            </td>
-        </tr>
-        
-        <tr >
-            <td>32</td>
-            <td ><code>additional_operating_cost</code></td>
-            <td >
-                Currency</td>
-            <td >
-                Additional Operating Cost
-                
-            </td>
-            <td>
-                <pre>Company:company:default_currency</pre>
-            </td>
-        </tr>
-        
-        <tr >
-            <td>33</td>
-            <td ><code>column_break_24</code></td>
-            <td class="info">
-                Column Break</td>
-            <td >
-                
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>34</td>
-            <td ><code>total_operating_cost</code></td>
-            <td >
-                Currency</td>
-            <td >
-                Total Operating Cost
-                
-            </td>
-            <td>
-                <pre>Company:company:default_currency</pre>
-            </td>
-        </tr>
-        
-        <tr class="info">
-            <td>35</td>
+            <td>19</td>
             <td ><code>required_items_section</code></td>
             <td >
                 Section Break</td>
@@ -713,7 +490,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>36</td>
+            <td>20</td>
             <td ><code>required_items</code></td>
             <td >
                 Table</td>
@@ -734,7 +511,208 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>37</td>
+            <td>21</td>
+            <td ><code>time</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Time
+                
+            </td>
+            <td>
+                <pre>fa fa-time</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>22</td>
+            <td class="danger" title="Mandatory"><code>planned_start_date</code></td>
+            <td >
+                Datetime</td>
+            <td >
+                Planned Start Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>23</td>
+            <td ><code>actual_start_date</code></td>
+            <td >
+                Datetime</td>
+            <td >
+                Actual Start Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>24</td>
+            <td ><code>column_break_13</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>25</td>
+            <td ><code>planned_end_date</code></td>
+            <td >
+                Datetime</td>
+            <td >
+                Planned End Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>26</td>
+            <td ><code>actual_end_date</code></td>
+            <td >
+                Datetime</td>
+            <td >
+                Actual End Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>27</td>
+            <td ><code>expected_delivery_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                Expected Delivery Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>28</td>
+            <td ><code>operations_section</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Operations
+                
+            </td>
+            <td>
+                <pre>fa fa-wrench</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>29</td>
+            <td ><code>operations</code></td>
+            <td >
+                Table</td>
+            <td >
+                Operations
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/production_order_operation">Production Order Operation</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>30</td>
+            <td ><code>section_break_22</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Operation Cost
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>31</td>
+            <td ><code>planned_operating_cost</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Planned Operating Cost
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>32</td>
+            <td ><code>actual_operating_cost</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Actual Operating Cost
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>33</td>
+            <td ><code>additional_operating_cost</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Additional Operating Cost
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>34</td>
+            <td ><code>column_break_24</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>35</td>
+            <td ><code>total_operating_cost</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Total Operating Cost
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>36</td>
             <td ><code>more_info</code></td>
             <td >
                 Section Break</td>
@@ -748,7 +726,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>38</td>
+            <td>37</td>
             <td ><code>description</code></td>
             <td >
                 Small Text</td>
@@ -760,7 +738,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>39</td>
+            <td>38</td>
             <td ><code>stock_uom</code></td>
             <td >
                 Link</td>
@@ -781,7 +759,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>40</td>
+            <td>39</td>
             <td class="danger" title="Mandatory"><code>company</code></td>
             <td >
                 Link</td>
@@ -802,7 +780,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>41</td>
+            <td>40</td>
             <td ><code>column_break2</code></td>
             <td class="info">
                 Column Break</td>
@@ -814,7 +792,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>42</td>
+            <td>41</td>
             <td ><code>material_request</code></td>
             <td >
                 Link</td>
@@ -836,7 +814,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>43</td>
+            <td>42</td>
             <td ><code>material_request_item</code></td>
             <td >
                 Data</td>
@@ -848,7 +826,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>44</td>
+            <td>43</td>
             <td ><code>amended_from</code></td>
             <td >
                 Link</td>

@@ -216,6 +216,17 @@ Last comment: {{ comments[-1].comment }} by {{ comments[-1].by }}
 
 <hr />
 
+<h3>Setting a Value after the Alert is Set</h3>
+
+<p>Sometimes to make sure that the email alert is not sent multiple times, you can
+define a custom property (via Customize Form) like "Email Alert Sent" and then
+set this property after the alert is sent by setting the <strong>Set Property After Alert</strong>
+field.</p>
+
+<p>Then you can use that as a condition in the <strong>Condition</strong> rules to ensure emails are not sent multiple times</p>
+
+<p><img class="screenshot" alt="Setting Property in Email Alert" src="https://frappe.github.io/erpnext/assets/img/setup/email/email-alert-subject.png"></p>
+
 <h3>Example</h3>
 
 <ol>
