@@ -25,7 +25,7 @@
     "payroll_period_name": "_Test 2017 - Monthly"
   },
   {
-    "pay_period_end_date": "2017-12-30",
+    "pay_period_end_date": "2017-12-31",
     "dates":[
       {
         "end_date": "2017-07-31",
@@ -75,7 +75,7 @@
     "payroll_period_name": "_Test 2017 - Monthly"
   },
   {
-    "pay_period_end_date": "2017-01-27",
+    "pay_period_end_date": "2017-01-28",
     "dates":[
       {
         "end_date": "2017-01-14",
@@ -90,7 +90,7 @@
     "payroll_period_name": "_Test 2017 - Fortnightly"
   },
   {
-    "pay_period_end_date": "2017-01-02",
+    "pay_period_end_date": "2017-01-07",
     "dates":[
       {
         "end_date": "2017-01-07",
@@ -105,7 +105,7 @@
     "payroll_period_name": "_Test 2017 - Weekly"
   },
   {
-    "pay_period_end_date": "2017-01-02",
+    "pay_period_end_date": "2017-01-07",
     "dates":[
       {
         "end_date": "2017-01-07",
@@ -116,7 +116,7 @@
     "is_active": "Yes",
     "doctype": "Fiscal Year Pay Period",
     "payment_frequency": "Weekly",
-    "pay_period_start_date": "2017-12-01",
+    "pay_period_start_date": "2017-01-01",
     "payroll_period_name": "_Test 2017 - Weekly"
   }
 ]

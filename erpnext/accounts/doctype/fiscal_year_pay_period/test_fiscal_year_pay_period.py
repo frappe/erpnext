@@ -46,7 +46,12 @@ class TestFiscalYearPayPeriod(unittest.TestCase):
 		if frappe.db.exists('Fiscal Year Pay Period', fypp_record['payroll_period_name']):
 			frappe.delete_doc('Fiscal Year Pay Period', fypp_record['payroll_period_name'])
 
+		if frappe.db.exists('Fiscal Year Pay Period', '_Test 1 Monthly'):
+			frappe.delete_doc('Fiscal Year Pay Period', '_Test 1 Monthly')
+
 		fy = frappe.get_doc(fypp_record)
+		fy.pay_period_start_date = '2017-01-07'
+		fy.pay_period_end_date = '2017-01-01'
 		self.assertRaises(frappe.ValidationError, fy.insert)
 
 		fy.pay_period_start_date = '2017-01-01'
@@ -65,6 +70,8 @@ class TestFiscalYearPayPeriod(unittest.TestCase):
 			frappe.delete_doc('Fiscal Year Pay Period', fypp_record['payroll_period_name'])
 
 		fy = frappe.get_doc(fypp_record)
+		fy.pay_period_start_date = '2017-01-01'
+		fy.pay_period_end_date = '2017-12-01'
 		self.assertRaises(frappe.ValidationError, fy.insert)
 
 	def test_create_fiscal_year_pay_period_wrong_dates_fortnightly(self):
@@ -74,6 +81,7 @@ class TestFiscalYearPayPeriod(unittest.TestCase):
 			frappe.delete_doc('Fiscal Year Pay Period', fypp_record['payroll_period_name'])
 
 		fy = frappe.get_doc(fypp_record)
+		fy.pay_period_end_date = '2017-01-31'
 		self.assertRaises(frappe.ValidationError, fy.insert)
 
 	def test_create_fiscal_year_pay_period_wrong_dates_weekly(self):
@@ -83,6 +91,7 @@ class TestFiscalYearPayPeriod(unittest.TestCase):
 			frappe.delete_doc('Fiscal Year Pay Period', fypp_record['payroll_period_name'])
 
 		fy = frappe.get_doc(fypp_record)
+		fy.pay_period_end_date = '2017-01-06'
 		self.assertRaises(frappe.ValidationError, fy.insert)
 
 	def test_fypp_payment_frequency(self):
