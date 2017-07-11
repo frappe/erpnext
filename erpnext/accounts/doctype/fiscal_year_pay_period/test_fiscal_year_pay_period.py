@@ -61,7 +61,60 @@ class TestFiscalYearPayPeriod(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, fy.insert)
 
 		fy.pay_period_end_date = '2017-12-31'
+		fy_first_row = fy.dates[0]
+		fy_first_row.end_date = '2017-01-31'
 		fy.insert()
+
+	def test_create_fypp_wrong_interval_in_child_table(self):
+		fypp_record = test_records[1]
+
+		if frappe.db.exists('Fiscal Year Pay Period', fypp_record['payroll_period_name']):
+			frappe.delete_doc('Fiscal Year Pay Period', fypp_record['payroll_period_name'])
+
+		fy = frappe.get_doc(fypp_record)
+		first_row = fy.dates[0]
+		first_row.end_date = '2017-07-15'
+
+		self.assertRaises(frappe.ValidationError, fy.insert)
+
+		first_row.end_date = '2017-07-31'
+
+		second_row = fy.dates[1]
+		second_row.start_date = '2017-08-05'
+
+		self.assertRaises(frappe.ValidationError, fy.insert)
+
+		second_row.start_date = '2017-08-01'
+		fy.insert()
+
+	def test_create_fypp_wrong_start_in_child_table(self):
+		fypp_record = test_records[1]
+
+		if frappe.db.exists('Fiscal Year Pay Period', fypp_record['payroll_period_name']):
+			frappe.delete_doc('Fiscal Year Pay Period', fypp_record['payroll_period_name'])
+
+		fy = frappe.get_doc(fypp_record)
+		first_row = fy.dates[0]
+		first_row.start_date = '2017-07-15'
+
+		self.assertRaises(frappe.ValidationError, fy.insert)
+
+		first_row.start_date = '2017-06-31'
+		self.assertRaises(frappe.ValidationError, fy.insert)
+
+		first_row.start_date = '2017-07-01'
+		fy.insert()
+
+	def test_create_fypp_no_gaps_in_child_table(self):
+		fypp_record = test_records[1]
+
+		if frappe.db.exists('Fiscal Year Pay Period', fypp_record['payroll_period_name']):
+			frappe.delete_doc('Fiscal Year Pay Period', fypp_record['payroll_period_name'])
+
+		fy = frappe.get_doc(fypp_record)
+		fy.dates.pop(1)
+
+		self.assertRaises(frappe.ValidationError, fy.insert)
 
 	def test_create_fiscal_year_pay_period_wrong_dates_monthly(self):
 		fypp_record = test_records[1]
