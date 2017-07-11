@@ -5,6 +5,7 @@ def execute():
 	frappe.reload_doc('regional', 'doctype', 'gst_settings')
 	frappe.reload_doc('regional', 'doctype', 'gst_hsn_code')
 	frappe.reload_doc('stock', 'doctype', 'item')
+	frappe.reload_doc("stock", "doctype", "customs_tariff_number")
 
 	for report_name in ('GST Sales Register', 'GST Purchase Register',
 		'GST Itemised Sales Register', 'GST Itemised Purchase Register'):

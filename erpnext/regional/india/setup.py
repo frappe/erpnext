@@ -84,7 +84,7 @@ def make_custom_fields():
 			dict(fieldname='gst_state', label='GST State', fieldtype='Select',
 				options='\n'.join(states), insert_after='gstin'),
 			dict(fieldname='gst_state_number', label='GST State Number',
-				fieldtype='Int', insert_after='gst_state'),
+				fieldtype='Int', insert_after='gst_state', read_only=1),
 		],
 		'Purchase Invoice': [
 			dict(fieldname='supplier_gstin', label='Supplier GSTIN',
@@ -102,8 +102,8 @@ def make_custom_fields():
 				fieldtype='Data', insert_after='company_address',
 				options='company_address.gstin', print_hide=1),
 			dict(fieldname='invoice_copy', label='Invoice Copy',
-				fieldtype='Select', insert_after='project', print_hide=1,
-				options='ORIGINAL FOR RECIPIENT\nDUPLICATE FOR TRANSPORTER\nTRIPLICATE FOR SUPPLIER')
+				fieldtype='Select', insert_after='project', print_hide=1, allow_on_submit=1,
+				options='ORIGINAL FOR RECIPIENT\nDUPLICATE FOR TRANSPORTER\nDUPLICATE FOR SUPPLIER\nTRIPLICATE FOR SUPPLIER')
 		],
 		'Item': [
 			dict(fieldname='gst_hsn_code', label='HSN/SAC',

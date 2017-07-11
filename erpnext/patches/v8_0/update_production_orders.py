@@ -17,9 +17,11 @@ def execute():
 		
 	pro_orders = frappe.get_all("Production Order", filters={"docstatus": ["!=", 2]}, fields=fields)
 	
+	count = 0
 	for p in pro_orders:
 		pro_order = frappe.get_doc("Production Order", p.name)
-		
+		count += 1
+
 		# set required items table
 		pro_order.set_required_items()
 		
@@ -39,6 +41,6 @@ def execute():
 				pro_order.db_set("status", status)
 			elif pro_order.status == "Stopped":
 				pro_order.update_reserved_qty_for_production()
-			
-			
-			
+		
+		if count % 200 == 0:
+			frappe.db.commit()

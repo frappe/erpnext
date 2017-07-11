@@ -90,9 +90,7 @@ frappe.ui.form.on("Production Order", {
 
 		// formatter for production order operation
 		frm.set_indicator_formatter('operation',
-			function(doc) { return (frm.doc.qty==doc.completed_qty) ? "green" : "orange" })
-
-		erpnext.production_order.set_custom_buttons(frm);
+			function(doc) { return (frm.doc.qty==doc.completed_qty) ? "green" : "orange" });
 	},
 	
 	refresh: function(frm) {
@@ -153,26 +151,28 @@ frappe.ui.form.on("Production Order", {
 	},
 	
 	production_item: function(frm) {
-		frappe.call({
-			method: "erpnext.manufacturing.doctype.production_order.production_order.get_item_details",
-			args: {
-				item: frm.doc.production_item,
-				project: frm.doc.project
-			},
-			callback: function(r) {
-				if(r.message) {
-					erpnext.in_production_item_onchange = true;
-					$.each(["description", "stock_uom", "project", "bom_no"], function(i, field) {
-						frm.set_value(field, r.message[field]);
-					});
+		if (frm.doc.production_item) {
+			frappe.call({
+				method: "erpnext.manufacturing.doctype.production_order.production_order.get_item_details",
+				args: {
+					item: frm.doc.production_item,
+					project: frm.doc.project
+				},
+				callback: function(r) {
+					if(r.message) {
+						erpnext.in_production_item_onchange = true;
+						$.each(["description", "stock_uom", "project", "bom_no"], function(i, field) {
+							frm.set_value(field, r.message[field]);
+						});
 
-					if(r.message["set_scrap_wh_mandatory"]){
-						frm.toggle_reqd("scrap_warehouse", true);
+						if(r.message["set_scrap_wh_mandatory"]){
+							frm.toggle_reqd("scrap_warehouse", true);
+						}
+						erpnext.in_production_item_onchange = false;
 					}
-					erpnext.in_production_item_onchange = false;
 				}
-			}
-		});
+			});
+		}
 	},
 	
 	project: function(frm) {
@@ -265,7 +265,7 @@ erpnext.production_order = {
 					erpnext.production_order.stop_production_order(frm, "Resumed");
 				}, __("Status"));
 			}
-			
+
 			if(!frm.doc.skip_transfer){
 				if ((flt(doc.material_transferred_for_manufacturing) < flt(doc.qty))
 					&& frm.doc.status != 'Stopped') {
@@ -274,7 +274,7 @@ erpnext.production_order = {
 						erpnext.production_order.make_se(frm, 'Material Transfer for Manufacture');
 					});
 					start_btn.addClass('btn-primary');
-					}
+				}
 			}
 
 			if(!frm.doc.skip_transfer){
@@ -293,8 +293,9 @@ erpnext.production_order = {
 			} else {
 				if ((flt(doc.produced_qty) < flt(doc.qty)) && frm.doc.status != 'Stopped') {
 					frm.has_finish_btn = true;
-					var finish_btn = frm.add_custom_button(__('Finish'),
-						cur_frm.cscript['Update Finished Goods']);
+					var finish_btn = frm.add_custom_button(__('Finish'), function() {
+						erpnext.production_order.make_se(frm, 'Manufacture');
+					});
 					finish_btn.addClass('btn-primary');
 				}
 			}

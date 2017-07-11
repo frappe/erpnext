@@ -63,37 +63,32 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		});
 
 		frappe.ui.form.on(this.frm.doctype, "additional_discount_percentage", function(frm) {
-			if (frm.via_discount_amount) {
-				return;
-			}
-
 			if(!frm.doc.apply_discount_on) {
 				frappe.msgprint(__("Please set 'Apply Additional Discount On'"));
-				return
+				return;
 			}
 
 			frm.via_discount_percentage = true;
 
 			if(frm.doc.additional_discount_percentage && frm.doc.discount_amount) {
 				// Reset discount amount and net / grand total
-				frm.set_value("discount_amount", 0);
+				frm.doc.discount_amount = 0;
+				frm.cscript.calculate_taxes_and_totals();
 			}
 
 			var total = flt(frm.doc[frappe.model.scrub(frm.doc.apply_discount_on)]);
 			var discount_amount = flt(total*flt(frm.doc.additional_discount_percentage) / 100,
 				precision("discount_amount"));
 
-			frm.set_value("discount_amount", discount_amount);
-			delete frm.via_discount_percentage;
+			frm.set_value("discount_amount", discount_amount)
+				.then(() => delete frm.via_discount_percentage);
 		});
 
 		frappe.ui.form.on(this.frm.doctype, "discount_amount", function(frm) {
 			frm.cscript.set_dynamic_labels();
 
 			if (!frm.via_discount_percentage) {
-				frm.via_discount_amount = true;
-				frm.set_value("additional_discount_percentage", 0);
-				delete frm.via_discount_amount;
+				frm.doc.additional_discount_percentage = 0;
 			}
 
 			frm.cscript.calculate_taxes_and_totals();
