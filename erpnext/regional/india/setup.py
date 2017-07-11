@@ -14,6 +14,7 @@ def setup(company=None, patch=True):
 	add_custom_roles_for_reports()
 	add_hsn_codes()
 	update_address_template()
+	add_print_formats()
 	if not patch:
 		make_fixtures()
 
@@ -69,50 +70,57 @@ def add_permissions():
 		add_permission(doctype, 'Accounts Manager', 0)
 		add_permission(doctype, 'All', 0)
 
+def add_print_formats():
+	frappe.reload_doc("regional", "print_format", "gst_tax_invoice")
+
 def make_custom_fields():
+	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
+		fieldtype='Data', options='item_code.gst_hsn_code', insert_after='description')
+	
 	custom_fields = {
 		'Address': [
 			dict(fieldname='gstin', label='Party GSTIN', fieldtype='Data',
 				insert_after='fax'),
 			dict(fieldname='gst_state', label='GST State', fieldtype='Select',
-				options='\n'.join(states), insert_after='gstin')
+				options='\n'.join(states), insert_after='gstin'),
+			dict(fieldname='gst_state_number', label='GST State Number',
+				fieldtype='Int', insert_after='gst_state', read_only=1),
 		],
 		'Purchase Invoice': [
 			dict(fieldname='supplier_gstin', label='Supplier GSTIN',
 				fieldtype='Data', insert_after='supplier_address',
-				options='supplier_address.gstin'),
+				options='supplier_address.gstin', print_hide=1),
 			dict(fieldname='company_gstin', label='Company GSTIN',
 				fieldtype='Data', insert_after='shipping_address',
-				options='shipping_address.gstin'),
+				options='shipping_address.gstin', print_hide=1),
 		],
 		'Sales Invoice': [
 			dict(fieldname='customer_gstin', label='Customer GSTIN',
 				fieldtype='Data', insert_after='shipping_address',
-				options='shipping_address_name.gstin'),
+				options='shipping_address_name.gstin', print_hide=1),
 			dict(fieldname='company_gstin', label='Company GSTIN',
 				fieldtype='Data', insert_after='company_address',
-				options='company_address.gstin'),
+				options='company_address.gstin', print_hide=1),
+			dict(fieldname='invoice_copy', label='Invoice Copy',
+				fieldtype='Select', insert_after='project', print_hide=1, allow_on_submit=1,
+				options='ORIGINAL FOR RECIPIENT\nDUPLICATE FOR TRANSPORTER\nDUPLICATE FOR SUPPLIER\nTRIPLICATE FOR SUPPLIER')
 		],
 		'Item': [
-			dict(fieldname='gst_hsn_code', label='GST HSN Code',
+			dict(fieldname='gst_hsn_code', label='HSN/SAC',
 				fieldtype='Link', options='GST HSN Code', insert_after='item_group'),
 		],
-		'Sales Invoice Item': [
-			dict(fieldname='gst_hsn_code', label='GST HSN Code',
-				fieldtype='Data', options='item_code.gst_hsn_code',
-				insert_after='income_account'),
-		],
-		'Purchase Invoice Item': [
-			dict(fieldname='gst_hsn_code', label='GST HSN Code',
-				fieldtype='Data', options='item_code.gst_hsn_code',
-				insert_after='expense_account'),
-		]
+		'Sales Order Item': [hsn_sac_field],
+		'Delivery Note Item': [hsn_sac_field],
+		'Sales Invoice Item': [hsn_sac_field],
+		'Purchase Order Item': [hsn_sac_field],
+		'Purchase Receipt Item': [hsn_sac_field],
+		'Purchase Invoice Item': [hsn_sac_field]
 	}
 
 	for doctype, fields in custom_fields.items():
 		for df in fields:
 			create_custom_field(doctype, df)
-
+			
 def make_fixtures():
 	docs = [
 		{'doctype': 'Salary Component', 'salary_component': 'Professional Tax', 'description': 'Professional Tax', 'type': 'Deduction'},

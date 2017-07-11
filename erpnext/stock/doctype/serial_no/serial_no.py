@@ -85,6 +85,10 @@ class SerialNo(StockController):
 				self.supplier, self.supplier_name = \
 					frappe.db.get_value("Purchase Receipt", purchase_sle.voucher_no,
 						["supplier", "supplier_name"])
+
+			# If sales return entry
+			if self.purchase_document_type == 'Delivery Note':
+				self.sales_invoice = None
 		else:
 			for fieldname in ("purchase_document_type", "purchase_document_no",
 				"purchase_date", "purchase_time", "purchase_rate", "supplier", "supplier_name"):

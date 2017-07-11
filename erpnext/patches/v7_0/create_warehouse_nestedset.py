@@ -73,7 +73,7 @@ def validate_parent_account_for_warehouse(company=None):
 	if not company:
 		return
 
-	if cint(erpnext.is_perpetual_inventory_enabled(company)):
+	if cint(erpnext.is_perpetual_inventory_enabled(company.name)):
 		parent_account = frappe.db.sql("""select name from tabAccount
 			where account_type='Stock' and company=%s and is_group=1
 			and (warehouse is null or warehouse = '')""", company.name)

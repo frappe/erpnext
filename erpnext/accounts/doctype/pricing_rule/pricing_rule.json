@@ -1,6 +1,5 @@
 {
  "allow_copy": 0, 
- "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:title", 
@@ -13,7 +12,6 @@
  "editable_grid": 0, 
  "fields": [
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -42,7 +40,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -72,7 +69,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -103,7 +99,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -134,7 +129,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -165,7 +159,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -196,7 +189,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -225,7 +217,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -256,7 +247,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -285,7 +275,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -314,7 +303,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -343,7 +331,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -372,7 +359,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -401,7 +387,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -432,7 +417,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -463,7 +447,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -494,7 +477,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -525,7 +507,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -556,7 +537,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -587,7 +567,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -618,7 +597,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -649,7 +627,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -678,7 +655,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -707,7 +683,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -736,7 +711,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -765,7 +739,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -794,7 +767,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -824,7 +796,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -853,7 +824,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -881,7 +851,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -911,7 +880,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -942,7 +910,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -974,7 +941,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -1003,7 +969,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -1035,7 +1000,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -1064,7 +1028,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -1095,7 +1058,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -1123,7 +1085,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -1153,7 +1114,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -1183,7 +1143,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -1214,39 +1173,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
-   "allow_on_submit": 0, 
-   "bold": 0, 
-   "collapsible": 0, 
-   "columns": 0, 
-   "depends_on": "eval:doc.price_or_discount==\"Price\"", 
-   "fieldname": "currency", 
-   "fieldtype": "Link", 
-   "hidden": 0, 
-   "ignore_user_permissions": 0, 
-   "ignore_xss_filter": 0, 
-   "in_filter": 0, 
-   "in_global_search": 0, 
-   "in_list_view": 0, 
-   "in_standard_filter": 0, 
-   "label": "Currency", 
-   "length": 0, 
-   "no_copy": 0, 
-   "options": "Currency", 
-   "permlevel": 0, 
-   "precision": "", 
-   "print_hide": 0, 
-   "print_hide_if_no_value": 0, 
-   "read_only": 0, 
-   "remember_last_selected_value": 0, 
-   "report_hide": 0, 
-   "reqd": 0, 
-   "search_index": 0, 
-   "set_only_once": 0, 
-   "unique": 0
-  }, 
-  {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -1276,7 +1202,6 @@
    "unique": 0
   }, 
   {
-   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -1305,18 +1230,18 @@
    "unique": 0
   }
  ], 
- "has_web_view": 0, 
  "hide_heading": 0, 
  "hide_toolbar": 0, 
  "icon": "fa fa-gift", 
  "idx": 1, 
  "image_view": 0, 
  "in_create": 0, 
+ "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-06-26 19:35:50.651619", 
+ "modified": "2017-02-17 16:21:28.446208", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Pricing Rule", 
