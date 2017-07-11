@@ -189,6 +189,32 @@ var erpnext_slides = [
 		}
 	},
 
+	{
+		// Users
+		name: 'users',
+		domains: ["all"],
+		title: __("Add Users"),
+		help: __("Add users to your organization, other than yourself"),
+		add_more: 1,
+		max_count: 3,
+		fields: [
+			{fieldtype:"Section Break"},
+			{fieldtype:"Data", fieldname:"user_fullname",
+				label:__("Full Name"), static: 1},
+			{fieldtype:"Data", fieldname:"user_email", label:__("Email ID"),
+				placeholder:__("user@example.com"), options: "Email", static: 1},
+			{fieldtype:"Column Break"},
+			{fieldtype: "Check", fieldname: "user_sales",
+				label:__("Sales"), "default": 1, static: 1,
+				hidden: frappe.setup.domain==='Education' ? 1 : 0},
+			{fieldtype: "Check", fieldname: "user_purchaser",
+				label:__("Purchaser"), "default": 1, static: 1,
+				hidden: frappe.setup.domain==='Education' ? 1 : 0},
+			{fieldtype: "Check", fieldname: "user_accountant",
+				label:__("Accountant"), "default": 1, static: 1,
+				hidden: frappe.setup.domain==='Education' ? 1 : 0},
+		]
+	},
 
 	{
 		// Taxes
@@ -198,7 +224,8 @@ var erpnext_slides = [
 		title: __("Add Taxes"),
 		help: __("List your tax heads (e.g. VAT, Customs etc; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later."),
 		add_more: 1,
-		max_count: 4,
+		max_count: 3,
+		mandatory_entry: 1,
 		fields: [
 			{fieldtype:"Section Break"},
 			{fieldtype:"Data", fieldname:"tax", label:__("Tax"),
@@ -216,7 +243,8 @@ var erpnext_slides = [
 		title: __("Add Customers"),
 		help: __("List a few of your customers. They could be organizations or individuals."),
 		add_more: 1,
-		max_count: 6,
+		max_count: 5,
+		mandatory_entry: 1,
 		fields: [
 			{fieldtype:"Section Break"},
 			{fieldtype:"Data", fieldname:"customer", label:__("Customer"),
@@ -235,7 +263,8 @@ var erpnext_slides = [
 		title: __("Your Suppliers"),
 		help: __("List a few of your suppliers. They could be organizations or individuals."),
 		add_more: 1,
-		max_count: 6,
+		max_count: 5,
+		mandatory_entry: 1,
 		fields: [
 			{fieldtype:"Section Break"},
 			{fieldtype:"Data", fieldname:"supplier", label:__("Supplier"),
@@ -254,7 +283,8 @@ var erpnext_slides = [
 		title: __("Your Products or Services"),
 		help: __("List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start."),
 		add_more: 1,
-		max_count: 6,
+		max_count: 5,
+		mandatory_entry: 1,
 		fields: [
 			{fieldtype:"Section Break", show_section_border: true},
 			{fieldtype:"Data", fieldname:"item", label:__("Item"),
@@ -262,16 +292,16 @@ var erpnext_slides = [
 			{fieldtype:"Select", label:__("Group"), fieldname:"item_group",
 				options:[__("Products"), __("Services"),
 					__("Raw Material"), __("Consumable"), __("Sub Assemblies")],
-				"default": __("Products")},
+				"default": __("Products"), static: 1},
 			{fieldtype:"Select", fieldname:"item_uom", label:__("UOM"),
 				options:[__("Unit"), __("Nos"), __("Box"), __("Pair"), __("Kg"), __("Set"),
 					__("Hour"), __("Minute"), __("Litre"), __("Meter"), __("Gram")],
-				"default": __("Unit")},
-			{fieldtype: "Check", fieldname: "is_sales_item", label:__("We sell this Item"), default: 1},
-			{fieldtype: "Check", fieldname: "is_purchase_item", label:__("We buy this Item")},
+				"default": __("Unit"), static: 1},
+			{fieldtype: "Check", fieldname: "is_sales_item", label:__("We sell this Item"), default: 1, static: 1},
+			{fieldtype: "Check", fieldname: "is_purchase_item", label:__("We buy this Item"), static: 1},
 			{fieldtype:"Column Break"},
-			{fieldtype:"Currency", fieldname:"item_price", label:__("Rate")},
-			{fieldtype:"Attach Image", fieldname:"item_img", label:__("Attach Image"), is_private: 0},
+			{fieldtype:"Currency", fieldname:"item_price", label:__("Rate"), static: 1},
+			{fieldtype:"Attach Image", fieldname:"item_img", label:__("Attach Image"), is_private: 0, static: 1},
 		],
 		get_item_count: function() {
 			return this.item_count;
@@ -285,7 +315,8 @@ var erpnext_slides = [
 		title: __("Program"),
 		help: __("Example: Masters in Computer Science"),
 		add_more: 1,
-		max_count: 6,
+		max_count: 5,
+		mandatory_entry: 1,
 		fields: [
 			{fieldtype:"Section Break", show_section_border: true},
 			{fieldtype:"Data", fieldname:"program", label:__("Program"), placeholder: __("Program Name")},
@@ -299,7 +330,8 @@ var erpnext_slides = [
 		title: __("Course"),
 		help: __("Example: Basic Mathematics"),
 		add_more: 1,
-		max_count: 6,
+		max_count: 5,
+		mandatory_entry: 1,
 		fields: [
 			{fieldtype:"Section Break", show_section_border: true},
 			{fieldtype:"Data", fieldname:"course", label:__("Course"),  placeholder: __("Course Name")},
@@ -313,7 +345,8 @@ var erpnext_slides = [
 		title: __("Instructor"),
 		help: __("People who teach at your organisation"),
 		add_more: 1,
-		max_count: 6,
+		max_count: 5,
+		mandatory_entry: 1,
 		fields: [
 			{fieldtype:"Section Break", show_section_border: true},
 			{fieldtype:"Data", fieldname:"instructor", label:__("Instructor"),  placeholder: __("Instructor Name")},
@@ -327,20 +360,21 @@ var erpnext_slides = [
 		title: __("Room"),
 		help: __("Classrooms/ Laboratories etc where lectures can be scheduled."),
 		add_more: 1,
-		max_count: 4,
+		max_count: 3,
+		mandatory_entry: 1,
 		fields: [
 			{fieldtype:"Section Break", show_section_border: true},
 			{fieldtype:"Data", fieldname:"room", label:__("Room")},
 			{fieldtype:"Column Break"},
-			{fieldtype:"Int", fieldname:"room_capacity", label:__("Room") + " Capacity"},
+			{fieldtype:"Int", fieldname:"room_capacity", label:__("Room") + " Capacity", static: 1},
 		]
 	},
 
 	{
-		// last slide: Bootstrap
+		// last slide: Sample Data
 		name: 'bootstrap',
 		domains: ["all"],
-		title: __("Bootstrap"),
+		title: __("Sample Data"),
 		fields: [{fieldtype: "Section Break"},
 			{fieldtype: "Check", fieldname: "add_sample_data",
 				label: __("Add a few sample records"), "default": 1},
