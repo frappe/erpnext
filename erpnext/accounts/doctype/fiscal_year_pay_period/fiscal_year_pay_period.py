@@ -158,10 +158,11 @@ def validate_table_rows(table_rows, frequency):
 		for i in range(len(table_rows)):
 			start_date = getdate(table_rows[i].start_date)
 			end_date = getdate(table_rows[i].end_date)
+
+			# This will also ensure that number of pay period dates are consistent with the
+			# selected frequency
 			_validate_dates(start_date, end_date)
 			if not dates_interval_valid(start_date, end_date, frequency):
 				frappe.throw(
-					_(
-						'The dates in Row {0} are not valid for {1} Payment Frequency'.format(i, frequency)
-					)
+					_('The dates in Row {0} are not valid for {1} Payment Frequency'.format(i, frequency))
 				)
