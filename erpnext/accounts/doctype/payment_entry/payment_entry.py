@@ -492,9 +492,13 @@ def get_outstanding_reference_documents(args):
 	
 	for d in outstanding_invoices:
 		d["exchange_rate"] = 1
-		if party_account_currency != company_currency \
-			and d.voucher_type in ("Sales Invoice", "Purchase Invoice"):
+		if party_account_currency != company_currency:
+			if d.voucher_type in ("Sales Invoice", "Purchase Invoice"):
 				d["exchange_rate"] = frappe.db.get_value(d.voucher_type, d.voucher_no, "conversion_rate")
+			elif d.voucher_type == "Journal Entry":
+				d["exchange_rate"] = get_exchange_rate(
+					party_account_currency,	company_currency, d.posting_date
+				)
 
 	# Get all SO / PO which are not fully billed or aginst which full advance not paid
 	orders_to_be_billed =  get_orders_to_be_billed(args.get("posting_date"),args.get("party_type"), args.get("party"), 

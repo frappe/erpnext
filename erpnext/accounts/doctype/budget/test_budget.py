@@ -140,6 +140,33 @@ class TestBudget(unittest.TestCase):
 		budget.load_from_db()
 		budget.cancel()
 
+	def test_monthly_budget_against_parent_group_cost_center(self):
+		cost_center = "_Test Cost Center 3 - _TC"
+
+		if not frappe.db.exists("Cost Center", cost_center):
+			frappe.get_doc({
+				'doctype': 'Cost Center',
+				'cost_center_name': '_Test Cost Center 3',
+				'parent_cost_center': "_Test Company - _TC",
+				'company': '_Test Company',
+				'is_group': 0
+			}).insert(ignore_permissions=True)
+
+		budget = make_budget("Cost Center", cost_center)
+		frappe.db.set_value("Budget", budget.name, "action_if_accumulated_monthly_budget_exceeded", "Stop")
+
+		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
+			"_Test Bank - _TC", 40000, cost_center)
+
+		self.assertRaises(BudgetError, jv.submit)
+
+		budget.load_from_db()
+		budget.cancel()
+		jv.cancel()
+
+		frappe.delete_doc('Journal Entry', jv.name)
+		frappe.delete_doc('Cost Center', cost_center)
+
 def set_total_expense_zero(posting_date, budget_against_field=None, budget_against_CC=None):
 	if budget_against_field == "Project":
 		budget_against = "_Test Project"
@@ -167,7 +194,8 @@ def make_budget(budget_against=None, cost_center=None):
 	if budget_against == "Project":
 		budget_list = frappe.get_all("Budget", fields=["name"], filters = {"name": ("like", "_Test Project/_Test Fiscal Year 2013%")})
 	else:
-		budget_list = frappe.get_all("Budget", fields=["name"], filters = {"name": ("like", "_Test Cost Center - _TC/_Test Fiscal Year 2013%")})
+		cost_center_name = "{0}%".format(cost_center or "_Test Cost Center - _TC/_Test Fiscal Year 2013")
+		budget_list = frappe.get_all("Budget", fields=["name"], filters = {"name": ("like", cost_center_name)})
 	for d in budget_list:
 		frappe.db.sql("delete from `tabBudget` where name = %(name)s", d)
 		frappe.db.sql("delete from `tabBudget Account` where parent = %(name)s", d)

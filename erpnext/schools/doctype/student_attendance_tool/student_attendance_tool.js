@@ -135,22 +135,24 @@ schools.StudentsEditor = Class.extend({
 				frappe.confirm(__("Do you want to update attendance?<br>Present: {0}\
 					<br>Absent: {1}", [students_present.length, students_absent.length]),
 					function() {	//ifyes
-						frappe.call({
-							method: "erpnext.schools.api.mark_attendance",
-							freeze: true,
-							freeze_message: "Marking attendance",
-							args: {
-								"students_present": students_present,
-								"students_absent": students_absent,
-								"student_group": frm.doc.student_group,
-								"course_schedule": frm.doc.course_schedule,
-								"date": frm.doc.date
-							},
-							callback: function(r) {
-								$(me.wrapper.find(".btn-mark-att")).attr("disabled", false);
-								frm.trigger("student_group");
-							}
-						});
+						if(!frappe.request.ajax_count) {
+							frappe.call({
+								method: "erpnext.schools.api.mark_attendance",
+								freeze: true,
+								freeze_message: "Marking attendance",
+								args: {
+									"students_present": students_present,
+									"students_absent": students_absent,
+									"student_group": frm.doc.student_group,
+									"course_schedule": frm.doc.course_schedule,
+									"date": frm.doc.date
+								},
+								callback: function(r) {
+									$(me.wrapper.find(".btn-mark-att")).attr("disabled", false);
+									frm.trigger("student_group");
+								}
+							});
+						}
 					},
 					function() {	//ifno
 						$(me.wrapper.find(".btn-mark-att")).attr("disabled", false);

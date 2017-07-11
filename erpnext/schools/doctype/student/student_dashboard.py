@@ -7,10 +7,24 @@ def get_data():
 		'fieldname': 'student',
 		'transactions': [
 			{
-				'items': ['Student Log', 'Student Group', 'Program Enrollment']
+				'label': _('Admission'),
+				'items': ['Program Enrollment']
 			},
 			{
-				'items': ['Fees', 'Assessment Result', 'Student Attendance', 'Student Leave Application']
+				'label': _('Student Activity'),
+				'items': ['Student Log', 'Student Group', ]
+			},
+			{
+				'label': _('Assessment'),
+				'items': ['Assessment Result']
+			},
+			{
+				'label': _('Attendance'),
+				'items': ['Student Attendance', 'Student Leave Application']
+			},
+			{
+				'label': _('Fee'),
+				'items': ['Fees']
 			}
 		]
 	}
