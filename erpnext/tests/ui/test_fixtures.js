@@ -59,5 +59,14 @@ $.extend(frappe.test_data, {
 				]
 			]}
 		]
+	},
+	'Terms and Conditions': {
+		'TEST Delivery Terms for Sales Order': [
+			{title: 'TEST Delivery Terms for Sales Order'},
+			{terms: '<pre style="line-height: 1.42857; background-color: rgb(255, 255, 255);">Delivery Terms for Order number {{ name }}\
+\
+-Order Date : {{ transaction_date }} \
+-Expected Delivery Date : {{ delivery_date }}</pre>'}
+		]
 	}
 });
