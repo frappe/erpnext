@@ -517,9 +517,9 @@ class calculate_taxes_and_totals(object):
 		
 		headings = get_table_column_headings(tax_accounts)
 		
-		distinct_items = self.get_distinct_items()
+		distinct_items, taxable_amount = self.get_distinct_items()
 		
-		rows = get_table_rows(distinct_items, item_tax, tax_accounts, company_currency)
+		rows = get_table_rows(distinct_items, item_tax, tax_accounts, company_currency, taxable_amount)
 		
 		if not rows:
 			self.doc.other_charges_calculation = ""
@@ -568,13 +568,17 @@ class calculate_taxes_and_totals(object):
 	def get_distinct_items(self):
 		distinct_item_names = []
 		distinct_items = []
+		taxable_amount = {}
 		for item in self.doc.items:
 			item_code = item.item_code or item.item_name
 			if item_code not in distinct_item_names:
 				distinct_item_names.append(item_code)
 				distinct_items.append(item)
+				taxable_amount[item_code] = item.net_amount
+			else:
+				taxable_amount[item_code] = taxable_amount.get(item_code, 0) + item.net_amount
 				
-		return distinct_items
+		return distinct_items, taxable_amount
 
 def get_table_column_headings(tax_accounts):
 	headings_name = [_("Item Name"), _("Taxable Amount")] + [d[1] for d in tax_accounts]
@@ -587,7 +591,7 @@ def get_table_column_headings(tax_accounts):
 			
 	return headings
 
-def get_table_rows(distinct_items, item_tax, tax_accounts, company_currency):
+def get_table_rows(distinct_items, item_tax, tax_accounts, company_currency, taxable_amount):
 	rows = []
 	for item in distinct_items:
 		item_tax_record = item_tax.get(item.item_code or item.item_name)
@@ -601,10 +605,11 @@ def get_table_rows(distinct_items, item_tax, tax_accounts, company_currency):
 					 + item_tax_record[head[0]][1] + "</td>")
 			else:
 				taxes.append("<td></td>")
-		
+
+		item_code = item.item_code or item.item_name
 		rows.append("<tr><td>{item_name}</td><td class='text-right'>{taxable_amount}</td>{taxes}</tr>".format(**{
 			"item_name": item.item_name,
-			"taxable_amount": fmt_money(item.net_amount, item.precision("net_amount"), company_currency),
+			"taxable_amount": fmt_money(taxable_amount.get(item_code, 0), item.precision("net_amount"), company_currency),
 			"taxes": "".join(taxes)
 		}))
 		
