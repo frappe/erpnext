@@ -41,6 +41,30 @@ Additional variables can be added through server-side customizations.
 
 The criteria formula should be customized to evaluate the suppliers in each criteria in a way that best fits the Company requirements.
 
+##### Evaluation Formulas
+The evaluation formula uses the pre-established or custom variables to evaluate an aspect of supplier performance over the scoring period. Formulas can use the following mathematical functions:
+
+* addition: + 
+* subtraction: -
+* multiplication: *
+* division: /
+* min: min(x,y)
+* max: max(x,y)
+* if/else: (x) if (formula) else (y)
+* less than: <
+* greated than: >
+* variables: {variable_name}
+
+It is crucial that the formula be solvable for all variable values. This is most often an issue if the value resolves to 0. For example:
+```
+{total_accepted_items} / {total_received_items}
+```
+
+This example would resolve to 0 / 0 in periods where there are no received items, and therefore should have a check to protect in this case:
+```
+({total_accepted_items} / {total_received_items}) if {total_received_items} > 0 else 1.
+```
+
 ### Evaluating the Supplier
 An evaluation is generated for each Supplier Scorecard Period by clicking the "Generate Missing Scorecard Periods" button. The supplier 
 current score can be seen, as well as a visual graphic showing the performance of the supplier over time. Any actions against the supplier 

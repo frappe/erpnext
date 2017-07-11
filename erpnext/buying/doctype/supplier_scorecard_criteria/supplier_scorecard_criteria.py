@@ -44,6 +44,18 @@ def get_scoring_criteria(criteria_name):
 
 	return criteria
 
+
+@frappe.whitelist()
+def get_criteria_list():
+	criteria = frappe.db.sql("""
+		SELECT
+			scs.name
+		FROM
+			`tabSupplier Scorecard Criteria` scs""",
+			{}, as_dict=1)
+
+	return criteria
+
 @frappe.whitelist()
 def get_variables(criteria_name):
 	criteria = frappe.get_doc("Supplier Scorecard Criteria", criteria_name)

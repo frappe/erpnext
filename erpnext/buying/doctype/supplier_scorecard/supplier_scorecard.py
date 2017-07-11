@@ -36,8 +36,8 @@ class SupplierScorecard(Document):
 		score = 0
 		for c1 in self.standings:
 			for c2 in self.standings:
-				if c1.min_grade == score:
-					score = c1.max_grade
+				if c2.min_grade == score:
+					score = c2.max_grade
 		if score < 100 :
 			throw(_('Unable to find score starting at ' + str(score) + '. You need to have standing scores covering 0 to 100'))
 
@@ -158,6 +158,9 @@ def make_all_scorecards(docname):
 	todays = getdate(nowdate())
 
 	scp_count = 0
+	first_start_date = todays
+	last_end_date = todays
+
 	while (start_date < todays) and (end_date <= todays):
 		# check to make sure there is no scorecard period already created
 		scorecards = frappe.db.sql("""
@@ -182,9 +185,14 @@ def make_all_scorecards(docname):
 			period_card.end_date = end_date
 			period_card.save()
 			scp_count = scp_count + 1
-			frappe.msgprint("Created scorecard for " + sc.supplier + " between " + str(start_date) + " and " + str(end_date))
+			if start_date < first_start_date:
+				first_start_date = start_date
+			last_end_date = end_date
+
 		start_date = getdate(add_days(end_date,1))
 		end_date = get_scorecard_date(sc.period, start_date)
+	if scp_count > 0:
+		frappe.msgprint(_("Created {0} scorecards for ".format(scp_count) + sc.supplier + " between: ") + str(first_start_date) + " - " + str(last_end_date))
 	return scp_count
 
 def get_scorecard_date(period, start_date):
