@@ -93,7 +93,7 @@ def get_list_context(context=None):
 		'show_sidebar': True,
 		'show_search': True,
 		'no_breadcrumbs': True,
-		'title': _('Quotes'),
+		'title': _('Quotations'),
 	})
 
 	return list_context
