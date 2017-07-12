@@ -6,7 +6,7 @@ states = [
  'Assam',
  'Bihar',
  'Chandigarh',
- 'Chattisgarh',
+ 'Chhattisgarh',
  'Dadra and Nagar Haveli',
  'Daman and Diu',
  'Delhi',
@@ -45,7 +45,7 @@ state_numbers = {
  "Assam": "18",
  "Bihar": "10",
  "Chandigarh": "04",
- "Chattisgarh": "22",
+ "Chhattisgarh": "22",
  "Dadra and Nagar Haveli": "26",
  "Daman and Diu": "25",
  "Delhi": "07",
@@ -65,6 +65,7 @@ state_numbers = {
  "Mizoram": "15",
  "Nagaland": "13",
  "Odisha": "21",
+ "Other Territory": "98",
  "Pondicherry": "34",
  "Punjab": "03",
  "Rajasthan": "08",
@@ -74,5 +75,5 @@ state_numbers = {
  "Tripura": "16",
  "Uttar Pradesh": "09",
  "Uttarakhand": "05",
- "West Bengal": "19"
+ "West Bengal": "19",
 }
