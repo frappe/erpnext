@@ -861,6 +861,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"pricing_rule": d.pricing_rule,
 					"warehouse": d.warehouse,
 					"serial_no": d.serial_no,
+					"discount_percentage": d.discount_percentage || 0.0,
 					"conversion_factor": d.conversion_factor || 1.0
 				});
 
