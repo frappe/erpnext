@@ -75,12 +75,12 @@ def execute(filters=None):
 
 			if "Total" not in kounter:
 				kounter["Total"] = {}
-			
+
 			if "total" in result_dict[result.student]:
 				prev_grade = result_dict[result.student]["total"]
 				prev_grade_count = kounter["Total"].get(prev_grade) - 1
 				kounter["Total"].update({prev_grade: prev_grade_count})
-			latest_grade_count = kounter["Total"].get(total)+1 if kounter["Total"].get(total) else 1 
+			latest_grade_count = kounter["Total"].get(total)+1 if kounter["Total"].get(total) else 1
 			kounter["Total"].update({total: latest_grade_count})
 
 			result_dict[result.student].update({
@@ -90,7 +90,6 @@ def execute(filters=None):
 					"total": total
 				})
 
-		print (kounter)
 		return result_dict, kounter
 
 	# make data from the result dict
@@ -112,20 +111,16 @@ def execute(filters=None):
 		grades = frappe.db.sql_list('''select grade_code from `tabGrading Scale Interval` where parent=%s''',
 			(grading_scale))
 		criteria_list = [d[0] for d in assessment_criteria_list] + ["Total"]
-		print (criteria_list)
 		return get_chart_data(grades, criteria_list, kounter)
 
 
 	assessment_plan_list, assessment_criteria_list, total_maximum_score, grading_scale,\
 		student_group_list = get_assessment_details()
 	result_dict, kounter = get_result_map()
-	print (kounter)
 	data = get_data()
 
-	print (assessment_criteria_list)
 	columns = get_column(assessment_criteria_list, total_maximum_score)
 	chart = get_chart()
-	print (chart)
 
 	return columns, data, None, chart
 
