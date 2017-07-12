@@ -36,7 +36,7 @@ class TestFiscalYear(unittest.TestCase):
 					"company": '_Test Company'}]
 		pay_periods = [
 			{"doctype": "Fiscal Year Pay Period",
-			 "pay_periods": "_Test 1907 - Monthly"
+			 "pay_period": "_Test 1907 - Monthly"
 			 }]
 
 
@@ -58,7 +58,7 @@ class TestFiscalYear(unittest.TestCase):
 		self.assertEquals(saved_fy.year_end_date, getdate(year_end))
 		self.assertEquals(saved_fy.year_start_date, getdate(year_start))
 		self.assertEquals(saved_fy.companies[0].company, companies[0]['company'])
-		self.assertEquals(saved_fy.pay_periods[0].pay_periods, pay_periods[0]['pay_periods'])
+		self.assertEquals(saved_fy.pay_periods[0].pay_period, pay_periods[0]['pay_period'])
 
 	def test_create_fiscal_year_no_pay_period(self):
 		if frappe.db.exists("Fiscal Year", "_Test Fiscal Year 1907"):
