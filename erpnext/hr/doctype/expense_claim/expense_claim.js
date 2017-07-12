@@ -167,6 +167,7 @@ frappe.ui.form.on("Expense Claim", {
 				},
 				callback: function(r) {
 					if(r.message)
+					{
 						for( var i = 0; i < r.message.length;i++)
 						{
 							var obj = r.message[i];
