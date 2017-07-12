@@ -45,6 +45,13 @@ $.extend(frappe.test_data, {
 			{standard_rate: 300}
 		]
 	},
+	'Terms and Conditions': {
+		'TEST Delivery Terms for Sales Order': [
+			{title: 'TEST Delivery Terms for Sales Order'},
+			{terms: '<pre style="line-height: 1.42857; background-color: rgb(255, 255, 255);">Delivery Terms for Order number {{ name }}\
+\
+-Order Date : {{ transaction_date }} \
+-Expected Delivery Date : {{ delivery_date }}</pre>'},
 	"Lead": {
 		"LEAD-00001": [
 			{lead_name: "Test Lead 1"}
