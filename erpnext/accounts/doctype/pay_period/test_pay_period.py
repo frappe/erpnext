@@ -17,16 +17,16 @@ class TestPayPeriod(unittest.TestCase):
 	def test_create_fiscal_year_pay_period(self):
 		fypp_record = test_records[0]
 
-		if frappe.db.exists('Pay Period', fypp_record['payroll_period_name']):
-			frappe.delete_doc('Pay Period', fypp_record['payroll_period_name'])
+		if frappe.db.exists('Pay Period', fypp_record['pay_period_name']):
+			frappe.delete_doc('Pay Period', fypp_record['pay_period_name'])
 
 		fy = frappe.get_doc(fypp_record)
 		fy.insert()
 
-		saved_fy = frappe.get_doc('Pay Period', fypp_record['payroll_period_name'])
+		saved_fy = frappe.get_doc('Pay Period', fypp_record['pay_period_name'])
 		self.assertEqual(saved_fy.payment_frequency, fypp_record['payment_frequency'])
 		self.assertEqual(saved_fy.pay_period_start_date, getdate(fypp_record['pay_period_start_date']))
-		self.assertEqual(saved_fy.payroll_period_name, fypp_record['payroll_period_name'])
+		self.assertEqual(saved_fy.pay_period_name, fypp_record['pay_period_name'])
 		self.assertEqual(saved_fy.pay_period_end_date, getdate(fypp_record['pay_period_end_date']))
 		for i in range(len(saved_fy.dates)):
 			self.assertEqual(
@@ -41,8 +41,8 @@ class TestPayPeriod(unittest.TestCase):
 	def test_create_fiscal_year_pay_period_bad_dates(self):
 		fypp_record = test_records[4]
 
-		if frappe.db.exists('Pay Period', fypp_record['payroll_period_name']):
-			frappe.delete_doc('Pay Period', fypp_record['payroll_period_name'])
+		if frappe.db.exists('Pay Period', fypp_record['pay_period_name']):
+			frappe.delete_doc('Pay Period', fypp_record['pay_period_name'])
 
 		if frappe.db.exists('Pay Period', '_Test 1 Monthly'):
 			frappe.delete_doc('Pay Period', '_Test 1 Monthly')
@@ -55,7 +55,7 @@ class TestPayPeriod(unittest.TestCase):
 		fy.pay_period_start_date = '2017-01-01'
 		fy.pay_period_end_date = '2017-12-01'
 		fy.payment_frequency = 'Monthly'
-		fy.payroll_period_name = '_Test 1 Monthly'
+		fy.pay_period_name = '_Test 1 Monthly'
 		self.assertRaises(frappe.ValidationError, fy.insert)
 
 		fy.pay_period_end_date = '2017-12-31'
@@ -66,8 +66,8 @@ class TestPayPeriod(unittest.TestCase):
 	def test_create_fypp_wrong_interval_in_child_table(self):
 		fypp_record = test_records[1]
 
-		if frappe.db.exists('Pay Period', fypp_record['payroll_period_name']):
-			frappe.delete_doc('Pay Period', fypp_record['payroll_period_name'])
+		if frappe.db.exists('Pay Period', fypp_record['pay_period_name']):
+			frappe.delete_doc('Pay Period', fypp_record['pay_period_name'])
 
 		fy = frappe.get_doc(fypp_record)
 		first_row = fy.dates[0]
@@ -88,8 +88,8 @@ class TestPayPeriod(unittest.TestCase):
 	def test_create_fypp_wrong_start_in_child_table(self):
 		fypp_record = test_records[1]
 
-		if frappe.db.exists('Pay Period', fypp_record['payroll_period_name']):
-			frappe.delete_doc('Pay Period', fypp_record['payroll_period_name'])
+		if frappe.db.exists('Pay Period', fypp_record['pay_period_name']):
+			frappe.delete_doc('Pay Period', fypp_record['pay_period_name'])
 
 		fy = frappe.get_doc(fypp_record)
 		first_row = fy.dates[0]
@@ -106,8 +106,8 @@ class TestPayPeriod(unittest.TestCase):
 	def test_create_fypp_no_gaps_in_child_table(self):
 		fypp_record = test_records[1]
 
-		if frappe.db.exists('Pay Period', fypp_record['payroll_period_name']):
-			frappe.delete_doc('Pay Period', fypp_record['payroll_period_name'])
+		if frappe.db.exists('Pay Period', fypp_record['pay_period_name']):
+			frappe.delete_doc('Pay Period', fypp_record['pay_period_name'])
 
 		fy = frappe.get_doc(fypp_record)
 		fy.dates.pop(1)
@@ -117,8 +117,8 @@ class TestPayPeriod(unittest.TestCase):
 	def test_create_fiscal_year_pay_period_wrong_dates_monthly(self):
 		fypp_record = test_records[1]
 
-		if frappe.db.exists('Pay Period', fypp_record['payroll_period_name']):
-			frappe.delete_doc('Pay Period', fypp_record['payroll_period_name'])
+		if frappe.db.exists('Pay Period', fypp_record['pay_period_name']):
+			frappe.delete_doc('Pay Period', fypp_record['pay_period_name'])
 
 		fy = frappe.get_doc(fypp_record)
 		fy.pay_period_start_date = '2017-01-01'
@@ -128,8 +128,8 @@ class TestPayPeriod(unittest.TestCase):
 	def test_create_fiscal_year_pay_period_wrong_dates_fortnightly(self):
 		fypp_record = test_records[2]
 
-		if frappe.db.exists('Pay Period', fypp_record['payroll_period_name']):
-			frappe.delete_doc('Pay Period', fypp_record['payroll_period_name'])
+		if frappe.db.exists('Pay Period', fypp_record['pay_period_name']):
+			frappe.delete_doc('Pay Period', fypp_record['pay_period_name'])
 
 		fy = frappe.get_doc(fypp_record)
 		fy.pay_period_end_date = '2017-01-31'
@@ -138,8 +138,8 @@ class TestPayPeriod(unittest.TestCase):
 	def test_create_fiscal_year_pay_period_wrong_dates_weekly(self):
 		fypp_record = test_records[3]
 
-		if frappe.db.exists('Pay Period', fypp_record['payroll_period_name']):
-			frappe.delete_doc('Pay Period', fypp_record['payroll_period_name'])
+		if frappe.db.exists('Pay Period', fypp_record['pay_period_name']):
+			frappe.delete_doc('Pay Period', fypp_record['pay_period_name'])
 
 		fy = frappe.get_doc(fypp_record)
 		fy.pay_period_end_date = '2017-01-06'
@@ -148,8 +148,8 @@ class TestPayPeriod(unittest.TestCase):
 	def test_fypp_payment_frequency(self):
 		fypp_record = test_records[0]
 
-		if frappe.db.exists('Pay Period', fypp_record['payroll_period_name']):
-			frappe.delete_doc('Pay Period', fypp_record['payroll_period_name'])
+		if frappe.db.exists('Pay Period', fypp_record['pay_period_name']):
+			frappe.delete_doc('Pay Period', fypp_record['pay_period_name'])
 
 		fy = frappe.get_doc(fypp_record)
 		fy.payment_frequency = 'Fail'
@@ -158,7 +158,7 @@ class TestPayPeriod(unittest.TestCase):
 		fy.payment_frequency = 'Monthly'
 		fy.insert()
 
-		saved_fy = frappe.get_doc('Pay Period', fypp_record['payroll_period_name'])
+		saved_fy = frappe.get_doc('Pay Period', fypp_record['pay_period_name'])
 		self.assertEqual(saved_fy.payment_frequency, fy.payment_frequency)
 
 	def test_get_pay_period_dates_daily(self):

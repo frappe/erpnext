@@ -22,7 +22,7 @@
     "doctype": "Pay Period",
     "payment_frequency": "Monthly",
     "pay_period_start_date": "2017-07-01",
-    "payroll_period_name": "_Test 2017 - Monthly"
+    "pay_period_name": "_Test 2017 - Monthly"
   },
   {
     "pay_period_end_date": "2017-12-31",
@@ -47,7 +47,7 @@
     "doctype": "Pay Period",
     "payment_frequency": "Monthly",
     "pay_period_start_date": "2017-07-01",
-    "payroll_period_name": "_Test 2017 - Monthly"
+    "pay_period_name": "_Test 2017 - Monthly"
   },
   {
     "pay_period_end_date": "2017-01-28",
@@ -62,7 +62,7 @@
     "doctype": "Pay Period",
     "payment_frequency": "Fortnightly",
     "pay_period_start_date": "2017-01-01",
-    "payroll_period_name": "_Test 2017 - Fortnightly"
+    "pay_period_name": "_Test 2017 - Fortnightly"
   },
   {
     "pay_period_end_date": "2017-01-07",
@@ -77,7 +77,7 @@
     "doctype": "Pay Period",
     "payment_frequency": "Weekly",
     "pay_period_start_date": "2017-01-01",
-    "payroll_period_name": "_Test 2017 - Weekly"
+    "pay_period_name": "_Test 2017 - Weekly"
   },
   {
     "pay_period_end_date": "2017-01-07",
@@ -92,6 +92,6 @@
     "doctype": "Pay Period",
     "payment_frequency": "Weekly",
     "pay_period_start_date": "2017-01-01",
-    "payroll_period_name": "_Test 2017 - Weekly"
+    "pay_period_name": "_Test 2017 - Weekly"
   }
 ]
