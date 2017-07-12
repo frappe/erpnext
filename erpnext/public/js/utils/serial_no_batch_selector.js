@@ -50,6 +50,14 @@ erpnext.SerialNoBatchSelector = Class.extend({
 						batches.grid.refresh();
 						batches.grid.add_new_row(null, null, null);
 					}
+				},
+				get_query: function() {
+					return {
+						filters: {
+							is_group: 0,
+							company: me.frm.doc.company
+						}
+					};
 				}
 			},
 			{fieldtype:'Column Break'},
