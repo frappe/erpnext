@@ -187,14 +187,14 @@ class ExpenseClaim(AccountsController):
 	def calculate_detail_table(self):
 		self.set('type_summary', [])
 		for d in self.get('expenses'):
-			type = next((x  for x in self.get('type_summary') if x.expense_type == d.expense_type), None)
-			if not type:
-				type = self.append('type_summary',{})
-				type.expense_type = d.expense_type
-				type.total_claim_amount = 0
-				type.total_tax_amount = 0
-			type.total_claim_amount += flt(d.claim_amount)
-			type.total_tax_amount += flt(d.tax_amount)
+			mytype = next((x  for x in self.get('type_summary') if x.expense_type == d.expense_type), None)
+			if not mytype:
+				mytype = self.append('type_summary',{})
+				mytype.expense_type = d.expense_type
+				mytype.total_claim_amount = 0
+				mytype.total_tax_amount = 0
+			mytype.total_claim_amount += flt(d.claim_amount)
+			mytype.total_tax_amount += flt(d.tax_amount)
 
 	def validate_expense_approver(self):
 		if self.exp_approver and "Expense Approver" not in frappe.get_roles(self.exp_approver):

@@ -46,7 +46,7 @@ frappe.ui.form.on("Expense Claim", {
 
 	onload: function(frm) {
 		if(!frm.doc.approval_status)
-			frm.set_value("approval_status", "Draft")
+			frm.set_value("approval_status", "Draft");
 
 		if (frm.doc.__islocal) {
 			frm.set_value("posting_date", frappe.datetime.get_today());
@@ -55,7 +55,7 @@ frappe.ui.form.on("Expense Claim", {
 			erpnext.hr.expense_claim.clear_sanctioned(frm.doc);
 		}
 
-		frm.fields_dict.employee.get_query = function(frm,cdt,cdn) {
+		frm.fields_dict.employee.get_query = function() {
 			return{
 				query: "erpnext.controllers.queries.employee_query"
 			}
@@ -137,7 +137,7 @@ frappe.ui.form.on("Expense Claim", {
 				frappe.set_route("query-report", "General Ledger");
 			}, __("View"));
 		}
-		frm.script_manager.trigger("toggle_fields")
+		frm.script_manager.trigger("toggle_fields");
 
 	},
 	validate: function(frm) {
@@ -152,8 +152,8 @@ frappe.ui.form.on("Expense Claim", {
 		}
 	},
 	setup: function(frm) {
-		frm.script_manager.trigger("set_query_for_cost_center")
-		frm.script_manager.trigger("set_query_for_payable_account")
+		frm.script_manager.trigger("set_query_for_cost_center");
+		frm.script_manager.trigger("set_query_for_payable_account");
 		frm.add_fetch("company", "cost_center", "cost_center");
 		frm.add_fetch("company", "default_payable_account", "payable_account");
 	},
@@ -167,12 +167,10 @@ frappe.ui.form.on("Expense Claim", {
 				},
 				callback: function(r) {
 					if(r.message)
-					{
-						console.log(r);
 						for( var i = 0; i < r.message.length;i++)
 						{
 							var obj = r.message[i];
-							if (!frm.doc.expenses.some(function(e) {return e.receipt == obj.name})) {
+							if (!frm.doc.expenses.some(function(e) {return e.receipt == obj.name;})) {
 								var new_row = frm.add_child("expenses");
 								for (var property in obj) {
 									if (property === "name") {
@@ -251,7 +249,7 @@ erpnext.hr.expense_claim = {
 		frm.set_intro("");
 		if((frm.doc.__islocal && !in_list(frappe.user_roles, "HR User")) ||(frm.doc.__unsaved)) {
 
-			frm.set_intro(__("Fill the form and save it"))
+			frm.set_intro(__("Fill the form and save it"));
 		} else {
 			if(frm.doc.docstatus==0 && frm.doc.approval_status=="Draft") {
 				if(frappe.session.user==frm.doc.exp_approver) {
@@ -274,7 +272,7 @@ frappe.ui.form.on("Expense Claim Detail", {
 			frappe.model.set_value(cdt, cdn, 'sanctioned_amount', child.claim_amount)
 		}
 
-		frappe.model.set_value(cdt, cdn, 'sanctioned_tax', child.tax_amount * child.sanctioned_amount / child.claim_amount)
+		frappe.model.set_value(cdt, cdn, 'sanctioned_tax', child.tax_amount * child.sanctioned_amount / child.claim_amount);
 
 
 		frm.cscript.calculate_total(doc);
@@ -282,7 +280,7 @@ frappe.ui.form.on("Expense Claim Detail", {
 	tax_amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		var doc = frm.doc;
-		frappe.model.set_value(cdt, cdn, 'sanctioned_tax', child.tax_amount * child.sanctioned_amount / child.claim_amount)
+		frappe.model.set_value(cdt, cdn, 'sanctioned_tax', child.tax_amount * child.sanctioned_amount / child.claim_amount);
 
 		frm.cscript.calculate_total(doc);
 	},
@@ -290,7 +288,7 @@ frappe.ui.form.on("Expense Claim Detail", {
 	sanctioned_amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		var doc = frm.doc;
-		frappe.model.set_value(cdt, cdn, 'sanctioned_tax', child.tax_amount * child.sanctioned_amount / child.claim_amount)
+		frappe.model.set_value(cdt, cdn, 'sanctioned_tax', child.tax_amount * child.sanctioned_amount / child.claim_amount);
 		frm.cscript.calculate_total(doc);
 	}
 });
