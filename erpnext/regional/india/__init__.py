@@ -1,5 +1,6 @@
 states = [
  '',
+ 'Andaman and Nicobar Islands',
  'Andhra Pradesh',
  'Arunachal Pradesh',
  'Assam',
@@ -38,6 +39,7 @@ states = [
 ]
 
 state_numbers = {
+ "Andaman and Nicobar Islands": "35",
  "Andhra Pradesh": "37",
  "Arunachal Pradesh": "12",
  "Assam": "18",
@@ -70,7 +72,7 @@ state_numbers = {
  "Tamil Nadu": "33",
  "Telangana": "36",
  "Tripura": "16",
- "Uttar Pradesh": "35",
- "Uttarakhand": "36",
+ "Uttar Pradesh": "09",
+ "Uttarakhand": "05",
  "West Bengal": "19"
 }
