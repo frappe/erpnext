@@ -504,12 +504,12 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.flags.ignore_permissions = True
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
-		
+
 		# set company address
 		target.update(get_company_address(target.company))
 		if target.company_address:
 			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
-		
+
 	def update_item(source, target, source_parent):
 		target.amount = flt(source.amount) - flt(source.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)

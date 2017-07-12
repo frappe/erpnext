@@ -382,12 +382,11 @@ def make_sales_invoice(source_name, target_doc=None):
 			frappe.throw(_("All these items have already been invoiced"))
 
 		target.run_method("calculate_taxes_and_totals")
-		
+
 		# set company address
 		target.update(get_company_address(target.company))
 		if target.company_address:
-			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
-		
+			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))	
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)

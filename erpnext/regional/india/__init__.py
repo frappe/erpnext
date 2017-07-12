@@ -26,6 +26,7 @@ states = [
  'Mizoram',
  'Nagaland',
  'Odisha',
+ 'Other Territory',
  'Pondicherry',
  'Punjab',
  'Rajasthan',
