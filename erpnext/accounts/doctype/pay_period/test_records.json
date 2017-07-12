@@ -4,22 +4,22 @@
     "dates":[
       {
         "end_date": "2017-07-31",
-        "doctype": "Fiscal Year Pay Date",
+        "doctype": "Pay Period Date",
         "start_date": "2017-07-01"
       },
       {
         "end_date": "2017-08-31",
-        "doctype": "Fiscal Year Pay Date",
+        "doctype": "Pay Period Date",
         "start_date": "2017-08-01"
       },
       {
         "end_date": "2017-09-30",
-        "doctype": "Fiscal Year Pay Date",
+        "doctype": "Pay Period Date",
         "start_date": "2017-09-01"
       }
     ],
     "is_active": "Yes",
-    "doctype": "Fiscal Year Pay Period",
+    "doctype": "Pay Period",
     "payment_frequency": "Monthly",
     "pay_period_start_date": "2017-07-01",
     "payroll_period_name": "_Test 2017 - Monthly"
@@ -29,22 +29,22 @@
     "dates":[
       {
         "end_date": "2017-07-31",
-        "doctype": "Fiscal Year Pay Date",
+        "doctype": "Pay Period Date",
         "start_date": "2017-07-01"
       },
       {
         "end_date": "2017-08-31",
-        "doctype": "Fiscal Year Pay Date",
+        "doctype": "Pay Period Date",
         "start_date": "2017-08-01"
       },
       {
         "end_date": "2017-09-30",
-        "doctype": "Fiscal Year Pay Date",
+        "doctype": "Pay Period Date",
         "start_date": "2017-09-01"
       }
     ],
     "is_active": "Yes",
-    "doctype": "Fiscal Year Pay Period",
+    "doctype": "Pay Period",
     "payment_frequency": "Monthly",
     "pay_period_start_date": "2017-07-01",
     "payroll_period_name": "_Test 2017 - Monthly"
@@ -54,12 +54,12 @@
     "dates":[
       {
         "end_date": "2017-01-14",
-        "doctype": "Fiscal Year Pay Date",
+        "doctype": "Pay Period Date",
         "start_date": "2017-01-01"
       }
     ],
     "is_active": "Yes",
-    "doctype": "Fiscal Year Pay Period",
+    "doctype": "Pay Period",
     "payment_frequency": "Fortnightly",
     "pay_period_start_date": "2017-01-01",
     "payroll_period_name": "_Test 2017 - Fortnightly"
@@ -69,12 +69,12 @@
     "dates":[
       {
         "end_date": "2017-01-07",
-        "doctype": "Fiscal Year Pay Date",
+        "doctype": "Pay Period Date",
         "start_date": "2017-01-01"
       }
     ],
     "is_active": "Yes",
-    "doctype": "Fiscal Year Pay Period",
+    "doctype": "Pay Period",
     "payment_frequency": "Weekly",
     "pay_period_start_date": "2017-01-01",
     "payroll_period_name": "_Test 2017 - Weekly"
@@ -84,12 +84,12 @@
     "dates":[
       {
         "end_date": "2017-01-07",
-        "doctype": "Fiscal Year Pay Date",
+        "doctype": "Pay Period Date",
         "start_date": "2017-01-01"
       }
     ],
     "is_active": "Yes",
-    "doctype": "Fiscal Year Pay Period",
+    "doctype": "Pay Period",
     "payment_frequency": "Weekly",
     "pay_period_start_date": "2017-01-01",
     "payroll_period_name": "_Test 2017 - Weekly"

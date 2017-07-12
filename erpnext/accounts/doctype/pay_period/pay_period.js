@@ -1,7 +1,7 @@
 // Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Fiscal Year Pay Period', {
+frappe.ui.form.on('Pay Period', {
 	onload: function(frm) {
 		if(frm.doc.__islocal){
 			remove_rows(frm, 'dates');
