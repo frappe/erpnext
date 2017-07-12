@@ -24,6 +24,7 @@ class FiscalYear(Document):
 	def validate(self):
 		self.validate_dates()
 		self.validate_overlap()
+		self.validate_pay_periods()
 
 		if not self.is_new():
 			year_start_end_dates = frappe.db.sql("""select year_start_date, year_end_date
@@ -81,6 +82,20 @@ class FiscalYear(Document):
 				if overlap:
 					frappe.throw(_("Year start date or end date is overlapping with {0}. To avoid please set company")
 						.format(existing.name), frappe.NameError)
+
+	def validate_pay_periods(self):
+		if self.pay_periods:
+			[self.validate_end_dates(period_date) for period_date in self.pay_periods]
+
+	def validate_end_dates(self, pay_period_date):
+		pay_period = frappe.get_doc('Pay Period', pay_period_date.pay_period)
+		if not getdate(self.year_end_date) >= getdate(pay_period.pay_period_end_date):
+			frappe.throw(_('Pay Period {0} extends beyond Fiscal Year {1}'.format(
+				pay_period.pay_period_name, self.year)))
+		elif not getdate(self.year_start_date) <= getdate(pay_period.pay_period_end_date):
+			frappe.throw(_('Pay Period {0} extends beyond Fiscal Year {1}'.format(
+				pay_period.pay_period_name, self.year)))
+
 
 @frappe.whitelist()
 def check_duplicate_fiscal_year(doc):

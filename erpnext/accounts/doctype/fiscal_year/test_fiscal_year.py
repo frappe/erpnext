@@ -3,7 +3,8 @@
 
 from __future__ import unicode_literals
 
-import frappe, unittest
+import frappe
+import unittest
 from frappe.utils import getdate
 
 test_records = frappe.get_test_records('Fiscal Year')
@@ -34,11 +35,10 @@ class TestFiscalYear(unittest.TestCase):
 		companies = [{
 					"doctype": 'Fiscal Year Company',
 					"company": '_Test Company'}]
-		pay_periods = [
-			{"doctype": "Fiscal Year Pay Period",
-			 "pay_period": "_Test 1907 - Monthly"
-			 }]
-
+		pay_periods = [{
+			"doctype": "Fiscal Year Pay Period",
+			"pay_period": "_Test 1907 - Monthly"
+			}]
 
 		fy = frappe.get_doc({
 			"doctype": "Fiscal Year",
@@ -60,6 +60,58 @@ class TestFiscalYear(unittest.TestCase):
 		self.assertEquals(saved_fy.companies[0].company, companies[0]['company'])
 		self.assertEquals(saved_fy.pay_periods[0].pay_period, pay_periods[0]['pay_period'])
 
+	def test_create_fiscal_year_with_pay_period_past_fiscal_year(self):
+		if frappe.db.exists("Fiscal Year", "_Test Fiscal Year 1907"):
+			frappe.delete_doc("Fiscal Year", "_Test Fiscal Year 1907")
+
+		year_start = "1907-01-07"
+		year_end = "1908-01-06"
+		year = "_Test Fiscal Year 1907"
+		companies = [{
+					"doctype": 'Fiscal Year Company',
+					"company": '_Test Company'}]
+		pay_periods = [{
+			"doctype": "Fiscal Year Pay Period",
+			"pay_period": "_Test 2017 - Monthly"
+			}]
+
+		fy = frappe.get_doc({
+			"doctype": "Fiscal Year",
+			"year_start_date": year_start,
+			"year": year,
+			"year_end_date": year_end,
+			"companies": companies,
+			"pay_periods": pay_periods
+		})
+
+		self.assertRaises(frappe.ValidationError, fy.insert)
+
+	def test_create_fiscal_year_with_pay_period_before_fiscal_year(self):
+		if frappe.db.exists("Fiscal Year", "_Test Fiscal Year 1907"):
+			frappe.delete_doc("Fiscal Year", "_Test Fiscal Year 1907")
+
+		year_start = "1907-01-07"
+		year_end = "1908-01-06"
+		year = "_Test Fiscal Year 1907"
+		companies = [{
+					"doctype": 'Fiscal Year Company',
+					"company": '_Test Company'}]
+		pay_periods = [{
+			"doctype": "Fiscal Year Pay Period",
+			"pay_period": "_Test 1905 - Monthly"
+			}]
+
+		fy = frappe.get_doc({
+			"doctype": "Fiscal Year",
+			"year_start_date": year_start,
+			"year": year,
+			"year_end_date": year_end,
+			"companies": companies,
+			"pay_periods": pay_periods
+		})
+
+		self.assertRaises(frappe.ValidationError, fy.insert)
+
 	def test_create_fiscal_year_no_pay_period(self):
 		if frappe.db.exists("Fiscal Year", "_Test Fiscal Year 1907"):
 			frappe.delete_doc("Fiscal Year", "_Test Fiscal Year 1907")
@@ -70,7 +122,6 @@ class TestFiscalYear(unittest.TestCase):
 		companies = [{
 					"doctype": 'Fiscal Year Company',
 					"company": '_Test Company'}]
-
 
 		fy = frappe.get_doc({
 			"doctype": "Fiscal Year",
