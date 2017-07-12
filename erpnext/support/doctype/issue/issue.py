@@ -90,7 +90,9 @@ def auto_close_tickets():
 	for issue in issues:
 		doc = frappe.get_doc("Issue", issue.get("name"))
 		doc.status = "Closed"
-		doc.save(ignore_permissions=True)
+		doc.flags.ignore_permissions = True
+		doc.flags.ignore_mandatory = True
+		doc.save()
 
 @frappe.whitelist()
 def set_multiple_status(names, status):
