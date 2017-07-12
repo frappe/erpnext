@@ -1,6 +1,6 @@
 QUnit.module('accounts');
 
-QUnit.only("test account", function(assert) {
+QUnit.test("test account", function(assert) {
 	assert.expect(4);
 	let done = assert.async();
 	frappe.run_serially([
