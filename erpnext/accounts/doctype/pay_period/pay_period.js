@@ -42,7 +42,7 @@ frappe.ui.form.on('Pay Period', {
 get_pay_period_dates = function(frm){
 	return frappe.call({
 				type: "GET",
-				method: "erpnext.accounts.doctype.fiscal_year_pay_period.fiscal_year_pay_period.get_pay_period_dates",
+				method: "erpnext.accounts.doctype.pay_period.pay_period.get_pay_period_dates",
 				args: {
 					"payroll_start": frm.doc.pay_period_start_date,
 					"payroll_end": frm.doc.pay_period_end_date,
