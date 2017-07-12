@@ -14,7 +14,6 @@ frappe.ui.form.on("Supplier Scorecard", {
 		}
 		if (frm.doc.__unsaved == 1)
 		{
-			//Add the criteria
 			frappe.call({
 				method: "erpnext.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_criteria.get_criteria_list",
 				callback: function(r) {
@@ -34,7 +33,6 @@ frappe.ui.form.on("Supplier Scorecard", {
 					refresh_field("criteria");
 				}
 			});
-			//Add the criteria
 			frappe.call({
 				method: "erpnext.buying.doctype.supplier_scorecard_standing.supplier_scorecard_standing.get_standings_list",
 				callback: function(r) {

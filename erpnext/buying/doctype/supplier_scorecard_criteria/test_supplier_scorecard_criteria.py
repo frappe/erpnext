@@ -9,15 +9,15 @@ import unittest
 class TestSupplierScorecardCriteria(unittest.TestCase):
 	def test_variables_exist(self):
 		delete_test_scorecards()
-		#for d in test_good_criteria:
-		#	frappe.get_doc(d).insert()
+		for d in test_good_criteria:
+			frappe.get_doc(d).insert()
 
-		#self.assertRaises(frappe.ValidationError,frappe.get_doc(test_bad_criteria[0]).insert)
+		self.assertRaises(frappe.ValidationError,frappe.get_doc(test_bad_criteria[0]).insert)
 
 	def test_formula_validate(self):
 		delete_test_scorecards()
-		#self.assertRaises(frappe.ValidationError,frappe.get_doc(test_bad_criteria[1]).insert)
-		#self.assertRaises(frappe.ValidationError,frappe.get_doc(test_bad_criteria[2]).insert)
+		self.assertRaises(frappe.ValidationError,frappe.get_doc(test_bad_criteria[1]).insert)
+		self.assertRaises(frappe.ValidationError,frappe.get_doc(test_bad_criteria[2]).insert)
 
 def delete_test_scorecards():
 	# Delete all the periods so we can delete all the criteria
