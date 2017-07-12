@@ -123,6 +123,11 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Expense Receipt",
+					"description": _("Receipts for company expenses."),
+				},
+				{
+					"type": "doctype",
 					"name": "Expense Claim",
 					"description": _("Claims for company expense."),
 				},

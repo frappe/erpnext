@@ -13,5 +13,15 @@ frappe.ui.form.on("Expense Claim Type", {
 				}
 			}
 		}
+		frm.fields_dict["tax_accounts"].grid.get_field("default_account").get_query = function(frm, cdt, cdn){
+			var d = locals[cdt][cdn];
+			return{
+				filters: {
+					"is_group": 0,
+					"root_type": "Expense",
+					'company': d.company
+				}
+			}
+		}
 	}
 })
