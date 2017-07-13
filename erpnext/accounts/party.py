@@ -288,8 +288,8 @@ def get_credit_days(party_type, party, company):
 				frappe.db.get_value("Supplier Type", supplier_type, ["credit_days_based_on", "credit_days"])
 
 	if not credit_days_based_on:
-			credit_days_based_on, credit_days = \
-				frappe.db.get_value("Company", company, ["credit_days_based_on", "credit_days"] )
+		credit_days_based_on, credit_days = \
+			frappe.db.get_value("Company", company, ["credit_days_based_on", "credit_days"])
 
 	return credit_days_based_on, credit_days
 
