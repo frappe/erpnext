@@ -4,6 +4,7 @@
 cur_frm.add_fetch("student_group", "course", "course");
 cur_frm.add_fetch("examiner", "instructor_name", "examiner_name");
 cur_frm.add_fetch("supervisor", "instructor_name", "supervisor_name");
+cur_frm.add_fetch("course", "default_grading_scale", "grading_scale");
 
 frappe.ui.form.on("Assessment Plan", {
     onload: function(frm) {
