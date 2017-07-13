@@ -17,7 +17,7 @@
 			{{ render_discount_amount(doc) }}
 		{%- endif -%}
 		{%- for charge in data -%}
-			{%- if not charge.included_in_print_rate -%}
+			{%- if charge.tax_amount and not charge.included_in_print_rate -%}
 			<div class="row">
 				<div class="col-xs-5 {%- if not doc._align_labels_left %} text-right{%- endif -%}">
 					<label>{{ charge.get_formatted("description") }}</label></div>

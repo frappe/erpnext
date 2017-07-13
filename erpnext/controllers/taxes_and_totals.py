@@ -559,7 +559,7 @@ class calculate_taxes_and_totals(object):
 							
 						item_tax[item_code][tax.name] = [tax_rate, tax_amount]
 					else:
-						item_tax[item_code][tax.name] = [cstr(flt(tax_data, tax_rate_precision)) + "%", ""]
+						item_tax[item_code][tax.name] = [cstr(flt(tax_data, tax_rate_precision)) + "%", "0.00"]
 			tax_accounts.append([tax.name, tax.account_head])
 		
 		return item_tax, tax_accounts
