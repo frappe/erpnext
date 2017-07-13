@@ -1,6 +1,6 @@
 import unittest, frappe, erpnext
 
-@erpnext.regional
+@erpnext.allow_regional
 def test_method():
 	return 'original'
 

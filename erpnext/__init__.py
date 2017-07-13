@@ -81,7 +81,13 @@ def get_region(company=None):
 	else:
 		return frappe.get_system_settings('country')
 
-def regional(fn):
+def allow_regional(fn):
+	'''Decorator to make a function regionally overridable
+
+	Example:
+	@erpnext.allow_regional
+	def myfunction():
+	  pass'''
 	def caller(*args, **kwargs):
 		region = get_region()
 		fn_name = inspect.getmodule(fn).__name__ + '.' + fn.__name__
