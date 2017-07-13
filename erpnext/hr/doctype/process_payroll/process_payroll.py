@@ -2,12 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+from six.moves import range
 import frappe
 from frappe.utils import cint, flt, nowdate, add_days, getdate, fmt_money
 from frappe import _
+from frappe.model.document import Document
 from erpnext.accounts.utils import get_fiscal_year
 
-from frappe.model.document import Document
+
 
 class ProcessPayroll(Document):
 	def get_emp_list(self):
@@ -359,6 +361,21 @@ class ProcessPayroll(Document):
 			self.start_date or self.posting_date, self.company))
 
 
+def get_pay_period_dates(fiscal_year, start_date, frequency):
+	pay_periods = frappe.db.sql(
+		"""
+		select start_date, end_date from `tabPay Period Date` ppd
+		inner join
+		(select pay_period from `tabFiscal Year Pay Period` where parent=%s) fypp
+		on ppd.parent=fypp.pay_period
+		inner join
+		(select pay_period_name from `tabPay Period` where payment_frequency=%s) pp
+		on ppd.parent=pp.pay_period_name
+		""",
+		(fiscal_year, frequency))
+	return pay_periods
+
+
 @frappe.whitelist()
 def get_start_end_dates(payroll_frequency, start_date=None, company=None):
 	'''Returns dict of start and end dates for given payroll frequency based on start_date'''
@@ -366,6 +383,17 @@ def get_start_end_dates(payroll_frequency, start_date=None, company=None):
 	if payroll_frequency == "Monthly" or payroll_frequency == "Bimonthly" or payroll_frequency == "":
 		fiscal_year = get_fiscal_year(start_date, company=company)[0]
 		month = "%02d" % getdate(start_date).month
+
+		# dates contains preset pay period dates. If empty, go for automatic option
+		dates = get_pay_period_dates(fiscal_year, start_date, payroll_frequency)
+		if dates:
+			for i in range(len(dates)):
+				if dates[i][0] == getdate(start_date):
+					return frappe._dict({
+						'start_date': dates[i][0],
+						'end_date': dates[i][1]
+					})
+
 		m = get_month_details(fiscal_year, month)
 		if payroll_frequency == "Bimonthly":
 			if getdate(start_date).day <= 15:
