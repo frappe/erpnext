@@ -484,10 +484,10 @@ def save_invoice(e, si_doc, name):
 @frappe.whitelist()
 def start_pos_session(pos_session_start):
 	new_session = frappe.get_doc({
-					"doctype" : "POS Session",
-					"pos_session_date" : nowdate(),
-					"pos_session_start" : pos_session_start
-					}).insert(ignore_permissions=True)
+		"doctype" : "POS Session",
+		"pos_session_date" : nowdate(),
+		"pos_session_start" : pos_session_start
+	}).insert(ignore_permissions=True)
 
 	return new_session.name
 
