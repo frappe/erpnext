@@ -398,16 +398,20 @@ def get_conditions(filters):
 
 
 def get_t_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"):
-	from frappe.www.list import get_list
+	# from frappe.www.list import get_list
 	user = frappe.session.user
-	ignore_permissions = True
-	if is_website_user():
-		if not filters: filters = []
-		filters.append(("Timesheet", "owner", "=", user))
-		ignore_permissions = True
+	# ignore_permissions = False
+	# if is_website_user():
+	# 	if not filters: filters = []
+	# 	filters.append(("Timesheet", "owner", "=", user))
+	# 	ignore_permissions = True
 
-	return get_list(doctype, txt, filters, limit_start, limit_page_length, ignore_permissions=ignore_permissions)
+	# return get_list(doctype, txt, filters, limit_start, limit_page_length, ignore_permissions=ignore_permissions)
 
+	return frappe. db.sql('''SELECT A.name, B.activity_type, A.status, A.total_billable_hours, B.sales_invoice, B.project  FROM \
+		`tabTimesheet` AS A inner join `tabTimesheet Detail` AS B ON B.parent = A.name\
+		order by end_date asc limit {0} , {1}'''
+		.format(limit_start, limit_page_length), as_dict = True)
 
 def get_list_context(context=None):
 	return {
@@ -418,3 +422,4 @@ def get_list_context(context=None):
 		"get_list": get_t_list,
 		"row_template": "templates/includes/timesheet/timesheet_row.html"
 	}
+
