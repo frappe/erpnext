@@ -53,4 +53,4 @@ script:
   - set -e
   - bench --verbose run-tests
   - sleep 5
-  - bench --verbose run-tests --ui-tests
+  - bench --verbose run-ui-tests --app erpnext
