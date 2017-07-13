@@ -4,7 +4,6 @@ frappe.provide("erpnext.stock");
 
 frappe.ui.form.on('Stock Entry', {
 	setup: function(frm) {
-		$.extend(frm.cscript, new erpnext.stock.StockEntry({frm: frm}));
 
 		frm.set_query('production_order', function() {
 			return {
@@ -583,3 +582,5 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 	});
 
 }
+
+$.extend(cur_frm.cscript, new erpnext.stock.StockEntry({frm: cur_frm}));
