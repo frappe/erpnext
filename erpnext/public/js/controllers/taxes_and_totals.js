@@ -675,7 +675,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 						item_tax[item_code][tax.name] = [tax_rate, tax_amount];
 					} else {
-						item_tax[item_code][tax.name] = [flt(tax_data, tax_rate_precision) + "%", ""];
+						item_tax[item_code][tax.name] = [flt(tax_data, tax_rate_precision) + "%", "0.00"];
 					}
 				});
 			tax_accounts.push([tax.name, tax.account_head]);

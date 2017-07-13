@@ -212,7 +212,9 @@ frappe.ui.form.on("Production Order", {
 frappe.ui.form.on("Production Order Item", {
 	source_warehouse: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
-		if(row.source_warehouse) {
+		if(!row.item_code) {
+			frappe.throw(__("Please set the Item Code first"));
+		} else if(row.source_warehouse) {
 			frappe.call({
 				"method": "erpnext.stock.utils.get_latest_stock_qty",
 				args: {

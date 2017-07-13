@@ -1,6 +1,5 @@
 DocType: Fee Structure,Components,Componentes
 DocType: Purchase Invoice Item,Item,Producto
-apps/erpnext/erpnext/hr/doctype/leave_block_list/leave_block_list.py +19,Date is repeated,La fecha está repetida
 DocType: Payment Entry,Deductions or Loss,Deducciones o Pérdidas
 DocType: Cheque Print Template,Cheque Size,Tamaño de Cheque
 apps/erpnext/erpnext/utilities/activation.py +126,Make Student Batch,Hacer lotes de Estudiante

@@ -340,10 +340,15 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	production_order: function() {
 		var me = this;
 		this.toggle_enable_bom();
+		if(!me.frm.doc.production_order) {
+			return;
+		}
 
 		return frappe.call({
 			method: "erpnext.stock.doctype.stock_entry.stock_entry.get_production_order_details",
-			args: {production_order: me.frm.doc.production_order},
+			args: {
+				production_order: me.frm.doc.production_order
+			},
 			callback: function(r) {
 				if (!r.exc) {
 					$.each(["from_bom", "bom_no", "fg_completed_qty", "use_multi_level_bom"], function(i, field) {
