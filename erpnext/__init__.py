@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import inspect
 import frappe
+from erpnext.hooks import regional_overrides
 
 __version__ = '8.3.6'
 
@@ -65,3 +67,28 @@ def is_perpetual_inventory_enabled(company):
 			company, "enable_perpetual_inventory") or 0
 
 	return frappe.local.enable_perpetual_inventory[company]
+
+def get_region(company=None):
+	'''Return the default country based on flag, company or global settings
+
+	You can also set global company flag in `frappe.flags.company`
+	'''
+	if company or frappe.flags.company:
+		return frappe.db.get_value('Company',
+			company or frappe.flags.company, 'country')
+	elif frappe.flags.country:
+		return frappe.flags.country
+	else:
+		return frappe.get_system_settings('country')
+
+def regional(fn):
+	def caller(*args, **kwargs):
+		region = get_region()
+		fn_name = inspect.getmodule(fn).__name__ + '.' + fn.__name__
+		if region in regional_overrides and fn_name in regional_overrides[region]:
+			return frappe.get_attr(regional_overrides[region][fn_name])(*args, **kwargs)
+		else:
+			return fn(*args, **kwargs)
+
+	return caller
+

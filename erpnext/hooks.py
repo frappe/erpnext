@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 from frappe import _
-from . import __version__ as app_version
 
 app_name = "erpnext"
 app_title = "ERPNext"
@@ -211,3 +210,9 @@ bot_parsers = [
 get_site_info = 'erpnext.utilities.get_site_info'
 
 payment_gateway_enabled = "erpnext.accounts.utils.create_payment_gateway_account"
+
+regional_overrides = {
+	'India': {
+		'erpnext.tests.test_regional.test_method': 'erpnext.regional.india.utils.test_method'
+	}
+}

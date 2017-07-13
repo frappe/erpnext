@@ -22,3 +22,8 @@ def validate_gstin_for_india(doc, method):
 			if doc.gstin != "NA" and doc.gst_state_number != doc.gstin[:2]:
 				frappe.throw(_("First 2 digits of GSTIN should match with State number {0}")
 					.format(doc.gst_state_number))
+
+# don't remove this function it is used in tests
+def test_method():
+	'''test function'''
+	return 'overridden'
