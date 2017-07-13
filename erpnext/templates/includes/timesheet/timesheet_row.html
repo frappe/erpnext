@@ -1,0 +1,12 @@
+<div class="web-list-item">
+    <a href="/timesheets?name={{ doc.name | urlencode }}" class="no-decoration">
+        <div class="row">
+            <div class="col-xs-3">
+                     <span class="indicator {{ "red" if doc.status=="Draft" else "green" if doc.status=="Submited" else "blue" if doc.status=="Submitted" else "darkgrey" }}">{{ doc.address_title }}</span>
+            </div>
+            <div class="col-xs-2"> {{ _(doc.project) }} </div>
+            <div class="col-xs-2"> {{ doc.name }} </div>
+        </div>
+    </a>
+</div>
+

@@ -109,7 +109,8 @@ website_route_rules = [
 	},
 	{"from_route": "/jobs", "to_route": "Job Opening"},
 	{"from_route": "/admissions", "to_route": "Student Admission"},
-	{"from_route": "/boms", "to_route": "BOM"}
+	{"from_route": "/boms", "to_route": "BOM"},
+	{"from_route": "/timesheets", "to_route": "Timesheet"},
 ]
 
 standard_portal_menu_items = [
@@ -122,7 +123,8 @@ standard_portal_menu_items = [
 	{"title": _("Shipments"), "route": "/shipments", "reference_doctype": "Delivery Note", "role":"Customer"},
 	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue", "role":"Customer"},
 	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"},
-	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role":"Student"}
+	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role":"Student"},
+	{"title": _("Timesheets"), "route": "/timesheets", "reference_doctype": "Timesheet"}
 ]
 
 default_roles = [
