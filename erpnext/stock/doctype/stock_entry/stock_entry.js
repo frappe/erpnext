@@ -341,7 +341,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		var me = this;
 		this.toggle_enable_bom();
 		if(!me.frm.doc.production_order) {
-			return
+			return;
 		}
 
 		return frappe.call({
