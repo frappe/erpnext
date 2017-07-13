@@ -1,0 +1,147 @@
+[
+  {
+    "pay_period_end_date": "2017-12-31",
+    "dates":[
+      {
+        "end_date": "2017-07-31",
+        "doctype": "Pay Period Date",
+        "start_date": "2017-07-01"
+      },
+      {
+        "end_date": "2017-08-31",
+        "doctype": "Pay Period Date",
+        "start_date": "2017-08-01"
+      },
+      {
+        "end_date": "2017-09-30",
+        "doctype": "Pay Period Date",
+        "start_date": "2017-09-01"
+      }
+    ],
+    "is_active": "Yes",
+    "doctype": "Pay Period",
+    "payment_frequency": "Monthly",
+    "pay_period_start_date": "2017-07-01",
+    "pay_period_name": "_Test 2017 - Monthly"
+  },
+  {
+    "pay_period_end_date": "2017-12-31",
+    "dates":[
+      {
+        "end_date": "2017-07-31",
+        "doctype": "Pay Period Date",
+        "start_date": "2017-07-01"
+      },
+      {
+        "end_date": "2017-08-31",
+        "doctype": "Pay Period Date",
+        "start_date": "2017-08-01"
+      },
+      {
+        "end_date": "2017-09-30",
+        "doctype": "Pay Period Date",
+        "start_date": "2017-09-01"
+      }
+    ],
+    "is_active": "Yes",
+    "doctype": "Pay Period",
+    "payment_frequency": "Monthly",
+    "pay_period_start_date": "2017-07-01",
+    "pay_period_name": "_Test 2017 - Monthly"
+  },
+  {
+    "pay_period_end_date": "2017-01-28",
+    "dates":[
+      {
+        "end_date": "2017-01-14",
+        "doctype": "Pay Period Date",
+        "start_date": "2017-01-01"
+      }
+    ],
+    "is_active": "Yes",
+    "doctype": "Pay Period",
+    "payment_frequency": "Fortnightly",
+    "pay_period_start_date": "2017-01-01",
+    "pay_period_name": "_Test 2017 - Fortnightly"
+  },
+  {
+    "pay_period_end_date": "2017-01-07",
+    "dates":[
+      {
+        "end_date": "2017-01-07",
+        "doctype": "Pay Period Date",
+        "start_date": "2017-01-01"
+      }
+    ],
+    "is_active": "Yes",
+    "doctype": "Pay Period",
+    "payment_frequency": "Weekly",
+    "pay_period_start_date": "2017-01-01",
+    "pay_period_name": "_Test 2017 - Weekly"
+  },
+  {
+    "pay_period_end_date": "2017-01-07",
+    "dates":[
+      {
+        "end_date": "2017-01-07",
+        "doctype": "Pay Period Date",
+        "start_date": "2017-01-01"
+      }
+    ],
+    "is_active": "Yes",
+    "doctype": "Pay Period",
+    "payment_frequency": "Weekly",
+    "pay_period_start_date": "2017-01-01",
+    "pay_period_name": "_Test 2017 - Weekly"
+  },
+  {
+    "pay_period_end_date": "1907-12-31",
+    "dates":[
+      {
+        "end_date": "1907-07-31",
+        "doctype": "Pay Period Date",
+        "start_date": "1907-07-01"
+      },
+      {
+        "end_date": "1907-08-31",
+        "doctype": "Pay Period Date",
+        "start_date": "1907-08-01"
+      },
+      {
+        "end_date": "1907-09-30",
+        "doctype": "Pay Period Date",
+        "start_date": "1907-09-01"
+      }
+    ],
+    "is_active": "Yes",
+    "doctype": "Pay Period",
+    "payment_frequency": "Monthly",
+    "pay_period_start_date": "1907-07-01",
+    "pay_period_name": "_Test 1907 - Monthly"
+  },
+  {
+    "pay_period_end_date": "1905-12-31",
+    "dates":[
+      {
+        "end_date": "1905-07-31",
+        "doctype": "Pay Period Date",
+        "start_date": "1905-07-01"
+      },
+      {
+        "end_date": "1905-08-31",
+        "doctype": "Pay Period Date",
+        "start_date": "1905-08-01"
+      },
+      {
+        "end_date": "1905-09-30",
+        "doctype": "Pay Period Date",
+        "start_date": "1905-09-01"
+      }
+    ],
+    "is_active": "Yes",
+    "doctype": "Pay Period",
+    "payment_frequency": "Monthly",
+    "pay_period_start_date": "1905-07-01",
+    "pay_period_name": "_Test 1905 - Monthly"
+  }
+]

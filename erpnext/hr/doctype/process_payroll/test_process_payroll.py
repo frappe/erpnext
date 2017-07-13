@@ -13,7 +13,7 @@ class TestProcessPayroll(unittest.TestCase):
 		month = "11"
 		fiscal_year = "_Test Fiscal Year 2016"
 
-		for data in frappe.get_all('Salary Component', fields = ["name"]):
+		for data in frappe.get_all('Salary Component', fields=["name"]):
 			if not frappe.db.get_value('Salary Component Account', {'parent': data.name, 'company': erpnext.get_default_company()}, 'name'):
 				get_salary_component_account(data.name)
 				
