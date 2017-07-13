@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 from frappe.model.document import Document
 import frappe
 from frappe import _
+from frappe.utils import money_in_words
 
 class Fees(Document):
 	def validate(self):
@@ -17,6 +18,7 @@ class Fees(Document):
 		for d in self.components:
 			self.total_amount += d.amount
 		self.outstanding_amount = self.total_amount
+		self.total_amount_in_words = money_in_words(self.total_amount)
 
 def get_fee_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"):
 	user = frappe.session.user
