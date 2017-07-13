@@ -282,12 +282,14 @@ def get_credit_days(party_type, party, company):
 	if not credit_days_based_on:
 		if party_type == "Customer":
 			credit_days_based_on, credit_days = \
-				frappe.db.get_value("Customer Group", customer_group, ["credit_days_based_on", "credit_days"]) \
-				or frappe.db.get_value("Company", company, ["credit_days_based_on", "credit_days"])
+				frappe.db.get_value("Customer Group", customer_group, ["credit_days_based_on", "credit_days"])
 		else:
 			credit_days_based_on, credit_days = \
-				frappe.db.get_value("Supplier Type", supplier_type, ["credit_days_based_on", "credit_days"])\
-				or frappe.db.get_value("Company", company, ["credit_days_based_on", "credit_days"] )
+				frappe.db.get_value("Supplier Type", supplier_type, ["credit_days_based_on", "credit_days"])
+
+	if not credit_days_based_on:
+			credit_days_based_on, credit_days = \
+				frappe.db.get_value("Company", company, ["credit_days_based_on", "credit_days"] )
 
 	return credit_days_based_on, credit_days
 
