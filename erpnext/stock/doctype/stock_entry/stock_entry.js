@@ -343,7 +343,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 		return frappe.call({
 			method: "erpnext.stock.doctype.stock_entry.stock_entry.get_production_order_details",
-			args: {production_order: me.frm.doc.production_order},
+			args: {
+				production_order: me.frm.doc.production_order
+			},
 			callback: function(r) {
 				if (!r.exc) {
 					$.each(["from_bom", "bom_no", "fg_completed_qty", "use_multi_level_bom"], function(i, field) {
