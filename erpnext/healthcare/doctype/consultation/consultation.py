@@ -6,9 +6,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cstr, getdate, get_time, math
-import time, json, datetime
-from datetime import timedelta
+from frappe.utils import getdate, get_time, math
+import json, datetime
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account
 
 class Consultation(Document):

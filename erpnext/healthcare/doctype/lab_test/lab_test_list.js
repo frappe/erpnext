@@ -6,10 +6,10 @@ frappe.listview_settings['Lab Test'] = {
 	filters:[["docstatus","=","0"]],
 	get_indicator: function(doc) {
 		if(doc.status=="Approved"){
-        		return [__("Approved"), "green", "status,=,Approved"];
-        	}
+			return [__("Approved"), "green", "status,=,Approved"];
+		}
 		if(doc.status=="Rejected"){
-        		return [__("Rejected"), "yellow", "status,=,Rejected"];
-        	}
+			return [__("Rejected"), "yellow", "status,=,Rejected"];
+		}
 	}
 };

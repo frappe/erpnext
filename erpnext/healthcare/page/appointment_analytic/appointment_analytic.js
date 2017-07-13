@@ -4,17 +4,14 @@ frappe.pages['appointment-analytic'].on_page_load = function(wrapper) {
 		title: 'Appointment Analytics',
 		single_column: true
 	});
-
 	new erpnext.AppointmentAnalytics(wrapper);
-
 	frappe.breadcrumbs.add("Medical");
-}
+};
 
 erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 	init: function(wrapper) {
 		this._super({
 			title: __("Appointment Analytics"),
-			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			page: wrapper.page,
 			doctypes: ["Patient Appointment", "Physician", "Medical Department", "Appointment Type", "Patient"],
@@ -90,7 +87,7 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 		this._super();
 		this.trigger_refresh_on_change(["tree_type", "physician", "department", "status", "type"]);
 
-		//this.show_zero_check()
+		//t his.show_zero_check()
 		this.setup_chart_check();
 	},
 	init_filter_values: function() {
@@ -100,7 +97,7 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 	prepare_data: function() {
 		var me = this;
 		if (!this.tl) {
-			this.tl = frappe.report_dump.data["Patient Appointment"]
+			this.tl = frappe.report_dump.data["Patient Appointment"];
 		}
 		if(!this.data || me.item_type != me.tree_type) {
 			if(me.tree_type=='Physician') {
@@ -108,7 +105,7 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 			} if(me.tree_type=='Medical Department') {
 				var items = this.prepare_tree("Physician", "Medical Department");
 			}
-			me.item_type = me.tree_type
+			me.item_type = me.tree_type;
 			me.parent_map = {};
 			me.item_by_name = {};
 			me.data = [];
@@ -201,7 +198,7 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 				if(col.formatter==me.currency_formatter && !col.hidden && col.field!="total")
 					d.total += d[col.field];
 				if(d.checked) checked = true;
-			})
+			});
 		});
 
 		if(sort)this.data = this.data.sort(function(a, b) { return b.total - a.total; });

@@ -18,19 +18,19 @@ frappe.ui.form.on('Consultation', {
 	onload: function(frm){
 		if(frm.doc.patient){
 			frappe.call({
-					"method": "erpnext.healthcare.doctype.patient.patient.get_patient_detail",
-					args: {
-							patient: frm.doc.patient
-					},
-					callback: function (data) {
-						age = ""
-						if(data.message.dob){
-							age = calculate_age(data.message.dob)
-						}
-						frappe.model.set_value(frm.doctype,frm.docname, "patient_age", age)
-						show_details(data.message);
+				"method": "erpnext.healthcare.doctype.patient.patient.get_patient_detail",
+				args: {
+					patient: frm.doc.patient
+				},
+				callback: function (data) {
+					age = null;
+					if(data.message.dob){
+						age = calculate_age(data.message.dob);
 					}
-				});
+					frappe.model.set_value(frm.doctype,frm.docname, "patient_age", age);
+					show_details(data.message);
+				}
+			});
 		}
 	},
 	refresh: function(frm) {
@@ -39,18 +39,18 @@ frappe.ui.form.on('Consultation', {
 		if(frappe.user.has_role("Physician")){
 			frm.add_custom_button(__('Medical Record'), function() {
 				if(frm.doc.patient){
-					frappe.route_options = {"patient": frm.doc.patient}
+					frappe.route_options = {"patient": frm.doc.patient};
 					frappe.set_route("medical_record");
 				}else{
 					frappe.msgprint("Please select Patient");
 				}
-			} );
+			});
 			frm.add_custom_button(__('Vital Signs'), function() {
 				btn_create_vital_signs(frm);
-			 },"Create");
-			 frm.add_custom_button(__('Medical Record'), function() {
+			},"Create");
+			frm.add_custom_button(__('Medical Record'), function() {
 				create_medical_record(frm);
-			 },"Create");
+			},"Create");
 		}
 		frm.set_query("patient", function () {
 			return {
@@ -60,8 +60,8 @@ frappe.ui.form.on('Consultation', {
 		if(!frm.doc.__islocal && !frm.doc.invoice){
 			frm.add_custom_button(__('Invoice'), function() {
 				btn_invoice_consultation(frm);
-			},__("Create") );
-		};
+			},__("Create"));
+		}
 		frm.set_df_property("appointment", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("patient", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("patient_age", "read_only", frm.doc.__islocal ? 0:1);
@@ -93,7 +93,7 @@ var btn_invoice_consultation = function(frm){
 
 var create_medical_record = function (frm) {
 	if(!frm.doc.patient){
-		frappe.throw("Please select patient")
+		frappe.throw("Please select patient");
 	}
 	frappe.route_options = {
 		"patient": frm.doc.patient,
@@ -101,7 +101,7 @@ var create_medical_record = function (frm) {
 		"reference_doctype": "Patient Medical Record",
 		"reference_owner": frm.doc.owner
 	}
-	frappe.new_doc("Patient Medical Record")
+	frappe.new_doc("Patient Medical Record");
 }
 
 var btn_create_vital_signs = function (frm) {
@@ -111,14 +111,14 @@ var btn_create_vital_signs = function (frm) {
 	frappe.route_options = {
 		"patient": frm.doc.patient,
 	}
-	frappe.new_doc("Vital Signs")
+	frappe.new_doc("Vital Signs");
 }
 
 var show_details = function(data){
 	var personal_details = "";
-	age = ""
+	age = null;
 	if(data.dob){
-		age = calculate_age(data.dob)
+		age = calculate_age(data.dob);
 		personal_details += "<br><b>Age :</b> " + age;
 	}
 	if(data.sex) personal_details += "<br><b>Gender :</b> " + data.sex;
@@ -128,7 +128,7 @@ var show_details = function(data){
 	if(data.mobile) personal_details += "<br><b>Mobile :</b> " + data.mobile;
 
 	if(personal_details){
-		personal_details = "<div style='padding-left:10px; font-size:13px;' align='left'></br><b class='text-muted'>Personal Details</b>" + personal_details + "</div>"
+		personal_details = "<div style='padding-left:10px; font-size:13px;' align='left'></br><b class='text-muted'>Personal Details</b>" + personal_details + "</div>";
 	}
 
 	var details = "";
@@ -145,42 +145,41 @@ var show_details = function(data){
 	if(data.patient_details) details += "<br><br><b>More info : </b> " + data.patient_details;
 
 	if(details){
-		details = "<div style='padding-left:10px; font-size:13px;' align='left'></br><b class='text-muted'>Patient Details</b>" + details + "</div>"
+		details = "<div style='padding-left:10px; font-size:13px;' align='left'></br><b class='text-muted'>Patient Details</b>" + details + "</div>";
 	}
 
-	var vitals = ""
+	var vitals = "";
 	if(data.temperature) vitals += "<br><b>Temperature :</b> " + data.temperature;
 	if(data.pulse) vitals += ", <b>Pulse :</b> " + data.pulse;
 	if(data.respiratory_rate) vitals += ", <b>Respiratory Rate :</b> " + data.respiratory_rate;
 	if(data.bp) vitals += ", <b>BP :</b> " + data.bp;
 	if(data.bmi) vitals += "<br><b>BMI :</b> " + data.bmi;
-	if(data.nutrition_note) vitals += " (" + data.nutrition_note + ")"
+	if(data.nutrition_note) vitals += " (" + data.nutrition_note + ")";
 	if(data.height) vitals += ", <b>Height :</b> " + data.height;
 	if(data.weight) vitals += ", <b>Weight :</b> " + data.weight;
 	if(data.signs_date) vitals += "<br><b>Date :</b> " + data.signs_date;
 
 	if(vitals){
-		vitals = "<div style='padding-left:10px; font-size:13px;' align='left'></br><b class='text-muted'>Vital Signs</b>" + vitals + "<br></div>"
+		vitals = "<div style='padding-left:10px; font-size:13px;' align='left'></br><b class='text-muted'>Vital Signs</b>" + vitals + "<br></div>";
 	}
-	details = personal_details + vitals + details
+	details = personal_details + vitals + details;
 	cur_frm.fields_dict.patient_details_html.$wrapper.html(details);
 }
 
-frappe.ui.form.on("Consultation", "appointment",
-    function(frm) {
+frappe.ui.form.on("Consultation", "appointment", function(frm){
 	if(frm.doc.appointment){
 		frappe.call({
-		    "method": "frappe.client.get",
-		    args: {
-		        doctype: "Patient Appointment",
-		        name: frm.doc.appointment
-		    },
-		    callback: function (data) {
-				frappe.model.set_value(frm.doctype,frm.docname, "patient", data.message.patient)
-				frappe.model.set_value(frm.doctype,frm.docname, "type", data.message.appointment_type)
-				frappe.model.set_value(frm.doctype,frm.docname, "physician", data.message.physician)
-				frappe.model.set_value(frm.doctype,frm.docname, "invoice", data.message.sales_invoice)
-		    }
+			"method": "frappe.client.get",
+			args: {
+				doctype: "Patient Appointment",
+				name: frm.doc.appointment
+			},
+			callback: function (data) {
+				frappe.model.set_value(frm.doctype,frm.docname, "patient", data.message.patient);
+				frappe.model.set_value(frm.doctype,frm.docname, "type", data.message.appointment_type);
+				frappe.model.set_value(frm.doctype,frm.docname, "physician", data.message.physician);
+				frappe.model.set_value(frm.doctype,frm.docname, "invoice", data.message.sales_invoice);
+			}
 		})
 	}
 });

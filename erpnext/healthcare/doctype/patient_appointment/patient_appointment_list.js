@@ -3,4 +3,4 @@
 */
 frappe.listview_settings['Patient Appointment'] = {
 	filters: [["status", "=", "Open"]],
-}
+};

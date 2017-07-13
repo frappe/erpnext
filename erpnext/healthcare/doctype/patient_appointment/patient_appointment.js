@@ -6,32 +6,32 @@ frappe.ui.form.on('Patient Appointment', {
 		frm.set_query("patient", function () {
 			return {
 				filters: {"disabled": 0}
-			}
+			};
 		});
 		if(frappe.user.has_role("Physician")){
 			if(frm.doc.patient){
 				frm.add_custom_button(__('Medical Record'), function() {
-					frappe.route_options = {"patient": frm.doc.patient}
+					frappe.route_options = {"patient": frm.doc.patient};
 					frappe.set_route("medical_record");
-				 },__("View") );
+				},__("View"));
 			};
 			if(frm.doc.status == "Open"){
-				 frm.add_custom_button(__('Cancel'), function() {
-	 				btn_update_status(frm, "Cancelled");
-	 			 } );
+				frm.add_custom_button(__('Cancel'), function() {
+					btn_update_status(frm, "Cancelled");
+				});
 			};
 			if(frm.doc.status == "Scheduled" && !frm.doc.__islocal){
-				 frm.add_custom_button(__('Cancel'), function() {
-	 				btn_update_status(frm, "Cancelled");
-	 			 } );
+				frm.add_custom_button(__('Cancel'), function() {
+					btn_update_status(frm, "Cancelled");
+				});
 			};
 			if(frm.doc.status == "Pending"){
 				frm.add_custom_button(__('Set Open'), function() {
 					btn_update_status(frm, "Open");
-				 } );
-				 frm.add_custom_button(__('Cancel'), function() {
-	 				btn_update_status(frm, "Cancelled");
-	 			 } );
+				});
+				frm.add_custom_button(__('Cancel'), function() {
+					btn_update_status(frm, "Cancelled");
+				});
 			};
 		}
 
@@ -43,7 +43,7 @@ frappe.ui.form.on('Patient Appointment', {
 		if(!frm.doc.__islocal && (frappe.user.has_role("Nursing User")||frappe.user.has_role("Physician")) && frm.doc.status == "Open"){
 			frm.add_custom_button(__('Vital Signs'), function() {
 				btn_create_vital_signs(frm);
-			 },"Create");
+			},"Create");
 		}
 
 		if(!frm.doc.__islocal){
@@ -55,7 +55,7 @@ frappe.ui.form.on('Patient Appointment', {
 			else if(frm.doc.status != "Cancelled"){
 				frm.add_custom_button(__('Invoice'), function() {
 					btn_invoice_consultation(frm);
-				 },__("Create") );
+				},__("Create"));
 			}
 		};
 	},
@@ -78,7 +78,7 @@ frappe.ui.form.on('Patient Appointment', {
 				if(data.available_slots.length > 0) {
 					show_availability(data);
 				} else {
-					show_empty_state()
+					show_empty_state();
 				}
 			}
 		});
@@ -116,7 +116,7 @@ frappe.ui.form.on('Patient Appointment', {
 					data-name=${slot.from_time}
 					style="margin: 0 10px 10px 0; width: 72px">
 					${slot.from_time.substring(0, slot.from_time.length - 3)}
-				</button>`
+				</button>`;
 			}).join("");
 
 			$wrapper
@@ -131,7 +131,7 @@ frappe.ui.form.on('Patient Appointment', {
 						.find(`button[data-name="${slot.appointment_time}"]`)
 						.attr('disabled', true);
 				}
-			})
+			});
 
 			// blue button when clicked
 			$wrapper.on('click', 'button', function() {
@@ -171,12 +171,12 @@ var btn_create_consultation = function(frm){
 
 var btn_create_vital_signs = function (frm) {
 	if(!frm.doc.patient){
-		frappe.throw("Please select patient")
+		frappe.throw("Please select patient");
 	}
 	frappe.route_options = {
 		"patient": frm.doc.patient,
 	}
-	frappe.new_doc("Vital Signs")
+	frappe.new_doc("Vital Signs");
 }
 
 var btn_update_status = function(frm, status){
@@ -211,46 +211,44 @@ var btn_invoice_consultation = function(frm){
 	});
 }
 
-frappe.ui.form.on("Patient Appointment", "physician",
-    function(frm) {
+frappe.ui.form.on("Patient Appointment", "physician", function(frm) {
 	if(frm.doc.physician){
 		frappe.call({
-		    "method": "frappe.client.get",
-		    args: {
-		        doctype: "Physician",
-		        name: frm.doc.physician
-		    },
-		    callback: function (data) {
-				frappe.model.set_value(frm.doctype,frm.docname, "department",data.message.department)
-		    }
-		})
+			"method": "frappe.client.get",
+			args: {
+				doctype: "Physician",
+				name: frm.doc.physician
+			},
+			callback: function (data) {
+				frappe.model.set_value(frm.doctype,frm.docname, "department",data.message.department);
+			}
+		});
 	}
 });
 
-frappe.ui.form.on("Patient Appointment", "patient",
-    function(frm) {
-        if(frm.doc.patient){
+frappe.ui.form.on("Patient Appointment", "patient", function(frm) {
+	if(frm.doc.patient){
 		frappe.call({
-		    "method": "frappe.client.get",
-		    args: {
-		        doctype: "Patient",
-		        name: frm.doc.patient
-		    },
-		    callback: function (data) {
-					age = null
-					if(data.message.dob){
-						age = calculate_age(data.message.dob)
-					}
-					frappe.model.set_value(frm.doctype,frm.docname, "patient_age", age)
-		    }
-		})
+			"method": "frappe.client.get",
+			args: {
+				doctype: "Patient",
+				name: frm.doc.patient
+			},
+			callback: function (data) {
+				age = null;
+				if(data.message.dob){
+					age = calculate_age(data.message.dob);
+				}
+				frappe.model.set_value(frm.doctype,frm.docname, "patient_age", age);
+			}
+		});
 	}
 });
 
 var calculate_age = function(birth) {
-  ageMS = Date.parse(Date()) - Date.parse(birth);
-  age = new Date();
-  age.setTime(ageMS);
-  years =  age.getFullYear() - 1970
-  return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)"
+	ageMS = Date.parse(Date()) - Date.parse(birth);
+	age = new Date();
+	age.setTime(ageMS);
+	years =  age.getFullYear() - 1970;
+	return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)";
 }

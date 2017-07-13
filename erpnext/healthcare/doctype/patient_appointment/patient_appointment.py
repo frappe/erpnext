@@ -5,12 +5,10 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-import time, json
-from frappe.utils import getdate, get_time
-from frappe import msgprint, _
+import json
+from frappe.utils import getdate
+from frappe import _
 import datetime
-from datetime import timedelta
-import calendar
 from erpnext.setup.doctype.sms_settings.sms_settings import send_sms
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account
 

@@ -10,7 +10,7 @@ frappe.ui.form.on('Healthcare Settings', {
 					'account_type': 'Receivable',
 					'company': d.company,
 				}
-			}
+			};
 		});
 		frm.set_query('account', 'income_account', function(doc, cdt, cdn) {
 			var d  = locals[cdt][cdn];
@@ -19,7 +19,7 @@ frappe.ui.form.on('Healthcare Settings', {
 					'root_type': 'Income',
 					'company': d.company,
 				}
-			}
+			};
 		});
 	}
 });

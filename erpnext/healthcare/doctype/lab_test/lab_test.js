@@ -5,8 +5,7 @@ cur_frm.cscript.custom_refresh = function(doc) {
 	cur_frm.toggle_display("sb_sensitivity", doc.sensitivity_toggle=="1");
 	cur_frm.toggle_display("sb_special", doc.special_toggle=="1");
 	cur_frm.toggle_display("sb_normal", doc.normal_toggle=="1");
-}
-
+};
 
 frappe.ui.form.on('Lab Test', {
 	setup: function(frm) {
@@ -28,23 +27,20 @@ frappe.ui.form.on('Lab Test', {
 		if(!frm.doc.__islocal && !frm.doc.invoice){
 			frm.add_custom_button(__('Make Invoice'), function() {
 				make_invoice(frm);
-			 } );
+			});
 		}
 		if(frm.doc.__islocal){
 			frm.add_custom_button(__('Get from Consultation'), function () {
 				get_lab_test_prescribed(frm);
-			})
+			});
 		}
-		if(frm.doc.docstatus==1 && frm.doc.status!='Approved' &&
-		 		frm.doc.status!='Rejected' &&
-		    frappe.defaults.get_default("require_test_result_approval") &&
-			frappe.user.has_role("LabTest Approver")){
+		if(frm.doc.docstatus==1	&&	frm.doc.status!='Approved'	&&	frm.doc.status!='Rejected'	&&	frappe.defaults.get_default("require_test_result_approval")	&&	frappe.user.has_role("LabTest Approver")){
 			frm.add_custom_button(__('Approve'), function() {
 				status_update(1,frm);
-			 } );
-			 frm.add_custom_button(__('Reject'), function() {
- 				status_update(0,frm);
- 			 } );
+			});
+			frm.add_custom_button(__('Reject'), function() {
+				status_update(0,frm);
+			});
 		}
 		if(frm.doc.docstatus==1 && frm.doc.sms_sent==0){
 			frm.add_custom_button(__('Send SMS'), function() {
@@ -53,18 +49,18 @@ frappe.ui.form.on('Lab Test', {
 					args:{doc: frm.doc.name},
 					callback: function(r) {
 						if(!r.exc) {
-							emailed = r.message.emailed
-							printed = r.message.printed
+							emailed = r.message.emailed;
+							printed = r.message.printed;
 							make_dialog(frm, emailed, printed);
 						}
 					}
 				});
-			} );
+			});
 		}
 
 	},
 	onload: function (frm) {
-		frm.add_fetch("physician", "department", "department")
+		frm.add_fetch("physician", "department", "department");
 		if(frm.doc.employee){
 			frappe.call({
 				method: "frappe.client.get",
@@ -78,53 +74,52 @@ frappe.ui.form.on('Lab Test', {
 				}
 			})
 		}
-  },
+	}
 })
 
-frappe.ui.form.on("Lab Test", "patient",
-    function(frm) {
-        if(frm.doc.patient){
+frappe.ui.form.on("Lab Test", "patient", function(frm) {
+	if(frm.doc.patient){
 		frappe.call({
-				"method": "erpnext.healthcare.doctype.patient.patient.get_patient_detail",
-		    args: {
-		        patient: frm.doc.patient
-		    },
-		    callback: function (data) {
-					age = ""
-					if(data.message.dob){
-						age = calculate_age(data.message.dob)
-					}
-					frappe.model.set_value(frm.doctype,frm.docname, "patient_age", age)
-					frappe.model.set_value(frm.doctype,frm.docname, "patient_sex", data.message.sex)
-					frappe.model.set_value(frm.doctype,frm.docname, "email", data.message.email)
-					frappe.model.set_value(frm.doctype,frm.docname, "mobile", data.message.mobile)
-					frappe.model.set_value(frm.doctype,frm.docname, "report_preference", data.message.report_preference)
-		    }
+			"method": "erpnext.healthcare.doctype.patient.patient.get_patient_detail",
+			args: {
+				patient: frm.doc.patient
+			},
+			callback: function (data) {
+				age = null;
+				if(data.message.dob){
+					age = calculate_age(data.message.dob);
+				}
+				frappe.model.set_value(frm.doctype,frm.docname, "patient_age", age);
+				frappe.model.set_value(frm.doctype,frm.docname, "patient_sex", data.message.sex);
+				frappe.model.set_value(frm.doctype,frm.docname, "email", data.message.email);
+				frappe.model.set_value(frm.doctype,frm.docname, "mobile", data.message.mobile);
+				frappe.model.set_value(frm.doctype,frm.docname, "report_preference", data.message.report_preference);
+			}
 		})
 	}
 });
 
 frappe.ui.form.on('Normal Test Items', {
-    normal_test_items_remove: function(frm) {
-        msgprint("Not permitted, configure Lab Test Template as required");
-        cur_frm.reload_doc();
-    }
+	normal_test_items_remove: function(frm) {
+		msgprint("Not permitted, configure Lab Test Template as required");
+		cur_frm.reload_doc();
+	}
 });
 
 frappe.ui.form.on('Special Test Items', {
-    special_test_items_remove: function(frm) {
-			msgprint("Not permitted, configure Lab Test Template as required");
-        cur_frm.reload_doc();
-    }
+	special_test_items_remove: function(frm) {
+		msgprint("Not permitted, configure Lab Test Template as required");
+		cur_frm.reload_doc();
+	}
 });
 
 var status_update = function(approve,frm){
 	var doc = frm.doc;
 	if(approve == 1){
-		status = "Approved"
+		status = "Approved";
 	}
 	else {
-		status = "Rejected"
+		status = "Rejected";
 	}
 	frappe.call({
 		method: "erpnext.healthcare.doctype.lab_test.lab_test.update_status",
@@ -138,18 +133,18 @@ var status_update = function(approve,frm){
 var get_lab_test_prescribed = function(frm){
 	if(frm.doc.patient){
 		frappe.call({
-			method:
-			"erpnext.healthcare.doctype.lab_test.lab_test.get_lab_test_prescribed",
-			args: {patient: frm.doc.patient},
+			method:	"erpnext.healthcare.doctype.lab_test.lab_test.get_lab_test_prescribed",
+			args:	{patient: frm.doc.patient},
 			callback: function(r){
-				show_lab_tests(frm, r.message)
+				show_lab_tests(frm, r.message);
 			}
 		});
 	}
 	else{
-			msgprint("Please select Patient to get Lab Tests");
+		msgprint("Please select Patient to get Lab Tests");
 	}
 }
+
 var show_lab_tests = function(frm, result){
 	var d = new frappe.ui.Dialog({
 		title: __("Lab Test Prescriptions"),

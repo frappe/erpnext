@@ -29,4 +29,4 @@ frappe.query_reports["Lab Test Report"] = {
 			"options": "Medical Department"
 		}
 	]
-}
+};

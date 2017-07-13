@@ -2,15 +2,13 @@
 // License: ESS license.txt
 
 frappe.ui.form.on("Lab Test Template",{
-		//Refernce item.js Ln90
-		test_name: function(frm) {
+	test_name: function(frm) {
 		if(!frm.doc.test_code)
-			frm.set_value("test_code", frm.doc.test_name);
+		frm.set_value("test_code", frm.doc.test_name);
 		if(!frm.doc.test_description)
-			frm.set_value("test_description", frm.doc.test_name);
+		frm.set_value("test_description", frm.doc.test_name);
 	}
-}
-)
+});
 
 cur_frm.cscript.custom_refresh = function(doc) {
 	cur_frm.set_df_property("test_code", "read_only", doc.__islocal ? 0 : 1);
@@ -30,7 +28,7 @@ cur_frm.cscript.custom_refresh = function(doc) {
 			} );
 		}
 	}
-}
+};
 
 var disable_template = function(frm){
 	var doc = frm.doc;
@@ -57,53 +55,53 @@ var enable_template = function(frm){
 
 var change_template_code = function(frm,doc){
 	var d = new frappe.ui.Dialog({
-			title:__("Change Template Code"),
-			fields:[
-				{
-					"fieldtype": "Data",
-					"label": "Test Template Code",
-					"fieldname": "Test Code",
-					reqd:1
-				},
-				{
-					"fieldtype": "Button",
-					"label": __("Change Code"),
-					click: function() {
-						var values = d.get_values();
-						if(!values)
-							return;
-						change_test_code_from_template(values["Test Code"],doc);
-						d.hide();
-					}
+		title:__("Change Template Code"),
+		fields:[
+			{
+				"fieldtype": "Data",
+				"label": "Test Template Code",
+				"fieldname": "Test Code",
+				reqd:1
+			},
+			{
+				"fieldtype": "Button",
+				"label": __("Change Code"),
+				click: function() {
+					var values = d.get_values();
+					if(!values)
+					return;
+					change_test_code_from_template(values["Test Code"],doc);
+					d.hide();
 				}
-			]
-		})
-		d.show();
-		d.set_values({
-			'Test Code': doc.test_code
-		})
+			}
+		]
+	});
+	d.show();
+	d.set_values({
+		'Test Code': doc.test_code
+	})
 
-		var change_test_code_from_template = function(test_code,doc){
-			frappe.call({
-				"method": "erpnext.healthcare.doctype.lab_test_template.lab_test_template.change_test_code_from_template",
-				"args": {test_code: test_code, doc: doc},
-			    callback: function (data) {
+	var change_test_code_from_template = function(test_code,doc){
+		frappe.call({
+			"method": "erpnext.healthcare.doctype.lab_test_template.lab_test_template.change_test_code_from_template",
+			"args": {test_code: test_code, doc: doc},
+			callback: function (data) {
 				frappe.set_route("Form", "Lab Test Template", data.message);
-			    }
-			})
-		}
+			}
+		})
+	}
 
 }
 
 
-//Restrict Special, Grouped type templates in Child TestGroups
+// Restrict Special, Grouped type templates in Child TestGroups
 me.frm.set_query("test_template", "test_groups", function(doc, cdt, cdn) {
-		return {
-			filters: {
-				test_template_type:['in',['Single','Compound']]
-			}
-		};
-	});
+	return {
+		filters: {
+			test_template_type:['in',['Single','Compound']]
+		}
+	};
+});
 
 frappe.ui.form.on("Lab Test Template", "test_name", function(frm,cdt,cdn){
 
@@ -129,7 +127,7 @@ frappe.ui.form.on("Lab Test Template", "test_description", function(frm,cdt,cdn)
 frappe.ui.form.on("Lab Test Groups", "template_or_new_line", function (frm, cdt, cdn) {
 	var child = locals[cdt][cdn];
 	if(child.template_or_new_line =="Add new line"){
-		frappe.model.set_value(cdt, cdn, 'test_template', "")
-		frappe.model.set_value(cdt, cdn, 'test_description', "")
+		frappe.model.set_value(cdt, cdn, 'test_template', "");
+		frappe.model.set_value(cdt, cdn, 'test_description', "");
 	}
 });

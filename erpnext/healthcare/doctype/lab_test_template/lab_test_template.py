@@ -29,7 +29,7 @@ class LabTestTemplate(Document):
 		if(self.item):
 			try:
 				frappe.delete_doc("Item",self.item)
-			except Exception, e:
+			except Exception:
 				frappe.throw("""Not permitted. Please disable the Test Template""")
 
 

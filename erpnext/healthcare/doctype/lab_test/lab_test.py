@@ -5,9 +5,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-import time, json
-from frappe.utils import cstr, getdate, get_time, math
-from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account
+import json
+from frappe.utils import getdate, get_time, math
+from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account
 from frappe import _
 
 class LabTest(Document):

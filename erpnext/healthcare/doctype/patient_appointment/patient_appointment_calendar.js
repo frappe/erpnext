@@ -41,4 +41,4 @@ frappe.views.calendar["Patient Appointment"] = {
 			'label': __('Status')
 		}
 	]
-}
+};
