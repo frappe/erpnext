@@ -23,12 +23,14 @@ def execute(filters=None):
 		filters['periodicity'] = 'Daily'
 
 	columns = get_columns()
-	data = get_data(filters)
-	return columns, data
+	data, timeslot_wise_count = get_data(filters)
+	chart = get_chartdata(timeslot_wise_count)
+	return columns, data, None, chart
 
 def get_data(filters):
 	start_date = getdate(filters.from_date)
 	data = []
+	time_slot_wise_total_count = {}
 	while(start_date <= getdate(filters.to_date)):
 		hours_count = {'date': start_date}
 		for key, value in time_slots.items():
@@ -36,13 +38,14 @@ def get_data(filters):
 			start_time = get_datetime("{0} {1}".format(start_date.strftime("%Y-%m-%d"), start_time))
 			end_time = get_datetime("{0} {1}".format(start_date.strftime("%Y-%m-%d"), end_time))
 			hours_count[key] = get_hours_count(start_time, end_time)
+			time_slot_wise_total_count[key] = time_slot_wise_total_count.get(key, 0) + hours_count[key]
 
 		if hours_count:
 			data.append(hours_count)
 
 		start_date = add_to_date(start_date, days=1)
 
-	return data
+	return data, time_slot_wise_total_count
 
 def get_hours_count(start_time, end_time):
 	data = frappe.db.sql(""" select count(*) from `tabIssue` where creation
@@ -71,3 +74,24 @@ def get_columns():
 		})
 
 	return columns
+
+def get_chartdata(timeslot_wise_count):
+	x_interval = ['x']
+	total_count = ['Total']
+	timeslots = ['12AM - 3AM', '3AM - 6AM', '6AM - 9AM',
+		'9AM - 12PM', '12PM - 3PM', '3PM - 6PM', '6PM - 9PM', '9PM - 12AM']
+
+	x_interval.extend(timeslots)
+	columns = [x_interval]
+	for data in timeslots:
+		total_count.append(timeslot_wise_count.get(data, 0))
+	columns.append(total_count)
+
+	chart = {
+		"data": {
+			'x': 'x',
+			'columns': columns
+		}
+	}
+	chart["chart_type"] = "line"
+	return chart
