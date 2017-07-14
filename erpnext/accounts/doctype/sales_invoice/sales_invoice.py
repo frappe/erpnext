@@ -83,10 +83,10 @@ class SalesInvoice(SellingController):
 
 		if not self.is_opening:
 			self.is_opening = 'No'
-			
+
 		if self._action != 'submit' and self.update_stock and not self.is_return:
 			set_batch_nos(self, 'warehouse', True)
-			
+
 
 		self.set_against_income_account()
 		self.validate_c_form()
@@ -98,7 +98,7 @@ class SalesInvoice(SellingController):
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
 		self.set_status()
-	
+
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
 
@@ -138,6 +138,7 @@ class SalesInvoice(SellingController):
 			self.update_against_document_in_jv()
 
 		self.update_time_sheet(self.name)
+		update_company_monthly_sales(self.company)
 
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:
@@ -816,7 +817,7 @@ class SalesInvoice(SellingController):
 		self.validate_serial_against_sales_invoice()
 
 	def validate_serial_against_delivery_note(self):
-		""" 
+		"""
 			validate if the serial numbers in Sales Invoice Items are same as in
 			Delivery Note Item
 		"""
@@ -918,6 +919,27 @@ def make_delivery_note(source_name, target_doc=None):
 
 	return doclist
 
+def update_company_monthly_sales(company):
+	from frappe.utils import today, formatdate
+	current_month_year = formatdate(today(), "MM-yyyy")
+
+	results = frappe.db.sql(('''
+		select
+			sum(grand_total) as total, date_format(creation, '%m-%Y') as month_year
+		from
+			`tabSales Invoice`
+		where
+			date_format(creation, '%m-%Y')="{0}" and
+			company = "{1}"
+		group by
+			month_year;
+	''').format(current_month_year, company), as_dict = True)
+
+	monthly_total = results[0]['total'] if len(results) > 0 else 0
+
+	frappe.db.sql(('''
+		update tabCompany set total_monthly_sales = {0} where name="{1}";
+	''').format(monthly_total, company))
 
 @frappe.whitelist()
 def make_sales_return(source_name, target_doc=None):

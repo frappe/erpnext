@@ -147,7 +147,7 @@ class Company(Document):
 	def validate_perpetual_inventory(self):
 		if not self.get("__islocal"):
 			if cint(self.enable_perpetual_inventory) == 1 and not self.default_inventory_account:
-				frappe.msgprint(_("Set default inventory account for perpetual inventory"), 
+				frappe.msgprint(_("Set default inventory account for perpetual inventory"),
 					alert=True, indicator='orange')
 
 	def set_default_accounts(self):
@@ -310,3 +310,12 @@ def get_name_with_abbr(name, company):
 		parts.append(company_abbr)
 
 	return " - ".join(parts)
+
+def cache_companies_monthly_sales_history():
+	'''Cache past year monthly sales of every company based on sales invoices'''
+	from frappe.utils.goal import get_monthly_results
+	companies = [d['name'] for d in frappe.get_list("Company")]
+	for company in companies:
+		filter_str = 'company = "_Test Company" and status != "Draft"'
+		month_to_value_dict = get_monthly_results("Sales Invoice", "grand_total", filter_str, "sum")
+		frappe.cache().hget("month_to_value_dict:Sales Invoice", "Company:" + company, month_to_value_dict)
