@@ -138,7 +138,8 @@ class SalesInvoice(SellingController):
 			self.update_against_document_in_jv()
 
 		self.update_time_sheet(self.name)
-		update_company_monthly_sales(self.company)
+
+		frappe.enqueue('erpnext.setup.doctype.company.company.update_company_current_month_sales', company=self.company)
 
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:
@@ -918,28 +919,6 @@ def make_delivery_note(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
-
-def update_company_monthly_sales(company):
-	from frappe.utils import today, formatdate
-	current_month_year = formatdate(today(), "MM-yyyy")
-
-	results = frappe.db.sql(('''
-		select
-			sum(grand_total) as total, date_format(creation, '%m-%Y') as month_year
-		from
-			`tabSales Invoice`
-		where
-			date_format(creation, '%m-%Y')="{0}" and
-			company = "{1}"
-		group by
-			month_year;
-	''').format(current_month_year, company), as_dict = True)
-
-	monthly_total = results[0]['total'] if len(results) > 0 else 0
-
-	frappe.db.sql(('''
-		update tabCompany set total_monthly_sales = {0} where name="{1}";
-	''').format(monthly_total, company))
 
 @frappe.whitelist()
 def make_sales_return(source_name, target_doc=None):
