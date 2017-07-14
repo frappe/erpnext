@@ -27,6 +27,10 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 			return;
 		}
 
+		if(!d.expense_type) {
+			return;
+		}
+
 		return frappe.call({
 			method: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_claim_account",
 			args: {
