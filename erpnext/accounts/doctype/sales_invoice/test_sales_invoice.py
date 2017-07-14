@@ -1105,10 +1105,41 @@ class TestSalesInvoice(unittest.TestCase):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 
-	def test_item_wise_tax_breakup(self):
+	def test_item_wise_tax_breakup_india(self):
+		frappe.db.set_value("Company", "_Test Company", "country", "India")
+		
+		si = self.create_si_to_test_tax_breakup()
+
+		tax_breakup_html = '''<div class="tax-break-up" style="overflow-x: auto;">\n\t<table class="table table-bordered table-hover">\n\t\t<thead>\n\t\t\t<tr>\n\t\t\t\t\n\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t<th class="text-left" style="min-width: 120px;">HSN/SAC</th>\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t<th class="text-right" style="min-width: 80px;">Taxable Amount</th>\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t<th class="text-right" style="min-width: 80px;">Service Tax</th>\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\n\t\t\t</tr>\n\t\t</thead>\n\t\t<tbody>\n\t\t\t\n\t\t\t\t<tr>\n\t\t\t\t\t<td>999800</td>\n\t\t\t\t\t<td class="text-right">\n\t\t\t\t\t\t\u20b9 15,000.00\n\t\t\t\t\t</td>\n\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\t<td class="text-right">\n\t\t\t\t\t\t\t\t(10.0)\n\t\t\t\t\t\t\t\t\u20b9 1,500.00\n\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t</tr>\n\t\t\t\n\t\t</tbody>\n\t</table>\n</div>'''
+		
+		self.assertEqual(si.other_charges_calculation, tax_breakup_html)
+
+	def test_item_wise_tax_breakup_outside_india(self):
+		frappe.db.set_value("Company", "_Test Company", "country", "United States")
+		
+		si = self.create_si_to_test_tax_breakup()
+
+		tax_breakup_html = '''<div class="tax-break-up" style="overflow-x: auto;">\n\t<table class="table table-bordered table-hover">\n\t\t<thead>\n\t\t\t<tr>\n\t\t\t\t\n\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t<th class="text-left" style="min-width: 120px;">Item</th>\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t<th class="text-right" style="min-width: 80px;">Taxable Amount</th>\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t<th class="text-right" style="min-width: 80px;">Service Tax</th>\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\n\t\t\t</tr>\n\t\t</thead>\n\t\t<tbody>\n\t\t\t\n\t\t\t\t<tr>\n\t\t\t\t\t<td>_Test Item</td>\n\t\t\t\t\t<td class="text-right">\n\t\t\t\t\t\t\u20b9 10,000.00\n\t\t\t\t\t</td>\n\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\t<td class="text-right">\n\t\t\t\t\t\t\t\t(10.0)\n\t\t\t\t\t\t\t\t\u20b9 1,000.00\n\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t</tr>\n\t\t\t\n\t\t\t\t<tr>\n\t\t\t\t\t<td>_Test Item 2</td>\n\t\t\t\t\t<td class="text-right">\n\t\t\t\t\t\t\u20b9 5,000.00\n\t\t\t\t\t</td>\n\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\t<td class="text-right">\n\t\t\t\t\t\t\t\t(10.0)\n\t\t\t\t\t\t\t\t\u20b9 500.00\n\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t</tr>\n\t\t\t\n\t\t</tbody>\n\t</table>\n</div>'''
+		
+		self.assertEqual(si.other_charges_calculation, tax_breakup_html)
+		
+		frappe.db.set_value("Company", "_Test Company", "country", "India")
+
+	def create_si_to_test_tax_breakup(self):
 		si = create_sales_invoice(qty=100, rate=50, do_not_save=True)
 		si.append("items", {
 			"item_code": "_Test Item",
+			"gst_hsn_code": "999800",
+			"warehouse": "_Test Warehouse - _TC",
+			"qty": 100,
+			"rate": 50,
+			"income_account": "Sales - _TC",
+			"expense_account": "Cost of Goods Sold - _TC",
+			"cost_center": "_Test Cost Center - _TC"
+		})
+		si.append("items", {
+			"item_code": "_Test Item 2",
+			"gst_hsn_code": "999800",
 			"warehouse": "_Test Warehouse - _TC",
 			"qty": 100,
 			"rate": 50,
@@ -1125,11 +1156,8 @@ class TestSalesInvoice(unittest.TestCase):
 			"rate": 10
 		})
 		si.insert()
-
-		tax_breakup_html = '''\n<div class="tax-break-up" style="overflow-x: auto;">\n\t<table class="table table-bordered table-hover">\n\t\t<thead><tr><th class="text-left" style="min-width: 120px;">Item Name</th><th class="text-right" style="min-width: 80px;">Taxable Amount</th><th class="text-right" style="min-width: 80px;">_Test Account Service Tax - _TC</th></tr></thead>\n\t\t<tbody><tr><td>_Test Item</td><td class="text-right">\u20b9 10,000.00</td><td class="text-right">(10.0%) \u20b9 1,000.00</td></tr></tbody>\n\t</table>\n</div>'''
 		
-		self.assertEqual(si.other_charges_calculation, tax_breakup_html)
-		
+		return si
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
@@ -1150,6 +1178,7 @@ def create_sales_invoice(**args):
 
 	si.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
+		"gst_hsn_code": "999800",
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"qty": args.qty or 1,
 		"rate": args.rate or 100,
