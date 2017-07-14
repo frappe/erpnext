@@ -100,7 +100,7 @@ var create_medical_record = function (frm) {
 		"status": "Open",
 		"reference_doctype": "Patient Medical Record",
 		"reference_owner": frm.doc.owner
-	}
+	};
 	frappe.new_doc("Patient Medical Record");
 };
 
@@ -110,7 +110,7 @@ var btn_create_vital_signs = function (frm) {
 	}
 	frappe.route_options = {
 		"patient": frm.doc.patient,
-	}
+	};
 	frappe.new_doc("Vital Signs");
 };
 
@@ -230,7 +230,7 @@ frappe.ui.form.on("Consultation", "patient", function(frm) {
 				patient: frm.doc.patient
 			},
 			callback: function (data) {
-				var age = ""
+				var age = "";
 				if(data.message.dob){
 					age = calculate_age(data.message.dob);
 				}
@@ -320,4 +320,4 @@ var calculate_age = function(birth) {
 	age.setTime(ageMS);
 	var years =  age.getFullYear() - 1970;
 	return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)";
-}
+};

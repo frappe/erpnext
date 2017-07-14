@@ -254,7 +254,7 @@ var make_dialog = function(frm, emailed, printed) {
 			send_sms(values,frm);
 			dialog.hide();
 		}
-	})
+	});
 	if(frm.doc.report_preference == "Email"){
 		dialog.set_values({
 			'sms_type': "Emailed",
@@ -285,7 +285,7 @@ var make_dialog = function(frm, emailed, printed) {
 			fd.messages_label.html("Message".bold());
 			fd.messages.html(printed);
 		}
-	})
+	});
 	dialog.show();
 };
 
