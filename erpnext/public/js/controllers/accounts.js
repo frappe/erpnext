@@ -94,6 +94,10 @@ var get_payment_mode_account = function(frm, mode_of_payment, callback) {
 		frappe.throw(__("Please select the Company first"));
 	}
 
+	if(!mode_of_payment) {
+		return;
+	}
+
 	return  frappe.call({
 		method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
 		args: {
