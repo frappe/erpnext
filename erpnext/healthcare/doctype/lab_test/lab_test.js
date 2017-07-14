@@ -49,8 +49,8 @@ frappe.ui.form.on('Lab Test', {
 					args:{doc: frm.doc.name},
 					callback: function(r) {
 						if(!r.exc) {
-							emailed = r.message.emailed;
-							printed = r.message.printed;
+							var emailed = r.message.emailed;
+							var printed = r.message.printed;
 							make_dialog(frm, emailed, printed);
 						}
 					}
@@ -72,7 +72,7 @@ frappe.ui.form.on('Lab Test', {
 					frappe.model.set_value(frm.doctype,frm.docname,"employee_name", arg.message.employee_name);
 					frappe.model.set_value(frm.doctype,frm.docname,"employee_designation", arg.message.designation);
 				}
-			})
+			});
 		}
 	}
 })
@@ -85,7 +85,7 @@ frappe.ui.form.on("Lab Test", "patient", function(frm) {
 				patient: frm.doc.patient
 			},
 			callback: function (data) {
-				age = null;
+				var age = null;
 				if(data.message.dob){
 					age = calculate_age(data.message.dob);
 				}
@@ -95,7 +95,7 @@ frappe.ui.form.on("Lab Test", "patient", function(frm) {
 				frappe.model.set_value(frm.doctype,frm.docname, "mobile", data.message.mobile);
 				frappe.model.set_value(frm.doctype,frm.docname, "report_preference", data.message.report_preference);
 			}
-		})
+		});
 	}
 });
 
@@ -128,7 +128,7 @@ var status_update = function(approve,frm){
 			cur_frm.reload_doc();
 		}
 	});
-}
+};
 
 var get_lab_test_prescribed = function(frm){
 	if(frm.doc.patient){
@@ -143,7 +143,7 @@ var get_lab_test_prescribed = function(frm){
 	else{
 		msgprint("Please select Patient to get Lab Tests");
 	}
-}
+};
 
 var show_lab_tests = function(frm, result){
 	var d = new frappe.ui.Dialog({
@@ -186,9 +186,9 @@ var show_lab_tests = function(frm, result){
 			d.hide();
 			return false;
 		});
-	})
+	});
 	if(!result){
-		var msg = "There are no Lab Test prescribed for "+frm.doc.patient
+		var msg = "There are no Lab Test prescribed for "+frm.doc.patient;
 		$(repl('<div class="col-xs-12" style="padding-top:20px;" >%(msg)s</div></div>', {msg: msg})).appendTo(html_field);
 	}
 	d.show();
@@ -202,8 +202,8 @@ var make_invoice = function(frm){
 		callback: function(r){
 			if(!r.exc){
 				if(r.message){
-					/*frappe.show_alert(__('Sales Invoice {0} created',
-						['<a href="#Form/Sales Invoice/'+r.message+'">' + r.message+ '</a>']));*/
+					/*	frappe.show_alert(__('Sales Invoice {0} created',
+					['<a href="#Form/Sales Invoice/'+r.message+'">' + r.message+ '</a>']));	*/
 					frappe.set_route("Form", "Sales Invoice", r.message);
 				}
 				cur_frm.reload_doc();
@@ -214,24 +214,22 @@ var make_invoice = function(frm){
 
 cur_frm.cscript.custom_before_submit =  function(doc) {
 	if(doc.normal_test_items){
-		for(result in doc.normal_test_items){
-			if(!doc.normal_test_items[result].result_value &&
-					doc.normal_test_items[result].require_result_value == 1){
+		for(var result in doc.normal_test_items){
+			if(!doc.normal_test_items[result].result_value	&&	doc.normal_test_items[result].require_result_value == 1){
 				msgprint("Please input all required Result Value(s)");
 				throw("Error");
 			}
 		}
 	}
 	if(doc.special_test_items){
-		for(result in doc.special_test_items){
-			if(!doc.special_test_items[result].result_value &&
-					doc.special_test_items[result].require_result_value == 1){
-				msgprint("Please input all required Result Value(s)")
+		for(var result in doc.special_test_items){
+			if(!doc.special_test_items[result].result_value	&&	doc.special_test_items[result].require_result_value == 1){
+				msgprint("Please input all required Result Value(s)");
 				throw("Error");
 			}
 		}
 	}
-}
+};
 
 var make_dialog = function(frm, emailed, printed) {
 	var number = frm.doc.mobile;
@@ -241,35 +239,35 @@ var make_dialog = function(frm, emailed, printed) {
 		width: 400,
 		fields: [
 			{fieldname:'sms_type', fieldtype:'Select', label:'Type', options:
-				['Emailed','Printed']},
+			['Emailed','Printed']},
 			{fieldname:'number', fieldtype:'Data', label:'Mobile Number', reqd:1},
 			{fieldname:'messages_label', fieldtype:'HTML'},
 			{fieldname:'messages', fieldtype:'HTML', reqd:1}
 		],
 		primary_action_label: __("Send"),
 		primary_action : function(){
-				var values = dialog.fields_dict;
-				if(!values){
-					return;
-				}
-				send_sms(values,frm);
-				dialog.hide();
+			var values = dialog.fields_dict;
+			if(!values){
+				return;
 			}
+			send_sms(values,frm);
+			dialog.hide();
+		}
 	})
 	if(frm.doc.report_preference == "Email"){
 		dialog.set_values({
 			'sms_type': "Emailed",
 			'number': number
-		})
-		dialog.fields_dict.messages_label.html("Message".bold())
-		dialog.fields_dict.messages.html(emailed)
+		});
+		dialog.fields_dict.messages_label.html("Message".bold());
+		dialog.fields_dict.messages.html(emailed);
 	}else{
 		dialog.set_values({
 			'sms_type': "Printed",
 			'number': number
-		})
-		dialog.fields_dict.messages_label.html("Message".bold())
-		dialog.fields_dict.messages.html(printed)
+		});
+		dialog.fields_dict.messages_label.html("Message".bold());
+		dialog.fields_dict.messages.html(printed);
 	}
 	var fd = dialog.fields_dict;
 	$(fd.sms_type.input).change(function(){
@@ -277,14 +275,14 @@ var make_dialog = function(frm, emailed, printed) {
 			dialog.set_values({
 				'number': number
 			});
-			fd.messages_label.html("Message".bold())
-			fd.messages.html(emailed)
+			fd.messages_label.html("Message".bold());
+			fd.messages.html(emailed);
 		}else{
 			dialog.set_values({
 				'number': number
-			})
-			fd.messages_label.html("Message".bold())
-			fd.messages.html(printed)
+			});
+			fd.messages_label.html("Message".bold());
+			fd.messages.html(printed);
 		}
 	})
 	dialog.show();
@@ -292,8 +290,8 @@ var make_dialog = function(frm, emailed, printed) {
 
 var send_sms = function(v,frm){
 	var doc = frm.doc;
-	number = v.number.last_value
-	messages = v.messages.wrapper.innerText
+	var number = v.number.last_value;
+	var messages = v.messages.wrapper.innerText;
 	frappe.call({
 		method: "erpnext.setup.doctype.sms_settings.sms_settings.send_sms",
 		args: {
@@ -316,9 +314,9 @@ var send_sms = function(v,frm){
 }
 
 var calculate_age = function(birth) {
-  ageMS = Date.parse(Date()) - Date.parse(birth);
-  age = new Date();
-  age.setTime(ageMS);
-  years =  age.getFullYear() - 1970
-  return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)"
+	var	ageMS = Date.parse(Date()) - Date.parse(birth);
+	var	age = new Date();
+	age.setTime(ageMS);
+	var	years =  age.getFullYear() - 1970;
+	return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)";
 }

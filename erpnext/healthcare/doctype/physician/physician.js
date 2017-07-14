@@ -35,7 +35,7 @@ frappe.ui.form.on("Physician", "user_id",function(frm) {
 						function(data) {
 							if(data)
 								frappe.model.set_value(frm.doctype,frm.docname, "employee", data.name);
-						})
+						});
 				}
 				if(!frm.doc.first_name)
 					frappe.model.set_value(frm.doctype,frm.docname, "first_name", data.message.first_name);

@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, cstr, getdate, get_time
+from frappe.utils import cint, cstr, getdate
 import dateutil
 from frappe.model.naming import make_autoname
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account,send_registration_sms

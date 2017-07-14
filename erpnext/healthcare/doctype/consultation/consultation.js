@@ -23,7 +23,7 @@ frappe.ui.form.on('Consultation', {
 					patient: frm.doc.patient
 				},
 				callback: function (data) {
-					age = null;
+					var age = null;
 					if(data.message.dob){
 						age = calculate_age(data.message.dob);
 					}
@@ -55,7 +55,7 @@ frappe.ui.form.on('Consultation', {
 		frm.set_query("patient", function () {
 			return {
 				filters: {"disabled": 0}
-			}
+			};
 		});
 		if(!frm.doc.__islocal && !frm.doc.invoice){
 			frm.add_custom_button(__('Invoice'), function() {
@@ -106,7 +106,7 @@ var create_medical_record = function (frm) {
 
 var btn_create_vital_signs = function (frm) {
 	if(!frm.doc.patient){
-		frappe.throw("Please select patient")
+		frappe.throw("Please select patient");
 	}
 	frappe.route_options = {
 		"patient": frm.doc.patient,
@@ -116,7 +116,7 @@ var btn_create_vital_signs = function (frm) {
 
 var show_details = function(data){
 	var personal_details = "";
-	age = null;
+	var age = null;
 	if(data.dob){
 		age = calculate_age(data.dob);
 		personal_details += "<br><b>Age :</b> " + age;
@@ -180,144 +180,146 @@ frappe.ui.form.on("Consultation", "appointment", function(frm){
 				frappe.model.set_value(frm.doctype,frm.docname, "physician", data.message.physician);
 				frappe.model.set_value(frm.doctype,frm.docname, "invoice", data.message.sales_invoice);
 			}
-		})
+		});
 	}
 });
 
 frappe.ui.form.on("Consultation", "physician",
-    function(frm) {
+function(frm) {
 	if(frm.doc.physician){
 		frappe.call({
-		    "method": "frappe.client.get",
-		    args: {
-		        doctype: "Physician",
-		        name: frm.doc.physician
-		    },
-		    callback: function (data) {
-				frappe.model.set_value(frm.doctype,frm.docname, "visit_department",data.message.department)
-		    }
-		})
+			"method": "frappe.client.get",
+			args: {
+				doctype: "Physician",
+				name: frm.doc.physician
+			},
+			callback: function (data) {
+				frappe.model.set_value(frm.doctype,frm.docname, "visit_department",data.message.department);
+			}
+		});
 	}
 });
 
 frappe.ui.form.on("Consultation", "symptoms_select", function(frm) {
 	if(frm.doc.symptoms_select){
+		var symptoms = null;
 		if(frm.doc.symptoms)
-			symptoms = frm.doc.symptoms + "\n" +frm.doc.symptoms_select
+			symptoms = frm.doc.symptoms + "\n" +frm.doc.symptoms_select;
 		else
-			symptoms = frm.doc.symptoms_select
-		frappe.model.set_value(frm.doctype,frm.docname, "symptoms", symptoms)
-		frappe.model.set_value(frm.doctype,frm.docname, "symptoms_select", null)
+			symptoms = frm.doc.symptoms_select;
+		frappe.model.set_value(frm.doctype,frm.docname, "symptoms", symptoms);
+		frappe.model.set_value(frm.doctype,frm.docname, "symptoms_select", null);
 	}
 });
 frappe.ui.form.on("Consultation", "diagnosis_select", function(frm) {
 	if(frm.doc.diagnosis_select){
+		var diagnosis = null;
 		if(frm.doc.diagnosis)
-			diagnosis = frm.doc.diagnosis + "\n" +frm.doc.diagnosis_select
+			diagnosis = frm.doc.diagnosis + "\n" +frm.doc.diagnosis_select;
 		else
-			diagnosis = frm.doc.diagnosis_select
-		frappe.model.set_value(frm.doctype,frm.docname, "diagnosis", diagnosis)
-		frappe.model.set_value(frm.doctype,frm.docname, "diagnosis_select", null)
+			diagnosis = frm.doc.diagnosis_select;
+		frappe.model.set_value(frm.doctype,frm.docname, "diagnosis", diagnosis);
+		frappe.model.set_value(frm.doctype,frm.docname, "diagnosis_select", null);
 	}
 });
 
 frappe.ui.form.on("Consultation", "patient",
-    function(frm) {
-        if(frm.doc.patient){
+function(frm) {
+	if(frm.doc.patient){
 		frappe.call({
-				"method": "erpnext.healthcare.doctype.patient.patient.get_patient_detail",
-		    args: {
-		        patient: frm.doc.patient
-		    },
-		    callback: function (data) {
-					age = ""
-					if(data.message.dob){
-						age = calculate_age(data.message.dob)
-					}
-					frappe.model.set_value(frm.doctype,frm.docname, "patient_age", age)
-					frappe.model.set_value(frm.doctype,frm.docname, "patient_sex", data.message.sex)
-					if(frm.doc.__islocal) show_details(data.message);
-		    }
-		})
+			"method": "erpnext.healthcare.doctype.patient.patient.get_patient_detail",
+			args: {
+				patient: frm.doc.patient
+			},
+			callback: function (data) {
+				var age = ""
+				if(data.message.dob){
+					age = calculate_age(data.message.dob);
+				}
+				frappe.model.set_value(frm.doctype,frm.docname, "patient_age", age);
+				frappe.model.set_value(frm.doctype,frm.docname, "patient_sex", data.message.sex);
+				if(frm.doc.__islocal) show_details(data.message);
+			}
+		});
 	}
 });
 
 me.frm.set_query("drug_code", "drug_prescription", function(doc, cdt, cdn) {
-		return {
-			filters: {
-				is_stock_item:'1'
-			}
-		};
-	});
+	return {
+		filters: {
+			is_stock_item:'1'
+		}
+	};
+});
 
 me.frm.set_query("test_code", "test_prescription", function(doc, cdt, cdn) {
-		return {
-			filters: {
-				is_billable:'1'
-			}
-		};
-	});
+	return {
+		filters: {
+			is_billable:'1'
+		}
+	};
+});
 
 me.frm.set_query("medical_code", "codification_table", function(doc, cdt, cdn) {
-		return {
-			filters: {
-				medical_code_standard: frappe.defaults.get_default("default_medical_code_standard")
-			}
-		};
-	});
+	return {
+		filters: {
+			medical_code_standard: frappe.defaults.get_default("default_medical_code_standard")
+		}
+	};
+});
 
 frappe.ui.form.on("Drug Prescription", {
 	drug_code:  function(frm, cdt, cdn) {
-		var child = locals[cdt][cdn]
+		var child = locals[cdt][cdn];
 		if(child.drug_code){
 			frappe.call({
 				"method": "frappe.client.get",
 				args: {
-				    doctype: "Item",
-				    name: child.drug_code,
+					doctype: "Item",
+					name: child.drug_code,
 				},
 				callback: function (data) {
-				frappe.model.set_value(cdt, cdn, 'drug_name',data.message.item_name)
+					frappe.model.set_value(cdt, cdn, 'drug_name',data.message.item_name);
 				}
-			})
+			});
 		}
 	},
 	dosage: function(frm, cdt, cdn){
-		frappe.model.set_value(cdt, cdn, 'update_schedule', 1)
-		var child = locals[cdt][cdn]
+		frappe.model.set_value(cdt, cdn, 'update_schedule', 1);
+		var child = locals[cdt][cdn];
 		if(child.dosage){
-			frappe.model.set_value(cdt, cdn, 'in_every', 'Day')
-			frappe.model.set_value(cdt, cdn, 'interval', 1)
+			frappe.model.set_value(cdt, cdn, 'in_every', 'Day');
+			frappe.model.set_value(cdt, cdn, 'interval', 1);
 		}
 	},
 	period: function(frm, cdt, cdn){
-		frappe.model.set_value(cdt, cdn, 'update_schedule', 1)
+		frappe.model.set_value(cdt, cdn, 'update_schedule', 1);
 	},
 	in_every: function(frm, cdt, cdn){
-		frappe.model.set_value(cdt, cdn, 'update_schedule', 1)
-		var child = locals[cdt][cdn]
+		frappe.model.set_value(cdt, cdn, 'update_schedule', 1);
+		var child = locals[cdt][cdn];
 		if(child.in_every == "Hour"){
-			frappe.model.set_value(cdt, cdn, 'dosage', null)
+			frappe.model.set_value(cdt, cdn, 'dosage', null);
 		}
 	}
 });
 
 me.frm.set_query("appointment", function(doc, cdt, cdn) {
-		return {
-			filters: {
-				//Scheduled filter for demo ...
-				status:['in',["Open","Scheduled"]],
-				//Commented for demo ..
-				//physician: doc.physician
-			}
-		};
-	});
+	return {
+		filters: {
+			//	Scheduled filter for demo ...
+			status:['in',["Open","Scheduled"]],
+			//	Commented for demo ..
+			//	physician: doc.physician
+		}
+	};
+});
 
 
 var calculate_age = function(birth) {
-  ageMS = Date.parse(Date()) - Date.parse(birth);
-  age = new Date();
-  age.setTime(ageMS);
-  years =  age.getFullYear() - 1970
-  return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)"
+	ageMS = Date.parse(Date()) - Date.parse(birth);
+	age = new Date();
+	age.setTime(ageMS);
+	years =  age.getFullYear() - 1970;
+	return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)";
 }

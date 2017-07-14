@@ -4,7 +4,7 @@
 frappe.ui.form.on('Physician Schedule', {
 	refresh: function(frm) {
 		frm.add_custom_button(__('Add Time Slots'), () => {
-			d = new frappe.ui.Dialog({
+			var d = new frappe.ui.Dialog({
 				fields: [
 					{fieldname: 'day', label: __('Day'), fieldtype:'Select',
 						options:[

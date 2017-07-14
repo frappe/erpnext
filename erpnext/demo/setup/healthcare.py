@@ -87,7 +87,7 @@ def consulation_on_appointment():
 		consultation = set_consultation(appointment.patient, appointment.patient_sex, appointment.physician, appointment.department, appointment.appointment_date, i)
 		consultation.appointment = appointment.name
 		consultation.save(ignore_permissions=True)
-	
+
 def set_consultation(patient, patient_sex, physician, department, consultation_date, i):
 	consultation = frappe.new_doc("Consultation")
 	consultation.patient = patient

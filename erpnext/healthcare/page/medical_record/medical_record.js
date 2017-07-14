@@ -44,7 +44,7 @@ frappe.pages['medical_record'].on_page_load = function(wrapper) {
 		}
 	});
 
-}
+};
 
 frappe.pages['medical_record'].refresh = function(wrapper) {
 	var me = this;
@@ -52,7 +52,7 @@ frappe.pages['medical_record'].refresh = function(wrapper) {
 	if(frappe.route_options) {
 		if(frappe.route_options.patient){
 			me.page.main.find(".frappe-list").html("");
-			patient = frappe.route_options.patient;
+			var patient = frappe.route_options.patient;
 			draw_page(patient,me);
 			me.page.main.find("[data-fieldname='patient']").val(patient);
 			frappe.route_options = null;
@@ -66,7 +66,7 @@ var show_patient_info = function(patient, me){
 			patient: patient
 		},
 		callback: function (r) {
-			data = r.message;
+			var data = r.message;
 			var details = "";
 			if(data.email) details += "<br><b>Email :</b> " + data.email;
 			if(data.mobile) details += "<br><b>Mobile :</b> " + data.mobile;
@@ -108,7 +108,7 @@ var show_patient_info = function(patient, me){
 			me.page.sidebar.html(details);
 			me.page.wrapper.find(".layout-main-section-wrapper").addClass("col-sm-9");
 		}
-	})
+	});
 }
 var draw_page = function(patient, me){
 	frappe.model.with_doctype("Patient Medical Record", function() {
@@ -120,12 +120,10 @@ var draw_page = function(patient, me){
 			parent: $("<div></div>").appendTo(me.page.main),
 			render_view: function(values) {
 				var me = this;
-				wrapper = me.page.main.find(".result-list").get(0)
+				var wrapper = me.page.main.find(".result-list").get(0);
 				values.map(function (value) {
-					var row = $('<div class="list-row">')
-						.data("data", value)
-						.appendTo($(wrapper)).get(0);
-						new frappe.medical_record.Feed(row, value);
+					var row = $('<div class="list-row">').data("data", value).appendTo($(wrapper)).get(0);
+					new frappe.medical_record.Feed(row, value);
 				});
 			},
 			show_filters: true,
@@ -134,7 +132,6 @@ var draw_page = function(patient, me){
 		show_patient_info(patient, me);
 		me.page.list.run();
 	});
-
 }
 
 frappe.medical_record.last_feed_date = false;
@@ -167,6 +164,7 @@ frappe.medical_record.Feed = Class.extend({
 
 		if((last && dateutil.obj_to_str(last) != dateutil.obj_to_str(date)) || (!last)) {
 			var diff = dateutil.get_day_diff(dateutil.get_today(), dateutil.obj_to_str(date));
+			var pdate = null;
 			if(diff < 1) {
 				pdate = 'Today';
 			} else if(diff < 2) {

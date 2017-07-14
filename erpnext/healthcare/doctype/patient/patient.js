@@ -43,14 +43,14 @@ frappe.ui.form.on('Patient', {
 
 frappe.ui.form.on("Patient", "dob", function(frm) {
 	if(frm.doc.dob){
-		today = new Date();
-		birthDate = new Date(frm.doc.dob);
+		var today = new Date();
+		var birthDate = new Date(frm.doc.dob);
 		if(today < birthDate){
 			msgprint("Please select a valid Date");
 			frappe.model.set_value(frm.doctype,frm.docname, "dob", "");
 		}
 		else{
-			age_str = get_age(frm.doc.dob);
+			var age_str = get_age(frm.doc.dob);
 			$(frm.fields_dict['age_html'].wrapper).html("AGE : " + age_str);
 		}
 	}
@@ -64,15 +64,15 @@ var create_medical_record = function (frm) {
 		"reference_owner": frm.doc.owner
 	};
 	frappe.new_doc("Patient Medical Record");
-}
+};
 
 var get_age = function (birth) {
-	ageMS = Date.parse(Date()) - Date.parse(birth);
-	age = new Date();
+	var ageMS = Date.parse(Date()) - Date.parse(birth);
+	var age = new Date();
 	age.setTime(ageMS);
-	years = age.getFullYear() - 1970;
-	return years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)"
-}
+	var years = age.getFullYear() - 1970;
+	return years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)";
+};
 
 var btn_create_vital_signs = function (frm) {
 	if (!frm.doc.name) {
@@ -86,7 +86,7 @@ var btn_create_vital_signs = function (frm) {
 
 var btn_create_consultation = function (frm) {
 	if (!frm.doc.name) {
-		frappe.throw("Please save the patient first")
+		frappe.throw("Please save the patient first");
 	}
 	frappe.route_options = {
 		"patient": frm.doc.name,

@@ -14,17 +14,17 @@ frappe.ui.form.on('Patient Appointment', {
 					frappe.route_options = {"patient": frm.doc.patient};
 					frappe.set_route("medical_record");
 				},__("View"));
-			};
+			}
 			if(frm.doc.status == "Open"){
 				frm.add_custom_button(__('Cancel'), function() {
 					btn_update_status(frm, "Cancelled");
 				});
-			};
+			}
 			if(frm.doc.status == "Scheduled" && !frm.doc.__islocal){
 				frm.add_custom_button(__('Cancel'), function() {
 					btn_update_status(frm, "Cancelled");
 				});
-			};
+			}
 			if(frm.doc.status == "Pending"){
 				frm.add_custom_button(__('Set Open'), function() {
 					btn_update_status(frm, "Open");
@@ -32,7 +32,7 @@ frappe.ui.form.on('Patient Appointment', {
 				frm.add_custom_button(__('Cancel'), function() {
 					btn_update_status(frm, "Cancelled");
 				});
-			};
+			}
 		}
 
 		if(!frm.doc.__islocal && frappe.user.has_role("Physician") && frm.doc.status == "Open"){
@@ -50,7 +50,7 @@ frappe.ui.form.on('Patient Appointment', {
 			if(frm.doc.sales_invoice){
 				frm.add_custom_button(__('Invoice'), function() {
 					frappe.set_route("Form", "Sales Invoice", frm.doc.sales_invoice);
-				 },__("View") );
+				},__("View") );
 			}
 			else if(frm.doc.status != "Cancelled"){
 				frm.add_custom_button(__('Invoice'), function() {
@@ -167,7 +167,7 @@ var btn_create_consultation = function(frm){
 			}
 		}
 	});
-}
+};
 
 var btn_create_vital_signs = function (frm) {
 	if(!frm.doc.patient){
@@ -177,7 +177,7 @@ var btn_create_vital_signs = function (frm) {
 		"patient": frm.doc.patient,
 	}
 	frappe.new_doc("Vital Signs");
-}
+};
 
 var btn_update_status = function(frm, status){
 	var doc = frm.doc;
@@ -191,7 +191,7 @@ var btn_update_status = function(frm, status){
 			}
 		}
 	});
-}
+};
 
 var btn_invoice_consultation = function(frm){
 	var doc = frm.doc;
@@ -209,7 +209,7 @@ var btn_invoice_consultation = function(frm){
 			}
 		}
 	});
-}
+};
 
 frappe.ui.form.on("Patient Appointment", "physician", function(frm) {
 	if(frm.doc.physician){
@@ -235,7 +235,7 @@ frappe.ui.form.on("Patient Appointment", "patient", function(frm) {
 				name: frm.doc.patient
 			},
 			callback: function (data) {
-				age = null;
+				var age = null;
 				if(data.message.dob){
 					age = calculate_age(data.message.dob);
 				}
@@ -246,9 +246,9 @@ frappe.ui.form.on("Patient Appointment", "patient", function(frm) {
 });
 
 var calculate_age = function(birth) {
-	ageMS = Date.parse(Date()) - Date.parse(birth);
-	age = new Date();
+	var ageMS = Date.parse(Date()) - Date.parse(birth);
+	var age = new Date();
 	age.setTime(ageMS);
-	years =  age.getFullYear() - 1970;
+	var years =  age.getFullYear() - 1970;
 	return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)";
 }

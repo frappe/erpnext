@@ -36,7 +36,7 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 					return item.name;
 				}
 			},
-		}
+		};
 	},
 	setup_columns: function() {
 		this.tree_grid = this.tree_grids[this.tree_type];
@@ -83,11 +83,10 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 				{label: __("Yearly"), value: "Yearly"}]}
 	],
 	setup_filters: function() {
-		var me = this;
 		this._super();
 		this.trigger_refresh_on_change(["tree_type", "physician", "department", "status", "type"]);
 
-		//t his.show_zero_check()
+		//	this.show_zero_check()
 		this.setup_chart_check();
 	},
 	init_filter_values: function() {
@@ -100,10 +99,11 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 			this.tl = frappe.report_dump.data["Patient Appointment"];
 		}
 		if(!this.data || me.item_type != me.tree_type) {
+			var items = null;
 			if(me.tree_type=='Physician') {
-				var items = frappe.report_dump.data["Physician"];
+				items = frappe.report_dump.data["Physician"];
 			} if(me.tree_type=='Medical Department') {
-				var items = this.prepare_tree("Physician", "Medical Department");
+				items = this.prepare_tree("Physician", "Medical Department");
 			}
 			me.item_type = me.tree_type;
 			me.parent_map = {};
@@ -143,8 +143,8 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 	prepare_balances: function() {
 		var me = this;
 		var from_date = frappe.datetime.str_to_obj(this.from_date);
-		status = this.status;
-		type = this.type;
+		var status = this.status;
+		var type = this.type;
 		var to_date = frappe.datetime.str_to_obj(this.to_date);
 		$.each(this.tl, function(i, tl) {
 			if (me.is_default('company') ? true : tl.company === me.company) {
@@ -191,13 +191,11 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 	},
 	set_totals: function(sort) {
 		var me = this;
-		var checked = false;
 		$.each(this.data, function(i, d) {
 			d.total = 0.0;
 			$.each(me.columns, function(i, col) {
 				if(col.formatter==me.currency_formatter && !col.hidden && col.field!="total")
 					d.total += d[col.field];
-				if(d.checked) checked = true;
 			});
 		});
 
@@ -208,4 +206,4 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 		}
 	}
 
-})
+});

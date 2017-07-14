@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 import json
-from frappe.utils import getdate, get_time, math
+from frappe.utils import getdate
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account
 from frappe import _
 

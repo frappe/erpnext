@@ -4,9 +4,9 @@
 frappe.ui.form.on("Lab Test Template",{
 	test_name: function(frm) {
 		if(!frm.doc.test_code)
-		frm.set_value("test_code", frm.doc.test_name);
+			frm.set_value("test_code", frm.doc.test_name);
 		if(!frm.doc.test_description)
-		frm.set_value("test_description", frm.doc.test_name);
+			frm.set_value("test_description", frm.doc.test_name);
 	}
 });
 
@@ -39,7 +39,7 @@ var disable_template = function(frm){
 			cur_frm.reload_doc();
 		}
 	});
-}
+};
 
 var enable_template = function(frm){
 	var doc = frm.doc;
@@ -50,7 +50,7 @@ var enable_template = function(frm){
 			cur_frm.reload_doc();
 		}
 	});
-}
+};
 
 
 var change_template_code = function(frm,doc){
@@ -69,7 +69,7 @@ var change_template_code = function(frm,doc){
 				click: function() {
 					var values = d.get_values();
 					if(!values)
-					return;
+						return;
 					change_test_code_from_template(values["Test Code"],doc);
 					d.hide();
 				}
@@ -79,7 +79,7 @@ var change_template_code = function(frm,doc){
 	d.show();
 	d.set_values({
 		'Test Code': doc.test_code
-	})
+	});
 
 	var change_test_code_from_template = function(test_code,doc){
 		frappe.call({
@@ -88,9 +88,8 @@ var change_template_code = function(frm,doc){
 			callback: function (data) {
 				frappe.set_route("Form", "Lab Test Template", data.message);
 			}
-		})
+		});
 	}
-
 }
 
 
