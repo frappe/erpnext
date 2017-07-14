@@ -5,8 +5,9 @@ QUnit.module('setup');
 QUnit.test('test program', function(assert){
 	assert.expect(11);
 	let done = assert.async();
+	let x;
+	let n;
 	frappe.run_serially([
-		// () => frappe.timeout(1),
 		() => frappe.tests.setup_doctype('Department'),
 		() => frappe.tests.setup_doctype('Grading Scale'),
 		() => frappe.tests.setup_doctype('Assessment Criteria Group'),
@@ -31,15 +32,14 @@ QUnit.test('test program', function(assert){
 		},
 
 		() => cur_frm.save(),
-		// () => { y = cur_frm.doc.program_name; }, // Storing current Doctype name
 		// Setting up Fee Category to select in Program doctype
 		() => frappe.tests.setup_doctype('Fee Category'),
 		// Setting up Fee Structure to be selected in Program doctype
 		() => frappe.tests.setup_doctype('Fee Structure'),
 		() => {
 			// x = $('.ellipsis.sub-heading.text-muted').text();
-			var x = $(location).attr('hash');
-			var n = x.indexOf('FS00');
+			x = $(location).attr('hash');
+			n = x.indexOf('FS00');
 			x = x.substring(n);
 		}, // Storing naming convention of Fee Structure entry
 		() => frappe.set_route('Form', ('Program/Standard Test')), // Routing to our current Program doctype
