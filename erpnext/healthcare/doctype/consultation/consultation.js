@@ -89,7 +89,7 @@ var btn_invoice_consultation = function(frm){
 			}
 		}
 	});
-}
+};
 
 var create_medical_record = function (frm) {
 	if(!frm.doc.patient){
@@ -102,7 +102,7 @@ var create_medical_record = function (frm) {
 		"reference_owner": frm.doc.owner
 	}
 	frappe.new_doc("Patient Medical Record");
-}
+};
 
 var btn_create_vital_signs = function (frm) {
 	if(!frm.doc.patient){
@@ -112,7 +112,7 @@ var btn_create_vital_signs = function (frm) {
 		"patient": frm.doc.patient,
 	}
 	frappe.new_doc("Vital Signs");
-}
+};
 
 var show_details = function(data){
 	var personal_details = "";
@@ -164,7 +164,7 @@ var show_details = function(data){
 	}
 	details = personal_details + vitals + details;
 	cur_frm.fields_dict.patient_details_html.$wrapper.html(details);
-}
+};
 
 frappe.ui.form.on("Consultation", "appointment", function(frm){
 	if(frm.doc.appointment){
@@ -184,8 +184,7 @@ frappe.ui.form.on("Consultation", "appointment", function(frm){
 	}
 });
 
-frappe.ui.form.on("Consultation", "physician",
-function(frm) {
+frappe.ui.form.on("Consultation", "physician", function(frm) {
 	if(frm.doc.physician){
 		frappe.call({
 			"method": "frappe.client.get",
@@ -223,8 +222,7 @@ frappe.ui.form.on("Consultation", "diagnosis_select", function(frm) {
 	}
 });
 
-frappe.ui.form.on("Consultation", "patient",
-function(frm) {
+frappe.ui.form.on("Consultation", "patient", function(frm) {
 	if(frm.doc.patient){
 		frappe.call({
 			"method": "erpnext.healthcare.doctype.patient.patient.get_patient_detail",
@@ -317,9 +315,9 @@ me.frm.set_query("appointment", function(doc, cdt, cdn) {
 
 
 var calculate_age = function(birth) {
-	ageMS = Date.parse(Date()) - Date.parse(birth);
-	age = new Date();
+	var ageMS = Date.parse(Date()) - Date.parse(birth);
+	var age = new Date();
 	age.setTime(ageMS);
-	years =  age.getFullYear() - 1970;
+	var years =  age.getFullYear() - 1970;
 	return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)";
 }

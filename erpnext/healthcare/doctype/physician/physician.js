@@ -46,7 +46,7 @@ frappe.ui.form.on("Physician", "user_id",function(frm) {
 				if(!frm.doc.mobile_phone)
 					frappe.model.set_value(frm.doctype,frm.docname, "mobile_phone", data.message.phone);
 			}
-		})
+		});
 	}
 });
 
@@ -60,13 +60,13 @@ frappe.ui.form.on("Physician", "employee", function(frm) {
 			},
 			callback: function (data) {
 				if(!frm.doc.designation)
-				frappe.model.set_value(frm.doctype,frm.docname, "designation", data.message.designation);
+					frappe.model.set_value(frm.doctype,frm.docname, "designation", data.message.designation);
 				if(!frm.doc.first_name)
-				frappe.model.set_value(frm.doctype,frm.docname, "first_name", data.message.employee_name);
+					frappe.model.set_value(frm.doctype,frm.docname, "first_name", data.message.employee_name);
 				if(!frm.doc.mobile_phone)
-				frappe.model.set_value(frm.doctype,frm.docname, "mobile_phone", data.message.cell_number);
+					frappe.model.set_value(frm.doctype,frm.docname, "mobile_phone", data.message.cell_number);
 				if(!frm.doc.address)
-				frappe.model.set_value(frm.doctype,frm.docname, "address", data.message.current_address);
+					frappe.model.set_value(frm.doctype,frm.docname, "address", data.message.current_address);
 			}
 		})
 	}

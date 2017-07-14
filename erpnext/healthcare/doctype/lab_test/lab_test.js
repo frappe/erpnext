@@ -75,7 +75,7 @@ frappe.ui.form.on('Lab Test', {
 			});
 		}
 	}
-})
+});
 
 frappe.ui.form.on("Lab Test", "patient", function(frm) {
 	if(frm.doc.patient){
@@ -115,6 +115,7 @@ frappe.ui.form.on('Special Test Items', {
 
 var status_update = function(approve,frm){
 	var doc = frm.doc;
+	var status = null;
 	if(approve == 1){
 		status = "Approved";
 	}
@@ -192,7 +193,7 @@ var show_lab_tests = function(frm, result){
 		$(repl('<div class="col-xs-12" style="padding-top:20px;" >%(msg)s</div></div>', {msg: msg})).appendTo(html_field);
 	}
 	d.show();
-}
+};
 
 var make_invoice = function(frm){
 	var doc = frm.doc;
@@ -210,11 +211,11 @@ var make_invoice = function(frm){
 			}
 		}
 	});
-}
+};
 
 cur_frm.cscript.custom_before_submit =  function(doc) {
 	if(doc.normal_test_items){
-		for(var result in doc.normal_test_items){
+		for(let result in doc.normal_test_items){
 			if(!doc.normal_test_items[result].result_value	&&	doc.normal_test_items[result].require_result_value == 1){
 				msgprint("Please input all required Result Value(s)");
 				throw("Error");
@@ -222,7 +223,7 @@ cur_frm.cscript.custom_before_submit =  function(doc) {
 		}
 	}
 	if(doc.special_test_items){
-		for(var result in doc.special_test_items){
+		for(let result in doc.special_test_items){
 			if(!doc.special_test_items[result].result_value	&&	doc.special_test_items[result].require_result_value == 1){
 				msgprint("Please input all required Result Value(s)");
 				throw("Error");
@@ -286,7 +287,7 @@ var make_dialog = function(frm, emailed, printed) {
 		}
 	})
 	dialog.show();
-}
+};
 
 var send_sms = function(v,frm){
 	var doc = frm.doc;
@@ -311,7 +312,7 @@ var send_sms = function(v,frm){
 			}
 		}
 	});
-}
+};
 
 var calculate_age = function(birth) {
 	var	ageMS = Date.parse(Date()) - Date.parse(birth);
@@ -319,4 +320,4 @@ var calculate_age = function(birth) {
 	age.setTime(ageMS);
 	var	years =  age.getFullYear() - 1970;
 	return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)";
-}
+};

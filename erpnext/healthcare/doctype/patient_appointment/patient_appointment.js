@@ -57,7 +57,7 @@ frappe.ui.form.on('Patient Appointment', {
 					btn_invoice_consultation(frm);
 				},__("Create"));
 			}
-		};
+		}
 	},
 	check_availability: function(frm) {
 		var { physician, appointment_date } = frm.doc;
@@ -175,7 +175,7 @@ var btn_create_vital_signs = function (frm) {
 	}
 	frappe.route_options = {
 		"patient": frm.doc.patient,
-	}
+	};
 	frappe.new_doc("Vital Signs");
 };
 

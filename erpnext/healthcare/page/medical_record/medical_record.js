@@ -58,7 +58,7 @@ frappe.pages['medical_record'].refresh = function(wrapper) {
 			frappe.route_options = null;
 		}
 	}
-}
+};
 var show_patient_info = function(patient, me){
 	frappe.call({
 		"method": "erpnext.healthcare.doctype.patient.patient.get_patient_detail",
@@ -109,7 +109,7 @@ var show_patient_info = function(patient, me){
 			me.page.wrapper.find(".layout-main-section-wrapper").addClass("col-sm-9");
 		}
 	});
-}
+};
 var draw_page = function(patient, me){
 	frappe.model.with_doctype("Patient Medical Record", function() {
 		me.page.list = new frappe.ui.BaseList({
@@ -132,7 +132,7 @@ var draw_page = function(patient, me){
 		show_patient_info(patient, me);
 		me.page.list.run();
 	});
-}
+};
 
 frappe.medical_record.last_feed_date = false;
 frappe.medical_record.Feed = Class.extend({

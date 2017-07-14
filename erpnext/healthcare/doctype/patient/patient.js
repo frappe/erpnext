@@ -80,9 +80,9 @@ var btn_create_vital_signs = function (frm) {
 	}
 	frappe.route_options = {
 		"patient": frm.doc.name,
-	}
+	};
 	frappe.new_doc("Vital Signs");
-}
+};
 
 var btn_create_consultation = function (frm) {
 	if (!frm.doc.name) {
@@ -90,9 +90,9 @@ var btn_create_consultation = function (frm) {
 	}
 	frappe.route_options = {
 		"patient": frm.doc.name,
-	}
+	};
 	frappe.new_doc("Consultation");
-}
+};
 
 var btn_invoice_registration = function (frm) {
 	frappe.call({
@@ -109,7 +109,7 @@ var btn_invoice_registration = function (frm) {
 			}
 		}
 	});
-}
+};
 
 me.frm.set_query("patient", "patient_relation", function (doc, cdt, cdn) {
 	return {

@@ -89,8 +89,8 @@ var change_template_code = function(frm,doc){
 				frappe.set_route("Form", "Lab Test Template", data.message);
 			}
 		});
-	}
-}
+	};
+};
 
 
 // Restrict Special, Grouped type templates in Child TestGroups
