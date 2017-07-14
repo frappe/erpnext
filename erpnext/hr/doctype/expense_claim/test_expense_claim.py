@@ -118,7 +118,6 @@ class TestExpenseClaim(unittest.TestCase):
 		expense_claim.cancel()
 
 		for gle in gl_entries:
-			print str(gle.account) + " vs " + str(expected_values[gle.account][0])
 			self.assertEquals(expected_values[gle.account][0], gle.account)
 			self.assertEquals(expected_values[gle.account][1], gle.debit)
 			self.assertEquals(expected_values[gle.account][2], gle.credit)
