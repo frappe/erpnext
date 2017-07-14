@@ -7,10 +7,11 @@ import frappe, erpnext
 def execute():
 	frappe.reload_doctype("Account")
 
-	warehouses = frappe.db.sql_list("""select name, company from tabAccount
+	warehouses = frappe.db.sql("""select name, company from tabAccount
 		where account_type = 'Stock' and is_group = 0
-		and (warehouse is null or warehouse = '')""", as_dict)
+		and (warehouse is null or warehouse = '')""", as_dict=1)
 	warehouses = [d.name for d in warehouses if erpnext.is_perpetual_inventory_enabled(d.company)]
+
 	if len(warehouses) > 0:
 		warehouses = set_warehouse_for_stock_account(warehouses)
 		if not warehouses:
