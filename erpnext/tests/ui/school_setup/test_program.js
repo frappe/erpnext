@@ -31,7 +31,7 @@ QUnit.test('test program', function(assert){
 		},
 
 		() => cur_frm.save(),
-		// () => { y = cur_frm.doc.program_name; }, // Storing current Doctype name 	
+		// () => { y = cur_frm.doc.program_name; }, // Storing current Doctype name
 		// Setting up Fee Category to select in Program doctype
 		() => frappe.tests.setup_doctype('Fee Category'),
 		// Setting up Fee Structure to be selected in Program doctype
@@ -45,7 +45,6 @@ QUnit.test('test program', function(assert){
 		() => frappe.set_route('Form', ('Program/Standard Test')), // Routing to our current Program doctype
 
 		() => $('.shaded-section~ .visible-section+ .visible-section .grid-add-row').trigger('click'), // clicking on Add Row button
-		
 		// Storing data that were dependent earlier inceptionally
 		() => cur_frm.doc.fees[0].academic_term = '2016-17 (Semester 1)',
 		() => cur_frm.doc.fees[0].student_category = 'Scholarship',

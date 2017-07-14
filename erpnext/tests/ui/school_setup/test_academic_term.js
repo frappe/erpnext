@@ -13,7 +13,7 @@ QUnit.test('test academic term', function(assert){
 				{academic_year: '2016-17'},
 				{term_name: "Semester 1"},
 				{term_start_date: '2016-07-20'},
-				{term_end_date:'2017-06-20'},		
+				{term_end_date:'2017-06-20'},
 			]);
 		},
 		() => {

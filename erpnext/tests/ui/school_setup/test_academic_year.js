@@ -11,7 +11,7 @@ QUnit.test('test academic year', function(assert){
 			return frappe.tests.make('Academic Year', [
 				{academic_year_name: '2015-16'},
 				{year_start_date: '2015-07-20'},
-				{year_end_date:'2016-06-20'},		
+				{year_end_date:'2016-06-20'},
 			]);
 		},
 
