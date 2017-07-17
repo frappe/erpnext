@@ -94,6 +94,6 @@ QUnit.test('test student applicant', function(assert){
 			assert.ok(cur_frm.get_field("siblings").grid.grid_rows[0].doc.program == 'Test Program');
 			assert.ok(cur_frm.get_field("siblings").grid.grid_rows[0].doc.date_of_birth == '1995-07-20');
 		},
-		// () => done()
+		() => done()
 	]);
 });
