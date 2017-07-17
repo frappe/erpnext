@@ -272,4 +272,6 @@ def auto_close_opportunity():
 	for opportunity in opportunities:
 		doc = frappe.get_doc("Opportunity", opportunity.get("name"))
 		doc.status = "Closed"
-		doc.save(ignore_permissions=True)
+		doc.flags.ignore_permissions = True
+		doc.flags.ignore_mandatory = True
+		doc.save()

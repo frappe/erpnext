@@ -9,8 +9,8 @@ from frappe.model.mapper import get_mapped_doc
 
 def execute():
 	# for converting student batch into student group
-	for doctype in ["Student Group", "Student Group Student", "Student Group Instructor", "Student Attendance"]:
-		frappe.reload_doc("schools", "doctype", doctype)
+	for doctype in ["Student Group", "Student Group Student", "Student Group Instructor", "Student Attendance", "Student"]:
+		frappe.reload_doc("schools", "doctype", frappe.scrub(doctype))
 
 	if frappe.db.table_exists("Student Batch"):
 		student_batches = frappe.db.sql('''select name as student_group_name, student_batch_name as batch,

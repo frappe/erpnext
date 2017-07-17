@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.stock.get_item_details import get_item_details
 from frappe import MandatoryError
 
@@ -249,3 +250,50 @@ class TestPricingRule(unittest.TestCase):
 		so = frappe.get_doc('Sales Order', so.name)
 		self.assertEquals(so.items[0].discount_percentage, 0)
 		self.assertEquals(so.items[0].rate, 100)
+
+	def test_pricing_rule_with_margin_and_discount(self):
+		make_pricing_rule(selling=1, margin_type="Percentage", margin_rate_or_amount=10)
+		si = create_sales_invoice(do_not_save=True)
+		si.items[0].price_list_rate = 1000
+		si.insert(ignore_permissions=True)
+
+		item = si.items[0]
+		self.assertEquals(item.rate, 1100)
+		self.assertEquals(item.margin_rate_or_amount, 10)
+
+		# With discount
+		item.discount_percentage = 10
+		si.save()
+		item = si.items[0]
+		self.assertEquals(item.rate, 990)
+		self.assertEquals(item.discount_percentage, 10)
+		frappe.db.sql("delete from `tabPricing Rule`")
+
+def make_pricing_rule(**args):
+	args = frappe._dict(args)
+
+	doc = frappe.get_doc({
+		"doctype": "Pricing Rule",
+		"title": args.title or "_Test Pricing Rule",
+		"company": args.company or "_Test Company",
+		"apply_on": args.apply_on or "Item Code",
+		"item_code": args.item_code or "_Test Item",
+		"applicable_for": args.applicable_for,
+		"selling": args.selling or 0,
+		"buying": args.buying or 0,
+		"min_qty": args.min_qty or 0.0,
+		"max_qty": args.max_qty or 0.0,
+		"price_or_discount": args.price_or_discount or "Discount Percentage",
+		"discount_percentage": args.discount_percentage or 0.0,
+		"price": args.price or 0.0,
+		"margin_type": args.margin_type,
+		"margin_rate_or_amount": args.margin_rate_or_amount or 0.0
+	}).insert(ignore_permissions=True)
+
+	apply_on = doc.apply_on.replace(' ', '_').lower()
+	if args.get(apply_on) and apply_on != "item_code":
+		doc.db_set(apply_on, args.get(apply_on))
+
+	applicable_for = doc.applicable_for.replace(' ', '_').lower()
+	if args.get(applicable_for):
+		doc.db_set(applicable_for, args.get(applicable_for))

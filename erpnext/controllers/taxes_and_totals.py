@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import json
 import frappe, erpnext
 from frappe import _, scrub
-from frappe.utils import cint, flt, cstr, fmt_money, round_based_on_smallest_currency_fraction
+from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 from erpnext.controllers.accounts_controller import validate_conversion_rate, \
 	validate_taxes_and_charges, validate_inclusive_tax
 
@@ -509,103 +509,72 @@ class calculate_taxes_and_totals(object):
 		return rate_with_margin
 
 	def set_item_wise_tax_breakup(self):
-		item_tax = {}
-		tax_accounts = []
-		company_currency = erpnext.get_company_currency(self.doc.company)
+		if not self.doc.taxes:
+			return
+		frappe.flags.company = self.doc.company
 		
-		item_tax, tax_accounts = self.get_item_tax(item_tax, tax_accounts, company_currency)
+		# get headers
+		tax_accounts = list(set([d.description for d in self.doc.taxes]))
+		headers = get_itemised_tax_breakup_header(self.doc.doctype + " Item", tax_accounts)
 		
-		headings = get_table_column_headings(tax_accounts)
+		# get tax breakup data
+		itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(self.doc)
 		
-		distinct_items = self.get_distinct_items()
+		frappe.flags.company = None
 		
-		rows = get_table_rows(distinct_items, item_tax, tax_accounts, company_currency)
-		
-		if not rows:
-			self.doc.other_charges_calculation = ""
-		else:
-			self.doc.other_charges_calculation = '''
-<div class="tax-break-up" style="overflow-x: auto;">
-	<table class="table table-bordered table-hover">
-		<thead><tr>{headings}</tr></thead>
-		<tbody>{rows}</tbody>
-	</table>
-</div>'''.format(**{
-	"headings": "".join(headings),
-	"rows": "".join(rows)
-})
+		self.doc.other_charges_calculation = frappe.render_template(
+			"templates/includes/itemised_tax_breakup.html", dict(
+				headers=headers,
+				itemised_tax=itemised_tax,
+				itemised_taxable_amount=itemised_taxable_amount,
+				tax_accounts=tax_accounts,
+				company_currency=erpnext.get_company_currency(self.doc.company)
+			)
+		)
 
-	def get_item_tax(self, item_tax, tax_accounts, company_currency):
-		for tax in self.doc.taxes:
-			tax_amount_precision = tax.precision("tax_amount")
-			tax_rate_precision = tax.precision("rate");
+@erpnext.allow_regional
+def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
+	return [_("Item"), _("Taxable Amount")] + tax_accounts
+
+@erpnext.allow_regional
+def get_itemised_tax_breakup_data(doc):
+	itemised_tax = get_itemised_tax(doc.taxes)
+
+	itemised_taxable_amount = get_itemised_taxable_amount(doc.items)
+
+	return itemised_tax, itemised_taxable_amount
+
+def get_itemised_tax(taxes):
+	itemised_tax = {}
+	for tax in taxes:
+		tax_amount_precision = tax.precision("tax_amount")
+		tax_rate_precision = tax.precision("rate")
+		
+		item_tax_map = json.loads(tax.item_wise_tax_detail) if tax.item_wise_tax_detail else {}
+		
+		for item_code, tax_data in item_tax_map.items():
+			itemised_tax.setdefault(item_code, frappe._dict())
 			
-			item_tax_map = self._load_item_tax_rate(tax.item_wise_tax_detail)
-			for item_code, tax_data in item_tax_map.items():
-				if not item_tax.get(item_code):
-					item_tax[item_code] = {}
-					
-				if isinstance(tax_data, list):
-					tax_rate = ""
-					if tax_data[0]:
-						if tax.charge_type == "Actual":
-							tax_rate = fmt_money(flt(tax_data[0], tax_amount_precision),
-								tax_amount_precision, company_currency)
-						else:
-							tax_rate = cstr(flt(tax_data[0], tax_rate_precision)) + "%"
-							
-						tax_amount = fmt_money(flt(tax_data[1], tax_amount_precision),
-							tax_amount_precision, company_currency)
-							
-						item_tax[item_code][tax.name] = [tax_rate, tax_amount]
-					else:
-						item_tax[item_code][tax.name] = [cstr(flt(tax_data, tax_rate_precision)) + "%", ""]
-			tax_accounts.append([tax.name, tax.account_head])
-		
-		return item_tax, tax_accounts
-
-	
-	def get_distinct_items(self):
-		distinct_item_names = []
-		distinct_items = []
-		for item in self.doc.items:
-			item_code = item.item_code or item.item_name
-			if item_code not in distinct_item_names:
-				distinct_item_names.append(item_code)
-				distinct_items.append(item)
+			if isinstance(tax_data, list) and tax_data[0]:
+				precision = tax_amount_precision if tax.charge_type == "Actual" else tax_rate_precision
 				
-		return distinct_items
-
-def get_table_column_headings(tax_accounts):
-	headings_name = [_("Item Name"), _("Taxable Amount")] + [d[1] for d in tax_accounts]
-	headings = []
-	for head in headings_name:
-		if head == _("Item Name"):
-			headings.append('<th style="min-width: 120px;" class="text-left">' + (head or "") + "</th>")
-		else:
-			headings.append('<th style="min-width: 80px;" class="text-right">' + (head or "") + "</th>")
-			
-	return headings
-
-def get_table_rows(distinct_items, item_tax, tax_accounts, company_currency):
-	rows = []
-	for item in distinct_items:
-		item_tax_record = item_tax.get(item.item_code or item.item_name)
-		if not item_tax_record:
-			continue
-		
-		taxes = []
-		for head in tax_accounts:
-			if item_tax_record[head[0]]:
-				taxes.append("<td class='text-right'>(" + item_tax_record[head[0]][0] + ") "
-					 + item_tax_record[head[0]][1] + "</td>")
+				itemised_tax[item_code][tax.description] = frappe._dict(dict(
+					tax_rate=flt(tax_data[0], precision),
+					tax_amount=flt(tax_data[1], tax_amount_precision)
+				))
 			else:
-				taxes.append("<td></td>")
-		
-		rows.append("<tr><td>{item_name}</td><td class='text-right'>{taxable_amount}</td>{taxes}</tr>".format(**{
-			"item_name": item.item_name,
-			"taxable_amount": fmt_money(item.net_amount, item.precision("net_amount"), company_currency),
-			"taxes": "".join(taxes)
-		}))
-		
-	return rows
+				itemised_tax[item_code][tax.description] = frappe._dict(dict(
+					tax_rate=flt(tax_data, tax_rate_precision),
+					tax_amount=0.0
+				))
+
+	return itemised_tax
+
+def get_itemised_taxable_amount(items):
+	itemised_taxable_amount = frappe._dict()
+	for item in items:
+		item_code = item.item_code or item.item_name
+		itemised_taxable_amount.setdefault(item_code, 0)
+		itemised_taxable_amount[item_code] += item.net_amount
+
+	return itemised_taxable_amount

@@ -415,4 +415,9 @@ erpnext.patches.v8_1.gst_fixes #2017-07-06
 erpnext.patches.v8_0.update_production_orders
 erpnext.patches.v8_1.remove_sales_invoice_from_returned_serial_no
 erpnext.patches.v8_1.allow_invoice_copy_to_edit_after_submit
+erpnext.patches.v8_1.add_hsn_sac_codes
+erpnext.patches.v8_1.update_gst_state #17-07-2017
+erpnext.patches.v8_1.removed_report_support_hours
+erpnext.patches.v8_1.add_indexes_in_transaction_doctypes
 erpnext.patches.v8_4.make_scorecard_records
+
