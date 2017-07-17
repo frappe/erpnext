@@ -14,7 +14,7 @@ class TestExpenseClaim(unittest.TestCase):
 		frappe.db.sql("""delete from `tabTask` where project = "_Test Project 1" """)
 		frappe.db.sql("""delete from `tabProject` where name = "_Test Project 1" """)
 
-		
+
 		frappe.get_doc({
 			"project_name": "_Test Project 1",
 			"doctype": "Project",
@@ -25,7 +25,7 @@ class TestExpenseClaim(unittest.TestCase):
 		task_name = frappe.db.get_value("Task", {"project": "_Test Project 1"})
 		payable_account = get_payable_account("Wind Power LLC")
 
-		expense_claim = make_expense_claim(payable_account, 300, 200, "Wind Power LLC","Travel Expenses - WP", "_Test Project 1", task_name)
+		make_expense_claim(payable_account, 300, 200, "Wind Power LLC","Travel Expenses - WP", "_Test Project 1", task_name)
 
 		self.assertEqual(frappe.db.get_value("Task", task_name, "total_expense_claim"), 200)
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_expense_claim"), 200)
@@ -40,7 +40,7 @@ class TestExpenseClaim(unittest.TestCase):
 
 		self.assertEqual(frappe.db.get_value("Task", task_name, "total_expense_claim"), 200)
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_expense_claim"), 200)
-		
+
 	def test_expense_claim_status(self):
 		payable_account = get_payable_account("Wind Power LLC")
 		expense_claim = make_expense_claim(payable_account, 300, 200, "Wind Power LLC", "Travel Expenses - WP")
@@ -54,7 +54,7 @@ class TestExpenseClaim(unittest.TestCase):
 
 		expense_claim = frappe.get_doc("Expense Claim", expense_claim.name)
 		self.assertEqual(expense_claim.status, "Paid")
-		
+
 		je.cancel()
 		expense_claim = frappe.get_doc("Expense Claim", expense_claim.name)
 		self.assertEqual(expense_claim.status, "Unpaid")
@@ -63,7 +63,7 @@ class TestExpenseClaim(unittest.TestCase):
 		payable_account = get_payable_account("Wind Power LLC")
 		expense_claim = make_expense_claim(payable_account, 300, 200, "Wind Power LLC", "Travel Expenses - WP")
 		expense_claim.submit()
-		
+
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Expense Claim' and voucher_no=%s
 			order by account asc""", expense_claim.name, as_dict=1)
@@ -100,7 +100,7 @@ class TestExpenseClaim(unittest.TestCase):
 
 def get_payable_account(company):
 	return frappe.db.get_value('Company', company, 'default_payable_account')
-	
+
 def make_expense_claim(payable_account,claim_amount, sanctioned_amount, company, account, project=None, task_name=None):
 	expense_claim = frappe.get_doc({
 		 "doctype": "Expense Claim",
@@ -118,5 +118,5 @@ def make_expense_claim(payable_account,claim_amount, sanctioned_amount, company,
 
 	expense_claim.submit()
 	return expense_claim
-	
+
 
