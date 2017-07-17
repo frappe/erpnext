@@ -72,14 +72,20 @@ website_route_rules = [
 			"parents": [{"title": _("Invoices"), "name": "invoices"}]
 		}
 	},
-	{"from_route": "/quotations", "to_route": "Supplier Quotation"},
-	{"from_route": "/quotations/<path:name>", "to_route": "order",
+	{"from_route": "/supplier-quotations", "to_route": "Supplier Quotation"},
+	{"from_route": "/supplier-quotations/<path:name>", "to_route": "order",
 		"defaults": {
 			"doctype": "Supplier Quotation",
 			"parents": [{"title": _("Supplier Quotation"), "name": "quotations"}]
 		}
 	},
-	{"from_route": "/quotation", "to_route": "Quotation"},
+	{"from_route": "/quotations", "to_route": "Quotation"},
+	{"from_route": "/quotations/<path:name>", "to_route": "order",
+		"defaults": {
+			"doctype": "Quotation",
+			"parents": [{"title": _("Quotations"), "name": "quotation"}]
+		}
+	},
 	{"from_route": "/shipments", "to_route": "Delivery Note"},
 	{"from_route": "/shipments/<path:name>", "to_route": "order",
 		"defaults": {
@@ -109,8 +115,8 @@ website_route_rules = [
 standard_portal_menu_items = [
 	{"title": _("Projects"), "route": "/project", "reference_doctype": "Project"},
 	{"title": _("Request for Quotations"), "route": "/rfq", "reference_doctype": "Request for Quotation", "role": "Supplier"},
-	{"title": _("Supplier Quotation"), "route": "/quotations", "reference_doctype": "Supplier Quotation", "role": "Supplier"},
-	{"title": _("Quotations"), "route": "/quotation", "reference_doctype": "Quotation", "role":"Customer"},
+	{"title": _("Supplier Quotation"), "route": "/supplier-quotations", "reference_doctype": "Supplier Quotation", "role": "Supplier"},
+	{"title": _("Quotations"), "route": "/quotations", "reference_doctype": "Quotation", "role":"Customer"},
 	{"title": _("Orders"), "route": "/orders", "reference_doctype": "Sales Order", "role":"Customer"},
 	{"title": _("Invoices"), "route": "/invoices", "reference_doctype": "Sales Invoice", "role":"Customer"},
 	{"title": _("Shipments"), "route": "/shipments", "reference_doctype": "Delivery Note", "role":"Customer"},
@@ -127,6 +133,7 @@ default_roles = [
 
 has_website_permission = {
 	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
+	"Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Sales Invoice": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Supplier Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
