@@ -192,9 +192,11 @@ $.extend(frappe.test_data, {
 	},
 	"Terms and Conditions": {
 		"Test Term 1": [
+			{terms: "This is Test"},
 			{title: "Test Term 1"}
 		],
 		"Test Term 2": [
+			{terms: "This is Test"},
 			{title: "Test Term 2"}
 		]
 	},
