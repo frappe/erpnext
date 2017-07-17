@@ -12,10 +12,10 @@ def setup(company=None, patch=True):
 	make_custom_fields()
 	add_permissions()
 	add_custom_roles_for_reports()
-	add_hsn_codes()
-	update_address_template()
+	add_hsn_sac_codes()
 	add_print_formats()
 	if not patch:
+		update_address_template()
 		make_fixtures()
 
 def update_address_template():
@@ -33,21 +33,26 @@ def update_address_template():
 			template=html
 		)).insert()
 
-def add_hsn_codes():
-	if frappe.db.count('GST HSN Code') > 100:
-		return
-
+def add_hsn_sac_codes():
+	# HSN codes
 	with open(os.path.join(os.path.dirname(__file__), 'hsn_code_data.json'), 'r') as f:
 		hsn_codes = json.loads(f.read())
 
-	frappe.db.commit()
-	frappe.db.sql('truncate `tabGST HSN Code`')
-
-	for d in hsn_codes:
-		hsn_code = frappe.new_doc('GST HSN Code')
-		hsn_code.update(d)
-		hsn_code.name = hsn_code.hsn_code
-		hsn_code.db_insert()
+	create_hsn_codes(hsn_codes, code_field="hsn_code")
+	
+	# SAC Codes
+	with open(os.path.join(os.path.dirname(__file__), 'sac_code_data.json'), 'r') as f:
+		sac_codes = json.loads(f.read())
+	create_hsn_codes(sac_codes, code_field="sac_code")
+	
+def create_hsn_codes(data, code_field):
+	for d in data:
+		if not frappe.db.exists("GST HSN Code", d[code_field]):
+			hsn_code = frappe.new_doc('GST HSN Code')
+			hsn_code.description = d["description"]
+			hsn_code.hsn_code = d[code_field]
+			hsn_code.name = d[code_field]
+			hsn_code.db_insert()
 
 	frappe.db.commit()
 
@@ -75,7 +80,7 @@ def add_print_formats():
 
 def make_custom_fields():
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
-		fieldtype='Data', options='item_code.gst_hsn_code', insert_after='description')
+		fieldtype='Data', options='item_code.gst_hsn_code', insert_after='description', print_hide=1)
 	
 	custom_fields = {
 		'Address': [
@@ -119,7 +124,13 @@ def make_custom_fields():
 
 	for doctype, fields in custom_fields.items():
 		for df in fields:
-			create_custom_field(doctype, df)
+			field = frappe.db.get_value("Custom Field", {"dt": doctype, "fieldname": df["fieldname"]})
+			if not field:
+				create_custom_field(doctype, df)
+			else:
+				custom_field = frappe.get_doc("Custom Field", field)
+				custom_field.update(df)
+				custom_field.save()
 			
 def make_fixtures():
 	docs = [

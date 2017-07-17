@@ -210,7 +210,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	refresh: function() {
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
-		this.show_item_wise_taxes();
 		this.set_dynamic_labels();
 		this.setup_sms();
 	},
@@ -338,7 +337,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				this.frm.trigger("item_code", cdt, cdn);
 			}
 			else {
-				var sr_no = [];
+				var valid_serial_nos = [];
 
 				// Replacing all occurences of comma with carriage return
 				var serial_nos = item.serial_no.trim().replace(/,/g, '\n');
@@ -347,21 +346,19 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 				// Trim each string and push unique string to new list
 				for (var x=0; x<=serial_nos.length - 1; x++) {
-					if (serial_nos[x].trim() != "" && sr_no.indexOf(serial_nos[x].trim()) == -1) {
-						sr_no.push(serial_nos[x].trim());
+					if (serial_nos[x].trim() != "" && valid_serial_nos.indexOf(serial_nos[x].trim()) == -1) {
+						valid_serial_nos.push(serial_nos[x].trim());
 					}
 				}
 
 				// Add the new list to the serial no. field in grid with each in new line
-				item.serial_no = "";
-				for (var x=0; x<=sr_no.length - 1; x++)
-					item.serial_no += sr_no[x] + '\n';
+				item.serial_no = valid_serial_nos.join('\n');
 
 				refresh_field("serial_no", item.name, item.parentfield);
 				if(!doc.is_return) {
 					frappe.model.set_value(item.doctype, item.name,
-						"qty", sr_no.length / item.conversion_factor);
-					frappe.model.set_value(item.doctype, item.name, "stock_qty", sr_no.length);
+						"qty", valid_serial_nos.length / item.conversion_factor);
+					frappe.model.set_value(item.doctype, item.name, "stock_qty", valid_serial_nos.length);
 				}
 			}
 		}
@@ -369,7 +366,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	validate: function() {
 		this.calculate_taxes_and_totals(false);
-		this.set_item_wise_tax_breakup();
 	},
 
 	company: function() {
@@ -861,6 +857,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"pricing_rule": d.pricing_rule,
 					"warehouse": d.warehouse,
 					"serial_no": d.serial_no,
+					"discount_percentage": d.discount_percentage || 0.0,
 					"conversion_factor": d.conversion_factor || 1.0
 				});
 

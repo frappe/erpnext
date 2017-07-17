@@ -8,10 +8,12 @@ from frappe.utils import flt, cint
 
 from frappe import msgprint, _
 import frappe.defaults
+from frappe.model.utils import get_fetch_values
 from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.selling_controller import SellingController
 from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.stock.doctype.batch.batch import set_batch_nos
+from frappe.contacts.doctype.address.address import get_company_address
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -371,7 +373,7 @@ def get_invoiced_qty_map(delivery_note):
 def make_sales_invoice(source_name, target_doc=None):
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
-	def update_accounts(source, target):
+	def set_missing_values(source, target):
 		target.is_pos = 0
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
@@ -380,6 +382,11 @@ def make_sales_invoice(source_name, target_doc=None):
 			frappe.throw(_("All these items have already been invoiced"))
 
 		target.run_method("calculate_taxes_and_totals")
+
+		# set company address
+		target.update(get_company_address(target.company))
+		if target.company_address:
+			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))	
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
@@ -415,7 +422,7 @@ def make_sales_invoice(source_name, target_doc=None):
 			},
 			"add_if_empty": True
 		}
-	}, target_doc, update_accounts)
+	}, target_doc, set_missing_values)
 
 	return doc
 

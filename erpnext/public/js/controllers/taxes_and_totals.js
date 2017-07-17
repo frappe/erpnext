@@ -54,7 +54,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.manipulate_grand_total_for_inclusive_tax();
 		this.calculate_totals();
 		this._cleanup();
-		this.show_item_wise_taxes();
 	},
 
 	validate_conversion_rate: function() {
@@ -634,92 +633,5 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		}
 		
 		this.calculate_outstanding_amount(false)
-	},
-	
-	show_item_wise_taxes: function() {
-		if(this.frm.fields_dict.other_charges_calculation) {
-			this.frm.toggle_display("other_charges_calculation", this.frm.doc.other_charges_calculation);
-		}
-	},
-	
-	set_item_wise_tax_breakup: function() {
-		if(this.frm.fields_dict.other_charges_calculation) {
-			var html = this.get_item_wise_taxes_html();
-			// console.log(html);
-			this.frm.set_value("other_charges_calculation", html);
-			this.show_item_wise_taxes();
-		}
-	},
-		
-	get_item_wise_taxes_html: function() {
-		var item_tax = {};
-		var tax_accounts = [];
-		var company_currency = this.get_company_currency();
-
-		$.each(this.frm.doc["taxes"] || [], function(i, tax) {
-			var tax_amount_precision = precision("tax_amount", tax);
-			var tax_rate_precision = precision("rate", tax);
-			$.each(JSON.parse(tax.item_wise_tax_detail || '{}'),
-				function(item_code, tax_data) {
-					if(!item_tax[item_code]) item_tax[item_code] = {};
-					if($.isArray(tax_data)) {
-						var tax_rate = "";
-						if(tax_data[0] != null) {
-							tax_rate = (tax.charge_type === "Actual") ?
-								format_currency(flt(tax_data[0], tax_amount_precision),
-									company_currency, tax_amount_precision) :
-								(flt(tax_data[0], tax_rate_precision) + "%");
-						}
-						var tax_amount = format_currency(flt(tax_data[1], tax_amount_precision),
-							company_currency, tax_amount_precision);
-
-						item_tax[item_code][tax.name] = [tax_rate, tax_amount];
-					} else {
-						item_tax[item_code][tax.name] = [flt(tax_data, tax_rate_precision) + "%", ""];
-					}
-				});
-			tax_accounts.push([tax.name, tax.account_head]);
-		});
-		
-		var headings = $.map([__("Item Name"), __("Taxable Amount")].concat($.map(tax_accounts, 
-			function(head) { return head[1]; })), function(head) {
-				if(head==__("Item Name")) {
-					return '<th style="min-width: 100px;" class="text-left">' + (head || "") + "</th>";
-				} else {
-					return '<th style="min-width: 80px;" class="text-right">' + (head || "") + "</th>";
-				}	
-			}
-		).join("");
-
-		var distinct_item_names = [];
-		var distinct_items = [];
-		$.each(this.frm.doc["items"] || [], function(i, item) {
-			if(distinct_item_names.indexOf(item.item_code || item.item_name)===-1) {
-				distinct_item_names.push(item.item_code || item.item_name);
-				distinct_items.push(item);
-			}
-		});
-
-		var rows = $.map(distinct_items, function(item) {
-			var item_tax_record = item_tax[item.item_code || item.item_name];
-			if(!item_tax_record) { return null; }
-			return repl("<tr><td>%(item_name)s</td><td class='text-right'>%(taxable_amount)s</td>%(taxes)s</tr>", {
-				item_name: item.item_name,
-				taxable_amount: format_currency(item.net_amount, 
-					company_currency, precision("net_amount", item)),
-				taxes: $.map(tax_accounts, function(head) {
-					return item_tax_record[head[0]] ?
-						"<td class='text-right'>(" + item_tax_record[head[0]][0] + ") " + item_tax_record[head[0]][1] + "</td>" :
-						"<td></td>";
-				}).join("")
-			});
-		}).join("");
-
-		if(!rows) return "";
-		return '<div class="tax-break-up" style="overflow-x: auto;">\
-		<table class="table table-bordered table-hover">\
-			<thead><tr>' + headings + '</tr></thead> \
-			<tbody>' + rows + '</tbody> \
-		</table></div>';
 	}
 })

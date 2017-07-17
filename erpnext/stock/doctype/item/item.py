@@ -146,10 +146,6 @@ class Item(WebsiteGenerator):
 			return cstr(frappe.db.get_value('Item Group', self.item_group,
 				'route')) + '/' + self.scrub(self.item_name + '-' + random_string(5))
 
-	def get_parents(self, context):
-		item_group, route = frappe.db.get_value('Item Group', self.item_group, ['name', 'route'])
-		context.parents = [{'name': route, 'label': item_group}]
-
 	def validate_website_image(self):
 		"""Validate if the website image is a public file"""
 		auto_set_website_image = False
@@ -242,14 +238,11 @@ class Item(WebsiteGenerator):
 		context.show_search=True
 		context.search_link = '/product_search'
 
-		context.parent_groups = get_parent_item_groups(self.item_group) + \
-			[{"name": self.name}]
+		context.parents = get_parent_item_groups(self.item_group)
 
 		self.set_variant_context(context)
 		self.set_attribute_context(context)
 		self.set_disabled_attributes(context)
-
-		self.get_parents(context)
 
 		return context
 

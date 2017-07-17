@@ -1078,7 +1078,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					} else if (item.barcode == me.serach_item.$input.val()) {
 						search_status = false;
 						return item.barcode == me.serach_item.$input.val();
-					} else if (reg.test(item.item_code.toLowerCase()) || reg.test(item.description.toLowerCase()) ||
+					} else if (reg.test(item.item_code.toLowerCase()) || (item.description && reg.test(item.description.toLowerCase())) ||
 						reg.test(item.item_name.toLowerCase()) || reg.test(item.item_group.toLowerCase())) {
 						return true
 					}
@@ -1351,7 +1351,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.child.item_name = this.items[0].item_name;
 		this.child.stock_uom = this.items[0].stock_uom;
 		this.child.brand = this.items[0].brand;
-		this.child.description = this.items[0].description;
+		this.child.description = this.items[0].description || this.items[0].item_name;
 		this.child.discount_percentage = 0.0;
 		this.child.qty = 1;
 		this.child.item_group = this.items[0].item_group;
@@ -1396,10 +1396,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	get_company_currency: function () {
 		return erpnext.get_currency(this.frm.doc.company);
-	},
-
-	show_item_wise_taxes: function () {
-		return null;
 	},
 
 	show_items_in_item_cart: function () {

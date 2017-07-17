@@ -8,9 +8,10 @@ import datetime
 from frappe import _, msgprint, scrub
 from frappe.defaults import get_user_permissions
 from frappe.model.utils import get_fetch_values
-from frappe.utils import add_days, getdate, formatdate, get_first_day, date_diff, \
-	add_years, get_timestamp, nowdate, flt
-from frappe.contacts.doctype.address.address import get_address_display, get_default_address
+from frappe.utils import (add_days, getdate, formatdate, get_first_day, date_diff,
+	add_years, get_timestamp, nowdate, flt)
+from frappe.contacts.doctype.address.address import (get_address_display,
+	get_default_address, get_company_address)
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
 from erpnext.exceptions import PartyFrozen, PartyDisabled, InvalidAccountCurrency
 from erpnext.accounts.utils import get_fiscal_year
@@ -77,8 +78,9 @@ def set_address_details(out, party, party_type, doctype=None, company=None):
 		out.update(get_fetch_values(doctype, 'shipping_address_name', out.shipping_address_name))
 
 	if doctype and doctype in ['Sales Invoice']:
-		out.company_address = get_default_address('Company', company)
-		out.update(get_fetch_values(doctype, 'company_address', out.company_address))
+		out.update(get_company_address(company))
+		if out.company_address:
+			out.update(get_fetch_values(doctype, 'company_address', out.company_address))
 
 def set_contact_details(out, party, party_type):
 	out.contact_person = get_default_contact(party_type, party.name)

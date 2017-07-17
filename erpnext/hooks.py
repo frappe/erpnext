@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 from frappe import _
-from . import __version__ as app_version
 
 app_name = "erpnext"
 app_title = "ERPNext"
@@ -80,6 +79,7 @@ website_route_rules = [
 			"parents": [{"title": _("Supplier Quotation"), "name": "quotations"}]
 		}
 	},
+	{"from_route": "/quotation", "to_route": "Quotation"},
 	{"from_route": "/shipments", "to_route": "Delivery Note"},
 	{"from_route": "/shipments/<path:name>", "to_route": "order",
 		"defaults": {
@@ -110,6 +110,7 @@ standard_portal_menu_items = [
 	{"title": _("Projects"), "route": "/project", "reference_doctype": "Project"},
 	{"title": _("Request for Quotations"), "route": "/rfq", "reference_doctype": "Request for Quotation", "role": "Supplier"},
 	{"title": _("Supplier Quotation"), "route": "/quotations", "reference_doctype": "Supplier Quotation", "role": "Supplier"},
+	{"title": _("Quotations"), "route": "/quotation", "reference_doctype": "Quotation", "role":"Customer"},
 	{"title": _("Orders"), "route": "/orders", "reference_doctype": "Sales Order", "role":"Customer"},
 	{"title": _("Invoices"), "route": "/invoices", "reference_doctype": "Sales Invoice", "role":"Customer"},
 	{"title": _("Shipments"), "route": "/shipments", "reference_doctype": "Delivery Note", "role":"Customer"},
@@ -187,6 +188,8 @@ scheduler_events = {
 	]
 }
 
+email_brand_image = "assets/erpnext/images/erpnext-logo.jpg"
+
 default_mail_footer = """<div style="text-align: center;">
 	<a href="https://erpnext.com?source=via_email_footer" target="_blank" style="color: #8d99a6;">
 		Sent via ERPNext
@@ -204,3 +207,11 @@ bot_parsers = [
 get_site_info = 'erpnext.utilities.get_site_info'
 
 payment_gateway_enabled = "erpnext.accounts.utils.create_payment_gateway_account"
+
+regional_overrides = {
+	'India': {
+		'erpnext.tests.test_regional.test_method': 'erpnext.regional.india.utils.test_method',
+		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_header': 'erpnext.regional.india.utils.get_itemised_tax_breakup_header',
+		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_data': 'erpnext.regional.india.utils.get_itemised_tax_breakup_data'
+	}
+}
