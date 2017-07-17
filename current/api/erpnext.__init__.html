@@ -161,6 +161,28 @@
     
     
 	<p class="docs-attr-name">
+        <a name="erpnext.allow_regional" href="#erpnext.allow_regional" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.<b>allow_regional</b>
+        <i class="text-muted">(fn)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Decorator to make a function regionally overridable</p>
+
+<pre><code>Example:
+@erpnext.allow_regional
+def myfunction():
+  pass
+</code></pre>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
         <a name="erpnext.encode_company_abbr" href="#erpnext.encode_company_abbr" class="text-muted small">
             <i class="fa fa-link small" style="color: #ccc;"></i></a>
 		erpnext.<b>encode_company_abbr</b>
@@ -215,6 +237,25 @@
         <i class="text-muted">()</i>
     </p>
 	<div class="docs-attr-desc"><p>Returns the currency of the default company</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.get_region" href="#erpnext.get_region" class="text-muted small">
+            <i class="fa fa-link small" style="color: #ccc;"></i></a>
+		erpnext.<b>get_region</b>
+        <i class="text-muted">(company=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Return the default country based on flag, company or global settings</p>
+
+<pre><code>You can also set global company flag in `frappe.flags.company`
+</code></pre>
 </div>
 	<br>
 
