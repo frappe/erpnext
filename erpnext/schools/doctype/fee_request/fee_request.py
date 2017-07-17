@@ -49,10 +49,6 @@ class FeeRequest(Document):
 			self.grand_total = total_fee_count*self.total_amount
 			self.grand_total_in_words = money_in_words(self.grand_total)
 
-		if self.fee_request_against == "Student Group":
-			for student_group in self.student_groups:
-				students += get_student_group_students(student_group, self.academic_year)
-
 
 @frappe.whitelist()
 def get_fee_structure(source_name,target_doc=None):

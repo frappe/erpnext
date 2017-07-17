@@ -583,7 +583,10 @@ class SalesInvoice(SellingController):
 			return
 
 		if not gl_entries:
+			print ("if not gl_entries")
 			gl_entries = self.get_gl_entries()
+
+		print (gl_entries)
 
 		if gl_entries:
 			from erpnext.accounts.general_ledger import make_gl_entries
@@ -593,6 +596,7 @@ class SalesInvoice(SellingController):
 
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
 				update_outstanding=update_outstanding, merge_entries=False)
+			# frappe.throw("go ahead bro")
 
 			if update_outstanding == "No":
 				from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
@@ -609,18 +613,22 @@ class SalesInvoice(SellingController):
 				delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 	def get_gl_entries(self, warehouse_account=None):
+		print ("inside the get_gl_entries")
 		from erpnext.accounts.general_ledger import merge_similar_entries
 
 		gl_entries = []
 
 		self.make_customer_gl_entry(gl_entries)
+		print ("make cuustomer gl entry", gl_entries)
 
 		self.make_tax_gl_entries(gl_entries)
 
 		self.make_item_gl_entries(gl_entries)
+		print ("make item gl entry", gl_entries)
 
 		# merge gl entries before adding pos entries
 		gl_entries = merge_similar_entries(gl_entries)
+		print ("after merged gl entry", gl_entries)
 
 		self.make_pos_gl_entries(gl_entries)
 		self.make_gle_for_change_amount(gl_entries)
