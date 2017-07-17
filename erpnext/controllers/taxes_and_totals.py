@@ -515,7 +515,7 @@ class calculate_taxes_and_totals(object):
 		
 		# get headers
 		tax_accounts = list(set([d.description for d in self.doc.taxes]))
-		headers = get_itemised_tax_breakup_header(tax_accounts)
+		headers = get_itemised_tax_breakup_header(self.doc.doctype + " Item", tax_accounts)
 		
 		# get tax breakup data
 		itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(self.doc)
@@ -533,7 +533,7 @@ class calculate_taxes_and_totals(object):
 		)
 
 @erpnext.allow_regional
-def get_itemised_tax_breakup_header(tax_accounts):
+def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
 	return [_("Item"), _("Taxable Amount")] + tax_accounts
 
 @erpnext.allow_regional

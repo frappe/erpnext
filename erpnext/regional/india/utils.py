@@ -24,17 +24,23 @@ def validate_gstin_for_india(doc, method):
 				frappe.throw(_("First 2 digits of GSTIN should match with State number {0}")
 					.format(doc.gst_state_number))
 
-def get_itemised_tax_breakup_header(tax_accounts):
-	return [_("HSN/SAC"), _("Taxable Amount")] + tax_accounts
+def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
+	if frappe.get_meta(item_doctype).has_field('gst_hsn_code'):
+		return [_("HSN/SAC"), _("Taxable Amount")] + tax_accounts
+	else:
+		return [_("Item"), _("Taxable Amount")] + tax_accounts
 	
 def get_itemised_tax_breakup_data(doc):
 	itemised_tax = get_itemised_tax(doc.taxes)
 
 	itemised_taxable_amount = get_itemised_taxable_amount(doc.items)
+	
+	if not frappe.get_meta(doc.doctype + " Item").has_field('gst_hsn_code'):
+		return itemised_tax, itemised_taxable_amount
 
 	item_hsn_map = frappe._dict()
 	for d in doc.items:
-		item_hsn_map.setdefault(d.item_code or d.item_name, d.gst_hsn_code)
+		item_hsn_map.setdefault(d.item_code or d.item_name, d.get("gst_hsn_code"))
 
 	hsn_tax = {}
 	for item, taxes in itemised_tax.items():
