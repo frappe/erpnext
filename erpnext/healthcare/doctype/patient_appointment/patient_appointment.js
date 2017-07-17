@@ -251,4 +251,4 @@ var calculate_age = function(birth) {
 	age.setTime(ageMS);
 	var years =  age.getFullYear() - 1970;
 	return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)";
-}
+};
