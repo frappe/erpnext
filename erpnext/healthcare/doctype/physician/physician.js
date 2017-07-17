@@ -68,6 +68,6 @@ frappe.ui.form.on("Physician", "employee", function(frm) {
 				if(!frm.doc.address)
 					frappe.model.set_value(frm.doctype,frm.docname, "address", data.message.current_address);
 			}
-		})
+		});
 	}
 });
