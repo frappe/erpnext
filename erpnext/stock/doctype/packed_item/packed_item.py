@@ -104,3 +104,6 @@ def get_items_from_product_bundle(args):
 		items.append(get_item_details(args))
 		
 	return items
+	
+def on_doctype_update():
+	frappe.db.add_index("Packed Item", ["item_code", "warehouse"])
