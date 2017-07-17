@@ -419,3 +419,4 @@ erpnext.patches.v8_1.add_hsn_sac_codes
 erpnext.patches.v8_1.update_gst_state #17-07-2017
 erpnext.patches.v8_1.removed_report_support_hours
 erpnext.patches.v8_1.add_indexes_in_transaction_doctypes
+erpnext.patches.v8_1.update_expense_claim_status
