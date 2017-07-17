@@ -81,14 +81,12 @@ QUnit.test('test student applicant', function(assert){
 		},
 		() => frappe.timeout(1),
 		() => $('a:contains("Guardian Details"):visible').click(),
-		() => $('.btn:contains("Add Row"):visible').click(),
 		() => {
 			assert.ok(cur_frm.get_field("guardians").grid.grid_rows[0].doc.guardian == guradian_auto_code);
 			assert.ok(cur_frm.get_field("guardians").grid.grid_rows[0].doc.relation == 'Father');
 			assert.ok(cur_frm.get_field("guardians").grid.grid_rows[0].doc.guardian_name == guardian_name);
 		},
 		() => $('a:contains("Sibling Details"):visible').click(),
-		() => $('.btn:contains("Add Row"):visible').click(),
 		() => {
 			assert.ok(cur_frm.get_field("siblings").grid.grid_rows[0].doc.full_name == 'Test Name');
 			assert.ok(cur_frm.get_field("siblings").grid.grid_rows[0].doc.gender == 'Male');
@@ -96,6 +94,6 @@ QUnit.test('test student applicant', function(assert){
 			assert.ok(cur_frm.get_field("siblings").grid.grid_rows[0].doc.program == 'Test Program');
 			assert.ok(cur_frm.get_field("siblings").grid.grid_rows[0].doc.date_of_birth == '1995-07-20');
 		},
-		() => done()
+		// () => done()
 	]);
 });
