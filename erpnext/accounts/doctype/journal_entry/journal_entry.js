@@ -125,11 +125,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 				var party_account_field = jvd.reference_type==="Sales Invoice" ? "debit_to": "credit_to";
 				out.filters.push([jvd.reference_type, party_account_field, "=", jvd.account]);
-			}
-			else if(jvd.reference_type === 'Asset'){
-				frappe.model.validate_missing(jvd, "account");
-			}
-			else {
+			} else {
 				// party_type and party mandatory
 				frappe.model.validate_missing(jvd, "party_type");
 				frappe.model.validate_missing(jvd, "party");
