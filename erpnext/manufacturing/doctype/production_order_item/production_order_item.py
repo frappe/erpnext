@@ -8,3 +8,6 @@ from frappe.model.document import Document
 
 class ProductionOrderItem(Document):
 	pass
+
+def on_doctype_update():
+	frappe.db.add_index("Production Order Item", ["item_code", "source_warehouse"])

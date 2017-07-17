@@ -417,3 +417,4 @@ erpnext.patches.v8_1.remove_sales_invoice_from_returned_serial_no
 erpnext.patches.v8_1.allow_invoice_copy_to_edit_after_submit
 erpnext.patches.v8_1.add_hsn_sac_codes
 erpnext.patches.v8_1.update_gst_state
+erpnext.patches.v8_1.add_indexes_in_transaction_doctypes
