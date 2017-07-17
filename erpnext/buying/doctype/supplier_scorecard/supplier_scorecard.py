@@ -25,21 +25,17 @@ class SupplierScorecard(Document):
 			self.save()
 
 	def validate_standings(self):
-		# Check that there are no overlapping scores
+		# Check that there are no overlapping scores and check that there are no missing scores
+		score = 0
 		for c1 in self.standings:
 			for c2 in self.standings:
 				if c1 != c2:
 					if (c1.max_grade > c2.min_grade and c1.min_grade < c2.max_grade):
-						throw(_('Overlap in scoring between ' + c1.standing_name + ' and ' + c2.standing_name))
-
-		# Check that there are no missing scores
-		score = 0
-		for c1 in self.standings:
-			for c2 in self.standings:
+						throw(_('Overlap in scoring between {0} and {1}').format(c1.standing_name,c2.standing_name))
 				if c2.min_grade == score:
 					score = c2.max_grade
-		if score < 100 :
-			throw(_('Unable to find score starting at ' + str(score) + '. You need to have standing scores covering 0 to 100'))
+		if score < 100:
+			throw(_('Unable to find score starting at {0}. You need to have standing scores covering 0 to 100').format(score))
 
 	def validate_criteria_weights(self):
 
@@ -92,22 +88,18 @@ class SupplierScorecard(Document):
 				(not standing.max_grade or (standing.max_grade > self.supplier_score)):
 				self.status = standing.standing_name
 				self.indicator_color = standing.standing_color
-				self.warn_pos = standing.warn_pos
-				self.warn_rfqs = standing.warn_rfqs
-				self.prevent_rfqs = standing.prevent_rfqs
-				self.prevent_pos = standing.prevent_pos
 				self.notify_supplier = standing.notify_supplier
 				self.notify_employee = standing.notify_employee
 				self.employee_link = standing.employee_link
 
 				#Update supplier standing info
-				frappe.db.set_value("Supplier", self.supplier, "prevent_pos", self.prevent_pos)
-				frappe.db.set_value("Supplier", self.supplier, "prevent_rfqs", self.prevent_rfqs)
-				frappe.db.set_value("Supplier", self.supplier, "warn_rfqs", self.warn_rfqs)
-				frappe.db.set_value("Supplier", self.supplier, "warn_pos", self.warn_pos)
+				for fieldname in ('prevent_pos', 'prevent_rfqs','warn_rfqs','warn_pos'):
+					self.set(fieldname, standing.get(fieldname))
+					frappe.db.set_value("Supplier", self.supplier, fieldname, self.get(fieldname))
+
 
 @frappe.whitelist()
-def timeline_data(doctype, name):
+def get_timeline_data(doctype, name):
 	# Get a list of all the associated scorecards
 	scs = frappe.get_doc(doctype, name)
 	out = {}
@@ -122,10 +114,10 @@ def timeline_data(doctype, name):
 			{"scs": scs.name}, as_dict=1)
 
 	for sc in scorecards:
-		sc = frappe.get_doc('Supplier Scorecard Period', sc.name)
+		start_date, end_date, total_score = frappe.db.get_value('Supplier Scorecard Period', sc.name, ['start_date', 'end_date', 'total_score'])
+		for single_date in daterange(start_date, end_date):
+			timeline_data[time.mktime(single_date.timetuple())] =  total_score
 
-		for single_date in daterange(sc.start_date, sc.end_date):
-			timeline_data[time.mktime(single_date.timetuple())] =  sc.total_score
 	out['timeline_data'] = timeline_data
 	return out
 
@@ -178,7 +170,7 @@ def make_all_scorecards(docname):
 					AND scp.end_date > %(start_date)s))
 			ORDER BY
 				scp.end_date DESC""",
-				{"sc": docname,"start_date": start_date,"end_date": end_date, "supplier": supplier}, as_dict=1)
+				{"sc": docname, "start_date": start_date, "end_date": end_date, "supplier": supplier}, as_dict=1)
 		if len(scorecards) == 0:
 			period_card = make_supplier_scorecard(docname, None)
 			period_card.start_date = start_date
@@ -192,7 +184,7 @@ def make_all_scorecards(docname):
 		start_date = getdate(add_days(end_date,1))
 		end_date = get_scorecard_date(sc.period, start_date)
 	if scp_count > 0:
-		frappe.msgprint(_("Created {0} scorecards for ".format(scp_count) + sc.supplier + " between: ") + str(first_start_date) + " - " + str(last_end_date))
+		frappe.msgprint(_("Created {0} scorecards for {1} between: ").format(scp_count, sc.supplier) + str(first_start_date) + " - " + str(last_end_date))
 	return scp_count
 
 def get_scorecard_date(period, start_date):
@@ -204,34 +196,67 @@ def get_scorecard_date(period, start_date):
 		end_date = add_days(add_years(start_date,1), -1)
 	return end_date
 
-def make_install_records():
-	install_docs = [
-		{"param_name":"total_accepted_items","name":"Total Accepted Items","doctype":"Supplier Scorecard Variable","variable_label":"Total Accepted Items","path":"get_total_accepted_items"},
-		{"param_name":"total_accepted_amount","name":"Total Accepted Amount","doctype":"Supplier Scorecard Variable","variable_label":"Total Accepted Amount","path":"get_total_accepted_amount"},
-		{"param_name":"total_rejected_items","name":"Total Rejected Items","doctype":"Supplier Scorecard Variable","variable_label":"Total Rejected Items","path":"get_total_rejected_items"},
-		{"param_name":"total_rejected_amount","name":"Total Rejected Amount","doctype":"Supplier Scorecard Variable","variable_label":"Total Rejected Amount","path":"get_total_rejected_amount"},
-		{"param_name":"total_received_items","name":"Total Received Items","doctype":"Supplier Scorecard Variable","variable_label":"Total Received Items","path":"get_total_received_items"},
-		{"param_name":"total_received_amount","name":"Total Received Amount","doctype":"Supplier Scorecard Variable","variable_label":"Total Received Amount","path":"get_total_received_amount"},
-		{"param_name":"rfq_response_days","name":"RFQ Response Days","doctype":"Supplier Scorecard Variable","variable_label":"RFQ Response Days","path":"get_rfq_response_days"},
-		{"param_name":"sq_total_items","name":"SQ Total Items","doctype":"Supplier Scorecard Variable","variable_label":"SQ Total Items","path":"get_sq_total_items"},
-		{"param_name":"sq_total_number","name":"SQ Total Number","doctype":"Supplier Scorecard Variable","variable_label":"SQ Total Number","path":"get_sq_total_number"},
-		{"param_name":"rfq_total_number","name":"RFQ Total Number","doctype":"Supplier Scorecard Variable","variable_label":"RFQ Total Number","path":"get_rfq_total_number"},
-		{"param_name":"rfq_total_items","name":"RFQ Total Items","doctype":"Supplier Scorecard Variable","variable_label":"RFQ Total Items","path":"get_rfq_total_items"},
-		{"param_name":"tot_item_days","name":"Total Item Days","doctype":"Supplier Scorecard Variable","variable_label":"Total Item Days","path":"get_item_workdays"},
-		{"param_name":"on_time_shipment_num","name":"# of On Time Shipments","doctype":"Supplier Scorecard Variable","variable_label":"# of On Time Shipments","path":"get_on_time_shipments"},
-		{"param_name":"cost_of_delayed_shipments","name":"Cost of Delayed Shipments","doctype":"Supplier Scorecard Variable","variable_label":"Cost of Delayed Shipments","path":"get_cost_of_delayed_shipments"},
-		{"param_name":"cost_of_on_time_shipments","name":"Cost of On Time Shipments","doctype":"Supplier Scorecard Variable","variable_label":"Cost of On Time Shipments","path":"get_cost_of_on_time_shipments"},
-		{"param_name":"total_working_days","name":"Total Working Days","doctype":"Supplier Scorecard Variable","variable_label":"Total Working Days","path":"get_total_workdays"},
-		{"param_name":"tot_cost_shipments","name":"Total Cost of Shipments","doctype":"Supplier Scorecard Variable","variable_label":"Total Cost of Shipments","path":"get_total_cost_of_shipments"},
-		{"param_name":"tot_days_late","name":"Total Days Late","doctype":"Supplier Scorecard Variable","variable_label":"Total Days Late","path":"get_total_days_late"},
-		{"param_name":"total_shipments","name":"Total Shipments","doctype":"Supplier Scorecard Variable","variable_label":"Total Shipments","path":"get_total_shipments"},
-		{"min_grade":0.0,"name":"Very Poor","prevent_rfqs":1,"notify_supplier":0,"doctype":"Supplier Scorecard Standing","max_grade":30.0,"prevent_pos":1,"standing_color":"Red","notify_employee":0,"standing_name":"Very Poor"},
-		{"min_grade":30.0,"name":"Poor","prevent_rfqs":1,"notify_supplier":0,"doctype":"Supplier Scorecard Standing","max_grade":50.0,"prevent_pos":0,"standing_color":"Red","notify_employee":0,"standing_name":"Poor"},
-		{"min_grade":50.0,"name":"Average","prevent_rfqs":0,"notify_supplier":0,"doctype":"Supplier Scorecard Standing","max_grade":80.0,"prevent_pos":0,"standing_color":"Green","notify_employee":0,"standing_name":"Average"},
-		{"min_grade":80.0,"name":"Excellent","prevent_rfqs":0,"notify_supplier":0,"doctype":"Supplier Scorecard Standing","max_grade":100.0,"prevent_pos":0,"standing_color":"Blue","notify_employee":0,"standing_name":"Excellent"},
+def make_default_records():
+	install_variable_docs = [
+		{"param_name": "total_accepted_items", "variable_label": "Total Accepted Items", \
+			"path": "get_total_accepted_items"},
+		{"param_name": "total_accepted_amount", "variable_label": "Total Accepted Amount", \
+			"path": "get_total_accepted_amount"},
+		{"param_name": "total_rejected_items", "variable_label": "Total Rejected Items", \
+			"path": "get_total_rejected_items"},
+		{"param_name": "total_rejected_amount", "variable_label": "Total Rejected Amount", \
+			"path": "get_total_rejected_amount"},
+		{"param_name": "total_received_items", "variable_label": "Total Received Items", \
+			"path": "get_total_received_items"},
+		{"param_name": "total_received_amount", "variable_label": "Total Received Amount", \
+			"path": "get_total_received_amount"},
+		{"param_name": "rfq_response_days", "variable_label": "RFQ Response Days", \
+			"path": "get_rfq_response_days"},
+		{"param_name": "sq_total_items", "variable_label": "SQ Total Items", \
+			"path": "get_sq_total_items"},
+		{"param_name": "sq_total_number", "variable_label": "SQ Total Number", \
+			"path": "get_sq_total_number"},
+		{"param_name": "rfq_total_number", "variable_label": "RFQ Total Number", \
+			"path": "get_rfq_total_number"},
+		{"param_name": "rfq_total_items", "variable_label": "RFQ Total Items", \
+			"path": "get_rfq_total_items"},
+		{"param_name": "tot_item_days", "variable_label": "Total Item Days", \
+			"path": "get_item_workdays"},
+		{"param_name": "on_time_shipment_num", "variable_label": "# of On Time Shipments", "path": \
+			"get_on_time_shipments"},
+		{"param_name": "cost_of_delayed_shipments", "variable_label": "Cost of Delayed Shipments", \
+			"path": "get_cost_of_delayed_shipments"},
+		{"param_name": "cost_of_on_time_shipments", "variable_label": "Cost of On Time Shipments", \
+			"path": "get_cost_of_on_time_shipments"},
+		{"param_name": "total_working_days", "variable_label": "Total Working Days", \
+			"path": "get_total_workdays"},
+		{"param_name": "tot_cost_shipments", "variable_label": "Total Cost of Shipments", \
+			"path": "get_total_cost_of_shipments"},
+		{"param_name": "tot_days_late", "variable_label": "Total Days Late", \
+			"path": "get_total_days_late"},
+		{"param_name": "total_shipments", "variable_label": "Total Shipments", \
+			"path": "get_total_shipments"}
 	]
-	for d in install_docs:
+	install_standing_docs = [
+		{"min_grade": 0.0, "prevent_rfqs": 1, "notify_supplier": 0, "max_grade": 30.0, "prevent_pos": 1, \
+			"standing_color": "Red", "notify_employee": 0, "standing_name": "Very Poor"},
+		{"min_grade": 30.0, "prevent_rfqs": 1, "notify_supplier": 0, "max_grade": 50.0, "prevent_pos": 0, \
+			"standing_color": "Red", "notify_employee": 0, "standing_name": "Poor"},
+		{"min_grade": 50.0, "prevent_rfqs": 0, "notify_supplier": 0, "max_grade": 80.0, "prevent_pos": 0, \
+			"standing_color": "Green", "notify_employee": 0, "standing_name": "Average"},
+		{"min_grade": 80.0, "prevent_rfqs": 0, "notify_supplier": 0, "max_grade": 100.0, "prevent_pos": 0, \
+			"standing_color": "Blue", "notify_employee": 0, "standing_name": "Excellent"},
+	]
+
+	for d in install_variable_docs:
 		try:
+			d.doctype = "Supplier Scorecard Variable"
+			frappe.get_doc(d).insert()
+		except frappe.NameError:
+			pass
+	for d in install_standing_docs:
+		try:
+			d.doctype = "Supplier Scorecard Standing"
 			frappe.get_doc(d).insert()
 		except frappe.NameError:
 			pass

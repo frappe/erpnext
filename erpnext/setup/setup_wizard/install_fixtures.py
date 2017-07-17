@@ -214,8 +214,8 @@ def install(country=None):
 	records += [{'doctype': 'Lead Source', 'source_name': _(d)} for d in default_lead_sources]
 
 	# Records for the Supplier Scorecard
-	from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_install_records
-	make_install_records()
+	from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_default_records
+	make_default_records()
 
 	from frappe.modules import scrub
 	for r in records:

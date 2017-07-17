@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_install_records
+from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_default_records
 def execute():
 
-	make_install_records()
+	make_default_records()
