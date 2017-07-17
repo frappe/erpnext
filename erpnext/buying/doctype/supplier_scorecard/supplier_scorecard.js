@@ -121,7 +121,7 @@ var loadAllCriteria = function(frm) {
 			refresh_field("criteria");
 		}
 	});
-}
+};
 var loadAllStandings = function(frm) {
 	frappe.call({
 		method: "erpnext.buying.doctype.supplier_scorecard_standing.supplier_scorecard_standing.get_standings_list",
@@ -141,6 +141,6 @@ var loadAllStandings = function(frm) {
 			refresh_field("standings");
 		}
 	});
-}
+};
 
 

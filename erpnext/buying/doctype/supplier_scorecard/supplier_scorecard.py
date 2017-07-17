@@ -250,13 +250,13 @@ def make_default_records():
 
 	for d in install_variable_docs:
 		try:
-			d.doctype = "Supplier Scorecard Variable"
+			d['doctype'] = "Supplier Scorecard Variable"
 			frappe.get_doc(d).insert()
 		except frappe.NameError:
 			pass
 	for d in install_standing_docs:
 		try:
-			d.doctype = "Supplier Scorecard Standing"
+			d['doctype'] = "Supplier Scorecard Standing"
 			frappe.get_doc(d).insert()
 		except frappe.NameError:
 			pass
