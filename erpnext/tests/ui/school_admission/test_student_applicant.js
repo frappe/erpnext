@@ -11,7 +11,7 @@ QUnit.test('test student applicant', function(assert){
 		() => frappe.tests.setup_doctype('Academic Term'),
 		() => frappe.tests.setup_doctype('Program'),
 		() => frappe.tests.setup_doctype('Student Admission'),
-		
+
 		// Setting up Guardian's entry and fetching its generated name
 		() => frappe.tests.setup_doctype('Guardian'),
 		() => {
@@ -54,11 +54,11 @@ QUnit.test('test student applicant', function(assert){
 		() => $('a:contains("Sibling Details"):visible').click(),
 		() => $('.btn:contains("Add Row"):visible').click(),
 		() => {
-			cur_frm.get_field("siblings").grid.grid_rows[0].doc.full_name = "Test Name"
-			cur_frm.get_field("siblings").grid.grid_rows[0].doc.gender = "Male"
-			cur_frm.get_field("siblings").grid.grid_rows[0].doc.institution = "Test Institution"
-			cur_frm.get_field("siblings").grid.grid_rows[0].doc.program = "Test Program"
-			cur_frm.get_field("siblings").grid.grid_rows[0].doc.date_of_birth = "1995-07-20"
+			cur_frm.get_field("siblings").grid.grid_rows[0].doc.full_name = "Test Name";
+			cur_frm.get_field("siblings").grid.grid_rows[0].doc.gender = "Male";
+			cur_frm.get_field("siblings").grid.grid_rows[0].doc.institution = "Test Institution";
+			cur_frm.get_field("siblings").grid.grid_rows[0].doc.program = "Test Program";
+			cur_frm.get_field("siblings").grid.grid_rows[0].doc.date_of_birth = "1995-07-20";
 			$('span.hidden-xs.octicon.octicon-triangle-up').click();
 			cur_frm.save();
 		},
@@ -67,7 +67,7 @@ QUnit.test('test student applicant', function(assert){
 			assert.ok(cur_frm.doc.middle_name == 'Test Mname');
 			assert.ok(cur_frm.doc.last_name == 'Test Lname');
 			assert.ok(cur_frm.doc.program == 'Standard Test');
-			assert.ok(cur_frm.doc.student_admission == '2016-17 Admissions')
+			assert.ok(cur_frm.doc.student_admission == '2016-17 Admissions');
 			assert.ok(cur_frm.doc.date_of_birth == '1995-07-20');
 			assert.ok(cur_frm.doc.student_email_id == 'test@testmail.com');
 			assert.ok(cur_frm.doc.gender == 'Male');
