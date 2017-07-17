@@ -51,7 +51,9 @@ frappe.ui.form.on("Process Payroll", {
 	},
 
 	end_date: function (frm) {
-		frm.trigger("set_start_end_dates");
+//		console.log("catch", frm.doc.end_date);
+//		frm.trigger("set_start_end_dates");
+//		console.log("catch", frm.doc.end_date);
 	},
 
 	salary_slip_based_on_timesheet: function (frm) {
