@@ -548,7 +548,7 @@ def get_itemised_tax(taxes):
 	itemised_tax = {}
 	for tax in taxes:
 		tax_amount_precision = tax.precision("tax_amount")
-		tax_rate_precision = tax.precision("rate");
+		tax_rate_precision = tax.precision("rate")
 		
 		item_tax_map = json.loads(tax.item_wise_tax_detail) if tax.item_wise_tax_detail else {}
 		

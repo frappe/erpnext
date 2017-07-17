@@ -13,6 +13,7 @@ from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
 from frappe.model.naming import make_autoname
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
@@ -1106,24 +1107,58 @@ class TestSalesInvoice(unittest.TestCase):
 				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 
 	def test_item_wise_tax_breakup_india(self):
-		frappe.db.set_value("Company", "_Test Company", "country", "India")
+		frappe.flags.country = "India"
 		
 		si = self.create_si_to_test_tax_breakup()
+		itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(si)
 
-		tax_breakup_html = '''<div class="tax-break-up" style="overflow-x: auto;">\n\t<table class="table table-bordered table-hover">\n\t\t<thead>\n\t\t\t<tr>\n\t\t\t\t\n\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t<th class="text-left" style="min-width: 120px;">HSN/SAC</th>\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t<th class="text-right" style="min-width: 80px;">Taxable Amount</th>\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t<th class="text-right" style="min-width: 80px;">Service Tax</th>\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\n\t\t\t</tr>\n\t\t</thead>\n\t\t<tbody>\n\t\t\t\n\t\t\t\t<tr>\n\t\t\t\t\t<td>999800</td>\n\t\t\t\t\t<td class="text-right">\n\t\t\t\t\t\t\u20b9 15,000.00\n\t\t\t\t\t</td>\n\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\t<td class="text-right">\n\t\t\t\t\t\t\t\t(10.0)\n\t\t\t\t\t\t\t\t\u20b9 1,500.00\n\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t</tr>\n\t\t\t\n\t\t</tbody>\n\t</table>\n</div>'''
+		expected_itemised_tax = {
+			"999800": {
+				"Service Tax": {
+					"tax_rate": 10.0,
+					"tax_amount": 1500.0
+				}
+			}
+		}
+		expected_itemised_taxable_amount = {
+			"999800": 15000.0
+		}
+
+		self.assertEqual(itemised_tax, expected_itemised_tax)
+		self.assertEqual(itemised_taxable_amount, expected_itemised_taxable_amount)
 		
-		self.assertEqual(si.other_charges_calculation, tax_breakup_html)
+		frappe.flags.country = None
 
 	def test_item_wise_tax_breakup_outside_india(self):
-		frappe.db.set_value("Company", "_Test Company", "country", "United States")
+		frappe.flags.country = "United States"
 		
 		si = self.create_si_to_test_tax_breakup()
 
-		tax_breakup_html = '''<div class="tax-break-up" style="overflow-x: auto;">\n\t<table class="table table-bordered table-hover">\n\t\t<thead>\n\t\t\t<tr>\n\t\t\t\t\n\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t<th class="text-left" style="min-width: 120px;">Item</th>\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t<th class="text-right" style="min-width: 80px;">Taxable Amount</th>\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\t\t<th class="text-right" style="min-width: 80px;">Service Tax</th>\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\n\t\t\t</tr>\n\t\t</thead>\n\t\t<tbody>\n\t\t\t\n\t\t\t\t<tr>\n\t\t\t\t\t<td>_Test Item</td>\n\t\t\t\t\t<td class="text-right">\n\t\t\t\t\t\t\u20b9 10,000.00\n\t\t\t\t\t</td>\n\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\t<td class="text-right">\n\t\t\t\t\t\t\t\t(10.0)\n\t\t\t\t\t\t\t\t\u20b9 1,000.00\n\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t</tr>\n\t\t\t\n\t\t\t\t<tr>\n\t\t\t\t\t<td>_Test Item 2</td>\n\t\t\t\t\t<td class="text-right">\n\t\t\t\t\t\t\u20b9 5,000.00\n\t\t\t\t\t</td>\n\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\n\t\t\t\t\t\t\t<td class="text-right">\n\t\t\t\t\t\t\t\t(10.0)\n\t\t\t\t\t\t\t\t\u20b9 500.00\n\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t</tr>\n\t\t\t\n\t\t</tbody>\n\t</table>\n</div>'''
+		itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(si)
+
+		expected_itemised_tax = {
+			"_Test Item": {
+				"Service Tax": {
+					"tax_rate": 10.0,
+					"tax_amount": 1000.0
+				}
+			},
+			"_Test Item 2": {
+				"Service Tax": {
+					"tax_rate": 10.0,
+					"tax_amount": 500.0
+				}
+			}
+		}
+		expected_itemised_taxable_amount = {
+			"_Test Item": 10000.0,
+			"_Test Item 2": 5000.0
+		}
+
+		self.assertEqual(itemised_tax, expected_itemised_tax)
+		self.assertEqual(itemised_taxable_amount, expected_itemised_taxable_amount)
 		
-		self.assertEqual(si.other_charges_calculation, tax_breakup_html)
-		
-		frappe.db.set_value("Company", "_Test Company", "country", "India")
+		frappe.flags.country = None
 
 	def create_si_to_test_tax_breakup(self):
 		si = create_sales_invoice(qty=100, rate=50, do_not_save=True)
@@ -1156,7 +1191,6 @@ class TestSalesInvoice(unittest.TestCase):
 			"rate": 10
 		})
 		si.insert()
-		
 		return si
 
 def create_sales_invoice(**args):
