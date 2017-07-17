@@ -113,5 +113,23 @@ class TestExpenseClaim(unittest.TestCase):
 			self.assertEquals(expected_values[gle.account][1], gle.debit)
 			self.assertEquals(expected_values[gle.account][2], gle.credit)
 
+	def test_rejected_expense_claim(self):
+		payable_account = get_payable_account("Wind Power LLC")
+		expense_claim = frappe.get_doc({
+			 "doctype": "Expense Claim",
+			 "employee": "_T-Employee-0001",
+			 "payable_account": payable_account,
+			 "approval_status": "Rejected",
+			 "expenses":
+			 	[{ "expense_type": "Travel", "default_account": "Travel Expenses - WP", "claim_amount": 300, "sanctioned_amount": 200 }]
+		})
+		expense_claim.submit()
+
+		self.assertEquals(expense_claim.status, 'Rejected')
+		self.assertEquals(expense_claim.total_sanctioned_amount, 0.0)
+
+		gl_entry = frappe.get_all('GL Entry', {'voucher_type': 'Expense Claim', 'voucher_no': expense_claim.name})
+		self.assertEquals(len(gl_entry), 0)
+
 def get_payable_account(company):
 	return frappe.db.get_value('Company', company, 'default_payable_account')
