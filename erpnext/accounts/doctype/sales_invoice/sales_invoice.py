@@ -18,6 +18,7 @@ from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timeshe
 from erpnext.accounts.doctype.asset.depreciation \
 	import get_disposal_account_and_cost_center, get_gl_entries_on_asset_disposal
 from erpnext.stock.doctype.batch.batch import set_batch_nos
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_delivery_note_serial_no
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -812,8 +813,15 @@ class SalesInvoice(SellingController):
 		"""
 			validate serial number agains Delivery Note and Sales Invoice
 		"""
+		self.set_serial_no_against_delivery_note()
 		self.validate_serial_against_delivery_note()
 		self.validate_serial_against_sales_invoice()
+
+	def set_serial_no_against_delivery_note(self):
+		for item in self.items:
+			if item.serial_no and item.delivery_note and \
+				item.qty != len(get_serial_nos(item.serial_no)):
+				item.serial_no = get_delivery_note_serial_no(item.item_code, item.qty, item.delivery_note)
 
 	def validate_serial_against_delivery_note(self):
 		""" 
@@ -826,13 +834,17 @@ class SalesInvoice(SellingController):
 				continue
 
 			serial_nos = frappe.db.get_value("Delivery Note Item", item.dn_detail, "serial_no") or ""
-			dn_serial_nos = set(serial_nos.split("\n"))
+			dn_serial_nos = set(get_serial_nos(serial_nos))
 
 			serial_nos = item.serial_no or ""
-			si_serial_nos = set(serial_nos.split("\n"))
+			si_serial_nos = set(get_serial_nos(serial_nos))
 
 			if si_serial_nos - dn_serial_nos:
 				frappe.throw(_("Serial Numbers in row {0} does not match with Delivery Note".format(item.idx)))
+
+			if item.serial_no and cint(item.qty) != len(si_serial_nos):
+				frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.".format(
+					item.idx, item.qty, item.item_code, len(si_serial_nos))))
 
 	def validate_serial_against_sales_invoice(self):
 		""" check if serial number is already used in other sales invoice """
