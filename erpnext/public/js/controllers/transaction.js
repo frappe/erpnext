@@ -366,7 +366,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	validate: function() {
 		this.calculate_taxes_and_totals(false);
-		this.set_item_wise_tax_breakup();
 	},
 
 	company: function() {
