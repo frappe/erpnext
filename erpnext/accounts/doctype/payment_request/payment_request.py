@@ -61,6 +61,7 @@ class PaymentRequest(Document):
 	def set_payment_request_url(self):
 		if self.payment_account:
 			self.payment_url = self.get_payment_url()
+			print (self.payment_url)
 
 		if self.payment_url:
 			self.db_set('payment_url', self.payment_url)
@@ -69,8 +70,11 @@ class PaymentRequest(Document):
 			self.db_set('status', 'Initiated')
 
 	def get_payment_url(self):
-		data = frappe.db.get_value(self.reference_doctype, self.reference_name,
-			["company", "customer_name"], as_dict=1)
+		if self.reference_doctype != "Fees":
+			data = frappe.db.get_value(self.reference_doctype, self.reference_name, ["company", "customer_name"], as_dict=1)
+		else:
+			data = frappe.db.get_value(self.reference_doctype, self.reference_name, ["student_name"], as_dict=1)
+			data.update({"company": frappe.defaults.get_defaults().company})
 
 		controller = get_payment_gateway_controller(self.payment_gateway)
 		controller.validate_transaction_currency(self.currency)
@@ -98,6 +102,7 @@ class PaymentRequest(Document):
 
 	def create_payment_entry(self, submit=True):
 		"""create entry"""
+		print ("creating the payment entry")
 		frappe.flags.ignore_account_permission = True
 
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
@@ -252,6 +257,7 @@ def make_payment_request(**args):
 		if args.order_type == "Shopping Cart" or args.mute_email:
 			pr.flags.mute_email = True
 
+		print ("comign in creatinf the new dottype")
 		if args.submit_doc:
 			pr.insert(ignore_permissions=True)
 			pr.submit()
@@ -276,6 +282,9 @@ def get_amount(ref_doc, dt):
 			grand_total = flt(ref_doc.outstanding_amount)
 		else:
 			grand_total = flt(ref_doc.outstanding_amount) / ref_doc.conversion_rate
+
+	if dt == "Fees":
+		grand_total = ref_doc.outstanding_amount
 
 	if grand_total > 0 :
 		return grand_total

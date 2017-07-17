@@ -3,14 +3,7 @@
 
 frappe.ui.form.on('Fee Request', {
 	refresh: function(frm) {
-		
-	},
-	fee_request_against: function(frm) {
-		if (frm.doc.fee_request_against == "Program") {
-			frm.set_value('student_groups', null)	
-		} else if (frm.doc.fee_request_against == "Student Group") {
-			frm.set_value('programs', null)				
-		}
+		frm.disable_save();	
 	},
 	fee_structure: function(frm) {
 		if (frm.doc.fee_structure) {
