@@ -11,8 +11,8 @@ class TestNotifications(unittest.TestCase):
 	def setUp(self):
 		test_records = [
 			{
-			"abbr": "_TC",
-			"company_name": "_Test Company",
+			"abbr": "_TC6",
+			"company_name": "_Test Company 6",
 			"country": "India",
 			"default_currency": "INR",
 			"doctype": "Company",
@@ -21,8 +21,8 @@ class TestNotifications(unittest.TestCase):
 			"chart_of_accounts": "Standard"
 			},
 			{
-			"abbr": "_TC1",
-			"company_name": "_Test Company 1",
+			"abbr": "_TC7",
+			"company_name": "_Test Company 7",
 			"country": "United States",
 			"default_currency": "USD",
 			"doctype": "Company",
@@ -42,5 +42,5 @@ class TestNotifications(unittest.TestCase):
 
 		config = notifications.get_notification_config()
 		doc_target_percents = notifications.get_notifications_for_targets(config, {})
-		self.assertEquals(doc_target_percents['Company']['_Test Company 1'], 10)
-		self.assertEquals(doc_target_percents['Company']['_Test Company'], 0)
+		self.assertEquals(doc_target_percents['Company']['_Test Company 7'], 10)
+		self.assertEquals(doc_target_percents['Company']['_Test Company 6'], 0)
