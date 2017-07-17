@@ -66,7 +66,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				fieldtype:'Float',
 				read_only: 1,
 				label: __(me.has_batch ? 'Total Qty' : 'Qty'),
-				default: me.qty
+				default: 0
 			},
 		];
 
