@@ -104,7 +104,7 @@ var erpnext_slides = [
 				options: "", fieldtype: 'Select'
 			},
 
-			{ fieldtype: "Section Break", label: "Financial Year" },
+			{ fieldtype: "Section Break", label: __('Financial Year') },
 			{ fieldname: 'fy_start_date', label: __('Start Date'), fieldtype: 'Date', reqd: 1 },
 			{ fieldtype: "Column Break" },
 			{ fieldname: 'fy_end_date', label: __('End Date'), fieldtype: 'Date', reqd: 1 },
