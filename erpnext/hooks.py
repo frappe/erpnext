@@ -209,6 +209,8 @@ payment_gateway_enabled = "erpnext.accounts.utils.create_payment_gateway_account
 
 regional_overrides = {
 	'India': {
-		'erpnext.tests.test_regional.test_method': 'erpnext.regional.india.utils.test_method'
+		'erpnext.tests.test_regional.test_method': 'erpnext.regional.india.utils.test_method',
+		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_header': 'erpnext.regional.india.utils.get_itemised_tax_breakup_header',
+		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_data': 'erpnext.regional.india.utils.get_itemised_tax_breakup_data'
 	}
 }

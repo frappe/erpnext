@@ -210,7 +210,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	refresh: function() {
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
-		this.show_item_wise_taxes();
 		this.set_dynamic_labels();
 		this.setup_sms();
 	},
