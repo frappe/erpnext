@@ -4,7 +4,6 @@ QUnit.test('test student applicant', function(assert){
 	assert.expect(10);
 	let done = assert.async();
 	let testing_status;
-	let applicant_code;
 	frappe.run_serially([
 		() => frappe.tests.setup_doctype('Academic Year'),
 		() => frappe.tests.setup_doctype('Academic Term'),
@@ -65,9 +64,6 @@ QUnit.test('test student applicant', function(assert){
 			testing_status = $('h1.editable-title').text();
 			assert.ok(testing_status.indexOf('Approved') != -1); // checking if Approved has been successfull
 		},
-
-		// Storing current form's route into applicant_code
-		() => applicant_code = frappe.get_route()[2],
 
 		// Clicking on Enroll button should add the applicant's entry in Student doctype, and take you to Program Enrollment page
 		() => frappe.tests.click_button('Enroll'),
