@@ -1398,10 +1398,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		return erpnext.get_currency(this.frm.doc.company);
 	},
 
-	show_item_wise_taxes: function () {
-		return null;
-	},
-
 	show_items_in_item_cart: function () {
 		var me = this;
 		var $items = this.wrapper.find(".items").empty();

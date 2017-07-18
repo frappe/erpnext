@@ -105,6 +105,10 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 	lead: function() {
 		var me = this;
+		if(!this.frm.doc.lead) {
+			return;
+		}
+
 		frappe.call({
 			method: "erpnext.crm.doctype.lead.lead.get_lead_details",
 			args: {

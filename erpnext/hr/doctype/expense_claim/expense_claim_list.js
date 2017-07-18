@@ -4,8 +4,10 @@ frappe.listview_settings['Expense Claim'] = {
 	get_indicator: function(doc) {
 		if(doc.status == "Paid") {
 			return [__("Paid"), "green", "status,=,'Paid'"];
-		} else {
+		}else if(doc.status == "Unpaid") {
 			return [__("Unpaid"), "orange"];
+		} else if(doc.status == "Rejected") {
+			return [__("Rejected"), "grey"];
 		}
 	}
 };

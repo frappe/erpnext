@@ -406,7 +406,6 @@ erpnext.patches.v8_0.change_in_words_varchar_length
 erpnext.patches.v8_0.update_stock_qty_value_in_bom_item
 erpnext.patches.v8_0.create_domain_docs	#16-05-2017
 erpnext.patches.v8_0.update_sales_cost_in_project
-erpnext.patches.v8_0.create_address_doc_from_address_field_in_company #10-05-2017
 erpnext.patches.v8_0.save_system_settings
 erpnext.patches.v8_1.delete_deprecated_reports
 erpnext.patches.v8_1.setup_gst_india #2017-06-27
@@ -416,3 +415,10 @@ erpnext.patches.v8_1.gst_fixes #2017-07-06
 erpnext.patches.v8_0.update_production_orders
 erpnext.patches.v8_1.remove_sales_invoice_from_returned_serial_no
 erpnext.patches.v8_1.allow_invoice_copy_to_edit_after_submit
+erpnext.patches.v8_1.add_hsn_sac_codes
+erpnext.patches.v8_1.update_gst_state #17-07-2017
+erpnext.patches.v8_1.removed_report_support_hours
+erpnext.patches.v8_1.add_indexes_in_transaction_doctypes
+erpnext.patches.v8_3.set_restrict_to_domain_for_module_def
+erpnext.patches.v8_1.update_expense_claim_status
+erpnext.patches.v8_3.update_company_total_sales

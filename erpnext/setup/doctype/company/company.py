@@ -147,7 +147,7 @@ class Company(Document):
 	def validate_perpetual_inventory(self):
 		if not self.get("__islocal"):
 			if cint(self.enable_perpetual_inventory) == 1 and not self.default_inventory_account:
-				frappe.msgprint(_("Set default inventory account for perpetual inventory"), 
+				frappe.msgprint(_("Set default inventory account for perpetual inventory"),
 					alert=True, indicator='orange')
 
 	def set_default_accounts(self):
@@ -310,3 +310,45 @@ def get_name_with_abbr(name, company):
 		parts.append(company_abbr)
 
 	return " - ".join(parts)
+
+def update_company_current_month_sales(company):
+	from frappe.utils import today, formatdate
+	current_month_year = formatdate(today(), "MM-yyyy")
+
+	results = frappe.db.sql(('''
+		select
+			sum(grand_total) as total, date_format(posting_date, '%m-%Y') as month_year
+		from
+			`tabSales Invoice`
+		where
+			date_format(posting_date, '%m-%Y')="{0}" and
+			company = "{1}"
+		group by
+			month_year;
+	''').format(current_month_year, frappe.db.escape(company)), as_dict = True)
+
+	monthly_total = results[0]['total'] if len(results) > 0 else 0
+
+	frappe.db.sql(('''
+		update tabCompany set total_monthly_sales = %s where name=%s
+	'''), (monthly_total, frappe.db.escape(company)))
+	frappe.db.commit()
+
+
+def update_company_monthly_sales(company):
+	'''Cache past year monthly sales of every company based on sales invoices'''
+	from frappe.utils.goal import get_monthly_results
+	import json
+	filter_str = "company = '{0}' and status != 'Draft'".format(frappe.db.escape(company))
+	month_to_value_dict = get_monthly_results("Sales Invoice", "base_grand_total", "posting_date", filter_str, "sum")
+
+	frappe.db.sql(('''
+		update tabCompany set sales_monthly_history = %s where name=%s
+	'''), (json.dumps(month_to_value_dict), frappe.db.escape(company)))
+	frappe.db.commit()
+
+def cache_companies_monthly_sales_history():
+	companies = [d['name'] for d in frappe.get_list("Company")]
+	for company in companies:
+		update_company_monthly_sales(company)
+	frappe.db.commit()

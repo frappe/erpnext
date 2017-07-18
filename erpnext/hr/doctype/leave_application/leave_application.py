@@ -63,13 +63,13 @@ class LeaveApplication(Document):
 	def validate_dates(self):
 		if self.from_date and self.to_date and (getdate(self.to_date) < getdate(self.from_date)):
 			frappe.throw(_("To date cannot be before from date"))
-			
+
 		if self.half_day and self.half_day_date \
-			and (getdate(self.half_day_date) < getdate(self.from_date) 
+			and (getdate(self.half_day_date) < getdate(self.from_date)
 			or getdate(self.half_day_date) > getdate(self.to_date)):
-				
+
 				frappe.throw(_("Half Day Date should be between From Date and To Date"))
-			
+
 		if not is_lwp(self.leave_type):
 			self.validate_dates_acorss_allocation()
 			self.validate_back_dated_application()
@@ -158,7 +158,7 @@ class LeaveApplication(Document):
 			self.name = "New Leave Application"
 
 		for d in frappe.db.sql("""
-			select 
+			select
 				name, leave_type, posting_date, from_date, to_date, total_leave_days, half_day_date
 			from `tabLeave Application`
 			where employee = %(employee)s and docstatus < 2 and status in ("Open", "Approved")
@@ -169,12 +169,12 @@ class LeaveApplication(Document):
 				"to_date": self.to_date,
 				"name": self.name
 			}, as_dict = 1):
-			
+
 			if cint(self.half_day)==1 and getdate(self.half_day_date) == getdate(d.half_day_date) and (
-				flt(self.total_leave_days)==0.5 
-				or getdate(self.from_date) == getdate(d.to_date) 
+				flt(self.total_leave_days)==0.5
+				or getdate(self.from_date) == getdate(d.to_date)
 				or getdate(self.to_date) == getdate(d.from_date)):
-				
+
 				total_leaves_on_half_day = self.get_total_leaves_on_half_day()
 				if total_leaves_on_half_day >= 1:
 					self.throw_overlap_error(d)
@@ -199,7 +199,7 @@ class LeaveApplication(Document):
 				"half_day_date": self.half_day_date,
 				"name": self.name
 			})[0][0]
-			
+
 		return leave_count_on_half_day_date * 0.5
 
 	def validate_max_days(self):
@@ -400,7 +400,7 @@ def is_lwp(leave_type):
 	return lwp and cint(lwp[0][0]) or 0
 
 @frappe.whitelist()
-def get_events(start, end):
+def get_events(start, end, filters=None):
 	events = []
 
 	employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, ["name", "company"],
@@ -411,14 +411,14 @@ def get_events(start, end):
 		employee=''
 		company=frappe.db.get_value("Global Defaults", None, "default_company")
 
-	from frappe.desk.reportview import build_match_conditions
-	match_conditions = build_match_conditions("Leave Application")
+	from frappe.desk.reportview import get_filters_cond
+	conditions = get_filters_cond("Leave Application")
 
 	# show department leaves for employee
 	if "Employee" in frappe.get_roles():
 		add_department_leaves(events, start, end, employee, company)
 
-	add_leaves(events, start, end, match_conditions)
+	add_leaves(events, start, end, conditions)
 
 	add_block_dates(events, start, end, employee, company)
 	add_holidays(events, start, end, employee, company)

@@ -3,10 +3,10 @@ WORK IN PROGRESS
 -->
 # Manual de Usuario (Español)
 
-### Contenido: 
+### Contenido:
 
 {index}
 
 **Trabajo en progreso.**
 
-[The Spanish Translation of the ERPNext manual is in progress. Click here to see the english manual]({{ docs_base_url }}/user/manual/en)
+[La traducción al Español del manual de ERPNext está en progreso. Click aquí para ver el manual en ingles]({{ docs_base_url }}/user/manual/en)

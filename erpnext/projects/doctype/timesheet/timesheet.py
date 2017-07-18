@@ -9,9 +9,8 @@ from frappe import _
 import json
 from datetime import timedelta
 from erpnext.controllers.queries import get_match_cond
-from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint, get_datetime_str
+from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint
 from frappe.model.document import Document
-from frappe.model.mapper import get_mapped_doc
 from erpnext.manufacturing.doctype.workstation.workstation import (check_if_within_operating_hours,
 	WorkstationHolidayError)
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
@@ -133,7 +132,7 @@ class Timesheet(Document):
 					if data.name == timesheet.operation_id:
 						summary = self.get_actual_timesheet_summary(timesheet.operation_id)
 						data.time_sheet = time_sheet
-						data.completed_qty = summary.completed_qty 
+						data.completed_qty = summary.completed_qty
 						data.actual_operation_time = summary.mins
 						data.actual_start_time = summary.from_time
 						data.actual_end_time = summary.to_time
@@ -148,7 +147,7 @@ class Timesheet(Document):
 		"""Returns 'Actual Operating Time'. """
 		return frappe.db.sql("""select
 			sum(tsd.hours*60) as mins, sum(tsd.completed_qty) as completed_qty, min(tsd.from_time) as from_time,
-			max(tsd.to_time) as to_time from `tabTimesheet Detail` as tsd, `tabTimesheet` as ts where 
+			max(tsd.to_time) as to_time from `tabTimesheet Detail` as tsd, `tabTimesheet` as ts where
 			ts.production_order = %s and tsd.operation_id = %s and ts.docstatus=1 and ts.name = tsd.parent""",
 			(self.production_order, operation_id), as_dict=1)[0]
 
@@ -192,7 +191,7 @@ class Timesheet(Document):
 		if fieldname == 'workstation':
 			cond = "tsd.`{0}`".format(fieldname)
 
-		existing = frappe.db.sql("""select ts.name as name, tsd.from_time as from_time, tsd.to_time as to_time from 
+		existing = frappe.db.sql("""select ts.name as name, tsd.from_time as from_time, tsd.to_time as to_time from
 			`tabTimesheet Detail` tsd, `tabTimesheet` ts where {0}=%(val)s and tsd.parent = ts.name and
 			(
 				(%(from_time)s > tsd.from_time and %(from_time)s < tsd.to_time) or
@@ -211,8 +210,8 @@ class Timesheet(Document):
 		# check internal overlap
 		for time_log in self.time_logs:
 			if (fieldname != 'workstation' or args.get(fieldname) == time_log.get(fieldname)) and \
-				args.idx != time_log.idx and ((args.from_time > time_log.from_time and args.from_time < time_log.to_time) or 
-				(args.to_time > time_log.from_time and args.to_time < time_log.to_time) or 
+				args.idx != time_log.idx and ((args.from_time > time_log.from_time and args.from_time < time_log.to_time) or
+				(args.to_time > time_log.from_time and args.to_time < time_log.to_time) or
 				(args.from_time <= time_log.from_time and args.to_time >= time_log.to_time)):
 				return self
 
@@ -239,7 +238,7 @@ class Timesheet(Document):
 			self.check_workstation_working_day(data)
 
 	def get_last_working_slot(self, time_sheet, workstation):
-		return frappe.db.sql(""" select max(from_time) as from_time, max(to_time) as to_time 
+		return frappe.db.sql(""" select max(from_time) as from_time, max(to_time) as to_time
 			from `tabTimesheet Detail` where workstation = %(workstation)s""",
 			{'workstation': workstation}, as_dict=True)[0]
 
@@ -277,7 +276,7 @@ def get_projectwise_timesheet_data(project, parent=None):
 	if parent:
 		cond = "and parent = %(parent)s"
 
-	return frappe.db.sql("""select name, parent, billing_hours, billing_amount as billing_amt 
+	return frappe.db.sql("""select name, parent, billing_hours, billing_amount as billing_amt
 			from `tabTimesheet Detail` where docstatus=1 and project = %(project)s {0} and billable = 1
 			and sales_invoice is null""".format(cond), {'project': project, 'parent': parent}, as_dict=1)
 
@@ -290,9 +289,9 @@ def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
 		condition = "and tsd.project = %(project)s"
 
 	return frappe.db.sql("""select distinct tsd.parent from `tabTimesheet Detail` tsd,
-			`tabTimesheet` ts where 
-			ts.status in ('Submitted', 'Payslip') and tsd.parent = ts.name and 
-			tsd.docstatus = 1 and ts.total_billable_amount > 0 
+			`tabTimesheet` ts where
+			ts.status in ('Submitted', 'Payslip') and tsd.parent = ts.name and
+			tsd.docstatus = 1 and ts.total_billable_amount > 0
 			and tsd.parent LIKE %(txt)s {condition}
 			order by tsd.parent limit %(start)s, %(page_len)s"""
 			.format(condition=condition), {
@@ -305,7 +304,7 @@ def get_timesheet_data(name, project):
 	if project and project!='':
 		data = get_projectwise_timesheet_data(project, name)
 	else:
-		data = frappe.get_all('Timesheet', 
+		data = frappe.get_all('Timesheet',
 			fields = ["(total_billable_amount - total_billed_amount) as billing_amt", "total_billable_hours as billing_hours"], filters = {'name': name})
 
 	return {
@@ -332,7 +331,7 @@ def make_sales_invoice(source_name, target=None):
 @frappe.whitelist()
 def make_salary_slip(source_name, target_doc=None):
 	target = frappe.new_doc("Salary Slip")
-	set_missing_values(source_name, target)	
+	set_missing_values(source_name, target)
 	target.run_method("get_emp_and_leave_details")
 
 	return target
@@ -364,32 +363,21 @@ def get_events(start, end, filters=None):
 	:param filters: Filters (JSON).
 	"""
 	filters = json.loads(filters)
+	from frappe.desk.calendar import get_event_conditions
+	conditions = get_event_conditions("Timesheet", filters)
 
-	conditions = get_conditions(filters)
-	return frappe.db.sql("""select `tabTimesheet Detail`.name as name, 
+	return frappe.db.sql("""select `tabTimesheet Detail`.name as name,
 			`tabTimesheet Detail`.docstatus as status, `tabTimesheet Detail`.parent as parent,
-			from_time as start_date, hours, activity_type, 
-			`tabTimesheet Detail`.project, to_time as end_date, 
-			CONCAT(`tabTimesheet Detail`.parent, ' (', ROUND(hours,2),' hrs)') as title 
-		from `tabTimesheet Detail`, `tabTimesheet` 
-		where `tabTimesheet Detail`.parent = `tabTimesheet`.name 
-			and `tabTimesheet`.docstatus < 2 
+			from_time as start_date, hours, activity_type,
+			`tabTimesheet Detail`.project, to_time as end_date,
+			CONCAT(`tabTimesheet Detail`.parent, ' (', ROUND(hours,2),' hrs)') as title
+		from `tabTimesheet Detail`, `tabTimesheet`
+		where `tabTimesheet Detail`.parent = `tabTimesheet`.name
+			and `tabTimesheet`.docstatus < 2
 			and (from_time <= %(end)s and to_time >= %(start)s) {conditions} {match_cond}
-		""".format(conditions=conditions, match_cond = get_match_cond('Timesheet')), 
+		""".format(conditions=conditions, match_cond = get_match_cond('Timesheet')),
 		{
 			"start": start,
 			"end": end
 		}, as_dict=True, update={"allDay": 0})
 
-def get_conditions(filters):
-	conditions = []
-	for key in filters:
-		if filters.get(key):
-			if frappe.get_meta("Timesheet").has_field(key):
-				dt = 'tabTimesheet'
-			elif frappe.get_meta("Timesheet Detail").has_field(key):
-				dt = 'tabTimesheet Detail'
-				
-			conditions.append("`%s`.%s = '%s'"%(dt, key, filters.get(key)))
-
-	return " and {}".format(" and ".join(conditions)) if conditions else ""

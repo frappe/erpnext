@@ -1,0 +1,59 @@
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr>
+		<div style="color: #333; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; word-wrap: break-word; overflow-wrap: break-word;">
+			<h3>{{ title }}</h3>
+		</div>
+	</tr>
+</table>
+{% for reply in replies %}
+<table border="0" cellpadding="0" cellspacing="0" width="100%"
+	style="background-color: #fafbfc; border: 1px solid #d1d8dd; border-radius: 3px 3px 0 0">
+	<tr height="10"></tr>
+	<tr>
+		<td width="15"></td>
+		<td valign="top" width="24">
+			{% if reply.image %}
+			<img width="24" height="24" embed="{{ reply.image }}" style="border-radius: 3px; vertical-align: middle;" />
+			{% else %}
+			<div style="width: 24px; height: 24px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;background: #fff; border-radius: 3px; border: 1px solid #d1d8dd; text-align: center; line-height: 24px; color: #d1d8dd;">
+				{{ reply.sender_name[0] }}
+			</div>
+			{% endif %}
+		</td>
+		<td width="10"></td>
+		<td>
+			<div style="font-size: 12px; color: #8D99A6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; word-wrap: break-word; line-height: 22px; overflow-wrap: break-word; text-decoration: none;">
+				<span>{{ reply.sender_name }}</span>
+			</div>
+		</td>
+		<td width="15"></td>
+	</tr>
+	<tr height="10"></tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%"
+	style="background-color: #fff; border: 1px solid #d1d8dd; border-top: none; border-radius: 0 0 3px 3px">
+	<tr height="10"></tr>
+	<tr>
+		<td width="15"></td>
+		<td>
+			<div style="font-size: 14px; color: #333; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; word-wrap: break-word; line-height: 22px; overflow-wrap: break-word; text-decoration: none;">
+				{{ reply.content }}
+			</div>
+		</td>
+		<td width="15"></td>
+	</tr>
+	<tr height="10"></tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr height="20"></tr>
+</table>
+{% endfor %}
+{% if did_not_reply %}
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr>
+		<div style="font-size: 14px; color: #8D99A6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; word-wrap: break-word; line-height: 22px; overflow-wrap: break-word; text-decoration: none;">
+			<p>{{ did_not_reply_title }}: {{ did_not_reply }}</p>
+		</div>
+	</tr>
+</table>
+{% endif %}

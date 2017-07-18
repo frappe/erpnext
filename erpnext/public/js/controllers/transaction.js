@@ -210,7 +210,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	refresh: function() {
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
-		this.show_item_wise_taxes();
 		this.set_dynamic_labels();
 		this.setup_sms();
 	},
@@ -367,7 +366,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	validate: function() {
 		this.calculate_taxes_and_totals(false);
-		this.set_item_wise_tax_breakup();
 	},
 
 	company: function() {
@@ -859,6 +857,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"pricing_rule": d.pricing_rule,
 					"warehouse": d.warehouse,
 					"serial_no": d.serial_no,
+					"discount_percentage": d.discount_percentage || 0.0,
 					"conversion_factor": d.conversion_factor || 1.0
 				});
 

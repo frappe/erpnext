@@ -5,7 +5,6 @@
 
 frappe.ui.form.on("Sales Order", {
 	setup: function(frm) {
-		$.extend(frm.cscript, new erpnext.selling.SalesOrderController({frm: frm}));
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery',
 			'Sales Invoice': 'Invoice',
@@ -347,3 +346,5 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		}
 	}
 });
+
+$.extend(cur_frm.cscript, new erpnext.selling.SalesOrderController({frm: cur_frm}));
