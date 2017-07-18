@@ -104,7 +104,7 @@ var erpnext_slides = [
 				options: "", fieldtype: 'Select'
 			},
 
-			{ fieldtype: "Section Break", label: "Financial Year" },
+			{ fieldtype: "Section Break", label: __('Financial Year') },
 			{ fieldname: 'fy_start_date', label: __('Start Date'), fieldtype: 'Date', reqd: 1 },
 			{ fieldtype: "Column Break" },
 			{ fieldname: 'fy_end_date', label: __('End Date'), fieldtype: 'Date', reqd: 1 },
@@ -213,6 +213,17 @@ var erpnext_slides = [
 			{fieldtype: "Check", fieldname: "user_accountant",
 				label:__("Accountant"), "default": 1, static: 1,
 				hidden: frappe.setup.domain==='Education' ? 1 : 0},
+		]
+	},
+
+	{
+		// Sales Target
+		name: 'Goals',
+		domains: ['manufacturing', 'services', 'retail', 'distribution'],
+		title: __("Set your Target"),
+		help: __("Set a sales target you'd like to achieve."),
+		fields: [
+			{fieldtype:"Currency", fieldname:"sales_target", label:__("Monthly Sales Target")},
 		]
 	},
 

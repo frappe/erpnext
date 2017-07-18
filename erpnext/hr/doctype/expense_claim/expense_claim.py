@@ -39,10 +39,13 @@ class ExpenseClaim(AccountsController):
 			"2": "Cancelled"
 		}[cstr(self.docstatus or 0)]
 
-		if self.total_sanctioned_amount == self.total_amount_reimbursed and self.docstatus == 1:
+		if self.total_sanctioned_amount > 0 and self.total_sanctioned_amount == self.total_amount_reimbursed \
+			and self.docstatus == 1 and self.approval_status == 'Approved':
 			self.status = "Paid"
-		elif self.docstatus == 1:
+		elif self.total_sanctioned_amount > 0 and self.docstatus == 1 and self.approval_status == 'Approved':
 			self.status = "Unpaid"
+		elif self.docstatus == 1 and self.approval_status == 'Rejected':
+			self.status = 'Rejected'
 
 	def set_payable_account(self):
 		if not self.payable_account and not self.is_paid:
@@ -157,6 +160,9 @@ class ExpenseClaim(AccountsController):
 		self.total_claimed_amount = 0
 		self.total_sanctioned_amount = 0
 		for d in self.get('expenses'):
+			if self.approval_status == 'Rejected':
+				d.sanctioned_amount = 0.0
+
 			self.total_claimed_amount += flt(d.claim_amount)
 			self.total_sanctioned_amount += flt(d.sanctioned_amount)
 

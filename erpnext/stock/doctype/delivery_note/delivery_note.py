@@ -14,6 +14,7 @@ from erpnext.controllers.selling_controller import SellingController
 from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from frappe.contacts.doctype.address.address import get_company_address
+from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -390,6 +391,9 @@ def make_sales_invoice(source_name, target_doc=None):
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
+		if source_doc.serial_no and source_parent.per_billed > 0:
+			target_doc.serial_no = get_delivery_note_serial_no(source_doc.item_code,
+				target_doc.qty, source_parent.name)
 
 	doc = get_mapped_doc("Delivery Note", source_name, 	{
 		"Delivery Note": {

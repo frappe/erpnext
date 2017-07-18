@@ -11,6 +11,9 @@ def execute():
 	for dt in ("assessment", "course", "fees"):
 		frappe.reload_doc("schools", "doctype", dt)
 
+	for dt in ("domain", "has_domain", "domain_settings"):
+		frappe.reload_doc("core", "doctype", dt)
+
 	frappe.reload_doc('website', 'doctype', 'portal_menu_item')
 
 	frappe.get_doc('Portal Settings').sync_menu()

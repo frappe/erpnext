@@ -91,7 +91,8 @@ def create_fiscal_year_and_company(args):
 			'country': args.get('country'),
 			'create_chart_of_accounts_based_on': 'Standard Template',
 			'chart_of_accounts': args.get('chart_of_accounts'),
-			'domain': args.get('domain')
+			'domain': args.get('domain'),
+			'sales_target': args.get('sales_target')
 		}).insert()
 
 		#Enable shopping cart

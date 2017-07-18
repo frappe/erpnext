@@ -42,11 +42,15 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 		callback: function(r) {
 			if(r.message) {
 				frm.updating_party_details = true;
-				frm.set_value(r.message);
-				frm.updating_party_details = false;
-				if(callback) callback();
-				frm.refresh();
-				erpnext.utils.add_item(frm);
+				frappe.run_serially([
+					() => frm.set_value(r.message),
+					() => {
+						frm.updating_party_details = false;
+						if(callback) callback();
+						frm.refresh();
+						erpnext.utils.add_item(frm);
+					}
+				]);
 			}
 		}
 	});

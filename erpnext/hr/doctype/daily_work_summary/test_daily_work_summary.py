@@ -46,9 +46,9 @@ class TestDailyWorkSummary(unittest.TestCase):
 		daily_work_summary = frappe.get_doc('Daily Work Summary',
 			frappe.get_all('Daily Work Summary')[0].name)
 
-		summary = daily_work_summary.get_summary_message()
+		args = daily_work_summary.get_message_details()
 
-		self.assertTrue('I built Daily Work Summary!' in summary)
+		self.assertTrue('I built Daily Work Summary!' in args.get('replies')[0].content)
 
 	def setup_and_prepare_test(self, hour=None):
 		frappe.db.sql('delete from `tabDaily Work Summary`')
