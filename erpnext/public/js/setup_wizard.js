@@ -217,6 +217,17 @@ var erpnext_slides = [
 	},
 
 	{
+		// Sales Target
+		name: 'Goals',
+		domains: ['manufacturing', 'services', 'retail', 'distribution'],
+		title: __("Set your Target"),
+		help: __("Set a sales target you'd like to achieve."),
+		fields: [
+			{fieldtype:"Currency", fieldname:"sales_target", label:__("Monthly Sales Target")},
+		]
+	},
+
+	{
 		// Taxes
 		name: 'taxes',
 		domains: ['manufacturing', 'services', 'retail', 'distribution'],
