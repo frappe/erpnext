@@ -412,10 +412,10 @@ def get_end_date(start_date, frequency):
 	# weekly, fortnightly and daily intervals have fixed days so no problems
 	end_date = add_to_date(start_date, **kwargs) - relativedelta(days=1)
 	if frequency != 'biweekly':
-		return end_date.strftime(DATE_FORMAT)
+		return dict(end_date=end_date.strftime(DATE_FORMAT))
 
 	else:
-		return ''
+		return dict(end_date='')
 
 
 def get_month_details(year, month):
