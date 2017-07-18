@@ -339,7 +339,7 @@ def update_company_monthly_sales(company):
 	'''Cache past year monthly sales of every company based on sales invoices'''
 	from frappe.utils.goal import get_monthly_results
 	import json
-	filter_str = 'company = "'+ company +'" and status != "Draft"'
+	filter_str = "company = '{0}' and status != 'Draft'".format(frappe.db.escape(company))
 	month_to_value_dict = get_monthly_results("Sales Invoice", "grand_total", "posting_date", filter_str, "sum")
 
 	frappe.db.sql(('''
