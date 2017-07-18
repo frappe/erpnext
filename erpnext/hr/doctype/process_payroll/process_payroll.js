@@ -45,13 +45,11 @@ frappe.ui.form.on("Process Payroll", {
 	},
 
 	payroll_frequency: function (frm) {
-		frm.set_value('start_date', '');
-		frm.set_value('end_date', '');
 		frm.trigger("set_start_end_dates");
 	},
 
 	start_date: function (frm) {
-		if(!in_progress){
+		if(!in_progress && frm.doc.start_date){
 			frm.trigger("set_end_date");
 		}else{
 			// reset flag
