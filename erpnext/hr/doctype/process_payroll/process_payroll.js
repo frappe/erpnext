@@ -54,15 +54,10 @@ frappe.ui.form.on("Process Payroll", {
 		if(!in_progress){
 			frm.trigger("set_end_date");
 		}else{
+			// reset flag
 			in_progress = false
 		}
 	},
-
-// 	end_date: function (frm) {
-//		console.log("catch", frm.doc.end_date);
-//		frm.trigger("set_start_end_dates");
-//		console.log("catch", frm.doc.end_date);
-//	},
 
 	salary_slip_based_on_timesheet: function (frm) {
 		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet);
