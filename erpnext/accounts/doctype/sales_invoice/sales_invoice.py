@@ -83,10 +83,10 @@ class SalesInvoice(SellingController):
 
 		if not self.is_opening:
 			self.is_opening = 'No'
-			
+
 		if self._action != 'submit' and self.update_stock and not self.is_return:
 			set_batch_nos(self, 'warehouse', True)
-			
+
 
 		self.set_against_income_account()
 		self.validate_c_form()
@@ -98,7 +98,7 @@ class SalesInvoice(SellingController):
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
 		self.set_status()
-	
+
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
 
@@ -138,6 +138,8 @@ class SalesInvoice(SellingController):
 			self.update_against_document_in_jv()
 
 		self.update_time_sheet(self.name)
+
+		frappe.enqueue('erpnext.setup.doctype.company.company.update_company_current_month_sales', company=self.company)
 
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:
@@ -816,7 +818,7 @@ class SalesInvoice(SellingController):
 		self.validate_serial_against_sales_invoice()
 
 	def validate_serial_against_delivery_note(self):
-		""" 
+		"""
 			validate if the serial numbers in Sales Invoice Items are same as in
 			Delivery Note Item
 		"""
@@ -917,7 +919,6 @@ def make_delivery_note(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
-
 
 @frappe.whitelist()
 def make_sales_return(source_name, target_doc=None):

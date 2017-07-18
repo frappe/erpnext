@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 def get_notification_config():
-	notification_for_doctype =  { "for_doctype":
+	notifications =  { "for_doctype":
 		{
 			"Issue": {"status": "Open"},
 			"Warranty Claim": {"status": "Open"},
@@ -56,12 +56,20 @@ def get_notification_config():
 			"Production Order": { "status": ("in", ("Draft", "Not Started", "In Process")) },
 			"BOM": {"docstatus": 0},
 			"Timesheet": {"status": "Draft"}
+		},
+
+		"targets": {
+			"Company": {
+				"filters" : { "sales_target": ( ">", 0 ) },
+				"target_field" : "sales_target",
+				"value_field" : "total_monthly_sales"
+			}
 		}
 	}
 
-	doctype = [d for d in notification_for_doctype.get('for_doctype')]
+	doctype = [d for d in notifications.get('for_doctype')]
 	for doc in frappe.get_all('DocType',
 		fields= ["name"], filters = {"name": ("not in", doctype), 'is_submittable': 1}):
-		notification_for_doctype["for_doctype"][doc.name] = {"docstatus": 0}
+		notifications["for_doctype"][doc.name] = {"docstatus": 0}
 
-	return notification_for_doctype
+	return notifications
