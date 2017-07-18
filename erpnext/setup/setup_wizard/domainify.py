@@ -151,8 +151,14 @@ def update_module_def_restrict_to_domain():
 	""" set the restrict to domain for the module def """
 
 	module_def_restrict_to_domain_mapper = {
-		"Schools": _('Education')
+		"Schools": 'Education'
 	}
 
+	lang = frappe.db.get_single_value("System Settings", "language") or "en"
 	for module, domain in module_def_restrict_to_domain_mapper.iteritems():
-		frappe.set_value("Module Def", module, "restrict_to_domain", domain)
+		if frappe.db.exists("Domain", _(domain, lang)):
+			frappe.set_value("Module Def", module, "restrict_to_domain", _(domain, lang))
+		elif frappe.db.exists("Domain", domain):
+			frappe.set_value("Module Def", module, "restrict_to_domain", domain)
+		else:
+			pass
