@@ -170,12 +170,32 @@ class TestDeliveryNote(unittest.TestCase):
 			"delivery_document_no": dn.name
 		})
 
+		si = make_sales_invoice(dn.name)
+		si.insert(ignore_permissions=True)
+		self.assertEquals(dn.items[0].serial_no, si.items[0].serial_no)
+
 		dn.cancel()
 
 		self.check_serial_no_values(serial_no, {
 			"warehouse": "_Test Warehouse - _TC",
 			"delivery_document_no": ""
 		})
+
+	def test_serialized_partial_sales_invoice(self):
+		se = make_serialized_item()
+		serial_no = get_serial_nos(se.get("items")[0].serial_no)
+		serial_no = '\n'.join(serial_no)
+
+		dn = create_delivery_note(item_code="_Test Serialized Item With Series", qty=2, serial_no=serial_no)
+
+		si = make_sales_invoice(dn.name)
+		si.items[0].qty = 1
+		si.submit()
+		self.assertEquals(si.items[0].qty, 1)
+
+		si = make_sales_invoice(dn.name)
+		si.submit()
+		self.assertEquals(si.items[0].qty, len(get_serial_nos(si.items[0].serial_no)))
 
 	def test_serialize_status(self):
 		from frappe.model.naming import make_autoname
