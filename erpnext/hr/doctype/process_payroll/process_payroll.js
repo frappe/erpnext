@@ -1,6 +1,8 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+var in_progress = false;
+
 frappe.ui.form.on("Process Payroll", {
 	onload: function (frm) {
 		frm.doc.posting_date = frappe.datetime.nowdate();
@@ -43,22 +45,24 @@ frappe.ui.form.on("Process Payroll", {
 	},
 
 	payroll_frequency: function (frm) {
+		frm.set_value('start_date', '');
+		frm.set_value('end_date', '');
 		frm.trigger("set_start_end_dates");
 	},
 
 	start_date: function (frm) {
-//		if (!frm.doc.start_date){
-//			frm.trigger("set_start_end_dates");
-//		} else {
-//			frm.trigger("set_end_date");
-//		}
+		if(!in_progress){
+			frm.trigger("set_end_date");
+		}else{
+			in_progress = false
+		}
 	},
 
-	end_date: function (frm) {
+// 	end_date: function (frm) {
 //		console.log("catch", frm.doc.end_date);
 //		frm.trigger("set_start_end_dates");
 //		console.log("catch", frm.doc.end_date);
-	},
+//	},
 
 	salary_slip_based_on_timesheet: function (frm) {
 		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet);
@@ -70,37 +74,37 @@ frappe.ui.form.on("Process Payroll", {
 
 	set_start_end_dates: function (frm) {
 		if (!frm.doc.salary_slip_based_on_timesheet) {
-			if(!frm.doc.start_date){
-				frappe.call({
-					method: 'erpnext.hr.doctype.process_payroll.process_payroll.get_start_end_dates',
-					args: {
-						payroll_frequency: frm.doc.payroll_frequency,
-						start_date: frm.doc.start_date || frm.doc.posting_date
-					},
-					callback: function (r) {
-						if (r.message) {
-							frm.set_value('start_date', r.message.start_date);
-							frm.set_value('end_date', r.message.end_date);
-						}
+			frappe.call({
+				method: 'erpnext.hr.doctype.process_payroll.process_payroll.get_start_end_dates',
+				args: {
+					payroll_frequency: frm.doc.payroll_frequency,
+					start_date: frm.doc.posting_date
+				},
+				callback: function (r) {
+					if (r.message) {
+						in_progress = true;
+						frm.set_value('start_date', r.message.start_date);
+						frm.set_value('end_date', r.message.end_date);
 					}
-				})
-			} else{
-				frappe.call({
-					method: 'erpnext.hr.doctype.process_payroll.process_payroll.get_end_date',
-					args: {
-						frequency: frm.doc.payroll_frequency,
-						start_date: frm.doc.start_date
-					},
-					callback: function (r) {
-						if (r.message) {
-							frm.set_value('start_date', r.message.start_date);
-							frm.set_value('end_date', r.message.end_date);
-						}
-					}
-				})
-			}
+				}
+			})
 		}
 	},
+
+	set_end_date: function(frm){
+		frappe.call({
+			method: 'erpnext.hr.doctype.process_payroll.process_payroll.get_end_date',
+			args: {
+				frequency: frm.doc.payroll_frequency,
+				start_date: frm.doc.start_date
+			},
+			callback: function (r) {
+				if (r.message) {
+					frm.set_value('end_date', r.message.end_date);
+				}
+			}
+		})
+	}
 })
 
 cur_frm.cscript.display_activity_log = function (msg) {
