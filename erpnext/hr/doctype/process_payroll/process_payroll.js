@@ -47,7 +47,11 @@ frappe.ui.form.on("Process Payroll", {
 	},
 
 	start_date: function (frm) {
-		frm.trigger("set_start_end_dates");
+//		if (!frm.doc.start_date){
+//			frm.trigger("set_start_end_dates");
+//		} else {
+//			frm.trigger("set_end_date");
+//		}
 	},
 
 	end_date: function (frm) {
@@ -66,19 +70,35 @@ frappe.ui.form.on("Process Payroll", {
 
 	set_start_end_dates: function (frm) {
 		if (!frm.doc.salary_slip_based_on_timesheet) {
-			frappe.call({
-				method: 'erpnext.hr.doctype.process_payroll.process_payroll.get_start_end_dates',
-				args: {
-					payroll_frequency: frm.doc.payroll_frequency,
-					start_date: frm.doc.start_date || frm.doc.posting_date
-				},
-				callback: function (r) {
-					if (r.message) {
-						frm.set_value('start_date', r.message.start_date);
-						frm.set_value('end_date', r.message.end_date);
+			if(!frm.doc.start_date){
+				frappe.call({
+					method: 'erpnext.hr.doctype.process_payroll.process_payroll.get_start_end_dates',
+					args: {
+						payroll_frequency: frm.doc.payroll_frequency,
+						start_date: frm.doc.start_date || frm.doc.posting_date
+					},
+					callback: function (r) {
+						if (r.message) {
+							frm.set_value('start_date', r.message.start_date);
+							frm.set_value('end_date', r.message.end_date);
+						}
 					}
-				}
-			})
+				})
+			} else{
+				frappe.call({
+					method: 'erpnext.hr.doctype.process_payroll.process_payroll.get_end_date',
+					args: {
+						frequency: frm.doc.payroll_frequency,
+						start_date: frm.doc.start_date
+					},
+					callback: function (r) {
+						if (r.message) {
+							frm.set_value('start_date', r.message.start_date);
+							frm.set_value('end_date', r.message.end_date);
+						}
+					}
+				})
+			}
 		}
 	},
 })
