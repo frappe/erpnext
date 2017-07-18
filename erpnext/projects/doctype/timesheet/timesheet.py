@@ -9,10 +9,8 @@ from frappe import _
 import json
 from datetime import timedelta
 from erpnext.controllers.queries import get_match_cond
-from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint, get_datetime_str
+from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint
 from frappe.model.document import Document
-from frappe.model.mapper import get_mapped_doc
-from frappe.utils.user import is_website_user
 from erpnext.manufacturing.doctype.workstation.workstation import (check_if_within_operating_hours,
 	WorkstationHolidayError)
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
@@ -365,8 +363,8 @@ def get_events(start, end, filters=None):
 	:param filters: Filters (JSON).
 	"""
 	filters = json.loads(filters)
-
-	conditions = get_conditions(filters)
+	from frappe.desk.calendar import get_event_conditions
+	conditions = get_event_conditions("Timesheet", filters)
 	return frappe.db.sql("""select `tabTimesheet Detail`.name as name,
 			`tabTimesheet Detail`.docstatus as status, `tabTimesheet Detail`.parent as parent,
 			from_time as start_date, hours, activity_type,
@@ -413,4 +411,3 @@ def get_list_context(context=None):
 		"get_list": get_timesheets_list,
 		"row_template": "templates/includes/timesheet/timesheet_row.html"
 	}
-

@@ -11,7 +11,7 @@ apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py +86,Tax Rule Conflict
 DocType: Tax Rule,Billing County,Municipio de Facturación
 DocType: Sales Invoice Timesheet,Billing Hours,Horas de Facturación
 DocType: Timesheet,Billing Details,Detalles de Facturación
-apps/erpnext/erpnext/accounts/party.py +257,Billing currency must be equal to either default comapany's currency or party account currency,Moneda de facturación debe ser igual a la moneda de la empresa o moneda de cuenta de contraparte
+apps/erpnext/erpnext/accounts/party.py +259,Billing currency must be equal to either default comapany's currency or party account currency,Moneda de facturación debe ser igual a la moneda de la empresa o moneda de cuenta de contraparte
 DocType: Tax Rule,Billing State,Región de Facturación
 DocType: Purchase Order Item,Billed Amt,Monto Facturado
 DocType: Item Tax,Tax Rate,Tasa de Impuesto

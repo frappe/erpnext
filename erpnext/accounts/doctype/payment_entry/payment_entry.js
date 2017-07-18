@@ -291,7 +291,7 @@ frappe.ui.form.on('Payment Entry', {
 
 	set_account_currency_and_balance: function(frm, account, currency_field,
 			balance_field, callback_function) {
-		if (frm.doc.posting_date) {
+		if (frm.doc.posting_date && account) {
 			frappe.call({
 				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_account_details",
 				args: {
