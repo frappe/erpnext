@@ -80,7 +80,7 @@ def add_print_formats():
 
 def make_custom_fields():
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
-		fieldtype='Data', options='item_code.gst_hsn_code', insert_after='description')
+		fieldtype='Data', options='item_code.gst_hsn_code', insert_after='description', print_hide=1)
 	
 	custom_fields = {
 		'Address': [
