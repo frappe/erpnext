@@ -10,4 +10,5 @@ def execute():
 	""" set the restrict to domain in module def """
 
 	frappe.reload_doc("core", "doctype", "module_def")
-	update_module_def_restrict_to_domain()
+	if frappe.db.get_single_value('System Settings', 'setup_complete'):
+		update_module_def_restrict_to_domain()
