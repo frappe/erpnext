@@ -49,8 +49,8 @@ QUnit.test("test sales order", function(assert) {
 			assert.ok($(".section-break+ .section-break .column-break:nth-child(1) .data-field:nth-child(1) .value").text().includes("Billing Street 1"), "Print Preview Works As Expected");
 		},
 		() => cur_frm.print_doc(),
-	/*	() => frappe.tests.click_button('Submit'),
-		() => frappe.tests.click_button('Yes'),*/
+		() => frappe.tests.click_button('Submit'),
+		() => frappe.tests.click_button('Yes'),
 		() => frappe.timeout(0.3),
 		() => done()
 	]);
