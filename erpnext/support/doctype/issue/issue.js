@@ -20,6 +20,8 @@ frappe.ui.form.on("Issue", {
 	timeline_refresh: function(frm) {
 		// create button for "Add to Knowledge Base"
 		if(frappe.model.can_create('Help Article')) {
+			// Removing Knowledge Base button if exists to avoid multiple occurance
+			frm.timeline.wrapper.find('.comment-header .asset-details .btn-add-to-kb').remove();
 			$('<button class="btn btn-xs btn-default btn-add-to-kb hidden-xs pull-right" style="margin-top: -2px">'+
 				__('Add to Knowledge Base') + '</button>')
 				.appendTo(frm.timeline.wrapper.find('.comment-header .asset-details'))
