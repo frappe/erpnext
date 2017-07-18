@@ -406,7 +406,7 @@ def get_frequency_kwargs(frequency_name):
 @frappe.whitelist()
 def get_end_date(start_date, frequency):
 	start_date = getdate(start_date)
-	frequency = frequency.lower()
+	frequency = frequency.lower() if frequency else 'monthly'
 	kwargs = get_frequency_kwargs(frequency) if frequency != 'bimonthly' else get_frequency_kwargs('monthly')
 
 	# weekly, fortnightly and daily intervals have fixed days so no problems
