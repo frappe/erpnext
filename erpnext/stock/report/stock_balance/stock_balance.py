@@ -61,7 +61,7 @@ def get_columns():
 		_("Balance Qty")+":Float:100",
 		_("Balance Value")+":Float:100",
 		_("Valuation Rate")+":Float:90",
-		_("Reorder Lvl")+":Float:80",
+		_("Reorder Level")+":Float:80",
 		_("Reorder Qty")+":Float:80",
 		_("Company")+":Link/Company:100"
 	]
