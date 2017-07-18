@@ -34,14 +34,14 @@ class TestProcessPayroll(unittest.TestCase):
 				r = process_payroll.make_payment_entry()
 
 	def test_get_end_date(self):
-		self.assertEqual(get_end_date('2017-01-01', 'monthly'), '2017-01-31')
-		self.assertEqual(get_end_date('2017-02-01', 'monthly'), '2017-02-28')
-		self.assertEqual(get_end_date('2017-02-01', 'fortnightly'), '2017-02-14')
-		self.assertEqual(get_end_date('2017-02-01', 'biweekly'), '')
-		self.assertEqual(get_end_date('2017-01-01', 'biweekly'), '')
-		self.assertEqual(get_end_date('2020-02-15', 'biweekly'), '')
-		self.assertEqual(get_end_date('2017-02-15', 'monthly'), '2017-03-14')
-		self.assertEqual(get_end_date('2017-02-15', 'daily'), '2017-02-15')
+		self.assertEqual(get_end_date('2017-01-01', 'monthly'), {'end_date': '2017-01-31'})
+		self.assertEqual(get_end_date('2017-02-01', 'monthly'), {'end_date': '2017-02-28'})
+		self.assertEqual(get_end_date('2017-02-01', 'fortnightly'), {'end_date': '2017-02-14'})
+		self.assertEqual(get_end_date('2017-02-01', 'bimonthly'), {'end_date': ''})
+		self.assertEqual(get_end_date('2017-01-01', 'bimonthly'), {'end_date': ''})
+		self.assertEqual(get_end_date('2020-02-15', 'bimonthly'), {'end_date': ''})
+		self.assertEqual(get_end_date('2017-02-15', 'monthly'), {'end_date': '2017-03-14'})
+		self.assertEqual(get_end_date('2017-02-15', 'daily'), {'end_date': '2017-02-15'})
 	
 
 def get_salary_component_account(sal_comp):
