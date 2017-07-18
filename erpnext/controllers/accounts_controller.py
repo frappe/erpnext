@@ -160,6 +160,7 @@ class AccountsController(TransactionBase):
 	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
 		from erpnext.stock.get_item_details import get_item_details
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 		if hasattr(self, "items"):
 			parent_dict = {}
@@ -196,7 +197,7 @@ class AccountsController(TransactionBase):
 
 							elif fieldname == "serial_no":
 								stock_qty = item.get("stock_qty") * -1 if item.get("stock_qty") < 0 else item.get("stock_qty")
-								if stock_qty != len(item.get('serial_no').split('\n')):
+								if stock_qty != len(get_serial_nos(item.get('serial_no'))):
 									item.set(fieldname, value)
 
 							elif fieldname == "conversion_factor" and not item.get("conversion_factor"):
