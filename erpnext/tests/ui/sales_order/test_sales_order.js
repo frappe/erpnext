@@ -1,7 +1,7 @@
 QUnit.module('Sales Order');
 
 QUnit.test("test sales order", function(assert) {
-	assert.expect(4);
+	assert.expect(7);
 	let done = assert.async();
 	frappe.run_serially([
 		() => frappe.tests.setup_doctype('Customer'),
@@ -29,6 +29,7 @@ QUnit.test("test sales order", function(assert) {
 		() => cur_frm.set_value('apply_discount_on','Grand Total'),
 		() => cur_frm.set_value('additional_discount_percentage',10),
 		() => frappe.timeout(1),
+		() => cur_frm.save(),
 		() => {
 			// get_item_details
 			assert.ok(cur_frm.doc.items[0].item_name=='Test Product 1');
@@ -39,6 +40,17 @@ QUnit.test("test sales order", function(assert) {
 			// calculate_taxes_and_totals
 			assert.ok(cur_frm.doc.grand_total==531);
 		},
+		() => cur_frm.print_doc(),
+		() => frappe.timeout(1),
+		() => {
+			assert.ok($('.btn-print-print').is(':visible'), "Print Format Available");
+			assert.ok(RegExp(/SO-\d\d\d\d\d/g).test($("#header-html small").text()));
+			assert.ok($(".section-break+ .section-break .column-break:nth-child(1) .data-field:nth-child(1) .value").text().includes("Billing Street 1"), "Print Preview Works As Expected");
+		},
+		() => cur_frm.print_doc(),
+		() => frappe.tests.click_button('Submit'),
+		() => frappe.tests.click_button('Yes'),
+		() => frappe.timeout(0.3),
 		() => done()
 	]);
 });
