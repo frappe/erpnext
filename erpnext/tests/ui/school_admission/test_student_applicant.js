@@ -49,6 +49,7 @@ QUnit.test('test student applicant', function(assert){
 			cur_frm.get_field("guardians").grid.grid_rows[0].doc.guardian = guradian_auto_code;
 			cur_frm.get_field("guardians").grid.grid_rows[0].doc.relation = "Father";
 			cur_frm.get_field("guardians").grid.grid_rows[0].doc.guardian_name = guardian_name;
+			$('a:contains("Guardian Details"):visible').click();
 		},
 		// Entry in Sibling child table
 		() => $('a:contains("Sibling Details"):visible').click(),

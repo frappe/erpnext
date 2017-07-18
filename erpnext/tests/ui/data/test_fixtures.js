@@ -88,6 +88,59 @@ $.extend(frappe.test_data, {
 			]}
 		]
 	},
+	"Program": {
+		"Standard Test": [
+			{program_name: 'Standard Test'},
+			{program_code: 'Standard Test'},
+			{department: 'Teaching'},
+			{program_abbreviation: 'Standard Test'}
+		]
+	},
+	"Student Admission": {
+		"Test Admission": [
+			{academic_year: '2016-17'},
+			{admission_start_date: '2016-04-20'},
+			{admission_end_date: '2016-05-31'},
+			{title: '2016-17 Admissions'},
+			{program: 'Standard Test'},
+			{application_fee: 1000},
+			{naming_series_for_student_applicant: 'AP'},
+			{introduction: 'Test intro'},
+			{eligibility: 'Test eligibility'}
+		]
+	},
+	"Guardian": {
+		"Test Guradian": [
+			{guardian_name: 'Test Guardian'},
+			{email_address: 'guardian@testmail.com'},
+			{mobile_number: 9898980000},
+			{alternate_number: 8989890000},
+			{date_of_birth: '1982-07-22'},
+			{education: 'Testing'},
+			{occupation: 'Testing'},
+			{designation: 'Testing'},
+			{work_address: 'Testing address'}
+		]
+	},
+	"Student Applicant": {
+		"Fname Mname Lname": [
+			{first_name: "Fname"},
+			{middle_name: "Mname"},
+			{last_name: "Lname"},
+			{program: "Standard Test"},
+			{student_admission: "2016-17 Admissions"},
+			{date_of_birth: '1995-07-20'},
+			{student_email_id: 'test1@testmail.com'},
+			{gender: 'Male'},
+			{student_mobile_number: 9898980000},
+			{blood_group: 'O+'},
+			{address_line_1: 'Test appt, Test Society,'},
+			{address_line_2: 'Test district, Test city.'},
+			{city: 'Test'},
+			{state: 'Test'},
+			{pincode: '395007'}
+		]
+	},
 	"Customer": {
 		"Test Customer 1": [
 			{customer_name: "Test Customer 1"}
