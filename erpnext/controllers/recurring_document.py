@@ -128,13 +128,15 @@ def get_next_date(dt, mcount, day=None):
 
 	return dt
 
-def send_notification(new_rv):
+def send_notification(new_rv, print_format='Standard', recipients=[]):
 	"""Notify concerned persons about recurring document generation"""
+	recipients = recipients or new_rv.notification_email_address
+	print_format = print_format or new_rv.recurring_print_format
 
-	frappe.sendmail(new_rv.notification_email_address,
+	frappe.sendmail(recipients,
 		subject=  _("New {0}: #{1}").format(new_rv.doctype, new_rv.name),
 		message = _("Please find attached {0} #{1}").format(new_rv.doctype, new_rv.name),
-		attachments = [frappe.attach_print(new_rv.doctype, new_rv.name, file_name=new_rv.name, print_format=new_rv.recurring_print_format)])
+		attachments = [frappe.attach_print(new_rv.doctype, new_rv.name, file_name=new_rv.name, print_format=print_format)])
 
 def notify_errors(doc, doctype, party, owner):
 	from frappe.utils.user import get_system_managers
