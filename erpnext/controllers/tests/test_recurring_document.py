@@ -27,7 +27,8 @@ def test_recurring_document(obj, test_records):
 	base_doc.set(date_field, today)
 
 	if base_doc.doctype == "Sales Order":
-		base_doc.set("delivery_date", add_days(today, 15))
+		for d in base_doc.get("items"):
+			d.set("delivery_date", add_days(today, 15))
 
 	# monthly
 	doc1 = frappe.copy_doc(base_doc)

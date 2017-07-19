@@ -1,5 +1,5 @@
 frappe.listview_settings['Sales Order'] = {
-	add_fields: ["base_grand_total", "customer_name", "currency", "final_delivery_date", 
+	add_fields: ["base_grand_total", "customer_name", "currency", "final_delivery_date",
 		"per_delivered", "per_billed", "status", "order_type", "name"],
 	get_indicator: function(doc) {
 		if(doc.status==="Closed"){

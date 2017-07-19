@@ -27,7 +27,8 @@ class TestQuotation(unittest.TestCase):
 		self.assertEquals(sales_order.get("items")[0].prevdoc_docname, quotation.name)
 		self.assertEquals(sales_order.customer, "_Test Customer")
 
-		sales_order.delivery_date = "2014-01-01"
+		for d in sales_order.get("items"):
+			d.delivery_date = "2014-01-01"
 		sales_order.naming_series = "_T-Quotation-"
 		sales_order.transaction_date = "2013-05-12"
 		sales_order.insert()
@@ -51,9 +52,11 @@ class TestQuotation(unittest.TestCase):
 		quotation.submit()
 
 		sales_order = make_sales_order(quotation.name)
-		sales_order.delivery_date = "2016-01-02"
 		sales_order.naming_series = "_T-Quotation-"
 		sales_order.transaction_date = "2016-01-01"
+		for d in sales_order.get("items"):
+			d.delivery_date = "2016-01-02"
+		
 		sales_order.insert()
 
 		self.assertEquals(quotation.get("items")[0].rate, rate_with_margin)

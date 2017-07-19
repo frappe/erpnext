@@ -49,7 +49,6 @@ class SalesOrder(SellingController):
 
 	def validate_po(self):
 		# validate p.o date v/s delivery date
-		
 		if self.po_date:
 			for d in self.get("items"):
 				 if d.delivery_date and getdate(self.po_date) > getdate(d.delivery_date):
@@ -60,8 +59,8 @@ class SalesOrder(SellingController):
 			so = frappe.db.sql("select name from `tabSales Order` \
 				where ifnull(po_no, '') = %s and name != %s and docstatus < 2\
 				and customer = %s", (self.po_no, self.name, self.customer))
-			if so and so[0][0] and not \
-				cint(frappe.db.get_single_value("Selling Settings", "allow_against_multiple_purchase_orders")):
+			if so and so[0][0] and not cint(frappe.db.get_single_value("Selling Settings",
+				"allow_against_multiple_purchase_orders")):
 				frappe.msgprint(_("Warning: Sales Order {0} already exists against Customer's Purchase Order {1}").format(so[0][0], self.po_no))
 
 	def validate_for_items(self):
@@ -73,7 +72,7 @@ class SalesOrder(SellingController):
 			d.transaction_date = self.transaction_date
 
 			tot_avail_qty = frappe.db.sql("select projected_qty from `tabBin` \
-				where item_code = %s and warehouse = %s", (d.item_code,d.warehouse))
+				where item_code = %s and warehouse = %s", (d.item_code, d.warehouse))
 			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
 
 		# check for same entry multiple times
@@ -92,7 +91,7 @@ class SalesOrder(SellingController):
 	def validate_sales_mntc_quotation(self):
 		for d in self.get('items'):
 			if d.prevdoc_docname:
-				res = frappe.db.sql("select name from `tabQuotation` where name=%s and order_type = %s", 
+				res = frappe.db.sql("select name from `tabQuotation` where name=%s and order_type = %s",
 					(d.prevdoc_docname, self.order_type))
 				if not res:
 					frappe.msgprint(_("Quotation {0} not of type {1}")
@@ -108,11 +107,11 @@ class SalesOrder(SellingController):
 				if not d.delivery_date:
 					frappe.throw(_("Row #{0}: Please enter Delivery Date against item {1}")
 						.format(d.idx, d.item_code))
-						
+
 				if getdate(self.transaction_date) > getdate(d.delivery_date):
 					frappe.msgprint(_("Expected Delivery Date should be after Sales Order Date"),
 						indicator='orange', title=_('Warning'))
-						
+				
 				if not self.final_delivery_date or \
 					(d.delivery_date and getdate(d.delivery_date) > getdate(self.final_delivery_date)):
 						self.final_delivery_date = d.delivery_date
@@ -131,7 +130,7 @@ class SalesOrder(SellingController):
 		super(SalesOrder, self).validate_warehouse()
 
 		for d in self.get("items"):
-			if (frappe.db.get_value("Item", d.item_code, "is_stock_item")==1 or
+			if (frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 or
 				(self.has_product_bundle(d.item_code) and self.product_bundle_has_stock_item(d.item_code))) \
 				and not d.warehouse and not cint(d.delivered_by_supplier):
 				frappe.throw(_("Delivery warehouse required for stock item {0}").format(d.item_code),
@@ -345,14 +344,13 @@ class SalesOrder(SellingController):
 
 		return items
 
-
 	def on_recurring(self, reference_doc):
 		mcount = month_map[reference_doc.recurring_type]
 		for d in self.get("items"):
-			reference_delivery_date = frappe.db.get_value("Sales Order Item", 
+			reference_delivery_date = frappe.db.get_value("Sales Order Item",
 				{"parent": reference_doc.name, "item_code": d.item_code, "idx": d.idx}, "delivery_date")
 				
-			d.set("delivery_date", 
+			d.set("delivery_date",
 				get_next_date(reference_delivery_date, mcount, cint(reference_doc.repeat_on_day_of_month)))
 
 def get_list_context(context=None):
