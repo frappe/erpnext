@@ -48,7 +48,6 @@ class ProcessPayroll(Document):
 			%s """% cond, {"sal_struct": sal_struct})
 			return emp_list
 
-
 	def get_filter_condition(self):
 		self.check_mandatory()
 
@@ -59,14 +58,12 @@ class ProcessPayroll(Document):
 
 		return cond
 
-
 	def get_joining_releiving_condition(self):
 		cond = """
 			and ifnull(t1.date_of_joining, '0000-00-00') <= '%(end_date)s'
 			and ifnull(t1.relieving_date, '2199-12-31') >= '%(start_date)s'
 		""" % {"start_date": self.start_date, "end_date": self.end_date}
 		return cond
-
 
 	def check_mandatory(self):
 		for fieldname in ['company', 'start_date', 'end_date']:
@@ -111,7 +108,6 @@ class ProcessPayroll(Document):
 					ss_list.append(ss_dict)
 		return self.create_log(ss_list)
 
-
 	def create_log(self, ss_list):
 		if not ss_list or len(ss_list) < 1: 
 			log = "<p>" + _("No employee for the above selected criteria OR salary slip already created") + "</p>"
@@ -134,7 +130,6 @@ class ProcessPayroll(Document):
 			and (t1.journal_entry is null or t1.journal_entry = "") and ifnull(salary_slip_based_on_timesheet,0) = %s %s
 		""" % ('%s', '%s', '%s','%s', cond), (ss_status, self.start_date, self.end_date, self.salary_slip_based_on_timesheet), as_dict=as_dict)
 		return ss_list
-
 
 	def submit_salary_slips(self):
 		"""
@@ -194,7 +189,6 @@ class ProcessPayroll(Document):
 
 	def format_as_links(self, salary_slip):
 		return ['<a href="#Form/Salary Slip/{0}">{0}</a>'.format(salary_slip)]
-
 
 	def get_total_salary_and_loan_amounts(self):
 		"""
@@ -257,7 +251,6 @@ class ProcessPayroll(Document):
 				.format(self.company))
 
 		return payroll_payable_account	
-
 
 	def make_accural_jv_entry(self):
 		self.check_permission('write')
@@ -359,7 +352,6 @@ class ProcessPayroll(Document):
 		self.update(get_start_end_dates(self.payroll_frequency, 
 			self.start_date or self.posting_date, self.company))
 
-
 @frappe.whitelist()
 def get_start_end_dates(payroll_frequency, start_date=None, company=None):
 	'''Returns dict of start and end dates for given payroll frequency based on start_date'''
@@ -392,7 +384,6 @@ def get_start_end_dates(payroll_frequency, start_date=None, company=None):
 		'start_date': start_date, 'end_date': end_date
 	})
 
-
 def get_frequency_kwargs(frequency_name):
 	frequency_dict = {
 		'monthly': {'months': 1},
@@ -401,7 +392,6 @@ def get_frequency_kwargs(frequency_name):
 		'daily': {'days': 1}
 	}
 	return frequency_dict.get(frequency_name)
-
 
 @frappe.whitelist()
 def get_end_date(start_date, frequency):
@@ -416,7 +406,6 @@ def get_end_date(start_date, frequency):
 
 	else:
 		return dict(end_date='')
-
 
 def get_month_details(year, month):
 	ysd = frappe.db.get_value("Fiscal Year", year, "year_start_date")
