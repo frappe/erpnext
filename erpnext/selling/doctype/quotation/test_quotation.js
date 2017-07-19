@@ -3,6 +3,7 @@ QUnit.test("test: quotation", function (assert) {
 	let done = assert.async();
 	frappe.run_serially([
 		() => frappe.tests.setup_doctype("Customer"),
+		() => frappe.tests.setup_doctype("Fiscal Year"),
 		() => frappe.tests.setup_doctype("Item"),
 		() => frappe.tests.setup_doctype("Address"),
 		() => frappe.tests.setup_doctype("Contact"),
@@ -10,20 +11,14 @@ QUnit.test("test: quotation", function (assert) {
 		() => frappe.tests.setup_doctype("Terms and Conditions"),
 		() => frappe.tests.setup_doctype("Sales Taxes and Charges Template"),
 		() => {
-			return frappe.tests.make("Quotation", [{
-				customer: "Test Customer 1"
-			},
-			{
-				items: [
-					[{
-						"item_code": "Test Product 1"
-					},
-					{
-						"qty": 5
-					}
-					]
-				]
-			}
+			return frappe.tests.make("Quotation", [
+				{customer: "Test Customer 1"},
+				{items: [
+					[
+						{"item_code": "Test Product 1"},
+						{"qty": 5}
+					]]
+				}
 			]);
 		},
 		() => {
@@ -56,7 +51,7 @@ QUnit.test("test: quotation", function (assert) {
 			assert.ok(cur_frm.doc_currency == "USD", "Currency Changed");
 			assert.ok(cur_frm.doc.selling_price_list == "Test-Selling-USD", "Price List Changed");
 			assert.ok(cur_frm.doc.items[0].rate == 200, "Price Changed Manually");
-			assert.ok(cur_frm.doc.total == 1000, "New Total Calculated");
+			assert.equal(cur_frm.doc.total, 1000, "New Total Calculated");
 
 			// Check Terms and Condtions
 			assert.ok(cur_frm.doc.tc_name == "Test Term 1", "Terms and Conditions Checked");
