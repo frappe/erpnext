@@ -51,6 +51,7 @@ class BOM(WebsiteGenerator):
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
 		validate_uom_is_integer(self, "stock_uom", "stock_qty", "BOM Item")
 
+		self.update_stock_qty()
 		self.validate_materials()
 		self.set_bom_material_details()
 		self.validate_operations()
