@@ -111,7 +111,7 @@ class SalesOrder(SellingController):
 				if getdate(self.transaction_date) > getdate(d.delivery_date):
 					frappe.msgprint(_("Expected Delivery Date should be after Sales Order Date"),
 						indicator='orange', title=_('Warning'))
-				
+
 				if not self.final_delivery_date or \
 					(d.delivery_date and getdate(d.delivery_date) > getdate(self.final_delivery_date)):
 						self.final_delivery_date = d.delivery_date
