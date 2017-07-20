@@ -228,6 +228,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				items: my_items
 			},
 			callback: function(r) {
+				if(r.exc) return;
+
 				var i = 0;
 				var item_length = cur_frm.doc.items.length;
 				while (i < item_length) {
