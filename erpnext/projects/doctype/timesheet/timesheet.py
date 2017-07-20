@@ -365,7 +365,6 @@ def get_events(start, end, filters=None):
 	filters = json.loads(filters)
 	from frappe.desk.calendar import get_event_conditions
 	conditions = get_event_conditions("Timesheet", filters)
-
 	return frappe.db.sql("""select `tabTimesheet Detail`.name as name,
 			`tabTimesheet Detail`.docstatus as status, `tabTimesheet Detail`.parent as parent,
 			from_time as start_date, hours, activity_type,
@@ -381,3 +380,34 @@ def get_events(start, end, filters=None):
 			"end": end
 		}, as_dict=True, update={"allDay": 0})
 
+def get_conditions(filters):
+	conditions = []
+	for key in filters:
+		if filters.get(key):
+			if frappe.get_meta("Timesheet").has_field(key):
+				dt = 'tabTimesheet'
+			elif frappe.get_meta("Timesheet Detail").has_field(key):
+				dt = 'tabTimesheet Detail'
+
+			conditions.append("`%s`.%s = '%s'"%(dt, key, filters.get(key)))
+
+	return " and {}".format(" and ".join(conditions)) if conditions else ""
+
+
+
+def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"):
+	user = frappe.session.user
+	return frappe. db.sql('''SELECT ts.name, tsd.activity_type, ts.status, ts.total_billable_hours, tsd.sales_invoice, tsd.project  FROM \
+		`tabTimesheet` AS ts inner join `tabTimesheet Detail` AS tsd ON tsd.parent = ts.name\
+		order by end_date asc limit {0} , {1}'''
+		.format(limit_start, limit_page_length), as_dict = True)
+
+def get_list_context(context=None):
+	return {
+		"show_sidebar": True,
+		"show_search": True,
+		'no_breadcrumbs': True,
+		"title": _("Timesheets"),
+		"get_list": get_timesheets_list,
+		"row_template": "templates/includes/timesheet/timesheet_row.html"
+	}
