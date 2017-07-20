@@ -236,7 +236,7 @@ var erpnext_slides = [
 		help: __("List your tax heads (e.g. VAT, Customs etc; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later."),
 		add_more: 1,
 		max_count: 3,
-		mandatory_entry: 1,
+		mandatory_entry: 0,
 		fields: [
 			{fieldtype:"Section Break"},
 			{fieldtype:"Data", fieldname:"tax", label:__("Tax"),
