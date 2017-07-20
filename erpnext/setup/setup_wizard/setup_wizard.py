@@ -287,12 +287,9 @@ def make_tax_account_and_template(company, account_name, tax_rate, template_name
 
 		if accounts:
 			make_sales_and_purchase_tax_templates(accounts, template_name)
-	except frappe.NameError, e:
-		if e.args[2][0]==1062:
-			pass
-		else:
-			raise
-	except RootNotEditable, e:
+	except frappe.NameError:
+		pass
+	except RootNotEditable:
 		pass
 
 def get_tax_account_group(company):
