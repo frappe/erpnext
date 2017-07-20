@@ -4,3 +4,4 @@ erpnext/crm/doctype/lead/test_lead.js
 erpnext/crm/doctype/opportunity/test_opportunity.js
 erpnext/selling/doctype/quotation/test_quotation.js
 erpnext/crm/doctype/item/test_item.js
+erpnext/hr/doctype/holiday_list/test_holiday_list.js
