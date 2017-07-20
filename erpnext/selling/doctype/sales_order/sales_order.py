@@ -334,11 +334,12 @@ class SalesOrder(SellingController):
 			bom = frappe.get_all('BOM', dict(item=i.item_code, is_active=True),
 					order_by='is_default desc')
 			bom = bom[0].name if bom else None
+			stock_qty = i.qty if self.packed_items else i.stock_qty
 			items.append(dict(
 				item_code= i.item_code,
 				bom = bom,
 				warehouse = i.warehouse,
-				pending_qty= i.stock_qty - flt(frappe.db.sql('''select sum(qty) from `tabProduction Order`
+				pending_qty= stock_qty - flt(frappe.db.sql('''select sum(qty) from `tabProduction Order`
 					where production_item=%s and sales_order=%s''', (i.item_code, self.name))[0][0])
 			))
 
