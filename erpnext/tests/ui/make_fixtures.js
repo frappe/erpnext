@@ -1,11 +1,11 @@
 $.extend(frappe.test_data, {
-	"Fiscal Year": {
-		"2017-18": [
-			{"year": "2017-18"},
-			{"year_start_date": "2017-04-01"},
-			{"year_end_date": "2018-03-31"},
-		]
-	},
+	// "Fiscal Year": {
+	// 	"2017-18": [
+	// 		{"year": "2017-18"},
+	// 		{"year_start_date": "2017-04-01"},
+	// 		{"year_end_date": "2018-03-31"},
+	// 	]
+	// },
 	"Customer": {
 		"Test Customer 1": [
 			{customer_name: "Test Customer 1"}
