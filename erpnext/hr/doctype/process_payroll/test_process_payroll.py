@@ -3,10 +3,12 @@
 from __future__ import unicode_literals
 
 import unittest
-import frappe
+
 import erpnext
-from frappe.utils import flt, add_months, cint, nowdate, getdate, add_days, random_string
-from frappe.utils.make_random import get_random
+import frappe
+from frappe.utils import nowdate
+from erpnext.hr.doctype.process_payroll.process_payroll import get_end_date
+
 
 class TestProcessPayroll(unittest.TestCase):
 	def test_process_payroll(self):
@@ -30,6 +32,16 @@ class TestProcessPayroll(unittest.TestCase):
 			process_payroll.submit_salary_slips()
 			if process_payroll.get_sal_slip_list(ss_status = 1):
 				r = process_payroll.make_payment_entry()
+
+	def test_get_end_date(self):
+		self.assertEqual(get_end_date('2017-01-01', 'monthly'), {'end_date': '2017-01-31'})
+		self.assertEqual(get_end_date('2017-02-01', 'monthly'), {'end_date': '2017-02-28'})
+		self.assertEqual(get_end_date('2017-02-01', 'fortnightly'), {'end_date': '2017-02-14'})
+		self.assertEqual(get_end_date('2017-02-01', 'bimonthly'), {'end_date': ''})
+		self.assertEqual(get_end_date('2017-01-01', 'bimonthly'), {'end_date': ''})
+		self.assertEqual(get_end_date('2020-02-15', 'bimonthly'), {'end_date': ''})
+		self.assertEqual(get_end_date('2017-02-15', 'monthly'), {'end_date': '2017-03-14'})
+		self.assertEqual(get_end_date('2017-02-15', 'daily'), {'end_date': '2017-02-15'})
 	
 
 def get_salary_component_account(sal_comp):
