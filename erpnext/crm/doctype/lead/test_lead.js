@@ -34,6 +34,7 @@ QUnit.test("test: lead", function (assert) {
 		// make opportunity
 		() => frappe.click_button('Make'),
 		() => frappe.click_link('Opportunity'),
+		() => frappe.timeout(2),
 		() => assert.equal(cur_frm.doc.lead, frappe.lead_name,
 			'lead name correctly mapped'),
 
