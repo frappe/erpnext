@@ -46,49 +46,55 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 		cur_frm.set_df_property("drop_ship", "hidden", !is_drop_ship);
 
-		if(doc.docstatus == 1 && !in_list(["Closed", "Delivered"], doc.status)) {
-			if (this.frm.has_perm("submit")) {
-				if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100) {
-					cur_frm.add_custom_button(__('Close'), this.close_purchase_order, __("Status"));
+		if(doc.docstatus === 1 && doc.status === "Completed"){
+			frm.clear_custom_buttons();
+		} else {
+
+			if(doc.docstatus == 1 && !in_list(["Closed", "Delivered"], doc.status)) {
+				if (this.frm.has_perm("submit")) {
+					if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100) {
+						cur_frm.add_custom_button(__('Close'), this.close_purchase_order, __("Status"));
+					}
+				}
+
+				if(is_drop_ship && doc.status!="Delivered"){
+					cur_frm.add_custom_button(__('Delivered'),
+						this.delivered_by_supplier, __("Status"));
+
+					cur_frm.page.set_inner_btn_group_as_primary(__("Status"));
+				}
+			} else if(doc.docstatus===0) {
+				cur_frm.cscript.add_from_mappers();
+			}
+
+			if(doc.docstatus == 1 && in_list(["Closed", "Delivered"], doc.status)) {
+				if (this.frm.has_perm("submit")) {
+					cur_frm.add_custom_button(__('Re-open'), this.unclose_purchase_order, __("Status"));
 				}
 			}
 
-			if(is_drop_ship && doc.status!="Delivered"){
-				cur_frm.add_custom_button(__('Delivered'),
-					this.delivered_by_supplier, __("Status"));
+			if(doc.docstatus == 1 && doc.status != "Closed") {
+				if(flt(doc.per_received, 2) < 100 && allow_receipt) {
+					cur_frm.add_custom_button(__('Receipt'), this.make_purchase_receipt, __("Make"));
 
-				cur_frm.page.set_inner_btn_group_as_primary(__("Status"));
-			}
-		} else if(doc.docstatus===0) {
-			cur_frm.cscript.add_from_mappers();
-		}
-
-		if(doc.docstatus == 1 && in_list(["Closed", "Delivered"], doc.status)) {
-			if (this.frm.has_perm("submit")) {
-				cur_frm.add_custom_button(__('Re-open'), this.unclose_purchase_order, __("Status"));
-			}
-		}
-
-		if(doc.docstatus == 1 && doc.status != "Closed") {
-			if(flt(doc.per_received, 2) < 100 && allow_receipt) {
-				cur_frm.add_custom_button(__('Receipt'), this.make_purchase_receipt, __("Make"));
-
-				if(doc.is_subcontracted==="Yes") {
-					cur_frm.add_custom_button(__('Material to Supplier'),
-						function() { me.make_stock_entry(); }, __("Transfer"));
+					if(doc.is_subcontracted==="Yes") {
+						cur_frm.add_custom_button(__('Material to Supplier'),
+							function() { me.make_stock_entry(); }, __("Transfer"));
+					}
 				}
+
+				if(flt(doc.per_billed, 2) < 100)
+					cur_frm.add_custom_button(__('Invoice'),
+						this.make_purchase_invoice, __("Make"));
+
+				if(flt(doc.per_billed)==0 && doc.status != "Delivered") {
+					cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_payment_entry, __("Make"));
+				}
+				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+
 			}
-
-			if(flt(doc.per_billed, 2) < 100)
-				cur_frm.add_custom_button(__('Invoice'),
-					this.make_purchase_invoice, __("Make"));
-
-			if(flt(doc.per_billed)==0 && doc.status != "Delivered") {
-				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_payment_entry, __("Make"));
-			}
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
-
 		}
+
 	},
 
 	get_items_from_open_material_requests: function() {
