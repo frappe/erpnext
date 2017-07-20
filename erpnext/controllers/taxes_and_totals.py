@@ -509,28 +509,31 @@ class calculate_taxes_and_totals(object):
 		return rate_with_margin
 
 	def set_item_wise_tax_breakup(self):
-		if not self.doc.taxes:
-			return
-		frappe.flags.company = self.doc.company
+		self.doc.other_charges_calculation = get_itemised_tax_breakup_html(self.doc)
 		
-		# get headers
-		tax_accounts = list(set([d.description for d in self.doc.taxes]))
-		headers = get_itemised_tax_breakup_header(self.doc.doctype + " Item", tax_accounts)
-		
-		# get tax breakup data
-		itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(self.doc)
-		
-		frappe.flags.company = None
-		
-		self.doc.other_charges_calculation = frappe.render_template(
-			"templates/includes/itemised_tax_breakup.html", dict(
-				headers=headers,
-				itemised_tax=itemised_tax,
-				itemised_taxable_amount=itemised_taxable_amount,
-				tax_accounts=tax_accounts,
-				company_currency=erpnext.get_company_currency(self.doc.company)
-			)
+def get_itemised_tax_breakup_html(doc):
+	if not doc.taxes:
+		return
+	frappe.flags.company = doc.company
+	
+	# get headers
+	tax_accounts = list(set([d.description for d in doc.taxes]))
+	headers = get_itemised_tax_breakup_header(doc.doctype + " Item", tax_accounts)
+	
+	# get tax breakup data
+	itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(doc)
+	
+	frappe.flags.company = None
+	
+	return frappe.render_template(
+		"templates/includes/itemised_tax_breakup.html", dict(
+			headers=headers,
+			itemised_tax=itemised_tax,
+			itemised_taxable_amount=itemised_taxable_amount,
+			tax_accounts=tax_accounts,
+			company_currency=erpnext.get_company_currency(doc.company)
 		)
+	)
 
 @erpnext.allow_regional
 def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
