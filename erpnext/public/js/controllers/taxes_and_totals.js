@@ -40,8 +40,10 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	calculate_discount_amount: function(){
-		if (frappe.meta.get_docfield(this.frm.doc.doctype, "discount_amount"))
+		if (frappe.meta.get_docfield(this.frm.doc.doctype, "discount_amount")) {
+			this.set_discount_amount();
 			this.apply_discount_amount();
+		}
 	},
 
 	_calculate_taxes_and_totals: function() {
@@ -448,6 +450,13 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 				tax.item_wise_tax_detail = JSON.stringify(tax.item_wise_tax_detail);
 			});
+		}
+	},
+
+	set_discount_amount: function() {
+		if(this.frm.doc.additional_discount_percentage) {
+			this.frm.doc.discount_amount = flt(flt(this.frm.doc[frappe.scrub(this.frm.doc.apply_discount_on)])
+				* this.frm.doc.additional_discount_percentage / 100, precision("discount_amount"));
 		}
 	},
 
