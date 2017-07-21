@@ -317,7 +317,7 @@ def update_company_current_month_sales(company):
 
 	results = frappe.db.sql(('''
 		select
-			sum(grand_total) as total, date_format(posting_date, '%m-%Y') as month_year
+			sum(base_grand_total) as total, date_format(posting_date, '%m-%Y') as month_year
 		from
 			`tabSales Invoice`
 		where
