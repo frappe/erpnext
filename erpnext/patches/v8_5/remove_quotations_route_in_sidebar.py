@@ -11,4 +11,6 @@ def execute():
 		delete from
 			`tabPortal Menu Item`
 		where
-			route = '/quotations' and title = 'Supplier Quotation' or route = '/quotation' and title = 'Quotations'""")
+			(route = '/quotations' and title = 'Supplier Quotation')
+		or (route = '/quotation' and title = 'Quotations')
+	""")
