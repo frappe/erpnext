@@ -420,15 +420,6 @@ erpnext.setup.fiscal_years = {
 
 frappe.setup.on("before_load", function () {
 	erpnext_slides.map(frappe.setup.add_slide);
-
-	// change header brand
-	let $brand = $('header .setup-wizard-brand');
-	if($brand.find('.erpnext-icon').length === 0) {
-		$brand.find('.frappe-icon').hide();
-		$brand.append(`<span>
-			<img src="/assets/erpnext/images/erp-icon.svg" class="brand-icon erpnext-icon"
-			style="width:36px;"><span class="brand-name">ERPNext</span></span>`);
-	}
 });
 
 var test_values_edu = {
