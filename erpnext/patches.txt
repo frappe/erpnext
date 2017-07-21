@@ -1,3 +1,4 @@
+erpnext.patches.v8_1.remove_quotations_route_in_sidebar
 execute:import unidecode # new requirement
 erpnext.patches.v8_0.move_perpetual_inventory_setting
 erpnext.patches.v4_0.validate_v3_patch
