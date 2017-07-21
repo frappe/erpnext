@@ -20,7 +20,7 @@ QUnit.test("test project", function(assert) {
 				]}
 			]);
 		},
-		// Retreiving random name generated against a task 
+		// Retreiving random name generated against a task
 		() => frappe.db.get_value('Task', {'subject': 'Documentation'}, 'name'),
 		(task) => {
 			// Creating timesheet for a project
