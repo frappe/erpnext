@@ -29,7 +29,7 @@ Note that the "Apply User Permissions" is already checked for this role. Then cl
 
 Here you will see that Company has already been checked. If you want user permissions not be applied for that particular rule, you can un check it.
 
-<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-perms/view-sleected-documents.png" class="screenshot" alt="Select Document Types to Edit the Setting">
+<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-perms/view-selected-documents.png" class="screenshot" alt="Select Document Types to Edit the Setting">
 
 ### Ignoring User Permissions on Certain Fields
 
