@@ -201,9 +201,11 @@ scheduler_events = {
 
 email_brand_image = "assets/erpnext/images/erpnext-logo.jpg"
 
-default_mail_footer = """<div style="text-align: center;">
-	<a href="https://erpnext.com?source=via_email_footer" target="_blank" style="color: #8d99a6;">
-		Sent via ERPNext
+default_mail_footer = """<div class="text-center">
+	<a class="text-muted" href="https://erpnext.com?source=via_email_footer" target="_blank">
+		<img embed="assets/erpnext/images/erpnext-grey.png"
+			alt="ERPNext" width="20" height="20"
+			style="width: 20px; height: 20px; margin-right: 5px; vertical-align:middle;" />
 	</a>
 </div>"""
 
