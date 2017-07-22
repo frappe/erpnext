@@ -42,10 +42,6 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 			return;
 		}
 
-		if(!d.expense_type) {
-			return;
-		}
-
 		return frappe.call({
 			method: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_claim_account",
 			args: {
@@ -113,7 +109,7 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn) {
 
 		if (doc.docstatus==0 && doc.approval_status=="Approved") {
 			if (cint(doc.total_advance_paid) < cint(doc.total_sanctioned_amount) && frappe.model.can_create("Journal Entry")) {
-				cur_frm.add_custom_button(__("Advance Payment"), cur_frm.cscript.make_advance_entry, __("Make"));
+				cur_frm.add_custom_button(__("Make Advance Payment"), cur_frm.cscript.make_advance_entry, __("Make"));
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 				}
 			}
@@ -195,24 +191,6 @@ erpnext.expense_claim = {
 }
 
 frappe.ui.form.on("Expense Claim", {
-        refresh: function(frm) {
-	var doc = frm.doc;
-		if(doc.advance_account)
-		frappe.call({
-			method: "erpnext.hr.doctype.expense_claim.expense_claim.update_advance_paid",
-			args: {
-				"docname": cur_frm.doc.name,
-				"advance_account": doc.advance_account
-			},
-			callback: function(r) {
-				cur_frm.set_value("total_advance_paid", r.message.amt)
-			}
-		});
-	}
-})
-
-
-frappe.ui.form.on("Expense Claim", {
 	refresh: function(frm) {
 		if(frm.doc.docstatus == 1) {
 			frm.add_custom_button(__('Accounting Ledger'), function() {
@@ -271,7 +249,7 @@ frappe.ui.form.on("Expense Claim",{
 		frm.fields_dict["payable_account"].get_query = function() {
 			return {
 				filters: {
-					"report_type": "Balance Sheet",
+					"root_type": "Liability",
 					"account_type": "Payable"
 				}
 			}
