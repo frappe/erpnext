@@ -202,6 +202,16 @@ def update_reimbursed_amount(doc):
 	frappe.db.set_value("Expense Claim", doc.name , "status", doc.status)
 
 @frappe.whitelist()
+def update_advance_paid(docname, advance_account):
+	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt 
+		from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
+		and account = %s """, (docname, advance_account) ,as_dict=1)[0].amt
+
+	return {
+		"amt": amt
+	}
+
+@frappe.whitelist()
 def get_expense_approver(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""
 		select u.name, concat(u.first_name, ' ', u.last_name)
@@ -274,14 +284,14 @@ def make_advance_entry(docname):
 
 	je.append("accounts", {
 		"account": expense_claim.advance_account,
-		"debit_in_account_currency": flt(expense_claim.total_sanctioned_amount),
+		"debit_in_account_currency": flt(expense_claim.total_sanctioned_amount - expense_claim.total_advance_paid),
 		"reference_type": "Expense Claim",
 		"reference_name": expense_claim.name
 	})
 
 	je.append("accounts", {
 		"account": default_bank_cash_account.account,
-		"credit_in_account_currency": flt(expense_claim.total_sanctioned_amount),
+		"credit_in_account_currency": flt(expense_claim.total_sanctioned_amount - expense_claim.total_advance_paid),
 		"reference_type": "Expense Claim",
 		"reference_name": expense_claim.name,
 		"balance": default_bank_cash_account.balance,
