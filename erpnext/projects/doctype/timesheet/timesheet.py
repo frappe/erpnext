@@ -381,3 +381,18 @@ def get_events(start, end, filters=None):
 			"end": end
 		}, as_dict=True, update={"allDay": 0})
 
+def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"):
+	return frappe. db.sql('''SELECT ts.name, tsd.activity_type, ts.status, ts.total_billable_hours, tsd.sales_invoice, tsd.project  FROM \
+		`tabTimesheet` AS ts inner join `tabTimesheet Detail` AS tsd ON tsd.parent = ts.name\
+		order by end_date asc limit {0} , {1}'''
+		.format(limit_start, limit_page_length), as_dict = True)
+
+def get_list_context(context=None):
+	return {
+		"show_sidebar": True,
+		"show_search": True,
+		'no_breadcrumbs': True,
+		"title": _("Timesheets"),
+		"get_list": get_timesheets_list,
+		"row_template": "templates/includes/timesheet/timesheet_row.html"
+	}
