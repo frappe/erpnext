@@ -1,7 +1,7 @@
 QUnit.module('hr');
 
 QUnit.test("Test: Holiday list [HR]", function (assert) {
-	assert.expect(2);
+	assert.expect(3);
 	let done = assert.async();
 	let date = frappe.datetime.add_months(frappe.datetime.nowdate(), -2);		// date 2 months from now
 
@@ -10,7 +10,7 @@ QUnit.test("Test: Holiday list [HR]", function (assert) {
 		() => frappe.set_route("List", "Holiday List", "List"),
 		() => frappe.new_doc("Holiday List"),
 		() => frappe.timeout(1),
-		() => cur_frm.set_value("holiday_list_name", "Holiday test"),
+		() => cur_frm.set_value("holiday_list_name", "Holiday list test"),
 		() => cur_frm.set_value("from_date", date),
 		() => cur_frm.set_value("weekly_off", "Sunday"),		// holiday list for sundays
 		() => frappe.click_button('Get Weekly Off Dates'),
@@ -18,8 +18,18 @@ QUnit.test("Test: Holiday list [HR]", function (assert) {
 		// save form
 		() => cur_frm.save(),
 		() => frappe.timeout(1),
-		() => assert.equal("Holiday test", cur_frm.doc.holiday_list_name,
+		() => assert.equal("Holiday list test", cur_frm.doc.holiday_list_name,
 			'name of holiday list correctly save'),
+
+		// check if holiday list contains correct days
+		() => {
+			var list = cur_frm.doc.holidays;
+			var list_length = list.length;
+			var i = 0;
+			for ( ; i < list_length; i++)
+				if (list[i].description != 'Sunday') break;
+			assert.equal(list_length, i, "all holidays are sundays in holiday list")
+		},
 
 		// check if to_date is set one year from from_date
 		() => {
