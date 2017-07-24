@@ -1,6 +1,7 @@
 QUnit.test("test: item", function (assert) {
-	assert.expect(0);
+	assert.expect(1);
 	let done = assert.async();
+
 	frappe.run_serially([
 		// test item creation
 		() => frappe.set_route("List", "Item"),
@@ -13,20 +14,16 @@ QUnit.test("test: item", function (assert) {
 				{with_operations: 1},
 				{operations: [
 					[
-						{operation: "CPU OP"},
-						{time_in_mins: 480},
-					]
-				]},
-				{operations: [
+						{operation: "Assemble CPU"},
+						{time_in_mins: 60},
+					],
 					[
-						{operation: "Screen OP"},
-						{time_in_mins: 480},
-					]
-				]},
-				{operations: [
+						{operation: "Assemble Keyboard"},
+						{time_in_mins: 30},
+					],
 					[
-						{operation: "Keyboard OP"},
-						{time_in_mins: 480},
+						{operation: "Assemble Screen"},
+						{time_in_mins: 30},
 					]
 				]},
 				{scrap_items: [
@@ -36,35 +33,30 @@ QUnit.test("test: item", function (assert) {
 				]},
 				{items: [
 					[
-						{item_code: "CPU"}
+						{item_code: "CPU"},
+						{qty: 1}
+					],
+					[
+						{item_code: "Keyboard"},
+						{qty: 1}
+					],
+					[
+						{item_code: "Screen"},
+						{qty: 1}
 					]
 				]},
-				{items: [
-					[
-						{item_code: "Screen"}
-					]
-				]},
-				{items: [
-					[
-						{item_code: "Keyboard"}
-					]
-				]}
 			]
 		),
-		// () => {
-		// 	assert.ok(cur_frm.doc.item_name.includes('Keyboard'),
-		// 		'Item Keyboard created correctly');
-		// 	assert.ok(cur_frm.doc.item_code.includes('Keyboard'),
-		// 		'item_code for Keyboard set correctly');
-		// 	assert.ok(cur_frm.doc.item_group.includes('Products'),
-		// 		'item_group for Keyboard set correctly');
-		// 	assert.equal(cur_frm.doc.is_stock_item, 1,
-		// 		'is_stock_item for Keyboard set correctly');
-		// 	assert.equal(cur_frm.doc.standard_rate, 1000,
-		// 		'standard_rate for Keyboard set correctly');
-		// 	assert.equal(cur_frm.doc.opening_stock, 100,
-		// 		'opening_stock for Keyboard set correctly');
-		// },
+		() => cur_frm.savesubmit(),
+		() => frappe.timeout(1),
+		() => $(`button.btn.btn-primary:contains('Yes')`).click(),
+		() => frappe.timeout(1),
+		
+		() => {
+			assert.ok(cur_frm.doc.operating_cost + cur_frm.doc.raw_material_cost -
+			cur_frm.doc.scrap_material_cost == cur_frm.doc.total_cost,
+				'Total_Cost calculated correctly');
+		},
 
 		() => done()
 	]);
