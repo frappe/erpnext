@@ -58,34 +58,17 @@ frappe.ui.form.on("Request for Quotation",{
 			fields: [
 				{	"fieldtype": "Select", "label": __("Get Suppliers By"),
 					"fieldname": "search_type",
-					"options": "Tag\nSupplier Type" ,
-					"reqd": 1 },
+					"options": "Tag\nSupplier Type", "reqd": 1 },
 				{	"fieldtype": "Link", "label": __("Supplier Type"),
 					"fieldname": "supplier_type",
-					"options": "Supplier Type" ,
-					"reqd": 0,
-					"hidden": 1	},
+					"options": "Supplier Type",	"reqd": 0,
+					"depends_on": "eval:doc.search_type == 'Supplier Type'"},
 				{	"fieldtype": "Data", "label": __("Tag"),
-					"fieldname": "tag",
-					"reqd": 0,
-					"hidden": 1	},
+					"fieldname": "tag",	"reqd": 0,
+					"depends_on": "eval:doc.search_type == 'Tag'" },
 				{	"fieldtype": "Button", "label": __("Add All Suppliers"),
-					"fieldname": "add_suppliers", "cssClass": "btn-primary" },
+					"fieldname": "add_suppliers", "cssClass": "btn-primary"},
 			]
-		});
-
-		dialog.fields_dict.search_type.$input.change( function() {
-			var args = dialog.get_values();
-			if(!args) return;
-			if (args.search_type === "Tag") {
-				dialog.fields_dict.supplier_type.df.hidden = 1;
-				dialog.fields_dict.tag.df.hidden = 0;
-				dialog.refresh();
-			} else {
-				dialog.fields_dict.supplier_type.df.hidden = 0;
-				dialog.fields_dict.tag.df.hidden = 1;
-				dialog.refresh();
-			}
 		});
 
 		dialog.fields_dict.add_suppliers.$input.click(function() {
@@ -94,11 +77,35 @@ frappe.ui.form.on("Request for Quotation",{
 			dialog.hide();
 
 			//Remove blanks
-			for (var j = 0; j < frm.doc.suppliers.length; j++)
-			{
+			for (var j = 0; j < frm.doc.suppliers.length; j++) {
 				if(!frm.doc.suppliers[j].hasOwnProperty("supplier")) {
 					frm.get_field("suppliers").grid.grid_rows[j].remove();
 				}
+			}
+
+			 function LoadSuppliers(r) {
+				if(r.message) {
+					for (var i = 0; i < r.message.length; i++) {
+						var exists = false;
+						if (r.message[i].constructor === Array){
+							var supplier = r.message[i][0];
+						} else {
+							var supplier = r.message[i].name;
+						}
+
+						for (var j = 0; j < doc.suppliers.length;j++) {
+							if (supplier === doc.suppliers[j].supplier) {
+								exists = true;
+							}
+						}
+						if(!exists) {
+							var d = frm.add_child('suppliers');
+							d.supplier = supplier;
+							frm.script_manager.trigger("supplier", d.doctype, d.name);
+						}
+					}
+				}
+				frm.refresh_field("suppliers");
 			}
 
 			if (args.search_type === "Tag" && args.tag) {
@@ -109,25 +116,7 @@ frappe.ui.form.on("Request for Quotation",{
 						"doctype": "Supplier",
 						"tag": args.tag
 					},
-					callback: function(r) {
-						if(r.message) {
-							for (var i = 0; i < r.message.length; i++) {
-								var exists = false;
-								var supplier = r.message[i][0];
-								for (var j = 0; j < doc.suppliers.length;j++) {
-									if (supplier === doc.suppliers[j].supplier) {
-										exists = true;
-									}
-								}
-								if(!exists) {
-									var d = frm.add_child('suppliers');
-									d.supplier = supplier;
-									frm.script_manager.trigger("supplier", d.doctype, d.name);
-								}
-							}
-						}
-						frm.refresh_field("suppliers");
-					}
+					callback: LoadSuppliers
 				});
 			} else if (args.supplier_type) {
 				return frappe.call({
@@ -139,26 +128,7 @@ frappe.ui.form.on("Request for Quotation",{
 						filters: [["Supplier", "supplier_type", "=", args.supplier_type]]
 
 					},
-					callback: function(r) {
-						console.log(r);
-						if(r.message) {
-							for (var i = 0; i < r.message.length; i++) {
-								var exists = false;
-								var supplier = r.message[i].name;
-								for (var j = 0; j < doc.suppliers.length;j++) {
-									if (supplier === doc.suppliers[j].supplier) {
-										exists = true;
-									}
-								}
-								if(!exists) {
-									var d = frm.add_child('suppliers');
-									d.supplier = supplier;
-									frm.script_manager.trigger("supplier", d.doctype, d.name);
-								}
-							}
-						}
-						frm.refresh_field("suppliers");
-					}
+					callback: LoadSuppliers
 				});
 			}
 		});
