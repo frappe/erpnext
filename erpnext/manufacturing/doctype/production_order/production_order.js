@@ -77,7 +77,6 @@ frappe.ui.form.on("Production Order", {
 		if (!frm.doc.status)
 			frm.doc.status = 'Draft';
 
-		frm.add_fetch("sales_order", "delivery_date", "expected_delivery_date");
 		frm.add_fetch("sales_order", "project", "project");
 
 		if(frm.doc.__islocal) {

@@ -31,7 +31,7 @@ Most of the information in your Sales Order is the same as the Quotation.
 There are a few amongst other things that a Sales Order will ask you to
 update.
 
-  * Expected date of delivery.
+  * Enter delivery date agaist each item. If there are multiple items and if you enter delivery date in the first row, the date will be copied to other rows as well where it is blank.
   * Customer Purchase Order number: If your customer has sent you a Purchase Order, you can update its number for future reference (in billing).
 
 ### Packing List
@@ -89,9 +89,9 @@ ERPNext will automatically create new Order and mail a notification to the Email
 Once you “Submit” your Sales Order, you can now trigger different aspects of
 your organization:
 
-  * To begin purchase click on “Make Purchase Request”
-  * To make a shipment entry click on “Make Delivery Note”
-  * To bill, make “Make Sales Invoice”
+  * To begin purchase click on Make -> Purchase Request
+  * To make a shipment entry click on Make -> Delivery Note. You can also make Delivery Note for selected items based on delivery date.
+  * To bill, make Make -> Sales Invoice
   * To stop further process on this Sales Order, click on “Stop”
 
 ### Submission

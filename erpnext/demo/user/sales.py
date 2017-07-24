@@ -118,7 +118,8 @@ def make_sales_order():
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 		so = frappe.get_doc(make_sales_order(q))
 		so.transaction_date = frappe.flags.current_date
-		so.delivery_date = frappe.utils.add_days(frappe.flags.current_date, 10)
+		for d in so.get("items"):
+			d.delivery_date = frappe.utils.add_days(frappe.flags.current_date, 10)
 		so.insert()
 		frappe.db.commit()
 		so.submit()

@@ -512,7 +512,6 @@ def make_sales_order(**args):
 
 	so.company = args.company or "_Test Company"
 	so.customer = args.customer or "_Test Customer"
-	so.delivery_date = add_days(so.transaction_date, 10)
 	so.currency = args.currency or "INR"
 	if args.selling_price_list:
 		so.selling_price_list = args.selling_price_list
@@ -532,6 +531,9 @@ def make_sales_order(**args):
 			"uom": args.uom or None,
 			"rate": args.rate or 100
 		})
+
+	for d in so.get("items"):
+		d.delivery_date = add_days(so.transaction_date, 10)
 
 	if not args.do_not_save:
 		so.insert()

@@ -412,7 +412,7 @@ def get_events(start, end, filters=None):
 		company=frappe.db.get_value("Global Defaults", None, "default_company")
 
 	from frappe.desk.reportview import get_filters_cond
-	conditions = get_filters_cond("Leave Application")
+	conditions = get_filters_cond("Leave Application", filters, [])
 
 	# show department leaves for employee
 	if "Employee" in frappe.get_roles():
@@ -435,7 +435,7 @@ def add_department_leaves(events, start, end, employee, company):
 	department_employees = frappe.db.sql_list("""select name from tabEmployee where department=%s
 		and company=%s""", (department, company))
 
-	match_conditions = "employee in (\"%s\")" % '", "'.join(department_employees)
+	match_conditions = "and employee in (\"%s\")" % '", "'.join(department_employees)
 	add_leaves(events, start, end, match_conditions=match_conditions)
 
 def add_leaves(events, start, end, match_conditions=None):
@@ -446,7 +446,7 @@ def add_leaves(events, start, end, match_conditions=None):
 		and docstatus < 2
 		and status!="Rejected" """
 	if match_conditions:
-		query += " and " + match_conditions
+		query += match_conditions
 
 	for d in frappe.db.sql(query, {"start":start, "end": end}, as_dict=True):
 		e = {

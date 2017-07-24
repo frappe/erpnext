@@ -107,13 +107,15 @@ def make_custom_fields():
 				fieldtype='Data', insert_after='company_address',
 				options='company_address.gstin', print_hide=1),
 			dict(fieldname='invoice_copy', label='Invoice Copy',
-				fieldtype='Select', insert_after='project', print_hide=1, allow_on_submit=1,
-				options='ORIGINAL FOR RECIPIENT\nDUPLICATE FOR TRANSPORTER\nDUPLICATE FOR SUPPLIER\nTRIPLICATE FOR SUPPLIER')
+				fieldtype='Select', insert_after='select_print_heading', print_hide=1, allow_on_submit=1,
+				options='Original for Recipient\nDuplicate for Transporter\nDuplicate for Supplier\nTriplicate for Supplier')
 		],
 		'Item': [
 			dict(fieldname='gst_hsn_code', label='HSN/SAC',
 				fieldtype='Link', options='GST HSN Code', insert_after='item_group'),
 		],
+		'Quotation Item': [hsn_sac_field],
+		'Supplier Quotation Item': [hsn_sac_field],
 		'Sales Order Item': [hsn_sac_field],
 		'Delivery Note Item': [hsn_sac_field],
 		'Sales Invoice Item': [hsn_sac_field],
@@ -131,7 +133,7 @@ def make_custom_fields():
 				custom_field = frappe.get_doc("Custom Field", field)
 				custom_field.update(df)
 				custom_field.save()
-			
+
 def make_fixtures():
 	docs = [
 		{'doctype': 'Salary Component', 'salary_component': 'Professional Tax', 'description': 'Professional Tax', 'type': 'Deduction'},

@@ -228,6 +228,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				items: my_items
 			},
 			callback: function(r) {
+				if(r.exc) return;
+
 				var i = 0;
 				var item_length = cur_frm.doc.items.length;
 				while (i < item_length) {
@@ -244,35 +246,26 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 							cur_frm.doc.items[i].qty = my_qty;
 
 							frappe.msgprint("Assigning " + d.mr_name + " to " + d.item_code + " (row " + cur_frm.doc.items[i].idx + ")");
-							if (qty > 0)
-							{
+							if (qty > 0) {
 								frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
 								var newrow = frappe.model.add_child(cur_frm.doc, cur_frm.doc.items[i].doctype, "items");
 								item_length++;
 
-								for (var key in cur_frm.doc.items[i])
-								{
+								for (var key in cur_frm.doc.items[i]) {
 									newrow[key] = cur_frm.doc.items[i][key];
 								}
 
 								newrow.idx = item_length;
 								newrow["stock_qty"] = newrow.conversion_factor*qty;
 								newrow["qty"] = qty;
-
 								newrow["material_request"] = "";
 								newrow["material_request_item"] = "";
-
 							}
-
-
-
 						}
-
 					});
 					i++;
 				}
 				refresh_field("items");
-				//cur_frm.save();
 			}
 		});
 	}
