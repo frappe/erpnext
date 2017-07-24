@@ -122,6 +122,18 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 
 	},
 
+	schedule_date: function(doc, cdt, cdn) {
+		var val = locals[cdt][cdn].schedule_date;
+		if(val) {
+			$.each((doc.items || []), function(i, d) {
+				if(!d.schedule_date) {
+					d.schedule_date = val;
+				}
+			});
+			refresh_field("items");
+		}
+	},
+
 	get_items_from_bom: function() {
 		var d = new frappe.ui.Dialog({
 			title: __("Get Items from BOM"),
