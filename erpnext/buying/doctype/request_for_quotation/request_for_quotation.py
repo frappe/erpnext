@@ -70,7 +70,6 @@ class RequestforQuotation(BuyingController):
 				self.supplier_rfq_mail(rfq_supplier, update_password_link, self.get_link())
 				rfq_supplier.email_sent = 1
 				rfq_supplier.save()
-		
 
 	def get_link(self):
 		# RFQ link for supplier portal
