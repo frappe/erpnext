@@ -26,6 +26,12 @@ To setup an incoming Email Account, check on **Enable Incoming** and set your PO
 
 <img class="screenshot" alt="Incoming EMail" src="{{docs_base_url}}/assets/img/setup/email/email-account-incoming.png">
 
+### Setting Import Conditions for Email Import
+
+Email Accounts allows you to set conditions according to the data of the incoming emails. The email will be imported to ERPNext only if the all conditions are true. For example if you want to import an email if the subject is "Some important email", you put doc.subject == "Some important email" in the conditions textbox. You can also set more complex conditions by combining them, as shown on the following screenshot.
+
+<img class="screenshot" alt="Incoming EMail Conditions" src="{{docs_base_url}}/assets/img/setup/email/email-account-incoming-conditions.png">
+
 ### How ERPNext handles replies
 
 In ERPNext when you send an email to a contact like a customer, the sender will be the user who sent the email. In the **Reply-To** property, the Email Address will be of the default incoming account (like `replies@yourcompany.com`). ERPNext will automatically extract these emails from the incoming account and tag it to the relevant communication
