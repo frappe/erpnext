@@ -50,6 +50,16 @@ $.extend(frappe.test_data, {
 			{item_group: "Services"},
 			{is_stock_item: 0},
 			{standard_rate: 300}
+		],
+		"Test Product 4": [
+			{item_code: "Test Product 4"},
+			{item_group: "Products"},
+			{is_stock_item: 1},
+			{has_batch_no: 1},
+			{create_new_batch: 1},
+			{has_serial_no: 1},
+			{standard_rate: 100},
+			{opening_stock: 100},
 		]
 	},
 	"Lead": {
@@ -199,10 +209,14 @@ $.extend(frappe.test_data, {
 	},
 	"Terms and Conditions": {
 		"Test Term 1": [
-			{title: "Test Term 1"}
+			{title: "Test Term 1"},
+			{terms: "Test 1"}
+
 		],
 		"Test Term 2": [
-			{title: "Test Term 2"}
+			{title: "Test Term 2"},
+			{terms: "Test 2"}
+
 		]
 	},
 	"Sales Taxes and Charges Template": {
