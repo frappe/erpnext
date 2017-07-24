@@ -308,9 +308,8 @@ $.extend(frappe.test_data, {
 		"Test Term 2": [
 			{title: "Test Term 2"}
 		]
-	},
+	}
 });
-
 
 // this is a script that creates all fixtures
 // called as a test
