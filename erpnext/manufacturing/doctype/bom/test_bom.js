@@ -44,7 +44,7 @@ QUnit.test("test: item", function (assert) {
 						{item_code: "Screen"},
 						{qty: 1}
 					]
-				]},
+				]}
 			]
 		),
 		() => cur_frm.savesubmit(),
