@@ -1,12 +1,6 @@
 // Copyright (c) 2016, ESS LLP and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Vital Signs', {
-	refresh: function(frm) {
-
-	}
-});
-
 frappe.ui.form.on("Vital Signs", "height", function(frm) {
 	if(frm.doc.height && frm.doc.weight){
 		calculate_bmi(frm);

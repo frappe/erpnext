@@ -2,7 +2,4 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Fee Validity', {
-	refresh: function(frm) {
-
-	}
 });
