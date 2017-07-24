@@ -19,7 +19,7 @@ QUnit.test("Test: Holiday list [HR]", function (assert) {
 		() => cur_frm.save(),
 		() => frappe.timeout(1),
 		() => assert.equal("Holiday list test", cur_frm.doc.holiday_list_name,
-			'name of holiday list correctly save'),
+			'name of holiday list correctly saved'),
 
 		// check if holiday list contains correct days
 		() => {
