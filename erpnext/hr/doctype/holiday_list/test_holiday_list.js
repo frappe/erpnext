@@ -28,7 +28,7 @@ QUnit.test("Test: Holiday list [HR]", function (assert) {
 			var i = 0;
 			for ( ; i < list_length; i++)
 				if (list[i].description != 'Sunday') break;
-			assert.equal(list_length, i, "all holidays are sundays in holiday list")
+			assert.equal(list_length, i, "all holidays are sundays in holiday list");
 		},
 
 		// check if to_date is set one year from from_date
