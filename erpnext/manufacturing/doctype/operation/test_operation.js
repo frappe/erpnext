@@ -1,5 +1,5 @@
 QUnit.test("test: operation", function (assert) {
-	assert.expect(6);
+	assert.expect(2);
 	let done = assert.async();
 	let set_op_name = (text) => {
 		$(`input.input-with-feedback.form-control.bold:visible`).val(`${text}`);
@@ -16,61 +16,49 @@ QUnit.test("test: operation", function (assert) {
 		() => {
 			frappe.tests.make(
 				"Operation", [
-					{workstation: "Keyboard WS"}
+					{workstation: "Keyboard assembly workstation"}
 				]
 			);
 		},
 		() => frappe.timeout(4),
-		() => set_op_name("Keyboard OP"),
+		() => set_op_name("Assemble Keyboard"),
 		() => frappe.timeout(0.5),
 		() => click_create(),
 		() => frappe.timeout(1),
 		() => {
-			assert.ok(cur_frm.docname.includes('Keyboard OP'),
-				'Keyboard OP created successfully');
-			assert.ok(cur_frm.doc.workstation.includes('Keyboard WS'),
-				'Keyboard WS was linked successfully');
+			assert.ok(cur_frm.docname.includes('Assemble Keyboard'),
+				'Assemble Keyboard created successfully');
+			assert.ok(cur_frm.doc.workstation.includes('Keyboard assembly workstation'),
+				'Keyboard assembly workstation was linked successfully');
 		},
 
 		// Create a Screen operation
 		() => {
 			frappe.tests.make(
 				"Operation", [
-					{workstation: "Screen WS"}
+					{workstation: "Screen assembly workstation"}
 				]
 			);
 		},
 		() => frappe.timeout(4),
-		() => set_op_name("Screen OP"),
+		() => set_op_name("Assemble Screen"),
 		() => frappe.timeout(0.5),
 		() => click_create(),
 		() => frappe.timeout(1),
-		() => {
-			assert.ok(cur_frm.docname.includes('Screen OP'),
-				'Screen OP created successfully');
-			assert.ok(cur_frm.doc.workstation.includes('Screen WS'),
-				'Screen WS was linked successfully');
-		},
 
 		// Create a CPU operation
 		() => {
 			frappe.tests.make(
 				"Operation", [
-					{workstation: "CPU WS"}
+					{workstation: "CPU assembly workstation"}
 				]
 			);
 		},
 		() => frappe.timeout(4),
-		() => set_op_name("CPU OP"),
+		() => set_op_name("Assemble CPU"),
 		() => frappe.timeout(0.5),
 		() => click_create(),
 		() => frappe.timeout(1),
-		() => {
-			assert.ok(cur_frm.docname.includes('CPU OP'),
-				'CPU OP created successfully');
-			assert.ok(cur_frm.doc.workstation.includes('CPU WS'),
-				'CPU WS was linked successfully');
-		},
 
 		() => done()
 	]);

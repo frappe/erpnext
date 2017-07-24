@@ -1,5 +1,5 @@
 QUnit.test("test: workstation", function (assert) {
-	assert.expect(24);
+	assert.expect(9);
 	let done = assert.async();
 	let elec_rate = 50;
 	let rent = 100;
@@ -12,7 +12,7 @@ QUnit.test("test: workstation", function (assert) {
 		// Create a keyboard workstation
 		() => frappe.tests.make(
 			"Workstation", [
-				{workstation_name: "Keyboard WS"},
+				{workstation_name: "Keyboard assembly workstation"},
 				{hour_rate_electricity: elec_rate},
 				{hour_rate_rent: rent},
 				{hour_rate_consumable: consumable_rate},
@@ -27,8 +27,8 @@ QUnit.test("test: workstation", function (assert) {
 			]
 		),
 		() => {
-			assert.ok(cur_frm.doc.workstation_name.includes('Keyboard WS'),
-				'Keyboard WS created successfully');
+			assert.ok(cur_frm.doc.workstation_name.includes('Keyboard assembly workstation'),
+				'Keyboard assembly workstation created successfully');
 			assert.equal(cur_frm.doc.hour_rate_electricity, elec_rate,
 				'electricity rate set correctly');
 			assert.equal(cur_frm.doc.hour_rate_rent, rent,
@@ -43,12 +43,15 @@ QUnit.test("test: workstation", function (assert) {
 				'start time set correctly');
 			assert.ok(cur_frm.doc.working_hours[0].end_time.includes('18:00:0'),
 				'end time set correctly');
+			assert.ok(cur_frm.doc.hour_rate_electricity+cur_frm.doc.hour_rate_rent+
+				cur_frm.doc.hour_rate_consumable+cur_frm.doc.hour_rate_labour==
+				cur_frm.doc.hour_rate, 'Net hour rate set correctly');
 		},
 
 		// Create a Screen workstation
 		() => frappe.tests.make(
 			"Workstation", [
-				{workstation_name: "Screen WS"},
+				{workstation_name: "Screen assembly workstation"},
 				{hour_rate_electricity: elec_rate},
 				{hour_rate_rent: rent},
 				{hour_rate_consumable: consumable_rate},
@@ -62,29 +65,11 @@ QUnit.test("test: workstation", function (assert) {
 				]}
 			]
 		),
-		() => {
-			assert.ok(cur_frm.doc.workstation_name.includes('Screen WS'),
-				'Screen WS created successfully');
-			assert.equal(cur_frm.doc.hour_rate_electricity, elec_rate,
-				'electricity rate set correctly');
-			assert.equal(cur_frm.doc.hour_rate_rent, rent,
-				'rent set correctly');
-			assert.equal(cur_frm.doc.hour_rate_consumable, consumable_rate,
-				'consumable rate set correctly');
-			assert.equal(cur_frm.doc.hour_rate_labour, labour_rate,
-				'labour rate set correctly');
-			assert.equal(cur_frm.doc.working_hours[0].enabled, 1,
-				'working hours enabled');
-			assert.ok(cur_frm.doc.working_hours[0].start_time.includes('11:00:0'),
-				'start time set correctly');
-			assert.ok(cur_frm.doc.working_hours[0].end_time.includes('18:00:0'),
-				'end time set correctly');
-		},
 
 		// Create a CPU workstation
 		() => frappe.tests.make(
 			"Workstation", [
-				{workstation_name: "CPU WS"},
+				{workstation_name: "CPU assembly workstation"},
 				{hour_rate_electricity: elec_rate},
 				{hour_rate_rent: rent},
 				{hour_rate_consumable: consumable_rate},
@@ -98,24 +83,6 @@ QUnit.test("test: workstation", function (assert) {
 				]}
 			]
 		),
-		() => {
-			assert.ok(cur_frm.doc.workstation_name.includes('CPU WS'),
-				'CPU WS created successfully');
-			assert.equal(cur_frm.doc.hour_rate_electricity, elec_rate,
-				'electricity rate set correctly');
-			assert.equal(cur_frm.doc.hour_rate_rent, rent,
-				'rent set correctly');
-			assert.equal(cur_frm.doc.hour_rate_consumable, consumable_rate,
-				'consumable rate set correctly');
-			assert.equal(cur_frm.doc.hour_rate_labour, labour_rate,
-				'labour rate set correctly');
-			assert.equal(cur_frm.doc.working_hours[0].enabled, 1,
-				'working hours enabled');
-			assert.ok(cur_frm.doc.working_hours[0].start_time.includes('11:00:0'),
-				'start time set correctly');
-			assert.ok(cur_frm.doc.working_hours[0].end_time.includes('18:00:0'),
-				'end time set correctly');
-		},
 
 		() => done()
 	]);
