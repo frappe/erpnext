@@ -1,4 +1,3 @@
-
 QUnit.test("test project", function(assert) {
 	assert.expect(6);
 	let done = assert.async();
@@ -50,11 +49,9 @@ QUnit.test("test project", function(assert) {
 					assert.ok(cur_frm.get_field('total_costing_amount').get_value()==50,
 						'Costing amount for Testing task is correctly calculated');
 				}
-
 			},
 		]);
 	};
-
 	frappe.run_serially([
 		() => {
 			// Creating project with task
