@@ -18,5 +18,22 @@ frappe.ui.form.on('Subscription', {
 				}
 			}
 		}
+	},
+
+	refresh: function(frm) {
+		if(frm.doc.docstatus == 1) {
+			label = 'View ' + frm.doc.base_doctype
+			frm.add_custom_button(__(label),
+				function() {
+					frm.trigger("view_subscription_document")
+			})
+		}
+	},
+
+	view_subscription_document: function(frm) {
+		frappe.route_options = {
+			"subscription": frm.doc.name,
+		};
+		frappe.set_route("List", frm.doc.base_doctype);
 	}
 });

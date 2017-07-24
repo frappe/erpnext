@@ -81,8 +81,8 @@ def make_subscription_entry(date=None):
 			frappe.log_error(frappe.get_traceback())
 
 def get_subscription_entries(date):
-	return frappe.db.sql(""" select sc.base_doctype, sc.base_docname, sc.submit_on_creation,
-			sc.notify_by_email, sc.recipients, sc.print_format, scs.schedule_date, scs.name
+	return frappe.db.sql(""" select sc.name as subscription, sc.base_doctype, sc.base_docname,
+			sc.submit_on_creation, sc.notify_by_email, sc.recipients, sc.print_format, scs.schedule_date, scs.name
 		from `tabSubscription` as sc, `tabSubscription Schedule` as scs
 		where sc.name = scs.parent and sc.docstatus = 1 and scs.schedule_date <=%s
 			and scs.base_docname is null""", (date), as_dict=1)
@@ -99,8 +99,12 @@ def make_new_document(args):
 	return new_doc
 
 def update_doc(new_document, args):
+	new_document.docstatus = 0
 	if new_document.meta.get_field('set_posting_time'):
 		new_document.set('set_posting_time', 1)
+
+	if new_document.meta.get_field('subscription'):
+		new_document.set('subscription', args.subscription)
 
 	for data in new_document.meta.fields:
 		if data.fieldtype == 'Date' and data.reqd==1:
