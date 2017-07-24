@@ -1,11 +1,4 @@
 $.extend(frappe.test_data, {
-	// "Fiscal Year": {
-	// 	"2017-18": [
-	// 		{"year": "2017-18"},
-	// 		{"year_start_date": "2017-04-01"},
-	// 		{"year_end_date": "2018-03-31"},
-	// 	]
-	// },
 	'Academic Year': {
 		'2016-17': [
 			{academic_year_name: '2016-17'},
@@ -127,21 +120,21 @@ $.extend(frappe.test_data, {
 			{item_group: "Products"},
 			{is_stock_item: 1},
 			{standard_rate: 100},
-			{opening_stock: 100},
+			{opening_stock: 100}
 		],
 		"Test Product 2": [
 			{item_code: "Test Product 2"},
 			{item_group: "Products"},
 			{is_stock_item: 1},
 			{standard_rate: 150},
-			{opening_stock: 200},
+			{opening_stock: 200}
 		],
 		"Test Product 3": [
 			{item_code: "Test Product 3"},
 			{item_group: "Products"},
 			{is_stock_item: 1},
 			{standard_rate: 250},
-			{opening_stock: 100},
+			{opening_stock: 100}
 		],
 		"Test Service 1": [
 			{item_code: "Test Service 1"},
