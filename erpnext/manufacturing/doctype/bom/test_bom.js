@@ -51,11 +51,10 @@ QUnit.test("test: item", function (assert) {
 		() => frappe.timeout(1),
 		() => $(`button.btn.btn-primary:contains('Yes')`).click(),
 		() => frappe.timeout(1),
-		
+
 		() => {
 			assert.ok(cur_frm.doc.operating_cost + cur_frm.doc.raw_material_cost -
-			cur_frm.doc.scrap_material_cost == cur_frm.doc.total_cost,
-				'Total_Cost calculated correctly');
+			cur_frm.doc.scrap_material_cost == cur_frm.doc.total_cost, 'Total_Cost calculated correctly');
 		},
 
 		() => done()
