@@ -1,4 +1,5 @@
 erpnext/tests/ui/make_fixtures.js #long
+erpnext/tests/ui/make_school_fixtures.js
 erpnext/accounts/doctype/account/test_account.js
 erpnext/crm/doctype/lead/test_lead.js
 erpnext/crm/doctype/opportunity/test_opportunity.js
