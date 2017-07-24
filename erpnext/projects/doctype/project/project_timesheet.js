@@ -1,5 +1,4 @@
 
-
 QUnit.test("test project", function(assert) {
 	assert.expect(6);
 	let done = assert.async();
@@ -30,7 +29,6 @@ QUnit.test("test project", function(assert) {
 			},
 			// To check if a correct billable and costing amount is calculated for every task
 			() => {
-			
 				if(title=== 'Documentation')
 				{
 					assert.ok(cur_frm.get_field('total_billable_amount').get_value()==20,
@@ -56,7 +54,6 @@ QUnit.test("test project", function(assert) {
 			},
 		]);
 	};
-
 	frappe.run_serially([
 		() => {
 			// Creating project with task
