@@ -11,12 +11,12 @@ apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +166,Lead must be se
 DocType: Item,Default Selling Cost Center,Standard Selling Cost center
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +64,90-Above,90-Above
 DocType: Pricing Rule,Selling,Selling
-apps/erpnext/erpnext/accounts/page/pos/pos.js +73, to ,Ultima Actualización : Fecha inválida
+apps/erpnext/erpnext/accounts/page/pos/pos.js +72, to ,Ultima Actualización : Fecha inválida
 DocType: Sales Order,%  Delivered,% Leveres
 DocType: Lead,Lead Owner,Bly Owner
 apps/erpnext/erpnext/controllers/stock_controller.py +236,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Udgiftområde er obligatorisk for varen {2}
 apps/erpnext/erpnext/config/selling.py +169,Tax template for selling transactions.,Skat skabelon til at sælge transaktioner.
-apps/erpnext/erpnext/controllers/accounts_controller.py +292, or ,o
+apps/erpnext/erpnext/controllers/accounts_controller.py +293, or ,o
 DocType: Sales Order,% of materials billed against this Sales Order,% Af materialer faktureret mod denne Sales Order
 DocType: SMS Center,All Lead (Open),Alle Bly (Open)
 apps/erpnext/erpnext/templates/includes/footer/footer_extension.html +7,Get Updates,Hent opdateringer
