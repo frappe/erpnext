@@ -9,9 +9,10 @@ from frappe import _
 from frappe.utils import money_in_words
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from frappe.utils.csvutils import getlink
+from erpnext.controllers.accounts_controller import AccountsController
 
 
-class Fees(Document):
+class Fees(AccountsController):
 	def validate(self):
 		self.set_missing_values()
 		self.calculate_total()
@@ -20,6 +21,10 @@ class Fees(Document):
 	def set_missing_values(self):
 		if not self.contact_email:
 			self.contact_email = "manas@erpnext.com"
+		if not self.against_income_account:
+			self.against_income_account = "Academic Fees - S"
+		if not self.cost_center:
+			self.cost_center = "Main - S"
 
 	def calculate_total(self):
 		"""Calculates total amount."""
@@ -39,28 +44,29 @@ class Fees(Document):
 			frappe.msgprint(_("Payment request {0} created").format(getlink("Payment Request", pr.name)))
 
 
-	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
+	def make_gl_entries(self):
 		if not self.grand_total:
 			return
-
-		if not gl_entries:
-			gl_entries =  self.get_gl_dict({
-								"account": self.debit_to,
-								"party_type": "Student",
-								"party": self.student,
-								"against": self.against_income_account,
-								"debit": grand_total_in_company_currency,
-								"debit_in_account_currency": grand_total_in_company_currency \
-									if self.party_account_currency==self.company_currency else self.grand_total,
-								"against_voucher": self.name,
-								"against_voucher_type": self.doctype
-							}, self.party_account_currency)
-
-		if gl_entries:
-			from erpnext.accounts.general_ledger import make_gl_entries
-
-			make_gl_entries(gl_entries, cancel=(self.docstatus == 2))
-
+		student_gl_entries =  self.get_gl_dict({
+							"account": self.debit_to,
+							"party_type": "Student",
+							"party": self.student,
+							"against": self.against_income_account,
+							"debit": self.grand_total,
+							"debit_in_account_currency": self.grand_total,
+							"against_voucher": self.name,
+							"against_voucher_type": self.doctype
+						})
+		fee_gl_entry = self.get_gl_dict({
+							"account": self.against_income_account,
+							"against": self.student,
+							"credit": self.grand_total,
+							"credit_in_account_currency": self.grand_total,
+							"cost_center": self.cost_center
+						})
+		from erpnext.accounts.general_ledger import make_gl_entries
+		make_gl_entries([student_gl_entries, fee_gl_entry], cancel=(self.docstatus == 2),
+			update_outstanding="Yes", merge_entries=False)
 
 def get_fee_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"):
 	user = frappe.session.user
