@@ -1,4 +1,5 @@
 erpnext/tests/ui/make_fixtures.js #long
+erpnext/setup/doctype/company/test_company.js
 erpnext/accounts/doctype/account/test_account.js
 erpnext/crm/doctype/lead/test_lead.js
 erpnext/crm/doctype/opportunity/test_opportunity.js
@@ -6,6 +7,9 @@ erpnext/selling/doctype/quotation/test_quotation.js
 erpnext/crm/doctype/item/test_item.js
 erpnext/manufacturing/doctype/workstation/test_workstation.js
 erpnext/manufacturing/doctype/operation/test_operation.js
+erpnext/manufacturing/doctype/bom/test_bom.js
 erpnext/hr/doctype/holiday_list/test_holiday_list.js
 erpnext/hr/doctype/branch/test_branch.js
-erpnext/manufacturing/doctype/bom/test_bom.js
+erpnext/hr/doctype/leave_block_list/test_leave_block_list.js
+erpnext/hr/doctype/department/test_department.js
+erpnext/hr/doctype/designation/test_designation.js
