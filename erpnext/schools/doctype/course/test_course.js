@@ -22,6 +22,8 @@ QUnit.test('test course', function(assert) {
 				]}
 			]);
 		},
+		() => cur_frm.save(),
+		() => frappe.timeout(1),
 		() => {
 			assert.ok(cur_frm.doc.course_name == 'Test_Subject');
 			assert.ok(cur_frm.doc.course_code == 'Test_Sub');

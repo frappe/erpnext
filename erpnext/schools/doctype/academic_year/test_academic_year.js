@@ -13,7 +13,8 @@ QUnit.test('test academic year', function(assert){
 				{year_end_date:'2017-06-20'},
 			]);
 		},
-
+		() => cur_frm.save(),
+		() => frappe.timeout(1),
 		() => {
 			assert.ok(cur_frm.doc.academic_year_name=='2016-17');
 			assert.ok(cur_frm.doc.year_start_date=='2016-07-20');
