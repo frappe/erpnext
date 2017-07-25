@@ -64,7 +64,7 @@ class TrainingEvent(Document):
 		if email:
 			make(subject = subject, content=message,recipients=email,
 				sender=sender,attachments = attachments, send_email=True,
-					doctype=self.doctype, name=self.name)["name"]
+					doctype=self.doctype, name=self.name)
 			frappe.msgprint(_("Email sent to {0}").format(data.employee_name))
 
 	def get_attachments(self):

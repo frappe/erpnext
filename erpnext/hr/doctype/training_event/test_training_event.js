@@ -19,8 +19,8 @@ QUnit.test("test: Training Event", function (assert) {
 		() => cur_frm.set_value("send_email", 0),
 		() => frappe.click_button('Add Row'),
 		() => {
- 			cur_frm.fields_dict.employees.grid.grid_rows[0].doc.attendance = "Optional";
- 		},
+			cur_frm.fields_dict.employees.grid.grid_rows[0].doc.attendance = "Optional";
+		},
 		() => frappe.click_button('Save'),
 		() => frappe.timeout(1),
 		() => frappe.click_button('Submit'),
