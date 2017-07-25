@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Patient', {
 	refresh: function (frm) {
-		frm.set_query("patient", "patient_relation", function (doc, cdt, cdn) {
+		frm.set_query("patient", "patient_relation", function () {
 			return {
 				filters: [
 					["Patient", "name", "!=", frm.doc.name]

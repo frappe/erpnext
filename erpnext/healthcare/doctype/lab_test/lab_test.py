@@ -18,6 +18,7 @@ class LabTest(Document):
 
 	def on_trash(self):
 		frappe.throw("""Not permitted""")
+		return
 
 	def on_cancel(self):
 		delete_lab_test_from_medical_record(self)

@@ -305,7 +305,7 @@ var send_sms = function(v,frm){
 				frappe.call({
 					method: "erpnext.healthcare.doctype.lab_test.lab_test.update_lab_test_print_sms_email_status",
 					args: {print_sms_email: "sms_sent", name: doc.name},
-					callback: function(r){
+					callback: function(){
 						cur_frm.reload_doc();
 					}
 				});

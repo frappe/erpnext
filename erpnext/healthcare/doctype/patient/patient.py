@@ -48,6 +48,7 @@ class Patient(Document):
 
 	def on_trash(self):
 		frappe.throw("""Not permitted. Please disable Patient""")
+		return
 
 	def get_patient_name(self):
 		name = self.patient_name

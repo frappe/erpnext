@@ -56,7 +56,7 @@ var enable_template = function(frm){
 	frappe.call({
 		method: 		"erpnext.healthcare.doctype.lab_test_template.lab_test_template.disable_enable_test_template",
 		args: {status: 0, name: doc.name, is_billable: doc.is_billable},
-		callback: function(r){
+		callback: function(){
 			cur_frm.reload_doc();
 		}
 	});
