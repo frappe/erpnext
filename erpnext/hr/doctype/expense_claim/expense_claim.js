@@ -51,7 +51,6 @@ $.extend(cur_frm.cscript, new erpnext.hr.ExpenseClaimController({frm: cur_frm}))
 
 cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.add_fetch('employee','employee_name','employee_name');
-cur_frm.add_fetch('employee','advance_account','advance_account');
 
 cur_frm.cscript.onload = function(doc) {
 	if(!doc.approval_status)
@@ -189,6 +188,7 @@ frappe.ui.form.on("Expense Claim", {
 			method: "erpnext.hr.doctype.expense_claim.expense_claim.update_advance_paid",
 			args: {
 				"docname": cur_frm.doc.name,
+				"employee": doc.employee,
 				"advance_account": doc.advance_account
 			},
 			callback: function(r) {
@@ -235,6 +235,25 @@ frappe.ui.form.on("Expense Claim", {
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
 		});
+
+	sanctioned_amount: function(frm, cdt, cdn) {
+		var doc = frm.doc;
+		cur_frm.cscript.calculate_total(doc,cdt,cdn);
+	}
+})
+
+frappe.ui.form.on("Expense Claim",{
+	setup: function(frm) {
+		frm.trigger("set_query_for_cost_center")
+		frm.trigger("set_query_for_advance_account")
+		frm.trigger("set_query_for_payable_account")
+		frm.add_fetch("company", "cost_center", "cost_center");
+		frm.add_fetch("company", "default_advance_account", "advance_account");
+		frm.add_fetch("company", "default_payable_account", "payable_account");
+	},
+
+	refresh: function(frm) {
+		frm.trigger("toggle_fields")
 	},
 	
 	set_query_for_cost_center: function(frm) {
@@ -245,6 +264,17 @@ frappe.ui.form.on("Expense Claim", {
 				}
 			};
 		};
+	},
+
+	set_query_for_advance_account: function(frm) {
+		frm.fields_dict["advance_account"].get_query = function() {
+			return {
+				filters: {
+					"report_type": "Balance Sheet",
+					"account_type": "Receivable"
+				}
+			}
+		}
 	},
 
 	set_query_for_payable_account: function(frm) {
