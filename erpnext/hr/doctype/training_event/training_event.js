@@ -22,7 +22,7 @@ frappe.ui.form.on('Training Event', {
 		var params = getSearchParameters();
 		if (params.hasOwnProperty('employee') && params.hasOwnProperty('status')) {
 			var newTemp = frm.doc.employees.filter(function(obj) {
-				return obj.name == params.employee
+				return obj.name == params.employee;
 			});
 			if (newTemp) {
 				newTemp[0].status = params.status;
@@ -42,12 +42,12 @@ function getSearchParameters() {
 }
 
 function transformToAssocArray( prmstr ) {
-    var params = {};
-    var prmarr = prmstr.split("&");
-    for ( var i = 0; i < prmarr.length; i++) {
-        var tmparr = prmarr[i].split("=");
-        params[tmparr[0]] = tmparr[1];
-    }
-    return params;
+	var params = {};
+	var prmarr = prmstr.split("&");
+	for ( var i = 0; i < prmarr.length; i++) {
+		var tmparr = prmarr[i].split("=");
+		params[tmparr[0]] = tmparr[1];
+	}
+	return params;
 }
 
