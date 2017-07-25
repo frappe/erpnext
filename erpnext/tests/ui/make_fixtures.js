@@ -199,12 +199,29 @@ $.extend(frappe.test_data, {
 	},
 	"Terms and Conditions": {
 		"Test Term 1": [
-			{title: "Test Term 1"}
+			{title: "Test Term 1"},
+			{terms: "Test 1"}
 		],
 		"Test Term 2": [
-			{title: "Test Term 2"}
+			{title: "Test Term 2"},
+			{terms: "Test 2"}
 		]
 	},
+	"Sales Taxes and Charges Template": {
+		"TEST In State GST": [
+			{title: "TEST In State GST"},
+			{taxes:[
+				[
+					{charge_type:"On Net Total"},
+					{account_head:"CGST - "+frappe.get_abbr(frappe.defaults.get_default("Company")) }
+				],
+				[
+					{charge_type:"On Net Total"},
+					{account_head:"SGST - "+frappe.get_abbr(frappe.defaults.get_default("Company")) }
+				]
+			]}
+		]
+	}
 });
 
 
