@@ -57,6 +57,35 @@ frappe.ui.form.on('Consultation', {
 				filters: {"disabled": 0}
 			};
 		});
+		frm.set_query("drug_code", "drug_prescription", function() {
+			return {
+				filters: {
+					is_stock_item:'1'
+				}
+			};
+		});
+		frm.set_query("test_code", "test_prescription", function() {
+			return {
+				filters: {
+					is_billable:'1'
+				}
+			};
+		});
+		frm.set_query("medical_code", "codification_table", function() {
+			return {
+				filters: {
+					medical_code_standard: frappe.defaults.get_default("default_medical_code_standard")
+				}
+			};
+		});
+		frm.set_query("appointment", function() {
+			return {
+				filters: {
+					//	Scheduled filter for demo ...
+					status:['in',["Open","Scheduled"]]
+				}
+			};
+		});
 		if(!frm.doc.__islocal && !frm.doc.invoice){
 			frm.add_custom_button(__('Invoice'), function() {
 				btn_invoice_consultation(frm);
@@ -242,30 +271,6 @@ frappe.ui.form.on("Consultation", "patient", function(frm) {
 	}
 });
 
-me.frm.set_query("drug_code", "drug_prescription", function(doc, cdt, cdn) {
-	return {
-		filters: {
-			is_stock_item:'1'
-		}
-	};
-});
-
-me.frm.set_query("test_code", "test_prescription", function(doc, cdt, cdn) {
-	return {
-		filters: {
-			is_billable:'1'
-		}
-	};
-});
-
-me.frm.set_query("medical_code", "codification_table", function(doc, cdt, cdn) {
-	return {
-		filters: {
-			medical_code_standard: frappe.defaults.get_default("default_medical_code_standard")
-		}
-	};
-});
-
 frappe.ui.form.on("Drug Prescription", {
 	drug_code:  function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
@@ -300,17 +305,6 @@ frappe.ui.form.on("Drug Prescription", {
 			frappe.model.set_value(cdt, cdn, 'dosage', null);
 		}
 	}
-});
-
-me.frm.set_query("appointment", function(doc, cdt, cdn) {
-	return {
-		filters: {
-			//	Scheduled filter for demo ...
-			status:['in',["Open","Scheduled"]],
-			//	Commented for demo ..
-			//	physician: doc.physician
-		}
-	};
 });
 
 

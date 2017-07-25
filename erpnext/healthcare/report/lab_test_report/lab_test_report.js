@@ -7,14 +7,14 @@ frappe.query_reports["Lab Test Report"] = {
 			"fieldname":"from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
-			"default": get_today(),
+			"default": frappe.datetime.now_date(),
 			"width": "80"
 		},
 		{
 			"fieldname":"to_date",
 			"label": __("To Date"),
 			"fieldtype": "Date",
-			"default": get_today()
+			"default": frappe.datetime.now_date()
 		},
 		{
 			"fieldname":"patient",

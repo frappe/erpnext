@@ -3,6 +3,13 @@
 
 frappe.ui.form.on('Patient', {
 	refresh: function (frm) {
+		frm.set_query("patient", "patient_relation", function (doc, cdt, cdn) {
+			return {
+				filters: [
+					["Patient", "name", "!=", frm.doc.name]
+				]
+			};
+		});
 		if (frappe.defaults.get_default("patient_master_name") != "Naming Series") {
 			frm.toggle_display("naming_series", false);
 		} else {
@@ -46,7 +53,7 @@ frappe.ui.form.on("Patient", "dob", function(frm) {
 		var today = new Date();
 		var birthDate = new Date(frm.doc.dob);
 		if(today < birthDate){
-			msgprint("Please select a valid Date");
+			frappe.msgprint("Please select a valid Date");
 			frappe.model.set_value(frm.doctype,frm.docname, "dob", "");
 		}
 		else{
@@ -110,11 +117,3 @@ var btn_invoice_registration = function (frm) {
 		}
 	});
 };
-
-me.frm.set_query("patient", "patient_relation", function (doc, cdt, cdn) {
-	return {
-		filters: [
-			["Patient", "name", "!=", me.frm.doc.name]
-		]
-	};
-});

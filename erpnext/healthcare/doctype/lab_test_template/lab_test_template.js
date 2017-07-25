@@ -7,6 +7,16 @@ frappe.ui.form.on("Lab Test Template",{
 			frm.set_value("test_code", frm.doc.test_name);
 		if(!frm.doc.test_description)
 			frm.set_value("test_description", frm.doc.test_name);
+	},
+	refresh :  function(frm){
+		// Restrict Special, Grouped type templates in Child TestGroups
+		frm.set_query("test_template", "test_groups", function() {
+			return {
+				filters: {
+					test_template_type:['in',['Single','Compound']]
+				}
+			};
+		});
 	}
 });
 
@@ -35,7 +45,7 @@ var disable_template = function(frm){
 	frappe.call({
 		method: 		"erpnext.healthcare.doctype.lab_test_template.lab_test_template.disable_enable_test_template",
 		args: {status: 1, name: doc.name, is_billable: doc.is_billable},
-		callback: function(r){
+		callback: function(){
 			cur_frm.reload_doc();
 		}
 	});
@@ -92,32 +102,22 @@ var change_template_code = function(frm,doc){
 	};
 };
 
-
-// Restrict Special, Grouped type templates in Child TestGroups
-me.frm.set_query("test_template", "test_groups", function(doc, cdt, cdn) {
-	return {
-		filters: {
-			test_template_type:['in',['Single','Compound']]
-		}
-	};
-});
-
-frappe.ui.form.on("Lab Test Template", "test_name", function(frm,cdt,cdn){
+frappe.ui.form.on("Lab Test Template", "test_name", function(frm){
 
 	frm.doc.change_in_item = 1;
 
 });
-frappe.ui.form.on("Lab Test Template", "test_rate", function(frm,cdt,cdn){
+frappe.ui.form.on("Lab Test Template", "test_rate", function(frm){
 
 	frm.doc.change_in_item = 1;
 
 });
-frappe.ui.form.on("Lab Test Template", "test_group", function(frm,cdt,cdn){
+frappe.ui.form.on("Lab Test Template", "test_group", function(frm){
 
 	frm.doc.change_in_item = 1;
 
 });
-frappe.ui.form.on("Lab Test Template", "test_description", function(frm,cdt,cdn){
+frappe.ui.form.on("Lab Test Template", "test_description", function(frm){
 
 	frm.doc.change_in_item = 1;
 

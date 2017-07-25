@@ -5,8 +5,6 @@ import frappe, json
 from frappe.utils.make_random import get_random
 import datetime
 from erpnext.demo.setup.setup_data import import_json
-import random
-from random import randrange
 from frappe.utils import getdate
 from erpnext.healthcare.doctype.lab_test.lab_test import create_test_from_template
 
@@ -28,7 +26,6 @@ def make_masters():
 	frappe.db.commit()
 
 def make_patient():
-	blood_group = ["A Positive", "A Negative", "AB Positive", "AB Negative", "B Positive", "B Negative", "O Positive", "O Negative"]
 	file_path = get_json_path("Patient")
 	with open(file_path, "r") as open_file:
 		patient_data = json.loads(open_file.read())
@@ -36,15 +33,11 @@ def make_patient():
 
 		for d in enumerate(patient_data):
 			patient = frappe.new_doc("Patient")
-			patient.patient_name = d.get('patient_name').title()
-			patient.image = d.get('image')
-			patient.sex = d.get('gender')
-			patient.blood_group = random.choice(blood_group)
-			year = random.randint(1990, 1998)
-			month = random.randint(1, 12)
-			day = random.randint(1, 28)
-			patient.date_of_birth = datetime.datetime(year, month, day)
-			patient.email_id = d.get('patient_name') + "_" + patient.date_of_birth.strftime('%m/%d/%Y') + "@example.com"
+			patient.patient_name = d[1]['patient_name'].title()
+			patient.sex = d[1]['gender']
+			patient.blood_group = "A Positive"
+			patient.date_of_birth = datetime.datetime(1990, 3, 25)
+			patient.email_id = d[1]['patient_name'] + "_" + patient.date_of_birth.strftime('%m/%d/%Y') + "@example.com"
 			if count <5:
 				patient.insert()
 				frappe.db.commit()
@@ -108,12 +101,11 @@ def set_consultation(patient, patient_sex, physician, department, consultation_d
 	return consultation
 
 def make_lab_test():
-	for test in frappe.db.get_list("Lab Test Template"):
-		physician = random.choice(frappe.db.get_list("Physician")).name
-		patient = get_random("Patient")
-		patient_sex = frappe.get_value("Patient", patient, "sex")
-		template = random.choice(frappe.db.get_list("Lab Test Template")).name
-		set_lab_test(patient, patient_sex, physician, template)
+	physician = get_random("Physician")
+	patient = get_random("Patient")
+	patient_sex = frappe.get_value("Patient", patient, "sex")
+	template = get_random("Lab Test Template")
+	set_lab_test(patient, patient_sex, physician, template)
 
 def lab_test_on_consultation():
 	i = 1
@@ -137,7 +129,7 @@ def append_test_rx(consultation):
 	i = 1
 	while i <= 2:
 		test_rx = consultation.append("test_prescription")
-		test_rx.test_code = random.choice(frappe.db.get_list("Lab Test Template")).name
+		test_rx.test_code = get_random("Lab Test Template")
 		i += 1
 	return consultation
 
@@ -149,15 +141,15 @@ def append_drug_rx(consultation):
 		drug_rx = consultation.append("drug_prescription")
 		drug_rx.drug_code = drug.item_code
 		drug_rx.drug_name = drug.item_name
-		drug_rx.dosage = random.choice(frappe.db.get_list("Prescription Dosage")).name
-		drug_rx.period = random.choice(frappe.db.get_list("Prescription Duration")).name
+		drug_rx.dosage = get_random("Prescription Dosage")
+		drug_rx.period = get_random("Prescription Duration")
 		i += 1
 	return consultation
 
 def random_date(start,l):
    current = start
    while l >= 0:
-      curr = current + datetime.timedelta(minutes=randrange(60))
+      curr = current + datetime.timedelta(minutes=60)
       yield curr
       l-=1
 

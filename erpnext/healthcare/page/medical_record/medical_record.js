@@ -46,7 +46,7 @@ frappe.pages['medical_record'].on_page_load = function(wrapper) {
 
 };
 
-frappe.pages['medical_record'].refresh = function(wrapper) {
+frappe.pages['medical_record'].refresh = function() {
 	var me = this;
 
 	if(frappe.route_options) {
@@ -159,18 +159,17 @@ frappe.medical_record.Feed = Class.extend({
 		data.icon = "icon-flag";
 	},
 	add_date_separator: function(row, data) {
-		var date = dateutil.str_to_obj(data.creation);
+		var date = frappe.datetime.str_to_obj(data.creation);
 		var last = frappe.medical_record.last_feed_date;
 
-		if((last && dateutil.obj_to_str(last) != dateutil.obj_to_str(date)) || (!last)) {
-			var diff = dateutil.get_day_diff(dateutil.get_today(), dateutil.obj_to_str(date));
-			var pdate = null;
+		if((last && frappe.datetime.obj_to_str(last) != frappe.datetime.obj_to_str(date)) || (!last)) {
+			var diff = frappe.datetime.get_day_diff(frappe.datetime.get_today(), frappe.datetime.obj_to_str(date));
 			if(diff < 1) {
-				pdate = 'Today';
+				var pdate = 'Today';
 			} else if(diff < 2) {
 				pdate = 'Yesterday';
 			} else {
-				pdate = dateutil.global_date_format(date);
+				pdate = frappe.datetime.global_date_format(date);
 			}
 			data.date_sep = pdate;
 			data.date_class = pdate=='Today' ? "date-indicator blue" : "date-indicator";
