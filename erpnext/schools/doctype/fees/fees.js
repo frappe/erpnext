@@ -1,5 +1,11 @@
+// Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
+// For license information, please see license.txt
 
 cur_frm.add_fetch("student", "title", "student_name");
+cur_frm.add_fetch("student", "student_email_id", "student_email");
+cur_frm.add_fetch("company", "default_receivable_account", "debit_to");
+cur_frm.add_fetch("company", "default_income_account", "against_income_account");
+cur_frm.add_fetch("company", "cost_center", "cost_center");
 
 frappe.ui.form.on("Fees", {
 	onload: function(frm){
@@ -19,7 +25,7 @@ frappe.ui.form.on("Fees", {
 			};
 		});
 
-		// debit account for booking the fee 
+		// debit account for booking the fee
 		frm.set_query("debit_to", function(doc) {
 			return {
 				filters: {
@@ -27,11 +33,11 @@ frappe.ui.form.on("Fees", {
 					'is_group': 0,
 					'company': doc.company
 				}
-			}
+			};
 		});
 
 		if (!frm.doc.posting_date) {
-			frm.doc.posting_date = frappe.datetime.get_today()		
+			frm.doc.posting_date = frappe.datetime.get_today();
 		}
 	},
 
@@ -57,56 +63,75 @@ frappe.ui.form.on("Fees", {
 		}
 		if(frm.doc.docstatus===1 && frm.doc.outstanding_amount>0) {
 			frm.add_custom_button(__("Payment Request"), function() {
-				frm.events.make_payment_request(frm)
+				frm.events.make_payment_request(frm);
 			}, __("Make"));
 			frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 		if(frm.doc.docstatus===1 && frm.doc.outstanding_amount!=0) {
 			frm.add_custom_button(__("Payment"), function() {
-				frm.events.make_payment_entry(frm)
+				frm.events.make_payment_entry(frm);
 			}, __("Make"));
 			frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 	},
-		// if (frm.doc.docstatus === 1 && (frm.doc.total_amount > frm.doc.paid_amount)) {
-		// 	frm.add_custom_button(__("Collect Fees"), function() {
-		// 		frappe.prompt({fieldtype:"Float", label: __("Amount Paid"), fieldname:"amt"},
-		// 			function(data) {
-		// 				frappe.call({
-		// 					method:"erpnext.schools.api.collect_fees",
-		// 					args: {
-		// 						"fees": frm.doc.name,
-		// 						"amt": data.amt
-		// 					},
-		// 					callback: function(r) {
-		// 						frm.doc.paid_amount = r.message
-		// 						frm.doc.outstanding_amount = frm.doc.total_amount - r.message
-		// 						frm.refresh()
-		// 					}
-		// 				});
-		// 			}, __("Enter Paid Amount"), __("Collect"));
-		// 	});
-		// }
+
+	student: function(frm) {
+		if (frm.doc.student) {
+			frappe.call({
+				method:"erpnext.schools.api.get_current_enrollment",
+				args: {
+					"student": frm.doc.student,
+					"academic_year": frm.doc.academic_year
+				},
+				callback: function(r) {
+					if(r){
+						console.log(r);
+						frm.set_value("student_name", r.message.student_name);
+						frm.set_value("program_enrollment", r.message.name);
+						frm.set_value("program", r.message.program);
+						frm.set_value("student_batch", r.message.student_batch_name);
+						frm.set_value("student_category", r.message.student_category);
+						frm.set_value("academic_term", r.message.academic_term);
+						frm.set_value("academic_year", r.message.academic_year);
+					}
+				}
+			});
+		}
+	},
 
 	make_payment_request: function(frm) {
 		frappe.call({
 			method:"erpnext.accounts.doctype.payment_request.payment_request.make_payment_request",
 			args: {
-				"dt": cur_frm.doc.doctype,
-				"dn": cur_frm.doc.name,
-				"recipient_id": cur_frm.doc.contact_email
+				"dt": frm.doc.doctype,
+				"dn": frm.doc.name,
+				"recipient_id": frm.doc.contact_email
 			},
 			callback: function(r) {
 				if(!r.exc){
 					var doc = frappe.model.sync(r.message);
-					frappe.set_route("Form", r.message.doctype, r.message.name);
+					frappe.set_route("Form", doc[0].doctype, doc[0].name);
 				}
 			}
-		})
+		});
+	},
+
+	make_payment_entry: function(frm) {
+		return frappe.call({
+			method: "erpnext.schools.doctype.fees.fees.get_payment_entry",
+			args: {
+				"dt": frm.doc.doctype,
+				"dn": frm.doc.name
+			},
+			callback: function(r) {
+				var doc = frappe.model.sync(r.message);
+				frappe.set_route("Form", doc[0].doctype, doc[0].name);
+			}
+		});
 	},
 
 	set_posting_time: function(frm) {
-		frm.refresh()
+		frm.refresh();
 	},
 
 	program: function(frm) {

@@ -7,9 +7,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from erpnext.schools.api import get_student_group_students
-from erpnext.schools.doctype.student_group.student_group import get_program_enrollment
-from frappe.model.mapper import get_mapped_doc
 from frappe.utils import money_in_words
 
 

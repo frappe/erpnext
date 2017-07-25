@@ -116,7 +116,6 @@ def round_off_debit_credit(gl_map):
 		currency=frappe.db.get_value("Company", gl_map[0].company, "default_currency", cache=True))
 
 	debit_credit_diff = 0.0
-	print ("gl map", gl_map)
 	for entry in gl_map:
 		entry.debit = flt(entry.debit, precision)
 		entry.credit = flt(entry.credit, precision)
