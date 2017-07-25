@@ -1,0 +1,24 @@
+QUnit.module('setup');
+
+QUnit.test("Test: Company [SetUp]", function (assert) {
+	assert.expect(1);
+	let done = assert.async();
+
+	frappe.run_serially([
+		// test company creation
+		() => frappe.set_route("List", "Company", "List"),
+		() => frappe.new_doc("Company"),
+		() => frappe.timeout(1),
+		() => cur_frm.set_value("company_name", "Company test"),
+		() => cur_frm.set_value("abbr", "CT"),
+		() => cur_frm.set_value("default_holiday_list", "Holiday list test"),
+		() => cur_frm.set_value("domain", "Services"),
+		() => cur_frm.set_value("default_currency", "INR"),
+		// save form
+		() => cur_frm.save(),
+		() => frappe.timeout(1),
+		() => assert.equal("Company test", cur_frm.doc.company_name,
+			'name of company correctly saved'),
+		() => done()
+	]);
+});
