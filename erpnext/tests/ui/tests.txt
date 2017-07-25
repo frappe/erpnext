@@ -8,3 +8,10 @@ erpnext/manufacturing/doctype/workstation/test_workstation.js
 erpnext/manufacturing/doctype/operation/test_operation.js
 erpnext/hr/doctype/holiday_list/test_holiday_list.js
 erpnext/hr/doctype/branch/test_branch.js
+erpnext/schools/doctype/academic_year/test_academic_year.js
+erpnext/schools/doctype/academic_term/test_academic_term.js
+erpnext/hr/doctype/department/test_department.js
+erpnext/schools/doctype/grading_scale/test_grading_scale.js
+erpnext/schools/doctype/assessment_criteria_group/test_assessment_criteria_group.js
+erpnext/schools/doctype/assessment_criteria/test_assessment_criteria.js
+erpnext/schools/doctype/course/test_course.js
