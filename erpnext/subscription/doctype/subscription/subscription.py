@@ -3,9 +3,9 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+import frappe
 from frappe.utils import getdate, add_days, cstr, today
-from erpnext.controllers.recurring_document import send_notification
+from erpnext.controllers.recurring_document import send_notification, get_next_date
 from frappe.model.document import Document
 
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
@@ -38,7 +38,7 @@ class Subscription(Document):
 			})
 
 		return next_schedule_date
-		
+
 	def update_subscription_id(self):
 		frappe.db.set_value(self.base_doctype, self.base_docname, 'subscription', self.name)
 
@@ -63,14 +63,6 @@ class Subscription(Document):
 
 		self.db_set("status", status)
 
-def get_next_date(dt, mcount, day=None):
-	dt = getdate(dt)
-
-	from dateutil.relativedelta import relativedelta
-	dt += relativedelta(months=mcount, day=day)
-
-	return dt
-
 def make_subscription_entry(date=None):
 	date = date or today()
 	for data in get_subscription_entries(date):
@@ -81,7 +73,7 @@ def make_subscription_entry(date=None):
 
 			if data.notify_by_email:
 				send_notification(doc, data.print_format, data.recipients)
-		except:
+		except Exception:
 			frappe.log_error(frappe.get_traceback())
 
 def get_subscription_entries(date):

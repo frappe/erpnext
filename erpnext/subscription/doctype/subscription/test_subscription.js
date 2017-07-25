@@ -3,21 +3,29 @@
 // and remove above this line
 
 QUnit.test("test: Subscription", function (assert) {
+	assert.expect(4);
 	let done = assert.async();
-
-	// number of asserts
-	assert.expect(1);
-
-	frappe.run_serially('Subscription', [
+	frappe.run_serially([
 		// insert a new Subscription
-		() => frappe.tests.make([
-			// values to be set
-			{key: 'value'}
-		]),
 		() => {
-			assert.equal(cur_frm.doc.key, 'value');
+			return frappe.tests.make("Subscription", [
+				{base_doctype: 'Sales Invoice'},
+				{base_docname: 'SINV-00004'},
+				{start_date: frappe.datetime.month_start()},
+				{end_date: frappe.datetime.month_end()},
+				{frequency: 'Weekly'}
+			]);
+		},
+		() => cur_frm.savesubmit(),
+		() => frappe.timeout(1),
+		() => frappe.click_button('Yes'),
+		() => frappe.timeout(2),
+		() => {
+			assert.ok(cur_frm.doc.frequency.includes("Weekly"), "Set frequency Weekly");
+			assert.ok(cur_frm.doc.base_doctype.includes("Sales Invoice"), "Set base doctype Sales Invoice");
+			assert.equal(cur_frm.doc.docstatus, 1, "Submitted subscription");
+			assert.ok(cur_frm.doc.schedules.length>1, "Subscription schedule has created");
 		},
 		() => done()
 	]);
-
 });
