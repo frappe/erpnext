@@ -1,10 +1,12 @@
 erpnext/tests/ui/make_fixtures.js #long
+erpnext/setup/doctype/company/tests/test_company.js
 erpnext/accounts/doctype/account/test_account.js
 erpnext/accounts/doctype/account/test_make_tax_account.js
 erpnext/accounts/doctype/sales_taxes_and_charges_template/test_sales_taxes_and_charges_template.js
 erpnext/crm/doctype/lead/test_lead.js
 erpnext/crm/doctype/opportunity/test_opportunity.js
 erpnext/selling/doctype/quotation/test_quotation.js
+erpnext/setup/doctype/company/tests/test_company_production.js
 erpnext/crm/doctype/item/test_item.js
 erpnext/manufacturing/doctype/workstation/test_workstation.js
 erpnext/manufacturing/doctype/operation/test_operation.js
@@ -30,5 +32,4 @@ erpnext/schools/doctype/student_category/test_student_category.js
 erpnext/schools/doctype/room/test_room.js
 erpnext/schools/doctype/instructor/test_instructor.js
 erpnext/stock/doctype/warehouse/test_warehouse.js
-erpnext/setup/doctype/company/test_company.js
 erpnext/manufacturing/doctype/production_order/test_production_order.js
