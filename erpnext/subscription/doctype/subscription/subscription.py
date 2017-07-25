@@ -15,6 +15,7 @@ class Subscription(Document):
 
 	def before_submit(self):
 		self.create_schedule()
+		self.update_subscription_id()
 
 	def create_schedule(self):
 		self.set('schedules', [])
@@ -37,6 +38,9 @@ class Subscription(Document):
 			})
 
 		return next_schedule_date
+		
+	def update_subscription_id(self):
+		frappe.db.set_value(self.base_doctype, self.base_docname, 'subscription', self.name)
 
 	def get_next_schedule_date(self, start_date):
 		mcount = month_map.get(self.frequency)
@@ -85,7 +89,7 @@ def get_subscription_entries(date):
 			sc.submit_on_creation, sc.notify_by_email, sc.recipients, sc.print_format, scs.schedule_date, scs.name
 		from `tabSubscription` as sc, `tabSubscription Schedule` as scs
 		where sc.name = scs.parent and sc.docstatus = 1 and scs.schedule_date <=%s
-			and scs.base_docname is null""", (date), as_dict=1)
+			and scs.base_docname is null and ifnull(sc.disabled, 0) = 0""", (date), as_dict=1)
 
 def make_new_document(args):
 	doc = frappe.get_doc(args.base_doctype, args.base_docname)
