@@ -12,7 +12,6 @@ QUnit.test("Test: Department [HR]", function (assert) {
 		() => frappe.click_link('Edit in full page'),
 		() => cur_frm.set_value("department_name", "Department test"),
 		() => cur_frm.set_value("leave_block_list", "Leave block list test"),
-		
 		// save form
 		() => cur_frm.save(),
 		() => frappe.timeout(1),
