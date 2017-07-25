@@ -46,11 +46,11 @@ Note: This amount should not be clubbed with Salary because the amount will then
 
 Sometimes an employee requires some advance payment before making expenses on behalf of the organisation. This can be managed from the Expense Claim
 
-First make sure that the Employee's Advance Account has been set in the Employee Master:
+First make sure that the Default Advance Account has been set in the Company Master:
 
-> Erpnext > HR > Employee
+> Erpnext > Setup > Company
 
-<img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/employee_advance_account.png">
+<img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/company_advance_account.png">
 
 When creating the Expense Claim, check the 'Advance Payment Required' option
 
