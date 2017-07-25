@@ -14,7 +14,7 @@ def get_data():
 			'goal_history_field': 'sales_monthly_history',
 			'goal_doctype': 'Sales Invoice',
 			'goal_doctype_link': 'company',
-			'goal_field': 'grand_total',
+			'goal_field': 'base_grand_total',
 			'date_field': 'posting_date',
 			'filter_str': 'status != "Draft"',
 			'aggregation': 'sum'
