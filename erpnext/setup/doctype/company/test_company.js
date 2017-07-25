@@ -11,7 +11,6 @@ QUnit.test("Test: Company [SetUp]", function (assert) {
 		() => frappe.timeout(1),
 		() => cur_frm.set_value("company_name", "Company test"),
 		() => cur_frm.set_value("abbr", "CT"),
-		() => cur_frm.set_value("default_holiday_list", "Holiday list test"),
 		() => cur_frm.set_value("domain", "Services"),
 		() => cur_frm.set_value("default_currency", "INR"),
 		// save form
