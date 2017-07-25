@@ -43,4 +43,4 @@ frappe.map_tax = {
 			() => frappe.click_button('Create New'),
 		]);
 	}
-}
+};
