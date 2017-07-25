@@ -16,10 +16,6 @@ class LabTest(Document):
 		insert_lab_test_to_medical_record(self)
 		frappe.db.set_value("Lab Test", self.name, "status", "Completed")
 
-	def on_trash(self):
-		frappe.throw("""Not permitted""")
-		return
-
 	def on_cancel(self):
 		delete_lab_test_from_medical_record(self)
 		frappe.db.set_value("Lab Test", self.name, "status", "Cancelled")
