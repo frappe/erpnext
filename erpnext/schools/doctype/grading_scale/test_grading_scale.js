@@ -22,7 +22,6 @@ QUnit.test('test grading scale', function(assert){
 				]}
 			]);
 		},
-		() => cur_frm.save(),
 		() => frappe.timeout(1),
 		() => done()
 	]);

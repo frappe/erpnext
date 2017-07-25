@@ -9,7 +9,6 @@ QUnit.test('test department', function(assert){
 				{department_name: 'Teaching'}
 			]);
 		},
-		() => cur_frm.save(),
 		() => frappe.timeout(1),
 		() => done()
 	]);

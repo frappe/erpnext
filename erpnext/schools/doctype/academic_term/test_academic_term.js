@@ -14,7 +14,6 @@ QUnit.test('test academic term', function(assert){
 				{term_end_date:'2017-06-20'},
 			]);
 		},
-		() => cur_frm.save(),
 		() => frappe.timeout(1),
 		() => {
 			assert.ok(cur_frm.doc.academic_year=='2016-17');

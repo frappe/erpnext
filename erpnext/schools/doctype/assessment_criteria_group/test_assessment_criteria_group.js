@@ -9,7 +9,6 @@ QUnit.test('test assessment criteria group', function(assert){
 				{assessment_criteria_group: 'Scholarship'}
 			]);
 		},
-		() => cur_frm.save(),
 		() => frappe.timeout(1),
 		() => done()
 	]);
