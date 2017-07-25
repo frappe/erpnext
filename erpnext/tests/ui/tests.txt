@@ -3,8 +3,4 @@ erpnext/accounts/doctype/account/test_account.js
 erpnext/crm/doctype/lead/test_lead.js
 erpnext/crm/doctype/opportunity/test_opportunity.js
 erpnext/selling/doctype/quotation/test_quotation.js
-erpnext/crm/doctype/item/test_item.js
-erpnext/manufacturing/doctype/workstation/test_workstation.js
-erpnext/manufacturing/doctype/operation/test_operation.js
-erpnext/hr/doctype/holiday_list/test_holiday_list.js
-erpnext/hr/doctype/branch/test_branch.js
+erpnext/projects/doctype/project/project_timesheet.js
