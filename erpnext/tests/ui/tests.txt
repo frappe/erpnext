@@ -31,3 +31,4 @@ erpnext/schools/doctype/room/test_room.js
 erpnext/schools/doctype/instructor/test_instructor.js
 erpnext/stock/doctype/warehouse/test_warehouse.js
 erpnext/setup/doctype/company/test_company.js
+erpnext/manufacturing/doctype/production_order/test_production_order.js
