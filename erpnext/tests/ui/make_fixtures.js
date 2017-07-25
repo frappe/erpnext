@@ -1,4 +1,11 @@
 $.extend(frappe.test_data, {
+	// "Fiscal Year": {
+	// 	"2017-18": [
+	// 		{"year": "2017-18"},
+	// 		{"year_start_date": "2017-04-01"},
+	// 		{"year_end_date": "2018-03-31"},
+	// 	]
+	// },
 	"Customer": {
 		"Test Customer 1": [
 			{customer_name: "Test Customer 1"}
@@ -198,19 +205,20 @@ $.extend(frappe.test_data, {
 			{title: "Test Term 2"}
 		]
 	},
-	"Sales Taxes and Charges Template": {
-		"TEST In State GST": [
-			{title: "TEST In State GST"},
-			{taxes:[
-				[
-					{charge_type:"On Net Total"},
-					{account_head:"CGST - "+frappe.get_abbr(frappe.defaults.get_default("Company")) }
-				],
-				[
-					{charge_type:"On Net Total"},
-					{account_head:"SGST - "+frappe.get_abbr(frappe.defaults.get_default("Company")) }
-				]
-			]}
-		]
-	}
+});
+
+
+// this is a script that creates all fixtures
+// called as a test
+QUnit.module('fixture');
+
+QUnit.test('Make fixtures', assert => {
+	// create all fixtures first
+	assert.expect(0);
+	let done = assert.async();
+	let tasks = [];
+	Object.keys(frappe.test_data).forEach(function(doctype) {
+		tasks.push(function() { return frappe.tests.setup_doctype(doctype); });
+	});
+	frappe.run_serially(tasks).then(() => done());
 });

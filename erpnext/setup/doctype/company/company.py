@@ -317,7 +317,7 @@ def update_company_current_month_sales(company):
 
 	results = frappe.db.sql(('''
 		select
-			sum(grand_total) as total, date_format(posting_date, '%m-%Y') as month_year
+			sum(base_grand_total) as total, date_format(posting_date, '%m-%Y') as month_year
 		from
 			`tabSales Invoice`
 		where
@@ -340,7 +340,7 @@ def update_company_monthly_sales(company):
 	from frappe.utils.goal import get_monthly_results
 	import json
 	filter_str = "company = '{0}' and status != 'Draft'".format(frappe.db.escape(company))
-	month_to_value_dict = get_monthly_results("Sales Invoice", "grand_total", "posting_date", filter_str, "sum")
+	month_to_value_dict = get_monthly_results("Sales Invoice", "base_grand_total", "posting_date", filter_str, "sum")
 
 	frappe.db.sql(('''
 		update tabCompany set sales_monthly_history = %s where name=%s
