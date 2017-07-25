@@ -21,6 +21,7 @@ STANDARD_USERS = ("Guest", "Administrator")
 class RequestforQuotation(BuyingController):
 	def validate(self):
 		self.validate_duplicate_supplier()
+		self.validate_supplier_list()
 		validate_for_items(self)
 		self.update_email_id()
 
@@ -28,6 +29,17 @@ class RequestforQuotation(BuyingController):
 		supplier_list = [d.supplier for d in self.suppliers]
 		if len(supplier_list) != len(set(supplier_list)):
 			frappe.throw(_("Same supplier has been entered multiple times"))
+
+	def validate_supplier_list(self):
+		for d in self.suppliers:
+			prevent_rfqs = frappe.db.get_value("Supplier", d.supplier, 'prevent_rfqs')
+			if prevent_rfqs:
+				standing = frappe.db.get_value("Supplier Scorecard",d.supplier, 'status')
+				frappe.throw(_("RFQs are not allowed for {0} due to a scorecard standing of {1}").format(d.supplier, standing))
+			warn_rfqs = frappe.db.get_value("Supplier", d.supplier, 'warn_rfqs')
+			if warn_rfqs:
+				standing = frappe.db.get_value("Supplier Scorecard",d.supplier, 'status')
+				frappe.msgprint(_("{0} currently has a {1} Supplier Scorecard standing, and RFQs to this supplier should be issued with caution.").format(d.supplier, standing), title=_("Caution"), indicator='orange')
 
 	def update_email_id(self):
 		for rfq_supplier in self.suppliers:
@@ -40,6 +52,8 @@ class RequestforQuotation(BuyingController):
 
 	def on_submit(self):
 		frappe.db.set(self, 'status', 'Submitted')
+		for supplier in self.suppliers:
+			supplier.email_sent = 0
 
 	def on_cancel(self):
 		frappe.db.set(self, 'status', 'Cancelled')
@@ -54,6 +68,8 @@ class RequestforQuotation(BuyingController):
 
 				self.update_supplier_part_no(rfq_supplier)
 				self.supplier_rfq_mail(rfq_supplier, update_password_link, self.get_link())
+				rfq_supplier.email_sent = 1
+				rfq_supplier.save()
 
 	def get_link(self):
 		# RFQ link for supplier portal
@@ -84,7 +100,10 @@ class RequestforQuotation(BuyingController):
 		else:
 			contact = frappe.new_doc("Contact")
 			contact.first_name = rfq_supplier.supplier_name or rfq_supplier.supplier
-			contact.supplier = rfq_supplier.supplier
+			contact.append('links', {
+				'link_doctype': 'Supplier',
+				'link_name': rfq_supplier.supplier
+			})
 
 		if not contact.email_id and not contact.user:
 			contact.email_id = user.name

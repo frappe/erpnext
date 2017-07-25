@@ -43,8 +43,26 @@ frappe.ui.form.on("Journal Entry", {
 		$.each(frm.doc.accounts || [], function(i, row) {
 			erpnext.journal_entry.set_exchange_rate(frm, row.doctype, row.name);
 		})
+	},
+
+	company: function(frm) {
+		frappe.call({
+			method: "frappe.client.get_value",
+			args: {
+				doctype: "Company",
+				filters: {"name": frm.doc.company},
+				fieldname: "cost_center"
+			},
+			callback: function(r){
+				if(r.message){
+					$.each(frm.doc.accounts || [], function(i, jvd) {
+						frappe.model.set_value(jvd.doctype, jvd.name, "cost_center", r.message.cost_center);
+					});
+				}
+			}
+		});
 	}
-})
+});
 
 erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 	onload: function() {

@@ -109,7 +109,8 @@ website_route_rules = [
 	},
 	{"from_route": "/jobs", "to_route": "Job Opening"},
 	{"from_route": "/admissions", "to_route": "Student Admission"},
-	{"from_route": "/boms", "to_route": "BOM"}
+	{"from_route": "/boms", "to_route": "BOM"},
+	{"from_route": "/timesheets", "to_route": "Timesheet"},
 ]
 
 standard_portal_menu_items = [
@@ -122,13 +123,14 @@ standard_portal_menu_items = [
 	{"title": _("Shipments"), "route": "/shipments", "reference_doctype": "Delivery Note", "role":"Customer"},
 	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue", "role":"Customer"},
 	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"},
-	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role":"Student"}
+	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role":"Student"},
+	{"title": _("Timesheets"), "route": "/timesheets", "reference_doctype": "Timesheet", "role":"Customer"}
 ]
 
 default_roles = [
 	{'role': 'Customer', 'doctype':'Contact', 'email_field': 'email_id'},
 	{'role': 'Supplier', 'doctype':'Contact', 'email_field': 'email_id'},
-	{'role': 'Student', 'doctype':'Student', 'email_field': 'student_email_id'}
+	{'role': 'Student', 'doctype':'Student', 'email_field': 'student_email_id'},
 ]
 
 has_website_permission = {
@@ -137,7 +139,8 @@ has_website_permission = {
 	"Sales Invoice": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Supplier Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
-	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission"
+	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",
+	"Timesheet": "erpnext.controllers.website_list_for_contact.has_website_permission"
 }
 
 dump_report_map = "erpnext.startup.report_data_map.data_map"
@@ -191,6 +194,7 @@ scheduler_events = {
 		"erpnext.accounts.doctype.asset.depreciation.post_depreciation_entries",
 		"erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary",
 		"erpnext.stock.doctype.serial_no.serial_no.update_maintenance_status",
+		"erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.refresh_scorecards",
 		"erpnext.setup.doctype.company.company.cache_companies_monthly_sales_history"
 	]
 }
