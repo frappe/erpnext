@@ -46,7 +46,6 @@ frappe.ui.form.on("Request for Quotation",{
 						rfq_name: frm.doc.name
 					},
 					callback: function(r){
-						debugger;
 						frm.reload_doc();
 					}
 				});
