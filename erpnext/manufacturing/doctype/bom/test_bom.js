@@ -49,7 +49,7 @@ QUnit.test("test: item", function (assert) {
 		),
 		() => cur_frm.savesubmit(),
 		() => frappe.timeout(1),
-		() => $(`button.btn.btn-primary:contains('Yes')`).click(),
+		() => frappe.click_button('Yes'),
 		() => frappe.timeout(1),
 
 		() => {
