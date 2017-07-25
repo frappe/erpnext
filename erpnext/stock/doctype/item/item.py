@@ -696,7 +696,7 @@ def _msgprint(msg, verbose):
 	if verbose:
 		msgprint(msg, raise_exception=True)
 	else:
-		raise frappe.ValidationError, msg
+		raise frappe.ValidationError(msg)
 
 
 def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
