@@ -189,7 +189,7 @@ class ExpenseClaim(AccountsController):
 def update_reimbursed_amount(doc):
 	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt 
 		from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
-		and party = %s """, (doc.name, doc.employee) ,as_dict=1)[0].amt
+		and party = %s and account = %s """, (doc.name, doc.employee, doc.payable_account) ,as_dict=1)[0].amt
 
 	doc.total_amount_reimbursed = amt
 	frappe.db.set_value("Expense Claim", doc.name , "total_amount_reimbursed", amt)
@@ -198,10 +198,10 @@ def update_reimbursed_amount(doc):
 	frappe.db.set_value("Expense Claim", doc.name , "status", doc.status)
 
 @frappe.whitelist()
-def update_advance_paid(docname, advance_account):
+def update_advance_paid(docname, employee, advance_account):
 	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt 
 		from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
-		and account = %s """, (docname, advance_account) ,as_dict=1)[0].amt
+		and party = %s and account = %s """, (docname, employee, advance_account) ,as_dict=1)[0].amt
 
 	return {
 		"amt": amt
@@ -282,6 +282,8 @@ def make_advance_entry(docname):
 		"account": expense_claim.advance_account,
 		"debit_in_account_currency": flt(expense_claim.total_sanctioned_amount - expense_claim.total_advance_paid),
 		"reference_type": "Expense Claim",
+		"party_type": "Employee",
+		"party": expense_claim.employee,
 		"reference_name": expense_claim.name
 	})
 
