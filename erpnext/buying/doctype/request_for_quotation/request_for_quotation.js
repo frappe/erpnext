@@ -83,7 +83,7 @@ frappe.ui.form.on("Request for Quotation",{
 				}
 			}
 
-			 function LoadSuppliers(r) {
+			 function load_suppliers(r) {
 				if(r.message) {
 					for (var i = 0; i < r.message.length; i++) {
 						var exists = false;
@@ -116,7 +116,7 @@ frappe.ui.form.on("Request for Quotation",{
 						"doctype": "Supplier",
 						"tag": args.tag
 					},
-					callback: LoadSuppliers
+					callback: load_suppliers
 				});
 			} else if (args.supplier_type) {
 				return frappe.call({
@@ -128,7 +128,7 @@ frappe.ui.form.on("Request for Quotation",{
 						filters: [["Supplier", "supplier_type", "=", args.supplier_type]]
 
 					},
-					callback: LoadSuppliers
+					callback: load_suppliers
 				});
 			}
 		});
