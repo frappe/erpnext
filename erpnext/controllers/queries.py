@@ -60,6 +60,7 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 
  # searches for customer
 def customer_query(doctype, txt, searchfield, start, page_len, filters):
+	conditions = []
 	cust_master_name = frappe.defaults.get_user_default("cust_master_name")
 
 	if cust_master_name == "Customer Name":
@@ -79,7 +80,7 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select {fields} from `tabCustomer`
 		where docstatus < 2
 			and ({scond}) and disabled=0
-			{mcond}
+			{fcond} {mcond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, customer_name), locate(%(_txt)s, customer_name), 99999),
@@ -88,7 +89,8 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 		limit %(start)s, %(page_len)s""".format(**{
 			"fields": fields,
 			"scond": searchfields,
-			"mcond": get_match_cond(doctype)
+			"mcond": get_match_cond(doctype),
+			"fcond": get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
 		}), {
 			'txt': "%%%s%%" % txt,
 			'_txt': txt.replace("%", ""),
