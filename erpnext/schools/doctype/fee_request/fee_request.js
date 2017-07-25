@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Fee Request', {
 	refresh: function(frm) {
-		frm.disable_save();	
+		frm.disable_save();
 	},
 	fee_structure: function(frm) {
 		if (frm.doc.fee_structure) {
