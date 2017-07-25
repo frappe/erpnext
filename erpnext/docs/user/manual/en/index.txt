@@ -9,6 +9,7 @@ manufacturing
 projects
 support
 human-resources
+subscription
 customer-portal
 website
 using-erpnext

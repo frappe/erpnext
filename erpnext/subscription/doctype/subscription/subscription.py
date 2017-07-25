@@ -19,8 +19,8 @@ class Subscription(Document):
 
 	def create_schedule(self):
 		self.set('schedules', [])
-		schedule_date = self.start_date 
-		while schedule_date <= self.end_date:
+		schedule_date = getdate(self.start_date)
+		while schedule_date <= getdate(self.end_date):
 			next_schedule_date = self.add_schedule(schedule_date)
 			schedule_date = next_schedule_date
 
