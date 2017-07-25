@@ -30,7 +30,7 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 	else:
 		filters.append((doctype, "docstatus", "=", 1))
 
-	if user != "Guest" and is_website_user():
+	if (user != "Guest" and is_website_user()) or doctype == 'Request for Quotation':
 		parties_doctype = 'Request for Quotation Supplier' if doctype == 'Request for Quotation' else doctype
 		# find party for this contact
 		customers, suppliers = get_customers_suppliers(parties_doctype, user)
