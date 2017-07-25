@@ -627,14 +627,15 @@ def get_events(start, end, filters=None):
 
 	data = frappe.db.sql("""
 		select
-			so.name, so.customer_name, so.status,
-			so.delivery_status, so.billing_status, so_item.delivery_date
+			`tabSales Order`.name, `tabSales Order`.customer_name, `tabSales Order`.status,
+			`tabSales Order`.delivery_status, `tabSales Order`.billing_status,
+			`tabSales Order Item`.delivery_date
 		from
-			`tabSales Order` so, `tabSales Order Item` so_item
-		where so.name = so_item.parent
-			and (ifnull(so_item.delivery_date, '0000-00-00')!= '0000-00-00') \
-			and (so_item.delivery_date between %(start)s and %(end)s)
-			and so.docstatus < 2
+			`tabSales Order`, `tabSales Order Item`
+		where `tabSales Order`.name = `tabSales Order Item`.parent
+			and (ifnull(`tabSales Order Item`.delivery_date, '0000-00-00')!= '0000-00-00') \
+			and (`tabSales Order Item`.delivery_date between %(start)s and %(end)s)
+			and `tabSales Order`.docstatus < 2
 			{conditions}
 		""".format(conditions=conditions), {
 			"start": start,
