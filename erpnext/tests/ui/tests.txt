@@ -3,3 +3,4 @@ erpnext/accounts/doctype/account/test_account.js
 erpnext/crm/doctype/lead/test_lead.js
 erpnext/crm/doctype/opportunity/test_opportunity.js
 erpnext/selling/doctype/quotation/test_quotation.js
+erpnext/projects/doctype/project/project_timesheet.js
