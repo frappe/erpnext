@@ -11,7 +11,6 @@ QUnit.test("test project", function(assert) {
 			(task) => {
 				// Creating timesheet for a project
 				return frappe.tests.make('Timesheet', [
-					{ employee: 'EMP/0001'},
 					{time_logs:[
 						[
 							{activity_type: 'Communication'},
