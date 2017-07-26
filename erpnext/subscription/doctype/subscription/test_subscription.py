@@ -18,7 +18,7 @@ class TestSubscription(unittest.TestCase):
 			quotation.submit()
 
 		doc = make_subscription()
-		self.assertEquals(doc.base_docname, doc.schedules[0].base_docname)
+		self.assertEquals(doc.next_schedule_date, today())
 
 		make_subscription_entry()
 		docnames = frappe.get_all(doc.base_doctype, {'subscription': doc.name})

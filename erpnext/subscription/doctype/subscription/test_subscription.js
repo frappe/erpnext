@@ -24,7 +24,8 @@ QUnit.test("test: Subscription", function (assert) {
 			assert.ok(cur_frm.doc.frequency.includes("Weekly"), "Set frequency Weekly");
 			assert.ok(cur_frm.doc.base_doctype.includes("Sales Invoice"), "Set base doctype Sales Invoice");
 			assert.equal(cur_frm.doc.docstatus, 1, "Submitted subscription");
-			assert.ok(cur_frm.doc.schedules.length>1, "Subscription schedule has created");
+			assert.ok(cur_frm.doc.next_schedule_date,
+				frappe.datetime.add_days(frappe.datetime.get_today(), 7),  "Set schedule date");
 		},
 		() => done()
 	]);
