@@ -14,7 +14,7 @@ QUnit.test("test: Activity Type", function (assert) {
 		() => frappe.timeout(1),
 		() => {
 			assert.equal(cur_frm.doc.name,"Test Activity");
-			},
+		},
 		() => done()
 	]);
 });
