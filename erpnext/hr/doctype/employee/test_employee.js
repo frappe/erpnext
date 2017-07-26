@@ -12,22 +12,22 @@ QUnit.test("Test: Employee [HR]", function (assert) {
 		() => frappe.set_route("List", "Employee", "List"),
 		() => frappe.new_doc("Employee"),
 		() => frappe.timeout(1),
-		() => cur_frm.set_value("employee_name", "Employee test"),
+		() => cur_frm.set_value("employee_name", "Test Employee"),
 		() => cur_frm.set_value("salutation", "Ms"),
 		() => cur_frm.set_value("date_of_joining", frappe.datetime.add_months(today_date, -2)),	// joined 2 month from now
 		() => cur_frm.set_value("date_of_birth", frappe.datetime.add_months(today_date, -240)),	// age is 20 years
-		() => cur_frm.set_value("employment_type", "Full-time"),
-		() => cur_frm.set_value("holiday_list", "Holiday list test"),
-		() => cur_frm.set_value("branch", "Branch test"),
-		() => cur_frm.set_value("department", "Department test"),
-		() => cur_frm.set_value("designation", "Designation test"),
+		() => cur_frm.set_value("employment_type", "Test Employment type"),
+		() => cur_frm.set_value("holiday_list", "Test Holiday list"),
+		() => cur_frm.set_value("branch", "Test Branch"),
+		() => cur_frm.set_value("department", "Test Department"),
+		() => cur_frm.set_value("designation", "Test Designation"),
 		() => frappe.click_button('Add Row'),
 		() => cur_frm.fields_dict.leave_approvers.grid.grid_rows[0].doc.leave_approver="Administrator",
 		// save data
 		() => cur_frm.save(),
 		() => frappe.timeout(1),
 		// check name of employee
-		() => assert.equal("Employee test", cur_frm.doc.employee_name,
+		() => assert.equal("Test Employee", cur_frm.doc.employee_name,
 			'name of employee correctly saved'),
 		// check auto filled gender according to salutation
 		() => assert.equal("Female", cur_frm.doc.gender,
