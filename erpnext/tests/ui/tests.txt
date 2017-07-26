@@ -17,3 +17,4 @@ erpnext/hr/doctype/department/test_department.js
 erpnext/hr/doctype/designation/test_designation.js
 erpnext/hr/doctype/employment_type/test_employment_type.js
 erpnext/hr/doctype/employee/test_employee.js
+erpnext/schools/doctype/academic_year/test_academic_year.js
