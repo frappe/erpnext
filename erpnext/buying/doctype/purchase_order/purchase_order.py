@@ -39,6 +39,8 @@ class PurchaseOrder(BuyingController):
 		super(PurchaseOrder, self).validate()
 
 		self.set_status()
+
+		self.validate_supplier()
 		validate_for_items(self)
 		self.check_for_closed_status()
 
@@ -64,6 +66,17 @@ class PurchaseOrder(BuyingController):
 				"is_child_table": True
 			}
 		})
+
+	def validate_supplier(self):
+		prevent_po = frappe.db.get_value("Supplier", self.supplier, 'prevent_pos')
+		if prevent_po:
+			standing = frappe.db.get_value("Supplier Scorecard",self.supplier, 'status')
+			frappe.throw(_("Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.").format(self.supplier, standing))
+
+		warn_po = frappe.db.get_value("Supplier", self.supplier, 'warn_pos')
+		if warn_po:
+			standing = frappe.db.get_value("Supplier Scorecard",self.supplier, 'status')
+			frappe.msgprint(_("{0} currently has a {1} Supplier Scorecard standing, and Purchase Orders to this supplier should be issued with caution.").format(self.supplier, standing), title=_("Caution"), indicator='orange')
 
 	def validate_minimum_order_qty(self):
 		items = list(set([d.item_code for d in self.get("items")]))

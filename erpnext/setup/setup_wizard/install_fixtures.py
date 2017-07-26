@@ -185,6 +185,10 @@ def install(country=None):
 		{'doctype': "Party Type", "party_type": "Supplier"},
 		{'doctype': "Party Type", "party_type": "Employee"},
 
+		{'doctype': "Project Type", "project_type": "Internal"},
+		{'doctype': "Project Type", "project_type": "External"},
+		{'doctype': "Project Type", "project_type": "Other"},
+
 		{"doctype": "Offer Term", "offer_term": _("Date of Joining")},
 		{"doctype": "Offer Term", "offer_term": _("Annual Salary")},
 		{"doctype": "Offer Term", "offer_term": _("Probationary Period")},
@@ -212,6 +216,10 @@ def install(country=None):
 	# records += [{"doctype":"Operation", "operation": d} for d in get_operations()]
 
 	records += [{'doctype': 'Lead Source', 'source_name': _(d)} for d in default_lead_sources]
+
+	# Records for the Supplier Scorecard
+	from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_default_records
+	make_default_records()
 
 	from frappe.modules import scrub
 	for r in records:

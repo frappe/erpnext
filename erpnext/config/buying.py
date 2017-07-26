@@ -142,6 +142,32 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Supplier Scorecard"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Supplier Scorecard",
+					"description": _("All Supplier scorecards."),
+				},
+				{
+					"type": "doctype",
+					"name": "Supplier Scorecard Variable",
+					"description": _("Templates of supplier scorecard variables.")
+				},
+				{
+					"type": "doctype",
+					"name": "Supplier Scorecard Criteria",
+					"description": _("Templates of supplier scorecard criteria."),
+				},
+				{
+					"type": "doctype",
+					"name": "Supplier Scorecard Standing",
+					"description": _("Templates of supplier standings."),
+				},
+
+			]
+		},
+		{
 			"label": _("Other Reports"),
 			"icon": "fa fa-list",
 			"items": [

@@ -422,5 +422,8 @@ erpnext.patches.v8_1.add_indexes_in_transaction_doctypes
 erpnext.patches.v8_3.set_restrict_to_domain_for_module_def
 erpnext.patches.v8_1.update_expense_claim_status
 erpnext.patches.v8_3.update_company_total_sales
+erpnext.patches.v8_4.make_scorecard_records
 erpnext.patches.v8_1.set_delivery_date_in_so_item
 erpnext.patches.v8_5.fix_tax_breakup_for_non_invoice_docs
+erpnext.patches.v8_5.remove_quotations_route_in_sidebar
+erpnext.patches.v8_5.update_existing_data_in_project_type
