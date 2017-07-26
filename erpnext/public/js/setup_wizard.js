@@ -46,13 +46,15 @@ var erpnext_slides = [
 				fieldtype: "Attach Image", fieldname: "attach_logo",
 				label: __("Attach Logo"),
 				description: __("100px by 100px"),
-				is_private: 0
+				is_private: 0,
+				align: 'center'
 			},
 			{
 				fieldname: 'company_name',
 				label: frappe.setup.domain === 'Education' ?
 					__('Institute Name') : __('Company Name'),
-				fieldtype: 'Data', reqd: 1
+				fieldtype: 'Data',
+				reqd: 1
 			},
 			{
 				fieldname: 'company_abbr',
@@ -422,15 +424,6 @@ erpnext.setup.fiscal_years = {
 
 frappe.setup.on("before_load", function () {
 	erpnext_slides.map(frappe.setup.add_slide);
-
-	// change header brand
-	let $brand = $('header .setup-wizard-brand');
-	if($brand.find('.erpnext-icon').length === 0) {
-		$brand.find('.frappe-icon').hide();
-		$brand.append(`<span>
-			<img src="/assets/erpnext/images/erp-icon.svg" class="brand-icon erpnext-icon"
-			style="width:36px;"><span class="brand-name">ERPNext</span></span>`);
-	}
 });
 
 var test_values_edu = {
