@@ -42,10 +42,6 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 			return;
 		}
 
-		if(!d.expense_type) {
-			return;
-		}
-
 		return frappe.call({
 			method: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_claim_account",
 			args: {
@@ -65,6 +61,7 @@ $.extend(cur_frm.cscript, new erpnext.hr.ExpenseClaimController({frm: cur_frm}))
 
 cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.add_fetch('employee','employee_name','employee_name');
+cur_frm.add_fetch('employee','advance_account','advance_account');
 
 cur_frm.cscript.onload = function(doc,cdt,cdn) {
 	if(!doc.approval_status)
@@ -112,7 +109,7 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn) {
 
 		if (doc.docstatus==0 && doc.approval_status=="Approved") {
 			if (cint(doc.total_advance_paid) < cint(doc.total_sanctioned_amount) && frappe.model.can_create("Journal Entry")) {
-				cur_frm.add_custom_button(__("Advance Payment"), cur_frm.cscript.make_advance_entry, __("Make"));
+				cur_frm.add_custom_button(__("Make Advance Payment"), cur_frm.cscript.make_advance_entry, __("Make"));
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 				}
 			}
@@ -194,25 +191,6 @@ erpnext.expense_claim = {
 }
 
 frappe.ui.form.on("Expense Claim", {
-        refresh: function(frm) {
-	var doc = frm.doc;
-		if(doc.advance_account)
-		frappe.call({
-			method: "erpnext.hr.doctype.expense_claim.expense_claim.update_advance_paid",
-			args: {
-				"docname": cur_frm.doc.name,
-				"employee": doc.employee,
-				"advance_account": doc.advance_account
-			},
-			callback: function(r) {
-				cur_frm.set_value("total_advance_paid", r.message.amt)
-			}
-		});
-	}
-})
-
-
-frappe.ui.form.on("Expense Claim", {
 	refresh: function(frm) {
 		if(frm.doc.docstatus == 1) {
 			frm.add_custom_button(__('Accounting Ledger'), function() {
@@ -248,10 +226,8 @@ frappe.ui.form.on("Expense Claim Detail", {
 frappe.ui.form.on("Expense Claim",{
 	setup: function(frm) {
 		frm.trigger("set_query_for_cost_center")
-		frm.trigger("set_query_for_advance_account")
 		frm.trigger("set_query_for_payable_account")
 		frm.add_fetch("company", "cost_center", "cost_center");
-		frm.add_fetch("company", "default_advance_account", "advance_account");
 		frm.add_fetch("company", "default_payable_account", "payable_account");
 	},
 
@@ -269,22 +245,11 @@ frappe.ui.form.on("Expense Claim",{
 		}
 	},
 
-	set_query_for_advance_account: function(frm) {
-		frm.fields_dict["advance_account"].get_query = function() {
-			return {
-				filters: {
-					"report_type": "Balance Sheet",
-					"account_type": "Receivable"
-				}
-			}
-		}
-	},
-
 	set_query_for_payable_account: function(frm) {
 		frm.fields_dict["payable_account"].get_query = function() {
 			return {
 				filters: {
-					"report_type": "Balance Sheet",
+					"root_type": "Liability",
 					"account_type": "Payable"
 				}
 			}
