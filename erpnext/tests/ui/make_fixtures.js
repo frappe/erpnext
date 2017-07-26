@@ -50,6 +50,23 @@ $.extend(frappe.test_data, {
 			{item_group: "Services"},
 			{is_stock_item: 0},
 			{standard_rate: 300}
+		],
+		"Test Product 6": [
+			{item_code: "Test Product 6"},
+			{item_group: "Products"},
+			{is_stock_item: 1},
+			{has_batch_no: 1},
+			{uoms:
+				[
+					[
+						{uom:"Unit"},
+						{conversion_factor: 10},
+					]
+				]},
+			{create_new_batch: 1},
+			{has_serial_no: 1},
+			{standard_rate: 100},
+			{opening_stock: 100},
 		]
 	},
 	"Lead": {
@@ -199,12 +216,31 @@ $.extend(frappe.test_data, {
 	},
 	"Terms and Conditions": {
 		"Test Term 1": [
-			{title: "Test Term 1"}
+			{title: "Test Term 1"},
+			{terms: "Test 1"}
+
 		],
 		"Test Term 2": [
-			{title: "Test Term 2"}
+			{title: "Test Term 2"},
+			{terms: "Test 2"}
+
 		]
 	},
+	"Sales Taxes and Charges Template": {
+		"TEST In State GST": [
+			{title: "TEST In State GST"},
+			{taxes:[
+				[
+					{charge_type:"On Net Total"},
+					{account_head:"CGST - "+frappe.get_abbr(frappe.defaults.get_default("Company")) }
+				],
+				[
+					{charge_type:"On Net Total"},
+					{account_head:"SGST - "+frappe.get_abbr(frappe.defaults.get_default("Company")) }
+				]
+			]}
+		]
+	}
 });
 
 
