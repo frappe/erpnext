@@ -1,9 +1,6 @@
 from __future__ import unicode_literals
 
-docs_version = "7.x.x"
-
 source_link = "https://github.com/frappe/erpnext"
-docs_base_url = "https://frappe.github.io/erpnext"
 headline = "ERPNext Documentation"
 sub_heading = "Detailed explanation for all ERPNext features and developer API"
 long_description = """ERPNext is a fully featured ERP system designed for Small and Medium Sized
