@@ -172,10 +172,6 @@ class Timesheet(Document):
 			self.validate_overlap(data)
 			self.validate_activity(data)
 
-	def validate_activity(self, data):
-		if frappe.get_value('Activity Type', data.activity_type, 'disabled'):
-			frappe.throw(_("Activity type for row {0} is disabled").format(data.idx))
-
 	def validate_overlap(self, data):
 		if self.production_order:
 			self.validate_overlap_for("workstation", data, data.workstation)
@@ -274,6 +270,10 @@ class Timesheet(Document):
 					data.costing_rate = flt(rate.get('costing_rate')) if flt(data.costing_rate) == 0 else data.costing_rate
 					data.billing_amount = data.billing_rate * hours
 					data.costing_amount = data.costing_rate * hours
+
+def validate_activity(data):
+	if frappe.get_value('Activity Type', data.activity_type, 'disabled'):
+		frappe.throw(_("Activity type for row {0} is disabled").format(data.idx))
 
 @frappe.whitelist()
 def get_projectwise_timesheet_data(project, parent=None):
