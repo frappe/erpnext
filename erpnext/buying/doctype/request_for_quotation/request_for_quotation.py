@@ -100,7 +100,10 @@ class RequestforQuotation(BuyingController):
 		else:
 			contact = frappe.new_doc("Contact")
 			contact.first_name = rfq_supplier.supplier_name or rfq_supplier.supplier
-			contact.supplier = rfq_supplier.supplier
+			contact.append('links', {
+				'link_doctype': 'Supplier',
+				'link_name': rfq_supplier.supplier
+			})
 
 		if not contact.email_id and not contact.user:
 			contact.email_id = user.name
