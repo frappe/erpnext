@@ -1,5 +1,5 @@
 // Testing Setup Module in Schools
-QUnit.module('setup');
+QUnit.module('schools');
 
 // Testing Academic Term option
 QUnit.test('test academic term', function(assert){
@@ -14,6 +14,7 @@ QUnit.test('test academic term', function(assert){
 				{term_end_date:'2017-06-20'},
 			]);
 		},
+		() => frappe.timeout(1),
 		() => {
 			assert.ok(cur_frm.doc.academic_year=='2016-17');
 			assert.ok(cur_frm.doc.term_name=='Semester 1');
