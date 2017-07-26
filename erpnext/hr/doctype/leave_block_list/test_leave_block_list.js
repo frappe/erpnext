@@ -11,7 +11,7 @@ QUnit.test("Test: Leave block list [HR]", function (assert) {
 		() => frappe.new_doc("Leave Block List"),
 		() => frappe.timeout(1),
 		() => cur_frm.set_value("leave_block_list_name", "Test Leave block list"),
-		() => cur_frm.set_value("company", "Company test"),
+		() => cur_frm.set_value("company", "Test Company"),
 		() => frappe.click_button('Add Row'),
 		() => {
 			cur_frm.fields_dict.leave_block_list_dates.grid.grid_rows[0].doc.block_date = today_date;
