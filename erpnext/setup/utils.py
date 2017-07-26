@@ -114,10 +114,10 @@ def enable_all_roles_and_domains():
 	if not domains:
 		return
 
-	domain_settigns = frappe.get_doc("Domain Settings", "Domain Settings")
-	domain_settigns.set("active_domains", [])
+	domain_settings = frappe.get_doc("Domain Settings", "Domain Settings")
+	domain_settings.set("active_domains", [])
 	for domain in domains:
-		row = domain_settigns.append("active_domains", {})
+		row = domain_settings.append("active_domains", {})
 		row.domain=domain.get("name")
 
-	domain_settigns.save()
+	domain_settings.save()
