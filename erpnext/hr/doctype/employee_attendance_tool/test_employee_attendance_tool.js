@@ -10,7 +10,7 @@ QUnit.test("Test: Employee attendance tool [HR]", function (assert) {
 		() => frappe.timeout(0.5),
 		() => assert.equal("Employee Attendance Tool", cur_frm.doctype,
 			"Form for Employee Attendance Tool opened successfully."),
- 		// set values in form
+		// set values in form
 		() => cur_frm.set_value("date", attendance_date),
 		() => cur_frm.set_value("branch", "Test Branch"),
 		() => cur_frm.set_value("department", "Test Department"),
