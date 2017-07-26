@@ -1,8 +1,5 @@
 QUnit.module('hr');
 
-//not added path in tests.txt yet
-		// () => cur_frm.set_value("company", "Test Company"),
-
 QUnit.test("Test: Employee attendance tool [HR]", function (assert) {
 	assert.expect(3);
 	let done = assert.async();

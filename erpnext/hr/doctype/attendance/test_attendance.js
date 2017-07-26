@@ -1,7 +1,5 @@
 QUnit.module('hr');
 
-//not added path in tests.txt yet
-
 QUnit.test("Test: Attendance [HR]", function (assert) {
 	assert.expect(4);
 	let done = assert.async();
