@@ -343,6 +343,7 @@ frappe.ui.form.on("Purchase Invoice", {
 			'Payment Entry': 'Payment'
 		}
 	},
+
 	onload: function(frm) {
 		$.each(["warehouse", "rejected_warehouse"], function(i, field) {
 			frm.set_query(field, "items", function() {
@@ -370,5 +371,17 @@ frappe.ui.form.on("Purchase Invoice", {
 			erpnext.buying.get_default_bom(frm);
 		}
 		frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted==="Yes");
-	}
+	},
+
+	refresh: function(frm) {
+		frm.trigger("make_subscription")
+	},
+
+	make_subscription: function(frm) {
+		if(frm.doc.docstatus == 1 && !frm.doc.subscription) {
+			frm.add_custom_button(__('Subscription'), function() {
+				erpnext.utils.make_subscription(frm.doc.doctype, frm.doc.name)
+			}, __("Make"))
+		}
+	},
 })

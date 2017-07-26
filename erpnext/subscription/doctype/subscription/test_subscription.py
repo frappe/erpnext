@@ -20,14 +20,6 @@ class TestSubscription(unittest.TestCase):
 		doc = make_subscription()
 		self.assertEquals(doc.next_schedule_date, today())
 
-		make_subscription_entry()
-		docnames = frappe.get_all(doc.base_doctype, {'subscription': doc.name})
-		self.assertEquals(len(docnames), 2)
-
-		docnames = frappe.get_all(doc.base_doctype,
-			{'subscription': doc.name, 'docstatus': 0})
-		self.assertEquals(len(docnames), 1)
-
 	def test_monthly_subscription(self):
 		current_fiscal_year = get_fiscal_year(today(), as_dict=True)
 		start_date = current_fiscal_year.year_start_date

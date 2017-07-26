@@ -48,21 +48,21 @@ def get_next_schedule_date(start_date, frequency, repeat_on_day):
 def make_subscription_entry(date=None):
 	date = date or today()
 	for data in get_subscription_entries(date):
-		schedule_date = data.next_schedule_date
+		schedule_date = getdate(data.next_schedule_date)
 		while schedule_date <= getdate(today()):
 			create_documents(data, schedule_date)
 
 			schedule_date = get_next_schedule_date(schedule_date,
 				data.frequency, data.repeat_on_day)
 
-		if schedule_date > getdate(today()) \
-			and schedule_date <= getdate(data.end_date):
+		if schedule_date:
 			frappe.db.set_value('Subscription', data.name, 'next_schedule_date', schedule_date)
 
 def get_subscription_entries(date):
 	return frappe.db.sql(""" select * from `tabSubscription`
 		where docstatus = 1 and next_schedule_date <=%s
 			and base_docname is not null and base_docname != ''
+			and next_schedule_date <= ifnull(end_date, '2199-12-31')
 			and ifnull(disabled, 0) = 0""", (date), as_dict=1)
 
 def create_documents(data, schedule_date):
@@ -95,3 +95,10 @@ def update_doc(new_document, args, schedule_date):
 	for data in new_document.meta.fields:
 		if data.fieldtype == 'Date' and data.reqd==1:
 			new_document.set(data.fieldname, schedule_date)
+
+@frappe.whitelist()
+def make_subscription(doctype, docname):
+	doc = frappe.new_doc('Subscription')
+	doc.base_doctype = doctype
+	doc.base_docname = docname
+	return doc

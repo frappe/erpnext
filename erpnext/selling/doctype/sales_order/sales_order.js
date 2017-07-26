@@ -41,6 +41,18 @@ frappe.ui.form.on("Sales Order", {
 		});
 		refresh_field("items");
 	}
+
+	refresh: function(frm) {
+		frm.trigger("make_subscription")
+	},
+
+	make_subscription: function(frm) {
+		if(frm.doc.docstatus == 1 && !frm.doc.subscription) {
+			frm.add_custom_button(__('Subscription'), function() {
+				erpnext.utils.make_subscription(frm.doc.doctype, frm.doc.name)
+			}, __("Make"))
+		}
+	},
 });
 
 frappe.ui.form.on("Sales Order Item", {
