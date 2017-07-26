@@ -9,14 +9,14 @@ QUnit.test("Test: Company [SetUp]", function (assert) {
 		() => frappe.set_route("List", "Company", "List"),
 		() => frappe.new_doc("Company"),
 		() => frappe.timeout(1),
-		() => cur_frm.set_value("company_name", "Company test"),
-		() => cur_frm.set_value("abbr", "CT"),
+		() => cur_frm.set_value("company_name", "Test Company"),
+		() => cur_frm.set_value("abbr", "TC"),
 		() => cur_frm.set_value("domain", "Services"),
 		() => cur_frm.set_value("default_currency", "INR"),
 		// save form
 		() => cur_frm.save(),
 		() => frappe.timeout(1),
-		() => assert.equal("Company test", cur_frm.doc.company_name,
+		() => assert.equal("Test Company", cur_frm.doc.company_name,
 			'name of company correctly saved'),
 		() => done()
 	]);
