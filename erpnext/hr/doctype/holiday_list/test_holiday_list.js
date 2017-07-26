@@ -10,7 +10,7 @@ QUnit.test("Test: Holiday list [HR]", function (assert) {
 		() => frappe.set_route("List", "Holiday List", "List"),
 		() => frappe.new_doc("Holiday List"),
 		() => frappe.timeout(1),
-		() => cur_frm.set_value("holiday_list_name", "Holiday list test"),
+		() => cur_frm.set_value("holiday_list_name", "Test Holiday list"),
 		() => cur_frm.set_value("from_date", date),
 		() => cur_frm.set_value("weekly_off", "Sunday"),		// holiday list for sundays
 		() => frappe.click_button('Get Weekly Off Dates'),
@@ -18,7 +18,7 @@ QUnit.test("Test: Holiday list [HR]", function (assert) {
 		// save form
 		() => cur_frm.save(),
 		() => frappe.timeout(1),
-		() => assert.equal("Holiday list test", cur_frm.doc.holiday_list_name,
+		() => assert.equal("Test Holiday list", cur_frm.doc.holiday_list_name,
 			'name of holiday list correctly saved'),
 
 		// check if holiday list contains correct days
