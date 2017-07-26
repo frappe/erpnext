@@ -28,7 +28,7 @@ frappe.ui.form.on('Employee Loan', {
 				"filters": {
 					"company": frm.doc.company,
 				}
-			}
+			};
 		});
 
 		$.each(["payment_account", "employee_loan_account"], function (i, field) {
