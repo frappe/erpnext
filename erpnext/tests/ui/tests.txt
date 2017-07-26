@@ -13,3 +13,4 @@ erpnext/hr/doctype/branch/test_branch.js
 erpnext/hr/doctype/leave_block_list/test_leave_block_list.js
 erpnext/hr/doctype/department/test_department.js
 erpnext/hr/doctype/designation/test_designation.js
+erpnext/hr/doctype/employment_type/test_employment_type.js
