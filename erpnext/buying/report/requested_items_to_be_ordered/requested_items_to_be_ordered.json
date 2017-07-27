@@ -1,0 +1,30 @@
+{
+ "add_total_row": 1, 
+ "apply_user_permissions": 1, 
+ "creation": "2013-05-13 16:10:02", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 3, 
+ "is_standard": "Yes", 
+ "modified": "2017-02-24 20:10:53.005589", 
+ "modified_by": "Administrator", 
+ "module": "Buying", 
+ "name": "Requested Items To Be Ordered", 
+ "owner": "Administrator", 
+ "query": "select \n    mr.name as \"Material Request:Link/Material Request:120\",\n\tmr.transaction_date as \"Date:Date:100\",\n\tmr_item.item_code as \"Item Code:Link/Item:120\",\n\tsum(ifnull(mr_item.qty, 0)) as \"Qty:Float:100\",\n\tsum(ifnull(mr_item.ordered_qty, 0)) as \"Ordered Qty:Float:100\", \n\t(sum(mr_item.qty) - sum(ifnull(mr_item.ordered_qty, 0))) as \"Qty to Order:Float:100\",\n\tmr_item.item_name as \"Item Name::150\",\n\tmr_item.description as \"Description::200\",\n\tmr.company as \"Company:Link/Company:\"\nfrom\n\t`tabMaterial Request` mr, `tabMaterial Request Item` mr_item\nwhere\n\tmr_item.parent = mr.name\n\tand mr.material_request_type = \"Purchase\"\n\tand mr.docstatus = 1\n\tand mr.status != \"Stopped\"\ngroup by mr.name, mr_item.item_code\nhaving\n\tsum(ifnull(mr_item.ordered_qty, 0)) < sum(ifnull(mr_item.qty, 0))\norder by mr.transaction_date asc", 
+ "ref_doctype": "Purchase Order", 
+ "report_name": "Requested Items To Be Ordered", 
+ "report_type": "Query Report", 
+ "roles": [
+  {
+   "role": "Stock User"
+  }, 
+  {
+   "role": "Purchase Manager"
+  }, 
+  {
+   "role": "Purchase User"
+  }
+ ]
+}

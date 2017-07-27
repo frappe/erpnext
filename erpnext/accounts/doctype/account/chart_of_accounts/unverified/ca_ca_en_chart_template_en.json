@@ -1,0 +1,172 @@
+{
+    "country_code": "ca",
+    "name": "Canada - Chart of Accounts for english-speaking provinces",
+    "tree": {
+        "ASSETS": {
+            "CURRENT ASSETS": {
+                "ACCOUNTS RECEIVABLES": {
+                    "ALLOWANCE FOR DOUBTFUL ACCOUNTS": {},
+                    "Customers Account": {
+                        "account_type": "Receivable"
+                    }
+                },
+                "CASH": {},
+                "CERTIFICATES OF DEPOSITS": {},
+                "INVESTMENTS HELD FOR TRADING": {},
+                "PREPAID EXPENSES": {},
+                "STOCKS": {
+                    "Stock Delivered But Not Billed": {},
+                    "Stock In Hand": {}
+                },
+                "TAXES RECEIVABLES": {
+                    "GST receivable": {
+                        "account_type": "Receivable"
+                    },
+                    "HST receivable": {
+                        "HST receivable - 13%": {
+                            "account_type": "Receivable"
+                        },
+                        "HST receivable - 14%": {
+                            "account_type": "Receivable"
+                        },
+                        "HST receivable - 15%": {
+                            "account_type": "Receivable"
+                        }
+                    },
+                    "PST/QST receivable": {
+                        "account_type": "Receivable"
+                    }
+                },
+                "TREASURY OR TREASURY EQUIVALENTS": {}
+            },
+            "NON-CURRENT ASSETS": {
+                "INTANGIBLE ASSETS": {
+                    "PATENTS, TRADEMARKS AND COPYRIGHTS": {}
+                },
+                "INVESTMENTS AVAILABLE FOR SALE": {},
+                "TANGIBLE ASSETS": {
+                    "ACCUMULATED DEPRECIATIONS": {}
+                }
+            },
+            "root_type": "Asset"
+        },
+        "EQUITY": {
+            "CONTRIBUTED SURPLUS": {},
+            "DIVIDENDS": {},
+            "PREMIUMS": {},
+            "RETAINED EARNINGS": {},
+            "SHARE CAPITAL": {},
+            "TRANSLATION ADJUSTMENTS": {},
+            "root_type": "Equity"
+        },
+        "EXPENSES": {
+            "NON-OPERATING EXPENSES": {
+                "INTERESTS EXPENSES": {},
+                "OTHER NON-OPERATING EXPENSES": {}
+            },
+            "OPERATING EXPENSES": {
+                "COST OF GOODS SOLD": {
+                    "Inside Purchases": {},
+                    "International Purchases": {},
+                    "Purchases in harmonized provinces": {},
+                    "Purchases in non-harmonized provinces": {}
+                },
+                "GENERAL EXPENSES": {},
+                "LABOUR EXPENSES": {
+                    "Annuities": {},
+                    "Employment Insurance": {},
+                    "Federal Income Tax": {},
+                    "Health Services Fund": {},
+                    "Holidays": {},
+                    "Labour Health and Safety": {},
+                    "Labour Standards": {},
+                    "Parental Insurance": {},
+                    "Provincial Income Tax": {},
+                    "Salaries, wages and commissions": {}
+                },
+                "OTHER OPERATING EXPENSES": {},
+                "RESEARCH AND DEVELOPMENT EXPENSES": {},
+                "SALES EXPENSES": {}
+            },
+            "root_type": "Expense"
+        },
+        "INCOMES": {
+            "NON-OPERATING INCOMES": {
+                "INTERESTS": {},
+                "OTHER NON-OPERATING INCOMES": {}
+            },
+            "OPERATING INCOMES": {
+                "Harmonized Provinces Sales": {},
+                "Inside Sales": {},
+                "International Sales": {},
+                "Non-Harmonized Provinces Sales": {},
+                "OTHER OPERATING INCOMES": {}
+            },
+            "root_type": "Income"
+        },
+        "LIABILITIES": {
+            "CURRENT LIABILITIES": {
+                "ACCOUNTS PAYABLES": {
+                    "Suppliers Account": {
+                        "account_type": "Payable"
+                    }
+                },
+                "CURRENT FINANCIAL DEBTS": {},
+                "LABOUR TAXES TO PAY": {
+                    "CANADIAN REVENU AGENCY": {
+                        "EMPLOYMENT INSURANCE TO PAY": {
+                            "EI - Employees Contribution": {},
+                            "EI - Employer Contribution": {}
+                        },
+                        "Federal Income Tax": {}
+                    },
+                    "PROVINCIAL REVENU AGENCY": {
+                        "ANNUITIES TO PAY": {
+                            "Annuities - Employees Contribution": {},
+                            "Annuities - Employer Contribution": {}
+                        },
+                        "Health Services Fund to pay": {},
+                        "Labour Health and Safety to pay": {},
+                        "Labour Standards to pay": {},
+                        "PARENTAL INSURANCE PLAN TO PAY": {
+                            "PAP - Employee Contribution": {},
+                            "PAP - Employer Contribution": {}
+                        },
+                        "Provincial Income Tax": {}
+                    }
+                },
+                "LIABILITIES ASSETS HELD FOR TRANSFER": {
+                    "Stock Received But Not Billed": {}
+                },
+                "OTHER ACCOUNTS PAYABLES": {},
+                "STOCK LIABILITIES": {},
+                "TAXES PAYABLES": {
+                    "GST to pay": {
+                        "account_type": "Payable"
+                    },
+                    "HST to pay": {
+                        "HST to pay - 13%": {
+                            "account_type": "Payable"
+                        },
+                        "HST to pay - 14%": {
+                            "account_type": "Payable"
+                        },
+                        "HST to pay - 15%": {
+                            "account_type": "Payable"
+                        }
+                    },
+                    "PST/QST to pay": {
+                        "account_type": "Payable"
+                    }
+                }
+            },
+            "NON-CURRENT LIABILITIES": {
+                "DEFERRED TAXES": {},
+                "NON-CURRENT FINANCIAL DEBTS": {},
+                "OTHER NON-CURRENT LIABILITIES": {},
+                "PROVISIONS FOR PENSIONS AND OTHER POST-EMPLOYMENT ADVANTAGES": {}
+            },
+            "root_type": "Liability"
+        }
+    }
+}

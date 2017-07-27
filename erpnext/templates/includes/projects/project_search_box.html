@@ -1,0 +1,30 @@
+<div class="project-search text-muted pull-right">
+	<input type="text" id="project-search" placeholder="Quick Search">
+	<i class="octicon octicon-search"></i>
+</div>
+<div class="clearfix pull-right" style="width:300px;">
+	<h4 class="project-search-results pull-left"></h4>
+	<p class="pull-right">
+		<a style="display: none; padding-left:5px;" href="/projects?project={{doc.name}}" class="octicon octicon-x 			text-extra-muted clear" title="Clear Search" ></a>
+	</p>
+</div>
+
+<script>
+frappe.ready(function() {
+	if(get_url_arg("q")){
+	var txt = get_url_arg("q");
+	$(".project-search-results").html("Search results for : " + encodeURIComponent(txt));
+	$(".clear").toggle(true);
+	}
+	var thread = null;
+	function findResult(t) {
+		window.location.href="/projects?project={{doc.name}}&q=" + t;
+	}
+
+	$("#project-search").keyup(function() {
+		clearTimeout(thread);
+		var $this = $(this); thread = setTimeout(function(){findResult($this.val())}, 1000);
+	});
+	$(".form-search").on("submit", function() { return false; });
+});
+</script>

@@ -1,0 +1,209 @@
+{
+    "country_code": "ar",
+    "name": "Argentina - Plan de Cuentas",
+    "tree": {
+        "Cuentas Patrimoniales": {
+            "ACTIVO": {
+                "Bienes Inmateriales": {
+                    "Bienes Inmateriales / (-) Amortizaci\u00f3n Acumulada": {},
+                    "Bienes Inmateriales / Concesiones y Franquicias": {},
+                    "Bienes Inmateriales / Marcas de F\u00e1brica": {},
+                    "Bienes Inmateriales / Patentes de Invenci\u00f3n": {}
+                },
+                "Bienes de Cambio": {
+                    "(-) Previsi\u00f3n para Desvalorizaci\u00f3n de Bienes de Cambio": {},
+                    "Bienes de Cambio - Mercader\u00edas": {
+                        "Bienes de Cambio - Mercader\u00edas / Categoria de productos 01": {}
+                    },
+                    "Bienes de Cambio - Mercader\u00edas en Tr\u00e1nsito": {},
+                    "Materiales Varios ": {},
+                    "Materias primas": {},
+                    "Productos Elaborados": {},
+                    "Productos en Curso de Elaboraci\u00f3n": {}
+                },
+                "Bienes de Uso": {
+                    "Bienes de Uso / (-) Depreciaci\u00f3n Acumulada": {},
+                    "Bienes de Uso / Equipos": {},
+                    "Bienes de Uso / Inmuebles": {},
+                    "Bienes de Uso / Maquinaria": {},
+                    "Bienes de Uso / Rodados": {}
+                },
+                "Caja y Bancos": {
+                    "Caja y Bancos - Caja": {
+                        "Caja y bancos - Caja / efectivo ARS": {}
+                    },
+                    "Caja y Bancos - Cuentas Corrientes": {
+                        "Caja y Bancos.../ BCO. CTA CTE ARS": {}
+                    },
+                    "Caja y Bancos - Fondos fijos": {
+                        "Caja y ...- Fondos fijos / caja chica 01 ARS": {}
+                    },
+                    "Caja y Bancos - Moneda Extranjera": {
+                        "Caja y bancos - Caja / efectivo USD": {}
+                    },
+                    "Caja y bancos - Recaudaciones a Depositar ": {},
+                    "Caja y bancos - Valores a Depositar ": {}
+                },
+                "Inversiones": {
+                    "Inversiones / (-) Previsi\u00f3n para Devalorizaci\u00f3n de Acciones": {},
+                    "Inversiones / Acciones Permanentes": {},
+                    "Inversiones / Acciones Transitorias": {},
+                    "Inversiones / T\u00edtulos P\u00fablicos": {}
+                }
+            },
+            "Cr\u00e9ditos por Ventas": {
+                "Cr\u00e9ditos por Ventas / (-) Previsi\u00f3n para Ds. Incobrables": {},
+                "Cr\u00e9ditos por Ventas / Deudores Morosos": {},
+                "Cr\u00e9ditos por Ventas / Deudores Varios": {},
+                "Cr\u00e9ditos por Ventas / Deudores en Gesti\u00f3n Judicial": {},
+                "Cr\u00e9ditos por Ventas / Deudores por Ventas": {}
+            },
+            "Otros Cr\u00e9ditos": {
+                "Otros Cr\u00e9ditos / (-) Intereses (+) a Devengar": {},
+                "Otros Cr\u00e9ditos / (-) Previsi\u00f3n para Descuentos": {},
+                "Otros Cr\u00e9ditos / Accionistas": {},
+                "Otros Cr\u00e9ditos / Alquileres Pagados por Adelantado": {},
+                "Otros Cr\u00e9ditos / Anticipo al Personal": {},
+                "Otros Cr\u00e9ditos / Anticipo de Impuestos": {},
+                "Otros Cr\u00e9ditos / Anticipos a Proveedores": {},
+                "Otros Cr\u00e9ditos / Intereses Pagados por Adelantado": {},
+                "Otros Cr\u00e9ditos / Pr\u00e9stamos otorgados": {}
+            },
+            "PASIVO": {
+                "Deudas Bancarias y Financieras": {
+                    "Deudas Bancarias y Financieras / Adelantos en Cuenta Corriente": {},
+                    "Deudas Bancarias y Financieras / Debentures Emitidos": {},
+                    "Deudas Bancarias y Financieras / Intereses a Pagar": {},
+                    "Deudas Bancarias y Financieras / Obligaciones a Pagar": {},
+                    "Deudas Bancarias y Financieras / Prestamos": {}
+                },
+                "Deudas Comerciales": {
+                    "Deudas Comerciales / (-) Intereses a Devengar por Compras al Cr\u00e9dito": {},
+                    "Deudas Comerciales / Anticipos de Clientes": {},
+                    "Deudas Comerciales / Proveedores": {}
+                },
+                "Deudas Fiscales": {
+                    "Deudas Fiscales / IVA a Pagar": {},
+                    "Deudas Fiscales / Impuesto a la Ganancia M\u00ednima Presunta a Pagar": {},
+                    "Deudas Fiscales / Impuesto a las Ganancias a Pagar": {},
+                    "Deudas Fiscales / Impuesto a los D\u00e9bitos y Cr\u00e9ditos Bancarios a Pagar": {},
+                    "Deudas Fiscales / Impuesto sobre los Bienes Personales a Pagar": {},
+                    "Deudas Fiscales / Monotributo a Pagar": {}
+                },
+                "Deudas Sociales": {
+                    "Deudas Sociales / Cargas Sociales a Pagar": {},
+                    "Deudas Sociales / Provisi\u00f3n para Sueldo Anual Complementario": {},
+                    "Deudas Sociales / Retenciones a Depositar": {},
+                    "Deudas Sociales / Sueldos a Pagar": {}
+                },
+                "Otras Deudas": {
+                    "Otras Deudas / Acreedores Varios": {},
+                    "Otras Deudas / Cobros por Adelantado": {},
+                    "Otras Deudas / Dividendos a Pagar": {},
+                    "Otras Deudas / Honorarios Directores y S\u00edndicos a Pagar": {}
+                },
+                "Previsiones": {
+                    "Previsiones / Previsi\u00f3n Indemnizaci\u00f3n por Despidos": {},
+                    "Previsiones / Previsi\u00f3n para Garant\u00edas por Service": {},
+                    "Previsiones / Previsi\u00f3n para juicios Pendientes": {}
+                }
+            },
+            "PATRIMONIO NETO": {
+                "Ajustes al Patrimonio": {
+                    "Ajustes al Patrimonio / Revaluo T\u00e9cnico de Bienes de Uso": {}
+                },
+                "Aportes No Capitalizados": {
+                    "Aportes No Capitalizados / Aportes Irrevocables Futura Suscripci\u00f3n de Acciones": {},
+                    "Aportes No Capitalizados / Primas de Emsi\u00f3n": {}
+                },
+                "Capital Social": {
+                    "Capital social / (-) Descuento de Emisi\u00f3n de Acciones": {},
+                    "Capital social / Acciones en Circulaci\u00f3n": {},
+                    "Capital social / Capital Suscripto": {},
+                    "Capital social / Dividendos a Distribuir en Acciones": {}
+                },
+                "Ganancias Reservadas": {
+                    "Reserva Estatutaria": {},
+                    "Reserva Facultativa": {},
+                    "Reserva Legal": {},
+                    "Reserva para Renovaci\u00f3n de Bienes de Uso": {}
+                },
+                "Resultados No Asignados": {
+                    "Ganancias y P\u00e9rdidas del Ejercicio": {},
+                    "Resultado del Ejercicio": {},
+                    "Resultados Acumulados": {},
+                    "Resultados Acumulados del Ejercicio Anterior": {}
+                }
+            },
+            "root_type": ""
+        },
+        "Cuentas de Movimiento": {
+            "Compras": {
+                "Compras - Categoria de productos 01": {}
+            },
+            "Costos de Producci\u00f3n": {},
+            "Gastos de Administraci\u00f3n": {},
+            "Gastos de Comercializaci\u00f3n": {},
+            "root_type": ""
+        },
+        "Cuentas de Orden": {
+            "CUENTAS DE ORDEN ACREEDORAS": {
+                "Acreedor por Documentos Descontados": {},
+                "Acreedor por Garant\u00edas Otorgadas": {},
+                "Comitente por Mercaderias Recibidas en Consignaci\u00f3n": {}
+            },
+            "CUENTAS DE ORDEN DEUDORAS": {
+                "Dep\u00f3sito de Valores Recibos en Garant\u00eda": {},
+                "Documentos Descontados": {},
+                "Documentos Endosados": {},
+                "Garantias Otorgadas": {},
+                "Mercaderias Recibidas en Consignaci\u00f3n": {}
+            },
+            "root_type": ""
+        },
+        "Cuentas de Resultado": {
+            "RESULTADOS NEGATIVOS": {
+                "Resultados Negativos Extraordinarios": {
+                    "Donaciones Cedidas, Otorgadas": {},
+                    "Gastos en Siniestros": {},
+                    "P\u00e9rdida Venta Bienes de Uso": {}
+                },
+                "Resultados Negativos Ordinarios": {
+                    "Costo de Mercader\u00edas Vendidas": {
+                        "Costo de Mercader\u00edas Vendidas - Categoria de productos 01": {}
+                    },
+                    "Gastos Bancarios": {},
+                    "Gastos de Publicidad y Propaganda": {},
+                    "Gastos en Amortizaci\u00f3n": {},
+                    "Gastos en Cargas Sociales": {},
+                    "Gastos en Depreciaci\u00f3n de Bienes de Uso": {},
+                    "Gastos en Impuestos": {},
+                    "Gastos en Servicios P\u00fablicos": {},
+                    "Gastos en Sueldos y Jormales": {}
+                }
+            },
+            "RESULTADOS POSITIVOS": {
+                "Resultados Positivos Extraordinarios": {
+                    "Donaciones obtenidas, ganandas, percibidas": {},
+                    "Ganancia Venta Inversiones Permanentes": {},
+                    "Ganancia Venta de Bienes de Uso": {},
+                    "Recupero de Deudores Incobrables": {},
+                    "Recupero de Rezagos": {}
+                },
+                "Resultados Positivos Ordinarios": {
+                    "Alquileres gananados, obtenidos, percibidos": {},
+                    "Comisiones gananados, obtenidos, percibidos": {},
+                    "Descuentos gananados, obtenidos, percibidos": {},
+                    "Ganancia Venta de Acciones": {},
+                    "Honorarios gananados, obtenidos, percibidos": {},
+                    "Intereses gananados, obtenidos, percibidos": {},
+                    "Renta de T\u00edtulos P\u00fablicos": {},
+                    "Resultados Positivos Ordinarios": {
+                        "Ventas - Categoria de productos 01": {}
+                    }
+                }
+            },
+            "root_type": ""
+        }
+    }
+}

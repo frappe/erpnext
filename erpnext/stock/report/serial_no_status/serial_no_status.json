@@ -1,0 +1,30 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2013-01-14 10:52:58", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 4, 
+ "is_standard": "Yes", 
+ "json": "{\"add_total_row\": 0, \"sort_by\": \"Serial No.name\", \"sort_order\": \"desc\", \"sort_by_next\": null, \"filters\": [], \"sort_order_next\": \"desc\", \"columns\": [[\"name\", \"Serial No\"], [\"item_code\", \"Serial No\"], [\"warehouse\", \"Serial No\"], [\"item_name\", \"Serial No\"], [\"description\", \"Serial No\"], [\"item_group\", \"Serial No\"], [\"brand\", \"Serial No\"], [\"purchase_document_type\", \"Serial No\"], [\"purchase_document_no\", \"Serial No\"], [\"purchase_date\", \"Serial No\"], [\"customer\", \"Serial No\"], [\"customer_name\", \"Serial No\"], [\"purchase_rate\", \"Serial No\"], [\"delivery_document_type\", \"Serial No\"], [\"delivery_document_no\", \"Serial No\"], [\"delivery_date\", \"Serial No\"], [\"supplier\", \"Serial No\"], [\"supplier_name\", \"Serial No\"]]}", 
+ "modified": "2017-02-24 19:54:21.392265", 
+ "modified_by": "Administrator", 
+ "module": "Stock", 
+ "name": "Serial No Status", 
+ "owner": "Administrator", 
+ "ref_doctype": "Serial No", 
+ "report_name": "Serial No Status", 
+ "report_type": "Report Builder", 
+ "roles": [
+  {
+   "role": "Item Manager"
+  }, 
+  {
+   "role": "Stock Manager"
+  }, 
+  {
+   "role": "Stock User"
+  }
+ ]
+}

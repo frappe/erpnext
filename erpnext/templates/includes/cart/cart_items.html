@@ -1,0 +1,32 @@
+{% from "erpnext/templates/includes/order/order_macros.html" import item_name_and_description %}
+{% from "erpnext/templates/includes/order/order_macros.html" import item_name_and_description_cart %}
+
+{% for d in doc.items %}
+<div class="row checkout">
+    <div class="col-sm-8 col-xs-6 col-name-description">
+        {{ item_name_and_description(d) }}
+    </div>
+    <div class="col-sm-2 col-xs-3 text-right col-qty">
+        <span style="display: inline-block">
+			<div class="input-group number-spinner">
+                <span class="input-group-btn">
+                    <button class="btn btn-default cart-btn" data-dir="dwn">
+                        –</button>
+                </span>
+            <input class="form-control text-right cart-qty"
+            value = "{{ d.get_formatted('qty') }}"
+            data-item-code="{{ d.item_code }}">
+                <span class="input-group-btn">
+                    <button class="btn btn-default cart-btn" data-dir="up" style="margin-left:-2px;">
+                        +</button>
+                </span>
+			</div>
+		</span>    	
+	</div>
+    <div class="col-sm-2 col-xs-3 text-right col-amount">
+        {{ d.get_formatted("amount") }}
+        <p class="text-muted small item-rate">{{
+            _("Rate: {0}").format(d.get_formatted("rate")) }}</p>
+    </div>
+</div>
+{% endfor %}

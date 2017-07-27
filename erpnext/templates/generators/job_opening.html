@@ -1,0 +1,22 @@
+{% extends "templates/web.html" %}
+
+{% block breadcrumbs %}
+	{% include "templates/includes/breadcrumbs.html" %}
+{% endblock %}
+
+{% block header %}
+<h1>{{ job_title }}</h1>
+{% endblock %}
+
+{% block page_content %}
+
+{%- if description -%}
+<div>{{ description }}</div>
+{% endif %}
+<p style='margin-top: 30px'>
+	<a class='btn btn-primary'
+	href='/job_application?new=1&job_title={{ doc.name }}'>
+	{{ _("Apply Now") }}</a>
+</p>
+
+{% endblock %}

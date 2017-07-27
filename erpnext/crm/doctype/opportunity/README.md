@@ -1,0 +1,1 @@
+Potential sales opportunity (deal) from a Lead or Customer.

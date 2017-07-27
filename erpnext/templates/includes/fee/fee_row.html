@@ -1,0 +1,18 @@
+<div class="web-list-item">
+	<a href = "/fees/{{doc.name}}/">
+		<div class="row">
+			<div class="col-xs-6">
+				{{ doc.program }}
+			</div>
+			<div class="col-xs-2">
+				{{ doc.get_formatted("total_amount") }}
+			</div>
+			<div class="col-xs-2">
+				{{ doc.get_formatted("paid_amount") }}
+			</div>
+			<div class="col-xs-2">
+				{{ doc.get_formatted("outstanding_amount") }}
+			</div>
+		</div>
+	</a>
+</div>

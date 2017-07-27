@@ -1,0 +1,27 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2013-09-25 10:21:15", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 3, 
+ "is_standard": "Yes", 
+ "json": "{\"add_total_row\": 0, \"sort_by\": \"Item Price.modified\", \"sort_order\": \"desc\", \"sort_by_next\": null, \"filters\": [], \"sort_order_next\": \"desc\", \"columns\": [[\"name\", \"Item Price\"], [\"price_list\", \"Item Price\"], [\"item_code\", \"Item Price\"], [\"item_name\", \"Item Price\"], [\"item_description\", \"Item Price\"], [\"price_list_rate\", \"Item Price\"], [\"buying\", \"Item Price\"], [\"selling\", \"Item Price\"], [\"currency\", \"Item Price\"]]}", 
+ "modified": "2017-02-24 20:02:09.364303", 
+ "modified_by": "Administrator", 
+ "module": "Stock", 
+ "name": "Item-wise Price List Rate", 
+ "owner": "Administrator", 
+ "ref_doctype": "Item Price", 
+ "report_name": "Item-wise Price List Rate", 
+ "report_type": "Report Builder", 
+ "roles": [
+  {
+   "role": "Sales Master Manager"
+  }, 
+  {
+   "role": "Purchase Master Manager"
+  }
+ ]
+}

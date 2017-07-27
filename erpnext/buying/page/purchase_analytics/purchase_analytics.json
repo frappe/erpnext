@@ -1,0 +1,23 @@
+{
+ "creation": "2012-09-21 20:15:16.000000", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "icon": "fa fa-bar-chart", 
+ "idx": 1, 
+ "modified": "2013-07-11 14:43:52.000000", 
+ "modified_by": "Administrator", 
+ "module": "Buying", 
+ "name": "purchase-analytics", 
+ "owner": "Administrator", 
+ "page_name": "purchase-analytics", 
+ "roles": [
+  {
+   "role": "Analytics"
+  }, 
+  {
+   "role": "Purchase Manager"
+  }
+ ], 
+ "standard": "Yes", 
+ "title": "Purchase Analytics"
+}

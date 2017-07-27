@@ -1,0 +1,20 @@
+{
+ "creation": "2013-01-04 15:31:45.000000", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "icon": "fa fa-bar-chart", 
+ "idx": 1, 
+ "modified": "2013-07-11 14:44:24.000000", 
+ "modified_by": "Administrator", 
+ "module": "Support", 
+ "name": "support-analytics", 
+ "owner": "Administrator", 
+ "page_name": "support-analytics", 
+ "roles": [
+  {
+   "role": "Support Team"
+  }
+ ], 
+ "standard": "Yes", 
+ "title": "Support Analytics"
+}

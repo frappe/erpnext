@@ -1,0 +1,1 @@
+Detail of Item installed as a part of Installation Note.

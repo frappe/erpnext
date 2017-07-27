@@ -1,0 +1,28 @@
+{
+ "content": null, 
+ "creation": "2014-08-08 02:45:55.931022", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "icon": "fa fa-th", 
+ "modified": "2014-08-08 05:59:33.045012", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "pos", 
+ "owner": "Administrator", 
+ "page_name": "pos", 
+ "roles": [
+  {
+   "role": "Sales User"
+  }, 
+  {
+   "role": "Purchase User"
+  }, 
+  {
+   "role": "Accounts User"
+  }
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "title": "POS"
+}

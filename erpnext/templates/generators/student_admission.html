@@ -1,0 +1,27 @@
+
+{% extends "templates/web.html" %}
+
+{% block breadcrumbs %}
+	{% include "templates/includes/breadcrumbs.html" %}
+{% endblock %}
+
+{% block header %}
+
+<h1>{{ title }}</h1>
+{% endblock %}
+
+{% block page_content %}
+
+{%- if introduction -%}
+<div>{{ introduction }}</div>
+{% endif %}
+
+{%- if application_form_route -%}
+<p>
+	<a class='btn btn-primary'
+	href='/{{ doc.application_form_route }}'>
+	{{ _("Apply Now") }}</a>
+</p>
+{% endif %}
+
+{% endblock %}

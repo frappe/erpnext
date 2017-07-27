@@ -1,0 +1,23 @@
+{
+ "creation": "2012-09-21 20:15:14.000000", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "icon": "fa fa-bar-chart", 
+ "idx": 1, 
+ "modified": "2013-07-11 14:44:10.000000", 
+ "modified_by": "Administrator", 
+ "module": "Stock", 
+ "name": "stock-analytics", 
+ "owner": "Administrator", 
+ "page_name": "stock-analytics", 
+ "roles": [
+  {
+   "role": "Analytics"
+  }, 
+  {
+   "role": "Material Manager"
+  }
+ ], 
+ "standard": "Yes", 
+ "title": "Stock Analytics"
+}

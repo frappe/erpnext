@@ -1,0 +1,1 @@
+User allowed to approve leave on blocked date.

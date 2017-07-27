@@ -1,0 +1,8 @@
+supplier
+request-for-quotation
+supplier-quotation
+purchase-order
+setup
+articles
+purchase-taxes
+supplier-scorecard

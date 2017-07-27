@@ -1,0 +1,1 @@
+Unique serial number assigned to an instance (unit) of an Item. This is used incase each unit of the Item needs to be tracked separately for warranty or recall purposes.

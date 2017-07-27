@@ -1,0 +1,16 @@
+{% for(var i=0, l=items.length; i < l; i++) { %}
+<div class="list-item">
+    <div class="row">
+        <div class="col-sm-6">
+            <h6>{%= items[i].item_name %}<h6>
+        </div>
+        <div class="col-sm-3">
+            <h6>{%= items[i].seller_name %}<h6>
+        </div>
+        <div class="col-sm-3 text-right">
+            <h6 class="text-muted">{%= items[i].seller_country %}<h6>
+        </div>
+    </div>
+    <p class="text-muted small">{%= items[i].description %}</p>
+</div>
+{% } %}

@@ -1,0 +1,35 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2013-06-21 12:14:15", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 3, 
+ "is_standard": "Yes", 
+ "modified": "2017-02-24 20:14:50.589149", 
+ "modified_by": "Administrator", 
+ "module": "Selling", 
+ "name": "Sales Person Target Variance Item Group-Wise", 
+ "owner": "Administrator", 
+ "ref_doctype": "Sales Order", 
+ "report_name": "Sales Person Target Variance Item Group-Wise", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Sales User"
+  }, 
+  {
+   "role": "Sales Manager"
+  }, 
+  {
+   "role": "Maintenance User"
+  }, 
+  {
+   "role": "Accounts User"
+  }, 
+  {
+   "role": "Stock User"
+  }
+ ]
+}

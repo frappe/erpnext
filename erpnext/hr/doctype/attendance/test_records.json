@@ -1,0 +1,10 @@
+[
+	{
+		"doctype": "Attendance",
+		"name": "_Test Attendance 1",
+		"employee": "_T-Employee-0001",
+		"status": "Present",
+		"attendance_date": "2014-02-01",
+		"company": "_Test Company"
+	}
+]

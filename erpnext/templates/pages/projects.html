@@ -1,0 +1,66 @@
+{% extends "templates/web.html" %}
+
+{% block title %}{{ doc.project_name }}{% endblock %}
+
+{% block header %}
+	<h1>{{ doc.project_name }}</h1>
+{% endblock %}
+
+{% block style %}
+	<style>
+		{% include "templates/includes/projects.css" %}
+	</style>
+{% endblock %}
+
+
+{% block page_content %}
+{% if doc.percent_complete %}
+<div class="progress progress-hg">
+	<div class="progress-bar progress-bar-{{ "warning" if doc.percent_complete|round < 100 else "success" }} active" 				role="progressbar" aria-valuenow="{{ doc.percent_complete|round|int }}"
+	aria-valuemin="0" aria-valuemax="100" style="width:{{ doc.percent_complete|round|int }}%;">
+	</div>
+</div>
+{% endif %}		
+
+<div class="clearfix">
+  <h4 style="float: left;">{{ _("Tasks") }}</h4>
+  <a class="btn btn-secondary btn-default btn-sm" style="float: right; position: relative; top: 10px;" href='/tasks?new=1&project={{ doc.project_name }}'>{{ _("New task") }}</a>
+</div>
+
+<p>
+<!-- <a class='small underline task-status-switch' data-status='Open'>{{ _("Show closed") }}</a> -->
+</p>
+
+{% if doc.tasks %}
+	<div class='project-task-section'>
+		<div class='project-task'>
+		{% include "erpnext/templates/includes/projects/project_tasks.html" %}
+		</div>
+		<p><a id= 'more-task' style='display: none;' class='more-tasks small underline'>{{ _("More") }}</a><p>
+	</div>
+{% else %}
+	<p class="text-muted">{{ _("No tasks") }}</p>
+{% endif %}
+
+
+<div class='padding'></div>
+
+<h4>{{ _("Timesheets") }}</h4>
+
+{% if doc.timesheets %}
+	<div class='project-timelogs'>
+	{% include "erpnext/templates/includes/projects/project_timesheets.html" %}
+	</div>
+	{% if doc.timesheets|length > 9 %}
+		<p><a class='more-timelogs small underline'>{{ _("More") }}</a><p>
+	{% endif %}
+{% else %}
+	<p class="text-muted">{{ _("No time sheets") }}</p>
+{% endif %}
+</div>
+
+<script>
+	{% include "erpnext/templates/pages/projects.js" %}
+</script>
+
+{% endblock %}

@@ -1,0 +1,1 @@
+Rule to define limits on transactions, above which only specified Role can Submit.

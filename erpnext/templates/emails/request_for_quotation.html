@@ -1,0 +1,11 @@
+<h3>{{_("Request for Quotation")}}</h3>
+<p>{{ message }}</p>
+{% if update_password_link %}
+<p>{{_("Please click on the following link to set your new password")}}:</p>
+<p><a href="{{ update_password_link }}">{{ update_password_link }}</a></p>
+{% else %}
+<p>{{_("The request for quotation can be accessed by clicking on the following link")}}:</p>
+<p><a href="{{ rfq_link }}">Submit your Quotation</a></p>
+{% endif %}
+<p>{{_("Thank you")}},<br>
+{{ user_fullname }}</p>

@@ -1,0 +1,47 @@
+{% extends "templates/web.html" %}
+
+{% block header %}<h1>{{ _("Products") }}</h1>{% endblock %}
+{% block breadcrumbs %}
+ <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+ 	<ul class="breadcrumb">
+ 		<li>
+ 			<span class="fa fa-angle-left"></span>
+ 			<a href="/me">{{ _("My Account") }}</a>
+ 		</li>
+ 	</ul>
+ </div>
+{% endblock %}
+
+{% block page_content %}
+<div class="item-group-content" itemscope itemtype="http://schema.org/Product">
+	<div>
+		{% if slideshow %}<!-- slideshow -->
+		{% include "templates/includes/slideshow.html" %}
+		{% endif %}
+		{% if description %}<!-- description -->
+		<div itemprop="description">{{ description or ""}}</div>
+		{% endif %}
+	</div>
+	<div>
+		{% if items %}
+		<div id="search-list" {% if not products_as_list -%} class="row" {%- endif %}>
+			{% for i in range(0, page_length) %}
+				{% if items[i] %}
+					{{ items[i] }}
+				{% endif %}
+			{% endfor %}
+		</div>
+		<div class="text-center item-group-nav-buttons">
+			{% if frappe.form_dict.start|int > 0 %}
+			<a class="btn btn-default" href="/{{ pathname }}?start={{ frappe.form_dict.start|int - page_length }}">{{ _("Prev") }}</a>
+			{% endif %}
+			{% if items|length > page_length %}
+			<a class="btn btn-default" href="/{{ pathname }}?start={{ frappe.form_dict.start|int + page_length }}">{{ _("Next") }}</a>
+			{% endif %}
+		</div>
+		{% else %}
+			<div class="text-muted">{{ _("No items listed") }}.</div>
+		{% endif %}
+	</div>
+</div>
+{% endblock %}

@@ -1,0 +1,1 @@
+Quality inspection parameter for parent Item.
