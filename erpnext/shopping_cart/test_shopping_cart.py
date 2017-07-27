@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
+from frappe.utils import nowdate, add_months
 from erpnext.shopping_cart.cart import _get_cart_quotation, update_cart, get_party
 from erpnext.tests.utils import create_test_contact_and_address
 
@@ -126,6 +127,8 @@ class TestShoppingCart(unittest.TestCase):
 			"selling_price_list": "_Test Price List Rest of the World",
 			"currency": "USD",
 			"taxes_and_charges" : "_Test Tax 1",
+			"transaction_date" : nowdate(),
+			"valid_till" : add_months(nowdate(), 1),
 			"items": [{
 				"item_code": "_Test Item",
 				"qty": 1

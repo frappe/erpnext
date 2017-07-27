@@ -311,7 +311,7 @@ class ProcessPayroll(Document):
 				journal_entry.submit()
 				jv_name = journal_entry.name
 				self.update_salary_slip_status(jv_name = jv_name)
-			except Exception, e:
+			except Exception as e:
 				frappe.msgprint(e)
 		return jv_name
 

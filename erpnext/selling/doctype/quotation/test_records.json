@@ -23,14 +23,15 @@
     "parentfield": "items", 
     "qty": 10.0, 
     "rate": 100.0,
-	  "uom": "_Test UOM 1",
+	"uom": "_Test UOM 1",
     "stock_uom": "_Test UOM 1",
-	  "conversion_factor": 1.0
+	"conversion_factor": 1.0
    }
   ], 
   "quotation_to": "Customer", 
   "selling_price_list": "_Test Price List", 
   "territory": "_Test Territory", 
-  "transaction_date": "2013-02-21"
+  "transaction_date": "2013-02-21",
+  "valid_till": "2013-03-21"
  }
 ]
