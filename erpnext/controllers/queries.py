@@ -212,7 +212,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 		cond = '(`tabProject`.customer = "' + filters['customer'] + '" or ifnull(`tabProject`.customer,"")="") and'
 
 	return frappe.db.sql("""select `tabProject`.name from `tabProject`
-		where `tabProject`.status not in ("Completed", "Cancelled")
+		where `tabProject`.status not in ("Cancelled")
 			and {cond} `tabProject`.name like %(txt)s {match_cond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
