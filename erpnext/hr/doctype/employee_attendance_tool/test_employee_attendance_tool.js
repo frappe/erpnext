@@ -41,7 +41,8 @@ QUnit.test("Test: Employee attendance tool [HR]", function (assert) {
 			assert.deepEqual(["Test Employee 2", "Test Employee 1"], [cur_list.data[0].employee_name, cur_list.data[1].employee_name],
 				"marked attendance correctly saved for both employee");
 			let marked_attendance = cur_list.data.filter(d => d.attendance_date == date_of_attendance);
-			assert.equal(marked_attendance.length, 2, 'both the attendance are marked for correct date');
+			assert.equal(marked_attendance.length, 2,
+				'both the attendance are marked for correct date');
 		},
 		() => done()
 	]);

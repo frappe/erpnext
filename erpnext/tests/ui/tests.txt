@@ -21,3 +21,4 @@ erpnext/hr/doctype/employee/test_employee.js
 erpnext/hr/doctype/employee_attendance_tool/test_employee_attendance_tool.js
 erpnext/hr/doctype/attendance/test_attendance.js
 erpnext/hr/doctype/leave_type/test_leave_type.js
+erpnext/hr/doctype/leave_control_panel/test_leave_control_panel.js
