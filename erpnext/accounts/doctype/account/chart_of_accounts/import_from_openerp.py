@@ -84,7 +84,7 @@ def get_csv_contents(files_path):
 					try:
 						csv_content.setdefault(file_type, [])\
 							.append(read_csv_content(csvfile.read()))
-					except Exception, e:
+					except Exception as e:
 						continue
 	return csv_content
 

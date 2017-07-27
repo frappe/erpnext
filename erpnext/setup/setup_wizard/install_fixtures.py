@@ -233,7 +233,7 @@ def install(country=None):
 
 		try:
 			doc.insert(ignore_permissions=True)
-		except frappe.DuplicateEntryError, e:
+		except frappe.DuplicateEntryError as e:
 			# pass DuplicateEntryError and continue
 			if e.args and e.args[0]==doc.doctype and e.args[1]==doc.name:
 				# make sure DuplicateEntryError is for the exact same doc and not a related doc
