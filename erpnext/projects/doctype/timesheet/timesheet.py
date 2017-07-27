@@ -61,8 +61,10 @@ class Timesheet(Document):
 			self.per_billed = (self.total_billed_amount * 100) / self.total_billable_amount
 
 	def update_billing_hours(self, args):
-		if flt(args.billing_hours) == 0.0:
+		if args.billable and flt(args.billing_hours) == 0.0:
 			args.billing_hours = args.hours
+		else:
+			args.billing_hours = 0
 
 	def set_status(self):
 		self.status = {
@@ -263,7 +265,7 @@ class Timesheet(Document):
 		for data in self.time_logs:
 			if data.activity_type and data.billable:
 				rate = get_activity_cost(self.employee, data.activity_type)
-				hours =  data.billing_hours or 0
+				hours = data.billing_hours or 0
 				if rate:
 					data.billing_rate = flt(rate.get('billing_rate')) if flt(data.billing_rate) == 0 else data.billing_rate
 					data.costing_rate = flt(rate.get('costing_rate')) if flt(data.costing_rate) == 0 else data.costing_rate

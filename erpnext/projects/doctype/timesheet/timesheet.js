@@ -105,7 +105,8 @@ frappe.ui.form.on("Timesheet Detail", {
 	},
 
 	billable: function(frm, cdt, cdn) {
-		calculate_billing_costing_amount(frm, cdt, cdn)
+		update_billing_hours(frm, cdt, cdn);
+		calculate_billing_costing_amount(frm, cdt, cdn);
 	},
 
 	activity_type: function(frm, cdt, cdn) {
@@ -146,6 +147,11 @@ var calculate_end_time = function(frm, cdt, cdn) {
 	if((frm.doc.__islocal || frm.doc.__onload.maintain_bill_work_hours_same) && child.hours){
 		frappe.model.set_value(cdt, cdn, "billing_hours", child.hours);
 	}
+}
+
+var update_billing_hours = function(frm, cdt, cdn){
+	var child = locals[cdt][cdn]
+	if(!child.billable) frappe.model.set_value(cdt, cdn, 'billing_hours', 0.0);
 }
 
 var calculate_billing_costing_amount = function(frm, cdt, cdn){
