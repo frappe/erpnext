@@ -1,3 +1,5 @@
+erpnext/schools/doctype/academic_year/test_academic_year.js
+erpnext/schools/doctype/academic_term/test_academic_term.js
 erpnext/tests/ui/make_fixtures.js #long
 erpnext/setup/doctype/company/test_company.js
 erpnext/accounts/doctype/account/test_account.js
