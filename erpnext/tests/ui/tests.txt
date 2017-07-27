@@ -37,3 +37,4 @@ erpnext/schools/doctype/grading_scale/test_grading_scale.js
 erpnext/schools/doctype/assessment_criteria_group/test_assessment_criteria_group.js
 erpnext/schools/doctype/assessment_criteria/test_assessment_criteria.js
 erpnext/schools/doctype/course/test_course.js
+erpnext/schools/doctype/program/test_program.js
