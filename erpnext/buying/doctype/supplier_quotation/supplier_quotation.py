@@ -74,12 +74,15 @@ class SupplierQuotation(BuyingController):
 						AND sqi.docstatus = 1
 						AND sq.name != %(me)s
 						AND sqi.request_for_quotation_item = %(rqi)s
-						AND sqi.parent = sq.name""", {"supplier": self.supplier, "rqi": item.name, 'me': self.name}, as_dict=1)[0]
-				self_count = sum(my_item.request_for_quotation_item == item.name for my_item in self.items) if include_me else 0
+						AND sqi.parent = sq.name""", 
+					{"supplier": self.supplier, "rqi": item.name, 'me': self.name}, as_dict=1)[0]
+				self_count = sum(my_item.request_for_quotation_item == item.name 
+					for my_item in self.items) if include_me else 0
 				if (sqi_count.count + self_count) == 0:
 					quote_status = _('Pending')
 			if quote_status == _('Received') and doc_sup.quote_status == _('No Quote'):
-				frappe.msgprint(_("{0} indicates that {1} will not provide a quotation, but all items have been quoted. Updating the RFQ quote status.").format(doc.name, self.supplier))
+				frappe.msgprint(_("{0} indicates that {1} will not provide a quotation, but all items \
+					have been quoted. Updating the RFQ quote status.").format(doc.name, self.supplier))
 				frappe.db.set_value('Request for Quotation Supplier', doc_sup.name, 'quote_status', quote_status)
 				frappe.db.set_value('Request for Quotation Supplier', doc_sup.name, 'no_quote', 0)
 			elif doc_sup.quote_status != _('No Quote'):
