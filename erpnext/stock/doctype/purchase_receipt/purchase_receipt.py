@@ -225,7 +225,7 @@ class PurchaseReceipt(BuyingController):
 					# sub-contracting warehouse
 					if flt(d.rm_supp_cost) and warehouse_account.get(self.supplier_warehouse):
 						gl_entries.append(self.get_gl_dict({
-							"account": warehouse_account[self.supplier_warehouse]["name"],
+							"account": warehouse_account[self.supplier_warehouse]["account"],
 							"against": warehouse_account[d.warehouse]["account"],
 							"cost_center": d.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
