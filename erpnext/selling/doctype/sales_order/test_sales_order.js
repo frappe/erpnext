@@ -46,9 +46,9 @@ QUnit.test("test sales order", function(assert) {
 			assert.ok(cur_frm.doc.taxes[0].account_head=='CGST - '+frappe.get_abbr(frappe.defaults.get_default('Company')), " Account Head abbr correct");
 			// calculate totals
 			assert.ok(cur_frm.doc.items[0].price_list_rate==100, "Item 1 price_list_rate "+cur_frm.doc.items[0].price_list_rate);
-			assert.ok(cur_frm.doc.items[0].net_amount==450, "Item 1  net_amount "+cur_frm.doc.items[0].price_list_rate);
-			assert.ok(cur_frm.doc.items[1].price_list_rate==900, "Item 2 price_list_rate "+cur_frm.doc.items[0].price_list_rate);
-			assert.ok(cur_frm.doc.items[1].net_amount==3645, "Item 2 net_amount "+cur_frm.doc.items[0].price_list_rate);
+			assert.ok(cur_frm.doc.items[0].net_amount==450, "Item 1  net_amount "+cur_frm.doc.items[0].net_amount);
+			assert.ok(cur_frm.doc.items[1].price_list_rate==900, "Item 2 price_list_rate "+cur_frm.doc.items[1].price_list_rate);
+			assert.ok(cur_frm.doc.items[1].net_amount==3645, "Item 2 net_amount "+cur_frm.doc.items[1].net_amount);
 			assert.ok(cur_frm.doc.total== 4550, "total correct "+cur_frm.doc.total);
 			assert.ok(cur_frm.doc.net_total== 4095, "net_total correct "+cur_frm.doc.net_total);
 			assert.ok(cur_frm.doc.grand_total== 4504.05, "grand total correct "+cur_frm.doc.grand_total);
