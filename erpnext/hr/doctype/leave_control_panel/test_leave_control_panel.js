@@ -16,7 +16,7 @@ QUnit.test("Test: Leave control panel [HR]", function (assert) {
 		() => cur_frm.set_value("department", "Test Department"),
 		() => cur_frm.set_value("designation", "Test Designation"),
 		() => cur_frm.set_value("from_date", frappe.datetime.add_months(today_date, -2)),
-		() => cur_frm.set_value("to_date", frappe.datetime.add_days(today_date, -1)),	//for two months [not today]
+		() => cur_frm.set_value("to_date", frappe.datetime.add_days(today_date, -1)),	// for two months [not today]
 		() => cur_frm.set_value("no_of_days", 3),
 		// allocate leaves
 		() => frappe.click_button('Allocate'),
