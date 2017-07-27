@@ -245,13 +245,11 @@ def get_price_list_rate(args, item_doc, out):
 		validate_conversion_rate(args, meta)
 
 		price_list_rate = get_price_list_rate_for(args.price_list,
-											  	  item_doc.name,
-												  args.qty)
+			item_doc.name, args.qty, args.transaction_date)
 		# variant
 		if not price_list_rate and item_doc.variant_of:
 			price_list_rate = get_price_list_rate_for(args.price_list,
-													  item_doc.variant_of,
-													  args.qty)
+				item_doc.variant_of, args.qty, args.transaction_date)
 
 		# insert in database
 		if not price_list_rate:
@@ -286,15 +284,14 @@ def insert_item_price(args):
 				"min_qty": args.qty
 			})
 
-			name = frappe.db.get_value(
-					'Item Price',
-					{
-						'item_code': args.item_code,
-						'price_list': args.price_list,
-						'currency': args.currency,
-						'min_qty': args.qty
-					},
-					'name')
+			name = frappe.db.get_value('Item Price',
+				{
+					'item_code': args.item_code,
+					'price_list': args.price_list,
+					'currency': args.currency,
+					'min_qty': args.qty
+				},
+				'name')
 
 			if name:
 				item_price = frappe.get_doc('Item Price', name)
@@ -307,7 +304,7 @@ def insert_item_price(args):
 				frappe.msgprint(_("Item Price added for {0} in Price List {1}w ith Mininum Quantity {2}").format(args.item_code,
 					args.price_list, args.qty))
 
-def get_price_list_rate_for(price_list, item_code, qty):
+def get_price_list_rate_for(price_list, item_code, qty, transaction_date):
 	"""
 		Return Price Rate based on min_qty of each Item Price Rate.\
 		For example, desired qty is 10 and Item Price Rates exists
@@ -319,12 +316,14 @@ def get_price_list_rate_for(price_list, item_code, qty):
 		:param qty: Derised Qty
 	"""
 	price_list_rate = frappe.db.sql("""
-		select price_list_rate
-		from `tabItem Price`
-		where item_code=%s
-			and price_list=%s
-			and min_qty<=%s order by min_qty desc""",
-		(item_code, price_list, qty))
+		SELECT price_list_rate
+		FROM `tabItem Price`
+		WHERE item_code=%(item_code)s
+			AND price_list=%(price_list)s
+			AND min_qty<=%((qty)s 
+			AND %(transaction_date)s BETWEEN start_date AND end_date
+		ORDER BY min_qty desc""",
+		{'item_code': item_code, 'price_list': price_list, 'qty': qty, 'transaction_date': transaction_date})
 	if price_list_rate:
 		return price_list_rate[0][0]
 	return None
