@@ -100,24 +100,33 @@ def enable_all_roles_and_domains():
 	""" enable all roles and domain for testing """
 	print "here"
 	roles = frappe.get_list("Role", filters={"disabled": 1})
+	print roles
 	for role in roles:
+		print role
 		_role = frappe.get_doc("Role", role.get("name"))
 		_role.disabled = 0
 		_role.flags.ignore_mandatory = True
 		_role.flags.ignore_permissions = True
 		_role.save()
+		print _role
 
 	# add all roles to users
 	user = frappe.get_doc("User", "test@erpnext.com")
+	print user
 	user.add_roles(*[role.get("name") for role in roles])
+	print user
 
 	domains = frappe.get_list("Domain")
+	print domains
 	if not domains:
+		print "domains blank"
 		return
 
 	domain_settings = frappe.get_doc("Domain Settings", "Domain Settings")
+	print domain_settings
 	domain_settings.set("active_domains", [])
 	for domain in domains:
+		print domain
 		row = domain_settings.append("active_domains", {})
 		row.domain=domain.get("name")
 
