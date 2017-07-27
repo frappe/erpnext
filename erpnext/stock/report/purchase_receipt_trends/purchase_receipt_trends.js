@@ -3,7 +3,7 @@
 
 frappe.require("assets/erpnext/js/purchase_trends_filters.js", function() {
 	frappe.query_reports["Purchase Receipt Trends"] = {
-		filters: erpnext.get_sales_trends_filters()
+		filters: erpnext.get_purchase_trends_filters()
 	}
 });
 
