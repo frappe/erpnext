@@ -61,7 +61,7 @@ class Timesheet(Document):
 			self.per_billed = (self.total_billed_amount * 100) / self.total_billable_amount
 
 	def update_billing_hours(self, args):
-		if cint(args.billing_hours) == 0:
+		if flt(args.billing_hours) == 0.0:
 			args.billing_hours = args.hours
 
 	def set_status(self):
