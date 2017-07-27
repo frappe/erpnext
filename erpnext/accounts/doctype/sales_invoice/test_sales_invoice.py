@@ -167,15 +167,15 @@ class TestSalesInvoice(unittest.TestCase):
 			"_Test Account S&H Education Cess - _TC": [1.5, 1619.5, 0.03, 32.39],
 			"_Test Account CST - _TC": [32.5, 1652, 0.65, 33.04],
 			"_Test Account VAT - _TC": [156.5, 1808.5, 3.13, 36.17],
-			"_Test Account Discount - _TC": [-180.5, 1628, -3.61, 32.56]
+			"_Test Account Discount - _TC": [-181.0, 1627.5, -3.62, 32.55]
 		}
 
 		for d in si.get("taxes"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.account_head][i])
 
-		self.assertEquals(si.base_grand_total, 1628)
-		self.assertEquals(si.grand_total, 32.56)
+		self.assertEquals(si.base_grand_total, 1627.5)
+		self.assertEquals(si.grand_total, 32.55)
 
 	def test_sales_invoice_with_discount_and_inclusive_tax(self):
 		si = create_sales_invoice(qty=100, rate=50, do_not_save=True)
@@ -235,21 +235,29 @@ class TestSalesInvoice(unittest.TestCase):
 				"item_code": "_Test Item Home Desktop 100",
 				"price_list_rate": 62.5,
 				"discount_percentage": 0,
-				"rate": 62.5, "amount": 625,
+				"rate": 62.5,
+				"amount": 625,
 				"base_price_list_rate": 62.5,
-				"base_rate": 62.5, "base_amount": 625,
-				"net_rate": 46.54, "net_amount": 465.37,
-				"base_net_rate": 46.54, "base_net_amount": 465.37
+				"base_rate": 62.5,
+				"base_amount": 625,
+				"net_rate": 46.54,
+				"net_amount": 465.37,
+				"base_net_rate": 46.54,
+				"base_net_amount": 465.37
 			},
 			{
 				"item_code": "_Test Item Home Desktop 200",
 				"price_list_rate": 190.66,
 				"discount_percentage": 0,
-				"rate": 190.66, "amount": 953.3,
+				"rate": 190.66,
+				"amount": 953.3,
 				"base_price_list_rate": 190.66,
-				"base_rate": 190.66, "base_amount": 953.3,
-				"net_rate": 139.62, "net_amount": 698.08,
-				"base_net_rate": 139.62, "base_net_amount": 698.08
+				"base_rate": 190.66,
+				"base_amount": 953.3,
+				"net_rate": 139.62,
+				"net_amount": 698.08,
+				"base_net_rate": 139.62,
+				"base_net_amount": 698.08
 			}
 		]
 
@@ -270,13 +278,13 @@ class TestSalesInvoice(unittest.TestCase):
 			"keys": ["tax_amount", "tax_amount_after_discount_amount", "total"],
 			"_Test Account Excise Duty - _TC": [140, 130.31, 1293.76],
 			"_Test Account Education Cess - _TC": [2.8, 2.61, 1296.37],
-			"_Test Account S&H Education Cess - _TC": [1.4, 1.31, 1297.68],
-			"_Test Account CST - _TC": [27.88, 25.96, 1323.64],
-			"_Test Account VAT - _TC": [156.25, 145.43, 1469.07],
-			"_Test Account Customs Duty - _TC": [125, 116.35, 1585.42],
-			"_Test Account Shipping Charges - _TC": [100, 100, 1685.42],
-			"_Test Account Discount - _TC": [-180.33, -168.54, 1516.88],
-			"_Test Account Service Tax - _TC": [-18.03, -16.88, 1500]
+			"_Test Account S&H Education Cess - _TC": [1.4, 1.30, 1297.67],
+			"_Test Account CST - _TC": [27.88, 25.95, 1323.62],
+			"_Test Account VAT - _TC": [156.25, 145.43, 1469.05],
+			"_Test Account Customs Duty - _TC": [125, 116.35, 1585.40],
+			"_Test Account Shipping Charges - _TC": [100, 100, 1685.40],
+			"_Test Account Discount - _TC": [-180.33, -168.54, 1516.86],
+			"_Test Account Service Tax - _TC": [-18.03, -16.86, 1500]
 		}
 
 		for d in si.get("taxes"):
@@ -312,13 +320,13 @@ class TestSalesInvoice(unittest.TestCase):
 			[test_records[3]["items"][0]["income_account"], 0.0, 1163.45],
 			[test_records[3]["taxes"][0]["account_head"], 0.0, 130.31],
 			[test_records[3]["taxes"][1]["account_head"], 0.0, 2.61],
-			[test_records[3]["taxes"][2]["account_head"], 0.0, 1.31],
-			[test_records[3]["taxes"][3]["account_head"], 0.0, 25.96],
+			[test_records[3]["taxes"][2]["account_head"], 0.0, 1.30],
+			[test_records[3]["taxes"][3]["account_head"], 0.0, 25.95],
 			[test_records[3]["taxes"][4]["account_head"], 0.0, 145.43],
 			[test_records[3]["taxes"][5]["account_head"], 0.0, 116.35],
 			[test_records[3]["taxes"][6]["account_head"], 0.0, 100],
 			[test_records[3]["taxes"][7]["account_head"], 168.54, 0.0],
-			["_Test Account Service Tax - _TC", 16.88, 0.0],
+			["_Test Account Service Tax - _TC", 16.86, 0.0]
 		])
 
 		for gle in gl_entries:
@@ -334,6 +342,60 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertFalse(gle)
 
+	def test_tax_calculation_with_multiple_items(self):
+		si = create_sales_invoice(qty=84, rate=4.6, do_not_save=True)
+		item_row = si.get("items")[0]
+		for qty in (54, 288, 144, 430):
+			item_row_copy = copy.deepcopy(item_row)
+			item_row_copy.qty = qty
+			si.append("items", item_row_copy)
+
+		si.append("taxes", {
+			"account_head": "_Test Account VAT - _TC",
+			"charge_type": "On Net Total",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "VAT",
+			"doctype": "Sales Taxes and Charges",
+			"rate": 19
+		})
+		si.insert()
+
+		self.assertEquals(si.net_total, 4600)
+		
+		self.assertEquals(si.get("taxes")[0].tax_amount, 874.0)
+		self.assertEquals(si.get("taxes")[0].total, 5474.0)
+
+		self.assertEquals(si.grand_total, 5474.0)
+
+	def test_tax_calculation_with_multiple_items_and_discount(self):
+		si = create_sales_invoice(qty=1, rate=75, do_not_save=True)
+		item_row = si.get("items")[0]
+		for rate in (500, 200, 100, 50, 50, 0, 0, 0):
+			item_row_copy = copy.deepcopy(item_row)
+			item_row_copy.rate = rate
+			si.append("items", item_row_copy)
+
+		si.apply_discount_on = "Net Total"
+		si.discount_amount = 75.0
+
+		si.append("taxes", {
+			"account_head": "_Test Account VAT - _TC",
+			"charge_type": "On Net Total",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "VAT",
+			"doctype": "Sales Taxes and Charges",
+			"rate": 24
+		})
+		si.insert()
+
+		self.assertEquals(si.total, 975)
+		self.assertEquals(si.net_total, 900)
+		
+		self.assertEquals(si.get("taxes")[0].tax_amount, 216.0)
+		self.assertEquals(si.get("taxes")[0].total, 1116.0)
+
+		self.assertEquals(si.grand_total, 1116.0)
+		
 	def test_inclusive_rate_validations(self):
 		si = frappe.copy_doc(test_records[2])
 		for i, tax in enumerate(si.get("taxes")):
@@ -416,21 +478,29 @@ class TestSalesInvoice(unittest.TestCase):
 				"item_code": "_Test Item Home Desktop 100",
 				"price_list_rate": 55.56,
 				"discount_percentage": 10,
-				"rate": 50, "amount": 500,
+				"rate": 50,
+				"amount": 500,
 				"base_price_list_rate": 2778,
-				"base_rate": 2500, "base_amount": 25000,
-				"net_rate": 40, "net_amount": 399.98,
-				"base_net_rate": 2000, "base_net_amount": 19999
+				"base_rate": 2500,
+				"base_amount": 25000,
+				"net_rate": 40,
+				"net_amount": 399.98,
+				"base_net_rate": 2000,
+				"base_net_amount": 19999
 			},
 			{
 				"item_code": "_Test Item Home Desktop 200",
 				"price_list_rate": 187.5,
 				"discount_percentage": 20,
-				"rate": 150, "amount": 750,
+				"rate": 150,
+				"amount": 750,
 				"base_price_list_rate": 9375,
-				"base_rate": 7500, "base_amount": 37500,
-				"net_rate": 118.01, "net_amount": 590.05,
-				"base_net_rate": 5900.5, "base_net_amount": 29502.5
+				"base_rate": 7500,
+				"base_amount": 37500,
+				"net_rate": 118.01,
+				"net_amount": 590.05,
+				"base_net_rate": 5900.5,
+				"base_net_amount": 29502.5
 			}
 		]
 
@@ -450,22 +520,22 @@ class TestSalesInvoice(unittest.TestCase):
 		# check tax calculation
 		expected_values = {
 			"keys": ["base_tax_amount", "base_total", "tax_amount", "total"],
-			"_Test Account Excise Duty - _TC": [5540.5, 55042, 110.81, 1100.84],
-			"_Test Account Education Cess - _TC": [111, 55153, 2.22, 1103.06],
-			"_Test Account S&H Education Cess - _TC": [55.5, 55208.5, 1.11, 1104.17],
-			"_Test Account CST - _TC": [1104, 56312.5, 22.08, 1126.25],
-			"_Test Account VAT - _TC": [6188, 62500.5, 123.76, 1250.01],
-			"_Test Account Customs Duty - _TC": [4950.5, 67451, 99.01, 1349.02],
-			"_Test Account Shipping Charges - _TC": [ 100, 67551, 2, 1351.02],
-			"_Test Account Discount - _TC": [ -6755, 60796, -135.10, 1215.92]
+			"_Test Account Excise Duty - _TC": [5540.0, 55041.5, 110.80, 1100.83],
+			"_Test Account Education Cess - _TC": [111, 55152.5, 2.22, 1103.05],
+			"_Test Account S&H Education Cess - _TC": [55.5, 55208.0, 1.11, 1104.16],
+			"_Test Account CST - _TC": [1104, 56312.0, 22.08, 1126.24],
+			"_Test Account VAT - _TC": [6187.5, 62499.5, 123.75, 1249.99],
+			"_Test Account Customs Duty - _TC": [4950.0, 67449.5, 99.0, 1348.99],
+			"_Test Account Shipping Charges - _TC": [ 100, 67549.5, 2, 1350.99],
+			"_Test Account Discount - _TC": [ -6755, 60794.5, -135.10, 1215.89]
 		}
 
 		for d in si.get("taxes"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.account_head][i])
 
-		self.assertEquals(si.base_grand_total, 60796)
-		self.assertEquals(si.grand_total, 1215.92)
+		self.assertEquals(si.base_grand_total, 60794.5)
+		self.assertEquals(si.grand_total, 1215.89)
 
 	def test_outstanding(self):
 		w = self.make()
@@ -910,19 +980,20 @@ class TestSalesInvoice(unittest.TestCase):
 			"_Test Account Excise Duty - _TC": [70, 70, 70],
 			"_Test Account Education Cess - _TC": [1.4, 1.4, 1.4],
 			"_Test Account S&H Education Cess - _TC": [.7, 0.7, 0.7],
-			"_Test Account CST - _TC": [17.2, 17.2, 17.2],
+			"_Test Account CST - _TC": [17.19, 17.19, 17.19],
 			"_Test Account VAT - _TC": [78.13, 78.13, 78.13],
 			"_Test Account Discount - _TC": [-95.49, -95.49, -95.49]
 		}
 
 		for d in si.get("taxes"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.get(k), expected_values[d.account_head][i])
+				if expected_values.get(d.account_head):
+					self.assertEquals(d.get(k), expected_values[d.account_head][i])
 
 
-		self.assertEquals(si.total_taxes_and_charges, 234.44)
-		self.assertEquals(si.base_grand_total, 859.44)
-		self.assertEquals(si.grand_total, 859.44)
+		self.assertEquals(si.total_taxes_and_charges, 234.43)
+		self.assertEquals(si.base_grand_total, 859.43)
+		self.assertEquals(si.grand_total, 859.43)
 
 	def test_multi_currency_gle(self):
 		set_perpetual_inventory(0)
