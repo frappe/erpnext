@@ -173,7 +173,7 @@ class RequestforQuotation(BuyingController):
 							WHERE sq.supplier = %(supplier)s
 								AND sqi.docstatus = 1
 								AND sqi.request_for_quotation_item = %(rqi)s
-								AND sqi.parent = sq.name""", 
+								AND sqi.parent = sq.name""",
 							{"supplier": supplier.supplier, "rqi": item.name}, as_dict=1)[0]
 						if (sqi_count.count) == 0:
 							quote_status = _('Pending')

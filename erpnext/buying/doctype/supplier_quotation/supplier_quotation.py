@@ -74,9 +74,9 @@ class SupplierQuotation(BuyingController):
 						AND sqi.docstatus = 1
 						AND sq.name != %(me)s
 						AND sqi.request_for_quotation_item = %(rqi)s
-						AND sqi.parent = sq.name""", 
+						AND sqi.parent = sq.name""",
 					{"supplier": self.supplier, "rqi": item.name, 'me': self.name}, as_dict=1)[0]
-				self_count = sum(my_item.request_for_quotation_item == item.name 
+				self_count = sum(my_item.request_for_quotation_item == item.name
 					for my_item in self.items) if include_me else 0
 				if (sqi_count.count + self_count) == 0:
 					quote_status = _('Pending')
