@@ -72,7 +72,7 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 
 	error_msg = _("""{0} {1} not in any active Fiscal Year.""").format(label, formatdate(transaction_date))
 	if verbose==1: frappe.msgprint(error_msg)
-	raise FiscalYearError, error_msg
+	raise FiscalYearError(error_msg)
 
 def validate_fiscal_year(date, fiscal_year, company, label="Date", doc=None):
 	years = [f[0] for f in get_fiscal_years(date, label=_(label), company=company)]
