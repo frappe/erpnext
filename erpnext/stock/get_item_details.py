@@ -304,7 +304,7 @@ def insert_item_price(args):
 				frappe.msgprint(_("Item Price added for {0} in Price List {1}w ith Mininum Quantity {2}").format(args.item_code,
 					args.price_list, args.qty))
 
-def get_price_list_rate_for(price_list, item_code, qty, transaction_date):
+def get_price_list_rate_for(price_list, item_code, qty, transaction_date=""):
 	"""
 		Return Price Rate based on min_qty of each Item Price Rate.\
 		For example, desired qty is 10 and Item Price Rates exists
@@ -314,16 +314,18 @@ def get_price_list_rate_for(price_list, item_code, qty, transaction_date):
 		:param price_list: str (Standard Buying or Standard Selling)
 		:param item_code: str, Item Doctype field item_code
 		:param qty: Derised Qty
+		:param transaction_date: Date of the price
 	"""
 	price_list_rate = frappe.db.sql("""
 		SELECT price_list_rate
 		FROM `tabItem Price`
 		WHERE item_code=%(item_code)s
-			AND price_list=%(price_list)s
-			AND min_qty<=%((qty)s 
-			AND %(transaction_date)s BETWEEN start_date AND end_date
-		ORDER BY min_qty desc""",
-		{'item_code': item_code, 'price_list': price_list, 'qty': qty, 'transaction_date': transaction_date})
+			AND price_list = %(price_list)s
+			AND min_qty <= %(qty)s 
+			AND (%(date)s BETWEEN valid_from AND valid_upto OR %(date)s = ""
+				OR (valid_from is NULL AND valid_upto is NULL))
+		ORDER BY price_list_rate asc""",
+		{'item_code': item_code, 'price_list': price_list, 'qty': qty, 'date': transaction_date})
 	if price_list_rate:
 		return price_list_rate[0][0]
 	return None

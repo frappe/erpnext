@@ -15,6 +15,7 @@ class ItemPrice(Document):
 		self.validate_item()
 		self.validate_price_list()
 		self.validate_dates()
+		self.validate_duplicates()
 		self.update_price_list_details()
 		self.update_item_details()
 
@@ -40,3 +41,34 @@ class ItemPrice(Document):
 	def update_item_details(self):
 		self.item_name, self.item_description = frappe.db.get_value("Item",
 			self.item_code, ["item_name", "description"])
+
+	def validate_duplicates(self):
+		args = {
+			"price_list": self.price_list,
+			"customer": self.customer, 
+			"currency": self.currency,
+			"item_code": self.item_code, 
+			"uom": self.uom,
+			"valid_from": self.valid_from, 
+			"valid_upto": self.valid_upto,
+			"min_qty": self.min_qty
+		}
+		empty_keys = [k for k,v in args.iteritems() if not v]
+		for k in empty_keys:
+			args[k] = ""
+
+		print str(args)
+		count = frappe.db.sql("""SELECT price_list
+			FROM `tabItem Price` 
+			WHERE (price_list =%(price_list)s OR %(price_list)s = "")
+				AND (customer =%(customer)s OR %(customer)s = "")
+				AND (currency =%(currency)s  OR %(currency)s = "")
+				AND (item_code =%(item_code)s OR %(item_code)s = "")
+				AND (uom =%(uom)s OR %(uom)s = "")
+				AND (min_qty =%(min_qty)s  OR %(min_qty)s = "")
+				AND (valid_from =%(valid_from)s  OR %(valid_from)s = "")
+				AND (valid_upto =%(valid_upto)s  OR %(valid_upto)s = "")
+				""", args)
+				
+		if len(count) > 0:
+			throw(_("Item Price is a duplicate").format(self.price_list), ItemPriceDuplicateItem)
