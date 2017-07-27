@@ -9,7 +9,7 @@ QUnit.test("Test: Attendance [HR]", function (assert) {
 		// get employee's auto generated name
 		() => frappe.set_route("List", "Employee", "List"),
 		() => frappe.timeout(0.5),
-		() => frappe.click_link('Test Employee'),
+		() => frappe.click_link('Test Employee 1'),
 		() => frappe.timeout(0.5),
 		() => employee_code = frappe.get_route()[2],
 		// test attendance creation for one employee
