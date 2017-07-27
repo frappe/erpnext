@@ -201,13 +201,7 @@ class calculate_taxes_and_totals(object):
 				# set tax after discount
 				tax.tax_amount_after_discount_amount += current_tax_amount
 
-				if getattr(tax, "category", None):
-					# if just for valuation, do not add the tax amount in total
-					# hence, setting it as 0 for further steps
-					current_tax_amount = 0.0 if (tax.category == "Valuation") \
-						else current_tax_amount
-
-					current_tax_amount *= -1.0 if (tax.add_deduct_tax == "Deduct") else 1.0
+				current_tax_amount = self.get_tax_amount_if_for_valuation_or_deduction(current_tax_amount, tax)
 
 				# note: grand_total_for_current_item contains the contribution of
 				# item's amount, previously applied tax and the current tax on that item
@@ -229,14 +223,23 @@ class calculate_taxes_and_totals(object):
 					if i == (len(self.doc.get("taxes")) - 1) and self.discount_amount_applied \
 						and self.doc.discount_amount and self.doc.apply_discount_on == "Grand Total":
 							self.adjust_discount_amount_loss(tax)
-	
+
+	def get_tax_amount_if_for_valuation_or_deduction(self, tax_amount, tax):
+		# if just for valuation, do not add the tax amount in total
+		# if tax/charges is for deduction, multiply by -1
+		if getattr(tax, "category", None):
+			tax_amount = 0.0 if (tax.category == "Valuation") else tax_amount
+			tax_amount *= -1.0 if (tax.add_deduct_tax == "Deduct") else 1.0
+		return tax_amount
+
 	def set_cumulative_total(self, row_idx, tax):
+		tax_amount = tax.tax_amount_after_discount_amount
+		tax_amount = self.get_tax_amount_if_for_valuation_or_deduction(tax_amount, tax)
+
 		if row_idx == 0:
-			tax.total = flt(self.doc.net_total + tax.tax_amount_after_discount_amount,
-				tax.precision("total"))
+			tax.total = flt(self.doc.net_total + tax_amount, tax.precision("total"))
 		else:
-			tax.total = flt(self.doc.get("taxes")[row_idx-1].total + tax.tax_amount_after_discount_amount,
-				tax.precision("total"))
+			tax.total = flt(self.doc.get("taxes")[row_idx-1].total + tax_amount, tax.precision("total"))
 
 	def get_current_tax_amount(self, item, tax, item_tax_map):
 		tax_rate = self._get_tax_rate(tax, item_tax_map)

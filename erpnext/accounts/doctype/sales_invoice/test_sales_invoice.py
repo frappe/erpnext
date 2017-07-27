@@ -370,8 +370,9 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_tax_calculation_with_multiple_items_and_discount(self):
 		si = create_sales_invoice(qty=1, rate=75, do_not_save=True)
 		item_row = si.get("items")[0]
-		for rate in (500, 200, 100, 50, 50, 0, 0, 0):
+		for rate in (500, 200, 100, 50, 50):
 			item_row_copy = copy.deepcopy(item_row)
+			item_row_copy.price_list_rate = rate
 			item_row_copy.rate = rate
 			si.append("items", item_row_copy)
 
