@@ -3,15 +3,8 @@ QUnit.module('hr');
 QUnit.test("Test: Attendance [HR]", function (assert) {
 	assert.expect(4);
 	let done = assert.async();
-	let employee_code;
 
 	frappe.run_serially([
-		// get employee's auto generated name
-		() => frappe.set_route("List", "Employee", "List"),
-		() => frappe.timeout(0.5),
-		() => frappe.click_link('Test Employee 1'),
-		() => frappe.timeout(0.5),
-		() => employee_code = frappe.get_route()[2],
 		// test attendance creation for one employee
 		() => frappe.set_route("List", "Attendance", "List"),
 		() => frappe.timeout(0.5),
@@ -21,7 +14,8 @@ QUnit.test("Test: Attendance [HR]", function (assert) {
 			"Form for new Attendance opened successfully."),
 		// set values in form
 		() => cur_frm.set_value("company", "Test Company"),
-		() => cur_frm.set_value("employee", employee_code),
+		() => frappe.db.get_value('Employee', {'employee_name':'Test Employee 1'}, 'name'),
+		(employee) => cur_frm.set_value("employee", employee.message.name),
 		() => cur_frm.save(),
 		() => frappe.timeout(1),
 		// check docstatus of attendance before submit [Draft]
