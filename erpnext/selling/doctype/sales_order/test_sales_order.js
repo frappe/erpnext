@@ -89,8 +89,8 @@ QUnit.test("test sales order", function(assert) {
 			// get tax account head details
 			assert.ok(cur_frm.doc.taxes[0].account_head=='CGST - '+frappe.get_abbr(frappe.defaults.get_default('Company')), " Account Head abbr correct");
 			// calculate totals
-			assert.ok(cur_frm.doc.grand_total== 4504.05, "grand total correct");
-			},
+			assert.ok(cur_frm.doc.grand_total== 4504.05, "grand total correct"+cur_frm.doc.grand_total);
+		},
 		() => cur_frm.print_doc(),
 		() => frappe.timeout(1),
 		() => {
