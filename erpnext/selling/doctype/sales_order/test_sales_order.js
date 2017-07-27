@@ -72,13 +72,14 @@ QUnit.test("test sales order", function(assert) {
 				{terms: 'This is Test'}
 			]);
 		},
-		() => { return frappe.tests.set_form_values(cur_frm, [
-					{selling_price_list:'Test-Selling-USD'},
-					{currency: 'USD'},
-					{apply_discount_on:'Grand Total'},
-					{additional_discount_percentage:10}
-				]);
-			},
+		() => {
+			return frappe.tests.set_form_values(cur_frm, [
+				{selling_price_list:'Test-Selling-USD'},
+				{currency: 'USD'},
+				{apply_discount_on:'Grand Total'},
+				{additional_discount_percentage:10}
+			]);
+		},
 		() => cur_frm.save(),
 		() => {
 			// get_item_details
