@@ -6,6 +6,7 @@ erpnext/accounts/doctype/sales_taxes_and_charges_template/test_sales_taxes_and_c
 erpnext/crm/doctype/lead/test_lead.js
 erpnext/crm/doctype/opportunity/test_opportunity.js
 erpnext/selling/doctype/quotation/test_quotation.js
+erpnext/selling/doctype/sales_order/test_sales_order.js
 erpnext/crm/doctype/item/test_item.js
 erpnext/manufacturing/doctype/workstation/test_workstation.js
 erpnext/manufacturing/doctype/operation/test_operation.js
