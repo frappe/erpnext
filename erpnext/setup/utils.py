@@ -111,7 +111,7 @@ def enable_all_roles_and_domains():
 		print _role
 
 	# add all roles to users
-	user = frappe.get_doc("User", "test@example.com")
+	user = frappe.get_doc("User", "Administrator")
 	print user
 	user.add_roles(*[role.get("name") for role in roles])
 	print user
