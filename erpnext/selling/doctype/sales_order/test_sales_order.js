@@ -1,49 +1,5 @@
-$.extend(frappe.test_data, {
-	"Item": {
-		"Test Product 4": [
-			{item_code: "Test Product 4"},
-			{item_group: "Products"},
-			{is_stock_item: 1},
-			{has_batch_no: 1},
-			{uoms:
-				[
-					[
-						{uom:"Unit"},
-						{conversion_factor: 10},
-					]
-				]
-			},
-			{taxes:
-				[
-					[
-						{tax_type:"SGST - "+frappe.get_abbr(frappe.defaults.get_default("Company"))},
-						{tax_rate: 0},
-					]
-				]},
-			{create_new_batch: 1},
-			{has_serial_no: 1},
-			{standard_rate: 100},
-			{opening_stock: 100},
-		]
-	}
-});
-
-QUnit.module('Sales Order');
-
-QUnit.test('fixtures multi uom and tax' , assert => {
-	// create all fixtures first
-	assert.expect(0);
-	let done = assert.async();
-	let tasks = [];
-	Object.keys(frappe.test_data).forEach(function(doctype) {
-		tasks.push(function() { return frappe.tests.setup_doctype(doctype); });
-	});
-	frappe.run_serially(tasks).then(() => done());
-});
-
-
 QUnit.test("test sales order", function(assert) {
-	assert.expect(6);
+	assert.expect(12);
 	let done = assert.async();
 	frappe.run_serially([
 		() => {
@@ -89,7 +45,14 @@ QUnit.test("test sales order", function(assert) {
 			// get tax account head details
 			assert.ok(cur_frm.doc.taxes[0].account_head=='CGST - '+frappe.get_abbr(frappe.defaults.get_default('Company')), " Account Head abbr correct");
 			// calculate totals
-			assert.ok(cur_frm.doc.grand_total== 4504.05, "grand total correct"+cur_frm.doc.grand_total);
+			assert.ok(cur_frm.doc.items[0].price_list_rate==100, "Item 1 price_list_rate "+cur_frm.doc.items[0].price_list_rate);
+			assert.ok(cur_frm.doc.items[0].net_amount==450, "Item 1  net_amount "+cur_frm.doc.items[0].price_list_rate);
+			assert.ok(cur_frm.doc.items[1].price_list_rate==900, "Item 2 price_list_rate "+cur_frm.doc.items[0].price_list_rate);
+			assert.ok(cur_frm.doc.items[1].net_amount==3645, "Item 2 net_amount "+cur_frm.doc.items[0].price_list_rate);
+			assert.ok(cur_frm.doc.total== 4550, "total correct "+cur_frm.doc.total);
+			assert.ok(cur_frm.doc.net_total== 4095, "net_total correct "+cur_frm.doc.net_total);
+			assert.ok(cur_frm.doc.grand_total== 4504.05, "grand total correct "+cur_frm.doc.grand_total);
+
 		},
 		() => cur_frm.print_doc(),
 		() => frappe.timeout(1),
@@ -98,8 +61,8 @@ QUnit.test("test sales order", function(assert) {
 			assert.ok($(".section-break+ .section-break .column-break:nth-child(1) .data-field:nth-child(1) .value").text().includes("Billing Street 1"), "Print Preview Works As Expected");
 		},
 		() => cur_frm.print_doc(),
-		() => frappe.tests.click_button('Submit'),
-		() => frappe.tests.click_button('Yes'),
+/*		() => frappe.tests.click_button('Submit'),
+		() => frappe.tests.click_button('Yes'),*/
 		() => frappe.timeout(0.3),
 		() => done()
 	]);
