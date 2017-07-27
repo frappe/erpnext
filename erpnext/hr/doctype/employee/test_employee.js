@@ -12,6 +12,7 @@ QUnit.test("Test: Employee [HR]", function (assert) {
 		() => frappe.timeout(1),
 		() => cur_frm.set_value("employee_name", "Test Employee"),
 		() => cur_frm.set_value("salutation", "Ms"),
+		() => cur_frm.set_value("company", "Test Company"),
 		() => cur_frm.set_value("date_of_joining", frappe.datetime.add_months(today_date, -2)),	// joined 2 month from now
 		() => cur_frm.set_value("date_of_birth", frappe.datetime.add_months(today_date, -240)),	// age is 20 years
 		() => cur_frm.set_value("employment_type", "Test Employment type"),
