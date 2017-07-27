@@ -209,7 +209,10 @@ class GrossProfitGenerator(object):
 						sle.voucher_detail_no == row.item_row:
 							previous_stock_value = len(my_sle) > i+1 and \
 								flt(my_sle[i+1].stock_value) or 0.0
-							return  previous_stock_value - flt(sle.stock_value)
+							if previous_stock_value:
+								return previous_stock_value - flt(sle.stock_value)
+							else:
+								return flt(row.qty) * self.get_average_buying_rate(row, item_code)
 			else:
 				return flt(row.qty) * self.get_average_buying_rate(row, item_code)
 
