@@ -4,6 +4,7 @@ QUnit.test("Test: Leave application [HR]", function (assert) {
 	assert.expect(4);
 	let done = assert.async();
 	let today_date = frappe.datetime.nowdate();
+	let leave_date = frappe.datetime.add_days(today_date, 1);
 
 	frappe.run_serially([
 		// test creating leave application
@@ -11,8 +12,8 @@ QUnit.test("Test: Leave application [HR]", function (assert) {
 		(employee) => {
 			return frappe.tests.make('Leave Application', [
 				{leave_type: "Test Leave type"},
-				{from_date: today_date},	// for today
-				{to_date: today_date},
+				{from_date: leave_date},	// for today
+				{to_date: leave_date},
 				{half_day: 1},
 				{employee: employee.message.name},
 				{leave_approver: "Administrator"},
