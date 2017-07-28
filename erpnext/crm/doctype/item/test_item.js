@@ -65,6 +65,13 @@ QUnit.test("test: item", function (assert) {
 				{item_group: "Products"}
 			]
 		),
+		() => frappe.tests.make(
+			"Item", [
+				{item_code: "Computer"},
+				{item_group: "Products"},
+				{is_stock_item: 0},
+			]
+		),
 
 		// Create a scrap item
 		() => frappe.tests.make(
