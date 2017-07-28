@@ -31,4 +31,5 @@ erpnext/schools/doctype/student_batch_name/test_student_batch_name.js
 erpnext/schools/doctype/student_category/test_student_category.js
 erpnext/schools/doctype/room/test_room.js
 erpnext/schools/doctype/instructor/test_instructor.js
+erpnext/accounts/page/pos/test_pos.js
 erpnext/selling/doctype/product_bundle/test_product_bundle.js
