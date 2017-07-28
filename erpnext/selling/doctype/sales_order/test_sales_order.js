@@ -1,17 +1,11 @@
 QUnit.test("test sales order", function(assert) {
-	assert.expect(12);
+	assert.expect(9);
 	let done = assert.async();
 	frappe.run_serially([
 		() => {
 			return frappe.tests.make('Sales Order', [
 				{customer: 'Test Customer 1'},
 				{items: [
-					[
-						{'delivery_date': frappe.datetime.add_days(frappe.defaults.get_default("year_end_date"), 1)},
-						{'rate':100},
-						{'qty': 5},
-						{'item_code': 'Test Product 1'},
-					],
 					[
 						{'delivery_date': frappe.datetime.add_days(frappe.defaults.get_default("year_end_date"), 1)},
 						{'rate':100},
@@ -32,8 +26,8 @@ QUnit.test("test sales order", function(assert) {
 		},
 		() => {
 			return frappe.tests.set_form_values(cur_frm, [
-				{selling_price_list:'Test-Selling-USD'},
-				{currency: 'USD'},
+				/*{selling_price_list:'Test-Selling-USD'},
+				{currency: 'USD'},*/
 				{apply_discount_on:'Grand Total'},
 				{additional_discount_percentage:10}
 			]);
@@ -41,19 +35,17 @@ QUnit.test("test sales order", function(assert) {
 		() => cur_frm.save(),
 		() => {
 			// get_item_details
-			assert.ok(cur_frm.doc.items[0].item_name=='Test Product 1', "Item name correct");
+			assert.ok(cur_frm.doc.items[0].item_name=='Test Product 4', "Item name correct");
 			// get tax details
 			assert.ok(cur_frm.doc.taxes_and_charges=='TEST In State GST', "Tax details correct");
 			// get tax account head details
 			assert.ok(cur_frm.doc.taxes[0].account_head=='CGST - '+frappe.get_abbr(frappe.defaults.get_default('Company')), " Account Head abbr correct");
 			// calculate totals
-			assert.ok(cur_frm.doc.items[0].price_list_rate==100, "Item 1 price_list_rate "+cur_frm.doc.items[0].price_list_rate);
-			assert.ok(cur_frm.doc.items[0].net_amount==450, "Item 1  net_amount "+cur_frm.doc.items[0].net_amount);
-			assert.ok(cur_frm.doc.items[1].price_list_rate==900, "Item 2 price_list_rate "+cur_frm.doc.items[1].price_list_rate);
-			assert.ok(cur_frm.doc.items[1].net_amount==3645, "Item 2 net_amount "+cur_frm.doc.items[1].net_amount);
-			assert.ok(cur_frm.doc.total== 4550, "total correct "+cur_frm.doc.total);
-			assert.ok(cur_frm.doc.net_total== 4095, "net_total correct "+cur_frm.doc.net_total);
-			assert.ok(cur_frm.doc.grand_total== 4504.05, "grand total correct "+cur_frm.doc.grand_total);
+			assert.ok(cur_frm.doc.items[0].price_list_rate==1000, "Item 1 price_list_rate "+cur_frm.doc.items[0].price_list_rate);
+			assert.ok(cur_frm.doc.items[0].net_amount==4050, "Item 1  net_amount "+cur_frm.doc.items[0].net_amount);
+			assert.ok(cur_frm.doc.total== 4500, "total correct "+cur_frm.doc.total+" "+cur_frm.doc.currency);
+/*			assert.ok(cur_frm.doc.net_total== 4095, "net_total correct "+cur_frm.doc.net_total);*/
+			assert.ok(cur_frm.doc.rounded_total== 4414, "rounded total correct "+cur_frm.doc.grand_total);
 
 		},
 		() => cur_frm.print_doc(),
