@@ -155,7 +155,7 @@ def get_data():
 					"name": "Fees"
 				},{
 					"type": "doctype",
-					"name": "Fee Request"
+					"name": "Fee Schedule"
 				},
 				{
 					"type": "doctype",
