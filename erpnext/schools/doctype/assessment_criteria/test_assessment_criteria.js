@@ -8,7 +8,7 @@ QUnit.test('Test: Assessment Criteria', function(assert){
 		() => {
 			return frappe.tests.make('Assessment Criteria', [
 				{assessment_criteria: 'Pass'},
-				{assessment_criteria_group: 'Scholarship'}
+				{assessment_criteria_group: 'Reservation'}
 			]);
 		},
 		() => done()
