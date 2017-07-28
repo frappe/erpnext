@@ -1,6 +1,8 @@
 erpnext/tests/ui/make_fixtures.js #long
 erpnext/setup/doctype/company/test_company.js
 erpnext/accounts/doctype/account/test_account.js
+erpnext/accounts/doctype/account/test_make_tax_account.js
+erpnext/accounts/doctype/sales_taxes_and_charges_template/test_sales_taxes_and_charges_template.js
 erpnext/crm/doctype/lead/test_lead.js
 erpnext/crm/doctype/opportunity/test_opportunity.js
 erpnext/selling/doctype/quotation/test_quotation.js
@@ -8,13 +10,21 @@ erpnext/crm/doctype/item/test_item.js
 erpnext/manufacturing/doctype/workstation/test_workstation.js
 erpnext/manufacturing/doctype/operation/test_operation.js
 erpnext/manufacturing/doctype/bom/test_bom.js
+erpnext/projects/doctype/project/project_timesheet.js
 erpnext/hr/doctype/holiday_list/test_holiday_list.js
 erpnext/hr/doctype/branch/test_branch.js
-erpnext/manufacturing/doctype/bom/test_bom.js
-erpnext/projects/doctype/project/project_timesheet.js
 erpnext/hr/doctype/leave_block_list/test_leave_block_list.js
 erpnext/hr/doctype/department/test_department.js
 erpnext/hr/doctype/designation/test_designation.js
 erpnext/hr/doctype/employment_type/test_employment_type.js
 erpnext/hr/doctype/employee/test_employee.js
+erpnext/hr/doctype/employee_attendance_tool/test_employee_attendance_tool.js
+erpnext/hr/doctype/attendance/test_attendance.js
+erpnext/schools/doctype/academic_year/test_academic_year.js
+erpnext/schools/doctype/academic_term/test_academic_term.js
+erpnext/schools/doctype/school_settings/test_school_settings.js
+erpnext/schools/doctype/student_batch_name/test_student_batch_name.js
+erpnext/schools/doctype/student_category/test_student_category.js
+erpnext/schools/doctype/room/test_room.js
+erpnext/schools/doctype/instructor/test_instructor.js
 erpnext/hr/doctype/training_event/test_training_event.js

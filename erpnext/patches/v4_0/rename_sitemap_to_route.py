@@ -12,6 +12,6 @@ def execute():
 		frappe.model.rename_field("Item", "parent_website_sitemap", "parent_website_route")
 		frappe.model.rename_field("Sales Partner", "parent_website_sitemap",
 			 "parent_website_route")
-	except Exception, e:
+	except Exception as e:
 		if e.args[0]!=1054:
 			raise
