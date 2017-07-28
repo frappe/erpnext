@@ -273,7 +273,6 @@ def get_due_date(posting_date, party_type, party, company):
 	return due_date
 
 def get_credit_days(party_type, party, company):
-	credit_days = 0
 	if party_type and party:
 		if party_type == "Customer":
 			credit_days_based_on, credit_days, customer_group = \
@@ -283,10 +282,10 @@ def get_credit_days(party_type, party, company):
 				frappe.db.get_value(party_type, party, ["credit_days_based_on", "credit_days", "supplier_type"])
 
 	if not credit_days_based_on:
-		if party_type == "Customer" and customer_group:
+		if party_type == "Customer":
 			credit_days_based_on, credit_days = \
 				frappe.db.get_value("Customer Group", customer_group, ["credit_days_based_on", "credit_days"])
-		elif party_type == "Supplier" and supplier_type:
+		else:
 			credit_days_based_on, credit_days = \
 				frappe.db.get_value("Supplier Type", supplier_type, ["credit_days_based_on", "credit_days"])
 
