@@ -147,8 +147,9 @@ class Asset(Document):
 		accumulated_depreciation_after_full_schedule = \
 			max([d.accumulated_depreciation_amount for d in self.get("schedules")])
 
-		asset_value_after_full_schedule = (flt(self.gross_purchase_amount) -
-			flt(accumulated_depreciation_after_full_schedule))
+		asset_value_after_full_schedule = flt(flt(self.gross_purchase_amount) -
+			flt(accumulated_depreciation_after_full_schedule),
+			self.precision('expected_value_after_useful_life'))
 
 		if self.expected_value_after_useful_life < asset_value_after_full_schedule:
 			frappe.throw(_("Expected value after useful life must be greater than or equal to {0}")
