@@ -132,7 +132,8 @@ class Item(WebsiteGenerator):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 		# default warehouse, or Stores
-		default_warehouse = (frappe.db.get_single_value('Stock Settings', 'default_warehouse')
+		default_warehouse = (self.default_warehouse
+			or frappe.db.get_single_value('Stock Settings', 'default_warehouse')
 			or frappe.db.get_value('Warehouse', {'warehouse_name': _('Stores')}))
 
 		if default_warehouse:
