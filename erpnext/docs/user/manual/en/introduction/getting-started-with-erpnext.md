@@ -1,3 +1,7 @@
+<!-- Getting Started with ERPNext-->
+
+# Getting Started with ERPNext
+
 There are many ways to get started with ERPNext.
 
 ### 1\. See the Demo
