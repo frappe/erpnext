@@ -1,10 +1,10 @@
 QUnit.module('hr');
 
 QUnit.test("Test: Leave application [HR]", function (assert) {
-	assert.expect(4);
+	assert.expect(5);
 	let done = assert.async();
 	let today_date = frappe.datetime.nowdate();
-	let leave_date = frappe.datetime.add_days(today_date, 1);
+	let leave_date = frappe.datetime.add_days(today_date, 1);	// leave for tomorrow
 
 	frappe.run_serially([
 		// test creating leave application
@@ -24,14 +24,8 @@ QUnit.test("Test: Leave application [HR]", function (assert) {
 		// check calculated total leave days
 		() => assert.equal("0.5", cur_frm.doc.total_leave_days,
 			"leave application for half day"),
-		() => cur_frm.savesubmit(),
-		() => frappe.timeout(1),
-		() => frappe.click_button('Yes'),
-		() => frappe.timeout(1),
-		() => assert.equal("Only Leave Applications with status 'Approved' and 'Rejected' can be submitted", cur_dialog.body.innerText,
-			"application not submitted with status as open"),
-		() => frappe.click_button('Close'),
-		() => frappe.timeout(0.5),
+		() => assert.ok(!cur_frm.doc.docstatus,
+			"leave application not submitted with status as open"),
 		() => cur_frm.set_value("status", "Approved"),	// approve the application [as administrator]
 		() => frappe.timeout(0.5),
 		// save form
@@ -41,12 +35,15 @@ QUnit.test("Test: Leave application [HR]", function (assert) {
 		() => frappe.timeout(1),
 		() => frappe.click_button('Yes'),
 		() => frappe.timeout(1),
+		() => assert.ok(cur_frm.doc.docstatus,
+			"leave application submitted after approval"),
 		// check auto filled posting date [today]
 		() => assert.equal(today_date, cur_frm.doc.posting_date,
 			"posting date correctly set"),
 		() => frappe.set_route("List", "Leave Application", "List"),
 		() => frappe.timeout(1),
-		() => assert.deepEual(["Test Employee 1", "Approved"], [cur_list.data[0].employee_name, cur_list.data[0].status],
+		// check approved application in list
+		() => assert.deepEqual(["Test Employee 1", "Approved"], [cur_list.data[0].employee_name, cur_list.data[0].status],
 			"leave for correct employee is approved"),
 		() => done()
 	]);
