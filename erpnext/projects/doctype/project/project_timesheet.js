@@ -1,4 +1,3 @@
-
 QUnit.test("test project", function(assert) {
 	assert.expect(6);
 	let done = assert.async();
