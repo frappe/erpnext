@@ -16,7 +16,7 @@ class TestSalesOrder(unittest.TestCase):
 		frappe.set_user("Administrator")
 
 		for role in ("Stock User", "Sales User"):
-			set_user_permission_doctypes(doctype="Sales Order", role=role,
+			set_user_permission_doctypes(doctypes="Sales Order", role=role,
 				apply_user_permissions=0, user_permission_doctypes=None)
 
 	def test_make_material_request(self):
@@ -257,7 +257,7 @@ class TestSalesOrder(unittest.TestCase):
 
 	def test_warehouse_user(self):
 		for role in ("Stock User", "Sales User"):
-			set_user_permission_doctypes(doctype="Sales Order", role=role,
+			set_user_permission_doctypes(doctypes="Sales Order", role=role,
 				apply_user_permissions=1, user_permission_doctypes=["Warehouse"])
 
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
