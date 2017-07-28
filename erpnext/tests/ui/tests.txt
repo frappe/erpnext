@@ -23,6 +23,7 @@ erpnext/hr/doctype/attendance/test_attendance.js
 erpnext/hr/doctype/leave_type/test_leave_type.js
 erpnext/hr/doctype/leave_control_panel/test_leave_control_panel.js
 erpnext/hr/doctype/leave_allocation/test_leave_allocation.js
+erpnext/hr/doctype/leave_application/test_leave_application.js
 erpnext/hr/doctype/expense_claim_type/test_expense_claim_type.js
 erpnext/hr/doctype/expense_claim/test_expense_claim.js
 erpnext/schools/doctype/academic_year/test_academic_year.js
@@ -32,3 +33,5 @@ erpnext/schools/doctype/student_batch_name/test_student_batch_name.js
 erpnext/schools/doctype/student_category/test_student_category.js
 erpnext/schools/doctype/room/test_room.js
 erpnext/schools/doctype/instructor/test_instructor.js
+erpnext/accounts/page/pos/test_pos.js
+erpnext/selling/doctype/product_bundle/test_product_bundle.js
