@@ -1,8 +1,7 @@
 // Testing Setup Module in Schools
-QUnit.module('setup');
+QUnit.module('schools');
 
-// Testing Academic Term option
-QUnit.test('test academic term', function(assert){
+QUnit.test('Test: Academic Term', function(assert){
 	assert.expect(4);
 	let done = assert.async();
 	frappe.run_serially([

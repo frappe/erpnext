@@ -107,7 +107,7 @@ def enable_all_roles_and_domains():
 		_role.save()
 
 	# add all roles to users
-	user = frappe.get_doc("User", "test@erpnext.com")
+	user = frappe.get_doc("User", "Administrator")
 	user.add_roles(*[role.get("name") for role in roles])
 
 	domains = frappe.get_list("Domain")
