@@ -10,7 +10,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import money_in_words
 
 
-class FeeRequest(Document):
+class FeeSchedule(Document):
 	def validate(self):
 		if not(self.programs or self.student_groups):
 			frappe.throw(_("Select atleast one {0}").format(self.fee_request_against))
@@ -51,7 +51,6 @@ class FeeRequest(Document):
 def get_fee_structure(source_name,target_doc=None):
 	fee_request = get_mapped_doc("Fee Structure", source_name,
 		{"Fee Structure": {
-			"doctype": "Fee Request"
+			"doctype": "Fee Schedule"
 		}}, ignore_permissions=True)
 	return fee_request
-
