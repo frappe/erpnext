@@ -20,6 +20,9 @@ erpnext/hr/doctype/employment_type/test_employment_type.js
 erpnext/hr/doctype/employee/test_employee.js
 erpnext/hr/doctype/employee_attendance_tool/test_employee_attendance_tool.js
 erpnext/hr/doctype/attendance/test_attendance.js
+erpnext/hr/doctype/leave_type/test_leave_type.js
+erpnext/hr/doctype/leave_control_panel/test_leave_control_panel.js
+erpnext/hr/doctype/leave_allocation/test_leave_allocation.js
 erpnext/schools/doctype/academic_year/test_academic_year.js
 erpnext/schools/doctype/academic_term/test_academic_term.js
 erpnext/schools/doctype/school_settings/test_school_settings.js
