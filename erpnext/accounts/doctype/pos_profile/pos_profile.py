@@ -14,6 +14,7 @@ class POSProfile(Document):
 		self.check_for_duplicate()
 		self.validate_all_link_fields()
 		self.validate_duplicate_groups()
+		self.validate_customer_territory_group()
 
 	def check_for_duplicate(self):
 		res = frappe.db.sql("""select name, user from `tabPOS Profile`
@@ -47,6 +48,13 @@ class POSProfile(Document):
 
 		if len(customer_groups) != len(set(customer_groups)):
 			frappe.throw(_("Duplicate customer group found in the cutomer group table"), title = "Duplicate Customer Group")
+
+	def validate_customer_territory_group(self):
+		if not self.territory:
+			frappe.throw(_("Territory is Required in POS Profile"), title="Mandatory Field")
+
+		if not self.customer_group:
+			frappe.throw(_("Customer Group is Required in POS Profile"), title="Mandatory Field")
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
