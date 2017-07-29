@@ -273,7 +273,7 @@ class ProductionOrder(Document):
 		timesheets = []
 		plan_days = frappe.db.get_single_value("Manufacturing Settings", "capacity_planning_for_days") or 30
 
-		timesheet = make_timesheet(self.name)
+		timesheet = make_timesheet(self.name, self.company)
 		timesheet.set('time_logs', [])
 
 		for i, d in enumerate(self.operations):
@@ -575,10 +575,11 @@ def get_events(start, end, filters=None):
 	return data
 
 @frappe.whitelist()
-def make_timesheet(production_order):
+def make_timesheet(production_order, company):
 	timesheet = frappe.new_doc("Timesheet")
 	timesheet.employee = ""
 	timesheet.production_order = production_order
+	timesheet.company = company
 	return timesheet
 
 @frappe.whitelist()
