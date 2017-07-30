@@ -12,12 +12,12 @@ Report Builder is an in-built report customization tool in ERPNext. This allows 
 
 Query Report is written in SQL which pull values from account's database and fetch in the report. Though SQL queries can be written from front end, like HTML, its restricted in hosted users. Because it will allow users with no access to specific report to query data directly from the database.
 
-Check Purchase Order Item to be Received report in Stock module for example of Query report. Click [here](https://frappe.github.io/frappe/user/en/guides/reports-and-printing/how-to-make-query-report.html) to learn how to create Query Report.
+Check Purchase Order Item to be Received report in Stock module for example of Query report. Click [here](https://frappe.io/docs/user/en/guides/reports-and-printing/how-to-make-query-report.html) to learn how to create Query Report.
 
 ### 3. Script Report
 
 Script Reports are written in Python and stored on server side. These are complex reports which involves logic and calculation. Since these reports are written on server side, customizing it from hosted account is not possible. 
 
-Check Financial Analytics report in Accounts module for example of Script Report. Click [here](https://frappe.github.io/frappe/user/en/guides/reports-and-printing/how-to-make-script-reports.html) to learn how to create Script Report.
+Check Financial Analytics report in Accounts module for example of Script Report. Click [here](https://frappe.io/docs/user/en/guides/reports-and-printing/how-to-make-script-reports.html) to learn how to create Script Report.
 
 <!-- markdown --> 

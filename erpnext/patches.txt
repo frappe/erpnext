@@ -427,3 +427,4 @@ erpnext.patches.v8_1.set_delivery_date_in_so_item
 erpnext.patches.v8_5.fix_tax_breakup_for_non_invoice_docs
 erpnext.patches.v8_5.remove_quotations_route_in_sidebar
 erpnext.patches.v8_5.update_existing_data_in_project_type
+erpnext.patches.v8_5.set_default_mode_of_payment

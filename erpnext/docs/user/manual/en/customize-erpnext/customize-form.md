@@ -1,5 +1,5 @@
 <!--markdown-->
-Before we venture to learn form customization tool, click [here](https://frappe.github.io/frappe/user/en/tutorial/doctypes.html) to understand the architecture of forms in ERPNext. It shall help you in using Customize Form tool more efficiently.
+Before we venture to learn form customization tool, click [here](https://frappe.io/docs/user/en/tutorial/doctypes.html) to understand the architecture of forms in ERPNext. It shall help you in using Customize Form tool more efficiently.
 
 Customize Form is the tool which allows user to customize property of the standard fields, and insert [custom fields]({{docs_base_url}}/user/manual/en/customize-erpnext/custom-field.html) as per the requirement. Let's assume we need to set Project Name field as a mandatory field in the Sales Order form. Following are the steps which shall be followed to achieve this.
 

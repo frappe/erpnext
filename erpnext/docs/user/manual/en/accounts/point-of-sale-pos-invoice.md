@@ -15,7 +15,7 @@ POS Invoices created in the offline mode will be saved locally in the browser. I
 In ERPNext all Sales and Purchase transactions, like Sales Invoice, Quotation, Sales Order, Purchase Order etc. can be edited via the POS. There two steps to Setup POS:
 
 1. Enable POS View via (Setup > Customize > Feature Setup)
-2. Create a [POS Setting]({{docs_base_url}}/user/manual/en/setting-up/pos-setting.html) record
+2. Create a [POS Profile]({{docs_base_url}}/user/manual/en/setting-up/pos-setting.html) record
 
 #### Different sections of the POS
 
