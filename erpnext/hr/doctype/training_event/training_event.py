@@ -62,8 +62,8 @@ class TrainingEvent(Document):
 	def send_invitation_email(self, data, sender, subject, message, attachments):
 		email = frappe.db.get_value("Employee", data.employee, "company_email")
 		if email:
-			make(subject = subject, content=message,recipients=email,
-				sender=sender,attachments = attachments, send_email=True,
+			make(subject=subject, content=message, recipients=email,
+				sender=sender, attachments=attachments, send_email=True,
 					doctype=self.doctype, name=self.name)
 			frappe.msgprint(_("Email sent to {0}").format(data.employee_name))
 
@@ -81,4 +81,4 @@ def set_response(event, response):
 	if doc:
 		doc.status = response
 		doc.save()
-		frappe.msgprint("Status for this training event as been updated")
+		frappe.msgprint(_("Status for this training event as been updated"))
