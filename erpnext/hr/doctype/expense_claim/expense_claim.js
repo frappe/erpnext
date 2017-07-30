@@ -14,7 +14,6 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 			callback: function(r) {
 				var doc = frappe.model.sync(r.message);
 				frappe.set_route('Form', 'Journal Entry', r.message.name);
-                                console.log('message');
 			}
 		});
 	},
