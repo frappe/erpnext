@@ -113,7 +113,7 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn) {
 			if (cint(doc.total_advance_paid) < cint(doc.total_sanctioned_amount) && frappe.model.can_create("Journal Entry")) {
 				cur_frm.add_custom_button(__("Advance Payment"), cur_frm.cscript.make_advance_entry, __("Make"));
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
-				}
+			}
 			}
 
 		if (doc.docstatus===1 && doc.approval_status=="Approved") {
@@ -193,20 +193,20 @@ erpnext.expense_claim = {
 }
 
 frappe.ui.form.on("Expense Claim", {
-        refresh: function(frm) {
-	var doc = frm.doc;
+	refresh: function(frm) {
+		var doc = frm.doc;
 		if(doc.advance_account)
-		frappe.call({
-			method: "erpnext.hr.doctype.expense_claim.expense_claim.update_advance_paid",
-			args: {
-				"docname": cur_frm.doc.name,
-				"employee": doc.employee,
-				"advance_account": doc.advance_account
-			},
-			callback: function(r) {
-				cur_frm.set_value("total_advance_paid", r.message.amt)
+			frappe.call({
+				method: "erpnext.hr.doctype.expense_claim.expense_claim.update_advance_paid",
+				args: {
+					"docname": cur_frm.doc.name,
+					"employee": doc.employee,
+					"advance_account": doc.advance_account
+				},
+				callback: function(r) {
+					cur_frm.set_value("total_advance_paid", r.message.amt);
 			}
-		});
+			});
 	}
 })
 
@@ -247,7 +247,7 @@ frappe.ui.form.on("Expense Claim Detail", {
 frappe.ui.form.on("Expense Claim",{
 	setup: function(frm) {
 		frm.trigger("set_query_for_cost_center")
-		frm.trigger("set_query_for_advance_account")
+		frm.trigger("set_query_for_advance_account");
 		frm.trigger("set_query_for_payable_account")
 		frm.add_fetch("company", "cost_center", "cost_center");
 		frm.add_fetch("company", "default_advance_account", "advance_account");
