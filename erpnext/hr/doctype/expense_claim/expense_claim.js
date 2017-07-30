@@ -99,7 +99,7 @@ cur_frm.cscript.refresh = function(doc) {
 			if (cint(doc.total_advance_paid) < cint(doc.total_sanctioned_amount) && frappe.model.can_create("Journal Entry")) {
 				cur_frm.add_custom_button(__("Advance Payment"), cur_frm.cscript.make_advance_entry, __("Make"));
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
-				}
+			}
 			}
 
 		if (doc.docstatus===1 && doc.approval_status=="Approved") {
@@ -173,28 +173,31 @@ erpnext.expense_claim = {
 };
 
 frappe.ui.form.on("Expense Claim", {
+	refresh: function(frm) {
+		var doc = frm.doc;
+		if(doc.advance_account)
+			frappe.call({
+				method: "erpnext.hr.doctype.expense_claim.expense_claim.update_advance_paid",
+				args: {
+					"docname": cur_frm.doc.name,
+					"employee": doc.employee,
+					"advance_account": doc.advance_account
+				},
+				callback: function(r) {
+					cur_frm.set_value("total_advance_paid", r.message.amt);
+			}
+			});
+	}
+
+frappe.ui.form.on("Expense Claim", {
 	setup: function(frm) {
 		frm.trigger("set_query_for_cost_center");
+		frm.trigger("set_query_for_advance_account");
 		frm.trigger("set_query_for_payable_account");
 		frm.add_fetch("company", "cost_center", "cost_center");
+		frm.add_fetch("company", "default_advance_account", "advance_account");
 		frm.add_fetch("company", "default_payable_account", "payable_account");
 	},
-
-        refresh: function(frm) {
-	var doc = frm.doc;
-		if(doc.advance_account)
-		frappe.call({
-			method: "erpnext.hr.doctype.expense_claim.expense_claim.update_advance_paid",
-			args: {
-				"docname": cur_frm.doc.name,
-				"employee": doc.employee,
-				"advance_account": doc.advance_account
-			},
-			callback: function(r) {
-				cur_frm.set_value("total_advance_paid", r.message.amt)
-			}
-		});
-	}
 
 	refresh: function(frm) {
 		frm.trigger("toggle_fields");
@@ -234,25 +237,6 @@ frappe.ui.form.on("Expense Claim", {
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
 		});
-
-	sanctioned_amount: function(frm, cdt, cdn) {
-		var doc = frm.doc;
-		cur_frm.cscript.calculate_total(doc,cdt,cdn);
-	}
-})
-
-frappe.ui.form.on("Expense Claim",{
-	setup: function(frm) {
-		frm.trigger("set_query_for_cost_center")
-		frm.trigger("set_query_for_advance_account")
-		frm.trigger("set_query_for_payable_account")
-		frm.add_fetch("company", "cost_center", "cost_center");
-		frm.add_fetch("company", "default_advance_account", "advance_account");
-		frm.add_fetch("company", "default_payable_account", "payable_account");
-	},
-
-	refresh: function(frm) {
-		frm.trigger("toggle_fields")
 	},
 	
 	set_query_for_cost_center: function(frm) {
