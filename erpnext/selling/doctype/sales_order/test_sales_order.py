@@ -532,8 +532,7 @@ def make_sales_order(**args):
 			"rate": args.rate or 100
 		})
 
-	for d in so.get("items"):
-		d.delivery_date = add_days(so.transaction_date, 10)
+	so.delivery_date = add_days(so.transaction_date, 10)
 
 	if not args.do_not_save:
 		so.insert()

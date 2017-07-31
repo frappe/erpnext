@@ -979,6 +979,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	get_prompt_details: function() {
 		this.prompt_details = this.customer_doc.get_values();
 		this.prompt_details['country'] = this.pos_profile_data.country;
+		this.prompt_details['territory'] = this.pos_profile_data["territory"];
+		this.prompt_details['customer_group'] = this.pos_profile_data["customer_group"];
 		this.prompt_details['customer_pos_id'] = this.customer_doc.fields_dict.customer_pos_id.value;
 		return JSON.stringify(this.prompt_details)
 	},

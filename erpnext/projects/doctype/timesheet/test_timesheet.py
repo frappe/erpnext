@@ -14,14 +14,24 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 
 class TestTimesheet(unittest.TestCase):
 	def test_timesheet_billing_amount(self):
-		salary_structure = make_salary_structure("_T-Employee-0001")
-		timesheet = make_timesheet("_T-Employee-0001", simulate = True, billable=1)
+		make_salary_structure("_T-Employee-0001")
+		timesheet = make_timesheet("_T-Employee-0001", simulate=True, billable=1)
 
 		self.assertEquals(timesheet.total_hours, 2)
 		self.assertEquals(timesheet.total_billable_hours, 2)
 		self.assertEquals(timesheet.time_logs[0].billing_rate, 50)
 		self.assertEquals(timesheet.time_logs[0].billing_amount, 100)
 		self.assertEquals(timesheet.total_billable_amount, 100)
+
+	def test_timesheet_billing_amount_not_billable(self):
+		make_salary_structure("_T-Employee-0001")
+		timesheet = make_timesheet("_T-Employee-0001", simulate=True, billable=0)
+
+		self.assertEquals(timesheet.total_hours, 2)
+		self.assertEquals(timesheet.total_billable_hours, 0)
+		self.assertEquals(timesheet.time_logs[0].billing_rate, 0)
+		self.assertEquals(timesheet.time_logs[0].billing_amount, 0)
+		self.assertEquals(timesheet.total_billable_amount, 0)
 
 	def test_salary_slip_from_timesheet(self):
 		salary_structure = make_salary_structure("_T-Employee-0001")
@@ -43,7 +53,7 @@ class TestTimesheet(unittest.TestCase):
 		self.assertEquals(timesheet.status, 'Submitted')
 
 	def test_sales_invoice_from_timesheet(self):
-		timesheet = make_timesheet("_T-Employee-0001", simulate = True, billable = 1)
+		timesheet = make_timesheet("_T-Employee-0001", simulate=True, billable=1)
 		sales_invoice = make_sales_invoice(timesheet.name)
 		sales_invoice.customer = "_Test Customer"
 		sales_invoice.due_date = nowdate()
