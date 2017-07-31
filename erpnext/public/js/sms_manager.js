@@ -35,7 +35,7 @@ erpnext.SMSManager = function SMSManager(doc) {
 
 	this.get_contact_number = function(contact, ref_doctype, ref_name) {
 		frappe.call({
-			method: "erpnext.setup.doctype.sms_settings.sms_settings.get_contact_number",
+			method: "frappe.core.doctype.sms_settings.sms_settings.get_contact_number",
 			args: {
 				contact_name: contact,
 				ref_doctype: ref_doctype,
@@ -85,7 +85,7 @@ erpnext.SMSManager = function SMSManager(doc) {
 			if(v) {
 				$(btn).set_working();
 				frappe.call({
-					method: "erpnext.setup.doctype.sms_settings.sms_settings.send_sms",
+					method: "frappe.core.doctype.sms_settings.sms_settings.send_sms",
 					args: {
 						receiver_list: [v.number],
 						msg: v.message
