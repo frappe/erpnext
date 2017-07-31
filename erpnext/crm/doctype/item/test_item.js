@@ -88,7 +88,33 @@ QUnit.test("test: item", function (assert) {
 				{default_warehouse: "Stores - RB"}
 			]
 		),
-
+		() => frappe.tests.make(
+			"Item", [
+				{item_code: "Test Product 4"},
+				{item_group: "Products"},
+				{is_stock_item: 1},
+				{has_batch_no: 1},
+				{create_new_batch: 1},
+				{uoms:
+					[
+						[
+							{uom:"Unit"},
+							{conversion_factor: 10},
+						]
+					]
+				},
+				{taxes:
+					[
+						[
+							{tax_type:"SGST - "+frappe.get_abbr(frappe.defaults.get_default("Company"))},
+							{tax_rate: 0},
+						]
+					]},
+				{has_serial_no: 1},
+				{standard_rate: 100},
+				{opening_stock: 100},
+			]
+		),
 		() => done()
 	]);
 });
