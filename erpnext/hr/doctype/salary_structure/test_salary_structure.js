@@ -10,7 +10,7 @@ QUnit.test("test salary structure", function(assert) {
 		() => {
 			// Creating Salary Structure for a employee);
 			frappe.tests.make('Salary Structure', [
-				{ company: 'ERPNext'},
+				{ company: 'Test Company'},
 				{ payroll_frequency: 'Monthly'},
 				{ employees: [
 					[
@@ -39,10 +39,10 @@ QUnit.test("test salary structure", function(assert) {
 						{formula: '(b+hra) * .20'}
 					]
 				]},
-				{ payment_account: 'CASH - E'},
+				{ payment_account: 'CASH - TC'},
 			]);
 		},
-		() => frappe.timeout(7),
+		() => frappe.timeout(8),
 		() => cur_dialog.set_value('value','Test Salary Structure'),
 		() => frappe.timeout(1),
 		() => frappe.click_button('Create'),

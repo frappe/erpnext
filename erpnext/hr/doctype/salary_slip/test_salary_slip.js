@@ -14,7 +14,7 @@ QUnit.test("test salary slip", function(assert) {
 				{ employee: employee_name}
 			]);
 		},
-		() => frappe.timeout(1),
+		() => frappe.timeout(3),
 		() => {
 			// To check if all the calculations are correctly done
 			assert.ok(cur_frm.doc.gross_pay==42500,
