@@ -30,3 +30,5 @@ erpnext/schools/doctype/student_batch_name/test_student_batch_name.js
 erpnext/schools/doctype/student_category/test_student_category.js
 erpnext/schools/doctype/room/test_room.js
 erpnext/schools/doctype/instructor/test_instructor.js
+erpnext/hr/doctype/salary_structure/test_salary_structure.js
+erpnext/hr/doctype/salary_slip/test_salary_slip.js
