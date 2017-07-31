@@ -174,7 +174,6 @@ class Timesheet(Document):
 		for data in self.get('time_logs'):
 			self.check_workstation_timings(data)
 			self.validate_overlap(data)
-			validate_activity(data)
 
 	def validate_overlap(self, data):
 		if self.production_order:
