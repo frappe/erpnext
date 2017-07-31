@@ -10,3 +10,4 @@ naming-series-current-value
 overwriting-data-from-data-import-tool
 rename-user
 using-custom-domain-on-erpnext
+setup-two-factor-authentication

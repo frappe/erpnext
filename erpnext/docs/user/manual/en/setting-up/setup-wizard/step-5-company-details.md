@@ -1,9 +1,8 @@
-# Step 4: Company Details
+# Step 5: Company Details
 
 Enter Company Details like Name, Abbreviation and Financial Year Details.
 
-<img alt="Company Details" class="screenshot"
-src="/docs/assets/img/setup-wizard/step-4.png">
+<img alt="Company Details" class="screenshot" src="/docs/assets/img/setup-wizard/step-4.png">
 
 ---
 
