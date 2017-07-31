@@ -62,49 +62,49 @@ website_route_rules = [
 	{"from_route": "/orders/<path:name>", "to_route": "order",
 		"defaults": {
 			"doctype": "Sales Order",
-			"parents": [{"title": _("Orders"), "name": "orders"}]
+			"parents": [{"label": _("Orders"), "route": "orders"}]
 		}
 	},
 	{"from_route": "/invoices", "to_route": "Sales Invoice"},
 	{"from_route": "/invoices/<path:name>", "to_route": "order",
 		"defaults": {
 			"doctype": "Sales Invoice",
-			"parents": [{"title": _("Invoices"), "name": "invoices"}]
+			"parents": [{"label": _("Invoices"), "route": "invoices"}]
 		}
 	},
 	{"from_route": "/supplier-quotations", "to_route": "Supplier Quotation"},
 	{"from_route": "/supplier-quotations/<path:name>", "to_route": "order",
 		"defaults": {
 			"doctype": "Supplier Quotation",
-			"parents": [{"title": _("Supplier Quotation"), "name": "quotations"}]
+			"parents": [{"label": _("Supplier Quotation"), "route": "quotations"}]
 		}
 	},
 	{"from_route": "/quotations", "to_route": "Quotation"},
 	{"from_route": "/quotations/<path:name>", "to_route": "order",
 		"defaults": {
 			"doctype": "Quotation",
-			"parents": [{"title": _("Quotations"), "name": "quotation"}]
+			"parents": [{"label": _("Quotations"), "route": "quotation"}]
 		}
 	},
 	{"from_route": "/shipments", "to_route": "Delivery Note"},
 	{"from_route": "/shipments/<path:name>", "to_route": "order",
 		"defaults": {
 			"doctype": "Delivery Note",
-			"parents": [{"title": _("Shipments"), "name": "shipments"}]
+			"parents": [{"label": _("Shipments"), "route": "shipments"}]
 		}
 	},
 	{"from_route": "/rfq", "to_route": "Request for Quotation"},
 	{"from_route": "/rfq/<path:name>", "to_route": "rfq",
 		"defaults": {
 			"doctype": "Request for Quotation",
-			"parents": [{"title": _("Request for Quotation"), "name": "rfq"}]
+			"parents": [{"label": _("Request for Quotation"), "route": "rfq"}]
 		}
 	},
 	{"from_route": "/addresses", "to_route": "Address"},
 	{"from_route": "/addresses/<path:name>", "to_route": "addresses",
 		"defaults": {
 			"doctype": "Address",
-			"parents": [{"title": _("Addresses"), "name": "addresses"}]
+			"parents": [{"label": _("Addresses"), "route": "addresses"}]
 		}
 	},
 	{"from_route": "/jobs", "to_route": "Job Opening"},
@@ -201,11 +201,14 @@ scheduler_events = {
 
 email_brand_image = "assets/erpnext/images/erpnext-logo.jpg"
 
-default_mail_footer = """<div style="text-align: center;">
-	<a href="https://erpnext.com?source=via_email_footer" target="_blank" style="color: #8d99a6;">
-		Sent via ERPNext
-	</a>
-</div>"""
+default_mail_footer = """
+	<span>
+		Sent via
+		<a class="text-muted" href="https://erpnext.com?source=via_email_footer" target="_blank">
+			ERPNext
+		</a>
+	</span>
+"""
 
 get_translated_dict = {
 	("doctype", "Global Defaults"): "frappe.geo.country_info.get_translated_dict"

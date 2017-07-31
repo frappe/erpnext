@@ -7,7 +7,7 @@ Unten Sehen Sie ein Beispiel eines Worklflows.
 
 Wenn ein Benutzer einen Urlaub beantragt, dann wird seine Anfrage an die Personalabteilung weiter geleitet. Die Personalabteilung, repräsentiert durch einen Mitarbeiter der Personalabteilung, wird diese Anfrage dann entweder genehmigen oder ablehnen. Wenn dieser Prozess abgeschlossen ist, dann bekommt der Vorgesetzte des Benutzers (der Urlaubsgenehmiger) eine Mitteilung, dass die Personalabteilung den Antrag genehmigt oder abgelehnt hat. Der Vorgesetzte, der die genehmigende Instanz ist, wird dann den Antrag entweder genehmigen oder ablehnen. Dementsprechend bekommt der Benutzer dann eine Genehmigung oder eine Ablehnung.
 
-<img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-leave-fl.jpg">
+<img class="screenshot" alt="Workflow" src="/docs/assets/img/setup/workflow-leave-fl.jpg">
 
 Um einen Workflow und Übergangsregeln zu erstellen, gehen Sie zu:
 
@@ -15,11 +15,11 @@ Um einen Workflow und Übergangsregeln zu erstellen, gehen Sie zu:
 
 #### Schritt 1: Geben Sie die unterschiedlichen Zustände des Prozesses Urlaubsantrag ein.
 
-<img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-1.png">
+<img class="screenshot" alt="Workflow" src="/docs/assets/img/setup/workflow-1.png">
 
 #### Schritt 2: Geben Sie die Übergangsregeln ein.
 
-<img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-2.png">
+<img class="screenshot" alt="Workflow" src="/docs/assets/img/setup/workflow-2.png">
 
 Hinweise:
 
@@ -37,14 +37,14 @@ Gehen Sie in das Modul Personalwesen und klicken Sie auf Urlaubsantrag. Beantrag
 
 Wenn ein Urlaubsantrag übertragen wird, steht der Status in der Ecke der rechten Seite auf "Beantragt".
 
-<img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-3.png">
+<img class="screenshot" alt="Workflow" src="/docs/assets/img/setup/workflow-3.png">
 
 Wenn sich ein Mitarbeiter der Personalabteilung anmeldet, dann kann er den Antrag genehmigen oder ablehnen. Wenn eine Genehmigung erfolgt, wechselt der Status in der rechten Ecke zu "Genehmigt". Es wird jedoch ein blaues Informationssymbol angezeigt, welches aussagt, dass der Urlaubsantrag noch anhängig ist.
 
-<img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-4.png">
+<img class="screenshot" alt="Workflow" src="/docs/assets/img/setup/workflow-4.png">
 
 Wenn der Urlaubsgenehmiger die Seite mit den Urlaubsanträgen öffnet, kann er den Status von "Genehmigt" auf "Abgelehnt" ändern.
 
-<img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/workflow-5.png">
+<img class="screenshot" alt="Workflow" src="/docs/assets/img/setup/workflow-5.png">
 
 {next}

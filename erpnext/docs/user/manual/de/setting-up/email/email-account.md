@@ -11,7 +11,7 @@ ERPNext erstellt standardmäßig Vorlagen für einige E-Mail-Konten. Nicht alle 
 
 Es gibt zwei Arten von E-Mail-Konten, ausgehend und eingehend. E-Mail-Konten für ausgehende E-Mails verwenden einen SMTP-Service, eingehende E-Mails verwenden einen POP-Service. Die meisten E-Mail-Anbieter wie GMail, Outlook oder Yahoo bieten diese Seriveleistungen an.
 
-<img class="screenshot" alt="Kriterien definieren" src="{{docs_base_url}}/assets/img/setup/email/email-account-list.png">
+<img class="screenshot" alt="Kriterien definieren" src="/docs/assets/img/setup/email/email-account-list.png">
 
 ### Konten zu ausgehenden E-Mails
 
@@ -19,13 +19,13 @@ Alle E-Mails, die vom System aus versendet werden, sei es von einem Benutzer zu 
 
 Um ein Konto für ausgehende E-Mails einzurichten, markieren Sie die Option **Ausgehend aktivieren** und geben Sie die Einstellungen zum SMTP-Server an. Wenn Sie einen bekannten E-Mail-Service nutzen, wird das vom System für Sie voreingestellt.
 
-<img class="screenshot" alt="Ausgehende E-Mails" src="{{docs_base_url}}/assets/img/setup/email/email-account-sending.png">
+<img class="screenshot" alt="Ausgehende E-Mails" src="/docs/assets/img/setup/email/email-account-sending.png">
 
 ### Konten zu eingehenden E-Mails
 
 Um ein Konto für eingehende E-Mails einzurichten, markieren Sie die Option **Eingehend aktivieren** und geben Sie die Einstellungen zum POP3-Server an. Wenn Sie einen bekannten E-Mail-Service nutzen, wird das vom System für Sie voreingestellt.
 
-<img class="screenshot" alt="Eingehende E-Mails" src="{{docs_base_url}}/assets/img/setup/email/email-account-incoming.png">
+<img class="screenshot" alt="Eingehende E-Mails" src="/docs/assets/img/setup/email/email-account-incoming.png">
 
 ### Wie ERPNext Antworten handhabt
 
@@ -35,6 +35,6 @@ Wenn Sie aus ERPNext heraus eine E-Mail an einen Kontakt wie z. B. einen Kunden 
 
 Wenn Sie möchten, dass ERPNext Sie benachrichtigt, wenn eine E-Mail für eine bestimmte Zeit unbeantwortet bleibt, dann können Sie die Option **Benachrichtigen, wenn unbeantwortet** markieren. Hier können Sie die Anzahl der Minuten einstellen, die das System warten soll, bevor eine Benachrichtigung gesendet wird, und den Empfänger.
 
-<img class="screenshot" alt="Eingehende Email" src="{{docs_base_url}}/assets/img/setup/email/email-account-unreplied.png">
+<img class="screenshot" alt="Eingehende Email" src="/docs/assets/img/setup/email/email-account-unreplied.png">
 
 {next}

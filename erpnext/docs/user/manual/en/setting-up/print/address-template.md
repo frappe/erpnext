@@ -26,6 +26,6 @@ Here is the default template:
 
 ### Example
 
-<img class="screenshot" alt="Print Heading" src="{{docs_base_url}}/assets/img/setup/print/address-format.png">
+<img class="screenshot" alt="Print Heading" src="/docs/assets/img/setup/print/address-format.png">
 
 {next}

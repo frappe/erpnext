@@ -20,7 +20,7 @@ Wir gehen davon aus, dass Sie mit der Buchhaltung in einem neuen Geschäftsjahr 
 
 Sie können Konten basierend auf Belegarten auswählen. In so einem Szenario sollte Ihre Bilanz ausgeglichen sein.
 
-<img class="screenshot" alt="Eröffnungskonto" src="{{docs_base_url}}/assets/img/accounts/opening-account-1.png">
+<img class="screenshot" alt="Eröffnungskonto" src="/docs/assets/img/accounts/opening-account-1.png">
 
 Beachten Sie bitte auch, dass das System abstürzt, wenn es mehr als 300 Bücher gibt. Um so eine Situation zu vermeiden, können Sie Konten über temporäre Konten eröffnen.
 
@@ -38,13 +38,13 @@ Hinweis: Stellen Sie sicher, dass im Abschnitt "Weitere Informationen" "Ist Erö
 
 Vervollständigen Sie die Buchungssätze auf der Soll- und Haben-Seite.
 
-<img class="screenshot" alt="Opening Account" src="{{docs_base_url}}/assets/img/accounts/opening-6.png">
+<img class="screenshot" alt="Opening Account" src="/docs/assets/img/accounts/opening-6.png">
 
 Um einen Eröffnungsstand einzupflegen, erstellen Sie einen Buchungssatz für ein Konto oder eine Gruppe von Konten.
 
 Beispiel: Wenn Sie die Kontenstände von drei Bankkonten einpflegen möchten, dann erstellen Sie Buchungssätze der folgenden Art und Weise:
 
-<img class="screenshot" alt="Opening Account" src="{{docs_base_url}}/assets/img/accounts/opening-3.png">
+<img class="screenshot" alt="Opening Account" src="/docs/assets/img/accounts/opening-3.png">
 
 Um einen Ausgleich herzustellen, wird ein temporäres Konto für Vermögen und Verbindlichkeiten verwendet. Wenn Sie einen Anfangsbestand in einem Verbindlichkeitenkonto einpflegen, können Sie zum Ausgleich ein temporäres Vermögenskonto verwenden.
 
@@ -59,7 +59,7 @@ Sie können zwei Eröffnungsbuchungssätze erstellen:
 
 Wenn Sie die Buchungen erstellt haben, schaut der Bericht zur Probebilanz in etwa wie folgt aus:
 
-<img class="screenshot" alt="Probebilanz" src="{{docs_base_url}}/assets/img/accounts/opening-4.png">
+<img class="screenshot" alt="Probebilanz" src="/docs/assets/img/accounts/opening-4.png">
 
 
 ### Offene Rechnungen

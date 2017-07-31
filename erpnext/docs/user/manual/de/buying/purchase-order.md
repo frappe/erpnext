@@ -7,7 +7,7 @@ Ein Lieferantenauftrag kann automatisch aus einer Materialanfrage oder einem Lie
 
 ### Flußdiagramm der Lieferantenbestellung
 
-<img class="screenshot" alt="Lieferantenauftrag" src="{{docs_base_url}}/assets/img/buying/purchase-order-f.jpg">
+<img class="screenshot" alt="Lieferantenauftrag" src="/docs/assets/img/buying/purchase-order-f.jpg">
 
 In ERPNext können Sie einen Lieferantenauftrag auch direkt erstellen über:
 
@@ -15,7 +15,7 @@ In ERPNext können Sie einen Lieferantenauftrag auch direkt erstellen über:
 
 ### Einen Lieferantenauftrag erstellen
 
-<img class="screenshot" alt="Lieferantenauftrag" src="{{docs_base_url}}/assets/img/buying/purchase-order.png">
+<img class="screenshot" alt="Lieferantenauftrag" src="/docs/assets/img/buying/purchase-order.png">
 
 Einen Lieferantenauftrag einzugeben ist sehr ähnlich zu einer Lieferantenanfrage. Zusätzlich müssen Sie Folgendes eingeben:
 
@@ -50,7 +50,7 @@ Beispiel: Wenn Sie Ihr Rohmaterial in großen Mengen in Großverpackungen eingek
 
 ### Abbildung 3: Umrechung von Einkaufsmaßeinheit in Lagermaßeinheit
 
-<img class="screenshot" alt="Lieferantenauftrag - Maßeinheit" src="{{docs_base_url}}/assets/img/buying/purchase-order-uom.png">
+<img class="screenshot" alt="Lieferantenauftrag - Maßeinheit" src="/docs/assets/img/buying/purchase-order-uom.png">
 
 **Schritt 4:** Geben Sie den Umrechnungsfaktor von einer in die andere Maßeinheit an. Beispiel: 100, wenn eine Kiste 100 Stück umfasst.
 

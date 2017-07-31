@@ -1,3 +1,5 @@
+# Authorization Rule
+
 Authorization Rule is a tool to define rule for conditional authorization.
 
 If you sales and purchase transactions of higher value or discount requires an authorization from senior manager, you can set authorization rule for it.
@@ -34,7 +36,7 @@ Select approvers Role. It will be Sales Manager role which if assigned to user, 
 
 Set Above Value. Given the exmaple, Above Value will be set as 10000.
 
-<img class="screenshot" alt="Authorization Rule" src="{{docs_base_url}}/assets/img/setup/auth-rule.png">
+<img class="screenshot" alt="Authorization Rule" src="/docs/assets/img/setup/auth-rule.png">
 
 If Sales User tries submitting Sales Order of value higher than 10000, then he will get error message.
 

@@ -5,6 +5,6 @@ The student doctype maintains personal details of the student.
 
 You can view everything related to a particular student on this page. Eg : Fees, Student Group, etc
 
-<img class="screenshot" alt="Student" src="{{url_prefix}}/assets/img/schools/student/student.png">
+<img class="screenshot" alt="Student" src="/docs/assets/img/schools/student/student.png">
 
 {next}

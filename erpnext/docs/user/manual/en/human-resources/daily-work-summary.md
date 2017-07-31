@@ -12,4 +12,4 @@ Go to "Daily Work Summary Settings" via HR module or search bar and set the comp
 
 You can also choose to Customize the Message you send to your employees:
 
-<img class="screenshot" alt="Department" src="{{docs_base_url}}/assets/img/human-resources/department.png">
+<img class="screenshot" alt="Department" src="/docs/assets/img/human-resources/department.png">

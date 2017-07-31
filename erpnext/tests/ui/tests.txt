@@ -1,12 +1,14 @@
 erpnext/tests/ui/make_fixtures.js #long
-erpnext/setup/doctype/company/test_company.js
+erpnext/setup/doctype/company/tests/test_company.js
 erpnext/accounts/doctype/account/test_account.js
 erpnext/accounts/doctype/account/test_make_tax_account.js
 erpnext/accounts/doctype/sales_taxes_and_charges_template/test_sales_taxes_and_charges_template.js
 erpnext/crm/doctype/lead/test_lead.js
 erpnext/crm/doctype/opportunity/test_opportunity.js
 erpnext/selling/doctype/quotation/test_quotation.js
+erpnext/setup/doctype/company/tests/test_company_production.js
 erpnext/crm/doctype/item/test_item.js
+erpnext/selling/doctype/sales_order/test_sales_order.js
 erpnext/manufacturing/doctype/workstation/test_workstation.js
 erpnext/manufacturing/doctype/operation/test_operation.js
 erpnext/manufacturing/doctype/bom/test_bom.js
@@ -23,6 +25,7 @@ erpnext/hr/doctype/attendance/test_attendance.js
 erpnext/hr/doctype/leave_type/test_leave_type.js
 erpnext/hr/doctype/leave_control_panel/test_leave_control_panel.js
 erpnext/hr/doctype/leave_allocation/test_leave_allocation.js
+erpnext/hr/doctype/leave_application/test_leave_application.js
 erpnext/schools/doctype/academic_year/test_academic_year.js
 erpnext/schools/doctype/academic_term/test_academic_term.js
 erpnext/schools/doctype/school_settings/test_school_settings.js
@@ -31,3 +34,12 @@ erpnext/schools/doctype/student_category/test_student_category.js
 erpnext/schools/doctype/room/test_room.js
 erpnext/schools/doctype/instructor/test_instructor.js
 erpnext/hr/doctype/salary_structure/test_salary_structure.js
+erpnext/stock/doctype/warehouse/test_warehouse.js
+erpnext/manufacturing/doctype/production_order/test_production_order.js
+erpnext/accounts/page/pos/test_pos.js
+erpnext/selling/doctype/product_bundle/test_product_bundle.js
+erpnext/schools/doctype/grading_scale/test_grading_scale.js
+erpnext/schools/doctype/assessment_criteria_group/test_assessment_criteria_group.js
+erpnext/schools/doctype/assessment_criteria/test_assessment_criteria.js
+erpnext/schools/doctype/course/test_course.js
+erpnext/schools/doctype/program/test_program.js

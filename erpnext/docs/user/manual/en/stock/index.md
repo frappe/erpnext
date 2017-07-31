@@ -1,3 +1,5 @@
+# Stock
+
 For most small business that deal in physical goods, a large part of their net
 worth is invested in the stock in hand.
 

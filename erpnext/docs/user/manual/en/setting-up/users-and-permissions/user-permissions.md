@@ -15,7 +15,7 @@ When you create a new record you will have to specify
 1. The type of document which will be allowed (for example "Company")
 1. The specific item that you want to allow (the name of the "Company)
 
-<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-perms/new-user-permission.png" class="screenshot" alt="Creating a new user permission">
+<img src="/docs/assets/img/users-and-permissions/user-perms/new-user-permission.png" class="screenshot" alt="Creating a new user permission">
 
 If you want to apply the permissions to all Roles for that user, keep the "Apply Permissions for all Roles of this User" checked. If you check this, it will automatically setup the rules for Roles to check for User Permissions.
 
@@ -25,11 +25,11 @@ You can also manually edit the the roles for which you want the user permissions
 
 Note that the "Apply User Permissions" is already checked for this role. Then click on "Select Document Types"
 
-<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-perms/select-document-types.png" class="screenshot" alt="Select Document Types to Edit the Setting">
+<img src="/docs/assets/img/users-and-permissions/user-perms/select-document-types.png" class="screenshot" alt="Select Document Types to Edit the Setting">
 
 Here you will see that Company has already been checked. If you want user permissions not be applied for that particular rule, you can un check it.
 
-<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-perms/view-selected-documents.png" class="screenshot" alt="Select Document Types to Edit the Setting">
+<img src="/docs/assets/img/users-and-permissions/user-perms/view-selected-documents.png" class="screenshot" alt="Select Document Types to Edit the Setting">
 
 ### Ignoring User Permissions on Certain Fields
 
@@ -37,7 +37,7 @@ Another way of allowing documents to be seen that have been restricited by User 
 
 For example you don't want Assets to be restricited for any user, then select **Asset** in **Customize Form** and in the Company field, check on "Ignore User Permissions"
 
-<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-perms/ignore-user-user-permissions.png" class="screenshot" alt="Ignore User Permissions on specific properties">
+<img src="/docs/assets/img/users-and-permissions/user-perms/ignore-user-user-permissions.png" class="screenshot" alt="Ignore User Permissions on specific properties">
 
 ### Strict Permisssions
 
@@ -49,4 +49,4 @@ You can change this setting incase you want the user permissions to be assigned 
 
 Finally once you have created your air-tight permission model, and you want to check how it applies to various users, you can see it via the **Permitted Documents for User** report. Using this report, you can select the **User** and document type and check how user permissions get applied.
 
-<img src="{{docs_base_url}}/assets/img/users-and-permissions/user-perms/permitted-documents.png" class="screenshot" alt="Permitted Documents for User report">
+<img src="/docs/assets/img/users-and-permissions/user-perms/permitted-documents.png" class="screenshot" alt="Permitted Documents for User report">

@@ -13,4 +13,4 @@ Dieses Werkzeug ermöglicht es Ihnen, gleichzeitig mehrere Datensätze umzubenen
 
 Um mehrere Datensätze umzubenennen, laden Sie eine CSV-Datei mit den alten Namen in der ersten Spalte und den neuen Namen in der zweiten Spalte hoch indem Sie auf "Hochladen" klicken.
 
-<img class="screenshot" alt="Bulk Rename" src="{{docs_base_url}}/assets/img/setup/data/rename.png">
+<img class="screenshot" alt="Bulk Rename" src="/docs/assets/img/setup/data/rename.png">
