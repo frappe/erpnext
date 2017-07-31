@@ -1,6 +1,6 @@
 # Introduction
 
-<img class="screenshot" alt="Task" src="{{docs_base_url}}/assets/img/manufacturing/manufacturing.png">
+<img class="screenshot" alt="Task" src="/docs/assets/img/manufacturing/manufacturing.png">
 
 ### Types of Production Planning
 

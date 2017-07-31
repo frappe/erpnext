@@ -16,13 +16,13 @@ Open User to be renamed.
 
 From Menu, select Rename.
 
-<img alt="Rename" class="screenshot" src="{{docs_base_url}}/assets/img/articles/rename-user-1.png">
+<img alt="Rename" class="screenshot" src="/docs/assets/img/articles/rename-user-1.png">
 
 #### Step 3: Update
 
 Enter valid Email Address and click on Rename.
 
-<img alt="Update" class="screenshot" src="{{docs_base_url}}/assets/img/articles/rename-user-2.png"> 
+<img alt="Update" class="screenshot" src="/docs/assets/img/articles/rename-user-2.png"> 
 
 After successful renaming, User will be able login using updated user id.
 

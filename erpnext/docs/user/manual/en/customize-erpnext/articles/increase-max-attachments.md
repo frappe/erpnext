@@ -12,13 +12,13 @@ Let's assume we need to update Max Attachment for Quotation to five.
 
 #### Step 2: Select Document Type
  
-<img alt="Select Doctype" class="screenshot" src="{{docs_base_url}}/assets/img/articles/max-attachment-1.png">
+<img alt="Select Doctype" class="screenshot" src="/docs/assets/img/articles/max-attachment-1.png">
 
 #### Step 3: Set Limit
 
 Set Maximum Attachments as five.
 
-<img alt="Set Max Attachment" class="screenshot" src="{{docs_base_url}}/assets/img/articles/max-attachment-2.png">
+<img alt="Set Max Attachment" class="screenshot" src="/docs/assets/img/articles/max-attachment-2.png">
 
 After update Max Attachments, Update Customization Form. Reload your ERPNext account and then check specific Quotation to confirm if Max Attachment limit is applied.
 

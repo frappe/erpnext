@@ -26,7 +26,7 @@ the row "Is Advance" click 'Yes'.
 
 #### Figure 1 : Journal Entry -Advance Entry
 
-<img class="screenshot" alt="Advace Payment" src="{{docs_base_url}}/assets/img/accounts/advance-payment-1.png">
+<img class="screenshot" alt="Advace Payment" src="/docs/assets/img/accounts/advance-payment-1.png">
 
 ### Double Entry Accounting
 
@@ -43,7 +43,7 @@ will be credited because it has given value.
 
 #### Figure 2: Transaction and Difference Entry
 
-<img class="screenshot" alt="Advace Payment" src="{{docs_base_url}}/assets/img/accounts/advance-payment-2.png">
+<img class="screenshot" alt="Advace Payment" src="/docs/assets/img/accounts/advance-payment-2.png">
 
 Save and submit the JV. If this document is not saved it will not be pulled in
 other accounting documents.
@@ -57,7 +57,7 @@ advance in the advances table. The accounting will be adjusted accordingly.
 
 #### Figure 3: Receive Advance
 
-<img class="screenshot" alt="Advace Payment" src="{{docs_base_url}}/assets/img/accounts/advance-payment-3.png">
+<img class="screenshot" alt="Advace Payment" src="/docs/assets/img/accounts/advance-payment-3.png">
 
 Save and submit the Sales Invoice.
 

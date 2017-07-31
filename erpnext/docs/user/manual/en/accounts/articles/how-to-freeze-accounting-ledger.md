@@ -14,7 +14,7 @@ To edit an Account, go to Chart of Accounts:
 
 `Explore > Accounts > Chart of Accounts`
 
-<img class="screenshot" alt="Freeze Account" src="{{docs_base_url}}/assets/img/articles/freeze-account-1.png">
+<img class="screenshot" alt="Freeze Account" src="/docs/assets/img/articles/freeze-account-1.png">
 
 Click on Account in which Frozen Date is to be updated.
 
@@ -22,7 +22,7 @@ Click on Account in which Frozen Date is to be updated.
 
 In the Account form, you will find a field called **Frozen**. Set value in this field as 'Yes'
 
-<img class="screenshot" alt="Freeze Account" src="{{docs_base_url}}/assets/img/articles/freeze-account-2.png">
+<img class="screenshot" alt="Freeze Account" src="/docs/assets/img/articles/freeze-account-2.png">
 
 ####Step 3: Save
 

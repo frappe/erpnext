@@ -12,7 +12,7 @@ To create a new Maintenance Schedule go to:
 
 > Support > Maintenance Schedule > New Maintenance Schedule
 
-<img class="screenshot" alt="Maintenance Schedule" src="{{docs_base_url}}/assets/img/support/maintenance-schedule.png">
+<img class="screenshot" alt="Maintenance Schedule" src="/docs/assets/img/support/maintenance-schedule.png">
 
 In the Maintenance Schedule, there are two sections:
 

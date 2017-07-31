@@ -29,17 +29,17 @@ To perform Stock Reconciliation, go to:
 
 A predefined template of an spreadsheet file should be followed for importing item's stock levels and valuations. Open new Stock Reconciliation form to see download option.
 
-<img class="screenshot" alt="Stock Reconciliation" src="{{docs_base_url}}/assets/img/setup/stock-recon-1.png">
+<img class="screenshot" alt="Stock Reconciliation" src="/docs/assets/img/setup/stock-recon-1.png">
 
 #### Step 2: Enter Data in csv file.
 
-<img class="screenshot" alt="Stock Reconciliation" src="{{docs_base_url}}/assets/img/setup/stock-reco-data.png">
+<img class="screenshot" alt="Stock Reconciliation" src="/docs/assets/img/setup/stock-reco-data.png">
 
 The csv format is case-sensitive. Do not edit the headers which are preset in the template. In the Item Code and Warehouse column, enter exact Item Code and Warehouse as created in your ERPNext account. For quatity, enter stock level you wish to set for that item, in a specific warehouse.
 
 #### Step 3: Upload file and Enter Values in Stock Reconciliation Form
 
-<img class="screenshot" alt="Stock Reconciliation" src="{{docs_base_url}}/assets/img/setup/stock-recon-2.png">
+<img class="screenshot" alt="Stock Reconciliation" src="/docs/assets/img/setup/stock-recon-2.png">
 
 **Posting Date**
 
@@ -61,11 +61,11 @@ report. The report will show you all types of rates.
 
 #### Step 4: Review the reconciliation data
 
-<img class="screenshot" alt="Stock Reconciliation" src="{{docs_base_url}}/assets/img/setup/stock-reco-upload.gif">
+<img class="screenshot" alt="Stock Reconciliation" src="/docs/assets/img/setup/stock-reco-upload.gif">
 
 ### Stock Ledger Report
 
-<img class="screenshot" alt="Stock Reconciliation" src="{{docs_base_url}}/assets/img/setup//stock-reco-ledger.png">
+<img class="screenshot" alt="Stock Reconciliation" src="/docs/assets/img/setup//stock-reco-ledger.png">
 
 
 **How Stock Reconciliation Works**

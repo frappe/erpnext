@@ -7,7 +7,7 @@ Wie Sie aus dieser Anleitung ersehen können, beinhaltet ERPNext viele verschied
 
 > Einstellungen > Werkzeuge > Funktionen verbergen/einblenden
 
-![Funktionen verbergen]({{docs_base_url}}/assets/old_images/erpnext/hide-features.png)
+![Funktionen verbergen](/docs/assets/old_images/erpnext/hide-features.png)
 
 Aktivieren/Deaktivieren Sie die Funktionen, die Sie verwenden möchten bzw. nicht verwenden wollen und laden Sie Ihre Seite neu, damit die Änderungen übernommen werden.
 
@@ -19,7 +19,7 @@ Um Module (Symbole) auf der Homepage zu verbergen, gehen Sie zu:
 
 > Einstellungen > Werkzeuge > Moduleinstellungen
 
-![Module verbergen/anzeigen]({{docs_base_url}}/assets/old_images/erpnext/hide-module.png)
+![Module verbergen/anzeigen](/docs/assets/old_images/erpnext/hide-module.png)
 
 > Anmerkung: Module werden automatisch für Benutzer verborgen, die keine Berechtigungen für Dokumente dieses Moduls haben. Beispiel: Wenn ein Benutzer keine Berechtigungen für Lieferantenauftrag, Materialanfrage und Lieferant hat, dann wird das Modul "Einkauf" automatisch verborgen.
 

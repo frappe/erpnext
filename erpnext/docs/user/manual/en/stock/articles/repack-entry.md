@@ -24,7 +24,7 @@ For raw-material/input item, only Source Warehouse will be provided.
 
 For repacked/output items, only Target Warehouse will be provided. You will have to provide valuation for the repack items.
 
-<img alt="Repack Entry" class="screenshot" src="{{docs_base_url}}/assets/img/articles/repack-1.png">
+<img alt="Repack Entry" class="screenshot" src="/docs/assets/img/articles/repack-1.png">
 
 Update Qty for all the items selected.
 
@@ -32,6 +32,6 @@ Update Qty for all the items selected.
 
 On submitting Stock Entry, stock of input item will be reduced from Source Warehouse, and stock of repack/output item will be added in the Target Warehouse.
 
-<img alt="Repack Stock Entry" class="screenshot" src="{{docs_base_url}}/assets/img/articles/repack-2.png">
+<img alt="Repack Stock Entry" class="screenshot" src="/docs/assets/img/articles/repack-2.png">
 
 <!-- markdown --> 

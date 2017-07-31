@@ -14,7 +14,7 @@ To pull items from Material Request for specific Supplier only, follow below giv
 
 Update Default Supplier in the Item master.
 
-<img alt="Item Purchase UoM" class="screenshot" src="{{docs_base_url}}/assets/img/articles/for-supplier-2.png">
+<img alt="Item Purchase UoM" class="screenshot" src="/docs/assets/img/articles/for-supplier-2.png">
 
 ####Step 2:  New Purchase Order
 
@@ -24,13 +24,13 @@ Update Default Supplier in the Item master.
 
 From the options available to pull data in the Purchase Order, click on `For Supplier`.
 
-<img alt="Item Purchase UoM" class="screenshot" src="{{docs_base_url}}/assets/img/articles/for-supplier-1.gif">
+<img alt="Item Purchase UoM" class="screenshot" src="/docs/assets/img/articles/for-supplier-1.gif">
 
 ####Step 4: Get Items
 
 Select Supplier name and click on `Get`.
 
-<img alt="Item Purchase UoM" class="screenshot" src="{{docs_base_url}}/assets/img/articles/for-supplier-3.png">
+<img alt="Item Purchase UoM" class="screenshot" src="/docs/assets/img/articles/for-supplier-3.png">
 
 ####Step 5: Edit Items
 

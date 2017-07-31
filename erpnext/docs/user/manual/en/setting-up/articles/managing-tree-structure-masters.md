@@ -26,7 +26,7 @@ Following are the steps to manage and create record in the tree structured maste
 
 ####Step 2 : Parent Territory
 
-<img alt="Default Territories" class="screenshot" src="{{docs_base_url}}/assets/img/articles/territory-2.png">
+<img alt="Default Territories" class="screenshot" src="/docs/assets/img/articles/territory-2.png">
 
 When click on Parent territory, you will see option to add child territory under it. All default Territory groups will be listed under Parent group called "All Territories". You can add further Parent or child Territory Groups under it.
 
@@ -44,11 +44,11 @@ If Group Node selected as Yes, then this Territory will be created as Parent, wh
 
 <div class="well">Only child Territory Groups are selectable in another masters and transactions.</div>
 
-<img alt="Default Territories" class="screenshot" src="{{docs_base_url}}/assets/img/articles/territory-1.gif">
+<img alt="Default Territories" class="screenshot" src="/docs/assets/img/articles/territory-1.gif">
 
 Following is how Child Territories will be listed under a Parent Territory.
 
-<img alt="Adding new Territories" class="screenshot" src="{{docs_base_url}}/assets/img/articles/territory-3.png">
+<img alt="Adding new Territories" class="screenshot" src="/docs/assets/img/articles/territory-3.png">
 
 Following this steps, you can manage other tree masters as well in ERPNext.
 

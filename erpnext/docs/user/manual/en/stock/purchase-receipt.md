@@ -12,7 +12,7 @@ You can make a Purchase Receipt directly from:
 
 or from a “Submitted” Purchase Order, by clicking on “Make Purchase Receipt”.
 
-<img class="screenshot" alt="Purchase Receipt" src="{{docs_base_url}}/assets/img/stock/purchase-receipt.png">
+<img class="screenshot" alt="Purchase Receipt" src="/docs/assets/img/stock/purchase-receipt.png">
 
 ### Rejections
 

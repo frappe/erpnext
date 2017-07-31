@@ -14,7 +14,7 @@ Following are step to merge documents. Let's assume we are merging two Accounts.
 
 For an Account to be merged, click on the "Rename" option.
 
-<img alt="Sales Order File Attachment" class="screenshot" src="{{docs_base_url}}/assets/img/articles/merge-docs-1.png">
+<img alt="Sales Order File Attachment" class="screenshot" src="/docs/assets/img/articles/merge-docs-1.png">
 
 #### Step 3: Merge Account
 
@@ -22,7 +22,7 @@ In the New Name field, enter another account name with which this account will b
 
 Following is how the merged account will appear in the Chart of Accounts master.
 
-<img alt="Sales Order File Attachment" class="screenshot" src="{{docs_base_url}}/assets/img/articles/merge-docs-2.gif">
+<img alt="Sales Order File Attachment" class="screenshot" src="/docs/assets/img/articles/merge-docs-2.gif">
 
 ###Effect of Merging
 

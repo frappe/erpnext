@@ -14,8 +14,8 @@ see how it looks to the recepient, you can use the test function. Save the
 document before testing. A test email will be sent to your Email Address. You can
 send the email to all the intended receipients by clicking on the send button.
 
-<img class="screenshot" alt="Newsletter - New" src="{{docs_base_url}}/assets/img/crm/newsletter-new.png">
+<img class="screenshot" alt="Newsletter - New" src="/docs/assets/img/crm/newsletter-new.png">
 
-<img class="screenshot" alt="Newsletter - Test" src="{{docs_base_url}}/assets/img/crm/newsletter-test.png">
+<img class="screenshot" alt="Newsletter - Test" src="/docs/assets/img/crm/newsletter-test.png">
 
 {next}

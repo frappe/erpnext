@@ -12,7 +12,7 @@ To create new Cost Center, go to:
 
 > Accounts > Budget and Cost Center > Chart of Cost Center > Add New Cost Center
 
-<img class="screenshot" alt="Budget" src="{{docs_base_url}}/assets/img/accounts/budgeting-cost-center.png">
+<img class="screenshot" alt="Budget" src="/docs/assets/img/accounts/budgeting-cost-center.png">
 
 ###Budgeting
 
@@ -30,20 +30,20 @@ In the Budget form, select a Cost Center. Budgets can be defined against any Cos
 
 In the Budgets table, select Income / Expense account for which Budget is to be defined. 
 
-<img class="screenshot" alt="Budget" src="{{docs_base_url}}/assets/img/accounts/budget-account.png">
+<img class="screenshot" alt="Budget" src="/docs/assets/img/accounts/budget-account.png">
 
 ####Step 4: Monthly Distribution
 
 If you have seasonal business, you can also define a Monthly Distribution record, to distribute the budget between months. If you don't set the monthly distribution, ERPNext will calculate the budget on yearly
 basis or in equal proportion for every month.
 
-<img class="screenshot" alt="Monthly Distribution" src="{{docs_base_url}}/assets/img/accounts/monthly-budget-distribution.png">
+<img class="screenshot" alt="Monthly Distribution" src="/docs/assets/img/accounts/monthly-budget-distribution.png">
 
 ####Step 5: Alert on Budget
 
 While setting budget, you can also define the actions when expenses will exceed the allocated budget for a period. You can set separate action for monthly and annual budgets. There are 3 types of actions: Stop, Warn and Ignore. If Stop, system will not allow to book expenses more than allocated budget. In Case of Warn, it will just warn the user that expenses has been exceeded from the allocated budget. And Ignore will do nothing.
 
-<img class="screenshot" alt="Monthly Distribution" src="{{docs_base_url}}/assets/img/accounts/budget-warning.png">
+<img class="screenshot" alt="Monthly Distribution" src="/docs/assets/img/accounts/budget-warning.png">
 
 ####Budget Variance Report
 
@@ -53,6 +53,6 @@ To check Budget Variance report, go to:
 
 Accounts > Budget and Cost Center > Budget Variance Report
 
-<img class="screenshot" alt="Budget Variance Report" src="{{docs_base_url}}/assets/img/accounts/budget-variance-report.png">
+<img class="screenshot" alt="Budget Variance Report" src="/docs/assets/img/accounts/budget-variance-report.png">
 
 {next}

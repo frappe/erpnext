@@ -7,6 +7,6 @@ each Item Group and get reports that will show your actual performance in the
 territory v/s what you had planned.
 You can also set different pricing for the same product sold across different territories.
 
-<img class="screenshot" alt="Territory Tree" src="{{docs_base_url}}/assets/img/crm/territory-tree.png">
+<img class="screenshot" alt="Territory Tree" src="/docs/assets/img/crm/territory-tree.png">
 
 {next}

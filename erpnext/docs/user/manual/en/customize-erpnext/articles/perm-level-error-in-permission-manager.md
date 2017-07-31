@@ -2,7 +2,7 @@
 
 #Perm Level Error in Permission Manager
 
-While customizing rules in the [Permission Manager]({{docs_base_url}}/user/erpnext/user/manual/en/setting-up/users-and-permissions/role-based-permissions), you might receive an error message saying:
+While customizing rules in the [Permission Manager](/docs/user/erpnext/user/manual/en/setting-up/users-and-permissions/role-based-permissions), you might receive an error message saying:
 
 `For System Manager _(or other role)_ at level 2 _(or other level)_ in Customer _(or other document)_ in row 8: Permission at level 0 must be set before higher levels are set.`
 

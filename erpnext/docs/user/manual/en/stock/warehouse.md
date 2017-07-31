@@ -14,7 +14,7 @@ This can become quite a detailed Tree like >Warehouse >Room >Row >Shelf >Box
 To go to Warehouse, click on Stock and go to Warehouse under Setup.  You
 could also switch to 'Tree' View or simply type warehouse tree in the awsone bar.
 
-<img class="screenshot" alt="Warehouse" src="{{docs_base_url}}/assets/img/stock/warehouse.png">
+<img class="screenshot" alt="Warehouse" src="/docs/assets/img/stock/warehouse.png">
 
 In ERPNext, every Warehouse must belong to a specific company, to maintain
 company wise stock balance. In order to do so each Warehouse is linked with an 

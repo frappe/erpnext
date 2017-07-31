@@ -7,7 +7,7 @@ Invoice”or a **Quotation**.
 
 A typical Selling flow looks like:
 
-<img class="screenshot" alt="Make Quotation from Opportunity" src="{{docs_base_url}}/assets/img/selling/selling-flow.png">
+<img class="screenshot" alt="Make Quotation from Opportunity" src="/docs/assets/img/selling/selling-flow.png">
 
 To create a new Quotation navigate to:
 
@@ -17,7 +17,7 @@ To create a new Quotation navigate to:
 
 You can also create a Quotation from an Opportunity.
 
-<img class="screenshot" alt="Make Quotation from Opportunity" src="{{docs_base_url}}/assets/img/selling/make-quote-from-opp.png">
+<img class="screenshot" alt="Make Quotation from Opportunity" src="/docs/assets/img/selling/make-quote-from-opp.png">
 
 A Quotation contains details about:
 
@@ -36,7 +36,7 @@ A Quotation contains details about:
 
 The rates you quote may depend on two things.
 
-  * The Price List: If you have multiple Price Lists, you can select a Price List or tag it to the Customer (so that it is auto-selected). Your Item prices will automatically be updated from the Price List. For details refer [Price List]({{docs_base_url}}/user/manual/en/setting-up/price-lists.html)
+  * The Price List: If you have multiple Price Lists, you can select a Price List or tag it to the Customer (so that it is auto-selected). Your Item prices will automatically be updated from the Price List. For details refer [Price List](/docs/user/manual/en/setting-up/price-lists.html)
 
   * The Currency: If you are quoting to a Customer in a different currency, you will have to update the conversion rates to enable ERPNext to save the information in your standard Currency. This will help you to analyze the value of your Quotations in standard Currency.
 
@@ -46,9 +46,9 @@ To add taxes to your Quotation, you can select a **Sales Taxes and Charges Templ
 
 For e.g
 
-<img class="screenshot" alt="Taxes and Charges" src="{{docs_base_url}}/assets/img/selling/taxes-and-charges.gif">
+<img class="screenshot" alt="Taxes and Charges" src="/docs/assets/img/selling/taxes-and-charges.gif">
 
-To understand taxes in detail visit [Taxes]({{docs_base_url}}/user/manual/en/setting-up/setting-up-taxes.html).
+To understand taxes in detail visit [Taxes](/docs/user/manual/en/setting-up/setting-up-taxes.html).
 
 ### Terms and Conditions
 

@@ -18,13 +18,13 @@ In ERPNext, there is two options through which user can capture the payment
 
 On submitting a document against which Payment Entry can be made, you will find Make Payment button.
 
-<img class="screenshot" alt="Making Payment" src="{{docs_base_url}}/assets/img/accounts/payment-entry-1.png">
+<img class="screenshot" alt="Making Payment" src="/docs/assets/img/accounts/payment-entry-1.png">
 
 ####Step 2: Payment Entry
 
-<img class="screenshot" alt="Making Payment" src="{{docs_base_url}}/assets/img/accounts/payment-entry-9.png">
+<img class="screenshot" alt="Making Payment" src="/docs/assets/img/accounts/payment-entry-9.png">
 
-For more details about payment entry [check here.]({{docs_base_url}}/user/manual/en/accounts/payment-entry)
+For more details about payment entry [check here.](/docs/user/manual/en/accounts/payment-entry)
 
 ## Journal Entry
 
@@ -34,19 +34,19 @@ To make paymant using journal entry, check below steps
 
 Goto Accounts Settings > checked Make Payment via Journal Entry
 
-<img class="screenshot" alt="Making Payment" src="{{docs_base_url}}/assets/img/accounts/account-settings.png">
+<img class="screenshot" alt="Making Payment" src="/docs/assets/img/accounts/account-settings.png">
 
 ####Step 2: Make Payment
 
 On submitting a document against which Journal Entry can be made, you will find Make Payment button.
 
-<img class="screenshot" alt="Making Payment" src="{{docs_base_url}}/assets/img/accounts/payment-entry-1.png">
+<img class="screenshot" alt="Making Payment" src="/docs/assets/img/accounts/payment-entry-1.png">
 
 ####Step 3: Journal Entry
 
 Save and submit the journal entry to record the payament against the invoice
-<img class="screenshot" alt="Making Payment" src="{{docs_base_url}}/assets/img/accounts/journal-entry.png">
+<img class="screenshot" alt="Making Payment" src="/docs/assets/img/accounts/journal-entry.png">
 
-For more details about journal entry [check here.]({{docs_base_url}}/user/manual/en/accounts/journal-entry)
+For more details about journal entry [check here.](/docs/user/manual/en/accounts/journal-entry)
 
 {next}

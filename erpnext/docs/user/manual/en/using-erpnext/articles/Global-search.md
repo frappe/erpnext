@@ -10,9 +10,9 @@ Global Search helps users find information quickly. It’s located in the upper 
 
 ### Using Awesome bar for Global Search.
 
-<img alt="Global Search" class="screenshot" src="{{docs_base_url}}/assets/img/articles/Global Search .gif">
+<img alt="Global Search" class="screenshot" src="/docs/assets/img/articles/Global Search .gif">
 
 ### Enable Global Search for fields in a Doctype.
 
-<img alt="Global Search" class="screenshot" src="{{docs_base_url}}/assets/img/articles/Enable Global Search .gif">
+<img alt="Global Search" class="screenshot" src="/docs/assets/img/articles/Enable Global Search .gif">
 

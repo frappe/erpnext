@@ -22,7 +22,7 @@ You can update landed cost any time in the future via Landed Cost Voucher.
 
 In the document, you can select multiple Purchase Receipts and fetch all items from those Purchase Receipts. Then you should add applicable charges in “Taxes and Charges” table. You can easily delete an item if the added charges is not applicable to that item. The added charges are proportionately distributed among all the items based their amount.
 
-<img class="screenshot" alt="Landed Cost Vouher" src="{{docs_base_url}}/assets/img/stock/landed-cost.png">
+<img class="screenshot" alt="Landed Cost Vouher" src="/docs/assets/img/stock/landed-cost.png">
 
 ### What happend on submission?
 

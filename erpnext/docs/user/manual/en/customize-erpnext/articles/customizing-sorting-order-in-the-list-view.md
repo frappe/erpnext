@@ -14,13 +14,13 @@
 
 Select document type for which Sort Order is to be customized.
 
-<img alt="Sort Order field" class="screenshot" src="{{docs_base_url}}/assets/img/articles/sort-order-2.png">
+<img alt="Sort Order field" class="screenshot" src="/docs/assets/img/articles/sort-order-2.png">
 
 ####Step 3: Update Sort Details
 
 In the Customize Form, you will find these fields.
 
-<img alt="Sort Order field" class="screenshot" src="{{docs_base_url}}/assets/img/articles/sort-order-1.png">
+<img alt="Sort Order field" class="screenshot" src="/docs/assets/img/articles/sort-order-1.png">
 
 1. Sort Field: Select field based on which sorting will be done. It will be "Item_Code" field in scenario.
 2. Sort Order: Sort Order will be two possible options, **Asc** for ascending, and **Desc** for descending.

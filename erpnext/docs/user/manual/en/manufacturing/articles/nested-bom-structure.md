@@ -10,7 +10,7 @@ A computer assembler is creating a BOM for PC. They also manufacture Hard Disk a
  
 BOM of PC will have all the raw-material items selected in it. Hard Disk and DVD Drive (sub-assemblies) will also be selected as raw-material items. For the sib-assembly items, respective BOM no. will be fetched as well.
 
-<img alt="Nested BOM" class="screenshot" src="{{docs_base_url}}/assets/img/articles/nested-bom-1.png">
+<img alt="Nested BOM" class="screenshot" src="/docs/assets/img/articles/nested-bom-1.png">
 
 Following is how the structure of nested BOM will look:
 

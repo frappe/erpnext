@@ -10,7 +10,7 @@ You can create new Price List
 
 > Selling/Buying/Stock  > Setup > Price List >> New
 
-<img class="screenshot" alt="Price List" src="{{docs_base_url}}/assets/img/price-list/price-list.png">
+<img class="screenshot" alt="Price List" src="/docs/assets/img/price-list/price-list.png">
 
 * These Price List will be used when creating Item Price record to track selling or buying price of an item. Click here to learn more about Item Price.
 

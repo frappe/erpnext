@@ -3,7 +3,7 @@
 
 Wählen Sie Ihre Sprache. ERPNext gibt es in mehr als 20 Sprachen.
 
-<img alt="Sprache" class="screenshot" src="{{docs_base_url}}/assets/img/setup-wizard/step-1.png">
+<img alt="Sprache" class="screenshot" src="/docs/assets/img/setup-wizard/step-1.png">
 
 ---
 

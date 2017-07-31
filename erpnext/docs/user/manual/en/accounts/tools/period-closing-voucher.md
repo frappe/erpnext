@@ -21,7 +21,7 @@ In ERPNext after making all the special entries via Journal Entry for the curren
 
 **Closing Fiscal Year** will be an year for which you are closing your financial statement.
 
-<img class="screenshot" alt="Period Closing Voucher" src="{{docs_base_url}}/assets/img/accounts/period-closing-voucher.png">
+<img class="screenshot" alt="Period Closing Voucher" src="/docs/assets/img/accounts/period-closing-voucher.png">
 
 This voucher will transfer Profit or Loss (availed from P&L statment) to Closing Account Head. You should select a liability account like Reserves and Surplus, or Capital Fund account as Closing Account.
 

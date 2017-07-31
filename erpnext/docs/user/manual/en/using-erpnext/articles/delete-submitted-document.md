@@ -14,18 +14,18 @@ Following are step to delete submitted documents.
 
 You will find option to Cancel in the submitted document. If document is at draft stage, it can delete directly. Also if document is not submittable, but only save, it can be deleted directly.
 
-<img alt="Cancel Doc" class="screenshot" src="{{docs_base_url}}/assets/img/articles/delete-submitted-doc-1.png">
+<img alt="Cancel Doc" class="screenshot" src="/docs/assets/img/articles/delete-submitted-doc-1.png">
 
 ####Step 2: Delete Document
 
 After cancellation, go to Menu and click on Delete.
 
-<img alt="Delete Doc" class="screenshot" src="{{docs_base_url}}/assets/img/articles/delete-submitted-doc-2.png">
+<img alt="Delete Doc" class="screenshot" src="/docs/assets/img/articles/delete-submitted-doc-2.png">
 
 ####Step 3: Deleting from List
 
 For bulk deletion, you can select multiple Cancelled records and delete at once from the List View.
 
-<img alt="Delete Doc from List" class="screenshot" src="{{docs_base_url}}/assets/img/articles/delete-submitted-doc-3.gif">
+<img alt="Delete Doc from List" class="screenshot" src="/docs/assets/img/articles/delete-submitted-doc-3.gif">
 
 <!-- markdown -->

@@ -4,7 +4,7 @@
 
 <h1 class="white">El campeón</h1>
 
-<img alt="Champion" class="screenshot" src="{{docs_base_url}}/assets/img/setup/implementation-image.png">
+<img alt="Champion" class="screenshot" src="/docs/assets/img/setup/implementation-image.png">
 
 Hemos visto docenas de implementaciones de sistemas ERP en los últimos años
 y nos hemos dado cuenta que una implementación exitosa es más sobre cosas intangibles y actitudes.

@@ -6,7 +6,7 @@ Lead form, you can do so by creating your own script.
 
 `Setup > Customization > Custom Script`
 
-<img alt="Custom Script" class="screenshot" src="{{docs_base_url}}/assets/img/customize/custom-script-1.png">
+<img alt="Custom Script" class="screenshot" src="/docs/assets/img/customize/custom-script-1.png">
 
 ### Topics
 

@@ -6,7 +6,7 @@ To create a new Deduction Type
 
 > Human Resource > Setup > Deduction Type > New
 
-<img class="screenshot" alt="Deduction Type" src="{{docs_base_url}}/assets/img/human-resources/deduction-type.png">
+<img class="screenshot" alt="Deduction Type" src="/docs/assets/img/human-resources/deduction-type.png">
 
 
 {next}

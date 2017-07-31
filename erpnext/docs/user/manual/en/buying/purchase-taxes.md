@@ -10,7 +10,7 @@ Orders and Purchase Invoices.
 > Buying > Setup > Purchase Taxes and Charges Template > New Purchase Taxes and Charges
 Master
 
-<img class="screenshot" alt="Purchase taxes" src="{{docs_base_url}}/assets/img/buying/purchase-taxes.png">
+<img class="screenshot" alt="Purchase taxes" src="/docs/assets/img/buying/purchase-taxes.png">
 
 
 You can specify if the tax / charge is only for valuation (not a part of

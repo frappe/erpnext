@@ -9,7 +9,7 @@ Sie können eine Ausgangsrechnung direkt erstellen über:
 
 oder indem Sie in der rechten Ecke des Lieferscheins auf "Rechnung erstellen" klicken.
 
-<img class="screenshot" alt="Ausgangsrechnung" src="{{docs_base_url}}/assets/img/accounts/sales-invoice.png">
+<img class="screenshot" alt="Ausgangsrechnung" src="/docs/assets/img/accounts/sales-invoice.png">
 
 ### Auswirkung auf die Buchhaltung
 

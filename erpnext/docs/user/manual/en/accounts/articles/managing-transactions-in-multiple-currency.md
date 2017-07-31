@@ -18,7 +18,7 @@ Select Customer from the Customer master. If default Currency is updated in the 
 
 Currency Exchange between base currency and customer currency will auto-fetch.
 
-<img alt="Accounts Frozen Date" class="screenshot" src="{{docs_base_url}}/assets/img/articles/multiple-currency-1.gif">
+<img alt="Accounts Frozen Date" class="screenshot" src="/docs/assets/img/articles/multiple-currency-1.gif">
 
 #### Step 4: Update Details
 
@@ -28,7 +28,7 @@ Update other details like Item, Taxes, Terms. In the Taxes and other Charges tab
 
 Save Sales Invoice and then check Print Format. For all the Currency field (rate, amount, totals) Customer's Currency symbol will be updated as well.
 
-<img alt="Accounts Frozen Date" class="screenshot" src="{{docs_base_url}}/assets/img/articles/multiple-currency-2.png">
+<img alt="Accounts Frozen Date" class="screenshot" src="/docs/assets/img/articles/multiple-currency-2.png">
 
 #### Currency Exchange Masters
 

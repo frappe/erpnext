@@ -12,17 +12,17 @@ Items on which differential tax rate is applied, you should mention tax rate for
 
 Here is the example of Item on which 12% GST is applied only.
 
-<img class="screenshot" alt="Opening Account" src="{{docs_base_url}}/assets/img/accounts/item-wise-tax.png">
+<img class="screenshot" alt="Opening Account" src="/docs/assets/img/accounts/item-wise-tax.png">
 
 For the item which is exempted from GST totally, mention 0% as tax rate in the Item master.
 
-<img class="screenshot" alt="Opening Account" src="{{docs_base_url}}/assets/img/accounts/exempted-item.png">
+<img class="screenshot" alt="Opening Account" src="/docs/assets/img/accounts/exempted-item.png">
 
 ####Step 2: Setup Taxes and Other Charges
 
 In Sales Taxes and Other Charges master, select GST 16% account and mention Tax Rate as 16. This tax rate will be applied on all the Items selected in the Sales Order, unless specific Tax Rate is defined in the Item master.
 
-<img class="screenshot" alt="Opening Account" src="{{docs_base_url}}/assets/img/accounts/tax-master.png">
+<img class="screenshot" alt="Opening Account" src="/docs/assets/img/accounts/tax-master.png">
 
 <div class="well">If you want to have tax rate always applied from the Item master, then you should update Rate for the tax account as zero in the Taxes and Charges master.</div>
 
@@ -30,7 +30,7 @@ In Sales Taxes and Other Charges master, select GST 16% account and mention Tax 
 
 In the Sales Order, we have selected many Items. For the items mentioned in blue, tax rate is applied based on tax rate mentioned in the taxes table. For the items highlited in red, tax rate has fetched for them from the respective item master.
 
-<img class="screenshot" alt="Opening Account" src="{{docs_base_url}}/assets/img/accounts/tax-calulation.png">
+<img class="screenshot" alt="Opening Account" src="/docs/assets/img/accounts/tax-calulation.png">
 
 Please note that item's tax rate will be pulled from the item master only if you have update same tax account (GST 16% in this case) in both Item master and tax master.
 

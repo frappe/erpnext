@@ -12,7 +12,7 @@ Feature of setting document as recurring is available in Sales Order, Sales Invo
 
 Option to set document as recurring will be visible only after submission. Recurring is last section in document. Check **Is Recurring** to set document as recurring.
 
-<img alt="Recurring Invoice" class="screenshot" src="{{docs_base_url}}/assets/img/accounts/recurring.gif">
+<img alt="Recurring Invoice" class="screenshot" src="/docs/assets/img/accounts/recurring.gif">
 
 **From Date and To Date:** This defines contract period with the customer.
 

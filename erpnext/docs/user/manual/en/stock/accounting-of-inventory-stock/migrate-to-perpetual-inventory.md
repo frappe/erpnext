@@ -22,7 +22,7 @@ Steps:
 
 	`Explore > Accounts > Accounts Settings`
 	
-	<img class="screenshot" alt="Perpetual Inventory" src="{{docs_base_url}}/assets/img/accounts/perpetual-1.png">
+	<img class="screenshot" alt="Perpetual Inventory" src="/docs/assets/img/accounts/perpetual-1.png">
   
 
   * Create Stock Entry (Material Transfer) to transfer available stock from existing warehouse to new warehouse. As stock will be available in the new warehouse, you should select the new warehouse for all the future transactions.

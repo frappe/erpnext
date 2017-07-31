@@ -20,7 +20,7 @@ setup, check the box that says Item Barcode.
 
 #### Figure 1: Check the box 'Item Barcode'
 
-<img class="screenshot" alt="Barcode" src="{{docs_base_url}}/assets/img/setup/barcode-1.png">
+<img class="screenshot" alt="Barcode" src="/docs/assets/img/setup/barcode-1.png">
 
 
 To start scanning with a bar-code, go to  
@@ -41,7 +41,7 @@ Then go to Accounts and click on Sales Invoice. Check the box 'Is POS'
   
 #### Figure 2: Check the box 'Is POS'
 
-<img class="screenshot" alt="Barcode" src="{{docs_base_url}}/assets/img/setup/barcode-2.png">
+<img class="screenshot" alt="Barcode" src="/docs/assets/img/setup/barcode-2.png">
 
 
 Go to Item and click on Add new row.  

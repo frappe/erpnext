@@ -6,7 +6,7 @@ To create a new Earning Type
 
 > Human Resource > Setup > Earning Type > New
 
-<img class="screenshot" alt="Earning Type" src="{{docs_base_url}}/assets/img/human-resources/earning-type.png">
+<img class="screenshot" alt="Earning Type" src="/docs/assets/img/human-resources/earning-type.png">
 
 
 {next}

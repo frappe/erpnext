@@ -24,7 +24,7 @@ To create Payment Entry, go to unpaid Sales Invoice and create click on Make Pay
 
 Enter Payment Amount as 19,600.
 
-<img alt="Sales Invoice Payment Amount" class="screenshot" src="{{docs_base_url}}/assets/img/articles/withhold-1.png">
+<img alt="Sales Invoice Payment Amount" class="screenshot" src="/docs/assets/img/articles/withhold-1.png">
 
 #####Step 2.2: Allocate Against Sales Invoice
 
@@ -34,6 +34,6 @@ Against Sales Invoice, allocate 20,000 (explained in GIF below).
 
 You can notice that there is a difference of 400 in the Payment Amount and the Amount Allocated against Sales Invoice. You can book this difference account under Withhold Account.
 
-<img alt="Deduction/Loss Account" class="screenshot" src="{{docs_base_url}}/assets/img/articles/withhold-2.gif">
+<img alt="Deduction/Loss Account" class="screenshot" src="/docs/assets/img/articles/withhold-2.gif">
 
  Following same steps, you can also manage difference availed due to Currency Exchange Gain/Loss.

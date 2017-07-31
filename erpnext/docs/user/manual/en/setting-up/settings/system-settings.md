@@ -8,6 +8,6 @@ To open System Settings, go to:
 
 > Setup > Settings > System Settings
 
-<img class="screenshot" alt="System Settings" src="{{docs_base_url}}/assets/img/setup/settings/system-settings.png">
+<img class="screenshot" alt="System Settings" src="/docs/assets/img/setup/settings/system-settings.png">
 
 {next}

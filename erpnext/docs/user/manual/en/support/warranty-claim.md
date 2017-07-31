@@ -17,7 +17,7 @@ To create a new **Warranty Claim**:
 
 > Support > Warranty Claim > New Warranty Claim
 
-![Warranty Claim]({{docs_base_url}}/assets/img/support/warranty-claim.png)
+![Warranty Claim](/docs/assets/img/support/warranty-claim.png)
 
 If a Customer visit is required to address the issue, you can create a new
 Maintenance Visit record from this.

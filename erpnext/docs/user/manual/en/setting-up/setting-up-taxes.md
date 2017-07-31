@@ -24,11 +24,11 @@ sales or purchase tax rate specified by you as default rates.
 
 Item Tax table can be found as a section within the Item Master document.
 
-<img class="screenshot" alt="Item Tax" src="{{docs_base_url}}/assets/img/taxes/item-tax.png">
+<img class="screenshot" alt="Item Tax" src="/docs/assets/img/taxes/item-tax.png">
 
   * **Inclusive and Exclusive Tax**: ERPNext allows you to enter Item rates which are tax inclusive.
 
-<img class="screenshot" alt="Inclusive Tax" src="{{docs_base_url}}/assets/img/taxes/inclusive-tax.png">
+<img class="screenshot" alt="Inclusive Tax" src="/docs/assets/img/taxes/inclusive-tax.png">
 
   * **Exception to the rule**: Item tax settings are required only if a particular Item has a different tax rate than the rate defined in the standard tax Account
   * **Item tax is overwrite-able**: You can overwrite or change the item tax rate by going to the Item master in the Item tax table.
@@ -51,7 +51,7 @@ have to go to:
 
 > Setup > Accounts > Sales Taxes and Charge Master
 
-<img class="screenshot" alt="Sales Tax Master" src="{{docs_base_url}}/assets/img/taxes/sales-tax-master.png">
+<img class="screenshot" alt="Sales Tax Master" src="/docs/assets/img/taxes/sales-tax-master.png">
 
 When you create a new master, you will have to add a row for each tax type.
 

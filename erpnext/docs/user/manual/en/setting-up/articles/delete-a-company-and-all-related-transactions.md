@@ -14,7 +14,7 @@ In Company master, click on the **Delete Company Transactions** button right at 
 
 This action will wipe out all the data related to that company like Quotation, Invoices, Purchase Orders etc. So be careful
 
-<img alt="Delete Transactions" class="screenshot" src="{{docs_base_url}}/assets/img/articles/delete-transactions.gif">
+<img alt="Delete Transactions" class="screenshot" src="/docs/assets/img/articles/delete-transactions.gif">
 
 **Note:** If you want to delete the company record itself, use the normal "Delete" button from Menu options. It will also delete Chart of Accounts, Chart of Cost Centers and Warehouse records for that company.
 

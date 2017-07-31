@@ -10,7 +10,7 @@ In this tool, you can select an account (your Customer’s account) and click on
 
 To cancel off some payments and invoices, select the Invoices and Journal Vouchers and click on “Reconcile”.
 
-<img class="screenshot" alt="Payment Reconciliation" src="{{docs_base_url}}/assets/img/accounts/payment-reconcile-tool.png">
+<img class="screenshot" alt="Payment Reconciliation" src="/docs/assets/img/accounts/payment-reconcile-tool.png">
 
 __Step 1:__ Select the Account against whom the payments need to be reconciled.
 

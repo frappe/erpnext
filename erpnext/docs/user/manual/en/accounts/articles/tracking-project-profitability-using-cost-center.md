@@ -17,7 +17,7 @@ To create new Project, go to:
 
 `Projects > Project > New`
 
-<img alt="Project Default Cost Center" class="screenshot" src="{{docs_base_url}}/assets/img/articles/project-cost-center-4.png">
+<img alt="Project Default Cost Center" class="screenshot" src="/docs/assets/img/articles/project-cost-center-4.png">
 
 #### 1.2 Create Cost Center
 
@@ -27,13 +27,13 @@ To create new Cost Center, go to:
 
 `Accounts > Setup > Cost Center`
 
-[Click here to learn how to manage Cost Centers.]({{docs_base_url}}/user/manual/en/accounts/setup/cost-center.html)
+[Click here to learn how to manage Cost Centers.](/docs/user/manual/en/accounts/setup/cost-center.html)
 
 #### 1.3 Update Cost Center in the Project
 
 Update Cost Center in the Project master.
 
-<img alt="Project Default Cost Center" class="screenshot" src="{{docs_base_url}}/assets/img/articles/project-cost-center-1.png">
+<img alt="Project Default Cost Center" class="screenshot" src="/docs/assets/img/articles/project-cost-center-1.png">
 
 In the sales and purchase transactions, if Project is selected, then Cost Center will fetched from the Project master.
 
@@ -45,7 +45,7 @@ Let's check how this setting will affect your sales and purchase entries.
 
 In the sales transactions (which are Sales Order, Delivery Note and Sales Invoice), Project will be selected in the More Info section. On selection of a Project, respective Cost Center will be updated for all the items in that transaction. Cost Center will be updated on in the transactions which has Cost Center field.
 
-<img alt="Project Default Cost Center" class="screenshot" src="{{docs_base_url}}/assets/img/articles/project-cost-center-2.png">
+<img alt="Project Default Cost Center" class="screenshot" src="/docs/assets/img/articles/project-cost-center-2.png">
 
 #### 2.2 Project in the Purchase Transactions
 
@@ -53,7 +53,7 @@ In the purchase transactions, Project is define for each line item. This is beca
 
 As per perpetual inventory valuation system, expense for the purchased item will be booked when raw-materials are consumed. On consumption of goods, if you are creating Material Issue (stock) entry, then Expense Cost (says Cost of Goods Sold) and Project's Cost Center should be updated in that entry.
 
-<img alt="Project Default Cost Center" class="screenshot" src="{{docs_base_url}}/assets/img/articles/project-cost-center-3.png">
+<img alt="Project Default Cost Center" class="screenshot" src="/docs/assets/img/articles/project-cost-center-3.png">
 
 ### 3. Accounting Report for a Project
 
@@ -63,11 +63,11 @@ Since Project's Cost Center is updated in both sales and purchase entries, you c
 
 **Monthly Project Analysis**
 
-<img alt="Project Default Cost Center" class="screenshot" src="{{docs_base_url}}/assets/img/articles/project-cost-center-5.png">
+<img alt="Project Default Cost Center" class="screenshot" src="/docs/assets/img/articles/project-cost-center-5.png">
 
 **Overall Profitability**
 
-<img alt="Project Default Cost Center" class="screenshot" src="{{docs_base_url}}/assets/img/articles/project-cost-center-6.png">
+<img alt="Project Default Cost Center" class="screenshot" src="/docs/assets/img/articles/project-cost-center-6.png">
 
 #### 3.2 Projectwise Budgeting
 
@@ -77,6 +77,6 @@ To check Budget Variance report, go to:
 
 `Accounts > Budget and Cost Center > Budget Variance Report`
 
-[Click here to learn how to do budgeting from Cost Center]({{docs_base_url}}/user/manual/en/accounts/budgeting.html).
+[Click here to learn how to do budgeting from Cost Center](/docs/user/manual/en/accounts/budgeting.html).
 
 <!-- markdown -->

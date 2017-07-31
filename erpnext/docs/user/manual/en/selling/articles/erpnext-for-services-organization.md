@@ -16,7 +16,7 @@ The setup for a Service company differs primarily for Items. They don't maintain
 
 To create a Service (non-stock) Item, in the item master, uncheck "Maintain Stock" field.
 
-<img alt="Service Item" class="screenshot"  src="{{docs_base_url}}/assets/img/articles/services-1.png">
+<img alt="Service Item" class="screenshot"  src="/docs/assets/img/articles/services-1.png">
 
 When creating Sales Order for the services, select Order Type as **Maintenance**. Sales Order of Maintenance Type needs lesser details compared to stock item's order like Delivery Note, item warehouse etc.
 
@@ -34,11 +34,11 @@ Modules unchecked here will be hidden from all the User.
 
 Within the form, there are many fields only needed for companies into trading and manufacturing businesses. These fields can be hidden for the service company. Feature Setup is a tool where you can enable/disable specific feature. If a feature is disabled, then fields relevant to that feature is hidden from all the forms. For example, if Serial No. feature is disabled, then Serial. No. field from Item as well as from all the sales and purchase transaction will be hidden.
 
-[To learn more about Feature Setup, click here.]({{docs_base_url}}/user/manual/en/customize-erpnext/hiding-modules-and-features.html).
+[To learn more about Feature Setup, click here.](/docs/user/manual/en/customize-erpnext/hiding-modules-and-features.html).
 
 ####Permissions
 
-ERPNext is the permission controlled system. Users access system based on permissions assigned to them. So, if user is not assigned Role related to Stock and Manufacturing module, it will be hidden from that User. [Click here to learn more about permission management.]({{docs_base_url}}/user/manual/en/setting-up/users-and-permissions.html).
+ERPNext is the permission controlled system. Users access system based on permissions assigned to them. So, if user is not assigned Role related to Stock and Manufacturing module, it will be hidden from that User. [Click here to learn more about permission management.](/docs/user/manual/en/setting-up/users-and-permissions.html).
 
 You can also refer to help video on User and Permissions setting in ERPNext.
 

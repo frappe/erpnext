@@ -14,37 +14,37 @@ To add a Custom Field, go to:
 
 In the Customize Form, select Document Type in which you want to insert Custom Field. Let's assume we are inserting Custom Field in the Employee master.
 
-<img alt="Select Document Type" class="screenshot" src="{{docs_base_url}}/assets/img/customize/custom-field-1.gif">
+<img alt="Select Document Type" class="screenshot" src="/docs/assets/img/customize/custom-field-1.gif">
 
 #### Insert Row for the Custom Field
 
 In Customize Form, open the field above which you want to insert a Custom Field. Click on Insert Above.
 
-<img alt="Select Document Type" class="screenshot" src="{{docs_base_url}}/assets/img/customize/custom-field-2.gif">
+<img alt="Select Document Type" class="screenshot" src="/docs/assets/img/customize/custom-field-2.gif">
 
 ####Set Field Label
 
 Custom Field's name will be set based on its Label. If you want to create Custom Field with specific name, but with different label, then you should first set Label as you want Field Name to be set. After Custom Field is saved, you can edit the Field Label again.
 
-<img alt="Select Document Type" class="screenshot" src="{{docs_base_url}}/assets/img/customize/custom-field-3.png">
+<img alt="Select Document Type" class="screenshot" src="/docs/assets/img/customize/custom-field-3.png">
 
 ####Select Field Type
 
 There are various types of Field like Data, Date, Link, Select, Text and so on. Select Field Type for the Custom Field.
 
-<img alt="Select Document Type" class="screenshot" src="{{docs_base_url}}/assets/img/customize/custom-field-4.png">
+<img alt="Select Document Type" class="screenshot" src="/docs/assets/img/customize/custom-field-4.png">
 
-Click [here]({{docs_base_url}}/user/manual/en/customize-erpnext/articles/field-types.html) to learn more about types of field you can set for your Custom Field.
+Click [here](/docs/user/manual/en/customize-erpnext/articles/field-types.html) to learn more about types of field you can set for your Custom Field.
 
 ####Set Option
 
 Based on the Field Type, value will be entered in the Options field.
 
-If you are creating a Link field, then in the Options, enter Doctype name with which this field will be linked. Click [here]({{docs_base_url}}/user/manual/en/customize-erpnext/articles/creating-custom-link-field.html) to learn more about creating custom link field.
+If you are creating a Link field, then in the Options, enter Doctype name with which this field will be linked. Click [here](/docs/user/manual/en/customize-erpnext/articles/creating-custom-link-field.html) to learn more about creating custom link field.
 
 If field type is set as Select (drop down field), then all he possible result for this field should be listed in the Options field. Each possible result should be separate by row.
 
-<img alt="Select Document Type" class="screenshot" src="{{docs_base_url}}/assets/img/customize/custom-field-5.png">
+<img alt="Select Document Type" class="screenshot" src="/docs/assets/img/customize/custom-field-5.png">
 
 For Data field, Option can be set to "Email" or "Phone" and the field will be validated accordingly.
 
@@ -65,7 +65,7 @@ You can set properties as:
 
 After inserting required details for the Custom Field, Update Customize Form. On update, Custom Field will be inserting in the form, Employee master in this case. Before checking Employee form, reload your ERPNext account. After reload, check Employee form to see Custom Field in a form.
 
-<img alt="Select Document Type" class="screenshot" src="{{docs_base_url}}/assets/img/customize/custom-field-6.png">
+<img alt="Select Document Type" class="screenshot" src="/docs/assets/img/customize/custom-field-6.png">
 
 ####Deleting Custom Field
 

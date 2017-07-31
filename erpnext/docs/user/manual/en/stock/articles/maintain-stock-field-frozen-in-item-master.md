@@ -8,7 +8,7 @@ In the item master, you might witness values in the following fields to be froze
 1. Has Batch No.
 1. Has Serial No.
 
-<img alt="Item Field Frozen" class="screenshot" src="{{docs_base_url}}/assets/img/articles/maintain-stock-1.png">
+<img alt="Item Field Frozen" class="screenshot" src="/docs/assets/img/articles/maintain-stock-1.png">
 
 For an item, once stock ledger entry is created, values in these fields will be froze. This is to prevent user from changing value which can lead to mis-match of actual stock, and stock level in the system of an item.
 

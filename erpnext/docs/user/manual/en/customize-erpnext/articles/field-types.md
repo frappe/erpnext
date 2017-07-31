@@ -34,7 +34,7 @@ This field will give you date and time picker. Current date and time (as provide
 
 - Dynamic Link
 
-Click [here]({{docs_base_url}}/user/manual/en/customize-erpnext/articles/managing-dynamic-link-fields.html) to learn how Dynamic Link Field function.
+Click [here](/docs/user/manual/en/customize-erpnext/articles/managing-dynamic-link-fields.html) to learn how Dynamic Link Field function.
 
 - Float
 
