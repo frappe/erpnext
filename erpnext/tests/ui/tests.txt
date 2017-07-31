@@ -34,7 +34,7 @@ erpnext/schools/doctype/student_category/test_student_category.js
 erpnext/schools/doctype/room/test_room.js
 erpnext/schools/doctype/instructor/test_instructor.js
 erpnext/stock/doctype/warehouse/test_warehouse.js
-erpnext/manufacturing/doctype/production_order/test_production_order.js
+erpnext/manufacturing/doctype/production_order/test_production_order.js #long
 erpnext/accounts/page/pos/test_pos.js
 erpnext/selling/doctype/product_bundle/test_product_bundle.js
 erpnext/schools/doctype/grading_scale/test_grading_scale.js
