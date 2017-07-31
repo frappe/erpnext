@@ -24,6 +24,7 @@ erpnext/hr/doctype/attendance/test_attendance.js
 erpnext/hr/doctype/leave_type/test_leave_type.js
 erpnext/hr/doctype/leave_control_panel/test_leave_control_panel.js
 erpnext/hr/doctype/leave_allocation/test_leave_allocation.js
+erpnext/hr/doctype/leave_application/test_leave_application.js
 erpnext/schools/doctype/academic_year/test_academic_year.js
 erpnext/schools/doctype/academic_term/test_academic_term.js
 erpnext/schools/doctype/school_settings/test_school_settings.js
@@ -33,3 +34,5 @@ erpnext/schools/doctype/room/test_room.js
 erpnext/schools/doctype/instructor/test_instructor.js
 erpnext/stock/doctype/warehouse/test_warehouse.js
 erpnext/manufacturing/doctype/production_order/test_production_order.js
+erpnext/accounts/page/pos/test_pos.js
+erpnext/selling/doctype/product_bundle/test_product_bundle.js

@@ -69,6 +69,13 @@ QUnit.test("test: item", function (assert) {
 				{default_warehouse: "Stores - RB"}
 			]
 		),
+		() => frappe.tests.make(
+			"Item", [
+				{item_code: "Computer"},
+				{item_group: "Products"},
+				{is_stock_item: 0},
+			]
+		),
 
 		// Create a scrap item
 		() => frappe.tests.make(
