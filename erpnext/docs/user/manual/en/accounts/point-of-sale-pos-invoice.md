@@ -17,6 +17,23 @@ In ERPNext all Sales and Purchase transactions, like Sales Invoice, Quotation, S
 1. Enable POS View via (Setup > Customize > Feature Setup)
 2. Create a [POS Profile]({{docs_base_url}}/user/manual/en/setting-up/pos-setting.html) record
 
+
+#### Starting and Ending a POS session
+
+It is a common practice to create a new session each day for each physical point of sale.
+Each session can then be used for reconciliation and reporting purposes.
+
+In ERPNext, the creation of a new session will occur when the user clicks on his/her picture at the beginning of the day for example:
+
+<img class="screenshot" alt="POS Session Start" src="{{docs_base_url}}/assets/img/accounts/pos_session_start.png">
+
+The session will run until it is ended by the cashier and all invoices generated during the day will be linked to a particular session.
+
+At the end of the day, when the cashier closes its counter, he/she can end the current session by selecting the corresponding option in the menu:
+
+<img class="screenshot" alt="POS Session Start" src="{{docs_base_url}}/assets/img/accounts/pos_session_end.png">
+
+
 #### Different sections of the POS
 
   * Update Stock: If this is checked, Stock Ledger Entries will be made when you “Submit” this Sales Invoice thereby eliminating the need for a separate Delivery Note.
@@ -50,7 +67,7 @@ in Search box.
 ### Removing an Item from the Cart
 
 1. Select row in the cart and clik on delete button in the numeric keypad
-  
+
 <img class="screenshot" alt="POS Item" src="{{docs_base_url}}/assets/img/accounts/pos_deleted_item.gif">
 
 
@@ -68,7 +85,7 @@ ready to make the Payment. Payment process is divided into 3 steps -
   1. Click on “Make Payment” to get the Payment window.
   2. Select your “Mode of Payment”.
   3. Click on “Pay” button to Save the document.
-  
+
 <img class="screenshot" alt="POS Payment" src="{{docs_base_url}}/assets/img/accounts/pos-payment.png">
 
 Submit the document to finalise the record. After the document is submitted,
@@ -97,12 +114,12 @@ All the records from the POS stores into the browser's local storegae and sync s
 
 Debits:
 
-  * Customer (grand total) 
+  * Customer (grand total)
   * Bank / Cash (payment)
 
 Credits:
 
-  * Income (net total, minus taxes for each Item) 
+  * Income (net total, minus taxes for each Item)
   * Taxes (liabilities to be paid to the government)
   * Customer (payment)
   * Write Off (optional)

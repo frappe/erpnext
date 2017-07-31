@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, json
-from frappe.utils import nowdate
+from frappe.utils import nowdate, now_datetime
 from erpnext.setup.utils import get_exchange_rate
 from frappe.core.doctype.communication.email import make
 from erpnext.stock.get_item_details import get_pos_profile
@@ -136,10 +136,10 @@ def get_items_list(pos_profile):
 			item_groups.extend([d.name for d in get_child_nodes('Item Group', d.item_group)])
 		cond = "item_group in (%s)"%(', '.join(['%s']*len(item_groups)))
 
-	return frappe.db.sql(""" 
+	return frappe.db.sql("""
 		select
 			name, item_code, item_name, description, item_group, expense_account, has_batch_no,
-			has_serial_no, expense_account, selling_cost_center, stock_uom, image, 
+			has_serial_no, expense_account, selling_cost_center, stock_uom, image,
 			default_warehouse, is_stock_item, barcode, brand
 		from
 			tabItem
@@ -198,11 +198,11 @@ def get_contacts(customers):
 		customers = [frappe._dict({'name': customers})]
 
 	for data in customers:
-		contact = frappe.db.sql(""" select email_id, phone, mobile_no from `tabContact` 
+		contact = frappe.db.sql(""" select email_id, phone, mobile_no from `tabContact`
 			where is_primary_contact =1 and name in
 			(select parent from `tabDynamic Link` where link_doctype = 'Customer' and link_name = %s
 			and parenttype = 'Contact')""", data.name, as_dict=1)
-		if contact: 
+		if contact:
 			customer_contact[data.name] = contact[0]
 
 	return customer_contact
@@ -411,7 +411,7 @@ def make_contact(args,customer):
 
 def make_address(args, customer):
 	if not args.get('address_line1'): return
-	
+
 	name = args.get('name')
 
 	if not name:
@@ -480,3 +480,23 @@ def save_invoice(e, si_doc, name):
 		si_doc.flags.ignore_mandatory = True
 		si_doc.due_date = si_doc.posting_date
 		si_doc.insert()
+
+@frappe.whitelist()
+def start_pos_session(pos_session_start):
+	new_session = frappe.get_doc({
+		"doctype" : "POS Session",
+		"pos_session_date" : nowdate(),
+		"pos_session_start" : pos_session_start
+	}).insert(ignore_permissions=True)
+
+	return new_session.name
+
+@frappe.whitelist()
+def end_pos_session(name, end):
+	frappe.reload_doctype('POS Session')
+	pos_session = frappe.get_doc("POS Session", name)
+
+	arg = { 'pos_session_end': end}
+	pos_session.update(arg)
+	pos_session.submit()
+	frappe.db.commit()
