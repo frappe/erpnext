@@ -42,9 +42,8 @@ QUnit.test("test sales order", function(assert) {
 			// get tax account head details
 			assert.ok(cur_frm.doc.taxes[0].account_head=='CGST - '+frappe.get_abbr(frappe.defaults.get_default('Company')), " Account Head abbr correct");
 			// calculate totals
-			assert.ok(cur_frm.doc.items[0].price_list_rate==1000, "Item 1 price_list_rate "+cur_frm.doc.items[0].price_list_rate);
+			assert.ok(cur_frm.doc.items[0].price_list_rate==1000, "Item 1 price_list_rate");
 			assert.ok(cur_frm.doc.total== 4500, "total correct ");
-/*			assert.ok(cur_frm.doc.net_total== 4095, "net_total correct "+cur_frm.doc.net_total);*/
 			assert.ok(cur_frm.doc.rounded_total== 4414.5, "rounded total correct ");
 
 		},
@@ -55,8 +54,8 @@ QUnit.test("test sales order", function(assert) {
 			assert.ok($(".section-break+ .section-break .column-break:nth-child(1) .data-field:nth-child(1) .value").text().includes("Billing Street 1"), "Print Preview Works As Expected");
 		},
 		() => cur_frm.print_doc(),
-/*		() => frappe.tests.click_button('Submit'),
-		() => frappe.tests.click_button('Yes'),*/
+		() => frappe.tests.click_button('Submit'),
+		() => frappe.tests.click_button('Yes'),
 		() => frappe.timeout(0.3),
 		() => done()
 	]);
