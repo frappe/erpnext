@@ -1,5 +1,5 @@
-QUnit.test("test salary structure", function(assert) {
-	assert.expect(6);
+QUnit.test("test Salary", function(assert) {
+	assert.expect(9);
 	let done = assert.async();
 	let employee_name;
 	frappe.run_serially([
@@ -61,6 +61,22 @@ QUnit.test("test salary structure", function(assert) {
 
 			assert.ok(cur_frm.doc.deductions[0].formula.includes('(b+hra) * .20'),
 				'Formula for deductions as Income Tax is correctly set');
+		},
+		() => {
+			// Creating a salary slip for a employee
+			frappe.tests.make('Salary Slip', [
+				{ employee: employee_name}
+			]);
+		},
+		() => frappe.timeout(4),
+		() => {
+			// To check if all the calculations are correctly done
+			assert.ok(cur_frm.doc.gross_pay==42500,
+				'Gross amount is correctly calculated');
+			assert.ok(cur_frm.doc.total_deduction==7000,
+				'Deduction amount is correctly calculated');
+			assert.ok(cur_frm.doc.net_pay==35500,
+				'Net amount is correctly calculated');
 		},
 		() => done()
 	]);
