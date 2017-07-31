@@ -1,3 +1,5 @@
+# Migrate To Perpetual Inventory
+
 Perpetual Inventory Valuation is activated by default in the system.
 
 For the users who are currently following periodic inventory valuation system, and wish to migrate to perpetual inventory valuation system, please follow the steps explained below.

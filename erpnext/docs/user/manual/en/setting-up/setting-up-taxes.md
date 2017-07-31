@@ -1,3 +1,5 @@
+# Setting Up Taxes
+
 One of the primary motivator for compulsory use of accounting tools is
 calculation of Taxes. You may or may not make money but your government will
 (to help your country be safe and prosperous). And if you don’t calculate your

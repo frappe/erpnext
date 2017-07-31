@@ -1,3 +1,5 @@
+# Sales Invoice
+
 A Sales Invoice is a bill that you send to your customers, against which the customer processes the payment. Sales Invoice is an accounting transaction. On submission of Sales Invoice,  the system updates the receivable and books income against a Customer Account.
 
 You can create a Sales Invoice directly from

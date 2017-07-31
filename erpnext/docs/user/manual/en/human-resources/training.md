@@ -1,3 +1,5 @@
+# Training
+
 ### Training Event
 
 Schedule seminars, workshops, conferences etc using Training Event. You can also invite your employees to attend the event using this feature.

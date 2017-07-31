@@ -1,3 +1,5 @@
+# Stock Reconciliation For Non Serialized Item
+
 Stock Reconciliation is the process of counting and evaluating stock-in-trade,
 usually at an organisations year end in order to value the total stock for
 preparation of the accounts. In this process actual physical stocks are

@@ -1,3 +1,5 @@
+# Tax Rule
+
 You can define which [Tax Template]({{docs_base_url}}/user/manual/en/setting-up/setting-up-taxes.html) must be applied on a Sales / Purchase transaction using Tax Rule.
 
 <img class="screenshot" alt="Tax Rule" src="{{docs_base_url}}/assets/img/accounts/tax-rule.png">

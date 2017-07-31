@@ -1,3 +1,5 @@
+# Deduction Type
+
 You can make a record of the tax and other salary deductions and describe it as Deduction Type
 
 To create a new Deduction Type

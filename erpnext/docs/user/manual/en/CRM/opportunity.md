@@ -1,3 +1,5 @@
+# Opportunity
+
 When you know a Lead is looking for some products or services to buy, you can
 track that as an Opportunity. Also opportunity document helps user to collect the requirement of a customer/lead.
 

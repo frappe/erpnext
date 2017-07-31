@@ -1,3 +1,5 @@
+# Warranty Claim
+
 If you are selling **Items** under warranty or if you have sold and extended
 service contract like the Annual Maintenance Contract (AMC), your **Customer**
 may call you about an issue or a break-down and give you the Serial No of this

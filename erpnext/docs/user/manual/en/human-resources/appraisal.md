@@ -1,3 +1,5 @@
+# Appraisal
+
 In ERPNext, you can manage Employee Appraisals by creating an Appraisal
 Template for each role with the parameters that define the performance by
 giving appropriate weightage to each parameter.

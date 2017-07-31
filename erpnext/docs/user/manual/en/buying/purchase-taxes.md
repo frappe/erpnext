@@ -1,3 +1,5 @@
+# Purchase Taxes
+
 For Tax Accounts that you want to use in the tax templates, you must mention
 them as type “Tax” in your Chart of Accounts.
 

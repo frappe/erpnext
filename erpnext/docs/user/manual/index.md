@@ -1,6 +1,3 @@
-<!---
-WORK IN PROGRESS
--->
 # ERPNext User Manual
 
 Select your language

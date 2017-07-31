@@ -1,3 +1,5 @@
+# Batch
+
 Batch feature in ERPNext allows you to group multiple units of an item,
 and assign them a unique value/number/tag called Batch No.
 

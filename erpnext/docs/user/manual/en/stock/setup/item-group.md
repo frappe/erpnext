@@ -1,3 +1,5 @@
+# Item Group
+
 Item Group is the classification category. Depending on the type of product,
 categorise it under its respective field. If the product is
 service oriented, name it under the group head - service. If the

@@ -1,3 +1,5 @@
+# Job Applicant
+
 You can mantain a list of People who have applied for a [Job Opening]({{docs_base_url}}/user/manual/en/human-resources/job-opening.html).
 
 To create a new Job Applicant go to 

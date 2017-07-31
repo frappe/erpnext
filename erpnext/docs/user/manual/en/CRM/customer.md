@@ -1,3 +1,5 @@
+# Customer
+
 A customer, who is sometimes known as a client, buyer, or purchaser is the one
 who receives goods, services, products, or ideas, from a seller for a monetary
 consideration. A customer can also receive goods or services from a vendor or

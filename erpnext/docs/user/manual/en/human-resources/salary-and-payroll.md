@@ -1,3 +1,5 @@
+# Salary And Payroll
+
 Salary is a fixed amount of money or compensation paid to an employee by an employer in return for the work performed . 
 
 Payroll is the administration of financial records of employees' salaries, wages, bonuses, net pay, and deductions.

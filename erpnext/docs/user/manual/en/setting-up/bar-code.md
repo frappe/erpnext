@@ -1,3 +1,5 @@
+# Bar Code
+
 A Barcode is a machine-readable code in the form of numbers and a pattern of
 parallel lines of varying widths, printed on a commodity and used especially
 for stock control.

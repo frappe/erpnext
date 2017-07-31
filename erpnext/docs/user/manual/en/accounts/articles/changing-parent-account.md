@@ -1,3 +1,5 @@
+# Changing Parent Account
+
 #Changing Parent Account
 
 Chart of Account has hierarchical structure. Each account has a parent it is listed under. 

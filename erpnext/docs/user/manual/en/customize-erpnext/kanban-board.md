@@ -1,3 +1,5 @@
+# Kanban Board
+
 #Kanban Board
  
 Kanban is a Japanese manufacturing system in which the supply of components is regulated through the use of an instruction card sent along the production line.

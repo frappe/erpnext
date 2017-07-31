@@ -1,3 +1,5 @@
+# Advance Payment Entry
+
 Payment done by the customer before accepting delivery of the product is an
 Advance Payment. For Orders of high value, the business houses expect to
 receive advance.

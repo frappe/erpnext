@@ -1,3 +1,5 @@
+# Payment Tool
+
 ###Payment Tool
 The Payment Tool Feature allows non-accounting personnel to generate Journal Entries by populating relevant fields in the Journal Entry with account and payment details.
 

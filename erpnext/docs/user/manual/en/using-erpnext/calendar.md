@@ -1,3 +1,5 @@
+# Calendar
+
 The Calendar is a tool where you can create and share Events and also see auto-generated events from the system.
 
 You can switch calendar view based on Month, Week and Day.

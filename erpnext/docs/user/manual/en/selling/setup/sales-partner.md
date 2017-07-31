@@ -1,3 +1,5 @@
+# Sales Partner
+
 People who assist you in getting business are termed as Sales Partners. Sales Partners can be represented by different names in ERPNext. You can call them Channel Partner, Distributor, Dealer, Agent, Retailer, Implementation Partner, Reseller etc.
 
 For each Sales Partner, you can define commission offer to them. When Sales Partner is selected in transactions, their commission is calculated over Net Total of Sales Order/Invoice or Delivery Note.

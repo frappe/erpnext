@@ -1,3 +1,5 @@
+# Sales Person Target Allocation
+
 With management of Sales Person, ERPNext also allow you to assign target to Sales Persons based on Item Group and Territory. Based on target allocated and actual sales booked by Sales Person, you will get target variance report for the Sales Person.
 
 ###1. Sales Person - Item Groupwise Target Allocation

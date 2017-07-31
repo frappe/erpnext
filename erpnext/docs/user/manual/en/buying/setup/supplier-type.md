@@ -1,3 +1,5 @@
+# Supplier Type
+
 A supplier may be distinguished from a contractor or subcontractor, who
 commonly adds specialized input to deliverables. A supplier is also known as a
 vendor. There are different types of suppliers based on their goods and

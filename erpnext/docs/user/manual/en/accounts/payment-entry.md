@@ -1,3 +1,5 @@
+# Payment Entry
+
 Payment Entry can be made against following transactions.
 
   1. Sales Invoice.

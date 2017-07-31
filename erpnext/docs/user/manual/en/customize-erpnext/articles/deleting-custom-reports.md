@@ -1,3 +1,5 @@
+# Deleting Custom Reports
+
 #Deleting Custom Reports
 
 ERPNext has several [types of reports]({{docs_base_url}}/user/manual/en/customize-erpnext/articles/making-custom-reports-in-erpnext) which can be customize as per the companies/users requirement.

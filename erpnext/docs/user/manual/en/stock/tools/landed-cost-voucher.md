@@ -1,3 +1,5 @@
+# Landed Cost Voucher
+
 Landed Cost is the total cost of a product to reach the product at the buyer’s door. Landed costs include the original cost of the item, complete shipping costs, customs duties, taxes, insurance and currency conversion fees etc. All of these components might not be applicable in every shipment, but relevant components must be considered as a part of the landed cost.
 
 > To understand landed cost better, let’s take an example based on our daily lives. You need to purchase a new washing machine for your home. Before making actual purchase, you probably do some investigation to know the best price. In this process, you often found a better deal from a store which is long away from your home. But you should also consider shipping cost while buying from that store. Total cost including transportation might be more than the price you get in your nearby store. In that case you will choose to buy from  your nearest store, as landed cost of the item is cheaper in the nearest store.

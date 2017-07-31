@@ -1,3 +1,5 @@
+# Customer Group
+
 Customer groups allow you to organize your customers. You can also have discounts based on customer groups.
 You can also get trend analysis for each
 group. Typically Customers are grouped by market segment (that is usually

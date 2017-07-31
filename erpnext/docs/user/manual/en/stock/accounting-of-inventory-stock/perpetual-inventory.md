@@ -1,3 +1,5 @@
+# Perpetual Inventory
+
 As per the perpetual inventory system, accounts posting is done for every stock transaction.
 
 On creating new Warehouse, the system will automatically create an Account in the Chart of Account, with the same name as Warehouse Name.

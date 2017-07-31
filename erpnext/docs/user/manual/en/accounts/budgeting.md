@@ -1,3 +1,5 @@
+# Budgeting
+
 In ERPNext, you can set and manage Budgets against a specific Account. This is useful when, for example, you are doing online sales. You have a budget for search ads, and you want ERPNext to stop or warn you from over spending, based on that budget.
 
 Budgets are also great for planning purposes. When you are making plans for the next financial year, you would typically target a revenue based on which you would set your expenses. Setting a budget will ensure that your expenses do not get out of hand, at any point, as per your plans.

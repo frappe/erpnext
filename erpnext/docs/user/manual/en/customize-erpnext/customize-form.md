@@ -1,3 +1,5 @@
+# Customize Form
+
 <!--markdown-->
 Before we venture to learn form customization tool, click [here](https://frappe.io/docs/user/en/tutorial/doctypes.html) to understand the architecture of forms in ERPNext. It shall help you in using Customize Form tool more efficiently.
 

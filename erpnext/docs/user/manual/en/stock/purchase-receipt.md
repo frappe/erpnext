@@ -1,3 +1,5 @@
+# Purchase Receipt
+
 Purchase Receipts are made when you accept material from your Supplier usually
 against a Purchase Order.
 

@@ -1,3 +1,5 @@
+# Territory
+
 If your business operates in multiple Territories (could be countries, states
 or cities) it is usually a great idea to build your structure in the system.
 Once you group your Customers by Territories, you can set annual targets for

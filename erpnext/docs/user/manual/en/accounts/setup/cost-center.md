@@ -1,3 +1,5 @@
+# Cost Center
+
 Your Chart of Accounts is mainly designed to provide reports to the government
 and tax authorities. Most businesses have multiple activities like different
 product lines, market segments, areas of business, etc that share some common

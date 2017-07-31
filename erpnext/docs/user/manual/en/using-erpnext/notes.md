@@ -1,3 +1,5 @@
+# Notes
+
 You can store your long notes under this section. It can contain your partner lists, frequently used passwords, terms and conditions, or any other document which needs to be shared. Following are the steps to create new Note.
 
 `Explore > Note > New`

@@ -1,3 +1,5 @@
+# Payments
+
 Payment can be made against following transactions.
 
   1. Sales Invoice.

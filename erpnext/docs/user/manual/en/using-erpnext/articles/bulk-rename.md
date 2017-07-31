@@ -1,3 +1,5 @@
+# Bulk Rename
+
 #Bulk Rename
 
 Using renaming tool, you can to rectify/change multiple document ids at once. This tool is only accessible to the User who has System Manager role assigned.

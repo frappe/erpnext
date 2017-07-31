@@ -1,3 +1,5 @@
+# Field Types
+
 #Field Types
 
 Following are the types of fields you can define while creating new ones, or while amend standard ones.

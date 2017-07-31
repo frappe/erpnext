@@ -1,3 +1,5 @@
+# Stock Entry
+
 A Stock Entry is a simple document that lets you record Item movement from a
 Warehouse, to a Warehouse and between Warehouses.
 

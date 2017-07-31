@@ -1,3 +1,5 @@
+# Item Price
+
 Item Price is the record in which you can log sellig and buying rate of an item.
 
 There are two ways to reach to new Item Price form.

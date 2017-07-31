@@ -1,3 +1,5 @@
+# Warehouse
+
 A warehouse is a commercial building for storage of goods. Warehouses are used
 by manufacturers, importers, exporters, wholesalers, transport businesses,
 customs, etc. They are usually large plain buildings in industrial areas of

@@ -1,3 +1,5 @@
+# Print Format
+
 Print Formats are the layouts that are generated when you want to Print or
 Email a transaction like a Sales Invoice. There are two types of Print
 Formats,

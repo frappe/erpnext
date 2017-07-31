@@ -1,3 +1,5 @@
+# Supplier
+
 Suppliers are companies or individuals who provide you with products or services.
 
 You can create a new Supplier from:

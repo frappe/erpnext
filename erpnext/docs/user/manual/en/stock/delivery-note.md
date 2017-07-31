@@ -1,3 +1,5 @@
+# Delivery Note
+
 A Delivery Note is made when a shipment is shipped from the company’s
 Warehouse.
 

@@ -1,3 +1,5 @@
+# Workstation
+
 ### Workstation
 
 Workstation stores information regarding the place where the workstation operations is carried out.

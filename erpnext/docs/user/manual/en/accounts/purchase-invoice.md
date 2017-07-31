@@ -1,3 +1,5 @@
+# Purchase Invoice
+
 Purchase Invoice is the exact opposite of your Sales Invoice. It is the bill
 that your Supplier sends you for products or services delivered. Here you
 accrue expenses to your Supplier. Making a Purchase Invoice is very similar to

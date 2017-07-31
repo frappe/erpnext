@@ -1,3 +1,5 @@
+# Managing Perm Level
+
 #Managing Perm Level in Permission Manager
 
 In each document, you can group fields by "levels". Each group of field is denoted by a unique number (0, 1, 2, 3 etc.). A separate set of permission rules can be applied to each field group. By default all fields are of level 0.

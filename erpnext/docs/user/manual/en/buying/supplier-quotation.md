@@ -1,3 +1,5 @@
+# Supplier Quotation
+
 A Supplier Quotation is a formal statement of promise by potential supplier to
 supply the goods or services required by a buyer, at specified prices, and
 within a specified period. A quotation may also contain terms of sale and

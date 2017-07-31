@@ -1,3 +1,5 @@
+# Accounting Entries
+
 The concept of accounting is explained with an example given below: We will
 take a "Tea Stall" as a company and see how to book accounting entries for the
 business.

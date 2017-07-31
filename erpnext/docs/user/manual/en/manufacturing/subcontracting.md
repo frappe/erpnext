@@ -1,3 +1,5 @@
+# Subcontracting
+
 Subcontracting is a type of job contract that seeks to outsource certain types
 of work to other companies. It allows work on more than one phase of the
 project to be done at once, often leading to a quicker completion.

@@ -1,3 +1,5 @@
+# Buying Settings
+
 Buying Settings is where you can define properties which will be applied in the Buying module's transactions. 
 
 ![Buying Settings]({{docs_base_url}}/assets/img/buying/buying-settings.png)

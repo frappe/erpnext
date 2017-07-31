@@ -1,3 +1,5 @@
+# Shipping Rule
+
 Using Shipping Rule you can define the cost for delivering the product to the customer.
 You can define different shipping rules for the same item across different territories.
 

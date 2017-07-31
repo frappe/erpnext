@@ -1,3 +1,5 @@
+# Purchase Order
+
 A Purchase Order is analogous to a Sales Order. It is usually a binding
 contract with your Supplier that you promise to buy a set of Items under the
 given conditions.

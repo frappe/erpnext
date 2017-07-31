@@ -1,3 +1,5 @@
+# Data Import Tool
+
 The Data Import Tool is a great way to upload (or edit) bulk data, specially master data, into the system.
 
 To Open the data import tool, you either go to Setup or go to the Transaction you want to Import. If Data Import is allowed, you will see an Import Button:

@@ -1,3 +1,5 @@
+# Authorization Rule
+
 Authorization Rule is a tool to define rule for conditional authorization.
 
 If you sales and purchase transactions of higher value or discount requires an authorization from senior manager, you can set authorization rule for it.

@@ -1,3 +1,5 @@
+# Payment Reconciliation
+
 In complex scenarios, especially in the capital goods industry, sometimes there is no direct link between payments and invoices. You send invoices to your Customers and your Customer sends you block payments or payments based on some schedule that is not linked to your invoices.
 
 In such cases, you can use the Payment to Invoice Matching Tool.

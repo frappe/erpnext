@@ -1,3 +1,5 @@
+# Bill Of Materials
+
 At the heart of the Manufacturing system is the **Bill of Materials** (BOM).
 The **BOM** is a list of all materials (either bought or made) and operations
 that go into a finished product or sub-Item. In ERPNext, the component could

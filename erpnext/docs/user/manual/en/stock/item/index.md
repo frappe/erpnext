@@ -1,3 +1,5 @@
+# Item
+
 An Item is your companys' product or a service. The term Item is applicable to things (products or services) you sell as well as raw materials or components of products yet to be produced (before they can be sold to customers). An Item can be a physical product or a service that you buy/sell from your customers/suppliers. ERPNext allows you to manage all sorts of items like raw-materials, sub-assemblies, finished goods, item variants and service items.
 
 ERPNext is optimised for itemised management of your sales and purchase. If you are in services, you can create an Item for each services that your offer. Completing the Item Master is very essential for successful implementation of ERPNext.

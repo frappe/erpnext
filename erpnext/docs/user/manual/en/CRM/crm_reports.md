@@ -1,3 +1,5 @@
+# Crm Reports
+
 CRM module's reports helps users to get the information about the prospects. Using Following reports, user can analyze the data about prospect's history with a company and will helps user to build strong relationships with them.
 
 ###Lead Details

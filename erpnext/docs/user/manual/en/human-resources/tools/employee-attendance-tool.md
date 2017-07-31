@@ -1,3 +1,5 @@
+# Employee Attendance Tool
+
 To go the attendance tool, go to:
 
 > Human Resources > Tools > Employee Attendance Tool

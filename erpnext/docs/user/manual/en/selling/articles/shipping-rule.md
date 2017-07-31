@@ -1,3 +1,5 @@
+# Shipping Rule
+
 #Shipping Rule
 
 Shipping Rule master helps in defining a rule based on which shipping charge is applied on a sales transactions.

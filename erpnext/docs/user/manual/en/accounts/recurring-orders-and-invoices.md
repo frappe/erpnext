@@ -1,3 +1,5 @@
+# Recurring Orders And Invoices
+
 #Recurring Orders and Invoices
 
 If you have a contract with a **Customer** where you bill the Customer on a monthly, quarterly, half-yearly or annual basis, you should use recurring feature in orders and invoices. 

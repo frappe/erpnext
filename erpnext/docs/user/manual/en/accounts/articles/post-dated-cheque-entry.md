@@ -1,3 +1,5 @@
+# Post Dated Cheque Entry
+
 #Post Dated Cheque Entry
 
 Post Dated Cheque is a cheque dated on future date. Party generally give post dated cheque, as advance payment. This cheque would be cleared only when cheque date arrives.

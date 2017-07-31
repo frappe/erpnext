@@ -1,3 +1,5 @@
+# Workflows
+
 In order to allow multiple people to submit multiple requests, for approvals,
 by multiple users, ERPNext requires you to fill the workflow conditions.
 ERPNext tracks the multiple permissions before submission.

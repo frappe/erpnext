@@ -1,3 +1,5 @@
+# Quotation
+
 During a sale, the customer may request for a written note about the products
 or services you are planning to offer, along with the prices and other terms
 of engagement. This is called a “Proposal” or an “Estimate” or a “Pro Forma

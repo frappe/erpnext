@@ -1,3 +1,5 @@
+# Accounts Settings
+
 
 <img class="screenshot" alt="Account Settings" src="{{docs_base_url}}/assets/img/accounts/account-settings.png">
 

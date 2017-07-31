@@ -1,3 +1,5 @@
+# Period Closing Voucher
+
 At the end of every year or (quarterly or maybe even monthly), after completing auditing, you can close your books of accounts. This means that you make all your special entries like:
 
   * Depreciation

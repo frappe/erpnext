@@ -1,3 +1,5 @@
+# Accounting Of Inventory Stock
+
 The value of available inventory is treated as an Asset in company's Chart of
 Accounts. Depending on the type of items, it can be treated as Fixed Asset or
 Current Asset. To prepare Balance Sheet, you should make the accounting

@@ -1,3 +1,5 @@
+# Website Settings
+
 Most of the website related settings can be defined here.
 
 <img class="screenshot" alt="Website Settings" src="{{docs_base_url}}/assets/img/website/website-settings.png">

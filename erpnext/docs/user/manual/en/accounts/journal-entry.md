@@ -1,3 +1,5 @@
+# Journal Entry
+
 All types of accounting entries other than **Sales Invoice** and **Purchase
 Invoice** are made using the **Journal Entry**. A **Journal Entry** 
 is a standard accounting transaction that affects

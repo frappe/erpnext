@@ -1,3 +1,5 @@
+# Job Opening
+
 You can make a record of the open vacancies in your company using Job Opening.
 
 To create a new Job Opening go to 

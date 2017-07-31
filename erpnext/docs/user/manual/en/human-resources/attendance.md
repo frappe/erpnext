@@ -1,3 +1,5 @@
+# Attendance
+
 An Attendance record stating that an Employee has been present on a particular
 day can be created manually by:
 

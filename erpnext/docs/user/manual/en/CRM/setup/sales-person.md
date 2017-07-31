@@ -1,3 +1,5 @@
+# Sales Person
+
 Sales Persons behave exactly like Territories. You can create an organization
 chart of Sales Persons where each Sales Person’s target can be set
 individually. Again as in Territory, the target has to be set against Item

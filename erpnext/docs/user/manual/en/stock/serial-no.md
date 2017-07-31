@@ -1,3 +1,5 @@
+# Serial No
+
 As we discussed in the **Item** section, if an **Item** is _serialized_, a
 **Serial Number** (Serial No) record is maintained for each quantity of that
 **Item**. This information is helpful in tracking the location of the Serial

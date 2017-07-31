@@ -1,3 +1,5 @@
+# Sales Persons In The Sales Transactions
+
 #Sales Persons in the Sales Transactions
 
 In ERPNext, Sales Person master is maintained in [tree structure]({{docs_base_url}}/user/manual/en/setting-up/articles/managing-tree-structure-masters.html). Sales Person is selectable in all the sales transactions.

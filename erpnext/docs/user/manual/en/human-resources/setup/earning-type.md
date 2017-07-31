@@ -1,3 +1,5 @@
+# Earning Type
+
 You can make a record of the Salary Components and describe it as Earning Type
 
 To create a new Earning Type

@@ -1,3 +1,5 @@
+# Managing Tree Structure Masters
+
 #Managing Tree Structure Masters
 
 Some of the masters in ERPNext are maintained in tree structure. Tree structured masters allow you to set Parent master, and Child masters under those Parents. Setting up this structure allows you creating intelligent report, and track growth at each level in the hierarchy. 

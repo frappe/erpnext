@@ -1,3 +1,5 @@
+# Price Lists
+
 ERPNext lets you maintain multiple selling and buying prices for an Item using Price Lists. A PriceList is a name you can give to a set of Item prices. 
 
 Why would you want Price Lists? You have different prices for different zones (based on the shipping costs), for different currencies etc.

@@ -1,3 +1,5 @@
+# Delete A Company And All Related Transactions
+
 #Delete All Related Transactions for a Company
 
 Often, users setup all the master data and then create a few dummy records. Then they want to delete the dummy records and the company and start over again, keeping the other master data like Customers, Items, BOMs intact.

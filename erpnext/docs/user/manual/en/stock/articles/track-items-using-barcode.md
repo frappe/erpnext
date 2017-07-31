@@ -1,3 +1,5 @@
+# Track Items Using Barcode
+
 #Track Items Using Barcode
 
 A barcode is a value decoded into vertical spaced lines. Barcode scanners are the input medium, like Keyboard. When it scans a barcode, the data appears in the computer screens at the point of a cursor.

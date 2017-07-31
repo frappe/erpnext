@@ -1,3 +1,5 @@
+# Leave Application
+
 If your company has a formal system where Employees have to apply for leaves
 to be able to qualify as paid leaveas, you can create Leave Application to
 track approval and usage of leaves. You have to mention the Employee, Leave

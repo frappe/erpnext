@@ -1,3 +1,5 @@
+# Renaming Documents
+
 #Renaming a Document
 
 Using Renaming feature, you can change ID of a master documents like Item, Warehouse, Accounts etc. Following are the steps to rename Item Code. Following same steps, you can rename other masters as well.

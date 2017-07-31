@@ -1,3 +1,5 @@
+# Chart Of Accounts
+
 The Chart of Accounts forms the blueprint of your organization. The overall
 structure of your Chart of Accounts is based on a system of double entry
 accounting that has become a standard all over the world to quantify how a

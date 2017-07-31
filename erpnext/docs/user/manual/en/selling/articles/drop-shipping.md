@@ -1,3 +1,5 @@
+# Drop Shipping
+
 #Drop Ship
 
 **Drop shipping** is a supply chain management technique in which the retailer does not keep goods in stock. Instead they transfer customer orders and shipment details to either the manufacturer, another retailer, or a wholesaler, who then ships the goods directly to the customer

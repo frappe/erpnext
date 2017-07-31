@@ -1,3 +1,5 @@
+# Auto Creation Of Material Request
+
 #Auto Creation of Material Request
 
 To prevent stockouts, you can track item's reorder level. When stock level goes below reorder level, purchase manager is notified and instructed to initiate purchase process for the item.

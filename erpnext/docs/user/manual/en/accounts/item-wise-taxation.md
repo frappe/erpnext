@@ -1,3 +1,5 @@
+# Item Wise Taxation
+
 In the sales and purchase transactions, you can apply taxes and other charges on the items. For the ease of applying taxes, you can fetch values from the [Sales Taxes and Charges master](/contents//setting-up/setting-up-taxes). Taxes and charges are applied equally on all the items. For example, if tax GST 16% is added in the tax table, then it will be applied on all the items. However, if you need to have different tax rate applied on some of the items, following is how you should setup Items and Sales Taxes and Other Charges master in your ERPNext account.
 
 Let's assume that we are creating a Sales Order. We have Sales Taxes and Charges master for GST 16%. Out of all the Sales Items, on one item, only 12% GST will be applied, while one more item is exempted from the tax.

@@ -1,3 +1,5 @@
+# Accounting Reports
+
 Some of the major accounting reports are:
 
 ### General Ledger

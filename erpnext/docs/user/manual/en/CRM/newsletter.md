@@ -1,3 +1,5 @@
+# Newsletter
+
 A newsletter is a short written report that tells about the recent activities
 of an organization. It is generally sent to members of the organization,
 potential clients customers or potential leads.

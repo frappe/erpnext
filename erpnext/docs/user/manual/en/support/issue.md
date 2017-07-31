@@ -1,3 +1,5 @@
+# Issue
+
 Issue is an incoming query from your Customer, usually via email or
 from the “Contact” section of your website. (To fully integrate the Support
 Ticket to email, see the Email Settings section).

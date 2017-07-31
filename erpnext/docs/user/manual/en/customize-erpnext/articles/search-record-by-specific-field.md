@@ -1,3 +1,5 @@
+# Search Record By Specific Field
+
 #Search Record by Specific Field
 
 While creating any document (say Sales Invoice), you have to select other document id in it (say Serial No). For ease in selection, you can also make value of other field of that visible in the search result. Search By functionality enables to define field whos value will be visible in the search result.

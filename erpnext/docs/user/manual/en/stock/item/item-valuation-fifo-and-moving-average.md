@@ -1,3 +1,5 @@
+# Item Valuation Fifo And Moving Average
+
 ### How are Items Valued?
 
 One of the major features of any inventory system is that you can find out the

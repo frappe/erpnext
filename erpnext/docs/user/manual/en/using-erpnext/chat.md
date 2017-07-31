@@ -1,3 +1,5 @@
+# Chat
+
 You can send and receive messages from the system by using the Messages tool. 
 
 `Explore > Tools > Chat`

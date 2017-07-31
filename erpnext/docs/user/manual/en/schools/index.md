@@ -1,3 +1,5 @@
+# Schools
+
 
 The School Modules is designed to meet requirements of Schools, Colleges & Educational Institutes.
 
