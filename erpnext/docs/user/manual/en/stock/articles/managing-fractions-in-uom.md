@@ -1,3 +1,5 @@
+# Managing Fractions In Uom
+
 #Managing Fractions in UoM
 
 UoM stands for Unit of Measurement. Few examples of UoM are Numbers (Nos), Kgs, Litre, Meter, Box, Carton etc.
@@ -18,7 +20,7 @@ From the list of UoM, select UoM for which value in decimal place is to be restr
 
 In the UoM master, you will find a field called "Must be whole number". Check this field to restrict user from enter value in decimal places in quantity field, for item having this UoM.
 
-<img alt="UoM Must be Whole No" class="screenshot" src="{{docs_base_url}}/assets/img/articles/uom-fraction-1.png">
+<img alt="UoM Must be Whole No" class="screenshot" src="/docs/assets/img/articles/uom-fraction-1.png">
 
 ####Validation
 
@@ -26,7 +28,7 @@ While creating transaction, if you enter value in fraction for item whos UoM has
 
 `Quantity cannot be a fraction at row #`
 
-<img alt="UoM Validation Message" class="screenshot" src="{{docs_base_url}}/assets/img/articles/uom-fraction-2.png">
+<img alt="UoM Validation Message" class="screenshot" src="/docs/assets/img/articles/uom-fraction-2.png">
 
 
 <!-- markdown -->

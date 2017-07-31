@@ -10,6 +10,6 @@ For example if you are in the services business, you want to hide the Manufactur
 
 Check / uncheck the items to show / hide.
 
-<img class="screenshot" alt="Module Settings" src="{{docs_base_url}}/assets/img/setup/settings/show-hide-modules.png">
+<img class="screenshot" alt="Module Settings" src="/docs/assets/img/setup/settings/show-hide-modules.png">
 
 {next}

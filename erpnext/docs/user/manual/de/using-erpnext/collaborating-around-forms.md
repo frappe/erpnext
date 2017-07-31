@@ -5,7 +5,7 @@
 
 Sie können jedwede Transaktion aus dem System versenden, indem Sie auf die Schaltfläche "Zugeordnet zu" klicken. Im Menü "Kommunikation" wird ein Protokoll aller von Ihnen versendeter E-Mails gepflegt.
 
-![Formulare]({{docs_base_url}}/assets/old_images/erpnext/forms.png)
+![Formulare](/docs/assets/old_images/erpnext/forms.png)
 
 ### Kommentar
 
@@ -13,6 +13,6 @@ Kommentare sind ein großartiger Weg Informationen über eine Transaktion, die a
 
 ### Schlagworte
 
-Lesen Sie hier mehr über [Schlagworte]({{docs_base_url}}/user/manual/de/using-erpnext/tags.html)
+Lesen Sie hier mehr über [Schlagworte](/docs/user/manual/de/using-erpnext/tags.html)
 
 {next}

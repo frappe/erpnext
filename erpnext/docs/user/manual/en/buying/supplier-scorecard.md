@@ -1,3 +1,5 @@
+# Supplier Scorecard
+
 A Supplier Scorecard is an evaluation tool used to assess the performance of 
 suppliers. Supplier scorecards can be used to keep track of item quality, 
 delivery and responsiveness of suppliers across long periods of time. This data 
@@ -12,24 +14,24 @@ In ERPNext, you can create a supplier scorecard by going to:
 ### Create Supplier Scorecard
 A supplier scorecard is created for each supplier individually. Only one supplier scorecard can be created for each 
 supplier. 
-<img class="screenshot" alt="Purchase Order" src="{{docs_base_url}}/assets/img/buying/supplier-scorecard.png">
+<img class="screenshot" alt="Purchase Order" src="/docs/assets/img/buying/supplier-scorecard.png">
 
 #### Final Score and Standings
 The supplier scorecard consists of a set evaluation periods, during which the performance of a supplier is 
 evaluated. This period can be daily, monthly or yearly. The current score is calculated from the score of each evaluation 
 period based on the weighting function. The default formula is linearly weight over the previous 12 scoring periods. 
-<img class="screenshot" alt="Purchase Order" src="{{docs_base_url}}/assets/img/buying/supplier-scorecard-weighing.png">
+<img class="screenshot" alt="Purchase Order" src="/docs/assets/img/buying/supplier-scorecard-weighing.png">
 This formula is customizable.
 
 The supplier standing is used to quickly sort suppliers based on their performance. These are customizable for each supplier. 
 The scorecard standing of a supplier can also be used to restrict suppliers from being included in Request for Quotations or 
 being issued Purchase Orders.
-<img class="screenshot" alt="Purchase Order" src="{{docs_base_url}}/assets/img/buying/supplier-scorecard-standing.png">
+<img class="screenshot" alt="Purchase Order" src="/docs/assets/img/buying/supplier-scorecard-standing.png">
 
 #### Evaluation Criteria and Variables
 A supplier can be evaluated on several individual evaluation criteria, including (but not limited to) quotation response time, 
 delivered item quality, and delivery timeliness. These criteria are weighed to determine the final period score.
-<img class="screenshot" alt="Purchase Order" src="{{docs_base_url}}/assets/img/buying/supplier-scorecard-criteria.png">
+<img class="screenshot" alt="Purchase Order" src="/docs/assets/img/buying/supplier-scorecard-criteria.png">
 The method for calculating each criteria is determined through the criteria formula field, which can use a number of pre-established variables.
 The value of each of these variables is calculated over the scoring period for each supplier. Examples of such variables include:
  - The total number of items received from the supplier

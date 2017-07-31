@@ -14,16 +14,16 @@ from:
 
 Set default values as defined.
 
-<img class="screenshot" alt="POS Setting" src="{{docs_base_url}}/assets/img/pos-setting/pos_profile.png">
+<img class="screenshot" alt="POS Setting" src="/docs/assets/img/pos-setting/pos_profile.png">
 
 To set the default mode of payment, enabled the option default in the mode of payments table
-<img class="screenshot" alt="POS Setting" src="{{docs_base_url}}/assets/img/pos-setting/default_mop.png">
+<img class="screenshot" alt="POS Setting" src="/docs/assets/img/pos-setting/default_mop.png">
 
 User can sale the particular products to the particular customers from the POS by adding item groups, customer groups in the POS Profile.
-<img class="screenshot" alt="POS Setting" src="{{docs_base_url}}/assets/img/pos-setting/item_customer_group.png">
+<img class="screenshot" alt="POS Setting" src="/docs/assets/img/pos-setting/item_customer_group.png">
 
 > Important : If you specify a particular User, the POS setting will be
 applied only to that User. If the User option is left blank, the setting will
-be set for all users. To understand POS in detail visit [Point of Sale]({{docs_base_url}}/user/manual/en/accounts/point-of-sale-pos-invoice.html)
+be set for all users. To understand POS in detail visit [Point of Sale](/docs/user/manual/en/accounts/point-of-sale-pos-invoice.html)
 
 {next}

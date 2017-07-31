@@ -1,3 +1,5 @@
+# Payment Tool
+
 ###Payment Tool
 The Payment Tool Feature allows non-accounting personnel to generate Journal Entries by populating relevant fields in the Journal Entry with account and payment details.
 
@@ -11,14 +13,14 @@ To go to Payment Tool, click on Accounts > Tools > Payment Tool.
 6. Click on Get Outstanding Vouchers to fetch all the valid Vouchers, Invoices and Orders against which a payment can be made/received. These will appear in the Against Voucher section.
 	* __Note:__ In case User is paying a customer or receiving payment from a supplier, add the details regarding the relevant invoices and orders manually.
 
-   <img class="screenshot" alt="Payment Tool" src="{{docs_base_url}}/assets/img/accounts/payment-tool-1.png">
+   <img class="screenshot" alt="Payment Tool" src="/docs/assets/img/accounts/payment-tool-1.png">
 
 7. Once details have been fetched, click on the detail entry and enter the payment amount made against that Invoice/Order/Voucher
 
-   <img class="screenshot" alt="Payment Tool" src="{{docs_base_url}}/assets/img/accounts/payment-tool-2.png">
+   <img class="screenshot" alt="Payment Tool" src="/docs/assets/img/accounts/payment-tool-2.png">
 
 8. Click on 'Make Journal Entry' to generate a new Journal Entry with the relevant Party Details and Credit/Debit details filled in.
 
-   <img class="screenshot" alt="Payment Tool" src="{{docs_base_url}}/assets/img/accounts/payment-tool-3.png">
+   <img class="screenshot" alt="Payment Tool" src="/docs/assets/img/accounts/payment-tool-3.png">
 	
 {next}

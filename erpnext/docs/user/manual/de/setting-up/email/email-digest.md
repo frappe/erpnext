@@ -13,6 +13,6 @@ Um einen E-Mail-Bericht einzurichten, gehen Sie zu:
 
 Stellen Sie ein, wie oft Sie eine Benachrichtigung erhalten wollen, markieren Sie alle Artikel, über die Sie in Ihrer wöchentlichen Aktualisierung benachrichtig werden wollen und wählen Sie die Benutzer-IDs aus, an die die Zusammenfassung gesendet werden soll.
 
-<img class="screenshot" alt="E-Mail-Bericht" src="{{docs_base_url}}/assets/img/setup/email/email-digest.png">
+<img class="screenshot" alt="E-Mail-Bericht" src="/docs/assets/img/setup/email/email-digest.png">
 
 {next}

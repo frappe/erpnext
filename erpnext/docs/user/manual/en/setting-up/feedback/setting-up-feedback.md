@@ -19,13 +19,13 @@ To Setup an Feedback:
 ### Setting a Subject
 You can retrieve the data for a particular field by using `doc.[field_name]`. To use it in your subject/message, you have to surround it with `{% raw %}{{ }}{% endraw %}`. These are called [Jinja](http://jinja.pocoo.org/) tags. So, for example, to get the name of a document, you use `{% raw %}{{ doc.name }}{% endraw %}`. The below example sends an feedback request whenever Issue is Closed with the Subject, "ISS-##### Issue is Resolved"
 
-<img class="screenshot" alt="Setting Subject" src="{{docs_base_url}}/assets/img/setup/feedback/feedback-trigger-subject.png">
+<img class="screenshot" alt="Setting Subject" src="/docs/assets/img/setup/feedback/feedback-trigger-subject.png">
 
 ### Setting Conditions
 
 Feedback Trigger allows you to set conditions according to the field data in your documents. The feedback request email will be sent on document save only if the all conditions are true For example if you want to trigger the feedback request mail to a customer if an Issue is has been saved as "Closed" as it's status, you put `doc.status == "Closed"` in the conditions textbox. You can also set more complex conditions by combining them.
 
-<img class="screenshot" alt="Setting Condition" src="{{docs_base_url}}/assets/img/setup/feedback/feedback-trigger-condition.png">
+<img class="screenshot" alt="Setting Condition" src="/docs/assets/img/setup/feedback/feedback-trigger-condition.png">
 
 ### Setting a Message
 
@@ -45,9 +45,9 @@ You can use both Jinja Tags (`{% raw %}{{ doc.[field_name] }}{% endraw %}`) and 
 ### Example
 
 1. Setting up Feedback Trigger
-    <img class="screenshot" alt="Defining Criteria" src="{{docs_base_url}}/assets/img/setup/feedback/setting-up-feedback-trigger.png">
+    <img class="screenshot" alt="Defining Criteria" src="/docs/assets/img/setup/feedback/setting-up-feedback-trigger.png">
 
 1. Setting the Recipients and Message
-    <img class="screenshot" alt="Set Message" src="{{docs_base_url}}/assets/img/setup/feedback/setting-up-feedback-trigger-message.png">
+    <img class="screenshot" alt="Set Message" src="/docs/assets/img/setup/feedback/setting-up-feedback-trigger-message.png">
 
 {next}

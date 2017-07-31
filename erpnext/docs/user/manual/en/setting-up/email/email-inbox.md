@@ -12,7 +12,7 @@ To add new User, go to:
 
 `Setup > User > New User`
 
-<img class="screenshot" alt="Email User" src="{{docs_base_url}}/assets/img/setup/email/email-user.png">
+<img class="screenshot" alt="Email User" src="/docs/assets/img/setup/email/email-user.png">
 
 #### Step 2: Create Email Domain
 
@@ -22,7 +22,7 @@ To add new Email Domain, go to:
 
 `Setup > Emails > Email Domain > New`
 
-<img class="screenshot" alt="Email Domain" src="{{docs_base_url}}/assets/img/setup/email/email-domain.png">
+<img class="screenshot" alt="Email Domain" src="/docs/assets/img/setup/email/email-domain.png">
 
 Once you have configured an Email Domain for your Email Service, it will be used for creating Email Accounts for all the Users in your ERPNext account.
 
@@ -43,44 +43,44 @@ Create an Email Account based on the Email ID of the User. For each User who's e
 
 If you are creating an Email Account for your colleague who's Email Password is unknown to you, then check field "Awaiting Password". As per this setting, a User (for whom Email Account is created) will get a prompt to enter email password when accessing his/her ERPNext Account.
 
-<img class="screenshot" alt="Email Password" src="{{docs_base_url}}/assets/img/setup/email/email-password.png">
+<img class="screenshot" alt="Email Password" src="/docs/assets/img/setup/email/email-password.png">
 
 In the Email Account, select Email Domain only if you are using Email Service other than Email Services listed above. Else, you can just select Email Service, leave Email Domain blank and proceed forward.
 
-<img class="screenshot" alt="Email Service" src="{{docs_base_url}}/assets/img/setup/email/email-service.png">
+<img class="screenshot" alt="Email Service" src="/docs/assets/img/setup/email/email-service.png">
 
 >If you are creating an Email Account for Email Inbox of a User, then leave Append To field as blank.
 
-For more details on how to setup Email Account, [click here]({{docs_base_url}}/user/manual/en/setting-up/email/email-account.html").
+For more details on how to setup Email Account, [click here](/docs/user/manual/en/setting-up/email/email-account.html").
 
 #### Step 4: Linking Email Account in User master
 
 Once an Email Account is created for an User, select that Email Account in the User. This will ensure that emails pulled from the said Email ID will accessible only to this User in your ERPNext account.
 
-<img class="screenshot" alt="Email User Link" src="{{docs_base_url}}/assets/img/setup/email/email-user-link.png">
+<img class="screenshot" alt="Email User Link" src="/docs/assets/img/setup/email/email-user-link.png">
 
 ## Email Inbox
 
 If you have correctly configured Email Inbox as instructed above, then on the login of a User, Email Inbox icon will be visible. This will navigate user to Email Inbox view within the ERPNext account. All the Emails received on that email will be fetch and listed in the Email Inbox view. User will be able to open emails and take various actions against it.
 
-<img class="screenshot" alt="Email Inbox" src="{{docs_base_url}}/assets/img/setup/email/email-inbox.png">
+<img class="screenshot" alt="Email Inbox" src="/docs/assets/img/setup/email/email-inbox.png">
 
 #### Folders
 
 In ERPNext, you can link multiple Email Accounts with the single User. To switch to Inbox of different email account and access other folders like Sent Emails, Spam, Trash, check Email Inbox option in the left bar.
 
-<img class="screenshot" alt="Email Folders" src="{{docs_base_url}}/assets/img/setup/email/email-folders.png">
+<img class="screenshot" alt="Email Folders" src="/docs/assets/img/setup/email/email-folders.png">
 
 #### Actions
 
 On the emails in your inbox, you can take various actions like Reply, Forward, Mark as Spam or Trash.
 
-<img class="screenshot" alt="Email Actions" src="{{docs_base_url}}/assets/img/setup/email/email-actions.png">
+<img class="screenshot" alt="Email Actions" src="/docs/assets/img/setup/email/email-actions.png">
 
 #### Make Options
 
 The Email Inbox within ERPNext also allow you to quickly create ERPNext transaction based on email received. From an Email itself, you can a Issue, Lead or Opportunity based on the context of the email.
 
-<img class="screenshot" alt="Make from Email" src="{{docs_base_url}}/assets/img/setup/email/make-from-email.png">
+<img class="screenshot" alt="Make from Email" src="/docs/assets/img/setup/email/make-from-email.png">
 
 

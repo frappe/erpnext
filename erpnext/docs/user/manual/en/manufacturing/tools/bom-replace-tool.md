@@ -33,7 +33,7 @@ If we have more items to be added , or existing items to be edited in the BOM of
 
 To update new BOM updated in the BOM of finished item, where CPU is selected as raw-material, you can use BOM Replace tool.
 
-<img class="screenshot" alt="BOM replace Tool" src="{{docs_base_url}}/assets/img/manufacturing/bom-replace-tool.png">
+<img class="screenshot" alt="BOM replace Tool" src="/docs/assets/img/manufacturing/bom-replace-tool.png">
 
 In this tool, you should select Current BOM, and New BOM. On clicking Replace button, current BOM of CPU will be replaced with New BOM in the BOM of finished Item (Computer).
 

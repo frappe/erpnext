@@ -11,7 +11,7 @@ a Sales Order.
 
 ### Sales Order Flow-Chart
 
-<img class="screenshot" alt="Sales Order flow" src="{{docs_base_url}}/assets/img/selling/sales-order-f.jpg">
+<img class="screenshot" alt="Sales Order flow" src="/docs/assets/img/selling/sales-order-f.jpg">
 
 To create a new Sales Order go to:
 
@@ -21,11 +21,11 @@ To create a new Sales Order go to:
 
 You can also create a Sales Order from a submitted Quotation.
 
-<img class="screenshot" alt="Make Sales Order from Quotation" src="{{docs_base_url}}/assets/img/selling/make-SO-from-quote.png">
+<img class="screenshot" alt="Make Sales Order from Quotation" src="/docs/assets/img/selling/make-SO-from-quote.png">
 
 Or you can create a new Sales Order and pull details from an Quotation.
 
-<img class="screenshot" alt="Make Sales Order from Quotation" src="{{docs_base_url}}/assets/img/selling/make-so.gif">
+<img class="screenshot" alt="Make Sales Order from Quotation" src="/docs/assets/img/selling/make-so.gif">
 
 Most of the information in your Sales Order is the same as the Quotation.
 There are a few amongst other things that a Sales Order will ask you to
@@ -56,9 +56,9 @@ To add taxes to your Quotation, you can select a **Sales Taxes and Charges Templ
 
 For e.g
 
-<img class="screenshot" alt="Taxes and Charges" src="{{docs_base_url}}/assets/img/selling/taxes-and-charges.gif">
+<img class="screenshot" alt="Taxes and Charges" src="/docs/assets/img/selling/taxes-and-charges.gif">
 
-To understand taxes in detail visit [Taxes]({{docs_base_url}}/user/manual/en/setting-up/setting-up-taxes.html).
+To understand taxes in detail visit [Taxes](/docs/user/manual/en/setting-up/setting-up-taxes.html).
 
 ### Sales Team
 
@@ -82,7 +82,7 @@ On updating the Sales Order, a Recurring ID will be generated which will be same
 
 ERPNext will automatically create new Order and mail a notification to the Email Addresses you set in the 'Notification Email Address'field.
 
-<img class="screenshot" alt="Reccuring Sales Order" src="{{docs_base_url}}/assets/img/selling/recurring-sales-order.png">
+<img class="screenshot" alt="Reccuring Sales Order" src="/docs/assets/img/selling/recurring-sales-order.png">
 
 ### Next Steps
 

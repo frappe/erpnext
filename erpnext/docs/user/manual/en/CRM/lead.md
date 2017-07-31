@@ -1,3 +1,5 @@
+# Lead
+
 To get the customer through the door, you may be doing all or any of the
 following:
 
@@ -24,7 +26,7 @@ To create a Lead, go to:
 
 > CRM > Lead > New Lead
 
-<img class="screenshot" alt="Lead" src="{{docs_base_url}}/assets/img/crm/lead.png">
+<img class="screenshot" alt="Lead" src="/docs/assets/img/crm/lead.png">
 
 ERPNext gives you a lot of options you may want to store about your Leads. For
 example what is the source, how likely are they to give you business etc. If
@@ -46,7 +48,7 @@ dropdown. Once the Customer is created, the Lead becomes “Converted” and any
 further Opportunities from the same source can be created against this
 Customer.
 
-<img class="screenshot" alt="Create Customer" src="{{docs_base_url}}/assets/img/crm/lead-to-customer.gif">
+<img class="screenshot" alt="Create Customer" src="/docs/assets/img/crm/lead-to-customer.gif">
 
 ---
 
