@@ -6,7 +6,7 @@ QUnit.test("test project", function(assert) {
 	// To create a timesheet with different tasks and costs
 	let timesheet = (title,start_time,end_time,bill_rate,cost_rate) => {
 		return frappe.run_serially([
-			() => frappe.db.get_value('Employee', {'employee_name': 'Rakesh'}, 'name'),
+			() => frappe.db.get_value('Employee', {'employee_name': 'Test Employee 1'}, 'name'),
 			(r) => {
 				employee_name = r.message.name;
 				return frappe.db.get_value('Task', {'subject': title}, 'name');
@@ -57,15 +57,6 @@ QUnit.test("test project", function(assert) {
 		]);
 	};
 	frappe.run_serially([
-		() => {
-			// Creating Employee
-			return frappe.tests.make('Employee', [
-				{ employee_name: 'Rakesh'},
-				{ date_of_birth: '2000-01-02'},
-				{ date_of_joining: '2017-07-01'},
-				{ gender: 'Male'}
-			]);
-		},
 		() => {
 			// Creating project with task
 			return frappe.tests.make('Project', [
