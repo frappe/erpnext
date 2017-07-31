@@ -14,7 +14,7 @@ Every table (regardless of storage engine) has a maximum row size of 65,535 byte
 
 The maximum row size constrains the number (and possibly size) of columns because the total length of all columns cannot exceed this size (65,535 bytes). For example, `utf8mb3` characters require up to 3 bytes per character, so for a `VARCHAR(140)` column, the server must allocate `140 × 3 = 420` bytes per value. Consequently, a table cannot contain more than `65,535 / 420 = 156` such columns.
 
-In Frappe frapework, `VARCHAR(140)` type columns are created based on "Data", "Link", "Select", "Dynamic Link", "Password" and "Read Only" fieldtypes. Hence, you can create approximately 156 such columns in the system.
+In Frappé frapework, `VARCHAR(140)` type columns are created based on "Data", "Link", "Select", "Dynamic Link", "Password" and "Read Only" fieldtypes. Hence, you can create approximately 156 such columns in the system.
 
 ### Solutions:
 

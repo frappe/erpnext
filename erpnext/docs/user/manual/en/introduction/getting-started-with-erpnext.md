@@ -16,7 +16,7 @@ see the demo at:
 ### 2\. Start a Free Account at ERPNext.com
 
 
-ERPNext.com is managed by the organization (Frappe) that publishes ERPNext.
+ERPNext.com is managed by the organization (Frappé) that publishes ERPNext.
 You can start with your own account by [signing up on the
 website](https://erpnext.com).
 
@@ -36,6 +36,6 @@ Image](https://erpnext.com/download)
 
 ### 4\. Install ERPNext on your Unix/Linux/Mac machine
 
-If you are familiar with installing applications on *nix platforms, read the instructions on how to install using [Frappe Bench](https://github.com/frappe/bench).
+If you are familiar with installing applications on *nix platforms, read the instructions on how to install using [Frappé Bench](https://github.com/frappe/bench).
 
 {next}

@@ -20,7 +20,7 @@ Wählen Sie den Typ des Druckformats, welches Sie bearbeiten wollen, und klicken
 
 Ein Druckformat zu bearbeiten ist eine langwierige Angelegenheit und Sie müssen etwas Grundwissen über HTML, CSS und Python mitbringen, um dies verstehen zu können. Wenn Sie Hilfe benötigen, erstellen Sie bitte im Forum eine Anfrage.
 
-Printformate werden auf der Serverseite über die [Programmiersprache Jinja Templating](http://jinja.pocoo.org/docs/templates/) erstellt. Alle Formulare haben Zugriff auf doc object, das Informationen über das Dokument enthält, welches formatiert wird. Sie können über das Frappe-Modul auch auf oft verwendete Hilfswerkzeuge zugreifen.
+Printformate werden auf der Serverseite über die [Programmiersprache Jinja Templating](http://jinja.pocoo.org/docs/templates/) erstellt. Alle Formulare haben Zugriff auf doc object, das Informationen über das Dokument enthält, welches formatiert wird. Sie können über das Frappé-Modul auch auf oft verwendete Hilfswerkzeuge zugreifen.
 
 Zum Bearbeiten des Erscheinungsbildes bietet sich das [Bootstrap CSS Framework](http://getbootstrap.com/)  an und Sie können die volle Bandbreite dieses Werkzeuges nutzen.
 

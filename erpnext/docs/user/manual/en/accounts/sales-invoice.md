@@ -90,5 +90,5 @@ not ideal as your Customer may or may not decide to pay up. But since your
 Customer wants an “Invoice”, you could give the Customer a Quotation (in
 ERPNext) titled as “Pro Forma Invoice”. This way everyone is happy.
 
-This is a fairly common practice. We follow this at Frappe too.
+This is a fairly common practice. We follow this at Frappé too.
 {next}
