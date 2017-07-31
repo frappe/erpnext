@@ -42,3 +42,7 @@ erpnext/schools/doctype/assessment_criteria/test_assessment_criteria.js
 erpnext/schools/doctype/course/test_course.js
 erpnext/schools/doctype/program/test_program.js
 erpnext/selling/doctype/sales_order/test_sales_order.js
+erpnext/schools/doctype/guardian/test_guardian.js
+erpnext/schools/doctype/student_admission/test_student_admission.js
+erpnext/schools/doctype/student_applicant/tests/test_student_applicant.js
+erpnext/schools/doctype/student_applicant/tests/test_student_applicant_options.js
