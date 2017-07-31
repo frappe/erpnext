@@ -101,20 +101,20 @@ class SalesOrder(SellingController):
 		super(SalesOrder, self).validate_order_type()
 
 	def validate_delivery_date(self):
-		self.final_delivery_date = None
 		if self.order_type == 'Sales':
-			for d in self.get("items"):
-				if not d.delivery_date:
-					frappe.throw(_("Row #{0}: Please enter Delivery Date against item {1}")
-						.format(d.idx, d.item_code))
+			if not self.delivery_date:
+				self.delivery_date = max([d.delivery_date for d in self.get("items")])
 
-				if getdate(self.transaction_date) > getdate(d.delivery_date):
-					frappe.msgprint(_("Expected Delivery Date should be after Sales Order Date"),
-						indicator='orange', title=_('Warning'))
-
-				if not self.final_delivery_date or \
-					(d.delivery_date and getdate(d.delivery_date) > getdate(self.final_delivery_date)):
-						self.final_delivery_date = d.delivery_date
+			if self.delivery_date:
+				for d in self.get("items"):
+					if not d.delivery_date:
+						d.delivery_date = self.delivery_date
+					
+					if getdate(self.transaction_date) > getdate(d.delivery_date):
+						frappe.msgprint(_("Expected Delivery Date should be after Sales Order Date"),
+							indicator='orange', title=_('Warning'))
+			else:
+				frappe.throw(_("Please enter Delivery Date"))
 
 		self.validate_sales_mntc_quotation()
 
@@ -347,6 +347,9 @@ class SalesOrder(SellingController):
 
 	def on_recurring(self, reference_doc):
 		mcount = month_map[reference_doc.recurring_type]
+		self.set("delivery_date", get_next_date(reference_doc.delivery_date, mcount,
+			cint(reference_doc.repeat_on_day_of_month)))
+
 		for d in self.get("items"):
 			reference_delivery_date = frappe.db.get_value("Sales Order Item",
 				{"parent": reference_doc.name, "item_code": d.item_code, "idx": d.idx}, "delivery_date")
