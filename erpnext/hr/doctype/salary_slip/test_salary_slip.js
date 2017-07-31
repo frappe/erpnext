@@ -1,3 +1,4 @@
+
 QUnit.test("test salary slip", function(assert) {
 	assert.expect(3);
 	let done = assert.async();
