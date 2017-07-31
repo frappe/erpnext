@@ -1,14 +1,15 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
-# License: GNU General Public License v3. See license.txt
+# -*- coding: utf-8 -*-
+# Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
+# For license information, please see license.txt
 
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, flt
 from frappe import _
-
+from erpnext.manufacturing.doctype.bom.bom import get_boms_in_bottom_up_order
 from frappe.model.document import Document
 
-class BOMReplaceTool(Document):
+class BOMUpdateTool(Document):
 	def replace_bom(self):
 		self.validate_bom()
 		self.update_new_bom()
@@ -40,3 +41,17 @@ class BOMReplaceTool(Document):
 		return [d[0] for d in frappe.db.sql("""select distinct parent
 			from `tabBOM Item` where ifnull(bom_no, '') = %s and docstatus < 2""",
 			self.new_bom)]
+
+@frappe.whitelist()
+def enqueue_update_cost():
+	frappe.enqueue("erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_cost")
+	frappe.msgprint(_("Queued for updating latest price in all Bill of Materials. It may take a few minutes."))
+
+def update_latest_price_in_all_boms():
+	if frappe.db.get_single_value("Manufacturing Settings", "update_bom_costs_automatically"):
+		update_cost()
+
+def update_cost():
+	bom_list = get_boms_in_bottom_up_order()
+	for bom in bom_list:
+		frappe.get_doc("BOM", bom).update_cost(update_parent=False, from_child_bom=True)
