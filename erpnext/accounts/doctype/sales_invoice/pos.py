@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, json
+from frappe import _
 from frappe.utils import nowdate
 from erpnext.setup.utils import get_exchange_rate
 from frappe.core.doctype.communication.email import make
@@ -20,6 +21,7 @@ def get_pos_data():
 
 	if pos_profile.get('name'):
 		pos_profile = frappe.get_doc('POS Profile', pos_profile.get('name'))
+		pos_profile.validate()
 
 	company_data = get_company_data(doc.company)
 	update_pos_profile_data(doc, pos_profile, company_data)
@@ -378,12 +380,26 @@ def add_customer(data):
 	customer_doc.customer_name = data.get('full_name') or data.get('customer')
 	customer_doc.customer_pos_id = data.get('customer_pos_id')
 	customer_doc.customer_type = 'Company'
-	customer_doc.customer_group = frappe.db.get_single_value('Selling Settings', 'customer_group')
-	customer_doc.territory = frappe.db.get_single_value('Selling Settings', 'territory')
+	customer_doc.customer_group = get_customer_group(data)
+	customer_doc.territory = get_territory(data)
 	customer_doc.flags.ignore_mandatory = True
 	customer_doc.save(ignore_permissions = True)
 	frappe.db.commit()
 	return customer_doc.name
+
+def get_territory(data):
+	if data.get('territory'):
+		return data.get('territory')
+
+	return frappe.db.get_single_value('Selling Settings',
+		'territory') or _('All Territories')
+
+def get_customer_group(data):
+	if data.get('customer_group'):
+		return data.get('customer_group')
+
+	return frappe.db.get_single_value('Selling Settings',
+		'customer_group') or frappe.db.get_value('Customer Group', {'is_group': 0}, 'name')
 
 def make_contact(args,customer):
 	if args.get('email_id') or args.get('phone'):
