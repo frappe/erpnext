@@ -14,7 +14,7 @@ Um Ihre eigenen Versionen zu erstellen, öffnen Sie eine bereits vorhandene Vorl
 
 > Einstellungen > Druck > Druckformate
 
-![Druckformat]({{docs_base_url}}/assets/img/customize/print-settings.png)
+![Druckformat](/docs/assets/img/customize/print-settings.png)
 
 Wählen Sie den Typ des Druckformats, welches Sie bearbeiten wollen, und klicken Sie auf die Schaltfläche "Kopieren" in der rechten Spalte. Es öffnet sich ein neues Druckformat mit der Einstellung NEIN für "für "Ist Standard" und Sie kännen das Druckformat bearbeiten.
 
@@ -37,7 +37,7 @@ Um Ihre Druck- und PDF-Einstellungen zu bearbeiten/zu aktualisieren, gehen Sie z
 
 > Einstellungen > Druck und Branding > Druckeinstellungen
 
-![Druckformat]({{docs_base_url}}/assets/img/customize/print-settings.png)
+![Druckformat](/docs/assets/img/customize/print-settings.png)
 
 ### Beispiel
 

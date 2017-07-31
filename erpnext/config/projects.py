@@ -18,6 +18,11 @@ def get_data():
 					"description": _("Project activity / task."),
 				},
 				{
+					"type": "doctype",
+					"name": "Project Type",
+					"description": _("Define Project type."),
+				},
+				{
 					"type": "report",
 					"route": "List/Task/Gantt",
 					"doctype": "Task",

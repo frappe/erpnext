@@ -15,6 +15,6 @@ Fügen Sie also im Skript Ausgangsrechnung Kunde Folgendes hinzu:
 
 * * *
 
-Sehen Sie hierzu auch: [Wie man ein benutzerdefiniertes Skript erstellt]({{docs_base_url}}/user/manual/de/customize-erpnext/custom-scripts/).
+Sehen Sie hierzu auch: [Wie man ein benutzerdefiniertes Skript erstellt](/docs/user/manual/de/customize-erpnext/custom-scripts/).
 
 {next}

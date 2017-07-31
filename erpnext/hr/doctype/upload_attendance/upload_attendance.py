@@ -121,7 +121,7 @@ def upload():
 		try:
 			check_record(d)
 			ret.append(import_doc(d, "Attendance", 1, row_idx, submit=True))
-		except Exception, e:
+		except Exception as e:
 			error = True
 			ret.append('Error for row (#%d) %s : %s' % (row_idx,
 				len(row)>1 and row[1] or "", cstr(e)))

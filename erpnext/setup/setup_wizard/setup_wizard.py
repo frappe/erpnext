@@ -91,7 +91,8 @@ def create_fiscal_year_and_company(args):
 			'country': args.get('country'),
 			'create_chart_of_accounts_based_on': 'Standard Template',
 			'chart_of_accounts': args.get('chart_of_accounts'),
-			'domain': args.get('domain')
+			'domain': args.get('domain'),
+			'sales_target': args.get('sales_target')
 		}).insert()
 
 		#Enable shopping cart
@@ -286,12 +287,9 @@ def make_tax_account_and_template(company, account_name, tax_rate, template_name
 
 		if accounts:
 			make_sales_and_purchase_tax_templates(accounts, template_name)
-	except frappe.NameError, e:
-		if e.args[2][0]==1062:
-			pass
-		else:
-			raise
-	except RootNotEditable, e:
+	except frappe.NameError:
+		pass
+	except RootNotEditable:
 		pass
 
 def get_tax_account_group(company):

@@ -1,3 +1,5 @@
+# Purchase Invoice
+
 Purchase Invoice is the exact opposite of your Sales Invoice. It is the bill
 that your Supplier sends you for products or services delivered. Here you
 accrue expenses to your Supplier. Making a Purchase Invoice is very similar to
@@ -12,7 +14,7 @@ or click on “Make Purchase Invoice” in Purchase Order or Purchase Receipt.
 You can also create a Purchase Invoice from:
 > Accounts > Billing > Purchase Invoice > New Purchase Invoice
 
-<img class="screenshot" alt="Purchase Invoice" src="{{docs_base_url}}/assets/img/accounts/purchase-invoice.png">
+<img class="screenshot" alt="Purchase Invoice" src="/docs/assets/img/accounts/purchase-invoice.png">
 
 The concept of “Posting Date” is again same as Sales Invoice. “Bill No” and
 “Bill Date” helps to track the bill number as set by your Supplier for

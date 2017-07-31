@@ -1,3 +1,5 @@
+# Custom Doctype
+
 DocType or a Document Type is a tool to insert form in ERPNext. The forms like Sales Order,
 Sales Invoices, Production Order are added as Doctype in the backend. Let's assume we are
 creating a Custom Doctype for a Book.
@@ -19,7 +21,7 @@ in the Sales Order Doctype, then you should check Is Child Table. Else no.
 not be able to re-produce.
 1. Custom?: This field will be checked by default when adding Custom Doctype.
 
-<img alt="Doctype Basic" class="screenshot" src="{{docs_base_url}}/assets/img/setup/customize/doctype-basics.png">
+<img alt="Doctype Basic" class="screenshot" src="/docs/assets/img/setup/customize/doctype-basics.png">
 
 #### Fields
 
@@ -34,7 +36,7 @@ Fields are much more than database columns, they can be:
 1. Actions (button)
 1. Attachments or Images
 
-<img alt="Doc fields" class="screenshot" src="{{docs_base_url}}/assets/img/setup/customize/doctype-all-fields.png">
+<img alt="Doc fields" class="screenshot" src="/docs/assets/img/setup/customize/doctype-all-fields.png">
 
 When you add fields, you need to enter the **Type**. **Label** is optional for Section Break and Column Break. **Name** (`fieldname`) is the name of the database table column.
 
@@ -44,19 +46,19 @@ You can also set other properties of the field like whether it is mandatory, rea
 
 In this section, you can define criteria based on which document for this doctype will be named. There are multiple criterion based on which document can be named, like naming based on the value in the specific field, or based on Naming Series, or based on value provided by the user in the prompt, which will be shown when saving document. In the following example, we are doing naming based on the value in the field **book_name**.
 
-<img alt="Doctype Naming" class="screenshot" src="{{docs_base_url}}/assets/img/setup/customize/doctype-field-naming.png">
+<img alt="Doctype Naming" class="screenshot" src="/docs/assets/img/setup/customize/doctype-field-naming.png">
 
 #### Permission
 
 In this table, you should select roles and define permission roles for them for this Doctype.
 
-<img alt="Doctype Permissions" class="screenshot" src="{{docs_base_url}}/assets/img/setup/customize/doctype-permissions.png">
+<img alt="Doctype Permissions" class="screenshot" src="/docs/assets/img/setup/customize/doctype-permissions.png">
 
 #### Save DocType
 
 On saving doctype, you will get pop-up to provide name for this Doctype.
 
-<img alt="Doctype Save" class="screenshot" src="{{docs_base_url}}/assets/img/setup/customize/doctype-save.png">
+<img alt="Doctype Save" class="screenshot" src="/docs/assets/img/setup/customize/doctype-save.png">
 
 #### DocType in System
 
@@ -65,12 +67,12 @@ Human Resource module, to access this doctype, go to:
 
 `Human Resource > Document > Book`
 
-<img alt="Doctype List" class="screenshot" src="{{docs_base_url}}/assets/img/setup/customize/doctype-list-view.png">
+<img alt="Doctype List" class="screenshot" src="/docs/assets/img/setup/customize/doctype-list-view.png">
 
 #### Book master
 
 Using the fields entered, following is the master one book.
 
-<img alt="Doctype Form" class="screenshot" src="{{docs_base_url}}/assets/img/setup/customize/doctype-book-added.png">
+<img alt="Doctype Form" class="screenshot" src="/docs/assets/img/setup/customize/doctype-book-added.png">
 
 {next}

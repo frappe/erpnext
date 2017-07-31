@@ -43,8 +43,26 @@ frappe.ui.form.on("Journal Entry", {
 		$.each(frm.doc.accounts || [], function(i, row) {
 			erpnext.journal_entry.set_exchange_rate(frm, row.doctype, row.name);
 		})
+	},
+
+	company: function(frm) {
+		frappe.call({
+			method: "frappe.client.get_value",
+			args: {
+				doctype: "Company",
+				filters: {"name": frm.doc.company},
+				fieldname: "cost_center"
+			},
+			callback: function(r){
+				if(r.message){
+					$.each(frm.doc.accounts || [], function(i, jvd) {
+						frappe.model.set_value(jvd.doctype, jvd.name, "cost_center", r.message.cost_center);
+					});
+				}
+			}
+		});
 	}
-})
+});
 
 erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 	onload: function() {
@@ -96,7 +114,14 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 			// expense claim
 			if(jvd.reference_type==="Expense Claim") {
-				return {};
+				return {
+					filters: {
+						'approval_status': 'Approved',
+						'total_sanctioned_amount': ['>', 0],
+						'status': ['!=', 'Paid'],
+						'docstatus': 1
+					}
+				};
 			}
 
 			// journal entry
@@ -122,10 +147,11 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 				// account filter
 				frappe.model.validate_missing(jvd, "account");
-
 				var party_account_field = jvd.reference_type==="Sales Invoice" ? "debit_to": "credit_to";
 				out.filters.push([jvd.reference_type, party_account_field, "=", jvd.account]);
-			} else {
+			}
+
+			if(in_list(["Sales Order", "Purchase Order"], jvd.reference_type)) {
 				// party_type and party mandatory
 				frappe.model.validate_missing(jvd, "party_type");
 				frappe.model.validate_missing(jvd, "party");

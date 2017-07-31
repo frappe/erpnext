@@ -1,3 +1,5 @@
+# Issue
+
 Issue is an incoming query from your Customer, usually via email or
 from the “Contact” section of your website. (To fully integrate the Support
 Ticket to email, see the Email Settings section).
@@ -11,7 +13,7 @@ Frappe system.
 
 > Support > Issue > New Issue
 
-<img class="screenshot" alt="Issue" src="{{docs_base_url}}/assets/img/support/issue.png">
+<img class="screenshot" alt="Issue" src="/docs/assets/img/support/issue.png">
 
 #### Discussion Thread
 

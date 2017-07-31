@@ -23,18 +23,18 @@ Um einen Lagerabgleich durchzuführen, gehen Sie zu:
 
 Sie sollten sich an eine spezielle Vorlage eines Tabellenblattes halten um den Bestand und den Wert eines Artikels zu importieren. Öffnen Sie ein neues Formular zum Bestandsabgleich um die Optionen für den Download zu sehen.
 
-<img class="screenshot" alt="Bestandsabgleich" src="{{docs_base_url}}/assets/img/setup/stock-recon-1.png">
+<img class="screenshot" alt="Bestandsabgleich" src="/docs/assets/img/setup/stock-recon-1.png">
 
 #### Schritt 2: Geben Sie Daten in die CSV-Datei ein.
 
-<img class="screenshot" alt="Bestandsabgleich" src="{{docs_base_url}}/assets/img/setup/stock-reco-data.png">
+<img class="screenshot" alt="Bestandsabgleich" src="/docs/assets/img/setup/stock-reco-data.png">
 
 Das CSV-Format beachtet Groß- und Kleinschreibung. Verändern Sie nicht die Kopfbezeichnungen, die in der Vorlage vordefiniert wurden. In den Spalten "Artikelnummer" und "Lager" geben Sie bitte die richtige Artikelnummer und das Lager ein, so wie es in ERPNext bezeichnet wird. Für die Menge geben Sie den Lagerbestand, den Sie für diesen Artikel erfassen wollen, in einem bestimmten Lager ein. Wenn Sie die Menge oder den wertmäßigen Betrag eines Artikels nicht ändern wollen, dann lassen Sie den Eintrag leer.
 Anmerkung: Geben Sie keine "0" ein, wenn sie die Menge oder den wertmäßigen Betrag nicht ändern wollen. Sonst kalkuliert das System eine Menge von "0". Lassen Sie also das Feld leer!
 
 #### Schritt 3: Laden Sie die Datei hoch und geben Sie in das Formular "Bestandsableich" Werte ein.
 
-<img class="screenshot" alt="Bestandsabgleich" src="{{docs_base_url}}/assets/img/setup/stock-recon-2.png">
+<img class="screenshot" alt="Bestandsabgleich" src="/docs/assets/img/setup/stock-recon-2.png">
 
 ##### Buchungsdatum
 
@@ -52,11 +52,11 @@ Notiz: Wenn Sie die bewerteten Beträge eines Artikels eingeben, können Sie zum
 
 #### Schritt 4: Überprüfen Sie die Daten zum Bestandsabgleich
 
-<img class="screenshot" alt="Bestandsabgleich Überprüfung" src="{{docs_base_url}}/assets/img/setup/stock-reco-upload.gif">
+<img class="screenshot" alt="Bestandsabgleich Überprüfung" src="/docs/assets/img/setup/stock-reco-upload.gif">
 
 ### Bericht zum Lagerbuch
 
-<img class="screenshot" alt="Bestandsabgleich" src="{{docs_base_url}}/assets/img/setup/stock-reco-ledger.png">
+<img class="screenshot" alt="Bestandsabgleich" src="/docs/assets/img/setup/stock-reco-ledger.png">
 
 
 ##### So arbeitet der Bestandsabgleich

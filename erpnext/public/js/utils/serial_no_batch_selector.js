@@ -66,7 +66,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				fieldtype:'Float',
 				read_only: 1,
 				label: __(me.has_batch ? 'Total Qty' : 'Qty'),
-				default: me.qty
+				default: 0
 			},
 		];
 
@@ -155,14 +155,10 @@ erpnext.SerialNoBatchSelector = Class.extend({
 	},
 
 	bind_qty: function() {
-		let serial_no_link = this.dialog.fields_dict.serial_no_select;
-		let serial_no_list_field = this.dialog.fields_dict.serial_no;
 		let batches_field = this.dialog.fields_dict.batches;
-
 		let qty_field = this.dialog.fields_dict.qty;
-
-		let update_quantity = (batch) => {
-			if(batch) {
+		if(batches_field) {
+			batches_field.grid.wrapper.on('change', function() {
 				let total_qty = 0;
 				batches_field.grid.wrapper.find(
 					'input[data-fieldname="selected_qty"]').each(function() {
@@ -170,48 +166,6 @@ erpnext.SerialNoBatchSelector = Class.extend({
 					total_qty += Number($(this).val());
 				});
 				qty_field.set_input(total_qty);
-			} else {
-				let serial_numbers = serial_no_list_field.get_value()
-					.replace(/\n/g, ' ').match(/\S+/g) || [];
-				qty_field.set_input(serial_numbers.length);
-			}
-		};
-
-		if(serial_no_link) {
-			let serial_list = [];
-			serial_no_link.$input.on('awesomplete-selectcomplete', function() {
-				if(serial_no_link.get_value().length > 0) {
-					let new_no = serial_no_link.get_value();
-					let list_value = serial_no_list_field.get_value();
-					let new_line = '\n';
-					if(!serial_no_list_field.get_value()) {
-						new_line = '';
-					} else {
-						serial_list = list_value.replace(/\s+/g, ' ').split(' ');
-					}
-					if(!serial_list.includes(new_no)) {
-						serial_no_link.set_new_description('');
-						serial_no_list_field.set_value(list_value + new_line + new_no);
-						update_quantity(0);
-					} else {
-						serial_no_link.set_new_description(new_no + ' is already selected.');
-					}
-				}
-
-				// Should, but doesn't work
-				serial_no_link.set_input('');
-				serial_no_link.$input.blur();
-			});
-
-			serial_no_list_field.$input.on('input', function() {
-				serial_list = serial_no_list_field.get_value().replace(/\s+/g, ' ').split(' ');
-				update_quantity(0);
-			});
-		}
-
-		if(batches_field) {
-			batches_field.grid.wrapper.on('change', function() {
-				update_quantity(1);
 			});
 		}
 	},
@@ -319,6 +273,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 	get_serial_no_fields: function() {
 		var me = this;
+		this.serial_list = [];
 		return [
 			{fieldtype: 'Section Break', label: __('Serial No')},
 			{
@@ -326,10 +281,46 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				label: __('Select'),
 				get_query: function() {
 					return { filters: {item_code: me.item_code}};
+				},
+				onchange: function(e) {
+					if(this.in_local_change) return;
+					this.in_local_change = 1;
+
+					let serial_no_list_field = this.layout.fields_dict.serial_no;
+					let qty_field = this.layout.fields_dict.qty;
+
+					let new_number = this.get_value();
+					let list_value = serial_no_list_field.get_value();
+					let new_line = '\n';
+					if(!list_value) {
+						new_line = '';
+					} else {
+						me.serial_list = list_value.replace(/\n/g, ' ').match(/\S+/g) || [];
+					}
+
+					if(!me.serial_list.includes(new_number)) {
+						this.set_new_description('');
+						serial_no_list_field.set_value(me.serial_list.join('\n') + new_line + new_number);
+						me.serial_list = serial_no_list_field.get_value().replace(/\n/g, ' ').match(/\S+/g) || [];
+					} else {
+						this.set_new_description(new_number + ' is already selected.');
+					}
+
+					qty_field.set_input(me.serial_list.length);
+					this.$input.val("");
+					this.in_local_change = 0;
 				}
 			},
 			{fieldtype: 'Column Break'},
-			{fieldname: 'serial_no', fieldtype: 'Small Text'}
+			{
+				fieldname: 'serial_no',
+				fieldtype: 'Small Text',
+				onchange: function() {
+					me.serial_list = this.get_value()
+						.replace(/\n/g, ' ').match(/\S+/g) || [];
+					this.layout.fields_dict.qty.set_input(me.serial_list.length);
+				}
+			}
 		];
 	}
 });

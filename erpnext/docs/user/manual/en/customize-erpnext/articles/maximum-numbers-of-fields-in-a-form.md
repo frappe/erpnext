@@ -1,3 +1,5 @@
+# Maximum Numbers Of Fields In A Form
+
 Sometimes while creating custom fields, you might experienced an error message like below:
 
 > Row size too large. The maximum row size for the used table type, not counting BLOBs, is 65535. This includes storage overhead, check the manual. You have to change some columns to TEXT or BLOBs

@@ -1,3 +1,5 @@
+# Dropbox Backup
+
 #Setting Up Dropbox Backups
 
 We always recommend customers to maintain backup of their data in ERPNext. The database backup is downloaded in the form of an SQL file. If needed, this SQL file of backup can be restored in the another ERPNext account as well.
@@ -11,7 +13,7 @@ To setup Dropbox Backup,
 
 Set Frequency to download backup in your Dropbox account.
 
-<img class="screenshot" alt="set frequency" src="{{docs_base_url}}/assets/img/setup/integrations/setup-backup-frequency.png">
+<img class="screenshot" alt="set frequency" src="/docs/assets/img/setup/integrations/setup-backup-frequency.png">
 
 ####Step 2: Allow Dropbox Access
 
@@ -21,13 +23,13 @@ After setting frequency and updating other details, click on `Allow Dropbox acce
 
 Login to your Dropbox account by entering login credentials.
 
-<img class="screenshot" alt="Login" src="{{docs_base_url}}/assets/img/setup/integrations/dropbox-2.png">
+<img class="screenshot" alt="Login" src="/docs/assets/img/setup/integrations/dropbox-2.png">
 
 ####Step 4: Allow
 
 On successful login, you will find a confirmation message as following. Click on "Allow" to let your ERPNext account have access to your Dropbox account.
 
-<img class="screenshot" alt="Allow" src="{{docs_base_url}}/assets/img/setup/integrations/dropbox-3.png">
+<img class="screenshot" alt="Allow" src="/docs/assets/img/setup/integrations/dropbox-3.png">
 
 With this, a folder called "ERPNext" will be created in your Dropbox account, and database backup will start to auto-download in it.
 
@@ -39,18 +41,18 @@ With this, a folder called "ERPNext" will be created in your Dropbox account, an
 
 ####Step 2:Create a new app
 
-<img class="screenshot" alt="Create new" src="{{docs_base_url}}/assets/img/setup/integrations/dropbox-open-3.png">
+<img class="screenshot" alt="Create new" src="/docs/assets/img/setup/integrations/dropbox-open-3.png">
 
 ####Step 3: Fill in details for the app
 
-<img class="screenshot" alt="Choose Dropbox API and type as APP Folder" src="{{docs_base_url}}/assets/img/setup/integrations/dropbox-open-1.png">
+<img class="screenshot" alt="Choose Dropbox API and type as APP Folder" src="/docs/assets/img/setup/integrations/dropbox-open-1.png">
 
 -
-<img class="screenshot" alt="Setup APP Name" src="{{docs_base_url}}/assets/img/setup/integrations/dropbox-open-2.png">
+<img class="screenshot" alt="Setup APP Name" src="/docs/assets/img/setup/integrations/dropbox-open-2.png">
 
 ####Step  4: Setup Redirect URL in app
 
-<img class="screenshot" alt="Set Redirect URL" src="{{docs_base_url}}/assets/img/setup/integrations/dropbox_redirect_uri.png">
+<img class="screenshot" alt="Set Redirect URL" src="/docs/assets/img/setup/integrations/dropbox_redirect_uri.png">
 
 ####Step 5: Settings in Site Config
 

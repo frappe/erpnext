@@ -230,7 +230,7 @@ frappe.ui.form.on("Expense Claim",{
 		frm.fields_dict["payable_account"].get_query = function() {
 			return {
 				filters: {
-					"root_type": "Liability",
+					"report_type": "Balance Sheet",
 					"account_type": "Payable"
 				}
 			}

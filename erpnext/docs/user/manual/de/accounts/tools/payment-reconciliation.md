@@ -7,7 +7,7 @@ Um das Werkzeug zum Zahlungsabgleich zu verwenden, gehen Sie zu:
 
 > Rechnungswesen > Werkzeuge > Zahlungsabgleich
 
-<img class="screenshot" alt="Zahlungsabgleich" src="{{docs_base_url}}/assets/img/accounts/payment-reconcile-tool.png">
+<img class="screenshot" alt="Zahlungsabgleich" src="/docs/assets/img/accounts/payment-reconcile-tool.png">
 
 **Schritt 1:** Wählen Sie das Konto aus, zu dem die Zahlungen abgeglichen werden sollen.
 

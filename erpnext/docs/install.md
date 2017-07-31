@@ -1,3 +1,5 @@
+# Install
+
 <!-- title: ERPNext Installation -->
 
 # Installation

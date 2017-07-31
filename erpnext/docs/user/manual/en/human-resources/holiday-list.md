@@ -1,3 +1,5 @@
+# Holiday List
+
 #Holiday List
 
 Holiday List is a list which contains the dates of holidays.
@@ -14,22 +16,22 @@ Click on New to add new Holiday List.
 
 Give a name to Holiday List. It can be based in Fiscal Year or location or department as application. Also select From and To Date for the Holiday List.
 
-<img class="screenshot" alt="Holiday List" src="{{docs_base_url}}/assets/img/human-resources/holiday-list-1.png"> 
+<img class="screenshot" alt="Holiday List" src="/docs/assets/img/human-resources/holiday-list-1.png"> 
 
 You can quickly add Weekly Off in the Holiday List as following.
 
-<img class="screenshot" alt="Holiday List" src="{{docs_base_url}}/assets/img/human-resources/holiday-list-2.gif"> 
+<img class="screenshot" alt="Holiday List" src="/docs/assets/img/human-resources/holiday-list-2.gif"> 
 
 After that, you can also add specific days (like festival holidays) manually.
 
-<img class="screenshot" alt="Holiday List" src="{{docs_base_url}}/assets/img/human-resources/holiday-list-3.png"> 
+<img class="screenshot" alt="Holiday List" src="/docs/assets/img/human-resources/holiday-list-3.png"> 
 
   
 ### Holiday List in Employee
 
 If you have created multiple Holiday List, then select specific Holiday List for an Employee in the respective master.
 
-<img class="screenshot" alt="Holiday List" src="{{docs_base_url}}/assets/img/human-resources/holiday-list-4.png"> 
+<img class="screenshot" alt="Holiday List" src="/docs/assets/img/human-resources/holiday-list-4.png"> 
 
 When an Employee applies for the Leave, then days mentioned in the Holiday List will not be counted, as they are holiday already. For more configuration option in Holiday List, check `HR > HR Settings`.
 
