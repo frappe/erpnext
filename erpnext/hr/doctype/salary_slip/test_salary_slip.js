@@ -8,13 +8,14 @@ QUnit.test("test salary slip", function(assert) {
 			employee_name = r.message.name;
 		},
 		() => {
+			// Creating a salary slip for a employee
 			frappe.tests.make('Salary Slip', [
 				{ employee: employee_name}
 			]);
 		},
 		() => frappe.timeout(5),
 		() => {
-			// To check if all the fields are correctly set
+			// To check if all the calculations are correctly done
 			assert.ok(cur_frm.doc.gross_pay==42500,
 				'Gross amount is correctly calculated'+cur_frm.doc.gross_pay);
 			assert.ok(cur_frm.doc.total_deduction==7000,
