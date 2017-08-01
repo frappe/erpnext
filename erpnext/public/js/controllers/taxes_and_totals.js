@@ -289,7 +289,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			tax.total = flt(this.frm.doc.net_total + tax.tax_amount_after_discount_amount,
 				precision("total", tax));
 		} else {
-			tax.total = flt(this.frm.doc.get("taxes")[row_idx-1].total + tax.tax_amount_after_discount_amount,
+			tax.total = flt(this.frm.doc["taxes"][row_idx-1].total + tax.tax_amount_after_discount_amount,
 				precision("total", tax));
 		}
 	},
