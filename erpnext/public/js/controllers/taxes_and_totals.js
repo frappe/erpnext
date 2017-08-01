@@ -272,7 +272,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 					// in tax.total, accumulate grand total for each item
 					tax.total = me.set_cumulative_total(i, tax);
 
-					this.set_in_company_currency(tax,
+					me.set_in_company_currency(tax,
 						["total", "tax_amount", "tax_amount_after_discount_amount"]);
 
 					// adjust Discount Amount loss in last tax iteration
