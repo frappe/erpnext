@@ -47,9 +47,9 @@ frappe.ui.form.on("Expense Claim", {
 		}
 
 		frm.fields_dict.employee.get_query = function() {
-			return{
+			return {
 				query: "erpnext.controllers.queries.employee_query"
-			}
+			};
 		};
 
 		frm.set_query("exp_approver", function() {
@@ -125,14 +125,13 @@ frappe.ui.form.on("Expense Claim", {
 		}
 
 		frm.script_manager.trigger("toggle_fields");
-    
-    if (frm.doc.docstatus===1 && frm.doc.approval_status=="Approved"
-        && (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total_sanctioned_amount))
-        && frappe.model.can_create("Payment Entry")) {
-      frm.add_custom_button(__('Payment'),
-        function() { frm.events.make_payment_entry(frm); }, __("Make"));
-    }
 
+		if (frm.doc.docstatus===1 && frm.doc.approval_status=="Approved"
+			&& (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total_sanctioned_amount))
+			&& frappe.model.can_create("Payment Entry")) {
+				frm.add_custom_button(__('Payment'),
+				function() { frm.events.make_payment_entry(frm); }, __("Make"));
+		}
 	},
 	validate: function(frm) {
 		frm.cscript.calculate_total(frm.doc);
@@ -153,6 +152,7 @@ frappe.ui.form.on("Expense Claim", {
 	},
 	get_unclaimed_button: function(frm) {
 		if (frm.doc.employee){
+			debugger;
 			frappe.call({
 				method: "erpnext.hr.doctype.expense_claim.expense_claim.get_unpaid_receipts",
 				args: {
@@ -160,6 +160,7 @@ frappe.ui.form.on("Expense Claim", {
 					company: frm.doc.company
 				},
 				callback: function(r) {
+					console.log(r);
 					if(r.message)
 					{
 						for( var i = 0; i < r.message.length;i++)
@@ -183,10 +184,10 @@ frappe.ui.form.on("Expense Claim", {
 				}
 			});
 		} else {
-			msgprint(__("Make sure the employee and company are filled out"));
+			frappe.msgprint(__("Make sure the employee and company are filled out"));
 		}
 	},
-  make_payment_entry: function(frm) {
+	make_payment_entry: function(frm) {
 		var method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry";
 		if(frm.doc.__onload && frm.doc.__onload.make_payment_via_journal_entry) {
 			method = "erpnext.hr.doctype.expense_claim.expense_claim.make_bank_entry"
@@ -224,7 +225,7 @@ frappe.ui.form.on("Expense Claim", {
 		};
 	},
 
-  is_paid: function(frm) {
+	is_paid: function(frm) {
 		frm.trigger("toggle_fields");
 	},
 
@@ -284,7 +285,7 @@ frappe.ui.form.on("Expense Claim Detail", {
 		var doc = frm.doc;
 
 		if((!child.sanctioned_amount) || (child.sanctioned_amount > child.claim_amount)){
-			frappe.model.set_value(cdt, cdn, 'sanctioned_amount', child.claim_amount)
+			frappe.model.set_value(cdt, cdn, 'sanctioned_amount', child.claim_amount);
 		}
 
 		frappe.model.set_value(cdt, cdn, 'sanctioned_tax', child.tax_amount * child.sanctioned_amount / child.claim_amount);

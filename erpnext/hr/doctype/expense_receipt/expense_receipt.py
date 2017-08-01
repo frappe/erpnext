@@ -6,13 +6,13 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils import flt
+from frappe import _
 from erpnext.hr.utils import set_employee_name
 
 class ExpenseReceipt(Document):
 	def validate(self):
 		self.validate_tax_amount()
 		set_employee_name(self)
-
 
 	def validate_tax_amount(self):
 		if flt(self.tax_amount) > flt(self.claim_amount):

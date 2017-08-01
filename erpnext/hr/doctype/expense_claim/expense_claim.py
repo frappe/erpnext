@@ -18,7 +18,7 @@ class InvalidExpenseApproverError(frappe.ValidationError): pass
 
 class ExpenseClaim(AccountsController):
 	def onload(self):
-		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings', 
+		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings',
 			'make_payment_via_journal_entry')
 
 	def get_feed(self):
@@ -108,13 +108,16 @@ class ExpenseClaim(AccountsController):
 		gl_entry = []
 		self.validate_account_details()
 
+		against_accounts = ",".join([d.default_account for d in self.expenses])
+		if len([d.default_tax_account for d in self.expenses if d.default_tax_account != None]) > 0:
+			against_accounts += "," + ",".join([d.default_tax_account for d in self.expenses if d.default_tax_account != None])
 		# payable entry
 		gl_entry.append(
 			self.get_gl_dict({
 				"account": self.payable_account,
 				"credit": self.total_sanctioned_amount,
 				"credit_in_account_currency": self.total_sanctioned_amount,
-				"against": ",".join([d.default_account for d in self.expenses]) + ",".join([d.default_tax_account for d in self.expenses]),
+				"against": against_accounts,
 				"party_type": "Employee",
 				"party": self.employee,
 				"against_voucher_type": self.doctype,
@@ -222,7 +225,10 @@ class ExpenseClaim(AccountsController):
 				frappe.throw(_("Tax Amount cannot be greater than Claim Amount in Row {0}.").format(d.idx))
 
 	def validate_sanctioned_amount(self):
+
 		for d in self.get('expenses'):
+			if d.sanctioned_tax == None:
+				d.sanctioned_tax = 0
 			if flt(d.sanctioned_amount) > flt(d.claim_amount):
 				frappe.throw(_("Sanctioned Amount cannot be greater than Claim Amount in Row {0}.").format(d.idx))
 			if flt(d.sanctioned_tax) > flt(d.sanctioned_amount):
@@ -230,6 +236,8 @@ class ExpenseClaim(AccountsController):
 
 	def validate_sanctioned_tax(self):
 		for d in self.get('expenses'):
+			if d.tax_amount == None:
+				d.tax_amount = 0
 			if flt(d.sanctioned_tax) > flt(d.tax_amount):
 				frappe.throw(_("Sanctioned Tax cannot be greater than Tax Amount in Row {0}.").format(d.idx))
 
