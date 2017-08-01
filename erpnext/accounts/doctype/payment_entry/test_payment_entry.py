@@ -10,7 +10,7 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry, InvalidPaymentEntry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.hr.doctype.expense_claim.test_expense_claim import make_expense_claim
+from erpnext.hr.doctype.expense_claim.test_expense_claim import make_expense_claim, set_accounts
 
 test_dependencies = ["Item"]
 
@@ -88,7 +88,8 @@ class TestPaymentEntry(unittest.TestCase):
 	def test_payment_entry_against_ec(self):
 
 		payable = frappe.db.get_value('Company', "_Test Company", 'default_payable_account')
-		ec =  make_expense_claim(payable, 300, 300, "_Test Company","Travel Expenses - _TC")
+		set_accounts("_Test Company")
+		ec =  make_expense_claim(payable, 300, 300, 30, 30, "_Test Company",)
 		pe = get_payment_entry("Expense Claim", ec.name, bank_account="_Test Bank USD - _TC", bank_amount=300)
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"

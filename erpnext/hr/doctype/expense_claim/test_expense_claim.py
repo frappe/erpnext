@@ -27,7 +27,7 @@ class TestExpenseClaim(unittest.TestCase):
 		payable_account = get_payable_account("Wind Power LLC")
 
 
-		make_expense_claim(payable_account, 400, 300, 10, 7.5, "Wind Power LLC", "_Test Project 1", task_name)
+		expense_claim = make_expense_claim(payable_account, 400, 300, 10, 7.5, "Wind Power LLC", "_Test Project 1", task_name)
 
 
 		self.assertEqual(frappe.db.get_value("Task", task_name, "total_expense_claim"), 300)
@@ -45,6 +45,9 @@ class TestExpenseClaim(unittest.TestCase):
 
 		self.assertEqual(frappe.db.get_value("Task", task_name, "total_expense_claim"), 300)
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_expense_claim"), 300)
+
+		expense_claim.cancel()
+		frappe.delete_doc("Expense Claim", expense_claim.name)
 
 
 	def test_expense_claim_status(self):
@@ -122,11 +125,12 @@ def set_accounts(company):
 
 	for expense_type in expense_types:
 		doc = frappe.get_doc("Expense Claim Type", expense_type["name"])
-		if len(doc.accounts) == 0:
+		if len([x for x in doc.accounts if x.company == company]) == 0:
 			doc.append("accounts", {
 				"company" : company,
 				"default_account" : expense_type["account"]
 			})
+		if len([x for x in doc.tax_accounts if x.company == company]) == 0:
 			doc.append("tax_accounts", {
 				"company" : company,
 				"default_account" : expense_type["tax_account"]
