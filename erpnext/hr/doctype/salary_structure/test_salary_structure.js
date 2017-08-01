@@ -1,5 +1,5 @@
 QUnit.test("test Salary", function(assert) {
-	assert.expect(9);
+	assert.expect(6);
 	let done = assert.async();
 	let employee_name;
 	frappe.run_serially([
