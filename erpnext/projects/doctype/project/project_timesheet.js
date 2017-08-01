@@ -3,14 +3,19 @@ QUnit.test("test project", function(assert) {
 	assert.expect(6);
 	let done = assert.async();
 	var task_title = ["Documentation","Implementation","Testing"];
-
+	let employee_name;
 	// To create a timesheet with different tasks and costs
 	let timesheet = (title,start_time,end_time,bill_rate,cost_rate) => {
 		return frappe.run_serially([
-			() => frappe.db.get_value('Task', {'subject': title}, 'name'),
-			(task) => {
+			() => frappe.db.get_value('Employee', {'employee_name': 'Test Employee 1'}, 'name'),
+			(r) => {
+				employee_name = r.message.name;
+				return frappe.db.get_value('Task', {'subject': title}, 'name');
+			},
+			(r) => {
 				// Creating timesheet for a project
 				return frappe.tests.make('Timesheet', [
+					{ employee: employee_name},
 					{time_logs:[
 						[
 							{activity_type: 'Communication'},
@@ -18,7 +23,7 @@ QUnit.test("test project", function(assert) {
 							{to_time: end_time},
 							{hours: 2},
 							{project: 'Test App'},
-							{task: task.name},
+							{task: r.message.name},
 							{billable: '1'},
 							{billing_rate: bill_rate},
 							{costing_rate: cost_rate}

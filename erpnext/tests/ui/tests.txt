@@ -12,7 +12,6 @@ erpnext/selling/doctype/sales_order/test_sales_order.js
 erpnext/manufacturing/doctype/workstation/test_workstation.js
 erpnext/manufacturing/doctype/operation/test_operation.js
 erpnext/manufacturing/doctype/bom/test_bom.js
-erpnext/projects/doctype/project/project_timesheet.js
 erpnext/hr/doctype/holiday_list/test_holiday_list.js
 erpnext/hr/doctype/branch/test_branch.js
 erpnext/hr/doctype/leave_block_list/test_leave_block_list.js
@@ -20,6 +19,7 @@ erpnext/hr/doctype/department/test_department.js
 erpnext/hr/doctype/designation/test_designation.js
 erpnext/hr/doctype/employment_type/test_employment_type.js
 erpnext/hr/doctype/employee/test_employee.js
+erpnext/projects/doctype/project/project_timesheet.js
 erpnext/hr/doctype/employee_attendance_tool/test_employee_attendance_tool.js
 erpnext/hr/doctype/attendance/test_attendance.js
 erpnext/hr/doctype/leave_type/test_leave_type.js
@@ -33,6 +33,8 @@ erpnext/schools/doctype/student_batch_name/test_student_batch_name.js
 erpnext/schools/doctype/student_category/test_student_category.js
 erpnext/schools/doctype/room/test_room.js
 erpnext/schools/doctype/instructor/test_instructor.js
+erpnext/hr/doctype/salary_structure/test_salary_structure.js
+erpnext/hr/doctype/salary_slip/test_salary_slip.js
 erpnext/stock/doctype/warehouse/test_warehouse.js
 erpnext/manufacturing/doctype/production_order/test_production_order.js
 erpnext/accounts/page/pos/test_pos.js
