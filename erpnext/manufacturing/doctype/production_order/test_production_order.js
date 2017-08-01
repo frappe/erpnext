@@ -76,7 +76,7 @@ QUnit.test("test: production order", function (assert) {
 		() => frappe.click_button('Yes'),
 		() => frappe.timeout(1),
 
-		() => frappe.click_link("TS-000"),
+		() => frappe.click_link("TS-00"),
 		() => frappe.timeout(1),
 		() => frappe.click_button("Save"),
 		() => frappe.timeout(1),
