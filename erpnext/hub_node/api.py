@@ -108,18 +108,25 @@ def make_rfq(data):
 
 	# return opportunity
 
+@frappe.whitelist(allow_guest=True)
 def make_opportunity(data):
 	# buyer_name = "Eg5"
 	# email_id = "eg5@example.com"
+	print("//////1///////")
 
 	args = json.loads(data)
-	buyer_name = args.buyer_name
-	email_id = args.email_id
+	buyer_name = args["buyer_name"]
+	email_id = args["email_id"]
+	print("//////2///////")
+	print email_id
+	print
 
 	buyer_name = "HUB-" + buyer_name
 	lead = frappe.new_doc("Lead")
 	lead.lead_name = buyer_name
 	lead.email_id = email_id
+
+	print("//////3///////")
 
 	lead.insert(ignore_permissions=True)
 	frappe.db.commit()

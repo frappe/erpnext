@@ -35,8 +35,6 @@ frappe.Hub = Class.extend({
 			} else {
 				const $toolbar_template = $(`<div class="col-md-12"  style="padding: 0px">
 					<input class="form-control search-input" name="search" placeholder="${__("Search")}">
-					<button class="btn btn-default cart-btn"><i class="fa fa-shopping-cart"></i>Cart</button>
-					<button class="btn btn-default test-btn">Test</button>
 				</div>`);
 				$toolbar_template.appendTo(me.page.page_actions);
 				me.page.$title_area.html("");
@@ -99,11 +97,11 @@ frappe.Hub = Class.extend({
 		this.more = this.page.main.find(".more")
 		this.more.find(".btn").on("click", function() { me.next_page('','') });
 
-		this.page.main.on('click', '.add-to-cart-btn', function(e) {
+		this.page.main.on('click', '.req-quote-btn', function(e) {
 			let $item = $(this);
 			let item_code = $item.attr('data-item-code');
 
-			me.load_message(item_code);
+			me.make_rfq(item_code);
 		});
 
 		this.reset();
@@ -116,24 +114,22 @@ frappe.Hub = Class.extend({
 		this.setup_filters();
 	},
 
-	load_message: function(item_code) {
-		// Get item details
-		let msg_type = "Request for Quotation";
+	make_rfq: function(item_code) {
 		let item = this.items[item_code];
-		let item_subset = (({ item_code, item_group, hub_user_name, email, company }) =>
-			({ item_code, item_group, hub_user_name, email, company }))(item);
+		console.log(item);
 		frappe.call({
-			method: "erpnext.hub_node.load_message",
+			method: "erpnext.hub_node.make_rfq",
 			args: {
-				msg_type: msg_type,
-				receiver: item.hub_user_name,
-				receiver_website: item.seller_website,
-				item: item_subset,
+				item_code: item.item_code,
+				item_group: item.item_group,
+				supplier_name: item.hub_user_name,
+				supplier_email: item.email,
+				company: item.company
 			},
 			callback: function(r) {
 				if(!r.message)
 					r.message = [];
-					console.log("DONE");
+				console.log("RFQ done?");
 			}
 		});
 	},
@@ -146,7 +142,7 @@ frappe.Hub = Class.extend({
 			callback: function(r) {
 				if(!r.message)
 					r.message = [];
-					console.log("DONE");
+				console.log("DONE");
 			}
 		});
 	},
@@ -159,35 +155,6 @@ frappe.Hub = Class.extend({
 		this.show_filters("Categories", "erpnext.hub_node.get_categories", {}, this.$categories, "category_name");
 		this.show_filters("Sellers", "erpnext.hub_node.get_all_users", {}, this.$sellers, "hub_user_name");
 		this.show_filters("Countries", "erpnext.hub_node.get_all_users", {}, this.$countries, "country");
-
-		// events
-
-		// $('.filters').on('change', '.list-item-container :checkbox', function (e) {
-		// 	var $item = $(this).closest('.list-item-container');
-		// 	var filename = $item.attr('data-filename');
-		// 	var $target = $(e.target);
-
-		// 	var checked = $target.is(':checked');
-		// 	if (checked){
-		// 		me.selections.push(filename);
-		// 	} else {
-		// 		var index = me.selections.indexOf(filename);
-		// 		if (index > -1) me.selections.splice(index, 1);
-		// 	}
-		// });
-		// this.$results.on('click', '.list-item-container', function (e) {
-		// 	if (!$(e.target).is(':checkbox') && !$(e.target).is('a')) {
-		// 		$(this).find(':checkbox').trigger('click');
-		// 	}
-		// });
-		// this.$results.on('click', '.list-item--head :checkbox', function (e) {
-		// 	// TO DO: more complex than it seems, think of uncheck case
-		// 	if ($(e.target).is(':checked')) {
-		// 		me.$results.find('.list-item-container :checkbox:not(:checked)').trigger('click');
-		// 	} else {
-		// 		me.$results.find('.list-item-container :checkbox(:checked)').trigger('click');
-		// 	}
-		// });
 
 	},
 
@@ -319,14 +286,14 @@ frappe.Hub = Class.extend({
 					<a class="grey list-id" data-name="${item.item_code}" title="${ item.item_name || item.item_code}">${item.item_name || item.item_code}</a>
 				</div>
 				<h6>${ item.hub_user_name }<h6>
-				<button class="btn btn-default add-to-cart-btn" data-item-code="${item.item_code}">Add to Cart</button>
+				<button class="btn btn-default req-quote-btn" data-item-code="${item.item_code}">Request a Quote</button>
 			</div>
 		</div>`);
 
 		return $item;
 	},
 
-	get_categories: function() {
+	get_categories: function(method) {
 		let me = this;
 		frappe.call({
 			method: method,
