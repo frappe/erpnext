@@ -6,6 +6,7 @@ Payment Entry can be made against following transactions.
   2. Purchase Invoice.
   3. Sales Order (Advance Payment)
   4. Purchase Order (Advance Payment)
+  5. Expense Claim
 
 ####Step 1: Make Payment
 
@@ -21,7 +22,7 @@ In the Payment Entry, select Mode of Payment (eg: Bank, Cash, Wire Transfer). In
 
 ####Step 3: Payment Amount
 
-Enter actual payment amount received from the Customer or paid to the Supplier.
+Enter actual payment amount received from the Customer or paid to the Supplier or Employee.
 
 <img class="screenshot" alt="Making Payment" src="/docs/assets/img/accounts/payment-entry-3.png">
 
@@ -90,7 +91,7 @@ Following internal transfers can be managed from the Payment Entry.
 	- Updating opening balance in an Accounts.
 	- Fixed Asset Depreciation entry.
 	- For adjusting Credit Note against Sales Invoice and Debit Note against Purchase Invoice, incase there is no payment happening at all.
-
+ 4. Payment Entries are used if a cheque is printed.
 * * *
 
 ## Managing Outstanding Payments
