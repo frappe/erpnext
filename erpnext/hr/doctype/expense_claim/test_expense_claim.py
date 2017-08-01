@@ -45,7 +45,7 @@ class TestExpenseClaim(unittest.TestCase):
 		payable_account = get_payable_account("Wind Power LLC")
 		expense_claim = make_expense_claim(payable_account, 300, 200, "Wind Power LLC", "Travel Expenses - WP")
 
-		je_dict = make_bank_entry(expense_claim.name)
+		je_dict = make_bank_entry("Expense Claim", expense_claim.name)
 		je = frappe.get_doc(je_dict)
 		je.posting_date = nowdate()
 		je.cheque_no = random_string(5)
