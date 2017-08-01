@@ -1,3 +1,5 @@
+# Production Planning Tool
+
 Production Planning Tool helps you plan production and purchase of Items for a
 period (usually a week or a month).
 
@@ -11,7 +13,7 @@ To use the Production Planning Tool, go to:
 
 > Manufacturing > Tools > Production Planning Tool
 
-<img class="screenshot" alt="Production Planing Tool" src="{{docs_base_url}}/assets/img/manufacturing/ppt.png">
+<img class="screenshot" alt="Production Planing Tool" src="/docs/assets/img/manufacturing/ppt.png">
 
 #### Step 1: Specify source to get Production Items
 
@@ -25,7 +27,7 @@ To use the Production Planning Tool, go to:
 * Use filters to get the Sales Order / Material Request
 * Click on Get Sales Order / Get Material Requests to generate a list.
 
-<img class="screenshot" alt="Production Planing Tool" src="{{docs_base_url}}/assets/img/manufacturing/ppt-get-sales-orders.png">
+<img class="screenshot" alt="Production Planing Tool" src="/docs/assets/img/manufacturing/ppt-get-sales-orders.png">
 
 
 
@@ -34,11 +36,11 @@ To use the Production Planning Tool, go to:
 * Get the items for the Sales Order / Material request list
 * You can add/remove or change quantity of these Items.
 
-<img class="screenshot" alt="Production Planing Tool" src="{{docs_base_url}}/assets/img/manufacturing/ppt-get-item.png">
+<img class="screenshot" alt="Production Planing Tool" src="/docs/assets/img/manufacturing/ppt-get-item.png">
 
 #### Step 4: Create Production Orders
 
-<img class="screenshot" alt="Production Planing Tool" src="{{docs_base_url}}/assets/img/manufacturing/ppt-create-production-order.png">
+<img class="screenshot" alt="Production Planing Tool" src="/docs/assets/img/manufacturing/ppt-create-production-order.png">
 
 
 
@@ -46,7 +48,7 @@ To use the Production Planning Tool, go to:
 
 Create Material Request for Items with projected shortfall.
 
-<img class="screenshot" alt="Production Planing Tool" src="{{docs_base_url}}/assets/img/manufacturing/ppt-create-material-request.png">
+<img class="screenshot" alt="Production Planing Tool" src="/docs/assets/img/manufacturing/ppt-create-material-request.png">
 
 
 

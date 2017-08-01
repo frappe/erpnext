@@ -7,15 +7,15 @@ In ERPNext können Sie Buchungen in unterschiedlichen Währungen erstellen. Beis
 
 Um mit Buchungen in unterschiedlichen Währungen zu beginnen, müssen Sie die Buchungswährung im Datensatz des Kontos einstellen. Sie können bei der Anlage eine Währung aus dem Kontenplan auswählen.
 
-<img class="screenshot" alt="Währung über den Kontenplan einstellen"  	src="{{docs_base_url}}/assets/img/accounts/multi-currency/chart-of-accounts.png">
+<img class="screenshot" alt="Währung über den Kontenplan einstellen"  	src="/docs/assets/img/accounts/multi-currency/chart-of-accounts.png">
 
 Sie können die Währung auch zuordnen oder bearbeiten, indem Sie den jeweiligen Datensatz für bereits angelegte Konten öffnen. 
 
-<img class="screenshot" alt="Kontenwährung anpassen"  	src="{{docs_base_url}}/assets/img/accounts/multi-currency/account.png">
+<img class="screenshot" alt="Kontenwährung anpassen"  	src="/docs/assets/img/accounts/multi-currency/account.png">
 
 Für Kunden/Lieferanten können Sie die Buchungswährung auch im Gruppendatensatz einstellen. Wenn sich die Buchungswährung der Gruppe von der Firmenwährung unterscheidet, müssen Sie die Standardkonten für Forderungen und Verbindlichkeiten auf diese Währung einstellen.
 
-<img class="screenshot" alt="Währung des Kundenkontos"  	src="{{docs_base_url}}/assets/img/accounts/multi-currency/customer.png">
+<img class="screenshot" alt="Währung des Kundenkontos"  	src="/docs/assets/img/accounts/multi-currency/customer.png">
 
 Wenn Sie die Buchungswährung für einen Artikel oder eine Gruppe eingestellt haben, können Sie Buchungen zu ihnen erstellen. Wenn sich die Buchungswährung der Gruppe von der Firmenwährung unterscheidet, dann beschränkt das System beim Erstellen von Transaktionen für diese Gruppe Buchungen auf diese Währung. Wenn die Buchungswährung die selbe wie die Firmenwährung ist, können Sie Transaktionen für diese Guppe in jeder beliebigen Währung erstellen. Aber die Hauptbuch-Buchungen werden immer in der Buchungswährung der Gruppe vorliegen. In jedem Fall ist die Wärung des Verbindlichkeitenkontos immer gleich der Buchungswährung der Gruppe.
 
@@ -33,7 +33,7 @@ Nun wird im POS der gezahlte Betrag in der Transaktionswährung eingegeben, im G
 
 Der ausstehende Betrag und Anzahlungsbeträge werden immer in der Währung des Kundenkontos kalkuliert und angezeigt.
 
-<img class="screenshot" alt="Offene Ausgangsrechnung"  	src="{{docs_base_url}}/assets/img/accounts/multi-currency/sales-invoice.png">
+<img class="screenshot" alt="Offene Ausgangsrechnung"  	src="/docs/assets/img/accounts/multi-currency/sales-invoice.png">
 
 #### Eingangsrechnung
 
@@ -43,13 +43,13 @@ In ähnlicher Art und Weise werden in Eingangsrechnungen Buchungen basierend auf
 
 In einer Journalbuchung können Sie Transaktionen in unterschiedlichen Währungen erstellen. Es gibt ein Auswahlfeld "Unterschiedliche Währungen" um Buchungen in mehreren Währungen zu aktivieren. Wenn die Option "Unterschiedliche Währungen" ausgewählt wurde, können Sie Konten mit unterschiedlichen Währungen auswählen.
 
-<img class="screenshot" alt="Wechselkurs im Buchungssatz"  	src="{{docs_base_url}}/assets/img/accounts/multi-currency/journal-entry-multi-currency.png">
+<img class="screenshot" alt="Wechselkurs im Buchungssatz"  	src="/docs/assets/img/accounts/multi-currency/journal-entry-multi-currency.png">
 
 In der Kontenübersicht zeigt das System den Abschnitt Währung an und holt sich die Kontenwährung und den Wechselkurs automatisch, wenn Sie ein Konto mit ausländischer Währung auswählen. Sie können den Wechselkurs später manuell ändern/anpassen.
 
 In einem einzelnen Buchungssatz können Sie nur Konten mit einer alternativen Währung auswählen, abweichend von Konten in der Firmenwährung. Die Beträge für Soll und Haben sollten in der Kontenwährung eingegeben werden, das System berechnet und zeigt dann den Betrag für Soll und Haben automatisch in der Firmenwährung.
 
-<img class="screenshot" alt="Buchungssatz mit verschiedenen Währungen"  	src="{{docs_base_url}}/assets/img/accounts/multi-currency/journal-entry-row.png">
+<img class="screenshot" alt="Buchungssatz mit verschiedenen Währungen"  	src="/docs/assets/img/accounts/multi-currency/journal-entry-row.png">
 
 #### Beispiel 1: Zahlungsbuchung eines Kunden in alternativer Währung
 
@@ -57,7 +57,7 @@ Nehmen wir an, dass die Standardwährung einer Firma Indische Rupien ist, und di
 
 Der Wechselkurs in der Zahlungsbuchung sollte immer der selbe wie auf der Rechnung (60) sein, auch dann, wenn der Wechselkurs am Tag der Zahlung 62 beträgt. Dem Bankkonto wird der Betrag mit einem Wechselkurs von 62 gut geschrieben. Deshalb wird ein Wechelkursgewinn bzw. -verlust basierend auf dem Unterschied im Wechselkurs gebucht.
 
-<img class="screenshot" alt="Zahlungsbuchung"  	src="{{docs_base_url}}/assets/img/accounts/multi-currency/payment-entry.png">
+<img class="screenshot" alt="Zahlungsbuchung"  	src="/docs/assets/img/accounts/multi-currency/payment-entry.png">
 
 #### Beispiel 2: Überweisung zwischen Banken (US-Dollar -> Indische Rupien)
 
@@ -100,7 +100,7 @@ Nehmen wir an, dass das Paypal-Konto folgende Beträge, die noch nicht auf Ihr a
 
 Angenommen, der Wechselkurs am Zahlungstag ist 62, dann schaut die Buchung zur Banküberweisung wie folgt aus:
 
-<img class="screenshot" alt="Übertrag zwischen den Banken"  	src="{{docs_base_url}}/assets/img/accounts/multi-currency/bank-transfer.png">
+<img class="screenshot" alt="Übertrag zwischen den Banken"  	src="/docs/assets/img/accounts/multi-currency/bank-transfer.png">
 
 ### Berichte
 
@@ -108,12 +108,12 @@ Angenommen, der Wechselkurs am Zahlungstag ist 62, dann schaut die Buchung zur B
 
 Im Hauptbuch zeigt das System den Betrag einer Gutschrift/Lastschrift in beiden Währungen an, wenn nach Konto gefiltert wurde, und wenn die Kontenwährung unterschiedlich zur Firmenwährung ist.
 
-<img class="screenshot" alt="Bericht zum Hauptbuch"  	src="{{docs_base_url}}/assets/img/accounts/multi-currency/general-ledger.png">
+<img class="screenshot" alt="Bericht zum Hauptbuch"  	src="/docs/assets/img/accounts/multi-currency/general-ledger.png">
 
 #### Forderungs- und Verbindlichkeitenkonten
 
 Im Bericht zu den Konten Forderungen und Verbindlichkeiten zeigt das System alle Beträge in der Währung der Gruppe/in der Kontenwährung an.
 
-<img class="screenshot" alt="Bericht zu den Forderungen"  	src="{{docs_base_url}}/assets/img/accounts/multi-currency/accounts-receivable.png">
+<img class="screenshot" alt="Bericht zu den Forderungen"  	src="/docs/assets/img/accounts/multi-currency/accounts-receivable.png">
 
 {next}

@@ -10,7 +10,7 @@ To create a new Loan Type go to:
 
 Configure Loan limit and Rate of interest.
 
-<img class="screenshot" alt="Loan Type" src="{{docs_base_url}}/assets/img/human-resources/loan-type.png">
+<img class="screenshot" alt="Loan Type" src="/docs/assets/img/human-resources/loan-type.png">
 
 ### Employee Loan Application
 
@@ -18,7 +18,7 @@ Employee can apply for loan by going to:
 
 > Human Resources > Employee Loan Management > Employee Loan Application > New Employee Loan Application
 
-<img class="screenshot" alt="Employee Loan Application" src="{{docs_base_url}}/assets/img/human-resources/employee-loan-application.png">
+<img class="screenshot" alt="Employee Loan Application" src="/docs/assets/img/human-resources/employee-loan-application.png">
 
 #### In the Employee Loan Application,
 
@@ -27,7 +27,7 @@ Employee can apply for loan by going to:
   
 On save, Employee can see Repayment Information and make changes if required before submitting.
 
-<img class="screenshot" alt="Employee Loan Application" src="{{docs_base_url}}/assets/img/human-resources/repayment-info.png">
+<img class="screenshot" alt="Employee Loan Application" src="/docs/assets/img/human-resources/repayment-info.png">
 
 ### Employee Loan
 
@@ -35,7 +35,7 @@ Once the Loan is approved, Manager can create Employee Loan record for the Emplo
 
 > Human Resources > Employee Loan Management > Employee Loan > New Employee Loan
 
-<img class="screenshot" alt="Employee Loan Application" src="{{docs_base_url}}/assets/img/human-resources/employee-loan.png">
+<img class="screenshot" alt="Employee Loan Application" src="/docs/assets/img/human-resources/employee-loan.png">
 
 #### In the Employee Loan,
 
@@ -44,13 +44,13 @@ Once the Loan is approved, Manager can create Employee Loan record for the Emplo
  * Enter Disbursement Date and Account Info
  * As soon as you hit save, the repayment schedule is generated.
  
-<img class="screenshot" alt="repayment Schedule" src="{{docs_base_url}}/assets/img/human-resources/repayment-schedule.png">
+<img class="screenshot" alt="repayment Schedule" src="/docs/assets/img/human-resources/repayment-schedule.png">
 
 #### Loan repayment deduction from Salary
 
 To auto deduct the Loan repayment from Salary, check "Repay from Salary" in Employee Loan. It will appear as Loan repayment in Salary Slip.
 
-<img class="screenshot" alt="Salary Slip" src="{{docs_base_url}}/assets/img/human-resources/loan-repayment-salary-slip.png">
+<img class="screenshot" alt="Salary Slip" src="/docs/assets/img/human-resources/loan-repayment-salary-slip.png">
 
 
  

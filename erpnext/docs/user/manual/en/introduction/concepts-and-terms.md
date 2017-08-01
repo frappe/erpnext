@@ -1,3 +1,5 @@
+# Concepts And Terms
+
 Before you start implementation, lets get familiar with the terminology that
 is used and some basic concepts in ERPNext.
 

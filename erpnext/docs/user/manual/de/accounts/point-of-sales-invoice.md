@@ -12,7 +12,7 @@ Sie können eine Ausgangsrechnung des Typs POS erstellen, indem Sie "Ist POS" an
 In ERPNext können über den POS alle Verkaufs- und Einkaufstransaktionen, wie Ausgangsrechnung, Angebot, Kundenauftrag, Lieferantenauftrag, usw. bearbeitet werden. Über folgende zwei Schritte richten Sie den POS ein:
 
 1. Aktivieren Sie die POS-Ansicht über Einstellungen > Anpassen > Funktionseinstellungen
-2. Erstellen Sie einen Datensatz für die [POS-Einstellungen]({{docs_base_url}}/user/manual/de/setting-up/pos-setting.html)
+2. Erstellen Sie einen Datensatz für die [POS-Einstellungen](/docs/user/manual/de/setting-up/pos-setting.html)
 
 #### Auf die POS-Ansicht umschalten
 
@@ -33,7 +33,7 @@ An der Kasse muss der Verkäufer die Artikel, die der Kunde kauft, auswählen. I
 
 **Barcode/Seriennummer:** Ein Barcode/eine Seriennummer ist eine optionale maschinenlesbare Möglichkeit Daten zu einem Objekt einzulesen, mit dem er/sie verbunden ist. Geben Sie wie auf dem Bild unten angegeben den Barcode/die Seriennummer in das Feld ein und warten Sie einen kurzen Moment, dann wird der Artikel automatisch zum Einkaufswagen hinzugefügt.
 
-![POS]({{docs_base_url}}/assets/old_images/erpnext/pos-add-item.png)
+![POS](/docs/assets/old_images/erpnext/pos-add-item.png)
 
 > Tipp: Um die Menge eines Artikels zu ändern, geben Sie die gewünschte Menge im Feld "Menge" ein. Das wird hauptsächliche dann verwendet, wenn ein Artikel in größeren Mengen gekauft wird.
 
@@ -50,7 +50,7 @@ Wenn Sie mehrere verschiedene Artikel auf einmal entfernen möchten, wählen Sie
 
 > Die Schaltfläche "Löschen" erscheint nur, wenn Artikel ausgewählt wurden.
 
-![POS]({{docs_base_url}}/assets/old_images/erpnext/pos-remove-item.png)
+![POS](/docs/assets/old_images/erpnext/pos-remove-item.png)
 
 ### Zahlung durchführen
 
@@ -60,7 +60,7 @@ Wenn alle Artikel mit Mengenangabe im Einkaufswagen hinzugefügt wurden, können
 2. Wählen Sie die Zahlungsart aus.
 3. Klicken Sie auf die Schaltfläche "Zahlen" um das Dokument abzuspeichern.
 
-![POS-Zahlung]({{docs_base_url}}/assets/old_images/erpnext/pos-make-payment.png)
+![POS-Zahlung](/docs/assets/old_images/erpnext/pos-make-payment.png)
 
 Übertragen Sie das Dokument um den Datensatz abzuschliessen. Nachdem das Dokument übertragen wurde, können Sie es entweder ausdrucken oder per E-Mail versenden.
 

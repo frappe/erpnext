@@ -32,13 +32,13 @@ To setup an Email Alert:
 ### Setting a Subject
 You can retrieve the data for a particular field by using `doc.[field_name]`. To use it in your subject / message, you have to surround it with `{% raw %}{{ }}{% endraw %}`. These are called [Jinja](http://jinja.pocoo.org/) tags. So, for example to get the name of a document, you use `{% raw %}{{ doc.name }}{% endraw %}`. The below example sends an email on saving a Task with the Subject, "TASK##### has been created"
 
-<img class="screenshot" alt="Setting Subject" src="{{docs_base_url}}/assets/img/setup/email/email-alert-subject.png">
+<img class="screenshot" alt="Setting Subject" src="/docs/assets/img/setup/email/email-alert-subject.png">
 
 ### Setting Conditions
 
 Email alerts allow you to set conditions according to the field data in your documents. For example, if you want to recieve an Email if a Lead has been saved as "Interested" as it's status, you put `doc.status == "Interested"` in the conditions textbox. You can also set more complex conditions by combining them.
 
-<img class="screenshot" alt="Setting Condition" src="{{docs_base_url}}/assets/img/setup/email/email-alert-condition.png">
+<img class="screenshot" alt="Setting Condition" src="/docs/assets/img/setup/email/email-alert-condition.png">
 
 The above example will send an Email Alert when a Task is saved with the status "Open" and the Expected End Date for the Task is the date on or before the date on which it was saved on.
 
@@ -74,14 +74,14 @@ field.
 
 Then you can use that as a condition in the **Condition** rules to ensure emails are not sent multiple times
 
-<img class="screenshot" alt="Setting Property in Email Alert" src="{{docs_base_url}}/assets/img/setup/email/email-alert-subject.png">
+<img class="screenshot" alt="Setting Property in Email Alert" src="/docs/assets/img/setup/email/email-alert-subject.png">
 
 ### Example
 
 1. Defining the Criteria
-    <img class="screenshot" alt="Defining Criteria" src="{{docs_base_url}}/assets/img/setup/email/email-alert-1.png">
+    <img class="screenshot" alt="Defining Criteria" src="/docs/assets/img/setup/email/email-alert-1.png">
 
 1. Setting the Recipients and Message
-    <img class="screenshot" alt="Set Message" src="{{docs_base_url}}/assets/img/setup/email/email-alert-2.png">
+    <img class="screenshot" alt="Set Message" src="/docs/assets/img/setup/email/email-alert-2.png">
 
 {next}

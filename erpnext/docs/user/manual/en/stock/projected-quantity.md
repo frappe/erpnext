@@ -1,3 +1,5 @@
+# Projected Quantity
+
 Projected Quantity is the level of stock that is predicted for a particular
 Item, based on the current stock levels and other requirements. It is the
 quantity of gross inventory that includes supply and demand in the past which
@@ -11,7 +13,7 @@ maintained to serve unexpected demands.
 Having a tight control of the projected inventory is crucial to determine
 shortages and to calculate the right order quantity.
 
-<img class="screenshot" alt="Projected Quantity" src="{{docs_base_url}}/assets/img/stock/projected_quantity.png">
+<img class="screenshot" alt="Projected Quantity" src="/docs/assets/img/stock/projected_quantity.png">
 
 
 > Projected Qty = Actual Qty + Planned Qty + Requested Qty + Ordered Qty -

@@ -1,3 +1,5 @@
+# Human Resource Setup
+
 The HR module has a setup process where you create the masters for all the
 major activities.
 

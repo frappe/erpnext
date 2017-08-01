@@ -12,17 +12,17 @@ Activity Type is a master of service offered by your personnel. You can add new 
 
 Activity Cost is a master where you can track billing and costing rate for each Employee, and for each Activity Type.
 
-![Activity Cost]({{docs_base_url}}/assets/img/articles/Screen Shot 2015-06-11 at 4.57.01 pm.png)
+![Activity Cost](/docs/assets/img/articles/Screen Shot 2015-06-11 at 4.57.01 pm.png)
 
 #### Time Log
 
 Based on Actual Time spent on the Project-Task, Employee will create a time log.
 
-![Time Log]({{docs_base_url}}/assets/img/articles/Screen Shot 2015-06-11 at 4.59.49 pm.png)
+![Time Log](/docs/assets/img/articles/Screen Shot 2015-06-11 at 4.59.49 pm.png)
 
 On selection of Activity Type in the Time Log, Billing and Costing Rate will fetched for that Employee from respective Activity Cost master. 
 
-![Time Log Costing]({{docs_base_url}}/assets/img/articles/Screen Shot 2015-06-11 at 5.00.06 pm.png)
+![Time Log Costing](/docs/assets/img/articles/Screen Shot 2015-06-11 at 5.00.06 pm.png)
 
 Multiplying these rates with total no. of Hours in the Time Log gives Costing Amount and Billing Amount for the specific Time Log.
 
@@ -30,10 +30,10 @@ Multiplying these rates with total no. of Hours in the Time Log gives Costing Am
 
 Based on total Time Logs created for a specific Task, its costing will be updated in the respective Task master. 
 
-![Costing in Task]({{docs_base_url}}/assets/img/articles/Screen Shot 2015-06-11 at 5.02.54 pm.png)
+![Costing in Task](/docs/assets/img/articles/Screen Shot 2015-06-11 at 5.02.54 pm.png)
 
 Same way, Project master will have cost updated based on Time Log created against that Projects, and tasks associated with that Project.
 
-![Costing in Project]({{docs_base_url}}/assets/img/articles/Screen Shot 2015-06-11 at 5.02.29 pm.png)
+![Costing in Project](/docs/assets/img/articles/Screen Shot 2015-06-11 at 5.02.29 pm.png)
 
 <!-- markdown -->

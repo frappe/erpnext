@@ -13,11 +13,11 @@ Wenn einige Ihrer Artikel einer anderen Besteuerung unterliegen als andere, gebe
 
 Die Tabelle zu den Artikelsteuern ist ein Abschnitt in den Artikelstammdaten.
 
-<img class="screenshot" alt="Artikelsteuer" src="{{docs_base_url}}/assets/img/taxes/item-tax.png">
+<img class="screenshot" alt="Artikelsteuer" src="/docs/assets/img/taxes/item-tax.png">
 
 * **Inklusive oder Exklusive Steuer:** ERPNext erlaubt es Ihnen Artikelpreise inklusive Steuer einzugeben.
 
-<img class="screenshot" alt="Steuer inklusive" src="{{docs_base_url}}/assets/img/taxes/inclusive-tax.png">
+<img class="screenshot" alt="Steuer inklusive" src="/docs/assets/img/taxes/inclusive-tax.png">
 
 * **Ausnahme von der Regel:** Die Einstellungen zur Artikelsteuer werden nur dann benötigt, wenn sich der Steuersatz eines bestimmten Artikels von demjenigen, den Sie im Standard-Steuerkonto definiert haben, unterscheidet.
 * **Die Artikelsteuer kann überschrieben werden:** Sie können den Artikelsteuersatz überschreiben oder ändern, wenn Sie in der Artikelsteuertabelle zu den Artikelstammdaten gehen.
@@ -34,7 +34,7 @@ Um eine neue Vorlage zu einer Verkaufssteuer z. B. mit dem Namen Vorlage für Ve
 
 > Einstellungen > Rechnungswesen > Vorlage für Verkaufssteuern und -abgaben
 
-<img class="screenshot" alt="Vorlage für Verkaufssteuern" src="{{docs_base_url}}/assets/img/taxes/sales-tax-master.png">
+<img class="screenshot" alt="Vorlage für Verkaufssteuern" src="/docs/assets/img/taxes/sales-tax-master.png">
 
 Wenn Sie eine neue Vorlage erstellen, müssen Sie für jeden Steuertyp eine neue Zeile einfügen.
 

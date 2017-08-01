@@ -34,11 +34,20 @@ frappe.ui.form.on("Sales Order", {
 
 		erpnext.queries.setup_warehouse_query(frm);
 	},
+	
+	delivery_date: function(frm) {
+		$.each(frm.doc.items || [], function(i, d) {
+			if(!d.delivery_date) d.delivery_date = frm.doc.delivery_date;
+		});
+		refresh_field("items");
+	}
 });
 
 frappe.ui.form.on("Sales Order Item", {
 	delivery_date: function(frm, cdt, cdn) {
-		erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "delivery_date");
+		if(!frm.doc.delivery_date) {
+			erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "delivery_date");
+		}
 	}	
 });
 
@@ -416,7 +425,12 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 	items_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("items", row, ["delivery_date"]);
+		if(doc.delivery_date) {
+			row.delivery_date = doc.delivery_date;
+			refresh_field("delivery_date", cdn, "items");
+		} else {
+			this.frm.script_manager.copy_from_first_row("items", row, ["delivery_date"]);
+		}
 	}
 });
 

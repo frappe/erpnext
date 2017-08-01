@@ -9,7 +9,7 @@ Wenn Ihr Kunde das Angebot annimmt, können Sie das Angebot in einen Kundenauftr
 
 ### Flußdiagramm des Kundenauftrags
 
-<img class="screenshot" alt="Kundenauftrag aus Angebot erstellen" src="{{docs_base_url}}/assets/img/selling/sales-order-f.jpg">
+<img class="screenshot" alt="Kundenauftrag aus Angebot erstellen" src="/docs/assets/img/selling/sales-order-f.jpg">
 
 Um einen neuen Kundenauftrag zu erstellen gehen Sie zu: > Vertrieb > Kundenauftrag > Neuer Kundenauftrag
 
@@ -17,11 +17,11 @@ Um einen neuen Kundenauftrag zu erstellen gehen Sie zu: > Vertrieb > Kundenauftr
 
 Sie können einen Kundenauftrag auch aus einem übertragenen Angebot heraus erstellen.
 
-<img class="screenshot" alt="Kundenauftrag aus Angebot erstellen" src="{{docs_base_url}}/assets/img/selling/make-SO-from-quote.png">
+<img class="screenshot" alt="Kundenauftrag aus Angebot erstellen" src="/docs/assets/img/selling/make-SO-from-quote.png">
 
 Oder Sie erstellen einen neuen Kundenauftrag und entnehmen die Details aus dem Angebot.
 
-<img class="screenshot" alt="Kundenauftrag aus Angebot erstellen" src="{{docs_base_url}}/assets/img/selling/make-so.gif">
+<img class="screenshot" alt="Kundenauftrag aus Angebot erstellen" src="/docs/assets/img/selling/make-so.gif">
 
 Die meisten Informationen im Kundenauftrag sind dieselben wie im Angebot. Einige Dinge möchte der Kundenauftrag aber aktualisiert haben.
 
@@ -60,7 +60,7 @@ Wenn Sie den Kundenauftrag aktualisieren, wird eine wiederkehrende ID generiert,
 
 ERPNext erstellt automatisch eine neue Bestellung und versendet eine E-Mail-Mitteilung an die E-Mail-Konten, die Sie im Feld "Benachrichtigungs-E-Mail-Adresse" eingestellt haben.
 
-<img class="screenshot" alt="Wiederkehrende Kundenaufträge" src="{{docs_base_url}}/assets/img/selling/recurring-sales-order.png">
+<img class="screenshot" alt="Wiederkehrende Kundenaufträge" src="/docs/assets/img/selling/recurring-sales-order.png">
 
 ### Die nächsten Schritte
 

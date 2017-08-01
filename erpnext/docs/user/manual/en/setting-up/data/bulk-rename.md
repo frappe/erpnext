@@ -12,4 +12,4 @@ This tool will allow you to rename multiple records at the same time.
 
 To rename multiple records, upload a **.csv** file with the old name in the first column and the new name in the second column and click on **Upload**.
 
-<img class="screenshot" alt="Bulk Rename" src="{{docs_base_url}}/assets/img/setup/data/rename.png">
+<img class="screenshot" alt="Bulk Rename" src="/docs/assets/img/setup/data/rename.png">

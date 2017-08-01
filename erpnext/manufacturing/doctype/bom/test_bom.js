@@ -12,6 +12,7 @@ QUnit.test("test: item", function (assert) {
 				{item: "Laptop"},
 				{quantity: 1},
 				{with_operations: 1},
+				{company: "Razer Blade"},
 				{operations: [
 					[
 						{operation: "Assemble CPU"},
