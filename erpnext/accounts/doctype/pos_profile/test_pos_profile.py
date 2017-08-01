@@ -42,6 +42,7 @@ def make_pos_profile():
 		"naming_series": "_T-POS Profile-",
 		"selling_price_list": "_Test Price List",
 		"territory": "_Test Territory",
+		"customer_group": frappe.db.get_value('Customer Group', {'is_group': 0}, 'name'),
 		"warehouse": "_Test Warehouse - _TC",
 		"write_off_account": "_Test Write Off - _TC",
 		"write_off_cost_center": "_Test Write Off Cost Center - _TC"
