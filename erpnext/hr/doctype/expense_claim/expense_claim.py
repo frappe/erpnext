@@ -189,13 +189,23 @@ class ExpenseClaim(AccountsController):
 def update_reimbursed_amount(doc):
 	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt 
 		from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
-		and party = %s """, (doc.name, doc.employee) ,as_dict=1)[0].amt
+		and party = %s and account = %s """, (doc.name, doc.employee, doc.payable_account) ,as_dict=1)[0].amt
 
 	doc.total_amount_reimbursed = amt
 	frappe.db.set_value("Expense Claim", doc.name , "total_amount_reimbursed", amt)
 
 	doc.set_status()
 	frappe.db.set_value("Expense Claim", doc.name , "status", doc.status)
+
+@frappe.whitelist()
+def update_advance_paid(docname, employee, advance_account):
+	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt 
+		from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
+		and party = %s and account = %s """, (docname, employee, advance_account) ,as_dict=1)[0].amt
+
+	return {
+		"amt": amt
+	}
 
 @frappe.whitelist()
 def get_expense_approver(doctype, txt, searchfield, start, page_len, filters):
@@ -253,3 +263,39 @@ def get_expense_claim_account(expense_claim_type, company):
 	return {
 		"account": account
 	}
+
+@frappe.whitelist()
+def make_advance_entry(docname):
+	from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+
+	expense_claim = frappe.get_doc("Expense Claim", docname)
+	default_bank_cash_account = get_default_bank_cash_account(expense_claim.company, "Bank")
+	if not default_bank_cash_account:
+		default_bank_cash_account = get_default_bank_cash_account(expense_claim.company, "Cash")
+
+	je = frappe.new_doc("Journal Entry")
+	je.voucher_type = 'Bank Entry'
+	je.company = expense_claim.company
+	je.remark = 'Advance Payment against Expense Claim: ' + docname;
+
+	je.append("accounts", {
+		"account": expense_claim.advance_account,
+		"debit_in_account_currency": flt(expense_claim.total_sanctioned_amount - expense_claim.total_advance_paid),
+		"reference_type": "Expense Claim",
+		"party_type": "Employee",
+		"party": expense_claim.employee,
+		"reference_name": expense_claim.name
+	})
+
+	je.append("accounts", {
+		"account": default_bank_cash_account.account,
+		"credit_in_account_currency": flt(expense_claim.total_sanctioned_amount - expense_claim.total_advance_paid),
+		"reference_type": "Expense Claim",
+		"reference_name": expense_claim.name,
+		"balance": default_bank_cash_account.balance,
+		"account_currency": default_bank_cash_account.account_currency,
+		"account_type": default_bank_cash_account.account_type
+	})
+
+	return je.as_dict()
+

@@ -442,7 +442,7 @@
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
-  }, 
+  },
   {
    "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
@@ -2432,7 +2432,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-06-13 14:29:13.694009", 
+ "modified": "2017-07-11 14:30:13.694009", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee", 
