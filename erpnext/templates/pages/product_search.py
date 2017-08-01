@@ -17,23 +17,25 @@ def get_product_list(search=None, start=0, limit=12):
 	# limit = 12 because we show 12 items in the grid view
 
 	# base query
-	query = """select name, item_name, item_code, route, website_image, thumbnail, item_group,
-			description, web_long_description as website_description
+	query = """select tabItem.name, tabItem.item_name, tabItem.item_code, tabItem.route, tabItem.website_image,
+			tabItem.thumbnail, tabItem.item_group, tabItem.description, tabItem.web_long_description as website_description,
+			case when ifnull(tabBin.actual_qty,0) > 0 then 1 else 0 end as in_stock
 		from `tabItem`
-		where (show_in_website = 1 or show_variant_in_website = 1)
-			and disabled=0
-			and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %(today)s)"""
+		left join tabBin on	tabItem.item_code=tabBin.item_code and tabItem.website_warehouse=tabBin.warehouse
+		where (tabItem.show_in_website = 1 or tabItem.show_variant_in_website = 1)
+			and tabItem.disabled=0
+			and (tabItem.end_of_life is null or tabItem.end_of_life='0000-00-00' or tabItem.end_of_life > %(today)s)"""
 
 	# search term condition
 	if search:
-		query += """ and (web_long_description like %(search)s
-				or description like %(search)s
-				or item_name like %(search)s
-				or name like %(search)s)"""
+		query += """ and (tabItem.web_long_description like %(search)s
+				or tabItem.description like %(search)s
+				or tabItem.item_name like %(search)s
+				or tabItem.name like %(search)s)"""
 		search = "%" + cstr(search) + "%"
 
 	# order by
-	query += """ order by weightage desc, idx desc, modified desc limit %s, %s""" % (cint(start), cint(limit))
+	query += """ order by tabItem.weightage desc, in_stock desc, tabItem.item_name limit %s, %s""" % (cint(start), cint(limit))
 
 	data = frappe.db.sql(query, {
 		"search": search,
