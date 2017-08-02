@@ -160,7 +160,7 @@ class RequestforQuotation(BuyingController):
 
 	def update_rfq_supplier_status(self, sup_name=None):
 		for supplier in self.suppliers:
-			if sup_name != None and supplier.supplier == sup_name:
+			if sup_name == None or supplier.supplier == sup_name:
 				if supplier.quote_status != _('No Quote'):
 					quote_status = _('Received')
 					for item in self.items:
