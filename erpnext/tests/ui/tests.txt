@@ -2,6 +2,7 @@ erpnext/tests/ui/make_fixtures.js #long
 erpnext/setup/doctype/company/tests/test_company.js
 erpnext/accounts/doctype/account/test_account.js
 erpnext/accounts/doctype/account/test_make_tax_account.js
+erpnext/accounts/doctype/pricing_rule/test_pricing_rule.js
 erpnext/accounts/doctype/sales_taxes_and_charges_template/test_sales_taxes_and_charges_template.js
 erpnext/crm/doctype/lead/test_lead.js
 erpnext/crm/doctype/opportunity/test_opportunity.js
