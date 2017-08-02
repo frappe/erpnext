@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import get_fullname, flt, cstr
+from frappe.utils import get_fullname, flt, cstr, get_link_to_form
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name
 from erpnext.accounts.party import get_party_account
@@ -189,6 +189,24 @@ class ExpenseClaim(AccountsController):
 		for expense in self.expenses:
 			if not expense.default_account:
 				expense.default_account = get_expense_claim_account(expense.expense_type, self.company)["account"]
+
+	def notify_expense_claim_approver(self):
+		if self.get("__islocal"):
+			frappe.throw(_("Please save the Expense Claim before notifying Expense Claim Approver"))
+		def _get_message(url=False):
+			if url:
+				name = get_link_to_form(self.doctype, self.name)
+				employee_name = get_link_to_form("Employee", self.employee, label=self.employee_name)
+			message = (_("Expense Claim") + ": %s") % (name)+"<br>"
+			message += (_("Employee") + ": %s") % (employee_name)+"<br>"
+			message += (_("Date") + ": %s") % (self.posting_date)+"<br>"
+			message += (_("Total Claimed Amount") + ": %s") % (self.total_claimed_amount)
+			return message
+
+		frappe.sendmail(recipients = self.exp_approver,
+			message = _get_message(url=True),
+			subject = _('New Expense Claim: {0} for Employee: {1}').format(self.name, self.employee_name))
+		frappe.msgprint(_("Email sent to {0}").format(self.exp_approver))
 
 def update_reimbursed_amount(doc):
 	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt 
