@@ -21,7 +21,7 @@ QUnit.test("test pricing rule", function(assert) {
 		() => {
 			assert.ok(cur_frm.doc.item_code=='Test Product 2');
 			assert.ok(cur_frm.doc.customer=='Test Customer 3');
-			},
+		},
 		() => done()
 	]);
 });
