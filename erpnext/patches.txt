@@ -426,3 +426,4 @@ erpnext.patches.v8_1.set_delivery_date_in_so_item #2017-07-28
 erpnext.patches.v8_5.fix_tax_breakup_for_non_invoice_docs
 erpnext.patches.v8_5.update_customer_group_in_POS_profile
 erpnext.patches.v8_6.update_timesheet_company_from_PO
+erpnext.patches.v8_6.set_write_permission_for_quotation_for_sales_manager
