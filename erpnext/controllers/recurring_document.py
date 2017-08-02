@@ -147,7 +147,7 @@ def notify_errors(doc, doctype, party, owner):
 		message = frappe.get_template("templates/emails/recurring_document_failed.html").render({
 			"type": doctype,
 			"name": doc,
-			"party": party
+			"party": party or ""
 		}))
 
 	assign_task_to_owner(doc, doctype, "Recurring Invoice Failed", recipients)

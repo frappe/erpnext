@@ -86,7 +86,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					this.make_payment_request, __("Make"));
 			}
 
-
+			if(!doc.subscription) {
+				cur_frm.add_custom_button(__('Subscription'), function() {
+					erpnext.utils.make_subscription(doc.doctype, doc.name)
+				}, __("Make"))
+			}
 		}
 
 		// Show buttons only when pos view is active
@@ -515,18 +519,6 @@ frappe.ui.form.on('Sales Invoice', {
 				}
 			};
 		});
-	},
-
-	refresh: function(frm) {
-		frm.trigger("make_subscription")
-	},
-
-	make_subscription: function(frm) {
-		if(frm.doc.docstatus == 1 && !frm.doc.subscription) {
-			frm.add_custom_button(__('Subscription'), function() {
-				erpnext.utils.make_subscription(frm.doc.doctype, frm.doc.name)
-			}, __("Make"))
-		}
 	},
 
 	project: function(frm){

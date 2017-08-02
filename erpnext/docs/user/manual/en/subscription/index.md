@@ -1,6 +1,6 @@
-Subscription module plays important role in every oraginization, specially for the organization who serve the services to the customers based on period
+Subscription module plays an important role in the every oraginization, specially for the organization who serve the services to the customers based on period.
 
-If you have a contract with a Customer where your organization gives bill to the Customer on a monthly, quarterly, half-yearly or annual basis, you should use subscription feature to make auto invoicing.
+If you have a contract with the Customer where your organization gives bill to the Customer on a monthly, quarterly, half-yearly or annual basis, you can use subscription feature to make auto invoicing.
 
 <img class="screenshot" alt="Subscription" src="{{docs_base_url}}/assets/img/subscription/subscription.png">
 

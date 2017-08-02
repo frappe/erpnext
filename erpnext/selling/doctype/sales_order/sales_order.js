@@ -41,18 +41,6 @@ frappe.ui.form.on("Sales Order", {
 		});
 		refresh_field("items");
 	}
-
-	refresh: function(frm) {
-		frm.trigger("make_subscription")
-	},
-
-	make_subscription: function(frm) {
-		if(frm.doc.docstatus == 1 && !frm.doc.subscription) {
-			frm.add_custom_button(__('Subscription'), function() {
-				erpnext.utils.make_subscription(frm.doc.doctype, frm.doc.name)
-			}, __("Make"))
-		}
-	},
 });
 
 frappe.ui.form.on("Sales Order Item", {
@@ -151,6 +139,12 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
 						this.frm.add_custom_button(__('Project'),
 							function() { me.make_project() }, __("Make"));
+				}
+
+				if(!doc.subscription) {
+					this.frm.add_custom_button(__('Subscription'), function() {
+						erpnext.utils.make_subscription(doc.doctype, doc.name)
+					}, __("Make"))
 				}
 
 			} else {

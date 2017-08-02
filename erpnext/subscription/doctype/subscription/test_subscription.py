@@ -31,16 +31,19 @@ class TestSubscription(unittest.TestCase):
 
 		doc.disabled = 1
 		doc.save()
+		frappe.db.commit()
 
 		make_subscription_entry()
 		docnames = frappe.get_all(doc.base_doctype, {'subscription': doc.name})
 		self.assertEquals(len(docnames), 1)
 
+		doc = frappe.get_doc('Subscription', doc.name)
 		doc.disabled = 0
 		doc.save()
 
 		months = get_months(getdate(start_date), getdate(today()))
 		make_subscription_entry()
+
 		docnames = frappe.get_all(doc.base_doctype, {'subscription': doc.name})
 		self.assertEquals(len(docnames), months)
 

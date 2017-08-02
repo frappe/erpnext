@@ -4,14 +4,16 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.utils import getdate, add_days, cstr, today
-from erpnext.controllers.recurring_document import send_notification, get_next_date
+from erpnext.controllers.recurring_document import send_notification, get_next_date, notify_errors
 from frappe.model.document import Document
 
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 class Subscription(Document):
 	def validate(self):
 		self.update_status()
+		self.validate_dates()
 
 	def before_submit(self):
 		self.set_next_schedule_date()
@@ -20,12 +22,21 @@ class Subscription(Document):
 		self.update_subscription_id()
 		self.update_status()
 
+	def on_update_after_submit(self):
+		self.validate_dates()
+		self.set_next_schedule_date()
+
+	def validate_dates(self):
+		if self.end_date and getdate(self.start_date) > getdate(self.end_date):
+			frappe.throw(_("End date must be greater than start date"))
+
 	def set_next_schedule_date(self):
 		self.next_schedule_date = get_next_schedule_date(self.start_date,
 			self.frequency, self.repeat_on_day)
 
 	def update_subscription_id(self):
-		frappe.db.set_value(self.base_doctype, self.base_docname, 'subscription', self.name)
+		doc = frappe.get_doc(self.base_doctype, self.base_docname)
+		doc.db_set('subscription', self.name)
 
 	def update_status(self):
 		status = {
@@ -55,8 +66,8 @@ def make_subscription_entry(date=None):
 			schedule_date = get_next_schedule_date(schedule_date,
 				data.frequency, data.repeat_on_day)
 
-		if schedule_date:
-			frappe.db.set_value('Subscription', data.name, 'next_schedule_date', schedule_date)
+			if schedule_date:
+				frappe.db.set_value('Subscription', data.name, 'next_schedule_date', schedule_date)
 
 def get_subscription_entries(date):
 	return frappe.db.sql(""" select * from `tabSubscription`
@@ -70,8 +81,29 @@ def create_documents(data, schedule_date):
 		doc = make_new_document(data, schedule_date)
 		if data.notify_by_email:
 			send_notification(doc, data.print_format, data.recipients)
+
+		frappe.db.commit()
 	except Exception:
+		frappe.db.rollback()
+		frappe.db.begin()
 		frappe.log_error(frappe.get_traceback())
+		frappe.db.commit()
+		if data.base_docname and not frappe.flags.in_test:
+			notify_error_to_user(data)
+
+def notify_error_to_user(data):
+	party = ''
+	party_type = ''
+
+	if data.base_doctype in ['Sales Order', 'Sales Invoice', 'Delivery Note']:
+		party_type = 'customer'
+	elif data.base_doctype in ['Purchase Order', 'Purchase Invoice', 'Purchase Receipt']:
+		party_type = 'supplier'
+
+	if party_type:
+		party = frappe.db.get_value(data.base_doctype, data.base_docname, party_type)
+
+	notify_errors(data.base_docname, data.base_doctype, party, data.owner)
 
 def make_new_document(args, schedule_date):
 	doc = frappe.get_doc(args.base_doctype, args.base_docname)
@@ -93,7 +125,7 @@ def update_doc(new_document, args, schedule_date):
 		new_document.set('subscription', args.name)
 
 	for data in new_document.meta.fields:
-		if data.fieldtype == 'Date' and data.reqd==1:
+		if data.fieldtype == 'Date':
 			new_document.set(data.fieldname, schedule_date)
 
 @frappe.whitelist()

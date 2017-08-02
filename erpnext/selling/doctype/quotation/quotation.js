@@ -22,18 +22,6 @@ frappe.ui.form.on('Quotation', {
 	set_label: function(frm) {
 		frm.fields_dict.customer_address.set_label(__(frm.doc.quotation_to + " Address"));
 	}
-
-	refresh: function(frm) {
-		frm.trigger("make_subscription")
-	},
-
-	make_subscription: function(frm) {
-		if(frm.doc.docstatus == 1 && !frm.doc.subscription) {
-			frm.add_custom_button(__('Subscription'), function() {
-				erpnext.utils.make_subscription(frm.doc.doctype, frm.doc.name)
-			}, __("Make"))
-		}
-	},
 });
 
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
@@ -66,6 +54,12 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 			if(doc.status!=="Ordered") {
 				cur_frm.add_custom_button(__('Set as Lost'),
 					cur_frm.cscript['Declare Order Lost']);
+			}
+
+			if(!doc.subscription) {
+				cur_frm.add_custom_button(__('Subscription'), function() {
+					erpnext.utils.make_subscription(doc.doctype, doc.name)
+				}, __("Make"))
 			}
 
 			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));

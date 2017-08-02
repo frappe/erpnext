@@ -22,18 +22,6 @@ frappe.ui.form.on("Purchase Order", {
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
 	},
-
-	refresh: function(frm) {
-		frm.trigger("make_subscription")
-	},
-
-	make_subscription: function(frm) {
-		if(frm.doc.docstatus == 1 && !frm.doc.subscription) {
-			frm.add_custom_button(__('Subscription'), function() {
-				erpnext.utils.make_subscription(frm.doc.doctype, frm.doc.name)
-			}, __("Make"))
-		}
-	},
 });
 
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
@@ -98,8 +86,13 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			if(flt(doc.per_billed)==0 && doc.status != "Delivered") {
 				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_payment_entry, __("Make"));
 			}
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 
+			if(!doc.subscription) {
+				cur_frm.add_custom_button(__('Subscription'), function() {
+					erpnext.utils.make_subscription(doc.doctype, doc.name)
+				}, __("Make"))
+			}
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 	},
 

@@ -184,7 +184,7 @@ doc_events = {
 
 scheduler_events = {
 	"hourly": [
-		"erpnext.controllers.recurring_document.create_recurring_documents",
+		"erpnext.subscription.doctype.subscription.subscription.make_subscription_entry",
 		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.trigger_emails'
 	],
 	"daily": [
@@ -198,7 +198,6 @@ scheduler_events = {
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
 		"erpnext.accounts.doctype.asset.depreciation.post_depreciation_entries",
 		"erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary",
-		"erpnext.subscription.doctype.subscription.subscription.make_subscription_entry",
 		"erpnext.stock.doctype.serial_no.serial_no.update_maintenance_status",
 		"erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.refresh_scorecards",
 		"erpnext.setup.doctype.company.company.cache_companies_monthly_sales_history",

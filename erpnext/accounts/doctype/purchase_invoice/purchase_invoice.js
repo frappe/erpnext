@@ -46,6 +46,12 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				cur_frm.add_custom_button(__('Return / Debit Note'),
 					this.make_debit_note, __("Make"));
 			}
+
+			if(!doc.subscription) {
+				cur_frm.add_custom_button(__('Subscription'), function() {
+					erpnext.utils.make_subscription(doc.doctype, doc.name)
+				}, __("Make"))
+			}
 		}
 
 		if(doc.docstatus===0) {
@@ -371,17 +377,5 @@ frappe.ui.form.on("Purchase Invoice", {
 			erpnext.buying.get_default_bom(frm);
 		}
 		frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted==="Yes");
-	},
-
-	refresh: function(frm) {
-		frm.trigger("make_subscription")
-	},
-
-	make_subscription: function(frm) {
-		if(frm.doc.docstatus == 1 && !frm.doc.subscription) {
-			frm.add_custom_button(__('Subscription'), function() {
-				erpnext.utils.make_subscription(frm.doc.doctype, frm.doc.name)
-			}, __("Make"))
-		}
 	},
 })
