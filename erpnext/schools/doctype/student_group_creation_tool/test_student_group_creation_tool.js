@@ -5,8 +5,9 @@ QUnit.test('Test: Student Group Creation Tool', function(assert){
 	assert.expect(5);
 	let done = assert.async();
 	let instructor_code;
+	let grid;
+	let grid_row;
 	let d;
-	let i;
 	frappe.run_serially([
 		// Saving Instructor code beforehand
 		() => frappe.set_route('List', 'Instructor'),
@@ -30,7 +31,8 @@ QUnit.test('Test: Student Group Creation Tool', function(assert){
 		},
 
 		() => {
-			for(i=0;i<cur_frm.get_field("courses").grid.grid_rows.length;i++){
+			for(d = 0; d < cur_frm.get_field("courses").grid.grid_rows.length; d++)
+			{
 				grid = cur_frm.get_field("courses").grid;
 				grid_row = grid.get_row(i).toggle_view(true);
 				if(grid_row.doc.student_group_name == 'Standard Test/A/2016-17 (Semester 1)'){
