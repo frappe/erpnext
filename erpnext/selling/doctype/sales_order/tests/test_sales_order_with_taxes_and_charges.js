@@ -32,8 +32,8 @@ QUnit.test("test sales order", function(assert) {
 			assert.ok(cur_frm.doc.taxes[0].account_head=='CGST - '+frappe.get_abbr(frappe.defaults.get_default('Company')), " Account Head abbr correct");
 
 		},
-/*		() => frappe.tests.click_button('Submit'),
-		() => frappe.tests.click_button('Yes'),*/
+		() => frappe.tests.click_button('Submit'),
+		() => frappe.tests.click_button('Yes'),
 		() => frappe.timeout(0.3),
 		() => done()
 	]);
