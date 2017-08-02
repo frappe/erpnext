@@ -490,7 +490,6 @@ frappe.ui.form.on('Payment Entry', {
 				}
 			},
 			callback: function(r, rt) {
-				console.log(r, rt);
 				if(r.message) {
 					var total_positive_outstanding = 0;
 					var total_negative_outstanding = 0;

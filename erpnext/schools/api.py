@@ -358,6 +358,22 @@ def update_email_group(doctype, name):
 @frappe.whitelist()
 def get_current_enrollment(student, academic_year=None):
 	current_academic_year = academic_year or frappe.defaults.get_defaults().academic_year
-	return frappe.get_all("Program Enrollment", fields=["name", "student", "student_name", "student_category",
+	program_enrollment_list = frappe.db.sql('''
+		select
+			name as program_enrollment, student_name, program, student_batch_name as student_batch,
+			student_category, academic_term, academic_year
+		from 
+			`tabProgram Enrollment`
+		where 
+			student = %s and academic_year = %s
+		order by creation''', (student, current_academic_year), as_dict=1)
+
+	'''
+	program_enrollment_list = frappe.get_all("Program Enrollment", fields=["name", "student", "student_name", "student_category",
 			"program", "student_batch_name", "academic_year", "academic_term"], filters={"student":student,
-			"academic_year": current_academic_year})[0]
+			"academic_year": current_academic_year})
+	'''
+	if program_enrollment_list:
+		return program_enrollment_list[0]
+	else:
+		return None

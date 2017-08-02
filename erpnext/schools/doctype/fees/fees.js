@@ -1,13 +1,17 @@
 // Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-cur_frm.add_fetch("student", "title", "student_name");
-cur_frm.add_fetch("student", "student_email_id", "student_email");
-cur_frm.add_fetch("company", "default_receivable_account", "debit_to");
-cur_frm.add_fetch("company", "default_income_account", "against_income_account");
-cur_frm.add_fetch("company", "cost_center", "cost_center");
 
 frappe.ui.form.on("Fees", {
+	setup: function(frm) {
+		frm.add_fetch("student", "title", "student_name");
+		frm.add_fetch("student", "student_email_id", "student_email");
+		frm.add_fetch("company", "default_receivable_account", "debit_to");
+		frm.add_fetch("company", "default_income_account", "against_income_account");
+		frm.add_fetch("company", "cost_center", "cost_center");
+
+	},
+
 	onload: function(frm){
 		frm.set_query("academic_term",function(){
 			return{
@@ -20,7 +24,7 @@ frappe.ui.form.on("Fees", {
 		frm.set_query("fee_structure",function(){
 			return{
 				"filters":{
-					"academic_term": (frm.doc.academic_term)
+					"academic_year": (frm.doc.academic_year)
 				}
 			};
 		});
@@ -85,14 +89,9 @@ frappe.ui.form.on("Fees", {
 				},
 				callback: function(r) {
 					if(r){
-						console.log(r);
-						frm.set_value("student_name", r.message.student_name);
-						frm.set_value("program_enrollment", r.message.name);
-						frm.set_value("program", r.message.program);
-						frm.set_value("student_batch", r.message.student_batch_name);
-						frm.set_value("student_category", r.message.student_category);
-						frm.set_value("academic_term", r.message.academic_term);
-						frm.set_value("academic_year", r.message.academic_year);
+						$.each(r.message, function(i, d) {
+							frm.set_value(i,d)
+						});
 					}
 				}
 			});
@@ -100,25 +99,29 @@ frappe.ui.form.on("Fees", {
 	},
 
 	make_payment_request: function(frm) {
-		frappe.call({
-			method:"erpnext.accounts.doctype.payment_request.payment_request.make_payment_request",
-			args: {
-				"dt": frm.doc.doctype,
-				"dn": frm.doc.name,
-				"recipient_id": frm.doc.contact_email
-			},
-			callback: function(r) {
-				if(!r.exc){
-					var doc = frappe.model.sync(r.message);
-					frappe.set_route("Form", doc[0].doctype, doc[0].name);
+		if (!frm.doc.contact_email) {
+			frappe.msgprint(__("Please set the Email ID for the Student to send the Payment Request"))
+		} else {		
+			frappe.call({
+				method:"erpnext.accounts.doctype.payment_request.payment_request.make_payment_request",
+				args: {
+					"dt": frm.doc.doctype,
+					"dn": frm.doc.name,
+					"recipient_id": frm.doc.contact_email
+				},
+				callback: function(r) {
+					if(!r.exc){
+						var doc = frappe.model.sync(r.message);
+						frappe.set_route("Form", doc[0].doctype, doc[0].name);
+					}
 				}
-			}
-		});
+			});
+		}
 	},
 
 	make_payment_entry: function(frm) {
 		return frappe.call({
-			method: "erpnext.schools.doctype.fees.fees.get_payment_entry",
+			method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
 			args: {
 				"dt": frm.doc.doctype,
 				"dn": frm.doc.name
