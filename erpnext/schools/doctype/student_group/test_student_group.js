@@ -64,7 +64,7 @@ QUnit.test('Test: Student Group', function(assert){
 		() => frappe.timeout(0.3),
 		() => frappe.set_route("Form", 'Student Group/test-course-wise-group'),
 		() => frappe.timeout(0.3),
-		() => {$(`.btn:contains("Get Students"):visible`).click()},
+		() => {$(`.btn:contains("Get Students"):visible`).click();},
 		() => frappe.timeout(0.2),
 		() => {
 			assert.ok(cur_frm.get_field("students").grid.grid_rows.length == 1, 'Successfully fetched list of students');
