@@ -339,7 +339,12 @@ class ProcessPayroll(Document):
 					"debit_in_account_currency": total_salary_amount.rounded_total
 				})	
 			journal_entry.set("accounts", account_amt_list)
-		return journal_entry.as_dict()
+			return journal_entry.as_dict()
+		else:
+			frappe.msgprint(
+				"There are no submitted Salary Slips to process.",
+				title="Error"
+			)
 
 	def update_salary_slip_status(self, jv_name = None):
 		ss_list = self.get_sal_slip_list(ss_status=1)
