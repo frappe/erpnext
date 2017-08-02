@@ -2,14 +2,12 @@
 	<table class="table table-bordered table-hover">
 		<thead>
 			<tr>
-				{% set i = 0 %}
 				{% for key in headers %}
-					{% if i==0 %}
+					{% if loop.first %}
 						<th style="min-width: 120px;" class="text-left">{{ key }}</th>
 					{% else %}
 						<th style="min-width: 80px;" class="text-right">{{ key }}</th>
 					{% endif %}
-					{% set i = i + 1 %}
 				{% endfor%}
 			</tr>
 		</thead>
