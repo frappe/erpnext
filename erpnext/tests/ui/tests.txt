@@ -8,7 +8,10 @@ erpnext/crm/doctype/opportunity/test_opportunity.js
 erpnext/selling/doctype/quotation/test_quotation.js
 erpnext/setup/doctype/company/tests/test_company_production.js
 erpnext/crm/doctype/item/test_item.js
-erpnext/selling/doctype/sales_order/test_sales_order.js
+erpnext/selling/doctype/sales_order/tests/test_sales_order.js
+erpnext/selling/doctype/sales_order/tests/test_sales_order_with_multiple_delivery_date.js
+erpnext/selling/doctype/sales_order/tests/test_sales_order_with_item_wise_discount.js
+erpnext/selling/doctype/sales_order/tests/test_sales_order_with_multi_uom.js
 erpnext/manufacturing/doctype/workstation/test_workstation.js
 erpnext/manufacturing/doctype/operation/test_operation.js
 erpnext/manufacturing/doctype/bom/test_bom.js
@@ -44,3 +47,7 @@ erpnext/schools/doctype/course/test_course.js
 erpnext/schools/doctype/program/test_program.js
 erpnext/hr/doctype/salary_structure/test_salary_structure.js
 erpnext/hr/doctype/salary_slip/test_salary_slip.js
+erpnext/schools/doctype/guardian/test_guardian.js
+erpnext/schools/doctype/student_admission/test_student_admission.js
+erpnext/schools/doctype/student_applicant/tests/test_student_applicant.js
+erpnext/schools/doctype/student_applicant/tests/test_student_applicant_options.js
