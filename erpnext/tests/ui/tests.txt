@@ -15,7 +15,6 @@ erpnext/selling/doctype/sales_order/tests/test_sales_order_with_multi_uom.js
 erpnext/manufacturing/doctype/workstation/test_workstation.js
 erpnext/manufacturing/doctype/operation/test_operation.js
 erpnext/manufacturing/doctype/bom/test_bom.js
-erpnext/projects/doctype/project/project_timesheet.js
 erpnext/hr/doctype/holiday_list/test_holiday_list.js
 erpnext/hr/doctype/branch/test_branch.js
 erpnext/hr/doctype/leave_block_list/test_leave_block_list.js
@@ -23,6 +22,7 @@ erpnext/hr/doctype/department/test_department.js
 erpnext/hr/doctype/designation/test_designation.js
 erpnext/hr/doctype/employment_type/test_employment_type.js
 erpnext/hr/doctype/employee/test_employee.js
+erpnext/projects/doctype/project/project_timesheet.js
 erpnext/hr/doctype/employee_attendance_tool/test_employee_attendance_tool.js
 erpnext/hr/doctype/attendance/test_attendance.js
 erpnext/hr/doctype/leave_type/test_leave_type.js
@@ -45,6 +45,8 @@ erpnext/schools/doctype/assessment_criteria_group/test_assessment_criteria_group
 erpnext/schools/doctype/assessment_criteria/test_assessment_criteria.js
 erpnext/schools/doctype/course/test_course.js
 erpnext/schools/doctype/program/test_program.js
+erpnext/hr/doctype/salary_structure/test_salary_structure.js
+erpnext/hr/doctype/salary_slip/test_salary_slip.js
 erpnext/schools/doctype/guardian/test_guardian.js
 erpnext/schools/doctype/student_admission/test_student_admission.js
 erpnext/schools/doctype/student_applicant/tests/test_student_applicant.js
