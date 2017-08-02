@@ -185,7 +185,7 @@ frappe.ui.form.on("Expense Claim", {
 				callback: function(r) {
 					cur_frm.set_value("total_advance_paid", r.message.amt);
 			}
-			});
+		});
 	}
 });
 
@@ -257,7 +257,7 @@ frappe.ui.form.on("Expense Claim", {
 					"account_type": "Receivable"
 				}
 			};
-		}
+		};
 	},
 
 	set_query_for_payable_account: function(frm) {
