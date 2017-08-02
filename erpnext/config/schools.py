@@ -153,9 +153,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Fees"
-				},{
-					"type": "doctype",
-					"name": "Fee Schedule"
 				},
 				{
 					"type": "doctype",

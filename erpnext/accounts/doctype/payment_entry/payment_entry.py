@@ -100,12 +100,9 @@ class PaymentEntry(AccountsController):
 			if not self.party:
 				frappe.throw(_("Party is mandatory"))
 
-			self.party_name = frappe.db.get_value(self.party_type, self.party,
-				self.party_type.lower() + "_name")
-
 			_party_name = "title" if self.party_type == "Student" else self.party_type.lower() + "_name"
 			self.party_name = frappe.db.get_value(self.party_type, self.party, _party_name)
-		
+
 		if self.party:
 			if not self.party_balance:
 				self.party_balance = get_balance_on(party_type=self.party_type,
@@ -504,11 +501,11 @@ def get_outstanding_reference_documents(args):
 
 	negative_outstanding_invoices = []
 	if (args.get("party_type") != "Student"):
-		negative_outstanding_invoices = get_negative_outstanding_invoices(args.get("party_type"), 
+		negative_outstanding_invoices = get_negative_outstanding_invoices(args.get("party_type"),
 			args.get("party"), args.get("party_account"), total_field)
 
 	# Get positive outstanding sales /purchase invoices/ Fees
-	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"), 
+	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"),
 		args.get("party_account"))
 
 	for d in outstanding_invoices:
@@ -687,9 +684,11 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		party_type = "Supplier"
 	elif dt in ("Expense Claim"):
 		party_type = "Employee"
+	elif dt in ("Fees"):
+		party_type = "Student"
 
 	# party account
-	if dt == "Sales Invoice":
+	if dt in ("Sales Invoice", "Fees"):
 		party_account = doc.debit_to
 	elif dt == "Purchase Invoice":
 		party_account = doc.credit_to
@@ -699,7 +698,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	party_account_currency = doc.get("party_account_currency") or get_account_currency(party_account)
 
 	# payment type
-	if (dt == "Sales Order" or (dt=="Sales Invoice" and doc.outstanding_amount > 0)) \
+	if (dt == "Sales Order" or (dt in ("Sales Invoice", "Fees") and doc.outstanding_amount > 0)) \
 		or (dt=="Purchase Invoice" and doc.outstanding_amount < 0):
 			payment_type = "Receive"
 	else:
@@ -715,6 +714,9 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	elif dt in ("Expense Claim"):
 		grand_total = doc.total_sanctioned_amount
 		outstanding_amount = doc.total_sanctioned_amount - doc.total_amount_reimbursed
+	elif dt == "Fees":
+		grand_total = doc.grand_total
+		outstanding_amount = doc.outstanding_amount
 	else:
 		total_field = "base_grand_total" if party_account_currency == doc.company_currency else "grand_total"
 		grand_total = flt(doc.get(total_field))
