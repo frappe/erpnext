@@ -14,6 +14,7 @@ QUnit.test('Test: Student Group', function(assert){
 		() => frappe.timeout(0.5),
 		() => {instructor_code = frappe.get_route()[2];},
 
+		// making a Batch-wise student group
 		() => {
 			return frappe.tests.make('Student Group', [
 				{academic_year: '2016-17'},
@@ -30,6 +31,7 @@ QUnit.test('Test: Student Group', function(assert){
 				]}
 			]);
 		},
+		// making a Course-wise student group
 		() => {
 			return frappe.tests.make('Student Group', [
 				{academic_year: '2016-17'},
@@ -47,24 +49,24 @@ QUnit.test('Test: Student Group', function(assert){
 				]}
 			]);
 		},
-		() => frappe.set_route("List", 'Student Group'),
+
+		// fetching list of student for batch group
 		() => frappe.timeout(0.3),
-		() => {$('a:contains("batch-wise-group"):visible').click()},
+		() => frappe.set_route("Form", 'Student Group/test-batch-wise-group'),
 		() => frappe.timeout(0.3),
 		() => {$(`.btn:contains("Get Students"):visible`).click()},
 		() => frappe.timeout(0.2),
 		() => {
-			console.log(cur_frm.get_field("students").grid.grid_rows.length);
 			assert.ok(cur_frm.get_field("students").grid.grid_rows.length == 1, 'Successfully fetched list of students');
 		},
-		() => frappe.set_route("List", 'Student Group'),
+
+		// fetching list of student for course group
 		() => frappe.timeout(0.3),
-		() => {$('a:contains("course-wise-group"):visible').click()},
+		() => frappe.set_route("Form", 'Student Group/test-course-wise-group'),
 		() => frappe.timeout(0.3),
 		() => {$(`.btn:contains("Get Students"):visible`).click()},
 		() => frappe.timeout(0.2),
 		() => {
-			console.log(cur_frm.get_field("students").grid.grid_rows.length);
 			assert.ok(cur_frm.get_field("students").grid.grid_rows.length == 1, 'Successfully fetched list of students');
 		},
 		() => done()
