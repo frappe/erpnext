@@ -1,7 +1,9 @@
-<!--markdown-->
-Before we venture to learn form customization tool, click [here](https://frappe.github.io/frappe/user/en/tutorial/doctypes.html) to understand the architecture of forms in ERPNext. It shall help you in using Customize Form tool more efficiently.
+# Customize Form
 
-Customize Form is the tool which allows user to customize property of the standard fields, and insert [custom fields]({{docs_base_url}}/user/manual/en/customize-erpnext/custom-field.html) as per the requirement. Let's assume we need to set Project Name field as a mandatory field in the Sales Order form. Following are the steps which shall be followed to achieve this.
+<!--markdown-->
+Before we venture to learn form customization tool, click [here](https://frappe.io/docs/user/en/tutorial/doctypes.html) to understand the architecture of forms in ERPNext. It shall help you in using Customize Form tool more efficiently.
+
+Customize Form is the tool which allows user to customize property of the standard fields, and insert [custom fields](/docs/user/manual/en/customize-erpnext/custom-field.html) as per the requirement. Let's assume we need to set Project Name field as a mandatory field in the Sales Order form. Following are the steps which shall be followed to achieve this.
 
 ####Step 1: Go to Customize Form
 
@@ -11,7 +13,7 @@ Go to Customize Form from:
 
 You can also reach the Customize Form tool from the List Views.
 
-<img alt="Customize Form List" class="screenshot" src="{{docs_base_url}}/assets/img/customize/customize-form-from-list-view.gif">
+<img alt="Customize Form List" class="screenshot" src="/docs/assets/img/customize/customize-form-from-list-view.gif">
 
 ####Step 2: Select Document Type
 
@@ -19,7 +21,7 @@ If navigate from the list view, Document Type will be automatically set in the C
 
 If you reach customize form from the Setup module, or from awesome bar, then you will have to manually select Document Type in which customization needs to be made.
 
-<img alt="Customize Form select doctype" class="screenshot" src="{{docs_base_url}}/assets/img/customize/customize-form-select-doctype.png">
+<img alt="Customize Form select doctype" class="screenshot" src="/docs/assets/img/customize/customize-form-select-doctype.png">
 
 ####Step 3: Edit Property
 
@@ -27,11 +29,11 @@ On selecting Document Type, all the fields of the Document Type will updated as 
 
 To customized Project field, click on the respective row, and check "Mandatory". With this, Project field will become mandatory in the Sales Order.
 
-<img alt="Customize Form select doctype" class="screenshot" src="{{docs_base_url}}/assets/img/customize/customize-form-edit-property.gif">
+<img alt="Customize Form select doctype" class="screenshot" src="/docs/assets/img/customize/customize-form-edit-property.gif">
 
 Like setting setting field Mandatory, following are the other customization options in the Customize Form tool.
 
-* Change [Field Type]({{docs_base_url}}/user/manual/en/customize-erpnext/articles/field-types.html).
+* Change [Field Type](/docs/user/manual/en/customize-erpnext/articles/field-types.html).
 * Edit Field Labels to suit your industry/language.
 * Set field precision for the Currency field.
 * To hide field, check Hidden.
@@ -47,9 +49,9 @@ To have customizations take effect, reload your ERPNext account once.
 
 From Customize Form, you can also do following customizations:
 
-* Max Attachment Limit: Define [maximum no. of files]({{docs_base_url}}/user/manual/en/customize-erpnext/articles/increase-max-attachments.html) which can attached on a document.
+* Max Attachment Limit: Define [maximum no. of files](/docs/user/manual/en/customize-erpnext/articles/increase-max-attachments.html) which can attached on a document.
 * Default Print Format: For one document type, you can have multiple print formats. In the Customize Form, you can also set default Print Format for a document.
-* Set [Title Field]({{docs_base_url}}/user/manual/en/customize-erpnext/document-title.html)
+* Set [Title Field](/docs/user/manual/en/customize-erpnext/document-title.html)
 * Sort Field and Sort Order: Define field based on which documents in the list view will be sorted.
 
 >Note: Though we want you to do everything you can to customize your ERP based on your business needs, we recommend that you do not make “wild” changes to the forms. This is because, these changes may affect certain operations and may mess up your forms. Make small changes and see its effect before doing some more.
@@ -92,7 +94,7 @@ table, th, td {
     </tr>
     <tr>
       <td>Field Type</td>
-      <td>Click <a href="{{docs_base_url}}/user/manual/en/customize-erpnext/articles/field-types.html">here</a> to learn about of fields types.</td>
+      <td>Click <a href="/docs/user/manual/en/customize-erpnext/articles/field-types.html">here</a> to learn about of fields types.</td>
     </tr>
     <tr>
       <td>Options</td>

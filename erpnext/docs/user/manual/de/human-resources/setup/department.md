@@ -3,6 +3,6 @@
 
 Abteilungen Ihres Unternehmens
 
-<img class="screenshot" alt="Abteilung" src="{{docs_base_url}}/assets/img/human-resources/department.png">
+<img class="screenshot" alt="Abteilung" src="/docs/assets/img/human-resources/department.png">
 
 {next}

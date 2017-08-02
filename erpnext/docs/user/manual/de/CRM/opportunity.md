@@ -11,11 +11,11 @@ Alternativ können Sie einen offenen Lead öffnen und auf die Schaltfläche "Opp
 
 ### Abbildung 1: Opportunity erstellen
 
-<img class="screenshot" alt="Opportunity" src="{{docs_base_url}}/assets/img/crm/opportunity.png">
+<img class="screenshot" alt="Opportunity" src="/docs/assets/img/crm/opportunity.png">
 
 ### Abbildung 2: Opportunity aus einem offenen Lead heraus erstellen
 
-<img class="screenshot" alt="Opportunity" src="{{docs_base_url}}/assets/img/crm/lead-to-opportunity.png">
+<img class="screenshot" alt="Opportunity" src="/docs/assets/img/crm/lead-to-opportunity.png">
 
 Eine Opportunity kann auch aus einem bereits vorhandenen Kunden heraus entstehen. Sie können mehrere verschiedene Opportunities zum gleichen Lead erstellen. In einer Opportunity können Sie abgesehen von der Kommunikation auch die Artikel mit vermerken, nach denen der Lead oder Kontakt sucht.
 

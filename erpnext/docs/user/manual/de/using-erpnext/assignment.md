@@ -11,9 +11,9 @@ Einschränkende Berechtigungen können nicht über "Zuweisen zu" erstellt werden
 
 Die Option "Zuweisen zu" befindet sich in der Fußzeile des Dokuments. Wenn Sie auf das Zuteilungs-Symbol in der Werkzeugleiste klicken, werden Sie schnell zur Fußzeile des selben Dokuments weiter geleitet.
 
-![Symbol für Zuweisung]({{docs_base_url}}/assets/old_images/erpnext/assigned-to-icon.png)
+![Symbol für Zuweisung](/docs/assets/old_images/erpnext/assigned-to-icon.png)
 
-![Zugewiesen zu]({{docs_base_url}}/assets/old_images/erpnext/assigned-to.png)
+![Zugewiesen zu](/docs/assets/old_images/erpnext/assigned-to.png)
 
 ### Schritt 2: Zu einem Benutzer zuweisen
 
@@ -21,19 +21,19 @@ Im Abschnitt "Zuweisen zu" können Sie einen Benutzer auswählen, dem das Dokume
 
 Bei der Zuordnung können Sie auch einen Kommentar für denjenigen hinterlassen, dem das Dokument zugeordnet wird.
 
-![Benutzer zuweisen]({{docs_base_url}}/assets/old_images/erpnext/assign-user.png)
+![Benutzer zuweisen](/docs/assets/old_images/erpnext/assign-user.png)
 
 ### Aufgabenliste des Empfängers
 
 Diese Transaktion erscheint in der Aufgabenliste des Empfängers.
 
-![Todo zuweisen]({{docs_base_url}}/assets/old_images/erpnext/assign-todo.png)
+![Todo zuweisen](/docs/assets/old_images/erpnext/assign-todo.png)
 
 Zuordnung entfernen
 
 Ein Benutzer kann eine Zuordnung entfernen, indem im Dokument die Schaltfläche "Zuordnung abgeschlossen" angeklickt wird.
 
-![Zuordnung entfernen]({{docs_base_url}}/assets/old_images/erpnext/assign-remove.png)
+![Zuordnung entfernen](/docs/assets/old_images/erpnext/assign-remove.png)
 
 Wenn die Zuordnung einmal als abgeschlossen markiert wurde, wird der Status des zugehörigen Eintrages in der Aufgabenliste auf "Abgeschlossen" gesetzt.
 

@@ -3,7 +3,7 @@
 
 Eine Materialanfrage ist ein einfaches Dokument, welches einen Bedarf an Artikeln (Produkte oder Dienstleistungen) für einen bestimmten Zweck erfasst.
 
-<img class="screenshot" alt="Materialanfrage" src="({{docs_base_url}}/assets/img/buying/material-request-workflow.jpg">
+<img class="screenshot" alt="Materialanfrage" src="(/docs/assets/img/buying/material-request-workflow.jpg">
 
 Um eine Materialanfrage manuell zu erstellen, gehen Sie bitte zu: 
 
@@ -11,14 +11,14 @@ Um eine Materialanfrage manuell zu erstellen, gehen Sie bitte zu:
 
 ### Materialanfrage erstellen
 
-<img class="screenshot" alt="Materialanfrage" src="{{docs_base_url}}/assets/img/buying/material-request.png">
+<img class="screenshot" alt="Materialanfrage" src="/docs/assets/img/buying/material-request.png">
 
 Eine Materialanfrage kann auf folgende Arten erstellt werden:
 
 * Automatisch aus einem Kundenauftrag heraus.
 * Automatisch, wenn die projizierte Menge eines Artikels in den Lagern einen bestimmten Bestand erreicht.
 * Automatisch aus einer Stückliste heraus, wenn Sie das Modul "Produktionsplanung" benutzen, um Ihre Fertigungsaktivitäten zu planen.
-* Wenn Ihre Artikel Bestandsposten sind, müssen Sie überdies das Lager angeben, auf welches diese Artikel geliefert werden sollen. Das hilft dabei die [projizierte Menge]({{docs_base_url}}/user/manual/de/stock/projected-quantity.html) für diesen Artikel im Auge zu behalten.
+* Wenn Ihre Artikel Bestandsposten sind, müssen Sie überdies das Lager angeben, auf welches diese Artikel geliefert werden sollen. Das hilft dabei die [projizierte Menge](/docs/user/manual/de/stock/projected-quantity.html) für diesen Artikel im Auge zu behalten.
 
 Es gibt folgende Typen von Materialanfragen:
 

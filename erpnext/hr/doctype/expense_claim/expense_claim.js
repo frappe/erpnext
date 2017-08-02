@@ -4,26 +4,13 @@
 frappe.provide("erpnext.hr");
 
 erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
-	make_bank_entry: function(frm) {
-		var me = this;
-		return frappe.call({
-			method: "erpnext.hr.doctype.expense_claim.expense_claim.make_bank_entry",
-			args: {
-				"docname": frm.doc.name,
-			},
-			callback: function(r) {
-				var doc = frappe.model.sync(r.message);
-				frappe.set_route('Form', 'Journal Entry', r.message.name);
-			}
-		});
-	},
 
 	expense_type: function(doc, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		if(!doc.company) {
 			d.expense_type = "";
 			frappe.msgprint(__("Please set the Company"));
-			this.frm.refresh_fields()
+			this.frm.refresh_fields();
 			return;
 		}
 
@@ -44,7 +31,7 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 			}
 		});
 	}
-})
+});
 
 frappe.ui.form.on("Expense Claim", {
 
@@ -92,7 +79,6 @@ frappe.ui.form.on("Expense Claim", {
 
 			refresh_field("total_claimed_amount");
 			refresh_field('total_sanctioned_amount');
-
 		};
 
 	},
@@ -107,12 +93,6 @@ frappe.ui.form.on("Expense Claim", {
 				frm.savesubmit();
 
 			if (frm.doc.docstatus===1 && frm.doc.approval_status=="Approved") {
-				if (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total_sanctioned_amount) && frappe.model.can_create("Journal Entry")) {
-					frm.add_custom_button(__("Bank Entry"), function() {
-						frm.cscript.make_bank_entry(frm);
-					}, __("Make"));
-					frm.page.set_inner_btn_group_as_primary(__("Make"));
-				}
 
 				/* eslint-disable */
 				// no idea how `me` works here
@@ -129,9 +109,11 @@ frappe.ui.form.on("Expense Claim", {
 				/* eslint-enable */
 			}
 		}
+
 		frm.toggle_display("summary_section", (frm.doc.__unsaved === undefined));
 
-		if(frm.doc.docstatus == 1) {
+		if(frm.doc.docstatus == 1 && frm.doc.approval_status == 'Approved') {
+
 			frm.add_custom_button(__('Accounting Ledger'), function() {
 				frappe.route_options = {
 					voucher_no: frm.doc.name,
@@ -141,7 +123,15 @@ frappe.ui.form.on("Expense Claim", {
 				frappe.set_route("query-report", "General Ledger");
 			}, __("View"));
 		}
+
 		frm.script_manager.trigger("toggle_fields");
+    
+    if (frm.doc.docstatus===1 && frm.doc.approval_status=="Approved"
+        && (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total_sanctioned_amount))
+        && frappe.model.can_create("Payment Entry")) {
+      frm.add_custom_button(__('Payment'),
+        function() { frm.events.make_payment_entry(frm); }, __("Make"));
+    }
 
 	},
 	validate: function(frm) {
@@ -196,14 +186,31 @@ frappe.ui.form.on("Expense Claim", {
 			msgprint(__("Make sure the employee and company are filled out"));
 		}
 	},
+  make_payment_entry: function(frm) {
+		var method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry";
+		if(frm.doc.__onload && frm.doc.__onload.make_payment_via_journal_entry) {
+			method = "erpnext.hr.doctype.expense_claim.expense_claim.make_bank_entry"
+		}
+		return frappe.call({
+			method: method,
+			args: {
+				"dt": frm.doc.doctype,
+				"dn": frm.doc.name
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
+	},
 	set_query_for_cost_center: function(frm) {
 		frm.fields_dict["cost_center"].get_query = function() {
 			return {
 				filters: {
 					"company": frm.doc.company
 				}
-			}
-		}
+			};
+		};
 	},
 
 	set_query_for_payable_account: function(frm) {
@@ -213,24 +220,28 @@ frappe.ui.form.on("Expense Claim", {
 					"report_type": "Balance Sheet",
 					"account_type": "Payable"
 				}
-			}
-		}
+			};
+		};
 	},
 
-	is_paid: function(frm) {
-		frm.script_manager.trigger("toggle_fields");
+  is_paid: function(frm) {
+		frm.trigger("toggle_fields");
 	},
 
 	toggle_fields: function(frm) {
 		frm.toggle_reqd("mode_of_payment", frm.doc.is_paid);
+	},
+
+	employee_name: function(frm) {
+		erpnext.hr.expense_claim.set_title(frm);
+	},
+
+	task: function(frm) {
+		erpnext.hr.expense_claim.set_title(frm);
 	}
 });
 
 $.extend(cur_frm.cscript, new erpnext.hr.ExpenseClaimController({frm: cur_frm}));
-
-
-
-
 
 erpnext.hr.expense_claim = {
 	set_title: function(frm) {
@@ -267,7 +278,6 @@ erpnext.hr.expense_claim = {
 	}
 }
 
-
 frappe.ui.form.on("Expense Claim Detail", {
 	claim_amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
@@ -297,15 +307,4 @@ frappe.ui.form.on("Expense Claim Detail", {
 		frm.cscript.calculate_total(doc);
 	}
 });
-
-
-
-frappe.ui.form.on("Expense Claim", "employee_name", function(frm) {
-	erpnext.hr.expense_claim.set_title(frm);
-});
-
-frappe.ui.form.on("Expense Claim", "task", function(frm) {
-	erpnext.hr.expense_claim.set_title(frm);
-});
-
 

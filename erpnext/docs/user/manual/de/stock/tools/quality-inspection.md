@@ -5,6 +5,6 @@ In ERPNext können Sie eingehende und ausgehende Produkte für eine Qualitätspr
 
 >  Lagerbestand > Werkzeuge > Qualitätsprüfung > Neu
 
-<img class="screenshot" alt="Qualitätsprüfung" src="{{docs_base_url}}/assets/img/stock/quality-inspection.png">
+<img class="screenshot" alt="Qualitätsprüfung" src="/docs/assets/img/stock/quality-inspection.png">
 
 {next}

@@ -46,13 +46,15 @@ var erpnext_slides = [
 				fieldtype: "Attach Image", fieldname: "attach_logo",
 				label: __("Attach Logo"),
 				description: __("100px by 100px"),
-				is_private: 0
+				is_private: 0,
+				align: 'center'
 			},
 			{
 				fieldname: 'company_name',
 				label: frappe.setup.domain === 'Education' ?
 					__('Institute Name') : __('Company Name'),
-				fieldtype: 'Data', reqd: 1
+				fieldtype: 'Data',
+				reqd: 1
 			},
 			{
 				fieldname: 'company_abbr',
@@ -236,7 +238,7 @@ var erpnext_slides = [
 		help: __("List your tax heads (e.g. VAT, Customs etc; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later."),
 		add_more: 1,
 		max_count: 3,
-		mandatory_entry: 1,
+		mandatory_entry: 0,
 		fields: [
 			{fieldtype:"Section Break"},
 			{fieldtype:"Data", fieldname:"tax", label:__("Tax"),
@@ -308,8 +310,10 @@ var erpnext_slides = [
 				options:[__("Unit"), __("Nos"), __("Box"), __("Pair"), __("Kg"), __("Set"),
 					__("Hour"), __("Minute"), __("Litre"), __("Meter"), __("Gram")],
 				"default": __("Unit"), static: 1},
-			{fieldtype: "Check", fieldname: "is_sales_item", label:__("We sell this Item"), default: 1, static: 1},
-			{fieldtype: "Check", fieldname: "is_purchase_item", label:__("We buy this Item"), static: 1},
+			{fieldtype: "Check", fieldname: "is_sales_item",
+				label:__("We sell this Item"), default: 1, static: 1},
+			{fieldtype: "Check", fieldname: "is_purchase_item",
+				label:__("We buy this Item"), default: 1, static: 1},
 			{fieldtype:"Column Break"},
 			{fieldtype:"Currency", fieldname:"item_price", label:__("Rate"), static: 1},
 			{fieldtype:"Attach Image", fieldname:"item_img", label:__("Attach Image"), is_private: 0, static: 1},
@@ -420,15 +424,6 @@ erpnext.setup.fiscal_years = {
 
 frappe.setup.on("before_load", function () {
 	erpnext_slides.map(frappe.setup.add_slide);
-
-	// change header brand
-	let $brand = $('header .setup-wizard-brand');
-	if($brand.find('.erpnext-icon').length === 0) {
-		$brand.find('.frappe-icon').hide();
-		$brand.append(`<span>
-			<img src="/assets/erpnext/images/erp-icon.svg" class="brand-icon erpnext-icon"
-			style="width:36px;"><span class="brand-name">ERPNext</span></span>`);
-	}
 });
 
 var test_values_edu = {

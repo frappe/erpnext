@@ -4,7 +4,7 @@
 Geben Sie bis zu drei Steuerarten an, die Sie regelmäßig in Bezug auf Ihr Gehalt zahlen. Dieser Assistent erstellt eine Steuervorlage, die die Steuren für jede Steuerart berechnet.
 
 <img alt="Steuerdetails" class="screenshot"
-src="{{docs_base_url}}/assets/img/setup-wizard/step-7.png">
+src="/docs/assets/img/setup-wizard/step-7.png">
 
 Geben Sie einfach den Namen der Steuerart und den Steuersatz ein.
 
@@ -18,6 +18,6 @@ Eine Mehrwertsteuer (MwSt) ist eine Art Verbrauchssteuer. Aus der Sicht des Kund
 
 Das Anliegen der Mehrwertsteuer ist es, für den Staat ähnlich der Körperschaftssteuer und der Einkommensteuer Steuererträge zu generieren. Beispiel: Wenn Sie in einem Kaufhaus einkaufen schlägt Ihnen das Geschäft 19% als Mehrwertsteuer auf die Rechnung auf.
 
-Um im Einstellungsassistenten die Mehrwertsteuer einzustellen, geben Sie einfach den Prozentsatz der vom Staat erhoben wird, ein. Um die Mehrwertsteuer zu einem späteren Zeitpunkt einzustellen, lesen Sie bitte den Abschnitt [Einstellen von Steuern]({{docs_base_url}}/user/manual/de/setting-up/setting-up-taxes.html).
+Um im Einstellungsassistenten die Mehrwertsteuer einzustellen, geben Sie einfach den Prozentsatz der vom Staat erhoben wird, ein. Um die Mehrwertsteuer zu einem späteren Zeitpunkt einzustellen, lesen Sie bitte den Abschnitt [Einstellen von Steuern](/docs/user/manual/de/setting-up/setting-up-taxes.html).
 
 {next}

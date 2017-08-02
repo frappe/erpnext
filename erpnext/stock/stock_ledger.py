@@ -378,7 +378,7 @@ class update_entries_after(object):
 		if self.verbose:
 			frappe.throw(msg, NegativeStockError, title='Insufficent Stock')
 		else:
-			raise NegativeStockError, msg
+			raise NegativeStockError(msg)
 
 def get_previous_sle(args, for_update=False):
 	"""

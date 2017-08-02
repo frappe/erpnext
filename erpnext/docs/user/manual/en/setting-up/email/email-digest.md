@@ -12,6 +12,6 @@ To set up Email Digest, go to:
 
 Set your frequency, check all the items you want to receive in your weekly update and select the user ids whom you want to send the Digest to.
 
-<img class="screenshot" alt="Email Digest" src="{{docs_base_url}}/assets/img/setup/email/email-digest.png">
+<img class="screenshot" alt="Email Digest" src="/docs/assets/img/setup/email/email-digest.png">
 
 {next}

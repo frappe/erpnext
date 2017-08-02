@@ -3,6 +3,22 @@
 
 frappe.ui.form.on("Project", {
 	onload: function(frm) {
+		frm.set_indicator_formatter('title',
+			function(doc) {
+				let indicator = 'orange';
+				if (doc.status == 'Overdue') {
+					indicator = 'red';
+				}
+				else if (doc.status == 'Cancelled') {
+					indicator = 'dark grey';
+				}
+				else if (doc.status == 'Closed') {
+					indicator = 'green';
+				}
+				return indicator;
+			}
+		);
+
 		var so = frappe.meta.get_docfield("Project", "sales_order");
 		so.get_route_options_for_new_doc = function(field) {
 			if(frm.is_new()) return;
@@ -35,6 +51,7 @@ frappe.ui.form.on("Project", {
 			}
 		});
 	},
+
 	refresh: function(frm) {
 		if(frm.doc.__islocal) {
 			frm.web_link && frm.web_link.remove();

@@ -24,14 +24,14 @@ Sie können eine Bezeichnung definieren, indem Sie Dokumenteneinstellungen in ge
 > {customer_name} for {project}
 
 <img class="screenshot" alt = "Bezeichnung anpassen"
-    src="{{docs_base_url}}/assets/img/customize/customize-title.gif">
+    src="/docs/assets/img/customize/customize-title.gif">
 
 ### Fest eingestellte und bearbeitbare Bezeichnungen
 
 Wenn Ihre Bezeichnung als Standard-Bezeichnung generiert wurde, kann sie vom Benutzer durch klicken auf den Kopf des Dokuments bearbeitet werden.
 
 <img class="screenshot" alt = "Bearbeitbare Bezeichnung"
-    src="{{docs_base_url}}/assets/img/customize/editable-title.gif">
+    src="/docs/assets/img/customize/editable-title.gif">
 
 Wenn Sie eine fest eingestellte Bezeichnung haben wollen, können Sie dies als Regel unter **Optionen** einstellen. Auf diese Weise wird die Bezeichnung jedesmal automatisch aktualisiert, wenn das Dokument aktualisiert wird.
 

@@ -1,8 +1,10 @@
+# Data Import Tool
+
 The Data Import Tool is a great way to upload (or edit) bulk data, specially master data, into the system.
 
 To Open the data import tool, you either go to Setup or go to the Transaction you want to Import. If Data Import is allowed, you will see an Import Button:
 
-<img alt="Start Import" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/data-import-1.png">
+<img alt="Start Import" class="screenshot" src="/docs/assets/img/setup/data-import/data-import-1.png">
 
 The tool has two sections, one to download a template and the second to upload
 the data.
@@ -23,33 +25,33 @@ Item can have multiple prices, An Invoice has multiple Items and so on.
   * Click on "Download Blank Template".
   * For bulk editing, you can click on "Download With Data".
   
-<img alt="Download Template" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/data-import-tool-template.gif">
+<img alt="Download Template" class="screenshot" src="/docs/assets/img/setup/data-import/data-import-tool-template.gif">
 
 ### 2\. Fill in the Template
 
 After downloading the template, open it in a spreadsheet application and fill
 in the data below the column headings.
 
-<img alt="Download Template" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/import-file.png">
+<img alt="Download Template" class="screenshot" src="/docs/assets/img/setup/data-import/import-file.png">
 
 Then export your template or save it as a Excel or Comma Separated Values (CSV)
 file. To export the document in Excel tick the checkbox for Download in Excel File Format 
 
-<img alt="Download Template" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/import-csv.png">
+<img alt="Download Template" class="screenshot" src="/docs/assets/img/setup/data-import/import-csv.png">
 
 ### Download in Excel
 
-<img alt="Download Template" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/data-import-excel.png">
+<img alt="Download Template" class="screenshot" src="/docs/assets/img/setup/data-import/data-import-excel.png">
 
 ### 3\. Upload the File ethier in .xlsx or .csv 
 
 Finally attach the  file in the section. Click on the "Upload". Once the upload is successfull click Import"
 button.
 
-<img alt="Upload" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/data-import-3.png">
+<img alt="Upload" class="screenshot" src="/docs/assets/img/setup/data-import/data-import-3.png">
 
 
-<img alt="Upload" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/data-import-4.png">
+<img alt="Upload" class="screenshot" src="/docs/assets/img/setup/data-import/data-import-4.png">
 
 #### Notes:
 

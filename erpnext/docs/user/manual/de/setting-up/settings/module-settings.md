@@ -11,6 +11,6 @@ Beispiel: Wenn Sie im Dienstleistungsbereich arbeiten, möchten Sie evtl. das Fe
 
 Markieren oder demarkieren Sie die Elemente die angezeigt / ausgeblendet werden sollen.
 
-<img class="screenshot" alt="Moduleinstellungen" src="{{docs_base_url}}/assets/img/setup/settings/show-hide-modules.png">
+<img class="screenshot" alt="Moduleinstellungen" src="/docs/assets/img/setup/settings/show-hide-modules.png">
 
 {next}

@@ -51,4 +51,4 @@ def check_and_update_auto_email_report(report):
 		frappe.delete_doc("Auto Email Report", auto_email_report)
 
 	elif report in ["Customer Addresses And Contacts", "Supplier Addresses And Contacts"]:
-		frapppe.db.set_value("Auto Email Report", auto_email_report, "report", report)
+		frappe.db.set_value("Auto Email Report", auto_email_report, "report", report)

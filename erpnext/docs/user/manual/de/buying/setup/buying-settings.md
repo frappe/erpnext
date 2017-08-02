@@ -3,7 +3,7 @@
 
 Hier können Sie Werte einstellen, die in den Transaktionen des Moduls Einkauf zugrunde gelegt werden.
 
-![Einkaufseinstellungen]({{docs_base_url}}/assets/img/buying/buying-settings.png)
+![Einkaufseinstellungen](/docs/assets/img/buying/buying-settings.png)
 
 Lassen Sie uns die verschiedenen Optionen durckgehen.
 
@@ -17,7 +17,7 @@ Sie können den Nummernkreis selbst definieren oder einstellen:
 
 > Einstellungen > Einstellungen > Nummernkreis
 
-[Klicken Sie hier, wenn Sie mehr über Nummernkreise wissen möchten]({{docs_base_url}}/user/manual/de/setting-up/settings/naming-series.html)
+[Klicken Sie hier, wenn Sie mehr über Nummernkreise wissen möchten](/docs/user/manual/de/setting-up/settings/naming-series.html)
 
 ### 2. Standard-Lieferantentyp
 

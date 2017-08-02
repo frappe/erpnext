@@ -46,6 +46,7 @@ class Timesheet(Document):
 
 		for d in self.get("time_logs"):
 			self.update_billing_hours(d)
+			self.update_time_rates(d)
 
 			self.total_hours += flt(d.hours)
 			if d.billable:
@@ -61,8 +62,11 @@ class Timesheet(Document):
 			self.per_billed = (self.total_billed_amount * 100) / self.total_billable_amount
 
 	def update_billing_hours(self, args):
-		if cint(args.billing_hours) == 0:
-			args.billing_hours = args.hours
+		if args.billable:
+			if flt(args.billing_hours) == 0.0:
+				args.billing_hours = args.hours
+		else:
+			args.billing_hours = 0
 
 	def set_status(self):
 		self.status = {
@@ -263,12 +267,17 @@ class Timesheet(Document):
 		for data in self.time_logs:
 			if data.activity_type and data.billable:
 				rate = get_activity_cost(self.employee, data.activity_type)
-				hours =  data.billing_hours or 0
+				hours = data.billing_hours or 0
 				if rate:
 					data.billing_rate = flt(rate.get('billing_rate')) if flt(data.billing_rate) == 0 else data.billing_rate
 					data.costing_rate = flt(rate.get('costing_rate')) if flt(data.costing_rate) == 0 else data.costing_rate
 					data.billing_amount = data.billing_rate * hours
 					data.costing_amount = data.costing_rate * hours
+
+	def update_time_rates(self, ts_detail):
+		if not ts_detail.billable:
+			ts_detail.billing_rate = 0.0
+			ts_detail.costing_rate = 0.0
 
 @frappe.whitelist()
 def get_projectwise_timesheet_data(project, parent=None):
@@ -381,3 +390,26 @@ def get_events(start, end, filters=None):
 			"end": end
 		}, as_dict=True, update={"allDay": 0})
 
+def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"):
+	user = frappe.session.user
+	# find customer name from contact.
+	customer = frappe.db.sql('''SELECT dl.link_name FROM `tabContact` AS c inner join \
+		`tabDynamic Link` AS dl ON c.first_name=dl.link_name WHERE c.email_id=%s''',user)
+	# find list of Sales Invoice for made for customer.
+	sales_invoice = frappe.db.sql('''SELECT name FROM `tabSales Invoice` WHERE customer = %s''',customer)
+	if customer:
+		# Return timesheet related data to web portal.
+		return frappe. db.sql('''SELECT ts.name, tsd.activity_type, ts.status, ts.total_billable_hours, \
+			tsd.sales_invoice, tsd.project  FROM `tabTimesheet` AS ts inner join `tabTimesheet Detail` \
+			AS tsd ON tsd.parent = ts.name where tsd.sales_invoice IN %s order by\
+			end_date asc limit {0} , {1}'''.format(limit_start, limit_page_length), [sales_invoice], as_dict = True)
+
+def get_list_context(context=None):
+	return {
+		"show_sidebar": True,
+		"show_search": True,
+		'no_breadcrumbs': True,
+		"title": _("Timesheets"),
+		"get_list": get_timesheets_list,
+		"row_template": "templates/includes/timesheet/timesheet_row.html"
+	}

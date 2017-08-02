@@ -27,9 +27,19 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 		var me = this;
 
+		if (doc.valid_till && frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) < 0) {
+			this.frm.set_intro(__("Validity period of this quotation has ended"));
+		}
+
+		if (doc.__islocal) {
+			this.frm.set_value('valid_till', frappe.datetime.add_months(doc.transaction_date, 1))
+		}
+
 		if(doc.docstatus == 1 && doc.status!=='Lost') {
-			cur_frm.add_custom_button(__('Make Sales Order'),
-				cur_frm.cscript['Make Sales Order']);
+			if(!doc.valid_till || frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) > 0) {
+				cur_frm.add_custom_button(__('Make Sales Order'),
+					cur_frm.cscript['Make Sales Order']);
+			}
 
 			if(doc.status!=="Ordered") {
 				cur_frm.add_custom_button(__('Set as Lost'),

@@ -10,10 +10,10 @@ Following are the steps to restrict User to a document based on Owner/creator.
 
 Select Document Type for which you want to set user permission. After permissions are loaded for selected document, scroll to role for which you want to set restriction.
 
-<img alt="Sales Order" class="screenshot" src="{{docs_base_url}}/assets/img/articles/owner-restriction-1.png">
+<img alt="Sales Order" class="screenshot" src="/docs/assets/img/articles/owner-restriction-1.png">
 
 #### Step 3: Apply User Permission
 
 For Role to be restricted (Sales User in this case), check "If Owner".
 
-<img alt="S" class="screenshot" src="{{docs_base_url}}/assets/img/articles/owner-restriction-2.png">
+<img alt="S" class="screenshot" src="/docs/assets/img/articles/owner-restriction-2.png">

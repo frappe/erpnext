@@ -22,7 +22,7 @@ Um Ihren Kostenstellenplan einzurichten, gehen Sie zu:
 
 >Rechnungswesen > Einstellungen > Kostenstellenplan
 
-<img class="screenshot" alt="Kostenstellenplan" src="{{docs_base_url}}/assets/img/accounts/budgeting-cost-center.png">
+<img class="screenshot" alt="Kostenstellenplan" src="/docs/assets/img/accounts/budgeting-cost-center.png">
 
 Kostenstellen helfen Ihnen bei der Erstellung von Budgets für Geschäftstätigkeiten.
 
@@ -36,7 +36,7 @@ Sie könne ein Budget in der Kostenstelle einrichten. Wenn Sie saisonale Verkäu
 
 > Rechnungswesen > Einstellungen > Budgetverteilung > Neu
 
-![Budgetverteilung]({{docs_base_url}}/assets/old_images/erpnext/budgeting.png)
+![Budgetverteilung](/docs/assets/old_images/erpnext/budgeting.png)
 
 ### Budgetaktionen
 

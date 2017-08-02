@@ -9,7 +9,7 @@ Bei diesem Prozess bucht das System jede Lagertransaktion um Lagerbestand und Bu
 
 Wenn Sie Artikel kaufen und erhalten, werden diese Artikel als Vermögen des Unternehmens gebucht (Warenbestand/Anlagevermögen). Wenn Sie diese Artikel wieder verkaufen und ausliefern, werden Kosten (Selbstkosten) in Höhe der Bezugskosten der Artikel verbucht. Nach jeder Lagertransaktion werden Buchungen im Hauptbuch erstellt. Dies hat zum Ergebnis, dass der Wert im Lagerbuch immer gleich dem Wert in der Bilanz bleibt. Das verbessert die Aussagekraft der Bilanz und der Gewinn- und Verlustrechnung.
 
-Um Buchungen für bestimmte Lagertransaktionen zu überprüfen, bitte unter [Beispiele]({{docs_base_url}}/user/manual/de/stock/accounting-of-inventory-stock/perpetual-inventory.html) nachlesen.
+Um Buchungen für bestimmte Lagertransaktionen zu überprüfen, bitte unter [Beispiele](/docs/user/manual/de/stock/accounting-of-inventory-stock/perpetual-inventory.html) nachlesen.
 
 #### Vorteile
 
@@ -33,6 +33,6 @@ Die Differenz aus dem Wert der Waren, die noch nicht verkauft wurden, und dem Wa
 
 Dieser Gesamtprozess wird als Stichtagsinventur bezeichnet.
 
-Wenn Sie als bereits existierender Benutzer die Stichtagsinventur nutzen aber zur Ständigen Inventur wechseln möchten, müssen Sie der Migrationsanleitung folgen. Für weitere Details lesen Sie [Migration aus der Stichtagsinventur]({{docs_base_url}}/user/manual/de/stock/accounting-of-inventory-stock/migrate-to-perpetual-inventory.html).
+Wenn Sie als bereits existierender Benutzer die Stichtagsinventur nutzen aber zur Ständigen Inventur wechseln möchten, müssen Sie der Migrationsanleitung folgen. Für weitere Details lesen Sie [Migration aus der Stichtagsinventur](/docs/user/manual/de/stock/accounting-of-inventory-stock/migrate-to-perpetual-inventory.html).
 
 {next}

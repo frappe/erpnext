@@ -33,7 +33,22 @@ frappe.ui.form.on("Sales Order", {
 			function(doc) { return (doc.stock_qty<=doc.delivered_qty) ? "green" : "orange" })
 
 		erpnext.queries.setup_warehouse_query(frm);
+	},
+	
+	delivery_date: function(frm) {
+		$.each(frm.doc.items || [], function(i, d) {
+			if(!d.delivery_date) d.delivery_date = frm.doc.delivery_date;
+		});
+		refresh_field("items");
 	}
+});
+
+frappe.ui.form.on("Sales Order Item", {
+	delivery_date: function(frm, cdt, cdn) {
+		if(!frm.doc.delivery_date) {
+			erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "delivery_date");
+		}
+	}	
 });
 
 erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend({
@@ -77,7 +92,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				// delivery note
 				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
 					this.frm.add_custom_button(__('Delivery'),
-						function() { me.make_delivery_note() }, __("Make"));
+						function() { me.make_delivery_note_based_on_delivery_note(); }, __("Make"));
 					this.frm.add_custom_button(__('Production Order'),
 						function() { me.make_production_order() }, __("Make"));
 
@@ -235,7 +250,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	},
 
 	order_type: function() {
-		this.frm.toggle_reqd("delivery_date", this.frm.doc.order_type == "Sales");
+		this.frm.fields_dict.items.grid.toggle_reqd("delivery_date", this.frm.doc.order_type == "Sales");
 	},
 
 	tc_name: function() {
@@ -249,10 +264,72 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		})
 	},
 
+	make_delivery_note_based_on_delivery_note: function() {
+		var me = this;
+		
+		var delivery_dates = [];
+		$.each(this.frm.doc.items || [], function(i, d) {
+			if(!delivery_dates.includes(d.delivery_date)) {
+				delivery_dates.push(d.delivery_date);
+			}
+		});
+		
+		var item_grid = this.frm.fields_dict["items"].grid;
+		if(!item_grid.get_selected().length && delivery_dates.length > 1) {
+			var dialog = new frappe.ui.Dialog({
+				title: __("Select Items based on Delivery Date"),
+				fields: [{fieldtype: "HTML", fieldname: "dates_html"}]
+			});
+			
+			var html = $(`
+				<div style="border: 1px solid #d1d8dd">
+					<div class="list-item list-item--head">
+						<div class="list-item__content list-item__content--flex-2">
+							${__('Delivery Date')}
+						</div>
+					</div>
+					${delivery_dates.map(date => `
+						<div class="list-item">
+							<div class="list-item__content list-item__content--flex-2">
+								<label>
+								<input type="checkbox" data-date="${date}" checked="checked"/>
+								${frappe.datetime.str_to_user(date)}
+								</label>
+							</div>
+						</div>
+					`).join("")}
+				</div>
+			`);
+
+			var wrapper = dialog.fields_dict.dates_html.$wrapper;
+			wrapper.html(html);
+
+			dialog.set_primary_action(__("Select"), function() {
+				var dates = wrapper.find('input[type=checkbox]:checked')
+					.map((i, el) => $(el).attr('data-date')).toArray();
+
+				if(!dates) return;
+				
+				$.each(dates, function(i, d) {
+					$.each(item_grid.grid_rows || [], function(j, row) {
+						if(row.doc.delivery_date == d) {
+							row.doc.__checked = 1;
+						}
+					});
+				})
+				me.make_delivery_note();
+				dialog.hide();
+			});
+			dialog.show();
+		} else {
+			this.make_delivery_note();
+		}
+	},
+
 	make_delivery_note: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
-			frm: this.frm
+			frm: me.frm
 		})
 	},
 
@@ -343,6 +420,16 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	on_submit: function(doc, cdt, cdn) {
 		if(cint(frappe.boot.notification_settings.sales_order)) {
 			this.frm.email_doc(frappe.boot.notification_settings.sales_order_message);
+		}
+	},
+
+	items_add: function(doc, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		if(doc.delivery_date) {
+			row.delivery_date = doc.delivery_date;
+			refresh_field("delivery_date", cdn, "items");
+		} else {
+			this.frm.script_manager.copy_from_first_row("items", row, ["delivery_date"]);
 		}
 	}
 });

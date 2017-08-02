@@ -1,3 +1,5 @@
+# Support Reports
+
 
 
 ### Support Hours
@@ -5,4 +7,4 @@ This report provide the information about the time slot along with the count of 
 
 > Support > Reports > Support Hours
 
-<img class="screenshot" alt="Maintenance Visit" src="{{docs_base_url}}/assets/img/support/support_hours.png">
+<img class="screenshot" alt="Maintenance Visit" src="/docs/assets/img/support/support_hours.png">

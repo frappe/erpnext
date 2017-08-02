@@ -11,7 +11,7 @@ Wenn Sie bei Ihrer Tätigkeit bestimmte Prozesse an eine Drittpartei, bei der Si
 2. Erstellen Sie ein Lager für den Lieferanten, damit Sie die übergebenen Artikel nachverfolgen können (möglicherweise geben Sie ja Artikel im Wert einer Monatslieferung außer Haus).
 3. Stellen Sie für den bearbeiteten Artikel  und der Artikelvorlage den Punkt "Ist Fremdvergabe" auf JA ein.
 
-<img class="screenshot" alt="Fremdvergabe" src="{{docs_base_url}}/assets/img/manufacturing/subcontract.png">
+<img class="screenshot" alt="Fremdvergabe" src="/docs/assets/img/manufacturing/subcontract.png">
 
 
 **Schritt 1:** Erstellen Sie für den bearbeiteten Artikel eine Stückliste, die den unbearbeiteten Artikel als Unterartikel enthält. Beispiel: Wenn Sie einen Stift herstellen, wird der bearbeitete Stift mit der Stückliste benannt, wbei der Tintentank, der Knopf und andere Artikel, die in die Fertigung eingehen als Unterartikel verwaltet werden.

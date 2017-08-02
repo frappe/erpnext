@@ -143,16 +143,16 @@ class StockReconciliation(StockController):
 
 			# item should not be serialized
 			if item.has_serial_no == 1:
-				raise frappe.ValidationError, _("Serialized Item {0} cannot be updated using Stock Reconciliation, please use Stock Entry").format(item_code)
+				raise frappe.ValidationError(_("Serialized Item {0} cannot be updated using Stock Reconciliation, please use Stock Entry").format(item_code))
 
 			# item managed batch-wise not allowed
 			if item.has_batch_no == 1:
-				raise frappe.ValidationError, _("Batched Item {0} cannot be updated using Stock Reconciliation, instead use Stock Entry").format(item_code)
+				raise frappe.ValidationError(_("Batched Item {0} cannot be updated using Stock Reconciliation, instead use Stock Entry").format(item_code))
 
 			# docstatus should be < 2
 			validate_cancelled_item(item_code, item.docstatus, verbose=0)
 
-		except Exception, e:
+		except Exception as e:
 			self.validation_messages.append(_("Row # ") + ("%d: " % (row_num)) + cstr(e))
 
 	def update_stock_ledger(self):

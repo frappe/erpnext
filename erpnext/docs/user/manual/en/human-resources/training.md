@@ -1,8 +1,10 @@
+# Training
+
 ### Training Event
 
 Schedule seminars, workshops, conferences etc using Training Event. You can also invite your employees to attend the event using this feature.
 
-<img class="screenshot" alt="Employee" src="{{docs_base_url}}/assets/img/human-resources/training_event.png">
+<img class="screenshot" alt="Employee" src="/docs/assets/img/human-resources/training_event.png">
 
 ### Inviting Employees for Event
 
@@ -12,17 +14,17 @@ The system shall notify the employee with status 'Open' by sending a email to th
 The status is changed to 'Invited' when an invitation email is sent to the employee by the system.
 When an Employee confirms his/her presence for the event you can change the status to 'Confirmed'.
 
-<img class="screenshot" alt="Employee" src="{{docs_base_url}}/assets/img/human-resources/training_event_employee.png">
+<img class="screenshot" alt="Employee" src="/docs/assets/img/human-resources/training_event_employee.png">
 
 ### Training Result
 
 After compleation of the training Employee Wise training results can be stored based on the Feedback received from the Trainer.
 
-<img class="screenshot" alt="Employee" src="{{docs_base_url}}/assets/img/human-resources/training_result.png">
+<img class="screenshot" alt="Employee" src="/docs/assets/img/human-resources/training_result.png">
 
 
 ### Trainig Feedback
 
 Collect feedback regarding the event from your Employees using Training Feedback.
 
-<img class="screenshot" alt="Employee" src="{{docs_base_url}}/assets/img/human-resources/training_feedback.png">
+<img class="screenshot" alt="Employee" src="/docs/assets/img/human-resources/training_feedback.png">
