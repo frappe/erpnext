@@ -169,7 +169,6 @@ def create_variant(item, args):
 
 	return variant
 
-
 def copy_attributes_to_variant(item, variant):
 	from frappe.model import no_value_fields
 
@@ -189,6 +188,8 @@ def copy_attributes_to_variant(item, variant):
 				variant.set(field.fieldname, item.get(field.fieldname))
 	variant.variant_of = item.name
 	variant.has_variants = 0
+	if not variant.description:
+		variant.description = ''
 
 	if item.variant_based_on=='Item Attribute':
 		if variant.attributes:
