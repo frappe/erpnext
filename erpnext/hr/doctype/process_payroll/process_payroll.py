@@ -343,7 +343,7 @@ class ProcessPayroll(Document):
 		else:
 			frappe.msgprint(
 				"There are no submitted Salary Slips to process.",
-				title="Error"
+				title="Error", indicator="red"
 			)
 
 	def update_salary_slip_status(self, jv_name = None):
