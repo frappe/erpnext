@@ -1,6 +1,6 @@
-QUnit.module('Shipping Rule');
+QUnit.module('Pricing Rule"');
 
-QUnit.test("test Shipping Rule", function(assert) {
+QUnit.test("test pricing rule", function(assert) {
 	assert.expect(2);
 	let done = assert.async();
 	frappe.run_serially([
