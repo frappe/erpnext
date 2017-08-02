@@ -16,6 +16,10 @@ from frappe.utils.csvutils import getlink
 class InvalidExpenseApproverError(frappe.ValidationError): pass
 
 class ExpenseClaim(AccountsController):
+	def onload(self):
+		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings', 
+			'make_payment_via_journal_entry')
+
 	def get_feed(self):
 		return _("{0}: From {0} for {1}").format(self.approval_status,
 			self.employee_name, self.total_claimed_amount)
@@ -207,10 +211,10 @@ def get_expense_approver(doctype, txt, searchfield, start, page_len, filters):
 	""", ("%" + txt + "%"))
 
 @frappe.whitelist()
-def make_bank_entry(docname):
+def make_bank_entry(dt, dn):
 	from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 
-	expense_claim = frappe.get_doc("Expense Claim", docname)
+	expense_claim = frappe.get_doc(dt, dn)
 	default_bank_cash_account = get_default_bank_cash_account(expense_claim.company, "Bank")
 	if not default_bank_cash_account:
 		default_bank_cash_account = get_default_bank_cash_account(expense_claim.company, "Cash")
@@ -218,7 +222,7 @@ def make_bank_entry(docname):
 	je = frappe.new_doc("Journal Entry")
 	je.voucher_type = 'Bank Entry'
 	je.company = expense_claim.company
-	je.remark = 'Payment against Expense Claim: ' + docname;
+	je.remark = 'Payment against Expense Claim: ' + dn;
 
 	je.append("accounts", {
 		"account": expense_claim.payable_account,
