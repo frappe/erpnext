@@ -18,7 +18,7 @@ QUnit.test("Test: Request for Quotation", function (assert) {
 			cur_frm.fields_dict.suppliers.grid.grid_rows[0].toggle_view();
 		},
 		() => frappe.timeout(1),
- 		() => {
+		() => {
 			cur_frm.fields_dict.suppliers.grid.grid_rows[0].doc.supplier = "_Test Supplier";
 			frappe.click_check('Send Email');
 			cur_frm.cur_grid.frm.script_manager.trigger('supplier');
@@ -36,9 +36,9 @@ QUnit.test("Test: Request for Quotation", function (assert) {
 		() => frappe.timeout(1),
  		() => {
 			cur_frm.fields_dict.suppliers.grid.grid_rows[1].doc.supplier = "_Test Supplier 1";
- 			frappe.click_check('Send Email');
- 			cur_frm.cur_grid.frm.script_manager.trigger('supplier');
- 		},
+			frappe.click_check('Send Email');
+			cur_frm.cur_grid.frm.script_manager.trigger('supplier');
+		},
 		() => frappe.timeout(1),
 		() => {
 			cur_frm.cur_grid.toggle_view();
@@ -94,7 +94,7 @@ QUnit.test("Test: Request for Quotation", function (assert) {
 		() => frappe.click_button('Update'),
 		() => frappe.timeout(1),
 
-		() => frappe.click_button('Supplier Quotation'), 
+		() => frappe.click_button('Supplier Quotation'),
 		() => frappe.timeout(1),
 		() => frappe.click_link('Make'),
 		() => frappe.timeout(1),
