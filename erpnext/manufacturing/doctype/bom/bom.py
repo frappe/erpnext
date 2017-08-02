@@ -52,8 +52,8 @@ class BOM(WebsiteGenerator):
 		validate_uom_is_integer(self, "stock_uom", "stock_qty", "BOM Item")
 
 		self.update_stock_qty()
-		self.validate_materials()
 		self.set_bom_material_details()
+		self.validate_materials()
 		self.validate_operations()
 		self.calculate_cost()
 
