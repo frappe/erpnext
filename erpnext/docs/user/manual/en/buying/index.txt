@@ -5,3 +5,4 @@ purchase-order
 setup
 articles
 purchase-taxes
+supplier-scorecard
