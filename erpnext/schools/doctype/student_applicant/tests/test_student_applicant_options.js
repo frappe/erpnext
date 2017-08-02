@@ -7,6 +7,7 @@ QUnit.test('test student applicant', function(assert){
 	let testing_status;
 	frappe.run_serially([
 		() => frappe.set_route('Form', 'School House/New School House'),
+		() => frappe.timeout(0.5),
 		() => cur_frm.doc.house_name = 'Test_house',
 		() => cur_frm.save(),
 		() => frappe.set_route('List', 'Student Applicant'),
