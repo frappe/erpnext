@@ -1,6 +1,6 @@
 QUnit.module('Sales Order');
 
-QUnit.test("test sales order", function(assert) {
+QUnit.test("test sales order with taxes and charges", function(assert) {
 	assert.expect(3);
 	let done = assert.async();
 	frappe.run_serially([
