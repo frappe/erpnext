@@ -188,6 +188,7 @@ frappe.ui.form.on("Expense Claim", {
 			}
 			});
 	}
+});
 
 frappe.ui.form.on("Expense Claim", {
 	setup: function(frm) {
