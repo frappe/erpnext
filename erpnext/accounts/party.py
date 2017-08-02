@@ -15,7 +15,8 @@ from frappe.contacts.doctype.address.address import (get_address_display,
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
 from erpnext.exceptions import PartyFrozen, PartyDisabled, InvalidAccountCurrency
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext import get_default_currency
+from erpnext import get_default_currency, get_company_currency
+
 
 class DuplicatePartyAccountError(frappe.ValidationError): pass
 
@@ -43,6 +44,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 		frappe.throw(_("Not permitted for {0}").format(party), frappe.PermissionError)
 
 	party = frappe.get_doc(party_type, party)
+	currency = party.default_currency if party.default_currency else get_company_currency(company)
 
 	set_address_details(out, party, party_type, doctype, company)
 	set_contact_details(out, party, party_type)
