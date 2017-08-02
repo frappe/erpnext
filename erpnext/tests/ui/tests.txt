@@ -53,3 +53,6 @@ erpnext/schools/doctype/guardian/test_guardian.js
 erpnext/schools/doctype/student_admission/test_student_admission.js
 erpnext/schools/doctype/student_applicant/tests/test_student_applicant.js
 erpnext/schools/doctype/student_applicant/tests/test_student_applicant_options.js
+erpnext/schools/doctype/student_log/test_student_log.js
+erpnext/schools/doctype/student_group/test_student_group.js
+erpnext/schools/doctype/student_group_creation_tool/test_student_group_creation_tool.js
