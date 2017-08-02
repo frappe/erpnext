@@ -5,7 +5,6 @@ frappe.provide("erpnext.hr");
 
 erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 	make_advance_entry: function() {
-		var me = this;
 		return frappe.call({
 			method: "erpnext.hr.doctype.expense_claim.expense_claim.make_advance_entry",
 			args: {
@@ -100,7 +99,7 @@ cur_frm.cscript.refresh = function(doc) {
 				cur_frm.add_custom_button(__("Advance Payment"), cur_frm.cscript.make_advance_entry, __("Make"));
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 			}
-			}
+		}
 
 		if (doc.docstatus===1 && doc.approval_status=="Approved") {
 			/* eslint-disable */
@@ -257,7 +256,7 @@ frappe.ui.form.on("Expense Claim", {
 					"report_type": "Balance Sheet",
 					"account_type": "Receivable"
 				}
-			}
+			};
 		}
 	},
 
