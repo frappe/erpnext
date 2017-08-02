@@ -184,8 +184,8 @@ frappe.ui.form.on("Expense Claim", {
 				},
 				callback: function(r) {
 					cur_frm.set_value("total_advance_paid", r.message.amt);
-			}
-		});
+		}
+			});
 	}
 });
 
