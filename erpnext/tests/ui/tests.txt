@@ -51,5 +51,6 @@ erpnext/schools/doctype/course/test_course.js
 erpnext/schools/doctype/program/test_program.js
 erpnext/schools/doctype/guardian/test_guardian.js
 erpnext/schools/doctype/student_admission/test_student_admission.js
+erpnext/schools/doctype/student_applicant/tests/test_student_applicant_dummy_data.js
 erpnext/schools/doctype/student_applicant/tests/test_student_applicant.js
 erpnext/schools/doctype/student_applicant/tests/test_student_applicant_options.js
