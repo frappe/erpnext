@@ -6,6 +6,6 @@ import frappe
 
 def execute():
 	# Set write permission to permlevel 1 for sales manager role in Quotation doctype
-	frappe.db.sql(""" update `tabCustom Docperm` set `tabCustom Docperm`.write = 1
-		where `tabCustom Docperm`.parent = 'Quotation' and `tabCustom Docperm`.role = 'Sales Manager'
-		and `tabCustom Docperm`.permlevel = 1 """)
+	frappe.db.sql(""" update `tabCustom DocPerm` set `tabCustom DocPerm`.write = 1
+		where `tabCustom DocPerm`.parent = 'Quotation' and `tabCustom DocPerm`.role = 'Sales Manager'
+		and `tabCustom DocPerm`.permlevel = 1 """)
