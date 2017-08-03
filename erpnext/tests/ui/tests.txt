@@ -17,6 +17,7 @@ erpnext/selling/doctype/sales_order/tests/test_sales_order_with_multi_uom.js
 erpnext/selling/doctype/sales_order/tests/test_sales_order_with_discount_on_grand_total.js
 erpnext/selling/doctype/sales_order/tests/test_sales_order_with_taxes_and_charges.js
 erpnext/selling/doctype/sales_order/tests/test_sales_order_with_shipping_rule.js
+erpnext/selling/doctype/sales_order/tests/test_sales_order_with_pricing_rule.js
 erpnext/manufacturing/doctype/workstation/test_workstation.js
 erpnext/manufacturing/doctype/operation/test_operation.js
 erpnext/manufacturing/doctype/bom/test_bom.js
