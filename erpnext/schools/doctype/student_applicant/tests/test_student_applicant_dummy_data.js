@@ -4,7 +4,6 @@ QUnit.test('Make Students', function(assert){
 	assert.expect(0);
 	let done = assert.async();
 	let tasks = [];
-	let index;
 	let loop = [1,2,3,4];
 	let fname;
 
