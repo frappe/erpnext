@@ -1,7 +1,7 @@
 # Der Champion
 <span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
-<img alt="Champion" class="screenshot" src="{{docs_base_url}}/assets/img/setup/implementation-image.png">
+<img alt="Champion" class="screenshot" src="/docs/assets/img/setup/implementation-image.png">
 
 Wir haben uns in den letzten Jahren dutzende von ERP-Umsetzungen angesehen, und wir haben erkannt, dass eine erfolgreiche Umsetzung viel mit schwer greifbaren Dingen und persönlichen Einstellungen zu tun hat.
 

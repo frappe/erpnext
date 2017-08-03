@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.utils import flt
+from frappe.utils import flt, add_days, nowdate, add_months
 import unittest
 
 test_dependencies = ["Product Bundle"]
@@ -13,10 +13,11 @@ class TestQuotation(unittest.TestCase):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 
 		quotation = frappe.copy_doc(test_records[0])
+		quotation.transaction_date = nowdate()
+		quotation.valid_till = add_months(quotation.transaction_date, 1)
 		quotation.insert()
 
 		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
-
 		quotation.submit()
 
 		sales_order = make_sales_order(quotation.name)
@@ -29,8 +30,20 @@ class TestQuotation(unittest.TestCase):
 
 		sales_order.delivery_date = "2014-01-01"
 		sales_order.naming_series = "_T-Quotation-"
-		sales_order.transaction_date = "2013-05-12"
+		sales_order.transaction_date = nowdate()
 		sales_order.insert()
+
+	def test_valid_till(self):
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+
+		quotation = frappe.copy_doc(test_records[0])
+		quotation.valid_till = add_days(quotation.transaction_date, -1)
+		self.assertRaises(frappe.ValidationError, quotation.validate)
+
+		quotation.valid_till = add_days(nowdate(), -1)
+		quotation.insert()
+		quotation.submit()
+		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
 
 	def test_create_quotation_with_margin(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
@@ -44,6 +57,8 @@ class TestQuotation(unittest.TestCase):
 		test_records[0]['items'][0]['margin_rate_or_amount'] = 18.75
 
 		quotation = frappe.copy_doc(test_records[0])
+		quotation.transaction_date = nowdate()
+		quotation.valid_till = add_months(quotation.transaction_date, 1)
 		quotation.insert()
 
 		self.assertEquals(quotation.get("items")[0].rate, rate_with_margin)

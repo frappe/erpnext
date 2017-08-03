@@ -36,9 +36,14 @@ frappe.ui.form.on("Material Request Item", {
 			frappe.msgprint(__("Warning: Material Requested Qty is less than Minimum Order Qty"));
 		}
 	},
+
 	item_code: function(frm, doctype, name) {
 		frm.script_manager.copy_from_first_row('items', frm.selected_doc,
 			'schedule_date');
+	},
+
+	schedule_date: function(frm, cdt, cdn) {
+		erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "schedule_date");
 	}
 });
 

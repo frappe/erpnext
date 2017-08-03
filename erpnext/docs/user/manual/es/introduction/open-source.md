@@ -1,3 +1,5 @@
+# Open Source
+
 El código fuente de ERPNext es de código abierto. Está abierto para que todos
 podamos entenderlo, extenderlo o mejorarlo. Y es gratis!
 

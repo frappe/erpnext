@@ -1,3 +1,5 @@
+# Recurring Orders And Invoices
+
 #Recurring Orders and Invoices
 
 If you have a contract with a **Customer** where you bill the Customer on a monthly, quarterly, half-yearly or annual basis, you should use recurring feature in orders and invoices. 
@@ -10,7 +12,7 @@ Feature of setting document as recurring is available in Sales Order, Sales Invo
 
 Option to set document as recurring will be visible only after submission. Recurring is last section in document. Check **Is Recurring** to set document as recurring.
 
-<img alt="Recurring Invoice" class="screenshot" src="{{docs_base_url}}/assets/img/accounts/recurring.gif">
+<img alt="Recurring Invoice" class="screenshot" src="/docs/assets/img/accounts/recurring.gif">
 
 **From Date and To Date:** This defines contract period with the customer.
 

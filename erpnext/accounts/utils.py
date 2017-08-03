@@ -20,36 +20,36 @@ def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1, compan
 
 def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False):
 	fiscal_years = frappe.cache().hget("fiscal_years", company) or []
-	
-	if not fiscal_years:		
+
+	if not fiscal_years:
 		# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
 		cond = ""
 		if fiscal_year:
 			cond += " and fy.name = {0}".format(frappe.db.escape(fiscal_year))
 		if company:
 			cond += """
-				and (not exists (select name 
-					from `tabFiscal Year Company` fyc 
-					where fyc.parent = fy.name) 
-				or exists(select company 
-					from `tabFiscal Year Company` fyc 
-					where fyc.parent = fy.name 
+				and (not exists (select name
+					from `tabFiscal Year Company` fyc
+					where fyc.parent = fy.name)
+				or exists(select company
+					from `tabFiscal Year Company` fyc
+					where fyc.parent = fy.name
 					and fyc.company=%(company)s)
 				)
 			"""
 
 		fiscal_years = frappe.db.sql("""
-			select 
-				fy.name, fy.year_start_date, fy.year_end_date 
-			from 
+			select
+				fy.name, fy.year_start_date, fy.year_end_date
+			from
 				`tabFiscal Year` fy
-			where 
+			where
 				disabled = 0 {0}
-			order by 
+			order by
 				fy.year_start_date desc""".format(cond), {
 				"company": company
 			}, as_dict=True)
-			
+
 		frappe.cache().hset("fiscal_years", company, fiscal_years)
 
 	if transaction_date:
@@ -60,10 +60,10 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 		if fiscal_year and fy.name == fiscal_year:
 			matched = True
 
-		if (transaction_date and getdate(fy.year_start_date) <= transaction_date 
+		if (transaction_date and getdate(fy.year_start_date) <= transaction_date
 			and getdate(fy.year_end_date) >= transaction_date):
 			matched = True
-			
+
 		if matched:
 			if as_dict:
 				return (fy,)
@@ -72,7 +72,7 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 
 	error_msg = _("""{0} {1} not in any active Fiscal Year.""").format(label, formatdate(transaction_date))
 	if verbose==1: frappe.msgprint(error_msg)
-	raise FiscalYearError, error_msg
+	raise FiscalYearError(error_msg)
 
 def validate_fiscal_year(date, fiscal_year, company, label="Date", doc=None):
 	years = [f[0] for f in get_fiscal_years(date, label=_(label), company=company)]
@@ -158,7 +158,6 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 		return flt(bal)
 
 def get_count_on(account, fieldname, date):
-
 	cond = []
 	if date:
 		cond.append("posting_date <= '%s'" % frappe.db.escape(cstr(date)))
@@ -195,11 +194,6 @@ def get_count_on(account, fieldname, date):
 				select name from `tabAccount` ac where ac.name = gle.account
 				and ac.lft >= %s and ac.rgt <= %s
 			)""" % (acc.lft, acc.rgt))
-
-			# If group and currency same as company,
-			# always return balance based on debit and credit in company currency
-			if acc.account_currency == frappe.db.get_value("Company", acc.company, "default_currency"):
-				in_account_currency = False
 		else:
 			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account, percent=False), ))
 
@@ -227,7 +221,7 @@ def get_count_on(account, fieldname, date):
 						WHERE docstatus < 2 and posting_date <= %(date)s and against_voucher = %(voucher_no)s
 						and party = %(party)s and name != %(name)s"""
 						.format(select_fields),
-						{"date": date, "voucher_no": gle.voucher_no, 
+						{"date": date, "voucher_no": gle.voucher_no,
 							"party": gle.party, "name": gle.name})[0][0]
 
 					outstanding_amount = flt(gle.get(dr_or_cr)) - flt(gle.get(cr_or_dr)) - payment_amount
@@ -274,7 +268,7 @@ def add_cc(args=None):
 
 	if not args:
 		args = frappe.local.form_dict
-	
+
 	args.doctype = "Cost Center"
 	args = make_tree_args(**args)
 
@@ -500,7 +494,8 @@ def get_company_default(company, fieldname):
 	value = frappe.db.get_value("Company", company, fieldname)
 
 	if not value:
-		throw(_("Please set default {0} in Company {1}").format(frappe.get_meta("Company").get_label(fieldname), company))
+		throw(_("Please set default {0} in Company {1}")
+		      .format(frappe.get_meta("Company").get_label(fieldname), company))
 
 	return value
 
@@ -534,18 +529,18 @@ def get_stock_and_account_difference(account_list=None, posting_date=None):
 			account_balance = get_balance_on(account_data.get('account'), posting_date, in_account_currency=False)
 			stock_value = get_stock_value_on(warehouse, posting_date)
 			if abs(flt(stock_value) - flt(account_balance)) > 0.005:
-				difference.setdefault(account, flt(stock_value) - flt(account_balance))
+				difference.setdefault(account_data.get('account'), flt(stock_value) - flt(account_balance))
 
 	return difference
 
-def get_currency_precision():	
+def get_currency_precision():
 	precision = cint(frappe.db.get_default("currency_precision"))
 	if not precision:
 		number_format = frappe.db.get_default("number_format") or "#,###.##"
 		precision = get_number_format_info(number_format)[2]
-	
+
 	return precision
-	
+
 def get_stock_rbnb_difference(posting_date, company):
 	stock_items = frappe.db.sql_list("""select distinct item_code
 		from `tabStock Ledger Entry` where company=%s""", company)
@@ -627,7 +622,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 			'invoice_amount': flt(d.invoice_amount),
 			'payment_amount': flt(d.payment_amount),
 			'outstanding_amount': flt(d.invoice_amount - d.payment_amount, precision),
-			'due_date': frappe.db.get_value(d.voucher_type, d.voucher_no, "due_date"),
+			'due_date': frappe.db.get_value(d.voucher_type, d.voucher_no, 
+				"posting_date" if party_type=="Employee" else "due_date"),
 		}))
 
 	outstanding_invoices = sorted(outstanding_invoices, key=lambda k: k['due_date'] or getdate(nowdate()))
@@ -654,7 +650,7 @@ def get_companies():
 @frappe.whitelist()
 def get_children():
 	from erpnext.accounts.report.financial_statements import sort_root_accounts
-	
+
 	args = frappe.local.form_dict
 	doctype, company = args['doctype'], args['company']
 	fieldname = frappe.db.escape(doctype.lower().replace(' ','_'))
@@ -694,9 +690,6 @@ def get_children():
 				each["balance_in_account_currency"] = flt(get_balance_on(each.get("value")))
 
 	return acc
-
-def create_payment_gateway_account(gateway):
-	create_payment_gateway_account(gateway)
 
 def create_payment_gateway_account(gateway):
 	from erpnext.setup.setup_wizard.setup_wizard import create_bank_account

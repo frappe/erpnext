@@ -15,7 +15,7 @@ POS Invoices created in the offline mode will be saved locally in the browser. I
 In ERPNext all Sales and Purchase transactions, like Sales Invoice, Quotation, Sales Order, Purchase Order etc. can be edited via the POS. There two steps to Setup POS:
 
 1. Enable POS View via (Setup > Customize > Feature Setup)
-2. Create a [POS Setting]({{docs_base_url}}/user/manual/en/setting-up/pos-setting.html) record
+2. Create a [POS Profile](/docs/user/manual/en/setting-up/pos-setting.html) record
 
 #### Different sections of the POS
 
@@ -29,7 +29,7 @@ In ERPNext all Sales and Purchase transactions, like Sales Invoice, Quotation, S
 
 In POS, user can select the existing customer during making an order or create the new customer. This features works in the offline mode also. User can also add the customer details like contact number, address details etc on the form. The customer which has been created from the POS will be synced when the internet connection is active.
 
-<img class="screenshot" alt="POS Customer" src="{{docs_base_url}}/assets/img/accounts/pos-customer.png">
+<img class="screenshot" alt="POS Customer" src="/docs/assets/img/accounts/pos-customer.png">
 
 ### Adding an Item
 
@@ -39,7 +39,7 @@ At the billing counter, the retailer needs to select Items which the consumer bu
 
 **Barcode / Serial No** \- A Barcode / Serial No is an optical machine-readable representation of data relating to the object to which it is attached. Enter Barcode / Serial No in the box as shown in the image below and pause for a second, the item will be automatically added to the cart.
 
-<img class="screenshot" alt="POS Item" src="{{docs_base_url}}/assets/img/accounts/pos-item.png">
+<img class="screenshot" alt="POS Item" src="/docs/assets/img/accounts/pos-item.png">
 
 > Tip: To change the quantity of an Item, enter your desired quantity in the
 quantity box. These are mostly used if the same Item is purchased in bulk.
@@ -51,7 +51,7 @@ in Search box.
 
 1. Select row in the cart and clik on delete button in the numeric keypad
   
-<img class="screenshot" alt="POS Item" src="{{docs_base_url}}/assets/img/accounts/pos_deleted_item.gif">
+<img class="screenshot" alt="POS Item" src="/docs/assets/img/accounts/pos_deleted_item.gif">
 
 
 2. Set Qty as zero to remove Item from the POS invoice. There are two ways to remove an Item.
@@ -69,7 +69,7 @@ ready to make the Payment. Payment process is divided into 3 steps -
   2. Select your “Mode of Payment”.
   3. Click on “Pay” button to Save the document.
   
-<img class="screenshot" alt="POS Payment" src="{{docs_base_url}}/assets/img/accounts/pos-payment.png">
+<img class="screenshot" alt="POS Payment" src="/docs/assets/img/accounts/pos-payment.png">
 
 Submit the document to finalise the record. After the document is submitted,
 you can either print or email it directly to the customer.
@@ -78,7 +78,7 @@ you can either print or email it directly to the customer.
 
 Outstanding amount can be write off from the POS, user has to enter the amount under write off field on the payment screen.
 
-<img class="screenshot" alt="POS Payment" src="{{docs_base_url}}/assets/img/accounts/write-off.png">
+<img class="screenshot" alt="POS Payment" src="/docs/assets/img/accounts/write-off.png">
 
 System books the write off amount into the ledger which has selected on the POS Profile.
 
@@ -86,12 +86,12 @@ System books the write off amount into the ledger which has selected on the POS 
 
 POS calculate the extra amount paid by the customer, which user can return from the cash account. User has to set the account for the change amount on the POS profile.
 
-<img class="screenshot" alt="POS Payment" src="{{docs_base_url}}/assets/img/accounts/change-amount.png">
+<img class="screenshot" alt="POS Payment" src="/docs/assets/img/accounts/change-amount.png">
 
 ### Offline Records
 All the records from the POS stores into the browser's local storegae and sync submitted records after every minute of the interval if system is connected to internet. User can view the offline records by clicking on Menu > View Offline Records
 
-<img class="screenshot" alt="POS Payment" src="{{docs_base_url}}/assets/img/accounts/offline-records.png">
+<img class="screenshot" alt="POS Payment" src="/docs/assets/img/accounts/offline-records.png">
 
 #### Accounting entries (GL Entry) for a Point of Sale:
 
@@ -112,7 +112,7 @@ To see entries after “Submit”, click on “View Ledger”.
 
 ### Email
 User can send email from the POS, after submission of an order, user has to click on menu > email
-<img class="screenshot" alt="POS Payment" src="{{docs_base_url}}/assets/img/accounts/pos-email.png">
+<img class="screenshot" alt="POS Payment" src="/docs/assets/img/accounts/pos-email.png">
 After sync of an order, email sent to the customer with the print of the bill in the attachment
 
 {next}

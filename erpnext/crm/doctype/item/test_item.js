@@ -18,7 +18,8 @@ QUnit.test("test: item", function (assert) {
 				{item_group: "Products"},
 				{is_stock_item: is_stock_item},
 				{standard_rate: keyboard_cost},
-				{opening_stock: no_of_items_to_stock}
+				{opening_stock: no_of_items_to_stock},
+				{default_warehouse: "Stores - RB"}
 			]
 		),
 		() => {
@@ -43,7 +44,8 @@ QUnit.test("test: item", function (assert) {
 				{item_group: "Products"},
 				{is_stock_item: is_stock_item},
 				{standard_rate: screen_cost},
-				{opening_stock: no_of_items_to_stock}
+				{opening_stock: no_of_items_to_stock},
+				{default_warehouse: "Stores - RB"}
 			]
 		),
 
@@ -54,7 +56,8 @@ QUnit.test("test: item", function (assert) {
 				{item_group: "Products"},
 				{is_stock_item: is_stock_item},
 				{standard_rate: CPU_cost},
-				{opening_stock: no_of_items_to_stock}
+				{opening_stock: no_of_items_to_stock},
+				{default_warehouse: "Stores - RB"}
 			]
 		),
 
@@ -62,7 +65,15 @@ QUnit.test("test: item", function (assert) {
 		() => frappe.tests.make(
 			"Item", [
 				{item_code: "Laptop"},
-				{item_group: "Products"}
+				{item_group: "Products"},
+				{default_warehouse: "Stores - RB"}
+			]
+		),
+		() => frappe.tests.make(
+			"Item", [
+				{item_code: "Computer"},
+				{item_group: "Products"},
+				{is_stock_item: 0},
 			]
 		),
 
@@ -73,10 +84,37 @@ QUnit.test("test: item", function (assert) {
 				{item_group: "Products"},
 				{is_stock_item: is_stock_item},
 				{standard_rate: scrap_cost},
-				{opening_stock: no_of_items_to_stock}
+				{opening_stock: no_of_items_to_stock},
+				{default_warehouse: "Stores - RB"}
 			]
 		),
-
+		() => frappe.tests.make(
+			"Item", [
+				{item_code: "Test Product 4"},
+				{item_group: "Products"},
+				{is_stock_item: 1},
+				{has_batch_no: 1},
+				{create_new_batch: 1},
+				{uoms:
+					[
+						[
+							{uom:"Unit"},
+							{conversion_factor: 10},
+						]
+					]
+				},
+				{taxes:
+					[
+						[
+							{tax_type:"SGST - "+frappe.get_abbr(frappe.defaults.get_default("Company"))},
+							{tax_rate: 0},
+						]
+					]},
+				{has_serial_no: 1},
+				{standard_rate: 100},
+				{opening_stock: 100},
+			]
+		),
 		() => done()
 	]);
 });

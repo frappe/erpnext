@@ -10,4 +10,4 @@ For example, you can set your reorder level of Motherboard at 10. When there are
 
 For example, If reorder level is 100 items, your reorder quantity may not necessarily be 100 items. The Reorder quantity can be greater than or equal to reorder level. It may depend upon lead time, discount, transportation and average daily consumption.
 
-<img alt="Item Reorder" class="screenshot" src="{{docs_base_url}}/assets/img/stock/item-reorder.png">
+<img alt="Item Reorder" class="screenshot" src="/docs/assets/img/stock/item-reorder.png">

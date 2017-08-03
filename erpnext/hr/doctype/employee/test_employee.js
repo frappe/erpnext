@@ -10,8 +10,9 @@ QUnit.test("Test: Employee [HR]", function (assert) {
 		() => frappe.set_route("List", "Employee", "List"),
 		() => frappe.new_doc("Employee"),
 		() => frappe.timeout(1),
-		() => cur_frm.set_value("employee_name", "Test Employee"),
+		() => cur_frm.set_value("employee_name", "Test Employee 1"),
 		() => cur_frm.set_value("salutation", "Ms"),
+		() => cur_frm.set_value("company", "Test Company"),
 		() => cur_frm.set_value("date_of_joining", frappe.datetime.add_months(today_date, -2)),	// joined 2 month from now
 		() => cur_frm.set_value("date_of_birth", frappe.datetime.add_months(today_date, -240)),	// age is 20 years
 		() => cur_frm.set_value("employment_type", "Test Employment type"),
@@ -25,7 +26,7 @@ QUnit.test("Test: Employee [HR]", function (assert) {
 		() => cur_frm.save(),
 		() => frappe.timeout(1),
 		// check name of employee
-		() => assert.equal("Test Employee", cur_frm.doc.employee_name,
+		() => assert.equal("Test Employee 1", cur_frm.doc.employee_name,
 			'name of employee correctly saved'),
 		// check auto filled gender according to salutation
 		() => assert.equal("Female", cur_frm.doc.gender,

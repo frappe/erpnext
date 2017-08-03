@@ -1,3 +1,5 @@
+# Introduction
+
 ## ¿Qué es un ERP y Por qué debería interesarme?
 
 (Si ya sabes que necesitas un sistema todo-en-uno para su compañia, puedes pasar a la siguiente página)

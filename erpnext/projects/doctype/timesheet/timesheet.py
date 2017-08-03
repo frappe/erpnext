@@ -279,7 +279,6 @@ class Timesheet(Document):
 			ts_detail.billing_rate = 0.0
 			ts_detail.costing_rate = 0.0
 
-
 @frappe.whitelist()
 def get_projectwise_timesheet_data(project, parent=None):
 	cond = ''

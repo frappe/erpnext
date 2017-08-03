@@ -9,7 +9,7 @@ Aufbauend darauf, was die Lieferanten anbieten, werden Sie in verschiedene Kateg
 
 > Einkauf > Einstellungen > Lieferantentyp > Neuer Lieferantentyp
 
-<img class="screenshot" alt="Lieferantentyp" src="{{docs_base_url}}/assets/img/buying/supplier-type.png">
+<img class="screenshot" alt="Lieferantentyp" src="/docs/assets/img/buying/supplier-type.png">
 
 Sie können Ihre Lieferanten aus einem breiten Angebot verfügbarer Typen in ERPNext klassifizieren. Wählen Sie aus einem Satz vorgegebener Optionen wie Großhändler, Elekktro, Hardware, Regional, Pharma, Rohstoffe, Dienstleistungen, etc. aus.
 
