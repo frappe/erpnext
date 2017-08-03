@@ -2572,7 +2572,7 @@
  "istable": 0, 
  "max_attachments": 1, 
  "menu_index": 0, 
- "modified": "2017-07-19 13:49:33.388736", 
+ "modified": "2017-08-02 18:15:38.198698", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation", 
@@ -2638,7 +2638,7 @@
    "set_user_permissions": 0, 
    "share": 0, 
    "submit": 0, 
-   "write": 0
+   "write": 1
   }, 
   {
    "amend": 1, 
