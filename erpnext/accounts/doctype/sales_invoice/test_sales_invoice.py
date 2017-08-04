@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest, copy
 from frappe.utils import nowdate, add_days, flt
+from frappe.model.dynamic_links import get_dynamic_link_map
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unlink_payment_on_cancel_of_invoice
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
@@ -118,6 +119,10 @@ class TestSalesInvoice(unittest.TestCase):
 		pe.paid_amount = si.grand_total
 		pe.insert()
 		pe.submit()
+
+		link_data = get_dynamic_link_map().get('Sales Invoice', [])
+		link_doctypes = [d.parent for d in link_data]
+		self.assertEquals(link_doctypes[-1], 'GL Entry')
 
 		unlink_payment_on_cancel_of_invoice(0)
 		si = frappe.get_doc('Sales Invoice', si.name)
