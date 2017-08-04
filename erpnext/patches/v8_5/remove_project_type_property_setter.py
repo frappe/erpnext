@@ -9,7 +9,7 @@ def execute():
 	project_types = frappe.db.sql_list('select distinct project_type from tabProject')
 
 	for project_type in project_types:
-		if not frappe.db.exists("Project Type", project_type):
+		if project_type and not frappe.db.exists("Project Type", project_type):
 			p_type = frappe.get_doc({
 				"doctype": "Project Type",
 				"project_type": project_type
