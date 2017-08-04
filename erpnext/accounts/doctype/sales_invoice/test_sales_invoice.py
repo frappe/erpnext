@@ -120,10 +120,6 @@ class TestSalesInvoice(unittest.TestCase):
 		pe.insert()
 		pe.submit()
 
-		link_data = get_dynamic_link_map().get('Sales Invoice', [])
-		link_doctypes = [d.parent for d in link_data]
-		self.assertEquals(link_doctypes[-1], 'GL Entry')
-
 		unlink_payment_on_cancel_of_invoice(0)
 		si = frappe.get_doc('Sales Invoice', si.name)
 		self.assertRaises(frappe.LinkExistsError, si.cancel)
@@ -560,6 +556,12 @@ class TestSalesInvoice(unittest.TestCase):
 		jv.submit()
 
 		self.assertEquals(frappe.db.get_value("Sales Invoice", w.name, "outstanding_amount"), 161.8)
+
+		link_data = get_dynamic_link_map().get('Sales Invoice', [])
+		link_doctypes = [d.parent for d in link_data]
+
+		# test case for dynamic link order
+		self.assertTrue(link_doctypes.index('GL Entry') > link_doctypes.index('Journal Entry Account'))
 
 		jv.cancel()
 		self.assertEquals(frappe.db.get_value("Sales Invoice", w.name, "outstanding_amount"), 561.8)
