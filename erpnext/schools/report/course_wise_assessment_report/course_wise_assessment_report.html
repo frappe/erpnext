@@ -8,11 +8,7 @@
 <hr>
 <h5 class="text-center">{%= __("Course Code: ") %} {%= filters.course %}</h5>
 <h5 class="text-center">{%= __("Assessment Group: ") %} {%= filters.assessment_group %}</h5>
-<h5 class="text-center">{%= __("Assessment Plan: ") %} 
-	{% for(var i=0, l=data_to_be_printed[0]["assessment_plan"].length; i<l; i++) { %}
-		{%= data_to_be_printed[0]["assessment_plan"][i] %}
-	{% } %}
-</h5>
+<h5 class="text-center">{%= __("Assessment Plan: ") %} {%= data_to_be_printed[0]["assessment_plan"] %} </h5>
 <hr>
 
 <table class="table table-bordered">

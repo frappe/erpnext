@@ -122,7 +122,7 @@ def execute(filters=None):
 	columns = get_column(assessment_criteria_list, total_maximum_score)
 	chart = get_chart()
 	data_to_be_printed = [{
-		"assessment_plan": assessment_plan_list
+		"assessment_plan": ", ".join(assessment_plan_list)
 	}]
 
 	return columns, data, None, chart, data_to_be_printed
