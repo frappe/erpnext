@@ -23,11 +23,11 @@ QUnit.test('Test: Student Attendance', function(assert){
 		},
 
 		() => frappe.timeout(0.5),
-		() => {assert.equal(cur_frm.doc.status, "Absent", "Attendance correctly saved")},
+		() => {assert.equal(cur_frm.doc.status, "Absent", "Attendance correctly saved");},
 
 		() => frappe.timeout(0.5),
 		() => cur_frm.set_value("status", "Present"),
-		() => {assert.equal(cur_frm.doc.status, "Present", "Attendance correctly saved")},
+		() => {assert.equal(cur_frm.doc.status, "Present", "Attendance correctly saved");},
 
 		() => done()
 	]);
