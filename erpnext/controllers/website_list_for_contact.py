@@ -19,7 +19,6 @@ def get_list_context(context=None):
 	}
 
 def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_page_length=20, order_by="modified"):
-	from frappe.www.list import get_list
 	user = frappe.session.user
 	key = None
 
@@ -45,7 +44,7 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 		filters.append((doctype, key, "in", parties))
 
 		if key:
-			return post_process(doctype, get_list(doctype, txt,
+			return post_process(doctype, get_list_for_transactions(doctype, txt,
 				filters=filters, fields = "name",
 				limit_start=limit_start, limit_page_length=limit_page_length,
 				ignore_permissions=True,
@@ -53,8 +52,34 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 		else:
 			return []
 
-	return post_process(doctype, get_list(doctype, txt, filters, limit_start, limit_page_length,
+	return post_process(doctype, get_list_for_transactions(doctype, txt, filters, limit_start, limit_page_length,
 		fields="name", order_by = "modified desc"))
+
+def get_list_for_transactions(doctype, txt, filters, limit_start, limit_page_length=20, ignore_permissions=False,fields=None, order_by=None):
+    from frappe.www.list import get_list
+    meta = frappe.get_meta(doctype)
+    data = []
+    or_filters = []
+
+    for d in get_list(doctype, txt, filters=filters, fields="name", limit_start=limit_start,
+        limit_page_length=limit_page_length, ignore_permissions=True, order_by="modified desc"):
+        data.append(d)
+
+    if txt:
+        if meta.get_field('items'):
+            if meta.get_field('items').options:
+               child_doctype = meta.get_field('items').options
+               for item in frappe.get_all(child_doctype, {"item_name": ['like', "%" + txt + "%"]}):
+                    child = frappe.get_doc(child_doctype, item.name)
+                    or_filters.append([doctype, "name", "=", child.parent])
+
+	if or_filters:
+		for r in frappe.get_list(doctype, fields=fields,filters=filters, or_filters=or_filters, limit_start=limit_start,
+			limit_page_length=limit_page_length, ignore_permissions=ignore_permissions,
+			order_by=order_by):
+			data.append(r)
+
+    return data
 
 def get_party_details(customers, suppliers):
 	if customers:
