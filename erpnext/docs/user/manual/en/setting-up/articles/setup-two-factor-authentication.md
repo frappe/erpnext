@@ -2,16 +2,20 @@
 
 ##Enable Two Factor Authentication (2FA)
 
-Activate two factor authentication under the Security Settings. 
+Activate two factor authentication by running the command.
 
-* Specify the method of OTP validation (OTP App = TOTP using Soft or Hard Token while Email/SMS = HOTP using Email or SMS
+`bench --site [sitename] enable_two_factor_auth true` 
+
+Specify the following in System Settings
+
+* The method of OTP validation (OTP App = TOTP using Soft or Hard Token while Email/SMS = HOTP using Email or SMS
 * The expiry time for the QR Code on the server if OTP App is specified
 * The OTP Issuer Name.
 
 <img alt="Enable Two Factor Auth" class="screenshot" src="/docs/assets/img/articles/twofactor/twofactor-1.png">
 
 
-On activation of 2FA from setup, it is also activated for the Role "All". In this way, all users except the Administrator have to perform a 2nd level authentication with a token. By unchecking the "Two Factor Authentication" checkbox in the "All" role and enabling it in other roles, the need to login with a token can be limited to specific roles. 2FA does not apply to login by Web Users and API login
+On activation of 2FA from setup, it is also activated for the Role "All". In this way, all users including the Administrator have to perform a 2nd level authentication with a token. By unchecking the "Two Factor Authentication" checkbox in the "All" role and enabling it in other roles, the need to login with a token can be limited to specific roles. 2FA does not apply to login by Web Users and API login
 
 <img alt="Role Enable Two Factor Auth" class="screenshot" src="/docs/assets/img/articles/twofactor/twofactor-2.png">
 
