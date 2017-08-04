@@ -68,7 +68,8 @@ frappe.ui.form.on('Account', {
 					}
 				});
 			});
-		} else if (cint(frm.doc.is_group) == 0) {
+		} else if (cint(frm.doc.is_group) == 0
+			&& frappe.boot.user.can_read.indexOf("GL Entry") !== -1) {
 			cur_frm.add_custom_button(__('Ledger'), function () {
 				frappe.route_options = {
 					"account": frm.doc.name,
