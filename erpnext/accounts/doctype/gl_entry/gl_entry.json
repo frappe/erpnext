@@ -718,7 +718,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-04-27 13:18:06.617940", 
+ "modified": "2017-08-03 12:40:09.611951", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "GL Entry", 
@@ -786,7 +786,7 @@
   }
  ], 
  "quick_entry": 1, 
- "read_only": 1, 
+ "read_only": 0, 
  "read_only_onload": 0, 
  "search_fields": "voucher_no,account,posting_date,against_voucher", 
  "show_name_in_global_search": 0, 
