@@ -14,7 +14,7 @@ erpnext/selling/doctype/quotation/tests/test_quotation_with_item_wise_discount.j
 erpnext/selling/doctype/quotation/tests/test_quotation_with_multi_uom.js
 erpnext/selling/doctype/quotation/tests/test_quotation_with_pricing_rule.js
 erpnext/selling/doctype/quotation/tests/test_quotation_with_shipping_rule.js
-erpnext/selling/doctype/quotation/tests/tests/test_quotation_with_taxes_and_charges.js
+erpnext/selling/doctype/quotation/tests/test_quotation_with_taxes_and_charges.js
 erpnext/selling/doctype/quotation/tests/test_quotation_submit_cancel_amend.js
 erpnext/selling/doctype/quotation/tests/test_quotation.js
 erpnext/selling/doctype/sales_order/tests/test_sales_order.js
