@@ -64,8 +64,6 @@ QUnit.test('Test: Student Group Creation Tool', function(assert){
 					() => frappe.timeout(1),
 					() => frappe.set_route("Form", index),
 					() => frappe.timeout(0.5),
-					() => frappe.tests.click_button("Get Students"),
-					() => frappe.timeout(0.5),
 					() => {
 						assert.equal(cur_frm.doc.students.length, 5, 'Successfully fetched list of students');
 					},
