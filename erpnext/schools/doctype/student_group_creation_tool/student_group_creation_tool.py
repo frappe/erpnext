@@ -64,6 +64,7 @@ class StudentGroupCreationTool(Document):
 			student_group.program = self.program
 			student_group.course = d.course
 			student_group.batch = d.batch
+			student_group.max_strength = d.max_strength
 			student_group.academic_term = self.academic_term
 			student_group.academic_year = self.academic_year
 			student_group.save()
