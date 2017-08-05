@@ -190,7 +190,10 @@ doc_events = {
 scheduler_events = {
 	"hourly": [
 		"erpnext.controllers.recurring_document.create_recurring_documents",
-		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.trigger_emails'
+		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.trigger_emails',
+		"erpnext.hr.doctype.governmental_documents.governmental_documents.hooked_validate_notification_message",
+		"erpnext.hr.doctype.employee.employee.hooked_validate_exp_dates",
+		"erpnext.hr.doctype.health_insurance_info.health_insurance_info.hooked_validate_exp_date"
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
@@ -201,7 +204,10 @@ scheduler_events = {
 		"erpnext.hr.doctype.employee.employee.send_birthday_reminders",
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
 		"erpnext.accounts.doctype.asset.depreciation.post_depreciation_entries",
-		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary'
+		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary',
+		'erpnext.hr.doctype.attendance.attendance.validate_absence_and_notify',
+		'erpnext.hr.doctype.leave_application.leave_application.hooked_leave_allocation_builder',
+		'erpnext.hr.doctype.leave_application.leave_application.create_return_from_leave_statement_after_leave'
 	]
 }
 

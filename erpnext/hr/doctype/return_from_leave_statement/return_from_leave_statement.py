@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate
+from frappe.utils import flt, getdate, nowdate
 from frappe.model.document import Document
 from erpnext.hr.doctype.leave_application.leave_application import get_number_of_leave_days
 # from erpnext import get_user_employee
@@ -19,10 +19,11 @@ class ReturnFromLeaveStatement(Document):
 	def on_submit(self):
 		self.validate_dates()
 		leave_application = frappe.get_doc("Leave Application",{'name':self.leave_application})
-		if leave_application.is_returned == 1:
+		if leave_application.status == "Returned":
 			frappe.throw(_("This Leave Application is already returned"))
 		else:
-			leave_application.is_returned = 1
+			leave_application.return_date = self.return_date
+			leave_application.status = "Returned"
 			# leave_application.cancel_date_hijri= self.cancel_date
 			# leave_application.is_canceled = "Yes"
 			# leave_application.return_from_leave_statement = self.name
@@ -33,8 +34,10 @@ class ReturnFromLeaveStatement(Document):
 			leave_application.save()
 
 	def validate_dates(self):
-		if getdate(self.cancel_date) < getdate(self.from_date):
-			frappe.throw(_("Cancel date can not be smaller than from date"))
+		if getdate(self.return_date) <= getdate(self.to_date):
+			frappe.throw(_("Return date can not be smaller or equal than to date"))
+		if getdate(nowdate()) != getdate(self.return_date):
+			frappe.throw(_("The return date must be today date"))
 			
 
 	def validate_emp(self):

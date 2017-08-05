@@ -49,6 +49,29 @@ class Employee(Document):
 				frappe.permissions.remove_user_permission(
 					"Employee", self.name, existing_user_id)
 		self.validate_employee_custody()
+		self.validate_exp_dates()
+	def validate_exp_dates(self):
+
+		from frappe.utils import getdate, add_months, nowdate
+		message_hold = ""
+		self.is_message = 0
+		if self.contract_end_date:
+			if getdate(self.contract_end_date) <= getdate(add_months(nowdate(), 3)):
+				message_hold += "<h5>The contract end date will be on {0}</h5><br />".format(self.contract_end_date)
+				self.is_message = 1
+
+		if self.civil_id_expiry_date:
+			if getdate(self.civil_id_expiry_date) <= getdate(add_months(nowdate(), 2)):
+				message_hold += "<h5>The civil ID expiry date will be on {0}</h5><br />".format(self.civil_id_expiry_date)
+				self.is_message = 1
+
+		if self.driving_licence_expiry_date:
+			if getdate(self.driving_licence_expiry_date) <= getdate(add_months(nowdate(), 2)):
+				message_hold += "<h5>The driving licence expiry date will be on {0}</h5><br />".format(self.driving_licence_expiry_date)
+				self.is_message = 1
+
+		self.message = message_hold
+
 	def validate_employee_custody(self):
 		if self.status == 'Left':
 			ac = frappe.db.get_values("Fixed Asset Custody", {"employee": self.employee,
@@ -277,3 +300,32 @@ def deactivate_sales_person(status = None, employee = None):
 		sales_person = frappe.db.get_value("Sales Person", {"Employee": employee})
 		if sales_person:
 			frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
+
+def hooked_validate_exp_dates():
+
+	from frappe.utils import getdate, add_months, nowdate
+	emps = frappe.get_all("Employee")
+	if emps:
+		for emp in emps:
+			emp_doc = frappe.get_doc("Employee", emp.name)
+			message_hold = ""
+			emp_doc.is_message = 0
+			if emp_doc.contract_end_date:
+				if getdate(emp_doc.contract_end_date) <= getdate(add_months(nowdate(), 3)):
+					message_hold += "<h5>The contract end date will be on {0}</h5><br />".format(emp_doc.contract_end_date)
+					emp_doc.is_message = 1
+
+			if emp_doc.civil_id_expiry_date:
+				if getdate(emp_doc.civil_id_expiry_date) <= getdate(add_months(nowdate(), 2)):
+					message_hold += "<h5>The civil ID expiry date will be on {0}</h5><br />".format(emp_doc.civil_id_expiry_date)
+					emp_doc.is_message = 1
+
+			if emp_doc.driving_licence_expiry_date:
+				if getdate(emp_doc.driving_licence_expiry_date) <= getdate(add_months(nowdate(), 2)):
+					message_hold += "<h5>The driving licence expiry date will be on {0}</h5><br />".format(emp_doc.driving_licence_expiry_date)
+					emp_doc.is_message = 1
+
+			if emp_doc.message != message_hold:
+				emp_doc.message = message_hold
+				emp_doc.save(ignore_permissions=True)
+				frappe.db.commit()

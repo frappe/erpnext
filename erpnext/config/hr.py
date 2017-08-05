@@ -20,6 +20,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Governmental Documents",
+					"description": _("Governmental Documents"),
+				},
+				{
+					"type": "doctype",
 					"name": "Attendance",
 					"description": _("Attendance record."),
 				},
@@ -82,11 +87,51 @@ def get_data():
 					"description":_("Cancel Leave Application")
 				},
 				{
+					"type": "doctype",
+					"name": "Return From Leave Statement",
+					"description":_("Return From Leave Statement")
+				},
+				# {
+				# 	"type": "doctype",
+				# 	"name": "Outside Job",
+				# 	"description":_("Outside Job")
+				# },
+				# {
+				# 	"type": "doctype",
+				# 	"name": "Promotion Decision",
+				# 	"description":_("Promotion Decision	")
+				# },
+				{
+					"type": "doctype",
+					"name": "Employee Badge Request",
+					"description":_("Employee Badge Request")
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Change IBAN",
+					"description":_("Employee Change IBAN")
+				},
+				{
 					"type": "report",
 					"name": "Financial Custody Report",
 					"description":_("Financial Custody"),
 					"is_query_report": False,
 					"doctype": "Financial Custody"
+				},
+				{
+					"type": "doctype",
+					"name": "Health Insurance Info",
+					"description": _("Health Insurance Info."),
+				},
+				{
+					"type": "doctype",
+					"name": "Medical Examination",
+					"description": _("Medical Examination."),
+				},
+				{
+					"type": "doctype",
+					"name": "Medical Insurance Application",
+					"description": _("Medical Insurance Application."),
 				},
 			]
 		},
@@ -117,6 +162,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Leave Application",
 					"description": _("Applications for leave."),
+				},
+				{
+					"type": "doctype",
+					"name": "Exit Re Entry Application",
+					"description": _("Exit Re Entry Application."),
 				},
 				{
 					"type": "doctype",
@@ -174,6 +224,12 @@ def get_data():
 					"label": _("Salary Components"),
 					"description": _("Earnings, Deductions and other Salary components")
 				},
+				{
+					"type": "doctype",
+					"name": "Penalty",
+					"description": _("Penalty."),
+				},
+
 
 			]
 		},

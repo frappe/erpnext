@@ -10,7 +10,7 @@ from frappe.utils import getdate, nowdate
 from frappe import _
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name
-from frappe.utils import cint, getdate, formatdate
+from frappe.utils import cint, getdate, formatdate, add_years
 import pymssql
 from datetime import tzinfo, timedelta, datetime
 from dateutil import parser
@@ -44,7 +44,6 @@ class Attendance(Document):
 
 	def validate_attendance_date(self):
 		pass
-		
 
 	def validate_employee(self):
 		emp = frappe.db.sql("select name from `tabEmployee` where name = %s and status = 'Active'",
@@ -166,4 +165,34 @@ def time_between_times(move_time,start_time,end_time):
 	else:
 		return move_time <= end_time and move_time >= start_time
 
+def validate_absence_and_notify():
 
+	emps = frappe.get_list("Employee", filters = {"status": "Active"}, fields = ["name","employee_name"])
+	super_emp_list = []
+	supers =frappe.get_all('UserRole', fields = ["parent"], filters={'role' : 'HR Manager'})
+	for s in supers:
+		super_emp_list.append(s.parent)
+	
+	for emp in emps:
+		ab = frappe.db.sql("""select count(name) from tabAttendance where employee = '{0}' and status = 'Absent' and attendance_date between '{1}' and '{2}'""".format(emp.name, add_years(nowdate(), -1), nowdate()))
+		if ab[0][0] >= 28:
+			# print ab[0][0]
+			for s in super_emp_list:
+				message = "This Employee {0}:{1} has {2} absence days during this year".format(emp.name, emp.employee_name, ab[0][0])
+				notify({
+					# for post in messages
+					"message": message,
+					"message_to": s,
+					# for email
+					"subject": "Employee Absence"
+				})
+
+
+
+def notify(args):
+	args = frappe._dict(args)
+	from frappe.desk.page.chat.chat import post
+	post(**{"txt": args.message, "contact": args.message_to, "subject": args.subject,
+	"notify": 1})
+
+# cint(self.follow_via_email)

@@ -97,7 +97,7 @@ class PaymentEntry(AccountsController):
 					party=self.party, date=self.posting_date, company=self.company)
 			
 			if not self.party_account:
-				party_account = get_party_account(self.party_type, self.party, self.company)
+				party_account = get_party_account(self.party_type, self.party, self.company,self.payment_type)
 				self.set(self.party_account_field, party_account)
 				self.party_account = party_account
 				
@@ -561,11 +561,14 @@ def get_negative_outstanding_invoices(party_type, party, party_account, total_fi
 		return {}
 	
 @frappe.whitelist()
-def get_party_details(company, party_type, party, date):
+def get_party_details(company, party_type, party, date,payment_type=None):
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("Invalid {0}: {1}").format(party_type, party))
-		
-	party_account = get_party_account(party_type, party, company)
+	
+	if payment_type:
+		party_account = get_party_account(party_type, party, company,payment_type)
+	else:
+		party_account = get_party_account(party_type, party, company)
 	
 	account_currency = get_account_currency(party_account)
 	account_balance = get_balance_on(party_account, date)
@@ -575,7 +578,7 @@ def get_party_details(company, party_type, party, date):
 		"party_account": party_account,
 		"party_account_currency": account_currency,
 		"party_balance": party_balance,
-		"account_balance": account_balance
+		"account_balance": account_balance,
 	}
 
 @frappe.whitelist()	

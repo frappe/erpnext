@@ -53,6 +53,7 @@ frappe.ui.form.on('Salary Structure', {
 		frm.add_custom_button(__("Add Employees"),function () {
 			frm.trigger('add_employees')
 		})
+		refresh_many(['grade', 'level', 'level_value','base']);
 		
 	},
 

@@ -18,7 +18,17 @@ class SalarySlip(TransactionBase):
 		self.name = make_autoname('Sal Slip/' +self.employee + '/.#####')
 
 	def validate(self):
+		self.validate_return_from_leave_deduction()
 		self.status = self.get_status()
+
+		pan=frappe.get_list("Penalty",['name'],filters={'start_date':self.start_date,'end_date':self.end_date,'employee':self.employee})
+		if pan:
+			pen_doc=frappe.get_doc("Penalty",pan[0].name)	
+			if pen_doc:
+				if pen_doc.penalty_type=="Days":
+					self.penalty_days=pen_doc.days_count
+		
+
 		self.validate_dates()
 		self.check_existing()
 		self.get_date_details()
@@ -58,8 +68,19 @@ class SalarySlip(TransactionBase):
 					#~ amount = math.ceil(amount)'
 					if struct_row.salary_component == "GOSY":
 						amount = math.ceil(amount)
+				
+
 					self.update_component_row(struct_row, amount, key)
 
+	def validate_return_from_leave_deduction(self):
+		if self.docstatus == 0:
+			rt = frappe.db.sql(""" select to_date, return_date from `tabReturn From Leave Statement` where docstatus = 1 and
+			employee = '{0}' and return_date between '{1}' and '{2}'""".format(self.employee, self.start_date, self.end_date), as_dict = True)
+			if rt:
+				for r in rt:
+					deducted_days = date_diff(r.return_date, r.to_date)
+					if deducted_days > 1:
+						self.deducted_days = deducted_days
 
 	def update_component_row(self, struct_row, amount, key):
 		component_row = None
@@ -259,7 +280,11 @@ class SalarySlip(TransactionBase):
 		if not cint(frappe.db.get_value("HR Settings", None, "include_holidays_in_total_working_days")):
 			holidays = self.get_holidays_for_employee(start_date, end_date)
 			payment_days -= len(holidays)
+
+
+
 		return payment_days
+
 
 	def get_holidays_for_employee(self, start_date, end_date):
 		holiday_list = get_holiday_list_for_employee(self.employee)

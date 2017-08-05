@@ -162,7 +162,7 @@ def get_company_currency():
 	return company_currency
 
 @frappe.whitelist()
-def get_party_account(party_type, party, company):
+def get_party_account(party_type, party, company,payment_type =None):
 	"""Returns the account for the given `party`.
 		Will first search in party (Customer / Supplier) record, if not found,
 		will search in group (Customer Group / Supplier Type),
@@ -185,9 +185,31 @@ def get_party_account(party_type, party, company):
 			default_account_name = "default_receivable_account" \
 				if party_type=="Customer" else "default_payable_account"
 			if party_type=="Employee" :
-				default_account_name = "default_employee_payable_account" 
-			account = frappe.db.get_value("Company", company, default_account_name)
+				if payment_type:
+					if payment_type =="Receive":
+						default_account_name = "default_employee_recivable_account" 
+					elif payment_type == "Pay":
+						default_account_name = "default_employee_payable_account"
+					else :
+						default_account_name = "default_employee_payable_account"
+				
+				else:default_account_name = "default_employee_payable_account" 
 			
+			if  party_type=="Employee" : 
+				emp = frappe.get_doc("Employee",party)
+				if payment_type:
+					if payment_type =="Receive" and emp.default_employee_recivable_account:
+						account = emp.default_employee_recivable_account
+					elif payment_type == "Pay" and emp.default_employee_payable_account:
+						account = emp.default_employee_payable_account
+					else :
+						account = frappe.db.get_value("Company", company, default_account_name)
+				else :				
+					account = frappe.db.get_value("Company", company, default_account_name)
+			else : 
+				account = frappe.db.get_value("Company", company, default_account_name)
+					
+
 		existing_gle_currency = get_party_gle_currency(party_type, party, company)
 		if existing_gle_currency:
 			if account:

@@ -49,3 +49,40 @@ class CancelLeaveApplication(Document):
 		leave_application = frappe.get_doc("Leave Application",{'name':self.leave_application})
 		if leave_application.is_canceled == 'Yes':
 			frappe.throw(_("Leave Application %s already canceled at %s")% (self.leave_application,leave_application.cancel_date) )
+
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+	employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
+	if employees:
+		employee = frappe.get_doc('Employee', {'name': employees[0].name})
+
+		if employee:
+			query = ""
+
+			if u'System Manager' in frappe.get_roles(user) or u'HR User' in frappe.get_roles(user):
+				return ""
+
+			if u'Employee' in frappe.get_roles(user):
+				if query != "":
+					query+=" or "
+				query+="employee = '{0}'".format(employee.name)
+
+			# if u'Leave Approver' in frappe.get_roles(user):	
+			# 	if query != "":
+			# 		query+=" or "
+   #      		query+= """(`tabreturn_from_leave_statement`.leave_approver = '{user}' or `tabreturn_from_leave_statement`.employee = '{employee}')""" \
+   #          	.format(user=frappe.db.escape(user), employee=frappe.db.escape(employee.name))
+
+			if u'Sub Department Manager' in frappe.get_roles(user):
+				if query != "":
+					query+=" or "
+				department = frappe.get_value("Department" , filters= {"sub_department_manager": employee.name}, fieldname="name")
+				query+="""employee in (SELECT name from tabEmployee where tabEmployee.department = '{0}')) or employee = '{1}'""".format(department, employee.name)
+
+			if u'Department Manager' in frappe.get_roles(user):
+				if query != "":
+					query+=" or "
+				department = frappe.get_value("Department" , filters= {"department_manager": employee.name}, fieldname="name")
+				query+="""employee in (SELECT name from tabEmployee where tabEmployee.department in 
+				(SELECT name from tabDepartment where parent_department = '{0}')) or employee = '{1}'""".format(department, employee.name)
+			return query

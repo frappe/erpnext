@@ -213,7 +213,8 @@ frappe.ui.form.on('Payment Entry', {
 					company: frm.doc.company,
 					party_type: frm.doc.party_type,
 					party: frm.doc.party,
-					date: frm.doc.posting_date
+					date: frm.doc.posting_date,
+					payment_type: frm.doc.payment_type
 				},
 				callback: function(r, rt) {
 					if(r.message) {

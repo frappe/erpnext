@@ -27,13 +27,13 @@ frappe.ui.form.on('Return From Leave Statement', {
 });
 
 cur_frm.fields_dict.leave_application.get_query = function(doc) {
-	// return{
-	// 	filters:[
-	// 		['employee', '=', doc.employee],
-	// 		['status', '=', "Approved"],
-	// 		['docstatus', '=', 1],
-	// 	]
-	// };
+	return{
+		filters:[
+			/*['employee', '=', doc.employee],*/
+			['status', '=', "Approved"],
+			['docstatus', '=', 1]
+		]
+	};
 };
 cur_frm.cscript.leave_application = function(doc, cdt, cd){
 	if (!doc.leave_application) {
@@ -41,19 +41,19 @@ cur_frm.cscript.leave_application = function(doc, cdt, cd){
 		cur_frm.set_value("employee_name", "");
 		cur_frm.set_value("from_date", "");
 		cur_frm.set_value("to_date", "");
-		cur_frm.set_value("from_date_hijri", "");
-		cur_frm.set_value("to_date_hijri", "");
+		// cur_frm.set_value("from_date_hijri", "");
+		// cur_frm.set_value("to_date_hijri", "");
 	}
 };
-var dates_g = ['cancel_date'];
-//
-$.each(dates_g, function(index, element) {
-  cur_frm.cscript['custom_' + element] = function(doc, cdt, cd) {
-    cur_frm.set_value(element + '_hijri', doc[element]);
-  };
+// var dates_g = ['return_date'];
+// //
+// $.each(dates_g, function(index, element) {
+//   cur_frm.cscript['custom_' + element] = function(doc, cdt, cd) {
+//     cur_frm.set_value(element + '_hijri', doc[element]);
+//   };
 
-  cur_frm.cscript['custom_' + element + '_hijri'] = function(doc, cdt, cd) {
-    cur_frm.set_value(element, doc[element + '_hijri']);
-  };
+//   cur_frm.cscript['custom_' + element + '_hijri'] = function(doc, cdt, cd) {
+//     cur_frm.set_value(element, doc[element + '_hijri']);
+//   };
 
-});
+// });

@@ -56,8 +56,9 @@ class JobAssignment(Document):
 		pass
 
 	def on_submit(self):
-		self.insert_expense_claim()
-		if frappe.session.user != self.reports_to or "Executive Manager" not in frappe.get_roles():
+		# self.insert_expense_claim()
+		# frappe.throw(frappe.session.user)
+		if "Executive Manager" not in frappe.get_roles() and frappe.session.user != self.reports_to:
 			frappe.throw(_("You are not permitted to submit"))
 		# if (frappe.session.user != self.reports_to) or ()
 		# self.notify()
@@ -141,9 +142,9 @@ class JobAssignment(Document):
 		"reference_name":self.name,
 		"remark":self.assignment_type
 		})
-		print '='*50
-		print expenses
-		print '=' * 50
+		# print '='*50
+		# print expenses
+		# print '=' * 50
 		expense_claim.save()
 
 	def validate_number_of_jobAssingment(self):
@@ -193,10 +194,11 @@ class JobAssignment(Document):
 	def get_grade_info(self):
 		emp = frappe.get_doc("Employee",self.employee)
 		grade = frappe.get_doc("Grade",emp.grade)
-		self.internal_per_diem_rate = grade.internal_per_diem_rate
-		self.external_per_diem_rate = grade.external_per_diem_rate
-		self.internal_ticket_class = grade.internal_ticket_class
-		self.external_ticket_class = grade.external_ticket_class
+		frappe.throw(emp.grade)
+		# self.internal_per_diem_rate = grade.internal_per_diem_rate
+		# self.external_per_diem_rate = grade.external_per_diem_rate
+		# self.internal_ticket_class = grade.internal_ticket_class
+		# self.external_ticket_class = grade.external_ticket_class
 
 	def get_ja_cost(self):
 		total =0.0

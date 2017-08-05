@@ -28,6 +28,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Personal Account",
+					"description": _("Personal Account")
+				},
+				{
+					"type": "doctype",
 					"name": "Payment Terms",
 					"description": _("Payment Terms")
 				},

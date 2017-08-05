@@ -24,3 +24,19 @@ class EmployeeResignation(Document):
 			eos_award.end_date=self.permission_date
 			eos_award.reason="استقالة العامل"
 			eos_award.insert()
+	def validate(self):
+		if frappe.get_value('Employee Loan', filters={'employee' : self.employee,'status':'Sanctioned'}):
+			name=frappe.get_value('Employee Loan', filters={'employee' : self.employee,'status':'Sanctioned'}) 
+			loan_emp =frappe.get_doc("Employee Loan",name)		
+			mm=loan_emp.status
+			frappe.throw(self.employee+"/ "+self.employee_name+" have an active loan")
+
+		if frappe.get_value('Financial Custody', filters={'employee' : self.employee}):
+			name=frappe.get_value('Financial Custody', filters={'employee' : self.employee}) 
+			custody =frappe.get_doc("Financial Custody",name)		
+			approver=custody.reported_by
+			if approver:
+				frappe.throw(self.employee+"/ "+self.employee_name+" have an active Financial Custody approved by "+approver)
+
+		
+

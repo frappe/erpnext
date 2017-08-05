@@ -2713,7 +2713,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 1, 
- "modified": "2017-03-29 20:54:35.951529", 
+ "modified": "2017-07-20 15:32:07.386125", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 
@@ -2849,8 +2849,8 @@
    "amend": 0, 
    "apply_user_permissions": 0, 
    "cancel": 0, 
-   "create": 0, 
-   "delete": 0, 
+   "create": 1, 
+   "delete": 1, 
    "email": 0, 
    "export": 0, 
    "if_owner": 0, 
@@ -2864,7 +2864,7 @@
    "set_user_permissions": 0, 
    "share": 0, 
    "submit": 0, 
-   "write": 0
+   "write": 1
   }, 
   {
    "amend": 0, 

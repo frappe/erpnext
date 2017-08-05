@@ -184,7 +184,7 @@ class OutsideJob(Document):
 			if value >0:
 				expenses.append( {
 				"claim_amount": value,
-				"expense_type": "خارج الدوام",
+				"expense_type": "outside job",
 				"sanctioned_amount":  value,
 				"description":key,
 				"parentfield": "expenses"
@@ -199,7 +199,7 @@ class OutsideJob(Document):
 		"reference_name":self.name,
 		"remark":self.notes
 		})
-		print expense_claim
+		# print expense_claim
 		expense_claim.save(ignore_permissions=True)
 
 	def notify_employee(self, status):

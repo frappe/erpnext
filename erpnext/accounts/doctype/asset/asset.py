@@ -145,7 +145,7 @@ class Asset(Document):
 					})
 
 				schedule_date = add_months(dd,
-					(number_of_pending_depreciations-1) * cint(self.frequency_of_depreciation))
+					(number_of_pending_depreciations) * cint(self.frequency_of_depreciation))
 				depreciation_amount2 = (self.get_depreciation_amount(value_after_depreciation))*((30.0-float(dayss))/30.0)
 
 				depreciation_amount = self.get_depreciation_amount(value_after_depreciation)
