@@ -53,11 +53,11 @@ QUnit.test('Test: Student Group', function(assert){
 			tasks = [];
 			loop.forEach(index => {
 				tasks.push(
-					() => frappe.timeout(0.3),
+					() => frappe.timeout(0.5),
 					() => frappe.set_route("Form", ('Student Group/' + index)),
-					() => frappe.timeout(0.3),
+					() => frappe.timeout(0.5),
 					() => frappe.tests.click_button('Get Students'),
-					() => frappe.timeout(0.2),
+					() => frappe.timeout(0.5),
 					() => {
 						assert.equal(cur_frm.doc.students.length, 5, 'Successfully fetched list of students');
 					},
