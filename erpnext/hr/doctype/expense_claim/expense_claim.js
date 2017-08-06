@@ -178,12 +178,12 @@ frappe.ui.form.on("Expense Claim", {
 			frappe.call({
 				method: "erpnext.hr.doctype.expense_claim.expense_claim.update_advance_paid",
 				args: {
-					"docname": cur_frm.doc.name,
+					"docname": doc.name,
 					"employee": doc.employee,
 					"advance_account": doc.advance_account
 				},
 				callback: function(r) {
-					cur_frm.set_value("total_advance_paid", r.message.amt);
+					frm.set_value("total_advance_paid", r.message.amt);
 				}
 			});
 	}
