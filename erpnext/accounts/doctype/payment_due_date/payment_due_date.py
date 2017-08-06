@@ -20,7 +20,7 @@ class PaymentDueDate(Document):
 				_('Term Days field cannot be less than 0'),
 				raise_exception=1, title='Error')
 
-		if cint(self.discount_percentage) < 0:
+		if cint(self.discount) < 0:
 			frappe.msgprint(
 				_('Discount cannot be less than 0'),
 				raise_exception=1, title='Error')
@@ -36,7 +36,7 @@ class PaymentDueDate(Document):
 			self.validate_discount_days()
 
 	def validate_discount_fields(self):
-		if not self.discount_percentage or not self.discount_days:
+		if not self.discount or not self.discount_days:
 			frappe.msgprint(
 				_('When Include Cash Discount is checked, Discount Percentage and Discount Days are compulsory.'),
 				raise_exception=1, title='Error')

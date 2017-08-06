@@ -30,7 +30,7 @@ class TestPaymentDueDate(unittest.TestCase):
 				"doctype": "Payment Due Date", "term_days": 30, "count_from_month_end": 0,
 				"with_discount": 1, "code": "_2/10 N30",
 				"description": "_2% Cash Discount Within 10 days; Net 30 days",
-				"discount_percentage": 2, "discount_days": 10
+				"discount": 2, "discount_days": 10
 			}
 		)
 		pyt_due_date.insert()
@@ -38,7 +38,7 @@ class TestPaymentDueDate(unittest.TestCase):
 		self.assertEqual(pyt_due_date.description, '_2% Cash Discount Within 10 days; Net 30 days')
 		self.assertEqual(cint(pyt_due_date.term_days), 30)
 		self.assertEqual(cint(pyt_due_date.with_discount), 1)
-		self.assertEqual(cint(pyt_due_date.discount_percentage), 2)
+		self.assertEqual(cint(pyt_due_date.discount), 2)
 		self.assertEqual(cint(pyt_due_date.discount_days), 10)
 
 		saved_pyt_due_date = frappe.get_doc('Payment Due Date', '_2/10 N30')
@@ -46,7 +46,7 @@ class TestPaymentDueDate(unittest.TestCase):
 		self.assertEqual(saved_pyt_due_date.description, '_2% Cash Discount Within 10 days; Net 30 days')
 		self.assertEqual(cint(saved_pyt_due_date.term_days), 30)
 		self.assertEqual(cint(saved_pyt_due_date.with_discount), 1)
-		self.assertEqual(cint(saved_pyt_due_date.discount_percentage), 2)
+		self.assertEqual(cint(saved_pyt_due_date.discount), 2)
 		self.assertEqual(cint(saved_pyt_due_date.discount_days), 10)
 
 		saved_pyt_due_date.delete()
@@ -60,13 +60,13 @@ class TestPaymentDueDate(unittest.TestCase):
 		pyt_due_date.term_days = 0
 		pyt_due_date.with_discount = 1
 		self.assertRaises(frappe.ValidationError, pyt_due_date.insert)
-		pyt_due_date.discount_percentage = -10
+		pyt_due_date.discount = -10
 		self.assertRaises(frappe.ValidationError, pyt_due_date.insert)
-		pyt_due_date.discount_percentage = 0
+		pyt_due_date.discount = 0
 		pyt_due_date.discount_days = -30
 		self.assertRaises(frappe.ValidationError, pyt_due_date.insert)
 		pyt_due_date.term_days = -30
-		pyt_due_date.discount_percentage = -2
+		pyt_due_date.discount = -2
 		pyt_due_date.discount_days = -30
 		self.assertRaises(frappe.ValidationError, pyt_due_date.insert)
 
@@ -76,10 +76,10 @@ class TestPaymentDueDate(unittest.TestCase):
 				"doctype": "Payment Due Date", "term_days": 0, "count_from_month_end": 0,
 				"with_discount": 1, "code": "_2/10 N30",
 				"description": "_2% Cash Discount Within 10 days; Net 30 days",
-				"discount_percentage": 0, "discount_days": 10
+				"discount": 0, "discount_days": 10
 			}
 		)
 		self.assertRaises(frappe.ValidationError, pyt_due_date.insert)
-		pyt_due_date.discount_percentage = 2
+		pyt_due_date.discount = 2
 		pyt_due_date.discount_days = 0
 		self.assertRaises(frappe.ValidationError, pyt_due_date.insert)

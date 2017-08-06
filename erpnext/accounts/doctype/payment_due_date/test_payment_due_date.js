@@ -46,14 +46,14 @@ QUnit.test('Create new Payment Due Date in full view ', function(assert){
 		() => cur_frm.set_value('term_days', '30'),
 		() => frappe.click_link('Cash Discounts'),
 		() => frappe.click_check('Include Cash Discount'),
-		() => cur_frm.set_value('discount_percentage', 2),
+		() => cur_frm.set_value('discount', 2),
 		() => cur_frm.set_value('discount_days', 10),
 		() => {
 			assert.equal(cur_frm.doc.code, '_2/10 N30');
 			assert.equal(cur_frm.doc.description, '_2% Cash Discount within 10 days; Net 30 days');
 			assert.equal(cur_frm.doc.term_days, 30);
 			assert.equal(cur_frm.doc.with_discount, 1),
-			assert.equal(cur_frm.doc.discount_percentage, 2),
+			assert.equal(cur_frm.doc.discount, 2),
 			assert.equal(cur_frm.doc.discount_days, 10)
 		},
 		() => frappe.click_button('Save'),
@@ -92,7 +92,7 @@ QUnit.test('Payment Due Date Validation', function(assert){
 		() => cur_frm.set_value('term_days', 30),
 		() => frappe.click_link('Cash Discounts'),
 		() => frappe.click_check('Include Cash Discount'),
-		() => cur_frm.set_value('discount_percentage', -22),
+		() => cur_frm.set_value('discount', -22),
 		() => frappe.click_button('Save'),
 		() => frappe.timeout(2),
 		() => {
@@ -100,7 +100,7 @@ QUnit.test('Payment Due Date Validation', function(assert){
 			assert.ok(cur_dialog);
 		},
 		() => frappe.click_button('Close'),
-		() => cur_frm.set_value('discount_percentage', 2),
+		() => cur_frm.set_value('discount', 2),
 		() => cur_frm.set_value('discount_days', -10),
 		() => frappe.click_button('Save'),
 		() => frappe.timeout(2),
@@ -113,7 +113,7 @@ QUnit.test('Payment Due Date Validation', function(assert){
 		// validate discount component
 		() => cur_frm.set_value('term_days', 0),
 		() => cur_frm.set_value('discount_days', 0),
-		() => cur_frm.set_value('discount_percentage', 0),
+		() => cur_frm.set_value('discount', 0),
 		() => frappe.click_button('Save'),
 		() => frappe.timeout(2),
 		() => {
@@ -130,7 +130,7 @@ QUnit.test('Payment Due Date Validation', function(assert){
 		},
 		() => frappe.click_button('Close'),
 		() => cur_frm.set_value('discount_days', 0),
-		() => cur_frm.set_value('discount_percentage', 2),
+		() => cur_frm.set_value('discount', 2),
 		() => frappe.click_button('Save'),
 		() => frappe.timeout(2),
 		() => {
@@ -138,7 +138,7 @@ QUnit.test('Payment Due Date Validation', function(assert){
 			assert.ok(cur_dialog);
 		},
 		() => frappe.click_button('Close'),
-		() => cur_frm.set_value('discount_percentage', 2),
+		() => cur_frm.set_value('discount', 2),
 		() => cur_frm.set_value('discount_days', 10),
 		() => cur_frm.set_value('term_days', 0),
 		() => frappe.click_button('Save'),
