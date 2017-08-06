@@ -69,21 +69,17 @@ frappe.ui.form.on("Expense Claim", {
 		frm.add_fetch('employee', 'company', 'company');
 		frm.add_fetch('employee','employee_name','employee_name');
 
-		frm.cscript.calculate_total =  function(doc) {
-			doc.total_claimed_amount = 0;
-			doc.total_sanctioned_amount = 0;
-			$.each((doc.expenses || []), function(i, d) {
-				doc.total_claimed_amount += d.claim_amount;
-				doc.total_sanctioned_amount += d.sanctioned_amount;
-			});
-
-			refresh_field("total_claimed_amount");
-			refresh_field('total_sanctioned_amount');
-		};
+		
 
 	},
 	refresh: function(frm) {
 		erpnext.hr.expense_claim.set_help(frm);
+
+		if (frm.doc.docstatus==0) {
+			frm.add_custom_button(__('Get unclaimed receipts'), function() {
+				erpnext.hr.get_unclaimed(frm);
+			});
+		}
 
 		if(!frm.doc.__islocal) {
 			frm.toggle_enable("exp_approver", frm.doc.approval_status=="Draft");
@@ -134,10 +130,10 @@ frappe.ui.form.on("Expense Claim", {
 		}
 	},
 	validate: function(frm) {
-		frm.cscript.calculate_total(frm.doc);
+		erpnext.hr.calculate_total(frm.doc);
 	},
 	calculate_total_amount: function(frm) {
-		frm.cscript.calculate_total(frm.doc);
+		erpnext.hr.calculate_total(frm.doc);
 	},
 	on_submit: function(frm) {
 		if(cint(frappe.boot.notification_settings && frappe.boot.notification_settings.expense_claim)) {
@@ -149,43 +145,6 @@ frappe.ui.form.on("Expense Claim", {
 		frm.script_manager.trigger("set_query_for_payable_account");
 		frm.add_fetch("company", "cost_center", "cost_center");
 		frm.add_fetch("company", "default_payable_account", "payable_account");
-	},
-	get_unclaimed_button: function(frm) {
-		if (frm.doc.employee){
-			debugger;
-			frappe.call({
-				method: "erpnext.hr.doctype.expense_claim.expense_claim.get_unpaid_receipts",
-				args: {
-					employee: frm.doc.employee,
-					company: frm.doc.company
-				},
-				callback: function(r) {
-					console.log(r);
-					if(r.message)
-					{
-						for( var i = 0; i < r.message.length;i++)
-						{
-							var obj = r.message[i];
-							if (!frm.doc.expenses.some(function(e) {return e.receipt == obj.name;})) {
-								var new_row = frm.add_child("expenses");
-								for (var property in obj) {
-									if (property === "name") {
-										new_row.receipt = obj[property];
-									}
-									else{
-										new_row[property] = obj[property];
-									}
-								}
-							}
-						}
-					}
-					refresh_field("expenses");
-
-				}
-			});
-		} else {
-			frappe.msgprint(__("Make sure the employee and company are filled out"));
-		}
 	},
 	make_payment_entry: function(frm) {
 		var method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry";
@@ -244,6 +203,55 @@ frappe.ui.form.on("Expense Claim", {
 
 $.extend(cur_frm.cscript, new erpnext.hr.ExpenseClaimController({frm: cur_frm}));
 
+
+erpnext.hr.calculate_total =  function(doc) {
+	doc.total_claimed_amount = 0;
+	doc.total_sanctioned_amount = 0;
+	$.each((doc.expenses || []), function(i, d) {
+		doc.total_claimed_amount += d.claim_amount;
+		doc.total_sanctioned_amount += d.sanctioned_amount;
+	});
+
+	refresh_field("total_claimed_amount");
+	refresh_field('total_sanctioned_amount');
+};
+
+erpnext.hr.get_unclaimed =  function(frm) {
+	if (frm.doc.employee){
+		frappe.call({
+			method: "erpnext.hr.doctype.expense_claim.expense_claim.get_unpaid_receipts",
+			args: {
+				employee: frm.doc.employee,
+				company: frm.doc.company
+			},
+			callback: function(r) {
+				if(r.message)
+				{
+					for( var i = 0; i < r.message.length;i++)
+					{
+						var obj = r.message[i];
+						if (!frm.doc.expenses.some(function(e) {return e.expense_receipt == obj.name;})) {
+							var new_row = frm.add_child("expenses");
+							for (var property in obj) {
+								if (property === "name") {
+									new_row.expense_receipt = obj[property];
+								}
+								else{
+									new_row[property] = obj[property];
+								}
+							}
+						}
+					}
+				}
+				refresh_field("expenses");
+
+			}
+		});
+	} else {
+		frappe.msgprint(__("Make sure the employee and company are filled out"));
+	}
+};
+		
 erpnext.hr.expense_claim = {
 	set_title: function(frm) {
 		if (!frm.doc.task) {
@@ -291,21 +299,21 @@ frappe.ui.form.on("Expense Claim Detail", {
 		frappe.model.set_value(cdt, cdn, 'sanctioned_tax', child.tax_amount * child.sanctioned_amount / child.claim_amount);
 
 
-		frm.cscript.calculate_total(doc);
+		erpnext.hr.calculate_total(doc);
 	},
 	tax_amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		var doc = frm.doc;
 		frappe.model.set_value(cdt, cdn, 'sanctioned_tax', child.tax_amount * child.sanctioned_amount / child.claim_amount);
 
-		frm.cscript.calculate_total(doc);
+		erpnext.hr.calculate_total(doc);
 	},
 
 	sanctioned_amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		var doc = frm.doc;
 		frappe.model.set_value(cdt, cdn, 'sanctioned_tax', child.tax_amount * child.sanctioned_amount / child.claim_amount);
-		frm.cscript.calculate_total(doc);
+		erpnext.hr.calculate_total(doc);
 	}
 });
 

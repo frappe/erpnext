@@ -75,11 +75,12 @@ class ExpenseClaim(AccountsController):
 		if self.is_paid:
 			update_reimbursed_amount(self)
 
-		self.claim_receipts()
+		self.claim_receipts(1)
 		self.set_status()
 
 	def on_cancel(self):
 		self.update_task_and_project()
+		self.claim_receipts(0)
 		if self.payable_account:
 			self.make_gl_entries(cancel=True)
 
@@ -94,10 +95,13 @@ class ExpenseClaim(AccountsController):
 		elif self.project:
 			frappe.get_doc("Project", self.project).update_project()
 
-	def claim_receipts(self):
+	def claim_receipts(self, claim):
 		for r in self.expenses:
-			if r.receipt:
-				frappe.set_value('Expense Receipt', r.receipt, "is_claimed", 1)
+			if r.expense_receipt:
+				frappe.set_value('Expense Receipt', r.expense_receipt, "is_claimed", claim)
+				submitted = frappe.get_value('Expense Receipt',r.expense_receipt, 'docstatus')
+				if not submitted and claim:
+					er = frappe.get_doc('Expense Receipt',r.expense_receipt).submit()
 
 	def make_gl_entries(self, cancel = False):
 		if flt(self.total_sanctioned_amount) > 0:
@@ -127,9 +131,9 @@ class ExpenseClaim(AccountsController):
 
 		# expense entries
 		for data in self.expenses:
-			amount = max(0 ,data.sanctioned_amount - data.sanctioned_tax)
+			amount = data.sanctioned_amount - data.sanctioned_tax
 			tax = data.sanctioned_tax
-
+			
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": data.default_account,
@@ -205,9 +209,11 @@ class ExpenseClaim(AccountsController):
 				mytype = self.append('type_summary',{})
 				mytype.expense_type = d.expense_type
 				mytype.total_claim_amount = 0
+				mytype.total_sanctioned_amount = 0
 				mytype.total_tax_amount = 0
 			mytype.total_claim_amount += flt(d.claim_amount)
 			mytype.total_tax_amount += flt(d.tax_amount)
+			mytype.total_sanctioned_amount += flt(d.sanctioned_amount)
 
 	def validate_expense_approver(self):
 		if self.exp_approver and "Expense Approver" not in frappe.get_roles(self.exp_approver):
@@ -250,8 +256,8 @@ class ExpenseClaim(AccountsController):
 
 	def add_receipt_attachments(self):
 		for d in self.expenses:
-			if not d.attachment and d.receipt:
-				receipt = frappe.get_doc("Expense Receipt", d.receipt)
+			if not d.attachment and d.expense_receipt:
+				receipt = frappe.get_doc("Expense Receipt", d.expense_receipt)
 				receipt_attachments = frappe.db.sql("""
 					SELECT file_url, file_name
 					FROM `tabFile`
@@ -281,7 +287,7 @@ def update_reimbursed_amount(doc):
 @frappe.whitelist()
 def get_unpaid_receipts(employee, company):
 	return frappe.db.sql("""
-		SELECT name, claim_amount, tax_amount, receipt_date, vendor, expense_type, tax_type, description, expense_date
+		SELECT name, claim_amount, tax_amount, expense_date, vendor, expense_type, description, expense_date
 		FROM
 			`tabExpense Receipt` r
 		WHERE
