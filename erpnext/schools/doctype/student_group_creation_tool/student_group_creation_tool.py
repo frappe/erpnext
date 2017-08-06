@@ -67,6 +67,49 @@ class StudentGroupCreationTool(Document):
 			student_group.max_strength = d.max_strength
 			student_group.academic_term = self.academic_term
 			student_group.academic_year = self.academic_year
+			student_list = get_students(self.academic_year, d.group_based_on, self.academic_term, self.program, d.batch, d.course)
+			if student_list:
+				for student in student_list:
+					student_group.append('students', student)
 			student_group.save()
 
 		frappe.msgprint(_("{0} Student Groups created.".format(l)))
+
+@frappe.whitelist()
+def get_students(academic_year, group_based_on, academic_term=None, program=None, batch=None, course=None):
+	enrolled_students = get_program_enrollment(academic_year, academic_term, program, batch, course)
+
+	if enrolled_students:
+		student_list = []
+		for s in enrolled_students:
+			if frappe.db.get_value("Student", s.student, "enabled"):
+				s.update({"active": 1})
+			else:
+				s.update({"active": 0})
+			student_list.append(s)
+		return student_list
+
+def get_program_enrollment(academic_year, academic_term=None, program=None, batch=None, course=None):
+	condition1 = " "
+	condition2 = " "
+	if academic_term:
+		condition1 += " and pe.academic_term = %(academic_term)s"
+	if program:
+		condition1 += " and pe.program = %(program)s"
+	if batch:
+		condition1 += " and pe.student_batch_name = %(batch)s"
+	if course:
+		condition1 += " and pe.name = pec.parent and pec.course = %(course)s"
+		condition2 = ", `tabProgram Enrollment Course` pec"
+
+	return frappe.db.sql('''
+		select 
+			pe.student, pe.student_name 
+		from 
+			`tabProgram Enrollment` pe {condition2}
+		where
+			pe.academic_year = %(academic_year)s  {condition1}
+		order by
+			pe.student_name asc
+		'''.format(condition1=condition1, condition2=condition2),
+		({"academic_year": academic_year, "academic_term":academic_term, "program": program, "batch": batch, "course": course}), as_dict=1)
