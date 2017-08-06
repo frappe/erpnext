@@ -17,14 +17,14 @@ QUnit.test('Create new Payment Due Date in quick view ', function(assert){
 		() => cur_dialog.set_value('description', '_Cash on Delivery'),
 		() => {
 			assert.equal(cur_dialog.doc.code, '_COD');
-			assert.equal(cur_dialog.doc.description, '_Cash on Delivery')
+			assert.equal(cur_dialog.doc.description, '_Cash on Delivery');
 		},
 		() => frappe.click_button('Save'),
 		// confirm successful save
 		() => frappe.click_button('Refresh'),
 		() => frappe.timeout(2),
 		() => {
-			assert.ok(cur_list.data.some(obj => obj.name === '_COD'))
+			assert.ok(cur_list.data.some(obj => obj.name === '_COD'));
 		},
 		() => done()
 	]);
@@ -52,9 +52,9 @@ QUnit.test('Create new Payment Due Date in full view ', function(assert){
 			assert.equal(cur_frm.doc.code, '_2/10 N30');
 			assert.equal(cur_frm.doc.description, '_2% Cash Discount within 10 days; Net 30 days');
 			assert.equal(cur_frm.doc.term_days, 30);
-			assert.equal(cur_frm.doc.with_discount, 1),
-			assert.equal(cur_frm.doc.discount, 2),
-			assert.equal(cur_frm.doc.discount_days, 10)
+			assert.equal(cur_frm.doc.with_discount, 1);
+			assert.equal(cur_frm.doc.discount, 2);
+			assert.equal(cur_frm.doc.discount_days, 10);
 		},
 		() => frappe.click_button('Save'),
 		() => frappe.timeout(2),
@@ -62,7 +62,7 @@ QUnit.test('Create new Payment Due Date in full view ', function(assert){
 		() => frappe.set_route('List', 'Payment Due Date'),
 		() => frappe.timeout(2),
 		() => {
-			assert.ok(cur_list.data.some(obj => obj.name === '_2/10 N30'))
+			assert.ok(cur_list.data.some(obj => obj.name === '_2/10 N30'));
 		},
 		() => done()
 	]);
