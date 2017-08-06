@@ -10,33 +10,42 @@ QUnit.test('Test: Student Group', function(assert){
 
 	frappe.run_serially([
 		// Saving Instructor code beforehand
-		() => frappe.set_route('List', 'Instructor'),
-		() => frappe.timeout(0.5),
-		() => frappe.tests.click_link('Instructor 1'),
-		() => frappe.timeout(0.5),
-		() => {instructor_code = frappe.get_route()[2];},
+		() => frappe.db.get_value('Instructor', {'instructor_name': 'Instructor 1'}, 'name'),
+		(instructor) => {instructor_code = instructor.message.name;},
 
 		// Creating a Batch and Course based group
 		() => {
-			loop.forEach(index => {
-				tasks.push(() => {
-					return frappe.tests.make('Student Group', [
-						{academic_year: '2016-17'},
-						{academic_term: '2016-17 (Semester 1)'},
-						{program: "Standard Test"},
-						{group_based_on: 'Batch'},
-						{student_group_name: index},
-						{max_strength: 10},
-						{batch: 'A'},
-						{instructors: [
-							[
-								{instructor: instructor_code}
-							]
-						]}
-					]);
-				});
-			});
-			return frappe.run_serially(tasks);
+			return frappe.tests.make('Student Group', [
+				{academic_year: '2016-17'},
+				{academic_term: '2016-17 (Semester 1)'},
+				{program: "Standard Test"},
+				{group_based_on: 'Batch'},
+				{student_group_name: loop[0]},
+				{max_strength: 10},
+				{batch: 'A'},
+				{instructors: [
+					[
+						{instructor: instructor_code}
+					]
+				]}
+			]);
+		},
+		() => {
+			return frappe.tests.make('Student Group', [
+				{academic_year: '2016-17'},
+				{academic_term: '2016-17 (Semester 1)'},
+				{program: "Standard Test"},
+				{group_based_on: 'Course'},
+				{student_group_name: loop[1]},
+				{max_strength: 10},
+				{batch: 'A'},
+				{course: 'Test_Sub'},
+				{instructors: [
+					[
+						{instructor: instructor_code}
+					]
+				]}
+			]);
 		},
 
 		// Populating the created group with Students
