@@ -242,7 +242,7 @@ def make_payment_request(**args):
 			"reference_name": args.dn
 		})
 
-		if args.order_type == "Shopping Cart":
+		if args.order_type == "Shopping Cart" or args.mute_email:
 			pr.flags.mute_email = True
 
 		if args.submit_doc:
