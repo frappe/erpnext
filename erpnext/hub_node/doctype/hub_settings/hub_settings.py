@@ -33,18 +33,23 @@ class HubSettings(Document):
 
 	def validate(self):
 		# self.before_update = frappe.get_doc('Hub Settings', self.name)
+		pass
 
-		if self.enabled:
-			if not self.password and not hasattr(self, 'private_key'):
-				self.register() # get password
-				self.last_sync_datetime = add_years(now(), -10)
 
 	def on_update(self):
-		self.update_hub()
+		if not self.password:
+			if self.enabled:
+				frappe.throw(_("Enabled without password"))
+			return
+		self.update_hub() #put back
+		pass
 
 	### Account methods
 	def register(self):
 		"""Register at hub.erpnext.org and exchange keys"""
+		# if self.password or hasattr(self, 'private_key'):
+		# 	return
+
 		(self.private_key, self.public_key_pem) = generate_keys()
 
 		response = requests.post(self.hub_url + "/api/method/hub.hub.api."+"register",
@@ -59,9 +64,7 @@ class HubSettings(Document):
 			backend=default_backend()
 		)
 
-	def unregister(self):
-		response_msg = self.call_hub_api_plaintext('unregister',
-			data=self.get_args(self.profile_args + self.seller_args))
+		self.last_sync_datetime = add_years(now(), -10)
 
 	def update_hub(self):
 		response_msg = self.call_hub_api_plaintext('update_user_details',
@@ -79,6 +82,14 @@ class HubSettings(Document):
 			"password": self.password
 		})
 		response.raise_for_status()
+
+	def unregister_from_hub(self):
+		"""Unpublish, then delete transactions and user from there"""
+		response = requests.post(self.hub_url + "/api/method/hub.hub.api.unregister", data={
+			"password": self.password
+		})
+		response.raise_for_status()
+		response_msg = response.json().get("message")
 
 	def sync(self, now = True, verbose=True):
 		"""Sync items with hub.erpnext.org"""
@@ -211,6 +222,7 @@ class HubSettings(Document):
 	def get_item_details(self, item):
 		"Get stock and price info"
 		pass
+
 
 
 ### Helpers
