@@ -69,7 +69,7 @@ class StudentGroupCreationTool(Document):
 			student_group.academic_term = self.academic_term
 			student_group.academic_year = self.academic_year
 			student_list = get_students(self.academic_year, d.group_based_on, self.academic_term, self.program, d.batch, d.course)
-			print student_list
+
 			if student_list:
 				for student in student_list:
 					student_group.append('students', student)
