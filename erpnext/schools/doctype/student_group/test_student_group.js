@@ -5,7 +5,7 @@ QUnit.test('Test: Student Group', function(assert){
 	assert.expect(2);
 	let done = assert.async();
 	let instructor_code;
-	let loop = ["test-batch-wise-group", "test-course-wise-group"];
+	let group_based_on = ["test-batch-wise-group", "test-course-wise-group"];
 	let tasks = [];
 
 	frappe.run_serially([
@@ -20,7 +20,7 @@ QUnit.test('Test: Student Group', function(assert){
 				{academic_term: '2016-17 (Semester 1)'},
 				{program: "Standard Test"},
 				{group_based_on: 'Batch'},
-				{student_group_name: loop[0]},
+				{student_group_name: group_based_on[0]},
 				{max_strength: 10},
 				{batch: 'A'},
 				{instructors: [
@@ -36,7 +36,7 @@ QUnit.test('Test: Student Group', function(assert){
 				{academic_term: '2016-17 (Semester 1)'},
 				{program: "Standard Test"},
 				{group_based_on: 'Course'},
-				{student_group_name: loop[1]},
+				{student_group_name: group_based_on[1]},
 				{max_strength: 10},
 				{batch: 'A'},
 				{course: 'Test_Sub'},
@@ -51,7 +51,7 @@ QUnit.test('Test: Student Group', function(assert){
 		// Populating the created group with Students
 		() => {
 			tasks = [];
-			loop.forEach(index => {
+			group_based_on.forEach(index => {
 				tasks.push(
 					() => frappe.timeout(0.5),
 					() => frappe.set_route("Form", ('Student Group/' + index)),

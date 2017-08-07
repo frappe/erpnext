@@ -69,6 +69,7 @@ def get_students(academic_year, group_based_on, academic_term=None, program=None
 		return student_list
 	else:
 		frappe.msgprint(_("No students found"))
+		return []
 
 def get_program_enrollment(academic_year, academic_term=None, program=None, batch=None, course=None):
 	

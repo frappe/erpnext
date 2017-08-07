@@ -54,9 +54,9 @@ QUnit.test('Test: Student Group Creation Tool', function(assert){
 
 		// Goin to the generated group to set up student and instructor list
 		() => {
-			let loop = ['Student Group/test-batch-wise-group-2', 'Student Group/test-course-wise-group-2'];
+			let group_name = ['Student Group/test-batch-wise-group-2', 'Student Group/test-course-wise-group-2'];
 			let tasks = [];
-			loop.forEach(index => {
+			group_name.forEach(index => {
 				tasks.push(
 					() => frappe.timeout(1),
 					() => frappe.set_route("Form", index),
