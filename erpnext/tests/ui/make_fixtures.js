@@ -135,6 +135,42 @@ $.extend(frappe.test_data, {
 					{link_name: "Test Customer 2"}
 				]
 			]}
+		],
+		"Test3-Billing": [
+			{address_title:"Test3"},
+			{address_type: "Billing"},
+			{address_line1: "Billing Street 3"},
+			{city: "Billing City 3"},
+			{links: [
+				[
+					{link_doctype: "Supplier"},
+					{link_name: "Test Supplier"}
+				]
+			]}
+		],
+		"Test3-Shipping": [
+			{address_title:"Test3"},
+			{address_type: "Shipping"},
+			{address_line1: "Shipping Street 3"},
+			{city: "Shipping City 3"},
+			{links: [
+				[
+					{link_doctype: "Supplier"},
+					{link_name: "Test Supplier"}
+				]
+			]}
+		],
+		"Test3-Warehouse": [
+			{address_title:"Test3"},
+			{address_type: "Warehouse"},
+			{address_line1: "Warehouse Street 3"},
+			{city: "Warehouse City 3"},
+			{links: [
+				[
+					{link_doctype: "Supplier"},
+					{link_name: "Test Supplier"}
+				]
+			]}
 		]
 	},
 	"Contact": {
@@ -171,6 +207,15 @@ $.extend(frappe.test_data, {
 				[
 					{link_doctype: "Customer"},
 					{link_name: "Test Customer 2"}
+				]
+			]}
+		],
+		"Contact 3-Test Supplier": [
+			{first_name: "Contact 3"},
+			{links: [
+				[
+					{link_doctype: "Supplier"},
+					{link_name: "Test Supplier"}
 				]
 			]}
 		],

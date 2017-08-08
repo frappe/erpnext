@@ -59,3 +59,6 @@ erpnext/schools/doctype/student_applicant/tests/test_student_applicant_options.j
 erpnext/schools/doctype/student_log/test_student_log.js
 erpnext/schools/doctype/student_group/test_student_group.js
 erpnext/schools/doctype/student_group_creation_tool/test_student_group_creation_tool.js
+erpnext/stock/doctype/material_request/test_material_request.js
+erpnext/buying/doctype/supplier/test_supplier.js
+erpnext/buying/doctype/request_for_quotation/test_request_for_quotation.js
