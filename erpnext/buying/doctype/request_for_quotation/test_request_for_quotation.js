@@ -22,7 +22,7 @@ QUnit.test("test: request_for_quotation", function(assert) {
 						{"warehouse": 'All Warehouses - TC'}
 					]
 				]},
-				{tc_name: 'Test Term 1'}	
+				{tc_name: 'Test Term 1'}
 			]);
 		},
 		() => {
@@ -36,19 +36,19 @@ QUnit.test("test: request_for_quotation", function(assert) {
 			assert.ok(cur_frm.doc.tc_name == 'Test Term 1', "Term name correct");
 		},
 		() => frappe.timeout(0.3),
-	() => cur_frm.print_doc(),
-	() => frappe.timeout(1),
-	() => {
-		assert.ok($('.btn-print-print').is(':visible'), "Print Format Available");
-		assert.ok($(".section-break+ .section-break .column-break:nth-child(1) .value").text().includes("Test Product 1"), "Print Preview Works");
-	},
-	() => cur_frm.print_doc(),
-	() => frappe.click_button('Submit'),
-	() => frappe.click_button('Yes'),
-	() => frappe.timeout(0.3),
-	() => {
-		assert.ok(cur_frm.doc.docstatus == 1, "Quotation request submitted");
-	},
-	() => done()
+		() => cur_frm.print_doc(),
+		() => frappe.timeout(1),
+		() => {
+			assert.ok($('.btn-print-print').is(':visible'), "Print Format Available");
+			assert.ok($(".section-break+ .section-break .column-break:nth-child(1) .value").text().includes("Test Product 1"), "Print Preview Works");
+		},
+		() => cur_frm.print_doc(),
+		() => frappe.click_button('Submit'),
+		() => frappe.click_button('Yes'),
+		() => frappe.timeout(0.3),
+		() => {
+			assert.ok(cur_frm.doc.docstatus == 1, "Quotation request submitted");
+		},
+		() => done()
 	]);
 });
