@@ -1,9 +1,8 @@
-# Step 5: Letterhead and Logo
+# Step 6: Letterhead and Logo
 
 Attach Company Letterhead and Company Logo.
 
-<img alt="Company Logo and Letterhead" class="screenshot"
-src="/docs/assets/img/setup-wizard/step-5.png">
+<img alt="Company Logo and Letterhead" class="screenshot" src="/docs/assets/img/setup-wizard/step-5.png">
 
 ---
 

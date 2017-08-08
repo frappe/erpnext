@@ -1,9 +1,8 @@
-# Step 6: Tax Details
+# Step 8: Tax Details
 
 Enter any three types of taxes which you regularly pay. This wizard will create a tax master which will calculate the taxes as per the tax-type.
 
-<img alt="Tax Details" class="screenshot"
-src="/docs/assets/img/setup-wizard/step-7.png">
+<img alt="Tax Details" class="screenshot" src="/docs/assets/img/setup-wizard/step-7.png">
 
 Just set the tax name and the standard percentage levied.
 

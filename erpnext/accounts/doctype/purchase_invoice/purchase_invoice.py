@@ -510,7 +510,7 @@ class PurchaseInvoice(BuyingController):
 
 				i += 1
 
-		if self.update_stock and valuation_tax:
+		if self.auto_accounting_for_stock and self.update_stock and valuation_tax:
 			for cost_center, amount in valuation_tax.items():
 				gl_entries.append(
 					self.get_gl_dict({

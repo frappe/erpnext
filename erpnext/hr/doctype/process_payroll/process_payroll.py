@@ -342,8 +342,8 @@ class ProcessPayroll(Document):
 			return journal_entry.as_dict()
 		else:
 			frappe.msgprint(
-				"There are no submitted Salary Slips to process.",
-				title="Error"
+				_("There are no submitted Salary Slips to process."),
+				title="Error", indicator="red"
 			)
 
 	def update_salary_slip_status(self, jv_name = None):
