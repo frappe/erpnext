@@ -64,3 +64,6 @@ erpnext/schools/doctype/student_applicant/tests/test_student_applicant_options.j
 erpnext/schools/doctype/student_log/test_student_log.js
 erpnext/schools/doctype/student_group/test_student_group.js
 erpnext/schools/doctype/student_group_creation_tool/test_student_group_creation_tool.js
+erpnext/schools/doctype/student_leave_application/test_student_leave_application.js
+erpnext/schools/doctype/student_attendance_tool/test_student_attendance_tool.js
+erpnext/schools/doctype/student_attendance/test_student_attendance.js
