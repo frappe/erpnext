@@ -1,7 +1,7 @@
 QUnit.module('Pricing Rule"');
 
 QUnit.test("test pricing rule", function(assert) {
-	assert.expect(2);
+	assert.expect(3);
 	let done = assert.async();
 	frappe.run_serially([
 		() => {
@@ -21,6 +21,7 @@ QUnit.test("test pricing rule", function(assert) {
 		() => {
 			assert.ok(cur_frm.doc.item_code=='Test Product 2');
 			assert.ok(cur_frm.doc.customer=='Test Customer 3');
+			assert.ok(cur_frm.doc.discount_percentage==10, cur_frm.doc.discount_percentage);
 		},
 		() => done()
 	]);
