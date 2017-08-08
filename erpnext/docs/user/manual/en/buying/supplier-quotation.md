@@ -1,3 +1,5 @@
+# Supplier Quotation
+
 A Supplier Quotation is a formal statement of promise by potential supplier to
 supply the goods or services required by a buyer, at specified prices, and
 within a specified period. A quotation may also contain terms of sale and
@@ -8,7 +10,7 @@ You can make a supplier quotation from a Material Request
 
 #### Supplier Quotation Flow-Chart
 
-![Supplier Quotation]({{docs_base_url}}/assets/img/buying/buying_flow.png)
+![Supplier Quotation](/docs/assets/img/buying/buying_flow.png)
 
 You can also make a Supplier Quotation directly from:
 
@@ -16,7 +18,7 @@ You can also make a Supplier Quotation directly from:
 
 #### Create Supplier Quotation
 
-<img class="screenshot" alt="Supplier Quotation" src="{{docs_base_url}}/assets/img/buying/supplier-quotation.png">
+<img class="screenshot" alt="Supplier Quotation" src="/docs/assets/img/buying/supplier-quotation.png">
 
 If you have multiple Suppliers who supply you with the same Item, you
 usually send out a message (Request for Quote) to various Suppliers. In
@@ -35,10 +37,10 @@ If your Supplier is going to charge you additional taxes or charge like a shippi
 
 You can select relevant tax by going to "Taxes and Charges" section and adding an entry to the table as shown below,
 
-<img class="screenshot" alt="Supplier Quotation" src="{{docs_base_url}}/assets/img/buying/add_taxes_to_doc.png">
+<img class="screenshot" alt="Supplier Quotation" src="/docs/assets/img/buying/add_taxes_to_doc.png">
 
 Besides, in case of multiple items you can keep track of taxes on each by clicking "Show tax break-up"
 
-<img class="screenshot" alt="Supplier Quotation" src="{{docs_base_url}}/assets/img/buying/show_tax_breakup.png">
+<img class="screenshot" alt="Supplier Quotation" src="/docs/assets/img/buying/show_tax_breakup.png">
 
 {next}

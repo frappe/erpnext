@@ -1,3 +1,5 @@
+# Issue
+
 Issue is an incoming query from your Customer, usually via email or
 from the “Contact” section of your website. (To fully integrate the Support
 Ticket to email, see the Email Settings section).
@@ -5,13 +7,13 @@ Ticket to email, see the Email Settings section).
 > Tip: A dedicated support Email Address is a good way to integrate incoming
 queries via email. For example, you can send support queries to ERPNext at
 support@erpnext.com and it will automatically create a Issue in the
-Frappe system.
+Frappé system.
 
 
 
 > Support > Issue > New Issue
 
-<img class="screenshot" alt="Issue" src="{{docs_base_url}}/assets/img/support/issue.png">
+<img class="screenshot" alt="Issue" src="/docs/assets/img/support/issue.png">
 
 #### Discussion Thread
 

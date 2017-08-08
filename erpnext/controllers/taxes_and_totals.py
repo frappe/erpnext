@@ -179,7 +179,6 @@ class calculate_taxes_and_totals(object):
 
 		for n, item in enumerate(self.doc.get("items")):
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
-
 			for i, tax in enumerate(self.doc.get("taxes")):
 				# tax_amount represents the amount of tax for the current step
 				current_tax_amount = self.get_current_tax_amount(item, tax, item_tax_map)
@@ -202,36 +201,45 @@ class calculate_taxes_and_totals(object):
 				# set tax after discount
 				tax.tax_amount_after_discount_amount += current_tax_amount
 
-				if getattr(tax, "category", None):
-					# if just for valuation, do not add the tax amount in total
-					# hence, setting it as 0 for further steps
-					current_tax_amount = 0.0 if (tax.category == "Valuation") \
-						else current_tax_amount
+				current_tax_amount = self.get_tax_amount_if_for_valuation_or_deduction(current_tax_amount, tax)
 
-					current_tax_amount *= -1.0 if (tax.add_deduct_tax == "Deduct") else 1.0
-
-				# Calculate tax.total viz. grand total till that step
 				# note: grand_total_for_current_item contains the contribution of
 				# item's amount, previously applied tax and the current tax on that item
 				if i==0:
-					tax.grand_total_for_current_item = flt(item.net_amount + current_tax_amount, tax.precision("total"))
+					tax.grand_total_for_current_item = flt(item.net_amount + current_tax_amount)
 				else:
 					tax.grand_total_for_current_item = \
-						flt(self.doc.get("taxes")[i-1].grand_total_for_current_item + current_tax_amount, tax.precision("total"))
-
-				# in tax.total, accumulate grand total of each item
-				tax.total += tax.grand_total_for_current_item
+						flt(self.doc.get("taxes")[i-1].grand_total_for_current_item + current_tax_amount)
 
 				# set precision in the last item iteration
 				if n == len(self.doc.get("items")) - 1:
 					self.round_off_totals(tax)
+					self.set_cumulative_total(i, tax)
+
+					self._set_in_company_currency(tax,
+						["total", "tax_amount", "tax_amount_after_discount_amount"])
 
 					# adjust Discount Amount loss in last tax iteration
 					if i == (len(self.doc.get("taxes")) - 1) and self.discount_amount_applied \
 						and self.doc.discount_amount and self.doc.apply_discount_on == "Grand Total":
 							self.adjust_discount_amount_loss(tax)
 
+	def get_tax_amount_if_for_valuation_or_deduction(self, tax_amount, tax):
+		# if just for valuation, do not add the tax amount in total
+		# if tax/charges is for deduction, multiply by -1
+		if getattr(tax, "category", None):
+			tax_amount = 0.0 if (tax.category == "Valuation") else tax_amount
+			tax_amount *= -1.0 if (tax.add_deduct_tax == "Deduct") else 1.0
+		return tax_amount
 
+	def set_cumulative_total(self, row_idx, tax):
+		tax_amount = tax.tax_amount_after_discount_amount
+		tax_amount = self.get_tax_amount_if_for_valuation_or_deduction(tax_amount, tax)
+
+		if row_idx == 0:
+			tax.total = flt(self.doc.net_total + tax_amount, tax.precision("total"))
+		else:
+			tax.total = flt(self.doc.get("taxes")[row_idx-1].total + tax_amount, tax.precision("total"))
 
 	def get_current_tax_amount(self, item, tax, item_tax_map):
 		tax_rate = self._get_tax_rate(tax, item_tax_map)
@@ -251,8 +259,6 @@ class calculate_taxes_and_totals(object):
 			current_tax_amount = (tax_rate / 100.0) * \
 				self.doc.get("taxes")[cint(tax.row_id) - 1].grand_total_for_current_item
 
-		current_tax_amount = flt(current_tax_amount, tax.precision("tax_amount"))
-
 		self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
 
 		return current_tax_amount
@@ -267,11 +273,9 @@ class calculate_taxes_and_totals(object):
 		tax.item_wise_tax_detail[key] = [tax_rate,flt(item_wise_tax_amount, tax.precision("base_tax_amount"))]
 
 	def round_off_totals(self, tax):
-		tax.total = flt(tax.total, tax.precision("total"))
 		tax.tax_amount = flt(tax.tax_amount, tax.precision("tax_amount"))
-		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount, tax.precision("tax_amount"))
-
-		self._set_in_company_currency(tax, ["total", "tax_amount", "tax_amount_after_discount_amount"])
+		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount, 
+			tax.precision("tax_amount"))
 
 	def adjust_discount_amount_loss(self, tax):
 		discount_amount_loss = self.doc.grand_total - flt(self.doc.discount_amount) - tax.total

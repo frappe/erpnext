@@ -7,7 +7,7 @@ Sie können Ihre Kunden entweder direkt erstellen über
 
 > CRM > Dokumente > Kunde > Neu
 
-<img class="screenshot" alt="Kunde" src="{{docs_base_url}}/assets/img/crm/create-customer.gif">
+<img class="screenshot" alt="Kunde" src="/docs/assets/img/crm/create-customer.gif">
 
 oder einen Upload über ein Datenimportwerkzeug durchführen.
 
@@ -17,7 +17,7 @@ oder einen Upload über ein Datenimportwerkzeug durchführen.
 
 Kontakte und Adressen werden in ERPNext getrennt gespeichert, damit Sie mehrere verschiedene Kontakte oder Adressen mit Kunden und Lieferanten verknüpfen können.
 
-Lesen Sie hierzu auch [Kontakt]({{docs_base_url}}/user/manual/de/CRM/contact.html).
+Lesen Sie hierzu auch [Kontakt](/docs/user/manual/de/CRM/contact.html).
 
 ### Einbindung in Konten
 

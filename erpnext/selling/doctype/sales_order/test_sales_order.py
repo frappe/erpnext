@@ -16,7 +16,7 @@ class TestSalesOrder(unittest.TestCase):
 		frappe.set_user("Administrator")
 
 		for role in ("Stock User", "Sales User"):
-			set_user_permission_doctypes(doctype="Sales Order", role=role,
+			set_user_permission_doctypes(doctypes="Sales Order", role=role,
 				apply_user_permissions=0, user_permission_doctypes=None)
 
 	def test_make_material_request(self):
@@ -137,10 +137,10 @@ class TestSalesOrder(unittest.TestCase):
 		total_projected_qty = get_total_projected_qty('_Test Item')
 		item_doc_after_cancel = frappe.get_doc('Item', '_Test Item')
 		self.assertEqual(total_projected_qty,  item_doc_after_cancel.total_projected_qty)
-		
+
 	def test_reserved_qty_for_over_delivery_via_sales_invoice(self):
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
-		
+
 		# set over-delivery tolerance
 		frappe.db.set_value('Item', "_Test Item", 'tolerance', 50)
 
@@ -158,9 +158,9 @@ class TestSalesOrder(unittest.TestCase):
 		total_projected_qty = get_total_projected_qty('_Test Item')
 		item_doc = frappe.get_doc('Item', '_Test Item')
 		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
-		
+
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty)
-		
+
 		so.load_from_db()
 		self.assertEqual(so.get("items")[0].delivered_qty, 12)
 		self.assertEqual(so.per_delivered, 100)
@@ -170,7 +170,7 @@ class TestSalesOrder(unittest.TestCase):
 		total_projected_qty = get_total_projected_qty('_Test Item')
 		item_doc = frappe.get_doc('Item', '_Test Item')
 		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
-		
+
 		so.load_from_db()
 		self.assertEqual(so.get("items")[0].delivered_qty, 0)
 		self.assertEqual(so.per_delivered, 0)
@@ -178,8 +178,8 @@ class TestSalesOrder(unittest.TestCase):
 	def test_reserved_qty_for_partial_delivery_with_packing_list(self):
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
 		make_stock_entry(item="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=10, rate=100)
-		
-		
+
+
 		existing_reserved_qty_item1 = get_reserved_qty("_Test Item")
 		existing_reserved_qty_item2 = get_reserved_qty("_Test Item Home Desktop 100")
 
@@ -227,7 +227,7 @@ class TestSalesOrder(unittest.TestCase):
 	def test_reserved_qty_for_over_delivery_with_packing_list(self):
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
 		make_stock_entry(item="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=10, rate=100)
-		
+
 		# set over-delivery tolerance
 		frappe.db.set_value('Item', "_Test Product Bundle Item", 'tolerance', 50)
 
@@ -257,7 +257,7 @@ class TestSalesOrder(unittest.TestCase):
 
 	def test_warehouse_user(self):
 		for role in ("Stock User", "Sales User"):
-			set_user_permission_doctypes(doctype="Sales Order", role=role,
+			set_user_permission_doctypes(doctypes="Sales Order", role=role,
 				apply_user_permissions=1, user_permission_doctypes=["Warehouse"])
 
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
@@ -283,6 +283,7 @@ class TestSalesOrder(unittest.TestCase):
 		frappe.set_user("test2@example.com")
 		so.insert()
 
+		frappe.set_user("Administrator")
 		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
 		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
 		frappe.permissions.remove_user_permission("Company", "_Test Company 1", "test2@example.com")
@@ -363,7 +364,7 @@ class TestSalesOrder(unittest.TestCase):
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
 
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
-		
+
 		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 1, "delivered_by_supplier": 1,
         'default_supplier': '_Test Supplier',
 		    "expense_account": "_Test Account Cost for Goods Sold - _TC",

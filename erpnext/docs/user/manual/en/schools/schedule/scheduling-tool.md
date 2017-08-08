@@ -2,7 +2,7 @@
 
 This tool can be used to create 'Course Schedules'. 
 
-<img class="screenshot" alt="Scheduling Tool" src="{{url_prefix}}/assets/img/schools/schedule/scheduling-tool.png">
+<img class="screenshot" alt="Scheduling Tool" src="/docs/assets/img/schools/schedule/scheduling-tool.png">
 
 ### Creating Course Schedules
 

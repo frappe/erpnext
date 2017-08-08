@@ -5,7 +5,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	setup: function() {},
 	apply_pricing_rule_on_item: function(item){
 		if(item.margin_type == "Percentage"){
-			item.rate_with_margin = flt(item.price_list_rate) 
+			item.rate_with_margin = flt(item.price_list_rate)
 				+ flt(item.price_list_rate) * ( flt(item.margin_rate_or_amount) / 100);
 		} else {
 			item.rate_with_margin = flt(item.price_list_rate) + flt(item.margin_rate_or_amount);
@@ -70,12 +70,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			} else {
 				frappe.throw(repl('%(conversion_rate_label)s' +
 					__(' is mandatory. Maybe Currency Exchange record is not created for ') +
-					'%(from_currency)s' + __(" to ") + '%(to_currency)s',
-					{
-						"conversion_rate_label": conversion_rate_label,
-						"from_currency": this.frm.doc.currency,
-						"to_currency": company_currency
-					}));
+				'%(from_currency)s' + __(" to ") + '%(to_currency)s', {
+					"conversion_rate_label": conversion_rate_label,
+					"from_currency": this.frm.doc.currency,
+					"to_currency": company_currency
+				}));
 			}
 
 		}
@@ -101,7 +100,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		var me = this;
 		$.each(fields, function(i, f) {
 			doc["base_"+f] = flt(flt(doc[f], precision(f, doc)) * me.frm.doc.conversion_rate, precision("base_" + f, doc));
-		})
+		});
 	},
 
 	initialize_taxes: function() {
@@ -111,14 +110,14 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			tax.item_wise_tax_detail = {};
 			var tax_fields = ["total", "tax_amount_after_discount_amount",
 				"tax_amount_for_current_item", "grand_total_for_current_item",
-				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
+				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"];
 
 			if (cstr(tax.charge_type) != "Actual" &&
 				!(me.discount_amount_applied && me.frm.doc.apply_discount_on=="Grand Total")) {
 				tax_fields.push("tax_amount");
 			}
 
-			$.each(tax_fields, function(i, fieldname) { tax[fieldname] = 0.0 });
+			$.each(tax_fields, function(i, fieldname) { tax[fieldname] = 0.0; });
 
 			if (!this.discount_amount_applied && cur_frm) {
 				cur_frm.cscript.validate_taxes_and_charges(tax.doctype, tax.name);
@@ -134,7 +133,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		var has_inclusive_tax = false;
 		$.each(me.frm.doc["taxes"] || [], function(i, row) {
 			if(cint(row.included_in_print_rate)) has_inclusive_tax = true;
-		})
+		});
 		if(has_inclusive_tax==false) return;
 
 		$.each(me.frm.doc["items"] || [], function(n, item) {
@@ -223,7 +222,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		$.each(this.frm.doc["items"] || [], function(n, item) {
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
-
 			$.each(me.frm.doc["taxes"] || [], function(i, tax) {
 				// tax_amount represents the amount of tax for the current step
 				var current_tax_amount = me.get_current_tax_amount(item, tax, item_tax_map);
@@ -232,7 +230,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				if (tax.charge_type == "Actual") {
 					actual_tax_dict[tax.idx] -= current_tax_amount;
 					if (n == me.frm.doc["items"].length - 1) {
-						current_tax_amount += actual_tax_dict[tax.idx]
+						current_tax_amount += actual_tax_dict[tax.idx];
 					}
 				}
 
@@ -258,22 +256,24 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 					current_tax_amount *= (tax.add_deduct_tax == "Deduct") ? -1.0 : 1.0;
 				}
 
-				// Calculate tax.total viz. grand total till that step
 				// note: grand_total_for_current_item contains the contribution of
 				// item's amount, previously applied tax and the current tax on that item
 				if(i==0) {
-					tax.grand_total_for_current_item = flt(item.net_amount + current_tax_amount, precision("total", tax));
+					tax.grand_total_for_current_item = flt(item.net_amount + current_tax_amount);
 				} else {
 					tax.grand_total_for_current_item =
-						flt(me.frm.doc["taxes"][i-1].grand_total_for_current_item + current_tax_amount, precision("total", tax));
+						flt(me.frm.doc["taxes"][i-1].grand_total_for_current_item + current_tax_amount);
 				}
-
-				// in tax.total, accumulate grand total for each item
-				tax.total += tax.grand_total_for_current_item;
 
 				// set precision in the last item iteration
 				if (n == me.frm.doc["items"].length - 1) {
 					me.round_off_totals(tax);
+
+					// in tax.total, accumulate grand total for each item
+					me.set_cumulative_total(i, tax);
+
+					me.set_in_company_currency(tax,
+						["total", "tax_amount", "tax_amount_after_discount_amount"]);
 
 					// adjust Discount Amount loss in last tax iteration
 					if ((i == me.frm.doc["taxes"].length - 1) && me.discount_amount_applied
@@ -282,6 +282,16 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				}
 			});
 		});
+	},
+
+	set_cumulative_total: function(row_idx, tax) {
+		if(row_idx==0) {
+			tax.total = flt(this.frm.doc.net_total + tax.tax_amount_after_discount_amount,
+				precision("total", tax));
+		} else {
+			tax.total = flt(this.frm.doc["taxes"][row_idx-1].total + tax.tax_amount_after_discount_amount,
+				precision("total", tax));
+		}
 	},
 
 	_load_item_tax_rate: function(item_tax_rate) {
@@ -300,7 +310,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		} else if(tax.charge_type == "On Net Total") {
 			current_tax_amount = (tax_rate / 100.0) * item.net_amount;
-
 		} else if(tax.charge_type == "On Previous Row Amount") {
 			current_tax_amount = (tax_rate / 100.0) *
 				this.frm.doc["taxes"][cint(tax.row_id) - 1].tax_amount_for_current_item;
@@ -309,8 +318,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			current_tax_amount = (tax_rate / 100.0) *
 				this.frm.doc["taxes"][cint(tax.row_id) - 1].grand_total_for_current_item;
 		}
-
-		current_tax_amount = flt(current_tax_amount, precision("tax_amount", tax));
 
 		this.set_item_wise_tax(item, tax, tax_rate, current_tax_amount);
 
@@ -322,18 +329,14 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		var key = item.item_code || item.item_name;
 		var item_wise_tax_amount = current_tax_amount * this.frm.doc.conversion_rate;
 		if (tax.item_wise_tax_detail && tax.item_wise_tax_detail[key])
-			item_wise_tax_amount += tax.item_wise_tax_detail[key][1]
+			item_wise_tax_amount += tax.item_wise_tax_detail[key][1];
 
-		tax.item_wise_tax_detail[key] = [tax_rate,flt(item_wise_tax_amount, precision("base_tax_amount", tax))]
-
+		tax.item_wise_tax_detail[key] = [tax_rate, flt(item_wise_tax_amount, precision("base_tax_amount", tax))];
 	},
 
 	round_off_totals: function(tax) {
-		tax.total = flt(tax.total, precision("total", tax));
 		tax.tax_amount = flt(tax.tax_amount, precision("tax_amount", tax));
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount, precision("tax_amount", tax));
-
-		this.set_in_company_currency(tax, ["total", "tax_amount", "tax_amount_after_discount_amount"]);
 	},
 
 	adjust_discount_amount_loss: function(tax) {
@@ -391,7 +394,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 							me.frm.doc.taxes_and_charges_deducted += flt(tax.tax_amount_after_discount_amount);
 						}
 					}
-				})
+				});
 
 				frappe.model.round_floats_in(this.frm.doc, ["taxes_and_charges_added", "taxes_and_charges_deducted"]);
 			}
@@ -437,7 +440,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		if(this.frm.doc["taxes"] && this.frm.doc["taxes"].length) {
 			var temporary_fields = ["tax_amount_for_current_item", "grand_total_for_current_item",
-				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
+				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"];
 
 			if(!frappe.meta.get_docfield(this.frm.doc["taxes"][0].doctype, "tax_amount_after_discount_amount", this.frm.doctype)) {
 				temporary_fields.push("tax_amount_after_discount_amount");
@@ -473,13 +476,24 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				precision("base_discount_amount"));
 
 			var total_for_discount_amount = this.get_total_for_discount_amount();
+			var net_total = 0;
 			// calculate item amount after Discount Amount
 			if (total_for_discount_amount) {
 				$.each(this.frm.doc["items"] || [], function(i, item) {
 					distributed_amount = flt(me.frm.doc.discount_amount) * item.net_amount / total_for_discount_amount;
-					item.net_amount = flt(item.net_amount - distributed_amount, precision("base_amount", item));
-					item.net_rate = flt(item.net_amount / item.qty, precision("net_rate", item));
+					item.net_amount = flt(item.net_amount - distributed_amount,
+						precision("base_amount", item));
+					net_total += item.net_amount;
 
+					// discount amount rounding loss adjustment if no taxes
+					if ((!(me.frm.doc.taxes || []).length || (me.frm.doc.apply_discount_on == "Net Total"))
+							&& i == (me.frm.doc.items || []).length - 1) {
+						var discount_amount_loss = flt(me.frm.doc.net_total - net_total
+							- me.frm.doc.discount_amount, precision("net_total"));
+						item.net_amount = flt(item.net_amount + discount_amount_loss,
+							precision("net_amount", item));
+					}
+					item.net_rate = flt(item.net_amount / item.qty, precision("net_rate", item));
 					me.set_in_company_currency(item, ["net_rate", "net_amount"]);
 				});
 
@@ -490,10 +504,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	get_total_for_discount_amount: function() {
-		var me = this;
-
 		if(this.frm.doc.apply_discount_on == "Net Total") {
-			return this.frm.doc.net_total
+			return this.frm.doc.net_total;
 		} else {
 			var total_actual_tax = 0.0;
 			var actual_taxes_dict = {};
@@ -517,7 +529,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	calculate_total_advance: function(update_paid_amount) {
 		var total_allocated_amount = frappe.utils.sum($.map(this.frm.doc["advances"] || [], function(adv) {
-			return flt(adv.allocated_amount, precision("allocated_amount", adv))
+			return flt(adv.allocated_amount, precision("allocated_amount", adv));
 		}));
 		this.frm.doc.total_advance = flt(total_allocated_amount, precision("total_advance"));
 
@@ -528,9 +540,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		// NOTE:
 		// paid_amount and write_off_amount is only for POS Invoice
 		// total_advance is only for non POS Invoice
-		
+
 		if(this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.is_return){
-			this.calculate_paid_amount()
+			this.calculate_paid_amount();
 		}
 
 		if(this.frm.doc.is_return || this.frm.doc.docstatus > 0) return;
@@ -558,25 +570,21 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			}
 
 			if(this.frm.doc.doctype == "Sales Invoice"){
-				this.set_default_payment(total_amount_to_pay, update_paid_amount)
-				this.calculate_paid_amount()
+				this.set_default_payment(total_amount_to_pay, update_paid_amount);
+				this.calculate_paid_amount();
 			}
 
-			this.calculate_change_amount()
-			var outstanding_amount = 0.0
+			this.calculate_change_amount();
 
 			var paid_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
 				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
-
-			var change_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
-				this.frm.doc.change_amount : this.frm.doc.base_change_amount;
 
 			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
 				flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
 
 		} else if(this.frm.doc.doctype == "Purchase Invoice") {
 			this.frm.doc.outstanding_amount = flt(total_amount_to_pay, precision("outstanding_amount"));
-		}		
+		}
 	},
 
 	set_default_payment: function(total_amount_to_pay, update_paid_amount){
@@ -584,14 +592,14 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		var payment_status = true;
 		if(this.frm.doc.is_pos && (update_paid_amount===undefined || update_paid_amount)){
 			$.each(this.frm.doc['payments'] || [], function(index, data){
-				if(data.type == "Cash" && payment_status && total_amount_to_pay > 0) {
+				if(data.default && payment_status && total_amount_to_pay > 0) {
 					data.base_amount = flt(total_amount_to_pay, precision("base_amount"));
 					data.amount = flt(total_amount_to_pay / me.frm.doc.conversion_rate, precision("amount"));
 					payment_status = false;
 				}else if(me.frm.doc.paid_amount){
 					data.amount = 0.0;
 				}
-			})
+			});
 		}
 	},
 
@@ -604,7 +612,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				data.base_amount = flt(data.amount * me.frm.doc.conversion_rate, precision("base_amount"));
 				paid_amount += data.amount;
 				base_paid_amount += data.base_amount;
-			})
+			});
 		} else if(!this.frm.doc.is_return){
 			this.frm.doc.payments = [];
 		}
@@ -617,30 +625,28 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.frm.doc.change_amount = 0.0;
 		this.frm.doc.base_change_amount = 0.0;
 		if(this.frm.doc.paid_amount > this.frm.doc.grand_total && !this.frm.doc.is_return) {
-			var payment_types = $.map(this.frm.doc.payments, function(d) { return d.type });
+			var payment_types = $.map(this.frm.doc.payments, function(d) { return d.type; });
 			if (in_list(payment_types, 'Cash')) {
 				this.frm.doc.change_amount = flt(this.frm.doc.paid_amount - this.frm.doc.grand_total +
 					this.frm.doc.write_off_amount, precision("change_amount"));
-					
-				this.frm.doc.base_change_amount = flt(this.frm.doc.base_paid_amount - 
-					this.frm.doc.base_grand_total + this.frm.doc.base_write_off_amount, 
+
+				this.frm.doc.base_change_amount = flt(this.frm.doc.base_paid_amount -
+					this.frm.doc.base_grand_total + this.frm.doc.base_write_off_amount,
 					precision("base_change_amount"));
-				
 			}
 		}
 	},
 
 	calculate_write_off_amount: function(){
 		if(this.frm.doc.paid_amount > this.frm.doc.grand_total){
-			this.frm.doc.write_off_amount = flt(this.frm.doc.grand_total - this.frm.doc.paid_amount + this.frm.doc.change_amount,
-					precision("write_off_amount"))
-		
+			this.frm.doc.write_off_amount = flt(this.frm.doc.grand_total - this.frm.doc.paid_amount
+				+ this.frm.doc.change_amount, precision("write_off_amount"));
+
 			this.frm.doc.base_write_off_amount = flt(this.frm.doc.write_off_amount * this.frm.doc.conversion_rate,
 				precision("base_write_off_amount"));
 		}else{
-			this.frm.doc.paid_amount = 0.0
+			this.frm.doc.paid_amount = 0.0;
 		}
-		
-		this.calculate_outstanding_amount(false)
+		this.calculate_outstanding_amount(false);
 	}
-})
+});

@@ -27,7 +27,7 @@ QUnit.test("test: Sales Order", function (assert) {
 			assert.ok(cur_frm.doc.items[0].delivery_date == delivery_date);
 		},
 		() => frappe.timeout(1),
-		// make SO without delivery date in parent, 
+		// make SO without delivery date in parent,
 		// parent delivery date should be set based on final delivery date entered in item
 		() => {
 			return frappe.tests.make('Sales Order', [

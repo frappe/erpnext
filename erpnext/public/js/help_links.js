@@ -14,7 +14,7 @@ frappe.help.help_links['List/User'] = [
 frappe.help.help_links['permission-manager'] = [
 	{ label: 'Role Permissions Manager', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/users-and-permissions/role-based-permissions' },
 	{ label: 'Managing Perm Level in Permissions Manager', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/articles/managing-perm-level' },
-	{ label: 'User Permissions Manager', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/users-and-permissions/user-permissions' },
+	{ label: 'User Permissions', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/users-and-permissions/user-permissions' },
 	{ label: 'Sharing', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/users-and-permissions/sharing' },
 	{ label: 'Password', url: 'https://frappe.github.io/erpnext/user/manual/en/setting-up/articles/change-password' },
 ]

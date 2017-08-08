@@ -4,7 +4,7 @@ Enter your Customer names and the contact person from that organisation.
 
 
 <img alt="Customers" class="screenshot"
-src="{{docs_base_url}}/assets/img/setup-wizard/step-8.png">
+src="/docs/assets/img/setup-wizard/step-8.png">
 
 ---
 
@@ -18,6 +18,6 @@ Customer Name: American Power Mills
 
 Contact Name:  Shiv Agarwal
 
-To understand Customer in detail visit [Customer Details]({{docs_base_url}}/user/manual/en/CRM/customer.html)
+To understand Customer in detail visit [Customer Details](/docs/user/manual/en/CRM/customer.html)
 
 {next}

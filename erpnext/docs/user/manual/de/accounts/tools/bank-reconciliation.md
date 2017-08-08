@@ -11,7 +11,7 @@ Der Kontoauszug erscheint in ERPNext in der Form eines Berichtes.
 
 #### Abbilung 1: Kontoauszug
 
-![]({{docs_base_url}}/assets/old_images/erpnext/bank-reconciliation-2.png) 
+![](/docs/assets/old_images/erpnext/bank-reconciliation-2.png) 
 
 Wenn Sie den Bericht erhalten, überprüfen Sie bitte, ob das Feld "Abwicklungsdatum" wie bei der Bank angegeben mit dem Kontoauszug übereinstimmt. Wenn die Beträge übereinstimmen, dann werden die Abwicklungsdaten abgeglichen. Wenn die Beträge nicht übereinstimmen, dann überprüfen Sie bitte die Abwicklungsdaten und die Journalbuchungen/Buchungssätze.
 
@@ -33,7 +33,7 @@ Jetzt werden alle Buchungen im angegebenen Zeitraum in der Tabelle darunter ange
 
 #### Abbildung 2: Werkzeug zum Kontenabgleich
 
-<img class="screenshot" alt="Kontenabgleich" src="{{docs_base_url}}/assets/img/accounts/bank-reconciliation.png">
+<img class="screenshot" alt="Kontenabgleich" src="/docs/assets/img/accounts/bank-reconciliation.png">
 
 **Schritt 5:** Klicken Sie auf die Schaltfläche "Abwicklungsdatum aktualisieren"
 

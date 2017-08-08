@@ -4,6 +4,6 @@
 Fügen Sie weitere Benutzer hinzu und teilen Sie ihnen gemäß Ihren Verantwortungsbereichen am Arbeitsplatz Rollen zu.
 
 <img alt="Benutzer" class="screenshot"
-src="{{docs_base_url}}/assets/img/setup-wizard/step-6.png">
+src="/docs/assets/img/setup-wizard/step-6.png">
 
 {next}

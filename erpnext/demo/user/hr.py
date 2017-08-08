@@ -67,7 +67,7 @@ def work():
 
 			if random.randint(0, 1):
 				#make journal entry against expense claim
-				je = frappe.get_doc(make_bank_entry(expense_claim.name))
+				je = frappe.get_doc(make_bank_entry("Expense Claim", expense_claim.name))
 				je.posting_date = frappe.flags.current_date
 				je.cheque_no = random_string(10)
 				je.cheque_date = frappe.flags.current_date

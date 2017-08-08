@@ -19,6 +19,6 @@ def execute():
 def rename_field_if_exists(doctype, old_fieldname, new_fieldname):
 	try:
 		rename_field(doctype, old_fieldname, new_fieldname)
-	except Exception, e:
+	except Exception as e:
 		if e.args[0] != 1054:
 			raise
