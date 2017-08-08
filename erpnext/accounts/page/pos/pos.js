@@ -1469,14 +1469,28 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.make_menu_list()
 		}, "fa fa-plus")
 
+		var options = $(this.page.menu).find('a').text();
+
 		if (this.frm.doc.docstatus == 1) {
 			this.page.set_secondary_action(__("Print"), function () {
 				var html = frappe.render(me.print_template_data, me.frm.doc)
 				me.print_document(html)
 			})
-			this.page.add_menu_item(__("Email"), function () {
-				me.email_prompt()
-			})
+
+			if(options.indexOf(__("Email")) == -1) {
+				this.page.add_menu_item(__("Email"), function () {
+					me.email_prompt()
+				})
+			}
+
+			if(this.pos_profile_data && this.pos_profile_data['allow_to_amend'] &&
+				options.indexOf(__("Amend")) == -1) {
+				this.page.add_menu_item(__("Amend"), function () {
+					me.frm.doc.docstatus = 0
+					me.update_invoice()
+					me.toggle_input_field()
+				})
+			}
 		}
 	},
 
