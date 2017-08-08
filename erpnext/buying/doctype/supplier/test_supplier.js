@@ -15,8 +15,8 @@ QUnit.test("test: supplier", function(assert) {
 						{"company": 'Test Company'},
 						{"account": 'Creditors - TC'}
 					]]
-				}	
-			]);	
+				}
+			]);
 		},
 		() => {
 			assert.ok(cur_frm.doc.supplier_name == 'Test Supplier', "Name correct");
@@ -24,6 +24,6 @@ QUnit.test("test: supplier", function(assert) {
 			assert.ok(cur_frm.doc.default_currency == 'INR', "Currency correct");
 			assert.ok(cur_frm.doc.accounts[0].account == 'Creditors - '+frappe.get_abbr('Test Company'), " Account Head abbr correct");
 		},
-		() => done() 
+		() => done()
 	]);
 });
