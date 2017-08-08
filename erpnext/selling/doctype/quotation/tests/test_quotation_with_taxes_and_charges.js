@@ -38,3 +38,4 @@ QUnit.test("test quotation with taxes and charges", function(assert) {
 		() => done()
 	]);
 });
+

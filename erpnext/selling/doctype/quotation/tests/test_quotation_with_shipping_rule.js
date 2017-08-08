@@ -33,3 +33,4 @@ QUnit.test("test quotation with shipping rule", function(assert) {
 		() => done()
 	]);
 });
+

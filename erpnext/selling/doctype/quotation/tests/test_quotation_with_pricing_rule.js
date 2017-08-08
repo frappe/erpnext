@@ -32,3 +32,4 @@ QUnit.test("test quotation with pricing_rule", function(assert) {
 		() => done()
 	]);
 });
+
