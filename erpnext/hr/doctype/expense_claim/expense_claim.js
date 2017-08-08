@@ -173,6 +173,17 @@ frappe.ui.form.on("Expense Claim", {
 			}, __("View"));
 		}
 
+		if (frm.doc.docstatus===0 && frm.doc.approval_status=="Draft"
+			&& frm.doc.exp_approver) {
+			frm.add_custom_button(__('Notify Expense Claim Approver'),
+				function() {
+					return frappe.call({
+						method: "notify_expense_claim_approver",
+						doc: frm.doc
+					});
+				});
+		}
+
 		if (frm.doc.docstatus===1 && frm.doc.approval_status=="Approved"
 				&& (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total_sanctioned_amount))
 				&& frappe.model.can_create("Payment Entry")) {
