@@ -19,6 +19,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Project and Task Details Template",
+					"description": _("Create Project/Task Details Template"),
+				},
+				{
+					"type": "doctype",
 					"name": "Project Type",
 					"description": _("Define Project type."),
 				},

@@ -97,6 +97,20 @@ frappe.ui.form.on("Project", {
 					{'activity_type': activity_type, 'project': frm.doc.name, 'status': ["!=", "Cancelled"]});
 			});
 		}
+	},
+	notes_template: function(frm) {
+		if (frm.doc.notes_template){
+			return frappe.call({
+				method: 'erpnext.projects.doctype.project_and_task_details_template.project_and_task_details_template.get_details',
+				args: {
+					template_name: frm.doc.notes_template,
+					doc: frm.doc
+				},
+				callback: function(r) {
+					cur_frm.set_value("notes", r.message);
+				}
+			});
+		}
 	}
 });
 
