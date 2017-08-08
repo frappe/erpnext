@@ -24,7 +24,7 @@ QUnit.test("test quotation with pricing_rule", function(assert) {
 			// get_item_details
 			assert.ok(cur_frm.doc.items[0].item_name=='Test Product 2', "Item name correct");
 			// get grand_total details
-			assert.ok(cur_frm.doc.grand_total== 675, "Grand total correct ");
+			assert.ok(cur_frm.doc.grand_total== 675, "Grand total correct " +cur_frm.doc.grand_total);
 		},
 		() => frappe.tests.click_button('Submit'),
 		() => frappe.tests.click_button('Yes'),
