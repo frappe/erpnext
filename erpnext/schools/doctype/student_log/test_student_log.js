@@ -6,11 +6,8 @@ QUnit.test('Test: Student Log', function(assert){
 	let done = assert.async();
 	let student_code;
 	frappe.run_serially([
-		() => frappe.set_route("List", "Student"),
-		() => frappe.timeout(0.5),
-		() => frappe.tests.click_link('Fname Mname Lname'),
-		() => frappe.timeout(0.5),
-		() => {student_code = frappe.get_route()[2];},
+		() => frappe.db.get_value('Student', {'student_email_id': 'test2@testmail.com'}, 'name'),
+		(student) => {student_code = student.message.name;},
 		() => {
 			return frappe.tests.make("Student Log", [
 				{student: student_code},
