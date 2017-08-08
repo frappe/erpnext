@@ -96,9 +96,10 @@ class Bin(Document):
 
 def update_item_projected_qty(item_code):
 	'''Set total_projected_qty in Item as sum of projected qty in all warehouses'''
-	frappe.db.sql('''update tabItem set
-		total_projected_qty = ifnull((select sum(projected_qty) from tabBin where item_code=%s), 0)
-		where name=%s''', (item_code, item_code))
+	total_projected_qty = frappe.db.sql("select sum(projected_qty) from tabBin where item_code=%s",
+		(item_code)) or 0.0
+	item = frappe.get_doc("Item", item_code)
+	item.db_set("total_projected_qty", flt(total_projected_qty))
 
 def on_doctype_update():
 	frappe.db.add_index("Bin", ["item_code", "warehouse"])
