@@ -7,11 +7,8 @@ QUnit.test('Test: Student Group Creation Tool', function(assert){
 
 	frappe.run_serially([
 		// Saving Instructor code beforehand
-		() => frappe.set_route('List', 'Instructor'),
-		() => frappe.timeout(0.5),
-		() => frappe.tests.click_link('Instructor 1'),
-		() => frappe.timeout(0.5),
-		() => {instructor_code = frappe.get_route()[2];},
+		() => frappe.db.get_value('Instructor', {'instructor_name': 'Instructor 1'}, 'name'),
+		(instructor) => {instructor_code = instructor.message.name;},
 
 		// Setting up the creation tool to generate and save Student Group
 		() => frappe.set_route('Form', 'Student Group Creation Tool'),
@@ -57,14 +54,12 @@ QUnit.test('Test: Student Group Creation Tool', function(assert){
 
 		// Goin to the generated group to set up student and instructor list
 		() => {
-			let loop = ['Student Group/test-batch-wise-group-2', 'Student Group/test-course-wise-group-2'];
+			let group_name = ['Student Group/test-batch-wise-group-2', 'Student Group/test-course-wise-group-2'];
 			let tasks = [];
-			loop.forEach(index => {
+			group_name.forEach(index => {
 				tasks.push(
 					() => frappe.timeout(1),
 					() => frappe.set_route("Form", index),
-					() => frappe.timeout(0.5),
-					() => frappe.tests.click_button("Get Students"),
 					() => frappe.timeout(0.5),
 					() => {
 						assert.equal(cur_frm.doc.students.length, 5, 'Successfully fetched list of students');

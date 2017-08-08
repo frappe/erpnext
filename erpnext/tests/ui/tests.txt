@@ -7,9 +7,14 @@ erpnext/accounts/doctype/sales_taxes_and_charges_template/test_sales_taxes_and_c
 erpnext/accounts/doctype/shipping_rule/test_shipping_rule.js
 erpnext/crm/doctype/lead/test_lead.js
 erpnext/crm/doctype/opportunity/test_opportunity.js
-erpnext/selling/doctype/quotation/test_quotation.js
 erpnext/setup/doctype/company/tests/test_company_production.js
 erpnext/crm/doctype/item/test_item.js
+erpnext/selling/doctype/quotation/tests/test_quotation_with_discount_on_grand_total.js
+erpnext/selling/doctype/quotation/tests/test_quotation_with_item_wise_discount.js
+erpnext/selling/doctype/quotation/tests/test_quotation_with_multi_uom.js
+erpnext/selling/doctype/quotation/tests/test_quotation_with_taxes_and_charges.js
+erpnext/selling/doctype/quotation/tests/test_quotation_with_shipping_rule.js
+erpnext/selling/doctype/quotation/tests/test_quotation.js
 erpnext/selling/doctype/sales_order/tests/test_sales_order.js
 erpnext/selling/doctype/sales_order/tests/test_sales_order_with_multiple_delivery_date.js
 erpnext/selling/doctype/sales_order/tests/test_sales_order_with_item_wise_discount.js
@@ -59,5 +64,7 @@ erpnext/schools/doctype/student_applicant/tests/test_student_applicant_options.j
 erpnext/schools/doctype/student_log/test_student_log.js
 erpnext/schools/doctype/student_group/test_student_group.js
 erpnext/schools/doctype/student_group_creation_tool/test_student_group_creation_tool.js
+erpnext/schools/doctype/student_leave_application/test_student_leave_application.js
+erpnext/schools/doctype/student_attendance_tool/test_student_attendance_tool.js
+erpnext/schools/doctype/student_attendance/test_student_attendance.js
 erpnext/hr/doctype/training_event/test_training_event.js
-
