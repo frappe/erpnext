@@ -12,6 +12,8 @@ from frappe.utils.csvutils import getlink
 from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+from erpnext.accounts.general_ledger import delete_gl_entries
+
 
 class Fees(AccountsController):
 	def set_indicator(self):
@@ -43,6 +45,10 @@ class Fees(AccountsController):
 			pr = make_payment_request(dt="Fees", dn=self.name, recipient_id=self.contact_email,
 					submit_doc=True, use_dummy_message=True)
 			frappe.msgprint(_("Payment request {0} created").format(getlink("Payment Request", pr.name)))
+
+	def on_cancel(self):
+		delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
+		# frappe.db.set(self, 'status', 'Cancelled')
 
 
 	def make_gl_entries(self):
