@@ -1,5 +1,3 @@
-# Serial No Naming
-
 #Serial No. Naming
 
 Serial Nos. is unique value assigned on each unit of an item. Serial no. helps in tracking item's warranty and expiry details. Generally high value items like machines, computers, costly equipments are serialized.

@@ -1,5 +1,3 @@
-# Making Custom Reports In Erpnext
-
 #Reports in ERPNext
 
 There are three kind of reports in ERPNext.

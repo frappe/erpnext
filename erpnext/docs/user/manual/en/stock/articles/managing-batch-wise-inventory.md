@@ -1,5 +1,3 @@
-# Managing Batch Wise Inventory
-
 #Managing Batch wise Inventory
 
 Set of items which has same properties and attributes can be group in a single Batch. For example, pharmaceuticals  items are batch, so that it's manufacturing and expiry date can be tracked together. 

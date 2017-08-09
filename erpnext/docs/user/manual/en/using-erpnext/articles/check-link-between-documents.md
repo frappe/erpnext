@@ -1,5 +1,3 @@
-# Check Link Between Documents
-
 #Checking Link Between Documents
 
 Links option shows one document is linked to which other documents. Check Menu for the Links options.

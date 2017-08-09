@@ -1,5 +1,3 @@
-# Product Bundle
-
 #Product Bundle
 
 Product Bundle can be seen as something like a "Bill-of-Material" on the Sales side. It's a master where you can list existing items which are bundled together and sold as a set (or bundle). For instance, when you sell a laptop, you need to ensure that charger, mouse and laptop bag are delivered with it and stock levels of these items get affected. 
