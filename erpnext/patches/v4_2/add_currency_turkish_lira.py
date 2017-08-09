@@ -6,5 +6,5 @@ import frappe
 
 def execute():
 	return
-	country = get_country_info(country="Turkey")
-	add_country_and_currency("Turkey", country)
+	# country = get_country_info(country="Turkey")
+	# add_country_and_currency("Turkey", country)

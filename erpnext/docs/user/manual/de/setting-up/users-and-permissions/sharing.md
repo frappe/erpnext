@@ -5,6 +5,6 @@ Zusätzlich zu Benutzer- und Rollenberechtigungen können Sie ein Dokument auch 
 
 Um ein Dokument zu teilen, öffnen Sie das Dokument, klicken Sie auf das "+"-Symbol im Abschnitt "Freigegeben für" und wählen Sie den Benutzer aus.
 
-<img class="screenshot" src="{{docs_base_url}}/assets/img/setup/users/share.gif">
+<img class="screenshot" src="/docs/assets/img/setup/users/share.gif">
 
 {next}

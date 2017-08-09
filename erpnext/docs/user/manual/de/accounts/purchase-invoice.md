@@ -9,7 +9,7 @@ Um eine neue Eingangsrechnung zu erstellen, gehen Sie zu:
 
 oder klicken Sie in einem Lieferantenauftrag oder einem Kaufbeleg auf "Eingangsrechnung erstellen".
 
-<img class="screenshot" alt="Eingangsrechnung" src="{{docs_base_url}}/assets/img/accounts/purchase-invoice.png">
+<img class="screenshot" alt="Eingangsrechnung" src="/docs/assets/img/accounts/purchase-invoice.png">
 
 Das Konzept des Veröffentlichungsdatums ist das gleiche wie bei der Ausgangsrechnung. Rechnungsnummer und Rechnungsdatum helfen Ihnen dabei nachzuvollziehen, unter welchen Daten die Rechnung bei Ihrem Lieferanten ausgewiesen ist.
 

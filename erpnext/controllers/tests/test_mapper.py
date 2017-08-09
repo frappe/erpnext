@@ -4,7 +4,7 @@ import frappe
 
 import random, json
 import frappe.utils
-from frappe.utils import nowdate
+from frappe.utils import nowdate, add_months
 from frappe.model import mapper
 from frappe.test_runner import make_test_records
 
@@ -44,7 +44,9 @@ class TestMapper(unittest.TestCase):
 			"doctype": "Quotation",
 			"quotation_to": "Customer",
 			"customer": customer,
-			"order_type": "Sales"
+			"order_type": "Sales",
+			"transaction_date" : nowdate(),
+			"valid_till" : add_months(nowdate(), 1)
 		})
 		for item in item_list:
 			qtn.append("items", {"qty": "2", "item_code": item.item_code})

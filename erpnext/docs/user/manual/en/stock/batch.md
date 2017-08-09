@@ -1,3 +1,5 @@
+# Batch
+
 Batch feature in ERPNext allows you to group multiple units of an item,
 and assign them a unique value/number/tag called Batch No.
 
@@ -9,7 +11,7 @@ To set item as a batch item, "Has Batch No" field should be checked in the Item 
 
 If you want automatic batch creation at the time of Purchase Receipt, you must check "Create New Batches Automatically"
 
-<img class="screenshot" alt="Item Setup for Batches" src="{{docs_base_url}}/assets/img/stock/item_setup_for_batch.png">
+<img class="screenshot" alt="Item Setup for Batches" src="/docs/assets/img/stock/item_setup_for_batch.png">
 
 ### Creating Batches
 
@@ -23,7 +25,7 @@ To create new Batch No. master for an item, go to:
 
 When you open a batch, you will see all the quantities relating this that batch on the page.
 
-<img class="screenshot" alt="Batch View" src="{{docs_base_url}}/assets/img/stock/batch_view.png">
+<img class="screenshot" alt="Batch View" src="/docs/assets/img/stock/batch_view.png">
 
 To move the batch from one warehouse to another, you can click on the move button.
 

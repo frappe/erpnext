@@ -32,7 +32,7 @@ class TestStockEntry(unittest.TestCase):
 		set_perpetual_inventory(0)
 
 		for role in ("Stock User", "Sales User"):
-			set_user_permission_doctypes(doctype="Stock Entry", role=role,
+			set_user_permission_doctypes(doctypes="Stock Entry", role=role,
 				apply_user_permissions=0, user_permission_doctypes=None)
 
 	def test_fifo(self):
@@ -188,18 +188,18 @@ class TestStockEntry(unittest.TestCase):
 			[["_Test Item", "_Test Warehouse - _TC", -45.0], ["_Test Item", "_Test Warehouse 1 - _TC", 45.0]])
 
 		stock_in_hand_account = get_inventory_account(mtn.company, mtn.get("items")[0].s_warehouse)
-		
+
 		fixed_asset_account = get_inventory_account(mtn.company, mtn.get("items")[0].t_warehouse)
-			
+
 		if stock_in_hand_account == fixed_asset_account:
 			# no gl entry as both source and target warehouse has linked to same account.
 			self.assertFalse(frappe.db.sql("""select * from `tabGL Entry`
 				where voucher_type='Stock Entry' and voucher_no=%s""", mtn.name))
-			
+
 		else:
 			stock_value_diff = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Stock Entry",
 				"voucher_no": mtn.name, "warehouse": "_Test Warehouse - _TC"}, "stock_value_difference"))
-		
+
 			self.check_gl_entries("Stock Entry", mtn.name,
 				sorted([
 					[stock_in_hand_account, 0.0, stock_value_diff],
@@ -467,7 +467,7 @@ class TestStockEntry(unittest.TestCase):
 	# permission tests
 	def test_warehouse_user(self):
 		for role in ("Stock User", "Sales User"):
-			set_user_permission_doctypes(doctype="Stock Entry", role=role,
+			set_user_permission_doctypes(doctypes="Stock Entry", role=role,
 				apply_user_permissions=1, user_permission_doctypes=["Warehouse"])
 
 		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com", "User Permission")

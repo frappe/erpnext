@@ -1,3 +1,5 @@
+# Accounts
+
 At the end of sales and purchase cycle comes billing and payments. You may have
 an accountant in your team, or you may be doing accounting yourself, or you may
 have outsourced your accounting. In all the cases financial accounting forms the core of any business management system like an ERP.

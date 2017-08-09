@@ -14,6 +14,7 @@ class POSProfile(Document):
 		self.check_for_duplicate()
 		self.validate_all_link_fields()
 		self.validate_duplicate_groups()
+		self.check_default_payment()
 		self.validate_customer_territory_group()
 
 	def check_for_duplicate(self):
@@ -49,6 +50,14 @@ class POSProfile(Document):
 		if len(customer_groups) != len(set(customer_groups)):
 			frappe.throw(_("Duplicate customer group found in the cutomer group table"), title = "Duplicate Customer Group")
 
+	def check_default_payment(self):
+		if self.payments:
+			default_mode_of_payment = [d.default for d in self.payments if d.default]
+			if not default_mode_of_payment:
+				frappe.throw(_("Set default mode of payment"))
+
+			if len(default_mode_of_payment) > 1:
+				frappe.throw(_("Multiple default mode of payment is not allowed"))
 	def validate_customer_territory_group(self):
 		if not self.territory:
 			frappe.throw(_("Territory is Required in POS Profile"), title="Mandatory Field")

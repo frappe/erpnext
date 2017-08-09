@@ -1,3 +1,5 @@
+# Assessment Plan
+
 #Assessment Plan
 
 To schedule an assessment/examination for a Student Group, for specific Course, create Assessment Plan. In the Assessment Plan, you can also capture details like:
@@ -10,10 +12,10 @@ To schedule an assessment/examination for a Student Group, for specific Course, 
 
 4. Examiner and Supervisor
 
-<img class="screenshot" alt="Assessment Plan Details" src="{{docs_base_url}}/assets/img/schools/assessment/assessment-plan-details.png">
+<img class="screenshot" alt="Assessment Plan Details" src="/docs/assets/img/schools/assessment/assessment-plan-details.png">
 
 5. Assessment Criteria is list of criteria based which each student in will be evaluated and grades will be assigned.
 
-<img class="screenshot" alt="Assessment Plan Criteria" src="{{docs_base_url}}/assets/img/schools/assessment/assessment-plan-criteria.png">
+<img class="screenshot" alt="Assessment Plan Criteria" src="/docs/assets/img/schools/assessment/assessment-plan-criteria.png">
 
 {next}

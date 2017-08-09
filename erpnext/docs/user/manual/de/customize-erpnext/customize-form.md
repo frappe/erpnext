@@ -13,13 +13,13 @@ Sie können zum benutzerdefinierten Formular folgendermaßen gelangen:
 
 Der Systemmanager findet die Option "Benutzerdefiniertes Formular" auch in der Liste Kundenauftrag (bzw. jedes andere Formular für diesen Sachverhalt). 
 
-![Formular anpassen - Listenansicht]({{docs_base_url}}/assets/old_images/erpnext/customize-form-list-view.png)
+![Formular anpassen - Listenansicht](/docs/assets/old_images/erpnext/customize-form-list-view.png)
 
 ### Schritt 2: Wählen Sie den DocType/das Dokument
 
 Wählen Sie jetzt den DocType/das Dokument aus, welcher/s das anzupassende Feld enthält.
 
-![Formular anpassen - Dokument]({{docs_base_url}}/assets/old_images/erpnext/customize-form-document.png)
+![Formular anpassen - Dokument](/docs/assets/old_images/erpnext/customize-form-document.png)
 
 ### Schritt 3: Bearbeiten Sie die Eigenschaften
 
@@ -27,7 +27,7 @@ Wenn Sie den DocType/das Dokument ausgewählt haben, werden alle Felder als Zeil
 
 Wenn Sie auf die Zeile "Projektname" klicken, werden Felder mit verschiedenen Eigenschaften für dieses Feld angezeigt. Um die Eigenschaft "Ist zwingend erforderlich" für ein Feld anzupassen gibt es ein Feld "Zwingend erfoderlich". Wenn Sie dieses Feld markieren, wird das Feld "Projektname" im Angebotsformular als zwingend erforderlich eingestellt.
 
-![Formular anpassen - Zwingend erfoderliche Angaben]({{docs_base_url}}/assets/old_images/erpnext/customize-form-mandatory.png)
+![Formular anpassen - Zwingend erfoderliche Angaben](/docs/assets/old_images/erpnext/customize-form-mandatory.png)
 
 Genauso können Sie folgende Eigenschaften eines Feldes anpassen.
 
@@ -40,7 +40,7 @@ Genauso können Sie folgende Eigenschaften eines Feldes anpassen.
 
 ### Schritt 4: Aktualisieren
 
-![Formular anpassen - Aktualisieren]({{docs_base_url}}/assets/old_images/erpnext/customize-form-update.png)
+![Formular anpassen - Aktualisieren](/docs/assets/old_images/erpnext/customize-form-update.png)
 
 Bevor Sie das Formular "Kundenauftrag" testen, sollten Sie den Cache leeren und den Inhalt des Browserfensters aktualiseren, um die Änderungen wirksam werden zu lassen.
 
@@ -71,7 +71,7 @@ Im Folgenden erhalten Sie eine Auflistung der Eigenschaften, die Sie für ein be
     </tr>
     <tr>
       <td>Feldtyp</td>
-      <td>Klicken Sie <a href="{{docs_base_url}}/user/manual/en/customize-erpnext/articles/field-types">hier</a> um mehr über Feldtypen zu erfahren.</td>
+      <td>Klicken Sie <a href="/docs/user/manual/en/customize-erpnext/articles/field-types">hier</a> um mehr über Feldtypen zu erfahren.</td>
     </tr>
     <tr>
       <td>Optionen</td>

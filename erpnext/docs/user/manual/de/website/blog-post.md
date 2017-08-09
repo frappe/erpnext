@@ -9,12 +9,12 @@ Um einen neuen Blog zu erstellen, gehen Sie zu:
 
 > Webseite > Blog-Eintrag > Neu
 
-<img class="screenshot" alt="Blogeintrag" src="{{docs_base_url}}/assets/img/website/blog-post.png">
+<img class="screenshot" alt="Blogeintrag" src="/docs/assets/img/website/blog-post.png">
 
 Sie können einen Blog mit Hilfe des Markdown-Formats formatieren. Sie können auf Ihren Blog auch zugreifen, indem Sie zur Seite "blog.html" gehen.
 
 #### Ein Beispiel für einen Blog.
 
-<img class="screenshot" alt="Beispiel für ein Blog" src="{{docs_base_url}}/assets/img/website/blog-sample.png">
+<img class="screenshot" alt="Beispiel für ein Blog" src="/docs/assets/img/website/blog-sample.png">
 
 {next}

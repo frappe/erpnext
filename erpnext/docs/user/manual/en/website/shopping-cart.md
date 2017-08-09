@@ -1,3 +1,5 @@
+# Shopping Cart
+
 On the Webpage, a shopping cart is an icon that allows you to store all the
 things that you have earmarked for purchasing. It is a graphical
 representation of a shopping basket or a shopping cart that allows you to save
@@ -14,7 +16,7 @@ To set up a shopping cart, go to the website module.
 
 #### Enter Company Details and Checkout Details.
 
-<img class="screenshot" alt="Shopping Cart Settings" src="{{docs_base_url}}/assets/img/website/item-website-specs.png">
+<img class="screenshot" alt="Shopping Cart Settings" src="/docs/assets/img/website/item-website-specs.png">
 
 To make item available on website go to Item master.
 
@@ -22,11 +24,11 @@ To make item available on website go to Item master.
 
 #### Enable Item for website.
 
-<img class="screenshot" alt="Item" src="{{docs_base_url}}/assets/img/website/item-in-webiste.png">
+<img class="screenshot" alt="Item" src="/docs/assets/img/website/item-in-webiste.png">
 
 #### Enter Website Specifications for Item.
 
-<img class="screenshot" alt="Website Specifications" src="{{docs_base_url}}/assets/img/website/item-website-specs.png">
+<img class="screenshot" alt="Website Specifications" src="/docs/assets/img/website/item-website-specs.png">
 
 
 ### Shop using Shopping Cart
@@ -35,20 +37,20 @@ To make item available on website go to Item master.
 
 Click on "Add to Cart" to add item to shopping cart.
 
-<img class="screenshot" alt="Website Specifications" src="{{docs_base_url}}/assets/img/website/item-website-view.png">
+<img class="screenshot" alt="Website Specifications" src="/docs/assets/img/website/item-website-view.png">
 
 #### Goto Checkout
 
 Click on "Go to Cart" to checkout or on "Cart" which is on upper right side
 of the screen.
 
-<img class="screenshot" alt="Website Specifications" src="{{docs_base_url}}/assets/img/website/checkout.png">
+<img class="screenshot" alt="Website Specifications" src="/docs/assets/img/website/checkout.png">
 
 #### Checkout
 
 Change quantity, select Shipping and Billing Address and click
 on "Place Order" to place the order.
 
-<img class="screenshot" alt="Website Specifications" src="{{docs_base_url}}/assets/img/website/place-order.png">
+<img class="screenshot" alt="Website Specifications" src="/docs/assets/img/website/place-order.png">
 
 {next}

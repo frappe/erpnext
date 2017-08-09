@@ -485,7 +485,7 @@ def submit_invoice(si_doc, name, doc):
 		si_doc.insert()
 		si_doc.submit()
 		frappe.db.commit()
-	except Exception, e:
+	except Exception as e:
 		if frappe.message_log: frappe.message_log.pop()
 		frappe.db.rollback()
 		save_invoice(e, si_doc, name)

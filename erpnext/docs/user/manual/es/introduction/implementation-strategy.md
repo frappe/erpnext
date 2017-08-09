@@ -1,3 +1,5 @@
+# Implementation Strategy
+
 Antes de que empieces a manejar todas tus operaciones en ERPNext, primero
 deberías estar familiarizado con el sistema y los términos que utiliza.
 	Por esa razón recomendamos que la implementación pase en dos fases.

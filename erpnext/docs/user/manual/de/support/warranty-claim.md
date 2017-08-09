@@ -11,7 +11,7 @@ Um einen neuen **Garantiefall** zu erstellen, gehen Sie zu:
 
 > Support > Dokukumente > Garantieantrag > Neu
 
-![Warranty Claim]({{docs_base_url}}/assets/img/support/warranty-claim.png)
+![Warranty Claim](/docs/assets/img/support/warranty-claim.png)
 
 Wenn für die Lösung des Problems ein Besuch beim Kunden notwendig ist, können Sie einen neuen Wartungsbesuch erstellen.
 
