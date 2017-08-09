@@ -403,6 +403,27 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEquals(expected_gl_entries[gle.account][1], gle.debit)
 			self.assertEquals(expected_gl_entries[gle.account][2], gle.credit)
 
+	def test_auto_batch(self):
+		item_code = frappe.db.get_value('Item',
+			{'has_batch_no': 1, 'create_new_batch':1}, 'name')
+
+		if not item_code:
+			doc = frappe.get_doc({
+				'doctype': 'Item',
+				'is_stock_item': 1,
+				'item_code': 'test batch item',
+				'item_group': 'Products',
+				'has_batch_no': 1,
+				'create_new_batch': 1
+			}).insert(ignore_permissions=True)
+			item_code = doc.name
+
+		pi = make_purchase_invoice(update_stock=1, posting_date=frappe.utils.nowdate(),
+			posting_time=frappe.utils.nowtime(), item_code=item_code)
+
+		self.assertTrue(frappe.db.get_value('Batch',
+			{'item': item_code, 'reference_name': pi.name}))
+
 	def test_update_stock_and_purchase_return(self):
 		actual_qty_0 = get_qty_after_transaction()
 
