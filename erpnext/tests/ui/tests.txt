@@ -72,3 +72,4 @@ erpnext/schools/doctype/student_leave_application/test_student_leave_application
 erpnext/schools/doctype/student_attendance_tool/test_student_attendance_tool.js
 erpnext/schools/doctype/student_attendance/test_student_attendance.js
 erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_material_issue.js
+erpnext/buying/doctype/supplier/test_supplier.js
