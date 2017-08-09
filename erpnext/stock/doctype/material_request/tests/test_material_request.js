@@ -8,7 +8,7 @@ QUnit.test("test material request", function(assert) {
 			return frappe.tests.make('Material Request', [
 				{items: [
 					[
-						{'schedule_date': frappe.datetime.add_days(frappe.defaults.get_default("year_end_date"), 1)},
+						{'schedule_date':  frappe.datetime.add_days(frappe.datetime.nowdate(), 5)},
 						{'qty': 5},
 						{'item_code': 'Test Product 1'},
 					]
