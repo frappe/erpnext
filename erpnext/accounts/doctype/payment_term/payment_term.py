@@ -9,7 +9,7 @@ from frappe.model.document import Document
 from frappe.utils import cint
 
 
-class PaymentDueDate(Document):
+class PaymentTerm(Document):
 	def validate(self):
 		self.validate_numerical_fields()
 		self.validate_discount()

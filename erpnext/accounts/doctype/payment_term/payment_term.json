@@ -329,10 +329,10 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-08-06 23:29:34.213462", 
+ "modified": "2017-08-09 09:28:43.502530", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
- "name": "Payment Due Date", 
+ "name": "Payment Term", 
  "name_case": "", 
  "owner": "Administrator", 
  "permissions": [

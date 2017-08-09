@@ -1,11 +1,11 @@
 QUnit.module('accounts');
 
-QUnit.test('Create new Payment Due Date in quick view ', function(assert){
+QUnit.test('Create new Payment Term in quick view ', function(assert){
 	assert.expect(4);
 	let done = assert.async();
 
 	frappe.run_serially([
-		() => frappe.set_route('List', 'Payment Due Date'),
+		() => frappe.set_route('List', 'Payment Term'),
 		() => frappe.timeout(2),
 		() => frappe.click_button('New'),
 		// open in quick view
@@ -30,12 +30,12 @@ QUnit.test('Create new Payment Due Date in quick view ', function(assert){
 	]);
 });
 
-QUnit.test('Create new Payment Due Date in full view ', function(assert){
+QUnit.test('Create new Payment Term in full view ', function(assert){
 	assert.expect(7);
 	let done = assert.async();
 
 	frappe.run_serially([
-		() => frappe.set_route('List', 'Payment Due Date'),
+		() => frappe.set_route('List', 'Payment Term'),
 		() => frappe.timeout(2),
 		() => frappe.click_button('New'),
 		() => frappe.timeout(2),
@@ -59,7 +59,7 @@ QUnit.test('Create new Payment Due Date in full view ', function(assert){
 		() => frappe.click_button('Save'),
 		() => frappe.timeout(2),
 		// confirm successful save
-		() => frappe.set_route('List', 'Payment Due Date'),
+		() => frappe.set_route('List', 'Payment Term'),
 		() => frappe.timeout(2),
 		() => {
 			assert.ok(cur_list.data.some(obj => obj.name === '_2/10 N30'));
@@ -68,11 +68,11 @@ QUnit.test('Create new Payment Due Date in full view ', function(assert){
 	]);
 });
 
-QUnit.test('Payment Due Date Validation', function(assert){
+QUnit.test('Payment Term Validation', function(assert){
 	assert.expect(8);
 	let done = assert.async();
 	frappe.run_serially([
-		() => frappe.set_route('List', 'Payment Due Date'),
+		() => frappe.set_route('List', 'Payment Term'),
 		() => frappe.timeout(2.5),
 		() => frappe.click_button('New'),
 		() => frappe.timeout(2),
@@ -153,7 +153,7 @@ QUnit.test('Payment Due Date Validation', function(assert){
 		() => frappe.timeout(2),
 
 		// confirm successful save
-		() => frappe.set_route('List', 'Payment Due Date'),
+		() => frappe.set_route('List', 'Payment Term'),
 		() => frappe.timeout(2),
 		() => {
 			assert.ok(cur_list.data.some(obj => obj.name === '_Test Code'));
