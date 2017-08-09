@@ -11,6 +11,7 @@ from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry, get_company_defaults
 from frappe.integrations.utils import get_payment_gateway_controller
+from frappe.utils.background_jobs import enqueue
 
 class PaymentRequest(Document):
 	def validate(self):
@@ -143,9 +144,15 @@ class PaymentRequest(Document):
 
 	def send_email(self):
 		"""send email with payment link"""
-		frappe.sendmail(recipients=self.email_to, sender=None, subject=self.subject,
-			message=self.get_message(), attachments=[frappe.attach_print(self.reference_doctype,
-			self.reference_name, file_name=self.reference_name, print_format=self.print_format)])
+		email_args = {
+			"recipients": self.email_to,
+			"sender": None,
+			"subject": self.subject,
+			"message": self.get_message(),
+			"now": True,
+			"attachments": [frappe.attach_print(self.reference_doctype, self.reference_name,
+				file_name=self.reference_name, print_format=self.print_format)]}
+		enqueue(method=frappe.sendmail, queue='short', timeout=300, async=True, **email_args)
 
 	def get_message(self):
 		"""return message with payment gateway link"""
