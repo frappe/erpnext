@@ -17,7 +17,7 @@ class TestNotifications(unittest.TestCase):
 			"default_currency": "INR",
 			"doctype": "Company",
 			"domain": "Manufacturing",
-			"sales_target": 2000,
+			"monthly_sales_target": 2000,
 			"chart_of_accounts": "Standard"
 			},
 			{
@@ -27,7 +27,7 @@ class TestNotifications(unittest.TestCase):
 			"default_currency": "USD",
 			"doctype": "Company",
 			"domain": "Retail",
-			"sales_target": 10000,
+			"monthly_sales_target": 10000,
 			"total_monthly_sales": 1000,
 			"chart_of_accounts": "Standard"
 			},

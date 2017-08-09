@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 
 def get_notification_config():
 	notifications =  { "for_doctype":
@@ -60,10 +60,19 @@ def get_notification_config():
 
 		"targets": {
 			"Company": {
-				"filters" : { "sales_target": ( ">", 0 ) },
-				"target_field" : "sales_target",
+				"filters" : { "monthly_sales_target": ( ">", 0 ) },
+				"target_field" : "monthly_sales_target",
 				"value_field" : "total_monthly_sales"
 			}
+		},
+
+		"user_progress": {
+			"Company": 1,
+			"Customers": frappe.db.count("Customer") > 0,
+			"Suppliers": frappe.db.count("Supplier") > 0,
+			"Products": frappe.db.count("Item") > 0,
+			"Taxes": 0,
+			"Sales_Target": 0
 		}
 	}
 
