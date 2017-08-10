@@ -53,6 +53,9 @@ class PurchaseInvoice(BuyingController):
 		if (self.is_paid == 1):
 			self.validate_cash()
 
+		if self._action=="submit" and self.update_stock:
+			self.make_batches('warehouse')
+
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advances")
