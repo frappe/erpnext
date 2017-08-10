@@ -1,0 +1,81 @@
+@import "../../../../frappe/frappe/public/less/variables.less";
+
+.pos {
+	// display: flex;
+	padding: 15px;
+}
+
+.customer-container {
+	padding: 0 15px;
+	// flex: 2;
+	display: inline-block;
+	width: 39%;
+	vertical-align: top;
+}
+
+.item-container {
+	padding: 0 15px;
+	// flex: 3;
+	display: inline-block;
+	width: 60%;
+	vertical-align: top;
+}
+
+.item-group-field {
+	margin-left: 15px;
+}
+
+.cart-wrapper {
+	.list-item__content:not(:first-child) {
+		justify-content: flex-end;
+	}
+}
+
+.cart-items {
+	height: 200px;
+	overflow: auto;
+
+	// .list-item {
+	// 	background-color: @light-yellow;
+	// 	transition: background-color 1s linear;
+	// }
+
+	// .list-item.added {
+	// 	background-color: white;
+	// }
+}
+
+.fields {
+	display: flex;
+}
+
+.pos-items-wrapper {
+	max-height: 480px;
+	overflow: auto;
+}
+
+.pos-item-wrapper {
+	height: 250px;
+}
+
+.image-view-container {
+	display: block;
+}
+
+.image-view-container .image-field {
+	height: auto;
+}
+
+.empty-state {
+	height: 100%;
+	position: relative;
+
+	span {
+		position: absolute;
+		color: @text-muted;
+		font-size: @text-medium;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+	}
+}

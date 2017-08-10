@@ -8,7 +8,8 @@ frappe.pages['pos'].on_page_load = function (wrapper) {
 		single_column: true
 	});
 
-	wrapper.pos = new erpnext.pos.PointOfSale(wrapper)
+	wrapper.pos = new erpnext.pos.PointOfSale(wrapper);
+	cur_pos = wrapper.pos;
 }
 
 frappe.pages['pos'].refresh = function (wrapper) {
