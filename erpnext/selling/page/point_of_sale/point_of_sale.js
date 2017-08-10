@@ -306,19 +306,28 @@ erpnext.POSItems = class POSItems {
 	}
 
 	make_fields() {
+		// Search field
 		this.search_field = frappe.ui.form.make_control({
 			df: {
 				fieldtype: 'Data',
-				label: 'Search Item',
-				onchange: (e) => {
-					const search_term = e.target.value;
-					this.filter_items(search_term);
-				}
+				label: 'Search Item (Ctrl + I)',
+				placeholder: 'Search by item code, serial number, batch no or barcode'
 			},
 			parent: this.wrapper.find('.search-field'),
 			render_input: true,
 		});
 
+		frappe.ui.keys.on('ctrl+i', () => {
+			this.search_field.set_focus();
+		});
+
+		this.search_field.$input.on('input', (e) => {
+			const search_term = e.target.value;
+			this.filter_items(search_term);
+		});
+
+
+		// Item group field
 		this.item_group_field = frappe.ui.form.make_control({
 			df: {
 				fieldtype: 'Select',
@@ -370,9 +379,11 @@ erpnext.POSItems = class POSItems {
 
 		const filtered_items =
 			Object.values(this.items)
-				.filter(
-					item => item.item_name.toLowerCase().includes(search_term)
-				);
+				.filter(item => {
+					return item.item_code.toLowerCase().includes(search_term) ||
+						item.item_name.toLowerCase().includes(search_term)
+				});
+
 		this.render_items(filtered_items);
 	}
 

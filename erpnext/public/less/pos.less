@@ -21,7 +21,16 @@
 	vertical-align: top;
 }
 
+.search-field {
+	width: 60%;
+
+	input::placeholder {
+		font-size: @text-medium;
+	}
+}
+
 .item-group-field {
+	width: 40%;
 	margin-left: 15px;
 }
 
@@ -34,15 +43,6 @@
 .cart-items {
 	height: 200px;
 	overflow: auto;
-
-	// .list-item {
-	// 	background-color: @light-yellow;
-	// 	transition: background-color 1s linear;
-	// }
-
-	// .list-item.added {
-	// 	background-color: white;
-	// }
 }
 
 .fields {
@@ -55,7 +55,9 @@
 }
 
 .pos-item-wrapper {
-	height: 250px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
 }
 
 .image-view-container {

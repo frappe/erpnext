@@ -13,7 +13,14 @@
   width: 60%;
   vertical-align: top;
 }
+.search-field {
+  width: 60%;
+}
+.search-field input::placeholder {
+  font-size: 12px;
+}
 .item-group-field {
+  width: 40%;
   margin-left: 15px;
 }
 .cart-wrapper .list-item__content:not(:first-child) {
@@ -31,7 +38,9 @@
   overflow: auto;
 }
 .pos-item-wrapper {
-  height: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 .image-view-container {
   display: block;
