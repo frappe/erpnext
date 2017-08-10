@@ -44,6 +44,26 @@ class TestSalaryStructure(unittest.TestCase):
 			self.assertEquals(sal_slip.get("deductions")[1].amount, 2500)
 			self.assertEquals(sal_slip.get("total_deduction"), 7500)
 			self.assertEquals(sal_slip.get("net_pay"), 7500)
+
+	def test_whitespaces_in_formula_conditions_fields(self):
+		make_salary_structure("Salary Structure Sample")
+		salary_structure = frappe.get_doc("Salary Structure", "Salary Structure Sample")
+
+		for row in salary_structure.earnings:
+			row.formula = "\n%s\n\n"%row.formula
+			row.condition = "\n%s\n\n"%row.condition
+
+		for row in salary_structure.deductions:
+			row.formula = "\n%s\n\n"%row.formula
+			row.condition = "\n%s\n\n"%row.condition
+
+		salary_structure.save()
+
+		for row in salary_structure.earnings:
+			self.assertFalse("\n" in row.formula or "\n" in row.condition)
+
+		for row in salary_structure.deductions:
+			self.assertFalse(("\n" in row.formula) or ("\n" in row.condition))
 			
 def make_employee(user):
 	if not frappe.db.get_value("User", user):
