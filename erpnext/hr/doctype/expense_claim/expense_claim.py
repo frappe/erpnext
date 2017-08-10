@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import get_fullname, flt, cstr
 from frappe.model.document import Document
+from frappe.utils.file_manager import save_url
 from erpnext.hr.utils import set_employee_name
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.general_ledger import make_gl_entries
@@ -17,7 +18,7 @@ class InvalidExpenseApproverError(frappe.ValidationError): pass
 
 class ExpenseClaim(AccountsController):
 	def onload(self):
-		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings', 
+		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings',
 			'make_payment_via_journal_entry')
 
 	def get_feed(self):
@@ -25,9 +26,13 @@ class ExpenseClaim(AccountsController):
 			self.employee_name, self.total_claimed_amount)
 
 	def validate(self):
+		self.validate_tax_amount()
 		self.validate_sanctioned_amount()
+		self.validate_sanctioned_tax()
 		self.validate_expense_approver()
+		self.add_receipt_attachments()
 		self.calculate_total_amount()
+		self.calculate_detail_table()
 		set_employee_name(self)
 		self.set_expense_account()
 		self.set_payable_account()
@@ -66,13 +71,16 @@ class ExpenseClaim(AccountsController):
 		self.update_task_and_project()
 		self.make_gl_entries()
 
+
 		if self.is_paid:
 			update_reimbursed_amount(self)
 
+		self.claim_receipts(1)
 		self.set_status()
 
 	def on_cancel(self):
 		self.update_task_and_project()
+		self.claim_receipts(0)
 		if self.payable_account:
 			self.make_gl_entries(cancel=True)
 
@@ -87,6 +95,14 @@ class ExpenseClaim(AccountsController):
 		elif self.project:
 			frappe.get_doc("Project", self.project).update_project()
 
+	def claim_receipts(self, claim):
+		for r in self.expenses:
+			if r.expense_receipt:
+				frappe.set_value('Expense Receipt', r.expense_receipt, "is_claimed", claim)
+				submitted = frappe.get_value('Expense Receipt',r.expense_receipt, 'docstatus')
+				if not submitted and claim:
+					er = frappe.get_doc('Expense Receipt',r.expense_receipt).submit()
+
 	def make_gl_entries(self, cancel = False):
 		if flt(self.total_sanctioned_amount) > 0:
 			gl_entries = self.get_gl_entries()
@@ -95,14 +111,17 @@ class ExpenseClaim(AccountsController):
 	def get_gl_entries(self):
 		gl_entry = []
 		self.validate_account_details()
-		
+
+		against_accounts = ",".join([d.default_account for d in self.expenses])
+		if len([d.default_tax_account for d in self.expenses if d.default_tax_account != None]) > 0:
+			against_accounts += "," + ",".join([d.default_tax_account for d in self.expenses if d.default_tax_account != None])
 		# payable entry
 		gl_entry.append(
 			self.get_gl_dict({
 				"account": self.payable_account,
 				"credit": self.total_sanctioned_amount,
 				"credit_in_account_currency": self.total_sanctioned_amount,
-				"against": ",".join([d.default_account for d in self.expenses]),
+				"against": against_accounts,
 				"party_type": "Employee",
 				"party": self.employee,
 				"against_voucher_type": self.doctype,
@@ -112,11 +131,23 @@ class ExpenseClaim(AccountsController):
 
 		# expense entries
 		for data in self.expenses:
+			amount = data.sanctioned_amount - data.sanctioned_tax
+			tax = data.sanctioned_tax
+			
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": data.default_account,
-					"debit": data.sanctioned_amount,
-					"debit_in_account_currency": data.sanctioned_amount,
+					"debit": amount,
+					"debit_in_account_currency": amount,
+					"against": self.employee,
+					"cost_center": self.cost_center
+				})
+			)
+			gl_entry.append(
+				self.get_gl_dict({
+					"account": data.default_tax_account,
+					"debit": tax,
+					"debit_in_account_currency": tax,
 					"against": self.employee,
 					"cost_center": self.cost_center
 				})
@@ -170,6 +201,20 @@ class ExpenseClaim(AccountsController):
 			self.total_claimed_amount += flt(d.claim_amount)
 			self.total_sanctioned_amount += flt(d.sanctioned_amount)
 
+	def calculate_detail_table(self):
+		self.set('type_summary', [])
+		for d in self.get('expenses'):
+			mytype = next((x  for x in self.get('type_summary') if x.expense_type == d.expense_type), None)
+			if not mytype:
+				mytype = self.append('type_summary',{})
+				mytype.expense_type = d.expense_type
+				mytype.total_claim_amount = 0
+				mytype.total_sanctioned_amount = 0
+				mytype.total_tax_amount = 0
+			mytype.total_claim_amount += flt(d.claim_amount)
+			mytype.total_tax_amount += flt(d.tax_amount)
+			mytype.total_sanctioned_amount += flt(d.sanctioned_amount)
+
 	def validate_expense_approver(self):
 		if self.exp_approver and "Expense Approver" not in frappe.get_roles(self.exp_approver):
 			frappe.throw(_("{0} ({1}) must have role 'Expense Approver'")\
@@ -180,18 +225,56 @@ class ExpenseClaim(AccountsController):
 		task.update_total_expense_claim()
 		task.save()
 
-	def validate_sanctioned_amount(self):
+	def validate_tax_amount(self):
 		for d in self.get('expenses'):
+			if flt(d.tax_amount) > flt(d.claim_amount):
+				frappe.throw(_("Tax Amount cannot be greater than Claim Amount in Row {0}.").format(d.idx))
+
+	def validate_sanctioned_amount(self):
+
+		for d in self.get('expenses'):
+			if d.sanctioned_tax == None:
+				d.sanctioned_tax = 0
 			if flt(d.sanctioned_amount) > flt(d.claim_amount):
 				frappe.throw(_("Sanctioned Amount cannot be greater than Claim Amount in Row {0}.").format(d.idx))
+			if flt(d.sanctioned_tax) > flt(d.sanctioned_amount):
+				frappe.throw(_("Sanctioned Tax cannot be greater than Sanctioned Amount in Row {0}.").format(d.idx))
+
+	def validate_sanctioned_tax(self):
+		for d in self.get('expenses'):
+			if d.tax_amount == None:
+				d.tax_amount = 0
+			if flt(d.sanctioned_tax) > flt(d.tax_amount):
+				frappe.throw(_("Sanctioned Tax cannot be greater than Tax Amount in Row {0}.").format(d.idx))
 
 	def set_expense_account(self):
 		for expense in self.expenses:
 			if not expense.default_account:
 				expense.default_account = get_expense_claim_account(expense.expense_type, self.company)["account"]
+			if not expense.default_tax_account and expense.tax_amount > 0:
+				expense.default_tax_account = get_expense_claim_tax_account(expense.expense_type, self.company)["tax_account"]
+
+	def add_receipt_attachments(self):
+		for d in self.expenses:
+			if not d.attachment and d.expense_receipt:
+				receipt = frappe.get_doc("Expense Receipt", d.expense_receipt)
+				receipt_attachments = frappe.db.sql("""
+					SELECT file_url, file_name
+					FROM `tabFile`
+					WHERE attached_to_doctype = %(doctype)s
+						AND attached_to_name = %(docname)s""",
+					{'doctype': receipt.doctype, 'docname': receipt.name}, as_dict = 1)
+
+				if len(receipt_attachments) > 1:
+					frappe.msgprint(_("Found more than one attachment for Expense Receipt {0}. Only able to attach {1}").join(receipt.name, receipt_attachments[0].file_name))
+				if len(receipt_attachments) > 0:
+					myFile = save_url(receipt_attachments[0].file_url, receipt_attachments[0].file_url, self.doctype, self.name, "Home/Attachments",1)
+					myFile.file_name = receipt_attachments[0].file_name
+					d.attachment = myFile.file_url
+					myFile.save()
 
 def update_reimbursed_amount(doc):
-	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt 
+	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt
 		from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
 		and party = %s """, (doc.name, doc.employee) ,as_dict=1)[0].amt
 
@@ -202,11 +285,24 @@ def update_reimbursed_amount(doc):
 	frappe.db.set_value("Expense Claim", doc.name , "status", doc.status)
 
 @frappe.whitelist()
+def get_unpaid_receipts(employee, company):
+	return frappe.db.sql("""
+		SELECT name, claim_amount, tax_amount, expense_date, vendor, expense_type, description, expense_date
+		FROM
+			`tabExpense Receipt` r
+		WHERE
+			r.company = %(company)s
+			AND	r.employee = %(employee)s
+			AND ifnull(is_claimed,0) = 0
+	""", {'company': company, 'employee': employee}, as_dict=1)
+
+
+@frappe.whitelist()
 def get_expense_approver(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""
 		select u.name, concat(u.first_name, ' ', u.last_name)
 		from tabUser u, `tabHas Role` r
-		where u.name = r.parent and r.role = 'Expense Approver' 
+		where u.name = r.parent and r.role = 'Expense Approver'
 		and u.enabled = 1 and u.name like %s
 	""", ("%" + txt + "%"))
 
@@ -248,12 +344,25 @@ def make_bank_entry(dt, dn):
 @frappe.whitelist()
 def get_expense_claim_account(expense_claim_type, company):
 	account = frappe.db.get_value("Expense Claim Account",
-		{"parent": expense_claim_type, "company": company}, "default_account")
-	
+		{"parent": expense_claim_type, "parentfield": "accounts", "company": company}, "default_account")
+
 	if not account:
 		frappe.throw(_("Please set default account in Expense Claim Type {0}")
 			.format(expense_claim_type))
-	
+
 	return {
 		"account": account
+	}
+
+@frappe.whitelist()
+def get_expense_claim_tax_account(expense_claim_type, company):
+	tax_account = frappe.db.get_value("Expense Claim Account",
+		{"parent": expense_claim_type, "parentfield": "tax_accounts", "company": company}, "default_account")
+
+	if not tax_account:
+		frappe.throw(_("Please set default tax account in Expense Claim Type {0}")
+			.format(expense_claim_type))
+
+	return {
+		"tax_account": tax_account
 	}

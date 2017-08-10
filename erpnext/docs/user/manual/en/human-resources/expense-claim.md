@@ -2,6 +2,18 @@
 
 Expense Claim is made when Employee’s make expenses out of their pocket on behalf of the company. For example, if they take a customer out for lunch, they can make a request for reimbursement via the Expense Claim form.
 
+### Expense Receipts
+To make a new Expense Receipt, go to:
+
+> HR > Expense Receipt > New Expense Receipt
+
+Employees can create Expense Receipt records for any purchase they plan on adding to an Expense Claim. These receipts are a 
+lightweight way to attach a receipt document without needing to fill in all the information or have a claim started.
+<img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/expense_receipt.png">
+
+An employee can plug in as much or as little information as they want, and can attach an image or other receipt document (pdf, txt, etc) if desired.
+
+### Expense Claims
 To make a new Expense Claim, go to:
 
 > HR > Expense Claim > New Expense Claim
@@ -9,7 +21,8 @@ To make a new Expense Claim, go to:
 <img class="screenshot" alt="Expense Claim" src="/docs/assets/img/human-resources/expense_claim.png">
 
 Set the Employee ID, date and the list of expenses that are to be claimed and
-“Submit” the record.
+“Submit” the record. Employees can use the Get Unclaimed Receipts button to pull in all unclaimed Expense Receipt records.
+
 
 ### Set Account for Employee
 Set employee's expense account on the employee form, system books an expense amount of an employee under this account.
@@ -21,7 +34,8 @@ Approver for the Expense Claim is selected by an Employee himself. Users to whom
 
 After saving Expense Claim, Employee should [Assign document to Approver](/docs/user/manual/en/using-eprnext/assignment.html). On assignment, approving user will also receive email notification. To automate email notification, you can also setup [Email Alert](/docs/user/manual/en/setting-up/email/email-alerts.html).
 
-Expense Claim Approver can update the “Sanctioned Amounts” against Claimed Amount of an Employee. If submitting, Approval Status should be submitted to Approved or Rejected. If Approved, then Expense Claim gets submitted. If rejected, then Expen
+Expense Claim Approver can update the “Sanctioned Amounts” against Claimed Amount of an Employee. If submitting, Approval Status should be submitted to Approved or Rejected. If Approved, then Expense Claim gets submitted. 
+
 Comments can be added in the Comments section explaining why the claim was approved or rejected.
 
 ### Booking the Expense
