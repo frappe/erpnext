@@ -46,7 +46,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 
 		row += [
 			d.credit_to, d.mode_of_payment, d.project, d.company, d.purchase_order,
-			purchase_receipt, expense_account, d.qty, d.base_net_rate, d.base_net_amount
+			purchase_receipt, expense_account, d.qty, d.stock_uom, d.base_net_rate, d.base_net_amount
 		]
 
 		for tax in tax_accounts:
@@ -76,7 +76,8 @@ def get_columns(additional_table_columns):
 		_("Mode of Payment") + ":Link/Mode of Payment:80", _("Project") + ":Link/Project:80",
 		_("Company") + ":Link/Company:100", _("Purchase Order") + ":Link/Purchase Order:100",
 		_("Purchase Receipt") + ":Link/Purchase Receipt:100", _("Expense Account") + ":Link/Account:140",
-		_("Qty") + ":Float:120", _("Rate") + ":Currency/currency:120", _("Amount") + ":Currency/currency:120"
+		_("Qty") + ":Float:120", _("Stock UOM") + "::100",
+		_("Rate") + ":Currency/currency:120", _("Amount") + ":Currency/currency:120"
 	]
 
 	return columns
@@ -106,8 +107,9 @@ def get_items(filters, additional_query_columns):
 			pi_item.name, pi_item.parent, pi.posting_date, pi.credit_to, pi.company,
 			pi.supplier, pi.remarks, pi.base_net_total, pi_item.item_code, pi_item.item_name,
 			pi_item.item_group, pi_item.project, pi_item.purchase_order, pi_item.purchase_receipt,
-			pi_item.po_detail, pi_item.expense_account, pi_item.qty, pi_item.base_net_rate,
-			pi_item.base_net_amount, pi.supplier_name, pi.mode_of_payment {0}
+			pi_item.po_detail, pi_item.expense_account, pi_item.qty, pi_item.stock_uom, 
+			pi_item.base_net_rate, pi_item.base_net_amount,
+			pi.supplier_name, pi.mode_of_payment {0}
 		from `tabPurchase Invoice` pi, `tabPurchase Invoice Item` pi_item
 		where pi.name = pi_item.parent and pi.docstatus = 1 %s %s
 		order by pi.posting_date desc, pi_item.item_code desc
