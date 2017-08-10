@@ -1,5 +1,3 @@
-# Merging Documents
-
 #Merging Documents
 
 For a document, if you have two records which are identical, and meant for common purpose, you can merge them into one record.

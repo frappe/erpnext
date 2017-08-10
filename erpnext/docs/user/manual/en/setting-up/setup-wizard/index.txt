@@ -1,7 +1,6 @@
 step-1-language
 step-2-currency-and-timezone
 step-3-user-details
-step-4-two-factor-authentication
 step-5-company-details
 step-6-letterhead-and-logo
 step-7-add-users

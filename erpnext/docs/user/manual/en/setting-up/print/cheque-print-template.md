@@ -1,5 +1,3 @@
-# Cheque Print Template
-
 #Cheque Print Template
 
 Business involves making payment to various parties like suppliers and employees. Payment can be made in various modes like cash, NEFT or cheque. If you are making a payment via cheque, you can also create a Print Format for printing Cheque from ERPNext based on the Payment Entry.

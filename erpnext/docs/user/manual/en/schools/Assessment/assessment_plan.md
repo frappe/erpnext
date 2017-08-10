@@ -1,5 +1,3 @@
-# Assessment Plan
-
 #Assessment Plan
 
 To schedule an assessment/examination for a Student Group, for specific Course, create Assessment Plan. In the Assessment Plan, you can also capture details like:

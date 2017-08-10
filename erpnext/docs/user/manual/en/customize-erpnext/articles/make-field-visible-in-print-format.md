@@ -1,5 +1,3 @@
-# Make Field Visible In Print Format
-
 #Make Fields Visible In Print Format
 
 Each transaction has Standard Print Format. In the Standard format, only certain fields are displayed by default. If  user needs field in the Standard format to be visible, it can be customized by using Customize Form tool.

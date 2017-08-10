@@ -1,5 +1,3 @@
-# Assessment Group
-
 #Assessment Group
 
 Assessment Group tree is a master where you can define the hierarchy for examination conducted in your education institute.

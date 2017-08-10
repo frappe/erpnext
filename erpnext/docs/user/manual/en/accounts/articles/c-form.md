@@ -1,5 +1,3 @@
-# C Form
-
 #C-Form
 
 C-Form functionality is only applicable for Indian customers.
