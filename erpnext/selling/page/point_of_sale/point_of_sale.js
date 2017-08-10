@@ -15,25 +15,26 @@ erpnext.PointOfSale = class PointOfSale {
 		this.page = wrapper.page;
 
 		const assets = [
-			'assets/frappe/js/lib/clusterize.js',
+			'assets/erpnext/js/pos/clusterize.js',
 			'assets/erpnext/css/pos.css'
 		];
 
 		frappe.require(assets, () => {
-			this.prepare();
-			this.make();
-			this.bind_events();
+			this.prepare().then(() => {
+				this.make();
+				this.bind_events();
+			});
 		});
 	}
 
 	prepare() {
 		this.set_online_status();
 		this.prepare_menu();
+		return this.get_pos_profile();
 	}
 
 	make() {
 		this.make_dom();
-		this.make_customer_field();
 		this.make_cart();
 		this.make_items();
 	}
@@ -49,6 +50,66 @@ erpnext.PointOfSale = class PointOfSale {
 					this.page.set_indicator(__("Online"), "green");
 				}
 			}
+		});
+	}
+
+	make_dom() {
+		this.wrapper.append(`
+			<div class="pos">
+				<section class="cart-container">
+
+				</section>
+				<section class="item-container">
+
+				</section>
+			</div>
+		`);
+	}
+
+	make_cart() {
+		this.cart = new erpnext.POSCart(this.wrapper.find('.cart-container'));
+	}
+
+	make_items() {
+		this.items = new erpnext.POSItems({
+			wrapper: this.wrapper.find('.item-container'),
+			pos_profile: this.pos_profile,
+			events: {
+				item_click: (item_code) => this.add_item_to_cart(item_code)
+			}
+		});
+	}
+
+	add_item_to_cart(item_code) {
+		const item = this.items.get(item_code);
+		this.cart.add_item(item);
+	}
+
+	bind_events() {
+
+	}
+
+	get_pos_profile() {
+		return frappe.call({
+			method: 'erpnext.stock.get_item_details.get_pos_profile',
+			args: {
+				company: frappe.sys_defaults.company
+			}
+		}).then(r => {
+			this.pos_profile = r.message;
+		});
+	}
+
+	make_sales_invoice_frm() {
+		const dt = 'Sales Invoice';
+		return new Promise(resolve => {
+			frappe.model.with_doctype(dt, function() {
+				const page = $('<div>');
+				const frm = new _f.Frm(dt, page, false);
+				const name = frappe.model.make_new_doc_and_get_name(dt, true);
+				frm.refresh(name);
+				resolve(frm);
+			});
 		});
 	}
 
@@ -76,19 +137,38 @@ erpnext.PointOfSale = class PointOfSale {
 			frappe.set_route('List', 'POS Profile');
 		});
 	}
+}
+
+erpnext.POSCart = class POSCart {
+	constructor(wrapper) {
+		this.wrapper = wrapper;
+		this.items = {};
+		this.make();
+	}
+
+	make() {
+		this.make_dom();
+		this.make_customer_field();
+	}
 
 	make_dom() {
 		this.wrapper.append(`
-			<div class="pos">
-				<section class="customer-container">
-					<div class="customer-field">
+			<div class="customer-field">
+			</div>
+			<div class="cart-wrapper">
+				<div class="list-item-table">
+					<div class="list-item list-item--head">
+						<div class="list-item__content list-item__content--flex-2 text-muted">${__('Item Name')}</div>
+						<div class="list-item__content text-muted text-right">${__('Quantity')}</div>
+						<div class="list-item__content text-muted text-right">${__('Discount')}</div>
+						<div class="list-item__content text-muted text-right">${__('Rate')}</div>
 					</div>
-					<div class="cart-wrapper">
+					<div class="cart-items">
+						<div class="empty-state">
+							<span>No Items added to cart</span>
+						</div>
 					</div>
-				</section>
-				<section class="item-container">
-
-				</section>
+				</div>
 			</div>
 		`);
 	}
@@ -103,61 +183,6 @@ erpnext.PointOfSale = class PointOfSale {
 			parent: this.wrapper.find('.customer-field'),
 			render_input: true
 		});
-	}
-
-	make_cart() {
-		this.cart = new erpnext.POSCart(this.wrapper.find('.cart-wrapper'));
-	}
-
-	make_items() {
-		this.items = new erpnext.POSItems(this.wrapper.find('.item-container'), {
-			item_click: (item_code) => this.add_item_to_cart(item_code)
-		});
-	}
-
-	add_item_to_cart(item_code) {
-		const item = this.items.get(item_code);
-		this.cart.add_item(item);
-	}
-
-	bind_events() {
-
-	}
-
-	make_sales_invoice_frm() {
-		const dt = 'Sales Invoice';
-		frappe.model.with_doctype(dt, function() {
-			const page = $('<div>');
-			const frm = new _f.Frm(dt, page, false);
-			const name = frappe.model.make_new_doc_and_get_name(dt, true);
-			frm.refresh(name);
-		});
-	}
-}
-
-erpnext.POSCart = class POSCart {
-	constructor(wrapper) {
-		this.wrapper = wrapper;
-		this.items = {};
-		this.make();
-	}
-
-	make() {
-		this.wrapper.append(`
-			<div class="list-item-table">
-				<div class="list-item list-item--head">
-					<div class="list-item__content list-item__content--flex-2 text-muted">${__('Item Name')}</div>
-					<div class="list-item__content text-muted text-right">${__('Quantity')}</div>
-					<div class="list-item__content text-muted text-right">${__('Discount')}</div>
-					<div class="list-item__content text-muted text-right">${__('Rate')}</div>
-				</div>
-				<div class="cart-items">
-					<div class="empty-state">
-						<span>No Items added to cart</span>
-					</div>
-				</div>
-			</div>
-		`);
 	}
 
 	add_item(item) {
@@ -240,9 +265,11 @@ erpnext.POSCart = class POSCart {
 }
 
 erpnext.POSItems = class POSItems {
-	constructor(wrapper, events) {
+	constructor({wrapper, pos_profile, events}) {
 		this.wrapper = wrapper;
+		this.pos_profile = pos_profile;
 		this.items = {};
+
 		this.make_dom();
 		this.make_fields();
 
@@ -432,7 +459,7 @@ erpnext.POSItems = class POSItems {
 		return template;
 	}
 
-	get_items(start = 0, page_length = 2000) {
+	get_items(start = 0, page_length = 20) {
 		return new Promise(res => {
 			frappe.call({
 				method: "frappe.desk.reportview.get",
