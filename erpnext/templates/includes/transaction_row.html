@@ -1,31 +1,16 @@
 <div class="web-list-item transaction-list-item">
 	<a href="/{{ pathname }}/{{ doc.name }}">
 		<div class="row">
-			<div class="col-sm-3">
-				<span class="indicator small {{ doc.indicator_color or "darkgrey" }}">
+			<div class="col-sm-4" style='margin-top: -3px;'>
+				<span class="indicator small {{ doc.indicator_color or ("blue" if doc.docstatus==1 else "darkgrey") }}">
 				{{ doc.name }}</span>
 				<div class="small text-muted transaction-time"
 					title="{{ frappe.utils.format_datetime(doc.modified, "medium") }}">
-					{{ frappe.utils.format_datetime(doc.modified, "medium") }}
+					{{ frappe.utils.global_date_format(doc.modified) }}
 				</div>
-				{% if doc.doctype == 'Quotation'%}
-				<div class="small text-muted valid-till">
-					Valid Till {{ doc.valid_till }}
-				</div>
-				{% endif %}
 			</div>
-			<div class="col-sm-6">
-				<span class="small text-muted customer-supplier">
-					{% if doc.doctype == 'Supplier Quotation' %}
-						<b>{{ doc.supplier_name}}</b>
-					{% else %}
-						<b>{{ doc.customer_name}}</b>
-					{% endif %}
-				</span>
-				<div class="small text-muted contact">
-					Contact : {{ doc.contact_display}}
-				</div >
-				<div class="small text-muted items-preview ellipsis ">
+			<div class="col-sm-5">
+				<div class="small text-muted items-preview ellipsis">
 					{{ doc.items_preview }}
 				</div>
 			</div>

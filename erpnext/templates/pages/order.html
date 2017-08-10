@@ -7,48 +7,38 @@
 
 {% block title %}{{ doc.name }}{% endblock %}
 
-{% block header %}<h1>{{ doc.name }}</h1>{% endblock %}
+{% block header %}
+	<h1>{{ doc.name }}</h1>
+{% endblock %}
+
+{% block header_actions %}
+<a class='btn btn-xs btn-default' href='/printview?doctype={{ doc.doctype}}&name={{ doc.name }}&format={{ print_format }}' target="_blank" rel="noopener noreferrer">{{ _("Print") }}</a>
+{% endblock %}
 
 {% block page_content %}
 
 <div class="row transaction-subheading">
     <div class="col-xs-6">
-        <span class="indicator {{ doc.indicator_color or "darkgrey" }}">
+        <span class="indicator {{ doc.indicator_color or ("blue" if doc.docstatus==1 else "darkgrey") }}">
             {{ doc.indicator_title or doc.status or "Submitted" }}
         </span>
 	</div>
     <div class="col-xs-6 text-muted text-right small">
         {{ frappe.utils.formatdate(doc.transaction_date, 'medium') }}
     </div>
-    <div class="col-xs-6 text-muted text-right">
-		<a class='text-muted small' href='/printview?doctype={{ doc.doctype}}&name={{ doc.name }}
-		&format={{ print_format }}' target="_blank" rel="noopener noreferrer">
-            <i class='fa fa-print'></i> {{ _("Print") }}</a>
-    </div>
 </div>
 
-<div class="row customer-supplier-info">
-    <div class="col-xs-6">
-        <span>
-            {% if doc.doctype == 'Supplier Quotation' %}
-                <b>{{ doc.supplier_name}}</b>
-            {% else %}
-                <b>{{ doc.customer_name}}</b>
-            {% endif %}
-        </span>
-	</div>
-    {% if doc.doctype == 'Quotation'%}
-    <div class="col-xs-6 text-muted text-right small">
-        {{ _("Valid Till") }} {{ doc.valid_till }}
-    </div>
-    {% endif %}
-</div>
-
-<div class="row transaction-contact">
-    <div class="col-xs-6 text-muted small">
-        {{ doc.contact_display }}
-    </div>
-</div>
+<p class='small' style='padding-top: 15px;'>
+{% if doc.doctype == 'Supplier Quotation' %}
+    <b>{{ doc.supplier_name}}</b>
+{% else %}
+    <b>{{ doc.customer_name}}</b>
+{% endif %}
+{% if doc.contact_display %}
+	<br>
+	{{ doc.contact_display }}
+{% endif %}
+</p>
 
 {% if doc._header %}
 {{ doc._header }}
@@ -114,7 +104,7 @@
 			{% endif %}
 		{% endif %}
 	</div>
-	
+
 {% if attachments %}
 <div class="order-item-table">
 	<div class="row order-items order-item-header text-muted">
