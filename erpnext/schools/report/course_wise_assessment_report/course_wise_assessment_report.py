@@ -59,7 +59,7 @@ def execute(filters=None):
 			from `tabAssessment Result` ar, `tabAssessment Result Detail` ard
 			where ar.assessment_plan in (%s) and ar.name=ard.parent and ar.docstatus=1
 			order by ard.assessment_criteria''' %', '.join(['%s']*len(assessment_plan_list)),
-			tuple(assessment_plan_list), as_dict=1, debug=True)
+			tuple(assessment_plan_list), as_dict=1)
 
 		for result in assessment_result:
 			if "total_score" in result_dict[result.student]:
@@ -121,8 +121,11 @@ def execute(filters=None):
 
 	columns = get_column(assessment_criteria_list, total_maximum_score)
 	chart = get_chart()
+	data_to_be_printed = [{
+		"assessment_plan": ", ".join(assessment_plan_list)
+	}]
 
-	return columns, data, None, chart
+	return columns, data, None, chart, data_to_be_printed
 
 def get_column(assessment_criteria, total_maximum_score):
 	columns = [{

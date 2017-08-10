@@ -1,5 +1,3 @@
-# Pos View
-
 #POS View
 
 POS (point of sale) view renders form in a different layout, optimized for the quick selection of items. This view has primarily been designed for the retail business.

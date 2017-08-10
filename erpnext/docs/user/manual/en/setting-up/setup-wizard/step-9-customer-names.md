@@ -1,10 +1,9 @@
-# Step 7: Customers
+# Step 9: Customers
 
 Enter your Customer names and the contact person from that organisation.
 
 
-<img alt="Customers" class="screenshot"
-src="/docs/assets/img/setup-wizard/step-8.png">
+<img alt="Customers" class="screenshot" src="/docs/assets/img/setup-wizard/step-8.png">
 
 ---
 

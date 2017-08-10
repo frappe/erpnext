@@ -1,5 +1,3 @@
-# Sales Invoice From Timesheet
-
 #Sales Invoice from Timesheet
 
 Customer can be invoiced based on total no. of hours your Employees has worked for that Customer. Timesheet can be used to track actual no. of hours Employee has worked. For example, in the IT services domain, clients are billed based on man-hour bases, where per hour billing cost is pre-determined.s

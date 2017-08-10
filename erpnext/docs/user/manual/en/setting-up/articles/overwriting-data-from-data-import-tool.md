@@ -1,5 +1,3 @@
-# Overwriting Data From Data Import Tool
-
 #Overwriting Data from Data Import Tool
 
 Data Import Tool allows importing documents (like customers, Suppliers, Orders, Invoices etc.) from spreadsheet file into ERPNext. The very same tool can also be used for overwrite values in the existing documents.

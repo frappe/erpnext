@@ -1,5 +1,3 @@
-# Opening Stock Balance Entry For The Serialized And Batch Item
-
 #Opening Stock Balance Entry for the Serialized and Batch Item
 
 Items for which Serial No. and Batch No. is maintained, opening stock balance entry for them is update via Stock Entry. [Click here to learn how serialized inventory is managed in ERPNext](/docs/user/manual/en/stock/serial-no.html).

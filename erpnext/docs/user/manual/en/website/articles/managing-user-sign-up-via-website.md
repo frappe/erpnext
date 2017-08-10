@@ -1,5 +1,3 @@
-# Managing User Sign Up Via Website
-
 #Customer / Supplier Signup
 
 Your Customer and Suppliers can signup to your ERPNext account by following Signup option on the Login Page.
