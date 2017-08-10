@@ -38,10 +38,6 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 		var me = this;
 
-		if (doc.valid_till && frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) < 0) {
-			this.frm.set_intro(__("Validity period of this quotation has ended"));
-		}
-
 		if (doc.__islocal) {
 			this.frm.set_value('valid_till', frappe.datetime.add_months(doc.transaction_date, 1))
 		}

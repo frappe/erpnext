@@ -50,7 +50,8 @@ calendars = ["Task", "Production Order", "Leave Application", "Sales Order", "Ho
 
 fixtures = ["Web Form"]
 
-website_generators = ["Item Group", "Item", "BOM", "Sales Partner", "Job Opening", "Student Admission"]
+website_generators = ["Item Group", "Item", "BOM", "Sales Partner",
+	"Job Opening", "Student Admission"]
 
 website_context = {
 	"favicon": 	"/assets/erpnext/images/favicon.png",
@@ -83,7 +84,7 @@ website_route_rules = [
 	{"from_route": "/quotations/<path:name>", "to_route": "order",
 		"defaults": {
 			"doctype": "Quotation",
-			"parents": [{"label": _("Quotations"), "route": "quotation"}]
+			"parents": [{"label": _("Quotations"), "route": "quotations"}]
 		}
 	},
 	{"from_route": "/shipments", "to_route": "Delivery Note"},
