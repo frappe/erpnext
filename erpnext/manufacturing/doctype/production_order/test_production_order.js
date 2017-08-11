@@ -111,8 +111,8 @@ QUnit.test("test: production order", function (assert) {
 		() => frappe.timeout(0.5),
 		() => click_make(),
 		() => {
-			assert.equal(cur_frm.doc.total_incoming_value, "105700",
-				"Incoming cost is correct"); // Price of each item x5, values are in USD
+			assert.equal(cur_frm.doc.total_incoming_value, "99104.51",
+				"Incoming cost is correct"+cur_frm.doc.total_incoming_value); // Price of each item x5, values are in USD
 			assert.equal(cur_frm.doc.total_outgoing_value, "99000",
 				"Outgoing cost is correct"); // Price of each item x5, values are in USD
 			assert.equal(cur_frm.doc.total_incoming_value - cur_frm.doc.total_outgoing_value, cur_frm.doc.value_difference,
