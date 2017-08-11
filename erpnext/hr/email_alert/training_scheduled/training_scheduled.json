@@ -10,7 +10,7 @@
  "idx": 0, 
  "is_standard": 1, 
  "message": "<h3>{{_(\"Training Event\")}}</h3>\n<p>{{ message }}</p>\n\n<h4>{{_(\"Details\")}}</h4>\n{{_(\"Event Name\")}}: <a href=\"{{ event_link }}\">{{ name }}</a>\n<br>{{_(\"Event Location\")}}: {{ location }}\n<br>{{_(\"Start Time\")}}: {{ start_time }}\n<br>{{_(\"End Time\")}}: {{ end_time }}\n<br>{{_(\"Attendance\")}}: {{ attendance }}\n", 
- "modified": "2017-08-11 03:13:40.519614", 
+ "modified": "2017-08-11 04:28:01.782271", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Training Scheduled", 
@@ -20,5 +20,5 @@
    "email_by_document_field": "employee_emails"
   }
  ], 
- "subject": "{{ _(\"Training Scheduled\") }}"
+ "subject": "Training Scheduled: {{ doc.name }}"
 }
