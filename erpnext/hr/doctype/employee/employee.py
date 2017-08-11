@@ -289,3 +289,13 @@ def create_user(employee, user = None):
 	})
 	user.insert()
 	return user.name
+
+def get_employee_emails(employee_list):
+	'''Returns list of employee emails either based on user_id or company_email'''
+	employee_emails = []
+	for employee in employee_list:
+		user, email = frappe.db.get_value('Employee', employee, ['user_id', 'company_email'])
+		if user or email:
+			employee_emails.append(user or email)
+
+	return employee_emails

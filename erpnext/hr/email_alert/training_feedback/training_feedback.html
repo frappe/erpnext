@@ -1,0 +1,6 @@
+<p>{{ _("Hello") }},</p>
+
+<p>You attended training {{ frappe.utils.get_link_to_form(
+	"Training Event", doc.training_event) }}</p>
+
+<p>{{ _("Please share your feedback to the training by clicking on 'Training Feedback' and then 'New'") }}</p>
