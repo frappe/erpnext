@@ -51,7 +51,6 @@ QUnit.test("test: supplier quotation", function(assert) {
 			assert.ok($('.btn-print-print').is(':visible'), "Print Format Available");
 			assert.ok($("table > tbody > tr > td:nth-child(3) > div").text().includes("Test Product 4"), "Print Preview Works As Expected");
 		},
-		
 		() => cur_frm.print_doc(),
 		() => frappe.timeout(1),
 		() => frappe.click_button('Get items from'),

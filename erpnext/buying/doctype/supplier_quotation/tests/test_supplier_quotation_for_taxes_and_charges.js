@@ -56,7 +56,6 @@ QUnit.test("test: supplier quotation with taxes and charges", function(assert) {
 		() => frappe.tests.click_button('Submit'),
 		() => frappe.tests.click_button('Yes'),
 		() => frappe.timeout(0.3),
-		
 		() => done()
 	]);
 });
