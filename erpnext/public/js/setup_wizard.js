@@ -189,33 +189,6 @@ var erpnext_slides = [
 				slide.form.fields_dict.fy_end_date.set_value(year_end_date);
 			});
 		}
-	},
-
-	{
-		// Users
-		name: 'users',
-		domains: ["all"],
-		title: __("Add Users"),
-		help: __("Add users to your organization, other than yourself"),
-		add_more: 1,
-		max_count: 3,
-		fields: [
-			{fieldtype:"Section Break"},
-			{fieldtype:"Data", fieldname:"user_fullname",
-				label:__("Full Name"), static: 1},
-			{fieldtype:"Data", fieldname:"user_email", label:__("Email ID"),
-				placeholder:__("user@example.com"), options: "Email", static: 1},
-			{fieldtype:"Column Break"},
-			{fieldtype: "Check", fieldname: "user_sales",
-				label:__("Sales"), "default": 1, static: 1,
-				hidden: frappe.setup.domain==='Education' ? 1 : 0},
-			{fieldtype: "Check", fieldname: "user_purchaser",
-				label:__("Purchaser"), "default": 1, static: 1,
-				hidden: frappe.setup.domain==='Education' ? 1 : 0},
-			{fieldtype: "Check", fieldname: "user_accountant",
-				label:__("Accountant"), "default": 1, static: 1,
-				hidden: frappe.setup.domain==='Education' ? 1 : 0},
-		]
 	}
 ];
 

@@ -11,6 +11,7 @@ from frappe import _
 from frappe.utils.file_manager import save_file
 from .default_website import website_maker
 import install_fixtures
+from .sample_data import make_sample_data
 from erpnext.accounts.doctype.account.account import RootNotEditable
 from frappe.core.doctype.communication.comment import add_info_comment
 from erpnext.setup.setup_wizard.domainify import setup_domain
@@ -24,7 +25,7 @@ def setup_complete(args=None):
 	create_price_lists(args)
 	create_fiscal_year_and_company(args)
 	create_sales_tax(args)
-	create_users(args)
+	create_employee_for_self(args)
 	set_defaults(args)
 	create_territories()
 	create_feed_and_todo()
@@ -48,6 +49,16 @@ def setup_complete(args=None):
 
 	frappe.db.commit()
 	frappe.clear_cache()
+
+	try:
+		make_sample_data(args.get('domain'))
+		frappe.clear_cache()
+	except:
+		# clear message
+		if frappe.message_log:
+			frappe.message_log.pop()
+
+		pass
 
 def create_fiscal_year_and_company(args):
 	if (args.get('fy_start_date')):
@@ -360,7 +371,7 @@ def login_as_first_user(args):
 	if args.get("email") and hasattr(frappe.local, "login_manager"):
 		frappe.local.login_manager.login_as(args.get("email"))
 
-def create_users(args):
+def create_employee_for_self(args):
 	if frappe.session.user == 'Administrator':
 		return
 
@@ -374,50 +385,6 @@ def create_users(args):
 	})
 	emp.flags.ignore_mandatory = True
 	emp.insert(ignore_permissions = True)
-
-	for i in xrange(1,5):
-		email = args.get("user_email_" + str(i))
-		fullname = args.get("user_fullname_" + str(i))
-		if email:
-			if not fullname:
-				fullname = email.split("@")[0]
-
-			parts = fullname.split(" ", 1)
-
-			user = frappe.get_doc({
-				"doctype": "User",
-				"email": email,
-				"first_name": parts[0],
-				"last_name": parts[1] if len(parts) > 1 else "",
-				"enabled": 1,
-				"user_type": "System User"
-			})
-
-			# default roles
-			user.append_roles("Projects User", "Stock User", "Support Team")
-
-			if args.get("user_sales_" + str(i)):
-				user.append_roles("Sales User", "Sales Manager", "Accounts User")
-			if args.get("user_purchaser_" + str(i)):
-				user.append_roles("Purchase User", "Purchase Manager", "Accounts User")
-			if args.get("user_accountant_" + str(i)):
-				user.append_roles("Accounts Manager", "Accounts User")
-
-			user.flags.delay_emails = True
-
-			if not frappe.db.get_value("User", email):
-				user.insert(ignore_permissions=True)
-
-				# create employee
-				emp = frappe.get_doc({
-					"doctype": "Employee",
-					"employee_name": fullname,
-					"user_id": email,
-					"status": "Active",
-					"company": args.get("company_name")
-				})
-				emp.flags.ignore_mandatory = True
-				emp.insert(ignore_permissions = True)
 
 # Schools
 def create_academic_term():

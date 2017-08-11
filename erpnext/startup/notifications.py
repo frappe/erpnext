@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+import frappe
 
 def get_notification_config():
 	notifications =  { "for_doctype":
@@ -67,13 +67,50 @@ def get_notification_config():
 		},
 
 		"user_progress": {
-			"Company": 1,
-			"Customers": frappe.db.count("Customer") > 0,
-			"Suppliers": frappe.db.count("Supplier") > 0,
-			"Products": frappe.db.count("Item") > 0,
-			"Taxes": 0,
-			"Sales_Target": 0
-		}
+			"Company": {
+				"doctype" : "Company",
+				"min_count": 0
+			},
+			"Customers": {
+				"doctype" : "Customer",
+				"min_count": 0
+			},
+			"Suppliers": {
+				"doctype" : "Supplier",
+				"min_count": 0
+			},
+			"Products": {
+				"doctype" : "Item",
+				"min_count": 0
+			},
+			"Sales_Target": {
+				"doctype": "Company",
+				"default": "company",
+				"field": "monthly_sales_target",
+				"min_value": 0
+			},
+			"Programs": {
+				"doctype" : "Program",
+				"min_count": 0
+			},
+			"Courses": {
+				"doctype" : "Course",
+				"min_count": 0
+			},
+			"Instructors": {
+				"doctype" : "Instructor",
+				"min_count": 0
+			},
+			"Rooms": {
+				"doctype" : "Room",
+				"min_count": 0
+			},
+			"Users": {
+				"doctype": "User",
+				"min_count": 3
+			}
+		},
+
 	}
 
 	doctype = [d for d in notifications.get('for_doctype')]
