@@ -30,6 +30,7 @@ erpnext.PointOfSale = class PointOfSale {
 	prepare() {
 		this.set_online_status();
 		this.prepare_menu();
+		this.make_sales_invoice_frm()
 		return this.get_pos_profile();
 	}
 
@@ -108,6 +109,7 @@ erpnext.PointOfSale = class PointOfSale {
 				const frm = new _f.Frm(dt, page, false);
 				const name = frappe.model.make_new_doc_and_get_name(dt, true);
 				frm.refresh(name);
+				frm.doc.items = [];
 				resolve(frm);
 			});
 		});
@@ -178,7 +180,10 @@ erpnext.POSCart = class POSCart {
 			df: {
 				fieldtype: 'Link',
 				label: 'Customer',
-				options: 'Customer'
+				options: 'Customer',
+				onchange: (e) => {
+					cur_frm.set_value('customer', this.customer_field.value);
+				}
 			},
 			parent: this.wrapper.find('.customer-field'),
 			render_input: true
@@ -195,6 +200,10 @@ erpnext.POSCart = class POSCart {
 			this.update_quantity(_item);
 		} else {
 			// add it to this.items
+			item['qty'] = 1;
+			this.child = cur_frm.add_child('items', item)
+			cur_frm.script_manager.trigger("item_code", this.child.doctype, this.child.name);
+
 			const _item = {
 				doc: item,
 				quantity: 1,
@@ -219,6 +228,12 @@ erpnext.POSCart = class POSCart {
 	update_quantity(item) {
 		this.wrapper.find(`.list-item[data-item-name="${item.doc.item_code}"] .quantity`)
 			.text(item.quantity);
+
+			$.each(cur_frm.doc["items"] || [], function(i, d) {
+				if (d.item_code == item.doc.item_code) {
+					frappe.model.set_value(d.doctype, d.name, "qty", d.qty + 1);
+				}
+			});
 	}
 
 	remove_item(item_code) {
