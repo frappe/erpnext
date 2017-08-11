@@ -55,6 +55,9 @@ erpnext/stock/doctype/material_request/tests/test_material_request.js
 erpnext/stock/doctype/material_request/tests/test_material_request_type_material_issue.js
 erpnext/stock/doctype/material_request/tests/test_material_request_type_material_transfer.js
 erpnext/stock/doctype/material_request/tests/test_material_request_type_manufacture.js
+erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_material_issue.js
+erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_material_receipt.js
+erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_material_transfer.js
 erpnext/schools/doctype/grading_scale/test_grading_scale.js
 erpnext/schools/doctype/assessment_criteria_group/test_assessment_criteria_group.js
 erpnext/schools/doctype/assessment_criteria/test_assessment_criteria.js
@@ -71,7 +74,6 @@ erpnext/schools/doctype/student_group_creation_tool/test_student_group_creation_
 erpnext/schools/doctype/student_leave_application/test_student_leave_application.js
 erpnext/schools/doctype/student_attendance_tool/test_student_attendance_tool.js
 erpnext/schools/doctype/student_attendance/test_student_attendance.js
-erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_material_issue.js
 erpnext/schools/doctype/assessment_group/test_assessment_group.js
 erpnext/schools/doctype/assessment_plan/test_assessment_plan.js
 erpnext/schools/doctype/assessment_result/test_assessment_result.js
