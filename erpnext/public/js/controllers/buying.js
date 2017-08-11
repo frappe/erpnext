@@ -347,6 +347,12 @@ erpnext.buying.get_items_from_product_bundle = function(frm) {
 			freeze: true,
 			callback: function(r) {
 				if(!r.exc && r.message) {
+					if($.isArray(frm.doc.items) && frm.doc.items.length > 0) {
+						// remove first item row if empty
+						if(!frm.doc.items[0].item_code) {
+							frm.doc.items = frm.doc.items.splice(1);
+						}
+					}
 					for ( var i=0; i< r.message.length; i++ ) {
 						var d = frm.add_child("items");
 						var item = r.message[i];
