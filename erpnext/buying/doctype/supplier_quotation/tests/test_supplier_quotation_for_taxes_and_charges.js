@@ -3,6 +3,7 @@ QUnit.module('Buying');
 QUnit.test("test: supplier quotation with taxes and charges", function(assert) {
 	assert.expect(3);
 	let done = assert.async();
+	let supplier_quotation_name;
 
 	frappe.run_serially([
 		() => {
@@ -18,7 +19,7 @@ QUnit.test("test: supplier quotation with taxes and charges", function(assert) {
 				]},
 			]);
 		},
-
+		() => {supplier_quotation_name = cur_frm.doc.name;},
 		() => frappe.set_route('Form', 'Purchase Taxes and Charges Template', 'New Purchase Taxes and Charges Template'),
 		() => frappe.timeout(1),
 		() => {
@@ -37,7 +38,7 @@ QUnit.test("test: supplier quotation with taxes and charges", function(assert) {
 			]);
 		},
 		() => cur_frm.save(),
-		() => frappe.set_route('Form', 'Supplier Quotation', 'SQTN-00006'),
+		() => frappe.set_route('Form', 'Supplier Quotation', supplier_quotation_name),
 		() => frappe.timeout(1),
 		() => {
 			return frappe.tests.set_form_values(cur_frm, [
