@@ -81,3 +81,4 @@ erpnext/schools/doctype/assessment_result/test_assessment_result.js
 erpnext/schools/doctype/assessment_result_tool/test_assessment_result_tool.js
 erpnext/buying/doctype/supplier/test_supplier.js
 erpnext/buying/doctype/request_for_quotation/test_request_for_quotation.js
+erpnext/hr/doctype/training_event/test_training_event.js
