@@ -15,7 +15,7 @@ def get_context(context):
 		context.doc.set_indicator()
 
 	if show_attachments():
-                context.attachments = get_attachments(frappe.form_dict.doctype, frappe.form_dict.name)
+		context.attachments = get_attachments(frappe.form_dict.doctype, frappe.form_dict.name)
 
 	context.parents = frappe.form_dict.parents
 	context.title = frappe.form_dict.name
@@ -28,5 +28,6 @@ def get_context(context):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
 
 def get_attachments(dt, dn):
-        return frappe.get_all("File", fields=["name", "file_name", "file_url", "is_private"],
-                              filters = {"attached_to_name": dn, "attached_to_doctype": dt, "is_private":0})
+        return frappe.get_all("File",
+			fields=["name", "file_name", "file_url", "is_private"],
+			filters = {"attached_to_name": dn, "attached_to_doctype": dt, "is_private":0})

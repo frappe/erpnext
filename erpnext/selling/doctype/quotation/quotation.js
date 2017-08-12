@@ -9,6 +9,15 @@ frappe.ui.form.on('Quotation', {
 		frm.custom_make_buttons = {
 			'Sales Order': 'Make Sales Order'
 		}
+	},
+	refresh: function(frm) {
+		frm.trigger("set_label");
+	},
+	quotation_to: function(frm) {
+		frm.trigger("set_label");
+	},
+	set_label: function(frm) {
+		frm.fields_dict.customer_address.set_label(__(frm.doc.quotation_to + " Address"));
 	}
 });
 
@@ -24,12 +33,10 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	},
 	refresh: function(doc, dt, dn) {
 		this._super(doc, dt, dn);
+		doctype = doc.quotation_to == 'Customer' ? 'Customer':'Lead';
+		frappe.dynamic_link = {doc: this.frm.doc, fieldname: doctype.toLowerCase(), doctype: doctype}
 
 		var me = this;
-
-		if (doc.valid_till && frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) < 0) {
-			this.frm.set_intro(__("Validity period of this quotation has ended"));
-		}
 
 		if (doc.__islocal) {
 			this.frm.set_value('valid_till', frappe.datetime.add_months(doc.transaction_date, 1))

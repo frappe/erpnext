@@ -1,0 +1,419 @@
+{
+    "country_code": "ar", 
+    "name": "Argentina - Chart of Accounts", 
+    "tree": {
+        "1.0.0.00.00 - ACTIVO": {
+            "1.1.0.00.00 - ACTIVO CORRIENTE": {
+                "1.1.1.00.00 - CAJA Y BANCOS": {
+                    "1.1.1.01.00 - CAJAS": {
+                        "1.1.1.01.01 - Caja": {}, 
+                        "1.1.1.01.02 - Caja chica": {}, 
+                        "1.1.1.01.03 - Caja en Moneda Extranjera": {}, 
+                        "1.1.1.01.04 - Valores a depositar": {}, 
+                        "1.1.1.01.05 - Tarjetas - Cupones": {}, 
+                        "account_type": "Cash"
+                    }, 
+                    "1.1.1.02.00 - BANCOS": {
+                        "1.1.1.02.01 - Banco de la Nacio\u0301n Argentina(ejemplo) c/c en": {}, 
+                        "1.1.1.02.03 - Banco del exterior": {}, 
+                        "account_type": "Bank"
+                    }
+                }, 
+                "1.1.2.00.00 - INVERSIONES TEMPORARIAS": {
+                    "1.1.2.01.00 - INVERSIONES EN ACCIONES": {
+                        "1.1.2.01.01 - Acciones": {
+                            "account_type": "Receivable"
+                        }
+                    }, 
+                    "1.1.2.02.00 - DEPO\u0301SITOS A PLAZO FIJO": {
+                        "1.1.2.02.01 - Depo\u0301sitos a Plazo Fijo en pesos": {
+                            "account_type": "Receivable"
+                        }, 
+                        "1.1.2.02.02 - Depo\u0301sitos a Plazo Fijo en moneda": {
+                            "account_type": "Receivable"
+                        }
+                    }
+                }, 
+                "1.1.3.00.00 - CRE\u0301DITOS POR VENTAS DE SERVICIOS": {
+                    "1.1.3.01.00 - DEUDORES EN CTA. CTE": {
+                        "1.1.3.01.01 - Deudores locales": {
+                            "account_type": "Receivable"
+                        }, 
+                        "1.1.3.01.02 - Deudores del exterior": {
+                            "account_type": "Receivable"
+                        }, 
+                        "1.1.3.01.03 - Deudores Morosos": {
+                            "account_type": "Chargeable"
+                        }, 
+                        "1.1.3.01.04 - Deudores en Gestio\u0301n Judicial": {}
+                    }, 
+                    "1.1.3.02.00 - Documentos a cobrar por Vas. de Servicios": {
+                        "account_type": "Receivable"
+                    }, 
+                    "1.1.3.03.00 - Previsio\u0301n para deudores incobrables": {}
+                }, 
+                "1.1.4.00.00 - OTROS CRE\u0301DITOS CORRIENTES": {
+                    "1.1.4.01.00 - CRE\u0301DITOS IMPOSITIVOS CORRIENTES": {
+                        "1.1.4.01.01 - Anticipos Impuesto a las Ganancias": {}, 
+                        "1.1.4.01.02 - Anticipos Impuesto a los Ingresos Brutos": {}, 
+                        "1.1.4.01.03 - Percepciones y Retenciones Impto. a las Ganancias": {}, 
+                        "1.1.4.01.04 - Percepciones y Retenciones Impto. a los": {}, 
+                        "1.1.4.01.05 - IVA Cre\u0301dito Fiscal": {}, 
+                        "1.1.4.01.06 - IVA Cre\u0301dito Fiscal Exportacio\u0301n": {}, 
+                        "1.1.4.01.07 - IVA Saldo a Favor Te\u0301cnico": {}, 
+                        "1.1.4.01.08 - IVA Saldo a Favor Te\u0301cnico": {}, 
+                        "1.1.4.01.09 - IVA Saldo a Favor de Libre": {}, 
+                        "1.1.4.01.10 - Percepciones y Retenciones de IVA": {}, 
+                        "1.1.4.01.11 - Cre\u0301ditos por quebrantos impositivos no": {}, 
+                        "1.1.4.01.12 - Activos por Impuesto Diferido (Ctes.)": {}
+                    }, 
+                    "1.1.4.02.00 - CRE\u0301DITOS DIVERSOS CORRIENTES": {
+                        "1.1.4.02.01 - Cuentas Particulares Directores": {}, 
+                        "1.1.4.02.02 - Cuentas Particulares Socios/Accionistas": {}, 
+                        "1.1.4.02.03 - Anticipos a Proveedores (No cong.": {
+                            "account_type": "Receivable"
+                        }, 
+                        "1.1.4.02.04 - Anticipos de Sueldos": {}, 
+                        "1.1.4.02.05 - Pre\u0301stamos al personal": {}, 
+                        "1.1.4.02.06 - Depo\u0301sitos pendientes de acreditacio\u0301n": {}, 
+                        "1.1.4.02.07 - Arrendamiento pagado por adelantado": {}
+                    }
+                }, 
+                "1.1.5.00.00 - OTROS ACTIVOS CORRIENTES": {
+                    "is_group": 1
+                }, 
+                "1.1.6.00.00 - INVENTARIOS": {
+                    "account_type": "Stock", 
+                    "is_group": 1
+                }
+            }, 
+            "1.2.0.00.00 - ACTIVO NO CORRIENTE": {
+                "1.2.1.00.00 - INVERSIONES PERMANENTES": {
+                    "1.2.1.01.00 - BONOS DE DEUDA": {
+                        "1.2.1.01.01 - Ti\u0301tulos Deuda Pu\u0301blica (Pesos)": {
+                            "is_group": 1
+                        }, 
+                        "1.2.1.01.02 - Bonex": {}
+                    }, 
+                    "1.2.1.02.00 - DEPO\u0301SITOS A PLAZO FIJO NO": {
+                        "1.2.1.02.01 - Depo\u0301sitos a plazo fijo en pesos (no cte.)": {}, 
+                        "1.2.1.02.02 - Depo\u0301sitos a plazo fijo en moneda": {}
+                    }, 
+                    "1.2.1.03.00 - INVERSIONES EN BIENES DEPRECIABLES": {
+                        "1.2.1.03.01 - Inversiones en Inmuebles Valores": {}, 
+                        "1.2.1.03.02 - Inversiones en Inmuebles": {}, 
+                        "1.2.1.03.03 - Amortizaciones Acumuladas Inversiones": {}
+                    }
+                }, 
+                "1.2.2.00.00 - BIENES DE USO": {
+                    "1.2.2.01.00 - INMUEBLES": {
+                        "1.2.2.01.01 - Inmuebles Valores originales": {
+                            "account_type": "Fixed Asset"
+                        }, 
+                        "1.2.2.01.02 - Inmuebles Actualizaciones": {}, 
+                        "1.2.2.01.03 - Amortizaciones Acumuladas Inmuebles": {
+                            "account_type": "Depreciation"
+                        }
+                    }, 
+                    "1.2.2.02.00 - MAQUINARIAS Y EQUIPOS": {
+                        "1.2.2.02.01 - Maquinarias y Equipos Valores de origen": {
+                            "account_type": "Fixed Asset"
+                        }, 
+                        "1.2.2.02.02 - Maquinarias y Equipos Actualizaciones": {}, 
+                        "1.2.2.02.03 - Amortizaciones Acumuladas Maquinarias": {
+                            "account_type": "Depreciation"
+                        }
+                    }, 
+                    "1.2.2.03.00 - MUEBLES Y U\u0301TILES": {
+                        "1.2.2.03.01 - Muebles y U\u0301tiles Valores de Origen": {
+                            "account_type": "Fixed Asset"
+                        }, 
+                        "1.2.2.03.02 - Muebles y U\u0301tiles Actualizaciones": {}, 
+                        "1.2.2.03.03 - Amortizaciones Acumuladas Muebles y": {
+                            "account_type": "Depreciation"
+                        }
+                    }, 
+                    "1.2.2.04.00 - RODADOS": {
+                        "1.2.2.04.01 - Rodados Valores Originales": {
+                            "account_type": "Fixed Asset"
+                        }, 
+                        "1.2.2.04.02 - Rodados Actualizaciones": {}, 
+                        "1.2.2.04.03 - Amortizaciones Acumuladas Rodados": {
+                            "account_type": "Depreciation"
+                        }
+                    }, 
+                    "1.2.2.07.00 - TERRENOS": {
+                        "1.2.2.07.01 - Terrenos Valores Originales": {
+                            "account_type": "Fixed Asset"
+                        }, 
+                        "1.2.2.07.02 - Terrenos Actualizaciones": {}
+                    }, 
+                    "1.2.2.08.00 - INSTALACIONES": {
+                        "1.2.2.08.01 - Instalaciones Valores Originales": {
+                            "account_type": "Fixed Asset"
+                        }, 
+                        "1.2.2.08.02 - Instalaciones Ajuste": {}, 
+                        "1.2.2.08.03 - Amortizaciones Acumuladas": {
+                            "account_type": "Depreciation"
+                        }
+                    }, 
+                    "1.2.2.09.00 - HERRAMIENTAS": {
+                        "1.2.2.09.01 - Herramientas Valores Originales": {
+                            "account_type": "Fixed Asset"
+                        }, 
+                        "1.2.2.09.02 - Herramientas Ajuste": {}, 
+                        "1.2.2.09.03 - Amortizaciones Acumuladas": {
+                            "account_type": "Depreciation"
+                        }
+                    }
+                }, 
+                "1.2.3.00.00 - ACTIVOS INTANGIBLES": {
+                    "1.2.3.01.00 - MARCAS Y PATENTES": {
+                        "1.2.3.01.01 - Marcas y Patentes Valores Originales": {}, 
+                        "1.2.3.01.02 - Marcas y Patentes Actualizaciones": {}, 
+                        "1.2.3.01.03 - Amortizaciones Acumuladas Marcas y": {}
+                    }
+                }, 
+                "1.2.4.00.00 - CRE\u0301DITOS POR VENTA DE SERVICIOS": {
+                    "1.2.4.01.00 - DEUDORES NO CORRIENTES": {
+                        "1.2.4.01.01 - Deudores Locales (No Ctes.)": {}
+                    }, 
+                    "1.2.4.02.00 - Documentos a cobrar por Vtas. de Servicios": {}
+                }, 
+                "1.2.5.00.00 - OTROS CRE\u0301DITOS NO CORRIENTES": {
+                    "1.2.5.01.00 - CRE\u0301DITOS IMPOSITIVOS NO CORRIENTES": {
+                        "1.2.5.01.01 - Activos por Impto. Diferido (No Ctes.)": {}, 
+                        "1.2.5.01.02 - Cre\u0301ditos por Quebrantos Impositivos no": {}
+                    }, 
+                    "1.2.5.02.00 - CRE\u0301DITOS DIVERSOS NO CORRIENTES": {
+                        "1.2.5.02.01 - Cuentas Particulares Directores (No": {}, 
+                        "1.2.5.02.02 - Cuentas Particulares Socios/Accionistas": {}
+                    }
+                }, 
+                "1.2.6.00.00 - OTROS ACTIVOS NO CORRIENTES": {
+                    "1.2.6.01.00 - Llave de Negocio": {}
+                }
+            }, 
+            "root_type": "Asset"
+        }, 
+        "2.0.0.00.00 - PASIVO": {
+            "2.1.0.00.00 - PASIVO CORRIENTE": {
+                "2.1.1.00.00 - DEUDAS COMERCIALES CORRIENTES": {
+                    "2.1.1.02.00 - ACREEDORES": {
+                        "2.1.1.02.01 - Acreedores Locales (Ctes.)": {
+                            "account_type": "Payable"
+                        }
+                    }
+                }, 
+                "2.1.2.00.00 - REMUNERACIONES Y CAGAS SOCIALES": {
+                    "2.1.2.02.00 - DEUDAS PREVISIONALES": {
+                        "2.1.2.02.01 - Jubilaciones a pagar": {}, 
+                        "2.1.2.02.02 - ART a pagar": {}, 
+                        "2.1.2.02.03 - Obra Social a pagar": {}, 
+                        "2.1.2.02.04 - SAC a pagar": {}, 
+                        "2.1.2.02.05 - Vacaciones a pagar": {}
+                    }, 
+                    "2.1.2.03.00 - Sueldos y Jornales a pagar": {
+                        "account_type": "Chargeable"
+                    }
+                }, 
+                "2.1.3.00.00 - CARGAS FISCALES": {
+                    "2.1.3.01.00 - IMPUESTO AL VALOR AGREGADO": {
+                        "2.1.3.01.01 - IVA De\u0301bito Fiscal": {}, 
+                        "2.1.3.01.02 - IVA De\u0301bito Fiscal Sobretasa": {}, 
+                        "2.1.3.01.03 - Percepciones y Retenciones efectuadas": {}, 
+                        "2.1.3.01.04 - IVA a Pagar": {}
+                    }, 
+                    "2.1.3.02.00 - INGRESOS BRUTOS": {
+                        "2.1.3.02.01 - Impuesto a los Ingresos Brutos a Pagar": {}, 
+                        "2.1.3.02.02 - Percepciones efectuadas Ingresos": {}
+                    }, 
+                    "2.1.3.03.00 - IMPUESTO A LAS GANANCIAS": {
+                        "2.1.3.03.01 - Impuesto Ganancia Mi\u0301nima Presunta a": {}, 
+                        "2.1.3.03.02 - Impuesto a las Ganancias a Pagar": {}, 
+                        "2.1.3.03.03 - Pasivo por Impuesto Diferido": {}, 
+                        "2.1.3.03.04 - Percepciones y Retenciones efectuadas": {}
+                    }
+                }, 
+                "2.1.4.00.00 - DEUDAS FINANCIERAS": {
+                    "2.1.4.01.00 - Pre\u0301stamo Banco de la Nacio\u0301n Argentina (Cte.)": {}, 
+                    "2.1.4.02.00 - Pre\u0301stamo Banco de la Provincia de Bs. As.": {}
+                }, 
+                "2.1.5.00.00 - OTRAS DEUDAS CORRIENTES": {
+                    "2.1.5.01.00 - Dividendos a pagar (Ctes.)": {}, 
+                    "2.1.5.02.00 - Honorarios Directores a Pagar (Ctes.)": {}
+                }, 
+                "2.1.6.00.00 - PROVISIONES": {
+                    "2.1.6.01.00 - Provisio\u0301n para despidos": {}, 
+                    "2.1.6.02.00 - Provisio\u0301n para SAC": {}
+                }, 
+                "2.1.7.00.00 - INVENTARIOS POR PAGAR": {
+                    "2.1.7.01.00 - Inventario entrante no facturado": {
+                        "account_type": "Stock Received But Not Billed"
+                    }
+                }
+            }, 
+            "2.2.0.00.00 - PASIVO NO CORRIENTE": {
+                "2.2.1.00.00 - DEUDAS FINANCIERAS NO CORRIENTES": {
+                    "2.2.1.01.00 - Pre\u0301stamo Banco de la Nacio\u0301n Argentina(ejemplo) (No": {}
+                }, 
+                "2.2.2.00.00 - CARGAS FISCALES NO CORRIENTES": {
+                    "2.2.2.01.00 - Moratoria": {}
+                }, 
+                "2.2.3.00.00 - DEUDAS COMERCIALES": {
+                    "2.2.3.01.00 - ACREEDORES": {
+                        "2.2.3.01.01 - Acreedores Locales (No Ctes.)": {}
+                    }
+                }, 
+                "2.2.4.00.00 - OTRAS DEUDAS NO CORRIENTES": {
+                    "is_group": 1
+                }
+            }, 
+            "root_type": "Liability"
+        }, 
+        "3.0.0.00.00 - PATRIMONIO NETO": {
+            "3.1.0.00.00 - APORTE DE LOS PROPIETARIOS": {
+                "3.1.1.00.00 - CAPITAL SOCIAL": {
+                    "3.1.1.01.00 - Acciones en Circulacio\u0301n": {}, 
+                    "3.1.1.02.00 - Aportes Irrevocables": {}, 
+                    "3.1.1.03.00 - Acciones a distribuir": {}, 
+                    "3.1.1.04.00 - Capital": {}, 
+                    "3.1.1.05.00 - Ajuste del Capital": {}
+                }
+            }, 
+            "3.3.0.00.00 - RESERVAS": {
+                "3.3.1.00.00 - Reserva Legal": {}, 
+                "3.3.2.00.00 - Reserva Facultativa": {}, 
+                "3.3.3.00.00 - Reserva Estatutaria": {}, 
+                "3.3.4.00.00 - Ajuste Reserva Legal": {}
+            }, 
+            "3.4.0.00.00 - RESULTADOS ACUMULADOS": {
+                "3.4.1.00.00 - Resultado del Ejercicio": {}, 
+                "3.4.2.00.00 - Resultado Ejercicios Anteriores": {}, 
+                "3.4.3.00.00 - A.R.E.A (P)": {}, 
+                "3.4.4.00.00 - A.R.E.A (G)": {}
+            }, 
+            "root_type": "Equity"
+        }, 
+        "4.1.0.00.00 - INGRESOS": {
+            "4.1.0.00.00 - INGRESOS ORDINARIOS": {
+                "4.1.1.00.00 - INGRESOS POR SERVICIOS PRESTADOS": {
+                    "4.1.1.01.00 - Ventas de Servicios": {}, 
+                    "4.1.1.02.00 - Ingresos de fuente extranjera": {}
+                }, 
+                "4.1.3.00.00 - RESULTADOS FINANCIEROS Y POR": {
+                    "4.1.3.01.00 - Intereses Ganados": {}, 
+                    "4.1.3.02.00 - Resultado por Tenencia de acciones": {}, 
+                    "4.1.3.03.00 - Diferencia tipo de cambio": {}, 
+                    "4.1.3.04.00 - Resultado por tenencia (positivo)": {}
+                }, 
+                "4.1.4.00.00 - OTROS INGRESOS ORDINARIOS": {
+                    "is_group": 1
+                }
+            }, 
+            "4.2.0.00.00 - INGRESOS EXTRAORDINARIOS": {
+                "4.2.1.00.00 - Utilidad Venta Bienes de Uso": {}, 
+                "4.2.2.00.00 - Reintegro de Seguros": {}, 
+                "4.2.3.00.00 - Otros ingresos extraordinarios": {}
+            }, 
+            "root_type": "Income"
+        }, 
+        "5.0.0.00.00 - EGRESOS": {
+            "5.1.0.00.00 - EGRESOS ORDINARIOS": {
+                "5.1.2.00.00 - GASTOS DE EXPLOTACIO\u0301N": {
+                    "5.1.2.01.00 - Sueldos y Jornales - Explotacio\u0301n": {}, 
+                    "5.1.2.02.00 - Cargas Sociales - Explotacio\u0301n": {}, 
+                    "5.1.2.03.00 - Energi\u0301a - Explotacio\u0301n": {}, 
+                    "5.1.2.04.00 - Honorarios Profesionales - Explotacio\u0301n": {}, 
+                    "5.1.2.05.00 - Ropa de trabajo - Explotacio\u0301n": {}, 
+                    "5.1.2.06.00 - Seguros - Explotacio\u0301n": {}, 
+                    "5.1.2.07.00 - Despidos - Explotacio\u0301n": {}, 
+                    "5.1.2.08.00 - Comida del personal - Explotacio\u0301n": {}, 
+                    "5.1.2.09.00 - Cuota me\u0301dica a cargo del empleador": {}, 
+                    "5.1.2.10.00 - Amortizaciones - Explotacio\u0301n": {}, 
+                    "5.1.2.11.00 - Repuestos y Reparaciones - Explotacio\u0301n": {}, 
+                    "5.1.2.12.00 - Gastos de limpieza - Explotacio\u0301n": {}, 
+                    "5.1.2.13.00 - Mantenimiento - Explotacio\u0301n": {}, 
+                    "5.1.2.14.00 - Combustibles y Lubricantes - Explotacio\u0301n": {}, 
+                    "5.1.2.15.00 - Insumos diversos - Explotacio\u0301n": {}, 
+                    "5.1.2.16.00 - Fletes - Explotacio\u0301n": {}
+                }, 
+                "5.1.3.00.00 - GASTOS DE ADMINISTRACIO\u0301N": {
+                    "5.1.3.01.00 - Sueldos - Administracio\u0301n": {}, 
+                    "5.1.3.02.00 - Cargas Sociales - Administracio\u0301n": {}, 
+                    "5.1.3.03.00 - Honorarios - Administracio\u0301n": {}, 
+                    "5.1.3.04.00 - Amortizaciones - Administracio\u0301n": {}, 
+                    "5.1.3.05.00 - Via\u0301ticos - Administracio\u0301n": {}, 
+                    "5.1.3.06.00 - Libreri\u0301a y Papeleri\u0301a - Administracio\u0301n": {}, 
+                    "5.1.3.07.00 - Certificaciones y Sellados": {}, 
+                    "5.1.3.08.00 - Gastos Bancarios - Administracio\u0301n": {}, 
+                    "5.1.3.09.00 - Gastos Varios - Administracio\u0301n": {}, 
+                    "5.1.3.10.00 - Insumos Computacio\u0301n - Administracio\u0301n": {}, 
+                    "5.1.3.11.00 - Correspondencia - Administracio\u0301n": {}, 
+                    "5.1.3.12.00 - Mantenimiento - Administracio\u0301n": {}, 
+                    "5.1.3.13.00 - Energi\u0301a - Administracio\u0301n": {}, 
+                    "5.1.3.14.00 - Seguros - Administracio\u0301n": {}, 
+                    "5.1.3.15.00 - Costo sobre ventas": {
+                        "account_type": "Cost of Goods Sold"
+                    }, 
+                    "5.1.3.16.00 - Gastos de Valoracion": {
+                        "account_type": "Expenses Included In Valuation"
+                    }
+                }, 
+                "5.1.4.00.00 - GASTOS DE COMERCIALIZACIO\u0301N": {
+                    "5.1.4.01.00 - Sueldos - Comercializacio\u0301n": {}, 
+                    "5.1.4.02.00 - Cargas Sociales - Comercializacio\u0301n": {}, 
+                    "5.1.4.03.00 - Publicidad - Comercializacio\u0301n": {}, 
+                    "5.1.4.04.00 - Amortizaciones - Comercializacio\u0301n": {}, 
+                    "5.1.4.05.00 - Seguros - Comercializacio\u0301n": {}, 
+                    "5.1.4.06.00 - Honorarios - Comercializacio\u0301n": {}, 
+                    "5.1.4.07.00 - Gastos Varios - Comercializacio\u0301n": {}, 
+                    "5.1.4.08.00 - Fletes - Comercializacio\u0301n": {}, 
+                    "5.1.4.09.00 - IVA no computable - Comercializacio\u0301n": {}, 
+                    "5.1.4.10.00 - Descuentos otorgados a clientes": {}, 
+                    "5.1.4.11.00 - Comisiones de terceros": {}, 
+                    "5.1.4.12.00 - Quebrantos por deudores": {}, 
+                    "5.1.4.13.00 - Via\u0301ticos - Comercializacio\u0301n": {}
+                }, 
+                "5.1.5.00.00 - GASTOS FINANCIEROS": {
+                    "5.1.5.01.00 - Intereses y Gastos bancarios": {}, 
+                    "5.1.5.02.00 - Intereses a Proveedores": {}, 
+                    "5.1.5.03.00 - Intereses y recargos impositivos": {}, 
+                    "5.1.5.04.00 - Diferencia de Cambio": {}, 
+                    "5.1.5.05.00 - Diferencia de Cambio Balance en": {}, 
+                    "5.1.5.06.00 - Resultado por tenencia (negativo)": {}, 
+                    "5.1.5.08.00 - Amortizaciones Inversiones en bienes": {}, 
+                    "5.1.5.09.00 - R.E.C.P.A.M": {}, 
+                    "5.1.5.10.00 - Resultado por tenencia negativo de": {}
+                }, 
+                "5.1.7.00.00 - IMPUESTOS": {
+                    "5.1.7.01.00 - Impuesto a las Ganancias": {}, 
+                    "5.1.7.02.00 - Impuesto a las Ganancia Mi\u0301nima": {}, 
+                    "5.1.7.03.00 - Impuesto a los Ingresos Brutos": {}, 
+                    "5.1.7.04.00 - Tasa municipal": {}, 
+                    "5.1.7.05.00 - Impuestos Territoriales": {}, 
+                    "5.1.7.06.00 - Impuesto s/ los De\u0301bitos y Cre\u0301ditos": {}, 
+                    "5.1.7.07.00 - Impuestos internos y varios": {}
+                }, 
+                "5.1.8.00.00 - GASTOS SOBRE EXISTENCIAS": {
+                    "5.1.8.01.00 - Costo sobre ventas": {
+                        "account_type": "Cost of Goods Sold"
+                    }, 
+                    "5.1.8.02.00 - Gastos de Valoracion": {
+                        "account_type": "Expenses Included In Valuation"
+                    }, 
+                    "5.1.8.03.00 - Ajuste de Existencia": {
+                        "account_type": "Stock Adjustment"
+                    }
+                }
+            }, 
+            "5.2.0.00.00 - EGRESOS EXTRAORDINARIOS": {
+                "5.2.1.00.00 - Pe\u0301rdida por venta bienes de uso": {}, 
+                "5.2.2.00.00 - Amortizaciones extraordinarias": {}, 
+                "5.2.3.00.00 - Ajuste del valor de los bienes": {}, 
+                "5.2.4.00.00 - Ajuste de Amortizaciones acumuladas de": {}
+            }, 
+            "root_type": "Expense"
+        }
+    }
+}

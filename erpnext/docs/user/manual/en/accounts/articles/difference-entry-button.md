@@ -1,5 +1,3 @@
-# Difference Entry Button
-
 #Difference Entry
 
 As per accounting standards, debit in a accounting entry must be equal to credit. If not, system does allow submission of accounting transaction, thereby stops ledger posting. In ERPNext, on saving accounting entry, system validates if debit and credit is tallying.

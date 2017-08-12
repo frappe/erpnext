@@ -1,5 +1,3 @@
-# Adding File As A Attachment
-
 #Adding File as a Attachment
 
 ERPNext allows to attach files with documents. User with a read permission on particular document will also be able to access files attached with it.

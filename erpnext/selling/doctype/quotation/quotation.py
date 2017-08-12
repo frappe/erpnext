@@ -14,6 +14,14 @@ form_grid_templates = {
 }
 
 class Quotation(SellingController):
+	def set_indicator(self):
+		if self.docstatus==1:
+			self.indicator_color = 'blue'
+			self.indicator_title = 'Submitted'
+		if self.valid_till and getdate(self.valid_till) < getdate(nowdate()):
+			self.indicator_color = 'darkgrey'
+			self.indicator_title = 'Expired'
+
 	def validate(self):
 		super(Quotation, self).validate()
 		self.set_status()

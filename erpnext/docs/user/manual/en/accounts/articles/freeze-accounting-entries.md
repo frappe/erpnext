@@ -1,5 +1,3 @@
-# Freeze Accounting Entries
-
 #Freeze Accounting Entries
 
 To freeze accounting entries upto a certain date, follow below given steps.

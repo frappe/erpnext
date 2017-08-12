@@ -1,5 +1,3 @@
-# What Is The Differences Of Total And Valuation In Tax And Charges
-
 #Purchase Tax or Charges Categories
 
 Consider Tax or Charge field in Purchase Taxes and Charges master has three values.

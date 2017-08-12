@@ -2,8 +2,7 @@
 
 Enter Users Profile Details like Name, User ID and preferred password.
 
-<img alt="User" class="screenshot"
-src="/docs/assets/img/setup-wizard/step-3.png">
+<img alt="User" class="screenshot" src="/docs/assets/img/setup-wizard/step-3.png">
 
 ---
 
