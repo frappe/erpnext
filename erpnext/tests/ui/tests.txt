@@ -5,6 +5,7 @@ erpnext/accounts/doctype/account/test_make_tax_account.js
 erpnext/accounts/doctype/pricing_rule/test_pricing_rule.js
 erpnext/accounts/doctype/sales_taxes_and_charges_template/test_sales_taxes_and_charges_template.js
 erpnext/accounts/doctype/shipping_rule/test_shipping_rule.js
+erpnext/accounts/doctype/currency_exchange_settings/test_currency_exchange_settings.js
 erpnext/crm/doctype/lead/test_lead.js
 erpnext/crm/doctype/opportunity/test_opportunity.js
 erpnext/selling/doctype/quotation/test_quotation.js
