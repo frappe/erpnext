@@ -31,5 +31,5 @@ QUnit.test("test: Currency Exchange Settings doesn't allow negatives", function 
 const unchecked_if_checked = function(frm, field_name, fn){
 	if (frm.doc.allow_stale) {
 		return fn(field_name);
-	};
-}
+	}
+};
