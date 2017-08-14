@@ -1,3 +1,5 @@
+/* global Clusterize */
+
 frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
@@ -5,11 +7,11 @@ frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	wrapper.pos = new erpnext.PointOfSale(wrapper);
-	cur_pos = wrapper.pos;
+	wrapper.pos = new PointOfSale(wrapper);
+	window.cur_pos = wrapper.pos;
 }
 
-erpnext.PointOfSale = class PointOfSale {
+class PointOfSale {
 	constructor(wrapper) {
 		this.wrapper = $(wrapper).find('.layout-main-section');
 		this.page = wrapper.page;
@@ -20,24 +22,25 @@ erpnext.PointOfSale = class PointOfSale {
 		];
 
 		frappe.require(assets, () => {
-			this.prepare().then(() => {
-				this.make();
-				this.bind_events();
-			});
+			this.make();
 		});
 	}
 
-	prepare() {
-		this.set_online_status();
-		this.prepare_menu();
-		this.make_sales_invoice_frm()
-		return this.get_pos_profile();
-	}
-
 	make() {
-		this.make_dom();
-		this.make_cart();
-		this.make_items();
+		return frappe.run_serially([
+			() => {
+				this.prepare_dom();
+				this.prepare_menu();
+				this.set_online_status();
+			},
+			() => this.make_sales_invoice_frm(),
+			() => this.setup_pos_profile(),
+			() => {
+				this.make_cart();
+				this.make_items();
+				this.bind_events();
+			}
+		]);
 	}
 
 	set_online_status() {
@@ -54,7 +57,7 @@ erpnext.PointOfSale = class PointOfSale {
 		});
 	}
 
-	make_dom() {
+	prepare_dom() {
 		this.wrapper.append(`
 			<div class="pos">
 				<section class="cart-container">
@@ -68,29 +71,64 @@ erpnext.PointOfSale = class PointOfSale {
 	}
 
 	make_cart() {
-		this.cart = new erpnext.POSCart(this.wrapper.find('.cart-container'));
-	}
-
-	make_items() {
-		this.items = new erpnext.POSItems({
-			wrapper: this.wrapper.find('.item-container'),
-			pos_profile: this.pos_profile,
+		this.cart = new POSCart({
+			wrapper: this.wrapper.find('.cart-container'),
 			events: {
-				item_click: (item_code) => this.add_item_to_cart(item_code)
+				customer_change: (customer) => this.cur_frm.set_value('customer', customer),
+				increase_qty: (item_code) => {
+					this.add_item_to_cart(item_code);
+				},
+				decrease_qty: (item_code) => {
+					this.add_item_to_cart(item_code, -1);
+				}
 			}
 		});
 	}
 
-	add_item_to_cart(item_code) {
-		const item = this.items.get(item_code);
-		this.cart.add_item(item);
+	make_items() {
+		this.items = new POSItems({
+			wrapper: this.wrapper.find('.item-container'),
+			pos_profile: this.pos_profile,
+			events: {
+				item_click: (item_code) => {
+					if(!this.cur_frm.doc.customer) {
+						frappe.throw(__('Please select a customer'));
+					}
+					this.add_item_to_cart(item_code);
+				}
+			}
+		});
+	}
+
+	add_item_to_cart(item_code, qty = 1) {
+
+		if(this.cart.exists(item_code)) {
+			// increase qty by 1
+			this.cur_frm.doc.items.forEach((item) => {
+				if (item.item_code === item_code) {
+					frappe.model.set_value(item.doctype, item.name, 'qty', item.qty + qty);
+					// update cart
+					this.cart.add_item(item);
+				}
+			});
+			return;
+		}
+
+		// add to cur_frm
+		const item = this.cur_frm.add_child('items', { item_code: item_code });
+		this.cur_frm.script_manager
+			.trigger('item_code', item.doctype, item.name)
+			.then(() => {
+				// update cart
+				this.cart.add_item(item);
+			});
 	}
 
 	bind_events() {
 
 	}
 
-	get_pos_profile() {
+	setup_pos_profile() {
 		return frappe.call({
 			method: 'erpnext.stock.get_item_details.get_pos_profile',
 			args: {
@@ -104,13 +142,14 @@ erpnext.PointOfSale = class PointOfSale {
 	make_sales_invoice_frm() {
 		const dt = 'Sales Invoice';
 		return new Promise(resolve => {
-			frappe.model.with_doctype(dt, function() {
+			frappe.model.with_doctype(dt, () => {
 				const page = $('<div>');
 				const frm = new _f.Frm(dt, page, false);
 				const name = frappe.model.make_new_doc_and_get_name(dt, true);
 				frm.refresh(name);
 				frm.doc.items = [];
-				resolve(frm);
+				this.cur_frm = frm;
+				resolve();
 			});
 		});
 	}
@@ -141,16 +180,18 @@ erpnext.PointOfSale = class PointOfSale {
 	}
 }
 
-erpnext.POSCart = class POSCart {
-	constructor(wrapper) {
+class POSCart {
+	constructor({wrapper, events}) {
 		this.wrapper = wrapper;
-		this.items = {};
+		this.events = events;
 		this.make();
+		this.bind_events();
 	}
 
 	make() {
 		this.make_dom();
 		this.make_customer_field();
+		this.make_numpad();
 	}
 
 	make_dom() {
@@ -172,7 +213,10 @@ erpnext.POSCart = class POSCart {
 					</div>
 				</div>
 			</div>
+			<div class="number-pad-container">
+			</div>
 		`);
+		this.$cart_items = this.wrapper.find('.cart-items');
 	}
 
 	make_customer_field() {
@@ -181,8 +225,9 @@ erpnext.POSCart = class POSCart {
 				fieldtype: 'Link',
 				label: 'Customer',
 				options: 'Customer',
+				reqd: 1,
 				onchange: (e) => {
-					cur_frm.set_value('customer', this.customer_field.value);
+					this.events.customer_change.apply(null, [this.customer_field.get_value()]);
 				}
 			},
 			parent: this.wrapper.find('.customer-field'),
@@ -190,96 +235,113 @@ erpnext.POSCart = class POSCart {
 		});
 	}
 
-	add_item(item) {
-		const { item_code } = item;
-		const _item = this.items[item_code];
-
-		if (_item) {
-			// exists, increase quantity
-			_item.quantity += 1;
-			this.update_quantity(_item);
-		} else {
-			// add it to this.items
-			item['qty'] = 1;
-			this.child = cur_frm.add_child('items', item)
-			cur_frm.script_manager.trigger("item_code", this.child.doctype, this.child.name);
-
-			const _item = {
-				doc: item,
-				quantity: 1,
-				discount: 2,
-				rate: 2
+	make_numpad() {
+		this.numpad = new NumberPad({
+			wrapper: this.wrapper.find('.number-pad-container'),
+			onclick: (btn_value) => {
+				// on click
+				console.log(btn_value);
 			}
-			Object.assign(this.items, {
-				[item_code]: _item
-			});
-			this.add_item_to_cart(_item);
-		}
+		});
 	}
 
-	add_item_to_cart(item) {
+	add_item(item) {
 		this.wrapper.find('.cart-items .empty-state').hide();
-		const $item = $(this.get_item_html(item))
-		$item.appendTo(this.wrapper.find('.cart-items'));
-		// $item.addClass('added');
-		// this.wrapper.find('.cart-items').append(this.get_item_html(item))
-	}
 
-	update_quantity(item) {
-		this.wrapper.find(`.list-item[data-item-name="${item.doc.item_code}"] .quantity`)
-			.text(item.quantity);
-
-			$.each(cur_frm.doc["items"] || [], function(i, d) {
-				if (d.item_code == item.doc.item_code) {
-					frappe.model.set_value(d.doctype, d.name, "qty", d.qty + 1);
-				}
-			});
-	}
-
-	remove_item(item_code) {
-		delete this.items[item_code];
-
-		// this.refresh();
-	}
-
-	refresh() {
-		const item_codes = Object.keys(this.items);
-		const html = item_codes
-			.map(item_code => this.get_item_html(item_code))
-			.join("");
-		this.wrapper.find('.cart-items').html(html);
-	}
-
-	get_item_html(_item) {
-
-		let item;
-		if (typeof _item === "object") {
-			item = _item;
+		if (this.exists(item.item_code)) {
+			// update quantity
+			this.update_item(item);
+		} else {
+			// add to cart
+			const $item = $(this.get_item_html(item));
+			$item.appendTo(this.$cart_items);
 		}
-		else if (typeof _item === "string") {
-			item = this.items[_item];
-		}
+		this.highlight_item(item.item_code);
+		this.scroll_to_item(item.item_code);
+	}
 
+	update_item(item) {
+		const $item = this.$cart_items.find(`[data-item-code="${item.item_code}"]`);
+		if(item.qty > 0) {
+			$item.find('.quantity input').val(item.qty);
+			$item.find('.discount').text(item.discount_percentage);
+			$item.find('.rate').text(item.rate);
+		} else {
+			$item.remove();
+		}
+	}
+
+	exists(item_code) {
+		let $item = this.$cart_items.find(`[data-item-code="${item_code}"]`);
+		return $item.length > 0;
+	}
+
+	highlight_item(item_code) {
+		const $item = this.$cart_items.find(`[data-item-code="${item_code}"]`);
+		$item.addClass('highlight');
+		setTimeout(() => $item.removeClass('highlight'), 1000);
+	}
+
+	scroll_to_item(item_code) {
+		const $item = this.$cart_items.find(`[data-item-code="${item_code}"]`);
+		const scrollTop = $item.offset().top - this.$cart_items.offset().top + this.$cart_items.scrollTop();
+		this.$cart_items.animate({ scrollTop });
+	}
+
+	get_item_html(item) {
 		return `
-			<div class="list-item" data-item-name="${item.doc.item_code}">
+			<div class="list-item" data-item-code="${item.item_code}">
 				<div class="item-name list-item__content list-item__content--flex-2 ellipsis">
-					${item.doc.item_name}
+					${item.item_name}
 				</div>
 				<div class="quantity list-item__content text-right">
-					${item.quantity}
+					${get_quantity_html(item.qty)}
 				</div>
 				<div class="discount list-item__content text-right">
-					${item.discount}
+					${item.discount_percentage}%
 				</div>
 				<div class="rate list-item__content text-right">
 					${item.rate}
 				</div>
 			</div>
 		`;
+
+		function get_quantity_html(value) {
+			return `
+				<div class="input-group input-group-xs">
+					<span class="input-group-btn">
+						<button class="btn btn-default btn-xs" data-action="increment">+</button>
+					</span>
+
+					<input class="form-control" type="number" value="${value}">
+
+					<span class="input-group-btn">
+						<button class="btn btn-default btn-xs" data-action="decrement">-</button>
+					</span>
+				</div>
+			`;
+		}
+	}
+
+	bind_events() {
+		const events = this.events;
+		this.$cart_items.on('click',
+			'[data-action="increment"], [data-action="decrement"]', function() {
+				const $btn = $(this);
+				const $item = $btn.closest('.list-item[data-item-code]');
+				const item_code = $item.attr('data-item-code');
+				const action = $btn.attr('data-action');
+
+				if(action === 'increment') {
+					events.increase_qty(item_code);
+				} else if(action === 'decrement') {
+					events.decrease_qty(item_code);
+				}
+			});
 	}
 }
 
-erpnext.POSItems = class POSItems {
+class POSItems {
 	constructor({wrapper, pos_profile, events}) {
 		this.wrapper = wrapper;
 		this.pos_profile = pos_profile;
@@ -439,16 +501,10 @@ erpnext.POSItems = class POSItems {
 						<div class="image-field"
 							style="${!item_image ? 'background-color: #fafbfc;' : ''} border: 0px;"
 						>
-							${!item_image ?
-								`<span class="placeholder-text">
+							${!item_image ? `<span class="placeholder-text">
 									${frappe.get_abbr(item_title)}
-								</span>` :
-								''
-							}
-							${item_image ?
-								`<img src="${item_image}" alt="${item_title}">` :
-								''
-							}
+								</span>` : '' }
+							${item_image ? `<img src="${item_image}" alt="${item_title}">` : '' }
 						</div>
 						<span class="price-info">
 							${item_price}
@@ -509,12 +565,12 @@ erpnext.POSItems = class POSItems {
 						"`tabItem`.`end_of_life`",
 						"`tabItem`.`total_projected_qty`"
 					],
+					filters: [['disabled', '=', '0']],
 					order_by: "`tabItem`.`modified` desc",
 					page_length: page_length,
 					start: start
 				}
-			})
-			.then(r => {
+			}).then(r => {
 				const data = r.message;
 				const items = frappe.utils.dict(data.keys, data.values);
 
@@ -527,5 +583,53 @@ erpnext.POSItems = class POSItems {
 				res(items_dict);
 			});
 		});
+	}
+}
+
+class NumberPad {
+	constructor({wrapper, onclick}) {
+		this.wrapper = wrapper;
+		this.onclick = onclick;
+		this.make_dom();
+		this.bind_events();
+	}
+
+	make_dom() {
+		const button_array = [
+			[1, 2, 3, 'Qty'],
+			[4, 5, 6, 'Disc'],
+			[7, 8, 9, 'Price'],
+			['Del', 0, '.', 'Pay']
+		];
+
+		this.wrapper.html(`
+			<div class="number-pad">
+				${button_array.map(get_row).join("")}
+			</div>
+		`);
+
+		function get_row(row) {
+			return '<div class="num-row">' + row.map(get_col).join("") + '</div>';
+		}
+
+		function get_col(col) {
+			return `<div class="num-col" data-value="${col}"><div>${col}</div></div>`;
+		}
+	}
+
+	bind_events() {
+		// bind click event
+		const me = this;
+		this.wrapper.on('click', '.num-col', function() {
+			const $btn = $(this);
+			me.highlight_button($btn);
+			me.onclick.apply(null, [$btn.attr('data-value')]);
+		});
+	}
+
+	highlight_button($btn) {
+		// const $btn = this.wrapper.find(`[data-value="${value}"]`);
+		$btn.addClass('highlight');
+		setTimeout(() => $btn.removeClass('highlight'), 1000);
 	}
 }
