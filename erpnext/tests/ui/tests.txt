@@ -29,7 +29,6 @@ erpnext/manufacturing/doctype/bom/test_bom.js
 erpnext/projects/doctype/project/project_timesheet.js
 erpnext/hr/doctype/holiday_list/test_holiday_list.js
 erpnext/hr/doctype/branch/test_branch.js
-<<<<<<< a5cb9ae8bdd7c810bf3241ea7525d378b91b05a4
 erpnext/hr/doctype/leave_block_list/test_leave_block_list.js
 erpnext/hr/doctype/department/test_department.js
 erpnext/hr/doctype/designation/test_designation.js
@@ -84,5 +83,4 @@ erpnext/buying/doctype/supplier/test_supplier.js
 erpnext/buying/doctype/request_for_quotation/test_request_for_quotation.js
 erpnext/buying/doctype/supplier_quotation/tests/test_supplier_quotation.js
 erpnext/buying/doctype/supplier_quotation/tests/test_supplier_quotation_for_taxes_and_charges.js
-erpnext/manufacturing/doctype/bom/test_bom.js
 erpnext/hr/doctype/training_event/test_training_event.js
