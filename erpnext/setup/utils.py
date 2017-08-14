@@ -70,13 +70,12 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None):
 	allow_stale_rates = currency_settings.get("allow_stale")
 
 	filters = [
+		["date", "<=", get_datetime_str(transaction_date)],
 		["from_currency", "=", from_currency],
 		["to_currency", "=", to_currency]
 	]
 
-	if allow_stale_rates:
-		filters.append(["date", "<=", get_datetime_str(transaction_date)])
-	else:
+	if not allow_stale_rates:
 		stale_days = currency_settings.get("stale_days")
 		checkpoint_date = add_days(transaction_date, -stale_days)
 		filters.append(["date", ">", get_datetime_str(checkpoint_date)])
