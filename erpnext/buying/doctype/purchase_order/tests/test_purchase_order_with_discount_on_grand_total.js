@@ -17,7 +17,7 @@ QUnit.test("test: purchase order with discount on grand total", function(assert)
 						{"item_code": 'Test Product 4'},
 						{"qty": 5},
 						{"uom": 'Unit'},
-						{"rate": 500 }
+						{"rate": 500 },
 						{"schedule_date": frappe.datetime.add_days(frappe.datetime.now_date(), 1)},
 						{"expected_delivery_date": frappe.datetime.add_days(frappe.datetime.now_date(), 5)},
 						{"warehouse": 'Stores - WP'}
