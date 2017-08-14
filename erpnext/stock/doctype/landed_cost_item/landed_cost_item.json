@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
  "beta": 0, 
@@ -12,6 +13,7 @@
  "engine": "InnoDB", 
  "fields": [
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -22,6 +24,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
    "in_standard_filter": 0, 
    "label": "Item Code", 
@@ -41,6 +44,7 @@
    "width": "100px"
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -51,6 +55,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
    "in_standard_filter": 0, 
    "label": "Description", 
@@ -72,6 +77,7 @@
    "width": "120px"
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -82,6 +88,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Receipt Document Type", 
@@ -101,6 +108,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -111,6 +119,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Receipt Document", 
@@ -130,6 +139,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -140,6 +150,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "length": 0, 
@@ -156,6 +167,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -166,6 +178,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
    "in_standard_filter": 0, 
    "label": "Qty", 
@@ -183,6 +196,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -193,6 +207,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Rate", 
@@ -211,6 +226,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -221,6 +237,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
    "in_standard_filter": 0, 
    "label": "Amount", 
@@ -241,6 +258,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -251,6 +269,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
    "in_standard_filter": 0, 
    "label": "Applicable Charges", 
@@ -269,6 +288,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -279,6 +299,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Purchase Receipt Item", 
@@ -294,19 +315,79 @@
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
+  }, 
+  {
+   "allow_bulk_edit": 0, 
+   "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
+   "columns": 0, 
+   "fieldname": "section_break_11", 
+   "fieldtype": "Section Break", 
+   "hidden": 0, 
+   "ignore_user_permissions": 0, 
+   "ignore_xss_filter": 0, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
+   "in_list_view": 0, 
+   "in_standard_filter": 0, 
+   "length": 0, 
+   "no_copy": 0, 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 0, 
+   "print_hide_if_no_value": 0, 
+   "read_only": 0, 
+   "remember_last_selected_value": 0, 
+   "report_hide": 0, 
+   "reqd": 0, 
+   "search_index": 0, 
+   "set_only_once": 0, 
+   "unique": 0
+  }, 
+  {
+   "allow_bulk_edit": 0, 
+   "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
+   "columns": 0, 
+   "fieldname": "cost_center", 
+   "fieldtype": "Link", 
+   "hidden": 0, 
+   "ignore_user_permissions": 0, 
+   "ignore_xss_filter": 0, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
+   "in_list_view": 0, 
+   "in_standard_filter": 0, 
+   "label": "Cost Center", 
+   "length": 0, 
+   "no_copy": 0, 
+   "options": "Cost Center", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 0, 
+   "print_hide_if_no_value": 0, 
+   "read_only": 0, 
+   "remember_last_selected_value": 0, 
+   "report_hide": 0, 
+   "reqd": 0, 
+   "search_index": 0, 
+   "set_only_once": 0, 
+   "unique": 0
   }
  ], 
+ "has_web_view": 0, 
  "hide_heading": 0, 
  "hide_toolbar": 0, 
  "idx": 1, 
  "image_view": 0, 
  "in_create": 0, 
- "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-12-20 04:50:19.785273", 
+ "modified": "2017-08-08 19:51:36.501765", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Landed Cost Item", 
@@ -315,5 +396,7 @@
  "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 0, 
+ "show_name_in_global_search": 0, 
+ "track_changes": 0, 
  "track_seen": 0
 }
