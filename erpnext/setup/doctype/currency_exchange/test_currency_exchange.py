@@ -33,6 +33,13 @@ class TestCurrencyExchange(unittest.TestCase):
 
 		save_new_records(test_records)
 
+		currency_settings = frappe.get_doc("Currency Exchange Settings", "Currency Exchange Settings")
+		checkpoint = currency_settings.allow_stale
+
+		# Start with allow_stale is True
+		currency_settings.allow_stale = 1
+		currency_settings.save()
+
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-01")
 		self.assertEqual(exchange_rate, 60.0)
 
@@ -45,3 +52,25 @@ class TestCurrencyExchange(unittest.TestCase):
 		# Exchange rate as on 15th Dec, 2015, should be fetched from fixer.io
 		exchange_rate = get_exchange_rate("USD", "INR", "2015-12-15")
 		self.assertFalse(exchange_rate==60)
+
+		# strict currency settings
+		currency_settings.allow_stale = 0
+		currency_settings.stale_days = 1
+		currency_settings.save()
+
+		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-01")
+		self.assertEqual(exchange_rate, 60.0)
+
+		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-15")
+		self.assertEqual(exchange_rate, 0)
+
+		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-30")
+		self.assertEqual(exchange_rate, 62.9)
+
+		# Exchange rate as on 15th Dec, 2015, should be fetched from fixer.io
+		exchange_rate = get_exchange_rate("USD", "INR", "2015-12-15")
+		self.assertFalse(exchange_rate == 60)
+
+		# Reset Currency Exchange Settings
+		currency_settings.allow_stale = 1
+		currency_settings.save()
