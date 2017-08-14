@@ -40,3 +40,4 @@ QUnit.test("test sales Invoice", function(assert) {
 		() => done()
 	]);
 });
+
