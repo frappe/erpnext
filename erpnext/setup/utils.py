@@ -89,8 +89,9 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None):
 		return flt(entries[0].exchange_rate)
 
 	try:
+		allow_stale_status = "stale_allowed" if allow_stale_rates else "no_stale_allowed"
 		cache = frappe.cache()
-		key = "currency_exchange_rate:{0}:{1}".format(from_currency, to_currency)
+		key = "currency_exchange_rate:{0}:{1}:{2}".format(from_currency, to_currency, allow_stale_status)
 		value = cache.get(key)
 
 		if not value:
