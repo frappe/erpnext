@@ -11,6 +11,7 @@ from frappe import msgprint, _
 from erpnext.hr.doctype.process_payroll.process_payroll import get_start_end_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.utilities.transaction_base import TransactionBase
+from frappe.utils.background_jobs import enqueue
 
 class SalarySlip(TransactionBase):
 	def autoname(self):
@@ -396,9 +397,15 @@ class SalarySlip(TransactionBase):
 		receiver = frappe.db.get_value("Employee", self.employee, "prefered_email")
 
 		if receiver:
-			subj = 'Salary Slip - from {0} to {1}'.format(self.start_date, self.end_date)
-			frappe.sendmail([receiver], subject=subj, message = _("Please see attachment"),
-				attachments=[frappe.attach_print(self.doctype, self.name, file_name=self.name)], reference_doctype= self.doctype, reference_name= self.name)
+			email_args = {
+				"recipients": [receiver],
+				"message": _("Please see attachment"),
+				"subject": 'Salary Slip - from {0} to {1}'.format(self.start_date, self.end_date),
+				"attachments": [frappe.attach_print(self.doctype, self.name, file_name=self.name)],
+				"reference_doctype": self.doctype,
+				"reference_name": self.name
+				}
+			enqueue(method=frappe.sendmail, queue='short', timeout=300, async=True, **email_args)
 		else:
 			msgprint(_("{0}: Employee email not found, hence email not sent").format(self.employee_name))
 
