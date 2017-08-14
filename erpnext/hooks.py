@@ -27,6 +27,7 @@ doctype_js = {
 # setup wizard
 setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
 setup_wizard_complete = "erpnext.setup.setup_wizard.setup_wizard.setup_complete"
+setup_wizard_success = "erpnext.setup.setup_wizard.setup_wizard.setup_success"
 
 before_install = "erpnext.setup.install.check_setup_wizard_not_completed"
 after_install = "erpnext.setup.install.after_install"

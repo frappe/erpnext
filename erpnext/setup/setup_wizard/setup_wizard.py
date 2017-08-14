@@ -15,6 +15,7 @@ from .sample_data import make_sample_data
 from erpnext.accounts.doctype.account.account import RootNotEditable
 from frappe.core.doctype.communication.comment import add_info_comment
 from erpnext.setup.setup_wizard.domainify import setup_domain
+from erpnext.setup.doctype.company.company import install_country_fixtures
 
 def setup_complete(args=None):
 	if frappe.db.sql("select name from tabCompany"):
@@ -59,6 +60,10 @@ def setup_complete(args=None):
 			frappe.message_log.pop()
 
 		pass
+
+def setup_success(args=None):
+	company = frappe.db.sql("select name from tabCompany", as_dict=True)[0]["name"]
+	install_country_fixtures(company)
 
 def create_fiscal_year_and_company(args):
 	if (args.get('fy_start_date')):

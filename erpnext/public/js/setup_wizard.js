@@ -7,7 +7,11 @@ frappe.pages['setup-wizard'].on_page_load = function(wrapper) {
 	}
 };
 
-var erpnext_slides = [
+frappe.setup.on("before_load", function () {
+	erpnext.setup.slides_settings.map(frappe.setup.add_slide);
+});
+
+erpnext.setup.slides_settings = [
 	{
 		// Domain
 		name: 'domain',
@@ -29,7 +33,7 @@ var erpnext_slides = [
 		onload: function (slide) {
 			slide.get_input("domain").on("change", function () {
 				frappe.setup.domain = $(this).val();
-				frappe.wizard.refresh_slides();
+				frappe.wizard.refresh_slides_settings();
 			});
 		},
 	},
@@ -215,23 +219,19 @@ erpnext.setup.fiscal_years = {
 	"United Kingdom": ["04-01", "03-31"],
 };
 
-frappe.setup.on("before_load", function () {
-	erpnext_slides.map(frappe.setup.add_slide);
-});
-
-var test_values_edu = {
-	"language": "english",
-	"domain": "Education",
-	"country": "India",
-	"timezone": "Asia/Kolkata",
-	"currency": "INR",
-	"first_name": "Tester",
-	"email": "test@example.com",
-	"password": "test",
-	"company_name": "Hogwarts",
-	"company_abbr": "HS",
-	"company_tagline": "School for magicians",
-	"bank_account": "Gringotts Wizarding Bank",
-	"fy_start_date": "2016-04-01",
-	"fy_end_date": "2017-03-31"
-}
+// var test_values_edu = {
+// 	"language": "english",
+// 	"domain": "Education",
+// 	"country": "India",
+// 	"timezone": "Asia/Kolkata",
+// 	"currency": "INR",
+// 	"first_name": "Tester",
+// 	"email": "test@example.com",
+// 	"password": "test",
+// 	"company_name": "Hogwarts",
+// 	"company_abbr": "HS",
+// 	"company_tagline": "School for magicians",
+// 	"bank_account": "Gringotts Wizarding Bank",
+// 	"fy_start_date": "2016-04-01",
+// 	"fy_end_date": "2017-03-31"
+// }
