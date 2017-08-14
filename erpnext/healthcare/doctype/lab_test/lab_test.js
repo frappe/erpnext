@@ -294,7 +294,7 @@ var send_sms = function(v,frm){
 	var number = v.number.last_value;
 	var messages = v.messages.wrapper.innerText;
 	frappe.call({
-		method: "erpnext.setup.doctype.sms_settings.sms_settings.send_sms",
+		method: "frappe.core.doctype.sms_settings.sms_settings.send_sms",
 		args: {
 			receiver_list: [number],
 			msg: messages
