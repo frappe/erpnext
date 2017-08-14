@@ -1,16 +1,13 @@
-import unittest
+# -*- coding: utf-8 -*-
+# Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
+# See license.txt
+from __future__ import unicode_literals
 
 import frappe
+import unittest
 
 
-class TestAccountsSettings(unittest.TestCase):
-	def tearDown(self):
-		# Just in case `save` method succeeds, we need to take things back to default so that other tests
-		# don't break
-		cur_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		cur_settings.allow_stale = 1
-		cur_settings.save()
-
+class TestCurrencyExchangeSettings(unittest.TestCase):
 	def test_stale_days(self):
 		cur_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
 		cur_settings.allow_stale = 0
