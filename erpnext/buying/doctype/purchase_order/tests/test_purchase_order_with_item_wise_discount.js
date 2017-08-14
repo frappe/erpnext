@@ -19,7 +19,7 @@ QUnit.test("test: purchase order with item wise discount", function(assert) {
 						{"uom": 'Unit'},
 						{"schedule_date": frappe.datetime.add_days(frappe.datetime.now_date(), 1)},
 						{"expected_delivery_date": frappe.datetime.add_days(frappe.datetime.now_date(), 5)},
-						{"warehouse": 'Stores - WP'}
+						{"warehouse": 'Stores - WP'},
 						{"discount_percentage": 20}
 					]
 				]}
