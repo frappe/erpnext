@@ -88,3 +88,6 @@ erpnext/buying/doctype/supplier_quotation/tests/test_supplier_quotation_for_item
 erpnext/buying/doctype/purchase_order/tests/test_purchase_order.js
 erpnext/buying/doctype/purchase_order/tests/test_purchase_order_with_multi_uom.js
 erpnext/buying/doctype/purchase_order/tests/test_purchase_order_get_items.js
+erpnext/buying/doctype/purchase_order/tests/test_purchase_order_with_discount_on_grand_total.js
+erpnext/buying/doctype/purchase_order/tests/test_purchase_order_with_item_wise_discount.js
+erpnext/buying/doctype/purchase_order/tests/test_purchase_order_with_taxes_and_charges.js
