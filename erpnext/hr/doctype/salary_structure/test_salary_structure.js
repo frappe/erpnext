@@ -1,8 +1,8 @@
 QUnit.test("test Salary Structure", function(assert) {
 	assert.expect(6);
 	let done = assert.async();
-	let employee_name1,employee_name2;
-	
+	let employee_name1;
+
 	let salary_structure = (ename1,ename2) => {
 		frappe.run_serially([
 			() => frappe.db.get_value('Employee', {'employee_name': ename1}, 'name'),
@@ -51,14 +51,14 @@ QUnit.test("test Salary Structure", function(assert) {
 			() => frappe.click_button('Create'),
 			() => {
 			// To check if all the fields are correctly set
-				assert.ok(cur_frm.doc.employees[0].employee_name.includes('Test Employee 1') && 
-					cur_frm.doc.employees[1].employee_name.includes('Test Employee 2'),
-						'Employee names are correctly set');
+				assert.ok(cur_frm.doc.employees[0].employee_name.includes('Test Employee 1') &&
+					cur_frm.doc.employees[1].employee_name.includes('Test Employee 3'),
+				'Employee names are correctly set');
 
-				assert.ok(cur_frm.doc.employees[0].base==25000, 
+				assert.ok(cur_frm.doc.employees[0].base==25000,
 					'Base value for first employee is correctly set');
 
-				assert.ok(cur_frm.doc.employees[1].base==30000, 
+				assert.ok(cur_frm.doc.employees[1].base==30000,
 					'Base value for second employee is correctly set');
 
 				assert.ok(cur_frm.doc.earnings[0].formula.includes('base * .80'),
@@ -73,7 +73,7 @@ QUnit.test("test Salary Structure", function(assert) {
 		]);
 	};
 	frappe.run_serially([
-		() => salary_structure('Test Employee 1','Test Employee 2'),
+		() => salary_structure('Test Employee 1','Test Employee 3'),
 		() => frappe.timeout(10),
 		() => done()
 	]);

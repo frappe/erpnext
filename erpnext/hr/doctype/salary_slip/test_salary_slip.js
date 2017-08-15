@@ -20,20 +20,20 @@ QUnit.test("test salary slip", function(assert) {
 			// To check if all the calculations are correctly done
 				if(ename === 'Test Employee 1')
 				{
-					assert.ok(cur_frm.doc.gross_pay==24000, 
+					assert.ok(cur_frm.doc.gross_pay==24000,
 						'Gross amount for first employee is correctly calculated');
-					assert.ok(cur_frm.doc.total_deduction==4800, 
+					assert.ok(cur_frm.doc.total_deduction==4800,
 						'Deduction amount for first employee is correctly calculated');
-					assert.ok(cur_frm.doc.net_pay==19200, 
+					assert.ok(cur_frm.doc.net_pay==19200,
 						'Net amount for first employee is correctly calculated');
 				}
-				if(ename === 'Test Employee 2')
+				if(ename === 'Test Employee 3')
 				{
-					assert.ok(cur_frm.doc.gross_pay==28800, 
+					assert.ok(cur_frm.doc.gross_pay==28800,
 						'Gross amount for second employee is correctly calculated');
-					assert.ok(cur_frm.doc.total_deduction==5760, 
+					assert.ok(cur_frm.doc.total_deduction==5760,
 						'Deduction amount for second employee is correctly calculated');
-					assert.ok(cur_frm.doc.net_pay==23040, 
+					assert.ok(cur_frm.doc.net_pay==23040,
 						'Net amount for second employee is correctly calculated');
 				}
 			},
@@ -42,7 +42,7 @@ QUnit.test("test salary slip", function(assert) {
 	frappe.run_serially([
 		() => salary_slip('Test Employee 1'),
 		() => frappe.timeout(6),
-		() => salary_slip('Test Employee 2'),
+		() => salary_slip('Test Employee 3'),
 		() => frappe.timeout(3),
 		() => done()
 	]);

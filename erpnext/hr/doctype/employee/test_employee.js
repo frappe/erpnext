@@ -33,7 +33,7 @@ QUnit.test("Test: Employee [HR]", function (assert) {
 	frappe.run_serially([
 		() => employee_creation('Test Employee 1','2017-04-01','1992-02-02'),
 		() => frappe.timeout(6),
-		() => employee_creation('Test Employee 2','2017-04-01','1992-02-02'),
+		() => employee_creation('Test Employee 3','2017-04-01','1992-02-02'),
 		() => frappe.timeout(4),
 		() => done()
 	]);
