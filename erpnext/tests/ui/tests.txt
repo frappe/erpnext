@@ -42,3 +42,5 @@ erpnext/schools/doctype/assessment_criteria_group/test_assessment_criteria_group
 erpnext/schools/doctype/assessment_criteria/test_assessment_criteria.js
 erpnext/schools/doctype/course/test_course.js
 erpnext/schools/doctype/program/test_program.js
+erpnext/hr/doctype/salary_structure/test_salary_structure.js 
+erpnext/hr/doctype/salary_slip/test_salary_slip.js  
