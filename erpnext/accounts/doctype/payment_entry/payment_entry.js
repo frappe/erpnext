@@ -404,6 +404,13 @@ frappe.ui.form.on('Payment Entry', {
 			
 			frm.events.set_difference_amount(frm);
 		}
+
+		// Make read only if currency exchange settings doesn't allow stale rates
+		frappe.model.get_value("Currency Exchange Settings", null, "allow_stale",
+			function(d){
+				frm.set_df_property("source_exchange_rate", "read_only", cint(d.allow_stale) ? 0 : 1);
+			}
+		);
 	},
 
 	target_exchange_rate: function(frm) {
@@ -422,6 +429,13 @@ frappe.ui.form.on('Payment Entry', {
 			frm.events.set_difference_amount(frm);
 		}
 		frm.set_paid_amount_based_on_received_amount = false;
+
+		// Make read only if currency exchange settings doesn't allow stale rates
+		frappe.model.get_value("Currency Exchange Settings", null, "allow_stale",
+			function(d){
+				frm.set_df_property("target_exchange_rate", "read_only", cint(d.allow_stale) ? 0 : 1);
+			}
+		);
 	},
 
 	paid_amount: function(frm) {
