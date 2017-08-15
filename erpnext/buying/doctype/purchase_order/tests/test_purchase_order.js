@@ -45,7 +45,7 @@ QUnit.test("test: purchase order", function(assert) {
 		},
 
 		() => cur_frm.print_doc(),
-		() => frappe.timeout(1),
+		() => frappe.timeout(2),
 		() => {
 			assert.ok($('.btn-print-print').is(':visible'), "Print Format Available");
 			assert.ok($('div > div:nth-child(5) > div > div > table > tbody > tr > td:nth-child(4) > div').text().includes('Test Product 4'), "Print Preview Works");
