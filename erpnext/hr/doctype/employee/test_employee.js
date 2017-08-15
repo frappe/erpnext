@@ -20,11 +20,6 @@ QUnit.test("Test: Employee [HR]", function (assert) {
 					{ department: 'Test Department'},
 					{ designation: 'Test Designation'}
 				]);
-
-				/* assert.ok(gender=='Male',
-					'Gender Correctly Set');
-				assert.ok(date_of_joining==joining_date,
-					'Joining date Correctly Set');*/
 			},
 			() => frappe.timeout(2),
 			() => {
@@ -36,7 +31,6 @@ QUnit.test("Test: Employee [HR]", function (assert) {
 		]);
 	};
 	frappe.run_serially([
-		// Creating Timesheet with different tasks
 		() => employee_creation('Test Employee 1','2017-04-01','1992-02-02'),
 		() => frappe.timeout(6),
 		() => employee_creation('Test Employee 2','2017-04-01','1992-02-02'),
