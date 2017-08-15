@@ -46,6 +46,7 @@ def get_product_info(item_code):
 	}
 
 def get_qty_in_stock(item_code, template_item_code):
+	in_stock, stock_qty = 0, ''
 	warehouse = frappe.db.get_value("Item", item_code, "website_warehouse")
 	if not warehouse and template_item_code and template_item_code != item_code:
 		warehouse = frappe.db.get_value("Item", template_item_code, "website_warehouse")
@@ -55,8 +56,6 @@ def get_qty_in_stock(item_code, template_item_code):
 			item_code=%s and warehouse=%s""", (item_code, warehouse))
 		if stock_qty:
 			in_stock = stock_qty[0][0] > 0 and 1 or 0
-		else:
-			in_stock = 0
 
 	return frappe._dict({"in_stock": in_stock, "stock_qty": stock_qty})
 
@@ -85,7 +84,7 @@ def get_price(item_code, template_item_code, price_list, qty=1):
 
 			if pricing_rule:
 				if pricing_rule.pricing_rule_for == "Discount Percentage":
-					price[0].price_list_rate = flt(price[0].price_list_rate * (1.0 - (pricing_rule.discount_percentage / 100.0)))
+					price[0].price_list_rate = flt(price[0].price_list_rate * (1.0 - (flt(pricing_rule.discount_percentage) / 100.0)))
 
 				if pricing_rule.pricing_rule_for == "Price":
 					price[0].price_list_rate = pricing_rule.price_list_rate

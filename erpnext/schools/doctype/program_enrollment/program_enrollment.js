@@ -43,6 +43,7 @@ frappe.ui.form.on("Program Enrollment", {
 	},
 
 	program: function(frm) {
+		frm.events.get_courses(frm);
 		if (frm.doc.program) {
 			frappe.call({
 				method: "erpnext.schools.api.get_fee_schedule",

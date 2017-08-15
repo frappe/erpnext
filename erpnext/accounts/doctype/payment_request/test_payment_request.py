@@ -70,7 +70,7 @@ class TestPaymentRequest(unittest.TestCase):
 		
 		so_inr = make_sales_order(currency="INR")
 		pr = make_payment_request(dt="Sales Order", dn=so_inr.name, recipient_id="saurabh@erpnext.com",
-			mute_email=1, submit_doc=1)
+			mute_email=1, submit_doc=1, return_doc=1)
 		pe = pr.set_as_paid()
 
 		so_inr = frappe.get_doc("Sales Order", so_inr.name)
@@ -81,7 +81,7 @@ class TestPaymentRequest(unittest.TestCase):
 			currency="USD", conversion_rate=50)
 
 		pr = make_payment_request(dt="Sales Invoice", dn=si_usd.name, recipient_id="saurabh@erpnext.com",
-			mute_email=1, payment_gateway="_Test Gateway - USD", submit_doc=1)
+			mute_email=1, payment_gateway="_Test Gateway - USD", submit_doc=1, return_doc=1)
 		
 		pe = pr.set_as_paid()
 		

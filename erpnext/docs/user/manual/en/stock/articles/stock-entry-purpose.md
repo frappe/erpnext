@@ -1,5 +1,3 @@
-# Stock Entry Purpose
-
 #Stock Entry Purpose
 
 Stock Entry is a stock transaction, which can be used for multiple purposes. Let's learn about each Stock Entry Purpose below.

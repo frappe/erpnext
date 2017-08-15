@@ -1,5 +1,3 @@
-# Pricing Rule
-
 #Pricing Rule
 
 Pricing Rule is a master where you can define rules based on which discount is applied to specific Customer or Supplier.

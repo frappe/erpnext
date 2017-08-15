@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from erpnext.schools.doctype.student_group.student_group import get_students
 
 class StudentGroupCreationTool(Document):
 	def get_courses(self):
@@ -64,8 +65,13 @@ class StudentGroupCreationTool(Document):
 			student_group.program = self.program
 			student_group.course = d.course
 			student_group.batch = d.batch
+			student_group.max_strength = d.max_strength
 			student_group.academic_term = self.academic_term
 			student_group.academic_year = self.academic_year
+			student_list = get_students(self.academic_year, d.group_based_on, self.academic_term, self.program, d.batch, d.course)
+
+			for student in student_list:
+				student_group.append('students', student)
 			student_group.save()
 
 		frappe.msgprint(_("{0} Student Groups created.".format(l)))

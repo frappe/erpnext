@@ -14,6 +14,14 @@ form_grid_templates = {
 }
 
 class Quotation(SellingController):
+	def set_indicator(self):
+		if self.docstatus==1:
+			self.indicator_color = 'blue'
+			self.indicator_title = 'Submitted'
+		if self.valid_till and getdate(self.valid_till) < getdate(nowdate()):
+			self.indicator_color = 'darkgrey'
+			self.indicator_title = 'Expired'
+
 	def validate(self):
 		super(Quotation, self).validate()
 		self.set_status()
@@ -49,9 +57,18 @@ class Quotation(SellingController):
 	def update_opportunity(self):
 		for opportunity in list(set([d.prevdoc_docname for d in self.get("items")])):
 			if opportunity:
-				opp = frappe.get_doc("Opportunity", opportunity)
-				opp.status = None
-				opp.set_status(update=True)
+				self.update_opportunity_status(opportunity)
+
+		if self.opportunity:
+			self.update_opportunity_status()
+
+	def update_opportunity_status(self, opportunity=None):
+		if not opportunity:
+			opportunity = self.opportunity
+
+		opp = frappe.get_doc("Opportunity", opportunity)
+		opp.status = None
+		opp.set_status(update=True)
 
 	def declare_order_lost(self, arg):
 		if not self.has_sales_order():

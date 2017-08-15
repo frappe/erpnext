@@ -1,5 +1,3 @@
-# Naming Series Current Value
-
 #Setting the Current Value for Naming Series
 
 Naming Series feature allows you to define prefix for naming of a documents. For example, if a Sales Order has prefix "SO", then the series will be generated as SO-00001, SO-00002... and so on. Click [here](/docs/user/manual/en/setting-up/settings/naming-series.html) to learn how you can customize Number Series for a transaction/master in ERPNext.

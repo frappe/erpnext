@@ -53,6 +53,6 @@ before_script:
 
 script:
   - set -e
-  - bench --verbose run-tests
+  - bench run-tests
   - sleep 5
-  - bench --verbose run-ui-tests --app erpnext
+  - bench run-ui-tests --app erpnext

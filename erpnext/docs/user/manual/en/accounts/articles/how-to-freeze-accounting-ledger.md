@@ -1,5 +1,3 @@
-# How To Freeze Accounting Ledger
-
 #How To Freeze Accounting Ledger?
 
 If you want to discontinue using specific Account, you can freeze it.
