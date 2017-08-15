@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, getdate
 from frappe import _, msgprint, throw
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.controllers.stock_controller import update_gl_entries_after
@@ -99,6 +99,8 @@ class SalesInvoice(SellingController):
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
 		self.set_status()
+		self.set_payment_schedule()
+		self.validate_payment_schedule()
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
@@ -530,6 +532,31 @@ class SalesInvoice(SellingController):
 
 		self.total_billing_amount = total_billing_amount
 
+	def set_payment_schedule(self):
+		if not self.get("payment_schedule"):
+			if self.due_date:
+				self.append("payment_schedule", {
+					"due_date": self.due_date,
+					"invoice_portion": 100,
+					"payment_amount": self.grand_total
+				})
+		else:
+			self.due_date = max([d.due_date for d in self.get("payment_schedule")])
+
+	def validate_payment_schedule(self):
+		if self.due_date and getdate(self.due_date) < getdate(self.posting_date):
+			frappe.throw(_("Due Date cannot be before posting date"))
+
+		total = 0
+		for d in self.get("payment_schedule"):
+			if getdate(d.due_date) < getdate(self.posting_date):
+				frappe.throw(_("Row {0}: Due Date cannot be before posting date").format(d.idx))
+
+			total += flt(d.payment_amount)
+
+		if total != self.grand_total:
+			frappe.throw(_("Total Payment Amount in Payment Schdule must be equal to Grand Total"))
+
 	def get_warehouse(self):
 		user_pos_profile = frappe.db.sql("""select name, warehouse from `tabPOS Profile`
 			where ifnull(user,'') = %s and company = %s""", (frappe.session['user'], self.company))
@@ -619,7 +646,27 @@ class SalesInvoice(SellingController):
 		return gl_entries
 
 	def make_customer_gl_entry(self, gl_entries):
-		if self.grand_total:
+		if self.get("payment_schedule"):
+			for d in self.get("payment_schedule"):
+				payment_amount_in_company_currency = flt(d.payment_amount * self.conversion_rate,
+					d.precision("payment_amount"))
+
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": self.debit_to,
+						"party_type": "Customer",
+						"party": self.customer,
+						"due_date": d.due_date,
+						"against": self.against_income_account,
+						"debit": payment_amount_in_company_currency,
+						"debit_in_account_currency": payment_amount_in_company_currency \
+							if self.party_account_currency==self.company_currency else d.payment_amount,
+						"against_voucher": self.return_against if cint(self.is_return) else self.name,
+						"against_voucher_type": self.doctype
+					}, self.party_account_currency)
+				)
+
+		elif self.grand_total:
 			# Didnot use base_grand_total to book rounding loss gle
 			grand_total_in_company_currency = flt(self.grand_total * self.conversion_rate,
 				self.precision("grand_total"))

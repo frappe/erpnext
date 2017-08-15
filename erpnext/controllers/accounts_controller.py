@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _, throw
-from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate
+from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate, add_days, add_months, get_last_day
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
@@ -783,3 +783,42 @@ def update_invoice_status():
 
 	frappe.db.sql(""" update `tabPurchase Invoice` set status = 'Overdue'
 		where due_date < CURDATE() and docstatus = 1 and outstanding_amount > 0""")
+
+@frappe.whitelist()
+def get_payment_terms(terms_template, posting_date=None, grand_total=None):
+	if not terms_template:
+		return
+
+	terms_doc = frappe.get_doc("Payment Terms Template", terms_template)
+
+	schedule = []
+	for i, d in enumerate(terms_doc.get("terms")):
+		term_details = get_payment_term_details(d, posting_date, grand_total)
+		schedule.append(term_details)
+
+	return schedule
+
+@frappe.whitelist()
+def get_payment_term_details(term, posting_date=None, grand_total=None):
+	term_details = frappe._dict()
+	if isinstance(term, unicode):
+		term = frappe.get_doc("Payment Term", term)
+	else:
+		term_details.payment_term = term.payment_term
+	term_details.description = term.description
+	term_details.invoice_portion = term.invoice_portion
+	term_details.payment_amount = flt(term.invoice_portion) * flt(grand_total) / 100
+	if posting_date:
+		term_details.due_date = get_due_date(posting_date, term)
+	return term_details
+
+def get_due_date(posting_date, term):
+	due_date = None
+	if term.due_date_based_on == "Day(s) after invoice date":
+		due_date = add_days(posting_date, term.credit_days)
+	elif term.due_date_based_on == "Day(s) after the end of the invoice month":
+		due_date = add_days(get_last_day(posting_date), term.credit_days)
+	elif term.due_date_based_on == "Month(s) after the end of the invoice month":
+		due_date = add_months(get_last_day(posting_date), term.credit_months)
+
+	return due_date

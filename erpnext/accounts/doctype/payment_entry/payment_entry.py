@@ -410,7 +410,8 @@ class PaymentEntry(AccountsController):
 				gle = party_gl_dict.copy()
 				gle.update({
 					"against_voucher_type": d.reference_doctype,
-					"against_voucher": d.reference_name
+					"against_voucher": d.reference_name,
+					"due_date": d.due_date
 				})
 
 				allocated_amount_in_company_currency = flt(flt(d.allocated_amount) * flt(d.exchange_rate),
@@ -742,14 +743,29 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.allocate_payment_amount = 1
 	pe.letter_head = doc.get("letter_head")
 
-	pe.append("references", {
-		"reference_doctype": dt,
-		"reference_name": dn,
-		"due_date": doc.get("due_date"),
-		"total_amount": grand_total,
-		"outstanding_amount": outstanding_amount,
-		"allocated_amount": outstanding_amount
-	})
+	if doc.get("payment_schedule"):
+		for d in doc.get("payment_schedule"):
+			invoice_amount = d.payment_amount * doc.conversion_rate \
+				if party_account_currency == doc.company_currency else d.payment_amount
+			paid_amount = get_paid_amount(dt, dn, party_type, pe.party, party_account, d.due_date)
+			outstanding_amount = invoice_amount - paid_amount
+			pe.append("references", {
+				"reference_doctype": dt,
+				"reference_name": dn,
+				"due_date": d.due_date,
+				"total_amount": invoice_amount,
+				"outstanding_amount": outstanding_amount,
+				"allocated_amount": outstanding_amount
+			})
+	else:
+		pe.append("references", {
+			"reference_doctype": dt,
+			"reference_name": dn,
+			"due_date": doc.get("due_date"),
+			"total_amount": grand_total,
+			"outstanding_amount": outstanding_amount,
+			"allocated_amount": outstanding_amount
+		})
 
 	pe.setup_party_account_field()
 	pe.set_missing_values()
@@ -757,3 +773,23 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		pe.set_exchange_rate()
 		pe.set_amounts()
 	return pe
+
+def get_paid_amount(dt, dn, party_type, party, account, due_date):
+	if party_type=="Customer":
+		dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
+	else:
+		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
+		
+	paid_amount = frappe.db.sql("""
+		select ifnull(sum({dr_or_cr}), 0) as paid_amount
+		from `tabGL Entry`
+		where against_voucher_type = %s
+			and against_voucher = %s
+			and party_type = %s
+			and party = %s
+			and account = %s
+			and due_date = %s
+			and {dr_or_cr} > 0
+	""".format(dr_or_cr=dr_or_cr), (dt, dn, party_type, party, account, due_date))
+
+	return paid_amount[0][0] if paid_amount else 0

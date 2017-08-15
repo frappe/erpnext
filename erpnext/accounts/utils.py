@@ -582,7 +582,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 
 	invoice_list = frappe.db.sql("""
 		select
-			voucher_no,	voucher_type, posting_date, ifnull(sum({dr_or_cr}), 0) as invoice_amount,
+			voucher_no,	voucher_type, posting_date, ifnull(sum({dr_or_cr}), 0) as invoice_amount, due_date,
 			(
 				select ifnull(sum({payment_dr_or_cr}), 0)
 				from `tabGL Entry` payment_gl_entry
@@ -591,6 +591,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 					and payment_gl_entry.party_type = invoice_gl_entry.party_type
 					and payment_gl_entry.party = invoice_gl_entry.party
 					and payment_gl_entry.account = invoice_gl_entry.account
+					and payment_gl_entry.due_date = invoice_gl_entry.due_date
 					and {payment_dr_or_cr} > 0
 			) as payment_amount
 		from
@@ -602,9 +603,9 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 			and ((voucher_type = 'Journal Entry'
 					and (against_voucher = '' or against_voucher is null))
 				or (voucher_type not in ('Journal Entry', 'Payment Entry')))
-		group by voucher_type, voucher_no
+		group by voucher_type, voucher_no, due_date
 		having (invoice_amount - payment_amount) > 0.005
-		order by posting_date, name""".format(
+		order by posting_date, name, due_date""".format(
 			dr_or_cr = dr_or_cr,
 			payment_dr_or_cr = payment_dr_or_cr,
 			condition = condition or ""
@@ -615,6 +616,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 		}, as_dict=True)
 
 	for d in invoice_list:
+		print d.voucher_no, d.invoice_amount, d.payment_amount
 		outstanding_invoices.append(frappe._dict({
 			'voucher_no': d.voucher_no,
 			'voucher_type': d.voucher_type,
@@ -622,8 +624,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 			'invoice_amount': flt(d.invoice_amount),
 			'payment_amount': flt(d.payment_amount),
 			'outstanding_amount': flt(d.invoice_amount - d.payment_amount, precision),
-			'due_date': frappe.db.get_value(d.voucher_type, d.voucher_no, 
-				"posting_date" if party_type=="Employee" else "due_date"),
+			'due_date': d.due_date or (frappe.db.get_value(d.voucher_type, d.voucher_no, 
+				"posting_date" if party_type=="Employee" else "due_date")),
 		}))
 
 	outstanding_invoices = sorted(outstanding_invoices, key=lambda k: k['due_date'] or getdate(nowdate()))
