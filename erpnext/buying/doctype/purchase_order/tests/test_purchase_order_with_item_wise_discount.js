@@ -32,8 +32,8 @@ QUnit.test("test: purchase order with item wise discount", function(assert) {
 			assert.ok(cur_frm.doc.supplier_name == 'Test Supplier', "Supplier name correct");
 			assert.ok(cur_frm.doc.items[0].discount_percentage == 20, "Discount correct");
 			// Calculate totals after discount
-			assert.ok(cur_frm.doc.total == 800, "Total correct");
-			assert.ok(cur_frm.doc.grand_total == 800, "Grand total correct");
+			assert.ok(cur_frm.doc.total == 2000, "Total correct");
+			assert.ok(cur_frm.doc.grand_total == 2000, "Grand total correct");
 		},
 
 		() => frappe.tests.click_button('Submit'),
