@@ -65,7 +65,7 @@ def get_stock_ledger_entries(filters):
 def get_item_details(filters):
 	item_details = {}
 	for item in frappe.db.sql("""select name, item_name, description, item_group,
-			brand, stock_uom from `tabItem` {item_conditions}"""\
+			brand, stock_uom from `tabItem` item {item_conditions}"""\
 			.format(item_conditions=get_item_conditions(filters)), filters, as_dict=1):
 		item_details.setdefault(item.name, item)
 
@@ -74,9 +74,11 @@ def get_item_details(filters):
 def get_item_conditions(filters):
 	conditions = []
 	if filters.get("item_code"):
-		conditions.append("name=%(item_code)s")
+		conditions.append("item.name=%(item_code)s")
 	if filters.get("brand"):
-		conditions.append("brand=%(brand)s")
+		conditions.append("item.brand=%(brand)s")
+	if filters.get("item_group"):
+		conditions.append(get_item_group_condition(filters.get("item_group")))
 
 	return "where {}".format(" and ".join(conditions)) if conditions else ""
 
@@ -84,7 +86,7 @@ def get_sle_conditions(filters):
 	conditions = []
 	item_conditions=get_item_conditions(filters)
 	if item_conditions:
-		conditions.append("""item_code in (select name from tabItem
+		conditions.append("""sle.item_code in (select item.name from tabItem item
 			{item_conditions})""".format(item_conditions=item_conditions))
 	if filters.get("warehouse"):
 		conditions.append(get_warehouse_condition(filters.get("warehouse")))
@@ -120,5 +122,14 @@ def get_warehouse_condition(warehouse):
 		return " exists (select name from `tabWarehouse` wh \
 			where wh.lft >= %s and wh.rgt <= %s and sle.warehouse = wh.name)"%(warehouse_details.lft,
 			warehouse_details.rgt)
+
+	return ''
+
+def get_item_group_condition(item_group):
+	item_group_details = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"], as_dict=1)
+	if item_group_details:
+		return "item.item_group in (select ig.name from `tabItem Group` ig \
+			where ig.lft >= %s and ig.rgt <= %s and item.item_group = ig.name)"%(item_group_details.lft,
+			item_group_details.rgt)
 
 	return ''
