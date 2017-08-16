@@ -62,7 +62,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.frm.doc.conversion_rate = flt(this.frm.doc.conversion_rate, (cur_frm) ? precision("conversion_rate") : 9);
 		var conversion_rate_label = frappe.meta.get_label(this.frm.doc.doctype, "conversion_rate",
 			this.frm.doc.name);
-		var company_currency = this.frm.doc.currency || this.get_company_currency();
+		var company_currency = this.get_company_currency();
 
 		if(!this.frm.doc.conversion_rate) {
 			if(this.frm.doc.currency == company_currency) {
@@ -419,7 +419,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				this.frm.doc.currency, precision("rounded_total"));
 		}
 		if(frappe.meta.get_docfield(this.frm.doc.doctype, "base_rounded_total", this.frm.doc.name)) {
-			var company_currency = this.frm.doc.currency || this.get_company_currency();
+			var company_currency = this.get_company_currency();
 
 			this.frm.doc.base_rounded_total =
 				round_based_on_smallest_currency_fraction(this.frm.doc.base_grand_total,
