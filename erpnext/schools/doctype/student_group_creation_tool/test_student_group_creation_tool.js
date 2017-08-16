@@ -19,9 +19,10 @@ QUnit.test('Test: Student Group Creation Tool', function(assert){
 			cur_frm.set_value("program", "Standard Test");
 			frappe.tests.click_button('Get Courses');
 		},
-		() => frappe.timeout(0.5),
+		() => frappe.timeout(1),
 		() => {
-			assert.equal(cur_frm.doc.courses.length, 4, 'Successfully created groups using the tool');
+			let no_of_courses = $('input.grid-row-check.pull-left').size() - 1;
+			assert.equal(cur_frm.doc.courses.length, no_of_courses, 'Successfully created groups using the tool');
 		},
 
 		() => {
