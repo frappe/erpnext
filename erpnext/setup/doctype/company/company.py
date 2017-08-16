@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe, os
 from frappe import _
 
-from frappe.utils import cint, now
+from frappe.utils import cint, today, formatdate
 import frappe.defaults
 
 
@@ -312,7 +312,6 @@ def get_name_with_abbr(name, company):
 	return " - ".join(parts)
 
 def update_company_current_month_sales(company):
-	from frappe.utils import today, formatdate
 	current_month_year = formatdate(today(), "MM-yyyy")
 
 	results = frappe.db.sql('''
@@ -321,18 +320,16 @@ def update_company_current_month_sales(company):
 		from
 			`tabSales Invoice`
 		where
-			date_format(posting_date, '%m-%Y')=%s
+			date_format(posting_date, '%m-%Y')="{0}"
 			and docstatus = 1
-			and company = %s
+			and company = "{1}"
 		group by
 			month_year
-	''', (current_month_year, company), as_dict = True)
+	'''.format(current_month_year, frappe.db.escape(company)), as_dict = True)
 
 	monthly_total = results[0]['total'] if len(results) > 0 else 0
 
-	frappe.db.sql(('''
-		update tabCompany set total_monthly_sales = %s, modified=%s where name=%s
-	'''), (monthly_total, now(), frappe.db.escape(company)))
+	frappe.db.set_value("Company", company, "total_monthly_sales", monthly_total)
 	frappe.db.commit()
 
 def update_company_monthly_sales(company):
@@ -343,9 +340,7 @@ def update_company_monthly_sales(company):
 	month_to_value_dict = get_monthly_results("Sales Invoice", "base_grand_total",
 		"posting_date", filter_str, "sum")
 
-	frappe.db.sql(('''
-		update tabCompany set sales_monthly_history = %s, modified=%s where name=%s
-	'''), (json.dumps(month_to_value_dict), now(), frappe.db.escape(company)))
+	frappe.db.set_value("Company", company, "sales_monthly_history", json.dumps(month_to_value_dict))
 	frappe.db.commit()
 
 def cache_companies_monthly_sales_history():

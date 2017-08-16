@@ -26,7 +26,7 @@ def delete_company_transactions(company_name):
 			"Party Account", "Employee", "Sales Taxes and Charges Template",
 			"Purchase Taxes and Charges Template", "POS Profile", 'BOM'):
 				delete_for_doctype(doctype, company_name)
-	
+
 	# reset company values
 	doc.total_monthly_sales = 0
 	doc.sales_monthly_history = None
