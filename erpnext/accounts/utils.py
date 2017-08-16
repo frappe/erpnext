@@ -580,9 +580,15 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 		dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 		payment_dr_or_cr = "payment_gl_entry.debit_in_account_currency - payment_gl_entry.credit_in_account_currency"
 
+	invoice = 'Sales Invoice' if party_type == 'Customer' else 'Purchase Invoice'
 	invoice_list = frappe.db.sql("""
 		select
 			voucher_no,	voucher_type, posting_date, ifnull(sum({dr_or_cr}), 0) as invoice_amount,
+			(
+				case when (voucher_type = 'Sales Invoice' or voucher_type = 'Purchase Invoice')
+					then (select due_date from `tab{invoice}` where name = voucher_no)
+				else posting_date end
+			) as due_date,
 			(
 				select ifnull(sum({payment_dr_or_cr}), 0)
 				from `tabGL Entry` payment_gl_entry
@@ -606,6 +612,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 		having (invoice_amount - payment_amount) > 0.005
 		order by posting_date, name""".format(
 			dr_or_cr = dr_or_cr,
+			invoice = invoice,
 			payment_dr_or_cr = payment_dr_or_cr,
 			condition = condition or ""
 		), {
@@ -618,6 +625,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 		outstanding_invoices.append(frappe._dict({
 			'voucher_no': d.voucher_no,
 			'voucher_type': d.voucher_type,
+			'due_date': d.due_date,
 			'posting_date': d.posting_date,
 			'invoice_amount': flt(d.invoice_amount),
 			'payment_amount': flt(d.payment_amount),

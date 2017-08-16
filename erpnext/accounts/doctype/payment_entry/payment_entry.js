@@ -499,6 +499,7 @@ frappe.ui.form.on('Payment Entry', {
 						var c = frm.add_child("references");
 						c.reference_doctype = d.voucher_type;
 						c.reference_name = d.voucher_no;
+						c.due_date = d.due_date
 						c.total_amount = d.invoice_amount;
 						c.outstanding_amount = d.outstanding_amount;
 						if(!in_list(["Sales Order", "Purchase Order", "Expense Claim"], d.voucher_type)) {
