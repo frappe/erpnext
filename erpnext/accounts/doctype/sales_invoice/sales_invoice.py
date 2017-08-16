@@ -177,6 +177,10 @@ class SalesInvoice(SellingController):
 
 		self.make_gl_entries_on_cancel()
 		frappe.db.set(self, 'status', 'Cancelled')
+		
+		# update current month sales data
+		frappe.enqueue('erpnext.setup.doctype.company.company.update_company_current_month_sales',
+			company=self.company)
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
