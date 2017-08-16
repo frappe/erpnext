@@ -346,7 +346,21 @@ erpnext.buying.get_items_from_product_bundle = function(frm) {
 			},
 			freeze: true,
 			callback: function(r) {
+				const first_row_is_empty = function(child_table){
+					if($.isArray(child_table) && child_table.length > 0) {
+						return !child_table[0].item_code;
+					}
+					return false;
+				};
+
+				const remove_empty_first_row = function(frm){
+				if (first_row_is_empty(frm.doc.items)){
+					frm.doc.items = frm.doc.items.splice(1);
+					}
+				};
+
 				if(!r.exc && r.message) {
+					remove_empty_first_row(frm);
 					for ( var i=0; i< r.message.length; i++ ) {
 						var d = frm.add_child("items");
 						var item = r.message[i];
@@ -366,3 +380,4 @@ erpnext.buying.get_items_from_product_bundle = function(frm) {
 	});
 	dialog.show();
 }
+
