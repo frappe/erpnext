@@ -29,11 +29,11 @@ erpnext.setup.slides_settings = [
 				], reqd: 1
 			},
 		],
-		help: __('Select the nature of your business.'),
+		// help: __('Select the nature of your business.'),
 		onload: function (slide) {
 			slide.get_input("domain").on("change", function () {
 				frappe.setup.domain = $(this).val();
-				frappe.wizard.refresh_slides_settings();
+				frappe.wizard.refresh_slides();
 			});
 		},
 	},
@@ -44,7 +44,7 @@ erpnext.setup.slides_settings = [
 		domains: ["all"],
 		icon: "fa fa-bookmark",
 		title: __("The Brand"),
-		help: __('Upload your letter head and logo. (you can edit them later).'),
+		// help: __('Upload your letter head and logo. (you can edit them later).'),
 		fields: [
 			{
 				fieldtype: "Attach Image", fieldname: "attach_logo",
@@ -83,6 +83,12 @@ erpnext.setup.slides_settings = [
 					slide.get_field("company_abbr").set_value("");
 				}
 			});
+		},
+		validate: function() {
+			if (!this.values.company_abbr) {
+				return false;
+			}
+			return true;
 		}
 	},
 	{
@@ -91,9 +97,9 @@ erpnext.setup.slides_settings = [
 		domains: ["all"],
 		title: __("Your Organization"),
 		icon: "fa fa-building",
-		help: (frappe.setup.domain === 'Education' ?
-			__('The name of the institute for which you are setting up this system.') :
-			__('The name of your company for which you are setting up this system.')),
+		// help: (frappe.setup.domain === 'Education' ?
+		// 	__('The name of the institute for which you are setting up this system.') :
+		// 	__('The name of your company for which you are setting up this system.')),
 		fields: [
 			{
 				fieldname: 'company_tagline',
