@@ -86,8 +86,9 @@ QUnit.test('test student applicant', function(assert){
 		// Enrolling the Student into a Program
 		() => {$('.form-documents .row:nth-child(1) .col-xs-6:nth-child(1) .octicon-plus').click();},
 		() => frappe.timeout(1),
+		() => cur_frm.set_value('program', 'Standard Test'),
+		() => frappe.timeout(1),
 		() => {
-			cur_frm.set_value('program', 'Standard Test');
 			cur_frm.set_value('student_category', 'Reservation');
 			cur_frm.set_value('student_batch_name', 'A');
 			cur_frm.set_value('academic_year', '2016-17');
