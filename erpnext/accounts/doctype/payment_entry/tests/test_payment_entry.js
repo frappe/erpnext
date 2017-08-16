@@ -26,4 +26,3 @@ QUnit.test("test payment entry", function(assert) {
 		() => done()
 	]);
 });
-
