@@ -1,39 +1,40 @@
 QUnit.module('hr');
 
 QUnit.test("Test: Employee [HR]", function (assert) {
-	assert.expect(3);
+	assert.expect(4);
 	let done = assert.async();
-	let today_date = frappe.datetime.nowdate();
-
-	frappe.run_serially([
+	// let today_date = frappe.datetime.nowdate();
+	let employee_creation = (name,joining_date,birth_date) => {
+		frappe.run_serially([
 		// test employee creation
-		() => frappe.set_route("List", "Employee", "List"),
-		() => frappe.new_doc("Employee"),
-		() => frappe.timeout(1),
-		() => cur_frm.set_value("employee_name", "Test Employee 1"),
-		() => cur_frm.set_value("salutation", "Ms"),
-		() => cur_frm.set_value("company", "Test Company"),
-		() => cur_frm.set_value("date_of_joining", frappe.datetime.add_months(today_date, -2)),	// joined 2 month from now
-		() => cur_frm.set_value("date_of_birth", frappe.datetime.add_months(today_date, -240)),	// age is 20 years
-		() => cur_frm.set_value("employment_type", "Test Employment type"),
-		() => cur_frm.set_value("holiday_list", "Test Holiday list"),
-		() => cur_frm.set_value("branch", "Test Branch"),
-		() => cur_frm.set_value("department", "Test Department"),
-		() => cur_frm.set_value("designation", "Test Designation"),
-		() => frappe.click_button('Add Row'),
-		() => cur_frm.fields_dict.leave_approvers.grid.grid_rows[0].doc.leave_approver="Administrator",
-		// save data
-		() => cur_frm.save(),
-		() => frappe.timeout(1),
-		// check name of employee
-		() => assert.equal("Test Employee 1", cur_frm.doc.employee_name,
-			'name of employee correctly saved'),
-		// check auto filled gender according to salutation
-		() => assert.equal("Female", cur_frm.doc.gender,
-			'gender correctly saved as per salutation'),
-		// check auto filled retirement date [60 years from DOB]
-		() => assert.equal(frappe.datetime.add_months(today_date, 480), cur_frm.doc.date_of_retirement,	// 40 years from now
-			'retirement date correctly saved as per date of birth'),
+			() => {
+				frappe.tests.make('Employee', [
+					{ employee_name: name},
+					{ salutation: 'Mr'},
+					{ company: 'Test Company'},
+					{ date_of_joining: joining_date},
+					{ date_of_birth: birth_date},
+					{ employment_type: 'Test Employment Type'},
+					{ holiday_list: 'Test Holiday List'},
+					{ branch: 'Test Branch'},
+					{ department: 'Test Department'},
+					{ designation: 'Test Designation'}
+				]);
+			},
+			() => frappe.timeout(2),
+			() => {
+				assert.ok(cur_frm.get_field('employee_name').value==name,
+					'Name of an Employee is correctly set');
+				assert.ok(cur_frm.get_field('gender').value=='Male',
+					'Gender of an Employee is correctly set');
+			},
+		]);
+	};
+	frappe.run_serially([
+		() => employee_creation('Test Employee 1','2017-04-01','1992-02-02'),
+		() => frappe.timeout(6),
+		() => employee_creation('Test Employee 3','2017-04-01','1992-02-02'),
+		() => frappe.timeout(4),
 		() => done()
 	]);
 });
