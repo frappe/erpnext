@@ -6,11 +6,11 @@ QUnit.test("test:POS Profile", function(assert) {
 		() => {
 			return frappe.tests.make("POS Profile", [
 				{naming_series: "SINV"},
-				{company: "_Test Company"},
+				{company: "Test Company"},
 				{country: "India"},
 				{currency: "INR"},
-				{write_off_account: "Write Off - _TC"},
-				{write_off_cost_center: "Main - _TC"},
+				{write_off_account: "Write Off - TC"},
+				{write_off_cost_center: "Main - TC"},
 				{payments: [
 					[
 						{"default": 1},
@@ -35,15 +35,16 @@ QUnit.test("test:Sales Invoice", function(assert) {
 	frappe.run_serially([
 		() => {
 			return frappe.tests.make("Sales Invoice", [
-				{customer: "_Test Customer 2"},
-				{company: "_Test Company"},
+				{customer: "Test Customer 2"},
+				{company: "Test Company"},
 				{is_pos: 1},
 				{posting_date: frappe.datetime.get_today()},
 				{due_date: frappe.datetime.get_today()},
 				{items: [
 					[
-						{"item_code": "_Test Item"},
-						{"qty": 5}
+						{"item_code": "Test Product 1"},
+						{"qty": 5},
+						{"warehouse":'Stores - TC'}
 					]]
 				}
 			]);
