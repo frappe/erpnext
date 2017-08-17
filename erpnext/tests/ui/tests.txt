@@ -100,3 +100,4 @@ erpnext/buying/doctype/purchase_order/tests/test_purchase_order_with_item_wise_d
 erpnext/buying/doctype/purchase_order/tests/test_purchase_order_with_taxes_and_charges.js
 erpnext/buying/doctype/purchase_order/tests/test_purchase_order_receipt.js
 erpnext/stock/doctype/purchase_receipt/test_purchase_receipt.js
+erpnext/stock/doctype/stock_reconciliation/test_stock_reconciliation.js
