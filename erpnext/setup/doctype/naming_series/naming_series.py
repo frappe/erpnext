@@ -21,7 +21,6 @@ class NamingSeries(Document):
 				where fieldname='naming_series'""")))
 
 		doctypes = list(set(get_doctypes_with_read()) | set(doctypes))
-
 		prefixes = ""
 		for d in doctypes:
 			options = ""
@@ -34,7 +33,6 @@ class NamingSeries(Document):
 
 			if options:
 				prefixes = prefixes + "\n" + options
-
 		prefixes.replace("\n\n", "\n")
 		prefixes = "\n".join(sorted(prefixes.split()))
 
@@ -112,9 +110,8 @@ class NamingSeries(Document):
 				where dt.name = df.dt and df.fieldname='naming_series' and dt.name != %s""",
 				self.select_doc_for_series)
 			))
-		sr = [[frappe.get_meta(p).get_field("naming_series").options, p]
-			for p in parent]
-
+		sr = [[frappe.get_meta(p).get_field("naming_series").options, p] for p in parent]
+		print sr
 		dt = frappe.get_doc("DocType", self.select_doc_for_series)
 		options = self.scrub_options_list(self.set_options.split("\n"))
 		for series in options:
@@ -124,6 +121,7 @@ class NamingSeries(Document):
 					existing_series = [d.split('.')[0] for d in i[0].split("\n")]
 					if series.split(".")[0] in existing_series:
 						frappe.throw(_("Series {0} already used in {1}").format(series,i[1]))
+		frappe.throw("wait")
 
 	def validate_series_name(self, n):
 		import re
