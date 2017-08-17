@@ -14,38 +14,13 @@ QUnit.test("test: supplier quotation with taxes and charges", function(assert) {
 						{"item_code": 'Test Product 4'},
 						{"qty": 5},
 						{"rate": 100},
-						{"warehouse": 'Stores - WP'},
+						{"warehouse": 'Stores - '+frappe.get_abbr(frappe.defaults.get_default('Company'))},
 					]
 				]},
+				{taxes_and_charges:'TEST In State GST'},
 			]);
 		},
 		() => {supplier_quotation_name = cur_frm.doc.name;},
-		() => frappe.set_route('Form', 'Purchase Taxes and Charges Template', 'New Purchase Taxes and Charges Template'),
-		() => frappe.timeout(1),
-		() => {
-			return frappe.tests.set_form_values(cur_frm, [
-				{title:'TEST In State GST'},
-				{taxes: [
-					[
-						{"charge_type": 'On Net Total'},
-						{"account_head": 'CGST - WP'}
-					],
-					[
-						{"charge_type": 'On Net Total'},
-						{"account_head": 'SGST - WP'}
-					]
-				]},
-			]);
-		},
-		() => cur_frm.save(),
-		() => frappe.set_route('Form', 'Supplier Quotation', supplier_quotation_name),
-		() => frappe.timeout(1),
-		() => {
-			return frappe.tests.set_form_values(cur_frm, [
-				{taxes_and_charges:'TEST In State GST'}
-			]);
-		},
-
 		() => {
 			assert.ok(cur_frm.doc.taxes[0].account_head=='CGST - '+frappe.get_abbr(frappe.defaults.get_default('Company')), " Account Head abbr correct");
 			assert.ok(cur_frm.doc.total_taxes_and_charges == 45, "Taxes and charges correct");
