@@ -8,7 +8,6 @@ QUnit.test("test: purchase order with item wise discount", function(assert) {
 		() => {
 			return frappe.tests.make('Purchase Order', [
 				{supplier: 'Test Supplier'},
-				{company: 'Wind Power LLC'},
 				{is_subcontracted: 'No'},
 				{buying_price_list: 'Test-Buying-EUR'},
 				{currency: 'EUR'},
@@ -19,7 +18,7 @@ QUnit.test("test: purchase order with item wise discount", function(assert) {
 						{"uom": 'Unit'},
 						{"schedule_date": frappe.datetime.add_days(frappe.datetime.now_date(), 1)},
 						{"expected_delivery_date": frappe.datetime.add_days(frappe.datetime.now_date(), 5)},
-						{"warehouse": 'Stores - WP'},
+						{"warehouse": 'Stores - '+frappe.get_abbr(frappe.defaults.get_default("Company"))},
 						{"discount_percentage": 20}
 					]
 				]}

@@ -9,7 +9,6 @@ QUnit.test("test: request_for_quotation", function(assert) {
 			date = frappe.datetime.add_days(frappe.datetime.now_date(), 10);
 			return frappe.tests.make('Request for Quotation', [
 				{transaction_date: date},
-				{company: 'Wind Power LLC'},
 				{suppliers: [
 					[
 						{"supplier": 'Test Supplier'},
@@ -21,7 +20,7 @@ QUnit.test("test: request_for_quotation", function(assert) {
 						{"item_code": 'Test Product 4'},
 						{"qty": 5},
 						{"schedule_date": frappe.datetime.add_days(frappe.datetime.now_date(),20)},
-						{"warehouse": 'All Warehouses - WP'}
+						{"warehouse": 'All Warehouses - '+frappe.get_abbr(frappe.defaults.get_default("Company"))}
 					]
 				]},
 				{message_for_supplier: 'Please supply the specified items at the best possible rates'},
@@ -30,12 +29,12 @@ QUnit.test("test: request_for_quotation", function(assert) {
 		},
 		() => {
 			assert.ok(cur_frm.doc.transaction_date == date, "Date correct");
-			assert.ok(cur_frm.doc.company == 'Wind Power LLC', "Company correct");
+			assert.ok(cur_frm.doc.company == cur_frm.doc.company, "Company correct");
 			assert.ok(cur_frm.doc.suppliers[0].supplier_name == 'Test Supplier', "Supplier name correct");
 			assert.ok(cur_frm.doc.suppliers[0].contact == 'Contact 3-Test Supplier', "Contact correct");
 			assert.ok(cur_frm.doc.suppliers[0].email_id == 'test@supplier.com', "Email id correct");
 			assert.ok(cur_frm.doc.items[0].item_name == 'Test Product 4', "Item Name correct");
-			assert.ok(cur_frm.doc.items[0].warehouse == 'All Warehouses - WP', "Warehouse correct");
+			assert.ok(cur_frm.doc.items[0].warehouse == 'All Warehouses - '+frappe.get_abbr(frappe.defaults.get_default("Company")), "Warehouse correct");
 			assert.ok(cur_frm.doc.message_for_supplier == 'Please supply the specified items at the best possible rates', "Reply correct");
 			assert.ok(cur_frm.doc.tc_name == 'Test Term 1', "Term name correct");
 		},

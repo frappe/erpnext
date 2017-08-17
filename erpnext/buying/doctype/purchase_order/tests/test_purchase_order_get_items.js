@@ -8,7 +8,6 @@ QUnit.test("test: purchase order with get items", function(assert) {
 		() => {
 			return frappe.tests.make('Purchase Order', [
 				{supplier: 'Test Supplier'},
-				{company: 'Wind Power LLC'},
 				{is_subcontracted: 'No'},
 				{buying_price_list: 'Test-Buying-USD'},
 				{currency: 'USD'},
@@ -18,7 +17,7 @@ QUnit.test("test: purchase order with get items", function(assert) {
 						{"qty": 5},
 						{"schedule_date": frappe.datetime.add_days(frappe.datetime.now_date(), 1)},
 						{"expected_delivery_date": frappe.datetime.add_days(frappe.datetime.now_date(), 5)},
-						{"warehouse": 'Stores - WP'}
+						{"warehouse": 'Stores - '+frappe.get_abbr(frappe.defaults.get_default("Company"))}
 					]
 				]}
 			]);
@@ -46,9 +45,9 @@ QUnit.test("test: purchase order with get items", function(assert) {
 			assert.ok(cur_frm.doc.items[3].item_name == 'Keyboard', "Product bundle item 3 correct");
 		},
 
-		() => cur_frm.doc.items[1].warehouse = 'Stores - WP',
-		() => cur_frm.doc.items[2].warehouse = 'Stores - WP',
-		() => cur_frm.doc.items[3].warehouse = 'Stores - WP',
+		() => cur_frm.doc.items[1].warehouse = 'Stores - '+frappe.get_abbr(frappe.defaults.get_default("Company")),
+		() => cur_frm.doc.items[2].warehouse = 'Stores - '+frappe.get_abbr(frappe.defaults.get_default("Company")),
+		() => cur_frm.doc.items[3].warehouse = 'Stores - '+frappe.get_abbr(frappe.defaults.get_default("Company")),
 
 		() => cur_frm.save(),
 		() => frappe.timeout(1),

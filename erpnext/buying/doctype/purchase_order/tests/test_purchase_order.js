@@ -8,10 +8,8 @@ QUnit.test("test: purchase order", function(assert) {
 		() => {
 			return frappe.tests.make('Purchase Order', [
 				{supplier: 'Test Supplier'},
-				{company: 'Wind Power LLC'},
 				{is_subcontracted: 'No'},
-				{buying_price_list: 'Test-Buying-USD'},
-				{currency: 'USD'},
+				{currency: 'INR'},
 				{items: [
 					[
 						{"item_code": 'Test Product 4'},
@@ -20,7 +18,7 @@ QUnit.test("test: purchase order", function(assert) {
 						{"qty": 5},
 						{"uom": 'Unit'},
 						{"rate": 100},
-						{"warehouse": 'Stores - WP'}
+						{"warehouse": 'Stores - '+frappe.get_abbr(frappe.defaults.get_default("Company"))}
 					]
 				]},
 
