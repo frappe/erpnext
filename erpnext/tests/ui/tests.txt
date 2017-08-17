@@ -83,7 +83,7 @@ erpnext/schools/doctype/assessment_plan/test_assessment_plan.js
 erpnext/schools/doctype/assessment_result/test_assessment_result.js
 erpnext/schools/doctype/assessment_result_tool/test_assessment_result_tool.js
 erpnext/buying/doctype/supplier/test_supplier.js
-erpnext/buying/doctype/request_for_quotation/test_request_for_quotation.js
+erpnext/buying/doctype/request_for_quotation/tests/test_request_for_quotation.js
 erpnext/buying/doctype/supplier_quotation/tests/test_supplier_quotation.js
 erpnext/buying/doctype/supplier_quotation/tests/test_supplier_quotation_for_taxes_and_charges.js
 erpnext/accounts/doctype/sales_invoice/test_sales_invoice.js
