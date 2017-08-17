@@ -82,17 +82,3 @@ erpnext/schools/doctype/assessment_group/test_assessment_group.js
 erpnext/schools/doctype/assessment_plan/test_assessment_plan.js
 erpnext/schools/doctype/assessment_result/test_assessment_result.js
 erpnext/schools/doctype/assessment_result_tool/test_assessment_result_tool.js
-erpnext/buying/doctype/supplier/test_supplier.js
-erpnext/buying/doctype/request_for_quotation/test_request_for_quotation.js
-erpnext/buying/doctype/supplier_quotation/tests/test_supplier_quotation.js
-erpnext/buying/doctype/supplier_quotation/tests/test_supplier_quotation_for_taxes_and_charges.js
-erpnext/accounts/doctype/sales_invoice/test_sales_invoice.js
-erpnext/accounts/doctype/purchase_invoice/test_purchase_invoice.js
-erpnext/buying/doctype/supplier_quotation/tests/test_supplier_quotation_for_item_wise_discount.js
-erpnext/buying/doctype/purchase_order/tests/test_purchase_order.js
-erpnext/buying/doctype/purchase_order/tests/test_purchase_order_with_multi_uom.js
-erpnext/buying/doctype/purchase_order/tests/test_purchase_order_get_items.js
-erpnext/buying/doctype/purchase_order/tests/test_purchase_order_with_discount_on_grand_total.js
-erpnext/buying/doctype/purchase_order/tests/test_purchase_order_with_item_wise_discount.js
-erpnext/buying/doctype/purchase_order/tests/test_purchase_order_with_taxes_and_charges.js
-erpnext/buying/doctype/purchase_order/tests/test_purchase_order_receipt.js
