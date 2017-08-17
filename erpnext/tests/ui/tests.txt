@@ -68,6 +68,9 @@ erpnext/schools/doctype/program/test_program.js
 erpnext/hr/doctype/salary_structure/test_salary_structure.js
 erpnext/hr/doctype/salary_slip/test_salary_slip.js
 erpnext/hr/doctype/process_payroll/test_process_payroll.js
+erpnext/hr/doctype/job_opening/test_job_opening.js
+erpnext/hr/doctype/job_applicant/test_job_applicant.js
+erpnext/hr/doctype/offer_letter/test_offer_letter.js
 erpnext/schools/doctype/guardian/test_guardian.js
 erpnext/schools/doctype/student_admission/test_student_admission.js
 erpnext/schools/doctype/student_applicant/tests/test_student_applicant_dummy_data.js
