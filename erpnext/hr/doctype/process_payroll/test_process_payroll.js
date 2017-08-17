@@ -14,7 +14,7 @@ QUnit.test("Test: Process Payroll [HR]", function (assert) {
 				net_pay=r.message.net_pay;
 			},
 			() => frappe.db.get_value('Salary Slip', {'employee_name': employee_name}, 'gross_pay'),
-			
+
 			// Checking if amounts are correctly calculated
 			(r) => {
 				assert.ok(net_pay==net_amt,
@@ -25,7 +25,7 @@ QUnit.test("Test: Process Payroll [HR]", function (assert) {
 		]);
 	};
 	frappe.run_serially([
-		
+
 		// Deleting the already generated Salary Slips for employees
 		() => frappe.set_route('List','Salary Slip'),
 		() => frappe.timeout(2),
