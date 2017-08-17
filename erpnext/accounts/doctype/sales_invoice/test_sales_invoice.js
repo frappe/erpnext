@@ -41,3 +41,35 @@ QUnit.test("test sales Invoice", function(assert) {
 	]);
 });
 
+QUnit.test("test sales Invoice currency is read only when stale currency not allowed", function(assert) {
+	assert.expect(1);
+	let done = assert.async();
+	frappe.run_serially([
+		// change currency exchange settings
+		() => frappe.set_route('Form', 'Currency Exchange Settings', 'Currency Exchange Settings'),
+		() => {
+			if(cur_frm.doc.allow_stale === '1'){
+				frappe.click_check('Allow Stale Exchange Rates');
+			}
+		},
+		// back to sales invoice
+		() => frappe.set_route('Form', 'Sales Invoice', 'New Sales Invoice 1'),
+		() => {
+			return frappe.tests.make('Sales Invoice', [
+				{customer: 'AUD Customer'},
+			]);
+		},
+		frappe.timeout(3),
+		() => {
+			assert.ok(frappe.tests.control_field_is_read_only('conversion_rate'));
+		},
+		// clean up after test
+		() => frappe.set_route('Form', 'Currency Exchange Settings', 'Currency Exchange Settings'),
+		() => {
+			if(cur_frm.doc.allow_stale === '0'){
+				frappe.click_check('Allow Stale Exchange Rates');
+			}
+		},
+		() => done()
+	]);
+});
