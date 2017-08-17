@@ -288,7 +288,7 @@ class TestPaymentEntry(unittest.TestCase):
 
 		self.assertEqual(pe.unallocated_amount, 0)
 		self.assertEqual(pe.difference_amount, 0)
-		
+
 		pe.submit()
 
 		expected_gle = dict((d[0], d) for d in [
@@ -316,7 +316,7 @@ class TestPaymentEntry(unittest.TestCase):
 
 		self.assertEqual(pe.unallocated_amount, 0)
 		self.assertEqual(pe.difference_amount, 0)
-		
+
 		pe.submit()
 
 		expected_gle = dict((d[0], d) for d in [

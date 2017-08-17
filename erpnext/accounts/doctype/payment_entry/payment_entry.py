@@ -299,7 +299,7 @@ class PaymentEntry(AccountsController):
 
 		total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
 
-		self.difference_amount = flt(self.difference_amount - total_deductions, 
+		self.difference_amount = flt(self.difference_amount - total_deductions,
 			self.precision("difference_amount"))
 
 	def clear_unallocated_reference_document_rows(self):
