@@ -20,8 +20,16 @@ def get_slide_settings():
 			icon="fa fa-bookmark",
 			title=_("Add Your Company") if domain != 'Education' else _("Add Your Institution"),
 			help=_('Setup your ' + ('company' if domain != 'Education' else 'institution') + ' and brand.'),
-			image_src="/assets/erpnext/images/illustrations/shop.jpg",
-			fields=[]
+			# image_src="/assets/erpnext/images/illustrations/shop.jpg",
+			fields=[],
+			next_steps_links= [
+				{
+
+				},
+				{
+
+				}
+			]
 		),
 		frappe._dict(
 			name='Customers',
@@ -31,7 +39,6 @@ def get_slide_settings():
 			icon="fa fa-group",
 			title=_("Add Customers"),
 			help=_("List a few of your customers. They could be organizations or individuals."),
-			image_src="/assets/erpnext/images/illustrations/shop2.jpg",
 			add_more=1,
 			max_count=3,
 			mandatory_entry=1,
@@ -53,7 +60,6 @@ def get_slide_settings():
 			icon="fa fa-group",
 			title=_("Your Suppliers"),
 			help=_("List a few of your suppliers. They could be organizations or individuals."),
-			image_src="/assets/erpnext/images/illustrations/shop.jpg",
 			add_more=1,
 			max_count=3,
 			mandatory_entry=1,
@@ -74,7 +80,6 @@ def get_slide_settings():
 			icon="fa fa-barcode",
 			title=_("Your Products or Services"),
 			help=_("List your products or services that you buy or sell."),
-			image_src="/assets/erpnext/images/illustrations/shop.jpg",
 			add_more=1,
 			max_count=3,
 			mandatory_entry=1,
@@ -92,20 +97,19 @@ def get_slide_settings():
 				{"fieldtype":"Currency", "fieldname":"item_price", "label":_("Rate"), "static": 1}
 			]
 		),
-		frappe._dict(
-			name='Sales Target',
-			route=["Form", "Company", company],
-			domains=['Manufacturing', 'Services', 'Retail', 'Distribution'],
-			title=_("Set your Target"),
-			help=_("Set a sales target you'd like to achieve for your company " + company),
-			image_src="/assets/erpnext/images/illustrations/shop.jpg",
-			mandatory_entry=1,
-			method="erpnext.utilities.user_progress.set_sales_target",
-			fields=[
-				{"fieldtype":"Currency", "fieldname":"monthly_sales_target",
-				"label":_("Monthly Sales Target (" + currency + ")")},
-			]
-		),
+		# frappe._dict(
+		# 	name='Sales Target',
+		# 	route=["Form", "Company", company],
+		# 	domains=['Manufacturing', 'Services', 'Retail', 'Distribution'],
+		# 	title=_("Set your Target"),
+		# 	help=_("Set a sales target you'd like to achieve for your company " + company),
+		# 	mandatory_entry=1,
+		# 	method="erpnext.utilities.user_progress.set_sales_target",
+		# 	fields=[
+		# 		{"fieldtype":"Currency", "fieldname":"monthly_sales_target",
+		# 		"label":_("Monthly Sales Target (" + currency + ")")},
+		# 	]
+		# ),
 
 		# School slides begin
 		frappe._dict(
