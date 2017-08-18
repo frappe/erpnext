@@ -11,8 +11,9 @@ QUnit.test("test Stock Reconciliation", function(assert) {
 		() => {cur_dialog.set_value('warehouse','Stores - RB'); },
 		() => frappe.timeout(0.5),
 		() => frappe.click_button('Update'),
-		() => { cur_frm.doc.items[0].qty = 150;
-				cur_frm.refresh_fields('items');},
+		() => {
+			cur_frm.doc.items[0].qty = 150;
+			cur_frm.refresh_fields('items');},
 		() => frappe.timeout(0.5),
 		() => cur_frm.set_value('expense_account','Stock Adjustment - RB'),
 		() => cur_frm.set_value('cost_center','Main - RB'),
