@@ -68,7 +68,7 @@ QUnit.test("test: purchase order receipt", function(assert) {
 		() => {
 			assert.ok($('div.slick-cell.l2.r2 > a').text().includes('Test Product 1')
 				&& $('div.slick-cell.l9.r9 > div').text().includes(5)
-				&& $('div.slick-cell.l12.r12 > div').text().includes(100), "Stock ledger entry correct");
+				&& $('div.slick-cell.l12.r12 > div').text().includes(95), "Stock ledger entry correct");
 		},
 
 		() => done()
