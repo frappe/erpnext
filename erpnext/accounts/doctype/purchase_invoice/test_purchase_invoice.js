@@ -1,22 +1,22 @@
-QUnit.module('Stock');
+QUnit.module('Purchaes Invoice');
 
-QUnit.test("test Purchase Receipt", function(assert) {
+QUnit.test("test purchase invoice", function(assert) {
 	assert.expect(4);
 	let done = assert.async();
 	frappe.run_serially([
 		() => {
-			return frappe.tests.make('Purchase Receipt', [
+			return frappe.tests.make('Purchase Invoice', [
 				{supplier: 'Test Supplier'},
 				{items: [
 					[
-						{'received_qty': 5},
-						{'qty': 4},
+						{'qty': 5},
 						{'item_code': 'Test Product 1'},
-						{'uom': 'Nos'},
-						{'warehouse':'Stores - '+frappe.get_abbr(frappe.defaults.get_default('Company'))},
-						{'rejected_warehouse':'Work In Progress - '+frappe.get_abbr(frappe.defaults.get_default('Company'))},
+						{'rate':100},
 					]
 				]},
+				{update_stock:1},
+				{supplier_address: 'Test1-Billing'},
+				{contact_person: 'Contact 3-Test Supplier'},
 				{taxes_and_charges: 'TEST In State GST'},
 				{tc_name: 'Test Term 1'},
 				{terms: 'This is Test'}
@@ -31,7 +31,7 @@ QUnit.test("test Purchase Receipt", function(assert) {
 			// get tax account head details
 			assert.ok(cur_frm.doc.taxes[0].account_head=='CGST - '+frappe.get_abbr(frappe.defaults.get_default('Company')), " Account Head abbr correct");
 			// grand_total Calculated
-			assert.ok(cur_frm.doc.grand_total==472, "Grad Total correct");
+			assert.ok(cur_frm.doc.grand_total==590, "Grad Total correct");
 
 		},
 		() => frappe.tests.click_button('Submit'),
@@ -40,3 +40,4 @@ QUnit.test("test Purchase Receipt", function(assert) {
 		() => done()
 	]);
 });
+
