@@ -44,7 +44,6 @@ class AccountsController(TransactionBase):
 			self.set_total_in_words()
 
 		if self.doctype in ("Sales Invoice", "Purchase Invoice") and not self.is_return:
-			self.set_payment_schedule()
 			self.validate_payment_schedule()
 			self.validate_due_date()
 			self.validate_advance_entries()
@@ -616,7 +615,7 @@ class AccountsController(TransactionBase):
 		for item in duplicate_list:
 			self.remove(item)
 
-	def set_payment_schedule(self):
+	def _set_payment_schedule(self):
 		if not self.get("payment_schedule"):
 			if self.due_date:
 				self.append("payment_schedule", {
