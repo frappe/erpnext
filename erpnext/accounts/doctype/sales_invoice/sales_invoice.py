@@ -99,8 +99,6 @@ class SalesInvoice(SellingController):
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
 		self.set_status()
-		self.set_payment_schedule()
-		self.validate_payment_schedule()
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
@@ -531,31 +529,6 @@ class SalesInvoice(SellingController):
 				total_billing_amount += data.billing_amount
 
 		self.total_billing_amount = total_billing_amount
-
-	def set_payment_schedule(self):
-		if not self.get("payment_schedule"):
-			if self.due_date:
-				self.append("payment_schedule", {
-					"due_date": self.due_date,
-					"invoice_portion": 100,
-					"payment_amount": self.grand_total
-				})
-		else:
-			self.due_date = max([d.due_date for d in self.get("payment_schedule")])
-
-	def validate_payment_schedule(self):
-		if self.due_date and getdate(self.due_date) < getdate(self.posting_date):
-			frappe.throw(_("Due Date cannot be before posting date"))
-
-		total = 0
-		for d in self.get("payment_schedule"):
-			if getdate(d.due_date) < getdate(self.posting_date):
-				frappe.throw(_("Row {0}: Due Date cannot be before posting date").format(d.idx))
-
-			total += flt(d.payment_amount)
-
-		if total != self.grand_total:
-			frappe.throw(_("Total Payment Amount in Payment Schdule must be equal to Grand Total"))
 
 	def get_warehouse(self):
 		user_pos_profile = frappe.db.sql("""select name, warehouse from `tabPOS Profile`
