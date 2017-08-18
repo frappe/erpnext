@@ -106,9 +106,11 @@ class PointOfSale {
 			// increase qty by 1
 			this.cur_frm.doc.items.forEach((item) => {
 				if (item.item_code === item_code) {
-					frappe.model.set_value(item.doctype, item.name, 'qty', item.qty + qty);
+					frappe.model.set_value(item.doctype, item.name, 'qty', item.qty + qty)
+					.then(() => {
+						this.cart.add_item(item);
+					})
 					// update cart
-					this.cart.add_item(item);
 				}
 			});
 			return;
@@ -149,6 +151,7 @@ class PointOfSale {
 				frm.refresh(name);
 				frm.doc.items = [];
 				this.cur_frm = frm;
+				this.cur_frm.set_value('is_pos', 1)
 				resolve();
 			});
 		});
@@ -240,9 +243,19 @@ class POSCart {
 			wrapper: this.wrapper.find('.number-pad-container'),
 			onclick: (btn_value) => {
 				// on click
+				if (btn_value == 'Pay') {
+					this.make_payment()
+				}
+
 				console.log(btn_value);
 			}
 		});
+	}
+
+	make_payment() {
+		this.payment = new MakePayment({
+			frm: cur_frm
+		})
 	}
 
 	add_item(item) {
@@ -268,6 +281,7 @@ class POSCart {
 			$item.find('.rate').text(item.rate);
 		} else {
 			$item.remove();
+			frappe.model.clear_doc(item.doctype, item.name)
 		}
 	}
 
@@ -284,8 +298,8 @@ class POSCart {
 
 	scroll_to_item(item_code) {
 		const $item = this.$cart_items.find(`[data-item-code="${item_code}"]`);
-		const scrollTop = $item.offset().top - this.$cart_items.offset().top + this.$cart_items.scrollTop();
-		this.$cart_items.animate({ scrollTop });
+		// const scrollTop = $item.offset().top - this.$cart_items.offset().top + this.$cart_items.scrollTop();
+		// this.$cart_items.animate({ scrollTop });
 	}
 
 	get_item_html(item) {
@@ -631,5 +645,166 @@ class NumberPad {
 		// const $btn = this.wrapper.find(`[data-value="${value}"]`);
 		$btn.addClass('highlight');
 		setTimeout(() => $btn.removeClass('highlight'), 1000);
+	}
+}
+
+class MakePayment {
+	constructor({frm}) {
+		this.frm = frm
+		this.make();
+		this.set_primary_action();
+		this.show_total_amount();
+		// this.show_outstanding_amount()
+	}
+
+	make() {
+		const me = this;
+		this.update_flag()
+
+		this.dialog = new frappe.ui.Dialog({
+			title: __('Payment'),
+			fields: this.get_fields(),
+			width:800
+		});
+
+		this.dialog.show();
+		this.$body = this.dialog.body;
+
+		this.numpad = new NumberPad({
+			wrapper: $(this.$body).find('[data-fieldname = "numpad"]'),
+			onclick: (btn_value) => {
+				// on click
+			}
+		});
+	}
+
+	set_primary_action() {
+		this.dialog.set_primary_action(__("Submit"), function() {
+			//save form
+		})
+	}
+
+	get_fields() {
+		const me = this;
+		const total_amount = [
+			{
+				fieldtype: 'HTML',
+				fieldname: "total_amount",
+			},
+			{
+				fieldtype: 'Section Break',
+				label: __("Mode of Payments")
+			},
+		]
+
+		const mode_of_paymen_fields = this.frm.doc.payments.map(p => {
+			return {
+				fieldtype: 'Currency',
+				label: __(p.mode_of_payment),
+				options: me.frm.doc.currency,
+				fieldname: p.mode_of_payment,
+				default: p.amount,
+				onchange: (e) => {
+					const fieldname = $(e.target).attr('data-fieldname');
+					const value = this.dialog.get_value(fieldname);
+					me.update_payment_value(fieldname, value)
+				}
+			}
+		})
+
+		const other_fields = [
+			{
+				fieldtype: 'Column Break',
+			},
+			{
+				fieldtype: 'HTML',
+				fieldname: 'numpad'
+			},
+			{
+				fieldtype: 'Section Break',
+			},
+			{
+				fieldtype: 'Currency',
+				label: __("Write off Amount"),
+				options: me.frm.doc.currency,
+				fieldname: "write_off_amount",
+				default: me.frm.doc.write_off_amount,
+				onchange: (e) => {
+					me.update_cur_frm_value('write_off_amount', () => {
+						frappe.flags.change_amount = false;
+						me.update_change_amount()
+					})
+				}
+			},
+			{
+				fieldtype: 'Column Break',
+			},
+			{
+				fieldtype: 'Currency',
+				label: __("Change Amount"),
+				options: me.frm.doc.currency,
+				fieldname: "change_amount",
+				default: me.frm.doc.change_amount,
+				onchange: (e) => {
+					me.update_cur_frm_value('change_amount', () => {
+						frappe.flags.write_off_amount = false;
+						me.update_write_off_amount()
+					})
+				}
+			},
+		]
+
+		$.merge(total_amount, mode_of_paymen_fields)
+		return $.merge(total_amount, other_fields)
+	}
+
+	update_flag() {
+		frappe.flags.write_off_amount = true;
+		frappe.flags.change_amount = true;
+	}
+
+	update_cur_frm_value(fieldname, callback) {
+		if (frappe.flags[fieldname]) {
+			const value = this.dialog.get_value(fieldname);
+			this.frm.set_value(fieldname, value)
+			.then(() => {
+				callback()
+			})
+		}
+
+		frappe.flags[fieldname] = true;
+	}
+
+	update_payment_value(fieldname, value) {
+		var me = this;
+		$.each(this.frm.doc.payments, function(i, data) {
+			if (__(data.mode_of_payment) == __(fieldname)) {
+				frappe.model.set_value('Sales Invoice Payment', data.name, 'amount', value)
+				.then(() => {
+					me.update_change_amount();
+					me.update_write_off_amount();
+				})
+			}
+		});
+	}
+
+	update_change_amount() {
+		this.dialog.set_value("change_amount", this.frm.doc.change_amount)
+	}
+
+	update_write_off_amount() {
+		this.dialog.set_value("write_off_amount", this.frm.doc.write_off_amount)
+	}
+
+	show_total_amount() {
+		const grand_total = format_currency(this.frm.doc.grand_total, this.frm.doc.currency)
+		const template = `
+			<h3>
+				${ __("Total Amount") }:
+				<span class="label label-default">${__(grand_total)}</span>
+			</h3>
+		`
+		this.total_amount_section = $(this.$body).find("[data-fieldname = 'total_amount']")
+		this.total_amount_section.append(template)
 	}
 }
