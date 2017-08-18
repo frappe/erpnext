@@ -82,7 +82,7 @@ def get_guardian_map(student_list):
 		select  parent, guardian, guardian_name, relation  from `tabStudent Guardian` where parent in (%s)''' %
 		', '.join(['%s']*len(student_list)), tuple(student_list), as_dict=1)
 
-	guardian_list = list(set([g.guardian for g in guardian_details]))
+	guardian_list = list(set([g.guardian for g in guardian_details])) or ['']
 
 	guardian_mobile_no = dict(frappe.db.sql("""select name, mobile_number from `tabGuardian` 
 			where name in (%s)""" % ", ".join(['%s']*len(guardian_list)), tuple(guardian_list)))
