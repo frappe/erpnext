@@ -96,3 +96,4 @@ erpnext/buying/doctype/purchase_order/tests/test_purchase_order_with_discount_on
 erpnext/buying/doctype/purchase_order/tests/test_purchase_order_with_item_wise_discount.js
 erpnext/buying/doctype/purchase_order/tests/test_purchase_order_with_taxes_and_charges.js
 erpnext/buying/doctype/purchase_order/tests/test_purchase_order_receipt.js
+erpnext/stock/doctype/purchase_receipt/test_purchase_receipt.js
