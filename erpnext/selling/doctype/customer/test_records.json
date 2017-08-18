@@ -1,6 +1,14 @@
 [
  {
   "customer_group": "_Test Customer Group",
+  "customer_name": "_Test Customer P",
+  "customer_type": "Individual",
+  "doctype": "Customer",
+  "territory": "_Test Territory",
+  "credit_days_based_on": "Fixed Days"
+ },
+ {
+  "customer_group": "_Test Customer Group",
   "customer_name": "_Test Customer",
   "customer_type": "Individual",
   "doctype": "Customer",

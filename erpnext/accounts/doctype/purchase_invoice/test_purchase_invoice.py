@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe, erpnext
 import frappe.model
-from frappe.utils import cint, flt, today, nowdate
+from frappe.utils import cint, flt, today, nowdate, getdate, add_days
 import frappe.defaults
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory, \
 	test_records as pr_test_records
@@ -550,6 +550,38 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.load_from_db()
 		#check outstanding after advance cancellation
 		self.assertEqual(flt(pi.outstanding_amount), flt(pi.grand_total + pi.total_advance))
+
+	def test_gl_entry_based_on_payment_schedule(self):
+		pi = make_purchase_invoice(do_not_save=True, supplier="_Test Supplier P")
+		pi.append("payment_schedule", {
+			"due_date": add_days(nowdate(), 15),
+			"payment_amount": 100
+		})
+		pi.append("payment_schedule", {
+			"due_date": add_days(nowdate(), 45),
+			"payment_amount": 150
+		})
+
+		pi.save()
+		pi.submit()
+
+		gl_entries = frappe.db.sql("""select account, debit, credit, due_date
+			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
+			order by account asc, debit asc""", pi.name, as_dict=1)
+		self.assertTrue(gl_entries)
+
+		expected_gl_entries = sorted([
+			[pi.credit_to, 0.0, 100.0, add_days(nowdate(), 15)],
+			[pi.credit_to, 0.0, 150.0, add_days(nowdate(), 45)],
+			["_Test Account Cost for Goods Sold - _TC", 250.0, 0.0, None]
+		])
+
+		for i, gle in enumerate(sorted(gl_entries, key=lambda gle: gle.account)):
+			self.assertEquals(expected_gl_entries[i][0], gle.account)
+			self.assertEquals(expected_gl_entries[i][1], gle.debit)
+			self.assertEquals(expected_gl_entries[i][2], gle.credit)
+			self.assertEquals(getdate(expected_gl_entries[i][3]), getdate(gle.due_date))
+
 
 def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")

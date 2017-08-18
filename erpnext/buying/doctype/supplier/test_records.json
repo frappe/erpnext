@@ -1,6 +1,12 @@
 [
  {
   "doctype": "Supplier",
+  "supplier_name": "_Test Supplier P",
+  "supplier_type": "_Test Supplier Type",
+  "credit_days_based_on": "Fixed Days"
+ },
+ {
+  "doctype": "Supplier",
   "supplier_name": "_Test Supplier with Country",
   "supplier_type": "_Test Supplier Type",
   "country": "Greece"
