@@ -22,7 +22,7 @@ class HubSettings(Document):
 	# hub_url = "http://hub.erpnext.org"
 
 	config_args = ['enabled']
-	profile_args = ['email', 'hub_user_name', 'company', 'country']  # also 'public_key_pem'
+	profile_args = ['email', 'hub_user_name', 'country']  # also 'public_key_pem'
 	only_in_code = ['private_key']
 	seller_args = ['publish', 'seller_city', 'seller_website', 'seller_description',
 		'publish_pricing', 'selling_price_list', 'publish_availability', 'warehouse']
@@ -37,9 +37,9 @@ class HubSettings(Document):
 
 
 	def on_update(self):
-		if not self.password:
+		if not self.access_token:
 			if self.enabled:
-				frappe.throw(_("Enabled without password"))
+				frappe.throw(_("Enabled without access_token"))
 			return
 		self.update_hub() #put back
 		pass
@@ -47,7 +47,7 @@ class HubSettings(Document):
 	### Account methods
 	def register(self):
 		"""Register at hub.erpnext.org and exchange keys"""
-		# if self.password or hasattr(self, 'private_key'):
+		# if self.access_token or hasattr(self, 'private_key'):
 		# 	return
 
 		(self.private_key, self.public_key_pem) = generate_keys()
@@ -57,7 +57,7 @@ class HubSettings(Document):
 		response.raise_for_status()
 		response_msg = response.json().get("message")
 
-		self.password = response_msg.get("password")
+		self.access_token = response_msg.get("access_token")
 		# rsa.RSAPublicKey
 		self.hub_public_key = load_pem_public_key(
 			str(response_msg.get("hub_public_key_pem")),
@@ -79,14 +79,14 @@ class HubSettings(Document):
 	def unpublish(self):
 		"""Unpublish from hub.erpnext.org, delete items there"""
 		response = requests.post(self.hub_url + "/api/method/hub.hub.api.unpublish", data={
-			"password": self.password
+			"access_token": self.access_token
 		})
 		response.raise_for_status()
 
 	def unregister_from_hub(self):
 		"""Unpublish, then delete transactions and user from there"""
 		response = requests.post(self.hub_url + "/api/method/hub.hub.api.unregister", data={
-			"password": self.password
+			"access_token": self.access_token
 		})
 		response.raise_for_status()
 		response_msg = response.json().get("message")
@@ -126,7 +126,7 @@ class HubSettings(Document):
 	def call_hub_api_plaintext(self, method, data):
 		response = requests.post(self.hub_url + "/api/method/hub.hub.api." + "call_method",
 			data = {
-				"password": self.password,
+				"access_token": self.access_token,
 				"method": method,
 				"message": json.dumps(data)
 			}
@@ -176,7 +176,7 @@ class HubSettings(Document):
 		hub_decryption_method = "decrypt_message_and_call_method"
 		response = requests.post(self.hub_url + "/api/method/hub.hub.api." + hub_decryption_method,
 			data = {
-				"password": self.password,
+				"access_token": self.access_token,
 				"method": method,
 				# "signature": signature,
 				"encrypted_key": unicode(encrypted_key.decode('latin-1')),

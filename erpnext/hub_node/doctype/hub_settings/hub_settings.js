@@ -28,7 +28,7 @@ frappe.ui.form.on("Hub Settings", {
 	},
 	enabled: function(frm) {
 		if(frm.doc.enabled) {
-			// frm.toggle_display("password", true);
+			// frm.toggle_display("access_token", true);
 		} else {
 			frm.trigger("set_enable_hub_primary_button");
 		}
@@ -49,12 +49,16 @@ frappe.ui.form.on("Hub Settings", {
 							frm.save();
 						});
 						frm.save();
-						if(!frm.doc.password.length) {
-							frappe.throw(__('No access token recieved.'));
+						// TODO: Handle bad response
+						if(!frm.doc.access_token.length) {
+							frm.set_value("enabled", 0);
+							frm.save();
+							frappe.throw(__('No access token received.'));
 						}
 					},
 					onerror: function() {
 						frappe.msgprint(__("Wrong Password"));
+						frm.set_value("enabled", 0);
 					}
 				});
 			});
@@ -79,7 +83,7 @@ frappe.ui.form.on("Hub Settings", {
 	disable_hub: (frm) => {
 		frm.set_value("enabled", 0);
 		frm.set_value("publish", 0);
-		frm.set_value("password", '');
+		frm.set_value("access_token", '');
 		frm.save();
 	},
 
