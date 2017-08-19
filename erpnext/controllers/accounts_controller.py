@@ -44,7 +44,9 @@ class AccountsController(TransactionBase):
 			self.set_total_in_words()
 
 		if self.doctype in ("Sales Invoice", "Purchase Invoice") and not self.is_return:
-			self.validate_payment_schedule()
+			if self.get("payment_schedule"):
+				self.set_due_date()
+				self.validate_payment_schedule()
 			self.validate_due_date()
 			self.validate_advance_entries()
 
@@ -626,6 +628,9 @@ class AccountsController(TransactionBase):
 		else:
 			self.due_date = max([d.due_date for d in self.get("payment_schedule")])
 
+	def set_due_date(self):
+		self.due_date = max([d.due_date for d in self.get("payment_schedule")])
+
 	def validate_payment_schedule(self):
 		if self.due_date and getdate(self.due_date) < getdate(self.posting_date):
 			frappe.throw(_("Due Date cannot be before posting date"))
@@ -639,7 +644,6 @@ class AccountsController(TransactionBase):
 
 		if total != self.grand_total:
 			frappe.throw(_("Total Payment Amount in Payment Schdule must be equal to Grand Total"))
-
 
 
 @frappe.whitelist()
