@@ -15,9 +15,7 @@ from frappe import _
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
 
 class HubSettings(Document):
-	# make a form with an enable hub button, that unhides profile section (mandatory fields)
-	# which on submitting, unhides publish check, which unlocks the publish options
-
+	# Constants
 	hub_url = "http://erpnext.hub:8000"
 	# hub_url = "http://hub.erpnext.org"
 
@@ -28,75 +26,106 @@ class HubSettings(Document):
 		'publish_pricing', 'selling_price_list', 'publish_availability', 'warehouse']
 	personal_args = ['hub_public_key_pem']
 
-	item_fields = ["name", "item_code", "item_name", "description", "image", "item_group",
-		"stock_uom", "modified", "price", "stock_qty"]
+	base_fields_for_items = ["name", "item_code", "item_name", "description", "image", "item_group",
+		 "modified"] #"price", "stock_uom", "stock_qty"
+
+	# Persistent global state
+	current_fields_for_items = base_fields_for_items
+
+	# Volatile current on-save state
+	item_fields_to_add = []
+	item_fields_to_remove = []
+	publishing_changed = {
+		"publish": 0,
+		"publish_pricing": 0,
+		"publish_availability": 0
+	}
 
 	def validate(self):
-		# self.before_update = frappe.get_doc('Hub Settings', self.name)
-		pass
-
+		self.before_update = frappe.get_doc('Hub Settings', self.name)
+		self.update_settings_changes()
+		if (self.publishing_changed["publish_pricing"] or
+			self.publishing_changed["publish_availability"]):
+			self.update_fields()
 
 	def on_update(self):
 		if not self.access_token:
 			if self.enabled:
 				frappe.throw(_("Enabled without access_token"))
 			return
-		self.update_hub() #put back
-		pass
 
-	### Account methods
-	def register(self):
-		"""Register at hub.erpnext.org and exchange keys"""
-		# if self.access_token or hasattr(self, 'private_key'):
-		# 	return
+		# If just registered
+		if self.enabled != self.before_update.enabled and self.enabled == 1:
+			return
 
-		(self.private_key, self.public_key_pem) = generate_keys()
+		self.update_hub()
+		self.reset_settings_changes()
+		self.update_item_fields_state()
 
-		response = requests.post(self.hub_url + "/api/method/hub.hub.api."+"register",
-			data = { "args_data": json.dumps(self.get_args(self.config_args + self.profile_args + ['public_key_pem'])) })
-		response.raise_for_status()
-		response_msg = response.json().get("message")
+	def update_settings_changes(self):
+		# Pick publishing changes
+		for setting in self.publishing_changed.keys():
+			if self.get(setting) != self.before_update.get(setting):
+				self.publishing_changed[setting] = 1
 
-		self.access_token = response_msg.get("access_token")
-		# rsa.RSAPublicKey
-		self.hub_public_key = load_pem_public_key(
-			str(response_msg.get("hub_public_key_pem")),
-			backend=default_backend()
-		)
+	def update_fields(self):
+		if self.publishing_changed["publish_pricing"]:
+			fields = ["", ""] # check
+			if self.publish_pricing:
+				self.item_fields_to_add = fields
+			else:
+				self.item_fields_to_remove = fields
+		if self.publishing_changed["publish_availability"]:
+			# fields = ["stock_uom", "stock_qty"]
+			fields = ["stock_uom"]
+			if self.publish_pricing:
+				self.item_fields_to_add = fields
+			else:
+				self.item_fields_to_remove = fields
 
-		self.last_sync_datetime = add_years(now(), -10)
+	def reset_settings_changes(self):
+		for setting in self.publishing_changed:
+			self.publishing_changed[setting] = 0
+
+	def update_item_fields_state(self):
+		self.current_fields_for_items += self.item_fields_to_add
+		fields = [f for f in self.current_fields_for_items if f not in self.item_fields_to_remove]
+		self.item_fields_to_remove = []
+		self.item_fields_to_add = []
 
 	def update_hub(self):
-		response_msg = self.call_hub_api_plaintext('update_user_details',
+		# Updating profile call
+		response_msg = self.call_hub_api_now('update_user_details',
 			data=self.get_args(self.profile_args + self.seller_args))
-		if self.publish:
-			self.sync(False)
 
-	def publish(self):
+		self.update_publishing()
+
+	def update_publishing(self):
+		if self.publishing_changed["publish"]:
+			if self.publish:
+				self.current_fields_for_items += self.item_fields_to_add
+				# [batch and enqueue] publishing call with all field values for all items (just like now)
+				self.publish_all_set_items()
+			else:
+				self.reset_publishing_settings()
+				# unpublishing call
+				self.unpublish_all_items()
+		else:
+			if self.item_fields_to_add:
+				# [batch and enqueue] adding call with name and these field values for all items
+				self.unpublish_all_items()
+			if self.item_fields_to_remove:
+				# removing call with that list
+				self.remove_item_fields_at_hub()
+
+	def publish_all_set_items(self, verbose=True):
 		"""Publish items hub.erpnext.org"""
-		self.sync()
+		# A way to set 'publish in hub' for a bulk of items, if not all are by default, like
+		self.publish_selling_items()
 
-	def unpublish(self):
-		"""Unpublish from hub.erpnext.org, delete items there"""
-		response = requests.post(self.hub_url + "/api/method/hub.hub.api.unpublish", data={
-			"access_token": self.access_token
-		})
-		response.raise_for_status()
-
-	def unregister_from_hub(self):
-		"""Unpublish, then delete transactions and user from there"""
-		response = requests.post(self.hub_url + "/api/method/hub.hub.api.unregister", data={
-			"access_token": self.access_token
-		})
-		response.raise_for_status()
-		response_msg = response.json().get("message")
-
-	def sync(self, now = True, verbose=True):
-		"""Sync items with hub.erpnext.org"""
-		item_fields = ["name", "item_code", "item_name", "description", "image", "item_group", "stock_uom", "modified"]
-		items = frappe.db.get_all("Item", fields=item_fields, filters={"publish_in_hub": 1, "modified": ['>', get_datetime(self.last_sync_datetime)]})
+		items = frappe.db.get_all("Item", fields=self.current_fields_for_items, filters={"publish_in_hub": 1})
 		if not items:
-			frappe.msgprint(_("Items already synced"))
+			frappe.msgprint(_("No published items found."))
 			return
 
 		for item in items:
@@ -105,25 +134,68 @@ class HubSettings(Document):
 				item.image = expand_relative_urls(item.image)
 		item_list = frappe.db.sql_list("select name from tabItem where publish_in_hub=1")
 
-		response_msg = self.call_hub_api_plaintext('sync',
+		response_msg = self.call_hub_api_now('update_items',
 			data={
 			"items_to_update": json.dumps(items),
-			"item_list": json.dumps(item_list)
+			"item_list": json.dumps(item_list),
+			"fields": self.current_fields_for_items
 		})
 		self.last_sync_datetime = response_msg.get("last_sync_datetime")
 
 		if verbose:
 			frappe.msgprint(_("{0} Items synced".format(len(items))))
 
-	def publish_selling_items(self):
-		"""Set `publish_in_hub`=1 for all Sales Items"""
-		# for item in frappe.get_all("Item", fields=["name"],
-		# 	filters={ "publish_in_hub": 0, "is_sales_item": 1}):
-		# 	frappe.db.set_value("Item", item.name, "publish_in_hub", 1)
-		pass
+	def unpublish_all_items(self):
+		"""Unpublish from hub.erpnext.org, delete items there"""
+		response_msg = self.call_hub_api_now('unpublish')
+
+	def add_item_fields_at_hub(self):
+		items = frappe.db.get_all("Item", fields=["item_code"] + self.item_fields_to_add, filters={"publish_in_hub": 1})
+		response_msg = self.call_hub_api_now('update_items',
+			data={
+				"items_with_new_fields": json.dumps(items),
+				"new_fields": self.item_fields_to_add
+			}
+		)
+
+	def remove_item_fields_at_hub(self):
+		response_msg = self.call_hub_api_now('remove_item_fields',
+			data={"fields_to_remove": json.dumps(self.item_fields_to_remove)})
+
+	### Account
+	def register(self):
+		"""Register at hub.erpnext.org and exchange keys"""
+		# if self.access_token or hasattr(self, 'private_key'):
+		# 	return
+		(self.private_key, self.public_key_pem) = generate_keys()
+		response = requests.post(self.hub_url + "/api/method/hub.hub.api."+"register",
+			data = { "args_data": json.dumps(self.get_args(self.config_args + self.profile_args + ['public_key_pem'])) })
+		response.raise_for_status()
+		response_msg = response.json().get("message")
+
+		self.access_token = response_msg.get("access_token")
+		self.hub_public_key = load_pem_public_key(	# An rsa.RSAPublicKey object
+			str(response_msg.get("hub_public_key_pem")),
+			backend=default_backend()
+		)
+
+		# Set start values
+		self.current_fields_for_items = self.base_fields_for_items
+		self.last_sync_datetime = add_years(now(), -10)
+
+	def unregister_from_hub(self):
+		"""Unpublish, then delete transactions and user from there"""
+		self.reset_publishing_settings()
+		response_msg = self.call_hub_api_now('unregister')
 
 	### Helpers
-	def call_hub_api_plaintext(self, method, data):
+	def get_args(self, arg_list):
+		args = {}
+		for d in arg_list:
+			args[d] = self.get(d)
+		return args
+
+	def call_hub_api_now(self, method, data = []):
 		response = requests.post(self.hub_url + "/api/method/hub.hub.api." + "call_method",
 			data = {
 				"access_token": self.access_token,
@@ -133,6 +205,19 @@ class HubSettings(Document):
 		)
 		response.raise_for_status()
 		return response.json().get("message")
+
+	def reset_publishing_settings(self):
+		self.publish = 0
+		self.publish_pricing = 0
+		self.publish_availability = 0
+		self.current_fields_for_items = self.base_fields_for_items
+
+	def publish_selling_items(self):
+		"""Set `publish_in_hub`=1 for all Sales Items"""
+		for item in frappe.get_all("Item", fields=["name"],
+			filters={ "publish_in_hub": 0, "is_sales_item": 1}):
+			frappe.db.set_value("Item", item.name, "publish_in_hub", 1)
+
 
 	def call_hub_api(self, method, data):
 		# Encryption
@@ -188,42 +273,6 @@ class HubSettings(Document):
 		print "=============5=============="
 		response.raise_for_status()
 		return response.json().get("message")
-
-	def get_args(self, arg_list):
-		args = {}
-		for d in arg_list:
-			args[d] = self.get(d)
-		return args
-
-		# return {
-		# 	"enabled": self.enabled,
-		# 	"hub_user_name": self.hub_user_name,
-		# 	"company": self.company,
-		# 	"country": self.country,
-		# 	"email": self.email,
-		# 	"publish": self.publish,
-		# 	"public_key_pem": self.pem_pub,
-		# 	"seller_city": self.seller_city,
-		# 	"seller_website": self.seller_website,
-		# 	"seller_description": self.seller_description,
-		# 	"publish_pricing": self.publish_pricing,
-		# 	"selling_price_list": self.selling_price_list,
-		# 	"publish_availability": self.publish_availability,
-		# 	"warehouse": self.warehouse
-		# }
-
-	# def get_item_details(self, item):
-	# 	item_code = item.item_code
-	# 	template_item_code = frappe.db.get_value("Item", item_code, "variant_of")
-	# 	# item = get_qty_in_stock(item, template_item_code, self.warehouse, self.last_sync_datetime)
-	# 	# item = get_price(item, template_item_code, self.selling_price_list, self.company, self.last_sync_datetime)
-	# 	return item
-
-	def get_item_details(self, item):
-		"Get stock and price info"
-		pass
-
-
 
 ### Helpers
 def generate_keys():

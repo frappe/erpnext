@@ -651,6 +651,13 @@ class Item(WebsiteGenerator):
 
 			validate_item_variant_attributes(self, args)
 
+	# Update on Hub
+	def update_on_hub(self):
+		pass
+
+	def update_communication_on_hub(self):
+		pass
+
 def get_timeline_data(doctype, name):
 	'''returns timeline data based on stock ledger entry'''
 	out = {}
@@ -797,4 +804,3 @@ def check_stock_uom_with_bin(item, stock_uom):
 
 	if not matched:
 		frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.").format(item))
-
