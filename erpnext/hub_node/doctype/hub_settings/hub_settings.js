@@ -24,6 +24,9 @@ frappe.ui.form.on("Hub Settings", {
 	},
 	refresh: function(frm) {
 	},
+	// validate: function(frm) {
+	// 	if(frm.doc.publish) {}
+	// },
 	on_update: function(frm) {
 	},
 	enabled: function(frm) {
