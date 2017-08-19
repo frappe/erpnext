@@ -252,6 +252,7 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEquals(so.items[0].rate, 100)
 
 	def test_pricing_rule_with_margin_and_discount(self):
+		frappe.delete_doc_if_exists('Pricing Rule', '_Test Pricing Rule')
 		make_pricing_rule(selling=1, margin_type="Percentage", margin_rate_or_amount=10)
 		si = create_sales_invoice(do_not_save=True)
 		si.items[0].price_list_rate = 1000

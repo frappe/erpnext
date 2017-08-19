@@ -643,7 +643,7 @@ class AccountsController(TransactionBase):
 			total += flt(d.payment_amount)
 
 		if total != self.grand_total:
-			frappe.throw(_("Total Payment Amount in Payment Schdule must be equal to Grand Total"))
+			frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand Total"))
 
 
 @frappe.whitelist()
@@ -824,7 +824,7 @@ def get_payment_terms(terms_template, posting_date=None, grand_total=None):
 	terms_doc = frappe.get_doc("Payment Terms Template", terms_template)
 
 	schedule = []
-	for i, d in enumerate(terms_doc.get("terms")):
+	for d in terms_doc.get("terms"):
 		term_details = get_payment_term_details(d, posting_date, grand_total)
 		schedule.append(term_details)
 
