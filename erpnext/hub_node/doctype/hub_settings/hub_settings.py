@@ -18,7 +18,6 @@ class HubSettings(Document):
 	# Constants
 	hub_url = "http://erpnext.hub:8000"
 	# hub_url = "http://hub.erpnext.org"
-
 	config_args = ['enabled']
 	profile_args = ['email', 'hub_user_name', 'country']  # also 'public_key_pem'
 	only_in_code = ['private_key']
@@ -72,16 +71,16 @@ class HubSettings(Document):
 		if self.publishing_changed["publish_pricing"]:
 			fields = ["", ""] # check
 			if self.publish_pricing:
-				self.item_fields_to_add = fields
+				self.item_fields_to_add += fields
 			else:
-				self.item_fields_to_remove = fields
+				self.item_fields_to_remove += fields
 		if self.publishing_changed["publish_availability"]:
 			# fields = ["stock_uom", "stock_qty"]
 			fields = ["stock_uom"]
-			if self.publish_pricing:
-				self.item_fields_to_add = fields
+			if self.publish_availability:
+				self.item_fields_to_add += fields
 			else:
-				self.item_fields_to_remove = fields
+				self.item_fields_to_remove += fields
 
 	def reset_settings_changes(self):
 		for setting in self.publishing_changed:
@@ -113,7 +112,7 @@ class HubSettings(Document):
 		else:
 			if self.item_fields_to_add:
 				# [batch and enqueue] adding call with name and these field values for all items
-				self.unpublish_all_items()
+				self.add_item_fields_at_hub()
 			if self.item_fields_to_remove:
 				# removing call with that list
 				self.remove_item_fields_at_hub()
@@ -138,7 +137,7 @@ class HubSettings(Document):
 			data={
 			"items_to_update": json.dumps(items),
 			"item_list": json.dumps(item_list),
-			"fields": self.current_fields_for_items
+			"item_fields": self.current_fields_for_items
 		})
 		self.last_sync_datetime = response_msg.get("last_sync_datetime")
 
@@ -147,20 +146,20 @@ class HubSettings(Document):
 
 	def unpublish_all_items(self):
 		"""Unpublish from hub.erpnext.org, delete items there"""
-		response_msg = self.call_hub_api_now('unpublish')
+		response_msg = self.call_hub_api_now('unpublish_items')
 
 	def add_item_fields_at_hub(self):
 		items = frappe.db.get_all("Item", fields=["item_code"] + self.item_fields_to_add, filters={"publish_in_hub": 1})
-		response_msg = self.call_hub_api_now('update_items',
+		response_msg = self.call_hub_api_now('add_item_fields',
 			data={
 				"items_with_new_fields": json.dumps(items),
-				"new_fields": self.item_fields_to_add
+				"fields_to_add": self.item_fields_to_add
 			}
 		)
 
 	def remove_item_fields_at_hub(self):
 		response_msg = self.call_hub_api_now('remove_item_fields',
-			data={"fields_to_remove": json.dumps(self.item_fields_to_remove)})
+			data={"fields_to_remove": self.item_fields_to_remove})
 
 	### Account
 	def register(self):
