@@ -70,6 +70,8 @@ cur_frm.cscript.start_date = function(doc, dt, dn){
 		callback: function(r, rt) {
 			cur_frm.refresh();
 			calculate_all(doc, dt, dn);
+			get_deducted_days(doc, dt, dn);
+			
 		}
 	});
 }
@@ -90,6 +92,20 @@ cur_frm.cscript.leave_without_pay = function(doc,dt,dn){
 			calculate_all(doc, dt, dn);
 		});
 	}
+}
+
+var get_deducted_days = function(doc, dt, dn){
+	 frappe.call({
+		method: 'validate_return_from_leave_deduction',
+		doc: cur_frm.doc,
+		callback: function(r, rt) {
+			// console.log(r);
+			// cur_frm.refresh();
+			// calculate_ded_total(doc, dt, dn);
+			cur_frm.refresh();
+			// 
+		}
+	});
 }
 
 var calculate_all = function(doc, dt, dn) {

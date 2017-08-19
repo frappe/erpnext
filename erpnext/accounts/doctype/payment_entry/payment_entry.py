@@ -88,8 +88,11 @@ class PaymentEntry(AccountsController):
 			if not self.party:
 				frappe.throw(_("Party is mandatory"))
 				
-			self.party_name = frappe.db.get_value(self.party_type, self.party, 
-				self.party_type.lower() + "_name")
+			if self.party_type != "Imprest Temporary" and self.party_type != "Imprest Permanent":
+				self.party_name = frappe.db.get_value(self.party_type, self.party, 
+					self.party_type.lower() + "_name")
+			else:
+				self.party_name = frappe.db.get_value(self.party_type, self.party,"name")
 		
 		if self.party:
 			if not self.party_balance:
@@ -136,15 +139,15 @@ class PaymentEntry(AccountsController):
 			if not frappe.db.exists(self.party_type, self.party):
 				frappe.throw(_("Invalid {0}: {1}").format(self.party_type, self.party))
 			
-			if self.party_account:
+			if self.party_account and self.party_type in ("Customer","Supplier"):
 				party_account_type = "Receivable" if self.party_type=="Customer" else "Payable"
 				self.validate_account_type(self.party_account, [party_account_type])
 					
 	def validate_bank_accounts(self):
-		if self.payment_type in ("Pay", "Internal Transfer"):
+		if self.payment_type in ("Pay"):
 			self.validate_account_type(self.paid_from, ["Bank", "Cash"])
 			
-		if self.payment_type in ("Receive", "Internal Transfer"):
+		if self.payment_type in ("Receive"):
 			self.validate_account_type(self.paid_to, ["Bank", "Cash"])
 			
 	def validate_account_type(self, account, account_types):
@@ -307,7 +310,7 @@ class PaymentEntry(AccountsController):
 			party_amount = self.paid_amount if self.payment_type=="Receive" else self.received_amount
 
 			if not total_negative_outstanding:
-				if self.party_type != "Employee":
+				if self.party_type != "Employee" and self.party_type != "Imprest Temporary" and self.party_type != "Imprest Permanent":
 					frappe.throw(_("Cannot {0} {1} {2} without any negative outstanding invoice")
 						.format(self.payment_type, ("to" if self.party_type=="Customer" else "from"), 
 							self.party_type), InvalidPaymentEntry)
@@ -386,7 +389,9 @@ class PaymentEntry(AccountsController):
 				"party": self.party,
 				"against": against_account,
 				"title": self.title,
-				"account_currency": self.party_account_currency
+				"account_currency": self.party_account_currency,
+				"description":self.description,
+				"reason":self.reason
 			})
 			
 			dr_or_cr = "credit" if self.party_type == "Customer" else "debit"
@@ -429,7 +434,9 @@ class PaymentEntry(AccountsController):
 					"account_currency": self.paid_from_account_currency,
 					"against": self.party if self.payment_type=="Pay" else self.paid_to,
 					"credit_in_account_currency": self.paid_amount,
-					"credit": self.base_paid_amount
+					"credit": self.base_paid_amount,
+					"description":self.description_to,
+					"reason":self.reason_to
 				})
 			)
 		if self.payment_type in ("Receive", "Internal Transfer"):
@@ -439,7 +446,9 @@ class PaymentEntry(AccountsController):
 					"account_currency": self.paid_to_account_currency,
 					"against": self.party if self.payment_type=="Receive" else self.paid_from,
 					"debit_in_account_currency": self.received_amount,
-					"debit": self.base_received_amount
+					"debit": self.base_received_amount,
+					"description":self.description_to,
+					"reason":self.reason_to
 				})
 			)
 			
@@ -498,7 +507,7 @@ def get_outstanding_reference_documents(args):
 	except : return {}
 	
 def get_orders_to_be_billed(posting_date, party_type, party, party_account_currency, company_currency):
-	if party_type != "Employee":
+	if party_type != "Employee" and party_type != "Imprest Temporary" and party_type != "Imprest Permanent":
 		voucher_type = 'Sales Order' if party_type == "Customer" else 'Purchase Order'
 
 		ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
@@ -538,7 +547,7 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 		return []
 	
 def get_negative_outstanding_invoices(party_type, party, party_account, total_field):
-	if party_type != "Employee":
+	if party_type != "Employee" and party_type != "Imprest Temporary" and party_type != "Imprest Permanent":
 		voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
 		return frappe.db.sql("""
 			select
@@ -719,3 +728,28 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		pe.set_exchange_rate()
 		pe.set_amounts()
 	return pe
+
+
+def paid_from_query(doctype, txt, searchfield, start, page_len, filters):
+	conditions = []
+	return frappe.db.sql("""select name from `tabAccount`
+		where status = 'Active'
+			and docstatus < 2
+			and ({key} like %(txt)s
+				or employee_name like %(txt)s)
+			{fcond} {mcond}
+		order by
+			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+			if(locate(%(_txt)s, employee_name), locate(%(_txt)s, employee_name), 99999),
+			idx desc,
+			name, employee_name
+		limit %(start)s, %(page_len)s""".format(**{
+			'key': searchfield,
+			'fcond': get_filters_cond(doctype, filters, conditions),
+			'mcond': get_match_cond(doctype)
+		}), {
+			'txt': "%%%s%%" % txt,
+			'_txt': txt.replace("%", ""),
+			'start': start,
+			'page_len': page_len
+		})

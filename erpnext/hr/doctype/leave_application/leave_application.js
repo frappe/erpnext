@@ -7,45 +7,55 @@ cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.cscript.custom_leave_type = function(doc) {
     if (cur_frm.doc.leave_type !== "Annual Leave - اجازة اعتيادية" && cur_frm.doc.leave_type !== "Compensatory off - تعويضية") {
         cur_frm.set_df_property("monthly_accumulated_leave_balance", "hidden", 1);
-    }
-    else{
+    } else {
         cur_frm.set_df_property("monthly_accumulated_leave_balance", "hidden", 0);
-    }
-    if (cur_frm.doc.leave_type != "Annual Leave - اجازة اعتيادية" && cur_frm.doc.leave_type != "Without Pay - غير مدفوعة" && cur_frm.doc.leave_type != "Compensatory off - تعويضية") {
-        // alert('dfggg')
-        cur_frm.set_df_property("attachment", "reqd", 1);
-    }
-    else{
-        cur_frm.set_df_property("attachment", "reqd", 0);
     }
 }
 cur_frm.fields_dict.alternative_employee.get_query = function(doc) {
     if (cur_frm.doc.employee == undefined || cur_frm.doc.employee == "") {
         frappe.throw(__("Please select an employee"));
     }
-    return {
-        filters: [
-            ['status', '=', 'Active'],
-            ['name', '!=', cur_frm.doc.employee],
-            ['department', '=', cur_frm.doc.department]
-        ]
-    };
+
+    if ('Director' in frappe.roles(user)) {
+        // alert("hhh")
+        return {
+            filters: [
+                ['status', '=', 'Active'],
+                ['name', '!=', cur_frm.doc.employee]
+            ]
+        };
+    } else {
+        // alert("mmm")
+        if (frm.doc.__islocal) {
+            return {
+                filters: [
+                    ['status', '=', 'Active'],
+                    ['name', '!=', cur_frm.doc.employee],
+                    ['department', '=', cur_frm.doc.department]
+                ]
+
+            };
+        }
+    }
 };
 frappe.ui.form.on("Leave Application", {
     validate: function(frm) {
-        if (!frm.doc.__islocal && frm.doc.owner != frappe.session.user) {
-            // if (frm.doc.leave_approver != frappe.session.user && frm.doc.docstatus != 1) {
-            //     //~ frm.set_value("docstatus", 0);
-            //     //     cur_frm.doc.docstatus = 0
-            //     //     frm.set_value("workflow_state", "Pending");
-            //     //     alert("Hit");
-            //     // } else {
-            //     //     alert("No");
-            // }
-        }
+        // if (!frm.doc.__islocal && frm.doc.owner != frappe.session.user) {
+        //     // if (frm.doc.leave_approver != frappe.session.user && frm.doc.docstatus != 1) {
+        //     //     //~ frm.set_value("docstatus", 0);
+        //     //     //     cur_frm.doc.docstatus = 0
+        //     //     //     frm.set_value("workflow_state", "Pending");
+        //     //     //     alert("Hit");
+        //     //     // } else {
+        //     //     //     alert("No");
+        //     // }
+        // }
 
     },
     onload: function(frm) {
+        if (cur_frm.doc.__islocal) {
+            frm.enable_save();
+        }
 
         if (!frm.doc.posting_date) {
             frm.set_value("posting_date", get_today());
@@ -65,6 +75,20 @@ frappe.ui.form.on("Leave Application", {
     },
 
     refresh: function(frm) {
+        if (!cur_frm.doc.__islocal) {
+            frm.disable_save();
+        }
+        if (cur_frm.doc.leave_type != "Annual Leave - اجازة اعتيادية" && cur_frm.doc.leave_type != "Without Pay - غير مدفوعة" && cur_frm.doc.leave_type != "Compensatory off - تعويضية" && cur_frm.doc.leave_type != "emergency -اضطرارية") {
+            // alert('dfggg');
+            if (!cur_frm.doc.__islocal) {
+                // alert("fgg");
+                cur_frm.set_df_property("attachment", "reqd", 1);
+                refresh_field("attachment");
+            }
+        } else {
+            cur_frm.set_df_property("attachment", "reqd", 0);
+            refresh_field("attachment");
+        }
         frappe.call({
             method: "validate_type_dis",
             doc: frm.doc,

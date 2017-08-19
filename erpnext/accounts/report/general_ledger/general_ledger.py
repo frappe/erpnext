@@ -94,7 +94,9 @@ def get_columns(filters):
 		_("Against Account") + "::120", _("Party Type") + "::80", _("Party") + "::150",
 		_("Project") + ":Link/Project:100", _("Cost Center") + ":Link/Cost Center:100",
 		_("Against Voucher Type") + "::120", _("Against Voucher") + ":Dynamic Link/"+_("Against Voucher Type")+":160",
-		_("Remarks") + "::400"
+		_("Remarks") + "::400",
+		_("Reson") + "::400",
+		_("Description") + "::400"
 	]
 
 	return columns
@@ -122,7 +124,7 @@ def get_gl_entries(filters):
 			sum(debit) as debit, sum(credit) as credit,
 			voucher_type, voucher_no,title, cost_center, project,
 			against_voucher_type, against_voucher,
-			remarks, against, is_opening {select_fields}
+			remarks,reason,description, against, is_opening {select_fields}
 		from `tabGL Entry`
 		where company=%(company)s {conditions}
 		{group_by_condition}
@@ -294,7 +296,7 @@ def get_result_as_list(data, filters):
 			row += [d.get("debit_in_account_currency"), d.get("credit_in_account_currency")]
 
 		row += [d.get("voucher_type"), d.get("voucher_no"), d.get("title"), d.get("against"),
-			d.get("party_type"), d.get("party"), d.get("project"), d.get("cost_center"), d.get("against_voucher_type"), d.get("against_voucher"), d.get("remarks")
+			d.get("party_type"), d.get("party"), d.get("project"), d.get("cost_center"), d.get("against_voucher_type"), d.get("against_voucher"), d.get("remarks"), d.get("reason"), d.get("description")
 		]
 
 		result.append(row)

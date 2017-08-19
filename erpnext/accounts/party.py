@@ -187,9 +187,9 @@ def get_party_account(party_type, party, company,payment_type =None):
 			if party_type=="Employee" :
 				if payment_type:
 					if payment_type =="Receive":
-						default_account_name = "default_employee_recivable_account" 
-					elif payment_type == "Pay":
 						default_account_name = "default_employee_payable_account"
+					elif payment_type == "Pay":
+						default_account_name = "default_employee_recivable_account" 
 					else :
 						default_account_name = "default_employee_payable_account"
 				

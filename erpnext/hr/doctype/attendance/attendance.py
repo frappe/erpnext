@@ -6,7 +6,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import getdate, nowdate
+from frappe.utils import getdate, nowdate,get_time
 from frappe import _
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name
@@ -57,6 +57,86 @@ class Attendance(Document):
 		self.validate_attendance_date()
 		self.validate_duplicate_record()
 		self.check_leave_record()
+		self.calulate_fields()
+
+	def calulate_fields(self):
+
+
+		self.early_entry=""
+		self.delay=""
+		self.early_exit=""
+		self.over_time=""
+		self.actual=""
+		self.total=""
+
+
+		start_time=self.start_time
+		allow_start_time=self.allow_start_time
+		end_time=self.end_time
+		allow_end_time=self.allow_end_time
+
+		attendance=self.attendance
+		departure=self.departure
+		early_entry=self.early_entry
+		delay=self.delay
+		early_exit=self.early_exit
+		over_time=self.over_time
+		actual=self.actual
+		total=self.total
+
+
+		raw_time=  frappe.utils.data.time_diff(departure,attendance)
+		att_to_end_time=  frappe.utils.data.time_diff(end_time,attendance)
+		
+
+
+		bool_entry_early= get_time(start_time) > get_time(attendance)
+		if bool_entry_early:
+			early_entry =  frappe.utils.data.time_diff(start_time,attendance)
+			self.early_entry =  early_entry
+			self.delay =  ""
+
+
+		bool_delay= get_time(allow_start_time) < get_time(attendance)
+		if bool_delay:
+			delay =  frappe.utils.data.time_diff(attendance,start_time)
+			self.delay =  delay
+			self.early_entry = ""
+
+
+		bool_departure= get_time(allow_end_time) > get_time(departure)
+		if bool_departure:
+			departure =  frappe.utils.data.time_diff(end_time,departure)
+			self.early_exit = departure
+			self.over_time=""
+
+
+		bool_overtime= get_time(end_time) < get_time(departure)
+		if bool_overtime:
+			overtime =  frappe.utils.data.time_diff(departure,end_time)
+			# frappe.throw(str(overtime))
+			self.over_time = overtime
+			self.early_exit=""
+
+
+
+		if bool_overtime:
+			bool_cond_over = get_time(self.over_time) <= get_time(self.allow_to)
+			if bool_cond_over:
+				total= raw_time
+				self.actual=total
+				self.total=total
+			else:
+				over_time=self.over_time
+				allow_to=self.allow_to
+				self.actual=raw_time
+				self.total= frappe.utils.data.to_timedelta(att_to_end_time)+  frappe.utils.data.to_timedelta(allow_to)
+		else:
+			total = raw_time
+			self.actual = total
+			self.total = total
+
+
 
 
 @frappe.whitelist(allow_guest=True)
@@ -196,3 +276,6 @@ def notify(args):
 	"notify": 1})
 
 # cint(self.follow_via_email)
+
+
+

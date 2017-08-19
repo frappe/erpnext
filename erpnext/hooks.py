@@ -193,7 +193,8 @@ scheduler_events = {
 		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.trigger_emails',
 		"erpnext.hr.doctype.governmental_documents.governmental_documents.hooked_validate_notification_message",
 		"erpnext.hr.doctype.employee.employee.hooked_validate_exp_dates",
-		"erpnext.hr.doctype.health_insurance_info.health_insurance_info.hooked_validate_exp_date"
+		"erpnext.hr.doctype.health_insurance_info.health_insurance_info.hooked_validate_exp_date",
+		'erpnext.hr.doctype.leave_application.leave_application.create_return_from_leave_statement_after_leave'
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
@@ -207,7 +208,6 @@ scheduler_events = {
 		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary',
 		'erpnext.hr.doctype.attendance.attendance.validate_absence_and_notify',
 		'erpnext.hr.doctype.leave_application.leave_application.hooked_leave_allocation_builder',
-		'erpnext.hr.doctype.leave_application.leave_application.create_return_from_leave_statement_after_leave'
 	]
 }
 

@@ -1294,14 +1294,14 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2017-06-17 16:00:33.639045", 
+ "modified": "2017-08-15 10:21:29.262730", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Entry", 
  "owner": "Administrator", 
  "permissions": [
   {
-   "amend": 1, 
+   "amend": 0, 
    "apply_user_permissions": 0, 
    "cancel": 1, 
    "create": 1, 
@@ -1322,7 +1322,7 @@
    "write": 1
   }, 
   {
-   "amend": 1, 
+   "amend": 0, 
    "apply_user_permissions": 0, 
    "cancel": 1, 
    "create": 1, 
@@ -1367,7 +1367,7 @@
  "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 1, 
- "search_fields": "voucher_type,posting_date, due_date, cheque_no", 
+ "search_fields": "voucher_type,posting_date, due_date, cheque_no,title", 
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "title_field": "title", 

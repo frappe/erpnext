@@ -142,7 +142,7 @@ def make_round_off_gle(gl_map, debit_credit_diff):
 
 	round_off_gle = frappe._dict()
 	for k in ["voucher_type", "voucher_no", "company",
-		"posting_date", "remarks", "is_opening"]:
+		"posting_date", "remarks", "is_opening","reason","description"]:
 			round_off_gle[k] = gl_map[0][k]
 
 	round_off_gle.update({

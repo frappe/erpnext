@@ -18,7 +18,7 @@ class SalarySlip(TransactionBase):
 		self.name = make_autoname('Sal Slip/' +self.employee + '/.#####')
 
 	def validate(self):
-		self.validate_return_from_leave_deduction()
+		# self.validate_return_from_leave_deduction()
 		self.status = self.get_status()
 
 		pan=frappe.get_list("Penalty",['name'],filters={'start_date':self.start_date,'end_date':self.end_date,'employee':self.employee})
@@ -49,6 +49,18 @@ class SalarySlip(TransactionBase):
 			if self.salary_slip_based_on_timesheet and (self.total_working_hours > int(max_working_hours)):
 				frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
 								format(max_working_hours), alert=True)
+		# self.validate_return_from_leave_deduction()
+	def validate_return_from_leave_deduction(self):
+		# if self.docstatus == 0:
+		rt = frappe.db.sql(""" select to_date, return_date from `tabReturn From Leave Statement` where docstatus = 1 and
+		employee = '{0}' and return_date between '{1}' and '{2}'""".format(self.employee, self.start_date, self.end_date), as_dict = True)
+		# frappe.throw(str(self.start_date))
+		if rt:
+			for r in rt:
+				deducted_days = date_diff(r.return_date, r.to_date)
+				if deducted_days > 1:
+					self.deducted_days = deducted_days - 1
+
 
 	def validate_dates(self):
 		if date_diff(self.end_date, self.start_date) < 0:
@@ -71,16 +83,6 @@ class SalarySlip(TransactionBase):
 				
 
 					self.update_component_row(struct_row, amount, key)
-
-	def validate_return_from_leave_deduction(self):
-		if self.docstatus == 0:
-			rt = frappe.db.sql(""" select to_date, return_date from `tabReturn From Leave Statement` where docstatus = 1 and
-			employee = '{0}' and return_date between '{1}' and '{2}'""".format(self.employee, self.start_date, self.end_date), as_dict = True)
-			if rt:
-				for r in rt:
-					deducted_days = date_diff(r.return_date, r.to_date)
-					if deducted_days > 1:
-						self.deducted_days = deducted_days
 
 	def update_component_row(self, struct_row, amount, key):
 		component_row = None

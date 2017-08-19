@@ -3,9 +3,14 @@
 
 frappe.ui.form.on('Financial Custody Entry', {
 	onload:function(frm){
+		//~ frm.set_query("employee", function() {
+			//~ return {
+				//~ query: "erpnext.controllers.queries.employee_query_custody"
+			//~ }
+		//~ });
 		frm.set_query("employee", function() {
 			return {
-				query: "erpnext.controllers.queries.employee_query_custody"
+				query: "erpnext.controllers.queries.employee_query"
 			}
 		});
 	}

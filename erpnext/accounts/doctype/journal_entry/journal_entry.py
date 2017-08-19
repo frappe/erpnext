@@ -378,8 +378,12 @@ class JournalEntry(AccountsController):
 			if d.party_type and d.party:
 				if not pay_to_recd_from:
 					if d.party_type != "Employee":
-						pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
-							"customer_name" if d.party_type=="Customer" else "supplier_name")
+						if d.party_type != "Imprest Temporary" and d.party_type != "Imprest Permanent":
+							pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
+								"customer_name" if d.party_type=="Customer" else "supplier_name")
+						else : 
+							self.party_name = frappe.db.get_value(d.party_type, d.party,"name")
+					
 					elif d.party_type == "Employee":
 						pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
 							"employee_name")
@@ -429,6 +433,8 @@ class JournalEntry(AccountsController):
 						"against_voucher_type": d.reference_type,
 						"against_voucher": d.reference_name,
 						"remarks": self.remark,
+						"reason": d.reason,
+						"description": d.description,
 						"cost_center": d.cost_center,
 						"project": d.project,
 						"title": self.title

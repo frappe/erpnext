@@ -1664,7 +1664,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2017-07-17 13:22:43.736685", 
+ "modified": "2017-08-15 10:20:05.070129", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 
@@ -1710,7 +1710,7 @@
    "set_user_permissions": 0, 
    "share": 0, 
    "submit": 0, 
-   "write": 0
+   "write": 1
   }, 
   {
    "amend": 0, 
