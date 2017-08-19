@@ -42,6 +42,22 @@ frappe.ui.form.on("Student Applicant", {
 	}
 });
 
+frappe.ui.form.on('Student Guardian', {
+	guardian: function(frm, cdt, cdn) {
+		var guardian = frappe.model.get_doc(cdt, cdn);
+		if(guardian.guardian){
+			frappe.call({
+				method: "erpnext.schools.doctype.student_applicant.student_applicant.get_guardian_name",
+				args: {
+					guardian: guardian.guardian
+				},
+				callback: function(r) {
+					frappe.model.set_value(cdt, cdn, "guardian_name", r.message);
+				}
+			});
+		}
+	}
+});
 
 frappe.ui.form.on('Student Sibling', {
 	student: function(frm) {
@@ -50,4 +66,3 @@ frappe.ui.form.on('Student Sibling', {
 		frm.add_fetch("student", "date_of_birth", "date_of_birth");
 	}
 });
-
