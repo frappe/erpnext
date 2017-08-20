@@ -213,7 +213,7 @@ def validate_serial_no(sle, item_det):
 							frappe.throw(_("Serial No {0} does not belong to Item {1}").format(serial_no,
 								sle.item_code), SerialNoItemError)
 
-					if sr.warehouse and sle.actual_qty > 0:
+					if (sr.warehouse or sr.purchase_document_no) and sle.actual_qty > 0:
 						frappe.throw(_("Serial No {0} has already been received").format(serial_no),
 							SerialNoDuplicateError)
 
