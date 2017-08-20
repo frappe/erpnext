@@ -15,6 +15,7 @@ from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from erpnext.controllers.item_variant import (get_variant, copy_attributes_to_variant,
 	make_variant_item_code, validate_item_variant_attributes, ItemVariantExistsError)
+from erpnext.hub_node.doctype.hub_settings.hub_settings import call_hub_api_now
 
 class DuplicateReorderRows(frappe.ValidationError): pass
 
@@ -103,6 +104,11 @@ class Item(WebsiteGenerator):
 		self.update_variants()
 		self.update_item_price()
 		self.update_template_item()
+
+		# 3 cases for doing hub stuff:
+		# if publish has not changed and is 1, has and: is 1 now, is 0 now
+		if self.publish_in_hub == 1:
+			self.update_on_hub()
 
 	def add_price(self, price_list=None):
 		'''Add a new price'''
@@ -669,9 +675,21 @@ class Item(WebsiteGenerator):
 
 			validate_item_variant_attributes(self, args)
 
-	# Update on Hub
 	def update_on_hub(self):
-		pass
+		access_token = frappe.db.get_single_value('Hub Settings', 'access_token')
+		current_hub_fields = json.loads(frappe.db.get_single_value('Hub Settings', 'current_item_fields'))
+
+		item_dict = {}
+		for field in current_hub_fields:
+			item_dict[field] = self.get(field)
+
+		response_msg = call_hub_api_now(
+			access_token, 'update_item',
+			data={
+				"item_code": self.item_code,
+				"item_dict": json.dumps(item_dict)
+			}
+		)
 
 	def update_communication_on_hub(self):
 		pass

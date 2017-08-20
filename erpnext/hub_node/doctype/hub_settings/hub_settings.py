@@ -14,10 +14,10 @@ from frappe.utils import cint, expand_relative_urls, fmt_money, flt, add_years, 
 from frappe import _
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
 
+hub_url = "http://erpnext.hub:8000"
+# hub_url = "http://hub.erpnext.org"
+
 class HubSettings(Document):
-	# Constants
-	hub_url = "http://erpnext.hub:8000"
-	# hub_url = "http://hub.erpnext.org"
 	config_args = ['enabled']
 	profile_args = ['email', 'hub_user_name', 'country']  # also 'public_key_pem'
 	only_in_code = ['private_key']
@@ -28,20 +28,18 @@ class HubSettings(Document):
 	base_fields_for_items = ["name", "item_code", "item_name", "description", "image", "item_group",
 		 "modified"] #"price", "stock_uom", "stock_qty"
 
-	# Persistent global state
-	current_fields_for_items = base_fields_for_items
-
-	# Volatile current on-save state
-	item_fields_to_add = []
-	item_fields_to_remove = []
-	publishing_changed = {
-		"publish": 0,
-		"publish_pricing": 0,
-		"publish_availability": 0
-	}
+	def reset_current_on_save_flags(self):
+		self.item_fields_to_add = []
+		self.item_fields_to_remove = []
+		self.publishing_changed = {
+			"publish": 0,
+			"publish_pricing": 0,
+			"publish_availability": 0
+		}
 
 	def validate(self):
 		self.before_update = frappe.get_doc('Hub Settings', self.name)
+		self.reset_current_on_save_flags()
 		self.update_settings_changes()
 		if (self.publishing_changed["publish_pricing"] or
 			self.publishing_changed["publish_availability"]):
@@ -58,7 +56,6 @@ class HubSettings(Document):
 			return
 
 		self.update_hub()
-		self.reset_settings_changes()
 		self.update_item_fields_state()
 
 	def update_settings_changes(self):
@@ -69,7 +66,8 @@ class HubSettings(Document):
 
 	def update_fields(self):
 		if self.publishing_changed["publish_pricing"]:
-			fields = ["", ""] # check
+			# TODO: pricing
+			fields = ["", ""]
 			if self.publish_pricing:
 				self.item_fields_to_add += fields
 			else:
@@ -82,19 +80,15 @@ class HubSettings(Document):
 			else:
 				self.item_fields_to_remove += fields
 
-	def reset_settings_changes(self):
-		for setting in self.publishing_changed:
-			self.publishing_changed[setting] = 0
-
 	def update_item_fields_state(self):
-		self.current_fields_for_items += self.item_fields_to_add
-		fields = [f for f in self.current_fields_for_items if f not in self.item_fields_to_remove]
-		self.item_fields_to_remove = []
-		self.item_fields_to_add = []
+		fields_step_1 = json.loads(self.current_item_fields)
+		fields_step_1 += self.item_fields_to_add
+		fields_step_2 = [f for f in set(fields_step_1) if f not in self.item_fields_to_remove]
+		self.current_item_fields = json.dumps(fields_step_2)
 
 	def update_hub(self):
 		# Updating profile call
-		response_msg = self.call_hub_api_now('update_user_details',
+		response_msg = call_hub_api_now(self.access_token, 'update_user_details',
 			data=self.get_args(self.profile_args + self.seller_args))
 
 		self.update_publishing()
@@ -102,7 +96,9 @@ class HubSettings(Document):
 	def update_publishing(self):
 		if self.publishing_changed["publish"]:
 			if self.publish:
-				self.current_fields_for_items += self.item_fields_to_add
+				fields = json.loads(self.current_item_fields)
+				fields += self.item_fields_to_add
+				self.current_item_fields = json.dumps(fields)
 				# [batch and enqueue] publishing call with all field values for all items (just like now)
 				self.publish_all_set_items()
 			else:
@@ -122,7 +118,9 @@ class HubSettings(Document):
 		# A way to set 'publish in hub' for a bulk of items, if not all are by default, like
 		self.publish_selling_items()
 
-		items = frappe.db.get_all("Item", fields=self.current_fields_for_items, filters={"publish_in_hub": 1})
+		fields = json.loads(self.current_item_fields)
+
+		items = frappe.db.get_all("Item", fields=fields, filters={"publish_in_hub": 1})
 		if not items:
 			frappe.msgprint(_("No published items found."))
 			return
@@ -133,11 +131,11 @@ class HubSettings(Document):
 				item.image = expand_relative_urls(item.image)
 		item_list = frappe.db.sql_list("select name from tabItem where publish_in_hub=1")
 
-		response_msg = self.call_hub_api_now('update_items',
+		response_msg = call_hub_api_now(self.access_token, 'update_items',
 			data={
 			"items_to_update": json.dumps(items),
 			"item_list": json.dumps(item_list),
-			"item_fields": self.current_fields_for_items
+			"item_fields": fields
 		})
 		self.last_sync_datetime = response_msg.get("last_sync_datetime")
 
@@ -146,11 +144,11 @@ class HubSettings(Document):
 
 	def unpublish_all_items(self):
 		"""Unpublish from hub.erpnext.org, delete items there"""
-		response_msg = self.call_hub_api_now('unpublish_items')
+		response_msg = call_hub_api_now(self.access_token, 'unpublish_items')
 
 	def add_item_fields_at_hub(self):
 		items = frappe.db.get_all("Item", fields=["item_code"] + self.item_fields_to_add, filters={"publish_in_hub": 1})
-		response_msg = self.call_hub_api_now('add_item_fields',
+		response_msg = call_hub_api_now(self.access_token, 'add_item_fields',
 			data={
 				"items_with_new_fields": json.dumps(items),
 				"fields_to_add": self.item_fields_to_add
@@ -158,7 +156,7 @@ class HubSettings(Document):
 		)
 
 	def remove_item_fields_at_hub(self):
-		response_msg = self.call_hub_api_now('remove_item_fields',
+		response_msg = call_hub_api_now(self.access_token, 'remove_item_fields',
 			data={"fields_to_remove": self.item_fields_to_remove})
 
 	### Account
@@ -167,7 +165,7 @@ class HubSettings(Document):
 		# if self.access_token or hasattr(self, 'private_key'):
 		# 	return
 		(self.private_key, self.public_key_pem) = generate_keys()
-		response = requests.post(self.hub_url + "/api/method/hub.hub.api."+"register",
+		response = requests.post(hub_url + "/api/method/hub.hub.api."+"register",
 			data = { "args_data": json.dumps(self.get_args(self.config_args + self.profile_args + ['public_key_pem'])) })
 		response.raise_for_status()
 		response_msg = response.json().get("message")
@@ -179,13 +177,13 @@ class HubSettings(Document):
 		)
 
 		# Set start values
-		self.current_fields_for_items = self.base_fields_for_items
+		self.current_item_fields = json.dumps(self.base_fields_for_items)
 		self.last_sync_datetime = add_years(now(), -10)
 
 	def unregister_from_hub(self):
 		"""Unpublish, then delete transactions and user from there"""
 		self.reset_publishing_settings()
-		response_msg = self.call_hub_api_now('unregister')
+		response_msg = call_hub_api_now(self.access_token, 'unregister')
 
 	### Helpers
 	def get_args(self, arg_list):
@@ -194,22 +192,12 @@ class HubSettings(Document):
 			args[d] = self.get(d)
 		return args
 
-	def call_hub_api_now(self, method, data = []):
-		response = requests.post(self.hub_url + "/api/method/hub.hub.api." + "call_method",
-			data = {
-				"access_token": self.access_token,
-				"method": method,
-				"message": json.dumps(data)
-			}
-		)
-		response.raise_for_status()
-		return response.json().get("message")
-
 	def reset_publishing_settings(self):
 		self.publish = 0
 		self.publish_pricing = 0
 		self.publish_availability = 0
-		self.current_fields_for_items = self.base_fields_for_items
+		self.current_item_fields = json.dumps(self.base_fields_for_items)
+
 
 	def publish_selling_items(self):
 		"""Set `publish_in_hub`=1 for all Sales Items"""
@@ -258,7 +246,7 @@ class HubSettings(Document):
 		# print type(signature)
 
 		hub_decryption_method = "decrypt_message_and_call_method"
-		response = requests.post(self.hub_url + "/api/method/hub.hub.api." + hub_decryption_method,
+		response = requests.post(hub_url + "/api/method/hub.hub.api." + hub_decryption_method,
 			data = {
 				"access_token": self.access_token,
 				"method": method,
@@ -274,6 +262,17 @@ class HubSettings(Document):
 		return response.json().get("message")
 
 ### Helpers
+def call_hub_api_now(access_token, method, data = []):
+	response = requests.post(hub_url + "/api/method/hub.hub.api." + "call_method",
+		data = {
+			"access_token": access_token,
+			"method": method,
+			"message": json.dumps(data)
+		}
+	)
+	response.raise_for_status()
+	return response.json().get("message")
+
 def generate_keys():
 	"""Generate RSA public and private keys and write to files in site directory"""
 	private_key = None
