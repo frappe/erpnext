@@ -532,8 +532,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 
 		}
-		// Make read only if currency exchange settings doesn't allow stale rates
-		frappe.model.get_value("Currency Exchange Settings", null, "allow_stale",
+		// Make read only if Accounts Settings doesn't allow stale rates
+		frappe.model.get_value("Accounts Settings", null, "allow_stale",
 			function(d){
 				me.set_df_property("conversion_rate", "read_only", cint(d.allow_stale) ? 0 : 1);
 			}
