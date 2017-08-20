@@ -46,7 +46,7 @@ QUnit.test("test Salary Structure", function(assert) {
 					{ payment_account: 'CASH - TC'},
 				]);
 			},
-			() => frappe.timeout(9),
+			() => frappe.timeout(10),
 			() => cur_dialog.set_value('value','Test Salary Structure'),
 			() => frappe.timeout(2),
 			() => frappe.click_button('Create'),
@@ -75,7 +75,7 @@ QUnit.test("test Salary Structure", function(assert) {
 	};
 	frappe.run_serially([
 		() => salary_structure('Test Employee 1','Test Employee 3'),
-		() => frappe.timeout(14),
+		() => frappe.timeout(16),
 		() => done()
 	]);
 });
