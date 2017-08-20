@@ -29,12 +29,12 @@ def save_new_records(test_records):
 
 class TestCurrencyExchange(unittest.TestCase):
 	def tearDown(self):
-		frappe.db.set_value("Currency Exchange Settings", None, "allow_stale", 1)
+		frappe.db.set_value("Accounts Settings", None, "allow_stale", 1)
 
 	def test_exchnage_rate(self):
 		save_new_records(test_records)
 
-		frappe.db.set_value("Currency Exchange Settings", None, "allow_stale", 1)
+		frappe.db.set_value("Accounts Settings", None, "allow_stale", 1)
 
 		# Start with allow_stale is True
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-01")
@@ -52,8 +52,8 @@ class TestCurrencyExchange(unittest.TestCase):
 
 	def test_exchange_rate_strict(self):
 		# strict currency settings
-		frappe.db.set_value("Currency Exchange Settings", None, "allow_stale", 0)
-		frappe.db.set_value("Currency Exchange Settings", None, "stale_days", 1)
+		frappe.db.set_value("Accounts Settings", None, "allow_stale", 0)
+		frappe.db.set_value("Accounts Settings", None, "stale_days", 1)
 
 
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-01")
@@ -85,8 +85,8 @@ class TestCurrencyExchange(unittest.TestCase):
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-15")
 		self.assertEqual(exchange_rate, 65.1)
 
-		frappe.db.set_value("Currency Exchange Settings", None, "allow_stale", 0)
-		frappe.db.set_value("Currency Exchange Settings", None, "stale_days", 1)
+		frappe.db.set_value("Accounts Settings", None, "allow_stale", 0)
+		frappe.db.set_value("Accounts Settings", None, "stale_days", 1)
 
 		# Will fetch from fixer.io
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-15")
