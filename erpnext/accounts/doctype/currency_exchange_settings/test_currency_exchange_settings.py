@@ -9,7 +9,7 @@ import unittest
 
 class TestCurrencyExchangeSettings(unittest.TestCase):
 	def test_stale_days(self):
-		cur_settings = frappe.get_doc('Currency Exchange Settings', 'Currency Exchange Settings')
+		cur_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
 		cur_settings.allow_stale = 0
 		cur_settings.stale_days = 0
 
