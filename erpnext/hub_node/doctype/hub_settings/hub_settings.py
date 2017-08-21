@@ -67,7 +67,7 @@ class HubSettings(Document):
 	def update_fields(self):
 		if self.publishing_changed["publish_pricing"]:
 			# TODO: pricing
-			fields = ["", ""]
+			fields = ["standard_rate"]
 			if self.publish_pricing:
 				self.item_fields_to_add += fields
 			else:
@@ -99,18 +99,14 @@ class HubSettings(Document):
 				fields = json.loads(self.current_item_fields)
 				fields += self.item_fields_to_add
 				self.current_item_fields = json.dumps(fields)
-				# [batch and enqueue] publishing call with all field values for all items (just like now)
 				self.publish_all_set_items()
 			else:
 				self.reset_publishing_settings()
-				# unpublishing call
 				self.unpublish_all_items()
 		else:
 			if self.item_fields_to_add:
-				# [batch and enqueue] adding call with name and these field values for all items
 				self.add_item_fields_at_hub()
 			if self.item_fields_to_remove:
-				# removing call with that list
 				self.remove_item_fields_at_hub()
 
 	def publish_all_set_items(self, verbose=True):
@@ -128,7 +124,7 @@ class HubSettings(Document):
 		for item in items:
 			item.modified = get_datetime_str(item.modified)
 			if item.image:
-				item.image = expand_relative_urls(item.image)
+				item.image = "http://" + frappe.local.site + ":8000" + item.image
 		item_list = frappe.db.sql_list("select name from tabItem where publish_in_hub=1")
 
 		response_msg = call_hub_api_now('update_items',
