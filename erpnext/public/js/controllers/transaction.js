@@ -261,7 +261,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var item = frappe.get_doc(cdt, cdn);
 		var update_stock = 0, show_batch_dialog = 0;
 
-		if(['Sales Invoice'].includes(this.frm.doc.doctype)) {
+		if(['Sales Invoice', 'Purchase Invoice'].includes(this.frm.doc.doctype)) {
 			update_stock = cint(me.frm.doc.update_stock);
 			show_batch_dialog = update_stock;
 
@@ -515,6 +515,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	conversion_rate: function() {
+		const me = this.frm;
 		if(this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.set_value("conversion_rate", 1.0);
 		}
@@ -531,6 +532,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 
 		}
+		// Make read only if Accounts Settings doesn't allow stale rates
+		frappe.model.get_value("Accounts Settings", null, "allow_stale",
+			function(d){
+				me.set_df_property("conversion_rate", "read_only", cint(d.allow_stale) ? 0 : 1);
+			}
+		);
 	},
 
 	get_exchange_rate: function(transaction_date, from_currency, to_currency, callback) {
