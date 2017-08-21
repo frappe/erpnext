@@ -13,11 +13,10 @@ def execute(filters=None):
 def _execute(filters=None, additional_table_columns=None, additional_query_columns=None):
 	if not filters: filters = {}
 	columns = get_columns(additional_table_columns)
-	last_col = len(columns)
 
 	item_list = get_items(filters, additional_query_columns)
 	if item_list:
-		item_row_tax, tax_accounts = get_tax_accounts(item_list, columns)
+		itemised_tax, tax_columns = get_tax_accounts(item_list, columns)
 	columns.append({
 		"fieldname": "currency",
 		"label": _("Currency"),
@@ -26,6 +25,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	})
 	company_currency = frappe.db.get_value("Company", filters.get("company"), "default_currency")
 	mode_of_payments = get_mode_of_payments(set([d.parent for d in item_list]))
+	so_dn_map = get_delivery_notes_against_sales_order(item_list)
 
 	data = []
 	for d in item_list:
@@ -33,8 +33,8 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		if d.delivery_note:
 			delivery_note = d.delivery_note
 		elif d.so_detail:
-			delivery_note = ", ".join(frappe.db.sql_list("""select distinct parent
-			from `tabDelivery Note Item` where docstatus=1 and so_detail=%s""", d.so_detail))
+			delivery_note = ", ".join(so_dn_map.get(d.so_detail, []))
+
 		if not delivery_note and d.update_stock:
 			delivery_note = d.parent
 
@@ -50,10 +50,12 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			delivery_note, d.income_account, d.cost_center, d.qty, d.base_net_rate, d.base_net_amount
 		]
 
-		for tax in tax_accounts:
-			row.append(item_row_tax.get(d.name, {}).get(tax, 0))
+		total_tax = 0
+		for tax in tax_columns:
+			item_tax = itemised_tax.get(d.name, {}).get(tax, {})
+			row += [item_tax.get("tax_rate", 0), item_tax.get("tax_amount", 0)]
+			total_tax += flt(item_tax.get("tax_amount"))
 
-		total_tax = sum(row[last_col:])
 		row += [total_tax, d.base_net_amount + total_tax, company_currency]
 
 		data.append(row)
@@ -120,54 +122,90 @@ def get_items(filters, additional_query_columns):
 		order by si.posting_date desc, si_item.item_code desc
 		""".format(additional_query_columns or '') % conditions, filters, as_dict=1)
 
-def get_tax_accounts(item_list, columns):
+def get_delivery_notes_against_sales_order(item_list):
+	so_dn_map = frappe._dict()
+	so_item_rows = list(set([d.so_detail for d in item_list]))
+
+	delivery_notes = frappe.db.sql("""
+		select parent, so_detail
+		from `tabDelivery Note Item`
+		where docstatus=1 and so_detail in (%s)
+		group by so_detail, parent
+	""" % (', '.join(['%s']*len(so_item_rows))), tuple(so_item_rows), as_dict=1)
+
+	for dn in delivery_notes:
+		so_dn_map.setdefault(dn.so_detail, []).append(dn.parent)
+
+	return so_dn_map
+
+def get_tax_accounts(item_list, columns, tax_doctype="Sales Taxes and Charges"):
 	import json
-	item_row_tax = {}
-	tax_accounts = []
-	invoice_item_row = {}
 	item_row_map = {}
+	tax_columns = []
+	invoice_item_row = {}
+	itemised_tax = {}
 	for d in item_list:
 		invoice_item_row.setdefault(d.parent, []).append(d)
 		item_row_map.setdefault(d.parent, {}).setdefault(d.item_code, []).append(d)
 
 	tax_details = frappe.db.sql("""
 		select
-			parent, account_head, item_wise_tax_detail,
+			parent, description, item_wise_tax_detail,
 			charge_type, base_tax_amount_after_discount_amount
-		from `tabSales Taxes and Charges`
+		from `tab%s`
 		where
 			parenttype = 'Sales Invoice' and docstatus = 1
-			and (account_head is not null and account_head != '')
+			and (description is not null and description != '')
 			and parent in (%s)
-	""" % ', '.join(['%s']*len(invoice_item_row)), tuple(invoice_item_row.keys()))
+		order by description
+	""" % (tax_doctype, ', '.join(['%s']*len(invoice_item_row))), tuple(invoice_item_row.keys()))
 
-	for parent, account_head, item_wise_tax_detail, charge_type, tax_amount in tax_details:
-		if account_head not in tax_accounts:
-			tax_accounts.append(account_head)
+	for parent, description, item_wise_tax_detail, charge_type, tax_amount in tax_details:
+		if description not in tax_columns and tax_amount:
+			tax_columns.append(description)
 
 		if item_wise_tax_detail:
 			try:
 				item_wise_tax_detail = json.loads(item_wise_tax_detail)
 
-				for item_code, tax_amount in item_wise_tax_detail.items():
-					tax_amount = flt(tax_amount[1]) if isinstance(tax_amount, list) else flt(tax_amount)
+				for item_code, tax_data in item_wise_tax_detail.items():
+					itemised_tax.setdefault(item_code, frappe._dict())
+
+					if isinstance(tax_data, list):
+						tax_rate, tax_amount = tax_data
+					else:
+						tax_rate = tax_data
+						tax_amount = 0
+
+					if charge_type == "Actual" and not tax_rate:
+						tax_rate = "NA"
 
 					item_net_amount = sum([flt(d.base_net_amount)
 						for d in item_row_map.get(parent, {}).get(item_code, [])])
 
 					for d in item_row_map.get(parent, {}).get(item_code, []):
-						item_tax_amount = flt((tax_amount * d.base_net_amount) / item_net_amount) if item_net_amount else 0
-						item_row_tax.setdefault(d.name, {})[account_head] = item_tax_amount
+						item_tax_amount = flt((tax_amount * d.base_net_amount) / item_net_amount) \
+							if item_net_amount else 0
+						if item_tax_amount:
+							itemised_tax.setdefault(d.name, {})[description] = frappe._dict({
+								"tax_rate": tax_rate,
+								"tax_amount": item_tax_amount
+							})
 
 			except ValueError:
 				continue
 		elif charge_type == "Actual" and tax_amount:
 			for d in invoice_item_row.get(parent, []):
-				item_row_tax.setdefault(d.name, {})[account_head] = \
-					flt((tax_amount * d.base_net_amount) / d.base_net_total)
+				itemised_tax.setdefault(d.name, {})[description] = frappe._dict({
+					"tax_rate": "NA",
+					"tax_amount": flt((tax_amount * d.base_net_amount) / d.base_net_total)
+				})
 
-	tax_accounts.sort()
-	columns += [account_head + ":Currency/currency:80" for account_head in tax_accounts]
-	columns += ["Total Tax:Currency/currency:80", "Total:Currency/currency:80"]
+	tax_columns.sort()
+	for desc in tax_columns:
+		columns.append(desc + " Rate:Data:80")
+		columns.append(desc + " Amount:Currency/currency:100")
 
-	return item_row_tax, tax_accounts
+	columns += ["Total Tax:Currency/currency:80", "Total:Currency/currency:100"]
+
+	return itemised_tax, tax_columns
