@@ -432,3 +432,4 @@ erpnext.patches.v8_5.update_customer_group_in_POS_profile
 erpnext.patches.v8_6.update_timesheet_company_from_PO
 erpnext.patches.v8_6.set_write_permission_for_quotation_for_sales_manager
 erpnext.patches.v8_5.remove_project_type_property_setter
+erpnext.patches.v8_7.add_more_gst_fields
