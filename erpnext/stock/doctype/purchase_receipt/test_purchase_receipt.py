@@ -253,6 +253,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEqual(pr2.status, "To Bill")
 
 	def test_not_accept_duplicate_serial_no(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
@@ -267,6 +268,10 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		pr = make_purchase_receipt(item_code=item_code, qty=1, serial_no=serial_no, do_not_submit=True)
 		self.assertRaises(SerialNoDuplicateError, pr.submit)
+
+		se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1,
+			serial_no=serial_no, basic_rate=100, do_not_submit=True)
+		self.assertRaises(SerialNoDuplicateError, se.submit)
 
 def get_gl_entries(voucher_type, voucher_no):
 	return frappe.db.sql("""select account, debit, credit
