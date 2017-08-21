@@ -26,6 +26,10 @@ def get_categories():
 	return call_hub_api_now('get_categories')
 
 @frappe.whitelist()
+def get_companies():
+	return call_hub_api_now('get_companies')
+
+@frappe.whitelist()
 def get_seller_details(user_name):
 	return call_hub_api_now('get_user_details', data={
 		"user_name": user_name,
