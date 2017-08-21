@@ -27,6 +27,10 @@ def delete_company_transactions(company_name):
 			"Purchase Taxes and Charges Template", "POS Profile", 'BOM'):
 				delete_for_doctype(doctype, company_name)
 
+	# reset company values
+	doc.total_monthly_sales = 0
+	doc.sales_monthly_history = None
+	doc.save()
 	# Clear notification counts
 	clear_notifications()
 
