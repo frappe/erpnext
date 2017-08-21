@@ -365,3 +365,32 @@ body[data-route="pos"] .collapse-btn {
 .leaderboard .list-item_content {
   padding-right: 45px;
 }
+/* hub */
+body[data-route="hub"] .page-head {
+  height: 80px;
+}
+body[data-route="hub"] .page-content {
+  margin-top: 80px;
+}
+body[data-route="hub"] .page-title h1 {
+  margin-bottom: 0px;
+}
+body[data-route="hub"] .account-details {
+  margin-top: 20px;
+}
+body[data-route="hub"] [data-original-title="Search"] {
+  float: right;
+  width: 250px;
+}
+body[data-route="hub"] .banner {
+  height: 150px;
+  background-color: lightgrey;
+}
+body[data-route="hub"] .main-list-section {
+  height: 150px;
+  background-color: lightblue;
+}
+body[data-route="hub"] .side-list-section {
+  height: 150px;
+  background-color: lightcyan;
+}
