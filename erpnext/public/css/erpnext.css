@@ -357,66 +357,85 @@ body[data-route="pos"] .collapse-btn {
   cursor: pointer;
 }
 /* hub */
-body[data-route="hub"] .page-head {
+div[data-page-route="hub"] .page-head {
   height: 80px;
 }
-body[data-route="hub"] .page-content {
+div[data-page-route="hub"] .page-head .title-text {
+  cursor: pointer;
+}
+div[data-page-route="hub"] .page-content {
   margin-top: 80px;
 }
-body[data-route="hub"] .page-title h1 {
+div[data-page-route="hub"] .page-title h1 {
   margin-bottom: 0px;
 }
-body[data-route="hub"] .account-details {
+div[data-page-route="hub"] .account-details {
   margin-top: 20px;
 }
-body[data-route="hub"] [data-original-title="Search"] {
+div[data-page-route="hub"] [data-original-title="Search"] {
   float: right;
-  width: 250px;
+  width: 220px;
 }
-body[data-route="hub"] .banner {
-  height: 150px;
-  background-color: lightgrey;
-}
-body[data-route="hub"] .listing-body {
+div[data-page-route="hub"] .listing-body {
   margin: 0;
 }
-body[data-route="hub"] .main-list-section {
+div[data-page-route="hub"] .main-list-section {
   padding: 0;
   border-right: 1px solid #d1d8dd;
 }
-body[data-route="hub"] .side-list-section {
+div[data-page-route="hub"] .side-list-section {
   padding: 0;
 }
-body[data-route="hub"] .item-list {
-  display: flex;
-  flex-wrap: wrap;
+div[data-page-route="hub"] .item-list-container {
   padding: 5px;
 }
-body[data-route="hub"] .item-card {
+div[data-page-route="hub"] .item-list-header {
+  padding-left: 5px;
+}
+div[data-page-route="hub"] .item-list-header h3 {
+  margin-bottom: 0px;
+  margin-top: 10px;
+  font-weight: normal;
+}
+div[data-page-route="hub"] .item-list {
+  display: flex;
+  flex-wrap: wrap;
+}
+div[data-page-route="hub"] .item-card {
   border: 1px solid #d1d8dd;
   border-radius: 3px;
   margin: 5px;
   width: 220px;
   display: flex;
 }
-body[data-route="hub"] .item-card .image {
+div[data-page-route="hub"] .item-card .image {
   border-right: 1px solid #d1d8dd;
 }
-body[data-route="hub"] .item-card .image img {
+div[data-page-route="hub"] .item-card .image img {
   height: 90px;
   width: 90px;
   padding: 5px;
 }
-body[data-route="hub"] .item-card .content {
+div[data-page-route="hub"] .item-card .content {
   padding: 10px;
 }
-body[data-route="hub"] .item-card .title {
+div[data-page-route="hub"] .item-card .title {
   font-weight: bold;
 }
-body[data-route="hub"] .item-card .company {
+div[data-page-route="hub"] .item-card .company {
   font-size: 12px;
   margin-bottom: 12px;
 }
-body[data-route="hub"] .item-card .price {
+div[data-page-route="hub"] .item-card .price {
   font-size: 12px;
+}
+div[data-page-route="hub"] .hub-item-page .item-header {
+  display: flex;
+}
+div[data-page-route="hub"] .hub-item-page .image img {
+  width: 200px;
+  height: 200px;
+}
+div[data-page-route="hub"] .company-header {
+  display: flex;
 }

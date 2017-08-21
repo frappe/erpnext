@@ -124,6 +124,7 @@ class HubSettings(Document):
 		for item in items:
 			item.modified = get_datetime_str(item.modified)
 			if item.image:
+				# Fix this
 				item.image = "http://" + frappe.local.site + ":8000" + item.image
 		item_list = frappe.db.sql_list("select name from tabItem where publish_in_hub=1")
 
