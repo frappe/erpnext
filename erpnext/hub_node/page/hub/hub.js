@@ -119,26 +119,26 @@ erpnext.Hub = class {
 	}
 
 	setup_item_list($parent, class_name){
-		let $item_list_container = $(`<div class="item-list-container ${class_name}" data-page-length="20">
+		let $item_list_container = $(`<div class="item-list-container ${class_name}" data-page-length="10">
 			<div class="item-list"></div>
 			<div class="loading">
 				<p class="text-muted text-center">${__("Loading...")}</p>
 			</div>
+			<div class="done hide">
+				<p class="text-muted text-center">${__("No more results.")}</p>
+			</div>
 			<div class="more text-center">
 				<button class="btn btn-default btn-sm">${__("More")}</div>
 			</div>
-			<div class="done text-center text-extra-muted">
-				<p>${__("No more results.")}</p>
-			</div>
 		</div>`).appendTo($parent);
 		$item_list_container.find('.loading').hide();
-		$item_list_container.find('.more').hide();
-		$item_list_container.find('.done').hide();
+		$item_list_container.find('.more').hide().on('click', () => {
+			this.next_page($item_list_container);
+		});
 		this.next_page($item_list_container);
 	}
 
 	reset($list_container) {
-		//
 		$list_container.find('.item-list').empty();
 	}
 
@@ -154,7 +154,7 @@ erpnext.Hub = class {
 		let args = {
 			text: search_term,
 			start: start,
-			limit: page_length
+			limit: page_length + 1
 		}
 		if(category.length > 0) {
 			args.category = category;
@@ -162,36 +162,46 @@ erpnext.Hub = class {
 		if(company.length > 0) {
 			args.company = company;
 		}
-		console.log("next page called with args", args, category, company, page_length, start);
+		// console.log("next page called with args", args, category, company, page_length, start);
 		frappe.call({
 			method: "erpnext.hub_node.get_items",
 			args: args,
 			callback: function(r) {
 				console.log("items: ", r.message);
 				$loading.hide();
-				r.message.forEach(function(item) {
-					me.make_item_card(item).appendTo($list_container);
-				});
-				if(r.message.length && r.message.length===me.page_length) {
+				if(r.message.length && r.message.length > page_length) {
+					r.message.pop();
 					$more.show();
-					$done.hide();
+					$done.addClass("hide");
 				} else {
-					$done.show();
+					$done.removeClass("hide");
 					$more.hide();
 				}
+				r.message.forEach(function(item) {
+					me.make_item_card(item).appendTo($list);
+				});
 			}
 		});
 	}
 
 	make_item_card(item) {
 		return $(`<div class="item-card">
-			<div class="">${item.item_name} ${item.company} ${item.description}</div>
+			<div class="image">
+				<a><img src="${item.image}"></a>
+			</div>
+			<div class="content">
+				<div class="title"><a>${item.item_name}</a></div>
+				<div class="company">${item.company}</div>
+				<div class="price">${item.standard_rate.toFixed(2)}</div>
+			</div>
 		</div>`);
 	}
 
 	setup_company_list() {
 		//
 	}
+
+	setup_search() { }
 
 	add_account_to_header() {
 		this.account_details.find('.user_name').empty().append(this.hub.hub_user_name);

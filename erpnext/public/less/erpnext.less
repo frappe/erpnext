@@ -454,13 +454,57 @@ body[data-route="hub"] {
 		background-color: lightgrey;
 	}
 
+	.listing-body {
+		margin: 0;
+	}
+
 	.main-list-section {
-		height: 150px;
-		background-color: lightblue;
+		padding: 0;
+		border-right: 1px solid #d1d8dd;
 	}
 
 	.side-list-section {
-		height: 150px;
-		background-color: lightcyan;
+		padding: 0;
 	}
+
+	.item-list {
+		display: flex;
+		flex-wrap: wrap;
+		padding: 5px;
+	}
+
+	.item-card {
+		border: 1px solid #d1d8dd;
+		border-radius: 3px;
+		margin: 5px;
+		width: 220px;
+		display: flex;
+
+		.image {
+			border-right: 1px solid #d1d8dd;
+			img {
+				height: 90px;
+				width: 90px;
+				padding: 5px;
+			}
+		}
+
+		.content {
+			padding: 10px;
+		}
+
+		.title {
+			font-weight: bold;
+		}
+
+		.company {
+			font-size: 12px;
+			margin-bottom: 12px;
+		}
+
+		.price {
+			font-size: 12px;
+		}
+	}
+
 }
