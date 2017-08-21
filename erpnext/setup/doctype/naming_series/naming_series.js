@@ -25,7 +25,6 @@ frappe.ui.form.on("Naming Series", {
 			method: "get_options",
 			doc: frm.doc,
 			callback: function(r) {
-				console.log(r);
 				frm.set_value("set_options", r.message);
 				if(r.message && r.message.split('\n')[0]=='')
 					frm.set_value('user_must_always_select', 1);
