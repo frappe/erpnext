@@ -53,6 +53,7 @@ class Item(WebsiteGenerator):
 		if not self.description:
 			self.description = self.item_name
 
+		# Set by default only for sales item, ond non-hub items
 		self.publish_in_hub = 1
 
 	def after_insert(self):
@@ -64,6 +65,10 @@ class Item(WebsiteGenerator):
 			self.set_opening_stock()
 
 	def validate(self):
+		self.before_update = None
+		if frappe.db.exists('Item', self.name):
+			self.before_update = frappe.get_doc('Item', self.name)
+
 		super(Item, self).validate()
 
 		if not self.item_name:
@@ -103,11 +108,7 @@ class Item(WebsiteGenerator):
 		self.validate_name_with_item_group()
 		self.update_item_price()
 		self.update_template_item()
-
-		# 3 cases for doing hub stuff:
-		# if publish has not changed and is 1, has and: is 1 now, is 0 now
-		if self.publish_in_hub == 1:
-			self.update_on_hub()
+		self.update_for_hub()
 
 	def add_price(self, price_list=None):
 		'''Add a new price'''
@@ -657,23 +658,53 @@ class Item(WebsiteGenerator):
 
 			validate_item_variant_attributes(self, args)
 
-	def update_on_hub(self):
-		access_token = frappe.db.get_single_value('Hub Settings', 'access_token')
-		current_hub_fields = json.loads(frappe.db.get_single_value('Hub Settings', 'current_item_fields'))
+	def update_for_hub(self):
+		if self.before_update:
+			if self.before_update.publish_in_hub == self.publish_in_hub:
+				if self.publish_in_hub == 1:
+					self.update_values_at_hub()
+			else:
+				if self.publish_in_hub == 1:
+					self.insert_at_hub()
+				else:
+					self.remove_at_hub()
+		else:
+			if self.publish_in_hub == 1:
+				self.insert_at_hub()
 
+		# If item deleted(will be handled by delete_doc)
+
+	def update_values_at_hub(self):
+		current_hub_fields = json.loads(frappe.db.get_single_value('Hub Settings', 'current_item_fields'))
 		item_dict = {}
 		for field in current_hub_fields:
 			item_dict[field] = self.get(field)
-
-		response_msg = call_hub_api_now(
-			access_token, 'update_item',
+		response_msg = call_hub_api_now('update_item',
 			data={
 				"item_code": self.item_code,
 				"item_dict": json.dumps(item_dict)
 			}
 		)
 
-	def update_communication_on_hub(self):
+	def insert_at_hub(self):
+		current_hub_fields = json.loads(frappe.db.get_single_value('Hub Settings', 'current_item_fields'))
+		item_dict = {}
+		for field in current_hub_fields:
+			item_dict[field] = self.get(field)
+		response_msg = call_hub_api_now('insert_item',
+			data={
+				"item_dict": json.dumps(item_dict)
+			}
+		)
+
+	def remove_at_hub(self):
+		response_msg = call_hub_api_now('delete_item',
+			data={
+				"item_code": self.item_code
+			}
+		)
+
+	def update_hub_communications(self):
 		pass
 
 def get_timeline_data(doctype, name):
