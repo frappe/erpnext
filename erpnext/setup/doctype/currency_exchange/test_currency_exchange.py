@@ -61,7 +61,7 @@ class TestCurrencyExchange(unittest.TestCase):
 
 		# Will fetch from fixer.io
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-15")
-		self.assertEqual(exchange_rate, 64.117)
+		self.assertEqual(exchange_rate, 64.143)
 
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-30")
 		self.assertEqual(exchange_rate, 62.9)
@@ -90,4 +90,4 @@ class TestCurrencyExchange(unittest.TestCase):
 
 		# Will fetch from fixer.io
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-15")
-		self.assertEqual(exchange_rate, 64.117)
+		self.assertEqual(exchange_rate, 64.143)
