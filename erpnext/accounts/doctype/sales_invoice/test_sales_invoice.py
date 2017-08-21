@@ -1304,6 +1304,17 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEquals(getdate(expected_gl_entries[i][3]), getdate(gle.due_date))
 
 
+	def test_company_monthly_sales(self):
+		existing_current_month_sales = frappe.db.get_value("Company", "_Test Company", "total_monthly_sales")
+
+		si = create_sales_invoice()
+		current_month_sales = frappe.db.get_value("Company", "_Test Company", "total_monthly_sales")
+		self.assertEqual(current_month_sales, existing_current_month_sales + si.base_grand_total)
+
+		si.cancel()
+		current_month_sales = frappe.db.get_value("Company", "_Test Company", "total_monthly_sales")
+		self.assertEqual(current_month_sales, existing_current_month_sales)
+
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
 	args = frappe._dict(args)

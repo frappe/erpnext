@@ -10,7 +10,7 @@ QUnit.test("Test: Company", function (assert) {
 		() => frappe.timeout(1),
 		() => cur_frm.set_value("company_name", "Razer Blade"),
 		() => cur_frm.set_value("abbr", "RB"),
-		() => cur_frm.set_value("default_currency", "USD"),
+		() => cur_frm.set_value("default_currency", "INR"),
 		() => cur_frm.save(),
 		() => frappe.timeout(1),
 
