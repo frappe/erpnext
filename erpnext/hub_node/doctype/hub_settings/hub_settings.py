@@ -19,10 +19,10 @@ hub_url = "http://erpnext.hub:8000"
 
 class HubSettings(Document):
 	config_args = ['enabled']
-	profile_args = ['email', 'hub_user_name', 'country']  # also 'public_key_pem'
+	profile_args = ['email', 'hub_user_name', 'country', 'company']  # also 'public_key_pem'
 	only_in_code = ['private_key']
-	seller_args = ['publish', 'seller_city', 'seller_website', 'seller_description',
-		'publish_pricing', 'selling_price_list', 'publish_availability', 'warehouse']
+	seller_args = ['publish', 'seller_city', 'seller_website', 'seller_description']
+	publishing_args = ['publish_pricing', 'selling_price_list', 'publish_availability', 'warehouse']
 	personal_args = ['hub_public_key_pem']
 
 	base_fields_for_items = ["name", "item_code", "item_name", "description", "image", "item_group",
@@ -88,7 +88,7 @@ class HubSettings(Document):
 
 	def update_hub(self):
 		# Updating profile call
-		response_msg = call_hub_api_now(self.access_token, 'update_user_details',
+		response_msg = call_hub_api_now('update_user_details',
 			data=self.get_args(self.profile_args + self.seller_args))
 
 		self.update_publishing()
@@ -131,7 +131,7 @@ class HubSettings(Document):
 				item.image = expand_relative_urls(item.image)
 		item_list = frappe.db.sql_list("select name from tabItem where publish_in_hub=1")
 
-		response_msg = call_hub_api_now(self.access_token, 'update_items',
+		response_msg = call_hub_api_now('update_items',
 			data={
 			"items_to_update": json.dumps(items),
 			"item_list": json.dumps(item_list),
@@ -144,11 +144,11 @@ class HubSettings(Document):
 
 	def unpublish_all_items(self):
 		"""Unpublish from hub.erpnext.org, delete items there"""
-		response_msg = call_hub_api_now(self.access_token, 'unpublish_items')
+		response_msg = call_hub_api_now('unpublish_items')
 
 	def add_item_fields_at_hub(self):
 		items = frappe.db.get_all("Item", fields=["item_code"] + self.item_fields_to_add, filters={"publish_in_hub": 1})
-		response_msg = call_hub_api_now(self.access_token, 'add_item_fields',
+		response_msg = call_hub_api_now('add_item_fields',
 			data={
 				"items_with_new_fields": json.dumps(items),
 				"fields_to_add": self.item_fields_to_add
@@ -156,7 +156,7 @@ class HubSettings(Document):
 		)
 
 	def remove_item_fields_at_hub(self):
-		response_msg = call_hub_api_now(self.access_token, 'remove_item_fields',
+		response_msg = call_hub_api_now('remove_item_fields',
 			data={"fields_to_remove": self.item_fields_to_remove})
 
 	### Account
@@ -166,7 +166,10 @@ class HubSettings(Document):
 		# 	return
 		(self.private_key, self.public_key_pem) = generate_keys()
 		response = requests.post(hub_url + "/api/method/hub.hub.api."+"register",
-			data = { "args_data": json.dumps(self.get_args(self.config_args + self.profile_args + ['public_key_pem'])) })
+			data = { "args_data": json.dumps(self.get_args(
+				self.config_args + self.profile_args + ['public_key_pem']
+			))}
+		)
 		response.raise_for_status()
 		response_msg = response.json().get("message")
 
@@ -183,7 +186,7 @@ class HubSettings(Document):
 	def unregister_from_hub(self):
 		"""Unpublish, then delete transactions and user from there"""
 		self.reset_publishing_settings()
-		response_msg = call_hub_api_now(self.access_token, 'unregister')
+		response_msg = call_hub_api_now('unregister')
 
 	### Helpers
 	def get_args(self, arg_list):
@@ -262,16 +265,25 @@ class HubSettings(Document):
 		return response.json().get("message")
 
 ### Helpers
-def call_hub_api_now(access_token, method, data = []):
+def call_hub_api_now(method, data = []):
+	hub = frappe.get_single("Hub Settings")
 	response = requests.post(hub_url + "/api/method/hub.hub.api." + "call_method",
 		data = {
-			"access_token": access_token,
+			"access_token": hub.access_token,
 			"method": method,
 			"message": json.dumps(data)
 		}
 	)
 	response.raise_for_status()
 	return response.json().get("message")
+
+### Sender terminal
+def make_message_queue_table():
+	pass
+
+def store_as_job_message(method, data):
+	# encrypt data and store both params in message queue
+	pass
 
 def generate_keys():
 	"""Generate RSA public and private keys and write to files in site directory"""
