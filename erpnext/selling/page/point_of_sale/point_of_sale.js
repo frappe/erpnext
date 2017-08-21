@@ -9,7 +9,7 @@ frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 
 	wrapper.pos = new PointOfSale(wrapper);
 	window.cur_pos = wrapper.pos;
-}
+};
 
 class PointOfSale {
 	constructor(wrapper) {
@@ -74,12 +74,20 @@ class PointOfSale {
 		this.cart = new POSCart({
 			wrapper: this.wrapper.find('.cart-container'),
 			events: {
-				customer_change: (customer) => this.cur_frm.set_value('customer', customer),
+				customer_change: (customer) => this.frm.set_value('customer', customer),
 				increase_qty: (item_code) => {
 					this.add_item_to_cart(item_code);
 				},
 				decrease_qty: (item_code) => {
 					this.add_item_to_cart(item_code, -1);
+				},
+				on_numpad: (value) => {
+					if (value == 'Pay') {
+						if (!this.payment) {
+							this.make_payment_modal();
+						}
+						this.payment.open_modal();
+					}
 				}
 			}
 		});
@@ -91,7 +99,7 @@ class PointOfSale {
 			pos_profile: this.pos_profile,
 			events: {
 				item_click: (item_code) => {
-					if(!this.cur_frm.doc.customer) {
+					if(!this.frm.doc.customer) {
 						frappe.throw(__('Please select a customer'));
 					}
 					this.add_item_to_cart(item_code);
@@ -104,26 +112,34 @@ class PointOfSale {
 
 		if(this.cart.exists(item_code)) {
 			// increase qty by 1
-			this.cur_frm.doc.items.forEach((item) => {
+			this.frm.doc.items.forEach((item) => {
 				if (item.item_code === item_code) {
-					frappe.model.set_value(item.doctype, item.name, 'qty', item.qty + qty)
+					const final_qty = item.qty + qty;
+					frappe.model.set_value(item.doctype, item.name, 'qty', final_qty)
 						.then(() => {
+							if (final_qty === 0) {
+								frappe.model.clear_doc(item.doctype, item.name);
+							}
+							// update cart
 							this.cart.add_item(item);
-						})
-					// update cart
+						});
 				}
 			});
 			return;
 		}
 
 		// add to cur_frm
-		const item = this.cur_frm.add_child('items', { item_code: item_code });
-		this.cur_frm.script_manager
+		const item = this.frm.add_child('items', { item_code: item_code });
+		this.frm.script_manager
 			.trigger('item_code', item.doctype, item.name)
 			.then(() => {
 				// update cart
 				this.cart.add_item(item);
 			});
+	}
+
+	make_payment_modal() {
+		this.payment = new Payment(this.frm);
 	}
 
 	bind_events() {
@@ -150,8 +166,8 @@ class PointOfSale {
 				const name = frappe.model.make_new_doc_and_get_name(dt, true);
 				frm.refresh(name);
 				frm.doc.items = [];
-				this.cur_frm = frm;
-				this.cur_frm.set_value('is_pos', 1)
+				this.frm = frm;
+				this.frm.set_value('is_pos', 1);
 				resolve();
 			});
 		});
@@ -167,7 +183,7 @@ class PointOfSale {
 
 		this.page.add_menu_item(__("New Sales Invoice"), function () {
 			//
-		})
+		});
 
 		this.page.add_menu_item(__("Sync Master Data"), function () {
 			//
@@ -229,7 +245,7 @@ class POSCart {
 				label: 'Customer',
 				options: 'Customer',
 				reqd: 1,
-				onchange: (e) => {
+				onchange: () => {
 					this.events.customer_change.apply(null, [this.customer_field.get_value()]);
 				}
 			},
@@ -243,19 +259,21 @@ class POSCart {
 			wrapper: this.wrapper.find('.number-pad-container'),
 			onclick: (btn_value) => {
 				// on click
-				if (btn_value == 'Pay') {
-					this.make_payment()
+				if (['Qty', 'Disc', 'Price'].includes(btn_value)) {
+					this.set_input_active(btn_value);
 				}
 
-				console.log(btn_value);
+				this.events.on_numpad.apply(null, [btn_value]);
 			}
 		});
 	}
 
-	make_payment() {
-		this.payment = new MakePayment({
-			frm: cur_frm
-		})
+	set_input_active(btn_value) {
+		if (!this.selected_item) return;
+
+		if (btn_value === 'Qty') {
+			this.selected_item.find('.quantity input').css('border', '1px solid blue');
+		}
 	}
 
 	add_item(item) {
@@ -281,7 +299,6 @@ class POSCart {
 			$item.find('.rate').text(item.rate);
 		} else {
 			$item.remove();
-			frappe.model.clear_doc(item.doctype, item.name)
 		}
 	}
 
@@ -352,6 +369,10 @@ class POSCart {
 					events.decrease_qty(item_code);
 				}
 			});
+		const me = this;
+		this.$cart_items.on('click', '.list-item', function() {
+			me.selected_item = $(this);
+		});
 	}
 }
 
@@ -528,30 +549,6 @@ class POSItems {
 			</div>
 		`;
 
-		// const template = `
-
-		// 	<div class="pos-item-wrapper" data-item-code="${item_code}">
-		// 		<div class="pos-item-head">
-		// 			<span class="bold">${item_name}</span>
-		// 			<span class="text-muted">Stock: ${item_stock}</span>
-		// 		</div>
-		// 		<div class="pos-item-body">
-		// 			<div class="pos-item-image text-center"
-		// 				style="${!item_image ?
-		// 					'background-color: #fafbfc;' : ''
-		// 				} border: 0px;">
-		// 				${item_image ?
-		// 					`<img src="${item_image}" alt="${item_title}">` :
-		// 					`<span class="placeholder-text">
-		// 						${frappe.get_abbr(item_title)}
-		// 					</span>`
-		// 				}
-		// 			</div>
-		// 		</div>
-		// 	</div>
-
-		// `;
-
 		return template;
 	}
 
@@ -601,24 +598,27 @@ class POSItems {
 }
 
 class NumberPad {
-	constructor({wrapper, onclick}) {
+	constructor({wrapper, onclick, button_array}) {
 		this.wrapper = wrapper;
 		this.onclick = onclick;
+		this.button_array = button_array;
 		this.make_dom();
 		this.bind_events();
 	}
 
 	make_dom() {
-		const button_array = [
-			[1, 2, 3, 'Qty'],
-			[4, 5, 6, 'Disc'],
-			[7, 8, 9, 'Price'],
-			['Del', 0, '.', 'Pay']
-		];
+		if (!this.button_array) {
+			this.button_array = [
+				[1, 2, 3, 'Qty'],
+				[4, 5, 6, 'Disc'],
+				[7, 8, 9, 'Price'],
+				['Del', 0, '.', 'Pay']
+			];
+		}
 
 		this.wrapper.html(`
 			<div class="number-pad">
-				${button_array.map(get_row).join("")}
+				${this.button_array.map(get_row).join("")}
 			</div>
 		`);
 
@@ -648,30 +648,38 @@ class NumberPad {
 	}
 }
 
-class MakePayment {
-	constructor({frm}) {
-		this.frm = frm
+class Payment {
+	constructor(frm) {
+		this.frm = frm;
 		this.make();
 		this.set_primary_action();
-		this.show_total_amount();
 		// this.show_outstanding_amount()
 	}
 
+	open_modal() {
+		this.show_total_amount();
+		this.dialog.show();
+	}
+
 	make() {
-		const me = this;
-		this.update_flag()
+		this.set_flag();
 
 		this.dialog = new frappe.ui.Dialog({
 			title: __('Payment'),
 			fields: this.get_fields(),
-			width:800
+			width: 800
 		});
 
-		this.dialog.show();
 		this.$body = this.dialog.body;
 
 		this.numpad = new NumberPad({
-			wrapper: $(this.$body).find('[data-fieldname = "numpad"]'),
+			wrapper: $(this.$body).find('[data-fieldname="numpad"]'),
+			button_array: [
+				[1, 2, 3],
+				[4, 5, 6],
+				[7, 8, 9],
+				['Del', 0, '.'],
+			],
 			onclick: (btn_value) => {
 				// on click
 			}
@@ -680,24 +688,24 @@ class MakePayment {
 
 	set_primary_action() {
 		this.dialog.set_primary_action(__("Submit"), function() {
-			//save form
-		})
+			// save form
+		});
 	}
 
 	get_fields() {
 		const me = this;
-		const total_amount = [
+		let fields = [
 			{
 				fieldtype: 'HTML',
-				fieldname: "total_amount",
+				fieldname: 'total_amount',
 			},
 			{
 				fieldtype: 'Section Break',
-				label: __("Mode of Payments")
+				label: __('Mode of Payments')
 			},
-		]
+		];
 
-		const mode_of_paymen_fields = this.frm.doc.payments.map(p => {
+		fields = fields.concat(this.frm.doc.payments.map(p => {
 			return {
 				fieldtype: 'Currency',
 				label: __(p.mode_of_payment),
@@ -707,12 +715,12 @@ class MakePayment {
 				onchange: (e) => {
 					const fieldname = $(e.target).attr('data-fieldname');
 					const value = this.dialog.get_value(fieldname);
-					me.update_payment_value(fieldname, value)
+					me.update_payment_value(fieldname, value);
 				}
-			}
-		})
+			};
+		}));
 
-		const other_fields = [
+		fields = fields.concat([
 			{
 				fieldtype: 'Column Break',
 			},
@@ -729,11 +737,11 @@ class MakePayment {
 				options: me.frm.doc.currency,
 				fieldname: "write_off_amount",
 				default: me.frm.doc.write_off_amount,
-				onchange: (e) => {
+				onchange: () => {
 					me.update_cur_frm_value('write_off_amount', () => {
 						frappe.flags.change_amount = false;
 						me.update_change_amount()
-					})
+					});
 				}
 			},
 			{
@@ -745,20 +753,19 @@ class MakePayment {
 				options: me.frm.doc.currency,
 				fieldname: "change_amount",
 				default: me.frm.doc.change_amount,
-				onchange: (e) => {
+				onchange: () => {
 					me.update_cur_frm_value('change_amount', () => {
 						frappe.flags.write_off_amount = false;
-						me.update_write_off_amount()
-					})
+						me.update_write_off_amount();
+					});
 				}
 			},
-		]
+		]);
 
-		$.merge(total_amount, mode_of_paymen_fields)
-		return $.merge(total_amount, other_fields)
+		return fields;
 	}
 
-	update_flag() {
+	set_flag() {
 		frappe.flags.write_off_amount = true;
 		frappe.flags.change_amount = true;
 	}
@@ -797,14 +804,14 @@ class MakePayment {
 	}
 
 	show_total_amount() {
-		const grand_total = format_currency(this.frm.doc.grand_total, this.frm.doc.currency)
+		const grand_total = format_currency(this.frm.doc.grand_total, this.frm.doc.currency);
 		const template = `
 			<h3>
 				${ __("Total Amount") }:
 				<span class="label label-default">${__(grand_total)}</span>
 			</h3>
 		`
-		this.total_amount_section = $(this.$body).find("[data-fieldname = 'total_amount']")
-		this.total_amount_section.append(template)
+		this.total_amount_section = $(this.$body).find("[data-fieldname = 'total_amount']");
+		this.total_amount_section.html(template);
 	}
 }
