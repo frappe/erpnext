@@ -697,6 +697,8 @@ class Item(WebsiteGenerator):
 		item_dict = {}
 		for field in current_hub_fields:
 			item_dict[field] = self.get(field)
+		if item_dict["image"]:
+			item_dict["image"] = "http://" + frappe.local.site + ":8000" + item_dict["image"]
 		response_msg = call_hub_api_now('update_item',
 			data={
 				"item_code": self.item_code,
@@ -709,6 +711,8 @@ class Item(WebsiteGenerator):
 		item_dict = {}
 		for field in current_hub_fields:
 			item_dict[field] = self.get(field)
+		if item_dict["image"]:
+			item_dict["image"] = "http://" + frappe.local.site + ":8000" + item_dict["image"]
 		response_msg = call_hub_api_now('insert_item',
 			data={
 				"item_dict": json.dumps(item_dict)
