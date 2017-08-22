@@ -72,7 +72,9 @@ erpnext.hub.Hub = class {
 
 	setup_live_state() {
 		this.add_account_to_header();
-		this.setup_filters();
+		if(!this.$search) {
+			this.setup_filters();
+		}
 		this.page.page_form.show();
 		this.render_body();
 		this.setup_lists();
@@ -95,13 +97,24 @@ erpnext.hub.Hub = class {
 
 		this.get_hub_companies((companies) => {
 			let company_names = companies.map(d => {
-				return {label: d.company_name, value: d.company_name}
+				return {label: d.company, value: d.company}
 			});
 
 			this.company_select = this.page.add_select(__("Company"),
 				[{"label": __("Select Company..."), value: "" }].concat(company_names)
 			);
-		})
+
+			this.company_select.on("change", () => {
+				this.$search.val("");
+				let val = $(this.company_select).val() || "";
+				this.go_to_items_only_page(
+					["hub", "Company", val, "Products"],
+					'Products by '  + val,
+					"company-product-list",
+					{text: "", company: val}
+				);
+			});
+		});
 
 		this.$search = this.page.add_data(__("Search"));
 		this.bind_filters();
@@ -160,27 +173,32 @@ erpnext.hub.Hub = class {
 	setup_search() {
 		this.$search.on("keypress", (e) => {
 			if(e.which === 13) {
-				var val = ($(this.$search).val() || "").toLowerCase();
-				this.go_to_search_page(val);
+				var search_term = ($(this.$search).val() || "").toLowerCase();
+				this.go_to_items_only_page(
+					["hub", "search", search_term],
+					'Search results for "'  + search_term + '"',
+					"search-product-list",
+					{text: search_term}
+				);
 			}
 		});
 	}
 
-	go_to_search_page(search_term) {
-		frappe.set_route("hub", "search", search_term);
+	go_to_items_only_page(route, title, class_name, filters) {
+		frappe.set_route(route);
 		this.$hub_main_section.empty();
-		this.search_item_list = new erpnext.hub.HubList({
+		this.filtered_item_list = new erpnext.hub.HubList({
 			parent: this.$hub_main_section,
-			title: 'Search results for "'  + search_term + '"',
+			title: title,
 			page_length: 20,
-			list_css_class: "search-product-list",
+			list_css_class: class_name,
 			method: "erpnext.hub_node.get_items",
-			filters: {text: search_term} // filters at the time of creation
+			filters: filters
 		});
-		this.search_item_list.item_on_click = (item) => {
+		this.filtered_item_list.item_on_click = (item) => {
 			this.go_to_item_page(item);
 		}
-		this.search_item_list.setup();
+		this.filtered_item_list.setup();
 	}
 
 	go_to_item_page(item) {
