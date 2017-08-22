@@ -68,6 +68,10 @@ erpnext.hub.Hub = class {
 		this.remove_account_from_header();
 		let $empty_state = $(frappe.render_template("register_in_hub", {}));
 		this.$hub_main_section.append($empty_state);
+		this.$hub_main_section.find(".hub-settings-btn").on('click', () => {
+			frappe.set_route("Form", "Hub Settings");
+			frappe.reload();
+		});
 	}
 
 	setup_live_state() {
@@ -126,7 +130,9 @@ erpnext.hub.Hub = class {
 		// bind dynamically
 	}
 
-	reset_filters() {}
+	reset_filters() {
+		$(this.company_select).val("");
+	}
 
 	bind_title() {
 		this.page.page_title.find('.title-text').on('click', () => {
@@ -151,7 +157,7 @@ erpnext.hub.Hub = class {
 			page_length: 20,
 			list_css_class: "home-product-list",
 			method: "erpnext.hub_node.get_items",
-			// filters: {text: ""} // filters at the time of creation
+			filters: {text: ""} // filters at the time of creation
 		});
 		this.home_item_list.item_on_click = (item) => {
 			this.go_to_item_page(item);
@@ -202,21 +208,45 @@ erpnext.hub.Hub = class {
 	}
 
 	go_to_item_page(item) {
+		// TODO: Check if item quote already requested
 		frappe.set_route("hub", "Item", item.item_name);
 		this.$hub_main_section.empty();
+		item.standard_rate = (item.standard_rate).toFixed(2);
 		let $item_page = $(frappe.render_template("hub_item_page", {item:item}))
 			.appendTo(this.$hub_main_section);
 
-		let $breadcrumbs = $();
-		$item_page.prepend($breadcrumbs);
-		this.bind_breadcrumbs();
+		let $company_items = $item_page.find('.company-items');
+
+		let company_item_list = new erpnext.hub.HubList({
+			parent: $company_items,
+			title: "More by " + item.company,
+			page_length: 20,
+			list_css_class: "company-item-list",
+			method: "erpnext.hub_node.get_items",
+			filters: {text: "", company: item.company}
+		});
+		company_item_list.item_on_click = (item) => {
+			this.go_to_item_page(item);
+		}
+		company_item_list.setup();
+
+		let $rfq_btn = $item_page.find('.rfq-btn');
+		$rfq_btn.on('click', () => {
+			this.make_rfq(item, () => {
+				$rfq_btn.addClass("disabled").html('<span><i class="fa fa-check"></i> Quote Requested</span>');
+			});
+		});
+
+		// let $breadcrumbs = $();
+		// $item_page.prepend($breadcrumbs);
+		// this.bind_breadcrumbs();
 	}
 
 	go_to_company_page(company) {
 		frappe.set_route("hub", "Company", company.name);
 	}
 
-	bind_breadcrumbs() {}
+	// bind_breadcrumbs() {}
 
 	go_to_home_page() {
 		frappe.set_route("hub");
@@ -242,7 +272,6 @@ erpnext.hub.Hub = class {
 		return [];
 	}
 	get_hub_companies(callback) {
-		let me = this;
 		frappe.call({
 			method: "erpnext.hub_node.get_all_companies",
 			args: {},
@@ -251,16 +280,35 @@ erpnext.hub.Hub = class {
 					r.message = [];
 				}
 				callback(r.message);
-				// r.message.map((company) => {
-
-				// });
 			}
 		});
-		return [];
 	}
 
 	get_search_term() {
 		return this.$search.val();
+	}
+
+	make_rfq(item, callback) {
+		// should be through hub?
+		frappe.call({
+			method: "erpnext.hub_node.make_rfq",
+			args: {
+				item_code: item.item_code,
+				item_group: "Products",
+				supplier_name: item.hub_user_name,
+				supplier_email: item.email,
+				company: item.company,
+				country: item.country
+			},
+			callback: function(r) {
+				// console.log("done?: ", r.message);
+				if(r.message == "Success") {
+					callback();
+				} else {
+					frappe.msgprint(r.message);
+				}
+			}
+		});
 	}
 }
 
