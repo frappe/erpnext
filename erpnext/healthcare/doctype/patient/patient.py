@@ -30,7 +30,8 @@ class Patient(Document):
 				user = frappe.get_doc({
 					"doctype": "User",
 					"first_name": self.patient_name,
-					"email": self.email
+					"email": self.email,
+					"user_type": "Website User"
 				})
 				user.flags.no_welcome_email = True
 				user.flags.ignore_permissions = True
