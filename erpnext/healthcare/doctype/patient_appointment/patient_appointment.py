@@ -241,3 +241,9 @@ def get_events(start, end, filters=None):
 	for item in data:
 		item.end = item.start + datetime.timedelta(minutes = item.duration)
 	return data
+
+@frappe.whitelist()
+def get_physician(doctype, txt, searchfield, start, page_len, filters):
+	query = """select name from `tabPhysician` where physician_schedule <> '' order by name"""
+
+	return frappe.db.sql(query)
