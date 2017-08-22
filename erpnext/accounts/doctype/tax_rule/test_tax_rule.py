@@ -34,6 +34,14 @@ class TestTaxRule(unittest.TestCase):
 		tax_rule2.save()
 		self.assertTrue(tax_rule2.name)
 
+	def test_for_parent_customer_group(self):
+		tax_rule1 = make_tax_rule(customer_group= "All Customer Groups",
+			sales_tax_template = "_Test Sales Taxes and Charges Template", priority = 1, from_date = "2015-01-01")
+		tax_rule1.save()
+
+		self.assertEquals(get_tax_template("2015-01-01", {"customer_group" : "Commercial"}),
+			"_Test Sales Taxes and Charges Template")
+
 	def test_conflict_with_overlapping_dates(self):
 		tax_rule1 = make_tax_rule(customer= "_Test Customer",
 			sales_tax_template = "_Test Sales Taxes and Charges Template", priority = 1, from_date = "2015-01-01", to_date = "2015-01-05")
