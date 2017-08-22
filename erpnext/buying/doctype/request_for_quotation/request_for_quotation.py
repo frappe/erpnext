@@ -195,8 +195,12 @@ def check_portal_enabled(reference_doctype):
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
-	list_context["show_sidebar"] = True
-	list_context["title"] = "Request for Quotation"
+	list_context.update({
+		'show_sidebar': True,
+		'show_search': True,
+		'no_breadcrumbs': True,
+		'title': _('Request for Quotation'),
+	})
 	return list_context
 
 def get_supplier_contacts(doctype, txt, searchfield, start, page_len, filters):
