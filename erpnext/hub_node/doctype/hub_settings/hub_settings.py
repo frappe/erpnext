@@ -19,10 +19,10 @@ hub_url = "http://erpnext.hub:8000"
 
 class HubSettings(Document):
 	config_args = ['enabled']
-	profile_args = ['email', 'hub_user_name', 'country', 'company']  # also 'public_key_pem'
+	profile_args = ['email', 'hub_user_name', 'country']  # also 'public_key_pem'
 	only_in_code = ['private_key']
-	seller_args = ['publish', 'seller_city', 'seller_website', 'seller_description']
-	publishing_args = ['publish_pricing', 'selling_price_list', 'publish_availability', 'warehouse']
+	seller_args = ['company', 'seller_city', 'seller_website', 'seller_description']
+	publishing_args = ['publish', 'publish_pricing', 'selling_price_list', 'publish_availability', 'warehouse']
 	personal_args = ['hub_public_key_pem']
 
 	base_fields_for_items = ["name", "item_code", "item_name", "description", "image", "item_group",
@@ -164,17 +164,17 @@ class HubSettings(Document):
 		(self.private_key, self.public_key_pem) = generate_keys()
 		response = requests.post(hub_url + "/api/method/hub.hub.api."+"register",
 			data = { "args_data": json.dumps(self.get_args(
-				self.config_args + self.profile_args + ['public_key_pem']
+				self.config_args + self.profile_args + self.seller_args #['public_key_pem']
 			))}
 		)
 		response.raise_for_status()
 		response_msg = response.json().get("message")
 
 		self.access_token = response_msg.get("access_token")
-		self.hub_public_key = load_pem_public_key(	# An rsa.RSAPublicKey object
-			str(response_msg.get("hub_public_key_pem")),
-			backend=default_backend()
-		)
+		# self.hub_public_key = load_pem_public_key(	# An rsa.RSAPublicKey object
+		# 	str(response_msg.get("hub_public_key_pem")),
+		# 	backend=default_backend()
+		# )
 
 		# Set start values
 		self.current_item_fields = json.dumps(self.base_fields_for_items)

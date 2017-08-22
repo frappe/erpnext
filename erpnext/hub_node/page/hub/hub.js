@@ -29,8 +29,6 @@ erpnext.hub.Hub = class {
 
 	setup() {
 		this.setup_header();
-		this.setup_filters();
-		this.setup_search();
 		this.$hub_main_section = $(`<div class="hub-main-section">`).appendTo(this.page.body);
 		this.refresh();
 	}
@@ -74,6 +72,7 @@ erpnext.hub.Hub = class {
 
 	setup_live_state() {
 		this.add_account_to_header();
+		this.setup_filters();
 		this.page.page_form.show();
 		this.render_body();
 		this.setup_lists();
@@ -86,9 +85,6 @@ erpnext.hub.Hub = class {
 		let countries = this.get_hub_countries().map(d => {
 			return {label: d, value: d}
 		});
-		let companies = this.get_hub_companies().map(d => {
-			return {label: d, value: d}
-		});
 
 		this.category_select = this.page.add_select(__("Category"),
 			[{"label": __("Select Category..."), value: "" }].concat(categories)
@@ -96,12 +92,20 @@ erpnext.hub.Hub = class {
 		this.country_select = this.page.add_select(__("Country"),
 			[{"label": __("Select Country..."), value: "" }].concat(countries)
 		);
-		this.company_select = this.page.add_select(__("Company"),
-			[{"label": __("Select Company..."), value: "" }].concat(companies)
-		);
+
+		this.get_hub_companies((companies) => {
+			let company_names = companies.map(d => {
+				return {label: d.company_name, value: d.company_name}
+			});
+
+			this.company_select = this.page.add_select(__("Company"),
+				[{"label": __("Select Company..."), value: "" }].concat(company_names)
+			);
+		})
 
 		this.$search = this.page.add_data(__("Search"));
 		this.bind_filters();
+		this.setup_search();
 	}
 
 	bind_filters() {
@@ -145,7 +149,12 @@ erpnext.hub.Hub = class {
 	}
 
 	setup_company_list() {
-
+		this.get_hub_companies((companies) => {
+			companies.map(company => {
+				let company_card = $(`<div class="company_card">
+				</div>`).appendTo(this.$side_list_section);
+			});
+		})
 	}
 
 	setup_search() {
@@ -207,14 +216,28 @@ erpnext.hub.Hub = class {
 		this.account_details.hide();
 	}
 
-	get_hub_categories() {
+	get_hub_categories(callback) {
 		// TODO
 		return [];
 	}
-	get_hub_countries() {
+	get_hub_countries(callback) {
 		return [];
 	}
-	get_hub_companies() {
+	get_hub_companies(callback) {
+		let me = this;
+		frappe.call({
+			method: "erpnext.hub_node.get_all_companies",
+			args: {},
+			callback: function(r) {
+				if(!r.message) {
+					r.message = [];
+				}
+				callback(r.message);
+				// r.message.map((company) => {
+
+				// });
+			}
+		});
 		return [];
 	}
 
