@@ -126,7 +126,6 @@ standard_portal_menu_items = [
 	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"},
 	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role":"Student"},
 	{"title": _("Timesheets"), "route": "/timesheets", "reference_doctype": "Timesheet", "role":"Customer"},
-	{"title": _("Profile"), "route": "/patient-profile", "reference_doctype": "Patient", "role":"Patient"},
 	{"title": _("Lab Test"), "route": "/lab-test", "reference_doctype": "Lab Test", "role":"Patient"},
 	{"title": _("Prescription"), "route": "/prescription", "reference_doctype": "Consultation", "role":"Patient"},
 	{"title": _("Patient Appointment"), "route": "/patient-appointments", "reference_doctype": "Patient Appointment", "role":"Patient"}
