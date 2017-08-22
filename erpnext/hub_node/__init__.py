@@ -36,15 +36,14 @@ def get_seller_details(user_name):
 	})
 
 @frappe.whitelist()
-def make_rfq(item_code, item_group, supplier_name, supplier_email, company):
-	args = {
-		"buyer_name": "Susan",
-		"email_id": "susan@example.com"
-	}
+def make_rfq(item_code, item_group, supplier_name, supplier_email, company, country):
+	item_code = "HUB-" + item_code
+	supplier_name = "HUB-" + supplier_name
+	company = "HUB-" + company
 
-	response = requests.post("http://erpnext.user1:8000" + "/api/method/erpnext.hub_node.api.make_opportunity", data=json.dumps(args))
-	response.raise_for_status()
-	return response.json().get("message")
+	# return if item_code already exists
+	if frappe.db.exists("Item", {'item_code': item_code}):
+		return "Fail: Already exists"
 
 	if not frappe.db.exists('Supplier', {'supplier_name': supplier_name}):
 		supplier = frappe.new_doc("Supplier")
@@ -52,18 +51,18 @@ def make_rfq(item_code, item_group, supplier_name, supplier_email, company):
 		supplier.supplier_type = "Distributor"
 		supplier.insert(ignore_permissions = True)
 
-	if not frappe.db.exists('Item', {'item_code': item_code}):
-		item = frappe.new_doc("Item")
-		item.item_code = item_code
-		item.item_group = item_group
-		item.insert(ignore_permissions = True)
+	item = frappe.new_doc("Item")
+	item.item_code = item_code
+	item.item_group = item_group
+	item.is_hub_item = 1
+	item.insert(ignore_permissions = True)
 
 	if not frappe.db.exists('Company', {'company_name': company}):
 		comp = frappe.new_doc("Company")
 		comp.company_name = company
-		comp.abbr = "hub" + company[0]
+		comp.abbr = "HUB-" + company[0]
 		comp.domain = "Distribution"
-		comp.country = "India"
+		comp.country = country
 		comp.default_currency = "USD"
 		comp.insert(ignore_permissions = True)
 
@@ -86,7 +85,9 @@ def make_rfq(item_code, item_group, supplier_name, supplier_email, company):
 		"description": item_code,
 		"uom": "Nos",
 		"qty": 1,
-		"warehouse": "Stores - F",
+		"warehouse": "Stores - F", # hardcode, default warehouse for hub items?
 		"schedule_date": nowdate()
 	})
 	rfq.insert(ignore_permissions=True)
+
+	return "Success"

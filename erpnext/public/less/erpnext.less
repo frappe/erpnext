@@ -539,14 +539,46 @@ div[data-page-route="hub"] {
 	}
 
 	.hub-item-page {
+		padding: 20px;
 		.item-header {
 			display: flex;
 		}
 
-		.image img{
-			width: 200px;
-			height: 200px;
+		.item-page-image {
+			flex: 1;
+			padding: 30px;
+
+			img {
+				width: 200px;
+				height: 200px;
+			}
 		}
+
+		.title-content {
+			flex: 3;
+
+			.description {
+				margin: 30px 0px;
+			}
+
+			.actions {
+				margin-top: 30px;
+
+				.rfq-btn.disabled {
+					background-color: #b1bdca;
+					color: #fff;
+					border-color: #b1bdca;
+				}
+			}
+		}
+
+		.company-items {
+			margin-top: 40px;
+		}
+
+		// h2 {
+		// 	margin-top: 15px;
+		// }
 	}
 
 	.company-header {

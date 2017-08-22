@@ -54,7 +54,8 @@ class Item(WebsiteGenerator):
 			self.description = self.item_name
 
 		# Set by default only for sales item, ond non-hub items
-		self.publish_in_hub = 1
+		if not self.is_hub_item:
+			self.publish_in_hub = 1
 
 	def after_insert(self):
 		'''set opening stock and item price'''
