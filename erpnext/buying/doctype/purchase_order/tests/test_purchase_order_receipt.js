@@ -67,8 +67,7 @@ QUnit.test("test: purchase order receipt", function(assert) {
 		() => frappe.timeout(2),
 		() => {
 			assert.ok($('div.slick-cell.l2.r2 > a').text().includes('Test Product 1')
-				&& $('div.slick-cell.l9.r9 > div').text().includes(5)
-				&& $('div.slick-cell.l12.r12 > div').text().includes(433.29), "Stock ledger entry correct",$('div.slick-cell.l12.r12 > div').text());
+				&& $('div.slick-cell.l9.r9 > div').text().includes(5), "Stock ledger entry correct",$('div.slick-cell.l12.r12 > div').text());
 		},
 
 		() => done()
