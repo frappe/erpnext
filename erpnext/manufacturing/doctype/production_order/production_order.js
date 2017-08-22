@@ -91,7 +91,7 @@ frappe.ui.form.on("Production Order", {
 		frm.set_indicator_formatter('operation',
 			function(doc) { return (frm.doc.qty==doc.completed_qty) ? "green" : "orange" });
 	},
-	
+
 	refresh: function(frm) {
 		erpnext.toggle_naming_series();
 		erpnext.production_order.set_custom_buttons(frm);
