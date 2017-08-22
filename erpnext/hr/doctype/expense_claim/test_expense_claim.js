@@ -8,7 +8,7 @@ QUnit.test("Test: Expense Claim [HR]", function (assert) {
 	frappe.run_serially([
 		// Creating Expense Claim
 		() => frappe.set_route('List','Expense Claim'),
-		() => frappe.timeout(0.3),
+		() => frappe.timeout(1),
 		() => frappe.click_button('Make a new Expense Claim'),
 		() => {
 			cur_frm.set_value('exp_approver','Administrator'),
@@ -22,12 +22,12 @@ QUnit.test("Test: Expense Claim [HR]", function (assert) {
 			d.sanctioned_amount=2000,
 			refresh_field('expenses');
 		},
-		() => frappe.timeout(0.5),
+		() => frappe.timeout(1),
 		() => frappe.db.get_value('Employee', {'employee_name': 'Test Employee 1'}, 'name'),
 		(r) => {
 			employee_name = r.message.name;
 		},
-		() => frappe.timeout(0.4),
+		() => frappe.timeout(1),
 		() => cur_frm.set_value('employee',employee_name),
 		() => cur_frm.set_value('employee_name','Test Employee 1'),
 		() => cur_frm.set_value('company','Test Company'),
@@ -35,14 +35,14 @@ QUnit.test("Test: Expense Claim [HR]", function (assert) {
 		() => cur_frm.set_value('cost_center','Main - TC'),
 		() => cur_frm.set_value('mode_of_payment','Cash'),
 		() => cur_frm.save(),
-		() => frappe.timeout(0.3),
+		() => frappe.timeout(1),
 		() => cur_frm.set_value('approval_status','Approved'),
-		() => frappe.timeout(0.3),
+		() => frappe.timeout(1),
 		() => cur_frm.save(),
 		// Submitting the Expense Claim
 		() => frappe.click_button('Submit'),
 		() => frappe.click_button('Yes'),
-		() => frappe.timeout(0.5),
+		() => frappe.timeout(1),
 		// Checking if the amount is correctly reimbursed for the employee
 		() => {
 			assert.equal(employee_name,cur_frm.get_field('employee').value,
