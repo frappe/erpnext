@@ -1,0 +1,3 @@
+setup_practice
+setup_laboratory
+setup_pharmacy
