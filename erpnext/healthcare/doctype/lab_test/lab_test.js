@@ -24,7 +24,7 @@ frappe.ui.form.on('Lab Test', {
 	refresh :  function(frm){
 		refresh_field('normal_test_items');
 		refresh_field('special_test_items');
-		if(!frm.doc.__islocal && !frm.doc.invoice){
+		if(!frm.doc.__islocal && !frm.doc.invoice && frappe.user.has_role("Accounts User")){
 			frm.add_custom_button(__('Make Invoice'), function() {
 				make_invoice(frm);
 			});

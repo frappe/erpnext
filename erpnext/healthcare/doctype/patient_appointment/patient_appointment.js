@@ -52,12 +52,12 @@ frappe.ui.form.on('Patient Appointment', {
 		}
 
 		if(!frm.doc.__islocal){
-			if(frm.doc.sales_invoice){
+			if(frm.doc.sales_invoice && frappe.user.has_role("Accounts User")){
 				frm.add_custom_button(__('Invoice'), function() {
 					frappe.set_route("Form", "Sales Invoice", frm.doc.sales_invoice);
 				},__("View") );
 			}
-			else if(frm.doc.status != "Cancelled"){
+			else if(frm.doc.status != "Cancelled" && frappe.user.has_role("Accounts User")){
 				frm.add_custom_button(__('Invoice'), function() {
 					btn_invoice_consultation(frm);
 				},__("Create"));

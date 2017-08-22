@@ -13,7 +13,7 @@ def get_domain(domain):
 				'Production Order',  'Stock Entry', 'Purchase Order', 'Task', 'Buying', 'Selling',
 				 'Accounts', 'HR', 'ToDo'],
 			'remove_roles': ['Academics User', 'Instructor', 'Physician', 'Nursing User',
-				'Laboratory user', 'LabTest Approver', 'Medical Administrator'],
+				'Laboratory user', 'LabTest Approver', 'Healthcare Administrator'],
 			'properties': [
 				{'doctype': 'Item', 'fieldname': 'manufacturing', 'property': 'collapsible_depends_on', 'value': 'is_stock_item'},
 			],
@@ -28,7 +28,7 @@ def get_domain(domain):
 			'Warranty Claim', 'Accounts', 'Task', 'Buying', 'ToDo'],
 			'remove_roles': ['Manufacturing User', 'Manufacturing Manager', 'Academics User', 'Instructor',
 				'Physician', 'Nursing User', 'Laboratory user',
-				'LabTest Approver', 'Medical Administrator'],
+				'LabTest Approver', 'Healthcare Administrator'],
 			'properties': [
 				{'doctype': 'Item', 'fieldname': 'manufacturing', 'property': 'hidden', 'value': 1},
 				{'doctype': 'Customer', 'fieldname': 'credit_limit_section', 'property': 'hidden', 'value': 1},
@@ -44,7 +44,7 @@ def get_domain(domain):
 				 'Sales Invoice', 'CRM', 'Selling', 'Buying', 'Stock', 'Accounts', 'HR', 'ToDo'],
 			'remove_roles': ['Manufacturing User', 'Manufacturing Manager', 'Academics User', 'Instructor',
 				'Physician', 'Nursing User', 'Laboratory user',
-				'LabTest Approver', 'Medical Administrator'],
+				'LabTest Approver', 'Healthcare Administrator'],
 			'set_value': [
 				['Stock Settings', None, 'show_barcode_field', 1]
 			],
@@ -56,7 +56,7 @@ def get_domain(domain):
 				'Lead', 'Opportunity', 'Task', 'Expense Claim', 'Employee', 'HR', 'ToDo'],
 			'remove_roles': ['Manufacturing User', 'Manufacturing Manager', 'Academics User', 'Instructor',
 				'Physician', 'Nursing User', 'Laboratory user',
-				'LabTest Approver', 'Medical Administrator'],
+				'LabTest Approver', 'Healthcare Administrator'],
 			'properties': [
 				{'doctype': 'Item', 'fieldname': 'is_stock_item', 'property': 'default', 'value': 0},
 			],

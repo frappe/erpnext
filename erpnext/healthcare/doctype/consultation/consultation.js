@@ -86,7 +86,7 @@ frappe.ui.form.on('Consultation', {
 				}
 			};
 		});
-		if(!frm.doc.__islocal && !frm.doc.invoice){
+		if(!frm.doc.__islocal && !frm.doc.invoice && (frappe.user.has_role("Accounts User"))){
 			frm.add_custom_button(__('Invoice'), function() {
 				btn_invoice_consultation(frm);
 			},__("Create"));
