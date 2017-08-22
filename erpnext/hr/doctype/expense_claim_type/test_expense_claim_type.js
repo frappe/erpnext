@@ -18,11 +18,9 @@ QUnit.test("Test: Expense Claim Type [HR]", function (assert) {
 			]);
 		},
 		() => frappe.timeout(3),
-		() => frappe.set_route('List','Expense Claim Type'),
-		() => frappe.timeout(3),
 		// Checking if the created type is present in the list
 		() => {
-			assert.equal('Test Expense Type 1', cur_list.data[0].name,
+			assert.equal('Test Expense Type 1', cur_frm.doc.expense_type,
 				'Expense Claim Type created successfully');
 		},
 		() => done()
