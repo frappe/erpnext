@@ -1,5 +1,3 @@
-# Maintaining Suppliers Part No In Item
-
 #Maintaining Supplier's Item Code in the Item master
 
 For each item, code assigned might differ from the code your supplier has given to that same item. ERPNext allows you to track Supplier's Item Code in the item master. Also you can fetch Supplier's Item Code in your purchase transactions, so that they can easily recognize item referring to their Item Code.

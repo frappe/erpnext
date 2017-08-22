@@ -1,5 +1,3 @@
-# Letter Head
-
 #Letter Head
 
 Each company has default Letter Head for their company. This Letter Head values are generally set as Header and Footer in the documents. In ERPNext, you can capture the these details in the Letter Head master.

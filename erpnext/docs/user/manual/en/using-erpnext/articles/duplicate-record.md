@@ -1,5 +1,3 @@
-# Duplicate Record
-
 #Duplicate a Record
 
 Duplicate feature helps you to copy values of existing document into new document.

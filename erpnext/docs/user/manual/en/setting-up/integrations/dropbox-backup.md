@@ -1,5 +1,3 @@
-# Dropbox Backup
-
 #Setting Up Dropbox Backups
 
 We always recommend customers to maintain backup of their data in ERPNext. The database backup is downloaded in the form of an SQL file. If needed, this SQL file of backup can be restored in the another ERPNext account as well.

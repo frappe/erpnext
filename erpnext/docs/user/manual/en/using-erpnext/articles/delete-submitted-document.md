@@ -1,5 +1,3 @@
-# Delete Submitted Document
-
 #Delete Submitted Document
 
 To be able to delete Submitted document, you should first Cancel. Once canceled, you can delete that document from Menu or from the List View of that Document Type.

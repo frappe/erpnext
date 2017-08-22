@@ -1,5 +1,3 @@
-# Erpnext For Services Organization
-
 #ERPNext for Service Organization
 
 **Question:** ERPNext looks primarily designed for the traders and manufacturers. Is ERPNext used by companies offering servies?

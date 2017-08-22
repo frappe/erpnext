@@ -2,14 +2,10 @@
 QUnit.module('schools');
 
 QUnit.test('test student applicant', function(assert){
-	assert.expect(12);
+	assert.expect(11);
 	let done = assert.async();
 	let testing_status;
 	frappe.run_serially([
-		() => frappe.set_route('Form', 'School House/New School House'),
-		() => frappe.timeout(0.5),
-		() => cur_frm.doc.house_name = 'Test_house',
-		() => cur_frm.save(),
 		() => frappe.set_route('List', 'Student Applicant'),
 		() => frappe.timeout(0.5),
 		() => {$(`a:contains("Fname Mname Lname"):visible`)[0].click();},
@@ -97,26 +93,15 @@ QUnit.test('test student applicant', function(assert){
 			cur_frm.set_value('academic_year', '2016-17');
 			cur_frm.set_value('academic_term', '2016-17 (Semester 1)');
 			cur_frm.set_value('school_house', 'Test_house');
-			$('a:contains("Fees"):visible').click();
-		},
-		() => frappe.timeout(1),
-		() => {
-			cur_frm.doc.fees[0].student_category = "Reservation";
 		},
 		() => cur_frm.save(),
+
 		// Submitting Program Enrollment form for our Test Student
-		() => frappe.timeout(0.5),
+		() => frappe.timeout(1),
 		() => frappe.tests.click_button('Submit'),
 		() => frappe.tests.click_button('Yes'),
 		() => {
-			testing_status = $('.msgprint').text();
-			assert.ok("Fee Records Created" == (testing_status.substring(0,19)), "Fee record created for enrolled student test");
-		},
-		() => frappe.timeout(0.5),
-		() => frappe.tests.click_button('Close'),
-		() => {
-			testing_status = $('h1').text();
-			assert.ok(testing_status.indexOf('Submitted') != -1, "Program enrollment successfully submitted"); // Checking if the program enrollment entry shows submitted or not
+			assert.ok(cur_frm.doc.docstatus == 1, "Program enrollment successfully submitted");
 		},
 		() => done()
 	]);

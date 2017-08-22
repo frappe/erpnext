@@ -84,6 +84,43 @@ class TestQuotation(unittest.TestCase):
 		self.assertEquals(quotation.get("items")[0].rate, rate_with_margin)
 		si.save()
 
+	def test_create_two_quotations(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		first_item = make_item("_Test Laptop",
+							{"is_stock_item": 1, "expense_account": "_Test Account Cost for Goods Sold - _TC",
+							 "cost_center": "_Test Cost Center - _TC"})
+
+		second_item = make_item("_Test CPU",
+							{"is_stock_item": 1, "expense_account": "_Test Account Cost for Goods Sold - _TC",
+							 "cost_center": "_Test Cost Center - _TC"})
+
+		qo_item1 = [
+			{
+				"item_code": first_item.item_code,
+				"warehouse": "",
+				"qty": 2,
+				"rate": 400,
+				"delivered_by_supplier": 1,
+				"supplier": '_Test Supplier'
+			}
+		]
+
+		qo_item2 = [
+			{
+				"item_code": second_item.item_code,
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 2,
+				"rate": 300,
+				"conversion_factor": 1.0
+			}
+		]
+
+		first_qo = make_quotation(item_list=qo_item1, do_not_submit=True)
+		first_qo.submit()
+		sec_qo = make_quotation(item_list=qo_item2, do_not_submit=True)
+		sec_qo.submit()
+
 test_records = frappe.get_test_records('Quotation')
 
 def get_quotation_dict(customer=None, item_code=None):
@@ -103,3 +140,41 @@ def get_quotation_dict(customer=None, item_code=None):
 			}
 		]
 	}
+
+
+def make_quotation(**args):
+	qo = frappe.new_doc("Quotation")
+	args = frappe._dict(args)
+	if args.transaction_date:
+		qo.transaction_date = args.transaction_date
+
+	qo.company = args.company or "_Test Company"
+	qo.customer = args.customer or "_Test Customer"
+	qo.currency = args.currency or "INR"
+	if args.selling_price_list:
+		qo.selling_price_list = args.selling_price_list
+
+	if "warehouse" not in args:
+		args.warehouse = "_Test Warehouse - _TC"
+
+	if args.item_list:
+		for item in args.item_list:
+			qo.append("items", item)
+
+	else:
+		qo.append("items", {
+			"item_code": args.item or args.item_code or "_Test Item",
+			"warehouse": args.warehouse,
+			"qty": args.qty or 10,
+			"uom": args.uom or None,
+			"rate": args.rate or 100
+		})
+
+	qo.delivery_date = add_days(qo.transaction_date, 10)
+
+	if not args.do_not_save:
+		qo.insert()
+		if not args.do_not_submit:
+			qo.submit()
+
+	return qo

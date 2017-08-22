@@ -1,5 +1,3 @@
-# Applying Discount
-
 #Applying Discount
 
 There are several ways Discount can be applied on an item in the sales transactions.

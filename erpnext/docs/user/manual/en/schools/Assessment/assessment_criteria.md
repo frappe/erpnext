@@ -1,5 +1,3 @@
-# Assessment Criteria
-
 #Assessment Criteria
 
 Assessment Criteria is the parameter based on which you assess the Student.

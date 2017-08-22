@@ -1,5 +1,3 @@
-# Document Versioning
-
 #Document Versioning
 
 The document versioning feature allows you to track all the changes made in the form over the period. It will be very helpful in audit trial to check which user edited what value, and when exactly.

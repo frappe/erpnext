@@ -1,5 +1,3 @@
-# Managing Dynamic Link Fields
-
 #Managing Dynamic Link Fields
 
 Dynamic Link field is one which can search and hold value of any document/doctype. Let's consider an example to learn how Dynamic Link field works.

@@ -36,12 +36,15 @@ def make_depreciation_entry(asset_name, date=None):
 	fixed_asset_account, accumulated_depreciation_account, depreciation_expense_account = \
 		get_depreciation_accounts(asset)
 
-	depreciation_cost_center = frappe.db.get_value("Company", asset.company, "depreciation_cost_center")
+	depreciation_cost_center, depreciation_series = frappe.db.get_value("Company", asset.company,
+		["depreciation_cost_center", "series_for_depreciation_entry"])
+	
 
 	for d in asset.get("schedules"):
 		if not d.journal_entry and getdate(d.schedule_date) <= getdate(date):
 			je = frappe.new_doc("Journal Entry")
 			je.voucher_type = "Depreciation Entry"
+			je.naming_series = depreciation_series
 			je.posting_date = d.schedule_date
 			je.company = asset.company
 			je.remark = "Depreciation Entry against {0} worth {1}".format(asset_name, d.depreciation_amount)
@@ -109,8 +112,11 @@ def scrap_asset(asset_name):
 	elif asset.status in ("Cancelled", "Sold", "Scrapped"):
 		frappe.throw(_("Asset {0} cannot be scrapped, as it is already {1}").format(asset.name, asset.status))
 
+	depreciation_series = frappe.db.get_value("Company", asset.company, "series_for_depreciation_entry")
+
 	je = frappe.new_doc("Journal Entry")
 	je.voucher_type = "Journal Entry"
+	je.naming_series = depreciation_series
 	je.posting_date = today()
 	je.company = asset.company
 	je.remark = "Scrap Entry for asset {0}".format(asset_name)

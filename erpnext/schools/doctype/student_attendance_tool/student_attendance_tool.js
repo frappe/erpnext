@@ -109,7 +109,7 @@ schools.StudentsEditor = Class.extend({
 			});
 
 		student_toolbar.find(".btn-mark-att")
-			.html(__('Mark Attendence'))
+			.html(__('Mark Attendance'))
 			.on("click", function() {
 				$(me.wrapper.find(".btn-mark-att")).attr("disabled", true);
 				var studs = [];

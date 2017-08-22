@@ -1,5 +1,3 @@
-# Customizing Sorting Order In The List View
-
 #Customizing Sorting Order in the List View
 
 **Question:** I want records in my Item List sorted based on Desc Order of Item Code.

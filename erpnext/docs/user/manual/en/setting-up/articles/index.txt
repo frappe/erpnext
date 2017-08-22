@@ -1,6 +1,7 @@
 change-password
 delete-a-company-and-all-related-transactions
 edit-submitted-document
+calculate-incentive-for-sales-team
 integrating-erpnext-with-other-application
 manage-header-and-footer
 managing-multiple-companies
@@ -10,3 +11,4 @@ naming-series-current-value
 overwriting-data-from-data-import-tool
 rename-user
 using-custom-domain-on-erpnext
+setup-two-factor-authentication

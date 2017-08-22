@@ -1,5 +1,3 @@
-# Timesheet Against Project
-
 #Timesheet against Project and Task
 
 Timesheets can be tracked against Project and Tasks so that you can get reports on how much time was spent on each Task or Project.

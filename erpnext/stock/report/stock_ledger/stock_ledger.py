@@ -29,13 +29,27 @@ def execute(filters=None):
 	return columns, data
 
 def get_columns():
-	return [_("Date") + ":Datetime:95", _("Item") + ":Link/Item:130", _("Item Name") + "::100", _("Item Group") + ":Link/Item Group:100",
-		_("Brand") + ":Link/Brand:100", _("Description") + "::200", _("Warehouse") + ":Link/Warehouse:100",
-		_("Stock UOM") + ":Link/UOM:100", _("Qty") + ":Float:50", _("Balance Qty") + ":Float:100",
-		_("Incoming Rate") + ":Currency:110", _("Valuation Rate") + ":Currency:110", _("Balance Value") + ":Currency:110",
-		_("Voucher Type") + "::110", _("Voucher #") + ":Dynamic Link/"+_("Voucher Type")+":100", _("Batch") + ":Link/Batch:100",
-		_("Serial #") + ":Link/Serial No:100", _("Company") + ":Link/Company:100"
+	columns = [
+		_("Date") + ":Datetime:95", _("Item") + ":Link/Item:130",
+		_("Item Name") + "::100", _("Item Group") + ":Link/Item Group:100",
+		_("Brand") + ":Link/Brand:100", _("Description") + "::200",
+		_("Warehouse") + ":Link/Warehouse:100", _("Stock UOM") + ":Link/UOM:100",
+		_("Qty") + ":Float:50", _("Balance Qty") + ":Float:100",
+		{"label": _("Incoming Rate"), "fieldtype": "Currency", "width": 110,
+			"options": "Company:company:default_currency"},
+		{"label": _("Valuation Rate"), "fieldtype": "Currency", "width": 110,
+			"options": "Company:company:default_currency"},
+		{"label": _("Balance Value"), "fieldtype": "Currency", "width": 110,
+			"options": "Company:company:default_currency"},
+		_("Voucher Type") + "::110",
+		_("Voucher #") + ":Dynamic Link/" + _("Voucher Type") + ":100",
+		_("Batch") + ":Link/Batch:100",
+		_("Serial #") + ":Link/Serial No:100",
+		{"label": _("Company"), "fieldtype": "Link", "width": 110,
+			"options": "company", "fieldname": "company"}
 	]
+
+	return columns
 
 def get_stock_ledger_entries(filters):
 	return frappe.db.sql("""select concat_ws(" ", posting_date, posting_time) as date,

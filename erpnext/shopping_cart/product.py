@@ -46,6 +46,7 @@ def get_product_info(item_code):
 	}
 
 def get_qty_in_stock(item_code, template_item_code):
+	in_stock, stock_qty = 0, ''
 	warehouse = frappe.db.get_value("Item", item_code, "website_warehouse")
 	if not warehouse and template_item_code and template_item_code != item_code:
 		warehouse = frappe.db.get_value("Item", template_item_code, "website_warehouse")
@@ -55,8 +56,6 @@ def get_qty_in_stock(item_code, template_item_code):
 			item_code=%s and warehouse=%s""", (item_code, warehouse))
 		if stock_qty:
 			in_stock = stock_qty[0][0] > 0 and 1 or 0
-		else:
-			in_stock = 0
 
 	return frappe._dict({"in_stock": in_stock, "stock_qty": stock_qty})
 

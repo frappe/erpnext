@@ -150,10 +150,15 @@ class TestAsset(unittest.TestCase):
 		asset.load_from_db()
 		self.assertEqual(asset.status, "Submitted")
 
+		frappe.db.set_value("Company", "_Test Company", "series_for_depreciation_entry", "DEPR-")
+
 		post_depreciation_entries(date="2021-01-01")
 		asset.load_from_db()
 
 		self.assertEqual(asset.status, "Partially Depreciated")
+
+		# check depreciation entry series
+		self.assertEqual(asset.get("schedules")[0].journal_entry[:4], "DEPR")
 
 		expected_gle = (
 			("_Test Accumulated Depreciations - _TC", 0.0, 30000.0),

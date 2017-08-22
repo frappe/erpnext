@@ -1,5 +1,3 @@
-# Stock Level Report
-
 #Stock Level Report
 
 Stock Level report list stock item's quantity available in a particular warehouse.

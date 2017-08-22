@@ -1,5 +1,3 @@
-# Leave
-
 #Overview
 This section enables you to manage leave schedule of your organization. It also explains the way employees can apply for leaves.  
 Employees create leave request and manager (leave approver) approves or rejects the request. You can select from a number of leave types such as sick leave, casual leave, privilege leave and so on. You can also allocate leaves to your employees and generate reports to track leaves record.

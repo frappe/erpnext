@@ -1,5 +1,3 @@
-# Rename User
-
 #Rename User
 
 Renaming functionality allows you to edit id of specific record. User is saved with person's Email Address. Only User with System Manager's role will be able to rename User IDs.

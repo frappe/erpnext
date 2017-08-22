@@ -1,5 +1,3 @@
-# Repack Entry
-
 #Repack Entry
 
 Repack Entry is created for item bought in bulk, which is being packed into smaller packages. For example, item bought in tons can be repacked into Kgs. 

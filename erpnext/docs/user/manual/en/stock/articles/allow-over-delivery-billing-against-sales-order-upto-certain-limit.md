@@ -1,5 +1,3 @@
-# Allow Over Delivery Billing Against Sales Order Upto Certain Limit
-
 #Allow Over Delivery/Billing
 
 While creating Delivery Note, system validates if item's Qty mentined is same as in the Sales Order. If Item Qty has been increased, you will get over-delivery validation. If you want to be able to deliver more items than mentioned in the Sales Order, you should update "Allow over delivery or receipt upto this percent" in the Item master.

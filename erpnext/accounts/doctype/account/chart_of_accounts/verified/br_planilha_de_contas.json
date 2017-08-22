@@ -49,6 +49,10 @@
                     "is_group": 1
                 }, 
                 "ESTOQUES": {
+                    "All Warehouses": {
+                        "account_type": "Stock", 
+                        "is_group": 1
+                    }, 
                     "Constru\u00e7\u00f5es em Andamento de Im\u00f3veis Destinados \u00e0 Venda": {}, 
                     "Estoques Destinados \u00e0 Doa\u00e7\u00e3o": {}, 
                     "Im\u00f3veis Destinados \u00e0 Venda": {}, 

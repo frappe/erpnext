@@ -1,5 +1,3 @@
-# Selling In Different Uom
-
 #Selling in Different Unit (UoM)
  
 A sell price unit of measure (UOM) is the UOM with which you price items. You can have multiple sell price UOMs for any inventory item.  However, when Customer places, UoM for an item could change. 

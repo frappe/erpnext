@@ -1,5 +1,3 @@
-# Custom Translations
-
 #Custom Translations
 
 User can print the customer's and supplier's document in their local language. For an example if I have customers from germany, france who want quotation in german, french language will be possible with these feature.

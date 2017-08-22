@@ -1,5 +1,3 @@
-# Managing Multiple Companies
-
 #Managing Multiple Companies
 
 ERPNext allows you to create multiple companies in a single ERPNext instance.

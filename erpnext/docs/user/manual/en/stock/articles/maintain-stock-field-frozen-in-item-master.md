@@ -1,5 +1,3 @@
-# Maintain Stock Field Frozen In Item Master
-
 #Maintain Stock field Frozen in the Item master
 
 In the item master, you might witness values in the following fields to be frozen.

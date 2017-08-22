@@ -1,5 +1,3 @@
-# Disable Rounded Total
-
 #Disable Rounded Total
 
 All the sales transactions like Sales Order, Sales Invoice has Rounded Total in it. It calculated based on the value of Grand Total. Also Rounded Total is also visible in the Standard Print Formats. 
