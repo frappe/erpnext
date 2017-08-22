@@ -18,7 +18,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	aii_account_map = get_aii_accounts()
 	if item_list:
 		itemised_tax, tax_columns = get_tax_accounts(item_list, columns,
-			tax_doctype="Purchase Taxes and Charges")
+			doctype="Purchase Invoice", tax_doctype="Purchase Taxes and Charges")
 
 	columns.append({
 		"fieldname": "currency",

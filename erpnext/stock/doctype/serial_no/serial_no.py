@@ -213,7 +213,7 @@ def validate_serial_no(sle, item_det):
 							frappe.throw(_("Serial No {0} does not belong to Item {1}").format(serial_no,
 								sle.item_code), SerialNoItemError)
 
-					if sr.warehouse and sle.actual_qty > 0:
+					if sle.actual_qty > 0 and has_duplicate_serial_no(sr, sle):
 						frappe.throw(_("Serial No {0} has already been received").format(serial_no),
 							SerialNoDuplicateError)
 
@@ -233,6 +233,21 @@ def validate_serial_no(sle, item_det):
 		elif sle.actual_qty < 0 or not item_det.serial_no_series:
 			frappe.throw(_("Serial Nos Required for Serialized Item {0}").format(sle.item_code),
 				SerialNoRequiredError)
+
+def has_duplicate_serial_no(sn, sle):
+	if sn.warehouse:
+		return True
+
+	status = False
+	if sn.purchase_document_no:
+		if sle.voucher_type in ['Purchase Receipt', 'Stock Entry']:
+			status = True
+
+		if status and sle.voucher_type == 'Stock Entry' and \
+			frappe.db.get_value('Stock Entry', sle.voucher_no, 'purpose') != 'Material Receipt':
+			status = False
+
+	return status
 
 def allow_serial_nos_with_different_item(sle_serial_no, sle):
 	"""

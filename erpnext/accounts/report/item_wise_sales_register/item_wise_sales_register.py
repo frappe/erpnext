@@ -139,7 +139,7 @@ def get_delivery_notes_against_sales_order(item_list):
 
 	return so_dn_map
 
-def get_tax_accounts(item_list, columns, tax_doctype="Sales Taxes and Charges"):
+def get_tax_accounts(item_list, columns, doctype="Sales Invoice", tax_doctype="Sales Taxes and Charges"):
 	import json
 	item_row_map = {}
 	tax_columns = []
@@ -155,11 +155,12 @@ def get_tax_accounts(item_list, columns, tax_doctype="Sales Taxes and Charges"):
 			charge_type, base_tax_amount_after_discount_amount
 		from `tab%s`
 		where
-			parenttype = 'Sales Invoice' and docstatus = 1
+			parenttype = %s and docstatus = 1
 			and (description is not null and description != '')
 			and parent in (%s)
 		order by description
-	""" % (tax_doctype, ', '.join(['%s']*len(invoice_item_row))), tuple(invoice_item_row.keys()))
+	""" % (tax_doctype, '%s', ', '.join(['%s']*len(invoice_item_row))),
+		tuple([doctype] + invoice_item_row.keys()))
 
 	for parent, description, item_wise_tax_detail, charge_type, tax_amount in tax_details:
 		if description not in tax_columns and tax_amount:
