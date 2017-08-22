@@ -4,11 +4,11 @@
 from __future__ import unicode_literals
 import frappe, requests, json
 from frappe.utils import now, nowdate
-from erpnext.hub_node.doctype.hub_settings.hub_settings import call_hub_api_now
+from erpnext.hub_node.doctype.hub_settings.hub_settings import send_hub_request
 
 @frappe.whitelist()
 def get_items(text, start, limit, category=None, company=None, country=None):
-	return call_hub_api_now('get_items', data={
+	return send_hub_request('get_items', data={
 		"text": text,
 		"category": category,
 		"company": company,
@@ -19,19 +19,19 @@ def get_items(text, start, limit, category=None, company=None, country=None):
 
 @frappe.whitelist()
 def get_all_users():
-	return call_hub_api_now('get_all_users')
+	return send_hub_request('get_all_users')
 
 @frappe.whitelist()
 def get_categories():
-	return call_hub_api_now('get_categories')
+	return send_hub_request('get_categories')
 
 @frappe.whitelist()
 def get_all_companies():
-	return call_hub_api_now('get_all_companies')
+	return send_hub_request('get_all_companies')
 
 @frappe.whitelist()
 def get_seller_details(user_name):
-	return call_hub_api_now('get_user_details', data={
+	return send_hub_request('get_user_details', data={
 		"user_name": user_name,
 	})
 

@@ -2,12 +2,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, requests, json, cryptography, os
-from cryptography.fernet import Fernet
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization, hashes
-from cryptography.hazmat.primitives.asymmetric import rsa, padding
-from cryptography.hazmat.primitives.serialization import load_pem_private_key, load_pem_public_key
+import frappe, requests, json, os
 
 from frappe.model.document import Document
 from frappe.utils import cint, expand_relative_urls, fmt_money, flt, add_years, add_to_date, now, get_datetime, get_datetime_str
@@ -19,7 +14,7 @@ hub_url = "http://erpnext.hub:8000"
 
 class HubSettings(Document):
 	config_args = ['enabled']
-	profile_args = ['email', 'hub_user_name', 'country']  # also 'public_key_pem'
+	profile_args = ['email', 'hub_user_name', 'country']
 	only_in_code = ['private_key']
 	seller_args = ['company', 'seller_city', 'seller_website', 'seller_description']
 	publishing_args = ['publish', 'publish_pricing', 'selling_price_list', 'publish_availability', 'warehouse']
@@ -81,14 +76,14 @@ class HubSettings(Document):
 				self.item_fields_to_remove += fields
 
 	def update_item_fields_state(self):
-		fields_step_1 = json.loads(self.current_item_fields)
-		fields_step_1 += self.item_fields_to_add
-		fields_step_2 = [f for f in set(fields_step_1) if f not in self.item_fields_to_remove]
-		self.current_item_fields = json.dumps(fields_step_2)
+		current_item_fields = json.loads(self.current_item_fields)
+		current_item_fields += self.item_fields_to_add
+		new_current_item_fields = [f for f in set(current_item_fields) if f not in self.item_fields_to_remove]
+		self.current_item_fields = json.dumps(new_current_item_fields)
 
 	def update_hub(self):
 		# Updating profile call
-		response_msg = call_hub_api_now('update_user_details',
+		response_msg = send_hub_request('update_user_details',
 			data=self.get_args(self.profile_args + self.seller_args))
 
 		self.update_publishing()
@@ -128,7 +123,7 @@ class HubSettings(Document):
 				item.image = "http://" + frappe.local.site + ":8000" + item.image
 		item_list = frappe.db.sql_list("select name from tabItem where publish_in_hub=1")
 
-		response_msg = call_hub_api_now('update_items',
+		response_msg = send_hub_request('update_items',
 			data={
 			"items_to_update": json.dumps(items),
 			"item_list": json.dumps(item_list),
@@ -141,11 +136,11 @@ class HubSettings(Document):
 
 	def unpublish_all_items(self):
 		"""Unpublish from hub.erpnext.org, delete items there"""
-		response_msg = call_hub_api_now('unpublish_items')
+		response_msg = send_hub_request('unpublish_items')
 
 	def add_item_fields_at_hub(self):
 		items = frappe.db.get_all("Item", fields=["item_code"] + self.item_fields_to_add, filters={"publish_in_hub": 1})
-		response_msg = call_hub_api_now('add_item_fields',
+		response_msg = send_hub_request('add_item_fields',
 			data={
 				"items_with_new_fields": json.dumps(items),
 				"fields_to_add": self.item_fields_to_add
@@ -153,7 +148,7 @@ class HubSettings(Document):
 		)
 
 	def remove_item_fields_at_hub(self):
-		response_msg = call_hub_api_now('remove_item_fields',
+		response_msg = send_hub_request('remove_item_fields',
 			data={"fields_to_remove": self.item_fields_to_remove})
 
 	### Account
@@ -171,10 +166,6 @@ class HubSettings(Document):
 		response_msg = response.json().get("message")
 
 		self.access_token = response_msg.get("access_token")
-		# self.hub_public_key = load_pem_public_key(	# An rsa.RSAPublicKey object
-		# 	str(response_msg.get("hub_public_key_pem")),
-		# 	backend=default_backend()
-		# )
 
 		# Set start values
 		self.current_item_fields = json.dumps(self.base_fields_for_items)
@@ -183,7 +174,7 @@ class HubSettings(Document):
 	def unregister_from_hub(self):
 		"""Unpublish, then delete transactions and user from there"""
 		self.reset_publishing_settings()
-		response_msg = call_hub_api_now('unregister')
+		response_msg = send_hub_request('unregister')
 
 	### Helpers
 	def get_args(self, arg_list):
@@ -205,64 +196,8 @@ class HubSettings(Document):
 			filters={ "publish_in_hub": 0, "is_sales_item": 1}):
 			frappe.db.set_value("Item", item.name, "publish_in_hub", 1)
 
-
-	def call_hub_api(self, method, data):
-		# Encryption
-		payload = bytes(json.dumps(data))
-		key = Fernet.generate_key()
-
-		# Encrypt message
-		f = Fernet(key)
-		encrypted_payload = f.encrypt(payload)
-
-		# Encrypt key
-		encrypted_key = self.hub_public_key.encrypt(
-			key,
-			padding.OAEP(
-				mgf=padding.MGF1(algorithm=hashes.SHA1()),
-				algorithm=hashes.SHA1(),
-				label=None
-			)
-		)
-
-		# Sign key
-		signature = self.private_key.sign(
-			encrypted_key,
-			padding.PSS(
-				mgf=padding.MGF1(hashes.SHA256()),
-				salt_length=padding.PSS.MAX_LENGTH
-			),
-			hashes.SHA256()
-		)
-
-		print type(encrypted_key)
-		print type(encrypted_payload)
-		print len(encrypted_key)
-
-		# print unicode(encrypted_key, 'latin-1')
-		# print encrypted_key.decode('unicode-escape')
-		print len(encrypted_key.decode('latin-1'))
-		print unicode(encrypted_key.decode('latin-1'))
-		# print type(signature)
-
-		hub_decryption_method = "decrypt_message_and_call_method"
-		response = requests.post(hub_url + "/api/method/hub.hub.api." + hub_decryption_method,
-			data = {
-				"access_token": self.access_token,
-				"method": method,
-				# "signature": signature,
-				"encrypted_key": unicode(encrypted_key.decode('latin-1')),
-				"message": unicode(encrypted_payload.decode('latin-1')),
-				# "encrypted_key": encrypted_key.decode('unicode-escape'),
-				# "message": encrypted_payload.decode('unicode-escape')
-			}
-		)
-		print "=============5=============="
-		response.raise_for_status()
-		return response.json().get("message")
-
 ### Helpers
-def call_hub_api_now(method, data = []):
+def send_hub_request(method, data = [], now = True):
 	hub = frappe.get_single("Hub Settings")
 	response = requests.post(hub_url + "/api/method/hub.hub.api." + "call_method",
 		data = {
@@ -282,36 +217,3 @@ def store_as_job_message(method, data):
 	# encrypt data and store both params in message queue
 	pass
 
-def generate_keys():
-	"""Generate RSA public and private keys and write to files in site directory"""
-	private_key = None
-	public_key = None
-
-	private_files = frappe.get_site_path('private', 'files')
-	if os.path.exists(os.path.join(private_files, "hub_client_rsa")):
-		with open(os.path.join(private_files, "hub_client_rsa"), "rb") as private_key_file, open("hub_client_rsa.pub", "rb") as public_key_file:
-				private_key = serialization.load_pem_private_key(private_key_file.read(), password=None, backend=default_backend())
-				public_key = private_key.public_key()
-
-				pem_priv = private_key_file.read()
-				pem_pub = public_key_file.read()
-				return (public_key, private_key, pem_priv, pem_pub)
-
-	private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048, backend=default_backend())
-	public_key = private_key.public_key()
-	# pem_priv = private_key.private_bytes(
-	# 	encoding=serialization.Encoding.PEM,
-	# 	format=serialization.PrivateFormat.TraditionalOpenSSL,
-	# 	encryption_algorithm=serialization.NoEncryption()
-	# )
-	# with open(os.path.join(private_files, "hub_client_rsa"), 'w') as priv:
-	# 	priv.write(pem_priv)
-
-	pem_pub = public_key.public_bytes(
-		encoding=serialization.Encoding.PEM,
-		format=serialization.PublicFormat.SubjectPublicKeyInfo
-	)
-	with open(os.path.join(private_files, "hub_client_rsa.pub"), 'w') as pub:
-		pub.write(pem_pub)
-
-	return (private_key, pem_pub)
