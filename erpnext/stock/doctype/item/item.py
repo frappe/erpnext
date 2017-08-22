@@ -15,7 +15,7 @@ from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from erpnext.controllers.item_variant import (get_variant, copy_attributes_to_variant,
 	make_variant_item_code, validate_item_variant_attributes, ItemVariantExistsError)
-from erpnext.hub_node.doctype.hub_settings.hub_settings import call_hub_api_now
+from erpnext.hub_node.doctype.hub_settings.hub_settings import send_hub_request
 
 class DuplicateReorderRows(frappe.ValidationError): pass
 
@@ -110,6 +110,9 @@ class Item(WebsiteGenerator):
 		self.update_item_price()
 		self.update_template_item()
 		self.update_for_hub()
+
+	def on_trash(self):
+		self.delete_at_hub()
 
 	def add_price(self, price_list=None):
 		'''Add a new price'''
@@ -668,7 +671,7 @@ class Item(WebsiteGenerator):
 				if self.publish_in_hub == 1:
 					self.insert_at_hub()
 				else:
-					self.remove_at_hub()
+					self.delete_at_hub()
 		else:
 			if self.publish_in_hub == 1:
 				self.insert_at_hub()
@@ -682,7 +685,7 @@ class Item(WebsiteGenerator):
 			item_dict[field] = self.get(field)
 		if item_dict["image"]:
 			item_dict["image"] = "http://" + frappe.local.site + ":8000" + item_dict["image"]
-		response_msg = call_hub_api_now('update_item',
+		response_msg = send_hub_request('update_item',
 			data={
 				"item_code": self.item_code,
 				"item_dict": json.dumps(item_dict)
@@ -696,14 +699,14 @@ class Item(WebsiteGenerator):
 			item_dict[field] = self.get(field)
 		if item_dict["image"]:
 			item_dict["image"] = "http://" + frappe.local.site + ":8000" + item_dict["image"]
-		response_msg = call_hub_api_now('insert_item',
+		response_msg = send_hub_request('insert_item',
 			data={
 				"item_dict": json.dumps(item_dict)
 			}
 		)
 
-	def remove_at_hub(self):
-		response_msg = call_hub_api_now('delete_item',
+	def delete_at_hub(self):
+		response_msg = send_hub_request('delete_item',
 			data={
 				"item_code": self.item_code
 			}
