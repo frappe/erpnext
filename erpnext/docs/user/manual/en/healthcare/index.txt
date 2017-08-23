@@ -2,6 +2,7 @@ patient
 appointment
 vital_signs
 consultation
+medical_record
 sample_collection
 lab_test
 invoicing
