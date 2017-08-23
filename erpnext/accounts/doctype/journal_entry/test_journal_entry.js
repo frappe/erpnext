@@ -6,7 +6,7 @@ QUnit.test("test journal entry", function(assert) {
 	frappe.run_serially([
 		() => {
 			return frappe.tests.make('Journal Entry', [
-				{posting_date:frappe.datetime.add_days(frappe.defaults.get_default("year_end_date"), 1)},
+				{posting_date:frappe.datetime.add_days(frappe.datetime.nowdate(), 0)},
 				{accounts: [
 					[
 						{'account':'Debtors - '+frappe.get_abbr(frappe.defaults.get_default('Company'))},
@@ -21,7 +21,7 @@ QUnit.test("test journal entry", function(assert) {
 					]
 				]},
 				{cheque_no:1234},
-				{cheque_date: frappe.datetime.add_days(frappe.defaults.get_default("year_end_date"), -1)},
+				{cheque_date: frappe.datetime.add_days(frappe.datetime.nowdate(), -1)},
 				{user_remark: 'Test'},
 			]);
 		},
@@ -31,7 +31,9 @@ QUnit.test("test journal entry", function(assert) {
 			assert.ok(cur_frm.doc.total_debit==1000, "total debit correct");
 			assert.ok(cur_frm.doc.total_credit==1000, "total credit correct");
 		},
-		() => frappe.timeout(0.2),
+		() => frappe.tests.click_button('Submit'),
+		() => frappe.tests.click_button('Yes'),
+		() => frappe.timeout(0.3),
 		() => done()
 	]);
 });
