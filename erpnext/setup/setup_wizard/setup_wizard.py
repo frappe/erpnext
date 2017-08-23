@@ -10,7 +10,7 @@ from frappe.utils import cstr, flt, getdate
 from frappe import _
 from frappe.utils.file_manager import save_file
 from .default_website import website_maker
-import install_fixtures
+from . import install_fixtures
 from .sample_data import make_sample_data
 from erpnext.accounts.doctype.account.account import RootNotEditable
 from frappe.core.doctype.communication.comment import add_info_comment
