@@ -49,6 +49,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Sample Collection",
 					"label": _("Sample Collection"),
+				},
+				{
+					"type": "report",
+					"name": "Lab Test Report",
+					"is_query_report": True
 				}
 			]
 		},
