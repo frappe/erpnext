@@ -218,7 +218,7 @@ class PaymentEntry(AccountsController):
 							ref_party_account = ref_doc.credit_to
 						elif self.party_type=="Employee":
 							ref_party_account = ref_doc.payable_account
-								
+
 					if d.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Fees"):
 						ref_party_account = ref_doc.debit_to \
 							if self.party_type in ("Customer", "Student") else ref_doc.credit_to

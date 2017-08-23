@@ -368,11 +368,6 @@ def get_current_enrollment(student, academic_year=None):
 			student = %s and academic_year = %s
 		order by creation''', (student, current_academic_year), as_dict=1)
 
-	'''
-	program_enrollment_list = frappe.get_all("Program Enrollment", fields=["name", "student", "student_name", "student_category",
-			"program", "student_batch_name", "academic_year", "academic_term"], filters={"student":student,
-			"academic_year": current_academic_year})
-	'''
 	if program_enrollment_list:
 		return program_enrollment_list[0]
 	else:

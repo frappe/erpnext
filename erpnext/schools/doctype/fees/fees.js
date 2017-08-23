@@ -6,10 +6,9 @@ frappe.ui.form.on("Fees", {
 	setup: function(frm) {
 		frm.add_fetch("student", "title", "student_name");
 		frm.add_fetch("student", "student_email_id", "student_email");
-		frm.add_fetch("company", "default_receivable_account", "debit_to");
-		frm.add_fetch("company", "default_income_account", "against_income_account");
-		frm.add_fetch("company", "cost_center", "cost_center");
-
+		frm.add_fetch("fee_structure", "debit_to", "debit_to");
+		frm.add_fetch("fee_structure", "against_income_account", "against_income_account");
+		frm.add_fetch("fee_structure", "cost_center", "cost_center");
 	},
 
 	onload: function(frm){
@@ -90,7 +89,7 @@ frappe.ui.form.on("Fees", {
 				callback: function(r) {
 					if(r){
 						$.each(r.message, function(i, d) {
-							frm.set_value(i,d)
+							frm.set_value(i,d);
 						});
 					}
 				}
@@ -100,8 +99,8 @@ frappe.ui.form.on("Fees", {
 
 	make_payment_request: function(frm) {
 		if (!frm.doc.contact_email) {
-			frappe.msgprint(__("Please set the Email ID for the Student to send the Payment Request"))
-		} else {		
+			frappe.msgprint(__("Please set the Email ID for the Student to send the Payment Request"));
+		} else {
 			frappe.call({
 				method:"erpnext.accounts.doctype.payment_request.payment_request.make_payment_request",
 				args: {
