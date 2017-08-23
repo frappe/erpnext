@@ -1,6 +1,7 @@
 student
-admission
+admissionA
+Attendance
 schedule
 fees
 setup
-assessment
+Assessment
