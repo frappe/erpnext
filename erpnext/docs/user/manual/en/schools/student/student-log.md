@@ -1,5 +1,6 @@
 # Student Log
 
+The Student log Doctype enables you to add and edit addtional information for a student.
 You can make a note of student activities using student log.
 Logs can be categorised as 'General', 'Academic', 'Medical' or 'Achievement'
 

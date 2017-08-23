@@ -2,16 +2,17 @@
 
 A teacher, or professor, of a specialised subject that involves skill. 
 
-Details of the Instructor form.
-
-Instructor  : Name of the Instructor.
-
-Employee : Employee Id for the Instructor.
-
-Department : Department of the Instructor.
+You can create an Instructor and link it to the Employee master and a Departmemt.
 
 <img class="screenshot" alt="Instructor" src="/docs/assets/img/schools/setup/instructor.png">
 
-Course schedule link is provided in the Instructor form to view or add the course schedule for the Instructor. 
+An insturctor is further linked to a course schedule, where you can define the schedule for course for a give date and room no.
+
+<img class="screenshot" alt="Instructor" src="/docs/assets/img/schools/setup/instructor.gif">
+It is also linked to Student group where an Instructor is assigen to the Student group.
+
+<img class="screenshot" alt="Instructor" src="/docs/assets/img/schools/setup/student-group-instructor.gif">
+
+An Instructor is also linked an Assesment Plan for a Student group. There the Instructor can be an Examiner or the supervisor for the Assesment. 
 
 {next}
