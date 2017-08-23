@@ -33,6 +33,19 @@
   height: 200px;
   overflow: auto;
 }
+.cart-items .list-item.current-item {
+  background-color: #fffce7;
+}
+.cart-items .list-item.current-item.qty input {
+  border: 1px solid #5E64FF;
+  font-weight: bold;
+}
+.cart-items .list-item.current-item.disc .discount {
+  font-weight: bold;
+}
+.cart-items .list-item.current-item.rate .rate {
+  font-weight: bold;
+}
 .cart-items input {
   height: 22px;
   font-size: 12px;
@@ -104,4 +117,11 @@ input[type=number]::-webkit-outer-spin-button {
   height: 50px;
   text-align: center;
   line-height: 50px;
+}
+.num-col.active {
+  background-color: #fffce7;
+}
+.num-col.brand-primary {
+  background-color: #5E64FF;
+  color: #ffffff;
 }

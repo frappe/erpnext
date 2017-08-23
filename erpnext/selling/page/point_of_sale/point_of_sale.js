@@ -90,6 +90,9 @@ class PointOfSale {
 						}
 						this.payment.open_modal();
 					}
+				},
+				on_select_change: () => {
+					this.cart.numpad.set_inactive();
 				}
 			}
 		});
@@ -109,6 +112,7 @@ class PointOfSale {
 						frappe.throw(__('Please select a customer'));
 					}
 					this.add_item_to_cart(item_code);
+					this.cart && this.cart.unselect_all();
 				}
 			}
 		});
@@ -121,10 +125,10 @@ class PointOfSale {
 			this.frm.doc.items.forEach((item) => {
 				if (item.item_code === item_code) {
 					if (barcode) {
-						value = barcode['serial_no'] ?
+						const value = barcode['serial_no'] ?
 							item.serial_no + '\n' + barcode['serial_no'] : barcode['batch_no'];
-						frappe.model.set_value(item.doctype, item.name, 
-							Object.keys(barcode)[0], final_qty);
+						frappe.model.set_value(item.doctype, item.name,
+							Object.keys(barcode)[0], value);
 					} else {
 						const final_qty = item.qty + qty;
 						frappe.model.set_value(item.doctype, item.name, 'qty', final_qty)
@@ -270,23 +274,45 @@ class POSCart {
 
 	make_numpad() {
 		this.numpad = new NumberPad({
+			button_array: [
+				[1, 2, 3, 'Qty'],
+				[4, 5, 6, 'Disc'],
+				[7, 8, 9, 'Rate'],
+				['Del', 0, '.', 'Pay']
+			],
+			add_class: {
+				'Pay': 'brand-primary'
+			},
+			disable_highlight: ['Qty', 'Disc', 'Rate'],
 			wrapper: this.wrapper.find('.number-pad-container'),
 			onclick: (btn_value) => {
 				// on click
-				if (['Qty', 'Disc', 'Price'].includes(btn_value)) {
+				if (['Qty', 'Disc', 'Rate'].includes(btn_value)) {
+					if (!this.selected_item) {
+						frappe.show_alert({
+							indicator: 'red',
+							message: __('Please select an item in the cart first')
+						});
+						return;
+					}
+					this.numpad.set_active(btn_value);
 					this.set_input_active(btn_value);
 				}
 
-				this.events.on_numpad.apply(null, [btn_value]);
+				this.events.on_numpad(btn_value);
 			}
 		});
 	}
 
 	set_input_active(btn_value) {
-		if (!this.selected_item) return;
+		this.selected_item.removeClass('qty disc rate');
 
 		if (btn_value === 'Qty') {
-			this.selected_item.find('.quantity input').css('border', '1px solid blue');
+			this.selected_item.addClass('qty');
+		} else if (btn_value == 'Disc') {
+			this.selected_item.addClass('disc');
+		} else if (btn_value == 'Rate') {
+			this.selected_item.addClass('rate');
 		}
 	}
 
@@ -315,7 +341,7 @@ class POSCart {
 			$item.remove();
 		}
 	}
-	
+
 	get_item_html(item) {
 		const rate = format_currency(item.rate, this.frm.doc.currency);
 		return `
@@ -365,12 +391,15 @@ class POSCart {
 
 	scroll_to_item(item_code) {
 		const $item = this.$cart_items.find(`[data-item-code="${item_code}"]`);
-		// const scrollTop = $item.offset().top - this.$cart_items.offset().top + this.$cart_items.scrollTop();
-		// this.$cart_items.animate({ scrollTop });
+		const scrollTop = $item.offset().top - this.$cart_items.offset().top + this.$cart_items.scrollTop();
+		this.$cart_items.animate({ scrollTop });
 	}
 
 	bind_events() {
+		const me = this;
 		const events = this.events;
+
+		// quantity change
 		this.$cart_items.on('click',
 			'[data-action="increment"], [data-action="decrement"]', function() {
 				const $btn = $(this);
@@ -384,10 +413,30 @@ class POSCart {
 					events.decrease_qty(item_code);
 				}
 			});
-		const me = this;
+
+		// current item
 		this.$cart_items.on('click', '.list-item', function() {
 			me.selected_item = $(this);
+			me.$cart_items.find('.list-item').removeClass('current-item qty disc rate');
+			me.selected_item.addClass('current-item');
+			me.events.on_select_change();
 		});
+
+		// disable current item
+		// $('body').on('click', function(e) {
+		// 	console.log(e);
+		// 	if($(e.target).is('.list-item')) {
+		// 		return;
+		// 	}
+		// 	me.$cart_items.find('.list-item').removeClass('current-item qty disc rate');
+		// 	me.selected_item = null;
+		// });
+	}
+
+	unselect_all() {
+		this.$cart_items.find('.list-item').removeClass('current-item qty disc rate');
+		this.selected_item = null;
+		this.events.on_select_change();
 	}
 }
 
@@ -396,7 +445,7 @@ class POSItems {
 		this.wrapper = wrapper;
 		this.pos_profile = pos_profile;
 		this.items = {};
-		this.currency = this.pos_profile.currency || 
+		this.currency = this.pos_profile.currency ||
 			frappe.defaults.get_default('currency');
 
 		this.make_dom();
@@ -595,10 +644,12 @@ class POSItems {
 }
 
 class NumberPad {
-	constructor({wrapper, onclick, button_array}) {
+	constructor({wrapper, onclick, button_array, add_class, disable_highlight}) {
 		this.wrapper = wrapper;
 		this.onclick = onclick;
 		this.button_array = button_array;
+		this.add_class = add_class;
+		this.disable_highlight = disable_highlight;
 		this.make_dom();
 		this.bind_events();
 	}
@@ -606,10 +657,10 @@ class NumberPad {
 	make_dom() {
 		if (!this.button_array) {
 			this.button_array = [
-				[1, 2, 3, 'Qty'],
-				[4, 5, 6, 'Disc'],
-				[7, 8, 9, 'Price'],
-				['Del', 0, '.', 'Pay']
+				[1, 2, 3],
+				[4, 5, 6],
+				[7, 8, 9],
+				['', 0, '']
 			];
 		}
 
@@ -626,6 +677,15 @@ class NumberPad {
 		function get_col(col) {
 			return `<div class="num-col" data-value="${col}"><div>${col}</div></div>`;
 		}
+
+		this.set_class();
+	}
+
+	set_class() {
+		for (const btn in this.add_class) {
+			const class_name = this.add_class[btn];
+			this.get_btn(btn).addClass(class_name);
+		}
 	}
 
 	bind_events() {
@@ -633,15 +693,31 @@ class NumberPad {
 		const me = this;
 		this.wrapper.on('click', '.num-col', function() {
 			const $btn = $(this);
-			me.highlight_button($btn);
-			me.onclick.apply(null, [$btn.attr('data-value')]);
+			const btn_value = $btn.attr('data-value');
+			if (!me.disable_highlight.includes(btn_value)) {
+				me.highlight_button($btn);
+			}
+			me.onclick(btn_value);
 		});
 	}
 
+	get_btn(btn_value) {
+		return this.wrapper.find(`.num-col[data-value="${btn_value}"]`);
+	}
+
 	highlight_button($btn) {
-		// const $btn = this.wrapper.find(`[data-value="${value}"]`);
 		$btn.addClass('highlight');
 		setTimeout(() => $btn.removeClass('highlight'), 1000);
+	}
+
+	set_active(btn_value) {
+		const $btn = this.get_btn(btn_value);
+		this.wrapper.find('.num-col').removeClass('active');
+		$btn.addClass('active');
+	}
+
+	set_inactive() {
+		this.wrapper.find('.num-col').removeClass('active');
 	}
 }
 

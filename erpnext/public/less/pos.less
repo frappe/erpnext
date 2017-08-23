@@ -45,6 +45,23 @@
 	height: 200px;
 	overflow: auto;
 
+	.list-item.current-item {
+		background-color: @light-yellow;
+	}
+
+	.list-item.current-item.qty input {
+		border: 1px solid @brand-primary;
+		font-weight: bold;
+	}
+
+	.list-item.current-item.disc .discount {
+		font-weight: bold;
+	}
+
+	.list-item.current-item.rate .rate {
+		font-weight: bold;
+	}
+
 	input {
 		height: 22px;
 		font-size: @text-medium;
@@ -127,5 +144,14 @@ input[type=number]::-webkit-outer-spin-button {
 		height: 50px;
 		text-align: center;
 		line-height: 50px;
+	}
+
+	&.active {
+		background-color: @light-yellow;
+	}
+
+	&.brand-primary {
+		background-color: @brand-primary;
+		color: #ffffff;
 	}
 }

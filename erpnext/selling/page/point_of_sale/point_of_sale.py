@@ -15,7 +15,6 @@ from erpnext.controllers.accounts_controller import get_taxes_and_charges
 def get_items(price_list, item=None):
 	condition = ""
 	order_by = ""
-	args = {"price_list": price_list}
 
 	if item:
 		# search serial no
@@ -42,5 +41,7 @@ def get_items(price_list, item=None):
 		ON
 			(item_det.item_code=i.name or item_det.item_code=i.variant_of)
 		where
-			i.has_variants = 0 and (i.item_code like %(item_code)s or i.item_name like %(item_code)s)
+			i.disabled = 0 and i.has_variants = 0
+			and (i.item_code like %(item_code)s
+			or i.item_name like %(item_code)s)
 		limit 24""", {'item_code': '%%%s%%'%(frappe.db.escape(item)), 'price_list': price_list} , as_dict=1)
