@@ -14,14 +14,19 @@ hub_url = "http://erpnext.hub:8000"
 
 class HubSettings(Document):
 	config_args = ['enabled']
-	profile_args = ['email', 'hub_user_name', 'country']
+	profile_args = ['hub_user_email', 'hub_user_name', 'country']
 	only_in_code = ['private_key']
-	seller_args = ['company', 'seller_city', 'seller_website', 'seller_description']
+	seller_args = ['company', 'seller_city', 'site_name', 'seller_description']
 	publishing_args = ['publish', 'publish_pricing', 'selling_price_list', 'publish_availability', 'warehouse']
 	personal_args = ['hub_public_key_pem']
 
 	base_fields_for_items = ["name", "item_code", "item_name", "description", "image", "item_group",
 		 "modified"] #"price", "stock_uom", "stock_qty"
+
+	def onload(self):
+		if not self.site_name:
+			# TODO: remove port for production
+			self.site_name = "http://" + frappe.local.site + ":8000"
 
 	def reset_current_on_save_flags(self):
 		self.item_fields_to_add = []
@@ -118,8 +123,7 @@ class HubSettings(Document):
 		for item in items:
 			item.modified = get_datetime_str(item.modified)
 			if item.image:
-				# Fix this
-				item.image = "http://" + frappe.local.site + ":8000" + item.image
+				item.image = self.site_name + item.image
 		item_list = frappe.db.sql_list("select name from tabItem where publish_in_hub=1")
 
 		response_msg = send_hub_request('update_items',

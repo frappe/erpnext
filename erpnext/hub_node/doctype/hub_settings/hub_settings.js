@@ -6,6 +6,7 @@ frappe.ui.form.on("Hub Settings", {
 		if(!frm.doc.company) {
 			frm.set_value("company", frappe.defaults.get_default("Company"));
 		}
+
 		// Set seller details as well if it makes sense
 
 		if(!frm.doc.enabled) {
@@ -34,6 +35,12 @@ frappe.ui.form.on("Hub Settings", {
 			// frm.toggle_display("access_token", true);
 		} else {
 			frm.trigger("set_enable_hub_primary_button");
+		}
+	},
+
+	hub_user_email: function(frm) {
+		if(frm.doc.hub_user_email){
+			frm.set_value("hub_user_name", frappe.user.full_name(frm.doc.hub_user_email));
 		}
 	},
 
