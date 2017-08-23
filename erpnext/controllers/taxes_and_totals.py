@@ -270,7 +270,7 @@ class calculate_taxes_and_totals(object):
 		if tax.item_wise_tax_detail.get(key):
 			item_wise_tax_amount += tax.item_wise_tax_detail[key][1]
 
-		tax.item_wise_tax_detail[key] = [tax_rate,flt(item_wise_tax_amount, tax.precision("base_tax_amount"))]
+		tax.item_wise_tax_detail[key] = [tax_rate,flt(item_wise_tax_amount)]
 
 	def round_off_totals(self, tax):
 		tax.tax_amount = flt(tax.tax_amount, tax.precision("tax_amount"))
@@ -532,7 +532,9 @@ def get_itemised_tax_breakup_html(doc):
 	
 	# get tax breakup data
 	itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(doc)
-	
+
+	get_rounded_tax_amount(itemised_tax, doc.precision("tax_amount", "taxes"))
+
 	frappe.flags.company = None
 	
 	return frappe.render_template(
@@ -575,12 +577,12 @@ def get_itemised_tax(taxes):
 				precision = tax_amount_precision if tax.charge_type == "Actual" else tax_rate_precision
 				
 				itemised_tax[item_code][tax.description] = frappe._dict(dict(
-					tax_rate=flt(tax_data[0], precision),
-					tax_amount=flt(tax_data[1], tax_amount_precision)
+					tax_rate=flt(tax_data[0]),
+					tax_amount=flt(tax_data[1])
 				))
 			else:
 				itemised_tax[item_code][tax.description] = frappe._dict(dict(
-					tax_rate=flt(tax_data, tax_rate_precision),
+					tax_rate=flt(tax_data),
 					tax_amount=0.0
 				))
 
@@ -594,3 +596,9 @@ def get_itemised_taxable_amount(items):
 		itemised_taxable_amount[item_code] += item.net_amount
 
 	return itemised_taxable_amount
+
+def get_rounded_tax_amount(itemised_tax, precision):
+	# Rounding based on tax_amount precision
+	for taxes in itemised_tax.values():
+		for tax_account in taxes:
+			taxes[tax_account]["tax_amount"] = flt(taxes[tax_account]["tax_amount"], precision)
