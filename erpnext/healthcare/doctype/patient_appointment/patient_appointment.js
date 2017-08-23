@@ -9,10 +9,10 @@ frappe.ui.form.on('Patient Appointment', {
 			};
 		});
 		frm.set_query("physician", function () {
-		  return {
-		    query : "erpnext.healthcare.doctype.patient_appointment.patient_appointment.get_physician"
-		  }
-	  });
+			return{
+				query:"erpnext.healthcare.doctype.patient_appointment.patient_appointment.get_physician"
+			};
+		});
 		if(frappe.user.has_role("Physician")){
 			if(frm.doc.patient){
 				frm.add_custom_button(__('Medical Record'), function() {
