@@ -1,9 +1,9 @@
-Course
-Program
-Instructor
-Room
-Student Category
-Student Batch Name
-Academic Term
-Academic Year
-School Settings
+course
+program
+instructor
+room
+student-category
+student-batch-name
+academic-term
+academic-year
+school-settings
