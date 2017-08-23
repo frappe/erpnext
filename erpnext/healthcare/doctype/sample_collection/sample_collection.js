@@ -11,3 +11,30 @@ frappe.ui.form.on('Sample Collection', {
 		}
 	}
 });
+
+frappe.ui.form.on("Sample Collection", "patient", function(frm) {
+	if(frm.doc.patient){
+		frappe.call({
+			"method": "erpnext.healthcare.doctype.patient.patient.get_patient_detail",
+			args: {
+				patient: frm.doc.patient
+			},
+			callback: function (data) {
+				var age = null;
+				if(data.message.dob){
+					age = calculate_age(data.message.dob);
+				}
+				frappe.model.set_value(frm.doctype,frm.docname, "patient_age", age);
+				frappe.model.set_value(frm.doctype,frm.docname, "patient_sex", data.message.sex);
+			}
+		});
+	}
+});
+
+var calculate_age = function(birth) {
+	var	ageMS = Date.parse(Date()) - Date.parse(birth);
+	var	age = new Date();
+	age.setTime(ageMS);
+	var	years =  age.getFullYear() - 1970;
+	return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)";
+};
