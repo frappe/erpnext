@@ -523,7 +523,8 @@ def set_production_order_ops(name):
 @frappe.whitelist()
 def make_stock_entry(production_order_id, purpose, qty=None):
 	production_order = frappe.get_doc("Production Order", production_order_id)
-	if not frappe.db.get_value("Warehouse", production_order.wip_warehouse, "is_group"):
+	if not frappe.db.get_value("Warehouse", production_order.wip_warehouse, "is_group") \
+			and not production_order.skip_transfer:
 		wip_warehouse = production_order.wip_warehouse
 	else:
 		wip_warehouse = None

@@ -47,7 +47,7 @@ class TestCompany(unittest.TestCase):
 	def test_coa_based_on_country_template(self):
 		countries = ["India", "Brazil", "United Arab Emirates", "Canada", "Germany", "France",
 			"Guatemala", "Indonesia", "Mexico", "Nicaragua", "Netherlands", "Singapore",
-			"Brazil", "Argentina", "Hungary"]
+			"Brazil", "Argentina", "Hungary", "Taiwan"]
 		
 		for country in countries:
 			templates = get_charts_for_country(country)

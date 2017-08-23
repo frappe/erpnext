@@ -62,11 +62,6 @@
 .featured-products {
   border-top: 1px solid #EBEFF2;
 }
-.transaction-list-item:hover,
-.transaction-list-item:active,
-.transaction-list-item:focus {
-  background-color: #fafbfc;
-}
 .transaction-list-item .indicator {
   font-weight: inherit;
   color: #8D99A6;
