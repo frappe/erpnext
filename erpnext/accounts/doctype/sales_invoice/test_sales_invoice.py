@@ -15,6 +15,7 @@ from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
 from frappe.model.naming import make_autoname
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
+from six.moves import xrange
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):

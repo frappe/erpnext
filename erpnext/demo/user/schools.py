@@ -12,6 +12,7 @@ from erpnext.schools.api import get_student_group_students, make_attendance_reco
 								get_fee_schedule, collect_fees, get_course
 from erpnext.schools.doctype.program_enrollment.program_enrollment import get_program_courses
 from erpnext.schools.doctype.student_group.student_group import get_students
+from six.moves import xrange
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_schools_user'))

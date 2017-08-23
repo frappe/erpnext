@@ -8,6 +8,7 @@ import frappe, erpnext
 from frappe import _, msgprint, throw
 from frappe.utils import flt, fmt_money
 from frappe.model.document import Document
+from six.moves import xrange
 
 class OverlappingConditionError(frappe.ValidationError): pass
 class FromGreaterThanToError(frappe.ValidationError): pass

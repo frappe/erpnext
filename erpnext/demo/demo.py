@@ -5,6 +5,7 @@ import erpnext
 import frappe.utils
 from erpnext.demo.user import hr, sales, purchase, manufacturing, stock, accounts, projects, fixed_asset, schools
 from erpnext.demo.setup import education, manufacture, setup_data
+from six.moves import xrange
 """
 Make a demo
 

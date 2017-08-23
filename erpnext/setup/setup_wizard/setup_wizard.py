@@ -16,6 +16,7 @@ from erpnext.accounts.doctype.account.account import RootNotEditable
 from frappe.core.doctype.communication.comment import add_info_comment
 from erpnext.setup.setup_wizard.domainify import setup_domain
 from erpnext.setup.doctype.company.company import install_country_fixtures
+from six.moves import xrange
 
 def setup_complete(args=None):
 	if frappe.db.sql("select name from tabCompany"):

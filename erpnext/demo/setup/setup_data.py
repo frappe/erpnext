@@ -7,6 +7,7 @@ from frappe.utils import flt, now_datetime, cstr, random_string
 from frappe.utils.make_random import add_random_children, get_random
 from erpnext.demo.domains import data
 from frappe import _
+from six.moves import xrange
 
 def setup(domain):
 	complete_setup(domain)

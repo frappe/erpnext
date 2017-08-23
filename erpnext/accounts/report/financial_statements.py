@@ -8,7 +8,7 @@ from frappe import _
 from frappe.utils import (flt, getdate, get_first_day, get_last_day, date_diff,
 	add_months, add_days, formatdate, cint)
 from erpnext.accounts.utils import get_fiscal_year
-
+from six.moves import xrange
 
 def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_values=False,
 	company=None, reset_period_on_fy_change=True):
