@@ -12,8 +12,14 @@ class LabTestTemplate(Document):
 		#Item and Price List update --> if (change_in_item)
 		if(self.change_in_item and self.is_billable == 1 and self.item):
 			updating_item(self)
-			if(self.test_rate != 0.0):
-				updating_test_rate(self)
+			if not item_price_exist(self):
+				if(self.test_rate != 0.0):
+					price_list_name = frappe.db.get_value("Price List", {"selling": 1})
+					if(self.test_rate):
+						make_item_price(self.test_code, price_list_name, self.test_rate)
+					else:
+						make_item_price(self.test_code, price_list_name, 0.0)
+
 			frappe.db.set_value(self.doctype,self.name,"change_in_item",0)
 		elif(self.is_billable == 0 and self.item):
 			frappe.db.set_value("Item",self.item,"disabled",1)
@@ -32,14 +38,19 @@ class LabTestTemplate(Document):
 			except Exception:
 				frappe.throw("""Not permitted. Please disable the Test Template""")
 
+def item_price_exist(doc):
+	item_price = frappe.db.exists({
+	"doctype": "Item Price",
+	"item_code": doc.test_code})
+	if(item_price):
+		return True
+	else:
+		return False
 
 def updating_item(self):
-	frappe.db.sql("""update `tabItem` set item_name=%s, item_group=%s, disabled=0,
+	frappe.db.sql("""update `tabItem` set item_name=%s, item_group=%s, disabled=0, standard_rate=%s,
 		description=%s, modified=NOW() where item_code=%s""",
-		(self.test_name, self.test_group , self.test_description, self.item))
-def updating_test_rate(self):
-	frappe.db.sql("""update `tabItem Price` set item_name=%s, price_list_rate=%s, modified=NOW() where item_code=%s""",(self.test_name, self.test_rate, self.item))
-
+		(self.test_name, self.test_group , self.test_rate, self.test_description, self.item))
 
 def create_item_from_template(doc):
 	if(doc.is_billable == 1):
@@ -69,8 +80,11 @@ def create_item_from_template(doc):
 		price_list_name = frappe.db.get_value("Price List", {"selling": 1})
 		if(doc.test_rate):
 			make_item_price(item.name, price_list_name, doc.test_rate)
+			item.standard_rate = doc.test_rate
 		else:
 			make_item_price(item.name, price_list_name, 0.0)
+			item.standard_rate = 0.0
+	item.save(ignore_permissions = True)
 	#Set item to the template
 	frappe.db.set_value("Lab Test Template", doc.name, "item", item.name)
 
