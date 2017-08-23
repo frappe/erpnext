@@ -131,7 +131,6 @@ class HubSettings(Document):
 			"item_list": json.dumps(item_list),
 			"item_fields": fields
 		})
-		self.last_sync_datetime = response_msg.get("last_sync_datetime")
 
 		if verbose:
 			frappe.msgprint(_("{0} Items synced".format(len(items))))
@@ -164,7 +163,7 @@ class HubSettings(Document):
 			))}
 		)
 		response.raise_for_status()
-		response.json().get("message")
+		response_msg = response.json().get("message")
 
 		self.access_token = response_msg.get("access_token")
 
@@ -206,11 +205,14 @@ class HubSettings(Document):
 
 ### Helpers
 def send_hub_request(method, data = [], now = False):
+	if now:
+		return hub_request(method, data)
 	try:
 		frappe.enqueue('erpnext.hub_node.doctype.hub_settings.hub_settings.hub_request', now=now,
 			api_method=method, data=data)
+		return 1
 	except redis.exceptions.ConnectionError:
-		hub_request(method, data)
+		return hub_request(method, data)
 
 def hub_request(api_method, data = []):
 	hub = frappe.get_single("Hub Settings")

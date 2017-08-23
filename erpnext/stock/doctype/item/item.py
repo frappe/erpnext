@@ -53,8 +53,7 @@ class Item(WebsiteGenerator):
 		if not self.description:
 			self.description = self.item_name
 
-		# Set by default only for sales item, ond non-hub items
-		if not self.is_hub_item:
+		if self.is_sales_item and not self.is_hub_item:
 			self.publish_in_hub = 1
 
 	def after_insert(self):
@@ -110,10 +109,12 @@ class Item(WebsiteGenerator):
 		self.update_variants()
 		self.update_item_price()
 		self.update_template_item()
-		self.update_for_hub()
+		if self.publish_in_hub and cint(frappe.db.get_single_value('Hub Settings', 'publish')):
+			self.update_for_hub()
 
 	def on_trash(self):
-		self.delete_at_hub()
+		if self.publish_in_hub and cint(frappe.db.get_single_value('Hub Settings', 'publish')):
+			self.delete_at_hub()
 
 	def add_price(self, price_list=None):
 		'''Add a new price'''
