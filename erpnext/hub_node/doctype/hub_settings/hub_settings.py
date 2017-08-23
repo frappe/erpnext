@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, requests, json, os
+import frappe, requests, json, os, redis
 
 from frappe.model.document import Document
 from frappe.utils import cint, expand_relative_urls, fmt_money, flt, add_years, add_to_date, now, get_datetime, get_datetime_str
@@ -18,7 +18,6 @@ class HubSettings(Document):
 	only_in_code = ['private_key']
 	seller_args = ['company', 'seller_city', 'site_name', 'seller_description']
 	publishing_args = ['publish', 'publish_pricing', 'selling_price_list', 'publish_availability', 'warehouse']
-	personal_args = ['hub_public_key_pem']
 
 	base_fields_for_items = ["name", "item_code", "item_name", "description", "image", "item_group",
 		 "modified"] #"price", "stock_uom", "stock_qty"
@@ -87,7 +86,7 @@ class HubSettings(Document):
 
 	def update_hub(self):
 		# Updating profile call
-		response_msg = send_hub_request('update_user_details',
+		send_hub_request('update_user_details',
 			data=self.get_args(self.profile_args + self.seller_args))
 
 		self.update_publishing()
@@ -126,7 +125,7 @@ class HubSettings(Document):
 				item.image = self.site_name + item.image
 		item_list = frappe.db.sql_list("select name from tabItem where publish_in_hub=1")
 
-		response_msg = send_hub_request('update_items',
+		send_hub_request('update_items',
 			data={
 			"items_to_update": json.dumps(items),
 			"item_list": json.dumps(item_list),
@@ -139,11 +138,11 @@ class HubSettings(Document):
 
 	def unpublish_all_items(self):
 		"""Unpublish from hub.erpnext.org, delete items there"""
-		response_msg = send_hub_request('delete_all_items_of_user')
+		send_hub_request('delete_all_items_of_user')
 
 	def add_item_fields_at_hub(self):
 		items = frappe.db.get_all("Item", fields=["item_code"] + self.item_fields_to_add, filters={"publish_in_hub": 1})
-		response_msg = send_hub_request('add_item_fields',
+		send_hub_request('add_item_fields',
 			data={
 				"items_with_new_fields": json.dumps(items),
 				"fields_to_add": self.item_fields_to_add
@@ -151,7 +150,7 @@ class HubSettings(Document):
 		)
 
 	def remove_item_fields_at_hub(self):
-		response_msg = send_hub_request('remove_item_fields',
+		send_hub_request('remove_item_fields',
 			data={"fields_to_remove": self.item_fields_to_remove})
 
 	### Account
@@ -165,7 +164,7 @@ class HubSettings(Document):
 			))}
 		)
 		response.raise_for_status()
-		response_msg = response.json().get("message")
+		response.json().get("message")
 
 		self.access_token = response_msg.get("access_token")
 
@@ -176,7 +175,7 @@ class HubSettings(Document):
 	def unregister_from_hub(self):
 		"""Unpublish, then delete transactions and user from there"""
 		self.reset_publishing_settings()
-		response_msg = send_hub_request('unregister')
+		send_hub_request('unregister')
 
 	### Helpers
 	def get_args(self, arg_list):
@@ -205,14 +204,20 @@ class HubSettings(Document):
 	def bulk_update_hub_category(self):
 		pass
 
-
 ### Helpers
-def send_hub_request(method, data = [], now = True):
+def send_hub_request(method, data = [], now = False):
+	try:
+		frappe.enqueue('erpnext.hub_node.doctype.hub_settings.hub_settings.hub_request', now=now,
+			api_method=method, data=data)
+	except redis.exceptions.ConnectionError:
+		hub_request(method, data)
+
+def hub_request(api_method, data = []):
 	hub = frappe.get_single("Hub Settings")
 	response = requests.post(hub_url + "/api/method/hub.hub.api." + "call_method",
 		data = {
 			"access_token": hub.access_token,
-			"method": method,
+			"method": api_method,
 			"message": json.dumps(data)
 		}
 	)

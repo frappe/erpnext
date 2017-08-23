@@ -5,6 +5,7 @@
 import frappe, json
 from frappe.utils import now, nowdate
 
+# API wrapper
 @frappe.whitelist(allow_guest=True)
 def call_method(access_token, method, message):
 	try:
