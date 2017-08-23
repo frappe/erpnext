@@ -127,15 +127,16 @@ def get_delivery_notes_against_sales_order(item_list):
 	so_dn_map = frappe._dict()
 	so_item_rows = list(set([d.so_detail for d in item_list]))
 
-	delivery_notes = frappe.db.sql("""
-		select parent, so_detail
-		from `tabDelivery Note Item`
-		where docstatus=1 and so_detail in (%s)
-		group by so_detail, parent
-	""" % (', '.join(['%s']*len(so_item_rows))), tuple(so_item_rows), as_dict=1)
+	if so_item_rows:
+		delivery_notes = frappe.db.sql("""
+			select parent, so_detail
+			from `tabDelivery Note Item`
+			where docstatus=1 and so_detail in (%s)
+			group by so_detail, parent
+		""" % (', '.join(['%s']*len(so_item_rows))), tuple(so_item_rows), as_dict=1)
 
-	for dn in delivery_notes:
-		so_dn_map.setdefault(dn.so_detail, []).append(dn.parent)
+		for dn in delivery_notes:
+			so_dn_map.setdefault(dn.so_detail, []).append(dn.parent)
 
 	return so_dn_map
 
