@@ -66,6 +66,8 @@ erpnext/hr/doctype/process_payroll/test_process_payroll.js
 erpnext/hr/doctype/job_opening/test_job_opening.js
 erpnext/hr/doctype/job_applicant/test_job_applicant.js
 erpnext/hr/doctype/offer_letter/test_offer_letter.js
+erpnext/hr/doctype/appraisal_template/test_appraisal_template.js
+erpnext/hr/doctype/appraisal/test_appraisal.js
 erpnext/buying/doctype/supplier/test_supplier.js
 erpnext/buying/doctype/request_for_quotation/tests/test_request_for_quotation.js
 erpnext/buying/doctype/supplier_quotation/tests/test_supplier_quotation.js
