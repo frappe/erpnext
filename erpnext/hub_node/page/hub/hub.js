@@ -69,8 +69,7 @@ erpnext.hub.Hub = class {
 		let $empty_state = $(frappe.render_template("register_in_hub", {}));
 		this.$hub_main_section.append($empty_state);
 		this.$hub_main_section.find(".hub-settings-btn").on('click', () => {
-			frappe.set_route("Form", "Hub Settings");
-			frappe.reload();
+			frappe.set_route("Form", "Hub Settings", {});
 		});
 	}
 
@@ -232,8 +231,13 @@ erpnext.hub.Hub = class {
 
 		let $rfq_btn = $item_page.find('.rfq-btn');
 		$rfq_btn.on('click', () => {
-			this.make_rfq(item, () => {
-				$rfq_btn.addClass("disabled").html('<span><i class="fa fa-check"></i> Quote Requested</span>');
+			$rfq_btn.addClass("disabled");
+			this.make_rfq(item, (success) => {
+				if(success) {
+					$rfq_btn.html('<span><i class="fa fa-check"></i> Quote Requested</span>');
+				} else {
+					frappe.msgprint(__("Sorry, we cannot process your request at this time."));
+				}
 			});
 		});
 
@@ -301,12 +305,7 @@ erpnext.hub.Hub = class {
 				country: item.country
 			},
 			callback: function(r) {
-				// console.log("done?: ", r.message);
-				if(r.message == "Success") {
-					callback();
-				} else {
-					frappe.msgprint(r.message);
-				}
+				callback(r.message);
 			}
 		});
 	}

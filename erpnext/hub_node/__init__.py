@@ -15,30 +15,31 @@ def get_items(text, start, limit, category=None, company=None, country=None):
 		"country": country,
 		"start": start,
 		"limit": limit
-	})
+	}, now=True)
 
 @frappe.whitelist()
 def get_all_users():
-	return send_hub_request('get_all_users')
+	return send_hub_request('get_all_users', now=True)
 
 @frappe.whitelist()
 def get_categories():
-	return send_hub_request('get_categories')
+	return send_hub_request('get_categories', now=True)
 
 @frappe.whitelist()
 def get_all_companies():
-	return send_hub_request('get_all_companies')
+	return send_hub_request('get_all_companies', now=True)
 
 @frappe.whitelist()
 def get_seller_details(user_name):
 	return send_hub_request('get_user_details', data={
 		"user_name": user_name,
-	})
+	}, now=True)
 
 @frappe.whitelist()
 def make_rfq_and_send_opportunity(item_code, item_group, supplier_name, supplier_email, company, country):
-	make_rfq(item_code, item_group, supplier_name, supplier_email, company, country)
-	return send_opportunity(supplier_name, supplier_email)
+	rfq_made = make_rfq(item_code, item_group, supplier_name, supplier_email, company, country)
+	opportunity_sent = send_opportunity(supplier_name, supplier_email)
+	return rfq_made and opportunity_sent
 
 def send_opportunity(supplier_name, supplier_email):
 	args = {
@@ -57,21 +58,18 @@ def make_rfq(item_code, item_group, supplier_name, supplier_email, company, coun
 	supplier_name = "HUB-" + supplier_name
 	company = "HUB-" + company
 
-	# return if item_code already exists
-	if frappe.db.exists("Item", {'item_code': item_code}):
-		return "Fail: Already exists"
-
 	if not frappe.db.exists('Supplier', {'supplier_name': supplier_name}):
 		supplier = frappe.new_doc("Supplier")
 		supplier.supplier_name = supplier_name
 		supplier.supplier_type = "Distributor"
 		supplier.insert(ignore_permissions = True)
 
-	item = frappe.new_doc("Item")
-	item.item_code = item_code
-	item.item_group = item_group
-	item.is_hub_item = 1
-	item.insert(ignore_permissions = True)
+	if not frappe.db.exists('Item', {'item_code': item_code}):
+		item = frappe.new_doc("Item")
+		item.item_code = item_code
+		item.item_group = item_group
+		item.is_hub_item = 1
+		item.insert(ignore_permissions = True)
 
 	if not frappe.db.exists('Company', {'company_name': company}):
 		comp = frappe.new_doc("Company")
@@ -106,4 +104,4 @@ def make_rfq(item_code, item_group, supplier_name, supplier_email, company, coun
 	})
 	rfq.insert(ignore_permissions=True)
 
-	return "Success"
+	return 1

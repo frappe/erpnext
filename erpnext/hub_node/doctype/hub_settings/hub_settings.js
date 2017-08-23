@@ -1,4 +1,7 @@
 frappe.ui.form.on("Hub Settings", {
+	refresh: function(frm) {
+		frm.trigger("enabled");
+	},
 	onload: function(frm) {
 		if(!frm.doc.country) {
 			frm.set_value("country", frappe.defaults.get_default("Country"));
@@ -6,35 +9,20 @@ frappe.ui.form.on("Hub Settings", {
 		if(!frm.doc.company) {
 			frm.set_value("company", frappe.defaults.get_default("Company"));
 		}
-
-		// Set seller details as well if it makes sense
-
+	},
+	onload_post_render: function(frm) {
+		if(frm.get_field("unregister_from_hub").$input)
+			frm.get_field("unregister_from_hub").$input.addClass("btn-danger");
+	},
+	on_update: function(frm) {
+	},
+	enabled: function(frm) {
 		if(!frm.doc.enabled) {
 			frm.trigger("set_enable_hub_primary_button");
 		} else {
 			frm.page.set_primary_action(__("Save Settings"), () => {
 				frm.save();
 			});
-		}
-	},
-	onload_post_render: function(frm) {
-		if(frm.get_field("unregister_from_hub").$input)
-			frm.get_field("unregister_from_hub").$input.addClass("btn-danger");
-		// if(frm.get_field("disable_hub_profile").$input)
-		// 	frm.get_field("disable_hub_profile").$input.addClass("btn-danger");
-	},
-	refresh: function(frm) {
-	},
-	// validate: function(frm) {
-	// 	if(frm.doc.publish) {}
-	// },
-	on_update: function(frm) {
-	},
-	enabled: function(frm) {
-		if(frm.doc.enabled) {
-			// frm.toggle_display("access_token", true);
-		} else {
-			frm.trigger("set_enable_hub_primary_button");
 		}
 	},
 
