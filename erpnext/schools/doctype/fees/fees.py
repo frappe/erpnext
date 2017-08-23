@@ -6,10 +6,9 @@ from __future__ import unicode_literals
 from frappe.model.document import Document
 import frappe
 from frappe import _
-from frappe.utils import money_in_words, nowdate
+from frappe.utils import money_in_words
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from frappe.utils.csvutils import getlink
-from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 from erpnext.accounts.general_ledger import delete_gl_entries
@@ -27,7 +26,22 @@ class Fees(AccountsController):
 
 	def validate(self):
 		self.calculate_total()
-		# set missing field here and validate the accounts
+		self.set_missing_accounts_and_fields()
+
+	def set_missing_accounts_and_fields(self):
+		if not self.company:
+			self.company = frappe.defaults.get_defaults().company
+		if not self.currency:
+			self.currency = frappe.defaults.get_defaults().currency
+		if not (self.debit_to and self.against_income_account and self.cost_center):
+			accounts_details = frappe.get_all("Company", fields=["default_receivable_account",
+				"default_income_account", "cost_center"], filters={"name": self.company})[0]
+		if not self.debit_to:
+			self.debit_to = accounts_details.default_receivable_account
+		if not self.against_income_account:
+			self.against_income_account = accounts_details.default_income_account
+		if not self.cost_center:
+			self.cost_center = accounts_details.cost_center
 
 	def calculate_total(self):
 		"""Calculates total amount."""
