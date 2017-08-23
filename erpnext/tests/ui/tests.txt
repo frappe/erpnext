@@ -104,3 +104,4 @@ erpnext/schools/doctype/assessment_result/test_assessment_result.js
 erpnext/schools/doctype/assessment_result_tool/test_assessment_result_tool.js
 erpnext/stock/doctype/stock_reconciliation/test_stock_reconciliation.js
 erpnext/accounts/doctype/journal_entry/test_journal_entry.js
+erpnext/accounts/doctype/payment_entry/tests/test_payment_entry.js
