@@ -150,6 +150,10 @@ def get_tax_accounts(item_list, columns, doctype="Sales Invoice", tax_doctype="S
 		invoice_item_row.setdefault(d.parent, []).append(d)
 		item_row_map.setdefault(d.parent, {}).setdefault(d.item_code, []).append(d)
 
+	conditions = ""
+	if doctype == "Purchase Invoice":
+		conditions = " and category in ('Total', 'Valuation and Total')"
+
 	tax_details = frappe.db.sql("""
 		select
 			parent, description, item_wise_tax_detail,
@@ -159,8 +163,9 @@ def get_tax_accounts(item_list, columns, doctype="Sales Invoice", tax_doctype="S
 			parenttype = %s and docstatus = 1
 			and (description is not null and description != '')
 			and parent in (%s)
+			%s
 		order by description
-	""" % (tax_doctype, '%s', ', '.join(['%s']*len(invoice_item_row))),
+	""" % (tax_doctype, '%s', ', '.join(['%s']*len(invoice_item_row)), conditions),
 		tuple([doctype] + invoice_item_row.keys()))
 
 	for parent, description, item_wise_tax_detail, charge_type, tax_amount in tax_details:

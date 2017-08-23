@@ -521,7 +521,13 @@ def get_itemised_tax_breakup_html(doc):
 	frappe.flags.company = doc.company
 	
 	# get headers
-	tax_accounts = list(set([d.description for d in doc.taxes]))
+	tax_accounts = []
+	for tax in doc.taxes:
+		if getattr(tax, "category", None) and tax.category=="Valuation":
+			continue
+		if tax.description not in tax_accounts:
+			tax_accounts.append(tax.description)
+
 	headers = get_itemised_tax_breakup_header(doc.doctype + " Item", tax_accounts)
 	
 	# get tax breakup data
@@ -554,6 +560,9 @@ def get_itemised_tax_breakup_data(doc):
 def get_itemised_tax(taxes):
 	itemised_tax = {}
 	for tax in taxes:
+		if getattr(tax, "category", None) and tax.category=="Valuation":
+			continue
+
 		tax_amount_precision = tax.precision("tax_amount")
 		tax_rate_precision = tax.precision("rate")
 		
@@ -562,7 +571,7 @@ def get_itemised_tax(taxes):
 		for item_code, tax_data in item_tax_map.items():
 			itemised_tax.setdefault(item_code, frappe._dict())
 			
-			if isinstance(tax_data, list) and tax_data[0]:
+			if isinstance(tax_data, list):
 				precision = tax_amount_precision if tax.charge_type == "Actual" else tax_rate_precision
 				
 				itemised_tax[item_code][tax.description] = frappe._dict(dict(
