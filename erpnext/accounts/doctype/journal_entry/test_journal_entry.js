@@ -15,7 +15,7 @@ QUnit.test("test journal entry", function(assert) {
 						{'credit_in_account_currency':1000},
 						{'is_advance':'Yes'},
 					],
-					  [
+					[
 						{'account':'HDFC - '+frappe.get_abbr(frappe.defaults.get_default('Company'))},
 						{'debit_in_account_currency':1000},
 					]
