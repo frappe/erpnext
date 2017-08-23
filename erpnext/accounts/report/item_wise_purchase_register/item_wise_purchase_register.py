@@ -125,14 +125,15 @@ def get_purchase_receipts_against_purchase_order(item_list):
 	po_pr_map = frappe._dict()
 	po_item_rows = list(set([d.po_detail for d in item_list]))
 
-	purchase_receipts = frappe.db.sql("""
-		select parent, purchase_order_item
-		from `tabPurchase Receipt Item`
-		where docstatus=1 and purchase_order_item in (%s)
-		group by purchase_order_item, parent
-	""" % (', '.join(['%s']*len(po_item_rows))), tuple(po_item_rows), as_dict=1)
+	if po_item_rows:
+		purchase_receipts = frappe.db.sql("""
+			select parent, purchase_order_item
+			from `tabPurchase Receipt Item`
+			where docstatus=1 and purchase_order_item in (%s)
+			group by purchase_order_item, parent
+		""" % (', '.join(['%s']*len(po_item_rows))), tuple(po_item_rows), as_dict=1)
 
-	for pr in purchase_receipts:
-		po_pr_map.setdefault(pr.po_detail, []).append(pr.parent)
+		for pr in purchase_receipts:
+			po_pr_map.setdefault(pr.po_detail, []).append(pr.parent)
 
 	return po_pr_map
