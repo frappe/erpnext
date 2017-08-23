@@ -76,12 +76,9 @@ class PointOfSale {
 			frm: this.frm,
 			wrapper: this.wrapper.find('.cart-container'),
 			events: {
-				customer_change: (customer) => this.frm.set_value('customer', customer),
-				increase_qty: (item_code) => {
-					this.add_item_to_cart(item_code);
-				},
-				decrease_qty: (item_code) => {
-					this.add_item_to_cart(item_code, -1);
+				on_customer_change: (customer) => this.frm.set_value('customer', customer),
+				on_field_change: (item_code, field, value) => {
+					this.update_item_in_cart(item_code, field, value);
 				},
 				on_numpad: (value) => {
 					if (value == 'Pay') {
@@ -111,37 +108,36 @@ class PointOfSale {
 					if(!this.frm.doc.customer) {
 						frappe.throw(__('Please select a customer'));
 					}
-					this.add_item_to_cart(item_code);
+					this.update_item_in_cart(item_code, 'qty', '+1');
 					this.cart && this.cart.unselect_all();
 				}
 			}
 		});
 	}
 
-	add_item_to_cart(item_code, qty = 1, barcode) {
+	update_item_in_cart(item_code, field='qty', value=1) {
 
 		if(this.cart.exists(item_code)) {
-			// increase qty by 1
-			this.frm.doc.items.forEach((item) => {
-				if (item.item_code === item_code) {
-					if (barcode) {
-						const value = barcode['serial_no'] ?
-							item.serial_no + '\n' + barcode['serial_no'] : barcode['batch_no'];
-						frappe.model.set_value(item.doctype, item.name,
-							Object.keys(barcode)[0], value);
-					} else {
-						const final_qty = item.qty + qty;
-						frappe.model.set_value(item.doctype, item.name, 'qty', final_qty)
-							.then(() => {
-								if (final_qty === 0) {
-									frappe.model.clear_doc(item.doctype, item.name);
-								}
-								// update cart
-								this.cart.add_item(item);
-							});
-					}
-				}
-			});
+			const item = this.frm.doc.items.find(i => i.item_code === item_code);
+
+			if (typeof value === 'string') {
+				// value can be of type '+1' or '-1'
+				value = item[field] + flt(value);
+			}
+
+			this.update_item_in_frm(item, field, value)
+				.then(() => {
+					// update cart
+					this.cart.add_item(item);
+				});
+
+			// if (barcode) {
+			// 	const value = barcode['serial_no'] ?
+			// 		item.serial_no + '\n' + barcode['serial_no'] : barcode['batch_no'];
+			// 	frappe.model.set_value(item.doctype, item.name,
+			// 		Object.keys(barcode)[0], value);
+			// } else {
+			// }
 			return;
 		}
 
@@ -152,6 +148,15 @@ class PointOfSale {
 			.then(() => {
 				// update cart
 				this.cart.add_item(item);
+			});
+	}
+
+	update_item_in_frm(item, field, value) {
+		return frappe.model.set_value(item.doctype, item.name, field, value)
+			.then(() => {
+				if (field === 'qty' && value === 0) {
+					frappe.model.clear_doc(item.doctype, item.name);
+				}
 			});
 	}
 
@@ -249,6 +254,16 @@ class POSCart {
 						</div>
 					</div>
 				</div>
+				<div class="taxes-and-totals">
+					<div class="list-item">
+						<div class="list-item__content list-item__content--flex-2 text-muted">${__('Net Total')}</div>
+						<div class="list-item__content">0.00</div>
+					</div>
+					<div class="list-item">
+						<div class="list-item__content list-item__content--flex-2 text-muted">${__('Taxes')}</div>
+						<div class="list-item__content">0.00</div>
+					</div>
+				</div>
 			</div>
 			<div class="number-pad-container">
 			</div>
@@ -264,7 +279,7 @@ class POSCart {
 				options: 'Customer',
 				reqd: 1,
 				onchange: () => {
-					this.events.customer_change.apply(null, [this.customer_field.get_value()]);
+					this.events.on_customer_change(this.customer_field.get_value());
 				}
 			},
 			parent: this.wrapper.find('.customer-field'),
@@ -283,20 +298,35 @@ class POSCart {
 			add_class: {
 				'Pay': 'brand-primary'
 			},
-			disable_highlight: ['Qty', 'Disc', 'Rate'],
+			disable_highlight: ['Qty', 'Disc', 'Rate', 'Pay'],
+			reset_btns: ['Qty', 'Disc', 'Rate', 'Pay'],
+			del_btn: 'Del',
 			wrapper: this.wrapper.find('.number-pad-container'),
 			onclick: (btn_value) => {
 				// on click
+				if (!this.selected_item) {
+					frappe.show_alert({
+						indicator: 'red',
+						message: __('Please select an item in the cart')
+					});
+					return;
+				}
 				if (['Qty', 'Disc', 'Rate'].includes(btn_value)) {
-					if (!this.selected_item) {
+					this.set_input_active(btn_value);
+				} else if (btn_value !== 'Pay') {
+					if (!this.selected_item.active_field) {
 						frappe.show_alert({
 							indicator: 'red',
-							message: __('Please select an item in the cart first')
+							message: __('Please select a field to edit from numpad')
 						});
 						return;
 					}
-					this.numpad.set_active(btn_value);
-					this.set_input_active(btn_value);
+
+					const item_code = this.selected_item.attr('data-item-code');
+					const field = this.selected_item.active_field;
+					const value = this.numpad.get_value();
+
+					this.events.on_field_change(item_code, field, value);
 				}
 
 				this.events.on_numpad(btn_value);
@@ -307,12 +337,16 @@ class POSCart {
 	set_input_active(btn_value) {
 		this.selected_item.removeClass('qty disc rate');
 
+		this.numpad.set_active(btn_value);
 		if (btn_value === 'Qty') {
 			this.selected_item.addClass('qty');
+			this.selected_item.active_field = 'qty';
 		} else if (btn_value == 'Disc') {
 			this.selected_item.addClass('disc');
+			this.selected_item.active_field = 'discount_percentage';
 		} else if (btn_value == 'Rate') {
 			this.selected_item.addClass('rate');
+			this.selected_item.active_field = 'rate';
 		}
 	}
 
@@ -391,6 +425,7 @@ class POSCart {
 
 	scroll_to_item(item_code) {
 		const $item = this.$cart_items.find(`[data-item-code="${item_code}"]`);
+		if ($item.length === 0) return;
 		const scrollTop = $item.offset().top - this.$cart_items.offset().top + this.$cart_items.scrollTop();
 		this.$cart_items.animate({ scrollTop });
 	}
@@ -408,18 +443,33 @@ class POSCart {
 				const action = $btn.attr('data-action');
 
 				if(action === 'increment') {
-					events.increase_qty(item_code);
+					events.on_field_change(item_code, 'qty', '+1');
 				} else if(action === 'decrement') {
-					events.decrease_qty(item_code);
+					events.on_field_change(item_code, 'qty', '-1');
 				}
 			});
 
+		// this.$cart_items.on('focus', '.quantity input', function(e) {
+		// 	const $input = $(this);
+		// 	const $item = $input.closest('.list-item[data-item-code]');
+		// 	me.set_selected_item($item);
+		// 	me.set_input_active('Qty');
+		// 	e.preventDefault();
+		// 	e.stopPropagation();
+		// 	return false;
+		// });
+
+		this.$cart_items.on('change', '.quantity input', function() {
+			const $input = $(this);
+			const $item = $input.closest('.list-item[data-item-code]');
+			const item_code = $item.attr('data-item-code');
+			events.on_field_change(item_code, 'qty', flt($input.val()));
+		});
+
 		// current item
 		this.$cart_items.on('click', '.list-item', function() {
-			me.selected_item = $(this);
-			me.$cart_items.find('.list-item').removeClass('current-item qty disc rate');
-			me.selected_item.addClass('current-item');
-			me.events.on_select_change();
+			console.log('cart item click');
+			me.set_selected_item($(this));
 		});
 
 		// disable current item
@@ -431,6 +481,13 @@ class POSCart {
 		// 	me.$cart_items.find('.list-item').removeClass('current-item qty disc rate');
 		// 	me.selected_item = null;
 		// });
+	}
+
+	set_selected_item($item) {
+		this.selected_item = $item;
+		this.$cart_items.find('.list-item').removeClass('current-item qty disc rate');
+		this.selected_item.addClass('current-item');
+		this.events.on_select_change();
 	}
 
 	unselect_all() {
@@ -456,8 +513,9 @@ class POSItems {
 
 		// bootstrap with 20 items
 		this.get_items()
-			.then(items => {
-				this.items = items
+			.then((items, serial_no) => {
+				console.log(serial_no);
+				this.items = items;
 			})
 			.then(() => this.render_items());
 	}
@@ -538,6 +596,7 @@ class POSItems {
 
 		const row_container = '<div style="display: flex; border-bottom: 1px solid #ebeff2">';
 		let curr_row = row_container;
+
 		for (let i=0; i < all_items.length; i++) {
 			// wrap 4 items in a div to emulate
 			// a row for clusterize
@@ -547,6 +606,10 @@ class POSItems {
 				curr_row = row_container;
 			}
 			curr_row += all_items[i];
+
+			if(i == all_items.length - 1 && all_items.length % 4 !== 0) {
+				row_items.push(curr_row);
+			}
 		}
 
 		this.clusterize.update(row_items);
@@ -555,14 +618,10 @@ class POSItems {
 	filter_items(search_term) {
 		search_term = search_term.toLowerCase();
 
-		const filtered_items =
-			Object.values(this.items)
-				.filter(item => {
-					return item.item_code.toLowerCase().includes(search_term) ||
-						item.item_name.toLowerCase().includes(search_term)
-				});
-
-		this.render_items(filtered_items);
+		this.get_items({search_value: search_term})
+			.then((items) => {
+				this.render_items(items);
+			});
 	}
 
 	bind_events(events) {
@@ -582,7 +641,7 @@ class POSItems {
 	}
 
 	get_item_html(item) {
-		const price_list_rate = format_currency(item.price_list_rate, this.currency)
+		const price_list_rate = format_currency(item.price_list_rate, this.currency);
 		const { item_code, item_name, item_image, item_stock=0} = item;
 		const item_title = item_name || item_code;
 
@@ -619,39 +678,41 @@ class POSItems {
 		return template;
 	}
 
-	get_items(start = 10, page_length = 20) {
-		var me = this;
+	get_items({start = 0, page_length = 40, search_value=''}={}) {
 		return new Promise(res => {
 			frappe.call({
 				method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
 				args: {
+					start,
+					page_length,
 					'price_list': this.pos_profile.selling_price_list,
-					'item': me.search_field.$input.value || ""
+					search_value,
 				}
 			}).then(r => {
-				const items = r.message;
+				const { items, serial_no } = r.message;
 
-				// convert to key, value
-				let items_dict = {};
-				items.map(item => {
-					items_dict[item.item_code] = item;
-				});
-
-				res(items_dict);
+				res(items, serial_no);
 			});
 		});
 	}
 }
 
 class NumberPad {
-	constructor({wrapper, onclick, button_array, add_class, disable_highlight}) {
+	constructor({
+		wrapper, onclick, button_array,
+		add_class={}, disable_highlight=[],
+		reset_btns=[], del_btn='',
+	}) {
 		this.wrapper = wrapper;
 		this.onclick = onclick;
 		this.button_array = button_array;
 		this.add_class = add_class;
 		this.disable_highlight = disable_highlight;
+		this.reset_btns = reset_btns;
+		this.del_btn = del_btn;
 		this.make_dom();
 		this.bind_events();
+		this.value = '';
 	}
 
 	make_dom() {
@@ -697,8 +758,21 @@ class NumberPad {
 			if (!me.disable_highlight.includes(btn_value)) {
 				me.highlight_button($btn);
 			}
+			if (me.reset_btns.includes(btn_value)) {
+				me.value = '';
+			} else {
+				if (btn_value === me.del_btn) {
+					me.value = me.value.substr(0, me.value.length - 1);
+				} else {
+					me.value += btn_value;
+				}
+			}
 			me.onclick(btn_value);
 		});
+	}
+
+	get_value() {
+		return flt(this.value);
 	}
 
 	get_btn(btn_value) {

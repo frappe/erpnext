@@ -29,6 +29,9 @@
 .cart-wrapper .list-item__content:not(:first-child) {
   justify-content: flex-end;
 }
+.cart-wrapper .list-item--head .list-item__content:nth-child(2) {
+  flex: 1.5;
+}
 .cart-items {
   height: 200px;
   overflow: auto;
@@ -46,7 +49,11 @@
 .cart-items .list-item.current-item.rate .rate {
   font-weight: bold;
 }
+.cart-items .list-item .quantity {
+  flex: 1.5;
+}
 .cart-items input {
+  text-align: right;
   height: 22px;
   font-size: 12px;
 }

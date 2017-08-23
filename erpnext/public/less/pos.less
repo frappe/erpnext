@@ -39,6 +39,10 @@
 	.list-item__content:not(:first-child) {
 		justify-content: flex-end;
 	}
+
+	.list-item--head .list-item__content:nth-child(2) {
+		flex: 1.5;
+	}
 }
 
 .cart-items {
@@ -62,7 +66,12 @@
 		font-weight: bold;
 	}
 
+	.list-item .quantity {
+		flex: 1.5;
+	}
+
 	input {
+		text-align: right;
 		height: 22px;
 		font-size: @text-medium;
 	}
