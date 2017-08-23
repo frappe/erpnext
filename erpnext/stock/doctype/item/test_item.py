@@ -11,6 +11,7 @@ from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsE
 
 from frappe.model.rename_doc import rename_doc
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from six import iteritems
 
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse"]
@@ -90,7 +91,7 @@ class TestItem(unittest.TestCase):
 			"customer": "_Test Customer"
 		})
 
-		for key, value in to_check.iteritems():
+		for key, value in iteritems(to_check):
 			self.assertEquals(value, details.get(key))
 
 	def test_item_attribute_change_after_variant(self):

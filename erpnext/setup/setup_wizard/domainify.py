@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from six import iteritems
 
 def get_domain(domain):
 	'''Written as a function to prevent data mutation effects'''
@@ -155,7 +156,7 @@ def update_module_def_restrict_to_domain():
 	}
 
 	lang = frappe.db.get_single_value("System Settings", "language") or "en"
-	for module, domain in module_def_restrict_to_domain_mapper.iteritems():
+	for module, domain in iteritems(module_def_restrict_to_domain_mapper):
 		if frappe.db.exists("Domain", _(domain, lang)):
 			frappe.db.set_value("Module Def", module, "restrict_to_domain", _(domain, lang))
 		elif frappe.db.exists("Domain", domain):

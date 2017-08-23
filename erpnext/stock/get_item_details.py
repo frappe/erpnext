@@ -10,6 +10,7 @@ from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_
 from erpnext.setup.utils import get_exchange_rate
 from frappe.model.meta import get_field_precision
 from erpnext.stock.doctype.batch.batch import get_batch_no
+from six import iteritems
 
 @frappe.whitelist()
 def get_item_details(args):
@@ -68,7 +69,7 @@ def get_item_details(args):
 		out.update(get_bin_details(args.item_code, out.warehouse))
 
 	# update args with out, if key or value not exists
-	for key, value in out.iteritems():
+	for key, value in iteritems(out):
 		if args.get(key) is None:
 			args[key] = value
 

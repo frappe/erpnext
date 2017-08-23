@@ -10,6 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 from erpnext.controllers.queries import get_filters_cond
 from frappe.desk.reportview import get_match_cond
+from six import iteritems
 
 class Project(Document):
 	def get_feed(self):
@@ -241,7 +242,7 @@ class Project(Document):
 				dependency_map[task.title] = [ x['subject'] for x in frappe.get_list(
 					'Task Depends On', {"parent": name}, ['subject'])]
 
-			for key, value in dependency_map.iteritems():
+			for key, value in iteritems(dependency_map):
 				task_name = frappe.db.get_value('Task', {"subject": key, "project": self.name })
 				task_doc = frappe.get_doc('Task', task_name)
 

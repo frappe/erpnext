@@ -16,6 +16,7 @@ from frappe.contacts.doctype.contact.contact import get_contact_details, get_def
 from erpnext.exceptions import PartyFrozen, PartyDisabled, InvalidAccountCurrency
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext import get_default_currency, get_company_currency
+from six import iteritems
 
 
 class DuplicatePartyAccountError(frappe.ValidationError): pass
@@ -372,7 +373,7 @@ def get_timeline_data(doctype, name):
 
 	timeline_items = dict(data)
 
-	for date, count in timeline_items.iteritems():
+	for date, count in iteritems(timeline_items):
 		timestamp = get_timestamp(date)
 		out.update({ timestamp: count })
 

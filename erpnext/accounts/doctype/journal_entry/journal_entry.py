@@ -10,6 +10,7 @@ from erpnext.accounts.utils import get_balance_on, get_account_currency
 from erpnext.accounts.party import get_party_account
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.hr.doctype.employee_loan.employee_loan import update_disbursement_status
+from six import iteritems
 
 class JournalEntry(AccountsController):
 	def __init__(self, arg1, arg2=None):
@@ -230,7 +231,7 @@ class JournalEntry(AccountsController):
 
 	def validate_orders(self):
 		"""Validate totals, closed and docstatus for orders"""
-		for reference_name, total in self.reference_totals.iteritems():
+		for reference_name, total in iteritems(self.reference_totals):
 			reference_type = self.reference_types[reference_name]
 			account = self.reference_accounts[reference_name]
 
@@ -262,7 +263,7 @@ class JournalEntry(AccountsController):
 
 	def validate_invoices(self):
 		"""Validate totals and docstatus for invoices"""
-		for reference_name, total in self.reference_totals.iteritems():
+		for reference_name, total in iteritems(self.reference_totals):
 			reference_type = self.reference_types[reference_name]
 
 			if reference_type in ("Sales Invoice", "Purchase Invoice"):

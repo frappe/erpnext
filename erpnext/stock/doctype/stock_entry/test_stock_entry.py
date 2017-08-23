@@ -14,10 +14,11 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 from frappe.tests.test_permissions import set_user_permission_doctypes
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from six import iteritems
 
 def get_sle(**args):
 	condition, values = "", []
-	for key, value in args.iteritems():
+	for key, value in iteritems(args):
 		condition += " and " if condition else " where "
 		condition += "`{0}`=%s".format(key)
 		values.append(value)
