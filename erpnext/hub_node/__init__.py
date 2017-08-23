@@ -36,6 +36,22 @@ def get_seller_details(user_name):
 	})
 
 @frappe.whitelist()
+def make_rfq_and_send_opportunity(item_code, item_group, supplier_name, supplier_email, company, country):
+	make_rfq(item_code, item_group, supplier_name, supplier_email, company, country)
+	return send_opportunity(supplier_name, supplier_email)
+
+def send_opportunity(supplier_name, supplier_email):
+	args = {
+		"buyer_name": supplier_name,
+		"email_id": supplier_email
+	}
+	return send_hub_request('enqueue_message', data={
+		"message_type": "CLIENT-OPP-",
+		"method": "make_opportunity",
+		"arguments": json.dumps(args),
+		"receiver_email": supplier_email
+	})
+
 def make_rfq(item_code, item_group, supplier_name, supplier_email, company, country):
 	item_code = "HUB-" + item_code
 	supplier_name = "HUB-" + supplier_name

@@ -291,12 +291,12 @@ erpnext.hub.Hub = class {
 	make_rfq(item, callback) {
 		// should be through hub?
 		frappe.call({
-			method: "erpnext.hub_node.make_rfq",
+			method: "erpnext.hub_node.make_rfq_and_send_opportunity",
 			args: {
 				item_code: item.item_code,
 				item_group: "Products",
 				supplier_name: item.hub_user_name,
-				supplier_email: item.email,
+				supplier_email: item.hub_user_email,
 				company: item.company,
 				country: item.country
 			},
