@@ -39,6 +39,7 @@ class PointOfSale {
 				this.make_cart();
 				this.make_items();
 				this.bind_events();
+				this.disable_text_box_and_button();
 			}
 		]);
 	}
@@ -72,6 +73,7 @@ class PointOfSale {
 
 	make_cart() {
 		this.cart = new POSCart({
+			frm: this.frm,
 			wrapper: this.wrapper.find('.cart-container'),
 			events: {
 				customer_change: (customer) => this.frm.set_value('customer', customer),
@@ -93,6 +95,10 @@ class PointOfSale {
 		});
 	}
 
+	disable_text_box_and_button() {
+		$(this.wrapper).find('input, button').prop("disabled", !(this.frm.doc.docstatus===0));
+	}
+
 	make_items() {
 		this.items = new POSItems({
 			wrapper: this.wrapper.find('.item-container'),
@@ -108,21 +114,28 @@ class PointOfSale {
 		});
 	}
 
-	add_item_to_cart(item_code, qty = 1) {
+	add_item_to_cart(item_code, qty = 1, barcode) {
 
 		if(this.cart.exists(item_code)) {
 			// increase qty by 1
 			this.frm.doc.items.forEach((item) => {
 				if (item.item_code === item_code) {
-					const final_qty = item.qty + qty;
-					frappe.model.set_value(item.doctype, item.name, 'qty', final_qty)
-						.then(() => {
-							if (final_qty === 0) {
-								frappe.model.clear_doc(item.doctype, item.name);
-							}
-							// update cart
-							this.cart.add_item(item);
-						});
+					if (barcode) {
+						value = barcode['serial_no'] ?
+							item.serial_no + '\n' + barcode['serial_no'] : barcode['batch_no'];
+						frappe.model.set_value(item.doctype, item.name, 
+							Object.keys(barcode)[0], final_qty);
+					} else {
+						const final_qty = item.qty + qty;
+						frappe.model.set_value(item.doctype, item.name, 'qty', final_qty)
+							.then(() => {
+								if (final_qty === 0) {
+									frappe.model.clear_doc(item.doctype, item.name);
+								}
+								// update cart
+								this.cart.add_item(item);
+							});
+					}
 				}
 			});
 			return;
@@ -200,7 +213,8 @@ class PointOfSale {
 }
 
 class POSCart {
-	constructor({wrapper, events}) {
+	constructor({frm, wrapper, events}) {
+		this.frm = frm;
 		this.wrapper = wrapper;
 		this.events = events;
 		this.make();
@@ -301,25 +315,9 @@ class POSCart {
 			$item.remove();
 		}
 	}
-
-	exists(item_code) {
-		let $item = this.$cart_items.find(`[data-item-code="${item_code}"]`);
-		return $item.length > 0;
-	}
-
-	highlight_item(item_code) {
-		const $item = this.$cart_items.find(`[data-item-code="${item_code}"]`);
-		$item.addClass('highlight');
-		setTimeout(() => $item.removeClass('highlight'), 1000);
-	}
-
-	scroll_to_item(item_code) {
-		const $item = this.$cart_items.find(`[data-item-code="${item_code}"]`);
-		// const scrollTop = $item.offset().top - this.$cart_items.offset().top + this.$cart_items.scrollTop();
-		// this.$cart_items.animate({ scrollTop });
-	}
-
+	
 	get_item_html(item) {
+		const rate = format_currency(item.rate, this.frm.doc.currency);
 		return `
 			<div class="list-item" data-item-code="${item.item_code}">
 				<div class="item-name list-item__content list-item__content--flex-2 ellipsis">
@@ -332,7 +330,7 @@ class POSCart {
 					${item.discount_percentage}%
 				</div>
 				<div class="rate list-item__content text-right">
-					${item.rate}
+					${rate}
 				</div>
 			</div>
 		`;
@@ -352,6 +350,23 @@ class POSCart {
 				</div>
 			`;
 		}
+	}
+
+	exists(item_code) {
+		let $item = this.$cart_items.find(`[data-item-code="${item_code}"]`);
+		return $item.length > 0;
+	}
+
+	highlight_item(item_code) {
+		const $item = this.$cart_items.find(`[data-item-code="${item_code}"]`);
+		$item.addClass('highlight');
+		setTimeout(() => $item.removeClass('highlight'), 1000);
+	}
+
+	scroll_to_item(item_code) {
+		const $item = this.$cart_items.find(`[data-item-code="${item_code}"]`);
+		// const scrollTop = $item.offset().top - this.$cart_items.offset().top + this.$cart_items.scrollTop();
+		// this.$cart_items.animate({ scrollTop });
 	}
 
 	bind_events() {
@@ -381,6 +396,8 @@ class POSItems {
 		this.wrapper = wrapper;
 		this.pos_profile = pos_profile;
 		this.items = {};
+		this.currency = this.pos_profile.currency || 
+			frappe.defaults.get_default('currency');
 
 		this.make_dom();
 		this.make_fields();
@@ -516,7 +533,8 @@ class POSItems {
 	}
 
 	get_item_html(item) {
-		const { item_code, item_name, image: item_image, item_stock=0, item_price=0} = item;
+		const price_list_rate = format_currency(item.price_list_rate, this.currency)
+		const { item_code, item_name, item_image, item_stock=0} = item;
 		const item_title = item_name || item_code;
 
 		const template = `
@@ -542,7 +560,7 @@ class POSItems {
 							${item_image ? `<img src="${item_image}" alt="${item_title}">` : '' }
 						</div>
 						<span class="price-info">
-							${item_price}
+							${price_list_rate}
 						</span>
 					</a>
 				</div>
@@ -552,38 +570,17 @@ class POSItems {
 		return template;
 	}
 
-	get_items(start = 0, page_length = 20) {
+	get_items(start = 10, page_length = 20) {
+		var me = this;
 		return new Promise(res => {
 			frappe.call({
-				method: "frappe.desk.reportview.get",
-				type: "GET",
+				method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
 				args: {
-					doctype: "Item",
-					fields: [
-						"`tabItem`.`name`",
-						"`tabItem`.`owner`",
-						"`tabItem`.`docstatus`",
-						"`tabItem`.`modified`",
-						"`tabItem`.`modified_by`",
-						"`tabItem`.`item_name`",
-						"`tabItem`.`item_code`",
-						"`tabItem`.`disabled`",
-						"`tabItem`.`item_group`",
-						"`tabItem`.`stock_uom`",
-						"`tabItem`.`image`",
-						"`tabItem`.`variant_of`",
-						"`tabItem`.`has_variants`",
-						"`tabItem`.`end_of_life`",
-						"`tabItem`.`total_projected_qty`"
-					],
-					filters: [['disabled', '=', '0']],
-					order_by: "`tabItem`.`modified` desc",
-					page_length: page_length,
-					start: start
+					'price_list': this.pos_profile.selling_price_list,
+					'item': me.search_field.$input.value || ""
 				}
 			}).then(r => {
-				const data = r.message;
-				const items = frappe.utils.dict(data.keys, data.values);
+				const items = r.message;
 
 				// convert to key, value
 				let items_dict = {};
@@ -687,8 +684,11 @@ class Payment {
 	}
 
 	set_primary_action() {
+		var me = this;
+
 		this.dialog.set_primary_action(__("Submit"), function() {
-			// save form
+			this.frm.doc.savesubmit()
+			this.dialog.hide()
 		});
 	}
 
