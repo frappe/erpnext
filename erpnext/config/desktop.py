@@ -267,6 +267,6 @@ def get_data():
 			"color": "#DE2B37",
 			"icon": "octicon octicon-globe",
 			"type": "module",
-			"label": _("Hub Node")
+			"label": _("Hub")
 		}
 	]

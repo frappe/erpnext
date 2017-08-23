@@ -33,7 +33,6 @@ class HubSettings(Document):
 		}
 
 	def validate(self):
-		self.before_update = frappe.get_doc('Hub Settings', self.name)
 		self.reset_current_on_save_flags()
 		self.update_settings_changes()
 		if (self.publishing_changed["publish_pricing"] or
@@ -47,7 +46,7 @@ class HubSettings(Document):
 			return
 
 		# If just registered
-		if self.enabled != self.before_update.enabled and self.enabled == 1:
+		if self.enabled != self.get_doc_before_save().enabled and self.enabled == 1:
 			return
 
 		self.update_hub()
@@ -56,7 +55,7 @@ class HubSettings(Document):
 	def update_settings_changes(self):
 		# Pick publishing changes
 		for setting in self.publishing_changed.keys():
-			if self.get(setting) != self.before_update.get(setting):
+			if self.get(setting) != self.get_doc_before_save().get(setting):
 				self.publishing_changed[setting] = 1
 
 	def update_fields(self):
@@ -107,7 +106,7 @@ class HubSettings(Document):
 	def publish_all_set_items(self, verbose=True):
 		"""Publish items hub.erpnext.org"""
 		# A way to set 'publish in hub' for a bulk of items, if not all are by default, like
-		self.publish_selling_items()
+		self.set_publish_for_selling_items()
 
 		fields = json.loads(self.current_item_fields)
 
@@ -136,7 +135,7 @@ class HubSettings(Document):
 
 	def unpublish_all_items(self):
 		"""Unpublish from hub.erpnext.org, delete items there"""
-		response_msg = send_hub_request('unpublish_items')
+		response_msg = send_hub_request('delete_all_items_of_user')
 
 	def add_item_fields_at_hub(self):
 		items = frappe.db.get_all("Item", fields=["item_code"] + self.item_fields_to_add, filters={"publish_in_hub": 1})
@@ -156,7 +155,6 @@ class HubSettings(Document):
 		"""Register at hub.erpnext.org and exchange keys"""
 		# if self.access_token or hasattr(self, 'private_key'):
 		# 	return
-		(self.private_key, self.public_key_pem) = generate_keys()
 		response = requests.post(hub_url + "/api/method/hub.hub.api."+"register",
 			data = { "args_data": json.dumps(self.get_args(
 				self.config_args + self.profile_args + self.seller_args #['public_key_pem']
@@ -190,11 +188,19 @@ class HubSettings(Document):
 		self.current_item_fields = json.dumps(self.base_fields_for_items)
 
 
-	def publish_selling_items(self):
+	def set_publish_for_selling_items(self):
 		"""Set `publish_in_hub`=1 for all Sales Items"""
 		for item in frappe.get_all("Item", fields=["name"],
 			filters={ "publish_in_hub": 0, "is_sales_item": 1}):
 			frappe.db.set_value("Item", item.name, "publish_in_hub", 1)
+
+	def publish_group(self):
+		pass
+
+	# get published items
+	def bulk_update_hub_category(self):
+		pass
+
 
 ### Helpers
 def send_hub_request(method, data = [], now = True):
