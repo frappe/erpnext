@@ -93,20 +93,22 @@ class PointOfSale {
 		});
 	}
 
-	disable_text_box_and_button() {
-		let disabled = this.frm.doc.docstatus == 1 ? true: false;
-		let pointer_events = this.frm.doc.docstatus == 1 ? "none":"inherit";
+	toggle_editing(flag) {
+		let disabled;
+		if (flag !== undefined) {
+			disabled = !flag;
+		} else {
+			disabled = this.frm.doc.docstatus == 1 ? true: false;
+		}
+		const pointer_events = disabled ? 'none' : 'inherit';
 
-		$(this.wrapper).find('input, button', 'select').prop("disabled", disabled);
-		$(this.wrapper).find(".number-pad-container").toggleClass("hide", disabled);
+		this.wrapper.find('input, button, select').prop("disabled", disabled);
+		this.wrapper.find('.number-pad-container').toggleClass("hide", disabled);
 
-		$(this.wrapper).find('.cart-container').css('pointer-events', pointer_events);
-		$(this.wrapper).find('.item-container').css('pointer-events', pointer_events);
+		this.wrapper.find('.cart-container').css('pointer-events', pointer_events);
+		this.wrapper.find('.item-container').css('pointer-events', pointer_events);
 
 		this.page.clear_actions();
-		if(this.frm.doc.docstatus === 1) {
-			this.set_primary_action()
-		}
 	}
 
 	make_items() {
@@ -193,38 +195,27 @@ class PointOfSale {
 	}
 
 	submit_sales_invoice() {
-		var me = this;
-		this.frm.savesubmit();
-		// frappe.confirm(__("Permanently Submit {0}?", [this.frm.doc.name]), function() {
-// 			return frappe.call({
-// 				method: 'erpnext.selling.page.point_of_sale.point_of_sale.submit_invoice',
-// 				freeze: true,
-// 				args: {
-// 					doc: me.frm.doc
-// 				}
-// 			}).then(r => {
-// 				if(r.message) {
-// 					me.frm.doc = r.message;
-// 					me.frm.meta.default_print_format = 'POS Invoice';
-// 					frappe.show_alert({
-// 						indicator: 'green',
-// 						message: __(`Sales invoice ${r.message.name} created succesfully`)
-// 					});
-//
-// 					me.frm.msgbox = frappe.msgprint(
-// 						`<a class="btn btn-primary" onclick="cur_frm.print_preview.printit(true)" style="margin-right: 5px;">
-// 							${__('Print')}</a>
-// 						<a class="btn btn-default new_doc">
-// 							${__('New')}</a>`
-// 					);
-// 					$(me.frm.msgbox.wrapper).find('.new_doc').click(function() {
-// 						me.frm.msgbox.hide()
-// 						me.make_new_invoice()
-// 					})
-// 					me.disable_text_box_and_button();
-// 				}
-// 			});
-// 		})
+
+		frappe.confirm(__("Permanently Submit {0}?", [this.frm.doc.name]), () => {
+			frappe.call({
+				method: 'erpnext.selling.page.point_of_sale.point_of_sale.submit_invoice',
+				freeze: true,
+				args: {
+					doc: this.frm.doc
+				}
+			}).then(r => {
+				if(r.message) {
+					this.frm.doc = r.message;
+					frappe.show_alert({
+						indicator: 'green',
+						message: __(`Sales invoice ${r.message.name} created succesfully`)
+					});
+
+					this.toggle_editing();
+					this.set_form_action();
+				}
+			});
+		});
 	}
 
 	bind_events() {
@@ -246,27 +237,42 @@ class PointOfSale {
 		return frappe.run_serially([
 			() => this.make_sales_invoice_frm(),
 			() => {
-				this.make_cart();
-				this.disable_text_box_and_button();
+				if (this.cart) {
+					this.cart.frm = this.frm;
+					this.cart.reset();
+				} else {
+					this.make_cart();
+				}
+				this.toggle_editing(true);
 			}
 		]);
 	}
 
 	make_sales_invoice_frm() {
-		this.dt = 'Sales Invoice';
+		const doctype = 'Sales Invoice';
 		return new Promise(resolve => {
-			frappe.model.with_doctype(this.dt, () => {
-				const page = $('<div>');
-				const frm = new _f.Frm(this.dt, page, false);
-				const name = frappe.model.make_new_doc_and_get_name(this.dt, true);
-				frm.refresh(name);
-				frm.doc.items = [];
-				this.doc = frm.doc;
-				this.frm = frm;
-				this.frm.set_value('is_pos', 1);
+			if (this.frm) {
+				this.frm = get_frm(this.frm);
 				resolve();
-			});
+			} else {
+				frappe.model.with_doctype(doctype, () => {
+					this.frm = get_frm();
+					resolve();
+				});
+			}
 		});
+
+		function get_frm(_frm) {
+			const page = $('<div>');
+			const frm = _frm || new _f.Frm(doctype, page, false);
+			const name = frappe.model.make_new_doc_and_get_name(doctype, true);
+			frm.refresh(name);
+			frm.doc.items = [];
+			frm.set_value('is_pos', 1);
+			frm.meta.default_print_format = 'POS Invoice';
+
+			return frm;
+		}
 	}
 
 	prepare_menu() {
@@ -291,15 +297,16 @@ class PointOfSale {
 		});
 	}
 
-	set_primary_action() {
-		var me = this;
-		this.page.set_secondary_action(__("Print"), function () {
-			me.frm.print_preview.printit(true)
-		})
+	set_form_action() {
+		if(this.frm.doc.docstatus !== 1) return;
 
-		this.page.set_primary_action(__("New"), function () {
-			me.make_new_invoice()
-		})
+		this.page.set_secondary_action(__("Print"), () => {
+			this.frm.print_preview.printit(true);
+		});
+
+		this.page.set_primary_action(__("New"), () => {
+			this.make_new_invoice();
+		});
 	}
 
 	show_taxes_and_totals() {
@@ -307,21 +314,18 @@ class PointOfSale {
 		let currency = this.frm.doc.currency;
 		const taxes_wrapper = $(this.wrapper).find('.taxes');
 
-		this.frm.refresh_field('taxes')
-		$(this.wrapper).find('.net_total').html(format_currency(this.frm.doc.net_total, this.currency))
-		console.log(this.frm.doc.taxes[0].tax_amount)
+		this.frm.refresh_field('taxes');
+		$(this.wrapper).find('.net-total').html(format_currency(this.frm.doc.net_total, this.currency))
 		$.each(this.frm.doc.taxes, function(index, data) {
-			console.log(data.tax_amount)
 			tax_template += `
 				<div class="list-item" style="padding-right: 0;">
 					<div >${data.description}</div>
 					<div class="text-right bold">${fmt_money(data.tax_amount, currency)}</div>
-				</div>`
-		})
+				</div>`;
+		});
 
 		taxes_wrapper.empty()
-		console.log(tax_template)
-		taxes_wrapper.html(tax_template)
+		taxes_wrapper.html(tax_template);
 	}
 }
 
@@ -341,7 +345,6 @@ class POSCart {
 	}
 
 	make_dom() {
-		$(this.wrapper).find('.pos-cart').empty()
 		this.wrapper.append(`
 			<div class="pos-cart">
 				<div class="customer-field">
@@ -361,14 +364,7 @@ class POSCart {
 						</div>
 					</div>
 					<div class="taxes-and-totals">
-						<div class="list-item">
-							<div class="list-item__content list-item__content--flex-2 text-muted">${__('Net Total')}</div>
-							<div class="list-item__content net_total">0.00</div>
-						</div>
-						<div class="list-item">
-							<div class="list-item__content list-item__content--flex-2 text-muted">${__('Taxes')}</div>
-							<div class="list-item__content taxes">0.00</div>
-						</div>
+						${this.get_taxes_and_totals()}
 					</div>
 				</div>
 				<div class="number-pad-container">
@@ -376,6 +372,28 @@ class POSCart {
 			</div>
 		`);
 		this.$cart_items = this.wrapper.find('.cart-items');
+		this.$empty_state = this.wrapper.find('.cart-items .empty-state');
+		this.$taxes_and_totals = this.wrapper.find('.taxes-and-totals');
+	}
+
+	reset() {
+		this.$cart_items.find('.list-item').remove();
+		this.$empty_state.show();
+		this.$taxes_and_totals.html(this.get_taxes_and_totals());
+		this.numpad && this.numpad.reset_value();
+		this.customer_field.set_value("");
+	}
+
+	get_taxes_and_totals() {
+		return `
+			<div class="list-item">
+				<div class="list-item__content list-item__content--flex-2 text-muted">${__('Net Total')}</div>
+				<div class="list-item__content net-total">0.00</div>
+			</div>
+			<div class="list-item">
+				<div class="list-item__content list-item__content--flex-2 text-muted">${__('Taxes')}</div>
+				<div class="list-item__content taxes">0.00</div>
+			</div>`;
 	}
 
 	make_customer_field() {
@@ -458,7 +476,7 @@ class POSCart {
 	}
 
 	add_item(item) {
-		this.wrapper.find('.cart-items .empty-state').hide();
+		this.$empty_state.hide();
 
 		if (this.exists(item.item_code)) {
 			// update quantity
@@ -575,7 +593,6 @@ class POSCart {
 
 		// current item
 		this.$cart_items.on('click', '.list-item', function() {
-			console.log('cart item click');
 			me.set_selected_item($(this));
 		});
 
@@ -872,7 +889,7 @@ class NumberPad {
 				me.highlight_button($btn);
 			}
 			if (me.reset_btns.includes(btn_value)) {
-				me.value = '';
+				me.reset_value();
 			} else {
 				if (btn_value === me.del_btn) {
 					me.value = me.value.substr(0, me.value.length - 1);
@@ -882,6 +899,10 @@ class NumberPad {
 			}
 			me.onclick(btn_value);
 		});
+	}
+
+	reset_value() {
+		this.value = '';
 	}
 
 	get_value() {
@@ -951,9 +972,9 @@ class Payment {
 		var me = this;
 
 		this.dialog.set_primary_action(__("Submit"), function() {
-			me.dialog.hide()
-			me.events.submit_form()
-		})
+			me.dialog.hide();
+			me.events.submit_form();
+		});
 	}
 
 	get_fields() {
