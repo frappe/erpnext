@@ -30,10 +30,10 @@ class MaterialRequest(BuyingController):
 		so_items = {} # Format --> {'SO/00001': {'Item/001': 120, 'Item/002': 24}}
 		for d in self.get('items'):
 			if d.sales_order:
-				if not so_items.has_key(d.sales_order):
+				if d.sales_order not in so_items:
 					so_items[d.sales_order] = {d.item_code: flt(d.qty)}
 				else:
-					if not so_items[d.sales_order].has_key(d.item_code):
+					if d.item_code not in so_items[d.sales_order]:
 						so_items[d.sales_order][d.item_code] = flt(d.qty)
 					else:
 						so_items[d.sales_order][d.item_code] += flt(d.qty)

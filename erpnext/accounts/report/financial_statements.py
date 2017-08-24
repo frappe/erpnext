@@ -240,7 +240,7 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 			total_row["total"] += flt(row["total"])
 			row["total"] = ""
 
-	if total_row.has_key("total"):
+	if "total" in total_row:
 		out.append(total_row)
 
 		# blank row after Total
