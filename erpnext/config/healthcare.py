@@ -119,8 +119,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Complaints",
-					"description": _("Complaints")
+					"name": "Complaint",
+					"description": _("Complaint")
 				},
 				{
 					"type": "doctype",
