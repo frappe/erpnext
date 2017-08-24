@@ -78,7 +78,7 @@ frappe.ui.form.on("Hub Settings", {
 	// 	});
 	// },
 
-	disable_hub: (frm) => {
+	reset_values: (frm) => {
 		frm.set_value("enabled", 0);
 		frm.set_value("publish", 0);
 		frm.set_value("access_token", '');
@@ -96,7 +96,7 @@ frappe.ui.form.on("Hub Settings", {
 					freeze: true,
 					callback: function(r) {
 						if(!r.exc){
-							frm.trigger('disable_hub');
+							frm.trigger('reset_values');
 							frappe.msgprint(__("Successfully unregistered."));
 						}
 					},

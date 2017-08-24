@@ -45,6 +45,11 @@ class HubSettings(Document):
 		if self.enabled != self.get_doc_before_save().enabled and self.enabled == 1:
 			return
 
+		if self.suspended:
+			# show a tag
+			pass
+
+
 		self.update_hub()
 
 	def update_hub(self):
