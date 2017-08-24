@@ -44,7 +44,7 @@ frappe.ui.form.on('Consultation', {
 				}else{
 					frappe.msgprint("Please select Patient");
 				}
-			});
+			},"View");
 			frm.add_custom_button(__('Vital Signs'), function() {
 				btn_create_vital_signs(frm);
 			},"Create");

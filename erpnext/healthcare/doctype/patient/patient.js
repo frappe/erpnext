@@ -24,7 +24,7 @@ frappe.ui.form.on('Patient', {
 			frm.add_custom_button(__('Medical Record'), function () {
 				frappe.route_options = { "patient": frm.doc.name };
 				frappe.set_route("medical_record");
-			});
+			},"View");
 		}
 		if (!frm.doc.__islocal && (frappe.user.has_role("Nursing User") || frappe.user.has_role("Physician"))) {
 			frm.add_custom_button(__('Vital Signs'), function () {
