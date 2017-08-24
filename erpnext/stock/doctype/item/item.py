@@ -15,7 +15,7 @@ from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from erpnext.controllers.item_variant import (get_variant, copy_attributes_to_variant,
 	make_variant_item_code, validate_item_variant_attributes, ItemVariantExistsError)
-from erpnext.hub_node.doctype.hub_settings.hub_settings import send_hub_request
+from erpnext.hub_node.doctype.hub_settings.hub_settings import is_hub_enabled, is_hub_published, send_hub_request
 
 class DuplicateReorderRows(frappe.ValidationError): pass
 
@@ -109,11 +109,11 @@ class Item(WebsiteGenerator):
 		self.update_variants()
 		self.update_item_price()
 		self.update_template_item()
-		if self.publish_in_hub and cint(frappe.db.get_single_value('Hub Settings', 'publish')):
+		if self.publish_in_hub and is_hub_enabled and is_hub_published:
 			self.update_for_hub()
 
 	def on_trash(self):
-		if self.publish_in_hub and cint(frappe.db.get_single_value('Hub Settings', 'publish')):
+		if self.publish_in_hub and is_hub_enabled and is_hub_published:
 			self.delete_at_hub()
 
 	def add_price(self, price_list=None):

@@ -7,46 +7,38 @@ import frappe, requests, json, os, redis
 from frappe.model.document import Document
 from frappe.utils import cint, expand_relative_urls, fmt_money, flt, add_years, add_to_date, now, get_datetime, get_datetime_str
 from frappe import _
-from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
+from erpnext.utilities.product import get_price, get_qty_in_stock
 
 hub_url = "http://erpnext.hub:8000"
 # hub_url = "http://hub.erpnext.org"
 
+class HubSetupError(frappe.ValidationError): pass
+
 class HubSettings(Document):
 	config_args = ['enabled']
 	profile_args = ['hub_user_email', 'hub_user_name', 'country']
-	only_in_code = ['private_key']
 	seller_args = ['company', 'seller_city', 'site_name', 'seller_description']
-	publishing_args = ['publish', 'publish_pricing', 'selling_price_list', 'publish_availability', 'warehouse']
+	publishing_args = ['publish', 'current_item_fields', 'publish_pricing',
+		'selling_price_list', 'publish_availability', 'warehouse']
 
-	base_fields_for_items = ["name", "item_code", "item_name", "description", "image", "item_group",
-		 "modified"] #"price", "stock_uom", "stock_qty"
+	base_fields_for_items = ["item_code", "item_name", "item_group", "description", "image", "stock_uom",
+		 "modified"]
+
+	item_fields_to_update = ["price", "currency", "stock_qty"]
 
 	def onload(self):
 		if not self.site_name:
 			# TODO: remove port for production
 			self.site_name = "http://" + frappe.local.site + ":8000"
 
-	def reset_current_on_save_flags(self):
-		self.item_fields_to_add = []
-		self.item_fields_to_remove = []
-		self.publishing_changed = {
-			"publish": 0,
-			"publish_pricing": 0,
-			"publish_availability": 0
-		}
-
 	def validate(self):
-		self.reset_current_on_save_flags()
-		self.update_settings_changes()
-		if (self.publishing_changed["publish_pricing"] or
-			self.publishing_changed["publish_availability"]):
-			self.update_fields()
+		if self.publish_pricing and not self.selling_price_list:
+			frappe.throw(_("Please select a Price List to publish pricing"))
 
 	def on_update(self):
 		if not self.access_token:
 			if self.enabled:
-				frappe.throw(_("Enabled without access_token"))
+				frappe.throw(_("Enabled without access token"))
 			return
 
 		# If just registered
@@ -54,67 +46,29 @@ class HubSettings(Document):
 			return
 
 		self.update_hub()
-		self.update_item_fields_state()
-
-	def update_settings_changes(self):
-		# Pick publishing changes
-		for setting in self.publishing_changed.keys():
-			if self.get(setting) != self.get_doc_before_save().get(setting):
-				self.publishing_changed[setting] = 1
-
-	def update_fields(self):
-		if self.publishing_changed["publish_pricing"]:
-			# TODO: pricing
-			fields = ["standard_rate"]
-			if self.publish_pricing:
-				self.item_fields_to_add += fields
-			else:
-				self.item_fields_to_remove += fields
-		if self.publishing_changed["publish_availability"]:
-			# fields = ["stock_uom", "stock_qty"]
-			fields = ["stock_uom"]
-			if self.publish_availability:
-				self.item_fields_to_add += fields
-			else:
-				self.item_fields_to_remove += fields
-
-	def update_item_fields_state(self):
-		current_item_fields = json.loads(self.current_item_fields)
-		current_item_fields += self.item_fields_to_add
-		new_current_item_fields = [f for f in set(current_item_fields) if f not in self.item_fields_to_remove]
-		self.current_item_fields = json.dumps(new_current_item_fields)
 
 	def update_hub(self):
-		# Updating profile call
-		send_hub_request('update_user_details',
-			data=self.get_args(self.profile_args + self.seller_args))
-
+		self.update_profile_settings()
 		self.update_publishing()
 
+	def update_profile_settings(self):
+		send_hub_request('update_user_details',
+			data=self.get_args(self.profile_args + self.seller_args + self.publishing_args))
+
 	def update_publishing(self):
-		if self.publishing_changed["publish"]:
+		if self.publish != self.get_doc_before_save().publish:
 			if self.publish:
-				fields = json.loads(self.current_item_fields)
-				fields += self.item_fields_to_add
-				self.current_item_fields = json.dumps(fields)
 				self.publish_all_set_items()
 			else:
 				self.reset_publishing_settings()
 				self.unpublish_all_items()
-		else:
-			if self.item_fields_to_add:
-				self.add_item_fields_at_hub()
-			if self.item_fields_to_remove:
-				self.remove_item_fields_at_hub()
 
 	def publish_all_set_items(self, verbose=True):
 		"""Publish items hub.erpnext.org"""
-		# A way to set 'publish in hub' for a bulk of items, if not all are by default, like
-		self.set_publish_for_selling_items()
+		# A way to set 'publish in hub' for a bulk of items, if not all are by default
 
-		fields = json.loads(self.current_item_fields)
-
-		items = frappe.db.get_all("Item", fields=fields, filters={"publish_in_hub": 1})
+		item_list = frappe.db.sql_list("select name from tabItem where publish_in_hub=1")
+		items = frappe.db.get_all("Item", fields=self.base_fields_for_items + ["hub_warehouse"], filters={"publish_in_hub": 1})
 		if not items:
 			frappe.msgprint(_("No published items found."))
 			return
@@ -123,13 +77,27 @@ class HubSettings(Document):
 			item.modified = get_datetime_str(item.modified)
 			if item.image:
 				item.image = self.site_name + item.image
-		item_list = frappe.db.sql_list("select name from tabItem where publish_in_hub=1")
+
+			item_code = item.item_code
+
+			if self.publish_pricing:
+				price = get_price(item_code, self.selling_price_list, "Commercial", self.company)
+				item.price = price["price_list_rate"]
+				item.currency = price["currency"]
+			else:
+				item.price = 0
+				item.currency = None
+
+			if self.publish_availability:
+				item.stock_qty = get_qty_in_stock(item_code, item.hub_warehouse).stock_qty
+			else:
+				item.stock_qty = None
 
 		send_hub_request('update_items',
 			data={
 			"items_to_update": json.dumps(items),
 			"item_list": json.dumps(item_list),
-			"item_fields": fields
+			"item_fields": self.base_fields_for_items + self.item_fields_to_update
 		})
 
 		if verbose:
@@ -139,18 +107,15 @@ class HubSettings(Document):
 		"""Unpublish from hub.erpnext.org, delete items there"""
 		send_hub_request('delete_all_items_of_user')
 
-	def add_item_fields_at_hub(self):
-		items = frappe.db.get_all("Item", fields=["item_code"] + self.item_fields_to_add, filters={"publish_in_hub": 1})
-		send_hub_request('add_item_fields',
+	def sync_item_fields_at_hub(self):
+		# Only updates dynamic feilds of price and stock
+		items = frappe.db.get_all("Item", fields=["item_code"] + self.item_fields_to_update, filters={"publish_in_hub": 1})
+		send_hub_request('update_item_fields',
 			data={
-				"items_with_new_fields": json.dumps(items),
-				"fields_to_add": self.item_fields_to_add
+				"items_with_fields_updates": json.dumps(items),
+				"fields_to_update": self.item_fields_to_update
 			}
 		)
-
-	def remove_item_fields_at_hub(self):
-		send_hub_request('remove_item_fields',
-			data={"fields_to_remove": self.item_fields_to_remove})
 
 	### Account
 	def register(self):
@@ -168,7 +133,7 @@ class HubSettings(Document):
 		self.access_token = response_msg.get("access_token")
 
 		# Set start values
-		self.current_item_fields = json.dumps(self.base_fields_for_items)
+		self.current_item_fields = json.dumps(self.base_fields_for_items + self.item_fields_to_update)
 		self.last_sync_datetime = add_years(now(), -10)
 
 	def unregister_from_hub(self):
@@ -187,8 +152,7 @@ class HubSettings(Document):
 		self.publish = 0
 		self.publish_pricing = 0
 		self.publish_availability = 0
-		self.current_item_fields = json.dumps(self.base_fields_for_items)
-
+		self.current_item_fields = json.dumps(self.base_fields_for_items + self.item_fields_to_update)
 
 	def set_publish_for_selling_items(self):
 		"""Set `publish_in_hub`=1 for all Sales Items"""
@@ -196,14 +160,6 @@ class HubSettings(Document):
 			filters={ "publish_in_hub": 0, "is_sales_item": 1}):
 			frappe.db.set_value("Item", item.name, "publish_in_hub", 1)
 
-	def publish_group(self):
-		pass
-
-	# get published items
-	def bulk_update_hub_category(self):
-		pass
-
-### Helpers
 def send_hub_request(method, data = [], now = False):
 	if now:
 		return hub_request(method, data)
@@ -226,11 +182,30 @@ def hub_request(api_method, data = []):
 	response.raise_for_status()
 	return response.json().get("message")
 
-### Sender terminal
-def make_message_queue_table():
-	pass
+def validate_hub_settings(doc, method):
+	frappe.get_doc("Hub Settings", "Hub Settings").run_method("validate")
 
-def store_as_job_message(method, data):
-	# encrypt data and store both params in message queue
-	pass
+def get_hub_settings():
+	if not getattr(frappe.local, "hub_settings", None):
+		frappe.local.hub_settings = frappe.get_doc("Hub Settings", "Hub Settings")
+	return frappe.local.hub_settings
+
+def is_hub_enabled():
+	return get_hub_settings().enabled
+
+def is_hub_published():
+	return get_hub_settings().publish
+
+def show_pricing_in_hub():
+	return get_hub_settings().publish_pricing
+
+def get_hub_selling_price_list():
+	return get_hub_settings().selling_price_list
+
+def show_availability_in_hub():
+	return get_hub_settings().publish_availability
+
+def check_hub_enabled():
+	if not get_hub_settings().enabled:
+		frappe.throw(_("You need to enable Hub"), HubSetupError)
 
