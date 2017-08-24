@@ -44,100 +44,13 @@ frappe.ui.form.on("Request for Quotation",{
 					freeze: true,
 					args: {
 						rfq_name: frm.doc.name
-					},
-					callback: function(r){
-						frm.reload_doc();
 					}
 				});
 			});
-		}
+		}		
 
 	},
 
-	get_suppliers_button: function (frm) {
-		var doc = frm.doc;
-		var dialog = new frappe.ui.Dialog({
-			title: __("Get Suppliers"),
-			fields: [
-				{	"fieldtype": "Select", "label": __("Get Suppliers By"),
-					"fieldname": "search_type",
-					"options": "Tag\nSupplier Type", "reqd": 1 },
-				{	"fieldtype": "Link", "label": __("Supplier Type"),
-					"fieldname": "supplier_type",
-					"options": "Supplier Type",	"reqd": 0,
-					"depends_on": "eval:doc.search_type == 'Supplier Type'"},
-				{	"fieldtype": "Data", "label": __("Tag"),
-					"fieldname": "tag",	"reqd": 0,
-					"depends_on": "eval:doc.search_type == 'Tag'" },
-				{	"fieldtype": "Button", "label": __("Add All Suppliers"),
-					"fieldname": "add_suppliers", "cssClass": "btn-primary"},
-			]
-		});
-
-		dialog.fields_dict.add_suppliers.$input.click(function() {
-			var args = dialog.get_values();
-			if(!args) return;
-			dialog.hide();
-
-			//Remove blanks
-			for (var j = 0; j < frm.doc.suppliers.length; j++) {
-				if(!frm.doc.suppliers[j].hasOwnProperty("supplier")) {
-					frm.get_field("suppliers").grid.grid_rows[j].remove();
-				}
-			}
-
-			 function load_suppliers(r) {
-				if(r.message) {
-					for (var i = 0; i < r.message.length; i++) {
-						var exists = false;
-						if (r.message[i].constructor === Array){
-							var supplier = r.message[i][0];
-						} else {
-							var supplier = r.message[i].name;
-						}
-
-						for (var j = 0; j < doc.suppliers.length;j++) {
-							if (supplier === doc.suppliers[j].supplier) {
-								exists = true;
-							}
-						}
-						if(!exists) {
-							var d = frm.add_child('suppliers');
-							d.supplier = supplier;
-							frm.script_manager.trigger("supplier", d.doctype, d.name);
-						}
-					}
-				}
-				frm.refresh_field("suppliers");
-			}
-
-			if (args.search_type === "Tag" && args.tag) {
-				return frappe.call({
-					type: "GET",
-					method: "frappe.desk.tags.get_tagged_docs",
-					args: {
-						"doctype": "Supplier",
-						"tag": args.tag
-					},
-					callback: load_suppliers
-				});
-			} else if (args.supplier_type) {
-				return frappe.call({
-					method: "frappe.client.get_list",
-					args: {
-						doctype: "Supplier",
-						order_by: "name",
-						fields: ["name"],
-						filters: [["Supplier", "supplier_type", "=", args.supplier_type]]
-
-					},
-					callback: load_suppliers
-				});
-			}
-		});
-		dialog.show();
-
-	},
 	make_suppplier_quotation: function(frm) {
 		var doc = frm.doc;
 		var dialog = new frappe.ui.Dialog({
@@ -206,29 +119,6 @@ frappe.ui.form.on("Request for Quotation Supplier",{
 		if(!w) {
 			frappe.msgprint(__("Please enable pop-ups")); return;
 		}
-	},
-	no_quote: function(frm, cdt, cdn) {
-		var d = locals[cdt][cdn];
-		if (d.no_quote) {
-			if (d.quote_status != __('Received')) {
-				frappe.model.set_value(cdt, cdn, 'quote_status', 'No Quote');
-			} else {
-				frappe.msgprint(__("Cannot set a received RFQ to No Quote"));
-				frappe.model.set_value(cdt, cdn, 'no_quote', 0);
-			}
-		} else {
-			d.quote_status = __('Pending');
-			frm.call({
-				method:"update_rfq_supplier_status",
-				doc: frm.doc,
-				args: {
-					sup_name: d.supplier
-				},
-				callback: function(r) {
-					frm.refresh_field("suppliers");
-				}
-			});
-		}
 	}
 })
 
@@ -254,6 +144,27 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 						}
 					})
 				}, __("Get items from"));
+
+			// Get items from Opportunity 
+            this.frm.add_custom_button(__('Opportunity'),
+				function() {
+					erpnext.utils.map_current_doc({
+						method: "erpnext.crm.doctype.opportunity.opportunity.make_request_for_quotation",
+						source_doctype: "Opportunity",
+						target: me.frm,
+						setters: {
+							company: me.frm.doc.company
+						},
+						get_query_filters: {
+							enquiry_type: "Sales"
+						}
+					})
+				}, __("Get items from"));  
+
+                
+
+
+
 			// Get items from open Material Requests based on supplier
 			this.frm.add_custom_button(__('Possible Supplier'), function() {
 				// Create a dialog window for the user to pick their supplier
@@ -294,7 +205,7 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 			}, __("Get items from"));
 
 		}
-	},
+   	},
 
 	calculate_taxes_and_totals: function() {
 		return;
