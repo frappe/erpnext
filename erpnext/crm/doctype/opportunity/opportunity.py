@@ -84,19 +84,11 @@ class Opportunity(TransactionBase):
 		self.delete_events()
 
 	def has_active_quotation(self):
-		if not self.with_items:
-			return frappe.get_all('Quotation',
-				{
-					'opportunity': self.name,
-					'status': ("not in", ['Lost', 'Closed']),
-					'docstatus': 1
-				}, 'name')
-		else:
-			return frappe.db.sql("""
-				select q.name
-				from `tabQuotation` q, `tabQuotation Item` qi
-				where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s
-				and q.status not in ('Lost', 'Closed')""", self.name)
+		return frappe.db.sql("""
+			select q.name 
+			from `tabQuotation` q, `tabQuotation Item` qi
+			where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s 
+			and q.status not in ('Lost', 'Closed')""", self.name)
 
 	def has_ordered_quotation(self):
 		return frappe.db.sql("""
@@ -194,6 +186,27 @@ def get_item_details(item_code):
 	}
 
 @frappe.whitelist()
+def make_request_for_quotation(source_name, target_doc=None):
+	doclist = get_mapped_doc("Opportunity", source_name, 	{
+		"Opportunity": {
+			"doctype": "Request for Quotation",
+			"validation": {
+				"enquiry_type": ["=", "Sales"]
+			}
+		},
+		"Opportunity Item": {
+			"doctype": "Request for Quotation Item",
+			"field_map": [
+				["name", "opportunity_item"],
+				["parent", "opportunity"],
+				["uom", "uom"]
+			]
+		}
+	}, target_doc)
+
+	return doclist		
+
+@frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
@@ -220,8 +233,6 @@ def make_quotation(source_name, target_doc=None):
 
 		quotation.run_method("set_missing_values")
 		quotation.run_method("calculate_taxes_and_totals")
-		if not source.with_items:
-			quotation.opportunity = source.name
 
 	doclist = get_mapped_doc("Opportunity", source_name, {
 		"Opportunity": {
@@ -247,6 +258,7 @@ def make_quotation(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_supplier_quotation(source_name, target_doc=None):
+	frappe.msgprint("python");
 	doclist = get_mapped_doc("Opportunity", source_name, {
 		"Opportunity": {
 			"doctype": "Supplier Quotation",
@@ -261,8 +273,10 @@ def make_supplier_quotation(source_name, target_doc=None):
 			}
 		}
 	}, target_doc)
-
+	
 	return doclist
+
+
 
 @frappe.whitelist()
 def set_multiple_status(names, status):
