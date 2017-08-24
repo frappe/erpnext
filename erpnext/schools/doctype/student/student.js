@@ -3,6 +3,11 @@
 
 frappe.ui.form.on('Student', {
 	setup: function(frm) {
+		frm.add_fetch("guardian", "guardian_name", "guardian_name");
+		frm.add_fetch("student", "title", "full_name");
+		frm.add_fetch("student", "gender", "gender");
+		frm.add_fetch("student", "date_of_birth", "date_of_birth");
+
 		frm.set_query("student", "siblings", function(doc, cdt, cdn) {
 			return {
 				"filters": {
@@ -10,19 +15,5 @@ frappe.ui.form.on('Student', {
 				}
 			};
 		})
-	}
-});
-
-frappe.ui.form.on("Student Guardian", {
-	guardian: function(frm) {
-		frm.add_fetch("guardian", "guardian_name", "guardian_name");
-	}
-});
-
-frappe.ui.form.on('Student Sibling', {
-	student: function(frm) {
-		frm.add_fetch("student", "title", "full_name");
-		frm.add_fetch("student", "gender", "gender");
-		frm.add_fetch("student", "date_of_birth", "date_of_birth");
 	}
 });

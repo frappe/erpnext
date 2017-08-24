@@ -30,8 +30,3 @@ class StudentApplicant(Document):
 
 	def on_payment_authorized(self, *args, **kwargs):
 		self.db_set('paid', 1)
-
-@frappe.whitelist()
-def get_guardian_name(guardian):
-	guardian_detail = frappe.get_doc("Guardian", guardian)
-	return guardian_detail.guardian_name
