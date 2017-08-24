@@ -108,11 +108,11 @@ class Item(WebsiteGenerator):
 		self.validate_name_with_item_group()
 		self.update_item_price()
 		self.update_template_item()
-		if self.publish_in_hub and is_hub_enabled and is_hub_published:
+		if self.publish_in_hub and is_hub_enabled() and is_hub_published():
 			self.update_for_hub()
 
 	def on_trash(self):
-		if self.publish_in_hub and is_hub_enabled and is_hub_published:
+		if self.publish_in_hub and is_hub_enabled() and is_hub_published():
 			self.delete_at_hub()
 
 	def add_price(self, price_list=None):

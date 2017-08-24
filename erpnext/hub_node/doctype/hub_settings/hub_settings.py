@@ -78,22 +78,15 @@ class HubSettings(Document):
 			if item.image:
 				item.image = self.site_name + item.image
 
-			item_code = item.item_code
+			set_stock_qty(item)
 
 			if self.publish_pricing:
-				price = get_price(item_code, self.selling_price_list, "Commercial", self.company)
-				item.price = price["price_list_rate"]
-				item.currency = price["currency"]
+				set_item_price(item, self.company, self.selling_price_list)
 			else:
 				item.price = 0
 				item.currency = None
 
-			if self.publish_availability:
-				item.stock_qty = get_qty_in_stock(item_code, item.hub_warehouse).stock_qty
-			else:
-				item.stock_qty = None
-
-		send_hub_request('update_items',
+		response_msg = send_hub_request('update_items',
 			data={
 			"items_to_update": json.dumps(items),
 			"item_list": json.dumps(item_list),
@@ -103,19 +96,11 @@ class HubSettings(Document):
 		if verbose:
 			frappe.msgprint(_("{0} Items synced".format(len(items))))
 
+		# sync_item_fields_at_hub()
+
 	def unpublish_all_items(self):
 		"""Unpublish from hub.erpnext.org, delete items there"""
 		send_hub_request('delete_all_items_of_user')
-
-	def sync_item_fields_at_hub(self):
-		# Only updates dynamic feilds of price and stock
-		items = frappe.db.get_all("Item", fields=["item_code"] + self.item_fields_to_update, filters={"publish_in_hub": 1})
-		send_hub_request('update_item_fields',
-			data={
-				"items_with_fields_updates": json.dumps(items),
-				"fields_to_update": self.item_fields_to_update
-			}
-		)
 
 	### Account
 	def register(self):
@@ -133,8 +118,8 @@ class HubSettings(Document):
 		self.access_token = response_msg.get("access_token")
 
 		# Set start values
-		self.current_item_fields = json.dumps(self.base_fields_for_items + self.item_fields_to_update)
 		self.last_sync_datetime = add_years(now(), -10)
+		self.current_item_fields = json.dumps(self.base_fields_for_items + self.item_fields_to_update)
 
 	def unregister_from_hub(self):
 		"""Unpublish, then delete transactions and user from there"""
@@ -196,16 +181,53 @@ def is_hub_enabled():
 def is_hub_published():
 	return get_hub_settings().publish
 
-def show_pricing_in_hub():
+def is_pricing_published():
 	return get_hub_settings().publish_pricing
 
 def get_hub_selling_price_list():
 	return get_hub_settings().selling_price_list
 
-def show_availability_in_hub():
+def is_availability_published():
 	return get_hub_settings().publish_availability
 
 def check_hub_enabled():
 	if not get_hub_settings().enabled:
 		frappe.throw(_("You need to enable Hub"), HubSetupError)
 
+def get_item_fields_to_sync():
+	return ["price", "currency", "stock_qty"]
+
+def sync_item_fields_at_hub():
+	# Only updates dynamic feilds of price and stock
+	items = frappe.db.get_all("Item", fields=["item_code", "hub_warehouse"], filters={"publish_in_hub": 1})
+
+	for item in items:
+		set_stock_qty(item)
+
+		hub_settings = get_hub_settings()
+		if is_pricing_published():
+			set_item_price(item, hub_settings.company, hub_settings.selling_price_list)
+		else:
+			item.price = 0
+			item.currency = None
+
+	response_msg = send_hub_request('update_item_fields',
+		data={
+			"items_with_fields_updates": json.dumps(items),
+			"fields_to_update": get_item_fields_to_sync()
+		}
+	)
+	# hub_settings = get_hub_settings()
+	# hub_settings.set("last_sync_datetime", response_msg["last_sync_datetime"])
+	# hub_settings.save()
+
+	frappe.msgprint(_("Field values synced"))
+
+def set_item_price(item, company, selling_price_list):
+	item_code = item.item_code
+	price = get_price(item_code, selling_price_list, "Commercial", company)
+	item.price = price["price_list_rate"]
+	item.currency = price["currency"]
+
+def set_stock_qty(item):
+	item.stock_qty = get_qty_in_stock(item.item_code, "hub_warehouse").stock_qty
