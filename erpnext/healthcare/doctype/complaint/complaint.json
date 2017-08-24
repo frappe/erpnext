@@ -54,10 +54,10 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-08-22 13:59:23.562517", 
+ "modified": "2017-08-24 15:48:53.230835", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
- "name": "Complaints", 
+ "name": "Complaint", 
  "name_case": "", 
  "owner": "Administrator", 
  "permissions": [
