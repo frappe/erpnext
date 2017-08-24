@@ -129,7 +129,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Lab Test Samples",
+					"name": "Lab Test Sample",
 					"description": _("Test Sample Master."),
 				},
 				{

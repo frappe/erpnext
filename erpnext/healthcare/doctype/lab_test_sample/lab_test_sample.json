@@ -84,10 +84,10 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-08-22 14:33:29.574402", 
+ "modified": "2017-08-24 15:40:52.708465", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
- "name": "Lab Test Samples", 
+ "name": "Lab Test Sample", 
  "name_case": "", 
  "owner": "Administrator", 
  "permissions": [
