@@ -51,3 +51,16 @@ def get_items(start, page_length, price_list, search_value=""):
 		})
 
 	return res
+
+@frappe.whitelist()
+def submit_invoice(doc):
+	if isinstance(doc, basestring):
+		args = json.loads(doc)
+
+	doc = frappe.new_doc('Sales Invoice')
+	doc.update(args)
+	doc.run_method("set_missing_values")
+	doc.run_method("calculate_taxes_and_totals")
+	doc.submit()
+
+	return doc
