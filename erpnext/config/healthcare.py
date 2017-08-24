@@ -139,8 +139,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Antibiotics",
-					"description": _("Antibiotics.")
+					"name": "Antibiotic",
+					"description": _("Antibiotic.")
 				},
 				{
 					"type": "doctype",

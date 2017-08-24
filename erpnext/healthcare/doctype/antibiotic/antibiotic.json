@@ -53,10 +53,10 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-08-22 13:57:58.694863", 
+ "modified": "2017-08-24 15:54:52.591037", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
- "name": "Antibiotics", 
+ "name": "Antibiotic", 
  "name_case": "", 
  "owner": "Administrator", 
  "permissions": [

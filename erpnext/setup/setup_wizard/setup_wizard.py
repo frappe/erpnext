@@ -677,10 +677,10 @@ def create_antibiotics():
 	 "Cycloserine 2", "Rifampin", "Rifabutin", "Rifapentine", "Rifalazil", "Bacitracin", "Polymyxin B",
 	 "Viomycin", "Capreomycin"]
 	for a in abt:
-		antibiotics = frappe.new_doc("Antibiotics")
-		antibiotics.antibiotic_name = a
+		antibiotic = frappe.new_doc("Antibiotic")
+		antibiotic.antibiotic_name = a
 		try:
-			antibiotics.save()
+			antibiotic.save()
 		except frappe.DuplicateEntryError:
 			pass
 
