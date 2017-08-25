@@ -34,3 +34,5 @@ To ease the data entry while recording the encounter impression, ERPNext Healthc
 > Healthcare > Setup > Complaints > New Complaint
 
 > Healthcare > Setup > Diagnosis > New Diagnosis
+
+{next}

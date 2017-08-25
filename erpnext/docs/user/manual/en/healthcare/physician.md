@@ -14,3 +14,5 @@ Each Physician can have a "Physician Schedule" and a "Time per Appointment" on t
 
 ### Referring Physicians
 You may also want to manage a list of Doctors who refers Patients to your facility. You can manage such data in the Physician document itself by leaving out the User link.
+
+{next}

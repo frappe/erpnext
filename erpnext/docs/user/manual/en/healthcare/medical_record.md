@@ -9,3 +9,5 @@ Medical Record automatically keeps track of all Consultations, recorded Vital Si
 In the Patient screen Create > Medical Record will allow you to record notes to the Medical Record manually. You can also attach files when doing this, and the Medical Record will display links to the attached file along side the notes. Create > Medical Record button is also made available in the Consultation screen
 
 <img class="screenshot" alt="ERPNext Healthcare" src="/docs/assets/img/healthcare/medical_record_2.png">
+
+{next}

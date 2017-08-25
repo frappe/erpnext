@@ -31,7 +31,7 @@ If you have this enabled, all new Patients you create will by default be in Disa
 ### Grant access to Patient Portal
 ERPNext Healthcare allows you to create a portal user associated with a Patient by simply entering the user email id. A welcome email will be sent to the Patient email address to "Complete" registration.
 
-### Workflows
+### Actions
 From the Patient document, the following links are enabled
 
 * Vital Signs: "Create > Vital Signs" button will take you to the new Vital Signs screen to record the vitals of the Patient.

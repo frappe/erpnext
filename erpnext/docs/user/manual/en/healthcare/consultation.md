@@ -24,3 +24,5 @@ Prescribing a laboratory investigation is similar and if you have Lab Tests conf
 You can also attach one or more Medical Codes to designate the Diagnosis in the Medical Coding Section. You will have to select the Medical Code Standard you wish to encode the diagnosis and then select the Code by searching the Code itself or the Code Description.
 
 <img class="screenshot" alt="ERPNext Healthcare" src="/docs/assets/img/healthcare/consultation_4.png">
+
+{next}

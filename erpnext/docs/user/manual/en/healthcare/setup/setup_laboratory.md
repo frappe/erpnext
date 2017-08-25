@@ -63,3 +63,5 @@ You can create masters for a list of Antibiotics.
 ### Sensitivity
 You can create masters for a list of Sensitivity to various Antibiotics.
 > Healthcare > Setup > Sensitivity > New Sensitivity
+
+{next}

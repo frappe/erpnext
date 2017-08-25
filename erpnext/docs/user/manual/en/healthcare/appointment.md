@@ -22,7 +22,7 @@ You can configure ERPNext to send an SMS alert to the Patient about the booking 
 
 The screen also allows the executive to select a Referring Physician so that you can track the source the appointment.
 
-### Workflows
+### Actions
   * Billing: If you collect the consultation fee while booking the Appointment itself you can do so by using the "Create > Invoice" button. This will take you to the ERPNext Accounts Sales Invoice screen.
 
   * Vital Signs: "Create > Vital Signs" button will take you to the new Vital Signs screen to record the vitals of the Patient.

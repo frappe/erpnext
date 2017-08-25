@@ -9,3 +9,5 @@ You can create Physician Schedule from -
 After naming the schedule you can use the "Add Time Slots" button to create time slots for each day of the week. These time slots will then be displayed while checking the availability of a Physician when booking an Appointment.
 
 <img class="screenshot" alt="ERPNext Healthcare" src="/docs/assets/img/healthcare/physician_schedule_2.png">
+
+{next}

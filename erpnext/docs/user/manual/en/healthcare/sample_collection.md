@@ -9,3 +9,5 @@ It's critical for a Laboratory to manage collected samples and you may want to I
 You will have to enter the sample collected date and time to Submit the document signaling that the sample is collected.
 
 Printing on sample identification tags is also possible. By default a sample sticker print template is made available, but you can always create a custom Print Format by using "Customize" button in the print preview.
+
+{next}

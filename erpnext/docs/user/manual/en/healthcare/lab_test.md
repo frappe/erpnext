@@ -18,3 +18,5 @@ In many Laboratories, approval of Lab Tests is a must before printing and submit
 >Healthcare Settings > Laboratory Settings > Require Lab Test Approval
 
 This will ensure that emailing or printing of Lab Tests can only be done after Approval of the Lab Test by the Lab Test Approver.
+
+{next}
