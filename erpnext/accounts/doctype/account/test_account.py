@@ -28,7 +28,14 @@ class TestAccount(unittest.TestCase):
 		self.assertEqual(new_acc.account_name, "Debtors 1")
 		self.assertEqual(new_acc.account_number, "1211")
 
-		frappe.delete_doc("Account", "1211 - Debtors 1 - _TC")
+		frappe.rename_doc("Account", "1211 - Debtors 1 - _TC", "Debtors 2")
+
+		new_acc = frappe.db.get_value("Account", "1211 - Debtors 2 - _TC",
+			["account_name", "account_number"], as_dict=1)
+		self.assertEqual(new_acc.account_name, "Debtors 2")
+		self.assertEqual(new_acc.account_number, "1211")
+
+		frappe.delete_doc("Account", "1211 - Debtors 2 - _TC")
 
 def _make_test_records(verbose):
 	from frappe.test_runner import make_test_objects
