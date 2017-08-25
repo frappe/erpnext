@@ -202,7 +202,8 @@ scheduler_events = {
 		"erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.refresh_scorecards",
 		"erpnext.setup.doctype.company.company.cache_companies_monthly_sales_history",
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms",
-		"erpnext.hub_node.doctype.hub_settings.hub_settings.sync_item_fields_at_hub"
+		"erpnext.hub_node.doctype.hub_settings.hub_settings.sync_item_fields_at_hub",
+		"erpnext.hub_node.update_local_hub_categories"
 	]
 }
 

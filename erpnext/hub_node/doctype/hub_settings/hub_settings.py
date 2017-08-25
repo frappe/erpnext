@@ -110,8 +110,6 @@ class HubSettings(Document):
 	### Account
 	def register(self):
 		"""Register at hub.erpnext.org and exchange keys"""
-		# if self.access_token or hasattr(self, 'private_key'):
-		# 	return
 		response = requests.post(hub_url + "/api/method/hub.hub.api."+"register",
 			data = { "args_data": json.dumps(self.get_args(
 				self.config_args + self.profile_args + self.seller_args #['public_key_pem']
@@ -129,7 +127,7 @@ class HubSettings(Document):
 	def unregister_from_hub(self):
 		"""Unpublish, then delete transactions and user from there"""
 		self.reset_publishing_settings()
-		send_hub_request('unregister')
+		send_hub_request('unregister_user')
 
 	### Helpers
 	def get_args(self, arg_list):
