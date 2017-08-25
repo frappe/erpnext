@@ -156,6 +156,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 						$.each(r.message, function(i, item) {
 							var d = frappe.model.add_child(cur_frm.doc, "Material Request Item", "items");
 							d.item_code = item.item_code;
+							d.item_name = item.item_name;
 							d.description = item.description;
 							d.warehouse = values.warehouse;
 							d.uom = item.stock_uom;
