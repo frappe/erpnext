@@ -79,6 +79,7 @@ erpnext/buying/doctype/supplier_quotation/tests/test_supplier_quotation.js
 erpnext/buying/doctype/supplier_quotation/tests/test_supplier_quotation_for_taxes_and_charges.js
 erpnext/accounts/doctype/sales_invoice/tests/test_sales_invoice.js
 erpnext/accounts/doctype/sales_invoice/tests/test_sales_invoice_with_payment.js
+erpnext/accounts/doctype/sales_invoice/tests/test_sales_invoice_with_payment_request.js
 erpnext/accounts/doctype/purchase_invoice/test_purchase_invoice.js
 erpnext/buying/doctype/supplier_quotation/tests/test_supplier_quotation_for_item_wise_discount.js
 erpnext/buying/doctype/purchase_order/tests/test_purchase_order.js
