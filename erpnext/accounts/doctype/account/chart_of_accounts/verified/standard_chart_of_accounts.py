@@ -5,173 +5,271 @@ from __future__ import unicode_literals
 from frappe import _
 
 def get():
-	return {
-	    _("Application of Funds (Assets)"): {
-	        _("Current Assets"): {
-	            _("Accounts Receivable"): {
-	                _("Debtors"): {
-	                    "account_type": "Receivable"
-	                }
-	            },
-	            _("Bank Accounts"): {
-	                "account_type": "Bank",
-					"is_group": 1
-	            },
-	            _("Cash In Hand"): {
-	                _("Cash"): {
-	                    "account_type": "Cash"
-	                },
-	                "account_type": "Cash"
-	            },
-	            _("Loans and Advances (Assets)"): {
-	            	"is_group": 1
-	            },
-	            _("Securities and Deposits"): {
-	                _("Earnest Money"): {}
-	            },
-	            _("Stock Assets"): {
-	                _("Stock In Hand"): {
-	                    "account_type": "Stock"
-	                },
-	                "account_type": "Stock",
-	            },
-	            _("Tax Assets"): {
-					"is_group": 1
-				}
-	        },
-	        _("Fixed Assets"): {
-	            _("Capital Equipments"): {
-	                "account_type": "Fixed Asset"
-	            },
-	            _("Electronic Equipments"): {
-	                "account_type": "Fixed Asset"
-	            },
-	            _("Furnitures and Fixtures"): {
-	                "account_type": "Fixed Asset"
-	            },
-	            _("Office Equipments"): {
-	                "account_type": "Fixed Asset"
-	            },
-	            _("Plants and Machineries"): {
-	                "account_type": "Fixed Asset"
-	            },
-				_("Buildings"): {
-					"account_type": "Fixed Asset"
-				},
-				_("Softwares"): {
-					"account_type": "Fixed Asset"
-				},
-	            _("Accumulated Depreciation"): {
-	            	"account_type": "Accumulated Depreciation"
-	            }
-	        },
-	        _("Investments"): {
-	        	"is_group": 1
-	        },
-	        _("Temporary Accounts"): {
-	            _("Temporary Opening"): {
-	            	"account_type": "Temporary"
-	            }
-	        },
-			"root_type": "Asset"
-	    },
-	    _("Expenses"): {
-	        _("Direct Expenses"): {
-	            _("Stock Expenses"): {
-	                _("Cost of Goods Sold"): {
-	                    "account_type": "Cost of Goods Sold"
-	                },
-	                _("Expenses Included In Valuation"): {
-	                    "account_type": "Expenses Included In Valuation"
-	                },
-	                _("Stock Adjustment"): {
-	                    "account_type": "Stock Adjustment"
-	                }
-	            },
-	        },
-	        _("Indirect Expenses"): {
-	            _("Administrative Expenses"): {},
-	            _("Commission on Sales"): {},
-	            _("Depreciation"): {
-	                "account_type": "Depreciation"
-	            },
-	            _("Entertainment Expenses"): {},
-	            _("Freight and Forwarding Charges"): {
-	                "account_type": "Chargeable"
-	            },
-	            _("Legal Expenses"): {},
-	            _("Marketing Expenses"): {
-	                "account_type": "Chargeable"
-	            },
-	            _("Miscellaneous Expenses"): {
-	                "account_type": "Chargeable"
-	            },
-	            _("Office Maintenance Expenses"): {},
-	            _("Office Rent"): {},
-	            _("Postal Expenses"): {},
-	            _("Print and Stationery"): {},
-	            _("Round Off"): {
-	                "account_type": "Round Off"
-	            },
-	            _("Salary"): {},
-	            _("Sales Expenses"): {},
-	            _("Telephone Expenses"): {},
-	            _("Travel Expenses"): {},
-	            _("Utility Expenses"): {},
-				_("Write Off"): {},
-				_("Exchange Gain/Loss"): {},
-				_("Gain/Loss on Asset Disposal"): {}
-	        },
-			"root_type": "Expense"
-	    },
-	    _("Income"): {
-	        _("Direct Income"): {
-	            _("Sales"): {},
-	            _("Service"): {}
-	        },
-	        _("Indirect Income"): {
-				"is_group": 1
-	        },
-	        "root_type": "Income"
-	    },
-	    _("Source of Funds (Liabilities)"): {
-	        _("Current Liabilities"): {
-			    _("Accounts Payable"): {
-			        _("Creditors"): {
-			            "account_type": "Payable"
-			        },
-			        _("Payroll Payable"): {},
-			    },
-			    _("Stock Liabilities"): {
-				    _("Stock Received But Not Billed"): {
-				        "account_type": "Stock Received But Not Billed"
-				    },
-			    },
-				_("Duties and Taxes"): {
-					"account_type": "Tax",
-					"is_group": 1
-				},
-				_("Loans (Liabilities)"): {
-					_("Secured Loans"): {},
-					_("Unsecured Loans"): {},
-					_("Bank Overdraft Account"): {},
-				},
-	        },
-			"root_type": "Liability"
-	    },
-		_("Equity"): {
-	        _("Capital Stock"): {
-	            "account_type": "Equity"
-	        },
-	        _("Dividends Paid"): {
-	            "account_type": "Equity"
-	        },
-	        _("Opening Balance Equity"): {
-	            "account_type": "Equity"
-	        },
-	        _("Retained Earnings"): {
-	            "account_type": "Equity"
-	        },
-			"root_type": "Equity"
-		}
-	}
+    return {
+        _("Application of Funds (Assets)"): {
+            _("Current Assets"): {
+                _("Accounts Receivable"): {
+                    _("Debtors"): {
+                        "account_type": "Receivable",
+                        "account_number": "1310"
+                    },
+                    "account_number": "1300"
+                },
+                _("Bank Accounts"): {
+                    "account_type": "Bank",
+                    "is_group": 1,
+                    "account_number": "1200"
+                },
+                _("Cash In Hand"): {
+                    _("Cash"): {
+                        "account_type": "Cash",
+                        "account_number": "1110"
+                    },
+                    "account_type": "Cash",
+                    "account_number": "1100"
+                },
+                _("Loans and Advances (Assets)"): {
+                    "is_group": 1,
+                    "account_number": "1600"
+                },
+                _("Securities and Deposits"): {
+                    _("Earnest Money"): {
+                        "account_number": "1651"
+                    },
+                    "account_number": "1650"
+                },
+                _("Stock Assets"): {
+                    _("Stock In Hand"): {
+                        "account_type": "Stock",
+                        "account_number": "1410"
+                    },
+                    "account_type": "Stock",
+                    "account_number": "1400"
+                },
+                _("Tax Assets"): {
+                    "is_group": 1,
+                    "account_number": "1500"
+                },
+                "account_number": "1100-1600"
+            },
+            _("Fixed Assets"): {
+                _("Capital Equipments"): {
+                    "account_type": "Fixed Asset",
+                    "account_number": "1710"
+                },
+                _("Electronic Equipments"): {
+                    "account_type": "Fixed Asset",
+                    "account_number": "1720"
+                },
+                _("Furnitures and Fixtures"): {
+                    "account_type": "Fixed Asset",
+                    "account_number": "1730"
+                },
+                _("Office Equipments"): {
+                    "account_type": "Fixed Asset",
+                    "account_number": "1740"
+                },
+                _("Plants and Machineries"): {
+                    "account_type": "Fixed Asset",
+                    "account_number": "1750"
+                },
+                _("Buildings"): {
+                    "account_type": "Fixed Asset",
+                    "account_number": "1760"
+                },
+                _("Softwares"): {
+                    "account_type": "Fixed Asset",
+                    "account_number": "1770"
+                },
+                _("Accumulated Depreciation"): {
+                    "account_type": "Accumulated Depreciation",
+                    "account_number": "1780"
+                },
+                "account_number": "1700"
+            },
+            _("Investments"): {
+                "is_group": 1,
+                "account_number": "1800"
+            },
+            _("Temporary Accounts"): {
+                _("Temporary Opening"): {
+                    "account_type": "Temporary",
+                    "account_number": "1910"
+                },
+                "account_number": "1900"
+            },
+            "root_type": "Asset",
+            "account_number": "1000"
+        },
+        _("Expenses"): {
+            _("Direct Expenses"): {
+                _("Stock Expenses"): {
+                    _("Cost of Goods Sold"): {
+                        "account_type": "Cost of Goods Sold",
+                        "account_number": "5111"
+                    },
+                    _("Expenses Included In Valuation"): {
+                        "account_type": "Expenses Included In Valuation",
+                        "account_number": "5118"
+                    },
+                    _("Stock Adjustment"): {
+                        "account_type": "Stock Adjustment",
+                        "account_number": "5119"
+                    },
+                    "account_number": "5110"
+                },
+                "account_number": "5100"
+            },
+            _("Indirect Expenses"): {
+                _("Administrative Expenses"): {
+                    "account_number": "5201"
+                },
+                _("Commission on Sales"): {
+                    "account_number": "5202"
+                },
+                _("Depreciation"): {
+                    "account_type": "Depreciation",
+                    "account_number": "5203"
+                },
+                _("Entertainment Expenses"): {
+                    "account_number": "5204"
+                },
+                _("Freight and Forwarding Charges"): {
+                    "account_type": "Chargeable",
+                    "account_number": "5205"
+                },
+                _("Legal Expenses"): {
+                    "account_number": "5206"
+                },
+                _("Marketing Expenses"): {
+                    "account_type": "Chargeable",
+                    "account_number": "5207"
+                },
+                _("Office Maintenance Expenses"): {
+                    "account_number": "5208"
+                },
+                _("Office Rent"): {
+                    "account_number": "5209"
+                },
+                _("Postal Expenses"): {
+                    "account_number": "5210"
+                },
+                _("Print and Stationery"): {
+                    "account_number": "5211"
+                },
+                _("Round Off"): {
+                    "account_type": "Round Off",
+                    "account_number": "5212"
+                },
+                _("Salary"): {
+                    "account_number": "5213"
+                },
+                _("Sales Expenses"): {
+                    "account_number": "5214"
+                },
+                _("Telephone Expenses"): {
+                    "account_number": "5215"
+                },
+                _("Travel Expenses"): {
+                    "account_number": "5216"
+                },
+                _("Utility Expenses"): {
+                    "account_number": "5217"
+                },
+                _("Write Off"): {
+                    "account_number": "5218"
+                },
+                _("Exchange Gain/Loss"): {
+                    "account_number": "5219"
+                },
+                _("Gain/Loss on Asset Disposal"): {
+                    "account_number": "5220"
+                },
+                _("Miscellaneous Expenses"): {
+                    "account_type": "Chargeable",
+                    "account_number": "5221"
+                },
+                "account_number": "5200"
+            },
+            "root_type": "Expense",
+            "account_number": "5000"
+        },
+        _("Income"): {
+            _("Direct Income"): {
+                _("Sales"): {
+                    "account_number": "4110"
+                },
+                _("Service"): {
+                    "account_number": "4120"
+                },
+                "account_number": "4100"
+            },
+            _("Indirect Income"): {
+                "is_group": 1,
+                "account_number": "4200"
+            },
+            "root_type": "Income",
+            "account_number": "4000"
+        },
+        _("Source of Funds (Liabilities)"): {
+            _("Current Liabilities"): {
+                _("Accounts Payable"): {
+                    _("Creditors"): {
+                        "account_type": "Payable",
+                        "account_number": "2110"
+                    },
+                    _("Payroll Payable"): {
+                        "account_number": "2120"
+                    },
+                    "account_number": "2100"
+                },
+                _("Stock Liabilities"): {
+                    _("Stock Received But Not Billed"): {
+                        "account_type": "Stock Received But Not Billed",
+                        "account_number": "2210"
+                    },
+                    "account_number": "2200"
+                },
+                _("Duties and Taxes"): {
+                    "account_type": "Tax",
+                    "is_group": 1,
+                    "account_number": "2300"
+                },
+                _("Loans (Liabilities)"): {
+                    _("Secured Loans"): {
+                        "account_number": "2410"
+                    },
+                    _("Unsecured Loans"): {
+                        "account_number": "2420"
+                    },
+                    _("Bank Overdraft Account"): {
+                        "account_number": "2430"
+                    },
+                    "account_number": "2400"
+                },
+                "account_number": "2100-2400"
+            },
+            "root_type": "Liability",
+            "account_number": "2000"
+        },
+        _("Equity"): {
+            _("Capital Stock"): {
+                "account_type": "Equity",
+                "account_number": "3100"
+            },
+            _("Dividends Paid"): {
+                "account_type": "Equity",
+                "account_number": "3200"
+            },
+            _("Opening Balance Equity"): {
+                "account_type": "Equity",
+                "account_number": "3300"
+            },
+            _("Retained Earnings"): {
+                "account_type": "Equity",
+                "account_number": "3400"
+            },
+            "root_type": "Equity",
+            "account_number": "3000"
+        }
+    }

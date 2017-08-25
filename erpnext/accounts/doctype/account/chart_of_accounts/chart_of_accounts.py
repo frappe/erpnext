@@ -16,12 +16,12 @@ def create_charts(company, chart_template=None, existing_company=None):
 				if root_account:
 					root_type = child.get("root_type")
 
-				if account_name not in ["account_type", "root_type", "is_group", "tax_rate"]:
+				if account_name not in ["account_number", "account_type",
+					"root_type", "is_group", "tax_rate"]:
 
-					account_name_in_db = unidecode(account_name.strip().lower())
-					if account_name_in_db in accounts:
-						count = accounts.count(account_name_in_db)
-						account_name = account_name + " " + cstr(count)
+					account_number = cstr(child.get("account_number")).strip()
+					account_name, account_name_in_db = add_suffix_if_duplicate(account_name,
+						account_number, accounts)
 
 					is_group = identify_is_group(child)
 					report_type = "Balance Sheet" if root_type in ["Asset", "Liability", "Equity"] \
@@ -35,6 +35,7 @@ def create_charts(company, chart_template=None, existing_company=None):
 						"is_group": is_group,
 						"root_type": root_type,
 						"report_type": report_type,
+						"account_number": account_number,
 						"account_type": child.get("account_type"),
 						"account_currency": frappe.db.get_value("Company", company, "default_currency"),
 						"tax_rate": child.get("tax_rate")
@@ -53,10 +54,23 @@ def create_charts(company, chart_template=None, existing_company=None):
 
 		_import_accounts(chart, None, None, root_account=True)
 
+def add_suffix_if_duplicate(account_name, account_number, accounts):
+	if account_number:
+		account_name_in_db = unidecode(" - ".join([account_number, 
+			account_name.strip().lower()]))
+	else:
+		account_name_in_db = unidecode(account_name.strip().lower())
+
+	if account_name_in_db in accounts:
+		count = accounts.count(account_name_in_db)
+		account_name = account_name + " " + cstr(count)
+
+	return account_name, account_name_in_db
+
 def identify_is_group(child):
 	if child.get("is_group"):
 		is_group = child.get("is_group")
-	elif len(set(child.keys()) - set(["account_type", "root_type", "is_group", "tax_rate"])):
+	elif len(set(child.keys()) - set(["account_type", "root_type", "is_group", "tax_rate", "account_number"])):
 		is_group = 1
 	else:
 		is_group = 0
@@ -118,19 +132,19 @@ def get_charts_for_country(country):
 
 
 def get_account_tree_from_existing_company(existing_company):
-	all_accounts = frappe.get_all('Account', 
-		filters={'company': existing_company}, 
-		fields = ["name", "account_name", "parent_account", "account_type", 
-			"is_group", "root_type", "tax_rate"], 
+	all_accounts = frappe.get_all('Account',
+		filters={'company': existing_company},
+		fields = ["name", "account_name", "parent_account", "account_type",
+			"is_group", "root_type", "tax_rate", "account_number"],
 		order_by="lft, rgt")
-	
+
 	account_tree = {}
 
 	# fill in tree starting with root accounts (those with no parent)
 	if all_accounts:
 		build_account_tree(account_tree, None, all_accounts)
 	return account_tree
-	
+
 def build_account_tree(tree, parent, all_accounts):
 	# find children
 	parent_account = parent.name if parent else ""
@@ -139,17 +153,16 @@ def build_account_tree(tree, parent, all_accounts):
 	# if no children, but a group account
 	if not children and parent.is_group:
 		tree["is_group"] = 1
+		tree["account_number"] = parent.account_number
 
 	# build a subtree for each child
 	for child in children:
-		if child.account_type == "Stock" and not child.is_group:
-			tree["is_group"] = 1
-			continue
-		
 		# start new subtree
 		tree[child.account_name] = {}
 		
 		# assign account_type and root_type
+		if child.account_type:
+			tree[child.account_name]["account_number"] = child.account_number
 		if child.account_type:
 			tree[child.account_name]["account_type"] = child.account_type
 		if child.tax_rate:
