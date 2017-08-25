@@ -6,6 +6,8 @@ import frappe, requests, json
 from frappe.utils import now, nowdate
 from erpnext.hub_node.doctype.hub_settings.hub_settings import send_hub_request
 
+opp_msg_id = ""
+
 @frappe.whitelist()
 def get_items(text, start, limit, category=None, company=None, country=None):
 	return send_hub_request('get_items', data={
@@ -21,7 +23,7 @@ def get_items(text, start, limit, category=None, company=None, country=None):
 def get_all_users():
 	return send_hub_request('get_all_users', now=True)
 
-@frappe.whitelist()
+# @frappe.whitelist()
 def get_categories():
 	return send_hub_request('get_categories', now=True)
 
@@ -35,23 +37,54 @@ def get_seller_details(user_name):
 		"user_name": user_name,
 	}, now=True)
 
+def update_local_hub_categories():
+	categories = get_categories()
+	categories_to_remove = []
+	categories_to_add = []
+	old_categories = frappe.db.sql_list("select category_name from from `tabHub Category`")
+	new_categories = [d.category_name for d in categories]
+	for old_category in old_categories:
+		if old_category not in new_categories:
+			categories_to_remove.append(old_category)
+
+	for new_category in new_categories:
+		if new_category not in old_categories:
+			categories_to_add.append(new_category)
+
+	for d in categories_to_remove:
+		docname = frappe.get_list('Hub Category', filters = {"category_name": d})[0]["name"]
+		frappe.delete_doc("Hub Category", docname)
+
+	for d in categories_to_add:
+		doc = frappe.new_doc("Hub Category")
+		doc.category_name = d
+		doc.save()
+
 @frappe.whitelist()
 def make_rfq_and_send_opportunity(item_code, item_group, supplier_name, supplier_email, company, country):
 	rfq_made = make_rfq(item_code, item_group, supplier_name, supplier_email, company, country)
 	opportunity_sent = send_opportunity(supplier_name, supplier_email)
 	return rfq_made and opportunity_sent
 
+@frappe.whitelist()
+def request_opportunity_message_status():
+	return send_hub_request('get_message_status', data={
+		"message_id": "CLIENT-OPP-"
+	})
+
 def send_opportunity(supplier_name, supplier_email):
 	args = {
 		"buyer_name": supplier_name,
 		"email_id": supplier_email
 	}
-	return send_hub_request('enqueue_message', data={
+	opp_msg_id = send_hub_request('enqueue_message', data={
 		"message_type": "CLIENT-OPP-",
 		"method": "make_opportunity",
 		"arguments": json.dumps(args),
 		"receiver_email": supplier_email
 	})
+
+	return opp_msg_id
 
 def make_rfq(item_code, item_group, supplier_name, supplier_email, company, country):
 	item_code = "HUB-" + item_code
