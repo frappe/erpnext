@@ -122,3 +122,4 @@ erpnext/accounts/doctype/bank_reconciliation/test_bank_reconciliation.js
 erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_material_receipt_for_serialize_item.js
 erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_material_transfer_for_manufacture.js
 erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_subcontract.js
+erpnext/accounts/doctype/sales_invoice/tests/test_sales_invoice_with_serialize_item.js
