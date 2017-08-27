@@ -808,12 +808,23 @@ class POSItems {
 	filter_items(search_term) {
 		search_term = search_term.toLowerCase();
 
+
+		// memoize
+		this.search_index = this.search_index || {};
+		if (this.search_index[search_term]) {
+			const items = this.search_index[search_term];
+			this.render_items(items);
+			return;
+		}
+
 		this.get_items({search_value: search_term})
 			.then((items) => {
+				this.search_index[search_term] = items;
+
 				this.render_items(items);
 				if(this.serial_no) {
 					this.events.update_cart(items[0].item_code,
-						'serial_no', this.serial_no)
+						'serial_no', this.serial_no);
 				}
 			});
 	}
