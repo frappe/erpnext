@@ -137,7 +137,6 @@ var get_bom_material_detail= function(doc, cdt, cdn, scrap_items) {
 					frappe.throw('Could not get details for the material.');
 				} else {
 					// TODO: erpnext.utils.remove_empty_first_row(cur_frm, "items");
-					const row = frappe.model.add_child(doc, cdt, "items");
 					$.each(r.message, function(field, value){
 						frappe.model.set_value(cdt, cdn, field, value);
 					});
