@@ -284,12 +284,9 @@ class PointOfSale {
 			//
 		}).addClass('visible-xs');
 
-		this.page.add_menu_item(__("Email"), function () {
-			me.frm.email_doc();
-		});
-
-		this.page.add_menu_item(__("Sync Offline Invoices"), function () {
-			//
+		this.page.add_menu_item(__("Form View"), function () {
+			var doc = frappe.model.sync(me.frm.doc);
+			frappe.set_route("Form", me.frm.doc.doctype, me.frm.doc.name);
 		});
 
 		this.page.add_menu_item(__("POS Profile"), function () {
@@ -306,6 +303,10 @@ class PointOfSale {
 
 		this.page.set_primary_action(__("New"), () => {
 			this.make_new_invoice();
+		});
+
+		this.page.add_menu_item(__("Email"), function () {
+			me.frm.email_doc();
 		});
 	}
 
@@ -934,20 +935,22 @@ class Payment {
 		this.frm = frm;
 		this.events = events;
 		this.make();
+		this.bind_events();
 		this.set_primary_action();
-		// this.show_outstanding_amount()
 	}
 
 	open_modal() {
-		this.show_total_amount();
 		this.dialog.show();
 	}
 
 	make() {
 		this.set_flag();
 
+		let title = __('Total Amount {0}',
+			[format_currency(this.frm.doc.grand_total, this.frm.doc.currency)])
+
 		this.dialog = new frappe.ui.Dialog({
-			title: __('Payment'),
+			title: title,
 			fields: this.get_fields(),
 			width: 800
 		});
@@ -963,9 +966,19 @@ class Payment {
 				['Del', 0, '.'],
 			],
 			onclick: (btn_value) => {
-				// on click
+				if(this.fieldname) {
+					this.dialog.set_value(this.fieldname, flt(this.numpad.value))
+				}
 			}
 		});
+	}
+
+	bind_events() {
+		var me = this;
+		$(this.dialog.body).find('.input-with-feedback').focusin(function() {
+			me.numpad.value = '';
+			me.fieldname = $(this).prop('dataset').fieldname;
+		})
 	}
 
 	set_primary_action() {
@@ -979,18 +992,8 @@ class Payment {
 
 	get_fields() {
 		const me = this;
-		let fields = [
-			{
-				fieldtype: 'HTML',
-				fieldname: 'total_amount',
-			},
-			{
-				fieldtype: 'Section Break',
-				label: __('Mode of Payments')
-			},
-		];
 
-		fields = fields.concat(this.frm.doc.payments.map(p => {
+		let fields = this.frm.doc.payments.map(p => {
 			return {
 				fieldtype: 'Currency',
 				label: __(p.mode_of_payment),
@@ -998,12 +1001,11 @@ class Payment {
 				fieldname: p.mode_of_payment,
 				default: p.amount,
 				onchange: (e) => {
-					const fieldname = $(e.target).attr('data-fieldname');
-					const value = this.dialog.get_value(fieldname);
-					me.update_payment_value(fieldname, value);
+					const value = this.dialog.get_value(this.fieldname);
+					me.update_payment_value(this.fieldname, value);
 				}
 			};
-		}));
+		});
 
 		fields = fields.concat([
 			{
@@ -1045,6 +1047,28 @@ class Payment {
 					});
 				}
 			},
+			{
+				fieldtype: 'Section Break',
+			},
+			{
+				fieldtype: 'Currency',
+				label: __("Paid Amount"),
+				options: me.frm.doc.currency,
+				fieldname: "paid_amount",
+				default: me.frm.doc.paid_amount,
+				read_only: 1
+			},
+			{
+				fieldtype: 'Column Break',
+			},
+			{
+				fieldtype: 'Currency',
+				label: __("Outstanding Amount"),
+				options: me.frm.doc.currency,
+				fieldname: "outstanding_amount",
+				default: me.frm.doc.outstanding_amount,
+				read_only: 1
+			},
 		]);
 
 		return fields;
@@ -1082,21 +1106,15 @@ class Payment {
 
 	update_change_amount() {
 		this.dialog.set_value("change_amount", this.frm.doc.change_amount)
+		this.show_paid_amount()
 	}
 
 	update_write_off_amount() {
 		this.dialog.set_value("write_off_amount", this.frm.doc.write_off_amount)
 	}
 
-	show_total_amount() {
-		const grand_total = format_currency(this.frm.doc.grand_total, this.frm.doc.currency);
-		const template = `
-			<h3>
-				${ __("Total Amount") }:
-				<span class="label label-default">${__(grand_total)}</span>
-			</h3>
-		`
-		this.total_amount_section = $(this.$body).find("[data-fieldname = 'total_amount']");
-		this.total_amount_section.html(template);
+	show_paid_amount() {
+		this.dialog.set_value("paid_amount", this.frm.doc.paid_amount)
+		this.dialog.set_value("outstanding_amount", this.frm.doc.outstanding_amount)
 	}
 }
