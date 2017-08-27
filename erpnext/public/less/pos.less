@@ -1,8 +1,23 @@
 @import "../../../../frappe/frappe/public/less/variables.less";
 
+[data-route="point-of-sale"] {
+	.layout-main-section-wrapper {
+		margin-bottom: 0;
+	}
+
+	.pos-items-wrapper {
+		max-height: ~"calc(100vh - 210px)";
+	}
+}
+
 .pos {
 	// display: flex;
 	padding: 15px;
+}
+
+.list-item {
+	min-height: 40px;
+	height: auto;
 }
 
 .cart-container {
@@ -46,7 +61,7 @@
 }
 
 .cart-items {
-	height: 200px;
+	height: 150px;
 	overflow: auto;
 
 	.list-item.current-item {
@@ -162,5 +177,45 @@ input[type=number]::-webkit-outer-spin-button {
 	&.brand-primary {
 		background-color: @brand-primary;
 		color: #ffffff;
+	}
+}
+
+// taxes, totals and discount area
+.discount-amount {
+	.discount-inputs {
+		display: flex;
+		flex-direction: column;
+		padding: 15px 0;
+	}
+
+	input:first-child {
+		margin-bottom: 10px;
+	}
+}
+
+.taxes-and-totals {
+	border-top: 1px solid @border-color;
+
+	.taxes {
+		display: flex;
+		flex-direction: column;
+		padding: 15px 0;
+		align-items: flex-end;
+
+		& > div:first-child {
+			margin-bottom: 10px;
+		}
+	}
+}
+
+.grand-total {
+	border-top: 1px solid @border-color;
+
+	.list-item {
+		height: 60px;
+	}
+
+	.grand-total-value {
+		font-size: 24px;
 	}
 }

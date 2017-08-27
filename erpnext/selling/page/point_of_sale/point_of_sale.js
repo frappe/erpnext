@@ -150,8 +150,9 @@ class PointOfSale {
 					this.cart.add_item(item);
 				})
 				.then(() => {
-					this.show_taxes_and_totals();
-				})
+					this.cart.update_taxes_and_totals();
+					this.cart.update_grand_total();
+				});
 
 			// if (barcode) {
 			// 	const value = barcode['serial_no'] ?
@@ -170,7 +171,8 @@ class PointOfSale {
 			.then(() => {
 				// update cart
 				this.cart.add_item(item);
-				this.show_taxes_and_totals();
+				this.cart.update_taxes_and_totals();
+				this.cart.update_grand_total();
 			});
 	}
 
@@ -306,27 +308,8 @@ class PointOfSale {
 		});
 
 		this.page.add_menu_item(__("Email"), function () {
-			me.frm.email_doc();
+			this.frm.email_doc();
 		});
-	}
-
-	show_taxes_and_totals() {
-		let tax_template = '';
-		let currency = this.frm.doc.currency;
-		const taxes_wrapper = $(this.wrapper).find('.taxes');
-
-		this.frm.refresh_field('taxes');
-		$(this.wrapper).find('.net-total').html(format_currency(this.frm.doc.net_total, this.currency))
-		$.each(this.frm.doc.taxes, function(index, data) {
-			tax_template += `
-				<div class="list-item" style="padding-right: 0;">
-					<div >${data.description}</div>
-					<div class="text-right bold">${fmt_money(data.tax_amount, currency)}</div>
-				</div>`;
-		});
-
-		taxes_wrapper.empty()
-		taxes_wrapper.html(tax_template);
 	}
 }
 
@@ -363,9 +346,15 @@ class POSCart {
 								<span>No Items added to cart</span>
 							</div>
 						</div>
-					</div>
-					<div class="taxes-and-totals">
-						${this.get_taxes_and_totals()}
+						<div class="taxes-and-totals">
+							${this.get_taxes_and_totals()}
+						</div>
+						<div class="discount-amount">
+							${this.get_discount_amount()}
+						</div>
+						<div class="grand-total">
+							${this.get_grand_total()}
+						</div>
 					</div>
 				</div>
 				<div class="number-pad-container">
@@ -375,6 +364,13 @@ class POSCart {
 		this.$cart_items = this.wrapper.find('.cart-items');
 		this.$empty_state = this.wrapper.find('.cart-items .empty-state');
 		this.$taxes_and_totals = this.wrapper.find('.taxes-and-totals');
+		this.$discount_amount = this.wrapper.find('.discount-amount');
+		this.$grand_total = this.wrapper.find('.grand-total');
+
+		this.toggle_taxes_and_totals(false);
+		this.$grand_total.on('click', () => {
+			this.toggle_taxes_and_totals();
+		});
 	}
 
 	reset() {
@@ -383,6 +379,35 @@ class POSCart {
 		this.$taxes_and_totals.html(this.get_taxes_and_totals());
 		this.numpad && this.numpad.reset_value();
 		this.customer_field.set_value("");
+	}
+
+	get_grand_total() {
+		return `
+			<div class="list-item">
+				<div class="list-item__content list-item__content--flex-2 text-muted">${__('Grand Total')}</div>
+				<div class="list-item__content grand-total-value">0.00</div>
+			</div>
+		`;
+	}
+
+	get_discount_amount() {
+		const get_currency_symbol = window.get_currency_symbol;
+
+		return `
+			<div class="list-item">
+				<div class="list-item__content list-item__content--flex-2 text-muted">${__('Discount')}</div>
+				<div class="list-item__content discount-inputs">
+					<input type="text"
+						class="form-control discount-percentage text-right"
+						placeholder="% 0.00"
+					>
+					<input type="text"
+						class="form-control discount-amount text-right"
+						placeholder="${get_currency_symbol(this.frm.doc.currency)} 0.00"
+					>
+				</div>
+			</div>
+		`;
 	}
 
 	get_taxes_and_totals() {
@@ -394,7 +419,47 @@ class POSCart {
 			<div class="list-item">
 				<div class="list-item__content list-item__content--flex-2 text-muted">${__('Taxes')}</div>
 				<div class="list-item__content taxes">0.00</div>
-			</div>`;
+			</div>
+		`;
+	}
+
+	toggle_taxes_and_totals(flag) {
+		if (flag !== undefined) {
+			this.tax_area_is_shown = flag;
+		} else {
+			this.tax_area_is_shown = !this.tax_area_is_shown;
+		}
+
+		this.$taxes_and_totals.toggle(this.tax_area_is_shown);
+		this.$discount_amount.toggle(this.tax_area_is_shown);
+	}
+
+	update_taxes_and_totals() {
+		const currency = this.frm.doc.currency;
+		this.frm.refresh_field('taxes');
+
+		// Update totals
+		this.$taxes_and_totals.find('.net-total')
+			.html(format_currency(this.frm.doc.net_total, currency));
+
+		// Update taxes
+		const taxes_html = this.frm.doc.taxes.map(tax => {
+			return `
+				<div>
+					<span>${tax.description}</span>
+					<span class="text-right bold">
+						${format_currency(tax.tax_amount, currency)}
+					</span>
+				</div>
+			`;
+		}).join("");
+		this.$taxes_and_totals.find('.taxes').html(taxes_html);
+	}
+
+	update_grand_total() {
+		this.$grand_total.find('.grand-total-value').text(
+			format_currency(this.frm.doc.grand_total, this.frm.currency)
+		);
 	}
 
 	make_customer_field() {
@@ -965,9 +1030,9 @@ class Payment {
 				[7, 8, 9],
 				['Del', 0, '.'],
 			],
-			onclick: (btn_value) => {
+			onclick: () => {
 				if(this.fieldname) {
-					this.dialog.set_value(this.fieldname, flt(this.numpad.value))
+					this.dialog.set_value(this.fieldname, this.numpad.get_value());
 				}
 			}
 		});
@@ -976,9 +1041,9 @@ class Payment {
 	bind_events() {
 		var me = this;
 		$(this.dialog.body).find('.input-with-feedback').focusin(function() {
-			me.numpad.value = '';
+			me.numpad.reset_value();
 			me.fieldname = $(this).prop('dataset').fieldname;
-		})
+		});
 	}
 
 	set_primary_action() {

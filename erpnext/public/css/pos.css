@@ -1,5 +1,15 @@
+[data-route="point-of-sale"] .layout-main-section-wrapper {
+  margin-bottom: 0;
+}
+[data-route="point-of-sale"] .pos-items-wrapper {
+  max-height: calc(100vh - 210px);
+}
 .pos {
   padding: 15px;
+}
+.list-item {
+  min-height: 40px;
+  height: auto;
 }
 .cart-container {
   padding: 0 15px;
@@ -33,7 +43,7 @@
   flex: 1.5;
 }
 .cart-items {
-  height: 200px;
+  height: 150px;
   overflow: auto;
 }
 .cart-items .list-item.current-item {
@@ -131,4 +141,33 @@ input[type=number]::-webkit-outer-spin-button {
 .num-col.brand-primary {
   background-color: #5E64FF;
   color: #ffffff;
+}
+.discount-amount .discount-inputs {
+  display: flex;
+  flex-direction: column;
+  padding: 15px 0;
+}
+.discount-amount input:first-child {
+  margin-bottom: 10px;
+}
+.taxes-and-totals {
+  border-top: 1px solid #d1d8dd;
+}
+.taxes-and-totals .taxes {
+  display: flex;
+  flex-direction: column;
+  padding: 15px 0;
+  align-items: flex-end;
+}
+.taxes-and-totals .taxes > div:first-child {
+  margin-bottom: 10px;
+}
+.grand-total {
+  border-top: 1px solid #d1d8dd;
+}
+.grand-total .list-item {
+  height: 60px;
+}
+.grand-total .grand-total-value {
+  font-size: 24px;
 }
