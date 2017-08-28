@@ -12,7 +12,7 @@ from erpnext.accounts.party import get_party_account_currency
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 
 @frappe.whitelist()
-def get_items(start, page_length, price_list, search_value=""):
+def get_items(start, page_length, price_list, item_group, search_value=""):
 	condition = ""
 	serial_no = ""
 	item_code = search_value
@@ -23,6 +23,7 @@ def get_items(start, page_length, price_list, search_value=""):
 		if serial_no_data:
 			serial_no, item_code = serial_no_data
 
+	lft, rgt = frappe.db.get_value('Item Group', item_group, ['lft', 'rgt'])
 	# locate function is used to sort by closest match from the beginning of the value
 	res = frappe.db.sql("""select i.name as item_code, i.item_name, i.image as item_image,
 		item_det.price_list_rate, item_det.currency
@@ -33,9 +34,10 @@ def get_items(start, page_length, price_list, search_value=""):
 			(item_det.item_code=i.name or item_det.item_code=i.variant_of)
 		where
 			i.disabled = 0 and i.has_variants = 0
+			and i.item_group in (select name from `tabItem Group` where lft >= {lft} and rgt <= {rgt})
 			and (i.item_code like %(item_code)s
 			or i.item_name like %(item_code)s)
-		limit {start}, {page_length}""".format(start=start, page_length=page_length),
+		limit {start}, {page_length}""".format(start=start, page_length=page_length, lft=lft, rgt=rgt),
 		{
 			'item_code': '%%%s%%'%(frappe.db.escape(item_code)),
 			'price_list': price_list

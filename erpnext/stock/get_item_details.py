@@ -79,7 +79,7 @@ def get_item_details(args):
 		and out.warehouse and out.stock_qty > 0:
 
 		if out.has_serial_no:
-			out.serial_no = get_serial_no(out)
+			out.serial_no = get_serial_no(out, args.serial_no)
 
 		if out.has_batch_no and not args.get("batch_no"):
 			out.batch_no = get_batch_no(out.item_code, out.warehouse, out.qty)
@@ -554,7 +554,8 @@ def get_gross_profit(out):
 	return out
 
 @frappe.whitelist()
-def get_serial_no(args):
+def get_serial_no(args, serial_nos=None):
+	serial_no = None
 	if isinstance(args, basestring):
 		args = json.loads(args)
 		args = frappe._dict(args)
@@ -568,4 +569,9 @@ def get_serial_no(args):
 			args = json.dumps({"item_code": args.get('item_code'),"warehouse": args.get('warehouse'),"stock_qty": args.get('stock_qty')})
 			args = process_args(args)
 			serial_no = get_serial_nos_by_fifo(args)
-			return serial_no
+
+	if not serial_no and serial_nos:
+		# For POS
+		serial_no = serial_nos
+
+	return serial_no
