@@ -113,3 +113,4 @@ erpnext/accounts/doctype/journal_entry/test_journal_entry.js
 erpnext/stock/doctype/stock_reconciliation/test_stock_reconciliation.js
 erpnext/accounts/doctype/payment_entry/tests/test_payment_entry.js
 erpnext/selling/doctype/quotation/tests/test_quotation_submit_cancel_amend.js
+erpnext/stock/doctype/batch/test_batch.js
