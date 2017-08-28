@@ -140,7 +140,6 @@ def get_help_messages():
 		)
 	]
 
-
 	for m in message_settings:
 		if not m.domain or domain in m.domain:
 			m.count = frappe.db.count(m.doctype)

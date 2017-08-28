@@ -64,53 +64,7 @@ def get_notification_config():
 				"target_field" : "monthly_sales_target",
 				"value_field" : "total_monthly_sales"
 			}
-		},
-
-		"user_progress": {
-			"Company": {
-				"doctype" : "Company",
-				"min_count": 0
-			},
-			"Customers": {
-				"doctype" : "Customer",
-				"min_count": 0
-			},
-			"Suppliers": {
-				"doctype" : "Supplier",
-				"min_count": 0
-			},
-			"Products": {
-				"doctype" : "Item",
-				"min_count": 0
-			},
-			"Sales_Target": {
-				"doctype": "Company",
-				"default": "company",
-				"field": "monthly_sales_target",
-				"min_value": 0
-			},
-			"Programs": {
-				"doctype" : "Program",
-				"min_count": 0
-			},
-			"Courses": {
-				"doctype" : "Course",
-				"min_count": 0
-			},
-			"Instructors": {
-				"doctype" : "Instructor",
-				"min_count": 0
-			},
-			"Rooms": {
-				"doctype" : "Room",
-				"min_count": 0
-			},
-			"Users": {
-				"doctype": "User",
-				"min_count": 3
-			}
-		},
-
+		}
 	}
 
 	doctype = [d for d in notifications.get('for_doctype')]

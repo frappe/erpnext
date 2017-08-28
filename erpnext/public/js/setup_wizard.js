@@ -22,10 +22,10 @@ erpnext.setup.slides_settings = [
 				fieldname: 'domain', label: __('Domain'), fieldtype: 'Select',
 				options: [
 					{ "label": __("Distribution"), "value": "Distribution" },
-					{ "label": __("Education"), "value": "Education" },
 					{ "label": __("Manufacturing"), "value": "Manufacturing" },
 					{ "label": __("Retail"), "value": "Retail" },
-					{ "label": __("Services"), "value": "Services" }
+					{ "label": __("Services"), "value": "Services" },
+					{ "label": __("Education"), "value": "Education" }
 				], reqd: 1
 			},
 		],

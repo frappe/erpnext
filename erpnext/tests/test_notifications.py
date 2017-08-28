@@ -33,25 +33,7 @@ class TestNotifications(unittest.TestCase):
 			},
 		]
 
-		test_records_customer = [
-			{
-				"customer_group": "All Customer Groups",
-				"customer_name": "_Test Customer 20",
-				"customer_type": "Individual",
-				"doctype": "Customer",
-				"territory": "All Territories"
-			},
-			{
-				"customer_group": "All Customer Groups",
-				"customer_name": "_Test Customer 21",
-				"customer_type": "Individual",
-				"doctype": "Customer",
-				"territory": "All Territories"
-			}
-		]
-
 		make_test_objects('Company', test_records=test_records_company, reset=True)
-		make_test_objects('Customer', test_records=test_records_customer, reset=True)
 
 	def test_get_notifications_for_targets(self):
 		'''
@@ -62,13 +44,3 @@ class TestNotifications(unittest.TestCase):
 		doc_target_percents = notifications.get_notifications_for_targets(config, {})
 		self.assertEquals(doc_target_percents['Company']['_Test Company 7'], 10)
 		self.assertEquals(doc_target_percents['Company']['_Test Company 6'], 0)
-
-	def test_get_user_progress_status(self):
-		'''
-			Test user progress status
-		'''
-		config = notifications.get_notification_config()
-		user_progress_status = notifications.get_user_progress_status(config)
-		self.assertEquals(user_progress_status['Company'], 1)
-		self.assertEquals(user_progress_status['Customers'], 1)
-
