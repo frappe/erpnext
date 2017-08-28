@@ -119,3 +119,4 @@ erpnext/accounts/doctype/payment_entry/tests/test_payment_entry.js
 erpnext/selling/doctype/quotation/tests/test_quotation_submit_cancel_amend.js
 erpnext/stock/doctype/batch/test_batch.js
 erpnext/accounts/doctype/bank_reconciliation/test_bank_reconciliation.js
+erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_material_transfer_for_manufacture.js
