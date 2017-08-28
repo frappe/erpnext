@@ -115,9 +115,6 @@ class PurchaseReceipt(BuyingController):
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
 
-		# Set status as Submitted
-		frappe.db.set(self, 'status', 'Submitted')
-
 		self.update_prevdoc_status()
 		if self.per_billed < 100:
 			self.update_billing_status()
@@ -151,8 +148,6 @@ class PurchaseReceipt(BuyingController):
 			self.name)
 		if submitted:
 			frappe.throw(_("Purchase Invoice {0} is already submitted").format(submitted[0][0]))
-
-		frappe.db.set(self,'status','Cancelled')
 
 		self.update_prevdoc_status()
 		self.update_billing_status()

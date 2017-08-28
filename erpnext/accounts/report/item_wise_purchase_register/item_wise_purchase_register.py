@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
 from frappe.utils import flt
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import get_tax_accounts
@@ -14,10 +14,12 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	if not filters: filters = {}
 	columns = get_columns(additional_table_columns)
 
+	company_currency = erpnext.get_company_currency(filters.company)
+
 	item_list = get_items(filters, additional_query_columns)
 	aii_account_map = get_aii_accounts()
 	if item_list:
-		itemised_tax, tax_columns = get_tax_accounts(item_list, columns,
+		itemised_tax, tax_columns = get_tax_accounts(item_list, columns, company_currency,
 			doctype="Purchase Invoice", tax_doctype="Purchase Taxes and Charges")
 
 	columns.append({
@@ -26,7 +28,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		"fieldtype": "Data",
 		"width": 80
 	})
-	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+
 	po_pr_map = get_purchase_receipts_against_purchase_order(item_list)
 
 	data = []
