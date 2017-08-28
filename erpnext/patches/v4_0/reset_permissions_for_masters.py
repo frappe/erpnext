@@ -1,7 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 from frappe.permissions import reset_perms
 
 def execute():
@@ -16,5 +16,5 @@ def execute():
 		try:
 			reset_perms(doctype)
 		except:
-			print "Error resetting perms for", doctype
+			print("Error resetting perms for", doctype)
 			raise

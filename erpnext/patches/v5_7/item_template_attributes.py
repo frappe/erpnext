@@ -1,7 +1,7 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 import frappe
 import MySQLdb
 
@@ -32,7 +32,7 @@ def execute():
 			migrate_item_variants()
 
 		except MySQLdb.ProgrammingError:
-			print "`tabItem Variant` not found"
+			print("`tabItem Variant` not found")
 
 def rename_and_reload_doctypes():
 	if "tabVariant Attribute" in frappe.db.get_tables():
