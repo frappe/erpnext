@@ -64,7 +64,24 @@ window.ERPNextHub = class ERPNextHub {
 
 	setup_empty_state() {
 		this.remove_account_from_header();
-		let $empty_state = $(frappe.render_template('register_in_hub', {}));
+		let $empty_state = $(`
+			<div style="padding: 70px 0px;">
+				<h2 class="text-center">${ __("Register For ERPNext Hub") }</h2>
+				<br>
+				<div class="row">
+					<div class="col-md-6 col-md-offset-3">
+						<ul>
+							<li>Let other ERPNext users discover your products</li>
+							<li>Automate workflow with Supplier from within ERPNext (later)</li>
+						</ul>
+					</div>
+				</div>
+				<br>
+				<div class="text-center">
+					<a class="btn btn-primary hub-settings-btn">Hub Settings</a>
+				</div>
+			</div>
+		`);
 		this.$hub_main_section.append($empty_state);
 		this.$hub_main_section.find('.hub-settings-btn').on('click', () => {
 			frappe.set_route('Form', 'Hub Settings', {});
@@ -205,7 +222,7 @@ window.ERPNextHub = class ERPNextHub {
 			method: 'erpnext.hub_node.get_items',
 			filters: filters
 		});
-		this.filtered_item_list.item_on_click = (item) => {
+		this.filtered_item_list.on_item_click = (item) => {
 			this.go_to_item_page(item);
 		}
 		this.filtered_item_list.setup();
@@ -215,20 +232,24 @@ window.ERPNextHub = class ERPNextHub {
 		// TODO: Check if item quote already requested
 		frappe.set_route('hub', 'Item', item.item_name);
 		this.$hub_main_section.empty();
-		let $item_page = $(frappe.render_template("hub_item_page", {item:item}))
-			.appendTo(this.$hub_main_section);
+
+		let $item_page =
+			$(this.get_item_page(item))
+				.appendTo(this.$hub_main_section);
 
 		let $company_items = $item_page.find('.company-items');
 
 		let company_item_list = new ERPNextHubList({
 			parent: $company_items,
 			title: 'More by ' + item.company,
-			page_length: 20,
+			page_length: 5,
 			list_css_class: 'company-item-list',
 			method: 'erpnext.hub_node.get_items',
-			filters: {text: '', company: item.company}
+			filters: {text: '', company: item.company},
+			img_size: 150
 		});
-		company_item_list.item_on_click = (item) => {
+
+		company_item_list.on_item_click = (item) => {
 			this.go_to_item_page(item);
 		}
 		company_item_list.setup();
@@ -248,6 +269,47 @@ window.ERPNextHub = class ERPNextHub {
 		// let $breadcrumbs = $();
 		// $item_page.prepend($breadcrumbs);
 		// this.bind_breadcrumbs();
+	}
+
+	get_item_page(item) {
+		return `
+			<div class="hub-item-page">
+				<div class="item-header">
+					<div class="item-page-image">
+						<img src="${ item.image }">
+					</div>
+					<div class="title-content">
+						<div class="title">
+							<h2>${ item.item_name }</h2>
+						</div>
+						<div class="company">
+							<span class="">${ item.company }</span>
+						</div>
+						<div class="category">
+							<span class="text-muted">Products</span>
+						</div>
+						<div class="description">
+							<span class="small">${ item.description }</span>
+						</div>
+						<div class="price">
+							${ item.standard_rate ? format_currency(item.standard_rate) : '' }
+						</div>
+						<div class="actions">
+							<a class="btn btn-primary rfq-btn">Request A Quote</a>
+						</div>
+					</div>
+
+				</div>
+				<div class="item-more-info"></div>
+				<div class="company-items">
+					<!--<div class="title">
+						More by ${ item.company }
+					</div>
+					<div class="company-item-list">
+					</div>-->
+				</div>
+			</div>
+		`;
 	}
 
 	go_to_company_page(company) {
@@ -329,7 +391,8 @@ window.ERPNextHubList = class ERPNextHubList {
 		list_css_class = '',
 		method = '',
 		filters = {text: ''},
-		on_item_click = null
+		on_item_click = null,
+		img_size = 200
 	}) {
 		this.parent = parent;
 		this.title = title;
@@ -338,6 +401,7 @@ window.ERPNextHubList = class ERPNextHubList {
 		this.method = method;
 		this.filters = filters;
 		this.on_item_click = on_item_click;
+		this.img_size = img_size;
 		// this.setup();
 	}
 
@@ -411,12 +475,8 @@ window.ERPNextHubList = class ERPNextHubList {
 			method: this.method,
 			args: args,
 			callback: function(r) {
-<<<<<<< HEAD
 				let items = r.message.items;
 				console.log("items: ", items);
-=======
-				console.log('items: ', r.message);
->>>>>>> 3577d6734... add hub.less, refactor code
 				me.$loading.hide();
 				if(items) {
 					if(items.length && items.length > me.page_length) {
@@ -427,13 +487,8 @@ window.ERPNextHubList = class ERPNextHubList {
 						me.$done.removeClass('hide');
 						me.$more.hide();
 					}
-<<<<<<< HEAD
 					items.forEach(function(item) {
 						let $item = me.make_item_card(item).appendTo(me.$list);
-=======
-					r.message.forEach(function(item) {
-						me.make_item_card(item).appendTo(me.$list);
->>>>>>> 3577d6734... add hub.less, refactor code
 					});
 				} else {
 					me.$item_list_title.html('No results found');
@@ -443,37 +498,37 @@ window.ERPNextHubList = class ERPNextHubList {
 	}
 
 	make_item_card(item) {
-<<<<<<< HEAD
-		let $item =  $(`<div class="item-card">
-			<div class="image">
-				<a class="item-link"><img src="${item.image}"></a>
+		return $(`
+			<div class="hub-item-wrapper" style="max-width: ${this.img_size}px;">
+				<a href>
+					<div class="hub-item-image">
+						${ this.get_item_image(item) }
+					</div>
+					<div class="hub-item-title">
+						<h5 class="bold">
+							${item.item_name}
+						<h5>
+					</div>
+				</a>
+				<div>${ item.company }</div>
+				<div>${ item.standard_rate ? format_currency(item.standard_rate) : ''}</div>
 			</div>
-			<div class="content">
-				<div class="title"><a class="item-link">${item.item_name}</a></div>
-				<div class="company">${item.company}</div>
-				${item.formatted_price ? '<div class="formatted_price">' +
-					item.formatted_price +  '</div>': ""}
-			</div>
-		</div>`);
-=======
-		let $item =  $(`
-			<div class='item-card'>
-				<div class='image'>
-					<a class='item-link'><img src='${item.image}'></a>
-				</div>
-				<div class='content'>
-					<div class='title'><a class='item-link'>${item.item_name}</a></div>
-					<div class='company'>${item.company}</div>
-					${item.standard_rate ? `<div class='price'>` +
-						item.standard_rate.toFixed(2) +  '</div>': ''}
-				</div>
-			</div>`);
->>>>>>> 3577d6734... add hub.less, refactor code
-
-		$item.find('.item-link').on('click', () => {
-			this.on_item_click &&
-			this.on_item_click(item);
+		`).click((e) => {
+			e.preventDefault();
+			this.on_item_click && this.on_item_click(item);
 		});
-		return $item;
+	}
+
+	get_item_image(item, size=this.img_size) {
+		const _size = size + 'px';
+		const item_image = item.image ?
+			`<img src="${item.image}"><span class="helper"></span>` :
+			`<div class="standard-image">${item.item_name[0]}</div>`;
+
+		return `
+			<div class="img-wrapper"
+				style="max-width: ${_size}; width: ${_size}; height: ${_size};">
+				${item_image}
+			</div>`;
 	}
 };

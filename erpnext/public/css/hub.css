@@ -30,45 +30,8 @@ div[data-page-route="hub"] .side-list-section {
 div[data-page-route="hub"] .item-list-container {
   padding: 15px;
 }
-div[data-page-route="hub"] .item-list-header {
-  padding-left: 5px;
-}
 div[data-page-route="hub"] .item-list-header h3 {
-  margin-bottom: 0px;
-  margin-top: 10px;
   font-weight: normal;
-}
-div[data-page-route="hub"] .item-list {
-  display: flex;
-  flex-wrap: wrap;
-}
-div[data-page-route="hub"] .item-card {
-  border: 1px solid #d1d8dd;
-  border-radius: 3px;
-  margin: 5px;
-  width: 220px;
-  display: flex;
-}
-div[data-page-route="hub"] .item-card .image {
-  border-right: 1px solid #d1d8dd;
-}
-div[data-page-route="hub"] .item-card .image img {
-  height: 90px;
-  width: 90px;
-  padding: 5px;
-}
-div[data-page-route="hub"] .item-card .content {
-  padding: 10px;
-}
-div[data-page-route="hub"] .item-card .title {
-  font-weight: bold;
-}
-div[data-page-route="hub"] .item-card .company {
-  font-size: 12px;
-  margin-bottom: 12px;
-}
-div[data-page-route="hub"] .item-card .price {
-  font-size: 12px;
 }
 div[data-page-route="hub"] .hub-item-page {
   padding: 20px;
@@ -103,4 +66,39 @@ div[data-page-route="hub"] .hub-item-page .company-items {
 }
 div[data-page-route="hub"] .company-header {
   display: flex;
+}
+div[data-page-route="hub"] .item-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+div[data-page-route="hub"] .hub-item-wrapper {
+  margin-bottom: 20px;
+}
+div[data-page-route="hub"] .img-wrapper {
+  border: 1px solid #d1d8dd;
+  border-radius: 3px;
+  padding: 12px;
+  overflow: hidden;
+  text-align: center;
+  white-space: nowrap;
+}
+div[data-page-route="hub"] .img-wrapper img {
+  max-width: 100%;
+  max-height: 100%;
+  display: inline-block;
+  vertical-align: middle;
+}
+div[data-page-route="hub"] .img-wrapper .helper {
+  height: 100%;
+  display: inline-block;
+  vertical-align: middle;
+}
+div[data-page-route="hub"] .img-wrapper .standard-image {
+  font-size: 72px;
+  border: none;
+  background-color: #fafbfc;
+}
+div[data-page-route="hub"] .hub-item-title {
+  width: 100%;
 }
