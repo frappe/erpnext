@@ -432,9 +432,6 @@ window.ERPNextHubList = class ERPNextHubList {
 		this.$more = this.container.find('.more').hide();
 		this.$done = this.container.find('.done');
 
-		// dynamic for next_page function
-		this.start = this.container.find('.item-card').length;
-
 		this.$more.on('click', () => {
 			this.next_page();
 		});
@@ -457,9 +454,9 @@ window.ERPNextHubList = class ERPNextHubList {
 	}
 
 	next_page() {
-		this.$item_list_title.html(this.title);
 		const me = this;
-		const start = this.$list.find('.item-card').length;
+		this.$item_list_title.html(this.title);
+		const start = this.$list.find('.hub-item-wrapper').length;
 		this.$loading.show();
 
 		// build args
@@ -468,8 +465,6 @@ window.ERPNextHubList = class ERPNextHubList {
 			limit: this.page_length + 1
 		};
 		Object.assign(args, this.filters);
-
-		console.log('next page called with args', args, this.filters, me.page_length, start);
 
 		frappe.call({
 			method: this.method,
@@ -484,14 +479,14 @@ window.ERPNextHubList = class ERPNextHubList {
 						me.$more.show();
 						me.$done.addClass('hide');
 					} else {
-						me.$done.removeClass('hide');
-						me.$more.hide();
+						this.$done.removeClass('hide');
+						this.$more.hide();
 					}
 					items.forEach(function(item) {
-						let $item = me.make_item_card(item).appendTo(me.$list);
+						me.make_item_card(item).appendTo(me.$list);
 					});
 				} else {
-					me.$item_list_title.html('No results found');
+					this.$item_list_title.html('No results found');
 				}
 			}
 		});
