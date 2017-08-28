@@ -426,11 +426,16 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		});
 
 		this.serach_item.make_input();
+		
 		this.serach_item.$input.on("keypress", function (event) {
-			if((me.serach_item.$input.val() != "") || (event.which == 13)){
-				me.items = me.get_items();
-				me.make_item_list();
-			}
+
+			clearTimeout(me.last_search_timeout);
+			me.last_search_timeout = setTimeout(() => {
+				if((me.serach_item.$input.val() != "") || (event.which == 13)) {
+					me.items = me.get_items();
+					me.make_item_list();
+				}				
+			}, 400);
 		});
 
 		this.search_item_group = this.wrapper.find('.search-item-group');
