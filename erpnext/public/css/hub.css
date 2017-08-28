@@ -18,6 +18,9 @@ div[data-page-route="hub"] [data-original-title="Search"] {
   float: right;
   width: 220px;
 }
+div[data-page-route="hub"] .hub-main-section {
+  padding: 30px;
+}
 div[data-page-route="hub"] .listing-body {
   margin: 0;
 }
@@ -27,25 +30,17 @@ div[data-page-route="hub"] .main-list-section {
 div[data-page-route="hub"] .side-list-section {
   padding: 0;
 }
-div[data-page-route="hub"] .item-list-container {
-  padding: 15px;
-}
 div[data-page-route="hub"] .item-list-header h3 {
   font-weight: normal;
 }
-div[data-page-route="hub"] .hub-item-page {
-  padding: 20px;
+div[data-page-route="hub"] .hub-item-page h2 {
+  margin-top: 10px;
 }
 div[data-page-route="hub"] .hub-item-page .item-header {
   display: flex;
 }
 div[data-page-route="hub"] .hub-item-page .item-page-image {
   flex: 1;
-  padding: 30px;
-}
-div[data-page-route="hub"] .hub-item-page .item-page-image img {
-  width: 200px;
-  height: 200px;
 }
 div[data-page-route="hub"] .hub-item-page .title-content {
   flex: 3;
@@ -101,4 +96,9 @@ div[data-page-route="hub"] .img-wrapper .standard-image {
 }
 div[data-page-route="hub"] .hub-item-title {
   width: 100%;
+}
+div[data-page-route="hub"] .breadcrumb {
+  padding-left: 0;
+  padding-top: 0;
+  margin-bottom: 10px;
 }
