@@ -18,7 +18,7 @@ QUnit.test("test repack", function(assert) {
 						{'qty': 1},
 						{'s_warehouse':'Stores - '+frappe.get_abbr(frappe.defaults.get_default('Company'))},
 					],
-					 [
+					[
 						{'item_code': 'Test Product 3'},
 						{'qty': 1},
 						{'t_warehouse':'Work In Progress - '+frappe.get_abbr(frappe.defaults.get_default('Company'))},
