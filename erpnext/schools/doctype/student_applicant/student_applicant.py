@@ -2,7 +2,7 @@
 # Copyright (c) 2015, Frappe Technologies and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -13,7 +13,7 @@ class StudentApplicant(Document):
 		if self.student_admission:
 			naming_series = frappe.db.get_value('Student Admission', self.student_admission,
 				'naming_series_for_student_applicant')
-			print naming_series
+			print(naming_series)
 
 			if naming_series:
 				self.naming_series = naming_series

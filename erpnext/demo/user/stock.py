@@ -1,7 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 
 import frappe, random
 from frappe.desk import query_report
@@ -36,7 +36,7 @@ def make_purchase_receipt():
 			try:
 				pr.submit()
 			except NegativeStockError:
-				print 'Negative stock for {0}'.format(po)
+				print('Negative stock for {0}'.format(po))
 				pass
 			frappe.db.commit()
 
