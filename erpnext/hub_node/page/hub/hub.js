@@ -24,6 +24,7 @@ window.ERPNextHub = class ERPNextHub {
 		this.setup_header();
 		this.$hub_main_section =
 			$(`<div class='hub-main-section'>`).appendTo(this.page.body);
+		this.bind_events();
 		this.refresh();
 	}
 
@@ -137,6 +138,17 @@ window.ERPNextHub = class ERPNextHub {
 		this.$search = this.page.add_data(__('Search'));
 		this.bind_filters();
 		this.setup_search();
+	}
+
+	bind_events() {
+		const me = this;
+		this.$hub_main_section.on('click', '.breadcrumb li', function(e) {
+			e.preventDefault();
+			const $li = $(this);
+			if ($li.attr('data-route') === 'Home') {
+				me.go_to_home_page();
+			}
+		});
 	}
 
 	bind_filters() {
@@ -276,9 +288,12 @@ window.ERPNextHub = class ERPNextHub {
 			<div class="hub-item-page">
 				<div class="item-header">
 					<div class="item-page-image">
-						<img src="${ item.image }">
+						${ this.home_item_list.get_item_image(item) }
 					</div>
 					<div class="title-content">
+						<div class="breadcrumbs">
+							${this.get_breadcrumb(item) }
+						</div>
 						<div class="title">
 							<h2>${ item.item_name }</h2>
 						</div>
@@ -302,13 +317,22 @@ window.ERPNextHub = class ERPNextHub {
 				</div>
 				<div class="item-more-info"></div>
 				<div class="company-items">
-					<!--<div class="title">
-						More by ${ item.company }
-					</div>
-					<div class="company-item-list">
-					</div>-->
+
 				</div>
 			</div>
+		`;
+	}
+
+	get_breadcrumb(item) {
+		return `
+			<ul class="breadcrumb">
+				<li data-route="Home">
+					<a href><span>Home</span></a>
+				</li>
+				<li class="active">
+					<span>${item.item_name}</span>
+				</li>
+			</ul>
 		`;
 	}
 
