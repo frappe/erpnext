@@ -133,14 +133,20 @@ var get_bom_material_detail= function(doc, cdt, cdn, scrap_items) {
 				'qty': d.qty
 			},
 			callback: function(r) {
-				d = locals[cdt][cdn];
-				$.extend(d, r.message);
-				refresh_field("items");
-				refresh_field("scrap_items");
-				doc = locals[doc.doctype][doc.name];
+				if(!r.message) {
+					frappe.throw('Could not get details for the material.');
+				} else {
+					// TODO: erpnext.utils.remove_empty_first_row(cur_frm, "items");
+					$.each(r.message, function(field, value){
+						frappe.model.set_value(cdt, cdn, field, value);
+					});
+					frappe.model.set_value(cdt, cdn, 'qty', d.qty);
+				}
 				erpnext.bom.calculate_rm_cost(doc);
 				erpnext.bom.calculate_scrap_materials_cost(doc);
 				erpnext.bom.calculate_total(doc);
+				refresh_field("items");
+				refresh_field("scrap_items");
 			},
 			freeze: true
 		});
@@ -326,8 +332,7 @@ frappe.ui.form.on("BOM Item", "qty", function(frm, cdt, cdn) {
 	d.stock_qty = d.qty * d.conversion_factor;
 	refresh_field("items");
 });
- 
- 
+
 frappe.ui.form.on("BOM Operation", "operations_remove", function(frm) {
 	erpnext.bom.calculate_op_cost(frm.doc);
 	erpnext.bom.calculate_total(frm.doc);
