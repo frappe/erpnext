@@ -5,7 +5,7 @@ frappe.provide("erpnext.bom");
 
 frappe.ui.form.on("BOM", {
 	setup: function(frm) {
-		frm.add_fetch('buying_price_list', 'currency', 'currency')
+		frm.add_fetch('buying_price_list', 'currency', 'currency');
 
 		frm.set_query("bom_no", "items", function() {
 			return {
@@ -13,15 +13,15 @@ frappe.ui.form.on("BOM", {
 					'currency': frm.doc.currency,
 					'company': frm.doc.company
 				}
-			}
+			};
 		});
-		
+
 		frm.set_query("source_warehouse", "items", function() {
 			return {
 				filters: {
 					'company': frm.doc.company,
 				}
-			}
+			};
 		});
 	},
 
@@ -57,10 +57,14 @@ frappe.ui.form.on("BOM", {
 			doc: frm.doc,
 			method: "update_cost",
 			freeze: true,
+			args: {
+				update_parent: true,
+				from_child_bom:false
+			},
 			callback: function(r) {
 				if(!r.exc) frm.refresh_fields();
 			}
-		})
+		});
 	}
 });
 
