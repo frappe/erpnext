@@ -15,6 +15,7 @@ from erpnext.controllers.accounts_controller import get_taxes_and_charges
 def get_items(start, page_length, price_list, item_group, search_value=""):
 	condition = ""
 	serial_no = ""
+	batch_no = ""
 	item_code = search_value
 
 	if search_value:
@@ -22,6 +23,11 @@ def get_items(start, page_length, price_list, item_group, search_value=""):
 		serial_no_data = frappe.db.get_value('Serial No', search_value, ['name', 'item_code'])
 		if serial_no_data:
 			serial_no, item_code = serial_no_data
+
+		if not serial_no:
+			batch_no_data = frappe.db.get_value('Batch', search_value, ['name', 'item'])
+			if batch_no_data:
+				batch_no, item_code = batch_no_data
 
 	lft, rgt = frappe.db.get_value('Item Group', item_group, ['lft', 'rgt'])
 	# locate function is used to sort by closest match from the beginning of the value
@@ -50,6 +56,11 @@ def get_items(start, page_length, price_list, item_group, search_value=""):
 	if serial_no:
 		res.update({
 			'serial_no': serial_no
+		})
+
+	if batch_no:
+		res.update({
+			'batch_no': batch_no
 		})
 
 	return res

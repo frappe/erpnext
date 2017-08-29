@@ -7,8 +7,16 @@ frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	wrapper.pos = new PointOfSale(wrapper);
-	window.cur_pos = wrapper.pos;
+	frappe.db.get_value('POS Settings', {name: 'POS Settings'}, 'is_online', (r) => {
+		if (r && r.is_online && cint(r.is_online)) {
+			// online
+			wrapper.pos = new PointOfSale(wrapper);
+			window.cur_pos = wrapper.pos;
+		} else {
+			// offline
+			frappe.set_route('pos');
+		}
+	});
 };
 
 class PointOfSale {
@@ -117,16 +125,12 @@ class PointOfSale {
 			wrapper: this.wrapper.find('.item-container'),
 			pos_profile: this.pos_profile,
 			events: {
-				item_click: (item_code) => {
+				update_cart: (item, field, value) => {
 					if(!this.frm.doc.customer) {
 						frappe.throw(__('Please select a customer'));
 					}
-
-					this.update_item_in_cart(item_code, 'qty', '+1');
+					this.update_item_in_cart(item, field, value);
 					this.cart && this.cart.unselect_all();
-				},
-				update_cart: (item, field, value) => {
-					this.update_item_in_cart(item, field, value)
 				}
 			}
 		});
@@ -146,7 +150,7 @@ class PointOfSale {
 			}
 
 			if(field === 'qty' && (item.serial_no || item.batch_no)) {
-				this.select_batch_and_serial_no(item)
+				this.select_batch_and_serial_no(item);
 			} else {
 				this.update_item_in_frm(item, field, value)
 					.then(() => {
@@ -257,6 +261,13 @@ class PointOfSale {
 			}
 		}).then(r => {
 			this.pos_profile = r.message;
+
+			if (!this.pos_profile) {
+				this.pos_profile = {
+					currency: frappe.defaults.get_default('currency'),
+					selling_price_list: frappe.defaults.get_default('selling_price_list')
+				};
+			}
 		});
 	}
 
@@ -307,9 +318,9 @@ class PointOfSale {
 		this.page.clear_menu();
 
 		// for mobile
-		this.page.add_menu_item(__("Pay"), function () {
-			//
-		}).addClass('visible-xs');
+		// this.page.add_menu_item(__("Pay"), function () {
+		//
+		// }).addClass('visible-xs');
 
 		this.page.add_menu_item(__("Form View"), function () {
 			var doc = frappe.model.sync(me.frm.doc);
@@ -318,6 +329,10 @@ class PointOfSale {
 
 		this.page.add_menu_item(__("POS Profile"), function () {
 			frappe.set_route('List', 'POS Profile');
+		});
+
+		this.page.add_menu_item(__('POS Settings'), function() {
+			frappe.set_route('Form', 'POS Settings');
 		});
 	}
 
@@ -740,8 +755,7 @@ class POSItems {
 		this.pos_profile = pos_profile;
 		this.items = {};
 		this.events = events;
-		this.currency = this.pos_profile.currency ||
-			frappe.defaults.get_default('currency');
+		this.currency = this.pos_profile.currency;
 
 		this.make_dom();
 		this.make_fields();
@@ -751,10 +765,11 @@ class POSItems {
 
 		// bootstrap with 20 items
 		this.get_items()
-			.then((items, serial_no) => {
+			.then(({ items }) => {
+				this.all_items = items;
 				this.items = items;
-			})
-			.then(() => this.render_items());
+				this.render_items(items);
+			});
 	}
 
 	make_dom() {
@@ -795,8 +810,11 @@ class POSItems {
 		});
 
 		this.search_field.$input.on('input', (e) => {
-			const search_term = e.target.value;
-			this.filter_items({ search_term });
+			clearTimeout(this.last_search);
+			this.last_search = setTimeout(() => {
+				const search_term = e.target.value;
+				this.filter_items({ search_term });
+			}, 300);
 		});
 
 		this.item_group_field = frappe.ui.form.make_control({
@@ -861,18 +879,26 @@ class POSItems {
 				this.render_items(items);
 				return;
 			}
+		} else {
+			return this.render_items(this.all_items);
 		}
 
 		this.get_items({search_value: search_term, item_group })
-			.then((items) => {
+			.then(({ items, serial_no, batch_no }) => {
 				if (search_term) {
 					this.search_index[search_term] = items;
 				}
 
 				this.render_items(items);
-				if(this.serial_no) {
+				if(serial_no) {
 					this.events.update_cart(items[0].item_code,
-						'serial_no', this.serial_no);
+						'serial_no', serial_no);
+					this.search_field.set_value('');
+				}
+				if(batch_no) {
+					this.events.update_cart(items[0].item_code,
+						'batch_no', serial_no);
+					this.search_field.set_value('');
 				}
 			});
 	}
@@ -882,7 +908,7 @@ class POSItems {
 		this.wrapper.on('click', '.pos-item-wrapper', function(e) {
 			const $item = $(this);
 			const item_code = $item.attr('data-item-code');
-			me.events.item_click.apply(null, [item_code]);
+			me.events.update_cart(item_code, 'qty', '+1');
 		});
 	}
 
@@ -944,10 +970,10 @@ class POSItems {
 					search_value
 				}
 			}).then(r => {
-				const { items, serial_no } = r.message;
+				// const { items, serial_no, batch_no } = r.message;
 
-				this.serial_no = serial_no || "";
-				res(items);
+				// this.serial_no = serial_no || "";
+				res(r.message);
 			});
 		});
 	}
