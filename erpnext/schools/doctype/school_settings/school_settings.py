@@ -26,3 +26,10 @@ class SchoolSettings(Document):
 
 	def get_defaults(self):
 		return frappe.defaults.get_defaults()
+
+	def validate(self):
+		from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+		if self.get('instructor_created_by')=='Naming Series':
+			make_property_setter('Instructor', "naming_series", "hidden", 0, "Check")
+		else:
+			make_property_setter('Instructor', "naming_series", "hidden", 1, "Check")

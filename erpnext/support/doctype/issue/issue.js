@@ -24,7 +24,7 @@ frappe.ui.form.on("Issue", {
 			frm.timeline.wrapper.find('.comment-header .asset-details .btn-add-to-kb').remove();
 			$('<button class="btn btn-xs btn-link btn-add-to-kb text-muted hidden-xs pull-right">'+
 				__('Help Article') + '</button>')
-				.appendTo(frm.timeline.wrapper.find('.comment-header .asset-details'))
+				.appendTo(frm.timeline.wrapper.find('.comment-header .asset-details:not([data-communication-type="Comment"])'))
 				.on('click', function() {
 					var content = $(this).parents('.timeline-item:first').find('.timeline-item-content').html();
 					var doc = frappe.model.get_new_doc('Help Article');

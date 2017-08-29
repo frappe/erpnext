@@ -109,7 +109,7 @@ class SalesInvoice(SellingController):
 
 		if not self.recurring_id:
 			frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
-			 	self.company, self.base_grand_total, self)
+				self.company, self.base_grand_total, self)
 
 		self.check_prev_docstatus()
 
