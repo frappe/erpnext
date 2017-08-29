@@ -84,7 +84,7 @@ def get_query_kwargs():
 		voucher_type='Purchase Invoice', doctype='GL Entry', fields=['voucher_no'],
 		limit_start=0, limit_page_length=5, filters={
 			"ifnull(due_date, '')": ('=', ''), "ifnull(party, '')": ('!=', ''),
-			'voucher_type': 'Purchase Invoice', 'debit': ('!=', '0')
+			'voucher_type': 'Purchase Invoice', 'credit': ('!=', '0')
 		}
 	)
 
@@ -92,7 +92,7 @@ def get_query_kwargs():
 		voucher_type='Sales Invoice', doctype='GL Entry', fields=['voucher_no'],
 		limit_start=0, limit_page_length=5, filters={
 			"ifnull(due_date, '')": ('=', ''), "ifnull(party, '')": ('!=', ''),
-			'voucher_type': 'Sales Invoice', 'credit': ('!=', '0')
+			'voucher_type': 'Sales Invoice', 'debit': ('!=', '0')
 		}
 	)
 
@@ -114,4 +114,25 @@ def get_query_kwargs():
 		voucher_num_col='against_voucher', use_voucher_type='Purchase Invoice',
 	)
 
-	return [pi_kwargs, si_kwargs, journal_kwargs_pi, journal_kwargs_si]
+	payment_entry_kwargs_pi = dict(
+		voucher_type='Payment Entry', doctype='GL Entry', fields=['against_voucher'],
+		limit_start=0, limit_page_length=5, filters={
+			"ifnull(due_date, '')": ('=', ''), "ifnull(party, '')": ('!=', ''),
+			'voucher_type': 'Payment Entry', 'against_voucher_type': 'Purchase Invoice'
+		},
+		voucher_num_col='against_voucher', use_voucher_type='Purchase Invoice',
+	)
+
+	payment_entry_kwargs_si = dict(
+		voucher_type='Payment Entry', doctype='GL Entry', fields=['against_voucher'],
+		limit_start=0, limit_page_length=5, filters={
+			"ifnull(due_date, '')": ('=', ''), "ifnull(party, '')": ('!=', ''),
+			'voucher_type': 'Payment Entry', 'against_voucher_type': 'Sales Invoice'
+		},
+		voucher_num_col='against_voucher', use_voucher_type='Sales Invoice',
+	)
+
+	return [
+		pi_kwargs, si_kwargs, journal_kwargs_pi, journal_kwargs_si,
+		payment_entry_kwargs_pi, payment_entry_kwargs_si
+	]
