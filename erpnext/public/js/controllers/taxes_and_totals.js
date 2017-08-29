@@ -279,8 +279,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 					// adjust Discount Amount loss in last tax iteration
 					if ((i == me.frm.doc["taxes"].length - 1) && me.discount_amount_applied
 						&& me.frm.doc.apply_discount_on == "Grand Total" && me.frm.doc.discount_amount) {
-						this.frm.doc.rounding_adjustment = flt(this.frm.doc.grand_total -
-							flt(this.frm.doc.discount_amount) - tax.total, precision("rounding_adjustment"));
+						me.frm.doc.rounding_adjustment = flt(me.frm.doc.grand_total -
+							flt(me.frm.doc.discount_amount) - tax.total, precision("rounding_adjustment"));
 					}
 				}
 			});

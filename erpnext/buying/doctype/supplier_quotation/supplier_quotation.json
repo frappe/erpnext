@@ -1682,7 +1682,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "fieldname": "base_company_currency", 
+   "fieldname": "base_rounding_adjustment", 
    "fieldtype": "Currency", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
