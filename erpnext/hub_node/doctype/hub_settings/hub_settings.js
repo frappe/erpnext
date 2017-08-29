@@ -35,31 +35,18 @@ frappe.ui.form.on("Hub Settings", {
 	set_enable_hub_primary_button: (frm) => {
 		frm.page.set_primary_action(__("Enable Hub"), () => {
 			frappe.verify_password(() => {
-				// enabled has to be passed to hub
-				frm.set_value("enabled", 1);
 				this.frm.call({
 					doc: this.frm.doc,
 					method: "register",
 					args: {},
 					freeze: true,
-					callback: function(r) {
-						frm.page.set_primary_action(__("Save Settings"), () => {
-							frm.save();
-						});
-						frm.save();
-						// TODO: Handle bad response
-						if(!frm.doc.access_token.length) {
-							frm.set_value("enabled", 0);
-							frm.save();
-							frappe.throw(__('No access token received.'));
-						}
-					},
+					callback: function(r) {},
 					onerror: function() {
 						frappe.msgprint(__("Wrong Password"));
 						frm.set_value("enabled", 0);
 					}
 				});
-			});
+			} );
 		});
 	},
 
@@ -78,13 +65,6 @@ frappe.ui.form.on("Hub Settings", {
 	// 	});
 	// },
 
-	reset_values: (frm) => {
-		frm.set_value("enabled", 0);
-		frm.set_value("publish", 0);
-		frm.set_value("access_token", '');
-		frm.save();
-	},
-
 	unregister_from_hub: (frm) => {
 		var me = this;
 		frappe.verify_password(() => {
@@ -94,12 +74,7 @@ frappe.ui.form.on("Hub Settings", {
 					method: "unregister_from_hub",
 					args: {},
 					freeze: true,
-					callback: function(r) {
-						if(!r.exc){
-							frm.trigger('reset_values');
-							frappe.msgprint(__("Successfully unregistered."));
-						}
-					},
+					callback: function(r) { },
 					onerror: function() {
 						frappe.msgprint(__("Wrong Password"));
 					}
