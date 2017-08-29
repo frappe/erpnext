@@ -3,12 +3,12 @@
 
 import frappe, erpnext
 from frappe import _
+from erpnext.setup.doctype.setup_progress.setup_progress import get_action_completed_state
 
 def get_slide_settings():
 	defaults = frappe.defaults.get_defaults()
 	domain = frappe.db.get_value('Company', erpnext.get_default_company(), 'domain')
 	company = defaults.get("company") or ''
-	currency = defaults.get("currency") or ''
 	# Initial state of slides
 	return [
 		frappe._dict(
@@ -17,15 +17,14 @@ def get_slide_settings():
 			help=_('Setup your ' + ('company' if domain != 'Education' else 'institution') + ' and brand.'),
 			# image_src="/assets/erpnext/images/illustrations/shop.jpg",
 			fields=[],
-			done=1,
 			action_cards=[
 				{
 					"action_name": "Make Company",
 					"title": _("You created a Company"),
 					"done": 1,
 					"actions": [{
-						"label": _("View Company"),
-						"route": ["Company", company]
+						"label": _("View " + company),
+						"route": ["Form", "Company", company]
 					}]
 				},
 				{
@@ -53,8 +52,8 @@ def get_slide_settings():
 					"content": _("Set a monthly sales goal that you'd like to achieve for your company " + company +
 						"."),
 					"actions": [{
-						"label": _('Set a target'),
-						"route": ["Company", company]
+						"label": _('Set a monthly target'),
+						"route": ["Form", "Company", company]
 					}],
 					"help_links": [{
 						"label": _('Learn More'),
@@ -403,6 +402,7 @@ def get_user_progress_slides():
 	for s in slide_settings:
 		if not s.domains or (domain and domain in s.domains):
 			s.mark_as_done_method = "erpnext.setup.doctype.setup_progress.setup_progress.set_action_completed_state"
+			s.done = get_action_completed_state(s.action_name) or 0
 			slides.append(s)
 
 	return slides

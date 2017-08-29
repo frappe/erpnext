@@ -6,7 +6,6 @@ import frappe, erpnext
 import json
 from frappe import _
 from frappe.utils import flt
-from frappe.utils.file_manager import save_file
 from erpnext.setup.doctype.setup_progress.setup_progress import update_domain_actions, get_domain_actions_state
 
 @frappe.whitelist()
