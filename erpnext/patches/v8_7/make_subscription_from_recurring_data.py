@@ -7,11 +7,14 @@ from frappe.utils import today
 
 def execute():
 	frappe.reload_doc('subscription', 'doctype', 'subscription')
+	frappe.reload_doc('selling', 'doctype', 'sales_order')
+	frappe.reload_doc('buying', 'doctype', 'purchase_order')
+	frappe.reload_doc('accounts', 'doctype', 'sales_invoice')
+	frappe.reload_doc('accounts', 'doctype', 'purchase_invoice')
 
 	for doctype in ['Sales Order', 'Sales Invoice',
 		'Purchase Invoice', 'Purchase Invoice']:
 		for data in get_data(doctype):
-			print(data)
 			make_subscription(doctype, data)
 
 def get_data(doctype):
@@ -24,8 +27,8 @@ def get_data(doctype):
 def make_subscription(doctype, data):
 	doc = frappe.get_doc({
 		'doctype': 'Subscription',
-		'base_doctype': doctype,
-		'base_docname': data.name,
+		'reference_doctype': doctype,
+		'reference_document': data.name,
 		'start_date': data.from_date,
 		'end_date': data.end_date,
 		'frequency': data.recurring_type,

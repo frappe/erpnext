@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Subscription', {
 	setup: function(frm) {
-		frm.fields_dict['base_docname'].get_query = function() {
+		frm.fields_dict['reference_document'].get_query = function() {
 			return {
 				filters: {
 					"docstatus": 1
@@ -14,7 +14,7 @@ frappe.ui.form.on('Subscription', {
 		frm.fields_dict['print_format'].get_query = function() {
 			return {
 				filters: {
-					"doc_type": frm.doc.base_doctype
+					"doc_type": frm.doc.reference_doctype
 				}
 			};
 		};
@@ -22,19 +22,15 @@ frappe.ui.form.on('Subscription', {
 
 	refresh: function(frm) {
 		if(frm.doc.docstatus == 1) {
-			let label = 'View ' + frm.doc.base_doctype;
+			let label = __('View {0}', [frm.doc.reference_doctype]);
 			frm.add_custom_button(__(label),
 				function() {
-					frm.trigger("view_subscription_document");
+					frappe.route_options = {
+						"subscription_id": frm.doc.name,
+					};
+					frappe.set_route("List", frm.doc.reference_doctype);
 				}
 			);
 		}
-	},
-
-	view_subscription_document: function(frm) {
-		frappe.route_options = {
-			"subscription": frm.doc.name,
-		};
-		frappe.set_route("List", frm.doc.base_doctype);
 	}
 });

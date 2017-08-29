@@ -9,7 +9,7 @@ def get_data():
 			'Payment Entry': 'reference_name',
 			'Payment Request': 'reference_name',
 			'Sales Invoice': 'return_against',
-			'Subscription': 'base_docname',
+			'Subscription': 'reference_document',
 		},
 		'internal_links': {
 			'Sales Order': ['items', 'sales_order']

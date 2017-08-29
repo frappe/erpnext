@@ -6,7 +6,7 @@ def get_data():
 		'non_standard_fieldnames': {
 			'Stock Entry': 'delivery_note_no',
 			'Quality Inspection': 'reference_name',
-			'Subscription': 'base_docname',
+			'Subscription': 'reference_document',
 		},
 		'internal_links': {
 			'Sales Order': ['items', 'against_sales_order'],

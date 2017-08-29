@@ -8,7 +8,7 @@ def get_data():
 			'Journal Entry': 'reference_name',
 			'Payment Entry': 'reference_name',
 			'Payment Request': 'reference_name',
-			'Subscription': 'base_docname',
+			'Subscription': 'reference_document',
 		},
 		'internal_links': {
 			'Quotation': ['items', 'prevdoc_docname']

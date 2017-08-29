@@ -9,7 +9,7 @@ def get_data():
 			'Payment Request': 'reference_name',
 			'Landed Cost Voucher': 'receipt_document',
 			'Purchase Invoice': 'return_against',
-			'Subscription': 'base_docname'
+			'Subscription': 'reference_document'
 		},
 		'internal_links': {
 			'Purchase Order': ['items', 'purchase_order'],

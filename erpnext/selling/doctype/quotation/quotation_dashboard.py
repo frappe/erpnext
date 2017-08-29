@@ -4,7 +4,7 @@ def get_data():
 	return {
 		'fieldname': 'prevdoc_docname',
 		'non_standard_fieldnames': {
-			'Subscription': 'base_docname',
+			'Subscription': 'reference_document',
 		},
 		'transactions': [
 			{

@@ -809,10 +809,6 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Entry Account`
 			where reference_name=%s""", si.name))
 
-	def test_recurring_invoice(self):
-		from erpnext.controllers.tests.test_recurring_document import test_recurring_document
-		test_recurring_document(self, test_records)
-
 	def test_serialized(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos

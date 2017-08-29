@@ -4,7 +4,7 @@ def get_data():
 	return {
 		'fieldname': 'supplier_quotation',
 		'non_standard_fieldnames': {
-			'Subscription': 'base_docname'
+			'Subscription': 'reference_document'
 		},
 		'internal_links': {
 			'Material Request': ['items', 'material_request'],

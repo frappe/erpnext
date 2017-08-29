@@ -1,5 +1,3 @@
-Subscription module plays an important role in the every oraginization, specially for the organization who serve the services to the customers based on period.
-
 If you have a contract with the Customer where your organization gives bill to the Customer on a monthly, quarterly, half-yearly or annual basis, you can use subscription feature to make auto invoicing.
 
 <img class="screenshot" alt="Subscription" src="{{docs_base_url}}/assets/img/subscription/subscription.png">
@@ -22,7 +20,3 @@ Goto Subscription > select base doctype "Sales Invoice" > select base docname "I
 **Print Format**: Select a print format to define document view which should be emailed to customer.
 
 **Disabled**: It will stop to make auto recurring documents against the subscription
-
-#### Recurring documents
-
-<img class="screenshot" alt="Subscription" src="{{docs_base_url}}/assets/img/subscription/subscription_schedules.gif">

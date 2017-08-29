@@ -6,7 +6,7 @@ def get_data():
 		'non_standard_fieldnames': {
 			'Purchase Invoice': 'purchase_receipt',
 			'Landed Cost Voucher': 'receipt_document',
-			'Subscription': 'base_docname'
+			'Subscription': 'reference_document'
 		},
 		'internal_links': {
 			'Purchase Order': ['items', 'purchase_order'],
