@@ -824,8 +824,10 @@ class POSItems {
 				options: 'Item Group',
 				default: 'All Item Groups',
 				onchange: () => {
-					console.log("in the item_group")
-					this.filter_items({ item_group: this.item_group_field.get_value() })
+					const item_group = this.item_group_field.get_value()
+					if (item_group) {
+						this.filter_items({ item_group: item_group })
+					}
 				},
 			},
 			parent: this.wrapper.find('.item-group-field'),
@@ -879,7 +881,7 @@ class POSItems {
 				this.render_items(items);
 				return;
 			}
-		} else {
+		} else if (item_group == "All Item Groups") {
 			return this.render_items(this.all_items);
 		}
 
