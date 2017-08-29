@@ -41,14 +41,13 @@ class HubSettings(Document):
 				frappe.throw(_("Enabled without access token"))
 			return
 
-		# If just registered
-		if self.enabled != self.get_doc_before_save().enabled and self.enabled == 1:
+		if not self.enabled or (hasattr(self, 'just_registered') and self.just_registered):
+			self.just_registered = 0
 			return
 
 		if self.suspended:
 			# show a tag
 			pass
-
 
 		self.update_hub()
 
@@ -65,7 +64,6 @@ class HubSettings(Document):
 			if self.publish:
 				self.publish_all_set_items()
 			else:
-				self.reset_publishing_settings()
 				self.unpublish_all_items()
 
 	def publish_all_set_items(self, verbose=True):
@@ -91,7 +89,7 @@ class HubSettings(Document):
 				item.price = 0
 				item.currency = None
 
-		response_msg = send_hub_request('update_items',
+		send_hub_request('update_items',
 			data={
 			"items_to_update": json.dumps(items),
 			"item_list": json.dumps(item_list),
@@ -105,29 +103,38 @@ class HubSettings(Document):
 
 	def unpublish_all_items(self):
 		"""Unpublish from hub.erpnext.org, delete items there"""
-		send_hub_request('delete_all_items_of_user')
+		send_hub_request('delete_all_items_of_user', now = True,
+			callback='erpnext.hub_node.doctype.hub_settings.hub_settings.reset_hub_publishing_settings')
 
 	### Account
 	def register(self):
 		"""Register at hub.erpnext.org and exchange keys"""
 		response = requests.post(hub_url + "/api/method/hub.hub.api."+"register",
 			data = { "args_data": json.dumps(self.get_args(
-				self.config_args + self.profile_args + self.seller_args #['public_key_pem']
+				self.config_args + self.profile_args + self.seller_args
 			))}
 		)
 		response.raise_for_status()
 		response_msg = response.json().get("message")
 
-		self.access_token = response_msg.get("access_token")
+		access_token = response_msg.get("access_token")
+		if access_token:
+			self.access_token = access_token
+			self.enabled = 1
+			self.last_sync_datetime = add_years(now(), -10)
+			self.current_item_fields = json.dumps(self.base_fields_for_items + self.item_fields_to_update)
 
-		# Set start values
-		self.last_sync_datetime = add_years(now(), -10)
-		self.current_item_fields = json.dumps(self.base_fields_for_items + self.item_fields_to_update)
+			# flag
+			self.just_registered = 1
+
+			self.save()
+		else:
+			frappe.throw(_("Sorry, we can't register you at this time."))
 
 	def unregister_from_hub(self):
 		"""Unpublish, then delete transactions and user from there"""
-		self.reset_publishing_settings()
-		send_hub_request('unregister_user')
+		send_hub_request('unregister_user', now = True,
+			callback='erpnext.hub_node.doctype.hub_settings.hub_settings.reset_hub_settings')
 
 	### Helpers
 	def get_args(self, arg_list):
@@ -136,11 +143,17 @@ class HubSettings(Document):
 			args[d] = self.get(d)
 		return args
 
-	def reset_publishing_settings(self):
+	def reset_enable(self):
+		self.enabled = 0
+		self.access_token = ""
+
+	def reset_publishing_settings(self, last_sync_datetime = ""):
 		self.publish = 0
 		self.publish_pricing = 0
 		self.publish_availability = 0
-		self.current_item_fields = json.dumps(self.base_fields_for_items + self.item_fields_to_update)
+		self.selling_price_list = ""
+		self.current_item_fields = json.dumps([])
+		self.last_sync_datetime = get_datetime(last_sync_datetime) or add_years(now(), -10)
 
 	def set_publish_for_selling_items(self):
 		"""Set `publish_in_hub`=1 for all Sales Items"""
@@ -148,17 +161,17 @@ class HubSettings(Document):
 			filters={ "publish_in_hub": 0, "is_sales_item": 1}):
 			frappe.db.set_value("Item", item.name, "publish_in_hub", 1)
 
-def send_hub_request(method, data = [], now = False):
+def send_hub_request(method, data = [], now = False, callback = "", callback_args = {}):
 	if now:
-		return hub_request(method, data)
+		hub_request(method, data, callback, callback_args)
+		return
 	try:
 		frappe.enqueue('erpnext.hub_node.doctype.hub_settings.hub_settings.hub_request', now=now,
-			api_method=method, data=data)
-		return 1
+			api_method=method, data=data, callback=callback, callback_args=callback_args)
 	except redis.exceptions.ConnectionError:
-		return hub_request(method, data)
+		hub_request(method, data, callback, callback_args)
 
-def hub_request(api_method, data = []):
+def hub_request(api_method, data = [], callback = "", callback_args = {}):
 	hub = frappe.get_single("Hub Settings")
 	response = requests.post(hub_url + "/api/method/hub.hub.api." + "call_method",
 		data = {
@@ -168,7 +181,10 @@ def hub_request(api_method, data = []):
 		}
 	)
 	response.raise_for_status()
-	return response.json().get("message")
+	response_msg = response.json().get("message")
+	if response_msg:
+		callback_args.update(response_msg)
+		frappe.enqueue(callback, now=True, **callback_args)
 
 def validate_hub_settings(doc, method):
 	frappe.get_doc("Hub Settings", "Hub Settings").run_method("validate")
@@ -200,6 +216,18 @@ def check_hub_enabled():
 def get_item_fields_to_sync():
 	return ["price", "currency", "stock_qty"]
 
+def reset_hub_publishing_settings(last_sync_datetime = ""):
+	doc = get_hub_settings()
+	doc.reset_publishing_settings(last_sync_datetime)
+	doc.save()
+
+def reset_hub_settings(last_sync_datetime = ""):
+	doc = get_hub_settings()
+	doc.reset_publishing_settings(last_sync_datetime)
+	doc.reset_enable()
+	doc.save()
+	frappe.msgprint(_("Successfully unregistered."))
+
 def sync_item_fields_at_hub():
 	# Only updates dynamic feilds of price and stock
 	items = frappe.db.get_all("Item", fields=["item_code", "hub_warehouse"], filters={"publish_in_hub": 1})
@@ -214,7 +242,7 @@ def sync_item_fields_at_hub():
 			item.price = 0
 			item.currency = None
 
-	response_msg = send_hub_request('update_item_fields',
+	send_hub_request('update_item_fields',
 		data={
 			"items_with_fields_updates": json.dumps(items),
 			"fields_to_update": get_item_fields_to_sync()
