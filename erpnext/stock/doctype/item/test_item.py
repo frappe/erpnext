@@ -119,6 +119,37 @@ class TestItem(unittest.TestCase):
 		variant.item_code = "_Test Variant Item-L-duplicate"
 		self.assertRaises(ItemVariantExistsError, variant.save)
 
+	def test_copy_fields_from_template_to_variants(self):
+		fields = [{'field_name': 'item_group'}, {'field_name': 'is_stock_item'}]
+		allow_fields = [d.get('field_name') for d in fields]
+		set_item_variant_settings(fields)
+
+		if not frappe.db.get_value('Item Attribute Value',
+			{'parent': 'Test Size', 'attribute_value': 'Extra Large'}, 'name'):
+			item_attribute = frappe.get_doc('Item Attribute', 'Test Size')
+			item_attribute.append('item_attribute_values', {
+				'attribute_value' : 'Extra Large',
+				'abbr': 'XL'
+			})
+			item_attribute.save()
+
+		variant = create_variant("_Test Variant Item", {"Test Size": "Extra Large"})
+		variant.item_code = "_Test Variant Item-XL"
+		variant.item_name = "_Test Variant Item-XL"
+		variant.save()
+
+		template = frappe.get_doc('Item', '_Test Variant Item')
+		template.item_group = "_Test Item Group D"
+		template.save()
+
+		variant = frappe.get_doc('Item', '_Test Variant Item-XL')
+		for fieldname in allow_fields:
+			self.assertEquals(template.get(fieldname), variant.get(fieldname))
+
+		template = frappe.get_doc('Item', '_Test Variant Item')
+		template.item_group = "_Test Item Group Desktops"
+		template.save()
+
 	def test_make_item_variant_with_numeric_values(self):
 		# cleanup
 		for d in frappe.db.get_all('Item', filters={'variant_of':
@@ -194,6 +225,9 @@ class TestItem(unittest.TestCase):
 			{"item_code": "Test Item for Merging 2", "warehouse": "_Test Warehouse 1 - _TC"}))
 
 	def test_item_variant_by_manufacturer(self):
+		fields = [{'field_name': 'description'}, {'field_name': 'variant_based_on'}]
+		set_item_variant_settings(fields)
+
 		if frappe.db.exists('Item', '_Test Variant Mfg'):
 			frappe.delete_doc('Item', '_Test Variant Mfg')
 		if frappe.db.exists('Item', '_Test Variant Mfg-1'):
@@ -227,6 +261,10 @@ class TestItem(unittest.TestCase):
 		self.assertEquals(variant.manufacturer, 'MSG1')
 		self.assertEquals(variant.manufacturer_part_no, '007')
 
+def set_item_variant_settings(fields):
+	doc = frappe.get_doc('Item Variant Settings')
+	doc.set('fields', fields)
+	doc.save()
 
 def make_item_variant():
 	if not frappe.db.exists("Item", "_Test Variant Item-S"):
