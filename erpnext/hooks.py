@@ -196,7 +196,8 @@ scheduler_events = {
 		"erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary",
 		"erpnext.stock.doctype.serial_no.serial_no.update_maintenance_status",
 		"erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.refresh_scorecards",
-		"erpnext.setup.doctype.company.company.cache_companies_monthly_sales_history"
+		"erpnext.setup.doctype.company.company.cache_companies_monthly_sales_history",
+		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms",
 	]
 }
 

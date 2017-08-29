@@ -92,7 +92,7 @@ class BOM(WebsiteGenerator):
 
 	def validate_rm_item(self, item):
 		if (item[0]['name'] in [it.item_code for it in self.items]) and item[0]['name'] == self.item:
-			frappe.throw(_("Raw material cannot be same as main Item"))
+			frappe.throw(_("BOM #{0}: Raw material cannot be same as main Item").format(self.name))
 
 	def set_bom_material_details(self):
 		for item in self.get("items"):
@@ -155,14 +155,16 @@ class BOM(WebsiteGenerator):
 				rate = frappe.db.get_value("Item Price", {"price_list": self.buying_price_list,
 					"item_code": arg["item_code"]}, "price_list_rate") or 0
 
-		if not rate and arg['bom_no']:
-			rate = self.get_bom_unitcost(arg['bom_no'])
+			if arg['bom_no'] and (not rate or self.set_rate_of_sub_assembly_item_based_on_bom):
+				rate = self.get_bom_unitcost(arg['bom_no'])
 
 		return rate
 
-	def update_cost(self):
+	def update_cost(self, update_parent=True, from_child_bom=False):
 		if self.docstatus == 2:
 			return
+
+		existing_bom_cost = self.total_cost
 
 		for d in self.get("items"):
 			rate = self.get_bom_material_detail({'item_code': d.item_code, 'bom_no': d.bom_no,
@@ -176,7 +178,16 @@ class BOM(WebsiteGenerator):
 		self.save()
 		self.update_exploded_items()
 
-		frappe.msgprint(_("Cost Updated"))
+		# update parent BOMs
+		if self.total_cost != existing_bom_cost and update_parent:
+			parent_boms = frappe.db.sql_list("""select distinct parent from `tabBOM Item`
+				where bom_no = %s and docstatus=1""", self.name)
+
+			for bom in parent_boms:
+				frappe.get_doc("BOM", bom).update_cost(from_child_bom=True)
+
+		if not from_child_bom:
+			frappe.msgprint(_("Cost Updated"))
 
 	def get_bom_unitcost(self, bom_no):
 		bom = frappe.db.sql("""select name, total_cost/quantity as unit_cost from `tabBOM`
@@ -248,15 +259,15 @@ class BOM(WebsiteGenerator):
 
 			
 	def update_stock_qty(self):
- 		for m in self.get('items'):
+		for m in self.get('items'):
 		
 			if not m.conversion_factor:
 				m.conversion_factor = flt(get_conversion_factor(m.item_code, m.uom)['conversion_factor'])
- 			if m.uom and m.qty:
- 				m.stock_qty = flt(m.conversion_factor)*flt(m.qty)
- 			if not m.uom and m.stock_uom:
- 				m.uom = m.stock_uom
- 				m.qty = m.stock_qty
+			if m.uom and m.qty:
+				m.stock_qty = flt(m.conversion_factor)*flt(m.qty)
+			if not m.uom and m.stock_uom:
+				m.uom = m.stock_uom
+				m.qty = m.stock_qty
  
  
 	def set_conversion_rate(self):
@@ -567,3 +578,26 @@ def get_children():
 			and bom_item.item_code = item.name
 			order by bom_item.idx
 			""", frappe.form_dict.parent, as_dict=True)
+
+def get_boms_in_bottom_up_order(bom_no=None):
+	def _get_parent(bom_no):
+		return frappe.db.sql_list("""select distinct parent from `tabBOM Item`
+			where bom_no = %s and docstatus=1""", bom_no)
+
+	count = 0
+	bom_list = []
+	if bom_no:
+		bom_list.append(bom_no)
+	else:
+		# get all leaf BOMs
+		bom_list = frappe.db.sql_list("""select name from `tabBOM` bom where docstatus=1
+			and not exists(select bom_no from `tabBOM Item`
+				where parent=bom.name and ifnull(bom_no, '')!='')""")
+
+	while(count < len(bom_list)):
+		for child_bom in _get_parent(bom_list[count]):
+			if child_bom not in bom_list:
+				bom_list.append(child_bom)
+		count += 1
+
+	return bom_list

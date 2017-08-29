@@ -1,0 +1,722 @@
+{
+    "country_code": "tw", 
+    "name": "Taiwan - Chart of Accounts", 
+    "tree": {
+        "1-\u8cc7\u7522": {
+            "11~12-\u6d41\u52d5\u8cc7\u7522": {
+                "111-\u73fe\u91d1\u53ca\u7d04\u7576\u73fe\u91d1": {
+                    "1111-\u5eab\u5b58\u73fe\u91d1": {
+                        "account_type": "Cash"
+                    },
+                    "1112-\u96f6\u7528\u91d1/\u9031\u8f49\u91d1": {
+                        "account_type": "Cash"
+                    },
+                    "1113-\u9280\u884c\u5b58\u6b3e": {
+                        "account_type": "Bank", 
+                        "\u4e2d\u570b\u4fe1\u8a17": {
+                            "account_type": "Bank"
+                        },
+                        "\u53f0\u5317\u5bcc\u90a6": {
+                            "account_type": "Bank"
+                        }
+                    },
+                    "1116-\u5728\u9014\u73fe\u91d1": {
+                        "account_type": "Cash"
+                    },
+                    "1117-\u7d04\u7576\u73fe\u91d1": {
+                        "account_type": "Cash"
+                    },
+                    "1118-\u5176\u4ed6\u73fe\u91d1\u53ca\u7d04\u7576\u73fe\u91d1": {
+                        "account_type": "Cash"
+                    },
+                    "account_type": "Cash"
+                },
+                "112-\u77ed\u671f\u6295\u8cc7": {
+                    "1121-\u77ed\u671f\u6295\u8cc7 \u2014\u80a1\u7968": {}
+                },
+                "113-\u61c9\u6536\u7968\u64da": {
+                    "1131-\u61c9\u6536\u7968\u64da": {
+                        "account_type": "Receivable"
+                    },
+                    "1132-\u61c9\u6536\u7968\u64da\u8cbc\u73fe ": {
+                        "account_type": "Receivable"
+                    },
+                    "1138-\u5176\u4ed6\u61c9\u6536\u7968\u64da ": {
+                        "account_type": "Receivable"
+                    },
+                    "1139-\u5099\u62b5\u5446\u5e33 \uff0d\u61c9\u6536\u7968\u64da ": {
+                        "account_type": "Receivable"
+                    },
+                    "account_type": "Receivable"
+                },
+                "114-\u61c9\u6536\u5e33\u6b3e": {
+                    "1141-\u61c9\u6536\u5e33\u6b3e ": {
+                        "account_type": "Receivable"
+                    },
+                    "1142-\u61c9\u6536\u5206\u671f\u5e33\u6b3e ": {
+                        "account_type": "Receivable"
+                    },
+                    "1149-\u5099\u62b5\u5446\u5e33 \uff0d\u61c9\u6536\u5e33\u6b3e ": {
+                        "account_type": "Receivable"
+                    },
+                    "account_type": "Receivable"
+                },
+                "118-\u5176\u4ed6\u61c9\u6536\u6b3e": {
+                    "1184-\u61c9\u6536\u6536\u76ca": {
+                        "account_type": "Receivable"
+                    },
+                    "1185-\u61c9\u6536\u9000\u7a05\u6b3e": {
+                        "account_type": "Receivable"
+                    },
+                    "1189-\u5099\u62b5\u5446\u5e33 \u2014 \u5176\u4ed6\u61c9\u6536\u6b3e ": {
+                        "account_type": "Receivable"
+                    },
+                    "account_type": "Receivable"
+                },
+                "121~122-\u5b58\u8ca8": {
+                    "1219-\u5099\u62b5\u5b58\u8ca8\u8dcc\u50f9\u640d\u5931": {},
+                    "1229-\u5099\u62b5\u5b58\u8ca8\u8dcc\u50f9\u640d\u5931": {},
+                    "account_type": "Stock", 
+                    "is_group": 1
+                },
+                "125-\u9810\u4ed8\u8cbb\u7528": {
+                    "1251-\u9810\u4ed8\u85aa\u8cc7": {},
+                    "1252-\u9810\u4ed8\u79df\u91d1": {},
+                    "1253-\u9810\u4ed8\u4fdd\u96aa\u8cbb": {},
+                    "1254-\u7528\u54c1\u76e4\u5b58": {},
+                    "1255-\u9810\u4ed8\u6240\u5f97\u7a05": {},
+                    "1258-\u5176\u4ed6\u9810\u4ed8\u8cbb\u7528": {}
+                },
+                "126-\u9810\u4ed8\u6b3e\u9805": {
+                    "1261-\u9810\u4ed8\u8ca8\u6b3e": {},
+                    "1268-\u5176\u4ed6\u9810\u4ed8\u6b3e\u9805": {}
+                },
+                "128~129-\u5176\u4ed6\u6d41\u52d5\u8cc7\u7522": {
+                    "1281-\u9032\u9805\u7a05\u984d": {},
+                    "1282-\u7559\u62b5\u7a05\u984d": {},
+                    "1283-\u66ab\u4ed8\u6b3e": {},
+                    "1284-\u4ee3\u4ed8\u6b3e": {},
+                    "1285-\u54e1\u5de5\u501f\u652f": {}
+                }
+            },
+            "13-\u57fa\u91d1\u53ca\u9577\u671f\u6295\u8cc7": {
+                "131-\u57fa\u91d1": {
+                    "1311-\u511f\u50b5\u57fa\u91d1": {},
+                    "1313-\u610f\u5916\u640d\u5931\u6e96\u5099\u57fa\u91d1": {},
+                    "1314-\u9000\u4f11\u57fa\u91d1": {},
+                    "1318-\u5176\u4ed6\u57fa\u91d1": {}
+                },
+                "132-\u9577\u671f\u6295\u8cc7": {
+                    "1321-\u9577\u671f\u80a1\u6b0a\u6295\u8cc7": {},
+                    "1322-\u9577\u671f\u50b5\u5238\u6295\u8cc7": {},
+                    "1323-\u9577\u671f\u4e0d\u52d5\u7522\u6295\u8cc7": {},
+                    "1328-\u5176\u4ed6\u9577\u671f\u6295\u8cc7": {}
+                }
+            },
+            "14~15-\u56fa\u5b9a\u8cc7\u7522": {
+                "141-\u571f\u5730": {
+                    "1411-\u571f\u5730": {
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_type": "Fixed Asset"
+                },
+                "142-\u571f\u5730\u6539\u826f\u7269": {
+                    "1421-\u571f\u5730\u6539\u826f\u7269": {
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_type": "Fixed Asset"
+                },
+                "143-\u623f\u5c4b\u53ca\u5efa\u7269": {
+                    "1431-\u623f\u5c4b\u53ca\u5efa\u7269": {
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_type": "Fixed Asset"
+                },
+                "144~146-\u6a5f(\u5668)\u5177\u53ca\u8a2d\u5099": {
+                    "1441-\u6a5f(\u5668)\u5177": {
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_type": "Fixed Asset"
+                },
+                "151-\u79df\u8cc3\u8cc7\u7522": {
+                    "1511-\u79df\u8cc3\u8cc7\u7522": {
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_type": "Fixed Asset"
+                },
+                "152-\u79df\u8cc3\u6b0a\u76ca\u6539\u826f": {
+                    "1521-\u79df\u8cc3\u6b0a\u76ca\u6539\u826f": {
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_type": "Fixed Asset"
+                },
+                "156-\u672a\u5b8c\u5de5\u7a0b\u53ca\u9810\u4ed8\u8cfc\u7f6e\u8a2d\u5099\u6b3e": {
+                    "1561-\u672a\u5b8c\u5de5\u7a0b": {
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_type": "Fixed Asset"
+                },
+                "158-\u96dc\u9805\u56fa\u5b9a\u8cc7\u7522": {
+                    "1581-\u96dc\u9805\u56fa\u5b9a\u8cc7\u7522": {
+                        "account_type": "Fixed Asset"
+                    },
+                    "account_type": "Fixed Asset"
+                },
+                "account_type": "Fixed Asset"
+            },
+            "16-\u905e\u8017\u8cc7\u7522": {
+                "161-\u905e\u8017\u8cc7\u7522": {
+                    "is_group": 1
+                }
+            },
+            "17-\u7121\u5f62\u8cc7\u7522": {
+                "171-\u5546\u6a19\u6b0a": {
+                    "1711-\u5546\u6a19\u6b0a": {}
+                },
+                "172-\u5c08\u5229\u6b0a": {
+                    "1721-\u5c08\u5229\u6b0a": {}
+                },
+                "176-\u5546\u8b7d": {
+                    "1761-\u5546\u8b7d": {}
+                },
+                "177-\u958b\u8fa6\u8cbb": {
+                    "1771-\u958b\u8fa6\u8cbb": {}
+                },
+                "178-\u5176\u4ed6\u7121\u5f62\u8cc7\u7522": {
+                    "1781-\u905e\u5ef6\u9000\u4f11\u91d1\u6210\u672c": {}
+                }
+            },
+            "18-\u5176\u4ed6\u8cc7\u7522": {
+                "181-\u905e\u5ef6\u8cc7\u7522": {
+                    "1811-\u50b5\u5238\u767c\u884c\u6210\u672c": {},
+                    "1812-\u9577\u671f\u9810\u4ed8\u79df\u91d1": {},
+                    "1813-\u9577\u671f\u9810\u4ed8\u4fdd\u96aa\u8cbb": {},
+                    "1814-\u905e\u5ef6\u6240\u5f97\u7a05\u8cc7\u7522": {},
+                    "1815-\u9810\u4ed8\u9000\u4f11\u91d1": {},
+                    "1818-\u5176\u4ed6\u905e\u5ef6\u8cc7\u7522": {}
+                },
+                "182-\u9592\u7f6e\u8cc7\u7522": {
+                    "1821-\u9592\u7f6e\u8cc7\u7522": {}
+                },
+                "184-\u9577\u671f\u61c9\u6536\u7968\u64da\u53ca\u6b3e\u9805\u8207\u50ac\u6536\u5e33\u6b3e": {
+                    "1841-\u9577\u671f\u61c9\u6536\u7968\u64da": {
+                        "account_type": "Receivable"
+                    },
+                    "1842-\u9577\u671f\u61c9\u6536\u5e33\u6b3e": {
+                        "account_type": "Receivable"
+                    },
+                    "1843-\u50ac\u6536\u5e33\u6b3e": {
+                        "account_type": "Receivable"
+                    },
+                    "1848-\u5176\u4ed6\u9577\u671f\u61c9\u6536\u6b3e\u9805": {
+                        "account_type": "Receivable"
+                    },
+                    "1849-\u5099\u62b5\u5446\u5e33\u2014\u9577\u671f\u61c9\u6536\u7968\u64da\u53ca\u6b3e\u9805\u8207\u50ac\u6536\u5e33\u6b3e": {
+                        "account_type": "Receivable"
+                    },
+                    "account_type": "Receivable"
+                },
+                "185-\u51fa\u79df\u8cc7\u7522": {
+                    "1851-\u51fa\u79df\u8cc7\u7522": {},
+                    "1858-\u51fa\u79df\u8cc7\u7522 \u2014\u91cd\u4f30\u589e\u503c": {},
+                    "1859-\u7d2f\u7a4d\u6298\u820a \u2014\u51fa\u79df\u8cc7\u7522": {
+                        "account_type": "Accumulated Depreciation"
+                    }
+                },
+                "186-\u5b58\u51fa\u4fdd\u8b49\u91d1": {
+                    "1861-\u5b58\u51fa\u4fdd\u8b49\u91d1": {}
+                },
+                "188-\u96dc\u9805\u8cc7\u7522": {
+                    "1881-\u53d7\u9650\u5236\u5b58\u6b3e": {},
+                    "1888-\u96dc\u9805\u8cc7\u7522 \u2014\u5176\u4ed6": {}
+                }
+            },
+            "Temporary Accounts": {
+                "Temporary Opening": {
+                    "account_type": "Temporary"
+                },
+                "account_type": "Temporary"
+            },
+            "root_type": "Asset"
+        },
+        "2-\u8ca0\u50b5": {
+            "21~22-\u6d41\u52d5\u8ca0\u50b5": {
+                "211-\u77ed\u671f\u501f\u6b3e": {
+                    "2111-\u9280\u884c\u900f\u652f": {},
+                    "2112-\u9280\u884c\u501f\u6b3e": {}
+                },
+                "212-\u61c9\u4ed8\u77ed\u671f\u7968\u5238": {
+                    "2121-\u61c9\u4ed8\u5546\u696d\u672c\u7968": {
+                        "account_type": "Payable"
+                    },
+                    "2122-\u9280\u884c\u627f\u514c\u532f\u7968": {
+                        "account_type": "Payable"
+                    },
+                    "account_type": "Payable"
+                },
+                "213-\u61c9\u4ed8\u7968\u64da": {
+                    "2131-\u61c9\u4ed8\u7968\u64da": {
+                        "account_type": "Payable"
+                    },
+                    "account_type": "Payable"
+                },
+                "214-\u61c9\u4ed8\u5e33\u6b3e": {
+                    "2141-\u61c9\u4ed8\u5e33\u6b3e": {
+                        "account_type": "Payable"
+                    },
+                    "account_type": "Payable"
+                },
+                "216-\u61c9\u4ed8\u6240\u5f97\u7a05": {
+                    "2161-\u61c9\u4ed8\u6240\u5f97\u7a05": {
+                        "account_type": "Tax", 
+                        "tax_rate": 5.0
+                    },
+                    "account_type": "Tax", 
+                    "tax_rate": 5.0
+                },
+                "217-\u61c9\u4ed8\u8cbb\u7528": {
+                    "2171-\u61c9\u4ed8\u85aa\u5de5": {},
+                    "2172-\u61c9\u4ed8\u79df\u91d1": {},
+                    "2173-\u61c9\u4ed8\u5229\u606f": {},
+                    "2174-\u61c9\u4ed8\u71df\u696d\u7a05": {},
+                    "2175-\u61c9\u4ed8\u7a05\u6350 \u2014\u5176\u4ed6": {
+                        "account_type": "Tax", 
+                        "tax_rate": 5.0
+                    },
+                    "2178-\u5176\u4ed6\u61c9\u4ed8\u8cbb\u7528": {}
+                },
+                "218~219-\u5176\u4ed6\u61c9\u4ed8\u6b3e": {
+                    "2184-\u61c9\u4ed8\u571f\u5730\u623f\u5c4b\u6b3e": {},
+                    "2185-\u61c9\u4ed8\u8a2d\u5099\u6b3e": {},
+                    "2192-\u61c9\u4ed8\u80a1\u5229": {}
+                },
+                "226-\u9810\u6536\u6b3e\u9805": {
+                    "2261-\u9810\u6536\u8ca8\u6b3e": {},
+                    "2262-\u9810\u6536\u6536\u5165": {},
+                    "2268-\u5176\u4ed6\u9810\u6536\u6b3e": {}
+                },
+                "227-\u4e00\u5e74\u6216\u4e00\u71df\u696d\u9031\u671f\u5167\u5230\u671f\u9577\u671f\u8ca0\u50b5": {
+                    "is_group": 1
+                },
+                "228~229-\u5176\u4ed6\u6d41\u52d5\u8ca0\u50b5": {
+                    "2281-\u92b7\u9805\u7a05\u984d": {},
+                    "2283-\u66ab\u6536\u6b3e ": {},
+                    "2284-\u4ee3\u6536\u6b3e": {},
+                    "2285-\u4f30\u8a08\u552e\u5f8c\u670d\u52d9/\u4fdd\u56fa\u8ca0\u50b5": {},
+                    "2291-\u905e\u5ef6\u6240\u5f97\u7a05\u8ca0\u50b5": {},
+                    "2292-\u905e\u5ef6\u514c\u63db\u5229\u76ca": {}
+                }
+            },
+            "23-\u9577\u671f\u8ca0\u50b5": {
+                "231-\u61c9\u4ed8\u516c\u53f8\u50b5": {
+                    "2311-\u61c9\u4ed8\u516c\u53f8\u50b5": {},
+                    "2319-\u61c9\u4ed8\u516c\u53f8\u50b5\u6ea2(\u6298)\u50f9": {}
+                },
+                "232-\u9577\u671f\u501f\u6b3e": {
+                    "2321-\u9577\u671f\u9280\u884c\u501f\u6b3e": {},
+                    "2324-\u9577\u671f\u501f\u6b3e \u2014\u696d\u4e3b": {},
+                    "2325-\u9577\u671f\u501f\u6b3e \u2014\u54e1\u5de5": {},
+                    "2327-\u9577\u671f\u501f\u6b3e \u2014\u95dc\u4fc2\u4eba": {},
+                    "2328-\u9577\u671f\u501f\u6b3e \u2014\u5176\u4ed6": {}
+                },
+                "233-\u9577\u671f\u61c9\u4ed8\u7968\u64da\u53ca\u6b3e\u9805": {
+                    "2331-\u9577\u671f\u61c9\u4ed8\u7968\u64da": {
+                        "account_type": "Payable"
+                    },
+                    "2332-\u9577\u671f\u61c9\u4ed8\u5e33\u6b3e": {
+                        "account_type": "Payable"
+                    },
+                    "2333-\u9577\u671f\u61c9\u4ed8\u79df\u8cc3\u8ca0\u50b5": {
+                        "account_type": "Payable"
+                    },
+                    "account_type": "Payable"
+                },
+                "234-\u4f30\u8a08\u61c9\u4ed8\u571f\u5730\u589e\u503c\u7a05": {
+                    "2341-\u4f30\u8a08\u61c9\u4ed8\u571f\u5730\u589e\u503c\u7a05": {}
+                },
+                "235-\u61c9\u8a08\u9000\u4f11\u91d1\u8ca0\u50b5": {
+                    "2351-\u61c9\u8a08\u9000\u4f11\u91d1\u8ca0\u50b5": {}
+                },
+                "238-\u5176\u4ed6\u9577\u671f\u8ca0\u50b5": {
+                    "2388-\u5176\u4ed6\u9577\u671f\u8ca0\u50b5\u2014\u5176\u4ed6": {}
+                }
+            },
+            "28-\u5176\u4ed6\u8ca0\u50b5": {
+                "281-\u905e\u5ef6\u8ca0\u50b5": {
+                    "2811-\u905e\u5ef6\u6536\u5165": {},
+                    "2814-\u905e\u5ef6\u6240\u5f97\u7a05\u8ca0\u50b5": {},
+                    "2818-\u5176\u4ed6\u905e\u5ef6\u8ca0\u50b5": {}
+                },
+                "286-\u5b58\u5165\u4fdd\u8b49\u91d1": {
+                    "2861-\u5b58\u5165\u4fdd\u8b49\u91d1": {}
+                },
+                "288-\u96dc\u9805\u8ca0\u50b5": {
+                    "2888-\u96dc\u9805\u8ca0\u50b5 \u2014\u5176\u4ed6": {}
+                }
+            },
+            "Stock Received But Not Billed": {
+                "account_type": "Stock Received But Not Billed"
+            },
+            "root_type": "Liability"
+        },
+        "3-\u696d\u4e3b\u6b0a\u76ca": {
+            "31-\u8cc7\u672c": {
+                "311-\u8cc7\u672c\uff08\u80a1\u672c\uff09 ": {
+                    "3111-\u666e\u901a\u80a1\u80a1\u672c": {},
+                    "3112-\u7279\u5225\u80a1\u80a1\u672c": {},
+                    "3113-\u9810\u6536\u80a1\u672c": {},
+                    "3114-\u5f85\u5206\u914d\u80a1\u7968\u80a1\u5229": {},
+                    "3115-\u8cc7\u672c": {}
+                }
+            },
+            "32-\u8cc7\u672c\u516c\u7a4d": {
+                "321-\u80a1\u7968\u6ea2\u50f9": {
+                    "3211-\u666e\u901a\u80a1\u80a1\u7968\u6ea2\u50f9": {},
+                    "3212-\u7279\u5225\u80a1\u80a1\u7968\u6ea2\u50f9": {}
+                },
+                "323-\u8cc7\u7522\u91cd\u4f30\u589e\u503c\u6e96\u5099": {
+                    "3231-\u8cc7\u7522\u91cd\u4f30\u589e\u503c\u6e96\u5099": {}
+                },
+                "324-\u8655\u5206\u8cc7\u7522\u6ea2\u50f9\u516c\u7a4d": {
+                    "3241-\u8655\u5206\u8cc7\u7522\u6ea2\u50f9\u516c\u7a4d": {}
+                },
+                "325-\u5408\u4f75\u516c\u7a4d": {
+                    "3251-\u5408\u4f75\u516c\u7a4d": {}
+                },
+                "326-\u53d7\u8d08\u516c\u7a4d": {
+                    "3261-\u53d7\u8d08\u516c\u7a4d": {}
+                },
+                "328-\u5176\u4ed6\u8cc7\u672c\u516c\u7a4d": {
+                    "3281-\u6b0a\u76ca\u6cd5\u9577\u671f\u80a1\u6b0a\u6295\u8cc7\u8cc7\u672c\u516c\u7a4d": {},
+                    "3282-\u8cc7\u672c\u516c\u7a4d\u2014 \u5eab\u85cf\u80a1\u7968\u4ea4\u6613": {}
+                }
+            },
+            "33-\u4fdd\u7559\u76c8\u9918(\u7d2f\u7a4d\u8667\u640d)": {
+                "331-\u6cd5\u5b9a\u76c8\u9918\u516c\u7a4d": {
+                    "3311-\u6cd5\u5b9a\u76c8\u9918\u516c\u7a4d": {}
+                },
+                "332-\u7279\u5225\u76c8\u9918\u516c\u7a4d": {
+                    "3321-\u610f\u5916\u640d\u5931\u6e96\u5099": {},
+                    "3322-\u6539\u826f\u64f4\u5145\u6e96\u5099": {},
+                    "3323-\u511f\u50b5\u6e96\u5099": {},
+                    "3328-\u5176\u4ed6\u7279\u5225\u76c8\u9918\u516c\u7a4d": {}
+                },
+                "335-\u672a\u5206\u914d\u76c8\u9918(\u7d2f\u7a4d\u8667\u640d) ": {
+                    "is_group": 1
+                }
+            },
+            "34-\u6b0a\u76ca\u8abf\u6574": {
+                "341-\u9577\u671f\u80a1\u6b0a\u6295\u8cc7\u672a\u5be6\u73fe\u8dcc\u50f9\u640d\u5931": {
+                    "3411-\u9577\u671f\u80a1\u6b0a\u6295\u8cc7\u672a\u5be6\u73fe\u8dcc\u50f9\u640d\u5931": {}
+                },
+                "342-\u7d2f\u7a4d\u63db\u7b97\u8abf\u6574\u6578": {
+                    "3421-\u7d2f\u7a4d\u63db\u7b97\u8abf\u6574\u6578": {}
+                },
+                "343-\u672a\u8a8d\u5217\u70ba\u9000\u4f11\u91d1\u6210\u672c\u4e4b\u6de8\u640d\u5931": {
+                    "3431-\u672a\u8a8d\u5217\u70ba\u9000\u4f11\u91d1\u6210\u672c\u4e4b\u6de8\u640d\u5931": {}
+                }
+            },
+            "35-\u5eab\u85cf\u80a1": {
+                "351-\u5eab\u85cf\u80a1": {
+                    "3511-\u5eab\u85cf\u80a1": {}
+                }
+            },
+            "36-\u5c11\u6578\u80a1\u6b0a": {
+                "361-\u5c11\u6578\u80a1\u6b0a": {
+                    "3611-\u5c11\u6578\u80a1\u6b0a": {}
+                }
+            },
+            "root_type": "Equity"
+        },
+        "4-\u71df\u696d\u6536\u5165": {
+            "41-\u92b7\u8ca8\u6536\u5165": {
+                "411-\u92b7\u8ca8\u6536\u5165": {
+                    "4111-\u92b7\u8ca8\u6536\u5165": {},
+                    "4112-\u5206\u671f\u4ed8\u6b3e\u92b7\u8ca8\u6536\u5165": {}
+                },
+                "417-\u92b7\u8ca8\u9000\u56de": {
+                    "4171-\u92b7\u8ca8\u9000\u56de": {}
+                },
+                "419-\u92b7\u8ca8\u6298\u8b93": {
+                    "4191-\u92b7\u8ca8\u6298\u8b93": {}
+                }
+            },
+            "46-\u52de\u52d9\u6536\u5165": {
+                "461-\u52de\u52d9\u6536\u5165": {
+                    "4611-\u52de\u52d9\u6536\u5165": {}
+                }
+            },
+            "47-\u696d\u52d9\u6536\u5165": {
+                "471-\u696d\u52d9\u6536\u5165": {
+                    "4711-\u696d\u52d9\u6536\u5165": {}
+                }
+            },
+            "48-\u5176\u4ed6\u71df\u696d\u6536\u5165": {
+                "488-\u5176\u4ed6\u71df\u696d\u6536\u5165\u2014\u5176\u4ed6": {
+                    "4888-\u5176\u4ed6\u71df\u696d\u6536\u5165\u2014\u5176\u4ed6": {}
+                }
+            },
+            "root_type": "Income"
+        },
+        "5-\u71df\u696d\u6210\u672c": {
+            "51-\u92b7\u8ca8\u6210\u672c": {
+                "511-\u92b7\u8ca8\u6210\u672c": {
+                    "5111-\u92b7\u8ca8\u6210\u672c": {
+                        "account_type": "Cost of Goods Sold"
+                    },
+                    "5112-\u5206\u671f\u4ed8\u6b3e\u92b7\u8ca8\u6210\u672c": {
+                        "account_type": "Cost of Goods Sold"
+                    },
+                    "account_type": "Cost of Goods Sold"
+                },
+                "512-\u9032\u8ca8": {
+                    "5121-\u9032\u8ca8": {},
+                    "5122-\u9032\u8ca8\u8cbb\u7528": {},
+                    "5123-\u9032\u8ca8\u9000\u51fa": {},
+                    "5124-\u9032\u8ca8\u6298\u8b93": {}
+                },
+                "513-\u9032\u6599": {
+                    "5131-\u9032\u6599": {},
+                    "5132-\u9032\u6599\u8cbb\u7528": {},
+                    "5133-\u9032\u6599\u9000\u51fa": {},
+                    "5134-\u9032\u6599\u6298\u8b93": {}
+                },
+                "514-\u76f4\u63a5\u4eba\u5de5": {
+                    "5141-\u76f4\u63a5\u4eba\u5de5": {}
+                },
+                "515~518-\u88fd\u9020\u8cbb\u7528": {
+                    "5151-\u9593\u63a5\u4eba\u5de5": {},
+                    "5152-\u79df\u91d1\u652f\u51fa": {},
+                    "5153-\u6587\u5177\u7528\u54c1": {},
+                    "5154-\u65c5\u8cbb": {},
+                    "5155-\u904b\u8cbb": {},
+                    "5156-\u90f5\u96fb\u8cbb": {},
+                    "5157-\u4fee\u7e55\u8cbb": {},
+                    "5158-\u5305\u88dd\u8cbb": {},
+                    "5161-\u6c34\u96fb\u74e6\u65af\u8cbb": {},
+                    "5162-\u4fdd\u96aa\u8cbb": {},
+                    "5163-\u52a0\u5de5\u8cbb": {},
+                    "5166-\u7a05\u6350": {
+                        "account_type": "Tax", 
+                        "tax_rate": 5.0
+                    },
+                    "5168-\u6298\u820a ": {
+                        "account_type": "Depreciation"
+                    },
+                    "5169-\u5404\u9805\u8017\u7aed\u53ca\u6524\u63d0": {},
+                    "5172-\u4f19\u98df\u8cbb": {},
+                    "5173-\u8077\u5de5\u798f\u5229": {},
+                    "5176-\u8a13\u7df4\u8cbb": {},
+                    "5177-\u9593\u63a5\u6750\u6599": {},
+                    "5188-\u5176\u4ed6\u88fd\u9020\u8cbb\u7528": {}
+                },
+                "Expenses Included In Valuation": {
+                    "account_type": "Expenses Included In Valuation"
+                },
+                "account_type": "Cost of Goods Sold"
+            },
+            "56-\u52de\u52d9\u6210\u672c\u88fd": {
+                "561-\u52de\u52d9\u6210\u672c": {
+                    "5611-\u52de\u52d9\u6210\u672c": {}
+                }
+            },
+            "57-\u696d\u52d9\u6210\u672c": {
+                "571-\u696d\u52d9\u6210\u672c": {
+                    "5711-\u696d\u52d9\u6210\u672c": {}
+                }
+            },
+            "58-\u5176\u4ed6\u71df\u696d\u6210\u672c": {
+                "588-\u5176\u4ed6\u71df\u696d\u6210\u672c\u2014\u5176\u4ed6 ": {
+                    "5888-\u5176\u4ed6\u71df\u696d\u6210\u672c\u2014\u5176\u4ed6": {}
+                }
+            },
+            "Stock Adjustment": {
+                "account_type": "Stock Adjustment"
+            },
+            "root_type": "Expense"
+        },
+        "6-\u71df\u696d\u8cbb\u7528": {
+            "61-\u63a8\u92b7\u8cbb\u7528": {
+                "615~618-\u63a8\u92b7\u8cbb\u7528": {
+                    "6151-\u85aa\u8cc7\u652f\u51fa": {},
+                    "6152-\u79df\u91d1\u652f\u51fa": {},
+                    "6153-\u6587\u5177\u7528\u54c1": {},
+                    "6154-\u65c5\u8cbb": {},
+                    "6155-\u904b\u8cbb": {},
+                    "6156-\u90f5\u96fb\u8cbb": {},
+                    "6157-\u4fee\u7e55\u8cbb": {},
+                    "6159-\u5ee3\u544a\u8cbb": {},
+                    "6161-\u6c34\u96fb\u74e6\u65af\u8cbb": {},
+                    "6162-\u4fdd\u96aa\u8cbb": {},
+                    "6164-\u4ea4\u969b\u8cbb": {},
+                    "6165-\u6350\u8d08": {},
+                    "6166-\u7a05\u6350": {
+                        "account_type": "Tax", 
+                        "tax_rate": 5.0
+                    },
+                    "6167-\u5446\u5e33\u640d\u5931": {},
+                    "6168-\u6298\u820a ": {
+                        "account_type": "Depreciation"
+                    },
+                    "6169-\u5404\u9805\u8017\u7aed\u53ca\u6524\u63d0": {},
+                    "6172-\u4f19\u98df\u8cbb": {},
+                    "6173-\u8077\u5de5\u798f\u5229": {},
+                    "6175-\u4f63\u91d1\u652f\u51fa": {},
+                    "6176-\u8a13\u7df4\u8cbb": {},
+                    "6188-\u5176\u4ed6\u63a8\u92b7\u8cbb\u7528": {}
+                }
+            },
+            "62-\u7ba1\u7406\u53ca\u7e3d\u52d9\u8cbb\u7528": {
+                "625~628-\u7ba1\u7406\u53ca\u7e3d\u52d9\u8cbb\u7528": {
+                    "6251-\u85aa\u8cc7\u652f\u51fa": {},
+                    "6252-\u79df\u91d1\u652f\u51fa": {},
+                    "6253-\u6587\u5177\u7528\u54c1": {},
+                    "6254-\u65c5\u8cbb": {},
+                    "6255-\u904b\u8cbb": {},
+                    "6256-\u90f5\u96fb\u8cbb": {},
+                    "6257-\u4fee\u7e55\u8cbb": {},
+                    "6259-\u5ee3\u544a\u8cbb": {},
+                    "6261-\u6c34\u96fb\u74e6\u65af\u8cbb": {},
+                    "6262-\u4fdd\u96aa\u8cbb": {},
+                    "6264-\u4ea4\u969b\u8cbb": {},
+                    "6265-\u6350\u8d08": {},
+                    "6266-\u7a05\u6350": {
+                        "account_type": "Tax", 
+                        "tax_rate": 5.0
+                    },
+                    "6267-\u5446\u5e33\u640d\u5931": {},
+                    "6268-\u6298\u820a": {
+                        "account_type": "Depreciation"
+                    },
+                    "6269-\u5404\u9805\u8017\u7aed\u53ca\u6524\u63d0": {},
+                    "6271-\u5916\u92b7\u640d\u5931": {},
+                    "6272-\u4f19\u98df\u8cbb": {},
+                    "6273-\u8077\u5de5\u798f\u5229": {},
+                    "6274-\u7814\u7a76\u767c\u5c55\u8cbb\u7528": {},
+                    "6275-\u4f63\u91d1\u652f\u51fa": {},
+                    "6276-\u8a13\u7df4\u8cbb": {},
+                    "6278-\u52de\u52d9\u8cbb": {},
+                    "6288-\u5176\u4ed6\u7ba1\u7406\u53ca\u7e3d\u52d9\u8cbb\u7528": {}
+                }
+            },
+            "63-\u7814\u7a76\u767c\u5c55\u8cbb\u7528": {
+                "635~638-\u7814\u7a76\u767c\u5c55\u8cbb\u7528": {
+                    "6351-\u85aa\u8cc7\u652f\u51fa": {},
+                    "6352-\u79df\u91d1\u652f\u51fa": {},
+                    "6353-\u6587\u5177\u7528\u54c1": {},
+                    "6354-\u65c5\u8cbb": {},
+                    "6355-\u904b\u8cbb": {},
+                    "6356-\u90f5\u96fb\u8cbb": {},
+                    "6357-\u4fee\u7e55\u8cbb": {},
+                    "6361-\u6c34\u96fb\u74e6\u65af\u8cbb": {},
+                    "6362-\u4fdd\u96aa\u8cbb": {},
+                    "6364-\u4ea4\u969b\u8cbb": {},
+                    "6366-\u7a05\u6350": {
+                        "account_type": "Tax", 
+                        "tax_rate": 5.0
+                    },
+                    "6368-\u6298\u820a": {
+                        "account_type": "Depreciation"
+                    },
+                    "6369-\u5404\u9805\u8017\u7aed\u53ca\u6524\u63d0": {},
+                    "6372-\u4f19\u98df\u8cbb": {},
+                    "6373-\u8077\u5de5\u798f\u5229": {},
+                    "6376-\u8a13\u7df4\u8cbb": {},
+                    "6378-\u5176\u4ed6\u7814\u7a76\u767c\u5c55\u8cbb\u7528": {}
+                }
+            },
+            "root_type": "Expense"
+        },
+        "7-\u71df\u696d\u5916\u6536\u5165\u53ca\u8cbb\u7528": {
+            "71~74-\u71df\u696d\u5916\u6536\u5165": {
+                "711-\u5229\u606f\u6536\u5165": {
+                    "7111-\u5229\u606f\u6536\u5165": {}
+                },
+                "712-\u6295\u8cc7\u6536\u76ca": {
+                    "7121-\u6b0a\u76ca\u6cd5\u8a8d\u5217\u4e4b\u6295\u8cc7\u6536\u76ca": {},
+                    "7122-\u80a1\u5229\u6536\u5165": {},
+                    "7123-\u77ed\u671f\u6295\u8cc7\u5e02\u50f9\u56de\u5347\u5229\u76ca": {}
+                },
+                "713-\u514c\u63db\u5229\u76ca": {
+                    "7131-\u514c\u63db\u5229\u76ca": {}
+                },
+                "714-\u8655\u5206\u6295\u8cc7\u6536\u76ca": {
+                    "7141-\u8655\u5206\u6295\u8cc7\u6536\u76ca": {}
+                },
+                "715-\u8655\u5206\u8cc7\u7522\u6ea2\u50f9\u6536\u5165": {
+                    "7151-\u8655\u5206\u8cc7\u7522\u6ea2\u50f9\u6536\u5165": {}
+                },
+                "748-\u5176\u4ed6\u71df\u696d\u5916\u6536\u5165": {
+                    "7481-\u6350\u8d08\u6536\u5165": {},
+                    "7482-\u79df\u91d1\u6536\u5165": {},
+                    "7483-\u4f63\u91d1\u6536\u5165": {},
+                    "7484-\u51fa\u552e\u4e0b\u8173\u53ca\u5ee2\u6599\u6536\u5165": {},
+                    "7485-\u5b58\u8ca8\u76e4\u76c8": {},
+                    "7486-\u5b58\u8ca8\u8dcc\u50f9\u56de\u5347\u5229\u76ca": {},
+                    "7487-\u58de\u5e33\u8f49\u56de\u5229\u76ca": {},
+                    "7488-\u5176\u4ed6\u71df\u696d\u5916\u6536\u5165\u2014\u5176\u4ed6": {}
+                }
+            },
+            "75~78-\u71df\u696d\u5916\u8cbb\u7528": {
+                "751-\u5229\u606f\u8cbb\u7528": {
+                    "7511-\u5229\u606f\u8cbb\u7528": {}
+                },
+                "752-\u6295\u8cc7\u640d\u5931": {
+                    "7521-\u6b0a\u76ca\u6cd5\u8a8d\u5217\u4e4b\u6295\u8cc7\u640d\u5931": {},
+                    "7523-\u77ed\u671f\u6295\u8cc7\u672a\u5be6\u73fe\u8dcc\u50f9\u640d\u5931": {}
+                },
+                "753-\u514c\u63db\u640d\u5931": {
+                    "7531-\u514c\u63db\u640d\u5931": {}
+                },
+                "754-\u8655\u5206\u6295\u8cc7\u640d\u5931": {
+                    "7541-\u8655\u5206\u6295\u8cc7\u640d\u5931": {}
+                },
+                "755-\u8655\u5206\u8cc7\u7522\u640d\u5931": {
+                    "7551-\u8655\u5206\u8cc7\u7522\u640d\u5931 ": {}
+                },
+                "788-\u5176\u4ed6\u71df\u696d\u5916\u8cbb\u7528": {
+                    "7881-\u505c\u5de5\u640d\u5931": {},
+                    "7882-\u707d\u5bb3\u640d\u5931": {},
+                    "7885-\u5b58\u8ca8\u76e4\u640d": {},
+                    "7886-\u5b58\u8ca8\u8dcc\u50f9\u53ca\u5446\u6eef\u640d\u5931": {},
+                    "7888-\u5176\u4ed6\u71df\u696d\u5916\u8cbb\u7528\u2014\u5176\u4ed6": {}
+                }
+            },
+            "root_type": "Income"
+        },
+        "8-\u6240\u5f97\u7a05\u8cbb\u7528(\u5229\u76ca)": {
+            "81-\u6240\u5f97\u7a05\u8cbb\u7528(\u5229\u76ca)": {
+                "811-\u6240\u5f97\u7a05\u8cbb\u7528(\u5229\u76ca) ": {
+                    "8111-\u6240\u5f97\u7a05\u8cbb\u7528(\u5229\u76ca) ": {}
+                }
+            },
+            "root_type": "Expense"
+        },
+        "9-\u975e\u7d93\u5e38\u71df\u696d\u640d\u76ca": {
+            "91-\u505c\u696d\u90e8\u9580\u640d\u76ca": {
+                "911-\u505c\u696d\u90e8\u9580\u640d\u76ca\u2014\u505c\u696d\u524d\u71df\u696d\u640d\u76ca": {
+                    "9111-\u505c\u696d\u90e8\u9580\u640d\u76ca\u2014\u505c\u696d\u524d\u71df\u696d\u640d\u76ca": {}
+                },
+                "912-\u505c\u696d\u90e8\u9580\u640d\u76ca\u2014\u8655\u5206\u640d\u76ca": {
+                    "9121-\u505c\u696d\u90e8\u9580\u640d\u76ca\u2014\u8655\u5206\u640d\u76ca": {}
+                }
+            },
+            "92-\u975e\u5e38\u640d\u76ca": {
+                "921-\u975e\u5e38\u640d\u76ca": {
+                    "9211-\u975e\u5e38\u640d\u76ca": {}
+                }
+            },
+            "93-\u6703\u8a08\u539f\u5247\u8b8a\u52d5\u7d2f\u7a4d\u5f71\u97ff\u6578": {
+                "931-\u6703\u8a08\u539f\u5247\u8b8a\u52d5\u7d2f\u7a4d\u5f71\u97ff\u6578": {
+                    "9311-\u6703\u8a08\u539f\u5247\u8b8a\u52d5\u7d2f\u7a4d\u5f71\u97ff\u6578": {}
+                }
+            },
+            "94-\u5c11\u6578\u80a1\u6b0a\u6de8\u5229": {
+                "941-\u5c11\u6578\u80a1\u6b0a\u6de8\u5229": {
+                    "9411-\u5c11\u6578\u80a1\u6b0a\u6de8\u5229": {}
+                }
+            },
+            "root_type": "Expense"
+        }
+    }
+}

@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
 from frappe.utils import flt
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import get_tax_accounts
@@ -14,10 +14,12 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	if not filters: filters = {}
 	columns = get_columns(additional_table_columns)
 
+	company_currency = erpnext.get_company_currency(filters.company)
+
 	item_list = get_items(filters, additional_query_columns)
 	aii_account_map = get_aii_accounts()
 	if item_list:
-		itemised_tax, tax_columns = get_tax_accounts(item_list, columns,
+		itemised_tax, tax_columns = get_tax_accounts(item_list, columns, company_currency,
 			doctype="Purchase Invoice", tax_doctype="Purchase Taxes and Charges")
 
 	columns.append({
@@ -26,7 +28,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		"fieldtype": "Data",
 		"width": 80
 	})
-	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+
 	po_pr_map = get_purchase_receipts_against_purchase_order(item_list)
 
 	data = []
@@ -125,14 +127,15 @@ def get_purchase_receipts_against_purchase_order(item_list):
 	po_pr_map = frappe._dict()
 	po_item_rows = list(set([d.po_detail for d in item_list]))
 
-	purchase_receipts = frappe.db.sql("""
-		select parent, purchase_order_item
-		from `tabPurchase Receipt Item`
-		where docstatus=1 and purchase_order_item in (%s)
-		group by purchase_order_item, parent
-	""" % (', '.join(['%s']*len(po_item_rows))), tuple(po_item_rows), as_dict=1)
+	if po_item_rows:
+		purchase_receipts = frappe.db.sql("""
+			select parent, purchase_order_item
+			from `tabPurchase Receipt Item`
+			where docstatus=1 and purchase_order_item in (%s)
+			group by purchase_order_item, parent
+		""" % (', '.join(['%s']*len(po_item_rows))), tuple(po_item_rows), as_dict=1)
 
-	for pr in purchase_receipts:
-		po_pr_map.setdefault(pr.po_detail, []).append(pr.parent)
+		for pr in purchase_receipts:
+			po_pr_map.setdefault(pr.po_detail, []).append(pr.parent)
 
 	return po_pr_map
