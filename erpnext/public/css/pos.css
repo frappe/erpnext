@@ -80,7 +80,8 @@
 .pos-item-wrapper {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  position: relative;
+  width: 25%;
 }
 .image-view-container {
   display: block;

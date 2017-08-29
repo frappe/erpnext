@@ -39,6 +39,7 @@ class PointOfSale {
 				this.bind_events();
 			},
 			() => this.make_new_invoice(),
+			() => this.page.set_title(__('Point of Sale'))
 		]);
 	}
 
@@ -584,7 +585,7 @@ class POSCart {
 		const $item = this.$cart_items.find(`[data-item-code="${item.item_code}"]`);
 		if(item.qty > 0) {
 			$item.find('.quantity input').val(item.qty);
-			$item.find('.discount').text(item.discount_percentage);
+			$item.find('.discount').text(item.discount_percentage + '%');
 			$item.find('.rate').text(format_currency(item.rate, this.frm.doc.currency));
 		} else {
 			$item.remove();
@@ -700,23 +701,23 @@ class POSCart {
 			frappe.model.set_value(this.frm.doctype, this.frm.docname,
 				'additional_discount_percentage', e.target.value)
 				.then(() => {
-					let discount_wrapper = this.wrapper.find('.discount_amount')
-					discount_wrapper.val(this.frm.doc.discount_amount)
-					discount_wrapper.trigger('change')
-				})
-		})
+					let discount_wrapper = this.wrapper.find('.discount_amount');
+					discount_wrapper.val(this.frm.doc.discount_amount);
+					discount_wrapper.trigger('change');
+				});
+		});
 
 		this.wrapper.find('.discount_amount').on('change', (e) => {
 			frappe.model.set_value(this.frm.doctype, this.frm.docname,
-				'discount_amount', e.target.value)
+				'discount_amount', e.target.value);
 			this.frm.trigger('discount_amount')
 				.then(() => {
 					let discount_wrapper = this.wrapper.find('.additional_discount_percentage');
 					discount_wrapper.val(this.frm.doc.additional_discount_percentage);
-					this.update_taxes_and_totals()
-					this.update_grand_total()
-				})
-		})
+					this.update_taxes_and_totals();
+					this.update_grand_total();
+				});
+		});
 	}
 
 	set_selected_item($item) {
