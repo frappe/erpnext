@@ -31,9 +31,11 @@ class SupplierQuotation(BuyingController):
 
 	def on_submit(self):
 		frappe.db.set(self, "status", "Submitted")
+		self.update_rfq_supplier_status(1)
 
 	def on_cancel(self):
 		frappe.db.set(self, "status", "Cancelled")
+		self.update_rfq_supplier_status(0)
 
 	def on_trash(self):
 		pass
@@ -50,6 +52,41 @@ class SupplierQuotation(BuyingController):
 				"is_child_table": True
 			}
 		})
+	def update_rfq_supplier_status(self, include_me):
+		rfq_list = set([])
+		for item in self.items:
+			if item.request_for_quotation:
+				rfq_list.add(item.request_for_quotation)
+		for rfq in rfq_list:
+			doc = frappe.get_doc('Request for Quotation', rfq)
+			doc_sup = frappe.get_all('Request for Quotation Supplier', filters=
+				{'parent': doc.name, 'supplier': self.supplier}, fields=['name', 'quote_status'])[0]
+
+			quote_status = _('Received')
+			for item in doc.items:
+				sqi_count = frappe.db.sql("""
+					SELECT
+						COUNT(sqi.name) as count
+					FROM
+						`tabSupplier Quotation Item` as sqi,
+						`tabSupplier Quotation` as sq
+					WHERE sq.supplier = %(supplier)s
+						AND sqi.docstatus = 1
+						AND sq.name != %(me)s
+						AND sqi.request_for_quotation_item = %(rqi)s
+						AND sqi.parent = sq.name""",
+					{"supplier": self.supplier, "rqi": item.name, 'me': self.name}, as_dict=1)[0]
+				self_count = sum(my_item.request_for_quotation_item == item.name
+					for my_item in self.items) if include_me else 0
+				if (sqi_count.count + self_count) == 0:
+					quote_status = _('Pending')
+			if quote_status == _('Received') and doc_sup.quote_status == _('No Quote'):
+				frappe.msgprint(_("{0} indicates that {1} will not provide a quotation, but all items \
+					have been quoted. Updating the RFQ quote status.").format(doc.name, self.supplier))
+				frappe.db.set_value('Request for Quotation Supplier', doc_sup.name, 'quote_status', quote_status)
+				frappe.db.set_value('Request for Quotation Supplier', doc_sup.name, 'no_quote', 0)
+			elif doc_sup.quote_status != _('No Quote'):
+				frappe.db.set_value('Request for Quotation Supplier', doc_sup.name, 'quote_status', quote_status)
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

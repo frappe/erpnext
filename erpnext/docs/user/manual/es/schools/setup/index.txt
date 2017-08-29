@@ -1,0 +1,6 @@
+course
+program
+instructor
+room
+academic-term
+academic-year

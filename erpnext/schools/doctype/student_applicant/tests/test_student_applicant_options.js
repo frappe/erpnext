@@ -15,6 +15,7 @@ QUnit.test('test student applicant', function(assert){
 		() => frappe.timeout(0.5),
 		() => frappe.tests.click_button('Submit'),
 		() => frappe.tests.click_button('Yes'),
+		() => frappe.timeout(0.5),
 		() => {
 			testing_status = $('span.indicator.orange').text();
 			assert.ok(testing_status.indexOf('Submit this document to confirm') == -1); // checking if submit has been successfull
@@ -86,8 +87,9 @@ QUnit.test('test student applicant', function(assert){
 		// Enrolling the Student into a Program
 		() => {$('.form-documents .row:nth-child(1) .col-xs-6:nth-child(1) .octicon-plus').click();},
 		() => frappe.timeout(1),
+		() => cur_frm.set_value('program', 'Standard Test'),
+		() => frappe.timeout(1),
 		() => {
-			cur_frm.set_value('program', 'Standard Test');
 			cur_frm.set_value('student_category', 'Reservation');
 			cur_frm.set_value('student_batch_name', 'A');
 			cur_frm.set_value('academic_year', '2016-17');
