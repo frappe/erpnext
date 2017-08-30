@@ -732,14 +732,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 					input = input.toLowerCase();
 					item = this.get_item(item.value);
-					var searchtext =
-						Object.keys(item)
-							.filter(key => ['customer_name', 'customer_group', 'value', 'label', 'email_id', 'phone', 'mobile_no'].includes(key))
-							.map(key => item[key])
-							.join(" ")
-							.toLowerCase();
-
-					return searchtext.includes(input)
+					return item.searchtext.includes(input)
 				},
 				item: function (item, input) {
 					var d = this.get_item(item.value);
@@ -813,7 +806,11 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				territory: c.territory,
 				phone: contact ? contact["phone"] : '',
 				mobile_no: contact ? contact["mobile_no"] : '',
-				email_id: contact ? contact["email_id"] : ''
+				email_id: contact ? contact["email_id"] : '',
+				searchtext: ['customer_name', 'customer_group', 'value',
+					'label', 'email_id', 'phone', 'mobile_no']
+					.map(key => c[key]).join(' ')
+					.toLowerCase()
 			}
 		});
 
