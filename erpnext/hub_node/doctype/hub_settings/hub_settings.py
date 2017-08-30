@@ -45,6 +45,10 @@ class HubSettings(Document):
 			self.just_registered = 0
 			return
 
+		if hasattr(self, 'in_callback') and self.in_callback:
+			self.in_callback = 0
+			return
+
 		if self.suspended:
 			# show a tag
 			pass
@@ -56,11 +60,12 @@ class HubSettings(Document):
 		self.update_publishing()
 
 	def update_profile_settings(self):
-		send_hub_request('update_user_details',
-			data=self.get_args(self.profile_args + self.seller_args + self.publishing_args))
+		make_and_enqueue_message(msg_type='HUB-USER-UPDATE', method='update_user_details',
+			data=self.get_args(self.profile_args + self.seller_args + self.publishing_args),
+			callback='erpnext.hub_node.doctype.hub_settings.hub_settings.set_last_sync_datetime')
 
 	def update_publishing(self):
-		if self.publish != self.get_doc_before_save().publish:
+		if self.publish != self._doc_before_save.publish:
 			if self.publish:
 				self.publish_all_set_items()
 			else:
@@ -89,21 +94,21 @@ class HubSettings(Document):
 				item.price = 0
 				item.currency = None
 
-		send_hub_request('update_items',
+		make_and_enqueue_message(msg_type='HUB-ITEMS-UPDATE', method='update_items',
 			data={
 			"items_to_update": json.dumps(items),
 			"item_list": json.dumps(item_list),
 			"item_fields": self.base_fields_for_items + self.item_fields_to_update
 		})
 
-		if verbose:
-			frappe.msgprint(_("{0} Items synced".format(len(items))))
+		# if verbose:
+		# 	frappe.msgprint(_("{0} Items synced".format(len(items))))
 
 		# sync_item_fields_at_hub()
 
 	def unpublish_all_items(self):
 		"""Unpublish from hub.erpnext.org, delete items there"""
-		send_hub_request('delete_all_items_of_user', now = True,
+		make_and_enqueue_message(msg_type='HUB-ITEMS-DELETE-ALL', method='delete_all_items_of_user', now = True,
 			callback='erpnext.hub_node.doctype.hub_settings.hub_settings.reset_hub_publishing_settings')
 
 	### Account
@@ -133,7 +138,7 @@ class HubSettings(Document):
 
 	def unregister_from_hub(self):
 		"""Unpublish, then delete transactions and user from there"""
-		send_hub_request('unregister_user', now = True,
+		make_and_enqueue_message(msg_type='HUB-USER-UNREG', method='unregister_user', now = True,
 			callback='erpnext.hub_node.doctype.hub_settings.hub_settings.reset_hub_settings')
 
 	### Helpers
@@ -161,7 +166,20 @@ class HubSettings(Document):
 			filters={ "publish_in_hub": 0, "is_sales_item": 1}):
 			frappe.db.set_value("Item", item.name, "publish_in_hub", 1)
 
-def send_hub_request(method, data = [], now = False, callback = "", callback_args = {}):
+def make_and_enqueue_message(msg_type, method, data=[], callback="", callback_args={}, now = 0):
+	message = frappe.new_doc("Outgoing Hub Message")
+
+	message.type = msg_type
+	message.method = method
+	message.arguments = json.dumps(data)
+	message.callback = callback
+	message.callback_args = json.dumps(callback_args)
+	message.now = now
+
+	message.save(ignore_permissions=True)
+
+###########################
+def send_hub_request(method, data = "", now = False, callback = "", callback_args = {}):
 	if now:
 		hub_request(method, data, callback, callback_args)
 		return
@@ -170,19 +188,28 @@ def send_hub_request(method, data = [], now = False, callback = "", callback_arg
 			api_method=method, data=data, callback=callback, callback_args=callback_args)
 	except redis.exceptions.ConnectionError:
 		hub_request(method, data, callback, callback_args)
+#########################
 
-def hub_request(api_method, data = [], callback = "", callback_args = {}):
+def hub_request(message_id, api_method, data = "", callback = "", callback_args = {}):
 	hub = frappe.get_single("Hub Settings")
 	response = requests.post(hub_url + "/api/method/hub.hub.api." + "call_method",
 		data = {
 			"access_token": hub.access_token,
 			"method": api_method,
-			"message": json.dumps(data)
+			"message": data,
+			# TODO: switch off debug mode
+			"debug": True
 		}
 	)
+	print("]]]]]]]]]]]]]]]]]")
 	response.raise_for_status()
+	print("=================")
+
+	callback_args = json.loads(callback_args)
 	response_msg = response.json().get("message")
 	if response_msg:
+		frappe.db.set_value("Outgoing Hub Message", message_id, "status", "Successful")
+		# Deleting mechanism for successful messages?, or logging
 		callback_args.update(response_msg)
 		frappe.enqueue(callback, now=True, **callback_args)
 
@@ -216,15 +243,23 @@ def check_hub_enabled():
 def get_item_fields_to_sync():
 	return ["price", "currency", "stock_qty"]
 
+def set_last_sync_datetime(last_sync_datetime):
+	doc = get_hub_settings()
+	doc.last_sync_datetime = get_datetime(last_sync_datetime)
+	doc.in_callback = 1
+	doc.save()
+
 def reset_hub_publishing_settings(last_sync_datetime = ""):
 	doc = get_hub_settings()
 	doc.reset_publishing_settings(last_sync_datetime)
+	doc.in_callback = 1
 	doc.save()
 
 def reset_hub_settings(last_sync_datetime = ""):
 	doc = get_hub_settings()
 	doc.reset_publishing_settings(last_sync_datetime)
 	doc.reset_enable()
+	doc.in_callback = 1
 	doc.save()
 	frappe.msgprint(_("Successfully unregistered."))
 
@@ -242,7 +277,7 @@ def sync_item_fields_at_hub():
 			item.price = 0
 			item.currency = None
 
-	send_hub_request('update_item_fields',
+	make_and_enqueue_message(msg_type='HUB-ITEMS-FIELDS-UPDATE', method='update_item_fields',
 		data={
 			"items_with_fields_updates": json.dumps(items),
 			"fields_to_update": get_item_fields_to_sync()
