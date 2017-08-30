@@ -146,7 +146,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			this.map_row_values(this.item, this.values, 'serial_no', 'qty');
 		}
 		refresh_field("items");
-		this.callback && this.callback(this.item)
+		this.callback && this.callback(this.item);
 	},
 
 	map_row_values: function(row, values, number, qty_field, warehouse) {

@@ -3,17 +3,9 @@
 
 from __future__ import unicode_literals
 import frappe, json
-from frappe import _
-from frappe.utils import nowdate
-from erpnext.setup.utils import get_exchange_rate
-from frappe.core.doctype.communication.email import make
-from erpnext.stock.get_item_details import get_pos_profile
-from erpnext.accounts.party import get_party_account_currency
-from erpnext.controllers.accounts_controller import get_taxes_and_charges
 
 @frappe.whitelist()
 def get_items(start, page_length, price_list, item_group, search_value=""):
-	condition = ""
 	serial_no = ""
 	batch_no = ""
 	item_code = search_value
@@ -42,7 +34,7 @@ def get_items(start, page_length, price_list, item_group, search_value=""):
 			i.disabled = 0 and i.has_variants = 0
 			and i.item_group in (select name from `tabItem Group` where lft >= {lft} and rgt <= {rgt})
 			and (i.item_code like %(item_code)s
-			or i.item_name like %(item_code)s)
+			or i.item_name like %(item_code)s or i.barcode like %(item_code)s)
 		limit {start}, {page_length}""".format(start=start, page_length=page_length, lft=lft, rgt=rgt),
 		{
 			'item_code': '%%%s%%'%(frappe.db.escape(item_code)),

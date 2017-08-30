@@ -1,7 +1,7 @@
 /* global Clusterize */
 
 frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
-	var page = frappe.ui.make_app_page({
+	frappe.ui.make_app_page({
 		parent: wrapper,
 		title: 'Point of Sale',
 		single_column: true
@@ -156,7 +156,7 @@ class PointOfSale {
 					.then(() => {
 						// update cart
 						this.update_cart_data(item);
-					})
+					});
 			}
 			return;
 		}
@@ -172,12 +172,12 @@ class PointOfSale {
 			.trigger('item_code', item.doctype, item.name)
 			.then(() => {
 				// update cart
-				this.update_cart_data(item)
+				this.update_cart_data(item);
 			});
 	}
 
 	select_batch_and_serial_no(item) {
-		let dialog = new erpnext.SerialNoBatchSelector({
+		new erpnext.SerialNoBatchSelector({
 			frm: this.frm,
 			item: item,
 			warehouse_details: {
@@ -189,9 +189,9 @@ class PointOfSale {
 					.then(() => {
 						// update cart
 						this.update_cart_data(item);
-					})
+					});
 			}
-		}, true)
+		}, true);
 	}
 
 	update_cart_data(item) {
@@ -202,7 +202,7 @@ class PointOfSale {
 
 	update_item_in_frm(item, field, value) {
 		if (field) {
-			frappe.model.set_value(item.doctype, item.name, field, value)
+			frappe.model.set_value(item.doctype, item.name, field, value);
 		}
 
 		return this.frm.script_manager
@@ -219,7 +219,7 @@ class PointOfSale {
 			frm: this.frm,
 			events: {
 				submit_form: () => {
-					this.submit_sales_invoice()
+					this.submit_sales_invoice();
 				}
 			}
 		});
@@ -323,7 +323,7 @@ class PointOfSale {
 		// }).addClass('visible-xs');
 
 		this.page.add_menu_item(__("Form View"), function () {
-			var doc = frappe.model.sync(me.frm.doc);
+			frappe.model.sync(me.frm.doc);
 			frappe.set_route("Form", me.frm.doc.doctype, me.frm.doc.name);
 		});
 
@@ -376,7 +376,7 @@ class POSCart {
 				<div class="cart-wrapper">
 					<div class="list-item-table">
 						<div class="list-item list-item--head">
-							<div class="list-item__content list-item__content--flex-2 text-muted">${__('Item Name')}</div>
+							<div class="list-item__content list-item__content--flex-1.5 text-muted">${__('Item Name')}</div>
 							<div class="list-item__content text-muted text-right">${__('Quantity')}</div>
 							<div class="list-item__content text-muted text-right">${__('Discount')}</div>
 							<div class="list-item__content text-muted text-right">${__('Rate')}</div>
@@ -610,8 +610,8 @@ class POSCart {
 	get_item_html(item) {
 		const rate = format_currency(item.rate, this.frm.doc.currency);
 		return `
-			<div class="list-item" data-item-code="${item.item_code}">
-				<div class="item-name list-item__content list-item__content--flex-2 ellipsis">
+			<div class="list-item" data-item-code="${item.item_code}" title="${item.item_name}">
+				<div class="item-name list-item__content list-item__content--flex-1.5 ellipsis">
 					${item.item_name}
 				</div>
 				<div class="quantity list-item__content text-right">
@@ -824,9 +824,9 @@ class POSItems {
 				options: 'Item Group',
 				default: 'All Item Groups',
 				onchange: () => {
-					const item_group = this.item_group_field.get_value()
+					const item_group = this.item_group_field.get_value();
 					if (item_group) {
-						this.filter_items({ item_group: item_group })
+						this.filter_items({ item_group: item_group });
 					}
 				},
 			},
@@ -907,7 +907,7 @@ class POSItems {
 
 	bind_events() {
 		var me = this;
-		this.wrapper.on('click', '.pos-item-wrapper', function(e) {
+		this.wrapper.on('click', '.pos-item-wrapper', function() {
 			const $item = $(this);
 			const item_code = $item.attr('data-item-code');
 			me.events.update_cart(item_code, 'qty', '+1');
@@ -1100,7 +1100,7 @@ class Payment {
 		this.set_flag();
 
 		let title = __('Total Amount {0}',
-			[format_currency(this.frm.doc.grand_total, this.frm.doc.currency)])
+			[format_currency(this.frm.doc.grand_total, this.frm.doc.currency)]);
 
 		this.dialog = new frappe.ui.Dialog({
 			title: title,
@@ -1153,7 +1153,7 @@ class Payment {
 				options: me.frm.doc.currency,
 				fieldname: p.mode_of_payment,
 				default: p.amount,
-				onchange: (e) => {
+				onchange: () => {
 					const value = this.dialog.get_value(this.fieldname);
 					me.update_payment_value(this.fieldname, value);
 				}
@@ -1180,7 +1180,7 @@ class Payment {
 				onchange: () => {
 					me.update_cur_frm_value('write_off_amount', () => {
 						frappe.flags.change_amount = false;
-						me.update_change_amount()
+						me.update_change_amount();
 					});
 				}
 			},
@@ -1237,8 +1237,8 @@ class Payment {
 			const value = this.dialog.get_value(fieldname);
 			this.frm.set_value(fieldname, value)
 				.then(() => {
-					callback()
-				})
+					callback();
+				});
 		}
 
 		frappe.flags[fieldname] = true;
@@ -1252,22 +1252,22 @@ class Payment {
 					.then(() => {
 						me.update_change_amount();
 						me.update_write_off_amount();
-					})
+					});
 			}
 		});
 	}
 
 	update_change_amount() {
-		this.dialog.set_value("change_amount", this.frm.doc.change_amount)
-		this.show_paid_amount()
+		this.dialog.set_value("change_amount", this.frm.doc.change_amount);
+		this.show_paid_amount();
 	}
 
 	update_write_off_amount() {
-		this.dialog.set_value("write_off_amount", this.frm.doc.write_off_amount)
+		this.dialog.set_value("write_off_amount", this.frm.doc.write_off_amount);
 	}
 
 	show_paid_amount() {
-		this.dialog.set_value("paid_amount", this.frm.doc.paid_amount)
-		this.dialog.set_value("outstanding_amount", this.frm.doc.outstanding_amount)
+		this.dialog.set_value("paid_amount", this.frm.doc.paid_amount);
+		this.dialog.set_value("outstanding_amount", this.frm.doc.outstanding_amount);
 	}
 }
