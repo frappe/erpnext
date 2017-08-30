@@ -424,8 +424,8 @@ class POSCart {
 	get_grand_total() {
 		return `
 			<div class="list-item">
-				<div class="list-item__content list-item__content--flex-2 text-muted">${__('Grand Total')}</div>
-				<div class="list-item__content grand-total-value">0.00</div>
+				<div class="list-item__content text-muted">${__('Grand Total')}</div>
+				<div class="list-item__content list-item__content--flex-2 grand-total-value">0.00</div>
 			</div>
 		`;
 	}
