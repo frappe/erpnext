@@ -436,7 +436,8 @@ class JournalEntry(AccountsController):
 						"against_voucher": d.reference_name,
 						"remarks": self.remark,
 						"cost_center": d.cost_center,
-						"project": d.project
+						"project": d.project,
+						"due_date": d.reference_due_date
 					})
 				)
 
