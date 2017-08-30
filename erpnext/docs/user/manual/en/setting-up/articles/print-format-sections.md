@@ -9,5 +9,3 @@
 Print Format Builder > Select Print Format > Edit Settings > Uncheck field "Show Line Breaks after Sections"
 
 <img alt="Email Setup Error" class="screenshot" src="/docs/assets/img/articles/sections-2.gif">
-
-
