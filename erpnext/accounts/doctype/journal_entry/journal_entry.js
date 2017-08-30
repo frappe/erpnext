@@ -185,24 +185,38 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		})
 	},
 
+	due_date_options_cache: {},
+
 	reference_name: function(doc, cdt, cdn) {
 		var d = frappe.get_doc(cdt, cdn);
+		var me = this;
 
-		const get_invoice_due_dates = (invoice_name) => {
-			frappe.call({
-				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_invoice_due_dates",
-				args: {name: invoice_name},
-				callback: function(r){
-					const wrapper = cur_frm.fields_dict["accounts"].wrapper;
-					const input = $(wrapper).find("select[data-fieldname=reference_due_date]");
+		const get_invoice_due_dates = invoice_name => {
+			const options = this.due_date_options_cache[invoice_name];
+			const input = $(cur_frm.fields_dict["accounts"].wrapper).find("select[data-fieldname=reference_due_date]");
 
-					input.children('option').remove();
-
-					$.each(r.message, function(key, value) {
-						input.append(new Option(value.due_date, "", false, false));
-					});
-				}
-			});
+			if (options) {
+				input.empty();
+				input.add_options(options);
+				frappe.model.set_value(cdt, cdn, "reference_due_date", options[0]);
+			}
+			else {
+				frappe.call({
+					method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_invoice_due_dates",
+					args: {name: invoice_name},
+					callback: function(r) {
+						const options = [];
+						$.each(r.message, function(key, value) {
+							options.push(value.due_date);
+						});
+						input.empty();
+						input.add_options(options);
+						frappe.model.set_value(cdt, cdn, "reference_due_date", options[0]);
+						me.due_date_options_cache[d.reference_name] = options;
+						console.log("input:", input);
+					}
+				});
+			}
 		}
 
 		if(d.reference_name) {
@@ -215,7 +229,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			if (d.reference_type==="Journal Entry" && !flt(d.credit) && !flt(d.debit)) {
 				this.get_outstanding('Journal Entry', d.reference_name, doc.company, d);
 			}
-			if( in_list(d.reference_type), ["Sales Invoice", "Purchase Invoice"]) {
+			if( in_list(["Sales Invoice", "Purchase Invoice"]), d.reference_type) {
 				get_invoice_due_dates(d.reference_name);
 			}
 		}
