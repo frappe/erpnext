@@ -28,8 +28,8 @@ QUnit.test("Test: Leave control panel [HR]", function (assert) {
 		() => frappe.timeout(1),
 		() => {
 			let leave_allocated = cur_list.data.filter(d => d.leave_type == "Test Leave type");
-			assert.equal(2, leave_allocated.length,
-				'leave allocation successfully done for both the employee');
+			assert.equal(3, leave_allocated.length,
+				'leave allocation successfully done for all the employees');
 		},
 		() => done()
 	]);
