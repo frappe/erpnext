@@ -20,48 +20,59 @@ def get_slide_settings():
 			action_cards=[
 				{
 					"action_name": "Make Company",
-					"title": _("You created a Company"),
-					"done": 1,
-					"actions": [{
-						"label": _("View " + company),
-						"route": ["Form", "Company", company]
-					}]
+					"title": _("You added " +  company),
+					"title_route": ["Form", "Company", company],
+					"done": 1
+					# "actions": [{
+					# 	"label": _("View " + company),
+					# 	"route":
+					# }]
 				},
-				{
-					"action_name": "Watch Accounts Opening Balance",
-					"title": _("Accounts Opening Balance"),
-					"content": _("Set an opening balance in Accounts."),
-					"video_id": "U5wPIvEn-0c"
-				},
+				# {
+				# 	"action_name": "Watch Accounts Opening Balance",
+				# 	"title": _("Accounts Opening Balance"),
+				# 	"title_link": _("Company"),
+				# 	"content": _("Set an opening balance in Accounts."),
+				# 	"video_id": "U5wPIvEn-0c"
+				# },
 				{
 					"action_name": "Review Chart of Accounts",
 					"title": _("Review Chart of Accounts"),
+					"title_route": ["Tree", "Account"],
 					# "content": _("Review the Chart of Accounts, update your opening balance and more"),
-					"actions": [{
-						"label": _("View Chart of Accounts"),
-						"route": ["Tree", "Account"]
-					}],
+					# "actions": [{
+					# 	"label": _("View Chart of Accounts"),
+					# 	"route": ["Tree", "Account"]
+					# }],
 					"help_links": [{
-						"label": _('Learn More'),
+						"label": _('Need help?'),
 						"url": ["https://erpnext.org/docs/user/manual/en/accounts"]
-					}]
+					},
+					{
+						"label": _('Set an Opening Balance'),
+						"video_id": "U5wPIvEn-0c"
+					}
+
+					]
 				},
 				{
 					"action_name": "Set Sales Target",
 					"title": _("Set a Sales Target"),
-					"content": _("Set a monthly sales goal that you'd like to achieve for your company " + company +
-						"."),
-					"actions": [{
-						"label": _('Set a monthly target'),
-						"route": ["Form", "Company", company]
-					}],
+					"title_route": ["Form", "Company", company],
+					# "content": _("Set a monthly sales goal that you'd like to achieve for your company " + company +
+					# 	"."),
+					# "actions": [{
+					# 	"label": _('Set a monthly target'),
+					# 	"route": ["Form", "Company", company]
+					# }],
 					"help_links": [{
-						"label": _('Learn More'),
+						"label": _('Need help?'),
 						"url": ["https://erpnext.org/docs/user/manual/en/setting-up/setting-company-sales-goal"]
 					}]
 				}
 			]
-		),
+		)
+		,
 		frappe._dict(
 			action_name='Add Customers',
 			domains=('Manufacturing', 'Services', 'Retail', 'Distribution'),
