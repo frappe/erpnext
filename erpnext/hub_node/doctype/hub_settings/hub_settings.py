@@ -22,7 +22,7 @@ class HubSettings(Document):
 		'selling_price_list', 'publish_availability', 'warehouse']
 
 	base_fields_for_items = ["item_code", "item_name", "item_group", "description", "image", "stock_uom",
-		 "modified"]
+		 "modified"] # hub_category
 
 	item_fields_to_update = ["price", "currency", "stock_qty"]
 
@@ -70,6 +70,17 @@ class HubSettings(Document):
 				self.publish_all_set_items()
 			else:
 				self.unpublish_all_items()
+		else:
+			if self.publish:
+				fields = []
+				if self.publish_pricing != self._doc_before_save.publish_pricing:
+					if self.publish_pricing:
+						fields += ["price", "currency", "formatted_price"]
+				if self.publish_availability != self._doc_before_save.publish_availability:
+					if self.publish_availability:
+						fields += ["stock_qty"]
+				if fields:
+					self.update_item_fields_at_hub(fields)
 
 	def publish_all_set_items(self, verbose=True):
 		"""Publish items hub.erpnext.org"""
@@ -90,26 +101,42 @@ class HubSettings(Document):
 
 			if self.publish_pricing:
 				set_item_price(item, self.company, self.selling_price_list)
-			else:
-				item.price = 0
-				item.currency = None
 
 		make_and_enqueue_message(msg_type='HUB-ITEMS-UPDATE', method='update_items',
 			data={
 			"items_to_update": json.dumps(items),
 			"item_list": json.dumps(item_list),
 			"item_fields": self.base_fields_for_items + self.item_fields_to_update
-		})
+			},
+			callback='erpnext.hub_node.doctype.hub_settings.hub_settings.after_items_synced',
+			callback_args={"action_msg": "{0} products synced"}
+		)
 
-		# if verbose:
-		# 	frappe.msgprint(_("{0} Items synced".format(len(items))))
+	def update_item_fields_at_hub(self, fields):
+		items = frappe.db.get_all("Item", fields=["item_code", "hub_warehouse"], filters={"publish_in_hub": 1})
 
-		# sync_item_fields_at_hub()
+		for item in items:
+			if "stock_qty" in fields:
+				set_stock_qty(item)
+
+			hub_settings = get_hub_settings()
+			if "price" in fields:
+				if self.publish_pricing:
+					set_item_price(item, hub_settings.company, hub_settings.selling_price_list)
+
+		make_and_enqueue_message(msg_type='HUB-ITEMS-FIELDS-UPDATE', method='update_item_fields',
+			data={
+				"items_with_fields_updates": json.dumps(items),
+				"fields_to_update": json.dumps(fields)
+			},
+			callback='erpnext.hub_node.doctype.hub_settings.hub_settings.after_items_synced',
+			callback_args={"action_msg": ((",".join(fields)) + " for {0} products synced")}
+		)
 
 	def unpublish_all_items(self):
 		"""Unpublish from hub.erpnext.org, delete items there"""
 		make_and_enqueue_message(msg_type='HUB-ITEMS-DELETE-ALL', method='delete_all_items_of_user', now = True,
-			callback='erpnext.hub_node.doctype.hub_settings.hub_settings.reset_hub_publishing_settings')
+			callback='erpnext.hub_node.doctype.hub_settings.hub_settings.after_items_unpublished')
 
 	### Account
 	def register(self):
@@ -210,6 +237,7 @@ def hub_request(message_id, api_method, data = "", callback = "", callback_args 
 		# Deleting mechanism for successful messages?, or logging
 		if callback:
 			callback_args.update(response_msg)
+			callback_args["message_id"] = message_id
 			frappe.enqueue(callback, now=True, **callback_args)
 
 def validate_hub_settings(doc, method):
@@ -239,14 +267,11 @@ def check_hub_enabled():
 	if not get_hub_settings().enabled:
 		frappe.throw(_("You need to enable Hub"), HubSetupError)
 
-def get_item_fields_to_sync():
-	return ["price", "currency", "stock_qty"]
-
 def set_last_sync_datetime(last_sync_datetime):
 	doc = frappe.get_doc("Hub Settings", "Hub Settings")
 	# doc.last_sync_datetime = get_datetime(last_sync_datetime)
 	# doc.in_callback = 1
-	# Can't even start saving
+	# Can't even start saving, even though reset pub after works
 	# doc.save()
 	pass
 
@@ -264,37 +289,46 @@ def reset_hub_settings(last_sync_datetime = ""):
 	doc.save()
 	frappe.msgprint(_("Successfully unregistered."))
 
+def after_items_synced(total_items, action_msg, last_sync_datetime, message_id):
+	msg = _((action_msg).format(total_items))
+	frappe.db.set_value("Outgoing Hub Message", message_id, "response", msg)
+	frappe.db.set_value("Outgoing Hub Message", message_id, "completed_on", get_datetime(last_sync_datetime))
+
+def after_items_unpublished(total_items, last_sync_datetime, message_id):
+	msg = _(("{0} products unpublished").format(total_items))
+	frappe.db.set_value("Outgoing Hub Message", message_id, "response", msg)
+	frappe.db.set_value("Outgoing Hub Message", message_id, "completed_on", get_datetime(last_sync_datetime))
+	reset_hub_publishing_settings()
+
 def sync_item_fields_at_hub():
 	# Only updates dynamic feilds of price and stock
 	items = frappe.db.get_all("Item", fields=["item_code", "hub_warehouse"], filters={"publish_in_hub": 1})
+	fields = ["stock_qty"]
 
 	for item in items:
 		set_stock_qty(item)
 
-		hub_settings = get_hub_settings()
 		if is_pricing_published():
+			fields += ["price", "currency", "formatted_price"]
+			hub_settings = get_hub_settings()
 			set_item_price(item, hub_settings.company, hub_settings.selling_price_list)
-		else:
-			item.price = 0
-			item.currency = None
 
 	make_and_enqueue_message(msg_type='HUB-ITEMS-FIELDS-UPDATE', method='update_item_fields',
 		data={
 			"items_with_fields_updates": json.dumps(items),
-			"fields_to_update": get_item_fields_to_sync()
-		}
+			"fields_to_update": json.dumps(fields)
+		},
+		callback='erpnext.hub_node.doctype.hub_settings.hub_settings.after_items_synced',
+		callback_args={"action_msg": ((",".join(fields)) + " for {0} products synced")}
 	)
-	# hub_settings = get_hub_settings()
-	# hub_settings.set("last_sync_datetime", response_msg["last_sync_datetime"])
-	# hub_settings.save()
-
-	frappe.msgprint(_("Field values synced"))
 
 def set_item_price(item, company, selling_price_list):
 	item_code = item.item_code
 	price = get_price(item_code, selling_price_list, "Commercial", company)
-	item.price = price["price_list_rate"]
-	item.currency = price["currency"]
+	item.price = price["price_list_rate"] if price else 0
+	item.currency = price["currency"] if price else ""
+	item.formatted_price = price["formatted_price"] if price else ""
 
 def set_stock_qty(item):
-	item.stock_qty = get_qty_in_stock(item.item_code, "hub_warehouse").stock_qty
+	qty = get_qty_in_stock(item.item_code, "hub_warehouse").stock_qty
+	item.stock_qty = qty[0][0] if qty else 0

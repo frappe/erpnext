@@ -57,8 +57,17 @@ def get_price(item_code, price_list, customer_group, company, qty=1):
 			if price_obj:
 				price_obj["formatted_price"] = fmt_money(price_obj["price_list_rate"], currency=price_obj["currency"])
 
-				price_obj["currency"] = not cint(frappe.db.get_default("hide_currency_symbol")) \
+				price_obj["currency_symbol"] = not cint(frappe.db.get_default("hide_currency_symbol")) \
 					and (frappe.db.get_value("Currency", price_obj.currency, "symbol") or price_obj.currency) \
 					or ""
+
+				if not price_obj["price_list_rate"]:
+					price_obj["price_list_rate"] = 0
+
+				if not price_obj["currency"]:
+					price_obj["currency"] = ""
+
+				if not price_obj["formatted_price"]:
+					price_obj["formatted_price"] = ""
 
 			return price_obj
