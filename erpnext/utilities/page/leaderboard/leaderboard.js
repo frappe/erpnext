@@ -1,3 +1,6 @@
+frappe.pages["leaderboard"].on_page_load = function (wrapper) {
+	frappe.leaderboard = new frappe.Leaderboard(wrapper);
+}
 
 frappe.Leaderboard = Class.extend({
 
@@ -13,18 +16,18 @@ frappe.Leaderboard = Class.extend({
 		this.timelines = ["Week", "Month", "Quarter", "Year"];
 		this.desc_fields = ["total_amount", "total_request", "annual_billing", "commission_rate"];
 		this.filters = {
-			"Customer": this.map_array(["title", "total_amount", "total_item_purchased", "modified"]),
-			"Item": this.map_array(["title", "total_request", "total_purchase", "avg_price", "modified"]),
-			"Supplier": this.map_array(["title", "annual_billing", "total_unpaid", "modified"]),
-			"Sales Partner": this.map_array(["title", "commission_rate", "target_qty", "target_amount", "modified"]),
+			"Customer": this.map_array(["title", "total_amount", "total_item_purchased"]),
+			"Item": this.map_array(["title", "total_request", "total_purchase", "avg_price"]),
+			"Supplier": this.map_array(["title", "annual_billing", "total_unpaid"]),
+			"Sales Partner": this.map_array(["title", "commission_rate", "target_qty", "target_amount"]),
 		};
 
 		// for saving current selected filters
-		const _selected_filter = this.filters[this.doctypes[0]];
+		const _initial_filter = this.filters[this.doctypes[0]];
 		this.options = {
 			selected_doctype: this.doctypes[0],
-			selected_filter: _selected_filter,
-			selected_filter_item: _selected_filter[1],
+			selected_filter: _initial_filter,
+			selected_filter_item: _initial_filter[1],
 			selected_timeline: this.timelines[0],
 		};
 
@@ -32,41 +35,39 @@ frappe.Leaderboard = Class.extend({
 		this.make();
 	},
 
-
-
 	make: function () {
 		var me = this;
 
-		var $leaderboard = $(frappe.render_template("leaderboard", this)).appendTo(this.page.main);
+		var $container = $(frappe.render_template("leaderboard", this)).appendTo(this.page.main);
 
 		// events
-		$leaderboard.find(".select-doctype")
+		$container.find(".select-doctype")
 			.on("change", function () {
 				me.options.selected_doctype = this.value;
 				me.options.selected_filter = me.filters[this.value];
 				me.options.selected_filter_item = me.filters[this.value][1];
-				me.make_request($leaderboard);
+				me.make_request($container);
 			});
 
-		$leaderboard.find(".select-time")
+		$container.find(".select-time")
 			.on("change", function () {
 				me.options.selected_timeline = this.value;
-				me.make_request($leaderboard);
+				me.make_request($container);
 			});
 
 		// now get leaderboard
-		me.make_request($leaderboard);
+		me.make_request($container);
 	},
 
-	make_request: function ($leaderboard) {
+	make_request: function ($container) {
 		var me = this;
 
 		frappe.model.with_doctype(me.options.selected_doctype, function () {
-			me.get_leaderboard(me.get_leaderboard_data, $leaderboard);
+			me.get_leaderboard(me.get_leaderboard_data, $container);
 		});
 	},
 
-	get_leaderboard: function (notify, $leaderboard) {
+	get_leaderboard: function (notify, $container) {
 		var me = this;
 
 		frappe.call({
@@ -76,18 +77,18 @@ frappe.Leaderboard = Class.extend({
 			},
 			callback: function (res) {
 				console.log(res)
-				notify(me, res, $leaderboard);
+				notify(me, res, $container);
 			}
 		});
 	},
 
-	get_leaderboard_data: function (me, res, $leaderboard) {
+	get_leaderboard_data: function (me, res, $container) {
 		if (res && res.message) {
 			me.message = null;
-			$leaderboard.find(".leaderboard").html(me.render_list_view(res.message));
+			$container.find(".leaderboard").html(me.render_list_view(res.message));
 
 			// event to change arrow
-			$leaderboard.find(".leaderboard-item")
+			$container.find(".leaderboard-item")
 				.click(function () {
 					const field = this.innerText.trim().toLowerCase().replace(new RegExp(" ", "g"), "_");
 					if (field && field !== "title") {
@@ -98,17 +99,17 @@ frappe.Leaderboard = Class.extend({
 							me.options.selected_filter_item.value = _selected_filter_item[0].value === "ASC" ? "DESC" : "ASC";
 
 							const new_class_name = `icon-${me.options.selected_filter_item.field} fa fa-chevron-${me.options.selected_filter_item.value === "ASC" ? "up" : "down"}`;
-							$leaderboard.find(`.icon-${me.options.selected_filter_item.field}`)
+							$container.find(`.icon-${me.options.selected_filter_item.field}`)
 								.attr("class", new_class_name);
 
 							// now make request to web
-							me.make_request($leaderboard);
+							me.make_request($container);
 						}
 					}
 				});
 		} else {
 			me.message = "No items found.";
-			$leaderboard.find(".leaderboard").html(me.render_list_view());
+			$container.find(".leaderboard").html(me.render_list_view());
 		}
 	},
 
@@ -186,10 +187,10 @@ frappe.Leaderboard = Class.extend({
 		var me = this;
 
 		let html =
-			`<div class="no-result text-center" style="${me.message ? "" : "display:none;"}">   
+			`<div class="no-result text-center" style="${me.message ? "" : "display:none;"}">
 				<div class="msg-box no-border">
 					<p>No Item found</p>
-				</div>  
+				</div>
 			</div>`;
 
 		return html;
@@ -215,8 +216,8 @@ frappe.Leaderboard = Class.extend({
 							${(col !== "Title" && col !== "Modified") ? "hidden-xs" : ""}
 							${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}">
 							${
-								col === "Title"	
-									? `<a class="grey list-id ellipsis" href="${item["href"]}"> ${val} </a>` 
+								col === "Title"
+									? `<a class="grey list-id ellipsis" href="${item["href"]}"> ${val} </a>`
 									: `<span class="text-muted ellipsis"> ${val}</span>`
 							}
 						</div>`);
@@ -242,7 +243,3 @@ frappe.Leaderboard = Class.extend({
 		});
 	}
 });
-
-frappe.pages["leaderboard"].on_page_load = function (wrapper) {
-	frappe.leaderboard = new frappe.Leaderboard(wrapper);
-}
