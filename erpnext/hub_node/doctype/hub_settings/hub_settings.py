@@ -201,17 +201,16 @@ def hub_request(message_id, api_method, data = "", callback = "", callback_args 
 			"debug": True
 		}
 	)
-	print("]]]]]]]]]]]]]]]]]")
 	response.raise_for_status()
-	print("=================")
 
 	callback_args = json.loads(callback_args)
 	response_msg = response.json().get("message")
 	if response_msg:
 		frappe.db.set_value("Outgoing Hub Message", message_id, "status", "Successful")
 		# Deleting mechanism for successful messages?, or logging
-		callback_args.update(response_msg)
-		frappe.enqueue(callback, now=True, **callback_args)
+		if callback:
+			callback_args.update(response_msg)
+			frappe.enqueue(callback, now=True, **callback_args)
 
 def validate_hub_settings(doc, method):
 	frappe.get_doc("Hub Settings", "Hub Settings").run_method("validate")
@@ -244,19 +243,21 @@ def get_item_fields_to_sync():
 	return ["price", "currency", "stock_qty"]
 
 def set_last_sync_datetime(last_sync_datetime):
-	doc = get_hub_settings()
-	doc.last_sync_datetime = get_datetime(last_sync_datetime)
-	doc.in_callback = 1
-	doc.save()
+	doc = frappe.get_doc("Hub Settings", "Hub Settings")
+	# doc.last_sync_datetime = get_datetime(last_sync_datetime)
+	# doc.in_callback = 1
+	# Can't even start saving
+	# doc.save()
+	pass
 
 def reset_hub_publishing_settings(last_sync_datetime = ""):
-	doc = get_hub_settings()
+	doc = frappe.get_doc("Hub Settings", "Hub Settings")
 	doc.reset_publishing_settings(last_sync_datetime)
 	doc.in_callback = 1
 	doc.save()
 
 def reset_hub_settings(last_sync_datetime = ""):
-	doc = get_hub_settings()
+	doc = frappe.get_doc("Hub Settings", "Hub Settings")
 	doc.reset_publishing_settings(last_sync_datetime)
 	doc.reset_enable()
 	doc.in_callback = 1
