@@ -50,18 +50,14 @@ frappe.ui.form.on("Hub Settings", {
 		});
 	},
 
-	// call_update_hub: (frm) => {
+	// update_hub: (frm) => {
 	// 	this.frm.call({
 	// 		doc: this.frm.doc,
 	// 		method: "update_hub",
 	// 		args: {},
 	// 		freeze: true,
-	// 		callback: function(r) {
-
-	// 		},
-	// 		onerror: function() {
-	// 			frappe.msgprint(__("Wrong Password"));
-	// 		}
+	// 		callback: function(r) { },
+	// 		onerror: function() { }
 	// 	});
 	// },
 
