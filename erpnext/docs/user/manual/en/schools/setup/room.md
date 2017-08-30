@@ -1,6 +1,6 @@
 # Room
 
-A classroom is a learning space, a room in which both children and adults learn about things. A room in an educational institute can be a Class room, a laboratory or a Examination hall.
+A classroom is a space (room or lab) where you want to schedule courses or examinations. A room in an educational institute can be a Class room, a laboratory or a Examination hall.
 
 The Room doctype allows you to record the room number and the seating capacity for a classroom. Once a room is created Course schedule link is provided in the Room doctype to view or add the course schedule for the classroom. 
 

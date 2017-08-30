@@ -1,5 +1,5 @@
 student
-admissionA
+admission
 Attendance
 schedule
 fees
