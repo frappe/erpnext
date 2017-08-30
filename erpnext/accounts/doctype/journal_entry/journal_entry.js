@@ -213,7 +213,6 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 						input.add_options(options);
 						frappe.model.set_value(cdt, cdn, "reference_due_date", options[0]);
 						me.due_date_options_cache[d.reference_name] = options;
-						console.log("input:", input);
 					}
 				});
 			}

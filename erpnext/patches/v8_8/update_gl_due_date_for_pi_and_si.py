@@ -1,10 +1,8 @@
 from __future__ import unicode_literals
 import frappe
 
-"""
-This will update existing GL Entries by saving its linked Purchase/Sales Invoice's
-and Journal Entry's due date as the due date for the GL Entry
-"""
+"""This will update existing GL Entries by saving its linked Purchase/Sales Invoice's
+and Journal Entry's due date as the due date for the GL Entry"""
 
 
 def execute():
