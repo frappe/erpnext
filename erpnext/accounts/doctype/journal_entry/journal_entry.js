@@ -187,6 +187,24 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 	reference_name: function(doc, cdt, cdn) {
 		var d = frappe.get_doc(cdt, cdn);
+
+		const get_invoice_due_dates = (invoice_name) => {
+			frappe.call({
+				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_invoice_due_dates",
+				args: {name: invoice_name},
+				callback: function(r){
+					const wrapper = cur_frm.fields_dict["accounts"].wrapper;
+					const input = $(wrapper).find("select[data-fieldname=reference_due_date]");
+
+					input.children('option').remove();
+
+					$.each(r.message, function(key, value) {
+						input.append(new Option(value.due_date, "", false, false));
+					});
+				}
+			});
+		}
+
 		if(d.reference_name) {
 			if (d.reference_type==="Purchase Invoice" && !flt(d.debit)) {
 				this.get_outstanding('Purchase Invoice', d.reference_name, doc.company, d);
@@ -196,6 +214,9 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			}
 			if (d.reference_type==="Journal Entry" && !flt(d.credit) && !flt(d.debit)) {
 				this.get_outstanding('Journal Entry', d.reference_name, doc.company, d);
+			}
+			if( in_list(d.reference_type), ["Sales Invoice", "Purchase Invoice"]) {
+				get_invoice_due_dates(d.reference_name);
 			}
 		}
 	},
