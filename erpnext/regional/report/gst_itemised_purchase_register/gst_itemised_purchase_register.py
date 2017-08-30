@@ -9,9 +9,19 @@ def execute(filters=None):
 	return _execute(filters, additional_table_columns=[
 		dict(fieldtype='Data', label='Supplier GSTIN', width=120),
 		dict(fieldtype='Data', label='Company GSTIN', width=120),
-		dict(fieldtype='Data', label='HSN Code', width=120)
+		dict(fieldtype='Data', label='Reverse Charge', width=120),
+		dict(fieldtype='Data', label='Invoice Type', width=120),
+		dict(fieldtype='Data', label='Export Type', width=120),
+		dict(fieldtype='Data', label='E-Commerce GSTIN', width=130),
+		dict(fieldtype='Data', label='HSN Code', width=120),
+		dict(fieldtype='Data', label='Supplier Invoice No', width=120)
 	], additional_query_columns=[
 		'supplier_gstin',
 		'company_gstin',
-		'gst_hsn_code'
+		'reverse_charge',
+		'invoice_type',
+		'export_type',
+		'ecommerce_gstin',
+		'gst_hsn_code',
+		'bill_no'
 	])

@@ -325,23 +325,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 
 		this.frm.refresh_fields();
-	},
-
-	company_address: function() {
-		var me = this;
-		if(this.frm.doc.company_address) {
-			frappe.call({
-				method: "frappe.contacts.doctype.address.address.get_address_display",
-				args: {"address_dict": this.frm.doc.company_address },
-				callback: function(r) {
-					if(r.message) {
-						me.frm.set_value("company_address_display", r.message)
-					}
-				}
-			})
-		} else {
-			this.frm.set_value("company_address_display", "");
-		}
 	}
 });
 

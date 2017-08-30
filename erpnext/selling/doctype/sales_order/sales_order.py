@@ -51,9 +51,9 @@ class SalesOrder(SellingController):
 		# validate p.o date v/s delivery date
 		if self.po_date:
 			for d in self.get("items"):
-				 if d.delivery_date and getdate(self.po_date) > getdate(d.delivery_date):
-					 frappe.throw(_("Row #{0}: Expected Delivery Date cannot be before Purchase Order Date")
-					 	.format(d.idx))
+				if d.delivery_date and getdate(self.po_date) > getdate(d.delivery_date):
+					frappe.throw(_("Row #{0}: Expected Delivery Date cannot be before Purchase Order Date")
+						.format(d.idx))
 
 		if self.po_no and self.customer:
 			so = frappe.db.sql("select name from `tabSales Order` \
@@ -330,18 +330,19 @@ class SalesOrder(SellingController):
 	def get_production_order_items(self):
 		'''Returns items with BOM that already do not have a linked production order'''
 		items = []
-		for i in self.packed_items or self.items:
-			bom = frappe.get_all('BOM', dict(item=i.item_code, is_active=True),
-					order_by='is_default desc')
-			bom = bom[0].name if bom else None
-			stock_qty = i.qty if self.packed_items else i.stock_qty
-			items.append(dict(
-				item_code= i.item_code,
-				bom = bom,
-				warehouse = i.warehouse,
-				pending_qty= stock_qty - flt(frappe.db.sql('''select sum(qty) from `tabProduction Order`
-					where production_item=%s and sales_order=%s''', (i.item_code, self.name))[0][0])
-			))
+
+		for table in [self.items, self.packed_items]:
+			for i in table:
+				bom = get_default_bom_item(i.item_code)
+				if bom:
+					stock_qty = i.qty if i.doctype == 'Packed Item' else i.stock_qty
+					items.append(dict(
+						item_code= i.item_code,
+						bom = bom,
+						warehouse = i.warehouse,
+						pending_qty= stock_qty - flt(frappe.db.sql('''select sum(qty) from `tabProduction Order`
+							where production_item=%s and sales_order=%s''', (i.item_code, self.name))[0][0])
+					))
 
 		return items
 
@@ -465,6 +466,11 @@ def make_delivery_note(source_name, target_doc=None):
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
+		
+		# set company address
+		target.update(get_company_address(target.company))
+		if target.company_address:
+			target.update(get_fetch_values("Delivery Note", 'company_address', target.company_address))
 
 	def update_item(source, target, source_parent):
 		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
@@ -774,3 +780,10 @@ def make_production_orders(items, sales_order, company, project=None):
 def update_status(status, name):
 	so = frappe.get_doc("Sales Order", name)
 	so.update_status(status)
+
+def get_default_bom_item(item_code):
+	bom = frappe.get_all('BOM', dict(item=item_code, is_active=True),
+			order_by='is_default desc')
+	bom = bom[0].name if bom else None
+
+	return bom

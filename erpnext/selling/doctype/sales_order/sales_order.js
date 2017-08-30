@@ -179,7 +179,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			doc: this.frm.doc,
 			method: 'get_production_order_items',
 			callback: function(r) {
-				if(!r.message.every(function(d) { return !!d.bom })) {
+				if(!r.message) {
 					frappe.msgprint({
 						title: __('Production Order not created'),
 						message: __('No Items with Bill of Materials to Manufacture'),

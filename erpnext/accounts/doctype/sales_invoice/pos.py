@@ -151,13 +151,8 @@ def get_items_list(pos_profile):
 
 def get_item_groups(pos_profile):
 	item_group_dict = {}
-	if pos_profile.get('item_groups'):
-		item_groups = []
-		for d in pos_profile.get('item_groups'):
-			item_groups.extend(get_child_nodes('Item Group', d.item_group))
-	else:
-		item_groups = frappe.db.sql("""Select name,
-			lft, rgt from `tabItem Group` order by lft""", as_dict=1)
+	item_groups = frappe.db.sql("""Select name,
+		lft, rgt from `tabItem Group` order by lft""", as_dict=1)
 
 	for data in item_groups:
 		item_group_dict[data.name] = [data.lft, data.rgt]

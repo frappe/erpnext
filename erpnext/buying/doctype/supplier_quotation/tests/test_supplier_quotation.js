@@ -11,16 +11,14 @@ QUnit.test("test: supplier quotation", function(assert) {
 			return frappe.tests.make('Supplier Quotation', [
 				{supplier: 'Test Supplier'},
 				{transaction_date: date},
-				{company: 'Wind Power LLC'},
-				{buying_price_list: 'Test-Buying-USD'},
-				{currency: 'USD'},
+				{currency: 'INR'},
 				{items: [
 					[
 						{"item_code": 'Test Product 4'},
 						{"qty": 5},
 						{"uom": 'Unit'},
 						{"rate": 200},
-						{"warehouse": 'All Warehouses - WP'}
+						{"warehouse": 'All Warehouses - '+frappe.get_abbr(frappe.defaults.get_default("Company"))}
 					]
 				]},
 				{apply_discount_on: 'Grand Total'},
@@ -32,7 +30,7 @@ QUnit.test("test: supplier quotation", function(assert) {
 		() => {
 			// Get Supplier details
 			assert.ok(cur_frm.doc.supplier == 'Test Supplier', "Supplier correct");
-			assert.ok(cur_frm.doc.company == 'Wind Power LLC', "Company correct");
+			assert.ok(cur_frm.doc.company == cur_frm.doc.company, "Company correct");
 			// Get Contact details
 			assert.ok(cur_frm.doc.contact_display == 'Contact 3', "Conatct correct");
 			assert.ok(cur_frm.doc.contact_email == 'test@supplier.com', "Email correct");

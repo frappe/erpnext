@@ -54,13 +54,15 @@ class ShippingRule(Document):
 			d.idx = i + 1
 
 	def validate_overlapping_shipping_rule_conditions(self):
-		def overlap_exists_between((x1, x2), (y1, y2)):
+		def overlap_exists_between(num_range1, num_range2):
 			"""
-				(x1, x2) and (y1, y2) are two ranges
-				if condition x = 100 to 300
-				then condition y can only be like 50 to 99 or 301 to 400
+				num_range1 and num_range2 are two ranges
+				ranges are represented as a tuple e.g. range 100 to 300 is represented as (100, 300)
+				if condition num_range1 = 100 to 300
+				then condition num_range2 can only be like 50 to 99 or 301 to 400
 				hence, non-overlapping condition = (x1 <= x2 < y1 <= y2) or (y1 <= y2 < x1 <= x2)
 			"""
+			(x1, x2), (y1, y2) = num_range1, num_range2
 			separate = (x1 <= x2 <= y1 <= y2) or (y1 <= y2 <= x1 <= x2)
 			return (not separate)
 
