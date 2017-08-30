@@ -6,13 +6,13 @@ You can create an Instructor and link it to the Employee master and a Departmemt
 
 <img class="screenshot" alt="Instructor" src="/docs/assets/img/schools/setup/instructor.png">
 
-An insturctor is further linked to a course schedule, where you can define the schedule for course for a give date and room no.
+An **Instructor** is further linked to a **Course Schedule**, where you can define the schedule for course for a give date and room no.
 
 <img class="screenshot" alt="Instructor" src="/docs/assets/img/schools/setup/instructor.gif">
-It is also linked to Student group where an Instructor is assigen to the Student group.
+It is also linked to **Student group** where an **Instructor** is assigned to the Student group.
 
 <img class="screenshot" alt="Instructor" src="/docs/assets/img/schools/setup/student-group-instructor.gif">
 
-An Instructor is also linked an Assesment Plan for a Student group. There the Instructor can be an Examiner or the supervisor for the Assesment. 
+An **Instructor** is also linked an **Assesment Plan** for a Student group. The Instructor can be an Examiner or the supervisor for the Assesment. 
 
 {next}
