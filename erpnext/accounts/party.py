@@ -9,7 +9,7 @@ from frappe import _, msgprint, scrub
 from frappe.defaults import get_user_permissions
 from frappe.model.utils import get_fetch_values
 from frappe.utils import (add_days, getdate, formatdate, get_first_day, date_diff,
-	add_years, get_timestamp, nowdate, flt)
+                          add_years, get_timestamp, nowdate, flt, add_months, get_last_day)
 from frappe.contacts.doctype.address.address import (get_address_display,
 	get_default_address, get_company_address)
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
@@ -162,7 +162,7 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 	out = {
 		party_type.lower(): party,
 		account_fieldname : account,
-		"due_date": get_due_date(posting_date, party_type, party, company)
+		"due_date": get_due_date(posting_date, party_type, party)
 	}
 	return out
 
@@ -259,21 +259,42 @@ def validate_party_accounts(doc):
 
 		if doc.get("default_currency") and party_account_currency and company_default_currency:
 			if doc.default_currency != party_account_currency and doc.default_currency != company_default_currency:
-				frappe.throw(_("Billing currency must be equal to either default comapany's currency or party account currency"))
+				frappe.throw(_("Billing currency must be equal to either default company's currency or party account currency"))
+
 
 @frappe.whitelist()
-def get_due_date(posting_date, party_type, party, company):
-	"""Set Due Date = Posting Date + Credit Days"""
+def get_due_date(posting_date, party_type, party):
+	"""Get due date from `Payment Terms Template`"""
 	due_date = None
 	if posting_date and party:
 		due_date = posting_date
-		credit_days_based_on, credit_days = get_credit_days(party_type, party, company)
-		if credit_days_based_on == "Fixed Days" and credit_days:
-			due_date = add_days(posting_date, credit_days)
-		elif credit_days_based_on == "Last Day of the Next Month":
-			due_date = (get_first_day(posting_date, 0, 2) + datetime.timedelta(-1)).strftime("%Y-%m-%d")
+		template_name = get_pyt_term_template(party, party_type)
+		if template_name:
+			due_date = get_due_date_from_template(template_name, posting_date)
 
 	return due_date
+
+
+def get_due_date_from_template(template_name, posting_date):
+	"""
+	Inspects all `Payment Term`s from the a `Payment Terms Template` and returns the due
+	date after considering all the `Payment Term`s requirements.
+	:param template_name: Name of the `Payment Terms Template`
+	:return: String representing the calculated due date
+	"""
+	due_date = getdate(posting_date)
+	template = frappe.get_doc('Payment Terms Template', template_name)
+
+	for term in template.terms:
+		if term.due_date_based_on == 'Day(s) after invoice date':
+			due_date = max(due_date, add_days(due_date, term.credit_days))
+		elif term.due_date_based_on == 'Day(s) after the end of the invoice month':
+			due_date = max(due_date, add_days(get_last_day(due_date), term.credit_days))
+		else:
+			due_date = max(due_date, add_months(get_last_day(due_date), term.credit_months))
+
+	return due_date
+
 
 def get_credit_days(party_type, party, company):
 	credit_days = 0
@@ -303,7 +324,7 @@ def validate_due_date(posting_date, due_date, party_type, party, company):
 	if getdate(due_date) < getdate(posting_date):
 		frappe.throw(_("Due Date cannot be before Posting Date"))
 	else:
-		default_due_date = get_due_date(posting_date, party_type, party, company)
+		default_due_date = get_due_date(posting_date, party_type, party)
 		if not default_due_date:
 			return
 
