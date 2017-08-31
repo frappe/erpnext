@@ -51,6 +51,30 @@ Set the Payment Type to "Pay", the Party Type to Employee, the Party to the empl
 from. All outstanding expense claims will be pulled in and payments amounts can be allocated to each expense.
 <img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/expense_claim_payment_entry.png">
 
+### Managing Advance Payments
+
+Sometimes an employee requires some advance payment before making expenses on behalf of the organisation. This can be managed from the Expense Claim
+
+First make sure that the Default Advance Account has been set in the Company Master:
+
+> Erpnext > Setup > Company
+
+<img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/company_advance_account.png">
+
+When creating the Expense Claim, check the 'Advance Payment Required' option
+
+<img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/advance_payment_required.png">
+
+After the Expense Claim is Saved and Approved by the Expense Approver, Journal Entry for Advance Payment can be raised by the accountant or user with appropriate permissions. To do that, just click on:
+
+> Make > Advance Payment
+
+<img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/make_advance_payment.png">
+
+Note: Once the Expense Claim is Submitted, the button for making Advance Payment is no longer available. This is because expenses get booked on Submission of the Expense Claim and as such, the next logical step is settlement/reimbursement
+
+Advance Payments are expected to be made 'before' the actual expenditure gets booked and settlement/reimbursement should be done against the Employee's Advance Account after submission of the Expense Claim
+
 ### Linking with Task & Project
 
 * To Link Expense Claim with Task or Project specify the Task or the Project while making an Expense Claim
