@@ -6,7 +6,7 @@ To create Student group using this tool go to
 
 ##Schools >>Student >> Student Group creation tool
 
-Select the **Academic Term** and the **Program** for which you a student group is to be created. 
+Select the **Academic Term** and the **Program** for which a student group is to be created. 
 
 <img class="screenshot" alt="Student Group Creation Tool" src="/docs/assets/img/schools/student/student-group-creation-tool.gif">
 
