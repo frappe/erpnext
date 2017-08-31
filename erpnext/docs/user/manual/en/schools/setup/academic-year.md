@@ -6,6 +6,6 @@ The **Academic year** form have the Start and End date for the Academic year.
 
 <img class="screenshot" alt="Academic Year" src="/docs/assets/img/schools/setup/academic-year.png">
 
-**Student group** link is given to view or add the respective student groups to the Academic year.
+**Student group** link is given to view or add the respective groups to the Academic year.
 
-{next}
+{next} 
