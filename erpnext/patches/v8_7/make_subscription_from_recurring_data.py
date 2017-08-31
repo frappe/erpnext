@@ -41,4 +41,5 @@ def make_subscription(doctype, data):
 
 	doc.submit()
 
-	frappe.db.set_value(doctype, data.name, "subscription", doc.name)
+	if not doc.subscription:
+		frappe.db.set_value(doctype, data.name, "subscription", doc.name)

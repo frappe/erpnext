@@ -107,7 +107,7 @@ class SalesInvoice(SellingController):
 	def on_submit(self):
 		self.validate_pos_paid_amount()
 
-		if not self.subscription_id:
+		if not self.subscription:
 			frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 				self.company, self.base_grand_total, self)
 

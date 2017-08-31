@@ -9,8 +9,7 @@ from frappe import _
 from frappe.desk.form import assign_to
 from dateutil.relativedelta import relativedelta
 from frappe.utils.user import get_system_managers
-from frappe.utils import (cstr, getdate, get_first_day,
-	get_last_day, split_emails, add_days, today)
+from frappe.utils import cstr, getdate, split_emails, add_days, today
 from frappe.model.document import Document
 
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
@@ -67,10 +66,10 @@ class Subscription(Document):
 
 	def update_subscription_id(self):
 		doc = frappe.get_doc(self.reference_doctype, self.reference_document)
-		if not doc.meta.get_field('subscription_id'):
+		if not doc.meta.get_field('subscription'):
 			frappe.throw(_("Add custom field Subscription Id in the doctype {0}").format(self.reference_doctype))
 
-		doc.db_set('subscription_id', self.name)
+		doc.db_set('subscription', self.name)
 
 	def update_status(self):
 		self.status = {
@@ -153,8 +152,8 @@ def update_doc(new_document, reference_doc, args, schedule_date):
 	if new_document.meta.get_field('set_posting_time'):
 		new_document.set('set_posting_time', 1)
 
-	if new_document.meta.get_field('subscription_id'):
-		new_document.set('subscription_id', args.name)
+	if new_document.meta.get_field('subscription'):
+		new_document.set('subscription', args.name)
 
 	new_document.run_method("on_recurring", reference_doc=reference_doc, subscription_doc=args)
 	for data in new_document.meta.fields:

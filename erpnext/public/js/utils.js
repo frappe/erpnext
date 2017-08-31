@@ -126,7 +126,7 @@ $.extend(erpnext.utils, {
 			});
 		}
 	},
-	
+
 	make_subscription: function(doctype, docname) {
 		frappe.call({
 			method: "erpnext.subscription.doctype.subscription.subscription.make_subscription",

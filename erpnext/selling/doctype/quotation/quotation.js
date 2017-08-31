@@ -56,7 +56,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 					cur_frm.cscript['Declare Order Lost']);
 			}
 
-			if(!doc.subscription_id) {
+			if(!doc.subscription) {
 				cur_frm.add_custom_button(__('Subscription'), function() {
 					erpnext.utils.make_subscription(doc.doctype, doc.name)
 				}, __("Make"))

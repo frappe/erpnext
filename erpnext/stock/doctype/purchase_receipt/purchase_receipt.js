@@ -99,7 +99,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 					cur_frm.add_custom_button(__('Invoice'), this.make_purchase_invoice, __("Make"));
 				}
 
-				if(!this.frm.doc.subscription_id) {
+				if(!this.frm.doc.subscription) {
 					cur_frm.add_custom_button(__('Subscription'), function() {
 						erpnext.utils.make_subscription(me.frm.doc.doctype, me.frm.doc.name)
 					}, __("Make"))

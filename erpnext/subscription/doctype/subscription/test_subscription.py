@@ -23,10 +23,10 @@ class TestSubscription(unittest.TestCase):
 		frappe.db.commit()
 
 		quotation = frappe.get_doc(doc.reference_doctype, doc.reference_document)
-		self.assertEquals(quotation.subscription_id, doc.name)
+		self.assertEquals(quotation.subscription, doc.name)
 
 		new_quotation = frappe.db.get_value('Quotation',
-			{'subscription_id': doc.name, 'name': ('!=', quotation.name)}, 'name')
+			{'subscription': doc.name, 'name': ('!=', quotation.name)}, 'name')
 
 		new_quotation = frappe.get_doc('Quotation', new_quotation)
 
@@ -59,7 +59,7 @@ class TestSubscription(unittest.TestCase):
 		frappe.db.commit()
 
 		make_subscription_entry()
-		docnames = frappe.get_all(doc.reference_doctype, {'subscription_id': doc.name})
+		docnames = frappe.get_all(doc.reference_doctype, {'subscription': doc.name})
 		self.assertEquals(len(docnames), 1)
 
 		doc = frappe.get_doc('Subscription', doc.name)
@@ -69,7 +69,7 @@ class TestSubscription(unittest.TestCase):
 		months = get_months(getdate(start_date), getdate(today()))
 		make_subscription_entry()
 
-		docnames = frappe.get_all(doc.reference_doctype, {'subscription_id': doc.name})
+		docnames = frappe.get_all(doc.reference_doctype, {'subscription': doc.name})
 		self.assertEquals(len(docnames), months)
 
 quotation_records = frappe.get_test_records('Quotation')

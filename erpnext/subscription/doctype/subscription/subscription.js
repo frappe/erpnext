@@ -26,7 +26,7 @@ frappe.ui.form.on('Subscription', {
 			frm.add_custom_button(__(label),
 				function() {
 					frappe.route_options = {
-						"subscription_id": frm.doc.name,
+						"subscription": frm.doc.name,
 					};
 					frappe.set_route("List", frm.doc.reference_doctype);
 				}
