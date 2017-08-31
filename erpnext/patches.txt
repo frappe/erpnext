@@ -436,3 +436,4 @@ erpnext.patches.v8_7.add_more_gst_fields
 erpnext.patches.v8_7.fix_purchase_receipt_status
 erpnext.patches.v8_6.rename_bom_update_tool
 erpnext.patches.v8_10.update_gl_due_date_for_pi_and_si
+erpnext.patches.v8_10.change_default_customer_credit_days
