@@ -15,7 +15,7 @@ from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from erpnext.controllers.item_variant import (get_variant, copy_attributes_to_variant,
 	make_variant_item_code, validate_item_variant_attributes, ItemVariantExistsError)
-from erpnext.hub_node.doctype.hub_settings.hub_settings import is_hub_enabled, is_hub_published, send_hub_request
+from erpnext.hub_node.doctype.hub_settings.hub_settings import is_hub_enabled, is_hub_published, get_current_item_fields, make_and_enqueue_message
 
 class DuplicateReorderRows(frappe.ValidationError): pass
 
@@ -698,13 +698,13 @@ class Item(WebsiteGenerator):
 		# If item deleted(will be handled by delete_doc)
 
 	def update_values_at_hub(self):
-		current_hub_fields = json.loads(frappe.db.get_single_value('Hub Settings', 'current_item_fields'))
+		current_hub_fields = get_current_item_fields()
 		item_dict = {}
 		for field in current_hub_fields:
 			item_dict[field] = self.get(field)
 		if item_dict["image"]:
 			item_dict["image"] = "http://" + frappe.local.site + ":8000" + item_dict["image"]
-		response_msg = send_hub_request('update_item',
+		response_msg = make_and_enqueue_message('HUB-ITEM-UPDATE', 'update_item',
 			data={
 				"item_code": self.item_code,
 				"item_dict": json.dumps(item_dict)
@@ -712,27 +712,25 @@ class Item(WebsiteGenerator):
 		)
 
 	def insert_at_hub(self):
-		current_hub_fields = json.loads(frappe.db.get_single_value('Hub Settings', 'current_item_fields'))
+		current_hub_fields = get_current_item_fields()
 		item_dict = {}
 		for field in current_hub_fields:
 			item_dict[field] = self.get(field)
 		if item_dict["image"]:
 			item_dict["image"] = "http://" + frappe.local.site + ":8000" + item_dict["image"]
-		response_msg = send_hub_request('insert_item',
+		response_msg = make_and_enqueue_message('HUB-ITEM-INSERT', 'insert_item',
 			data={
 				"item_dict": json.dumps(item_dict)
 			}
 		)
 
 	def delete_at_hub(self):
-		response_msg = send_hub_request('delete_item',
+		response_msg = make_and_enqueue_message('HUB-ITEM-DELETE', 'delete_item',
 			data={
 				"item_code": self.item_code
 			}
 		)
 
-	def update_hub_communications(self):
-		pass
 
 def get_timeline_data(doctype, name):
 	'''returns timeline data based on stock ledger entry'''

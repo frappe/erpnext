@@ -210,7 +210,6 @@ erpnext.hub.Hub = class {
 		// TODO: Check if item quote already requested
 		frappe.set_route("hub", "Item", item.item_name);
 		this.$hub_main_section.empty();
-		item.standard_rate = (item.standard_rate).toFixed(2);
 		let $item_page = $(frappe.render_template("hub_item_page", {item:item}))
 			.appendTo(this.$hub_main_section);
 
@@ -269,7 +268,14 @@ erpnext.hub.Hub = class {
 	}
 
 	get_hub_categories(callback) {
-		// TODO
+		// frappe.call({
+		// 	method: "erpnext.hub_node.get_all_categories",
+		// 	args: {},
+		// 	callback: function(r) {
+		// 		let categories = r.message.categories ? r.message.categories : [];
+		// 		callback(categories);
+		// 	}
+		// });
 		return [];
 	}
 	get_hub_countries(callback) {
@@ -280,10 +286,8 @@ erpnext.hub.Hub = class {
 			method: "erpnext.hub_node.get_all_companies",
 			args: {},
 			callback: function(r) {
-				if(!r.message) {
-					r.message = [];
-				}
-				callback(r.message);
+				let companies = r.message.companies ? r.message.companies : [];
+				callback(companies);
 			}
 		});
 	}
@@ -393,18 +397,19 @@ erpnext.hub.HubList = class {
 			method: me.method,
 			args: args,
 			callback: function(r) {
-				console.log("items: ", r.message);
+				let items = r.message.items;
+				console.log("items: ", items);
 				me.$loading.hide();
-				if(r.message) {
-					if(r.message.length && r.message.length > me.page_length) {
-						r.message.pop();
+				if(items) {
+					if(items.length && items.length > me.page_length) {
+						items.pop();
 						me.$more.show();
 						me.$done.addClass("hide");
 					} else {
 						me.$done.removeClass("hide");
 						me.$more.hide();
 					}
-					r.message.forEach(function(item) {
+					items.forEach(function(item) {
 						let $item = me.make_item_card(item).appendTo(me.$list);
 					});
 				} else {
@@ -422,8 +427,8 @@ erpnext.hub.HubList = class {
 			<div class="content">
 				<div class="title"><a class="item-link">${item.item_name}</a></div>
 				<div class="company">${item.company}</div>
-				${item.standard_rate ? '<div class="price">' +
-					item.standard_rate.toFixed(2) +  '</div>': ""}
+				${item.formatted_price ? '<div class="formatted_price">' +
+					item.formatted_price +  '</div>': ""}
 			</div>
 		</div>`);
 

@@ -18,17 +18,17 @@ class OutgoingHubMessage(Document):
 		self.enqueue()
 
 	def enqueue(self):
-		enqueue_message(self.name, self.method, self.arguments, self.callback, self.callback_args, self.now)
+		enqueue_message(self.method, self.arguments, self.callback, self.callback_args, self.name, self.now)
 
-def enqueue_message(message_id, method, data="", callback="", callback_args="", now=False):
+def enqueue_message(method, data="", callback="", callback_args="", message_id="", now=False):
 	if now:
-		hub_request(message_id, method, data, callback, callback_args)
+		hub_request(method, data, callback, callback_args, message_id)
 		return
 	try:
 		frappe.enqueue('erpnext.hub_node.doctype.hub_settings.hub_settings.hub_request', now=now,
-			message_id=message_id, api_method=method, data=data, callback=callback, callback_args=callback_args)
+			api_method=method, data=data, callback=callback, callback_args=callback_args, message_id=message_id)
 	except redis.exceptions.ConnectionError:
-		hub_request(message_id, method, data, callback, callback_args)
+		hub_request(method, data, callback, callback_args, message_id)
 
 def resend_failed_messages():
 	max_tries = 10

@@ -111,6 +111,7 @@ class HubSettings(Document):
 			callback='erpnext.hub_node.doctype.hub_settings.hub_settings.after_items_synced',
 			callback_args={"action_msg": "{0} products synced"}
 		)
+		self.current_item_fields = json.dumps(self.base_fields_for_items + self.item_fields_to_update)
 
 	def update_item_fields_at_hub(self, fields):
 		items = frappe.db.get_all("Item", fields=["item_code", "hub_warehouse"], filters={"publish_in_hub": 1})
@@ -205,19 +206,7 @@ def make_and_enqueue_message(msg_type, method, data=[], callback="", callback_ar
 
 	message.save(ignore_permissions=True)
 
-###########################
-def send_hub_request(method, data = "", now = False, callback = "", callback_args = {}):
-	if now:
-		hub_request(method, data, callback, callback_args)
-		return
-	try:
-		frappe.enqueue('erpnext.hub_node.doctype.hub_settings.hub_settings.hub_request', now=now,
-			api_method=method, data=data, callback=callback, callback_args=callback_args)
-	except redis.exceptions.ConnectionError:
-		hub_request(method, data, callback, callback_args)
-#########################
-
-def hub_request(message_id, api_method, data = "", callback = "", callback_args = {}):
+def hub_request(api_method, data = (json.dumps([])), callback = "", callback_args = "", message_id = ""):
 	hub = frappe.get_single("Hub Settings")
 	response = requests.post(hub_url + "/api/method/hub.hub.api." + "call_method",
 		data = {
@@ -230,15 +219,19 @@ def hub_request(message_id, api_method, data = "", callback = "", callback_args 
 	)
 	response.raise_for_status()
 
-	callback_args = json.loads(callback_args)
 	response_msg = response.json().get("message")
 	if response_msg:
-		frappe.db.set_value("Outgoing Hub Message", message_id, "status", "Successful")
-		# Deleting mechanism for successful messages?, or logging
+		# is now
+		if not message_id and not callback:
+			return response_msg
+		callback_args_dict = json.loads(callback_args)
+		if message_id:
+			frappe.db.set_value("Outgoing Hub Message", message_id, "status", "Successful")
+			# Deleting mechanism for successful messages?, or logging
+			callback_args_dict.update(response_msg)
 		if callback:
-			callback_args.update(response_msg)
-			callback_args["message_id"] = message_id
-			frappe.enqueue(callback, now=True, **callback_args)
+			callback_args_dict["message_id"] = message_id
+			frappe.enqueue(callback, now=True, **callback_args_dict)
 
 def validate_hub_settings(doc, method):
 	frappe.get_doc("Hub Settings", "Hub Settings").run_method("validate")
@@ -262,6 +255,9 @@ def get_hub_selling_price_list():
 
 def is_availability_published():
 	return get_hub_settings().publish_availability
+
+def get_current_item_fields():
+	return json.loads(get_hub_settings().current_item_fields)
 
 def check_hub_enabled():
 	if not get_hub_settings().enabled:
