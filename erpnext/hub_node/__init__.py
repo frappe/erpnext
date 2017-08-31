@@ -4,38 +4,40 @@
 from __future__ import unicode_literals
 import frappe, requests, json
 from frappe.utils import now, nowdate
-from erpnext.hub_node.doctype.hub_settings.hub_settings import send_hub_request
+from erpnext.hub_node.doctype.hub_settings.hub_settings import hub_request
 
 opp_msg_id = ""
 
 @frappe.whitelist()
 def get_items(text, start, limit, category=None, company=None, country=None):
-	return send_hub_request('get_items', data={
+	args = {
 		"text": text,
 		"category": category,
 		"company": company,
 		"country": country,
 		"start": start,
 		"limit": limit
-	}, now=True)
+	}
+	return hub_request('get_items', data=json.dumps(args))
 
 @frappe.whitelist()
 def get_all_users():
-	return send_hub_request('get_all_users', now=True)
+	return hub_request('get_all_users')
 
 # @frappe.whitelist()
 def get_categories():
-	return send_hub_request('get_categories', now=True)
+	return hub_request('get_categories')
 
 @frappe.whitelist()
 def get_all_companies():
-	return send_hub_request('get_all_companies', now=True)
+	return hub_request('get_all_companies')
 
 @frappe.whitelist()
 def get_seller_details(user_name):
-	return send_hub_request('get_user_details', data={
+	args = {
 		"user_name": user_name,
-	}, now=True)
+	}
+	return hub_request('get_user_details', data=json.dumps(args))
 
 def update_local_hub_categories():
 	categories = get_categories()
@@ -68,7 +70,8 @@ def make_rfq_and_send_opportunity(item_code, item_group, supplier_name, supplier
 
 @frappe.whitelist()
 def request_opportunity_message_status():
-	return send_hub_request('get_message_status', data={
+	# needs an outgoing hub message
+	return hub_request('get_message_status', data={
 		"message_id": "CLIENT-OPP-"
 	})
 
@@ -77,7 +80,7 @@ def send_opportunity(supplier_name, supplier_email):
 		"buyer_name": supplier_name,
 		"email_id": supplier_email
 	}
-	opp_msg_id = send_hub_request('enqueue_message', data={
+	opp_msg_id = hub_request('enqueue_message', data={
 		"message_type": "CLIENT-OPP-",
 		"method": "make_opportunity",
 		"arguments": json.dumps(args),
