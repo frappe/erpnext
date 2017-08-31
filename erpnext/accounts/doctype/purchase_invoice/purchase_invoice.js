@@ -372,3 +372,22 @@ frappe.ui.form.on("Purchase Invoice", {
 		frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted==="Yes");
 	}
 })
+
+frappe.ui.form.on("Purchase Invoice", {
+	payment_terms_template: function() {
+		cur_frm.trigger("disable_due_date");
+	},
+
+	disable_due_date: function() {
+		const disable = !cur_frm.doc.payment_terms_template && cur_frm.doc.payment_schedule.length == 0;
+		cur_frm.set_df_property("due_date", "read_only", disable ? 1 : 0);
+	},
+
+});
+
+frappe.ui.form.on("Payment Schedule", {
+	payment_schedule_remove: function() {
+		cur_frm.trigger("disable_due_date");
+	},
+
+});
