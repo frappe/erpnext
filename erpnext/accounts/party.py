@@ -51,6 +51,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	set_other_values(out, party, party_type)
 	set_price_list(out, party, party_type, price_list)
 	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group, out.supplier_type)
+	out["payment_terms_template"] = get_pyt_term_template(party.name, party_type)
 
 	if not out.get("currency"):
 		out["currency"] = currency
@@ -344,6 +345,16 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 		args.update({"use_for_shopping_cart": use_for_shopping_cart})
 
 	return get_tax_template(posting_date, args)
+
+
+@frappe.whitelist()
+def get_pyt_term_template(party_name, party_type):
+	template = None
+	if party_type in ('Customer', 'Supplier'):
+		template = frappe.db.get_value(party_type, party_name, fieldname='payment_terms')
+
+	return template
+
 
 def validate_party_frozen_disabled(party_type, party_name):
 	if party_type and party_name:
