@@ -296,30 +296,6 @@ def get_due_date_from_template(template_name, posting_date):
 	return due_date
 
 
-def get_credit_days(party_type, party, company):
-	credit_days = 0
-	if party_type and party:
-		if party_type == "Customer":
-			credit_days_based_on, credit_days, customer_group = \
-				frappe.db.get_value(party_type, party, ["credit_days_based_on", "credit_days", "customer_group"])
-		else:
-			credit_days_based_on, credit_days, supplier_type = \
-				frappe.db.get_value(party_type, party, ["credit_days_based_on", "credit_days", "supplier_type"])
-
-	if not credit_days_based_on:
-		if party_type == "Customer" and customer_group:
-			credit_days_based_on, credit_days = \
-				frappe.db.get_value("Customer Group", customer_group, ["credit_days_based_on", "credit_days"])
-		elif party_type == "Supplier" and supplier_type:
-			credit_days_based_on, credit_days = \
-				frappe.db.get_value("Supplier Type", supplier_type, ["credit_days_based_on", "credit_days"])
-
-	if not credit_days_based_on:
-		credit_days_based_on, credit_days = \
-			frappe.db.get_value("Company", company, ["credit_days_based_on", "credit_days"])
-
-	return credit_days_based_on, credit_days
-
 def validate_due_date(posting_date, due_date, party_type, party, company):
 	if getdate(due_date) < getdate(posting_date):
 		frappe.throw(_("Due Date cannot be before Posting Date"))
