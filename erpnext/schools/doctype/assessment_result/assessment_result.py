@@ -14,7 +14,8 @@ from frappe.utils.csvutils import getlink
 
 class AssessmentResult(Document):
 	def validate(self):
-		print "======================================================"
+		if self.student and not self.student_name:
+			self.student_name = frappe.db.get_value("Student", self.student, "title")
 		self.grading_scale = frappe.db.get_value("Assessment Plan", self.assessment_plan, "grading_scale")
 		self.validate_maximum_score()
 		self.validate_grade()
@@ -40,8 +41,8 @@ class AssessmentResult(Document):
 		self.grade = get_grade(self.grading_scale, (self.total_score/self.maximum_score)*100)
 
 	def validate_duplicate(self):
-		assessment_result = frappe.get_list("Assessment Result",
-			filters={"name": ("not in", [self.name]), "student":self.student, "assessment_plan":self.assessment_plan})
+		assessment_result = frappe.get_list("Assessment Result", filters={"name": ("not in", [self.name]),
+			"student":self.student, "assessment_plan":self.assessment_plan, "docstatus":("!=", 2)})
 		if assessment_result:
 			frappe.throw(_("Assessment Result record {0} already exists.".format(getlink("Assessment Result",assessment_result[0].name))))
 

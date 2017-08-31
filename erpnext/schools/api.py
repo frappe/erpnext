@@ -210,7 +210,10 @@ def get_assessment_students(assessment_plan, student_group):
 			student_result = {}
 			for d in result.details:
 				student_result.update({d.assessment_criteria: [cstr(d.score), d.grade]})
-			student_result.update({"total_score": [cstr(result.total_score), result.grade]})
+			student_result.update({
+				"total_score": [cstr(result.total_score), result.grade],
+				"comment": result.comment
+			})
 			student.update({'assessment_details':student_result, 'docstatus':result.docstatus})			
 		else:
 			student.update({'assessment_details': None})
@@ -262,43 +265,43 @@ def get_grade(grading_scale, percentage):
 @frappe.whitelist()
 def mark_assessment_result(assessment_plan, scores):
 	student_score = json.loads(scores);
-
-	for s in student_score:
-		print s
-		assessment_result = get_assessment_result_doc(s, assessment_plan)
-		print assessment_result
-		details = []
-		for d in student_score[s]:
-			details.append({
-				"assessment_criteria": s,
-				"score": flt(student_score[s])
-			})
-		print details
-
-	frappe.throw("we got it man");
-
-
-	assessment_result_list = frappe.get_list("Assessment Result", filters={"student": student, "assessment_plan": assessment_plan})
-	if assessment_result_list:
-		assessment_result = frappe.get_doc("Assessment Result", assessment_result_list[0].name)
-	else:
-		assessment_result = frappe.new_doc("Assessment Result")
-		assessment_result.update({
-			"student": student,
-			"student_name": frappe.db.get_value("Student", student, "title"),
-			"assessment_plan": assessment_plan,
+	assessment_details = []
+	for criteria in student_score.get("assessment_details"):
+		assessment_details.append({
+			"assessment_criteria": criteria,
+			"score": flt(student_score["assessment_details"][criteria])
 		})
-	assessment_result.update({"details": details})
+	assessment_result = get_assessment_result_doc(student_score["student"], assessment_plan)
+	assessment_result.update({
+		"student": student_score.get("student"),
+		"assessment_plan": assessment_plan,
+		"comment": student_score.get("comment"),
+		"total_score":student_score.get("total_score"),
+		"details": assessment_details
+	})
 	assessment_result.save()
-	# assessment_result.submit()
-	return assessment_result
+	details = {}
+	for d in assessment_result.details:
+		details.update({d.assessment_criteria: d.grade})
+	assessment_result_dict = {
+		"student": assessment_result.student,
+		"total_score": assessment_result.total_score,
+		"grade": assessment_result.grade,
+		"details": details
+	}
+	return assessment_result_dict
 
 
 def get_assessment_result_doc(student, assessment_plan):
-	assessment_result = frappe.get_all("Assessment Result", filters={"student": student, "assessment_plan": assessment_plan})
-	print assessment_result
+	assessment_result = frappe.get_all("Assessment Result", filters={"student": student,
+			"assessment_plan": assessment_plan, "docstatus": ("!=", 2)})
 	if assessment_result:
-		return frappe.get_doc("Assessment Result", assessment_result[0])
+		doc = frappe.get_doc("Assessment Result", assessment_result[0])
+		if doc.docstatus == 0:
+			return doc
+		elif doc.docstatus == 1:
+			frappe.msgprint("Result already Submitted")
+			return None
 	else:
 		return frappe.new_doc("Assessment Result")
 

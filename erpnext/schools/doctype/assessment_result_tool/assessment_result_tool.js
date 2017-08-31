@@ -12,8 +12,7 @@ frappe.ui.form.on('Assessment Result Tool', {
 			frappe.route_options = null;
 		}
 		frm.disable_save();
-		frm.page.set_primary_action(__("Save Result"), function() {
-			console.log("Marks Submitted")
+		frm.page.set_primary_action(__("Submit"), function() {
 			frm.events.make_result(frm)
 		});
 		frm.page.clear_indicator();
@@ -36,46 +35,79 @@ frappe.ui.form.on('Assessment Result Tool', {
 
 	render_table: function(frm) {
 		$(frm.fields_dict.result_html.wrapper).empty();
-		var assessment_plan = frm.doc.assessment_plan;
+		let assessment_plan = frm.doc.assessment_plan;
 		frappe.call({
 			method: "erpnext.schools.api.get_assessment_details",
 			args: {
 				assessment_plan: assessment_plan
 			},
 			callback: function(r) {
-				var criteria_list = r.message;
-				var max_total_score = 0;
-				criteria_list.forEach(function(c) {
-					max_total_score += c.maximum_score
-				});
-				var result_table = $(frappe.render_template('assessment_result_tool', {
-					frm: frm,
-					students: frm.doc.students,
-					criteria: criteria_list,
-					max_total_score: max_total_score
-				}));
-				result_table.appendTo(frm.fields_dict.result_html.wrapper);
-				result_table.on('change', 'input', function(e) {
-					var $input = $(e.target);
-					var student = $input.data().student;
-					var max_score = $input.data().maxScore;
-					var value = $input.val();
-					if(value < 0) {
-						$input.val(0);
-						value = 0;
-					} else if(value > max_score) {
-						$input.val(max_score);
-						value = max_score;
+				frm.events.get_marks(frm, r.message);
+			}
+		});
+	},
+
+	get_marks: function(frm, criteria_list) {
+		let max_total_score = 0;
+		criteria_list.forEach(function(c) {
+			max_total_score += c.maximum_score
+		});
+		var result_table = $(frappe.render_template('assessment_result_tool', {
+			frm: frm,
+			students: frm.doc.students,
+			criteria: criteria_list,
+			max_total_score: max_total_score
+		}));
+		result_table.appendTo(frm.fields_dict.result_html.wrapper);
+
+		result_table.on('change', 'input', function(e) {
+			let $input = $(e.target);
+			let student = $input.data().student;
+			let max_score = $input.data().maxScore;
+			let value = $input.val();
+			if(value < 0) {
+				$input.val(0);
+			} else if(value > max_score) {
+				$input.val(max_score);
+			}
+			let total_score = 0;
+			let student_scores = {};
+			student_scores["assessment_details"] = {}
+			result_table.find(`input[data-student=${student}].student-result-data`)
+				.each(function(el, input) {
+					let $input = $(input);
+					let criteria = $input.data().criteria;
+					let value = parseFloat($input.val());
+					if (value) {
+						student_scores["assessment_details"][criteria] = value;
 					}
-					var total_score = 0;
-					result_table.find(`input[data-student=${student}]`).each(function(el, input) {
-						var $input = $(input);
-						total_score += parseFloat($input.val());
-					});
-					if(!isNaN(total_score)) {
-						console.log("ok");
-						result_table.find(`[data-student=${student}].total-score`)
-							.html(total_score);
+					total_score += value;
+			});
+			if(!Number.isNaN(total_score)) {
+				result_table.find(`span[data-student=${student}].total-score`).html(total_score);
+			}
+			if (Object.keys(student_scores["assessment_details"]).length === criteria_list.length) {
+				student_scores["student"] = student;
+				student_scores["total_score"] = total_score;
+				result_table.find(`[data-student=${student}].result-comment`)
+					.each(function(el, input){
+					student_scores["comment"] = $(input).val();
+				});
+				frappe.call({
+					method: "erpnext.schools.api.mark_assessment_result",
+					args: {
+						"assessment_plan": frm.doc.assessment_plan,
+						"scores": student_scores
+					},
+					callback: function(r) {
+						let assessment_result = r.message;
+						for (var criteria of Object.keys(assessment_result.details)) {
+							result_table.find(`[data-criteria=${criteria}][data-student=${assessment_result
+								.student}].student-result-grade`).each(function(e1, input) {
+									$(input).html(assessment_result.details[criteria]);
+							});
+						}
+						result_table.find(`span[data-student=${assessment_result.student}].total-score-grade`).html(assessment_result.grade);
 					}
 				});
 			}
@@ -83,29 +115,7 @@ frappe.ui.form.on('Assessment Result Tool', {
 	},
 
 	make_result: function(frm) {
-		var student_scores = {};
-		frm.doc.students.forEach(function(stu) {
-			student_scores[stu.student] = {}
-			var result_table = $(frm.fields_dict.result_html.wrapper);
-			result_table.find(`input[data-student=${stu.student}]`).each(function(el, input) {
-				var $input = $(input);
-				var criteria = $input.data().criteria;
-				var value = parseFloat($input.val());
-				if (value) {
-					student_scores[stu.student][criteria] = value;
-				}
-			});
-			result_table.find(`[data-student=${stu.student}].total-score`).each(function(el, input){
-				student_scores[stu.student]["total_score"] = parseFloat($(input).html());
-			})
-		});
-		Object.keys(student_scores).forEach(function(key){
-			if (isNaN(student_scores[key]["total_score"])){
-				delete student_scores[key];
-			}
-		});
-		console.log(student_scores);
-		frappe.call(({
+		frappe.call({
 			method: "erpnext.schools.api.mark_assessment_result",
 			args: {
 				"assessment_plan": frm.doc.assessment_plan,
@@ -114,8 +124,7 @@ frappe.ui.form.on('Assessment Result Tool', {
 			callback: function(r) {
 				console.log(r);
 			}
-		}))
-		
+		});
 	}
 
 });
