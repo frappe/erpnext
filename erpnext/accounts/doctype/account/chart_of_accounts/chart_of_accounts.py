@@ -78,7 +78,7 @@ def get_chart(chart_template, existing_company=None):
 		for folder in folders:
 			path = os.path.join(os.path.dirname(__file__), folder)
 			for fname in os.listdir(path):
-				if fname.endswith(".json"):
+				if fname.decode("utf-8").endswith(".json"):
 					with open(os.path.join(path, fname), "r") as f:
 						chart = f.read()
 						if chart and json.loads(chart).get("name") == chart_template:
@@ -105,7 +105,7 @@ def get_charts_for_country(country):
 			path = os.path.join(os.path.dirname(__file__), folder)
 
 			for fname in os.listdir(path):
-				if (fname.startswith(country_code) or fname.startswith(country)) and fname.endswith(".json"):
+				if (fname.decode("utf-8").startswith(country_code) or fname.decode("utf-8").startswith(country)) and fname.decode("utf-8").endswith(".json"):
 					with open(os.path.join(path, fname), "r") as f:
 						_get_chart_name(f.read())
 
