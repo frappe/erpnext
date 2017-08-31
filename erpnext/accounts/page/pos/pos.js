@@ -426,11 +426,16 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		});
 
 		this.serach_item.make_input();
-		this.serach_item.$input.on("keyup", function () {
-			setTimeout(function () {
-				me.items = me.get_items();
-				me.make_item_list();
-			}, 1000);
+		
+		this.serach_item.$input.on("keypress", function (event) {
+
+			clearTimeout(me.last_search_timeout);
+			me.last_search_timeout = setTimeout(() => {
+				if((me.serach_item.$input.val() != "") || (event.which == 13)) {
+					me.items = me.get_items();
+					me.make_item_list();
+				}				
+			}, 400);
 		});
 
 		this.search_item_group = this.wrapper.find('.search-item-group');
@@ -727,14 +732,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 					input = input.toLowerCase();
 					item = this.get_item(item.value);
-					var searchtext =
-						Object.keys(item)
-							.filter(key => ['customer_name', 'customer_group', 'value', 'label', 'email_id', 'phone', 'mobile_no'].includes(key))
-							.map(key => item[key])
-							.join(" ")
-							.toLowerCase();
-
-					return searchtext.includes(input)
+					return item.searchtext.includes(input)
 				},
 				item: function (item, input) {
 					var d = this.get_item(item.value);
@@ -808,7 +806,11 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				territory: c.territory,
 				phone: contact ? contact["phone"] : '',
 				mobile_no: contact ? contact["mobile_no"] : '',
-				email_id: contact ? contact["email_id"] : ''
+				email_id: contact ? contact["email_id"] : '',
+				searchtext: ['customer_name', 'customer_group', 'value',
+					'label', 'email_id', 'phone', 'mobile_no']
+					.map(key => c[key]).join(' ')
+					.toLowerCase()
 			}
 		});
 
