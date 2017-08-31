@@ -15,6 +15,7 @@ from erpnext.stock import get_warehouse_account_map
 from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entries, delete_gl_entries
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.buying.utils import check_for_closed_status
+from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -353,6 +354,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_payment_gl_entries(gl_entries)
 		self.make_write_off_gl_entry(gl_entries)
+		self.make_gle_for_rounding_adjustment(gl_entries)
 
 		return gl_entries
 
@@ -583,6 +585,21 @@ class PurchaseInvoice(BuyingController):
 					"cost_center": self.write_off_cost_center
 				})
 			)
+
+	def make_gle_for_rounding_adjustment(self, gl_entries):
+		if self.rounding_adjustment:
+			round_off_account, round_off_cost_center = \
+				get_round_off_account_and_cost_center(self.company)
+
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": round_off_account,
+					"against": self.supplier,
+					"debit_in_account_currency": self.rounding_adjustment,
+					"debit": self.base_rounding_adjustment,
+					"cost_center": round_off_cost_center,
+				}
+			))
 
 	def on_cancel(self):
 		self.check_for_closed_status()
