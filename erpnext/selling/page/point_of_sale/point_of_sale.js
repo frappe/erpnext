@@ -507,8 +507,10 @@ class POSCart {
 			df: {
 				fieldtype: 'Link',
 				label: 'Customer',
+				fieldname: 'customer',
 				options: 'Customer',
 				reqd: 1,
+				default: this.frm.doc.customer,
 				onchange: () => {
 					this.events.on_customer_change(this.customer_field.get_value());
 				}
