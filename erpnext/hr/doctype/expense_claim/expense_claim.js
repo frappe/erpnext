@@ -4,19 +4,6 @@
 frappe.provide("erpnext.hr");
 
 erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
-	make_advance_entry: function() {
-		return frappe.call({
-			method: "erpnext.hr.doctype.expense_claim.expense_claim.make_advance_entry",
-			args: {
-				"docname": cur_frm.doc.name,
-			},
-			callback: function(r) {
-				frappe.model.sync(r.message);
-				frappe.set_route('Form', 'Journal Entry', r.message.name);
-			}
-		});
-	},
-
 	expense_type: function(doc, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		if(!doc.company) {
@@ -46,9 +33,6 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 });
 
 $.extend(cur_frm.cscript, new erpnext.hr.ExpenseClaimController({frm: cur_frm}));
-
-cur_frm.add_fetch('employee', 'company', 'company');
-cur_frm.add_fetch('employee','employee_name','employee_name');
 
 cur_frm.cscript.onload = function(doc) {
 	if(!doc.approval_status)
@@ -82,41 +66,6 @@ cur_frm.cscript.clear_sanctioned = function(doc) {
 
 	doc.total_sanctioned_amount = '';
 	refresh_many(['sanctioned_amount', 'total_sanctioned_amount']);
-};
-
-cur_frm.cscript.refresh = function(doc) {
-	cur_frm.cscript.set_help(doc);
-
-	if(!doc.__islocal) {
-		cur_frm.toggle_enable("exp_approver", doc.approval_status=="Draft");
-		cur_frm.toggle_enable("approval_status", (doc.exp_approver==frappe.session.user && doc.docstatus==0));
-
-		if (doc.docstatus==0 && doc.exp_approver==frappe.session.user && doc.approval_status=="Approved" && doc.advance_required==0)
-			cur_frm.savesubmit();
-
-		if (doc.docstatus==0 && doc.approval_status=="Approved") {
-			if (cint(doc.total_advance_paid) < cint(doc.total_sanctioned_amount) && frappe.model.can_create("Journal Entry")) {
-				cur_frm.add_custom_button(__("Advance Payment"), cur_frm.cscript.make_advance_entry, __("Make"));
-				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
-			}
-		}
-
-		if (doc.docstatus===1 && doc.approval_status=="Approved") {
-			/* eslint-disable */
-			// no idea how `me` works here 
-			if (cint(doc.total_amount_reimbursed) > 0 && frappe.model.can_read("Journal Entry")) {
-				cur_frm.add_custom_button(__('Bank Entries'), function() {
-					frappe.route_options = {
-						"Journal Entry Account.reference_type": me.frm.doc.doctype,
-						"Journal Entry Account.reference_name": me.frm.doc.name,
-						company: me.frm.doc.company
-					};
-					frappe.set_route("List", "Journal Entry");
-				}, __("View"));
-			}
-			/* eslint-enable */
-		}
-	}
 };
 
 cur_frm.cscript.set_help = function(doc) {
@@ -172,24 +121,6 @@ erpnext.expense_claim = {
 };
 
 frappe.ui.form.on("Expense Claim", {
-	refresh: function(frm) {
-		var doc = frm.doc;
-		if(doc.advance_account)
-			frappe.call({
-				method: "erpnext.hr.doctype.expense_claim.expense_claim.update_advance_paid",
-				args: {
-					"docname": doc.name,
-					"employee": doc.employee,
-					"advance_account": doc.advance_account
-				},
-				callback: function(r) {
-					frm.set_value("total_advance_paid", r.message.amt);
-				}
-			});
-	}
-});
-
-frappe.ui.form.on("Expense Claim", {
 	setup: function(frm) {
 		frm.trigger("set_query_for_cost_center");
 		frm.trigger("set_query_for_advance_account");
@@ -197,27 +128,70 @@ frappe.ui.form.on("Expense Claim", {
 		frm.add_fetch("company", "cost_center", "cost_center");
 		frm.add_fetch("company", "default_advance_account", "advance_account");
 		frm.add_fetch("company", "default_payable_account", "payable_account");
+		frm.add_fetch('employee', 'company', 'company');
+		frm.add_fetch('employee','employee_name','employee_name');
 	},
 
 	refresh: function(frm) {
-		frm.trigger("toggle_fields");
+		cur_frm.cscript.set_help(frm.doc);
 
-		if(frm.doc.docstatus == 1 && frm.doc.approval_status == 'Approved') {
-			frm.add_custom_button(__('Accounting Ledger'), function() {
-				frappe.route_options = {
-					voucher_no: frm.doc.name,
-					company: frm.doc.company,
-					group_by_voucher: false
-				};
-				frappe.set_route("query-report", "General Ledger");
-			}, __("View"));
-		}
+		if(!frm.doc.__islocal) {
+			frm.trigger("toggle_fields");
+			frm.toggle_enable("exp_approver", frm.doc.approval_status=="Draft");
+			frm.toggle_enable("approval_status",
+				(frm.doc.exp_approver==frappe.session.user && frm.doc.docstatus==0));
+			frm.toggle_enable("employee", !(frm.doc.status=="Approved" || frm.doc.total_advance_paid));
+			frm.toggle_enable("advance_account", !frm.doc.total_advance_paid);
+			frm.toggle_enable("company", !(frm.doc.status=="Approved" || frm.doc.total_advance_paid));
 
-		if (frm.doc.docstatus===1 && frm.doc.approval_status=="Approved"
-				&& (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total_sanctioned_amount))
-				&& frappe.model.can_create("Payment Entry")) {
-			frm.add_custom_button(__('Payment'),
-				function() { frm.events.make_payment_entry(frm); }, __("Make"));
+			if (frm.doc.docstatus==0 && frm.doc.exp_approver==frappe.session.user
+				&& frm.doc.approval_status=="Approved" && frm.doc.advance_required==0) {
+				frm.savesubmit();
+			}
+
+			if (frm.doc.docstatus==0 && frm.doc.approval_status=="Approved"
+					&& frm.doc.advance_required
+					&& cint(frm.doc.total_advance_paid) < cint(frm.doc.total_sanctioned_amount)
+					&& frappe.model.can_create("Payment Entry")) {
+
+				frm.add_custom_button(__('Advance Payment'),
+					function() { frm.events.make_payment_entry(frm); }, __("Make"));
+				frm.page.set_inner_btn_group_as_primary(__("Make"));
+			}
+
+			if (frm.doc.docstatus===1 && frm.doc.approval_status=="Approved"
+					&& (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total_sanctioned_amount))
+					&& frappe.model.can_create("Payment Entry")) {
+				frm.add_custom_button(__('Payment'),
+					function() { frm.events.make_payment_entry(frm); }, __("Make"));
+			}
+
+			if(frm.doc.docstatus == 1 && frm.doc.approval_status == 'Approved') {
+				frm.add_custom_button(__('Accounting Ledger'), function() {
+					frappe.route_options = {
+						voucher_no: frm.doc.name,
+						company: frm.doc.company,
+						group_by_voucher: false
+					};
+					frappe.set_route("query-report", "General Ledger");
+				}, __("View"));
+			}
+
+			if (frm.doc.docstatus===1 && frm.doc.approval_status=="Approved") {
+				/* eslint-disable */
+				// no idea how `me` works here 
+				if (cint(frm.doc.total_amount_reimbursed) > 0 && frappe.model.can_read("Journal Entry")) {
+					frm.add_custom_button(__('Bank Entries'), function() {
+						frappe.route_options = {
+							"Journal Entry Account.reference_type": frm.doc.doctype,
+							"Journal Entry Account.reference_name": frm.doc.name,
+							company: frm.doc.company
+						};
+						frappe.set_route("List", "Journal Entry");
+					}, __("View"));
+				}
+				/* eslint-enable */
+			}
 		}
 	},
 
@@ -238,7 +212,11 @@ frappe.ui.form.on("Expense Claim", {
 			}
 		});
 	},
-	
+
+	advance_required: function(frm) {
+		frm.refresh();
+	},
+
 	set_query_for_cost_center: function(frm) {
 		frm.fields_dict["cost_center"].get_query = function() {
 			return {
@@ -254,7 +232,8 @@ frappe.ui.form.on("Expense Claim", {
 			return {
 				filters: {
 					"report_type": "Balance Sheet",
-					"account_type": "Receivable"
+					"account_type": "Receivable",
+					"company": frm.doc.company
 				}
 			};
 		};
