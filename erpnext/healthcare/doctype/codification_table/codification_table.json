@@ -1,5 +1,5 @@
 {
- "allow_copy": 0, 
+ "allow_copy": 1, 
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
@@ -116,7 +116,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2017-07-12 14:34:41.947803", 
+ "modified": "2017-08-31 14:06:50.281545", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Codification Table", 

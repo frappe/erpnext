@@ -1,7 +1,7 @@
 {
- "allow_copy": 0, 
+ "allow_copy": 1, 
  "allow_guest_to_view": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "", 
  "beta": 1, 
@@ -809,7 +809,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-08-22 11:35:02.616969", 
+ "modified": "2017-08-31 13:51:28.975120", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Physician", 
@@ -882,10 +882,10 @@
  "read_only_onload": 0, 
  "restrict_to_domain": "Healthcare", 
  "search_fields": "first_name,mobile_phone,office_phone", 
- "show_name_in_global_search": 0, 
+ "show_name_in_global_search": 1, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "title_field": "first_name", 
- "track_changes": 0, 
+ "track_changes": 1, 
  "track_seen": 0
 }

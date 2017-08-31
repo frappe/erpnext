@@ -1,7 +1,7 @@
 {
- "allow_copy": 0, 
+ "allow_copy": 1, 
  "allow_guest_to_view": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:complaints", 
  "beta": 1, 
@@ -54,7 +54,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-08-24 15:48:53.230835", 
+ "modified": "2017-08-31 13:44:31.848346", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Complaint", 

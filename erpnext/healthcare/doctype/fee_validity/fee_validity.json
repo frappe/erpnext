@@ -1,7 +1,7 @@
 {
- "allow_copy": 0, 
+ "allow_copy": 1, 
  "allow_guest_to_view": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 0, 
  "beta": 1, 
  "creation": "2017-01-05 10:56:29.564806", 
@@ -206,7 +206,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-08-22 14:32:54.790061", 
+ "modified": "2017-08-31 13:36:52.108407", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Fee Validity", 

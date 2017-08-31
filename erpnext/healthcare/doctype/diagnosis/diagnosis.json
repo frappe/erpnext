@@ -1,7 +1,7 @@
 {
- "allow_copy": 0, 
+ "allow_copy": 1, 
  "allow_guest_to_view": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:diagnosis", 
  "beta": 1, 
@@ -54,7 +54,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-08-22 14:32:02.642329", 
+ "modified": "2017-08-31 13:40:09.731904", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Diagnosis", 
@@ -111,6 +111,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "title_field": "diagnosis", 
- "track_changes": 0, 
+ "track_changes": 1, 
  "track_seen": 0
 }

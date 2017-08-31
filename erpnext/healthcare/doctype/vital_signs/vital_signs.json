@@ -1,7 +1,7 @@
 {
- "allow_copy": 0, 
+ "allow_copy": 1, 
  "allow_guest_to_view": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 0, 
  "beta": 1, 
  "creation": "2017-02-02 11:00:24.853005", 
@@ -689,7 +689,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-07-12 14:30:28.892373", 
+ "modified": "2017-08-31 14:13:05.056773", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Vital Signs", 
@@ -741,11 +741,11 @@
  "read_only": 0, 
  "read_only_onload": 0, 
  "restrict_to_domain": "Healthcare", 
- "search_fields": "patient", 
- "show_name_in_global_search": 0, 
+ "search_fields": "patient, signs_date", 
+ "show_name_in_global_search": 1, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "title_field": "patient", 
- "track_changes": 0, 
- "track_seen": 0
+ "track_changes": 1, 
+ "track_seen": 1
 }

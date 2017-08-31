@@ -1,5 +1,5 @@
 {
- "allow_copy": 0, 
+ "allow_copy": 1, 
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
@@ -84,7 +84,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2017-08-24 15:54:40.081245", 
+ "modified": "2017-08-31 13:46:40.609983", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Sensitivity Test Items", 

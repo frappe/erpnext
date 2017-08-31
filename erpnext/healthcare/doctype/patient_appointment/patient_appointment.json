@@ -1,7 +1,7 @@
 {
- "allow_copy": 0, 
+ "allow_copy": 1, 
  "allow_guest_to_view": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "OP-.######", 
  "beta": 1, 
@@ -755,7 +755,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-08-24 16:14:32.050201", 
+ "modified": "2017-08-31 13:27:39.208298", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Patient Appointment", 
@@ -807,11 +807,11 @@
  "read_only": 0, 
  "read_only_onload": 0, 
  "restrict_to_domain": "Healthcare", 
- "search_fields": "patient, physician, appointment_datetime", 
- "show_name_in_global_search": 0, 
+ "search_fields": "patient, physician, appointment_datetime,department", 
+ "show_name_in_global_search": 1, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "title_field": "patient", 
- "track_changes": 0, 
- "track_seen": 0
+ "track_changes": 1, 
+ "track_seen": 1
 }

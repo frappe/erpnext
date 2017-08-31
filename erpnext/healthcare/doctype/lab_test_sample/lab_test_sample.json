@@ -1,5 +1,5 @@
 {
- "allow_copy": 0, 
+ "allow_copy": 1, 
  "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 1, 
@@ -45,7 +45,7 @@
   {
    "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "columns": 0, 
    "fieldname": "sample_uom", 
@@ -84,7 +84,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-08-24 15:40:52.708465", 
+ "modified": "2017-08-31 13:46:22.508908", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Lab Test Sample", 
@@ -140,6 +140,6 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "title_field": "sample", 
- "track_changes": 0, 
+ "track_changes": 1, 
  "track_seen": 0
 }

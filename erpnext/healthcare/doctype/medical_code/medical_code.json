@@ -1,8 +1,8 @@
 {
- "allow_copy": 0, 
+ "allow_copy": 1, 
  "allow_guest_to_view": 0, 
- "allow_import": 0, 
- "allow_rename": 0, 
+ "allow_import": 1, 
+ "allow_rename": 1, 
  "beta": 1, 
  "creation": "2017-06-21 13:02:56.122897", 
  "custom": 0, 
@@ -76,7 +76,7 @@
   {
    "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "columns": 0, 
    "fieldname": "description", 
@@ -114,7 +114,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-07-12 14:34:53.147332", 
+ "modified": "2017-08-31 14:01:18.817484", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Medical Code", 
@@ -142,7 +142,7 @@
    "write": 1
   }
  ], 
- "quick_entry": 0, 
+ "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "restrict_to_domain": "Healthcare", 

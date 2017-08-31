@@ -45,7 +45,7 @@
   {
    "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "columns": 0, 
    "fieldname": "ip", 
@@ -83,7 +83,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-08-22 13:58:44.086539", 
+ "modified": "2017-08-31 13:46:57.142289", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Appointment Type", 

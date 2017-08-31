@@ -1,7 +1,7 @@
 {
- "allow_copy": 0, 
+ "allow_copy": 1, 
  "allow_guest_to_view": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "", 
  "beta": 1, 
@@ -84,7 +84,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-08-22 14:35:43.487733", 
+ "modified": "2017-08-31 13:42:51.325725", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Prescription Duration", 
@@ -140,6 +140,6 @@
  "show_name_in_global_search": 0, 
  "sort_field": "", 
  "sort_order": "ASC", 
- "track_changes": 0, 
+ "track_changes": 1, 
  "track_seen": 0
 }

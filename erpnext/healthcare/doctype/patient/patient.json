@@ -1,5 +1,5 @@
 {
- "allow_copy": 0, 
+ "allow_copy": 1, 
  "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 0, 
@@ -1274,7 +1274,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 50, 
- "modified": "2017-08-22 11:46:27.527277", 
+ "modified": "2017-08-31 13:50:25.474398", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "Patient", 
@@ -1346,11 +1346,11 @@
  "read_only": 0, 
  "read_only_onload": 0, 
  "restrict_to_domain": "Healthcare", 
- "search_fields": "patient_name,mobile,email", 
- "show_name_in_global_search": 0, 
+ "search_fields": "patient_name,mobile,email,phone", 
+ "show_name_in_global_search": 1, 
  "sort_field": "modified", 
  "sort_order": "ASC", 
  "title_field": "patient_name", 
- "track_changes": 0, 
+ "track_changes": 1, 
  "track_seen": 0
 }
