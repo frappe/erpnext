@@ -139,6 +139,7 @@ class PointOfSale {
 	update_item_in_cart(item_code, field='qty', value=1) {
 		if(this.cart.exists(item_code)) {
 			const item = this.frm.doc.items.find(i => i.item_code === item_code);
+			frappe.flags.hide_serial_batch_dialog = false;
 
 			if (typeof value === 'string' && !in_list(['serial_no', 'batch_no'], field)) {
 				// value can be of type '+1' or '-1'
@@ -168,29 +169,28 @@ class PointOfSale {
 
 		// add to cur_frm
 		const item = this.frm.add_child('items', args);
+		frappe.flags.hide_serial_batch_dialog = true;
 		this.frm.script_manager
 			.trigger('item_code', item.doctype, item.name)
 			.then(() => {
-				// update cart
-				this.update_cart_data(item);
+				const show_dialog = item.has_serial_no || item.has_batch_no;
+				if (show_dialog && field == 'qty') {
+					// check has serial no/batch no and update cart
+					this.select_batch_and_serial_no(item);
+				} else {
+					// update cart
+					this.update_cart_data(item);
+				}
 			});
 	}
 
 	select_batch_and_serial_no(item) {
-		new erpnext.SerialNoBatchSelector({
-			frm: this.frm,
-			item: item,
-			warehouse_details: {
-				type: "Warehouse",
-				name: item.warehouse
-			},
-			callback: (item) => {
-				this.update_item_in_frm(item)
-					.then(() => {
-						// update cart
-						this.update_cart_data(item);
-					});
-			}
+		erpnext.show_serial_batch_selector(this.frm, item, () => {
+			this.update_item_in_frm(item)
+				.then(() => {
+					// update cart
+					this.update_cart_data(item);
+				});
 		}, true);
 	}
 
@@ -308,7 +308,6 @@ class PointOfSale {
 			frm.doc.items = [];
 			frm.set_value('is_pos', 1);
 			frm.meta.default_print_format = 'POS Invoice';
-
 			return frm;
 		}
 	}
@@ -340,6 +339,9 @@ class PointOfSale {
 		if(this.frm.doc.docstatus !== 1) return;
 
 		this.page.set_secondary_action(__("Print"), () => {
+			if (this.pos_profile && this.pos_profile.print_format_for_online) {
+				this.frm.meta.default_print_format = this.pos_profile.print_format_for_online;
+			}
 			this.frm.print_preview.printit(true);
 		});
 
