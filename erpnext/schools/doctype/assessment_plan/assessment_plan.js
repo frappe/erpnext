@@ -27,6 +27,14 @@ frappe.ui.form.on("Assessment Plan", {
                 frappe.set_route("Form", "Assessment Result Tool");
             });
         }
+
+		frm.set_query('grading_scale', function(){
+			return {
+				filters: {
+					docstatus: 1
+				}
+			}
+		});
     },
 
 	course: function(frm) {
