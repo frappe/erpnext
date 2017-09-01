@@ -1,36 +1,46 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-cur_frm.add_fetch("assessment_plan", "student_group", "student_group");
 
 frappe.ui.form.on('Assessment Result Tool', {
+	setup: function(frm) {
+		frm.add_fetch("assessment_plan", "student_group", "student_group");
+	},
+
 	refresh: function(frm) {
-		frm.trigger("assessment_plan");
 		if (frappe.route_options) {
 			frm.set_value("student_group", frappe.route_options.student_group);
 			frm.set_value("assessment_plan", frappe.route_options.assessment_plan);
 			frappe.route_options = null;
 		}
 		frm.disable_save();
-		frm.page.set_primary_action(__("Submit"), function() {
-			frm.events.make_result(frm)
-		});
 		frm.page.clear_indicator();
 	},
 
 	assessment_plan: function(frm) {
-		if(!frm.doc.student_group) return;
-		frappe.call({
-			method: "erpnext.schools.api.get_assessment_students",
-			args: {
-				"assessment_plan": frm.doc.assessment_plan,
-				"student_group": frm.doc.student_group
-			},
-			callback: function(r) {
-				frm.doc.students = r.message;
-				frm.events.render_table(frm);
-			}
-		});
+		frm.doc.show_submit = false;
+		if(frm.doc.assessment_plan) {
+			if (!frm.doc.student_group)
+				return
+			frappe.call({
+				method: "erpnext.schools.api.get_assessment_students",
+				args: {
+					"assessment_plan": frm.doc.assessment_plan,
+					"student_group": frm.doc.student_group
+				},
+				callback: function(r) {
+					frm.doc.students = r.message;
+					frm.events.render_table(frm);
+					for (let value of r.message) {
+						if (!value.docstatus) {
+							frm.doc.show_submit = true;
+							break;
+						}
+					}
+					frm.events.submit_result(frm);
+				}
+			});
+		}
 	},
 
 	render_table: function(frm) {
@@ -114,17 +124,28 @@ frappe.ui.form.on('Assessment Result Tool', {
 		});
 	},
 
-	make_result: function(frm) {
-		frappe.call({
-			method: "erpnext.schools.api.mark_assessment_result",
-			args: {
-				"assessment_plan": frm.doc.assessment_plan,
-				"scores": student_scores
-			},
-			callback: function(r) {
-				console.log(r);
-			}
-		});
+	submit_result: function(frm) {
+		if (frm.doc.show_submit) {
+			frm.page.set_primary_action(__("Submit"), function() {
+				frappe.call({
+					method: "erpnext.schools.api.submit_assessment_results",
+					args: {
+						"assessment_plan": frm.doc.assessment_plan,
+						"student_group": frm.doc.student_group
+					},
+					callback: function(r) {
+						if (r.message) {
+							frappe.msgprint(__("{0} Result submittted", [r.message]));
+						} else {
+							frappe.msgprint(__("No Result to submit"));
+						}
+						frm.events.assessment_plan(frm);
+					}
+				});
+			});
+		}
+		else {
+			frm.page.clear_primary_action();
+		}
 	}
-
 });

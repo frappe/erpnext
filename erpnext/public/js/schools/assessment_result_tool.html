@@ -20,15 +20,14 @@
 	<tbody>
 		{% for s in students %}
 		<tr 
-<!-- 			{% if(s.assessment_details && s.docstatus && s.docstatus == 1) { %} class="text-muted" {% } %}
-			{% if(s.assessment_details && s.docstatus && s.docstatus == 0) { %} class="like-disabled-input" {% } %} -->
+			{% if(s.assessment_details && s.docstatus && s.docstatus == 1) { %} class="text-muted" {% } %}
 			data-student="{{s.student}}">
 
 			<td>{{ s.student }}</td>
 			<td>{{ s.student_name }}</td>
 			{% for c in criteria %}
 			<td>
-				<span data-student="{{s.student}}" data-criteria="{{c.assessment_criteria}}" class="student-result-grade" style="width:30%; float:left;"> 
+				<span data-student="{{s.student}}" data-criteria="{{c.assessment_criteria}}" class="student-result-grade" style="width:30%; float:left; background-color: #f5f7fa;">
 					{% if(s.assessment_details) { %}
 						{{s.assessment_details[c.assessment_criteria][1]}} 
 					{% } %}
@@ -37,6 +36,7 @@
 					data-max-score="{{c.maximum_score}}"
 					data-criteria="{{c.assessment_criteria}}"
 					data-student="{{s.student}}"
+					{% if(s.assessment_details && s.docstatus && s.docstatus == 1) { %} disabled {% } %}
 					{% if(s.assessment_details) { %}
 						value="{{s.assessment_details[c.assessment_criteria][0]}}"
 					{% } %}/>
@@ -44,12 +44,13 @@
 			{% endfor %}
 			<td>
 				<input type="text" class="result-comment" data-student="{{s.student}}"
+				{% if(s.assessment_details && s.docstatus && s.docstatus == 1) { %} disabled {% } %}
 				{% if(s.assessment_details) { %}
 					value="{{s.assessment_details.comment}}"
 				{% } %}
 			</td>
 			<td>
-				<span data-student="{{s.student}}" class="total-score-grade" style="width:30%; float:left;"> 
+				<span data-student="{{s.student}}" class="total-score-grade" style="width:30%; float:left; background-color: #f5f7fa;">
 				{% if(s.assessment_details) { %}
 				{{s.assessment_details.total_score[1]}}
 				{% } %}
