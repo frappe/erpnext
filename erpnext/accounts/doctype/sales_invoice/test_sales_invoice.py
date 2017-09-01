@@ -890,20 +890,6 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertEquals(si.get("items")[0].serial_no, dn.get("items")[0].serial_no)
 
-	def test_invoice_due_date_against_customers_credit_days(self):
-		# set customer's credit days
-		frappe.db.set_value("Customer", "_Test Customer", "credit_days_based_on", "Fixed Days")
-		frappe.db.set_value("Customer", "_Test Customer", "credit_days", 10)
-
-		si = create_sales_invoice()
-		self.assertEqual(si.due_date, add_days(nowdate(), 10))
-
-		# set customer's credit days is last day of the next month
-		frappe.db.set_value("Customer", "_Test Customer", "credit_days_based_on", "Last Day of the Next Month")
-
-		si1 = create_sales_invoice(posting_date="2015-07-05")
-		self.assertEqual(si1.due_date, "2015-08-31")
-
 	def test_return_sales_invoice(self):
 		set_perpetual_inventory()
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)

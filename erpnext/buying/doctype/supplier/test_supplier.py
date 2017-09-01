@@ -16,7 +16,7 @@ class TestSupplier(unittest.TestCase):
         frappe.db.set_value("Supplier", "_Test Supplier", "credit_days_based_on", "Fixed Days")
         frappe.db.set_value("Supplier", "_Test Supplier", "credit_days", 10)
 
-        due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier", "_Test Company")
+        due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier")
         self.assertEqual(due_date, "2016-02-01")
 
         # Set Credit Limit based on Last day next month
