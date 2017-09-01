@@ -10,7 +10,6 @@ from frappe.utils import money_in_words
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from frappe.utils.csvutils import getlink
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 from erpnext.accounts.general_ledger import delete_gl_entries
 
 

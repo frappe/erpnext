@@ -16,6 +16,21 @@ frappe.ui.form.on('Fee Structure', {
 				}
 			};
 		});
+	},
+
+	refresh: function(frm) {
+		if(frm.doc.docstatus === 1) {
+			frm.add_custom_button(__("Make Fee Schedule"), function() {
+				frm.events.make_fee_schedule(frm);
+			});
+		}
+	},
+
+	make_fee_schedule: function(frm) {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.schools.doctype.fee_structure.fee_structure.make_fee_schedule",
+			frm: frm
+		});
 	}
 });
 

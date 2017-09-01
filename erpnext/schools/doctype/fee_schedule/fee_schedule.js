@@ -3,9 +3,16 @@
 
 frappe.ui.form.on('Fee Schedule', {
 	setup: function(frm) {
-		frm.add_fetch("company", "default_receivable_account", "debit_to");
-		frm.add_fetch("company", "default_income_account", "against_income_account");
-		frm.add_fetch("company", "cost_center", "cost_center");
+		frm.add_fetch("fee_structure", "default_receivable_account", "debit_to");
+		frm.add_fetch("fee_structure", "default_income_account", "against_income_account");
+		frm.add_fetch("fee_structure", "cost_center", "cost_center");
+
+		frm.set_query("student_group", "student_groups", function() {
+			return {
+				"program": frm.doc.program,
+				"academic_year": frm.doc.academic_year
+			};
+		});
 	},
 
 	refresh: function(frm) {
@@ -47,20 +54,20 @@ frappe.ui.form.on('Fee Schedule', {
 	}
 });
 
-frappe.ui.form.on("Fee Component", {
-	refresh: function(frm) {
-		frm.set_read_only();
-	}
-});
-
 frappe.ui.form.on("Fee Schedule Student Group", {
-	onload: function(frm) {
-		frm.set_query("student_group",function(){
-			return{
-				"filters":{
-					"group_based_on": "Batch"
+	student_group: function(frm, cdt, cdn) {
+		var row = locals[cdt][cdn];
+		frappe.call({
+			method: "erpnext.schools.doctype.fee_schedule.fee_schedule.get_total_students",
+			args: {
+				"student_group": row.student_group,
+				"student_category": frm.doc.student_category
+			},
+			callback: function(r) {
+				if(!r.exc) {
+					frappe.model.set_value(cdt, cdn, "total_students", r.message);
 				}
-			};
-		});
+			}
+		})
 	}
-});
+})
