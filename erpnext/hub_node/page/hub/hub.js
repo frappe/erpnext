@@ -47,18 +47,18 @@ window.ERPNextHub = class ERPNextHub {
 		this.tag_line = $(`
 			<div class='tag-line-container'>
 				<span class='tag-line text-muted small'>
-					Product listing and discovery for ERPNext users
+					${__('Product listing and discovery for ERPNext users')}
 				</span>
 			</div>`)
 			.appendTo(this.page.page_title);
 
-		this.account_details = $(`
-			<div class='account-details text-muted'>
-				<!-- <i class='octicon octicon-person'></i> <a class='user-name small'></a> -->
-				<i class='octicon octicon-globe' style='margin-left: 20px;'></i> <a class='company-name small'></a>
-			</div>`)
-			.appendTo(this.page.page_actions)
-			.hide();
+		// this.account_details = $(`
+		// 	<div class='account-details text-muted'>
+		// 		<!-- <i class='octicon octicon-person'></i> <a class='user-name small'></a> -->
+		// 		<i class='octicon octicon-globe' style='margin-left: 20px;'></i> <a class='company-name small'></a>
+		// 	</div>`)
+		// 	.appendTo(this.page.page_actions)
+		// 	.hide();
 
 		this.bind_title();
 	}
@@ -95,6 +95,8 @@ window.ERPNextHub = class ERPNextHub {
 			this.setup_filters();
 		}
 		this.page.page_form.show();
+		this.setup_menu();
+		this.setup_sidebar();
 		this.render_body();
 		this.setup_lists();
 	}
@@ -349,14 +351,51 @@ window.ERPNextHub = class ERPNextHub {
 	}
 
 	add_account_to_header() {
-		const { hub_user_name, company } = this.hub_settings;
+		// const { hub_user_name, company } = this.hub_settings;
 		// this.account_details.find('.user-name').hide();
-		this.account_details.find('.company-name').text(company);
-		this.account_details.show();
+		// this.account_details.find('.company-name').text(company);
+		// this.account_details.show();
+	}
+
+	setup_menu() {
+		this.page.add_menu_item(__('Hub Settings'),
+			() => frappe.set_route('Form', 'Hub Settings'));
+	}
+
+	setup_sidebar() {
+		this.sidebar = new ERPNextHubSidebar({
+			wrapper: this.page.wrapper.find('.layout-side-section')
+		});
+		this.sidebar.add_item({
+			label: this.hub_settings.company,
+			on_click: () => frappe.set_route('Form', 'Company', this.hub_settings.company)
+		});
+
+		frappe.call({
+			method: 'erpnext.hub_node.get_categories'
+		}).then((r) => {
+			if (r.message) {
+				const categories = r.message.categories;
+				categories
+					.map(c => c.hub_category_name)
+					.map(c => this.sidebar.add_item({
+						label: c,
+						on_click: () => {
+							this.home_item_list &&
+							this.home_item_list.refresh({
+								text: '',
+								start: 0,
+								limit: 20,
+								category: c && c !== 'All Categories' ? c : undefined
+							});
+						}
+					}, __('Hub Category')));
+			}
+		});
 	}
 
 	remove_account_from_header() {
-		this.account_details.hide();
+		// this.account_details.hide();
 	}
 
 	get_hub_categories(callback) {
@@ -407,7 +446,7 @@ window.ERPNextHub = class ERPNextHub {
 	}
 }
 
-window.ERPNextHubList = class ERPNextHubList {
+class ERPNextHubList {
 	constructor({
 		parent = null,
 		title = 'Items',
@@ -493,7 +532,7 @@ window.ERPNextHubList = class ERPNextHubList {
 		frappe.call({
 			method: this.method,
 			args: args,
-			callback: function(r) {
+			callback: (r) => {
 				let items = r.message.items;
 				console.log("items: ", items);
 				me.$loading.hide();
@@ -503,8 +542,8 @@ window.ERPNextHubList = class ERPNextHubList {
 						me.$more.show();
 						me.$done.addClass('hide');
 					} else {
-						this.$done.removeClass('hide');
-						this.$more.hide();
+						me.$done.removeClass('hide');
+						me.$more.hide();
 					}
 					items.forEach(function(item) {
 						me.make_item_card(item).appendTo(me.$list);
@@ -550,4 +589,58 @@ window.ERPNextHubList = class ERPNextHubList {
 				${item_image}
 			</div>`;
 	}
-};
+}
+
+class ERPNextHubSidebar {
+	constructor({ wrapper }) {
+		this.wrapper = wrapper;
+		this.make_dom();
+	}
+
+	make_dom() {
+		this.wrapper.html(`
+			<div class="hub-sidebar overlay-sidebar hidden-xs hidden-sm">
+			</div>
+		`);
+
+		this.$sidebar = this.wrapper.find('.hub-sidebar');
+	}
+
+	add_item(item, section) {
+		let $section;
+		if(!section && this.wrapper.find('.sidebar-menu').length === 0) {
+			// if no section, add section with no heading
+			$section = this.get_section();
+		} else {
+			$section = this.get_section(section);
+		}
+
+		const $li_item = $(`
+			<li><a ${item.href ? `href="${item.href}"` : ''}>${item.label}</a></li>
+		`).click(
+			() => item.on_click && item.on_click()
+		);
+
+		$section.append($li_item);
+	}
+
+	get_section(section_heading="") {
+		let $section = $(this.wrapper.find(
+			`[data-section-heading="${section_heading}"]`));
+		if($section.length) {
+			return $section;
+		}
+
+		const $section_heading = section_heading ?
+			`<li class="h6">${section_heading}</li>` : '';
+
+		$section = $(`
+			<ul class="list-unstyled sidebar-menu" data-section-heading="${section_heading || 'default'}">
+				${$section_heading}
+			</ul>
+		`);
+
+		this.$sidebar.append($section);
+		return $section;
+	}
+}
