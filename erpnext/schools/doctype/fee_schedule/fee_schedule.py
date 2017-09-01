@@ -34,7 +34,7 @@ class FeeSchedule(Document):
 		no_of_students = 0
 		for d in self.student_groups:
 			# if not d.total_students:
-			d.total_students = get_total_students(d.student_group)
+			d.total_students = get_total_students(d.student_group, self.student_category)
 			no_of_students += cint(d.total_students)
 		self.grand_total = no_of_students*self.total_amount
 		self.grand_total_in_words = money_in_words(self.grand_total)
@@ -44,7 +44,7 @@ class FeeSchedule(Document):
 			self.fee_creation_status = "In Process"
 			enqueue(generate_fee, queue='default', timeout=6000, event='generate_fee',
 				fee_schedule=self.name)
-			frappe.msgprint(_("Fee generation started"))
+			frappe.msgprint(_("Fee records will be created in the background. In case of any error, the error message will be updated in the Schedule, check after refresh in 5 minutes."))
 
 
 def generate_fee(fee_schedule):
@@ -84,7 +84,6 @@ def generate_fee(fee_schedule):
 		frappe.db.set_value("Fee Schedule", fee_schedule, "error_log", err_msg)
 
 	else:
-		frappe.db.commit()
 		frappe.db.set_value("Fee Schedule", fee_schedule, "fee_creation_status", "Successful")
 		frappe.db.set_value("Fee Schedule", fee_schedule, "error_log", None)
 
@@ -98,7 +97,17 @@ def get_fee_structure(source_name,target_doc=None):
 	return fee_request
 
 @frappe.whitelist()
-def get_total_students(student_group):
-	students = frappe.get_all("Student Group Student",
-		filters={"parent": student_group, "parenttype": "Student Group", "active": 1}) or []
-	return len(students)
+def get_total_students(student_group, student_category=None):
+	conditions = ""
+	if student_category:
+		conditions = " and s.student_category='{}'".format(frappe.db.escape(student_category))
+
+	return frappe.db.sql("""
+		select count(s.name)
+		from `tabStudent` s, `tabStudent Group Student` sgs
+		where 
+			s.name = sgs.student
+			and sgs.parent = %s
+			and sgs.active = 1
+			{conditions}
+	""".format(conditions=conditions), student_group)[0][0]

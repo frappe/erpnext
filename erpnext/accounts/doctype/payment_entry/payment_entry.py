@@ -403,9 +403,9 @@ class PaymentEntry(AccountsController):
 				"against": against_account,
 				"account_currency": self.party_account_currency
 			})
-			
+
 			dr_or_cr = "credit" if self.party_type in ["Customer", "Student"] else "debit"
-			
+
 			for d in self.get("references"):
 				gle = party_gl_dict.copy()
 				gle.update({
@@ -530,7 +530,7 @@ def get_outstanding_reference_documents(args):
 	if (args.get("party_type") != "Student"):
 		orders_to_be_billed =  get_orders_to_be_billed(args.get("posting_date"),args.get("party_type"),
 			args.get("party"), party_account_currency, company_currency)
-	
+
 	return negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
 
 def get_orders_to_be_billed(posting_date, party_type, party, party_account_currency, company_currency):
