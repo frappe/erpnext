@@ -21,10 +21,11 @@ def execute():
 	value_query_str = " ".join(payment_terms)
 	cond_query_str = " ELSE `payment_terms` END WHERE "
 
-	frappe.db.sql(
-		begin_query_str + value_query_str + cond_query_str + '`customer_name` IN %s',
-		(customers,)
-	)
+	if customers:
+		frappe.db.sql(
+			begin_query_str + value_query_str + cond_query_str + '`customer_name` IN %s',
+			(customers,)
+		)
 
 
 def make_template(payment_term):
