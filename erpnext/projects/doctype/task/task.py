@@ -49,7 +49,7 @@ class Task(Document):
 			clear(self.doctype, self.name)
 			
 	def validate_progress(self):
-		if self.progress > 100:
+		if int(self.progress or 0) > 100:
 			frappe.throw(_("Progress % for a task cannot be more than 100."))
 
 	def update_depends_on(self):
