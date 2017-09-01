@@ -27,7 +27,7 @@
 			<td>{{ s.student_name }}</td>
 			{% for c in criteria %}
 			<td>
-				<span data-student="{{s.student}}" data-criteria="{{c.assessment_criteria}}" class="student-result-grade" style="width:30%; float:left; background-color: #f5f7fa;">
+				<span data-student="{{s.student}}" data-criteria="{{c.assessment_criteria}}" class="student-result-grade badge" >
 					{% if(s.assessment_details) { %}
 						{{s.assessment_details[c.assessment_criteria][1]}} 
 					{% } %}
@@ -50,15 +50,20 @@
 				{% } %}
 			</td>
 			<td>
-				<span data-student="{{s.student}}" class="total-score-grade" style="width:30%; float:left; background-color: #f5f7fa;">
+				<span data-student="{{s.student}}" class="total-score-grade badge" style="width:30%; float:left;">
 				{% if(s.assessment_details) { %}
 				{{s.assessment_details.total_score[1]}}
 				{% } %}
 				</span>
-				<span data-student="{{s.student}}" class="total-score" style="width:70%; float:right;">
+				<span data-student="{{s.student}}" class="total-score" style="width:60%; float:center;">
 				{% if(s.assessment_details) { %}
 				{{s.assessment_details.total_score[0]}}
 				{% } %}
+				</span>
+				<span data-student="{{s.student}}" class="total-result-link" style="width: 10%; display:{% if(!s.assessment_details) { %}None{% } %}; float:right;">
+					<a class="btn-open no-decoration" title="Open Link" href="#Form/Assessment Result/{% if(s.assessment_details) { %}{{s.name}}{% } %}">
+						<i class="octicon octicon-arrow-right"></i>
+					</a>
 				</span>
 			</td>
 		</tr>

@@ -15,6 +15,7 @@ frappe.ui.form.on('Assessment Result Tool', {
 		}
 		frm.disable_save();
 		frm.page.clear_indicator();
+		frm.trigger("assessment_plan");
 	},
 
 	assessment_plan: function(frm) {
@@ -111,6 +112,10 @@ frappe.ui.form.on('Assessment Result Tool', {
 					},
 					callback: function(r) {
 						let assessment_result = r.message;
+						if (!frm.doc.show_submit) {
+							frm.doc.show_submit = true;
+							frm.events.submit_result;
+						}
 						for (var criteria of Object.keys(assessment_result.details)) {
 							result_table.find(`[data-criteria=${criteria}][data-student=${assessment_result
 								.student}].student-result-grade`).each(function(e1, input) {
@@ -118,6 +123,9 @@ frappe.ui.form.on('Assessment Result Tool', {
 							});
 						}
 						result_table.find(`span[data-student=${assessment_result.student}].total-score-grade`).html(assessment_result.grade);
+						let link_span = result_table.find(`span[data-student=${assessment_result.student}].total-result-link`);
+						$(link_span).css("display", "block");
+						$(link_span).find("a").attr("href", "#Form/Assessment Result/"+assessment_result.name);
 					}
 				});
 			}

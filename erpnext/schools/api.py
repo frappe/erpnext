@@ -215,7 +215,6 @@ def get_assessment_criteria(course):
 
 @frappe.whitelist()
 def get_assessment_students(assessment_plan, student_group):
-	
 	student_list = get_student_group_students(student_group)
 	for i, student in enumerate(student_list):
 		result = get_result(student.student, assessment_plan)
@@ -227,7 +226,11 @@ def get_assessment_students(assessment_plan, student_group):
 				"total_score": [cstr(result.total_score), result.grade],
 				"comment": result.comment
 			})
-			student.update({'assessment_details':student_result, 'docstatus':result.docstatus})			
+			student.update({
+				"assessment_details": student_result,
+				"docstatus": result.docstatus,
+				"name": result.name
+			})
 		else:
 			student.update({'assessment_details': None})
 	return student_list
@@ -250,7 +253,8 @@ def get_result(student, assessment_plan):
 	:param Student: Student
 	:param Assessment Plan: Assessment Plan
 	"""
-	results = frappe.get_all("Assessment Result", filters={"student": student, "assessment_plan": assessment_plan})
+	results = frappe.get_all("Assessment Result", filters={"student": student,
+		"assessment_plan": assessment_plan, "docstatus": ("!=", 2)})
 	if results:
 		return frappe.get_doc("Assessment Result", results[0])
 	else:
@@ -299,6 +303,7 @@ def mark_assessment_result(assessment_plan, scores):
 	for d in assessment_result.details:
 		details.update({d.assessment_criteria: d.grade})
 	assessment_result_dict = {
+		"name": assessment_result.name,
 		"student": assessment_result.student,
 		"total_score": assessment_result.total_score,
 		"grade": assessment_result.grade,
