@@ -24,7 +24,7 @@ def get_items(text, start, limit, category=None, company=None, country=None):
 def get_all_users():
 	return hub_request('get_all_users')
 
-# @frappe.whitelist()
+@frappe.whitelist()
 def get_categories():
 	return hub_request('get_categories')
 
