@@ -5,7 +5,7 @@ QUnit.test("test account", function(assert) {
 	let done = assert.async();
 	frappe.run_serially([
 		() => frappe.set_route('Tree', 'Account'),
-		() => frappe.timeout(2),
+		() => frappe.timeout(3),
 		() => frappe.click_button('Expand All'),
 		() => frappe.timeout(1),
 		() => frappe.click_link('Debtors'),
