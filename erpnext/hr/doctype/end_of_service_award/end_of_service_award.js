@@ -5,8 +5,20 @@
 //     alert("Ggg");
 // }
 cur_frm.add_fetch("employee", "date_of_joining", "work_start_date");
-frappe.ui.form.on('End of Service Award', {
 
+frappe.ui.form.on('End of Service Award', {
+    refresh: function() {
+        cur_frm.add_fetch("employee", "employment_type", "type_of_contract");
+        if (cur_frm.doc.employee) {
+            if (cur_frm.doc.type_of_contract == "Contractor") {
+                cur_frm.set_df_property("reason", "options", "\nانتهاء مدة العقد , أو باتفاق الطرفين على إنهاء العقد\nفسخ العقد من قبل صاحب العمل\nفسخ العقد من قبل صاحب العمل لأحد الحالات الواردة في المادة (80)\nترك العامل العمل نتيجة لقوة قاهرة\nإنهاء العاملة لعقد العمل خلال ستة أشهر من عقد الزواج أو خلال ثلاثة أشهر من الوضع\nترك العامل العمل لأحد الحالات الواردة في المادة (81)\nفسخ العقد من قبل العامل أو ترك العامل العمل لغير الحالات الواردة في المادة (81)");
+            } else if (cur_frm.doc.type_of_contract == "Full-time") {
+                cur_frm.set_df_property("reason", "options", "\nاتفاق العامل وصاحب العمل على إنهاء العقد\nفسخ العقد من قبل صاحب العمل\nفسخ العقد من قبل صاحب العمل لأحد الحالات الواردة في المادة (80)\nترك العامل العمل نتيجة لقوة قاهرة\nإنهاء العاملة لعقد العمل خلال ستة أشهر من عقد الزواج أو خلال ثلاثة أشهر من الوضع\nترك العامل العمل لأحد الحالات الواردة في المادة (81)\nترك العامل العمل دون تقديم استقالة لغير الحالات الواردة في المادة (81)\nاستقالة العامل");
+            } else {
+                cur_frm.set_df_property("reason", "options", "");
+            }
+        }
+    },
     employee: function() {
         //        // cur_frm.set_value('award',"");
         //        // cur_frm.set_value('salary'," ");
@@ -42,7 +54,7 @@ frappe.ui.form.on('End of Service Award', {
             cur_frm.set_value('years', 0);
             cur_frm.set_value('months', 0);
             cur_frm.set_value('days', 0)
-            frappe.msgprint("تاريخ نهاية العمل يجب أن يكون أكبر من تاريخ بداية العمل");
+            frappe.throw("تاريخ نهاية العمل يجب أن يكون أكبر من تاريخ بداية العمل");
 
         } else {
             var date1 = new Date(start);
@@ -61,15 +73,21 @@ frappe.ui.form.on('End of Service Award', {
 
         };
 
-
-
-
+    },
+    validate: function(frm) {
+        frm.trigger("get_award");
     },
 
-
     find: function(frm) {
+        frm.trigger("get_award");
+    },
 
-        cur_frm.set_value('award', " ");
+    get_award: function() {
+
+        if (!cur_frm.doc.reason) {
+            frappe.throw("أرجو اختيار سبب نهاية الخدمة");
+        }
+        cur_frm.set_value('award', "");
 
         frappe.call({
             "method": "get_salary",
@@ -90,7 +108,7 @@ frappe.ui.form.on('End of Service Award', {
         end = cur_frm.doc.end_date;
 
         if (end < start) {
-            frappe.msgprint("تاريخ نهاية العمل يجب أن يكون أكبر من تاريخ بداية العمل");
+            frappe.throw("تاريخ نهاية العمل يجب أن يكون أكبر من تاريخ بداية العمل");
         } else {
             var date1 = new Date(start);
             var date2 = new Date(end);
@@ -101,7 +119,6 @@ frappe.ui.form.on('End of Service Award', {
             months = Math.floor(daysrem / 30.416);
             monthss = months
             days = Math.ceil(daysrem - (months * 30.416));
-
             cur_frm.set_value('years', years);
             cur_frm.set_value('months', monthss);
             cur_frm.set_value('days', days);
@@ -115,7 +132,7 @@ frappe.ui.form.on('End of Service Award', {
         var reason = cur_frm.doc.reason;
 
         if (!reason) {
-            frappe.msgprint("برجاء اختيار سبب انتهاء العلاقة العمالية");
+            frappe.throw("برجاء اختيار سبب انتهاء العلاقة العمالية");
             cur_frm.set_value('award', "");
         } else {
 
@@ -137,7 +154,7 @@ frappe.ui.form.on('End of Service Award', {
                     }
                     // calculate
                     result = (firstPeriod * cur_frm.doc.salary * 0.5) + (secondPeriod * cur_frm.doc.salary);
-                    cur_frm.set_value('award', (result).toFixed(2));
+                    cur_frm.set_value('award', result);
 
                 }
             } else if (cur_frm.doc.type_of_contract == "Full-time") {
@@ -155,22 +172,32 @@ frappe.ui.form.on('End of Service Award', {
                     } else {
                         result = (0.5 * cur_frm.doc.salary * 5) + (cur_frm.doc.salary * (years - 5));
                     }
-                    cur_frm.set_value('award', (result).toFixed(2));
-
+                    if (typeof(result) === 'number') {
+                        cur_frm.set_value('award', result);
+                    }
+                    else{
+                        cur_frm.set_value('award', result);
+                    }
+                    // (result).toFixed(2)
+                    console.log(result);
                 } else {
                     if (years <= 5) {
                         result = 0.5 * cur_frm.doc.salary * years;
                     } else {
                         result = (0.5 * cur_frm.doc.salary * 5) + (cur_frm.doc.salary * (years - 5));
                     }
-                    cur_frm.set_value('award', (result).toFixed(2));
+                    if (typeof(result) === 'number') {
+                        cur_frm.set_value('award', result);
+                    }
+                    else{
+                        cur_frm.set_value('award', result);
+                    }
+                    console.log(result);
                 }
 
 
             }
         };
-
     }
-
 
 });

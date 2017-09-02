@@ -49,18 +49,30 @@ class SalarySlip(TransactionBase):
 			if self.salary_slip_based_on_timesheet and (self.total_working_hours > int(max_working_hours)):
 				frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
 								format(max_working_hours), alert=True)
-		# self.validate_return_from_leave_deduction()
+		self.validate_return_from_leave_deduction()
 	def validate_return_from_leave_deduction(self):
 		# if self.docstatus == 0:
-		rt = frappe.db.sql(""" select to_date, return_date from `tabReturn From Leave Statement` where docstatus = 1 and
-		employee = '{0}' and return_date between '{1}' and '{2}'""".format(self.employee, self.start_date, self.end_date), as_dict = True)
-		# frappe.throw(str(self.start_date))
-		if rt:
-			for r in rt:
-				deducted_days = date_diff(r.return_date, r.to_date)
-				if deducted_days > 1:
-					self.deducted_days = deducted_days - 1
+		end_date = "{0}-{1}-20".format(getdate(self.end_date).year, getdate(self.end_date).month)
+		prev_month = getdate(self.end_date).month - 1 if getdate(self.end_date).month - 1 > 0 else 12
+		prev_month_start_date = ""
+		if prev_month != 12:
+			prev_month_start_date = "{0}-{1}-20".format(getdate(self.end_date).year, prev_month)
+		else:
+			prev_month_start_date = "{0}-{1}-20".format(getdate(self.end_date).year - 1, prev_month)
+		self.set_deduction_for_return_from_leave(prev_month_start_date, end_date)
+		
+	def set_deduction_for_return_from_leave(self, start_date, end_date):
 
+		rt = frappe.db.sql(""" select to_date, return_date from `tabReturn From Leave Statement` where docstatus = 1 and
+		employee = '{0}' and return_date between '{1}' and '{2}'""".format(self.employee, start_date, end_date), as_dict = True)
+
+		if rt:
+			deducted_days = 0
+			for r in rt:
+				deducted_days += date_diff(r.return_date, r.to_date)
+				if deducted_days > 1:
+					deducted_days = deducted_days - 1
+			self.deducted_days = deducted_days
 
 	def validate_dates(self):
 		if date_diff(self.end_date, self.start_date) < 0:

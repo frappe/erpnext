@@ -37,7 +37,7 @@ def add_header(w):
 	w.writerow(["Status should be one of these values: " + status])
 	w.writerow(["If you are overwriting existing attendance records, 'ID' column mandatory"])
 	w.writerow(["ID", "Employee", "Employee Name", "Date", "Status",
-		 "Company", "Naming Series"])
+		 "Company", "Naming Series","Attendance","Departure","Early Entry","Delay","Early Exit","Over Time","Actual","Total"])
 	return w
 
 def add_data(w, args):
@@ -103,7 +103,15 @@ def upload():
 		return {"messages": msg, "error": msg}
 	columns = [scrub(f) for f in rows[4]]
 	columns[0] = "name"
-	columns[3] = "att_date"
+	columns[3] = "attendance_date"
+	columns[7] = "attendance"
+	columns[8] = "end_time"
+	columns[9] = "early_entry"
+	columns[10] = "delay"
+	columns[11] = "early_exit"
+	columns[12] = "over_time"
+	columns[13] = "actual"
+	columns[14] = "total"
 	ret = []
 	error = False
 

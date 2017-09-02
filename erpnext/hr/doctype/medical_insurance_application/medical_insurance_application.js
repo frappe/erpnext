@@ -2,7 +2,21 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Medical Insurance Application', {
+    onload: function(frm){
+        
+    },
+    get_medical_disclaimer_templete: function(frm){
+        // window.location.href = repl(frappe.request.url +
+        //     '?cmd=%(cmd)s&from_date=%(from_date)s&to_date=%(to_date)s', {
+        //         cmd: "erpnext.hr.doctype.medical_insurance_application.medical_insurance_application.get_template"
+        //     });
+        window.open("assets/Medical_Declaration_Form_V1.2016.pdf");
+    },
 	employee: function (frm) {
+        if(frm.doc.nationality == "Saudi" || frm.doc.nationality == "Saudi Arabia"){
+            // alert("fgg");
+            cur_frm.fields_dict["attachments"].df.reqd = 1
+        }
         frappe.call({
             method: "frappe.client.get_list",
             args: {

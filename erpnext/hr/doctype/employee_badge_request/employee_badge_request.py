@@ -29,3 +29,9 @@ class EmployeeBadgeRequest(Document):
 	def before_submit(self):
 		if self.badge_received != "Yes":
 			frappe.throw(_("Employee must recieve the Badge before submit"))
+	
+	def validate(self):
+		if self.workflow_state:
+			if "Rejected" in self.workflow_state:
+				self.docstatus = 1
+				self.docstatus = 2

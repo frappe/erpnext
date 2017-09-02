@@ -1,0 +1,71 @@
+<div style="margin-bottom: 7px;" class="text-center">
+	{%= frappe.boot.letter_heads[frappe.get_doc(":Company", filters.company).default_letter_head || frappe.defaults.get_default("letter_head")] %}
+</div>
+<h2 class="text-center">{%= __(report.report_name) %}</h2>
+<h2 class="text-center"> {%= filters.from_date %} - {%= filters.to_date %} </h2> 
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th style="width: 15%">{%= __("Employee") %}</th>
+            <th style="width: 15%">{%= __("Employee Name") %}</th>
+            <th style="width: 15%">{%= __("Department") %}</th>
+            <th style="width: 15%">{%= __("Designation") %}</th>
+            <th style="width: 15%">{%= __("Leave Without Pay") %}</th>
+            <th style="width: 15%">{%= __("Basic") %}</th>
+            <th style="width: 15%">{%= __("Transportation#") %}</th>
+            <th style="width: 15%">{%= __("Housing") %}</th>
+            <th style="width: 15%">{%= __("Communication") %}</th>
+
+            <th style="width: 15%">{%= __("Gross Pay") %}</th>
+            <th style="width: 15%">{%= __("GOSI") %}</th>
+            <th style="width: 15%">{%= __("Penalty") %}</th>
+            <th style="width: 15%">{%= __("Total Deduction") %}</th>
+            <th style="width: 10%">{%= __("Net Pay") %}</th>
+
+
+        </tr>
+    </thead>
+    <tbody>
+     
+        {% for(var i=0, l=data.length; i
+        <l; i++) { %}  <tr>
+            <td>{%= data[i]["Employee"] %}</td>
+            <td>{%= data[i]["Employee Name"] %}</td>
+            <td>{%= data[i]["Department"] %}</td>
+            <td>{%= data[i]["Designation"] %}</td>
+            <td>{%= data[i]["Leave Without Pay"] %}</td>
+            
+	    <td>{%= 	(Number( data[i]["Basic"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
+            <td>{%= 	(Number( data[i]["Transportation"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
+            <td>{%= 	(Number( data[i]["Housing"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
+            <td>{%= 	(Number( data[i]["Communication"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
+            
+	    <td>{%= 	(Number( data[i]["Gross Pay"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
+            <td>{%= 	(Number( data[i]["GOSY"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
+            <td>{%= 	(Number( data[i]["Penalty"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
+            <td>{%= 	(Number( data[i]["Total Deduction"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
+            <td>{%= 	(Number( data[i]["Net Pay"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
+         
+
+
+            </tr>
+           {% } %}
+
+    </tbody>
+</table>
+<p class="text-right text-muted">{{ __("Printed On") }}{%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>
+
+
+<table class="text-left text-muted">
+        <tr >
+			<td>{%= __("Printed By") %}: </td>
+		</tr>
+		<tr style="margin-top:15px;">
+			<td>
+				{%= frappe.boot.user.first_name %} {% if (frappe.boot.user.last_name) { %} {%= frappe.boot.user.last_name %} {% } %}
+			</td>
+        </tr>
+		
+		</table>
+

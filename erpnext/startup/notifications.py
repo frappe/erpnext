@@ -16,7 +16,7 @@ def get_notification_config():
 			"is_message": ("=", 1)
 			},
 			"Return From Leave Statement":{
-			"docstatus": 0
+			"docstatus": ("=", 0)
 			},
 			"Issue": {"status": "Open"},
 			"Warranty Claim": {"status": "Open"},

@@ -5,8 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 def execute(filters=None):
-	# columns, data = [], []
-	# return columns, data
+
 	if not filters: filters = {}
 
 	columns = get_columns()
@@ -32,7 +31,7 @@ def get_columns():
 def get_employees(filters):
 	conditions = get_conditions(filters)
 
-	return frappe.db.sql("""select name, employee_name,	designation,attendance,departure,working_hours,early_entry,
+	return frappe.db.sql("""select name, employee_name,designation,attendance,departure,working_hours,early_entry,
 	delay,early_exit,allow_to,over_time,total,actual,attendance_date
 	 from tabAttendance where employee_status = 'Active' %s""" % conditions, as_list=1)
 
@@ -42,8 +41,17 @@ def get_conditions(filters):
 
 	if filters.get("employee"): conditions += " and employee = '%s'" % \
 		filters["employee"].replace("'", "\\'")
-	if filters.get("employee"): conditions += " and employee = '%s'" % \
-		filters["employee"].replace("'", "\\'")
+	if filters.get("company"): conditions += " and company = '%s'" % \
+		filters["company"].replace("'", "\\'")
+
+	if filters.get("from_date"): conditions += " and attendance_date >= '%(from_date)s'" % {'from_date':filters["from_date"].replace("'", "\\'")}  
+	if filters.get("to_date"): conditions += " and attendance_date <= '%(to_date)s'" % {'to_date':filters["to_date"]}
+
+
+
+
+
+
 	return conditions
 
 

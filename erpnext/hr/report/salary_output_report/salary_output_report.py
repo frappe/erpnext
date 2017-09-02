@@ -18,8 +18,7 @@ def execute(filters=None):
 
 	data = []
 	for ss in salary_slips:
-		row = [ ss.employee, ss.employee_name,ss.date_of_joining, ss.department, ss.designation,ss.grade,
-			ss.company, ss.leave_withut_pay, ss.payment_days]
+		row = [ ss.employee, ss.employee_name, ss.department, ss.designation, ss.leave_withut_pay]
 
 		for e in earning_types:
 			row.append(ss_earning_map.get(ss.name, {}).get(e))
@@ -29,17 +28,34 @@ def execute(filters=None):
 		for d in ded_types:
 			row.append(ss_ded_map.get(ss.name, {}).get(d))
 
-		row += [ss.total_deduction, ss.net_pay,ss.civil_id,ss.bank_name,ss.bank_account_no]
+		row += [ss.total_deduction, ss.net_pay]
 
 		data.append(row)
+
+			
+	
+
+	total_col= [""]*len(columns)
+
+	for row in data:
+		for i, col in enumerate(row):
+			if i >4:
+				total_col[i] = flt(total_col[i]) + flt(col)
+			
+	for i, col in enumerate(total_col):
+		if i >4:
+			total_col[i] = flt(total_col[i],2)
+
+
+	total_col[0]='Totals'
+		
+	data.append(total_col)
 
 	return columns, data
 
 def get_columns(salary_slips):
-	columns = [_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140",_("Joining Date")+"::80", 
-		_("Department") + ":Link/Department:120", _("Designation") + ":Link/Designation:120",
-_("Grade")+":Link/Grade:120",_("Company") + ":Link/Company:120", _("Leave Without Pay") + ":Float:130",
-		_("Payment Days") + ":Float:120"
+	columns = [_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140", 
+		_("Department") + ":Link/Department:120", _("Designation") + ":Link/Designation:120", _("Leave Without Pay") + ":Float:130",
 	]
 
 	salary_components = {_("Earning"): [], _("Deduction"): []}
@@ -53,7 +69,8 @@ _("Grade")+":Link/Grade:120",_("Company") + ":Link/Company:120", _("Leave Withou
 	columns = columns + [(e + ":Currency:120") for e in salary_components[_("Earning")]] + \
 		[ 
 		_("Gross Pay") + ":Currency:120"] + [(d + ":Currency:120") for d in salary_components[_("Deduction")]] + \
-		[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]+[_("Civil Number")+(":Data:120"),_("Bank")+(":Link/Bank:120"),_("Bank Account Number")+":Data:120"]
+		[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]
+		# +[_("Civil Number")+(":Data:120"),_("Bank")+(":Link/Bank:120"),_("Bank Account Number")+":Data:120"]
 
 	return columns, salary_components[_("Earning")], salary_components[_("Deduction")]
 

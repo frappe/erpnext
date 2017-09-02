@@ -11,18 +11,27 @@ import re
 class EmployeeChangeIBAN(Document):
 	def validate(self):
 		self.validate_IBAN()
+		self.validate_commitment_with_bank()
+		if self.workflow_state:
+			if "Rejected" in self.workflow_state:
+				self.docstatus = 1
+				self.docstatus = 2
 
 	def validate_IBAN(self):		
 		#pattern = r"^[a-zA-Z]{2}[0-9]{2}[a-zA-Z0-9]{4}[0-9]{7}([a-zA-Z0-9]?){0,16}$"
 		pattern = r'(^(SA.{22})$)'
 		if not re.match(pattern, self.new_iban):
 			frappe.throw(_("Invalid IBAN number, IBAN should be like SAxxxxxxxxxxxxxxxxxxxxxx."))
-
+	
+	def validate_commitment_with_bank(self):
+		if self.commitment_with_bank=='1':
+			frappe.throw("You are commited with a bank ")
 
 	def before_submit(self):
 		employee = frappe.get_doc("Employee", self.employee)
 		employee.db_set("iban", self.new_iban)
 		employee.db_set("bank_name", self.new_bank)
+		self.validate_commitment_with_bank()
 
 
 

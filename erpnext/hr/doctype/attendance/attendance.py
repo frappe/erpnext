@@ -52,90 +52,136 @@ class Attendance(Document):
 			frappe.throw(_("Employee {0} is not active or does not exist").format(self.employee))
 
 	def validate(self):
+
 		from erpnext.controllers.status_updater import validate_status
-		validate_status(self.status, ["Present", "Absent", "On Leave", "Half Day","Late","Early Leave"])
+		validate_status(self.status, ["Present", "Absent", "On Leave", "Half Day","Late","Early Leave","Missing"])
 		self.validate_attendance_date()
 		self.validate_duplicate_record()
 		self.check_leave_record()
 		self.calulate_fields()
 
+
+	def get_attendance_hours(self):
+		if self.employee : 
+			emp = frappe.get_doc("Employee",self.employee)
+			att_hour = emp.attendance_hours
+			if not att_hour:
+				att_hour = frappe.db.get_single_value("HR Settings", "attendance_hours")
+			att = frappe.get_doc("Attendance Hours",att_hour)
+			self.working_hours = att.attendance_hours
+			self.start_time=att.start_time			
+			self.allow_start_time=att.allow_start_time
+			self.absent_time=att.absent_time
+			self.allow_end_time=att.allow_end_time
+			self.end_time=att.end_time
+			self.break_hours=att.break_hours
+			self.allow_to=att.over_time
+
+
 	def calulate_fields(self):
+		self.early_entry='0:00:00'
+
+		self.delay='0:00:00'
+
+		self.early_exit='0:00:00'
+
+		self.over_time='0:00:00'
+
+		self.actual='0:00:00'
+
+		self.total='0:00:00'
+
+		self.status=""
 
 
-		self.early_entry=""
-		self.delay=""
-		self.early_exit=""
-		self.over_time=""
-		self.actual=""
-		self.total=""
+		if self.attendance!=' ' and self.departure!=' ':
 
 
-		start_time=self.start_time
-		allow_start_time=self.allow_start_time
-		end_time=self.end_time
-		allow_end_time=self.allow_end_time
+			self.get_attendance_hours()
+			start_time=str(self.start_time)
+			allow_start_time=self.allow_start_time
+			end_time=str(self.end_time)
+			allow_end_time=self.allow_end_time
+			attendance=self.attendance
+			departure=self.departure
+			early_entry=self.early_entry
+			delay=self.delay
+			early_exit=self.early_exit
+			over_time=self.over_time
+			actual=self.actual
+			total=self.total
 
-		attendance=self.attendance
-		departure=self.departure
-		early_entry=self.early_entry
-		delay=self.delay
-		early_exit=self.early_exit
-		over_time=self.over_time
-		actual=self.actual
-		total=self.total
 
+			
+			raw_time=  frappe.utils.data.time_diff(departure,attendance)
 
-		raw_time=  frappe.utils.data.time_diff(departure,attendance)
-		att_to_end_time=  frappe.utils.data.time_diff(end_time,attendance)
+			att_to_end_time=  frappe.utils.data.time_diff(end_time,attendance)
 		
 
-
-		bool_entry_early= get_time(start_time) > get_time(attendance)
-		if bool_entry_early:
-			early_entry =  frappe.utils.data.time_diff(start_time,attendance)
-			self.early_entry =  early_entry
-			self.delay =  ""
-
-
-		bool_delay= get_time(allow_start_time) < get_time(attendance)
-		if bool_delay:
-			delay =  frappe.utils.data.time_diff(attendance,start_time)
-			self.delay =  delay
-			self.early_entry = ""
+			bool_entry_early= get_time(start_time) > get_time(attendance)
+			if bool_entry_early:
+				early_entry =  frappe.utils.data.time_diff(start_time,attendance)
+				self.early_entry =  early_entry
+				self.delay =  ""
 
 
-		bool_departure= get_time(allow_end_time) > get_time(departure)
-		if bool_departure:
-			departure =  frappe.utils.data.time_diff(end_time,departure)
-			self.early_exit = departure
-			self.over_time=""
+			bool_delay= get_time(allow_start_time) < get_time(attendance)
+			if bool_delay:
+				delay =  frappe.utils.data.time_diff(attendance,start_time)
+				self.delay =  delay
+				self.early_entry = ""
 
 
-		bool_overtime= get_time(end_time) < get_time(departure)
-		if bool_overtime:
-			overtime =  frappe.utils.data.time_diff(departure,end_time)
-			# frappe.throw(str(overtime))
-			self.over_time = overtime
-			self.early_exit=""
+			bool_departure= get_time(allow_end_time) > get_time(departure)
+			if bool_departure:
+				departure =  frappe.utils.data.time_diff(end_time,departure)
+				self.early_exit = departure
+				self.over_time=""
 
 
+			bool_overtime= get_time(end_time) < get_time(departure)
+			if bool_overtime:
+				overtime =  frappe.utils.data.time_diff(departure,end_time)
 
-		if bool_overtime:
-			bool_cond_over = get_time(self.over_time) <= get_time(self.allow_to)
-			if bool_cond_over:
-				total= raw_time
-				self.actual=total
-				self.total=total
+				self.over_time = overtime
+				self.early_exit=""
+
+			
+
+			if self.allow_to:
+				if bool_overtime:
+					bool_cond_over = get_time(self.over_time) <= get_time(self.allow_to)
+					if bool_cond_over:
+						total= raw_time
+						self.actual=total
+						self.total=total
+					else:
+						over_time=self.over_time
+						allow_to=self.allow_to
+						self.actual=raw_time
+						self.total= frappe.utils.data.to_timedelta(att_to_end_time)+  frappe.utils.data.to_timedelta(allow_to)
 			else:
-				over_time=self.over_time
-				allow_to=self.allow_to
-				self.actual=raw_time
-				self.total= frappe.utils.data.to_timedelta(att_to_end_time)+  frappe.utils.data.to_timedelta(allow_to)
-		else:
-			total = raw_time
-			self.actual = total
-			self.total = total
+				total = raw_time
+				self.actual = total
+				self.total = total
+				
 
+			if bool_delay and bool_departure:
+				self.status='Half Day'
+
+			elif bool_departure:
+				self.status='Early Leave'
+
+			elif bool_delay:
+				self.status='Late'
+
+			else:
+				self.status='Present'
+		
+		elif self.attendance ==' ' and  self.departure==' ':
+			self.status='Absent'
+		else:
+			self.status='Missing'
 
 
 

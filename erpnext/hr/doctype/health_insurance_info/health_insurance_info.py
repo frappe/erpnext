@@ -9,6 +9,10 @@ from frappe.model.document import Document
 class HealthInsuranceInfo(Document):
 	
 	def validate(self):
+		
+		if "Rejected" in self.workflow_state:
+			self.docstatus = 1
+			self.docstatus = 2
 		self.validate_exp_date()
 
 	def validate_exp_date(self):
