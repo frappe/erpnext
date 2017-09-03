@@ -56,12 +56,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				return item.is_delivered_by_supplier ? true : false;
 			})
 
-			if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
-				cur_frm.add_custom_button(__('Return / Credit Note'),
-					this.make_sales_return, __("Make"));
-				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
-			}
-
 			if(cint(doc.update_stock)!=1) {
 				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
 				var from_delivery_note = false;
@@ -76,18 +70,25 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}
 			}
 
-			if(doc.outstanding_amount!=0 && !cint(doc.is_return)) {
-				cur_frm.add_custom_button(__('Payment'),
-					this.make_payment_entry, __("Make"));
-			}
-
 			if(doc.outstanding_amount>0 && !cint(doc.is_return)) {
 				cur_frm.add_custom_button(__('Payment Request'),
 					this.make_payment_request, __("Make"));
 			}
 
-
 		}
+
+		//Allow payment if it is a standard Sales Invoice or if it is a Standalone Credit Note
+		if(doc.docstatus==1 && (cint(doc.is_return) && !doc.return_against || doc.outstanding_amount!=0 && !cint(doc.is_return))) {
+			cur_frm.add_custom_button(__('Payment'), this.make_payment_entry, __("Make"));
+		}
+		//Allow creation of: 
+		//(1) Standalone Credit Note if Sales Invoice has never been saved or 
+		//(2) Standard Credit Note if Sales Invoice is submitted and if there is still outstanding amount
+		if(!doc.is_return && (this.frm.doc.__islocal || doc.docstatus==1 && (doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)))) {
+			cur_frm.add_custom_button(__('Return / Credit Note'),
+					this.make_sales_return, __("Make"));
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+ 		}
 
 		// Show buttons only when pos view is active
 		if (cint(doc.docstatus==0) && cur_frm.page.current_view_name!=="pos" && !doc.is_return) {
@@ -263,10 +264,19 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	make_sales_return: function() {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_sales_return",
-			frm: cur_frm
-		})
+		//For Standalone Credit Note
+		if(cur_frm.doc.__islocal) {
+			frappe.model.open_mapped_doc({
+				method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_sales_return"
+			});
+		}
+		//For Credit Note with reference to a Sales Invoice
+		else {
+			frappe.model.open_mapped_doc({
+				method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_sales_return",
+				frm: cur_frm
+			});
+		}
 	},
 
 	asset: function(frm, cdt, cdn) {
@@ -351,6 +361,12 @@ cur_frm.cscript.hide_fields = function(doc) {
 	else hide_field(['c_form_applicable', 'c_form_no']);
 
 	this.frm.toggle_enable("write_off_amount", !!!cint(doc.write_off_outstanding_amount_automatically));
+
+	//Set Update Stock to unchecked and hide Update Stock if it is a Standalone Credit Note
+	if(doc.is_return && !doc.return_against) {
+		doc.update_stock = 0;
+		hide_field('update_stock');
+	}
 
 	cur_frm.refresh_fields();
 }
