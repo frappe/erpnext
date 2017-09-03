@@ -9,12 +9,13 @@ from erpnext.hub_node.doctype.hub_settings.hub_settings import hub_request
 opp_msg_id = ""
 
 @frappe.whitelist()
-def get_items(text, start, limit, category=None, company_name=None, country=None):
+def get_items(text, start=0, limit=20, order_by='', category=None, company_name=None, country=None):
 	args = {
 		"text": text,
 		"category": category,
 		"company_name": company_name,
 		"country": country,
+		"order_by": order_by,
 		"start": start,
 		"limit": limit
 	}
