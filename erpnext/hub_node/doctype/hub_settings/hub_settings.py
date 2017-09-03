@@ -208,7 +208,7 @@ def make_and_enqueue_message(msg_type, method, data=[], callback="", callback_ar
 
 def hub_request(api_method, data = (json.dumps([])), callback = "", callback_args = "", message_id = ""):
 	hub = frappe.get_single("Hub Settings")
-	response = requests.post(hub_url + "/api/method/hub.hub.api." + "call_method",
+	response = requests.post(hub_url + "/api/method/hub.hub.api." + "dispatch_request",
 		data = {
 			"access_token": hub.access_token,
 			"method": api_method,
