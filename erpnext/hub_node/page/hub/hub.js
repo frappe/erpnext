@@ -11,17 +11,46 @@ frappe.pages['hub'].on_page_load = function(wrapper) {
 	erpnext.hub.Hub = new ERPNextHub({ page });
 };
 
+frappe.pages['hub'].on_page_show = function(wrapper) {
+	const current_route = frappe.get_route();
+
+	// if(current_route[1] === "Products") {
+	// 	if(current_route[2]) {
+	// 		const item_code = current_route[2];
+	// 	}
+	// }
+
+	if(current_route[1] === "Company") {
+		if(current_route[2]) {
+			// erpnext.hub.Hub.refresh();
+			erpnext.hub.Hub.get_company_details(current_route[2]);
+		}
+	}
+}
+
 window.ERPNextHub = class ERPNextHub {
 	constructor({ page }) {
 		this.page = page;
 
-		frappe.require('/assets/erpnext/css/hub.css',
-			() => this.setup()
-		);
+		frappe.model.with_doc('Hub Settings', 'Hub Settings', () => {
+			this.country = frappe.get_doc('Hub Settings').country;
+
+			frappe.require('/assets/erpnext/css/hub.css',
+				() => this.setup()
+			);
+		});
+
+		// frappe.require('/assets/erpnext/css/hub.css',
+		// 	() => this.setup()
+		// );
 	}
 
 	setup() {
 		this.setup_header();
+		this.company_cache = {};
+		this.item_cache = {};
+		this.filters = {};
+
 		this.$hub_main_section =
 			$(`<div class='hub-main-section'>`).appendTo(this.page.body);
 		this.bind_events();
@@ -34,6 +63,7 @@ window.ERPNextHub = class ERPNextHub {
 
 		frappe.model.with_doc('Hub Settings', 'Hub Settings', () => {
 			this.hub_settings = frappe.get_doc('Hub Settings');
+			// const { hub_user_name, company_name } = this.hub_settings;
 			if(!this.hub_settings.enabled) {
 				this.setup_empty_state();
 			} else {
@@ -52,19 +82,10 @@ window.ERPNextHub = class ERPNextHub {
 			</div>`)
 			.appendTo(this.page.page_title);
 
-		// this.account_details = $(`
-		// 	<div class='account-details text-muted'>
-		// 		<!-- <i class='octicon octicon-person'></i> <a class='user-name small'></a> -->
-		// 		<i class='octicon octicon-globe' style='margin-left: 20px;'></i> <a class='company-name small'></a>
-		// 	</div>`)
-		// 	.appendTo(this.page.page_actions)
-		// 	.hide();
-
 		this.bind_title();
 	}
 
 	setup_empty_state() {
-		this.remove_account_from_header();
 		let $empty_state = $(`
 			<div style="padding: 70px 0px;">
 				<h2 class="text-center">${ __("Register For ERPNext Hub") }</h2>
@@ -90,7 +111,7 @@ window.ERPNextHub = class ERPNextHub {
 	}
 
 	setup_live_state() {
-		this.add_account_to_header();
+
 		if(!this.$search) {
 			this.setup_filters();
 		}
@@ -102,60 +123,61 @@ window.ERPNextHub = class ERPNextHub {
 	}
 
 	setup_filters() {
-		let categories = this.get_hub_categories().map(d => {
-			return {label: __(d), value: d}
-		});
-		let countries = this.get_hub_countries().map(d => {
-			return {label: d, value: d}
+		// Add category link
+		// category, price, sort_by,
+		this.category_select = this.page.add_field({
+			fieldtype: 'Link',
+			label: __("All Categories"),
+			options: "Hub Category",
+			fieldname: "category_select",
+			onchange: () => {
+				// me.refresh(true);
+			}
 		});
 
-		this.category_select = this.page.add_select(__('Category'),
-			[{'label': __('Select Category...'), value: '' }].concat(categories)
+		this.price_sort_select = this.page.add_select(__('Sort by Price'),
+			[
+				{'label': __(''), value: '' },
+
+			]
 		);
-		this.country_select = this.page.add_select(__('Country'),
-			[{'label': __('Select Country...'), value: '' }].concat(countries)
+
+		this.criteria_select = this.page.add_select(__('Sort by Price'),
+			[
+				{'label': __(''), value: '' }
+			]
 		);
 
-		this.get_hub_companies((companies) => {
-			let company_names = companies.map(d => {
-				return {label: d.company, value: d.company}
-			});
-
-			this.company_select = this.page.add_select(__('Company'),
-				[{'label': __('Select Company...'), value: '' }].concat(company_names)
-			);
-
-			this.company_select.on('change', () => {
-				this.$search.val('');
-				let val = $(this.company_select).val() || '';
-				this.go_to_items_only_page(
-					['hub', 'Company', val, 'Products'],
-					'Products by '  + val,
-					'company-product-list',
-					{text: '', company: val}
-				);
-			});
-		});
+		// this.company_select.on('change', () => {
+		// 	this.reset_search();
+		// 	let val = $(this.company_select).val() || '';
+		// 	this.go_to_items_only_page(
+		// 		['hub', 'Company', val, 'Products'],
+		// 		'Products by '  + val,
+		// 		'company-product-list',
+		// 		{text: '', company: val}
+		// 	);
+		// });
 
 		this.$search = this.page.add_data(__('Search'));
-		this.bind_filters();
 		this.setup_search();
 	}
 
 	bind_events() {
 		const me = this;
-		this.$hub_main_section.on('click', '.breadcrumb li', function(e) {
-			e.preventDefault();
-			const $li = $(this);
-			if ($li.attr('data-route') === 'Home') {
-				me.go_to_home_page();
-			}
-		});
-	}
-
-	bind_filters() {
-		// TODO: categories
-		// bind dynamically
+		this.$hub_main_section
+			.on('click', '.company-link a', function(e) {
+				e.preventDefault();
+				const company_name = $(this).attr('data-company-name');
+				me.get_company_details(company_name);
+			})
+			.on('click', '.breadcrumb li', function(e) {
+				e.preventDefault();
+				const $li = $(this);
+				if ($li.attr('data-route') === 'Home') {
+					me.go_to_home_page();
+				}
+			});
 	}
 
 	reset_filters() {
@@ -191,24 +213,13 @@ window.ERPNextHub = class ERPNextHub {
 			page_length: 20,
 			list_css_class: 'home-product-list',
 			method: 'erpnext.hub_node.get_items',
-			filters: {text: ''}, // filters at the time of creation
+			filters: {text: '', country: this.country}, // filters at the time of creation
 			on_item_click: (item) => {
 				this.go_to_item_page(item);
 			}
 		});
 
 		this.home_item_list.setup();
-
-		this.setup_company_list();
-	}
-
-	setup_company_list() {
-		this.get_hub_companies((companies) => {
-			companies.map(company => {
-				let company_card = $(`<div class='company_card'>
-				</div>`).appendTo(this.$side_list_section);
-			});
-		})
 	}
 
 	setup_search() {
@@ -243,8 +254,7 @@ window.ERPNextHub = class ERPNextHub {
 	}
 
 	go_to_item_page(item) {
-		// TODO: Check if item quote already requested
-		frappe.set_route('hub', 'Item', item.item_name);
+		frappe.set_route('hub', 'Products', item.item_name);
 		this.$hub_main_section.empty();
 
 		let $item_page =
@@ -255,11 +265,11 @@ window.ERPNextHub = class ERPNextHub {
 
 		let company_item_list = new ERPNextHubList({
 			parent: $company_items,
-			title: 'More by ' + item.company,
+			title: 'More by ' + item.company_name,
 			page_length: 5,
 			list_css_class: 'company-item-list',
 			method: 'erpnext.hub_node.get_items',
-			filters: {text: '', company: item.company},
+			filters: {text: '', company_name: item.company_name, country: this.country},
 			img_size: 150
 		});
 
@@ -279,10 +289,51 @@ window.ERPNextHub = class ERPNextHub {
 				}
 			});
 		});
+	}
 
-		// let $breadcrumbs = $();
-		// $item_page.prepend($breadcrumbs);
-		// this.bind_breadcrumbs();
+	get_company_details(company_id) {
+		// get from cache if exists
+		let company_details = this.company_cache[company_id];
+		if(this.company_cache[company_id]) {
+			this.go_to_company_page(company_details);
+			return;
+		}
+		frappe.call({
+			method: 'erpnext.hub_node.get_company_details',
+			args: {company_id: company_id}
+		}).then((r) => {
+			if (r.message) {
+				const company_details = r.message.company_details;
+				this.company_cache[company_id] = company_details;
+				this.go_to_company_page(company_details)
+			}
+		});
+	}
+
+	go_to_company_page(company_details) {
+		frappe.set_route('hub', 'Company', company_details.company_name);
+		this.$hub_main_section.empty();
+
+		let $company_page =
+			$(this.get_company_page(company_details))
+				.appendTo(this.$hub_main_section);
+
+		let $company_items = $company_page.find('.company-items');
+
+		let company_item_list = new ERPNextHubList({
+			parent: $company_items,
+			title: 'More by ' + company_details.company_name,
+			page_length: 5,
+			list_css_class: 'company-item-list',
+			method: 'erpnext.hub_node.get_items',
+			filters: {text: '', company: company_details.company_name, country: this.country},
+			img_size: 150
+		});
+
+		company_item_list.on_item_click = (item) => {
+			this.go_to_item_page(item);
+		}
+		company_item_list.setup();
 	}
 
 	get_item_page(item) {
@@ -294,13 +345,13 @@ window.ERPNextHub = class ERPNextHub {
 					</div>
 					<div class="title-content">
 						<div class="breadcrumbs">
-							${this.get_breadcrumb(item) }
+							${this.get_breadcrumb(item.item_name, "Products") }
 						</div>
 						<div class="title">
 							<h2>${ item.item_name }</h2>
 						</div>
 						<div class="company">
-							<span class="">${ item.company }</span>
+							<span class="">${ item.company_name }</span>
 						</div>
 						<div class="category">
 							<span class="text-muted">Products</span>
@@ -309,7 +360,7 @@ window.ERPNextHub = class ERPNextHub {
 							<span class="small">${ item.description }</span>
 						</div>
 						<div class="price">
-							${ item.standard_rate ? format_currency(item.standard_rate) : '' }
+							${ item.formatted_price ? item.formatted_price : '' }
 						</div>
 						<div class="actions">
 							<a class="btn btn-primary rfq-btn">Request A Quote</a>
@@ -325,36 +376,54 @@ window.ERPNextHub = class ERPNextHub {
 		`;
 	}
 
-	get_breadcrumb(item) {
+	get_company_page(company_details) {
+		return `
+			<div class="hub-item-page">
+				<div class="item-header">
+					<div class="title-content">
+						<div class="breadcrumbs">
+							${this.get_breadcrumb(company_details.company_name, "Company") }
+						</div>
+						<div class="title">
+							<h2>${ company_details.company_name }</h2>
+						</div>
+						<div class="company">
+							<span class="">${ company_details.seller_city }</span>
+						</div>
+						<div class="description">
+							<span class="small">${ company_details.seller_description }</span>
+						</div>
+					</div>
+
+				</div>
+				<div class="item-more-info"></div>
+				<div class="company-items">
+
+				</div>
+			</div>
+		`;
+	}
+
+	get_breadcrumb(name, type) {
 		return `
 			<ul class="breadcrumb">
 				<li data-route="Home">
 					<a href><span>Home</span></a>
 				</li>
+				<li data-route="List">
+					<a href><span>${type}</span></a>
+				</li>
 				<li class="active">
-					<span>${item.item_name}</span>
+					<span>${name}</span>
 				</li>
 			</ul>
 		`;
 	}
 
-	go_to_company_page(company) {
-		frappe.set_route('hub', 'Company', company.name);
-	}
-
-	// bind_breadcrumbs() {}
-
 	go_to_home_page() {
 		frappe.set_route('hub');
 		this.reset_filters();
 		this.refresh();
-	}
-
-	add_account_to_header() {
-		// const { hub_user_name, company } = this.hub_settings;
-		// this.account_details.find('.user-name').hide();
-		// this.account_details.find('.company-name').text(company);
-		// this.account_details.show();
 	}
 
 	setup_menu() {
@@ -363,12 +432,9 @@ window.ERPNextHub = class ERPNextHub {
 	}
 
 	setup_sidebar() {
+		var me = this;
 		this.sidebar = new ERPNextHubSidebar({
 			wrapper: this.page.wrapper.find('.layout-side-section')
-		});
-		this.sidebar.add_item({
-			label: this.hub_settings.company,
-			on_click: () => frappe.set_route('Form', 'Company', this.hub_settings.company)
 		});
 
 		frappe.call({
@@ -376,8 +442,9 @@ window.ERPNextHub = class ERPNextHub {
 		}).then((r) => {
 			if (r.message) {
 				const categories = r.message.categories;
+				console.log("ccategories", categories);
 				categories
-					.map(c => c.hub_category_name)
+					.map(c => c.category_name)
 					.map(c => this.sidebar.add_item({
 						label: c,
 						on_click: () => {
@@ -390,45 +457,48 @@ window.ERPNextHub = class ERPNextHub {
 							});
 						}
 					}, __('Hub Category')));
+
+				this.add_country_and_account_to_sidebar();
 			}
 		});
+
 	}
 
-	remove_account_from_header() {
-		// this.account_details.hide();
-	}
+	add_country_and_account_to_sidebar() {
+		this.sidebar.add_item({
+			label: this.hub_settings.company,
+			on_click: () => frappe.set_route('Form', 'Company', this.hub_settings.company)
+		}, __("Account"));
 
-	get_hub_categories(callback) {
-		// frappe.call({
-		// 	method: "erpnext.hub_node.get_all_categories",
-		// 	args: {},
-		// 	callback: function(r) {
-		// 		let categories = r.message.categories ? r.message.categories : [];
-		// 		callback(categories);
-		// 	}
-		// });
-		return [];
-	}
-	get_hub_countries(callback) {
-		return [];
-	}
-	get_hub_companies(callback) {
-		frappe.call({
-			method: 'erpnext.hub_node.get_all_companies',
-			args: {},
-			callback: function(r) {
-				let companies = r.message.companies ? r.message.companies : [];
-				callback(companies);
-			}
-		});
+		this.sidebar.add_item({
+			label: __("Requested Products"),
+			on_click: () => {}
+		}, __("Account"));
+
+		this.sidebar.add_item({
+			label: this.country + __( " (Change)"),
+			on_click: () => frappe.prompt({
+				label: __("Country"),
+				fieldname: "country",
+				fieldtype: "Link",
+				options: "Country",
+				default: this.country
+			}, (values) => {
+				this.country = values.country;
+				this.go_to_home_page();
+			}, __("Set Country"), __("Change"))
+		}, __("Country"));
 	}
 
 	get_search_term() {
 		return this.$search.val();
 	}
 
+	reset_search() {
+		this.$search.val('');
+	}
+
 	make_rfq(item, callback) {
-		// should be through hub?
 		frappe.call({
 			method: 'erpnext.hub_node.make_rfq_and_send_opportunity',
 			args: {
@@ -436,7 +506,7 @@ window.ERPNextHub = class ERPNextHub {
 				item_group: 'Products',
 				supplier_name: item.hub_user_name,
 				supplier_email: item.hub_user_email,
-				company: item.company,
+				company: item.company_name,
 				country: item.country
 			},
 			callback: function(r) {
@@ -449,7 +519,7 @@ window.ERPNextHub = class ERPNextHub {
 class ERPNextHubList {
 	constructor({
 		parent = null,
-		title = 'Items',
+		title = 'Products',
 		page_length = 10,
 		list_css_class = '',
 		method = '',
@@ -517,7 +587,6 @@ class ERPNextHubList {
 	}
 
 	next_page() {
-		const me = this;
 		this.$item_list_title.html(this.title);
 		const start = this.$list.find('.hub-item-wrapper').length;
 		this.$loading.show();
@@ -528,6 +597,7 @@ class ERPNextHubList {
 			limit: this.page_length + 1
 		};
 		Object.assign(args, this.filters);
+		console.log("filters: ", args);
 
 		frappe.call({
 			method: this.method,
@@ -535,18 +605,18 @@ class ERPNextHubList {
 			callback: (r) => {
 				let items = r.message.items;
 				console.log("items: ", items);
-				me.$loading.hide();
+				this.$loading.hide();
 				if(items) {
-					if(items.length && items.length > me.page_length) {
+					if(items.length && items.length > this.page_length) {
 						items.pop();
-						me.$more.show();
-						me.$done.addClass('hide');
+						this.$more.show();
+						this.$done.addClass('hide');
 					} else {
-						me.$done.removeClass('hide');
-						me.$more.hide();
+						this.$done.removeClass('hide');
+						this.$more.hide();
 					}
-					items.forEach(function(item) {
-						me.make_item_card(item).appendTo(me.$list);
+					items.forEach((item) => {
+						this.make_item_card(item).appendTo(this.$list);
 					});
 				} else {
 					this.$item_list_title.html('No results found');
@@ -556,9 +626,9 @@ class ERPNextHubList {
 	}
 
 	make_item_card(item) {
-		return $(`
+		let $item_card = $(`
 			<div class="hub-item-wrapper" style="max-width: ${this.img_size}px;">
-				<a href>
+				<a class="item-link" href>
 					<div class="hub-item-image">
 						${ this.get_item_image(item) }
 					</div>
@@ -568,13 +638,19 @@ class ERPNextHubList {
 						<h5>
 					</div>
 				</a>
-				<div>${ item.company }</div>
-				<div>${ item.standard_rate ? format_currency(item.standard_rate) : ''}</div>
+				<div class="company-link">
+					<a data-company-name="${ item.company_id }" class="">${ item.company_name }</a>
+				</div>
+				<div>${ item.formatted_price ? item.formatted_price : ''}</div>
 			</div>
-		`).click((e) => {
+		`);
+
+		$item_card.find(".item-link").click((e) => {
 			e.preventDefault();
 			this.on_item_click && this.on_item_click(item);
 		});
+
+		return $item_card;
 	}
 
 	get_item_image(item, size=this.img_size) {

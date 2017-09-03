@@ -9,11 +9,11 @@ from erpnext.hub_node.doctype.hub_settings.hub_settings import hub_request
 opp_msg_id = ""
 
 @frappe.whitelist()
-def get_items(text, start, limit, category=None, company=None, country=None):
+def get_items(text, start, limit, category=None, company_name=None, country=None):
 	args = {
 		"text": text,
 		"category": category,
-		"company": company,
+		"company_name": company_name,
 		"country": country,
 		"start": start,
 		"limit": limit
@@ -21,23 +21,26 @@ def get_items(text, start, limit, category=None, company=None, country=None):
 	return hub_request('get_items', data=json.dumps(args))
 
 @frappe.whitelist()
-def get_all_users():
-	return hub_request('get_all_users')
-
-@frappe.whitelist()
-def get_categories():
-	return hub_request('get_categories')
-
-@frappe.whitelist()
 def get_all_companies():
 	return hub_request('get_all_companies')
 
 @frappe.whitelist()
-def get_seller_details(user_name):
+def get_item_details(item_code):
 	args = {
-		"user_name": user_name,
+		"item_code": item_code,
 	}
-	return hub_request('get_user_details', data=json.dumps(args))
+	return hub_request('get_item_details', data=json.dumps(args))
+
+@frappe.whitelist()
+def get_company_details(company_id):
+	args = {
+		"company_id": company_id,
+	}
+	return hub_request('get_company_details', data=json.dumps(args))
+
+@frappe.whitelist()
+def get_categories():
+	return hub_request('get_categories')
 
 def update_local_hub_categories():
 	categories = get_categories()
@@ -61,6 +64,12 @@ def update_local_hub_categories():
 		doc = frappe.new_doc("Hub Category")
 		doc.category_name = d
 		doc.save()
+
+@frappe.whitelist()
+def hub_item_request_action(item_code, item_group, supplier_name, supplier_email, company, country):
+	# make rfq, send click count and say requested
+	# enqueue opportunity message
+	pass
 
 @frappe.whitelist()
 def make_rfq_and_send_opportunity(item_code, item_group, supplier_name, supplier_email, company, country):
