@@ -50,6 +50,7 @@ window.ERPNextHub = class ERPNextHub {
 		this.company_cache = {};
 		this.item_cache = {};
 		this.filters = {};
+		this.order_by = '';
 
 		this.$hub_main_section =
 			$(`<div class='hub-main-section'>`).appendTo(this.page.body);
@@ -111,7 +112,6 @@ window.ERPNextHub = class ERPNextHub {
 	}
 
 	setup_live_state() {
-
 		if(!this.$search) {
 			this.setup_filters();
 		}
@@ -137,27 +137,26 @@ window.ERPNextHub = class ERPNextHub {
 
 		this.price_sort_select = this.page.add_select(__('Sort by Price'),
 			[
-				{'label': __(''), value: '' },
-
+				{label: __('Sort by Price ...'), value: '' },
+				{label: __('High to Low'), value: 'price desc' },
+				{label: __('Low to High'), value: 'price' },
 			]
 		);
 
-		this.criteria_select = this.page.add_select(__('Sort by Price'),
+		this.criteria_select = this.page.add_select(__('Sort by Criteria'),
 			[
-				{'label': __(''), value: '' }
+				{label: __('Most Popular'), value: 'request_count' },
+				{label: __('Newest'), value: 'creation' },
 			]
 		);
 
-		// this.company_select.on('change', () => {
-		// 	this.reset_search();
-		// 	let val = $(this.company_select).val() || '';
-		// 	this.go_to_items_only_page(
-		// 		['hub', 'Company', val, 'Products'],
-		// 		'Products by '  + val,
-		// 		'company-product-list',
-		// 		{text: '', company: val}
-		// 	);
-		// });
+		this.price_sort_select.on('change', () => {
+			this.refresh_item_only_page();
+		});
+
+		this.criteria_select.on('change', () => {
+			this.refresh_item_only_page();
+		});
 
 		this.$search = this.page.add_data(__('Search'));
 		this.setup_search();
@@ -180,8 +179,35 @@ window.ERPNextHub = class ERPNextHub {
 			});
 	}
 
+	update_filters() {
+		let price_sort = $(this.price_sort_select).val() || '';
+		let criteria = $(this.criteria_select).val() || '';
+
+		let order_by_params = [];
+		let query_string = '';
+		if(criteria) {
+			order_by_params.push(criteria);
+			// query_string += 'sort_by=' + criteria
+		}
+		if(price_sort) order_by_params.push(price_sort);
+		this.order_by = order_by_params.join(",");
+		// return query_string;
+	}
+
 	reset_filters() {
-		$(this.company_select).val('');
+		this.order_by = '';
+		$(this.category_select).val('');
+		$(this.price_sort_select).val('');
+		$(this.criteria_select).val('Most Popular');
+	}
+
+	refresh_item_only_page() {
+		this.reset_search();
+		this.update_filters();
+		this.go_to_items_only_page(
+			['hub', 'Products'],
+			'', 'product-list'
+		);
 	}
 
 	bind_title() {
@@ -213,6 +239,7 @@ window.ERPNextHub = class ERPNextHub {
 			page_length: 20,
 			list_css_class: 'home-product-list',
 			method: 'erpnext.hub_node.get_items',
+			// order_by: 'request_count',
 			filters: {text: '', country: this.country}, // filters at the time of creation
 			on_item_click: (item) => {
 				this.go_to_item_page(item);
@@ -236,7 +263,7 @@ window.ERPNextHub = class ERPNextHub {
 		});
 	}
 
-	go_to_items_only_page(route, title, class_name, filters) {
+	go_to_items_only_page(route, title, class_name, filters = {text: ''}) {
 		frappe.set_route(route);
 		this.$hub_main_section.empty();
 		this.filtered_item_list = new ERPNextHubList({
@@ -245,6 +272,7 @@ window.ERPNextHub = class ERPNextHub {
 			page_length: 20,
 			list_css_class: class_name,
 			method: 'erpnext.hub_node.get_items',
+			order_by: this.order_by,
 			filters: filters
 		});
 		this.filtered_item_list.on_item_click = (item) => {
@@ -269,7 +297,9 @@ window.ERPNextHub = class ERPNextHub {
 			page_length: 5,
 			list_css_class: 'company-item-list',
 			method: 'erpnext.hub_node.get_items',
+			// order_by: 'request_count',
 			filters: {text: '', company_name: item.company_name, country: this.country},
+			paginated: 0,
 			img_size: 150
 		});
 
@@ -326,7 +356,9 @@ window.ERPNextHub = class ERPNextHub {
 			page_length: 5,
 			list_css_class: 'company-item-list',
 			method: 'erpnext.hub_node.get_items',
+			// order_by: 'request_count',
 			filters: {text: '', company: company_details.company_name, country: this.country},
+			paginated: 0,
 			img_size: 150
 		});
 
@@ -524,6 +556,8 @@ class ERPNextHubList {
 		list_css_class = '',
 		method = '',
 		filters = {text: ''},
+		order_by = '',
+		paginated = 1,
 		on_item_click = null,
 		img_size = 200
 	}) {
@@ -533,11 +567,14 @@ class ERPNextHubList {
 		this.list_css_class = list_css_class;
 		this.method = method;
 		this.filters = filters;
+		this.order_by = order_by;
+		this.paginated = paginated;
+
 		this.on_item_click = on_item_click;
 		this.img_size = img_size;
-		// this.setup();
 	}
 
+	// to be called on demand
 	setup() {
 		this.container = $(`
 			<div class='item-list-container ${this.list_css_class}' data-page-length='${this.page_length}'>
@@ -598,7 +635,7 @@ class ERPNextHubList {
 		};
 		Object.assign(args, this.filters);
 		console.log("filters: ", args);
-
+		args.order_by = this.order_by;
 		frappe.call({
 			method: this.method,
 			args: args,
