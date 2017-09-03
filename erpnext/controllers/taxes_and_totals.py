@@ -434,7 +434,8 @@ class calculate_taxes_and_totals(object):
 		if self.doc.doctype == "Sales Invoice":
 			self.calculate_paid_amount()
 
-		if self.doc.is_return: return
+		# Do not calculate outstanding amount if it is a return document and there is a return against reference
+		if self.doc.is_return and self.doc.return_against: return
 
 		self.doc.round_floats_in(self.doc, ["grand_total", "total_advance", "write_off_amount"])
 		self._set_in_company_currency(self.doc, ['write_off_amount'])
@@ -449,8 +450,10 @@ class calculate_taxes_and_totals(object):
 
 		if self.doc.doctype == "Sales Invoice":			
 			self.doc.round_floats_in(self.doc, ["paid_amount"])
-			self.calculate_write_off_amount()
-			self.calculate_change_amount()
+			# Do not calculate write off and change amount if it is a return document and there is a return against reference
+			if not (self.doc.is_return and self.doc.return_against):
+				self.calculate_write_off_amount()
+				self.calculate_change_amount()
 			
 			paid_amount = self.doc.paid_amount \
 				if self.doc.party_account_currency == self.doc.currency else self.doc.base_paid_amount
