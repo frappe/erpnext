@@ -36,16 +36,17 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			this.show_stock_ledger();
 		}
 
-		if(!doc.is_return && doc.docstatus==1) {
-			if(doc.outstanding_amount != 0) {
-				this.frm.add_custom_button(__('Payment'), this.make_payment_entry, __("Make"));
-				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
-			}
-
-			if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
-				cur_frm.add_custom_button(__('Return / Debit Note'),
-					this.make_debit_note, __("Make"));
-			}
+		//Allow payment if it is a standard Purchase Invoice or if it is a Standalone Debit Note
+		if(doc.docstatus==1 && (doc.is_return && !doc.return_against || !doc.is_return && doc.outstanding_amount != 0)) {
+			this.frm.add_custom_button(__('Payment'), this.make_payment_entry, __("Make"));
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+		}
+		//Allow creation of: 
+		//(1) Standalone Debit Note if Purchase Invoice has never been saved or 
+		//(2) Standard Debit Note if Purchase Invoice is submitted and if there is still outstanding amount
+		if(!doc.is_return && (this.frm.doc.__islocal || doc.docstatus==1 && (doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)))) {
+			cur_frm.add_custom_button(__('Return / Debit Note'),
+				this.make_debit_note, __("Make"));
 		}
 
 		if(doc.docstatus===0) {
@@ -167,10 +168,19 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	},
 
 	make_debit_note: function() {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_debit_note",
-			frm: cur_frm
-		})
+		//For Standalone Debit Note
+		if(cur_frm.doc.__islocal) {
+			frappe.model.open_mapped_doc({
+				method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_debit_note"
+			});
+		}
+		//For Debit Note with reference to a Purchase Invoice
+		else {
+			frappe.model.open_mapped_doc({
+				method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_debit_note",
+				frm: cur_frm
+			});
+		}
 	},
 
 	asset: function(frm, cdt, cdn) {
@@ -211,6 +221,12 @@ function hide_fields(doc) {
 
 	cur_frm.fields_dict['items'].grid.set_column_disp(item_fields_stock,
 		(cint(doc.update_stock)==1 || cint(doc.is_return)==1 ? true : false));
+
+	//Set Update Stock to unchecked and hide Update Stock if it is a Standalone Debit Note
+	if(doc.is_return && !doc.return_against) {
+		doc.update_stock = 0;
+		hide_field('update_stock');
+	}
 
 	cur_frm.refresh_fields();
 }

@@ -943,7 +943,7 @@ def make_delivery_note(source_name, target_doc=None):
 	return doclist
 
 @frappe.whitelist()
-def make_sales_return(source_name, target_doc=None):
+def make_sales_return(source_name=None, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 	return make_return_doc("Sales Invoice", source_name, target_doc)
 
