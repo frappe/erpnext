@@ -14,6 +14,7 @@ from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.production_order.production_order import get_item_details
 from erpnext.buying.utils import check_for_closed_status, validate_for_items
+from six import string_types
 
 form_grid_templates = {
 	"items": "templates/form_grid/material_request_grid.html"
@@ -278,7 +279,7 @@ def make_request_for_quotation(source_name, target_doc=None):
 @frappe.whitelist()
 def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 	if target_doc:
-		if isinstance(target_doc, basestring):
+		if isinstance(target_doc, string_types):
 			import json
 			target_doc = frappe.get_doc(json.loads(target_doc))
 		target_doc.set("items", [])

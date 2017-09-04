@@ -5,6 +5,7 @@ import json
 import unittest
 
 from erpnext.controllers.item_variant import copy_attributes_to_variant, make_variant_item_code
+from six import string_types
 
 # python 3 compatibility stuff
 try:
@@ -18,7 +19,7 @@ else:
 
 
 def create_variant_with_tables(item, args):
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	template = frappe.get_doc("Item", item)

@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 import json
 from frappe.utils import flt, cstr, nowdate, nowtime
+from six import string_types
 
 class InvalidWarehouseCompany(frappe.ValidationError): pass
 
@@ -127,7 +128,7 @@ def get_incoming_rate(args):
 	"""Get Incoming Rate based on valuation method"""
 	from erpnext.stock.stock_ledger import get_previous_sle
 	
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	in_rate = 0

@@ -10,6 +10,7 @@ import copy
 from frappe import throw, _
 from frappe.utils import flt, cint
 from frappe.model.document import Document
+from six import string_types
 
 
 class MultiplePricingRuleConflict(frappe.ValidationError): pass
@@ -96,7 +97,7 @@ def apply_pricing_rule(args):
 			"ignore_pricing_rule": "something"
 		}
 	"""
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	args = frappe._dict(args)
@@ -207,7 +208,7 @@ def remove_pricing_rule_for_item(pricing_rule, item_details):
 
 @frappe.whitelist()
 def remove_pricing_rules(item_list):
-	if isinstance(item_list, basestring):
+	if isinstance(item_list, string_types):
 		item_list = json.loads(item_list)
 	
 	out = []	

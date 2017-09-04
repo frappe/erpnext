@@ -10,6 +10,7 @@ from frappe.website.website_generator import WebsiteGenerator
 from erpnext.stock.get_item_details import get_conversion_factor
 
 from operator import itemgetter
+from six import string_types
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -109,7 +110,7 @@ class BOM(WebsiteGenerator):
 		if not args:
 			args = frappe.form_dict.get('args')
 
-		if isinstance(args, basestring):
+		if isinstance(args, string_types):
 			import json
 			args = json.loads(args)
 

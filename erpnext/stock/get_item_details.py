@@ -10,7 +10,7 @@ from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_
 from erpnext.setup.utils import get_exchange_rate
 from frappe.model.meta import get_field_precision
 from erpnext.stock.doctype.batch.batch import get_batch_no
-from six import iteritems
+from six import iteritems, string_types
 
 @frappe.whitelist()
 def get_item_details(args):
@@ -108,7 +108,7 @@ def get_item_details(args):
 	# })
 
 def process_args(args):
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	args = frappe._dict(args)
@@ -556,7 +556,7 @@ def get_gross_profit(out):
 
 @frappe.whitelist()
 def get_serial_no(args):
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 		args = frappe._dict(args)
 

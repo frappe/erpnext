@@ -10,6 +10,7 @@ from frappe.core.doctype.communication.email import make
 from erpnext.stock.get_item_details import get_pos_profile
 from erpnext.accounts.party import get_party_account_currency
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
+from six import string_types
 
 @frappe.whitelist()
 def get_pos_data():
@@ -173,7 +174,7 @@ def get_customers_list(pos_profile={}):
 
 def get_customers_address(customers):
 	customer_address = {}
-	if isinstance(customers, basestring):
+	if isinstance(customers, string_types):
 		customers = [frappe._dict({'name': customers})]
 
 	for data in customers:
@@ -191,7 +192,7 @@ def get_customers_address(customers):
 
 def get_contacts(customers):
 	customer_contact = {}
-	if isinstance(customers, basestring):
+	if isinstance(customers, string_types):
 		customers = [frappe._dict({'name': customers})]
 
 	for data in customers:
@@ -299,13 +300,13 @@ def get_pricing_rule_data(doc):
 
 @frappe.whitelist()
 def make_invoice(doc_list={}, email_queue_list={}, customers_list={}):
-	if isinstance(doc_list, basestring):
+	if isinstance(doc_list, string_types):
 		doc_list = json.loads(doc_list)
 
-	if isinstance(email_queue_list, basestring):
+	if isinstance(email_queue_list, string_types):
 		email_queue_list = json.loads(email_queue_list)
 
-	if isinstance(customers_list, basestring):
+	if isinstance(customers_list, string_types):
 		customers_list = json.loads(customers_list)
 
 	customers_list = make_customer_and_address(customers_list)

@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import cstr, flt
 import json
+from six import string_types
 
 class ItemVariantExistsError(frappe.ValidationError): pass
 class InvalidItemAttributeValueError(frappe.ValidationError): pass
@@ -26,7 +27,7 @@ def get_variant(template, args=None, variant=None, manufacturer=None,
 		return make_variant_based_on_manufacturer(item_template, manufacturer,
 			manufacturer_part_no)
 	else:
-		if isinstance(args, basestring):
+		if isinstance(args, string_types):
 			args = json.loads(args)
 
 		if not args:
@@ -50,7 +51,7 @@ def make_variant_based_on_manufacturer(template, manufacturer, manufacturer_part
 	return variant
 
 def validate_item_variant_attributes(item, args=None):
-	if isinstance(item, basestring):
+	if isinstance(item, string_types):
 		item = frappe.get_doc('Item', item)
 
 	if not args:
@@ -149,7 +150,7 @@ def find_variant(template, args, variant_item_code=None):
 
 @frappe.whitelist()
 def create_variant(item, args):
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	template = frappe.get_doc("Item", item)
