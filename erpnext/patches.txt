@@ -437,4 +437,5 @@ erpnext.patches.v8_7.fix_purchase_receipt_status
 erpnext.patches.v8_6.rename_bom_update_tool
 erpnext.patches.v8_10.add_due_date_to_gle
 erpnext.patches.v8_10.update_gl_due_date_for_pi_and_si
+erpnext.patches.v8_10.add_payment_terms_field_to_supplier
 erpnext.patches.v8_10.change_default_customer_credit_days
