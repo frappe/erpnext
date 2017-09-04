@@ -3,4 +3,5 @@ import frappe
 
 
 def execute():
-	frappe.db.sql("ALTER TABLE `tabGL Entry` ADD COLUMN `due_date` DATE DEFAULT NULL")
+	if not frappe.db.has_column("GL Entry", "due_date"):
+		frappe.db.sql("ALTER TABLE `tabGL Entry` ADD COLUMN `due_date` DATE DEFAULT NULL")
