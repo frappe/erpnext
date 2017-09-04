@@ -12,6 +12,8 @@ from erpnext.utilities.product import get_price, get_qty_in_stock
 hub_url = "http://erpnext.hub:8000"
 # hub_url = "http://hub.erpnext.org"
 
+batch_size = 200
+
 class HubSetupError(frappe.ValidationError): pass
 
 class HubSettings(Document):
@@ -67,7 +69,10 @@ class HubSettings(Document):
 	def update_publishing(self):
 		if self.publish != self._doc_before_save.publish:
 			if self.publish:
-				self.publish_all_set_items()
+				frappe.enqueue('erpnext.hub_node.doctype.hub_settings.hub_settings.publish_all_set_items',
+					fields=self.base_fields_for_items, fields_to_update=self.item_fields_to_update, site_name=self.site_name)
+
+				self.current_item_fields = json.dumps(self.base_fields_for_items + self.item_fields_to_update)
 			else:
 				self.unpublish_all_items()
 		else:
@@ -80,59 +85,8 @@ class HubSettings(Document):
 					if self.publish_availability:
 						fields += ["stock_qty"]
 				if fields:
-					self.update_item_fields_at_hub(fields)
-
-	def publish_all_set_items(self, verbose=True):
-		"""Publish items hub.erpnext.org"""
-		# A way to set 'publish in hub' for a bulk of items, if not all are by default
-
-		item_list = frappe.db.sql_list("select name from tabItem where publish_in_hub=1")
-		items = frappe.db.get_all("Item", fields=self.base_fields_for_items + ["hub_warehouse"], filters={"publish_in_hub": 1})
-		if not items:
-			frappe.msgprint(_("No published items found."))
-			return
-
-		for item in items:
-			item.modified = get_datetime_str(item.modified)
-			if item.image:
-				item.image = self.site_name + item.image
-
-			set_stock_qty(item)
-
-			if self.publish_pricing:
-				set_item_price(item, self.company, self.selling_price_list)
-
-		make_and_enqueue_message(msg_type='HUB-ITEMS-UPDATE', method='update_items',
-			data={
-			"items_to_update": json.dumps(items),
-			"item_list": json.dumps(item_list),
-			"item_fields": self.base_fields_for_items + self.item_fields_to_update
-			},
-			callback='erpnext.hub_node.doctype.hub_settings.hub_settings.after_items_synced',
-			callback_args={"action_msg": "{0} products synced"}
-		)
-		self.current_item_fields = json.dumps(self.base_fields_for_items + self.item_fields_to_update)
-
-	def update_item_fields_at_hub(self, fields):
-		items = frappe.db.get_all("Item", fields=["item_code", "hub_warehouse"], filters={"publish_in_hub": 1})
-
-		for item in items:
-			if "stock_qty" in fields:
-				set_stock_qty(item)
-
-			hub_settings = get_hub_settings()
-			if "price" in fields:
-				if self.publish_pricing:
-					set_item_price(item, hub_settings.company, hub_settings.selling_price_list)
-
-		make_and_enqueue_message(msg_type='HUB-ITEMS-FIELDS-UPDATE', method='update_item_fields',
-			data={
-				"items_with_fields_updates": json.dumps(items),
-				"fields_to_update": json.dumps(fields)
-			},
-			callback='erpnext.hub_node.doctype.hub_settings.hub_settings.after_items_synced',
-			callback_args={"action_msg": ((",".join(fields)) + " for {0} products synced")}
-		)
+					frappe.enqueue('erpnext.hub_node.doctype.hub_settings.hub_settings.update_item_fields_at_hub',
+						fields=fields)
 
 	def unpublish_all_items(self):
 		"""Unpublish from hub.erpnext.org, delete items there"""
@@ -295,6 +249,75 @@ def after_items_unpublished(total_items, last_sync_datetime, message_id):
 	frappe.db.set_value("Outgoing Hub Message", message_id, "response", msg)
 	frappe.db.set_value("Outgoing Hub Message", message_id, "completed_on", get_datetime(last_sync_datetime))
 	reset_hub_publishing_settings()
+
+def publish_all_set_items(fields, fields_to_update, site_name):
+	"""Publish items hub.erpnext.org"""
+	# A way to set 'publish in hub' for a bulk of items, if not all are by default
+
+	publish_item_count = frappe.db.count("Item", filters={"publish_in_hub": 1})
+	start = 0
+
+	while start < publish_item_count:
+		items = frappe.db.get_all("Item", fields=fields + ["hub_warehouse"], filters={"publish_in_hub": 1},
+			limit_start = start, limit_page_length = batch_size, order_by='modified desc')
+		if not items:
+			frappe.msgprint(_("No published items found."))
+			return
+		enqueue_item_batch(items, fields, fields_to_update, site_name)
+		start += batch_size
+
+def enqueue_item_batch(items, fields, fields_to_update, site_name):
+	item_list = []
+	for item in items:
+		item_list.append(item.name)
+		item.modified = get_datetime_str(item.modified)
+		if item.image:
+			item.image = site_name + item.image
+
+		set_stock_qty(item)
+
+		hub_settings = get_hub_settings()
+		if is_pricing_published():
+			set_item_price(item, hub_settings.company, hub_settings.selling_price_list)
+
+	make_and_enqueue_message(msg_type='HUB-ITEMS-UPDATE', method='update_items',
+		data={
+		"items_to_update": json.dumps(items),
+		"item_list": json.dumps(item_list),
+		"item_fields": fields + fields_to_update
+		},
+		callback='erpnext.hub_node.doctype.hub_settings.hub_settings.after_items_synced',
+		callback_args={"action_msg": "{0} products synced"}
+	)
+
+def update_item_fields_at_hub(fields):
+	publish_item_count = frappe.db.count("Item", filters={"publish_in_hub": 1})
+	start = 0
+
+	while start < publish_item_count:
+		items = frappe.db.get_all("Item", fields=["item_code", "hub_warehouse"], filters={"publish_in_hub": 1},
+			limit_start = start, limit_page_length = batch_size, order_by='modified desc')
+		enqueue_item_batch_with_fields(items, fields)
+		start += batch_size
+
+def enqueue_item_batch_with_fields(items, fields):
+	for item in items:
+		if "stock_qty" in fields:
+			set_stock_qty(item)
+
+		hub_settings = get_hub_settings()
+		if "price" in fields:
+			if is_pricing_published():
+				set_item_price(item, hub_settings.company, hub_settings.selling_price_list)
+
+	make_and_enqueue_message(msg_type='HUB-ITEMS-FIELDS-UPDATE', method='update_item_fields',
+		data={
+			"items_with_fields_updates": json.dumps(items),
+			"fields_to_update": json.dumps(fields)
+		},
+		callback='erpnext.hub_node.doctype.hub_settings.hub_settings.after_items_synced',
+		callback_args={"action_msg": ((",".join(fields)) + " for {0} products synced")}
+	)
 
 def sync_item_fields_at_hub():
 	# Only updates dynamic feilds of price and stock
