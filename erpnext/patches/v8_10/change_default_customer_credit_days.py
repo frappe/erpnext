@@ -5,6 +5,7 @@ import frappe
 def execute():
 	payment_terms = []
 	customers = []
+	suppliers = []
 	credit_days = frappe.db.sql(
 		"SELECT DISTINCT `credit_days`, `credit_days_based_on`, `customer_name` from "
 		"`tabCustomer` where credit_days_based_on='Fixed Days' or "
@@ -25,6 +26,39 @@ def execute():
 		frappe.db.sql(
 			begin_query_str + value_query_str + cond_query_str + '`customer_name` IN %s',
 			(customers,)
+		)
+
+	# reset
+	payment_terms = []
+	credit_days = frappe.db.sql(
+		"SELECT DISTINCT `credit_days`, `credit_days_based_on`, `supplier_name` from "
+		"`tabSupplier` where credit_days_based_on='Fixed Days' or "
+		"credit_days_based_on='Last Day of the Next Month'")
+
+	credit_records = ((record[0], record[1], record[2]) for record in credit_days)
+	for days, based_on, supplier_name in credit_records:
+		if based_on == "Fixed Days":
+			pyt_term_name = 'N{0}'.format(days)
+		else:
+			pyt_term_name = 'EO2M'
+
+		if not frappe.db.exists("Payment Term", pyt_term_name):
+			payment_term = make_payment_term(days, based_on)
+			make_template(payment_term)
+		else:
+			payment_term = frappe.get_doc("Payment Term", pyt_term_name)
+
+		payment_terms.append('WHEN `supplier_name`="%s" THEN "%s"' % (supplier_name, payment_term.payment_term_name))
+		suppliers.append(supplier_name)
+
+	begin_query_str = "UPDATE `tabSupplier` SET `payment_terms` = CASE "
+	value_query_str = " ".join(payment_terms)
+	cond_query_str = " ELSE `payment_terms` END WHERE "
+
+	if customers:
+		frappe.db.sql(
+			begin_query_str + value_query_str + cond_query_str + '`supplier_name` IN %s',
+			(suppliers,)
 		)
 
 
