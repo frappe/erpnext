@@ -20,7 +20,12 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 				freeze: true,
 				method: "make_invoices",
 				freeze_message: __("Creating {0} Invoice", [frm.doc.invoice_type]),
-				callback: function(r) {
+				callback: (r) => {
+					if(!r.exc){
+						frappe.msgprint(__("Opening {0} Invoice created", [frm.doc.invoice_type]));
+						frm.clear_table("invoices");
+						frm.refresh_fields();
+					}
 				}
 			});
 		});

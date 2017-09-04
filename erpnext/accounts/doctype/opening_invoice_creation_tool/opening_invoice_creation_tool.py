@@ -23,8 +23,10 @@ class OpeningInvoiceCreationTool(Document):
 			doc = frappe.get_doc(args).insert()
 			doc.submit()
 
-			self.make_gl_entries(doc, party_type=row.party_type, party=row.party,
-				outstanding_amount=flt(row.outstanding_amount))
+			# create GL entries
+			if doc.base_grand_total:
+				self.make_gl_entries(doc, party_type=row.party_type, party=row.party,
+					outstanding_amount=flt(row.outstanding_amount))
 
 			if(len(self.invoices) > 5):
 				frappe.publish_realtime("progress",
@@ -34,7 +36,7 @@ class OpeningInvoiceCreationTool(Document):
 	def get_invoice_dict(self, row=None):
 		def get_item_dict():
 			default_uom = frappe.db.get_single_value("Stock Settings", "stock_uom") or _("Nos")
-			rate = flt(row.net_total) / flt(row.qty) or 1.0
+			rate = flt(row.net_total) / (flt(row.qty) or 1.0)
 
 			return frappe._dict({
 				"uom": default_uom,
