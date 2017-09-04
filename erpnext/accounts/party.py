@@ -270,7 +270,7 @@ def get_due_date(posting_date, party_type, party):
 		due_date = posting_date
 		template_name = get_pyt_term_template(party, party_type)
 		if template_name:
-			due_date = get_due_date_from_template(template_name, posting_date)
+			due_date = get_due_date_from_template(template_name, posting_date).strftime("%Y-%m-%d")
 
 	return due_date
 
