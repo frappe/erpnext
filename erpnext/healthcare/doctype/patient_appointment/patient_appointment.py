@@ -116,6 +116,7 @@ def create_invoice(company, physician, patient, appointment_id, appointment_date
 		return False
 	sales_invoice = frappe.new_doc("Sales Invoice")
 	sales_invoice.customer = frappe.get_value("Patient", patient, "customer")
+	sales_invoice.appointment = appointment_id
 	sales_invoice.due_date = getdate()
 	sales_invoice.is_pos = '0'
 	sales_invoice.debit_to = get_receivable_account(company)
@@ -241,9 +242,3 @@ def get_events(start, end, filters=None):
 	for item in data:
 		item.end = item.start + datetime.timedelta(minutes = item.duration)
 	return data
-
-@frappe.whitelist()
-def get_physician(doctype, txt, searchfield, start, page_len, filters):
-	query = """select name from `tabPhysician` where physician_schedule <> '' order by name"""
-
-	return frappe.db.sql(query)

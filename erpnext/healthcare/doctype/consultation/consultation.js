@@ -36,22 +36,22 @@ frappe.ui.form.on('Consultation', {
 	refresh: function(frm) {
 		refresh_field('drug_prescription');
 		refresh_field('test_prescription');
-		if(frappe.user.has_role("Physician")){
-			frm.add_custom_button(__('Medical Record'), function() {
-				if(frm.doc.patient){
-					frappe.route_options = {"patient": frm.doc.patient};
-					frappe.set_route("medical_record");
-				}else{
-					frappe.msgprint("Please select Patient");
-				}
-			},"View");
-			frm.add_custom_button(__('Vital Signs'), function() {
-				btn_create_vital_signs(frm);
-			},"Create");
-			frm.add_custom_button(__('Medical Record'), function() {
-				create_medical_record(frm);
-			},"Create");
-		}
+
+		frm.add_custom_button(__('Medical Record'), function() {
+			if (frm.doc.patient) {
+				frappe.route_options = {"patient": frm.doc.patient};
+				frappe.set_route("medical_record");
+			} else {
+				frappe.msgprint("Please select Patient");
+			}
+		},"View");
+		frm.add_custom_button(__('Vital Signs'), function() {
+			btn_create_vital_signs(frm);
+		},"Create");
+		frm.add_custom_button(__('Medical Record'), function() {
+			create_medical_record(frm);
+		},"Create");
+
 		frm.set_query("patient", function () {
 			return {
 				filters: {"disabled": 0}

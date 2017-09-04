@@ -2,54 +2,51 @@
 // For license information, please see license.txt
 frappe.provide("erpnext.queries");
 frappe.ui.form.on('Patient Appointment', {
+	setup: function(frm) {
+		frm.custom_make_buttons = {
+			'Sales Invoice': 'Invoice',
+			'Vital Signs': 'Vital Signs',
+			'Consultation': 'Consultation'
+		};
+	},
 	refresh: function(frm) {
 		frm.set_query("patient", function () {
 			return {
 				filters: {"disabled": 0}
 			};
 		});
-		frm.set_query("physician", function () {
-			return{
-				query:"erpnext.healthcare.doctype.patient_appointment.patient_appointment.get_physician"
-			};
-		});
-		if(frappe.user.has_role("Physician")){
-			if(frm.doc.patient){
-				frm.add_custom_button(__('Medical Record'), function() {
-					frappe.route_options = {"patient": frm.doc.patient};
-					frappe.set_route("medical_record");
-				},__("View"));
-			}
-			if(frm.doc.status == "Open"){
-				frm.add_custom_button(__('Cancel'), function() {
-					btn_update_status(frm, "Cancelled");
-				});
-			}
-			if(frm.doc.status == "Scheduled" && !frm.doc.__islocal){
-				frm.add_custom_button(__('Cancel'), function() {
-					btn_update_status(frm, "Cancelled");
-				});
-			}
-			if(frm.doc.status == "Pending"){
-				frm.add_custom_button(__('Set Open'), function() {
-					btn_update_status(frm, "Open");
-				});
-				frm.add_custom_button(__('Cancel'), function() {
-					btn_update_status(frm, "Cancelled");
-				});
-			}
+		if(frm.doc.patient){
+			frm.add_custom_button(__('Medical Record'), function() {
+				frappe.route_options = {"patient": frm.doc.patient};
+				frappe.set_route("medical_record");
+			},__("View"));
+		}
+		if(frm.doc.status == "Open"){
+			frm.add_custom_button(__('Cancel'), function() {
+				btn_update_status(frm, "Cancelled");
+			});
+		}
+		if(frm.doc.status == "Scheduled" && !frm.doc.__islocal){
+			frm.add_custom_button(__('Cancel'), function() {
+				btn_update_status(frm, "Cancelled");
+			});
+		}
+		if(frm.doc.status == "Pending"){
+			frm.add_custom_button(__('Set Open'), function() {
+				btn_update_status(frm, "Open");
+			});
+			frm.add_custom_button(__('Cancel'), function() {
+				btn_update_status(frm, "Cancelled");
+			});
 		}
 
-		if(!frm.doc.__islocal && frappe.user.has_role("Physician") && frm.doc.status == "Open"){
-			frm.add_custom_button(__("Consultation"),function(){
-				btn_create_consultation(frm);
-			},"Create");
-		}
-		if(!frm.doc.__islocal && (frappe.user.has_role("Nursing User")||frappe.user.has_role("Physician")) && frm.doc.status == "Open"){
-			frm.add_custom_button(__('Vital Signs'), function() {
-				btn_create_vital_signs(frm);
-			},"Create");
-		}
+		frm.add_custom_button(__("Consultation"),function(){
+			btn_create_consultation(frm);
+		},"Create");
+
+		frm.add_custom_button(__('Vital Signs'), function() {
+			btn_create_vital_signs(frm);
+		},"Create");
 
 		if(!frm.doc.__islocal){
 			if(frm.doc.sales_invoice && frappe.user.has_role("Accounts User")){
