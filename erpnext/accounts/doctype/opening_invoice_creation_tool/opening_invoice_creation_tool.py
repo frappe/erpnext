@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt
 from frappe.model.document import Document
 from erpnext.accounts.utils import get_fiscal_years
 from erpnext.accounts.general_ledger import make_gl_entries
@@ -23,7 +24,7 @@ class OpeningInvoiceCreationTool(Document):
 			doc.submit()
 
 			self.make_gl_entries(doc, party_type=row.party_type, party=row.party,
-				outstanding_amount=row.outstanding_amount or 0.0)
+				outstanding_amount=flt(row.outstanding_amount))
 
 			if(len(self.invoices) > 5):
 				frappe.publish_realtime("progress",
@@ -33,12 +34,13 @@ class OpeningInvoiceCreationTool(Document):
 	def get_invoice_dict(self, row=None):
 		def get_item_dict():
 			default_uom = frappe.db.get_single_value("Stock Settings", "stock_uom") or _("Nos")
+			rate = flt(row.net_total) / flt(row.qty) or 1.0
 
 			return frappe._dict({
 				"uom": default_uom,
+				"rate": rate or 0.0,
+				"qty": flt(row.qty) or 1.0,
 				"conversion_factor": 1.0,
-				"qty": row.qty or 1.0,
-				"rate": row.net_total or 0.0,
 				"item_name": row.item_name or "Opening Item",
 				"description": row.item_name or "Opening Item",
 				income_expense_account_field: self.get_account()
