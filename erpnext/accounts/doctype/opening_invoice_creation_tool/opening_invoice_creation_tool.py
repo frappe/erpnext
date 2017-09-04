@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from erpnext.accounts.utils import get_fiscal_years
 from erpnext.accounts.general_ledger import make_gl_entries
@@ -22,7 +23,12 @@ class OpeningInvoiceCreationTool(Document):
 			doc.submit()
 
 			self.make_gl_entries(doc, party_type=row.party_type, party=row.party,
-				outstanding_amount=row.outstanding_amount)
+				outstanding_amount=row.outstanding_amount or 0.0)
+
+			if(len(self.invoices) > 5):
+				frappe.publish_realtime("progress",
+					dict(progress=[row.idx, len(self.invoices)], title=_('Creating {0}').format(doc.doctype)),
+					user=frappe.session.user)
 
 	def get_invoice_dict(self, row=None):
 		def get_item_dict():
@@ -66,7 +72,7 @@ class OpeningInvoiceCreationTool(Document):
 
 		return accounts[0].name
 
-	def make_gl_entries(self, doc, party_type, party, outstanding_amount=0):
+	def make_gl_entries(self, doc, party_type, party, outstanding_amount=0.0):
 		""" Make payment GL Entries for the invoices """
 		if not doc:
 			return
