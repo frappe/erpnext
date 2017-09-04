@@ -41,6 +41,7 @@ def get_company_details(company_id):
 
 @frappe.whitelist()
 def get_categories():
+	# update_local_hub_categories()
 	return hub_request('get_categories')
 
 def update_local_hub_categories():
