@@ -4,7 +4,8 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.utils.nestedset import NestedSet
 from frappe.model.document import Document
 
-class HubCategory(Document):
+class HubCategory(NestedSet):
 	pass
