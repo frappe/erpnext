@@ -9,6 +9,7 @@ from frappe.utils.selenium_testdriver import TestDriver
 def run_setup_wizard_test():
 	driver = TestDriver()
 	frappe.db.set_default('in_selenium', '1')
+	frappe.db.commit()
 
 	driver.login('#page-setup-wizard')
 	print('Running Setup Wizard Test...')
@@ -41,8 +42,8 @@ def run_setup_wizard_test():
 	driver.set_field("bank_account", "HDFC")
 	driver.wait_till_clickable(".complete-btn").click()
 
-	# Wait for desk (Lock wait timeout error)
-	driver.wait_for('#page-desktop', timeout=240)
+	# Wait for desktop
+	driver.wait_for('#page-desktop', timeout=600)
 
 	console = driver.get_console()
 	if frappe.flags.tests_verbose:
@@ -52,6 +53,8 @@ def run_setup_wizard_test():
 	time.sleep(1)
 
 	frappe.db.set_default('in_selenium', None)
+	frappe.db.commit()
+
 	driver.close()
 
 	return True
