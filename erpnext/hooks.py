@@ -27,6 +27,8 @@ doctype_js = {
 # setup wizard
 setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
 setup_wizard_complete = "erpnext.setup.setup_wizard.setup_wizard.setup_complete"
+setup_wizard_success = "erpnext.setup.setup_wizard.setup_wizard.setup_success"
+setup_wizard_test = "erpnext.setup.setup_wizard.test_setup_wizard.run_setup_wizard_test"
 
 before_install = "erpnext.setup.install.check_setup_wizard_not_completed"
 after_install = "erpnext.setup.install.after_install"
@@ -34,6 +36,8 @@ after_install = "erpnext.setup.install.after_install"
 boot_session = "erpnext.startup.boot.boot_session"
 notification_config = "erpnext.startup.notifications.get_notification_config"
 get_help_messages = "erpnext.utilities.activation.get_help_messages"
+get_user_progress_slides = "erpnext.utilities.user_progress.get_user_progress_slides"
+update_and_get_user_progress = "erpnext.utilities.user_progress_utils.update_default_domain_actions_and_get_state"
 
 on_session_creation = "erpnext.shopping_cart.utils.set_cart_count"
 on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
@@ -196,7 +200,8 @@ scheduler_events = {
 		"erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary",
 		"erpnext.stock.doctype.serial_no.serial_no.update_maintenance_status",
 		"erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.refresh_scorecards",
-		"erpnext.setup.doctype.company.company.cache_companies_monthly_sales_history"
+		"erpnext.setup.doctype.company.company.cache_companies_monthly_sales_history",
+		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms",
 	]
 }
 

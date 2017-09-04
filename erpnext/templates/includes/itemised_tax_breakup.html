@@ -4,9 +4,9 @@
 			<tr>
 				{% for key in headers %}
 					{% if loop.first %}
-						<th style="min-width: 120px;" class="text-left">{{ key }}</th>
+						<th class="text-left">{{ key }}</th>
 					{% else %}
-						<th style="min-width: 80px;" class="text-right">{{ key }}</th>
+						<th class="text-right">{{ key }}</th>
 					{% endif %}
 				{% endfor%}
 			</tr>
@@ -22,7 +22,9 @@
 						{% set tax_details = taxes.get(tax_account) %}
 						{% if tax_details %}
 							<td class='text-right'>
-								({{ tax_details.tax_rate }})
+								{% if tax_details.tax_rate or not tax_details.tax_amount %}
+									({{ tax_details.tax_rate }}%)<br>
+								{% endif %}
 								{{ frappe.utils.fmt_money(tax_details.tax_amount, None, company_currency) }}
 							</td>
 						{% else %}

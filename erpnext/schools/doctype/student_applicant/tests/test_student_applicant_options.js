@@ -15,6 +15,7 @@ QUnit.test('test student applicant', function(assert){
 		() => frappe.timeout(0.5),
 		() => frappe.tests.click_button('Submit'),
 		() => frappe.tests.click_button('Yes'),
+		() => frappe.timeout(0.5),
 		() => {
 			testing_status = $('span.indicator.orange').text();
 			assert.ok(testing_status.indexOf('Submit this document to confirm') == -1); // checking if submit has been successfull

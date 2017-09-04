@@ -7,7 +7,7 @@ frappe.query_reports["Item-wise Sales Register"] = frappe.query_reports["Sales R
 			"fieldname":"from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
-			"default": frappe.defaults.get_default("year_start_date"),
+			"default": frappe.datetime.add_months(frappe.datetime.get_today(), -1),
 			"width": "80"
 		},
 		{

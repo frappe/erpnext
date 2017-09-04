@@ -10,7 +10,7 @@ from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_
 
 class TestLeaveBlockList(unittest.TestCase):
 	def tearDown(self):
-		 frappe.set_user("Administrator")
+		frappe.set_user("Administrator")
 
 	def test_get_applicable_block_dates(self):
 		frappe.set_user("test@example.com")
