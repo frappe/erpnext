@@ -1,5 +1,5 @@
 import frappe
-from patches.v8_10.change_default_customer_credit_days import make_payment_term, make_template
+from erpnext.patches.v8_10.change_default_customer_credit_days import make_payment_term, make_template
 
 
 def execute():
@@ -25,15 +25,15 @@ def execute():
 		else:
 			payment_term = frappe.get_doc("Payment Term", pyt_term_name)
 
-		payment_terms.append('WHEN `supplier_name`="%s" THEN "%s"' % (supplier_type, payment_term.payment_term_name))
+		payment_terms.append('WHEN `supplier_type`="%s" THEN "%s"' % (supplier_type, payment_term.payment_term_name))
 		supplier_types.append(supplier_type)
 
-	begin_query_str = "UPDATE `tabSupplier` SET `payment_terms` = CASE "
+	begin_query_str = "UPDATE `tabSupplier Type` SET `payment_terms` = CASE "
 	value_query_str = " ".join(payment_terms)
 	cond_query_str = " ELSE `payment_terms` END WHERE "
 
 	if supplier_types:
 		frappe.db.sql(
-			begin_query_str + value_query_str + cond_query_str + '`supplier_name` IN %s',
+			begin_query_str + value_query_str + cond_query_str + '`supplier_type` IN %s',
 			(supplier_types,)
 		)

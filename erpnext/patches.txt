@@ -439,3 +439,5 @@ erpnext.patches.v8_10.add_due_date_to_gle
 erpnext.patches.v8_10.update_gl_due_date_for_pi_and_si
 erpnext.patches.v8_10.add_payment_terms_field_to_supplier
 erpnext.patches.v8_10.change_default_customer_credit_days
+erpnext.patches.v8_10.add_payment_terms_field_to_supplier_type
+erpnext.patches.v8_10.change_default_supplier_type_credit_days

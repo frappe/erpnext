@@ -3,6 +3,10 @@ import frappe
 
 
 def execute():
+	frappe.reload_doc("accounts", "doctype", "payment_term")
+	frappe.reload_doc("accounts", "doctype", "payment_terms_template_detail")
+	frappe.reload_doc("accounts", "doctype", "payment_terms_template")
+
 	payment_terms = []
 	customers = []
 	suppliers = []
@@ -14,9 +18,9 @@ def execute():
 	credit_records = ((record[0], record[1], record[2]) for record in credit_days)
 	for days, based_on, customer_name in credit_records:
 		payment_term = make_payment_term(days, based_on)
-		payment_terms.append('WHEN `customer_name`="%s" THEN "%s"' % (customer_name, payment_term.payment_term_name))
+		template = make_template(payment_term)
+		payment_terms.append('WHEN `customer_name`="%s" THEN "%s"' % (customer_name, template.template_name))
 		customers.append(customer_name)
-		make_template(payment_term)
 
 	begin_query_str = "UPDATE `tabCustomer` SET `payment_terms` = CASE "
 	value_query_str = " ".join(payment_terms)
@@ -38,17 +42,17 @@ def execute():
 	credit_records = ((record[0], record[1], record[2]) for record in credit_days)
 	for days, based_on, supplier_name in credit_records:
 		if based_on == "Fixed Days":
-			pyt_term_name = 'N{0}'.format(days)
+			pyt_template_name = 'Default Payment Term - N{0}'.format(days)
 		else:
-			pyt_term_name = 'EO2M'
+			pyt_template_name = 'Default Payment Term - EO2M'
 
-		if not frappe.db.exists("Payment Term", pyt_term_name):
+		if not frappe.db.exists("Payment Term Template", pyt_template_name):
 			payment_term = make_payment_term(days, based_on)
-			make_template(payment_term)
+			template = make_template(payment_term)
 		else:
-			payment_term = frappe.get_doc("Payment Term", pyt_term_name)
+			template = frappe.get_doc("Payment Term Template", pyt_template_name)
 
-		payment_terms.append('WHEN `supplier_name`="%s" THEN "%s"' % (supplier_name, payment_term.payment_term_name))
+		payment_terms.append('WHEN `supplier_name`="%s" THEN "%s"' % (supplier_name, template.template_name))
 		suppliers.append(supplier_name)
 
 	begin_query_str = "UPDATE `tabSupplier` SET `payment_terms` = CASE "
@@ -73,8 +77,10 @@ def make_template(payment_term):
 
 	template = frappe.new_doc('Payment Terms Template')
 	template.template_name = 'Default Payment Term - {0}'.format(payment_term.payment_term_name)
-	template.terms = [doc]
+	template.append('terms', doc)
 	template.save()
+
+	return template
 
 
 def make_payment_term(days, based_on):
