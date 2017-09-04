@@ -571,7 +571,8 @@ frappe.ui.form.on("Sales Invoice", {
 	},
 
 	disable_due_date: function() {
-		const disable = !cur_frm.doc.payment_terms_template && cur_frm.doc.payment_schedule.length == 0;
+		const disable = cur_frm.doc.payment_terms_template || (
+							cur_frm.doc.payment_schedule && cur_frm.doc.payment_schedule.length == 0);
 		cur_frm.set_df_property("due_date", "read_only", disable ? 1 : 0);
 	},
 
