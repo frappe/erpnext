@@ -4,6 +4,6 @@ import frappe
 
 def execute():
 	if not frappe.db.has_column("Customer", "payment_terms"):
-		frappe.db.sql("ALTER TABLE `tabCustomer` ADD COLUMN `payment_terms` DATE DEFAULT NULL")
+		frappe.db.sql("ALTER TABLE `tabCustomer` ADD COLUMN `payment_terms` VARCHAR(140) NULL")
 	if not frappe.db.has_column("Supplier", "payment_terms"):
-		frappe.db.sql("ALTER TABLE `tabSupplier` ADD COLUMN `payment_terms` DATE DEFAULT NULL")
+		frappe.db.sql("ALTER TABLE `tabSupplier` ADD COLUMN `payment_terms` VARCHAR(140) NULL")

@@ -55,7 +55,7 @@ def execute():
 	value_query_str = " ".join(payment_terms)
 	cond_query_str = " ELSE `payment_terms` END WHERE "
 
-	if customers:
+	if suppliers:
 		frappe.db.sql(
 			begin_query_str + value_query_str + cond_query_str + '`supplier_name` IN %s',
 			(suppliers,)
