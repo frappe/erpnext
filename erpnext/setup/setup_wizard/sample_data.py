@@ -10,25 +10,26 @@ import random, os, json
 from frappe import _
 from markdown2 import markdown
 
-def make_sample_data(args):
+def make_sample_data(domain, make_dependent = False):
 	"""Create a few opportunities, quotes, material requests, issues, todos, projects
 	to help the user get started"""
-	items = frappe.get_all("Item", {'is_sales_item': 1})
 
-	customers = frappe.get_all("Customer")
-	warehouses = frappe.get_all("Warehouse")
+	if make_dependent:
+		items = frappe.get_all("Item", {'is_sales_item': 1})
+		customers = frappe.get_all("Customer")
+		warehouses = frappe.get_all("Warehouse")
 
-	if items and customers:
-		for i in range(3):
-			customer = random.choice(customers).name
-			make_opportunity(items, customer)
-			make_quote(items, customer)
+		if items and customers:
+			for i in range(3):
+				customer = random.choice(customers).name
+				make_opportunity(items, customer)
+				make_quote(items, customer)
 
-	make_projects(args.get('domain'))
+		if items and warehouses:
+			make_material_request(frappe.get_all("Item"))
+
+	make_projects(domain)
 	import_email_alert()
-
-	if items and warehouses:
-		make_material_request(frappe.get_all("Item"))
 
 	frappe.db.commit()
 

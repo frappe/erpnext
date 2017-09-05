@@ -161,7 +161,7 @@ cur_frm.cscript['Make Sales Order'] = function() {
 
 cur_frm.cscript['Declare Order Lost'] = function(){
 	var dialog = new frappe.ui.Dialog({
-		title: "Set as Lost",
+		title: __('Set as Lost'),
 		fields: [
 			{"fieldtype": "Text", "label": __("Reason for losing"), "fieldname": "reason",
 				"reqd": 1 },

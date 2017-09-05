@@ -36,5 +36,4 @@ A separate Chart of Account master will be set for each company in the ERPNext. 
 
 <img alt="New Company" class="screenshot" src="/docs/assets/img/articles/new-company-3.png">
 
-
 <!-- markdown -->
