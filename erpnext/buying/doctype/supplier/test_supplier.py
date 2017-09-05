@@ -38,25 +38,20 @@ class TestSupplier(unittest.TestCase):
         frappe.db.set_value("Supplier", "_Test Supplier With Template 1", "payment_terms", "")
 
         # Set credit limit for the supplier type instead of supplier and evaluate the due date
-        # frappe.db.set_value("Supplier Type", "_Test Supplier Type", "credit_days_based_on",
-        #                     "Fixed Days")
-        # frappe.db.set_value("Supplier Type", "_Test Supplier Type", "credit_days", 10)
-        #
-        # due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier", "_Test Company")
-        # self.assertEqual(due_date, "2016-02-01")
-        #
-        # # Set credit limit for the supplier type instead of supplier and evaluate the due date
-        # # based on Last day of next month
-        # frappe.db.set_value("Supplier", "_Test Supplier Type", "credit_days", 0)
-        # frappe.db.set_value("Supplier Type", "_Test Supplier Type", "credit_days_based_on",
-        #                     "Last Day of the Next Month")
-        #
-        # # Leap year
-        # due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier", "_Test Company")
-        # self.assertEqual(due_date, "2016-02-29")
+        frappe.db.set_value("Supplier Type", "_Test Supplier Type", "payment_terms", "_Test Payment Term Template 3")
+
+        due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier With Template 1")
+        self.assertEqual(due_date, "2016-02-21")
+
+        # Set credit limit for the supplier type instead of supplier and evaluate the due date
+        frappe.db.set_value("Supplier Type", "_Test Supplier Type", "payment_terms", "_Test Payment Term Template 1")
+
+        # Leap year
+        due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier With Template 1")
+        self.assertEqual(due_date, "2016-02-29")
         # # Non Leap year
-        # due_date = get_due_date("2017-01-22", "Supplier", "_Test Supplier", "_Test Company")
-        # self.assertEqual(due_date, "2017-02-28")
+        due_date = get_due_date("2017-01-22", "Supplier", "_Test Supplier With Template 1")
+        self.assertEqual(due_date, "2017-02-28")
 
     def test_supplier_disabled(self):
         make_test_records("Item")
