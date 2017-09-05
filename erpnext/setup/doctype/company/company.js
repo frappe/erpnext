@@ -12,9 +12,9 @@ frappe.ui.form.on("Company", {
 		if(frm.doc.__islocal) {
 			let parts = frm.doc.company_name.split();
 			let abbr = $.map(parts, function (p) {
-				return p? p.substr(0, 1) : null 
+				return p? p.substr(0, 1) : null;
 			}).join("");
-			frm.set_value("abbr", abbr)
+			frm.set_value("abbr", abbr);
 		}
 	},
 
