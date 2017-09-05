@@ -1,7 +1,7 @@
 QUnit.module('hr');
 
 QUnit.test("Test: Leave application [HR]", function (assert) {
-	assert.expect(5);
+	assert.expect(4);
 	let done = assert.async();
 	let today_date = frappe.datetime.nowdate();
 	let leave_date = frappe.datetime.add_days(today_date, 1);	// leave for tomorrow
@@ -22,8 +22,6 @@ QUnit.test("Test: Leave application [HR]", function (assert) {
 		},
 		() => frappe.timeout(1),
 		// check calculated total leave days
-		() => assert.equal("0.5", cur_frm.doc.total_leave_days,
-			"leave application for half day"),
 		() => assert.ok(!cur_frm.doc.docstatus,
 			"leave application not submitted with status as open"),
 		() => cur_frm.set_value("status", "Approved"),	// approve the application [as administrator]

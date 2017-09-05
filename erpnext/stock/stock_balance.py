@@ -1,7 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 import frappe
 
 from frappe.utils import flt, cstr, nowdate, nowtime
@@ -170,7 +170,7 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 			where item_code=%s and warehouse=%s and docstatus < 2""", (d[0], d[1]))
 
 		if serial_nos and flt(serial_nos[0][0]) != flt(d[2]):
-			print d[0], d[1], d[2], serial_nos[0][0]
+			print(d[0], d[1], d[2], serial_nos[0][0])
 
 		sle = frappe.db.sql("""select valuation_rate, company from `tabStock Ledger Entry`
 			where item_code = %s and warehouse = %s and ifnull(is_cancelled, 'No') = 'No'
@@ -244,7 +244,7 @@ def repost_all_stock_vouchers():
 	i = 0
 	for voucher_type, voucher_no in vouchers:
 		i+=1
-		print i, "/", len(vouchers), voucher_type, voucher_no
+		print(i, "/", len(vouchers), voucher_type, voucher_no)
 		try:
 			for dt in ["Stock Ledger Entry", "GL Entry"]:
 				frappe.db.sql("""delete from `tab%s` where voucher_type=%s and voucher_no=%s"""%
@@ -259,9 +259,9 @@ def repost_all_stock_vouchers():
 			doc.update_stock_ledger()
 			doc.make_gl_entries(repost_future_gle=False)
 			frappe.db.commit()
-		except Exception, e:
-			print frappe.get_traceback()
+		except Exception as e:
+			print(frappe.get_traceback())
 			rejected.append([voucher_type, voucher_no])
 			frappe.db.rollback()
 
-	print rejected
+	print(rejected)

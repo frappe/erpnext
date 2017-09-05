@@ -67,7 +67,7 @@ class Customer(TransactionBase):
 		'''If Customer created from Lead, update lead status to "Converted"
 		update Customer link in Quotation, Opportunity'''
 		if self.lead_name:
-		 	frappe.db.set_value('Lead', self.lead_name, 'status', 'Converted', update_modified=False)
+			frappe.db.set_value('Lead', self.lead_name, 'status', 'Converted', update_modified=False)
 
 			for doctype in ('Opportunity', 'Quotation'):
 				for d in frappe.get_all(doctype, {'lead': self.lead_name}):
