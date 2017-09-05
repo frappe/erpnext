@@ -6,19 +6,27 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from erpnext.hr.doctype.employee.employee import get_employee_emails
 
 class TrainingResult(Document):
+	def validate(self):
+		training_event = frappe.get_doc("Training Event", self.training_event)
+		if training_event.docstatus != 1:
+			frappe.throw(_('{0} must be submitted').format(_('Training Event')))
+
+		self.employee_emails = ', '.join(get_employee_emails([d.employee
+			for d in self.employees]))
+
 	def on_submit(self):
-		self.send_result()
-	
-	def send_result(self):
-		for emp in self.employees:
-			message = "Thank You for attending {0}.".format(self.training_event)
-			if emp.grade: 
-				message = message + "Your grade: {0}".format(emp.grade)
-			frappe.sendmail(frappe.db.get_value("Employee", emp.employee, "company_email"), \
-				subject=_("{0} Results".format(self.training_event)), \
-				content=message)
+		training_event = frappe.get_doc("Training Event", self.training_event)
+		training_event.status = 'Completed'
+		for e in self.employees:
+			for e1 in training_event.employees:
+				if e1.employee == e.employee:
+					e1.status = 'Completed'
+					break
+
+		training_event.save()
 
 @frappe.whitelist()
 def get_employees(training_event):
