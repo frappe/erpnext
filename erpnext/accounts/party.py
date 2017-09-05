@@ -275,6 +275,7 @@ def get_due_date(posting_date, party_type, party):
 			if party_type == "Supplier":
 				supplier_type = frappe.db.get_value(party_type, party, fieldname="supplier_type")
 				template_name = frappe.db.get_value("Supplier Type", supplier_type, fieldname="payment_terms")
+				print("template name:", template_name)
 				due_date = get_due_date_from_template(template_name, posting_date).strftime("%Y-%m-%d")
 
 	return due_date
