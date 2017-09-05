@@ -60,8 +60,13 @@ class DailyWorkSummary(Document):
 					if file_name:
 						file_name = file_name[0].name
 						file_doc = frappe.get_doc('File', file_name)
-						d.image = file_doc.make_thumbnail(set_as_thumbnail=False, width=100, height=100)
-			except:
+						d.image = file_doc.make_thumbnail(
+							set_as_thumbnail=False,
+							width=100,
+							height=100,
+							crop=True
+						)
+			except Exception:
 				pass
 
 			if d.sender in did_not_reply:
