@@ -15,7 +15,8 @@ class OpeningInvoiceCreationTool(Document):
 		self.make_invoices()
 
 	def make_invoices(self):
-		mandatory_error_msg = _("Row {idx}: {field} is required to create the Opening {invoice_type} Invoices") 
+		names = []
+		mandatory_error_msg = _("Row {idx}: {field} is required to create the Opening {invoice_type} Invoices")
 		if not self.company:
 			frappe.throw(_("Please select the Company"))
 
@@ -26,6 +27,9 @@ class OpeningInvoiceCreationTool(Document):
 					field="Party",
 					invoice_type=self.invoice_type
 				))
+			# set party type if not available
+			if not row.party_type:
+				row.party_type = "Customer" if self.invoice_type == "Sales" else "Supplier"
 
 			if not row.posting_date:
 				frappe.throw(mandatory_error_msg.format(
@@ -40,6 +44,7 @@ class OpeningInvoiceCreationTool(Document):
 
 			doc = frappe.get_doc(args).insert()
 			doc.submit()
+			names.append(doc.name)
 
 			# create GL entries
 			if doc.base_grand_total:
@@ -51,9 +56,14 @@ class OpeningInvoiceCreationTool(Document):
 					dict(progress=[row.idx, len(self.invoices)], title=_('Creating {0}').format(doc.doctype)),
 					user=frappe.session.user)
 
+		return names
+
 	def get_invoice_dict(self, row=None):
 		def get_item_dict():
 			default_uom = frappe.db.get_single_value("Stock Settings", "stock_uom") or _("Nos")
+			cost_center = frappe.db.get_value("Company", self.company, "cost_center")
+			if not cost_center:
+				frappe.throw(_("Please set the Default Cost Center in {0} company").format(frappe.bold(self.company)))
 			rate = flt(row.net_total) / (flt(row.qty) or 1.0)
 
 			return frappe._dict({
@@ -63,7 +73,8 @@ class OpeningInvoiceCreationTool(Document):
 				"conversion_factor": 1.0,
 				"item_name": row.item_name or "Opening Item",
 				"description": row.item_name or "Opening Item",
-				income_expense_account_field: self.get_account()
+				income_expense_account_field: self.get_account(),
+				"cost_center": cost_center
 			})
 
 		if not row:
@@ -79,16 +90,21 @@ class OpeningInvoiceCreationTool(Document):
 		return frappe._dict({
 			"items": [item],
 			"is_opening": "Yes",
+			"set_posting_time": 1,
 			"company": self.company,
-			"due_date": row.posting_date,
+			"due_date": row.due_date,
 			"posting_date": row.posting_date,
 			frappe.scrub(party_type): row.party,
 			"doctype": "Sales Invoice" if self.invoice_type == "Sales" \
-				else "Purchase Invoice"
+				else "Purchase Invoice",
+			"currency": frappe.db.get_value("Company", self.company, "default_currency")
 		})
 
 	def get_account(self):
-		accounts = frappe.get_all("Account", filters={'account_type': 'Temporary'})
+		accounts = frappe.get_all("Account", filters={
+			'company': self.company,
+			'account_type': 'Temporary'
+		})
 		if not accounts:
 			frappe.throw(_("Please add the Temporary Opening account in Chart of Accounts"))
 
@@ -109,6 +125,8 @@ class OpeningInvoiceCreationTool(Document):
 
 		# gl entry for party
 		dr_or_cr = "credit" if party_type == "Customer" else "debit"
+		amount = doc.grand_total - outstanding_amount
+		amount_in_account_currency = flt(amount * doc.conversion_rate or 1.0)
 		gle = gl_dict.copy()
 		gle.update({
 			"party": party,
@@ -116,8 +134,8 @@ class OpeningInvoiceCreationTool(Document):
 			"against": self.get_account(),
 			"against_voucher": doc.name,
 			"against_voucher_type": doc.doctype,
-			dr_or_cr: doc.base_grand_total - outstanding_amount,
-			dr_or_cr + "_in_account_currency": doc.grand_total - outstanding_amount,
+			dr_or_cr: amount_in_account_currency,
+			dr_or_cr + "_in_account_currency": amount_in_account_currency,
 			"account": doc.debit_to if doc.doctype == "Sales Invoice" else doc.credit_to
 		})
 		gl_entries.append(gle)
@@ -127,8 +145,8 @@ class OpeningInvoiceCreationTool(Document):
 		gle.update({
 			"against": party,
 			"account": self.get_account(),
-			dr_or_cr: doc.base_grand_total - outstanding_amount,
-			dr_or_cr + "_in_account_currency": doc.grand_total - outstanding_amount
+			dr_or_cr: amount_in_account_currency,
+			dr_or_cr + "_in_account_currency": amount_in_account_currency
 		})
 		gl_entries.append(gle)
 
@@ -155,18 +173,3 @@ class OpeningInvoiceCreationTool(Document):
 		})
 		gl_dict.update(args)
 		return gl_dict
-
-	def get_gl_entries(self):
-		gl_entries.append(
-			self.get_gl_dict(doc.posting_date, {
-				"account": self.debit_to,
-				"party_type": "Customer",
-				"party": self.customer,
-				"against": self.against_income_account,
-				"debit": grand_total_in_company_currency,
-				"debit_in_account_currency": grand_total_in_company_currency \
-					if self.party_account_currency==self.company_currency else self.grand_total,
-				"against_voucher": self.return_against if cint(self.is_return) else self.name,
-				"against_voucher_type": self.doctype
-			}, self.party_account_currency)
-		)
