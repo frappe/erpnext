@@ -132,6 +132,7 @@ erpnext.bom.BomController = erpnext.TransactionController.extend({
 			item.stock_qty = flt(item.qty * item.conversion_factor, precision("stock_qty", item));
 			refresh_field("stock_qty", item.name, item.parentfield);
 			this.toggle_conversion_factor(item);
+			this.frm.events.update_cost(this.frm);
 		}
 	},
 });
