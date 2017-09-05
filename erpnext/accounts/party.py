@@ -271,6 +271,11 @@ def get_due_date(posting_date, party_type, party):
 		template_name = get_pyt_term_template(party, party_type)
 		if template_name:
 			due_date = get_due_date_from_template(template_name, posting_date).strftime("%Y-%m-%d")
+		else:
+			if party_type == "Supplier":
+				supplier_type = frappe.db.get_value(party_type, party, fieldname="supplier_type")
+				template_name = frappe.db.get_value("Supplier Type", supplier_type, fieldname="payment_terms")
+				due_date = get_due_date_from_template(template_name, posting_date).strftime("%Y-%m-%d")
 
 	return due_date
 
