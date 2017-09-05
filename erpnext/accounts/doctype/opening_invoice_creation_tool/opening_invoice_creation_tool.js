@@ -14,10 +14,12 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 
 	refresh: (frm) => {
 		frm.disable_save();
-		frm.page.set_primary_action(__("Make Invoice"), function() {
+		frm.page.set_primary_action(__("Make Invoice"), () => {
+			btn_primary = frm.page.btn_primary.get(0);
 			return frm.call({
 				doc: frm.doc,
 				freeze: true,
+				btn: $(btn_primary),
 				method: "make_invoices",
 				freeze_message: __("Creating {0} Invoice", [frm.doc.invoice_type]),
 				callback: (r) => {
