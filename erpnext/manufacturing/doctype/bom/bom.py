@@ -512,6 +512,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 
 	# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 	query = """select
+				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s ) as idx,
 				bom_item.item_code,
 				item.item_name,
 				sum(bom_item.stock_qty/ifnull(bom.quantity, 1)) * %(qty)s as qty,
@@ -531,20 +532,21 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				and item.name = bom_item.item_code
 				and is_stock_item = 1
 				{where_conditions}
-				group by item_code, stock_uom"""
+				group by item_code, stock_uom
+				order by idx"""
 
 	if fetch_exploded:
 		query = query.format(table="BOM Explosion Item",
 			where_conditions="""and item.is_sub_contracted_item = 0""",
 			select_columns = ", bom_item.source_warehouse")
-		items = frappe.db.sql(query, { "qty": qty,	"bom": bom }, as_dict=True)
+		items = frappe.db.sql(query, { "parent": bom, "qty": qty,	"bom": bom }, as_dict=True)
 	elif fetch_scrap_items:
 		query = query.format(table="BOM Scrap Item", where_conditions="", select_columns="")
-		items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
+		items = frappe.db.sql(query, { "parent": bom, "qty": qty, "bom": bom }, as_dict=True)
 	else:
 		query = query.format(table="BOM Item", where_conditions="",
 			select_columns = ", bom_item.source_warehouse")
-		items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
+		items = frappe.db.sql(query, { "parent": bom, "qty": qty, "bom": bom }, as_dict=True)
 
 	for item in items:
 		if item_dict.has_key(item.item_code):
