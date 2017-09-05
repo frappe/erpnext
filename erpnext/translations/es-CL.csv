@@ -29,7 +29,7 @@ DocType: Stock Entry,Customer or Supplier Details,Detalle de cliente o proveedor
 DocType: Course Scheduling Tool,Course Scheduling Tool,Herramienta de Programación de cursos
 DocType: Shopping Cart Settings,Checkout Settings,Ajustes de Finalización de Pedido
 DocType: Guardian Interest,Guardian Interest,Interés del Guardián
-apps/erpnext/erpnext/public/js/setup_wizard.js +376,Classrooms/ Laboratories etc where lectures can be scheduled.,"Aulas / laboratorios, etc., donde las lecturas se pueden programar."
+apps/erpnext/erpnext/utilities/user_progress.py +184,Classrooms/ Laboratories etc where lectures can be scheduled.,"Aulas / laboratorios, etc., donde las lecturas se pueden programar."
 apps/erpnext/erpnext/templates/includes/cart/cart_dropdown.html +18,Checkout,Finalizando pedido
 DocType: Guardian Student,Guardian Student,Guardián del Estudiante
 DocType: BOM Operation,Base Hour Rate(Company Currency),Tarifa Base por Hora (Divisa de Compañía)
