@@ -354,7 +354,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			this.frm.email_doc();
 		});
 	}
-}
+};
 
 class POSCart {
 	constructor({frm, wrapper, events}) {
