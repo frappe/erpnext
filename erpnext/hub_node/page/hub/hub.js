@@ -263,7 +263,7 @@ window.ERPNextHub = class ERPNextHub {
 		});
 	}
 
-	go_to_items_only_page(route, title, class_name, filters = {text: ''}) {
+	go_to_items_only_page(route, title, class_name, filters = {text: ''}, by_item_codes=0) {
 		frappe.set_route(route);
 		this.$hub_main_section.empty();
 		this.filtered_item_list = new ERPNextHubList({
@@ -273,7 +273,8 @@ window.ERPNextHub = class ERPNextHub {
 			list_css_class: class_name,
 			method: 'erpnext.hub_node.get_items',
 			order_by: this.order_by,
-			filters: filters
+			filters: filters,
+			by_item_codes: by_item_codes
 		});
 		this.filtered_item_list.on_item_click = (item) => {
 			this.go_to_item_page(item);
@@ -504,7 +505,7 @@ window.ERPNextHub = class ERPNextHub {
 
 		this.sidebar.add_item({
 			label: __("Requested Products"),
-			on_click: () => {}
+			on_click: () => this.go_to_seen_items()
 		}, __("Account"));
 
 		this.sidebar.add_item({
@@ -532,7 +533,7 @@ window.ERPNextHub = class ERPNextHub {
 
 	make_rfq(item, callback) {
 		frappe.call({
-			method: 'erpnext.hub_node.make_rfq_and_send_opportunity',
+			method: 'erpnext.hub_node.hub_item_request_action',
 			args: {
 				item_code: item.item_code,
 				item_group: 'Products',
@@ -541,10 +542,19 @@ window.ERPNextHub = class ERPNextHub {
 				company: item.company_name,
 				country: item.country
 			},
-			callback: function(r) {
+			callback: (r) => {
 				callback(r.message);
 			}
 		});
+	}
+
+	go_to_seen_items() {
+		this.go_to_items_only_page(
+			['hub', 'Requested Products'],
+			__('Requested Products'),
+			'requested-product-list',
+			{}, 1
+		);
 	}
 }
 
@@ -552,11 +562,12 @@ class ERPNextHubList {
 	constructor({
 		parent = null,
 		title = 'Products',
-		page_length = 10,
+		page_length = 20,
 		list_css_class = '',
-		method = '',
+		method = 'erpnext.hub_node.get_items',
 		filters = {text: ''},
 		order_by = '',
+		by_item_codes = 0,
 		paginated = 1,
 		on_item_click = null,
 		img_size = 200
@@ -568,6 +579,7 @@ class ERPNextHubList {
 		this.method = method;
 		this.filters = filters;
 		this.order_by = order_by;
+		this.by_item_codes = by_item_codes;
 		this.paginated = paginated;
 
 		this.on_item_click = on_item_click;
@@ -631,33 +643,64 @@ class ERPNextHubList {
 		// build args
 		let args = {
 			start: start,
+			// query one extra
 			limit: this.page_length + 1
 		};
 		Object.assign(args, this.filters);
 		console.log("filters: ", args);
 		args.order_by = this.order_by;
+		args.by_item_codes = this.by_item_codes;
+
 		frappe.call({
 			method: this.method,
 			args: args,
 			callback: (r) => {
 				let items = r.message.items;
 				console.log("items: ", items);
-				this.$loading.hide();
-				if(items) {
-					if(items.length && items.length > this.page_length) {
-						items.pop();
-						this.$more.show();
-						this.$done.addClass('hide');
-					} else {
-						this.$done.removeClass('hide');
-						this.$more.hide();
-					}
-					items.forEach((item) => {
-						this.make_item_card(item).appendTo(this.$list);
-					});
-				} else {
-					this.$item_list_title.html('No results found');
-				}
+				this.render_items(items);
+			}
+		});
+	}
+
+	render_items(items) {
+		if(items) {
+			let done = 0;
+			if(items.length && items.length > this.page_length) {
+				// remove the extra queried
+				items.pop();
+			} else {
+				done = 1;
+			}
+			this.get_items_seen_states(items, done, (items, done) => {
+				items.forEach((item) => {
+					this.make_item_card(item).appendTo(this.$list);
+				});
+				this.update_list_state(done);
+			});
+		} else {
+			this.$item_list_title.html('No results found');
+		}
+	}
+
+	update_list_state(done=0) {
+		this.$loading.hide();
+		if(done) {
+			this.$done.removeClass('hide');
+			this.$more.hide();
+		} else {
+			this.$more.show();
+			this.$done.addClass('hide');
+		}
+	}
+
+	get_items_seen_states(items, done, callback) {
+		frappe.call({
+			method: 'erpnext.hub_node.get_items_seen_states',
+			args: {items: items}
+		}).then((r) => {
+			if (r.message) {
+				items = r.message;
+				callback(items, done);
 			}
 		});
 	}
@@ -671,7 +714,7 @@ class ERPNextHubList {
 					</div>
 					<div class="hub-item-title">
 						<h5 class="bold">
-							${item.item_name}
+							${!item.seen ? item.item_name : `<span class="indicator blue">${item.item_name}</span>`}
 						<h5>
 					</div>
 				</a>

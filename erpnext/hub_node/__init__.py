@@ -3,15 +3,23 @@
 
 from __future__ import unicode_literals
 import frappe, requests, json
-from frappe.utils import now, nowdate
+from frappe.utils import now, nowdate, cint
 from erpnext.hub_node.doctype.hub_settings.hub_settings import hub_request
 
 opp_msg_id = ""
 
 @frappe.whitelist()
-def get_items(text, start=0, limit=20, order_by='', category=None, company_name=None, country=None):
+def get_items(text='', by_item_codes=0, start=0, limit=20, order_by='', category=None, company_name=None, country=None):
+	item_codes = []
+	if cint(by_item_codes):
+		item_codes = [d["item_code"] for d in frappe.get_all("Item", fields=["item_code"], filters={"is_hub_item": "1"},
+			limit_start = start, limit_page_length = limit)]
+		if not item_codes:
+			return []
+
 	args = {
 		"text": text,
+		"item_codes": item_codes,
 		"category": category,
 		"company_name": company_name,
 		"country": country,
@@ -67,38 +75,50 @@ def update_local_hub_categories():
 		doc.category_name = d
 		doc.save()
 
-@frappe.whitelist()
-def hub_item_request_action(item_code, item_group, supplier_name, supplier_email, company, country):
-	# make rfq, send click count and say requested
-	# enqueue opportunity message
-	pass
 
 @frappe.whitelist()
-def make_rfq_and_send_opportunity(item_code, item_group, supplier_name, supplier_email, company, country):
+def get_items_seen_states(items):
+	items = json.loads(items)
+	for d in items:
+		local_item_code = "HUB-" + d["item_code"]
+		if frappe.db.exists("Item", {"item_code": local_item_code}):
+			d["seen"] = 1
+		else:
+			d["seen"] = 0
+	return items
+
+@frappe.whitelist()
+def get_local_hub_item_codes():
+	item_codes = []
+	for d in frappe.get_all("Item", fields=["item_code"], filters={"is_hub_item": 1}):
+		item_codes.append(d["item_code"][4:])
+	return item_codes
+
+@frappe.whitelist()
+def hub_item_request_action(item_code, item_group, supplier_name, supplier_email, company, country):
 	rfq_made = make_rfq(item_code, item_group, supplier_name, supplier_email, company, country)
-	opportunity_sent = send_opportunity(supplier_name, supplier_email)
-	return rfq_made and opportunity_sent
+	# , send click count and say requested
+	# opportunity_sent = send_opportunity(supplier_name, supplier_email)
+	return rfq_made
 
 @frappe.whitelist()
 def request_opportunity_message_status():
-	# needs an outgoing hub message
-	return hub_request('get_message_status', data={
+	return hub_request('get_message_status', data=json.dumps({
 		"message_id": "CLIENT-OPP-"
-	})
+	}))
 
 def send_opportunity(supplier_name, supplier_email):
-	args = {
+	params = {
 		"buyer_name": supplier_name,
 		"email_id": supplier_email
 	}
-	opp_msg_id = hub_request('enqueue_message', data={
+	args = {
 		"message_type": "CLIENT-OPP-",
 		"method": "make_opportunity",
-		"arguments": json.dumps(args),
+		"arguments": json.dumps(params),
 		"receiver_email": supplier_email
-	})
-
-	return opp_msg_id
+	}
+	return hub_request('enqueue_message', data=json.dumps(args))
 
 def make_rfq(item_code, item_group, supplier_name, supplier_email, company, country):
 	item_code = "HUB-" + item_code
