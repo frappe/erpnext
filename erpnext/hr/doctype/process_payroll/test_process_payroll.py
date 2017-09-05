@@ -16,10 +16,13 @@ class TestProcessPayroll(unittest.TestCase):
 		fiscal_year = "_Test Fiscal Year 2016"
 
 		for data in frappe.get_all('Salary Component', fields = ["name"]):
-			if not frappe.db.get_value('Salary Component Account', {'parent': data.name, 'company': erpnext.get_default_company()}, 'name'):
+			if not frappe.db.get_value('Salary Component Account',
+				{'parent': data.name, 'company': erpnext.get_default_company()}, 'name'):
 				get_salary_component_account(data.name)
 				
-		payment_account = frappe.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
+		payment_account = frappe.get_value('Account',
+			{'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
+
 		if not frappe.db.get_value("Salary Slip", {"start_date": "2016-11-01", "end_date": "2016-11-30"}):
 			process_payroll = frappe.get_doc("Process Payroll", "Process Payroll")
 			process_payroll.company = erpnext.get_default_company()

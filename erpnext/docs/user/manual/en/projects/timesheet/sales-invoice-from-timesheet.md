@@ -48,6 +48,8 @@ In the Timesheet, if "Is Billable" is checked, you will find option to create Sa
 
 <img class="screenshot" alt="Sales Invoice" src="/docs/assets/img/project/timesheet/timesheet-invoice-1.png">
 
+<img class="screenshot" alt="Sales Invoice timesheet" src="{{docs_base_url}}/assets/img/project/timesheet/make_invoice_from_timesheet.gif">
+
 ####Sales Invoice
 
 Sales Invoice has dedicated table for the Timesheet table where Timesheet details will be updated. You can select more Timesheets in this table.

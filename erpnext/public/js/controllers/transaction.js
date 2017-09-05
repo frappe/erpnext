@@ -528,6 +528,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			if(this.frm.doc.ignore_pricing_rule) {
 				this.calculate_taxes_and_totals();
 			} else if (!this.in_apply_price_list){
+				this.set_actual_charges_based_on_currency();
 				this.apply_price_list();
 			}
 
@@ -538,6 +539,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				me.set_df_property("conversion_rate", "read_only", cint(d.allow_stale) ? 0 : 1);
 			}
 		);
+	},
+
+	set_actual_charges_based_on_currency: function() {
+		var me = this;
+		$.each(this.frm.doc.taxes || [], function(i, d) {
+			if(d.charge_type == "Actual") {
+				frappe.model.set_value(d.doctype, d.name, "tax_amount",
+					flt(d.tax_amount) / flt(me.frm.doc.conversion_rate));
+			}
+		});
 	},
 
 	get_exchange_rate: function(transaction_date, from_currency, to_currency, callback) {
