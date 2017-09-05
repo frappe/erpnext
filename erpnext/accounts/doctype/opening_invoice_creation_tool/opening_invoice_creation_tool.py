@@ -15,7 +15,25 @@ class OpeningInvoiceCreationTool(Document):
 		self.make_invoices()
 
 	def make_invoices(self):
+		mandatory_error_msg = _("Row {idx}: {field} is required to create the Opening {invoice_type} Invoices") 
+		if not self.company:
+			frappe.throw(_("Please select the Company"))
+
 		for row in self.invoices:
+			if not row.party:
+				frappe.throw(mandatory_error_msg.format(
+					idx=row.idx,
+					field="Party",
+					invoice_type=self.invoice_type
+				))
+
+			if not row.posting_date:
+				frappe.throw(mandatory_error_msg.format(
+					idx=row.idx,
+					field="Party",
+					invoice_type=self.invoice_type
+				))
+
 			args = self.get_invoice_dict(row=row)
 			if not args:
 				continue
