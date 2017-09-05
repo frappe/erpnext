@@ -86,9 +86,8 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertEqual(outstanding_amount, 0)
 
 	def test_payment_entry_against_ec(self):
-
 		payable = frappe.db.get_value('Company', "_Test Company", 'default_payable_account')
-		ec =  make_expense_claim(payable, 300, 300, "_Test Company","Travel Expenses - _TC")
+		ec =  make_expense_claim(300, 300, "Travel Expenses - _TC", "_Test Company", payable)
 		pe = get_payment_entry("Expense Claim", ec.name, bank_account="_Test Bank USD - _TC", bank_amount=300)
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
