@@ -1,4 +1,5 @@
 /* global Clusterize */
+frappe.provide('erpnext.pos');
 
 frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 	frappe.ui.make_app_page({
@@ -10,7 +11,7 @@ frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 	frappe.db.get_value('POS Settings', {name: 'POS Settings'}, 'is_online', (r) => {
 		if (r && r.is_online && cint(r.is_online)) {
 			// online
-			wrapper.pos = new PointOfSale(wrapper);
+			wrapper.pos = new erpnext.pos.PointOfSale(wrapper);
 			window.cur_pos = wrapper.pos;
 		} else {
 			// offline
@@ -19,7 +20,7 @@ frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 	});
 };
 
-class PointOfSale {
+erpnext.pos.PointOfSale = class PointOfSale {
 	constructor(wrapper) {
 		this.wrapper = $(wrapper).find('.layout-main-section');
 		this.page = wrapper.page;
