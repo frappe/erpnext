@@ -2,15 +2,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, requests, json, os, redis
+import frappe, requests, json
 
 from frappe.model.document import Document
-from frappe.utils import cint, expand_relative_urls, fmt_money, flt, add_years, add_to_date, now, get_datetime, get_datetime_str
+from frappe.utils import add_years, now, get_datetime, get_datetime_str
 from frappe import _
 from erpnext.utilities.product import get_price, get_qty_in_stock
 
 # hub_url = "http://erpnext.hub:8000"
-hub_url = "http://hub.erpnext.org"
+hub_url = "https://hub.erpnext.org"
 
 batch_size = 200
 
@@ -96,11 +96,13 @@ class HubSettings(Document):
 	### Account
 	def register(self):
 		"""Register at hub.erpnext.org and exchange keys"""
-		response = requests.post(hub_url + "/api/method/hub.hub.api."+"register",
-			data = { "args_data": json.dumps(self.get_args(
+
+		response = requests.post(hub_url + "/api/method/hub.hub.api.register",
+			data = {"args_data": json.dumps(self.get_args(
 				self.config_args + self.profile_args + self.seller_args
 			))}
 		)
+
 		response.raise_for_status()
 		response_msg = response.json().get("message")
 
@@ -218,7 +220,7 @@ def check_hub_enabled():
 		frappe.throw(_("You need to enable Hub"), HubSetupError)
 
 def set_last_sync_datetime(last_sync_datetime):
-	doc = frappe.get_doc("Hub Settings", "Hub Settings")
+	# doc = frappe.get_doc("Hub Settings", "Hub Settings")
 	# doc.last_sync_datetime = get_datetime(last_sync_datetime)
 	# doc.in_callback = 1
 	# Can't even start saving, even though reset pub after works
@@ -351,3 +353,4 @@ def set_item_price(item, company, selling_price_list):
 def set_stock_qty(item):
 	qty = get_qty_in_stock(item.item_code, "hub_warehouse").stock_qty
 	item.stock_qty = qty[0][0] if qty else 0
+
