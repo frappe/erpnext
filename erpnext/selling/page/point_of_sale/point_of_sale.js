@@ -603,10 +603,16 @@ class POSCart {
 
 	update_item(item) {
 		const $item = this.$cart_items.find(`[data-item-code="${item.item_code}"]`);
+
 		if(item.qty > 0) {
+			const indicator_class = item.actual_qty >= item.qty ? 'green' : 'red';
+			const remove_class = indicator_class == 'green' ? 'red' : 'green';
+
 			$item.find('.quantity input').val(item.qty);
 			$item.find('.discount').text(item.discount_percentage + '%');
 			$item.find('.rate').text(format_currency(item.rate, this.frm.doc.currency));
+			$item.addClass(indicator_class);
+			$item.removeClass(remove_class);
 		} else {
 			$item.remove();
 		}
@@ -614,8 +620,9 @@ class POSCart {
 
 	get_item_html(item) {
 		const rate = format_currency(item.rate, this.frm.doc.currency);
+		const indicator_class = item.actual_qty >= item.qty ? 'green' : 'red';
 		return `
-			<div class="list-item" data-item-code="${item.item_code}" title="${item.item_name}">
+			<div class="list-item indicator ${indicator_class}" data-item-code="${item.item_code}" title="Item: ${item.item_name}  Available Qty: ${item.actual_qty}">
 				<div class="item-name list-item__content list-item__content--flex-1.5 ellipsis">
 					${item.item_name}
 				</div>
@@ -929,7 +936,7 @@ class POSItems {
 
 	get_item_html(item) {
 		const price_list_rate = format_currency(item.price_list_rate, this.currency);
-		const { item_code, item_name, item_image, item_stock=0} = item;
+		const { item_code, item_name, item_image} = item;
 		const item_title = item_name || item_code;
 
 		const template = `
@@ -939,7 +946,6 @@ class POSItems {
 						<a class="grey list-id" data-name="${item_code}" title="${item_title}">
 							${item_title}
 						</a>
-						<p class="text-muted small">(${__(item_stock)})</p>
 					</div>
 				</div>
 				<div class="image-view-body">
