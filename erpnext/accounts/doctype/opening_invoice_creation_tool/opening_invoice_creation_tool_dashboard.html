@@ -4,10 +4,13 @@
 {% $.each(["Sales Invoice", "Purchase Invoice"], (idx, doctype) => { %}
 {% if summery[doctype] %}
 <div class="row">
-	<div class="col-xs-5">
+	<div class="col-xs-3">
 		<a class="small invoice-link" data-type="{{ doctype }}" data-company="{{ company }}"> {{ __("{0}", [doctype]) }}</a>
 	</div>
-	<div class="col-xs-7 small text-right">
+	<div class="col-xs-3">
+		<span class=" small">{{ __("Total: {0}", [summery[doctype].total_invoices]) }}</span>
+	</div>
+	<div class="col-xs-6 small text-right">
 		<span class="inline-graph">
 			<span class="inline-graph-half" title="{{ __("Total Outstanding Amount") }}">
 				<span class="inline-graph-count">
