@@ -42,7 +42,7 @@ class TestSupplier(unittest.TestCase):
         due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier With Template 1")
         self.assertEqual(due_date, "2016-02-21")
 
-        # Set credit limit for the supplier type instead of supplier and evaluate the due date
+        # Payment terms for Supplier Type instead of supplier and evaluate the due date
         frappe.db.set_value("Supplier Type", "_Test Supplier Type", "payment_terms", "_Test Payment Term Template 1")
 
         # Leap year
@@ -51,6 +51,16 @@ class TestSupplier(unittest.TestCase):
         # # Non Leap year
         due_date = get_due_date("2017-01-22", "Supplier", "_Test Supplier With Template 1")
         self.assertEqual(due_date, "2017-02-28")
+
+        # Supplier with no default Payment Terms Template
+        frappe.db.set_value("Supplier Type", "_Test Supplier Type", "payment_terms", "")
+        frappe.db.set_value("Supplier", "_Test Supplier", "payment_terms", "")
+
+        due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier")
+        self.assertEqual(due_date, "2016-01-22")
+        # # Non Leap year
+        due_date = get_due_date("2017-01-22", "Supplier", "_Test Supplier")
+        self.assertEqual(due_date, "2017-01-22")
 
     def test_supplier_disabled(self):
         make_test_records("Item")
