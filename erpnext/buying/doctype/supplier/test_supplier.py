@@ -7,7 +7,6 @@ import frappe, unittest
 from erpnext.accounts.party import get_due_date
 from erpnext.exceptions import PartyDisabled
 from frappe.test_runner import make_test_records
-from frappe.utils import add_days, add_months, get_last_day
 
 test_dependencies = ['Payment Term', 'Payment Terms Template']
 test_records = frappe.get_test_records('Supplier')
