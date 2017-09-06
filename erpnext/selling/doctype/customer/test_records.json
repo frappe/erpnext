@@ -1,11 +1,10 @@
 [
  {
   "customer_group": "_Test Customer Group",
-  "customer_name": "_Test Customer P",
+  "customer_name": "_Test Customer With Template",
   "customer_type": "Individual",
   "doctype": "Customer",
-  "territory": "_Test Territory",
-  "credit_days_based_on": "Fixed Days"
+  "territory": "_Test Territory"
  },
  {
   "customer_group": "_Test Customer Group",
