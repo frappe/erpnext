@@ -1,0 +1,22 @@
+<h4>Item Attributes</h4>
+<table class="table table-bordered table-condensed">
+	<thead>
+		<tr>
+			<td>Page No.</td>
+			<td>Attribute</td>
+			<td>Attribute Value</td>
+		</tr>
+	</thead>
+	<tbody>
+		{% $.each(attributes, function(index, row){  %}
+			<tr>
+				{% if (!(index % 5)) { %}
+					{% var page_no = Math.ceil( (index + 1)/ 5) %}
+					<td rowspan=5>{{ page_no }}</td>
+				{% } %}
+				<td>{{ row.attribute }}</td>
+				<td>{{ attribute_values[row.attribute] || "" }}</td>
+			</tr>
+		{% }); %}
+	</tbody>
+</table>
