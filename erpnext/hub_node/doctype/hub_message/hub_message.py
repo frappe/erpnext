@@ -8,16 +8,17 @@ from frappe.model.document import Document
 
 class HubMessage(Document):
 	def on_update(self):
-		if self.now:
-			self.run()
-		else:
-			frappe.enqueue('erpnext.hub_node.doctype.hub_message.hub_message.enqueue', message_id=self.name)
+		if self.status == 'Pending':
+			if self.now:
+				self.run()
+			else:
+				frappe.enqueue('erpnext.hub_node.doctype.hub_message.hub_message.enqueue', message_id=self.name)
 
 	def run(self):
 		hub = frappe.get_single("Hub Settings")
 		data = json.loads(self.data)
 		data['access_token'] = hub.access_token
-		self.response = requests.post(hub.get_hub_url() + "/api/method/hub.hub.api." + self.method,
+		self.response = requests.post(hub.get_hub_url() + "/api/method/" + self.method,
 			data = data)
 
 		self.http_status_code = self.response.status_code
@@ -38,8 +39,8 @@ class HubMessage(Document):
 @frappe.whitelist()
 def resend(message):
 	message = frappe.get_doc('Hub Message', message)
-	if message.has_permission() and message.status=='Pending':
-		message.enqueue()
+	if message.has_permission():
+		message.run()
 
 def enqueue(message_id):
 	frappe.get_doc('Hub Message', message_id).run()

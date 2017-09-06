@@ -3,10 +3,8 @@
 
 frappe.ui.form.on('Hub Message', {
 	refresh: function(frm) {
-		if (frm.doc.status === 'Pending') {
-			frm.add_custom_button('Resend', () =>
-				frappe.call('erpnext.hub_node.doctype.hub_message.hub_message.resend',
-					{message: frm.doc.name}));
-		}
+		frm.add_custom_button('Replay', () =>
+			frappe.call('erpnext.hub_node.doctype.hub_message.hub_message.resend',
+				{message: frm.doc.name}));
 	}
 });

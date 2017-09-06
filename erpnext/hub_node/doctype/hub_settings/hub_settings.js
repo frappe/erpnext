@@ -1,13 +1,14 @@
 frappe.ui.form.on("Hub Settings", {
 	refresh: function(frm) {
+		frm.add_custom_button(__('Logs'),
+			() => frappe.set_route('List', 'Hub Message'));
+
 		frm.trigger("enabled");
 		if (frm.doc.enabled) {
 			frm.add_custom_button(__('View Hub'),
 				() => frappe.set_route('hub'));
 			frm.add_custom_button(__('Sync Items'),
 				() => frappe.call('erpnext.hub_node.doctype.hub_settings.hub_settings.sync_items'));
-			frm.add_custom_button(__('Logs'),
-				() => frappe.set_route('List', 'Hub Message'));
 		}
 	},
 	onload: function(frm) {
@@ -42,6 +43,9 @@ frappe.ui.form.on("Hub Settings", {
 
 	set_enable_hub_primary_button: (frm) => {
 		frm.page.set_primary_action(__("Enable Hub"), () => {
+			if(!(frm.doc.hub_user && frm.doc.seller_city && frm.doc.company)) {
+				frappe.throw(__('Please fill mandatory values'));
+			}
 			frappe.verify_password(() => {
 				this.frm.call({
 					doc: this.frm.doc,

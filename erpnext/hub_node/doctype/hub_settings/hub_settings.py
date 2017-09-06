@@ -10,7 +10,7 @@ from frappe import _
 from erpnext.utilities.product import get_price, get_qty_in_stock
 from six import string_types
 
-hub_url = "http://hub.erpnext.dev:8000"
+hub_url = "http://erpnext.hub:8000"
 # hub_url = "https://hub.erpnext.org"
 
 batch_size = 200
@@ -63,7 +63,7 @@ class HubSettings(Document):
 
 	def update_hub(self):
 		self.update_profile_settings()
-		self.update_publishing()
+		# self.update_publishing()
 
 	def update_profile_settings(self):
 		hub_request(
@@ -92,7 +92,7 @@ class HubSettings(Document):
 	def enqueue_item_batch(self, items):
 		item_list = []
 		for item in items:
-			item_list.append(item.name)
+			item_list.append(item.item_code)
 			item.modified = get_datetime_str(item.modified)
 			if item.image:
 				item.image = self.site_name + item.image
@@ -103,7 +103,7 @@ class HubSettings(Document):
 				set_item_price(item, self.company, self.selling_price_list)
 
 		hub_request(
-			method='update_items',
+			method='hub.hub.doctype.hub_item.hub_item.sync_items',
 			data={
 				"items_to_update": json.dumps(items),
 				"item_list": json.dumps(item_list),
@@ -112,7 +112,7 @@ class HubSettings(Document):
 
 
 	def update_publishing(self):
-		if self.publish != self._doc_before_save.publish:
+		if self.publish != self.get_doc_before_save().publish:
 			if self.publish:
 				frappe.enqueue('erpnext.hub_node.doctype.hub_settings.hub_settings.sync_items')
 
@@ -122,10 +122,10 @@ class HubSettings(Document):
 		else:
 			if self.publish:
 				fields = []
-				if self.publish_pricing != self._doc_before_save.publish_pricing:
+				if self.publish_pricing != self.get_doc_before_save().publish_pricing:
 					if self.publish_pricing:
 						fields += ["price", "currency", "formatted_price"]
-				if self.publish_availability != self._doc_before_save.publish_availability:
+				if self.publish_availability != self.get_doc_before_save().publish_availability:
 					if self.publish_availability:
 						fields += ["stock_qty"]
 				if fields:
