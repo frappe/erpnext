@@ -37,7 +37,7 @@ QUnit.test("test payment entry", function(assert) {
 		},
 		() => cur_frm.set_value('paid_amount', 100),
 		() => {
-			cur_frm.doc.references[0].allocated_amount = 101
+			cur_frm.doc.references[0].allocated_amount = 101;
 		},
 		() => frappe.click_button('Write Off Difference Amount'),
 		() => {
