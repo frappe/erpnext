@@ -15,6 +15,7 @@ from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from erpnext.controllers.item_variant import (get_variant, copy_attributes_to_variant,
 	make_variant_item_code, validate_item_variant_attributes, ItemVariantExistsError)
+from erpnext.hub_node.doctype.hub_settings.hub_settings import is_hub_enabled, is_hub_published, get_current_item_fields, make_and_enqueue_message
 
 class DuplicateReorderRows(frappe.ValidationError): pass
 
@@ -52,7 +53,8 @@ class Item(WebsiteGenerator):
 		if not self.description:
 			self.description = self.item_name
 
-		self.publish_in_hub = 1
+		if self.is_sales_item and not self.is_hub_item:
+			self.publish_in_hub = 1
 
 	def after_insert(self):
 		'''set opening stock and item price'''
@@ -63,6 +65,10 @@ class Item(WebsiteGenerator):
 			self.set_opening_stock()
 
 	def validate(self):
+		self.before_update = None
+		if frappe.db.exists('Item', self.name):
+			self.before_update = frappe.get_doc('Item', self.name)
+
 		super(Item, self).validate()
 
 		if not self.item_name:
@@ -102,6 +108,12 @@ class Item(WebsiteGenerator):
 		self.validate_name_with_item_group()
 		self.update_item_price()
 		self.update_template_item()
+		if self.publish_in_hub and is_hub_enabled() and is_hub_published():
+			self.update_for_hub()
+
+	def on_trash(self):
+		if self.publish_in_hub and is_hub_enabled() and is_hub_published():
+			self.delete_at_hub()
 
 	def add_price(self, price_list=None):
 		'''Add a new price'''
@@ -653,6 +665,57 @@ class Item(WebsiteGenerator):
 
 			validate_item_variant_attributes(self, args)
 
+	def update_for_hub(self):
+		if self.before_update:
+			if self.before_update.publish_in_hub == self.publish_in_hub:
+				if self.publish_in_hub == 1:
+					self.update_values_at_hub()
+			else:
+				if self.publish_in_hub == 1:
+					self.insert_at_hub()
+				else:
+					self.delete_at_hub()
+		else:
+			if self.publish_in_hub == 1:
+				self.insert_at_hub()
+
+		# If item deleted(will be handled by delete_doc)
+
+	def update_values_at_hub(self):
+		current_hub_fields = get_current_item_fields()
+		item_dict = {}
+		for field in current_hub_fields:
+			item_dict[field] = self.get(field)
+		if item_dict["image"]:
+			item_dict["image"] = "http://" + frappe.local.site + ":8000" + item_dict["image"]
+		response_msg = make_and_enqueue_message('HUB-ITEM-UPDATE', 'update_item',
+			data={
+				"item_code": self.item_code,
+				"item_dict": json.dumps(item_dict)
+			}
+		)
+
+	def insert_at_hub(self):
+		current_hub_fields = get_current_item_fields()
+		item_dict = {}
+		for field in current_hub_fields:
+			item_dict[field] = self.get(field)
+		if item_dict["image"]:
+			item_dict["image"] = "http://" + frappe.local.site + ":8000" + item_dict["image"]
+		response_msg = make_and_enqueue_message('HUB-ITEM-INSERT', 'insert_item',
+			data={
+				"item_dict": json.dumps(item_dict)
+			}
+		)
+
+	def delete_at_hub(self):
+		response_msg = make_and_enqueue_message('HUB-ITEM-DELETE', 'delete_item',
+			data={
+				"item_code": self.item_code
+			}
+		)
+
+
 def get_timeline_data(doctype, name):
 	'''returns timeline data based on stock ledger entry'''
 	out = {}
@@ -799,4 +862,3 @@ def check_stock_uom_with_bin(item, stock_uom):
 
 	if not matched:
 		frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.").format(item))
-
