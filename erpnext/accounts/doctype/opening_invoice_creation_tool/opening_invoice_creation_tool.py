@@ -11,8 +11,52 @@ from erpnext.accounts.utils import get_fiscal_years
 from erpnext.accounts.general_ledger import make_gl_entries
 
 class OpeningInvoiceCreationTool(Document):
-	def validate(self):
-		self.make_invoices()
+	def onload(self):
+		"""Load the Opening Invoice Summery"""
+		summery, max_count = self.get_opening_invoice_summery()
+		self.set_onload('opening_invoices_summery', summery)
+		self.set_onload('max_count', max_count)
+
+	def get_opening_invoice_summery(self):
+		def prepare_invoice_summery(doctype, invoices):
+			# add company wise sales / purchase invoice summery
+			paid_amount = []
+			outstanding_amount = []
+			for invoice in invoices:
+				company = invoice.pop("company")
+				_summery = invoices_summery.get(company, {})
+				_summery.update({
+					"currency": company_wise_currency.get(company),
+					doctype: invoice
+				})
+				invoices_summery.update({company: _summery})
+
+				paid_amount.append(invoice.paid_amount)
+				outstanding_amount.append(invoice.outstanding_amount)
+
+			max_count.update({
+				doctype: {
+					"max_paid": max(paid_amount),
+					"max_due": max(outstanding_amount)
+				}
+			})
+		invoices_summery = {}
+		max_count = {}
+		fields = [
+			"company", "count(name) as total_invoices", "sum(outstanding_amount) as outstanding_amount",
+			 "sum(base_grand_total) - sum(outstanding_amount) as paid_amount"
+		]
+		companies = frappe.get_all("Company", fields=["name as company", "default_currency as currency"])
+		if not companies:
+			return {}
+
+		company_wise_currency = {row.company: row.currency for row in companies}
+		for doctype in ["Sales Invoice", "Purchase Invoice"]:
+			invoices = frappe.get_all(doctype, filters=dict(is_opening="Yes", docstatus=1),
+				fields=fields, group_by="company")
+			prepare_invoice_summery(doctype, invoices)
+
+		return invoices_summery, max_count
 
 	def make_invoices(self):
 		names = []
