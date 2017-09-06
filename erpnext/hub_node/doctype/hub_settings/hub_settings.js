@@ -1,6 +1,14 @@
 frappe.ui.form.on("Hub Settings", {
 	refresh: function(frm) {
 		frm.trigger("enabled");
+		if (frm.doc.enabled) {
+			frm.add_custom_button(__('View Hub'),
+				() => frappe.set_route('hub'));
+			frm.add_custom_button(__('Sync Items'),
+				() => frappe.call('erpnext.hub_node.doctype.hub_settings.hub_settings.sync_items'));
+			frm.add_custom_button(__('Logs'),
+				() => frappe.set_route('List', 'Hub Message'));
+		}
 	},
 	onload: function(frm) {
 		if(!frm.doc.country) {
