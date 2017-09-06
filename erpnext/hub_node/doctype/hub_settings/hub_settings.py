@@ -9,8 +9,8 @@ from frappe.utils import cint, expand_relative_urls, fmt_money, flt, add_years, 
 from frappe import _
 from erpnext.utilities.product import get_price, get_qty_in_stock
 
-hub_url = "http://erpnext.hub:8000"
-# hub_url = "http://hub.erpnext.org"
+# hub_url = "http://erpnext.hub:8000"
+hub_url = "http://hub.erpnext.org"
 
 batch_size = 200
 

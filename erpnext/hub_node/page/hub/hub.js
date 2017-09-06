@@ -5,10 +5,35 @@ frappe.provide('erpnext.hub');
 frappe.pages['hub'].on_page_load = function(wrapper) {
 	const page = frappe.ui.make_app_page({
 		parent: wrapper,
-		title: 'ERPNext Hub'
+		title: 'Hub',
+		single_col: false,
+		required_libs: '/assets/erpnext/css/hub.css',
+		empty_state: {
+			get_whether_active: (on_empty, on_active) => {
+				frappe.model.with_doc('Hub Settings', 'Hub Settings', () => {
+					let hub_settings = frappe.get_doc('Hub Settings');
+					if(hub_settings.enabled) {
+						on_active();
+					} else {
+						on_empty();
+					}
+				});
+			},
+			title: __("Register for Hub"),
+			message: __(`Let other ERPNext users discover your products and
+				automate workflow with Supplier from within ERPNext.`),
+			primary_action: {
+				label: __("Register"),
+				on_click: () => {
+					frappe.set_route('Form', 'Hub Settings', {});
+				}
+			}
+		},
+		make_page: () => {
+			erpnext.hub.Hub = new ERPNextHub({ page });
+		}
 	});
 
-	erpnext.hub.Hub = new ERPNextHub({ page });
 };
 
 frappe.pages['hub'].on_page_show = function(wrapper) {
@@ -32,17 +57,7 @@ window.ERPNextHub = class ERPNextHub {
 	constructor({ page }) {
 		this.page = page;
 
-		frappe.model.with_doc('Hub Settings', 'Hub Settings', () => {
-			this.country = frappe.get_doc('Hub Settings').country;
-
-			frappe.require('/assets/erpnext/css/hub.css',
-				() => this.setup()
-			);
-		});
-
-		// frappe.require('/assets/erpnext/css/hub.css',
-		// 	() => this.setup()
-		// );
+		this.setup()
 	}
 
 	setup() {
@@ -59,8 +74,10 @@ window.ERPNextHub = class ERPNextHub {
 	}
 
 	refresh() {
+		console.log(this);
 		this.$hub_main_section.empty();
 		this.page.page_form.hide();
+
 
 		frappe.model.with_doc('Hub Settings', 'Hub Settings', () => {
 			this.hub_settings = frappe.get_doc('Hub Settings');
@@ -477,7 +494,7 @@ window.ERPNextHub = class ERPNextHub {
 				const categories = r.message.categories;
 				console.log("ccategories", categories);
 				categories
-					.map(c => c.category_name)
+					.map(c => c.hub_category_name)
 					.map(c => this.sidebar.add_item({
 						label: c,
 						on_click: () => {
