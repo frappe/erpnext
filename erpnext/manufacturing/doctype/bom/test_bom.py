@@ -93,6 +93,8 @@ class TestBOM(unittest.TestCase):
 
 	def test_bom_cost_multi_uom_multi_currency(self):
 		for item_code, rate in (("_Test Item", 3600), ("_Test Item Home Desktop Manufactured", 3000)):
+			frappe.db.sql("delete from `tabItem Price` where price_list='_Test Price List' and item_code=%s",
+				item_code)
 			item_price = frappe.new_doc("Item Price")
 			item_price.price_list = "_Test Price List"
 			item_price.item_code = item_code
@@ -100,6 +102,7 @@ class TestBOM(unittest.TestCase):
 			item_price.insert()
 		
 		bom = frappe.copy_doc(test_records[2])
+		bom.set_rate_of_sub_assembly_item_based_on_bom = 0
 		bom.rm_cost_as_per = "Price List"
 		bom.buying_price_list = "_Test Price List"
 		bom.items[0].uom = "_Test UOM 1"
