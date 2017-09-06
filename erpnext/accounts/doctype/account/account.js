@@ -132,10 +132,10 @@ frappe.ui.form.on('Account', {
 							d.hide();
 						}
 					}
-				})
+				});
 			},
 			primary_action_label: __('Update')
-		})
+		});
 		d.show();
 	}
 });

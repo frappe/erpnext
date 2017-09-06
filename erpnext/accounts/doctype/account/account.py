@@ -185,7 +185,7 @@ class Account(Document):
 		# Add company abbr if not provided
 		from erpnext.setup.doctype.company.company import get_name_with_abbr
 		new_account = get_name_with_abbr(new, self.company)
-		new_account = self.get_name_with_number(new_account, self.account_number)
+		new_account = get_name_with_number(new_account, self.account_number)
 
 		# Validate properties before merging
 		if merge:
@@ -204,17 +204,12 @@ class Account(Document):
 
 		return new_account
 
-	def get_name_with_number(self, new_account, account_number):
-		if account_number and not new_account[0].isdigit():
-			new_account = account_number + " - " + new_account
-		return new_account
-
 	def after_rename(self, old, new, merge=False):
 		super(Account, self).after_rename(old, new, merge)
 
 		if not merge:
 			new_acc = frappe.db.get_value("Account", new, ["account_name", "account_number"], as_dict=1)
-			
+
 			# exclude company abbr
 			new_parts = new.split(" - ")[:-1]
 			# update account number and remove from parts
@@ -266,7 +261,7 @@ def get_account_autoname(account_number, account_name, company):
 
 def validate_account_number(name, account_number, company):
 	if account_number:
-		account_with_same_number = frappe.db.get_value("Account", 
+		account_with_same_number = frappe.db.get_value("Account",
 			{"account_number": account_number, "company": company, "name": ["!=", name]})
 		if account_with_same_number:
 			frappe.throw(_("Account Number {0} already used in account {1}")
@@ -290,3 +285,8 @@ def update_account_number(name, account_number):
 	if name != new_name:
 		frappe.rename_doc("Account", name, new_name)
 		return new_name
+
+def get_name_with_number(new_account, account_number):
+	if account_number and not new_account[0].isdigit():
+		new_account = account_number + " - " + new_account
+	return new_account

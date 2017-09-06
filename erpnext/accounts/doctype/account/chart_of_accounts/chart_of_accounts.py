@@ -56,7 +56,7 @@ def create_charts(company, chart_template=None, existing_company=None):
 
 def add_suffix_if_duplicate(account_name, account_number, accounts):
 	if account_number:
-		account_name_in_db = unidecode(" - ".join([account_number, 
+		account_name_in_db = unidecode(" - ".join([account_number,
 			account_name.strip().lower()]))
 	else:
 		account_name_in_db = unidecode(account_name.strip().lower())
