@@ -2,13 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, add_days
+from frappe.utils import flt, add_days, DATE_FORMAT
 import frappe.permissions
 import unittest
 from erpnext.stock.doctype.item.test_item import get_total_projected_qty
 from erpnext.selling.doctype.sales_order.sales_order \
 	import make_material_request, make_delivery_note, make_sales_invoice, WarehouseRequired
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.controllers.accounts_controller import get_payment_terms
 from frappe.tests.test_permissions import set_user_permission_doctypes
 
 class TestSalesOrder(unittest.TestCase):
@@ -48,6 +49,35 @@ class TestSalesOrder(unittest.TestCase):
 
 		so.submit()
 		si = make_sales_invoice(so.name)
+
+		self.assertEquals(len(si.get("items")), len(so.get("items")))
+		self.assertEquals(len(si.get("items")), 1)
+
+		si.insert()
+		si.submit()
+
+		si1 = make_sales_invoice(so.name)
+		self.assertEquals(len(si1.get("items")), 0)
+
+	def test_make_sales_invoice_with_terms(self):
+		so = make_sales_order(do_not_submit=True)
+
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, so.name)
+
+		so.update(
+			{"payment_schedule": get_payment_terms(
+				"_Test Payment Term Template", so.transaction_date, so.grand_total
+			)}
+		)
+
+		so.save()
+		so.submit()
+		si = make_sales_invoice(so.name)
+
+		self.assertEqual(si.payment_schedule[0].payment_amount, 500.0)
+		self.assertEqual(si.payment_schedule[0].due_date.strftime(DATE_FORMAT), so.transaction_date)
+		self.assertEqual(si.payment_schedule[1].payment_amount, 500.0)
+		self.assertEqual(si.payment_schedule[1].due_date.strftime(DATE_FORMAT), add_days(so.transaction_date, 30))
 
 		self.assertEquals(len(si.get("items")), len(so.get("items")))
 		self.assertEquals(len(si.get("items")), 1)

@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.utils import flt, add_days, nowdate, add_months
+from frappe.utils import flt, add_days, nowdate, add_months, DATE_FORMAT
 from erpnext.controllers.accounts_controller import get_payment_terms
 import unittest
 
@@ -62,6 +62,10 @@ class TestQuotation(unittest.TestCase):
 		self.assertEquals(sales_order.get("items")[0].doctype, "Sales Order Item")
 		self.assertEquals(sales_order.get("items")[0].prevdoc_docname, quotation.name)
 		self.assertEquals(sales_order.customer, "_Test Customer")
+		self.assertEqual(sales_order.payment_schedule[0].payment_amount, 8906.25)
+		self.assertEqual(sales_order.payment_schedule[0].due_date.strftime(DATE_FORMAT), quotation.transaction_date)
+		self.assertEqual(sales_order.payment_schedule[1].payment_amount, 8906.25)
+		self.assertEqual(sales_order.payment_schedule[1].due_date.strftime(DATE_FORMAT), add_days(quotation.transaction_date, 30))
 
 		sales_order.delivery_date = "2014-01-01"
 		sales_order.naming_series = "_T-Quotation-"

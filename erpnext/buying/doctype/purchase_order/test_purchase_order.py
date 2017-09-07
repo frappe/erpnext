@@ -5,8 +5,9 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 import frappe.defaults
-from frappe.utils import flt, add_days, nowdate
+from frappe.utils import flt, add_days, nowdate, DATE_FORMAT
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt, make_purchase_invoice
+from erpnext.controllers.accounts_controller import get_payment_terms
 
 class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_receipt(self):
@@ -82,6 +83,34 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		self.assertEquals(pi.doctype, "Purchase Invoice")
 		self.assertEquals(len(pi.get("items", [])), 1)
+
+	def test_make_purchase_invoice_with_terms(self):
+		po = create_purchase_order(do_not_submit=True)
+
+		self.assertRaises(frappe.ValidationError, make_purchase_invoice, po.name)
+
+		po.update(
+			{"payment_schedule": get_payment_terms(
+				"_Test Payment Term Template", po.transaction_date, po.grand_total
+			)}
+		)
+
+		po.save()
+		po.submit()
+
+		self.assertEqual(po.payment_schedule[0].payment_amount, 2500.0)
+		self.assertEqual(po.payment_schedule[0].due_date, po.transaction_date)
+		self.assertEqual(po.payment_schedule[1].payment_amount, 2500.0)
+		self.assertEqual(po.payment_schedule[1].due_date, add_days(po.transaction_date, 30))
+		pi = make_purchase_invoice(po.name)
+
+		self.assertEquals(pi.doctype, "Purchase Invoice")
+		self.assertEquals(len(pi.get("items", [])), 1)
+
+		self.assertEqual(pi.payment_schedule[0].payment_amount, 2500.0)
+		self.assertEqual(pi.payment_schedule[0].due_date.strftime(DATE_FORMAT), po.transaction_date)
+		self.assertEqual(pi.payment_schedule[1].payment_amount, 2500.0)
+		self.assertEqual(pi.payment_schedule[1].due_date.strftime(DATE_FORMAT), add_days(po.transaction_date, 30))
 
 	def test_subcontracting(self):
 		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")
