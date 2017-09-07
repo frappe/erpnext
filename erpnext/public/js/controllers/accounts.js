@@ -52,14 +52,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 	},
 	taxes_on_form_rendered: function(frm) {
 		erpnext.taxes.set_conditional_mandatory_rate_or_amount(frm.open_grid_row());
-	},
-
-	disable_due_date: function() {
-		const disable = cur_frm.doc.payment_terms_template || (
-							cur_frm.doc.payment_schedule && cur_frm.doc.payment_schedule.length != 0);
-		cur_frm.set_df_property("due_date", "read_only", disable ? 1 : 0);
-	},
-
+	}
 });
 
 frappe.ui.form.on('Sales Invoice Payment', {
