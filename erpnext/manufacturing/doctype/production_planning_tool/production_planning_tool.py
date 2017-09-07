@@ -369,7 +369,7 @@ class ProductionPlanningTool(Document):
 		for d in items:
 			if ((d.default_material_request_type == "Purchase"
 				and not (d.is_sub_contracted and only_raw and include_sublevel))
-				or (d.default_material_request_type == "Manufacture" and not only_raw)):
+				or (d.default_material_request_type == "Manufacture")):
 
 				if d.item_code in bom_wise_item_details:
 					bom_wise_item_details[d.item_code].qty = bom_wise_item_details[d.item_code].qty + d.qty
