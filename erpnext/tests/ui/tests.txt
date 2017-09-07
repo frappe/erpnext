@@ -127,3 +127,4 @@ erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_subcontract.js
 erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_material_issue_with_serialize_item.js
 erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_repack.js
 erpnext/accounts/doctype/sales_invoice/tests/test_sales_invoice_with_serialize_item.js
+erpnext/accounts/doctype/payment_entry/tests/test_payment_against_invoice.js

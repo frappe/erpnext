@@ -166,6 +166,12 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 				__("Status"))
 		}
 		erpnext.stock.delivery_note.set_print_hide(doc, dt, dn);
+
+		if(doc.docstatus==1 && !doc.subscription) {
+			cur_frm.add_custom_button(__('Subscription'), function() {
+				erpnext.utils.make_subscription(doc.doctype, doc.name)
+			}, __("Make"))
+		}
 	},
 
 	make_sales_invoice: function() {
