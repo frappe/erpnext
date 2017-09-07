@@ -10,6 +10,3 @@ def complete():
 
 	#setup_wizard.create_sales_tax(data)
 	setup_complete(data)
-
-
-
