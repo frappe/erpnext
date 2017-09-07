@@ -1,0 +1,37 @@
+{
+ "creation": "2017-09-07 11:38:43.169065", 
+ "docstatus": 0, 
+ "doctype": "Data Migration Mapping", 
+ "fields": [
+  {
+   "local_fieldname": "name", 
+   "remote_fieldname": "company_name"
+  }, 
+  {
+   "local_fieldname": "country", 
+   "remote_fieldname": "country"
+  }, 
+  {
+   "local_fieldname": "\"city\"", 
+   "remote_fieldname": "seller_city"
+  }, 
+  {
+   "local_fieldname": "eval:frappe.session.user", 
+   "remote_fieldname": "hub_user"
+  }, 
+  {
+   "local_fieldname": "eval:frappe.local.site", 
+   "remote_fieldname": "site_name"
+  }
+ ], 
+ "idx": 0, 
+ "local_doctype": "Company", 
+ "mapping_name": "Company to Hub Company", 
+ "mapping_type": "Push", 
+ "modified": "2017-09-07 12:22:31.761878", 
+ "modified_by": "Administrator", 
+ "name": "Company to Hub Company", 
+ "owner": "Administrator", 
+ "remote_objectname": "Hub Company", 
+ "remote_primary_key": "name"
+}

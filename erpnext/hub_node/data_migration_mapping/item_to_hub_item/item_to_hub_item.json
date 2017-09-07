@@ -1,0 +1,29 @@
+{
+ "creation": "2017-09-07 13:27:52.726350", 
+ "docstatus": 0, 
+ "doctype": "Data Migration Mapping", 
+ "fields": [
+  {
+   "local_fieldname": "item_code", 
+   "remote_fieldname": "item_code"
+  }, 
+  {
+   "local_fieldname": "item_name", 
+   "remote_fieldname": "item_name"
+  }, 
+  {
+   "local_fieldname": "eval:frappe.db.get_default(\"company\")", 
+   "remote_fieldname": "company_name"
+  }
+ ], 
+ "idx": 0, 
+ "local_doctype": "Item", 
+ "mapping_name": "Item to Hub Item", 
+ "mapping_type": "Push", 
+ "modified": "2017-09-07 13:28:46.754893", 
+ "modified_by": "Administrator", 
+ "name": "Item to Hub Item", 
+ "owner": "Administrator", 
+ "remote_objectname": "Hub Item", 
+ "remote_primary_key": "item_code"
+}
