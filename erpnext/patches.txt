@@ -438,3 +438,4 @@ erpnext.patches.v8_6.rename_bom_update_tool
 erpnext.patches.v8_9.add_setup_progress_actions
 erpnext.patches.v8_9.rename_company_sales_target_field
 erpnext.patches.v8_8.set_bom_rate_as_per_uom
+erpnext.patches.v8_7.make_subscription_from_recurring_data
