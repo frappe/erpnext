@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from erpnext.accounts.doctype.tax_rule.tax_rule import IncorrectCustomerGroup, IncorrectSupplierType, ConflictingTaxRule, get_tax_template
+from six import iteritems
 
 test_records = frappe.get_test_records('Tax Rule')
 
@@ -126,7 +127,7 @@ def make_tax_rule(**args):
 
 	tax_rule = frappe.new_doc("Tax Rule")
 
-	for key, val in args.iteritems():
+	for key, val in iteritems(args):
 		if key != "save":
 			tax_rule.set(key, val)
 

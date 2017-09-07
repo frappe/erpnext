@@ -10,6 +10,7 @@ from frappe.model.document import Document
 from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_fixed_asset_account
 from erpnext.accounts.doctype.asset.depreciation \
 	import get_disposal_account_and_cost_center, get_depreciation_accounts
+from six.moves import xrange
 
 class Asset(Document):
 	def validate(self):

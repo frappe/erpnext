@@ -11,6 +11,7 @@ from erpnext.exceptions import PartyFrozen, PartyDisabled
 from frappe.utils import flt
 from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
 from erpnext.tests.utils import create_test_contact_and_address
+from six import iteritems
 
 test_ignore = ["Price List"]
 
@@ -50,7 +51,7 @@ class TestCustomer(unittest.TestCase):
 
 		details = get_party_details("_Test Customer")
 
-		for key, value in to_check.iteritems():
+		for key, value in iteritems(to_check):
 			self.assertEquals(value, details.get(key))
 
 	def test_rename(self):

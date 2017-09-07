@@ -7,6 +7,7 @@ import frappe.share
 from frappe import _
 from frappe.utils import cstr, now_datetime, cint, flt
 from erpnext.controllers.status_updater import StatusUpdater
+from six import string_types
 
 class UOMMustBeIntegerError(frappe.ValidationError): pass
 
@@ -134,7 +135,7 @@ def delete_events(ref_type, ref_name):
 		where ref_type=%s and ref_name=%s""", (ref_type, ref_name)), for_reload=True)
 
 def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
-	if isinstance(qty_fields, basestring):
+	if isinstance(qty_fields, string_types):
 		qty_fields = [qty_fields]
 
 	distinct_uoms = list(set([d.get(uom_field) for d in doc.get_all_children()]))

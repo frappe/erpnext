@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import cint, flt, cstr, now
 from erpnext.stock.utils import get_valuation_method
 import json
+from six import iteritems
 
 # future reposting
 class NegativeStockError(frappe.ValidationError): pass
@@ -87,7 +88,7 @@ class update_entries_after(object):
 				"allow_negative_stock"))
 
 		self.args = args
-		for key, value in args.iteritems():
+		for key, value in iteritems(args):
 			setattr(self, key, value)
 
 		self.previous_sle = self.get_sle_before_datetime()

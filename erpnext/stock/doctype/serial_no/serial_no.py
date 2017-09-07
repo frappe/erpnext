@@ -8,6 +8,7 @@ from frappe.utils import cint, cstr, flt, add_days, nowdate, getdate
 from frappe import _, ValidationError
 
 from erpnext.controllers.stock_controller import StockController
+from six.moves import xrange
 
 class SerialNoCannotCreateDirectError(ValidationError): pass
 class SerialNoCannotCannotChangeError(ValidationError): pass

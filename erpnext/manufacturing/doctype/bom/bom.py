@@ -10,6 +10,7 @@ from frappe.website.website_generator import WebsiteGenerator
 from erpnext.stock.get_item_details import get_conversion_factor
 
 from operator import itemgetter
+from six import string_types
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -109,7 +110,7 @@ class BOM(WebsiteGenerator):
 		if not args:
 			args = frappe.form_dict.get('args')
 
-		if isinstance(args, basestring):
+		if isinstance(args, string_types):
 			import json
 			args = json.loads(args)
 
@@ -547,7 +548,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
 
 	for item in items:
-		if item_dict.has_key(item.item_code):
+		if item.item_code in item_dict:
 			item_dict[item.item_code]["qty"] += flt(item.qty)
 		else:
 			item_dict[item.item_code] = item

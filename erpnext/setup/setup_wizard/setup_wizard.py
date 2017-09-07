@@ -10,12 +10,13 @@ from frappe.utils import cstr, flt, getdate
 from frappe import _
 from frappe.utils.file_manager import save_file
 from .default_website import website_maker
-import install_fixtures
+from . import install_fixtures
 from .sample_data import make_sample_data
 from erpnext.accounts.doctype.account.account import RootNotEditable
 from frappe.core.doctype.communication.comment import add_info_comment
 from erpnext.setup.setup_wizard.domainify import setup_domain
 from erpnext.setup.doctype.company.company import install_country_fixtures
+from six.moves import xrange
 
 def setup_complete(args=None):
 	if frappe.db.sql("select name from tabCompany"):

@@ -6,6 +6,7 @@ import frappe
 import frappe.permissions
 from erpnext.controllers.recurring_document import date_field_map
 from frappe.utils import get_first_day, get_last_day, add_to_date, nowdate, getdate, add_days
+from six.moves import xrange
 
 def test_recurring_document(obj, test_records):
 	frappe.db.set_value("Print Settings", "Print Settings", "send_print_as_pdf", 1)

@@ -12,6 +12,7 @@ from erpnext.stock.get_item_details import get_bin_details, get_default_cost_cen
 from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 import json
+from six import string_types
 
 class IncorrectValuationRateError(frappe.ValidationError): pass
 class DuplicateEntryForProductionOrderError(frappe.ValidationError): pass
@@ -877,7 +878,7 @@ def get_uom_details(item_code, uom, qty):
 
 @frappe.whitelist()
 def get_warehouse_details(args):
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	args = frappe._dict(args)

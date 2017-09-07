@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import getdate, cint
 import calendar
+from six.moves import xrange
 
 def execute(filters=None):
 	# key yyyy-mm

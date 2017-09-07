@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import getdate
 from frappe import _
+from six.moves import xrange
 
 def get_columns(filters, trans):
 	validate_filters(filters)

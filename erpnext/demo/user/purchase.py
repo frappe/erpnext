@@ -12,6 +12,7 @@ from erpnext.exceptions import InvalidCurrency
 from erpnext.stock.doctype.material_request.material_request import make_request_for_quotation
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import \
 			 make_supplier_quotation as make_quotation_from_rfq
+from six.moves import xrange
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_purchase_user'))

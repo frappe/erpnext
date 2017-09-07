@@ -15,6 +15,7 @@ from erpnext.accounts.party import get_party_account_currency, get_party_details
 from erpnext.stock.doctype.material_request.material_request import set_missing_values
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.buying.utils import validate_for_items
+from six import string_types
 
 STANDARD_USERS = ("Guest", "Administrator")
 
@@ -240,7 +241,7 @@ def make_supplier_quotation(source_name, for_supplier, target_doc=None):
 # This method is used to make supplier quotation from supplier's portal.
 @frappe.whitelist()
 def create_supplier_quotation(doc):
-	if isinstance(doc, basestring):
+	if isinstance(doc, string_types):
 		doc = json.loads(doc)
 
 	try:

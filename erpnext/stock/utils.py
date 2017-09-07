@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 import json
 from frappe.utils import flt, cstr, nowdate, nowtime
+from six import string_types
 
 class InvalidWarehouseCompany(frappe.ValidationError): pass
 
@@ -41,7 +42,7 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 
 	sle_map = {}
 	for sle in stock_ledger_entries:
-		if not sle_map.has_key((sle.item_code, sle.warehouse)):
+		if (sle.item_code, sle.warehouse) not in sle_map:
 			sle_map[(sle.item_code, sle.warehouse)] = flt(sle.stock_value)
 		
 	return sum(sle_map.values())
@@ -127,7 +128,7 @@ def get_incoming_rate(args):
 	"""Get Incoming Rate based on valuation method"""
 	from erpnext.stock.stock_ledger import get_previous_sle
 	
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	in_rate = 0

@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from frappe.utils import cstr, cint
 from frappe.contacts.doctype.address.address import get_default_address
 from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
+from six import iteritems
 
 class IncorrectCustomerGroup(frappe.ValidationError): pass
 class IncorrectSupplierType(frappe.ValidationError): pass
@@ -132,7 +133,7 @@ def get_tax_template(posting_date, args):
 	conditions = ["""(from_date is null  or from_date = '' or from_date <= '{0}')
 		and (to_date is null  or to_date = '' or to_date >= '{0}')""".format(posting_date)]
 
-	for key, value in args.iteritems():
+	for key, value in iteritems(args):
 		if key=="use_for_shopping_cart":
 			conditions.append("use_for_shopping_cart = {0}".format(1 if value else 0))
 		if key == 'customer_group' and value:

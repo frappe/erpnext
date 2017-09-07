@@ -8,7 +8,7 @@ from frappe import _
 from frappe.utils import (flt, getdate, get_first_day, get_last_day, date_diff,
 	add_months, add_days, formatdate, cint)
 from erpnext.accounts.utils import get_fiscal_year
-
+from six.moves import xrange
 
 def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_values=False,
 	company=None, reset_period_on_fy_change=True):
@@ -240,7 +240,7 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 			total_row["total"] += flt(row["total"])
 			row["total"] = ""
 
-	if total_row.has_key("total"):
+	if "total" in total_row:
 		out.append(total_row)
 
 		# blank row after Total

@@ -156,7 +156,7 @@ class calculate_taxes_and_totals(object):
 		return current_tax_fraction
 
 	def _get_tax_rate(self, tax, item_tax_map):
-		if item_tax_map.has_key(tax.account_head):
+		if tax.account_head in item_tax_map:
 			return flt(item_tax_map.get(tax.account_head), self.doc.precision("rate", tax))
 		else:
 			return tax.rate
