@@ -34,6 +34,7 @@ def execute():
 	]
 
 	setup_progress = frappe.get_doc("Setup Progress", "Setup Progress")
+	setup_progress.actions = []
 	for action in actions:
 		setup_progress.append("actions", action)
 
