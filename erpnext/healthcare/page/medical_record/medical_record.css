@@ -1,0 +1,73 @@
+#page-medical_record .label {
+	display: inline-block;
+	margin-right: 7px;
+}
+
+#page-medical_record .list-row {
+	border: none;
+	padding: 0px;
+	cursor: pointer;
+}
+
+.medical_record-label {
+	max-width: 100px;
+	margin-bottom: -4px;
+}
+
+.date-indicator {
+    background:none;
+    font-size:12px;
+    vertical-align:middle;
+    font-weight:bold;
+    color:#6c7680;
+}
+.date-indicator::after {
+    margin:0 -4px 0 12px;
+    content:'';
+    display:inline-block;
+    height:8px;
+    width:8px;
+    border-radius:8px;
+	background: #d1d8dd;
+}
+
+.date-indicator.blue {
+	color: #5e64ff;
+}
+
+.date-indicator.blue::after {
+	background: #5e64ff;
+}
+
+.medical_record-message {
+	border-left: 1px solid #d1d8dd;
+	padding: 15px;
+	padding-right: 30px;
+}
+
+.medical_record-date {
+	padding: 15px;
+	padding-right: 0px;
+	z-index: 1;
+}
+
+#page-medical_record .plot-wrapper {
+	padding: 20px 15px;
+	border-bottom: 1px solid #d1d8dd;
+	text-align: center;
+}
+
+#page-medical_record .plot {
+	height: 140px ;
+	width: 97% ;
+	margin: auto;
+}
+
+#page-medical_record .list-filters {
+	display: none ;
+}
+
+#page-medical_record .octicon-heart {
+	color: #ff5858;
+	margin: 0px 5px;
+}

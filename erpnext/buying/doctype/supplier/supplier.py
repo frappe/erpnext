@@ -16,7 +16,7 @@ class Supplier(TransactionBase):
 
 	def onload(self):
 		"""Load address and contacts in `__onload`"""
-		load_address_and_contact(self, "supplier")
+		load_address_and_contact(self)
 		self.load_dashboard_info()
 
 	def load_dashboard_info(self):
