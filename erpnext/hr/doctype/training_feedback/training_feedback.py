@@ -20,4 +20,4 @@ class TrainingFeedback(Document):
 				training_event.status = 'Feedback Submitted'
 				break
 
-		training_event.update_after_submit()
+		training_event.save()
