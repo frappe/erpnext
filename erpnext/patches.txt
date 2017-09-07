@@ -438,6 +438,7 @@ erpnext.patches.v8_6.rename_bom_update_tool
 erpnext.patches.v8_9.add_setup_progress_actions
 erpnext.patches.v8_9.rename_company_sales_target_field
 erpnext.patches.v8_8.set_bom_rate_as_per_uom
+erpnext.patches.v8_7.make_subscription_from_recurring_data
 erpnext.patches.v8_10.add_due_date_to_gle
 erpnext.patches.v8_10.update_gl_due_date_for_pi_and_si
 erpnext.patches.v8_10.add_payment_terms_field_to_supplier
