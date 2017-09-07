@@ -10,11 +10,12 @@ from frappe.utils import cint, flt, today, nowdate, getdate, add_days
 import frappe.defaults
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory, \
 	test_records as pr_test_records
+from erpnext.controllers.accounts_controller import get_payment_terms
 from erpnext.exceptions import InvalidCurrency
 from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 
-test_dependencies = ["Item", "Cost Center"]
+test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Template"]
 test_ignore = ["Serial No"]
 
 class TestPurchaseInvoice(unittest.TestCase):
@@ -255,6 +256,55 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		self.assertFalse(frappe.db.sql("""select name from `tabJournal Entry Account`
 			where reference_type='Purchase Invoice' and reference_name=%s""", pi.name))
+
+	def test_invoice_with_advance_and_multi_payment_terms(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
+			import test_records as jv_test_records
+
+		jv = frappe.copy_doc(jv_test_records[1])
+		jv.insert()
+		jv.submit()
+
+		pi = frappe.copy_doc(test_records[0])
+
+		pi.append("advances", {
+			"reference_type": "Journal Entry",
+			"reference_name": jv.name,
+			"reference_row": jv.get("accounts")[0].name,
+			"advance_amount": 400,
+			"allocated_amount": 300,
+			"remarks": jv.remark
+		})
+		pi.insert()
+
+		pi.update(
+			{"payment_schedule": get_payment_terms("_Test Payment Term Template", pi.posting_date, pi.grand_total)}
+		)
+
+		pi.save()
+		pi.submit()
+		self.assertEqual(pi.payment_schedule[0].payment_amount, 756.15)
+		self.assertEqual(pi.payment_schedule[0].due_date, pi.posting_date)
+		self.assertEqual(pi.payment_schedule[1].payment_amount, 756.15)
+		self.assertEqual(pi.payment_schedule[1].due_date, add_days(pi.posting_date, 30))
+
+		pi.load_from_db()
+
+		self.assertTrue(
+			frappe.db.sql(
+				"select name from `tabJournal Entry Account` where reference_type='Purchase Invoice' and "
+				"reference_name=%s and debit_in_account_currency=300", pi.name)
+		)
+
+		self.assertEqual(pi.outstanding_amount, 1212.30)
+
+		pi.cancel()
+
+		self.assertFalse(
+			frappe.db.sql(
+				"select name from `tabJournal Entry Account` where reference_type='Purchase Invoice' and "
+				"reference_name=%s", pi.name)
+		)
 
 	def test_recurring_invoice(self):
 		from erpnext.controllers.tests.test_recurring_document import test_recurring_document
