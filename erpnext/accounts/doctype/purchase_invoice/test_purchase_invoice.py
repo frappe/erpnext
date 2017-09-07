@@ -62,6 +62,12 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		set_perpetual_inventory(0, pi.company)
 
+	def test_terms_added_after_save(self):
+		pi = frappe.copy_doc(test_records[1])
+		pi.insert()
+		self.assertTrue(pi.payment_schedule)
+		self.assertEqual(pi.payment_schedule[0].due_date, pi.due_date)
+
 	def test_payment_entry_unlink_against_purchase_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 		unlink_payment_on_cancel_of_invoice(0)

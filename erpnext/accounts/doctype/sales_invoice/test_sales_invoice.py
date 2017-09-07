@@ -58,6 +58,13 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertRaises(frappe.CannotChangeConstantError, si.save)
 
+	def test_add_terms_after_save(self):
+		si = frappe.copy_doc(test_records[2])
+		si.insert()
+
+		self.assertTrue(si.payment_schedule)
+		self.assertEqual(si.payment_schedule[0].due_date, si.due_date)
+
 	def test_sales_invoice_calculation_base_currency(self):
 		si = frappe.copy_doc(test_records[2])
 		si.insert()
