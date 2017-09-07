@@ -56,6 +56,6 @@ script:
   - bench run-tests
   - sleep 5
   - bench reinstall --yes
-  - bench execute erpnext.setup.setup_wizard.utils.complete
+  - bench --verbose run-setup-wizard-ui-test
   - bench execute erpnext.setup.utils.enable_all_roles_and_domains
   - bench run-ui-tests --app erpnext

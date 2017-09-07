@@ -4,6 +4,7 @@
 erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	setup: function() {
 		this._super();
+		frappe.flags.hide_serial_batch_dialog = false;
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
 			var has_margin_field = frappe.meta.has_field(cdt, 'margin_type');
@@ -314,12 +315,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						if(!r.exc) {
 							me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
 							me.toggle_conversion_factor(item);
-							if(show_batch_dialog) {
+							if(show_batch_dialog && !frappe.flags.hide_serial_batch_dialog) {
 								var d = locals[cdt][cdn];
 								$.each(r.message, function(k, v) {
 									if(!d[k]) d[k] = v;
 								});
-								erpnext.show_serial_batch_selector(me.frm, d);
+
+								erpnext.show_serial_batch_selector(me.frm, d, (item) => {
+									me.frm.script_manager.trigger('qty', item.doctype, item.name);
+								});
 							}
 						}
 					}
@@ -527,10 +531,21 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			if(this.frm.doc.ignore_pricing_rule) {
 				this.calculate_taxes_and_totals();
 			} else if (!this.in_apply_price_list){
+				this.set_actual_charges_based_on_currency();
 				this.apply_price_list();
 			}
 
 		}
+	},
+
+	set_actual_charges_based_on_currency: function() {
+		var me = this;
+		$.each(this.frm.doc.taxes || [], function(i, d) {
+			if(d.charge_type == "Actual") {
+				frappe.model.set_value(d.doctype, d.name, "tax_amount",
+					flt(d.tax_amount) / flt(me.frm.doc.conversion_rate));
+			}
+		});
 	},
 
 	get_exchange_rate: function(transaction_date, from_currency, to_currency, callback) {
@@ -1102,7 +1117,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 });
 
-erpnext.show_serial_batch_selector = function(frm, d) {
+erpnext.show_serial_batch_selector = function(frm, d, callback, show_dialog) {
 	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
 		new erpnext.SerialNoBatchSelector({
 			frm: frm,
@@ -1111,6 +1126,7 @@ erpnext.show_serial_batch_selector = function(frm, d) {
 				type: "Warehouse",
 				name: d.warehouse
 			},
-		});
+			callback: callback
+		}, show_dialog);
 	});
 }

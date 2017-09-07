@@ -60,8 +60,8 @@ def get_notification_config():
 
 		"targets": {
 			"Company": {
-				"filters" : { "sales_target": ( ">", 0 ) },
-				"target_field" : "sales_target",
+				"filters" : { "monthly_sales_target": ( ">", 0 ) },
+				"target_field" : "monthly_sales_target",
 				"value_field" : "total_monthly_sales"
 			}
 		}
