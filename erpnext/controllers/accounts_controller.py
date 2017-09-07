@@ -47,6 +47,9 @@ class AccountsController(TransactionBase):
 			if self.get("payment_schedule"):
 				self.set_due_date()
 				self.validate_payment_schedule()
+			else:
+				self.set_payment_schedule()
+				self.set_due_date()
 			self.validate_due_date()
 			self.validate_advance_entries()
 
@@ -125,9 +128,9 @@ class AccountsController(TransactionBase):
 			if not self.due_date:
 				frappe.throw(_("Due Date is mandatory"))
 
-			validate_due_date(self.posting_date, self.due_date, "Customer", self.customer, self.company)
+			validate_due_date(self.posting_date, self.due_date, "Customer", self.customer)
 		elif self.doctype == "Purchase Invoice":
-			validate_due_date(self.posting_date, self.due_date, "Supplier", self.supplier, self.company)
+			validate_due_date(self.posting_date, self.due_date, "Supplier", self.supplier)
 
 	def set_price_list_currency(self, buying_or_selling):
 		if self.meta.get_field("posting_date"):
@@ -617,16 +620,13 @@ class AccountsController(TransactionBase):
 		for item in duplicate_list:
 			self.remove(item)
 
-	def _set_payment_schedule(self):
-		if not self.get("payment_schedule"):
-			if self.due_date:
-				self.append("payment_schedule", {
-					"due_date": self.due_date,
-					"invoice_portion": 100,
-					"payment_amount": self.grand_total
-				})
-		else:
-			self.due_date = max([d.due_date for d in self.get("payment_schedule")])
+	def set_payment_schedule(self):
+		due_date = self.due_date or get_due_date(self.posting_date)
+		self.append("payment_schedule", {
+			"due_date": due_date,
+			"invoice_portion": 100,
+			"payment_amount": self.grand_total
+		})
 
 	def set_due_date(self):
 		self.due_date = max([d.due_date for d in self.get("payment_schedule")])
@@ -643,7 +643,12 @@ class AccountsController(TransactionBase):
 			total += flt(d.payment_amount)
 
 		if total != self.grand_total:
-			frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand Total"))
+			# Try to recover if the Payment Term is a very simple one.
+			# If there is just one Payment Term and the invoice portion is 100:
+			if len(self.payment_schedule) == 1 and self.payment_schedule[0].invoice_portion == 100:
+				self.payment_schedule[0].update({'payment_amount': self.grand_total})
+			else:
+				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand Total"))
 
 
 @frappe.whitelist()

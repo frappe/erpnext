@@ -9,6 +9,7 @@ from frappe.utils import cint, cstr, getdate, nowdate, \
 
 from frappe import _, msgprint, throw
 
+
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 date_field_map = {
 	"Sales Order": "transaction_date",
@@ -73,6 +74,7 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 		frappe.throw(exception_message)
 
 def make_new_document(reference_doc, date_field, posting_date):
+	from erpnext.controllers.accounts_controller import get_payment_terms
 	new_document = frappe.copy_doc(reference_doc, ignore_no_copy=False)
 	mcount = month_map[reference_doc.recurring_type]
 
@@ -90,7 +92,8 @@ def make_new_document(reference_doc, date_field, posting_date):
 		date_field: posting_date,
 		"from_date": from_date,
 		"to_date": to_date,
-		"next_date": get_next_date(reference_doc.next_date, mcount,cint(reference_doc.repeat_on_day_of_month))
+		"next_date": get_next_date(reference_doc.next_date, mcount,cint(reference_doc.repeat_on_day_of_month)),
+		"payment_schedule": get_payment_terms("_Test Payment Term Template 3", posting_date, new_document.grand_total)
 	})
 
 	if new_document.meta.get_field('set_posting_time'):

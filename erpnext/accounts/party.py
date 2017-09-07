@@ -302,7 +302,7 @@ def get_due_date_from_template(template_name, posting_date):
 	return due_date
 
 
-def validate_due_date(posting_date, due_date, party_type, party, company):
+def validate_due_date(posting_date, due_date, party_type, party):
 	if getdate(due_date) < getdate(posting_date):
 		frappe.throw(_("Due Date cannot be before Posting Date"))
 	else:
