@@ -35,7 +35,6 @@ class PaymentRequest(Document):
 
 	def on_submit(self):
 		send_mail = True
-		self.make_communication_entry()
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 
 		if (hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") == "Shopping Cart") \
@@ -45,6 +44,7 @@ class PaymentRequest(Document):
 		if send_mail:
 			self.set_payment_request_url()
 			self.send_email()
+			self.make_communication_entry()
 
 	def on_cancel(self):
 		self.check_if_payment_entry_exists()
