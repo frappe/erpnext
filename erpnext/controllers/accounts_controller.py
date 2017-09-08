@@ -609,11 +609,14 @@ class AccountsController(TransactionBase):
 
 	def set_payment_schedule(self):
 		due_date = self.due_date or get_due_date(self.posting_date)
-		self.append("payment_schedule", {
-			"due_date": due_date,
-			"invoice_portion": 100,
-			"payment_amount": self.grand_total
-		})
+
+		if self.get("payment_terms_template"):
+			data = get_payment_terms(self.payment_terms_template, self.posting_date, self.grand_total)
+			for item in data:
+				self.append("payment_schedule", item)
+		else:
+			data = dict(due_date=due_date, invoice_portion=100, payment_amount=self.grand_total)
+			self.append("payment_schedule", data)
 
 	def set_due_date(self):
 		self.due_date = max([d.due_date for d in self.get("payment_schedule")])
