@@ -286,11 +286,13 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	set_cumulative_total: function(row_idx, tax) {
 		if(row_idx==0) {
-			tax.total = flt(this.frm.doc.net_total + tax.tax_amount_after_discount_amount,
-				precision("total", tax));
+			tax.total = (in_list(["Valuation and Total", "Total"], tax.category)) ?
+				flt(this.frm.doc.net_total + tax.tax_amount_after_discount_amount, precision("total", tax)): 
+				flt(this.frm.doc.net_total, precision("total", tax));
 		} else {
-			tax.total = flt(this.frm.doc["taxes"][row_idx-1].total + tax.tax_amount_after_discount_amount,
-				precision("total", tax));
+			tax.total = (in_list(["Valuation and Total", "Total"], tax.category)) ? 
+				flt(this.frm.doc["taxes"][row_idx-1].total + tax.tax_amount_after_discount_amount, precision("total", tax)): 
+				flt(this.frm.doc["taxes"][row_idx-1].total, precision("total", tax));
 		}
 	},
 
