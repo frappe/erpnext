@@ -528,7 +528,7 @@ frappe.ui.form.on('Sales Invoice', {
 						frm.set_value("company_address",r.message)
 					}
 					else {
-						frm.set_value = ("company_address","")
+						frm.set_value("company_address","")
 					}
 				}
 			})
