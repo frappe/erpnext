@@ -1,6 +1,7 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 cur_frm.add_fetch("employee", "employee_name", "employee_name");
+cur_frm.add_fetch('employee','department','department');
 // cur_frm.add_fetch("employee", "grade", "grade");
 // cur_frm.add_fetch("grade", "internal_per_diem_rate", "internal_per_diem_rate");
 // cur_frm.add_fetch("grade", "external_per_diem_rate", "external_per_diem_rate");

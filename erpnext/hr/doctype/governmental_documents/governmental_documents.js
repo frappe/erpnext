@@ -13,3 +13,5 @@ cur_frm.cscript.custom_issue_date = cur_frm.cscript.custom_expired_date = functi
 		frappe.msgprint(__("Issue date can't be greater than Expired date"));
 	}
 }
+cur_frm.add_fetch('employee','department','department');
+

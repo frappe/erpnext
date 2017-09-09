@@ -1,6 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-
+cur_frm.add_fetch('employee','department','department');
 // cur_frm.cscript.custom_employee = function(doc, cdt, cd) {
 //     alert("Ggg");
 // }

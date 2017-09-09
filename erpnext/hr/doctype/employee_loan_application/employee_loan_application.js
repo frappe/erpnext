@@ -1,6 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-
+cur_frm.add_fetch('employee','department','department');
 frappe.ui.form.on('Employee Loan Application', {
 	refresh: function(frm) {
 		frm.trigger("toggle_fields")
