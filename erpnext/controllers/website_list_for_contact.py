@@ -55,7 +55,7 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 	return post_process(doctype, get_list_for_transactions(doctype, txt, filters, limit_start, limit_page_length,
 		fields="name", order_by="modified desc"))
 
-def get_list_for_transactions(doctype, txt, filters, limit_start, limit_page_length=20, 
+def get_list_for_transactions(doctype, txt, filters, limit_start, limit_page_length=20,
 	ignore_permissions=False,fields=None, order_by=None):
 	""" Get List of transactions like Invoices, Orders """
 	from frappe.www.list import get_list
