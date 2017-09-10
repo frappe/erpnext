@@ -488,6 +488,8 @@ class Item(WebsiteGenerator):
 	def validate_warehouse_for_reorder(self):
 		warehouse = []
 		for i in self.get("reorder_levels"):
+			if not i.warehouse_group:
+				i.warehouse_group = i.warehouse
 			if i.get("warehouse") and i.get("warehouse") not in warehouse:
 				warehouse += [i.get("warehouse")]
 			else:

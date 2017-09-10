@@ -69,5 +69,5 @@ apps/erpnext/erpnext/schools/doctype/assessment_result/assessment_result.js +34,
 apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py +60,Please set Company filter blank if Group By is 'Company',"Por favor, establezca el filtro de Compañía en blanco si Agrupar Por es 'Compañía'"
 DocType: School Settings,"For Course based Student Group, the Course will be validated for every Student from the enrolled Courses in Program Enrollment.","Para Grupo de Estudiantes por Curso, el Curso será validado para cada Estudiante de los Cursos inscritos en la Inscripción del Programa."
 DocType: School Settings,"For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.","Para grupo de estudiantes por lotes, el lote de estudiantes se validará para cada estudiante de la inscripción del programa."
-apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +44,Leave Encashment,Cobro de Permiso
+apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +66,Leave Encashment,Cobro de Permiso
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +982,Select Items based on Delivery Date,Seleccionar Artículos según la fecha de entrega

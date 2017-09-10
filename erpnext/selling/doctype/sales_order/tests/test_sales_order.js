@@ -1,7 +1,7 @@
 QUnit.module('Sales Order');
 
 QUnit.test("test sales order", function(assert) {
-	assert.expect(8);
+	assert.expect(10);
 	let done = assert.async();
 	frappe.run_serially([
 		() => {
@@ -12,7 +12,7 @@ QUnit.test("test sales order", function(assert) {
 						{'delivery_date': frappe.datetime.add_days(frappe.defaults.get_default("year_end_date"), 1)},
 						{'qty': 5},
 						{'item_code': 'Test Product 4'},
-						{'uom': 'unit'},
+						{'uom': 'Nos'},
 						{'margin_type': 'Percentage'},
 						{'discount_percentage': 10},
 					]
@@ -33,7 +33,7 @@ QUnit.test("test sales order", function(assert) {
 				{additional_discount_percentage:10}
 			]);
 		},
-		() => cur_frm.save(),
+		() => frappe.timeout(1),
 		() => {
 			// get_item_details
 			assert.ok(cur_frm.doc.items[0].item_name=='Test Product 4', "Item name correct");
@@ -42,15 +42,19 @@ QUnit.test("test sales order", function(assert) {
 			// get tax account head details
 			assert.ok(cur_frm.doc.taxes[0].account_head=='CGST - '+frappe.get_abbr(frappe.defaults.get_default('Company')), " Account Head abbr correct");
 			// calculate totals
-			assert.ok(cur_frm.doc.items[0].price_list_rate==1000, "Item 1 price_list_rate");
-			assert.ok(cur_frm.doc.total== 4500, "total correct ");
-			assert.ok(cur_frm.doc.rounded_total== 4414.5, "rounded total correct ");
-
+			assert.ok(cur_frm.doc.items[0].price_list_rate==90, "Item 1 price_list_rate");
+			assert.ok(cur_frm.doc.total== 405, "total correct ");
+			assert.ok(cur_frm.doc.net_total== 364.5, "net total correct ");
+			assert.ok(cur_frm.doc.grand_total== 397.30, "grand total correct ");
+			assert.ok(cur_frm.doc.rounded_total== 397.30, "rounded total correct ");
 		},
+		() => cur_frm.save(),
+		() => frappe.timeout(1),
 		() => cur_frm.print_doc(),
 		() => frappe.timeout(1),
 		() => {
 			assert.ok($('.btn-print-print').is(':visible'), "Print Format Available");
+			frappe.timeout(1);
 			assert.ok($(".section-break+ .section-break .column-break:nth-child(1) .data-field:nth-child(1) .value").text().includes("Billing Street 1"), "Print Preview Works As Expected");
 		},
 		() => cur_frm.print_doc(),

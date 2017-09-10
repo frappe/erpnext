@@ -74,7 +74,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				cur_frm.add_custom_button(__('Payment Request'),
 					this.make_payment_request, __("Make"));
 			}
-
+      
+      if(!doc.subscription) {
+				cur_frm.add_custom_button(__('Subscription'), function() {
+					erpnext.utils.make_subscription(doc.doctype, doc.name)
+				}, __("Make"))
+			}
 		}
 
 		//Allow payment if it is a standard Sales Invoice or if it is a Standalone Credit Note

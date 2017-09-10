@@ -38,7 +38,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 		//Allow payment if it is a standard Purchase Invoice or if it is a Standalone Debit Note
 		if(doc.docstatus==1 && (doc.is_return && !doc.return_against || !doc.is_return && doc.outstanding_amount != 0)) {
-			this.frm.add_custom_button(__('Payment'), this.make_payment_entry, __("Make"));
+		  this.frm.add_custom_button(__('Payment'), this.make_payment_entry, __("Make"));
 			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 		//Allow creation of: 
@@ -47,6 +47,13 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		if(!doc.is_return && (this.frm.doc.__islocal || doc.docstatus==1 && (doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)))) {
 			cur_frm.add_custom_button(__('Return / Debit Note'),
 				this.make_debit_note, __("Make"));
+
+		if(!doc.is_return && doc.docstatus==1) {
+			if(!doc.subscription) {
+				cur_frm.add_custom_button(__('Subscription'), function() {
+					erpnext.utils.make_subscription(doc.doctype, doc.name)
+				}, __("Make"))
+			}
 		}
 
 		if(doc.docstatus===0) {
@@ -359,6 +366,7 @@ frappe.ui.form.on("Purchase Invoice", {
 			'Payment Entry': 'Payment'
 		}
 	},
+
 	onload: function(frm) {
 		$.each(["warehouse", "rejected_warehouse"], function(i, field) {
 			frm.set_query(field, "items", function() {
@@ -386,5 +394,5 @@ frappe.ui.form.on("Purchase Invoice", {
 			erpnext.buying.get_default_bom(frm);
 		}
 		frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted==="Yes");
-	}
+	},
 })
