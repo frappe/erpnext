@@ -130,12 +130,7 @@ def get_customers_suppliers(doctype, user):
 	suppliers = []
 	meta = frappe.get_meta(doctype)
 
-	if frappe.has_permission(doctype, 'read', user=user):
-		customers = [customer.name for customer in frappe.get_list("Customer")] \
-			if meta.get_field("customer") else None
-		suppliers = [supplier.name for supplier in frappe.get_list("Customer")] \
-			if meta.get_field("supplier") else None
-	elif has_common(["Supplier", "Customer"], frappe.get_roles(user)):
+	if has_common(["Supplier", "Customer"], frappe.get_roles(user)):
 		contacts = frappe.db.sql("""
 			select 
 				`tabContact`.email_id,
@@ -146,10 +141,14 @@ def get_customers_suppliers(doctype, user):
 			where
 				`tabContact`.name=`tabDynamic Link`.parent and `tabContact`.email_id =%s
 			""", user, as_dict=1)
-
 		customers = [c.link_name for c in contacts if c.link_doctype == 'Customer'] \
 			if meta.get_field("customer") else None
 		suppliers = [c.link_name for c in contacts if c.link_doctype == 'Supplier'] \
+			if meta.get_field("supplier") else None
+	elif frappe.has_permission(doctype, 'read', user=user):
+		customers = [customer.name for customer in frappe.get_list("Customer")] \
+			if meta.get_field("customer") else None
+		suppliers = [supplier.name for supplier in frappe.get_list("Customer")] \
 			if meta.get_field("supplier") else None
 
 	return customers, suppliers
