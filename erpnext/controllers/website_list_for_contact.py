@@ -55,14 +55,16 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 	return post_process(doctype, get_list_for_transactions(doctype, txt, filters, limit_start, limit_page_length,
 		fields="name", order_by="modified desc"))
 
-def get_list_for_transactions(doctype, txt, filters, limit_start, limit_page_length=20, ignore_permissions=False,fields=None, order_by=None):
+def get_list_for_transactions(doctype, txt, filters, limit_start, limit_page_length=20, 
+	ignore_permissions=False,fields=None, order_by=None):
+	""" Get List of transactions like Invoices, Orders """
 	from frappe.www.list import get_list
 	meta = frappe.get_meta(doctype)
 	data = []
 	or_filters = []
 
 	for d in get_list(doctype, txt, filters=filters, fields="name", limit_start=limit_start,
-		limit_page_length=limit_page_length, ignore_permissions=True, order_by="modified desc"):
+		limit_page_length=limit_page_length, ignore_permissions=ignore_permissions, order_by="modified desc"):
 		data.append(d)
 
 	if txt:
@@ -74,9 +76,9 @@ def get_list_for_transactions(doctype, txt, filters, limit_start, limit_page_len
 					or_filters.append([doctype, "name", "=", child.parent])
 
 	if or_filters:
-		for r in frappe.get_list(doctype, fields=fields,filters=filters, or_filters=or_filters, limit_start=limit_start,
-			limit_page_length=limit_page_length, ignore_permissions=ignore_permissions,
-			order_by=order_by):
+		for r in frappe.get_list(doctype, fields=fields,filters=filters, or_filters=or_filters,
+			limit_start=limit_start, limit_page_length=limit_page_length, 
+			ignore_permissions=ignore_permissions, order_by=order_by):
 			data.append(r)
 
 	return data
