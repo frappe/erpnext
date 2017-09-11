@@ -1,16 +1,27 @@
 // Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-cur_frm.add_fetch("company", "default_receivable_account", "debit_to");
-cur_frm.add_fetch("company", "default_income_account", "against_income_account");
-cur_frm.add_fetch("company", "cost_center", "cost_center");
-
 frappe.ui.form.on('Fee Structure', {
+	setup: function(frm) {
+		frm.add_fetch("company", "default_receivable_account", "receivable_account");
+		frm.add_fetch("company", "default_income_account", "income_account");
+		frm.add_fetch("company", "cost_center", "cost_center");
+	},
+
 	onload: function(frm) {
-		frm.set_query("debit_to", function(doc) {
+		frm.set_query("receivable_account", function(doc) {
 			return {
 				filters: {
 					'account_type': 'Receivable',
+					'is_group': 0,
+					'company': doc.company
+				}
+			};
+		});
+		frm.set_query("income_account", function(doc) {
+			return {
+				filters: {
+					'account_type': 'Income Account',
 					'is_group': 0,
 					'company': doc.company
 				}

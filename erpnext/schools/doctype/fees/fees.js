@@ -6,8 +6,8 @@ frappe.ui.form.on("Fees", {
 	setup: function(frm) {
 		frm.add_fetch("student", "title", "student_name");
 		frm.add_fetch("student", "student_email_id", "student_email");
-		frm.add_fetch("fee_structure", "debit_to", "debit_to");
-		frm.add_fetch("fee_structure", "against_income_account", "against_income_account");
+		frm.add_fetch("fee_structure", "receivable_account", "receivable_account");
+		frm.add_fetch("fee_structure", "income_account", "income_account");
 		frm.add_fetch("fee_structure", "cost_center", "cost_center");
 	},
 
@@ -19,7 +19,6 @@ frappe.ui.form.on("Fees", {
 				}
 			};
 		});
-
 		frm.set_query("fee_structure",function(){
 			return{
 				"filters":{
@@ -27,9 +26,7 @@ frappe.ui.form.on("Fees", {
 				}
 			};
 		});
-
-		// debit account for booking the fee
-		frm.set_query("debit_to", function(doc) {
+		frm.set_query("receivable_account", function(doc) {
 			return {
 				filters: {
 					'account_type': 'Receivable',
@@ -38,7 +35,15 @@ frappe.ui.form.on("Fees", {
 				}
 			};
 		});
-
+		frm.set_query("income_account", function(doc) {
+			return {
+				filters: {
+					'account_type': 'Income Account',
+					'is_group': 0,
+					'company': doc.company
+				}
+			};
+		});
 		if (!frm.doc.posting_date) {
 			frm.doc.posting_date = frappe.datetime.get_today();
 		}
@@ -98,7 +103,7 @@ frappe.ui.form.on("Fees", {
 	},
 
 	make_payment_request: function(frm) {
-		if (!frm.doc.contact_email) {
+		if (!frm.doc.student_email) {
 			frappe.msgprint(__("Please set the Email ID for the Student to send the Payment Request"));
 		} else {
 			frappe.call({
@@ -106,7 +111,7 @@ frappe.ui.form.on("Fees", {
 				args: {
 					"dt": frm.doc.doctype,
 					"dn": frm.doc.name,
-					"recipient_id": frm.doc.contact_email
+					"recipient_id": frm.doc.student_email
 				},
 				callback: function(r) {
 					if(!r.exc){
@@ -134,23 +139,6 @@ frappe.ui.form.on("Fees", {
 
 	set_posting_time: function(frm) {
 		frm.refresh();
-	},
-
-	program: function(frm) {
-		if (frm.doc.program && frm.doc.academic_term) {
-			frappe.call({
-				method: "erpnext.schools.api.get_fee_structure",
-				args: {
-					"program": frm.doc.program,
-					"academic_term": frm.doc.academic_term
-				},
-				callback: function(r) {
-					if(r.message) {
-						frm.set_value("fee_structure" ,r.message);
-					}
-				}
-			});
-		}
 	},
 
 	academic_term: function() {

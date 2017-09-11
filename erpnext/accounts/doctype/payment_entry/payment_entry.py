@@ -212,18 +212,16 @@ class PaymentEntry(AccountsController):
 						self.validate_journal_entry()
 
 					if d.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Expense Claim", "Fees"):
-						if self.party_type in ("Customer", "Student"):
+						if self.party_type == "Customer":
 							ref_party_account = ref_doc.debit_to
+						elif self.party_type == "Student":
+							ref_party_account = ref_doc.receivable_account
 						elif self.party_type=="Supplier":
 							ref_party_account = ref_doc.credit_to
 						elif self.party_type=="Employee":
 							ref_party_account = ref_doc.payable_account
 
-					if d.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Fees"):
-						ref_party_account = ref_doc.debit_to \
-							if self.party_type in ("Customer", "Student") else ref_doc.credit_to
-
-						if ref_party_account != self.party_account:
+					if ref_party_account != self.party_account:
 							frappe.throw(_("{0} {1} is associated with {2}, but Party Account is {3}")
 								.format(d.reference_doctype, d.reference_name, ref_party_account, self.party_account))
 
@@ -688,10 +686,12 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		party_type = "Student"
 
 	# party account
-	if dt in ("Sales Invoice", "Fees"):
+	if dt == "Sales Invoice":
 		party_account = doc.debit_to
 	elif dt == "Purchase Invoice":
 		party_account = doc.credit_to
+	elif dt == "Fees":
+		party_account = doc.receivable_account
 	else:
 		party_account = get_party_account(party_type, doc.get(party_type.lower()), doc.company)
 

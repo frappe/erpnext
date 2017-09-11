@@ -42,14 +42,15 @@ class FeeSchedule(Document):
 	def create_fees(self):
 		if not self.fee_creation_status or self.fee_creation_status == "Failed":
 			self.fee_creation_status = "In Process"
+			frappe.publish_realtime("fee_schedule_progress", {"progress": 0, "reload": True}, user=frappe.session.user)
 			enqueue(generate_fee, queue='default', timeout=6000, event='generate_fee',
 				fee_schedule=self.name)
-			frappe.msgprint(_("Fee records will be created in the background. In case of any error, the error message will be updated in the Schedule, check after refresh in 5 minutes."))
-
 
 def generate_fee(fee_schedule):
 	doc = frappe.get_doc("Fee Schedule", fee_schedule)
 	error = False
+	total_records = sum([int(d.total_students) for d in doc.student_groups])
+	created_records = 0
 	for d in doc.student_groups:
 		try:
 			students = frappe.db.sql(""" select sg.program, sg.batch, sgs.student, sgs.student_name
@@ -74,6 +75,9 @@ def generate_fee(fee_schedule):
 				doc.send_payment_request = 1
 				doc.save()
 				doc.submit()
+				created_records += 1
+				frappe.publish_realtime("fee_schedule_progress", {"progress": created_records}, user=frappe.session.user)
+
 		except Exception as e:
 			error = True
 			err_msg = frappe.local.message_log and "\n\n".join(frappe.local.message_log) or cstr(e)

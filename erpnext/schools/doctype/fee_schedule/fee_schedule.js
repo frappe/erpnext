@@ -3,10 +3,39 @@
 
 frappe.ui.form.on('Fee Schedule', {
 	setup: function(frm) {
-		frm.add_fetch("fee_structure", "default_receivable_account", "debit_to");
-		frm.add_fetch("fee_structure", "default_income_account", "against_income_account");
+		frm.add_fetch("fee_structure", "receivable_account", "receivable_account");
+		frm.add_fetch("fee_structure", "income_account", "income_account");
 		frm.add_fetch("fee_structure", "cost_center", "cost_center");
+		frappe.realtime.on("fee_schedule_progress", function(data) {
+			if (data.progress && data.progress === 0) {
+				frappe.msgprint(__("Fee records will be created in the background. In case of any error the error message will be updated in the Schedule."));
+			}
+			if (data.progress) {
+				frm.reload_doc();
+				frm.dashboard.add_progress("Fee Creation Status", data.progress);
+			}
+		});
+	},
 
+	onload: function(frm) {
+		frm.set_query("receivable_account", function(doc) {
+			return {
+				filters: {
+					'account_type': 'Receivable',
+					'is_group': 0,
+					'company': doc.company
+				}
+			};
+		});
+		frm.set_query("income_account", function(doc) {
+			return {
+				filters: {
+					'account_type': 'Income Account',
+					'is_group': 0,
+					'company': doc.company
+				}
+			};
+		});
 		frm.set_query("student_group", "student_groups", function() {
 			return {
 				"program": frm.doc.program,
@@ -24,7 +53,8 @@ frappe.ui.form.on('Fee Schedule', {
 			frm.dashboard.add_indicator(__('Total Outstanding: {0}', [format_currency(info.total_unpaid,
 				info.currency)]), info.total_unpaid ? 'orange' : 'green');
 		}
-		if (!frm.doc.fee_creation_status || frm.doc.fee_creation_status == "Failed") {
+		
+		if (!frm.doc.__islocal && !frm.doc.fee_creation_status || frm.doc.fee_creation_status == "Failed") {
 			frm.add_custom_button(__('Create Fees'), function() {
 				frappe.call({
 					method: "create_fees",
