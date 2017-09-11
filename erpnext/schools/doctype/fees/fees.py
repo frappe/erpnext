@@ -11,6 +11,7 @@ from erpnext.accounts.doctype.payment_request.payment_request import make_paymen
 from frappe.utils.csvutils import getlink
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import delete_gl_entries
+from erpnext.schools.api import get_student_guardians
 
 
 class Fees(AccountsController):
@@ -32,15 +33,27 @@ class Fees(AccountsController):
 			self.company = frappe.defaults.get_defaults().company
 		if not self.currency:
 			self.currency = frappe.defaults.get_defaults().currency
-		if not (self.debit_to and self.against_income_account and self.cost_center):
+		if not (self.receivable_account and self.income_account and self.cost_center):
 			accounts_details = frappe.get_all("Company", fields=["default_receivable_account",
 				"default_income_account", "cost_center"], filters={"name": self.company})[0]
-		if not self.debit_to:
-			self.debit_to = accounts_details.default_receivable_account
-		if not self.against_income_account:
-			self.against_income_account = accounts_details.default_income_account
+		if not self.receivable_account:
+			self.receivable_account = accounts_details.default_receivable_account
+		if not self.income_account:
+			self.income_account = accounts_details.default_income_account
 		if not self.cost_center:
 			self.cost_center = accounts_details.cost_center
+		if not self.student_email:
+			self.student_email = self.get_student_emails()
+
+	def get_student_emails(self):
+		guardians = get_student_guardians(self.student)
+		email_list = []
+		for guardian in guardians:
+			email = frappe.db.get_value("Guardian", guardian.guardian, "email_address")
+			if email:
+				email_list.append(email)
+		return ", ".join(email_list)
+
 
 	def calculate_total(self):
 		"""Calculates total amount."""
@@ -55,7 +68,7 @@ class Fees(AccountsController):
 		self.make_gl_entries()
 
 		if self.send_payment_request and self.student_email:
-			pr = make_payment_request(dt="Fees", dn=self.name, recipient_id=self.contact_email,
+			pr = make_payment_request(dt="Fees", dn=self.name, recipient_id=self.student_email,
 					submit_doc=True, use_dummy_message=True)
 			frappe.msgprint(_("Payment request {0} created").format(getlink("Payment Request", pr.name)))
 
@@ -68,17 +81,17 @@ class Fees(AccountsController):
 		if not self.grand_total:
 			return
 		student_gl_entries =  self.get_gl_dict({
-			"account": self.debit_to,
+			"account": self.receivable_account,
 			"party_type": "Student",
 			"party": self.student,
-			"against": self.against_income_account,
+			"against": self.income_account,
 			"debit": self.grand_total,
 			"debit_in_account_currency": self.grand_total,
 			"against_voucher": self.name,
 			"against_voucher_type": self.doctype
 		})
 		fee_gl_entry = self.get_gl_dict({
-			"account": self.against_income_account,
+			"account": self.income_account,
 			"against": self.student,
 			"credit": self.grand_total,
 			"credit_in_account_currency": self.grand_total,
