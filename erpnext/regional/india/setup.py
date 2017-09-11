@@ -54,8 +54,6 @@ def create_hsn_codes(data, code_field):
 			hsn_code.name = d[code_field]
 			hsn_code.db_insert()
 
-	frappe.db.commit()
-
 def add_custom_roles_for_reports():
 	for report_name in ('GST Sales Register', 'GST Purchase Register',
 		'GST Itemised Sales Register', 'GST Itemised Purchase Register'):
