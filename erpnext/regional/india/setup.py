@@ -78,7 +78,8 @@ def add_print_formats():
 
 def make_custom_fields():
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
-		fieldtype='Data', options='item_code.gst_hsn_code', insert_after='description', print_hide=1)
+		fieldtype='Data', options='item_code.gst_hsn_code', insert_after='description',
+		allow_on_submit=1, print_hide=1)
 	invoice_gst_fields = [
 		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
 			insert_after='select_print_heading', print_hide=1, collapsible=1),
