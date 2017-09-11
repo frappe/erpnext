@@ -19,3 +19,4 @@ Regional
 Healthcare
 Restaurant
 ERPNext Integrations
+Non Profit
