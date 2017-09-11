@@ -99,7 +99,8 @@ def get_actual_details(name, filters):
 		where
 			b.name = ba.parent
 			and b.docstatus = 1
-			and ba.account=gl.account 
+			and ba.account=gl.account
+			and b.{budget_against} = gl.{budget_against}
 			and gl.fiscal_year=%s 
 			and b.{budget_against}=%s
 			and exists(select name from `tab{tab}` where name=gl.{budget_against} and {cond})
