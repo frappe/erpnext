@@ -300,4 +300,11 @@ def get_data():
 			"icon": "octicon octicon-database",
 			"type": "module"
 		},
+		{
+			"module_name": "Non Profit",
+			"color": "#DE2B37",
+			"icon": "octicon octicon-heart",
+			"type": "module",
+			"label": _("Non Profit")
+		}
 	]
