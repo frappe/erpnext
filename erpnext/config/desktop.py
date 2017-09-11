@@ -268,5 +268,12 @@ def get_data():
 			"icon": "octicon octicon-plus",
 			"type": "module",
 			"label": _("Healthcare")
+		},
+		{
+			"module_name": "Non Profit",
+			"color": "#DE2B37",
+			"icon": "octicon octicon-heart",
+			"type": "module",
+			"label": _("Non Profit")
 		}
 	]
