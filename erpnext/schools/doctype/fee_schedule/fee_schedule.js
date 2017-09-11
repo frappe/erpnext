@@ -6,15 +6,6 @@ frappe.ui.form.on('Fee Schedule', {
 		frm.add_fetch("fee_structure", "receivable_account", "receivable_account");
 		frm.add_fetch("fee_structure", "income_account", "income_account");
 		frm.add_fetch("fee_structure", "cost_center", "cost_center");
-		frappe.realtime.on("fee_schedule_progress", function(data) {
-			if (data.progress && data.progress === 0) {
-				frappe.msgprint(__("Fee records will be created in the background. In case of any error the error message will be updated in the Schedule."));
-			}
-			if (data.progress) {
-				frm.reload_doc();
-				frm.dashboard.add_progress("Fee Creation Status", data.progress);
-			}
-		});
 	},
 
 	onload: function(frm) {
@@ -42,6 +33,21 @@ frappe.ui.form.on('Fee Schedule', {
 				"academic_year": frm.doc.academic_year
 			};
 		});
+		frappe.realtime.on("fee_schedule_progress", function(data) {
+			if (data.reload && data.reload === 1) {
+				frm.reload_doc();
+			}
+			if (data.progress && data.progress === "0") {
+				frappe.msgprint(__("Fee records will be created in the background. In case of any error the error message will be updated in the Schedule."));
+			}
+			if (data.progress) {
+				let progress_bar = $(cur_frm.dashboard.progress_area).find(".progress-bar");
+				if (progress_bar) {
+					$(progress_bar).removeClass("progress-bar-danger").addClass("progress-bar-success progress-bar-striped");
+					$(progress_bar).css("width", data.progress+"%");
+				}
+			}
+		});
 	},
 
 	refresh: function(frm) {
@@ -53,9 +59,13 @@ frappe.ui.form.on('Fee Schedule', {
 			frm.dashboard.add_indicator(__('Total Outstanding: {0}', [format_currency(info.total_unpaid,
 				info.currency)]), info.total_unpaid ? 'orange' : 'green');
 		}
-		
+		if (frm.doc.fee_creation_status=="In Process") {
+			frm.dashboard.add_progress("Fee Creation Status", "0");
+		}
 		if (!frm.doc.__islocal && !frm.doc.fee_creation_status || frm.doc.fee_creation_status == "Failed") {
 			frm.add_custom_button(__('Create Fees'), function() {
+				frm.doc.fee_creation_status = "In Process";
+				frm.save();
 				frappe.call({
 					method: "create_fees",
 					doc: frm.doc,
@@ -64,6 +74,9 @@ frappe.ui.form.on('Fee Schedule', {
 					}
 				});
 			}, "fa fa-play", "btn-success");
+		}
+		if (frm.doc.fee_creation_status==="Successful") {
+			frm.set_read_only();
 		}
 	},
 
@@ -98,6 +111,6 @@ frappe.ui.form.on("Fee Schedule Student Group", {
 					frappe.model.set_value(cdt, cdn, "total_students", r.message);
 				}
 			}
-		})
+		});
 	}
 })

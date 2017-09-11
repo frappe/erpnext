@@ -4,7 +4,6 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import money_in_words
@@ -40,9 +39,8 @@ class FeeSchedule(Document):
 		self.grand_total_in_words = money_in_words(self.grand_total)
 
 	def create_fees(self):
-		if not self.fee_creation_status or self.fee_creation_status == "Failed":
-			self.fee_creation_status = "In Process"
-			frappe.publish_realtime("fee_schedule_progress", {"progress": 0, "reload": True}, user=frappe.session.user)
+		if self.fee_creation_status == "In Process":
+			frappe.publish_realtime("fee_schedule_progress", {"progress": "0", "reload": 1}, user=frappe.session.user)
 			enqueue(generate_fee, queue='default', timeout=6000, event='generate_fee',
 				fee_schedule=self.name)
 
@@ -52,15 +50,13 @@ def generate_fee(fee_schedule):
 	total_records = sum([int(d.total_students) for d in doc.student_groups])
 	created_records = 0
 	for d in doc.student_groups:
-		try:
-			students = frappe.db.sql(""" select sg.program, sg.batch, sgs.student, sgs.student_name
-				from `tabStudent Group` sg, `tabStudent Group Student` sgs
-				where sg.name=%s and sg.name=sgs.parent and sgs.active=1""", d.student_group, as_dict=1)
+		students = frappe.db.sql(""" select sg.program, sg.batch, sgs.student, sgs.student_name
+			from `tabStudent Group` sg, `tabStudent Group Student` sgs
+			where sg.name=%s and sg.name=sgs.parent and sgs.active=1""", d.student_group, as_dict=1)
 
-			# students = frappe.get_all("Student Group Student", fields=["student", "student_name"],
-			# 	filters={"parent": d.student_group, "parenttype": "Student Group", "active": 1})
-			for student in students:
-				doc = get_mapped_doc("Fee Schedule", fee_schedule,	{
+		for student in students:
+			try:
+				fees_doc = get_mapped_doc("Fee Schedule", fee_schedule,	{
 					"Fee Schedule": {
 						"doctype": "Fees",
 						"field_map": {
@@ -68,19 +64,19 @@ def generate_fee(fee_schedule):
 						}
 					}
 				})
-				doc.student = student.student
-				doc.student_name = student.student_name
-				doc.program = student.program
-				doc.student_batch = student.batch
-				doc.send_payment_request = 1
-				doc.save()
-				doc.submit()
+				fees_doc.student = student.student
+				fees_doc.student_name = student.student_name
+				fees_doc.program = student.program
+				fees_doc.student_batch = student.batch
+				fees_doc.send_payment_request = doc.send_email
+				fees_doc.save()
+				fees_doc.submit()
 				created_records += 1
-				frappe.publish_realtime("fee_schedule_progress", {"progress": created_records}, user=frappe.session.user)
+				frappe.publish_realtime("fee_schedule_progress", {"progress": str(int(created_records * 100/total_records))}, user=frappe.session.user)
 
-		except Exception as e:
-			error = True
-			err_msg = frappe.local.message_log and "\n\n".join(frappe.local.message_log) or cstr(e)
+			except Exception as e:
+				error = True
+				err_msg = frappe.local.message_log and "\n\n".join(frappe.local.message_log) or cstr(e)
 
 	if error:
 		frappe.db.rollback()
@@ -90,6 +86,8 @@ def generate_fee(fee_schedule):
 	else:
 		frappe.db.set_value("Fee Schedule", fee_schedule, "fee_creation_status", "Successful")
 		frappe.db.set_value("Fee Schedule", fee_schedule, "error_log", None)
+
+	frappe.publish_realtime("fee_schedule_progress", {"progress": "100", "reload": 1}, user=frappe.session.user)
 
 
 @frappe.whitelist()
