@@ -85,14 +85,12 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(len(pi.get("items", [])), 1)
 
 	def test_make_purchase_invoice_with_terms(self):
-		po = create_purchase_order(do_not_submit=True)
+		po = create_purchase_order(do_not_save=True)
 
 		self.assertRaises(frappe.ValidationError, make_purchase_invoice, po.name)
 
 		po.update(
-			{"payment_schedule": get_payment_terms(
-				"_Test Payment Term Template", po.transaction_date, po.grand_total
-			)}
+			{"payment_terms_template": "_Test Payment Term Template"}
 		)
 
 		po.save()
@@ -103,14 +101,15 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(po.payment_schedule[1].payment_amount, 2500.0)
 		self.assertEqual(po.payment_schedule[1].due_date, add_days(po.transaction_date, 30))
 		pi = make_purchase_invoice(po.name)
+		pi.save()
 
 		self.assertEquals(pi.doctype, "Purchase Invoice")
 		self.assertEquals(len(pi.get("items", [])), 1)
 
 		self.assertEqual(pi.payment_schedule[0].payment_amount, 2500.0)
-		self.assertEqual(pi.payment_schedule[0].due_date.strftime(DATE_FORMAT), po.transaction_date)
+		self.assertEqual(pi.payment_schedule[0].due_date, po.transaction_date)
 		self.assertEqual(pi.payment_schedule[1].payment_amount, 2500.0)
-		self.assertEqual(pi.payment_schedule[1].due_date.strftime(DATE_FORMAT), add_days(po.transaction_date, 30))
+		self.assertEqual(pi.payment_schedule[1].due_date, add_days(po.transaction_date, 30))
 
 	def test_subcontracting(self):
 		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")

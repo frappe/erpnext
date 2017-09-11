@@ -26,7 +26,9 @@ class AccountsController(TransactionBase):
 		return self.__company_currency
 
 	def onload(self):
+		print("onload called:", self.get("__onload"))
 		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry')
+		self.set_payment_schedule()
 
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
@@ -51,6 +53,8 @@ class AccountsController(TransactionBase):
 				self.set_due_date()
 			self.validate_due_date()
 			self.validate_advance_entries()
+		elif self.doctype in ("Quotation", "Purchase Order", "Sales Order"):
+			self.set_payment_schedule()
 
 		if self.meta.get_field("taxes_and_charges"):
 			self.validate_enabled_taxes_and_charges()
@@ -608,13 +612,15 @@ class AccountsController(TransactionBase):
 			self.remove(item)
 
 	def set_payment_schedule(self):
-		due_date = self.due_date or get_due_date(self.posting_date)
+		posting_date = self.get("posting_date") or self.get("transaction_date")
+		date = self.get("due_date")
+		due_date = date or posting_date
 
-		if self.get("payment_terms_template"):
-			data = get_payment_terms(self.payment_terms_template, self.posting_date, self.grand_total)
+		if self.get("payment_terms_template") and not self.get("payment_schedule"):
+			data = get_payment_terms(self.payment_terms_template, posting_date, self.grand_total)
 			for item in data:
 				self.append("payment_schedule", item)
-		else:
+		elif not self.get("payment_schedule"):
 			data = dict(due_date=due_date, invoice_portion=100, payment_amount=self.grand_total)
 			self.append("payment_schedule", data)
 

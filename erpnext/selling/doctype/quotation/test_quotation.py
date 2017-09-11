@@ -40,16 +40,15 @@ class TestQuotation(unittest.TestCase):
 		quotation = frappe.copy_doc(test_records[0])
 		quotation.transaction_date = nowdate()
 		quotation.valid_till = add_months(quotation.transaction_date, 1)
-		quotation.insert()
 		quotation.update(
-			{"payment_schedule": get_payment_terms(
-				"_Test Payment Term Template", quotation.transaction_date, quotation.grand_total
-			)}
+			{"payment_terms_template": "_Test Payment Term Template"}
 		)
+		quotation.insert()
 
 		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
 		quotation.save()
 		quotation.submit()
+
 		self.assertEqual(quotation.payment_schedule[0].payment_amount, 8906.25)
 		self.assertEqual(quotation.payment_schedule[0].due_date, quotation.transaction_date)
 		self.assertEqual(quotation.payment_schedule[1].payment_amount, 8906.25)
@@ -62,15 +61,18 @@ class TestQuotation(unittest.TestCase):
 		self.assertEquals(sales_order.get("items")[0].doctype, "Sales Order Item")
 		self.assertEquals(sales_order.get("items")[0].prevdoc_docname, quotation.name)
 		self.assertEquals(sales_order.customer, "_Test Customer")
-		self.assertEqual(sales_order.payment_schedule[0].payment_amount, 8906.25)
-		self.assertEqual(sales_order.payment_schedule[0].due_date.strftime(DATE_FORMAT), quotation.transaction_date)
-		self.assertEqual(sales_order.payment_schedule[1].payment_amount, 8906.25)
-		self.assertEqual(sales_order.payment_schedule[1].due_date.strftime(DATE_FORMAT), add_days(quotation.transaction_date, 30))
 
 		sales_order.delivery_date = "2014-01-01"
 		sales_order.naming_series = "_T-Quotation-"
 		sales_order.transaction_date = nowdate()
 		sales_order.insert()
+
+		self.assertEqual(sales_order.payment_schedule[0].payment_amount, 8906.25)
+		self.assertEqual(sales_order.payment_schedule[0].due_date, quotation.transaction_date)
+		self.assertEqual(sales_order.payment_schedule[1].payment_amount, 8906.25)
+		self.assertEqual(
+			sales_order.payment_schedule[1].due_date, add_days(quotation.transaction_date, 30)
+		)
 
 	def test_valid_till(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order

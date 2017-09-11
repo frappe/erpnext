@@ -123,6 +123,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 		}
 
+		if(this.frm.fields_dict["payment_terms_template"]){
+			console.log("triggered");
+			this.frm.trigger("payment_terms_template");
+		}
+
 		if(this.frm.fields_dict["taxes"]) {
 			this["taxes_remove"] = this.calculate_taxes_and_totals;
 		}
