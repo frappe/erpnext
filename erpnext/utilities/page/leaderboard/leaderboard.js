@@ -8,11 +8,13 @@ frappe.Leaderboard = Class.extend({
 		frappe.ui.make_app_page({
 			parent: parent,
 			title: "Leaderboard",
-			single_column: true
+			single_column: false
 		});
 
 		this.parent = parent;
 		this.page = this.parent.page;
+		this.page.sidebar.html(`<ul class="module-sidebar-nav overlay-sidebar nav nav-pills nav-stacked"></ul>`);
+		this.$sidebar_list = this.page.sidebar.find('ul');
 
 		// const list of doctypes
 		this.doctypes = ["Customer", "Item", "Supplier", "Sales Partner"];
@@ -52,11 +54,15 @@ frappe.Leaderboard = Class.extend({
 
 		this.$graph_area = $container.find('.leaderboard-graph');
 
-		this.doctype_select = this.page.add_select(__("Doctype"),
-			this.doctypes.map(d => {
-				return {"label": __(d), value: d }
-			})
-		);
+		this.doctypes.map(doctype => {
+			this.get_sidebar_item(doctype).appendTo(this.$sidebar_list);
+		});
+
+		// this.doctype_select = this.page.add_select(__("Doctype"),
+		// 	this.doctypes.map(d => {
+		// 		return {"label": __(d), value: d }
+		// 	})
+		// );
 
 		this.timespan_select = this.page.add_select(__("Timespan"),
 			this.timespans.map(d => {
@@ -72,6 +78,19 @@ frappe.Leaderboard = Class.extend({
 				return {"label": __(frappe.model.unscrub(d)), value: d }
 			})
 		);
+
+		this.$sidebar_list.on('click', 'li', (e) => {
+			let doctype = $(e.target).find('span').html();
+
+			me.options.selected_doctype = doctype;
+			me.options.selected_filter = me.filters[doctype];
+			me.options.selected_filter_item = me.filters[doctype][1];
+
+			this.$sidebar_list.find('li').removeClass('active');
+			$(e.target).addClass('active');
+
+			me.make_request($container);
+		});
 
 		this.doctype_select.on("change", function() {
 			me.options.selected_doctype = this.value;
@@ -100,7 +119,7 @@ frappe.Leaderboard = Class.extend({
 		});
 
 		// now get leaderboard
-		me.make_request($container);
+		this.$sidebar_list.find('li')[0].trigger('click');
 	},
 
 	make_request: function ($container) {
@@ -171,7 +190,8 @@ frappe.Leaderboard = Class.extend({
 		var me = this;
 
 		var html =
-			`${me.render_list_result(items)}`;
+			`${me.render_list_header()}
+			${me.render_list_result(items)}`;
 
 		return html;
 	},
@@ -288,5 +308,12 @@ frappe.Leaderboard = Class.extend({
 				value: value
 			};
 		});
+	},
+
+	get_sidebar_item: function(item) {
+		return $(`<li class="strong module-sidebar-item">
+			<a class="module-link">
+			<span>${ item }</span></a>
+		</li>`);
 	}
 });

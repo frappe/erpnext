@@ -356,20 +356,9 @@ body[data-route="pos"] .collapse-btn {
   border-radius: 3px;
   color: #fff;
 }
-.leaderboard {
-  margin: 20px;
-  margin-right: 5px;
+.leaderboard .list-item {
+  padding-left: 45px;
 }
-.leaderboard .leaderboard-list {
-  margin: 0px 20px;
-  margin-right: 35px;
-}
-.leaderboard .leaderboard-list .first {
-  padding: 10px 0px;
-}
-.leaderboard .leaderboard-list .first .list-item {
-  font-size: 16px;
-}
-.leaderboard .leaderboard-list .first a {
-  font-weight: normal;
+.leaderboard .list-item_content {
+  padding-right: 45px;
 }

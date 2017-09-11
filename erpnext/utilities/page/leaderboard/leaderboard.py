@@ -86,9 +86,6 @@ def get_all_customers(doctype, filters, items, field, start=0, limit=100):
 
 def get_all_items(doctype, filters, items, field, start=0, limit=100):
 	"""return all items"""
-	print("===========")
-	print(field)
-	print(field=="avg_price")
 
 	x = frappe.get_list(doctype, fields=["name", "modified"], filters=filters, limit_start=start, limit_page_length=limit)
 	for val in x:
