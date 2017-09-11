@@ -238,6 +238,7 @@ frappe.ui.form.on("Expense Claim", {
 
 	against_advance: function(frm) {
 		if (frm.doc.against_advance) {
+		frm.set_value("payable_account","");
 		frm.fields_dict["payable_account"].get_query = function() {
 			return {
 				filters: {
