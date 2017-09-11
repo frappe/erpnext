@@ -8,5 +8,5 @@ def execute():
 	frappe.reload_doc('accounts', 'doctype', 'pos_settings')
 
 	doc = frappe.get_doc('POS Settings')
-	doc.is_online = 0
+	doc.use_pos_in_offline_mode = 1
 	doc.save()
