@@ -30,7 +30,7 @@ QUnit.test("test: quotation", function (assert) {
 		() => cur_frm.doc.items[0].rate = 200,
 		() => frappe.timeout(0.3),
 		() => cur_frm.set_value("tc_name", "Test Term 1"),
-		() => frappe.timeout(0.3),
+		() => frappe.timeout(0.5),
 		() => cur_frm.save(),
 		() => {
 			// Check Address and Contact Info

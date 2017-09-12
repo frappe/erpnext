@@ -65,7 +65,7 @@ QUnit.test("test: request_for_quotation", function(assert) {
 			assert.ok(cur_frm.doc.docstatus == 1, "Quotation request submitted");
 		},
 		() => frappe.click_button('Send Supplier Emails'),
-		() => frappe.timeout(3),
+		() => frappe.timeout(4),
 		() => {
 			assert.ok($('div.modal.fade.in > div.modal-dialog > div > div.modal-body.ui-front > div.msgprint').text().includes("Email sent to supplier Test Supplier"), "Send emails working");
 		},
