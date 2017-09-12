@@ -256,10 +256,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertFalse(frappe.db.sql("""select name from `tabJournal Entry Account`
 			where reference_type='Purchase Invoice' and reference_name=%s""", pi.name))
 
-	def test_recurring_invoice(self):
-		from erpnext.controllers.tests.test_recurring_document import test_recurring_document
-		test_recurring_document(self, test_records)
-
 	def test_total_purchase_cost_for_project(self):
 		existing_purchase_cost = frappe.db.sql("""select sum(base_net_amount)
 			from `tabPurchase Invoice Item` where project = '_Test Project' and docstatus=1""")
