@@ -40,8 +40,10 @@ def execute():
 					student.update({"group_roll_number": i+1})
 				doc.extend("students", student_list)
 
-			instructor_list = frappe.db.sql('''select instructor, instructor_name from `tabStudent Batch Instructor`
-				where parent=%s''', (doc.student_group_name), as_dict=1)
+			instructor_list = None
+			if frappe.db.table_exists("Student Batch Instructor"):
+				instructor_list = frappe.db.sql('''select instructor, instructor_name from `tabStudent Batch Instructor`
+					where parent=%s''', (doc.student_group_name), as_dict=1)
 			if instructor_list:
 				doc.extend("instructors", instructor_list)
 			doc.save()
