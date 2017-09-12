@@ -16,4 +16,5 @@ Maintenance
 Schools
 Regional
 Healthcare
-SubscriptionAgriculture
+Subscription
+Agriculture
