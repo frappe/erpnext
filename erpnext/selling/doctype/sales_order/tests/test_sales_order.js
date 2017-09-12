@@ -27,7 +27,12 @@ QUnit.test("test sales order", function(assert) {
 		},
 		() => {
 			return frappe.tests.set_form_values(cur_frm, [
-				{selling_price_list:'Test-Selling-USD'},
+				{selling_price_list:'Test-Selling-USD'}
+			]);
+		},
+		() => frappe.timeout(.5),
+		() => {
+			return frappe.tests.set_form_values(cur_frm, [
 				{currency: 'USD'},
 				{apply_discount_on:'Grand Total'},
 				{additional_discount_percentage:10}
