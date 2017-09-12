@@ -9,7 +9,8 @@ from frappe.model.mapper import get_mapped_doc
 
 def execute():
 	# for converting student batch into student group
-	for doctype in ["Student Group", "Student Group Student", "Student Group Instructor", "Student Attendance", "Student"]:
+	for doctype in ["Student Group", "Student Group Student",
+		"Student Group Instructor", "Student Attendance", "Student", "Student Batch Name"]:
 		frappe.reload_doc("schools", "doctype", frappe.scrub(doctype))
 
 	if frappe.db.table_exists("Student Batch"):
@@ -39,8 +40,10 @@ def execute():
 					student.update({"group_roll_number": i+1})
 				doc.extend("students", student_list)
 
-			instructor_list = frappe.db.sql('''select instructor, instructor_name from `tabStudent Batch Instructor`
-				where parent=%s''', (doc.student_group_name), as_dict=1)
+			instructor_list = None
+			if frappe.db.table_exists("Student Batch Instructor"):
+				instructor_list = frappe.db.sql('''select instructor, instructor_name from `tabStudent Batch Instructor`
+					where parent=%s''', (doc.student_group_name), as_dict=1)
 			if instructor_list:
 				doc.extend("instructors", instructor_list)
 			doc.save()
