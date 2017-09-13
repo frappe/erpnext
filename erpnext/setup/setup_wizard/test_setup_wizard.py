@@ -16,6 +16,7 @@ def run_setup_wizard_test():
 
 	# Language slide
 	driver.wait_for_ajax(True)
+	time.sleep(2)
 	driver.set_select("language", "English (United States)")
 	driver.wait_for_ajax(True)
 	driver.wait_till_clickable(".next-btn").click()

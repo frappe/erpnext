@@ -158,7 +158,9 @@ def set_defaults(args):
 
 	global_defaults.save()
 
-	frappe.db.set_value("System Settings", None, "email_footer_address", args.get("company"))
+	system_settings = frappe.get_doc("System Settings")
+	system_settings.email_footer_address = args.get("company")
+	system_settings.save()
 
 	stock_settings = frappe.get_doc("Stock Settings")
 	stock_settings.item_naming_by = "Item Code"
