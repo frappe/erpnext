@@ -301,12 +301,19 @@ class StockController(AccountsController):
 			validate_warehouse_company(w, self.company)
 
 	def update_billing_percentage(self, update_modified=True):
+		transaction_type = 'Sales'
+		if doctype in ['Purchase Order', 'Purchase Invoice', 'Purchase Receipt']:
+			transaction_type = 'Purchase'
+
+		target_ref_field = get_reference_field(transaction_type, 'Billing')
+		target_field = get_target_field(transaction_type, 'Billing', target_ref_field)
+
 		self._update_percent_field({
 			"target_dt": self.doctype + " Item",
 			"target_parent_dt": self.doctype,
 			"target_parent_field": "per_billed",
-			"target_ref_field": "amount",
-			"target_field": "billed_amt",
+			"target_ref_field": target_ref_field,
+			"target_field": target_field,
 			"name": self.name,
 		}, update_modified)
 

@@ -250,16 +250,28 @@ class StatusUpdater(Document):
 
 			if args['detail_id']:
 				if not args.get("extra_cond"): args["extra_cond"] = ""
+				args = self.get_update_field_condition(args)
 
 				frappe.db.sql("""update `tab%(target_dt)s`
-					set %(target_field)s = (
-						(select ifnull(sum(%(source_field)s), 0)
-							from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s"
-							and (docstatus=1 %(cond)s) %(extra_cond)s)
-						%(second_source_condition)s
-					)
+					set %(update_fields)s
 					%(update_modified)s
 					where name='%(detail_id)s'""" % args)
+
+	def get_update_field_condition(self, args):
+		update_condition = []
+		for target_field, source_field in args.get('update_fields').items():
+			args['source_fieldname'] = source_field
+			args['target_fieldname'] = target_field
+
+			update_condition.append("""%(target_fieldname)s = (
+				(select ifnull(sum(%(source_fieldname)s), 0)
+					from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s"
+					and (docstatus=1 %(cond)s) %(extra_cond)s)
+				%(second_source_condition)s)""" % args)
+
+		args["update_fields"] = ','.join(update_condition)
+
+		return args
 
 	def _update_percent_field_in_targets(self, args, update_modified=True):
 		"""Update percent field in parent transaction"""
@@ -353,3 +365,22 @@ def get_tolerance_for(item_code, item_tolerance={}, global_tolerance=None):
 
 	item_tolerance[item_code] = tolerance
 	return tolerance, item_tolerance, global_tolerance
+
+def get_reference_field(transaction_type, percentage_type):
+	field_mapper = {'Quantity': 'qty', 'Amount': 'amount'}
+	doctype = "Selling Settings" if transaction_type == 'Sales' else "Buying Settings"
+	field = 'billing_percentage_based_on' if percentage_type == 'Billing' else 'delivery_percentage_based_on'
+	field = frappe.db.get_single_value(doctype, field)
+	if not field:
+		field = 'Amount' if percentage_type == 'Billing' else 'Quantity'
+
+	return field_mapper[field]
+
+def get_target_field(transaction_type, percentage_type, ref_field):
+	if transaction_type == 'Sales':
+		target_field_mapper = {
+			'Delivery': {'qty': 'delivered_qty', 'amount': 'delivered_amt'},
+			'Billing': {'qty': 'billed_qty', 'amount': 'billed_amt'},
+		}
+
+		return target_field_mapper[percentage_type][ref_field]

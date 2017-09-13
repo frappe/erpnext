@@ -15,6 +15,7 @@ from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from frappe.contacts.doctype.address.address import get_company_address
 from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
+from erpnext.controllers.status_updater import get_reference_field, get_target_field
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -23,14 +24,19 @@ form_grid_templates = {
 class DeliveryNote(SellingController):
 	def __init__(self, arg1, arg2=None):
 		super(DeliveryNote, self).__init__(arg1, arg2)
+
+		target_ref_field = get_reference_field('Sales', 'Delivery')
+		target_field = get_target_field('Sales', 'Delivery', target_ref_field)
+
 		self.status_updater = [{
 			'source_dt': 'Delivery Note Item',
 			'target_dt': 'Sales Order Item',
+			'update_fields': {'delivered_amt': 'amount', 'delivered_qty': 'qty'},
 			'join_field': 'so_detail',
-			'target_field': 'delivered_qty',
+			'target_field': target_field,
 			'target_parent_dt': 'Sales Order',
 			'target_parent_field': 'per_delivered',
-			'target_ref_field': 'qty',
+			'target_ref_field': target_ref_field,
 			'source_field': 'qty',
 			'percent_join_field': 'against_sales_order',
 			'status_field': 'delivery_status',
@@ -46,9 +52,10 @@ class DeliveryNote(SellingController):
 			'source_dt': 'Delivery Note Item',
 			'target_dt': 'Sales Invoice Item',
 			'join_field': 'si_detail',
-			'target_field': 'delivered_qty',
+			'update_fields': {'delivered_amt': 'amount', 'delivered_qty': 'qty'},
+			'target_field': target_field,
 			'target_parent_dt': 'Sales Invoice',
-			'target_ref_field': 'qty',
+			'target_ref_field': target_ref_field,
 			'source_field': 'qty',
 			'percent_join_field': 'against_sales_invoice',
 			'overflow_type': 'delivery',
@@ -57,6 +64,7 @@ class DeliveryNote(SellingController):
 		{
 			'source_dt': 'Delivery Note Item',
 			'target_dt': 'Sales Order Item',
+			'update_fields': {'returned_qty': '-1 * qty'},
 			'join_field': 'so_detail',
 			'target_field': 'returned_qty',
 			'target_parent_dt': 'Sales Order',
@@ -295,6 +303,7 @@ class DeliveryNote(SellingController):
 		for d in self.get("items"):
 			if d.si_detail and not d.so_detail:
 				d.db_set('billed_amt', d.amount, update_modified=update_modified)
+				d.db_set('billed_qty', d.qty, update_modified=update_modified)
 			elif d.so_detail:
 				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)
 
