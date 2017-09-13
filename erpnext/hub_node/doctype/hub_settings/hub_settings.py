@@ -71,6 +71,16 @@ class HubSettings(Document):
 			data=self.get_args(self.profile_args + self.seller_args + self.publishing_args)
 		)
 
+	def sync(self):
+		"""Create and execute Data Migration Run for Hub Sync plan"""
+		doc = frappe.get_doc({
+			'doctype': 'Data Migration Run',
+			'data_migration_plan': 'Hub Sync',
+			'data_migration_connector': 'Hub Connector'
+		}).insert()
+
+		doc.run()
+
 	def sync_items(self):
 		publish_item_count = frappe.db.count("Item", filters={"publish_in_hub": 1})
 		start = 0
@@ -138,32 +148,34 @@ class HubSettings(Document):
 			method='delete_all_items_of_user',
 			now = True)
 
-	### Account
 	def register(self):
-		"""Register at hub.erpnext.org and exchange keys"""
+		""" Create a User on hub.erpnext.org and return username/password """
+		first_name, last_name = frappe.db.get_value('User', self.hub_user, ['first_name', 'last_name'])
+		data = {
+			'email': frappe.session.user
+		}
+		post_url = hub_url + '/api/method/hub.hub.api.register'
 
-		response = requests.post(hub_url + "/api/method/hub.hub.api.register",
-			data = {"args_data": json.dumps(self.get_args(
-				self.config_args + self.profile_args + self.seller_args
-			))}
-		)
+		response = requests.post(post_url, data=data)
+		message = response.json().get('message')
 
-		response.raise_for_status()
-		response_msg = response.json().get("message")
+		if message and message.get('password'):
+			self.create_hub_connector(message['password'])
+		self.enabled = 1
+		self.save()
 
-		access_token = response_msg.get("access_token")
-		if access_token:
-			self.access_token = access_token
-			self.enabled = 1
-			self.last_sync_datetime = add_years(now(), -10)
-			self.current_item_fields = json.dumps(self.base_fields_for_items + self.item_fields_to_update)
+	def create_hub_connector(self, password):
+		if frappe.db.exists('Data Migration Connector', 'Hub Connector'):
+			return
 
-			# flag
-			self.just_registered = 1
-
-			self.save()
-		else:
-			frappe.throw(_("Sorry, we can't register you at this time."))
+		frappe.get_doc({
+			'doctype': 'Data Migration Connector',
+			'connector_type': 'Frappe',
+			'connector_name': 'Hub Connector',
+			'hostname': hub_url,
+			'username': self.hub_user,
+			'password': password
+		}).insert()
 
 	def unregister_from_hub(self):
 		"""Unpublish, then delete transactions and user from there"""
@@ -254,6 +266,9 @@ def reset_hub_settings(last_sync_datetime = ""):
 	doc.in_callback = 1
 	doc.save()
 	frappe.msgprint(_("Successfully unregistered."))
+
+@frappe.whitelist()
+
 
 @frappe.whitelist()
 def sync_items():

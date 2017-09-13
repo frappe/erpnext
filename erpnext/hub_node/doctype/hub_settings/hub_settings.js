@@ -8,7 +8,7 @@ frappe.ui.form.on("Hub Settings", {
 			frm.add_custom_button(__('View Hub'),
 				() => frappe.set_route('hub'));
 			frm.add_custom_button(__('Sync Items'),
-				() => frappe.call('erpnext.hub_node.doctype.hub_settings.hub_settings.sync_items'));
+				() => frm.call('sync'));
 		}
 	},
 	onload: function(frm) {

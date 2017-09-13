@@ -16,14 +16,16 @@
    "remote_fieldname": "company_name"
   }
  ], 
- "idx": 0, 
+ "idx": 1, 
  "local_doctype": "Item", 
  "mapping_name": "Item to Hub Item", 
  "mapping_type": "Push", 
- "modified": "2017-09-07 13:28:46.754893", 
- "modified_by": "Administrator", 
+ "migration_id_field": "hub_sync_id", 
+ "modified": "2017-09-13 14:59:20.755525", 
+ "modified_by": "faris@erpnext.com", 
  "name": "Item to Hub Item", 
  "owner": "Administrator", 
+ "page_length": 10, 
  "remote_objectname": "Hub Item", 
  "remote_primary_key": "item_code"
 }

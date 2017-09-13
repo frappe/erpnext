@@ -1,9 +1,8 @@
 {
- "connector": "Hub", 
  "creation": "2017-09-07 11:39:38.445902", 
  "docstatus": 0, 
  "doctype": "Data Migration Plan", 
- "idx": 0, 
+ "idx": 1, 
  "mappings": [
   {
    "mapping": "Company to Hub Company"
@@ -12,8 +11,8 @@
    "mapping": "Item to Hub Item"
   }
  ], 
- "modified": "2017-09-07 14:01:03.925380", 
- "modified_by": "Administrator", 
+ "modified": "2017-09-13 14:59:20.659301", 
+ "modified_by": "faris@erpnext.com", 
  "module": "Hub Node", 
  "name": "Hub Sync", 
  "owner": "Administrator", 
