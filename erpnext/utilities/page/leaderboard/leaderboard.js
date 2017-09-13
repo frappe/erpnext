@@ -21,16 +21,16 @@ frappe.Leaderboard = Class.extend({
 		this.timespans = ["Week", "Month", "Quarter", "Year"];
 		this.desc_fields = ["total_amount", "total_request", "annual_billing", "commission_rate"];
 		this.filters = {
-			"Customer": this.map_array(["total_amount", "total_item_purchased"]),
-			"Item": this.map_array(["total_request", "total_purchase", "avg_price"]),
-			"Supplier": this.map_array(["annual_billing", "total_unpaid"]),
-			"Sales Partner": this.map_array(["commission_rate", "target_qty", "target_amount"]),
+			"Customer": ["total_amount", "total_item_purchased"],
+			"Item": ["total_request", "total_purchase", "avg_price"],
+			"Supplier": ["annual_billing", "total_unpaid"],
+			"Sales Partner": ["commission_rate", "target_qty", "target_amount"],
 		};
 
 		// for saving current selected filters
 		// TODO: revert to 0 index for doctype and timespan, and remove preset down
-		const _initial_doctype = this.doctypes[1];
-		const _initial_timespan = this.timespans[1];
+		const _initial_doctype = this.doctypes[0];
+		const _initial_timespan = this.timespans[0];
 		const _initial_filter = this.filters[_initial_doctype];
 
 		this.options = {
@@ -58,50 +58,37 @@ frappe.Leaderboard = Class.extend({
 			this.get_sidebar_item(doctype).appendTo(this.$sidebar_list);
 		});
 
-		// this.doctype_select = this.page.add_select(__("Doctype"),
-		// 	this.doctypes.map(d => {
-		// 		return {"label": __(d), value: d }
-		// 	})
-		// );
-
 		this.timespan_select = this.page.add_select(__("Timespan"),
 			this.timespans.map(d => {
 				return {"label": __(d), value: d }
 			})
 		);
 
-		this.doctype_select.val(this.doctypes[1]);
-		this.timespan_select.val(this.timespans[1]);
+		// this.timespan_select.val(this.timespans[1]);
 
 		this.type_select = this.page.add_select(__("Type"),
-			me.options.selected_filter.map(d => d.field).map(d => {
+			me.options.selected_filter.map(d => {
 				return {"label": __(frappe.model.unscrub(d)), value: d }
 			})
 		);
 
-		this.$sidebar_list.on('click', 'li', (e) => {
-			let doctype = $(e.target).find('span').html();
+		this.$sidebar_list.on('click', 'li', function(e) {
+			let $li = $(this);
+			let doctype = $li.find('span').html();
 
 			me.options.selected_doctype = doctype;
 			me.options.selected_filter = me.filters[doctype];
-			me.options.selected_filter_item = me.filters[doctype][1];
-
-			this.$sidebar_list.find('li').removeClass('active');
-			$(e.target).addClass('active');
-
-			me.make_request($container);
-		});
-
-		this.doctype_select.on("change", function() {
-			me.options.selected_doctype = this.value;
-			me.options.selected_filter = me.filters[this.value];
-			me.options.selected_filter_item = me.filters[this.value][1];
+			me.options.selected_filter_item = me.filters[doctype][0];
 
 			me.type_select.empty().add_options(
-				me.options.selected_filter.map(d => d.field).map(d => {
+				me.options.selected_filter.map(d => {
 					return {"label": __(frappe.model.unscrub(d)), value: d }
 				})
 			);
+
+			me.$sidebar_list.find('li').removeClass('active');
+			$li.addClass('active');
+
 			me.make_request($container);
 		});
 
@@ -111,15 +98,12 @@ frappe.Leaderboard = Class.extend({
 		});
 
 		this.type_select.on("change", function() {
-			me.options.selected_filter_item = {
-				field: this.value,
-				value: ""
-			};
+			me.options.selected_filter_item = this.value
 			me.make_request($container);
 		});
 
 		// now get leaderboard
-		this.$sidebar_list.find('li')[0].trigger('click');
+		this.$sidebar_list.find('li:first').trigger('click');
 	},
 
 	make_request: function ($container) {
@@ -130,36 +114,41 @@ frappe.Leaderboard = Class.extend({
 		});
 	},
 
-	get_leaderboard: function (notify, $container) {
+	get_leaderboard: function (notify, $container, start=0) {
 		var me = this;
 
 		frappe.call({
 			method: "erpnext.utilities.page.leaderboard.leaderboard.get_leaderboard",
 			args: {
-				obj: JSON.stringify(me.options)
+				doctype: me.options.selected_doctype,
+				timespan: me.options.selected_timespan,
+				field: me.options.selected_filter_item,
+				start: start
 			},
-			callback: function (res) {
-				// console.log(res);
+			callback: function (r) {
+				let results = r.message || [];
 
-				me.$graph_area.empty().removeClass('hidden');
+				let graph_items = results.slice(0, 10);
+
+				me.$graph_area.show().empty();
 				let args = {
 					parent: me.$graph_area,
 					y: [
 						{
 							color: 'light-green',
-							values: res.message.map(d=>d.value),
-							formatted: res.message.map(d=>d[me.options.selected_filter_item.field])
+							values: graph_items.map(d=>d.value),
+							formatted: graph_items.map(d=>d[me.options.selected_filter_item])
 						}
 					],
 					x: {
-						values: res.message.map(d=>d.title)
+						values: graph_items.map(d=>d.name)
 					},
 					mode: 'bar',
 					height: 140
 				};
 				new frappe.ui.Graph(args);
 
-				notify(me, res, $container);
+				notify(me, r, $container);
 			}
 		});
 	},
@@ -169,6 +158,7 @@ frappe.Leaderboard = Class.extend({
 			me.message = null;
 			$container.find(".leaderboard-list").html(me.render_list_view(res.message));
 		} else {
+			me.$graph_area.hide();
 			me.message = "No items found.";
 			$container.find(".leaderboard-list").html(me.render_list_view());
 		}
@@ -199,16 +189,15 @@ frappe.Leaderboard = Class.extend({
 	render_list_header: function () {
 		var me = this;
 		const _selected_filter = me.options.selected_filter
-			.map(i => frappe.model.unscrub(i.field));
-		// const fields = [{field:"title", value:""}].concat(me.options.selected_filter);
-		const fields = [{field:"title", value:""}, me.options.selected_filter_item];
+			.map(i => frappe.model.unscrub(i));
+		const fields = ['name', me.options.selected_filter_item];
 
 		const html =
 			`<div class="list-headers">
 				<div class="list-item list-item--head" data-list-renderer="${"List"}">
 					${
 					fields.map(filter => {
-							const col = frappe.model.unscrub(filter.field);
+							const col = frappe.model.unscrub(filter);
 							return (
 								`<div class="leaderboard-item list-item_content ellipsis text-muted list-item__content--flex-2
 									header-btn-base
@@ -268,25 +257,24 @@ frappe.Leaderboard = Class.extend({
 	get_item_html: function (item) {
 		var me = this;
 		const _selected_filter = me.options.selected_filter
-			.map(i => frappe.model.unscrub(i.field));
-		// const fields = [{field:"title", value:""}].concat(me.options.selected_filter);
-		const fields = [{field:"title", value:""}, me.options.selected_filter_item];
+			.map(i => frappe.model.unscrub(i));
+		const fields = ['name', me.options.selected_filter_item];
 
 		const html =
 			`<div class="list-item">
 				${
 			fields.map(filter => {
-					const col = frappe.model.unscrub(filter.field);
-					let val = item[filter.field];
+					const col = frappe.model.unscrub(filter);
+					let val = item[filter];
 					if (col === "Modified") {
 						val = comment_when(val);
 					}
 					return (
 						`<div class="list-item_content ellipsis list-item__content--flex-2
-							${(col !== "Title" && col !== "Modified") ? "hidden-xs" : ""}
+							${(col !== "Name" && col !== "Modified") ? "hidden-xs" : ""}
 							${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}">
 							${
-								col === "Title"
+								col === "Name"
 									? `<a class="grey list-id ellipsis" href="${item["href"]}"> ${val} </a>`
 									: `<span class="text-muted ellipsis"> ${val}</span>`
 							}
@@ -296,18 +284,6 @@ frappe.Leaderboard = Class.extend({
 			</div>`;
 
 		return html;
-	},
-
-	map_array: function (_array) {
-		var me = this;
-		return _array.map((str) => {
-			let value = me.desc_fields.indexOf(str) > -1 ? "DESC" : "ASC";
-			return {
-				field: str,
-				// label: ,
-				value: value
-			};
-		});
 	},
 
 	get_sidebar_item: function(item) {
