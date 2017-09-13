@@ -15,16 +15,15 @@ def run_setup_wizard_test():
 	print('Running Setup Wizard Test...')
 
 	# Language slide
+	driver.wait_for_ajax(True)
 	driver.set_select("language", "English (United States)")
 	driver.wait_for_ajax(True)
-	driver.wait_for('.next-btn', timeout=100)
 	driver.wait_till_clickable(".next-btn").click()
 
 	# Region slide
 	driver.wait_for_ajax(True)
 	driver.set_select("country", "India")
 	driver.wait_for_ajax(True)
-	driver.wait_for('.next-btn', timeout=100)
 	driver.wait_till_clickable(".next-btn").click()
 
 	# Profile slide
