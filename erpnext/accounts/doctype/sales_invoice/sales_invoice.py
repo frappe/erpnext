@@ -20,7 +20,6 @@ from erpnext.accounts.doctype.asset.depreciation \
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_delivery_note_serial_no
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
-from erpnext.controllers.status_updater import get_reference_field, get_target_field
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -29,15 +28,13 @@ form_grid_templates = {
 class SalesInvoice(SellingController):
 	def __init__(self, arg1, arg2=None):
 		super(SalesInvoice, self).__init__(arg1, arg2)
-
-		target_ref_field = get_reference_field('Sales', 'Billing')
-		target_field = get_target_field('Sales', 'Billing', target_ref_field)
+		self.set_field_for_percentage_calculation('Sales', 'Billing')
 
 		self.status_updater = [{
 			'source_dt': 'Sales Invoice Item',
 			'update_fields': {'billed_amt': 'amount', 'billed_qty': 'qty'},
-			'target_field': target_field,
-			'target_ref_field': target_ref_field,
+			'target_field': self.target_field,
+			'target_ref_field': self.target_ref_field,
 			'target_dt': 'Sales Order Item',
 			'join_field': 'so_detail',
 			'target_parent_dt': 'Sales Order',
@@ -196,18 +193,15 @@ class SalesInvoice(SellingController):
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
-
-			target_ref_field = get_reference_field('Sales', 'Delivery')
-			target_field = get_target_field('Sales', 'Delivery', target_ref_field)
-
+			self.set_field_for_percentage_calculation('Sales', 'Billing')
 			self.status_updater.extend([{
 				'source_dt':'Sales Invoice Item',
 				'target_dt':'Sales Order Item',
 				'target_parent_dt':'Sales Order',
 				'target_parent_field':'per_delivered',
-				'update_fields': {'delivered_qty': 'qty'},
-				'target_field':target_field,
-				'target_ref_field': target_ref_field,
+				'update_fields': {'delivered_qty': 'qty', 'delivered_amt': 'amount'},
+				'target_field': self.target_field,
+				'target_ref_field': self.target_ref_field,
 				'source_field':'qty',
 				'join_field':'so_detail',
 				'percent_join_field':'sales_order',
@@ -227,11 +221,6 @@ class SalesInvoice(SellingController):
 				'update_fields': {'returned_qty': '-1 * qty'},
 				'target_field': 'returned_qty',
 				'target_parent_dt': 'Sales Order',
-				# 'target_parent_field': 'per_delivered',
-				# 'target_ref_field': 'qty',
-				'source_field': '-1 * qty',
-				# 'percent_join_field': 'sales_order',
-				# 'overflow_type': 'delivery',
 				'extra_cond': """ and exists (select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent and update_stock=1 and is_return=1)"""
 			}
 		])

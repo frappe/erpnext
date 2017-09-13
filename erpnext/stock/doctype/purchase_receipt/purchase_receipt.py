@@ -21,28 +21,26 @@ form_grid_templates = {
 class PurchaseReceipt(BuyingController):
 	def __init__(self, arg1, arg2=None):
 		super(PurchaseReceipt, self).__init__(arg1, arg2)
+		self.set_field_for_percentage_calculation('Purchase', 'Receipt')
 		self.status_updater = [{
 			'source_dt': 'Purchase Receipt Item',
 			'target_dt': 'Purchase Order Item',
+			'update_fields': {'received_amt': 'amount', 'received_qty': 'qty'},
 			'join_field': 'purchase_order_item',
-			'target_field': 'received_qty',
+			'target_field': self.target_field,
 			'target_parent_dt': 'Purchase Order',
 			'target_parent_field': 'per_received',
-			'target_ref_field': 'qty',
-			'source_field': 'qty',
+			'target_ref_field': self.target_ref_field,
 			'percent_join_field': 'purchase_order',
 			'overflow_type': 'receipt'
 		},
 		{
 			'source_dt': 'Purchase Receipt Item',
 			'target_dt': 'Purchase Order Item',
+			'update_fields': {'returned_qty': '-1 * qty'},
 			'join_field': 'purchase_order_item',
 			'target_field': 'returned_qty',
 			'target_parent_dt': 'Purchase Order',
-			# 'target_parent_field': 'per_received',
-			# 'target_ref_field': 'qty',
-			'source_field': '-1 * qty',
-			# 'overflow_type': 'receipt',
 			'extra_cond': """ and exists (select name from `tabPurchase Receipt` where name=`tabPurchase Receipt Item`.parent and is_return=1)"""
 		}]
 

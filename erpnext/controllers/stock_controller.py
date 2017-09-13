@@ -11,6 +11,7 @@ from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, 
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock import get_warehouse_account_map
+from erpnext.controllers.status_updater import get_reference_field, get_target_field
 
 class StockController(AccountsController):
 	def validate(self):
@@ -302,7 +303,7 @@ class StockController(AccountsController):
 
 	def update_billing_percentage(self, update_modified=True):
 		transaction_type = 'Sales'
-		if doctype in ['Purchase Order', 'Purchase Invoice', 'Purchase Receipt']:
+		if self.doctype in ['Purchase Order', 'Purchase Invoice', 'Purchase Receipt']:
 			transaction_type = 'Purchase'
 
 		target_ref_field = get_reference_field(transaction_type, 'Billing')

@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe.utils import flt, comma_or, nowdate, getdate
 from frappe import _
 from frappe.model.document import Document
@@ -368,9 +368,15 @@ def get_tolerance_for(item_code, item_tolerance={}, global_tolerance=None):
 
 def get_reference_field(transaction_type, percentage_type):
 	field_mapper = {'Quantity': 'qty', 'Amount': 'amount'}
+	percentage_based_on = {
+		'Billing': 'billing_percentage_based_on',
+		'Receipt': 'receipt_percentage_based_on',
+		'Delivery': 'delivery_percentage_based_on'
+	}
+
 	doctype = "Selling Settings" if transaction_type == 'Sales' else "Buying Settings"
-	field = 'billing_percentage_based_on' if percentage_type == 'Billing' else 'delivery_percentage_based_on'
-	field = frappe.db.get_single_value(doctype, field)
+	field = percentage_based_on[percentage_type]
+	field = erpnext.get_percentage_ref_field(doctype, field)
 	if not field:
 		field = 'Amount' if percentage_type == 'Billing' else 'Quantity'
 
@@ -382,5 +388,10 @@ def get_target_field(transaction_type, percentage_type, ref_field):
 			'Delivery': {'qty': 'delivered_qty', 'amount': 'delivered_amt'},
 			'Billing': {'qty': 'billed_qty', 'amount': 'billed_amt'},
 		}
+	else:
+		target_field_mapper = {
+			'Receipt': {'qty': 'received_qty', 'amount': 'received_amt'},
+			'Billing': {'qty': 'billed_qty', 'amount': 'billed_amt'},
+		}
 
-		return target_field_mapper[percentage_type][ref_field]
+	return target_field_mapper[percentage_type][ref_field]

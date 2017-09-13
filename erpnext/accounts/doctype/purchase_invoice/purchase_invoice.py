@@ -15,6 +15,7 @@ from erpnext.stock import get_warehouse_account_map
 from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entries, delete_gl_entries
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.buying.utils import check_for_closed_status
+from erpnext.controllers.status_updater import get_reference_field, get_target_field
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -23,15 +24,16 @@ form_grid_templates = {
 class PurchaseInvoice(BuyingController):
 	def __init__(self, arg1, arg2=None):
 		super(PurchaseInvoice, self).__init__(arg1, arg2)
+		self.set_field_for_percentage_calculation('Purchase', 'Billing')
 		self.status_updater = [{
 			'source_dt': 'Purchase Invoice Item',
 			'target_dt': 'Purchase Order Item',
+			'update_fields': {'billed_amt': 'amount', 'billed_qty': 'qty'},
 			'join_field': 'po_detail',
-			'target_field': 'billed_amt',
+			'target_field': self.target_field,
 			'target_parent_dt': 'Purchase Order',
 			'target_parent_field': 'per_billed',
-			'target_ref_field': 'amount',
-			'source_field': 'amount',
+			'target_ref_field': self.target_ref_field,
 			'percent_join_field': 'purchase_order',
 			'overflow_type': 'billing'
 		}]
@@ -234,17 +236,17 @@ class PurchaseInvoice(BuyingController):
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
+			self.set_field_for_percentage_calculation('Purchase', 'Receipt')
 			self.status_updater.extend([{
 				'source_dt': 'Purchase Invoice Item',
 				'target_dt': 'Purchase Order Item',
+				'update_fields': {'received_qty': 'qty', 'received_amt': 'amount'},
 				'join_field': 'po_detail',
-				'target_field': 'received_qty',
+				'target_field': self.target_field,
 				'target_parent_dt': 'Purchase Order',
 				'target_parent_field': 'per_received',
-				'target_ref_field': 'qty',
-				'source_field': 'qty',
+				'target_ref_field': self.target_ref_field,
 				'percent_join_field':'purchase_order',
-				# 'percent_join_field': 'prevdoc_docname',
 				'overflow_type': 'receipt',
 				'extra_cond': """ and exists(select name from `tabPurchase Invoice`
 					where name=`tabPurchase Invoice Item`.parent and update_stock = 1)"""
@@ -252,14 +254,10 @@ class PurchaseInvoice(BuyingController):
 			{
 				'source_dt': 'Purchase Invoice Item',
 				'target_dt': 'Purchase Order Item',
+				'update_fields': {'returned_qty': '-1 * qty'},
 				'join_field': 'po_detail',
 				'target_field': 'returned_qty',
 				'target_parent_dt': 'Purchase Order',
-				# 'target_parent_field': 'per_received',
-				# 'target_ref_field': 'qty',
-				'source_field': '-1 * qty',
-				# 'percent_join_field': 'prevdoc_docname',
-				# 'overflow_type': 'receipt',
 				'extra_cond': """ and exists (select name from `tabPurchase Invoice`
 					where name=`tabPurchase Invoice Item`.parent and update_stock=1 and is_return=1)"""
 			}
