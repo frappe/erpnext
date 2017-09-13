@@ -37,7 +37,6 @@ QUnit.test("test sales order", function(assert) {
 			// get tax account head details
 			assert.ok(cur_frm.doc.taxes[0].account_head=='CGST - '+frappe.get_abbr(frappe.defaults.get_default('Company')), " Account Head abbr correct");
 			// calculate totals
-			var price
 			assert.ok(cur_frm.doc.items[0].price_list_rate==250, "Item 1 price_list_rate");
 			assert.ok(cur_frm.doc.net_total== 1280.75, "net total correct ");
 			assert.ok(cur_frm.doc.base_grand_total== flt(1511.29* cur_frm.doc.conversion_rate, precision('base_grand_total')), "base round total correct ");
