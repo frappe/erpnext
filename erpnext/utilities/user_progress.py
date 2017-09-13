@@ -9,6 +9,14 @@ def get_slide_settings():
 	defaults = frappe.defaults.get_defaults()
 	domain = frappe.db.get_value('Company', erpnext.get_default_company(), 'domain')
 	company = defaults.get("company") or ''
+	currency = defaults.get("currency") or ''
+
+	doc = frappe.get_doc("Setup Progress")
+	item = [d for d in doc.get("actions") if d.action_name == "Set Sales Target"][0]
+	item.action_document = company
+	item.save()
+	doc.save()
+
 	# Initial state of slides
 	return [
 		frappe._dict(
@@ -29,12 +37,29 @@ def get_slide_settings():
 					"video_id": "U5wPIvEn-0c"
 				}
 			]
-		)
-		,
+		),
+		frappe._dict(
+			action_name='Set Sales Target',
+			domains=('Manufacturing', 'Services', 'Retail', 'Distribution'),
+			title=_("Set a Target"),
+			help=_("Set a sales goal you'd like to achieve for your company."),
+			fields=[
+				{"fieldtype":"Currency", "fieldname":"monthly_sales_target",
+					"label":_("Monthly Sales Target (" + currency + ")")},
+			],
+			submit_method="erpnext.utilities.user_progress_utils.set_sales_target",
+			done_state_title=_("Go to " + company),
+			done_state_title_route=["Form", "Company", company],
+			help_links=[
+				{
+					"label": _('Learn More'),
+					"url": ["https://erpnext.org/docs/user/manual/en/setting-up/setting-company-sales-goal"]
+				}
+			]
+		),
 		frappe._dict(
 			action_name='Add Customers',
 			domains=('Manufacturing', 'Services', 'Retail', 'Distribution'),
-			icon="fa fa-group",
 			title=_("Add Customers"),
 			help=_("List a few of your customers. They could be organizations or individuals."),
 			fields=[
