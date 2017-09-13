@@ -6,7 +6,7 @@ import frappe
 from frappe.utils import today
 
 def execute():
-	frappe.reload_doc('subscription', 'doctype', 'subscription')
+	frappe.reload_doc('accounts', 'doctype', 'subscription')
 	frappe.reload_doc('selling', 'doctype', 'sales_order')
 	frappe.reload_doc('buying', 'doctype', 'purchase_order')
 	frappe.reload_doc('accounts', 'doctype', 'sales_invoice')
