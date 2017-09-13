@@ -244,10 +244,10 @@ frappe.ui.form.on("Expense Claim", {
 					filters: {
 						"report_type": "Balance Sheet",
 						"root_type": "Asset"
-			}
+					}
 				};
-				};
-	}
+			};
+		}
 	}
 });
 
