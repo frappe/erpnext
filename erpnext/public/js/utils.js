@@ -125,7 +125,47 @@ $.extend(erpnext.utils, {
 				}
 			});
 		}
-	}
+	},
+
+	make_subscription: function(doctype, docname) {
+		frappe.call({
+			method: "erpnext.subscription.doctype.subscription.subscription.make_subscription",
+			args: {
+				doctype: doctype,
+				docname: docname
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		})
+	},
+
+	/**
+	* Checks if the first row of a given child table is empty
+	* @param child_table - Child table Doctype
+	* @return {Boolean}
+	**/
+	first_row_is_empty: function(child_table){
+		if($.isArray(child_table) && child_table.length > 0) {
+			return !child_table[0].item_code;
+		}
+		return false;
+	},
+
+	/**
+	* Removes the first row of a child table if it is empty
+	* @param {_Frm} frm - The current form
+	* @param {String} child_table_name - The child table field name
+	* @return {Boolean}
+	**/
+	remove_empty_first_row: function(frm, child_table_name){
+		const rows = frm['doc'][child_table_name];
+		if (this.first_row_is_empty(rows)){
+			frm['doc'][child_table_name] = rows.splice(1);
+		}
+		return rows;
+	},
 });
 
 erpnext.utils.map_current_doc = function(opts) {

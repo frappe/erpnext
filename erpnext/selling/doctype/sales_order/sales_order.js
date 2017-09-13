@@ -141,6 +141,12 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							function() { me.make_project() }, __("Make"));
 				}
 
+				if(!doc.subscription) {
+					this.frm.add_custom_button(__('Subscription'), function() {
+						erpnext.utils.make_subscription(doc.doctype, doc.name)
+					}, __("Make"))
+				}
+
 			} else {
 				if (this.frm.has_perm("submit")) {
 					// un-close

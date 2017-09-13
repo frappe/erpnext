@@ -205,6 +205,18 @@ $.extend(frappe.test_data, {
 			{title: "Test Term 2"}
 		]
 	},
+	"Item Price": {
+		"ITEM-PRICE-00001": [
+			{item_code: 'Test Product 1'},
+			{price_list: '_Test Price List'},
+			{price_list_rate: 100}
+		],
+		"ITEM-PRICE-00002": [
+			{item_code: 'Test Product 2'},
+			{price_list: '_Test Price List'},
+			{price_list_rate: 200}
+		]
+	}
 });
 
 

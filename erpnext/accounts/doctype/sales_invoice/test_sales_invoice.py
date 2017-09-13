@@ -809,10 +809,6 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Entry Account`
 			where reference_name=%s""", si.name))
 
-	def test_recurring_invoice(self):
-		from erpnext.controllers.tests.test_recurring_document import test_recurring_document
-		test_recurring_document(self, test_records)
-
 	def test_serialized(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -1167,8 +1163,15 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(flt(si.outstanding_amount), flt(si.grand_total + si.total_advance, si.precision("outstanding_amount")))
 
 	def test_multiple_uom_in_selling(self):
-		si = frappe.copy_doc(test_records[1])
+		frappe.db.sql("""delete from `tabItem Price`
+			where price_list='_Test Price List' and item_code='_Test Item'""")
+		item_price = frappe.new_doc("Item Price")
+		item_price.price_list = "_Test Price List"
+		item_price.item_code = "_Test Item"
+		item_price.price_list_rate = 100
+		item_price.insert()
 
+		si = frappe.copy_doc(test_records[1])
 		si.items[0].uom = "_Test UOM 1"
 		si.items[0].conversion_factor = None
 		si.items[0].price_list_rate = None

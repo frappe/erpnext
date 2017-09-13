@@ -508,8 +508,8 @@ frappe.help.help_links['Form/Production Planning Tool'] = [
 	{ label: 'Production Planning Tool', url: 'https://frappe.github.io/erpnext/user/manual/en/manufacturing/tools/production-planning-tool' },
 ]
 
-frappe.help.help_links['Form/BOM Replace Tool'] = [
-	{ label: 'BOM Replace Tool', url: 'https://frappe.github.io/erpnext/user/manual/en/manufacturing/tools/bom-replace-tool' },
+frappe.help.help_links['Form/BOM Update Tool'] = [
+	{ label: 'BOM Update Tool', url: 'https://frappe.github.io/erpnext/user/manual/en/manufacturing/tools/bom-update-tool' },
 ]
 
 //Customize

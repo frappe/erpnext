@@ -76,7 +76,10 @@ class Company(Document):
 				self.create_default_accounts()
 				self.create_default_warehouses()
 
-				self.install_country_fixtures()
+				if cint(frappe.db.get_single_value('System Settings', 'setup_complete')):
+					# In the case of setup, fixtures should be installed after setup_success
+					# This also prevents db commits before setup is successful
+					install_country_fixtures(self.name)
 
 		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
 			self.create_default_cost_center()
@@ -94,12 +97,6 @@ class Company(Document):
 			frappe.local.enable_perpetual_inventory[self.name] = self.enable_perpetual_inventory
 
 		frappe.clear_cache()
-
-	def install_country_fixtures(self):
-		path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(self.country))
-		if os.path.exists(path.encode("utf-8")):
-			frappe.get_attr("erpnext.regional.{0}.setup.setup"
-				.format(self.country.lower()))(self)
 
 	def create_default_warehouses(self):
 		for wh_detail in [
@@ -310,6 +307,13 @@ def get_name_with_abbr(name, company):
 		parts.append(company_abbr)
 
 	return " - ".join(parts)
+
+def install_country_fixtures(company):
+	company_doc = frappe.get_doc("Company", company)
+	path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(company_doc.country))
+	if os.path.exists(path.encode("utf-8")):
+		frappe.get_attr("erpnext.regional.{0}.setup.setup"
+			.format(company_doc.country.lower()))(company_doc)
 
 def update_company_current_month_sales(company):
 	current_month_year = formatdate(today(), "MM-yyyy")

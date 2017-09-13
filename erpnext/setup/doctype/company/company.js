@@ -8,6 +8,16 @@ frappe.ui.form.on("Company", {
 		erpnext.company.setup_queries(frm);
 	},
 
+	company_name: function(frm) {
+		if(frm.doc.__islocal) {
+			let parts = frm.doc.company_name.split();
+			let abbr = $.map(parts, function (p) {
+				return p? p.substr(0, 1) : null;
+			}).join("");
+			frm.set_value("abbr", abbr);
+		}
+	},
+
 	refresh: function(frm) {
 		if(frm.doc.abbr && !frm.doc.__islocal) {
 			frm.set_df_property("abbr", "read_only", 1);

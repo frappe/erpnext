@@ -232,7 +232,7 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 		select `tabDelivery Note`.name, `tabDelivery Note`.customer, `tabDelivery Note`.posting_date
 		from `tabDelivery Note`
 		where `tabDelivery Note`.`%(key)s` like %(txt)s and
-			`tabDelivery Note`.docstatus = 1 and `tabDelivery Note`.is_return = 0 
+			`tabDelivery Note`.docstatus = 1 and `tabDelivery Note`.is_return = 0
 			and status not in ("Stopped", "Closed") %(fcond)s
 			and (`tabDelivery Note`.per_billed < 100 or `tabDelivery Note`.grand_total = 0)
 			%(mcond)s order by `tabDelivery Note`.`%(key)s` asc
@@ -367,31 +367,30 @@ def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
 	sub_query = """ select round(`tabBin`.actual_qty, 2) from `tabBin`
 		where `tabBin`.warehouse = `tabWarehouse`.name
 		{bin_conditions} """.format(
-		bin_conditions=get_filters_cond(doctype, filter_dict.get("Bin"), 
+		bin_conditions=get_filters_cond(doctype, filter_dict.get("Bin"),
 			bin_conditions, ignore_permissions=True))
 
-	response = frappe.db.sql("""select `tabWarehouse`.name,
+	query = """select `tabWarehouse`.name,
 		CONCAT_WS(" : ", "Actual Qty", ifnull( ({sub_query}), 0) ) as actual_qty
 		from `tabWarehouse`
 		where
-		   `tabWarehouse`.`{key}` like %(txt)s
+		   `tabWarehouse`.`{key}` like '{txt}'
 			{fcond} {mcond}
 		order by
 			`tabWarehouse`.name desc
 		limit
-			%(start)s, %(page_len)s
+			{start}, {page_len}
 		""".format(
 			sub_query=sub_query,
 			key=frappe.db.escape(searchfield),
 			fcond=get_filters_cond(doctype, filter_dict.get("Warehouse"), conditions),
-			mcond=get_match_cond(doctype)
-		),
-		{
-			"txt": "%%%s%%" % frappe.db.escape(txt),
-			"start": start,
-			"page_len": page_len
-		})
-	return response
+			mcond=get_match_cond(doctype),
+			start=start,
+			page_len=page_len,
+			txt=frappe.db.escape('%{0}%'.format(txt))
+		)
+
+	return frappe.db.sql(query)
 
 
 def get_doctype_wise_filters(filters):

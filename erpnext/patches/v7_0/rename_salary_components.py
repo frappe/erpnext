@@ -81,7 +81,7 @@ def execute():
 		try:
 			frappe.db.sql("""INSERT INTO `tabSalary Component` ({0}) SELECT {1} FROM `tab{2}`"""
 				.format(target_cols, source_cols, doctype))
-		except Exception, e:
+		except Exception as e:
 			if e.args[0]==1062:
 				pass
 			

@@ -281,13 +281,8 @@ class PaymentEntry(AccountsController):
 		if self.party:
 			party_amount = self.paid_amount if self.payment_type=="Receive" else self.received_amount
 
-			total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
-
 			if self.total_allocated_amount < party_amount:
-				if self.payment_type == "Receive":
-					self.unallocated_amount = party_amount - (self.total_allocated_amount - total_deductions)
-				else:
-					self.unallocated_amount = party_amount - (self.total_allocated_amount + total_deductions)
+				self.unallocated_amount = party_amount - self.total_allocated_amount
 
 	def set_difference_amount(self):
 		base_unallocated_amount = flt(self.unallocated_amount) * (flt(self.source_exchange_rate)
@@ -302,11 +297,10 @@ class PaymentEntry(AccountsController):
 		else:
 			self.difference_amount = self.base_paid_amount - flt(self.base_received_amount)
 
-		for d in self.get("deductions"):
-			if d.amount:
-				self.difference_amount -= flt(d.amount)
+		total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
 
-		self.difference_amount = flt(self.difference_amount, self.precision("difference_amount"))
+		self.difference_amount = flt(self.difference_amount - total_deductions,
+			self.precision("difference_amount"))
 
 	def clear_unallocated_reference_document_rows(self):
 		self.set("references", self.get("references", {"allocated_amount": ["not in", [0, None, ""]]}))
@@ -393,7 +387,7 @@ class PaymentEntry(AccountsController):
 			if self.payment_type=="Receive":
 				against_account = self.paid_to
 			else:
-				 against_account = self.paid_from
+				against_account = self.paid_from
 
 
 			party_gl_dict = self.get_gl_dict({

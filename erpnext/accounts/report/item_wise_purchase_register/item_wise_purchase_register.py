@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
 from frappe.utils import flt
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import get_tax_accounts
@@ -14,11 +14,13 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	if not filters: filters = {}
 	columns = get_columns(additional_table_columns)
 
+	company_currency = erpnext.get_company_currency(filters.company)
+
 	item_list = get_items(filters, additional_query_columns)
 	aii_account_map = get_aii_accounts()
 	if item_list:
-		itemised_tax, tax_columns = get_tax_accounts(item_list, columns,
-			tax_doctype="Purchase Taxes and Charges")
+		itemised_tax, tax_columns = get_tax_accounts(item_list, columns, company_currency,
+			doctype="Purchase Invoice", tax_doctype="Purchase Taxes and Charges")
 
 	columns.append({
 		"fieldname": "currency",
@@ -26,7 +28,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		"fieldtype": "Data",
 		"width": 80
 	})
-	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+
 	po_pr_map = get_purchase_receipts_against_purchase_order(item_list)
 
 	data = []
@@ -47,7 +49,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 
 		row += [
 			d.credit_to, d.mode_of_payment, d.project, d.company, d.purchase_order,
-			purchase_receipt, expense_account, d.qty, d.stock_uom, d.base_net_rate, d.base_net_amount
+			purchase_receipt, expense_account, d.stock_qty, d.stock_uom, d.base_net_rate, d.base_net_amount
 		]
 
 		total_tax = 0
@@ -79,7 +81,7 @@ def get_columns(additional_table_columns):
 		_("Mode of Payment") + ":Link/Mode of Payment:80", _("Project") + ":Link/Project:80",
 		_("Company") + ":Link/Company:100", _("Purchase Order") + ":Link/Purchase Order:100",
 		_("Purchase Receipt") + ":Link/Purchase Receipt:100", _("Expense Account") + ":Link/Account:140",
-		_("Qty") + ":Float:120", _("Stock UOM") + "::100",
+		_("Stock Qty") + ":Float:120", _("Stock UOM") + "::100",
 		_("Rate") + ":Currency/currency:120", _("Amount") + ":Currency/currency:120"
 	]
 
@@ -110,7 +112,7 @@ def get_items(filters, additional_query_columns):
 			pi_item.name, pi_item.parent, pi.posting_date, pi.credit_to, pi.company,
 			pi.supplier, pi.remarks, pi.base_net_total, pi_item.item_code, pi_item.item_name,
 			pi_item.item_group, pi_item.project, pi_item.purchase_order, pi_item.purchase_receipt,
-			pi_item.po_detail, pi_item.expense_account, pi_item.qty, pi_item.stock_uom, 
+			pi_item.po_detail, pi_item.expense_account, pi_item.stock_qty, pi_item.stock_uom, 
 			pi_item.base_net_rate, pi_item.base_net_amount,
 			pi.supplier_name, pi.mode_of_payment {0}
 		from `tabPurchase Invoice` pi, `tabPurchase Invoice Item` pi_item
@@ -125,14 +127,15 @@ def get_purchase_receipts_against_purchase_order(item_list):
 	po_pr_map = frappe._dict()
 	po_item_rows = list(set([d.po_detail for d in item_list]))
 
-	purchase_receipts = frappe.db.sql("""
-		select parent, purchase_order_item
-		from `tabPurchase Receipt Item`
-		where docstatus=1 and purchase_order_item in (%s)
-		group by purchase_order_item, parent
-	""" % (', '.join(['%s']*len(po_item_rows))), tuple(po_item_rows), as_dict=1)
+	if po_item_rows:
+		purchase_receipts = frappe.db.sql("""
+			select parent, purchase_order_item
+			from `tabPurchase Receipt Item`
+			where docstatus=1 and purchase_order_item in (%s)
+			group by purchase_order_item, parent
+		""" % (', '.join(['%s']*len(po_item_rows))), tuple(po_item_rows), as_dict=1)
 
-	for pr in purchase_receipts:
-		po_pr_map.setdefault(pr.po_detail, []).append(pr.parent)
+		for pr in purchase_receipts:
+			po_pr_map.setdefault(pr.po_detail, []).append(pr.parent)
 
 	return po_pr_map

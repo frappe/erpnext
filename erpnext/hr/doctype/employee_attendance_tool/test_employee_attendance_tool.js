@@ -38,9 +38,23 @@ QUnit.test("Test: Employee attendance tool [HR]", function (assert) {
 		() => frappe.set_route("List", "Attendance", "List"),
 		() => frappe.timeout(1),
 		() => {
-			let marked_attendance = cur_list.data.filter(d => d.attendance_date == date_of_attendance);
-			assert.equal(marked_attendance.length, 3,
-				'all the attendance are marked for correct date');
+			return frappe.call({
+				method: "frappe.client.get_list",
+				args: {
+					doctype: "Employee",
+					filters: {
+						"branch": "Test Branch",
+						"department": "Test Department",
+						"company": "Test Company",
+						"status": "Active"
+					}
+				},
+				callback: function(r) {
+					let marked_attendance = cur_list.data.filter(d => d.attendance_date == date_of_attendance);
+					assert.equal(marked_attendance.length, r.message.length,
+						'all the attendance are marked for correct date');
+				}
+			});
 		},
 		() => done()
 	]);

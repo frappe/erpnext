@@ -8,7 +8,16 @@ frappe.pages['pos'].on_page_load = function (wrapper) {
 		single_column: true
 	});
 
-	wrapper.pos = new erpnext.pos.PointOfSale(wrapper)
+	frappe.db.get_value('POS Settings', {name: 'POS Settings'}, 'is_online', (r) => {
+		if (r && r.use_pos_in_offline_mode && cint(r.use_pos_in_offline_mode)) {
+			// offline
+			wrapper.pos = new erpnext.pos.PointOfSale(wrapper);
+			cur_pos = wrapper.pos;
+		} else {
+			// online
+			frappe.set_route('point-of-sale');
+		}
+	});
 }
 
 frappe.pages['pos'].refresh = function (wrapper) {
@@ -426,11 +435,16 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		});
 
 		this.serach_item.make_input();
-		this.serach_item.$input.on("keyup", function () {
-			setTimeout(function () {
-				me.items = me.get_items();
-				me.make_item_list();
-			}, 1000);
+		
+		this.serach_item.$input.on("keypress", function (event) {
+
+			clearTimeout(me.last_search_timeout);
+			me.last_search_timeout = setTimeout(() => {
+				if((me.serach_item.$input.val() != "") || (event.which == 13)) {
+					me.items = me.get_items();
+					me.make_item_list();
+				}				
+			}, 400);
 		});
 
 		this.search_item_group = this.wrapper.find('.search-item-group');
@@ -727,14 +741,12 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 					input = input.toLowerCase();
 					item = this.get_item(item.value);
-					var searchtext =
-						Object.keys(item)
-							.filter(key => ['customer_name', 'customer_group', 'value', 'label', 'email_id', 'phone', 'mobile_no'].includes(key))
-							.map(key => item[key])
-							.join(" ")
-							.toLowerCase();
-
-					return searchtext.includes(input)
+					result = item ? item.searchtext.includes(input) : '';
+					if(!result) {
+						me.prepare_customer_mapper(input);
+					} else {
+						return result;
+					}
 				},
 				item: function (item, input) {
 					var d = this.get_item(item.value);
@@ -755,6 +767,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		this.party_field.$input
 			.on('input', function (e) {
+				if(me.customers_mapper.length <= 1) {
+					me.prepare_customer_mapper(e.target.value);
+				}
 				me.party_field.awesomeplete.list = me.customers_mapper;
 			})
 			.on('awesomplete-select', function (e) {
@@ -795,20 +810,56 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			});
 	},
 
-	prepare_customer_mapper: function() {
+	prepare_customer_mapper: function(key) {
 		var me = this;
+		var customer_data = '';
 
-		this.customers_mapper = this.customers.map(function (c) {
-			contact = me.contacts[c.name];
-			return {
-				label: c.name,
-				value: c.name,
-				customer_name: c.customer_name,
-				customer_group: c.customer_group,
-				territory: c.territory,
-				phone: contact ? contact["phone"] : '',
-				mobile_no: contact ? contact["mobile_no"] : '',
-				email_id: contact ? contact["email_id"] : ''
+		if (key) {
+			key = key.toLowerCase().trim();
+			var re = new RegExp('%', 'g');
+			var reg = new RegExp(key.replace(re, '\\w*\\s*[a-zA-Z0-9]*'));
+
+			customer_data =  $.grep(this.customers, function(data) {
+				contact = me.contacts[data.name];
+				if(reg.test(data.name.toLowerCase())
+					|| reg.test(data.customer_name.toLowerCase())
+					|| (contact && reg.test(contact["mobile_no"]))
+					|| (contact && reg.test(contact["phone"]))
+					|| (data.customer_group && reg.test(data.customer_group.toLowerCase()))){
+						return data;
+				}
+			})
+		} else {
+			customer_data = this.customers;
+		}
+
+		this.customers_mapper = [];
+
+		customer_data.forEach(function (c, index) {
+			if(index < 30) {
+				contact = me.contacts[c.name];
+				if(contact && !c['phone']) {
+					c["phone"] = contact["phone"];
+					c["email_id"] = contact["email_id"];
+					c["mobile_no"] = contact["mobile_no"];
+				}
+
+				me.customers_mapper.push({
+					label: c.name,
+					value: c.name,
+					customer_name: c.customer_name,
+					customer_group: c.customer_group,
+					territory: c.territory,
+					phone: contact ? contact["phone"] : '',
+					mobile_no: contact ? contact["mobile_no"] : '',
+					email_id: contact ? contact["email_id"] : '',
+					searchtext: ['customer_name', 'customer_group', 'name', 'value',
+						'label', 'email_id', 'phone', 'mobile_no']
+						.map(key => c[key]).join(' ')
+						.toLowerCase()
+				});
+			} else {
+				return;
 			}
 		});
 

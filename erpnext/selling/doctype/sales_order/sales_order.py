@@ -11,9 +11,9 @@ from frappe.model.utils import get_fetch_values
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
 from frappe.desk.notifications import clear_doctype_notifications
-from erpnext.controllers.recurring_document import month_map, get_next_date
 from frappe.contacts.doctype.address.address import get_company_address
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.subscription.doctype.subscription.subscription import month_map, get_next_date
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -51,9 +51,9 @@ class SalesOrder(SellingController):
 		# validate p.o date v/s delivery date
 		if self.po_date:
 			for d in self.get("items"):
-				 if d.delivery_date and getdate(self.po_date) > getdate(d.delivery_date):
-					 frappe.throw(_("Row #{0}: Expected Delivery Date cannot be before Purchase Order Date")
-					 	.format(d.idx))
+				if d.delivery_date and getdate(self.po_date) > getdate(d.delivery_date):
+					frappe.throw(_("Row #{0}: Expected Delivery Date cannot be before Purchase Order Date")
+						.format(d.idx))
 
 		if self.po_no and self.customer:
 			so = frappe.db.sql("select name from `tabSales Order` \
@@ -346,17 +346,17 @@ class SalesOrder(SellingController):
 
 		return items
 
-	def on_recurring(self, reference_doc):
-		mcount = month_map[reference_doc.recurring_type]
+	def on_recurring(self, reference_doc, subscription_doc):
+		mcount = month_map[subscription_doc.frequency]
 		self.set("delivery_date", get_next_date(reference_doc.delivery_date, mcount,
-			cint(reference_doc.repeat_on_day_of_month)))
+			cint(subscription_doc.repeat_on_day)))
 
 		for d in self.get("items"):
 			reference_delivery_date = frappe.db.get_value("Sales Order Item",
 				{"parent": reference_doc.name, "item_code": d.item_code, "idx": d.idx}, "delivery_date")
 
 			d.set("delivery_date",
-				get_next_date(reference_delivery_date, mcount, cint(reference_doc.repeat_on_day_of_month)))
+				get_next_date(reference_delivery_date, mcount, cint(subscription_doc.repeat_on_day)))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

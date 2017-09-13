@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe, os, json
-from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.permissions import add_permission
 from erpnext.regional.india import states
 
@@ -39,12 +39,12 @@ def add_hsn_sac_codes():
 		hsn_codes = json.loads(f.read())
 
 	create_hsn_codes(hsn_codes, code_field="hsn_code")
-	
+
 	# SAC Codes
 	with open(os.path.join(os.path.dirname(__file__), 'sac_code_data.json'), 'r') as f:
 		sac_codes = json.loads(f.read())
 	create_hsn_codes(sac_codes, code_field="sac_code")
-	
+
 def create_hsn_codes(data, code_field):
 	for d in data:
 		if not frappe.db.exists("GST HSN Code", d[code_field]):
@@ -53,8 +53,6 @@ def create_hsn_codes(data, code_field):
 			hsn_code.hsn_code = d[code_field]
 			hsn_code.name = d[code_field]
 			hsn_code.db_insert()
-
-	frappe.db.commit()
 
 def add_custom_roles_for_reports():
 	for report_name in ('GST Sales Register', 'GST Purchase Register',
@@ -80,7 +78,8 @@ def add_print_formats():
 
 def make_custom_fields():
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
-		fieldtype='Data', options='item_code.gst_hsn_code', insert_after='description', print_hide=1)
+		fieldtype='Data', options='item_code.gst_hsn_code', insert_after='description',
+		allow_on_submit=1, print_hide=1)
 	invoice_gst_fields = [
 		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
 			insert_after='select_print_heading', print_hide=1, collapsible=1),
@@ -101,7 +100,7 @@ def make_custom_fields():
 		dict(fieldname='ecommerce_gstin', label='E-commerce GSTIN',
 			fieldtype='Data', insert_after='export_type', print_hide=1)
 	]
-	
+
 	purchase_invoice_gst_fields = [
 			dict(fieldname='supplier_gstin', label='Supplier GSTIN',
 				fieldtype='Data', insert_after='supplier_address',
@@ -110,7 +109,7 @@ def make_custom_fields():
 				fieldtype='Data', insert_after='shipping_address',
 				options='shipping_address.gstin', print_hide=1)
 		]
-		
+
 	sales_invoice_gst_fields = [
 			dict(fieldname='customer_gstin', label='Customer GSTIN',
 				fieldtype='Data', insert_after='shipping_address',
@@ -122,7 +121,7 @@ def make_custom_fields():
 				fieldtype='Data', insert_after='company_address',
 				options='company_address.gstin', print_hide=1)
 		]
-	
+
 	custom_fields = {
 		'Address': [
 			dict(fieldname='gstin', label='Party GSTIN', fieldtype='Data',
@@ -149,15 +148,7 @@ def make_custom_fields():
 		'Purchase Invoice Item': [hsn_sac_field]
 	}
 
-	for doctype, fields in custom_fields.items():
-		for df in fields:
-			field = frappe.db.get_value("Custom Field", {"dt": doctype, "fieldname": df["fieldname"]})
-			if not field:
-				create_custom_field(doctype, df)
-			else:
-				custom_field = frappe.get_doc("Custom Field", field)
-				custom_field.update(df)
-				custom_field.save()
+	create_custom_fields(custom_fields)
 
 def make_fixtures():
 	docs = [

@@ -20,7 +20,7 @@ class Lead(SellingController):
 	def onload(self):
 		customer = frappe.db.get_value("Customer", {"lead_name": self.name})
 		self.get("__onload").is_customer = customer
-		load_address_and_contact(self, "lead")
+		load_address_and_contact(self)
 
 	def validate(self):
 		self._prev = frappe._dict({

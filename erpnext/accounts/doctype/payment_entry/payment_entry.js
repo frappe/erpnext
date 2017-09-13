@@ -569,7 +569,7 @@ frappe.ui.form.on('Payment Entry', {
 		})
 
 		var allocated_negative_outstanding = 0;
-		if((frm.doc.payment_type=="Receive" && frm.doc.party_type=="Customer") ||
+		if ((frm.doc.payment_type=="Receive" && frm.doc.party_type=="Customer") ||
 				(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Supplier") ||
 				(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Employee")) {
 			if(total_positive_outstanding_including_order > paid_amount) {
@@ -579,7 +579,7 @@ frappe.ui.form.on('Payment Entry', {
 			}
 
 			var allocated_positive_outstanding =  paid_amount + allocated_negative_outstanding;
-		} else {
+		} else if (in_list(["Customer", "Supplier"], frm.doc.party_type)) {
 			if(paid_amount > total_negative_outstanding) {
 				if(total_negative_outstanding == 0) {
 					frappe.msgprint(__("Cannot {0} {1} {2} without any negative outstanding invoice",
@@ -644,16 +644,9 @@ frappe.ui.form.on('Payment Entry', {
 		if(frm.doc.party) {
 			var party_amount = frm.doc.payment_type=="Receive" ?
 				frm.doc.paid_amount : frm.doc.received_amount;
-				
-			var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
-				function(d) { return flt(d.amount) }));
 
 			if(frm.doc.total_allocated_amount < party_amount) {
-				if(frm.doc.payment_type == "Receive") {
-					unallocated_amount = party_amount - (frm.doc.total_allocated_amount - total_deductions);
-				} else {
-					unallocated_amount = party_amount - (frm.doc.total_allocated_amount + total_deductions);
-				}
+				unallocated_amount = party_amount - frm.doc.total_allocated_amount;
 			}
 		}
 		frm.set_value("unallocated_amount", unallocated_amount);
@@ -672,11 +665,10 @@ frappe.ui.form.on('Payment Entry', {
 			difference_amount = flt(frm.doc.base_paid_amount) - flt(frm.doc.base_received_amount);
 		}
 
-		$.each(frm.doc.deductions || [], function(i, d) {
-			if(d.amount) difference_amount -= flt(d.amount);
-		})
+		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
+			function(d) { return flt(d.amount) }));
 
-		frm.set_value("difference_amount", difference_amount);
+		frm.set_value("difference_amount", difference_amount - total_deductions);
 
 		frm.events.hide_unhide_fields(frm);
 	},

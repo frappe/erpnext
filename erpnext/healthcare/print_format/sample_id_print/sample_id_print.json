@@ -1,0 +1,22 @@
+{
+ "align_labels_left": 0,
+ "creation": "2017-02-17 17:40:52.967840",
+ "custom_format": 1,
+ "disabled": 0,
+ "doc_type": "Sample Collection",
+ "docstatus": 0,
+ "doctype": "Print Format",
+ "font": "Default",
+ "html": "<style>\n\t.print-format table, .print-format tr, \n\t.print-format td, .print-format div, .print-format p {\n\t\tfont-family: Monospace;\n\t\tline-height: 170%;\n\t\tvertical-align: middle;\n\t}\n\t@media screen {\n\t\t.print-format {\n\t\t\twidth: 6in;\n\t\t\tpadding: 0.25in;\n\t\t\tmin-height: 2in;\n\t\t}\n\t}\n</style>\n{% set column = 0 %}\n<table>\n{% for _ in range(0, doc.num_print) %}\n{% if column == 0 -%}<tr>{% endif %}\n\t<td style=\"width: 2in; height: 1.8in;\">{{doc.name}}<br>{{doc.patient}}<br>\n{% if doc.patient_age %}{{doc.patient_age}}, {% endif %} {% if doc.patient_sex %}{{doc.patient_sex}}{% endif %}<br> {% if doc.collected_time %}{{doc.collected_time}} {% endif %}<br>{% if doc.collected_by %} {{doc.collected_by}} {% endif %}</td>\n{% if column == 0 %}{% set column = column+1 %}\n{% elif column == 2%} </tr>{%- set column = 0 %}\n{% else %}{%- set column = column+1 -%}{%- endif %}\n\t\n{% endfor %}\n</table>",
+ "idx": 0,
+ "line_breaks": 0,
+ "modified": "2017-03-30 18:09:39.537609",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Sample ID Print", 
+ "owner": "Administrator",
+ "print_format_builder": 0,
+ "print_format_type": "Server",
+ "show_section_headings": 0,
+ "standard": "Yes"
+}

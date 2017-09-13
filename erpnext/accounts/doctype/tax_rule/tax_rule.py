@@ -163,6 +163,8 @@ def get_tax_template(posting_date, args):
 	return tax_template
 
 def get_customer_group_condition(customer_group):
-	customer_groups = ["'%s'"%(d.name) for d in get_parent_customer_groups(frappe.db.escape(customer_group))]
-	condition = ",".join(['%s'] * len(customer_groups))%(tuple(customer_groups))
+	condition = ""
+	customer_groups = ["'%s'"%(frappe.db.escape(d.name)) for d in get_parent_customer_groups(customer_group)]
+	if customer_groups:
+		condition = ",".join(['%s'] * len(customer_groups))%(tuple(customer_groups))
 	return condition

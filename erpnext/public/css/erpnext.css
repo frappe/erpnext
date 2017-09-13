@@ -308,16 +308,6 @@ body[data-route="pos"] .item-list .image-field .placeholder-text {
 body[data-route="pos"] .item-list .pos-item-wrapper {
   position: relative;
 }
-body[data-route="pos"] .item-list .price-info {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  margin: 0 0 15px 15px;
-  background-color: rgba(141, 153, 166, 0.6);
-  padding: 5px 9px;
-  border-radius: 3px;
-  color: #fff;
-}
 body[data-route="pos"] .pos-bill-toolbar {
   margin-top: 10px;
 }
@@ -356,6 +346,7 @@ body[data-route="pos"] .btn-more {
 body[data-route="pos"] .collapse-btn {
   cursor: pointer;
 }
+
 /* hub */
 body[data-route="hub"] .page-head {
   height: 80px;
@@ -419,4 +410,14 @@ body[data-route="hub"] .item-card .company {
 }
 body[data-route="hub"] .item-card .price {
   font-size: 12px;
+}
+.price-info {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  margin: 0 0 15px 15px;
+  background-color: rgba(141, 153, 166, 0.6);
+  padding: 5px 9px;
+  border-radius: 3px;
+  color: #fff;
 }

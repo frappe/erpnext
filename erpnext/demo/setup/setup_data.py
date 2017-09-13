@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 
 import random, json
 import frappe, erpnext
@@ -42,7 +42,7 @@ def setup(domain):
 	frappe.clear_cache()
 
 def complete_setup(domain='Manufacturing'):
-	print "Complete Setup..."
+	print("Complete Setup...")
 	from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
 
 	if not frappe.get_all('Company', limit=1):
@@ -184,7 +184,8 @@ def setup_user_roles():
 	user.add_roles('HR User', 'HR Manager', 'Accounts User', 'Accounts Manager',
 		'Stock User', 'Stock Manager', 'Sales User', 'Sales Manager', 'Purchase User',
 		'Purchase Manager', 'Projects User', 'Manufacturing User', 'Manufacturing Manager',
-		'Support Team', 'Academics User')
+		'Support Team', 'Academics User', 'Physician', 'Healthcare Administrator', 'Laboratory User',
+		'Nursing User', 'Patient')
 
 	if not frappe.db.get_global('demo_hr_user'):
 		user = frappe.get_doc('User', 'CharmaineGaudreau@example.com')
@@ -387,5 +388,3 @@ def import_json(doctype, submit=False, values=None):
 	frappe.db.commit()
 
 	frappe.flags.in_import = False
-
-

@@ -2,9 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
 from frappe.utils import flt
+from frappe.model.meta import get_field_precision
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
 
 def execute(filters=None):
@@ -14,16 +15,17 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	if not filters: filters = {}
 	columns = get_columns(additional_table_columns)
 
+	company_currency = erpnext.get_company_currency(filters.company)
+
 	item_list = get_items(filters, additional_query_columns)
 	if item_list:
-		itemised_tax, tax_columns = get_tax_accounts(item_list, columns)
+		itemised_tax, tax_columns = get_tax_accounts(item_list, columns, company_currency)
 	columns.append({
 		"fieldname": "currency",
 		"label": _("Currency"),
 		"fieldtype": "Data",
 		"width": 80
 	})
-	company_currency = frappe.db.get_value("Company", filters.get("company"), "default_currency")
 	mode_of_payments = get_mode_of_payments(set([d.parent for d in item_list]))
 	so_dn_map = get_delivery_notes_against_sales_order(item_list)
 
@@ -47,7 +49,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		row += [
 			d.customer_group, d.debit_to, ", ".join(mode_of_payments.get(d.parent, [])),
 			d.territory, d.project, d.company, d.sales_order,
-			delivery_note, d.income_account, d.cost_center, d.qty, d.stock_uom,
+			delivery_note, d.income_account, d.cost_center, d.stock_qty, d.stock_uom,
 			d.base_net_rate, d.base_net_amount
 		]
 
@@ -80,7 +82,7 @@ def get_columns(additional_table_columns):
 		_("Project") + ":Link/Project:80", _("Company") + ":Link/Company:100",
 		_("Sales Order") + ":Link/Sales Order:100", _("Delivery Note") + ":Link/Delivery Note:100",
 		_("Income Account") + ":Link/Account:140", _("Cost Center") + ":Link/Cost Center:140",
-		_("Qty") + ":Float:120", _("Stock UOM") + "::100",
+		_("Stock Qty") + ":Float:120", _("Stock UOM") + "::100",
 		_("Rate") + ":Currency/currency:120",
 		_("Amount") + ":Currency/currency:120"
 	]
@@ -116,7 +118,7 @@ def get_items(filters, additional_query_columns):
 			si.customer, si.remarks, si.territory, si.company, si.base_net_total,
 			si_item.item_code, si_item.item_name, si_item.item_group, si_item.sales_order,
 			si_item.delivery_note, si_item.income_account, si_item.cost_center,
-			si_item.qty, si_item.stock_uom, si_item.base_net_rate, si_item.base_net_amount,
+			si_item.stock_qty, si_item.stock_uom, si_item.base_net_rate, si_item.base_net_amount,
 			si.customer_name, si.customer_group, si_item.so_detail, si.update_stock {0}
 		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
 		where si.name = si_item.parent and si.docstatus = 1 %s
@@ -127,27 +129,37 @@ def get_delivery_notes_against_sales_order(item_list):
 	so_dn_map = frappe._dict()
 	so_item_rows = list(set([d.so_detail for d in item_list]))
 
-	delivery_notes = frappe.db.sql("""
-		select parent, so_detail
-		from `tabDelivery Note Item`
-		where docstatus=1 and so_detail in (%s)
-		group by so_detail, parent
-	""" % (', '.join(['%s']*len(so_item_rows))), tuple(so_item_rows), as_dict=1)
+	if so_item_rows:
+		delivery_notes = frappe.db.sql("""
+			select parent, so_detail
+			from `tabDelivery Note Item`
+			where docstatus=1 and so_detail in (%s)
+			group by so_detail, parent
+		""" % (', '.join(['%s']*len(so_item_rows))), tuple(so_item_rows), as_dict=1)
 
-	for dn in delivery_notes:
-		so_dn_map.setdefault(dn.so_detail, []).append(dn.parent)
+		for dn in delivery_notes:
+			so_dn_map.setdefault(dn.so_detail, []).append(dn.parent)
 
 	return so_dn_map
 
-def get_tax_accounts(item_list, columns, tax_doctype="Sales Taxes and Charges"):
+def get_tax_accounts(item_list, columns, company_currency,
+		doctype="Sales Invoice", tax_doctype="Sales Taxes and Charges"):
 	import json
 	item_row_map = {}
 	tax_columns = []
 	invoice_item_row = {}
 	itemised_tax = {}
+
+	tax_amount_precision = get_field_precision(frappe.get_meta(tax_doctype).get_field("tax_amount"),
+		currency=company_currency) or 2
+
 	for d in item_list:
 		invoice_item_row.setdefault(d.parent, []).append(d)
 		item_row_map.setdefault(d.parent, {}).setdefault(d.item_code, []).append(d)
+
+	conditions = ""
+	if doctype == "Purchase Invoice":
+		conditions = " and category in ('Total', 'Valuation and Total')"
 
 	tax_details = frappe.db.sql("""
 		select
@@ -155,11 +167,13 @@ def get_tax_accounts(item_list, columns, tax_doctype="Sales Taxes and Charges"):
 			charge_type, base_tax_amount_after_discount_amount
 		from `tab%s`
 		where
-			parenttype = 'Sales Invoice' and docstatus = 1
+			parenttype = %s and docstatus = 1
 			and (description is not null and description != '')
 			and parent in (%s)
+			%s
 		order by description
-	""" % (tax_doctype, ', '.join(['%s']*len(invoice_item_row))), tuple(invoice_item_row.keys()))
+	""" % (tax_doctype, '%s', ', '.join(['%s']*len(invoice_item_row)), conditions),
+		tuple([doctype] + invoice_item_row.keys()))
 
 	for parent, description, item_wise_tax_detail, charge_type, tax_amount in tax_details:
 		if description not in tax_columns and tax_amount:
@@ -190,7 +204,7 @@ def get_tax_accounts(item_list, columns, tax_doctype="Sales Taxes and Charges"):
 						if item_tax_amount:
 							itemised_tax.setdefault(d.name, {})[description] = frappe._dict({
 								"tax_rate": tax_rate,
-								"tax_amount": item_tax_amount
+								"tax_amount": flt(item_tax_amount, tax_amount_precision)
 							})
 
 			except ValueError:
@@ -199,7 +213,8 @@ def get_tax_accounts(item_list, columns, tax_doctype="Sales Taxes and Charges"):
 			for d in invoice_item_row.get(parent, []):
 				itemised_tax.setdefault(d.name, {})[description] = frappe._dict({
 					"tax_rate": "NA",
-					"tax_amount": flt((tax_amount * d.base_net_amount) / d.base_net_total)
+					"tax_amount": flt((tax_amount * d.base_net_amount) / d.base_net_total,
+						tax_amount_precision)
 				})
 
 	tax_columns.sort()

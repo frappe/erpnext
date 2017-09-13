@@ -18,7 +18,7 @@ class Customer(TransactionBase):
 
 	def onload(self):
 		"""Load address and contacts in `__onload`"""
-		load_address_and_contact(self, "customer")
+		load_address_and_contact(self)
 		self.load_dashboard_info()
 
 	def load_dashboard_info(self):
@@ -67,7 +67,7 @@ class Customer(TransactionBase):
 		'''If Customer created from Lead, update lead status to "Converted"
 		update Customer link in Quotation, Opportunity'''
 		if self.lead_name:
-		 	frappe.db.set_value('Lead', self.lead_name, 'status', 'Converted', update_modified=False)
+			frappe.db.set_value('Lead', self.lead_name, 'status', 'Converted', update_modified=False)
 
 			for doctype in ('Opportunity', 'Quotation'):
 				for d in frappe.get_all(doctype, {'lead': self.lead_name}):
@@ -89,6 +89,9 @@ class Customer(TransactionBase):
 					address.save()
 
 			lead = frappe.db.get_value("Lead", self.lead_name, ["lead_name", "email_id", "phone", "mobile_no", "gender", "salutation"], as_dict=True)
+
+			if not lead.lead_name:
+				frappe.throw(_("Please mention the Lead Name in Lead {0}").format(self.lead_name))
 
 			lead.lead_name = lead.lead_name.split(" ")
 			lead.first_name = lead.lead_name[0]
