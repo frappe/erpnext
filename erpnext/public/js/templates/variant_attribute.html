@@ -10,9 +10,9 @@
 	<tbody>
 		{% $.each(attributes, function(index, row){  %}
 			<tr>
-				{% if (!(index % 5)) { %}
-					{% var page_no = Math.ceil( (index + 1)/ 5) %}
-					<td rowspan=5>{{ page_no }}</td>
+				{% if (!(index % 3)) { %}
+					{% var page_no = Math.ceil( (index + 1)/ 3) %}
+					<td rowspan=3>{{ page_no }}</td>
 				{% } %}
 				<td>{{ row.attribute }}</td>
 				<td>{{ attribute_values[row.attribute] || "" }}</td>
