@@ -246,7 +246,7 @@ frappe.ui.form.on("Expense Claim", {
 						"root_type": "Asset"
 			}
 				};
-		};
+				};
 	}
 	}
 });
