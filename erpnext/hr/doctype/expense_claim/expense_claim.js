@@ -40,7 +40,7 @@ $.extend(cur_frm.cscript, new erpnext.hr.ExpenseClaimController({frm: cur_frm}))
 
 cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.add_fetch('employee','employee_name','employee_name');
-
+cur_frm.add_fetch('employee', 'department', 'department');
 cur_frm.cscript.onload = function(doc,cdt,cdn) {
 	if(!doc.approval_status)
 		cur_frm.set_value("approval_status", "Draft")

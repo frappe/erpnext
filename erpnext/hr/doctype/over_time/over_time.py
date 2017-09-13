@@ -12,9 +12,25 @@ class OverTime(Document):
 	def validate(self):
 		self.validate_date()
 		self.validate_hour_count()
-		self.status="Pending"
-		self.get_department_manager()
+		# self.get_department_manager()
+		self.validate_emp()
+		if self.workflow_state:
+			if "Rejected" in self.workflow_state:
+				self.docstatus = 1
+				self.docstatus = 2
 
+	def validate_emp(self):
+		 if self.get('__islocal'):
+			if u'CEO' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By CEO"
+			elif u'Director' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Director"
+			elif u'Manager' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Manager"
+			elif u'Line Manager' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Line Manager"
+			elif u'Employee' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Pending"
 
 	def validate_date(self):
 		if not self.date:
@@ -24,14 +40,15 @@ class OverTime(Document):
 			
 
 	def validate_hour_count(self):
-		if not self.hours_count:
-			frappe.throw(_("Hours Count field required"))
-		if self.hours_count > 24.0:
-			frappe.throw(_("The Overtime Hours Count cant be more than 24 hour"))
+		pass
+		# if not self.hours_count:
+		# 	frappe.throw(_("Hours Count field required"))
+		# if self.hours_count > 24:
+		# 	frappe.throw(_("The Overtime Hours Count cant be more than 24 hour"))
 
 
 	def on_submit(self):
-		self.insert_expense_claim()
+		# self.insert_expense_claim()
 		self.status="Approved"
 
 	def on_cancle(self):
@@ -110,32 +127,33 @@ class OverTime(Document):
 		self.approval_name=app_doc.employee_name
 
 def get_permission_query_conditions(user):
-	if not user: user = frappe.session.user
-	employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
-	if employees:
-		employee = frappe.get_doc('Employee', {'name': employees[0].name})
+	pass
+	# if not user: user = frappe.session.user
+	# employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
+	# if employees:
+	# 	employee = frappe.get_doc('Employee', {'name': employees[0].name})
 
-		if employee:
-			query = ""
-			if u'System Manager' in frappe.get_roles(user) or u'HR User' in frappe.get_roles(user):
-				return ""
+	# 	if employee:
+	# 		query = ""
+	# 		if u'System Manager' in frappe.get_roles(user) or u'HR User' in frappe.get_roles(user):
+	# 			return ""
 				
-			if u'Employee' in frappe.get_roles(user):
-				if query != "":
-					query+=" or "
-				query+="employee = '{0}'".format(employee.name)
+	# 		if u'Employee' in frappe.get_roles(user):
+	# 			if query != "":
+	# 				query+=" or "
+	# 			query+="employee = '{0}'".format(employee.name)
 
-			if u'Sub Department Manager' in frappe.get_roles(user):
-				if query != "":
-					query+=" or "
-				department = frappe.get_value("Department" , filters= {"sub_department_manager": employee.name}, fieldname="name")
-				query+="""employee in (SELECT name from tabEmployee where tabEmployee.department = '{0}')) or employee = '{1}'""".format(department, employee.name)
+	# 		if u'Sub Department Manager' in frappe.get_roles(user):
+	# 			if query != "":
+	# 				query+=" or "
+	# 			department = frappe.get_value("Department" , filters= {"sub_department_manager": employee.name}, fieldname="name")
+	# 			query+="""employee in (SELECT name from tabEmployee where tabEmployee.department = '{0}')) or employee = '{1}'""".format(department, employee.name)
 
-			if u'Department Manager' in frappe.get_roles(user):
-				if query != "":
-					query+=" or "
-				department = frappe.get_value("Department" , filters= {"department_manager": employee.name}, fieldname="name")
-				query+="""employee in (SELECT name from tabEmployee where tabEmployee.department in 
-				(SELECT name from tabDepartment where parent_department = '{0}')) or employee = '{1}'""".format(department, employee.name)
-			return query
+	# 		if u'Department Manager' in frappe.get_roles(user):
+	# 			if query != "":
+	# 				query+=" or "
+	# 			department = frappe.get_value("Department" , filters= {"department_manager": employee.name}, fieldname="name")
+	# 			query+="""employee in (SELECT name from tabEmployee where tabEmployee.department in 
+	# 			(SELECT name from tabDepartment where parent_department = '{0}')) or employee = '{1}'""".format(department, employee.name)
+	# 		return query
 

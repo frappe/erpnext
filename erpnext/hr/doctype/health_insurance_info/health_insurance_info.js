@@ -38,7 +38,7 @@ frappe.ui.form.on('Health Insurance Info', {
         });
     }
 });
-
+cur_frm.add_fetch('employee', 'department', 'department');
 cur_frm.add_fetch('employee', 'employee_name', 'employee_name');
 //cur_frm.add_fetch('employee', 'employee_name_english', 'employee_name_english');
 cur_frm.add_fetch('employee', 'marital_status', 'marital_status');

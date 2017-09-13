@@ -18,6 +18,11 @@ class CancelLeaveApplication(Document):
 		self.add_leave_details()
 		self.validate_dates()
 		self.validate_is_canceled()
+		self.validate_emp()
+		if self.workflow_state:
+			if "Rejected" in self.workflow_state:
+				self.docstatus = 1
+				self.docstatus = 2
 
 	def on_submit(self):
 		self.validate_dates()
@@ -32,6 +37,19 @@ class CancelLeaveApplication(Document):
 			self.cancel_date, leave_application.half_day)
 		leave_application.flags.ignore_validate_update_after_submit = True
 		leave_application.save()
+
+	def validate_emp(self):
+		 if self.get('__islocal'):
+			if u'CEO' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By CEO"
+			elif u'Director' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Director"
+			elif u'Manager' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Manager"
+			elif u'Line Manager' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Line Manager"
+			elif u'Employee' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Pending"
 
 	def validate_dates(self):
 		if getdate(self.cancel_date) >= getdate(self.to_date):
@@ -51,38 +69,39 @@ class CancelLeaveApplication(Document):
 			frappe.throw(_("Leave Application %s already canceled at %s")% (self.leave_application,leave_application.cancel_date) )
 
 def get_permission_query_conditions(user):
-	if not user: user = frappe.session.user
-	employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
-	if employees:
-		employee = frappe.get_doc('Employee', {'name': employees[0].name})
+	pass
+	# if not user: user = frappe.session.user
+	# employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
+	# if employees:
+	# 	employee = frappe.get_doc('Employee', {'name': employees[0].name})
 
-		if employee:
-			query = ""
+	# 	if employee:
+	# 		query = ""
 
-			if u'System Manager' in frappe.get_roles(user) or u'HR User' in frappe.get_roles(user):
-				return ""
+	# 		if u'System Manager' in frappe.get_roles(user) or u'HR User' in frappe.get_roles(user):
+	# 			return ""
 
-			if u'Employee' in frappe.get_roles(user):
-				if query != "":
-					query+=" or "
-				query+="employee = '{0}'".format(employee.name)
+	# 		if u'Employee' in frappe.get_roles(user):
+	# 			if query != "":
+	# 				query+=" or "
+	# 			query+="employee = '{0}'".format(employee.name)
 
-			# if u'Leave Approver' in frappe.get_roles(user):	
-			# 	if query != "":
-			# 		query+=" or "
-   #      		query+= """(`tabreturn_from_leave_statement`.leave_approver = '{user}' or `tabreturn_from_leave_statement`.employee = '{employee}')""" \
-   #          	.format(user=frappe.db.escape(user), employee=frappe.db.escape(employee.name))
+	# 		# if u'Leave Approver' in frappe.get_roles(user):	
+	# 		# 	if query != "":
+	# 		# 		query+=" or "
+ #   #      		query+= """(`tabreturn_from_leave_statement`.leave_approver = '{user}' or `tabreturn_from_leave_statement`.employee = '{employee}')""" \
+ #   #          	.format(user=frappe.db.escape(user), employee=frappe.db.escape(employee.name))
 
-			if u'Sub Department Manager' in frappe.get_roles(user):
-				if query != "":
-					query+=" or "
-				department = frappe.get_value("Department" , filters= {"sub_department_manager": employee.name}, fieldname="name")
-				query+="""employee in (SELECT name from tabEmployee where tabEmployee.department = '{0}')) or employee = '{1}'""".format(department, employee.name)
+	# 		if u'Sub Department Manager' in frappe.get_roles(user):
+	# 			if query != "":
+	# 				query+=" or "
+	# 			department = frappe.get_value("Department" , filters= {"sub_department_manager": employee.name}, fieldname="name")
+	# 			query+="""employee in (SELECT name from tabEmployee where tabEmployee.department = '{0}')) or employee = '{1}'""".format(department, employee.name)
 
-			if u'Department Manager' in frappe.get_roles(user):
-				if query != "":
-					query+=" or "
-				department = frappe.get_value("Department" , filters= {"department_manager": employee.name}, fieldname="name")
-				query+="""employee in (SELECT name from tabEmployee where tabEmployee.department in 
-				(SELECT name from tabDepartment where parent_department = '{0}')) or employee = '{1}'""".format(department, employee.name)
-			return query
+	# 		if u'Department Manager' in frappe.get_roles(user):
+	# 			if query != "":
+	# 				query+=" or "
+	# 			department = frappe.get_value("Department" , filters= {"department_manager": employee.name}, fieldname="name")
+	# 			query+="""employee in (SELECT name from tabEmployee where tabEmployee.department in 
+	# 			(SELECT name from tabDepartment where parent_department = '{0}')) or employee = '{1}'""".format(department, employee.name)
+	# 		return query

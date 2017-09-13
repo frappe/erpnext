@@ -6,3 +6,4 @@ frappe.ui.form.on('Penalty', {
 
 	}
 });
+cur_frm.add_fetch('employee','department','department');

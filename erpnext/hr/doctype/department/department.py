@@ -14,9 +14,9 @@ class Department(Document):
 	def validate(self):
 		pass
 
-
 	def on_update(self):
 		self.update_nsm_model()
+		self.add_roles_and_permissions()
 
 	def on_trash(self):
 		self.validate_trash()
@@ -26,9 +26,36 @@ class Department(Document):
 		"""update lft, rgt indices for nested set model"""
 		frappe.utils.nestedset.update_nsm(self)
 
-
 	def validate_trash(self):
 		pass
+
+	def add_roles_and_permissions(self):
+		if self.director:
+			user_emp = frappe.db.sql("select user_id from `tabEmployee` where name = '{0}'".format(self.director), as_dict = 1)
+			user = frappe.get_doc("User", user_emp[0].user_id)
+			user.add_roles("Director")
+			frappe.permissions.add_user_permission ("Department", self.name, user_emp[0].user_id)
+			second_level_departments = frappe.db.sql("select name from `tabDepartment` where parent_department = '{0}'".format(self.name), as_dict = 1)
+			for dp in second_level_departments:
+				frappe.permissions.add_user_permission ("Department", dp.name, user_emp[0].user_id)
+				third_level_departments = frappe.db.sql("select name from `tabDepartment` where parent_department = '{0}'".format(dp.name), as_dict = 1)
+				for dp in third_level_departments:
+					frappe.permissions.add_user_permission ("Department", dp.name,user_emp[0].user_id)
+
+		elif self.manager:
+			user_emp = frappe.db.sql("select user_id from `tabEmployee` where name = '{0}'".format(self.manager), as_dict = 1)
+			user = frappe.get_doc("User", user_emp[0].user_id)
+			user.add_roles("Manager")
+			frappe.permissions.add_user_permission ("Department", self.name, user_emp[0].user_id)
+			second_level_departments = frappe.db.sql("select name from `tabDepartment` where parent_department = '{0}'".format(self.name), as_dict = 1)
+			for dp in second_level_departments:
+				frappe.permissions.add_user_permission ("Department", dp.name, user_emp[0].user_id)
+
+		elif self.line_manager:
+			user_emp = frappe.db.sql("select user_id from `tabEmployee` where name = '{0}'".format(self.line_manager), as_dict = 1)
+			user = frappe.get_doc("User", user_emp[0].user_id)
+			user.add_roles("Line Manager")
+			frappe.permissions.add_user_permission ("Department", self.name, user_emp[0].user_id)
 
 def add_departments():
 	dps = frappe.db.sql("select name from `tabDepartment` where parent_department = 'الادارة العليا'", as_dict = 1)
@@ -49,7 +76,7 @@ def add_departments():
 				print x
 
 def add_roles_and_permissions():
-	frappe.permissions.add_user_permission ("Department", "Digital Computing", "as.alqahtani@tawari.sa")
+	# frappe.permissions.add_user_permission ("Department", "Digital Computing", "as.alqahtani@tawari.sa")
 	# print frappe.permissions.has_permission ("Department", doc="Digital Computing", user="as.alqahtani@tawari.sa")
 	# print frappe.permissions.user_has_permission ("Digital Computing", user="as.alqahtani@tawari.sa")
 	dps = frappe.db.sql("select name, line_manager, manager, director from `tabDepartment`", as_dict = 1)

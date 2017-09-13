@@ -11,6 +11,10 @@ class MayConcernLetter(Document):
 	def validate(self):
 		self.fieldsvalidate()
 		self.salary=self.get_salary()
+		if self.workflow_state:
+			if "Rejected" in self.workflow_state:
+			    self.docstatus = 1
+			    self.docstatus = 2
 
 	def fieldsvalidate(self):
 		if not self.employee_name:

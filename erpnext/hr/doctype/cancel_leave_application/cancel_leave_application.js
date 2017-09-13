@@ -31,4 +31,4 @@ cur_frm.fields_dict.leave_application.get_query = function(doc) {
 		]
 	};
 };
-cur_frm.add_fetch('employee','department','department');
+cur_frm.add_fetch('leave_application','department','department');

@@ -11,9 +11,10 @@ from frappe.utils.csvutils import UnicodeWriter
 class MedicalInsuranceApplication(Document):
 
 	def validate(self):
-		if "Rejected" in self.workflow_state:
-			self.docstatus = 1
-			self.docstatus = 2
+		if self.workflow_state:
+			if "Rejected" in self.workflow_state:
+			    self.docstatus = 1
+			    self.docstatus = 2
 
 
 @frappe.whitelist()

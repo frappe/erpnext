@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.add_fetch('employee', 'employee_name', 'employee_name');
+ cur_frm.add_fetch('employee', 'department', 'department');
 cur_frm.add_fetch('employee', 'company', 'company');
 // cur_frm.add_fetch('employee', 'reports_to', 'leave_approver');
 cur_frm.cscript.custom_leave_type = function(doc) {

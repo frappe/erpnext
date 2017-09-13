@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.add_fetch('employee','employee_name','employee_name');
+cur_frm.add_fetch('employee','department','department');
 
 frappe.ui.form.on("Leave Allocation", {
 	onload: function(frm) {

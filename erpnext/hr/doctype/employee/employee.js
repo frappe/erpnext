@@ -117,24 +117,24 @@ frappe.ui.form.on('Employee', {
         });
     },
 });
-cur_frm.cscript = new erpnext.hr.EmployeeController({ frm: cur_frm });
-cur_frm.cscript.custom_department = function(doc, cdt, cd, cdn) {
-    cur_frm.set_value("sub_department", "");
-};
-cur_frm.fields_dict.department.get_query = function(doc) {
-    return {
-        filters: [
-            ['parent_department', '=', 'الادارة العليا'],
-        ]
-    };
-};
-cur_frm.fields_dict.sub_department.get_query = function(doc, cdt, cdn) {
-    if (cur_frm.doc.department == undefined || cur_frm.doc.department == "") {
-        frappe.throw(__("Please select a Department"));
-    }
-    return {
-        filters: {
-            parent_department: doc.department
-        }
-    }
-};
+// cur_frm.cscript = new erpnext.hr.EmployeeController({ frm: cur_frm });
+// cur_frm.cscript.custom_department = function(doc, cdt, cd, cdn) {
+//     cur_frm.set_value("sub_department", "");
+// };
+// cur_frm.fields_dict.department.get_query = function(doc) {
+//     return {
+//         filters: [
+//             ['parent_department', '=', 'الادارة العليا'],
+//         ]
+//     };
+// };
+// cur_frm.fields_dict.sub_department.get_query = function(doc, cdt, cdn) {
+//     if (cur_frm.doc.department == undefined || cur_frm.doc.department == "") {
+//         frappe.throw(__("Please select a Department"));
+//     }
+//     return {
+//         filters: {
+//             parent_department: doc.department
+//         }
+//     }
+// };

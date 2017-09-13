@@ -6,6 +6,7 @@
 // cur_frm.add_fetch('employee', 'branch', 'branch');
 // cur_frm.add_fetch('employee', 'department', 'department');
 // cur_frm.add_fetch('employee', 'designation', 'designation');
+cur_frm.add_fetch('leave_application','department','department');
 cur_frm.add_fetch('leave_application', 'employee_name', 'employee_name');
 cur_frm.add_fetch('leave_application','employee','employee');
 cur_frm.add_fetch('leave_application', 'total_leave_days', 'total_leave_days');

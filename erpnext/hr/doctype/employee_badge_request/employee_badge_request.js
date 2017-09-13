@@ -12,40 +12,47 @@ cur_frm.add_fetch('employee', 'employment_type', 'employment_type');
 cur_frm.add_fetch('employee', 'date_of_joining', 'date_of_joining');
 cur_frm.add_fetch('employee', 'nationality', 'nationality');
 cur_frm.add_fetch('employee', 'gender', 'gender');
-
+cur_frm.add_fetch('employee', 'department', 'department');
 frappe.ui.form.on('Employee Badge Request', {
-  refresh: function(frm) {
-		if (frm.doc.__islocal) {
-			// get_employee_illnes(frm.doc);
-		}
-  }
+    refresh: function(frm) {
+        if (frm.doc.__islocal) {
+            // get_employee_illnes(frm.doc);
+        }
+    },
+    validate: function(frm) {
+        // if (!frm.doc.__islocal) {
+        //     if (frm.doc.badge_received != "Yes") {
+        //         frappe.throw(__("Employee must recieve the Badge before submit"));
+        //     }
+        // }
+    }
 });
 var dates_g = ['date'];
 
 $.each(dates_g, function(index, element) {
-  cur_frm.cscript['custom_' + element] = function(doc, cdt, cd) {
-    cur_frm.set_value(element + '_hijri', doc[element]);
-  };
+    cur_frm.cscript['custom_' + element] = function(doc, cdt, cd) {
+        cur_frm.set_value(element + '_hijri', doc[element]);
+    };
 
-  cur_frm.cscript['custom_' + element + '_hijri'] = function(doc, cdt, cd) {
-    cur_frm.set_value(element, doc[element + '_hijri']);
-  };
+    cur_frm.cscript['custom_' + element + '_hijri'] = function(doc, cdt, cd) {
+        cur_frm.set_value(element, doc[element + '_hijri']);
+    };
 
 });
 
 cur_frm.cscript.custom_employee = function(doc, cdt, cd) {
-// get_employee_illnes(doc);
+    // get_employee_illnes(doc);
 };
 
 get_employee_illnes = function(doc) {
-  if (doc.employee) {
-    frappe.call({
-      method: 'get_employee_illnes',
-      doc: doc,
-      callback: function(e) {
-				console.log(e.message);
-				cur_frm.refresh_fields(["special_case"]);
-			}
-    });
-  }
+    if (doc.employee) {
+        frappe.call({
+            method: 'get_employee_illnes',
+            doc: doc,
+            callback: function(e) {
+                console.log(e.message);
+                cur_frm.refresh_fields(["special_case"]);
+            }
+        });
+    }
 };
