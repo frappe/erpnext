@@ -14,8 +14,12 @@ QUnit.test("Test: Attendance [HR]", function (assert) {
 			"Form for new Attendance opened successfully."),
 		// set values in form
 		() => cur_frm.set_value("company", "Test Company"),
-		() => frappe.db.get_value('Employee', {'employee_name':'Test Employee 1'}, 'name'),
-		(employee) => cur_frm.set_value("employee", employee.message.name),
+		() => {
+			frappe.db.get_value('Employee', {'employee_name':'Test Employee 1'}, 'name', function(r) {
+				cur_frm.set_value("employee", r.name)
+			});
+		},
+		() => frappe.timeout(1),
 		() => cur_frm.save(),
 		() => frappe.timeout(1),
 		// check docstatus of attendance before submit [Draft]

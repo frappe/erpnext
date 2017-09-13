@@ -204,9 +204,9 @@ def get_list_context(context=None):
 	return list_context
 
 def get_supplier_contacts(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql(""" select `tabContact`.name from `tabContact`, `tabDynamic Link`
-		where `tabDynamic Link`.link_doctype = 'Supplier' and (`tabDynamic Link`.link_name = %(name)s
-		or `tabDynamic Link`.link_name like %(txt)s) and `tabContact`.name = `tabDynamic Link`.parent
+	return frappe.db.sql("""select `tabContact`.name from `tabContact`, `tabDynamic Link`
+		where `tabDynamic Link`.link_doctype = 'Supplier' and (`tabDynamic Link`.link_name=%(name)s
+		and `tabDynamic Link`.link_name like %(txt)s) and `tabContact`.name = `tabDynamic Link`.parent
 		limit %(start)s, %(page_len)s""", {"start": start, "page_len":page_len, "txt": "%%%s%%" % txt, "name": filters.get('supplier')})
 
 # This method is used to make supplier quotation from material request form.

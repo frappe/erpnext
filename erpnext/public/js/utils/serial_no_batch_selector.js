@@ -1,15 +1,16 @@
 
 erpnext.SerialNoBatchSelector = Class.extend({
-	init: function(opts) {
+	init: function(opts, show_dialog) {
 		$.extend(this, opts);
+		this.show_dialog = show_dialog;
 		// frm, item, warehouse_details, has_batch, oldest
 		let d = this.item;
 
 		// Don't show dialog if batch no or serial no already set
-		if(d && d.has_batch_no && !d.batch_no) {
+		if(d && d.has_batch_no && (!d.batch_no || this.show_dialog)) {
 			this.has_batch = 1;
 			this.setup();
-		} else if(d && d.has_serial_no && !d.serial_no) {
+		} else if(d && d.has_serial_no && (!d.serial_no || this.show_dialog)) {
 			this.has_batch = 0;
 			this.setup();
 		}
@@ -93,6 +94,11 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			}
 		});
 
+		if(this.show_dialog) {
+			let d = this.item;
+			this.dialog.set_value('serial_no', d.serial_no);
+		}
+
 		this.dialog.show();
 	},
 
@@ -140,6 +146,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			this.map_row_values(this.item, this.values, 'serial_no', 'qty');
 		}
 		refresh_field("items");
+		this.callback && this.callback(this.item);
 	},
 
 	map_row_values: function(row, values, number, qty_field, warehouse) {

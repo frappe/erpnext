@@ -90,6 +90,9 @@ class Customer(TransactionBase):
 
 			lead = frappe.db.get_value("Lead", self.lead_name, ["lead_name", "email_id", "phone", "mobile_no", "gender", "salutation"], as_dict=True)
 
+			if not lead.lead_name:
+				frappe.throw(_("Please mention the Lead Name in Lead {0}").format(self.lead_name))
+
 			lead.lead_name = lead.lead_name.split(" ")
 			lead.first_name = lead.lead_name[0]
 			lead.last_name = " ".join(lead.lead_name[1:])

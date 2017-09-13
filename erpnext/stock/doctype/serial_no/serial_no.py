@@ -240,7 +240,8 @@ def has_duplicate_serial_no(sn, sle):
 
 	status = False
 	if sn.purchase_document_no:
-		if sle.voucher_type in ['Purchase Receipt', 'Stock Entry']:
+		if sle.voucher_type in ['Purchase Receipt', 'Stock Entry'] and \
+			sn.delivery_document_type not in ['Purchase Receipt', 'Stock Entry']:
 			status = True
 
 		if status and sle.voucher_type == 'Stock Entry' and \

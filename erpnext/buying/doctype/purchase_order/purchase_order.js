@@ -13,6 +13,7 @@ frappe.ui.form.on("Purchase Order", {
 			'Stock Entry': 'Material to Supplier'
 		}
 	},
+
 	onload: function(frm) {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
@@ -20,8 +21,7 @@ frappe.ui.form.on("Purchase Order", {
 
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
-
-	}
+	},
 });
 
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
@@ -86,8 +86,13 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			if(flt(doc.per_billed)==0 && doc.status != "Delivered") {
 				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_payment_entry, __("Make"));
 			}
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 
+			if(!doc.subscription) {
+				cur_frm.add_custom_button(__('Subscription'), function() {
+					erpnext.utils.make_subscription(doc.doctype, doc.name)
+				}, __("Make"))
+			}
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 	},
 
