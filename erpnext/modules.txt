@@ -15,5 +15,5 @@ Portal
 Maintenance
 Schools
 Regional
-Subscription
-Agriculture
+Healthcare
+SubscriptionAgriculture
