@@ -1,7 +1,9 @@
 frappe.ui.form.on("Hub Settings", {
 	refresh: function(frm) {
 		frm.add_custom_button(__('Logs'),
-			() => frappe.set_route('List', 'Hub Message'));
+			() => frappe.set_route('List', 'Data Migration Run', {
+				data_migration_plan: 'Hub Sync'
+			}));
 
 		frm.trigger("enabled");
 		if (frm.doc.enabled) {
