@@ -13,7 +13,7 @@ QUnit.test("Test: Attendance [HR]", function (assert) {
 		() => assert.equal("Attendance", cur_frm.doctype,
 			"Form for new Attendance opened successfully."),
 		// set values in form
-		() => cur_frm.set_value("company", "Test Company"),
+		() => cur_frm.set_value("company", "For Testing"),
 		() => {
 			frappe.db.get_value('Employee', {'employee_name':'Test Employee 1'}, 'name', function(r) {
 				cur_frm.set_value("employee", r.name)

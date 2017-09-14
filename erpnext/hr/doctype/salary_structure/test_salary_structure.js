@@ -13,7 +13,7 @@ QUnit.test("test Salary Structure", function(assert) {
 			(r) => {
 			// Creating Salary Structure for employees);
 				frappe.tests.make('Salary Structure', [
-					{ company: 'Test Company'},
+					{ company: 'For Testing'},
 					{ payroll_frequency: 'Monthly'},
 					{ employees: [
 						[
@@ -43,7 +43,7 @@ QUnit.test("test Salary Structure", function(assert) {
 							{formula: '(B+LE) * .20'}
 						]
 					]},
-					{ payment_account: 'CASH - TC'},
+					{ payment_account: 'CASH - FT'},
 				]);
 			},
 			() => frappe.timeout(10),

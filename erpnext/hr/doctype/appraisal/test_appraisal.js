@@ -29,7 +29,7 @@ QUnit.test("Test: Expense Claim [HR]", function (assert) {
 		() => frappe.timeout(1),
 		() => cur_frm.set_value('employee',employee_name),
 		() => cur_frm.set_value('employee_name','Test Employee 1'),
-		() => cur_frm.set_value('company','Test Company'),
+		() => cur_frm.set_value('company','For Testing'),
 		() => frappe.click_button('Calculate Total Score'),
 		() => frappe.timeout(1),
 		() => cur_frm.save(),

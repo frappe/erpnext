@@ -19,7 +19,7 @@ QUnit.test("test: item", function (assert) {
 				{is_stock_item: is_stock_item},
 				{standard_rate: keyboard_cost},
 				{opening_stock: no_of_items_to_stock},
-				{default_warehouse: "Stores - RB"}
+				{default_warehouse: "Stores - FT"}
 			]
 		),
 		() => {
@@ -45,7 +45,7 @@ QUnit.test("test: item", function (assert) {
 				{is_stock_item: is_stock_item},
 				{standard_rate: screen_cost},
 				{opening_stock: no_of_items_to_stock},
-				{default_warehouse: "Stores - RB"}
+				{default_warehouse: "Stores - FT"}
 			]
 		),
 
@@ -57,7 +57,7 @@ QUnit.test("test: item", function (assert) {
 				{is_stock_item: is_stock_item},
 				{standard_rate: CPU_cost},
 				{opening_stock: no_of_items_to_stock},
-				{default_warehouse: "Stores - RB"}
+				{default_warehouse: "Stores - FT"}
 			]
 		),
 
@@ -66,7 +66,7 @@ QUnit.test("test: item", function (assert) {
 			"Item", [
 				{item_code: "Laptop"},
 				{item_group: "Products"},
-				{default_warehouse: "Stores - RB"}
+				{default_warehouse: "Stores - FT"}
 			]
 		),
 		() => frappe.tests.make(
@@ -85,7 +85,7 @@ QUnit.test("test: item", function (assert) {
 				{is_stock_item: is_stock_item},
 				{standard_rate: scrap_cost},
 				{opening_stock: no_of_items_to_stock},
-				{default_warehouse: "Stores - RB"}
+				{default_warehouse: "Stores - FT"}
 			]
 		),
 		() => frappe.tests.make(
