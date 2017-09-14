@@ -15,8 +15,6 @@ from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from erpnext.controllers.item_variant import (get_variant, copy_attributes_to_variant,
 	make_variant_item_code, validate_item_variant_attributes, ItemVariantExistsError)
-from erpnext.hub_node.doctype.hub_settings.hub_settings import (is_hub_enabled, is_hub_published,
-	get_current_item_fields, hub_request)
 
 class DuplicateReorderRows(frappe.ValidationError): pass
 
@@ -110,12 +108,6 @@ class Item(WebsiteGenerator):
 		self.update_variants()
 		self.update_item_price()
 		self.update_template_item()
-		if self.publish_in_hub and is_hub_enabled() and is_hub_published():
-			self.update_for_hub()
-
-	def on_trash(self):
-		if self.publish_in_hub and is_hub_enabled() and is_hub_published():
-			self.delete_at_hub()
 
 	def add_price(self, price_list=None):
 		'''Add a new price'''
@@ -681,57 +673,6 @@ class Item(WebsiteGenerator):
 					.format(variant), ItemVariantExistsError)
 
 			validate_item_variant_attributes(self, args)
-
-	def update_for_hub(self):
-		if self.before_update:
-			if self.before_update.publish_in_hub == self.publish_in_hub:
-				if self.publish_in_hub == 1:
-					self.update_values_at_hub()
-			else:
-				if self.publish_in_hub == 1:
-					self.insert_at_hub()
-				else:
-					self.delete_at_hub()
-		else:
-			if self.publish_in_hub == 1:
-				self.insert_at_hub()
-
-		# If item deleted(will be handled by delete_doc)
-
-	def update_values_at_hub(self):
-		current_hub_fields = get_current_item_fields()
-		item_dict = {}
-		for field in current_hub_fields:
-			item_dict[field] = self.get(field)
-		if item_dict["image"]:
-			item_dict["image"] = "http://" + frappe.local.site + ":8000" + item_dict["image"]
-		response_msg = hub_request('update_item',
-			data={
-				"item_code": self.item_code,
-				"item_dict": json.dumps(item_dict)
-			}
-		)
-
-	def insert_at_hub(self):
-		current_hub_fields = get_current_item_fields()
-		item_dict = {}
-		for field in current_hub_fields:
-			item_dict[field] = self.get(field)
-		if item_dict["image"]:
-			item_dict["image"] = "http://" + frappe.local.site + ":8000" + item_dict["image"]
-		response_msg = hub_request('insert_item',
-			data={
-				"item_dict": json.dumps(item_dict)
-			}
-		)
-
-	def delete_at_hub(self):
-		response_msg = hub_request('delete_item',
-			data={
-				"item_code": self.item_code
-			}
-		)
-
 
 def get_timeline_data(doctype, name):
 	'''returns timeline data based on stock ledger entry'''
