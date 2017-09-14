@@ -47,7 +47,6 @@ class ExpenseClaim(AccountsController):
 
 		if self.total_sanctioned_amount > 0 and self.total_sanctioned_amount == self.total_amount_reimbursed \
 			and self.docstatus == 1 and self.approval_status == 'Approved':
-			frappe.msgprint("Approved")
 			self.status = "Paid"
 		elif self.total_sanctioned_amount > 0 and self.docstatus == 1 and self.approval_status == 'Approved':
 			self.status = "Unpaid"
