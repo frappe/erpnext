@@ -8,6 +8,7 @@ import frappe
 import frappe.defaults
 from frappe.utils import cint
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+from frappe.utils.nestedset import get_root_of
 
 from frappe.model.document import Document
 
@@ -31,3 +32,9 @@ class SellingSettings(Document):
 		for doctype in ("Sales Order", "Sales Invoice", "Delivery Note"):
 			make_property_setter(doctype, "tax_id", "hidden", self.hide_tax_id, "Check")
 			make_property_setter(doctype, "tax_id", "print_hide", self.hide_tax_id, "Check")
+
+	def set_default_customer_group_and_territory(self):
+		if not self.customer_group:
+			self.customer_group = get_root_of('Customer Group')
+		if not self.territory:
+			self.territory = get_root_of('Territory')

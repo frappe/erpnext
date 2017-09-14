@@ -4,7 +4,6 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils.nestedset import get_root_of
 
 def boot_session(bootinfo):
 	"""boot session - send website info if guest"""
@@ -17,9 +16,9 @@ def boot_session(bootinfo):
 
 		load_country_and_currency(bootinfo)
 		bootinfo.sysdefaults.territory = frappe.db.get_single_value('Selling Settings',
-			'territory') or get_root_of('Territory')
+			'territory')
 		bootinfo.sysdefaults.customer_group = frappe.db.get_single_value('Selling Settings',
-			'customer_group') or get_root_of('Customer Group')
+			'customer_group')
 
 		bootinfo.notification_settings = frappe.get_doc("Notification Control",
 			"Notification Control")
