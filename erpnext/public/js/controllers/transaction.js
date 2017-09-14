@@ -400,7 +400,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				if(me.frm.doc.company && me.frm.doc.doctype == "Sales Invoice"){
 					frappe.call({
 						method:"frappe.contacts.doctype.address.address.get_default_address",
-						args:{ doctype:'Company',name:frm.doc.company},
+						args:{ doctype:'Company',name:me.frm.doc.company},
 						callback: function(r) {
 							if (r.message) {
 								me.frm.set_value("company_address",r.message);
@@ -411,7 +411,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						}
 					})
 				}
-		}
+			}
 	}
 
 		var set_party_account = function(set_pricing) {
