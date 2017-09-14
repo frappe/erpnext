@@ -14,7 +14,8 @@ def execute(filters=None):
 		dict(fieldtype='Data', label='Export Type', width=120),
 		dict(fieldtype='Data', label='E-Commerce GSTIN', width=130),
 		dict(fieldtype='Data', label='HSN Code', width=120),
-		dict(fieldtype='Data', label='Supplier Invoice No', width=120)
+		dict(fieldtype='Data', label='Supplier Invoice No', width=120),
+		dict(fieldtype='Date', label='Supplier Invoice Date', width=100)
 	], additional_query_columns=[
 		'supplier_gstin',
 		'company_gstin',
@@ -23,5 +24,6 @@ def execute(filters=None):
 		'export_type',
 		'ecommerce_gstin',
 		'gst_hsn_code',
-		'bill_no'
+		'bill_no',
+		'bill_date'
 	])
