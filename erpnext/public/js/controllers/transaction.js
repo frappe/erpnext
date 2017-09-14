@@ -396,21 +396,21 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				me.frm.script_manager.trigger("currency");
 				me.apply_pricing_rule();
 			}
-		var set_address = function() {
-			if(me.frm.doc.company && me.frm.doc.doctype == "Sales Invoice"){
-				frappe.call({
-					method:"frappe.contacts.doctype.address.address.get_default_address",
-					args:{ doctype:'Company',name:frm.doc.company},
-					callback: function(r) {
+			var set_address = function() {
+				if(me.frm.doc.company && me.frm.doc.doctype == "Sales Invoice"){
+					frappe.call({
+						method:"frappe.contacts.doctype.address.address.get_default_address",
+						args:{ doctype:'Company',name:frm.doc.company},
+						callback: function(r) {
 							if (r.message) {
-									frm.set_value("company_address",r.message)
+								me.frm.set_value("company_address",r.message);
 							}
 							else {
-									frm.set_value("company_address","")
+								me.frm.set_value("company_address","");
 							}
 						}
-				})
-			}
+					})
+				}
 		}
 	}
 
