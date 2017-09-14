@@ -63,7 +63,6 @@ class HubSettings(Document):
 		response = connection.update('User', frappe._dict({'enabled': 0}), hub_connector.username)
 
 		if response.ok:
-			self.remove_hub_connector()
 			self.enabled = 0
 			self.save()
 
@@ -83,10 +82,6 @@ class HubSettings(Document):
 			'username': message['email'],
 			'password': message['password']
 		}).insert()
-
-	def remove_hub_connector(self):
-		if frappe.db.exists('Data Migration Connector', 'Hub Connector'):
-			frappe.delete_doc('Data Migration Connector', 'Hub Connector')
 
 def reset_hub_publishing_settings(last_sync_datetime = ""):
 	doc = frappe.get_doc("Hub Settings", "Hub Settings")
