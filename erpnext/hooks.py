@@ -42,7 +42,7 @@ update_and_get_user_progress = "erpnext.utilities.user_progress_utils.update_def
 on_session_creation = "erpnext.shopping_cart.utils.set_cart_count"
 on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
 
-treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory', "BOM"]
+treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory']
 
 # website
 update_website_context = "erpnext.shopping_cart.utils.update_website_context"
@@ -129,7 +129,10 @@ standard_portal_menu_items = [
 	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue", "role":"Customer"},
 	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"},
 	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role":"Student"},
-	{"title": _("Timesheets"), "route": "/timesheets", "reference_doctype": "Timesheet", "role":"Customer"}
+	{"title": _("Timesheets"), "route": "/timesheets", "reference_doctype": "Timesheet", "role":"Customer"},
+	{"title": _("Lab Test"), "route": "/lab-test", "reference_doctype": "Lab Test", "role":"Patient"},
+	{"title": _("Prescription"), "route": "/prescription", "reference_doctype": "Consultation", "role":"Patient"},
+	{"title": _("Patient Appointment"), "route": "/patient-appointments", "reference_doctype": "Patient Appointment", "role":"Patient"}
 ]
 
 default_roles = [
@@ -145,7 +148,10 @@ has_website_permission = {
 	"Supplier Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",
-	"Timesheet": "erpnext.controllers.website_list_for_contact.has_website_permission"
+	"Timesheet": "erpnext.controllers.website_list_for_contact.has_website_permission",
+	"Lab Test": "erpnext.healthcare.web_form.lab_test.lab_test.has_website_permission",
+	"Consultation": "erpnext.healthcare.web_form.prescription.prescription.has_website_permission",
+	"Patient Appointment": "erpnext.healthcare.web_form.patient_appointments.patient_appointments.has_website_permission"
 }
 
 dump_report_map = "erpnext.startup.report_data_map.data_map"

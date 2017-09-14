@@ -15,6 +15,8 @@ def run_setup_wizard_test():
 	print('Running Setup Wizard Test...')
 
 	# Language slide
+	driver.wait_for_ajax(True)
+	time.sleep(2)
 	driver.set_select("language", "English (United States)")
 	driver.wait_for_ajax(True)
 	driver.wait_till_clickable(".next-btn").click()
@@ -33,6 +35,7 @@ def run_setup_wizard_test():
 
 	# Brand slide
 	driver.set_select("domain", "Manufacturing")
+	time.sleep(5)
 	driver.wait_till_clickable(".next-btn").click()
 
 	# Org slide

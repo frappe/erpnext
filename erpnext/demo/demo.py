@@ -4,7 +4,7 @@ import frappe, sys
 import erpnext
 import frappe.utils
 from erpnext.demo.user import hr, sales, purchase, manufacturing, stock, accounts, projects, fixed_asset, schools
-from erpnext.demo.setup import education, manufacture, setup_data
+from erpnext.demo.setup import education, manufacture, setup_data, healthcare
 """
 Make a demo
 
@@ -30,6 +30,8 @@ def make(domain='Manufacturing', days=100):
 		manufacture.setup_data()
 	elif domain== 'Education':
 		education.setup_data()
+	elif domain== 'Healthcare':
+		healthcare.setup_data()
 
 	site = frappe.local.site
 	frappe.destroy()
