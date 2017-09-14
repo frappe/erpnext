@@ -19,6 +19,7 @@ frappe.ui.form.on("BOM", {
 		frm.set_query("source_warehouse", "items", function() {
 			return {
 				filters: {
+					'is_group': 0,
 					'company': frm.doc.company,
 				}
 			};
