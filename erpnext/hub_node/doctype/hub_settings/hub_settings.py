@@ -49,9 +49,8 @@ class HubSettings(Document):
 
 		if message and message.get('password'):
 			self.create_hub_connector(message)
-
-		self.enabled = 1
-		self.save()
+			self.enabled = 1
+			self.save()
 
 	def unregister(self):
 		""" Disable the User on hub.erpnext.org"""
