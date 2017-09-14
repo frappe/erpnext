@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe, os, json
-from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.permissions import add_permission
 from erpnext.regional.india import states
 
@@ -78,7 +78,8 @@ def add_print_formats():
 
 def make_custom_fields():
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
-		fieldtype='Data', options='item_code.gst_hsn_code', insert_after='description', print_hide=1)
+		fieldtype='Data', options='item_code.gst_hsn_code', insert_after='description',
+		allow_on_submit=1, print_hide=1)
 	invoice_gst_fields = [
 		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
 			insert_after='select_print_heading', print_hide=1, collapsible=1),
@@ -147,15 +148,7 @@ def make_custom_fields():
 		'Purchase Invoice Item': [hsn_sac_field]
 	}
 
-	for doctype, fields in custom_fields.items():
-		for df in fields:
-			field = frappe.db.get_value("Custom Field", {"dt": doctype, "fieldname": df["fieldname"]})
-			if not field:
-				create_custom_field(doctype, df)
-			else:
-				custom_field = frappe.get_doc("Custom Field", field)
-				custom_field.update(df)
-				custom_field.save()
+	create_custom_fields(custom_fields)
 
 def make_fixtures():
 	docs = [

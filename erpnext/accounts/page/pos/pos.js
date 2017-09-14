@@ -269,9 +269,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			this.calculate_outstanding_amount();
 		}
 
-		if (this.frm.doc.customer) {
-			this.party_field.$input.val(this.frm.doc.customer);
-		}
+		this.set_customer_value_in_party_field();
 
 		if (!this.frm.doc.write_off_account) {
 			this.frm.doc.write_off_account = doc.write_off_account
@@ -279,6 +277,12 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		if (!this.frm.doc.account_for_change_amount) {
 			this.frm.doc.account_for_change_amount = doc.account_for_change_amount
+		}
+	},
+
+	set_customer_value_in_party_field: function() {
+		if (this.frm.doc.customer) {
+			this.party_field.$input.val(this.frm.doc.customer);
 		}
 	},
 
@@ -695,6 +699,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	set_focus: function () {
 		if (this.default_customer || this.frm.doc.customer) {
+			this.set_customer_value_in_party_field();
 			this.serach_item.$input.focus();
 		} else {
 			this.party_field.$input.focus();
@@ -741,7 +746,12 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 					input = input.toLowerCase();
 					item = this.get_item(item.value);
-					return item.searchtext.includes(input)
+					result = item ? item.searchtext.includes(input) : '';
+					if(!result) {
+						me.prepare_customer_mapper(input);
+					} else {
+						return result;
+					}
 				},
 				item: function (item, input) {
 					var d = this.get_item(item.value);
@@ -762,6 +772,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		this.party_field.$input
 			.on('input', function (e) {
+				if(me.customers_mapper.length <= 1) {
+					me.prepare_customer_mapper(e.target.value);
+				}
 				me.party_field.awesomeplete.list = me.customers_mapper;
 			})
 			.on('awesomplete-select', function (e) {
@@ -802,24 +815,56 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			});
 	},
 
-	prepare_customer_mapper: function() {
+	prepare_customer_mapper: function(key) {
 		var me = this;
+		var customer_data = '';
 
-		this.customers_mapper = this.customers.map(function (c) {
-			contact = me.contacts[c.name];
-			return {
-				label: c.name,
-				value: c.name,
-				customer_name: c.customer_name,
-				customer_group: c.customer_group,
-				territory: c.territory,
-				phone: contact ? contact["phone"] : '',
-				mobile_no: contact ? contact["mobile_no"] : '',
-				email_id: contact ? contact["email_id"] : '',
-				searchtext: ['customer_name', 'customer_group', 'value',
-					'label', 'email_id', 'phone', 'mobile_no']
-					.map(key => c[key]).join(' ')
-					.toLowerCase()
+		if (key) {
+			key = key.toLowerCase().trim();
+			var re = new RegExp('%', 'g');
+			var reg = new RegExp(key.replace(re, '\\w*\\s*[a-zA-Z0-9]*'));
+
+			customer_data =  $.grep(this.customers, function(data) {
+				contact = me.contacts[data.name];
+				if(reg.test(data.name.toLowerCase())
+					|| reg.test(data.customer_name.toLowerCase())
+					|| (contact && reg.test(contact["mobile_no"]))
+					|| (contact && reg.test(contact["phone"]))
+					|| (data.customer_group && reg.test(data.customer_group.toLowerCase()))){
+						return data;
+				}
+			})
+		} else {
+			customer_data = this.customers;
+		}
+
+		this.customers_mapper = [];
+
+		customer_data.forEach(function (c, index) {
+			if(index < 30) {
+				contact = me.contacts[c.name];
+				if(contact && !c['phone']) {
+					c["phone"] = contact["phone"];
+					c["email_id"] = contact["email_id"];
+					c["mobile_no"] = contact["mobile_no"];
+				}
+
+				me.customers_mapper.push({
+					label: c.name,
+					value: c.name,
+					customer_name: c.customer_name,
+					customer_group: c.customer_group,
+					territory: c.territory,
+					phone: contact ? contact["phone"] : '',
+					mobile_no: contact ? contact["mobile_no"] : '',
+					email_id: contact ? contact["email_id"] : '',
+					searchtext: ['customer_name', 'customer_group', 'name', 'value',
+						'label', 'email_id', 'phone', 'mobile_no']
+						.map(key => c[key]).join(' ')
+						.toLowerCase()
+				});
+			} else {
+				return;
 			}
 		});
 

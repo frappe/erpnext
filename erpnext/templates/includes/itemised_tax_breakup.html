@@ -23,7 +23,7 @@
 						{% if tax_details %}
 							<td class='text-right'>
 								{% if tax_details.tax_rate or not tax_details.tax_amount %}
-									({{ tax_details.tax_rate }}%)<br>
+									({{ tax_details.tax_rate }}%) 
 								{% endif %}
 								{{ frappe.utils.fmt_money(tax_details.tax_amount, None, company_currency) }}
 							</td>
