@@ -57,6 +57,7 @@ class LeaveApplication(Document):
 		self.validate_days_and_fin()
 		#~ # self.docstatus=1
 		self.set_approvals()
+		self.validate_leave_submission_dates()
 
 		#~ # self.update_leaves_allocated()
 		#~ result=frappe.db.sql("select name from tabCommunication where reference_name='{0}' and subject='Approved By Line Manager'".format(self.name))
@@ -445,12 +446,13 @@ class LeaveApplication(Document):
 		pass
 			
 	def validate_back_days(self):
-		from frappe.utils import getdate, nowdate
-		user = frappe.session.user
-		if getdate(self.from_date) < getdate(nowdate()) and ("HR User" not in frappe.get_roles(user)):
+		pass
+		# from frappe.utils import getdate, nowdate
+		# user = frappe.session.user
+		# if getdate(self.from_date) < getdate(nowdate()) and ("HR User" not in frappe.get_roles(user)):
 			
-			# if user != self.leave_approver:
-			frappe.throw(_("Application can not be marked for past of the day"))
+		# 	# if user != self.leave_approver:
+		# 	frappe.throw(_("Application can not be marked for past of the day"))
 			
 	def on_update(self):
 		# if (not self.previous_doc and self.leave_approver) or (self.previous_doc and \
@@ -472,7 +474,7 @@ class LeaveApplication(Document):
 		if self.half_day != 1 :
 			# self.notify_exec_manager()
 			self.notify_employee(self.status)
-		self.validate_leave_submission_dates()
+		# self.validate_leave_submission_dates()
 	
 	def on_update_after_submit(self):
 		frappe.db.sql("update tabCommunication set subject ='Approved By Manager' , content='Approved By Manager' where reference_name ='{0}' and subject ='Approved By Line Manager'".format(self.name))
