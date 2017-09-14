@@ -46,7 +46,7 @@ QUnit.test("test Salary Structure", function(assert) {
 					{ payment_account: 'CASH - FT'},
 				]);
 			},
-			() => frappe.timeout(10),
+			() => frappe.timeout(12),
 			() => cur_dialog.set_value('value','Test Salary Structure'),
 			() => frappe.timeout(2),
 			() => frappe.click_button('Create'),
