@@ -267,3 +267,8 @@ def install(country=None):
 				pass
 			else:
 				raise
+
+	# set default customer group and territory
+	selling_settings = frappe.get_doc("Selling Settings")
+	selling_settings.set_default_customer_group_and_territory()
+	selling_settings.save()
