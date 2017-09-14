@@ -1,4 +1,5 @@
 {
+ "condition": "{'name': ('=', frappe.db.get_single_value('Hub Settings', 'company'))}", 
  "creation": "2017-09-07 11:38:43.169065", 
  "docstatus": 0, 
  "doctype": "Data Migration Mapping", 
@@ -16,20 +17,16 @@
    "remote_fieldname": "seller_city"
   }, 
   {
-   "local_fieldname": "eval:frappe.session.user", 
-   "remote_fieldname": "hub_user"
-  }, 
-  {
    "local_fieldname": "eval:frappe.local.site", 
    "remote_fieldname": "site_name"
   }
  ], 
- "idx": 1, 
+ "idx": 2, 
  "local_doctype": "Company", 
  "mapping_name": "Company to Hub Company", 
  "mapping_type": "Push", 
  "migration_id_field": "hub_sync_id", 
- "modified": "2017-09-13 14:59:20.723247", 
+ "modified": "2017-09-14 15:28:39.676464", 
  "modified_by": "faris@erpnext.com", 
  "name": "Company to Hub Company", 
  "owner": "Administrator", 
