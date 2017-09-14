@@ -437,7 +437,7 @@ class ProductionOrder(Document):
 			item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=self.qty,
 				fetch_exploded = self.use_multi_level_bom)
 
-			for item in item_dict.values():
+			for item in sorted(item_dict.values(), key=lambda d: d['idx']):
 				self.append('required_items', {
 					'item_code': item.item_code,
 					'required_qty': item.qty,
