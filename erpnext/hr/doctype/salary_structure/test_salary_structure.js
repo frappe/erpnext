@@ -1,5 +1,5 @@
 QUnit.test("test Salary Structure", function(assert) {
-	assert.expect(12);
+	assert.expect(6);
 	let done = assert.async();
 	let employee_name1;
 
