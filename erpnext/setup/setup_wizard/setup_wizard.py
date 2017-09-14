@@ -176,6 +176,7 @@ def set_defaults(args):
 	selling_settings.so_required = "No"
 	selling_settings.dn_required = "No"
 	selling_settings.allow_multiple_items = 1
+	selling_settings.set_default_customer_group_and_territory()
 	selling_settings.save()
 
 	buying_settings = frappe.get_doc("Buying Settings")
