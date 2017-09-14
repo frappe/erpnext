@@ -336,14 +336,15 @@ class SalesOrder(SellingController):
 				bom = get_default_bom_item(i.item_code)
 				if bom:
 					stock_qty = i.qty if i.doctype == 'Packed Item' else i.stock_qty
-					items.append(dict(
-						item_code= i.item_code,
-						bom = bom,
-						warehouse = i.warehouse,
-						pending_qty= stock_qty - flt(frappe.db.sql('''select sum(qty) from `tabProduction Order`
-							where production_item=%s and sales_order=%s''', (i.item_code, self.name))[0][0])
-					))
-
+					pending_qty= stock_qty - flt(frappe.db.sql('''select sum(qty) from `tabProduction Order`
+							where production_item=%s and sales_order=%s and docstatus<2''', (i.item_code, self.name))[0][0])
+					if pending_qty:
+						items.append(dict(
+							item_code= i.item_code,
+							bom = bom,
+							warehouse = i.warehouse,
+							pending_qty = pending_qty
+						))
 		return items
 
 	def on_recurring(self, reference_doc, subscription_doc):
