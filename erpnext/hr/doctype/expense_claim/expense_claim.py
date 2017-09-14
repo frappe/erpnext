@@ -47,6 +47,7 @@ class ExpenseClaim(AccountsController):
 
 		if self.total_sanctioned_amount > 0 and self.total_sanctioned_amount == self.total_amount_reimbursed \
 			and self.docstatus == 1 and self.approval_status == 'Approved':
+			frappe.msgprint("Approved")
 			self.status = "Paid"
 		elif self.total_sanctioned_amount > 0 and self.docstatus == 1 and self.approval_status == 'Approved':
 			self.status = "Unpaid"
@@ -226,15 +227,17 @@ def update_reimbursed_amount(doc):
 			and party = %s """, (doc.name, doc.employee) ,as_dict=1)[0].amt
 		doc.total_amount_reimbursed = amt
 		frappe.db.set_value("Expense Claim", doc.name , "total_amount_reimbursed", amt)
-
-	if doc.against_advance:
-		amt = frappe.db.sql("""select ifnull(sum(credit_in_account_currency), 0) as amt
+		doc.set_status()
+		frappe.db.set_value("Expense Claim", doc.name , "status", doc.status)
+		
+	elif doc.against_advance:
+		amt = frappe.db.sql("""select ifnull(sum(credit_in_account_currency), 0) as amt 
 			from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
 			and party = %s """, (doc.name, doc.employee) ,as_dict=1)[0].amt
 		doc.total_amount_reimbursed = amt
 		frappe.db.set_value("Expense Claim", doc.name , "total_amount_reimbursed", amt)
-	doc.set_status()
-	frappe.db.set_value("Expense Claim", doc.name , "status", doc.status)
+		doc.set_status()
+		frappe.db.set_value("Expense Claim", doc.name , "status", doc.status)
 
 def validate_employee_cash_adv(doc):
 	if doc.payable_account:
