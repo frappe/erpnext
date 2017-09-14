@@ -35,7 +35,7 @@ def run_setup_wizard_test():
 
 	# Brand slide
 	driver.set_select("domain", "Manufacturing")
-	time.sleep(2)
+	time.sleep(5)
 	driver.wait_till_clickable(".next-btn").click()
 
 	# Org slide
