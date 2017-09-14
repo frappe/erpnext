@@ -41,26 +41,6 @@ class HubSettings(Document):
 	def get_hub_url(self):
 		return hub_url
 
-	def on_update(self):
-		if not self.access_token:
-			if self.enabled:
-				frappe.throw(_("Enabled without access token"))
-			return
-
-		if not self.enabled or (hasattr(self, 'just_registered') and self.just_registered):
-			self.just_registered = 0
-			return
-
-		if hasattr(self, 'in_callback') and self.in_callback:
-			self.in_callback = 0
-			return
-
-		if self.suspended:
-			# show a tag
-			pass
-
-		self.update_hub()
-
 	def update_hub(self):
 		self.update_profile_settings()
 		# self.update_publishing()
@@ -80,46 +60,6 @@ class HubSettings(Document):
 		}).insert()
 
 		doc.run()
-
-	def sync_items(self):
-		publish_item_count = frappe.db.count("Item", filters={"publish_in_hub": 1})
-		start = 0
-
-		while start < publish_item_count:
-			items = frappe.db.get_all("Item",
-				fields = self.base_fields_for_items + ["hub_warehouse"],
-				filters ={"publish_in_hub": 1},
-				limit_start = start,
-				limit_page_length = batch_size,
-				order_by='modified desc'
-			)
-			if not items:
-				frappe.msgprint(_("No published items found."))
-				return
-			self.enqueue_item_batch(items)
-			start += batch_size
-
-	def enqueue_item_batch(self, items):
-		item_list = []
-		for item in items:
-			item_list.append(item.item_code)
-			item.modified = get_datetime_str(item.modified)
-			if item.image:
-				item.image = self.site_name + item.image
-
-			set_stock_qty(item)
-
-			if self.publish_pricing:
-				set_item_price(item, self.company, self.selling_price_list)
-
-		hub_request(
-			method='hub.hub.doctype.hub_item.hub_item.sync_items',
-			data={
-				"items_to_update": json.dumps(items),
-				"item_list": json.dumps(item_list),
-				"item_fields": self.item_fields_to_update + self.base_fields_for_items
-			})
-
 
 	def update_publishing(self):
 		if self.publish != self.get_doc_before_save().publish:
@@ -150,21 +90,22 @@ class HubSettings(Document):
 
 	def register(self):
 		""" Create a User on hub.erpnext.org and return username/password """
-		first_name, last_name = frappe.db.get_value('User', self.hub_user, ['first_name', 'last_name'])
 		data = {
 			'email': frappe.session.user
 		}
 		post_url = hub_url + '/api/method/hub.hub.api.register'
 
 		response = requests.post(post_url, data=data)
+		response.raise_for_status()
 		message = response.json().get('message')
 
 		if message and message.get('password'):
-			self.create_hub_connector(message['password'])
+			self.create_hub_connector(message)
+
 		self.enabled = 1
 		self.save()
 
-	def create_hub_connector(self, password):
+	def create_hub_connector(self, message):
 		if frappe.db.exists('Data Migration Connector', 'Hub Connector'):
 			return
 
@@ -173,8 +114,8 @@ class HubSettings(Document):
 			'connector_type': 'Frappe',
 			'connector_name': 'Hub Connector',
 			'hostname': hub_url,
-			'username': self.hub_user,
-			'password': password
+			'username': message['email'],
+			'password': message['password']
 		}).insert()
 
 	def unregister_from_hub(self):
@@ -266,8 +207,6 @@ def reset_hub_settings(last_sync_datetime = ""):
 	doc.in_callback = 1
 	doc.save()
 	frappe.msgprint(_("Successfully unregistered."))
-
-@frappe.whitelist()
 
 
 @frappe.whitelist()

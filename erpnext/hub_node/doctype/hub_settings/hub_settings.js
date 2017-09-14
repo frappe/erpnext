@@ -7,7 +7,7 @@ frappe.ui.form.on("Hub Settings", {
 		if (frm.doc.enabled) {
 			frm.add_custom_button(__('View Hub'),
 				() => frappe.set_route('hub'));
-			frm.add_custom_button(__('Sync Items'),
+			frm.add_custom_button(__('Sync'),
 				() => frm.call('sync'));
 		}
 	},
@@ -43,9 +43,6 @@ frappe.ui.form.on("Hub Settings", {
 
 	set_enable_hub_primary_button: (frm) => {
 		frm.page.set_primary_action(__("Enable Hub"), () => {
-			if(!(frm.doc.hub_user && frm.doc.seller_city && frm.doc.company)) {
-				frappe.throw(__('Please fill mandatory values'));
-			}
 			frappe.verify_password(() => {
 				this.frm.call({
 					doc: this.frm.doc,
