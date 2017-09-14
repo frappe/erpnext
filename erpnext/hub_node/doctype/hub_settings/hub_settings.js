@@ -73,19 +73,9 @@ frappe.ui.form.on("Hub Settings", {
 	// },
 
 	unregister_from_hub: (frm) => {
-		var me = this;
 		frappe.verify_password(() => {
 			var d = frappe.confirm(__('Are you sure you want to unregister?'), () => {
-				this.frm.call({
-					doc: me.frm.doc,
-					method: "unregister_from_hub",
-					args: {},
-					freeze: true,
-					callback: function(r) { },
-					onerror: function() {
-						frappe.msgprint(__("Wrong Password"));
-					}
-				});
+				frm.call('unregister');
 			}, () => {}, __('Confirm Action'));
 			d.get_primary_btn().addClass("btn-danger");
 		});

@@ -53,6 +53,20 @@ class HubSettings(Document):
 		self.enabled = 1
 		self.save()
 
+	def unregister(self):
+		""" Disable the User on hub.erpnext.org"""
+
+		hub_connector = frappe.get_doc(
+			'Data Migration Connector', 'Hub Connector')
+
+		connection = hub_connector.get_connection()
+		response = connection.update('User', frappe._dict({'enabled': 0}), hub_connector.username)
+
+		if response.ok:
+			self.remove_hub_connector()
+			self.enabled = 0
+			self.save()
+
 	def create_hub_connector(self, message):
 		if frappe.db.exists('Data Migration Connector', 'Hub Connector'):
 			return
@@ -65,6 +79,10 @@ class HubSettings(Document):
 			'username': message['email'],
 			'password': message['password']
 		}).insert()
+
+	def remove_hub_connector(self):
+		if frappe.db.exists('Data Migration Connector', 'Hub Connector'):
+			frappe.delete_doc('Data Migration Connector', 'Hub Connector')
 
 def reset_hub_publishing_settings(last_sync_datetime = ""):
 	doc = frappe.get_doc("Hub Settings", "Hub Settings")
