@@ -221,7 +221,7 @@ class ExpenseClaim(AccountsController):
 
 def update_reimbursed_amount(doc):
 	if doc.is_paid:
-		amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt 
+		amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt
 			from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
 			and party = %s """, (doc.name, doc.employee) ,as_dict=1)[0].amt
 		doc.total_amount_reimbursed = amt
