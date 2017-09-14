@@ -789,10 +789,11 @@ class SalesInvoice(SellingController):
 		updated_delivery_notes = []
 		for d in self.get("items"):
 			if d.dn_detail:
-				invoice_data = frappe.db.sql("""select sum(amount), sum(qty) from `tabSales Invoice Item`
+				invoice_data = frappe.db.sql("""select sum(qty), sum(amount)  from `tabSales Invoice Item`
 					where dn_detail=%s and docstatus=1""", d.dn_detail)
-				billed_amt = invoice_data and invoice_data[0][0] or 0
-				billed_qty = invoice_data and invoice_data[0][1] or 0
+				billed_qty = invoice_data and invoice_data[0][0] or 0
+				billed_amt = invoice_data and invoice_data[0][1] or 0
+
 				frappe.db.set_value("Delivery Note Item", d.dn_detail, "billed_amt", billed_amt, update_modified=update_modified)
 				frappe.db.set_value("Delivery Note Item", d.dn_detail, "billed_qty", billed_qty, update_modified=update_modified)
 				updated_delivery_notes.append(d.delivery_note)

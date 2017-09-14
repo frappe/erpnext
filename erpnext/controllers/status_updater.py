@@ -370,7 +370,7 @@ def get_reference_field(transaction_type, percentage_type):
 	field_mapper = {'Quantity': 'qty', 'Amount': 'amount'}
 	percentage_based_on = {
 		'Billing': 'billing_percentage_based_on',
-		'Receipt': 'receipt_percentage_based_on',
+		'Receive': 'receive_percentage_based_on',
 		'Delivery': 'delivery_percentage_based_on'
 	}
 
@@ -390,7 +390,7 @@ def get_target_field(transaction_type, percentage_type, ref_field):
 		}
 	else:
 		target_field_mapper = {
-			'Receipt': {'qty': 'received_qty', 'amount': 'received_amt'},
+			'Receive': {'qty': 'received_qty', 'amount': 'received_amt'},
 			'Billing': {'qty': 'billed_qty', 'amount': 'billed_amt'},
 		}
 

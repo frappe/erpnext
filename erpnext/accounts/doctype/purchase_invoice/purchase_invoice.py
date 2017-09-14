@@ -236,7 +236,7 @@ class PurchaseInvoice(BuyingController):
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
-			self.set_field_for_percentage_calculation('Purchase', 'Receipt')
+			self.set_field_for_percentage_calculation('Purchase', 'Receive')
 			self.status_updater.extend([{
 				'source_dt': 'Purchase Invoice Item',
 				'target_dt': 'Purchase Order Item',
@@ -647,10 +647,13 @@ class PurchaseInvoice(BuyingController):
 		updated_pr = []
 		for d in self.get("items"):
 			if d.pr_detail:
-				billed_amt = frappe.db.sql("""select sum(amount) from `tabPurchase Invoice Item`
+				billed_details = frappe.db.sql("""select sum(qty), sum(amount)  from `tabPurchase Invoice Item`
 					where pr_detail=%s and docstatus=1""", d.pr_detail)
-				billed_amt = billed_amt and billed_amt[0][0] or 0
+				billed_qty = billed_details and billed_details[0][0] or 0
+				billed_amt = billed_details and billed_details[0][1] or 0
+
 				frappe.db.set_value("Purchase Receipt Item", d.pr_detail, "billed_amt", billed_amt, update_modified=update_modified)
+				frappe.db.set_value("Purchase Receipt Item", d.pr_detail, "billed_qty", billed_qty, update_modified=update_modified)
 				updated_pr.append(d.purchase_receipt)
 			elif d.po_detail:
 				updated_pr += update_billed_amount_based_on_po(d.po_detail, update_modified)
