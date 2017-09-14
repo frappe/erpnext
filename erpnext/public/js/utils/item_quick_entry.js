@@ -46,7 +46,7 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			if (data) {
 				me.dialog.working = true;
 				var values = me.update_doc();
-				// patch for manufacturer type variants as extend is overwriting it.  
+				//patch for manufacturer type variants as extend is overwriting it.
 				if (variant_values['variant_based_on'] == "Manufacturer") {
 					values['variant_based_on'] = "Manufacturer";
 				}
@@ -114,14 +114,14 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			reqd: 0,
 			fieldtype: 'Link',
 			options: "Item",
-			get_query: function(argument) {
+			get_query: function() {
 				return {
 					filters: {
 						"has_variants": 1
 					}
-				}
+				};
 			}
-		}]
+		}];
 
 		return variant_fields;
 	},
@@ -175,7 +175,7 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 	init_for_item_template_trigger: function() {
 		var me = this;
 
-		me.dialog.fields_dict.item_template.$input.on("awesomplete-close", function(e) {
+		me.dialog.fields_dict.item_template.$input.on("awesomplete-close", function() {
 			var template = me.dialog.fields_dict.item_template.input.value;
 			if (template) {
 				frappe.call({
@@ -222,7 +222,6 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 	},
 
 	show_attributes: function(attributes) {
-		var me = this;
 		this.render_attributes(attributes.slice(0, 3));
 		$(this.dialog.fields_dict.attribute_html.wrapper).find(".page-count").text(this.page_count);
 	},
@@ -244,7 +243,7 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			} else {
 				frappe.show_alert(__("Maximum page size reached."), 2);
 			}
-		})
+		});
 	},
 
 	init_for_prev_trigger: function() {
@@ -282,24 +281,23 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		this.dialog.fields_dict.attribute_html.$wrapper.find(".cur-page").text(this.current_page);
 
 		$.each(attributes, function(index, row) {
-			console.log("attribute_values", me.attribute_values[row.attribute])
 			var desc = "";
 			var fieldtype = "Data";
 			if (row.numeric_values) {
 				fieldtype = "Float";
-				desc = "Min Value: " + row.from_range + " , Max Value: " + row.to_range + ", in Increments of: " + row.increment
+				desc = "Min Value: " + row.from_range + " , Max Value: " + row.to_range + ", in Increments of: " + row.increment;
 			}
 
-			me.init_make_control(fieldtype, row)
+			me.init_make_control(fieldtype, row);
 			me[row.attribute].set_value(me.attribute_values[row.attribute] || "");
 			me[row.attribute].$wrapper.toggleClass("has-error", me.attribute_values[row.attribute] ? false : true);
 
 			// Set Label explicitly as make_control is not displaying label
 			$(me[row.attribute].label_area).text(row.attribute);
 			$(repl(`<p class="help-box small text-muted hidden-xs">%(desc)s</p>`, {
-					"desc": desc
-				}))
-				.insertAfter(me[row.attribute].input_area);
+				"desc": desc
+			}))
+			.insertAfter(me[row.attribute].input_area);
 
 			if (!row.numeric_values) {
 				me.init_awesomplete_for_attribute(row);
@@ -337,32 +335,32 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		});
 
 		this[row.attribute].$input.on('input', function(e) {
-				frappe.call({
-					method: "frappe.client.get_list",
-					args: {
-						doctype: "Item Attribute Value",
-						filters: [
-							["parent", "=", $(e.target).attr("data-fieldname")],
-							["attribute_value", "like", e.target.value + "%"]
-						],
-						fields: ["attribute_value"]
-					},
-					callback: function(r) {
-						if (r.message) {
-							e.target.awesomplete.list = r.message.map(function(d) {
-								return d.attribute_value;
-							});
-						}
+			frappe.call({
+				method: "frappe.client.get_list",
+				args: {
+					doctype: "Item Attribute Value",
+					filters: [
+						["parent", "=", $(e.target).attr("data-fieldname")],
+						["attribute_value", "like", e.target.value + "%"]
+					],
+					fields: ["attribute_value"]
+				},
+				callback: function(r) {
+					if (r.message) {
+						e.target.awesomplete.list = r.message.map(function(d) {
+							return d.attribute_value;
+						});
 					}
-				});
-			})
-			.on('focus', function(e) {
-				$(e.target).val('').trigger('input');
-			})
-			.on('awesomplete-close', function(e) {
-				me.attribute_values[$(e.target).attr("data-fieldname")] = e.target.value;
-				$(e.target).closest(".frappe-control").toggleClass("has-error", e.target.value ? false : true);
-			})
+				}
+			});
+		})
+		.on('focus', function(e) {
+			$(e.target).val('').trigger('input');
+		})
+		.on('awesomplete-close', function(e) {
+			me.attribute_values[$(e.target).attr("data-fieldname")] = e.target.value;
+			$(e.target).closest(".frappe-control").toggleClass("has-error", e.target.value ? false : true);
+		})
 	},
 
 	get_variant_doc: function() {
@@ -382,10 +380,10 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 					if (Object.prototype.toString.call(r.message) == "[object Object]") {
 						variant_doc = r.message;
 					} else {
-						msgprint_dialog = frappe.msgprint(__("Item Variant {0} already exists with same attributes", [repl('<a class="strong variant-click" data-item-code="%(item)s" \
+						var msgprint_dialog = frappe.msgprint(__("Item Variant {0} already exists with same attributes", [repl('<a class="strong variant-click" data-item-code="%(item)s" \
 								>%(item)s</a>', {
-							item: r.message
-						})]));
+								item: r.message
+							})]));
 
 						msgprint_dialog.$wrapper.find(".variant-click").on("click", function() {
 							msgprint_dialog.hide();
@@ -411,7 +409,7 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		$.each(this.attributes, function(index, attr) {
 			var value = me.attribute_values[attr.attribute] || "";
 			if (value) {
-				attribute[attr.attribute] = attr.numeric_values ? flt(value) : value
+				attribute[attr.attribute] = attr.numeric_values ? flt(value) : value;
 			} else {
 				mandatory.push(attr.attribute);
 			}
@@ -423,7 +421,7 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 				message: __('Following fields have missing values:') + '<br><br><ul><li>' + mandatory.join('<li>') + '</ul>',
 				indicator: 'orange'
 			});
-			return {}
+			return {};
 		}
 
 		if (this.is_manufacturer) {
