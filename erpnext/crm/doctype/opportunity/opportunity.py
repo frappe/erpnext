@@ -273,7 +273,7 @@ def make_supplier_quotation(source_name, target_doc=None):
 		}
 	}, target_doc)
 	
-	return doclist
+        return doclist
 
 @frappe.whitelist()
 def set_multiple_status(names, status):
