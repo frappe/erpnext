@@ -337,13 +337,14 @@ class SalesOrder(SellingController):
 				if bom:
 					stock_qty = i.qty if i.doctype == 'Packed Item' else i.stock_qty
 					pending_qty= stock_qty - flt(frappe.db.sql('''select sum(qty) from `tabProduction Order`
-							where production_item=%s and sales_order=%s and docstatus<2''', (i.item_code, self.name))[0][0])
+							where production_item=%s and sales_order=%s and sales_order_item = %s and docstatus<2''', (i.item_code, self.name, i.name))[0][0])
 					if pending_qty:
 						items.append(dict(
 							item_code= i.item_code,
 							bom = bom,
 							warehouse = i.warehouse,
-							pending_qty = pending_qty
+							pending_qty = pending_qty,
+							sales_order_item = i.name
 						))
 		return items
 
@@ -768,6 +769,7 @@ def make_production_orders(items, sales_order, company, project=None):
 			qty=i['pending_qty'],
 			company=company,
 			sales_order=sales_order,
+			sales_order_item=i['sales_order_item'],
 			project=project,
 			fg_warehouse=i['warehouse']
 		)).insert()

@@ -213,6 +213,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 									}},
 								{fieldtype:'Float', fieldname:'pending_qty', reqd: 1,
 									label: __('Qty'), in_list_view:1},
+								{fieldtype:'Data', fieldname:'sales_order_item', reqd: 1,
+									label: __('Sales Order Item'), hidden:1}
 							],
 							get_data: function() {
 								return r.message
