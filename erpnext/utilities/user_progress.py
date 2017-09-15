@@ -20,7 +20,7 @@ def get_slide_settings():
 	# Initial state of slides
 	return [
 		frappe._dict(
-			action_name='Add Company',
+			action_name=_('Add Company'),
 			title=_("Setup Company") if domain != 'Education' else _("Setup Institution"),
 			help=_('Setup your ' + ('company' if domain != 'Education' else 'institution') + ' and brand.'),
 			# image_src="/assets/erpnext/images/illustrations/shop.jpg",
@@ -58,7 +58,7 @@ def get_slide_settings():
 			]
 		),
 		frappe._dict(
-			action_name='Add Customers',
+			action_name=_('Add Customers'),
 			domains=('Manufacturing', 'Services', 'Retail', 'Distribution'),
 			title=_("Add Customers"),
 			help=_("List a few of your customers. They could be organizations or individuals."),
@@ -82,7 +82,7 @@ def get_slide_settings():
 			]
 		),
 		frappe._dict(
-			action_name='Add Suppliers',
+			action_name=_('Add Suppliers'),
 			domains=('Manufacturing', 'Services', 'Retail', 'Distribution'),
 			icon="fa fa-group",
 			title=_("Your Suppliers"),
@@ -111,7 +111,7 @@ def get_slide_settings():
 			]
 		),
 		frappe._dict(
-			action_name='Add Products',
+			action_name=_('Add Products'),
 			domains=['Manufacturing', 'Services', 'Retail', 'Distribution'],
 			icon="fa fa-barcode",
 			title=_("Your Products or Services"),
@@ -142,7 +142,7 @@ def get_slide_settings():
 
 		# School slides begin
 		frappe._dict(
-			action_name='Add Programs',
+			action_name=_('Add Programs'),
 			domains=("Education"),
 			title=_("Program"),
 			help=_("Example: Masters in Computer Science"),
@@ -163,7 +163,7 @@ def get_slide_settings():
 
 		),
 		frappe._dict(
-			action_name='Add Courses',
+			action_name=_('Add Courses'),
 			domains=["Education"],
 			title=_("Course"),
 			help=_("Example: Basic Mathematics"),
@@ -183,7 +183,7 @@ def get_slide_settings():
 			]
 		),
 		frappe._dict(
-			action_name='Add Instructors',
+			action_name=_('Add Instructors'),
 			domains=["Education"],
 			title=_("Instructor"),
 			help=_("People who teach at your organisation"),
@@ -203,7 +203,7 @@ def get_slide_settings():
 			]
 		),
 		frappe._dict(
-			action_name='Add Rooms',
+			action_name=_('Add Rooms'),
 			domains=["Education"],
 			title=_("Room"),
 			help=_("Classrooms/ Laboratories etc where lectures can be scheduled."),
@@ -222,7 +222,7 @@ def get_slide_settings():
 		# School slides end
 
 		frappe._dict(
-			action_name='Add Users',
+			action_name=_('Add Users'),
 			title=_("Add Users"),
 			help=_("Add users to your organization, other than yourself."),
 			fields=[
