@@ -1,7 +1,7 @@
 QUnit.module('hr');
 
 QUnit.test("Test: Loan Type [HR]", function (assert) {
-	assert.expect(3);
+	assert.expect(2);
 	let done = assert.async();
 
 	frappe.run_serially([
@@ -15,15 +15,12 @@ QUnit.test("Test: Loan Type [HR]", function (assert) {
 					'This is just a test.'}
 			]);
 		},
-		() => frappe.timeout(3),
-		() => frappe.set_route('List','Loan Type','List'),
-		() => frappe.timeout(2),
+		() => frappe.timeout(5),
 
 		// Checking if the fields are correctly set
 		() => {
-			assert.ok(cur_list.data.length==1, 'Loan Type created successfully');
-			assert.ok(cur_list.data[0].name=='Test Loan', 'Loan title Correctly set');
-			assert.ok(cur_list.data[0].disabled==0, 'Loan enabled');
+			assert.ok(cur_frm.get_field('disabled').value==0, 'Loan Type created successfully');
+			assert.ok(cur_frm.docname=='Test Loan', 'Loan title Correctly set');
 		},
 		() => done()
 	]);
