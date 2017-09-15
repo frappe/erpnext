@@ -68,8 +68,7 @@ class ExpenseClaim(AccountsController):
 		self.update_task_and_project()
 		self.make_gl_entries()
 
-		if self.is_paid or self.against_advance:
-			update_reimbursed_amount(self)
+		update_reimbursed_amount(self)
 
 		self.set_status()
 
@@ -220,8 +219,8 @@ class ExpenseClaim(AccountsController):
 				expense.default_account = get_expense_claim_account(expense.expense_type, self.company)["account"]
 
 def update_reimbursed_amount(doc):
-	if doc.is_paid:
-		amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt
+	if doc.against_advance:
+		amt = frappe.db.sql("""select ifnull(sum(credit_in_account_currency), 0) as amt
 			from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
 			and party = %s """, (doc.name, doc.employee) ,as_dict=1)[0].amt
 		doc.total_amount_reimbursed = amt
@@ -229,8 +228,8 @@ def update_reimbursed_amount(doc):
 		doc.set_status()
 		frappe.db.set_value("Expense Claim", doc.name , "status", doc.status)
 		
-	elif doc.against_advance:
-		amt = frappe.db.sql("""select ifnull(sum(credit_in_account_currency), 0) as amt 
+	else:
+		amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt
 			from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
 			and party = %s """, (doc.name, doc.employee) ,as_dict=1)[0].amt
 		doc.total_amount_reimbursed = amt
