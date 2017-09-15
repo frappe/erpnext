@@ -11,7 +11,6 @@ from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, 
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock import get_warehouse_account_map
-from erpnext.controllers.status_updater import get_reference_field, get_target_field
 
 class StockController(AccountsController):
 	def validate(self):

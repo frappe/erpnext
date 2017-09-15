@@ -10,6 +10,9 @@ from erpnext.selling.doctype.sales_order.sales_order \
 	import make_material_request, make_delivery_note, make_sales_invoice, WarehouseRequired
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from frappe.tests.test_permissions import set_user_permission_doctypes
+from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import \
+	make_delivery_note as make_delivery_note_from_si
 
 class TestSalesOrder(unittest.TestCase):
 	def tearDown(self):
@@ -504,6 +507,87 @@ class TestSalesOrder(unittest.TestCase):
 		new_so.submit()
 
 		self.assertEquals(new_so.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
+
+	def test_status_based_on_qty_amount(self):
+		set_percentage_field_based_on({
+			'billing_percentage_based_on': 'Quantity',
+			'delivery_percentage_based_on': 'Amount'
+		})
+
+		so = make_sales_order()
+		si = make_sales_invoice(so.name)
+		si.insert()
+		si.submit()
+
+		so_doc = frappe.get_doc('Sales Order', so.name)
+		self.assertEquals(so_doc.status, 'To Deliver')
+
+		si_item = si.items[0]
+		make_serialized_item(item_code=si_item.item_code, target_warehouse=si_item.warehouse)
+
+		dn = make_delivery_note(so.name)
+		dn.insert()
+		dn.submit()
+
+		dn_item = dn.items[0]
+
+		so_doc = frappe.get_doc('Sales Order', so.name)
+		so_item = so_doc.items[0]
+
+		self.assertEquals(so_doc.status, 'Completed')
+		self.assertEquals(so_doc.per_delivered, 100)
+		self.assertEquals(so_doc.per_billed, 100)
+		self.assertEquals(so_item.billed_qty, si_item.qty)
+		self.assertEquals(so_item.billed_amt, si_item.amount)
+		self.assertEquals(so_item.delivered_qty, dn_item.qty)
+		self.assertEquals(so_item.delivered_amt, dn_item.amount)
+		set_percentage_field_based_on()
+
+	def test_status_based_on_amount_qty(self):
+		set_percentage_field_based_on({
+			'billing_percentage_based_on': 'Quantity',
+			'delivery_percentage_based_on': 'Amount'
+		})
+
+		so = make_sales_order()
+		si = make_sales_invoice(so.name)
+		si.insert()
+		si.submit()
+
+		so_doc = frappe.get_doc('Sales Order', so.name)
+		self.assertEquals(so_doc.status, 'To Deliver')
+
+		si_item = si.items[0]
+		make_serialized_item(item_code=si_item.item_code, target_warehouse=si_item.warehouse)
+
+		dn = make_delivery_note_from_si(si.name)
+		dn.insert()
+		dn.submit()
+
+		dn_item = dn.items[0]
+
+		si_doc = frappe.get_doc('Sales Invoice', si.name)
+		si_item = si_doc.items[0]
+
+		so_doc = frappe.get_doc('Sales Order', so.name)
+
+		self.assertEquals(so_doc.status, 'Completed')
+		self.assertEquals(so_doc.per_delivered, 100)
+		self.assertEquals(so_doc.per_billed, 100)
+		self.assertEquals(si_item.delivered_qty, dn_item.qty)
+		self.assertEquals(si_item.delivered_amt, dn_item.amount)
+		set_percentage_field_based_on()
+
+def set_percentage_field_based_on(args=None):
+	if not args:
+		args = {
+			'billing_percentage_based_on': 'Amount',
+			'delivery_percentage_based_on': 'Quantity'
+		}
+
+	doc = frappe.get_doc('Selling Settings')
+	doc.update(args)
+	doc.save()
 
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")

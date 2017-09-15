@@ -343,7 +343,7 @@ def update_billed_amount_based_on_so(so_detail, update_modified=True):
 			# Distribute billed amount directly against SO between DNs based on FIFO
 			if billed_against_so[key] and billed_against_dn < dnd[key]:
 				pending_to_bill = flt(dnd[key]) - billed_against_dn
-				if pending_to_bill <= billed_against_so:
+				if pending_to_bill <= billed_against_so[key]:
 					billed_against_dn += pending_to_bill
 					billed_against_so[key] -= pending_to_bill
 				else:

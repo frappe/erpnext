@@ -250,28 +250,12 @@ class StatusUpdater(Document):
 
 			if args['detail_id']:
 				if not args.get("extra_cond"): args["extra_cond"] = ""
-				args = self.get_update_field_condition(args)
+				args = get_update_field_condition(args)
 
 				frappe.db.sql("""update `tab%(target_dt)s`
-					set %(update_fields)s
+					set %(set_update_fields)s
 					%(update_modified)s
 					where name='%(detail_id)s'""" % args)
-
-	def get_update_field_condition(self, args):
-		update_condition = []
-		for target_field, source_field in args.get('update_fields').items():
-			args['source_fieldname'] = source_field
-			args['target_fieldname'] = target_field
-
-			update_condition.append("""%(target_fieldname)s = (
-				(select ifnull(sum(%(source_fieldname)s), 0)
-					from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s"
-					and (docstatus=1 %(cond)s) %(extra_cond)s)
-				%(second_source_condition)s)""" % args)
-
-		args["update_fields"] = ','.join(update_condition)
-
-		return args
 
 	def _update_percent_field_in_targets(self, args, update_modified=True):
 		"""Update percent field in parent transaction"""
@@ -348,6 +332,22 @@ class StatusUpdater(Document):
 
 			ref_doc.db_set("per_billed", per_billed)
 			ref_doc.set_status(update=True)
+
+def get_update_field_condition(args):
+	update_condition = []
+	for target_field, source_field in args.get('update_fields').items():
+		args['source_fieldname'] = source_field
+		args['target_fieldname'] = target_field
+
+		update_condition.append("""%(target_fieldname)s = (
+			(select ifnull(sum(%(source_fieldname)s), 0)
+				from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s"
+				and (docstatus=1 %(cond)s) %(extra_cond)s)
+			%(second_source_condition)s)""" % args)
+
+	args["set_update_fields"] = ','.join(update_condition)
+
+	return args
 
 def get_tolerance_for(item_code, item_tolerance={}, global_tolerance=None):
 	"""

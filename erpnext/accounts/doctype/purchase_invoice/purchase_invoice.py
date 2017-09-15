@@ -15,7 +15,6 @@ from erpnext.stock import get_warehouse_account_map
 from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entries, delete_gl_entries
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.buying.utils import check_for_closed_status
-from erpnext.controllers.status_updater import get_reference_field, get_target_field
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"

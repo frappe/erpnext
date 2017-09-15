@@ -38,4 +38,7 @@ If this option is configured "Yes", ERPNext will prevent you from creating a Pur
 
 If this option is configured "Yes", ERPNext will prevent you from creating a Purchase Invoice without first creating a Purchase Receipt.
 
+###7. Percentage Based On
+In purchase order, received percentage and billed percentage is based on the received quantity and billed amount. User can set the fieldname on which they want to calculate the percentage of receipt and percentage of billing in the purchase order.For billing they can set the fieldname in the Billing Percentage Based On field and for receipt they can set the fieldname in the Receive Percentage Based On field.
+
 {next}
