@@ -439,6 +439,7 @@ erpnext.patches.v8_7.set_offline_in_pos_settings #11-09-17
 erpnext.patches.v8_9.add_setup_progress_actions #08-09-2017
 erpnext.patches.v8_9.rename_company_sales_target_field
 erpnext.patches.v8_8.set_bom_rate_as_per_uom
+erpnext.patches.v9_0.remove_subscription_module
 erpnext.patches.v8_7.make_subscription_from_recurring_data
 erpnext.patches.v8_9.set_print_zero_amount_taxes
 erpnext.patches.v8_9.set_default_customer_group

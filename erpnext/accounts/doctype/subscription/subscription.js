@@ -40,6 +40,38 @@ frappe.ui.form.on('Subscription', {
 					frappe.set_route("List", frm.doc.reference_doctype);
 				}
 			);
+
+			if(frm.doc.status != 'Stopped') {
+				frm.add_custom_button(__("Stop"),
+					function() {
+						frm.events.stop_resume_subscription(frm, "Stopped");
+					}
+				);
+			}
+
+			if(frm.doc.status == 'Stopped') {
+				frm.add_custom_button(__("Resume"),
+					function() {
+						frm.events.stop_resume_subscription(frm, "Resumed");
+					}
+				);
+			}
 		}
+	},
+
+	stop_resume_subscription: function(frm, status) {
+		frappe.call({
+			method: "erpnext.accounts.doctype.subscription.subscription.stop_resume_subscription",
+			args: {
+				subscription: frm.doc.name,
+				status: status
+			},
+			callback: function(r) {
+				if(r.message) {
+					frm.set_value("status", r.message);
+					frm.reload_doc();
+				}
+			}
+		});
 	}
 });
