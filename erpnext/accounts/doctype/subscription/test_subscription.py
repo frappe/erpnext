@@ -10,7 +10,7 @@ from erpnext.accounts.utils import get_fiscal_year
 from erpnext.accounts.report.financial_statements import get_months
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.subscription.doctype.subscription.subscription import make_subscription_entry
+from erpnext.accounts.doctype.subscription.subscription import make_subscription_entry
 
 class TestSubscription(unittest.TestCase):
 	def test_daily_subscription(self):
