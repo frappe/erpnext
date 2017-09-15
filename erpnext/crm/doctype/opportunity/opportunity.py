@@ -272,7 +272,6 @@ def make_supplier_quotation(source_name, target_doc=None):
 			}
 		}
 	}, target_doc)
-	
         return doclist
 
 @frappe.whitelist()
