@@ -17,9 +17,9 @@ frappe.ui.form.on("Project", {
 				}
 				return indicator;
 			}
-		);	
+		);
 	},
-	
+
 	onload: function(frm) {
 		var so = frappe.meta.get_docfield("Project", "sales_order");
 		so.get_route_options_for_new_doc = function(field) {
@@ -115,4 +115,3 @@ frappe.ui.form.on("Project Task", {
 		frm.trigger('tasks_refresh');
 	},
 });
-
