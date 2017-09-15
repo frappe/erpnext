@@ -187,7 +187,7 @@ def get_item_details(item_code):
 
 @frappe.whitelist()
 def make_request_for_quotation(source_name, target_doc=None):
-	doclist = get_mapped_doc("Opportunity", source_name, 	{
+	doclist = get_mapped_doc("Opportunity", source_name, {
 		"Opportunity": {
 			"doctype": "Request for Quotation",
 			"validation": {
@@ -204,7 +204,7 @@ def make_request_for_quotation(source_name, target_doc=None):
 		}
 	}, target_doc)
 
-	return doclist		
+	return doclist
 
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
@@ -258,7 +258,6 @@ def make_quotation(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_supplier_quotation(source_name, target_doc=None):
-	frappe.msgprint("python");
 	doclist = get_mapped_doc("Opportunity", source_name, {
 		"Opportunity": {
 			"doctype": "Supplier Quotation",
@@ -275,8 +274,6 @@ def make_supplier_quotation(source_name, target_doc=None):
 	}, target_doc)
 	
 	return doclist
-
-
 
 @frappe.whitelist()
 def set_multiple_status(names, status):
