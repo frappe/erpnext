@@ -90,8 +90,8 @@ class SalarySlip(TransactionBase):
 				amount = self.eval_condition_and_formula(struct_row, data)
 				if amount:
 					#~ amount = math.ceil(amount)'
-					if struct_row.salary_component == "GOSY":
-						pass
+					# if struct_row.salary_component == "GOSY":
+					# 	pass
 						# amount = math.ceil(amount)
 				
 
