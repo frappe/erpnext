@@ -53,7 +53,30 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_query("paid_to", function() {
 			var account_types = in_list(["Receive", "Internal Transfer"], frm.doc.payment_type) ?
 	 			["Bank", "Cash"] : party_account_type;
-
+			if (frm.doc.payment_type == "Internal Transfer")
+			{
+				account_types = [
+					"Accumulated Depreciation",
+					"Bank",
+					"Cash",
+					"Chargeable",
+					"Cost of Goods Sold",
+					"Depreciation",
+					"Equity",
+					"Expense Account",
+					"Expenses Included In Valuation",
+					"Fixed Asset",
+					"Income Account",
+					"Payable",
+					"Receivable",
+					"Round Off",
+					"Stock",
+					"Stock Adjustment",
+					"Stock Received But Not Billed",
+					"Tax",
+					"Temporary",
+				]
+			}
 			return {
 				filters: {
 					"account_type": ["in", account_types],
