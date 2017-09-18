@@ -91,10 +91,10 @@ def get_conditions(filters):
 	conditions = ""
 
 	for opts in (("company", " and company=%(company)s"),
-		("supplier", " and pi.supplier = %(supplier)s"),
-		("item_code", " and pi_item.item_code = %(item_code)s"),
-		("from_date", " and pi.posting_date>=%(from_date)s"),
-		("to_date", " and pi.posting_date<=%(to_date)s"),
+		("supplier", " and `tabPurchase Invoice`.supplier = %(supplier)s"),
+		("item_code", " and `tabPurchase Invoice Item`.item_code = %(item_code)s"),
+		("from_date", " and `tabPurchase Invoice`.posting_date>=%(from_date)s"),
+		("to_date", " and `tabPurchase Invoice`.posting_date<=%(to_date)s"),
 		("mode_of_payment", " and ifnull(mode_of_payment, '') = %(mode_of_payment)s")):
 			if filters.get(opts[0]):
 				conditions += opts[1]
@@ -104,20 +104,29 @@ def get_conditions(filters):
 def get_items(filters, additional_query_columns):
 	conditions = get_conditions(filters)
 	match_conditions = frappe.build_match_conditions("Purchase Invoice")
+	
+	if match_conditions:
+		match_conditions = " and {0} ".format(match_conditions)
+	
 	if additional_query_columns:
 		additional_query_columns = ', ' + ', '.join(additional_query_columns)
 
 	return frappe.db.sql("""
 		select
-			pi_item.name, pi_item.parent, pi.posting_date, pi.credit_to, pi.company,
-			pi.supplier, pi.remarks, pi.base_net_total, pi_item.item_code, pi_item.item_name,
-			pi_item.item_group, pi_item.project, pi_item.purchase_order, pi_item.purchase_receipt,
-			pi_item.po_detail, pi_item.expense_account, pi_item.stock_qty, pi_item.stock_uom, 
-			pi_item.base_net_rate, pi_item.base_net_amount,
-			pi.supplier_name, pi.mode_of_payment {0}
-		from `tabPurchase Invoice` pi, `tabPurchase Invoice Item` pi_item
-		where pi.name = pi_item.parent and pi.docstatus = 1 %s %s
-		order by pi.posting_date desc, pi_item.item_code desc
+			`tabPurchase Invoice Item`.`name`, `tabPurchase Invoice Item`.`parent`,
+			`tabPurchase Invoice`.posting_date, `tabPurchase Invoice`.credit_to, `tabPurchase Invoice`.company,
+			`tabPurchase Invoice`.supplier, `tabPurchase Invoice`.remarks, `tabPurchase Invoice`.base_net_total, `tabPurchase Invoice Item`.`item_code`,
+			`tabPurchase Invoice Item`.`item_name`, `tabPurchase Invoice Item`.`item_group`,
+			`tabPurchase Invoice Item`.`project`, `tabPurchase Invoice Item`.`purchase_order`,
+			`tabPurchase Invoice Item`.`purchase_receipt`, `tabPurchase Invoice Item`.`po_detail`,
+			`tabPurchase Invoice Item`.`expense_account`, `tabPurchase Invoice Item`.`stock_qty`,
+			`tabPurchase Invoice Item`.`stock_uom`, `tabPurchase Invoice Item`.`base_net_rate`,
+			`tabPurchase Invoice Item`.`base_net_amount`,
+			`tabPurchase Invoice`.supplier_name, `tabPurchase Invoice`.mode_of_payment {0}
+		from `tabPurchase Invoice`, `tabPurchase Invoice Item`
+		where `tabPurchase Invoice`.name = `tabPurchase Invoice Item`.`parent` and
+		`tabPurchase Invoice`.docstatus = 1 %s %s
+		order by `tabPurchase Invoice`.posting_date desc, `tabPurchase Invoice Item`.item_code desc
 	""".format(additional_query_columns) % (conditions, match_conditions), filters, as_dict=1)
 
 def get_aii_accounts():
