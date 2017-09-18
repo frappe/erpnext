@@ -45,19 +45,23 @@ frappe.ui.form.on("Hub Settings", {
 
 	set_enable_hub_primary_button: (frm) => {
 		frm.page.set_primary_action(__("Enable Hub"), () => {
-			frappe.verify_password(() => {
-				this.frm.call({
-					doc: this.frm.doc,
-					method: "register",
-					args: {},
-					freeze: true,
-					callback: function(r) {},
-					onerror: function() {
-						frappe.msgprint(__("Wrong Password"));
-						frm.set_value("enabled", 0);
-					}
-				});
-			} );
+			if(frappe.session.user === "Administrator") {
+				frappe.msgprint("Please login as another user.")
+			} else {
+				frappe.verify_password(() => {
+					this.frm.call({
+						doc: this.frm.doc,
+						method: "register",
+						args: {},
+						freeze: true,
+						callback: function(r) {},
+						onerror: function() {
+							frappe.msgprint(__("Wrong Password"));
+							frm.set_value("enabled", 0);
+						}
+					});
+				} );
+			}
 		});
 	},
 
