@@ -136,7 +136,7 @@ def get_tax_template(posting_date, args):
 		if key=="use_for_shopping_cart":
 			conditions.append("use_for_shopping_cart = {0}".format(1 if value else 0))
 		if key == 'customer_group':
-			if not value: value = "All Customer Groups"
+			if not value: value = _("All Customer Groups")
 			customer_group_condition = get_customer_group_condition(value)
 			conditions.append("ifnull({0}, '') in ('', {1})".format(key, customer_group_condition))
 		else:
