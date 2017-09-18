@@ -1,5 +1,5 @@
 import frappe
 
 def execute():
-	if frappe.get_meta('Salary Structure').has_field('employee'):
+	if 'employee' in frappe.db.get_table_columns("Salary Structure"):
 		frappe.db.sql("alter table `tabEmployee` drop column employee")
