@@ -60,8 +60,8 @@ frappe.ui.form.on('Asset', {
 	},
 
 	show_graph: function(frm) {
-		var x_intervals = ["x", frm.doc.purchase_date];
-		var asset_values = ["Asset Value", frm.doc.gross_purchase_amount];
+		var x_intervals = [frm.doc.purchase_date];
+		var asset_values = [frm.doc.gross_purchase_amount];
 		var last_depreciation_date = frm.doc.purchase_date;
 
 		if(frm.doc.opening_accumulated_depreciation) {
@@ -94,31 +94,27 @@ frappe.ui.form.on('Asset', {
 			last_depreciation_date = frm.doc.disposal_date;
 		}
 
-		frm.dashboard.setup_chart({
-			data: {
-				x: 'x',
-				columns: [x_intervals, asset_values],
-				regions: {
-					'Asset Value': [{'start': last_depreciation_date, 'style':'dashed'}]
-				}
-			},
-			legend: {
-				show: false
-			},
-			axis: {
-				x: {
-					type: 'timeseries',
-					tick: {
-						format: "%d-%m-%Y"
-					}
-				},
-				y: {
-					min: 0,
-					padding: {bottom: 10}
-				}
+		frm.dashboard.render_graph({
+			title: "Asset Value",
+			// Make y object
+			y: [{
+				color: 'green',
+				values: asset_values,
+				formatted: asset_values.map(d => d.toFixed(2)) // Move this out
+			}],
+			x: {
+				values: x_intervals,
+				// // formatted: x_intervals, // put nice full date, two formats in all: axis and popup, passed data will only be something that can be parsed as a date object
+
+				// is_series: 1, // implied by is_time_axis
+				is_time_axis: 1,
+				format: "%d-%m-%Y",
+				// get_tooltip_format:
+				// get_axis_format:
 			}
 		});
 	},
+
 
 	item_code: function(frm) {
 		if(frm.doc.item_code) {
