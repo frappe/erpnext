@@ -502,6 +502,8 @@ frappe.ui.form.on('Payment Entry', {
 						c.due_date = d.due_date
 						c.total_amount = d.invoice_amount;
 						c.outstanding_amount = d.outstanding_amount;
+						c.bill_no = d.bill_no;
+
 						if(!in_list(["Sales Order", "Purchase Order", "Expense Claim"], d.voucher_type)) {
 							if(flt(d.outstanding_amount) > 0)
 								total_positive_outstanding += flt(d.outstanding_amount);
