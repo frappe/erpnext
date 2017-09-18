@@ -23,6 +23,13 @@ def get_categories():
 # 	frappe_client = get_frappe_client()
 # 	return frappe_client.get_doc('Hub Company', hub_sync_id)
 
+@frappe.whitelist()
+def enable_hub():
+	hub_settings = frappe.get_doc('Hub Settings')
+	hub_settings.register()
+	frappe.db.commit()
+	return hub_settings
+
 def get_frappe_client():
 	hub_connector = frappe.get_doc(
 		'Data Migration Connector', 'Hub Connector')

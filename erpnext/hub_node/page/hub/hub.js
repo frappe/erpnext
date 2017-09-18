@@ -34,7 +34,7 @@ window.ERPNextHub = class ERPNextHub {
 	constructor({ page }) {
 		this.page = page;
 		frappe.require('/assets/erpnext/css/hub.css', () => {
-			this.setup()
+			this.setup();
 		});
 	}
 
@@ -44,10 +44,6 @@ window.ERPNextHub = class ERPNextHub {
 		this.item_cache = {};
 		this.filters = {};
 		this.order_by = '';
-
-		// const { company_cache } = this;
-		// JS -> keys -> value, funcrion
-
 
 		this.$hub_main_section =
 			$(`<div class='hub-main-section'>`).appendTo(this.page.body);
@@ -59,21 +55,47 @@ window.ERPNextHub = class ERPNextHub {
 		this.$hub_main_section.empty();
 		this.page.page_form.hide();
 
+		const $layout_main = this.page.wrapper.find('.layout-main');
+
 		frappe.model.with_doc('Hub Settings', 'Hub Settings', () => {
 			this.hub_settings = frappe.get_doc('Hub Settings');
-			// const { hub_user_name, company_name } = this.hub_settings;
-			if(!this.hub_settings.enabled) {
+
+			if(this.hub_settings.enabled == 0) {
 				let $empty_state = this.page.get_empty_state(
-					 __("Register for Hub"), __(`Let other ERPNext users discover your products and
-					automate workflow with Supplier from within ERPNext.`), __("Register")
-				)
-				$(".layout-main").html($empty_state);
+					__("Register for Hub"),
+					__(`Let other ERPNext users discover your products
+						and automate workflow with Supplier from within ERPNext.`),
+					__("Register")
+				);
+
+				$layout_main
+					.find('.layout-side-section, .layout-main-section-wrapper')
+					.hide();
+				$layout_main.append($empty_state);
+
 				$empty_state.find('.btn-primary').on('click', () => {
-					frappe.set_route('Form', 'Hub Settings');
+					// frappe.set_route('Form', 'Hub Settings');
+					this.register_for_hub();
 				});
 			} else {
+				$layout_main.find('.page-card-container').remove();
+				$layout_main.find('.layout-side-section, .layout-main-section-wrapper').show();
 				this.setup_live_state();
 			}
+		});
+	}
+
+	register_for_hub() {
+		frappe.verify_password(() => {
+			frappe.call({
+				method: 'erpnext.hub_node.enable_hub',
+				callback: (r) => {
+					if(r.message.enabled == 1) {
+						Object.assign(this.hub_settings, r.message);
+						this.refresh();
+					}
+				}
+			});
 		});
 	}
 
@@ -465,6 +487,8 @@ window.ERPNextHub = class ERPNextHub {
 	setup_menu() {
 		this.page.add_menu_item(__('Hub Settings'),
 			() => frappe.set_route('Form', 'Hub Settings'));
+
+		this.page.add_menu_item(__('Refresh'), () => this.refresh());
 	}
 
 	setup_sidebar() {
