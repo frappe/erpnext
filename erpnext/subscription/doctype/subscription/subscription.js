@@ -3,6 +3,15 @@
 
 frappe.ui.form.on('Subscription', {
 	setup: function(frm) {
+		if(frm.doc.__islocal) {
+			var last_route = frappe.route_history.slice(-2, -1)[0];
+			if(frappe.dynamic_link && frappe.dynamic_link.doc
+					&& frappe.dynamic_link.doc.name==last_route[2]) {
+				frm.set_value('reference_doctype', last_route[1]);
+				frm.set_value('reference_document', last_route[2]);
+			}
+		}
+
 		frm.fields_dict['reference_document'].get_query = function() {
 			return {
 				filters: {
