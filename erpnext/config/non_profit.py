@@ -32,6 +32,11 @@ def get_data():
 					"name": "Membership",
 					"description": _("Memebership Details"),
 				},
+				{
+					"type": "doctype",
+					"name": "Membership Type",
+					"description": _("Memebership Type Details"),
+				},
 			]
 		}
 	]
