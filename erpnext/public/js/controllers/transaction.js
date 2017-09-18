@@ -124,7 +124,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		if(this.frm.fields_dict["payment_terms_template"]){
-			console.log("triggered");
 			this.frm.trigger("payment_terms_template");
 		}
 

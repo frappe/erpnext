@@ -99,7 +99,7 @@ def make_payment_term(days, based_on):
 		doc.payment_term_name = 'N{0}'.format(days)
 	else:
 		doc.credit_months = 1
-		doc.description = 'Net payable by the end of next month'.format(days)
+		doc.description = 'Net payable by the end of next month'
 		doc.payment_term_name = 'EO2M'
 
 	doc.save()

@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, add_days, DATE_FORMAT
+from frappe.utils import flt, add_days
 import frappe.permissions
 import unittest
 from erpnext.stock.doctype.item.test_item import get_total_projected_qty

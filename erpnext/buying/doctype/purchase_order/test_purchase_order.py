@@ -5,9 +5,9 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 import frappe.defaults
-from frappe.utils import flt, add_days, nowdate, DATE_FORMAT
+from frappe.utils import flt, add_days, nowdate
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt, make_purchase_invoice
-from erpnext.controllers.accounts_controller import get_payment_terms
+
 
 class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_receipt(self):

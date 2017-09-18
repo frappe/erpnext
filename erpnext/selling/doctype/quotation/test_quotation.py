@@ -3,8 +3,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.utils import flt, add_days, nowdate, add_months, DATE_FORMAT
-from erpnext.controllers.accounts_controller import get_payment_terms
+from frappe.utils import flt, add_days, nowdate, add_months
 import unittest
 
 test_dependencies = ["Product Bundle"]
