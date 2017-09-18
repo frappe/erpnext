@@ -63,8 +63,8 @@ frappe.ui.form.on("Item", {
 			frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 		if (frm.doc.variant_of) {
-			frm.set_intro(__("This Item is a Variant of {0} (Template).", 
-				[frm.doc.variant_of]), true);
+			frm.set_intro(__('This Item is a Variant of {0} (Template).', 
+				[`<a href="#Form/Item/${frm.doc.variant_of}">${frm.doc.variant_of}</a>`]), true);
 		}
 
 		if (frappe.defaults.get_default("item_naming_by")!="Naming Series" || frm.doc.variant_of) {
