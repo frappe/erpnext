@@ -263,6 +263,13 @@ def get_data():
 			"label": _("Schools")
 		},
 		{
+			"module_name": "Hub Node",
+			"color": "#DE2B37",
+			"icon": "octicon octicon-globe",
+			"type": "module",
+			"label": _("Hub Node")
+    },
+		{
 			"module_name": "Healthcare",
 			"color": "#FF888B",
 			"icon": "octicon octicon-plus",

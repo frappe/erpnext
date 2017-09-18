@@ -1,90 +1,233 @@
+frappe.provide("erpnext.hub");
+
 frappe.pages['hub'].on_page_load = function(wrapper) {
-	var page = frappe.ui.make_app_page({
+	let page = frappe.ui.make_app_page({
 		parent: wrapper,
-		title: 'Hub',
+		title: 'ERPNext Hub',
 		single_column: true
 	});
 
-	frappe.hub = new frappe.Hub({page:page});
+	frappe.hub = new erpnext.Hub({page:page});
 
 }
 
 frappe.pages['hub'].on_page_show = function() {
-	frappe.hub.refresh();
+	// frappe.hub.refresh();
 }
 
-frappe.Hub = Class.extend({
-	init: function(args) {
-		$.extend(this, args);
-		this.render();
-	},
-	refresh: function() {
-		if(this.hub && this.hub.publish && !this.hub_list) {
-			this.setup_list();
-		}
-	},
-	render: function() {
-		this.page.main.empty();
-		var me = this;
-		frappe.model.with_doc("Hub Settings", "Hub Settings", function() {
-			me.hub = locals["Hub Settings"]["Hub Settings"];
-			if(!me.hub.publish) {
-				$(frappe.render_template("register_in_hub", {})).appendTo(me.page.main);
+erpnext.Hub = class {
+	constructor({
+		page = null
+	}) {
+		this.page = page;
+		this.setup();
+	}
+
+	setup() {
+		this.setup_header();
+		this.setup_filters();
+		this.$hub_main_section = $(`<div class="hub-main-section">`).appendTo(this.page.body);
+		this.refresh();
+	}
+
+	refresh() {
+		this.$hub_main_section.empty();
+		this.page.page_form.hide();
+		// if(this.hub && this.hub.publish && !this.$hub_list) {
+		// 	this.setup_live_state();
+		// } else {
+		// 	this.setup_empty_state();
+		// }
+
+		frappe.model.with_doc("Hub Settings", "Hub Settings", () => {
+			this.hub = locals["Hub Settings"]["Hub Settings"];
+			if(!this.hub.publish) {
+				this.setup_empty_state();
 			} else {
-				me.setup_list();
+				this.setup_live_state();
 			}
 		});
-	},
-	setup_list: function() {
-		var me = this;
-		$(frappe.render_template("hub_body", {})).appendTo(this.page.main);
-		this.hub_list = this.page.main.find(".hub-list");
-		this.search = this.page.main.find("input").on("keypress", function(e) {
-			if(e.which===13) {
-				me.reset();
-			}
+	}
+
+	setup_header() {
+		this.page.page_title = this.page.wrapper.find(".page-title");
+		this.tag_line = $(`<div class="tag-line-container"><span class="tag-line text-muted">Free product listing and discovery for
+			ERPNext users</span></div>`).appendTo(this.page.page_title);
+		this.account_details = $(`<div class="account-details">
+			<i class="fa fa-user"></i> <a class="user_name small"></a>
+			<i class="octicon octicon-globe" style="margin-left: 20px;"></i> <a class="company_name small"></a>
+		</div>`).appendTo(this.page.page_actions);
+		this.account_details.hide();
+	}
+
+	setup_empty_state() {
+		this.remove_account_from_header();
+		let $empty_state = $(frappe.render_template("register_in_hub", {}));
+		this.$hub_main_section.append($empty_state);
+	}
+
+	setup_live_state() {
+		this.add_account_to_header();
+		this.page.page_form.show();
+		this.render_body();
+		this.setup_lists();
+	}
+
+	setup_filters() {
+		let categories = this.get_hub_categories().map(d => {
+			return {label: __(d), value: d}
 		});
-		this.loading = this.page.main.find(".loading");
-		this.done = this.page.main.find(".done");
-		this.more = this.page.main.find(".more")
-		this.more.find(".btn").on("click", function() { me.next_page() });
-		this.reset();
-	},
-	reset: function() {
-		this.hub_list.empty();
-		this.start = 0;
-		this.page_length = 20;
-		this.next_page();
-	},
-	next_page: function() {
-		var me = this;
-		this.loading.toggleClass("hide", false);
+		let countries = this.get_hub_countries().map(d => {
+			return {label: d, value: d}
+		});
+		let companies = this.get_hub_companies().map(d => {
+			return {label: d, value: d}
+		});
+
+		this.category_select = this.page.add_select(__("Category"),
+			[{"label": __("Select Category..."), value: "" }].concat(categories)
+		);
+		this.country_select = this.page.add_select(__("Country"),
+			[{"label": __("Select Country..."), value: "" }].concat(countries)
+		);
+		this.company_select = this.page.add_select(__("Company"),
+			[{"label": __("Select Company..."), value: "" }].concat(companies)
+		);
+
+		this.search = this.page.add_data(__("Search"));
+		this.bind_filters();
+	}
+
+	bind_filters() {
+		// TODO: categories
+		// bind dynamically
+	}
+
+	render_body() {
+		this.$home_page = $(frappe.render_template("hub_home_page", {}))
+			.appendTo(this.$hub_main_section);
+
+		this.$banner = this.$hub_main_section.find(".banner");
+		this.$listing_body = this.$hub_main_section.find(".listing-body");
+		this.$main_list_section = this.$hub_main_section.find(".main-list-section");
+		this.$side_list_section = this.$hub_main_section.find(".side-list-section");
+	}
+
+	setup_lists() {
+		this.setup_item_list(this.$main_list_section, 'home-product-list');
+		this.setup_company_list();
+	}
+
+	setup_item_list($parent, class_name){
+		let $item_list_container = $(`<div class="item-list-container ${class_name}" data-page-length="10">
+			<div class="item-list"></div>
+			<div class="loading">
+				<p class="text-muted text-center">${__("Loading...")}</p>
+			</div>
+			<div class="done hide">
+				<p class="text-muted text-center">${__("No more results.")}</p>
+			</div>
+			<div class="more text-center">
+				<button class="btn btn-default btn-sm">${__("More")}</div>
+			</div>
+		</div>`).appendTo($parent);
+		$item_list_container.find('.loading').hide();
+		$item_list_container.find('.more').hide().on('click', () => {
+			this.next_page($item_list_container);
+		});
+		this.next_page($item_list_container);
+	}
+
+	reset($list_container) {
+		$list_container.find('.item-list').empty();
+	}
+
+	next_page($list_container, search_term='', category='', company='') {
+		let me = this;
+		let $list = $list_container.find('.item-list');
+		let $loading = $list_container.find('.loading');
+		let $more = $list_container.find('.more');
+		let $done = $list_container.find('.done');
+		let page_length = parseInt($list_container.attr("data-page-length"));
+		let start = $list_container.find('.item-card').length;
+		$loading.show();
+		let args = {
+			text: search_term,
+			start: start,
+			limit: page_length + 1
+		}
+		if(category.length > 0) {
+			args.category = category;
+		}
+		if(company.length > 0) {
+			args.company = company;
+		}
+		// console.log("next page called with args", args, category, company, page_length, start);
 		frappe.call({
 			method: "erpnext.hub_node.get_items",
-			args: {
-				text: this.get_text(),
-				start: this.start,
-				limit: this.page_length
-			},
+			args: args,
 			callback: function(r) {
-				me.loading.toggleClass("hide", true);
-				if(!r.message)
-					r.message = [];
-				me.start += r.message.length;
-				$(frappe.render_template("hub_list", {items: r.message})).appendTo(me.hub_list);
-				if(r.message.length && r.message.length===me.page_length) {
-					// more
-					me.more.removeClass("hide");
-					me.done.addClass("hide");
+				console.log("items: ", r.message);
+				$loading.hide();
+				if(r.message.length && r.message.length > page_length) {
+					r.message.pop();
+					$more.show();
+					$done.addClass("hide");
 				} else {
-					// done
-					me.more.addClass("hide");
-					me.done.removeClass("hide");
+					$done.removeClass("hide");
+					$more.hide();
 				}
+				r.message.forEach(function(item) {
+					me.make_item_card(item).appendTo($list);
+				});
 			}
 		});
-	},
-	get_text: function() {
-		return this.search.val();
-	},
-})
+	}
+
+	make_item_card(item) {
+		return $(`<div class="item-card">
+			<div class="image">
+				<a><img src="${item.image}"></a>
+			</div>
+			<div class="content">
+				<div class="title"><a>${item.item_name}</a></div>
+				<div class="company">${item.company}</div>
+				<div class="price">${item.standard_rate.toFixed(2)}</div>
+			</div>
+		</div>`);
+	}
+
+	setup_company_list() {
+		//
+	}
+
+	setup_search() { }
+
+	add_account_to_header() {
+		this.account_details.find('.user_name').empty().append(this.hub.hub_user_name);
+		this.account_details.find('.company_name').empty().append(this.hub.company);
+		this.account_details.show();
+	}
+
+	remove_account_from_header() {
+		this.account_details.hide();
+	}
+
+	get_hub_categories() {
+		// TODO
+		return [];
+	}
+	get_hub_countries() {
+		return [];
+	}
+	get_hub_companies() {
+		return [];
+	}
+
+	get_search_term() {
+		return this.$search.val();
+	}
+}
+
+// Lists can be generic objects
+erpnext.HubItemList = class {}

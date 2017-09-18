@@ -346,6 +346,71 @@ body[data-route="pos"] .btn-more {
 body[data-route="pos"] .collapse-btn {
   cursor: pointer;
 }
+
+/* hub */
+body[data-route="hub"] .page-head {
+  height: 80px;
+}
+body[data-route="hub"] .page-content {
+  margin-top: 80px;
+}
+body[data-route="hub"] .page-title h1 {
+  margin-bottom: 0px;
+}
+body[data-route="hub"] .account-details {
+  margin-top: 20px;
+}
+body[data-route="hub"] [data-original-title="Search"] {
+  float: right;
+  width: 250px;
+}
+body[data-route="hub"] .banner {
+  height: 150px;
+  background-color: lightgrey;
+}
+body[data-route="hub"] .listing-body {
+  margin: 0;
+}
+body[data-route="hub"] .main-list-section {
+  padding: 0;
+  border-right: 1px solid #d1d8dd;
+}
+body[data-route="hub"] .side-list-section {
+  padding: 0;
+}
+body[data-route="hub"] .item-list {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 5px;
+}
+body[data-route="hub"] .item-card {
+  border: 1px solid #d1d8dd;
+  border-radius: 3px;
+  margin: 5px;
+  width: 220px;
+  display: flex;
+}
+body[data-route="hub"] .item-card .image {
+  border-right: 1px solid #d1d8dd;
+}
+body[data-route="hub"] .item-card .image img {
+  height: 90px;
+  width: 90px;
+  padding: 5px;
+}
+body[data-route="hub"] .item-card .content {
+  padding: 10px;
+}
+body[data-route="hub"] .item-card .title {
+  font-weight: bold;
+}
+body[data-route="hub"] .item-card .company {
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+body[data-route="hub"] .item-card .price {
+  font-size: 12px;
+}
 .price-info {
   position: absolute;
   left: 0;

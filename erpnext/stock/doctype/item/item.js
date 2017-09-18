@@ -97,6 +97,8 @@ frappe.ui.form.on("Item", {
 			}
 			frappe.set_route('Form', 'Item', new_item.name);
 		});
+
+
 	},
 
 	validate: function(frm){
@@ -147,6 +149,12 @@ frappe.ui.form.on("Item", {
 		}
 	}
 });
+
+frappe.ui.form.on('Item', 'publish_in_hub',
+	function(frm){
+		erpnext.item.make_hub_categories(frm);
+	}
+)
 
 frappe.ui.form.on('Item Reorder', {
 	reorder_levels_add: function(frm, cdt, cdn) {
@@ -273,6 +281,33 @@ $.extend(erpnext.item, {
 		} else {
 			erpnext.item.show_modal_for_manufacturers(frm);
 		}
+	},
+
+	make_hub_categories: function(frm) {
+		var input = frm.fields_dict["hub_category"].$input.get(0);
+		input.awesomplete = new Awesomplete(input, {
+			minChars: 0,
+			maxItems: 99,
+			autoFirst: true,
+			list: [],
+		});
+
+		frm.fields_dict['hub_category'].$input
+			.on('input', function(e) {
+				var term = e.target.value;
+				frappe.call({
+					method: "erpnext.hub_node.get_categories",
+					args: {},
+					callback: function(r) {
+						if (r.message) {
+							e.target.awesomplete.list = r.message.map(function(category) { return category.category_name; });
+						}
+					}
+				});
+			})
+			.on('focus', function(e) {
+				$(e.target).val('').trigger('input');
+			})
 	},
 
 	show_modal_for_manufacturers: function(frm) {
