@@ -92,8 +92,7 @@ class PaymentRequest(Document):
 			frappe.set_user("Administrator")
 
 		payment_entry = self.create_payment_entry()
-		if not frappe.db.get_single_value("Accounts Settings", "disable_sales_invoice_auto_creation"):
-			self.make_invoice()
+		self.make_invoice()
 
 		return payment_entry
 
