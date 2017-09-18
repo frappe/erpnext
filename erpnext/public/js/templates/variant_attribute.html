@@ -2,9 +2,9 @@
 <table class="table table-bordered table-condensed">
 	<thead>
 		<tr>
-			<td>Page No.</td>
-			<td>Attribute</td>
-			<td>Attribute Value</td>
+			<td>{{ __("Page No") }}</td>
+			<td>{{ __("Attribute") }}</td>
+			<td>{{ __("Attribute Value") }}</td>
 		</tr>
 	</thead>
 	<tbody>
@@ -14,7 +14,7 @@
 					{% var page_no = Math.ceil( (index + 1)/ 3) %}
 					<td rowspan=3>{{ page_no }}</td>
 				{% } %}
-				<td>{{ row.attribute }}</td>
+				<td>{{ __(row.attribute) }}</td>
 				<td>{{ attribute_values[row.attribute] || "" }}</td>
 			</tr>
 		{% }); %}
