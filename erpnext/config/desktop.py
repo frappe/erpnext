@@ -127,7 +127,6 @@ def get_data():
 		{
 			"module_name": "POS",
 			"color": "#589494",
-			"icon": "fa fa-th",
 			"icon": "octicon octicon-credit-card",
 			"type": "page",
 			"link": "pos",
@@ -270,10 +269,11 @@ def get_data():
 			"label": _("Healthcare"),
 		},
 		{
-			"module_name": "Hub Node",
-			"color": "#DE2B37",
-			"icon": "octicon octicon-globe",
-			"type": "module",
+			"module_name": "Hub",
+			"color": "#009248",
+			"icon": "/assets/erpnext/images/hub_logo.svg",
+			"type": "page",
+			"link": "hub",
 			"label": _("Hub")
 		}
 	]
