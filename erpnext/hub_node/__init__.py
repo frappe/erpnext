@@ -8,6 +8,28 @@ from frappe.utils import now, nowdate, cint
 
 # opp_msg_id = ""
 
+@frappe.whitelist()
+def get_items(start=0, page_length=20):
+	frappe_client = get_frappe_client()
+	return frappe_client.get_list('Hub Item', limit_start=start, limit_page_length=page_length)
+
+@frappe.whitelist()
+def get_categories():
+	frappe_client = get_frappe_client()
+	return frappe_client.get_list('Hub Category')
+
+# @frappe.whitelist()
+# def get_company_details(hub_sync_id):
+# 	frappe_client = get_frappe_client()
+# 	return frappe_client.get_doc('Hub Company', hub_sync_id)
+
+def get_frappe_client():
+	hub_connector = frappe.get_doc(
+		'Data Migration Connector', 'Hub Connector')
+	hub_connection = hub_connector.get_connection()
+	return hub_connection.connection
+
+
 # @frappe.whitelist()
 # def get_items(text='', by_item_codes=0, start=0, limit=20, order_by='', category=None, company_name=None, country=None):
 # 	item_codes = []
