@@ -640,12 +640,7 @@ class AccountsController(TransactionBase):
 			total += flt(d.payment_amount)
 
 		if total != self.grand_total:
-			# Try to recover if the Payment Term is a very simple one.
-			# If there is just one Payment Term and the invoice portion is 100:
-			if len(self.payment_schedule) == 1 and self.payment_schedule[0].invoice_portion == 100:
-				self.payment_schedule[0].update({'payment_amount': self.grand_total})
-			else:
-				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand Total"))
+			frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand Total"))
 
 
 @frappe.whitelist()
