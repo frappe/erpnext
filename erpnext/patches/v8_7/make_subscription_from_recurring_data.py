@@ -18,7 +18,7 @@ def execute():
 			make_subscription(doctype, data)
 
 def get_data(doctype):
-	return frappe.db.sql(""" select name, from_date, end_date, recurring_type,recurring_id
+	return frappe.db.sql(""" select name, from_date, end_date, recurring_type,recurring_id,
 		next_date, notify_by_email, notification_email_address, recurring_print_format,
 		repeat_on_day_of_month, submit_on_creation
 		from `tab{0}` where is_recurring = 1 and next_date >= %s
@@ -40,6 +40,3 @@ def make_subscription(doctype, data):
 	}).insert(ignore_permissions=True)
 
 	doc.submit()
-
-	if not doc.subscription:
-		frappe.db.set_value(doctype, data.name, "subscription", doc.name)
