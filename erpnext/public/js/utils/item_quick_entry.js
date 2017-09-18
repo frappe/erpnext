@@ -293,7 +293,7 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			me[row.attribute].$wrapper.toggleClass("has-error", me.attribute_values[row.attribute] ? false : true);
 
 			// Set Label explicitly as make_control is not displaying label
-			$(me[row.attribute].label_area).text(row.attribute);
+			$(me[row.attribute].label_area).text(__(row.attribute));
 			$(repl(`<p class="help-box small text-muted hidden-xs">%(desc)s</p>`, {
 				"desc": desc
 			}))
