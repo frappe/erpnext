@@ -4,8 +4,6 @@
 
 frappe.ui.form.on("Fees", {
 	setup: function(frm) {
-		frm.add_fetch("student", "title", "student_name");
-		frm.add_fetch("student", "student_email_id", "student_email");
 		frm.add_fetch("fee_structure", "receivable_account", "receivable_account");
 		frm.add_fetch("fee_structure", "income_account", "income_account");
 		frm.add_fetch("fee_structure", "cost_center", "cost_center");

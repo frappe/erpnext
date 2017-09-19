@@ -62,10 +62,8 @@ frappe.ui.form.on('Fee Schedule', {
 		if (frm.doc.fee_creation_status=="In Process") {
 			frm.dashboard.add_progress("Fee Creation Status", "0");
 		}
-		if (!frm.doc.__islocal && !frm.doc.fee_creation_status || frm.doc.fee_creation_status == "Failed") {
+		if (frm.doc.docstatus==1 && !frm.doc.fee_creation_status || frm.doc.fee_creation_status == "Failed") {
 			frm.add_custom_button(__('Create Fees'), function() {
-				frm.doc.fee_creation_status = "In Process";
-				frm.save();
 				frappe.call({
 					method: "create_fees",
 					doc: frm.doc,
@@ -74,9 +72,6 @@ frappe.ui.form.on('Fee Schedule', {
 					}
 				});
 			}, "fa fa-play", "btn-success");
-		}
-		if (frm.doc.fee_creation_status==="Successful") {
-			frm.set_read_only();
 		}
 	},
 
@@ -104,6 +99,8 @@ frappe.ui.form.on("Fee Schedule Student Group", {
 			method: "erpnext.schools.doctype.fee_schedule.fee_schedule.get_total_students",
 			args: {
 				"student_group": row.student_group,
+				"academic_year": frm.doc.academic_year,
+				"academic_term": frm.doc.academic_term,
 				"student_category": frm.doc.student_category
 			},
 			callback: function(r) {

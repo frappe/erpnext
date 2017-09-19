@@ -4,14 +4,13 @@
 
 from __future__ import unicode_literals
 from frappe.model.document import Document
-import frappe
+import frappe, erpnext
 from frappe import _
 from frappe.utils import money_in_words
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from frappe.utils.csvutils import getlink
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import delete_gl_entries
-from erpnext.schools.api import get_student_guardians
 
 
 class Fees(AccountsController):
@@ -32,10 +31,11 @@ class Fees(AccountsController):
 		if not self.company:
 			self.company = frappe.defaults.get_defaults().company
 		if not self.currency:
-			self.currency = frappe.defaults.get_defaults().currency
+			self.currency = erpnext.get_company_currency(self.company)
 		if not (self.receivable_account and self.income_account and self.cost_center):
-			accounts_details = frappe.get_all("Company", fields=["default_receivable_account",
-				"default_income_account", "cost_center"], filters={"name": self.company})[0]
+			accounts_details = frappe.get_all("Company",
+				fields=["default_receivable_account", "default_income_account", "cost_center"],
+				filters={"name": self.company})[0]
 		if not self.receivable_account:
 			self.receivable_account = accounts_details.default_receivable_account
 		if not self.income_account:
@@ -46,13 +46,14 @@ class Fees(AccountsController):
 			self.student_email = self.get_student_emails()
 
 	def get_student_emails(self):
-		guardians = get_student_guardians(self.student)
-		email_list = []
-		for guardian in guardians:
-			email = frappe.db.get_value("Guardian", guardian.guardian, "email_address")
-			if email:
-				email_list.append(email)
-		return ", ".join(email_list)
+		student_emails = frappe.db.sql_list("""
+			select g.email_address
+			from `tabGuardian` g, `tabStudent Guardian` sg
+			where g.name = sg.guardian and sg.parent = %s and sg.parenttype = 'Student'
+		""", self.student)
+
+		student_emails.append(frappe.db.get_value("Student", self.student, "student_email_id"))
+		return ", ".join(list(set(student_emails)))
 
 
 	def calculate_total(self):
