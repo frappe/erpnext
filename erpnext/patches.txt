@@ -437,3 +437,5 @@ erpnext.patches.v8_7.fix_purchase_receipt_status
 erpnext.patches.v8_6.rename_bom_update_tool
 erpnext.patches.v8_9.set_print_zero_amount_taxes
 erpnext.patches.v8_9.set_default_customer_group
+erpnext.patches.v8_9.remove_employee_from_salary_structure_parent
+erpnext.patches.v8_9.delete_gst_doctypes_for_outside_india_accounts
