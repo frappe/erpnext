@@ -206,6 +206,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# additional discount
 		si.discount_amount = 100
 		si.apply_discount_on = 'Net Total'
+		si.payment_schedule = []
 
 		si.save()
 
@@ -218,6 +219,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# additional discount on grand total
 		si.discount_amount = 100
 		si.apply_discount_on = 'Grand Total'
+		si.payment_schedule = []
 
 		si.save()
 
@@ -1344,6 +1346,11 @@ def create_sales_invoice(**args):
 		si.insert()
 		if not args.do_not_submit:
 			si.submit()
+		else:
+			si.payment_schedule = []
+	else:
+		si.payment_schedule = []
+
 	return si
 
 test_dependencies = ["Journal Entry", "Contact", "Address"]
