@@ -12,7 +12,8 @@ frappe.ui.form.on('Payment Entry', {
 
 	setup: function(frm) {
 		frm.set_query("paid_from", function() {
-			var party_account_type = frm.doc.party_type=="Customer" ? "Receivable" : "Payable";
+			var party_account_type = in_list(["Customer", "Student"], frm.doc.party_type) ?
+				"Receivable" : "Payable";
 			var account_types = in_list(["Pay", "Internal Transfer"], frm.doc.payment_type) ?
 				["Bank", "Cash"] : party_account_type;
 
@@ -28,13 +29,14 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_query("party_type", function() {
 			return{
 				"filters": {
-					"name": ["in",["Customer","Supplier", "Employee"]],
+					"name": ["in",["Customer","Supplier", "Employee", "Student"]],
 				}
 			}
 		});
 
 		frm.set_query("paid_to", function() {
-			var party_account_type = frm.doc.party_type=="Customer" ? "Receivable" : "Payable";
+			var party_account_type = in_list(["Customer", "Student"], frm.doc.party_type) ?
+				"Receivable" : "Payable";
 			var account_types = in_list(["Receive", "Internal Transfer"], frm.doc.payment_type) ?
 				["Bank", "Cash"] : party_account_type;
 
@@ -72,6 +74,8 @@ frappe.ui.form.on('Payment Entry', {
 				var doctypes = ["Purchase Order", "Purchase Invoice", "Journal Entry"];
 			} else if (frm.doc.party_type=="Employee") {
 				var doctypes = ["Expense Claim", "Journal Entry"];
+			} else if (frm.doc.party_type=="Student") {
+				var doctypes = ["Fees"];
 			} else {
 				var doctypes = ["Journal Entry"];
 			}
@@ -85,7 +89,7 @@ frappe.ui.form.on('Payment Entry', {
 			child = locals[cdt][cdn];
 			filters = {"docstatus": 1, "company": doc.company};
 			party_type_doctypes = ['Sales Invoice', 'Sales Order', 'Purchase Invoice', 
-				'Purchase Order', 'Expense Claim'];
+				'Purchase Order', 'Expense Claim', 'Fees'];
 
 			if (in_list(party_type_doctypes, child.reference_doctype)) {
 				filters[doc.party_type.toLowerCase()] = doc.party;
@@ -207,19 +211,13 @@ frappe.ui.form.on('Payment Entry', {
 				frm.set_value(field, null);
 			});
 		} else {
-			if(!frm.doc.party)
-			{
-				if (frm.doc.payment_type=="Receive"){
-					frm.set_value("party_type", "Customer");
-				}
-			}
-			else
-			{
-				frm.events.party(frm);
+			if(frm.doc.party) {
+				frm.events.party(frm);	
 			}
 
-			if(frm.doc.mode_of_payment)
+			if(frm.doc.mode_of_payment) {
 				frm.events.mode_of_payment(frm);
+			}
 		}
 	},
 
@@ -254,6 +252,7 @@ frappe.ui.form.on('Payment Entry', {
 					date: frm.doc.posting_date
 				},
 				callback: function(r, rt) {
+					console.log(r, rt);
 					if(r.message) {
 						if(frm.doc.payment_type == "Receive") {
 							frm.set_value("paid_from", r.message.party_account);
