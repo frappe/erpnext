@@ -56,6 +56,7 @@ window.ERPNextHub = class ERPNextHub {
 		this.page.page_form.hide();
 
 		const $layout_main = this.page.wrapper.find('.layout-main');
+		const $page_head = this.page.wrapper.find('.page-head');
 
 		frappe.model.with_doc('Hub Settings', 'Hub Settings', () => {
 			this.hub_settings = frappe.get_doc('Hub Settings');
@@ -68,6 +69,7 @@ window.ERPNextHub = class ERPNextHub {
 					__("Register")
 				);
 
+				$page_head.hide();
 				$layout_main
 					.find('.layout-side-section, .layout-main-section-wrapper')
 					.hide();
@@ -78,6 +80,7 @@ window.ERPNextHub = class ERPNextHub {
 					this.register_for_hub();
 				});
 			} else {
+				$page_head.show();
 				$layout_main.find('.page-card-container').remove();
 				$layout_main.find('.layout-side-section, .layout-main-section-wrapper').show();
 				this.setup_live_state();
