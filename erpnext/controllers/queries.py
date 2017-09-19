@@ -227,21 +227,30 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 				"_txt": txt.replace('%', '')
 			})
 
+
 def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters, as_dict):
 	return frappe.db.sql("""
 		select `tabDelivery Note`.name, `tabDelivery Note`.customer, `tabDelivery Note`.posting_date
 		from `tabDelivery Note`
 		where `tabDelivery Note`.`%(key)s` like %(txt)s and
-			`tabDelivery Note`.docstatus = 1 and `tabDelivery Note`.is_return = 0
+			`tabDelivery Note`.docstatus = 1
 			and status not in ("Stopped", "Closed") %(fcond)s
-			and (`tabDelivery Note`.per_billed < 100 or `tabDelivery Note`.grand_total = 0)
+			and (
+				(`tabDelivery Note`.is_return = 0 and `tabDelivery Note`.per_billed < 100)
+				or `tabDelivery Note`.grand_total = 0
+				or (
+					`tabDelivery Note`.is_return = 1
+					and return_against in (select name from `tabDelivery Note` where per_billed < 100)
+				)
+			)
 			%(mcond)s order by `tabDelivery Note`.`%(key)s` asc
 	""" % {
 		"key": searchfield,
 		"fcond": get_filters_cond(doctype, filters, []),
 		"mcond": get_match_cond(doctype),
 		"txt": "%(txt)s"
-	}, { "txt": ("%%%s%%" % txt) }, as_dict=as_dict)
+	}, {"txt": ("%%%s%%" % txt)}, as_dict=as_dict)
+
 
 def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	cond = ""

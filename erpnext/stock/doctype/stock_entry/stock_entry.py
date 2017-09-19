@@ -631,7 +631,8 @@ class StockEntry(StockController):
 			fetch_exploded = self.use_multi_level_bom)
 
 		for item in item_dict.values():
-			item.from_warehouse = self.from_warehouse or item.default_warehouse
+			# if source warehouse presents in BOM set from_warehouse as bom source_warehouse
+			item.from_warehouse = self.from_warehouse or item.source_warehouse or item.default_warehouse
 		return item_dict
 
 	def get_bom_scrap_material(self, qty):
