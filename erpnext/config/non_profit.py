@@ -38,5 +38,45 @@ def get_data():
 					"description": _("Memebership Type Details"),
 				},
 			]
-		}
+		},
+		{
+			"label": _("Volunteer Mangement"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Member",
+					"description": _("Member information."),
+				}
+			]
+		},
+		{
+			"label": _("Donor Management"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Member",
+					"description": _("Member information."),
+				}
+			]
+		},
+		{
+			"label": _("Event Management"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Member",
+					"description": _("Member information."),
+				}
+			]
+		},
+		{
+			"label": _("Setup Meeting"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Member",
+					"description": _("Member information."),
+				}
+			]
+		},
 	]
