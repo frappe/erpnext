@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import inspect
 import frappe
 from erpnext.hooks import regional_overrides
+from frappe.utils import getdate
 
 __version__ = '9.2.19'
 
