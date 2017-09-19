@@ -530,8 +530,8 @@ window.ERPNextHub = class ERPNextHub {
 			args: {
 				item_code: item.item_code,
 				item_group: 'Products',
-				supplier_name: item.hub_user_name,
-				supplier_email: item.hub_user_email,
+				supplier_name: item.company_name,
+				supplier_email: item.seller,
 				company: item.company_name,
 				country: item.country
 			},

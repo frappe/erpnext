@@ -10,18 +10,20 @@ from frappe.utils import now, nowdate, cint
 
 @frappe.whitelist()
 def get_items(start=0, page_length=20):
-	frappe_client = get_frappe_client()
-	return frappe_client.get_list('Hub Item', limit_start=start, limit_page_length=page_length)
+	connection = get_connection()
+	response = connection.get_list('Hub Item', limit_start=start, limit_page_length=page_length)
+	return response.list
 
 @frappe.whitelist()
 def get_categories():
-	frappe_client = get_frappe_client()
-	return frappe_client.get_list('Hub Category')
+	connection = get_connection()
+	response = connection.get_list('Hub Category')
+	return response.list
 
 # @frappe.whitelist()
 # def get_company_details(hub_sync_id):
-# 	frappe_client = get_frappe_client()
-# 	return frappe_client.get_doc('Hub Company', hub_sync_id)
+# 	connection = get_connection()
+# 	return connection.get_doc('Hub Company', hub_sync_id)
 
 @frappe.whitelist()
 def enable_hub():
@@ -30,11 +32,38 @@ def enable_hub():
 	frappe.db.commit()
 	return hub_settings
 
-def get_frappe_client():
+def get_connection():
 	hub_connector = frappe.get_doc(
 		'Data Migration Connector', 'Hub Connector')
 	hub_connection = hub_connector.get_connection()
-	return hub_connection.connection
+	return hub_connection
+
+def get_opportunities_data():
+	connection = get_connection()
+	hub_settings = frappe.get_doc('Hub Settings')
+	response = connection.get_list('Hub Document', fields=['document_data'],
+		filters={'type': 'Opportunity', 'user': hub_settings.user})
+	data_list = [json.loads(d['document_data']) for d in response.list]
+	return data_list
+
+def make_opportunities():
+	data_list = get_opportunities_data()
+	for d in data_list:
+		make_opportunity(d['buyer_name'], d['email_id'])
+
+def make_opportunity(buyer_name, email_id):
+	buyer_name = "HUB-" + buyer_name
+
+	if not frappe.db.exists('Lead', {'email_id': email_id}):
+		lead = frappe.new_doc("Lead")
+		lead.lead_name = buyer_name
+		lead.email_id = email_id
+		lead.save(ignore_permissions=True)
+
+	opportunity = frappe.new_doc("Opportunity")
+	opportunity.enquiry_from = "Lead"
+	opportunity.lead = frappe.get_all("Lead", filters={"email_id": email_id}, fields = ["name"])[0]["name"]
+	opportunity.save(ignore_permissions=True)
 
 
 # @frappe.whitelist()
@@ -127,7 +156,8 @@ def get_frappe_client():
 def hub_item_request_action(item_code, item_group, supplier_name, supplier_email, company, country):
 	rfq_made = make_rfq(item_code, item_group, supplier_name, supplier_email, company, country)
 	# , send click count and say requested
-	# opportunity_sent = send_opportunity(supplier_name, supplier_email)
+	send_opportunity_details(supplier_name, supplier_email)
+	make_opportunities()
 	return rfq_made
 
 # @frappe.whitelist()
@@ -136,18 +166,19 @@ def hub_item_request_action(item_code, item_group, supplier_name, supplier_email
 # 		"message_id": "CLIENT-OPP-"
 # 	}))
 
-# def send_opportunity(supplier_name, supplier_email):
-# 	params = {
-# 		"buyer_name": supplier_name,
-# 		"email_id": supplier_email
-# 	}
-# 	args = {
-# 		"message_type": "CLIENT-OPP-",
-# 		"method": "make_opportunity",
-# 		"arguments": json.dumps(params),
-# 		"receiver_email": supplier_email
-# 	}
-# 	return hub_request('enqueue_message', data=json.dumps(args))
+def send_opportunity_details(supplier_name, supplier_email):
+	connection = get_connection()
+	params = {
+		"buyer_name": supplier_name,
+		"email_id": supplier_email
+	}
+	args = frappe._dict(dict(
+		doctype="Hub Document",
+		type="Opportunity",
+		document_data=json.dumps(params),
+		user=supplier_email
+	))
+	response = connection.insert("Hub Document", args)
 
 def make_rfq(item_code, item_group, supplier_name, supplier_email, company, country):
 	item_code = "HUB-" + item_code
