@@ -90,7 +90,7 @@ def get_item_details(args):
 			item.lead_time_days)
 
 	if args.get("is_subcontracted") == "Yes":
-		out.bom = get_default_bom(args.item_code)
+		out.bom = args.get('bom') or get_default_bom(args.item_code)
 
 	get_gross_profit(out)
 
