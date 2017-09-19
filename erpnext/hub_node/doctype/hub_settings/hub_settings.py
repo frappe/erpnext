@@ -12,6 +12,7 @@ from six import string_types
 
 hub_url = "http://erpnext.hub:8000"
 # hub_url = "https://hub.erpnext.org"
+# hub_url = "http://192.168.29.145:3000"
 
 class HubSetupError(frappe.ValidationError): pass
 
@@ -48,6 +49,7 @@ class HubSettings(Document):
 		message = response.json().get('message')
 
 		if message and message.get('password'):
+			self.user = frappe.session.user
 			self.create_hub_connector(message)
 			self.enabled = 1
 			self.save()

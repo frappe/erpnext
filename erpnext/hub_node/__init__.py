@@ -123,12 +123,12 @@ def get_frappe_client():
 # 		item_codes.append(d["item_code"][4:])
 # 	return item_codes
 
-# @frappe.whitelist()
-# def hub_item_request_action(item_code, item_group, supplier_name, supplier_email, company, country):
-# 	rfq_made = make_rfq(item_code, item_group, supplier_name, supplier_email, company, country)
-# 	# , send click count and say requested
-# 	# opportunity_sent = send_opportunity(supplier_name, supplier_email)
-# 	return rfq_made
+@frappe.whitelist()
+def hub_item_request_action(item_code, item_group, supplier_name, supplier_email, company, country):
+	rfq_made = make_rfq(item_code, item_group, supplier_name, supplier_email, company, country)
+	# , send click count and say requested
+	# opportunity_sent = send_opportunity(supplier_name, supplier_email)
+	return rfq_made
 
 # @frappe.whitelist()
 # def request_opportunity_message_status():
@@ -149,55 +149,58 @@ def get_frappe_client():
 # 	}
 # 	return hub_request('enqueue_message', data=json.dumps(args))
 
-# def make_rfq(item_code, item_group, supplier_name, supplier_email, company, country):
-# 	item_code = "HUB-" + item_code
-# 	supplier_name = "HUB-" + supplier_name
-# 	company = "HUB-" + company
+def make_rfq(item_code, item_group, supplier_name, supplier_email, company, country):
+	item_code = "HUB-" + item_code
+	supplier_name = "HUB-" + supplier_name
+	company = "HUB-" + company
 
-# 	if not frappe.db.exists('Supplier', {'supplier_name': supplier_name}):
-# 		supplier = frappe.new_doc("Supplier")
-# 		supplier.supplier_name = supplier_name
-# 		supplier.supplier_type = "Distributor"
-# 		supplier.insert(ignore_permissions = True)
+	if not frappe.db.exists('Supplier', {'supplier_name': supplier_name}):
+		supplier = frappe.new_doc("Supplier")
+		supplier.supplier_name = supplier_name
+		supplier.supplier_type = "Distributor"
+		supplier.insert(ignore_permissions = True)
 
-# 	if not frappe.db.exists('Item', {'item_code': item_code}):
-# 		item = frappe.new_doc("Item")
-# 		item.item_code = item_code
-# 		item.item_group = item_group
-# 		item.is_hub_item = 1
-# 		item.insert(ignore_permissions = True)
+	if not frappe.db.exists('Item', {'item_code': item_code}):
+		item = frappe.new_doc("Item")
+		item.item_code = item_code
+		item.item_group = item_group
+		item.is_hub_item = 1
+		item.insert(ignore_permissions = True)
 
-# 	if not frappe.db.exists('Company', {'company_name': company}):
-# 		comp = frappe.new_doc("Company")
-# 		comp.company_name = company
-# 		comp.abbr = "HUB-" + company[0]
-# 		comp.domain = "Distribution"
-# 		comp.country = country
-# 		comp.default_currency = "USD"
-# 		comp.insert(ignore_permissions = True)
+	if not frappe.db.exists('Company', {'company_name': company}):
+		comp = frappe.new_doc("Company")
+		comp.company_name = company
+		comp.abbr = "HUB-" + company[0]
+		comp.domain = "Distribution"
+		comp.country = country
+		comp.default_currency = "USD"
+		comp.insert(ignore_permissions = True)
 
-# 	supplier_data = {
-# 		"supplier": supplier_name,
-# 		"supplier_name": supplier_name,
-# 		"email_id": supplier_email
-# 	}
+	supplier_data = {
+		"supplier": supplier_name,
+		"supplier_name": supplier_name,
+		"email_id": supplier_email
+	}
 
-# 	rfq = frappe.new_doc('Request for Quotation')
-# 	rfq.transaction_date = nowdate()
-# 	rfq.status = 'Draft'
-# 	rfq.company = company
-# 	rfq.message_for_supplier = 'Please supply the specified items at the best possible rates.'
+	rfq = frappe.new_doc('Request for Quotation')
+	rfq.transaction_date = nowdate()
+	rfq.status = 'Draft'
+	rfq.company = company
+	rfq.message_for_supplier = 'Please supply the specified items at the best possible rates.'
 
-# 	rfq.append('suppliers', supplier_data)
+	rfq.append('suppliers', supplier_data)
 
-# 	rfq.append("items", {
-# 		"item_code": item_code,
-# 		"description": item_code,
-# 		"uom": "Nos",
-# 		"qty": 1,
-# 		"warehouse": "Stores - F", # hardcode, default warehouse for hub items?
-# 		"schedule_date": nowdate()
-# 	})
-# 	rfq.insert(ignore_permissions=True)
+	warehouse = frappe.get_list('Warehouse')[0]['name'];
+	print(warehouse)
 
-# 	return 1
+	rfq.append("items", {
+		"item_code": item_code,
+		"description": item_code,
+		"uom": "Nos",
+		"qty": 1,
+		"warehouse": warehouse, # hardcode, default warehouse for hub items?
+		"schedule_date": nowdate()
+	})
+	rfq.insert(ignore_permissions=True)
+
+	return 1
