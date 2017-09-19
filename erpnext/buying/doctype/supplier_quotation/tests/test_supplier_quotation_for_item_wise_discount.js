@@ -8,13 +8,13 @@ QUnit.test("test: supplier quotation with item wise discount", function(assert){
 		() => {
 			return frappe.tests.make('Supplier Quotation', [
 				{supplier: 'Test Supplier'},
-				{company: 'Test Company'},
+				{company: 'For Testing'},
 				{items: [
 					[
 						{"item_code": 'Test Product 4'},
 						{"qty": 5},
 						{"uom": 'Unit'},
-						{"warehouse": 'All Warehouses - TC'},
+						{"warehouse": 'All Warehouses - FT'},
 						{'discount_percentage': 10},
 					]
 				]}

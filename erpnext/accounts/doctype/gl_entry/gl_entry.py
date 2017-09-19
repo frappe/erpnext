@@ -36,7 +36,7 @@ class GLEntry(Document):
 		validate_balance_type(self.account, adv_adj)
 
 		# Update outstanding amt on against voucher
-		if self.against_voucher_type in ['Journal Entry', 'Sales Invoice', 'Purchase Invoice'] \
+		if self.against_voucher_type in ['Journal Entry', 'Sales Invoice', 'Purchase Invoice', 'Fees'] \
 			and self.against_voucher and update_outstanding == 'Yes' and not from_repost:
 				update_outstanding_amt(self.account, self.party_type, self.party, self.against_voucher_type,
 					self.against_voucher)
@@ -196,7 +196,7 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 			frappe.throw(_("Outstanding for {0} cannot be less than zero ({1})").format(against_voucher, fmt_money(bal)))
 
 	# Update outstanding amt on against voucher
-	if against_voucher_type in ["Sales Invoice", "Purchase Invoice"]:
+	if against_voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"]:
 		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
 		ref_doc.db_set('outstanding_amount', bal)
 		ref_doc.set_status(update=True)

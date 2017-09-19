@@ -30,7 +30,7 @@ def execute():
 		.format(', '.join(['%s']*len(modified_items))), tuple(modified_items)))
 	
 	item_warehouses_with_transactions += list(frappe.db.sql("""
-		select distinct pr_item.item_code, pr.source_warehouse 
+		select distinct pr_item.item_code, pr_item.source_warehouse 
 		from `tabProduction Order` pr, `tabProduction Order Item` pr_item 
 		where pr_item.parent and pr.name and pr.docstatus=1 and pr_item.item_code in ({0})"""
 		.format(', '.join(['%s']*len(modified_items))), tuple(modified_items)))

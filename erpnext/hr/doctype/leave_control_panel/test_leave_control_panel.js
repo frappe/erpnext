@@ -10,7 +10,7 @@ QUnit.test("Test: Leave control panel [HR]", function (assert) {
 		() => frappe.set_route("Form", "Leave Control Panel"),
 		() => frappe.timeout(1),
 		() => cur_frm.set_value("leave_type", "Test Leave type"),
-		() => cur_frm.set_value("company", "Test Company"),
+		() => cur_frm.set_value("company", "For Testing"),
 		() => cur_frm.set_value("employment_type", "Test Employment Type"),
 		() => cur_frm.set_value("branch", "Test Branch"),
 		() => cur_frm.set_value("department", "Test Department"),
@@ -33,7 +33,7 @@ QUnit.test("Test: Leave control panel [HR]", function (assert) {
 					filters: {
 						"branch": "Test Branch",
 						"department": "Test Department",
-						"company": "Test Company",
+						"company": "For Testing",
 						"designation": "Test Designation",
 						"status": "Active"
 					}

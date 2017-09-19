@@ -33,6 +33,12 @@ def get_data():
 					"description": _("Point of Sale")
 				},
 				{
+					"type": "doctype",
+					"name": "Subscription",
+					"label": _("Subscription"),
+					"description": _("To make recurring documents")
+				},
+				{
 					"type": "report",
 					"name": "Accounts Receivable",
 					"doctype": "Sales Invoice",

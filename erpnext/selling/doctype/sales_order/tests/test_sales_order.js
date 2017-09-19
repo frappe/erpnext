@@ -10,11 +10,8 @@ QUnit.test("test sales order", function(assert) {
 				{items: [
 					[
 						{'delivery_date': frappe.datetime.add_days(frappe.defaults.get_default("year_end_date"), 1)},
-						{'qty': 5},
-						{'item_code': 'Test Product 4'},
-						{'uom': 'Nos'},
-						{'margin_type': 'Percentage'},
-						{'discount_percentage': 10},
+						{'qty': 5.123},
+						{'item_code': 'Test Product 3'},
 					]
 				]},
 				{customer_address: 'Test1-Billing'},
@@ -27,31 +24,24 @@ QUnit.test("test sales order", function(assert) {
 		},
 		() => {
 			return frappe.tests.set_form_values(cur_frm, [
-				{selling_price_list:'Test-Selling-USD'}
-			]);
-		},
-		() => frappe.timeout(.5),
-		() => {
-			return frappe.tests.set_form_values(cur_frm, [
-				{currency: 'USD'},
-				{apply_discount_on:'Grand Total'},
-				{additional_discount_percentage:10}
+				{selling_price_list:'Test-Selling-USD'},
+				{currency: 'USD'}
 			]);
 		},
 		() => frappe.timeout(1),
 		() => {
 			// get_item_details
-			assert.ok(cur_frm.doc.items[0].item_name=='Test Product 4', "Item name correct");
+			assert.ok(cur_frm.doc.items[0].item_name=='Test Product 3', "Item name correct");
 			// get tax details
 			assert.ok(cur_frm.doc.taxes_and_charges=='TEST In State GST', "Tax details correct");
 			// get tax account head details
 			assert.ok(cur_frm.doc.taxes[0].account_head=='CGST - '+frappe.get_abbr(frappe.defaults.get_default('Company')), " Account Head abbr correct");
 			// calculate totals
-			assert.ok(cur_frm.doc.items[0].price_list_rate==90, "Item 1 price_list_rate");
-			assert.ok(cur_frm.doc.total== 405, "total correct ");
-			assert.ok(cur_frm.doc.net_total== 364.5, "net total correct ");
-			assert.ok(cur_frm.doc.grand_total== 397.30, "grand total correct ");
-			assert.ok(cur_frm.doc.rounded_total== 397.30, "rounded total correct ");
+			assert.ok(cur_frm.doc.items[0].price_list_rate==250, "Item 1 price_list_rate");
+			assert.ok(cur_frm.doc.net_total== 1280.75, "net total correct ");
+			assert.ok(cur_frm.doc.base_grand_total== flt(1511.29* cur_frm.doc.conversion_rate, precision('base_grand_total')), "base round total correct ");
+			assert.ok(cur_frm.doc.grand_total== 1511.29 , "grand total correct ");
+			assert.ok(cur_frm.doc.rounded_total== 1511.30, "rounded total correct ");
 		},
 		() => cur_frm.save(),
 		() => frappe.timeout(1),

@@ -24,10 +24,21 @@ def update_action_completed_state(action_name):
 		if d.action_name == action_name][0]
 	update_action(action_table_doc)
 
-def update_action(action_table_doc):
-	if not action_table_doc.is_completed and frappe.db.count(action_table_doc.action_doctype) >= action_table_doc.min_doc_count:
-		action_table_doc.is_completed = 1
-		action_table_doc.save()
+def update_action(doc):
+	doctype = doc.action_doctype
+	docname = doc.action_document
+	field = doc.action_field
+
+	if not doc.is_completed:
+		if doc.min_doc_count:
+			if frappe.db.count(doctype) >= doc.min_doc_count:
+				doc.is_completed = 1
+				doc.save()
+		if docname and field:
+			d = frappe.get_doc(doctype, docname)
+			if d.get(field):
+				doc.is_completed = 1
+				doc.save()
 
 def update_domain_actions(domain):
 	for d in get_setup_progress().actions:

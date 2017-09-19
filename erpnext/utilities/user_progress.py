@@ -9,10 +9,18 @@ def get_slide_settings():
 	defaults = frappe.defaults.get_defaults()
 	domain = frappe.db.get_value('Company', erpnext.get_default_company(), 'domain')
 	company = defaults.get("company") or ''
+	currency = defaults.get("currency") or ''
+
+	doc = frappe.get_doc("Setup Progress")
+	item = [d for d in doc.get("actions") if d.action_name == "Set Sales Target"][0]
+	item.action_document = company
+	item.save()
+	doc.save()
+
 	# Initial state of slides
 	return [
 		frappe._dict(
-			action_name='Add Company',
+			action_name=_('Add Company'),
 			title=_("Setup Company") if domain != 'Education' else _("Setup Institution"),
 			help=_('Setup your ' + ('company' if domain != 'Education' else 'institution') + ' and brand.'),
 			# image_src="/assets/erpnext/images/illustrations/shop.jpg",
@@ -29,12 +37,29 @@ def get_slide_settings():
 					"video_id": "U5wPIvEn-0c"
 				}
 			]
-		)
-		,
+		),
 		frappe._dict(
-			action_name='Add Customers',
+			action_name='Set Sales Target',
 			domains=('Manufacturing', 'Services', 'Retail', 'Distribution'),
-			icon="fa fa-group",
+			title=_("Set a Target"),
+			help=_("Set a sales goal you'd like to achieve for your company."),
+			fields=[
+				{"fieldtype":"Currency", "fieldname":"monthly_sales_target",
+					"label":_("Monthly Sales Target (" + currency + ")")},
+			],
+			submit_method="erpnext.utilities.user_progress_utils.set_sales_target",
+			done_state_title=_("Go to " + company),
+			done_state_title_route=["Form", "Company", company],
+			help_links=[
+				{
+					"label": _('Learn More'),
+					"url": ["https://erpnext.org/docs/user/manual/en/setting-up/setting-company-sales-goal"]
+				}
+			]
+		),
+		frappe._dict(
+			action_name=_('Add Customers'),
+			domains=('Manufacturing', 'Services', 'Retail', 'Distribution'),
 			title=_("Add Customers"),
 			help=_("List a few of your customers. They could be organizations or individuals."),
 			fields=[
@@ -57,7 +82,7 @@ def get_slide_settings():
 			]
 		),
 		frappe._dict(
-			action_name='Add Suppliers',
+			action_name=_('Add Suppliers'),
 			domains=('Manufacturing', 'Services', 'Retail', 'Distribution'),
 			icon="fa fa-group",
 			title=_("Your Suppliers"),
@@ -86,7 +111,7 @@ def get_slide_settings():
 			]
 		),
 		frappe._dict(
-			action_name='Add Products',
+			action_name=_('Add Products'),
 			domains=['Manufacturing', 'Services', 'Retail', 'Distribution'],
 			icon="fa fa-barcode",
 			title=_("Your Products or Services"),
@@ -117,7 +142,7 @@ def get_slide_settings():
 
 		# School slides begin
 		frappe._dict(
-			action_name='Add Programs',
+			action_name=_('Add Programs'),
 			domains=("Education"),
 			title=_("Program"),
 			help=_("Example: Masters in Computer Science"),
@@ -138,7 +163,7 @@ def get_slide_settings():
 
 		),
 		frappe._dict(
-			action_name='Add Courses',
+			action_name=_('Add Courses'),
 			domains=["Education"],
 			title=_("Course"),
 			help=_("Example: Basic Mathematics"),
@@ -158,7 +183,7 @@ def get_slide_settings():
 			]
 		),
 		frappe._dict(
-			action_name='Add Instructors',
+			action_name=_('Add Instructors'),
 			domains=["Education"],
 			title=_("Instructor"),
 			help=_("People who teach at your organisation"),
@@ -178,7 +203,7 @@ def get_slide_settings():
 			]
 		),
 		frappe._dict(
-			action_name='Add Rooms',
+			action_name=_('Add Rooms'),
 			domains=["Education"],
 			title=_("Room"),
 			help=_("Classrooms/ Laboratories etc where lectures can be scheduled."),
@@ -197,7 +222,7 @@ def get_slide_settings():
 		# School slides end
 
 		frappe._dict(
-			action_name='Add Users',
+			action_name=_('Add Users'),
 			title=_("Add Users"),
 			help=_("Add users to your organization, other than yourself."),
 			fields=[

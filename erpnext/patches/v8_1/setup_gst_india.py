@@ -2,21 +2,25 @@ import frappe
 from frappe.email import sendmail_to_system_managers
 
 def execute():
-	frappe.reload_doc('regional', 'doctype', 'gst_settings')
-	frappe.reload_doc('regional', 'doctype', 'gst_hsn_code')
 	frappe.reload_doc('stock', 'doctype', 'item')
 	frappe.reload_doc("stock", "doctype", "customs_tariff_number")
+
+	company = frappe.get_all('Company', filters = {'country': 'India'})
+	if not company:
+		return
+
+	frappe.reload_doc('regional', 'doctype', 'gst_settings')
+	frappe.reload_doc('regional', 'doctype', 'gst_hsn_code')
 
 	for report_name in ('GST Sales Register', 'GST Purchase Register',
 		'GST Itemised Sales Register', 'GST Itemised Purchase Register'):
 
 		frappe.reload_doc('regional', 'report', frappe.scrub(report_name))
 
-	if frappe.db.get_single_value('System Settings', 'country')=='India':
-		from erpnext.regional.india.setup import setup
-		delete_custom_field_tax_id_if_exists()
-		setup(patch=True)
-		send_gst_update_email()
+	from erpnext.regional.india.setup import setup
+	delete_custom_field_tax_id_if_exists()
+	setup(patch=True)
+	send_gst_update_email()
 
 def delete_custom_field_tax_id_if_exists():
 	for field in frappe.db.sql_list("""select name from `tabCustom Field` where fieldname='tax_id'
