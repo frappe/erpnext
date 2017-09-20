@@ -221,9 +221,9 @@ class PaymentEntry(AccountsController):
 						elif self.party_type=="Employee":
 							ref_party_account = ref_doc.payable_account
 
-					if ref_party_account != self.party_account:
-							frappe.throw(_("{0} {1} is associated with {2}, but Party Account is {3}")
-								.format(d.reference_doctype, d.reference_name, ref_party_account, self.party_account))
+						if ref_party_account != self.party_account:
+								frappe.throw(_("{0} {1} is associated with {2}, but Party Account is {3}")
+									.format(d.reference_doctype, d.reference_name, ref_party_account, self.party_account))
 
 					if ref_doc.docstatus != 1:
 						frappe.throw(_("{0} {1} must be submitted")
