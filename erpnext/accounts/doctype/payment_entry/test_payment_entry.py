@@ -212,7 +212,7 @@ class TestPaymentEntry(unittest.TestCase):
 
 		self.assertRaises(InvalidPaymentEntry, pe1.validate)
 
-		si1 =  create_sales_invoice()
+		si1 = create_sales_invoice()
 
 		# create full payment entry against si1
 		pe2 = get_payment_entry("Sales Invoice", si1.name, bank_account="_Test Cash - _TC")
