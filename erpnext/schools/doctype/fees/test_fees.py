@@ -19,8 +19,8 @@ class TestFees(unittest.TestCase):
 		fee.posting_date = nowdate()
 		fee.due_date = nowdate()
 		fee.student = student
-		fee.debit_to = "_Test Receivable - _TC"
-		fee.against_income_account = "Sales - _TC"
+		fee.receivable_account = "_Test Receivable - _TC"
+		fee.income_account = "Sales - _TC"
 		fee.cost_center = "_Test Cost Center - _TC"
 		fee.company = "_Test Company"
 
