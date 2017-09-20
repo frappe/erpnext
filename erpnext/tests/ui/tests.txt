@@ -11,6 +11,7 @@ erpnext/crm/doctype/opportunity/test_opportunity.js
 erpnext/setup/doctype/company/tests/test_company_production.js
 erpnext/stock/doctype/item/tests/test_item.js
 erpnext/stock/doctype/item/tests/test_item_attribute.js
+erpnext/stock/doctype/item/tests/test_item_variant_from_quick_entry.js
 erpnext/selling/doctype/quotation/tests/test_quotation_with_discount_on_grand_total.js
 erpnext/selling/doctype/quotation/tests/test_quotation_with_item_wise_discount.js
 erpnext/selling/doctype/quotation/tests/test_quotation_with_multi_uom.js
