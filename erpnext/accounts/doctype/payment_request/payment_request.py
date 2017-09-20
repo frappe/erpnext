@@ -50,14 +50,6 @@ class PaymentRequest(Document):
 		self.check_if_payment_entry_exists()
 		self.set_as_cancelled()
 
-	def make_invoice(self):
-		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
-		if (hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") == "Shopping Cart"):
-			from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
-			si = make_sales_invoice(self.reference_name, ignore_permissions=True)
-			si = si.insert(ignore_permissions=True)
-			si.submit()
-
 	def set_payment_request_url(self):
 		if self.payment_account:
 			self.payment_url = self.get_payment_url()
@@ -95,8 +87,6 @@ class PaymentRequest(Document):
 			frappe.set_user("Administrator")
 
 		payment_entry = self.create_payment_entry()
-		self.make_invoice()
-
 		return payment_entry
 
 	def create_payment_entry(self, submit=True):
