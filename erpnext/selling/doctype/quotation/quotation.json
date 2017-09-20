@@ -2850,9 +2850,9 @@
  "istable": 0, 
  "max_attachments": 1, 
  "menu_index": 0, 
- "modified": "2017-08-31 11:22:15.268846",
- "modified_by": "Administrator",
- "module": "Selling", 
+ "modified": "2017-09-19 11:22:15.268846",
+ "modified_by": "Administrator", 
+ "module": "Selling",
  "name": "Quotation", 
  "owner": "Administrator", 
  "permissions": [
