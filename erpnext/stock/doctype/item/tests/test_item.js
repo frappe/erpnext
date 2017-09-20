@@ -1,3 +1,4 @@
+QUnit.module('stock');
 QUnit.test("test: item", function (assert) {
 	assert.expect(6);
 	let done = assert.async();
