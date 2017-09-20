@@ -175,7 +175,7 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 	init_for_item_template_trigger: function() {
 		var me = this;
 
-		me.dialog.fields_dict.item_template.$input.on("awesomplete-close", function() {
+		me.dialog.fields_dict["item_template"].df.onchange = () => {
 			var template = me.dialog.fields_dict.item_template.input.value;
 			if (template) {
 				frappe.call({
@@ -200,7 +200,7 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			} else {
 				me.init_post_template_trigger_operations(false, [], true);
 			}
-		});
+		}
 	},
 
 	init_post_template_trigger_operations: function(is_manufacturer, attributes, attributes_flag) {
@@ -357,7 +357,7 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		.on('focus', function(e) {
 			$(e.target).val('').trigger('input');
 		})
-		.on('awesomplete-close', function(e) {
+		.on("awesomplete-select", function (e) {
 			me.attribute_values[$(e.target).attr("data-fieldname")] = e.target.value;
 			$(e.target).closest(".frappe-control").toggleClass("has-error", e.target.value ? false : true);
 		})
