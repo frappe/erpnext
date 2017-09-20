@@ -271,6 +271,10 @@ class SalesOrder(SellingController):
 	def on_update(self):
 		pass
 
+	# Remove the "Draft" state
+	def after_insert(self):
+		self.submit()
+
 	def before_update_after_submit(self):
 		self.validate_po()
 		self.validate_drop_ship()
