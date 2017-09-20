@@ -39,44 +39,54 @@ def get_data():
 				},
 			]
 		},
-		# {
-		# 	"label": _("Volunteer Mangement"),
-		# 	"items": [
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Member",
-		# 			"description": _("Member information."),
-		# 		}
-		# 	]
-		# },
-		# {
-		# 	"label": _("Donor Management"),
-		# 	"items": [
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Member",
-		# 			"description": _("Member information."),
-		# 		}
-		# 	]
-		# },
-		# {
-		# 	"label": _("Event Management"),
-		# 	"items": [
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Member",
-		# 			"description": _("Member information."),
-		# 		}
-		# 	]
-		# },
-		# {
-		# 	"label": _("Setup Meeting"),
-		# 	"items": [
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Member",
-		# 			"description": _("Member information."),
-		# 		}
-		# 	]
-		# },
+		{
+			"label": _("Volunteer"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Volunteer",
+					"description": _("Volunteer information."),
+				},
+				{
+					"type": "doctype",
+					"name": "Volunteer Type",
+					"description": _("Volunteer Type information."),
+				}
+			]
+		},
+		{
+			"label": _("Donor"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Donor",
+					"description": _("Donor information."),
+				},
+				{
+					"type": "doctype",
+					"name": "Donor Type",
+					"description": _("Donor Type information."),
+				}
+			]
+		},
+		{
+			"label": _("Event"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Member",
+					"description": _("Member information."),
+				}
+			]
+		},
+		{
+			"label": _("Setup Meeting"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Member",
+					"description": _("Member information."),
+				}
+			]
+		},
 	]
