@@ -108,7 +108,7 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertEqual(outstanding_amount, 0)
 
 	def test_payment_entry_against_si_usd_to_inr(self):
-		si =  create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
+		si = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
 			currency="USD", conversion_rate=50)
 		pe = get_payment_entry("Sales Invoice", si.name, party_amount=20,
 			bank_account="_Test Bank - _TC", bank_amount=900)

@@ -290,7 +290,7 @@ class PaymentEntry(AccountsController):
 
 	def set_difference_amount(self):
 		base_unallocated_amount = flt(self.unallocated_amount) * (flt(self.source_exchange_rate)
-			if self.payment_type=="Receive" else flt(self.target_exchange_rate))
+			if self.payment_type == "Receive" else flt(self.target_exchange_rate))
 
 		base_party_amount = flt(self.base_total_allocated_amount) + flt(base_unallocated_amount)
 
@@ -777,7 +777,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 				'due_date': reference.due_date,
 				'total_amount': reference.invoice_amount,
 				'outstanding_amount': reference.outstanding_amount,
-				'allocated_amount': reference.outstanding_amount
+				'allocated_amount': allocated_amount
 			})
 			if paid_amount:
 				paid_amount -= allocated_amount
