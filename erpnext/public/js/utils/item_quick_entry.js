@@ -357,7 +357,7 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		.on('focus', function(e) {
 			$(e.target).val('').trigger('input');
 		})
-		.on("awesomplete-select", function (e) {
+		.on("awesomplete-close", function (e) {
 			me.attribute_values[$(e.target).attr("data-fieldname")] = e.target.value;
 			$(e.target).closest(".frappe-control").toggleClass("has-error", e.target.value ? false : true);
 		})

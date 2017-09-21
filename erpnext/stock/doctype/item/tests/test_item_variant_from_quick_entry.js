@@ -17,7 +17,6 @@ QUnit.test('Test: Item variant Creation from Quick Entry', function(assert){
 				{item_group: "Products"},
 				{is_stock_item: is_stock_item},
 				{standard_rate: drill_cost},
-				{default_warehouse: "Stores - RB"},
 				{has_variants: has_variants},
 				{variant_based_on: "Item Attribute"},
 				{attributes: [
@@ -25,7 +24,10 @@ QUnit.test('Test: Item variant Creation from Quick Entry', function(assert){
 						{'attribute': 'Colour'}
 					],
 					[
-						{'attribute': 'Flute Diameter'}
+						{
+							'attribute': 'Flute Diameter',
+							'numeric_values': 1
+						}
 					]
 				]}
 			]
@@ -51,9 +53,10 @@ QUnit.test('Test: Item variant Creation from Quick Entry', function(assert){
 		
 		// set attribute value
 		() => cur_dialog.fields_dict.attribute_html.$wrapper.find('[data-fieldname=Colour]').val("Red"),
-		() => cur_dialog.fields_dict.attribute_html.$wrapper.find('[data-fieldname=Colour]').trigger("awesomplete-select"),
+		() => cur_dialog.fields_dict.attribute_html.$wrapper.find('[data-fieldname=Colour]').trigger("awesomplete-close"),
 		() => cur_dialog.fields_dict.attribute_html.$wrapper.find('[data-fieldname="Flute Diameter"]').val("12"),
-		() => cur_dialog.fields_dict.attribute_html.$wrapper.find('[data-fieldname="Flute Diameter"]').trigger("awesomplete-select"),
+		() => cur_dialog.fields_dict.attribute_html.$wrapper.find('[data-fieldname="Flute Diameter"]').trigger("change"),
+		() => frappe.timeout(0.5),
 		() => cur_dialog.get_primary_btn().click(),
 		() => frappe.timeout(1),
 
