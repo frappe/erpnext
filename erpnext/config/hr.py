@@ -68,8 +68,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Over Time",
-					"description":_("Over Time"),
+					"name": "Overtime Request",
+					"description":_("Overtime Request"),
 				},
 				{
 					"type": "doctype",

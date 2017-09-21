@@ -5,13 +5,17 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, formatdate, getdate, nowdate
+from frappe.utils import flt, formatdate, getdate, nowdate, get_datetime_str, get_first_day, get_last_day
 from frappe.model.document import Document
 
 class OverTime(Document):
 	def validate(self):
+
 		self.validate_date()
 		self.validate_hour_count()
+		self.overtime_hours = frappe.utils.data.time_diff_in_hours(self.to_date, self.from_date)
+		# frappe.throw(str(frappe.utils.data.time_diff_in_hours(self.to_date, self.from_date)))
+		self.insert_expense_claim()
 		# self.get_department_manager()
 		self.validate_emp()
 		if self.workflow_state:
@@ -33,10 +37,11 @@ class OverTime(Document):
 				self.workflow_state = "Pending"
 
 	def validate_date(self):
-		if not self.date:
-			frappe.throw(_("Date field required"))
-		if getdate(self.date) > getdate(nowdate()):
-			frappe.throw(_("The Overtime date cant be greater than the current date"))
+		pass
+		# if not self.date:
+		# 	frappe.throw(_("Date field required"))
+		# if getdate(self.date) > getdate(nowdate()):
+		# 	frappe.throw(_("The Overtime date cant be greater than the current date"))
 			
 
 	def validate_hour_count(self):
@@ -78,30 +83,43 @@ class OverTime(Document):
 		if grade:
 			overtime_value=grade.overtime_value
 
-		hour_sal=(float(main_payment) /160.0 )*overtime_value
-		app_user=frappe.get_doc("Employee",self.approval)
-		app_userr=app_user.user_id
+		hour_sal=(float(main_payment) /160.0 )*overtime_value*self.overtime_hours
+		# app_user=frappe.get_doc("Employee",self.approval)
+		# app_userr=app_user.user_id
+		date_d = getdate(self.from_date)
+		exp_date = get_datetime_str(date_d)
+		first_day= get_first_day(exp_date)
+		last_day= get_last_day(exp_date)
+
+		parent_exp = frappe.db.sql("""Select parent from `tabExpense Claim Detail` where
+		 expense_date between '{0}' and '{1}' and expense_type = 'Over Time'
+		 order by modified desc limit 1""".format(first_day,last_day), as_dict=True)
 
 		expenses=[{
 				"claim_amount": hour_sal,
 				"expense_type": "over time",
 				"sanctioned_amount":  hour_sal,
-				"expense_date":  self.date,
-				"description":self.reson,
-				"parentfield": "expenses"
+				"expense_date": exp_date,
+				"description":self.reason,
+				"parentfield": "expenses",
+				"default_account":"42010008-Wages - اجور - T"
 				}]
-		expense_claim = frappe.get_doc({
-		"doctype": "Expense Claim",
-		"naming_series": "EXP",
-		"exp_approver": app_userr,
-		"posting_date":  self.date,
-		"employee": self.employee,
-		"expenses":expenses,
-		"reference_type":"Over Time",
-		"reference_name":self.name,
-		"remark":self.reson,
-		"company" :"Tawari"
-		}).insert(ignore_permissions=True)
+		if parent_exp:
+			exp_claim = frappe.get_doc("Expense Claim",parent_exp[0].parent)
+			exp_claim.set("expenses",expenses)
+
+		else:
+			expense_claim = frappe.get_doc({
+			"doctype": "Expense Claim",
+			"naming_series": "EXP",
+			"posting_date":  exp_date,
+			"employee": self.employee,
+			"expenses":expenses,
+			"reference_type":"Over Time",
+			"reference_name":self.name,
+			"remark":self.reason,
+			"company" :"Tawari"
+			}).insert(ignore_permissions=True)
 
 
 

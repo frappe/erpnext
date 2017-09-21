@@ -9,7 +9,15 @@ cur_frm.add_fetch('leave_application','to_date','to_date');
 
 frappe.ui.form.on('Cancel Leave Application', {
 	refresh: function(frm) {
-
+    if (!cur_frm.doc.__islocal) {
+        	for (var key in cur_frm.fields_dict){
+        		cur_frm.fields_dict[key].df.read_only =1; 
+        	}
+            cur_frm.disable_save();
+        }
+        else{
+        	cur_frm.enable_save();
+        }
 	}
 });
 

@@ -12,15 +12,18 @@ class EmployeeResignation(Document):
 	def on_submit(self):
 		emp = frappe.get_doc("Employee",self.employee)
 		emp.status ="Left"
-		emp.relieving_date =self.permission_date
+		emp.relieving_date =self.last_working_date
 		emp.save(ignore_permissions=True)
 		eos_award=frappe.new_doc("End of Service Award")
 		eos_award.employee=self.employee
-		eos_award.end_date=self.permission_date
+		eos_award.end_date=self.last_working_date
 		eos_award.reason="استقالة العامل"
 		eos_award.insert()
 
 	def validate(self):
+		
+		if not self.last_working_date:
+			frappe.throw("Please enter your last working date")
 
 		if frappe.get_value('Employee Loan', filters={'employee' : self.employee,'status':'Sanctioned'}):
 			name=frappe.get_value('Employee Loan', filters={'employee' : self.employee,'status':'Sanctioned'}) 
