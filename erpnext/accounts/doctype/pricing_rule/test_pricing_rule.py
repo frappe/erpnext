@@ -256,6 +256,7 @@ class TestPricingRule(unittest.TestCase):
 		make_pricing_rule(selling=1, margin_type="Percentage", margin_rate_or_amount=10)
 		si = create_sales_invoice(do_not_save=True)
 		si.items[0].price_list_rate = 1000
+		si.payment_schedule = []
 		si.insert(ignore_permissions=True)
 
 		item = si.items[0]
@@ -264,6 +265,7 @@ class TestPricingRule(unittest.TestCase):
 
 		# With discount
 		item.discount_percentage = 10
+		si.payment_schedule = []
 		si.save()
 		item = si.items[0]
 		self.assertEquals(item.rate, 990)

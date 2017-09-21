@@ -526,6 +526,8 @@ class TestSalesOrder(unittest.TestCase):
 
 		self.assertEquals(new_so.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
 		new_so.items[0].margin_rate_or_amount = 25
+		new_so.payment_schedule = []
+		new_so.save()
 		new_so.submit()
 
 		self.assertEquals(new_so.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
@@ -564,6 +566,10 @@ def make_sales_order(**args):
 		so.insert()
 		if not args.do_not_submit:
 			so.submit()
+		else:
+			so.payment_schedule = []
+	else:
+		so.payment_schedule = []
 
 	return so
 
