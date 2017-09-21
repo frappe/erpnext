@@ -379,6 +379,7 @@ window.ERPNextHub = class ERPNextHub {
 						return this.make_rfq(item, supplier, $btn);
 					})
 					.then(r => {
+						console.log(r);
 						if (r.message && r.message.rfq) {
 							$btn.html(`<span><i class='fa fa-check'></i> ${__('Quote Requested')}</span>`);
 						} else {
@@ -595,7 +596,7 @@ window.ERPNextHub = class ERPNextHub {
 	make_rfq(item, supplier, btn) {
 		return new Promise((resolve, reject) => {
 			frappe.call({
-				method: 'erpnext.hub_node.make_rfq',
+				method: 'erpnext.hub_node.make_rfq_and_send_opportunity',
 				args: { item, supplier },
 				callback: resolve,
 				btn,
