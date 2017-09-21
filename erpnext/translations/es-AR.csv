@@ -3,3 +3,5 @@ DocType: Purchase Invoice Item,Item,Producto
 DocType: Payment Entry,Deductions or Loss,Deducciones o Pérdidas
 DocType: Cheque Print Template,Cheque Size,Tamaño de Cheque
 apps/erpnext/erpnext/utilities/activation.py +126,Make Student Batch,Hacer lotes de Estudiante
+apps/erpnext/erpnext/accounts/report/daily_movements/daily_movements.py +28, Concept, Concepto
+apps/erpnext/erpnext/config/accounts.py +80, Daily Movements, Movimientos Diarios

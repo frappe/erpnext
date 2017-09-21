@@ -74,6 +74,13 @@ def get_data():
 					"doctype": "GL Entry",
 					"is_query_report": True,
 				},
+				{
+					"type": "report",
+					"name": _("Daily Movements"),
+					"label": "Movimientos Diarios",
+					"doctype": "Payment Entry",
+					"is_query_report": True
+				}
 			]
 		},
 		{
