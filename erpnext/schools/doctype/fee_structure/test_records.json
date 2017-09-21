@@ -14,8 +14,8 @@
 			}
 		],
 		"total_amount": 50000,
-		"debit_to": "_Test Receivable - _TC",
-		"against_income_account": "Sales - _TC",
+		"receivable_account": "_Test Receivable - _TC",
+		"income_account": "Sales - _TC",
 		"cost_center": "_Test Cost Center - _TC",
 		"company": "_Test Company"
 	},
@@ -34,8 +34,8 @@
 			}
 		],
 		"total_amount": 50000,
-		"debit_to": "_Test Receivable - _TC",
-		"against_income_account": "Sales - _TC",
+		"receivable_account": "_Test Receivable - _TC",
+		"income_account": "Sales - _TC",
 		"cost_center": "_Test Cost Center - _TC",
 		"company": "_Test Company"
 	}
