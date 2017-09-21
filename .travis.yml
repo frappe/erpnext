@@ -57,8 +57,11 @@ jobs:
       script:
         - set -e
         - bench run-tests
+      env: Server Side Test
     - # stage
       script:
         - bench --verbose run-setup-wizard-ui-test
         - bench execute erpnext.setup.utils.enable_all_roles_and_domains
         - bench run-ui-tests --app erpnext
+      env: Client Side Test
+
