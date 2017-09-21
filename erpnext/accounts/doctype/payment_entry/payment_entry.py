@@ -769,14 +769,18 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	references = get_outstanding_reference_documents(args=args)
 
 	for reference in references:
-		pe.append("references", {
-			'reference_doctype': reference.voucher_type,
-			'reference_name': reference.voucher_no,
-			'due_date': reference.due_date,
-			'total_amount': reference.invoice_amount,
-			'outstanding_amount': reference.outstanding_amount,
-			'allocated_amount': reference.outstanding_amount
-		})
+		if reference.voucher_no == dn:
+			allocated_amount = min(paid_amount, reference.outstanding_amount)
+			pe.append("references", {
+				'reference_doctype': reference.voucher_type,
+				'reference_name': reference.voucher_no,
+				'due_date': reference.due_date,
+				'total_amount': reference.invoice_amount,
+				'outstanding_amount': reference.outstanding_amount,
+				'allocated_amount': reference.outstanding_amount
+			})
+			if paid_amount:
+				paid_amount -= allocated_amount
 
 	pe.setup_party_account_field()
 	pe.set_missing_values()
@@ -784,6 +788,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		pe.set_exchange_rate()
 		pe.set_amounts()
 	return pe
+
 
 def get_paid_amount(dt, dn, party_type, party, account, due_date):
 	if party_type=="Customer":
