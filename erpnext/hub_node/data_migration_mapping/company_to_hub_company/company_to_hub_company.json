@@ -5,20 +5,29 @@
  "doctype": "Data Migration Mapping", 
  "fields": [
   {
+   "is_child_table": 0, 
    "local_fieldname": "name", 
    "remote_fieldname": "company_name"
   }, 
   {
+   "is_child_table": 0, 
    "local_fieldname": "country", 
    "remote_fieldname": "country"
   }, 
   {
+   "is_child_table": 0, 
    "local_fieldname": "\"city\"", 
    "remote_fieldname": "seller_city"
   }, 
   {
+   "is_child_table": 0, 
    "local_fieldname": "eval:frappe.local.site", 
    "remote_fieldname": "site_name"
+  }, 
+  {
+   "is_child_table": 0, 
+   "local_fieldname": "eval:frappe.session.user", 
+   "remote_fieldname": "user"
   }
  ], 
  "idx": 2, 
@@ -26,8 +35,8 @@
  "mapping_name": "Company to Hub Company", 
  "mapping_type": "Push", 
  "migration_id_field": "hub_sync_id", 
- "modified": "2017-09-14 15:28:39.676464", 
- "modified_by": "faris@erpnext.com", 
+ "modified": "2017-09-19 12:04:54.114438", 
+ "modified_by": "frappetest@gmail.com", 
  "name": "Company to Hub Company", 
  "owner": "Administrator", 
  "page_length": 10, 

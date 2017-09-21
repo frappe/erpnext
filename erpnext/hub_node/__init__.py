@@ -4,9 +4,13 @@
 from __future__ import unicode_literals
 import frappe, requests, json
 from frappe.utils import now, nowdate, cint
-# from erpnext.hub_node.doctype.hub_settings.hub_settings import hub_request
 
-# opp_msg_id = ""
+@frappe.whitelist()
+def enable_hub():
+	hub_settings = frappe.get_doc('Hub Settings')
+	hub_settings.register()
+	frappe.db.commit()
+	return hub_settings
 
 @frappe.whitelist()
 def get_items(start=0, page_length=20):
@@ -24,13 +28,6 @@ def get_categories():
 # def get_company_details(hub_sync_id):
 # 	connection = get_connection()
 # 	return connection.get_doc('Hub Company', hub_sync_id)
-
-@frappe.whitelist()
-def enable_hub():
-	hub_settings = frappe.get_doc('Hub Settings')
-	hub_settings.register()
-	frappe.db.commit()
-	return hub_settings
 
 def get_connection():
 	hub_connector = frappe.get_doc(
@@ -60,11 +57,10 @@ def make_opportunity(buyer_name, email_id):
 		lead.email_id = email_id
 		lead.save(ignore_permissions=True)
 
-	opportunity = frappe.new_doc("Opportunity")
-	opportunity.enquiry_from = "Lead"
-	opportunity.lead = frappe.get_all("Lead", filters={"email_id": email_id}, fields = ["name"])[0]["name"]
-	opportunity.save(ignore_permissions=True)
-
+	o = frappe.new_doc("Opportunity")
+	o.enquiry_from = "Lead"
+	o.lead = frappe.get_all("Lead", filters={"email_id": email_id}, fields = ["name"])[0]["name"]
+	o.save(ignore_permissions=True)
 
 # @frappe.whitelist()
 # def get_items(text='', by_item_codes=0, start=0, limit=20, order_by='', category=None, company_name=None, country=None):
@@ -159,12 +155,6 @@ def hub_item_request_action(item_code, item_group, supplier_name, supplier_email
 	send_opportunity_details(supplier_name, supplier_email)
 	make_opportunities()
 	return rfq_made
-
-# @frappe.whitelist()
-# def request_opportunity_message_status():
-# 	return hub_request('get_message_status', data=json.dumps({
-# 		"message_id": "CLIENT-OPP-"
-# 	}))
 
 def send_opportunity_details(supplier_name, supplier_email):
 	connection = get_connection()

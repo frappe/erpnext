@@ -1,0 +1,33 @@
+{
+ "condition": "{'type': 'Opportunity', 'user': frappe.get_doc('Hub Settings').user}", 
+ "creation": "2017-09-20 15:06:40.279930", 
+ "docstatus": 0, 
+ "doctype": "Data Migration Mapping", 
+ "fields": [
+  {
+   "is_child_table": 0, 
+   "local_fieldname": "email_id", 
+   "remote_fieldname": "email_id"
+  }, 
+  {
+   "is_child_table": 0, 
+   "local_fieldname": "lead_name", 
+   "remote_fieldname": "buyer_name"
+  }
+ ], 
+ "idx": 0, 
+ "local_doctype": "Lead", 
+ "local_primary_key": "email_id", 
+ "mapping_name": "Hub Document to Lead", 
+ "mapping_type": "Pull", 
+ "modified": "2017-09-21 07:59:58.895667", 
+ "modified_by": "Administrator", 
+ "module": "Hub Node", 
+ "name": "Hub Document to Lead", 
+ "owner": "frappetest@gmail.com", 
+ "page_length": 10, 
+ "post_process": "", 
+ "pre_process": "{0}['document_data']", 
+ "remote_objectname": "Hub Document", 
+ "remote_primary_key": "name"
+}

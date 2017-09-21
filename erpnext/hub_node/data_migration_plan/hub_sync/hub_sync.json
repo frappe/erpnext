@@ -5,14 +5,20 @@
  "idx": 1, 
  "mappings": [
   {
+   "enabled": 0, 
    "mapping": "Company to Hub Company"
   }, 
   {
+   "enabled": 0, 
    "mapping": "Item to Hub Item"
+  }, 
+  {
+   "enabled": 1, 
+   "mapping": "Hub Document to Lead"
   }
  ], 
- "modified": "2017-09-14 15:49:26.363624", 
- "modified_by": "faris@erpnext.com", 
+ "modified": "2017-09-21 07:12:26.577172", 
+ "modified_by": "Administrator", 
  "module": "Hub Node", 
  "name": "Hub Sync", 
  "owner": "Administrator", 
