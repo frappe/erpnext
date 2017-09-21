@@ -105,6 +105,11 @@ def get_data():
 					"name": "Pricing Rule",
 					"description": _("Rules for applying pricing and discount.")
 				},
+				{
+					"type": "doctype",
+					"name": "Item Variant Settings",
+					"description": _("Item Variant Settings."),
+				},
 
 			]
 		},
