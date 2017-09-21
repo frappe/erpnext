@@ -15,18 +15,23 @@ frappe.pages['hub'].on_page_load = function(wrapper) {
 
 frappe.pages['hub'].on_page_show = function(wrapper) {
 	const current_route = frappe.get_route();
-
-	// if(current_route[1] === "Products") {
-	// 	if(current_route[2]) {
-	// 		const item_code = current_route[2];
-	// 	}
-	// }
+	if(current_route[1] === "Products") {
+		const item_code = current_route[2];
+		if(item_code) {
+			erpnext.hub.Hub.go_to_item_page(item_code);
+		}
+	}
 
 	if(current_route[1] === "Company") {
-		if(current_route[2]) {
-			// erpnext.hub.Hub.refresh();
-			erpnext.hub.Hub.get_company_details(current_route[2]);
+		const company_name = current_route[2];
+		if(company_name) {
+			erpnext.hub.Hub.go_to_company_page(company_name);
 		}
+	}
+
+	if(!current_route[1]) {
+		erpnext.hub.Hub.reset_filters();
+		erpnext.hub.Hub.refresh();
 	}
 }
 
@@ -176,8 +181,6 @@ window.ERPNextHub = class ERPNextHub {
 			]
 		);
 
-
-
 		this.price_sort_select.on('change', () => {
 			this.refresh_item_only_page();
 		});
@@ -269,8 +272,8 @@ window.ERPNextHub = class ERPNextHub {
 			method: 'erpnext.hub_node.get_items',
 			// order_by: 'request_count',
 			filters: {text: '', country: this.country}, // filters at the time of creation
-			on_item_click: (item) => {
-				this.go_to_item_page(item);
+			on_item_click: (item_code) => {
+				frappe.set_route('hub', 'Products', item_code);
 			}
 		});
 
@@ -304,15 +307,38 @@ window.ERPNextHub = class ERPNextHub {
 			filters: filters,
 			by_item_codes: by_item_codes
 		});
-		this.filtered_item_list.on_item_click = (item) => {
-			this.go_to_item_page(item);
+		this.filtered_item_list.on_item_click = (item_code) => {
+			frappe.set_route('hub', 'Products', item_code);
 		}
 		this.filtered_item_list.setup();
 	}
 
-	go_to_item_page(item) {
-		frappe.set_route('hub', 'Products', item.item_name);
+	go_to_item_page(item_code) {
+		if(this.item_cache) {
+			let item = this.item_cache[item_code];
+			if(item) {
+				this.render_item_page(item);
+				return;
+			}
+		} else {
+			this.item_cache = {};
+		}
+		frappe.call({
+			args:{
+				hub_sync_id: item_code
+			},
+			method: "erpnext.hub_node.get_item_details",
+			callback: (r) => {
+				let item = r.message;
+				this.item_cache[item_code] = item;
+				this.render_item_page(item);
+			}
+		});
+	}
+
+	render_item_page(item) {
 		this.$hub_main_section.empty();
+
 
 		let $item_page =
 			$(this.get_item_page(item))
@@ -332,8 +358,8 @@ window.ERPNextHub = class ERPNextHub {
 			img_size: 150
 		});
 
-		company_item_list.on_item_click = (item) => {
-			this.go_to_item_page(item);
+		company_item_list.on_item_click = (item_code) => {
+			frappe.set_route('hub', 'Products', item_code);
 		}
 		company_item_list.setup();
 
@@ -352,21 +378,21 @@ window.ERPNextHub = class ERPNextHub {
 
 	get_company_details(company_id) {
 		// get from cache if exists
-		// let company_details = this.company_cache[company_id];
-		// if(this.company_cache[company_id]) {
-		// 	this.go_to_company_page(company_details);
-		// 	return;
-		// }
-		// frappe.call({
-		// 	method: 'erpnext.hub_node.get_company_details',
-		// 	args: {company_id: company_id}
-		// }).then((r) => {
-		// 	if (r.message) {
-		// 		const company_details = r.message.company_details;
-		// 		this.company_cache[company_id] = company_details;
-		// 		this.go_to_company_page(company_details)
-		// 	}
-		// });
+		let company_details = this.company_cache[company_id];
+		if(this.company_cache[company_id]) {
+			this.go_to_company_page(company_details);
+			return;
+		}
+		frappe.call({
+			method: 'erpnext.hub_node.get_company_details',
+			args: {company_id: company_id}
+		}).then((r) => {
+			if (r.message) {
+				const company_details = r.message.company_details;
+				this.company_cache[company_id] = company_details;
+				this.go_to_company_page(company_details)
+			}
+		});
 	}
 
 	go_to_company_page(company_details) {
@@ -391,8 +417,8 @@ window.ERPNextHub = class ERPNextHub {
 			img_size: 150
 		});
 
-		company_item_list.on_item_click = (item) => {
-			this.go_to_item_page(item);
+		company_item_list.on_item_click = (item_code) => {
+			frappe.set_route('hub', 'Products', item_code);
 		}
 		company_item_list.setup();
 	}
@@ -483,8 +509,6 @@ window.ERPNextHub = class ERPNextHub {
 
 	go_to_home_page() {
 		frappe.set_route('hub');
-		this.reset_filters();
-		this.refresh();
 	}
 
 	setup_menu() {
@@ -708,7 +732,7 @@ class ERPNextHubList {
 
 		$item_card.find(".item-link").click((e) => {
 			e.preventDefault();
-			this.on_item_click && this.on_item_click(item);
+			this.on_item_click && this.on_item_click(item.item_code);
 		});
 
 		return $item_card;

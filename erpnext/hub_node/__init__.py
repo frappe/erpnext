@@ -24,29 +24,21 @@ def get_categories():
 	response = connection.get_list('Hub Category')
 	return response.list
 
-# @frappe.whitelist()
-# def get_company_details(hub_sync_id):
-# 	connection = get_connection()
-# 	return connection.get_doc('Hub Company', hub_sync_id)
+@frappe.whitelist()
+def get_item_details(hub_sync_id):
+	connection = get_connection()
+	return connection.connection.get_doc('Hub Item', hub_sync_id)
+
+@frappe.whitelist()
+def get_company_details(hub_sync_id):
+	connection = get_connection()
+	return connection.connection.get_doc('Hub Company', hub_sync_id)
 
 def get_connection():
 	hub_connector = frappe.get_doc(
 		'Data Migration Connector', 'Hub Connector')
 	hub_connection = hub_connector.get_connection()
 	return hub_connection
-
-def get_opportunities_data():
-	connection = get_connection()
-	hub_settings = frappe.get_doc('Hub Settings')
-	response = connection.get_list('Hub Document', fields=['document_data'],
-		filters={'type': 'Opportunity', 'user': hub_settings.user})
-	data_list = [json.loads(d['document_data']) for d in response.list]
-	return data_list
-
-def make_opportunities():
-	data_list = get_opportunities_data()
-	for d in data_list:
-		make_opportunity(d['buyer_name'], d['email_id'])
 
 def make_opportunity(buyer_name, email_id):
 	buyer_name = "HUB-" + buyer_name
