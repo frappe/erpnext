@@ -25,7 +25,8 @@ erpnext.setup.slides_settings = [
 					{ "label": __("Manufacturing"), "value": "Manufacturing" },
 					{ "label": __("Retail"), "value": "Retail" },
 					{ "label": __("Services"), "value": "Services" },
-					{ "label": __("Education"), "value": "Education" }
+					{ "label": __("Education (beta)"), "value": "Education" },
+					{"label": __("Healthcare (beta)"), "value": "Healthcare"}
 				], reqd: 1
 			},
 		],
@@ -134,12 +135,10 @@ erpnext.setup.slides_settings = [
 				frappe.msgprint(__("Please enter valid Financial Year Start and End Dates"));
 				return false;
 			}
-
 			if ((this.values.company_name || "").toLowerCase() == "company") {
 				frappe.msgprint(__("Company Name cannot be Company"));
 				return false;
 			}
-
 			return true;
 		},
 
@@ -163,7 +162,6 @@ erpnext.setup.slides_settings = [
 				slide.get_field("fy_start_date").set_value(current_year + '-' + fy[0]);
 				slide.get_field("fy_end_date").set_value(next_year + '-' + fy[1]);
 			}
-
 		},
 
 

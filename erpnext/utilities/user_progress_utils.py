@@ -9,6 +9,12 @@ from frappe.utils import flt
 from erpnext.setup.doctype.setup_progress.setup_progress import update_domain_actions, get_domain_actions_state
 
 @frappe.whitelist()
+def set_sales_target(args_data):
+	args = json.loads(args_data)
+	defaults = frappe.defaults.get_defaults()
+	frappe.db.set_value("Company", defaults.get("company"), "monthly_sales_target", args.get('monthly_sales_target'))
+
+@frappe.whitelist()
 def create_customers(args_data):
 	args = json.loads(args_data)
 	defaults = frappe.defaults.get_defaults()

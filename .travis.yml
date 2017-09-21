@@ -51,11 +51,17 @@ before_script:
   - bench start &
   - sleep 10
 
-script:
-  - set -e
-  - bench run-tests
-  - sleep 5
-  - bench reinstall --yes
-  - bench --verbose run-setup-wizard-ui-test
-  - bench execute erpnext.setup.utils.enable_all_roles_and_domains
-  - bench run-ui-tests --app erpnext
+jobs:
+  include:
+    - stage: test
+      script:
+        - set -e
+        - bench run-tests
+      env: Server Side Test
+    - # stage
+      script:
+        - bench --verbose run-setup-wizard-ui-test
+        - bench execute erpnext.setup.utils.enable_all_roles_and_domains
+        - bench run-ui-tests --app erpnext
+      env: Client Side Test
+

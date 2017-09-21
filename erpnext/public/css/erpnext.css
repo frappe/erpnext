@@ -356,3 +356,12 @@ body[data-route="pos"] .collapse-btn {
   border-radius: 3px;
   color: #fff;
 }
+.leaderboard .result {
+  border-top: 1px solid #d1d8dd;
+}
+.leaderboard .list-item {
+  padding-left: 45px;
+}
+.leaderboard .list-item_content {
+  padding-right: 45px;
+}
