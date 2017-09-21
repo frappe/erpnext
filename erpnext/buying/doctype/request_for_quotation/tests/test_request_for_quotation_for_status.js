@@ -12,7 +12,7 @@ QUnit.test("Test: Request for Quotation", function (assert) {
 		() => frappe.new_doc("Request for Quotation"),
 		() => frappe.timeout(1),
 		() => cur_frm.set_value("transaction_date", "04-04-2017"),
-		() => cur_frm.set_value("company", "_Test Company"),
+		() => cur_frm.set_value("company", "For Testing"),
 		// Add Suppliers
 		() => {
 			cur_frm.fields_dict.suppliers.grid.grid_rows[0].toggle_view();
@@ -62,7 +62,7 @@ QUnit.test("Test: Request for Quotation", function (assert) {
 		},
 		() => frappe.timeout(2),
 		() => {
-			cur_frm.fields_dict.items.grid.grid_rows[0].doc.warehouse = "_Test Warehouse - _TC";
+			cur_frm.fields_dict.items.grid.grid_rows[0].doc.warehouse = "_Test Warehouse - FT";
 		},
 		() => frappe.click_button('Save'),
 		() => frappe.timeout(1),
@@ -104,7 +104,7 @@ QUnit.test("Test: Request for Quotation", function (assert) {
 		() => frappe.timeout(1),
 		() => frappe.click_button('Make Supplier Quotation'),
 		() => frappe.timeout(1),
-		() => cur_frm.set_value("company", "_Test Company"),
+		() => cur_frm.set_value("company", "For Testing"),
 		() => cur_frm.fields_dict.items.grid.grid_rows[0].doc.rate = 4.99,
 		() => frappe.timeout(1),
 		() => frappe.click_button('Save'),

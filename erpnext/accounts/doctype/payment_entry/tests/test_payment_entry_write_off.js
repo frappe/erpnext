@@ -7,7 +7,7 @@ QUnit.test("test payment entry", function(assert) {
 		() => {
 			return frappe.tests.make('Sales Invoice', [
 				{customer: 'Test Customer 1'},
-				{company: '_Test Company'},
+				{company: 'For Testing'},
 				{currency: 'INR'},
 				{selling_price_list: '_Test Price List'},
 				{items: [
@@ -29,12 +29,12 @@ QUnit.test("test payment entry", function(assert) {
 		() => frappe.timeout(1),
 		() => frappe.click_link('Payment'),
 		() => frappe.timeout(2),
-		() => cur_frm.set_value("paid_to", "_Test Cash - _TC"),
+		() => cur_frm.set_value("paid_to", "_Test Cash - FT"),
 		() => frappe.timeout(0.5),
 		() => {
 			assert.equal(frappe.get_route()[1], 'Payment Entry', 'made payment entry');
 			assert.equal(cur_frm.doc.party, 'Test Customer 1', 'customer set in payment entry');
-			assert.equal(cur_frm.doc.paid_from, 'Debtors - _TC', 'customer account set in payment entry');
+			assert.equal(cur_frm.doc.paid_from, 'Debtors - FT', 'customer account set in payment entry');
 			assert.equal(cur_frm.doc.paid_amount, 100, 'paid amount set in payment entry');
 			assert.equal(cur_frm.doc.references[0].allocated_amount, 100,
 				'amount allocated against sales invoice');
@@ -50,10 +50,10 @@ QUnit.test("test payment entry", function(assert) {
 			assert.equal(cur_frm.doc.difference_amount, 5, 'difference amount is 5');
 		},
 		() => {
-			frappe.db.set_value("Company", "_Test Company", "write_off_account", "_Test Write Off - _TC");
+			frappe.db.set_value("Company", "For Testing", "write_off_account", "_Test Write Off - FT");
 			frappe.timeout(1);
-			frappe.db.set_value("Company", "_Test Company",
-				"exchange_gain_loss_account", "_Test Exchange Gain/Loss - _TC");
+			frappe.db.set_value("Company", "For Testing",
+				"exchange_gain_loss_account", "_Test Exchange Gain/Loss - FT");
 		},
 		() => frappe.timeout(1),
 		() => frappe.click_button('Write Off Difference Amount'),

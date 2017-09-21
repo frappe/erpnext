@@ -39,7 +39,7 @@ QUnit.test("Test: Process Payroll [HR]", function (assert) {
 		// Creating Process Payroll for specific company
 		() => frappe.set_route('Form','Process Payroll'),
 		() => {
-			cur_frm.set_value('company','Test Company'),
+			cur_frm.set_value('company','For Testing'),
 			frappe.timeout(1),
 			cur_frm.set_value('payroll_frequency','Monthly'),
 			cur_frm.set_value('start_date','2017-08-01'),

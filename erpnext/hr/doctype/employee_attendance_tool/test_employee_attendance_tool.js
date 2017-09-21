@@ -12,7 +12,7 @@ QUnit.test("Test: Employee attendance tool [HR]", function (assert) {
 			return frappe.tests.make('Employee', [
 				{salutation: "Mr"},
 				{employee_name: "Test Employee 2"},
-				{company: "Test Company"},
+				{company: "For Testing"},
 				{date_of_joining: frappe.datetime.add_months(today_date, -2)},	// joined 2 month from now
 				{date_of_birth: frappe.datetime.add_months(today_date, -240)},	// age is 20 years
 				{employment_type: "Test Employment type"},
@@ -30,7 +30,7 @@ QUnit.test("Test: Employee attendance tool [HR]", function (assert) {
 		() => cur_frm.set_value("date", date_of_attendance),
 		() => cur_frm.set_value("branch", "Test Branch"),
 		() => cur_frm.set_value("department", "Test Department"),
-		() => cur_frm.set_value("company", "Test Company"),
+		() => cur_frm.set_value("company", "For Testing"),
 		() => frappe.timeout(1),
 		() => frappe.click_button('Check all'),
 		() => frappe.click_button('Mark Present'),
@@ -45,7 +45,7 @@ QUnit.test("Test: Employee attendance tool [HR]", function (assert) {
 					filters: {
 						"branch": "Test Branch",
 						"department": "Test Department",
-						"company": "Test Company",
+						"company": "For Testing",
 						"status": "Active"
 					}
 				},

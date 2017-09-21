@@ -269,9 +269,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			this.calculate_outstanding_amount();
 		}
 
-		if (this.frm.doc.customer) {
-			this.party_field.$input.val(this.frm.doc.customer);
-		}
+		this.set_customer_value_in_party_field();
 
 		if (!this.frm.doc.write_off_account) {
 			this.frm.doc.write_off_account = doc.write_off_account
@@ -279,6 +277,12 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		if (!this.frm.doc.account_for_change_amount) {
 			this.frm.doc.account_for_change_amount = doc.account_for_change_amount
+		}
+	},
+
+	set_customer_value_in_party_field: function() {
+		if (this.frm.doc.customer) {
+			this.party_field.$input.val(this.frm.doc.customer);
 		}
 	},
 
@@ -695,6 +699,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	set_focus: function () {
 		if (this.default_customer || this.frm.doc.customer) {
+			this.set_customer_value_in_party_field();
 			this.serach_item.$input.focus();
 		} else {
 			this.party_field.$input.focus();

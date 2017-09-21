@@ -20,6 +20,7 @@ from erpnext.accounts.doctype.asset.depreciation \
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_delivery_note_serial_no
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
+from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -625,6 +626,7 @@ class SalesInvoice(SellingController):
 		self.make_gle_for_change_amount(gl_entries)
 
 		self.make_write_off_gl_entry(gl_entries)
+		self.make_gle_for_rounding_adjustment(gl_entries)
 
 		return gl_entries
 
@@ -783,6 +785,21 @@ class SalesInvoice(SellingController):
 					"cost_center": self.write_off_cost_center or default_cost_center
 				}, write_off_account_currency)
 			)
+
+	def make_gle_for_rounding_adjustment(self, gl_entries):
+		if self.rounding_adjustment:
+			round_off_account, round_off_cost_center = \
+				get_round_off_account_and_cost_center(self.company)
+
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": round_off_account,
+					"against": self.customer,
+					"credit_in_account_currency": self.rounding_adjustment,
+					"credit": self.base_rounding_adjustment,
+					"cost_center": round_off_cost_center,
+				}
+			))
 
 	def update_billing_status_in_dn(self, update_modified=True):
 		updated_delivery_notes = []

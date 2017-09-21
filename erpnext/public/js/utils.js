@@ -129,7 +129,7 @@ $.extend(erpnext.utils, {
 
 	make_subscription: function(doctype, docname) {
 		frappe.call({
-			method: "erpnext.subscription.doctype.subscription.subscription.make_subscription",
+			method: "erpnext.accounts.doctype.subscription.subscription.make_subscription",
 			args: {
 				doctype: doctype,
 				docname: docname

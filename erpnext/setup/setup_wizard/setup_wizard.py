@@ -10,6 +10,7 @@ from frappe.utils import cstr, flt, getdate
 from frappe import _
 from frappe.utils.file_manager import save_file
 from .default_website import website_maker
+from .healthcare import setup_healthcare
 import install_fixtures
 from .sample_data import make_sample_data
 from erpnext.accounts.doctype.account.account import RootNotEditable
@@ -36,6 +37,9 @@ def setup_complete(args=None):
 	if args.get('domain').lower() == 'education':
 		create_academic_year()
 		create_academic_term()
+
+	if args.domain.lower() == 'healthcare':
+		setup_healthcare()
 
 	if args.get('setup_website'):
 		website_maker(args)
@@ -154,7 +158,9 @@ def set_defaults(args):
 
 	global_defaults.save()
 
-	frappe.db.set_value("System Settings", None, "email_footer_address", args.get("company"))
+	system_settings = frappe.get_doc("System Settings")
+	system_settings.email_footer_address = args.get("company")
+	system_settings.save()
 
 	stock_settings = frappe.get_doc("Stock Settings")
 	stock_settings.item_naming_by = "Item Code"
@@ -414,3 +420,4 @@ def create_academic_year():
 			academic_year.save()
 		except frappe.DuplicateEntryError:
 			pass
+

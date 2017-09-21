@@ -278,6 +278,8 @@ class Company(Document):
 		frappe.db.sql("""update `tabSingles` set value=""
 			where doctype='Global Defaults' and field='default_company'
 			and value=%s""", self.name)
+		# delete mode of payment account
+		frappe.db.sql("delete from `tabMode of Payment Account` where company=%s", self.name)
 
 @frappe.whitelist()
 def replace_abbr(company, old, new):

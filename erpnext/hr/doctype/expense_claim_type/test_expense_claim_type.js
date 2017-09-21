@@ -11,8 +11,8 @@ QUnit.test("Test: Expense Claim Type [HR]", function (assert) {
 				{ description:'This is just a test'},
 				{ accounts: [
 					[
-						{ company: 'Test Company'},
-						{ default_account: 'Round Off - TC'}
+						{ company: 'For Testing'},
+						{ default_account: 'Round Off - FT'}
 					]
 				]},
 			]);
