@@ -11,6 +11,7 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
+from erpnext.stock.doctype.item.test_item import set_item_variant_settings
 from frappe.tests.test_permissions import set_user_permission_doctypes
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
@@ -79,6 +80,19 @@ class TestStockEntry(unittest.TestCase):
 		self._test_auto_material_request("_Test Item", material_request_type="Transfer")
 
 	def test_auto_material_request_for_variant(self):
+		fields = [{'field_name': 'reorder_levels'}]
+		set_item_variant_settings(fields)
+		template = frappe.get_doc("Item", "_Test Variant Item")
+
+		if not template.reorder_levels:
+			template.append('reorder_levels', {
+				"material_request_type": "Purchase",
+				"warehouse": "_Test Warehouse - _TC",
+				"warehouse_reorder_level": 20,
+				"warehouse_reorder_qty": 20
+			})
+
+		template.save()
 		self._test_auto_material_request("_Test Variant Item-S")
 
 	def test_auto_material_request_for_warehouse_group(self):

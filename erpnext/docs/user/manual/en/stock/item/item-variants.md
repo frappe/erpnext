@@ -49,3 +49,10 @@ When you make a new Variant, the system will prompt you to select a Manufacturer
 	src='/docs/assets/img/stock/set-variant-by-mfg.png'>
 
 The naming of the variant will be the name (ID) of the template Item with a number suffix. e.g. "ITEM000" will have variant "ITEM000-1"
+
+### Update Variants Based on Template
+To update the value in the variants items from the template item, select the respective fields first in the Item Variant Settings page. After that system will update the value of that fields in the variants if that values has been changed in the template item.
+
+To set the fields Goto Stock > Item Variant Settings
+<img class='screenshot' alt='Item Variant Settings'
+	src='/docs/assets/img/stock/item_variants_settings.png'>
