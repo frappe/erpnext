@@ -4,11 +4,12 @@
 frappe.ui.form.on('Item Variant Settings', {
 	setup: function(frm) {
 		const allow_fields = [];
-		const exclude_fields = ["item_code", "item_name", "show_in_website", "show_variant_in_website", "standard_rate"];
+		const exclude_fields = ["item_code", "item_name", "show_in_website", "show_variant_in_website", 
+			"opening_stock", "variant_of", "valuation_rate", "variant_based_on"];
 
 		frappe.model.with_doctype('Item', () => {
 			frappe.get_meta('Item').fields.forEach(d => {
-				if(!in_list(['HTML', 'Section Break', 'Column Break', 'Button'], d.fieldtype)
+				if(!in_list(['HTML', 'Section Break', 'Column Break', 'Button', 'Read Only'], d.fieldtype)
 					&& !d.no_copy && !in_list(exclude_fields, d.fieldname)) {
 					allow_fields.push(d.fieldname);
 				}
