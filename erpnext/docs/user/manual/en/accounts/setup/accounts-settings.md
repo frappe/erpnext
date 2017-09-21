@@ -13,4 +13,8 @@
 
 * Unlink Payment on Cancellation of Invoice: If checked, system will unlink the payment against the invoice. Otherwise, it will show the link error.
 
+* Allow Stale Exchange Rate:  This should be unchecked if you want ERPNext to check the age of records fetched from Currency Exchange in foreign currency transactions. If it is unchecked, the exchange rate field will be read-only in documents. 
+ 
+* Stale Days: The number of days to use when deciding if a Currency Exchange record is stale. E.g If Currency Exchange records are to be updated every day, the Stale Days should be set as 1. 
+
 {next}

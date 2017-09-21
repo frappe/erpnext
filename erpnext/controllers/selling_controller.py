@@ -179,6 +179,9 @@ class SellingController(StockController):
 			return
 
 		for it in self.get("items"):
+			if not it.item_code:
+				continue
+
 			last_purchase_rate, is_stock_item = frappe.db.get_value("Item", it.item_code, ["last_purchase_rate", "is_stock_item"])
 			last_purchase_rate_in_sales_uom = last_purchase_rate / (it.conversion_factor or 1)
 			if flt(it.base_rate) < flt(last_purchase_rate_in_sales_uom):

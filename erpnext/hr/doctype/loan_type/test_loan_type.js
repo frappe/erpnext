@@ -15,9 +15,9 @@ QUnit.test("Test: Loan Type [HR]", function (assert) {
 					'This is just a test.'}
 			]);
 		},
-		() => frappe.timeout(3),
+		() => frappe.timeout(7),
 		() => frappe.set_route('List','Loan Type','List'),
-		() => frappe.timeout(2),
+		() => frappe.timeout(4),
 
 		// Checking if the fields are correctly set
 		() => {

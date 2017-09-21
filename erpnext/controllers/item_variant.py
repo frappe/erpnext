@@ -180,10 +180,10 @@ def copy_attributes_to_variant(item, variant):
 		# don't copy manufacturer values if based on part no
 		exclude_fields += ['manufacturer', 'manufacturer_part_no']
 
+	allow_fields = [d.field_name for d in frappe.get_all("Variant Field", fields = ['field_name'])]
 	for field in item.meta.fields:
 		# "Table" is part of `no_value_field` but we shouldn't ignore tables
-		if (field.fieldtype == 'Table' or field.fieldtype not in no_value_fields) \
-			and (not field.no_copy) and field.fieldname not in exclude_fields:
+		if (field.reqd or field.fieldname in allow_fields) and field.fieldname not in exclude_fields:
 			if variant.get(field.fieldname) != item.get(field.fieldname):
 				variant.set(field.fieldname, item.get(field.fieldname))
 	variant.variant_of = item.name

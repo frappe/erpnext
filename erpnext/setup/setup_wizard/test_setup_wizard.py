@@ -56,6 +56,8 @@ def run_setup_wizard_test():
 	time.sleep(1)
 
 	frappe.db.set_default('in_selenium', None)
+	frappe.db.set_value("Company", "For Testing", "write_off_account", "Write Off - FT")
+	frappe.db.set_value("Company", "For Testing", "exchange_gain_loss_account", "Exchange Gain/Loss - FT")
 	frappe.db.commit()
 
 	driver.close()

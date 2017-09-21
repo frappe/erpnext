@@ -215,12 +215,12 @@ class TestSalesInvoice(unittest.TestCase):
 		si.save()
 
 		# with inclusive tax and additional discount
-		self.assertEquals(si.net_total, 4298.24)
+		self.assertEquals(si.net_total, 4298.25)
 		self.assertEquals(si.grand_total, 4900.00)
 
 	def test_sales_invoice_discount_amount(self):
 		si = frappe.copy_doc(test_records[3])
-		si.discount_amount = 104.95
+		si.discount_amount = 104.94
 		si.append("taxes", {
 			"charge_type": "On Previous Row Amount",
 			"account_head": "_Test Account Service Tax - _TC",
@@ -285,7 +285,7 @@ class TestSalesInvoice(unittest.TestCase):
 			"_Test Account Customs Duty - _TC": [125, 116.35, 1585.40],
 			"_Test Account Shipping Charges - _TC": [100, 100, 1685.40],
 			"_Test Account Discount - _TC": [-180.33, -168.54, 1516.86],
-			"_Test Account Service Tax - _TC": [-18.03, -16.86, 1500]
+			"_Test Account Service Tax - _TC": [-18.03, -16.85, 1500.01]
 		}
 
 		for d in si.get("taxes"):
@@ -294,10 +294,12 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertEquals(si.base_grand_total, 1500)
 		self.assertEquals(si.grand_total, 1500)
+		self.assertEquals(si.rounding_adjustment, -0.01)
 
 	def test_discount_amount_gl_entry(self):
+		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
 		si = frappe.copy_doc(test_records[3])
-		si.discount_amount = 104.95
+		si.discount_amount = 104.94
 		si.append("taxes", {
 			"doctype": "Sales Taxes and Charges",
 			"charge_type": "On Previous Row Amount",
@@ -327,7 +329,8 @@ class TestSalesInvoice(unittest.TestCase):
 			[test_records[3]["taxes"][5]["account_head"], 0.0, 116.35],
 			[test_records[3]["taxes"][6]["account_head"], 0.0, 100],
 			[test_records[3]["taxes"][7]["account_head"], 168.54, 0.0],
-			["_Test Account Service Tax - _TC", 16.86, 0.0]
+			["_Test Account Service Tax - _TC", 16.85, 0.0],
+			["Round Off - _TC", 0.01, 0.0]
 		])
 
 		for gle in gl_entries:
@@ -423,13 +426,12 @@ class TestSalesInvoice(unittest.TestCase):
 		expected_values = {
 			"keys": ["price_list_rate", "discount_percentage", "rate", "amount",
 				"base_price_list_rate", "base_rate", "base_amount", "net_rate", "net_amount"],
-			"_Test Item Home Desktop 100": [62.5, 0, 62.5, 625.0, 62.5, 62.5, 625.0, 50, 499.98],
-			"_Test Item Home Desktop 200": [190.66, 0, 190.66, 953.3, 190.66, 190.66, 953.3, 150, 750],
+			"_Test Item Home Desktop 100": [62.5, 0, 62.5, 625.0, 62.5, 62.5, 625.0, 50, 499.97600115194473],
+			"_Test Item Home Desktop 200": [190.66, 0, 190.66, 953.3, 190.66, 190.66, 953.3, 150, 749.9968530500239],
 		}
 
 		# check if children are saved
-		self.assertEquals(len(si.get("items")),
-			len(expected_values)-1)
+		self.assertEquals(len(si.get("items")), len(expected_values)-1)
 
 		# check if item values are calculated
 		for d in si.get("items"):
@@ -437,28 +439,28 @@ class TestSalesInvoice(unittest.TestCase):
 				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 
 		# check net total
-		self.assertEquals(si.base_net_total, 1249.98)
+		self.assertEquals(si.net_total, 1249.97)
 		self.assertEquals(si.total, 1578.3)
 
 		# check tax calculation
 		expected_values = {
 			"keys": ["tax_amount", "total"],
-			"_Test Account Excise Duty - _TC": [140, 1389.98],
-			"_Test Account Education Cess - _TC": [2.8, 1392.78],
-			"_Test Account S&H Education Cess - _TC": [1.4, 1394.18],
-			"_Test Account CST - _TC": [27.88, 1422.06],
-			"_Test Account VAT - _TC": [156.25, 1578.31],
-			"_Test Account Customs Duty - _TC": [125, 1703.31],
-			"_Test Account Shipping Charges - _TC": [100, 1803.31],
-			"_Test Account Discount - _TC": [-180.33, 1622.98]
+			"_Test Account Excise Duty - _TC": [140, 1389.97],
+			"_Test Account Education Cess - _TC": [2.8, 1392.77],
+			"_Test Account S&H Education Cess - _TC": [1.4, 1394.17],
+			"_Test Account CST - _TC": [27.88, 1422.05],
+			"_Test Account VAT - _TC": [156.25, 1578.30],
+			"_Test Account Customs Duty - _TC": [125, 1703.30],
+			"_Test Account Shipping Charges - _TC": [100, 1803.30],
+			"_Test Account Discount - _TC": [-180.33, 1622.97]
 		}
 
 		for d in si.get("taxes"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.account_head][i])
 
-		self.assertEquals(si.base_grand_total, 1622.98)
-		self.assertEquals(si.grand_total, 1622.98)
+		self.assertEquals(si.base_grand_total, 1622.97)
+		self.assertEquals(si.grand_total, 1622.97)
 
 	def test_sales_invoice_calculation_export_currency_with_tax_inclusive_price(self):
 		# prepare
@@ -486,7 +488,7 @@ class TestSalesInvoice(unittest.TestCase):
 				"base_rate": 2500,
 				"base_amount": 25000,
 				"net_rate": 40,
-				"net_amount": 399.98,
+				"net_amount": 399.9808009215558,
 				"base_net_rate": 2000,
 				"base_net_amount": 19999
 			},
@@ -500,7 +502,7 @@ class TestSalesInvoice(unittest.TestCase):
 				"base_rate": 7500,
 				"base_amount": 37500,
 				"net_rate": 118.01,
-				"net_amount": 590.05,
+				"net_amount": 590.0531205155963,
 				"base_net_rate": 5900.5,
 				"base_net_amount": 29502.5
 			}
@@ -536,8 +538,11 @@ class TestSalesInvoice(unittest.TestCase):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.account_head][i])
 
-		self.assertEquals(si.base_grand_total, 60794.5)
-		self.assertEquals(si.grand_total, 1215.89)
+		self.assertEquals(si.base_grand_total, 60795)
+		self.assertEquals(si.grand_total, 1215.90)
+		self.assertEquals(si.rounding_adjustment, 0.01)
+		self.assertEquals(si.base_rounding_adjustment, 0.50)
+		
 
 	def test_outstanding(self):
 		w = self.make()
@@ -1285,6 +1290,40 @@ class TestSalesInvoice(unittest.TestCase):
 		si.cancel()
 		current_month_sales = frappe.db.get_value("Company", "_Test Company", "total_monthly_sales")
 		self.assertEqual(current_month_sales, existing_current_month_sales)
+
+	def test_rounding_adjustment(self):
+		si = create_sales_invoice(rate=24900, do_not_save=True)
+		for tax in ["Tax 1", "Tax2"]:
+			si.append("taxes", {
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"description": tax,
+				"rate": 14,
+				"cost_center": "_Test Cost Center - _TC",
+				"included_in_print_rate": 1
+			})
+		si.save()
+
+		self.assertEqual(si.net_total, 19453.13)
+		self.assertEqual(si.grand_total, 24900)
+		self.assertEqual(si.total_taxes_and_charges, 5446.88)
+		self.assertEqual(si.rounding_adjustment, -0.01)
+
+		expected_values = dict((d[0], d) for d in [
+			[si.debit_to, 24900, 0.0],
+			["_Test Account Service Tax - _TC", 0.0, 5446.88],
+			["Sales - _TC", 0.0, 19453.13],
+			["Round Off - _TC", 0.01, 0.0]
+		])
+
+		gl_entries = frappe.db.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc""", si.name, as_dict=1)
+
+		for gle in gl_entries:
+			self.assertEquals(expected_values[gle.account][0], gle.account)
+			self.assertEquals(expected_values[gle.account][1], gle.debit)
+			self.assertEquals(expected_values[gle.account][2], gle.credit)
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
