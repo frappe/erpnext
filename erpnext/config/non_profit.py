@@ -70,6 +70,16 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Grant Application"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Grant Application",
+					"description": _("Grant information."),
+				}
+			]
+		},
+		{
 			"label": _("Event"),
 			"items": [
 				{
