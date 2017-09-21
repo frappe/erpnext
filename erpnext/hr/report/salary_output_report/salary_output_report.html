@@ -18,8 +18,10 @@
             <th style="width: 15%">{%= __("Communication") %}</th>
 
             <th style="width: 15%">{%= __("Gross Pay") %}</th>
-            <th style="width: 15%">{%= __("GOSI") %}</th>
-            <th style="width: 15%">{%= __("Penalty") %}</th>
+            <th style="width: 10%">{%= __("GOSI") %}</th>
+<!--             <th style="width: 10%">{%= __("Penalty") %}</th>
+ -->            
+            <th style="width: 15%">{%= __("Loan Installment") %}</th>
             <th style="width: 15%">{%= __("Total Deduction") %}</th>
             <th style="width: 10%">{%= __("Net Pay") %}</th>
 
@@ -42,8 +44,25 @@
             <td>{%= 	(Number( data[i]["Communication"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
             
 	    <td>{%= 	(Number( data[i]["Gross Pay"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
-            <td>{%= 	(Number( data[i]["GOSY"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
-            <td>{%= 	(Number( data[i]["Penalty"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
+            <td>{%= 	(Number( data[i]["GOSI"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
+          
+
+<!--              <td>
+
+        	 {%	if(typeof((data[i]["Penalty"])) == "undefined") { %}
+
+       			 0
+         	{% } %}
+
+        	 {%	if(typeof((data[i]["Penalty"])) != "undefined") { %}
+         	(Number( data[i]["GOSI"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)
+         	{% } %}
+</td>
+ -->
+     		
+
+            <td>{%=     (Number( data[i]["Loan Installment"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
+
             <td>{%= 	(Number( data[i]["Total Deduction"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
             <td>{%= 	(Number( data[i]["Net Pay"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
          
@@ -51,6 +70,7 @@
 
             </tr>
            {% } %}
+
 
     </tbody>
 </table>

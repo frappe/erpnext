@@ -4,6 +4,16 @@ cur_frm.add_fetch('employee','department','department');
 frappe.ui.form.on('Medical Insurance Application', {
     onload: function(frm){
         
+    },refresh: function(frm) {
+        if (!cur_frm.doc.__islocal) {
+        	cur_frm.doc.docstatus = 1;
+            cur_frm.disable_save();
+        }
+        else{
+        	cur_frm.enable_save();
+        }
+
+
     },
     get_medical_disclaimer_templete: function(frm){
         // window.location.href = repl(frappe.request.url +

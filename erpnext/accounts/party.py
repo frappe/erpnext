@@ -184,6 +184,11 @@ def get_party_account(party_type, party, company,payment_type =None):
 		if not account:
 			default_account_name = "default_receivable_account" \
 				if party_type=="Customer" else "default_payable_account"
+			if party_type=="Imprest Permanent" :
+				default_account_name = "default_imprest_permanent"
+			if party_type=="Imprest Temporary" :
+				default_account_name = "default_imprest_temporary"
+				
 			if party_type=="Employee" :
 				if payment_type:
 					if payment_type =="Receive":

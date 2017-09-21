@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words
+from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words, get_first_day, get_last_day
 from frappe.model.naming import make_autoname
 
 from frappe import msgprint, _
@@ -18,6 +18,7 @@ class SalarySlip(TransactionBase):
 		self.name = make_autoname('Sal Slip/' +self.employee + '/.#####')
 
 	def validate(self):
+		self.validate_overtime()
 		# self.validate_return_from_leave_deduction()
 		self.status = self.get_status()
 
@@ -50,6 +51,26 @@ class SalarySlip(TransactionBase):
 				frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
 								format(max_working_hours), alert=True)
 		self.validate_return_from_leave_deduction()
+
+	def validate_overtime(self):
+		prev_month = getdate(self.start_date).month - 1 if getdate(self.start_date).month - 1 > 0 else 12
+		prev_month_start_date = None
+		prev_month_end_date = None
+		if prev_month != 12:
+			prev_month_start_date = "{0}-{1}-01".format(getdate(self.start_date).year, prev_month)
+			prev_month_start_date_object = getdate(prev_month_start_date)
+			prev_month_end_date = get_last_day(prev_month_start_date_object)
+		else:
+			prev_month_start_date = "{0}-{1}-20".format(getdate(self.start_date).year - 1, prev_month)
+			prev_month_start_date_object = getdate(prev_month_start_date)
+			prev_month_end_date = get_last_day(prev_month_start_date_object)
+
+		overtime_hours = frappe.db.sql("""Select total_modified_hours from `tabOvertime Request` where
+		 from_date between '{0}' and '{1}' and employee = '{2}' and docstatus = 1
+		 order by modified desc limit 1""".format(prev_month_start_date,prev_month_end_date, self.employee), as_dict=True)
+		if overtime_hours:
+			self.overtime_hours = overtime_hours[0].total_modified_hours
+
 	def validate_return_from_leave_deduction(self):
 		# if self.docstatus == 0:
 		end_date = "{0}-{1}-20".format(getdate(self.end_date).year, getdate(self.end_date).month)
