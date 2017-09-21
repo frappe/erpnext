@@ -234,6 +234,20 @@ frappe.ui.form.on("Expense Claim", {
 
 	task: function(frm) {
 		erpnext.expense_claim.set_title(frm);
+	},
+
+	against_advance: function(frm) {
+		if (frm.doc.against_advance) {
+			frm.set_value("payable_account","");
+			frm.fields_dict["payable_account"].get_query = function() {
+				return {
+					filters: {
+						"report_type": "Balance Sheet",
+						"root_type": "Asset"
+					}
+				};
+			};
+		}
 	}
 });
 

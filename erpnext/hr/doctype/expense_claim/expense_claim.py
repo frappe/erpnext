@@ -35,6 +35,8 @@ class ExpenseClaim(AccountsController):
 		self.set_status()
 		if self.task and not self.project:
 			self.project = frappe.db.get_value("Task", self.task, "project")
+		if self.against_advance and self.docstatus == 1:
+			validate_employee_cash_adv(self)
 
 	def set_status(self):
 		self.status = {
@@ -66,8 +68,7 @@ class ExpenseClaim(AccountsController):
 		self.update_task_and_project()
 		self.make_gl_entries()
 
-		if self.is_paid:
-			update_reimbursed_amount(self)
+		update_reimbursed_amount(self)
 
 		self.set_status()
 
@@ -76,7 +77,7 @@ class ExpenseClaim(AccountsController):
 		if self.payable_account:
 			self.make_gl_entries(cancel=True)
 
-		if self.is_paid:
+		if self.is_paid or self.against_advance:
 			update_reimbursed_amount(self)
 
 		self.set_status()
@@ -97,28 +98,55 @@ class ExpenseClaim(AccountsController):
 		self.validate_account_details()
 		
 		# payable entry
-		gl_entry.append(
-			self.get_gl_dict({
-				"account": self.payable_account,
-				"credit": self.total_sanctioned_amount,
-				"credit_in_account_currency": self.total_sanctioned_amount,
-				"against": ",".join([d.default_account for d in self.expenses]),
-				"party_type": "Employee",
-				"party": self.employee,
-				"against_voucher_type": self.doctype,
-				"against_voucher": self.name
-			})
-		)
-
-		# expense entries
-		for data in self.expenses:
+		if not self.against_advance:
 			gl_entry.append(
 				self.get_gl_dict({
-					"account": data.default_account,
-					"debit": data.sanctioned_amount,
-					"debit_in_account_currency": data.sanctioned_amount,
-					"against": self.employee,
-					"cost_center": self.cost_center
+					"account": self.payable_account,
+					"credit": self.total_sanctioned_amount,
+					"credit_in_account_currency": self.total_sanctioned_amount,
+					"against": ",".join([d.default_account for d in self.expenses]),
+					"party_type": "Employee",
+					"party": self.employee,
+					"against_voucher_type": self.doctype,
+					"against_voucher": self.name
+				})
+				)
+
+		# expense entries
+			for data in self.expenses:
+				gl_entry.append(
+					self.get_gl_dict({
+						"account": data.default_account,
+						"debit": data.sanctioned_amount,
+						"debit_in_account_currency": data.sanctioned_amount,
+						"against": self.employee,
+						"cost_center": self.cost_center
+					})
+					)
+		# against cash advance
+		else:
+			#Dr Expense A/C
+			for data in self.expenses:
+				gl_entry.append(
+					self.get_gl_dict({
+						"account": data.default_account,
+						"debit": data.sanctioned_amount,
+						"debit_in_account_currency": data.sanctioned_amount,
+						"against": self.employee,
+						"cost_center": self.cost_center
+					})
+					)
+			#Credit against Employee Cash Advance A/C if there is balance
+			gl_entry.append(
+				self.get_gl_dict({
+					"account": self.payable_account,
+					"party_type": "Employee",
+					"party": self.employee,
+					"against": ",".join([d.default_account for d in self.expenses]),
+					"credit": self.total_sanctioned_amount,
+					"credit_in_account_currency": self.total_sanctioned_amount,
+					"against_voucher": self.name,
+					"against_voucher_type": self.doctype,
 				})
 			)
 
@@ -191,15 +219,33 @@ class ExpenseClaim(AccountsController):
 				expense.default_account = get_expense_claim_account(expense.expense_type, self.company)["account"]
 
 def update_reimbursed_amount(doc):
-	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt 
-		from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
-		and party = %s """, (doc.name, doc.employee) ,as_dict=1)[0].amt
+	if doc.against_advance:
+		amt = frappe.db.sql("""select ifnull(sum(credit_in_account_currency), 0) as amt
+			from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
+			and party = %s """, (doc.name, doc.employee) ,as_dict=1)[0].amt
+		doc.total_amount_reimbursed = amt
+		frappe.db.set_value("Expense Claim", doc.name , "total_amount_reimbursed", amt)
+		doc.set_status()
+		frappe.db.set_value("Expense Claim", doc.name , "status", doc.status)
+		
+	else:
+		amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt
+			from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
+			and party = %s """, (doc.name, doc.employee) ,as_dict=1)[0].amt
+		doc.total_amount_reimbursed = amt
+		frappe.db.set_value("Expense Claim", doc.name , "total_amount_reimbursed", amt)
+		doc.set_status()
+		frappe.db.set_value("Expense Claim", doc.name , "status", doc.status)
 
-	doc.total_amount_reimbursed = amt
-	frappe.db.set_value("Expense Claim", doc.name , "total_amount_reimbursed", amt)
-
-	doc.set_status()
-	frappe.db.set_value("Expense Claim", doc.name , "status", doc.status)
+def validate_employee_cash_adv(doc):
+	if doc.payable_account:
+		debit_amt = frappe.db.sql("""select ifnull(sum(debit - credit), 0) as amt
+		from `tabGL Entry` where account = %s and party_type = 'Employee'
+		and party = %s """, (doc.payable_account, doc.employee) ,as_dict=1)[0].amt
+		if debit_amt < doc.total_sanctioned_amount:
+			frappe.throw(_("Payable Account entered does not have sufficient Cash Advance Amount"))
+	else:
+		frappe.throw(_("Please enter Payable Account for Cash Advance Deduction"))
 
 @frappe.whitelist()
 def get_expense_approver(doctype, txt, searchfield, start, page_len, filters):
