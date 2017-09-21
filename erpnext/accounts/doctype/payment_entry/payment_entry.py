@@ -379,8 +379,13 @@ class PaymentEntry(AccountsController):
 		if self.party_account:
 			if self.payment_type=="Receive":
 				against_account = self.paid_to
+				the_reson = self.reason_to
+				the_description = self.description_to
 			else:
 				 against_account = self.paid_from
+				 the_reson = self.reason
+				 the_description = self.description
+			
 			
 				
 			party_gl_dict = self.get_gl_dict({
@@ -390,8 +395,8 @@ class PaymentEntry(AccountsController):
 				"against": against_account,
 				"title": self.title,
 				"account_currency": self.party_account_currency,
-				"description":self.description,
-				"reason":self.reason
+				"description":the_description,
+				"reason":the_reson
 			})
 			
 			dr_or_cr = "credit" if self.party_type == "Customer" else "debit"
@@ -435,8 +440,8 @@ class PaymentEntry(AccountsController):
 					"against": self.party if self.payment_type=="Pay" else self.paid_to,
 					"credit_in_account_currency": self.paid_amount,
 					"credit": self.base_paid_amount,
-					"description":self.description_to,
-					"reason":self.reason_to
+					"description":self.description,
+					"reason":self.reason
 				})
 			)
 		if self.payment_type in ("Receive", "Internal Transfer"):
