@@ -20,8 +20,9 @@ QUnit.test('Test: Assessment Result', function(assert){
 		() => cur_frm.refresh(),
 		() => frappe.timeout(1),
 		() => {
-			for(i = 0; i < $('tbody tr').size() * 4; i = (i + 4))
-				student_list.push($(`tbody td:eq("${i}")`).text());
+			$("tbody tr").each( function(i, input){
+				student_list.push($(input).data().student);
+			});
 		},
 
 		// Looping through each student in the list and setting up their score

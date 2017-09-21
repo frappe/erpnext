@@ -52,8 +52,13 @@ class Fees(AccountsController):
 			where g.name = sg.guardian and sg.parent = %s and sg.parenttype = 'Student'
 		""", self.student)
 
-		student_emails.append(frappe.db.get_value("Student", self.student, "student_email_id"))
-		return ", ".join(list(set(student_emails)))
+		student_email_id = frappe.db.get_value("Student", self.student, "student_email_id")
+		if student_email_id:
+			student_emails.append(student_email_id)
+		if student_emails:
+			return ", ".join(list(set(student_emails)))
+		else:
+			return None
 
 
 	def calculate_total(self):
