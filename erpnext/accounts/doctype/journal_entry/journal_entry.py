@@ -8,7 +8,7 @@ from frappe import msgprint, _, scrub
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_account_currency
 from erpnext.accounts.party import get_party_account
-from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
+from erpnext.hr.doctype.expense_claim.expense_claim import update_paid_amount
 from erpnext.hr.doctype.employee_loan.employee_loan import update_disbursement_status
 
 class JournalEntry(AccountsController):
@@ -215,8 +215,8 @@ class JournalEntry(AccountsController):
 				if d.reference_type in ("Sales Invoice", "Purchase Invoice"):
 					if (against_voucher[0] != d.party or against_voucher[1] != d.account):
 						frappe.throw(_("Row {0}: Party / Account does not match with {1} / {2} in {3} {4}")
-							.format(d.idx, field_dict.get(d.reference_type)[0], field_dict.get(d.reference_type)[1],
-								d.reference_type, d.reference_name))
+							.format(d.idx, field_dict.get(d.reference_type)[0], 
+								field_dict.get(d.reference_type)[1], d.reference_type, d.reference_name))
 
 				# check if party matches for Sales / Purchase Order
 				if d.reference_type in ("Sales Order", "Purchase Order"):
@@ -224,6 +224,17 @@ class JournalEntry(AccountsController):
 					if against_voucher != d.party:
 						frappe.throw(_("Row {0}: {1} {2} does not match with {3}") \
 							.format(d.idx, d.party_type, d.party, d.reference_type))
+
+			if d.reference_type == "Expense Claim":
+				ref_doc = frappe.get_doc("Expense Claim", d.reference_name)
+				if ref_doc.employee != d.party:
+					frappe.throw(_("Row {0}# Party must be {1}, same as Expense Claim {2}")
+						.format(d.idx, ref_doc.employee, d.reference_name))
+
+				account_field = "advance_account" if ref_doc.docstatus==0 else "payable_account"
+				if ref_doc.get(account_field) != d.account:
+					frappe.throw(_("Row {0}# Account must be {1}, same as Expense Claim {2}")
+						.format(d.idx, ref_doc.get(account_field), d.reference_name))
 
 		self.validate_orders()
 		self.validate_invoices()
@@ -516,7 +527,7 @@ class JournalEntry(AccountsController):
 		for d in self.accounts:
 			if d.reference_type=="Expense Claim" and d.reference_name:
 				doc = frappe.get_doc("Expense Claim", d.reference_name)
-				update_reimbursed_amount(doc)
+				update_paid_amount(doc, d.account)
 
 	def update_employee_loan(self):
 		for d in self.accounts:

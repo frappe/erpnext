@@ -12,7 +12,7 @@ from erpnext.accounts.doctype.journal_entry.journal_entry \
 	import get_average_exchange_rate, get_default_bank_cash_account
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.general_ledger import make_gl_entries
-from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
+from erpnext.hr.doctype.expense_claim.expense_claim import update_paid_amount
 from erpnext.controllers.accounts_controller import AccountsController
 
 class InvalidPaymentEntry(ValidationError): pass
@@ -219,15 +219,20 @@ class PaymentEntry(AccountsController):
 						elif self.party_type=="Supplier":
 							ref_party_account = ref_doc.credit_to
 						elif self.party_type=="Employee":
-							ref_party_account = ref_doc.payable_account
+							ref_party_account = ref_doc.payable_account \
+								if ref_doc.docstatus==1 else ref_doc.advance_account
 
 						if ref_party_account != self.party_account:
 								frappe.throw(_("{0} {1} is associated with {2}, but Party Account is {3}")
 									.format(d.reference_doctype, d.reference_name, ref_party_account, self.party_account))
 
 					if ref_doc.docstatus != 1:
-						frappe.throw(_("{0} {1} must be submitted")
-							.format(d.reference_doctype, d.reference_name))
+						if d.reference_doctype!="Expense Claim":
+							frappe.throw(_("{0} {1} must be submitted")
+								.format(d.reference_doctype, d.reference_name))
+						elif not ref_doc.advance_required:
+							frappe.throw(_("Advance Payment Required should be checked in Expense Claim {0}")
+								.format(d.reference_name))
 
 	def validate_journal_entry(self):
 		for d in self.get("references"):
@@ -481,11 +486,11 @@ class PaymentEntry(AccountsController):
 					frappe.get_doc(d.reference_doctype, d.reference_name).set_total_advance_paid()
 
 	def update_expense_claim(self):
-		if self.payment_type in ("Pay") and self.party:
+		if self.payment_type =="Pay" and self.party:
 			for d in self.get("references"):
 				if d.reference_doctype=="Expense Claim" and d.reference_name:
 					doc = frappe.get_doc("Expense Claim", d.reference_name)
-					update_reimbursed_amount(doc)
+					update_paid_amount(doc, self.paid_to)
 
 	def on_recurring(self, reference_doc, subscription_doc):
 		self.reference_no = reference_doc.name
@@ -697,6 +702,8 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		party_account = doc.debit_to
 	elif dt == "Purchase Invoice":
 		party_account = doc.credit_to
+	elif dt == "Expense Claim":
+		party_account = doc.payable_account if doc.docstatus==1 else doc.advance_account
 	elif dt == "Fees":
 		party_account = doc.receivable_account
 	else:
@@ -716,11 +723,13 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	if party_amount:
 		grand_total = outstanding_amount = party_amount
 	elif dt in ("Sales Invoice", "Purchase Invoice"):
-		grand_total = doc.base_grand_total if party_account_currency == doc.company_currency else doc.grand_total
+		grand_total = doc.base_grand_total \
+			if party_account_currency == doc.company_currency else doc.grand_total
 		outstanding_amount = doc.outstanding_amount
 	elif dt in ("Expense Claim"):
 		grand_total = doc.total_sanctioned_amount
-		outstanding_amount = doc.total_sanctioned_amount - doc.total_amount_reimbursed
+		outstanding_amount = flt(doc.total_sanctioned_amount) - flt(doc.total_amount_reimbursed) \
+			- flt(doc.total_advance_paid)
 	elif dt == "Fees":
 		grand_total = doc.grand_total
 		outstanding_amount = doc.outstanding_amount
