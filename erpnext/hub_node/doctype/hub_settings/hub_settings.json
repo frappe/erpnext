@@ -161,7 +161,7 @@
    "read_only": 0, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
-   "reqd": 1, 
+   "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -192,7 +192,7 @@
    "read_only": 0, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
-   "reqd": 1, 
+   "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -486,8 +486,8 @@
  "issingle": 1, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-09-19 11:58:59.511496", 
- "modified_by": "frappetest@gmail.com", 
+ "modified": "2017-09-21 12:13:50.841646", 
+ "modified_by": "manas@erpnext.com", 
  "module": "Hub Node", 
  "name": "Hub Settings", 
  "name_case": "", 

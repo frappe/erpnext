@@ -140,80 +140,108 @@ def make_opportunity(buyer_name, email_id):
 # 		item_codes.append(d["item_code"][4:])
 # 	return item_codes
 
+# @frappe.whitelist()
+# def hub_item_request_action(item):
+# 	item = json.loads(item)
+# 	rfq = make_rfq(item)
+# 	# , send click count and say requested
+# 	send_opportunity_details(supplier_name, supplier_email)
+# 	make_opportunities()
+# 	return rfq
+
+# def send_opportunity_details(supplier_name, supplier_email):
+# 	connection = get_connection()
+# 	params = {
+# 		"buyer_name": supplier_name,
+# 		"email_id": supplier_email
+# 	}
+# 	args = frappe._dict(dict(
+# 		doctype="Hub Document",
+# 		type="Opportunity",
+# 		document_data=json.dumps(params),
+# 		user=supplier_email
+# 	))
+# 	response = connection.insert("Hub Document", args)
+
 @frappe.whitelist()
-def hub_item_request_action(item_code, item_group, supplier_name, supplier_email, company, country):
-	rfq_made = make_rfq(item_code, item_group, supplier_name, supplier_email, company, country)
-	# , send click count and say requested
-	send_opportunity_details(supplier_name, supplier_email)
-	make_opportunities()
-	return rfq_made
+def make_rfq_and_send_opportunity(item, supplier):
+	rfq = make_rfq(item, supplier)
+	# send_opportunity(supplier)
 
-def send_opportunity_details(supplier_name, supplier_email):
-	connection = get_connection()
-	params = {
-		"buyer_name": supplier_name,
-		"email_id": supplier_email
-	}
-	args = frappe._dict(dict(
-		doctype="Hub Document",
-		type="Opportunity",
-		document_data=json.dumps(params),
-		user=supplier_email
-	))
-	response = connection.insert("Hub Document", args)
-
-def make_rfq(item_code, item_group, supplier_name, supplier_email, company, country):
-	item_code = "HUB-" + item_code
-	supplier_name = "HUB-" + supplier_name
-	company = "HUB-" + company
-
-	if not frappe.db.exists('Supplier', {'supplier_name': supplier_name}):
-		supplier = frappe.new_doc("Supplier")
-		supplier.supplier_name = supplier_name
-		supplier.supplier_type = "Distributor"
-		supplier.insert(ignore_permissions = True)
-
-	if not frappe.db.exists('Item', {'item_code': item_code}):
-		item = frappe.new_doc("Item")
-		item.item_code = item_code
-		item.item_group = item_group
-		item.is_hub_item = 1
-		item.insert(ignore_permissions = True)
-
-	if not frappe.db.exists('Company', {'company_name': company}):
-		comp = frappe.new_doc("Company")
-		comp.company_name = company
-		comp.abbr = "HUB-" + company[0]
-		comp.domain = "Distribution"
-		comp.country = country
-		comp.default_currency = "USD"
-		comp.insert(ignore_permissions = True)
-
-	supplier_data = {
-		"supplier": supplier_name,
-		"supplier_name": supplier_name,
-		"email_id": supplier_email
+	return {
+		'rfq': rfq
 	}
 
-	rfq = frappe.new_doc('Request for Quotation')
-	rfq.transaction_date = nowdate()
-	rfq.status = 'Draft'
-	rfq.company = company
-	rfq.message_for_supplier = 'Please supply the specified items at the best possible rates.'
+@frappe.whitelist()
+def make_rfq(item, supplier):
 
-	rfq.append('suppliers', supplier_data)
+	# make supplier if not already exists
+	supplier = frappe._dict(json.loads(supplier))
 
-	warehouse = frappe.get_list('Warehouse')[0]['name'];
-	print(warehouse)
+	if not frappe.db.exists('Supplier', {'supplier_name': supplier.supplier_name}):
+		supplier_doc = frappe.get_doc({
+			'doctype': 'Supplier',
+			'supplier_name': supplier.supplier_name,
+			'supplier_type': supplier.supplier_type
+		}).insert()
 
-	rfq.append("items", {
-		"item_code": item_code,
-		"description": item_code,
-		"uom": "Nos",
-		"qty": 1,
-		"warehouse": warehouse, # hardcode, default warehouse for hub items?
-		"schedule_date": nowdate()
-	})
-	rfq.insert(ignore_permissions=True)
+		print(supplier)
 
-	return 1
+		contact_doc = frappe.get_doc({
+			'doctype': 'Contact',
+			'first_name': supplier.supplier_name,
+			'email_id': supplier.supplier_email,
+			'is_primary_contact': 1,
+			'links': [
+				{'link_doctype': 'Supplier', 'link_name': supplier_doc.name}
+			]
+		}).insert()
+		contact = contact_doc.name
+	else:
+		supplier_doc = frappe.get_doc('Supplier', supplier.supplier_name)
+
+		from frappe.contacts.doctype.contact.contact import get_default_contact
+		contact = get_default_contact('Supplier', supplier.supplier_name)
+
+	# make item if not already exists
+	item = frappe._dict(json.loads(item))
+
+	if not frappe.db.exists('Item', {'item_code': item.item_code}):
+		item_doc = frappe.get_doc({
+			'doctype': 'Item',
+			'item_code': item.item_code,
+			'item_group': item.item_group,
+			'is_hub_item': 1
+		}).insert()
+	else:
+		item_doc = frappe.get_doc('Item', item.item_code)
+
+	# make rfq
+	rfq = frappe.get_doc({
+		'doctype': 'Request for Quotation',
+		'transaction_date': nowdate(),
+		'status': 'Draft',
+		'company': frappe.db.get_single_value('Hub Settings', 'company'),
+		'message_for_supplier': 'Please supply the specified items at the best possible rates',
+		'suppliers': [
+			{ 'supplier': supplier_doc.name, 'contact': contact }
+		],
+		'items': [
+			{
+				'item_code': item_doc.item_code,
+				'qty': 1,
+				'schedule_date': nowdate(),
+				'warehouse': item_doc.default_warehouse,
+				'description': item_doc.description,
+				'uom': item_doc.stock_uom
+			}
+		]
+	}).insert()
+
+	rfq.save()
+	rfq.submit()
+
+	return rfq
+
+def make_opportunity(supplier):
+	supplier = frappe._dict(json.loads(supplier))

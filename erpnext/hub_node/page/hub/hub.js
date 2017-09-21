@@ -363,16 +363,60 @@ window.ERPNextHub = class ERPNextHub {
 		}
 		company_item_list.setup();
 
-		let $rfq_btn = $item_page.find('.rfq-btn');
-		$rfq_btn.on('click', () => {
-			$rfq_btn.addClass('disabled');
-			this.make_rfq(item, (success) => {
-				if(success) {
-					$rfq_btn.html(`<span><i class='fa fa-check'></i> Quote Requested</span>`);
-				} else {
-					frappe.msgprint(__('Sorry, we cannot process your request at this time.'));
+		$item_page.find('.rfq-btn')
+			.click((e) => {
+				const $btn = $(e.target);
+
+				this.show_rfq_modal(item)
+					.then(values => {
+						item.item_code = values.item_code;
+						delete values.item_code;
+
+						const supplier = values;
+						return [item, supplier];
+					})
+					.then(([item, supplier]) => {
+						return this.make_rfq(item, supplier, $btn);
+					})
+					.then(r => {
+						if (r.message && r.message.rfq) {
+							$btn.html(`<span><i class='fa fa-check'></i> ${__('Quote Requested')}</span>`);
+						} else {
+							throw r;
+						}
+					})
+					.catch((e) => {
+						console.log(e); //eslint-disable-line
+					});
+			});
+	}
+
+	show_rfq_modal(item) {
+		return new Promise(res => {
+			let fields = [
+				{ label: __('Item Code'), fieldtype: 'Data', fieldname: 'item_code', default: item.item_code },
+				{ fieldtype: 'Column Break' },
+				{ label: __('Item Group'), fieldtype: 'Link', fieldname: 'item_group', default: item.item_group },
+				{ label: __('Supplier Details'), fieldtype: 'Section Break' },
+				{ label: __('Supplier Name'), fieldtype: 'Data', fieldname: 'supplier_name', default: item.company_name },
+				{ label: __('Supplier Email'), fieldtype: 'Data', fieldname: 'supplier_email', default: item.seller },
+				{ fieldtype: 'Column Break' },
+				{ label: __('Supplier Type'), fieldname: 'supplier_type',
+					fieldtype: 'Link', options: 'Supplier Type' }
+			];
+			fields = fields.map(f => { f.reqd = 1; return f; });
+
+			const d = new frappe.ui.Dialog({
+				title: __('Request for Quotation'),
+				fields: fields,
+				primary_action_label: __('Send'),
+				primary_action: (values) => {
+					res(values);
+					d.hide();
 				}
 			});
+
+			d.show();
 		});
 	}
 
@@ -548,20 +592,14 @@ window.ERPNextHub = class ERPNextHub {
 		this.$search.val('');
 	}
 
-	make_rfq(item, callback) {
-		frappe.call({
-			method: 'erpnext.hub_node.hub_item_request_action',
-			args: {
-				item_code: item.item_code,
-				item_group: 'Products',
-				supplier_name: item.company_name,
-				supplier_email: item.seller,
-				company: item.company_name,
-				country: item.country
-			},
-			callback: (r) => {
-				callback(r.message);
-			}
+	make_rfq(item, supplier, btn) {
+		return new Promise((resolve, reject) => {
+			frappe.call({
+				method: 'erpnext.hub_node.make_rfq',
+				args: { item, supplier },
+				callback: resolve,
+				btn,
+			}).fail(reject);
 		});
 	}
 
