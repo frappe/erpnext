@@ -9,16 +9,16 @@
    "mapping": "Company to Hub Company"
   }, 
   {
-   "enabled": 0, 
+   "enabled": 1, 
    "mapping": "Item to Hub Item"
   }, 
   {
-   "enabled": 1, 
+   "enabled": 0, 
    "mapping": "Hub Document to Lead"
   }
  ], 
- "modified": "2017-09-21 18:33:01.950039", 
- "modified_by": "faris@erpnext.com", 
+ "modified": "2017-09-22 14:27:46.535702", 
+ "modified_by": "Administrator", 
  "module": "Hub Node", 
  "name": "Hub Sync", 
  "owner": "Administrator", 
