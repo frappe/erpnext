@@ -19,16 +19,9 @@
    "remote_fieldname": "company_name"
   }, 
   {
-   "formula": "import os, base64\nfrom frappe.utils.file_manager import get_files_path\n\nvalue = doc.get(current_val)\nfile_name = value[value.rfind('/')+1:]\nimg_path =  os.path.abspath(get_files_path(file_name))\nwith open(img_path) as f:\n\timg_content = f.read()\n\timg_base64 = base64.b64encode(img_content)\nmodified_field_value = img_base64", 
    "is_child_table": 0, 
    "local_fieldname": "image", 
    "remote_fieldname": "image"
-  }, 
-  {
-   "formula": "value = doc.get(current_val)\nmodified_field_value = value[value.rfind('.')+1:]\n", 
-   "is_child_table": 0, 
-   "local_fieldname": "image", 
-   "remote_fieldname": "image_type"
   }, 
   {
    "is_child_table": 0, 
@@ -51,7 +44,7 @@
  "mapping_name": "Item to Hub Item", 
  "mapping_type": "Push", 
  "migration_id_field": "hub_sync_id", 
- "modified": "2017-09-22 14:27:29.172750", 
+ "modified": "2017-09-21 18:18:35.610945", 
  "modified_by": "Administrator", 
  "name": "Item to Hub Item", 
  "owner": "Administrator", 

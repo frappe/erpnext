@@ -777,7 +777,7 @@ class HubList {
 	get_item_image(item, size=this.img_size) {
 		const _size = size + 'px';
 		const item_image = item.image ?
-			`<img src="${"data:image/"+ (item.image_type || "jpg") +";base64, " + item.image}"><span class="helper"></span>` :
+			`<img src="${item.image}"><span class="helper"></span>` :
 			`<div class="standard-image">${item.item_name[0]}</div>`;
 
 		return `
