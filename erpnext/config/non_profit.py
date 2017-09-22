@@ -78,25 +78,5 @@ def get_data():
 					"description": _("Grant information."),
 				}
 			]
-		},
-		{
-			"label": _("Event"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Member",
-					"description": _("Member information."),
-				}
-			]
-		},
-		{
-			"label": _("Setup Meeting"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Member",
-					"description": _("Member information."),
-				}
-			]
-		},
+		}
 	]
