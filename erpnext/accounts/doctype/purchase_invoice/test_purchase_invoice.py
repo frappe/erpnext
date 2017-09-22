@@ -645,6 +645,13 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		self.assertTrue(pi.get('payment_schedule'))
 
+	def test_duplicate_due_date_in_terms(self):
+		pi = make_purchase_invoice(do_not_save=1)
+		pi.append('payment_schedule', dict(due_date='2017-01-01', invoice_portion=50.00, payment_amount=50))
+		pi.append('payment_schedule', dict(due_date='2017-01-01', invoice_portion=50.00, payment_amount=50))
+
+		self.assertRaises(frappe.ValidationError, pi.insert)
+
 
 def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")

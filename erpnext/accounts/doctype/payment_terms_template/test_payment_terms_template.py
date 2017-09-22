@@ -47,3 +47,26 @@ class TestPaymentTermsTemplate(unittest.TestCase):
 		})
 
 		self.assertRaises(frappe.ValidationError, template.insert)
+
+	def test_duplicate_terms(self):
+		template = frappe.get_doc({
+			'doctype': 'Payment Terms Template',
+			'template_name': '_Test Payment Terms Template For Test',
+			'terms': [
+				{
+					'doctype': 'Payment Terms Template Detail',
+					'invoice_portion': 50.00,
+					'credit_days_based_on': 'Day(s) after invoice date',
+					'credit_days': 30
+				},
+				{
+					'doctype': 'Payment Terms Template Detail',
+					'invoice_portion': 50.00,
+					'credit_days_based_on': 'Day(s) after invoice date',
+					'credit_days': 30
+				}
+
+			]
+		})
+
+		self.assertRaises(frappe.ValidationError, template.insert)

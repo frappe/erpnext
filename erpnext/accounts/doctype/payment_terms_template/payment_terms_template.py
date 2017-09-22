@@ -14,6 +14,7 @@ class PaymentTermsTemplate(Document):
 	def validate(self):
 		self.validate_invoice_portion()
 		self.validate_credit_days()
+		self.check_duplicate_terms()
 
 	def validate_invoice_portion(self):
 		total_portion = 0
@@ -28,3 +29,14 @@ class PaymentTermsTemplate(Document):
 			if term.credit_days < 0:
 				frappe.msgprint(_('Credit Days cannot be a negative number'), raise_exception=1, indicator='red')
 
+	def check_duplicate_terms(self):
+		terms = []
+		for term in self.terms:
+			term_info = (term.credit_days, term.due_date_based_on)
+			if term_info in terms:
+				frappe.msgprint(
+					_('The Payment Term at row {0} is possibly a duplicate.').format(term.idx),
+					raise_exception=1, indicator='red'
+				)
+			else:
+				terms.append(term_info)
