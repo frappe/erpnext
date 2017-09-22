@@ -76,7 +76,7 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name": _("Daily Movements"),
+					"name": "Daily Movements",
 					"label": "Movimientos Diarios",
 					"doctype": "Payment Entry",
 					"is_query_report": True

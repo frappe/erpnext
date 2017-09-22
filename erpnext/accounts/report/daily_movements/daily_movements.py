@@ -25,7 +25,7 @@ def execute(filters=None):
 #		}
 #
 #	]
-	columns = ["Fecha:Date:100",_("Concepto") + ":Select:300", "Ingresos:Currency/currency:150","Egresos:Currency/currency:150", "Saldo:Currency/currency:150",_("Mode of Payment") + "::150"]
+	columns = [_("Fecha") +":Date:100",_("Concept") + ":Select:300", _("Income") + ":Currency/currency:150",_("Expenditures") + ":Currency/currency:150", "Saldo:Currency/currency:150",_("Mode of Payment") + "::150"]
 
 	total_income = 0
 	total_expenditure = 0
@@ -34,7 +34,7 @@ def execute(filters=None):
 	for row in result:
 		if current_payment_mode != row.payment_mode:
 			if current_payment_mode != "":
-				data.append([filters.get("target_date"), "Total ", total_income, total_expenditure,
+				data.append([filters.get("target_date"), _("Total") + " ", total_income, total_expenditure,
 						 total_income - total_expenditure, current_payment_mode])
 				data.append([])
 			total_expenditure = 0
@@ -44,11 +44,11 @@ def execute(filters=None):
 		expenditure = 0
 		concept = ""
 		if row.payment_type == "Receive":
-			concept = "Cobro "
+			concept = _("Receive") + " "
 			income = row.paid_amount
 			total_income += income
 		if row.payment_type == "Pay":
-			concept = "Pago "
+			concept = _("Payment ") + " "
 			expenditure = row.paid_amount
 			total_expenditure+= expenditure
 		if row.party_type == "Customer":
