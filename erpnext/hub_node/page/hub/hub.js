@@ -557,6 +557,9 @@ window.Hub = class Hub {
 			() => frappe.set_route('Form', 'Hub Settings'));
 
 		this.page.add_menu_item(__('Refresh'), () => this.refresh());
+
+		this.page.add_menu_item(__('Sync'),
+			() => frappe.call('erpnext.hub_node.doctype.hub_settings.hub_settings.sync'));
 	}
 
 	setup_sidebar() {
@@ -768,7 +771,7 @@ class HubList {
 
 		$item_card.find(".item-link").click((e) => {
 			e.preventDefault();
-			this.on_item_click && this.on_item_click(item.item_code);
+			this.on_item_click && this.on_item_click(item.name);
 		});
 
 		return $item_card;

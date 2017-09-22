@@ -44,7 +44,7 @@
  "mapping_name": "Item to Hub Item", 
  "mapping_type": "Push", 
  "migration_id_field": "hub_sync_id", 
- "modified": "2017-09-21 18:18:35.610945", 
+ "modified": "2017-09-22 15:32:12.674169", 
  "modified_by": "Administrator", 
  "name": "Item to Hub Item", 
  "owner": "Administrator", 
