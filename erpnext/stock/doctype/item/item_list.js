@@ -16,7 +16,6 @@ frappe.listview_settings['Item'] = {
 			return [__("Variant"), "green", "variant_of,=," + doc.variant_of];
 		}
 	},
-
 	reports: [
 		{
 			name: 'Stock Summary',
@@ -36,7 +35,10 @@ frappe.listview_settings['Item'] = {
 			report_type: 'Script Report'
 		}
 
-	]
+	],
+	onload: function (listview) {
+        	frappe.route_options = {"item_group": __("Products")};
+	}
 };
 
 frappe.help.youtube_id["Item"] = "qXaEwld4_Ps";
