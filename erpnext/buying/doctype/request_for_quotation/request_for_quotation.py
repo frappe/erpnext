@@ -138,7 +138,7 @@ class RequestforQuotation(BuyingController):
 			'user_fullname': full_name
 		}
 
-		subject = _("Request for Quotation")
+		subject = _("Request for Quotation: {0}".format(self.name))
 		template = "templates/emails/request_for_quotation.html"
 		sender = frappe.session.user not in STANDARD_USERS and frappe.session.user or None
 		message = frappe.get_template(template).render(args)
