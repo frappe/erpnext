@@ -31,8 +31,8 @@ rfq = Class.extend({
 		var me = this;
 		$('.rfq-items').on("change", ".rfq-qty", function(){
 			me.idx = parseFloat($(this).attr('data-idx'));
-			me.qty = parseFloat($(this).val()) || 0;
-			me.rate = parseFloat($(repl('.rfq-rate[data-idx=%(idx)s]',{'idx': me.idx})).val());
+			me.qty = me.get_float_with_comma($(this).val()) || 0;
+			me.rate = me.get_float_with_comma($(repl('.rfq-rate[data-idx=%(idx)s]',{'idx': me.idx})).val());
 			me.update_qty_rate();
 			$(this).val(format_number(me.qty, doc.number_format, 2));
 		})
@@ -42,8 +42,8 @@ rfq = Class.extend({
 		var me = this;
 		$(".rfq-items").on("change", ".rfq-rate", function(){
 			me.idx = parseFloat($(this).attr('data-idx'));
-			me.rate = parseFloat($(this).val()) || 0;
-			me.qty = parseFloat($(repl('.rfq-qty[data-idx=%(idx)s]',{'idx': me.idx})).val());
+			me.rate = me.get_float_with_comma($(this).val()) || 0;
+			me.qty = me.get_float_with_comma($(repl('.rfq-qty[data-idx=%(idx)s]',{'idx': me.idx})).val());
 			me.update_qty_rate();
 			$(this).val(format_number(me.rate, doc.number_format, 2));
 		})
@@ -85,7 +85,7 @@ rfq = Class.extend({
 					frappe.unfreeze();
 					if(r.message){
 						$('.btn-sm').hide()
-						window.location.href = "/quotations/" + encodeURIComponent(r.message);
+						window.location.href = "/supplier-quotations/" + encodeURIComponent(r.message);
 					}
 				}
 			})
@@ -97,5 +97,10 @@ rfq = Class.extend({
 			name = $(this).attr('idx')
 			window.location.href = "/quotations/" + encodeURIComponent(name);
 		})
+	},
+
+	get_float_with_comma:function(float_val){
+		var return_val = parseFloat(float_val.replace(/,/g, ''));
+		return return_val
 	}
 })
