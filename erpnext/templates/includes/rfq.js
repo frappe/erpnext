@@ -101,6 +101,6 @@ rfq = Class.extend({
 
 	get_float_with_comma:function(float_val){
 		var return_val = parseFloat(float_val.replace(/,/g, ''));
-		return return_val
+		return return_val;
 	}
 })
