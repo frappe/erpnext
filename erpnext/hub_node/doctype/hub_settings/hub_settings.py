@@ -10,8 +10,8 @@ from frappe import _
 from erpnext.utilities.product import get_price, get_qty_in_stock
 from six import string_types
 
-hub_url = "http://erpnext.hub:8000"
-# hub_url = "https://hub.erpnext.org"
+# hub_url = "http://erpnext.hub:8000"
+hub_url = "https://hub.erpnext.org"
 # hub_url = "http://192.168.29.145:3000"
 
 class HubSetupError(frappe.ValidationError): pass
@@ -51,6 +51,7 @@ class HubSettings(Document):
 		if message and message.get('password'):
 			self.user = frappe.session.user
 			self.create_hub_connector(message)
+			self.company = frappe.defaults.get_user_default('company')
 			self.enabled = 1
 			self.save()
 
