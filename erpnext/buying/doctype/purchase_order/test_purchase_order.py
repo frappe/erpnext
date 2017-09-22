@@ -152,6 +152,35 @@ class TestPurchaseOrder(unittest.TestCase):
 			"group_same_items": 1
 			}).insert(ignore_permissions=True)
 
+	def test_make_po_without_terms(self):
+		po = create_purchase_order(do_not_save=1)
+
+		self.assertFalse(po.get('payment_schedule'))
+
+		po.insert()
+
+		self.assertTrue(po.get('payment_schedule'))
+
+	def test_terms_does_not_copy(self):
+		po = create_purchase_order()
+
+		self.assertTrue(po.get('payment_schedule'))
+
+		pi = make_purchase_invoice(po.name)
+
+		self.assertFalse(pi.get('payment_schedule'))
+
+	def test_terms_copied(self):
+		po = create_purchase_order(do_not_save=1)
+		po.payment_terms_template = '_Test Payment Term Template'
+		po.insert()
+		po.submit()
+		self.assertTrue(po.get('payment_schedule'))
+
+		pi = make_purchase_invoice(po.name)
+		pi.insert()
+		self.assertTrue(pi.get('payment_schedule'))
+
 		
 def get_same_items():
 	return [

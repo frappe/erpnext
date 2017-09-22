@@ -532,6 +532,33 @@ class TestSalesOrder(unittest.TestCase):
 
 		self.assertEquals(new_so.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
 
+	def test_terms_auto_added(self):
+		so = make_sales_order(do_not_save=1)
+
+		self.assertFalse(so.get('payment_schedule'))
+
+		so.insert()
+
+		self.assertTrue(so.get('payment_schedule'))
+
+	def test_terms_not_copied(self):
+		so = make_sales_order()
+		self.assertTrue(so.get('payment_schedule'))
+
+		si = make_sales_invoice(so.name)
+		self.assertFalse(si.get('payment_schedule'))
+
+	def test_terms_copied(self):
+		so = make_sales_order(do_not_copy=1)
+		so.payment_terms_template = '_Test Payment Term Template'
+		so.insert()
+		self.assertTrue(so.get('payment_schedule'))
+
+		si = make_sales_invoice(so.name)
+		si.insert()
+		self.assertTrue(si.get('payment_schedule'))
+
+
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")
 	args = frappe._dict(args)

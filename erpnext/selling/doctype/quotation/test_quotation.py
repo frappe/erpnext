@@ -8,7 +8,29 @@ import unittest
 
 test_dependencies = ["Product Bundle"]
 
+
 class TestQuotation(unittest.TestCase):
+	def test_make_quotation_without_terms(self):
+		quotation = make_quotation(do_not_save=1)
+		self.assertFalse(quotation.get('payment_schedule'))
+
+		quotation.insert()
+
+		self.assertTrue(quotation.payment_schedule)
+
+	def test_make_sales_order_terms_not_copied(self):
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+
+		quotation = frappe.copy_doc(test_records[0])
+		quotation.transaction_date = nowdate()
+		quotation.valid_till = add_months(quotation.transaction_date, 1)
+		quotation.insert()
+		quotation.submit()
+
+		sales_order = make_sales_order(quotation.name)
+
+		self.assertFalse(sales_order.get('payment_schedule'))
+
 	def test_make_sales_order(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 

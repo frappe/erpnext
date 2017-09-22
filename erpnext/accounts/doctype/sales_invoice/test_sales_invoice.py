@@ -1354,6 +1354,14 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEquals(expected_values[gle.account][1], gle.debit)
 			self.assertEquals(expected_values[gle.account][2], gle.credit)
 
+	def test_create_invoice_without_terms(self):
+		si = create_sales_invoice(do_not_save=1)
+		self.assertFalse(si.get('payment_schedule'))
+
+		si.insert()
+		self.assertTrue(si.get('payment_schedule'))
+
+
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
 	args = frappe._dict(args)

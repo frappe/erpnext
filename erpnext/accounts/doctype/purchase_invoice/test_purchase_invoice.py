@@ -636,6 +636,15 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEquals(expected_gl_entries[i][2], gle.credit)
 			self.assertEquals(getdate(expected_gl_entries[i][3]), getdate(gle.due_date))
 
+	def test_make_pi_without_terms(self):
+		pi = make_purchase_invoice(do_not_save=1)
+
+		self.assertFalse(pi.get('payment_schedule'))
+
+		pi.insert()
+
+		self.assertTrue(pi.get('payment_schedule'))
+
 
 def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")

@@ -9,12 +9,12 @@ import frappe
 
 class TestPaymentTermsTemplate(unittest.TestCase):
 	def tearDown(self):
-		frappe.delete_doc('Payment Terms Template', '_Test Payment Terms Template', force=1)
+		frappe.delete_doc('Payment Terms Template', '_Test Payment Terms Template For Test', force=1)
 
 	def test_create_template(self):
 		template = frappe.get_doc({
 			'doctype': 'Payment Terms Template',
-			'template_name': '_Test Payment Terms Template',
+			'template_name': '_Test Payment Terms Template For Test',
 			'terms': [{
 				'doctype': 'Payment Terms Template Detail',
 				'invoice_portion': 50.00,
@@ -37,7 +37,7 @@ class TestPaymentTermsTemplate(unittest.TestCase):
 	def test_credit_days(self):
 		template = frappe.get_doc({
 			'doctype': 'Payment Terms Template',
-			'template_name': '_Test Payment Terms Template',
+			'template_name': '_Test Payment Terms Template For Test',
 			'terms': [{
 				'doctype': 'Payment Terms Template Detail',
 				'invoice_portion': 100.00,
