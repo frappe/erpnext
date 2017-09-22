@@ -1279,11 +1279,13 @@ class TestSalesInvoice(unittest.TestCase):
 		si = create_sales_invoice(do_not_save=True, customer="_Test Customer P")
 		si.append("payment_schedule", {
 			"due_date": add_days(nowdate(), 15),
-			"payment_amount": 20
+			"payment_amount": 20,
+			"invoice_portion": 20.00
 		})
 		si.append("payment_schedule", {
 			"due_date": add_days(nowdate(), 45),
-			"payment_amount": 80
+			"payment_amount": 80,
+			"invoice_portion": 80.00
 		})
 		
 		si.save()

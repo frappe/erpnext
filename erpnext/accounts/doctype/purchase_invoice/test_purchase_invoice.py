@@ -607,11 +607,13 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi = make_purchase_invoice(do_not_save=True, supplier="_Test Supplier P")
 		pi.append("payment_schedule", {
 			"due_date": add_days(nowdate(), 15),
-			"payment_amount": 100
+			"payment_amount": 100,
+			"invoice_portion": 40.00
 		})
 		pi.append("payment_schedule", {
 			"due_date": add_days(nowdate(), 45),
-			"payment_amount": 150
+			"payment_amount": 150,
+			"invoice_portion": 60.00
 		})
 
 		pi.save()

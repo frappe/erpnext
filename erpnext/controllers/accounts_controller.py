@@ -34,6 +34,7 @@ class AccountsController(TransactionBase):
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
+
 		self.validate_date_with_fiscal_year()
 
 		if self.meta.get_field("currency"):
@@ -45,17 +46,7 @@ class AccountsController(TransactionBase):
 			validate_return(self)
 			self.set_total_in_words()
 
-		if self.doctype in ("Sales Invoice", "Purchase Invoice") and not self.is_return:
-			if self.get("payment_schedule"):
-				self.set_due_date()
-				self.validate_payment_schedule()
-			else:
-				self.set_payment_schedule()
-				self.set_due_date()
-			self.validate_due_date()
-			self.validate_advance_entries()
-		elif self.doctype in ("Quotation", "Purchase Order", "Sales Order"):
-			self.set_payment_schedule()
+		self.validate_all_documents_schedule()
 
 		if self.meta.get_field("taxes_and_charges"):
 			self.validate_enabled_taxes_and_charges()
@@ -65,6 +56,29 @@ class AccountsController(TransactionBase):
 
 		if self.doctype == 'Purchase Invoice':
 			self.validate_paid_amount()
+
+	def validate_invoice_documents_schedule(self):
+		if self.get("payment_schedule"):
+			self.set_due_date()
+			self.validate_payment_schedule()
+		else:
+			self.set_payment_schedule()
+			self.set_due_date()
+		self.validate_due_date()
+		self.validate_advance_entries()
+
+	def validate_non_invoice_documents_schedule(self):
+		if self.get("payment_schedule"):
+			self.validate_invoice_portion()
+			self.validate_payment_schedule_amount()
+		else:
+			self.set_payment_schedule()
+
+	def validate_all_documents_schedule(self):
+		if self.doctype in ("Sales Invoice", "Purchase Invoice") and not self.is_return:
+			self.validate_invoice_documents_schedule()
+		elif self.doctype in ("Quotation", "Purchase Order", "Sales Order"):
+			self.validate_non_invoice_documents_schedule()
 
 	def before_print(self):
 		if self.doctype in ['Purchase Order', 'Sales Order']:
@@ -85,11 +99,11 @@ class AccountsController(TransactionBase):
 						self.paid_amount = 0
 						frappe.throw(_("Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified"))
 			else:
-				frappe.db.set(self,'paid_amount',0)
+				frappe.db.set(self, 'paid_amount', 0)
 
 	def set_missing_values(self, for_validate=False):
 		if frappe.flags.in_test:
-			for fieldname in ["posting_date","transaction_date"]:
+			for fieldname in ["posting_date", "transaction_date"]:
 				if self.meta.get_field(fieldname) and not self.get(fieldname):
 					self.set(fieldname, today())
 					break
@@ -629,18 +643,33 @@ class AccountsController(TransactionBase):
 		self.due_date = max([d.due_date for d in self.get("payment_schedule")])
 
 	def validate_payment_schedule(self):
+		self.validate_payment_schedule_dates()
+		self.validate_invoice_portion()
+		self.validate_payment_schedule_amount()
+
+	def validate_payment_schedule_dates(self):
 		if self.due_date and getdate(self.due_date) < getdate(self.posting_date):
 			frappe.throw(_("Due Date cannot be before posting date"))
 
-		total = 0
 		for d in self.get("payment_schedule"):
 			if getdate(d.due_date) < getdate(self.posting_date):
 				frappe.throw(_("Row {0}: Due Date cannot be before posting date").format(d.idx))
 
+	def validate_payment_schedule_amount(self):
+		total = 0
+		for d in self.get("payment_schedule"):
 			total += flt(d.payment_amount)
 
 		if total != self.grand_total:
 			frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand Total"))
+
+	def validate_invoice_portion(self):
+		total_portion = 0
+		for term in self.payment_schedule:
+			total_portion += term.invoice_portion
+
+		if flt(total_portion, 2) != 100.00:
+			frappe.msgprint(_('Combined invoice portion must equal 100%'), raise_exception=1, indicator='red')
 
 
 @frappe.whitelist()
