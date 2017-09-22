@@ -1,4 +1,4 @@
-/* globals ERPNextHub, ERPNextHubList */
+/* globals Hub, HubList */
 
 frappe.provide('erpnext.hub');
 
@@ -9,7 +9,7 @@ frappe.pages['hub'].on_page_load = function(wrapper) {
 		single_col: false
 	});
 
-	erpnext.hub.Hub = new ERPNextHub({ page });
+	erpnext.hub.Hub = new Hub({ page });
 
 };
 
@@ -28,14 +28,9 @@ frappe.pages['hub'].on_page_show = function(wrapper) {
 			erpnext.hub.Hub.go_to_company_page(company_name);
 		}
 	}
-
-	if(!current_route[1]) {
-		erpnext.hub.Hub.reset_filters();
-		erpnext.hub.Hub.refresh();
-	}
 }
 
-window.ERPNextHub = class ERPNextHub {
+window.Hub = class Hub {
 	constructor({ page }) {
 		this.page = page;
 		frappe.require('/assets/erpnext/css/hub.css', () => {
@@ -81,7 +76,6 @@ window.ERPNextHub = class ERPNextHub {
 				$layout_main.append($empty_state);
 
 				$empty_state.find('.btn-primary').on('click', () => {
-					// frappe.set_route('Form', 'Hub Settings');
 					this.register_for_hub();
 				});
 			} else {
@@ -264,7 +258,7 @@ window.ERPNextHub = class ERPNextHub {
 	}
 
 	setup_lists() {
-		this.home_item_list = new ERPNextHubList({
+		this.home_item_list = new HubList({
 			parent: this.$main_list_section,
 			title: 'New',
 			page_length: 20,
@@ -297,7 +291,7 @@ window.ERPNextHub = class ERPNextHub {
 	go_to_items_only_page(route, title, class_name, filters = {text: ''}, by_item_codes=0) {
 		frappe.set_route(route);
 		this.$hub_main_section.empty();
-		this.filtered_item_list = new ERPNextHubList({
+		this.filtered_item_list = new HubList({
 			parent: this.$hub_main_section,
 			title: title,
 			page_length: 20,
@@ -346,7 +340,7 @@ window.ERPNextHub = class ERPNextHub {
 
 		let $company_items = $item_page.find('.company-items');
 
-		let company_item_list = new ERPNextHubList({
+		let company_item_list = new HubList({
 			parent: $company_items,
 			title: 'More by ' + item.company_name,
 			page_length: 5,
@@ -381,7 +375,7 @@ window.ERPNextHub = class ERPNextHub {
 					.then(r => {
 						console.log(r);
 						if (r.message && r.message.rfq) {
-							$btn.html(`<span><i class='fa fa-check'></i> ${__('Quote Requested')}</span>`);
+							$btn.addClass('disabled').html(`<span><i class='fa fa-check'></i> ${__('Quote Requested')}</span>`);
 						} else {
 							throw r;
 						}
@@ -450,7 +444,7 @@ window.ERPNextHub = class ERPNextHub {
 
 		let $company_items = $company_page.find('.company-items');
 
-		let company_item_list = new ERPNextHubList({
+		let company_item_list = new HubList({
 			parent: $company_items,
 			title: 'More by ' + company_details.company_name,
 			page_length: 5,
@@ -489,7 +483,7 @@ window.ERPNextHub = class ERPNextHub {
 							<span class="text-muted">Products</span>
 						</div>
 						<div class="description">
-							<span class="small">${ item.description }</span>
+							<span class="small">${ item.description ? item.description : "" }</span>
 						</div>
 						<div class="price">
 							${ item.formatted_price ? item.formatted_price : '' }
@@ -554,6 +548,8 @@ window.ERPNextHub = class ERPNextHub {
 
 	go_to_home_page() {
 		frappe.set_route('hub');
+		this.reset_filters();
+		this.refresh();
 	}
 
 	setup_menu() {
@@ -565,7 +561,7 @@ window.ERPNextHub = class ERPNextHub {
 
 	setup_sidebar() {
 		var me = this;
-		this.sidebar = new ERPNextHubSidebar({
+		this.sidebar = new HubSidebar({
 			wrapper: this.page.wrapper.find('.layout-side-section')
 		});
 
@@ -594,6 +590,7 @@ window.ERPNextHub = class ERPNextHub {
 	}
 
 	make_rfq(item, supplier, btn) {
+		console.log(supplier);
 		return new Promise((resolve, reject) => {
 			frappe.call({
 				method: 'erpnext.hub_node.make_rfq_and_send_opportunity',
@@ -614,7 +611,7 @@ window.ERPNextHub = class ERPNextHub {
 	}
 }
 
-class ERPNextHubList {
+class HubList {
 	constructor({
 		parent = null,
 		title = 'Products',
@@ -791,7 +788,7 @@ class ERPNextHubList {
 	}
 }
 
-class ERPNextHubSidebar {
+class HubSidebar {
 	constructor({ wrapper }) {
 		this.wrapper = wrapper;
 		this.make_dom();

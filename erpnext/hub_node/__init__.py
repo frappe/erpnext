@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe, requests, json
 from frappe.utils import now, nowdate, cint
+from frappe.utils.nestedset import get_root_of
 from frappe.contacts.doctype.contact.contact import get_default_contact
 
 @frappe.whitelist()
@@ -16,8 +17,8 @@ def enable_hub():
 @frappe.whitelist()
 def get_items(start=0, page_length=20):
 	connection = get_connection()
-	response = connection.get_list('Hub Item', limit_start=start, limit_page_length=page_length)
-	return response.list
+	response = connection.connection.get_list('Hub Item', limit_start=start, limit_page_length=page_length)
+	return response
 
 @frappe.whitelist()
 def get_categories():
@@ -170,7 +171,7 @@ def make_rfq_and_send_opportunity(item, supplier):
 	contact = make_contact(supplier)
 	item = make_item(item)
 	rfq = make_rfq(item, supplier, contact)
-	status = send_opportunity(supplier, contact)
+	status = send_opportunity(contact)
 
 	return {
 		'rfq': rfq,
@@ -185,7 +186,8 @@ def make_supplier(supplier):
 		supplier_doc = frappe.get_doc({
 			'doctype': 'Supplier',
 			'supplier_name': supplier.supplier_name,
-			'supplier_type': supplier.supplier_type
+			'supplier_type': supplier.supplier_type,
+			'supplier_email': supplier.supplier_email
 		}).insert()
 	else:
 		supplier_doc = frappe.get_doc('Supplier', supplier.supplier_name)
@@ -202,7 +204,7 @@ def make_contact(supplier):
 			'email_id': supplier.supplier_email,
 			'is_primary_contact': 1,
 			'links': [
-				{'link_doctype': 'Supplier', 'link_name': supplier_doc.name}
+				{'link_doctype': 'Supplier', 'link_name': supplier.supplier_name}
 			]
 		}).insert()
 	else:
@@ -242,7 +244,7 @@ def make_rfq(item, supplier, contact):
 				'item_code': item.item_code,
 				'qty': 1,
 				'schedule_date': nowdate(),
-				'warehouse': item.default_warehouse,
+				'warehouse': item.default_warehouse or get_root_of("Warehouse"),
 				'description': item.description,
 				'uom': item.stock_uom
 			}
@@ -253,13 +255,14 @@ def make_rfq(item, supplier, contact):
 	rfq.submit()
 	return rfq
 
-def send_opportunity(supplier, contact):
+def send_opportunity(contact):
 	# Make Hub Document on Hub with lead data
 	doc = {
 		'doctype': 'Lead',
-		'lead_name': supplier.supplier_name,
-		'email_id': contact.email_id
+		'lead_name': frappe.db.get_single_value('Hub Settings', 'company'),
+		'email_id': frappe.db.get_single_value('Hub Settings', 'user')
 	}
+
 	args = frappe._dict(dict(
 		doctype='Hub Document',
 		reference_doctype='Lead',
