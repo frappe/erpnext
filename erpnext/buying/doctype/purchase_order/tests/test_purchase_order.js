@@ -20,7 +20,7 @@ QUnit.test("test: purchase order", function(assert) {
 						{"rate": 100},
 						{"warehouse": 'Stores - '+frappe.get_abbr(frappe.defaults.get_default("Company"))}
 					],
-					[
+                    [
 						{"item_code": 'Test Product 1'},
 						{"schedule_date": frappe.datetime.add_days(frappe.datetime.now_date(), 1)},
 						{"expected_delivery_date": frappe.datetime.add_days(frappe.datetime.now_date(), 5)},
