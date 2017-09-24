@@ -13,14 +13,14 @@ QUnit.test("test: purchase order", function(assert) {
 				{items: [
 					[
 						{"item_code": 'Test Product 4'},
-						{"schedule_date": frappe.datetime.add_days(frappe.datetime.now_date(), 2)},
+						{"schedule_date": frappe.datetime.add_days(frappe.datetime.now_date(), 1)},
 						{"expected_delivery_date": frappe.datetime.add_days(frappe.datetime.now_date(), 5)},
 						{"qty": 5},
 						{"uom": 'Unit'},
 						{"rate": 100},
 						{"warehouse": 'Stores - '+frappe.get_abbr(frappe.defaults.get_default("Company"))}
 					],
-					[
+                    [
 						{"item_code": 'Test Product 1'},
 						{"schedule_date": frappe.datetime.add_days(frappe.datetime.now_date(), 1)},
 						{"expected_delivery_date": frappe.datetime.add_days(frappe.datetime.now_date(), 5)},
