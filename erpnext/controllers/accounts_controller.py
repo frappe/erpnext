@@ -8,7 +8,6 @@ from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
 from erpnext.controllers.sales_and_purchase_return import validate_return
 from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled
 from erpnext.exceptions import InvalidCurrency
@@ -53,13 +52,6 @@ class AccountsController(TransactionBase):
 		self.validate_party()
 		self.validate_currency()
 
-		if self.meta.get_field("is_recurring"):
-			if self.amended_from and self.recurring_id == self.amended_from:
-				self.recurring_id = None
-			if not self.get("__islocal"):
-				validate_recurring_document(self)
-				convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
-
 		if self.doctype == 'Purchase Invoice':
 			self.validate_paid_amount()
 
@@ -83,11 +75,6 @@ class AccountsController(TransactionBase):
 						frappe.throw(_("Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified"))
 			else:
 				frappe.db.set(self,'paid_amount',0)
-
-	def on_update_after_submit(self):
-		if self.meta.get_field("is_recurring"):
-			validate_recurring_document(self)
-			convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
 
 	def set_missing_values(self, for_validate=False):
 		if frappe.flags.in_test:

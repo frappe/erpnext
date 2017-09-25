@@ -1,0 +1,42 @@
+[
+	{
+		"doctype": "Fee Structure",
+		"academic_year": "2017-2018",
+		"academic_term": "2017-2018 (_Test AT1)",
+		"components": [
+			{
+				"fees_category": "Tuition Fee",
+				"amount": 40000
+			},
+			{
+				"fees_category": "Transportation Fee",
+				"amount": 10000
+			}
+		],
+		"total_amount": 50000,
+		"receivable_account": "_Test Receivable - _TC",
+		"income_account": "Sales - _TC",
+		"cost_center": "_Test Cost Center - _TC",
+		"company": "_Test Company"
+	},
+	{
+		"doctype": "Fee Structure",
+		"academic_year": "2017-2018",
+		"academic_term": "2017-2018 (_Test AT2)",
+		"components": [
+			{
+				"fees_category": "Tuition Fee",
+				"amount": 40000
+			},
+			{
+				"fees_category": "Transportation Fee",
+				"amount": 10000
+			}
+		],
+		"total_amount": 50000,
+		"receivable_account": "_Test Receivable - _TC",
+		"income_account": "Sales - _TC",
+		"cost_center": "_Test Cost Center - _TC",
+		"company": "_Test Company"
+	}
+]

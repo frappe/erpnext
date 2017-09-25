@@ -63,8 +63,8 @@ frappe.ui.form.on("Item", {
 			frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 		if (frm.doc.variant_of) {
-			frm.set_intro(__("This Item is a Variant of {0} (Template).", 
-				[frm.doc.variant_of]), true);
+			frm.set_intro(__('This Item is a Variant of {0} (Template).', 
+				[`<a href="#Form/Item/${frm.doc.variant_of}">${frm.doc.variant_of}</a>`]), true);
 		}
 
 		if (frappe.defaults.get_default("item_naming_by")!="Naming Series" || frm.doc.variant_of) {
@@ -97,6 +97,12 @@ frappe.ui.form.on("Item", {
 			}
 			frappe.set_route('Form', 'Item', new_item.name);
 		});
+
+		if(frm.doc.has_variants) {
+			frm.add_custom_button(__("Item Variant Settings"), function() {
+				frappe.set_route("Form", "Item Variant Settings");
+			}, __("View"));
+		}
 	},
 
 	validate: function(frm){

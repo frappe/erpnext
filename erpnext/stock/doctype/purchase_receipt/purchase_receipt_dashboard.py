@@ -5,7 +5,8 @@ def get_data():
 		'fieldname': 'purchase_receipt_no',
 		'non_standard_fieldnames': {
 			'Purchase Invoice': 'purchase_receipt',
-			'Landed Cost Voucher': 'receipt_document'
+			'Landed Cost Voucher': 'receipt_document',
+			'Subscription': 'reference_document'
 		},
 		'internal_links': {
 			'Purchase Order': ['items', 'purchase_order'],
@@ -24,6 +25,10 @@ def get_data():
 			{
 				'label': _('Returns'),
 				'items': ['Stock Entry']
+			},
+			{
+				'label': _('Subscription'),
+				'items': ['Subscription']
 			},
 		]
 	}

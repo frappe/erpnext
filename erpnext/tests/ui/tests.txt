@@ -50,6 +50,7 @@ erpnext/schools/doctype/room/test_room.js
 erpnext/schools/doctype/instructor/test_instructor.js
 erpnext/stock/doctype/warehouse/test_warehouse.js
 erpnext/manufacturing/doctype/production_order/test_production_order.js #long
+erpnext/selling/page/point_of_sale/tests/test_point_of_sale.js
 erpnext/accounts/page/pos/test_pos.js
 erpnext/selling/doctype/product_bundle/test_product_bundle.js
 erpnext/stock/doctype/delivery_note/test_delivery_note.js
@@ -70,7 +71,8 @@ erpnext/hr/doctype/appraisal_template/test_appraisal_template.js
 erpnext/hr/doctype/appraisal/test_appraisal.js
 erpnext/hr/doctype/expense_claim_type/test_expense_claim_type.js
 erpnext/hr/doctype/expense_claim/test_expense_claim.js
-erpnext/hr/doctype/training_event/test_training_event.js
+erpnext/hr/doctype/training_event/tests/test_training_event.js
+erpnext/hr/doctype/training_event/tests/test_training_event_attendance.js
 erpnext/hr/doctype/training_result_employee/test_training_result.js
 erpnext/hr/doctype/training_feedback/test_training_feedback.js
 erpnext/hr/doctype/loan_type/test_loan_type.js
@@ -125,3 +127,4 @@ erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_subcontract.js
 erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_material_issue_with_serialize_item.js
 erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_repack.js
 erpnext/accounts/doctype/sales_invoice/tests/test_sales_invoice_with_serialize_item.js
+erpnext/accounts/doctype/payment_entry/tests/test_payment_against_invoice.js

@@ -38,6 +38,7 @@ $.extend(frappe.test_data, {
 			{is_stock_item: 1},
 			{standard_rate: 250},
 			{opening_stock: 100},
+			{stock_uom:'Kg'}
 		],
 		"Test Service 1": [
 			{item_code: "Test Service 1"},
@@ -205,6 +206,18 @@ $.extend(frappe.test_data, {
 			{title: "Test Term 2"}
 		]
 	},
+	"Item Price": {
+		"ITEM-PRICE-00001": [
+			{item_code: 'Test Product 1'},
+			{price_list: '_Test Price List'},
+			{price_list_rate: 100}
+		],
+		"ITEM-PRICE-00002": [
+			{item_code: 'Test Product 2'},
+			{price_list: '_Test Price List'},
+			{price_list_rate: 200}
+		]
+	}
 });
 
 

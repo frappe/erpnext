@@ -1,0 +1,21 @@
+<h3>{{_("Training Event")}}</h3>
+<p>{{ message }}</p>
+
+<h4>{{_("Details")}}</h4>
+{{_("Event Name")}}: <a href="{{ event_link }}">{{ name }}</a>
+<br>{{_("Event Location")}}: {{ location }}
+<br>{{_("Start Time")}}: {{ start_time }}
+<br>{{_("End Time")}}: {{ end_time }}
+<br>{{_("Attendance")}}: {{ attendance }}
+
+<h4>{{_("Update Response")}}</h4>
+{% if not self_study %}
+<p>{{_("Please update your status for this training event")}}:</p>
+<form action="{{ confirm_link }}"><input style="display:inline-block" type="submit" value="Confirm Attendance" /></form>   
+<form action="{{ reject_link }}"><input style="display:inline-block" type="submit" value="Reject Invitation" /></form>
+{% else %}
+<p>{{_("Please confirm once you have completed your training")}}:</p>
+<form action="{{ complete_link }}"><input style="display:inline-block" type="submit" value="Completed Training" /></form>
+{% endif %}
+<p>{{_("Thank you")}},<br>
+{{ user_fullname }}</p>
