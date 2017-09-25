@@ -519,7 +519,7 @@ class TestSalesOrder(unittest.TestCase):
 		so.items[0].price_list_rate = price_list_rate = 100
 		so.items[0].margin_type = 'Percentage'
 		so.items[0].margin_rate_or_amount = 25
-		so.insert()
+		so.save()
 
 		new_so = frappe.copy_doc(so)
 		new_so.save(ignore_permissions=True)
@@ -549,7 +549,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertFalse(si.get('payment_schedule'))
 
 	def test_terms_copied(self):
-		so = make_sales_order(do_not_copy=1)
+		so = make_sales_order(do_not_copy=1, do_not_save=1)
 		so.payment_terms_template = '_Test Payment Term Template'
 		so.insert()
 		self.assertTrue(so.get('payment_schedule'))
