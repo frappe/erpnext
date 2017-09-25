@@ -552,6 +552,7 @@ class TestSalesOrder(unittest.TestCase):
 		so = make_sales_order(do_not_copy=1, do_not_save=1)
 		so.payment_terms_template = '_Test Payment Term Template'
 		so.insert()
+		so.submit()
 		self.assertTrue(so.get('payment_schedule'))
 
 		si = make_sales_invoice(so.name)
