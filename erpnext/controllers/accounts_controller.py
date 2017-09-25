@@ -650,6 +650,7 @@ class AccountsController(TransactionBase):
 
 	def validate_payment_schedule_dates(self):
 		dates = []
+		li = []
 		if self.due_date and getdate(self.due_date) < getdate(self.posting_date):
 			frappe.throw(_("Due Date cannot be before posting date"))
 
@@ -657,7 +658,14 @@ class AccountsController(TransactionBase):
 			if getdate(d.due_date) < getdate(self.posting_date):
 				frappe.throw(_("Row {0}: Due Date cannot be before posting date").format(d.idx))
 			elif d.due_date in dates:
-				frappe.throw(_("Row {0}: Duplicate due date found").format(d.idx))
+				li.append('{0} in row {1}'.format(d.due_date, d.idx))
+				# frappe.throw(_("Row {0}: Duplicate due date found").format(d.idx))
+			dates.append(d.due_date)
+
+		if li:
+			duplicates = '<br>' + '<br>'.join(li)
+			frappe.throw(_("Rows with duplicate due dates in other rows were found: {list}").format(list=duplicates))
+
 
 	def validate_payment_schedule_amount(self):
 		total = 0
