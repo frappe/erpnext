@@ -47,7 +47,7 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 		let me = this;
 		let max_count = this.frm.doc.__onload.max_count;
 		let opening_invoices_summery = this.frm.doc.__onload.opening_invoices_summery;
-		if(opening_invoices_summery) {
+		if(!$.isEmptyObject(opening_invoices_summery)) {
 			let section = this.frm.dashboard.add_section(
 				frappe.render_template('opening_invoice_creation_tool_dashboard', {
 					data: opening_invoices_summery,
@@ -61,8 +61,8 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 				frappe.set_route('List', doctype,
 					{'is_opening': 'Yes', 'company': me.frm.doc.company, 'docstatus': 1});
 			});
+			this.frm.dashboard.show();
 		}
-		this.frm.dashboard.show();
 	}
 });
 
