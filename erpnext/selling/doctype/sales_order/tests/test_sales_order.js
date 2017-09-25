@@ -19,13 +19,15 @@ QUnit.test("test sales order", function(assert) {
 				{contact_person: 'Contact 1-Test Customer 1'},
 				{taxes_and_charges: 'TEST In State GST'},
 				{tc_name: 'Test Term 1'},
-				{terms: 'This is Test'}
+				{terms: 'This is Test'},
+				{payment_terms_template: '_Test Payment Term Template UI'}
 			]);
 		},
 		() => {
 			return frappe.tests.set_form_values(cur_frm, [
 				{selling_price_list:'Test-Selling-USD'},
-				{currency: 'USD'}
+				{currency: 'USD'},
+				{payment_schedule: []}
 			]);
 		},
 		() => frappe.timeout(1),
