@@ -117,8 +117,8 @@ class OpeningInvoiceCreationTool(Document):
 				"rate": rate or 0.0,
 				"qty": flt(row.qty) or 1.0,
 				"conversion_factor": 1.0,
-				"item_name": row.item_name or "Opening Item",
-				"description": row.item_name or "Opening Item",
+				"item_name": row.item_name or "Opening Invoice Item",
+				"description": row.item_name or "Opening Invoice Item",
 				income_expense_account_field: self.get_account(),
 				"cost_center": cost_center
 			})
