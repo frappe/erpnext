@@ -24,6 +24,19 @@ frappe.ui.form.on("Purchase Order", {
 	},
 });
 
+frappe.ui.form.on("Purchase Order Item", {
+	item_code: function(frm) {
+		frappe.call({
+			"method": "get_last_purchase_rate",
+			"doc": cur_frm.doc,
+			callback: function(r, rt) {
+				cur_frm.dirty();
+				cur_frm.cscript.calculate_taxes_and_totals();
+			}
+		})
+	}
+});
+
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
 	refresh: function(doc, cdt, cdn) {
 		var me = this;
@@ -214,17 +227,6 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 	delivered_by_supplier: function(){
 		cur_frm.cscript.update_status('Deliver', 'Delivered')
-	},
-
-	get_last_purchase_rate: function() {
-		frappe.call({
-			"method": "get_last_purchase_rate",
-			"doc": cur_frm.doc,
-			callback: function(r, rt) {
-				cur_frm.dirty();
-				cur_frm.cscript.calculate_taxes_and_totals();
-			}
-		})
 	}
 
 });
