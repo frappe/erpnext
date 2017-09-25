@@ -1,7 +1,54 @@
 {% extends "templates/web.html" %}
 
 {% block page_content %}
-<h1>{{ title }}</h1>
+<!-- <h1>{{ title }}</h1>
 {% endblock %}
 
-<!-- this is a sample default web page template -->
+this is a sample default web page template
+
+{% extends "templates/web.html" %} -->
+
+{% block content %}
+    <ul class="list-unstyled">
+        <li>
+            <label>Date:</label> {{ doc.get_formatted("date") }}
+        </li>
+        <li>
+            <label>Time:</label> {{ doc.get_formatted("from_time") }} to {{ doc.get_formatted("to_time") }}
+        </li>
+        <li>
+            <label>Status: </label> {{ doc.status }}
+        </li>
+    </ul>
+
+    <hr>
+    <h2>Agenda</h2>
+    <ol>
+        {% for agenda in doc.agenda %}
+        <li>
+            {{ agenda.description }}
+        </li>
+        {% endfor %}
+    </ol>
+
+    <hr>
+    <h2>Attendees</h2>
+    <ol>
+        {% for attendee in doc.attendees %}
+        <li>
+            {{ attendee.full_name }} {% if attendee.accepted %} <i class="icon icon-ok"></i> {% endif %}
+        </li>
+        {% endfor %}
+    </ol>
+
+    <hr>
+    <h2>Minutes</h2>
+    <ol>
+        {% for minute in doc.minutes %}
+        <li>
+            {{ minute.description }}
+        </li>
+        {% endfor %}
+    </ol>
+
+{% endblock %}
