@@ -298,7 +298,7 @@
    "bold": 0,
    "collapsible": 0,
    "columns": 0,
-   "default": "Today",
+   "default": "",
    "fieldname": "schedule_date",
    "fieldtype": "Date",
    "hidden": 0,
