@@ -66,10 +66,6 @@ def setup_complete(args=None):
 
 		pass
 
-def setup_success(args=None):
-	company = frappe.db.sql("select name from tabCompany", as_dict=True)[0]["name"]
-	install_country_fixtures(company)
-
 def create_fiscal_year_and_company(args):
 	if (args.get('fy_start_date')):
 		curr_fiscal_year = get_fy_details(args.get('fy_start_date'), args.get('fy_end_date'))
