@@ -27,9 +27,10 @@ class AccountsController(TransactionBase):
 
 	def onload(self):
 		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry')
-		relevant_docs = ("Quotation", "Purchase Order", "Sales Order", "Purchase Invoice", "Purchase Order")
-		if self.doctype in relevant_docs:
-			self.set_payment_schedule()
+		if self.is_new():
+			relevant_docs = ("Quotation", "Purchase Order", "Sales Order", "Purchase Invoice", "Purchase Order")
+			if self.doctype in relevant_docs:
+				self.set_payment_schedule()
 
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
