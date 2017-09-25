@@ -18,3 +18,4 @@ Regional
 Healthcare
 Restaurant
 ERPNext Integrations
+Meeting Minutes
