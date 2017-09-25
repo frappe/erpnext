@@ -111,8 +111,9 @@ cur_frm.cscript.change_abbr = function() {
 	dialog.fields_dict.update.$input.click(function() {
 		var args = dialog.get_values();
 		if(!args) return;
+		frappe.show_alert(__("Update in progress. It might take a while."));
 		return frappe.call({
-			method: "erpnext.setup.doctype.company.company.replace_abbr",
+			method: "erpnext.setup.doctype.company.company.enqueue_replace_abbr",
 			args: {
 				"company": cur_frm.doc.name,
 				"old": cur_frm.doc.abbr,
