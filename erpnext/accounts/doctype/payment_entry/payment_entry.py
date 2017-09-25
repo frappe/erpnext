@@ -8,14 +8,16 @@ from frappe import _, scrub, ValidationError
 from frappe.utils import flt, comma_or, nowdate
 from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on
 from erpnext.accounts.party import get_party_account
-from erpnext.accounts.doctype.journal_entry.journal_entry \
-	import get_average_exchange_rate, get_default_bank_cash_account
+from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.controllers.accounts_controller import AccountsController
 
-class InvalidPaymentEntry(ValidationError): pass
+
+class InvalidPaymentEntry(ValidationError):
+	pass
+
 
 class PaymentEntry(AccountsController):
 	def setup_party_account_field(self):
@@ -69,17 +71,15 @@ class PaymentEntry(AccountsController):
 	def validate_duplicate_entry(self):
 		reference_names = []
 		for d in self.get("references"):
-			if (d.reference_doctype, d.reference_name) in reference_names:
+			if (d.reference_doctype, d.reference_name, d.due_date) in reference_names:
 				frappe.throw(_("Row #{0}: Duplicate entry in References {1} {2}").format(d.idx, d.reference_doctype, d.reference_name))
-			reference_names.append((d.reference_doctype, d.reference_name))
-
+			reference_names.append((d.reference_doctype, d.reference_name, d.due_date))
 
 	def validate_allocated_amount(self):
 		for d in self.get("references"):
 			if (flt(d.allocated_amount))> 0:
 				if flt(d.allocated_amount) > flt(d.outstanding_amount):
 					frappe.throw(_("Row #{0}: Allocated Amount cannot be greater than outstanding amount.").format(d.idx))
-
 
 	def delink_advance_entry_references(self):
 		for reference in self.references:
@@ -127,7 +127,6 @@ class PaymentEntry(AccountsController):
 			if self.payment_type=="Receive" else self.paid_to_account_currency
 
 		self.set_missing_ref_details()
-
 
 	def set_missing_ref_details(self):
 		for d in self.get("references"):
@@ -594,8 +593,8 @@ def get_negative_outstanding_invoices(party_type, party, party_account, total_fi
 				"total_field": total_field,
 				"voucher_type": voucher_type,
 				"party_type": scrub(party_type),
-				"party_account": "debit_to" if party_type=="Customer" else "credit_to"
-			}), (party, party_account), as_dict = True)
+				"party_account": "debit_to" if party_type == "Customer" else "credit_to"
+			}), (party, party_account), as_dict=True)
 	else:
 		return []
 
