@@ -1,5 +1,5 @@
 QUnit.test("test: quotation", function (assert) {
-	assert.expect(10);
+	assert.expect(12);
 	let done = assert.async();
 	frappe.run_serially([
 		() => {
@@ -48,6 +48,9 @@ QUnit.test("test: quotation", function (assert) {
 
 			// Check Terms and Condtions
 			assert.ok(cur_frm.doc.tc_name == "Test Term 1", "Terms and Conditions Checked");
+
+			assert.ok(cur_frm.doc.payment_terms_template, "Payment Terms Template is correct");
+			assert.ok(cur_frm.doc.payment_schedule.length > 0, "Payment Term Schedule is not empty");
 
 		},
 		() => done()

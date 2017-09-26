@@ -1,7 +1,7 @@
 QUnit.module('Sales Order');
 
 QUnit.test("test sales order", function(assert) {
-	assert.expect(10);
+	assert.expect(12);
 	let done = assert.async();
 	frappe.run_serially([
 		() => {
@@ -50,6 +50,9 @@ QUnit.test("test sales order", function(assert) {
 		() => cur_frm.print_doc(),
 		() => frappe.timeout(1),
 		() => {
+			assert.ok(cur_frm.doc.payment_terms_template, "Payment Terms Template is correct");
+			assert.ok(cur_frm.doc.payment_schedule.length > 0, "Payment Term Schedule is not empty");
+
 			assert.ok($('.btn-print-print').is(':visible'), "Print Format Available");
 			frappe.timeout(1);
 			assert.ok($(".section-break+ .section-break .column-break:nth-child(1) .data-field:nth-child(1) .value").text().includes("Billing Street 1"), "Print Preview Works As Expected");
