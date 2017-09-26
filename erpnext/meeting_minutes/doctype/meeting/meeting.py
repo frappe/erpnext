@@ -9,14 +9,15 @@ from frappe.model.document import Document
 from frappe.website.website_generator import WebsiteGenerator
 
 class Meeting(WebsiteGenerator):
-	_website = frappe._dict(
-		template = "meeting.html",
-		page_title_field = "name",
+	website = frappe._dict(
+		template = "meeting/templates/meeting.html",
+		condition_field = "published",
+		page_title_field = "title",
 	)
 
 	def validate(self):
 		if not self.route:
-			self.route = 'meetings/' + self.scrub(self.name)
+			self.route = 'meetings/' + self.scrub(self.title)
 		self.validate_attendees()
 
 	def on_update(self):
@@ -72,10 +73,13 @@ class Meeting(WebsiteGenerator):
 			todo.delete()
 
 	def get_context(self, context):
-		context.parents = [{"name": "meetings", "title": "Meetings"}]
+		context.parents = [{'name': 'meetings', 'title': _('All Meetings') }]
+		# context.parents = [{"name": "meetings", "title": "Meetings"}]
+		# context.title = _("Jobs")
 
-		# context.parents = [dict(label='All Meetings',
-		# route='/meetings', title='All Meetings')]
+	def get_list_context(context):
+		context.title = 'All Meetings'
+
 
 
 @frappe.whitelist()
