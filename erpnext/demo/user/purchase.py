@@ -128,6 +128,7 @@ def make_subcontract():
 		po = frappe.new_doc("Purchase Order")
 		po.is_subcontracted = "Yes"
 		po.supplier = get_random("Supplier")
+		po.schedule_date = frappe.utils.add_days(frappe.flags.current_date, 7)
 
 		item_code = get_random("Item", {"is_sub_contracted_item": 1})
 

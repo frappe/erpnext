@@ -149,6 +149,7 @@ def create_purchase_order(**args):
 	if args.transaction_date:
 		po.transaction_date = args.transaction_date
 
+	po.schedule_date = add_days(nowdate(), 1)
 	po.company = args.company or "_Test Company"
 	po.supplier = args.customer or "_Test Supplier"
 	po.is_subcontracted = args.is_subcontracted or "No"
