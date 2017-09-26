@@ -776,7 +776,8 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 				'due_date': reference.due_date,
 				'total_amount': reference.invoice_amount,
 				'outstanding_amount': reference.outstanding_amount,
-				'allocated_amount': allocated_amount
+				'allocated_amount': allocated_amount,
+				"bill_no": reference.get("bill_no")
 			})
 			if paid_amount:
 				paid_amount -= allocated_amount
