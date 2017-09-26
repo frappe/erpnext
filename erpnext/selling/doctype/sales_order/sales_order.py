@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 import frappe.utils
-from frappe.utils import cstr, flt, getdate, comma_and, cint
+from frappe.utils import cstr, flt, getdate, comma_and, cint, nowdate, add_days
 from frappe import _
 from frappe.model.utils import get_fetch_values
 from frappe.model.mapper import get_mapped_doc
@@ -658,6 +658,7 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 		target.apply_discount_on = ""
 		target.additional_discount_percentage = 0.0
 		target.discount_amount = 0.0
+		target.schedule_date = add_days(nowdate(), 1)
 
 		default_price_list = frappe.get_value("Supplier", for_supplier, "default_price_list")
 		if default_price_list:
