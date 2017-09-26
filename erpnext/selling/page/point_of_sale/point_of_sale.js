@@ -20,6 +20,10 @@ frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 	});
 };
 
+frappe.pages['point-of-sale'].refresh = function(wrapper) {
+	cur_frm = wrapper.pos.frm;
+}
+
 erpnext.pos.PointOfSale = class PointOfSale {
 	constructor(wrapper) {
 		this.wrapper = $(wrapper).find('.layout-main-section');
@@ -478,6 +482,8 @@ class POSCart {
 	}
 
 	update_taxes_and_totals() {
+		if (!this.frm.doc.taxes) { return; }
+
 		const currency = this.frm.doc.currency;
 		this.frm.refresh_field('taxes');
 
