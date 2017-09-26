@@ -8,7 +8,7 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 				filters: {
 					'name': ['in', 'Customer,Supplier']
 				}
-			}
+			};
 		});
 	},
 
@@ -16,7 +16,7 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 		frm.disable_save();
 		this.trigger("make_dashboard");
 		frm.page.set_primary_action(__("Make Invoice"), () => {
-			btn_primary = frm.page.btn_primary.get(0);
+			let btn_primary = frm.page.btn_primary.get(0);
 			return frm.call({
 				doc: frm.doc,
 				freeze: true,
@@ -59,7 +59,7 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 				let doctype = $(this).attr('data-type');
 				let company = $(this).attr('data-company');
 				frappe.set_route('List', doctype,
-					{'is_opening': 'Yes', 'company': me.frm.doc.company, 'docstatus': 1});
+					{'is_opening': 'Yes', 'company': company, 'docstatus': 1});
 			});
 			this.frm.dashboard.show();
 		}
@@ -72,4 +72,4 @@ frappe.ui.form.on('Opening Invoice Creation Tool Item', {
 			row.party_type = frm.doc.invoice_type == "Sales"? "Customer": "Supplier";
 		});
 	}
-})
+});

@@ -10,7 +10,6 @@ test_dependencies = ["Customer", "Supplier"]
 
 class TestOpeningInvoiceCreationTool(unittest.TestCase):
 	def make_invoices(self, invoice_type="Sales"):
-		invoices = []
 		doc = frappe.get_single("Opening Invoice Creation Tool")
 		args = get_opening_invoice_creation_dict(invoice_type=invoice_type)
 		doc.update(args)
@@ -26,12 +25,12 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 			1: ["_Test Customer 1", 250, 45.50, "Overdue"],
 			2: ["_Test Customer 2", 150, 0, "Paid"]
 		}
-		self.check_expected_values(invoices=invoices, expected_value=expected_value)
+		self.check_expected_values(invoices, expected_value)
 
-	def check_expected_values(self, invoice_type="Sales", invoices=[], expected_value={}):
+	def check_expected_values(self, invoices, expected_value, invoice_type="Sales"):
 		doctype = "Sales Invoice" if invoice_type == "Sales" else "Purchase Invoice"
 
-		for invoice_idx, invoice in enumerate(invoices):
+		for invoice_idx, invoice in enumerate(invoices or []):
 			si = frappe.get_doc(doctype, invoice)
 			for field_idx, field in enumerate(expected_value["keys"]):
 				self.assertEqual(si.get(field, ""), expected_value[invoice_idx][field_idx])
@@ -46,7 +45,7 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 			1: ["_Test Supplier 1", 250, 45.50, "Overdue"],
 			2: ["_Test Supplier 2", 150, 0, "Paid"]
 		}
-		self.check_expected_values(invoice_type="Purchase", invoices=invoices, expected_value=expected_value)
+		self.check_expected_values(invoices, expected_value, invoice_type="Purchase", )
 
 def get_opening_invoice_creation_dict(**args):
 	party = "Customer" if args.get("invoice_type", "Sales") == "Sales" else "Supplier"
