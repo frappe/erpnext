@@ -765,6 +765,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.append("references", {
 		"reference_doctype": dt,
 		"reference_name": dn,
+		"bill_no": doc.get("bill_no"),
 		"due_date": doc.get("due_date"),
 		"total_amount": grand_total,
 		"outstanding_amount": outstanding_amount,
