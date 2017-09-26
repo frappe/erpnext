@@ -35,7 +35,6 @@ class PaymentRequest(Document):
 
 	def on_submit(self):
 		send_mail = True
-		self.make_communication_entry()
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 
 		if (hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") == "Shopping Cart") \
@@ -45,6 +44,7 @@ class PaymentRequest(Document):
 		if send_mail:
 			self.set_payment_request_url()
 			self.send_email()
+			self.make_communication_entry()
 
 	def on_cancel(self):
 		self.check_if_payment_entry_exists()
@@ -69,8 +69,11 @@ class PaymentRequest(Document):
 			self.db_set('status', 'Initiated')
 
 	def get_payment_url(self):
-		data = frappe.db.get_value(self.reference_doctype, self.reference_name,
-			["company", "customer_name"], as_dict=1)
+		if self.reference_doctype != "Fees":
+			data = frappe.db.get_value(self.reference_doctype, self.reference_name, ["company", "customer_name"], as_dict=1)
+		else:
+			data = frappe.db.get_value(self.reference_doctype, self.reference_name, ["student_name"], as_dict=1)
+			data.update({"company": frappe.defaults.get_defaults().company})
 
 		controller = get_payment_gateway_controller(self.payment_gateway)
 		controller.validate_transaction_currency(self.currency)
@@ -276,6 +279,9 @@ def get_amount(ref_doc, dt):
 			grand_total = flt(ref_doc.outstanding_amount)
 		else:
 			grand_total = flt(ref_doc.outstanding_amount) / ref_doc.conversion_rate
+
+	if dt == "Fees":
+		grand_total = ref_doc.outstanding_amount
 
 	if grand_total > 0 :
 		return grand_total

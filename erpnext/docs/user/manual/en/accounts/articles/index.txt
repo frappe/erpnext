@@ -14,3 +14,4 @@ withdrawing-salary-from-owners-equity-account
 adjust-withhold-amount-payment-entry
 common-receivable-account.md
 types-in-tax-template
+freeze-account

@@ -8,7 +8,16 @@ frappe.pages['pos'].on_page_load = function (wrapper) {
 		single_column: true
 	});
 
-	wrapper.pos = new erpnext.pos.PointOfSale(wrapper)
+	frappe.db.get_value('POS Settings', {name: 'POS Settings'}, 'is_online', (r) => {
+		if (r && r.use_pos_in_offline_mode && cint(r.use_pos_in_offline_mode)) {
+			// offline
+			wrapper.pos = new erpnext.pos.PointOfSale(wrapper);
+			cur_pos = wrapper.pos;
+		} else {
+			// online
+			frappe.set_route('point-of-sale');
+		}
+	});
 }
 
 frappe.pages['pos'].refresh = function (wrapper) {

@@ -13,5 +13,15 @@
         "doctype": "Academic Term",
         "academic_year": "2014-2015",
         "term_name": "_Test Academic Term 2"
+    },
+    {
+        "doctype": "Academic Term",
+        "academic_year": "2017-2018",
+        "term_name": "_Test AT1"
+    },
+    {
+        "doctype": "Academic Term",
+        "academic_year": "2017-2018",
+        "term_name": "_Test AT2"
     }
 ]    

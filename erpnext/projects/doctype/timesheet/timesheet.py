@@ -323,17 +323,32 @@ def get_timesheet_data(name, project):
 	}
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target=None):
+def make_sales_invoice(source_name, item_code=None, customer=None):
 	target = frappe.new_doc("Sales Invoice")
 	timesheet = frappe.get_doc('Timesheet', source_name)
 
+	hours = flt(timesheet.total_billable_hours) - flt(timesheet.total_billed_hours)
+	billing_amount = flt(timesheet.total_billable_amount) - flt(timesheet.total_billed_amount)
+	billing_rate = billing_amount / hours
+
+	if customer:
+		target.customer = customer
+
+	if item_code:
+		target.append('items', {
+			'item_code': item_code,
+			'qty': hours,
+			'rate': billing_rate
+		})
+
 	target.append('timesheets', {
 		'time_sheet': timesheet.name,
-		'billing_hours': flt(timesheet.total_billable_hours) - flt(timesheet.total_billed_hours),
-		'billing_amount': flt(timesheet.total_billable_amount) - flt(timesheet.total_billed_amount)
+		'billing_hours': hours,
+		'billing_amount': billing_amount
 	})
 
 	target.run_method("calculate_billing_amount_for_timesheet")
+	target.run_method("set_missing_values")
 
 	return target
 

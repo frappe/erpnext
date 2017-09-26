@@ -4,6 +4,7 @@
 erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	setup: function() {
 		this._super();
+		frappe.flags.hide_serial_batch_dialog = false;
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
 			var has_margin_field = frappe.meta.has_field(cdt, 'margin_type');
@@ -314,12 +315,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						if(!r.exc) {
 							me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
 							me.toggle_conversion_factor(item);
-							if(show_batch_dialog) {
+							if(show_batch_dialog && !frappe.flags.hide_serial_batch_dialog) {
 								var d = locals[cdt][cdn];
 								$.each(r.message, function(k, v) {
 									if(!d[k]) d[k] = v;
 								});
-								erpnext.show_serial_batch_selector(me.frm, d);
+
+								erpnext.show_serial_batch_selector(me.frm, d, (item) => {
+									me.frm.script_manager.trigger('qty', item.doctype, item.name);
+								});
 							}
 						}
 					}
@@ -527,10 +531,21 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			if(this.frm.doc.ignore_pricing_rule) {
 				this.calculate_taxes_and_totals();
 			} else if (!this.in_apply_price_list){
+				this.set_actual_charges_based_on_currency();
 				this.apply_price_list();
 			}
 
 		}
+	},
+
+	set_actual_charges_based_on_currency: function() {
+		var me = this;
+		$.each(this.frm.doc.taxes || [], function(i, d) {
+			if(d.charge_type == "Actual") {
+				frappe.model.set_value(d.doctype, d.name, "tax_amount",
+					flt(d.tax_amount) / flt(me.frm.doc.conversion_rate));
+			}
+		});
 	},
 
 	get_exchange_rate: function(transaction_date, from_currency, to_currency, callback) {
@@ -645,30 +660,32 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"base_discount_amount", "base_grand_total", "base_rounded_total", "base_in_words",
 			"base_taxes_and_charges_added", "base_taxes_and_charges_deducted", "total_amount_to_pay",
 			"base_paid_amount", "base_write_off_amount", "base_change_amount", "base_operating_cost",
-			"base_raw_material_cost", "base_total_cost", "base_scrap_material_cost"
-		], company_currency);
+			"base_raw_material_cost", "base_total_cost", "base_scrap_material_cost",
+			"base_rounding_adjustment"], company_currency);
 
 		this.frm.set_currency_labels(["total", "net_total", "total_taxes_and_charges", "discount_amount",
 			"grand_total", "taxes_and_charges_added", "taxes_and_charges_deducted",
-			"rounded_total", "in_words", "paid_amount", "write_off_amount", "operating_cost", "scrap_material_cost",
-			"raw_material_cost", "total_cost"], this.frm.doc.currency);
+			"rounded_total", "in_words", "paid_amount", "write_off_amount", "operating_cost",
+			"scrap_material_cost", "rounding_adjustment", "raw_material_cost",
+			"total_cost"], this.frm.doc.currency);
 
-		this.frm.set_currency_labels(["outstanding_amount", "total_advance"], this.frm.doc.party_account_currency);
+		this.frm.set_currency_labels(["outstanding_amount", "total_advance"],
+			this.frm.doc.party_account_currency);
 
 		cur_frm.set_df_property("conversion_rate", "description", "1 " + this.frm.doc.currency
-			+ " = [?] " + company_currency)
+			+ " = [?] " + company_currency);
 
 		if(this.frm.doc.price_list_currency && this.frm.doc.price_list_currency!=company_currency) {
-			cur_frm.set_df_property("plc_conversion_rate", "description", "1 " + this.frm.doc.price_list_currency
-				+ " = [?] " + company_currency)
+			cur_frm.set_df_property("plc_conversion_rate", "description", "1 "
+				+ this.frm.doc.price_list_currency + " = [?] " + company_currency);
 		}
 
 		// toggle fields
-		this.frm.toggle_display(["conversion_rate", "base_total", "base_net_total", "base_total_taxes_and_charges",
-			"base_taxes_and_charges_added", "base_taxes_and_charges_deducted",
+		this.frm.toggle_display(["conversion_rate", "base_total", "base_net_total",
+			"base_total_taxes_and_charges", "base_taxes_and_charges_added", "base_taxes_and_charges_deducted",
 			"base_grand_total", "base_rounded_total", "base_in_words", "base_discount_amount",
-			"base_paid_amount", "base_write_off_amount", "base_operating_cost",
-			"base_raw_material_cost", "base_total_cost", "base_scrap_material_cost"],
+			"base_paid_amount", "base_write_off_amount", "base_operating_cost", "base_raw_material_cost",
+			"base_total_cost", "base_scrap_material_cost", "base_rounding_adjustment"],
 			this.frm.doc.currency != company_currency);
 
 		this.frm.toggle_display(["plc_conversion_rate", "price_list_currency"],
@@ -1102,7 +1119,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 });
 
-erpnext.show_serial_batch_selector = function(frm, d) {
+erpnext.show_serial_batch_selector = function(frm, d, callback, show_dialog) {
 	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
 		new erpnext.SerialNoBatchSelector({
 			frm: frm,
@@ -1111,6 +1128,7 @@ erpnext.show_serial_batch_selector = function(frm, d) {
 				type: "Warehouse",
 				name: d.warehouse
 			},
-		});
+			callback: callback
+		}, show_dialog);
 	});
 }

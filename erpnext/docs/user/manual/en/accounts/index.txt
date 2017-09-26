@@ -6,6 +6,7 @@ purchase-invoice
 payments
 journal-entry
 payment-entry
+subscription
 multi-currency-accounting
 advance-payment-entry
 payment-request

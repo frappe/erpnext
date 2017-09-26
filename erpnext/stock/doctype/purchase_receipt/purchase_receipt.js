@@ -48,7 +48,7 @@ frappe.ui.form.on("Purchase Receipt", {
 	toggle_display_account_head: function(frm) {
 		var enabled = erpnext.is_perpetual_inventory_enabled(frm.doc.company)
 		frm.fields_dict["items"].grid.set_column_disp(["cost_center"], enabled);
-	}
+	},
 });
 
 erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend({
@@ -98,6 +98,13 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 				if(flt(this.frm.doc.per_billed) < 100) {
 					cur_frm.add_custom_button(__('Invoice'), this.make_purchase_invoice, __("Make"));
 				}
+
+				if(!this.frm.doc.subscription) {
+					cur_frm.add_custom_button(__('Subscription'), function() {
+						erpnext.utils.make_subscription(me.frm.doc.doctype, me.frm.doc.name)
+					}, __("Make"))
+				}
+
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 			}
 		}

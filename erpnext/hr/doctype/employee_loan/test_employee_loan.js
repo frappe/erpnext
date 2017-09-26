@@ -15,14 +15,14 @@ QUnit.test("Test Loan [HR]", function(assert) {
 			(r) => {
 				// Creating loan for an employee
 				return frappe.tests.make('Employee Loan', [
-					{ company: 'Test Company'},
+					{ company: 'For Testing'},
 					{ posting_date: '2017-08-26'},
 					{ employee: employee_name},
 					{ employee_loan_application: r.message.name},
 					{ disbursement_date: '2018-08-26'},
 					{ mode_of_payment: 'Cash'},
-					{ employee_loan_account: 'Temporary Opening - TC'},
-					{ interest_income_account: 'Service - TC'}
+					{ employee_loan_account: 'Temporary Opening - FT'},
+					{ interest_income_account: 'Service - FT'}
 				]);
 			},
 			() => frappe.timeout(3),

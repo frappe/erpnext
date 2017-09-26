@@ -30,7 +30,7 @@ QUnit.test("test: quotation", function (assert) {
 		() => cur_frm.doc.items[0].rate = 200,
 		() => frappe.timeout(0.3),
 		() => cur_frm.set_value("tc_name", "Test Term 1"),
-		() => frappe.timeout(0.3),
+		() => frappe.timeout(0.5),
 		() => cur_frm.save(),
 		() => {
 			// Check Address and Contact Info
@@ -39,7 +39,7 @@ QUnit.test("test: quotation", function (assert) {
 			assert.ok(cur_frm.doc.contact_display == "Contact 1", "Contact info changed");
 
 			// Check Currency
-			assert.ok(cur_frm.doc_currency == "USD", "Currency Changed");
+			assert.ok(cur_frm.doc.currency == "USD", "Currency Changed");
 			assert.ok(cur_frm.doc.selling_price_list == "Test-Selling-USD", "Price List Changed");
 			assert.ok(cur_frm.doc.items[0].rate == 200, "Price Changed Manually");
 			assert.equal(cur_frm.doc.total, 1000, "New Total Calculated");

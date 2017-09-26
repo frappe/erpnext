@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("Project", {
-	onload: function(frm) {
+	setup: function(frm) {
 		frm.set_indicator_formatter('title',
 			function(doc) {
 				let indicator = 'orange';
@@ -18,7 +18,9 @@ frappe.ui.form.on("Project", {
 				return indicator;
 			}
 		);
+	},
 
+	onload: function(frm) {
 		var so = frappe.meta.get_docfield("Project", "sales_order");
 		so.get_route_options_for_new_doc = function(field) {
 			if(frm.is_new()) return;
@@ -113,4 +115,3 @@ frappe.ui.form.on("Project Task", {
 		frm.trigger('tasks_refresh');
 	},
 });
-

@@ -108,6 +108,9 @@ class Quotation(SellingController):
 			print_lst.append(lst1)
 		return print_lst
 
+	def on_recurring(self, reference_doc, subscription_doc):
+		self.valid_till = None
+
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)

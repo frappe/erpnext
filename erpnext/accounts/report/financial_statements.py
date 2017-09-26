@@ -142,10 +142,16 @@ def get_data(company, root_type, balance_must_be, period_list, filters=None,
 
 	return out
 
+
 def calculate_values(accounts_by_name, gl_entries_by_account, period_list, accumulated_values, ignore_accumulated_values_for_fy):
 	for entries in gl_entries_by_account.values():
 		for entry in entries:
 			d = accounts_by_name.get(entry.account)
+			if not d:
+				frappe.msgprint(
+					_("Could not retrieve information for {0}.".format(entry.account)), title="Error",
+					raise_exception=1
+				)
 			for period in period_list:
 				# check if posting date is within the period
 

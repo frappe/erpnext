@@ -8,7 +8,8 @@ def get_data():
 			'Payment Entry': 'reference_name',
 			'Payment Request': 'reference_name',
 			'Landed Cost Voucher': 'receipt_document',
-			'Purchase Invoice': 'return_against'
+			'Purchase Invoice': 'return_against',
+			'Subscription': 'reference_document'
 		},
 		'internal_links': {
 			'Purchase Order': ['items', 'purchase_order'],
@@ -26,6 +27,10 @@ def get_data():
 			{
 				'label': _('Returns'),
 				'items': ['Purchase Invoice']
+			},
+			{
+				'label': _('Subscription'),
+				'items': ['Subscription']
 			},
 		]
 	}

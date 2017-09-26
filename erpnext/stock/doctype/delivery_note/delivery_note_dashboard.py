@@ -5,7 +5,8 @@ def get_data():
 		'fieldname': 'delivery_note',
 		'non_standard_fieldnames': {
 			'Stock Entry': 'delivery_note_no',
-			'Quality Inspection': 'reference_name'
+			'Quality Inspection': 'reference_name',
+			'Subscription': 'reference_document',
 		},
 		'internal_links': {
 			'Sales Order': ['items', 'against_sales_order'],
@@ -22,6 +23,10 @@ def get_data():
 			{
 				'label': _('Returns'),
 				'items': ['Stock Entry']
+			},
+			{
+				'label': _('Subscription'),
+				'items': ['Subscription']
 			},
 		]
 	}
