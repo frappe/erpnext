@@ -35,6 +35,7 @@ class ProductionOrder(Document):
 			validate_bom_no(self.production_item, self.bom_no)
 
 		self.validate_sales_order()
+		self.set_default_warehouse()
 		self.validate_warehouse_belongs_to_company()
 		self.calculate_operating_cost()
 		self.validate_qty()
@@ -69,6 +70,12 @@ class ProductionOrder(Document):
 			else:
 				frappe.throw(_("Sales Order {0} is not valid").format(self.sales_order))
 
+	def set_default_warehouse(self):
+		if not self.wip_warehouse:
+			self.wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
+		if not self.fg_warehouse:
+			self.fg_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_fg_warehouse")
+	
 	def validate_warehouse_belongs_to_company(self):
 		warehouses = [self.fg_warehouse, self.wip_warehouse]
 		for d in self.get("required_items"):
