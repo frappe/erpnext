@@ -288,7 +288,6 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 
 	def postprocess(source, target_doc):
 		target_doc.supplier = source_name
-		target_doc.schedule_date = add_days(nowdate(), 1)
 
 		target_doc.set("items", [d for d in target_doc.get("items")
 			if d.get("item_code") in supplier_items and d.get("qty") > 0])
