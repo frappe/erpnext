@@ -1,14 +1,7 @@
 {% extends "templates/web.html" %}
 
+
 {% block page_content %}
-<!-- <h1>{{ title }}</h1>
-{% endblock %}
-
-this is a sample default web page template
-
-{% extends "templates/web.html" %} -->
-
-{% block content %}
     <ul class="list-unstyled">
         <li>
             <label>Date:</label> {{ doc.get_formatted("date") }}
