@@ -104,7 +104,7 @@ def get_list_context(context=None):
 def make_purchase_order(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.ignore_pricing_rule = 1
-		target.schedule_Date = add_days(nowdate(), 1)
+		target.schedule_date = add_days(nowdate(), 1)
 		target.run_method("set_missing_values")
 		target.run_method("get_schedule_dates")
 		target.run_method("calculate_taxes_and_totals")

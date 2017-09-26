@@ -118,7 +118,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			"company": "_Test Company",
 			"supplier" : "_Test Supplier",
 			"is_subcontracted" : "No",
-			"schedule_Date": add_days(nowdate(), 1),
+			"schedule_date": add_days(nowdate(), 1),
 			"currency" : frappe.db.get_value("Company", "_Test Company", "default_currency"),
 			"conversion_factor" : 1,
 			"items" : get_same_items(),
