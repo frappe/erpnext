@@ -85,6 +85,10 @@ def get_chart(chart_template, existing_company=None):
 	elif chart_template == "Standard":
 		from erpnext.accounts.doctype.account.chart_of_accounts.verified import standard_chart_of_accounts
 		return standard_chart_of_accounts.get()
+	elif chart_template == "Standard with Numbers":
+		from erpnext.accounts.doctype.account.chart_of_accounts.verified \
+			import standard_chart_of_accounts_with_account_number
+		return standard_chart_of_accounts_with_account_number.get()
 	else:
 		folders = ("verified",)
 		if frappe.local.flags.allow_unverified_charts:
@@ -100,7 +104,7 @@ def get_chart(chart_template, existing_company=None):
 							return json.loads(chart).get("tree")
 
 @frappe.whitelist()
-def get_charts_for_country(country):
+def get_charts_for_country(country, with_standard=False):
 	charts = []
 
 	def _get_chart_name(content):
@@ -125,8 +129,8 @@ def get_charts_for_country(country):
 					with open(os.path.join(path, fname), "r") as f:
 						_get_chart_name(f.read())
 
-	if len(charts) != 1:
-		charts.append("Standard")
+	if len(charts) != 1 or with_standard:
+		charts += ["Standard", "Standard with Numbers"]
 
 	return charts
 
