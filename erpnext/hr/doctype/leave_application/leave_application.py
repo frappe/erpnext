@@ -112,6 +112,8 @@ class LeaveApplication(Document):
 			self.workflow_state = "Created By Director"
 		elif u'Manager' in frappe.get_roles(frappe.session.user):
 				self.workflow_state = "Created By Manager"
+		# elif u'Line Manager' in frappe.get_roles(frappe.session.user):
+		# 		self.workflow_state = "Created By Line Manager"
 
 
 	def after_insert(self):
@@ -121,6 +123,8 @@ class LeaveApplication(Document):
 			# frappe.msgprint("111")
 		if self.leave_type != "Annual Leave - اجازة اعتيادية" and self.leave_type != "Without Pay - غير مدفوعة" and self.leave_type != "Compensatory off - تعويضية" and self.leave_type != "emergency -اضطرارية":
 			frappe.msgprint(_("You must attach the required file otherwise the application will be <span style='color:red;'>REJECTED!</span>"))
+	
+
 	def validate_approval_line_manager(self):
 		dd=frappe.get_doc("Employee",self.employee)
 		if dd.sub_department:
@@ -148,6 +152,7 @@ class LeaveApplication(Document):
 				if self.workflow_state=="Approved By CEO":
 					frappe.db.sql("update `tabLeave Application` set workflow_state='Approved By HR Specialist' where name ='{0}'".format(self.employee))
 					self.workflow_state="Approved By HR Specialist"
+				
 				if self.workflow_state=="Rejected By CEO":
 					self.workflow_state="Rejected By HR Specialist"
 
@@ -156,10 +161,13 @@ class LeaveApplication(Document):
 			if (self.leave_type=="Without Pay - غير مدفوعة" or self.leave_type=="Annual Leave - اجازة اعتيادية" or self.leave_type=="emergency -اضطرارية") and self.total_leave_days>5:
 				if self.workflow_state=="Approved By HR Specialist":
 					self.workflow_state="Approved By HR Manager"
+
 				if self.workflow_state=="Approved By CEO":
 					self.workflow_state="Approved By HR Manager"
+
 				if self.workflow_state=="Rejected By HR Specialist":
 					self.workflow_state="Rejected By HR Manager"
+					
 				if self.workflow_state=="Rejected By CEO":
 					self.workflow_state="Rejected By HR Manager"
 

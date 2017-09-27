@@ -75,7 +75,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "default": "Open", 
+   "default": "", 
    "fieldname": "status", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -87,7 +87,7 @@
    "label": "Status", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "Open\nApproved\nRejected", 
+   "options": "\nOpen\nApproved\nRejected", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -366,7 +366,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-09-12 10:35:15.521546", 
+ "modified": "2017-09-24 22:01:06.884010", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee Resignation", 
@@ -510,5 +510,5 @@
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "title_field": "employee_name", 
- "track_seen": 0
+ "track_seen": 1
 }

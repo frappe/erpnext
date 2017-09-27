@@ -55,6 +55,8 @@ class ReturnFromLeaveStatement(Document):
 			frappe.throw(_("Return date can not be smaller or equal than to date"))
 		if getdate(nowdate()) != getdate(self.return_date):
 			frappe.throw(_("The return date must be today date"))
+
+
 			
 
 	# def validate_emp(self):
@@ -78,28 +80,30 @@ class ReturnFromLeaveStatement(Document):
 				
 				
 	def add_leave_details(self):
-		emp =frappe.get_doc('Employee',{'name' : self.employee})
-		la =frappe.get_doc('Leave Application',{'name' : self.leave_application})
-		self.employee = la.employee
-		self.employee_name = la.employee_name
-		# self.employee_name_english = emp.employee_name_english
-		# self.grade = emp.grade
-		# self.region = emp.region
-		# self.branch = emp.branch
-		# self.department = emp.department
-		# self.designation = emp.designation
-		self.from_date = la.from_date
-		self.to_date = la.to_date
-		self.total_leave_days = la.total_leave_days
-		self.leave_approver = la.leave_approver
-		self.leave_approver_name = la.leave_approver_name
-		#self.actual_departure_date = la.actual_departure_date
-		self.from_date = la.from_date
-		self.to_date = la.to_date
-		#self.actual_departure_date_hijri = la.actual_departure_date_hijri
-		# self.from_date_hijri = la.from_date_hijri
-		# self.to_date_hijri = la.to_date_hijri
-		# self.cancel_date_hijri = la.cancel_date_hijri
+		la =frappe.get_doc('Leave Application',{'name' : self.leave_application, 'status': "Approved"})
+		if not la:
+			frappe.throw(_("The selected Leave Application must be approved"))
+		else:
+			self.employee = la.employee
+			self.employee_name = la.employee_name
+			# self.employee_name_english = emp.employee_name_english
+			# self.grade = emp.grade
+			# self.region = emp.region
+			# self.branch = emp.branch
+			# self.department = emp.department
+			# self.designation = emp.designation
+			self.from_date = la.from_date
+			self.to_date = la.to_date
+			self.total_leave_days = la.total_leave_days
+			self.leave_approver = la.leave_approver
+			self.leave_approver_name = la.leave_approver_name
+			#self.actual_departure_date = la.actual_departure_date
+			# self.from_date = la.from_date
+			# self.to_date = la.to_date
+			#self.actual_departure_date_hijri = la.actual_departure_date_hijri
+			# self.from_date_hijri = la.from_date_hijri
+			# self.to_date_hijri = la.to_date_hijri
+			# self.cancel_date_hijri = la.cancel_date_hijri
 
 
 def get_permission_query_conditions(user):

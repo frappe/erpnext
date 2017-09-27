@@ -7,7 +7,14 @@ import frappe
 from frappe.model.document import Document
 
 class ExitReEntryApplication(Document):
-	pass
+	def validate(self):
+		if  self.exit_type== "VISA":
+			if not self.country:
+				frappe.throw("Kindly choose country when select 'VISA'") 
+
+ 
+
+
 	# def on_submit(self):
 	# 	leave=frappe.get_doc("Leave Application",self.application_requested)
 	# 	mng=frappe.db.sql("select name from tabEmployee where user_id in(select name from tabUser where name in(select parent from tabUserRole where role='Ticket Approver'))")

@@ -61,7 +61,7 @@ class SalarySlip(TransactionBase):
 			prev_month_start_date_object = getdate(prev_month_start_date)
 			prev_month_end_date = get_last_day(prev_month_start_date_object)
 		else:
-			prev_month_start_date = "{0}-{1}-20".format(getdate(self.start_date).year - 1, prev_month)
+			prev_month_start_date = "{0}-{1}-01".format(getdate(self.start_date).year - 1, prev_month)
 			prev_month_start_date_object = getdate(prev_month_start_date)
 			prev_month_end_date = get_last_day(prev_month_start_date_object)
 

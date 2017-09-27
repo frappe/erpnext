@@ -51,9 +51,28 @@ class JournalEntry(AccountsController):
 		#~ self.title = self.title+" - ("+str(self.posting_date)+")"
 
 	def get_title(self):
-		title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ self.name[len(self.naming_series):]
-		return title
-
+		from frappe.utils import getdate
+		
+		namming =frappe.get_list("Enhanced Nameing Doc", fields=["name","name_of_doc", "index_value","year"],filters={"year": str(getdate(self.posting_date).year),"name_of_doc":self.doctype},ignore_permissions=True)
+		if namming :
+			#~ title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ self.name[len(self.naming_series):]
+			title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ str(namming[0]["index_value"]+1).zfill(5)
+			nammeing_doc = frappe.get_doc("Enhanced Nameing Doc",namming[0]["name"])
+			nammeing_doc.flags.ignore_permissions = True
+			nammeing_doc.index_value = nammeing_doc.index_value+1
+			nammeing_doc.save()
+			return title
+		else : 
+			title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ str(1).zfill(5)
+			nammeing_doc = frappe.new_doc("Enhanced Nameing Doc")
+			nammeing_doc.flags.ignore_permissions = True
+			nammeing_doc.parent = "Enhanced Nameing"
+			nammeing_doc.parenttype = "Enhanced Nameing"
+			nammeing_doc.index_value = 1
+			nammeing_doc.year = str(getdate(self.posting_date).year)
+			nammeing_doc.name_of_doc = self.doctype
+			nammeing_doc.save()
+			return title
 	def update_advance_paid(self):
 		advance_paid = frappe._dict()
 		for d in self.get("accounts"):
@@ -809,7 +828,7 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 
 	company_currency = get_company_currency(company)
-	account_details = frappe.db.get_value("Account", account, ["account_type", "account_currency"], as_dict=1)
+	account_details = frappe.db.get_value("Account", account, ["account_type", "account_currency","root_type"], as_dict=1)
 
 	if not account_details:
 		return
@@ -826,6 +845,7 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 		#~ "party_type": party_type,
 		"account_type": account_details.account_type,
 		"account_currency": account_details.account_currency or company_currency,
+		"root_type":account_details.root_type,
 		
 		# The date used to retreive the exchange rate here is the date passed in 
 		# as an argument to this function. It is assumed to be the date on which the balance is sought
@@ -886,3 +906,54 @@ def get_average_exchange_rate(account):
 		exchange_rate = bank_balance_in_company_currency / bank_balance_in_account_currency
 
 	return exchange_rate
+
+
+@frappe.whitelist()
+def make_reverse(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
+	def set_missing_values(source, target):
+		target.accounts = []
+		target.is_reverse =1
+		target.reverse_from =source.name
+		target.reverse_title =source.title
+		for account in source.get("accounts"):
+			child = target.append('accounts', {})
+			child.account = account.account
+			child.account_type = account.account_type
+			child.balance = account.balance
+			child.cost_center = account.cost_center
+			child.party_type = account.party_type
+			child.party = account.party
+			child.party_balance = account.party_balance
+			child.account_currency = account.account_currency
+			child.exchange_rate = account.exchange_rate
+			
+			child.credit_in_account_currency = account.debit_in_account_currency
+			child.credit  = account.debit
+			child.debit_in_account_currency= account.credit_in_account_currency
+			child.debit = account.credit
+			
+			child.reference_type = account.reference_type
+			child.reference_name = account.reference_name
+			child.project = account.project
+			child.is_advance = account.is_advance
+			child.reason_code = account.reason_code
+			child.reason = account.reason
+			child.description = account.description
+			child.against_account = account.against_account
+	
+	doc = get_mapped_doc("Journal Entry", source_name, {
+			"Journal Entry": {
+				"doctype": "Journal Entry",
+				"field_map": {
+					"posting_date": "posting_date",
+					"voucher_type": "voucher_type",
+					"naming_series": "naming_series",
+					"company": "company",
+					"cheque_no": "cheque_no",
+					"cheque_date": "cheque_date",
+					"user_remark": "user_remark",
+				}}
+		}, target_doc, set_missing_values)
+	return doc
+
