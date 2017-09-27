@@ -64,7 +64,7 @@ domains = {
 }
 
 website_generators = ["Item Group", "Item", "BOM", "Sales Partner",
-	"Job Opening", "Student Admission"]
+	"Job Opening", "Student Admission","Meeting"]
 
 website_context = {
 	"favicon": 	"/assets/erpnext/images/favicon.png",
