@@ -9,7 +9,7 @@ from frappe.model.document import Document
 from frappe.website.website_generator import WebsiteGenerator
 
 class Meeting(WebsiteGenerator):
-	website = frappe._dict(
+	_website = frappe._dict(
 		template = "meeting/templates/meeting.html",
 		condition_field = "published",
 		page_title_field = "title",
@@ -73,12 +73,17 @@ class Meeting(WebsiteGenerator):
 			todo.delete()
 
 	def get_context(self, context):
-		context.parents = [{'name': 'meetings', 'title': _('All Meetings') }]
-		# context.parents = [{"name": "meetings", "title": "Meetings"}]
-		# context.title = _("Jobs")
+		context.parents = [dict(label='All Meetings', route='/meeting_row', title='meetings')]
+		context.planned_meetings = get_meetings("Planned")
 
-	def get_list_context(context):
-		context.title = 'All Meetings'
+		# show only 20 past meetings
+		context.past_meetings = get_meetings("Completed", limit_page_length=20)
+
+	def get_meetings(status, **kwargs):
+		return frappe.get_all("Meeting",
+			fields=["name", "title", "date", "from_time", "to_time", "route"],
+			filters={"status": status, "show_in_website": 1},
+			order_by="date desc", **kwargs)
 
 
 
