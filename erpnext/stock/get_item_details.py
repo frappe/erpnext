@@ -164,6 +164,16 @@ def get_basic_details(args, item):
 
 	warehouse = user_default_warehouse or item.default_warehouse or args.warehouse
 
+	#Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
+	if args.get('doctype') in ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']:
+		uom = item.sales_uom if item.sales_uom else item.stock_uom
+	elif args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']:
+		uom = item.purchase_uom if item.purchase_uom else item.stock_uom
+	else:
+		uom = item.stock_uom
+
+	args.uom = uom
+
 	out = frappe._dict({
 		"item_code": item.name,
 		"item_name": item.item_name,
@@ -178,7 +188,7 @@ def get_basic_details(args, item):
 		"batch_no": None,
 		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in
 			item.get("taxes")))),
-		"uom": item.stock_uom,
+		"uom": uom,
 		"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
 		"qty": args.qty or 1.0,
 		"stock_qty": args.qty or 1.0,
