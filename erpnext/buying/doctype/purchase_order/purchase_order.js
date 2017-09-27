@@ -1,3 +1,4 @@
+
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
@@ -28,10 +29,10 @@ frappe.ui.form.on("Purchase Order Item", {
 	item_code: function(frm) {
 		frappe.call({
 			"method": "get_last_purchase_rate",
-			"doc": cur_frm.doc,
+			"doc": frm.doc,
 			callback: function(r, rt) {
-				cur_frm.dirty();
-				cur_frm.cscript.calculate_taxes_and_totals();
+				frm.dirty();
+				frm.cscript.calculate_taxes_and_totals();
 			}
 		})
 	}
