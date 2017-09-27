@@ -95,10 +95,31 @@ window.Hub = class Hub {
 					if(r.message.enabled == 1) {
 						Object.assign(this.hub_settings, r.message);
 						this.refresh();
+						this.prompt_for_item_sync();
 					}
 				}
 			});
 		});
+	}
+
+	prompt_for_item_sync() {
+		frappe.call({
+			method: 'frappe.client.get_list',
+			args: {
+				doctype: 'Data Migration Run',
+				filters: {
+					'data_migration_plan': 'Hub Sync'
+				},
+				limit_page_length: 1
+			},
+			callback: function(r) {
+				if (!r) {
+					frappe.confirm(__('Do you want to publish your Items to Hub ?'), () => {
+						this.sync_items_to_hub();
+					});
+				}
+			}
+		})
 	}
 
 	setup_header() {
@@ -558,8 +579,11 @@ window.Hub = class Hub {
 
 		this.page.add_menu_item(__('Refresh'), () => this.refresh());
 
-		this.page.add_menu_item(__('Sync'),
-			() => frappe.call('erpnext.hub_node.doctype.hub_settings.hub_settings.sync'));
+		this.page.add_menu_item(__('Sync'), () => this.sync_items_to_hub());
+	}
+
+	sync_items_to_hub() {
+		frappe.call('erpnext.hub_node.doctype.hub_settings.hub_settings.sync')
 	}
 
 	setup_sidebar() {
