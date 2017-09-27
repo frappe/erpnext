@@ -21,7 +21,9 @@ frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 };
 
 frappe.pages['point-of-sale'].refresh = function(wrapper) {
-	cur_frm = wrapper.pos.frm;
+	if (wrapper.pos) {
+		cur_frm = wrapper.pos.frm;
+	}
 }
 
 erpnext.pos.PointOfSale = class PointOfSale {
@@ -742,7 +744,7 @@ class POSCart {
 
 		this.wrapper.find('.discount_amount').on('change', (e) => {
 			frappe.model.set_value(this.frm.doctype, this.frm.docname,
-				'discount_amount', e.target.value);
+				'discount_amount', flt(e.target.value));
 			this.frm.trigger('discount_amount')
 				.then(() => {
 					let discount_wrapper = this.wrapper.find('.additional_discount_percentage');
