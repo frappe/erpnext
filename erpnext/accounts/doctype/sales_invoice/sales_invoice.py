@@ -29,10 +29,13 @@ form_grid_templates = {
 class SalesInvoice(SellingController):
 	def __init__(self, arg1, arg2=None):
 		super(SalesInvoice, self).__init__(arg1, arg2)
+		self.set_field_for_percentage_calculation('Sales', 'Billing')
+
 		self.status_updater = [{
 			'source_dt': 'Sales Invoice Item',
-			'target_field': 'billed_amt',
-			'target_ref_field': 'amount',
+			'update_fields': {'billed_amt': 'amount', 'billed_qty': 'qty'},
+			'target_field': self.target_field,
+			'target_ref_field': self.target_ref_field,
 			'target_dt': 'Sales Order Item',
 			'join_field': 'so_detail',
 			'target_parent_dt': 'Sales Order',
@@ -191,13 +194,15 @@ class SalesInvoice(SellingController):
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
+			self.set_field_for_percentage_calculation('Sales', 'Billing')
 			self.status_updater.extend([{
 				'source_dt':'Sales Invoice Item',
 				'target_dt':'Sales Order Item',
 				'target_parent_dt':'Sales Order',
 				'target_parent_field':'per_delivered',
-				'target_field':'delivered_qty',
-				'target_ref_field':'qty',
+				'update_fields': {'delivered_qty': 'qty', 'delivered_amt': 'amount'},
+				'target_field': self.target_field,
+				'target_ref_field': self.target_ref_field,
 				'source_field':'qty',
 				'join_field':'so_detail',
 				'percent_join_field':'sales_order',
@@ -214,13 +219,9 @@ class SalesInvoice(SellingController):
 				'source_dt': 'Sales Invoice Item',
 				'target_dt': 'Sales Order Item',
 				'join_field': 'so_detail',
+				'update_fields': {'returned_qty': '-1 * qty'},
 				'target_field': 'returned_qty',
 				'target_parent_dt': 'Sales Order',
-				# 'target_parent_field': 'per_delivered',
-				# 'target_ref_field': 'qty',
-				'source_field': '-1 * qty',
-				# 'percent_join_field': 'sales_order',
-				# 'overflow_type': 'delivery',
 				'extra_cond': """ and exists (select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent and update_stock=1 and is_return=1)"""
 			}
 		])
@@ -805,10 +806,13 @@ class SalesInvoice(SellingController):
 		updated_delivery_notes = []
 		for d in self.get("items"):
 			if d.dn_detail:
-				billed_amt = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item`
+				invoice_data = frappe.db.sql("""select sum(qty), sum(amount)  from `tabSales Invoice Item`
 					where dn_detail=%s and docstatus=1""", d.dn_detail)
-				billed_amt = billed_amt and billed_amt[0][0] or 0
+				billed_qty = invoice_data and invoice_data[0][0] or 0
+				billed_amt = invoice_data and invoice_data[0][1] or 0
+
 				frappe.db.set_value("Delivery Note Item", d.dn_detail, "billed_amt", billed_amt, update_modified=update_modified)
+				frappe.db.set_value("Delivery Note Item", d.dn_detail, "billed_qty", billed_qty, update_modified=update_modified)
 				updated_delivery_notes.append(d.delivery_note)
 			elif d.so_detail:
 				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)

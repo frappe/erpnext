@@ -21,28 +21,26 @@ form_grid_templates = {
 class PurchaseReceipt(BuyingController):
 	def __init__(self, arg1, arg2=None):
 		super(PurchaseReceipt, self).__init__(arg1, arg2)
+		self.set_field_for_percentage_calculation('Purchase', 'Receive')
 		self.status_updater = [{
 			'source_dt': 'Purchase Receipt Item',
 			'target_dt': 'Purchase Order Item',
+			'update_fields': {'received_amt': 'amount', 'received_qty': 'qty'},
 			'join_field': 'purchase_order_item',
-			'target_field': 'received_qty',
+			'target_field': self.target_field,
 			'target_parent_dt': 'Purchase Order',
 			'target_parent_field': 'per_received',
-			'target_ref_field': 'qty',
-			'source_field': 'qty',
+			'target_ref_field': self.target_ref_field,
 			'percent_join_field': 'purchase_order',
 			'overflow_type': 'receipt'
 		},
 		{
 			'source_dt': 'Purchase Receipt Item',
 			'target_dt': 'Purchase Order Item',
+			'update_fields': {'returned_qty': '-1 * qty'},
 			'join_field': 'purchase_order_item',
 			'target_field': 'returned_qty',
 			'target_parent_dt': 'Purchase Order',
-			# 'target_parent_field': 'per_received',
-			# 'target_ref_field': 'qty',
-			'source_field': '-1 * qty',
-			# 'overflow_type': 'receipt',
 			'extra_cond': """ and exists (select name from `tabPurchase Receipt` where name=`tabPurchase Receipt Item`.parent and is_return=1)"""
 		}]
 
@@ -121,6 +119,7 @@ class PurchaseReceipt(BuyingController):
 
 		if not self.is_return:
 			update_last_purchase_rate(self, 1)
+			self.update_billing_status_for_zero_amount_refdoc("Purchase Receipt")
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
@@ -154,6 +153,7 @@ class PurchaseReceipt(BuyingController):
 
 		if not self.is_return:
 			update_last_purchase_rate(self, 0)
+			self.update_billing_status_for_zero_amount_refdoc("Purchase Receipt")
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
@@ -325,12 +325,15 @@ class PurchaseReceipt(BuyingController):
 
 def update_billed_amount_based_on_po(po_detail, update_modified=True):
 	# Billed against Sales Order directly
-	billed_against_po = frappe.db.sql("""select sum(amount) from `tabPurchase Invoice Item`
+	billed_against_po = frappe.db.sql("""select sum(qty), sum(amount) from `tabPurchase Invoice Item`
 		where po_detail=%s and (pr_detail is null or pr_detail = '') and docstatus=1""", po_detail)
-	billed_against_po = billed_against_po and billed_against_po[0][0] or 0
+	billed_against_po = {
+		'qty': billed_against_po and billed_against_po[0][0] or 0,
+		'amount': billed_against_po and billed_against_po[0][1] or 0
+	}
 
 	# Get all Delivery Note Item rows against the Sales Order Item row
-	pr_details = frappe.db.sql("""select pr_item.name, pr_item.amount, pr_item.parent
+	pr_details = frappe.db.sql("""select pr_item.name, pr_item.amount, pr_item.parent, pr_item.qty
 		from `tabPurchase Receipt Item` pr_item, `tabPurchase Receipt` pr
 		where pr.name=pr_item.parent and pr_item.purchase_order_item=%s
 			and pr.docstatus=1 and pr.is_return = 0
@@ -338,22 +341,26 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 
 	updated_pr = []
 	for pr_item in pr_details:
-		# Get billed amount directly against Purchase Receipt
-		billed_amt_agianst_pr = frappe.db.sql("""select sum(amount) from `tabPurchase Invoice Item`
-			where pr_detail=%s and docstatus=1""", pr_item.name)
-		billed_amt_agianst_pr = billed_amt_agianst_pr and billed_amt_agianst_pr[0][0] or 0
+		for key in ['qty', 'amount']:
+			# Get billed amount directly against Purchase Receipt
+			billed_against_pr = frappe.db.sql("""select sum({0}) from `tabPurchase Invoice Item`
+				where pr_detail=%s and docstatus=1""".format(key), pr_item.name)
+			billed_against_pr = billed_against_pr and billed_against_pr[0][0] or 0
 
-		# Distribute billed amount directly against PO between PRs based on FIFO
-		if billed_against_po and billed_amt_agianst_pr < pr_item.amount:
-			pending_to_bill = flt(pr_item.amount) - billed_amt_agianst_pr
-			if pending_to_bill <= billed_against_po:
-				billed_amt_agianst_pr += pending_to_bill
-				billed_against_po -= pending_to_bill
-			else:
-				billed_amt_agianst_pr += billed_against_po
-				billed_against_po = 0
+			# Distribute billed amount directly against PO between PRs based on FIFO
+			if billed_against_po[key] and billed_against_pr < pr_item[key]:
+				pending_to_bill = flt(pr_item[key]) - billed_against_pr
+				if pending_to_bill <= billed_against_po[key]:
+					billed_against_pr += pending_to_bill
+					billed_against_po[key] -= pending_to_bill
+				else:
+					billed_against_pr += billed_against_po[key]
+					billed_against_po[key] = 0
 
-		frappe.db.set_value("Purchase Receipt Item", pr_item.name, "billed_amt", billed_amt_agianst_pr, update_modified=update_modified)
+			if billed_against_pr:
+				update_field = "billed_qty" if key=='qty' else 'billed_amt'
+				frappe.db.set_value("Purchase Receipt Item", pr_item.name, update_field,
+					billed_against_pr, update_modified=update_modified)
 
 		updated_pr.append(pr_item.parent)
 

@@ -56,13 +56,16 @@ set Sales Order Required field as Yes. Bydefault, this will be "No" for a value.
 To make Delivery Note creation as mandatory before Sales Invoice creation, you should set 
 this field as "Yes". It will be "No" by default.
 
-####8. Maintain Same Rate Throughout Sales Cycle
+####8. Percentage Based On
+In sales order, deliverd percentage and billed percentage is based on the deliverd quantity and billed amount. User can set the fieldname on which they want to calculate the percentage of delivery and percentage of billing in the sales order.For billing they can set the fieldname in the Billing Percentage Based On field and for delivery they can set the fieldname in the Delivery Percentage Based On field.
+
+####9. Maintain Same Rate Throughout Sales Cycle
 
 System bydefault validates that item price will be same throughout sales cycle 
 (Sales Order - Delivery Note - Sales Invoice). If you could have item price changing within the cycle, 
 and you need to bypass validation of same rate throughout cycle, then you should uncheck this field and save.
 
-####9. Allow User to Edit Price List Rate in Transaction
+####10. Allow User to Edit Price List Rate in Transaction
 
 Item table of the sale transactions has field called Price List Rate. This field be non-editale 
 by default in all the sales transactions. This is to ensure that price of an item is fetched from 

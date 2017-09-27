@@ -25,6 +25,7 @@ class PurchaseOrder(BuyingController):
 		self.status_updater = [{
 			'source_dt': 'Purchase Order Item',
 			'target_dt': 'Material Request Item',
+			'update_fields': {'ordered_qty': 'stock_qty'},
 			'join_field': 'material_request_item',
 			'target_field': 'ordered_qty',
 			'target_parent_dt': 'Material Request',

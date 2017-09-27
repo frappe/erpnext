@@ -17,12 +17,12 @@ class InstallationNote(TransactionBase):
 		self.status_updater = [{
 			'source_dt': 'Installation Note Item',
 			'target_dt': 'Delivery Note Item',
+			'update_fields': {'installed_qty': 'qty'},
 			'target_field': 'installed_qty',
 			'target_ref_field': 'qty',
 			'join_field': 'prevdoc_detail_docname',
 			'target_parent_dt': 'Delivery Note',
 			'target_parent_field': 'per_installed',
-			'source_field': 'qty',
 			'percent_join_field': 'prevdoc_docname',
 			'status_field': 'installation_status',
 			'keyword': 'Installed',

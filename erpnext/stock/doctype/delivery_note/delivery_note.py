@@ -23,14 +23,17 @@ form_grid_templates = {
 class DeliveryNote(SellingController):
 	def __init__(self, arg1, arg2=None):
 		super(DeliveryNote, self).__init__(arg1, arg2)
+		self.set_field_for_percentage_calculation('Sales', 'Delivery')
+
 		self.status_updater = [{
 			'source_dt': 'Delivery Note Item',
 			'target_dt': 'Sales Order Item',
+			'update_fields': {'delivered_amt': 'amount', 'delivered_qty': 'qty'},
 			'join_field': 'so_detail',
-			'target_field': 'delivered_qty',
+			'target_field': self.target_field,
 			'target_parent_dt': 'Sales Order',
 			'target_parent_field': 'per_delivered',
-			'target_ref_field': 'qty',
+			'target_ref_field': self.target_ref_field,
 			'source_field': 'qty',
 			'percent_join_field': 'against_sales_order',
 			'status_field': 'delivery_status',
@@ -46,9 +49,10 @@ class DeliveryNote(SellingController):
 			'source_dt': 'Delivery Note Item',
 			'target_dt': 'Sales Invoice Item',
 			'join_field': 'si_detail',
-			'target_field': 'delivered_qty',
+			'update_fields': {'delivered_amt': 'amount', 'delivered_qty': 'qty'},
+			'target_field': self.target_field,
 			'target_parent_dt': 'Sales Invoice',
-			'target_ref_field': 'qty',
+			'target_ref_field': self.target_ref_field,
 			'source_field': 'qty',
 			'percent_join_field': 'against_sales_invoice',
 			'overflow_type': 'delivery',
@@ -57,6 +61,7 @@ class DeliveryNote(SellingController):
 		{
 			'source_dt': 'Delivery Note Item',
 			'target_dt': 'Sales Order Item',
+			'update_fields': {'returned_qty': '-1 * qty'},
 			'join_field': 'so_detail',
 			'target_field': 'returned_qty',
 			'target_parent_dt': 'Sales Order',
@@ -295,6 +300,7 @@ class DeliveryNote(SellingController):
 		for d in self.get("items"):
 			if d.si_detail and not d.so_detail:
 				d.db_set('billed_amt', d.amount, update_modified=update_modified)
+				d.db_set('billed_qty', d.qty, update_modified=update_modified)
 			elif d.so_detail:
 				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)
 
@@ -306,12 +312,17 @@ class DeliveryNote(SellingController):
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
 	# Billed against Sales Order directly
-	billed_against_so = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item`
+	billed_against_so = frappe.db.sql("""select sum(qty), sum(amount) from `tabSales Invoice Item`
 		where so_detail=%s and (dn_detail is null or dn_detail = '') and docstatus=1""", so_detail)
-	billed_against_so = billed_against_so and billed_against_so[0][0] or 0
+
+	billed_against_so = {
+		'qty': billed_against_so and billed_against_so[0][0] or 0,
+		'amount': billed_against_so and billed_against_so[0][1] or 0
+	}
 
 	# Get all Delivery Note Item rows against the Sales Order Item row
-	dn_details = frappe.db.sql("""select dn_item.name, dn_item.amount, dn_item.si_detail, dn_item.parent
+	dn_details = frappe.db.sql("""select dn_item.name, dn_item.amount, dn_item.si_detail,
+			dn_item.parent, dn_item.qty
 		from `tabDelivery Note Item` dn_item, `tabDelivery Note` dn
 		where dn.name=dn_item.parent and dn_item.so_detail=%s
 			and dn.docstatus=1 and dn.is_return = 0
@@ -319,29 +330,30 @@ def update_billed_amount_based_on_so(so_detail, update_modified=True):
 
 	updated_dn = []
 	for dnd in dn_details:
-		billed_amt_agianst_dn = 0
-
-		# If delivered against Sales Invoice
-		if dnd.si_detail:
-			billed_amt_agianst_dn = flt(dnd.amount)
-			billed_against_so -= billed_amt_agianst_dn
-		else:
-			# Get billed amount directly against Delivery Note
-			billed_amt_agianst_dn = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item`
-				where dn_detail=%s and docstatus=1""", dnd.name)
-			billed_amt_agianst_dn = billed_amt_agianst_dn and billed_amt_agianst_dn[0][0] or 0
-
-		# Distribute billed amount directly against SO between DNs based on FIFO
-		if billed_against_so and billed_amt_agianst_dn < dnd.amount:
-			pending_to_bill = flt(dnd.amount) - billed_amt_agianst_dn
-			if pending_to_bill <= billed_against_so:
-				billed_amt_agianst_dn += pending_to_bill
-				billed_against_so -= pending_to_bill
+		for key in ['qty', 'amount']:
+			billed_against_dn = 0
+			if dnd.si_detail:
+				billed_against_dn = flt(dnd[key])
+				billed_against_so[key] -= billed_against_dn
 			else:
-				billed_amt_agianst_dn += billed_against_so
-				billed_against_so = 0
+				billed_against_dn = frappe.db.sql("""select sum({0}) from `tabSales Invoice Item`
+					where dn_detail=%s and docstatus=1""".format(key), dnd.name)
+				billed_against_dn = billed_against_dn and billed_against_dn[0][0] or 0
 
-		frappe.db.set_value("Delivery Note Item", dnd.name, "billed_amt", billed_amt_agianst_dn, update_modified=update_modified)
+			# Distribute billed amount directly against SO between DNs based on FIFO
+			if billed_against_so[key] and billed_against_dn < dnd[key]:
+				pending_to_bill = flt(dnd[key]) - billed_against_dn
+				if pending_to_bill <= billed_against_so[key]:
+					billed_against_dn += pending_to_bill
+					billed_against_so[key] -= pending_to_bill
+				else:
+					billed_against_dn += billed_against_so[key]
+					billed_against_so[key] = 0
+
+			if billed_against_dn:
+				update_field = 'billed_qty' if key == 'qty' else 'billed_amt'
+				frappe.db.set_value("Delivery Note Item", dnd.name,
+					 update_field, billed_against_dn, update_modified=update_modified)
 
 		updated_dn.append(dnd.parent)
 

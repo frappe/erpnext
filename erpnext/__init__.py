@@ -78,6 +78,20 @@ def is_perpetual_inventory_enabled(company):
 
 	return frappe.local.enable_perpetual_inventory[company]
 
+def get_percentage_ref_field(doctype, field):
+	if not hasattr(frappe.local, 'percentage_ref_field'):
+		frappe.local.percentage_ref_field = {}
+
+	if not doctype in frappe.local.percentage_ref_field:
+		frappe.local.percentage_ref_field.setdefault(doctype, {
+			field: frappe.db.get_single_value(doctype, field)
+		})
+
+	if not field in frappe.local.percentage_ref_field[doctype]:
+		frappe.local.percentage_ref_field[doctype][field] = frappe.db.get_single_value(doctype, field)
+
+	return frappe.local.percentage_ref_field[doctype][field]
+
 def get_region(company=None):
 	'''Return the default country based on flag, company or global settings
 

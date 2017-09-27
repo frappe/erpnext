@@ -11,6 +11,7 @@ from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.sales_and_purchase_return import validate_return
 from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled
 from erpnext.exceptions import InvalidCurrency
+from erpnext.controllers.status_updater import get_reference_field, get_target_field
 
 force_item_fields = ("item_group", "barcode", "brand", "stock_uom")
 
@@ -54,6 +55,13 @@ class AccountsController(TransactionBase):
 
 		if self.doctype == 'Purchase Invoice':
 			self.validate_paid_amount()
+
+	def set_field_for_percentage_calculation(self, transaction_type, percentage_type):
+		target_ref_field = get_reference_field(transaction_type, percentage_type)
+		target_field = get_target_field(transaction_type, percentage_type, target_ref_field)
+
+		setattr(self, 'target_field', target_field)
+		setattr(self, 'target_ref_field', target_ref_field)
 
 	def before_print(self):
 		if self.doctype in ['Purchase Order', 'Sales Order']:

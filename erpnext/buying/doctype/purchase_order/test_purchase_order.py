@@ -7,6 +7,8 @@ import frappe
 import frappe.defaults
 from frappe.utils import flt, add_days, nowdate
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt, make_purchase_invoice
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import \
+	make_purchase_invoice as make_purchase_invoice_from_pr
 
 class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_receipt(self):
@@ -124,7 +126,81 @@ class TestPurchaseOrder(unittest.TestCase):
 			"group_same_items": 1
 			}).insert(ignore_permissions=True)
 
-		
+	def test_status_based_on_qty_amount(self):
+		set_percentage_field_based_on({
+			'billing_percentage_based_on': 'Quantity',
+			'receive_percentage_based_on': 'Amount'
+		})
+
+		po = create_purchase_order()
+		pi = make_purchase_invoice(po.name)
+		pi.insert()
+		pi.submit()
+
+		pi_item = pi.items[0]
+		po_doc = frappe.get_doc('Purchase Order', po.name)
+		self.assertEquals(po_doc.status, 'To Receive')
+
+		pr = make_purchase_receipt(po.name)
+		pr.insert()
+		pr.submit()
+
+		pr_item = pr.items[0]
+
+		po_doc = frappe.get_doc('Purchase Order', po.name)
+		po_item = po_doc.items[0]
+
+		self.assertEquals(po_doc.status, 'Completed')
+		self.assertEquals(po_doc.per_received, 100)
+		self.assertEquals(po_doc.per_billed, 100)
+		self.assertEquals(po_item.billed_qty, pi_item.qty)
+		self.assertEquals(po_item.billed_amt, pi_item.amount)
+		self.assertEquals(po_item.received_qty, pr_item.qty)
+		self.assertEquals(po_item.received_amt, pr_item.amount)
+		set_percentage_field_based_on()
+
+	def test_status_based_on_amount_qty(self):
+		set_percentage_field_based_on({
+			'billing_percentage_based_on': 'Quantity',
+			'receive_percentage_based_on': 'Amount'
+		})
+
+		po = create_purchase_order()
+		pr = make_purchase_receipt(po.name)
+		pr.insert()
+		pr.submit()
+
+		po_doc = frappe.get_doc('Purchase Order', po.name)
+		self.assertEquals(po_doc.status, 'To Bill')
+
+
+		pi = make_purchase_invoice_from_pr(pr.name)
+		pi.insert()
+		pi.submit()
+
+		pi_item = pi.items[0]
+		po_doc = frappe.get_doc('Purchase Order', po.name)
+		pr_doc = frappe.get_doc('Purchase Receipt', pr.name)
+		pr_item = pr_doc.items[0]
+
+		self.assertEquals(po_doc.status, 'Completed')
+		self.assertEquals(po_doc.per_received, 100)
+		self.assertEquals(po_doc.per_billed, 100)
+		self.assertEquals(pr_item.billed_qty, pi_item.qty)
+		self.assertEquals(pr_item.billed_amt, pi_item.amount)
+		set_percentage_field_based_on()
+
+def set_percentage_field_based_on(args=None):
+	if not args:
+		args = {
+			'billing_percentage_based_on': 'Amount',
+			'receive_percentage_based_on': 'Quantity'
+		}
+
+	doc = frappe.get_doc('Buying Settings')
+	doc.update(args)
+	doc.save()
+
 def get_same_items():
 	return [
 				{
