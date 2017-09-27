@@ -42,7 +42,10 @@ before_script:
   - echo "USE mysql;\nCREATE USER 'test_frappe'@'localhost' IDENTIFIED BY 'test_frappe';\nFLUSH PRIVILEGES;\n" | mysql -u root -ptravis
   - echo "USE mysql;\nGRANT ALL PRIVILEGES ON \`test_frappe\`.* TO 'test_frappe'@'localhost';\n" | mysql -u root -ptravis
 
+  - cd ~/frappe-bench/apps
+  - sudo rm -R frappe
   - cd ~/frappe-bench
+  - bench get-app frappe https://github.com/Zlash65/frappe
   - bench get-app erpnext $TRAVIS_BUILD_DIR
   - bench use test_site
   - bench reinstall --yes

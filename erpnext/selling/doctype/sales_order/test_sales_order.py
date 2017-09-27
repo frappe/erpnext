@@ -490,7 +490,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEquals(get_reserved_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"), existing_reserved_qty)
 
 	def test_create_so_with_margin(self):
-		so = make_sales_order(item_code="_Test Item", qty=1, do_not_submit=True)
+		so = make_sales_order(item_code="_Test Item", qty=1, do_not_submit=True, do_not_save=True)
 		so.items[0].price_list_rate = price_list_rate = 100
 		so.items[0].margin_type = 'Percentage'
 		so.items[0].margin_rate_or_amount = 25
