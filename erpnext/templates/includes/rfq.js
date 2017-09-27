@@ -85,7 +85,7 @@ rfq = Class.extend({
 					frappe.unfreeze();
 					if(r.message){
 						$('.btn-sm').hide()
-						window.location.href = "/quotations/" + encodeURIComponent(r.message);
+						window.location.href = "/supplier-quotations/" + encodeURIComponent(r.message);
 					}
 				}
 			})
