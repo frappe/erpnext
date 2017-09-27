@@ -28,11 +28,10 @@ frappe.ui.form.on("Purchase Order", {
 frappe.ui.form.on("Purchase Order Item", {
 	item_code: function(frm) {
 		frappe.call({
-			"method": "get_last_purchase_rate",
-			"doc": frm.doc,
+			method: "get_last_purchase_rate",
+			doc: frm.doc,
 			callback: function(r, rt) {
-				frm.dirty();
-				frm.cscript.calculate_taxes_and_totals();
+				frm.trigger('calculate_taxes_and_totals');
 			}
 		})
 	}
