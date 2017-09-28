@@ -12,7 +12,7 @@ class ItemSettings(Document):
 		if int(self.clean_description_html or 0) \
 			and not int(self.db_get('clean_description_html') or 0):
 			# changed to text
-			frappe.enqueue(clean_all_descriptions, now=frappe.flags.in_test)
+			frappe.enqueue('erpnext.stock.doctype.item_settings.item_settings.clean_all_descriptions', now=frappe.flags.in_test)
 
 
 def clean_all_descriptions():
