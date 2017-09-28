@@ -110,7 +110,6 @@ def get_data():
 					"name": "Item Variant Settings",
 					"description": _("Item Variant Settings."),
 				},
-
 			]
 		},
 		{
@@ -203,6 +202,10 @@ def get_data():
 					"type": "doctype",
 					"name": "Brand",
 					"description": _("Brand master.")
+				},
+				{
+					"type": "doctype",
+					"name": "Item Settings",
 				},
 			]
 		},

@@ -23,6 +23,7 @@ execute:frappe.reload_doc('selling', 'doctype', 'customer') # 2014-01-29
 execute:frappe.reload_doc('buying', 'doctype', 'supplier') # 2014-01-29
 execute:frappe.reload_doc('accounts', 'doctype', 'asset_category')
 execute:frappe.reload_doc('accounts', 'doctype', 'pricing_rule')
+execute:frappe.reload_doc('stock', 'doctype', 'item_settings')
 erpnext.patches.v4_0.map_charge_to_taxes_and_charges
 execute:frappe.reload_doc('support', 'doctype', 'newsletter') # 2014-01-31
 execute:frappe.reload_doc('hr', 'doctype', 'employee') # 2014-02-03
@@ -460,3 +461,4 @@ execute:frappe.delete_doc_if_exists("DocType", "Program Fee")
 erpnext.patches.v9_0.set_pos_profile_name
 erpnext.patches.v9_0.remove_non_existing_warehouse_from_stock_settings
 execute:frappe.delete_doc_if_exists("DocType", "Program Fee")
+erpnext.patches.v9_0.set_item_settings
