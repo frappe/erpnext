@@ -16,6 +16,7 @@ def setup(domain):
 	setup_user()
 	setup_employee()
 	setup_user_roles()
+	setup_role_permissions()
 
 	employees = frappe.get_all('Employee',  fields=['name', 'date_of_joining'])
 
@@ -91,7 +92,8 @@ def setup_fiscal_year():
 			pass
 
 	# set the last fiscal year (current year) as default
-	fiscal_year.set_as_default()
+	if fiscal_year:
+		fiscal_year.set_as_default()
 
 def setup_holiday_list():
 	"""Setup Holiday List for the current year"""
@@ -373,6 +375,22 @@ def setup_pos_profile():
 	})
 
 	pos.insert()
+
+def setup_role_permissions():
+	role_permissions = {'Batch': ['Accounts User', 'Item Manager']}
+	for doctype, roles in role_permissions.items():
+		for role in roles:
+			if not frappe.db.get_value('Custom DocPerm',
+				{'parent': doctype, 'role': role}):
+				frappe.get_doc({
+					'doctype': 'Custom DocPerm',
+					'role': role,
+					'read': 1,
+					'write': 1,
+					'create': 1,
+					'delete': 1,
+					'parent': doctype
+				}).insert(ignore_permissions=True)
 
 def import_json(doctype, submit=False, values=None):
 	frappe.flags.in_import = True
