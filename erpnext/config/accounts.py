@@ -4,7 +4,13 @@ import frappe
 from frappe import _
 
 
-def get_data():
+def get_data(**kwargs):
+	"""
+	Returns the data to be displayed in a modules page.
+
+	:param kwargs: Parameters to be supplied into `frappe.get_list`. **kwargs was added to make testing easier.
+	:return: List of dict
+	"""
 
 	# Seperate data for GST so that we can maintain the order of display
 	GST_DATA = {
@@ -496,7 +502,10 @@ def get_data():
 	]
 
 	# If there is no Company with country == India, remove GST_DATA from data
-	india_coy = frappe.get_list('Company', fields=['name'], filters={'country': 'India'})
+	if kwargs:
+		india_coy = frappe.get_list(**kwargs)
+	else:
+		india_coy = frappe.get_list('Company', fields=['name'], filters={'country': 'India'})
 	if not india_coy:
 		data.remove(GST_DATA)
 
