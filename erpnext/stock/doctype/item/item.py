@@ -100,6 +100,7 @@ class Item(WebsiteGenerator):
 	def on_update(self):
 		invalidate_cache_for_item(self)
 		self.validate_name_with_item_group()
+		self.update_variants()
 		self.update_item_price()
 		self.update_template_item()
 
@@ -607,8 +608,23 @@ class Item(WebsiteGenerator):
 
 			if not template_item.show_in_website:
 				template_item.show_in_website = 1
+				template_item.flags.dont_update_variants = True
 				template_item.flags.ignore_permissions = True
 				template_item.save()
+
+	def update_variants(self):
+			if self.flags.dont_update_variants:
+				return
+			if self.has_variants:
+				updated = []
+				variants = frappe.db.get_all("Item", fields=["item_code"], filters={"variant_of": self.name })
+				for d in variants:
+					variant = frappe.get_doc("Item", d)
+					copy_attributes_to_variant(self, variant)
+					variant.save()
+					updated.append(d.item_code)
+				if updated:
+					frappe.msgprint(_("Item Variants {0} updated").format(", ".join(updated)))
 
 	def validate_has_variants(self):
 		if not self.has_variants and frappe.db.get_value("Item", self.name, "has_variants"):

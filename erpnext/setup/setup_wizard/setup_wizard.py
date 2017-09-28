@@ -33,6 +33,7 @@ def setup_complete(args=None):
 	create_feed_and_todo()
 	create_email_digest()
 	create_letter_head(args)
+	set_no_copy_fields_in_variant_settings()
 
 	if args.get('domain').lower() == 'education':
 		create_academic_year()
@@ -64,10 +65,6 @@ def setup_complete(args=None):
 			frappe.message_log.pop()
 
 		pass
-
-def setup_success(args=None):
-	company = frappe.db.sql("select name from tabCompany", as_dict=True)[0]["name"]
-	install_country_fixtures(company)
 
 def create_fiscal_year_and_company(args):
 	if (args.get('fy_start_date')):
@@ -353,6 +350,12 @@ def create_letter_head(args):
 			filename, filetype, content = attach_letterhead
 			fileurl = save_file(filename, content, "Letter Head", _("Standard"), decode=True).file_url
 			frappe.db.set_value("Letter Head", _("Standard"), "content", "<img src='%s' style='max-width: 100%%;'>" % fileurl)
+
+def set_no_copy_fields_in_variant_settings():
+	# set no copy fields of an item doctype to item variant settings
+	doc = frappe.get_doc('Item Variant Settings')
+	doc.set_default_fields()
+	doc.save()
 
 def create_logo(args):
 	if args.get("attach_logo"):
