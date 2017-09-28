@@ -1084,7 +1084,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.items[0].price_list_rate = price_list_rate
 		si.items[0].margin_type = 'Percentage'
 		si.items[0].margin_rate_or_amount = 25
-		si.insert()
+		si.save()
 		self.assertEqual(si.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
 
 	def test_outstanding_amount_after_advance_jv_cancelation(self):
