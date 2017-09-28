@@ -21,8 +21,8 @@ class Subscription(Document):
 		self.validate_next_schedule_date()
 		self.validate_email_id()
 
-		validate_template(self.subject)
-		validate_template(self.message)
+		validate_template(self.subject or "")
+		validate_template(self.message or "")
 
 	def before_submit(self):
 		self.set_next_schedule_date()
