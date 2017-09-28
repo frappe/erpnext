@@ -16,7 +16,7 @@ QUnit.test("test: production order", function (assert) {
 	frappe.run_serially([
 		// test production order
 		() => frappe.set_route("List", "Production Order"),
-		() => frappe.timeout(0.5),
+		() => frappe.timeout(3),
 
 		// Create a laptop production order
 		() => {
@@ -29,7 +29,7 @@ QUnit.test("test: production order", function (assert) {
 				{fg_warehouse: "Finished Goods - FT"}
 			]);
 		},
-		() => frappe.timeout(2),
+		() => frappe.timeout(3),
 		() => {
 			assert.equal(cur_frm.doc.planned_operating_cost, cur_frm.doc.total_operating_cost,
 				"Total and Planned Cost is equal");
@@ -54,21 +54,24 @@ QUnit.test("test: production order", function (assert) {
 		() => cur_frm.savesubmit(),
 		() => frappe.timeout(1),
 		() => frappe.click_button('Yes'),
-		() => frappe.timeout(1),
+		() => frappe.timeout(2.5),
 
 		// Confirm the production order timesheet, save and submit it
-		() => frappe.click_link("TS-00"),
-		() => frappe.timeout(1),
+		() => frappe.click_link("Timesheet"),
+		() => frappe.timeout(2.5),
+		() => {
+			let name = cur_list.data[0].name;
+			frappe.click_link(name);
+		},
+		() => frappe.timeout(2.5),
 		() => frappe.click_button("Save"),
 		() => frappe.timeout(1),
 		() => frappe.click_button("Submit"),
 		() => frappe.timeout(1),
 		() => frappe.click_button("Yes"),
-		() => frappe.timeout(2),
+		() => frappe.timeout(2.5),
 
 		// Start the production order process
-		() => frappe.set_route("List", "Production Order"),
-		() => frappe.timeout(.5),
 		() => frappe.set_route("List", "Production Order"),
 		() => frappe.timeout(2),
 		() => frappe.click_link("Laptop"),
