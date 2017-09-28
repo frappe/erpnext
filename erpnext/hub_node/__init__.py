@@ -256,7 +256,7 @@ def make_rfq(item, supplier, contact):
 	return rfq
 
 def send_opportunity(contact):
-	# Make Hub Document on Hub with lead data
+	# Make Hub Message on Hub with lead data
 	doc = {
 		'doctype': 'Lead',
 		'lead_name': frappe.db.get_single_value('Hub Settings', 'company'),
@@ -264,14 +264,13 @@ def send_opportunity(contact):
 	}
 
 	args = frappe._dict(dict(
-		doctype='Hub Document',
+		doctype='Hub Message',
 		reference_doctype='Lead',
 		data=json.dumps(doc),
 		user=contact.email_id
 	))
 
 	connection = get_connection()
-	response = connection.insert('Hub Document', args)
+	response = connection.insert('Hub Message', args)
 
 	return response.ok
-

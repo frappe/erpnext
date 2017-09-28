@@ -1,5 +1,5 @@
 {
- "condition": "{'reference_doctype': 'Lead', 'user': frappe.db.get_single_value('Hub Settings', 'user')}", 
+ "condition": "{'reference_doctype': 'Lead', 'user': frappe.db.get_single_value('Hub Settings', 'user'), 'status': 'Pending'}", 
  "creation": "2017-09-20 15:06:40.279930", 
  "docstatus": 0, 
  "doctype": "Data Migration Mapping", 
@@ -18,16 +18,14 @@
  "idx": 0, 
  "local_doctype": "Lead", 
  "local_primary_key": "email_id", 
- "mapping_name": "Hub Document to Lead", 
+ "mapping_name": "Hub Message to Lead", 
  "mapping_type": "Pull", 
  "migration_id_field": "hub_sync_id", 
- "modified": "2017-09-22 15:32:12.705366", 
- "modified_by": "Administrator", 
- "name": "Hub Document to Lead", 
+ "modified": "2017-09-28 13:21:41.575155", 
+ "modified_by": "faris@erpnext.com", 
+ "name": "Hub Message to Lead", 
  "owner": "frappetest@gmail.com", 
  "page_length": 10, 
- "post_process": "", 
- "pre_process": "import json\ndoc = json.loads(doc.data)", 
- "remote_objectname": "Hub Document", 
+ "remote_objectname": "Hub Message", 
  "remote_primary_key": "name"
 }
