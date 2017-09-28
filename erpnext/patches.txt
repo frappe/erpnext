@@ -434,7 +434,7 @@ erpnext.patches.v8_5.update_customer_group_in_POS_profile
 erpnext.patches.v8_6.update_timesheet_company_from_PO
 erpnext.patches.v8_6.set_write_permission_for_quotation_for_sales_manager
 erpnext.patches.v8_5.remove_project_type_property_setter
-erpnext.patches.v8_7.add_more_gst_fields
+erpnext.patches.v8_7.add_more_gst_fields #21-09-2017
 erpnext.patches.v8_7.fix_purchase_receipt_status
 erpnext.patches.v8_6.rename_bom_update_tool
 erpnext.patches.v8_7.set_offline_in_pos_settings #11-09-17
@@ -447,3 +447,4 @@ erpnext.patches.v8_9.set_default_customer_group
 erpnext.patches.v8_9.remove_employee_from_salary_structure_parent
 erpnext.patches.v8_9.delete_gst_doctypes_for_outside_india_accounts
 erpnext.patches.v8_9.set_default_fields_in_variant_settings
+erpnext.patches.v8_9.update_billing_gstin_for_indian_account

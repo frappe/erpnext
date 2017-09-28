@@ -3,12 +3,15 @@
 
 from __future__ import unicode_literals
 import frappe, json
+from frappe.utils.nestedset import get_root_of
 
 @frappe.whitelist()
 def get_items(start, page_length, price_list, item_group, search_value=""):
 	serial_no = ""
 	batch_no = ""
 	item_code = search_value
+	if not frappe.db.exists('Item Group', item_group):
+		item_group = get_root_of('Item Group')
 
 	if search_value:
 		# search serial no
