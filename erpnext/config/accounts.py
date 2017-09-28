@@ -1,8 +1,47 @@
 from __future__ import unicode_literals
+
+import frappe
 from frappe import _
 
+
 def get_data():
-	return [
+
+	# Seperate data for GST so that we can maintain the order of display
+	GST_DATA = {
+			"label": _("Goods and Services Tax (GST India)"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "GST Settings",
+				},
+				{
+					"type": "doctype",
+					"name": "GST HSN Code",
+				},
+				{
+					"type": "report",
+					"name": "GST Sales Register",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "GST Purchase Register",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "GST Itemised Sales Register",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "GST Itemised Purchase Register",
+					"is_query_report": True
+				},
+			]
+		}
+
+	data = [
 		{
 			"label": _("Billing"),
 			"items": [
@@ -204,39 +243,7 @@ def get_data():
 				},
 			]
 		},
-		{
-			"label": _("Goods and Services Tax (GST India)"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "GST Settings",
-				},
-				{
-					"type": "doctype",
-					"name": "GST HSN Code",
-				},
-				{
-					"type": "report",
-					"name": "GST Sales Register",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "GST Purchase Register",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "GST Itemised Sales Register",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "GST Itemised Purchase Register",
-					"is_query_report": True
-				},
-			]
-		},
+		GST_DATA,
 		{
 			"label": _("Budget and Cost Center"),
 			"items": [
@@ -487,3 +494,10 @@ def get_data():
 			]
 		}
 	]
+
+	# If there is no Company with country == India, remove GST_DATA from data
+	india_coy = frappe.get_list('Company', fields=['name'], filters={'country': 'India'})
+	if not india_coy:
+		data.remove(GST_DATA)
+
+	return data
