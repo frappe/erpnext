@@ -87,7 +87,8 @@ class TestItem(unittest.TestCase):
 			"price_list_currency": "_Test Currency",
 			"plc_conversion_rate": 1,
 			"order_type": "Sales",
-			"customer": "_Test Customer"
+			"customer": "_Test Customer",
+			"qty": 1.0
 		})
 
 		for key, value in to_check.iteritems():

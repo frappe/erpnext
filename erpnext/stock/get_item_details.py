@@ -240,17 +240,17 @@ def get_default_cost_center(args, item):
 
 def get_price_list_rate(args, item_doc, out):
 	meta = frappe.get_meta(args.parenttype or args.doctype)
-
 	if meta.get_field("currency"):
 		validate_price_list(args)
 		if args.price_list:
 			validate_conversion_rate(args, meta)
 
-		price_list_rate = get_price_list_rate_for(args.price_list, item_doc.name)
-
+		price_list_rate = get_price_list_rate_for(args.price_list,
+			item_doc.name, args.qty, args.transaction_date)
 		# variant
 		if not price_list_rate and item_doc.variant_of:
-			price_list_rate = get_price_list_rate_for(args.price_list, item_doc.variant_of)
+			price_list_rate = get_price_list_rate_for(args.price_list,
+				item_doc.variant_of, args.qty, args.transaction_date)
 
 		# insert in database
 		if not price_list_rate:
@@ -281,25 +281,55 @@ def insert_item_price(args):
 				"price_list": args.price_list,
 				"item_code": args.item_code,
 				"currency": args.currency,
-				"price_list_rate": price_list_rate
+				"price_list_rate": price_list_rate,
+				"min_qty": args.qty
 			})
 
-			name = frappe.db.get_value('Item Price', {'item_code': args.item_code, 'price_list': args.price_list, 'currency': args.currency}, 'name')
+			name = frappe.db.get_value('Item Price',
+				{
+					'item_code': args.item_code,
+					'price_list': args.price_list,
+					'currency': args.currency,
+					'min_qty': args.qty
+				},
+				'name')
 
 			if name:
 				item_price = frappe.get_doc('Item Price', name)
 				item_price.price_list_rate = price_list_rate
 				item_price.save()
-				frappe.msgprint(_("Item Price updated for {0} in Price List {1}").format(args.item_code,
-					args.price_list))
+				frappe.msgprint(_("Item Price updated for {0} in Price List {1} with Mininum Quantity {2}").format(args.item_code,
+					args.price_list, args.qty))
 			else:
 				item_price.insert()
-				frappe.msgprint(_("Item Price added for {0} in Price List {1}").format(args.item_code,
-					args.price_list))
+				frappe.msgprint(_("Item Price added for {0} in Price List {1}w ith Mininum Quantity {2}").format(args.item_code,
+					args.price_list, args.qty))
 
-def get_price_list_rate_for(price_list, item_code):
-	return frappe.db.get_value("Item Price",
-			{"price_list": price_list, "item_code": item_code}, "price_list_rate")
+def get_price_list_rate_for(price_list, item_code, qty, transaction_date=""):
+	"""
+		Return Price Rate based on min_qty of each Item Price Rate.\
+		For example, desired qty is 10 and Item Price Rates exists
+		for min_qty 9 and min_qty 20. It returns Item Price Rate for qty 9 as
+		the best fit in the range of avaliable min_qtyies
+
+		:param price_list: str (Standard Buying or Standard Selling)
+		:param item_code: str, Item Doctype field item_code
+		:param qty: Derised Qty
+		:param transaction_date: Date of the price
+	"""
+	price_list_rate = frappe.db.sql("""
+		SELECT price_list_rate
+		FROM `tabItem Price`
+		WHERE item_code=%(item_code)s
+			AND price_list = %(price_list)s
+			AND min_qty <= %(qty)s 
+			AND (%(date)s BETWEEN valid_from AND valid_upto OR %(date)s = ""
+				OR (valid_from is NULL AND valid_upto is NULL))
+		ORDER BY price_list_rate asc""",
+		{'item_code': item_code, 'price_list': price_list, 'qty': qty, 'date': transaction_date})
+	if price_list_rate:
+		return price_list_rate[0][0]
+	return None
 
 def validate_price_list(args):
 	if args.get("price_list"):
