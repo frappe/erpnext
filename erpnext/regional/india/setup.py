@@ -12,7 +12,7 @@ def setup(company=None, patch=True):
 	make_custom_fields()
 	add_permissions()
 	add_custom_roles_for_reports()
-	add_hsn_sac_codes()
+	frappe.enqueue('erpnext.regional.india.setup.add_hsn_sac_codes')
 	add_print_formats()
 	if not patch:
 		update_address_template()
@@ -47,12 +47,14 @@ def add_hsn_sac_codes():
 
 def create_hsn_codes(data, code_field):
 	for d in data:
-		if not frappe.db.exists("GST HSN Code", d[code_field]):
-			hsn_code = frappe.new_doc('GST HSN Code')
-			hsn_code.description = d["description"]
-			hsn_code.hsn_code = d[code_field]
-			hsn_code.name = d[code_field]
+		hsn_code = frappe.new_doc('GST HSN Code')
+		hsn_code.description = d["description"]
+		hsn_code.hsn_code = d[code_field]
+		hsn_code.name = d[code_field]
+		try:
 			hsn_code.db_insert()
+		except frappe.DuplicateEntryError:
+			pass
 
 def add_custom_roles_for_reports():
 	for report_name in ('GST Sales Register', 'GST Purchase Register',
@@ -111,12 +113,15 @@ def make_custom_fields():
 		]
 
 	sales_invoice_gst_fields = [
+			dict(fieldname='billing_address_gstin', label='Billing Address GSTIN',
+				fieldtype='Data', insert_after='customer_address',
+				options='customer_address.gstin', print_hide=1),
 			dict(fieldname='customer_gstin', label='Customer GSTIN',
 				fieldtype='Data', insert_after='shipping_address',
 				options='shipping_address_name.gstin', print_hide=1),
 			dict(fieldname='place_of_supply', label='Place of Supply',
 				fieldtype='Data', insert_after='customer_gstin', print_hide=1,
-				options='shipping_address_name.gst_state_number', read_only=1),
+				options='shipping_address_name.gst_state_number', read_only=0),
 			dict(fieldname='company_gstin', label='Company GSTIN',
 				fieldtype='Data', insert_after='company_address',
 				options='company_address.gstin', print_hide=1)
