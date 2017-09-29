@@ -261,20 +261,57 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	setup_pos_profile() {
-		return frappe.call({
-			method: 'erpnext.stock.get_item_details.get_pos_profile',
-			args: {
-				company: frappe.sys_defaults.company
-			}
-		}).then(r => {
-			this.pos_profile = r.message;
+		return new Promise((resolve) => {
+			const on_submit = ({ pos_profile }) => {
+				this.get_pos_profile_doc(pos_profile)
+					.then(doc => {
+						this.pos_profile = doc;
 
-			if (!this.pos_profile) {
-				this.pos_profile = {
-					currency: frappe.defaults.get_default('currency'),
-					selling_price_list: frappe.defaults.get_default('selling_price_list')
-				};
+						if (!this.pos_profile) {
+							this.pos_profile = {
+								currency: frappe.defaults.get_default('currency'),
+								selling_price_list: frappe.defaults.get_default('selling_price_list')
+							};
+						}
+
+						resolve();
+					});
 			}
+
+			frappe.call({
+				method: 'erpnext.accounts.doctype.pos_profile.pos_profile.get_pos_profiles_for_user'
+			})
+			.then((r) => {
+				if (r && r.message) {
+					const pos_profiles = r.message;
+
+					if(pos_profiles.length === 1) {
+						// load profile directly
+						on_submit({pos_profile: pos_profiles[0]});
+					} else {
+						// ask prompt
+						frappe.prompt(
+							[{ fieldtype: 'Select', label: 'POS Profile', options: pos_profiles }],
+							on_submit,
+							__('Select POS Profile')
+						)
+					}
+				}
+			});
+		});
+	}
+
+	get_pos_profile_doc(pos_profile_name) {
+		return new Promise(resolve => {
+			frappe.call({
+				method: 'erpnext.accounts.doctype.pos_profile.pos_profile.get_pos_profile',
+				args: {
+					pos_profile_name
+				},
+				callback: (r) => {
+					resolve(r.message);
+				}
+			});
 		});
 	}
 
