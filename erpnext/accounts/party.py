@@ -320,10 +320,14 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
 	args = {
 		party_type.lower(): party,
-		"customer_group":	customer_group,
-		"supplier_type":	supplier_type,
 		"company":			company
 	}
+
+	if customer_group:
+		args['customer_group'] = customer_group
+
+	if supplier_type:
+		args['supplier_type'] = supplier_type
 
 	if billing_address or shipping_address:
 		args.update(get_party_details(party, party_type, {"billing_address": billing_address, \
