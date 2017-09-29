@@ -1,0 +1,17 @@
+<div style="margin-bottom: 30px; max-width: 600px" class="with-border clickable">
+	<a href={{ route }}>
+		<h3>{{ doc.title }}</h3>
+		<p>
+			<span class="label">{{ frappe.db.get_value('User', chapter_head, 'full_name') }}</span>
+			<span class="label">
+				{% if members %}
+					Members: {{ members|length }}
+				{% else %}
+					Members: 0
+				{% endif %}
+			</span>
+		</p>
+		<p>{{ html2text(doc.introduction[:200]) }}{% if introduction|len > 200 %}...{% endif %}</p>
+	</a>
+</div>
+<!-- this is a sample default list template -->
