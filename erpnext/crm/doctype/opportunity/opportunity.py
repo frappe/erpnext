@@ -246,6 +246,27 @@ def make_quotation(source_name, target_doc=None):
 	return doclist
 
 @frappe.whitelist()
+def make_request_for_quotation(source_name, target_doc=None):
+	doclist = get_mapped_doc("Opportunity", source_name, {
+		"Opportunity": {
+			"doctype": "Request for Quotation",
+			"validation": {
+				"enquiry_type": ["=", "Sales"]
+			}
+		},
+		"Opportunity Item": {
+			"doctype": "Request for Quotation Item",
+			"field_map": [
+				["name", "opportunity_item"],
+				["parent", "opportunity"],
+				["uom", "uom"]
+			]
+		}
+	}, target_doc)
+
+	return doclist
+
+@frappe.whitelist()
 def make_supplier_quotation(source_name, target_doc=None):
 	doclist = get_mapped_doc("Opportunity", source_name, {
 		"Opportunity": {

@@ -27,7 +27,6 @@ doctype_js = {
 # setup wizard
 setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
 setup_wizard_complete = "erpnext.setup.setup_wizard.setup_wizard.setup_complete"
-setup_wizard_success = "erpnext.setup.setup_wizard.setup_wizard.setup_success"
 setup_wizard_test = "erpnext.setup.setup_wizard.test_setup_wizard.run_setup_wizard_test"
 
 before_install = "erpnext.setup.install.check_setup_wizard_not_completed"
@@ -81,7 +80,7 @@ website_route_rules = [
 	{"from_route": "/supplier-quotations/<path:name>", "to_route": "order",
 		"defaults": {
 			"doctype": "Supplier Quotation",
-			"parents": [{"label": _("Supplier Quotation"), "route": "quotations"}]
+			"parents": [{"label": _("Supplier Quotation"), "route": "supplier-quotations"}]
 		}
 	},
 	{"from_route": "/quotations", "to_route": "Quotation"},

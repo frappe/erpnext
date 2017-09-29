@@ -378,7 +378,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			if(me.frm.doc.company && me.frm.fields_dict.currency) {
 				var company_currency = me.get_company_currency();
 				var company_doc = frappe.get_doc(":Company", me.frm.doc.company);
-				if (!me.frm.doc.currency) {
+
+				if (!me.frm.doc.currency || me.frm.doc.currency != company_currency) {
 					me.frm.set_value("currency", company_currency);
 				}
 
@@ -519,6 +520,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	conversion_rate: function() {
+		const me = this.frm;
 		if(this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.set_value("conversion_rate", 1.0);
 		}
@@ -536,6 +538,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 
 		}
+		// Make read only if Accounts Settings doesn't allow stale rates
+		frappe.model.get_value("Accounts Settings", null, "allow_stale",
+			function(d){
+				me.set_df_property("conversion_rate", "read_only", cint(d.allow_stale) ? 0 : 1);
+			}
+		);
 	},
 
 	set_actual_charges_based_on_currency: function() {

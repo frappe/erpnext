@@ -128,3 +128,4 @@ erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_material_issue_with
 erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_repack.js
 erpnext/accounts/doctype/sales_invoice/tests/test_sales_invoice_with_serialize_item.js
 erpnext/accounts/doctype/payment_entry/tests/test_payment_against_invoice.js
+erpnext/buying/doctype/purchase_order/tests/test_purchase_order_with_last_purchase_rate.js
