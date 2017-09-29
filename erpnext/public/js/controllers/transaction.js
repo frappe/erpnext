@@ -382,7 +382,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			if(me.frm.doc.company && me.frm.fields_dict.currency) {
 				var company_currency = me.get_company_currency();
 				var company_doc = frappe.get_doc(":Company", me.frm.doc.company);
-				if (!me.frm.doc.currency) {
+
+				if (!me.frm.doc.currency || me.frm.doc.currency != company_currency) {
 					me.frm.set_value("currency", company_currency);
 				}
 
