@@ -86,8 +86,10 @@ class Opportunity(TransactionBase):
 
 				lead.flags.ignore_email_validation = True
 				lead.insert(ignore_permissions=True)
-				self.enquiry_from = "Lead"
-				self.lead = lead.name
+				lead_name = lead.name
+
+			self.enquiry_from = "Lead"
+			self.lead = lead_name
 
 	def declare_enquiry_lost(self,arg):
 		if not self.has_active_quotation():
