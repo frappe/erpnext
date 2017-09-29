@@ -74,7 +74,6 @@ class BankStatement(Document):
 		return mapping_row.target_field, csv_row_field_value
 
 	def fill_table(self):
-
 		self.bank_statement_items = []
 		bank_statement_format = frappe.get_doc("Bank Statement Format", self.bank_statement_format)
 		bank_statement_mapping_items = bank_statement_format.bank_statement_mapping_item
@@ -114,8 +113,6 @@ class BankStatement(Document):
 		self.save()
 
 	def process_statement(self):
-		import csv
-		from frappe.utils.file_manager import get_file_path
 		if not self.file: frappe.throw("No statement file present")
 		if not self.validate_file_format: frappe.throw(_("File format mismatch"))
 		#with open(get_file_path(self.file)) as f_h:
