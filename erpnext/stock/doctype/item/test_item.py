@@ -120,6 +120,8 @@ class TestItem(unittest.TestCase):
 		self.assertRaises(ItemVariantExistsError, variant.save)
 
 	def test_copy_fields_from_template_to_variants(self):
+		frappe.delete_doc_if_exists("Item", "_Test Variant Item-XL", force=1)
+		
 		fields = [{'field_name': 'item_group'}, {'field_name': 'is_stock_item'}]
 		allow_fields = [d.get('field_name') for d in fields]
 		set_item_variant_settings(fields)
