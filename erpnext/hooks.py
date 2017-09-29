@@ -54,7 +54,7 @@ calendars = ["Task", "Production Order", "Leave Application", "Sales Order", "Ho
 fixtures = ["Web Form"]
 
 website_generators = ["Item Group", "Item", "BOM", "Sales Partner",
-	"Job Opening", "Student Admission"]
+	"Job Opening", "Student Admission","Meeting"]
 
 website_context = {
 	"favicon": 	"/assets/erpnext/images/favicon.png",
@@ -169,7 +169,8 @@ doc_events = {
 		"on_cancel": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty"
 	},
 	"User": {
-		"after_insert": "frappe.contacts.doctype.contact.contact.update_contact",
+		"after_insert": ["frappe.contacts.doctype.contact.contact.update_contact",
+			"erpnext.meeting_minutes.api.make_orientation_meeting"],
 		"validate": "erpnext.hr.doctype.employee.employee.validate_employee_role",
 		"on_update": ["erpnext.hr.doctype.employee.employee.update_user_permissions",
 			"erpnext.portal.utils.set_default_role"]
@@ -186,8 +187,17 @@ doc_events = {
 	},
 	'Address': {
 		'validate': 'erpnext.regional.india.utils.validate_gstin_for_india'
+	},
+	"ToDo": {
+		"on_update": "erpnext.meeting_minutes.api.update_minute_status",
+		"on_trash": "erpnext.meeting_minutes.api.update_minute_status"
 	}
+
 }
+
+
+
+
 
 scheduler_events = {
 	"hourly": [

@@ -268,5 +268,12 @@ def get_data():
 			"icon": "octicon octicon-plus",
 			"type": "module",
 			"label": _("Healthcare")
+		},
+		{
+			"module_name": "Meeting Minutes",
+			"color": "#FF888B",
+			"icon": "octicon octicon-briefcase",
+			"type": "module",
+			"label": _("Meeting Minutes")
 		}
 	]
