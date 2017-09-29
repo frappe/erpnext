@@ -1079,7 +1079,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertRaises(InvalidAccountCurrency, si5.submit)
 
 	def test_create_so_with_margin(self):
-		si = create_sales_invoice(item_code="_Test Item", qty=1, do_not_submit=True)
+		si = create_sales_invoice(item_code="_Test Item", qty=1, do_not_submit=True, do_not_save=True)
 		price_list_rate = 100
 		si.items[0].price_list_rate = price_list_rate
 		si.items[0].margin_type = 'Percentage'
