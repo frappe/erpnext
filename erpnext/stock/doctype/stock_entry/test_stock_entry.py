@@ -46,6 +46,7 @@ class TestStockEntry(unittest.TestCase):
 
 		make_stock_entry(item_code=item_code, target=warehouse, qty=1, basic_rate=10)
 		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
+
 		self.assertEqual([[1, 10]], frappe.safe_eval(sle.stock_queue))
 
 		# negative qty

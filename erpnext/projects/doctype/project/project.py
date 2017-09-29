@@ -61,7 +61,7 @@ class Project(Document):
 		self.send_welcome_email()
 
 	def validate_project_name(self):
-		if frappe.db.exists("Project", self.project_name):
+		if self.get("__islocal") and frappe.db.exists("Project", self.project_name):
 			frappe.throw(_("Project {0} already exists").format(self.project_name))
 
 	def validate_dates(self):
