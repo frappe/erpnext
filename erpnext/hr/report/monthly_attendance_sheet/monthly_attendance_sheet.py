@@ -36,7 +36,7 @@ def execute(filters=None):
 			status_map = {"Present": "P", "Absent": "A", "Half Day": "HD", "On Leave": "L", "None": "", "Holiday":"<b>H</b>"}
 			if status == "None" and holiday_map:
 				emp_holiday_list = emp_det.holiday_list if emp_det.holiday_list else default_holiday_list
-				if (day+1) in holiday_map[emp_holiday_list]:
+				if emp_holiday_list in holiday_map and (day+1) in holiday_map[emp_holiday_list]:
 					status = "Holiday"
 			row.append(status_map[status])
 
@@ -45,7 +45,7 @@ def execute(filters=None):
 			elif status == "Absent":
 				total_a += 1
 			elif status == "On Leave":
-				total_l += 1	
+				total_l += 1
 			elif status == "Half Day":
 				total_p += 0.5
 				total_a += 0.5
