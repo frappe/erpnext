@@ -174,7 +174,8 @@ def copy_attributes_to_variant(item, variant):
 
 	# copy non no-copy fields
 
-	exclude_fields = ["item_code", "item_name", "show_in_website"]
+	exclude_fields = ["naming_series", "item_code", "item_name", "show_in_website",
+		"show_variant_in_website", "opening_stock", "variant_of", "valuation_rate", "variant_based_on"]
 
 	if item.variant_based_on=='Manufacturer':
 		# don't copy manufacturer values if based on part no
@@ -186,6 +187,7 @@ def copy_attributes_to_variant(item, variant):
 		if (field.reqd or field.fieldname in allow_fields) and field.fieldname not in exclude_fields:
 			if variant.get(field.fieldname) != item.get(field.fieldname):
 				variant.set(field.fieldname, item.get(field.fieldname))
+
 	variant.variant_of = item.name
 	variant.has_variants = 0
 	if not variant.description:
