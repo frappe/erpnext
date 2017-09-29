@@ -12,7 +12,7 @@ def setup(company=None, patch=True):
 	make_custom_fields()
 	add_permissions()
 	add_custom_roles_for_reports()
-	frappe.enqueue('erpnext.regional.india.setup.add_hsn_sac_codes')
+	frappe.enqueue('erpnext.regional.india.setup.add_hsn_sac_codes', now=frappe.flags.in_test)
 	add_print_formats()
 	if not patch:
 		update_address_template()
