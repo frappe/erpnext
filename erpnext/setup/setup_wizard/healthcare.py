@@ -191,21 +191,21 @@ def create_healthcare_item_groups():
 def create_lab_test_items():
 	records = [
 		{"doctype": "Item", "item_code": "MCH", "item_name": "MCH", "item_group": "Laboratory",
-			"stock_uom": "Unit", "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
+			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
 		{"doctype": "Item", "item_code": "LDL", "item_name": "LDL", "item_group": "Laboratory",
-			"stock_uom": "Unit", "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
+			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
 		{"doctype": "Item", "item_code": "GTT", "item_name": "GTT", "item_group": "Laboratory",
-			"stock_uom": "Unit", "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
+			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
 		{"doctype": "Item", "item_code": "HDL", "item_name": "HDL", "item_group": "Laboratory",
-			"stock_uom": "Unit", "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
+			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
 		{"doctype": "Item", "item_code": "BILT", "item_name": "BILT", "item_group": "Laboratory",
-			"stock_uom": "Unit", "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
+			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
 		{"doctype": "Item", "item_code": "BILD", "item_name": "BILD", "item_group": "Laboratory",
-			"stock_uom": "Unit", "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
+			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
 		{"doctype": "Item", "item_code": "BP", "item_name": "BP", "item_group": "Laboratory",
-			"stock_uom": "Unit", "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
+			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
 		{"doctype": "Item", "item_code": "BS", "item_name": "BS", "item_group": "Laboratory",
-			"stock_uom": "Unit", "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1}
+			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1}
 	]
 	insert_record(records)
 
