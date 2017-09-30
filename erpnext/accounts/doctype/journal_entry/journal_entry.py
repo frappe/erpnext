@@ -18,12 +18,12 @@ class JournalEntry(AccountsController):
 
 	def get_feed(self):
 		return self.voucher_type
-
+			
 	def validate(self):
 		if not self.is_opening:
 			self.is_opening='No'
 		self.clearance_date = None
-
+		
 		self.validate_party()
 		self.validate_cheque_info()
 		self.validate_entries_for_advance()
@@ -41,7 +41,8 @@ class JournalEntry(AccountsController):
 		self.set_account_and_party_balance()
 		if not self.title:
 			self.title = self.get_title()
-
+		self.validate_is_reverse()
+		
 	def on_submit(self):
 		self.check_credit_limit()
 		self.make_gl_entries()
@@ -235,7 +236,14 @@ class JournalEntry(AccountsController):
 
 		self.validate_orders()
 		self.validate_invoices()
-
+	
+	def validate_is_reverse(self):
+		if self.reverse_from: 
+			doc = frappe.get_doc(self.doctype,self.reverse_from)
+			doc.is_canceled = 1
+			self.is_reverse =1
+			doc.save()
+			
 	def validate_orders(self):
 		"""Validate totals, closed and docstatus for orders"""
 		for reference_name, total in self.reference_totals.iteritems():

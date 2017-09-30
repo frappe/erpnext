@@ -213,6 +213,17 @@ frappe.ui.form.on('Payment Entry', {
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, "fa fa-table");
+		
+		if (in_list(user_roles, "Accounts Manager") && ! frm.doc.is_canceled)
+			{
+				frm.add_custom_button(__('Revarse'), function() {
+				frappe.model.open_mapped_doc({
+					method: "erpnext.accounts.doctype.payment_entry.payment_entry.make_reverse",
+					frm: frm
+				});
+				}, "fa fa-table");
+			}
+		
 		}
 	},
 
@@ -300,6 +311,14 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	paid_to: function(frm) {
+
+		account_doc= frappe.get_doc('Account',String(frm.doc.paid_to));
+		account_type = account_doc.account_type;
+		alert(""+account_type)
+
+
+
+
 		if(frm.set_party_account_based_on_party) return;
 
 		frm.events.set_account_currency_and_balance(frm, frm.doc.paid_to,

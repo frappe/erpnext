@@ -31,9 +31,7 @@ def get_notification_config():
 			"Medical Insurance Application":{
 			"workflow_state": ("in", ("Pending", "Approved By HR Specialist","Approved By HR Manager")),
 			},
-			"Outside Job":{
-			"workflow_state": ("in", ("Pending", "موافقة المسؤل المباشر","موافقة الموارد البشرية")),
-			},
+			
 			"Employee Badge Request":{
 			"workflow_state": ("in", ("Pending", "Approved By HR Specialist",)),
 			},
@@ -41,9 +39,6 @@ def get_notification_config():
 			"workflow_state": ("in", ("Pending", "Approved By HR Specialist","Approved By HR Manager")),
 			},
 
-			"Permission Application":{
-			"workflow_state": ("in", ("Pending", "موافقة المسؤل المباشر","موافقة المدير التنفيذي","خصم اذونات")),
-			},
 			"Employee Resignation":{
 			"workflow_state": ("in", ("Created By CEO", "Created By Director","Created By Manager",
 				"Created By Line Manager","Pending","Approved By Line Manager","Approved by Manager",
@@ -120,4 +115,3 @@ def get_notification_config():
 			"BOM": {"docstatus": 0},
 			"Timesheet": {"status": "Draft"}
 		}
-	}
