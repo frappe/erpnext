@@ -71,7 +71,7 @@ class CancelLeaveApplication(Document):
 				else:
 					leave_application = frappe.get_doc("Leave Application", self.leave_application)
 					leave_application.is_canceled = "Yes"
-					leave_application.workflow_state ='Rejected By Employee'
+					leave_application.workflow_state ='Canceled By Employee'
 					leave_application.save()
 					frappe.msgprint(_("Leave Application record {0} has been canceled").format("<a href='#Form/Leave Application/{0}'>{0}</a>".format(self.leave_application)))
 		# leave_doc=frappe.get_value("Leave Application",filters={"name":self.leave_application},fieldname="docstatus")
