@@ -53,8 +53,28 @@ class PaymentEntry(AccountsController):
 				
 	def get_title(self):
 		from frappe.utils import getdate
-		title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ self.name[len(self.naming_series):]
-		return title
+		
+		namming =frappe.get_list("Enhanced Nameing Doc", fields=["name","name_of_doc", "index_value","year"],filters={"year": str(getdate(self.posting_date).year),"name_of_doc":self.doctype},ignore_permissions=True)
+		if namming :
+			#~ title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ self.name[len(self.naming_series):]
+			title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ str(namming[0]["index_value"]+1).zfill(5)
+			nammeing_doc = frappe.get_doc("Enhanced Nameing Doc",namming[0]["name"])
+			nammeing_doc.flags.ignore_permissions = True
+			nammeing_doc.index_value = nammeing_doc.index_value+1
+			nammeing_doc.save()
+			return title
+		else : 
+			title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ str(1).zfill(5)
+			nammeing_doc = frappe.new_doc("Enhanced Nameing Doc")
+			nammeing_doc.flags.ignore_permissions = True
+			nammeing_doc.parent = "Enhanced Nameing"
+			nammeing_doc.parenttype = "Enhanced Nameing"
+			nammeing_doc.index_value = 1
+			nammeing_doc.year = str(getdate(self.posting_date).year)
+			nammeing_doc.name_of_doc = self.doctype
+			nammeing_doc.save()
+			return title
+		
 		
 	def on_submit(self):
 		self.setup_party_account_field()
@@ -758,3 +778,70 @@ def paid_from_query(doctype, txt, searchfield, start, page_len, filters):
 			'start': start,
 			'page_len': page_len
 		})
+@frappe.whitelist()
+def make_reverse(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
+	def set_missing_values(source, target):
+		target.is_reverse =1
+		target.reverse_from =source.name
+		target.reverse_title =source.title
+		target.allocate_payment_amount = 0
+		target.references =[]
+		target.title =""
+		if source.payment_type == "Pay":
+			target.payment_type = "Receive"
+		elif source.payment_type == "Receive":
+			target.payment_type = "Pay"
+		else :
+			target.payment_type = source.payment_type
+			
+	
+	doc = get_mapped_doc("Payment Entry", source_name, {
+			"Payment Entry": {
+				"doctype": "Payment Entry",
+				"field_map": {
+					"posting_date": "posting_date",
+					#~ "payment_type": "payment_type",
+					"party_type": "party_type",
+					"party": "party",
+					"party_name": "party_name",
+					"company": "company",
+					"mode_of_payment": "mode_of_payment",
+					"reason_code": "reason_code",
+					"reason": "reason",
+					"description": "description",
+					"reason_code_to": "reason_code_to",
+					"reason_to": "reason_to",
+					"description_to": "description_to",
+					"party_balance": "party_balance",
+					
+					"paid_from": "paid_to",
+					"paid_from_account_currency": "paid_to_account_currency",
+					"paid_from_account_balance": "paid_from_account_balance",
+					
+					"paid_to": "paid_from",
+					"paid_to_account_currency": "paid_from_account_currency",
+					"paid_amount": "paid_amount",
+					
+					"source_exchange_rate": "source_exchange_rate",
+					"base_paid_amount": "base_paid_amount",
+					"received_amount": "received_amount",
+					"target_exchange_rate": "target_exchange_rate",
+					"base_received_amount": "base_received_amount",
+					"total_allocated_amount": "total_allocated_amount",
+					"base_total_allocated_amount": "base_total_allocated_amount",
+					"set_exchange_gain_loss": "set_exchange_gain_loss",
+					"unallocated_amount": "unallocated_amount",
+					"difference_amount": "difference_amount",
+					"write_off_difference_amount": "write_off_difference_amount",
+					"deductions_or_loss_section": "deductions_or_loss_section",
+					"deductions": "deductions",
+					"transaction_references": "transaction_references",
+					#~ "reference_no": "reference_no",
+					#~ "reference_date": "reference_date",
+					"project": "project",
+					"remarks": "remarks",
+
+				}}
+		}, target_doc, set_missing_values)
+	return doc

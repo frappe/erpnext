@@ -15,6 +15,46 @@ frappe.ui.form.on('Overtime Request', {
 
 
     },
+    month: function(frm){
+    	if (frm.doc.month){
+
+    		var month_arr=new Array(12);
+				month_arr["January"]=0;
+				month_arr["February"]=1;
+				month_arr["March"]=2;
+				month_arr["April"]=3;
+				month_arr["May"]=4;
+				month_arr["June"]=5;
+				month_arr["July"]=6;
+				month_arr["August"]=7;
+				month_arr["September"]=8;
+				month_arr["October"]=9;
+				month_arr["November"]=10;
+				month_arr["December"]=11;
+
+    		var date = new Date();
+    		var month = frm.doc.month;
+
+    		date.setMonth(month_arr[month])
+    		date.setDate(1)
+			var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+			var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+			var first_day_exp =firstDay.getFullYear()+'-' + (firstDay.getMonth()+1) + '-'+firstDay.getDate();//prints expected format.
+			var last_day_exp =lastDay.getFullYear()+'-' + (lastDay.getMonth()+1) + '-'+lastDay.getDate();//prints expected format.
+
+    		frm.doc.from_date = first_day_exp;
+    		frm.doc.to_date=last_day_exp;
+
+    		cur_frm.refresh();
+    		if (frm.doc.month) {
+            	frm.trigger("get_overtime_records");
+            }
+
+
+
+    	}
+    }
+    ,
     from_date: function(frm) {
         if (frm.doc.to_date) {
             frm.trigger("get_overtime_records");

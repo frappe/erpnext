@@ -21,6 +21,16 @@ frappe.ui.form.on("Journal Entry", {
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, "fa fa-table");
+			
+			if (in_list(user_roles, "Accounts Manager") && ! frm.doc.is_canceled)
+			{
+				frm.add_custom_button(__('Revarse'), function() {
+				frappe.model.open_mapped_doc({
+					method: "erpnext.accounts.doctype.journal_entry.journal_entry.make_reverse",
+					frm: frm
+				});
+				}, "fa fa-table");
+			}
 		}
 
 		if (frm.doc.__islocal) {
@@ -203,6 +213,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		var row = frappe.get_doc(cdt, cdn);
 		$.each(doc.accounts, function(i, d) {
 			if(d.account && d.party && d.party_type) {
+				row.cost_center = "";
 				row.account = d.account;
 				row.party = d.party;
 				row.party_type = d.party_type;
@@ -346,6 +357,8 @@ frappe.ui.form.on("Journal Entry Account", {
 				callback: function(r) {
 					if(r.message) {
 						$.extend(d, r.message);
+						console.log("tttttttttttttttttttt",r.message);
+						frm.fields_dict.accounts.grid.toggle_reqd("cost_center", r.message.root_type == "Expense");
 						erpnext.journal_entry.set_debit_credit_in_company_currency(frm, dt, dn);
 						refresh_field('accounts');
 					}

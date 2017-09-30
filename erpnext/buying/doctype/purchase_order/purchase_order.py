@@ -49,7 +49,31 @@ class PurchaseOrder(BuyingController):
 		self.validate_minimum_order_qty()
 		self.create_raw_materials_supplied("supplied_items")
 		self.set_received_qty_for_drop_ship_items()
-
+		if self.get("__islocal") :
+				self.title = self.get_title()
+	def get_title(self):
+		from frappe.utils import getdate
+		
+		namming =frappe.get_list("Enhanced Nameing Doc", fields=["name","name_of_doc", "index_value","year"],filters={"year": str(getdate(self.transaction_date).year),"name_of_doc":self.doctype},ignore_permissions=True)
+		if namming :
+			#~ title =self.name[:len(self.naming_series)] + str(getdate(self.transaction_date).year) +"-"+ self.name[len(self.naming_series):]
+			title =self.name[:len(self.naming_series)] + str(getdate(self.transaction_date).year) +"-"+ str(namming[0]["index_value"]+1).zfill(5)
+			nammeing_doc = frappe.get_doc("Enhanced Nameing Doc",namming[0]["name"])
+			nammeing_doc.flags.ignore_permissions = True
+			nammeing_doc.index_value = nammeing_doc.index_value+1
+			nammeing_doc.save()
+			return title
+		else : 
+			title =self.name[:len(self.naming_series)] + str(getdate(self.transaction_date).year) +"-"+ str(1).zfill(5)
+			nammeing_doc = frappe.new_doc("Enhanced Nameing Doc")
+			nammeing_doc.flags.ignore_permissions = True
+			nammeing_doc.parent = "Enhanced Nameing"
+			nammeing_doc.parenttype = "Enhanced Nameing"
+			nammeing_doc.index_value = 1
+			nammeing_doc.year = str(getdate(self.transaction_date).year)
+			nammeing_doc.name_of_doc = self.doctype
+			nammeing_doc.save()
+			return title
 	def validate_with_previous_doc(self):
 		super(PurchaseOrder, self).validate_with_previous_doc({
 			"Supplier Quotation": {

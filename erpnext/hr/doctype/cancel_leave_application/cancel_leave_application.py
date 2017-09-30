@@ -11,8 +11,23 @@ from erpnext.hr.doctype.leave_application.leave_application import get_number_of
 from frappe.model.naming import make_autoname
 # from erpnext import get_user_employee
 class CancelLeaveApplication(Document):
+	# @frappe.whitelist() 
+	# def cancel_leave_app(self,leave_app):
+	# 	leave_doc=frappe.get_doc("Leave Application", str(leave_app))
+	# 	name=leave_doc.employee_name
+	# 	# 
+	# 	leave_doc.is_canceled=1
+	# 	leave_doc.workflow_state='Rejected By Employee'
+	# 	leave_doc.save()
+	# 	# leave_doc.submit()
+	# 	# leave_doc.cancel()
+
+	# 	return """ canceled """+name
+
+
 	def autoname(self):
 		self.name = make_autoname(self.employee +"-"+ self.leave_application)
+
 
 	def validate(self):
 		self.add_leave_details()
@@ -25,18 +40,8 @@ class CancelLeaveApplication(Document):
 				self.docstatus = 2
 
 	def on_submit(self):
-		self.validate_dates()
-		self.validate_is_canceled()
-		leave_application = frappe.get_doc("Leave Application",{'name':self.leave_application})
-		leave_application.old_to_date = leave_application.to_date
-		leave_application.to_date= self.cancel_date
-		# leave_application.cancel_date_hijri= self.cancel_date
-		leave_application.is_canceled = "Yes"
-		# employee = get_user_employee().name
-		leave_application.total_leave_days = get_number_of_leave_days(self.employee, leave_application.leave_type, leave_application.from_date, 
-			self.cancel_date, leave_application.half_day)
-		leave_application.flags.ignore_validate_update_after_submit = True
-		leave_application.save()
+		self.validate_leave_cancelation()
+	pass
 
 	def validate_emp(self):
 		 if self.get('__islocal'):
@@ -54,8 +59,32 @@ class CancelLeaveApplication(Document):
 	def validate_dates(self):
 		if getdate(self.cancel_date) >= getdate(self.to_date):
 			frappe.throw(_("Cancel date can not be greater or equal than end date"))
-		if getdate(self.cancel_date) < getdate(self.from_date):
-			frappe.throw(_("Cancel date can not be smaller than from date"))
+   
+	def validate_leave_cancelation(self):
+		leave_application = frappe.get_doc("Leave Application",{'name':self.leave_application})
+		if leave_application:
+			if getdate(self.cancel_date) < getdate(self.from_date):
+				if leave_application.docstatus == 1:
+					leave_application.flags.ignore_validate_update_after_submit = True
+				elif leave_application.docstatus == 2:
+					frappe.throw(_("Leave Application {0} is already canceled".format(self.leave_application)))
+				else:
+					leave_application = frappe.get_doc("Leave Application", self.leave_application)
+					leave_application.is_canceled = "Yes"
+					leave_application.workflow_state ='Rejected By Employee'
+					leave_application.save()
+					frappe.msgprint(_("Leave Application record {0} has been canceled").format("<a href='#Form/Leave Application/{0}'>{0}</a>".format(self.leave_application)))
+		# leave_doc=frappe.get_value("Leave Application",filters={"name":self.leave_application},fieldname="docstatus")
+		# if leave_doc==0:
+			elif getdate(self.cancel_date) > getdate(self.from_date) and getdate(self.cancel_date) <= getdate(self.to_date):
+				leave_application.old_to_date = leave_application.to_date
+				leave_application.to_date= self.cancel_date
+				leave_application.is_canceled = "Yes"
+				leave_application.total_leave_days = get_number_of_leave_days(self.employee, leave_application.leave_type, leave_application.from_date, 
+					self.cancel_date, leave_application.half_day)
+				leave_application.flags.ignore_validate_update_after_submit = True
+				leave_application.save()
+				frappe.msgprint(_("Leave Application to date {0} has been amended").format("<a href='#Form/Leave Application/{0}'>{0}</a>".format(self.leave_application)))			
 
 	def add_leave_details(self):
 		la =frappe.get_doc('Leave Application',{'name' : self.leave_application})
@@ -63,10 +92,11 @@ class CancelLeaveApplication(Document):
 		self.employee_name = la.employee_name
 		self.from_date = la.from_date
 		self.to_date = la.to_date
+	
 	def validate_is_canceled(self):
 		leave_application = frappe.get_doc("Leave Application",{'name':self.leave_application})
 		if leave_application.is_canceled == 'Yes':
-			frappe.throw(_("Leave Application %s already canceled at %s")% (self.leave_application,leave_application.cancel_date) )
+			frappe.throw(_("Leave Application {0} already is canceled".format(self.leave_application)))
 
 def get_permission_query_conditions(user):
 	pass
