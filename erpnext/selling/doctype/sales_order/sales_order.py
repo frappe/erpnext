@@ -22,8 +22,8 @@ form_grid_templates = {
 class WarehouseRequired(frappe.ValidationError): pass
 
 class SalesOrder(SellingController):
-	def __init__(self, arg1, arg2=None):
-		super(SalesOrder, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(SalesOrder, self).__init__(*args, **kwargs)
 
 	def validate(self):
 		super(SalesOrder, self).validate()
