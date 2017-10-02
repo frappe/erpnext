@@ -101,32 +101,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				return me.set_query_for_batch(doc, cdt, cdn)
 			});
 		}
-	},
-	onload: function() {
-		var me = this;
-		if(this.frm.doc.__islocal) {
-			var today = frappe.datetime.get_today(),
-				currency = frappe.defaults.get_user_default("currency");
-
-			let set_value = (fieldname, value) => {
-				if(me.frm.fields_dict[fieldname] && !me.frm.doc[fieldname]) {
-					return me.frm.set_value(fieldname, value);
-				}
-			};
-
-			frappe.run_serially([
-				() => set_value('currency', currency),
-				() => set_value('price_list_currency', currency),
-				() => set_value('status', 'Draft'),
-				() => set_value('is_subcontracted', 'No'),
-				() => {
-					if(this.frm.doc.company && !this.frm.doc.amended_from) {
-						this.frm.trigger("company");
-					}
-				}
-			]);
-
-		}
 
 		if(this.frm.fields_dict["taxes"]) {
 			this["taxes_remove"] = this.calculate_taxes_and_totals;
@@ -158,11 +132,36 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 				return {
 					filters: filters
-				}
+				};
 			});
 		}
+	},
+	onload: function() {
+		var me = this;
 
 		this.setup_quality_inspection();
+
+		if(this.frm.doc.__islocal) {
+			var currency = frappe.defaults.get_user_default("currency");
+
+			let set_value = (fieldname, value) => {
+				if(me.frm.fields_dict[fieldname] && !me.frm.doc[fieldname]) {
+					return me.frm.set_value(fieldname, value);
+				}
+			};
+
+			return frappe.run_serially([
+				() => set_value('currency', currency),
+				() => set_value('price_list_currency', currency),
+				() => set_value('status', 'Draft'),
+				() => set_value('is_subcontracted', 'No'),
+				() => {
+					if(this.frm.doc.company && !this.frm.doc.amended_from) {
+						this.frm.trigger("company");
+					}
+				}
+			]);
+		}
 	},
 
 	setup_quality_inspection: function() {
