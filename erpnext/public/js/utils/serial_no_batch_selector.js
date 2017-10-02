@@ -96,7 +96,17 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 		if(this.show_dialog) {
 			let d = this.item;
-			this.dialog.set_value('serial_no', d.serial_no);
+			if (d.has_serial_no && d.serial_no) {
+				this.dialog.set_value('serial_no', d.serial_no);
+			} else if (d.batch_no) {
+				this.dialog.fields_dict.batches.df.data.push({
+					'batch_no': d.batch_no,
+					'actual_qty': d.actual_qty,
+					'selected_qty': d.qty
+				});
+
+				this.dialog.fields_dict.batches.grid.refresh();
+			}
 		}
 
 		this.dialog.show();
@@ -116,8 +126,10 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			}
 			values.batches.map((batch, i) => {
 				if(!batch.selected_qty || batch.selected_qty === 0 ) {
-					frappe.throw(__("Please select quantity on row " + (i+1)));
-					return false;
+					if (!this.show_dialog) {
+						frappe.throw(__("Please select quantity on row " + (i+1)));
+						return false;
+					}
 				}
 			});
 			return true;
@@ -125,9 +137,11 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		} else {
 			let serial_nos = values.serial_no || '';
 			if (!serial_nos || !serial_nos.replace(/\s/g, '').length) {
-				frappe.throw(__("Please enter serial numbers for serialized item "
-					+ values.item_code));
-				return false;
+				if (!this.show_dialog) {
+					frappe.throw(__("Please enter serial numbers for serialized item "
+						+ values.item_code));
+					return false;
+				}
 			}
 			return true;
 		}
