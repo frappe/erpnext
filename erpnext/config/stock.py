@@ -105,7 +105,10 @@ def get_data():
 					"name": "Pricing Rule",
 					"description": _("Rules for applying pricing and discount.")
 				},
-
+				{
+					"type": "doctype",
+					"name": "Item Settings",
+				},
 			]
 		},
 		{
@@ -198,6 +201,10 @@ def get_data():
 					"type": "doctype",
 					"name": "Brand",
 					"description": _("Brand master.")
+				},
+				{
+					"type": "doctype",
+					"name": "Item Settings",
 				},
 			]
 		},
