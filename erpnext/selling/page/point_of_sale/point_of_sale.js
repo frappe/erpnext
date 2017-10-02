@@ -8,16 +8,8 @@ frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	frappe.db.get_value('POS Settings', {name: 'POS Settings'}, 'is_online', (r) => {
-		if (r && r.use_pos_in_offline_mode && !cint(r.use_pos_in_offline_mode)) {
-			// online
-			wrapper.pos = new erpnext.pos.PointOfSale(wrapper);
-			window.cur_pos = wrapper.pos;
-		} else {
-			// offline
-			frappe.set_route('pos');
-		}
-	});
+	wrapper.pos = new erpnext.pos.PointOfSale(wrapper);
+	window.cur_pos = wrapper.pos;
 };
 
 frappe.pages['point-of-sale'].refresh = function(wrapper) {
@@ -33,7 +25,8 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 		const assets = [
 			'assets/erpnext/js/pos/clusterize.js',
-			'assets/erpnext/css/pos.css'
+			'assets/erpnext/css/pos.css',
+			'assets/erpnext/js/pos/offline_pos.js'
 		];
 
 		frappe.require(assets, () => {
@@ -46,26 +39,36 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			() => {
 				this.prepare_dom();
 				this.prepare_menu();
-				this.set_online_status();
+				setTimeout(() => {
+					this.check_online_status();
+				}, 5000);
 			},
+			() => this.use_pos_in_offline_mode(),
 			() => this.setup_pos_profile(),
 			() => {
-				this.make_items();
-				this.bind_events();
+				this.make_new_invoice()
+					.then(() => {
+						if(!this.disabled_offline_mode) {
+							this.offline_pos.sync_sales_invoice();
+							this.offline_pos.get_master_data_for_offline_mode(this.pos_profile);
+						}
+
+						this.make_items();
+						this.bind_events();
+					});
 			},
-			() => this.make_new_invoice(),
-			() => this.page.set_title(__('Point of Sale'))
+			() => this.page.set_title(__('Point of Sale')),
 		]);
 	}
 
-	set_online_status() {
+	check_online_status() {
 		this.connection_status = false;
 		this.page.set_indicator(__("Offline"), "grey");
 		frappe.call({
 			method: "frappe.handler.ping",
 			callback: r => {
 				if (r.message) {
-					this.connection_status = true;
+					this.connection_status = false;
 					this.page.set_indicator(__("Online"), "green");
 				}
 			}
@@ -90,6 +93,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			frm: this.frm,
 			wrapper: this.wrapper.find('.cart-container'),
 			pos_profile: this.pos_profile,
+			offline_pos: this.offline_pos,
 			events: {
 				on_customer_change: (customer) => this.frm.set_value('customer', customer),
 				on_field_change: (item_code, field, value) => {
@@ -97,14 +101,43 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				},
 				on_numpad: (value) => {
 					if (value == 'Pay') {
+						if(!this.disabled_offline_mode) {
+							this.offline_pos.update_paid_amount_status(true);
+						}
+
 						if (!this.payment) {
 							this.make_payment_modal();
+						} else {
+							const mop_field = this.payment.default_mop;
+							let amount = 0.0;
+							this.frm.doc.payments.map(p => {
+								if (p.mode_of_payment == mop_field) {
+									amount = p.amount;
+									return;
+								}
+							});
+
+							this.payment.dialog.set_value(mop_field, flt(amount));
 						}
 						this.payment.open_modal();
 					}
 				},
 				on_select_change: () => {
 					this.cart.numpad.set_inactive();
+				},
+				open_order_in_cart: (id) => {
+					if (id) {
+						if(this.offline_pos) {
+							this.offline_pos.name = id;
+							const doc = this.offline_pos.get_invoice_doc();
+							this.reset_cart_data(doc[0][id]);
+						} else {
+							frappe.model.with_doc("Sales Invoice", id, () => {
+								const doc = frappe.model.get_doc("Sales Invoice", id);
+								this.reset_cart_data(doc);
+							});
+						}
+					}
 				}
 			}
 		});
@@ -125,13 +158,14 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		this.wrapper.find('.cart-container').css('pointer-events', pointer_events);
 		this.wrapper.find('.item-container').css('pointer-events', pointer_events);
 
-		this.page.clear_actions();
+		// this.page.clear_actions();
 	}
 
 	make_items() {
 		this.items = new POSItems({
 			wrapper: this.wrapper.find('.item-container'),
 			pos_profile: this.pos_profile,
+			offline_pos: this.offline_pos,
 			events: {
 				update_cart: (item, field, value) => {
 					if(!this.frm.doc.customer) {
@@ -145,6 +179,13 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	update_item_in_cart(item_code, field='qty', value=1) {
+		if (!this.disabled_offline_mode) {
+			this.offline_pos.add_to_cart({item_code: item_code, field: field, value: value});
+			const item = this.frm.doc.items.find(i => i.item_code === item_code);
+			this.update_cart_data(item);
+			return;
+		}
+
 		if(this.cart.exists(item_code)) {
 			const item = this.frm.doc.items.find(i => i.item_code === item_code);
 			frappe.flags.hide_serial_batch_dialog = false;
@@ -192,6 +233,12 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			});
 	}
 
+	activate_offline_pos_mode() {
+		if(!this.offline_pos && !this.disabled_offline_mode) {
+			this.offline_pos = new erpnext.pos.OfflinePOS(this.frm, this.pos_profile);
+		}
+	}
+
 	select_batch_and_serial_no(item) {
 		erpnext.show_serial_batch_selector(this.frm, item, () => {
 			this.update_item_in_frm(item)
@@ -236,36 +283,98 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				submit_form: () => {
 					this.submit_sales_invoice();
 				}
+			},
+			offline_pos: this.offline_pos || '',
+		});
+	}
+
+	save_sales_invoice() {
+		if(this.offline_pos) {
+			const data = this.offline_pos.save_previous_entry();
+			const offline_id = this.offline_pos.name;
+			this.on_save(data[offline_id], offline_id);
+			return;
+		}
+
+		frappe.call({
+			method: 'erpnext.selling.page.point_of_sale.point_of_sale.submit_invoice',
+			freeze: true,
+			args: {
+				doc: this.frm.doc
+			}
+		}).then(r => {
+			if (r.message) {
+				this.on_save(r.message);
 			}
 		});
 	}
 
+	on_save(data, id) {
+		const order_name = id || data.name;
+		frappe.show_alert({
+			indicator: 'green',
+			message: __(`Sales invoice ${order_name} created succesfully`)
+		});
+
+		if(this.cart) {
+			this.cart.order_data.push({
+				'name': id || data.name,
+				'customer': data.customer,
+				'grand_total': data.grand_total,
+				'posting_date': data.posting_date
+			})
+
+			this.cart.render_orders();
+		}
+	}
+
 	submit_sales_invoice() {
+		if(!this.disabled_offline_mode && !this.connection_status) {
+			this.frm.doc = this.offline_pos.submit_invoice();
+			this.on_submit();
+			return;
+		}
 
 		frappe.confirm(__("Permanently Submit {0}?", [this.frm.doc.name]), () => {
 			frappe.call({
 				method: 'erpnext.selling.page.point_of_sale.point_of_sale.submit_invoice',
 				freeze: true,
 				args: {
-					doc: this.frm.doc
+					doc: this.frm.doc,
+					submitted: true
 				}
 			}).then(r => {
 				if(r.message) {
 					this.frm.doc = r.message;
-					frappe.show_alert({
-						indicator: 'green',
-						message: __(`Sales invoice ${r.message.name} created succesfully`)
-					});
-
-					this.toggle_editing();
-					this.set_form_action();
+					this.on_submit();
 				}
 			});
 		});
 	}
 
+	on_submit() {
+		if(this.frm.doc.name) {
+			frappe.show_alert({
+				indicator: 'green',
+				message: __(`Sales invoice ${this.frm.doc.name} submitted succesfully`)
+			});
+		}
+
+		this.toggle_editing();
+		this.set_form_action();
+	}
+
 	bind_events() {
 
+	}
+
+	use_pos_in_offline_mode() {
+		frappe.db.get_value('POS Settings', {name: 'POS Settings'}, 'is_online', (r) => {
+			if (r && r.use_pos_in_offline_mode && !cint(r.use_pos_in_offline_mode)) {
+				// online
+				this.disabled_offline_mode = true;
+			}
+		});
 	}
 
 	setup_pos_profile() {
@@ -289,16 +398,40 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	make_new_invoice() {
 		return frappe.run_serially([
 			() => this.make_sales_invoice_frm(),
+			() => this.activate_offline_pos_mode(),
 			() => {
 				if (this.cart) {
-					this.cart.frm = this.frm;
-					this.cart.reset();
+					this.reset_cart_data();
 				} else {
 					this.make_cart();
 				}
+
+				this.page.set_primary_action(__("Save"), () => {
+					this.cart.cart_view = false;
+					this.save_sales_invoice();
+				});
 				this.toggle_editing(true);
 			}
 		]);
+	}
+
+	reset_cart_data(doc) {
+		if (doc) {
+			this.frm.doc = doc;
+		}
+
+		this.cart.frm = this.frm;
+		this.cart.reset();
+		this.load_existing_data();
+		this.cart.toggle_cart_view();
+	}
+
+	load_existing_data() {
+		const doc = this.frm.doc;
+		this.cart.customer_field.set_value(doc.customer);
+		$.each(doc.items, (index, item) => {
+			this.update_cart_data(item);
+		})
 	}
 
 	make_sales_invoice_frm() {
@@ -348,6 +481,10 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		this.page.add_menu_item(__('POS Settings'), function() {
 			frappe.set_route('Form', 'POS Settings');
 		});
+
+		this.page.add_menu_item(__("New Invoice"), () => {
+			this.make_new_invoice();
+		});
 	}
 
 	set_form_action() {
@@ -360,7 +497,9 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			this.frm.print_preview.printit(true);
 		});
 
+		this.page.clear_primary_action();
 		this.page.set_primary_action(__("New"), () => {
+			this.page.clear_secondary_action();
 			this.make_new_invoice();
 		});
 
@@ -371,8 +510,10 @@ erpnext.pos.PointOfSale = class PointOfSale {
 };
 
 class POSCart {
-	constructor({frm, wrapper, pos_profile, events}) {
+	constructor({frm, wrapper, pos_profile, offline_pos, events}) {
 		this.frm = frm;
+		this.cart_view = true;
+		this.offline_pos = offline_pos;
 		this.wrapper = wrapper;
 		this.events = events;
 		this.pos_profile = pos_profile;
@@ -384,38 +525,67 @@ class POSCart {
 		this.make_dom();
 		this.make_customer_field();
 		this.make_numpad();
+		this.make_orders_list();
+
+		$('.view_orders').click(()=> {
+			this.toggle_cart_view();
+		})
 	}
 
 	make_dom() {
 		this.wrapper.append(`
 			<div class="pos-cart">
-				<div class="customer-field">
+				<div style="display: flex;">
+					<div class="customer-field" style="width: 90%">
+					</div>
+					<button class="btn btn-default view_orders" style="margin-left: 12px; margin-top:24px;height:10%">
+						<i class="octicon octicon-organization"></i>
+					</button>
 				</div>
-				<div class="cart-wrapper">
-					<div class="list-item-table">
-						<div class="list-item list-item--head">
-							<div class="list-item__content list-item__content--flex-1.5 text-muted">${__('Item Name')}</div>
-							<div class="list-item__content text-muted text-right">${__('Quantity')}</div>
-							<div class="list-item__content text-muted text-right">${__('Discount')}</div>
-							<div class="list-item__content text-muted text-right">${__('Rate')}</div>
-						</div>
-						<div class="cart-items">
-							<div class="empty-state">
-								<span>No Items added to cart</span>
+
+				<div class="cart-details">
+					<div class="cart-wrapper">
+						<div class="list-item-table">
+							<div class="list-item list-item--head">
+								<div class="list-item__content list-item__content--flex-1.5 text-muted">${__('Item Name')}</div>
+								<div class="list-item__content text-muted text-right">${__('Quantity')}</div>
+								<div class="list-item__content text-muted text-right">${__('Discount')}</div>
+								<div class="list-item__content text-muted text-right">${__('Rate')}</div>
+							</div>
+							<div class="cart-items">
+								<div class="empty-state">
+									<span>No Items added to cart</span>
+								</div>
+							</div>
+							<div class="taxes-and-totals">
+								${this.get_taxes_and_totals()}
+							</div>
+							<div class="discount-amount">
+								${this.get_discount_amount()}
+							</div>
+							<div class="grand-total">
+								${this.get_grand_total()}
 							</div>
 						</div>
-						<div class="taxes-and-totals">
-							${this.get_taxes_and_totals()}
-						</div>
-						<div class="discount-amount">
-							${this.get_discount_amount()}
-						</div>
-						<div class="grand-total">
-							${this.get_grand_total()}
-						</div>
+					</div>
+					<div class="number-pad-container" style="float:right;">
 					</div>
 				</div>
-				<div class="number-pad-container">
+
+				<div class = "orders-list" style="display:none">
+					<div class="list-item list-item--head border-left border-right border-top text-muted">
+						<div class="list-item__content subject"><input class="list-select-all" type="checkbox">${__("Customer")}</div>
+						<div class="list-item__content text-right">${__("Date")}</div>
+						<div class="list-item__content text-right">${__("Grand Total")}</div>
+					</div>
+					<div class="border-left border-right border-bottom orders">
+						<div class="text-extra-muted">
+							<span class="text-center">
+								<i class="fa fa-2x fa-user" style="display:block"></i>
+								<p>${__("No Customers yet!")}</p>
+							</span>
+						</div>
+					</div>
 				</div>
 			</div>
 		`);
@@ -424,6 +594,9 @@ class POSCart {
 		this.$taxes_and_totals = this.wrapper.find('.taxes-and-totals');
 		this.$discount_amount = this.wrapper.find('.discount-amount');
 		this.$grand_total = this.wrapper.find('.grand-total');
+		this.$cart_view_class = this.wrapper.find('.cart-details');
+		this.$orders_list_class = this.wrapper.find('.orders-list');
+		this.$orders_class = this.wrapper.find('.orders');
 
 		this.toggle_taxes_and_totals(false);
 		this.$grand_total.on('click', () => {
@@ -432,11 +605,17 @@ class POSCart {
 	}
 
 	reset() {
+		this.cart_view = false;
 		this.$cart_items.find('.list-item').remove();
 		this.$empty_state.show();
 		this.$taxes_and_totals.html(this.get_taxes_and_totals());
 		this.numpad && this.numpad.reset_value();
 		this.customer_field.set_value("");
+		this.wrapper.find('.grand-total-value').text(
+			format_currency(this.frm.doc.grand_total, this.frm.currency));
+
+		const customer = this.frm.doc.customer || this.pos_profile.customer;
+		this.customer_field.set_value(customer);
 	}
 
 	get_grand_total() {
@@ -526,13 +705,15 @@ class POSCart {
 		let customer = this.frm.doc.customer || this.pos_profile['customer'];
 		this.customer_field = frappe.ui.form.make_control({
 			df: {
-				fieldtype: 'Link',
+				fieldtype: 'Offline Link',
 				label: 'Customer',
 				fieldname: 'customer',
 				options: 'Customer',
 				reqd: 1,
 				onchange: () => {
-					this.events.on_customer_change(this.customer_field.get_value());
+					const customer = this.customer_field.get_value();
+					this.frm.doc.customer = customer;
+					this.events.on_customer_change(customer);
 				}
 			},
 			parent: this.wrapper.find('.customer-field'),
@@ -780,10 +961,90 @@ class POSCart {
 		this.selected_item = null;
 		this.events.on_select_change();
 	}
+
+	make_orders_list() {
+		this.order_data = [];
+		if (this.offline_pos) {
+			this.get_offlline_data();
+			this.render_orders();
+			this.open_order_in_cart();
+			return;
+		}
+
+		frappe.call({
+			method: 'erpnext.selling.page.point_of_sale.point_of_sale.get_orders',
+			args: {
+				company: this.frm.doc.company
+			}
+		}).then((r) => {
+			if(r.message) {
+				this.order_data = r.message;
+				this.render_orders();
+				this.open_order_in_cart();
+			}
+		})
+	}
+
+	get_offlline_data() {
+		const offline_data = this.offline_pos.get_offline_records();
+		$.each(offline_data, (key, value) => {
+			let data = value[key];
+			this.order_data.push({
+				name: key,
+				customer: data.customer,
+				posting_date: data.posting_date,
+				grand_total: data.grand_total
+			});
+		});
+	}
+
+	render_orders() {
+		this.$orders_class.empty();
+
+		$.each(this.order_data, (index, data)=> {
+			this.$orders_class.append(`
+				<div class="list-item border-left
+					border-right border-bottom orders-details" data-name="${data.name}">
+						<div class="list-item__content subject">
+							<input class="list-select-all" type="checkbox">${data.customer}
+						</div>
+						<div class="list-item__content text-right">
+							${data.posting_date}
+						</div>
+						<div class="list-item__content text-right">
+							${format_currency(data.grand_total, this.frm.doc.currency)}
+						</div>
+				</div>`
+			);
+		});
+	}
+
+	open_order_in_cart() {
+		var me = this;
+		this.wrapper.on('click', '.orders-details', function() {
+			const $order = $(this);
+			const id = $order.attr('data-name');
+
+			me.cart_view = false;
+			me.events.open_order_in_cart(id);
+		});
+	}
+
+	toggle_cart_view() {
+		if (this.cart_view) {
+			this.$cart_view_class.hide();
+			this.$orders_list_class.show();
+			this.cart_view = false;
+		} else {
+			this.$cart_view_class.show();
+			this.$orders_list_class.hide();
+			this.cart_view = true;
+		}
+	}
 }
 
 class POSItems {
-	constructor({wrapper, pos_profile, events}) {
+	constructor({wrapper, pos_profile, offline_pos, events}) {
 		this.wrapper = wrapper;
 		this.pos_profile = pos_profile;
 		this.items = {};
@@ -795,14 +1056,19 @@ class POSItems {
 
 		this.init_clusterize();
 		this.bind_events();
+		this.offline_pos = offline_pos;
 
 		// bootstrap with 20 items
 		this.get_items()
 			.then(({ items }) => {
-				this.all_items = items;
-				this.items = items;
-				this.render_items(items);
+				this.prepare_items_data(items);
 			});
+	}
+
+	prepare_items_data(items) {
+		this.all_items = items;
+		this.items = items;
+		this.render_items(items);
 	}
 
 	make_dom() {
@@ -852,7 +1118,7 @@ class POSItems {
 
 		this.item_group_field = frappe.ui.form.make_control({
 			df: {
-				fieldtype: 'Link',
+				fieldtype: 'Offline Link',
 				label: 'Item Group',
 				options: 'Item Group',
 				default: 'All Item Groups',
@@ -1002,7 +1268,14 @@ class POSItems {
 					'price_list': this.pos_profile.selling_price_list,
 					item_group,
 					search_value
-				}
+				},
+				error: () => {
+					// For offline search
+					const items = this.search_in_cache(search_value, item_group);
+					if (items){
+						this.prepare_items_data(items);
+					}
+				},
 			}).then(r => {
 				// const { items, serial_no, batch_no } = r.message;
 
@@ -1010,6 +1283,13 @@ class POSItems {
 				res(r.message);
 			});
 		});
+	}
+
+	search_in_cache(search_value, item_group) {
+		this.offline_pos.search_item = search_value;
+		this.offline_pos.item_group = item_group;
+		const data = this.offline_pos.get_items();
+		return data;
 	}
 }
 
@@ -1116,12 +1396,13 @@ class NumberPad {
 }
 
 class Payment {
-	constructor({frm, events}) {
+	constructor({frm, events, offline_pos}) {
 		this.frm = frm;
 		this.events = events;
 		this.make();
 		this.bind_events();
 		this.set_primary_action();
+		this.offline_pos = offline_pos;
 	}
 
 	open_modal() {
@@ -1179,6 +1460,10 @@ class Payment {
 		const me = this;
 
 		let fields = this.frm.doc.payments.map(p => {
+			if (p.default) {
+				this.default_mop = p.mode_of_payment;
+			}
+
 			return {
 				fieldtype: 'Currency',
 				label: __(p.mode_of_payment),
@@ -1212,6 +1497,10 @@ class Payment {
 				onchange: () => {
 					me.update_cur_frm_value('write_off_amount', () => {
 						frappe.flags.change_amount = false;
+
+						if (this.offline_pos) {
+							this.offline_pos.calculate_outstanding_amount(false);
+						}
 						me.update_change_amount();
 					});
 				}
@@ -1228,6 +1517,9 @@ class Payment {
 				onchange: () => {
 					me.update_cur_frm_value('change_amount', () => {
 						frappe.flags.write_off_amount = false;
+						if(this.offline_pos) {
+							this.offline_pos.calculate_write_off_amount();
+						}
 						me.update_write_off_amount();
 					});
 				}
@@ -1267,26 +1559,41 @@ class Payment {
 	update_cur_frm_value(fieldname, callback) {
 		if (frappe.flags[fieldname]) {
 			const value = this.dialog.get_value(fieldname);
-			this.frm.set_value(fieldname, value)
-				.then(() => {
-					callback();
-				});
+
+			if (!this.offline_pos) {
+				this.frm.set_value(fieldname, value)
+					.then(() => {
+						callback();
+					});
+			} else {
+				this.frm.doc[fieldname] = value;
+				callback();
+			}
 		}
 
 		frappe.flags[fieldname] = true;
 	}
 
 	update_payment_value(fieldname, value) {
-		var me = this;
-		$.each(this.frm.doc.payments, function(i, data) {
+		$.each(this.frm.doc.payments, (i, data) => {
 			if (__(data.mode_of_payment) == __(fieldname)) {
-				frappe.model.set_value('Sales Invoice Payment', data.name, 'amount', value)
-					.then(() => {
-						me.update_change_amount();
-						me.update_write_off_amount();
-					});
+				if (!this.offline_pos) {
+					frappe.model.set_value('Sales Invoice Payment', data.name, 'amount', value)
+						.then(() => {
+							this.on_payment();
+						});
+				} else {
+					data.amount = value;
+					this.on_payment();
+				}
 			}
 		});
+	}
+
+	on_payment() {
+		this.offline_pos.calculate_outstanding_amount(false);
+		this.update_change_amount();
+		this.update_write_off_amount();
 	}
 
 	update_change_amount() {
