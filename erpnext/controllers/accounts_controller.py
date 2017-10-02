@@ -15,8 +15,8 @@ from erpnext.exceptions import InvalidCurrency
 force_item_fields = ("item_group", "barcode", "brand", "stock_uom")
 
 class AccountsController(TransactionBase):
-	def __init__(self, arg1, arg2=None):
-		super(AccountsController, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(AccountsController, self).__init__(*args, **kwargs)
 
 	@property
 	def company_currency(self):

@@ -68,7 +68,8 @@ def set_address_details(out, party, party_type, doctype=None, company=None):
 	billing_address_field = "customer_address" if party_type == "Lead" \
 		else party_type.lower() + "_address"
 	out[billing_address_field] = get_default_address(party_type, party.name)
-	out.update(get_fetch_values(doctype, billing_address_field, out[billing_address_field]))
+	if doctype:
+		out.update(get_fetch_values(doctype, billing_address_field, out[billing_address_field]))
 
 	# address display
 	out.address_display = get_address_display(out[billing_address_field])
@@ -77,7 +78,8 @@ def set_address_details(out, party, party_type, doctype=None, company=None):
 	if party_type in ["Customer", "Lead"]:
 		out.shipping_address_name = get_default_address(party_type, party.name, 'is_shipping_address')
 		out.shipping_address = get_address_display(out["shipping_address_name"])
-		out.update(get_fetch_values(doctype, 'shipping_address_name', out.shipping_address_name))
+		if doctype:
+			out.update(get_fetch_values(doctype, 'shipping_address_name', out.shipping_address_name))
 
 	if doctype and doctype in ['Delivery Note', 'Sales Invoice']:
 		out.update(get_company_address(company))
