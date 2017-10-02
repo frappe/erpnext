@@ -6,7 +6,7 @@ from __future__ import print_function, unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, nowdate
+from frappe.utils import getdate
 
 class StudentApplicant(Document):
 	def autoname(self):
@@ -41,12 +41,9 @@ class StudentApplicant(Document):
 	def validation_from_student_admission(self):
 		student_admission = get_student_admission_data(self.student_admission, self.program)
 		if student_admission:
-			if not (getdate(student_admission.minimam_age) >= getdate(self.date_of_birth) >=
-				getdate(student_admission.maximam_age)):
+			if not (getdate(student_admission.minimum_age) >= getdate(self.date_of_birth) >=
+				getdate(student_admission.maximum_age)):
 				frappe.throw(_("Not eligible for the admission in this program as per DOB"))
-			# if not (getdate(student_admission.admission_end_date) >= getdate(nowdate())   >=
-			# 	getdate(student_admission.admission_start_date)):
-			# 	frappe.throw(_("You can't edit the form since admission is closed"))
 
 	def on_payment_authorized(self, *args, **kwargs):
 		self.db_set('paid', 1)
@@ -54,7 +51,7 @@ class StudentApplicant(Document):
 
 def get_student_admission_data(student_admission, program):
 	student_admission = frappe.db.sql("""select sa.admission_start_date, sa.admission_end_date,
-		sap.program, sap.minimam_age, sap.maximam_age, sap.applicant_naming_series
+		sap.program, sap.minimum_age, sap.maximum_age, sap.applicant_naming_series
 		from `tabStudent Admission` sa, `tabStudent Admission Program` sap
 		where sa.name = sap.parent and sa.name = %s and sap.program = %s""", (student_admission, program), as_dict=1)
 	if student_admission:

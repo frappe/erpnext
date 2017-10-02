@@ -26,8 +26,8 @@
 	        </span>
 		</div>
 	    <div class="col-xs-6 text-muted text-right small">
-	        {{ _("Start on") }}: {{ frappe.format_date(admission_start_date) }} <br>
-	        {{ _("End on  ") }}: {{ frappe.format_date(admission_end_date) }}
+	        {{ _("Start on") }}: {{ frappe.format_date(admission_start_date) }}<br>
+	        {{ _("End on") }}: {{ frappe.format_date(admission_end_date) }}
 	    </div>
 	</div><br>
 
@@ -43,8 +43,8 @@
 				<thead>
 					<tr class="active">
 						<th style="width: 90px">Program/Std.</th>
-						<th style="width: 170px">Minumum DOB</th>
-						<th style="width: 170px">Maximum DOB</th>
+						<th style="width: 170px">Minumum Age(DOB)</th>
+						<th style="width: 170px">Maximum Age(DOB)</th>
 						<th style="width: 100px">Application Fee</th>
 					</tr>
 				</thead>
@@ -52,8 +52,8 @@
 					{% for row in program_details %}
 						<tr>
 							<td>{{ row.program }}</td>
-							<td>{{ row.minimam_dob }}</td>
-							<td>{{ row.maximam_dob }}</td>
+							<td>{{ row.minimum_age }}</td>
+							<td>{{ row.maximum_age }}</td>
 							<td>{{ row.application_fee }}</td>
 						</tr>
 					{% endfor %}

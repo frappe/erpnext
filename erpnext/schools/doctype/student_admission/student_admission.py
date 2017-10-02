@@ -16,7 +16,7 @@ class StudentAdmission(WebsiteGenerator):
 		self.name = self.title
 
 	def validate(self):
-		if not self.route:
+		if not self.route:		#pylint: disable=E0203
 			self.route = "admissions/" + "-".join(self.title.split(" "))
 
 	def get_context(self, context):
