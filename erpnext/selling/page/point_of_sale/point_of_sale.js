@@ -89,6 +89,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		this.cart = new POSCart({
 			frm: this.frm,
 			wrapper: this.wrapper.find('.cart-container'),
+			pos_profile: this.pos_profile,
 			events: {
 				on_customer_change: (customer) => this.frm.set_value('customer', customer),
 				on_field_change: (item_code, field, value) => {
@@ -196,6 +197,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			this.update_item_in_frm(item)
 				.then(() => {
 					// update cart
+					this.remove_item_from_cart(item);
 					this.update_cart_data(item);
 				});
 		}, true);
@@ -215,10 +217,16 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		return this.frm.script_manager
 			.trigger('qty', item.doctype, item.name)
 			.then(() => {
-				if (field === 'qty' && value === 0) {
-					frappe.model.clear_doc(item.doctype, item.name);
+				if (field === 'qty') {
+					this.remove_item_from_cart(item);
 				}
 			});
+	}
+
+	remove_item_from_cart(item) {
+		if (item.qty === 0) {
+			frappe.model.clear_doc(item.doctype, item.name);
+		}
 	}
 
 	make_payment_modal() {
@@ -363,10 +371,11 @@ erpnext.pos.PointOfSale = class PointOfSale {
 };
 
 class POSCart {
-	constructor({frm, wrapper, events}) {
+	constructor({frm, wrapper, pos_profile, events}) {
 		this.frm = frm;
 		this.wrapper = wrapper;
 		this.events = events;
+		this.pos_profile = pos_profile;
 		this.make();
 		this.bind_events();
 	}
@@ -514,6 +523,7 @@ class POSCart {
 	}
 
 	make_customer_field() {
+		let customer = this.frm.doc.customer || this.pos_profile['customer'];
 		this.customer_field = frappe.ui.form.make_control({
 			df: {
 				fieldtype: 'Link',
@@ -521,7 +531,6 @@ class POSCart {
 				fieldname: 'customer',
 				options: 'Customer',
 				reqd: 1,
-				default: this.frm.doc.customer,
 				onchange: () => {
 					this.events.on_customer_change(this.customer_field.get_value());
 				}
@@ -529,6 +538,10 @@ class POSCart {
 			parent: this.wrapper.find('.customer-field'),
 			render_input: true
 		});
+
+		if (customer) {
+			this.customer_field.set_value(customer);
+		}
 	}
 
 	make_numpad() {
@@ -919,7 +932,7 @@ class POSItems {
 				}
 				if(batch_no) {
 					this.events.update_cart(items[0].item_code,
-						'batch_no', serial_no);
+						'batch_no', batch_no);
 					this.search_field.set_value('');
 				}
 			});
