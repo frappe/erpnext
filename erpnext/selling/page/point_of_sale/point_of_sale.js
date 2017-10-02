@@ -99,6 +99,17 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					if (value == 'Pay') {
 						if (!this.payment) {
 							this.make_payment_modal();
+						} else {
+							const mop_field = this.payment.default_mop;
+							let amount = 0.0;
+							this.frm.doc.payments.map(p => {
+								if (p.mode_of_payment == mop_field) {
+									amount = p.amount;
+									return;
+								}
+							});
+
+							this.payment.dialog.set_value(mop_field, flt(amount));
 						}
 						this.payment.open_modal();
 					}
@@ -437,6 +448,12 @@ class POSCart {
 		this.$taxes_and_totals.html(this.get_taxes_and_totals());
 		this.numpad && this.numpad.reset_value();
 		this.customer_field.set_value("");
+
+		this.wrapper.find('.grand-total-value').text(
+			format_currency(this.frm.doc.grand_total, this.frm.currency));
+
+		const customer = this.frm.doc.customer || this.pos_profile.customer;
+		this.customer_field.set_value(customer);
 	}
 
 	get_grand_total() {
@@ -1179,6 +1196,10 @@ class Payment {
 		const me = this;
 
 		let fields = this.frm.doc.payments.map(p => {
+			if (p.default) {
+				this.default_mop = p.mode_of_payment;
+			}
+
 			return {
 				fieldtype: 'Currency',
 				label: __(p.mode_of_payment),
