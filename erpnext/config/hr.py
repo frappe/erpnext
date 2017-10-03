@@ -39,13 +39,13 @@ def get_data():
 					"name": "Grade",
 					"description":_("Grade"),
 					"hide_count": True
-				}
-				# {
-				# 	"type": "doctype",
-				# 	"name": "May Concern Letter",
-				# 	"description":_("May Concern Letter"),
-				# 	"hide_count": True
-				# },
+				},
+				{
+					"type": "doctype",
+					"name": "May Concern Letter",
+					"description":_("May Concern Letter"),
+					"hide_count": True
+				},
 				# {
 				# 	"type": "doctype",
 				# 	"name": "Job Assignment",
@@ -61,36 +61,36 @@ def get_data():
 				# 	"name": "Employee Loan Application",
 				# 	"description":_("Employee Loan Application"),
 				# },
-				# {
-				# 	"type": "doctype",
-				# 	"name": "End of Service Award",
-				# 	"description":_("End Of Service Award"),
-				# },
-				# {
-				# 	"type": "doctype",
-				# 	"name": "Overtime Request",
-				# 	"description":_("Overtime Request"),
-				# },
+				{
+					"type": "doctype",
+					"name": "End of Service Award",
+					"description":_("End Of Service Award"),
+				},
+				{
+					"type": "doctype",
+					"name": "Overtime Request",
+					"description":_("Overtime Request"),
+				},
 				# {
 				# 	"type": "doctype",
 				# 	"name": "Financial Custody",
 				# 	"description":_("Financial Custody"),
 				# },
-				# {
-				# 	"type": "doctype",
-				# 	"name": "Employee Resignation",
-				# 	"description":_("Employee Resignation"),
-				# },
-				# {
-				# 	"type": "doctype",
-				# 	"name": "Cancel Leave Application",
-				# 	"description":_("Cancel Leave Application")
-				# },
-				# {
-				# 	"type": "doctype",
-				# 	"name": "Return From Leave Statement",
-				# 	"description":_("Return From Leave Statement")
-				# },
+				{
+					"type": "doctype",
+					"name": "Employee Resignation",
+					"description":_("Employee Resignation"),
+				},
+				{
+					"type": "doctype",
+					"name": "Cancel Leave Application",
+					"description":_("Cancel Leave Application")
+				},
+				{
+					"type": "doctype",
+					"name": "Return From Leave Statement",
+					"description":_("Return From Leave Statement")
+				},
 				# # {
 				# # 	"type": "doctype",
 				# # 	"name": "Outside Job",
@@ -101,16 +101,16 @@ def get_data():
 				# # 	"name": "Promotion Decision",
 				# # 	"description":_("Promotion Decision	")
 				# # },
-				# {
-				# 	"type": "doctype",
-				# 	"name": "Employee Badge Request",
-				# 	"description":_("Employee Badge Request")
-				# },
-				# {
-				# 	"type": "doctype",
-				# 	"name": "Employee Change IBAN",
-				# 	"description":_("Employee Change IBAN")
-				# },
+				{
+					"type": "doctype",
+					"name": "Employee Badge Request",
+					"description":_("Employee Badge Request")
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Change IBAN",
+					"description":_("Employee Change IBAN")
+				},
 				# {
 				# 	"type": "report",
 				# 	"name": "Financial Custody Report",
@@ -118,21 +118,21 @@ def get_data():
 				# 	"is_query_report": False,
 				# 	"doctype": "Financial Custody"
 				# },
-				# {
-				# 	"type": "doctype",
-				# 	"name": "Health Insurance Info",
-				# 	"description": _("Health Insurance Info."),
-				# },
+				{
+					"type": "doctype",
+					"name": "Health Insurance Info",
+					"description": _("Health Insurance Info."),
+				},
 				# {
 				# 	"type": "doctype",
 				# 	"name": "Medical Examination",
 				# 	"description": _("Medical Examination."),
 				# },
-				# {
-				# 	"type": "doctype",
-				# 	"name": "Medical Insurance Application",
-				# 	"description": _("Medical Insurance Application."),
-				# },
+				{
+					"type": "doctype",
+					"name": "Medical Insurance Application",
+					"description": _("Medical Insurance Application."),
+				},
 			]
 		},
 		# {
