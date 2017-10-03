@@ -13,7 +13,6 @@ class StudentApplicant(Document):
 		if self.student_admission:
 			naming_series = frappe.db.get_value('Student Admission', self.student_admission,
 				'naming_series_for_student_applicant')
-			print(naming_series)
 
 			if naming_series:
 				self.naming_series = naming_series

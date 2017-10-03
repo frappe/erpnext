@@ -417,6 +417,7 @@ def make_contact(args,customer):
 				'link_doctype': 'Customer',
 				'link_name': customer
 			})
+		doc.flags.ignore_mandatory = True
 		doc.save(ignore_permissions=True)
 
 def make_address(args, customer):
@@ -441,6 +442,7 @@ def make_address(args, customer):
 	address.is_primary_address = 1
 	address.is_shipping_address = 1
 	address.update(args)
+	address.flags.ignore_mandatory = True
 	address.save(ignore_permissions = True)
 
 def make_email_queue(email_queue):
