@@ -60,8 +60,9 @@ class BankStatement(Document):
 			str_month = False
 			if len(csv_row_field_value) == 3:
 				for i,n in enumerate(csv_row_field_value):
-					if isinstance(n, basestring):
+					if not is_number(n):
 						str_month = True
+						c.append(n)
 						continue
 					if len(str(n)) < 2:
 						n = '0{}'.format(n)
@@ -129,3 +130,10 @@ class BankStatement(Document):
 		#			header = row
 		#			continue
 		#		self.append
+
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False

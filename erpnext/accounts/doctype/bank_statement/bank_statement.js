@@ -18,19 +18,7 @@ frappe.ui.form.on('Bank Statement', {
 			})
 		});
 	}
-	
-	/*
-	process_statement: function(frm){
-		frappe.call({
-			method: 'fill_table',
-			doc: frm.doc,
-			freeze: true,
-			callback: function(r){
-				frm.refresh_field('bank_statement_items');
-			}
-		})
-	}
-	*/
+
 });
 
 frappe.ui.form.on('Bank Statement Item', 'jl_debit_account_type', (frm, dt, dn)=>{
