@@ -15,6 +15,19 @@ frappe.ui.form.on('Overtime Request', {
 
 
     },
+    workflow_state: function(frm){
+        cur_frm.refresh_fields(["workflow_state"]);
+    },
+    validate: function(frm){
+
+        cur_frm.refresh_fields(["workflow_state"]);
+        // if (cur_frm.doc.workflow_state.indexOf("Approve") !== -1 || cur_frm.doc.workflow_state.indexOf("Reject") !== -1){
+        //     if(cur_frm.doc.to_date >= frappe.datetime.nowdate()){
+        //         cur_frm.doc.workflow_state = "Pending";
+        //         frappe.throw(__("You can't Approve or Reject before month end"));
+        //     }
+        // }
+    },
     month: function(frm){
     	if (frm.doc.month){
 

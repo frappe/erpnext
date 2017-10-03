@@ -59,6 +59,8 @@ cur_frm.fields_dict.leave_application.get_query = function(doc) {
         filters: [
             ['is_canceled', '!=', 1],
             ['docstatus', '!=', 2],
+            ['status', '=', 'Approved'],
+            ['docstatus', '=', 1]
         ]
     };
 };
