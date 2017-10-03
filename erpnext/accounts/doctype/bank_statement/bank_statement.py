@@ -54,11 +54,15 @@ class BankStatement(Document):
 		transformation_rule = mapping_row.transformation_rule
 		# result = apply_rule(transformation_rule, data_to_use)fmt
 		if 'date' in str(mapping_row.target_field).lower():
-			csv_row_field_value = csv_row_field_value.strip().replace('-','/').replace(',','/')
+			csv_row_field_value = csv_row_field_value.strip().replace('-','/').replace(',','/').replace('.','/')
 			csv_row_field_value = csv_row_field_value.split('/')
 			c = []
+			str_month = False
 			if len(csv_row_field_value) == 3:
 				for i,n in enumerate(csv_row_field_value):
+					if isinstance(n, basestring):
+						str_month = True
+						continue
 					if len(str(n)) < 2:
 						n = '0{}'.format(n)
 					if i == 2:
@@ -68,8 +72,11 @@ class BankStatement(Document):
 							n = '20{}'.format(n)
 					c.append(n)
 			csv_row_field_value = ''.join(c)
-			csv_row_field_value = str(datetime.datetime.strptime(csv_row_field_value,'%d%m%Y').date())  #00/00/0000
-		if 'amount' in str(mapping_row.target_field).lower():
+			if str_month:
+				csv_row_field_value = str(datetime.datetime.strptime(csv_row_field_value,'%d%b%Y').date())  #00/00/0000
+			else:
+				csv_row_field_value = str(datetime.datetime.strptime(csv_row_field_value,'%d%m%Y').date())  #00/00/0000
+		if ('amount' in str(mapping_row.target_field).lower()) or ('balance' in str(mapping_row.target_field).lower()):
 			csv_row_field_value = flt(csv_row_field_value)
 		return mapping_row.target_field, csv_row_field_value
 
