@@ -76,10 +76,10 @@ class CancelLeaveApplication(Document):
 					frappe.msgprint(_("Leave Application record {0} has been canceled").format("<a href='#Form/Leave Application/{0}'>{0}</a>".format(self.leave_application)))
 		# leave_doc=frappe.get_value("Leave Application",filters={"name":self.leave_application},fieldname="docstatus")
 		# if leave_doc==0:
-			elif getdate(self.cancel_date) > getdate(self.from_date) and getdate(self.cancel_date) <= getdate(self.to_date):
+			elif getdate(self.cancel_date) >= getdate(self.from_date) and getdate(self.cancel_date) <= getdate(self.to_date):
 				leave_application.old_to_date = leave_application.to_date
 				leave_application.to_date= self.cancel_date
-				leave_application.is_canceled = "Yes"
+				leave_application.is_canceled = 1
 				leave_application.total_leave_days = get_number_of_leave_days(self.employee, leave_application.leave_type, leave_application.from_date, 
 					self.cancel_date, leave_application.half_day)
 				leave_application.flags.ignore_validate_update_after_submit = True

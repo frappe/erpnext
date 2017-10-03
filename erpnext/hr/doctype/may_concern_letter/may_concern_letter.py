@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 import json
+
 class MayConcernLetter(Document):
 	
 	def validate(self):
@@ -51,9 +52,25 @@ class MayConcernLetter(Document):
 
 	def get_salary(self):
 		if self.salary_selection=='Total Salary':
-			result =frappe.db.sql("select net_pay from `tabSalary Slip` where employee='{0}' and docstatus=1 order by creation desc limit 1".format(self.employee))
+			doc = frappe.new_doc("Salary Slip")
+			doc.salary_slip_based_on_timesheet="0"
+
+			doc.payroll_frequency= "Monthly"
+			doc.start_date="2017-11-01"
+			doc.end_date="2017-11-29"
+			doc.employee= str(self.employee)
+			doc.employee_name=str(self.employee_name)
+			doc.company= "Tawari"
+			doc.posting_date= "2017-10-01"
+			
+			doc.insert()
+
+
+			grosspay =doc.gross_pay
+			#result =frappe.db.sql("select gross_pay from `tabSalary Slip` where employee='{0}' and docstatus=1 order by creation desc limit 1".format(self.employee))
+			result=grosspay
 			if result:
-			    return result[0][0]
+			    return result
 			else:
 			    frappe.msgprint("لا يوجد قسيمة راتب لهذا الموظف")
 			    self.salary_selection='No salary'

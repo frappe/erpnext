@@ -13,12 +13,27 @@ from erpnext.hr.doctype.leave_application.leave_application import get_holidays
 class OvertimeRequest(Document):
 	def validate(self):
 		self.validate_dates()
+		self.validate_emp()
 		self.validate_max_hours()
+		self.validate_approvals()
 		if self.workflow_state:
 			if "Rejected" in self.workflow_state:
 				self.docstatus = 1
 				self.docstatus = 2
 		# self.get_overtime_records()
+
+	def validate_emp(self):
+		 if self.get('__islocal'):
+			if u'CEO' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By CEO"
+			elif u'Director' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Director"
+			elif u'Manager' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Manager"
+			elif u'Line Manager' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Line Manager"
+			elif u'Employee' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Pending"
 
 	def validate_dates(self):
 		if getdate(self.from_date) > getdate(self.to_date):
@@ -55,3 +70,9 @@ class OvertimeRequest(Document):
 			"hours":0
 			})
 		self.set("overtime_details",overtime_details)
+
+	def validate_approvals(self):
+		if getdate(self.to_date) >= getdate(nowdate()):
+			if "Reject" in self.workflow_state or "Approve" in self.workflow_state:
+				self.workflow_state = "Pending"
+				frappe.throw(_("You can't Approve or Reject before month end"))

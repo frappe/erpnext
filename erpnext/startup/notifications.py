@@ -55,7 +55,6 @@ def get_notification_config():
 				"Approved By Director","Approved By CEO","Approved By HR Specialist","Created By CEO",
 				"Created By Director","Created By Manager","Created By Line Manager")),
 			},
-			},
 			
 			"Return From Leave Statement":{
 			"workflow_state": ("in", ("Pending", "Created By Line Manager","Created By Manager",
@@ -115,3 +114,4 @@ def get_notification_config():
 			"BOM": {"docstatus": 0},
 			"Timesheet": {"status": "Draft"}
 		}
+}
