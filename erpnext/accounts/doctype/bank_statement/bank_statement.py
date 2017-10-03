@@ -10,6 +10,21 @@ from frappe.model.document import Document
 import csv, datetime
 from frappe.utils.file_manager import get_file_path
 
+dateformats = {
+	'1990-01-31': '%Y-%m-%d',
+	'31-01-1990': '%d-%m-%Y',
+	'31/01/1990': '%d/%m/%Y',
+	'31.01.1990': '%d.%m.%Y',
+	'01/31/1990': '%m/%d/%Y',
+	'01-31-1990': '%m-%d-%Y',
+	'1990-JAN-31': '%Y-%b-%d',
+	'31-JAN-1990': '%d-%b-%Y',
+	'31/JAN/1990': '%d/%b/%Y',
+	'31.JAN.1990': '%d.%b.%Y',
+	'JAN/31/1990': '%b/%d/%Y',
+	'JAN-31-1990': '%b-%d-%Y',
+}
+
 class BankStatement(Document):
 	def validate_file_format(self):
 		if not self.file: return
@@ -54,29 +69,14 @@ class BankStatement(Document):
 		transformation_rule = mapping_row.transformation_rule
 		# result = apply_rule(transformation_rule, data_to_use)fmt
 		if 'date' in str(mapping_row.target_field).lower():
-			csv_row_field_value = csv_row_field_value.strip().replace('-','/').replace(',','/').replace('.','/')
-			csv_row_field_value = csv_row_field_value.split('/')
-			c = []
-			str_month = False
-			if len(csv_row_field_value) == 3:
-				for i,n in enumerate(csv_row_field_value):
-					if not is_number(n):
-						str_month = True
-						c.append(n)
-						continue
-					if len(str(n)) < 2:
-						n = '0{}'.format(n)
-					if i == 2:
-						if (int(n) + 2000) > int(frappe.utils.now().split('-',1)[0]):
-							n = '19{}'.format(n)
-						else:
-							n = '20{}'.format(n)
-					c.append(n)
-			csv_row_field_value = ''.join(c)
-			if str_month:
-				csv_row_field_value = str(datetime.datetime.strptime(csv_row_field_value,'%d%b%Y').date())  #00/00/0000
+			date_format = frappe.db.get_value("Bank Statement Format", self.bank_statement_format, 'date_format')
+			strptime_format = dateformats.get(date_format)
+			if strptime_format.index('%Y') == 0:
+				year_index = 0
 			else:
-				csv_row_field_value = str(datetime.datetime.strptime(csv_row_field_value,'%d%m%Y').date())  #00/00/0000
+				year_index = 2
+			date_str = prepare_date_str(csv_row_field_value, year_index)
+			csv_row_field_value = str(datetime.datetime.strptime(date_str, strptime_format).date())  #00/00/0000
 		if ('amount' in str(mapping_row.target_field).lower()) or ('balance' in str(mapping_row.target_field).lower()):
 			csv_row_field_value = flt(csv_row_field_value)
 		return mapping_row.target_field, csv_row_field_value
@@ -137,3 +137,27 @@ def is_number(s):
         return True
     except ValueError:
         return False
+
+def prepare_date_str(s,idx=2):
+	separator = '/'
+	date_str = s.strip()
+	for sep in [',','/','.','-']:
+		if sep in s:
+			separator = sep
+			date_str = date_str.split(sep)
+			break
+	for i,n in enumerate(date_str):
+		if (i != idx) and is_number(n):
+			if len(str(n)) < 2:
+				date_str[i] = '0{}'.format(n)
+	if idx == 0:
+		dt_year = date_str[0]
+	else:
+		dt_year = date_str[2]
+	if len(str(dt_year)) <= 2:
+		if (int(dt_year) + 2000) <= int(frappe.utils.now().split('-',1)[0]):
+			dt_year = '20{}'.format(dt_year)
+		else:
+			dt_year = '19{}'.format(dt_year)
+	date_str[idx] = dt_year
+	return separator.join(date_str)
