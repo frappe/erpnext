@@ -297,6 +297,83 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	paid_from: function(frm) {
+
+		var is_bank = ''
+		
+		frappe.call({
+		    method:"frappe.client.get_value", 
+		     args:{
+		     	doctype:'Account',
+
+				fieldname:'account_type',
+				filters:{'name': frm.doc.paid_from}
+				},//dotted path to server method
+		    callback: function(r) {
+		        // code snippet
+		        //alert(""+r.message)
+		        if (r.message){
+		        	console.log(r.message.account_type);
+		        	is_bank = r.message.account_type;
+		        	if (is_bank=='Bank'){
+		        		f();
+
+		        	}else{
+
+		        		clean();
+		        	}
+		        }
+		    }
+		});
+ 
+ var clean = function(){
+		        	cur_frm.set_value("account_paid_from_name","");
+		        	cur_frm.set_value("account_paid_from_no","");
+
+};
+
+ var f = function(){
+		frappe.call({
+		    method:"frappe.client.get_value", 
+		     args:{
+		     	doctype:'Bank Account',
+				fieldname:'parent',
+				filters:{'bank_account': frm.doc.paid_from}
+				},//dotted path to server method
+		    callback: function(r) {
+		        // code snippet
+		        //alert(""+r.message)
+		        if (r.message){
+		        	console.log(r.message.parent);
+		        	cur_frm.set_value("account_paid_from_name",r.message.parent);
+
+		        }
+		    }
+		});
+	
+
+		frappe.call({
+		    method:"frappe.client.get_value", 
+		     args:{
+		     	doctype:'Bank Account',
+				fieldname:'bank_account_no',
+				filters:{'bank_account': String(cur_frm.doc.paid_from)}
+				},//dotted path to server method
+		    callback: function(r) {
+		        // code snippet
+		        //alert(""+r.message)
+		        if (r.message){
+		        	console.log(r.message.bank_account_no);
+		        	cur_frm.set_value("account_paid_from_no",r.message.bank_account_no);
+
+		        }
+		    }
+		});
+
+
+};
+
+
+
 		if(frm.set_party_account_based_on_party) return;
 
 		frm.events.set_account_currency_and_balance(frm, frm.doc.paid_from,
@@ -312,10 +389,82 @@ frappe.ui.form.on('Payment Entry', {
 
 	paid_to: function(frm) {
 
-		account_doc= frappe.get_doc('Account',String(frm.doc.paid_to));
-		account_type = account_doc.account_type;
-		alert(""+account_type)
+		
+		
 
+		var is_bank = ''
+		
+		frappe.call({
+		    method:"frappe.client.get_value", 
+		     args:{
+		     	doctype:'Account',
+
+				fieldname:'account_type',
+				filters:{'name': frm.doc.paid_to}
+				},//dotted path to server method
+		    callback: function(r) {
+		        // code snippet
+		        //alert(""+r.message)
+		        if (r.message){
+		        	console.log(r.message.account_type);
+		        	is_bank = r.message.account_type;
+		        	if (is_bank=='Bank'){
+		        		f();
+
+		        	}else{
+
+		        		clean();
+		        	}
+		        }
+		    }
+		});
+ 
+ var clean = function(){
+		        	cur_frm.set_value("account_paid_to_name","");
+		        	cur_frm.set_value("account_paid_to_no","");
+
+};
+
+ var f = function(){
+		frappe.call({
+		    method:"frappe.client.get_value", 
+		     args:{
+		     	doctype:'Bank Account',
+				fieldname:'parent',
+				filters:{'bank_account': frm.doc.paid_to}
+				},//dotted path to server method
+		    callback: function(r) {
+		        // code snippet
+		        //alert(""+r.message)
+		        if (r.message){
+		        	console.log(r.message.parent);
+		        	cur_frm.set_value("account_paid_to_name",r.message.parent);
+
+		        }
+		    }
+		});
+	
+
+		frappe.call({
+		    method:"frappe.client.get_value", 
+		     args:{
+		     	doctype:'Bank Account',
+				fieldname:'bank_account_no',
+				filters:{'bank_account': String(cur_frm.doc.paid_to)}
+				},//dotted path to server method
+		    callback: function(r) {
+		        // code snippet
+		        //alert(""+r.message)
+		        if (r.message){
+		        	console.log(r.message.bank_account_no);
+		        	cur_frm.set_value("account_paid_to_no",r.message.bank_account_no);
+
+		        }
+		    }
+		});
+
+
+};
 
 
 

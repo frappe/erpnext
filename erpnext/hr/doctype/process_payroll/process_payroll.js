@@ -31,13 +31,13 @@ frappe.ui.form.on("Process Payroll", {
 		frm.trigger("set_start_end_dates");
 	},
 
-	start_date: function(frm) {
-		frm.trigger("set_start_end_dates");
-	},
+	// start_date: function(frm) {
+	// 	frm.trigger("set_start_end_dates");
+	// },
 
-	end_date: function(frm) {
-		frm.trigger("set_start_end_dates");
-	},
+	// end_date: function(frm) {
+	// 	frm.trigger("set_start_end_dates");
+	// },
 
 	salary_slip_based_on_timesheet: function(frm) {
 		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet);

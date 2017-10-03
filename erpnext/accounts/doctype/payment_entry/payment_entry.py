@@ -16,6 +16,9 @@ from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.controllers.accounts_controller import AccountsController
 
 class InvalidPaymentEntry(ValidationError): pass
+@frappe.whitelist(allow_guest=True)
+def is_bank(bank):
+	return 'as'
 
 class PaymentEntry(AccountsController):
 	def setup_party_account_field(self):		
