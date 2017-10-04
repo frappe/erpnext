@@ -4,7 +4,7 @@
 frappe.ui.form.on('Member', {
 	refresh: function(frm) {
 
-		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Member'}
+		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Member'};
 
 		frm.toggle_display(['address_html','contact_html'], !frm.doc.__islocal);
 
