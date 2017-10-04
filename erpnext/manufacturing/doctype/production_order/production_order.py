@@ -369,9 +369,12 @@ class ProductionOrder(Document):
 	def set_actual_dates(self):
 		self.actual_start_date = None
 		self.actual_end_date = None
-		if self.get("operations"):
-			self.actual_start_date = min([d.actual_start_time for d in self.get("operations") if d.actual_start_time])
-			self.actual_end_date = max([d.actual_end_time for d in self.get("operations") if d.actual_end_time])
+		actual_start_time = [d.actual_start_time for d in self.get("operations") if d.actual_start_time]
+		actual_end_time = [d.actual_end_time for d in self.get("operations") if d.actual_end_time]
+		if self.get("operations") and actual_start_time \
+			and actual_end_time:
+			self.actual_start_date = min(actual_start_time)
+			self.actual_end_date = max(actual_end_time)
 
 	def delete_timesheet(self):
 		for timesheet in frappe.get_all("Timesheet", ["name"], {"production_order": self.name}):
