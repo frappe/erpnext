@@ -43,7 +43,7 @@ def execute(filters=None):
 		report_data += [get_variant_attr_val(item,i) for i in variants_attributes]
 		data.append(report_data)
 
-	columns += ["{}::Data:100".format(i) for i in variants_attributes]
+	columns += ["{}:Data:100".format(i) for i in variants_attributes]
 	
 
 	return columns, data
