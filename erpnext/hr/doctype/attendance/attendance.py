@@ -62,7 +62,6 @@ def employee():
 
 	:param email: employee company email id
 	"""
-	print frappe.session.user
 	employee_details, = frappe.db.sql("""
 			SELECT name, employee_name FROM `tabEmployee` WHERE
 			user_id = '{0}' or company_email='{0}'
@@ -76,6 +75,9 @@ def validate_attendance():
 	Check If attendance is already marked
 	"""
 	employee_details = employee()
+	if frappe.session.user == 'Administrator':
+		return
+
 	sql = """
 		SELECT name FROM `tabAttendance` WHERE
 		attendance_date = CURRENT_DATE()
@@ -85,7 +87,6 @@ def validate_attendance():
 		attendance, = frappe.db.sql(sql, as_dict=1)
 	except ValueError:
 		return
-	frappe.cache().set_value('check_in', 1)
 
 	return attendance
 
