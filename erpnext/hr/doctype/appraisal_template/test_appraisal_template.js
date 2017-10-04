@@ -20,7 +20,7 @@ QUnit.test("Test: Appraisal Template [HR]", function (assert) {
 				]},
 			]);
 		},
-		() => frappe.timeout(5),
+		() => frappe.timeout(10),
 		() => {
 			assert.equal('Test Appraisal 1',cur_frm.doc.kra_title, 'Appraisal name correctly set');
 		},

@@ -346,6 +346,7 @@ erpnext.production_order = {
 			var max = flt(frm.doc.qty) - flt(frm.doc.produced_qty);
 		}
 
+		max = flt(max, precision("qty"));
 		frappe.prompt({fieldtype:"Float", label: __("Qty for {0}", [purpose]), fieldname:"qty",
 			description: __("Max: {0}", [max]), 'default': max },
 			function(data) {

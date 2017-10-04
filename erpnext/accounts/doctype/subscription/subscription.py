@@ -7,9 +7,10 @@ import frappe
 import calendar
 from frappe import _
 from frappe.desk.form import assign_to
+from frappe.utils.jinja import validate_template
 from dateutil.relativedelta import relativedelta
 from frappe.utils.user import get_system_managers
-from frappe.utils import cstr, getdate, split_emails, add_days, today
+from frappe.utils import cstr, getdate, split_emails, add_days, today, get_last_day, get_first_day
 from frappe.model.document import Document
 
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
@@ -20,15 +21,29 @@ class Subscription(Document):
 		self.validate_next_schedule_date()
 		self.validate_email_id()
 
+		validate_template(self.subject or "")
+		validate_template(self.message or "")
+
 	def before_submit(self):
 		self.set_next_schedule_date()
 
 	def on_submit(self):
-		self.update_subscription_id()
+		# self.update_subscription_id()
+		self.update_subscription_data()
 
 	def on_update_after_submit(self):
+		self.update_subscription_data()
 		self.validate_dates()
 		self.set_next_schedule_date()
+
+	def before_cancel(self):
+		self.unlink_subscription_id()
+
+	def unlink_subscription_id(self):
+		doc = frappe.get_doc(self.reference_doctype, self.reference_document)
+		if doc.meta.get_field('subscription'):
+			doc.subscription = None
+			doc.db_update()
 
 	def validate_dates(self):
 		if self.end_date and getdate(self.start_date) > getdate(self.end_date):
@@ -64,6 +79,21 @@ class Subscription(Document):
 		self.next_schedule_date = get_next_schedule_date(self.start_date,
 			self.frequency, self.repeat_on_day)
 
+	def update_subscription_data(self):
+		update_doc = False
+		doc = frappe.get_doc(self.reference_doctype, self.reference_document)
+		if frappe.get_meta(self.reference_doctype).get_field("from_date"):
+			doc.from_date = self.from_date
+			doc.to_date = self.to_date
+			update_doc = True
+
+		if not doc.subscription:
+			doc.subscription = self.name
+			update_doc = True
+
+		if update_doc:
+			doc.db_update()
+
 	def update_subscription_id(self):
 		doc = frappe.get_doc(self.reference_doctype, self.reference_document)
 		if not doc.meta.get_field('subscription'):
@@ -71,12 +101,15 @@ class Subscription(Document):
 
 		doc.db_set('subscription', self.name)
 
-	def update_status(self):
+	def update_status(self, status=None):
 		self.status = {
 			'0': 'Draft',
 			'1': 'Submitted',
 			'2': 'Cancelled'
 		}[cstr(self.docstatus or 0)]
+
+		if status and status != 'Resumed':
+			self.status = status
 
 def get_next_schedule_date(start_date, frequency, repeat_on_day):
 	mcount = month_map.get(frequency)
@@ -93,11 +126,10 @@ def make_subscription_entry(date=None):
 		schedule_date = getdate(data.next_schedule_date)
 		while schedule_date <= getdate(today()):
 			create_documents(data, schedule_date)
-
 			schedule_date = get_next_schedule_date(schedule_date,
 				data.frequency, data.repeat_on_day)
 
-			if schedule_date:
+			if schedule_date and not frappe.db.get_value('Subscription', data.name, 'disabled'):
 				frappe.db.set_value('Subscription', data.name, 'next_schedule_date', schedule_date)
 
 def get_subscription_entries(date):
@@ -105,22 +137,38 @@ def get_subscription_entries(date):
 		where docstatus = 1 and next_schedule_date <=%s
 			and reference_document is not null and reference_document != ''
 			and next_schedule_date <= ifnull(end_date, '2199-12-31')
-			and ifnull(disabled, 0) = 0""", (date), as_dict=1)
+			and ifnull(disabled, 0) = 0 and status != 'Stopped' """, (date), as_dict=1)
 
 def create_documents(data, schedule_date):
 	try:
 		doc = make_new_document(data, schedule_date)
-		if data.notify_by_email:
-			send_notification(doc, data.print_format, data.recipients)
+		if getattr(doc, "from_date", None):
+			update_subscription_period(data, doc)
+
+		if data.notify_by_email and data.recipients:
+			print_format = data.print_format or "Standard"
+			send_notification(doc, data, print_format=print_format)
 
 		frappe.db.commit()
 	except Exception:
 		frappe.db.rollback()
 		frappe.db.begin()
 		frappe.log_error(frappe.get_traceback())
+		disable_subscription(data)
 		frappe.db.commit()
 		if data.reference_document and not frappe.flags.in_test:
 			notify_error_to_user(data)
+
+def update_subscription_period(data, doc):
+	from_date = doc.from_date
+	to_date = doc.to_date
+
+	frappe.db.set_value('Subscription', data.name, 'from_date', from_date)
+	frappe.db.set_value('Subscription', data.name, 'to_date', to_date)
+
+def disable_subscription(data):
+	subscription = frappe.get_doc('Subscription', data.name)
+	subscription.db_set('disabled', 1)
 
 def notify_error_to_user(data):
 	party = ''
@@ -134,7 +182,7 @@ def notify_error_to_user(data):
 	if party_type:
 		party = frappe.db.get_value(data.reference_doctype, data.reference_document, party_type)
 
-	notify_errors(data.reference_document, data.reference_doctype, party, data.owner)
+	notify_errors(data.reference_document, data.reference_doctype, party, data.owner, data.name)
 
 def make_new_document(args, schedule_date):
 	doc = frappe.get_doc(args.reference_doctype, args.reference_document)
@@ -152,8 +200,23 @@ def update_doc(new_document, reference_doc, args, schedule_date):
 	if new_document.meta.get_field('set_posting_time'):
 		new_document.set('set_posting_time', 1)
 
+	mcount = month_map.get(args.frequency)
+
 	if new_document.meta.get_field('subscription'):
 		new_document.set('subscription', args.name)
+
+	if args.from_date and args.to_date:
+		from_date = get_next_date(args.from_date, mcount)
+
+		if (cstr(get_first_day(args.from_date)) == cstr(args.from_date)) and \
+			(cstr(get_last_day(args.to_date)) == cstr(args.to_date)):
+				to_date = get_last_day(get_next_date(args.to_date, mcount))
+		else:
+			to_date = get_next_date(args.to_date, mcount)
+
+		if new_document.meta.get_field('from_date'):
+			new_document.set('from_date', from_date)
+			new_document.set('to_date', to_date)
 
 	new_document.run_method("on_recurring", reference_doc=reference_doc, subscription_doc=args)
 	for data in new_document.meta.fields:
@@ -166,34 +229,45 @@ def get_next_date(dt, mcount, day=None):
 
 	return dt
 
-def send_notification(new_rv, print_format='Standard', recipients=None):
+def send_notification(new_rv, subscription_doc, print_format='Standard'):
 	"""Notify concerned persons about recurring document generation"""
-	recipients = recipients or new_rv.notification_email_address
-	print_format = print_format or new_rv.recurring_print_format
+	print_format = print_format
 
-	frappe.sendmail(recipients,
-		subject=  _("New {0}: #{1}").format(new_rv.doctype, new_rv.name),
-		message = _("Please find attached {0} #{1}").format(new_rv.doctype, new_rv.name),
-		attachments = [frappe.attach_print(new_rv.doctype, new_rv.name, file_name=new_rv.name, print_format=print_format)])
+	if not subscription_doc.subject:
+		subject = _("New {0}: #{1}").format(new_rv.doctype, new_rv.name)
+	elif "{" in subscription_doc.subject:
+		subject = frappe.render_template(subscription_doc.subject, {'doc': new_rv})
 
-def notify_errors(doc, doctype, party, owner):
+	if not subscription_doc.message:
+		message = _("Please find attached {0} #{1}").format(new_rv.doctype, new_rv.name)
+	elif "{" in subscription_doc.message:
+		message = frappe.render_template(subscription_doc.message, {'doc': new_rv})
+
+	attachments = [frappe.attach_print(new_rv.doctype, new_rv.name,
+		file_name=new_rv.name, print_format=print_format)]
+
+	frappe.sendmail(subscription_doc.recipients,
+		subject=subject, message=message, attachments=attachments)
+
+def notify_errors(doc, doctype, party, owner, name):
 	recipients = get_system_managers(only_name=True)
 	frappe.sendmail(recipients + [frappe.db.get_value("User", owner, "email")],
-		subject="[Urgent] Error while creating recurring %s for %s" % (doctype, doc),
+		subject=_("[Urgent] Error while creating recurring %s for %s" % (doctype, doc)),
 		message = frappe.get_template("templates/emails/recurring_document_failed.html").render({
-			"type": doctype,
+			"type": _(doctype),
 			"name": doc,
-			"party": party or ""
+			"party": party or "",
+			"subscription": name
 		}))
 
-	assign_task_to_owner(doc, doctype, "Recurring Invoice Failed", recipients)
+	assign_task_to_owner(name, "Recurring Documents Failed", recipients)
 
-def assign_task_to_owner(doc, doctype, msg, users):
+def assign_task_to_owner(name, msg, users):
 	for d in users:
 		args = {
+			'doctype'		:	'Subscription',
 			'assign_to' 	:	d,
-			'doctype'		:	doctype,
-			'name'			:	doc,
+			'name'			:	name,
 			'description'	:	msg,
 			'priority'		:	'High'
 		}
@@ -205,3 +279,32 @@ def make_subscription(doctype, docname):
 	doc.reference_doctype = doctype
 	doc.reference_document = docname
 	return doc
+
+@frappe.whitelist()
+def stop_resume_subscription(subscription, status):
+	doc = frappe.get_doc('Subscription', subscription)
+	frappe.msgprint(_("Subscription has been {0}").format(status))
+	if status == 'Resumed':
+		doc.next_schedule_date = get_next_schedule_date(today(),
+			doc.frequency, doc.repeat_on_day)
+
+	doc.update_status(status)
+	doc.save()
+
+	return doc.status
+
+def subscription_doctype_query(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("""select parent from `tabDocField`
+		where fieldname = 'subscription'
+			and parent like %(txt)s
+		order by
+			if(locate(%(_txt)s, parent), locate(%(_txt)s, parent), 99999),
+			parent
+		limit %(start)s, %(page_len)s""".format(**{
+			'key': searchfield,
+		}), {
+			'txt': "%%%s%%" % txt,
+			'_txt': txt.replace("%", ""),
+			'start': start,
+			'page_len': page_len
+		})

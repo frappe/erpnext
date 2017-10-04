@@ -75,11 +75,7 @@ class Company(Document):
 			if not frappe.local.flags.ignore_chart_of_accounts:
 				self.create_default_accounts()
 				self.create_default_warehouses()
-
-				if cint(frappe.db.get_single_value('System Settings', 'setup_complete')):
-					# In the case of setup, fixtures should be installed after setup_success
-					# This also prevents db commits before setup is successful
-					install_country_fixtures(self.name)
+				install_country_fixtures(self.name)
 
 		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
 			self.create_default_cost_center()
@@ -278,6 +274,15 @@ class Company(Document):
 		frappe.db.sql("""update `tabSingles` set value=""
 			where doctype='Global Defaults' and field='default_company'
 			and value=%s""", self.name)
+		# delete mode of payment account
+		frappe.db.sql("delete from `tabMode of Payment Account` where company=%s", self.name)
+
+
+@frappe.whitelist()
+def enqueue_replace_abbr(company, old, new):
+	kwargs = dict(company=company, old=old, new=new)
+	frappe.enqueue('erpnext.setup.doctype.company.company.replace_abbr', **kwargs)
+
 
 @frappe.whitelist()
 def replace_abbr(company, old, new):
@@ -289,15 +294,21 @@ def replace_abbr(company, old, new):
 
 	frappe.db.set_value("Company", company, "abbr", new)
 
-	def _rename_record(dt):
-		for d in frappe.db.sql("select name from `tab%s` where company=%s" % (dt, '%s'), company):
-			parts = d[0].rsplit(" - ", 1)
-			if len(parts) == 1 or parts[1].lower() == old.lower():
-				frappe.rename_doc(dt, d[0], parts[0] + " - " + new)
+	def _rename_record(doc):
+		parts = doc[0].rsplit(" - ", 1)
+		if len(parts) == 1 or parts[1].lower() == old.lower():
+			frappe.rename_doc(dt, doc[0], parts[0] + " - " + new)
+
+	def _rename_records(dt):
+		# rename is expensive so let's be economical with memory usage
+		doc = (d for d in frappe.db.sql("select name from `tab%s` where company=%s" % (dt, '%s'), company))
+		for d in doc:
+			_rename_record(d)
 
 	for dt in ["Warehouse", "Account", "Cost Center"]:
-		_rename_record(dt)
+		_rename_records(dt)
 		frappe.db.commit()
+
 
 def get_name_with_abbr(name, company):
 	company_abbr = frappe.db.get_value("Company", company, "abbr")

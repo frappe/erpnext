@@ -90,7 +90,7 @@ def get_item_details(args):
 			item.lead_time_days)
 
 	if args.get("is_subcontracted") == "Yes":
-		out.bom = get_default_bom(args.item_code)
+		out.bom = args.get('bom') or get_default_bom(args.item_code)
 
 	get_gross_profit(out)
 
@@ -164,6 +164,15 @@ def get_basic_details(args, item):
 
 	warehouse = user_default_warehouse or item.default_warehouse or args.warehouse
 
+	#Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
+	if not args.uom:
+		if args.get('doctype') in ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']:
+			args.uom = item.sales_uom if item.sales_uom else item.stock_uom
+		elif args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']:
+			args.uom = item.purchase_uom if item.purchase_uom else item.stock_uom
+		else:
+			args.uom = item.stock_uom
+
 	out = frappe._dict({
 		"item_code": item.name,
 		"item_name": item.item_name,
@@ -178,7 +187,7 @@ def get_basic_details(args, item):
 		"batch_no": None,
 		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in
 			item.get("taxes")))),
-		"uom": item.stock_uom,
+		"uom": args.uom,
 		"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
 		"qty": args.qty or 1.0,
 		"stock_qty": args.qty or 1.0,

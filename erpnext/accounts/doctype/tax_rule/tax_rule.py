@@ -8,6 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cstr, cint
 from frappe.contacts.doctype.address.address import get_default_address
+from frappe.utils.nestedset import get_root_of
 from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
 
 class IncorrectCustomerGroup(frappe.ValidationError): pass
@@ -135,7 +136,8 @@ def get_tax_template(posting_date, args):
 	for key, value in args.iteritems():
 		if key=="use_for_shopping_cart":
 			conditions.append("use_for_shopping_cart = {0}".format(1 if value else 0))
-		if key == 'customer_group' and value:
+		if key == 'customer_group':
+			if not value: value = get_root_of("Customer Group")
 			customer_group_condition = get_customer_group_condition(value)
 			conditions.append("ifnull({0}, '') in ('', {1})".format(key, customer_group_condition))
 		else:

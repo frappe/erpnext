@@ -12,8 +12,8 @@ from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amo
 from erpnext.hr.doctype.employee_loan.employee_loan import update_disbursement_status
 
 class JournalEntry(AccountsController):
-	def __init__(self, arg1, arg2=None):
-		super(JournalEntry, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(JournalEntry, self).__init__(*args, **kwargs)
 
 	def get_feed(self):
 		return self.voucher_type

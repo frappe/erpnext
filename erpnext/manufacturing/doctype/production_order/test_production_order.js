@@ -2,7 +2,7 @@ QUnit.test("test: production order", function (assert) {
 	assert.expect(25);
 	let done = assert.async();
 	let laptop_quantity = 5;
-	let items = ["Screen", "CPU", "Keyboard"];
+	let items = ["CPU", "Keyboard", "Screen"];
 	let operation_items = ["CPU", "Keyboard", "Screen"];
 	let click_make = () => {
 		let element = $(`.btn-primary:contains("Make"):visible`);
@@ -19,22 +19,17 @@ QUnit.test("test: production order", function (assert) {
 		() => frappe.timeout(0.5),
 
 		// Create a laptop production order
-		() => frappe.new_doc("Production Order"),
-		() => frappe.timeout(1),
-		() => cur_frm.set_value("production_item", "Laptop"),
+		() => {
+			return frappe.tests.make('Production Order', [
+				{production_item: 'Laptop'},
+				{company: 'For Testing'},
+				{qty: laptop_quantity},
+				{scrap_warehouse: "Laptop Scrap Warehouse - FT"},
+				{wip_warehouse: "Work In Progress - FT"},
+				{fg_warehouse: "Finished Goods - FT"}
+			]);
+		},
 		() => frappe.timeout(2),
-		() => cur_frm.set_value("company", "Razer Blade"),
-		() => frappe.timeout(2),
-		() => cur_frm.set_value("qty", laptop_quantity),
-		() => frappe.timeout(2),
-		() => cur_frm.set_value("scrap_warehouse", "Laptop Scrap Warehouse - RB"),
-		() => frappe.timeout(1),
-		() => cur_frm.set_value("wip_warehouse", "Work In Progress - RB"),
-		() => frappe.timeout(1),
-		() => cur_frm.set_value("fg_warehouse", "Finished Goods - RB"),
-		() => cur_frm.save(),
-		() => frappe.timeout(2),
-
 		() => {
 			assert.equal(cur_frm.doc.planned_operating_cost, cur_frm.doc.total_operating_cost,
 				"Total and Planned Cost is equal");
@@ -43,7 +38,7 @@ QUnit.test("test: production order", function (assert) {
 
 			items.forEach(function(item, index) {
 				assert.equal(item, cur_frm.doc.required_items[index].item_code, `Required item ${item} added`);
-				assert.equal("Stores - RB", cur_frm.doc.required_items[index].source_warehouse, `Item ${item} warhouse verified`);
+				assert.equal("Stores - FT", cur_frm.doc.required_items[index].source_warehouse, `Item ${item} warhouse verified`);
 				assert.equal("5", cur_frm.doc.required_items[index].required_qty, `Item ${item} quantity verified`);
 			});
 
@@ -64,8 +59,6 @@ QUnit.test("test: production order", function (assert) {
 		// Confirm the production order timesheet, save and submit it
 		() => frappe.click_link("TS-00"),
 		() => frappe.timeout(1),
-		() => frappe.click_button("Save"),
-		() => frappe.timeout(1),
 		() => frappe.click_button("Submit"),
 		() => frappe.timeout(1),
 		() => frappe.click_button("Yes"),
@@ -73,7 +66,7 @@ QUnit.test("test: production order", function (assert) {
 
 		// Start the production order process
 		() => frappe.set_route("List", "Production Order"),
-		() => frappe.timeout(2),
+		() => frappe.timeout(.5),
 		() => frappe.set_route("List", "Production Order"),
 		() => frappe.timeout(2),
 		() => frappe.click_link("Laptop"),
@@ -81,6 +74,7 @@ QUnit.test("test: production order", function (assert) {
 		() => frappe.click_button("Start"),
 		() => frappe.timeout(0.5),
 		() => click_make(),
+		() => frappe.timeout(1),
 		() => frappe.click_button("Save"),
 		() => frappe.timeout(0.5),
 

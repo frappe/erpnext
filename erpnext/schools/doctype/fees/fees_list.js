@@ -1,15 +1,12 @@
 frappe.listview_settings['Fees'] = {
-	add_fields: [ "total_amount", "paid_amount", "due_date"],
+	add_fields: ["grand_total", "outstanding_amount", "due_date"],
 	get_indicator: function(doc) {
-		var { get_today } = frappe.datetime;
-		if ((doc.total_amount > doc.paid_amount) && doc.due_date < get_today()) {
-			return [__("Overdue"), "red", ["due_date,<," + get_today()], ["due_date,<," + get_today()]];
-		}
-		else if (doc.total_amount > doc.paid_amount) {
-			return [__("Pending"), "orange"];
-		}
-		else {
-			return [__("Paid"), "green"];
+		if(flt(doc.outstanding_amount)==0) {
+			return [__("Paid"), "green", "outstanding_amount,=,0"];
+		} else if (flt(doc.outstanding_amount) > 0 && doc.due_date >= frappe.datetime.get_today()) {
+			return [__("Unpaid"), "orange", "outstanding_amount,>,0|due_date,>,Today"];
+		} else if (flt(doc.outstanding_amount) > 0 && doc.due_date < frappe.datetime.get_today()) {
+			return [__("Overdue"), "red", "outstanding_amount,>,0|due_date,<=,Today"];
 		}
 	}
 };

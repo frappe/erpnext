@@ -14,8 +14,8 @@ class OpeningEntryAccountError(frappe.ValidationError): pass
 class EmptyStockReconciliationItemsError(frappe.ValidationError): pass
 
 class StockReconciliation(StockController):
-	def __init__(self, arg1, arg2=None):
-		super(StockReconciliation, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(StockReconciliation, self).__init__(*args, **kwargs)
 		self.head_row = ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]
 
 	def validate(self):

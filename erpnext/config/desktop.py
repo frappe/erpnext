@@ -268,5 +268,13 @@ def get_data():
 			"icon": "octicon octicon-plus",
 			"type": "module",
 			"label": _("Healthcare")
-		}
+		},
+		{
+			"module_name": "Data Import Tool",
+			"color": "#7f8c8d",
+			"icon": "octicon octicon-circuit-board",
+			"type": "page",
+			"link": "data-import-tool",
+			"label": _("Data Import Tool")
+		},
 	]
