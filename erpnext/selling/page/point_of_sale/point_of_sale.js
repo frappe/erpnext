@@ -763,26 +763,39 @@ class POSCart {
 		// });
 
 		this.wrapper.find('.additional_discount_percentage').on('change', (e) => {
+			const discount_percentage = flt(e.target.value,
+				precision("additional_discount_percentage"));
+
 			frappe.model.set_value(this.frm.doctype, this.frm.docname,
-				'additional_discount_percentage', e.target.value)
+				'additional_discount_percentage', discount_percentage)
 				.then(() => {
 					let discount_wrapper = this.wrapper.find('.discount_amount');
-					discount_wrapper.val(this.frm.doc.discount_amount);
+					discount_wrapper.val(flt(this.frm.doc.discount_amount,
+						precision('discount_amount')));
 					discount_wrapper.trigger('change');
 				});
 		});
 
 		this.wrapper.find('.discount_amount').on('change', (e) => {
+			const discount_amount = flt(e.target.value, precision('discount_amount'));
 			frappe.model.set_value(this.frm.doctype, this.frm.docname,
-				'discount_amount', flt(e.target.value));
+				'discount_amount', discount_amount);
 			this.frm.trigger('discount_amount')
 				.then(() => {
-					let discount_wrapper = this.wrapper.find('.additional_discount_percentage');
-					discount_wrapper.val(this.frm.doc.additional_discount_percentage);
+					this.update_discount_fields();
 					this.update_taxes_and_totals();
 					this.update_grand_total();
 				});
 		});
+	}
+
+	update_discount_fields() {
+		let discount_wrapper = this.wrapper.find('.additional_discount_percentage');
+		let discount_amt_wrapper = this.wrapper.find('.discount_amount');
+		discount_wrapper.val(flt(this.frm.doc.additional_discount_percentage,
+			precision('additional_discount_percentage')));
+		discount_amt_wrapper.val(flt(this.frm.doc.discount_amount,
+			precision('discount_amount')));
 	}
 
 	set_selected_item($item) {
@@ -848,7 +861,7 @@ class POSItems {
 		this.search_field = frappe.ui.form.make_control({
 			df: {
 				fieldtype: 'Data',
-				label: 'Search Item (Ctrl + I)',
+				label: 'Search Item ( Ctrl + i )',
 				placeholder: 'Search by item code, serial number, batch no or barcode'
 			},
 			parent: this.wrapper.find('.search-field'),
@@ -945,14 +958,19 @@ class POSItems {
 				if(serial_no) {
 					this.events.update_cart(items[0].item_code,
 						'serial_no', serial_no);
-					this.search_field.set_value('');
+					this.reset_search_field();
 				}
 				if(batch_no) {
 					this.events.update_cart(items[0].item_code,
 						'batch_no', batch_no);
-					this.search_field.set_value('');
+					this.reset_search_field();
 				}
 			});
+	}
+
+	reset_search_field() {
+		this.search_field.set_value('');
+		this.search_field.$input.trigger("input");
 	}
 
 	bind_events() {
