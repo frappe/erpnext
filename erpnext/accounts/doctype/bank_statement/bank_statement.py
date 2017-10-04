@@ -3,12 +3,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, csv, datetime, os
 from frappe import _
 from frappe.utils import flt
 from frappe.model.document import Document
-import csv, datetime
-from frappe.utils.file_manager import get_file_path
+from frappe.utils.file_manager import get_file_path, get_uploaded_content
 
 dateformats = {
 	'1990-01-31': '%Y-%m-%d',
@@ -83,42 +82,53 @@ class BankStatement(Document):
 		return mapping_row.target_field, csv_row_field_value
 
 	def fill_table(self):
+		if not self.file: return
+		file_doc = frappe._dict()
 		self.bank_statement_items = []
 		bank_statement_format = frappe.get_doc("Bank Statement Format", self.bank_statement_format)
 		bank_statement_mapping_items = bank_statement_format.bank_statement_mapping_item
-
+		file_id = frappe.db.sql("""SELECT name FROM tabFile WHERE attached_to_doctype = '{0}' AND attached_to_name = '{1}'
+						""".format("Bank Statement", self.name), as_dict=1)
+		file_doc = frappe.get_doc("File",file_id[0].name)
 		# load contents of CSV file into 2d array raw_bank_statement_items
 		# create a list of maps, intermediate_bank_statement_items, to hold bank statement items based on internal > 
 		# < representation see "Bank Statement Item" definition
 		intermediate_bank_statement_items = []
+		filename, file_extension = os.path.splitext(self.file)
+
+		if file_extension == '.xlsx':
+			from frappe.utils.xlsxutils import read_xlsx_file_from_attached_file
+			rows = read_xlsx_file_from_attached_file(file_id=file_doc.name)
+		elif file_extension == '.csv':
+			from frappe.utils.file_manager import get_file
+			from frappe.utils.csvutils import read_csv_content
+			fname, fcontent = get_file(file_doc.name)
+			rows = read_csv_content(fcontent)
+		else:
+			frappe.throw(_("Unsupported File Format"))
+
+		csv_header_list = rows[0]
+		data_rows = rows[1:]
 
 		# for each statement_row in raw_bank_statement_items:
-		with open(get_file_path(self.file),"rb") as csv_file:
-			csv_file_content = csv.reader(csv_file)
-			for index, statement_row in enumerate(csv_file_content): # exclude header
-				bank_sta_item = dict()
-				if index == 0:
-					csv_header_list = statement_row
-					continue
-				for column_index, column_value in enumerate(statement_row):
-					print "CSV csv_header_list"
-					print csv_header_list
-					itm = self.convert_to_internal_format(csv_header_list[column_index], column_value, bank_statement_mapping_items)
-					if not itm: continue
-					target_field, eval_result = itm
-					if target_field <> "txn_type":
-						# add eval_result to the appropriate row and column in intermediate_bank_statement_items
-						bank_sta_item[frappe.scrub(target_field)] = eval_result
-					elif target_field == "txn_type":
-						txn_type = get_txn_type(eval_result)	
-						# add txn_type to the appropriate row and column in intermediate_bank_statement_items
-						bank_sta_item[frappe.scrub(txn_type)] = txn_type
-				intermediate_bank_statement_items.append(bank_sta_item) if bank_sta_item else None
-		print intermediate_bank_statement_items
+		for statement_row in data_rows:
+			bank_sta_item = dict()
+			for column_index, column_value in enumerate(statement_row):
+				itm = self.convert_to_internal_format(csv_header_list[column_index], column_value, bank_statement_mapping_items)
+				if not itm: continue
+				target_field, eval_result = itm
+				if target_field <> "txn_type":
+					# add eval_result to the appropriate row and column in intermediate_bank_statement_items
+					bank_sta_item[frappe.scrub(target_field)] = eval_result
+				elif target_field == "txn_type":
+					txn_type = get_txn_type(eval_result)	
+					# add txn_type to the appropriate row and column in intermediate_bank_statement_items
+					bank_sta_item[frappe.scrub(txn_type)] = txn_type
+			intermediate_bank_statement_items.append(bank_sta_item) if bank_sta_item else None
+
 		for sta in intermediate_bank_statement_items:
-			print '\n\nStatement Appended\n\n'
-			print sta
 			self.append('bank_statement_items', sta)  # create bank_statement_item table entries
+
 		self.save()
 
 	def process_statement(self):
