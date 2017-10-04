@@ -165,6 +165,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			and (tabItem.`{key}` LIKE %(txt)s
 				or tabItem.item_group LIKE %(txt)s
 				or tabItem.item_name LIKE %(txt)s
+				or tabItem.barcode LIKE %(txt)s
 				or tabItem.description LIKE %(txt)s)
 			{fcond} {mcond}
 		order by
