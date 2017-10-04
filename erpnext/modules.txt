@@ -16,8 +16,5 @@ Maintenance
 Schools
 Regional
 Healthcare
-<<<<<<< 61287e3c53618f3d1620a69f2e576a43b653a6ae
-=======
 Subscription
 Agriculture
->>>>>>> Initialized module Agriculture
