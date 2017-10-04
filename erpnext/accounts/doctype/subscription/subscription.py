@@ -142,7 +142,7 @@ def get_subscription_entries(date):
 def create_documents(data, schedule_date):
 	try:
 		doc = make_new_document(data, schedule_date)
-		if doc.from_date:
+		if getattr(doc, "from_date", None):
 			update_subscription_period(data, doc)
 
 		if data.notify_by_email and data.recipients:
@@ -154,7 +154,7 @@ def create_documents(data, schedule_date):
 		frappe.db.rollback()
 		frappe.db.begin()
 		frappe.log_error(frappe.get_traceback())
-		disabled_subscription(data)
+		disable_subscription(data)
 		frappe.db.commit()
 		if data.reference_document and not frappe.flags.in_test:
 			notify_error_to_user(data)
@@ -166,7 +166,7 @@ def update_subscription_period(data, doc):
 	frappe.db.set_value('Subscription', data.name, 'from_date', from_date)
 	frappe.db.set_value('Subscription', data.name, 'to_date', to_date)
 
-def disabled_subscription(data):
+def disable_subscription(data):
 	subscription = frappe.get_doc('Subscription', data.name)
 	subscription.db_set('disabled', 1)
 
