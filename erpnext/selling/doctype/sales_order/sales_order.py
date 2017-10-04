@@ -22,8 +22,8 @@ form_grid_templates = {
 class WarehouseRequired(frappe.ValidationError): pass
 
 class SalesOrder(SellingController):
-	def __init__(self, arg1, arg2=None):
-		super(SalesOrder, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(SalesOrder, self).__init__(*args, **kwargs)
 
 	def validate(self):
 		super(SalesOrder, self).validate()
@@ -696,7 +696,8 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 				"contact_display",
 				"contact_mobile",
 				"contact_email",
-				"contact_person"
+				"contact_person",
+				"taxes_and_charges"
 			],
 			"validation": {
 				"docstatus": ["=", 1]

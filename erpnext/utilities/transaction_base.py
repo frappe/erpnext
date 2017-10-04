@@ -25,7 +25,7 @@ class TransactionBase(StatusUpdater):
 		if not getattr(self, 'set_posting_time', None):
 			now = now_datetime()
 			self.posting_date = now.strftime('%Y-%m-%d')
-			self.posting_time = now.strftime('%H:%M:%S')
+			self.posting_time = now.strftime('%H:%M:%S.%f')
 
 	def add_calendar_event(self, opts, force=False):
 		if cstr(self.contact_by) != cstr(self._prev.contact_by) or \

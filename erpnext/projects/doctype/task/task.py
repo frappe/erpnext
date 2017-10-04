@@ -47,7 +47,7 @@ class Task(Document):
 
 			from frappe.desk.form.assign_to import clear
 			clear(self.doctype, self.name)
-			
+
 	def validate_progress(self):
 		if self.progress > 100:
 			frappe.throw(_("Progress % for a task cannot be more than 100."))
@@ -63,6 +63,12 @@ class Task(Document):
 		self.check_recursion()
 		self.reschedule_dependent_tasks()
 		self.update_project()
+		self.unassign_todo()
+
+	def unassign_todo(self):
+		if self.status == "Closed" or self.status == "Cancelled":
+			from frappe.desk.form.assign_to import clear
+			clear(self.doctype, self.name)
 
 	def update_total_expense_claim(self):
 		self.total_expense_claim = frappe.db.sql("""select sum(total_sanctioned_amount) from `tabExpense Claim`
@@ -120,7 +126,7 @@ class Task(Document):
 	def has_webform_permission(doc):
 		project_user = frappe.db.get_value("Project User", {"parent": doc.project, "user":frappe.session.user} , "user")
 		if project_user:
-			return True				
+			return True
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
@@ -154,7 +160,7 @@ def get_project(doctype, txt, searchfield, start, page_len, filters):
 			order by name
 			limit %(start)s, %(page_len)s """ % {'key': searchfield,
 			'txt': "%%%s%%" % frappe.db.escape(txt), 'mcond':get_match_cond(doctype),
-			'start': start, 'page_len': page_len})			
+			'start': start, 'page_len': page_len})
 
 
 @frappe.whitelist()
@@ -170,4 +176,5 @@ def set_tasks_as_overdue():
 		where exp_end_date is not null
 		and exp_end_date < CURDATE()
 		and `status` not in ('Closed', 'Cancelled')""")
-		
+
+

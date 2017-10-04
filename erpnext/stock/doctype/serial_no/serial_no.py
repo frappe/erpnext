@@ -20,8 +20,8 @@ class SerialNoNotExistsError(ValidationError): pass
 class SerialNoDuplicateError(ValidationError): pass
 
 class SerialNo(StockController):
-	def __init__(self, arg1, arg2=None):
-		super(SerialNo, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(SerialNo, self).__init__(*args, **kwargs)
 		self.via_stock_ledger = False
 
 	def validate(self):

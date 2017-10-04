@@ -15,8 +15,8 @@ from erpnext.exceptions import InvalidCurrency
 force_item_fields = ("item_group", "barcode", "brand", "stock_uom")
 
 class AccountsController(TransactionBase):
-	def __init__(self, arg1, arg2=None):
-		super(AccountsController, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(AccountsController, self).__init__(*args, **kwargs)
 
 	@property
 	def company_currency(self):
@@ -186,9 +186,6 @@ class AccountsController(TransactionBase):
 								stock_qty = item.get("stock_qty") * -1 if item.get("stock_qty") < 0 else item.get("stock_qty")
 								if stock_qty != len(get_serial_nos(item.get('serial_no'))):
 									item.set(fieldname, value)
-
-							elif fieldname == "conversion_factor" and not item.get("conversion_factor"):
-								item.set(fieldname, value)
 
 					if ret.get("pricing_rule"):
 						# if user changed the discount percentage then set user's discount percentage ?
