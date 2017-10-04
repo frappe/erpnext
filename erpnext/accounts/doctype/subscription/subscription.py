@@ -277,3 +277,19 @@ def stop_resume_subscription(subscription, status):
 	doc.save()
 
 	return doc.status
+
+def subscription_doctype_query(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("""select parent from `tabDocField`
+		where fieldname = 'subscription'
+			and parent like %(txt)s
+		order by
+			if(locate(%(_txt)s, parent), locate(%(_txt)s, parent), 99999),
+			parent
+		limit %(start)s, %(page_len)s""".format(**{
+			'key': searchfield,
+		}), {
+			'txt': "%%%s%%" % txt,
+			'_txt': txt.replace("%", ""),
+			'start': start,
+			'page_len': page_len
+		})
