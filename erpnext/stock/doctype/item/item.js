@@ -97,6 +97,12 @@ frappe.ui.form.on("Item", {
 			}
 			frappe.set_route('Form', 'Item', new_item.name);
 		});
+
+		if(frm.doc.has_variants) {
+			frm.add_custom_button(__("Item Variant Settings"), function() {
+				frappe.set_route("Form", "Item Variant Settings");
+			}, __("View"));
+		}
 	},
 
 	validate: function(frm){

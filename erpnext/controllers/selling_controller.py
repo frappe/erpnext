@@ -49,7 +49,8 @@ class SellingController(StockController):
 		if getattr(self, "customer", None):
 			from erpnext.accounts.party import _get_party_details
 			party_details = _get_party_details(self.customer,
-				ignore_permissions=self.flags.ignore_permissions)
+				ignore_permissions=self.flags.ignore_permissions,
+				doctype=self.doctype, company=self.company)
 			if not self.meta.get_field("sales_team"):
 				party_details.pop("sales_team")
 

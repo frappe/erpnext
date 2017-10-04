@@ -494,7 +494,7 @@ class TestSalesOrder(unittest.TestCase):
 		so.items[0].price_list_rate = price_list_rate = 100
 		so.items[0].margin_type = 'Percentage'
 		so.items[0].margin_rate_or_amount = 25
-		so.insert()
+		so.save()
 
 		new_so = frappe.copy_doc(so)
 		new_so.save(ignore_permissions=True)

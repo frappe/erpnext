@@ -7,6 +7,7 @@ import frappe
 import calendar
 from frappe import _
 from frappe.desk.form import assign_to
+from frappe.utils.jinja import validate_template
 from dateutil.relativedelta import relativedelta
 from frappe.utils.user import get_system_managers
 from frappe.utils import cstr, getdate, split_emails, add_days, today, get_last_day, get_first_day
@@ -19,6 +20,9 @@ class Subscription(Document):
 		self.validate_dates()
 		self.validate_next_schedule_date()
 		self.validate_email_id()
+
+		validate_template(self.subject or "")
+		validate_template(self.message or "")
 
 	def before_submit(self):
 		self.set_next_schedule_date()
@@ -138,19 +142,19 @@ def get_subscription_entries(date):
 def create_documents(data, schedule_date):
 	try:
 		doc = make_new_document(data, schedule_date)
-		if doc.from_date:
+		if getattr(doc, "from_date", None):
 			update_subscription_period(data, doc)
 
 		if data.notify_by_email and data.recipients:
 			print_format = data.print_format or "Standard"
-			send_notification(doc, print_format, data.recipients)
+			send_notification(doc, data, print_format=print_format)
 
 		frappe.db.commit()
 	except Exception:
 		frappe.db.rollback()
 		frappe.db.begin()
 		frappe.log_error(frappe.get_traceback())
-		disabled_subscription(data)
+		disable_subscription(data)
 		frappe.db.commit()
 		if data.reference_document and not frappe.flags.in_test:
 			notify_error_to_user(data)
@@ -162,7 +166,7 @@ def update_subscription_period(data, doc):
 	frappe.db.set_value('Subscription', data.name, 'from_date', from_date)
 	frappe.db.set_value('Subscription', data.name, 'to_date', to_date)
 
-def disabled_subscription(data):
+def disable_subscription(data):
 	subscription = frappe.get_doc('Subscription', data.name)
 	subscription.db_set('disabled', 1)
 
@@ -225,14 +229,25 @@ def get_next_date(dt, mcount, day=None):
 
 	return dt
 
-def send_notification(new_rv, print_format='Standard', recipients=None):
+def send_notification(new_rv, subscription_doc, print_format='Standard'):
 	"""Notify concerned persons about recurring document generation"""
 	print_format = print_format
 
-	frappe.sendmail(recipients,
-		subject=  _("New {0}: #{1}").format(new_rv.doctype, new_rv.name),
-		message = _("Please find attached {0} #{1}").format(new_rv.doctype, new_rv.name),
-		attachments = [frappe.attach_print(new_rv.doctype, new_rv.name, file_name=new_rv.name, print_format=print_format)])
+	if not subscription_doc.subject:
+		subject = _("New {0}: #{1}").format(new_rv.doctype, new_rv.name)
+	elif "{" in subscription_doc.subject:
+		subject = frappe.render_template(subscription_doc.subject, {'doc': new_rv})
+
+	if not subscription_doc.message:
+		message = _("Please find attached {0} #{1}").format(new_rv.doctype, new_rv.name)
+	elif "{" in subscription_doc.message:
+		message = frappe.render_template(subscription_doc.message, {'doc': new_rv})
+
+	attachments = [frappe.attach_print(new_rv.doctype, new_rv.name,
+		file_name=new_rv.name, print_format=print_format)]
+
+	frappe.sendmail(subscription_doc.recipients,
+		subject=subject, message=message, attachments=attachments)
 
 def notify_errors(doc, doctype, party, owner, name):
 	recipients = get_system_managers(only_name=True)

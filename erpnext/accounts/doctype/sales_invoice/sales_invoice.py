@@ -27,8 +27,8 @@ form_grid_templates = {
 }
 
 class SalesInvoice(SellingController):
-	def __init__(self, arg1, arg2=None):
-		super(SalesInvoice, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(SalesInvoice, self).__init__(*args, **kwargs)
 		self.status_updater = [{
 			'source_dt': 'Sales Invoice Item',
 			'target_field': 'billed_amt',

@@ -4,6 +4,7 @@ import frappe
 import json
 import unittest
 
+from erpnext.stock.doctype.item.test_item import set_item_variant_settings
 from erpnext.controllers.item_variant import copy_attributes_to_variant, make_variant_item_code
 
 # python 3 compatibility stuff
@@ -54,5 +55,7 @@ def make_item_variant():
 
 class TestItemVariant(unittest.TestCase):
 	def test_tables_in_template_copied_to_variant(self):
+		fields = [{'field_name': 'quality_parameters'}]
+		set_item_variant_settings(fields)
 		variant = make_item_variant()
 		self.assertNotEqual(variant.get("quality_parameters"), [])

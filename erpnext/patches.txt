@@ -441,9 +441,11 @@ erpnext.patches.v8_7.set_offline_in_pos_settings #11-09-17
 erpnext.patches.v8_9.add_setup_progress_actions #08-09-2017 #26-09-2017
 erpnext.patches.v8_9.rename_company_sales_target_field
 erpnext.patches.v8_8.set_bom_rate_as_per_uom
+erpnext.patches.v8_8.add_new_fields_in_accounts_settings
 erpnext.patches.v8_9.set_print_zero_amount_taxes
 erpnext.patches.v8_9.set_default_customer_group
 erpnext.patches.v8_9.remove_employee_from_salary_structure_parent
 erpnext.patches.v8_9.delete_gst_doctypes_for_outside_india_accounts
+erpnext.patches.v8_9.set_default_fields_in_variant_settings
 erpnext.patches.v8_9.update_billing_gstin_for_indian_account
 erpnext.patches.v9_0.fix_subscription_next_date

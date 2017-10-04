@@ -101,27 +101,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				return me.set_query_for_batch(doc, cdt, cdn)
 			});
 		}
-	},
-	onload: function() {
-		var me = this;
-		if(this.frm.doc.__islocal) {
-			var today = frappe.datetime.get_today(),
-				currency = frappe.defaults.get_user_default("currency");
-
-			$.each({
-				currency: currency,
-				price_list_currency: currency,
-				status: "Draft",
-				is_subcontracted: "No",
-			}, function(fieldname, value) {
-				if(me.frm.fields_dict[fieldname] && !me.frm.doc[fieldname])
-					me.frm.set_value(fieldname, value);
-			});
-
-			if(this.frm.doc.company && !this.frm.doc.amended_from) {
-				this.frm.trigger("company");
-			}
-		}
 
 		if(this.frm.fields_dict["taxes"]) {
 			this["taxes_remove"] = this.calculate_taxes_and_totals;
@@ -153,11 +132,36 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 				return {
 					filters: filters
-				}
+				};
 			});
 		}
+	},
+	onload: function() {
+		var me = this;
 
 		this.setup_quality_inspection();
+
+		if(this.frm.doc.__islocal) {
+			var currency = frappe.defaults.get_user_default("currency");
+
+			let set_value = (fieldname, value) => {
+				if(me.frm.fields_dict[fieldname] && !me.frm.doc[fieldname]) {
+					return me.frm.set_value(fieldname, value);
+				}
+			};
+
+			return frappe.run_serially([
+				() => set_value('currency', currency),
+				() => set_value('price_list_currency', currency),
+				() => set_value('status', 'Draft'),
+				() => set_value('is_subcontracted', 'No'),
+				() => {
+					if(this.frm.doc.company && !this.frm.doc.amended_from) {
+						this.frm.trigger("company");
+					}
+				}
+			]);
+		}
 	},
 
 	setup_quality_inspection: function() {
@@ -195,13 +199,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	onload_post_render: function() {
-		var me = this;
 		if(this.frm.doc.__islocal && !(this.frm.doc.taxes || []).length
 			&& !(this.frm.doc.__onload ? this.frm.doc.__onload.load_after_mapping : false)) {
-			this.apply_default_taxes();
+			frappe.after_ajax(() => this.apply_default_taxes());
 		} else if(this.frm.doc.__islocal && this.frm.doc.company && this.frm.doc["items"]
 			&& !this.frm.doc.is_pos) {
-			me.calculate_taxes_and_totals();
+			frappe.after_ajax(() => this.calculate_taxes_and_totals());
 		}
 		if(frappe.meta.get_docfield(this.frm.doc.doctype + " Item", "item_code")) {
 			this.setup_item_selector();
@@ -378,6 +381,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			if(me.frm.doc.company && me.frm.fields_dict.currency) {
 				var company_currency = me.get_company_currency();
 				var company_doc = frappe.get_doc(":Company", me.frm.doc.company);
+
 				if (!me.frm.doc.currency) {
 					me.frm.set_value("currency", company_currency);
 				}
@@ -519,6 +523,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	conversion_rate: function() {
+		const me = this.frm;
 		if(this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.set_value("conversion_rate", 1.0);
 		}
@@ -536,6 +541,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 
 		}
+		// Make read only if Accounts Settings doesn't allow stale rates
+		frappe.model.get_value("Accounts Settings", null, "allow_stale",
+			function(d){
+				me.set_df_property("conversion_rate", "read_only", cint(d.allow_stale) ? 0 : 1);
+			}
+		);
 	},
 
 	set_actual_charges_based_on_currency: function() {
