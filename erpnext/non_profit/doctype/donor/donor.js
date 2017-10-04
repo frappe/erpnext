@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Donor', {
 	refresh: function(frm) {
-		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Donor'}
+		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Donor'};
 
 		frm.toggle_display(['address_html','contact_html'], !frm.doc.__islocal);
 
