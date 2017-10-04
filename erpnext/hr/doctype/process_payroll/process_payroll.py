@@ -284,7 +284,7 @@ class ProcessPayroll(Document):
 					})
 
 			# Deductions
-			for acc, amt in deductions.items():
+			for acc, amount in deductions.items():
 				payable_amount -= flt(amount, precision)
 				accounts.append({
 						"account": acc,
