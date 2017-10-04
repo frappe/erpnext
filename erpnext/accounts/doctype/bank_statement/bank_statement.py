@@ -28,10 +28,7 @@ dateformats = {
 class BankStatement(Document):
 	def validate_file_format(self):
 		if not self.file: return
-		if not self.check_file_format(): frappe.throw
-
-	def test_method(self):
-		return frappe.form_dict.keys()
+		if not self.check_file_format(): frappe.throw(_("File Format check failed!"))
 
 	def check_file_format(self):
 		
@@ -76,7 +73,11 @@ class BankStatement(Document):
 			else:
 				year_index = 2
 			date_str = prepare_date_str(csv_row_field_value, year_index)
-			csv_row_field_value = str(datetime.datetime.strptime(date_str, strptime_format).date())  #00/00/0000
+			try:
+				csv_row_field_value = str(datetime.datetime.strptime(date_str, strptime_format).date())  #00/00/0000
+			except Exception as e9433:
+				frappe.throw(_("Date format in attached file does not match that in bank statement format used"))
+
 		if ('amount' in str(mapping_row.target_field).lower()) or ('balance' in str(mapping_row.target_field).lower()):
 			csv_row_field_value = flt(csv_row_field_value)
 		return mapping_row.target_field, csv_row_field_value
