@@ -7,9 +7,6 @@ import frappe
 from frappe.website.website_generator import WebsiteGenerator
 
 class Chapter(WebsiteGenerator):
-	def get_context(self, context):
-		context.no_cache = True
-
 	def enable(self):
 		chapter = frappe.get_doc('Chapter', frappe.form_dict.name)
 		chapter.append('members', dict(enable=self.value))

@@ -8,9 +8,6 @@ from frappe.model.document import Document
 from frappe import _
 
 class ChapterMessage(Document):
-	def get_context(self, context):
-		context.no_cache = True
-
 	def validate(self):
 		chapter = frappe.get_doc('Chapter', self.chapter)
 		if frappe.session.user != chapter.chapter_head:
