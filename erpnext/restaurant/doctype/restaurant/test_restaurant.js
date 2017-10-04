@@ -10,30 +10,28 @@ QUnit.test("test: Restaurant", function (assert) {
 
 	frappe.run_serially([
 		// insert a new Restaurant
-		() => frappe.tests.make('Restaurant', [
-			// values to be set
-			{name: 'Test Restaurant 1'},
-			{company: '_Test Company 1'},
-			{invoice_series_prefix: 'Test-Rest-1-Inv-'}
-		]),
 		() => {
-			assert.equal(cur_frm.doc.company, '_Test Company 1');
+			return frappe.tests.make('Restaurant', [
+				// values to be set
+				{__newname: 'Test Restaurant 1'},
+				{company: 'Test Company'},
+				{invoice_series_prefix: 'Test-Rest-1-Inv-'}
+			])
+		},
+		() => {
+			assert.equal(cur_frm.doc.company, 'Test Company');
+		},
+		() => {
+			return frappe.tests.make('Restaurant', [
+				// values to be set
+				{__newname: 'Test Restaurant 2'},
+				{company: 'Test Company'},
+				{invoice_series_prefix: 'Test-Rest-3-Inv-'}
+			]);
+		},
+		() => {
+			assert.equal(cur_frm.doc.company, 'Test Company');
 		},
 		() => done()
 	]);
-
-	frappe.run_serially([
-		// insert a new Restaurant
-		() => frappe.tests.make('Restaurant', [
-			// values to be set
-			{name: 'Test Restaurant 2'},
-			{company: '_Test Company 1'},
-			{invoice_series_prefix: 'Test-Rest-3-Inv-'}
-		]),
-		() => {
-			assert.equal(cur_frm.doc.company, '_Test Company 2');
-		},
-		() => done()
-	]);
-
 });

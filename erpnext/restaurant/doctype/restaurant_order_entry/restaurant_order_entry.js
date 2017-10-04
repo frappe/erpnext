@@ -26,12 +26,23 @@ frappe.ui.form.on('Restaurant Order Entry', {
 			});
 		}
 
-		frm.get_field('add_item').$input.on('keyup', function(e) {
+		let $input = frm.get_field('add_item').$input;
+
+		$input.on('keyup', function(e) {
 			if (e.which===13) {
 				if (frm.clear_item_timeout) {
 					clearTimeout (frm.clear_item_timeout);
 				}
-				let item = $(this).val();
+
+				// clear the item input so user can enter a new item
+				frm.clear_item_timeout = setTimeout (() => {
+					frm.set_value('add_item', '');
+				}, 1000);
+
+				let item = $input.val();
+
+				if (!item) return;
+
 				var added = false;
 				(frm.doc.items || []).forEach((d) => {
 					if (d.item===item) {
@@ -39,28 +50,28 @@ frappe.ui.form.on('Restaurant Order Entry', {
 						added = true;
 					}
 				});
-				if (!added) {
-					frm.add_child('items', {item: item, qty: 1});
-				}
-				frm.get_field("items").refresh();
 
-				// clear the item input so user can enter a new item
-				frm.clear_item_timeout = setTimeout (() => {
-					frm.set_value('add_item', '');
-				}, 1000);
+				return frappe.run_serially([
+					() => {
+						if (!added) {
+							return frm.add_child('items', {item: item, qty: 1});
+						}
+					},
+					() => frm.get_field("items").refresh()
+				]);
 			}
 		});
 	},
 	refresh: function(frm) {
 		frm.disable_save();
 		frm.add_custom_button(__('Update'), () => {
-			frm.trigger('sync');
+			return frm.trigger('sync');
 		});
 		frm.add_custom_button(__('Clear'), () => {
-			frm.trigger('clear');
+			return frm.trigger('clear');
 		});
 		frm.add_custom_button(__('Bill'), () => {
-			frm.trigger('make_invoice');
+			return frm.trigger('make_invoice');
 		});
 	},
 	clear: function(frm) {

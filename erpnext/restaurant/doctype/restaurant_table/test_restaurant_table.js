@@ -6,17 +6,35 @@ QUnit.test("test: Restaurant Table", function (assert) {
 	let done = assert.async();
 
 	// number of asserts
-	assert.expect(1);
+	assert.expect(0);
 
 	frappe.run_serially([
 		// insert a new Restaurant Table
 		() => frappe.tests.make('Restaurant Table', [
 			// values to be set
-			{key: 'value'}
+			{restaurant: 'Test Restaurant 1'},
+			{no_of_seats: 4},
 		]),
-		() => {
-			assert.equal(cur_frm.doc.key, 'value');
-		},
+		() => frappe.tests.make('Restaurant Table', [
+			// values to be set
+			{restaurant: 'Test Restaurant 1'},
+			{no_of_seats: 5},
+		]),
+		() => frappe.tests.make('Restaurant Table', [
+			// values to be set
+			{restaurant: 'Test Restaurant 1'},
+			{no_of_seats: 2},
+		]),
+		() => frappe.tests.make('Restaurant Table', [
+			// values to be set
+			{restaurant: 'Test Restaurant 1'},
+			{no_of_seats: 2},
+		]),
+		() => frappe.tests.make('Restaurant Table', [
+			// values to be set
+			{restaurant: 'Test Restaurant 1'},
+			{no_of_seats: 6},
+		]),
 		() => done()
 	]);
 
