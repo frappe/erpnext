@@ -242,3 +242,5 @@ regional_overrides = {
 		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_data': 'erpnext.regional.india.utils.get_itemised_tax_breakup_data'
 	}
 }
+
+page_js = {"desktop": "public/js/checkin_checkout_attendance.js"}

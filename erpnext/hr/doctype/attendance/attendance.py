@@ -54,3 +54,52 @@ class Attendance(Document):
 		self.validate_attendance_date()
 		self.validate_duplicate_record()
 		self.check_leave_record()
+
+
+def employee():
+	"""
+	Retun employee id
+
+	:param email: employee company email id
+	"""
+	print frappe.session.user
+	employee_details, = frappe.db.sql("""
+			SELECT name, employee_name FROM `tabEmployee` WHERE
+			user_id = '{0}' or company_email='{0}'
+			""".format(frappe.session.user), as_dict=1)
+	return employee_details
+
+
+@frappe.whitelist()
+def validate_attendance():
+	"""
+	Check If attendance is already marked
+	"""
+	employee_details = employee()
+	sql = """
+		SELECT name FROM `tabAttendance` WHERE
+		attendance_date = CURRENT_DATE()
+		and employee = '{}'
+		""".format(employee_details.name)
+	try:
+		attendance, = frappe.db.sql(sql, as_dict=1)
+	except ValueError:
+		return
+	frappe.cache().set_value('check_in', 1)
+
+	return attendance
+
+
+@frappe.whitelist()
+def check_in():
+	employee_details = employee()
+	attendance = frappe.get_doc({
+		'doctype': 'Attendance',
+		'employee': employee_details['name'],
+		'employee_name': employee_details['employee_name'],
+		'status': "Present",
+		'attendance_date': frappe.utils.data.nowdate(),
+		'check_in': frappe.utils.data.now()
+	})
+	attendance.insert()
+	return True
