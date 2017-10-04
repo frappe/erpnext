@@ -15,6 +15,7 @@ def execute(filters=None):
 	item_map = get_item_details(filters)
 	item_reorder_detail_map = get_item_reorder_details(filters)
 	iwb_map = get_item_warehouse_map(filters)
+	variants_attributes = get_variants_attributes()
 
 	data = []
 	for (company, item, warehouse) in sorted(iwb_map):
@@ -24,8 +25,8 @@ def execute(filters=None):
 		if item + warehouse in item_reorder_detail_map:
 			item_reorder_level = item_reorder_detail_map[item + warehouse]["warehouse_reorder_level"]
 			item_reorder_qty = item_reorder_detail_map[item + warehouse]["warehouse_reorder_qty"]
-			
-		data.append([item, item_map[item]["item_name"],
+
+		report_data = [item, item_map[item]["item_name"],
 			item_map[item]["item_group"],
 			item_map[item]["brand"],
 			item_map[item]["description"], warehouse,
@@ -36,8 +37,14 @@ def execute(filters=None):
 			qty_dict.bal_val, qty_dict.val_rate,
 			item_reorder_level,
 			item_reorder_qty,
-			company
-		])
+			company,
+
+		]
+		report_data += [get_variant_attr_val(item,i) for i in variants_attributes]
+		data.append(report_data)
+
+	columns += ["{}::Data:100".format(i) for i in variants_attributes]
+	
 
 	return columns, data
 
@@ -63,7 +70,8 @@ def get_columns():
 		_("Valuation Rate")+":Float:90",
 		_("Reorder Level")+":Float:80",
 		_("Reorder Qty")+":Float:80",
-		_("Company")+":Link/Company:100"
+		_("Company")+":Link/Company:100",
+
 	]
 
 	return columns
@@ -210,3 +218,12 @@ def validate_filters(filters):
 		sle_count = flt(frappe.db.sql("""select count(name) from `tabStock Ledger Entry`""")[0][0])
 		if sle_count > 500000:
 			frappe.throw(_("Please set filter based on Item or Warehouse"))
+
+
+def get_variants_attributes():
+	'''Return all item variant attributes.'''
+	return [i.name for i in frappe.get_all('Item Attribute')]
+
+def get_variant_attr_val(item, attr):
+	'''Return item variant attribute if any.'''
+	return frappe.get_value('Item Variant Attribute',{'parent':item,'attribute':attr},'attribute_value')
