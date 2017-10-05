@@ -42,15 +42,15 @@ def appointment_cancel(appointmentId):
 	appointment = frappe.get_doc("Patient Appointment",appointmentId)
 	#If invoice --> fee_validity update with -1 visit
 	if (appointment.sales_invoice):
- 		validity = frappe.db.exists({"doctype": "Fee Validity","ref_invoice": appointment.sales_invoice})
- 		if(validity):
- 			fee_validity = frappe.get_doc("Fee Validity",validity[0][0])
- 			visited = fee_validity.visited - 1
- 			frappe.db.set_value("Fee Validity",fee_validity.name,"visited",visited)
- 			if visited <= 0:
- 				frappe.msgprint(_("Appointment cancelled, Please review and cancel the invoice {0}".format(appointment.sales_invoice)))
- 			else:
- 				frappe.msgprint(_("Appointment cancelled"))
+		validity = frappe.db.exists({"doctype": "Fee Validity","ref_invoice": appointment.sales_invoice})
+		if(validity):
+			fee_validity = frappe.get_doc("Fee Validity",validity[0][0])
+			visited = fee_validity.visited - 1
+			frappe.db.set_value("Fee Validity",fee_validity.name,"visited",visited)
+			if visited <= 0:
+				frappe.msgprint(_("Appointment cancelled, Please review and cancel the invoice {0}".format(appointment.sales_invoice)))
+			else:
+				frappe.msgprint(_("Appointment cancelled"))
 
 
 @frappe.whitelist()
