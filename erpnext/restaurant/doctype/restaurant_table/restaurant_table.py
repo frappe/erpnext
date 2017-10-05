@@ -3,11 +3,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, re
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
 
-
 class RestaurantTable(Document):
 	def autoname(self):
-		self.name = make_autoname(self.restaurant.replace(' ', '-') + '-.##')
+		prefix = re.sub('-+', '-', self.restaurant.replace(' ', '-'))
+		self.name = make_autoname(prefix + '-.##')

@@ -11,8 +11,6 @@ from erpnext.restaurant.doctype.restaurant_order_entry.restaurant_order_entry \
 
 class TestRestaurantOrderEntry(unittest.TestCase):
 	def setUp(self):
-		frappe.db.set_value('Restaurant Settings', None, 'default_customer', '_Test Customer')
-
 		# save the menus as Price List is deleted before tests...
 		frappe.get_doc('Restaurant Menu', 'Test Restaurant 1 Menu 1').save()
 		frappe.get_doc('Restaurant Menu', 'Test Restaurant 1 Menu 2').save()

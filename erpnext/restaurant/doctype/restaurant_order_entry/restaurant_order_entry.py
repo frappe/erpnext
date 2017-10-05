@@ -22,7 +22,7 @@ def get_invoice(table):
 		invoice = frappe.new_doc('Sales Invoice')
 		invoice.naming_series = frappe.db.get_value('Restaurant', restaurant, 'invoice_series_prefix')
 		invoice.is_pos = 1
-		default_customer = frappe.db.get_single_value('Restaurant Settings', 'default_customer')
+		default_customer = frappe.db.get_value('Restaurant', restaurant, 'default_customer')
 		if not default_customer:
 			frappe.throw(_('Please set default customer in Restaurant Settings'))
 		invoice.customer = default_customer
