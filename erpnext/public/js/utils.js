@@ -168,14 +168,14 @@ $.extend(erpnext.utils, {
 	},
 
 	guess_colour_from_status: function(status) {
-		status_mapper = {
+		let status_mapper = {
 			"Open": "orange",
 			"Unreplied": "red"
 		}
 		if(in_list(["Open", "Unreplied"], status)) {
-			return status_mapper[status]
+			return status_mapper[status];
 		} else {
-			frappe.utils.guess_colour(status)
+			return frappe.utils.guess_colour(status);
 		}
 	}
 });
