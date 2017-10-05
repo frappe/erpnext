@@ -7,14 +7,14 @@ import frappe
 def get_notification_config():
 	notifications =  { "for_doctype":
 		{
-			"Issue": {"status": "Open"},
+			"Issue": {"status": ("in", ("Open", "Unreplied"))},
 			"Warranty Claim": {"status": "Open"},
 			"Task": {"status": ("in", ("Open", "Overdue"))},
 			"Project": {"status": "Open"},
 			"Item": {"total_projected_qty": ("<", 0)},
 			"Lead": {"status": "Open"},
 			"Contact": {"status": "Open"},
-			"Opportunity": {"status": "Open"},
+			"Opportunity": {"status": ("in", ("Open", "Unreplied"))},
 			"Quotation": {"docstatus": 0},
 			"Sales Order": {
 				"status": ("not in", ("Completed", "Closed")),
