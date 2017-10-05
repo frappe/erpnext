@@ -121,7 +121,8 @@ def create_material_request(material_requests):
 				mr.update({
 					"company": company,
 					"transaction_date": nowdate(),
-					"material_request_type": "Material Transfer" if request_type=="Transfer" else request_type
+					"material_request_type": "Material Transfer" if request_type=="Transfer" else request_type,
+					"schedule_date": add_days(nowdate(), cint(items[0].lead_time_days))
 				})
 
 				for d in items:

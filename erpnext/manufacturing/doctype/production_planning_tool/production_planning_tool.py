@@ -515,7 +515,8 @@ class ProductionPlanningTool(Document):
 					"transaction_date": nowdate(),
 					"status": "Draft",
 					"company": self.company,
-					"requested_by": frappe.session.user
+					"requested_by": frappe.session.user,
+					"schedule_date": add_days(nowdate(), cint(item_wrapper.lead_time_days)),
 				})
 				material_request.update({"material_request_type": item_wrapper.default_material_request_type})
 
