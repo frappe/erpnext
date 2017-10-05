@@ -21,7 +21,7 @@
 				{% for(var i=1, l=report.columns.length; i<l; i++) { %}
 					<td class="text-right">
 						{% var fieldname = report.columns[i].field; %}
-                        {% if (i > 10) { %}
+                        {% if (!isNaN(row[fieldname])) { %}
                             {%= format_currency(row[fieldname]) %}
                         {% } else { %}
 						    {% if (!is_null(row[fieldname])) { %}
