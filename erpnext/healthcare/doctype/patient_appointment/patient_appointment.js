@@ -40,7 +40,7 @@ frappe.ui.form.on('Patient Appointment', {
 			});
 		}
 
-		if(!frm.doc.__islocal){
+		if(!frm.doc.__islocal && !frm.doc.status == 'Cancelled'){
 			frm.add_custom_button(__("Consultation"),function(){
 				btn_create_consultation(frm);
 			},"Create");
