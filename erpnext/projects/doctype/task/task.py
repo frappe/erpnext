@@ -203,7 +203,7 @@ def get_children():
 	if parent == "Tasks":
 		parent = ""
 
-	tasks = frappe.db.sql("""select name as value, subject,
+	tasks = frappe.db.sql("""select name as value,
 		is_group as expandable
 		from `tab{doctype}`
 		where docstatus < 2
