@@ -1371,6 +1371,39 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEquals(expected_values[gle.account][1], gle.debit)
 			self.assertEquals(expected_values[gle.account][2], gle.credit)
 
+	def test_sales_invoice_with_shipping_rule(self):
+		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule \
+			import create_shipping_rule
+
+		shipping_rule = create_shipping_rule(shipping_rule_type = "Selling", shipping_rule_name = "Shipping Rule - Sales Invoice Test")
+
+		si = frappe.copy_doc(test_records[2])
+		
+		si.shipping_rule = shipping_rule.name
+		si.insert()
+
+		shipping_amount = 0.0
+		for condition in shipping_rule.get("conditions"):
+			if not condition.to_value or (flt(condition.from_value) <= si.net_total <= flt(condition.to_value)):
+				shipping_amount = condition.shipping_amount
+
+		shipping_charge = {
+			"doctype": "Sales Taxes and Charges",
+			"category": "Valuation and Total",
+			"charge_type": "Actual",
+			"account_head": shipping_rule.account,
+			"cost_center": shipping_rule.cost_center,
+			"tax_amount": shipping_amount,
+			"description": shipping_rule.name
+		}	
+		si.append("taxes", shipping_charge)
+		si.save()
+
+		self.assertEquals(si.net_total, 1250)
+
+		self.assertEquals(si.total_taxes_and_charges, 577.05)
+		self.assertEquals(si.grand_total, 1827.05)		
+
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
 	args = frappe._dict(args)
