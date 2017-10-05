@@ -52,7 +52,8 @@ class Item(WebsiteGenerator):
 		if not self.description:
 			self.description = self.item_name
 
-		self.publish_in_hub = 1
+		if self.is_sales_item and not self.is_hub_item:
+			self.publish_in_hub = 1
 
 	def after_insert(self):
 		'''set opening stock and item price'''
@@ -63,6 +64,10 @@ class Item(WebsiteGenerator):
 			self.set_opening_stock()
 
 	def validate(self):
+		self.before_update = None
+		if frappe.db.exists('Item', self.name):
+			self.before_update = frappe.get_doc('Item', self.name)
+
 		super(Item, self).validate()
 
 		if not self.item_name:
@@ -815,4 +820,3 @@ def check_stock_uom_with_bin(item, stock_uom):
 
 	if not matched:
 		frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.").format(item))
-

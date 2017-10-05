@@ -21,7 +21,7 @@ class JobOpening(WebsiteGenerator):
 			self.route = frappe.scrub(self.job_title).replace('_', '-')
 
 	def get_context(self, context):
-		context.parents = [{'name': 'jobs', 'title': _('All Jobs') }]
+		context.parents = [{'route': 'jobs', 'title': _('All Jobs') }]
 
 def get_list_context(context):
 	context.title = _("Jobs")
