@@ -133,7 +133,8 @@ standard_portal_menu_items = [
 	{"title": _("Prescription"), "route": "/prescription", "reference_doctype": "Consultation", "role":"Patient"},
 	{"title": _("Patient Appointment"), "route": "/patient-appointments", "reference_doctype": "Patient Appointment", "role":"Patient"},
 	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role":"Student"},
-	{"title": _("Newsletter"), "route": "/newsletters", "reference_doctype": "Newsletter"}
+	{"title": _("Newsletter"), "route": "/newsletters", "reference_doctype": "Newsletter"},
+	{"title": _("Admission"), "route": "/admissions", "reference_doctype": "Student Admission"}
 ]
 
 default_roles = [
