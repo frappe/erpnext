@@ -54,9 +54,18 @@ class MaterialRequest(BuyingController):
 					frappe.throw(_("Material Request of maximum {0} can be made for Item {1} against Sales Order {2}").format(actual_so_qty - already_indented, item, so_no))
 
 	def validate_schedule_date(self):
-		for d in self.get('items'):
-			if d.schedule_date and getdate(d.schedule_date) < getdate(self.transaction_date):
-				frappe.throw(_("Expected Date cannot be before Material Request Date"))
+		if not self.schedule_date:
+			self.schedule_date = max([d.schedule_date for d in self.get("items")])
+
+		if self.schedule_date:
+			for d in self.get('items'):
+				if not d.schedule_date:
+					d.schedule_date = self.schedule_date
+
+				if d.schedule_date and getdate(d.schedule_date) < getdate(self.transaction_date):
+					frappe.throw(_("Expected Date cannot be before Material Request Date"))
+		else:
+			frappe.throw(_("Please enter Schedule Date"))
 
 	# Validate
 	# ---------------------
@@ -70,9 +79,9 @@ class MaterialRequest(BuyingController):
 			self.status = "Draft"
 
 		from erpnext.controllers.status_updater import validate_status
-		validate_status(self.status, ["Draft", "Submitted", "Stopped", "Cancelled", "Pending",
-										"Partially Ordered", "Ordered", "Issued", "Transferred"]
-						)
+		validate_status(self.status, 
+			["Draft", "Submitted", "Stopped", "Cancelled", "Pending",
+			"Partially Ordered", "Ordered", "Issued", "Transferred"])
 
 		validate_for_items(self)
 

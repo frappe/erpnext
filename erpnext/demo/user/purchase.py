@@ -103,6 +103,7 @@ def make_material_request(item_code, qty):
 		mr.material_request_type = "Purchase"
 
 	mr.transaction_date = frappe.flags.current_date
+	mr.schedule_date = frappe.utils.add_days(mr.transaction_date, 7)
 
 	mr.append("items", {
 		"doctype": "Material Request Item",

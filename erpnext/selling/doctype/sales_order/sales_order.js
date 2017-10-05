@@ -92,7 +92,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				// delivery note
 				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
 					this.frm.add_custom_button(__('Delivery'),
-						function() { me.make_delivery_note_based_on_delivery_note(); }, __("Make"));
+						function() { me.make_delivery_note_based_on_delivery_date(); }, __("Make"));
 					this.frm.add_custom_button(__('Production Order'),
 						function() { me.make_production_order() }, __("Make"));
 
@@ -270,7 +270,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		})
 	},
 
-	make_delivery_note_based_on_delivery_note: function() {
+	make_delivery_note_based_on_delivery_date: function() {
 		var me = this;
 		
 		var delivery_dates = [];
