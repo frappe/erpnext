@@ -9,7 +9,7 @@ from frappe import _
 import json
 from datetime import timedelta
 from erpnext.controllers.queries import get_match_cond
-from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint
+from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint, add_to_date, add_days, now_datetime
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.workstation.workstation import (check_if_within_operating_hours,
 	WorkstationHolidayError)
@@ -150,7 +150,7 @@ class Timesheet(Document):
 	def get_actual_timesheet_summary(self, operation_id):
 		"""Returns 'Actual Operating Time'. """
 		return frappe.db.sql("""select
-			sum(tsd.hours*60) as mins, sum(tsd.completed_qty) as completed_qty, min(tsd.from_time) as from_time,
+			sum(tsd.hours*60) as mins, Avg(tsd.completed_qty) as completed_qty, min(tsd.from_time) as from_time,
 			max(tsd.to_time) as to_time from `tabTimesheet Detail` as tsd, `tabTimesheet` as ts where
 			ts.production_order = %s and tsd.operation_id = %s and ts.docstatus=1 and ts.name = tsd.parent""",
 			(self.production_order, operation_id), as_dict=1)[0]
@@ -236,15 +236,14 @@ class Timesheet(Document):
 	def move_to_next_non_overlapping_slot(self, data):
 		overlapping = self.get_overlap_for("workstation", data, data.workstation)
 		if overlapping:
-			time_sheet = self.get_last_working_slot(overlapping.name, data.workstation)
-			data.from_time = get_datetime(time_sheet.to_time) + get_mins_between_operations()
+			to_time = self.get_last_working_slot(overlapping.name, data.workstation) or now_datetime()
+			data.from_time = get_datetime(to_time) + get_mins_between_operations()
 			data.to_time = self.get_to_time(data)
 			self.check_workstation_working_day(data)
 
 	def get_last_working_slot(self, time_sheet, workstation):
-		return frappe.db.sql(""" select max(from_time) as from_time, max(to_time) as to_time
-			from `tabTimesheet Detail` where workstation = %(workstation)s""",
-			{'workstation': workstation}, as_dict=True)[0]
+		to_time = [d.to_time for d in self.time_logs if d.workstation == workstation] or []
+		return max(to_time) if to_time else None
 
 	def move_to_next_day(self, data):
 		"""Move start and end time one day forward"""
@@ -428,3 +427,80 @@ def get_list_context(context=None):
 		"get_list": get_timesheets_list,
 		"row_template": "templates/includes/timesheet/timesheet_row.html"
 	}
+
+def scheduling_based_on_workstation_timings(data, completed_qty, project):
+	data.operation_time = data.time_in_mins
+	workstation_timings = frappe.get_all('Workstation Working Hour',
+		filters = {'parent': data.workstation, 'enabled': 1}, fields = ["start_time", "end_time", "idx"])
+
+	timesheet_details = []
+	while cint(data.operation_time) > 0:
+		date = getdate(data.planned_start_time)
+		args = get_end_date_from_workstation(data, workstation_timings, date)
+
+		if not args:
+			next_date = add_days(date, 1)
+			data.planned_start_time = concate_datetime(next_date, workstation_timings[0].start_time)
+
+		if args:
+			timesheet_details.append(update_timesheet(args, completed_qty, project))
+
+			if args.get("next_start_time"):
+				data.planned_start_time = args.next_start_time
+
+	return timesheet_details
+
+def update_timesheet(args, completed_qty, project):
+	return {
+		'from_time': get_datetime(args.planned_start_time),
+		'hours': args.time_in_mins / 60.0,
+		'to_time': get_datetime(args.planned_end_time),
+		'project': project,
+		'operation': args.operation,
+		'operation_id': args.name,
+		'workstation': args.workstation,
+		'completed_qty': completed_qty
+	}
+
+def get_end_date_from_workstation(data, workstation_timings, date):
+	from_datetime = get_datetime(data.planned_start_time)
+
+	for time_data in workstation_timings:
+		start_datetime = concate_datetime(date, time_data.start_time)
+		end_datetime = concate_datetime(date, time_data.end_time)
+		if start_datetime <= from_datetime and from_datetime < end_datetime \
+			or (from_datetime < start_datetime and from_datetime < end_datetime):
+			data.time_in_mins = (time_diff_in_hours(end_datetime, from_datetime)) * 60
+			data.planned_end_time = end_datetime
+			if data.time_in_mins > data.operation_time:
+				data.time_in_mins = data.operation_time
+				data.planned_end_time = add_to_date(from_datetime, hours = (data.operation_time/60))
+			data.operation_time -= data.time_in_mins
+			data = check_workstation_holiday(data)
+			data.next_start_time = data.planned_end_time
+			if cint(data.operation_time) > 0 and len(workstation_timings) > time_data.idx:
+				data.next_start_time = concate_datetime(date, workstation_timings[time_data.idx].start_time)
+
+			return data
+
+def check_workstation_holiday(args):
+	try:
+		check_if_within_operating_hours(args.workstation,
+			args.operation, args.planned_start_time, args.planned_end_time)
+	except WorkstationHolidayError:
+		args.planned_start_time = get_datetime(args.planned_start_time) + timedelta(hours=24)
+		args.planned_end_time = add_to_date(args.planned_start_time, hours = (args.time_in_mins/60))
+		check_workstation_holiday(args)
+
+	return args
+
+def concate_datetime(date, time):
+	return get_datetime('{0} {1}'.format(date, time))
+
+def get_scheduled_operation_time(timesheet, operation_id):
+	operation_time = 0.0
+	for data in timesheet.time_logs:
+		if data.operation_id == operation_id:
+			operation_time += flt(data.hours)
+
+	return flt(operation_time * 60, 2)
