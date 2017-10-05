@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe.utils import today
+from erpnext.crm.doctype.lead.lead import make_customer
 from erpnext.crm.doctype.opportunity.opportunity import make_quotation
 import unittest
 
@@ -25,12 +26,45 @@ class TestOpportunity(unittest.TestCase):
 		doc = frappe.get_doc('Opportunity', doc.name)
 		self.assertEquals(doc.status, "Quotation")
 
+	def test_make_new_lead_if_required(self):
+		args = {
+			"doctype": "Opportunity",
+			"contact_email":"new.opportunity@example.com",
+			"enquiry_type": "Sales",
+			"with_items": 0,
+			"transaction_date": today()
+		}
+		# new lead should be created against the new.opportunity@example.com
+		opp_doc = frappe.get_doc(args).insert(ignore_permissions=True)
+
+		self.assertTrue(opp_doc.lead)
+		self.assertEquals(opp_doc.enquiry_from, "Lead")
+		self.assertEquals(frappe.db.get_value("Lead", opp_doc.lead, "email_id"),
+			'new.opportunity@example.com')
+
+		# create new customer and create new contact against 'new.opportunity@example.com'
+		customer = make_customer(opp_doc.lead).insert(ignore_permissions=True)
+		frappe.get_doc({
+			"doctype": "Contact",
+			"email_id": "new.opportunity@example.com",
+			"first_name": "_Test Opportunity Customer",
+			"links": [{
+				"link_doctype": "Customer",
+				"link_name": customer.name
+			}]
+		}).insert(ignore_permissions=True)
+
+		opp_doc = frappe.get_doc(args).insert(ignore_permissions=True)
+		self.assertTrue(opp_doc.customer)
+		self.assertEquals(opp_doc.enquiry_from, "Customer")
+		self.assertEquals(opp_doc.customer, customer.name)
+
 def make_opportunity(**args):
 	args = frappe._dict(args)
 
 	opp_doc = frappe.get_doc({
 		"doctype": "Opportunity",
-		"enquiry_from": "Customer" or args.enquiry_from,
+		"enquiry_from": args.enquiry_from or "Customer",
 		"enquiry_type": "Sales",
 		"with_items": args.with_items or 0,
 		"transaction_date": today()

@@ -19,8 +19,8 @@ form_grid_templates = {
 }
 
 class PurchaseReceipt(BuyingController):
-	def __init__(self, arg1, arg2=None):
-		super(PurchaseReceipt, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(PurchaseReceipt, self).__init__(*args, **kwargs)
 		self.status_updater = [{
 			'source_dt': 'Purchase Receipt Item',
 			'target_dt': 'Purchase Order Item',

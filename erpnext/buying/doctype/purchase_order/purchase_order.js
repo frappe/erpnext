@@ -1,3 +1,4 @@
+
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
@@ -22,6 +23,18 @@ frappe.ui.form.on("Purchase Order", {
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
 	},
+});
+
+frappe.ui.form.on("Purchase Order Item", {
+	item_code: function(frm) {
+		frappe.call({
+			method: "get_last_purchase_rate",
+			doc: frm.doc,
+			callback: function(r, rt) {
+				frm.trigger('calculate_taxes_and_totals');
+			}
+		})
+	}
 });
 
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
@@ -214,17 +227,6 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 	delivered_by_supplier: function(){
 		cur_frm.cscript.update_status('Deliver', 'Delivered')
-	},
-
-	get_last_purchase_rate: function() {
-		frappe.call({
-			"method": "get_last_purchase_rate",
-			"doc": cur_frm.doc,
-			callback: function(r, rt) {
-				cur_frm.dirty();
-				cur_frm.cscript.calculate_taxes_and_totals();
-			}
-		})
 	}
 
 });

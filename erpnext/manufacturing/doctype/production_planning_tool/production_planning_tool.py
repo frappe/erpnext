@@ -12,10 +12,6 @@ from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from erpnext.manufacturing.doctype.production_order.production_order import get_item_details
 
 class ProductionPlanningTool(Document):
-	def __init__(self, arg1, arg2=None):
-		super(ProductionPlanningTool, self).__init__(arg1, arg2)
-		self.item_dict = {}
-
 	def clear_table(self, table_name):
 		self.set(table_name, [])
 
@@ -398,6 +394,9 @@ class ProductionPlanningTool(Document):
 		return bom_wise_item_details
 
 	def make_items_dict(self, item_list):
+		if not getattr(self, "item_dict", None):
+			self.item_dict = {}
+
 		for i in item_list:
 			self.item_dict.setdefault(i[0], []).append([flt(i[1]), i[2], i[3], i[4], i[5]])
 

@@ -520,6 +520,24 @@ frappe.ui.form.on('Sales Invoice', {
 			};
 		});
 	},
+	//When multiple companies are set up. in case company name is changed set default company address
+	company:function(frm){
+		if (frm.doc.company)
+		{
+			frappe.call({
+				method:"frappe.contacts.doctype.address.address.get_default_address",
+				args:{ doctype:'Company',name:frm.doc.company},
+				callback: function(r){
+					if (r.message){
+						frm.set_value("company_address",r.message)
+					}
+					else {
+						frm.set_value("company_address","")
+					}
+				}
+			})
+		}
+	},
 
 	project: function(frm){
 		frm.call({

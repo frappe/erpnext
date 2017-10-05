@@ -89,6 +89,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		this.cart = new POSCart({
 			frm: this.frm,
 			wrapper: this.wrapper.find('.cart-container'),
+			pos_profile: this.pos_profile,
 			events: {
 				on_customer_change: (customer) => this.frm.set_value('customer', customer),
 				on_field_change: (item_code, field, value) => {
@@ -98,6 +99,17 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					if (value == 'Pay') {
 						if (!this.payment) {
 							this.make_payment_modal();
+						} else {
+							const mop_field = this.payment.default_mop;
+							let amount = 0.0;
+							this.frm.doc.payments.map(p => {
+								if (p.mode_of_payment == mop_field) {
+									amount = p.amount;
+									return;
+								}
+							});
+
+							this.payment.dialog.set_value(mop_field, flt(amount));
 						}
 						this.payment.open_modal();
 					}
@@ -196,6 +208,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			this.update_item_in_frm(item)
 				.then(() => {
 					// update cart
+					this.remove_item_from_cart(item);
 					this.update_cart_data(item);
 				});
 		}, true);
@@ -215,10 +228,16 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		return this.frm.script_manager
 			.trigger('qty', item.doctype, item.name)
 			.then(() => {
-				if (field === 'qty' && value === 0) {
-					frappe.model.clear_doc(item.doctype, item.name);
+				if (field === 'qty') {
+					this.remove_item_from_cart(item);
 				}
 			});
+	}
+
+	remove_item_from_cart(item) {
+		if (item.qty === 0) {
+			frappe.model.clear_doc(item.doctype, item.name);
+		}
 	}
 
 	make_payment_modal() {
@@ -363,10 +382,11 @@ erpnext.pos.PointOfSale = class PointOfSale {
 };
 
 class POSCart {
-	constructor({frm, wrapper, events}) {
+	constructor({frm, wrapper, pos_profile, events}) {
 		this.frm = frm;
 		this.wrapper = wrapper;
 		this.events = events;
+		this.pos_profile = pos_profile;
 		this.make();
 		this.bind_events();
 	}
@@ -428,6 +448,12 @@ class POSCart {
 		this.$taxes_and_totals.html(this.get_taxes_and_totals());
 		this.numpad && this.numpad.reset_value();
 		this.customer_field.set_value("");
+
+		this.wrapper.find('.grand-total-value').text(
+			format_currency(this.frm.doc.grand_total, this.frm.currency));
+
+		const customer = this.frm.doc.customer || this.pos_profile.customer;
+		this.customer_field.set_value(customer);
 	}
 
 	get_grand_total() {
@@ -514,6 +540,7 @@ class POSCart {
 	}
 
 	make_customer_field() {
+		let customer = this.frm.doc.customer || this.pos_profile['customer'];
 		this.customer_field = frappe.ui.form.make_control({
 			df: {
 				fieldtype: 'Link',
@@ -521,7 +548,6 @@ class POSCart {
 				fieldname: 'customer',
 				options: 'Customer',
 				reqd: 1,
-				default: this.frm.doc.customer,
 				onchange: () => {
 					this.events.on_customer_change(this.customer_field.get_value());
 				}
@@ -529,6 +555,10 @@ class POSCart {
 			parent: this.wrapper.find('.customer-field'),
 			render_input: true
 		});
+
+		if (customer) {
+			this.customer_field.set_value(customer);
+		}
 	}
 
 	make_numpad() {
@@ -733,26 +763,39 @@ class POSCart {
 		// });
 
 		this.wrapper.find('.additional_discount_percentage').on('change', (e) => {
+			const discount_percentage = flt(e.target.value,
+				precision("additional_discount_percentage"));
+
 			frappe.model.set_value(this.frm.doctype, this.frm.docname,
-				'additional_discount_percentage', e.target.value)
+				'additional_discount_percentage', discount_percentage)
 				.then(() => {
 					let discount_wrapper = this.wrapper.find('.discount_amount');
-					discount_wrapper.val(this.frm.doc.discount_amount);
+					discount_wrapper.val(flt(this.frm.doc.discount_amount,
+						precision('discount_amount')));
 					discount_wrapper.trigger('change');
 				});
 		});
 
 		this.wrapper.find('.discount_amount').on('change', (e) => {
+			const discount_amount = flt(e.target.value, precision('discount_amount'));
 			frappe.model.set_value(this.frm.doctype, this.frm.docname,
-				'discount_amount', flt(e.target.value));
+				'discount_amount', discount_amount);
 			this.frm.trigger('discount_amount')
 				.then(() => {
-					let discount_wrapper = this.wrapper.find('.additional_discount_percentage');
-					discount_wrapper.val(this.frm.doc.additional_discount_percentage);
+					this.update_discount_fields();
 					this.update_taxes_and_totals();
 					this.update_grand_total();
 				});
 		});
+	}
+
+	update_discount_fields() {
+		let discount_wrapper = this.wrapper.find('.additional_discount_percentage');
+		let discount_amt_wrapper = this.wrapper.find('.discount_amount');
+		discount_wrapper.val(flt(this.frm.doc.additional_discount_percentage,
+			precision('additional_discount_percentage')));
+		discount_amt_wrapper.val(flt(this.frm.doc.discount_amount,
+			precision('discount_amount')));
 	}
 
 	set_selected_item($item) {
@@ -818,7 +861,7 @@ class POSItems {
 		this.search_field = frappe.ui.form.make_control({
 			df: {
 				fieldtype: 'Data',
-				label: 'Search Item (Ctrl + I)',
+				label: 'Search Item ( Ctrl + i )',
 				placeholder: 'Search by item code, serial number, batch no or barcode'
 			},
 			parent: this.wrapper.find('.search-field'),
@@ -915,14 +958,19 @@ class POSItems {
 				if(serial_no) {
 					this.events.update_cart(items[0].item_code,
 						'serial_no', serial_no);
-					this.search_field.set_value('');
+					this.reset_search_field();
 				}
 				if(batch_no) {
 					this.events.update_cart(items[0].item_code,
-						'batch_no', serial_no);
-					this.search_field.set_value('');
+						'batch_no', batch_no);
+					this.reset_search_field();
 				}
 			});
+	}
+
+	reset_search_field() {
+		this.search_field.set_value('');
+		this.search_field.$input.trigger("input");
 	}
 
 	bind_events() {
@@ -1166,6 +1214,10 @@ class Payment {
 		const me = this;
 
 		let fields = this.frm.doc.payments.map(p => {
+			if (p.default) {
+				this.default_mop = p.mode_of_payment;
+			}
+
 			return {
 				fieldtype: 'Currency',
 				label: __(p.mode_of_payment),

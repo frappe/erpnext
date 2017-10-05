@@ -11,7 +11,7 @@ app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
-develop_version = '8.x.x-beta'
+develop_version = '9.x.x-develop'
 
 error_report_email = "support@erpnext.com"
 
@@ -47,7 +47,7 @@ treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Grou
 update_website_context = "erpnext.shopping_cart.utils.update_website_context"
 my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
 
-email_append_to = ["Job Applicant", "Opportunity", "Issue"]
+email_append_to = ["Job Applicant", "Lead", "Opportunity", "Issue"]
 
 calendars = ["Task", "Production Order", "Leave Application", "Sales Order", "Holiday List"]
 

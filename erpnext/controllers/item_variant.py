@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import cstr, flt
-import json
+import json, copy
 
 class ItemVariantExistsError(frappe.ValidationError): pass
 class InvalidItemAttributeValueError(frappe.ValidationError): pass
@@ -174,18 +174,30 @@ def copy_attributes_to_variant(item, variant):
 
 	# copy non no-copy fields
 
-	exclude_fields = ["item_code", "item_name", "show_in_website"]
+	exclude_fields = ["naming_series", "item_code", "item_name", "show_in_website",
+		"show_variant_in_website", "opening_stock", "variant_of", "valuation_rate"]
 
 	if item.variant_based_on=='Manufacturer':
 		# don't copy manufacturer values if based on part no
 		exclude_fields += ['manufacturer', 'manufacturer_part_no']
 
 	allow_fields = [d.field_name for d in frappe.get_all("Variant Field", fields = ['field_name'])]
+	if "variant_based_on" not in allow_fields:
+		allow_fields.append("variant_based_on")
 	for field in item.meta.fields:
 		# "Table" is part of `no_value_field` but we shouldn't ignore tables
 		if (field.reqd or field.fieldname in allow_fields) and field.fieldname not in exclude_fields:
 			if variant.get(field.fieldname) != item.get(field.fieldname):
-				variant.set(field.fieldname, item.get(field.fieldname))
+				if field.fieldtype == "Table":
+					variant.set(field.fieldname, [])
+					for d in item.get(field.fieldname):
+						row = copy.deepcopy(d)
+						if row.get("name"):
+							row.name = None
+						variant.append(field.fieldname, row)
+				else:
+					variant.set(field.fieldname, item.get(field.fieldname))
+
 	variant.variant_of = item.name
 	variant.has_variants = 0
 	if not variant.description:
@@ -195,7 +207,7 @@ def copy_attributes_to_variant(item, variant):
 		if variant.attributes:
 			variant.description += "\n"
 			for d in variant.attributes:
-				variant.description += "<p>" + d.attribute + ": " + cstr(d.attribute_value) + "</p>"
+				variant.description += "<div>" + d.attribute + ": " + cstr(d.attribute_value) + "</div>"
 
 def make_variant_item_code(template_item_code, template_item_name, variant):
 	"""Uses template's item code and abbreviations to make variant's item code"""
