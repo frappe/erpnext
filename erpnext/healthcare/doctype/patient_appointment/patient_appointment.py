@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 import json
-from frappe.utils import getdate
+from frappe.utils import getdate, cint
 from frappe import _
 import datetime
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
@@ -37,6 +37,14 @@ class PatientAppointment(Document):
 					frappe.db.set_value("Patient Appointment",appointment.name,"sales_invoice",fee_validity.ref_invoice)
 				frappe.msgprint(_("{0} has fee validity till {1}").format(appointment.patient, fee_validity.valid_till))
 		confirm_sms(self)
+
+	def save(self):
+		# duration is the only changeable field in the document
+		if not self.is_new():
+			self.db_set('duration', cint(self.duration))
+		else:
+			super(PatientAppointment, self).save()
+
 
 def appointment_cancel(appointmentId):
 	appointment = frappe.get_doc("Patient Appointment",appointmentId)
