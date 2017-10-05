@@ -30,6 +30,14 @@ frappe.ui.form.on('Patient Appointment', {
 			frm.add_custom_button(__('Cancel'), function() {
 				btn_update_status(frm, "Cancelled");
 			});
+
+			frm.add_custom_button(__("Consultation"),function(){
+				btn_create_consultation(frm);
+			},"Create");
+
+			frm.add_custom_button(__('Vital Signs'), function() {
+				btn_create_vital_signs(frm);
+			},"Create");
 		}
 		if(frm.doc.status == "Pending"){
 			frm.add_custom_button(__('Set Open'), function() {
@@ -38,16 +46,6 @@ frappe.ui.form.on('Patient Appointment', {
 			frm.add_custom_button(__('Cancel'), function() {
 				btn_update_status(frm, "Cancelled");
 			});
-		}
-
-		if(!frm.doc.__islocal && !frm.doc.status == 'Cancelled'){
-			frm.add_custom_button(__("Consultation"),function(){
-				btn_create_consultation(frm);
-			},"Create");
-
-			frm.add_custom_button(__('Vital Signs'), function() {
-				btn_create_vital_signs(frm);
-			},"Create");
 		}
 
 		if(!frm.doc.__islocal){
