@@ -1,17 +1,15 @@
 frappe.listview_settings['Opportunity'] = {
 	add_fields: ["customer_name", "enquiry_type", "enquiry_from", "status"],
 	get_indicator: function(doc) {
-		var indicator = [__(doc.status), frappe.utils.guess_colour(doc.status), "status,=," + doc.status];
-		if(doc.status=="Quotation") {
-			indicator[1] = "green";
-		}
-		return indicator;
+		let colour = doc.status == "Quotation"? "green":
+			erpnext.utils.guess_colour_from_status(doc.status)
+		return [__(doc.status), colour, "status,=," + doc.status];
 	},
 	onload: function(listview) {
 		var method = "erpnext.crm.doctype.opportunity.opportunity.set_multiple_status";
 
-		listview.page.add_menu_item(__("Set as Open"), function() {
-			listview.call_for_selected_items(method, {"status": "Open"});
+		listview.page.add_menu_item(__("Set as Unreplied"), function() {
+			listview.call_for_selected_items(method, {"status": "Unreplied"});
 		});
 
 		listview.page.add_menu_item(__("Set as Closed"), function() {
