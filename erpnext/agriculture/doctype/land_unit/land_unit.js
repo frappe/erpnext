@@ -30,11 +30,94 @@ frappe.ui.form.on('Land Unit', {
                 attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
 
-            L.marker([19.0800, 72.8961]).addTo(map)
-                .bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
+            var MyCustomMarker = L.Icon.extend({
+                options: {
+                    shadowUrl: null,
+                    iconAnchor: new L.Point(12, 12),
+                    iconSize: new L.Point(24, 24),
+                    iconUrl: 'assets/erpnext/images/leaflet/lego.png'
+                }
+            });
+
+            L.marker([19.0800, 72.8961], { icon: new MyCustomMarker() }).addTo(map)
+                .bindPopup('Map Center')
                 .openPopup();
 
+            if (frm.fields_dict.coordinate_options.value) {
+                geojsonFeature = JSON.parse(frm.doc.coordinate_options)
+                    // map.addLayer(geojsonFeature);
+            }
+            var editableLayers = L.geoJson(geojsonFeature).addTo(map);
             //
+            //var editableLayers = new L.FeatureGroup();
+            map.addLayer(editableLayers);
+
+
+            var options = {
+                position: 'topleft',
+                draw: {
+                    polyline: {
+                        shapeOptions: {
+                            color: '#f357a1',
+                            weight: 10
+                        }
+                    },
+                    polygon: {
+                        allowIntersection: false, // Restricts shapes to simple polygons
+                        drawError: {
+                            color: '#e1e100', // Color the shape will turn when intersects
+                            message: '<strong>Oh snap!<strong> you can\'t draw that!' // Message that will show when intersect
+                        },
+                        shapeOptions: {
+                            color: '#f357a1'
+                        }
+                    },
+                    circle: true,
+                    rectangle: {
+                        shapeOptions: {
+                            clickable: false
+                        }
+                    },
+                    marker: {
+                        icon: new MyCustomMarker()
+                    }
+                },
+                edit: {
+                    featureGroup: editableLayers, //REQUIRED!!
+                    remove: true
+                }
+            };
+
+            var drawControl = new L.Control.Draw(options);
+            map.addControl(drawControl);
+
+            map.on('draw:created', function(e) {
+                var type = e.layerType,
+                    layer = e.layer;
+                if (type === 'marker') {
+                    layer.bindPopup('A popup!');
+                }
+                editableLayers.addLayer(layer);
+                //console.log("The editable layer is {0}", [JSON.stringify(editableLayers.toGeoJSON())])
+                frm.doc.coordinate_options = JSON.stringify(editableLayers.toGeoJSON())
+
+            });
+
+            map.on('draw:deleted', function(e) {
+                var type = e.layerType,
+                    layer = e.layer;
+                editableLayers.removeLayer(layer);
+                frm.doc.coordinate_options = JSON.stringify(editableLayers.toGeoJSON())
+            });
+
+            map.on('draw:edited', function(e) {
+                var type = e.layerType,
+                    layer = e.layer;
+                editableLayers.removeLayer(layer);
+                frm.doc.coordinate_options = JSON.stringify(editableLayers.toGeoJSON())
+            });
+            //console.log("The editable layer is {0}", [JSON.stringify(editableLayers.toGeoJSON())])
+            // frm.doc.coordinate_options = JSON.stringify(editableLayers.toGeoJSON())[0]
         }
     }
 });
