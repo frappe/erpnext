@@ -222,6 +222,11 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	update_item_in_frm(item, field, value) {
+		if (field == 'qty' && value < 0) {
+			frappe.msgprint(__("Quantity must be positive"))
+			value = item.qty;
+		}
+
 		if (field) {
 			frappe.model.set_value(item.doctype, item.name, field, value);
 		}
