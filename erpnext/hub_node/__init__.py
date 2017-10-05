@@ -15,32 +15,40 @@ def enable_hub():
 	return hub_settings
 
 @frappe.whitelist()
-def get_items(start=0, page_length=20):
+def get_items(start=0, limit=20, category=None, order_by=None, text=None):
 	connection = get_connection()
-	response = connection.connection.get_list('Hub Item', limit_start=start, limit_page_length=page_length)
+	filters = {
+		'hub_category': category,
+	}
+	if text:
+		filters.update({'item_name': ('like', '%' + text + '%')})
+	response = connection.get_list('Hub Item',
+		limit_start=start, limit_page_length=limit,
+		filters=filters)
 	return response
 
 @frappe.whitelist()
 def get_categories():
 	connection = get_connection()
 	response = connection.get_list('Hub Category')
-	return response.list
+	return response
 
 @frappe.whitelist()
 def get_item_details(hub_sync_id):
 	connection = get_connection()
-	return connection.connection.get_doc('Hub Item', hub_sync_id)
+	return connection.get_doc('Hub Item', hub_sync_id)
 
 @frappe.whitelist()
 def get_company_details(hub_sync_id):
 	connection = get_connection()
-	return connection.connection.get_doc('Hub Company', hub_sync_id)
+	return connection.get_doc('Hub Company', hub_sync_id)
 
 def get_connection():
 	hub_connector = frappe.get_doc(
 		'Data Migration Connector', 'Hub Connector')
 	hub_connection = hub_connector.get_connection()
-	return hub_connection
+	# frappeclient connection
+	return hub_connection.connection
 
 def make_opportunity(buyer_name, email_id):
 	buyer_name = "HUB-" + buyer_name

@@ -62,9 +62,9 @@ class HubSettings(Document):
 			'Data Migration Connector', 'Hub Connector')
 
 		connection = hub_connector.get_connection()
-		response = connection.update('User', frappe._dict({'enabled': 0}), hub_connector.username)
+		response_doc = connection.update('User', frappe._dict({'enabled': 0}), hub_connector.username)
 
-		if response.ok:
+		if response_doc['enabled'] == 0:
 			self.enabled = 0
 			self.save()
 

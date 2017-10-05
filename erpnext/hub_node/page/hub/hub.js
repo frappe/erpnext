@@ -9,28 +9,26 @@ frappe.pages['hub'].on_page_load = function(wrapper) {
 		single_col: false
 	});
 
-	erpnext.hub.Hub = new Hub({ page });
-
+	wrapper.hub_page = new erpnext.hub.Hub({ page });
 };
 
 frappe.pages['hub'].on_page_show = function(wrapper) {
-	const current_route = frappe.get_route();
-	if(current_route[1] === "Products") {
-		const item_code = current_route[2];
-		if(item_code) {
-			erpnext.hub.Hub.go_to_item_page(item_code);
-		}
+	const hub_page = wrapper.hub_page;
+	const [hub, type, id] = frappe.get_route();
+
+	if (!(hub || type || id)) {
+		hub_page.go_to_home_page();
+		return;
 	}
 
-	if(current_route[1] === "Company") {
-		const company_name = current_route[2];
-		if(company_name) {
-			erpnext.hub.Hub.go_to_company_page(company_name);
-		}
+	if (type === "Products") {
+		hub_page.go_to_item_page(id);
+	} else if (type === "Company") {
+		hub_page.go_to_company_page(id);
 	}
 }
 
-window.Hub = class Hub {
+erpnext.hub.Hub = class Hub {
 	constructor({ page }) {
 		this.page = page;
 		frappe.require('/assets/erpnext/css/hub.css', () => {
@@ -88,6 +86,9 @@ window.Hub = class Hub {
 	}
 
 	register_for_hub() {
+		if (frappe.session.user.includes('Administrator')) {
+			frappe.throw(__('Please login as another user.'))
+		}
 		frappe.verify_password(() => {
 			frappe.call({
 				method: 'erpnext.hub_node.enable_hub',
@@ -204,7 +205,7 @@ window.Hub = class Hub {
 			this.refresh_item_only_page();
 		});
 
-		this.$search = this.page.add_data(__('Search'));
+		this.setup_hub_category_filter();
 		this.setup_search();
 	}
 
@@ -279,7 +280,7 @@ window.Hub = class Hub {
 	}
 
 	setup_lists() {
-		this.home_item_list = new HubList({
+		this.home_item_list = new erpnext.hub.HubList({
 			parent: this.$main_list_section,
 			title: 'New',
 			page_length: 20,
@@ -295,7 +296,44 @@ window.Hub = class Hub {
 		this.home_item_list.setup();
 	}
 
+	setup_hub_category_filter() {
+		const me = this;
+
+		this.hub_category_field = this.page.add_field({
+			fieldtype: 'Autocomplete',
+			label: 'Hub Category',
+			change() {
+				let value = this.get_value();
+				let title = value;
+				if (value === 'All Categories') {
+					// show all items
+					value = null;
+				}
+
+				me.home_item_list.title = title;
+				me.home_item_list.refresh({
+					text: '',
+					start: 0,
+					limit: 20,
+					category: value
+				});
+			}
+		});
+
+		frappe.call('erpnext.hub_node.get_categories')
+			.then((r) => {
+				if (r.message) {
+					const categories = r.message;
+
+					this.hub_category_field.set_data(
+						categories.map(c => c.hub_category_name)
+					);
+				}
+			});
+	}
+
 	setup_search() {
+		this.$search = this.page.add_data(__('Search'));
 		this.$search.on('keypress', (e) => {
 			if(e.which === 13) {
 				var search_term = ($(this.$search).val() || '').toLowerCase();
@@ -312,7 +350,7 @@ window.Hub = class Hub {
 	go_to_items_only_page(route, title, class_name, filters = {text: ''}, by_item_codes=0) {
 		frappe.set_route(route);
 		this.$hub_main_section.empty();
-		this.filtered_item_list = new HubList({
+		this.filtered_item_list = new erpnext.hub.HubList({
 			parent: this.$hub_main_section,
 			title: title,
 			page_length: 20,
@@ -361,7 +399,7 @@ window.Hub = class Hub {
 
 		let $company_items = $item_page.find('.company-items');
 
-		let company_item_list = new HubList({
+		let company_item_list = new erpnext.hub.HubList({
 			parent: $company_items,
 			title: 'More by ' + item.company_name,
 			page_length: 5,
@@ -465,7 +503,7 @@ window.Hub = class Hub {
 
 		let $company_items = $company_page.find('.company-items');
 
-		let company_item_list = new HubList({
+		let company_item_list = new erpnext.hub.HubList({
 			parent: $company_items,
 			title: 'More by ' + company_details.company_name,
 			page_length: 5,
@@ -574,12 +612,14 @@ window.Hub = class Hub {
 	}
 
 	setup_menu() {
+		if (this.menu_setup) return;
+
 		this.page.add_menu_item(__('Hub Settings'),
 			() => frappe.set_route('Form', 'Hub Settings'));
-
 		this.page.add_menu_item(__('Refresh'), () => this.refresh());
-
 		this.page.add_menu_item(__('Sync'), () => this.sync_items_to_hub());
+
+		this.menu_setup = true;
 	}
 
 	sync_items_to_hub() {
@@ -588,12 +628,12 @@ window.Hub = class Hub {
 
 	setup_sidebar() {
 		var me = this;
-		this.sidebar = new HubSidebar({
-			wrapper: this.page.wrapper.find('.layout-side-section')
+		this.sidebar = new frappe.ui.Sidebar({
+			wrapper: this.page.wrapper.find('.layout-side-section'),
+			css_class: 'hub-sidebar'
 		});
 
 		this.add_account_to_sidebar();
-
 	}
 
 	add_account_to_sidebar() {
@@ -603,8 +643,8 @@ window.Hub = class Hub {
 		}, __("Account"));
 
 		this.sidebar.add_item({
-			label: __("Requested Products"),
-			on_click: () => this.go_to_seen_items()
+			label: __("My Orders"),
+			on_click: () => frappe.set_route('List', 'Request for Quotation')
 		}, __("Account"));
 	}
 
@@ -638,7 +678,7 @@ window.Hub = class Hub {
 	}
 }
 
-class HubList {
+erpnext.hub.HubList = class HubList {
 	constructor({
 		parent = null,
 		title = 'Products',
@@ -744,6 +784,8 @@ class HubList {
 
 	render_items(items) {
 		if(items) {
+			// clear any filler divs
+			this.$list.find('.filler').remove();
 			let done = 0;
 			console.log("items length", items.length);
 			if(items.length && items.length > this.page_length) {
@@ -755,10 +797,16 @@ class HubList {
 			items.forEach((item) => {
 				this.make_item_card(item).appendTo(this.$list);
 			});
-			console.log(done);
+
+			const remainder = items.length % 4;
+			if (remainder > 0) {
+				// fill with filler divs to make flexbox happy
+				Array.from(Array(remainder))
+					.map(r => $('<div class="filler">').css('width', '200px').appendTo(this.$list));
+			}
 			this.update_list_state(done);
 		} else {
-			this.$item_list_title.html('No results found');
+			this.update_list_state(1);
 		}
 	}
 
@@ -812,59 +860,5 @@ class HubList {
 				style="max-width: ${_size}; width: ${_size}; height: ${_size};">
 				${item_image}
 			</div>`;
-	}
-}
-
-class HubSidebar {
-	constructor({ wrapper }) {
-		this.wrapper = wrapper;
-		this.make_dom();
-	}
-
-	make_dom() {
-		this.wrapper.html(`
-			<div class="hub-sidebar overlay-sidebar hidden-xs hidden-sm">
-			</div>
-		`);
-
-		this.$sidebar = this.wrapper.find('.hub-sidebar');
-	}
-
-	add_item(item, section) {
-		let $section;
-		if(!section && this.wrapper.find('.sidebar-menu').length === 0) {
-			// if no section, add section with no heading
-			$section = this.get_section();
-		} else {
-			$section = this.get_section(section);
-		}
-
-		const $li_item = $(`
-			<li><a ${item.href ? `href="${item.href}"` : ''}>${item.label}</a></li>
-		`).click(
-			() => item.on_click && item.on_click()
-		);
-
-		$section.append($li_item);
-	}
-
-	get_section(section_heading="") {
-		let $section = $(this.wrapper.find(
-			`[data-section-heading="${section_heading}"]`));
-		if($section.length) {
-			return $section;
-		}
-
-		const $section_heading = section_heading ?
-			`<li class="h6">${section_heading}</li>` : '';
-
-		$section = $(`
-			<ul class="list-unstyled sidebar-menu" data-section-heading="${section_heading || 'default'}">
-				${$section_heading}
-			</ul>
-		`);
-
-		this.$sidebar.append($section);
-		return $section;
 	}
 }
