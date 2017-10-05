@@ -9,13 +9,13 @@ QUnit.test("test: Donor Type", function (assert) {
 	assert.expect(1);
 
 	frappe.run_serially([
-		// insert a new Donor Type
+		// insert a new Member
 		() => frappe.tests.make('Donor Type', [
 			// values to be set
-			{key: 'value'}
+			{donor_type: 'Test Organization'},
 		]),
 		() => {
-			assert.equal(cur_frm.doc.key, 'value');
+			assert.equal(cur_frm.doc.donor_type, 'Test Organization');
 		},
 		() => done()
 	]);

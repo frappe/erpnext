@@ -6,16 +6,18 @@ QUnit.test("test: Volunteer Type", function (assert) {
 	let done = assert.async();
 
 	// number of asserts
-	assert.expect(1);
+	assert.expect(2);
 
 	frappe.run_serially([
-		// insert a new Volunteer Type
+		// insert a new Member
 		() => frappe.tests.make('Volunteer Type', [
 			// values to be set
-			{key: 'value'}
+			{volunteer_type: 'Test Work'},
+			{amount: 500}
 		]),
 		() => {
-			assert.equal(cur_frm.doc.key, 'value');
+			assert.equal(cur_frm.doc.volunteer_type, 'Test Work');
+			assert.equal(cur_frm.doc.amount, 500);
 		},
 		() => done()
 	]);
