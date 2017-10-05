@@ -20,7 +20,8 @@ def update_documents_status(doctype):
 		SET status = CASE
 			WHEN status='Open' THEN 'Unreplied'
 			WHEN status='Replied' THEN 'Open'
-		END""".format(doctype))
+		END
+		WHERE status in ('Open', 'Replied')""".format(doctype))
 
 def update_email_alerts_conditions(doctype):
 	"""
