@@ -63,7 +63,7 @@ frappe.ui.form.on("Item", {
 			frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 		if (frm.doc.variant_of) {
-			frm.set_intro(__('This Item is a Variant of {0} (Template).', 
+			frm.set_intro(__('This Item is a Variant of {0} (Template).',
 				[`<a href="#Form/Item/${frm.doc.variant_of}">${frm.doc.variant_of}</a>`]), true);
 		}
 
@@ -127,7 +127,7 @@ frappe.ui.form.on("Item", {
 		if(!frm.doc.description)
 			frm.set_value("description", frm.doc.item_code);
 	},
-	
+
 	is_stock_item: function(frm) {
 		if(!frm.doc.is_stock_item) {
 			frm.set_value("has_batch_no", 0);
@@ -135,7 +135,7 @@ frappe.ui.form.on("Item", {
 			frm.set_value("has_serial_no", 0);
 		}
 	},
-	
+
 	copy_from_item_group: function(frm) {
 		return frm.call({
 			doc: frm.doc,
