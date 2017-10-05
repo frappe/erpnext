@@ -186,7 +186,7 @@ var btn_update_status = function(frm, status){
 	frappe.call({
 		method:
 		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.update_status",
-		args: {appointmentId: doc.name, status:status},
+		args: {appointment_id: doc.name, status:status},
 		callback: function(data){
 			if(!data.exc){
 				cur_frm.reload_doc();

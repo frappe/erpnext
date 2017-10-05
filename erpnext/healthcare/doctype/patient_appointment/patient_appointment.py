@@ -17,24 +17,26 @@ class PatientAppointment(Document):
 	def on_update(self):
 		today = datetime.date.today()
 		appointment_date = getdate(self.appointment_date)
-		#If appointment created for today set as open
-		if(today == appointment_date):
-			frappe.db.set_value("Patient Appointment",self.name,"status","Open")
+
+		# If appointment created for today set as open
+		if today == appointment_date:
+			frappe.db.set_value("Patient Appointment", self.name, "status", "Open")
 			self.reload()
 
 	def after_insert(self):
-		#Check fee validity exists
+		# Check fee validity exists
 		appointment = self
 		validity_exist = validity_exists(appointment.physician, appointment.patient)
-		if validity_exist :
-			fee_validity = frappe.get_doc("Fee Validity",validity_exist[0][0])
-			#Check if the validity is valid
+		if validity_exist:
+			fee_validity = frappe.get_doc("Fee Validity", validity_exist[0][0])
+
+			# Check if the validity is valid
 			appointment_date = getdate(appointment.appointment_date)
-			if((fee_validity.valid_till >= appointment_date) and (fee_validity.visited < fee_validity.max_visit)):
+			if (fee_validity.valid_till >= appointment_date) and (fee_validity.visited < fee_validity.max_visit):
 				visited = fee_validity.visited + 1
-				frappe.db.set_value("Fee Validity",fee_validity.name,"visited",visited)
-				if(fee_validity.ref_invoice):
-					frappe.db.set_value("Patient Appointment",appointment.name,"sales_invoice",fee_validity.ref_invoice)
+				frappe.db.set_value("Fee Validity", fee_validity.name, "visited", visited)
+				if fee_validity.ref_invoice:
+					frappe.db.set_value("Patient Appointment", appointment.name, "sales_invoice", fee_validity.ref_invoice)
 				frappe.msgprint(_("{0} has fee validity till {1}").format(appointment.patient, fee_validity.valid_till))
 		confirm_sms(self)
 
@@ -46,17 +48,20 @@ class PatientAppointment(Document):
 			super(PatientAppointment, self).save()
 
 
-def appointment_cancel(appointmentId):
-	appointment = frappe.get_doc("Patient Appointment",appointmentId)
-	#If invoice --> fee_validity update with -1 visit
-	if (appointment.sales_invoice):
-		validity = frappe.db.exists({"doctype": "Fee Validity","ref_invoice": appointment.sales_invoice})
-		if(validity):
-			fee_validity = frappe.get_doc("Fee Validity",validity[0][0])
+def appointment_cancel(appointment_id):
+	appointment = frappe.get_doc("Patient Appointment", appointment_id)
+
+	# If invoice --> fee_validity update with -1 visit
+	if appointment.sales_invoice:
+		validity = frappe.db.exists({"doctype": "Fee Validity", "ref_invoice": appointment.sales_invoice})
+		if validity:
+			fee_validity = frappe.get_doc("Fee Validity", validity[0][0])
 			visited = fee_validity.visited - 1
-			frappe.db.set_value("Fee Validity",fee_validity.name,"visited",visited)
+			frappe.db.set_value("Fee Validity", fee_validity.name, "visited", visited)
 			if visited <= 0:
-				frappe.msgprint(_("Appointment cancelled, Please review and cancel the invoice {0}".format(appointment.sales_invoice)))
+				frappe.msgprint(
+					_("Appointment cancelled, Please review and cancel the invoice {0}".format(appointment.sales_invoice))
+				)
 			else:
 				frappe.msgprint(_("Appointment cancelled"))
 
@@ -118,26 +123,35 @@ def get_availability_data(date, physician):
 		"time_per_appointment": time_per_appointment
 	}
 
+
 @frappe.whitelist()
-def update_status(appointmentId, status):
-	frappe.db.set_value("Patient Appointment",appointmentId,"status",status)
-	if(status=="Cancelled"):
-		appointment_cancel(appointmentId)
+def update_status(appointment_id, status):
+	frappe.db.set_value("Patient Appointment", appointment_id, "status", status)
+	if status == "Cancelled":
+		appointment_cancel(appointment_id)
+
 
 @frappe.whitelist()
 def set_open_appointments():
 	today = getdate()
-	frappe.db.sql("""update `tabPatient Appointment` set status='Open' where status = 'Scheduled' and appointment_date = %s""",(today))
+	frappe.db.sql(
+		"update `tabPatient Appointment` set status='Open' where status = 'Scheduled'"
+		" and appointment_date = %s", today)
+
 
 @frappe.whitelist()
 def set_pending_appointments():
 	today = getdate()
-	frappe.db.sql("""update `tabPatient Appointment` set status='Pending' where status in ('Scheduled','Open') and appointment_date < %s""",(today))
+	frappe.db.sql(
+		"update `tabPatient Appointment` set status='Pending' where status in "
+		"('Scheduled','Open') and appointment_date < %s", today)
+
 
 def confirm_sms(doc):
-	if (frappe.db.get_value("Healthcare Settings", None, "app_con")=='1'):
+	if frappe.db.get_value("Healthcare Settings", None, "app_con") == '1':
 		message = frappe.db.get_value("Healthcare Settings", None, "app_con_msg")
 		send_message(doc, message)
+
 
 @frappe.whitelist()
 def create_invoice(company, physician, patient, appointment_id, appointment_date):
@@ -163,20 +177,23 @@ def create_invoice(company, physician, patient, appointment_id, appointment_date
 		frappe.db.set_value("Consultation", consultation[0][0], "invoice", sales_invoice.name)
 	return sales_invoice.name
 
+
 def get_fee_validity(physician, patient, date):
 	validity_exist = validity_exists(physician, patient)
-	if validity_exist :
-		fee_validity = frappe.get_doc("Fee Validity",validity_exist[0][0])
+	if validity_exist:
+		fee_validity = frappe.get_doc("Fee Validity", validity_exist[0][0])
 		fee_validity = update_fee_validity(fee_validity, date)
 	else:
 		fee_validity = create_fee_validity(physician, patient, date)
 	return fee_validity
+
 
 def validity_exists(physician, patient):
 	return frappe.db.exists({
 			"doctype": "Fee Validity",
 			"physician": physician,
 			"patient": patient})
+
 
 def update_fee_validity(fee_validity, date):
 	max_visit = frappe.db.get_value("Healthcare Settings", None, "max_visit")
@@ -193,12 +210,14 @@ def update_fee_validity(fee_validity, date):
 	fee_validity.save(ignore_permissions=True)
 	return fee_validity
 
+
 def create_fee_validity(physician, patient, date):
 	fee_validity = frappe.new_doc("Fee Validity")
 	fee_validity.physician = physician
 	fee_validity.patient = patient
 	fee_validity = update_fee_validity(fee_validity, date)
 	return fee_validity
+
 
 def create_invoice_items(appointment_id, physician, company, invoice):
 	item_line = invoice.append("items")
@@ -207,12 +226,13 @@ def create_invoice_items(appointment_id, physician, company, invoice):
 	item_line.qty = 1
 	item_line.uom = "Nos"
 	item_line.conversion_factor = 1
-	item_line.income_account = get_income_account(physician,company)
+	item_line.income_account = get_income_account(physician, company)
 	op_consulting_charge = frappe.db.get_value("Physician", physician, "op_consulting_charge")
 	if op_consulting_charge:
 		item_line.rate = op_consulting_charge
 		item_line.amount = op_consulting_charge
 	return invoice
+
 
 @frappe.whitelist()
 def create_consultation(appointment):
@@ -228,29 +248,37 @@ def create_consultation(appointment):
 		consultation.invoice = appointment.sales_invoice
 	return consultation.as_dict()
 
+
 def remind_appointment():
-	if (frappe.db.get_value("Healthcare Settings", None, "app_rem")=='1'):
+	if frappe.db.get_value("Healthcare Settings", None, "app_rem") == '1':
 		rem_before = datetime.datetime.strptime(frappe.get_value("Healthcare Settings", None, "rem_before"), "%H:%M:%S")
-		rem_dt = datetime.datetime.now() + datetime.timedelta(hours = rem_before.hour, minutes=rem_before.minute, seconds= rem_before.second)
+		rem_dt = datetime.datetime.now() + datetime.timedelta(
+			hours=rem_before.hour, minutes=rem_before.minute, seconds=rem_before.second)
 
-		appointment_list = frappe.db.sql("select name from `tabPatient Appointment` where start_dt between %s and %s and reminded = 0 ", (datetime.datetime.now(), rem_dt))
+		appointment_list = frappe.db.sql(
+			"select name from `tabPatient Appointment` where start_dt between %s and %s and reminded = 0 ",
+			(datetime.datetime.now(), rem_dt)
+		)
 
-		for i in range (0,len(appointment_list)):
+		for i in range(0, len(appointment_list)):
 			doc = frappe.get_doc("Patient Appointment", appointment_list[i][0])
 			message = frappe.db.get_value("Healthcare Settings", None, "app_rem_msg")
 			send_message(doc, message)
-			frappe.db.set_value("Patient Appointment",doc.name,"reminded",1)
+			frappe.db.set_value("Patient Appointment", doc.name, "reminded",1)
+
 
 def send_message(doc, message):
-	patient = frappe.get_doc("Patient",doc.patient)
-	if(patient.mobile):
+	patient = frappe.get_doc("Patient", doc.patient)
+	if patient.mobile:
 		context = {"doc": doc, "alert": doc, "comments": None}
 		if doc.get("_comments"):
 			context["comments"] = json.loads(doc.get("_comments"))
-		#jinja to string convertion happens here
+
+		# jinja to string convertion happens here
 		message = frappe.render_template(message, context)
 		number = [patient.mobile]
-		send_sms(number,message)
+		send_sms(number, message)
+
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
