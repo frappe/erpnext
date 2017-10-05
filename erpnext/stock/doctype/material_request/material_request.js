@@ -53,7 +53,7 @@ frappe.ui.form.on("Material Request Item", {
 				set_schedule_date(frm);
 			}
 		}
-	}	
+	}
 });
 
 erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.extend({

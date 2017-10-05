@@ -206,6 +206,7 @@ class TestMaterialRequest(unittest.TestCase):
 		po_doc = make_purchase_order(mr.name)
 		po_doc.supplier = "_Test Supplier"
 		po_doc.transaction_date = "2013-07-07"
+		po_doc.schedule_date = "2013-07-09"
 		po_doc.get("items")[0].qty = 27.0
 		po_doc.get("items")[1].qty = 1.5
 		po_doc.get("items")[0].schedule_date = "2013-07-09"
