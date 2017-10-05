@@ -79,7 +79,7 @@ erpnext.stock.ItemDashboard = Class.extend({
 		if (context.data.length > 0) {
 			$(frappe.render_template('item_dashboard_list', context)).appendTo(this.result);
 		} else {
-			var message = __(" Currenlty no stock to any warehouse")
+			var message = __(" Currently no stock available in any warehouse")
 			$("<span class='small'> <i class='fa fa-exclamation-triangle' aria-hidden='true'></i>"+message+"</span>").appendTo(this.result);
 		}
 	},
