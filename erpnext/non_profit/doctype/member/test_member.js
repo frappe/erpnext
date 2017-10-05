@@ -6,16 +6,19 @@ QUnit.test("test: Member", function (assert) {
 	let done = assert.async();
 
 	// number of asserts
-	assert.expect(1);
+	assert.expect(2);
 
 	frappe.run_serially([
 		// insert a new Member
 		() => frappe.tests.make('Member', [
 			// values to be set
-			{key: 'value'}
+			{member_name: 'Test Member'},
+			{membership_type: 'Gold'},
+			{email: 'test@example.com'}
 		]),
 		() => {
-			assert.equal(cur_frm.doc.key, 'value');
+			assert.equal(cur_frm.doc.membership_type, 'Gold');
+			assert.equal(cur_frm.doc.email, 'test@example.com');
 		},
 		() => done()
 	]);

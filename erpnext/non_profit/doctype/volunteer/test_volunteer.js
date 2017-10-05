@@ -6,16 +6,31 @@ QUnit.test("test: Volunteer", function (assert) {
 	let done = assert.async();
 
 	// number of asserts
-	assert.expect(1);
+	assert.expect(4);
 
 	frappe.run_serially([
-		// insert a new Volunteer
+		// insert a new Member
 		() => frappe.tests.make('Volunteer', [
 			// values to be set
-			{key: 'value'}
+			{volunteer_name: 'Test Volunteer'},
+			{volunteer_type:'Test Work'},
+			{email:'test@example.com'},
+			{volunteer_availability_table:[
+					[
+						{'volunteer_availability': 'Weekends'},
+					]
+			]},
+			{volunteer_skills_table:[
+					[
+						{'volunteer_skills': 'Fundraiser'},
+					]
+			]},
 		]),
 		() => {
-			assert.equal(cur_frm.doc.key, 'value');
+			assert.equal(cur_frm.doc.volunteer_name, 'Test Volunteer');
+			assert.equal(cur_frm.doc.volunteer_type, 'Test Work');
+			assert.equal(cur_frm.doc.email, 'test@example.com');
+			assert.equal(cur_frm.doc.volunteer_availability_table[0].volunteer_availability, 'Weekends');
 		},
 		() => done()
 	]);
