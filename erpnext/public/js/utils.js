@@ -166,6 +166,18 @@ $.extend(erpnext.utils, {
 		}
 		return rows;
 	},
+
+	guess_colour_from_status: function(status) {
+		let status_mapper = {
+			"Open": "orange",
+			"Unreplied": "red"
+		}
+		if(in_list(["Open", "Unreplied"], status)) {
+			return status_mapper[status];
+		} else {
+			return frappe.utils.guess_colour(status);
+		}
+	}
 });
 
 erpnext.utils.map_current_doc = function(opts) {
