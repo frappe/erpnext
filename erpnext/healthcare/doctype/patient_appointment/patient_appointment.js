@@ -40,13 +40,15 @@ frappe.ui.form.on('Patient Appointment', {
 			});
 		}
 
-		frm.add_custom_button(__("Consultation"),function(){
-			btn_create_consultation(frm);
-		},"Create");
+		if(!frm.doc.__islocal){
+			frm.add_custom_button(__("Consultation"),function(){
+				btn_create_consultation(frm);
+			},"Create");
 
-		frm.add_custom_button(__('Vital Signs'), function() {
-			btn_create_vital_signs(frm);
-		},"Create");
+			frm.add_custom_button(__('Vital Signs'), function() {
+				btn_create_vital_signs(frm);
+			},"Create");
+		}
 
 		if(!frm.doc.__islocal){
 			if(frm.doc.sales_invoice && frappe.user.has_role("Accounts User")){
