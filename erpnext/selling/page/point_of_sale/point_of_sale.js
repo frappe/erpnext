@@ -49,11 +49,12 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				this.set_online_status();
 			},
 			() => this.setup_pos_profile(),
+			() => this.make_new_invoice(),
 			() => {
+				frappe.timeout(1);
 				this.make_items();
 				this.bind_events();
 			},
-			() => this.make_new_invoice(),
 			() => this.page.set_title(__('Point of Sale'))
 		]);
 	}
