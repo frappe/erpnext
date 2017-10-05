@@ -112,7 +112,7 @@ def make_item(item):
 			'doctype': 'Item',
 			'item_code': item.item_code,
 			'item_group': item.item_group,
-			'is_hub_item': 1
+			'is_item_from_hub': 1
 		}).insert()
 	else:
 		item_doc = frappe.get_doc('Item', item.item_code)
