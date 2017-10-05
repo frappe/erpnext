@@ -12,6 +12,7 @@ import datetime
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account
 
+
 class PatientAppointment(Document):
 	def on_update(self):
 		today = datetime.date.today()
@@ -51,21 +52,41 @@ def appointment_cancel(appointmentId):
  			else:
  				frappe.msgprint(_("Appointment cancelled"))
 
+
 @frappe.whitelist()
 def get_availability_data(date, physician):
-	# get availability data of 'physician' on 'date'
+	"""
+	Get availability data of 'physician' on 'date'
+	:param date: Date to check in schedule
+	:param physician: Name of the physician
+	:return: dict containing a list of available slots, list of appointments and time of appointments
+	"""
+
 	date = getdate(date)
 	weekday = date.strftime("%A")
 
 	available_slots = []
+	physician_schedule_name = None
+	physician_schedule = None
+	time_per_appointment = None
+
 	# get physicians schedule
 	physician_schedule_name = frappe.db.get_value("Physician", physician, "physician_schedule")
-	physician_schedule = frappe.get_doc("Physician Schedule", physician_schedule_name)
-	time_per_appointment = frappe.db.get_value("Physician", physician, "time_per_appointment")
+	if physician_schedule_name:
+		physician_schedule = frappe.get_doc("Physician Schedule", physician_schedule_name)
+		time_per_appointment = frappe.db.get_value("Physician", physician, "time_per_appointment")
+	else:
+		frappe.throw(_("Dr {0} does not have a Physician Schedule. Add it in Physician master".format(physician)))
 
-	for t in physician_schedule.time_slots:
-		if weekday == t.day:
-			available_slots.append(t)
+	if physician_schedule:
+		for t in physician_schedule.time_slots:
+			if weekday == t.day:
+				available_slots.append(t)
+
+	# `time_per_appointment` should never be None since validation in `Patient` is supposed to prevent
+	# that. However, it isn't impossible so we'll prepare for that.
+	if not time_per_appointment:
+		frappe.throw(_('"Time Per Appointment" hasn"t been set for Dr {0}. Add it in Physician master.').format(physician))
 
 	# if physician not available return
 	if not available_slots:
@@ -187,7 +208,7 @@ def create_invoice_items(appointment_id, physician, company, invoice):
 
 @frappe.whitelist()
 def create_consultation(appointment):
-	appointment = frappe.get_doc("Patient Appointment",appointment)
+	appointment = frappe.get_doc("Patient Appointment", appointment)
 	consultation = frappe.new_doc("Consultation")
 	consultation.appointment = appointment.name
 	consultation.patient = appointment.patient
