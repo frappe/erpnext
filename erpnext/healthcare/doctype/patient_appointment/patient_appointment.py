@@ -40,12 +40,12 @@ class PatientAppointment(Document):
 				frappe.msgprint(_("{0} has fee validity till {1}").format(appointment.patient, fee_validity.valid_till))
 		confirm_sms(self)
 
-	def save(self):
+	def save(self, *args, **kwargs):
 		# duration is the only changeable field in the document
 		if not self.is_new():
 			self.db_set('duration', cint(self.duration))
 		else:
-			super(PatientAppointment, self).save()
+			super(PatientAppointment, self).save(*args, **kwargs)
 
 
 def appointment_cancel(appointment_id):
