@@ -34,3 +34,4 @@ class TestPhysician(unittest.TestCase):
 		physician.first_name = '_Testdoctor2'
 
 		physician.insert()
+		self.assertEqual(frappe.get_value('Physician', '_Testdoctor2', 'first_name'), '_Testdoctor2')
