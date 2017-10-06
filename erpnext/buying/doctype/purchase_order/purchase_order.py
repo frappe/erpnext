@@ -41,6 +41,7 @@ class PurchaseOrder(BuyingController):
 		self.set_status()
 
 		self.validate_supplier()
+		self.validate_schedule_date()
 		validate_for_items(self)
 		self.check_for_closed_status()
 

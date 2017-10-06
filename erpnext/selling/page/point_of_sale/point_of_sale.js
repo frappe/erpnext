@@ -49,11 +49,12 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				this.set_online_status();
 			},
 			() => this.setup_pos_profile(),
+			() => this.make_new_invoice(),
 			() => {
+				frappe.timeout(1);
 				this.make_items();
 				this.bind_events();
 			},
-			() => this.make_new_invoice(),
 			() => this.page.set_title(__('Point of Sale'))
 		]);
 	}
@@ -99,6 +100,17 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					if (value == 'Pay') {
 						if (!this.payment) {
 							this.make_payment_modal();
+						} else {
+							const mop_field = this.payment.default_mop;
+							let amount = 0.0;
+							this.frm.doc.payments.map(p => {
+								if (p.mode_of_payment == mop_field) {
+									amount = p.amount;
+									return;
+								}
+							});
+
+							this.payment.dialog.set_value(mop_field, flt(amount));
 						}
 						this.payment.open_modal();
 					}
@@ -437,6 +449,12 @@ class POSCart {
 		this.$taxes_and_totals.html(this.get_taxes_and_totals());
 		this.numpad && this.numpad.reset_value();
 		this.customer_field.set_value("");
+
+		this.wrapper.find('.grand-total-value').text(
+			format_currency(this.frm.doc.grand_total, this.frm.currency));
+
+		const customer = this.frm.doc.customer || this.pos_profile.customer;
+		this.customer_field.set_value(customer);
 	}
 
 	get_grand_total() {
@@ -746,26 +764,39 @@ class POSCart {
 		// });
 
 		this.wrapper.find('.additional_discount_percentage').on('change', (e) => {
+			const discount_percentage = flt(e.target.value,
+				precision("additional_discount_percentage"));
+
 			frappe.model.set_value(this.frm.doctype, this.frm.docname,
-				'additional_discount_percentage', e.target.value)
+				'additional_discount_percentage', discount_percentage)
 				.then(() => {
 					let discount_wrapper = this.wrapper.find('.discount_amount');
-					discount_wrapper.val(this.frm.doc.discount_amount);
+					discount_wrapper.val(flt(this.frm.doc.discount_amount,
+						precision('discount_amount')));
 					discount_wrapper.trigger('change');
 				});
 		});
 
 		this.wrapper.find('.discount_amount').on('change', (e) => {
+			const discount_amount = flt(e.target.value, precision('discount_amount'));
 			frappe.model.set_value(this.frm.doctype, this.frm.docname,
-				'discount_amount', flt(e.target.value));
+				'discount_amount', discount_amount);
 			this.frm.trigger('discount_amount')
 				.then(() => {
-					let discount_wrapper = this.wrapper.find('.additional_discount_percentage');
-					discount_wrapper.val(this.frm.doc.additional_discount_percentage);
+					this.update_discount_fields();
 					this.update_taxes_and_totals();
 					this.update_grand_total();
 				});
 		});
+	}
+
+	update_discount_fields() {
+		let discount_wrapper = this.wrapper.find('.additional_discount_percentage');
+		let discount_amt_wrapper = this.wrapper.find('.discount_amount');
+		discount_wrapper.val(flt(this.frm.doc.additional_discount_percentage,
+			precision('additional_discount_percentage')));
+		discount_amt_wrapper.val(flt(this.frm.doc.discount_amount,
+			precision('discount_amount')));
 	}
 
 	set_selected_item($item) {
@@ -831,7 +862,7 @@ class POSItems {
 		this.search_field = frappe.ui.form.make_control({
 			df: {
 				fieldtype: 'Data',
-				label: 'Search Item (Ctrl + I)',
+				label: 'Search Item ( Ctrl + i )',
 				placeholder: 'Search by item code, serial number, batch no or barcode'
 			},
 			parent: this.wrapper.find('.search-field'),
@@ -928,14 +959,19 @@ class POSItems {
 				if(serial_no) {
 					this.events.update_cart(items[0].item_code,
 						'serial_no', serial_no);
-					this.search_field.set_value('');
+					this.reset_search_field();
 				}
 				if(batch_no) {
 					this.events.update_cart(items[0].item_code,
 						'batch_no', batch_no);
-					this.search_field.set_value('');
+					this.reset_search_field();
 				}
 			});
+	}
+
+	reset_search_field() {
+		this.search_field.set_value('');
+		this.search_field.$input.trigger("input");
 	}
 
 	bind_events() {
@@ -1179,6 +1215,10 @@ class Payment {
 		const me = this;
 
 		let fields = this.frm.doc.payments.map(p => {
+			if (p.default) {
+				this.default_mop = p.mode_of_payment;
+			}
+
 			return {
 				fieldtype: 'Currency',
 				label: __(p.mode_of_payment),
