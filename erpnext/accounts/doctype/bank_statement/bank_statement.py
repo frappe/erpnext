@@ -94,7 +94,7 @@ class BankStatement(Document):
 
 		transformation_rule = mapping_row.transformation_rule
 		if not transformation_rule: transformation_rule = mapping_row.source_field_abbr
-		csv_row_field_value = self.eval_transformation(transformation_rule, mapping_row.source_field_abbr, eval_data)
+		csv_row_field_value = self.eval_transformation(transformation_rule, mapping_row.source_field_abbr.strip(), eval_data)
 
 		return mapping_row.target_field, csv_row_field_value
 
@@ -158,6 +158,7 @@ class BankStatement(Document):
 			if code_type == 'condition':
 				if not frappe.safe_eval(eval_code, None, eval_data):
 					return None
+			eval_result = frappe.safe_eval(source_abbr, None, eval_data)
 			if code_type == 'date_format':
 				eval_result = datetime.datetime.strptime(eval_data[source_abbr].strip(), eval_code.strip()).date()
 			if code_type == 'eval':
@@ -230,6 +231,6 @@ def get_source_abbr(source_field, bank_statement_mapping_items):
 def get_code_type(eval_code):
 	eval_code = eval_code.lower()
 	if eval_code.startswith('if'): return 'condition'
-	if eval_code.startswith('date'): return 'date_format'
+	if eval_code.startswith('date:'): return 'date_format'
 	if eval_code.startswith('eval'): return 'eval'
 	return 'eval'
