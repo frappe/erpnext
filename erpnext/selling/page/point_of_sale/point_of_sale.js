@@ -523,7 +523,7 @@ class POSCart {
 
 		// Update totals
 		this.$taxes_and_totals.find('.net-total')
-			.html(format_currency(this.frm.doc.net_total, currency));
+			.html(format_currency(this.frm.doc.total, currency));
 
 		// Update taxes
 		const taxes_html = this.frm.doc.taxes.map(tax => {
