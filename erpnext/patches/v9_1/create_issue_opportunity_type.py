@@ -33,14 +33,11 @@ def create_type_documents(doctype, issue_opportunity_type_doctype, field):
 		if frappe.db.exists(doctype, issue_opportunity_type):
 			return
 
-		try:
-			fieldname = frappe.scrub(doctype)
-			frappe.get_doc({
-				"doctype": doctype,
-				fieldname: issue_opportunity_type
-			}).insert(ignore_permissions=True)
-		except Exception as e:
-			pass
+		fieldname = frappe.scrub(doctype)
+		frappe.get_doc({
+			"doctype": doctype,
+			fieldname: issue_opportunity_type
+		}).insert(ignore_permissions=True)
 
 	issue_opportunity_types = []
 	if field.fieldtype == "Select":
