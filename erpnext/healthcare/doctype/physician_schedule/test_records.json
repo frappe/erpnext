@@ -1,0 +1,36 @@
+[
+  {
+    "doctype": "Physician Schedule",
+    "schedule_name": "_Test Testdoctor Schedule",
+    "time_slots": [
+      {
+        "from_time": "8:00:00",
+        "idx": "1",
+        "to_time": "14:00:00",
+        "doctype": "Physician Schedule Time Slot",
+        "day": "Monday"
+      },
+      {
+        "from_time": "8:00:00",
+        "idx": "2",
+        "to_time": "14:00:00",
+        "doctype": "Physician Schedule Time Slot",
+        "day": "Tuesday"
+      },
+      {
+        "from_time": "8:00:00",
+        "idx": "3",
+        "to_time": "14:00:00",
+        "doctype": "Physician Schedule Time Slot",
+        "day": "Thursday"
+      },
+      {
+        "from_time": "8:00:00",
+        "idx": "4",
+        "to_time": "14:00:00",
+        "doctype": "Physician Schedule Time Slot",
+        "day": "Friday"
+      }
+    ]
+  }
+]
