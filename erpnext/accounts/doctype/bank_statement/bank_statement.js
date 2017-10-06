@@ -1,7 +1,9 @@
 // Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-var acc_currency_map = {}
+var acc_currency_map = {},
+	statement_date_overlap,
+	statement_first_validate = true
 
 frappe.ui.form.on('Bank Statement', {
 	refresh: (frm)=>{
@@ -19,6 +21,9 @@ frappe.ui.form.on('Bank Statement', {
 				}
 			})
 		});
+		if (frm.doc.bank){
+			frm.trigger('bank');
+		}
 	},
 	bank: (frm)=>{
 		frappe.call({
@@ -36,6 +41,28 @@ frappe.ui.form.on('Bank Statement', {
 		if (acc_currency_map.map){
 			frm.set_value('account_currency', acc_currency_map.map[frm.doc.account_no])
 			frm.refresh_field('account_currency')
+		}
+	},
+	statement_start_date: (frm)=>{
+		frappe.call({
+			method: "check_end_date",
+			doc: frm.doc,
+			callback: function(d){
+				if (d.message){	
+					statement_date_overlap = d.message.gap
+				}
+			}
+		})
+	},
+	validate: (frm)=>{
+		if ((statement_date_overlap) && (statement_first_validate)){
+			frappe.confirm(
+				"There is a gap in the previous statement's end date and the specified start date (" + statement_date_overlap + " days). <br><b>Continue</b>?",
+				()=>{statement_first_validate=false;frm.save();},
+				()=>show_alert('Document save cancelled')
+			)
+			frappe.validated = false
+			return false
 		}
 	}
 });

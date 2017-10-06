@@ -5,10 +5,11 @@
 from __future__ import unicode_literals
 import frappe, csv, datetime, os
 from frappe import _
-from frappe.utils import flt, date_diff
+from frappe.utils import flt, date_diff, getdate
 from frappe.model.document import Document
 from frappe.utils.file_manager import get_file_path, get_uploaded_content
 
+# just for reference, no longer used
 dateformats = {
 	'1990-01-31': '%Y-%m-%d',
 	'31-01-1990': '%d-%m-%Y',
@@ -25,32 +26,62 @@ dateformats = {
 }
 
 class BankStatement(Document):
+
+	def validate(self):
+		self.validate_file_format()
+		self.validate_dates()
+
+	def validate_dates(self):
+		previous_sta = frappe.get_all("Bank Statement", fields=['statement_start_date','bank','account_no', 'name'])
+		end_dates = [(s.name,s.statement_start_date) for s in previous_sta if (s.bank == self.bank and s.account_no == self.account_no)]
+		end_dates = filter(lambda x: isinstance(x[1], datetime.date), end_dates)
+		if end_dates:
+			previous_statement_end_date = sorted(end_dates, key=lambda x:x[1], reverse=True)[0]
+		else:
+			previous_statement_end_date = ('Curent Doc', getdate(self.statement_start_date))
+		if self.statement_start_date > self.statement_end_date:
+			frappe.throw(_("Statement start date cannot be later than end date"))
+		if getdate(self.statement_start_date) < previous_statement_end_date[1]:
+			prev_doc_name = previous_statement_end_date[0]
+			if getattr(self,'name',None) and self.name == prev_doc_name:
+				return
+			frappe.throw(_("Statement start date cannot be earlier than a previous statement's end date ({})".format(prev_doc_name)))
+
+	def check_end_date(self):
+		previous_sta = frappe.get_all("Bank Statement", fields=['statement_start_date','bank','account_no'])
+		end_dates = [s.statement_start_date for s in previous_sta if (s.bank == self.bank and s.account_no == self.account_no)]
+		for e_date in end_dates:
+			date_interval = date_diff(self.statement_start_date, e_date)
+			if date_interval > 1:      # if start date is greater than an end date by a day
+				return {'gap': date_interval}
+		return {'gap': False}
+
 	def validate_file_format(self):
 		if not self.file: return
 		if not self.check_file_format(): frappe.throw(_("File Format check failed!"))
+		if not self.previous_bank_statement: self.fill_previous_statement()
+
+	def fill_previous_statement(self):
+		previous_sta = []
+		all_previous_sta = frappe.get_all("Bank Statement", fields=['name','bank','account_no','statement_end_date'],
+							order_by='creation')
+		for sta in all_previous_sta:
+			if (sta.bank == self.bank) and (sta.account_no == self.account_no) and (getdate(self.statement_start_date) > sta.statement_end_date):
+				previous_sta.append(sta)
+
+		if not previous_sta: return
+
+		if len(previous_sta) > 1:
+			previous_sta.sort(key=lambda x: x.statement_end_date, reverse=True)
+
+		self.previous_bank_statement = previous_sta[0].name
 
 	def check_file_format(self):
 		
 		# verify that format of self.file is same as specification described in self.bank_statement_format (and its child > 
 		# table bank_statement_format.bank_statment_mapping_item)
-		sta_format = frappe.get_doc("Bank Statement Format",self.bank_statment_format)
-		try:
-			with open(get_file_path(self.file),"rb") as file:
-				header = None
-				for index,contnt in enumerate(file):
-					if index == 0:
-						header = contnt
-						break
-				if sta_format.statement_format == 'csv':
-					fields_expected = [f.source_field for f in sta_format.bank_statement_mapping_items]
-					if not set(fields_expected) <= set(header):
-						return False
-				if format.statement_format == 'next_format':
-					print 'and so on...'
-			return True
-		except:
-			frappe.log_error(frappe.get_traceback(), 'bank statement format error')
-			return False
+		sta_format = frappe.get_doc("Bank Statement Format",self.bank_statement_format)
+		return True
 
 	def convert_to_internal_format(self, csv_column_header, csv_row_field_value, bank_statement_mapping_items, eval_data):
 
@@ -61,27 +92,9 @@ class BankStatement(Document):
 				mapping_row = row
 		if not mapping_row: return
 
-		# transformation_rule from mapping_row.transformation_rule (should be a python snippet).
 		transformation_rule = mapping_row.transformation_rule
+		if not transformation_rule: transformation_rule = mapping_row.source_field_abbr
 		csv_row_field_value = self.eval_transformation(transformation_rule, mapping_row.source_field_abbr, eval_data)
-
-		#if not csv_row_field_value:
-		#	Deprecated (leave for now. Make a general return value preparation)
-		#	if 'date' in str(mapping_row.target_field).lower():
-		#		date_format = frappe.db.get_value("Bank Statement Format", self.bank_statement_format, 'date_format')
-		#		strptime_format = dateformats.get(date_format)
-		#		if strptime_format.index('%Y') == 0:
-		#			year_index = 0
-		#		else:
-		#			year_index = 2
-		#		date_str = prepare_date_str(csv_row_field_value, year_index)
-		#		try:
-		#			csv_row_field_value = str(datetime.datetime.strptime(date_str, strptime_format).date())  #00/00/0000
-		#		except Exception as e9433:
-		#			frappe.throw(_("Date format in attached file does not match that in bank statement format used"))
-
-		#	if ('amount' in str(mapping_row.target_field).lower()) or ('balance' in str(mapping_row.target_field).lower()):
-		#		csv_row_field_value = flt(csv_row_field_value)
 
 		return mapping_row.target_field, csv_row_field_value
 
@@ -89,15 +102,10 @@ class BankStatement(Document):
 		if not self.file: return
 		file_doc = frappe._dict()
 		self.bank_statement_items = []
-		bank_statement_format = frappe.get_doc("Bank Statement Format", self.bank_statement_format)
-		bank_statement_mapping_items = bank_statement_format.bank_statement_mapping_item
+		bank_statement_mapping_items = frappe.get_doc("Bank Statement Format", self.bank_statement_format).bank_statement_mapping_item
 		file_id = frappe.db.sql("""SELECT name FROM tabFile WHERE attached_to_doctype = '{0}' AND attached_to_name = '{1}'
 						""".format("Bank Statement", self.name), as_dict=1)
 		file_doc = frappe.get_doc("File",file_id[0].name)
-		# load contents of CSV file into 2d array raw_bank_statement_items
-		# create a list of maps, intermediate_bank_statement_items, to hold bank statement items based on internal > 
-		# < representation see "Bank Statement Item" definition
-		intermediate_bank_statement_items = []
 		filename, file_extension = os.path.splitext(self.file)
 
 		if file_extension == '.xlsx':
@@ -114,7 +122,9 @@ class BankStatement(Document):
 		csv_header_list = rows[0]
 		data_rows = rows[1:]
 
-		# for each statement_row in raw_bank_statement_items:
+		intermediate_bank_statement_items = []
+		# create a list of maps, intermediate_bank_statement_items, to hold bank statement items based on internal > 
+		# < representation see "Bank Statement Item" definition
 		for statement_row in data_rows:
 			bank_sta_item = dict()
 			eval_data = self.get_data_for_eval(statement_row, csv_header_list, bank_statement_mapping_items)
@@ -137,30 +147,19 @@ class BankStatement(Document):
 
 		self.save()
 
-	def process_statement(self):
-		if not self.file: frappe.throw("No statement file present")
-		if not self.validate_file_format: frappe.throw(_("File format mismatch"))
-		#with open(get_file_path(self.file)) as f_h:
-		#	header = None
-		#	for index,row in enumerate(csv.reader(f_h)):
-		#		if index == 0:
-		#			header = row
-		#			continue
-		#		self.append
-
 	def eval_transformation(self, eval_code, source_abbr, data):
 		if not eval_code:
 			frappe.msgprint(_("There is no eval code"))
 			return
 		try:
 			code_type = get_code_type(eval_code.strip())
-			if ':' in eval_code: eval_code = eval_code[eval_code.index(':')+1:]
+			if ':' in eval_code: eval_code = eval_code.split(':',1)[-1]
 			eval_data = data
 			if code_type == 'condition':
 				if not frappe.safe_eval(eval_code, None, eval_data):
 					return None
 			if code_type == 'date_format':
-				eval_result = datetime.datetime.strptime(eval_data[source_abbr].strip(), eval_code.strip())
+				eval_result = datetime.datetime.strptime(eval_data[source_abbr].strip(), eval_code.strip()).date()
 			if code_type == 'eval':
 				eval_result = frappe.safe_eval(eval_code, None, eval_data)
 
@@ -183,10 +182,6 @@ class BankStatement(Document):
 			data[source_abbr] = column_value
 
 		return data
-
-	def validate_dates(self): # ToDo
-		if date_diff(self.end_date, self.start_date) < 0:
-			frappe.throw(_("To date cannot be before From date"))
 
 	def get_account_no(self):
 		bank = frappe.get_doc("Bank", self.bank)
