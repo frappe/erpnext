@@ -449,3 +449,4 @@ erpnext.patches.v8_9.delete_gst_doctypes_for_outside_india_accounts
 erpnext.patches.v8_9.set_default_fields_in_variant_settings
 erpnext.patches.v8_9.update_billing_gstin_for_indian_account
 erpnext.patches.v9_0.fix_subscription_next_date
+erpnext.patches.v9_0.add_healthcare_domain
