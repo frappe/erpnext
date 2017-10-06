@@ -1,0 +1,33 @@
+<h2 class="text-center">{%= __("Daily Movements") %}</h2>
+
+<div>
+    <h6>{%= __("From") %} {%= dateutil.str_to_user(filters.start_date) %} {%= __("To") %} {%= dateutil.str_to_user(filters.end_date) %}</h6>
+</div>
+
+<table class="table table-condensed">
+    <thead>
+        <tr>
+            <th>{%= __("Date") %}</th>
+            <th>{%= __("Concept") %}</th>
+            <th>{%= __("Income") %}</th>
+            <th>{%= __("Expenditures") %}</th>
+            <th>{%= __("Balance") %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for line in data %}
+            <tr class="danger">
+                <td>{%= dateutil.str_to_user(line[__("Date")]) %}</td>
+                {% if line[__("Concept")] == __("Total") %}
+                    <td>{{ line[__("Concept")] }}</td>
+                {% else %}
+                    <td>{{ line[__("Concept")] }}</td>
+                {% endif %}
+                <td>{%= format_currency(line[__("Income")]) %}</td>
+                <td>{%= format_currency(line[__("Expenditures")]) %}</td>
+                <td>{%= format_currency(line[__("Balance")]) %}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+
+</table>

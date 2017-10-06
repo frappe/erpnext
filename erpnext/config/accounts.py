@@ -76,9 +76,9 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name": "Daily Movements",
-					"label": "Movimientos Diarios",
-					"doctype": "Payment Entry",
+					"name": "Income and Expenditure",
+					"label": _("Income and Expenditure"),
+					"doctype": "General Ledger",
 					"is_query_report": True
 				}
 			]

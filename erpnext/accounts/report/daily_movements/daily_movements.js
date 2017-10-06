@@ -5,8 +5,16 @@
 frappe.query_reports["Daily Movements"] = {
 	"filters": [
         {
-			"fieldname":"target_date",
-			"label": __("Target Date"),
+			"fieldname":"start_date",
+			"label": __("Start Date"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.get_today(),
+			"reqd": 1,
+			"width": "60px"
+		},
+		{
+			"fieldname":"end_date",
+			"label": __("End Date"),
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today(),
 			"reqd": 1,
@@ -18,5 +26,17 @@ frappe.query_reports["Daily Movements"] = {
 			"fieldtype": "Link",
 			"options": "Mode of Payment"
 		}
-	]
+	],
+	"formatter": function (row, cell, value, columnDef, dataContext, default_formatter) {
+	     console.log(row);
+	     value = default_formatter(row, cell, value, columnDef, dataContext);
+	     if (columnDef.id == __("Concept") && dataContext[__("Concept")] == "Total" ) {
+	        value = "<span style='color:red!important;font-weight:bold'>" + value + "</span>";
+	     }
+	     if (columnDef.id == __("Concept") && dataContext[__("Concept")] == "Balance Inicial" ) {
+	        value = "<span style='color:green!important;font-weight:bold'>" + value + "</span>";
+	     }
+	     return value;
+	}
+
 }

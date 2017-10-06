@@ -37,7 +37,7 @@ frappe.listview_settings['Item'] = {
 
 	],
 	onload: function (listview) {
-        	frappe.route_options = {"item_group": __("Products")};
+        	frappe.route_options = {"item_group": ["=",__("Products")]};
 	}
 };
 
