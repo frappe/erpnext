@@ -74,9 +74,10 @@ def validate_attendance():
 	"""
 	Check If attendance is already marked
 	"""
-	employee_details = employee()
 	if frappe.session.user == 'Administrator':
-		return
+		return False
+
+	employee_details = employee()
 
 	sql = """
 		SELECT name FROM `tabAttendance` WHERE
@@ -86,9 +87,9 @@ def validate_attendance():
 	try:
 		attendance, = frappe.db.sql(sql, as_dict=1)
 	except ValueError:
-		return
+		return False
 
-	return attendance
+	return True
 
 
 @frappe.whitelist()
