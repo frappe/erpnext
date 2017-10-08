@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe, csv, datetime, os
 from frappe import _
-from frappe.utils import flt, date_diff, getdate
+from frappe.utils import flt, date_diff, getdate, dateutils
 from frappe.model.document import Document
 from frappe.utils.file_manager import get_file_path, get_uploaded_content
 
@@ -32,11 +32,13 @@ class BankStatement(Document):
 		self.validate_dates()
 
 	def validate_dates(self):
-		previous_sta = frappe.get_all("Bank Statement", fields=['statement_start_date','bank','account_no', 'name'])
-		end_dates = [(s.name,s.statement_start_date) for s in previous_sta if (s.bank == self.bank and s.account_no == self.account_no)]
+		previous_sta = frappe.get_all("Bank Statement", fields=['statement_end_date','bank','account_no', 'name'])
+		end_dates = [(s.name,s.statement_end_date) for s in previous_sta if (s.bank == self.bank and s.account_no == self.account_no and s.statement_end_date <= getdate(self.statement_start_date))]
 		end_dates = filter(lambda x: isinstance(x[1], datetime.date), end_dates)
+		print end_dates
 		if end_dates:
 			previous_statement_end_date = sorted(end_dates, key=lambda x:x[1], reverse=True)[0]
+			print previous_statement_end_date
 		else:
 			previous_statement_end_date = ('Curent Doc', getdate(self.statement_start_date))
 		if self.statement_start_date > self.statement_end_date:
@@ -94,7 +96,8 @@ class BankStatement(Document):
 
 		transformation_rule = mapping_row.transformation_rule
 		if not transformation_rule: transformation_rule = mapping_row.source_field_abbr
-		csv_row_field_value = self.eval_transformation(transformation_rule, mapping_row.source_field_abbr.strip(), eval_data)
+		csv_row_field_value = self.eval_transformation(transformation_rule, mapping_row.source_field_abbr, eval_data)
+		eval_data[mapping_row.target_field_abbr] = csv_row_field_value
 
 		return mapping_row.target_field, csv_row_field_value
 
@@ -147,23 +150,12 @@ class BankStatement(Document):
 
 		self.save()
 
-	def eval_transformation(self, eval_code, source_abbr, data):
+	def eval_transformation(self, eval_code, source_abbr, eval_data):
 		if not eval_code:
 			frappe.msgprint(_("There is no eval code"))
 			return
 		try:
-			code_type = get_code_type(eval_code.strip())
-			if ':' in eval_code: eval_code = eval_code.split(':',1)[-1]
-			eval_data = data
-			if code_type == 'condition':
-				if not frappe.safe_eval(eval_code, None, eval_data):
-					return None
-			eval_result = frappe.safe_eval(source_abbr, None, eval_data)
-			if code_type == 'date_format':
-				eval_result = datetime.datetime.strptime(eval_data[source_abbr].strip(), eval_code.strip()).date()
-			if code_type == 'eval':
-				eval_result = frappe.safe_eval(eval_code, None, eval_data)
-
+			eval_result = frappe.safe_eval(eval_code, None, eval_data)
 			return eval_result
 
 		except NameError as err:
@@ -181,7 +173,8 @@ class BankStatement(Document):
 			source_abbr = get_source_abbr(csv_header_list[column_index], bank_statement_mapping_items)
 			if not source_abbr: continue
 			data[source_abbr] = column_value
-
+			
+		data["reformat_date"] = reformat_date
 		return data
 
 	def get_account_no(self):
@@ -228,9 +221,18 @@ def get_source_abbr(source_field, bank_statement_mapping_items):
 		if row.source_field == source_field:
 			return row.source_field_abbr
 
+def get_target_abbr(target_field, bank_statement_mapping_items):
+	for row in bank_statement_mapping_items:
+		if row.target_field == target_field:
+			return row.target_field_abbr
+
 def get_code_type(eval_code):
 	eval_code = eval_code.lower()
 	if eval_code.startswith('if'): return 'condition'
 	if eval_code.startswith('date:'): return 'date_format'
 	if eval_code.startswith('eval'): return 'eval'
 	return 'eval'
+	
+def reformat_date(date_string, from_format, to_format='%Y-%m-%d'):
+	if date_string and from_format and to_format:
+		return datetime.datetime.strptime(date_string, from_format).strftime(to_format)
