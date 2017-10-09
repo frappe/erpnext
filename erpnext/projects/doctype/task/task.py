@@ -135,14 +135,15 @@ class Task(NestedSet):
 			return True
 
 	def on_trash(self):
-		if self.check_if_child_exists():
+		if check_if_child_exists(self.name):
 			throw(_("Child Task exists for this Task. You can not delete this Task."))
 
 		self.update_nsm_model()
 
-	def check_if_child_exists(self):
-		return frappe.db.sql("""select name from `tabTask`
-			where parent_task = %s""", self.name)
+@frappe.whitelist()
+def check_if_child_exists(name):
+	return frappe.db.sql("""select name from `tabTask`
+		where parent_task = %s""", name)
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):

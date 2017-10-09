@@ -80,6 +80,21 @@ frappe.ui.form.on("Task", {
 		}
 	},
 
+	is_group: function(frm) {
+		frappe.call({
+			method:"erpnext.projects.doctype.task.task.check_if_child_exists",
+			args: {
+				name: frm.doc.name
+			},
+			callback: function(r){
+				if(r.message){
+					frappe.msgprint(__('Cannot convert it to non-group. Child Tasks exist.'));
+					frm.reload_doc();
+				}
+			}
+		})
+	},
+
 	validate: function(frm) {
 		frm.doc.project && frappe.model.remove_from_locals("Project",
 			frm.doc.project);
