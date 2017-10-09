@@ -48,6 +48,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				this.prepare_menu();
 				this.set_online_status();
 			},
+			() => this.setup_company(),
 			() => this.setup_pos_profile(),
 			() => this.make_new_invoice(),
 			() => {
@@ -286,21 +287,40 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	setup_pos_profile() {
-		return frappe.call({
-			method: 'erpnext.stock.get_item_details.get_pos_profile',
-			args: {
-				company: frappe.sys_defaults.company
-			}
-		}).then(r => {
-			this.pos_profile = r.message;
+		return new Promise(resolve => {
+			frappe.call({
+				method: 'erpnext.stock.get_item_details.get_pos_profile',
+				args: {
+					company: this.company
+				}
+			}).then(r => {
+				this.pos_profile = r.message;
 
-			if (!this.pos_profile) {
-				this.pos_profile = {
-					currency: frappe.defaults.get_default('currency'),
-					selling_price_list: frappe.defaults.get_default('selling_price_list')
-				};
+				if (!this.pos_profile) {
+					this.pos_profile = {
+						company: this.company,
+						currency: frappe.defaults.get_default('currency'),
+						selling_price_list: frappe.defaults.get_default('selling_price_list')
+					};
+				}
+				resolve();
+			});
+		})
+	}
+
+	setup_company() {
+		this.company = frappe.sys_defaults.company;
+		return new Promise(resolve => {
+			if(!this.company) {
+				frappe.prompt({fieldname:"company", options: "Company", fieldtype:"Link",
+					label: __("Select Company"), reqd: 1}, (data) => {
+						this.company = data.company;
+						resolve(this.company);
+				}, __("Select Company"));
+			} else {
+				resolve(this.company);
 			}
-		});
+		})
 	}
 
 	make_new_invoice() {
@@ -322,22 +342,25 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		const doctype = 'Sales Invoice';
 		return new Promise(resolve => {
 			if (this.frm) {
-				this.frm = get_frm(this.frm);
+				this.frm = get_frm(this.pos_profile, this.frm);
 				resolve();
 			} else {
 				frappe.model.with_doctype(doctype, () => {
-					this.frm = get_frm();
+					this.frm = get_frm(this.pos_profile);
 					resolve();
 				});
 			}
 		});
 
-		function get_frm(_frm) {
+		function get_frm(pos_profile, _frm) {
 			const page = $('<div>');
 			const frm = _frm || new _f.Frm(doctype, page, false);
 			const name = frappe.model.make_new_doc_and_get_name(doctype, true);
 			frm.refresh(name);
 			frm.doc.items = [];
+			if(!frm.doc.company) {
+				frm.set_value('company', pos_profile.company);
+			}
 			frm.set_value('is_pos', 1);
 			frm.meta.default_print_format = 'POS Invoice';
 			return frm;
