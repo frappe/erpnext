@@ -94,7 +94,7 @@ class BankStatement(Document):
 				mapping_row = row
 		if not mapping_row: return
 
-		transformation_rule = mapping_row.transformation_rule
+		transformation_rule = mapping_row.transformation_rule.strip()
 		if not transformation_rule: transformation_rule = mapping_row.source_field_abbr
 		csv_row_field_value = self.eval_transformation(transformation_rule, mapping_row.source_field_abbr, eval_data)
 		eval_data[mapping_row.target_field_abbr] = csv_row_field_value
@@ -184,37 +184,6 @@ class BankStatement(Document):
 			'currency_map': {acc.account_number:acc.currency for acc in bank.bank_accounts}
 		}
 		return ret_dict
-
-def is_number(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
-
-def prepare_date_str(s,idx=2):
-	separator = '/'
-	date_str = s.strip()
-	for sep in [',','/','.','-']:
-		if sep in s:
-			separator = sep
-			date_str = date_str.split(sep)
-			break
-	for i,n in enumerate(date_str):
-		if (i != idx) and is_number(n):
-			if len(str(n)) < 2:
-				date_str[i] = '0{}'.format(n)
-	if idx == 0:
-		dt_year = date_str[0]
-	else:
-		dt_year = date_str[2]
-	if len(str(dt_year)) <= 2:
-		if (int(dt_year) + 2000) <= int(frappe.utils.now().split('-',1)[0]):
-			dt_year = '20{}'.format(dt_year)
-		else:
-			dt_year = '19{}'.format(dt_year)
-	date_str[idx] = dt_year
-	return separator.join(date_str)
 
 def get_source_abbr(source_field, bank_statement_mapping_items):
 	for row in bank_statement_mapping_items:
