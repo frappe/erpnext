@@ -656,12 +656,16 @@ frappe.ui.form.on('Payment Entry', {
 
 	set_difference_amount: function(frm) {
 		var unallocated_amount = 0;
+
+		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
+			function(d) { return flt(d.amount) }));
+
 		if(frm.doc.party) {
 			var party_amount = frm.doc.payment_type=="Receive" ?
 				frm.doc.paid_amount : frm.doc.received_amount;
 
 			if(frm.doc.total_allocated_amount < party_amount) {
-				unallocated_amount = party_amount - frm.doc.total_allocated_amount;
+				unallocated_amount = party_amount - frm.doc.total_allocated_amount - total_deductions;
 			}
 		}
 		frm.set_value("unallocated_amount", unallocated_amount);
@@ -679,9 +683,6 @@ frappe.ui.form.on('Payment Entry', {
 		} else {
 			difference_amount = flt(frm.doc.base_paid_amount) - flt(frm.doc.base_received_amount);
 		}
-
-		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
-			function(d) { return flt(d.amount) }));
 
 		frm.set_value("difference_amount", difference_amount - total_deductions);
 
