@@ -222,6 +222,11 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	update_item_in_frm(item, field, value) {
+		if (field == 'qty' && value < 0) {
+			frappe.msgprint(__("Quantity must be positive"));
+			value = item.qty;
+		}
+
 		if (field) {
 			frappe.model.set_value(item.doctype, item.name, field, value);
 		}
@@ -518,7 +523,7 @@ class POSCart {
 
 		// Update totals
 		this.$taxes_and_totals.find('.net-total')
-			.html(format_currency(this.frm.doc.net_total, currency));
+			.html(format_currency(this.frm.doc.total, currency));
 
 		// Update taxes
 		const taxes_html = this.frm.doc.taxes.map(tax => {
@@ -943,6 +948,7 @@ class POSItems {
 			if (this.search_index[search_term]) {
 				const items = this.search_index[search_term];
 				this.render_items(items);
+				this.set_item_in_the_cart(items);
 				return;
 			}
 		} else if (item_group == "All Item Groups") {
@@ -956,17 +962,30 @@ class POSItems {
 				}
 
 				this.render_items(items);
-				if(serial_no) {
-					this.events.update_cart(items[0].item_code,
-						'serial_no', serial_no);
-					this.reset_search_field();
-				}
-				if(batch_no) {
-					this.events.update_cart(items[0].item_code,
-						'batch_no', batch_no);
-					this.reset_search_field();
-				}
+				this.set_item_in_the_cart(items, serial_no, batch_no);
 			});
+	}
+
+	set_item_in_the_cart(items, serial_no, batch_no) {
+		if (serial_no) {
+			this.events.update_cart(items[0].item_code,
+				'serial_no', serial_no);
+			this.reset_search_field();
+			return;
+		}
+
+		if (batch_no) {
+			this.events.update_cart(items[0].item_code,
+				'batch_no', batch_no);
+			this.reset_search_field();
+			return;
+		}
+
+		if (items.length === 1) {
+			this.events.update_cart(items[0].item_code,
+				'qty', '+1');
+			this.reset_search_field();
+		}
 	}
 
 	reset_search_field() {

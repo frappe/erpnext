@@ -1,4 +1,5 @@
 {
+ "condition": "{\"publish_in_hub\": 1}", 
  "creation": "2017-09-07 13:27:52.726350", 
  "docstatus": 0, 
  "doctype": "Data Migration Mapping", 
@@ -44,7 +45,7 @@
  "mapping_name": "Item to Hub Item", 
  "mapping_type": "Push", 
  "migration_id_field": "hub_sync_id", 
- "modified": "2017-09-22 15:32:12.674169", 
+ "modified": "2017-10-09 17:30:17.890337", 
  "modified_by": "Administrator", 
  "name": "Item to Hub Item", 
  "owner": "Administrator", 
