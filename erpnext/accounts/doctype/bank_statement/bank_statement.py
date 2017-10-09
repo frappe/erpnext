@@ -30,23 +30,22 @@ class BankStatement(Document):
 	def validate(self):
 		self.validate_file_format()
 		self.validate_dates()
+		if not self.previous_bank_statement: self.fill_previous_statement()
 
 	def validate_dates(self):
-		previous_sta = frappe.get_all("Bank Statement", fields=['statement_end_date','bank','account_no', 'name'])
-		end_dates = [(s.name,s.statement_end_date) for s in previous_sta if (s.bank == self.bank and s.account_no == self.account_no and s.statement_end_date <= getdate(self.statement_start_date))]
+		previous_sta = frappe.get_all("Bank Statement", fields=['statement_end_date','bank','account_no', 'name'],
+						filters={'name': ['!=', getattr(self,'name',"")]})
+		end_dates = [(s.name,s.statement_end_date) for s in previous_sta if (s.bank == self.bank \
+			and s.account_no == self.account_no and s.statement_end_date >= getdate(self.statement_start_date))]
 		end_dates = filter(lambda x: isinstance(x[1], datetime.date), end_dates)
-		print end_dates
 		if end_dates:
 			previous_statement_end_date = sorted(end_dates, key=lambda x:x[1], reverse=True)[0]
-			print previous_statement_end_date
 		else:
 			previous_statement_end_date = ('Curent Doc', getdate(self.statement_start_date))
 		if self.statement_start_date > self.statement_end_date:
 			frappe.throw(_("Statement start date cannot be later than end date"))
 		if getdate(self.statement_start_date) < previous_statement_end_date[1]:
 			prev_doc_name = previous_statement_end_date[0]
-			if getattr(self,'name',None) and self.name == prev_doc_name:
-				return
 			frappe.throw(_("Statement start date cannot be earlier than a previous statement's end date ({})".format(prev_doc_name)))
 
 	def check_end_date(self):
@@ -61,16 +60,14 @@ class BankStatement(Document):
 	def validate_file_format(self):
 		if not self.file: return
 		if not self.check_file_format(): frappe.throw(_("File Format check failed!"))
-		if not self.previous_bank_statement: self.fill_previous_statement()
 
 	def fill_previous_statement(self):
 		previous_sta = []
-		all_previous_sta = frappe.get_all("Bank Statement", fields=['name','bank','account_no','statement_end_date'],
-							order_by='creation')
+		all_previous_sta = frappe.get_all("Bank Statement", fields=['statement_end_date','bank','account_no', 'name'],
+							filters={'name': ['!=', getattr(self,'name',"")]}, order_by='creation')
 		for sta in all_previous_sta:
-			if (sta.bank == self.bank) and (sta.account_no == self.account_no) and (getdate(self.statement_start_date) > sta.statement_end_date):
+			if (sta.bank == self.bank) and (sta.account_no == self.account_no) and (getdate(self.statement_start_date) >= sta.statement_end_date):
 				previous_sta.append(sta)
-
 		if not previous_sta: return
 
 		if len(previous_sta) > 1:
@@ -194,14 +191,7 @@ def get_target_abbr(target_field, bank_statement_mapping_items):
 	for row in bank_statement_mapping_items:
 		if row.target_field == target_field:
 			return row.target_field_abbr
-
-def get_code_type(eval_code):
-	eval_code = eval_code.lower()
-	if eval_code.startswith('if'): return 'condition'
-	if eval_code.startswith('date:'): return 'date_format'
-	if eval_code.startswith('eval'): return 'eval'
-	return 'eval'
 	
-def reformat_date(date_string, from_format, to_format='%Y-%m-%d'):
-	if date_string and from_format and to_format:
-		return datetime.datetime.strptime(date_string, from_format).strftime(to_format)
+def reformat_date(date_string, from_format):
+	if date_string and from_format:
+		return datetime.datetime.strptime(date_string, from_format)
