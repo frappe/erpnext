@@ -28,7 +28,6 @@ dateformats = {
 class BankStatement(Document):
 
 	def validate(self):
-		self.validate_file_format()
 		self.validate_dates()
 		if not self.previous_bank_statement: self.fill_previous_statement()
 
@@ -42,7 +41,7 @@ class BankStatement(Document):
 			previous_statement_end_date = sorted(end_dates, key=lambda x:x[1], reverse=True)[0]
 		else:
 			previous_statement_end_date = ('Curent Doc', getdate(self.statement_start_date))
-		if self.statement_start_date > self.statement_end_date:
+		if getdate(self.statement_start_date) > getdate(self.statement_end_date):
 			frappe.throw(_("Statement start date cannot be later than end date"))
 		if getdate(self.statement_start_date) < previous_statement_end_date[1]:
 			prev_doc_name = previous_statement_end_date[0]
@@ -56,10 +55,6 @@ class BankStatement(Document):
 			if date_interval > 1:      # if start date is greater than an end date by a day
 				return {'gap': date_interval}
 		return {'gap': False}
-
-	def validate_file_format(self):
-		if not self.file: return
-		if not self.check_file_format(): frappe.throw(_("File Format check failed!"))
 
 	def fill_previous_statement(self):
 		previous_sta = []
@@ -75,12 +70,14 @@ class BankStatement(Document):
 
 		self.previous_bank_statement = previous_sta[0].name
 
-	def check_file_format(self):
+	def check_file_format(self, csv_header_list):
 		
 		# verify that format of self.file is same as specification described in self.bank_statement_format (and its child > 
 		# table bank_statement_format.bank_statment_mapping_item)
 		sta_format = frappe.get_doc("Bank Statement Format",self.bank_statement_format)
-		return True
+		if sta_format.bank != self.bank: frappe.throw(_("Bank does not match that in statement format used"))
+		source_fields = set(s.source_field for s in sta_format.bank_statement_mapping_item)
+		if not set(csv_header_list) <= source_fields: frappe.msgprint(_("The attached statement does not contain all the columns specified in the format selected"))
 
 	def convert_to_internal_format(self, csv_column_header, csv_row_field_value, bank_statement_mapping_items, eval_data):
 
@@ -121,6 +118,8 @@ class BankStatement(Document):
 
 		csv_header_list = rows[0]
 		data_rows = rows[1:]
+
+		self.check_file_format(csv_header_list)
 
 		intermediate_bank_statement_items = []
 		# create a list of maps, intermediate_bank_statement_items, to hold bank statement items based on internal > 
