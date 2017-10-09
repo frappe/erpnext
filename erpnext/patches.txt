@@ -450,3 +450,4 @@ erpnext.patches.v8_9.set_default_fields_in_variant_settings
 erpnext.patches.v8_9.update_billing_gstin_for_indian_account
 erpnext.patches.v9_0.fix_subscription_next_date
 erpnext.patches.v9_0.set_schedule_date_for_material_request_and_purchase_order
+erpnext.patches.v9_0.student_admission_childtable_migrate
