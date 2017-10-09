@@ -18,7 +18,7 @@ QUnit.test("test: HR Incident Body Part", function (assert) {
 		// save form
 		() => cur_frm.save(),
 		() => frappe.timeout(1),
-		() => assert.equal("Test body part", cur_frm.doc.department_name,
+		() => assert.equal("Test body part", cur_frm.doc.body_part,
 			'name of body part correctly saved'),
 		() => done()
 	]);
