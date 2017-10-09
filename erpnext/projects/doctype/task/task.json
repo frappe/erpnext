@@ -40,7 +40,7 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "unique": 1
+   "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 

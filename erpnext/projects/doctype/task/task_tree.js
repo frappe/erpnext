@@ -1,4 +1,4 @@
-frappe.provide("frappe.treeview_settings")
+frappe.provide("frappe.treeview_settings");
 
 frappe.treeview_settings['Task'] = {
 	get_tree_nodes: "erpnext.projects.doctype.task.task.get_children",
@@ -7,6 +7,6 @@ frappe.treeview_settings['Task'] = {
 	root_label: "Tasks",
 	ignore_fields:["parent_task"],
 	onload: function(me){
-		me.make_tree()
+		me.make_tree();
 	}
-}
+};

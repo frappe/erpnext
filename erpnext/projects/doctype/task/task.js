@@ -19,7 +19,7 @@ frappe.ui.form.on("Task", {
 	},
 
 	refresh: function(frm) {
-		frm.fields_dict['parent_task'].get_query = function(doc) {
+		frm.fields_dict['parent_task'].get_query = function() {
 			return {
 				filters: {
 					"is_group": 1,
