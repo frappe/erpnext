@@ -235,8 +235,7 @@ DocType: Purchase Invoice,Advance Payments,Pagos adelantados
 DocType: Sales Invoice Advance,Advance amount,Advance amount
 apps/erpnext/erpnext/controllers/taxes_and_totals.py +424,Advance amount cannot be greater than {0} {1},Cantidad de avance no puede ser mayor que {0} {1}
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +260,"Advance paid against {0} {1} cannot be greater \
-						than Grand Total {2}","Advance paid against {0} {1} cannot be greater \
-						than Grand Total {2}"
+						than Grand Total {2}",
 DocType: Purchase Invoice,Advances,Anticipos
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +6,Advertising,Publicidad
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +7,Aerospace,Aeroespacial
@@ -1285,8 +1284,7 @@ apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.js +128,Do you r
 apps/erpnext/erpnext/accounts/doctype/asset/asset.js +245,Do you really want to restore this scrapped asset?,¿Realmente desea restaurar este activo desechado?
 apps/erpnext/erpnext/accounts/doctype/asset/asset.js +231,Do you really want to scrap this asset?,¿Realmente desea desechar este activo?
 apps/erpnext/erpnext/schools/doctype/student_attendance_tool/student_attendance_tool.js +135,"Do you want to update attendance?<br>Present: {0}\
-					<br>Absent: {1}","Do you want to update attendance?<br>Present: {0}\
-					<br>Absent: {1}"
+					<br>Absent: {1}",
 apps/erpnext/erpnext/selling/report/inactive_customers/inactive_customers.js +14,Doctype,Daily Movements
 DocType: Maintenance Visit Purpose,Document Type,Tipo de documento
 DocType: Company,Domain,Dominio
@@ -1298,8 +1296,7 @@ DocType: Request for Quotation Supplier,Download PDF,Descargar PDF
 DocType: Upload Attendance,Download Template,Descargar plantilla
 DocType: Production Planning Tool,Download a report containing all raw materials with their latest inventory status,Descargar un informe con todas las materias primas y su inventario actual
 DocType: Upload Attendance,"Download the Template, fill appropriate data and attach the modified file.
-All dates and employee combination in the selected period will come in the template, with existing attendance records","Download the Template, fill appropriate data and attach the modified file.
-All dates and employee combination in the selected period will come in the template, with existing attendance records"
+All dates and employee combination in the selected period will come in the template, with existing attendance records",
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +179,Dr,Dr
 DocType: Asset,Draft,Borrador
 DocType: Sales Invoice Item,Drop Ship,Envío Triangulado
@@ -1440,8 +1437,7 @@ DocType: Training Event,Exam,Examen
 DocType: Assessment Plan,Examiner,Examinador
 DocType: Assessment Plan,Examiner Name,Nombre del examinador
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank."
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",
 apps/erpnext/erpnext/public/js/setup_wizard.js +346,Example: Basic Mathematics,Ejemplo: Matemáticas Básicas
 apps/erpnext/erpnext/public/js/setup_wizard.js +331,Example: Masters in Computer Science,Ejemplo: Maestría en Ciencias de la Computación
 DocType: Company,Exchange Gain / Loss Account,Cuenta de Ganancias / Pérdidas en Cambio
@@ -3475,8 +3471,7 @@ DocType: BOM Update Tool,Replace,Reemplazar
 DocType: BOM Update Tool,Replace BOM,Reference Docname
 apps/erpnext/erpnext/config/manufacturing.py +74,Replace BOM and update latest price in all BOMs,Reference Doctype
 DocType: BOM Update Tool,"Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate ""BOM Explosion Item"" table as per new BOM.
-It also updates latest price in all the BOMs.","Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate ""BOM Explosion Item"" table as per new BOM.
-It also updates latest price in all the BOMs."
+It also updates latest price in all the BOMs.",
 DocType: Lead,Replied,Respondido
 apps/erpnext/erpnext/config/learn.py +26,Report Builder,Generador de reportes
 DocType: Quality Inspection,Report Date,Fecha del reporte
@@ -3626,8 +3621,7 @@ apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.py +190,Row {0}: From 
 apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.py +121,Row {0}: Hours value must be greater than zero.,Fila {0}: valor Horas debe ser mayor que cero.
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +212,Row {0}: Invalid reference {1},Fila {0}: Referencia no válida {1}
 apps/erpnext/erpnext/accounts/doctype/c_form/c_form.py +30,"Row {0}: Invoice {1} is invalid, it might be cancelled / does not exist. \
-						Please enter a valid Invoice","Row {0}: Invoice {1} is invalid, it might be cancelled / does not exist. \
-						Please enter a valid Invoice"
+						Please enter a valid Invoice",
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +217,Row {0}: Party / Account does not match with {1} / {2} in {3} {4},Línea {0}: Socio / Cuenta no coincide con {1} / {2} en {3} {4}
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +105,Row {0}: Party Type and Party is only applicable against Receivable / Payable account,Línea {0}: el tipo de entidad es aplicable únicamente contra las cuentas de cobrar/pagar
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +103,Row {0}: Party Type and Party is required for Receivable / Payable account {1},Línea {0}: el tipo de entidad se requiere para la cuenta por cobrar/pagar {1}
@@ -3636,8 +3630,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +130,Row {0
 apps/erpnext/erpnext/controllers/selling_controller.py +205,Row {0}: Qty is mandatory,Línea {0}: La cantidad es obligatoria
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +231,Row {0}: Qty not available for {4} in warehouse {1} at posting time of the entry ({2} {3}),Fila {0}: Cantidad no está disponible para {4} en el almacén {1} en el momento de publicación de la entrada ({2} {3})
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +137,"Row {0}: To set {1} periodicity, difference between from and to date \
-						must be greater than or equal to {2}","Row {0}: To set {1} periodicity, difference between from and to date \
-						must be greater than or equal to {2}"
+						must be greater than or equal to {2}",
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +85,Row {0}: UOM Conversion Factor is mandatory,Línea {0}: El factor de conversión de (UdM) es obligatorio
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +862,Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.,Fila {0}: {1} Números de serie necesarios para el elemento {2}. Ha proporcionado {3}.
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +225,Row {0}: {1} {2} does not match with {3},Línea {0}: {1} {2} no coincide con {3}
@@ -3773,10 +3766,7 @@ DocType: Supplier Scorecard,Scorecard Actions,SSC-
 DocType: Supplier Scorecard,"Scorecard variables can be used, as well as:
 {total_score} (the total score from that period),
 {period_number} (the number of periods to present day)
-","Scorecard variables can be used, as well as:
-{total_score} (the total score from that period),
-{period_number} (the number of periods to present day)
-"
+",
 apps/erpnext/erpnext/buying/doctype/supplier_scorecard/supplier_scorecard_dashboard.py +11,Scorecards,Scheduled To Send
 DocType: Supplier Scorecard,Scoring Criteria,Scorecard Actions
 DocType: Supplier Scorecard,Scoring Setup,"Scorecard variables can be used, as well as:{total_score} (the total score from that period),{period_number} (the number of periods to present day)"
@@ -4333,8 +4323,7 @@ apps/erpnext/erpnext/config/accounts.py +192,Tax Rule for transactions.,Regla de
 apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py +40,Tax Template is mandatory.,Plantilla de impuestos es obligatorio.
 DocType: Tax Rule,Tax Type,Tipo de impuestos
 DocType: Purchase Invoice Item,"Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges","Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges"
+Used for Taxes and Charges",
 apps/erpnext/erpnext/config/buying.py +76,Tax template for buying transactions.,Plantilla de impuestos para las transacciones de compra
 apps/erpnext/erpnext/config/accounts.py +182,Tax template for selling transactions.,Plantilla de Impuestos para las transacciones de venta
 apps/erpnext/erpnext/regional/india/utils.py +29,Taxable Amount,Base Imponible
@@ -4404,8 +4393,7 @@ apps/erpnext/erpnext/templates/emails/request_for_quotation.html +7,The request 
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py +30,The selected BOMs are not for the same item,Las listas de materiales seleccionados no son para el mismo artículo
 apps/erpnext/erpnext/stock/doctype/batch/batch.py +37,The selected item cannot have Batch,El producto seleccionado no puede contener lotes
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +167,"The total Issue / Transfer quantity {0} in Material Request {1}  \
-							cannot be greater than requested quantity {2} for Item {3}","The total Issue / Transfer quantity {0} in Material Request {1}  \
-							cannot be greater than requested quantity {2} for Item {3}"
+							cannot be greater than requested quantity {2} for Item {3}",
 DocType: Purchase Invoice,The unique id for tracking all recurring invoices. It is generated on submit.,Territory is Required in POS Profile
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +36,"Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Type, Campaign, Sales Partner etc.","Luego las reglas de precios son filtradas por cliente, categoría de cliente, territorio, proveedor, tipo de proveedor, campaña, socio de ventas, etc."
 DocType: Training Event,Theory,Teoría
@@ -4951,13 +4939,13 @@ apps/erpnext/erpnext/config/accounts.py +334,"e.g. Bank, Cash, Credit Card","Los
 apps/erpnext/erpnext/config/stock.py +190,"e.g. Kg, Unit, Nos, m","por ejemplo Kg, Unidades, Metros"
 apps/erpnext/erpnext/public/js/setup_wizard.js +245,e.g. VAT,por ejemplo IVA
 DocType: Shipping Rule,example: Next Day Shipping,ejemplo : Envío express
+apps/erpnext/erpnext/accounts/report/income_and_expenditure/income_and_expenditure.html +11,from, desde
 apps/erpnext/erpnext/templates/form_grid/item_grid.html +66,hidden,email inbox
 apps/erpnext/erpnext/projects/doctype/project/project_dashboard.html +13,hours,green
 DocType: Batch,image,home
 DocType: Production Order Operation,in Minutes,icon
 DocType: Production Order Operation,"in Minutes
-Updated via 'Time Log'","in Minutes
-Updated via 'Time Log'"
+Updated via 'Time Log'",
 DocType: Cost Center,lft,in Minutes
 DocType: Production Plan Item,material_request_item,material_request_item
 apps/erpnext/erpnext/templates/includes/projects/project_tasks.html +9,modified,modificado
@@ -4972,7 +4960,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +366,receiv
 DocType: Cost Center,rgt,rgt
 DocType: Homepage Featured Product,route,red
 DocType: Activity Cost,title,tags
-apps/erpnext/erpnext/accounts/report/income_expenditure/income_expenditure.html +9,to, hasta
+apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.html +13,to,hasta
 apps/erpnext/erpnext/public/js/setup_wizard.js +207,user@example.com,usuario@ejemplo.com
 apps/erpnext/erpnext/controllers/accounts_controller.py +246,{0} '{1}' is disabled,{0} '{1}' está deshabilitado
 apps/erpnext/erpnext/accounts/utils.py +87,{0} '{1}' not in Fiscal Year {2},{0} '{1}' no esta en el año fiscal {2}
@@ -5002,11 +4990,9 @@ apps/erpnext/erpnext/stock/doctype/item/item.py +436,{0} entered twice in Item T
 apps/erpnext/erpnext/projects/doctype/activity_cost/activity_cost.py +21,{0} for {1},{0} de {1}
 apps/erpnext/erpnext/projects/doctype/project/project_dashboard.html +15,{0} hours,{0} horas
 apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation.py +84,"{0} indicates that {1} will not provide a quotation, but all items \
-					have been quoted. Updating the RFQ quote status.","{0} indicates that {1} will not provide a quotation, but all items \
-					have been quoted. Updating the RFQ quote status."
+					have been quoted. Updating the RFQ quote status.",
 apps/erpnext/erpnext/controllers/recurring_document.py +213,"{0} is an invalid email address in 'Notification \
-						Email Address'","{0} is an invalid email address in 'Notification \
-						Email Address'"
+						Email Address'",
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +31,{0} is mandatory,{0} es obligatorio
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +426,{0} is mandatory for Item {1},{0} es obligatorio para el artículo {1}
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +20,{0} is mandatory for Return,{0} es obligatorio para la devolución

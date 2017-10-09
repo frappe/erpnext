@@ -77,7 +77,7 @@ def set_account_currency(filters):
 
 def get_columns(filters):
     columns = [
-        _("Posting Date") + ":Date:90", _("Account") + ":Link/Account:160",
+        _("Posting Date") + ":Date:90", _("Account") + ":Link/Account:180",
         _("Debit") + ":Float:100", _("Credit") + ":Float:100", _("Balance") + ":Float:100"
     ]
 

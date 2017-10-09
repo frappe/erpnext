@@ -44,5 +44,15 @@ frappe.query_reports["Income and Expenditure"] = {
 				}
 			}
 		}
-	]
+	],
+	"formatter": function (row, cell, value, columnDef, dataContext, default_formatter) {
+	    value = default_formatter(row, cell, value, columnDef, dataContext);
+	    if (columnDef.id == __("Account") && dataContext[__("Account")] == "'" + __("Opening") + "'" ) {
+	        value = "<span style='color:green!important;font-weight:bold'>" + value + "</span>";
+	    }
+	    if (columnDef.id == __("Account") && dataContext[__("Account")] == "'" + __("Closing (Opening + Totals)") + "'" ) {
+	        value = "<span style='color:red!important;font-weight:bold'>" + value + "</span>";
+	    }
+	    return value;
+	}
 }

@@ -1,10 +1,14 @@
-<h2 class="text-center">{%= __("Income and Expenditures") %}</h2>
+<h2 class="text-center">{%= __("Income and Expenditure") %}</h2>
 <h4 class="text-center">
 	{% if (filters.account) { %}
 		{%= filters.account %}
 	{% } %}
 </h4>
+<h4 class="text-center">
+	{%= filters.company %}
+</h4>
 <h5 class="text-center">
+	{%= __("from") %}
 	{%= dateutil.str_to_user(filters.from_date) %}
 	{%= __("to") %}
 	{%= dateutil.str_to_user(filters.to_date) %}
