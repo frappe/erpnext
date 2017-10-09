@@ -55,11 +55,11 @@ frappe.ui.form.on('Asset', {
 				});
 			}
 
-			frm.trigger("show_graph");
+			frm.trigger("setup_chart");
 		}
 	},
 
-	show_graph: function(frm) {
+	setup_chart: function(frm) {
 		var x_intervals = [frm.doc.purchase_date];
 		var asset_values = [frm.doc.gross_purchase_amount];
 		var last_depreciation_date = frm.doc.purchase_date;
@@ -96,22 +96,15 @@ frappe.ui.form.on('Asset', {
 
 		frm.dashboard.render_graph({
 			title: "Asset Value",
-			// Make y object
-			y: [{
-				color: 'green',
-				values: asset_values,
-				formatted: asset_values.map(d => d.toFixed(2)) // Move this out
-			}],
-			x: {
-				values: x_intervals,
-				// // formatted: x_intervals, // put nice full date, two formats in all: axis and popup, passed data will only be something that can be parsed as a date object
-
-				// is_series: 1, // implied by is_time_axis
-				is_time_axis: 1,
-				format: "%d-%m-%Y",
-				// get_tooltip_format:
-				// get_axis_format:
-			}
+			data: {
+				labels: x_intervals,
+				datasets: [{
+					color: 'green',
+					values: asset_values,
+					formatted: asset_values.map(d => d.toFixed(2))
+				}]
+			},
+			type: 'line'
 		});
 	},
 
