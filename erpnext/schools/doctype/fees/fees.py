@@ -50,6 +50,7 @@ class Fees(AccountsController):
 			select g.email_address
 			from `tabGuardian` g, `tabStudent Guardian` sg
 			where g.name = sg.guardian and sg.parent = %s and sg.parenttype = 'Student'
+			and ifnull(g.email_address, '')!=''
 		""", self.student)
 
 		student_email_id = frappe.db.get_value("Student", self.student, "student_email_id")
