@@ -281,7 +281,7 @@ class PaymentEntry(AccountsController):
 		self.base_total_allocated_amount = abs(base_total_allocated_amount)
 
 	def set_unallocated_amount(self):
-		self.unallocated_amount = 0;
+		self.unallocated_amount = 0
 		if self.party:
 			party_amount = flt(self.paid_amount if self.payment_type=="Receive" else self.received_amount)
 
