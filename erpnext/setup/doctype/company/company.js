@@ -166,6 +166,7 @@ erpnext.company.setup_queries = function(frm) {
 		["cost_center", {}],
 		["round_off_cost_center", {}],
 		["depreciation_cost_center", {}]
+		["default_employee_advance_account", {"root_type": "Asset"}],
 	], function(i, v) {
 		erpnext.company.set_custom_query(frm, v);
 	});
