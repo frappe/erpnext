@@ -187,8 +187,7 @@ class BankStatement(Document):
 		import re
 		if not self.bank_statement_items: return
 		for itm in self.bank_statement_items:
-			print '\n\n'
-			print itm
+			if itm.transaction_type: continue
 			match_type = []
 			if itm.credit_amount:
 				DR_or_CR = 'CR'
@@ -196,13 +195,12 @@ class BankStatement(Document):
 				DR_or_CR = 'DR'
 			else:
 				DR_or_CR = None
-			print DR_or_CR
-			print '\n\n'
+			
 			for txn_type in frappe.get_all('Bank Transaction Type', filters={'bank': self.bank, 'debit_or_credit': DR_or_CR}, fields=['name', 'transaction_type_match_expression']):
-				txn_match = re.search(r'{}'.format(itm.transaction_description), r'{}'.format(txn_type.transaction_type_match_expression))
-				print txn_match
+				rgx = re.compile(r'{}'.format(txn_type.transaction_type_match_expression))
+				txn_match = rgx.search(r'{}'.format(itm.transaction_description))
 				if txn_match:
-					match_type.append(txn_match)
+					match_type.append(txn_type)
 			if len(match_type) != 1: continue
 			itm.transaction_type = match_type[0].name
 		self.save()
