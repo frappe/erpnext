@@ -9,7 +9,14 @@ frappe.ui.form.on('Bank Statement', {
 	refresh: (frm)=>{
 		var doc = frm.doc;
 		frm.add_custom_button(__("Process Statement"), function() {
-			frappe.call()
+			frappe.call({
+				method: 'process_statement',
+				doc: frm.doc,
+				freeze: true,
+				callback: function(r){
+					frm.refresh_field('bank_statement_items');
+				}
+			})
 		});
 		frm.add_custom_button(__("Upload Statement"), function() {
 			frappe.call({
@@ -78,3 +85,8 @@ frappe.ui.form.on('Bank Statement Item', 'jl_debit_account_type', (frm, dt, dn)=
 	}
 	frm.refresh_field('bank_statement_items');
 });
+
+frappe.ui.form.on('Bank Statement Item', 'post_manually', (frm, dt, dn)=>{
+	frappe.show_alert('Post manually')
+	return false;
+})

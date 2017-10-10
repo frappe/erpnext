@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe, csv, datetime, os
 from frappe import _
-from frappe.utils import flt, date_diff, getdate, dateutils
+from frappe.utils import flt, date_diff, getdate, dateutils, get_datetime
 from frappe.model.document import Document
 from frappe.utils.file_manager import get_file_path, get_uploaded_content
 
@@ -33,7 +33,7 @@ class BankStatement(Document):
 
 	def validate_dates(self):
 		previous_sta = frappe.get_all("Bank Statement", fields=['statement_end_date','bank','account_no', 'name'],
-						filters={'name': ['!=', getattr(self,'name',"")]})
+						filters={'name': ['!=', getattr(self,'name',"")], 'creation': ['<', getattr(self,'creation',get_datetime())]})
 		end_dates = [(s.name,s.statement_end_date) for s in previous_sta if (s.bank == self.bank \
 			and s.account_no == self.account_no and s.statement_end_date >= getdate(self.statement_start_date))]
 		end_dates = filter(lambda x: isinstance(x[1], datetime.date), end_dates)
@@ -182,6 +182,30 @@ class BankStatement(Document):
 			'currency_map': {acc.account_number:acc.currency for acc in bank.bank_accounts}
 		}
 		return ret_dict
+
+	def process_statement(self):
+		import re
+		if not self.bank_statement_items: return
+		for itm in self.bank_statement_items:
+			print '\n\n'
+			print itm
+			match_type = []
+			if itm.credit_amount:
+				DR_or_CR = 'CR'
+			elif itm.debit_amount:
+				DR_or_CR = 'DR'
+			else:
+				DR_or_CR = None
+			print DR_or_CR
+			print '\n\n'
+			for txn_type in frappe.get_all('Bank Transaction Type', filters={'bank': self.bank, 'debit_or_credit': DR_or_CR}, fields=['name', 'transaction_type_match_expression']):
+				txn_match = re.search(r'{}'.format(itm.transaction_description), r'{}'.format(txn_type.transaction_type_match_expression))
+				print txn_match
+				if txn_match:
+					match_type.append(txn_match)
+			if len(match_type) != 1: continue
+			itm.transaction_type = match_type[0].name
+		self.save()
 
 def get_source_abbr(source_field, bank_statement_mapping_items):
 	for row in bank_statement_mapping_items:
