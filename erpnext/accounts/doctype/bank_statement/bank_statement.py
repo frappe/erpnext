@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, csv, datetime, os
+import frappe, csv, datetime, os, re
 from frappe import _
 from frappe.utils import flt, date_diff, getdate, dateutils, get_datetime
 from frappe.model.document import Document
@@ -184,10 +184,10 @@ class BankStatement(Document):
 		return ret_dict
 
 	def process_statement(self):
-		import re
 		if not self.bank_statement_items: return
+		txn_type_derivation = frappe.db.get_value("Bank Statement Format", self.bank_statement_format, 'txn_type_derivation')
+		if not txn_type_derivation == "Derive Using Bank Transaction Type": return
 		for itm in self.bank_statement_items:
-			if itm.transaction_type: continue
 			match_type = []
 			if itm.credit_amount:
 				DR_or_CR = 'CR'
