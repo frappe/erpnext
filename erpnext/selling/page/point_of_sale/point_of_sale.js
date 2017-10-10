@@ -107,7 +107,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 								}
 							});
 
-							this.payment.set_title()
+							this.payment.set_title();
 						}
 						this.payment.open_modal();
 					}
