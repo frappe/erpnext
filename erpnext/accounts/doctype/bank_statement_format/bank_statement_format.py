@@ -7,4 +7,5 @@ import frappe
 from frappe.model.document import Document
 
 class BankStatementFormat(Document):
-	pass
+	def autoname(self):
+		self.name = self.bank + '-' + self.statement_format

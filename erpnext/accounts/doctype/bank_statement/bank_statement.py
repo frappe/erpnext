@@ -39,13 +39,11 @@ class BankStatement(Document):
 		end_dates = filter(lambda x: isinstance(x[1], datetime.date), end_dates)
 		if end_dates:
 			previous_statement_end_date = sorted(end_dates, key=lambda x:x[1], reverse=True)[0]
-		else:
-			previous_statement_end_date = ('Curent Doc', getdate(self.statement_start_date))
-		if getdate(self.statement_start_date) > getdate(self.statement_end_date):
-			frappe.throw(_("Statement start date cannot be later than end date"))
-		if getdate(self.statement_start_date) < previous_statement_end_date[1]:
-			prev_doc_name = previous_statement_end_date[0]
-			frappe.throw(_("Statement start date cannot be earlier than a previous statement's end date ({})".format(prev_doc_name)))
+			if getdate(self.statement_start_date) > getdate(self.statement_end_date):
+				frappe.throw(_("Statement start date cannot be later than end date"))
+			if getdate(self.statement_start_date) <= previous_statement_end_date[1]:
+				prev_doc_name = previous_statement_end_date[0]
+				frappe.throw(_("Statement start date cannot be same as or earlier than a previous statement's end date ({})".format(prev_doc_name)))
 
 	def check_end_date(self):
 		previous_sta = frappe.get_all("Bank Statement", fields=['statement_start_date','bank','account_no'])
@@ -132,6 +130,8 @@ class BankStatement(Document):
 				if not itm: continue
 
 				target_field, eval_result = itm
+				"""
+				#No need to differentiate here. Have a look at the spec I documented 
 				if target_field <> "txn_type":
 					# add eval_result to the appropriate row and column in intermediate_bank_statement_items
 					bank_sta_item[frappe.scrub(target_field)] = eval_result
@@ -139,6 +139,8 @@ class BankStatement(Document):
 					txn_type = get_txn_type(eval_result)	
 					# add txn_type to the appropriate row and column in intermediate_bank_statement_items
 					bank_sta_item[frappe.scrub(txn_type)] = txn_type
+				"""
+				bank_sta_item[frappe.scrub(target_field)] = eval_result
 			intermediate_bank_statement_items.append(bank_sta_item) if bank_sta_item else None
 
 		for sta in intermediate_bank_statement_items:
@@ -193,4 +195,4 @@ def get_target_abbr(target_field, bank_statement_mapping_items):
 	
 def reformat_date(date_string, from_format):
 	if date_string and from_format:
-		return datetime.datetime.strptime(date_string, from_format)
+		return datetime.datetime.strptime(date_string, from_format).strftime('%Y-%m-%d')
