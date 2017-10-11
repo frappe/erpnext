@@ -1,5 +1,6 @@
 employee
 leave
+employee-advance
 expense-claim
 attendance
 salary-and-payroll
