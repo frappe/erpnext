@@ -159,9 +159,14 @@ frappe.ui.form.on("Timesheet Detail", {
 });
 
 var calculate_end_time = function(frm, cdt, cdn) {
-	var child = locals[cdt][cdn];
+	let child = locals[cdt][cdn];
 
-	var d = moment(child.from_time);
+	if(!child.from_time) {
+		// if from_time value is not available then set the current datetime
+		frappe.model.set_value(cdt, cdn, "from_time", frappe.datetime.get_datetime_as_string());
+	}
+
+	let d = moment(child.from_time);
 	if(child.hours) {
 		d.add(child.hours, "hours");
 		frm._setting_hours = true;
