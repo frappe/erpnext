@@ -1187,6 +1187,8 @@ class Payment {
 			width: 800
 		});
 
+		this.set_title();
+
 		this.$body = this.dialog.body;
 
 		this.numpad = new NumberPad({
