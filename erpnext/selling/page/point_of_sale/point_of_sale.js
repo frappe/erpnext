@@ -101,16 +101,13 @@ erpnext.pos.PointOfSale = class PointOfSale {
 						if (!this.payment) {
 							this.make_payment_modal();
 						} else {
-							const mop_field = this.payment.default_mop;
-							let amount = 0.0;
 							this.frm.doc.payments.map(p => {
-								if (p.mode_of_payment == mop_field) {
-									amount = p.amount;
-									return;
+								if (p.amount) {
+									this.payment.dialog.set_value(p.mode_of_payment, p.amount);
 								}
 							});
 
-							this.payment.dialog.set_value(mop_field, flt(amount));
+							this.payment.set_title();
 						}
 						this.payment.open_modal();
 					}
@@ -1185,12 +1182,7 @@ class Payment {
 
 	make() {
 		this.set_flag();
-
-		let title = __('Total Amount {0}',
-			[format_currency(this.frm.doc.grand_total, this.frm.doc.currency)]);
-
 		this.dialog = new frappe.ui.Dialog({
-			title: title,
 			fields: this.get_fields(),
 			width: 800
 		});
@@ -1211,6 +1203,13 @@ class Payment {
 				}
 			}
 		});
+	}
+
+	set_title() {
+		let title = __('Total Amount {0}',
+			[format_currency(this.frm.doc.grand_total, this.frm.doc.currency)]);
+
+		this.dialog.set_title(title);
 	}
 
 	bind_events() {
@@ -1234,10 +1233,6 @@ class Payment {
 		const me = this;
 
 		let fields = this.frm.doc.payments.map(p => {
-			if (p.default) {
-				this.default_mop = p.mode_of_payment;
-			}
-
 			return {
 				fieldtype: 'Currency',
 				label: __(p.mode_of_payment),
