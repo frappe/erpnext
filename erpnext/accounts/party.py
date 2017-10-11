@@ -14,7 +14,7 @@ from frappe.contacts.doctype.address.address import (get_address_display,
 	get_default_address, get_company_address)
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
 from erpnext.exceptions import PartyFrozen, PartyDisabled, InvalidAccountCurrency
-from erpnext.accounts.utils import get_fiscal_year
+from erpnext.accounts.utils import get_fiscal_year, get_party_shipping_address
 from erpnext import get_default_currency, get_company_currency
 
 
@@ -76,7 +76,7 @@ def set_address_details(out, party, party_type, doctype=None, company=None):
 
 	# shipping address
 	if party_type in ["Customer", "Lead"]:
-		out.shipping_address_name = get_default_address(party_type, party.name, 'is_shipping_address')
+		out.shipping_address_name = get_party_shipping_address(party_type, party.name)
 		out.shipping_address = get_address_display(out["shipping_address_name"])
 		if doctype:
 			out.update(get_fetch_values(doctype, 'shipping_address_name', out.shipping_address_name))
