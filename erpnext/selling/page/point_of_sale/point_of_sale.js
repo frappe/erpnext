@@ -48,6 +48,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				this.prepare_menu();
 				this.set_online_status();
 			},
+			() => this.setup_company(),
 			() => this.setup_pos_profile(),
 			() => this.make_new_invoice(),
 			() => {
@@ -101,16 +102,13 @@ erpnext.pos.PointOfSale = class PointOfSale {
 						if (!this.payment) {
 							this.make_payment_modal();
 						} else {
-							const mop_field = this.payment.default_mop;
-							let amount = 0.0;
 							this.frm.doc.payments.map(p => {
-								if (p.mode_of_payment == mop_field) {
-									amount = p.amount;
-									return;
+								if (p.amount) {
+									this.payment.dialog.set_value(p.mode_of_payment, p.amount);
 								}
 							});
 
-							this.payment.dialog.set_value(mop_field, flt(amount));
+							this.payment.set_title();
 						}
 						this.payment.open_modal();
 					}
@@ -286,21 +284,40 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	setup_pos_profile() {
-		return frappe.call({
-			method: 'erpnext.stock.get_item_details.get_pos_profile',
-			args: {
-				company: frappe.sys_defaults.company
-			}
-		}).then(r => {
-			this.pos_profile = r.message;
+		return new Promise(resolve => {
+			frappe.call({
+				method: 'erpnext.stock.get_item_details.get_pos_profile',
+				args: {
+					company: this.company
+				}
+			}).then(r => {
+				this.pos_profile = r.message;
 
-			if (!this.pos_profile) {
-				this.pos_profile = {
-					currency: frappe.defaults.get_default('currency'),
-					selling_price_list: frappe.defaults.get_default('selling_price_list')
-				};
+				if (!this.pos_profile) {
+					this.pos_profile = {
+						company: this.company,
+						currency: frappe.defaults.get_default('currency'),
+						selling_price_list: frappe.defaults.get_default('selling_price_list')
+					};
+				}
+				resolve();
+			});
+		})
+	}
+
+	setup_company() {
+		this.company = frappe.sys_defaults.company;
+		return new Promise(resolve => {
+			if(!this.company) {
+				frappe.prompt({fieldname:"company", options: "Company", fieldtype:"Link",
+					label: __("Select Company"), reqd: 1}, (data) => {
+						this.company = data.company;
+						resolve(this.company);
+				}, __("Select Company"));
+			} else {
+				resolve(this.company);
 			}
-		});
+		})
 	}
 
 	make_new_invoice() {
@@ -322,22 +339,25 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		const doctype = 'Sales Invoice';
 		return new Promise(resolve => {
 			if (this.frm) {
-				this.frm = get_frm(this.frm);
+				this.frm = get_frm(this.pos_profile, this.frm);
 				resolve();
 			} else {
 				frappe.model.with_doctype(doctype, () => {
-					this.frm = get_frm();
+					this.frm = get_frm(this.pos_profile);
 					resolve();
 				});
 			}
 		});
 
-		function get_frm(_frm) {
+		function get_frm(pos_profile, _frm) {
 			const page = $('<div>');
 			const frm = _frm || new _f.Frm(doctype, page, false);
 			const name = frappe.model.make_new_doc_and_get_name(doctype, true);
 			frm.refresh(name);
 			frm.doc.items = [];
+			if(!frm.doc.company) {
+				frm.set_value('company', pos_profile.company);
+			}
 			frm.set_value('is_pos', 1);
 			frm.meta.default_print_format = 'POS Invoice';
 			return frm;
@@ -1185,15 +1205,12 @@ class Payment {
 
 	make() {
 		this.set_flag();
-
-		let title = __('Total Amount {0}',
-			[format_currency(this.frm.doc.grand_total, this.frm.doc.currency)]);
-
 		this.dialog = new frappe.ui.Dialog({
-			title: title,
 			fields: this.get_fields(),
 			width: 800
 		});
+
+		this.set_title();
 
 		this.$body = this.dialog.body;
 
@@ -1211,6 +1228,13 @@ class Payment {
 				}
 			}
 		});
+	}
+
+	set_title() {
+		let title = __('Total Amount {0}',
+			[format_currency(this.frm.doc.grand_total, this.frm.doc.currency)]);
+
+		this.dialog.set_title(title);
 	}
 
 	bind_events() {
@@ -1234,10 +1258,6 @@ class Payment {
 		const me = this;
 
 		let fields = this.frm.doc.payments.map(p => {
-			if (p.default) {
-				this.default_mop = p.mode_of_payment;
-			}
-
 			return {
 				fieldtype: 'Currency',
 				label: __(p.mode_of_payment),
