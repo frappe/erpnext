@@ -762,7 +762,7 @@ def get_party_shipping_address(doctype, name):
 		'and dl.parenttype="Address" '
 		'and '
 		'(ta.address_type="Shipping" or ta.is_shipping_address=1) '
-		'order by ta.is_shipping_address, ta.address_type desc limit 1',
+		'order by ta.is_shipping_address desc, ta.address_type desc limit 1',
 		(doctype, name)
 	)
 	if out:
