@@ -195,10 +195,11 @@ class BankStatement(Document):
 				DR_or_CR = 'DR'
 			else:
 				DR_or_CR = None
-			
-			for txn_type in frappe.get_all('Bank Transaction Type', filters={'bank': self.bank, 'debit_or_credit': DR_or_CR}, fields=['name', 'transaction_type_match_expression']):
-				rgx = re.compile(r'{}'.format(txn_type.transaction_type_match_expression))
-				txn_match = rgx.search(r'{}'.format(itm.transaction_description))
+			bnks_txn_types = frappe.get_all('Bank Transaction Type', filters={'bank': self.bank, 'debit_or_credit': DR_or_CR},
+											fields=['name', 'transaction_type_match_expression'])
+			for txn_type in bnks_txn_types:
+				rgx = re.compile(txn_type.transaction_type_match_expression)
+				txn_match = rgx.search(itm.transaction_description)
 				if txn_match:
 					match_type.append(txn_type)
 			if len(match_type) != 1: continue
