@@ -29,48 +29,53 @@ def make_custom_fields():
 
 
 def create_medical_departments():
-	depts = ["Accident and emergency care" ,"Anaesthetics", "Biochemistry", "Cardiology", "Dermatology",
-				"Diagnostic imaging", "ENT", "Gastroenterology", "General Surgery", "Gynaecology",
-				"Haematology", "Maternity", "Microbiology", "Nephrology", "Neurology", "Oncology",
-				 "Orthopaedics", "Pathology", "Physiotherapy", "Rheumatology", "Serology", "Urology"]
-	for d in depts:
+	departments = [
+		"Accident And Emergency Care" ,"Anaesthetics", "Biochemistry", "Cardiology", "Dermatology",
+		"Diagnostic Imaging", "ENT", "Gastroenterology", "General Surgery", "Gynaecology",
+		"Haematology", "Maternity", "Microbiology", "Nephrology", "Neurology", "Oncology",
+		"Orthopaedics", "Pathology", "Physiotherapy", "Rheumatology", "Serology", "Urology"
+	]
+	for department in departments:
 		mediacal_department = frappe.new_doc("Medical Department")
-		mediacal_department.department = d
+		mediacal_department.department = _(department)
 		try:
 			mediacal_department.save()
 		except frappe.DuplicateEntryError:
 			pass
 
 def create_antibiotics():
-	abt = ["Amoxicillin", "Ampicillin", "Bacampicillin", "Carbenicillin", "Cloxacillin", "Dicloxacillin",
-	 "Flucloxacillin", "Mezlocillin", "Nafcillin", "Oxacillin", "Penicillin G", "Penicillin V",
-	 "Piperacillin", "Pivampicillin", "Pivmecillinam", "Ticarcillin", "Cefacetrile (cephacetrile)",
-	 "Cefadroxil (cefadroxyl)", "Cefalexin (cephalexin)", "Cefaloglycin (cephaloglycin)",
-	 "Cefalonium (cephalonium)", "Cefaloridine (cephaloradine)", "Cefalotin (cephalothin)",
-	 "Cefapirin (cephapirin)", "Cefatrizine", "Cefazaflur", "Cefazedone", "Cefazolin (cephazolin)",
-	 "Cefradine (cephradine)", "Cefroxadine", "Ceftezole", "Cefaclor", "Cefamandole", "Cefmetazole",
-	 "Cefonicid", "Cefotetan", "Cefoxitin", "Cefprozil (cefproxil)", "Cefuroxime", "Cefuzonam",
-	 "Cefcapene", "Cefdaloxime", "Cefdinir", "Cefditoren", "Cefetamet", "Cefixime", "Cefmenoxime",
-	 "Cefodizime", "Cefotaxime", "Cefpimizole", "Cefpodoxime", "Cefteram", "Ceftibuten", "Ceftiofur",
-	 "Ceftiolene", "Ceftizoxime", "Ceftriaxone", "Cefoperazone", "Ceftazidime", "Cefclidine", "Cefepime",
-	 "Cefluprenam", "Cefoselis", "Cefozopran", "Cefpirome", "Cefquinome", "Ceftobiprole", "Ceftaroline",
-	 "Cefaclomezine","Cefaloram", "Cefaparole", "Cefcanel", "Cefedrolor", "Cefempidone", "Cefetrizole",
-	 "Cefivitril", "Cefmatilen", "Cefmepidium", "Cefovecin", "Cefoxazole", "Cefrotil", "Cefsumide",
-	 "Cefuracetime", "Ceftioxide", "Ceftazidime/Avibactam", "Ceftolozane/Tazobactam", "Aztreonam",
-	 "Imipenem", "Imipenem/cilastatin", "Doripenem", "Meropenem", "Ertapenem", "Azithromycin",
-	 "Erythromycin", "Clarithromycin", "Dirithromycin", "Roxithromycin", "Telithromycin", "Clindamycin",
-	 "Lincomycin", "Pristinamycin", "Quinupristin/dalfopristin", "Amikacin", "Gentamicin", "Kanamycin",
-	 "Neomycin", "Netilmicin", "Paromomycin", "Streptomycin", "Tobramycin", "Flumequine", "Nalidixic acid",
-	 "Oxolinic acid", "Piromidic acid", "Pipemidic acid", "Rosoxacin", "Ciprofloxacin", "Enoxacin",
-	 "Lomefloxacin", "Nadifloxacin", "Norfloxacin", "Ofloxacin", "Pefloxacin", "Rufloxacin", "Balofloxacin",
-	 "Gatifloxacin", "Grepafloxacin", "Levofloxacin", "Moxifloxacin", "Pazufloxacin", "Sparfloxacin",
-	 "Temafloxacin", "Tosufloxacin", "Besifloxacin", "Clinafloxacin", "Gemifloxacin",
-	 "Sitafloxacin", "Trovafloxacin", "Prulifloxacin", "Sulfamethizole", "Sulfamethoxazole",
-	 "Sulfisoxazole", "Trimethoprim-Sulfamethoxazole", "Demeclocycline", "Doxycycline", "Minocycline",
-	 "Oxytetracycline", "Tetracycline", "Tigecycline", "Chloramphenicol", "Metronidazole",
-	 "Tinidazole", "Nitrofurantoin", "Vancomycin", "Teicoplanin", "Telavancin", "Linezolid",
-	 "Cycloserine 2", "Rifampin", "Rifabutin", "Rifapentine", "Rifalazil", "Bacitracin", "Polymyxin B",
-	 "Viomycin", "Capreomycin"]
+	abt = [
+		"Amoxicillin", "Ampicillin", "Bacampicillin", "Carbenicillin", "Cloxacillin", "Dicloxacillin",
+		"Flucloxacillin", "Mezlocillin", "Nafcillin", "Oxacillin", "Penicillin G", "Penicillin V",
+		"Piperacillin", "Pivampicillin", "Pivmecillinam", "Ticarcillin", "Cefacetrile (cephacetrile)",
+		"Cefadroxil (cefadroxyl)", "Cefalexin (cephalexin)", "Cefaloglycin (cephaloglycin)",
+		"Cefalonium (cephalonium)", "Cefaloridine (cephaloradine)", "Cefalotin (cephalothin)",
+		"Cefapirin (cephapirin)", "Cefatrizine", "Cefazaflur", "Cefazedone", "Cefazolin (cephazolin)",
+		"Cefradine (cephradine)", "Cefroxadine", "Ceftezole", "Cefaclor", "Cefamandole", "Cefmetazole",
+		"Cefonicid", "Cefotetan", "Cefoxitin", "Cefprozil (cefproxil)", "Cefuroxime", "Cefuzonam",
+		"Cefcapene", "Cefdaloxime", "Cefdinir", "Cefditoren", "Cefetamet", "Cefixime", "Cefmenoxime",
+		"Cefodizime", "Cefotaxime", "Cefpimizole", "Cefpodoxime", "Cefteram", "Ceftibuten", "Ceftiofur",
+		"Ceftiolene", "Ceftizoxime", "Ceftriaxone", "Cefoperazone", "Ceftazidime", "Cefclidine", "Cefepime",
+		"Cefluprenam", "Cefoselis", "Cefozopran", "Cefpirome", "Cefquinome", "Ceftobiprole", "Ceftaroline",
+		"Cefaclomezine","Cefaloram", "Cefaparole", "Cefcanel", "Cefedrolor", "Cefempidone", "Cefetrizole",
+		"Cefivitril", "Cefmatilen", "Cefmepidium", "Cefovecin", "Cefoxazole", "Cefrotil", "Cefsumide",
+		"Cefuracetime", "Ceftioxide", "Ceftazidime/Avibactam", "Ceftolozane/Tazobactam", "Aztreonam",
+		"Imipenem", "Imipenem/cilastatin", "Doripenem", "Meropenem", "Ertapenem", "Azithromycin",
+		"Erythromycin", "Clarithromycin", "Dirithromycin", "Roxithromycin", "Telithromycin", "Clindamycin",
+		"Lincomycin", "Pristinamycin", "Quinupristin/dalfopristin", "Amikacin", "Gentamicin", "Kanamycin",
+		"Neomycin", "Netilmicin", "Paromomycin", "Streptomycin", "Tobramycin", "Flumequine", "Nalidixic acid",
+		"Oxolinic acid", "Piromidic acid", "Pipemidic acid", "Rosoxacin", "Ciprofloxacin", "Enoxacin",
+		"Lomefloxacin", "Nadifloxacin", "Norfloxacin", "Ofloxacin", "Pefloxacin", "Rufloxacin", "Balofloxacin",
+		"Gatifloxacin", "Grepafloxacin", "Levofloxacin", "Moxifloxacin", "Pazufloxacin", "Sparfloxacin",
+		"Temafloxacin", "Tosufloxacin", "Besifloxacin", "Clinafloxacin", "Gemifloxacin",
+		"Sitafloxacin", "Trovafloxacin", "Prulifloxacin", "Sulfamethizole", "Sulfamethoxazole",
+		"Sulfisoxazole", "Trimethoprim-Sulfamethoxazole", "Demeclocycline", "Doxycycline", "Minocycline",
+		"Oxytetracycline", "Tetracycline", "Tigecycline", "Chloramphenicol", "Metronidazole",
+		"Tinidazole", "Nitrofurantoin", "Vancomycin", "Teicoplanin", "Telavancin", "Linezolid",
+		"Cycloserine 2", "Rifampin", "Rifabutin", "Rifapentine", "Rifalazil", "Bacitracin", "Polymyxin B",
+		"Viomycin", "Capreomycin"
+	]
+
 	for a in abt:
 		antibiotic = frappe.new_doc("Antibiotic")
 		antibiotic.antibiotic_name = a
@@ -190,21 +195,21 @@ def create_healthcare_item_groups():
 
 def create_lab_test_items():
 	records = [
-		{"doctype": "Item", "item_code": "MCH", "item_name": "MCH", "item_group": "Laboratory",
+		{"doctype": "Item", "item_code": "MCH", "item_name": "MCH", "item_group": _("Laboratory"),
 			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "LDL", "item_name": "LDL", "item_group": "Laboratory",
+		{"doctype": "Item", "item_code": "LDL", "item_name": "LDL", "item_group": _("Laboratory"),
 			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "GTT", "item_name": "GTT", "item_group": "Laboratory",
+		{"doctype": "Item", "item_code": "GTT", "item_name": "GTT", "item_group": _("Laboratory"),
 			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "HDL", "item_name": "HDL", "item_group": "Laboratory",
+		{"doctype": "Item", "item_code": "HDL", "item_name": "HDL", "item_group": _("Laboratory"),
 			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "BILT", "item_name": "BILT", "item_group": "Laboratory",
+		{"doctype": "Item", "item_code": "BILT", "item_name": "BILT", "item_group": _("Laboratory"),
 			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "BILD", "item_name": "BILD", "item_group": "Laboratory",
+		{"doctype": "Item", "item_code": "BILD", "item_name": "BILD", "item_group": _("Laboratory"),
 			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "BP", "item_name": "BP", "item_group": "Laboratory",
+		{"doctype": "Item", "item_code": "BP", "item_name": "BP", "item_group": _("Laboratory"),
 			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1},
-		{"doctype": "Item", "item_code": "BS", "item_name": "BS", "item_group": "Laboratory",
+		{"doctype": "Item", "item_code": "BS", "item_name": "BS", "item_group": _("Laboratory"),
 			"stock_uom": _("Unit"), "is_stock_item": 0, "is_purchase_item": 0, "is_sales_item": 1}
 	]
 	insert_record(records)
@@ -212,43 +217,43 @@ def create_lab_test_items():
 def create_lab_test_template():
 	records = [
 		{"doctype": "Lab Test Template", "name": "MCH","test_name": "MCH","test_code": "MCH",
-		"test_group": "Laboratory","department": "Haematology","item": "MCH",
+		"test_group": _("Laboratory"),"department": _("Haematology"),"item": "MCH",
 		"test_template_type": "Single","is_billable": 1,"test_rate": 0.0,"test_uom": "Microgram",
 		"test_normal_range": "27 - 32 Microgram",
 		"sensitivity": 0,"test_description": "Mean Corpuscular Hemoglobin"},
 		{"doctype": "Lab Test Template", "name": "LDL","test_name": "LDL (Serum)","test_code": "LDL",
-		"test_group": "Laboratory","department": "Biochemistry",
+		"test_group": _("Laboratory"),"department": _("Biochemistry"),
 		"item": "LDL","test_template_type": "Single",
 		"is_billable": 1,"test_rate": 0.0,"test_uom": "mg / dl","test_normal_range": "70 - 160 mg/dlLow-density Lipoprotein (LDL)",
 		"sensitivity": 0,"test_description": "Low-density Lipoprotein (LDL)"},
 		{"doctype": "Lab Test Template", "name": "GTT","test_name": "GTT","test_code": "GTT",
-		"test_group": "Laboratory","department": "Haematology",
+		"test_group": _("Laboratory"),"department": _("Haematology"),
 		"item": "GTT","test_template_type": "Single",
 		"is_billable": 1,"test_rate": 0.0,"test_uom": "mg / dl","test_normal_range": "Less than 85 mg/dl",
 		"sensitivity": 0,"test_description": "Glucose Tolerance Test"},
 		{"doctype": "Lab Test Template", "name": "HDL","test_name": "HDL (Serum)","test_code": "HDL",
-		"test_group": "Laboratory","department": "Biochemistry",
+		"test_group": _("Laboratory"),"department": _("Biochemistry"),
 		"item": "HDL","test_template_type": "Single",
 		"is_billable": 1,"test_rate": 0.0,"test_uom": "mg / dl","test_normal_range": "35 - 65 mg/dl",
 		"sensitivity": 0,"test_description": "High-density Lipoprotein (HDL)"},
 		{"doctype": "Lab Test Template", "name": "BILT","test_name": "Bilirubin Total","test_code": "BILT",
-		"test_group": "Laboratory","department": "Biochemistry",
+		"test_group": _("Laboratory"),"department": _("Biochemistry"),
 		"item": "BILT","test_template_type": "Single",
 		"is_billable": 1,"test_rate": 0.0,"test_uom": "mg / dl","test_normal_range": "0.2 - 1.2 mg / dl",
 		"sensitivity": 0,"test_description": "Bilirubin Total"},
 		{"doctype": "Lab Test Template", "name": "BILD","test_name": "Bilirubin Direct","test_code": "BILD",
-		"test_group": "Laboratory","department": "Biochemistry",
+		"test_group": _("Laboratory"),"department": _("Biochemistry"),
 		"item": "BILD","test_template_type": "Single",
 		"is_billable": 1,"test_rate": 0.0,"test_uom": "mg / dl","test_normal_range": "0.4 mg / dl",
 		"sensitivity": 0,"test_description": "Bilirubin Direct"},
 
 		{"doctype": "Lab Test Template", "name": "BP","test_name": "Bile Pigment","test_code": "BP",
-		"test_group": "Laboratory","department": "Pathology",
+		"test_group": _("Laboratory"),"department": _("Pathology"),
 		"item": "BP","test_template_type": "Single",
 		"is_billable": 1,"test_rate": 0.0,"test_uom": "","test_normal_range": "",
 		"sensitivity": 0,"test_description": "Bile Pigment"},
 		{"doctype": "Lab Test Template", "name": "BS","test_name": "Bile Salt","test_code": "BS",
-		"test_group": "Laboratory","department": "Pathology",
+		"test_group": _("Laboratory"),"department": _("Pathology"),
 		"item": "BS","test_template_type": "Single",
 		"is_billable": 1,"test_rate": 0.0,"test_uom": "","test_normal_range": "",
 		"sensitivity": 0,"test_description": "Bile Salt"}
@@ -257,12 +262,12 @@ def create_lab_test_template():
 
 def create_sensitivity():
 	records = [
-		{"doctype": "Sensitivity", "sensitivity": "Low Sensitivity"},
-		{"doctype": "Sensitivity", "sensitivity": "High Sensitivity"},
-		{"doctype": "Sensitivity", "sensitivity": "Moderate Sensitivity"},
-		{"doctype": "Sensitivity", "sensitivity": "Susceptible"},
-		{"doctype": "Sensitivity", "sensitivity": "Resistant"},
-		{"doctype": "Sensitivity", "sensitivity": "Intermediate"}
+		{"doctype": "Sensitivity", "sensitivity": _("Low Sensitivity")},
+		{"doctype": "Sensitivity", "sensitivity": _("High Sensitivity")},
+		{"doctype": "Sensitivity", "sensitivity": _("Moderate Sensitivity")},
+		{"doctype": "Sensitivity", "sensitivity": _("Susceptible")},
+		{"doctype": "Sensitivity", "sensitivity": _("Resistant")},
+		{"doctype": "Sensitivity", "sensitivity": _("Intermediate")}
 	]
 	insert_record(records)
 
