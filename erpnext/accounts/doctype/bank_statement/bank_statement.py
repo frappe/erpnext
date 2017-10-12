@@ -127,6 +127,7 @@ class BankStatement(Document):
 			bank_sta_item = dict()
 			eval_data = self.get_data_for_eval(statement_row, csv_header_list, bank_statement_mapping_items)
 			for column_index, column_value in enumerate(statement_row):
+				column_value = str(column_value) if column_value else None
 				itm = self.convert_to_internal_format(csv_header_list[column_index], column_value, bank_statement_mapping_items, eval_data)
 				if not itm: continue
 
@@ -171,7 +172,7 @@ class BankStatement(Document):
 		for column_index, column_value in enumerate(statement_row):
 			source_abbr = get_source_abbr(csv_header_list[column_index], bank_statement_mapping_items)
 			if not source_abbr: continue
-			data[source_abbr] = column_value
+			data[source_abbr] = str(column_value) if column_value else None
 			
 		data["reformat_date"] = reformat_date
 		return data
