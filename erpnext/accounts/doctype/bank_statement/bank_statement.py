@@ -86,10 +86,11 @@ class BankStatement(Document):
 				mapping_row = row
 		if not mapping_row: return
 
-		transformation_rule = mapping_row.transformation_rule.strip()
-		if not transformation_rule: transformation_rule = mapping_row.source_field_abbr
-		csv_row_field_value = self.eval_transformation(transformation_rule, mapping_row.source_field_abbr, eval_data)
-		eval_data[mapping_row.target_field_abbr] = csv_row_field_value
+		if not (mapping_row.source_field_abbr or mapping_row.transformation_rule):
+			return mapping_row.target_field, csv_row_field_value
+		transformation_rule = mapping_row.source_field_abbr.strip() if not mapping_row.transformation_rule else mapping_row.transformation_rule.strip()
+		csv_row_field_value = self.eval_transformation(transformation_rule, mapping_row.source_field_abbr.strip(), eval_data)
+		eval_data[mapping_row.target_field_abbr.strip()] = csv_row_field_value
 
 		return mapping_row.target_field, csv_row_field_value
 
