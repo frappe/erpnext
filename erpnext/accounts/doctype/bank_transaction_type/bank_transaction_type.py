@@ -8,4 +8,4 @@ from frappe.model.document import Document
 
 class BankTransactionType(Document):
 	def autoname(self):
-		self.name = self.bank + '-' + self.transaction_type.strip() + '-' + self.debit_or_credit
+		self.name = self.bank_statement_format.strip() + '-' + self.transaction_type.strip() + '-' + self.debit_or_credit

@@ -1,7 +1,7 @@
 {
  "allow_copy": 0, 
  "allow_guest_to_view": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "", 
  "beta": 0, 
@@ -416,7 +416,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-10-09 23:23:03.200264", 
+ "modified": "2017-10-13 01:49:44.540860", 
  "modified_by": "chude.osiegbu@manqala.com", 
  "module": "Accounts", 
  "name": "Bank", 

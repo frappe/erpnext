@@ -73,7 +73,8 @@ class BankStatement(Document):
 		# verify that format of self.file is same as specification described in self.bank_statement_format (and its child > 
 		# table bank_statement_format.bank_statment_mapping_item)
 		sta_format = frappe.get_doc("Bank Statement Format",self.bank_statement_format)
-		if sta_format.bank != self.bank: frappe.throw(_("Bank does not match that in statement format used"))
+		# the link between statement format and bank has been removed making the line below unnecessary
+		# if sta_format.bank != self.bank: frappe.throw(_("Bank does not match that in statement format used"))
 		source_fields = set(s.source_field for s in sta_format.bank_statement_mapping_item)
 		if not set(csv_header_list) <= source_fields: frappe.msgprint(_("The attached statement does not contain all the columns specified in the format selected"))
 
@@ -197,14 +198,16 @@ class BankStatement(Document):
 				DR_or_CR = 'DR'
 			else:
 				DR_or_CR = None
-			bnks_txn_types = frappe.get_all('Bank Transaction Type', filters={'bank': self.bank, 'debit_or_credit': DR_or_CR},
+			bnks_txn_types = frappe.get_all('Bank Transaction Type', filters={'bank_statement_format': self.bank_statement_format, 'debit_or_credit': DR_or_CR},
 											fields=['name', 'transaction_type_match_expression'])
 			for txn_type in bnks_txn_types:
 				rgx = re.compile(txn_type.transaction_type_match_expression)
 				txn_match = rgx.search(itm.transaction_description)
 				if txn_match:
 					match_type.append(txn_type)
-			if len(match_type) != 1: continue
+			# @innocent in the check below, we need to set the status of the bank statement item to show that either no item was found or more than one item was found
+			if len(match_type) != 1:
+				continue
 			itm.transaction_type = match_type[0].name
 		self.save()
 
