@@ -69,17 +69,12 @@ class BankStatement(Document):
 		self.previous_bank_statement = previous_sta[0].name
 
 	def check_file_format(self, csv_header_list):
-		
-		# verify that format of self.file is same as specification described in self.bank_statement_format (and its child > 
-		# table bank_statement_format.bank_statment_mapping_item)
 		sta_format = frappe.get_doc("Bank Statement Format",self.bank_statement_format)
-		# the link between statement format and bank has been removed making the line below unnecessary
-		# if sta_format.bank != self.bank: frappe.throw(_("Bank does not match that in statement format used"))
 		source_fields = set(s.source_field for s in sta_format.bank_statement_mapping_item)
-		if not set(csv_header_list) <= source_fields: frappe.msgprint(_("The attached statement does not contain all the columns specified in the format selected"))
+		if not (set(csv_header_list) >= source_fields):
+			frappe.msgprint(_("The attached statement does not contain all the columns specified in the format selected"))
 
 	def convert_to_internal_format(self, csv_column_header, csv_row_field_value, bank_statement_mapping_items, eval_data):
-
 		# select mapping_row from bank_statement_mapping_item where source_field = csv_column_header
 		mapping_row = None
 		for row in bank_statement_mapping_items:
@@ -131,18 +126,7 @@ class BankStatement(Document):
 				column_value = str(column_value) if column_value else None
 				itm = self.convert_to_internal_format(csv_header_list[column_index], column_value, bank_statement_mapping_items, eval_data)
 				if not itm: continue
-
 				target_field, eval_result = itm
-				"""
-				#No need to differentiate here. Have a look at the spec I documented 
-				if target_field <> "txn_type":
-					# add eval_result to the appropriate row and column in intermediate_bank_statement_items
-					bank_sta_item[frappe.scrub(target_field)] = eval_result
-				elif target_field == "txn_type":
-					txn_type = get_txn_type(eval_result)	
-					# add txn_type to the appropriate row and column in intermediate_bank_statement_items
-					bank_sta_item[frappe.scrub(txn_type)] = txn_type
-				"""
 				bank_sta_item[frappe.scrub(target_field)] = eval_result
 			intermediate_bank_statement_items.append(bank_sta_item) if bank_sta_item else None
 
@@ -198,11 +182,11 @@ class BankStatement(Document):
 				DR_or_CR = 'DR'
 			else:
 				DR_or_CR = None
-			bnks_txn_types = frappe.get_all('Bank Transaction Type', filters={'bank_statement_format': self.bank_statement_format, 'debit_or_credit': DR_or_CR},
+			bnks_txn_types = frappe.get_all('Bank Transaction Type',
+											filters={'bank_statement_format': self.bank_statement_format, 'debit_or_credit': DR_or_CR},
 											fields=['name', 'transaction_type_match_expression'])
 			for txn_type in bnks_txn_types:
-				rgx = re.compile(txn_type.transaction_type_match_expression)
-				txn_match = rgx.search(itm.transaction_description)
+				txn_match = rgx.search(txn_type.transaction_type_match_expression, itm.transaction_description)
 				if txn_match:
 					match_type.append(txn_type)
 			# @innocent in the check below, we need to set the status of the bank statement item to show that either no item was found or more than one item was found
@@ -215,11 +199,6 @@ def get_source_abbr(source_field, bank_statement_mapping_items):
 	for row in bank_statement_mapping_items:
 		if row.source_field == source_field:
 			return row.source_field_abbr
-
-def get_target_abbr(target_field, bank_statement_mapping_items):
-	for row in bank_statement_mapping_items:
-		if row.target_field == target_field:
-			return row.target_field_abbr
 	
 def reformat_date(date_string, from_format):
 	if date_string and from_format:
