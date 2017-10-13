@@ -37,6 +37,10 @@ $.extend(erpnext, {
 		}
 	},
 
+	allow_stale_rate: () => {
+		return cint(frappe.boot.sysdefaults.allow_stale) || 0;
+	},
+
 	setup_serial_no: function() {
 		var grid_row = cur_frm.open_grid_row();
 		if(!grid_row || !grid_row.grid_form.fields_dict.serial_no ||
