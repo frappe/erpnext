@@ -116,7 +116,7 @@ class calculate_taxes_and_totals(object):
 						+ tax.tax_fraction_for_current_item
 
 				cumulated_tax_fraction += tax.tax_fraction_for_current_item
-
+		# frappe.msgprint(""+item.net)
 			if cumulated_tax_fraction and not self.discount_amount_applied and item.qty:
 				item.net_amount = flt(item.amount / (1 + cumulated_tax_fraction), item.precision("net_amount"))
 				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate"))

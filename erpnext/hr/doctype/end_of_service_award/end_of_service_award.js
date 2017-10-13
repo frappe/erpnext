@@ -1,6 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-cur_frm.add_fetch('employee','department','department');
+cur_frm.add_fetch('employee', 'department', 'department');
 // cur_frm.cscript.custom_employee = function(doc, cdt, cd) {
 //     alert("Ggg");
 // }
@@ -8,14 +8,13 @@ cur_frm.add_fetch("employee", "date_of_joining", "work_start_date");
 
 frappe.ui.form.on('End of Service Award', {
     refresh: function() {
-    if (!cur_frm.doc.__islocal) {
-        	for (var key in cur_frm.fields_dict){
-                cur_frm.fields_dict[key].df.read_only =1; 
+        if (!cur_frm.doc.__islocal) {
+            for (var key in cur_frm.fields_dict) {
+                cur_frm.fields_dict[key].df.read_only = 1;
             }
             cur_frm.disable_save();
-        }
-        else{
-        	cur_frm.enable_save();
+        } else {
+            cur_frm.enable_save();
         }
 
         cur_frm.add_fetch("employee", "employment_type", "type_of_contract");
@@ -55,8 +54,21 @@ frappe.ui.form.on('End of Service Award', {
             cur_frm.set_df_property("reason", "options", "");
         }
     },
-    end_date: function() {
+    end_date: function(frm) {
+        frm.trigger("get_days_months_years");
 
+        frappe.call({
+            method: "erpnext.hr.doctype.end_of_service_award.end_of_service_award.get_award",
+            args: {
+                EOS_doc: frm.doc
+            },
+            callback: function(r) {
+                console.log(r);
+
+            }
+        });
+    },
+    get_days_months_years: function(frm) {
         start = cur_frm.doc.work_start_date;
         end = cur_frm.doc.end_date;
 
@@ -83,6 +95,7 @@ frappe.ui.form.on('End of Service Award', {
 
         };
 
+
     },
     validate: function(frm) {
         frm.trigger("get_award");
@@ -92,7 +105,7 @@ frappe.ui.form.on('End of Service Award', {
         frm.trigger("get_award");
     },
 
-    get_award: function() {
+    get_award: function(frm) {
 
         if (!cur_frm.doc.reason) {
             frappe.throw("أرجو اختيار سبب نهاية الخدمة");
@@ -114,28 +127,7 @@ frappe.ui.form.on('End of Service Award', {
         });
 
 
-        start = cur_frm.doc.work_start_date;
-        end = cur_frm.doc.end_date;
-
-        if (end < start) {
-            frappe.throw("تاريخ نهاية العمل يجب أن يكون أكبر من تاريخ بداية العمل");
-        } else {
-            var date1 = new Date(start);
-            var date2 = new Date(end);
-            var timeDiff = Math.abs(date2.getTime() - date1.getTime());
-            var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
-            years = Math.floor(diffDays / 365);
-            daysrem = diffDays - (years * 365);
-            months = Math.floor(daysrem / 30.416);
-            monthss = months
-            days = Math.ceil(daysrem - (months * 30.416));
-            cur_frm.set_value('years', years);
-            cur_frm.set_value('months', monthss);
-            cur_frm.set_value('days', days);
-
-        };
-
-
+        frm.trigger("get_days_months_years");
 
         var salary = cur_frm.doc.salary;
         var years = parseInt(cur_frm.doc.years) + (parseInt(cur_frm.doc.months) / 12) + (parseInt(cur_frm.doc.days) / 365);
@@ -184,8 +176,7 @@ frappe.ui.form.on('End of Service Award', {
                     }
                     if (typeof(result) === 'number') {
                         cur_frm.set_value('award', result);
-                    }
-                    else{
+                    } else {
                         cur_frm.set_value('award', result);
                     }
                     // (result).toFixed(2)
@@ -198,8 +189,7 @@ frappe.ui.form.on('End of Service Award', {
                     }
                     if (typeof(result) === 'number') {
                         cur_frm.set_value('award', result);
-                    }
-                    else{
+                    } else {
                         cur_frm.set_value('award', result);
                     }
                     console.log(result);

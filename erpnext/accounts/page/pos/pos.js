@@ -733,6 +733,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		});
 
 		this.wrapper.find('input.discount-amount').on("change", function() {
+			alert("mkmkljo")
 			me.frm.doc.discount_amount = flt($(this).val(), precision("discount_amount"));
 			me.frm.doc.additional_discount_percentage = 0.0;
 			me.wrapper.find('input.discount-percentage').val(0);
