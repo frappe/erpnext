@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-#~ from umalqurra.hijri_date import HijriDate
+from umalqurra.hijri_date import HijriDate
 import datetime
 import json
 
