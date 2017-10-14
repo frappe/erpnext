@@ -6,22 +6,64 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import msgprint, _
+from erpnext.hr.doctype.end_of_service_award.end_of_service_award import get_award
+from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_link_to_form, \
+    comma_or, get_fullname, add_years, add_months, add_days, nowdate, get_first_day, get_last_day
 
 class EmployeeResignation(Document):
-	
+
 	def on_submit(self):
 		emp = frappe.get_doc("Employee",self.employee)
 		emp.status ="Left"
 		emp.relieving_date =self.last_working_date
 		emp.save(ignore_permissions=True)
-		eos_award=frappe.new_doc("End of Service Award")
-		eos_award.employee=self.employee
-		eos_award.end_date=self.last_working_date
+
+
+		salary = self.get_salary()
+		award_info = get_award(self.date_of_joining, self.last_working_date, salary,self.employment_type, "استقالة العامل")
+
+		eos_award = frappe.new_doc("End of Service Award")
+		eos_award.employee = self.employee
+		eos_award.end_date = self.last_working_date
+		eos_award.salary = salary
 		eos_award.reason="استقالة العامل"
+		eos_award.workflow_state="Pending"
+		eos_award.days = award_info['days']
+		eos_award.months = award_info['months']
+		eos_award.years = award_info['years']
+		eos_award.award = award_info['award']
 		eos_award.insert()
 
-	def validate(self):
+	def get_salary(self):
+		# award_info = get_award(self)
+		# frappe.throw(str(award_info))
+		start_date = get_first_day(getdate(nowdate()))
+		end_date = get_last_day(getdate(nowdate()))
+		doc = frappe.new_doc("Salary Slip")
+		doc.salary_slip_based_on_timesheet="0"
+
+		doc.payroll_frequency= "Monthly"
+		doc.start_date= start_date
+		doc.end_date= end_date
+		doc.employee= self.employee
+		doc.employee_name= self.employee_name
+		doc.company= "Tawari"
+		doc.posting_date= start_date
 		
+		doc.insert()
+
+
+		grosspay =doc.gross_pay
+		result=grosspay
+		if result:
+		    return result
+		else:
+		    frappe.throw("لا يوجد قسيمة راتب لهذا الموظف")
+	
+		
+
+	def validate(self):
+
 		if not self.last_working_date:
 			frappe.throw("Please enter your last working date")
 

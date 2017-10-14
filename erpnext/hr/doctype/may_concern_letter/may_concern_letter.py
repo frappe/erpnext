@@ -5,12 +5,25 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+#~ from umalqurra.hijri_date import HijriDate
+import datetime
 import json
 
 class MayConcernLetter(Document):
 	
+
+
+	def get_hijry(self):
+
+		datee = datetime.datetime.strptime(frappe.utils.today(), "%Y-%m-%d")
+		um = HijriDate(datee.year,datee.month,datee.day,gr=True)
+		return str('هـ'+str(int(um.year))+str(um.month_name) + str(int(um.day)))
+
+
+
 	def validate(self):
 		self.fieldsvalidate()
+		self.hijry=self.get_hijry()
 		self.salary=self.get_salary()
 		if self.workflow_state:
 			if "Rejected" in self.workflow_state:

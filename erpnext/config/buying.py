@@ -24,6 +24,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Quotation Opening",
+					"description": _("Quotation Opening."),
+				},
+				{
+					"type": "doctype",
 					"name": "Purchase Order",
 					"description": _("Purchase Orders given to Suppliers."),
 				},
