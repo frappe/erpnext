@@ -72,6 +72,7 @@ class PaymentEntry(AccountsController):
 			nammeing_doc.flags.ignore_permissions = True
 			nammeing_doc.parent = "Enhanced Nameing"
 			nammeing_doc.parenttype = "Enhanced Nameing"
+			nammeing_doc.parentfield='enhanced_nameing'
 			nammeing_doc.index_value = 1
 			nammeing_doc.year = str(getdate(self.posting_date).year)
 			nammeing_doc.name_of_doc = self.doctype
@@ -402,12 +403,12 @@ class PaymentEntry(AccountsController):
 		if self.party_account:
 			if self.payment_type=="Receive":
 				against_account = self.paid_to
-				the_reson = self.reason_to
-				the_description = self.description_to
+				#~ the_reson = self.reason_to
+				the_description = self.description
 			else:
 				 against_account = self.paid_from
-				 the_reson = self.reason
-				 the_description = self.description
+				 #~ the_reson = self.reason
+				 the_description = self.description_to
 			
 			
 				
@@ -419,7 +420,7 @@ class PaymentEntry(AccountsController):
 				"title": self.title,
 				"account_currency": self.party_account_currency,
 				"description":the_description,
-				"reason":the_reson
+				#~ "reason":the_reson
 			})
 			
 			dr_or_cr = "credit" if self.party_type == "Customer" else "debit"

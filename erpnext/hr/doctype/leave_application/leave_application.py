@@ -479,10 +479,10 @@ class LeaveApplication(Document):
 
 		self.validate_type()
 		self.validate_days_and_fin()
-		if self.half_day != 1 :
-			# self.notify_exec_manager()
-			self.notify_employee(self.status)
-		# self.validate_leave_submission_dates()
+		# if self.half_day != 1 :
+		# 	# self.notify_exec_manager()
+		# 	self.notify_employee(self.status)
+		# # self.validate_leave_submission_dates()
 	
 	def on_update_after_submit(self):
 		frappe.db.sql("update tabCommunication set subject ='Approved By Manager' , content='Approved By Manager' where reference_name ='{0}' and subject ='Approved By Line Manager'".format(self.name))
@@ -490,9 +490,9 @@ class LeaveApplication(Document):
 		self.validate_type()
 		self.validate_days_and_fin()
 
-		if self.half_day != 1 :
-			# self.notify_exec_manager()
-			self.notify_employee(self.status)
+		# if self.half_day != 1 :
+		# 	# self.notify_exec_manager()
+		# 	self.notify_employee(self.status)
 
 
 	def on_cancel(self):
@@ -501,8 +501,8 @@ class LeaveApplication(Document):
 			frappe.db.sql("update `tabLeave Application` set status ='Rejected' where name ='{0}'".format(self.name))
 
 
-		if self.half_day != 1 :
-			self.notify_employee("cancelled")
+		# if self.half_day != 1 :
+		# 	self.notify_employee("cancelled")
 
 	def validate_dates(self):
 		if self.from_date and self.to_date and (getdate(self.to_date) < getdate(self.from_date)):

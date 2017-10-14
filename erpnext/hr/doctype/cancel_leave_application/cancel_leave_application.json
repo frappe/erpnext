@@ -305,7 +305,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-09-12 10:31:50.143017", 
+ "modified": "2017-10-04 12:41:07.676790", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Cancel Leave Application", 
@@ -335,7 +335,7 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 1, 
+   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 0, 
@@ -352,7 +352,6 @@
    "set_user_permissions": 0, 
    "share": 1, 
    "submit": 0, 
-   "user_permission_doctypes": "[\"Employee\"]", 
    "write": 1
   }, 
   {
@@ -399,7 +398,7 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 1, 
+   "apply_user_permissions": 0, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
@@ -416,7 +415,6 @@
    "set_user_permissions": 0, 
    "share": 1, 
    "submit": 1, 
-   "user_permission_doctypes": "[\"Department\"]", 
    "write": 1
   }, 
   {
@@ -442,7 +440,7 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 1, 
+   "apply_user_permissions": 0, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
@@ -459,12 +457,11 @@
    "set_user_permissions": 0, 
    "share": 1, 
    "submit": 1, 
-   "user_permission_doctypes": "[\"Department\"]", 
    "write": 1
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 1, 
+   "apply_user_permissions": 0, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
@@ -481,7 +478,6 @@
    "set_user_permissions": 0, 
    "share": 1, 
    "submit": 1, 
-   "user_permission_doctypes": "[\"Department\"]", 
    "write": 1
   }
  ], 

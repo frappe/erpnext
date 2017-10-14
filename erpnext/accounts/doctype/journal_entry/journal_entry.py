@@ -69,6 +69,7 @@ class JournalEntry(AccountsController):
 			nammeing_doc.flags.ignore_permissions = True
 			nammeing_doc.parent = "Enhanced Nameing"
 			nammeing_doc.parenttype = "Enhanced Nameing"
+			nammeing_doc.parentfield='enhanced_nameing'
 			nammeing_doc.index_value = 1
 			nammeing_doc.year = str(getdate(self.posting_date).year)
 			nammeing_doc.name_of_doc = self.doctype

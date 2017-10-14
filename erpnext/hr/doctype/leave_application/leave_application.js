@@ -83,8 +83,8 @@ frappe.ui.form.on("Leave Application", {
             // alert('dfggg');
             if (!cur_frm.doc.__islocal) {
                 // alert("fgg");
-                cur_frm.set_df_property("attachment", "reqd", 1);
-                refresh_field("attachment");
+                // cur_frm.set_df_property("attachment", "reqd", 1);
+                // refresh_field("attachment");
             }
         } else {
             cur_frm.set_df_property("attachment", "reqd", 0);

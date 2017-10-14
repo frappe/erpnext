@@ -1,7 +1,7 @@
 {
  "allow_copy": 0, 
  "allow_import": 0, 
- "allow_rename": 0, 
+ "allow_rename": 1, 
  "autoname": "field:bank_name", 
  "beta": 0, 
  "creation": "2017-05-31 17:59:07.168687", 
@@ -108,7 +108,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-05-31 18:03:07.915692", 
+ "modified": "2017-10-05 08:58:34.086805", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Bank Definition", 

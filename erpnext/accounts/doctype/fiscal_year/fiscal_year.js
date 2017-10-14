@@ -9,8 +9,8 @@ $.extend(cur_frm.cscript, {
 	},
 	refresh: function (doc, dt, dn) {
 		var me = this;
-		this.frm.toggle_enable('year_start_date', doc.__islocal)
-		this.frm.toggle_enable('year_end_date', doc.__islocal)
+		////this.frm.toggle_enable('year_start_date', doc.__islocal)
+		////this.frm.toggle_enable('year_end_date', doc.__islocal)
 
 		if (!doc.__islocal && (doc.name != sys_defaults.fiscal_year)) {
 			this.frm.add_custom_button(__("Default"),
