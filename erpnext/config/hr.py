@@ -106,6 +106,13 @@ def get_data():
 					"name": "Employee Badge Request",
 					"description":_("Employee Badge Request")
 				},
+				# {
+				# 	"type": "report",
+				# 	"name": "Financial Custody Report",
+				# 	"description":_("Financial Custody"),
+				# 	"is_query_report": False,
+				# 	"doctype": "Financial Custody"
+				# },
 				{
 					"type": "doctype",
 					"name": "Employee Change IBAN",
@@ -118,11 +125,11 @@ def get_data():
 				# 	"is_query_report": False,
 				# 	"doctype": "Financial Custody"
 				# },
-				{
-					"type": "doctype",
-					"name": "Health Insurance Info",
-					"description": _("Health Insurance Info."),
-				},
+				# {
+				# 	"type": "doctype",
+				# 	"name": "Health Insurance Info",
+				# 	"description": _("Health Insurance Info."),
+				# },
 				# {
 				# 	"type": "doctype",
 				# 	"name": "Medical Examination",
