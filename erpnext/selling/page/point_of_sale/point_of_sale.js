@@ -103,9 +103,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 							this.make_payment_modal();
 						} else {
 							this.frm.doc.payments.map(p => {
-								if (p.amount) {
-									this.payment.dialog.set_value(p.mode_of_payment, p.amount);
-								}
+								this.payment.dialog.set_value(p.mode_of_payment, p.amount);
 							});
 
 							this.payment.set_title();
