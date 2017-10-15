@@ -107,6 +107,8 @@ class GrossProfitGenerator(object):
 
 	def process(self):
 		self.grouped = {}
+		self.grouped_data = []
+
 		for row in self.si_list:
 			if self.skip_row(row, self.product_bundles):
 				continue
@@ -150,7 +152,6 @@ class GrossProfitGenerator(object):
 
 	def get_average_rate_based_on_group_by(self):
 		# sum buying / selling totals for group
-		self.grouped_data = []
 		for key in self.grouped.keys():
 			if self.filters.get("group_by") != "Invoice":
 				for i, row in enumerate(self.grouped[key]):
