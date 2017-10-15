@@ -1,7 +1,7 @@
 QUnit.module('Stock');
 
 QUnit.test("test material request", function(assert) {
-	assert.expect(1);
+	assert.expect(5);
 	let done = assert.async();
 	frappe.run_serially([
 		() => {
