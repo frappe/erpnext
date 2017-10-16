@@ -205,9 +205,10 @@ def copy_attributes_to_variant(item, variant):
 
 	if item.variant_based_on=='Item Attribute':
 		if variant.attributes:
-			variant.description += "\n"
-			for d in variant.attributes:
-				variant.description += "<div>" + d.attribute + ": " + cstr(d.attribute_value) + "</div>"
+			if not variant.description:
+				variant.description += "\n"
+				for d in variant.attributes:
+					variant.description += "<div>" + d.attribute + ": " + cstr(d.attribute_value) + "</div>"
 
 def make_variant_item_code(template_item_code, template_item_name, variant):
 	"""Uses template's item code and abbreviations to make variant's item code"""
