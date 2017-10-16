@@ -130,7 +130,8 @@ class BankStatement(Document):
 				bank_sta_item[frappe.scrub(target_field)] = eval_result
 			intermediate_bank_statement_items.append(bank_sta_item) if bank_sta_item else None
 
-		for sta in intermediate_bank_statement_items:
+		for idx, sta in enumerate(intermediate_bank_statement_items):
+			sta['transaction_type'] = processs_statement(self, idx+1, sta)
 			self.append('bank_statement_items', sta)  # create bank_statement_item table entries
 
 		self.save()
@@ -174,7 +175,8 @@ class BankStatement(Document):
 		if not self.bank_statement_items: return
 		txn_type_derivation = frappe.db.get_value("Bank Statement Format", self.bank_statement_format, 'txn_type_derivation')
 		if not txn_type_derivation == "Derive Using Bank Transaction Type": return
-		for itm in self.bank_statement_items:
+		ret_list = []
+		for idx, itm in enumerate(self.bank_statement_items):
 			match_type = []
 			if itm.credit_amount:
 				DR_or_CR = 'CR'
@@ -183,16 +185,21 @@ class BankStatement(Document):
 			else:
 				DR_or_CR = None
 			bnks_txn_types = frappe.get_all('Bank Transaction Type',
-											filters={'bank_statement_format': self.bank_statement_format, 'debit_or_credit': DR_or_CR},
-											fields=['name', 'transaction_type_match_expression'])
+									filters={'bank_statement_format': self.bank_statement_format, 'debit_or_credit': DR_or_CR},
+									fields=['name', 'transaction_type_match_expression', 'ignore_case', 'multi_line', 'dot_all'])
 			for txn_type in bnks_txn_types:
-				txn_match = rgx.search(txn_type.transaction_type_match_expression, itm.transaction_description)
+				re_flag = 0
+				for i,d in [('ignore_case', re.I), ('dot_all', re.S), ('multi_line', re.M)]:
+					if txn_type.get(i): re_flag = re_flag | d
+				txn_match = re.search(txn_type.transaction_type_match_expression, itm.transaction_description, flags=re_flag)
 				if txn_match:
 					match_type.append(txn_type)
 			# @innocent in the check below, we need to set the status of the bank statement item to show that either no item was found or more than one item was found
 			if len(match_type) != 1:
+				ret_list.append({'row': idx+1, 'matches': match_type})
 				continue
 			itm.transaction_type = match_type[0].name
+		get_ret_msg(ret_list)
 		self.save()
 
 def get_source_abbr(source_field, bank_statement_mapping_items):
@@ -203,3 +210,50 @@ def get_source_abbr(source_field, bank_statement_mapping_items):
 def reformat_date(date_string, from_format):
 	if date_string and from_format:
 		return datetime.datetime.strptime(date_string, from_format).strftime('%Y-%m-%d')
+
+def get_ret_msg(ret_list):
+	print '\nINSIDE\n'
+	print ret_list
+	if not ret_list: return
+	for i in ret_list:
+		if len(i.get('matches')) == 0:
+			frappe.msgprint('No match was found for item in row {} \n'.format(i.get('row')))
+			continue
+		ret_msg = ''
+		ret_msg += 'Multiple matches were found for item in row {} \n'.format(i.get('row'))
+		for match in i.get('matches'):
+			ret_msg += '<ul> {} </ul>'.format(match.get('name'))
+		frappe.msgprint(ret_msg)
+
+
+def processs_statement(self, idx, itm):
+	print '\ngot here\n'
+	print idx
+	print itm
+	itm = frappe._dict(itm)
+	ret_list = []
+	txn_type_derivation = frappe.db.get_value("Bank Statement Format", self.bank_statement_format, 'txn_type_derivation')
+	if not txn_type_derivation == "Derive Using Bank Transaction Type": return
+	match_type = []
+	if itm.credit_amount:
+		DR_or_CR = 'CR'
+	elif itm.debit_amount:
+		DR_or_CR = 'DR'
+	else:
+		DR_or_CR = None
+	bnks_txn_types = frappe.get_all('Bank Transaction Type',
+							filters={'bank_statement_format': self.bank_statement_format, 'debit_or_credit': DR_or_CR},
+							fields=['name', 'transaction_type_match_expression', 'ignore_case', 'multi_line', 'dot_all'])
+	for txn_type in bnks_txn_types:
+		re_flag = 0
+		for i,d in [('ignore_case', re.I), ('dot_all', re.S), ('multi_line', re.M)]:
+			if txn_type.get(i): re_flag = re_flag | d
+		txn_match = re.search(txn_type.transaction_type_match_expression, itm.transaction_description, flags=re_flag)
+		if txn_match:
+			match_type.append(txn_type)
+	# @innocent in the check below, we need to set the status of the bank statement item to show that either no item was found or more than one item was found
+	if len(match_type) != 1:
+		ret_list.append({'row': idx+1, 'matches': match_type})
+		return
+	get_ret_msg(ret_list)
+	return match_type[0].name
