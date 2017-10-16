@@ -150,7 +150,7 @@ class BOM(WebsiteGenerator):
 			if self.rm_cost_as_per == 'Valuation Rate':
 				rate = self.get_valuation_rate(arg)
 			elif self.rm_cost_as_per == 'Last Purchase Rate':
-				rate = arg['last_purchase_rate'] \
+				rate = arg.get('last_purchase_rate') \
 					or frappe.db.get_value("Item", arg['item_code'], "last_purchase_rate")
 			elif self.rm_cost_as_per == "Price List":
 				if not self.buying_price_list:
@@ -161,7 +161,7 @@ class BOM(WebsiteGenerator):
 				if price_list_currency != self.company_currency():
 					rate = flt(rate * self.conversion_rate)
 
-			if arg['bom_no'] and (not rate or self.set_rate_of_sub_assembly_item_based_on_bom):
+			if arg.get('bom_no') and (not rate or self.set_rate_of_sub_assembly_item_based_on_bom):
 				rate = self.get_bom_unitcost(arg['bom_no'])
 
 		return flt(rate)
