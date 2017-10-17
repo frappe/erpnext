@@ -48,6 +48,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				this.prepare_menu();
 				this.set_online_status();
 			},
+			() => this.setup_company(),
 			() => this.setup_pos_profile(),
 			() => this.make_new_invoice(),
 			() => {
@@ -101,16 +102,11 @@ erpnext.pos.PointOfSale = class PointOfSale {
 						if (!this.payment) {
 							this.make_payment_modal();
 						} else {
-							const mop_field = this.payment.default_mop;
-							let amount = 0.0;
 							this.frm.doc.payments.map(p => {
-								if (p.mode_of_payment == mop_field) {
-									amount = p.amount;
-									return;
-								}
+								this.payment.dialog.set_value(p.mode_of_payment, p.amount);
 							});
 
-							this.payment.dialog.set_value(mop_field, flt(amount));
+							this.payment.set_title();
 						}
 						this.payment.open_modal();
 					}
@@ -222,6 +218,11 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	update_item_in_frm(item, field, value) {
+		if (field == 'qty' && value < 0) {
+			frappe.msgprint(__("Quantity must be positive"));
+			value = item.qty;
+		}
+
 		if (field) {
 			frappe.model.set_value(item.doctype, item.name, field, value);
 		}
@@ -281,21 +282,40 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	setup_pos_profile() {
-		return frappe.call({
-			method: 'erpnext.stock.get_item_details.get_pos_profile',
-			args: {
-				company: frappe.sys_defaults.company
-			}
-		}).then(r => {
-			this.pos_profile = r.message;
+		return new Promise(resolve => {
+			frappe.call({
+				method: 'erpnext.stock.get_item_details.get_pos_profile',
+				args: {
+					company: this.company
+				}
+			}).then(r => {
+				this.pos_profile = r.message;
 
-			if (!this.pos_profile) {
-				this.pos_profile = {
-					currency: frappe.defaults.get_default('currency'),
-					selling_price_list: frappe.defaults.get_default('selling_price_list')
-				};
+				if (!this.pos_profile) {
+					this.pos_profile = {
+						company: this.company,
+						currency: frappe.defaults.get_default('currency'),
+						selling_price_list: frappe.defaults.get_default('selling_price_list')
+					};
+				}
+				resolve();
+			});
+		})
+	}
+
+	setup_company() {
+		this.company = frappe.sys_defaults.company;
+		return new Promise(resolve => {
+			if(!this.company) {
+				frappe.prompt({fieldname:"company", options: "Company", fieldtype:"Link",
+					label: __("Select Company"), reqd: 1}, (data) => {
+						this.company = data.company;
+						resolve(this.company);
+				}, __("Select Company"));
+			} else {
+				resolve(this.company);
 			}
-		});
+		})
 	}
 
 	make_new_invoice() {
@@ -317,22 +337,25 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		const doctype = 'Sales Invoice';
 		return new Promise(resolve => {
 			if (this.frm) {
-				this.frm = get_frm(this.frm);
+				this.frm = get_frm(this.pos_profile, this.frm);
 				resolve();
 			} else {
 				frappe.model.with_doctype(doctype, () => {
-					this.frm = get_frm();
+					this.frm = get_frm(this.pos_profile);
 					resolve();
 				});
 			}
 		});
 
-		function get_frm(_frm) {
+		function get_frm(pos_profile, _frm) {
 			const page = $('<div>');
 			const frm = _frm || new _f.Frm(doctype, page, false);
 			const name = frappe.model.make_new_doc_and_get_name(doctype, true);
 			frm.refresh(name);
 			frm.doc.items = [];
+			if(!frm.doc.company) {
+				frm.set_value('company', pos_profile.company);
+			}
 			frm.set_value('is_pos', 1);
 			frm.meta.default_print_format = 'POS Invoice';
 			return frm;
@@ -518,7 +541,7 @@ class POSCart {
 
 		// Update totals
 		this.$taxes_and_totals.find('.net-total')
-			.html(format_currency(this.frm.doc.net_total, currency));
+			.html(format_currency(this.frm.doc.total, currency));
 
 		// Update taxes
 		const taxes_html = this.frm.doc.taxes.map(tax => {
@@ -913,7 +936,7 @@ class POSItems {
 		const all_items = Object.values(_items).map(item => this.get_item_html(item));
 		let row_items = [];
 
-		const row_container = '<div style="display: flex; border-bottom: 1px solid #ebeff2">';
+		const row_container = '<div class="image-view-row">';
 		let curr_row = row_container;
 
 		for (let i=0; i < all_items.length; i++) {
@@ -943,6 +966,7 @@ class POSItems {
 			if (this.search_index[search_term]) {
 				const items = this.search_index[search_term];
 				this.render_items(items);
+				this.set_item_in_the_cart(items);
 				return;
 			}
 		} else if (item_group == "All Item Groups") {
@@ -956,17 +980,30 @@ class POSItems {
 				}
 
 				this.render_items(items);
-				if(serial_no) {
-					this.events.update_cart(items[0].item_code,
-						'serial_no', serial_no);
-					this.reset_search_field();
-				}
-				if(batch_no) {
-					this.events.update_cart(items[0].item_code,
-						'batch_no', batch_no);
-					this.reset_search_field();
-				}
+				this.set_item_in_the_cart(items, serial_no, batch_no);
 			});
+	}
+
+	set_item_in_the_cart(items, serial_no, batch_no) {
+		if (serial_no) {
+			this.events.update_cart(items[0].item_code,
+				'serial_no', serial_no);
+			this.reset_search_field();
+			return;
+		}
+
+		if (batch_no) {
+			this.events.update_cart(items[0].item_code,
+				'batch_no', batch_no);
+			this.reset_search_field();
+			return;
+		}
+
+		if (items.length === 1) {
+			this.events.update_cart(items[0].item_code,
+				'qty', '+1');
+			this.reset_search_field();
+		}
 	}
 
 	reset_search_field() {
@@ -1166,15 +1203,12 @@ class Payment {
 
 	make() {
 		this.set_flag();
-
-		let title = __('Total Amount {0}',
-			[format_currency(this.frm.doc.grand_total, this.frm.doc.currency)]);
-
 		this.dialog = new frappe.ui.Dialog({
-			title: title,
 			fields: this.get_fields(),
 			width: 800
 		});
+
+		this.set_title();
 
 		this.$body = this.dialog.body;
 
@@ -1192,6 +1226,13 @@ class Payment {
 				}
 			}
 		});
+	}
+
+	set_title() {
+		let title = __('Total Amount {0}',
+			[format_currency(this.frm.doc.grand_total, this.frm.doc.currency)]);
+
+		this.dialog.set_title(title);
 	}
 
 	bind_events() {
@@ -1215,10 +1256,6 @@ class Payment {
 		const me = this;
 
 		let fields = this.frm.doc.payments.map(p => {
-			if (p.default) {
-				this.default_mop = p.mode_of_payment;
-			}
-
 			return {
 				fieldtype: 'Currency',
 				label: __(p.mode_of_payment),

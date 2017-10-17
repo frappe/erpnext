@@ -128,7 +128,7 @@ class BOM(WebsiteGenerator):
 			 'uom'			: item and args['stock_uom'] or '',
  			 'conversion_factor': 1,
 			 'bom_no'		: args['bom_no'],
-			 'rate'			: rate / self.conversion_rate,
+			 'rate'			: rate / self.conversion_rate if self.conversion_rate else rate,
 			 'qty'			: args.get("qty") or args.get("stock_qty") or 1,
 			 'stock_qty'	: args.get("qty") or args.get("stock_qty") or 1,
 			 'base_rate'	: rate
@@ -374,7 +374,7 @@ class BOM(WebsiteGenerator):
 			if d.workstation:
 				if not d.hour_rate:
 					hour_rate = flt(frappe.db.get_value("Workstation", d.workstation, "hour_rate"))
-					d.hour_rate = hour_rate / flt(self.conversion_rate)
+					d.hour_rate = hour_rate / flt(self.conversion_rate) if self.conversion_rate else hour_rate
 
 			if d.hour_rate and d.time_in_mins:
 				d.base_hour_rate = flt(d.hour_rate) * flt(self.conversion_rate)
