@@ -1,10 +1,12 @@
 from __future__ import unicode_literals
 import frappe
-from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 from frappe import _
 
 def setup_healthcare():
+	if frappe.db.exists('Medical Department', 'Cardiology'):
+		# already setup
+		return
 	create_medical_departments()
 	create_antibiotics()
 	create_test_uom()
@@ -14,19 +16,6 @@ def setup_healthcare():
 	create_lab_test_items()
 	create_lab_test_template()
 	create_sensitivity()
-	make_custom_fields()
-
-def make_custom_fields():
-	custom_fields = {
-		'Sales Invoice': [
-			dict(fieldname='appointment', label='Patient Appointment',
-				fieldtype='Link', options='Patient Appointment',
-				insert_after='customer')
-		]
-	}
-
-	create_custom_fields(custom_fields)
-
 
 def create_medical_departments():
 	departments = [
