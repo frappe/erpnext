@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 {% include 'erpnext/buying/doctype/purchase_common/purchase_common.js' %};
-
+cur_frm.add_fetch("material_requester","department","department");
 frappe.ui.form.on('Material Request', {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
@@ -11,6 +11,11 @@ frappe.ui.form.on('Material Request', {
 			'Request for Quotation': 'Request for Quotation',
 			'Supplier Quotation': 'Supplier Quotation',
 			'Production Order': 'Production Order'
+		}
+	},
+	purchase_workflow: function(frm){
+		if(frm.purchase_workflow != "Project"){
+			frm.set_value("project",undefined);
 		}
 	},
 	onload: function(frm) {

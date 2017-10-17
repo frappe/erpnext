@@ -51,6 +51,21 @@ class Project(Document):
 		self.sync_tasks()
 		self.tasks = []
 		self.send_welcome_email()
+		self.validate_project_roles()
+
+	def validate_project_roles(self):
+		if self.project_manager:
+			user_emp = frappe.db.sql("select user_id from `tabEmployee` where name = '{0}'".format(self.project_manager), as_dict = 1)
+			# frappe.throw(user_emp[0].user_id)
+			user = frappe.get_doc("User", user_emp[0].user_id)
+			user.add_roles("Project Manager")
+			frappe.permissions.add_user_permission("Project", self.name, user_emp[0].user_id)
+
+		if self.project_budget_controller:
+			user_emp = frappe.db.sql("select user_id from `tabEmployee` where name = '{0}'".format(self.project_budget_controller), as_dict = 1)
+			user = frappe.get_doc("User", user_emp[0].user_id)
+			user.add_roles("Project Budget Controller")
+			frappe.permissions.add_user_permission("Project", self.name, user_emp[0].user_id)
 
 	def validate_dates(self):
 		if self.expected_start_date and self.expected_end_date:

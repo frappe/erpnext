@@ -39,10 +39,10 @@ class AdministrativeDecision(Document):
 
 
 	def validate(self):
-		self.validate_dates()
+		# self.validate_dates()
 		self.check_employee()
-		self.check_branch_department()
-		self.validate_fields()
+		# self.check_branch_department()
+		# self.validate_fields()
 		if self.get('docstatus') == 1:
 			self.validate_approve()
 			# if self.state != "Active" and  not self.get('__islocal'):
@@ -56,9 +56,10 @@ class AdministrativeDecision(Document):
 		pass
 
 
-	def validate_dates(self):
-		if getdate(self.start_date) > getdate(self.end_date):
-			frappe.throw(_("End Date can not be less than Start Date"))
+	# def validate_dates(self):
+	# 	if getdate(self.start_date) > getdate(self.end_date):
+	# 		frappe.throw(_("End Date can not be less than Start Date"))
+			
 	def check_employee(self) :
 		if self.type == "Inside" :
 			if not self.employee:
@@ -67,22 +68,20 @@ class AdministrativeDecision(Document):
 			if not self.coming_from:
 				frappe.throw(_("The Issued Address Missing"))
 
-	def check_branch_department(self):
-		if self.type == "Inside" :
-			if not self.department or not self.branch:
-				frappe.throw(_("Add Branch and Department information"))
-			if not self.grade:
-				frappe.throw(_("Add Grade information"))
-			if not self.start_date:
-				frappe.throw(_("Add Start Date"))
+	# def check_branch_department(self):
+	# 	if self.type == "Inside" :
+	# 		if not self.department or not self.branch:
+	# 			frappe.throw(_("Add Branch and Department information"))
+	# 		if not self.start_date:
+	# 			frappe.throw(_("Add Start Date"))
 
-	def validate_fields(self):
-		if self.type == "Out":
-			if not self.start_date:
-				frappe.throw(_("Add Start Date"))
-		if self.type == "Out" or self.type == "Coming" :
-			if not self.end_date:
-				frappe.throw(_("Add End Date"))
+	# def validate_fields(self):
+	# 	if self.type == "Out":
+	# 		if not self.start_date:
+	# 			frappe.throw(_("Add Start Date"))
+		# if self.type == "Out" or self.type == "Coming" :
+		# 	if not self.end_date:
+		# 		frappe.throw(_("Add End Date"))
 
 	def validate_approve(self):
 		checker = 1

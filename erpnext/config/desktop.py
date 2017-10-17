@@ -265,6 +265,15 @@ def get_data():
 			"type": "list"
 		},
 		{
+			"module_name": "Administrative Communications",
+			"color": "#5955FE",
+			"icon": "fa fa-address-book-o",
+			"label": _("Administrative Decision"),
+			"link": "List/Administrative Decision",
+			"_doctype": "Administrative Decision",
+			"type": "list"
+		},
+		{
 			"module_name": "Schools",
 			"color": "#DE2B37",
 			"icon": "octicon octicon-mortar-board",

@@ -28,6 +28,13 @@ class SupplierQuotation(BuyingController):
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
 
+
+	# def after_insert(self):
+	# 	for item in self.get("items"):
+	# 		if item.material_request:
+	# 			frappe.throw(item)
+
+
 	def on_submit(self):
 		frappe.db.set(self, "status", "Submitted")
 
@@ -102,3 +109,10 @@ def make_purchase_order(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+
+# @frappe.whitelist()
+# def get_project(materialrequest):
+# 	ss = materialrequest
+# 	return ss
+

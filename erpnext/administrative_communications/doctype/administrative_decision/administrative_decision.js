@@ -1,9 +1,7 @@
 // Copyright (c) 2016, Erpdeveloper.team and contributors
 // For license information, please see license.txt
-cur_frm.add_fetch('employee', 'grade', 'grade');
-cur_frm.add_fetch('employee', 'branch', 'branch');
-cur_frm.add_fetch('employee', 'department', 'department');
-cur_frm.add_fetch('employee', 'designation', 'designation');
+// cur_frm.add_fetch('employee', 'branch', 'branch');
+// cur_frm.add_fetch('employee', 'department', 'department');
 
 frappe.ui.form.on('Administrative Decision', {
 	refresh: function(frm) {
