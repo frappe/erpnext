@@ -172,6 +172,7 @@ class BankStatement(Document):
 		return ret_dict
 
 	def process_statement(self):
+		'''To be removed. Matching of transaction type to be done on statement upload'''
 		if not self.bank_statement_items: return
 		txn_type_derivation = frappe.db.get_value("Bank Statement Format", self.bank_statement_format, 'txn_type_derivation')
 		if not txn_type_derivation == "Derive Using Bank Transaction Type": return
@@ -212,8 +213,6 @@ def reformat_date(date_string, from_format):
 		return datetime.datetime.strptime(date_string, from_format).strftime('%Y-%m-%d')
 
 def get_ret_msg(ret_list):
-	print '\nINSIDE\n'
-	print ret_list
 	if not ret_list: return
 	for i in ret_list:
 		if len(i.get('matches')) == 0:
@@ -227,9 +226,6 @@ def get_ret_msg(ret_list):
 
 
 def processs_statement(self, idx, itm):
-	print '\ngot here\n'
-	print idx
-	print itm
 	itm = frappe._dict(itm)
 	ret_list = []
 	txn_type_derivation = frappe.db.get_value("Bank Statement Format", self.bank_statement_format, 'txn_type_derivation')
@@ -253,7 +249,7 @@ def processs_statement(self, idx, itm):
 			match_type.append(txn_type)
 	# @innocent in the check below, we need to set the status of the bank statement item to show that either no item was found or more than one item was found
 	if len(match_type) != 1:
-		ret_list.append({'row': idx+1, 'matches': match_type})
+		ret_list.append({'row': idx, 'matches': match_type})
+		get_ret_msg(ret_list)
 		return
-	get_ret_msg(ret_list)
 	return match_type[0].name
