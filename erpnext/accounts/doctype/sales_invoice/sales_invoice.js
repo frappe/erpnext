@@ -298,7 +298,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		var row = locals[cdt][cdn];
 		if(row.asset) {
 			frappe.call({
-				method: erpnext.accounts.doctype.asset.depreciation.get_disposal_account_and_cost_center,
+				method: erpnext.assets.doctype.asset.depreciation.get_disposal_account_and_cost_center,
 				args: {
 					"company": frm.doc.company
 				},

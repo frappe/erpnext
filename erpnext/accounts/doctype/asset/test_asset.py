@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 from __future__ import unicode_literals
 
 import frappe
 import unittest
 from frappe.utils import cstr, nowdate, getdate, flt
-from erpnext.accounts.doctype.asset.depreciation import post_depreciation_entries, scrap_asset, restore_asset
-from erpnext.accounts.doctype.asset.asset import make_sales_invoice, make_purchase_invoice
+from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries, scrap_asset, restore_asset
+from erpnext.assets.doctype.asset.asset import make_sales_invoice, make_purchase_invoice
 
 class TestAsset(unittest.TestCase):
 	def setUp(self):

@@ -6,8 +6,8 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe.utils.make_random import get_random
-from erpnext.accounts.doctype.asset.asset import make_purchase_invoice, make_sales_invoice
-from erpnext.accounts.doctype.asset.depreciation import post_depreciation_entries, scrap_asset
+from erpnext.assets.doctype.asset.asset import make_purchase_invoice, make_sales_invoice
+from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries, scrap_asset
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_accounts_user'))
