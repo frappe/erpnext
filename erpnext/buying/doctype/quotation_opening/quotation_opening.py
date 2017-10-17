@@ -13,6 +13,13 @@ class QuotationOpening(Document):
 		self.validate_sq_duplicate()
 		# sqs = get_sqs_for_rfq(self.request_for_quotation)
 		# if sqs: 
+		material = frappe.get_doc('Supplier Quotation', self.supplier_quotation)
+		if material.material_request:
+			self.material_request = material.material_request
+
+			proj = frappe.get_doc('Material Request', self.material_request)
+			if proj.project:
+				self.project = proj.project
 
 	def validate_sq_duplicate(self):
 		sq = frappe.db.sql("select name from `tabQuotation Opening` where docstatus = 1 and request_for_quotation = '{0}'".format(self.request_for_quotation), as_dict = True)

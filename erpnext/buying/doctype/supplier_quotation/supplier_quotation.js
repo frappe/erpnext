@@ -35,6 +35,21 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 						}
 					})
 				}, __("Get items from"));
+
+
+			// var aa = [];
+			// aa.push(cur_frm.doc.items);
+			// var length = aa[0].length;
+
+			// for(i=0;i<length;i++){
+			// 	if(cur_frm.doc.items[i].material_request){
+			// 		cur_frm.set_value('material_request', cur_frm.doc.items[i].material_request);
+			// 		cur_frm.refresh_fields('material_request');
+			// 	}
+			// }
+
+
+
 		}
 	},
 
@@ -44,6 +59,25 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 			// frm: cur_frm
 		})
 	}
+
+
+	// material_request: function(frm){
+
+
+	// 	return frappe.call({
+	// 	method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.get_project",
+	// 	args: {
+	// 	materialrequest: frm.doc.material_request,
+	// 		},
+	// 	callback: function(r) {
+	// 		if (r.message) {
+	// 		console.log(r.message)
+	// 			}
+	// 		}
+	// 	});
+	// }
+
+
 });
 
 // for backward compatibility: combine new and previous states
