@@ -486,17 +486,21 @@ def submit_invoice(si_doc, name, doc, name_list):
 		if frappe.message_log: frappe.message_log.pop()
 		frappe.db.rollback()
 		frappe.log_error(frappe.get_traceback())
-		name_list = save_invoice(e, si_doc, name, name_list)
+		name_list = save_invoice(doc, name, name_list)
 
 	return name_list
 
-def save_invoice(e, si_doc, name, name_list):
+def save_invoice(doc, name, name_list):
 	try:
 		if not frappe.db.exists('Sales Invoice', {'offline_pos_name': name}):
-			si_doc.docstatus = 0
-			si_doc.flags.ignore_mandatory = True
-			si_doc.due_date = si_doc.posting_date
-			si_doc.insert()
+			si = frappe.new_doc('Sales Invoice')
+			si.update(doc)
+			si.set_posting_time = 1
+			si.customer = get_customer_id(doc)
+			si.due_date = doc.get('posting_date')
+			si.flags.ignore_mandatory = True
+			si.insert(ignore_permissions=True)
+			frappe.db.commit()
 			name_list.append(name)
 	except Exception:
 		frappe.log_error(frappe.get_traceback())
