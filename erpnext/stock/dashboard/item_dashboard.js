@@ -75,8 +75,13 @@ erpnext.stock.ItemDashboard = Class.extend({
 			this.content.find('.more').addClass('hidden');
 		}
 
-		$(frappe.render_template('item_dashboard_list', context)).appendTo(this.result);
-
+        // If not any stock in any warehouses provide a message to end user
+		if (context.data.length > 0) {
+			$(frappe.render_template('item_dashboard_list', context)).appendTo(this.result);
+		} else {
+			var message = __(" Currently no stock available in any warehouse")
+			$("<span class='small'> <i class='fa fa-exclamation-triangle' aria-hidden='true'></i>"+message+"</span>").appendTo(this.result);
+		}
 	},
 	get_item_dashboard_data: function(data, max_count, show_item) {
 		if(!max_count) max_count = 0;

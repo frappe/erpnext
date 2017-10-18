@@ -3,94 +3,103 @@
 
 from __future__ import unicode_literals
 import frappe, requests, json
-from frappe.model.document import Document
-from frappe.utils import cint, expand_relative_urls
-from frappe import _
 
+from frappe.model.document import Document
+from frappe.utils import add_years, now, get_datetime, get_datetime_str
+from frappe import _
+from erpnext.utilities.product import get_price, get_qty_in_stock
+from six import string_types
+
+# hub_url = "http://erpnext.hub:8000"
+hub_url = "https://hub.erpnext.org"
+# hub_url = "http://192.168.29.145:3000"
+
+class HubSetupError(frappe.ValidationError): pass
 
 class HubSettings(Document):
-	hub_url = "http://localhost:8001"
-	def validate(self):
-		if cint(self.publish):
-			if not self.name_token:
-				self.register()
-			else:
-				self.update_seller_details()
-			self.publish_selling_items()
-		else:
-			if self.name_token:
-				self.unpublish()
 
-	def publish_selling_items(self):
-		"""Set `publish_in_hub`=1 for all Sales Items"""
-		for item in frappe.get_all("Item", fields=["name"],
-			filters={ "publish_in_hub": "0"}):
-			frappe.db.set_value("Item", item.name, "publish_in_hub", 1)
+	def validate(self):
+		if self.publish_pricing and not self.selling_price_list:
+			frappe.throw(_("Please select a Price List to publish pricing"))
+
+	def get_hub_url(self):
+		return hub_url
+
+	def sync(self):
+		"""Create and execute Data Migration Run for Hub Sync plan"""
+		frappe.has_permission('Hub Settings', throw=True)
+
+		doc = frappe.get_doc({
+			'doctype': 'Data Migration Run',
+			'data_migration_plan': 'Hub Sync',
+			'data_migration_connector': 'Hub Connector'
+		}).insert()
+
+		doc.run()
 
 	def register(self):
-		"""Register at hub.erpnext.com, save `name_token` and `access_token`"""
-		response = requests.post(self.hub_url + "/api/method/hub.hub.api.register", data=self.get_args())
-		response.raise_for_status()
-		response = response.json()
-		self.name_token = response.get("message").get("name")
-		self.access_token = response.get("message").get("access_token")
-
-	def unpublish(self):
-		"""Unpublish from hub.erpnext.com"""
-		response = requests.post(self.hub_url + "/api/method/hub.hub.api.unpublish", data={
-			"access_token": self.access_token
-		})
-		response.raise_for_status()
-
-	def update_seller_details(self):
-		"""Update details at hub.erpnext.com"""
-		args = self.get_args()
-		args["published"] = 1
-		response = requests.post(self.hub_url + "/api/method/hub.hub.api.update_seller", data={
-			"access_token": self.access_token,
-			"args": json.dumps(args)
-		})
-		response.raise_for_status()
-
-	def get_args(self):
-		return {
-			"seller_name": self.seller_name,
-			"seller_country": self.seller_country,
-			"seller_city": self.seller_city,
-			"seller_email": self.seller_email,
-			"seller_website": self.seller_website,
-			"seller_description": self.seller_description
+		""" Create a User on hub.erpnext.org and return username/password """
+		data = {
+			'email': frappe.session.user
 		}
+		post_url = hub_url + '/api/method/hub.hub.api.register'
 
-	def sync(self, verbose=True):
-		"""Sync items with hub.erpnext.com"""
-		if not self.publish:
-			if verbose:
-				frappe.msgprint(_("Publish to sync items"))
+		response = requests.post(post_url, data=data)
+		response.raise_for_status()
+		message = response.json().get('message')
+
+		if message and message.get('password'):
+			self.user = frappe.session.user
+			self.create_hub_connector(message)
+			self.company = frappe.defaults.get_user_default('company')
+			self.enabled = 1
+			self.save()
+
+	def unregister(self):
+		""" Disable the User on hub.erpnext.org"""
+
+		hub_connector = frappe.get_doc(
+			'Data Migration Connector', 'Hub Connector')
+
+		connection = hub_connector.get_connection()
+		response_doc = connection.update('User', frappe._dict({'enabled': 0}), hub_connector.username)
+
+		if response_doc['enabled'] == 0:
+			self.enabled = 0
+			self.save()
+
+	def create_hub_connector(self, message):
+		if frappe.db.exists('Data Migration Connector', 'Hub Connector'):
+			hub_connector = frappe.get_doc('Data Migration Connector', 'Hub Connector')
+			hub_connector.username = message['email']
+			hub_connector.password = message['password']
+			hub_connector.save()
 			return
 
-		items = frappe.db.get_all("Item",
-			fields=["name", "item_name", "description", "image", "item_group"],
-			filters={"publish_in_hub": 1, "synced_with_hub": 0})
+		frappe.get_doc({
+			'doctype': 'Data Migration Connector',
+			'connector_type': 'Frappe',
+			'connector_name': 'Hub Connector',
+			'hostname': hub_url,
+			'username': message['email'],
+			'password': message['password']
+		}).insert()
 
-		for item in items:
-			item.item_code = item.name
-			if item.image:
-				item.image = expand_relative_urls(item.image)
+def reset_hub_publishing_settings(last_sync_datetime = ""):
+	doc = frappe.get_doc("Hub Settings", "Hub Settings")
+	doc.reset_publishing_settings(last_sync_datetime)
+	doc.in_callback = 1
+	doc.save()
 
-		item_list = frappe.db.sql_list("select name from tabItem where publish_in_hub=1")
+def reset_hub_settings(last_sync_datetime = ""):
+	doc = frappe.get_doc("Hub Settings", "Hub Settings")
+	doc.reset_publishing_settings(last_sync_datetime)
+	doc.reset_enable()
+	doc.in_callback = 1
+	doc.save()
+	frappe.msgprint(_("Successfully unregistered."))
 
-		if items:
-			response = requests.post(self.hub_url + "/api/method/hub.hub.api.sync", data={
-				"access_token": self.access_token,
-				"items": json.dumps(items),
-				"item_list": json.dumps(item_list)
-			})
-			response.raise_for_status()
-			for item in items:
-				frappe.db.set_value("Item", item.name, "synced_with_hub", 1)
-			if verbose:
-				frappe.msgprint(_("{0} Items synced".format(len(items))))
-		else:
-			if verbose:
-				frappe.msgprint(_("Items already synced"))
+@frappe.whitelist()
+def sync():
+	hub_settings = frappe.get_doc('Hub Settings')
+	hub_settings.sync()

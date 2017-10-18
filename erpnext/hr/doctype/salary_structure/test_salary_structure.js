@@ -13,6 +13,7 @@ QUnit.test("test Salary Structure", function(assert) {
 			(r) => {
 			// Creating Salary Structure for employees);
 				return frappe.tests.make('Salary Structure', [
+					{ __newname: 'Test Salary Structure'},
 					{ company: 'For Testing'},
 					{ payroll_frequency: 'Monthly'},
 					{ employees: [
@@ -47,11 +48,7 @@ QUnit.test("test Salary Structure", function(assert) {
 				]);
 			}
 		),
-		() => frappe.timeout(18),
-		() => cur_dialog.set_value('value','Test Salary Structure'),
-		() => frappe.timeout(1),
-		() => frappe.click_button('Create'),
-		() => frappe.timeout(1),
+		() => frappe.timeout(3),
 		() => {
 		// To check if all the fields are correctly set
 			assert.ok(cur_frm.doc.employees[0].employee_name.includes('Test Employee 1') &&

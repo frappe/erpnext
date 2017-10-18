@@ -1,9 +1,5 @@
 # The Champion
 
-<!-- no-heading -->
-
-<h1 class="white">The Champion</h1>
-
 <img alt="Champion" class="screenshot" src="/docs/assets/img/setup/implementation-image.png">
 
 We have seen dozens of ERP implementations over the past few years and we

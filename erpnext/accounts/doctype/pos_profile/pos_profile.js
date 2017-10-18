@@ -37,10 +37,10 @@ frappe.ui.form.on('POS Profile', {
 			return { filters: { doc_type: "Sales Invoice", print_format_type: "Js"} };
 		});
 
-		frappe.db.get_value('POS Settings', {name: 'POS Settings'}, 'is_online', (r) => {
-			is_online = r && cint(r.is_online)
-			frm.toggle_display('offline_pos_section', !is_online);
-			frm.toggle_display('print_format_for_online', is_online);
+		frappe.db.get_value('POS Settings', {name: 'POS Settings'}, 'use_pos_in_offline_mode', (r) => {
+			is_offline = r && cint(r.use_pos_in_offline_mode)
+			frm.toggle_display('offline_pos_section', is_offline);
+			frm.toggle_display('print_format_for_online', !is_offline);
 		});
 	},
 

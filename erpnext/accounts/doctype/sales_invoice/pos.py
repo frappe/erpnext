@@ -88,7 +88,7 @@ def update_pos_profile_data(doc, pos_profile, company_data):
 	doc.naming_series = pos_profile.get('naming_series') or 'SINV-'
 	doc.letter_head = pos_profile.get('letter_head') or company_data.default_letter_head
 	doc.ignore_pricing_rule = pos_profile.get('ignore_pricing_rule') or 0
-	doc.apply_discount_on = pos_profile.get('apply_discount_on') if pos_profile.get('apply_discount') else ''
+	doc.apply_discount_on = pos_profile.get('apply_discount_on') or ''
 	doc.customer_group = pos_profile.get('customer_group') or get_root('Customer Group')
 	doc.territory = pos_profile.get('territory') or get_root('Territory')
 	doc.terms = frappe.db.get_value('Terms and Conditions', pos_profile.get('tc_name'), 'terms') or doc.terms or ''
@@ -417,6 +417,7 @@ def make_contact(args,customer):
 				'link_doctype': 'Customer',
 				'link_name': customer
 			})
+		doc.flags.ignore_mandatory = True
 		doc.save(ignore_permissions=True)
 
 def make_address(args, customer):
@@ -441,6 +442,7 @@ def make_address(args, customer):
 	address.is_primary_address = 1
 	address.is_shipping_address = 1
 	address.update(args)
+	address.flags.ignore_mandatory = True
 	address.save(ignore_permissions = True)
 
 def make_email_queue(email_queue):

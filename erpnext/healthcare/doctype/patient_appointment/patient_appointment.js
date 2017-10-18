@@ -183,16 +183,20 @@ var btn_create_vital_signs = function (frm) {
 
 var btn_update_status = function(frm, status){
 	var doc = frm.doc;
-	frappe.call({
-		method:
-		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.update_status",
-		args: {appointmentId: doc.name, status:status},
-		callback: function(data){
-			if(!data.exc){
-				cur_frm.reload_doc();
-			}
+	frappe.confirm(__('Are you sure you want to cancel this appointment?'),
+		function() {
+			frappe.call({
+				method:
+				"erpnext.healthcare.doctype.patient_appointment.patient_appointment.update_status",
+				args: {appointmentId: doc.name, status:status},
+				callback: function(data){
+					if(!data.exc){
+						frm.reload_doc();
+					}
+				}
+			});
 		}
-	});
+	);
 };
 
 var btn_invoice_consultation = function(frm){
