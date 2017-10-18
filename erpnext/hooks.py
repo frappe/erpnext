@@ -53,6 +53,16 @@ calendars = ["Task", "Production Order", "Leave Application", "Sales Order", "Ho
 
 fixtures = ["Web Form"]
 
+domains = {
+	'Distribution': 'erpnext.domains.distribution',
+	'Education': 'erpnext.domains.education',
+	'Healthcare': 'erpnext.domains.healthcare',
+	'Hospitality': 'erpnext.domains.hospitality',
+	'Manufacturing': 'erpnext.domains.manufacturing',
+	'Retail': 'erpnext.domains.retail',
+	'Services': 'erpnext.domains.services',
+}
+
 website_generators = ["Item Group", "Item", "BOM", "Sales Partner",
 	"Job Opening", "Student Admission"]
 

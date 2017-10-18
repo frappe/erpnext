@@ -205,6 +205,17 @@ def update_doc(new_document, reference_doc, args, schedule_date):
 	if new_document.meta.get_field('subscription'):
 		new_document.set('subscription', args.name)
 
+	for fieldname in ['naming_series', 'ignore_pricing_rule', 'posting_time'
+		'select_print_heading', 'remarks', 'owner']:
+		if new_document.meta.get_field(fieldname):
+			new_document.set(fieldname, reference_doc.get(fieldname))
+
+	# copy item fields
+	if new_document.meta.get_field('items'):
+		for i, item in enumerate(new_document.items):
+			for fieldname in ("page_break",):
+				item.set(fieldname, reference_doc.items[i].get(fieldname))
+
 	if args.from_date and args.to_date:
 		from_date = get_next_date(args.from_date, mcount)
 
