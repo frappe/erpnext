@@ -27,7 +27,7 @@ def execute():
 			if variant.attributes:
 				for d in variant.attributes:
 					temp_variant_description += "<div>" + d.attribute + ": " + cstr(d.attribute_value) + "</div>"
-					
+
 				variant_description = variant.description.replace(temp_variant_description, '').rstrip()
 				if variant_description:
 					splitted_desc = variant.description.strip().split(temp_variant_description)
@@ -37,8 +37,9 @@ def execute():
 							variant_description = temp_variant_description + variant_description
 						elif splitted_desc[1] == '' or splitted_desc[1] == '\n':
 							variant_description += temp_variant_description
-
-					variant.db_set('description', variant_description, update_modified=False)
+						variant.db_set('description', variant_description, update_modified=False)
+					else:
+						variant.db_set('description', variant_description, update_modified=False)
 
 				else:
 					variant.db_set('description', temp_variant_description, update_modified=False)
