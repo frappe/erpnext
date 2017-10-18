@@ -173,6 +173,8 @@ class BankStatement(Document):
 
 	def process_statement(self):
 		'''To be removed. Matching of transaction type to be done on statement upload'''
+		'''
+		basic code for journal account matching
 		if not self.bank_statement_items: return
 		txn_type_derivation = frappe.db.get_value("Bank Statement Format", self.bank_statement_format, 'txn_type_derivation')
 		if not txn_type_derivation == "Derive Using Bank Transaction Type": return
@@ -201,6 +203,52 @@ class BankStatement(Document):
 				continue
 			itm.transaction_type = match_type[0].name
 		get_ret_msg(ret_list)
+		self.save()
+		'''
+		for bank_statement_item in self.bank_statement_items:
+			if not bank_statement_item.transaction_type: continue
+			txn_type = frappe.get_doc('Bank Transaction Type', bank_statement_item.transaction_type)
+			if txn_type.debit_account_party_type:
+				#create new item in bank_statement_item.third_party_journal_items
+				#set debit_account_type of newly created third_party_journal_item to > 
+				#< bank_statement_item.txn_type.debit_account_party_type
+				if not bank_statement_item.txn_type.debit_account:
+					dr_open_items = get_open_third_party_documents_using_search_fields(
+						txn_type.search_fields_third_party_doc_dr,
+						txn_type.third_party_type,
+						bank_statement_item.txn_description
+					)
+					if len(dr_open_items) >= 1:
+						#set debit_account of of newly created third_party_journal_item to > 
+						#< dr_open_items[0].third_party
+						bank_statement_item.jl_credit_account = cr_open_items[0].account
+					else:
+						continue
+				else:
+					#set debit_account of of newly created third_party_journal_item to > 
+					#< bank_statement_item.txn_type.debit_account
+					bank_statement_item.jl_credit_account = txn_type.debit_account
+
+			if txn_type.credit_account_party_type:
+				#create new item in bank_statement_item.third_party_journal_items
+				#set credit_account_type of newly created third_party_journal_item to > 
+				#< bank_statement_item.txn_type.credit_account_party_type
+				if not bank_statement_item.txn_type.credit_account:
+					cr_open_items = get_open_third_party_documents_using_search_fields(
+						txn_type.search_fields_third_party_doc_cr,
+						txn_type.third_party_type,
+						bank_statement_item.txn_description
+					)
+					if len(cr_open_items) >= 1:
+						#set credit_account of of newly created third_party_journal_item to > 
+						#< cr_open_items[0].third_party
+						bank_statement_item.jl_credit_account = cr_open_items[0].account
+					else:
+						continue
+			else :
+				#set credit_account of of newly created third_party_journal_item to > 
+				#< bank_statement_item.txn_type.credit_account
+				bank_statement_item.jl_credit_account = txn_type.credit_account
 		self.save()
 
 def get_source_abbr(source_field, bank_statement_mapping_items):
@@ -253,3 +301,26 @@ def processs_statement(self, idx, itm):
 		get_ret_msg(ret_list)
 		return
 	return match_type[0].name
+
+def get_open_third_party_documents_using_search_fields(search_fields, third_party_type, txn_description):
+	from _mysql_exceptions import OperationalError
+	from frappe.exceptions import ValidationError
+	from erpnext.accounts.doctype.payment_request.payment_request import get_amount
+
+	found_documents = []
+	for s_field in search_fields:
+		#search for all documents in general ledger where outstanding amount <> 0 and value of search_field in document is 
+		#contained in txn_description. Append result to found_documents
+		search_field = '_'.join(s_field.field_name.replace(' ','_').split(' ')).lower()
+		try:
+			query = """select account, against_voucher,against_voucher_type,{0} from `tabGL Entry` where account_type = '{1}'
+						""".format(search_field, third_party_type)
+			result = frappe.db.sql(query, as_dict=1)
+			if not result: continue
+			dt,dn = result.against_voucher_type,result.against_voucher
+			amt_outstanding = get_amount(frappe.db.get_value(dt,dn))
+			if result.search_field in txn_description:
+				found_documents.append(frappe._dict({'doc':frappe.get_doc(dt,dn), 'account':result.account}))
+		except OperationalError, ValidationError:
+			continue
+	return found_documents
