@@ -15,6 +15,7 @@ def _make_test_records(verbose):
 		["_Test Bank USD", "Bank Accounts", 0, "Bank", "USD"],
 		["_Test Bank EUR", "Bank Accounts", 0, "Bank", "EUR"],
 		["_Test Cash", "Cash In Hand", 0, "Cash", None],
+		["_Test Employee Advance", "Current Assets", 0, "", None],
 
 		["_Test Account Stock Expenses", "Direct Expenses", 1, None, None],
 		["_Test Account Shipping Charges", "_Test Account Stock Expenses", 0, "Chargeable", None],
