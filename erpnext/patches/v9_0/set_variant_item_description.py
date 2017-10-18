@@ -42,6 +42,3 @@ def execute():
 
 				else:
 					variant.db_set('description', temp_variant_description, update_modified=False)
-
-				variant.flags.ignore_permissions=True
-				variant.save()
