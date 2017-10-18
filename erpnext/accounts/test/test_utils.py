@@ -1,5 +1,5 @@
 import unittest
-from erpnext.accounts.utils import get_party_shipping_address
+from erpnext.accounts.party import get_party_shipping_address
 from frappe.test_runner import make_test_objects
 
 
