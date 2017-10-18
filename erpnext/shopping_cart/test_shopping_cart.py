@@ -21,6 +21,7 @@ class TestShoppingCart(unittest.TestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 		self.disable_shopping_cart()
+		frappe.db.sql("delete from `tabTax Rule`")
 
 	def test_get_cart_new_user(self):
 		self.login_as_new_user()

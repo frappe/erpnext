@@ -13,6 +13,7 @@ class TestAsset(unittest.TestCase):
 	def setUp(self):
 		set_depreciation_settings_in_company()
 		create_asset()
+		frappe.db.sql("delete from `tabTax Rule`")
 		
 	def test_purchase_asset(self):
 		asset = frappe.get_doc("Asset", "Macbook Pro 1")
