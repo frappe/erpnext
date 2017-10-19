@@ -38,7 +38,7 @@ QUnit.test("test: request_for_quotation", function(assert) {
 			assert.ok(cur_frm.doc.message_for_supplier == 'Please supply the specified items at the best possible rates', "Reply correct");
 			assert.ok(cur_frm.doc.tc_name == 'Test Term 1', "Term name correct");
 		},
-		() => frappe.timeout(0.3),
+		() => frappe.timeout(3),
 		() => cur_frm.print_doc(),
 		() => frappe.timeout(1),
 		() => {
@@ -65,7 +65,7 @@ QUnit.test("test: request_for_quotation", function(assert) {
 			assert.ok(cur_frm.doc.docstatus == 1, "Quotation request submitted");
 		},
 		() => frappe.click_button('Send Supplier Emails'),
-		() => frappe.timeout(4),
+		() => frappe.timeout(6),
 		() => {
 			assert.ok($('div.modal.fade.in > div.modal-dialog > div > div.modal-body.ui-front > div.msgprint').text().includes("Email sent to supplier Test Supplier"), "Send emails working");
 		},
