@@ -30,8 +30,7 @@ class PaymentReconciliation(Document):
 		return payment_entries
 
 	def get_jv_entries(self):
-		dr_or_cr = "credit_in_account_currency" if self.party_type == "Customer" \
-			else "debit_in_account_currency"
+		dr_or_cr = self.get_dr_or_cr()
 
 		bank_account_condition = "t2.against_account like %(bank_cash_account)s" \
 				if self.bank_cash_account else "1=1"
@@ -103,8 +102,7 @@ class PaymentReconciliation(Document):
 
 		self.get_invoice_entries()
 		self.validate_invoice()
-		dr_or_cr = "credit_in_account_currency" \
-			if self.party_type == "Customer" else "debit_in_account_currency"
+		dr_or_cr = self.get_dr_or_cr()
 			
 		lst = []
 		for e in self.get('payments'):
@@ -184,3 +182,12 @@ class PaymentReconciliation(Document):
 			cond += " and `{0}` <= {1}".format(dr_or_cr, flt(self.maximum_amount))
 
 		return cond
+
+	def get_dr_or_cr(self):
+		'''Return credit_in_account_currency if not set and party is customer.'''
+		if hasattr(self, "dr_or_cr"):
+			return self.dr_or_cr
+		if self.party_type == 'Customer':
+			return "credit_in_account_currency"
+		else:
+			return "debit_in_account_currency"
