@@ -27,7 +27,7 @@ QUnit.test("Test: Offer Letter [HR]", function (assert) {
 				]},
 			]);
 		},
-		() => frappe.timeout(8),
+		() => frappe.timeout(12),
 		() => frappe.click_button('Submit'),
 		() => frappe.timeout(2),
 		() => frappe.click_button('Yes'),
