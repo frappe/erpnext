@@ -48,7 +48,7 @@ QUnit.test("test Salary Structure", function(assert) {
 				]);
 			}
 		),
-		() => frappe.timeout(3),
+		() => frappe.timeout(5),
 		() => {
 		// To check if all the fields are correctly set
 			assert.ok(cur_frm.doc.employees[0].employee_name.includes('Test Employee 1') &&

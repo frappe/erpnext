@@ -18,6 +18,7 @@ QUnit.test("test: Restaurant", function (assert) {
 				{invoice_series_prefix: 'Test-Rest-1-Inv-'}
 			])
 		},
+		() => frappe.timeout(3),
 		() => {
 			assert.equal(cur_frm.doc.company, 'Test Company');
 		},
@@ -29,6 +30,7 @@ QUnit.test("test: Restaurant", function (assert) {
 				{invoice_series_prefix: 'Test-Rest-3-Inv-'}
 			]);
 		},
+		() => frappe.timeout(3),
 		() => {
 			assert.equal(cur_frm.doc.company, 'Test Company');
 		},

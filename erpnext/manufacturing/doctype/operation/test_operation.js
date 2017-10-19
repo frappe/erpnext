@@ -14,7 +14,7 @@ QUnit.test("test: operation", function (assert) {
 				]
 			);
 		},
-		() => frappe.timeout(1),
+		() => frappe.timeout(3),
 		() => {
 			assert.ok(cur_frm.docname.includes('Assemble Keyboard'),
 				'Assemble Keyboard created successfully');
@@ -31,7 +31,7 @@ QUnit.test("test: operation", function (assert) {
 				]
 			);
 		},
-		() => frappe.timeout(1),
+		() => frappe.timeout(3),
 
 		// Create a CPU operation
 		() => {
@@ -42,7 +42,7 @@ QUnit.test("test: operation", function (assert) {
 				]
 			);
 		},
-		() => frappe.timeout(1),
+		() => frappe.timeout(3),
 
 		() => done()
 	]);
