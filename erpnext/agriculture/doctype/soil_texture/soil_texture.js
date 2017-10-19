@@ -24,7 +24,7 @@ frappe.ui.form.on('Soil Texture', {
 });
 
 let get_soil_type = (clay, sand, silt) => {
-	if (soil_edit_order.reduce((a, b) => a + b, 0) < 5) return "Undefined"
+	if (soil_edit_order.reduce((a, b) => a + b, 0) < 5) return "Undefined";
 	last_edit_index = soil_edit_order.indexOf(Math.min.apply(Math, soil_edit_order));
 
 	sand = parseFloat(sand);
