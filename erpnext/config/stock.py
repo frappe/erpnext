@@ -149,6 +149,16 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Fulfilment"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Delivery",
+					"description": _("Delivery service tours to customers.")
+				}
+			]
+		},
+		{
 			"label": _("Tools"),
 			"icon": "fa fa-wrench",
 			"items": [
