@@ -212,7 +212,7 @@ class BankStatement(Document):
 				#create new item in bank_statement_item.third_party_journal_items
 				#set debit_account_type of newly created third_party_journal_item to > 
 				#< bank_statement_item.txn_type.debit_account_party_type
-				if not bank_statement_item.txn_type.debit_account:
+				if not txn_type.debit_account:
 					dr_open_items = get_open_third_party_documents_using_search_fields(
 						txn_type.search_fields_third_party_doc_dr,
 						txn_type.third_party_type,
@@ -233,11 +233,10 @@ class BankStatement(Document):
 				#create new item in bank_statement_item.third_party_journal_items
 				#set credit_account_type of newly created third_party_journal_item to > 
 				#< bank_statement_item.txn_type.credit_account_party_type
-				if not bank_statement_item.txn_type.credit_account:
+				if not txn_type.credit_account:
 					cr_open_items = get_open_third_party_documents_using_search_fields(
 						txn_type.search_fields_third_party_doc_cr,
-						txn_type.third_party_type,
-						bank_statement_item.txn_description
+						bank_statement_item.transaction_description
 					)
 					if len(cr_open_items) >= 1:
 						#set credit_account of of newly created third_party_journal_item to > 
@@ -302,7 +301,7 @@ def processs_statement(self, idx, itm):
 		return
 	return match_type[0].name
 
-def get_open_third_party_documents_using_search_fields(search_fields, third_party_type, txn_description):
+def get_open_third_party_documents_using_search_fields(search_fields, txn_description):
 	from _mysql_exceptions import OperationalError
 	from frappe.exceptions import ValidationError
 	from erpnext.accounts.doctype.payment_request.payment_request import get_amount
@@ -313,14 +312,26 @@ def get_open_third_party_documents_using_search_fields(search_fields, third_part
 		#contained in txn_description. Append result to found_documents
 		search_field = '_'.join(s_field.field_name.replace(' ','_').split(' ')).lower()
 		try:
-			query = """select account, against_voucher,against_voucher_type,{0} from `tabGL Entry` where account_type = '{1}'
-						""".format(search_field, third_party_type)
+			query = """select account, against_voucher,against_voucher_type,{0} from `tabGL Entry` limit 1""".format(search_field)
 			result = frappe.db.sql(query, as_dict=1)
 			if not result: continue
-			dt,dn = result.against_voucher_type,result.against_voucher
-			amt_outstanding = get_amount(frappe.db.get_value(dt,dn))
-			if result.search_field in txn_description:
-				found_documents.append(frappe._dict({'doc':frappe.get_doc(dt,dn), 'account':result.account}))
+			dt,dn = result[0].against_voucher_type,result[0].against_voucher
+			# this throws an error if the amount is not greater than 0
+			amt_outstanding = get_amount(frappe.get_doc(dt,dn), dt)
+			# match the search field content in any order, can be separated by space or underscore('pet cat' or 'cat_pet')
+			# avoid using '.' or - in searches, to avoid conflict with re operation
+			search_lst = result[0].get(search_field).replace('-','_').replace('.','_').split('_')
+			search_txt = ('({})'*len(search_lst)).format(*search_lst)
+			search_txt = '[{}\s_\B.\-]+'.format(search_txt)
+			found = re.findall(r'{}'.format(search_txt), txn_description, re.I)
+			if not found: continue
+			# avoid matching substrings of key words
+			min_len = len(sorted(search_lst, key=len)[0])
+			found = map(lambda x:x.strip() if x else x, found)
+			found = filter(lambda x:len(x)>min_len if x else x, found)
+			if not found: continue
+			ret_dict = frappe._dict({'doc':frappe.get_doc(dt,dn), 'account':result[0].account})
+			if not ret_dict in found_documents: found_documents.append(ret_dict)
 		except OperationalError, ValidationError:
 			continue
 	return found_documents
