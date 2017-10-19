@@ -72,13 +72,13 @@ class PaymentReconciliation(Document):
 			row = self.append('payments', {})
 			row.update(e)
 
-	def get_invoice_entries(self):
+	def get_invoice_entries(self, paying_party=False):
 		#Fetch JVs, Sales and Purchase Invoices for 'invoices' to reconcile against
 
 		condition = self.check_condition()
 
 		non_reconciled_invoices = get_outstanding_invoices(self.party_type, self.party,
-			self.receivable_payable_account, condition=condition)
+			self.receivable_payable_account, condition=condition, paying_party=paying_party)
 
 		self.add_invoice_entries(non_reconciled_invoices)
 
