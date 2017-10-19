@@ -3551,7 +3551,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "modified": "2017-10-05 14:19:04.102534",
- "modified_by": "Administrator", 
+ "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order", 
  "owner": "Administrator", 

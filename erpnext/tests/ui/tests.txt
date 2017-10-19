@@ -130,3 +130,7 @@ erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_repack.js
 erpnext/accounts/doctype/sales_invoice/tests/test_sales_invoice_with_serialize_item.js
 erpnext/accounts/doctype/payment_entry/tests/test_payment_against_invoice.js
 erpnext/buying/doctype/purchase_order/tests/test_purchase_order_with_last_purchase_rate.js
+erpnext/restaurant/doctype/restaurant/test_restaurant.js
+erpnext/restaurant/doctype/test_restaurant_table/test_restaurant_table.js
+erpnext/restaurant/doctype/restaurant_menu/test_restaurant_menu.js
+erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_entry.js

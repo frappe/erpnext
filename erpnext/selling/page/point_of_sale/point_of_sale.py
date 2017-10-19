@@ -9,6 +9,8 @@ from frappe.utils.nestedset import get_root_of
 def get_items(start, page_length, price_list, item_group, search_value=""):
 	serial_no = ""
 	batch_no = ""
+	barcode = ""
+
 	item_code = search_value
 	if not frappe.db.exists('Item Group', item_group):
 		item_group = get_root_of('Item Group')
@@ -24,7 +26,12 @@ def get_items(start, page_length, price_list, item_group, search_value=""):
 			if batch_no_data:
 				batch_no, item_code = batch_no_data
 
-	item_code, condition = get_conditions(item_code, serial_no, batch_no)
+		if not serial_no and not batch_no:
+			barcode_data = frappe.db.get_value('Item', {'barcode': search_value}, ['name', 'barcode'])
+			if barcode_data:
+				item_code, barcode = barcode_data
+
+	item_code, condition = get_conditions(item_code, serial_no, batch_no, barcode)
 
 	lft, rgt = frappe.db.get_value('Item Group', item_group, ['lft', 'rgt'])
 	# locate function is used to sort by closest match from the beginning of the value
@@ -62,12 +69,12 @@ def get_items(start, page_length, price_list, item_group, search_value=""):
 
 	return res
 
-def get_conditions(item_code, serial_no, batch_no):
-	if serial_no or batch_no:
+def get_conditions(item_code, serial_no, batch_no, barcode):
+	if serial_no or batch_no or barcode:
 		return frappe.db.escape(item_code), "i.item_code = %(item_code)s"
 
 	condition = """(i.item_code like %(item_code)s
-			or i.item_name like %(item_code)s or i.barcode like %(item_code)s)"""
+			or i.item_name like %(item_code)s)"""
 
 	return '%%%s%%'%(frappe.db.escape(item_code)), condition
 

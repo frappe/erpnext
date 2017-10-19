@@ -70,6 +70,7 @@ class SalarySlip(TransactionBase):
 				'default_amount': amount,
 				'depends_on_lwp' : struct_row.depends_on_lwp,
 				'salary_component' : struct_row.salary_component,
+				'abbr' : struct_row.abbr,
 				'do_not_include_in_total' : struct_row.do_not_include_in_total
 			})
 		else:

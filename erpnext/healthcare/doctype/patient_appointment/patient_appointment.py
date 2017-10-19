@@ -125,7 +125,7 @@ def create_invoice(company, physician, patient, appointment_id, appointment_date
 	create_invoice_items(appointment_id, physician, company, sales_invoice)
 
 	sales_invoice.save(ignore_permissions=True)
-	frappe.db.sql(_("""update `tabPatient Appointment` set sales_invoice='{0}' where name='{1}'""").format(sales_invoice.name, appointment_id))
+	frappe.db.sql("""update `tabPatient Appointment` set sales_invoice=%s where name=%s""", (sales_invoice.name, appointment_id))
 	frappe.db.set_value("Fee Validity", fee_validity.name, "ref_invoice", sales_invoice.name)
 	consultation = frappe.db.exists({
 			"doctype": "Consultation",

@@ -558,5 +558,5 @@ class TestMaterialRequest(unittest.TestCase):
 			item_code= %s and warehouse= %s """, (mr.items[0].item_code, mr.items[0].warehouse))[0][0]
 		self.assertEquals(requested_qty, new_requested_qty)
 
-test_dependencies = ["Currency Exchange"]
+test_dependencies = ["Currency Exchange", "BOM"]
 test_records = frappe.get_test_records('Material Request')

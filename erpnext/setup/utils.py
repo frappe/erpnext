@@ -111,27 +111,12 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None):
 
 def enable_all_roles_and_domains():
 	""" enable all roles and domain for testing """
-	roles = frappe.get_list("Role", filters={"disabled": 1})
-	for role in roles:
-		_role = frappe.get_doc("Role", role.get("name"))
-		_role.disabled = 0
-		_role.flags.ignore_mandatory = True
-		_role.flags.ignore_permissions = True
-		_role.save()
-
 	# add all roles to users
-	if roles:
-		user = frappe.get_doc("User", "Administrator")
-		user.add_roles(*[role.get("name") for role in roles])
-
-	domains = frappe.get_list("Domain")
+	domains = frappe.get_all("Domain")
 	if not domains:
 		return
 
-	domain_settings = frappe.get_doc("Domain Settings", "Domain Settings")
-	domain_settings.set("active_domains", [])
-	for domain in domains:
-		row = domain_settings.append("active_domains", {})
-		row.domain=domain.get("name")
-
-	domain_settings.save()
+	from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
+	frappe.get_single('Domain Settings').set_active_domains(\
+		[d.name for d in domains])
+	add_all_roles_to('Administrator')
