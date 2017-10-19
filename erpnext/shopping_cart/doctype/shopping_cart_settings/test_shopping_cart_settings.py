@@ -12,9 +12,6 @@ class TestShoppingCartSettings(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql("""delete from `tabSingles` where doctype="Shipping Cart Settings" """)
 
-	def tearDown(self):
-		frappe.db.sql("delete from `tabTax Rule`")
-
 	def get_cart_settings(self):
 		return frappe.get_doc({"doctype": "Shopping Cart Settings",
 			"company": "_Test Company"})
