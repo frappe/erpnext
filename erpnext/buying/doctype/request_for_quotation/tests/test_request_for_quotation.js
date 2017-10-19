@@ -27,6 +27,7 @@ QUnit.test("test: request_for_quotation", function(assert) {
 				{tc_name: 'Test Term 1'}
 			]);
 		},
+		() => frappe.timeout(3),
 		() => {
 			assert.ok(cur_frm.doc.transaction_date == date, "Date correct");
 			assert.ok(cur_frm.doc.company == cur_frm.doc.company, "Company correct");

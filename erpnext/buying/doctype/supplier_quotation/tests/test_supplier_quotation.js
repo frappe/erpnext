@@ -27,6 +27,7 @@ QUnit.test("test: supplier quotation", function(assert) {
 				{terms: 'This is a term'}
 			]);
 		},
+		() => frappe.timeout(3),
 		() => {
 			// Get Supplier details
 			assert.ok(cur_frm.doc.supplier == 'Test Supplier', "Supplier correct");
