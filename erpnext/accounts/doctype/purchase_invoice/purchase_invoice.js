@@ -47,6 +47,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		if(!doc.is_return && (this.frm.doc.__islocal || doc.docstatus==1 && (doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)))) {
 			cur_frm.add_custom_button(__('Return / Debit Note'),
 				this.make_debit_note, __("Make"));
+		}
 
 		if(!doc.is_return && doc.docstatus==1) {
 			if(!doc.subscription) {
