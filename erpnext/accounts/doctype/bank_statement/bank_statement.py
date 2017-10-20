@@ -215,13 +215,12 @@ class BankStatement(Document):
 				if not txn_type.debit_account:
 					dr_open_items = get_open_third_party_documents_using_search_fields(
 						txn_type.search_fields_third_party_doc_dr,
-						txn_type.third_party_type,
-						bank_statement_item.txn_description
+						bank_statement_item.transaction_description
 					)
 					if len(dr_open_items) >= 1:
 						#set debit_account of of newly created third_party_journal_item to > 
 						#< dr_open_items[0].third_party
-						bank_statement_item.jl_credit_account = cr_open_items[0].account
+						bank_statement_item.jl_credit_account = dr_open_items[0].account
 					else:
 						continue
 				else:
@@ -312,26 +311,28 @@ def get_open_third_party_documents_using_search_fields(search_fields, txn_descri
 		#contained in txn_description. Append result to found_documents
 		search_field = '_'.join(s_field.field_name.replace(' ','_').split(' ')).lower()
 		try:
-			query = """select account, against_voucher,against_voucher_type,{0} from `tabGL Entry` limit 1""".format(search_field)
+			query = """select account, against_voucher,against_voucher_type,{0} from `tabGL Entry` where against_voucher_type IS NOT NULL""".format(search_field)
 			result = frappe.db.sql(query, as_dict=1)
 			if not result: continue
-			dt,dn = result[0].against_voucher_type,result[0].against_voucher
-			# this throws an error if the amount is not greater than 0
-			amt_outstanding = get_amount(frappe.get_doc(dt,dn), dt)
-			# match the search field content in any order, can be separated by space or underscore('pet cat' or 'cat_pet')
-			# avoid using '.' or - in searches, to avoid conflict with re operation
-			search_lst = result[0].get(search_field).replace('-','_').replace('.','_').split('_')
-			search_txt = ('({})'*len(search_lst)).format(*search_lst)
-			search_txt = '[{}\s_\B.\-]+'.format(search_txt)
-			found = re.findall(r'{}'.format(search_txt), txn_description, re.I)
-			if not found: continue
-			# avoid matching substrings of key words
-			min_len = len(sorted(search_lst, key=len)[0])
-			found = map(lambda x:x.strip() if x else x, found)
-			found = filter(lambda x:len(x)>min_len if x else x, found)
-			if not found: continue
-			ret_dict = frappe._dict({'doc':frappe.get_doc(dt,dn), 'account':result[0].account})
-			if not ret_dict in found_documents: found_documents.append(ret_dict)
+			for res in result:
+				dt,dn = res.against_voucher_type, res.against_voucher
+				# this throws an error if the amount is not greater than 0
+				amt_outstanding = get_amount(frappe.get_doc(dt,dn), dt)
+				# match the search field content in any order, can be separated by space or underscore('pet cat' or 'cat_pet')
+				# avoid using '.' or - in searches, to avoid conflict with re operation
+				search_lst = res.get(search_field).replace('-','_').replace('.','_').split('_')
+				search_lst = map(lambda x:'(?:{})'.format(x), search_lst)
+				search_txt = '|'.join(search_lst)
+				search_txt = '(?:{}|[\s_\B.\-])+'.format(search_txt)
+				found = re.findall(r'{}'.format(search_txt), txn_description, re.I)
+				if not found: continue
+				# avoid matching substrings of key words
+				min_len = len(sorted(search_lst, key=len)[0])
+				found = map(lambda x:x.strip() if x else x, found)
+				found = filter(lambda x:len(x)>min_len if x else x, found)
+				if not found: continue
+				ret_dict = frappe._dict({'doc':frappe.get_doc(dt,dn), 'account':result[0].account})
+				if not ret_dict in found_documents: found_documents.append(ret_dict)
 		except OperationalError, ValidationError:
 			continue
 	return found_documents
