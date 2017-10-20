@@ -57,8 +57,6 @@ def get_default_address(out, name):
 
 @frappe.whitelist()
 def get_contact_and_address(name):
-	# TODO what is this print statement here?
-	print name, "*****"
 	out = frappe._dict()
 	get_default_contact(out, name)
 	get_default_address(out, name)

@@ -3,31 +3,31 @@
 
 frappe.ui.form.on('Delivery', {
 	refresh: function(frm) {
-		// if(!frm.doc.__islocal && frm.doc.workflow_state == 'Planned' && frm.doc.delivery_stop.length > 0) {
-		if(!frm.doc.__islocal && frm.doc.delivery_stop.length > 0) {
-			frm.add_custom_button(__("Notify Customers via Email"), function() {
-			frm.trigger('notify_customers')
+		if(!frm.is_new() && frm.doc.delivery_stop.length > 0) {
+		        frm.add_custom_button(__("Notify Customers via Email"), function() {
+		        frm.trigger('notify_customers')
 			});
 		}
 		frm.set_df_property("company", "read_only", frm.doc.__islocal ? 0 : 1);
 		frm.set_df_property("naming_series", "read_only", 1);
 	},
 	calculate_arrival_time: function(frm){
-	  if(!frm.is_new()) {
-	    frappe.call({
-	      method: 'erpnext.stock.doctype.delivery.delivery.calculate_time_matrix',
-	      freeze: true,
-	      args: {
-	        name: frm.doc.name
-	      },
-	      callback: function(r){
-					if (r.message.error) {
-						console.log(r.message.error)
-						frappe.throw(__("Malformatted address for " + r.message.error.destination.address + ", please fix to continue."))
-						return
-					}
+	    if(!frm.is_new()) {
+            frappe.call({
+	        method: 'erpnext.stock.doctype.delivery.delivery.calculate_time_matrix',
+            freeze: true,
+	        freeze_message:__("Updating estimated arrival times."),
+	        args: {
+	            name: frm.doc.name
+	        },
+	        callback: function(r){
+				if (r.message.error) {
+					console.log(r.message.error)
+					frappe.throw(__("Malformatted address for " + r.message.error.destination.address + ", please fix to continue."))
+					return
+				}
 	        frm.reload_doc()
-	      }
+	        }
 	    })
 	  } else {
 	    frappe.msgprint(__("You must save the doc at least once"))
@@ -50,16 +50,16 @@ frappe.ui.form.on('Delivery', {
 		}
 
 		frappe.confirm(__("Do you want to notify all the customers by email?"), function () {
-				frappe.call({
-					method: "erpnext.stock.doctype.delivery.delivery.notify_customers",
-					args: {
-						"docname": frm.doc.name,
-						"date": frm.doc.date,
-						"driver": frm.doc.driver,
-						"vehicle": frm.doc.vehicle,
-						"sender_email": owner_email,
-						"sender_name": frappe.user.full_name(owner_email),
-						"delivery_notification": frm.doc.delivery_notification
+			frappe.call({
+				method: "erpnext.stock.doctype.delivery.delivery.notify_customers",
+				args: {
+					"docname": frm.doc.name,
+					"date": frm.doc.date,
+					"driver": frm.doc.driver,
+					"vehicle": frm.doc.vehicle,
+					"sender_email": owner_email,
+					"sender_name": frappe.user.full_name(owner_email),
+					"delivery_notification": frm.doc.delivery_notification
 					}
 				});
 		});
@@ -99,7 +99,6 @@ frappe.ui.form.on('Delivery Stop', {
 			method: "erpnext.stock.doctype.delivery.delivery.get_contact_and_address",
 			args: {"name": row.customer},
 			callback: function(r) {
-			    console.log(r)
 				if(r.message) {
 					if(r.message["shipping_address"]) {
 						frappe.model.set_value(cdt, cdn, "address", r.message["shipping_address"].parent);
@@ -146,7 +145,7 @@ frappe.ui.form.on('Delivery Stop', {
 					delivery_notes.push(value.name);
 				})
 				if(r.message) {
-					var dialog = new frappe.ui.Dialog({
+					var d = new frappe.ui.Dialog({
 						title: __("Select Delivery Notes"),
 						fields: [{fieldtype: "HTML", fieldname: "delivery_notes_html"}]
 					});
@@ -170,18 +169,18 @@ frappe.ui.form.on('Delivery Stop', {
 						</div>
 					`);
 
-					var wrapper = dialog.fields_dict.delivery_notes_html.$wrapper;
+					var wrapper = d.fields_dict.delivery_notes_html.$wrapper;
 					wrapper.html(html);
 
-					dialog.set_primary_action(__("Select"), function() {
+					d.set_primary_action(__("Select"), function() {
 						var delivery_notes = wrapper.find('input[type=checkbox]:checked')
 							.map((i, el) => $(el).attr('data-delivery-note')).toArray();
 
 						if(!delivery_notes) return;
 						frappe.model.set_value(cdt, cdn, "delivery_notes", delivery_notes.join(","));
-						dialog.hide();
+						d.hide();
 					});
-					dialog.show();
+					d.show();
 				}
 				else {
 					frappe.msgprint(__("No submitted Delivery Notes found"))
