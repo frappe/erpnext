@@ -50,6 +50,7 @@ QUnit.test("test: Restaurant Menu", function (assert) {
 				]}
 			]);
 		},
+		() => frappe.timeout(2),
 		() => {
 			return frappe.tests.make("Restaurant Menu", [
 				{__newname: 'Restaurant Menu 2'},
@@ -66,6 +67,7 @@ QUnit.test("test: Restaurant Menu", function (assert) {
 				]}
 			]);
 		},
+		() => frappe.timeout(2),
 		() => frappe.set_route('Form', 'Restaurant', 'Test Restaurant 1'),
 		() => cur_frm.set_value('active_menu', 'Restaurant Menu 1'),
 		() => cur_frm.save(),

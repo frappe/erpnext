@@ -1,7 +1,7 @@
 QUnit.module('Buying');
 
 QUnit.test("test: purchase order", function(assert) {
-	assert.expect(11);
+	assert.expect(17);
 	let done = assert.async();
 
 	frappe.run_serially([
@@ -53,7 +53,7 @@ QUnit.test("test: purchase order", function(assert) {
 			assert.ok(cur_frm.doc.items[1].qty == 2, "Quantity correct");
 			assert.ok(cur_frm.doc.items[1].schedule_date == cur_frm.doc.schedule_date, "Schedule Date correct");
 			// Calculate total
-			assert.ok(cur_frm.doc.total == 500, "Total correct");
+			assert.ok(cur_frm.doc.total == 700, "Total correct");
 			// Get terms
 			assert.ok(cur_frm.doc.terms == 'This is a term.', "Terms correct");
 		},
@@ -70,7 +70,7 @@ QUnit.test("test: purchase order", function(assert) {
 
 		() => frappe.tests.click_button('Submit'),
 		() => frappe.tests.click_button('Yes'),
-		() => frappe.timeout(0.3),
+		() => frappe.timeout(1),
 
 		() => {
 			assert.ok(cur_frm.doc.status == 'To Receive and Bill', "Submitted successfully");
