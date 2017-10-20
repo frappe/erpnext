@@ -451,3 +451,4 @@ erpnext.patches.v8_9.update_billing_gstin_for_indian_account
 erpnext.patches.v9_0.fix_subscription_next_date
 erpnext.patches.v9_0.add_healthcare_domain
 erpnext.patches.v9_0.set_variant_item_description
+erpnext.patches.v9_0.set_uoms_in_variant_field
