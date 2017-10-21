@@ -53,6 +53,16 @@ calendars = ["Task", "Production Order", "Leave Application", "Sales Order", "Ho
 
 fixtures = ["Web Form"]
 
+domains = {
+	'Distribution': 'erpnext.domains.distribution',
+	'Education': 'erpnext.domains.education',
+	'Healthcare': 'erpnext.domains.healthcare',
+	'Hospitality': 'erpnext.domains.hospitality',
+	'Manufacturing': 'erpnext.domains.manufacturing',
+	'Retail': 'erpnext.domains.retail',
+	'Services': 'erpnext.domains.services',
+}
+
 website_generators = ["Item Group", "Item", "BOM", "Sales Partner",
 	"Job Opening", "Student Admission"]
 
@@ -133,7 +143,8 @@ standard_portal_menu_items = [
 	{"title": _("Prescription"), "route": "/prescription", "reference_doctype": "Consultation", "role":"Patient"},
 	{"title": _("Patient Appointment"), "route": "/patient-appointments", "reference_doctype": "Patient Appointment", "role":"Patient"},
 	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role":"Student"},
-	{"title": _("Newsletter"), "route": "/newsletters", "reference_doctype": "Newsletter"}
+	{"title": _("Newsletter"), "route": "/newsletters", "reference_doctype": "Newsletter"},
+	{"title": _("Admission"), "route": "/admissions", "reference_doctype": "Student Admission"}
 ]
 
 default_roles = [
@@ -208,7 +219,7 @@ scheduler_events = {
 		"erpnext.stock.doctype.serial_no.serial_no.update_maintenance_status",
 		"erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.refresh_scorecards",
 		"erpnext.setup.doctype.company.company.cache_companies_monthly_sales_history",
-		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms",
+		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms"
 	]
 }
 

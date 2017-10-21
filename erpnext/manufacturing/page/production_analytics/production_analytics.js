@@ -53,7 +53,7 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 
 		this.show_zero_check()
 		this.setup_chart_check();
-		
+
 	},
 	init_filter_values: function() {
 		this._super();
@@ -61,12 +61,13 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 	},
 	setup_chart: function() {
 		var me = this;
-		
+
 		var chart_data = this.get_chart_data ? this.get_chart_data() : null;
 
-		this.chart = new frappe.ui.Chart({
-			wrapper: this.chart_area,
-			data: chart_data
+		this.chart = new frappe.chart.FrappeChart({
+			parent: ".chart",
+			data: chart_data,
+			type: 'line'
 		});
 	},
 	set_default_values: function() {
@@ -95,7 +96,7 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 		var  pending = {name:"Pending", "id":"pending-pos",
 			checked:true};
 		var completed = {name:"Completed", "id":"completed-pos",
-			checked:true};	
+			checked:true};
 
 		$.each(frappe.report_dump.data["Production Order"], function(i, d) {
 			var dateobj = frappe.datetime.str_to_obj(d.creation);
@@ -109,10 +110,10 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 					var planned_start_date = frappe.datetime.user_to_obj(frappe.datetime.str_to_user(d.planned_start_date));
 					var aend_date = frappe.datetime.user_to_obj(frappe.datetime.str_to_user(d.actual_end_date));
 					var modified = frappe.datetime.user_to_obj(frappe.datetime.str_to_user(d.modified));
-					
+
 					if (dateobj <= start_period || dateobj <= end_period) {
 						all_open_orders[col.field] = flt(all_open_orders[col.field]) + 1;
-				
+
 						if(d.status=="Completed") {
 							if(aend_date < start_period || modified < start_period) {
 								completed[col.field] = flt(completed[col.field]) + 1;
@@ -140,7 +141,7 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 							}else{
 								not_started[col.field] = flt(not_started[col.field]) + 1;
 							}
-						}							
+						}
 					}
 				}
 			});
@@ -151,6 +152,6 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 			this.chart_area.toggle(false);
 		}
 		this.data = [all_open_orders, not_started, overdue, pending, completed];
-		
+
 	}
 });

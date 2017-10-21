@@ -8,15 +8,15 @@ from frappe.utils import flt
 from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data)
 
 def execute(filters=None):
-	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, 
+	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year,
 		filters.periodicity, filters.accumulated_values, filters.company)
 
 	income = get_data(filters.company, "Income", "Credit", period_list, filters = filters,
-		accumulated_values=filters.accumulated_values, 
+		accumulated_values=filters.accumulated_values,
 		ignore_closing_entries=True, ignore_accumulated_values_for_fy= True)
-		
+
 	expense = get_data(filters.company, "Expense", "Debit", period_list, filters=filters,
-		accumulated_values=filters.accumulated_values, 
+		accumulated_values=filters.accumulated_values,
 		ignore_closing_entries=True, ignore_accumulated_values_for_fy= True)
 
 	net_profit_loss = get_net_profit_loss(income, expense, period_list, filters.company)
@@ -61,7 +61,7 @@ def get_net_profit_loss(income, expense, period_list, company):
 
 
 def get_chart_data(filters, columns, income, expense, net_profit_loss):
-	x_intervals = ['x'] + [d.get("label") for d in columns[2:]]
+	labels = [d.get("label") for d in columns[2:]]
 
 	income_data, expense_data, net_profit = [], [], []
 
@@ -73,27 +73,24 @@ def get_chart_data(filters, columns, income, expense, net_profit_loss):
 		if net_profit_loss:
 			net_profit.append(net_profit_loss.get(p.get("fieldname")))
 
-	columns = [x_intervals]
+	datasets = []
 	if income_data:
-		columns.append(["Income"] + income_data)
+		datasets.append({'title': 'Income', 'values': income_data})
 	if expense_data:
-		columns.append(["Expense"] + expense_data)
+		datasets.append({'title': 'Expense', 'values': expense_data})
 	if net_profit:
-		columns.append(["Net Profit/Loss"] + net_profit)
+		datasets.append({'title': 'Net Profit/Loss', 'values': net_profit})
 
 	chart = {
 		"data": {
-			'x': 'x',
-			'columns': columns,
-			'colors': {
-				'Income': '#5E64FF',
-				'Expense': '#b8c2cc',
-				'Net Profit/Loss': '#ff5858'
-			}
+			'labels': labels,
+			'datasets': datasets
 		}
 	}
 
 	if not filters.accumulated_values:
-		chart["chart_type"] = "bar"
+		chart["type"] = "bar"
+	else:
+		chart["type"] = "line"
 
 	return chart

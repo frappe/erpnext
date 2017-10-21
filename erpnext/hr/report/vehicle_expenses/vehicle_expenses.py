@@ -29,26 +29,26 @@ def get_columns():
 
 def get_log_data(filters):
 	fy = frappe.db.get_value('Fiscal Year', filters.get('fiscal_year'), ['year_start_date', 'year_end_date'], as_dict=True)
-	data = frappe.db.sql("""select 
+	data = frappe.db.sql("""select
 			vhcl.license_plate as "License", vhcl.make as "Make", vhcl.model as "Model",
-			vhcl.location as "Location", log.name as "Log", log.odometer as "Odometer", 
+			vhcl.location as "Location", log.name as "Log", log.odometer as "Odometer",
 			log.date as "Date", log.fuel_qty as "Fuel Qty", log.price as "Fuel Price"
-		from 
+		from
 			`tabVehicle` vhcl,`tabVehicle Log` log
-		where 
+		where
 			vhcl.license_plate = log.license_plate and log.docstatus = 1 and date between %s and %s
 		order by date""" ,(fy.year_start_date, fy.year_end_date), as_dict=1)
 	dl=list(data)
 	for row in dl:
 		row["Service Expense"]= get_service_expense(row["Log"])
 	return dl
-	
+
 def get_service_expense(logname):
-	expense_amount = frappe.db.sql("""select sum(expense_amount) 
-		from `tabVehicle Log` log,`tabVehicle Service` ser 
+	expense_amount = frappe.db.sql("""select sum(expense_amount)
+		from `tabVehicle Log` log,`tabVehicle Service` ser
 		where ser.parent=log.name and log.name=%s""",logname)
 	return flt(expense_amount[0][0]) if expense_amount else 0
-	
+
 def get_chart_data(data,period_list):
 	fuel_exp_data,service_exp_data,fueldata,servicedata = [],[],[],[]
 	service_exp_data = []
@@ -63,19 +63,25 @@ def get_chart_data(data,period_list):
 		fueldata.append([period.key,total_fuel_exp])
 		servicedata.append([period.key,total_ser_exp])
 
-	x_intervals = ['x'] + [period.key for period in period_list]
+	labels = [period.key for period in period_list]
 	fuel_exp_data= [row[1] for row in fueldata]
 	service_exp_data= [row[1] for row in servicedata]
-	columns = [x_intervals]
+	datasets = []
 	if fuel_exp_data:
-		columns.append(["Fuel Expenses"]+ fuel_exp_data)
+		datasets.append({
+			'title': 'Fuel Expenses',
+			'values': fuel_exp_data
+		})
 	if service_exp_data:
-		columns.append(["Service Expenses"]+ service_exp_data)
+		datasets.append({
+			'title': 'Service Expenses',
+			'values': service_exp_data
+		})
 	chart = {
 		"data": {
-			'x': 'x',
-			'columns': columns
+			'labels': labels,
+			'datasets': datasets
 		}
 	}
-	chart["chart_type"] = "line"
+	chart["type"] = "line"
 	return chart

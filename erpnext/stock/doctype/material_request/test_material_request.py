@@ -206,6 +206,7 @@ class TestMaterialRequest(unittest.TestCase):
 		po_doc = make_purchase_order(mr.name)
 		po_doc.supplier = "_Test Supplier"
 		po_doc.transaction_date = "2013-07-07"
+		po_doc.schedule_date = "2013-07-09"
 		po_doc.get("items")[0].qty = 27.0
 		po_doc.get("items")[1].qty = 1.5
 		po_doc.get("items")[0].schedule_date = "2013-07-09"
@@ -557,5 +558,5 @@ class TestMaterialRequest(unittest.TestCase):
 			item_code= %s and warehouse= %s """, (mr.items[0].item_code, mr.items[0].warehouse))[0][0]
 		self.assertEquals(requested_qty, new_requested_qty)
 
-test_dependencies = ["Currency Exchange"]
+test_dependencies = ["Currency Exchange", "BOM"]
 test_records = frappe.get_test_records('Material Request')
