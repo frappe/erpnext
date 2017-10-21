@@ -16,7 +16,7 @@ QUnit.test("test: Restaurant Menu", function (assert) {
 			{item_group: "Products"},
 			{is_stock_item: 1},
 		],
-		"Test Product 3": [
+		"Food Item 3": [
 			{item_code: "Food Item 3"},
 			{item_group: "Products"},
 			{is_stock_item: 1},

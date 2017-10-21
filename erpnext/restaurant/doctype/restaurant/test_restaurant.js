@@ -15,7 +15,8 @@ QUnit.test("test: Restaurant", function (assert) {
 				// values to be set
 				{__newname: 'Test Restaurant 1'},
 				{company: 'Test Company'},
-				{invoice_series_prefix: 'Test-Rest-1-Inv-'}
+				{invoice_series_prefix: 'Test-Rest-1-Inv-'},
+				{default_customer: 'Test Customer 1'}
 			])
 		},
 		() => frappe.timeout(3),
@@ -27,7 +28,8 @@ QUnit.test("test: Restaurant", function (assert) {
 				// values to be set
 				{__newname: 'Test Restaurant 2'},
 				{company: 'Test Company'},
-				{invoice_series_prefix: 'Test-Rest-3-Inv-'}
+				{invoice_series_prefix: 'Test-Rest-3-Inv-'},
+				{default_customer: 'Test Customer 2'}
 			]);
 		},
 		() => frappe.timeout(3),

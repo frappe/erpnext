@@ -2,7 +2,7 @@
 QUnit.module('schools');
 
 QUnit.test('Test: Student Admission', function(assert) {
-	assert.expect(9);
+	assert.expect(10);
 	let done = assert.async();
 	frappe.run_serially([
 		() => {
