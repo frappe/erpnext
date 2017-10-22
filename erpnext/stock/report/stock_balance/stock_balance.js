@@ -40,5 +40,10 @@ frappe.query_reports["Stock Balance"] = {
 			"width": "80",
 			"options": "Warehouse"
 		},
+		{
+			"fieldname": "show_variants",
+			"label": __("Show Variants"),
+			"fieldtype": "Check"
+		},
 	]
 }
