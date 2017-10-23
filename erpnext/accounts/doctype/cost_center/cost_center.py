@@ -61,7 +61,20 @@ class CostCenter(NestedSet):
 
 	def after_rename(self, olddn, newdn, merge=False):
 		if not merge:
-			#new_cc = frappe.db.get_value("Cost Center", newdn, ["cost_center_name", "cost_center_number"], as_dict=1)
+			new_cc = frappe.db.get_value("Cost Center", newdn, ["cost_center_name", "cost_center_number"], as_dict=1)
+			# exclude company abbr
+			new_parts = newdn.split(" - ")[:-1]
+
+			# update cost center number and remove from parts
+			if new_parts[0][0].isdigit():
+				# if cost center number is separate by space, split using space
+				if len(new_parts) == 1:
+					new_parts = newdn.split(" ")
+				if new_cc.cost_center_number != new_parts[0]:
+					self.cost_center_number = new_parts[0]
+					self.db_set("cost_center_number", new_parts[0])
+				new_parts = new_parts[1:]
+
 			frappe.db.set_value("Cost Center", newdn, "cost_center_name",
 				" - ".join(newdn.split(" - ")[:-1]))
 		else:
