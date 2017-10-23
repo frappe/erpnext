@@ -43,7 +43,7 @@ def execute(filters=None):
 
 		if filters.get('show_variants',0) == 1:
 			variants_attributes = get_variants_attributes()
-			report_data += [item_map[item][i] for i in variants_attributes]			
+			report_data += [item_map[item][i] for i in variants_attributes]
 		data.append(report_data)
 
 	if filters.get('show_variants',0) == 1:
@@ -232,13 +232,11 @@ def get_variants_attributes():
 
 def get_variant_values_for_(items):
 	'''Returns variant values for items.'''
-	attribute_map = {}	
-	for attr in frappe.db.sql('''select parent, attribute, attribute_value 
-									from 
-									`tabItem Variant Attribute` 
-									 where parent in (%s);''' %", ".join(["%s"]*len(items)), 
-									 tuple(items), 
-									 as_dict=1):
-		attribute_map.setdefault(attr['parent'],{})
+	attribute_map = {}
+	for attr in frappe.db.sql('''select parent, attribute,
+							attribute_value from `tabItem Variant Attribute`
+							where parent in (%s);
+							''' % ", ".join(["%s"] * len(items)), tuple(items), as_dict=1):
+		attribute_map.setdefault(attr['parent'], {})
 		attribute_map[attr['parent']].update({attr['attribute']:attr['attribute_value']})
 	return attribute_map
