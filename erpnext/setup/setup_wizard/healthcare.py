@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 import frappe
-from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 
 from frappe import _
 
@@ -21,11 +21,13 @@ def make_custom_fields():
 		'Sales Invoice': [
 			dict(fieldname='appointment', label='Patient Appointment',
 				fieldtype='Link', options='Patient Appointment',
-				insert_after='customer')
+				insert_after='customer',print_hide=0)
 		]
 	}
 
-	create_custom_fields(custom_fields)
+	for dt, data in custom_fields.iteritems():
+		for df in data:
+			create_custom_field(dt, df)
 
 
 def create_medical_departments():
