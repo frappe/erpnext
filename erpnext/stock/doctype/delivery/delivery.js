@@ -3,70 +3,64 @@
 
 frappe.ui.form.on('Delivery', {
 	refresh: function(frm) {
-		if(!frm.is_new() && frm.doc.delivery_stop.length > 0) {
+		if(frm.doc.docstatus == 1 && frm.doc.delivery_stops.length > 0) {
 		        frm.add_custom_button(__("Notify Customers via Email"), function() {
 		        frm.trigger('notify_customers')
 			});
 		}
-		frm.set_df_property("company", "read_only", frm.doc.__islocal ? 0 : 1);
-		frm.set_df_property("naming_series", "read_only", 1);
 	},
 	calculate_arrival_time: function(frm){
-	    if(!frm.is_new()) {
-            frappe.call({
-	        method: 'erpnext.stock.doctype.delivery.delivery.calculate_time_matrix',
-            freeze: true,
-	        freeze_message:__("Updating estimated arrival times."),
-	        args: {
-	            name: frm.doc.name
-	        },
-	        callback: function(r){
+        frappe.call({
+        	method: 'erpnext.stock.doctype.delivery.delivery.calculate_time_matrix',
+        	freeze: true,
+        	freeze_message:__("Updating estimated arrival times."),
+        	args: {
+            	name: frm.doc.name
+        	},
+        	callback: function(r){
 				if (r.message.error) {
-					console.log(r.message.error)
 					frappe.throw(__("Malformatted address for " + r.message.error.destination.address + ", please fix to continue."))
-					return
+				return
 				}
-	        frm.reload_doc()
-	        }
+        	frm.reload_doc()
+        	}
 	    })
-	  } else {
-	    frappe.msgprint(__("You must save the doc at least once"))
-	  }
 	},
-
 	notify_customers: function(frm) {
 		var owner_email = frm.doc.owner=="Administrator"
 			? frappe.user_info("Administrator").email
 			: frm.doc.owner;
 
-		for (var i = 0; i < frm.doc.delivery_stop.length; i++) {
-			if (!frm.doc.delivery_stop[i].delivery_notes)
-			{
-				var indicator = "orange";
-				var title = __("Warning");
-				var message = __("No Delivery Note selected for Customer {}", [frm.doc.delivery_stop[i].customer]);
-				frappe.msgprint({"message" : message, "title" : title, "indicator" : indicator, "alert": 1});
-			}
-		}
-
-		frappe.confirm(__("Do you want to notify all the customers by email?"), function () {
-			frappe.call({
-				method: "erpnext.stock.doctype.delivery.delivery.notify_customers",
-				args: {
-					"docname": frm.doc.name,
-					"date": frm.doc.date,
-					"driver": frm.doc.driver,
-					"vehicle": frm.doc.vehicle,
-					"sender_email": owner_email,
-					"sender_name": frappe.user.full_name(owner_email),
-					"delivery_notification": frm.doc.delivery_notification
-					}
+		$.each(frm.doc.delivery_stops || [], function(i, delivery_stop) {
+			if (!delivery_stop.delivery_notes) {
+				frappe.msgprint({
+						"message" : __("No Delivery Note selected for Customer {}", [delivery_stop.customer]),
+						"title" : __("Warning"),
+						"indicator" : "orange",
+						"alert": 1
 				});
+			}
 		});
-	}
+		frappe.confirm(__("Do you want to notify all the customers by email?"), function () {
+			// frappe.call({
+			// 	method: "erpnext.stock.doctype.delivery.delivery.notify_customers",
+			// 	args: {
+			// 		"docname": frm.doc.name,
+			// 		"date": frm.doc.date,
+			// 		"driver": frm.doc.driver,
+			// 		"vehicle": frm.doc.vehicle,
+			// 		"sender_email": owner_email,
+			// 		"sender_name": frappe.user.full_name(owner_email),
+			// 		"delivery_notification": frm.doc.delivery_notification
+			// 		}
+			// 	});
+			frm.doc.email_notification_sent = true;
+			frm.refresh_field('email_notification_sent')
+		});
+}
 });
 
-cur_frm.fields_dict['delivery_stop'].grid.get_field("address").get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['delivery_stops'].grid.get_field("address").get_query = function(doc, cdt, cdn) {
 	var row = locals[cdt][cdn];
 	if (row.customer) {
 		return {
@@ -79,7 +73,7 @@ cur_frm.fields_dict['delivery_stop'].grid.get_field("address").get_query = funct
 	};
 }
 
-cur_frm.fields_dict['delivery_stop'].grid.get_field("contact").get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['delivery_stops'].grid.get_field("contact").get_query = function(doc, cdt, cdn) {
 	var row = locals[cdt][cdn];
 	if (row.customer) {
 		return {
@@ -169,11 +163,10 @@ frappe.ui.form.on('Delivery Stop', {
 						</div>
 					`);
 
-					var wrapper = d.fields_dict.delivery_notes_html.$wrapper;
-					wrapper.html(html);
+					var delivery_notes_el = d.fields_dict.delivery_notes_html.$wrapper.html(html);
 
 					d.set_primary_action(__("Select"), function() {
-						var delivery_notes = wrapper.find('input[type=checkbox]:checked')
+						var delivery_notes = delivery_notes_el.find('input[type=checkbox]:checked')
 							.map((i, el) => $(el).attr('data-delivery-note')).toArray();
 
 						if(!delivery_notes) return;
