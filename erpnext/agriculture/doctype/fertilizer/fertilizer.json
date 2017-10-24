@@ -739,7 +739,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-10-18 12:11:30.605288", 
+ "modified": "2017-10-24 15:36:35.948764", 
  "modified_by": "Administrator", 
  "module": "Agriculture", 
  "name": "Fertilizer", 
@@ -767,7 +767,7 @@
    "write": 1
   }
  ], 
- "quick_entry": 1, 
+ "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "show_name_in_global_search": 0, 

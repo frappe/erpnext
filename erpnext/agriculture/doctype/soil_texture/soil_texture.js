@@ -6,17 +6,27 @@ let soil_edit_order = [0,1,2];
 frappe.ui.form.on('Soil Texture', {
 	refresh: function(frm) {
 	},
+	validate: function(frm) {
+		if (frm.doc.clay_composition < 0 || frm.doc.sand_composition < 0 || frm.doc.silt_composition < 0 )
+			frappe.throw("Soil Composition cannot have negetive values")
+	},
 	clay_composition: function(frm) {
+		if (frm.doc.clay_composition > 100 || frm.doc.clay_composition < 0)
+			frappe.throw("Clay Composition should be a value between 0 and 100")
 		soil_edit_order[0] = Math.max.apply(Math, soil_edit_order)+1;
 		frm.doc.soil_type = get_soil_type(frm.doc.clay_composition, frm.doc.sand_composition, frm.doc.silt_composition);
 		frm.refresh_fields();
 	},
 	sand_composition: function(frm) {
+		if (frm.doc.sand_composition > 100 || frm.doc.sand_composition < 0)
+			frappe.throw("Sand Composition should be a value between 0 and 100")
 		soil_edit_order[1] = Math.max.apply(Math, soil_edit_order)+1;
 		frm.doc.soil_type = get_soil_type(frm.doc.clay_composition, frm.doc.sand_composition, frm.doc.silt_composition);
 		frm.refresh_fields();
 	},
 	silt_composition: function(frm) {
+		if (frm.doc.silt_composition > 100 || frm.doc.silt_composition < 0)
+			frappe.throw("Silt Composition should be a value between 0 and 100")
 		soil_edit_order[2] = Math.max.apply(Math, soil_edit_order)+1;
 		frm.doc.soil_type = get_soil_type(frm.doc.clay_composition, frm.doc.sand_composition, frm.doc.silt_composition);
 		frm.refresh_fields();
