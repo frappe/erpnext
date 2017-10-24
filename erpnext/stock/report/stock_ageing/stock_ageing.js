@@ -15,7 +15,7 @@ frappe.query_reports["Stock Ageing"] = {
 			"fieldname":"to_date",
 			"label": __("To Date"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.get_today(),
+			"default": frappe.datetime.get_todayfrappe.datetime.get_today(),
 			"reqd": 1
 		},
 		{

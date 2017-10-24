@@ -18,7 +18,7 @@ erpnext.selling.InstallationNote = frappe.ui.form.Controller.extend({
 	onload: function() {
 		if(!this.frm.doc.status) set_multiple(dt,dn,{ status:'Draft'});
 		if(this.frm.doc.__islocal) set_multiple(this.frm.doc.doctype, this.frm.doc.name,
-				{inst_date: get_today()});
+				{inst_date: frappe.datetime.get_today()});
 
 		this.setup_queries();
 	},

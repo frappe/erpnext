@@ -6,7 +6,7 @@ frappe.query_reports["Student Batch-Wise Attendance"] = {
         "fieldname": "date",
         "label": __("Date"),
         "fieldtype": "Date",
-        "default": get_today(),
+        "default": frappe.datetime.get_today(),
         "reqd": 1
     }]
 }

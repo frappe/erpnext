@@ -4,7 +4,7 @@ frappe.ui.form.on("Employee Attendance Tool", {
 	},
 	
 	onload: function(frm) {
-		frm.set_value("date", get_today());
+		frm.set_value("date", frappe.datetime.get_today());
 		erpnext.employee_attendance_tool.load_employees(frm);
 	},
 

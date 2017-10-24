@@ -22,7 +22,7 @@ frappe.ui.form.on("Journal Entry", {
 				frappe.set_route("query-report", "General Ledger");
 			}, "fa fa-table");
 			
-			if (in_list(user_roles, "Accounts Manager") && ! frm.doc.is_canceled)
+			if (in_list(frappe.user_roles, "Accounts Manager") && ! frm.doc.is_canceled)
 			{
 				frm.add_custom_button(__('Revarse'), function() {
 				frappe.model.open_mapped_doc({
@@ -76,7 +76,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 				}
 			);
 
-			if(!this.frm.doc.amended_from) this.frm.doc.posting_date = this.frm.posting_date || get_today();
+			if(!this.frm.doc.amended_from) this.frm.doc.posting_date = this.frm.posting_date || frappe.datetime.get_today();
 		}
 	},
 

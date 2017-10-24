@@ -4,7 +4,7 @@ cur_frm.add_fetch('leave_type', 'max_days_allowed', 'no_of_days');
 
 cur_frm.cscript.onload = function(doc, dt, dn){
 	if(!doc.posting_date)
-		set_multiple(dt, dn, {posting_date: get_today()});
+		set_multiple(dt, dn, {posting_date: frappe.datetime.get_today()});
 	if(!doc.leave_transaction_type)
 		set_multiple(dt, dn, {leave_transaction_type: 'Allocation'});
 }

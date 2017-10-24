@@ -42,8 +42,8 @@ erpnext.SalesFunnel = Class.extend({
 			.appendTo(this.elements.layout);
 
 		this.options = {
-			from_date: frappe.datetime.add_months(frappe.datetime.get_today(), -1),
-			to_date: frappe.datetime.get_today()
+			from_date: frappe.datetime.add_months(frappe.datetime.get_todayfrappe.datetime.get_today(), -1),
+			to_date: frappe.datetime.get_todayfrappe.datetime.get_today()
 		};
 
 		// set defaults and bind on change

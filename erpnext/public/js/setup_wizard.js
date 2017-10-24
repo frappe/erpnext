@@ -102,7 +102,7 @@ function load_erpnext_slides() {
 					}
 					
 					var year_start_date = current_year + "-" + fy[0];
-					if(year_start_date > get_today()) {
+					if(year_start_date > frappe.datetime.get_today()) {
 						next_year = current_year
 						current_year -= 1;
 					}

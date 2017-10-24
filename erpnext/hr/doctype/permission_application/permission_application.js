@@ -23,9 +23,9 @@ frappe.ui.form.on('Permission Application', {
 		if (frm.doc.__islocal) {
 			get_employee(frm);
 		}
-		if( in_list(user_roles, "HR Manager") && !frm.doc.__islocal) {
-			frm.set_df_property("permission_time", "read_only", !in_list(user_roles, "HR Manager"));	
-			frm.set_df_property("permission_time_to", "read_only", !in_list(user_roles, "HR Manager"));	
+		if( in_list(frappe.user_roles, "HR Manager") && !frm.doc.__islocal) {
+			frm.set_df_property("permission_time", "read_only", !in_list(frappe.user_roles, "HR Manager"));	
+			frm.set_df_property("permission_time_to", "read_only", !in_list(frappe.user_roles, "HR Manager"));	
 		}
 	}
 	

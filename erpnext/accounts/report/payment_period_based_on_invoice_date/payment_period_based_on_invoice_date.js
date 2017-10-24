@@ -21,7 +21,7 @@ frappe.query_reports["Payment Period Based On Invoice Date"] = {
 			fieldname:"to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
-			default: get_today()
+			default: frappe.datetime.get_today()
 		},
 		{
 			fieldname:"payment_type",

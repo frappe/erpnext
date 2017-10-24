@@ -215,7 +215,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					serial_no: item.serial_no || ""
 				},
 				callback:function(r){
-					if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+					if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
 						me.batch_no(doc, cdt, cdn);
 					}
 				}
@@ -301,7 +301,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		if ((doc.packed_items || []).length) {
 			$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(true);
 
-			if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+			if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
 				help_msg = "<div class='alert alert-warning'>" +
 					__("For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.")+
 				"</div>";
@@ -309,7 +309,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			}
 		} else {
 			$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(false);
-			if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+			if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
 				frappe.meta.get_docfield(doc.doctype, 'product_bundle_help', doc.name).options = '';
 			}
 		}
