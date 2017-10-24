@@ -80,8 +80,7 @@ class Subscription(Document):
 				frappe.throw(_("'Recipients' not specified"))
 
 	def set_next_schedule_date(self):
-		last_repeat_on_day = frappe.db.get_value("Subscription", self.name, "repeat_on_day")
-		if self.repeat_on_day != last_repeat_on_day:
+		if self.repeat_on_day:
 			self.next_schedule_date = get_next_date(self.next_schedule_date, 0, self.repeat_on_day)
 
 	def update_subscription_id(self):
@@ -199,9 +198,9 @@ def update_doc(new_document, reference_doc, args, schedule_date):
 	set_subscription_period(args, mcount, new_document)
 
 	new_document.run_method("on_recurring", reference_doc=reference_doc, subscription_doc=args)
-	
+
 def set_subscription_period(args, mcount, new_document):
-	if "from_date" in new_document.meta.fields and "to_date" in new_document.meta.fields:
+	if new_document.meta.get_field('from_date') and new_document.meta.get_field('to_date'):
 		last_ref_doc = frappe.db.sql("""
 			select name, from_date, to_date
 			from `tab{0}`
@@ -209,10 +208,10 @@ def set_subscription_period(args, mcount, new_document):
 			order by creation desc
 			limit 1
 		""".format(args.reference_doctype), args.name, as_dict=1)
-		
+
 		if not last_ref_doc:
 			return
-		
+
 		from_date = get_next_date(last_ref_doc[0].from_date, mcount)
 
 		if (cstr(get_first_day(last_ref_doc[0].from_date)) == cstr(last_ref_doc[0].from_date)) and \
@@ -277,8 +276,11 @@ def assign_task_to_owner(name, msg, users):
 @frappe.whitelist()
 def make_subscription(doctype, docname):
 	doc = frappe.new_doc('Subscription')
+
+	reference_doc = frappe.get_doc(doctype, docname)
 	doc.reference_doctype = doctype
 	doc.reference_document = docname
+	doc.start_date = reference_doc.get('posting_date') or reference_doc.get('transaction_date')
 	return doc
 
 @frappe.whitelist()

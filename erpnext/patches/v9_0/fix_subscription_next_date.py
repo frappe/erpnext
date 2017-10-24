@@ -13,7 +13,7 @@ def execute():
 	for data in frappe.get_all('Subscription',
 		fields = ["name", "reference_doctype", "reference_document",
 			"start_date", "frequency", "repeat_on_day"],
-		filters = {'reference_doctype': ('in', doctypes)}):
+		filters = {'reference_doctype': ('in', doctypes), 'docstatus': 1}):
 
 		recurring_id = frappe.db.get_value(data.reference_doctype, data.reference_document, "recurring_id")
 		if recurring_id:
@@ -34,10 +34,10 @@ def execute():
 				order by creation desc
 				limit 1
 			""".format(date_field, data.reference_doctype), data.name)[0][0]
-			
+
 			next_schedule_date = get_next_schedule_date(last_ref_date, data.frequency, data.repeat_on_day)
 
 			frappe.db.set_value("Subscription", data.name, {
 				"start_date": start_date,
 				"next_schedule_date": next_schedule_date
-			})
+			}, None)
