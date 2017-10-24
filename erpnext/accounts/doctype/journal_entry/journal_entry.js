@@ -322,6 +322,11 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 }
 
 frappe.ui.form.on("Journal Entry Account", {
+	onload: function(frm, cdt, cdn) {
+		var d = frappe.get_doc(cdt, cdn);
+		frm.fields_dict.accounts.grid.toggle_reqd("cost_center", false);
+		cur_frm.cscript.update_totals(frm.doc);
+	},
 	party: function(frm, cdt, cdn) {
 		var d = frappe.get_doc(cdt, cdn);
 		if(!d.account && d.party_type && d.party) {
