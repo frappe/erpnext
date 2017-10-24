@@ -74,13 +74,69 @@ class MaterialRequest(BuyingController):
 
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
-
+		self.validate_department()
+		# self.validate_director()
+		self.validate_emp_requester()
+		self.validate_project_manager()
 		# self.set_title()
 
 
 		# self.validate_qty_against_so()
 		# NOTE: Since Item BOM and FG quantities are combined, using current data, it cannot be validated
 		# Though the creation of Material Request from a Production Plan can be rethought to fix this
+	def validate_emp_requester(self):
+		if self.get('__islocal') or self.state == "Initiated":
+			if self.material_requester:
+				user = frappe.get_value("Employee", filters = {'name' : self.material_requester}, fieldname = "user_id")
+				if u'Project Manager' in frappe.get_roles(user) and self.purchase_workflow == "Project":
+					self.workflow_state = "Created By Project Manager"
+				else:
+					self.workflow_state = "Pending"
+
+	def after_insert(self):
+		self.validate_adding_mr()
+
+	# def validate_wf_transition():
+
+	# 	if self.workflow_state:
+	# 		if self.workflow_state == "Pending" or self.workflow_state == "Modified":
+	# 			if u'Director' in frappe.get_roles(frappe.session.user):
+	def validate_director(self):
+		pass
+
+		# if u'Director' in frappe.get_roles(frappe.session.user) and self.purchase_workflow != "Project" and self.workflow_state == "Approved By Project Budget Controller":
+		# 	if frappe.permissions.has_permission("Department", ptype='read', doc=self.department, verbose=False, user=frappe.session.user):
+		# 		self.workflow_state = "Approved By Director" if self.state == "Approved" else 	"Rejected By Director"
+	def validate_project_manager(self):
+		pms_str = self.get_project_manager()
+		if pms_str:
+			pms_list = pms_str.split(",")
+			if self.material_requester not in pms_list:
+				frappe.throw(_("The selected Material Requester is not valid as a Project Manager"))
+
+
+	def get_project_manager(self):
+		pms = frappe.db.sql("""select name from tabEmployee where user_id in 
+			(select parent from `tabUserRole` where role = 'Project Manager')""", as_dict = True)
+		if pms :
+			pms_str = ""
+			for pm in pms:
+				pms_str += pm.name+","
+			pms_str = pms_str[:-1]
+			return pms_str
+
+
+	def validate_adding_mr(self):
+		if self.material_requester:
+			user_emp = frappe.db.sql("select user_id from `tabEmployee` where name = '{0}'".format(self.material_requester), as_dict = 1)
+			# frappe.throw(user_emp[0].user_id)
+			user = frappe.get_doc("User", user_emp[0].user_id)
+			user.add_roles("Material Requester")
+			frappe.permissions.add_user_permission("Material Request", self.name, user_emp[0].user_id)
+
+	def validate_department(self):
+		if self.purchase_workflow == "Project":
+			self.department = None
 
 	def set_title(self):
 		'''Set title as comma separated list of items'''
