@@ -49,10 +49,10 @@ class Timesheet(Document):
 			self.update_time_rates(d)
 
 			self.total_hours += flt(d.hours)
+			self.total_costing_amount += flt(d.costing_amount)
 			if d.billable:
 				self.total_billable_hours += flt(d.billing_hours)
 				self.total_billable_amount += flt(d.billing_amount)
-				self.total_costing_amount += flt(d.costing_amount)
 				self.total_billed_amount += flt(d.billing_amount) if d.sales_invoice else 0.0
 				self.total_billed_hours += flt(d.billing_hours) if d.sales_invoice else 0.0
 
@@ -265,9 +265,9 @@ class Timesheet(Document):
 
 	def update_cost(self):
 		for data in self.time_logs:
-			if data.activity_type and data.billable:
+			if data.activity_type or data.billable:
 				rate = get_activity_cost(self.employee, data.activity_type)
-				hours = data.billing_hours or 0
+				hours = data.billing_hours or data.hours or 0
 				if rate:
 					data.billing_rate = flt(rate.get('billing_rate')) if flt(data.billing_rate) == 0 else data.billing_rate
 					data.costing_rate = flt(rate.get('costing_rate')) if flt(data.costing_rate) == 0 else data.costing_rate
@@ -277,7 +277,6 @@ class Timesheet(Document):
 	def update_time_rates(self, ts_detail):
 		if not ts_detail.billable:
 			ts_detail.billing_rate = 0.0
-			ts_detail.costing_rate = 0.0
 
 @frappe.whitelist()
 def get_projectwise_timesheet_data(project, parent=None):
