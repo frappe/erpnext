@@ -53,6 +53,16 @@ class PaymentEntry(AccountsController):
 		self.set_remarks()
 		if self.get("__islocal") :
 				self.title = self.get_title()
+
+
+		# def after_save(self):
+		# 	x = frappe.get_doc('Payment Entry', self.name).get('references')
+		# 	for i in range(len(x)):
+		# 		if x[i].reference_doctype == "Purchase Order":
+		# 			material = frappe.db.sql("select material_request from `tabPurchase Order` where name ='{0}'".format(x[i].reference_name))
+		# 			self.material_request = material[0][0]
+			
+
 				
 	def get_title(self):
 		from frappe.utils import getdate

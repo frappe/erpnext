@@ -12,10 +12,43 @@ from erpnext.accounts.doctype.asset.depreciation \
 	import get_disposal_account_and_cost_center, get_depreciation_accounts
 from frappe.model.naming import make_autoname
 
+import barcode
+from barcode.writer import ImageWriter
+
+
 class Asset(Document):
 
 	# def autoname(self):
 	# 	self.asset_name = make_autoname(self.title +'-.####')
+	def barcode_attach(self):
+	    barcode_class = barcode.get_barcode_class('code39')
+	    ean = barcode_class(self.name, ImageWriter(), add_checksum=False)
+	    barcode_path = frappe.get_site_path()+'/public/files/'
+
+	    ean.save(barcode_path+self.name)
+	    # ean.save(barcode_path+self.name+'.png')
+
+	    self.save_image("/files/",self.name + '.png')
+	    
+	def save_image(self,path, name):
+	    # save barcode image to file table
+	    attach_image = frappe.get_doc({
+	        "doctype": "File",
+	        "file_name": name,
+	        "file_url": path + name,
+	        "folder":"home"
+	    })
+
+	    attach_image.insert()
+
+
+	def after_insert(self):
+	    img_path = "/files/" + self.name + ".png"
+
+	    frappe.db.sql("""update `tabAsset` set barcode_img = %s
+	        where name = %s""", (img_path, self.name))
+	    frappe.db.commit()
+
 
 	def validate(self):
 		self.status = self.get_status()
@@ -27,6 +60,9 @@ class Asset(Document):
 		self.validate_expected_value_after_useful_life()
 		# Validate depreciation related accounts
 		get_depreciation_accounts(self)
+		# attache barcode image 
+		self.barcode_attach()
+
 
 	def on_submit(self):
 		self.set_status()

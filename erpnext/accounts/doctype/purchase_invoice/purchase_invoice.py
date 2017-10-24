@@ -686,6 +686,13 @@ class PurchaseInvoice(BuyingController):
 	def on_recurring(self, reference_doc):
 		self.due_date = None
 
+
+@frappe.whitelist()
+def get_material_request_name(purchase_order_name):
+	material = frappe.db.sql("select material_request from `tabPurchase Order` where name='{0}'".format(purchase_order_name))
+	if material:
+		return material[0][0]
+
 @frappe.whitelist()
 def make_debit_note(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc

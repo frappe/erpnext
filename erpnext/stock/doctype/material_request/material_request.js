@@ -3,7 +3,15 @@
 
 {% include 'erpnext/buying/doctype/purchase_common/purchase_common.js' %};
 cur_frm.add_fetch("material_requester","department","department");
+cur_frm.add_fetch("material_requester","user_id","user_id");
 frappe.ui.form.on('Material Request', {
+	// validate: function(frm) {
+ //        if (user_roles.indexOf("Director") != -1 && frm.doc.state == "Approved") {
+ //            frm.set_value("workflow_state", "Approved By Director");
+ //            frm.disable_save();
+ //        }
+
+ //    },
 	setup: function(frm) {
 		frm.custom_make_buttons = {
 			'Stock Entry': 'Issue Material',
@@ -14,9 +22,35 @@ frappe.ui.form.on('Material Request', {
 		}
 	},
 	purchase_workflow: function(frm){
-		if(frm.purchase_workflow != "Project"){
-			frm.set_value("project",undefined);
+		frm.set_value("material_requester", undefined);
+		frm.set_value("project",undefined);
+		frm.toggle_enable("project", frm.doc.purchase_workflow == "Project");
+		frm.toggle_reqd("project", frm.doc.purchase_workflow == "Project");
+		if(frm.doc.purchase_workflow == "Project"){
+			 frappe.call({
+                method: "get_project_manager",
+                doc: frm.doc,
+                callback: function(r) {
+                    frm.fields_dict['material_requester'].get_query = function() {
+                        return {
+                            filters: [
+                                ['name', 'in', r.message]
+                            ]
+                        }
+                    }
+                }
+            });
 		}
+		else {
+			frm.fields_dict['material_requester'].get_query = function() {
+				return "";
+			}
+		}
+
+	},
+	material_requester: function(frm){
+
+		
 	},
 	onload: function(frm) {
 		// add item, if previous view was item
@@ -55,6 +89,19 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 	},
 
 	refresh: function(doc) {
+
+		 for (var key in cur_frm.fields_dict) {
+            cur_frm.fields_dict[key].df.read_only = 1;
+        }
+        cur_frm.disable_save();
+        if (cur_frm.doc.__islocal || (cur_frm.doc.state == "Rejected" && cur_frm.doc.user_id == user)) {
+            for (var key in cur_frm.fields_dict) {
+                cur_frm.fields_dict[key].df.read_only = 0;
+            }
+            cur_frm.enable_save();
+        }
+
+
 		var me = this;
 		this._super();
 
@@ -250,3 +297,10 @@ cur_frm.cscript['Unstop Material Request'] = function(){
 		cur_frm.refresh();
 	});
 };
+
+// frappe.ui.form.on("Material Request", "validate", function (frm) {
+//     if (user_roles.indexOf("Director") != -1 && frm.doc.workflow_state == "Pending") {
+//         frappe.throw("Message to be printed");
+//         frm.disable_save();
+//     }
+// });

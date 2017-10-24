@@ -72,6 +72,41 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 					}
 				})
 			}, __("Get items from"));
+		
+
+			var aa = [];
+			aa.push(cur_frm.doc.items);
+			var length = aa[0].length;
+			for(i=0;i<length;i++){
+				if(cur_frm.doc.items[i].purchase_order){
+
+
+			frappe.call({
+				method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.get_material_request_name",
+				args: {
+					"purchase_order_name": cur_frm.doc.items[i].purchase_order
+				},
+				function(r, rt) {
+					if(r.message) {
+						console.log(r);
+
+					}
+				}
+
+			});
+
+
+
+
+
+					// cur_frm.set_value('material_request', cur_frm.doc.items[i].purchase_order);
+					cur_frm.refresh_fields('material_request');
+				}
+			}
+
+
+
+
 		}
 
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
