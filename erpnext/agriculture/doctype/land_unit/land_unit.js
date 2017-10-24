@@ -9,9 +9,7 @@ frappe.ui.form.on('Land Unit', {
 		} else {
 			frm.set_intro(null);
 		}
-		if(frm.doc.land_unit_type == 'Block') {
-			frm.doc.is_group = 0
-		}
+		
 		frappe.require([
 			"assets/erpnext/js/leaflet/leaflet.js",
 			"assets/erpnext/css/leaflet/leaflet.css",
