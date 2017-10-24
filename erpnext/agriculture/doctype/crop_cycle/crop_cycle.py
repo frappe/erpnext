@@ -8,5 +8,5 @@ from frappe.model.document import Document
 
 class CropCycle(Document):
 	def autoname(self):
-		if self.site_name == None:
-			return self.name = '{crop} {start_date} {end_date}'.formate(crop = self.crop, start_date = self.start_date, end_date = self.end_date)
+		if self.name == None:
+			self.name = '{crop} {start_date} {end_date}'.format(crop=self.crop, start_date=self.start_date, end_date=self.end_date)
