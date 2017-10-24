@@ -1072,7 +1072,7 @@
    "in_standard_filter": 0, 
    "label": "UOMs", 
    "length": 0, 
-   "no_copy": 1, 
+   "no_copy": 0,
    "oldfieldname": "uom_conversion_details", 
    "oldfieldtype": "Table", 
    "options": "UOM Conversion Detail", 
