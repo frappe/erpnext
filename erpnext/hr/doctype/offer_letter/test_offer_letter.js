@@ -27,13 +27,13 @@ QUnit.test("Test: Offer Letter [HR]", function (assert) {
 				]},
 			]);
 		},
-		() => frappe.timeout(12),
+		() => frappe.timeout(10),
 		() => frappe.click_button('Submit'),
 		() => frappe.timeout(2),
 		() => frappe.click_button('Yes'),
-		() => frappe.timeout(8),
+		() => frappe.timeout(5),
+		// To check if the fields are correctly set
 		() => {
-			// To check if the fields are correctly set
 			assert.ok(cur_frm.get_field('status').value=='Accepted',
 				'Status of job offer is correct');
 			assert.ok(cur_frm.get_field('designation').value=='Software Developer',
@@ -45,7 +45,7 @@ QUnit.test("Test: Offer Letter [HR]", function (assert) {
 		() => {
 			assert.ok(cur_list.data[0].docstatus==1,'Offer Letter Submitted successfully');
 		},
-		() => frappe.timeout(4),
+		() => frappe.timeout(2),
 		() => done()
 	]);
 });
