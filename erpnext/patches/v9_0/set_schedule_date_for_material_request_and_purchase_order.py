@@ -17,6 +17,8 @@ def execute():
 			doc = frappe.get_doc(doctype, record)
 			if doc.items:
 				if not doc.schedule_date:
-					min_schedule_date = min([d.schedule_date for d in doc.items])
-					frappe.db.set_value(doctype, record,
-						"schedule_date", min_schedule_date, update_modified=False)
+					schedule_dates = [d.schedule_date for d in doc.items if d.schedule_date]
+					if len(schedule_dates) > 0:
+						min_schedule_date = min(schedule_dates)
+						frappe.db.set_value(doctype, record,
+							"schedule_date", min_schedule_date, update_modified=False)
