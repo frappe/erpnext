@@ -11,7 +11,7 @@ from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name
 
 class SalaryStructure(Document):
-	
+
 	def validate(self):
 		self.validate_amount()
 		for e in self.get('employees'):
@@ -77,7 +77,7 @@ class SalaryStructure(Document):
 def make_salary_slip(source_name, target_doc = None, employee = None, as_print = False, print_format = None):
 	def postprocess(source, target):
 		if employee:
-			employee_details = frappe.db.get_value("Employee", employee, 
+			employee_details = frappe.db.get_value("Employee", employee,
 							["employee_name", "branch", "designation", "department"], as_dict=1)
 			target.employee = employee
 			target.employee_name = employee_details.employee_name
