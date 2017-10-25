@@ -56,9 +56,9 @@ Integer field holds numeric value, without decimal place.
 
 Link field is connected to another master from where it fetches data. For example, in the Quotation master, Customer is a Link field.
 
-- Map
+- Geolocation
 
-Use Map field to store GeoJSON <a href="https://tools.ietf.org/html/rfc7946#section-3.3">featurecollection</a>. Stores polygons, lines and points. Internally it uses following custom properties for identifying a circle.
+Use Geolocation field to store GeoJSON <a href="https://tools.ietf.org/html/rfc7946#section-3.3">featurecollection</a>. Stores polygons, lines and points. Internally it uses following custom properties for identifying a circle.
 
 ```
 {
