@@ -405,11 +405,7 @@ frappe.ui.form.on('Payment Entry', {
 		}
 
 		// Make read only if Accounts Settings doesn't allow stale rates
-		frappe.model.get_value("Accounts Settings", null, "allow_stale",
-			function(d){
-				frm.set_df_property("source_exchange_rate", "read_only", cint(d.allow_stale) ? 0 : 1);
-			}
-		);
+		frm.set_df_property("source_exchange_rate", "read_only", erpnext.stale_rate_allowed());
 	},
 
 	target_exchange_rate: function(frm) {
@@ -430,11 +426,7 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_paid_amount_based_on_received_amount = false;
 
 		// Make read only if Accounts Settings doesn't allow stale rates
-		frappe.model.get_value("Accounts Settings", null, "allow_stale",
-			function(d){
-				frm.set_df_property("target_exchange_rate", "read_only", cint(d.allow_stale) ? 0 : 1);
-			}
-		);
+		frm.set_df_property("target_exchange_rate", "read_only", erpnext.stale_rate_allowed());
 	},
 
 	paid_amount: function(frm) {
@@ -660,8 +652,15 @@ frappe.ui.form.on('Payment Entry', {
 			var party_amount = frm.doc.payment_type=="Receive" ?
 				frm.doc.paid_amount : frm.doc.received_amount;
 
+			var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
+				function(d) { return flt(d.amount) }));
+
 			if(frm.doc.total_allocated_amount < party_amount) {
-				unallocated_amount = party_amount - frm.doc.total_allocated_amount;
+				if(frm.doc.payment_type == "Receive") {
+					unallocated_amount = party_amount - (frm.doc.total_allocated_amount - total_deductions);
+				} else {
+					unallocated_amount = party_amount - (frm.doc.total_allocated_amount + total_deductions);
+				}
 			}
 		}
 		frm.set_value("unallocated_amount", unallocated_amount);
@@ -679,9 +678,6 @@ frappe.ui.form.on('Payment Entry', {
 		} else {
 			difference_amount = flt(frm.doc.base_paid_amount) - flt(frm.doc.base_received_amount);
 		}
-
-		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
-			function(d) { return flt(d.amount) }));
 
 		frm.set_value("difference_amount", difference_amount - total_deductions);
 
