@@ -50,11 +50,11 @@ cur_frm.cscript.supplier_type = function(doc, cdt, cdn) {
 
    	var type= cur_frm.doc.supplier_type;
    	if (type == 'Local'){
-   		    cur_frm.set_value("naming_series", 'SUPP-L-.####');
+   		    cur_frm.set_value("naming_series", 'LOS-.#####');
    	}else if(type=='Foreign'){
-   		    cur_frm.set_value("naming_series", 'SUPP-F-.####');
+   		    cur_frm.set_value("naming_series", 'FOS-.#####');
     }else{
-    	    cur_frm.set_value("naming_series", 'SUPP-O-.####');
+    	    cur_frm.set_value("naming_series", 'OOS-.#####');
 
     }
 }
