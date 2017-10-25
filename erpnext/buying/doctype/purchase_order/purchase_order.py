@@ -51,6 +51,7 @@ class PurchaseOrder(BuyingController):
 		self.set_received_qty_for_drop_ship_items()
 		if self.get("__islocal") :
 				self.title = self.get_title()
+		self.vallidate_workflow_transition()
 	def get_title(self):
 		from frappe.utils import getdate
 		
@@ -75,6 +76,13 @@ class PurchaseOrder(BuyingController):
 			nammeing_doc.name_of_doc = self.doctype
 			nammeing_doc.save()
 			return title
+
+	def vallidate_workflow_transition(self):
+		if u"Shared Services Director" in frappe.get_roles(frappe.session.user):
+			if self.project and self.workflow_state == "Approved By Shared Services Director":
+				self.workflow_state = "Approved By Shared Services Director (Prt.)"
+
+
 	def validate_with_previous_doc(self):
 		super(PurchaseOrder, self).validate_with_previous_doc({
 			"Supplier Quotation": {

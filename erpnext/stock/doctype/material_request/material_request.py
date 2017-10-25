@@ -78,6 +78,7 @@ class MaterialRequest(BuyingController):
 		# self.validate_director()
 		self.validate_emp_requester()
 		self.validate_project_manager()
+		self.validate_project()
 		# self.set_title()
 
 
@@ -125,6 +126,10 @@ class MaterialRequest(BuyingController):
 			pms_str = pms_str[:-1]
 			return pms_str
 
+	def validate_project(self):
+		pro_list = frappe.get_list("Project", filters = {"project_manager": self.material_requester}, fields = ["name"])
+		if not pro_list:
+			frappe.throw(_("The Project is not valid"))
 
 	def validate_adding_mr(self):
 		if self.material_requester:

@@ -76,3 +76,19 @@ class OvertimeRequest(Document):
 			if "Reject" in self.workflow_state or "Approve" in self.workflow_state:
 				self.workflow_state = "Pending"
 				frappe.throw(_("You can't Approve or Reject before month end"))
+
+
+
+
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+	employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
+	if employees:
+		query = ""
+		employee = frappe.get_doc('Employee', {'name': employees[0].name})
+		
+		if u'Employee' in frappe.get_roles(user):
+			if query != "":
+				query+=" or "
+			query+=""" employee = '{0}'""".format(employee.name)
+		return query

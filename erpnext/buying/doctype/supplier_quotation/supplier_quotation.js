@@ -16,9 +16,9 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 	refresh: function() {
 		this._super();
 		if (this.frm.doc.docstatus === 1) {
-			cur_frm.add_custom_button(__("Purchase Order"), this.make_purchase_order,
-				__("Make"));
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+			// cur_frm.add_custom_button(__("Purchase Order"), this.make_purchase_order,
+			// 	__("Make"));
+			// cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 		else if (this.frm.doc.docstatus===0) {
 			cur_frm.add_custom_button(__('Material Request'),
@@ -56,7 +56,7 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 	make_purchase_order: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
-			// frm: cur_frm
+			frm: cur_frm
 		})
 	}
 

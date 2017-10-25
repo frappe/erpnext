@@ -53,6 +53,18 @@ frappe.ui.form.on('Material Request', {
 		
 	},
 	onload: function(frm) {
+		frm.fields_dict['project'].get_query = function() {
+            if (!frm.doc.material_requester) {
+                frappe.throw(__("Please select a requester"));
+            }
+            return {
+                filters: {
+                    "project_manager": frm.doc.material_requester,
+                    "status": "Open"
+                }
+
+            }
+        }
 		// add item, if previous view was item
 		erpnext.utils.add_item(frm);
 
@@ -86,6 +98,8 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 				query: "erpnext.controllers.queries.item_query"
 			}
 		});
+
+
 	},
 
 	refresh: function(doc) {
@@ -110,7 +124,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 				cur_frm.cscript.get_items_from_bom, "fa fa-sitemap", "btn-default");
 		}
 
-		if(doc.docstatus == 1 && doc.status != 'Stopped') {
+		if(doc.docstatus == 1 && doc.status != 'Stopped' && user_roles.indexOf("CFO") != -1) {
 			if(flt(doc.per_ordered, 2) < 100) {
 				// make
 				if(doc.material_request_type === "Material Transfer" && doc.status === "Submitted")

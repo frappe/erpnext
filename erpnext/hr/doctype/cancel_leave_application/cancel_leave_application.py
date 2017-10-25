@@ -98,8 +98,24 @@ class CancelLeaveApplication(Document):
 		if leave_application.is_canceled == 'Yes':
 			frappe.throw(_("Leave Application {0} already is canceled".format(self.leave_application)))
 
+
 def get_permission_query_conditions(user):
-	pass
+	if not user: user = frappe.session.user
+	employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
+	if employees:
+		query = ""
+		employee = frappe.get_doc('Employee', {'name': employees[0].name})
+		
+		if u'Employee' in frappe.get_roles(user):
+			if query != "":
+				query+=" or "
+			query+=""" employee = '{0}'""".format(employee.name)
+		return query
+
+
+
+# def get_permission_query_conditions(user):
+# 	pass
 	# if not user: user = frappe.session.user
 	# employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
 	# if employees:
