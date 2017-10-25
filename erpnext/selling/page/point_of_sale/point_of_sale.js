@@ -48,6 +48,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				this.prepare_menu();
 				this.set_online_status();
 			},
+			() => this.setup_company(),
 			() => this.setup_pos_profile(),
 			() => this.make_new_invoice(),
 			() => {
@@ -101,22 +102,20 @@ erpnext.pos.PointOfSale = class PointOfSale {
 						if (!this.payment) {
 							this.make_payment_modal();
 						} else {
-							const mop_field = this.payment.default_mop;
-							let amount = 0.0;
 							this.frm.doc.payments.map(p => {
-								if (p.mode_of_payment == mop_field) {
-									amount = p.amount;
-									return;
-								}
+								this.payment.dialog.set_value(p.mode_of_payment, p.amount);
 							});
 
-							this.payment.dialog.set_value(mop_field, flt(amount));
+							this.payment.set_title();
 						}
 						this.payment.open_modal();
 					}
 				},
 				on_select_change: () => {
 					this.cart.numpad.set_inactive();
+				},
+				get_item_details: (item_code) => {
+					return this.items.get(item_code);
 				}
 			}
 		});
@@ -286,21 +285,40 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	setup_pos_profile() {
-		return frappe.call({
-			method: 'erpnext.stock.get_item_details.get_pos_profile',
-			args: {
-				company: frappe.sys_defaults.company
-			}
-		}).then(r => {
-			this.pos_profile = r.message;
+		return new Promise(resolve => {
+			frappe.call({
+				method: 'erpnext.stock.get_item_details.get_pos_profile',
+				args: {
+					company: this.company
+				}
+			}).then(r => {
+				this.pos_profile = r.message;
 
-			if (!this.pos_profile) {
-				this.pos_profile = {
-					currency: frappe.defaults.get_default('currency'),
-					selling_price_list: frappe.defaults.get_default('selling_price_list')
-				};
+				if (!this.pos_profile) {
+					this.pos_profile = {
+						company: this.company,
+						currency: frappe.defaults.get_default('currency'),
+						selling_price_list: frappe.defaults.get_default('selling_price_list')
+					};
+				}
+				resolve();
+			});
+		})
+	}
+
+	setup_company() {
+		this.company = frappe.sys_defaults.company;
+		return new Promise(resolve => {
+			if(!this.company) {
+				frappe.prompt({fieldname:"company", options: "Company", fieldtype:"Link",
+					label: __("Select Company"), reqd: 1}, (data) => {
+						this.company = data.company;
+						resolve(this.company);
+				}, __("Select Company"));
+			} else {
+				resolve(this.company);
 			}
-		});
+		})
 	}
 
 	make_new_invoice() {
@@ -322,22 +340,25 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		const doctype = 'Sales Invoice';
 		return new Promise(resolve => {
 			if (this.frm) {
-				this.frm = get_frm(this.frm);
+				this.frm = get_frm(this.pos_profile, this.frm);
 				resolve();
 			} else {
 				frappe.model.with_doctype(doctype, () => {
-					this.frm = get_frm();
+					this.frm = get_frm(this.pos_profile);
 					resolve();
 				});
 			}
 		});
 
-		function get_frm(_frm) {
+		function get_frm(pos_profile, _frm) {
 			const page = $('<div>');
 			const frm = _frm || new _f.Frm(doctype, page, false);
 			const name = frappe.model.make_new_doc_and_get_name(doctype, true);
 			frm.refresh(name);
 			frm.doc.items = [];
+			if(!frm.doc.company) {
+				frm.set_value('company', pos_profile.company);
+			}
 			frm.set_value('is_pos', 1);
 			frm.meta.default_print_format = 'POS Invoice';
 			return frm;
@@ -390,6 +411,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 class POSCart {
 	constructor({frm, wrapper, pos_profile, events}) {
 		this.frm = frm;
+		this.item_data = {};
 		this.wrapper = wrapper;
 		this.events = events;
 		this.pos_profile = pos_profile;
@@ -649,7 +671,8 @@ class POSCart {
 		const $item = this.$cart_items.find(`[data-item-code="${item.item_code}"]`);
 
 		if(item.qty > 0) {
-			const indicator_class = item.actual_qty >= item.qty ? 'green' : 'red';
+			const is_stock_item = this.get_item_details(item.item_code).is_stock_item;
+			const indicator_class = (!is_stock_item || item.actual_qty >= item.qty) ? 'green' : 'red';
 			const remove_class = indicator_class == 'green' ? 'red' : 'green';
 
 			$item.find('.quantity input').val(item.qty);
@@ -663,8 +686,9 @@ class POSCart {
 	}
 
 	get_item_html(item) {
+		const is_stock_item = this.get_item_details(item.item_code).is_stock_item;
 		const rate = format_currency(item.rate, this.frm.doc.currency);
-		const indicator_class = item.actual_qty >= item.qty ? 'green' : 'red';
+		const indicator_class = (!is_stock_item || item.actual_qty >= item.qty) ? 'green' : 'red';
 		return `
 			<div class="list-item indicator ${indicator_class}" data-item-code="${item.item_code}" title="Item: ${item.item_name}  Available Qty: ${item.actual_qty}">
 				<div class="item-name list-item__content list-item__content--flex-1.5 ellipsis">
@@ -697,6 +721,14 @@ class POSCart {
 				</div>
 			`;
 		}
+	}
+
+	get_item_details(item_code) {
+		if (!this.item_data[item_code]) {
+			this.item_data[item_code] = this.events.get_item_details(item_code);
+		}
+
+		return this.item_data[item_code];
 	}
 
 	exists(item_code) {
@@ -918,7 +950,7 @@ class POSItems {
 		const all_items = Object.values(_items).map(item => this.get_item_html(item));
 		let row_items = [];
 
-		const row_container = '<div style="display: flex; border-bottom: 1px solid #ebeff2">';
+		const row_container = '<div class="image-view-row">';
 		let curr_row = row_container;
 
 		for (let i=0; i < all_items.length; i++) {
@@ -947,11 +979,13 @@ class POSItems {
 			this.search_index = this.search_index || {};
 			if (this.search_index[search_term]) {
 				const items = this.search_index[search_term];
+				this.items = items;
 				this.render_items(items);
 				this.set_item_in_the_cart(items);
 				return;
 			}
 		} else if (item_group == "All Item Groups") {
+			this.items = this.all_items;
 			return this.render_items(this.all_items);
 		}
 
@@ -961,6 +995,7 @@ class POSItems {
 					this.search_index[search_term] = items;
 				}
 
+				this.items = items;
 				this.render_items(items);
 				this.set_item_in_the_cart(items, serial_no, batch_no);
 			});
@@ -1003,7 +1038,14 @@ class POSItems {
 	}
 
 	get(item_code) {
-		return this.items[item_code];
+		let item = {};
+		this.items.map(data => {
+			if (data.item_code === item_code) {
+				item = data;
+			}
+		})
+
+		return item
 	}
 
 	get_all() {
@@ -1185,15 +1227,12 @@ class Payment {
 
 	make() {
 		this.set_flag();
-
-		let title = __('Total Amount {0}',
-			[format_currency(this.frm.doc.grand_total, this.frm.doc.currency)]);
-
 		this.dialog = new frappe.ui.Dialog({
-			title: title,
 			fields: this.get_fields(),
 			width: 800
 		});
+
+		this.set_title();
 
 		this.$body = this.dialog.body;
 
@@ -1211,6 +1250,13 @@ class Payment {
 				}
 			}
 		});
+	}
+
+	set_title() {
+		let title = __('Total Amount {0}',
+			[format_currency(this.frm.doc.grand_total, this.frm.doc.currency)]);
+
+		this.dialog.set_title(title);
 	}
 
 	bind_events() {
@@ -1234,10 +1280,6 @@ class Payment {
 		const me = this;
 
 		let fields = this.frm.doc.payments.map(p => {
-			if (p.default) {
-				this.default_mop = p.mode_of_payment;
-			}
-
 			return {
 				fieldtype: 'Currency',
 				label: __(p.mode_of_payment),

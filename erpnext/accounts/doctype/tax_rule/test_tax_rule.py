@@ -11,7 +11,10 @@ test_records = frappe.get_test_records('Tax Rule')
 
 class TestTaxRule(unittest.TestCase):
 	def setUp(self):
-		frappe.db.sql("delete from `tabTax Rule` where use_for_shopping_cart <> 1")
+		frappe.db.sql("delete from `tabTax Rule`")
+
+	def tearDown(self):
+		frappe.db.sql("delete from `tabTax Rule`")
 
 	def test_conflict(self):
 		tax_rule1 = make_tax_rule(customer= "_Test Customer",

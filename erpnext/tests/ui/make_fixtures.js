@@ -231,7 +231,9 @@ QUnit.test('Make fixtures', assert => {
 	let done = assert.async();
 	let tasks = [];
 	Object.keys(frappe.test_data).forEach(function(doctype) {
-		tasks.push(function() { return frappe.tests.setup_doctype(doctype); });
+		tasks.push(function() {
+			return frappe.tests.setup_doctype(doctype, frappe.test_data[doctype]);
+		});
 	});
 	frappe.run_serially(tasks).then(() => done());
 });

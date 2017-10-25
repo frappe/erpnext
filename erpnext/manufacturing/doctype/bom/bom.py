@@ -147,22 +147,28 @@ class BOM(WebsiteGenerator):
 		if arg.get('scrap_items'):
 			rate = self.get_valuation_rate(arg)
 		elif arg:
-			if self.rm_cost_as_per == 'Valuation Rate':
-				rate = self.get_valuation_rate(arg)
-			elif self.rm_cost_as_per == 'Last Purchase Rate':
-				rate = arg['last_purchase_rate'] \
-					or frappe.db.get_value("Item", arg['item_code'], "last_purchase_rate")
-			elif self.rm_cost_as_per == "Price List":
-				if not self.buying_price_list:
-					frappe.throw(_("Please select Price List"))
-				rate = frappe.db.get_value("Item Price",
-					{"price_list": self.buying_price_list, "item_code": arg["item_code"]}, "price_list_rate")
-				price_list_currency = frappe.db.get_value("Price List", self.buying_price_list, "currency")
-				if price_list_currency != self.company_currency():
-					rate = flt(rate * self.conversion_rate)
-
-			if arg['bom_no'] and (not rate or self.set_rate_of_sub_assembly_item_based_on_bom):
+			if arg.get('bom_no') and self.set_rate_of_sub_assembly_item_based_on_bom:
 				rate = self.get_bom_unitcost(arg['bom_no'])
+			else:
+				if self.rm_cost_as_per == 'Valuation Rate':
+					rate = self.get_valuation_rate(arg)
+				elif self.rm_cost_as_per == 'Last Purchase Rate':
+					rate = arg.get('last_purchase_rate') \
+						or frappe.db.get_value("Item", arg['item_code'], "last_purchase_rate")
+				elif self.rm_cost_as_per == "Price List":
+					if not self.buying_price_list:
+						frappe.throw(_("Please select Price List"))
+					rate = frappe.db.get_value("Item Price", {"price_list": self.buying_price_list,
+						"item_code": arg["item_code"]}, "price_list_rate")
+
+					price_list_currency = frappe.db.get_value("Price List",
+						self.buying_price_list, "currency")
+					if price_list_currency != self.company_currency():
+						rate = flt(rate * self.conversion_rate)
+
+				if not rate:
+					frappe.msgprint(_("{0} not found for Item {1}")
+						.format(self.rm_cost_as_per, arg["item_code"]))
 
 		return flt(rate)
 

@@ -83,6 +83,9 @@ class AccountsController(TransactionBase):
 					self.set(fieldname, today())
 					break
 
+		# set taxes table if missing from `taxes_and_charges`
+		self.set_taxes()
+
 	def calculate_taxes_and_totals(self):
 		from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
 		calculate_taxes_and_totals(self)
@@ -259,9 +262,9 @@ class AccountsController(TransactionBase):
 		if not account_currency:
 			account_currency = get_account_currency(gl_dict.account)
 
-		if gl_dict.account and self.doctype not in ["Journal Entry", 
+		if gl_dict.account and self.doctype not in ["Journal Entry",
 			"Period Closing Voucher", "Payment Entry"]:
-			
+
 			self.validate_account_currency(gl_dict.account, account_currency)
 			set_balance_in_account_currency(gl_dict, account_currency, self.get("conversion_rate"), self.company_currency)
 
