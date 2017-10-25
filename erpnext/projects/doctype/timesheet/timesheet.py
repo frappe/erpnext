@@ -267,12 +267,13 @@ class Timesheet(Document):
 		for data in self.time_logs:
 			if data.activity_type or data.billable:
 				rate = get_activity_cost(self.employee, data.activity_type)
-				hours = data.billing_hours or data.hours or 0
+				hours = data.billing_hours or 0
+				costing_hours = data.billing_hours or data.hours or 0
 				if rate:
 					data.billing_rate = flt(rate.get('billing_rate')) if flt(data.billing_rate) == 0 else data.billing_rate
 					data.costing_rate = flt(rate.get('costing_rate')) if flt(data.costing_rate) == 0 else data.costing_rate
 					data.billing_amount = data.billing_rate * hours
-					data.costing_amount = data.costing_rate * hours
+					data.costing_amount = data.costing_rate * costing_hours
 
 	def update_time_rates(self, ts_detail):
 		if not ts_detail.billable:
