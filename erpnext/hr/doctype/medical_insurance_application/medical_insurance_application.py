@@ -49,3 +49,18 @@ def get_template():
 	# frappe.response['result'] = cstr(w.getvalue())
 	# frappe.response['type'] = 'csv'
 	# frappe.response['doctype'] = "Medical Insurance Application"
+
+
+
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+	employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
+	if employees:
+		query = ""
+		employee = frappe.get_doc('Employee', {'name': employees[0].name})
+		
+		if u'Employee' in frappe.get_roles(user):
+			if query != "":
+				query+=" or "
+			query+=""" employee = '{0}'""".format(employee.name)
+		return query

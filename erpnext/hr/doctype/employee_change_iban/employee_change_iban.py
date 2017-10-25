@@ -35,22 +35,37 @@ class EmployeeChangeIBAN(Document):
 
 
 
-def get_permission_query_conditions(user):
-	pass
-def get_permission_query_conditions22(user):
-	return ""
-	if not user: user = frappe.session.user
+# def get_permission_query_conditions(user):
+# 	pass
+# def get_permission_query_conditions22(user):
+# 	return ""
+# 	if not user: user = frappe.session.user
 	
+# 	employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
+# 	if employees:
+# 		employee = frappe.get_doc('Employee', {'name': employees[0].name})
+		
+# 		if u'Change IBAN Approver' in frappe.get_roles(user) :			
+# 			return ""
+# 		elif u'Employee' in frappe.get_roles(user):
+# 			return """(`Employee Change IBAN`.owner = '{user}' or `Employee Change IBAN`.employee = '{employee}')""" \
+# 				.format(user=frappe.db.escape(user), employee=frappe.db.escape(employee.name))
+# 		else:
+# 			return None
+
+
+
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
 	employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
 	if employees:
+		query = ""
 		employee = frappe.get_doc('Employee', {'name': employees[0].name})
 		
-		if u'Change IBAN Approver' in frappe.get_roles(user) :			
-			return ""
-		elif u'Employee' in frappe.get_roles(user):
-			return """(`Employee Change IBAN`.owner = '{user}' or `Employee Change IBAN`.employee = '{employee}')""" \
-				.format(user=frappe.db.escape(user), employee=frappe.db.escape(employee.name))
-		else:
-			return None
+		if u'Employee' in frappe.get_roles(user):
+			if query != "":
+				query+=" or "
+			query+=""" employee = '{0}'""".format(employee.name)
+		return query
 
 

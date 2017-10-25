@@ -138,7 +138,19 @@ permission_query_conditions = {
 	"Leave Application": "erpnext.hr.doctype.leave_application.leave_application.get_permission_query_conditions",
 	"Job Assignment": "erpnext.hr.doctype.job_assignment.job_assignment.get_permission_query_conditions",
 	"Financial Custody": "erpnext.hr.doctype.financial_custody.financial_custody.get_permission_query_conditions",
-	"Over Time": "erpnext.hr.doctype.over_time.over_time.get_permission_query_conditions"
+	"Over Time": "erpnext.hr.doctype.over_time.over_time.get_permission_query_conditions",
+	"Salary Slip": "erpnext.hr.doctype.salary_slip.salary_slip.get_permission_query_conditions",
+	"Salary Structure": "erpnext.hr.doctype.salary_structure.salary_structure.get_permission_query_conditions",
+	"Return From Leave Statement": "erpnext.hr.doctype.return_from_leave_statement.return_from_leave_statement.get_permission_query_conditions",
+	"Employee Badge Request": "erpnext.hr.doctype.employee_badge_request.employee_badge_request.get_permission_query_conditions",
+	"Employee Change IBAN": "erpnext.hr.doctype.employee_change_iban.employee_change_iban.get_permission_query_conditions",
+	"Medical Insurance Application": "erpnext.hr.doctype.medical_insurance_application.medical_insurance_application.get_permission_query_conditions",
+	"Governmental Documents": "erpnext.hr.doctype.governmental_documents.governmental_documents.get_permission_query_conditions",
+	"May Concern Letter": "erpnext.hr.doctype.may_concern_letter.may_concern_letter.get_permission_query_conditions",
+	"End of Service Award": "erpnext.hr.doctype.end_of_service_award.end_of_service_award.get_permission_query_conditions",
+	"Overtime Request": "erpnext.hr.doctype.overtime_request.overtime_request.get_permission_query_conditions",
+	"Employee Resignation": "erpnext.hr.doctype.employee_resignation.employee_resignation.get_permission_query_conditions",
+	"Cancel Leave Application": "erpnext.hr.doctype.cancel_leave_application.cancel_leave_application.get_permission_query_conditions"
 
 }
 

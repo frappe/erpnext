@@ -742,7 +742,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-10-04 11:50:17.452325", 
+ "modified": "2017-10-24 14:46:23.636427", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Grade", 
@@ -772,7 +772,7 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 

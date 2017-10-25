@@ -449,7 +449,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-10-04 12:55:45.230553", 
+ "modified": "2017-10-25 09:47:43.429964", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee Change IBAN", 
@@ -458,13 +458,13 @@
  "permissions": [
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
    "export": 1, 
-   "if_owner": 0, 
+   "if_owner": 1, 
    "import": 0, 
    "is_custom": 0, 
    "permlevel": 0, 
@@ -475,6 +475,7 @@
    "set_user_permissions": 0, 
    "share": 1, 
    "submit": 0, 
+   "user_permission_doctypes": "[\"Employee\"]", 
    "write": 1
   }, 
   {

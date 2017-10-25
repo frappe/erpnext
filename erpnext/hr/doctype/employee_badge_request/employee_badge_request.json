@@ -623,7 +623,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-10-04 12:54:12.518785", 
+ "modified": "2017-10-24 16:08:29.901973", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee Badge Request", 
@@ -632,7 +632,7 @@
  "permissions": [
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 1, 
    "delete": 0, 
@@ -649,6 +649,7 @@
    "set_user_permissions": 0, 
    "share": 1, 
    "submit": 0, 
+   "user_permission_doctypes": "[\"Employee\"]", 
    "write": 1
   }, 
   {

@@ -252,7 +252,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-09-09 16:24:36.644154", 
+ "modified": "2017-10-24 16:05:34.021747", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Governmental Documents", 
@@ -282,7 +282,7 @@
   }, 
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 
@@ -299,6 +299,7 @@
    "set_user_permissions": 0, 
    "share": 1, 
    "submit": 0, 
+   "user_permission_doctypes": "[\"Employee\"]", 
    "write": 1
   }
  ], 

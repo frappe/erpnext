@@ -25,6 +25,7 @@ class AttendanceAlreadyMarkedError(frappe.ValidationError): pass
 
 from frappe.model.document import Document
 class LeaveApplication(Document):
+	pass
 	def get_feed(self):
 		return _("{0}: From {0} of type {1}").format(self.status, self.employee_name, self.leave_type)
 
@@ -179,11 +180,24 @@ class LeaveApplication(Document):
 			if self.workflow_state=="Approved By HR Specialist":
 				self.status="Approved"
 				self.docstatus=1
-		else:
-			if self.workflow_state=="Approved By HR Manager":
+				''' start form here by ahmad  to allow ceo to add leave application directally 
+				without the need for hr manager to approve it which make it status = approved and 1 
+				, yet the hr manager can approve it and it would be 
+				just deccoratoed '''
+		#commented nisma two lines 
+		#else:
+			# if self.workflow_state=="Approved By HR Manager":
+			elif self.workflow_state=="Approved By HR Manager":
 				self.status="Approved"
 				self.docstatus=1
-		
+		#added by ahmad
+			elif self.workflow_state=="Created By CEO":
+				self.status="Approved"
+				self.docstatus=1
+
+				''' end to here by ahmad '''
+
+
 		if "Rejected" in str(self.workflow_state):
 			self.status="Rejected"
 			self.docstatus=2
