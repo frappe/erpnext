@@ -1,7 +1,7 @@
 QUnit.module('Buying');
 
 QUnit.test("test: purchase order", function(assert) {
-	assert.expect(11);
+	assert.expect(16);
 	let done = assert.async();
 
 	frappe.run_serially([
@@ -40,7 +40,6 @@ QUnit.test("test: purchase order", function(assert) {
 			// Get supplier details
 			assert.ok(cur_frm.doc.supplier_name == 'Test Supplier', "Supplier name correct");
 			assert.ok(cur_frm.doc.schedule_date == frappe.datetime.add_days(frappe.datetime.now_date(), 1), "Schedule Date correct");
-			assert.ok($('div.control-value.like-disabled-input.for-description').text().includes('Contact 3'), "Contact display correct");
 			assert.ok(cur_frm.doc.contact_email == 'test@supplier.com', "Contact email correct");
 			// Get item details
 			assert.ok(cur_frm.doc.items[0].item_name == 'Test Product 4', "Item name correct");
@@ -53,7 +52,7 @@ QUnit.test("test: purchase order", function(assert) {
 			assert.ok(cur_frm.doc.items[1].qty == 2, "Quantity correct");
 			assert.ok(cur_frm.doc.items[1].schedule_date == cur_frm.doc.schedule_date, "Schedule Date correct");
 			// Calculate total
-			assert.ok(cur_frm.doc.total == 500, "Total correct");
+			assert.ok(cur_frm.doc.total == 700, "Total correct");
 			// Get terms
 			assert.ok(cur_frm.doc.terms == 'This is a term.', "Terms correct");
 		},
@@ -70,7 +69,7 @@ QUnit.test("test: purchase order", function(assert) {
 
 		() => frappe.tests.click_button('Submit'),
 		() => frappe.tests.click_button('Yes'),
-		() => frappe.timeout(0.3),
+		() => frappe.timeout(1),
 
 		() => {
 			assert.ok(cur_frm.doc.status == 'To Receive and Bill', "Submitted successfully");

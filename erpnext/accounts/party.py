@@ -76,7 +76,7 @@ def set_address_details(out, party, party_type, doctype=None, company=None):
 
 	# shipping address
 	if party_type in ["Customer", "Lead"]:
-		out.shipping_address_name = get_default_address(party_type, party.name, 'is_shipping_address')
+		out.shipping_address_name = get_party_shipping_address(party_type, party.name)
 		out.shipping_address = get_address_display(out["shipping_address_name"])
 		if doctype:
 			out.update(get_fetch_values(doctype, 'shipping_address_name', out.shipping_address_name))
@@ -418,3 +418,32 @@ def get_dashboard_info(party_type, party):
 		info["total_unpaid"] = -1 * info["total_unpaid"]
 
 	return info
+
+
+def get_party_shipping_address(doctype, name):
+	"""
+	Returns an Address name (best guess) for the given doctype and name for which `address_type == 'Shipping'` is true.
+	and/or `is_shipping_address = 1`.
+
+	It returns an empty string if there is no matching record.
+
+	:param doctype: Party Doctype
+	:param name: Party name
+	:return: String
+	"""
+	out = frappe.db.sql(
+		'SELECT dl.parent '
+		'from `tabDynamic Link` dl join `tabAddress` ta on dl.parent=ta.name '
+		'where '
+		'dl.link_doctype=%s '
+		'and dl.link_name=%s '
+		'and dl.parenttype="Address" '
+		'and '
+		'(ta.address_type="Shipping" or ta.is_shipping_address=1) '
+		'order by ta.is_shipping_address desc, ta.address_type desc limit 1',
+		(doctype, name)
+	)
+	if out:
+		return out[0][0]
+	else:
+		return ''

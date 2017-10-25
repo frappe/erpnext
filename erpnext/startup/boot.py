@@ -19,6 +19,8 @@ def boot_session(bootinfo):
 			'territory')
 		bootinfo.sysdefaults.customer_group = frappe.db.get_single_value('Selling Settings',
 			'customer_group')
+		bootinfo.sysdefaults.allow_stale = frappe.db.get_single_value('Accounts Settings',
+			'allow_stale') or 1
 
 		bootinfo.notification_settings = frappe.get_doc("Notification Control",
 			"Notification Control")
