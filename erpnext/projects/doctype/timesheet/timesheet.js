@@ -191,7 +191,6 @@ var update_time_rates = function(frm, cdt, cdn){
 	var child = locals[cdt][cdn];
 	if(!child.billable){
 		frappe.model.set_value(cdt, cdn, 'billing_rate', 0.0);
-		frappe.model.set_value(cdt, cdn, 'costing_rate', 0.0);
 	}
 }
 
@@ -202,9 +201,8 @@ var calculate_billing_costing_amount = function(frm, cdt, cdn){
 
 	if(child.billing_hours && child.billable){
 		billing_amount = (child.billing_hours * child.billing_rate);
-		costing_amount = flt(child.costing_rate * child.billing_hours);
 	}
-
+	costing_amount = flt(child.costing_rate * child.hours);
 	frappe.model.set_value(cdt, cdn, 'billing_amount', billing_amount);
 	frappe.model.set_value(cdt, cdn, 'costing_amount', costing_amount);
 	calculate_time_and_amount(frm);
