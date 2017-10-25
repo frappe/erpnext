@@ -135,12 +135,13 @@ erpnext/restaurant/doctype/restaurant_table/test_restaurant_table.js
 erpnext/restaurant/doctype/restaurant_menu/test_restaurant_menu.js
 erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_entry.js
 erpnext/projects/doctype/task/tests/test_task_tree.js
+<<<<<<< 59a4e70a6ae65bce0b998cb8a7b3a96cfee07fbc
 erpnext/stock/doctype/item_price/test_item_price.js
 erpnext/stock/doctype/delivery_note/test_delivery_note_with_margin.js
 erpnext/selling/doctype/sales_order/tests/test_sales_order_with_margin.js
 erpnext/selling/doctype/quotation/tests/test_quotation_with_margin.js
 erpnext/accounts/doctype/sales_invoice/tests/test_sales_invoice_with_margin.js
-erpnext/non_profit/doctype/membership_type/test_member.js
+erpnext/non_profit/doctype/membership_type/test_membership_type.js
 erpnext/non_profit/doctype/member/test_member.js
 erpnext/non_profit/doctype/volunteer_type/test_volunteer_type.js
 erpnext/non_profit/doctype/volunteer/test_volunteer.js
