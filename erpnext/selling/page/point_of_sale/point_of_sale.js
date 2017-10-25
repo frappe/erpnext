@@ -950,7 +950,7 @@ class POSItems {
 		const all_items = Object.values(_items).map(item => this.get_item_html(item));
 		let row_items = [];
 
-		const row_container = '<div style="display: flex; border-bottom: 1px solid #ebeff2">';
+		const row_container = '<div class="image-view-row">';
 		let curr_row = row_container;
 
 		for (let i=0; i < all_items.length; i++) {

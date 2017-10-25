@@ -7,6 +7,7 @@ QUnit.test("test purchase invoice", function(assert) {
 		() => {
 			return frappe.tests.make('Purchase Invoice', [
 				{supplier: 'Test Supplier'},
+				{bill_no: 'in123'},
 				{items: [
 					[
 						{'qty': 5},
@@ -36,7 +37,7 @@ QUnit.test("test purchase invoice", function(assert) {
 		},
 		() => frappe.tests.click_button('Submit'),
 		() => frappe.tests.click_button('Yes'),
-		() => frappe.timeout(0.3),
+		() => frappe.timeout(1),
 		() => done()
 	]);
 });

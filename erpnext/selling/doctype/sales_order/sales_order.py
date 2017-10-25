@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 import frappe.utils
-from frappe.utils import cstr, flt, getdate, comma_and, cint
+from frappe.utils import cstr, flt, getdate, comma_and, cint, nowdate, add_days
 from frappe import _
 from frappe.model.utils import get_fetch_values
 from frappe.model.mapper import get_mapped_doc

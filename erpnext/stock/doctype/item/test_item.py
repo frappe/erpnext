@@ -191,7 +191,8 @@ class TestItem(unittest.TestCase):
 					"increment": 0.5
 				}
 			],
-			"default_warehouse": "_Test Warehouse - _TC"
+			"default_warehouse": "_Test Warehouse - _TC",
+			"has_variants": 1
 		})
 
 		variant = create_variant("_Test Numeric Template Item",

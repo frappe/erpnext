@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, nowdate, add_days
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.buying_controller import BuyingController
@@ -152,4 +152,3 @@ def make_quotation(source_name, target_doc=None):
 	}, target_doc)
 
 	return doclist
-
