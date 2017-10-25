@@ -738,19 +738,24 @@ class POSCart {
 	bind_events() {
 		const me = this;
 		const events = this.events;
+		var flag = false;
 
 		// quantity change
 		this.$cart_items.on('click',
 			'[data-action="increment"], [data-action="decrement"]', function() {
-				const $btn = $(this);
-				const $item = $btn.closest('.list-item[data-item-code]');
-				const item_code = $item.attr('data-item-code');
-				const action = $btn.attr('data-action');
-
-				if(action === 'increment') {
-					events.on_field_change(item_code, 'qty', '+1');
-				} else if(action === 'decrement') {
-					events.on_field_change(item_code, 'qty', '-1');
+				if(!flag){
+					flag = true;
+					setTimeout(function(){ flag = false; }, 500);
+					const $btn = $(this);
+					const $item = $btn.closest('.list-item[data-item-code]');
+					const item_code = $item.attr('data-item-code');
+					const action = $btn.attr('data-action');
+	
+					if(action === 'increment') {
+						events.on_field_change(item_code, 'qty', '+1');
+					} else if(action === 'decrement') {
+						events.on_field_change(item_code, 'qty', '-1');
+					}
 				}
 			});
 
@@ -1013,10 +1018,15 @@ class POSItems {
 
 	bind_events() {
 		var me = this;
+		var flag = false;
 		this.wrapper.on('click', '.pos-item-wrapper', function() {
-			const $item = $(this);
-			const item_code = $item.attr('data-item-code');
-			me.events.update_cart(item_code, 'qty', '+1');
+			if(!flag) {
+				flag = true;
+				setTimeout(function(){ flag=false; }, 500);
+				const $item = $(this);
+				const item_code = $item.attr('data-item-code');
+				me.events.update_cart(item_code, 'qty', '+1');
+			}
 		});
 	}
 
