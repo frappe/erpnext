@@ -569,7 +569,7 @@ def get_events(start, end, filters=None):
 		where ((ifnull(planned_start_date, '0000-00-00')!= '0000-00-00') \
 				and (planned_start_date <= %(end)s) \
 			and ((ifnull(planned_start_date, '0000-00-00')!= '0000-00-00') \
-				and planned_end_date >= %(start)s)) {conditions}
+				and ifnull(planned_end_date, '2199-12-31 00:00:00') >= %(start)s)) {conditions}
 		""".format(conditions=conditions), {
 			"start": start,
 			"end": end
