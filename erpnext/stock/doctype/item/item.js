@@ -103,6 +103,11 @@ frappe.ui.form.on("Item", {
 				frappe.set_route("Form", "Item Variant Settings");
 			}, __("View"));
 		}
+
+		if(frm.doc.__onload && frm.doc.__onload.stock_exists) {
+			// Hide variants section if stock exists
+			frm.toggle_display("variants_section", 0);
+		}
 	},
 
 	validate: function(frm){
