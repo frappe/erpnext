@@ -405,11 +405,7 @@ frappe.ui.form.on('Payment Entry', {
 		}
 
 		// Make read only if Accounts Settings doesn't allow stale rates
-		frappe.model.get_value("Accounts Settings", null, "allow_stale",
-			function(d){
-				frm.set_df_property("source_exchange_rate", "read_only", cint(d.allow_stale) ? 0 : 1);
-			}
-		);
+		frm.set_df_property("source_exchange_rate", "read_only", erpnext.stale_rate_allowed());
 	},
 
 	target_exchange_rate: function(frm) {
@@ -430,11 +426,7 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_paid_amount_based_on_received_amount = false;
 
 		// Make read only if Accounts Settings doesn't allow stale rates
-		frappe.model.get_value("Accounts Settings", null, "allow_stale",
-			function(d){
-				frm.set_df_property("target_exchange_rate", "read_only", cint(d.allow_stale) ? 0 : 1);
-			}
-		);
+		frm.set_df_property("target_exchange_rate", "read_only", erpnext.stale_rate_allowed());
 	},
 
 	paid_amount: function(frm) {
