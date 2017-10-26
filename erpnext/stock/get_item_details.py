@@ -168,7 +168,8 @@ def get_basic_details(args, item):
 	if not args.uom:
 		if args.get('doctype') in ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']:
 			args.uom = item.sales_uom if item.sales_uom else item.stock_uom
-		elif args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']:
+		elif args.get('doctype') in ['Material Request', 'Purchase Order',
+			'Purchase Receipt', 'Purchase Invoice']:
 			args.uom = item.purchase_uom if item.purchase_uom else item.stock_uom
 		else:
 			args.uom = item.stock_uom

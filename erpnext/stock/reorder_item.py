@@ -4,6 +4,7 @@
 import frappe
 import erpnext
 from frappe.utils import flt, nowdate, add_days, cint
+from erpnext.stock.get_item_details import get_conversion_factor
 from frappe import _
 
 def reorder_item():
@@ -128,11 +129,14 @@ def create_material_request(material_requests):
 				for d in items:
 					d = frappe._dict(d)
 					item = frappe.get_doc("Item", d.item_code)
+					uom = item.purchase_uom if item.purchase_uom else item.stock_uom
+
 					mr.append("items", {
 						"doctype": "Material Request Item",
 						"item_code": d.item_code,
 						"schedule_date": add_days(nowdate(),cint(item.lead_time_days)),
-						"uom":	item.stock_uom,
+						"uom":	uom,
+						"stock_uom": item.stock_uom,
 						"warehouse": d.warehouse,
 						"item_name": item.item_name,
 						"description": item.description,

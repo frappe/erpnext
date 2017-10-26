@@ -153,7 +153,7 @@ class MaterialRequest(BuyingController):
 		for d in self.get("items"):
 			if d.name in mr_items:
 				if self.material_request_type in ("Material Issue", "Material Transfer"):
-					d.ordered_qty =  flt(frappe.db.sql("""select sum(transfer_qty)
+					d.ordered_qty =  flt(frappe.db.sql("""select sum(qty)
 						from `tabStock Entry Detail` where material_request = %s
 						and material_request_item = %s and docstatus = 1""",
 						(self.name, d.name))[0][0])
@@ -216,9 +216,9 @@ def set_missing_values(source, target_doc):
 	target_doc.run_method("calculate_taxes_and_totals")
 
 def update_item(obj, target, source_parent):
-	target.conversion_factor = 1
+	target.conversion_factor = obj.conversion_factor
 	target.qty = flt(obj.qty) - flt(obj.ordered_qty)
-	target.stock_qty = target.qty
+	target.stock_qty = (target.qty * target.conversion_factor)
 
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):
@@ -357,7 +357,8 @@ def make_stock_entry(source_name, target_doc=None):
 			if flt(obj.qty) > flt(obj.ordered_qty) else 0
 		target.qty = qty
 		target.transfer_qty = qty
-		target.conversion_factor = 1
+		target.conversion_factor = obj.conversion_factor
+		target.transfer_qty = (qty * obj.conversion_factor)
 
 		if source_parent.material_request_type == "Material Transfer":
 			target.t_warehouse = obj.warehouse
@@ -405,7 +406,9 @@ def raise_production_orders(material_request):
 				prod_order.fg_warehouse = d.warehouse
 				prod_order.wip_warehouse = default_wip_warehouse
 				prod_order.description = d.description
-				prod_order.stock_uom = d.uom
+				prod_order.stock_uom = d.stock_uom
+				prod_order.conversion_factor = d.conversion_factor
+				prod_order.stock_qty = d.stock_qty
 				prod_order.expected_delivery_date = d.schedule_date
 				prod_order.sales_order = d.sales_order
 				prod_order.bom_no = get_item_details(d.item_code).bom_no
