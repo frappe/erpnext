@@ -198,7 +198,7 @@ class SalesOrder(SellingController):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
 	    #PR : 10861, Author : ashish-greycube & jigneshpshah,  Email:mr.ashish.shah@gmail.com 
 		# bypass credit limit check is set to true (1) at sales order level, then we need not to check credit limit and vise versa
-		bypass_credit_limit_check_at_sales_order = frappe.db.get_value("Customer", self.customer, "bypass_credit_limit_check_at_sales_order")
+		bypass_credit_limit_check_at_sales_order = cint(frappe.db.get_value("Customer", self.customer, "bypass_credit_limit_check_at_sales_order"))
 		if bypass_credit_limit_check_at_sales_order == 0:
 			check_credit_limit(self.customer, self.company)
 
@@ -351,15 +351,15 @@ class SalesOrder(SellingController):
 		return items
 
 	def on_recurring(self, reference_doc, subscription_doc):
-		self.set("delivery_date", get_next_schedule_date(reference_doc.delivery_date, subscription_doc.frequency,
-			cint(subscription_doc.repeat_on_day)))
+		self.set("delivery_date", get_next_schedule_date(reference_doc.delivery_date,
+			subscription_doc.frequency, cint(subscription_doc.repeat_on_day)))
 
 		for d in self.get("items"):
 			reference_delivery_date = frappe.db.get_value("Sales Order Item",
 				{"parent": reference_doc.name, "item_code": d.item_code, "idx": d.idx}, "delivery_date")
 
-			d.set("delivery_date",
-				get_next_schedule_date(reference_delivery_date, subscription_doc.frequency, cint(subscription_doc.repeat_on_day)))
+			d.set("delivery_date", get_next_schedule_date(reference_delivery_date,
+				subscription_doc.frequency, cint(subscription_doc.repeat_on_day)))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
@@ -465,14 +465,13 @@ def make_delivery_note(source_name, target_doc=None):
 				target.po_no = ", ".join(list(set(target_po_no))) if len(target_po_no) > 1 else target_po_no[0]
 			else:
 				target.po_no = source.po_no
-	    
+
 	    #PR : 10861, Author : ashish-greycube & jigneshpshah,  Email:mr.ashish.shah@gmail.com 
 		# Since the credit limit check is bypassed at sales order level, we need to check it at delivery note
-		bypass_credit_limit_check_at_sales_order = frappe.db.get_value("Customer", source.customer, "bypass_credit_limit_check_at_sales_order")
+		bypass_credit_limit_check_at_sales_order = cint(frappe.db.get_value("Customer", source.customer, "bypass_credit_limit_check_at_sales_order"))
 		if bypass_credit_limit_check_at_sales_order == 1:
 			from erpnext.selling.doctype.customer.customer import check_credit_limit
 			check_credit_limit(source.customer, source.company)
-
 
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
@@ -538,7 +537,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 
 	    #PR : 10861, Author : ashish-greycube & jigneshpshah,  Email:mr.ashish.shah@gmail.com 
 		# Since the credit limit check is bypassed at sales order level, we need to check it at sales invoice
-		bypass_credit_limit_check_at_sales_order = frappe.db.get_value("Customer", source.customer, "bypass_credit_limit_check_at_sales_order")
+		bypass_credit_limit_check_at_sales_order = cint(frappe.db.get_value("Customer", source.customer, "bypass_credit_limit_check_at_sales_order"))
 		if bypass_credit_limit_check_at_sales_order == 1:
 			from erpnext.selling.doctype.customer.customer import check_credit_limit
 			check_credit_limit(source.customer, source.company)
