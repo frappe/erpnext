@@ -71,9 +71,9 @@ def get_items(start, page_length, price_list, item_group, search_value=""):
 
 def get_conditions(item_code, serial_no, batch_no, barcode):
 	if serial_no or batch_no or barcode:
-		return frappe.db.escape(item_code), "i.item_code = %(item_code)s"
+		return frappe.db.escape(item_code), "i.name = %(item_code)s"
 
-	condition = """(i.item_code like %(item_code)s
+	condition = """(i.name like %(item_code)s
 			or i.item_name like %(item_code)s)"""
 
 	return '%%%s%%'%(frappe.db.escape(item_code)), condition
