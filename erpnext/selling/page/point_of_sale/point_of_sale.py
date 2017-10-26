@@ -36,7 +36,7 @@ def get_items(start, page_length, price_list, item_group, search_value=""):
 	lft, rgt = frappe.db.get_value('Item Group', item_group, ['lft', 'rgt'])
 	# locate function is used to sort by closest match from the beginning of the value
 	res = frappe.db.sql("""select i.name as item_code, i.item_name, i.image as item_image,
-		item_det.price_list_rate, item_det.currency
+		i.is_stock_item, item_det.price_list_rate, item_det.currency
 		from `tabItem` i LEFT JOIN
 			(select item_code, price_list_rate, currency from
 				`tabItem Price`	where price_list=%(price_list)s) item_det
@@ -71,9 +71,9 @@ def get_items(start, page_length, price_list, item_group, search_value=""):
 
 def get_conditions(item_code, serial_no, batch_no, barcode):
 	if serial_no or batch_no or barcode:
-		return frappe.db.escape(item_code), "i.item_code = %(item_code)s"
+		return frappe.db.escape(item_code), "i.name = %(item_code)s"
 
-	condition = """(i.item_code like %(item_code)s
+	condition = """(i.name like %(item_code)s
 			or i.item_name like %(item_code)s)"""
 
 	return '%%%s%%'%(frappe.db.escape(item_code)), condition

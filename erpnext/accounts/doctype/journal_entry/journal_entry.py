@@ -54,7 +54,7 @@ class JournalEntry(AccountsController):
 	def update_advance_paid(self):
 		advance_paid = frappe._dict()
 		for d in self.get("accounts"):
-			if d.is_advance:
+			if d.is_advance == "Yes":
 				if d.reference_type in ("Sales Order", "Purchase Order"):
 					advance_paid.setdefault(d.reference_type, []).append(d.reference_name)
 
@@ -76,7 +76,7 @@ class JournalEntry(AccountsController):
 
 	def unlink_advance_entry_reference(self):
 		for d in self.get("accounts"):
-			if d.is_advance and d.reference_type in ("Sales Invoice", "Purchase Invoice"):
+			if d.is_advance == "Yes" and d.reference_type in ("Sales Invoice", "Purchase Invoice"):
 				doc = frappe.get_doc(d.reference_type, d.reference_name)
 				doc.delink_advance_entries(self.name)
 				d.reference_type = ''
