@@ -15,7 +15,7 @@ class TestPhysician(unittest.TestCase):
 	def test_schedule_and_time(self):
 		physician = frappe.new_doc('Physician')
 		physician.first_name = '_Testdoctor2'
-		physician.physician_schedule = '_Test Testdoctor Schedule'
+		physician.physician_schedule = '_Testdoctor2 Schedule'
 
 		self.assertRaises(frappe.ValidationError, physician.insert)
 
@@ -24,7 +24,7 @@ class TestPhysician(unittest.TestCase):
 
 		self.assertRaises(frappe.ValidationError, physician.insert)
 
-		physician.physician_schedule = '_Test Testdoctor Schedule'
+		physician.physician_schedule = '_Testdoctor2 Schedule'
 		physician.time_per_appointment = 15
 
 		physician.insert()
