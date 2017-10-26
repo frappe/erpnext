@@ -208,7 +208,9 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			this.update_item_in_frm(item)
 				.then(() => {
 					// update cart
-					this.remove_item_from_cart(item);
+					if (item.qty === 0) {
+						frappe.model.clear_doc(item.doctype, item.name);
+					}
 					this.update_cart_data(item);
 				});
 		}, true);
@@ -227,22 +229,18 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		}
 
 		if (field) {
-			frappe.model.set_value(item.doctype, item.name, field, value);
+			return frappe.model.set_value(item.doctype, item.name, field, value)
+				.then(() => this.frm.script_manager.trigger('qty', item.doctype, item.name))
+				.then(() => {
+					console.log(item.qty, item.amount);
+
+					if (field === 'qty' && item.qty === 0) {
+						frappe.model.clear_doc(item.doctype, item.name);
+					}
+				})
 		}
 
-		return this.frm.script_manager
-			.trigger('qty', item.doctype, item.name)
-			.then(() => {
-				if (field === 'qty') {
-					this.remove_item_from_cart(item);
-				}
-			});
-	}
-
-	remove_item_from_cart(item) {
-		if (item.qty === 0) {
-			frappe.model.clear_doc(item.doctype, item.name);
-		}
+		return Promise.resolve();
 	}
 
 	make_payment_modal() {
