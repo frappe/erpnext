@@ -652,8 +652,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.toggle_conversion_factor(item);
 			if (!dont_fetch_price_list_rate &&
 				frappe.meta.has_field(doc.doctype, "price_list_currency")) {
-					this.apply_price_list(item, true)
-			};
+				this.apply_price_list(item, true);
+			}
 		}
 	},
 

@@ -29,8 +29,8 @@ class PurchaseOrder(BuyingController):
 			'target_field': 'ordered_qty',
 			'target_parent_dt': 'Material Request',
 			'target_parent_field': 'per_ordered',
-			'target_ref_field': 'qty',
-			'source_field': 'qty',
+			'target_ref_field': 'stock_qty',
+			'source_field': 'stock_qty',
 			'percent_join_field': 'material_request',
 			'overflow_type': 'order'
 		}]

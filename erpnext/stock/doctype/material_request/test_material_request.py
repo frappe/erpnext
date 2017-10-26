@@ -562,6 +562,7 @@ class TestMaterialRequest(unittest.TestCase):
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 
 		mr = frappe.copy_doc(test_records[0])
+		mr.material_request_type = 'Purchase'
 		item = mr.items[0]
 		mr.schedule_date = today()
 

@@ -465,3 +465,4 @@ erpnext.patches.v9_2.delete_healthcare_domain_default_items
 erpnext.patches.v9_1.create_issue_opportunity_type
 erpnext.patches.v9_2.rename_translated_domains_in_en
 erpnext.patches.v9_0.set_shipping_type_for_existing_shipping_rules
+erpnext.patches.v9_0.update_multi_uom_fields_in_material_request
