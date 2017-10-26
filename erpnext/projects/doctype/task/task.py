@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, json
 
-from frappe.utils import getdate, date_diff, add_days, cstr, cint
+from frappe.utils import getdate, date_diff, add_days, cstr
 from frappe import _, throw
 from frappe.utils.nestedset import NestedSet, rebuild_tree
 
@@ -201,7 +201,7 @@ def get_children():
 	parent_field = 'parent_' + doctype.lower().replace(' ', '_')
 	parent = frappe.form_dict.get("parent") or ""
 
-	if parent == "Tasks":
+	if parent == "task":
 		parent = ""
 
 	tasks = frappe.db.sql("""select name as value,
@@ -217,14 +217,25 @@ def get_children():
 
 @frappe.whitelist()
 def add_node():
-	from frappe.desk.treeview import make_tree_args
-	args = frappe.form_dict
-	args.update({
-		"name_field": "subject"
-	})
-	args = make_tree_args(**args)
+    from frappe.desk.treeview import make_tree_args
+    args = frappe.form_dict
+    args.update({
+    	"name_field": "subject"
+    })
+    args = make_tree_args(**args)
 
-	if cint(args.is_root):
-		args.parent_task = None
+    if args.parent_task == 'task':
+        args.parent_task = None
 
-	frappe.get_doc(args).insert()
+    frappe.get_doc(args).insert()
+
+@frappe.whitelist()
+def add_multiple_tasks(data, parent):
+    data = json.loads(data)['tasks']
+    tasks = data.split('\n')
+    new_doc = {'doctype': 'Task', 'parent_task': parent}
+
+    for d in tasks:
+        new_doc['subject'] = d
+        new_task = frappe.get_doc(new_doc)
+        new_task.insert()
