@@ -70,6 +70,7 @@ class SalesInvoice(SellingController):
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
 		self.add_remarks()
 		self.validate_write_off_account()
+		self.validate_duplicate_offline_pos_entry()
 		self.validate_account_for_change_amount()
 		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
@@ -461,6 +462,12 @@ class SalesInvoice(SellingController):
 
 		if flt(self.write_off_amount) and not self.write_off_account:
 			msgprint(_("Please enter Write Off Account"), raise_exception=1)
+
+	def validate_duplicate_offline_pos_entry(self):
+		if self.is_pos and self.offline_pos_name \
+			and frappe.db.get_value('Sales Invoice',
+			{'offline_pos_name': self.offline_pos_name, 'docstatus': 1}):
+			frappe.throw(_("Duplicate offline pos sales invoice {0}").format(self.offline_pos_name))
 
 	def validate_account_for_change_amount(self):
 		if flt(self.change_amount) and not self.account_for_change_amount:
@@ -919,7 +926,7 @@ def make_delivery_note(source_name, target_doc=None):
 
 	    #PR : 10861, Author : ashish-greycube & jigneshpshah,  Email:mr.ashish.shah@gmail.com 
 		# Since the credit limit check is bypassed at sales order level, we need to check it at delivery note
-		bypass_credit_limit_check_at_sales_order = frappe.db.get_value("Customer", source.customer, "bypass_credit_limit_check_at_sales_order")
+		bypass_credit_limit_check_at_sales_order = cint(frappe.db.get_value("Customer", source.customer, "bypass_credit_limit_check_at_sales_order"))
 		if bypass_credit_limit_check_at_sales_order == 1:
 			from erpnext.selling.doctype.customer.customer import check_credit_limit
 			check_credit_limit(source.customer, source.company)
