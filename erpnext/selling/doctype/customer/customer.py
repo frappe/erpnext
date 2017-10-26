@@ -191,7 +191,7 @@ def get_customer_outstanding(customer, company,caller=None):
 	#PR : 10861, Author : ashish-greycube & jigneshpshah,  Email:mr.ashish.shah@gmail.com 
 	# Since the credit limit check is bypassed at sales order level, when customer credit balance report is run we need to treat sales order with status 'To Deliver and Bill' as not outstanding
 	outstanding_based_on_bypassed_so = 0.0
-	bypass_credit_limit_check_at_sales_order = frappe.db.get_value("Customer", customer, "bypass_credit_limit_check_at_sales_order")
+	bypass_credit_limit_check_at_sales_order = cint(frappe.db.get_value("Customer", customer, "bypass_credit_limit_check_at_sales_order"))
 	if bypass_credit_limit_check_at_sales_order == 1 and caller=='customer_credit_balance_report':
 		outstanding_based_on_bypassed_so = frappe.db.sql("""
 			select (sum(base_grand_total))
