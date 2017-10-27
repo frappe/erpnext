@@ -84,10 +84,10 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-10-27 12:20:06.360556", 
+ "modified": "2017-10-27 17:36:01.170344", 
  "modified_by": "Administrator", 
  "module": "HR", 
- "name": "Injury or Illness Case Severity level", 
+ "name": "Injury or Illness Case Severity Level", 
  "name_case": "", 
  "owner": "Administrator", 
  "permissions": [
