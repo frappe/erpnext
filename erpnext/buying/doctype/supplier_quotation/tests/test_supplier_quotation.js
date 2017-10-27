@@ -27,12 +27,13 @@ QUnit.test("test: supplier quotation", function(assert) {
 				{terms: 'This is a term'}
 			]);
 		},
+		() => frappe.timeout(3),
 		() => {
 			// Get Supplier details
 			assert.ok(cur_frm.doc.supplier == 'Test Supplier', "Supplier correct");
 			assert.ok(cur_frm.doc.company == cur_frm.doc.company, "Company correct");
 			// Get Contact details
-			assert.ok(cur_frm.doc.contact_display == 'Contact 3', "Conatct correct");
+			assert.ok(cur_frm.doc.contact_person == 'Contact 3-Test Supplier', "Conatct correct");
 			assert.ok(cur_frm.doc.contact_email == 'test@supplier.com', "Email correct");
 			// Get uom
 			assert.ok(cur_frm.doc.items[0].uom == 'Unit', "Multi uom correct");

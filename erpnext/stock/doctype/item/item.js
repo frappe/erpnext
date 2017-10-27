@@ -103,6 +103,11 @@ frappe.ui.form.on("Item", {
 				frappe.set_route("Form", "Item Variant Settings");
 			}, __("View"));
 		}
+
+		if(frm.doc.__onload && frm.doc.__onload.stock_exists) {
+			// Hide variants section if stock exists
+			frm.toggle_display("variants_section", 0);
+		}
 	},
 
 	validate: function(frm){
@@ -249,15 +254,18 @@ $.extend(erpnext.item, {
 		if(frm.doc.__islocal)
 			return;
 
-		frappe.require('assets/js/item-dashboard.min.js', function() {
-			var section = frm.dashboard.add_section('<h5 style="margin-top: 0px;">\
-				<a href="#stock-balance">' + __("Stock Levels") + '</a></h5>');
-			erpnext.item.item_dashboard = new erpnext.stock.ItemDashboard({
-				parent: section,
-				item_code: frm.doc.name
+		// Show Stock Levels only if is_stock_item
+		if (frm.doc.is_stock_item) {
+			frappe.require('assets/js/item-dashboard.min.js', function() {
+				var section = frm.dashboard.add_section('<h5 style="margin-top: 0px;">\
+					<a href="#stock-balance">' + __("Stock Levels") + '</a></h5>');
+				erpnext.item.item_dashboard = new erpnext.stock.ItemDashboard({
+					parent: section,
+					item_code: frm.doc.name
+				});
+				erpnext.item.item_dashboard.refresh();
 			});
-			erpnext.item.item_dashboard.refresh();
-		});
+		}
 	},
 
 	edit_prices_button: function(frm) {

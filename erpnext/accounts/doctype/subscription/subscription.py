@@ -17,6 +17,7 @@ month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 class Subscription(Document):
 	def validate(self):
 		self.update_status()
+		self.validate_reference_doctype()
 		self.validate_dates()
 		self.validate_next_schedule_date()
 		self.validate_email_id()
@@ -25,25 +26,28 @@ class Subscription(Document):
 		validate_template(self.message or "")
 
 	def before_submit(self):
-		self.set_next_schedule_date()
+		if not self.next_schedule_date:
+			self.next_schedule_date = get_next_schedule_date(self.start_date,
+				self.frequency, self.repeat_on_day)
 
 	def on_submit(self):
-		# self.update_subscription_id()
-		self.update_subscription_data()
+		self.update_subscription_id()
 
 	def on_update_after_submit(self):
-		self.update_subscription_data()
 		self.validate_dates()
 		self.set_next_schedule_date()
 
 	def before_cancel(self):
 		self.unlink_subscription_id()
+		self.next_schedule_date = None
 
 	def unlink_subscription_id(self):
-		doc = frappe.get_doc(self.reference_doctype, self.reference_document)
-		if doc.meta.get_field('subscription'):
-			doc.subscription = None
-			doc.db_update()
+		frappe.db.sql("update `tab{0}` set subscription = null where subscription=%s"
+			.format(self.reference_doctype), self.name)
+
+	def validate_reference_doctype(self):
+		if not frappe.get_meta(self.reference_doctype).has_field('subscription'):
+			frappe.throw(_("Add custom field Subscription in the doctype {0}").format(self.reference_doctype))
 
 	def validate_dates(self):
 		if self.end_date and getdate(self.start_date) > getdate(self.end_date):
@@ -76,30 +80,11 @@ class Subscription(Document):
 				frappe.throw(_("'Recipients' not specified"))
 
 	def set_next_schedule_date(self):
-		self.next_schedule_date = get_next_schedule_date(self.start_date,
-			self.frequency, self.repeat_on_day)
-
-	def update_subscription_data(self):
-		update_doc = False
-		doc = frappe.get_doc(self.reference_doctype, self.reference_document)
-		if frappe.get_meta(self.reference_doctype).get_field("from_date"):
-			doc.from_date = self.from_date
-			doc.to_date = self.to_date
-			update_doc = True
-
-		if not doc.subscription:
-			doc.subscription = self.name
-			update_doc = True
-
-		if update_doc:
-			doc.db_update()
+		if self.repeat_on_day:
+			self.next_schedule_date = get_next_date(self.next_schedule_date, 0, self.repeat_on_day)
 
 	def update_subscription_id(self):
-		doc = frappe.get_doc(self.reference_doctype, self.reference_document)
-		if not doc.meta.get_field('subscription'):
-			frappe.throw(_("Add custom field Subscription Id in the doctype {0}").format(self.reference_doctype))
-
-		doc.db_set('subscription', self.name)
+		frappe.db.set_value(self.reference_doctype, self.reference_document, "subscription", self.name)
 
 	def update_status(self, status=None):
 		self.status = {
@@ -142,9 +127,6 @@ def get_subscription_entries(date):
 def create_documents(data, schedule_date):
 	try:
 		doc = make_new_document(data, schedule_date)
-		if getattr(doc, "from_date", None):
-			update_subscription_period(data, doc)
-
 		if data.notify_by_email and data.recipients:
 			print_format = data.print_format or "Standard"
 			send_notification(doc, data, print_format=print_format)
@@ -158,13 +140,6 @@ def create_documents(data, schedule_date):
 		frappe.db.commit()
 		if data.reference_document and not frappe.flags.in_test:
 			notify_error_to_user(data)
-
-def update_subscription_period(data, doc):
-	from_date = doc.from_date
-	to_date = doc.to_date
-
-	frappe.db.set_value('Subscription', data.name, 'from_date', from_date)
-	frappe.db.set_value('Subscription', data.name, 'to_date', to_date)
 
 def disable_subscription(data):
 	subscription = frappe.get_doc('Subscription', data.name)
@@ -205,23 +180,48 @@ def update_doc(new_document, reference_doc, args, schedule_date):
 	if new_document.meta.get_field('subscription'):
 		new_document.set('subscription', args.name)
 
-	if args.from_date and args.to_date:
-		from_date = get_next_date(args.from_date, mcount)
+	for fieldname in ['naming_series', 'ignore_pricing_rule', 'posting_time'
+		'select_print_heading', 'remarks', 'owner']:
+		if new_document.meta.get_field(fieldname):
+			new_document.set(fieldname, reference_doc.get(fieldname))
 
-		if (cstr(get_first_day(args.from_date)) == cstr(args.from_date)) and \
-			(cstr(get_last_day(args.to_date)) == cstr(args.to_date)):
-				to_date = get_last_day(get_next_date(args.to_date, mcount))
-		else:
-			to_date = get_next_date(args.to_date, mcount)
+	# copy item fields
+	if new_document.meta.get_field('items'):
+		for i, item in enumerate(new_document.items):
+			for fieldname in ("page_break",):
+				item.set(fieldname, reference_doc.items[i].get(fieldname))
 
-		if new_document.meta.get_field('from_date'):
-			new_document.set('from_date', from_date)
-			new_document.set('to_date', to_date)
-
-	new_document.run_method("on_recurring", reference_doc=reference_doc, subscription_doc=args)
 	for data in new_document.meta.fields:
 		if data.fieldtype == 'Date' and data.reqd:
 			new_document.set(data.fieldname, schedule_date)
+
+	set_subscription_period(args, mcount, new_document)
+
+	new_document.run_method("on_recurring", reference_doc=reference_doc, subscription_doc=args)
+
+def set_subscription_period(args, mcount, new_document):
+	if mcount and new_document.meta.get_field('from_date') and new_document.meta.get_field('to_date'):
+		last_ref_doc = frappe.db.sql("""
+			select name, from_date, to_date
+			from `tab{0}`
+			where subscription=%s and docstatus < 2
+			order by creation desc
+			limit 1
+		""".format(args.reference_doctype), args.name, as_dict=1)
+
+		if not last_ref_doc:
+			return
+
+		from_date = get_next_date(last_ref_doc[0].from_date, mcount)
+
+		if (cstr(get_first_day(last_ref_doc[0].from_date)) == cstr(last_ref_doc[0].from_date)) and \
+			(cstr(get_last_day(last_ref_doc[0].to_date)) == cstr(last_ref_doc[0].to_date)):
+				to_date = get_last_day(get_next_date(last_ref_doc[0].to_date, mcount))
+		else:
+			to_date = get_next_date(last_ref_doc[0].to_date, mcount)
+
+		new_document.set('from_date', from_date)
+		new_document.set('to_date', to_date)
 
 def get_next_date(dt, mcount, day=None):
 	dt = getdate(dt)
@@ -276,8 +276,11 @@ def assign_task_to_owner(name, msg, users):
 @frappe.whitelist()
 def make_subscription(doctype, docname):
 	doc = frappe.new_doc('Subscription')
+
+	reference_doc = frappe.get_doc(doctype, docname)
 	doc.reference_doctype = doctype
 	doc.reference_document = docname
+	doc.start_date = reference_doc.get('posting_date') or reference_doc.get('transaction_date')
 	return doc
 
 @frappe.whitelist()

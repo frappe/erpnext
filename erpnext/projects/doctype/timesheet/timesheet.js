@@ -159,9 +159,14 @@ frappe.ui.form.on("Timesheet Detail", {
 });
 
 var calculate_end_time = function(frm, cdt, cdn) {
-	var child = locals[cdt][cdn];
+	let child = locals[cdt][cdn];
 
-	var d = moment(child.from_time);
+	if(!child.from_time) {
+		// if from_time value is not available then set the current datetime
+		frappe.model.set_value(cdt, cdn, "from_time", frappe.datetime.get_datetime_as_string());
+	}
+
+	let d = moment(child.from_time);
 	if(child.hours) {
 		d.add(child.hours, "hours");
 		frm._setting_hours = true;
@@ -186,7 +191,6 @@ var update_time_rates = function(frm, cdt, cdn){
 	var child = locals[cdt][cdn];
 	if(!child.billable){
 		frappe.model.set_value(cdt, cdn, 'billing_rate', 0.0);
-		frappe.model.set_value(cdt, cdn, 'costing_rate', 0.0);
 	}
 }
 
@@ -197,9 +201,8 @@ var calculate_billing_costing_amount = function(frm, cdt, cdn){
 
 	if(child.billing_hours && child.billable){
 		billing_amount = (child.billing_hours * child.billing_rate);
-		costing_amount = flt(child.costing_rate * child.billing_hours);
 	}
-
+	costing_amount = flt(child.costing_rate * child.hours);
 	frappe.model.set_value(cdt, cdn, 'billing_amount', billing_amount);
 	frappe.model.set_value(cdt, cdn, 'costing_amount', costing_amount);
 	calculate_time_and_amount(frm);

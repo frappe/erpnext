@@ -35,7 +35,7 @@
  "mapping_name": "Company to Hub Company", 
  "mapping_type": "Push", 
  "migration_id_field": "hub_sync_id", 
- "modified": "2017-09-22 15:32:12.459172", 
+ "modified": "2017-10-09 17:30:17.853929", 
  "modified_by": "Administrator", 
  "name": "Company to Hub Company", 
  "owner": "Administrator", 

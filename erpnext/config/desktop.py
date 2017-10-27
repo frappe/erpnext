@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from __future__ import unicode_literals
 from frappe import _
 
@@ -284,4 +286,12 @@ def get_data():
 			"link": "data-import-tool",
 			"label": _("Data Import Tool")
 		},
+		{
+			"module_name": "Restaurant",
+			"color": "#EA81E8",
+			"icon": "🍔",
+			"_doctype": "Restaurant",
+			"link": "List/Restaurant",
+			"label": _("Restaurant")
+		}
 	]

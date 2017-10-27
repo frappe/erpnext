@@ -12,7 +12,8 @@ frappe.ui.form.on('Subscription', {
 		frm.fields_dict['reference_document'].get_query = function() {
 			return {
 				filters: {
-					"docstatus": 1
+					"docstatus": 1,
+					"subscription": ''
 				}
 			};
 		};

@@ -73,6 +73,7 @@ def make_material_request(items):
 		mr = frappe.get_doc({
 			"doctype": "Material Request",
 			"material_request_type": "Purchase",
+			"schedule_date": frappe.utils.add_days(frappe.utils.nowdate(), 7),
 			"items": [{
 				"schedule_date": frappe.utils.add_days(frappe.utils.nowdate(), 7),
 				"item_code": i.name,

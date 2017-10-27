@@ -7,7 +7,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cstr, flt, getdate, new_line_sep
+from frappe.utils import cstr, flt, getdate, new_line_sep, nowdate, add_days
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
@@ -53,11 +53,6 @@ class MaterialRequest(BuyingController):
 				if actual_so_qty and (flt(so_items[so_no][item]) + already_indented > actual_so_qty):
 					frappe.throw(_("Material Request of maximum {0} can be made for Item {1} against Sales Order {2}").format(actual_so_qty - already_indented, item, so_no))
 
-	def validate_schedule_date(self):
-		for d in self.get('items'):
-			if d.schedule_date and getdate(d.schedule_date) < getdate(self.transaction_date):
-				frappe.throw(_("Expected Date cannot be before Material Request Date"))
-
 	# Validate
 	# ---------------------
 	def validate(self):
@@ -70,9 +65,9 @@ class MaterialRequest(BuyingController):
 			self.status = "Draft"
 
 		from erpnext.controllers.status_updater import validate_status
-		validate_status(self.status, ["Draft", "Submitted", "Stopped", "Cancelled", "Pending",
-										"Partially Ordered", "Ordered", "Issued", "Transferred"]
-						)
+		validate_status(self.status, 
+			["Draft", "Submitted", "Stopped", "Cancelled", "Pending",
+			"Partially Ordered", "Ordered", "Issued", "Transferred"])
 
 		validate_for_items(self)
 
@@ -287,7 +282,7 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 
 	def postprocess(source, target_doc):
 		target_doc.supplier = source_name
-
+		target_doc.schedule_date = add_days(nowdate(), 1)
 		target_doc.set("items", [d for d in target_doc.get("items")
 			if d.get("item_code") in supplier_items and d.get("qty") > 0])
 
@@ -320,12 +315,12 @@ def get_material_requests_based_on_supplier(supplier):
 		material_requests = frappe.db.sql_list("""select distinct mr.name
 			from `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
 			where mr.name = mr_item.parent
-			and mr_item.item_code in (%s)
-			and mr.material_request_type = 'Purchase'
-			and mr.per_ordered < 99.99
-			and mr.docstatus = 1
-			and mr.status != 'Stopped'
-                        order by mr_item.item_code ASC""" % ', '.join(['%s']*len(supplier_items)),
+				and mr_item.item_code in (%s)
+				and mr.material_request_type = 'Purchase'
+				and mr.per_ordered < 99.99
+				and mr.docstatus = 1
+				and mr.status != 'Stopped'
+			order by mr_item.item_code ASC""" % ', '.join(['%s']*len(supplier_items)),
 			tuple(supplier_items))
 	else:
 		material_requests = []
