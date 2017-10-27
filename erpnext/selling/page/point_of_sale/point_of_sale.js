@@ -169,6 +169,10 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				value = item.serial_no + '\n'+ value;
 			}
 
+			if (field == 'qty' && value < 0) {
+				value = 0;
+			}
+
 			if(field === 'qty' && (item.serial_no || item.batch_no)) {
 				this.select_batch_and_serial_no(item);
 			} else {
@@ -232,8 +236,6 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			return frappe.model.set_value(item.doctype, item.name, field, value)
 				.then(() => this.frm.script_manager.trigger('qty', item.doctype, item.name))
 				.then(() => {
-					console.log(item.qty, item.amount);
-
 					if (field === 'qty' && item.qty === 0) {
 						frappe.model.clear_doc(item.doctype, item.name);
 					}
@@ -750,6 +752,9 @@ class POSCart {
 	bind_events() {
 		const me = this;
 		const events = this.events;
+		let clicks = 0;
+		let old_click_time = '';
+		let new_click_time = '';
 
 		// quantity change
 		this.$cart_items.on('click',
@@ -759,10 +764,19 @@ class POSCart {
 				const item_code = $item.attr('data-item-code');
 				const action = $btn.attr('data-action');
 
-				if(action === 'increment') {
-					events.on_field_change(item_code, 'qty', '+1');
-				} else if(action === 'decrement') {
-					events.on_field_change(item_code, 'qty', '-1');
+				new_click_time = Date.now();
+
+				if (!old_click_time || new_click_time - old_click_time > 200) {
+					clicks = clicks || 1;
+					old_click_time = Date.now();
+					if(action === 'increment') {
+						events.on_field_change(item_code, 'qty', '+' + cstr(clicks));
+					} else if(action === 'decrement') {
+						events.on_field_change(item_code, 'qty', '-' + cstr(clicks));
+					}
+					clicks = 1;
+				} else {
+					clicks++;
 				}
 			});
 
@@ -1028,10 +1042,30 @@ class POSItems {
 
 	bind_events() {
 		var me = this;
+		let clicks = 0;
+		let old_click_time = '';
+		let new_click_time = '';
+		let clicked_item = {};
 		this.wrapper.on('click', '.pos-item-wrapper', function() {
 			const $item = $(this);
 			const item_code = $item.attr('data-item-code');
-			me.events.update_cart(item_code, 'qty', '+1');
+			new_click_time = Date.now();
+
+			if (!clicked_item[item_code]) {
+				clicked_item[item_code] = true;
+				clicks = 1;
+			}
+
+			if (!old_click_time || new_click_time - old_click_time > 200) {
+				clicks = clicks ? '+' + cstr(clicks) : '+1';
+				me.events.update_cart(item_code, 'qty', clicks);
+
+				clicks = 1;
+				old_click_time = Date.now();
+				delete clicked_item[item_code];
+			} else {
+				clicks++;
+			}
 		});
 	}
 
