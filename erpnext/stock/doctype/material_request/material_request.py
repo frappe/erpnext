@@ -109,27 +109,29 @@ class MaterialRequest(BuyingController):
 		# 	if frappe.permissions.has_permission("Department", ptype='read', doc=self.department, verbose=False, user=frappe.session.user):
 		# 		self.workflow_state = "Approved By Director" if self.state == "Approved" else 	"Rejected By Director"
 	def validate_project_manager(self):
-		pms_str = self.get_project_manager()
-		if pms_str:
-			pms_list = pms_str.split(",")
-			if self.material_requester not in pms_list:
-				frappe.throw(_("The selected Material Requester is not valid as a Project Manager"))
+			pms_str = self.get_project_manager()
+			if pms_str:
+				pms_list = pms_str.split(",")
+				if self.material_requester not in pms_list:
+					frappe.throw(_("The selected Material Requester is not valid as a Project Manager"))
 
 
 	def get_project_manager(self):
-		pms = frappe.db.sql("""select name from tabEmployee where user_id in 
-			(select parent from `tabUserRole` where role = 'Project Manager')""", as_dict = True)
-		if pms :
-			pms_str = ""
-			for pm in pms:
-				pms_str += pm.name+","
-			pms_str = pms_str[:-1]
-			return pms_str
+		if self.project:
+			pms = frappe.db.sql("""select name from tabEmployee where user_id in 
+				(select parent from `tabUserRole` where role = 'Project Manager')""", as_dict = True)
+			if pms :
+				pms_str = ""
+				for pm in pms:
+					pms_str += pm.name+","
+				pms_str = pms_str[:-1]
+				return pms_str
 
 	def validate_project(self):
-		pro_list = frappe.get_list("Project", filters = {"project_manager": self.material_requester}, fields = ["name"])
-		if not pro_list:
-			frappe.throw(_("The Project is not valid"))
+		if self.project:
+			pro_list = frappe.get_list("Project", filters = {"project_manager": self.material_requester}, fields = ["name"])
+			if not pro_list:
+				frappe.throw(_("The Project is not valid"))
 
 	def validate_adding_mr(self):
 		if self.material_requester:
