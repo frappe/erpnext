@@ -67,7 +67,8 @@ class LeaveApplication(Document):
 	def validate_leave_submission_dates(self):
 		if self.leave_type == "Annual Leave - اجازة اعتيادية":
 			if getdate(self.from_date) <=  getdate(nowdate()):
-				frappe.throw(_("The submission date must be before from date"))
+				pass
+				# frappe.throw(_("The submission date must be before from date"))
 		# if self.leave_type == "emergency -اضطرارية":
 		# 	if date_diff(nowdate(), self.from_date) > 3:
 		# 		frappe.throw(_("The submission date must be less than or equal 3 days after leave start"))
