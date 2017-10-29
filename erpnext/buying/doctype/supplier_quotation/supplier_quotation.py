@@ -77,6 +77,11 @@ def get_list_context(context=None):
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):
 	def set_missing_values(source, target):
+		qo = frappe.db.sql("select name, reason from `tabQuotation Opening` where supplier_quotation = '{0}'".format(source.name), as_dict=True)
+		if qo:
+			target.quotation_opening = qo[0].name
+			if qo.reason:
+				target.reason = qo.reason
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("get_schedule_dates")

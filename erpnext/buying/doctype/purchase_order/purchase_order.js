@@ -4,7 +4,6 @@
 frappe.provide("erpnext.buying");
 
 {% include 'erpnext/buying/doctype/purchase_common/purchase_common.js' %};
-
 frappe.ui.form.on("Purchase Order", {
     setup: function(frm) {
         frm.custom_make_buttons = {
@@ -21,6 +20,9 @@ frappe.ui.form.on("Purchase Order", {
         frm.set_indicator_formatter('item_code',
             function(doc) { return (doc.qty <= doc.received_qty) ? "green" : "orange" })
 
+    },
+    onload_post_render: function(frm){
+        frm.add_fetch("quotation_opening", "reason", "reason");   
     }
 });
 
