@@ -120,8 +120,9 @@ class LeaveApplication(Document):
 	def after_insert(self):
 
 		if self.workflow_state=="Approved By Manager":
-			frappe.db.sql("update tabCommunication set subject ='Approved By Manager' , content='Approved By Manager' where reference_name ='{0}' and subject ='Approved By Line Manager'".format(self.name))
+			#frappe.db.sql("update tabCommunication set subject ='Approved By Manager' , content='Approved By Manager' where reference_name ='{0}' and subject ='Approved By Line Manager'".format(self.name))
 			# frappe.msgprint("111")
+			pass
 		if self.leave_type != "Annual Leave - اجازة اعتيادية" and self.leave_type != "Without Pay - غير مدفوعة" and self.leave_type != "Compensatory off - تعويضية" and self.leave_type != "emergency -اضطرارية":
 			frappe.msgprint(_("You must attach the required file otherwise the application will be <span style='color:red;'>REJECTED!</span>"))
 	
@@ -219,7 +220,7 @@ class LeaveApplication(Document):
 			if emplo.user_id:
 				userem=frappe.get_doc("User",emplo.user_id)
 
-		result=frappe.db.sql("select name from tabCommunication where reference_name='{0}' and subject='Approved By Line Manager'".format(self.name))
+		#result=frappe.db.sql("select name from tabCommunication where reference_name='{0}' and subject='Approved By Line Manager'".format(self.name))
 		# if result:
 		#     frappe.msgprint(result[0][0])
 		fl=False
@@ -489,7 +490,7 @@ class LeaveApplication(Document):
 		
 	
 	def on_submit(self):
-		frappe.db.sql("update tabCommunication set subject ='Approved By Manager' , content='Approved By Manager' where reference_name ='{0}' and subject ='Approved By Line Manager'".format(self.name))
+		#frappe.db.sql("update tabCommunication set subject ='Approved By Manager' , content='Approved By Manager' where reference_name ='{0}' and subject ='Approved By Line Manager'".format(self.name))
 
 		self.validate_type()
 		self.validate_days_and_fin()
@@ -499,7 +500,7 @@ class LeaveApplication(Document):
 		# # self.validate_leave_submission_dates()
 	
 	def on_update_after_submit(self):
-		frappe.db.sql("update tabCommunication set subject ='Approved By Manager' , content='Approved By Manager' where reference_name ='{0}' and subject ='Approved By Line Manager'".format(self.name))
+		#frappe.db.sql("update tabCommunication set subject ='Approved By Manager' , content='Approved By Manager' where reference_name ='{0}' and subject ='Approved By Line Manager'".format(self.name))
 
 		self.validate_type()
 		self.validate_days_and_fin()

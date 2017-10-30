@@ -469,5 +469,7 @@ def get_permission_query_conditions(user):
 			if query != "":
 				query+=" or "
 			query+=""" employee = '{0}'""".format(employee.name)
+		if u'HR Specialist' in frappe.get_roles(user) or u'HR Manager' in frappe.get_roles(user):
+			query=""
 		return query
 
