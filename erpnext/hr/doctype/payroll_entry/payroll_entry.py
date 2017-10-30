@@ -112,8 +112,9 @@ class PayrollEntry(Document):
 		return self.create_log(ss_list)
 
 	def create_log(self, ss_list):
-		if not ss_list or len(ss_list) < 1: 
+		if not ss_list or len(ss_list) < 1:
 			frappe.throw(_("No employee for the above selected criteria OR salary slip already created"))
+		return
 
 	def get_sal_slip_list(self, ss_status, as_dict=False):
 		"""
@@ -147,7 +148,7 @@ class PayrollEntry(Document):
 			ss_dict["Total Pay"] = fmt_money(ss_obj.net_pay,
 				currency = frappe.defaults.get_global_default("currency"))	
 			ss_dict["Salary Slip"] = self.format_as_links(ss_obj.name)[0]
-			
+
 			if ss_obj.net_pay<0:
 				not_submitted_ss.append(ss_dict)
 			else:
@@ -173,7 +174,7 @@ class PayrollEntry(Document):
 				Possible reasons: <br>\
 				1. Net pay is less than 0. <br>\
 				2. Company Email Address specified in employee master is not valid. <br>")
-
+		return
 	def format_as_links(self, salary_slip):
 		return ['<a href="#Form/Salary Slip/{0}">{0}</a>'.format(salary_slip)]
 
@@ -188,9 +189,9 @@ class PayrollEntry(Document):
 			where t1.docstatus = 1 and start_date >= %s and end_date <= %s %s
 			""" % ('%s', '%s', cond), (self.start_date, self.end_date), as_dict=True)
 		return totals[0]
-	
+
 	def get_loan_accounts(self):
-		loan_accounts = frappe.get_all("Employee Loan", fields=["employee_loan_account", "interest_income_account"], 
+		loan_accounts = frappe.get_all("Employee Loan", fields=["employee_loan_account", "interest_income_account"],
 						filters = {"company": self.company, "docstatus":1})
 		if loan_accounts:
 			return loan_accounts[0]
@@ -237,7 +238,7 @@ class PayrollEntry(Document):
 			frappe.throw(_("Please set Default Payroll Payable Account in Company {0}")
 				.format(self.company))
 
-		return payroll_payable_account	
+		return payroll_payable_account
 
 	def make_accural_jv_entry(self):
 		self.check_permission('write')
@@ -353,7 +354,7 @@ class PayrollEntry(Document):
 			frappe.db.set_value("Salary Slip", ss_obj.name, "journal_entry", jv_name)
 
 	def set_start_end_dates(self):
-		self.update(get_start_end_dates(self.payroll_frequency, 
+		self.update(get_start_end_dates(self.payroll_frequency,
 			self.start_date or self.posting_date, self.company))
 
 @frappe.whitelist()
@@ -414,9 +415,7 @@ def get_end_date(start_date, frequency):
 def get_month_details(year, month):
 	ysd = frappe.db.get_value("Fiscal Year", year, "year_start_date")
 	if ysd:
-		from dateutil.relativedelta import relativedelta
 		import calendar, datetime
-		frappe.msgprint
 		diff_mnt = cint(month)-cint(ysd.month)
 		if diff_mnt<0:
 			diff_mnt = 12-int(ysd.month)+cint(month)

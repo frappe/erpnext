@@ -1,6 +1,8 @@
 // Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
+var in_progress = false;
+
 frappe.ui.form.on('Payroll Entry', {
 	onload: function (frm) {
 		frm.doc.posting_date = frappe.datetime.nowdate();
@@ -35,23 +37,23 @@ frappe.ui.form.on('Payroll Entry', {
 					"is_group": 0,
 					"company": frm.doc.company
 				}
-			}
+			};
 		}),
-			frm.set_query("cost_center", function () {
-				return {
-					filters: {
-						"is_group": 0,
-						company: frm.doc.company
-					}
+		frm.set_query("cost_center", function () {
+			return {
+				filters: {
+					"is_group": 0,
+					company: frm.doc.company
 				}
-			}),
-			frm.set_query("project", function () {
-				return {
-					filters: {
-						company: frm.doc.company
-					}
+			};
+		}),
+		frm.set_query("project", function () {
+			return {
+				filters: {
+					company: frm.doc.company
 				}
-			})
+			};
+		});
 	},
 
 	payroll_frequency: function (frm) {
@@ -63,14 +65,13 @@ frappe.ui.form.on('Payroll Entry', {
 			frm.trigger("set_end_date");
 		}else{
 			// reset flag
-			in_progress = false
+			in_progress = false;
 		}
 	},
 
 	salary_slip_based_on_timesheet: function (frm) {
 		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet);
 	},
-
 
 	set_start_end_dates: function (frm) {
 		if (!frm.doc.salary_slip_based_on_timesheet) {
@@ -87,7 +88,7 @@ frappe.ui.form.on('Payroll Entry', {
 						frm.set_value('end_date', r.message.end_date);
 					}
 				}
-			})
+			});
 		}
 	},
 
@@ -109,19 +110,19 @@ frappe.ui.form.on('Payroll Entry', {
 
 // Create salary slips
 
-cur_frm.cscript.custom_before_submit = function (doc, cdt, cdn) {
+cur_frm.cscript.custom_before_submit = function (doc) {
 	return $c('runserverobj', { 'method': 'create_salary_slips', 'docs': doc });
-}
+};
 
 // Submit salary slips
 
-submit_salary_slip = function (frm, cdt, cdn) {
-	doc = frm.doc;
+let submit_salary_slip = function (frm) {
+	var doc = frm.doc;
 	return $c('runserverobj', { 'method': 'submit_salary_slips', 'docs': doc });
 }
 
-make_bank_entry = function (frm, cdt, cdn) {
-	doc = frm.doc;
+let make_bank_entry = function (frm) {
+	var doc = frm.doc;
 	if (doc.company && doc.start_date && doc.end_date) {
 		return frappe.call({
 			doc: cur_frm.doc,
