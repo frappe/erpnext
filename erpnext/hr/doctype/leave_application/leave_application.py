@@ -1216,18 +1216,37 @@ def hooked_leave_allocation_builder():
 
 def create_return_from_leave_statement_after_leave():
 
-	lps = frappe.get_list("Leave Application", filters = {"status": "Approved"}, fields = ["name", "to_date", "employee"])
+	lps = frappe.get_list("Leave Application", filters = {"status": "Approved"}, fields = ["name", "to_date", "from_date", "employee", "employee_name", "department", "total_leave_days"])
 	for lp in lps:
 		emp_user = frappe.get_value("Employee", filters = {"name": lp.employee}, fieldname = "user_id")
 		rfls = frappe.get_value("Return From Leave Statement", filters = {"leave_application": lp.name}, fieldname = ["name"])
 		if not rfls and getdate(nowdate()) > getdate(lp.to_date): 
-			frappe.get_doc({
+			workflow_state = ""
+			if u'CEO' in frappe.get_roles(emp_user):
+				workflow_state = "Created By CEO"
+			elif u'Director' in frappe.get_roles(emp_user):
+				workflow_state = "Created By Director"
+			elif u'Manager' in frappe.get_roles(emp_user):
+				workflow_state = "Created By Manager"
+			elif u'Line Manager' in frappe.get_roles(emp_user):
+				workflow_state = "Created By Line Manager"
+			elif u'Employee' in frappe.get_roles(emp_user):
+				workflow_state = "Pending"
+			rfls_doc = frappe.get_doc({
 				"doctype": "Return From Leave Statement",
 				"leave_application": lp.name,
-				"return_date": nowdate(),
 				"employee": lp.employee,
-				"owner": emp_user
-				}).save(ignore_permissions = True)
+				"employee_name": lp.employee_name,
+				"owner": emp_user,
+				"total_leave_days": lp.total_leave_days,
+				"from_date": lp.from_date,
+				"to_date": lp.to_date,
+				"workflow_state": workflow_state
+				})
+			rfls_doc.flags.ignore_validate = True
+			rfls_doc.flags.ignore_mandatory = True
+			rfls_doc.save()
+
 			frappe.db.commit()
 		# print nowdate()
 

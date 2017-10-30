@@ -144,7 +144,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
                 cur_frm.cscript.get_items_from_bom, "fa fa-sitemap", "btn-default");
         }
 
-        if (doc.docstatus == 1 && doc.status != 'Stopped' && user_roles.indexOf("CFO") != -1) {
+        if (doc.docstatus == 1 && doc.status != 'Stopped' && user_roles.indexOf("Purchase Manager") != -1) {
             if (flt(doc.per_ordered, 2) < 100) {
                 // make
                 if (doc.material_request_type === "Material Transfer" && doc.status === "Submitted")

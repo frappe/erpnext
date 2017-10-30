@@ -4,7 +4,7 @@
 frappe.ui.form.on('Quotation Opening', {
     refresh: function(frm) {
         // cur_frm.trigger("get_sqs_filter");
-        if (cur_frm.doc.docstatus === 1) {
+        if (cur_frm.doc.docstatus === 1 && user_roles.indexOf("Purchase Manager") != -1) {
             cur_frm.add_custom_button(__("Purchase Order"), cur_frm.cscript['Make Purchase Order'],
                 __("Make"));
             cur_frm.page.set_inner_btn_group_as_primary(__("Make"));

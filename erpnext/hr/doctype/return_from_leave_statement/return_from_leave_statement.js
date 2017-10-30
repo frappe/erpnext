@@ -29,6 +29,10 @@ frappe.ui.form.on('Return From Leave Statement', {
         		cur_frm.fields_dict[key].df.read_only =1; 
         	}
             cur_frm.disable_save();
+            if(!cur_frm.doc.return_date){
+            	cur_frm.fields_dict["return_date"].df.read_only =0; 
+            	cur_frm.enable_save();
+            }
         }
         else{
         	cur_frm.enable_save();
