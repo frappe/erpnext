@@ -290,21 +290,19 @@ erpnext.pos.PointOfSale = class PointOfSale {
 						this.pos_profile = doc;
 
 						if (!this.pos_profile) {
-              this.pos_profile = {
-                company: this.company,
-                currency: frappe.defaults.get_default('currency'),
-                selling_price_list: frappe.defaults.get_default('selling_price_list')
-              };
-            }
-
+							this.pos_profile = {
+								company: this.company,
+								currency: frappe.defaults.get_default('currency'),
+								selling_price_list: frappe.defaults.get_default('selling_price_list')
+							};
+						}
 						resolve();
 					});
 			}
 
 			frappe.call({
 				method: 'erpnext.accounts.doctype.pos_profile.pos_profile.get_pos_profiles_for_user'
-			})
-			.then((r) => {
+			}).then((r) => {
 				if (r && r.message) {
 					const pos_profiles = r.message;
 
