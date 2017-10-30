@@ -77,6 +77,7 @@ erpnext/hr/doctype/training_feedback/test_training_feedback.js
 erpnext/hr/doctype/loan_type/test_loan_type.js
 erpnext/hr/doctype/employee_loan_application/test_employee_loan_application.js
 erpnext/hr/doctype/employee_loan/test_employee_loan.js
+erpnext/hr/doctype/payroll_entry/test_set_salary_components.js
 erpnext/hr/doctype/payroll_entry/test_payroll_entry.js
 erpnext/buying/doctype/supplier/test_supplier.js
 erpnext/buying/doctype/request_for_quotation/tests/test_request_for_quotation.js
