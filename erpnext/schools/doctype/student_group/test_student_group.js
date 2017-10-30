@@ -4,15 +4,10 @@ QUnit.module('schools');
 QUnit.test('Test: Student Group', function(assert){
 	assert.expect(2);
 	let done = assert.async();
-	let instructor_code;
 	let group_based_on = ["test-batch-wise-group", "test-course-wise-group"];
 	let tasks = [];
 
 	frappe.run_serially([
-		// Saving Instructor code beforehand
-		() => frappe.db.get_value('Instructor', {'instructor_name': 'Instructor 1'}, 'name'),
-		(instructor) => {instructor_code = instructor.message.name;},
-
 		// Creating a Batch and Course based group
 		() => {
 			return frappe.tests.make('Student Group', [
@@ -22,12 +17,7 @@ QUnit.test('Test: Student Group', function(assert){
 				{group_based_on: 'Batch'},
 				{student_group_name: group_based_on[0]},
 				{max_strength: 10},
-				{batch: 'A'},
-				{instructors: [
-					[
-						{instructor: instructor_code}
-					]
-				]}
+				{batch: 'A'}
 			]);
 		},
 		() => {
@@ -40,11 +30,6 @@ QUnit.test('Test: Student Group', function(assert){
 				{max_strength: 10},
 				{batch: 'A'},
 				{course: 'Test_Sub'},
-				{instructors: [
-					[
-						{instructor: instructor_code}
-					]
-				]}
 			]);
 		},
 

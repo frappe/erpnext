@@ -50,6 +50,7 @@ class Fees(AccountsController):
 			select g.email_address
 			from `tabGuardian` g, `tabStudent Guardian` sg
 			where g.name = sg.guardian and sg.parent = %s and sg.parenttype = 'Student'
+			and ifnull(g.email_address, '')!=''
 		""", self.student)
 
 		student_email_id = frappe.db.get_value("Student", self.student, "student_email_id")
@@ -111,7 +112,7 @@ def get_fee_list(doctype, txt, filters, limit_start, limit_page_length=20, order
 	user = frappe.session.user
 	student = frappe.db.sql("select name from `tabStudent` where student_email_id= %s", user)
 	if student:
-		return frappe. db.sql('''select name, program, due_date, paid_amount, outstanding_amount, total_amount from `tabFees`
+		return frappe. db.sql('''select name, program, due_date, paid_amount, outstanding_amount, grand_total from `tabFees`
 			where student= %s and docstatus=1
 			order by due_date asc limit {0} , {1}'''
 			.format(limit_start, limit_page_length), student, as_dict = True)

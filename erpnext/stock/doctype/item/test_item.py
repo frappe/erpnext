@@ -8,6 +8,7 @@ import frappe
 from frappe.test_runner import make_test_records
 from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsError,
 	InvalidItemAttributeValueError, get_variant)
+from erpnext.stock.doctype.item.item import StockExistsForTemplate
 
 from frappe.model.rename_doc import rename_doc
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -120,6 +121,8 @@ class TestItem(unittest.TestCase):
 		self.assertRaises(ItemVariantExistsError, variant.save)
 
 	def test_copy_fields_from_template_to_variants(self):
+		frappe.delete_doc_if_exists("Item", "_Test Variant Item-XL", force=1)
+		
 		fields = [{'field_name': 'item_group'}, {'field_name': 'is_stock_item'}]
 		allow_fields = [d.get('field_name') for d in fields]
 		set_item_variant_settings(fields)
@@ -188,7 +191,8 @@ class TestItem(unittest.TestCase):
 					"increment": 0.5
 				}
 			],
-			"default_warehouse": "_Test Warehouse - _TC"
+			"default_warehouse": "_Test Warehouse - _TC",
+			"has_variants": 1
 		})
 
 		variant = create_variant("_Test Numeric Template Item",
@@ -260,6 +264,15 @@ class TestItem(unittest.TestCase):
 		self.assertEquals(variant.description, '_Test Variant Mfg')
 		self.assertEquals(variant.manufacturer, 'MSG1')
 		self.assertEquals(variant.manufacturer_part_no, '007')
+
+	def test_stock_exists_against_template_item(self):
+		stock_item = frappe.get_all('Stock Ledger Entry', fields = ["item_code"], limit=1)
+		if stock_item:
+			item_code = stock_item[0].item_code
+
+			item_doc = frappe.get_doc('Item', item_code)
+			item_doc.has_variants = 1
+			self.assertRaises(StockExistsForTemplate, item_doc.save)
 
 def set_item_variant_settings(fields):
 	doc = frappe.get_doc('Item Variant Settings')

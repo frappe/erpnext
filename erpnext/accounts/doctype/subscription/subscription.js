@@ -3,10 +3,17 @@
 
 frappe.ui.form.on('Subscription', {
 	setup: function(frm) {
+		frm.fields_dict['reference_doctype'].get_query = function(doc) {
+			return {
+				query: "erpnext.accounts.doctype.subscription.subscription.subscription_doctype_query"
+			};
+		};
+
 		frm.fields_dict['reference_document'].get_query = function() {
 			return {
 				filters: {
-					"docstatus": 1
+					"docstatus": 1,
+					"subscription": ''
 				}
 			};
 		};

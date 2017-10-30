@@ -59,8 +59,6 @@ QUnit.test("test: production order", function (assert) {
 		// Confirm the production order timesheet, save and submit it
 		() => frappe.click_link("TS-00"),
 		() => frappe.timeout(1),
-		() => frappe.click_button("Save"),
-		() => frappe.timeout(1),
 		() => frappe.click_button("Submit"),
 		() => frappe.timeout(1),
 		() => frappe.click_button("Yes"),

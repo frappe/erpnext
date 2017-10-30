@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 import frappe.utils
-from frappe.utils import cstr, flt, getdate, comma_and, cint
+from frappe.utils import cstr, flt, getdate, comma_and, cint, nowdate, add_days
 from frappe import _
 from frappe.model.utils import get_fetch_values
 from frappe.model.mapper import get_mapped_doc
@@ -22,8 +22,8 @@ form_grid_templates = {
 class WarehouseRequired(frappe.ValidationError): pass
 
 class SalesOrder(SellingController):
-	def __init__(self, arg1, arg2=None):
-		super(SalesOrder, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(SalesOrder, self).__init__(*args, **kwargs)
 
 	def validate(self):
 		super(SalesOrder, self).validate()
@@ -347,15 +347,15 @@ class SalesOrder(SellingController):
 		return items
 
 	def on_recurring(self, reference_doc, subscription_doc):
-		self.set("delivery_date", get_next_schedule_date(reference_doc.delivery_date, subscription_doc.frequency,
-			cint(subscription_doc.repeat_on_day)))
+		self.set("delivery_date", get_next_schedule_date(reference_doc.delivery_date,
+			subscription_doc.frequency, cint(subscription_doc.repeat_on_day)))
 
 		for d in self.get("items"):
 			reference_delivery_date = frappe.db.get_value("Sales Order Item",
 				{"parent": reference_doc.name, "item_code": d.item_code, "idx": d.idx}, "delivery_date")
 
-			d.set("delivery_date",
-				get_next_schedule_date(reference_delivery_date, subscription_doc.frequency, cint(subscription_doc.repeat_on_day)))
+			d.set("delivery_date", get_next_schedule_date(reference_delivery_date,
+				subscription_doc.frequency, cint(subscription_doc.repeat_on_day)))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
@@ -696,7 +696,8 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 				"contact_display",
 				"contact_mobile",
 				"contact_email",
-				"contact_person"
+				"contact_person",
+				"taxes_and_charges"
 			],
 			"validation": {
 				"docstatus": ["=", 1]

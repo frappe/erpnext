@@ -339,7 +339,7 @@ $.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_
 // ------------
 cur_frm.cscript.hide_fields = function(doc) {
 	var parent_fields = ['project', 'due_date', 'is_opening', 'source', 'total_advance', 'get_advances',
-		'advances', 'sales_partner', 'commission_rate', 'total_commission', 'advances', 'from_date', 'to_date'];
+		'advances', 'advances', 'from_date', 'to_date'];
 
 	if(cint(doc.is_pos) == 1) {
 		hide_field(parent_fields);
@@ -519,6 +519,24 @@ frappe.ui.form.on('Sales Invoice', {
 				}
 			};
 		});
+	},
+	//When multiple companies are set up. in case company name is changed set default company address
+	company:function(frm){
+		if (frm.doc.company)
+		{
+			frappe.call({
+				method:"frappe.contacts.doctype.address.address.get_default_address",
+				args:{ doctype:'Company',name:frm.doc.company},
+				callback: function(r){
+					if (r.message){
+						frm.set_value("company_address",r.message)
+					}
+					else {
+						frm.set_value("company_address","")
+					}
+				}
+			})
+		}
 	},
 
 	project: function(frm){

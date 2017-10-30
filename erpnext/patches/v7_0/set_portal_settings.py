@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 import frappe
-from erpnext.setup.setup_wizard import domainify
 
 def execute():
 	frappe.reload_doctype('Role')
@@ -19,6 +18,9 @@ def execute():
 	frappe.get_doc('Portal Settings').sync_menu()
 
 	if 'schools' in frappe.get_installed_apps():
-		domainify.setup_domain('Education')
+		domain = frappe.get_doc('Domain', 'Education')
+		domain.setup_domain()
 	else:
-		domainify.setup_sidebar_items(domainify.get_domain('Manufacturing'))
+		domain = frappe.get_doc('Domain', 'Manufacturing')
+		domain.setup_data()
+		domain.setup_sidebar_items()

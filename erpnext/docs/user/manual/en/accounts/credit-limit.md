@@ -16,7 +16,9 @@ To set credit limit go to Customer - Master
 
 <img class="screenshot" alt="Credit Limit" src="/docs/assets/img/accounts/credit-limit-1.png">
 
-Go to the 'More Info section' and enter the amount in the field Credit Limit.
+Go to the 'CREDIT LIMIT' section and enter the amount in the field Credit Limit.
+
+If you leave CREDIT LIMIT as 0.00, it has no effect.
 
 In case a need arises to allow more credit to the customer as a good-will, the
 Credit Controller has access to submit order even if credit limit is crossed.
@@ -26,6 +28,25 @@ has expired, go to accounting settings and make changes.
 
 In the field Credit Controller, select the role who would be authorized to
 accept orders or raise credit limits of customers.
+
+To set credit limit at Customer Group Level go to Selling -> Customers -> Customer Group
+
+Go to the 'CREDIT LIMIT' field and enter the amount.
+If you leave CREDIT LIMIT as 0.00, it has no effect.
+
+
+To set credit limit at Company level go to Account -> Company
+
+Go to the 'ACCOUNT SETTINGS' section and enter the amount in the CREDIT LIMIT field.
+If you leave CREDIT LIMIT as 0.00, it has no effect.
+
+For 'CREDIT LIMIT' check functionality, Priority (High to Low) is as below
+1) Customer
+2) Customer Group
+3) Company
+
+
+
   
 #### Figure 2: Credit Controller
 

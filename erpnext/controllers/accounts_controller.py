@@ -15,8 +15,8 @@ from erpnext.exceptions import InvalidCurrency
 force_item_fields = ("item_group", "barcode", "brand", "stock_uom")
 
 class AccountsController(TransactionBase):
-	def __init__(self, arg1, arg2=None):
-		super(AccountsController, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(AccountsController, self).__init__(*args, **kwargs)
 
 	@property
 	def company_currency(self):
@@ -82,6 +82,9 @@ class AccountsController(TransactionBase):
 				if self.meta.get_field(fieldname) and not self.get(fieldname):
 					self.set(fieldname, today())
 					break
+
+		# set taxes table if missing from `taxes_and_charges`
+		self.set_taxes()
 
 	def calculate_taxes_and_totals(self):
 		from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
@@ -187,9 +190,6 @@ class AccountsController(TransactionBase):
 								if stock_qty != len(get_serial_nos(item.get('serial_no'))):
 									item.set(fieldname, value)
 
-							elif fieldname == "conversion_factor" and not item.get("conversion_factor"):
-								item.set(fieldname, value)
-
 					if ret.get("pricing_rule"):
 						# if user changed the discount percentage then set user's discount percentage ?
 						item.set("discount_percentage", ret.get("discount_percentage"))
@@ -262,9 +262,9 @@ class AccountsController(TransactionBase):
 		if not account_currency:
 			account_currency = get_account_currency(gl_dict.account)
 
-		if gl_dict.account and self.doctype not in ["Journal Entry", 
+		if gl_dict.account and self.doctype not in ["Journal Entry",
 			"Period Closing Voucher", "Payment Entry"]:
-			
+
 			self.validate_account_currency(gl_dict.account, account_currency)
 			set_balance_in_account_currency(gl_dict, account_currency, self.get("conversion_rate"), self.company_currency)
 

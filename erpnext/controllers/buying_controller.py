@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
-from frappe.utils import flt,cint, cstr
+from frappe.utils import flt,cint, cstr, getdate
 
 from erpnext.accounts.party import get_party_details
 from erpnext.stock.get_item_details import get_conversion_factor
@@ -61,7 +61,7 @@ class BuyingController(StockController):
 
 		# set contact and address details for supplier, if they are not mentioned
 		if getattr(self, "supplier", None):
-			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier", ignore_permissions=self.flags.ignore_permissions))
+			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier", ignore_permissions=self.flags.ignore_permissions, doctype=self.doctype, company=self.company))
 
 		self.set_missing_item_details(for_validate)
 
@@ -408,3 +408,16 @@ class BuyingController(StockController):
 					"actual_qty": -1*flt(d.consumed_qty),
 				}))
 
+	def validate_schedule_date(self):
+		if not self.schedule_date:
+			self.schedule_date = min([d.schedule_date for d in self.get("items")])
+
+		if self.schedule_date:
+			for d in self.get('items'):
+				if not d.schedule_date:
+					d.schedule_date = self.schedule_date
+
+				if d.schedule_date and getdate(d.schedule_date) < getdate(self.transaction_date):
+					frappe.throw(_("Expected Date cannot be before Transaction Date"))
+		else:
+			frappe.throw(_("Please enter Schedule Date"))

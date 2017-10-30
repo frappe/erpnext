@@ -17,6 +17,7 @@ from erpnext.controllers.item_variant import (get_variant, copy_attributes_to_va
 	make_variant_item_code, validate_item_variant_attributes, ItemVariantExistsError)
 
 class DuplicateReorderRows(frappe.ValidationError): pass
+class StockExistsForTemplate(frappe.ValidationError): pass
 
 class Item(WebsiteGenerator):
 	website = frappe._dict(
@@ -28,10 +29,14 @@ class Item(WebsiteGenerator):
 
 	def onload(self):
 		super(Item, self).onload()
+
 		self.set_onload('sle_exists', self.check_if_sle_exists())
 		if self.is_fixed_asset:
 			asset = frappe.db.get_all("Asset", filters={"item_code": self.name, "docstatus": 1}, limit=1)
 			self.set_onload("asset_exists", True if asset else False)
+
+		if frappe.db.get_value('Stock Ledger Entry', {'item_code': self.name}):
+			self.set_onload('stock_exists', True)
 
 	def autoname(self):
 		if frappe.db.get_default("item_naming_by")=="Naming Series":
@@ -52,7 +57,8 @@ class Item(WebsiteGenerator):
 		if not self.description:
 			self.description = self.item_name
 
-		self.publish_in_hub = 1
+		if self.is_sales_item and not self.is_item_from_hub:
+			self.publish_in_hub = 1
 
 	def after_insert(self):
 		'''set opening stock and item price'''
@@ -63,6 +69,10 @@ class Item(WebsiteGenerator):
 			self.set_opening_stock()
 
 	def validate(self):
+		self.before_update = None
+		if frappe.db.exists('Item', self.name):
+			self.before_update = frappe.get_doc('Item', self.name)
+
 		super(Item, self).validate()
 
 		if not self.item_name:
@@ -85,6 +95,7 @@ class Item(WebsiteGenerator):
 		self.synced_with_hub = 0
 
 		self.validate_has_variants()
+		self.validate_stock_exists_for_template_item()
 		self.validate_attributes()
 		self.validate_variant_attributes()
 		self.validate_website_image()
@@ -631,6 +642,12 @@ class Item(WebsiteGenerator):
 			if frappe.db.exists("Item", {"variant_of": self.name}):
 				frappe.throw(_("Item has variants."))
 
+	def validate_stock_exists_for_template_item(self):
+		if self.has_variants and \
+			frappe.db.get_value('Stock Ledger Entry', {'item_code': self.name}):
+			frappe.throw(_("As stock exists against an item {0}, you can not enable has variants property")
+				.format(self.name), StockExistsForTemplate)
+
 	def validate_uom(self):
 		if not self.get("__islocal"):
 			check_stock_uom_with_bin(self.name, self.stock_uom)
@@ -815,4 +832,3 @@ def check_stock_uom_with_bin(item, stock_uom):
 
 	if not matched:
 		frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.").format(item))
-

@@ -15,7 +15,7 @@ QUnit.test("test salary slip", function(assert) {
 					{ employee: employee_name}
 				]);
 			},
-			() => frappe.timeout(1),
+			() => frappe.timeout(3),
 			() => {
 			// To check if all the calculations are correctly done
 				if(ename === 'Test Employee 1')
@@ -43,7 +43,7 @@ QUnit.test("test salary slip", function(assert) {
 		() => salary_slip('Test Employee 1'),
 		() => frappe.timeout(6),
 		() => salary_slip('Test Employee 3'),
-		() => frappe.timeout(3),
+		() => frappe.timeout(5),
 		() => done()
 	]);
 });

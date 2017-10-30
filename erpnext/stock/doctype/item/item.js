@@ -63,7 +63,7 @@ frappe.ui.form.on("Item", {
 			frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 		if (frm.doc.variant_of) {
-			frm.set_intro(__('This Item is a Variant of {0} (Template).', 
+			frm.set_intro(__('This Item is a Variant of {0} (Template).',
 				[`<a href="#Form/Item/${frm.doc.variant_of}">${frm.doc.variant_of}</a>`]), true);
 		}
 
@@ -103,6 +103,11 @@ frappe.ui.form.on("Item", {
 				frappe.set_route("Form", "Item Variant Settings");
 			}, __("View"));
 		}
+
+		if(frm.doc.__onload && frm.doc.__onload.stock_exists) {
+			// Hide variants section if stock exists
+			frm.toggle_display("variants_section", 0);
+		}
 	},
 
 	validate: function(frm){
@@ -127,7 +132,7 @@ frappe.ui.form.on("Item", {
 		if(!frm.doc.description)
 			frm.set_value("description", frm.doc.item_code);
 	},
-	
+
 	is_stock_item: function(frm) {
 		if(!frm.doc.is_stock_item) {
 			frm.set_value("has_batch_no", 0);
@@ -135,7 +140,7 @@ frappe.ui.form.on("Item", {
 			frm.set_value("has_serial_no", 0);
 		}
 	},
-	
+
 	copy_from_item_group: function(frm) {
 		return frm.call({
 			doc: frm.doc,
@@ -249,15 +254,18 @@ $.extend(erpnext.item, {
 		if(frm.doc.__islocal)
 			return;
 
-		frappe.require('assets/js/item-dashboard.min.js', function() {
-			var section = frm.dashboard.add_section('<h5 style="margin-top: 0px;">\
-				<a href="#stock-balance">' + __("Stock Levels") + '</a></h5>');
-			erpnext.item.item_dashboard = new erpnext.stock.ItemDashboard({
-				parent: section,
-				item_code: frm.doc.name
+		// Show Stock Levels only if is_stock_item
+		if (frm.doc.is_stock_item) {
+			frappe.require('assets/js/item-dashboard.min.js', function() {
+				var section = frm.dashboard.add_section('<h5 style="margin-top: 0px;">\
+					<a href="#stock-balance">' + __("Stock Levels") + '</a></h5>');
+				erpnext.item.item_dashboard = new erpnext.stock.ItemDashboard({
+					parent: section,
+					item_code: frm.doc.name
+				});
+				erpnext.item.item_dashboard.refresh();
 			});
-			erpnext.item.item_dashboard.refresh();
-		});
+		}
 	},
 
 	edit_prices_button: function(frm) {

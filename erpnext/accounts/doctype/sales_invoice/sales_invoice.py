@@ -27,8 +27,8 @@ form_grid_templates = {
 }
 
 class SalesInvoice(SellingController):
-	def __init__(self, arg1, arg2=None):
-		super(SalesInvoice, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(SalesInvoice, self).__init__(*args, **kwargs)
 		self.status_updater = [{
 			'source_dt': 'Sales Invoice Item',
 			'target_field': 'billed_amt',
@@ -70,6 +70,7 @@ class SalesInvoice(SellingController):
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
 		self.add_remarks()
 		self.validate_write_off_account()
+		self.validate_duplicate_offline_pos_entry()
 		self.validate_account_for_change_amount()
 		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
@@ -461,6 +462,12 @@ class SalesInvoice(SellingController):
 
 		if flt(self.write_off_amount) and not self.write_off_account:
 			msgprint(_("Please enter Write Off Account"), raise_exception=1)
+
+	def validate_duplicate_offline_pos_entry(self):
+		if self.is_pos and self.offline_pos_name \
+			and frappe.db.get_value('Sales Invoice',
+			{'offline_pos_name': self.offline_pos_name, 'docstatus': 1}):
+			frappe.throw(_("Duplicate offline pos sales invoice {0}").format(self.offline_pos_name))
 
 	def validate_account_for_change_amount(self):
 		if flt(self.change_amount) and not self.account_for_change_amount:
