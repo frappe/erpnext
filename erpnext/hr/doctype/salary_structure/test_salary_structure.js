@@ -1,5 +1,5 @@
 QUnit.test("test Salary Structure", function(assert) {
-	assert.expect(6);
+	assert.expect(7);
 	let done = assert.async();
 	let employee_name1;
 
@@ -9,10 +9,12 @@ QUnit.test("test Salary Structure", function(assert) {
 				employee_name1 = r.name;
 			}
 		),
+		() => frappe.timeout(5),
 		() => frappe.db.get_value('Employee', {'employee_name': "Test Employee 3"}, 'name',
 			(r) => {
 			// Creating Salary Structure for employees);
 				return frappe.tests.make('Salary Structure', [
+					{ __newname: 'Test Salary Structure'},
 					{ company: 'For Testing'},
 					{ payroll_frequency: 'Monthly'},
 					{ employees: [
@@ -47,16 +49,14 @@ QUnit.test("test Salary Structure", function(assert) {
 				]);
 			}
 		),
-		() => frappe.timeout(18),
-		() => cur_dialog.set_value('value','Test Salary Structure'),
-		() => frappe.timeout(1),
-		() => frappe.click_button('Create'),
-		() => frappe.timeout(1),
+		() => frappe.timeout(15),
 		() => {
-		// To check if all the fields are correctly set
-			assert.ok(cur_frm.doc.employees[0].employee_name.includes('Test Employee 1') &&
-				cur_frm.doc.employees[1].employee_name.includes('Test Employee 3'),
-			'Employee names are correctly set');
+			// To check if all the fields are correctly set
+			assert.ok(cur_frm.doc.employees[0].employee_name=='Test Employee 1',
+				'Employee 1 name correctly set');
+
+			assert.ok(cur_frm.doc.employees[1].employee_name=='Test Employee 3',
+				'Employee 2 name correctly set');
 
 			assert.ok(cur_frm.doc.employees[0].base==25000,
 				'Base value for first employee is correctly set');

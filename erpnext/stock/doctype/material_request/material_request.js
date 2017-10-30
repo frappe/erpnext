@@ -17,6 +17,9 @@ frappe.ui.form.on('Material Request', {
 		// add item, if previous view was item
 		erpnext.utils.add_item(frm);
 
+		//set schedule_date
+		set_schedule_date(frm);
+
 		// formatter for material request item
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.ordered_qty) ? "green" : "orange" }),
@@ -38,12 +41,18 @@ frappe.ui.form.on("Material Request Item", {
 	},
 
 	item_code: function(frm, doctype, name) {
-		frm.script_manager.copy_from_first_row('items', frm.selected_doc,
-			'schedule_date');
+		set_schedule_date(frm);
 	},
 
 	schedule_date: function(frm, cdt, cdn) {
-		erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "schedule_date");
+		var row = locals[cdt][cdn];
+		if (row.schedule_date) {
+			if(!frm.doc.schedule_date) {
+				erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "schedule_date");
+			} else {
+				set_schedule_date(frm);
+			}
+		}
 	}
 });
 
@@ -227,6 +236,28 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 				}
 			}
 		});
+	},
+
+	validate: function() {
+		set_schedule_date(this.frm);
+	},
+
+	items_add: function(doc, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		if(doc.schedule_date) {
+			row.schedule_date = doc.schedule_date;
+			refresh_field("schedule_date", cdn, "items");
+		} else {
+			this.frm.script_manager.copy_from_first_row("items", row, ["schedule_date"]);
+		}
+	},
+
+	items_on_form_rendered: function() {
+		set_schedule_date(this.frm);
+	},
+
+	schedule_date: function() {
+		set_schedule_date(this.frm);
 	}
 });
 
@@ -246,3 +277,9 @@ cur_frm.cscript['Unstop Material Request'] = function(){
 		cur_frm.refresh();
 	});
 };
+
+function set_schedule_date(frm) {
+	if(frm.doc.schedule_date){
+		erpnext.utils.copy_value_in_all_row(frm.doc, frm.doc.doctype, frm.doc.name, "items", "schedule_date");
+	}
+}

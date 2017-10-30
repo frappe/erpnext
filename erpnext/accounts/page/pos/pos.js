@@ -84,6 +84,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.get_data_from_server(function () {
 			me.make_control();
 			me.create_new();
+			me.make();
 		});
 	},
 
@@ -113,6 +114,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		});
 
 		this.page.add_menu_item(__("Sync Offline Invoices"), function () {
+			me.freeze_screen = true;
 			me.sync_sales_invoice()
 		});
 
@@ -381,7 +383,6 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	},
 
 	setup: function () {
-		this.make();
 		this.set_primary_action();
 		this.party_field.$input.attr('disabled', false);
 		if(this.selected_row) {
@@ -1340,6 +1341,12 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		this.wrapper.find('input.discount-percentage').on("change", function () {
 			me.frm.doc.additional_discount_percentage = flt($(this).val(), precision("additional_discount_percentage"));
+
+			if(me.frm.doc.additional_discount_percentage && me.frm.doc.discount_amount) {
+				// Reset discount amount
+				me.frm.doc.discount_amount = 0;
+			}
+
 			var total = me.frm.doc.grand_total
 
 			if (me.frm.doc.apply_discount_on == 'Net Total') {
@@ -1347,15 +1354,15 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			}
 
 			me.frm.doc.discount_amount = flt(total * flt(me.frm.doc.additional_discount_percentage) / 100, precision("discount_amount"));
-			me.wrapper.find('input.discount-amount').val(me.frm.doc.discount_amount)
 			me.refresh();
+			me.wrapper.find('input.discount-amount').val(me.frm.doc.discount_amount)
 		});
 
 		this.wrapper.find('input.discount-amount').on("change", function () {
 			me.frm.doc.discount_amount = flt($(this).val(), precision("discount_amount"));
 			me.frm.doc.additional_discount_percentage = 0.0;
-			me.wrapper.find('input.discount-percentage').val(0);
 			me.refresh();
+			me.wrapper.find('input.discount-percentage').val(0);
 		});
 	},
 
@@ -1516,6 +1523,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 		this.wrapper.find(".net-total").text(format_currency(me.frm.doc.total, me.frm.doc.currency));
 		this.wrapper.find(".grand-total").text(format_currency(me.frm.doc.grand_total, me.frm.doc.currency));
+		this.wrapper.find('input.discount-percentage').val(this.frm.doc.additional_discount_percentage);
+		this.wrapper.find('input.discount-amount').val(this.frm.doc.discount_amount);
 	},
 
 	set_primary_action: function () {
@@ -1684,6 +1693,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	set_interval_for_si_sync: function () {
 		var me = this;
 		setInterval(function () {
+			me.freeze_screen = false;
 			me.sync_sales_invoice()
 		}, 60000)
 	},
@@ -1697,9 +1707,12 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			this.freeze = this.customer_doc.display
 		}
 
+		freeze_screen = this.freeze_screen || false;
+
 		if ((this.si_docs.length || this.email_queue_list || this.customers_list) && !this.freeze) {
 			frappe.call({
 				method: "erpnext.accounts.doctype.sales_invoice.pos.make_invoice",
+				freeze: freeze_screen,
 				args: {
 					doc_list: me.si_docs,
 					email_queue_list: me.email_queue_list,

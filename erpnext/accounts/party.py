@@ -68,16 +68,18 @@ def set_address_details(out, party, party_type, doctype=None, company=None):
 	billing_address_field = "customer_address" if party_type == "Lead" \
 		else party_type.lower() + "_address"
 	out[billing_address_field] = get_default_address(party_type, party.name)
-	out.update(get_fetch_values(doctype, billing_address_field, out[billing_address_field]))
+	if doctype:
+		out.update(get_fetch_values(doctype, billing_address_field, out[billing_address_field]))
 
 	# address display
 	out.address_display = get_address_display(out[billing_address_field])
 
 	# shipping address
 	if party_type in ["Customer", "Lead"]:
-		out.shipping_address_name = get_default_address(party_type, party.name, 'is_shipping_address')
+		out.shipping_address_name = get_party_shipping_address(party_type, party.name)
 		out.shipping_address = get_address_display(out["shipping_address_name"])
-		out.update(get_fetch_values(doctype, 'shipping_address_name', out.shipping_address_name))
+		if doctype:
+			out.update(get_fetch_values(doctype, 'shipping_address_name', out.shipping_address_name))
 
 	if doctype and doctype in ['Delivery Note', 'Sales Invoice']:
 		out.update(get_company_address(company))
@@ -320,10 +322,14 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
 	args = {
 		party_type.lower(): party,
-		"customer_group":	customer_group,
-		"supplier_type":	supplier_type,
 		"company":			company
 	}
+
+	if customer_group:
+		args['customer_group'] = customer_group
+
+	if supplier_type:
+		args['supplier_type'] = supplier_type
 
 	if billing_address or shipping_address:
 		args.update(get_party_details(party, party_type, {"billing_address": billing_address, \
@@ -412,3 +418,32 @@ def get_dashboard_info(party_type, party):
 		info["total_unpaid"] = -1 * info["total_unpaid"]
 
 	return info
+
+
+def get_party_shipping_address(doctype, name):
+	"""
+	Returns an Address name (best guess) for the given doctype and name for which `address_type == 'Shipping'` is true.
+	and/or `is_shipping_address = 1`.
+
+	It returns an empty string if there is no matching record.
+
+	:param doctype: Party Doctype
+	:param name: Party name
+	:return: String
+	"""
+	out = frappe.db.sql(
+		'SELECT dl.parent '
+		'from `tabDynamic Link` dl join `tabAddress` ta on dl.parent=ta.name '
+		'where '
+		'dl.link_doctype=%s '
+		'and dl.link_name=%s '
+		'and dl.parenttype="Address" '
+		'and '
+		'(ta.address_type="Shipping" or ta.is_shipping_address=1) '
+		'order by ta.is_shipping_address desc, ta.address_type desc limit 1',
+		(doctype, name)
+	)
+	if out:
+		return out[0][0]
+	else:
+		return ''

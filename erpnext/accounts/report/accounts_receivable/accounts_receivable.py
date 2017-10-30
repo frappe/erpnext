@@ -44,7 +44,7 @@ class ReceivablePayableReport(object):
 			})
 
 		columns += [_("Age (Days)") + ":Int:80"]
-		
+
 		self.ageing_col_idx_start = len(columns)
 
 		if not "range1" in self.filters:
@@ -53,7 +53,7 @@ class ReceivablePayableReport(object):
 			self.filters["range2"] = "60"
 		if not "range3" in self.filters:
 			self.filters["range3"] = "90"
-			
+
 		for label in ("0-{range1}".format(range1=self.filters["range1"]),
 			"{range1}-{range2}".format(range1=cint(self.filters["range1"])+ 1, range2=self.filters["range2"]),
 			"{range2}-{range3}".format(range2=cint(self.filters["range2"])+ 1, range3=self.filters["range3"]),
@@ -74,14 +74,14 @@ class ReceivablePayableReport(object):
 		})
 		if args.get("party_type") == "Customer":
 			columns += [
-				_("Territory") + ":Link/Territory:80", 
+				_("Territory") + ":Link/Territory:80",
 				_("Customer Group") + ":Link/Customer Group:120"
 			]
 		if args.get("party_type") == "Supplier":
 			columns += [_("Supplier Type") + ":Link/Supplier Type:80"]
-			
+
 		columns.append(_("Remarks") + "::200")
-		
+
 		return columns
 
 	def get_data(self, party_naming_by, args):
@@ -97,13 +97,13 @@ class ReceivablePayableReport(object):
 			self.filters["company"] = frappe.db.get_single_value('Global Defaults', 'default_company')
 
 		company_currency = frappe.db.get_value("Company", self.filters.get("company"), "default_currency")
-		
+
 		return_entries = self.get_return_entries(args.get("party_type"))
 
 		data = []
 		for gle in self.get_entries_till(self.filters.report_date, args.get("party_type")):
 			if self.is_receivable_or_payable(gle, dr_or_cr, future_vouchers):
-				outstanding_amount, credit_note_amount = self.get_outstanding_amount(gle, 
+				outstanding_amount, credit_note_amount = self.get_outstanding_amount(gle,
 					self.filters.report_date, dr_or_cr, return_entries, currency_precision)
 				if abs(outstanding_amount) > 0.1/10**currency_precision:
 					row = [gle.posting_date, gle.party]
@@ -179,15 +179,15 @@ class ReceivablePayableReport(object):
 			# entries adjusted with future vouchers
 			((gle.against_voucher_type, gle.against_voucher) in future_vouchers)
 		)
-		
+
 	def get_return_entries(self, party_type):
 		doctype = "Sales Invoice" if party_type=="Customer" else "Purchase Invoice"
-		return [d.name for d in frappe.get_all(doctype, filters={"is_return": 1, "docstatus": 1})]	
+		return [d.name for d in frappe.get_all(doctype, filters={"is_return": 1, "docstatus": 1})]
 
 	def get_outstanding_amount(self, gle, report_date, dr_or_cr, return_entries, currency_precision):
 		payment_amount, credit_note_amount = 0.0, 0.0
 		reverse_dr_or_cr = "credit" if dr_or_cr=="debit" else "debit"
-		
+
 		for e in self.get_gl_entries_for(gle.party, gle.party_type, gle.voucher_type, gle.voucher_no):
 			if getdate(e.posting_date) <= report_date and e.name!=gle.name:
 				amount = flt(e.get(reverse_dr_or_cr)) - flt(e.get(dr_or_cr))
@@ -195,11 +195,11 @@ class ReceivablePayableReport(object):
 					payment_amount += amount
 				else:
 					credit_note_amount += amount
-					
+
 		outstanding_amount = flt((flt(gle.get(dr_or_cr)) - flt(gle.get(reverse_dr_or_cr)) \
 			- payment_amount - credit_note_amount), currency_precision)
 		credit_note_amount = flt(credit_note_amount, currency_precision)
-		
+
 		return outstanding_amount, credit_note_amount
 
 	def get_party_name(self, party_type, party_name):
@@ -207,7 +207,7 @@ class ReceivablePayableReport(object):
 
 	def get_territory(self, party_name):
 		return self.get_party_map("Customer").get(party_name, {}).get("territory") or ""
-		
+
 	def get_customer_group(self, party_name):
 		return self.get_party_map("Customer").get(party_name, {}).get("customer_group") or ""
 
@@ -220,7 +220,7 @@ class ReceivablePayableReport(object):
 				select_fields = "name, customer_name, territory, customer_group"
 			elif party_type == "Supplier":
 				select_fields = "name, supplier_name, supplier_type"
-			
+
 			self.party_map = dict(((r.name, r) for r in frappe.db.sql("select {0} from `tab{1}`"
 				.format(select_fields, party_type), as_dict=True)))
 
@@ -250,8 +250,8 @@ class ReceivablePayableReport(object):
 			else:
 				select_fields = "sum(debit) as debit, sum(credit) as credit"
 
-			self.gl_entries = frappe.db.sql("""select name, posting_date, account, party_type, party, 
-				voucher_type, voucher_no, against_voucher_type, against_voucher, 
+			self.gl_entries = frappe.db.sql("""select name, posting_date, account, party_type, party,
+				voucher_type, voucher_no, against_voucher_type, against_voucher,
 				account_currency, remarks, {0}
 				from `tabGL Entry`
 				where docstatus < 2 and party_type=%s and (party is not null and party != '') {1}
@@ -277,13 +277,13 @@ class ReceivablePayableReport(object):
 
 		if party_type_field=="customer":
 			if self.filters.get("customer_group"):
-				lft, rgt = frappe.db.get_value("Customer Group", 
+				lft, rgt = frappe.db.get_value("Customer Group",
 					self.filters.get("customer_group"), ["lft", "rgt"])
-			
-				conditions.append("""party in (select name from tabCustomer 
-					where exists(select name from `tabCustomer Group` where lft >= {0} and rgt <= {1} 
+
+				conditions.append("""party in (select name from tabCustomer
+					where exists(select name from `tabCustomer Group` where lft >= {0} and rgt <= {1}
 						and name=tabCustomer.customer_group))""".format(lft, rgt))
-						
+
 			if self.filters.get("credit_days_based_on"):
 				conditions.append("party in (select name from tabCustomer where credit_days_based_on=%s)")
 				values.append(self.filters.get("credit_days_based_on"))
@@ -303,22 +303,22 @@ class ReceivablePayableReport(object):
 		return self.gl_entries_map.get(party, {})\
 			.get(against_voucher_type, {})\
 			.get(against_voucher, [])
-			
+
 	def get_chart_data(self, columns, data):
 		ageing_columns = columns[self.ageing_col_idx_start : self.ageing_col_idx_start+4]
-		
+
 		rows = []
 		for d in data:
 			rows.append(d[self.ageing_col_idx_start : self.ageing_col_idx_start+4])
 
 		if rows:
 			rows.insert(0, [[d.get("label")] for d in ageing_columns])
-		
+
 		return {
 			"data": {
-				'rows': rows
+				'labels': rows
 			},
-			"chart_type": 'pie'
+			"type": 'percentage'
 		}
 
 def execute(filters=None):

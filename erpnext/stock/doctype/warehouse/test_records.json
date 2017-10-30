@@ -15,13 +15,6 @@
  },
  {
   "company": "_Test Company",
-  "create_account_under": "Stock Assets - _TC",
-  "doctype": "Warehouse",
-  "warehouse_name": "_Test Warehouse",
-  "is_group": 0
- },
- {
-  "company": "_Test Company",
   "create_account_under": "Fixed Assets - _TC",
   "doctype": "Warehouse",
   "warehouse_name": "_Test Warehouse 1",

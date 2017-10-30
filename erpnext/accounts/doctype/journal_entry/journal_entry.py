@@ -12,8 +12,8 @@ from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amo
 from erpnext.hr.doctype.employee_loan.employee_loan import update_disbursement_status
 
 class JournalEntry(AccountsController):
-	def __init__(self, arg1, arg2=None):
-		super(JournalEntry, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(JournalEntry, self).__init__(*args, **kwargs)
 
 	def get_feed(self):
 		return self.voucher_type
@@ -54,7 +54,7 @@ class JournalEntry(AccountsController):
 	def update_advance_paid(self):
 		advance_paid = frappe._dict()
 		for d in self.get("accounts"):
-			if d.is_advance:
+			if d.is_advance == "Yes":
 				if d.reference_type in ("Sales Order", "Purchase Order"):
 					advance_paid.setdefault(d.reference_type, []).append(d.reference_name)
 
@@ -76,7 +76,7 @@ class JournalEntry(AccountsController):
 
 	def unlink_advance_entry_reference(self):
 		for d in self.get("accounts"):
-			if d.is_advance and d.reference_type in ("Sales Invoice", "Purchase Invoice"):
+			if d.is_advance == "Yes" and d.reference_type in ("Sales Invoice", "Purchase Invoice"):
 				doc = frappe.get_doc(d.reference_type, d.reference_name)
 				doc.delink_advance_entries(self.name)
 				d.reference_type = ''

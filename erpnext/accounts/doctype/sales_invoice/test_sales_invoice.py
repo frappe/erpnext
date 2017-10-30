@@ -3,8 +3,8 @@
 from __future__ import unicode_literals
 
 import frappe
-import unittest, copy
-from frappe.utils import nowdate, add_days, flt
+import unittest, copy, time
+from frappe.utils import nowdate, add_days, flt, cint
 from frappe.model.dynamic_links import get_dynamic_link_map
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unlink_payment_on_cancel_of_invoice
@@ -665,6 +665,47 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.pos_gl_entry(si, pos, 330)
 
+	def test_make_pos_invoice_in_draft(self):
+		from erpnext.accounts.doctype.sales_invoice.pos import make_invoice
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		set_perpetual_inventory()
+
+		allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		if allow_negative_stock:
+			frappe.db.set_value('Stock Settings', None, 'allow_negative_stock', 0)
+
+		make_pos_profile()
+		timestamp = cint(time.time())
+
+		item = make_item("_Test POS Item")
+		pos = copy.deepcopy(test_records[1])
+		pos['items'][0]['item_code'] = item.name
+		pos["is_pos"] = 1
+		pos["offline_pos_name"] = timestamp
+		pos["update_stock"] = 1
+		pos["payments"] = [{'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 300},
+							{'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 330}]
+
+		invoice_data = [{timestamp: pos}]
+		si = make_invoice(invoice_data).get('invoice')
+		self.assertEquals(si[0], timestamp)
+
+		sales_invoice = frappe.get_all('Sales Invoice', fields =["*"], filters = {'offline_pos_name': timestamp})
+		self.assertEquals(sales_invoice[0].docstatus, 0)
+
+		timestamp = cint(time.time())
+		pos["offline_pos_name"] = timestamp
+		invoice_data = [{timestamp: pos}]
+		si1 = make_invoice(invoice_data).get('invoice')
+		self.assertEquals(si1[0], timestamp)
+
+		sales_invoice1 = frappe.get_all('Sales Invoice', fields =["*"], filters = {'offline_pos_name': timestamp})
+		self.assertEquals(sales_invoice1[0].docstatus, 0)
+
+		if allow_negative_stock:
+			frappe.db.set_value('Stock Settings', None, 'allow_negative_stock', 1)
+
 	def pos_gl_entry(self, si, pos, cash_amount):
 		# check stock ledger entries
 		sle = frappe.db.sql("""select * from `tabStock Ledger Entry`
@@ -1092,6 +1133,7 @@ class TestSalesInvoice(unittest.TestCase):
 			import test_records as jv_test_records
 
 		jv = frappe.copy_doc(jv_test_records[0])
+		jv.accounts[0].is_advance = 'Yes'
 		jv.insert()
 		jv.submit()
 

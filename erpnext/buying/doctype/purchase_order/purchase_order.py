@@ -20,8 +20,8 @@ form_grid_templates = {
 }
 
 class PurchaseOrder(BuyingController):
-	def __init__(self, arg1, arg2=None):
-		super(PurchaseOrder, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(PurchaseOrder, self).__init__(*args, **kwargs)
 		self.status_updater = [{
 			'source_dt': 'Purchase Order Item',
 			'target_dt': 'Material Request Item',
@@ -41,6 +41,7 @@ class PurchaseOrder(BuyingController):
 		self.set_status()
 
 		self.validate_supplier()
+		self.validate_schedule_date()
 		validate_for_items(self)
 		self.check_for_closed_status()
 
@@ -116,14 +117,13 @@ class PurchaseOrder(BuyingController):
 					d.discount_percentage = last_purchase_details['discount_percentage']
 					d.base_rate = last_purchase_details['base_rate'] * (flt(d.conversion_factor) or 1.0)
 					d.price_list_rate = d.base_price_list_rate / conversion_rate
-					d.rate = d.base_rate / conversion_rate
+					d.last_purchase_rate = d.base_rate / conversion_rate
 				else:
-					msgprint(_("Last purchase rate not found"))
 
 					item_last_purchase_rate = frappe.db.get_value("Item", d.item_code, "last_purchase_rate")
 					if item_last_purchase_rate:
 						d.base_price_list_rate = d.base_rate = d.price_list_rate \
-							= d.rate = item_last_purchase_rate
+							= d.last_purchase_rate = item_last_purchase_rate
 
 	# Check for Closed status
 	def check_for_closed_status(self):

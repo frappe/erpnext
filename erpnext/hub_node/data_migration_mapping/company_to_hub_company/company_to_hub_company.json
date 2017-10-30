@@ -1,0 +1,45 @@
+{
+ "condition": "{'name': ('=', frappe.db.get_single_value('Hub Settings', 'company'))}", 
+ "creation": "2017-09-07 11:38:43.169065", 
+ "docstatus": 0, 
+ "doctype": "Data Migration Mapping", 
+ "fields": [
+  {
+   "is_child_table": 0, 
+   "local_fieldname": "name", 
+   "remote_fieldname": "company_name"
+  }, 
+  {
+   "is_child_table": 0, 
+   "local_fieldname": "country", 
+   "remote_fieldname": "country"
+  }, 
+  {
+   "is_child_table": 0, 
+   "local_fieldname": "\"city\"", 
+   "remote_fieldname": "seller_city"
+  }, 
+  {
+   "is_child_table": 0, 
+   "local_fieldname": "eval:frappe.local.site", 
+   "remote_fieldname": "site_name"
+  }, 
+  {
+   "is_child_table": 0, 
+   "local_fieldname": "eval:frappe.session.user", 
+   "remote_fieldname": "user"
+  }
+ ], 
+ "idx": 2, 
+ "local_doctype": "Company", 
+ "mapping_name": "Company to Hub Company", 
+ "mapping_type": "Push", 
+ "migration_id_field": "hub_sync_id", 
+ "modified": "2017-10-09 17:30:17.853929", 
+ "modified_by": "Administrator", 
+ "name": "Company to Hub Company", 
+ "owner": "Administrator", 
+ "page_length": 10, 
+ "remote_objectname": "Hub Company", 
+ "remote_primary_key": "name"
+}

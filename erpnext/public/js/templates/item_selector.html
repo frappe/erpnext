@@ -1,16 +1,37 @@
-<div class="row pos-item-area">
+<div class="app-listing item-list image-view-container item-selector">
 {% for (var i=0; i < data.length; i++) { var item = data[i]; %}
-<div class="col-xs-3 pos-item-wrapper">
-	<div class="pos-item" data-name="{{ item.name }}">
-		<div class="pos-item-image"
-			{% if(item.image) { %}style="background-image: url({{ item.image }});"{% }
-			else { %}style="background-color: {{ item.color }};"{% } %}>
-			{% if(!item.image) { %}{{ item.abbr }}{% } %}
+	{% if (i % 4 === 0) { %}<div class="image-view-row">{% } %}
+	<div class="image-view-item" data-name="{{ item.name }}">
+		<div class="image-view-header doclist-row">
+			<div class="list-value">
+				<a class="grey list-id" data-name="{{item.name}}"
+					title="{{ item.item_name || item.name}}">
+					{{item.item_name || item.name}}</a>
+			</div>
 		</div>
-		<div class="pos-item-text">
-			<h6 class="item-code ellipsis">{{ item.name }}</h6>
+		<div class="image-view-body">
+			<a  data-item-code="{{ item.name }}"
+				title="{{ item.item_name || item.name }}"
+			>
+				<div class="image-field"
+					style="
+					{% if (!item.image) { %}
+						background-color: #fafbfc;
+					{% } %}
+					border: 0px;"
+				>
+					{% if (!item.image) { %}
+					<span class="placeholder-text">
+						{%= frappe.get_abbr(item.item_name || item.name) %}
+					</span>
+					{% } %}
+					{% if (item.image) { %}
+					<img src="{{ item.image }}" alt="{{item.item_name || item.name}}">
+					{% } %}
+				</div>
+			</a>
 		</div>
 	</div>
-</div>
-{% } %}
+	{% if ((i % 4 === 3) || (i===data.length - 1)) { %}</div>{% } %}
+{% endfor %}
 </div>
