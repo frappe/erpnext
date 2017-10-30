@@ -47,9 +47,6 @@ class PayrollEntry(Document):
 					and t1.name = t2.employee
 			%s """% cond, {"sal_struct": sal_struct})
 			return emp_list
-		else:
-			frappe.msgprint(_("No active or default Salary Structure found for employee {0} for the given dates")
-				.format(self	.employee), title=_('Salary Structure Missing'))
 
 	def get_filter_condition(self):
 		self.check_mandatory()
@@ -107,14 +104,9 @@ class PayrollEntry(Document):
 					ss_dict = {}
 					ss_dict["Employee Name"] = ss.employee_name
 					ss_dict["Total Pay"] = fmt_money(ss.rounded_total,currency = frappe.defaults.get_global_default("currency"))
-					ss_dict["Salary Slip"] = self.format_as_links(ss.name)[0]
+					ss_dict["Salary Slip"] = format_as_links(ss.name)[0]
 					ss_list.append(ss_dict)
-		return self.create_log(ss_list)
-
-	def create_log(self, ss_list):
-		if not ss_list or len(ss_list) < 1:
-			frappe.throw(_("No employee for the above selected criteria OR salary slip already created"))
-		return
+		return create_log(ss_list)
 
 	def get_sal_slip_list(self, ss_status, as_dict=False):
 		"""
@@ -146,8 +138,8 @@ class PayrollEntry(Document):
 			ss_dict = {}
 			ss_dict["Employee Name"] = ss_obj.employee_name
 			ss_dict["Total Pay"] = fmt_money(ss_obj.net_pay,
-				currency = frappe.defaults.get_global_default("currency"))	
-			ss_dict["Salary Slip"] = self.format_as_links(ss_obj.name)[0]
+				currency = frappe.defaults.get_global_default("currency"))
+			ss_dict["Salary Slip"] = format_as_links(ss_obj.name)[0]
 
 			if ss_obj.net_pay<0:
 				not_submitted_ss.append(ss_dict)
@@ -162,21 +154,7 @@ class PayrollEntry(Document):
 			jv_name = self.make_accural_jv_entry()
 			frappe.msgprint(_("Salary Slip submitted from {0} to {1}").format(ss_obj.start_date, ss_obj.end_date))
 
-		return self.create_submit_log(submitted_ss, not_submitted_ss, jv_name)
-
-	def create_submit_log(self, submitted_ss, not_submitted_ss, jv_name):
-
-		if not submitted_ss and not not_submitted_ss:
-			frappe.msgprint("No salary slip found to submit for the above selected criteria OR salary slip already submitted")
-
-		if not_submitted_ss:
-			frappe.msgprint("Not submitted Salary Slip <br>\
-				Possible reasons: <br>\
-				1. Net pay is less than 0. <br>\
-				2. Company Email Address specified in employee master is not valid. <br>")
-		return
-	def format_as_links(self, salary_slip):
-		return ['<a href="#Form/Salary Slip/{0}">{0}</a>'.format(salary_slip)]
+		return create_submit_log(submitted_ss, not_submitted_ss, jv_name)
 
 	def get_total_salary_and_loan_amounts(self):
 		"""
@@ -229,7 +207,7 @@ class PayrollEntry(Document):
 			account = self.get_salary_component_account(s)
 			account_dict[account] = account_dict.get(account, 0) + a
 		return account_dict
-	
+
 	def get_default_payroll_payable_account(self):
 		payroll_payable_account = frappe.db.get_value("Company",
 			{"company_name": self.company}, "default_payroll_payable_account")
@@ -434,3 +412,21 @@ def get_month_details(year, month):
 		})
 	else:
 		frappe.throw(_("Fiscal Year {0} not found").format(year))
+
+def create_log(ss_list):
+	if not ss_list or len(ss_list) < 1:
+		frappe.throw(_("No employee for the above selected criteria OR salary slip already created"))
+
+def format_as_links(salary_slip):
+	return ['<a href="#Form/Salary Slip/{0}">{0}</a>'.format(salary_slip)]
+
+def create_submit_log(submitted_ss, not_submitted_ss, jv_name):
+
+	if not submitted_ss and not not_submitted_ss:
+		frappe.msgprint("No salary slip found to submit for the above selected criteria OR salary slip already submitted")
+
+	if not_submitted_ss:
+		frappe.msgprint("Not submitted Salary Slip <br>\
+			Possible reasons: <br>\
+			1. Net pay is less than 0. <br>\
+			2. Company Email Address specified in employee master is not valid. <br>")

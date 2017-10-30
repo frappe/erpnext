@@ -104,9 +104,9 @@ frappe.ui.form.on('Payroll Entry', {
 					frm.set_value('end_date', r.message.end_date);
 				}
 			}
-		})
+		});
 	},
-})
+});
 
 // Create salary slips
 
@@ -119,7 +119,7 @@ cur_frm.cscript.custom_before_submit = function (doc) {
 let submit_salary_slip = function (frm) {
 	var doc = frm.doc;
 	return $c('runserverobj', { 'method': 'submit_salary_slips', 'docs': doc });
-}
+};
 
 let make_bank_entry = function (frm) {
 	var doc = frm.doc;
@@ -136,4 +136,4 @@ let make_bank_entry = function (frm) {
 	} else {
 		frappe.msgprint(__("Company, From Date and To Date is mandatory"));
 	}
-}
+};
