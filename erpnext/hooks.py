@@ -125,6 +125,7 @@ website_route_rules = [
 	{"from_route": "/admissions", "to_route": "Student Admission"},
 	{"from_route": "/boms", "to_route": "BOM"},
 	{"from_route": "/timesheets", "to_route": "Timesheet"},
+	{"from_route": "/grant-application", "to_route": "Grant Application"},
 ]
 
 standard_portal_menu_items = [
@@ -144,7 +145,8 @@ standard_portal_menu_items = [
 	{"title": _("Patient Appointment"), "route": "/patient-appointments", "reference_doctype": "Patient Appointment", "role":"Patient"},
 	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role":"Student"},
 	{"title": _("Newsletter"), "route": "/newsletters", "reference_doctype": "Newsletter"},
-	{"title": _("Admission"), "route": "/admissions", "reference_doctype": "Student Admission"}
+	{"title": _("Admission"), "route": "/admissions", "reference_doctype": "Student Admission"},
+	{"title": _("Grant Application"), "route": "/grant-application", "reference_doctype": "Grant Application"}
 ]
 
 default_roles = [
