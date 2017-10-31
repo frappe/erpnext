@@ -5,13 +5,14 @@ from __future__ import unicode_literals
 import frappe, json
 
 from frappe.utils import getdate, date_diff, add_days, cstr
-from frappe import _
-
-from frappe.model.document import Document
+from frappe import _, throw
+from frappe.utils.nestedset import NestedSet, rebuild_tree
 
 class CircularReferenceError(frappe.ValidationError): pass
 
-class Task(Document):
+class Task(NestedSet):
+	nsm_parent_field = 'parent_task'
+
 	def get_feed(self):
 		return '{0}: {1}'.format(_(self.status), self.subject)
 
@@ -59,11 +60,16 @@ class Task(Document):
 				depends_on_tasks += d.task + ","
 		self.depends_on_tasks = depends_on_tasks
 
+	def update_nsm_model(self):
+		frappe.utils.nestedset.update_nsm(self)
+
 	def on_update(self):
+		self.update_nsm_model()
 		self.check_recursion()
 		self.reschedule_dependent_tasks()
 		self.update_project()
 		self.unassign_todo()
+		rebuild_tree("Task", "parent_task")
 
 	def unassign_todo(self):
 		if self.status == "Closed" or self.status == "Cancelled":
@@ -128,6 +134,17 @@ class Task(Document):
 		if project_user:
 			return True
 
+	def on_trash(self):
+		if check_if_child_exists(self.name):
+			throw(_("Child Task exists for this Task. You can not delete this Task."))
+
+		self.update_nsm_model()
+
+@frappe.whitelist()
+def check_if_child_exists(name):
+	return frappe.db.sql("""select name from `tabTask`
+		where parent_task = %s""", name)
+
 @frappe.whitelist()
 def get_events(start, end, filters=None):
 	"""Returns events for Gantt / Calendar view rendering.
@@ -177,4 +194,48 @@ def set_tasks_as_overdue():
 		and exp_end_date < CURDATE()
 		and `status` not in ('Closed', 'Cancelled')""")
 
+@frappe.whitelist()
+def get_children():
+	doctype = frappe.local.form_dict.get('doctype')
 
+	parent_field = 'parent_' + doctype.lower().replace(' ', '_')
+	parent = frappe.form_dict.get("parent") or ""
+
+	if parent == "task":
+		parent = ""
+
+	tasks = frappe.db.sql("""select name as value,
+		is_group as expandable
+		from `tab{doctype}`
+		where docstatus < 2
+		and ifnull(`{parent_field}`,'') = %s
+		order by name""".format(doctype=frappe.db.escape(doctype),
+		parent_field=frappe.db.escape(parent_field)), (parent), as_dict=1)
+
+	# return tasks
+	return tasks
+
+@frappe.whitelist()
+def add_node():
+    from frappe.desk.treeview import make_tree_args
+    args = frappe.form_dict
+    args.update({
+    	"name_field": "subject"
+    })
+    args = make_tree_args(**args)
+
+    if args.parent_task == 'task':
+        args.parent_task = None
+
+    frappe.get_doc(args).insert()
+
+@frappe.whitelist()
+def add_multiple_tasks(data, parent):
+    data = json.loads(data)['tasks']
+    tasks = data.split('\n')
+    new_doc = {'doctype': 'Task', 'parent_task': parent}
+
+    for d in tasks:
+        new_doc['subject'] = d
+        new_task = frappe.get_doc(new_doc)
+        new_task.insert()
