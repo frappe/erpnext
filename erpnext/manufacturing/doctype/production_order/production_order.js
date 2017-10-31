@@ -112,15 +112,6 @@ frappe.ui.form.on("Production Order", {
 		if (frm.doc.docstatus===1) {
 			frm.trigger('show_progress');
 		}
-
-		if(frm.doc.docstatus == 1 && frm.doc.status != 'Stopped'){
-			frm.add_custom_button(__('Make Timesheet'), function(){
-				frappe.model.open_mapped_doc({
-					method: "erpnext.manufacturing.doctype.production_order.production_order.make_new_timesheet",
-					frm: cur_frm
-				})
-			})
-		}
 	},
 	
 	show_progress: function(frm) {

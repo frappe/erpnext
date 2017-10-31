@@ -604,16 +604,6 @@ def get_default_warehouse():
 	return {"wip_warehouse": wip_warehouse, "fg_warehouse": fg_warehouse}
 
 @frappe.whitelist()
-def make_new_timesheet(source_name, target_doc=None):
-	po = frappe.get_doc('Production Order', source_name)
-	ts = po.make_time_logs(open_new=True)
-
-	if not ts or not ts.get('time_logs'):
-		frappe.throw(_("Already completed"))
-
-	return ts
-
-@frappe.whitelist()
 def stop_unstop(production_order, status):
 	""" Called from client side on Stop/Unstop event"""
 
