@@ -9,7 +9,8 @@ agriculture.TernaryPlot = class TernaryPlot {
 			this.init_snap();
 			this.init_config();
 			this.make_plot();
-			this.make_legends();
+			this.make_plot_marking();
+			this.make_legend();
 			this.mark_blip();
 		});
 	}
@@ -168,35 +169,60 @@ agriculture.TernaryPlot = class TernaryPlot {
 		}
 	}
 
-	make_legends() {
+	make_plot_marking() {
 		let { triangle_side: t, spacing: s, scaling_factor: p } = this.config;
 
 		let clay = this.paper.text(t * Snap.cos(60) / 2, s + t * Snap.cos(30) / 2, "Clay").attr({
-			fill: "black"
+			fill: frappe.ui.color.get('black')
 		});
 		clay.transform("r300");
 
 		let silt = this.paper.text(t, s + t * Snap.cos(30) / 2, "Silt").attr({
-			fill: "black"
+			fill: frappe.ui.color.get('black')
 		});
 		silt.transform("r60");
 
 		let sand = this.paper.text(35 + t * Snap.cos(60), 90 + t * Snap.cos(30), "Sand").attr({
-			fill: "black"
+			fill: frappe.ui.color.get('black')
 		});
 		sand.transform("r0");
 	}
 
+	make_legend() {
+		// let side = len(this.coords)/2;
+		let index = 1;
+		let offset = 0;
+		let exec_once = true;
+		for (let soil_type in this.coords) {
+			if (index > 6 && exec_once){
+				offset = 300;
+				index = 1;
+				exec_once = false;
+			}
+			let rect = this.paper.rect(0+offset, 0+index*20, 100, 19, 5, 5).attr({
+				fill: this.get_color(soil_type),
+				stroke: frappe.ui.color.get('black')
+			});
+			let text = this.paper.text(5+offset, 16+index*20, soil_type).attr({
+				fill: frappe.ui.color.get('black'),
+				'font-size': 12
+			});
+			index++;
+		}
+	}
+
 	mark_blip({clay, sand, silt} = this) {
-		let { triangle_side: t, spacing: s, scaling_factor: p } = this.config;
+		if (clay + sand + silt != 0){
+			let { triangle_side: t, spacing: s, scaling_factor: p } = this.config;
 
-		let x_blip = s + clay * p * Snap.cos(60) + silt * p;
-		let y_blip = s + silt * p * Snap.cos(30) + sand * p * Snap.sin(60);
-
-		this.paper.circle(x_blip, y_blip, 4).attr({
-			fill: frappe.ui.color.get("orange"),
-			stroke: frappe.ui.color.get("orange"),
-			strokeWidth: 2
-		});
+			let x_blip = s + clay * p * Snap.cos(60) + silt * p;
+			let y_blip = s + silt * p * Snap.cos(30) + sand * p * Snap.sin(60);
+			console.log(s, clay, p, silt, Snap.cos(30), sand);
+			this.paper.circle(x_blip, y_blip, 4).attr({
+				fill: frappe.ui.color.get("orange"),
+				stroke: frappe.ui.color.get("orange"),
+				strokeWidth: 2
+			});
+		}
 	}
 };
