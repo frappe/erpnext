@@ -477,9 +477,11 @@ def make_delivery_note(source_name, target_doc=None):
 		target.qty = flt(source.qty) - flt(source.delivered_qty)
 
 		item = frappe.db.get_value("Item", target.item_code, ["item_group", "selling_cost_center"], as_dict=1)
-		target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
-			or item.selling_cost_center \
-			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
+
+		if item:
+			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
+				or item.selling_cost_center \
+				or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
 
 	target_doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
