@@ -7,8 +7,12 @@ import frappe
 import unittest
 from erpnext.accounts.doctype.budget.budget import get_actual_expense, BudgetError
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from erpnext.projects.doctype.project.test_project import create_project
 
-class TestBudget(unittest.TestCase):		
+class TestBudget(unittest.TestCase):
+	def setUp(self):
+		create_project()
+
 	def test_monthly_budget_crossed_ignore(self):
 		set_total_expense_zero("2013-02-28", "Cost Center")
 
