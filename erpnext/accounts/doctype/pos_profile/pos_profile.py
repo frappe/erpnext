@@ -132,6 +132,7 @@ def get_pos_profiles_for_user(user=None):
 	return out
 
 @frappe.whitelist()
-def get_pos_profile(pos_profile_name):
+def get_pos_profile(pos_profile_name=None):
+	if not pos_profile_name: return
 	name = frappe.db.get_value('POS Profile', { 'pos_profile_name': pos_profile_name })
 	return frappe.get_doc('POS Profile', name)
