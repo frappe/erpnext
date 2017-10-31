@@ -284,17 +284,22 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 	setup_pos_profile() {
 		return new Promise((resolve) => {
+
+			const load_default = () => {
+				this.pos_profile = {
+					company: this.company,
+					currency: frappe.defaults.get_default('currency'),
+					selling_price_list: frappe.defaults.get_default('selling_price_list')
+				};
+				resolve();
+			}
+
 			const on_submit = ({ pos_profile }) => {
 				this.get_pos_profile_doc(pos_profile)
 					.then(doc => {
 						this.pos_profile = doc;
-
 						if (!this.pos_profile) {
-							this.pos_profile = {
-								company: this.company,
-								currency: frappe.defaults.get_default('currency'),
-								selling_price_list: frappe.defaults.get_default('selling_price_list')
-							};
+							load_default();
 						}
 						resolve();
 					});
@@ -304,9 +309,11 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				method: 'erpnext.accounts.doctype.pos_profile.pos_profile.get_pos_profiles_for_user'
 			}).then((r) => {
 				if (r && r.message) {
-					const pos_profiles = r.message;
+					const pos_profiles = r.message.filter(a => a);
 
-					if(pos_profiles.length === 1) {
+					if (pos_profiles.length === 0) {
+						load_default();
+					} else if(pos_profiles.length === 1) {
 						// load profile directly
 						on_submit({pos_profile: pos_profiles[0]});
 					} else {
