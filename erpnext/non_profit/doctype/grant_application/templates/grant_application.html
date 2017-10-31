@@ -1,0 +1,52 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<h1>{{ title }}</h1>
+{% if frappe.user == owner %}
+<p><a class='btn btn-primary btn-sm' href="/my-grant?name={{ name }}">Edit Grant</a></p>
+{% endif %}
+<br>
+<table class='table table-bordered small' style='max-width: 400px; margin-bottom: 0px;'>
+    <tr>
+        <td style='width: 38.2%'>Organization/Indvidual</td>
+        <td>{{ title }}</td>
+    </tr>
+    <tr>
+        <td>Grant Applicant Name</td>
+        <td>{{ grant_applicant_name }}</td>
+    </tr>
+    <tr>
+        <td>Date</td>
+        <td>{{ frappe.format_date(creation) }}</td>
+    </tr>
+    <tr>
+        <td>Status</td>
+        <td>{{ status }}</td>
+    </tr>
+    <tr>
+        <td>Email</td>
+        <td>{{ email }}</td>
+    </tr>
+</table>
+<h3>Please outline your current situation and why you are applying for a grant?</h3>
+<p>{{ grant_description }}</p>
+<h3>Please Describe the purpose of the grant and how it will benfit your organization?</h3>
+<p>{{ grant_purpose }}</p>
+<h3>Amount Requested Details</h3>
+<p>{{ amount }}</p>
+<h3>Have you Recevied grant from us before?</h3>
+<p>{{ grant_past_record }}</p>
+<h3>Contact</h3>
+{% if frappe.user != 'Guest' %}
+<table class='table table-bordered small' style='max-width: 400px; margin-bottom: 0px;'>
+    <tr>
+        <td style='width: 38.2%'>Email</td>
+        <td>{{ email }}</td>
+    </tr>
+</table>
+{% else %}
+<p><a href="/login">You must register and login to view contact details</a></p>
+{% endif %}
+<p><br><a href="/my-grant?new=1" class='btn btn-primary'>Post a New Grant</a></p>
+
+{% endblock %}
