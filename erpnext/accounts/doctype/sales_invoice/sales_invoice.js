@@ -153,6 +153,26 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				})
 			}, __("Get items from"));
 	},
+	
+	quotation_btn: function() {
+		var me = this;
+		this.$quotation_btn = this.frm.add_custom_button(__('Quotation'),
+			function() {
+				erpnext.utils.map_current_doc({
+					method: "erpnext.selling.doctype.quotation.quotation.make_quotation",
+					source_doctype: "Quotation",
+					target: me.frm,
+					setters: {
+						customer: me.frm.doc.customer || undefined,
+					},
+					get_query_filters: {
+						docstatus: 1,
+						status: ["!=", "Lost"],
+						company: me.frm.doc.company
+					}
+				})
+			}, __("Get items from"));
+	},
 
 	delivery_note_btn: function() {
 		var me = this;
