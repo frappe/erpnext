@@ -131,12 +131,12 @@ cur_frm.cscript.custom_hours = function(doc, cdt, cdn) {
 //             }
 //         });
 // };
-frappe.ui.form.on('Supplier Quotation Item', {
-    //  overtime_details_add: function(frm) {
-    //    // adding a row ... or on btn add row
-    // },
-    quotations_add: function(frm) {
-      alert("dgfg");
-        // removing a row ... or on btn delete 
-    }
-});
+// frappe.ui.form.on('Supplier Quotation Item', {
+//     //  overtime_details_add: function(frm) {
+//     //    // adding a row ... or on btn add row
+//     // },
+//     quotations_add: function(frm) {
+//       alert("dgfg");
+//         // removing a row ... or on btn delete 
+//     }
+// });

@@ -11,6 +11,7 @@ class QuotationOpening(Document):
 	def validate(self):
 		self.validate_supplier_quotation()
 		self.validate_sq_duplicate()
+		self.get_sqs_for_rfq()
 		# sqs = get_sqs_for_rfq(self.request_for_quotation)
 		# if sqs: 
 		material = frappe.get_doc('Supplier Quotation', self.supplier_quotation)

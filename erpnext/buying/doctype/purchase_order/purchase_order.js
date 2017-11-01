@@ -70,7 +70,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
                 cur_frm.page.set_inner_btn_group_as_primary(__("Status"));
             }
         } else if (doc.docstatus === 0) {
-            cur_frm.cscript.add_from_mappers();
+            // cur_frm.cscript.add_from_mappers();
         }
 
         if (doc.docstatus == 1 && in_list(["Closed", "Delivered"], doc.status)) {

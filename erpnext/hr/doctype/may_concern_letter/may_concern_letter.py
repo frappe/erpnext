@@ -64,7 +64,7 @@ class MayConcernLetter(Document):
 
 
 	def get_salary(self):
-		if self.salary_selection=='Total Salary':
+		if self.salary_selection=='Total Salary' or self.salary_selection=='Basic Salary'  :
 			doc = frappe.new_doc("Salary Slip")
 			doc.salary_slip_based_on_timesheet="0"
 
@@ -79,27 +79,41 @@ class MayConcernLetter(Document):
 			doc.insert()
 
 
-			grosspay =doc.gross_pay
-			#result =frappe.db.sql("select gross_pay from `tabSalary Slip` where employee='{0}' and docstatus=1 order by creation desc limit 1".format(self.employee))
-			result=grosspay
+			result =doc.gross_pay
+			
+			for earning in doc.earnings:
+				if earning.salary_component =='Basic':
+					self.basic = str(earning.amount)
+				if earning.salary_component =='Housing':
+					self.housing = str(earning.amount)
+				if earning.salary_component =='Transportation':
+					self.transportation = str(earning.amount)
+				if earning.salary_component =='Communication':
+					self.communication = str(earning.amount)
+
+			doc.delete()
+
+					
+
 			if result:
 			    return result
 			else:
 			    frappe.msgprint("لا يوجد قسيمة راتب لهذا الموظف")
 			    self.salary_selection='No salary'
 			    return '0'
-		
-		elif self.salary_selection=='Basic Salary':
-			result= frappe.get_list('Salary Slip', filters={'employee': self.employee})
-			if result:
-				doc = frappe.get_doc('Salary Slip',result[0])
-				for earning in doc.earnings:
-					if earning.salary_component =='Basic':
-						return str(earning.amount)
-			else:
-			    frappe.msgprint("لا يوجد قسيمة راتب لهذا الموظف")
-			    self.salary_selection='No salary'
-			    return '0'
+
+
+		# elif self.salary_selection=='Basic Salary':
+		# 	result= frappe.get_list('Salary Slip', filters={'employee': self.employee})
+		# 	if result:
+		# 		doc = frappe.get_doc('Salary Slip',result[0])
+		# 		for earning in doc.earnings:
+		# 			if earning.salary_component =='Basic':
+		# 				return str(earning.amount)
+		# 	else:
+		# 	    frappe.msgprint("لا يوجد قسيمة راتب لهذا الموظف")
+		# 	    self.salary_selection='No salary'
+		# 	    return '0'
 
 				
 

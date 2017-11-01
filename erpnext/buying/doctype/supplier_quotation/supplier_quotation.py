@@ -27,7 +27,10 @@ class SupplierQuotation(BuyingController):
 		self.validate_common()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
-
+		rfq = frappe.get_value("Supplier Quotation Item", filters = {"parent": self.name}, fieldname = "request_for_quotation")
+		if rfq:
+			mr = frappe.get_value("Request for Quotation", filters = {"name": rfq}, fieldname = "material_request")
+			self.material_request = mr
 
 	# def after_insert(self):
 	# 	for item in self.get("items"):

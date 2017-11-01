@@ -123,22 +123,22 @@ frappe.ui.form.on("Request for Quotation Supplier",{
 erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.extend({
 	refresh: function() {
 		this._super();
-		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(__('Material Request'),
-				function() {
-					erpnext.utils.map_current_doc({
-						method: "erpnext.stock.doctype.material_request.material_request.make_request_for_quotation",
-						source_doctype: "Material Request",
-						get_query_filters: {
-							material_request_type: "Purchase",
-							docstatus: 1,
-							status: ["!=", "Stopped"],
-							per_ordered: ["<", 99.99],
-							company: cur_frm.doc.company
-						}
-					})
-				}, __("Get items from"));
-		}
+		// if (this.frm.doc.docstatus===0) {
+		// 	cur_frm.add_custom_button(__('Material Request'),
+		// 		function() {
+		// 			erpnext.utils.map_current_doc({
+		// 				method: "erpnext.stock.doctype.material_request.material_request.make_request_for_quotation",
+		// 				source_doctype: "Material Request",
+		// 				get_query_filters: {
+		// 					material_request_type: "Purchase",
+		// 					docstatus: 1,
+		// 					status: ["!=", "Stopped"],
+		// 					per_ordered: ["<", 99.99],
+		// 					company: cur_frm.doc.company
+		// 				}
+		// 			})
+		// 		}, __("Get items from"));
+		// }
 	},
 
 	calculate_taxes_and_totals: function() {
@@ -153,3 +153,13 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new erpnext.buying.RequestforQuotationController({frm: cur_frm}));
+
+cur_frm.cscript.custom_qty = cur_frm.cscript.custom_suggested_price_per_unit = function(doc, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	frappe.model.set_value(d.doctype, d.name, "suggested_total_price", parseFloat(d.suggested_price_per_unit)*parseFloat(d.qty));
+	var val = 0
+    $.each((doc.items), function(i, d) {
+        val += parseFloat(d.suggested_total_price);
+    });
+    cur_frm.set_value("suggested_grand_total", val);
+}

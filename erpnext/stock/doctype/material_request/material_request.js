@@ -23,6 +23,8 @@ frappe.ui.form.on('Material Request', {
     },
     purchase_workflow: function(frm) {
         // frm.set_value("material_requester", undefined);
+        frm.clear_table("items");
+        refresh_many(['items']);
         frm.set_value("project", undefined);
         frm.toggle_enable("project", frm.doc.purchase_workflow == "Project");
         frm.toggle_reqd("project", frm.doc.purchase_workflow == "Project");
@@ -51,19 +53,21 @@ frappe.ui.form.on('Material Request', {
 
     },
     onload: function(frm) {
-        frappe.call({
-            method: "frappe.client.get_value",
-            args: {
-                doctype: "Employee",
-                fieldname: "name",
-                filters: { "user_id": user }
-            },
-            callback: function(r, rt) {
-                if (r.message.name) {
-                    cur_frm.set_value("material_requester", r.message.name);
-                }
-            }
-        });
+    	if(cur_frm.doc.__islocal){
+	        frappe.call({
+	            method: "frappe.client.get_value",
+	            args: {
+	                doctype: "Employee",
+	                fieldname: "name",
+	                filters: { "user_id": user }
+	            },
+	            callback: function(r, rt) {
+	                if (r.message.name) {
+	                    cur_frm.set_value("material_requester", r.message.name);
+	                }
+	            }
+	        });
+    	}
         frm.fields_dict['project'].get_query = function() {
             if (!frm.doc.material_requester) {
                 frappe.throw(__("Please select a requester"));
@@ -133,6 +137,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
             cur_frm.enable_save();
             cur_frm.fields_dict["material_requester"].df.read_only = 1;
             cur_frm.fields_dict["state"].df.read_only = 1;
+            cur_frm.fields_dict["suggested_grand_total"].df.read_only = 1;
         }
 
 
@@ -346,6 +351,15 @@ cur_frm.cscript['Unstop Material Request'] = function() {
         cur_frm.refresh();
     });
 };
+cur_frm.cscript.custom_qty = cur_frm.cscript.custom_suggested_price_per_unit = function(doc, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	frappe.model.set_value(d.doctype, d.name, "suggested_total_price", parseFloat(d.suggested_price_per_unit)*parseFloat(d.qty));
+	var val = 0
+    $.each((doc.items), function(i, d) {
+        val += parseFloat(d.suggested_total_price);
+    });
+    cur_frm.set_value("suggested_grand_total", val);
+}
 
 // frappe.ui.form.on("Material Request", "validate", function (frm) {
 //     if (user_roles.indexOf("Director") != -1 && frm.doc.workflow_state == "Pending") {

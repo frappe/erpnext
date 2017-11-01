@@ -30,7 +30,6 @@ frappe.ui.form.on('Quotation Opening', {
                 "flt": 1
             },
             callback: function(r) {
-            	console.log(r.message);
                 if (!r.message) {
 
                     cur_frm.toggle_enable("supplier_quotation", false)
