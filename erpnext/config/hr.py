@@ -357,12 +357,12 @@ def get_data():
 					"name": "Employee Information",
 					"doctype": "Employee"
 				},
-				# {
-				# 	"type": "report",
-				# 	"is_query_report": True,
-				# 	"name": "Monthly Salary Register",
-				# 	"doctype": "Salary Slip"
-				# },
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Salary Output Report",
+					"doctype": "Salary Slip"
+				},
 				{
 					"type": "report",
 					"is_query_report": True,
