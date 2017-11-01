@@ -173,6 +173,13 @@ def get_basic_details(args, item):
 		else:
 			args.uom = item.stock_uom
 
+	batch_no = ''
+	try:
+		if item.has_batch_no:
+			batch_no = get_batch_no(item.item_code, warehouse, args.qty or 1.0)
+	except frappe.ValidationError as e:
+		pass
+
 	out = frappe._dict({
 		"item_code": item.name,
 		"item_name": item.item_name,
@@ -184,7 +191,7 @@ def get_basic_details(args, item):
 		"cost_center": get_default_cost_center(args, item),
 		'has_serial_no': item.has_serial_no,
 		'has_batch_no': item.has_batch_no,
-		"batch_no": None,
+		"batch_no": batch_no,
 		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in
 			item.get("taxes")))),
 		"uom": args.uom,
