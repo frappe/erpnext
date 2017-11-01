@@ -65,7 +65,7 @@ class LeaveApplication(Document):
 	
 
 	def validate_leave_submission_dates(self):
-		if u'HR User' not in frappe.get_roles(frappe.session.user) or u'HR Manager' not in frappe.get_roles(frappe.session.user) or u'HR Specialist' not in frappe.get_roles(frappe.session.user):
+		if u'HR User' not in frappe.get_roles(frappe.session.user):
 			if self.leave_type == "Annual Leave - اجازة اعتيادية":
 				if getdate(self.from_date) <=  getdate(nowdate()):
 					frappe.throw(_("The submission date must be before from date"))
