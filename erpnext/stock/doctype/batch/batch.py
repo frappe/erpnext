@@ -5,7 +5,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import flt, cint
+
 
 class UnableToSelectBatchError(frappe.ValidationError): pass
 
@@ -130,5 +131,33 @@ def get_batch_no(item_code, warehouse, qty, throw=False):
 	if not batch_no:
 		frappe.msgprint(_('Please select a Batch for Item {0}. Unable to find a single batch that fulfills this requirement').format(frappe.bold(item_code)))
 		if throw: raise UnableToSelectBatchError
+
+	return batch_no
+
+
+def get_batch_no_fefo(item_code, warehouse, qty=1):
+	"""
+	Get batch number using First Expiring First Out method.
+	:param item_code: `item_code` of Item Document
+	:param warehouse: name of Warehouse to check
+	:param qty: quantity of Items
+	:return: String represent batch number of batch with sufficient quantity else an empty String
+	"""
+
+	batch_no = ""
+	batches = frappe.db.sql(
+		'select batch_id, sum(actual_qty) as qty from `tabBatch` join `tabStock Ledger Entry` '
+		'on `tabBatch`.batch_id = `tabStock Ledger Entry`.batch_no '
+		'where `tabStock Ledger Entry`.item_code = %s and  `tabStock Ledger Entry`.warehouse = %s '
+		'group by batch_id '
+		'order by `tabBatch`.expiry_date DESC, `tabBatch`.creation ASC',
+		(item_code, warehouse),
+		as_dict=True
+	)
+
+	for batch in batches:
+		if cint(qty) <= cint(batch.qty):
+			batch_no = batch.batch_id
+			break
 
 	return batch_no
