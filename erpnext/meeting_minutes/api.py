@@ -25,23 +25,25 @@ def send_invitation_emails(meeting):
 	else:
 		frappe.msgprint(_("Meeting Status must be 'Planned'"))
 
-@frappe.whitelist()
-def get_meetings(start, end):
-	if not frappe.has_permission("Meeting", "read"):
-		raise frappe.PermissionError
+# @frappe.whitelist()
+# def get_meetings(start, end):
+# 	for x in xrange(1,10):
+# 		print("test 2")
+# 	if not frappe.has_permission("Meeting", "read"):
+# 		raise frappe.PermissionError
 
-	return frappe.db.sql("""select
-		timestamp(`date`, from_time) as start,
-		timestamp(`date`, to_time) as end,
-		name,
-		title,
-		status,
-		0 as all_day
-	from `tabMeeting`
-	where `date` between %(start)s and %(end)s""", {
-		"start": start,
-		"end": end
-	}, as_dict=True)
+# 	return frappe.db.sql("""select
+# 		timestamp(`date`, from_time) as start,
+# 		timestamp(`date`, to_time) as end,
+# 		name,
+# 		title,
+# 		status,
+# 		0 as all_day
+# 	from `tabMeeting`
+# 	where `date` between %(start)s and %(end)s""", {
+# 		"start": start,
+# 		"end": end
+# 	}, as_dict=True)
 
 def make_orientation_meeting(doc, method):
 	"""Create an orientation meeting when a new User is added"""

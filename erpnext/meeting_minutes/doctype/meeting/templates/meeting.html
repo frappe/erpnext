@@ -2,6 +2,8 @@
 
 
 {% block content %}
+    <div><h1>{{ title }}</h1></div>
+    <hr>
     <ul class="list-unstyled">
         <li>
             <label>Date:</label> {{ doc.get_formatted("date") }}
@@ -15,16 +17,6 @@
     </ul>
 
     <hr>
-    <h2>Agenda</h2>
-    <ol>
-        {% for agenda in doc.agenda %}
-        <li>
-            {{ agenda.description }}
-        </li>
-        {% endfor %}
-    </ol>
-
-    <hr>
     <h2>Attendees</h2>
     <ol>
         {% for attendee in doc.attendees %}
@@ -34,7 +26,17 @@
         {% endfor %}
     </ol>
 
-    <hr>
+    <h2>Agenda</h2>
+    <ol>
+        {% for agenda in doc.agenda %}
+        <li>
+            {{ agenda.description }}
+        </li>
+        {% endfor %}
+    </ol>
+
+
+
     <h2>Minutes</h2>
     <ol>
         {% for minute in doc.minutes %}
@@ -43,5 +45,4 @@
         </li>
         {% endfor %}
     </ol>
-
 {% endblock %}

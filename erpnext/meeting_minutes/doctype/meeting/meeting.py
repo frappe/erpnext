@@ -10,14 +10,12 @@ from frappe.website.website_generator import WebsiteGenerator
 
 class Meeting(WebsiteGenerator):
 	_website = frappe._dict(
-		template = "meeting/templates/meeting.html",
 		condition_field = "published",
-		page_title_field = "title",
 	)
 
 	def validate(self):
 		if not self.route:
-			self.route = 'meetings/' + self.scrub(self.title)
+			self.route = 'meeting/' + self.scrub(self.title)
 		self.validate_attendees()
 
 	def on_update(self):
@@ -73,17 +71,28 @@ class Meeting(WebsiteGenerator):
 			todo.delete()
 
 	def get_context(self, context):
-		context.parents = [dict(label='All Meetings', route='/meeting_row', title='meetings')]
-		context.planned_meetings = get_meetings("Planned")
+		context.no_cache = True
+		context.parents = [dict(label='View All Meetings',
+			route='meeting', title='View All Meeting')]
 
-		# show only 20 past meetings
-		context.past_meetings = get_meetings("Completed", limit_page_length=20)
+@frappe.whitelist()
+def get_meetings(status, **kwargs):
+	return frappe.get_all("Meeting",
+		fields=["name", "title", "date", "from_time", "to_time", "route"],
+		filters={"status": status, "published": 1},
+		order_by="date desc", **kwargs)
 
-	def get_meetings(status, **kwargs):
-		return frappe.get_all("Meeting",
-			fields=["name", "title", "date", "from_time", "to_time", "route"],
-			filters={"status": status, "show_in_website": 1},
-			order_by="date desc", **kwargs)
+
+def get_list_context(context):
+	context.allow_guest = True
+	context.no_cache = True
+	context.no_breadcrumbs = True
+	context.order_by = 'creation desc'
+	context.planned_meetings = get_meetings("Planned")
+
+	# show only 20 past meetings
+	context.past_meetings = get_meetings("Completed", limit_page_length=20)
+
 
 
 

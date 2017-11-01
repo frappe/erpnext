@@ -1,9 +1,8 @@
 {% macro render_meetings(meetings) %}
     {% if meetings %}
-    {{ meetings }}
     <ul class="list-unstyled meetings-list">
         {% for meeting in meetings %}
-        <a href="/meetings/{{ meeting.page_name }}">
+        <a href="{{ meeting.route }}">
             <li>
                 {{ meeting.title }}<br>
                 <span class="text-muted">{{ frappe.format_date(meeting.date) }}: {{ meeting.from_time }} to {{ meeting.to_time }}</span>
@@ -18,6 +17,7 @@
 
     {% endif %}
 {% endmacro %}
+
 
 <h2>Planned Meetings</h2>
 
