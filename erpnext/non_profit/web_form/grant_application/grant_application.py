@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
 
-import frappe
-
 def get_context(context):
-	# do your magic here
-	pass
+	context.no_cache = True
+	context.parents = [dict(label='View All ',
+		route='grant-application', title='View All')]
+
+

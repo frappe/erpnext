@@ -13,7 +13,7 @@ class GrantApplication(WebsiteGenerator):
 	)
 
 	def validate(self):
-		if not self.route:
+		if not self.route:		#pylint: disable=E0203
 			self.route = 'grant-application/' + self.scrub(self.name)
 
 	def onload(self):
@@ -21,16 +21,9 @@ class GrantApplication(WebsiteGenerator):
 		load_address_and_contact(self)
 
 
-	def get_context(self, context):
-		context.no_cache = True
-		context.parents = [dict(label='View All ',
-			route='grant-application', title='View All')]
-
-
-
 def get_list_context(context):
 	context.allow_guest = True
 	context.no_cache = True
 	context.no_breadcrumbs = True
 	context.order_by = 'creation desc'
-	context.introduction ='<div>Grant Application List</div><br><a class="btn btn-primary" href="/my-jobs?new=1">Apply for new Grant Application</a>'
+	context.introduction ='<div>Grant Application List</div><br><a class="btn btn-primary" href="/my-grant?new=1">Apply for new Grant Application</a>'
