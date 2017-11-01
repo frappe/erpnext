@@ -98,6 +98,18 @@ frappe.ui.form.on('Salary Detail', {
 	}
 })
 
+frappe.ui.form.on('Salary Slip Timesheet', {
+	time_sheet: function(frm, dt, dn) {
+		frappe.call({
+			method:"set_time_sheet",
+			doc: frm.doc,
+			callback: function(r, rt) {
+				console.log('hey', r)
+			}
+		});
+	}
+});
+
 // Get leave details
 //---------------------------------------------------------------------
 cur_frm.cscript.start_date = function(doc, dt, dn){

@@ -21,6 +21,7 @@ class SalarySlip(TransactionBase):
 		self.status = self.get_status()
 		self.validate_dates()
 		self.check_existing()
+		# self.pull_sal_struct()
 		if not self.salary_slip_based_on_timesheet:
 			self.get_date_details()
 
@@ -148,7 +149,7 @@ class SalarySlip(TransactionBase):
 			self.set("timesheets", [])
 			timesheets = frappe.db.sql(""" select * from `tabTimesheet` where employee = %(employee)s and start_date BETWEEN %(start_date)s AND %(end_date)s and (status = 'Submitted' or
 				status = 'Billed')""", {'employee': self.employee, 'start_date': self.start_date, 'end_date': self.end_date}, as_dict=1)
-
+			frappe.errprint(timesheets)
 			for data in timesheets:
 				self.append('timesheets', {
 					'time_sheet': data.name,
