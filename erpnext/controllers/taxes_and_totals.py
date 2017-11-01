@@ -55,7 +55,7 @@ class calculate_taxes_and_totals(object):
 			for item in self.doc.get("items"):
 				self.doc.round_floats_in(item)
 
-				if item.discount_percentage == 100:
+				if (item.doctype in ["Quotation"] and item.sub_item) or item.discount_percentage == 100:
 					item.rate = 0.0
 				elif not item.rate:
 					item.rate = flt(item.price_list_rate *
