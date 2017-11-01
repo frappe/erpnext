@@ -216,7 +216,7 @@ def get_basic_details(args, item):
 
 	batch_no = ''
 	try:
-		if item.has_batch_no:
+		if item.has_batch_no and args.get('doctype') in ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']:
 			batch_no = get_batch_no(item.item_code, warehouse, args.qty or 1.0)
 	except frappe.ValidationError:
 		pass
