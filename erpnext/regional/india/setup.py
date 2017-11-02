@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe, os, json
-from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe.permissions import add_permission
 from erpnext.regional.india import states
 
@@ -148,7 +148,11 @@ def make_custom_fields():
 		'Purchase Invoice Item': [hsn_sac_field]
 	}
 
-	create_custom_fields(custom_fields)
+	for dt, data in custom_fields.iteritems():
+		for df in data:
+			create_custom_field(dt, df)
+
+	# create_custom_fields(custom_fields)
 
 def make_fixtures():
 	docs = [
