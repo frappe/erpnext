@@ -566,17 +566,26 @@ def get_default_bank_cash_account(company, account_type=None, mode_of_payment=No
 		account = get_bank_cash_account(mode_of_payment, company).get("account")
 
 	if not account:
+		'''
+			Set the default account first. If the user hasn't set any default account then, he doesn't
+			want us to set any random account. In this case set the account only if there is single
+			account (of that type), otherwise return empty dict.
+		'''
 		if account_type=="Bank":
 			account = frappe.db.get_value("Company", company, "default_bank_account")
 			if not account:
-				account = frappe.db.get_value("Account",
-					{"company": company, "account_type": "Bank", "is_group": 0})
+				account_list = frappe.get_all("Account", filters = {"company": company,
+					"account_type": "Bank", "is_group": 0})
+				if len(account_list) == 1:
+					account = account_list[0].name
 
 		elif account_type=="Cash":
 			account = frappe.db.get_value("Company", company, "default_cash_account")
 			if not account:
-				account = frappe.db.get_value("Account",
-					{"company": company, "account_type": "Cash", "is_group": 0})
+				account_list = frappe.get_all("Account", filters = {"company": company,
+					"account_type": "Cash", "is_group": 0})
+				if len(account_list) == 1:
+					account = account_list[0].name
 
 	if account:
 		account_details = frappe.db.get_value("Account", account,

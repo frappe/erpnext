@@ -17,6 +17,14 @@ frappe.ui.form.on("Production Order", {
 			}
 		});
 		
+		frm.set_query("source_warehouse", function() {
+			return {
+				filters: {
+					'company': frm.doc.company,
+				}
+			}
+		});
+		
 		frm.set_query("source_warehouse", "required_items", function() {
 			return {
 				filters: {

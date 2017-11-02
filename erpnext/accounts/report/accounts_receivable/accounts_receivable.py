@@ -309,14 +309,16 @@ class ReceivablePayableReport(object):
 
 		rows = []
 		for d in data:
-			rows.append(d[self.ageing_col_idx_start : self.ageing_col_idx_start+4])
-
-		if rows:
-			rows.insert(0, [[d.get("label")] for d in ageing_columns])
+			rows.append(
+				{
+					'values': d[self.ageing_col_idx_start : self.ageing_col_idx_start+4]
+				}
+			)
 
 		return {
 			"data": {
-				'labels': rows
+				'labels': [d.get("label") for d in ageing_columns],
+				'datasets': rows
 			},
 			"type": 'percentage'
 		}

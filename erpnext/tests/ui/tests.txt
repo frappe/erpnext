@@ -133,3 +133,4 @@ erpnext/restaurant/doctype/restaurant/test_restaurant.js
 erpnext/restaurant/doctype/restaurant_table/test_restaurant_table.js
 erpnext/restaurant/doctype/restaurant_menu/test_restaurant_menu.js
 erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_entry.js
+erpnext/projects/doctype/task/tests/test_task_tree.js
