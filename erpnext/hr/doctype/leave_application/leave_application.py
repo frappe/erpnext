@@ -1214,6 +1214,15 @@ def hooked_leave_allocation_builder():
 	# lts = frappe.get_list("Leave Type", fields = ["name"])
 	# for lt in lts:
 	# 	print lt.name
+def update_la_from_date():
+	new_emps = frappe.db.sql("""SELECT `tabLeave Allocation`.name, `tabEmployee`.date_of_joining,
+		`tabLeave Allocation`.employee FROM `tabLeave Allocation` INNER JOIN `tabEmployee` ON 
+		`tabLeave Allocation`.employee = 
+		`tabEmployee`.name where DATEDIFF('2017-01-01',`tabEmployee`.date_of_joining) < 0 
+		and `tabLeave Allocation`.leave_type = 'Annual Leave - اجازة اعتيادية' """, as_dict = True)
+	for new_emp in new_emps:
+		frappe.db.set_value("Leave Allocation", new_emp.name, "from_date", new_emp.date_of_joining)
+		print new_emp.date_of_joining
 
 def create_return_from_leave_statement_after_leave():
 
