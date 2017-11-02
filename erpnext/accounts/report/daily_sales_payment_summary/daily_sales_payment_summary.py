@@ -25,7 +25,6 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 	#Cost Center & Warehouse Map
 	invoice_cc_wh_map = get_invoice_cc_wh_map(invoice_list)
 	customers = list(set([inv.customer for inv in invoice_list]))
-	customer_map = get_customer_details(customers)
 	company_currency = frappe.db.get_value("Company", filters.get("company"), "default_currency")
 	mode_of_payments = get_mode_of_payments([inv.name for inv in invoice_list])
 
@@ -209,15 +208,6 @@ def get_invoice_cc_wh_map(invoice_list):
 				"warehouse", []).append(d.warehouse)
 
 	return invoice_cc_wh_map
-
-def get_customer_details(customers):
-	customer_map = {}
-	for cust in frappe.db.sql("""select name from `tabCustomer`
-		where name in (%s)""" % ", ".join(["%s"]*len(customers)), tuple(customers), as_dict=1):
-			customer_map.setdefault(cust.name, cust)
-
-	return customer_map
-
 
 def get_mode_of_payments(invoice_list):
 	mode_of_payments = {}
