@@ -1,0 +1,60 @@
+<div class="col-md-12" style="background-color:#fafbfc; border:1px solid #d1d8dd;">
+  <a href="#Form/Patient/{{data.name}}" class="btn btn-xs btn-default pull-right"
+   style="margin-top:5px">Edit</a>
+  <div align="left" class="col-md-12 text-muted">
+  {% if data.sex || data.blood_group || data.occupation || data.email || data.moblie || data.dob %}
+    <div class="col-md-6" style="padding-bottom:20px;">
+      {% if data.sex %} <br> {{ __("Gender") }}:   {{ data.sex }} {% endif %}
+      {% if data.dob %} <br> {{ __("Age") }}:   {{ data.dob }} {% endif %}
+      {% if data.blood_group %} <br> {{ __("Blood group") }}:   {{ data.blood_group }} {% endif %}
+      {% if data.occupation %} <br> {{ __("Occupation") }}:   {{ data.occupation }} {% endif %}
+      {% if data.email %} <br> {{ __("Email") }}:   {{ data.email }} {% endif %}
+      {% if data.mobile %} <br> {{ __("Mobile") }}:   {{ data.mobile }} {% endif %}
+      <br>
+  {% endif %}
+    </div>
+  {% if data.vitals %}
+    <div class="col-md-6" style="padding-bottom:20px;"><b>{{ __("Vitals") }}</b>
+      {% if data.vitals.temperature %} <br> {{ __("Temperature") }}:   {{ data.vitals.temperature }} {% endif %}
+      {% if data.vitals.pulse %} <br> {{ __("Pulse") }}:   {{ data.vitals.pulse }} {% endif %}
+      {% if data.vitals.respiratory_rate %} <br> {{ __("Respiratory Rate") }}:   {{ data.vitals.respiratory_rate }} {% endif %}
+      {% if data.vitals.bp %} <br> {{ __("Blood Preassure") }}:   {{ data.vitals.bp }} {% endif %}
+      <br>{{ __("Recorded on")}}: {{ frappe.datetime.str_to_user(data.vitals.signs_date) }}
+      <br>
+    </div>
+  {% endif %}
+  {% if data.allergies || data.medication || data.medical_history || data.surgical_history %}
+    <div class="col-md-6" style="padding-bottom:20px;"><b>{{ __("Allergies, Medical and Surgical History") }}</b>
+      {% if data.allergies %} <br> {{ __("Allergies") }}:   {{ data.allergies }} {% endif %}
+      {% if data.medication %} <br> {{ __("Medication") }}:   {{ data.medication }} {% endif %}
+      {% if data.medical_history %} <br> {{ __("Medical History") }}:   {{ data.medical_history }} {% endif %}
+      {% if data.surgical_history %} <br> {{ __("Surgical History") }}:   {{ data.surgical_history }} {% endif %}
+      <br>
+    </div>
+  {% endif %}
+  {% if data.occupation || data.marital_status %}
+    <div class="col-md-6" style="padding-bottom:20px;"><b>{{ __("Personal and Social History") }}</b>
+      {% if data.occupation %} <br> {{ __("Occupation") }}:   {{ data.occupation }} {% endif %}
+      {% if data.marital_status %} <br> {{ __("Marital Status") }}:   {{ data.marital_status }} {% endif %}
+      <br>
+    </div>
+  {% endif %}
+  {% if data.tobacco_past_use || data.tobacco_current_use || data.alcohol_past_use || data.alcohol_current_use ||
+    data.surrounding_factors || data.other_risk_factors %}
+    <div class="col-md-6" style="padding-bottom:20px;"><b>{{ __("Risk Factors") }}</b>
+      {% if data.tobacco_past_use %} <br> {{ __("Tobacco Past Use") }}:   {{ data.tobacco_past_use }} {% endif %}
+      {% if data.tobacco_current_use %} <br> {{ __("Tobacco Current Use") }}:   {{ data.tobacco_current_use }} {% endif %}
+      {% if data.alcohol_past_use %} <br> {{ __("Alcohol Past Use") }}:   {{ data.alcohol_past_use }} {% endif %}
+      {% if data.alcohol_current_use %} <br> {{ __("Alcohol Current Use") }}:   {{ data.alcohol_current_use }} {% endif %}
+      {% if data.surrounding_factors %} <br> {{ __("Occupational Hazards and Environmental Factors") }}:   {{ data.surrounding_factors }} {% endif %}
+      {% if data.other_risk_factors %} <br> {{ __("Other Risk Factors") }}:   {{ data.other_risk_factors }} {% endif %}
+      <br>
+    </div>
+  {% endif %}
+  {% if data.patient_details %}
+    <div class="col-md-6"><b>{{ __("More Information") }}</b>
+      <br>{{ data.patient_details }}
+    </div>
+  {% endif %}
+</div>
+</div>

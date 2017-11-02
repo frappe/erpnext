@@ -4,9 +4,10 @@ frappe.pages['medical_record'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
 		title: 'Medical Record',
+		single_column: true
 	});
 
-	frappe.breadcrumbs.add("Medical");
+	frappe.breadcrumbs.add("Healthcare");
 
 	page.main.html(frappe.render_template("patient_select", {}));
 	var patient = frappe.ui.form.make_control({
@@ -18,6 +19,7 @@ frappe.pages['medical_record'].on_page_load = function(wrapper) {
 			change: function(){
 				page.main.find(".frappe-list").html("");
 				draw_page(patient.get_value(), me);
+				patient.refresh();
 			}
 		},
 		only_input: true,
@@ -28,7 +30,6 @@ frappe.pages['medical_record'].on_page_load = function(wrapper) {
 	this.page.main.on("click", ".medical_record-message", function() {
 		var	doctype = $(this).attr("data-doctype"),
 			docname = $(this).attr("data-docname");
-
 		if (doctype && docname) {
 			frappe.route_options = {
 				scroll_to: { "doctype": doctype, "name": docname }
@@ -37,18 +38,10 @@ frappe.pages['medical_record'].on_page_load = function(wrapper) {
 		}
 	});
 
-	this.page.sidebar.on("click", ".edit-details", function() {
-		patient = patient.get_value();
-		if (patient) {
-			frappe.set_route(["Form", "Patient", patient]);
-		}
-	});
-
 };
 
 frappe.pages['medical_record'].refresh = function() {
 	var me = this;
-
 	if(frappe.route_options) {
 		if(frappe.route_options.patient){
 			me.page.main.find(".frappe-list").html("");
@@ -67,50 +60,20 @@ var show_patient_info = function(patient, me){
 		},
 		callback: function (r) {
 			var data = r.message;
-			var details = "";
-			if(data.email) details += "<br><b>Email :</b> " + data.email;
-			if(data.mobile) details += "<br><b>Mobile :</b> " + data.mobile;
-			if(data.occupation) details += "<br><b>Occupation :</b> " + data.occupation;
-			if(data.blood_group) details += "<br><b>Blood group : </b> " + data.blood_group;
-			if(data.allergies) details +=  "<br><br><b>Allergies : </b> "+  data.allergies;
-			if(data.medication) details +=  "<br><b>Medication : </b> "+  data.medication;
-			if(data.alcohol_current_use) details +=  "<br><br><b>Alcohol use : </b> "+  data.alcohol_current_use;
-			if(data.alcohol_past_use) details +=  "<br><b>Alcohol past use : </b> "+  data.alcohol_past_use;
-			if(data.tobacco_current_use) details +=  "<br><b>Tobacco use : </b> "+  data.tobacco_current_use;
-			if(data.tobacco_past_use) details +=  "<br><b>Tobacco past use : </b> "+  data.tobacco_past_use;
-			if(data.medical_history) details +=  "<br><br><b>Medical history : </b> "+  data.medical_history;
-			if(data.surgical_history) details +=  "<br><b>Surgical history : </b> "+  data.surgical_history;
-			if(data.surrounding_factors) details +=  "<br><br><b>Occupational hazards : </b> "+  data.surrounding_factors;
-			if(data.other_risk_factors) details += "<br><b>Other risk factors : </b> " + data.other_risk_factors;
-			if(data.patient_details) details += "<br><br><b>More info : </b> " + data.patient_details;
-
-			if(details){
-				details = "<div style='padding-left:10px; font-size:13px;' align='center'></br><b class='text-muted'>Patient Details</b>" + details + "</div>";
-			}
-
-			var vitals = "";
-			if(data.temperature) vitals += "<br><b>Temperature :</b> " + data.temperature;
-			if(data.pulse) vitals += "<br><b>Pulse :</b> " + data.pulse;
-			if(data.respiratory_rate) vitals += "<br><b>Respiratory Rate :</b> " + data.respiratory_rate;
-			if(data.bp) vitals += "<br><b>BP :</b> " + data.bp;
-			if(data.bmi) vitals += "<br><b>BMI :</b> " + data.bmi;
-			if(data.height) vitals += "<br><b>Height :</b> " + data.height;
-			if(data.weight) vitals += "<br><b>Weight :</b> " + data.weight;
-			if(data.signs_date) vitals += "<br><b>Date :</b> " + data.signs_date;
-
-			if(vitals){
-				vitals = "<div style='padding-left:10px; font-size:13px;' align='center'></br><b class='text-muted'>Vital Signs</b>" + vitals + "<br></div>";
-				details = vitals + details;
-			}
-			if(details) details += "<div align='center'><br><a class='btn btn-default btn-sm edit-details'>Edit Details</a></b> </div>";
-
-			me.page.sidebar.addClass("col-sm-3");
-			me.page.sidebar.html(details);
-			me.page.wrapper.find(".layout-main-section-wrapper").addClass("col-sm-9");
+			details = frappe.render_template("patient_details", {"data": data});
+			me.page.wrapper.find(".patient-details").html(details);
+			me.page.wrapper.find(".section-patient-details").removeClass("hide")
+			me.page.wrapper.find(".patient-details").removeClass("hide");
+			return
 		}
 	});
 };
 var draw_page = function(patient, me){
+	if(!patient){
+		me.page.wrapper.find(".section-patient-details").addClass("hide");
+		me.page.wrapper.find(".patient-details").addClass("hide");
+		return
+	}
 	frappe.model.with_doctype("Patient Medical Record", function() {
 		me.page.list = new frappe.ui.BaseList({
 			hide_refresh: true,
@@ -126,7 +89,6 @@ var draw_page = function(patient, me){
 					new frappe.medical_record.Feed(row, value);
 				});
 			},
-			show_filters: true,
 			doctype: "Patient Medical Record",
 		});
 		show_patient_info(patient, me);
