@@ -57,7 +57,7 @@ class Item(WebsiteGenerator):
 		if not self.description:
 			self.description = self.item_name
 
-		if self.is_sales_item and not self.is_item_from_hub:
+		if self.is_sales_item and not self.get('is_item_from_hub'):
 			self.publish_in_hub = 1
 
 	def after_insert(self):
