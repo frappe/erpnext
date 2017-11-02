@@ -84,11 +84,14 @@ class PackingSlip(Document):
 			* No. of Cases of this packing slip
 		"""
 
-		# also pick custom fields from delivery note
 		rows = [d.item_code for d in self.get("items")]
 
-		custom_fields = ', '.join(['dni.`{0}`'.format(d.fieldname) for d in \
-			frappe.get_meta("Delivery Note Item").get_custom_fields()])
+		# also pick custom fields from delivery note
+		exclude_fieldtypes = ["Column Break", "Section Break"]
+
+		custom_fields = ', '.join(['dni.`{0}`'.format(d.fieldname) for d in
+							 frappe.get_meta("Delivery Note Item").get_custom_fields()
+							 if d.fieldtype not in exclude_fieldtypes])
 
 		if custom_fields:
 			custom_fields = ', ' + custom_fields
