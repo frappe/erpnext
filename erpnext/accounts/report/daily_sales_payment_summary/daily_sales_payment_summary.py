@@ -35,7 +35,6 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 		cost_center = list(set(invoice_cc_wh_map.get(inv.name, {}).get("cost_center", [])))
 		warehouse = list(set(invoice_cc_wh_map.get(inv.name, {}).get("warehouse", [])))
 
-		customer_details = customer_map.get(inv.customer, {})
 		row = [
 			inv.name, inv.posting_date, inv.customer, inv.customer_name
 		]

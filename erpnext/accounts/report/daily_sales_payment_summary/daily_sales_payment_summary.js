@@ -59,4 +59,4 @@ frappe.query_reports["Daily Sales Payment Summary"] = {
 			"fieldtype": "Check"
 		}
 	]
-}
+};
