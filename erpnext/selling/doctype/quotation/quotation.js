@@ -207,7 +207,7 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 		cur_frm.email_doc(frappe.boot.notification_settings.quotation_message);
 }
 
-frappe.ui.form.on("Quotation Item", "on_sub_item", function(frm, cdt, cdn) {
+frappe.ui.form.on("Quotation Item", "sub_item", function(frm, cdt, cdn) {
     "use strict";
     var item = locals[cdt][cdn];
 
@@ -217,6 +217,7 @@ frappe.ui.form.on("Quotation Item", "on_sub_item", function(frm, cdt, cdn) {
         item.discount_percentage = 100;
         item.margin_type = "";
         item.margin_rate_or_amount = 0.0;
+	item.rate = 0.0;
     }
 
     if(!item.sub_item) {
