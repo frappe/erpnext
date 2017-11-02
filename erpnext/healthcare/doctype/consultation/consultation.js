@@ -148,11 +148,11 @@ var show_details = function(data){
 	var age = null;
 	if(data.dob){
 		age = calculate_age(data.dob);
-		data.dob = age
+		data.dob = age;
 	}
-	details = frappe.render_template("patient_details", {"data": data});
+	let details = frappe.render_template("patient_details", {"data": data});
 	cur_frm.fields_dict.patient_details_html.$wrapper.html(details);
-	return
+	return;
 };
 
 

@@ -59,12 +59,12 @@ var show_patient_info = function(patient, me){
 			patient: patient
 		},
 		callback: function (r) {
-			var data = r.message;
-			details = frappe.render_template("patient_details", {"data": data});
+			let data = r.message;
+			let details = frappe.render_template("patient_details", {"data": data});
 			me.page.wrapper.find(".patient-details").html(details);
-			me.page.wrapper.find(".section-patient-details").removeClass("hide")
+			me.page.wrapper.find(".section-patient-details").removeClass("hide");
 			me.page.wrapper.find(".patient-details").removeClass("hide");
-			return
+			return;
 		}
 	});
 };
@@ -72,7 +72,7 @@ var draw_page = function(patient, me){
 	if(!patient){
 		me.page.wrapper.find(".section-patient-details").addClass("hide");
 		me.page.wrapper.find(".patient-details").addClass("hide");
-		return
+		return;
 	}
 	frappe.model.with_doctype("Patient Medical Record", function() {
 		me.page.list = new frappe.ui.BaseList({
