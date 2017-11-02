@@ -63,6 +63,7 @@ frappe.ui.form.on("Salary Slip", {
 		var salary_detail_fields = ['formula', 'abbr', 'statistical_component']
 		cur_frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields,false);
 		cur_frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields,false);
+		total_w_hours(frm)
 	},	
 
 	salary_slip_based_on_timesheet: function(frm) {
@@ -100,13 +101,12 @@ frappe.ui.form.on('Salary Detail', {
 
 frappe.ui.form.on('Salary Slip Timesheet', {
 	time_sheet: function(frm, dt, dn) {
-		frappe.call({
-			method:"set_time_sheet",
-			doc: frm.doc,
-			callback: function(r, rt) {
-				console.log('hey', r)
-			}
-		});
+		total_w_hours(frm)
+		calculate_all(frm.doc)
+	},
+	timesheets_remove: function(frm, dt, dn) {
+		total_w_hours(frm)
+		calculate_all(frm.doc)
 	}
 });
 
@@ -221,4 +221,13 @@ cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {
 	return{
 		query: "erpnext.controllers.queries.employee_query"
 	}
+}
+
+let total_w_hours = function(frm){
+	var total = 0;
+	ts = frm.doc.timesheets
+	for (var i = 0; i < ts.length; i++) {
+		total += ts[i].working_hours
+	}
+	frm.set_value('total_working_hours', total);
 }

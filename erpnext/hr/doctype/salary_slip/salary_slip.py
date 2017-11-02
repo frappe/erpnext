@@ -149,7 +149,6 @@ class SalarySlip(TransactionBase):
 			self.set("timesheets", [])
 			timesheets = frappe.db.sql(""" select * from `tabTimesheet` where employee = %(employee)s and start_date BETWEEN %(start_date)s AND %(end_date)s and (status = 'Submitted' or
 				status = 'Billed')""", {'employee': self.employee, 'start_date': self.start_date, 'end_date': self.end_date}, as_dict=1)
-			frappe.errprint(timesheets)
 			for data in timesheets:
 				self.append('timesheets', {
 					'time_sheet': data.name,
@@ -465,3 +464,4 @@ def unlink_ref_doc_from_salary_slip(ref_no):
 		for ss in linked_ss:
 			ss_doc = frappe.get_doc("Salary Slip", ss)
 			frappe.db.set_value("Salary Slip", ss_doc.name, "journal_entry", "")
+
