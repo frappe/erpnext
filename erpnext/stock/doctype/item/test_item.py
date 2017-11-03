@@ -70,7 +70,7 @@ class TestItem(unittest.TestCase):
 			"base_rate": 0.0,
 			"amount": 0.0,
 			"base_amount": 0.0,
-			"batch_no": None,
+			"batch_no": '',
 			"item_tax_rate": '{}',
 			"uom": "_Test UOM",
 			"conversion_factor": 1.0,
