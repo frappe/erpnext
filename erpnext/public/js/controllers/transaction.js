@@ -642,6 +642,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	qty: function(doc, cdt, cdn) {
 		this.conversion_factor(doc, cdt, cdn, true);
 		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
+		this.set_batch_number(cdt, cdn);
 	},
 
     /* Determine appropriate batch number and set it in the form.
