@@ -40,7 +40,7 @@ def setup_complete(args=None):
 
 	frappe.local.message_log = []
 	domain_settings = frappe.get_single('Domain Settings')
-	domain_settings.set_active_domains([args.get('domain')])
+	domain_settings.set_active_domains([_(args.get('domain'))])
 
 	frappe.db.commit()
 	login_as_first_user(args)

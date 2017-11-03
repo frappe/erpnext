@@ -13,9 +13,12 @@ class StudentApplicant(Document):
 		from frappe.model.naming import set_name_by_naming_series
 		if self.student_admission:
 			if self.program:
+				# set the naming series from the student admission if provided.
 				student_admission = get_student_admission_data(self.student_admission, self.program)
 				if student_admission:
 					naming_series = student_admission.get("applicant_naming_series")
+				else:
+					naming_series = None
 			else:
 				frappe.throw(_("Select the program first"))
 
@@ -40,15 +43,16 @@ class StudentApplicant(Document):
 
 	def validation_from_student_admission(self):
 		student_admission = get_student_admission_data(self.student_admission, self.program)
-		if student_admission:
-			if ((
-					student_admission.minimum_age
-					and getdate(student_admission.minimum_age) > getdate(self.date_of_birth)
-				) or (
-					student_admission.maximum_age
-					and getdate(student_admission.maximum_age) < getdate(self.date_of_birth)
-				)):
-					frappe.throw(_("Not eligible for the admission in this program as per DOB"))
+
+		# different validation for minimum and maximum age so that either min/max can also work independently.
+		if student_admission and student_admission.minimum_age and \
+			getdate(student_admission.minimum_age) < getdate(self.date_of_birth):
+				frappe.throw(_("Not eligible for the admission in this program as per DOB"))
+
+		if student_admission and student_admission.maximum_age and \
+			getdate(student_admission.maximum_age) > getdate(self.date_of_birth):
+				frappe.throw(_("Not eligible for the admission in this program as per DOB"))
+
 
 	def on_payment_authorized(self, *args, **kwargs):
 		self.db_set('paid', 1)
