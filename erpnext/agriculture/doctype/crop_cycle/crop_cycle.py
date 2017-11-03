@@ -7,6 +7,4 @@ import frappe
 from frappe.model.document import Document
 
 class CropCycle(Document):
-	def autoname(self):
-		if self.name == None:
-			self.name = '{crop} {start_date} {end_date}'.format(crop=self.crop, start_date=self.start_date, end_date=self.end_date)
+	pass
