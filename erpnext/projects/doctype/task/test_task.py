@@ -9,9 +9,9 @@ from erpnext.projects.doctype.task.task import CircularReferenceError
 
 class TestTask(unittest.TestCase):
 	def test_circular_reference(self):
-		task1 = create_task("_Test Task 1", "2015-01-01", "2015-01-10")
-		task2 = create_task("_Test Task 2", "2015-01-11", "2015-01-15", task1.name)
-		task3 = create_task("_Test Task 3", "2015-01-11", "2015-01-15", task2.name)
+		task1 = create_task("_Test Task 1", nowdate(), add_days(nowdate(), 10))
+		task2 = create_task("_Test Task 2", add_days(nowdate(), 11), add_days(nowdate(), 15), task1.name)
+		task3 = create_task("_Test Task 3", add_days(nowdate(), 11), add_days(nowdate(), 15), task2.name)
 
 		task1.reload()
 		task1.append("depends_on", {
@@ -23,7 +23,7 @@ class TestTask(unittest.TestCase):
 		task1.set("depends_on", [])
 		task1.save()
 
-		task4 = create_task("_Test Task 4", "2015-01-01", "2015-01-15", task1.name)
+		task4 = create_task("_Test Task 4", nowdate(), add_days(nowdate(), 15), task1.name)
 
 		task3.append("depends_on", {
 			"task": task4.name
@@ -31,13 +31,15 @@ class TestTask(unittest.TestCase):
 
 	def test_reschedule_dependent_task(self):
 		task1 = create_task("_Test Task 1", nowdate(), add_days(nowdate(), 10))
+
 		task2 = create_task("_Test Task 2", add_days(nowdate(), 11), add_days(nowdate(), 15), task1.name)
 		task2.get("depends_on")[0].project = "_Test Project"
 		task2.save()
+
 		task3 = create_task("_Test Task 3", add_days(nowdate(), 11), add_days(nowdate(), 15), task2.name)
 		task3.get("depends_on")[0].project = "_Test Project"
 		task3.save()
-		
+
 		task1.update({
 			"exp_end_date": add_days(nowdate(), 20)
 		})
@@ -69,8 +71,10 @@ class TestTask(unittest.TestCase):
 			})
 
 		def get_owner_and_status():
-			return frappe.db.get_value("ToDo", filters={"reference_type": task.doctype, "reference_name": task.name,
-					"description": "Close this task"}, fieldname=("owner", "status"), as_dict=True)
+			return frappe.db.get_value("ToDo", 
+				filters={"reference_type": task.doctype, "reference_name": task.name,
+					"description": "Close this task"},
+				fieldname=("owner", "status"), as_dict=True)
 
 		assign()
 		todo = get_owner_and_status()
@@ -86,13 +90,12 @@ class TestTask(unittest.TestCase):
 		self.assertEquals(todo.status, "Closed")
 
 	def test_overdue(self):
-		task = create_task("Testing Overdue", "2015-01-10", "2015-01-11")
+		task = create_task("Testing Overdue", add_days(nowdate(), -10), add_days(nowdate(), -5))
 
 		from erpnext.projects.doctype.task.task import set_tasks_as_overdue
 		set_tasks_as_overdue()
 
 		self.assertEquals(frappe.db.get_value("Task", task.name, "status"), "Overdue")
-
 
 def create_task(subject, start=None, end=None, depends_on=None, project=None):
 	if not frappe.db.exists("Task", subject):
