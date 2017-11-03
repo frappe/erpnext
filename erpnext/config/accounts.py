@@ -471,7 +471,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Daily Sales Payment Summary",
+					"name": "Sales Payment Summary",
 					"doctype": "Sales Invoice"
 				}
 			]
