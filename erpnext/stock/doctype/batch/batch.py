@@ -115,28 +115,8 @@ def set_batch_nos(doc, warehouse_field, throw = False):
 				if flt(batch_qty) < flt(qty):
 					frappe.throw(_("Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches").format(d.idx, d.batch_no, batch_qty, d.qty))
 
-def get_batch_no(item_code, warehouse, qty, throw=False):
-	'''get the smallest batch with for the given item_code, warehouse and qty'''
-
-	batch_no = None
-	batches = get_batch_qty(item_code = item_code, warehouse = warehouse)
-	if batches:
-		batches = sorted(batches, lambda a, b: 1 if a.qty > b.qty else -1)
-		for b in batches:
-			if b.qty >= qty:
-				batch_no = b.batch_no
-				# found!
-				break
-
-	if not batch_no:
-		frappe.msgprint(_('Please select a Batch for Item {0}. Unable to find a single batch that fulfills this requirement').format(frappe.bold(item_code)))
-		if throw: raise UnableToSelectBatchError
-
-	return batch_no
-
-
 @frappe.whitelist()
-def get_batch_no_fefo(item_code, warehouse, qty=1):
+def get_batch_no(item_code, warehouse, qty=1, throw=False):
 	"""
 	Get batch number using First Expiring First Out method.
 	:param item_code: `item_code` of Item Document
@@ -145,7 +125,7 @@ def get_batch_no_fefo(item_code, warehouse, qty=1):
 	:return: String represent batch number of batch with sufficient quantity else an empty String
 	"""
 
-	batch_no = ""
+	batch_no = None
 	batches = frappe.db.sql(
 		'select batch_id, sum(actual_qty) as qty from `tabBatch` join `tabStock Ledger Entry` '
 		'on `tabBatch`.batch_id = `tabStock Ledger Entry`.batch_no '
@@ -160,5 +140,10 @@ def get_batch_no_fefo(item_code, warehouse, qty=1):
 		if cint(qty) <= cint(batch.qty):
 			batch_no = batch.batch_id
 			break
+
+	if not batch_no:
+		frappe.msgprint(_('Please select a Batch for Item {0}. Unable to find a single batch that fulfills this requirement').format(frappe.bold(item_code)))
+		if throw:
+			raise UnableToSelectBatchError
 
 	return batch_no

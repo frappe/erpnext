@@ -9,7 +9,7 @@ import json
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item, set_transaction_type
 from erpnext.setup.utils import get_exchange_rate
 from frappe.model.meta import get_field_precision
-from erpnext.stock.doctype.batch.batch import get_batch_no, get_batch_no_fefo
+from erpnext.stock.doctype.batch.batch import get_batch_no
 
 
 @frappe.whitelist()
@@ -218,7 +218,7 @@ def get_basic_details(args, item):
 	try:
 		# Only fetch auto-fetch batch for non-sales Document
 		if item.has_batch_no and args.get('doctype') in ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']:
-			batch_no = get_batch_no_fefo(item.item_code, warehouse, args.qty or 1.0)
+			batch_no = get_batch_no(item.item_code, warehouse, args.qty or 1.0)
 	except frappe.ValidationError:
 		pass
 

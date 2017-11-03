@@ -659,7 +659,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	_set_batch_number: function(doc) {
         return frappe.call({
-            method: 'erpnext.stock.doctype.batch.batch.get_batch_no_fefo',
+            method: 'erpnext.stock.doctype.batch.batch.get_batch_no',
             args: {'item_code': doc.item_code, 'warehouse': doc.warehouse, 'qty': flt(doc.qty) * flt(doc.conversion_factor)},
             callback: function(r) {
                 if(r.message) {
