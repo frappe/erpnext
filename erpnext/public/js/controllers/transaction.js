@@ -644,6 +644,31 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
 	},
 
+    /* Determine appropriate batch number and set it in the form.
+    * @param {string} cdt - Document Doctype
+    * @param {string} cdn - Document name
+    */
+	set_batch_number: function(cdt, cdn) {
+	    const doc = frappe.get_doc(cdt, cdn);
+	    if(doc) {
+	        const batches = this._set_batch_number(doc);
+	    }
+	},
+
+	_set_batch_number: function(doc) {
+	    const batch_numbers = this.frm.doc.__onload.batch_numbers;
+	    console.log(batch_numbers);
+        frappe.call({
+            method: 'erpnext.stock.doctype.batch.batch.get_batch_no_fefo',
+            args: {'item_code': doc.item_code, 'warehouse': doc.warehouse, 'qty': doc.qty},
+            callback: function(r) {
+                if(r.message) {
+                    frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message);
+                }
+            }
+        });
+	},
+
 	set_dynamic_labels: function() {
 		// What TODO? should we make price list system non-mandatory?
 		this.frm.toggle_reqd("plc_conversion_rate",
