@@ -19,8 +19,9 @@ class LandUnit(NestedSet):
 		if self.get('parent') and not self.is_new():
 			
 			ancestors = self.get_ancestors()
-			self_features = self.add_child_property()	
-			parent_child_features, parent_non_child_features = self.feature_seperator(feature_of = self.get('parent'))
+			self_features = self.add_child_property()
+			parent_doc = frappe.get_doc('Land Unit', self.get('parent'))
+			parent_child_features, parent_non_child_features = parent_doc.feature_seperator(child_feature = self.get('land_unit_name'))
 
 			self_features = set(self_features)
 			child_features = set(parent_child_features)
@@ -35,8 +36,9 @@ class LandUnit(NestedSet):
 				child_features = list(child_features)
 
 				for ancestor in ancestors:
-					ancestor_child_features, ancestor_non_child_features = self.feature_seperator(feature_of = ancestor)
-					ancestor_features = ancestor_non_child_features
+					ancestor_doc = frappe.get_doc('Land Unit', ancestor)
+					ancestor_child_features, ancestor_non_child_features = ancestor_doc.feature_seperator(child_feature = self.get('land_unit_name'))
+					ancestor_features = list(set(ancestor_non_child_features))
 					ancestor_features.extend(child_features)
 					print(ancestor_features)
 					for index,feature in enumerate(ancestor_features):
@@ -61,15 +63,15 @@ class LandUnit(NestedSet):
 			features = json.loads(location).get('features')	
 			if type(features) != list:
 				features = json.loads(features)
-			for index,feature in enumerate(features):
-				if not feature.get('properties'):
-					feature['properties'].update({'child_feature': True, 'feature_of': self.land_unit_name})
-				features[index] = json.dumps(feature)
-			return features 
+			filter_features = [feature for feature in features if feature.get('properties').get('child_feature') != True]
+			for index,feature in enumerate(filter_features):
+				feature['properties'].update({'child_feature': True, 'feature_of': self.land_unit_name})
+				filter_features[index] = json.dumps(filter_features[index])
+			return filter_features 
 		return []
 
-	def feature_seperator(self, feature_of=None):
-		doc = frappe.get_doc('Land Unit', feature_of)
+	def feature_seperator(self, child_feature=None):
+		doc = self 
 		child_features = []
 		non_child_features = []
 		location = doc.get('location')
@@ -78,7 +80,7 @@ class LandUnit(NestedSet):
 			if type(features) != list:
 				features = json.loads(features)
 			for feature in features:
-				if feature.get('properties').get('feature_of') == self.get('land_unit_name'):
+				if feature.get('properties').get('feature_of') == child_feature:
 					child_features.extend([json.dumps(feature)])
 				else:
 					non_child_features.extend([json.dumps(feature)])
