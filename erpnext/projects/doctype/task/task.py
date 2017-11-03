@@ -69,7 +69,6 @@ class Task(NestedSet):
 		self.reschedule_dependent_tasks()
 		self.update_project()
 		self.unassign_todo()
-		rebuild_tree("Task", "parent_task")
 
 	def unassign_todo(self):
 		if self.status == "Closed" or self.status == "Cancelled":
@@ -111,16 +110,20 @@ class Task(NestedSet):
 						frappe.throw(_("Circular Reference Error"), CircularReferenceError)
 					if b[0]:
 						task_list.append(b[0])
+
 				if count == 15:
 					break
 
 	def reschedule_dependent_tasks(self):
 		end_date = self.exp_end_date or self.act_end_date
 		if end_date:
-			for task_name in frappe.db.sql("""select name from `tabTask` as parent where parent.project = %(project)s and parent.name in \
-				(select parent from `tabTask Depends On` as child where child.task = %(task)s and child.project = %(project)s)""",
-				{'project': self.project, 'task':self.name }, as_dict=1):
-
+			for task_name in frappe.db.sql("""
+				select name from `tabTask` as parent 
+				where parent.project = %(project)s 
+					and parent.name in (
+						select parent from `tabTask Depends On` as child 
+						where child.task = %(task)s and child.project = %(project)s)
+			""", {'project': self.project, 'task':self.name }, as_dict=1):
 				task = frappe.get_doc("Task", task_name.name)
 				if task.exp_start_date and task.exp_end_date and task.exp_start_date < getdate(end_date) and task.status == "Open":
 					task_duration = date_diff(task.exp_end_date, task.exp_start_date)
