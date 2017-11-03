@@ -3,41 +3,72 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import throw, _
+from frappe import _
+
 
 class ItemPriceDuplicateItem(frappe.ValidationError): pass
 
+
 from frappe.model.document import Document
 
+
 class ItemPrice(Document):
-	def validate(self):
-		self.validate_item()
-		self.validate_price_list()
-		self.check_duplicate_item()
-		self.update_price_list_details()
-		self.update_item_details()
+    
+    def validate(self):
+        self.validate_item()
+        self.validate_dates()
+        self.update_price_list_details()
+        self.update_item_details()
+        self.check_duplicates()
 
-	def validate_item(self):
-		if not frappe.db.exists("Item", self.item_code):
-			throw(_("Item {0} not found").format(self.item_code))
+    def validate_item(self):
+        if not frappe.db.exists("Item", self.item_code):
+            frappe.throw(_("Item {0} not found").format(self.item_code))
 
-	def validate_price_list(self):
-		enabled = frappe.db.get_value("Price List", self.price_list, "enabled")
-		if not enabled:
-			throw(_("Price List {0} is disabled").format(self.price_list))
+    def validate_dates(self):
+        if self.valid_from and self.valid_upto:
+            if self.valid_from > self.valid_upto:
+                frappe.throw(_("Valid From Date must be lesser than Valid Upto Date."))
 
-	def check_duplicate_item(self):
-		if frappe.db.sql("""select name from `tabItem Price`
-			where item_code=%s and price_list=%s and name!=%s""", (self.item_code, self.price_list, self.name)):
+    def update_price_list_details(self):
+        self.buying, self.selling, self.currency = \
+            frappe.db.get_value("Price List", 
+                                {"name": self.price_list, "enabled": 1},
+                                ["buying", "selling", "currency"])
 
-			frappe.throw(_("Item {0} appears multiple times in Price List {1}").format(self.item_code, self.price_list),
-				ItemPriceDuplicateItem)
+    def update_item_details(self):
+        self.item_name, self.item_description, self.uom = frappe.db.get_value("Item",self.item_code,["item_name", "description", "stock_uom"])
 
-	def update_price_list_details(self):
-		self.buying, self.selling, self.currency = \
-			frappe.db.get_value("Price List", {"name": self.price_list, "enabled": 1},
-				["buying", "selling", "currency"])
+    def check_duplicates(self):
+        conditions = """
+            where item_code=%(item_code)s
+            and price_list=%(price_list)s
+            and min_qty=%(min_qty)s
+            and uom=%(uom)s
+            and price_list_rate=%(price_list_rate)s
+            and valid_from = %(valid_from)s
+            and valid_upto = %(valid_upto)s
+            and packing_unit=%(packing_unit)s
+        """
+        
+        if self.customer and not self.supplier:
+            conditions += "and customer= %(customer)s"
 
-	def update_item_details(self):
-		self.item_name, self.item_description = frappe.db.get_value("Item",
-			self.item_code, ["item_name", "description"])
+        if self.supplier and not self.customer:
+            conditions += "and supplier= %(supplier)s" 
+
+
+        price_list_rate = frappe.db.sql("""
+            SELECT price_list_rate
+            FROM `tabItem Price`
+              {conditions} """.format(conditions=conditions), self.as_dict())
+
+        if price_list_rate :
+            frappe.throw(_(
+                "Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, UOM, Qty and Dates."))
+
+    def before_save(self):
+        if self.selling:
+            self.reference = self.customer
+        if self.buying:
+            self.reference = self.supplier
