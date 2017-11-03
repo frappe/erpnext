@@ -614,7 +614,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				callback: function(r) {
 					if(!r.exc) {
 						me.conversion_factor(me.frm.doc, cdt, cdn);
-						me.set_batch_number(cdt, cdn);
 					}
 				}
 			});
@@ -629,6 +628,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			refresh_field("stock_qty", item.name, item.parentfield);
 			this.toggle_conversion_factor(item);
 			if(!dont_fetch_price_list_rate) this.apply_price_list(item, true);
+			this.set_batch_number(cdt, cdn);
 		}
 	},
 
