@@ -69,7 +69,6 @@ class Task(NestedSet):
 		self.reschedule_dependent_tasks()
 		self.update_project()
 		self.unassign_todo()
-		rebuild_tree("Task", "parent_task")
 
 	def unassign_todo(self):
 		if self.status == "Closed" or self.status == "Cancelled":
