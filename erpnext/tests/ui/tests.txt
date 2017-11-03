@@ -134,3 +134,8 @@ erpnext/restaurant/doctype/restaurant_table/test_restaurant_table.js
 erpnext/restaurant/doctype/restaurant_menu/test_restaurant_menu.js
 erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_entry.js
 erpnext/projects/doctype/task/tests/test_task_tree.js
+erpnext/stock/doctype/item_price/test_item_price.js
+erpnext/stock/doctype/delivery_note/test_delivery_note_with_margin.js
+erpnext/selling/doctype/sales_order/tests/test_sales_order_with_margin.js
+erpnext/selling/doctype/quotation/tests/test_quotation_with_margin.js
+erpnext/accounts/doctype/sales_invoice/tests/test_sales_invoice_with_margin.js
