@@ -114,6 +114,12 @@ cur_frm.cscript.custom_before_submit = function (doc) {
 	return $c('runserverobj', { 'method': 'create_salary_slips', 'docs': doc });
 };
 
+// cur_frm.cscript.get_employee_details = function(doc) {
+// 	frappe.ui.form.on('Payroll Entry Employee', {
+		
+// 	})
+// }
+
 // Submit salary slips
 
 let submit_salary_slip = function (frm) {

@@ -46,6 +46,7 @@ class PayrollEntry(Document):
 					t1.docstatus!=2
 					and t1.name = t2.employee
 			%s """% cond, {"sal_struct": sal_struct})
+			frappe.errprint(emp_list)
 			return emp_list
 
 	def get_filter_condition(self):
