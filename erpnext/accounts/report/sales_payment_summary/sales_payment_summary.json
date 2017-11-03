@@ -1,5 +1,5 @@
 {
- "add_total_row": 0, 
+ "add_total_row": 1, 
  "apply_user_permissions": 1, 
  "creation": "2017-11-03 16:31:45.757516", 
  "disabled": 0, 
@@ -7,7 +7,7 @@
  "doctype": "Report", 
  "idx": 0, 
  "is_standard": "Yes", 
- "modified": "2017-11-03 17:00:37.871577", 
+ "modified": "2017-11-04 05:15:35.892659", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Payment Summary", 
