@@ -614,6 +614,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				callback: function(r) {
 					if(!r.exc) {
 						me.conversion_factor(me.frm.doc, cdt, cdn);
+						this.set_batch_number(cdt, cdn);
 					}
 				}
 			});
