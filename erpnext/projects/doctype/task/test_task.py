@@ -71,7 +71,7 @@ class TestTask(unittest.TestCase):
 			})
 
 		def get_owner_and_status():
-			return frappe.db.get_value("ToDo", 
+			return frappe.db.get_value("ToDo",
 				filters={"reference_type": task.doctype, "reference_name": task.name,
 					"description": "Close this task"},
 				fieldname=("owner", "status"), as_dict=True)
