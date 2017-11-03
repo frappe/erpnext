@@ -11,8 +11,12 @@ from frappe.utils import now_datetime, nowdate, add_days, add_months
 from erpnext.projects.doctype.timesheet.timesheet import OverlapError
 from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_sales_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.projects.doctype.project.test_project import create_project
 
 class TestTimesheet(unittest.TestCase):
+	def setUp(self):
+		create_project()
+
 	def test_timesheet_billing_amount(self):
 		make_salary_structure("_T-Employee-0001")
 		timesheet = make_timesheet("_T-Employee-0001", simulate=True, billable=1)

@@ -13,6 +13,7 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_per
 from erpnext.exceptions import InvalidCurrency
 from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.projects.doctype.project.test_project import create_project
 
 test_dependencies = ["Item", "Cost Center"]
 test_ignore = ["Serial No"]
@@ -21,6 +22,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 	def setUp(self):
 		unlink_payment_on_cancel_of_invoice()
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
+		create_project()
 
 	def tearDown(self):
 		unlink_payment_on_cancel_of_invoice(0)
