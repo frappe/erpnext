@@ -322,7 +322,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 							[{ fieldtype: 'Select', label: 'POS Profile', options: pos_profiles }],
 							on_submit,
 							__('Select POS Profile')
-						)
+						);
 					}
 				}
 			});
@@ -341,7 +341,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				}
 			});
 		});
-  }
+	}
 
 	setup_company() {
 		this.company = frappe.sys_defaults.company;
