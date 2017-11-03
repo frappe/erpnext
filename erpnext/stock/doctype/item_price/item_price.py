@@ -13,6 +13,7 @@ from frappe.model.document import Document
 
 
 class ItemPrice(Document):
+    
     def validate(self):
         self.validate_item()
         self.validate_dates()
@@ -31,28 +32,43 @@ class ItemPrice(Document):
 
     def update_price_list_details(self):
         self.buying, self.selling, self.currency = \
-            frappe.db.get_value("Price List", {"name": self.price_list, "enabled": 1},
+            frappe.db.get_value("Price List",
+                                {"name": self.price_list, "enabled": 1},
                                 ["buying", "selling", "currency"])
 
     def update_item_details(self):
         self.item_name, self.item_description, self.uom = frappe.db.get_value("Item",self.item_code,["item_name", "description", "stock_uom"])
 
     def check_duplicates(self):
-        conditions = "WHERE item_code = '%s' AND price_list = '%s' AND min_qty = '%s' AND uom = '%s' AND price_list_rate = '%s' " \
-                       "AND (valid_from is null or valid_from <= '%s') AND (valid_upto is null or valid_upto >= '%s') AND packing_unit = '%s'" \
-                        % (self.item_code, self.price_list, self.min_qty, self.uom, self.price_list_rate, self.valid_from, self.valid_upto, self.packing_unit)
+        conditions = """
+            where item_code=%(item_code)s
+            and price_list=%(price_list)s
+            and min_qty=%(min_qty)s
+            and uom=%(uom)s
+            and price_list_rate=%(price_list_rate)s
+            and valid_from = %(valid_from)s
+            and valid_upto = %(valid_upto)s
+            and packing_unit=%(packing_unit)s
+        """
 
         if self.customer and not self.supplier:
-            conditions += "AND customer= '%s'" % (self.customer)
+            conditions += "and customer= %(customer)s"
 
         if self.supplier and not self.customer:
-            conditions += "AND supplier= '%s'" % (self.supplier)
+            conditions += "and supplier= %(supplier)s"
+
 
         price_list_rate = frappe.db.sql("""
             SELECT price_list_rate
             FROM `tabItem Price`
-              %s """ % (conditions))
+              {conditions} """.format(conditions=conditions), self.as_dict())
 
         if price_list_rate :
             frappe.throw(_(
                 "Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, UOM, Qty and Dates."))
+
+    def before_save(self):
+        if self.selling:
+            self.reference = self.customer
+        if self.buying:
+            self.reference = self.supplier

@@ -257,13 +257,14 @@ def get_basic_details(args, item):
 		"is_fixed_asset": item.is_fixed_asset,
 		"weight_per_unit":item.weight_per_unit,
 		"weight_uom":item.weight_uom,
-		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0
+		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0,
+		"transaction_date": args.get("transaction_date")
 	})
 
 	if item.enable_deferred_revenue:
 		service_end_date = add_months(args.transaction_date, item.no_of_months)
 		out.update({
-			"enable_deferred_revenue": item.enable_deferred_revenue, 
+			"enable_deferred_revenue": item.enable_deferred_revenue,
 			"deferred_revenue_account": get_default_deferred_revenue_account(args, item),
 			"service_start_date": args.transaction_date,
 			"service_end_date": service_end_date
@@ -332,10 +333,11 @@ def get_price_list_rate(args, item_doc, out):
 			validate_conversion_rate(args, meta)
 
 		price_list_rate = get_price_list_rate_for(args, item_doc.name)
+		print(">> Price List Rate", price_list_rate)
 
 		# insert in database
-		if not args.price_list and args.rate:
-			insert_item_price(args)
+		#if not price_list_rate:
+		insert_item_price(args)
 
 		# variant
 		if not price_list_rate and item_doc.variant_of:
@@ -352,45 +354,41 @@ def get_price_list_rate(args, item_doc, out):
 				args.name, args.conversion_rate))
 
 def get_item_price_name(args):
-	conditions = " WHERE item_code = '%s' AND price_list = '%s' AND min_qty <= '%s' AND uom = '%s'" \
-				 % frappe.db.escape(args.item_code, args.price_list, args.qty, args.uom)
-	if args.customer and not args.supplier:
-		conditions += "AND customer= '%s'" % frappe.db.escape(args.customer)
+	"""Get Item Price name based on Price List, Supplier/Customer, Currency, Item, UOM, Qty and Dates"""
+	conditions = """
+		WHERE item_code = %(item_code)s
+		AND price_list = %(price_list)s
+		AND min_qty = %(min_qty)s
+		AND uom=%(uom)s
+	"""
+	if args.get("customer"):
+		conditions += "and customer=%(customer)s"
 
-	if args.supplier and not args.customer:
-		conditions += "AND supplier= '%s'" % frappe.db.escape(args.supplier)
+	if args.get("supplier"):
+		conditions += "and supplier=%(supplier)s"
 
+	if args.get('transaction_date'):
+		conditions += """
+			and (valid_from is null or valid_from <= %(transaction_date)s)
+			and (valid_upto is null or valid_upto >= %(transaction_date)s)
+		"""
 	return frappe.db.sql("""
-		SELECT name
-		FROM `tabItem Price`
-			%s """  % (conditions))
-
-def get_item_price(args, item_code):
-	conditions = "WHERE item_code = '%s' " \
-				 "AND price_list = '%s' " \
-				 "AND min_qty <= '%s' " \
-				 "AND uom = '%s' " \
-				 "AND (valid_from is null or valid_from <= '%s') " \
-				 "AND (valid_upto is null or valid_upto >= '%s')" \
-				  % (item_code, args.price_list, args.qty, args.uom, args.transaction_date, args.transaction_date)
-
-	if args.customer and not args.supplier:
-		conditions += "AND customer= '%s'" % frappe.db.escape(args.customer, percent=False)
-
-	if args.supplier and not args.customer:
-		conditions += "AND supplier= '%s'" % frappe.db.escape(args.supplier, percent=False)
-
-	return frappe.db.sql("""
-	    		SELECT name, price_list_rate
-	    		FROM `tabItem Price` %s """ % (conditions))
+		select name
+		from `tabItem Price`
+		{conditions}""".format(conditions=conditions), args)
 
 def insert_item_price(args):
 	"""Insert Item Price if Price List and Price List Rate are specified and currency is the same"""
 	if frappe.db.get_value("Price List", args.price_list, "currency") == args.currency \
 		and cint(frappe.db.get_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing")):
 		if frappe.has_permission("Item Price", "write"):
-			price_list_rate = args.rate / args.conversion_factor \
-				if args.get("conversion_factor") else args.rate
+			price_list_rate = 0
+			if args.get('conversion_rate'):
+				if args.get("rate"):
+					price_list_rate = float(args.get("rate")) / float(args.get('conversion_rate'))
+			else:
+				price_list_rate = args.get("rate")
+
 
 			item_price = frappe.get_doc({
 				"doctype": "Item Price",
@@ -399,25 +397,77 @@ def insert_item_price(args):
 				"currency": args.currency,
 				"price_list_rate": price_list_rate,
 				"customer": args.customer,
-				"suppplier": args.supplier,
+				"supplier": args.supplier,
 				"uom": args.uom,
-				"min_qty": 1,
+				"min_qty": args.qty,
 				"valid_from": args.transaction_date,
 			})
-
-			name = get_item_price_name(args)
-
-			if name:
-				existing_item_price = frappe.get_doc('Item Price', name[0][0])
-				if existing_item_price.price_list_rate != price_list_rate:
-					existing_item_price.price_list_rate = price_list_rate
-					existing_item_price.save()
-					frappe.msgprint(_("Item Price {0} updated for {1} in Price List {2}").format(name[0][0], args.item_code,
-						args.price_list))
+            # Find if Item Price Exist
+			item_price_search = get_item_price_name({
+				"item_code": args.item_code,
+				"price_list": args.price_list,
+				"customer": args.customer,
+				"suppplier": args.supplier,
+				"uom": args.uom,
+				"min_qty": args.qty,
+				"transaction_date": args.transaction_date
+			})
+			if item_price_search:
+				name = item_price_search[0][0]
+				existing_item_price = frappe.get_doc('Item Price', name)
+				if price_list_rate != 0:
+					if existing_item_price.price_list_rate != price_list_rate:
+						existing_item_price.price_list_rate = price_list_rate
+						existing_item_price.save()
+						frappe.msgprint(_("Item Price {0} updated for {1} in Price List {2}").format(
+										name, args.item_code, args.price_list))
 			else:
-				item_price.insert()
-				frappe.msgprint(_("Item Price {0} added for {1} in Price List {2}").format(item_price.name, args.item_code,
-					args.price_list))
+				if price_list_rate != 0:
+					item_price.insert()
+					frappe.msgprint(_("Item Price {0} added for {1} in Price List {2}").format(
+									  item_price.name, args.item_code, args.price_list))
+
+def get_item_price(args, item_code):
+    """
+    	Get name, price_list_rate from Item Price based on conditions
+			Check if the Derised qty is within the increment of the packing list.
+		:param args: dict (or frappe._dict) with mandatory fields price_list, uom
+		             optional fields min_qty, transaction_date, customer, supplier
+		:param item_code: str, Item Doctype field item_code
+    """
+    args['item_code'] = item_code
+    has_item_price_record = frappe.get_all('Item Price',
+    		filters={'item_code': item_code, 'price_list': args.get('price_list')})
+    if not has_item_price_record:
+    	return
+
+    conditions = """
+		where item_code=%(item_code)s
+		and price_list=%(price_list)s
+		and uom=%(uom)s
+	"""
+    if args.get('min_qty'):
+        conditions += " and min_qty <= %(min_qty)s"
+
+    if args.get('transaction_date'):
+		conditions += """
+			and (valid_from is null or valid_from <= %(transaction_date)s)
+			and (valid_upto is null or valid_upto  >= %(transaction_date)s)
+		"""
+    if args.get("customer"):
+		conditions += " and customer=%(customer)s"
+
+    if args.get("supplier"):
+		conditions += " and supplier=%(supplier)s"
+
+
+    return frappe.db.sql(
+    	"""
+	    	select name, price_list_rate
+	    	from `tabItem Price` {conditions}
+	    	order by min_qty desc
+		""".format(conditions=conditions),
+		args)
 
 def get_price_list_rate_for(args, item_code):
 	"""
@@ -433,37 +483,59 @@ def get_price_list_rate_for(args, item_code):
 		:param qty: Derised Qty
 		:param transaction_date: Date of the price
 	"""
-	price_list_rate = get_item_price(args, item_code)
+	price_list_rate = get_item_price({
+			"item_code": args.get('item_code'),
+			"price_list": args.get('price_list'),
+			"customer": args.get('customer'),
+			"suppplier": args.get('supplier'),
+			"uom": args.get('uom'),
+			"min_qty": args.get('qty'),
+			"transaction_date": args.get('transaction_date'),
+	}, item_code)
 
 	if price_list_rate:
-		if check_packing_list(args, item_code) == True:
+		desired_qty = args.get("qty")
+		if check_packing_list(price_list_rate[0][0], desired_qty, item_code):
 			return price_list_rate[0][1]
 	else:
-		general_price_list_rate = frappe.db.sql("""
-				SELECT price_list_rate
-				FROM `tabItem Price`
-				WHERE item_code=%(item_code)s
-				    AND customer is Null
-				    AND supplier is Null
-				    AND UOM = %(uom)s
-					AND price_list = %(price_list)s
-					AND (valid_from is null or valid_from <= %(transaction_date)s)
-					AND (valid_upto is null or valid_upto  >= %(transaction_date)s)""",
-				{'item_code': item_code, 'uom': args.uom, 'price_list': args.price_list, 'transaction_date': args.transaction_date})
+		values = {'item_code': item_code,
+				  'uom': args.get("uom"),
+				  'price_list': args.get("price_list"),
+				  'transaction_date': args.get("transaction_date", None)}
+		general_price_list_rate = frappe.db.sql(
+			"""
+				select price_list_rate
+				from `tabItem Price`
+				where item_code=%(item_code)s
+				and customer is Null
+				and supplier is Null
+				and UOM = %(uom)s
+				and price_list = %(price_list)s
+				and valid_from <= %(transaction_date)s
+				and valid_upto >= %(transaction_date)s
+			""",
+			values)
 		if general_price_list_rate:
 			return general_price_list_rate[0][0]
 		else:
 			return None
 
-def check_packing_list(args, item_code):
+def check_packing_list(price_list_rate_name, desired_qty, item_code):
+	"""
+		Check if the Derised qty is within the increment of the packing list.
+		:param price_list_rate_name: Name of Item Price
+        :param desired_qty: Derised Qt
+		:param item_code: str, Item Doctype field item_code
+		:param qty: Derised Qt
 
-	name = get_item_price(args, item_code)
+	"""
 
-	item_price = frappe.get_doc("Item Price", name[0][0])
-	packing_increment = (args.qty - item_price.min_qty) % item_price.packing_unit
+	item_price = frappe.get_doc("Item Price", price_list_rate_name)
+	if desired_qty:
+		packing_increment = (desired_qty - item_price.min_qty) % item_price.packing_unit
 
-	if packing_increment == 0:
-		return True
+		if packing_increment == 0:
+			return True
 
 def validate_price_list(args):
 	if args.get("price_list"):

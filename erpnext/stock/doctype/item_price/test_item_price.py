@@ -4,14 +4,13 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from erpnext.stock.get_item_details import get_price_list_rate_for
+from erpnext.stock.get_item_details import get_price_list_rate_for, process_args
 
 class TestItem(unittest.TestCase):
 
 	def test_duplicate_item(self):
-		from erpnext.stock.doctype.item_price.item_price import ItemPriceDuplicateItem
 		doc = frappe.copy_doc(test_records[0])
-		self.assertRaises(ItemPriceDuplicateItem, doc.save)
+		self.assertRaises(frappe.ValidationError, doc.save)
 
 	def test_addition_of_new_fields(self):
 		# Based on https://github.com/frappe/erpnext/issues/8456
@@ -38,37 +37,45 @@ class TestItem(unittest.TestCase):
 
 		args = {
 			"price_list": doc.price_list,
-			"min_qty": doc.min_qty
+			"min_qty": doc.min_qty,
+            "customer": doc.customer,
+            "uom": "_Test UOM",
+            "transaction_date": '2017-04-18',
+            "qty": 10
 		}
 
-		price = get_price_list_rate_for(args, doc.item_code)
-		self.assertEqual(price, doc.save)
+		price = get_price_list_rate_for(process_args(args), doc.item_code)
+		self.assertEqual(price, 20.0)
 
 	def test_price_with_no_qty(self):
 		# Check correct price when no quantity
 		doc = frappe.copy_doc(test_records[2])
-
 		args = {
 			"price_list": doc.price_list,
-			"min_qty": doc.min_qty
+			"min_qty": 30,
+			"customer": doc.customer,
+			"uom": "_Test UOM",
+            "transaction_date": '2017-04-18',
 		}
 
 		price = get_price_list_rate_for(args, doc.item_code)
-		self.assertEqual(price, doc.save)
+		self.assertEqual(price, None)
 
 
 	def test_prices_at_date(self):
 		# Check correct price at first date
-		doc = frappe.copy_doc(test_records[4])
+		doc = frappe.copy_doc(test_records[2])
 
 		args = {
 			"price_list": doc.price_list,
 			"min_qty": doc.min_qty,
-			"tranaction_date": "2017-04-10"
+			"uom": "_Test UOM",
+			"transaction_date": '2017-04-18',
+			"qty": 7
 		}
 
 		price = get_price_list_rate_for(args, doc.item_code)
-		self.assertEqual(price, doc.save)
+		self.assertEqual(price, 20)
 
 	def test_prices_at_invalid_date(self):
 		#Check correct price at invalid date
@@ -77,11 +84,13 @@ class TestItem(unittest.TestCase):
 		args = {
 			"price_list": doc.price_list,
 			"min_qty": doc.min_qty,
-			"transaction_date": "01-15-2017"
+			"qty": 7,
+			"uom": "_Test UOM",
+			"transaction_date": "01-15-2019"
 		}
 
 		price = get_price_list_rate_for(args, doc.item_code)
-		self.assertEqual(price, doc.save)
+		self.assertEqual(price, None)
 
 	def test_prices_outside_of_date(self):
 		#Check correct price when outside of the date
@@ -90,11 +99,14 @@ class TestItem(unittest.TestCase):
 		args = {
 			"price_list": doc.price_list,
 			"min_qty": doc.min_qty,
+            "customer": "_Test Customer",
+            "uom": "_Test UOM",
 			"transaction_date": "2017-04-25",
+			"qty": 7,
 		}
 
 		price = get_price_list_rate_for(args, doc.item_code)
-		self.assertEqual(price, doc.save)
+		self.assertEqual(price, None)
 
 	def test_lowest_price_when_no_date_provided(self):
 		#Check lowest price when no date provided
@@ -103,15 +115,13 @@ class TestItem(unittest.TestCase):
 		args = {
 			"price_list": doc.price_list,
 			"min_qty": doc.min_qty,
+			"uom": "_Test UOM",
+			"qty": 7,
 		}
 
 		price = get_price_list_rate_for(args, doc.item_code)
-		self.assertEqual(price, doc.save)
+		self.assertEqual(price, 10)
 
-
-	def test_duplicates(self):
-		doc = frappe.copy_doc(test_records[1])
-		self.assertRaises(frappe.ValidationError, doc.save)
 
 	def test_invalid_item(self):
 		doc = frappe.copy_doc(test_records[1])
@@ -120,24 +130,13 @@ class TestItem(unittest.TestCase):
 		# Valid item codes must already exist
 		self.assertRaises(frappe.ValidationError, doc.save)
 
-	def test_price_list(self):
+	def test_invalid_price_list(self):
 		doc = frappe.copy_doc(test_records[1])
 		# Check for invalid price list
 		doc.price_list = "This is not a price list"
 		# Valid price list must already exist
 		self.assertRaises(frappe.ValidationError, doc.save)
 
-		# Check for disabled price list
-		doc = frappe.copy_doc(test_records[1])
-		# Enter invalid price list
-		pr = frappe.get_doc("Price List", doc.save)
-		pr.enabled = 0
-		pr.save()
 
-		doc.price_list = pr.name
-		# Valid price list must already exist
-		self.assertRaises(frappe.ValidationError, doc.save)
-		pr.enabled = 1
-		pr.save()
 
 test_records = frappe.get_test_records('Item Price')
