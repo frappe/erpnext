@@ -217,12 +217,16 @@ agriculture.TernaryPlot = class TernaryPlot {
 
 			let x_blip = s + clay * p * Snap.cos(60) + silt * p;
 			let y_blip = s + silt * p * Snap.cos(30) + sand * p * Snap.sin(60);
-			console.log(s, clay, p, silt, Snap.cos(30), sand);
-			this.paper.circle(x_blip, y_blip, 4).attr({
+			this.blip = this.paper.circle(x_blip, y_blip, 4).attr({
 				fill: frappe.ui.color.get("orange"),
 				stroke: frappe.ui.color.get("orange"),
 				strokeWidth: 2
 			});
 		}
+	}
+
+	remove_blip() {
+		if (typeof this.blip !== 'undefined')
+			this.blip.remove();
 	}
 };

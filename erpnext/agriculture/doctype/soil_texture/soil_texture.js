@@ -24,8 +24,8 @@ frappe.ui.form.on('Soil Texture', {
 		soil_edit_order[0] = Math.max.apply(Math, soil_edit_order)+1;
 		frm.doc.soil_type = get_soil_type(frm.doc.clay_composition, frm.doc.sand_composition, frm.doc.silt_composition);
 		frm.refresh_fields();
-		console.log(frm.doc.clay_composition, frm.doc.sand_composition, frm.doc.silt_composition);
-		this.ternary_plot.mark_blip(frm.doc.clay_composition, frm.doc.sand_composition, frm.doc.silt_composition);
+		this.ternary_plot.remove_blip();
+		this.ternary_plot.mark_blip({clay: frm.doc.clay_composition, sand: frm.doc.sand_composition, silt: frm.doc.silt_composition});
 	},
 	sand_composition: function(frm) {
 		if (frm.doc.sand_composition > 100 || frm.doc.sand_composition < 0)
@@ -33,8 +33,8 @@ frappe.ui.form.on('Soil Texture', {
 		soil_edit_order[1] = Math.max.apply(Math, soil_edit_order)+1;
 		frm.doc.soil_type = get_soil_type(frm.doc.clay_composition, frm.doc.sand_composition, frm.doc.silt_composition);
 		frm.refresh_fields();
-		console.log(frm.doc.clay_composition, frm.doc.sand_composition, frm.doc.silt_composition);
-		this.ternary_plot.mark_blip(frm.doc.clay_composition, frm.doc.sand_composition, frm.doc.silt_composition);
+		this.ternary_plot.remove_blip();
+		this.ternary_plot.mark_blip({clay: frm.doc.clay_composition, sand: frm.doc.sand_composition, silt: frm.doc.silt_composition});
 	},
 	silt_composition: function(frm) {
 		if (frm.doc.silt_composition > 100 || frm.doc.silt_composition < 0)
@@ -42,8 +42,8 @@ frappe.ui.form.on('Soil Texture', {
 		soil_edit_order[2] = Math.max.apply(Math, soil_edit_order)+1;
 		frm.doc.soil_type = get_soil_type(frm.doc.clay_composition, frm.doc.sand_composition, frm.doc.silt_composition);
 		frm.refresh_fields();
-		console.log(frm.doc.clay_composition, frm.doc.sand_composition, frm.doc.silt_composition);
-		this.ternary_plot.mark_blip(frm.doc.clay_composition, frm.doc.sand_composition, frm.doc.silt_composition);
+		this.ternary_plot.remove_blip();
+		this.ternary_plot.mark_blip({clay: frm.doc.clay_composition, sand: frm.doc.sand_composition, silt: frm.doc.silt_composition});
 	}
 });
 
