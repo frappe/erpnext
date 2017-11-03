@@ -38,7 +38,7 @@ $.extend(erpnext, {
 	},
 
 	stale_rate_allowed: () => {
-		return cint(frappe.boot.sysdefaults.allow_stale) || 1;
+		return cint(frappe.boot.sysdefaults.allow_stale);
 	},
 
 	setup_serial_no: function() {
