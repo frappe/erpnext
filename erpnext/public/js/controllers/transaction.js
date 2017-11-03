@@ -614,7 +614,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				callback: function(r) {
 					if(!r.exc) {
 						me.conversion_factor(me.frm.doc, cdt, cdn);
-						this.set_batch_number(cdt, cdn);
+						me.set_batch_number(cdt, cdn);
 					}
 				}
 			});
@@ -658,11 +658,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	_set_batch_number: function(doc) {
-	    const batch_numbers = this.frm.doc.__onload.batch_numbers;
-	    console.log(batch_numbers);
-        frappe.call({
+        return frappe.call({
             method: 'erpnext.stock.doctype.batch.batch.get_batch_no_fefo',
-            args: {'item_code': doc.item_code, 'warehouse': doc.warehouse, 'qty': doc.qty},
+            args: {'item_code': doc.item_code, 'warehouse': doc.warehouse, 'qty': flt(doc.qty) * flt(doc.conversion_factor)},
             callback: function(r) {
                 if(r.message) {
                     frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message);
