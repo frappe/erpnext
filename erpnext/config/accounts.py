@@ -468,6 +468,12 @@ def get_data():
 					"name": "Customer Credit Balance",
 					"doctype": "Customer"
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales Payment Summary",
+					"doctype": "Sales Invoice"
+				}
 			]
 		},
 		{
