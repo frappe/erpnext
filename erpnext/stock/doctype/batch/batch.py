@@ -135,6 +135,7 @@ def get_batch_no(item_code, warehouse, qty, throw=False):
 	return batch_no
 
 
+@frappe.whitelist()
 def get_batch_no_fefo(item_code, warehouse, qty=1):
 	"""
 	Get batch number using First Expiring First Out method.
