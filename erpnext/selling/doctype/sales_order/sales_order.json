@@ -3406,7 +3406,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-10-24 12:52:28.115742", 
+ "modified": "2017-11-03 05:31:56.636424", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order", 
@@ -3543,5 +3543,5 @@
  "timeline_field": "customer", 
  "title_field": "title", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 1
 }
