@@ -27,3 +27,12 @@ def get_list_context(context):
 	context.no_breadcrumbs = True
 	context.order_by = 'creation desc'
 	context.introduction ='<div>Grant Application List</div><br><a class="btn btn-primary" href="/my-grant?new=1">Apply for new Grant Application</a>'
+
+@frappe.whitelist(allow_guest=True)
+def assessment_result(title, assessment_scale, note):
+	vote = frappe.get_doc("Grant Application", title)
+	vote.assessment_scale = assessment_scale
+	vote.note = note
+	vote.save()
+	frappe.db.commit()
+	return "Thank you for Assessment Review"
