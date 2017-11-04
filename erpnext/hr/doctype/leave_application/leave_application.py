@@ -114,8 +114,8 @@ class LeaveApplication(Document):
 			self.workflow_state = "Created By Director"
 		elif u'Manager' in frappe.get_roles(frappe.session.user):
 				self.workflow_state = "Created By Manager"
-		# elif u'Line Manager' in frappe.get_roles(frappe.session.user):
-		# 		self.workflow_state = "Created By Line Manager"
+		elif u'Line Manager' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Line Manager"
 
 
 	def after_insert(self):
@@ -127,6 +127,27 @@ class LeaveApplication(Document):
 		if self.leave_type != "Annual Leave - اجازة اعتيادية" and self.leave_type != "Without Pay - غير مدفوعة" and self.leave_type != "Compensatory off - تعويضية" and self.leave_type != "emergency -اضطرارية":
 			frappe.msgprint(_("You must attach the required file otherwise the application will be <span style='color:red;'>REJECTED!</span>"))
 	
+	def validate_conditional_workflow_transition(self):
+
+		def unpaid_leave_switcher(wf=self.workflow_state,lt=self.leave_type,emp=self.employee,from_date=self.from_date,to_date=self.to_date,ld=self.leave_days):
+			if lt == "Without Pay - غير مدفوعة" and wf == "Approved By Director":
+				allocation_records = get_leave_allocation_records(from_date, emp, lt)
+				if allocation_records:
+					la_from_date = allocation_records[emp][lt].from_date
+					la_to_date = allocation_records[emp][lt].to_date
+					applied_days = get_approved_leaves_for_period(emp, lt, la_from_date, la_to_date)
+					if applied_days or ld > 10:
+						self.workflow_state == "Approved By Director (U.L)"
+		def five_days_leave_switcher(wf = self.workflow_state, ld = self.leave_days, lt = self.leave_type):
+			if ld > 5:
+				if wf == "Approved By Director" and (lt == " Annual Leave - اجازة اعتيادية" or lt == " emergency -اضطرارية" or lt == " Without Pay - غير مدفوعة"):
+					self.workflow_state = "Approved By Director (+5)"
+
+				elif wf == "Approved By CEO":
+					self.workflow_state = "Approved By CEO (+5 U.L)"
+			else:
+				if wf == "Approved By HR Specialist":
+					self.workflow_state = "Approved By HR Specialist (F.T)"
 
 	def validate_approval_line_manager(self):
 		dd=frappe.get_doc("Employee",self.employee)
@@ -438,27 +459,8 @@ class LeaveApplication(Document):
 		# frappe.throw(str(prev_year_date))
 		if self.leave_type == "Annual Leave - اجازة اعتيادية" or self.leave_type == "Compensatory off - تعويضية":
 			allocation_records = get_leave_allocation_records(self.from_date, self.employee, self.leave_type)
-			# doj = frappe.get_value("Employee", filters = {"name": self.employee}, fieldname = "date_of_joining")
-			# frappe.throw(str(allocation_records[self.employee][self.leave_type]))
 			if allocation_records:
-				# if getdate(doj).year == getdate(self.to_date).year:
-				# 	if getdate(allocation_records[self.employee][self.leave_type].from_date) != getdate(doj):
-				# 		la_doc = frappe.get_doc("Leave Allocation",{
-				# 		"employee": self.employee,
-				# 		"from_date": allocation_records[self.employee][self.leave_type].from_date,
-				# 		"to_date": allocation_records[self.employee][self.leave_type].to_date,
-				# 		"leave_type": self.leave_type
-				# 		})
-				# 		la_doc.flags.ignore_validate_update_after_submit = True
-				# 		la_doc.from_date = doj
-				# 		la_doc.new_leaves_allocated = 2.5 * (12 - (getdate(doj).month - 1))
-				# 		la_doc.save(ignore_permissions=True)
-				# 		frappe.db.commit()
-
 				from_date = allocation_records[self.employee][self.leave_type].from_date
-				# frappe.get_value("Leave Allocation", filters = {"employee": self.employee, "to_date": allocation_records[self.employee][self.leave_type].to_date, "leave_type": self.leave_type},
-				# 	fieldname = "from_date")
-				# frappe.throw(str(getdate(from_date)))
 				applied_days = get_approved_leaves_for_period(self.employee, self.leave_type, from_date, self.to_date)
 				# frappe.throw(str(applied_days + self.total_leave_days))
 				date_dif = date_diff(self.to_date, from_date)
