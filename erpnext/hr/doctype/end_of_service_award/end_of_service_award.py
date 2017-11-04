@@ -7,7 +7,7 @@ from frappe.model.document import Document
 import json
 import math
 from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_link_to_form, \
-    comma_or, get_fullname, add_years, add_months, add_days, nowdate
+    comma_or, get_fullname, add_years, add_months, add_days, nowdate,get_first_day,get_last_day
 
 class EndofServiceAward(Document):
 
@@ -115,14 +115,15 @@ def get_award(start_date, end_date, salary, toc, reason):
 
 
 def get_permission_query_conditions(user):
-    if not user: user = frappe.session.user
-    employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
-    if employees:
-        query = ""
-        employee = frappe.get_doc('Employee', {'name': employees[0].name})
+    pass
+    # if not user: user = frappe.session.user
+    # employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
+    # if employees:
+    #     query = ""
+    #     employee = frappe.get_doc('Employee', {'name': employees[0].name})
         
-        if u'Employee' in frappe.get_roles(user):
-            if query != "":
-                query+=" or "
-            query+=""" employee = '{0}'""".format(employee.name)
-        return query
+    #     if u'Employee' in frappe.get_roles(user):
+    #         if query != "":
+    #             query+=" or "
+    #         query+=""" employee = '{0}'""".format(employee.name)
+    #     return query

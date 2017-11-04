@@ -23,6 +23,11 @@ frappe.ui.form.on('Employee Badge Request', {
             cur_frm.disable_save();
         }
         else{
+            if (roles.indexOf("HR Specialist")!= -1){
+                cur_frm.fields_dict["badge_received"].df.read_only=0;
+                cur_frm.refresh_fields(["badge_received"]);
+
+            }
         	cur_frm.enable_save();
         }
     },
