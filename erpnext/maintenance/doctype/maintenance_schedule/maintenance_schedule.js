@@ -85,7 +85,7 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(!doc.status) set_multiple(dt,dn,{status:'Draft'});
 
 	if(doc.__islocal){
-		set_multiple(dt,dn,{transaction_date:get_today()});
+		set_multiple(dt,dn,{transaction_date:frappe.datetime.get_today()});
 	}
 
 	// set add fetch for item_code's item_name and description

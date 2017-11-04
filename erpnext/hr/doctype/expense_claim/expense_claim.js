@@ -46,7 +46,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn) {
 		cur_frm.set_value("approval_status", "Draft")
 
 	if (doc.__islocal) {
-		cur_frm.set_value("posting_date", dateutil.get_today());
+		cur_frm.set_value("posting_date", dateutil.frappe.datetime.get_today());
 		if(doc.amended_from)
 			cur_frm.set_value("approval_status", "Draft");
 		cur_frm.cscript.clear_sanctioned(doc);
@@ -107,7 +107,7 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 
 cur_frm.cscript.set_help = function(doc) {
 	cur_frm.set_intro("");
-	if(doc.__islocal && !in_list(user_roles, "HR User")) {
+	if(doc.__islocal && !in_list(frappe.user_roles, "HR User")) {
 		cur_frm.set_intro(__("Fill the form and save it"))
 	} else {
 		if(doc.docstatus==0 && doc.approval_status=="Draft") {

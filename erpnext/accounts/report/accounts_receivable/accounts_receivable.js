@@ -20,7 +20,7 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldname":"report_date",
 			"label": __("As on Date"),
 			"fieldtype": "Date",
-			"default": get_today()
+			"default": frappe.datetime.get_today()
 		},
 		{
 			"fieldname":"ageing_based_on",

@@ -131,7 +131,7 @@ cur_frm.cscript.reference_entry = function(doc,cdt,cdn){
 				"fieldname": "reference_date",
 				"fieldtype": "Date",
 				"reqd": 1,
-				"default": get_today()
+				"default": frappe.datetime.get_today()
 			}
 		]
 	});

@@ -8,7 +8,7 @@ frappe.listview_settings['Item'] = {
 			return [__("Shortage"), "red", "total_projected_qty,<,0"];
 		} else if (doc.disabled) {
 			return [__("Disabled"), "grey", "disabled,=,Yes"];
-		} else if (doc.end_of_life && doc.end_of_life < frappe.datetime.get_today()) {
+		} else if (doc.end_of_life && doc.end_of_life < frappe.datetime.get_todayfrappe.datetime.get_today()) {
 			return [__("Expired"), "grey", "end_of_life,<,Today"];
 		} else if (doc.has_variants) {
 			return [__("Template"), "blue", "has_variants,=,Yes"];
