@@ -25,6 +25,7 @@ class AttendanceAlreadyMarkedError(frappe.ValidationError): pass
 
 from frappe.model.document import Document
 class LeaveApplication(Document):
+	pass
 	def get_feed(self):
 		return _("{0}: From {0} of type {1}").format(self.status, self.employee_name, self.leave_type)
 
@@ -64,27 +65,28 @@ class LeaveApplication(Document):
 	
 
 	def validate_leave_submission_dates(self):
-		if self.leave_type == "Annual Leave - اجازة اعتيادية":
-			if getdate(self.from_date) <=  getdate(nowdate()):
-				frappe.throw(_("The submission date must be before from date"))
-		# if self.leave_type == "emergency -اضطرارية":
-		# 	if date_diff(nowdate(), self.from_date) > 3:
-		# 		frappe.throw(_("The submission date must be less than or equal 3 days after leave start"))
-		if self.leave_type == "Marriage - زواج" or self.leave_type == "New Born - مولود جديد" or self.leave_type == "Death - وفاة":
-			if date_diff(nowdate(), self.to_date) > 15:
-				frappe.throw(_("The submission date must not exceed 15 days after leave end"))
-		if self.leave_type == "Hajj leave - حج":
-			if date_diff(self.from_date, nowdate()) < 10:
-				frappe.throw(_("The submission date must before 10 days from leave start"))
-		if self.leave_type == "Sick Leave - مرضية":
-			if date_diff(nowdate(), self.to_date) > 10:
-				frappe.throw(_("The submission date must not exceed 10 days after leave end"))
-		if self.leave_type == "Educational - تعليمية":
-			if date_diff(self.from_date, nowdate()) < 15:
-				frappe.throw(_("The submission date must be greater than or equal 15 days before leave start"))
-		if self.leave_type == "Without Pay - غير مدفوعة":
-			if date_diff( nowdate(), self.from_date) >= 0:
-				frappe.throw(_("The submission date can't be after leave start"))
+		if u'HR User' not in frappe.get_roles(frappe.session.user):
+			if self.leave_type == "Annual Leave - اجازة اعتيادية":
+				if getdate(self.from_date) <=  getdate(nowdate()):
+					frappe.throw(_("The submission date must be before from date"))
+			if self.leave_type == "emergency -اضطرارية":
+				if date_diff(nowdate(), self.from_date) > 3:
+					frappe.throw(_("The submission date must be less than or equal 3 days after leave start"))
+			if self.leave_type == "Marriage - زواج" or self.leave_type == "New Born - مولود جديد" or self.leave_type == "Death - وفاة":
+				if date_diff(nowdate(), self.to_date) > 15:
+					frappe.throw(_("The submission date must not exceed 15 days after leave end"))
+			if self.leave_type == "Hajj leave - حج":
+				if date_diff(self.from_date, nowdate()) < 10:
+					frappe.throw(_("The submission date must before 10 days from leave start"))
+			if self.leave_type == "Sick Leave - مرضية":
+				if date_diff(nowdate(), self.to_date) > 10:
+					frappe.throw(_("The submission date must not exceed 10 days after leave end"))
+			if self.leave_type == "Educational - تعليمية":
+				if date_diff(self.from_date, nowdate()) < 15:
+					frappe.throw(_("The submission date must be greater than or equal 15 days before leave start"))
+			if self.leave_type == "Without Pay - غير مدفوعة":
+				if date_diff( nowdate(), self.from_date) >= 0:
+					frappe.throw(_("The submission date can't be after leave start"))
 
 	def set_approvals(self):
 		user = frappe.session.user
@@ -112,18 +114,40 @@ class LeaveApplication(Document):
 			self.workflow_state = "Created By Director"
 		elif u'Manager' in frappe.get_roles(frappe.session.user):
 				self.workflow_state = "Created By Manager"
-		# elif u'Line Manager' in frappe.get_roles(frappe.session.user):
-		# 		self.workflow_state = "Created By Line Manager"
+		elif u'Line Manager' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Line Manager"
 
 
 	def after_insert(self):
 
 		if self.workflow_state=="Approved By Manager":
-			frappe.db.sql("update tabCommunication set subject ='Approved By Manager' , content='Approved By Manager' where reference_name ='{0}' and subject ='Approved By Line Manager'".format(self.name))
+			#frappe.db.sql("update tabCommunication set subject ='Approved By Manager' , content='Approved By Manager' where reference_name ='{0}' and subject ='Approved By Line Manager'".format(self.name))
 			# frappe.msgprint("111")
+			pass
 		if self.leave_type != "Annual Leave - اجازة اعتيادية" and self.leave_type != "Without Pay - غير مدفوعة" and self.leave_type != "Compensatory off - تعويضية" and self.leave_type != "emergency -اضطرارية":
 			frappe.msgprint(_("You must attach the required file otherwise the application will be <span style='color:red;'>REJECTED!</span>"))
 	
+	def validate_conditional_workflow_transition(self):
+
+		def unpaid_leave_switcher(wf=self.workflow_state,lt=self.leave_type,emp=self.employee,from_date=self.from_date,to_date=self.to_date,ld=self.leave_days):
+			if lt == "Without Pay - غير مدفوعة" and wf == "Approved By Director":
+				allocation_records = get_leave_allocation_records(from_date, emp, lt)
+				if allocation_records:
+					la_from_date = allocation_records[emp][lt].from_date
+					la_to_date = allocation_records[emp][lt].to_date
+					applied_days = get_approved_leaves_for_period(emp, lt, la_from_date, la_to_date)
+					if applied_days or ld > 10:
+						self.workflow_state == "Approved By Director (U.L)"
+		def five_days_leave_switcher(wf = self.workflow_state, ld = self.leave_days, lt = self.leave_type):
+			if ld > 5:
+				if wf == "Approved By Director" and (lt == " Annual Leave - اجازة اعتيادية" or lt == " emergency -اضطرارية" or lt == " Without Pay - غير مدفوعة"):
+					self.workflow_state = "Approved By Director (+5)"
+
+				elif wf == "Approved By CEO":
+					self.workflow_state = "Approved By CEO (+5 U.L)"
+			else:
+				if wf == "Approved By HR Specialist":
+					self.workflow_state = "Approved By HR Specialist (F.T)"
 
 	def validate_approval_line_manager(self):
 		dd=frappe.get_doc("Employee",self.employee)
@@ -179,11 +203,24 @@ class LeaveApplication(Document):
 			if self.workflow_state=="Approved By HR Specialist":
 				self.status="Approved"
 				self.docstatus=1
-		else:
-			if self.workflow_state=="Approved By HR Manager":
+				''' start form here by ahmad  to allow ceo to add leave application directally 
+				without the need for hr manager to approve it which make it status = approved and 1 
+				, yet the hr manager can approve it and it would be 
+				just deccoratoed '''
+		#commented nisma two lines 
+		#else:
+			# if self.workflow_state=="Approved By HR Manager":
+			elif self.workflow_state=="Approved By HR Manager":
 				self.status="Approved"
 				self.docstatus=1
-		
+		#added by ahmad
+			elif self.workflow_state=="Created By CEO":
+				self.status="Approved"
+				self.docstatus=1
+
+				''' end to here by ahmad '''
+
+
 		if "Rejected" in str(self.workflow_state):
 			self.status="Rejected"
 			self.docstatus=2
@@ -205,7 +242,7 @@ class LeaveApplication(Document):
 			if emplo.user_id:
 				userem=frappe.get_doc("User",emplo.user_id)
 
-		result=frappe.db.sql("select name from tabCommunication where reference_name='{0}' and subject='Approved By Line Manager'".format(self.name))
+		#result=frappe.db.sql("select name from tabCommunication where reference_name='{0}' and subject='Approved By Line Manager'".format(self.name))
 		# if result:
 		#     frappe.msgprint(result[0][0])
 		fl=False
@@ -422,27 +459,8 @@ class LeaveApplication(Document):
 		# frappe.throw(str(prev_year_date))
 		if self.leave_type == "Annual Leave - اجازة اعتيادية" or self.leave_type == "Compensatory off - تعويضية":
 			allocation_records = get_leave_allocation_records(self.from_date, self.employee, self.leave_type)
-			# doj = frappe.get_value("Employee", filters = {"name": self.employee}, fieldname = "date_of_joining")
-			# frappe.throw(str(allocation_records[self.employee][self.leave_type]))
 			if allocation_records:
-				# if getdate(doj).year == getdate(self.to_date).year:
-				# 	if getdate(allocation_records[self.employee][self.leave_type].from_date) != getdate(doj):
-				# 		la_doc = frappe.get_doc("Leave Allocation",{
-				# 		"employee": self.employee,
-				# 		"from_date": allocation_records[self.employee][self.leave_type].from_date,
-				# 		"to_date": allocation_records[self.employee][self.leave_type].to_date,
-				# 		"leave_type": self.leave_type
-				# 		})
-				# 		la_doc.flags.ignore_validate_update_after_submit = True
-				# 		la_doc.from_date = doj
-				# 		la_doc.new_leaves_allocated = 2.5 * (12 - (getdate(doj).month - 1))
-				# 		la_doc.save(ignore_permissions=True)
-				# 		frappe.db.commit()
-
 				from_date = allocation_records[self.employee][self.leave_type].from_date
-				# frappe.get_value("Leave Allocation", filters = {"employee": self.employee, "to_date": allocation_records[self.employee][self.leave_type].to_date, "leave_type": self.leave_type},
-				# 	fieldname = "from_date")
-				# frappe.throw(str(getdate(from_date)))
 				applied_days = get_approved_leaves_for_period(self.employee, self.leave_type, from_date, self.to_date)
 				# frappe.throw(str(applied_days + self.total_leave_days))
 				date_dif = date_diff(self.to_date, from_date)
@@ -475,7 +493,7 @@ class LeaveApplication(Document):
 		
 	
 	def on_submit(self):
-		frappe.db.sql("update tabCommunication set subject ='Approved By Manager' , content='Approved By Manager' where reference_name ='{0}' and subject ='Approved By Line Manager'".format(self.name))
+		#frappe.db.sql("update tabCommunication set subject ='Approved By Manager' , content='Approved By Manager' where reference_name ='{0}' and subject ='Approved By Line Manager'".format(self.name))
 
 		self.validate_type()
 		self.validate_days_and_fin()
@@ -485,7 +503,7 @@ class LeaveApplication(Document):
 		# # self.validate_leave_submission_dates()
 	
 	def on_update_after_submit(self):
-		frappe.db.sql("update tabCommunication set subject ='Approved By Manager' , content='Approved By Manager' where reference_name ='{0}' and subject ='Approved By Line Manager'".format(self.name))
+		#frappe.db.sql("update tabCommunication set subject ='Approved By Manager' , content='Approved By Manager' where reference_name ='{0}' and subject ='Approved By Line Manager'".format(self.name))
 
 		self.validate_type()
 		self.validate_days_and_fin()
@@ -1198,21 +1216,49 @@ def hooked_leave_allocation_builder():
 	# lts = frappe.get_list("Leave Type", fields = ["name"])
 	# for lt in lts:
 	# 	print lt.name
+def update_la_from_date():
+	new_emps = frappe.db.sql("""SELECT `tabLeave Allocation`.name, `tabEmployee`.date_of_joining,
+		`tabLeave Allocation`.employee FROM `tabLeave Allocation` INNER JOIN `tabEmployee` ON 
+		`tabLeave Allocation`.employee = 
+		`tabEmployee`.name where DATEDIFF('2017-01-01',`tabEmployee`.date_of_joining) < 0 
+		and `tabLeave Allocation`.leave_type = 'Annual Leave - اجازة اعتيادية' """, as_dict = True)
+	for new_emp in new_emps:
+		frappe.db.set_value("Leave Allocation", new_emp.name, "from_date", new_emp.date_of_joining)
+		print new_emp.date_of_joining
 
 def create_return_from_leave_statement_after_leave():
 
-	lps = frappe.get_list("Leave Application", filters = {"status": "Approved"}, fields = ["name", "to_date", "employee"])
+	lps = frappe.get_list("Leave Application", filters = {"status": "Approved"}, fields = ["name", "to_date", "from_date", "employee", "employee_name", "department", "total_leave_days"])
 	for lp in lps:
 		emp_user = frappe.get_value("Employee", filters = {"name": lp.employee}, fieldname = "user_id")
 		rfls = frappe.get_value("Return From Leave Statement", filters = {"leave_application": lp.name}, fieldname = ["name"])
 		if not rfls and getdate(nowdate()) > getdate(lp.to_date): 
-			frappe.get_doc({
+			workflow_state = ""
+			if u'CEO' in frappe.get_roles(emp_user):
+				workflow_state = "Created By CEO"
+			elif u'Director' in frappe.get_roles(emp_user):
+				workflow_state = "Created By Director"
+			elif u'Manager' in frappe.get_roles(emp_user):
+				workflow_state = "Created By Manager"
+			elif u'Line Manager' in frappe.get_roles(emp_user):
+				workflow_state = "Created By Line Manager"
+			elif u'Employee' in frappe.get_roles(emp_user):
+				workflow_state = "Pending"
+			rfls_doc = frappe.get_doc({
 				"doctype": "Return From Leave Statement",
 				"leave_application": lp.name,
-				"return_date": nowdate(),
 				"employee": lp.employee,
-				"owner": emp_user
-				}).save(ignore_permissions = True)
+				"employee_name": lp.employee_name,
+				"owner": emp_user,
+				"total_leave_days": lp.total_leave_days,
+				"from_date": lp.from_date,
+				"to_date": lp.to_date,
+				"workflow_state": workflow_state
+				})
+			rfls_doc.flags.ignore_validate = True
+			rfls_doc.flags.ignore_mandatory = True
+			rfls_doc.save()
+
 			frappe.db.commit()
 		# print nowdate()
 
