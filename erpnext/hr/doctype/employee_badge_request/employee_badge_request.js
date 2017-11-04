@@ -16,20 +16,20 @@ cur_frm.add_fetch('employee', 'department', 'department');
 frappe.ui.form.on('Employee Badge Request', {
     refresh: function(frm) {
 
-        if (!cur_frm.doc.__islocal) {
-        	for (var key in cur_frm.fields_dict){
-                cur_frm.fields_dict[key].df.read_only =1; 
-            }
-            cur_frm.disable_save();
-        }
-        else{
-            if (roles.indexOf("HR Specialist")!= -1){
-                cur_frm.fields_dict["badge_received"].df.read_only=0;
-                cur_frm.refresh_fields(["badge_received"]);
+        // if (!cur_frm.doc.__islocal) {
+        // 	for (var key in cur_frm.fields_dict){
+        //         cur_frm.fields_dict[key].df.read_only =1; 
+        //     }
+        //     cur_frm.disable_save();
+        // }
+        // else{
+        //     if (roles.indexOf("HR Specialist")!= -1){
+        //         cur_frm.fields_dict["badge_received"].df.read_only=0;
+        //         cur_frm.refresh_fields(["badge_received"]);
 
-            }
-        	cur_frm.enable_save();
-        }
+        //     }
+        // 	cur_frm.enable_save();
+        // }
     },
     validate: function(frm) {
         // if (!frm.doc.__islocal) {

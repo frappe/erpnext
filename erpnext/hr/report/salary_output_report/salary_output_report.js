@@ -7,14 +7,14 @@ frappe.query_reports["Salary Output Report"] = {
 			"fieldname":"from_date",
 			"label": __("From"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.add_months(frappe.datetime.get_todayfrappe.datetime.get_today(), -1),
+			"default": frappe.datetime.add_months(frappe.datetime.get_today(), -1),
 			"reqd": 1
 		},
 		{
 			"fieldname":"to_date",
 			"label": __("To"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.get_todayfrappe.datetime.get_today(),
+			"default": frappe.datetime.get_today(),
 			"reqd": 1
 		},
 		{
