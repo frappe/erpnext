@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import msgprint, _
 
 def execute(filters=None):
 
@@ -18,7 +17,7 @@ def get_columns():
 		_("Date") + ":Date:80",
 		_("Owner") + "::150",
 		_("Payment Mode") + "::120",
-		_("Warehouse") + ":Link/Cost Center:100", 
+		_("Warehouse") + ":Link/Cost Center:100",
 		_("Cost Center") + ":Link/Warehouse:100",
 		_("Sales and Returns") + ":Currency/currency:120",
 		_("Taxes") + ":Currency/currency:120",
@@ -34,7 +33,7 @@ def get_sales_payment_data(filters, columns):
 		row = [inv.posting_date, inv.owner, inv.mode_of_payment,inv.warehouse, inv.cost_center,inv.net_total, inv.total_taxes, inv.paid_amount, inv.net_total + inv.total_taxes - inv.paid_amount]
 		data.append(row)
 	return data
-	
+
 def get_conditions(filters):
 
 	conditions = ""
@@ -53,7 +52,7 @@ def get_conditions(filters):
 def get_sales_invoice_data(filters):
 
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select a.owner, a.posting_date, c.mode_of_payment, b.warehouse, b.cost_center, 
+	return frappe.db.sql("""select a.owner, a.posting_date, c.mode_of_payment, b.warehouse, b.cost_center,
 	sum(a.net_total) as "net_total",sum(a.total_taxes_and_charges) as "total_taxes", sum(a.base_paid_amount) as "paid_amount"
  	from `tabSales Invoice` a, `tabSales Invoice Item` b, `tabSales Invoice Payment` c 
 	where a.name = b.parent and a.name = c.parent and {conditions}
