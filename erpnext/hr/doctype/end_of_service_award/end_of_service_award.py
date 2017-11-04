@@ -18,39 +18,39 @@ class EndofServiceAward(Document):
                 self.docstatus = 2
         # frappe.throw(str(self.months))
 
-    # def get_salary(self,employee):
-
-    #   result =frappe.db.sql("select net_pay from `tabSalary Slip` where employee='{0}' order by creation desc limit 1".format(employee))
-    #   if result:
-    #       return result[0][0]
-    #   else:
-    #       frappe.throw("لا يوجد قسيمة راتب لهذا الموظف")
-
-
-
     def get_salary(self,employee):
-        start_date = get_first_day(getdate(nowdate()))
-        end_date = get_last_day(getdate(nowdate()))
-        doc = frappe.new_doc("Salary Slip")
-        doc.salary_slip_based_on_timesheet="0"
 
-        doc.payroll_frequency= "Monthly"
-        doc.start_date= start_date
-        doc.end_date= end_date
-        doc.employee= self.employee
-        doc.employee_name= self.employee_name
-        doc.company= "Tawari"
-        doc.posting_date= start_date
+      result =frappe.db.sql("select gross_pay from `tabSalary Slip` where employee='{0}' order by creation desc limit 1".format(employee))
+      if result:
+          return result[0][0]
+      else:
+          frappe.throw("لا يوجد قسيمة راتب لهذا الموظف")
+
+
+
+    # def get_salary(self,employee):
+    #     start_date = get_first_day(getdate(nowdate()))
+    #     end_date = get_last_day(getdate(nowdate()))
+    #     doc = frappe.new_doc("Salary Slip")
+    #     doc.salary_slip_based_on_timesheet="0"
+
+    #     doc.payroll_frequency= "Monthly"
+    #     doc.start_date= start_date
+    #     doc.end_date= end_date
+    #     doc.employee= self.employee
+    #     doc.employee_name= self.employee_name
+    #     doc.company= "Tawari"
+    #     doc.posting_date= start_date
         
-        doc.insert()
+    #     doc.insert(ignore_permissions = True)
 
 
-        grosspay =doc.gross_pay
-        result=grosspay
-        if result:
-            return result
-        else:
-            frappe.throw("لا يوجد قسيمة راتب لهذا الموظف")
+    #     grosspay =doc.gross_pay
+    #     result=grosspay
+    #     if result:
+    #         return result
+    #     else:
+    #         frappe.throw("لا يوجد قسيمة راتب لهذا الموظف")
 
 @frappe.whitelist()
 def get_award(start_date, end_date, salary, toc, reason):

@@ -48,25 +48,30 @@ frappe.ui.form.on('End of Service Award', {
     type_of_contract: function() {
         if (cur_frm.doc.type_of_contract == "Contractor") {
             cur_frm.set_df_property("reason", "options", "\nانتهاء مدة العقد , أو باتفاق الطرفين على إنهاء العقد\nفسخ العقد من قبل صاحب العمل\nفسخ العقد من قبل صاحب العمل لأحد الحالات الواردة في المادة (80)\nترك العامل العمل نتيجة لقوة قاهرة\nإنهاء العاملة لعقد العمل خلال ستة أشهر من عقد الزواج أو خلال ثلاثة أشهر من الوضع\nترك العامل العمل لأحد الحالات الواردة في المادة (81)\nفسخ العقد من قبل العامل أو ترك العامل العمل لغير الحالات الواردة في المادة (81)");
-        } else if (cur_frm.doc.type_of_contract == "Full-time") {
-            cur_frm.set_df_property("reason", "options", "\nاتفاق العامل وصاحب العمل على إنهاء العقد\nفسخ العقد من قبل صاحب العمل\nفسخ العقد من قبل صاحب العمل لأحد الحالات الواردة في المادة (80)\nترك العامل العمل نتيجة لقوة قاهرة\nإنهاء العاملة لعقد العمل خلال ستة أشهر من عقد الزواج أو خلال ثلاثة أشهر من الوضع\nترك العامل العمل لأحد الحالات الواردة في المادة (81)\nترك العامل العمل دون تقديم استقالة لغير الحالات الواردة في المادة (81)\nاستقالة العامل");
         } else {
-            cur_frm.set_df_property("reason", "options", "");
+            cur_frm.set_df_property("reason", "options", "\nاتفاق العامل وصاحب العمل على إنهاء العقد\nفسخ العقد من قبل صاحب العمل\nفسخ العقد من قبل صاحب العمل لأحد الحالات الواردة في المادة (80)\nترك العامل العمل نتيجة لقوة قاهرة\nإنهاء العاملة لعقد العمل خلال ستة أشهر من عقد الزواج أو خلال ثلاثة أشهر من الوضع\nترك العامل العمل لأحد الحالات الواردة في المادة (81)\nترك العامل العمل دون تقديم استقالة لغير الحالات الواردة في المادة (81)\nاستقالة العامل");
         }
+        //  else {
+        //     cur_frm.set_df_property("reason", "options", "");
+        // }
     },
     end_date: function(frm) {
         frm.trigger("get_days_months_years");
 
-        frappe.call({
-            method: "erpnext.hr.doctype.end_of_service_award.end_of_service_award.get_award",
-            args: {
-                EOS_doc: frm.doc
-            },
-            callback: function(r) {
-                console.log(r);
+        // frappe.call({
+        //     method: "erpnext.hr.doctype.end_of_service_award.end_of_service_award.get_award",
+        //     args: {
+        //         start_date: frm.doc.work_start_date,
+        //         end_date: frm.doc.end_date,
+        //         salary: frm.doc.salary,
+        //         toc: frm.doc.toc,
+        //         reason: frm.doc.reason
+        //     },
+        //     callback: function(r) {
+        //         console.log(r);
 
-            }
-        });
+        //     }
+        // });
     },
     get_days_months_years: function(frm) {
         start = cur_frm.doc.work_start_date;

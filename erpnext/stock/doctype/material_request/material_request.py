@@ -139,7 +139,7 @@ class MaterialRequest(BuyingController):
 			# frappe.throw(user_emp[0].user_id)
 			user = frappe.get_doc("User", user_emp[0].user_id)
 			user.add_roles("Material Requester")
-			frappe.permissions.add_user_permission("Material Request", self.name, user_emp[0].user_id)
+			#~ frappe.permissions.add_user_permission("Material Request", self.name, user_emp[0].user_id)
 
 	def validate_department(self):
 		if self.purchase_workflow == "Project":

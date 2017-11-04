@@ -207,7 +207,37 @@ class PurchaseReceipt(BuyingController):
 		warehouse_with_no_account = []
 		negative_expense_to_be_booked = 0.0
 		stock_items = self.get_stock_items()
+		fixed_asset_items = self.get_is_fixed_asset_items()
 		for d in self.get("items"):
+			if d.item_code in fixed_asset_items:
+				print ("Start 2" ,warehouse_account.get(d.warehouse))
+				if warehouse_account.get(d.warehouse):
+					# stock received but not billed
+					stock_rbnb_currency = get_account_currency(stock_rbnb)
+					
+					gl_entries.append(self.get_gl_dict({
+						"account": warehouse_account[d.warehouse]["name"],
+						"against": stock_rbnb,
+						"cost_center": d.cost_center,
+						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+						"debit": flt(d.base_net_amount, d.precision("base_net_amount")),
+					}, warehouse_account[d.warehouse]["account_currency"]))
+					
+					gl_entries.append(self.get_gl_dict({
+						"account": stock_rbnb,
+						"against": warehouse_account[d.warehouse]["name"],
+						"cost_center": d.cost_center,
+						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+						"credit": flt(d.base_net_amount, d.precision("base_net_amount")),
+						"credit_in_account_currency": flt(d.base_net_amount, d.precision("base_net_amount")) \
+							if stock_rbnb_currency==self.company_currency else flt(d.net_amount, d.precision("net_amount"))
+					}, stock_rbnb_currency))
+
+				elif d.warehouse not in warehouse_with_no_account or \
+					d.rejected_warehouse not in warehouse_with_no_account:
+						warehouse_with_no_account.append(d.warehouse)
+				print ("Start 44")
+			
 			if d.item_code in stock_items and flt(d.valuation_rate) and flt(d.qty):
 				if warehouse_account.get(d.warehouse):
 					stock_value_diff = frappe.db.get_value("Stock Ledger Entry",

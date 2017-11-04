@@ -22,9 +22,10 @@ class SalarySlip(TransactionBase):
 		# self.validate_return_from_leave_deduction()
 		self.status = self.get_status()
 
-		pan=frappe.get_list("Penalty",['name'],filters={'start_date':self.start_date,'end_date':self.end_date,'employee':self.employee})
+		pan=frappe.get_list("Penalty",['name'],filters={'start_date':self.start_date,'end_date':self.end_date,'employee':self.employee}, ignore_permissions=True)
 		if pan:
 			pen_doc=frappe.get_doc("Penalty",pan[0].name)	
+			pen_doc.flags.ignore_permissions = True
 			if pen_doc:
 				if pen_doc.penalty_type=="Days":
 					self.penalty_days=pen_doc.days_count

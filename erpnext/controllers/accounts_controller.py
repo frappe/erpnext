@@ -443,6 +443,16 @@ class AccountsController(TransactionBase):
 				(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
 		return stock_items
+	
+	def get_is_fixed_asset_items(self):
+		items = []
+		item_codes = list(set(item.item_code for item in self.get("items")))
+		if item_codes:
+			items = [r[0] for r in frappe.db.sql("""select name
+				from `tabItem` where name in (%s) and is_fixed_asset=1""" % \
+				(", ".join((["%s"]*len(item_codes))),), item_codes)]
+
+		return items
 
 	def set_total_advance_paid(self):
 		if self.doctype == "Sales Order":
