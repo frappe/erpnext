@@ -55,17 +55,41 @@ class Project(Document):
 
 	def validate_project_roles(self):
 		if self.project_manager:
-			user_emp = frappe.db.sql("select user_id from `tabEmployee` where name = '{0}'".format(self.project_manager), as_dict = 1)
+			user_emp = frappe.db.sql("select user_id from `tabEmployee` where name = '{0}'".format(self.project_manager))
 			# frappe.throw(user_emp[0].user_id)
-			user = frappe.get_doc("User", user_emp[0].user_id)
+			user = frappe.get_doc("User", user_emp[0][0])
 			user.add_roles("Project Manager")
-			frappe.permissions.add_user_permission("Project", self.name, user_emp[0].user_id)
+			frappe.get_doc(dict(
+			doctype='User Permission',
+			user=user_emp[0][0],
+			allow="Project",
+			for_value=self.name,
+			apply_for_all_roles=apply
+			)).insert(ignore_permissions = True)
+			# frappe.permissions.add_user_permission("Project", self.name, user_emp[0].user_id)
 
 		if self.project_budget_controller:
-			user_emp = frappe.db.sql("select user_id from `tabEmployee` where name = '{0}'".format(self.project_budget_controller), as_dict = 1)
-			user = frappe.get_doc("User", user_emp[0].user_id)
+			user_emp = frappe.db.sql("select user_id from `tabEmployee` where name = '{0}'".format(self.project_budget_controller))
+			user = frappe.get_doc("User", user_emp[0][0])
 			user.add_roles("Project Budget Controller")
-			frappe.permissions.add_user_permission("Project", self.name, user_emp[0].user_id)
+			frappe.get_doc(dict(
+			doctype='User Permission',
+			user=user_emp[0][0],
+			allow="Project",
+			for_value=self.name,
+			apply_for_all_roles=apply
+			)).insert(ignore_permissions = True)
+			# frappe.permissions.add_user_permission("Project", self.name, user_emp[0].user_id)
+		pdds = frappe.db.sql("select parent from `tabUserRole` where role = 'Projects Department Director'")
+		for pdd in pdds:
+			if pdd[0] and pdd[0] != "Administrator":
+				frappe.get_doc(dict(
+				doctype='User Permission',
+				user=pdd[0],
+				allow="Project",
+				for_value=self.name,
+				apply_for_all_roles=apply
+				)).insert(ignore_permissions = True)
 
 	def validate_dates(self):
 		if self.expected_start_date and self.expected_end_date:

@@ -52,6 +52,15 @@ class PurchaseOrder(BuyingController):
 		if self.get("__islocal") :
 				self.title = self.get_title()
 		self.vallidate_workflow_transition()
+
+		mr = frappe.get_value('Quotation Opening', filters = {"name": self.quotation_opening, "docstatus": 1}, fieldname = "material_request")
+		if mr:
+			self.material_request = mr
+
+			proj = frappe.get_value('Quotation Opening', filters = {"name": self.quotation_opening, "docstatus": 1}, fieldname = "project")
+			if proj:
+				self.project = proj
+
 	def get_title(self):
 		from frappe.utils import getdate
 		

@@ -5,13 +5,10 @@
 cur_frm.add_fetch("material_requester", "department", "department");
 cur_frm.add_fetch("material_requester", "user_id", "user_id");
 frappe.ui.form.on('Material Request', {
-    // validate: function(frm) {
-    //        if (user_roles.indexOf("Director") != -1 && frm.doc.state == "Approved") {
-    //            frm.set_value("workflow_state", "Approved By Director");
-    //            frm.disable_save();
-    //        }
+    validate: function(frm) {
+           cur_frm.refresh();
 
-    //    },
+       },
     setup: function(frm) {
         frm.custom_make_buttons = {
             'Stock Entry': 'Issue Material',

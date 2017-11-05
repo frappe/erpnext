@@ -41,6 +41,8 @@ cur_frm.fields_dict.alternative_employee.get_query = function(doc) {
 };
 frappe.ui.form.on("Leave Application", {
     validate: function(frm) {
+        tit = frm.page.$title_area.find('.hidden-xs');
+        console.log(tit);
         // if (!frm.doc.__islocal && frm.doc.owner != frappe.session.user) {
         //     // if (frm.doc.leave_approver != frappe.session.user && frm.doc.docstatus != 1) {
         //     //     //~ frm.set_value("docstatus", 0);

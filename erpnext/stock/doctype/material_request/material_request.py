@@ -134,12 +134,19 @@ class MaterialRequest(BuyingController):
 				frappe.throw(_("The Project is not valid"))
 
 	def validate_adding_mr(self):
+		pass
 		if self.material_requester:
 			user_emp = frappe.db.sql("select user_id from `tabEmployee` where name = '{0}'".format(self.material_requester), as_dict = 1)
 			# frappe.throw(user_emp[0].user_id)
-			user = frappe.get_doc("User", user_emp[0].user_id)
-			user.add_roles("Material Requester")
-			#~ frappe.permissions.add_user_permission("Material Request", self.name, user_emp[0].user_id)
+			frappe.get_doc(dict(
+			doctype='User Permission',
+			user=user_emp[0].user_id,
+			allow="Material Request",
+			for_value=self.name,
+			apply_for_all_roles=apply
+			)).insert(ignore_permissions = True)
+			# user = frappe.get_doc("User", user_emp[0].user_id)
+			# frappe.permissions.add_user_permission("Material Request", self.name, user_emp[0].user_id, apply=False)
 
 	def validate_department(self):
 		if self.purchase_workflow == "Project":

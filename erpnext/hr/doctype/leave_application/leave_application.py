@@ -119,6 +119,7 @@ class LeaveApplication(Document):
 
 
 	def after_insert(self):
+		# frappe.clear_cache(user=frappe.session.user)
 
 		if self.workflow_state=="Approved By Manager":
 			#frappe.db.sql("update tabCommunication set subject ='Approved By Manager' , content='Approved By Manager' where reference_name ='{0}' and subject ='Approved By Line Manager'".format(self.name))
@@ -129,7 +130,7 @@ class LeaveApplication(Document):
 	
 	def validate_conditional_workflow_transition(self):
 
-		def unpaid_leave_switcher(wf=self.workflow_state,lt=self.leave_type,emp=self.employee,from_date=self.from_date,to_date=self.to_date,ld=self.leave_days):
+		def unpaid_leave_switcher(wf=self.workflow_state,lt=self.leave_type,emp=self.employee,from_date=self.from_date,to_date=self.to_date,ld=self.total_leave_days):
 			if lt == "Without Pay - غير مدفوعة" and wf == "Approved By Director":
 				allocation_records = get_leave_allocation_records(from_date, emp, lt)
 				if allocation_records:
@@ -138,7 +139,7 @@ class LeaveApplication(Document):
 					applied_days = get_approved_leaves_for_period(emp, lt, la_from_date, la_to_date)
 					if applied_days or ld > 10:
 						self.workflow_state == "Approved By Director (U.L)"
-		def five_days_leave_switcher(wf = self.workflow_state, ld = self.leave_days, lt = self.leave_type):
+		def five_days_leave_switcher(wf = self.workflow_state, ld = self.total_leave_days, lt = self.leave_type):
 			if ld > 5:
 				if wf == "Approved By Director" and (lt == " Annual Leave - اجازة اعتيادية" or lt == " emergency -اضطرارية" or lt == " Without Pay - غير مدفوعة"):
 					self.workflow_state = "Approved By Director (+5)"
@@ -857,7 +858,7 @@ def get_monthly_accumulated_leave(from_date, to_date, leave_type, employee):
 			total_leave_days = get_number_of_leave_days(employee, leave_type, from_date, to_date)
 			date_dif = date_diff(to_date, allocation_records[employee][leave_type].from_date)
 			# frappe.throw(str(date_dif))
-			period_balance = (date_dif) * (allocation_records[employee][leave_type].total_leaves_allocated/365)
+			period_balance = (date_dif) * ((allocation_records[employee][leave_type].total_leaves_allocated/12)*(30))
 			balance = period_balance - applied_days - total_leave_days
 			# getdate(to_date).month
 			return str(balance)
