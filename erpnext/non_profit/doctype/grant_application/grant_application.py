@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.website.website_generator import WebsiteGenerator
 from frappe.contacts.address_and_contact import load_address_and_contact
+from frappe.utils import get_url
 
 class GrantApplication(WebsiteGenerator):
 	_website = frappe._dict(
@@ -43,17 +44,17 @@ def assessment_result(title, assessment_scale, note):
 @frappe.whitelist()
 def send_grant_review_emails(grant_application):
 	grant = frappe.get_doc("Grant Application", grant_application)
-
+	url =  get_url('grant-application/{0}'.format(grant_application))
 	frappe.sendmail(
 		recipients= grant.assessment_manager,
 		sender=frappe.session.user,
 		subject=grant.title,
-		message='<p> Please Review this grant application</p><br>' ,
+		message='<p> Please Review this grant application</p><br>'+url,
 		reference_doctype=grant.doctype,
 		reference_name=grant.name
 	)
 
 	grant.status = "In Progress"
-	meeting.save()
+	grant.save()
 
-	frappe.msgprint(_("Invitation Sent"))
+	frappe.msgprint(_("Review Invitation Sent"))
