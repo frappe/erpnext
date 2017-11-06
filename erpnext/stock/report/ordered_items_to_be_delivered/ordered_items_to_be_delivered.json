@@ -1,5 +1,5 @@
 {
- "add_total_row": 0, 
+ "add_total_row": 1, 
  "apply_user_permissions": 1, 
  "creation": "2013-02-22 18:01:55", 
  "disabled": 0, 
@@ -7,7 +7,7 @@
  "doctype": "Report", 
  "idx": 3, 
  "is_standard": "Yes", 
- "modified": "2017-09-18 12:28:49.322622", 
+ "modified": "2017-11-06 13:05:38.965229", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Ordered Items To Be Delivered", 
