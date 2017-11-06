@@ -92,9 +92,7 @@ def get_list_context(context):
 
 	# show only 20 past meetings
 	context.past_meetings = get_meetings("Completed", limit_page_length=20)
-
-
-
+	context.introduction = frappe.render_template('erpnext/meeting_minutes/doctype/meeting/templates/meeting_list.html', context)
 
 @frappe.whitelist()
 def get_full_name(attendee):

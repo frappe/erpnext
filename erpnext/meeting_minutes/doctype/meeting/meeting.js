@@ -12,8 +12,7 @@ frappe.ui.form.on("Meeting", "refresh", function(frm) {
 			});
 		}
 	});
-
-    });
+});
 
 frappe.ui.form.on("Meeting Attendee", {
 	attendee: function(frm, cdt, cdn) {
