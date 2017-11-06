@@ -646,27 +646,27 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.set_batch_number(cdt, cdn);
 	},
 
-    /* Determine appropriate batch number and set it in the form.
-    * @param {string} cdt - Document Doctype
-    * @param {string} cdn - Document name
-    */
+	/* Determine appropriate batch number and set it in the form.
+	* @param {string} cdt - Document Doctype
+	* @param {string} cdn - Document name
+	*/
 	set_batch_number: function(cdt, cdn) {
-	    const doc = frappe.get_doc(cdt, cdn);
-	    if(doc) {
-	        const batches = this._set_batch_number(doc);
-	    }
+		const doc = frappe.get_doc(cdt, cdn);
+		if(doc) {
+			this._set_batch_number(doc);
+		}
 	},
 
 	_set_batch_number: function(doc) {
-        return frappe.call({
-            method: 'erpnext.stock.doctype.batch.batch.get_batch_no',
-            args: {'item_code': doc.item_code, 'warehouse': doc.warehouse, 'qty': flt(doc.qty) * flt(doc.conversion_factor)},
-            callback: function(r) {
-                if(r.message) {
-                    frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message);
-                }
-            }
-        });
+		return frappe.call({
+			method: 'erpnext.stock.doctype.batch.batch.get_batch_no',
+			args: {'item_code': doc.item_code, 'warehouse': doc.warehouse, 'qty': flt(doc.qty) * flt(doc.conversion_factor)},
+			callback: function(r) {
+				if(r.message) {
+					frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message);
+				}
+			}
+		});
 	},
 
 	set_dynamic_labels: function() {
