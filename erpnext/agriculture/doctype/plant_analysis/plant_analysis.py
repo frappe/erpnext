@@ -4,8 +4,10 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.model.naming import make_autoname
 from frappe.model.document import Document
 
 class PlantAnalysis(Document):
 	def autoname(self):
 		self.name = self.crop +' '+ self.date
+		# self.name = make_autoname(self.crop + '-.#####')
