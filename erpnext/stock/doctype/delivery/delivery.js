@@ -42,22 +42,22 @@ frappe.ui.form.on('Delivery', {
 			}
 		});
 		frappe.confirm(__("Do you want to notify all the customers by email?"), function () {
-			// frappe.call({
-			// 	method: "erpnext.stock.doctype.delivery.delivery.notify_customers",
-			// 	args: {
-			// 		"docname": frm.doc.name,
-			// 		"date": frm.doc.date,
-			// 		"driver": frm.doc.driver,
-			// 		"vehicle": frm.doc.vehicle,
-			// 		"sender_email": owner_email,
-			// 		"sender_name": frappe.user.full_name(owner_email),
-			// 		"delivery_notification": frm.doc.delivery_notification
-			// 		}
-			// 	});
+			frappe.call({
+				method: "erpnext.stock.doctype.delivery.delivery.notify_customers",
+				args: {
+					"docname": frm.doc.name,
+					"date": frm.doc.date,
+					"driver": frm.doc.driver,
+					"vehicle": frm.doc.vehicle,
+					"sender_email": owner_email,
+					"sender_name": frappe.user.full_name(owner_email),
+					"delivery_notification": frm.doc.delivery_notification
+					}
+			});
 			frm.doc.email_notification_sent = true;
 			frm.refresh_field('email_notification_sent')
 		});
-}
+	}
 });
 
 cur_frm.fields_dict['delivery_stops'].grid.get_field("address").get_query = function(doc, cdt, cdn) {
