@@ -33,7 +33,8 @@ frappe.query_reports["Sales Payment Summary"] = {
 			"fieldname":"owner",
 			"label": __("Owner"),
 			"fieldtype": "Link",
-			"options": "User"
+			"options": "User",
+			"defaults": user
 		},
 		{
 			"fieldname":"cost_center",
