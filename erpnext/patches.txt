@@ -455,3 +455,4 @@ erpnext.patches.v9_0.add_healthcare_domain
 erpnext.patches.v9_0.set_variant_item_description
 erpnext.patches.v9_0.set_uoms_in_variant_field
 erpnext.patches.v9_0.copy_old_fees_field_data
+erpnext.patches.v9_0.set_pos_profile_name
