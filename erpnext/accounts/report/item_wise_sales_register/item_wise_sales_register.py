@@ -175,21 +175,21 @@ def get_tax_accounts(item_list, columns, company_currency,
 
 	tax_details = frappe.db.sql("""
 		select
-			parent, description, item_wise_tax_detail,
+			parent, account_head, item_wise_tax_detail,
 			charge_type, base_tax_amount_after_discount_amount
 		from `tab%s`
 		where
 			parenttype = %s and docstatus = 1
-			and (description is not null and description != '')
+			and (account_head is not null and account_head != '')
 			and parent in (%s)
 			%s
-		order by description
+		order by account_head
 	""" % (tax_doctype, '%s', ', '.join(['%s']*len(invoice_item_row)), conditions),
 		tuple([doctype] + invoice_item_row.keys()))
 
-	for parent, description, item_wise_tax_detail, charge_type, tax_amount in tax_details:
-		if description not in tax_columns and tax_amount:
-			tax_columns.append(description)
+	for parent, tax_account, item_wise_tax_detail, charge_type, tax_amount in tax_details:
+		if tax_account not in tax_columns and tax_amount:
+			tax_columns.append(tax_account)
 
 		if item_wise_tax_detail:
 			try:
@@ -214,7 +214,7 @@ def get_tax_accounts(item_list, columns, company_currency,
 						item_tax_amount = flt((tax_amount * d.base_net_amount) / item_net_amount) \
 							if item_net_amount else 0
 						if item_tax_amount:
-							itemised_tax.setdefault(d.name, {})[description] = frappe._dict({
+							itemised_tax.setdefault(d.name, {})[tax_account] = frappe._dict({
 								"tax_rate": tax_rate,
 								"tax_amount": flt(item_tax_amount, tax_amount_precision)
 							})
@@ -223,16 +223,16 @@ def get_tax_accounts(item_list, columns, company_currency,
 				continue
 		elif charge_type == "Actual" and tax_amount:
 			for d in invoice_item_row.get(parent, []):
-				itemised_tax.setdefault(d.name, {})[description] = frappe._dict({
+				itemised_tax.setdefault(d.name, {})[tax_account] = frappe._dict({
 					"tax_rate": "NA",
 					"tax_amount": flt((tax_amount * d.base_net_amount) / d.base_net_total,
 						tax_amount_precision)
 				})
 
 	tax_columns.sort()
-	for desc in tax_columns:
-		columns.append(desc + " Rate:Data:80")
-		columns.append(desc + " Amount:Currency/currency:100")
+	for tax_account in tax_columns:
+		columns.append(tax_account + " Rate:Data:80")
+		columns.append(tax_account + " Amount:Currency/currency:100")
 
 	columns += ["Total Tax:Currency/currency:80", "Total:Currency/currency:100"]
 
