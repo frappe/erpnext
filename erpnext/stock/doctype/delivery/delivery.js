@@ -53,11 +53,11 @@ frappe.ui.form.on('Delivery', {
 					"sender_name": frappe.user.full_name(owner_email),
 					"delivery_notification": frm.doc.delivery_notification
 					}
-				});
+			});
 			frm.doc.email_notification_sent = true;
 			frm.refresh_field('email_notification_sent')
 		});
-}
+	}
 });
 
 cur_frm.fields_dict['delivery_stops'].grid.get_field("address").get_query = function(doc, cdt, cdn) {
