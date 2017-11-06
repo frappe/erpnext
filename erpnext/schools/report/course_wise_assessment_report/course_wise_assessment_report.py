@@ -173,14 +173,16 @@ def get_column(assessment_criteria, total_maximum_score):
 def get_chart_data(grades, assessment_criteria_list, kounter):
 	grades = sorted(grades)
 	datasets = []
+
 	for grade in grades:
-		tmp = []
-		for ac in assessment_criteria_list:
-			if grade in kounter[ac]:
-				tmp.append(kounter[ac][grade])
+		tmp = frappe._dict({"values":[], "title": grade})
+		for criteria in assessment_criteria_list:
+			if grade in kounter[criteria]:
+				tmp["values"].append(kounter[criteria][grade])
 			else:
-				tmp.append(0)
+				tmp["values"].append(0)
 		datasets.append(tmp)
+
 	return {
 		"data": {
 			"labels": assessment_criteria_list,
