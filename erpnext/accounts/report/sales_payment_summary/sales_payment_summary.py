@@ -6,14 +6,12 @@ import frappe
 from frappe import _
 
 def execute(filters=None):
-
 	columns, data = [], []
 	columns=get_columns()
 	data=get_sales_payment_data(filters, columns)
 	return columns, data
 
 def get_columns():
-
 	return [
 		_("Date") + ":Date:80",
 		_("Owner") + "::150",
@@ -27,16 +25,16 @@ def get_columns():
 	]
 
 def get_sales_payment_data(filters, columns):
-
 	sales_invoice_data = get_sales_invoice_data(filters)
 	data = []
 	for inv in sales_invoice_data:
-		row = [inv.posting_date, inv.owner, inv.mode_of_payment,inv.warehouse, inv.cost_center,inv.net_total, inv.total_taxes, inv.paid_amount, inv.net_total + inv.total_taxes - inv.paid_amount]
+		row = [inv.posting_date, inv.owner, inv.mode_of_payment,inv.warehouse,
+			inv.cost_center,inv.net_total, inv.total_taxes, inv.paid_amount,
+			(inv.net_total + inv.total_taxes - inv.paid_amount)]
 		data.append(row)
 	return data
 
 def get_conditions(filters):
-
 	conditions = ""
 	if filters.get("company"): conditions += " a.company=%(company)s"
 	if filters.get("customer"): conditions += " and a.customer = %(customer)s"
@@ -51,10 +49,18 @@ def get_conditions(filters):
 	return conditions
 
 def get_sales_invoice_data(filters):
-
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select a.owner, a.posting_date, c.mode_of_payment, b.warehouse, b.cost_center,
-	sum(a.net_total) as "net_total",sum(a.total_taxes_and_charges) as "total_taxes", sum(a.base_paid_amount) as "paid_amount"
- 	from `tabSales Invoice` a, `tabSales Invoice Item` b, `tabSales Invoice Payment` c 
-	where a.name = b.parent and a.name = c.parent and {conditions}
-	group by a.owner, a.posting_date, c.mode_of_payment, b.warehouse, b.cost_center""".format(conditions=conditions),filters, as_dict=1)
+	return frappe.db.sql("""
+		select
+			a.owner, a.posting_date, c.mode_of_payment, b.warehouse, b.cost_center,
+			sum(a.net_total) as "net_total",
+			sum(a.total_taxes_and_charges) as "total_taxes",
+			sum(a.base_paid_amount) as "paid_amount"
+		from `tabSales Invoice` a, `tabSales Invoice Item` b, `tabSales Invoice Payment` c
+		where
+			a.name = b.parent
+			and a.name = c.parent
+			and {conditions}
+			group by
+			a.owner, a.posting_date, c.mode_of_payment, b.warehouse, b.cost_center
+	""".format(conditions=conditions), filters, as_dict=1)
