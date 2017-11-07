@@ -53,12 +53,12 @@ class LeaveApplication(Document):
 		self.validate_attendance()
 		self.validate_back_days()
 		self.validate_monthly_leave()
-		self.validate_approval_line_manager()
-		self.validate_type()
-		self.validate_days_and_fin()
-		#~ # self.docstatus=1
-		self.set_approvals()
+		# self.validate_approval_line_manager()
+		# self.validate_type()
+		# self.validate_days_and_fin()
+		# self.set_approvals()
 		self.validate_leave_submission_dates()
+		self.validate_conditional_workflow_transition()
 
 		#~ # self.update_leaves_allocated()
 		#~ result=frappe.db.sql("select name from tabCommunication where reference_name='{0}' and subject='Approved By Line Manager'".format(self.name))
@@ -88,58 +88,57 @@ class LeaveApplication(Document):
 				if date_diff( nowdate(), self.from_date) >= 0:
 					frappe.throw(_("The submission date can't be after leave start"))
 
-	def set_approvals(self):
-		user = frappe.session.user
-		employee = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
-		if employee:
-			emp=frappe.get_doc("Employee",employee[0].name)
-			# frappe.msgprint(employee[0].name)
-			app=self.get("approvals")
-			if (not self.get('__islocal')) and (self.workflow_state=="Pending" or self.workflow_state=="Created By Manager" or self.workflow_state=="Created By Director"): 
-				pass
-			else:
-				app.append({
-					"approval" :employee[0].name,
-					"approval_name":emp.employee_name,
-					"state":self.workflow_state,
-					"date" :frappe.utils.data.now_datetime()
-					})
-				self.set("approvals",app)
+	# def set_approvals(self):
+	# 	user = frappe.session.user
+	# 	employee = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
+	# 	if employee:
+	# 		emp=frappe.get_doc("Employee",employee[0].name)
+	# 		# frappe.msgprint(employee[0].name)
+	# 		app=self.get("approvals")
+	# 		if (not self.get('__islocal')) and (self.workflow_state=="Pending" or self.workflow_state=="Created By Manager" or self.workflow_state=="Created By Director"): 
+	# 			pass
+	# 		else:
+	# 			app.append({
+	# 				"approval" :employee[0].name,
+	# 				"approval_name":emp.employee_name,
+	# 				"state":self.workflow_state,
+	# 				"date" :frappe.utils.data.now_datetime()
+	# 				})
+	# 			self.set("approvals",app)
 
 	def validate_emp(self):
-	 if self.get('__islocal'):
-		if u'CEO' in frappe.get_roles(frappe.session.user):
-			self.workflow_state = "Created By CEO"
-		elif u'Director' in frappe.get_roles(frappe.session.user):
-			self.workflow_state = "Created By Director"
-		elif u'Manager' in frappe.get_roles(frappe.session.user):
-				self.workflow_state = "Created By Manager"
-		elif u'Line Manager' in frappe.get_roles(frappe.session.user):
-				self.workflow_state = "Created By Line Manager"
+		employee_user = frappe.get_value("Employee", filters = {"name": self.employee}, fieldname="user_id")
+		if self.get('__islocal') and employee_user:
+			if u'CEO' in frappe.get_roles(employee_user):
+				self.workflow_state = "Created By CEO"
+			elif u'Director' in frappe.get_roles(employee_user):
+				self.workflow_state = "Created By Director"
+			elif u'Manager' in frappe.get_roles(employee_user):
+					self.workflow_state = "Created By Manager"
+			elif u'Line Manager' in frappe.get_roles(employee_user):
+					self.workflow_state = "Created By Line Manager"
+			else:
+				self.workflow_state = "Pending"
 
 
 	def after_insert(self):
 		# frappe.clear_cache(user=frappe.session.user)
 
-		if self.workflow_state=="Approved By Manager":
-			#frappe.db.sql("update tabCommunication set subject ='Approved By Manager' , content='Approved By Manager' where reference_name ='{0}' and subject ='Approved By Line Manager'".format(self.name))
-			# frappe.msgprint("111")
-			pass
+		# if self.workflow_state=="Approved By Manager":
+		# 	#frappe.db.sql("update tabCommunication set subject ='Approved By Manager' , content='Approved By Manager' where reference_name ='{0}' and subject ='Approved By Line Manager'".format(self.name))
+		# 	# frappe.msgprint("111")
+		# 	pass
 		if self.leave_type != "Annual Leave - اجازة اعتيادية" and self.leave_type != "Without Pay - غير مدفوعة" and self.leave_type != "Compensatory off - تعويضية" and self.leave_type != "emergency -اضطرارية":
 			frappe.msgprint(_("You must attach the required file otherwise the application will be <span style='color:red;'>REJECTED!</span>"))
 	
 	def validate_conditional_workflow_transition(self):
 
-		def unpaid_leave_switcher(wf=self.workflow_state,lt=self.leave_type,emp=self.employee,from_date=self.from_date,to_date=self.to_date,ld=self.total_leave_days):
-			if lt == "Without Pay - غير مدفوعة" and wf == "Approved By Director":
-				allocation_records = get_leave_allocation_records(from_date, emp, lt)
-				if allocation_records:
-					la_from_date = allocation_records[emp][lt].from_date
-					la_to_date = allocation_records[emp][lt].to_date
-					applied_days = get_approved_leaves_for_period(emp, lt, la_from_date, la_to_date)
-					if applied_days or ld > 10:
-						self.workflow_state == "Approved By Director (U.L)"
-		def five_days_leave_switcher(wf = self.workflow_state, ld = self.total_leave_days, lt = self.leave_type):
+		def unpaid_leave_switcher():
+			if self.leave_type == "Without Pay - غير مدفوعة" and self.workflow_state == "Approved By Director":
+					applied_days = has_approved_leave(self.leave_type, self.employee)
+					if applied_days or self.total_leave_days > 10:
+						self.workflow_state = "Approved By Director (U.L)"
+		def workflow_leave_switcher(wf = self.workflow_state, ld = self.total_leave_days, lt = self.leave_type):
 			if ld > 5:
 				if wf == "Approved By Director" and (lt == " Annual Leave - اجازة اعتيادية" or lt == " emergency -اضطرارية" or lt == " Without Pay - غير مدفوعة"):
 					self.workflow_state = "Approved By Director (+5)"
@@ -149,200 +148,209 @@ class LeaveApplication(Document):
 			else:
 				if wf == "Approved By HR Specialist":
 					self.workflow_state = "Approved By HR Specialist (F.T)"
+					self.status = "Approved"
+					self.docstatus = 1
+			if wf == "Approved By Director" and lt == "Compensatory off - تعويضية":
+				self.workflow_state = "Approved By Director (F.T)"
+				self.status = "Approved"
+				self.docstatus = 1
 
-	def validate_approval_line_manager(self):
-		dd=frappe.get_doc("Employee",self.employee)
-		if dd.sub_department:
-			dep=frappe.get_doc("Department",dd.sub_department)
-			if dep.is_group==0 and (not dep.line_manager):
-				user_roles = frappe.get_roles()
-				if  "Manager" in user_roles:
-					if  dep.manager and self.workflow_state=="Approved By Line Manager":
-						self.workflow_state="Approved By Manager"
-					if  dep.manager and self.workflow_state=="Rejected By Line Manager":
-						self.workflow_state="Rejected By Manager"
-						# result=frappe.db.sql("select name from tabCommunication where reference_name='{0}' and subject='Approved By Line Manager'".format(self.name))
+		unpaid_leave_switcher()
+		workflow_leave_switcher()
+
+	# def validate_approval_line_manager(self):
+	# 	dd=frappe.get_doc("Employee",self.employee)
+	# 	if dd.sub_department:
+	# 		dep=frappe.get_doc("Department",dd.sub_department)
+	# 		if dep.is_group==0 and (not dep.line_manager):
+	# 			user_roles = frappe.get_roles()
+	# 			if  "Manager" in user_roles:
+	# 				if  dep.manager and self.workflow_state=="Approved By Line Manager":
+	# 					self.workflow_state="Approved By Manager"
+	# 				if  dep.manager and self.workflow_state=="Rejected By Line Manager":
+	# 					self.workflow_state="Rejected By Manager"
+	# 					# result=frappe.db.sql("select name from tabCommunication where reference_name='{0}' and subject='Approved By Line Manager'".format(self.name))
 	            
-	     #        		if result:
-						#     frappe.msgprint(result[0][0])
+	#      #        		if result:
+	# 					#     frappe.msgprint(result[0][0])
 
-	def validate_type(self):
+	# def validate_type(self):
 		
-		le_list=frappe.get_list("Leave Application",['name'],filters={"leave_type":"Without Pay - غير مدفوعة","employee":self.employee,"status":"Approved"})
-		user_roles = frappe.get_roles()
+	# 	le_list=frappe.get_list("Leave Application",['name'],filters={"leave_type":"Without Pay - غير مدفوعة","employee":self.employee,"status":"Approved"})
+	# 	user_roles = frappe.get_roles()
 
 
-		if  "HR Specialist" in user_roles:
-			if not ((le_list and self.leave_type=="Without Pay - غير مدفوعة") or (self.leave_type=="Without Pay - غير مدفوعة" and self.total_leave_days >10)):
-				if self.workflow_state=="Approved By CEO":
-					frappe.db.sql("update `tabLeave Application` set workflow_state='Approved By HR Specialist' where name ='{0}'".format(self.employee))
-					self.workflow_state="Approved By HR Specialist"
+	# 	if  "HR Specialist" in user_roles:
+	# 		if not ((le_list and self.leave_type=="Without Pay - غير مدفوعة") or (self.leave_type=="Without Pay - غير مدفوعة" and self.total_leave_days >10)):
+	# 			if self.workflow_state=="Approved By CEO":
+	# 				frappe.db.sql("update `tabLeave Application` set workflow_state='Approved By HR Specialist' where name ='{0}'".format(self.employee))
+	# 				self.workflow_state="Approved By HR Specialist"
 				
-				if self.workflow_state=="Rejected By CEO":
-					self.workflow_state="Rejected By HR Specialist"
+	# 			if self.workflow_state=="Rejected By CEO":
+	# 				self.workflow_state="Rejected By HR Specialist"
 
 
-		if "HR Manager" in user_roles:
-			if (self.leave_type=="Without Pay - غير مدفوعة" or self.leave_type=="Annual Leave - اجازة اعتيادية" or self.leave_type=="emergency -اضطرارية") and self.total_leave_days>5:
-				if self.workflow_state=="Approved By HR Specialist":
-					self.workflow_state="Approved By HR Manager"
+	# 	if "HR Manager" in user_roles:
+	# 		if (self.leave_type=="Without Pay - غير مدفوعة" or self.leave_type=="Annual Leave - اجازة اعتيادية" or self.leave_type=="emergency -اضطرارية") and self.total_leave_days>5:
+	# 			if self.workflow_state=="Approved By HR Specialist":
+	# 				self.workflow_state="Approved By HR Manager"
 
-				if self.workflow_state=="Approved By CEO":
-					self.workflow_state="Approved By HR Manager"
+	# 			if self.workflow_state=="Approved By CEO":
+	# 				self.workflow_state="Approved By HR Manager"
 
-				if self.workflow_state=="Rejected By HR Specialist":
-					self.workflow_state="Rejected By HR Manager"
+	# 			if self.workflow_state=="Rejected By HR Specialist":
+	# 				self.workflow_state="Rejected By HR Manager"
 					
-				if self.workflow_state=="Rejected By CEO":
-					self.workflow_state="Rejected By HR Manager"
+	# 			if self.workflow_state=="Rejected By CEO":
+	# 				self.workflow_state="Rejected By HR Manager"
 
 
 
 
-	def validate_days_and_fin(self):
-		if not((self.total_leave_days <5 and self.leave_type=="Without Pay - غير مدفوعة") or self.total_leave_days >5):
-			if self.workflow_state=="Approved By HR Specialist":
-				self.status="Approved"
-				self.docstatus=1
-				''' start form here by ahmad  to allow ceo to add leave application directally 
-				without the need for hr manager to approve it which make it status = approved and 1 
-				, yet the hr manager can approve it and it would be 
-				just deccoratoed '''
-		#commented nisma two lines 
-		#else:
-			# if self.workflow_state=="Approved By HR Manager":
-			elif self.workflow_state=="Approved By HR Manager":
-				self.status="Approved"
-				self.docstatus=1
-		#added by ahmad
-			elif self.workflow_state=="Created By CEO":
-				self.status="Approved"
-				self.docstatus=1
+	# def validate_days_and_fin(self):
+	# 	if not((self.total_leave_days <5 and self.leave_type=="Without Pay - غير مدفوعة") or self.total_leave_days >5):
+	# 		if self.workflow_state=="Approved By HR Specialist":
+	# 			self.status="Approved"
+	# 			self.docstatus=1
+	# 			''' start form here by ahmad  to allow ceo to add leave application directally 
+	# 			without the need for hr manager to approve it which make it status = approved and 1 
+	# 			, yet the hr manager can approve it and it would be 
+	# 			just deccoratoed '''
+	# 	#commented nisma two lines 
+	# 	#else:
+	# 		# if self.workflow_state=="Approved By HR Manager":
+	# 		elif self.workflow_state=="Approved By HR Manager":
+	# 			self.status="Approved"
+	# 			self.docstatus=1
+	# 	#added by ahmad
+	# 		elif self.workflow_state=="Created By CEO":
+	# 			self.status="Approved"
+	# 			self.docstatus=1
 
-				''' end to here by ahmad '''
+	# 			''' end to here by ahmad '''
 
 
-		if "Rejected" in str(self.workflow_state):
-			self.status="Rejected"
-			self.docstatus=2
+	# 	if "Rejected" in str(self.workflow_state):
+	# 		self.status="Rejected"
+	# 		self.docstatus=2
 
 
 	
-	def validate_type_dis(self):
+	# def validate_type_dis(self):
 
-		user = frappe.session.user
-		employee = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
-		if employee:
+	# 	user = frappe.session.user
+	# 	employee = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
+	# 	if employee:
 
-			# department = frappe.get_value("Department" , filters= {"manager": employee[0].name}, fieldname="name")
-			emplo=frappe.get_doc("Employee",self.employee)
-			if emplo.sub_department:
-				department_doc=frappe.get_doc("Department",emplo.sub_department)	
-			if emplo.department:
-				department_doc_main=frappe.get_doc("Department",emplo.department)		
-			if emplo.user_id:
-				userem=frappe.get_doc("User",emplo.user_id)
+	# 		# department = frappe.get_value("Department" , filters= {"manager": employee[0].name}, fieldname="name")
+	# 		emplo=frappe.get_doc("Employee",self.employee)
+	# 		if emplo.sub_department:
+	# 			department_doc=frappe.get_doc("Department",emplo.sub_department)	
+	# 		if emplo.department:
+	# 			department_doc_main=frappe.get_doc("Department",emplo.department)		
+	# 		if emplo.user_id:
+	# 			userem=frappe.get_doc("User",emplo.user_id)
 
-		#result=frappe.db.sql("select name from tabCommunication where reference_name='{0}' and subject='Approved By Line Manager'".format(self.name))
-		# if result:
-		#     frappe.msgprint(result[0][0])
-		fl=False
-		le_list=frappe.get_all("Leave Application",['name'],filters={"leave_type":"Without Pay - غير مدفوعة","employee":self.employee,"workflow_state":"Approved By HR Manager"})
-		user_roles = frappe.get_roles()
+	# 	#result=frappe.db.sql("select name from tabCommunication where reference_name='{0}' and subject='Approved By Line Manager'".format(self.name))
+	# 	# if result:
+	# 	#     frappe.msgprint(result[0][0])
+	# 	fl=False
+	# 	le_list=frappe.get_all("Leave Application",['name'],filters={"leave_type":"Without Pay - غير مدفوعة","employee":self.employee,"workflow_state":"Approved By HR Manager"})
+	# 	user_roles = frappe.get_roles()
 
-		if not self.get('__islocal'):
-			if (not("Manager" in user_roles)) and self.workflow_state=="Pending":
-				# frappe.msgprint(("Manager" in user_roles))
-				fl=True
+	# 	if not self.get('__islocal'):
+	# 		if (not("Manager" in user_roles)) and self.workflow_state=="Pending":
+	# 			# frappe.msgprint(("Manager" in user_roles))
+	# 			fl=True
 
-			if self.workflow_state:
-				if 'Rejected' in self.workflow_state :
-					fl=True
-			if  ("CEO" in user_roles and frappe.session.user != "Administrator") :
-				if not self.workflow_state=="Created By Director":
-					if not ((le_list and self.leave_type=="Without Pay - غير مدفوعة") or (self.leave_type=="Without Pay - غير مدفوعة" and self.total_leave_days >10)):
-						fl= True
-			if "HR Manager" in user_roles and frappe.session.user != "Administrator" :
-				if self.workflow_state=="Approved by Manager" or  self.workflow_state=="Created By Manager":
-					if department_doc_main.director !=  employee[0].name:
+	# 		if self.workflow_state:
+	# 			if 'Rejected' in self.workflow_state :
+	# 				fl=True
+	# 		if  ("CEO" in user_roles and frappe.session.user != "Administrator") :
+	# 			if not self.workflow_state=="Created By Director":
+	# 				if not ((le_list and self.leave_type=="Without Pay - غير مدفوعة") or (self.leave_type=="Without Pay - غير مدفوعة" and self.total_leave_days >10)):
+	# 					fl= True
+	# 		if "HR Manager" in user_roles and frappe.session.user != "Administrator" :
+	# 			if self.workflow_state=="Approved by Manager" or  self.workflow_state=="Created By Manager":
+	# 				if department_doc_main.director !=  employee[0].name:
 			
-						fl=True
-					else:
-						return
+	# 					fl=True
+	# 				else:
+	# 					return
 
 
-				elif not (((((self.leave_type=="Wihout Pay - غير مدفوعة" and self.total_leave_days<=10) or self.leave_type=="Annual Leave - اجازة اعتيادية" or self.leave_type=="emergency -اضطرارية") and self.total_leave_days>5 )and self.workflow_state=="Approved By Director" )or (((le_list and self.leave_type=="Without Pay - غير مدفوعة") or (self.leave_type=="Without Pay - غير مدفوعة" and self.total_leave_days >10)) and self.workflow_state=="Approved By CEO" ) or (self.leave_type=="Without Pay - غير مدفوعة"  and self.workflow_state=="Approved By HR Specialist" ) or self.workflow_state=="Created By CEO" or (u"Director" in frappe.get_roles(userem.name) and self.workflow_state=="Approved By CEO" and self.total_leave_days>5 and (self.leave_type=="Wihout Pay - غير مدفوعة"  or self.leave_type=="Annual Leave - اجازة اعتيادية" or self.leave_type=="emergency -اضطرارية"))):
-					if ( self.total_leave_days>5 )and self.workflow_state=="Approved By Director":
-						if (self.leave_type=="Without Pay - غير مدفوعة" and self.total_leave_days<=10)or self.leave_type=="Annual Leave - اجازة اعتيادية" or self.leave_type=="emergency -اضطرارية":
-							return
-					if (not(self.leave_type=="Wihout Pay - غير مدفوعة"  or self.leave_type=="Annual Leave - اجازة اعتيادية" or self.leave_type=="emergency -اضطرارية")) and self.total_leave_days>5 and self.workflow_state=="Approved By HR Specialist":
-						return 
+	# 			elif not (((((self.leave_type=="Wihout Pay - غير مدفوعة" and self.total_leave_days<=10) or self.leave_type=="Annual Leave - اجازة اعتيادية" or self.leave_type=="emergency -اضطرارية") and self.total_leave_days>5 )and self.workflow_state=="Approved By Director" )or (((le_list and self.leave_type=="Without Pay - غير مدفوعة") or (self.leave_type=="Without Pay - غير مدفوعة" and self.total_leave_days >10)) and self.workflow_state=="Approved By CEO" ) or (self.leave_type=="Without Pay - غير مدفوعة"  and self.workflow_state=="Approved By HR Specialist" ) or self.workflow_state=="Created By CEO" or (u"Director" in frappe.get_roles(userem.name) and self.workflow_state=="Approved By CEO" and self.total_leave_days>5 and (self.leave_type=="Wihout Pay - غير مدفوعة"  or self.leave_type=="Annual Leave - اجازة اعتيادية" or self.leave_type=="emergency -اضطرارية"))):
+	# 				if ( self.total_leave_days>5 )and self.workflow_state=="Approved By Director":
+	# 					if (self.leave_type=="Without Pay - غير مدفوعة" and self.total_leave_days<=10)or self.leave_type=="Annual Leave - اجازة اعتيادية" or self.leave_type=="emergency -اضطرارية":
+	# 						return
+	# 				if (not(self.leave_type=="Wihout Pay - غير مدفوعة"  or self.leave_type=="Annual Leave - اجازة اعتيادية" or self.leave_type=="emergency -اضطرارية")) and self.total_leave_days>5 and self.workflow_state=="Approved By HR Specialist":
+	# 					return 
 
 
 						
-					fl=True
+	# 				fl=True
 
 
-				elif self.total_leave_days <5 and self.workflow_state=="Approved By HR Specialist" and self.leave_type!="Without Pay - غير مدفوعة":
-					fl=True
+	# 			elif self.total_leave_days <5 and self.workflow_state=="Approved By HR Specialist" and self.leave_type!="Without Pay - غير مدفوعة":
+	# 				fl=True
 
-				elif (self.total_leave_days <5 and self.workflow_state=="Approved By Director"):
-					fl=True	
+	# 			elif (self.total_leave_days <5 and self.workflow_state=="Approved By Director"):
+	# 				fl=True	
 
 				
 
 
 
-			if "HR Specialist" in user_roles and frappe.session.user != "Administrator" :
-				if ((self.workflow_state=="Approved By CEO" or (((self.leave_type=="Without Pay - غير مدفوعة" and self.total_leave_days<10)or self.leave_type=="Annual Leave - اجازة اعتيادية" or self.leave_type=="emergency -اضطرارية" ) and self.workflow_state=="Approved By Director")) and self.total_leave_days>5):
-					fl= True
-				# if self.total_leave_days>5:
-				# 	if not(self.workflow_state=="Pending" and department_doc.manager ==  employee[0].name):
-				# 		fl=True
-				if (not((self.leave_type=="Without Pay - غير مدفوعة" and self.total_leave_days<10)or self.leave_type=="Annual Leave - اجازة اعتيادية" or self.leave_type=="emergency -اضطرارية" )) and self.workflow_state=="Approved By Director" and self.total_leave_days>5:
-					return
+	# 		if "HR Specialist" in user_roles and frappe.session.user != "Administrator" :
+	# 			if ((self.workflow_state=="Approved By CEO" or (((self.leave_type=="Without Pay - غير مدفوعة" and self.total_leave_days<10)or self.leave_type=="Annual Leave - اجازة اعتيادية" or self.leave_type=="emergency -اضطرارية" ) and self.workflow_state=="Approved By Director")) and self.total_leave_days>5):
+	# 				fl= True
+	# 			# if self.total_leave_days>5:
+	# 			# 	if not(self.workflow_state=="Pending" and department_doc.manager ==  employee[0].name):
+	# 			# 		fl=True
+	# 			if (not((self.leave_type=="Without Pay - غير مدفوعة" and self.total_leave_days<10)or self.leave_type=="Annual Leave - اجازة اعتيادية" or self.leave_type=="emergency -اضطرارية" )) and self.workflow_state=="Approved By Director" and self.total_leave_days>5:
+	# 				return
 
-				if (((le_list and self.leave_type=="Without Pay - غير مدفوعة") or (self.leave_type=="Without Pay - غير مدفوعة" and self.total_leave_days >10))and self.workflow_state=="Approved By Director") :
-					fl=True
+	# 			if (((le_list and self.leave_type=="Without Pay - غير مدفوعة") or (self.leave_type=="Without Pay - غير مدفوعة" and self.total_leave_days >10))and self.workflow_state=="Approved By Director") :
+	# 				fl=True
 
-				elif self.workflow_state=="Pending"  :
-					if department_doc.manager !=  employee[0].name:
-						fl=True
+	# 			elif self.workflow_state=="Pending"  :
+	# 				if department_doc.manager !=  employee[0].name:
+	# 					fl=True
 
-				elif self.workflow_state=="Created By CEO":
-					fl=True
+	# 			elif self.workflow_state=="Created By CEO":
+	# 				fl=True
 
-				elif self.workflow_state=="Approved By Director" and (not((le_list and self.leave_type=="Without Pay - غير مدفوعة") or (self.leave_type=="Without Pay - غير مدفوعة" and self.total_leave_days >10))) and self.total_leave_days <5:
-					return 
-
-
-
-				elif u"Director" in frappe.get_roles(userem.name) and self.workflow_state=="Approved By CEO" and (not(self.total_leave_days>5 and (self.leave_type=="Wihout Pay - غير مدفوعة"  or self.leave_type=="Annual Leave - اجازة اعتيادية" or self.leave_type=="emergency -اضطرارية"))):
-					return
-				elif u"Director" in frappe.get_roles(userem.name) and self.workflow_state=="Approved By CEO" :
-					if self.total_leave_days>5 and (self.leave_type=="Wihout Pay - غير مدفوعة"  or self.leave_type=="Annual Leave - اجازة اعتيادية" or self.leave_type=="emergency -اضطرارية"):
-						fl=True
+	# 			elif self.workflow_state=="Approved By Director" and (not((le_list and self.leave_type=="Without Pay - غير مدفوعة") or (self.leave_type=="Without Pay - غير مدفوعة" and self.total_leave_days >10))) and self.total_leave_days <5:
+	# 				return 
 
 
-				elif not (self.workflow_state=="Approved By CEO" and ((le_list and self.leave_type=="Without Pay - غير مدفوعة") or (self.leave_type=="Without Pay - غير مدفوعة" and self.total_leave_days >10))):
-					fl=True
+
+	# 			elif u"Director" in frappe.get_roles(userem.name) and self.workflow_state=="Approved By CEO" and (not(self.total_leave_days>5 and (self.leave_type=="Wihout Pay - غير مدفوعة"  or self.leave_type=="Annual Leave - اجازة اعتيادية" or self.leave_type=="emergency -اضطرارية"))):
+	# 				return
+	# 			elif u"Director" in frappe.get_roles(userem.name) and self.workflow_state=="Approved By CEO" :
+	# 				if self.total_leave_days>5 and (self.leave_type=="Wihout Pay - غير مدفوعة"  or self.leave_type=="Annual Leave - اجازة اعتيادية" or self.leave_type=="emergency -اضطرارية"):
+	# 					fl=True
+
+
+	# 			elif not (self.workflow_state=="Approved By CEO" and ((le_list and self.leave_type=="Without Pay - غير مدفوعة") or (self.leave_type=="Without Pay - غير مدفوعة" and self.total_leave_days >10))):
+	# 				fl=True
 
 					
 
 
-			if frappe.session.user==self.owner:
-				fl=True
+	# 		if frappe.session.user==self.owner:
+	# 			fl=True
 
 
-			if u"Manager" in user_roles and (u"Director" not in user_roles) and frappe.session.user != "Administrator" and self.workflow_state=="Approved By Manager":
-				fl= True
+	# 		if u"Manager" in user_roles and (u"Director" not in user_roles) and frappe.session.user != "Administrator" and self.workflow_state=="Approved By Manager":
+	# 			fl= True
 
 
 				
             
         
 
-		return fl
+	# 	return fl
 
 	def validate_yearly_repeated_leaves(self):
 		if self.leave_type == "New Born - مولود جديد" or self.leave_type == "Death - وفاة" or self.leave_type == "Educational - تعليمية":
@@ -465,7 +473,7 @@ class LeaveApplication(Document):
 				applied_days = get_approved_leaves_for_period(self.employee, self.leave_type, from_date, self.to_date)
 				# frappe.throw(str(applied_days + self.total_leave_days))
 				date_dif = date_diff(self.to_date, from_date)
-				period_balance = (date_dif) * (allocation_records[self.employee][self.leave_type].total_leaves_allocated/365)
+				period_balance = (date_dif) * (allocation_records[self.employee][self.leave_type].total_leaves_allocated/360)
 				if period_balance < applied_days + self.total_leave_days: 
 					frappe.throw(_("Your monthly leave balance is not sufficient"))
 
@@ -482,32 +490,35 @@ class LeaveApplication(Document):
 		# 	frappe.throw(_("Application can not be marked for past of the day"))
 			
 	def on_update(self):
+		pass
 		# if (not self.previous_doc and self.leave_approver) or (self.previous_doc and \
 		# 		self.status == "Open" and self.previous_doc.leave_approver != self.leave_approver):
 		# 	# notify leave approver about creation
 			
-		if self.previous_doc and self.workflow_state and self.previous_doc.status != self.workflow_state and self.status == "Rejected":
-			# notify employee about rejection
-			if self.half_day != 1 :
-				self.notify_employee(self.status)
+		# if self.previous_doc and self.workflow_state and self.previous_doc.status != self.workflow_state and self.status == "Rejected":
+		# 	# notify employee about rejection
+		# 	if self.half_day != 1 :
+		# 		self.notify_employee(self.status)
 		
 		
 	
 	def on_submit(self):
+		pass
 		#frappe.db.sql("update tabCommunication set subject ='Approved By Manager' , content='Approved By Manager' where reference_name ='{0}' and subject ='Approved By Line Manager'".format(self.name))
 
-		self.validate_type()
-		self.validate_days_and_fin()
+		# self.validate_type()
+		# self.validate_days_and_fin()
 		# if self.half_day != 1 :
 		# 	# self.notify_exec_manager()
 		# 	self.notify_employee(self.status)
 		# # self.validate_leave_submission_dates()
 	
 	def on_update_after_submit(self):
+		pass
 		#frappe.db.sql("update tabCommunication set subject ='Approved By Manager' , content='Approved By Manager' where reference_name ='{0}' and subject ='Approved By Line Manager'".format(self.name))
 
-		self.validate_type()
-		self.validate_days_and_fin()
+		# self.validate_type()
+		# self.validate_days_and_fin()
 
 		# if self.half_day != 1 :
 		# 	# self.notify_exec_manager()
@@ -515,9 +526,10 @@ class LeaveApplication(Document):
 
 
 	def on_cancel(self):
+		pass
 		# notify leave applier about cancellation
-		if 'Rejected' in self.workflow_state:
-			frappe.db.sql("update `tabLeave Application` set status ='Rejected' where name ='{0}'".format(self.name))
+		# if 'Rejected' in self.workflow_state:
+		# 	frappe.db.sql("update `tabLeave Application` set status ='Rejected' where name ='{0}'".format(self.name))
 
 
 		# if self.half_day != 1 :
@@ -849,20 +861,36 @@ def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def get_monthly_accumulated_leave(from_date, to_date, leave_type, employee):
-	if leave_type == "Compensatory off - تعويضية" or leave_type == "Annual Leave - اجازة اعتيادية":
-		allocation_records = get_leave_allocation_records(from_date, employee, leave_type)
-		if allocation_records:
+	allocation_records = get_leave_allocation_records(from_date, employee, leave_type)
+	if allocation_records:
+		applied_days = get_approved_leaves_for_period(employee, leave_type, allocation_records[employee][leave_type].from_date, to_date)
+		total_leave_days = get_number_of_leave_days(employee, leave_type, from_date, to_date)
+		date_dif = date_diff(to_date, allocation_records[employee][leave_type].from_date)
+		balance = ""
+		if leave_type == "Annual Leave - اجازة اعتيادية":
 			# al_from_date_month = getdate(allocation_records[employee][leave_type].from_date).month
 			# al_to_date_month = getdate(allocation_records[employee][leave_type].to_date).month
-			applied_days = get_approved_leaves_for_period(employee, leave_type, allocation_records[employee][leave_type].from_date, to_date)
-			total_leave_days = get_number_of_leave_days(employee, leave_type, from_date, to_date)
-			date_dif = date_diff(to_date, allocation_records[employee][leave_type].from_date)
 			# frappe.throw(str(date_dif))
-			period_balance = (date_dif) * ((allocation_records[employee][leave_type].total_leaves_allocated/12)*(30))
+			period_balance = (date_dif) * (allocation_records[employee][leave_type].total_leaves_allocated/360)
 			balance = period_balance - applied_days - total_leave_days
 			# getdate(to_date).month
-			return str(balance)
+			
 
+		elif leave_type == "Compensatory off - تعويضية":
+			al_from_date = getdate(allocation_records[employee][leave_type].from_date)
+			first_of_month = 1 if al_from_date.day == 1 else 0
+			
+			if al_from_date.year == getdate(to_date).year:
+				period_balance = (getdate(to_date).month - al_from_date.month + first_of_month)*10
+				balance = period_balance - applied_days - total_leave_days
+
+			elif al_from_date.year < getdate(to_date).year:
+				period_balance = (12 - al_from_date.month + getdate(to_date).month + first_of_month)*10
+				balance = period_balance - applied_days - total_leave_days
+			else:
+				frappe.throw(_("Invalid Dates"))
+
+		return str(balance)
 @frappe.whitelist()
 def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day=None):
 	if half_day==1:
@@ -886,6 +914,11 @@ def get_leave_balance_on(employee, leave_type, date, allocation_records=None,
 	leaves_taken = get_approved_leaves_for_period(employee, leave_type, allocation.from_date, date)
 
 	return flt(allocation.total_leaves_allocated) - flt(leaves_taken)
+def has_approved_leave(leave_type, employee):
+	la = frappe.db.sql("""select name from `tabLeave Application` 
+		where leave_type = '{0}' and docstatus = 1 and status='Approved'
+		and employee = '{1}'""".format(leave_type, employee))
+	return True if la else False
 
 def get_approved_leaves_for_period(employee, leave_type, from_date, to_date):
 	#"
@@ -1228,7 +1261,8 @@ def update_la_from_date():
 		print new_emp.date_of_joining
 
 def create_return_from_leave_statement_after_leave():
-
+	''' Create return form leave docfield at 12 pm when the leave application ends  '''
+	
 	lps = frappe.get_list("Leave Application", filters = {"status": "Approved"}, fields = ["name", "to_date", "from_date", "employee", "employee_name", "department", "total_leave_days"])
 	for lp in lps:
 		emp_user = frappe.get_value("Employee", filters = {"name": lp.employee}, fieldname = "user_id")
@@ -1261,9 +1295,37 @@ def create_return_from_leave_statement_after_leave():
 			rfls_doc.save()
 
 			frappe.db.commit()
+
+			from frappe.core.doctype.communication.email import make
+			frappe.flags.sent_mail = None
+			content_msg="Please review your return from leave Statement has been creation"
+	 		prefered_email = frappe.get_value("Employee", filters = {"user_id": emp_user}, fieldname = "prefered_email")
+	
+	 		if prefered_email:
+
+				try:
+					make(subject = "Return from leave ", content=content_msg, recipients=prefered_email ,send_email=True, sender="ahmedzaqout@outlook.com")
+				except:
+					frappe.throw("could not send")
+
 		# print nowdate()
 
 
+#api for testing email 
+#should be deleted after finish
+
+def ahmadragheb():
+	from frappe.core.doctype.communication.email import make
+	frappe.flags.sent_mail = None
+	content_msg="Please review your return from leave Statement has been creation"
+	
+	try:
+		make(subject = "Return from leave ", content=content_msg, recipients="ahmedragheb75@gmail.com" ,send_email=True, sender="ahmedzaqout@outlook.com")
+		print("done")
+	except:
+		frappe.throw("could not send")
+		
+	
 
 
 
@@ -1284,46 +1346,46 @@ def create_return_from_leave_statement_after_leave():
 #             .format(user=frappe.db.escape(user), employee=frappe.db.escape(employee.name))
 
 def get_permission_query_conditions(user):
+	pass
+	# if not user: user = frappe.session.user
+	# employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
+	# if employees:
+	# 	employee = frappe.get_doc('Employee', {'name': employees[0].name})
 
-	if not user: user = frappe.session.user
-	employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
-	if employees:
-		employee = frappe.get_doc('Employee', {'name': employees[0].name})
+	# 	if employee:
+	# 		query = ""
 
-		if employee:
-			query = ""
+	# 		if u'CEO' in frappe.get_roles(user) :
+	# 			if query != "":
+	# 				query+=" or "
+	# 			query+= "`tabLeave Application`.workflow_state = 'Created By Director' or(`tabLeave Application`.workflow_state = 'Approved By Director' and (`tabLeave Application`.leave_type = 'Without Pay - غير مدفوعة' or (`tabLeave Application`.leave_type='Annual Leave - اجازة اعتيادية' and `tabLeave Application`.total_leave_days>=30)))"
 
-			if u'CEO' in frappe.get_roles(user) :
-				if query != "":
-					query+=" or "
-				query+= "`tabLeave Application`.workflow_state = 'Created By Director' or(`tabLeave Application`.workflow_state = 'Approved By Director' and (`tabLeave Application`.leave_type = 'Without Pay - غير مدفوعة' or (`tabLeave Application`.leave_type='Annual Leave - اجازة اعتيادية' and `tabLeave Application`.total_leave_days>=30)))"
-
-			if u'Director' in frappe.get_roles(user):
-				if query != "":
-					query+=" or "
-				department = frappe.get_value("Department" , filters= {"director": employee.name}, fieldname="name")
-				query+="""(employee in (SELECT name from tabEmployee where tabEmployee.department = '{0}')  or employee = '{1}')""".format(department, employee.name)
+	# 		if u'Director' in frappe.get_roles(user):
+	# 			if query != "":
+	# 				query+=" or "
+	# 			department = frappe.get_value("Department" , filters= {"director": employee.name}, fieldname="name")
+	# 			query+="""(employee in (SELECT name from tabEmployee where tabEmployee.department = '{0}')  or employee = '{1}')""".format(department, employee.name)
 			
-			if u'Manager' in frappe.get_roles(user):
-				if query != "":
-					query+=" or "
-				department = frappe.get_value("Department" , filters= {"manager": employee.name}, fieldname="name")
-				query+="""(employee in (SELECT name from tabEmployee where tabEmployee.sub_department in (select name from `tabDepartment` where manager='{0}')) ) or employee = '{0}'""".format( employee.name)
-				# frappe.msgprint("hh")
+	# 		if u'Manager' in frappe.get_roles(user):
+	# 			if query != "":
+	# 				query+=" or "
+	# 			department = frappe.get_value("Department" , filters= {"manager": employee.name}, fieldname="name")
+	# 			query+="""(employee in (SELECT name from tabEmployee where tabEmployee.sub_department in (select name from `tabDepartment` where manager='{0}')) ) or employee = '{0}'""".format( employee.name)
+	# 			# frappe.msgprint("hh")
 
 			
-			if u'HR Manager' in frappe.get_roles(user):
-				# if query != "":
-				# 	query+=" or "
-				# query+="""workflow_state='Approved By HR Specialist' or workflow_state='Created By CEO'  or (workflow_state='Approved By CEO' and total_leave_days >=5) or ((leave_type='Without Pay - غير مدفوعة' or leave_type='Annual Leave - اجازة اعتيادية' or leave_type='emergency -اضطرارية')and workflow_state='Approved By Director') or employee = '{0}'""".format(employee.name)
-				return "" 
+	# 		if u'HR Manager' in frappe.get_roles(user):
+	# 			# if query != "":
+	# 			# 	query+=" or "
+	# 			# query+="""workflow_state='Approved By HR Specialist' or workflow_state='Created By CEO'  or (workflow_state='Approved By CEO' and total_leave_days >=5) or ((leave_type='Without Pay - غير مدفوعة' or leave_type='Annual Leave - اجازة اعتيادية' or leave_type='emergency -اضطرارية')and workflow_state='Approved By Director') or employee = '{0}'""".format(employee.name)
+	# 			return "" 
 
-			if u'HR Specialist' in frappe.get_roles(user):
-				return "" 
+	# 		if u'HR Specialist' in frappe.get_roles(user):
+	# 			return "" 
 
-			if u'Employee' in frappe.get_roles(user):
-				if query != "":
-					query+=" or "
-				query+=""" employee = '{0}'""".format(employee.name)
-			# frappe.msgprint(query)
-			return query
+	# 		if u'Employee' in frappe.get_roles(user):
+	# 			if query != "":
+	# 				query+=" or "
+	# 			query+=""" employee = '{0}'""".format(employee.name)
+	# 		# frappe.msgprint(query)
+	# 		return query

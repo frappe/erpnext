@@ -17,32 +17,32 @@ cur_frm.fields_dict.alternative_employee.get_query = function(doc) {
         frappe.throw(__("Please select an employee"));
     }
 
-    if ('Director' in frappe.roles(user)) {
-        // alert("hhh")
-        return {
-            filters: [
-                ['status', '=', 'Active'],
-                ['name', '!=', cur_frm.doc.employee]
-            ]
-        };
-    } else {
-        // alert("mmm")
-        if (frm.doc.__islocal) {
-            return {
-                filters: [
-                    ['status', '=', 'Active'],
-                    ['name', '!=', cur_frm.doc.employee],
-                    ['department', '=', cur_frm.doc.department]
-                ]
+    // if ('Director' in frappe.roles(user)) {
+    //     // alert("hhh")
+    //     return {
+    //         filters: [
+    //             ['status', '=', 'Active'],
+    //             ['name', '!=', cur_frm.doc.employee]
+    //         ]
+    //     };
+    // } else {
+    //     // alert("mmm")
+    //     if (frm.doc.__islocal) {
+    //         return {
+    //             filters: [
+    //                 ['status', '=', 'Active'],
+    //                 ['name', '!=', cur_frm.doc.employee],
+    //                 ['department', '=', cur_frm.doc.department]
+    //             ]
 
-            };
-        }
-    }
+    //         };
+    //     }
+    // }
 };
 frappe.ui.form.on("Leave Application", {
     validate: function(frm) {
-        tit = frm.page.$title_area.find('.hidden-xs');
-        console.log(tit);
+        // tit = frm.page.$title_area.find('.hidden-xs');
+        // console.log(tit);
         // if (!frm.doc.__islocal && frm.doc.owner != frappe.session.user) {
         //     // if (frm.doc.leave_approver != frappe.session.user && frm.doc.docstatus != 1) {
         //     //     //~ frm.set_value("docstatus", 0);
@@ -92,19 +92,19 @@ frappe.ui.form.on("Leave Application", {
             cur_frm.set_df_property("attachment", "reqd", 0);
             refresh_field("attachment");
         }
-        frappe.call({
-            method: "validate_type_dis",
-            doc: frm.doc,
+        // frappe.call({
+        //     method: "validate_type_dis",
+        //     doc: frm.doc,
 
-            callback: function(r) {
-                if (!r.exc && r.message) {
-                    console.log(r.message)
-                    if (r.message) {
-                        frm.page.clear_actions_menu();
-                    }
-                }
-            }
-        });
+        //     callback: function(r) {
+        //         if (!r.exc && r.message) {
+        //             console.log(r.message)
+        //             if (r.message) {
+        //                 frm.page.clear_actions_menu();
+        //             }
+        //         }
+        //     }
+        // });
         frm.set_df_property("naming_series", "read_only", frm.doc.__islocal ? 0 : 1);
         frm.set_df_property("leave_type", "read_only", frm.doc.__islocal ? 0 : 1);
         frm.set_df_property("employee", "read_only", frm.doc.__islocal ? 0 : 1);
