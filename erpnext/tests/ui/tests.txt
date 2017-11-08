@@ -50,8 +50,8 @@ erpnext/schools/doctype/room/test_room.js
 erpnext/schools/doctype/instructor/test_instructor.js
 erpnext/stock/doctype/warehouse/test_warehouse.js
 erpnext/manufacturing/doctype/production_order/test_production_order.js #long
-erpnext/selling/page/point_of_sale/tests/test_point_of_sale.js
 erpnext/accounts/page/pos/test_pos.js
+erpnext/selling/page/point_of_sale/tests/test_point_of_sale.js
 erpnext/selling/doctype/product_bundle/test_product_bundle.js
 erpnext/stock/doctype/delivery_note/test_delivery_note.js
 erpnext/stock/doctype/material_request/tests/test_material_request.js
