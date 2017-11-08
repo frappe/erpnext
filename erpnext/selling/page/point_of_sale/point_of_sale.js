@@ -43,6 +43,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 	make() {
 		return frappe.run_serially([
+			() => frappe.dom.freeze(),
 			() => {
 				this.prepare_dom();
 				this.prepare_menu();
@@ -55,6 +56,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				frappe.timeout(1);
 				this.make_items();
 				this.bind_events();
+				frappe.dom.unfreeze();
 			},
 			() => this.page.set_title(__('Point of Sale'))
 		]);
@@ -156,6 +158,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	update_item_in_cart(item_code, field='qty', value=1) {
+		frappe.dom.freeze();
 		if(this.cart.exists(item_code)) {
 			const item = this.frm.doc.items.find(i => i.item_code === item_code);
 			frappe.flags.hide_serial_batch_dialog = false;
@@ -220,6 +223,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		this.cart.add_item(item);
 		this.cart.update_taxes_and_totals();
 		this.cart.update_grand_total();
+		frappe.dom.unfreeze();
 	}
 
 	update_item_in_frm(item, field, value) {
@@ -232,8 +236,6 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			return frappe.model.set_value(item.doctype, item.name, field, value)
 				.then(() => this.frm.script_manager.trigger('qty', item.doctype, item.name))
 				.then(() => {
-					console.log(item.qty, item.amount);
-
 					if (field === 'qty' && item.qty === 0) {
 						frappe.model.clear_doc(item.doctype, item.name);
 					}
