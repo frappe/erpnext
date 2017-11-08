@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.model.document import Document
 from frappe.website.website_generator import WebsiteGenerator
 
 class Meeting(WebsiteGenerator):
@@ -14,7 +13,7 @@ class Meeting(WebsiteGenerator):
 	)
 
 	def validate(self):
-		if not self.route:
+		if not self.route:		#pylint: disable=E0203
 			self.route = 'meeting/' + self.scrub(self.title)
 		self.validate_attendees()
 
@@ -69,11 +68,6 @@ class Meeting(WebsiteGenerator):
 			todo = frappe.get_doc("ToDo", todo)
 			todo.flags.from_meeting = True
 			todo.delete()
-
-	def get_context(self, context):
-		context.no_cache = True
-		context.parents = [dict(label='View All Meetings',
-			route='meeting', title='View All Meeting')]
 
 @frappe.whitelist()
 def get_meetings(status, **kwargs):

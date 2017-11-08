@@ -8,4 +8,4 @@ frappe.views.calendar["Meeting"] = {
 		"allDay": "all_day",
 	},
 	get_events_method: "erpnext.meeting_minutes.api.get_meetings"
-}
+};
