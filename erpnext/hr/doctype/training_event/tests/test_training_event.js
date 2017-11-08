@@ -1,7 +1,7 @@
 QUnit.module('hr');
 
 QUnit.test("Test: Training Event [HR]", function (assert) {
-	assert.expect(4);
+	assert.expect(5);
 	let done = assert.async();
 	let employee_name;
 
@@ -21,7 +21,8 @@ QUnit.test("Test: Training Event [HR]", function (assert) {
 				{ employees: [
 					[
 						{employee: employee_name},
-						{employee_name: 'Test Employee 1'}
+						{employee_name: 'Test Employee 1'},
+						{attendance: 'Optional'}
 					]
 				]},
 			]);
@@ -41,6 +42,9 @@ QUnit.test("Test: Training Event [HR]", function (assert) {
 
 			assert.ok(cur_frm.doc.employees[0].employee_name=='Test Employee 1',
 				'Attendee Employee is correctly set');
+
+			assert.ok(cur_frm.doc.employees[0].attendance=='Optional',
+				'Attendance is correctly set');
 		},
 
 		() => frappe.set_route('List','Training Event','List'),

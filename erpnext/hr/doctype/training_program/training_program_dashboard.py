@@ -5,7 +5,7 @@ def get_data():
 		'fieldname': 'training_program',
 		'transactions': [
 			{
-				'label': _('Training Event'),
+				'label': _('Training Events'),
 				'items': ['Training Event']
 			},
 		]

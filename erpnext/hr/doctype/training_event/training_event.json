@@ -809,7 +809,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-10-18 11:22:20.143491", 
+ "modified": "2017-10-23 06:13:29.065781", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Training Event", 
@@ -837,7 +837,7 @@
    "write": 1
   }
  ], 
- "quick_entry": 1, 
+ "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "search_fields": "event_name", 
