@@ -326,6 +326,9 @@ erpnext.pos.PointOfSale = class PointOfSale {
 							__('Select POS Profile')
 						);
 					}
+				} else {
+					frappe.dom.unfreeze();
+					frappe.throw(__("POS Profile is required to use Point-of-Sale"));
 				}
 			});
 		});

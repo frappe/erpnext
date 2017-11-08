@@ -6,7 +6,8 @@ import frappe
 
 def execute():
 	doctype = 'POS Profile'
-	frappe.reload_doctype(doctype)
+	frappe.reload_doc('accounts', 'doctype', doctype)
+	frappe.reload_doc('accounts', 'doctype', 'POS Profile User')
 
 	for doc in frappe.get_all(doctype):
 		_doc = frappe.get_doc(doctype, doc.name)
