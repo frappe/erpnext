@@ -6,6 +6,7 @@ QUnit.test("test:Sales Invoice", function(assert) {
 		() => {
 			return frappe.tests.make("POS Profile", [
 				{naming_series: "SINV"},
+				{pos_profile_name: "_Test POS Profile"},
 				{country: "India"},
 				{currency: "INR"},
 				{write_off_account: "Write Off - FT"},

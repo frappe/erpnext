@@ -624,7 +624,8 @@ class Item(WebsiteGenerator):
 				template_item.save()
 
 	def update_variants(self):
-			if self.flags.dont_update_variants:
+			if self.flags.dont_update_variants or \
+				frappe.db.get_single_value('Item Variant Settings', 'do_not_update_variants'):
 				return
 			if self.has_variants:
 				updated = []
