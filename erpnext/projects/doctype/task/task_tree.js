@@ -48,7 +48,7 @@ frappe.treeview_settings['Task'] = {
 							method: "erpnext.projects.doctype.task.task.add_multiple_tasks",
 							args: {
 								data: d.get_values(),
-								parent: node.data.name
+								parent: node.data.name ? node.data.name : ""
 							},
 							callback: function() { glob.make_tree(); }
 						});

@@ -239,9 +239,10 @@ def add_multiple_tasks(data, parent):
 	new_doc = {'doctype': 'Task', 'parent_task': parent}
 
 	for d in tasks:
-		new_doc['subject'] = d
-		new_task = frappe.get_doc(new_doc)
-		new_task.insert()
+		if d:
+			new_doc['subject'] = d
+			new_task = frappe.get_doc(new_doc)
+			new_task.insert()
 
 @frappe.whitelist()
 def rename_subject(data, name, is_group):
