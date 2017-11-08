@@ -92,6 +92,7 @@ def update_pos_profile_data(doc, pos_profile, company_data):
 	doc.customer_group = pos_profile.get('customer_group') or get_root('Customer Group')
 	doc.territory = pos_profile.get('territory') or get_root('Territory')
 	doc.terms = frappe.db.get_value('Terms and Conditions', pos_profile.get('tc_name'), 'terms') or doc.terms or ''
+	doc.offline_pos_name = ''
 
 def get_root(table):
 	root = frappe.db.sql(""" select name from `tab%(table)s` having
