@@ -1358,7 +1358,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-07-10 14:29:00.457874", 
+ "modified": "2017-11-03 05:31:56.636424", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order", 
@@ -1412,5 +1412,5 @@
  "sort_order": "ASC", 
  "title_field": "production_item", 
  "track_changes": 1, 
- "track_seen": 0
+ "track_seen": 1
 }
