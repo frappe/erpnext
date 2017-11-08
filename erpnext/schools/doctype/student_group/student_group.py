@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 from erpnext.schools.utils import validate_duplicate_student
+from frappe.utils import cint
 
 class StudentGroup(Document):
 	def validate(self):
@@ -34,9 +35,13 @@ class StudentGroup(Document):
 		for d in self.students:
 			if not frappe.db.get_value("Student", d.student, "enabled") and d.active:
 				frappe.throw(_("{0} - {1} is inactive student".format(d.group_roll_number, d.student_name)))
-			if self.group_based_on == "Batch" and d.student not in students and frappe.defaults.get_defaults().validate_batch:
+
+			if (self.group_based_on == "Batch") and cint(frappe.defaults.get_defaults().validate_batch)\
+				and d.student not in students:
 				frappe.throw(_("{0} - {1} is not enrolled in the Batch {2}".format(d.group_roll_number, d.student_name, self.batch)))
-			if self.group_based_on == "Course" and d.student not in students and frappe.defaults.get_defaults().validate_course:
+
+			if (self.group_based_on == "Course") and cint(frappe.defaults.get_defaults().validate_course)\
+				and (d.student not in students):
 				frappe.throw(_("{0} - {1} is not enrolled in the Course {2}".format(d.group_roll_number, d.student_name, self.course)))
 
 	def validate_and_set_child_table_fields(self):
@@ -108,14 +113,14 @@ def fetch_students(doctype, txt, searchfield, start, page_len, filters):
 		students = ([d.student for d in enrolled_students if d.student not in student_group_student]
 			if enrolled_students else [""]) or [""]
 		return frappe.db.sql("""select name, title from tabStudent
-			where name in ({0}) and `{1}` LIKE %s
+			where name in ({0}) and (`{1}` LIKE %s or title LIKE %s)
 			order by idx desc, name
 			limit %s, %s""".format(", ".join(['%s']*len(students)), searchfield),
-			tuple(students + ["%%%s%%" % txt, start, page_len]))
+			tuple(students + ["%%%s%%" % txt, "%%%s%%" % txt, start, page_len]))
 	else:
 		return frappe.db.sql("""select name, title from tabStudent
-			where `{0}` LIKE %s
+			where `{0}` LIKE %s or title LIKE %s
 			order by idx desc, name
 			limit %s, %s""".format(searchfield),
-			tuple(["%%%s%%" % txt, start, page_len]))
+			tuple(["%%%s%%" % txt, "%%%s%%" % txt, start, page_len]))
 
