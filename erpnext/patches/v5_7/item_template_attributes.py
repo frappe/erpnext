@@ -3,7 +3,7 @@
 
 from __future__ import print_function, unicode_literals
 import frappe
-import MySQLdb
+from frappe.exceptions import SQLError
 
 def execute():
 	"""
@@ -31,7 +31,7 @@ def execute():
 		try:
 			migrate_item_variants()
 
-		except MySQLdb.ProgrammingError:
+		except SQLError:
 			print("`tabItem Variant` not found")
 
 def rename_and_reload_doctypes():
