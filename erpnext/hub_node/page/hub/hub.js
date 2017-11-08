@@ -484,7 +484,7 @@ erpnext.hub.Hub = class Hub {
 		}
 		frappe.call({
 			method: 'erpnext.hub_node.get_company_details',
-			args: {company_id: company_id}
+			args: {hub_sync_id: company_id}
 		}).then((r) => {
 			if (r.message) {
 				const company_details = r.message.company_details;
