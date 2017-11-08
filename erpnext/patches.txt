@@ -458,3 +458,4 @@ erpnext.patches.v9_0.set_uoms_in_variant_field
 erpnext.patches.v9_0.copy_old_fees_field_data
 execute:frappe.delete_doc_if_exists("DocType", "Program Fee")
 erpnext.patches.v9_0.set_pos_profile_name
+erpnext.patches.v9_0.remove_non_existing_warehouse_from_stock_settings
