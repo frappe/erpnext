@@ -12,6 +12,7 @@ class StudentApplicant(Document):
 	def autoname(self):
 		from frappe.model.naming import set_name_by_naming_series
 		if self.student_admission:
+			naming_series = None
 			if self.program:
 				student_admission = get_student_admission_data(self.student_admission, self.program)
 				if student_admission:
