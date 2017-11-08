@@ -48,31 +48,7 @@ frappe.treeview_settings['Task'] = {
 							method: "erpnext.projects.doctype.task.task.add_multiple_tasks",
 							args: {
 								data: d.get_values(),
-								parent: node.data.name ? node.data.name : ""
-							},
-							callback: function() { glob.make_tree(); }
-						});
-					}
-				});
-				d.show();
-			}
-		},
-		{
-			label:__("Rename"),
-			click: function(node) {
-				var d = new frappe.ui.Dialog({
-					'title': __("Rename Subject"),
-					'fields': [
-						{'fieldname': 'subject', 'label': 'Subject', 'fieldtype': 'Data'},
-					],
-					primary_action: function(){
-						d.hide();
-						return frappe.call({
-							method: "erpnext.projects.doctype.task.task.rename_subject",
-							args: {
-								data: d.get_values().subject,
-								name: node.data.name,
-								is_group: node.data.expandable
+								parent: node.data.name || ""
 							},
 							callback: function() { glob.make_tree(); }
 						});

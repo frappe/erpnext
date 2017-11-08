@@ -243,7 +243,3 @@ def add_multiple_tasks(data, parent):
 			new_doc['subject'] = d
 			new_task = frappe.get_doc(new_doc)
 			new_task.insert()
-
-@frappe.whitelist()
-def rename_subject(data, name, is_group):
-	frappe.db.sql("""update `tabTask` set subject='{0}' where name='{1}'""".format(data, name))
