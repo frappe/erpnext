@@ -7,4 +7,11 @@ import frappe
 from frappe.model.document import Document
 
 class CropCycle(Document):
-	pass
+	def create_tasks(self, subject, day, holiday_management, priority="Low"):
+		task = frappe.new_doc("Task")
+		task.subject = subject
+		task.priority = priority
+		task.exp_end_date = frappe.utils.data.add_days(self.start_date, day)
+		task.insert()
+		frappe.db.commit()
+		return task.as_dict.im_self.name
