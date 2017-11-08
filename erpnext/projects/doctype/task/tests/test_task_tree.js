@@ -34,7 +34,8 @@ QUnit.test("test: Task Tree", function (assert) {
 		() => frappe.tests.click_link('Test-1'),
 		() => frappe.tests.click_button('Edit'),
 		() => frappe.timeout(0.5),
-		() => {assert.deepEqual(frappe.get_route(), ["Form", "Task", "Test-1"], "Edit route checks");},
+		() => frappe.db.get_value('Task', {'subject': 'Test-1'}, 'name'),
+		(task) => {assert.deepEqual(frappe.get_route(), ["Form", "Task", task.message.name], "Edit route checks");},
 
 		// Deleting child Node
 		() => frappe.set_route('Tree', 'Task'),
@@ -59,7 +60,7 @@ QUnit.test("test: Task Tree", function (assert) {
 		() => frappe.tests.click_link('Test-2'),
 		() => frappe.tests.click_button('Rename'),
 		() => frappe.timeout(1),
-		() => cur_dialog.set_value('new_name', 'Test-5'),
+		() => cur_dialog.set_value('subject', 'Test-5'),
 		() => frappe.timeout(1.5),
 		() => cur_dialog.get_primary_btn().click(),
 		() => frappe.timeout(1),
@@ -74,8 +75,7 @@ QUnit.test("test: Task Tree", function (assert) {
 		() => frappe.timeout(0.5),
 		() => frappe.click_button('Submit'),
 		() => frappe.timeout(2),
-		() => frappe.click_button('Expand All'),
-		() => frappe.timeout(1),
+		() => frappe.tests.click_link('Test-3'),
 		() => {
 			let count = $(`a:contains("Test-6"):visible`).length + $(`a:contains("Test-7"):visible`).length;
 			assert.equal(count, 2, "Multiple Tasks added successfully");
