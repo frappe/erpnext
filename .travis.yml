@@ -64,4 +64,10 @@ jobs:
         - bench execute erpnext.setup.utils.enable_all_roles_and_domains
         - bench run-ui-tests --app erpnext
       env: Client Side Test
+    - # stage
+      script:
+        - wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz
+        - bench --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz --mariadb-root-password travis
+        - bench migrate
+      env: Patch Testing
 
