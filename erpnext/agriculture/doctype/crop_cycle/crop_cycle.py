@@ -13,14 +13,25 @@ class CropCycle(Document):
 		project.expected_start_date = self.start_date
 		project.expected_end_date = frappe.utils.data.add_days(self.start_date, period-1)
 		project.insert()
+		task = frappe.new_doc("Task")
+		task.subject = self.title
+		task.exp_start_date = self.start_date
+		task.exp_end_date = frappe.utils.data.add_days(self.start_date, period-1)
+		task.is_group = 1
+		task.insert()
 		self.create_task(crop_tasks, project.as_dict.im_self.name, self.start_date)
 		return project.as_dict.im_self.name
 
 	def create_task(self, crop_tasks, project_name, start_date):
 		for crop_task in crop_tasks:
+			print crop_task
 			task = frappe.new_doc("Task")
 			task.subject = crop_task.get("subject")
 			task.priority = crop_task.get("priority")
 			task.project = project_name
-			task.exp_end_date = frappe.utils.data.add_days(start_date, crop_task.get("day"))
+			task.parent_task = project_name
+			print frappe.utils.data.add_days(start_date, crop_task.get("start_day")-1)
+			print frappe.utils.data.add_days(start_date, crop_task.get("end_day")-1)
+			task.exp_start_date = frappe.utils.data.add_days(start_date, crop_task.get("start_day")-1)
+			task.exp_end_date = frappe.utils.data.add_days(start_date, crop_task.get("end_day")-1)
 			task.insert()
