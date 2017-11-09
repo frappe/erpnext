@@ -602,7 +602,7 @@ class Item(WebsiteGenerator):
 	def update_bom_item_desc(self):
 		if self.is_new(): return
 
-		if frappe.db.get_value('Item', self.name, 'description') != self.description:
+		if self.db_get('description') != self.description:
 			frappe.db.sql("""
 				update `tabBOM`
 				set description = %s
