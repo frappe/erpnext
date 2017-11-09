@@ -19,7 +19,7 @@ def get_product_list(search=None, start=0, limit=12):
 	# base query
 	query = """select I.name, I.item_name, I.item_code, I.route, I.website_image, I.thumbnail, I.item_group,
 			I.description, I.web_long_description as website_description,
-			case when ifnull(S.actual_qty,0) > 0 then 1 else 0 end as in_stock
+			case when (S.actual_qty - S.reserved_qty) > 0 then 1 else 0 end as in_stock
 		from `tabItem` I
 		left join tabBin S on I.item_code = S.item_code and I.website_warehouse = S.warehouse
 		where (I.show_in_website = 1 or I.show_variant_in_website = 1)
