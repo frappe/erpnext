@@ -1,5 +1,5 @@
-// School Assessment module
-QUnit.module('schools');
+// Education Assessment module
+QUnit.module('education');
 
 QUnit.test('Test: Grading Scale', function(assert){
 	assert.expect(3);

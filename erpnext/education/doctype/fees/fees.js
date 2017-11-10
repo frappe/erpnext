@@ -84,7 +84,7 @@ frappe.ui.form.on("Fees", {
 	student: function(frm) {
 		if (frm.doc.student) {
 			frappe.call({
-				method:"erpnext.schools.api.get_current_enrollment",
+				method:"erpnext.education.api.get_current_enrollment",
 				args: {
 					"student": frm.doc.student,
 					"academic_year": frm.doc.academic_year
@@ -147,7 +147,7 @@ frappe.ui.form.on("Fees", {
 		frm.set_value("components" ,"");
 		if (frm.doc.fee_structure) {
 			frappe.call({
-				method: "erpnext.schools.api.get_fee_components",
+				method: "erpnext.education.api.get_fee_components",
 				args: {
 					"fee_structure": frm.doc.fee_structure
 				},

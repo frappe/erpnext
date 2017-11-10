@@ -1,5 +1,5 @@
-// School Assessment module
-QUnit.module('schools');
+// Education Assessment module
+QUnit.module('education');
 
 QUnit.test('Test: Assessment Criteria Group', function(assert){
 	assert.expect(0);

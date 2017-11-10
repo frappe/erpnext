@@ -7,7 +7,7 @@ import frappe
 import frappe.defaults
 from frappe.model.document import Document
 
-school_keydict = {
+education_keydict = {
 	# "key in defaults": "key in Global Defaults"
 	"academic_year": "current_academic_year",
 	"academic_term": "current_academic_term",
@@ -18,8 +18,8 @@ school_keydict = {
 class SchoolSettings(Document):
 	def on_update(self):
 		"""update defaults"""
-		for key in school_keydict:
-			frappe.db.set_default(key, self.get(school_keydict[key], ''))
+		for key in education_keydict:
+			frappe.db.set_default(key, self.get(education_keydict[key], ''))
 
 		# clear cache
 		frappe.clear_cache()

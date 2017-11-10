@@ -32,7 +32,7 @@ class ProgramEnrollment(Document):
 		frappe.db.set_value("Student", self.student, "joining_date", date)
 		
 	def make_fee_records(self):
-		from erpnext.schools.api import get_fee_components
+		from erpnext.education.api import get_fee_components
 		fee_list = []
 		for d in self.fees:
 			fee_components = get_fee_components(d.fee_structure)

@@ -39,7 +39,7 @@ frappe.ui.form.on('Fee Structure', {
 
 	make_fee_schedule: function(frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.schools.doctype.fee_structure.fee_structure.make_fee_schedule",
+			method: "erpnext.education.doctype.fee_structure.fee_structure.make_fee_schedule",
 			frm: frm
 		});
 	}

@@ -34,7 +34,7 @@ def get_list_context(context=None):
 		"show_sidebar": True,
 		"title": _("Student Admissions"),
 		"get_list": get_admission_list,
-		"row_template": "schools/doctype/student_admission/templates/student_admission_row.html",
+		"row_template": "education/doctype/student_admission/templates/student_admission_row.html",
 	})
 
 def get_admission_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"):

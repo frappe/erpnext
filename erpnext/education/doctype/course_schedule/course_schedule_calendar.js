@@ -34,5 +34,5 @@ frappe.views.calendar["Course Schedule"] = {
 			"label": __("Room")
 		}
 	],
-	get_events_method: "erpnext.schools.api.get_course_schedule_events"
+	get_events_method: "erpnext.education.api.get_course_schedule_events"
 }

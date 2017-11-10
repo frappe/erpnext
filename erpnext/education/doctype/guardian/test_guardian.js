@@ -1,5 +1,5 @@
-// Testing Student Module in Schools
-QUnit.module('schools');
+// Testing Student Module in education
+QUnit.module('education');
 
 QUnit.test('Test: Guardian', function(assert){
 	assert.expect(9);

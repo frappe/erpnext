@@ -32,7 +32,7 @@ class CourseSchedule(Document):
 	def validate_overlap(self):
 		"""Validates overlap for Student Group, Instructor, Room"""
 		
-		from erpnext.schools.utils import validate_overlap_for
+		from erpnext.education.utils import validate_overlap_for
 
 		#Validate overlapping course schedules.
 		if self.student_group:

@@ -40,7 +40,7 @@ frappe.ui.form.on("Student Applicant", {
 
 	enroll: function(frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.schools.api.enroll_student",
+			method: "erpnext.education.api.enroll_student",
 			frm: frm
 		})
 	}

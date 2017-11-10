@@ -6,7 +6,7 @@ import frappe
 from frappe.utils import cstr, cint, getdate, get_first_day, get_last_day, date_diff, add_days
 from frappe import msgprint, _
 from calendar import monthrange
-from erpnext.schools.api import get_student_group_students
+from erpnext.education.api import get_student_group_students
 
 def execute(filters=None):
 	if not filters: filters = {}

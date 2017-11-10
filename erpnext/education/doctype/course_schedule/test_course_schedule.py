@@ -8,7 +8,7 @@ import unittest
 
 import datetime
 from frappe.utils import today, to_timedelta
-from erpnext.schools.utils import OverlapError
+from erpnext.education.utils import OverlapError
 
 # test_records = frappe.get_test_records('Course Schedule')
 

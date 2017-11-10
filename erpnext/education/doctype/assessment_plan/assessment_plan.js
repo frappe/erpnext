@@ -40,7 +40,7 @@ frappe.ui.form.on("Assessment Plan", {
 	course: function(frm) {
 		if (frm.doc.course && frm.doc.maximum_assessment_score) {
 			frappe.call({
-				method: "erpnext.schools.api.get_assessment_criteria",
+				method: "erpnext.education.api.get_assessment_criteria",
 				args: {
 					course: frm.doc.course
 				},

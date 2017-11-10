@@ -5,7 +5,9 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	frappe.reload_doc("schools", "doctype", "fees")
+	# 'Schools' module changed to the 'Education'
+	# frappe.reload_doc("schools", "doctype", "fees")
+	frappe.reload_doc("education", "doctype", "fees")
 
 	if "total_amount" not in frappe.db.get_table_columns("Fees"):
 		return

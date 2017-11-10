@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
-from erpnext.schools.utils import validate_duplicate_student
+from erpnext.education.utils import validate_duplicate_student
 from frappe.utils import cint
 
 class StudentGroup(Document):

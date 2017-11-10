@@ -31,10 +31,10 @@
         "public/js/templates/item_selector.html",
         "public/js/utils/item_selector.js",
         "public/js/help_links.js",
-        "public/js/schools/student_button.html",
-        "public/js/schools/assessment_result_tool.html",
         "public/js/templates/item_quick_entry.html",
         "public/js/utils/item_quick_entry.js"
+        "public/js/education/student_button.html",
+        "public/js/education/assessment_result_tool.html"
     ],
     "js/item-dashboard.min.js": [
         "stock/dashboard/item_dashboard.html",

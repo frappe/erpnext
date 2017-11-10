@@ -1,5 +1,5 @@
-// Testing Setup Module in Schools
-QUnit.module('schools');
+// Testing Setup Module in Education
+QUnit.module('education');
 
 QUnit.test("Test: School Settings", function(assert){
 	assert.expect(3);

@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from erpnext.schools.api import enroll_student
+from erpnext.education.api import enroll_student
 
 class ProgramEnrollmentTool(Document):
 	def get_students(self):

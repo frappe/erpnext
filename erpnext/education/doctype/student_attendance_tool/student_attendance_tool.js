@@ -1,6 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-frappe.provide("schools")
+frappe.provide("education")
 
 frappe.ui.form.on('Student Attendance Tool', {
 	onload: function(frm) {
@@ -33,7 +33,7 @@ frappe.ui.form.on('Student Attendance Tool', {
 
 	student_group: function(frm) {
 		if ((frm.doc.student_group && frm.doc.date) || frm.doc.course_schedule) {
-			var method = "erpnext.schools.doctype.student_attendance_tool.student_attendance_tool.get_student_attendance_records";
+			var method = "erpnext.education.doctype.student_attendance_tool.student_attendance_tool.get_student_attendance_records";
 
 			frappe.call({
 				method: method,
@@ -64,12 +64,12 @@ frappe.ui.form.on('Student Attendance Tool', {
 				.appendTo(frm.fields_dict.students_html.wrapper);
 		}
 		students = students || [];
-		frm.students_editor = new schools.StudentsEditor(frm, frm.students_area, students)
+		frm.students_editor = new Education.StudentsEditor(frm, frm.students_area, students)
 	}
 });
 
 
-schools.StudentsEditor = Class.extend({
+Education.StudentsEditor = Class.extend({
 	init: function(frm, wrapper, students) {
 		this.wrapper = wrapper;
 		this.frm = frm;
@@ -137,7 +137,7 @@ schools.StudentsEditor = Class.extend({
 					function() {	//ifyes
 						if(!frappe.request.ajax_count) {
 							frappe.call({
-								method: "erpnext.schools.api.mark_attendance",
+								method: "erpnext.education.api.mark_attendance",
 								freeze: true,
 								freeze_message: "Marking attendance",
 								args: {

@@ -1,4 +1,4 @@
-frappe.provide("schools")
+frappe.provide("education")
 
 cur_frm.add_fetch("student_group", "course", "course")
 frappe.ui.form.on("Course Schedule", {

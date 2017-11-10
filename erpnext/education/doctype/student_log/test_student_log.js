@@ -1,5 +1,5 @@
-// Testing Student Module in Schools
-QUnit.module('schools');
+// Testing Student Module in Education
+QUnit.module('education');
 
 QUnit.test('Test: Student Log', function(assert){
 	assert.expect(9);

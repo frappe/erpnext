@@ -1,5 +1,5 @@
-// Testing Attendance Module in Schools
-QUnit.module('schools');
+// Testing Attendance Module in Education
+QUnit.module('education');
 
 QUnit.test('Test: Student Attendance', function(assert){
 	assert.expect(2);

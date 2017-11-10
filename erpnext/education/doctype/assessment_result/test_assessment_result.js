@@ -1,5 +1,5 @@
-// School Assessment module
-QUnit.module('schools');
+// Education Assessment module
+QUnit.module('education');
 
 QUnit.test('Test: Assessment Result', function(assert){
 	assert.expect(25);
@@ -46,7 +46,7 @@ QUnit.test('Test: Assessment Result', function(assert){
 						assert.equal(cur_frm.doc.maximum_score, assessment_plan.message.maximum_assessment_score, 'Maximum score correctly fetched');
 
 						frappe.call({
-							method: "erpnext.schools.api.get_grade",
+							method: "erpnext.education.api.get_grade",
 							args: {
 								"grading_scale": assessment_plan.message.grading_scale,
 								"percentage": cur_frm.doc.total_score

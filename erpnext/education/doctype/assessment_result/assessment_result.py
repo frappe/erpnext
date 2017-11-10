@@ -7,8 +7,8 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 from frappe.model.document import Document
-from erpnext.schools.api import get_grade
-from erpnext.schools.api import get_assessment_details
+from erpnext.education.api import get_grade
+from erpnext.education.api import get_assessment_details
 from frappe.utils.csvutils import getlink
 
 

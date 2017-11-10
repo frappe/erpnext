@@ -29,7 +29,7 @@ frappe.query_reports["Student Monthly Attendance Sheet"] = {
 
 	"onload": function() {
 		return frappe.call({
-			method: "erpnext.schools.report.student_monthly_attendance_sheet.student_monthly_attendance_sheet.get_attendance_years",
+			method: "erpnext.education.report.student_monthly_attendance_sheet.student_monthly_attendance_sheet.get_attendance_years",
 			callback: function(r) {
 				var year_filter = frappe.query_report_filters_by_name.year;
 				year_filter.df.options = r.message;

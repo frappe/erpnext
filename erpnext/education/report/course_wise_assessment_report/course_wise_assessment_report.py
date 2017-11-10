@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 from collections import defaultdict
-from erpnext.schools.api import get_grade
+from erpnext.education.api import get_grade
 
 
 def execute(filters=None):

@@ -25,7 +25,7 @@ frappe.ui.form.on('Assessment Result Tool', {
 			if (!frm.doc.student_group)
 				return
 			frappe.call({
-				method: "erpnext.schools.api.get_assessment_students",
+				method: "erpnext.education.api.get_assessment_students",
 				args: {
 					"assessment_plan": frm.doc.assessment_plan,
 					"student_group": frm.doc.student_group
@@ -49,7 +49,7 @@ frappe.ui.form.on('Assessment Result Tool', {
 		$(frm.fields_dict.result_html.wrapper).empty();
 		let assessment_plan = frm.doc.assessment_plan;
 		frappe.call({
-			method: "erpnext.schools.api.get_assessment_details",
+			method: "erpnext.education.api.get_assessment_details",
 			args: {
 				assessment_plan: assessment_plan
 			},
@@ -106,7 +106,7 @@ frappe.ui.form.on('Assessment Result Tool', {
 					student_scores["comment"] = $(input).val();
 				});
 				frappe.call({
-					method: "erpnext.schools.api.mark_assessment_result",
+					method: "erpnext.education.api.mark_assessment_result",
 					args: {
 						"assessment_plan": frm.doc.assessment_plan,
 						"scores": student_scores
@@ -137,7 +137,7 @@ frappe.ui.form.on('Assessment Result Tool', {
 		if (frm.doc.show_submit) {
 			frm.page.set_primary_action(__("Submit"), function() {
 				frappe.call({
-					method: "erpnext.schools.api.submit_assessment_results",
+					method: "erpnext.education.api.submit_assessment_results",
 					args: {
 						"assessment_plan": frm.doc.assessment_plan,
 						"student_group": frm.doc.student_group

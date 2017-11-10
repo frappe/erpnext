@@ -9,7 +9,7 @@ frappe.ui.form.on("Assessment Result", {
 	assessment_plan: function(frm) {
 		if (frm.doc.assessment_plan) {
 			frappe.call({
-				method: "erpnext.schools.api.get_assessment_details",
+				method: "erpnext.education.api.get_assessment_details",
 				args: {
 					assessment_plan: frm.doc.assessment_plan
 				},
@@ -37,7 +37,7 @@ frappe.ui.form.on("Assessment Result Detail", {
 		}
 		else {
 			frappe.call({
-				method: "erpnext.schools.api.get_grade",
+				method: "erpnext.education.api.get_grade",
 				args: {
 					grading_scale: frm.doc.grading_scale,
 					percentage: ((d.score/d.maximum_score) * 100)

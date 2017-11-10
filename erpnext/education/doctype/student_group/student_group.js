@@ -12,7 +12,7 @@ frappe.ui.form.on("Student Group", {
 		if (!frm.__islocal) {
 			frm.set_query("student", "students", function() {
 				return{
-					query: "erpnext.schools.doctype.student_group.student_group.fetch_students",
+					query: "erpnext.education.doctype.student_group.student_group.fetch_students",
 					filters: {
 						'academic_year': frm.doc.academic_year,
 						'group_based_on': frm.doc.group_based_on,
@@ -50,7 +50,7 @@ frappe.ui.form.on("Student Group", {
 			});
 			frm.add_custom_button(__("Update Email Group"), function() {
 				frappe.call({
-					method: "erpnext.schools.api.update_email_group",
+					method: "erpnext.education.api.update_email_group",
 					args: {
 						"doctype": "Student Group",
 						"name": frm.doc.name
@@ -83,7 +83,7 @@ frappe.ui.form.on("Student Group", {
 				}
 			});
 			frappe.call({
-				method: "erpnext.schools.doctype.student_group.student_group.get_students",
+				method: "erpnext.education.doctype.student_group.student_group.get_students",
 				args: {
 					"academic_year": frm.doc.academic_year,
 					"academic_term": frm.doc.academic_term,

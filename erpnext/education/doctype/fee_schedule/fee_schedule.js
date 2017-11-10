@@ -78,7 +78,7 @@ frappe.ui.form.on('Fee Schedule', {
 	fee_structure: function(frm) {
 		if (frm.doc.fee_structure) {
 			frappe.call({
-				method: "erpnext.schools.doctype.fee_schedule.fee_schedule.get_fee_structure",
+				method: "erpnext.education.doctype.fee_schedule.fee_schedule.get_fee_structure",
 				args: {
 					"target_doc": frm.doc.name,
 					"source_name": frm.doc.fee_structure
@@ -96,7 +96,7 @@ frappe.ui.form.on("Fee Schedule Student Group", {
 	student_group: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		frappe.call({
-			method: "erpnext.schools.doctype.fee_schedule.fee_schedule.get_total_students",
+			method: "erpnext.education.doctype.fee_schedule.fee_schedule.get_total_students",
 			args: {
 				"student_group": row.student_group,
 				"academic_year": frm.doc.academic_year,

@@ -1,4 +1,4 @@
-QUnit.module('schools');
+QUnit.module('education');
 
 QUnit.test('Test: Student Group Creation Tool', function(assert){
 	assert.expect(5);

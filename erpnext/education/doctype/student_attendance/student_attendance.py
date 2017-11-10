@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 from frappe.utils import cstr
-from erpnext.schools.api import get_student_group_students
+from erpnext.education.api import get_student_group_students
 
 
 class StudentAttendance(Document):

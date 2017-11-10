@@ -1,5 +1,5 @@
-// Testing Admission module in Schools
-QUnit.module('schools');
+// Testing Admission module in Education
+QUnit.module('education');
 
 QUnit.test('Test: Student Applicant', function(assert){
 	assert.expect(24);

@@ -1,5 +1,5 @@
-// Testing Assessment Module in Schools
-QUnit.module('schools');
+// Testing Assessment Module in education
+QUnit.module('education');
 
 QUnit.test('Test: Assessment Plan', function(assert){
 	assert.expect(6);

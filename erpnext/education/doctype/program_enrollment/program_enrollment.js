@@ -26,7 +26,7 @@ frappe.ui.form.on("Program Enrollment", {
 		if (frm.doc.program) {
 			frm.set_query("course", "courses", function(doc, cdt, cdn) {
 				return{
-					query: "erpnext.schools.doctype.program_enrollment.program_enrollment.get_program_courses",
+					query: "erpnext.education.doctype.program_enrollment.program_enrollment.get_program_courses",
 					filters: {
 						'program': frm.doc.program
 					}
@@ -36,7 +36,7 @@ frappe.ui.form.on("Program Enrollment", {
 
 		frm.set_query("student", function() {
 			return{
-				query: "erpnext.schools.doctype.program_enrollment.program_enrollment.get_students",
+				query: "erpnext.education.doctype.program_enrollment.program_enrollment.get_students",
 				filters: {
 					'academic_year': frm.doc.academic_year,
 					'academic_term': frm.doc.academic_term
@@ -49,7 +49,7 @@ frappe.ui.form.on("Program Enrollment", {
 		frm.events.get_courses(frm);
 		if (frm.doc.program) {
 			frappe.call({
-				method: "erpnext.schools.api.get_fee_schedule",
+				method: "erpnext.education.api.get_fee_schedule",
 				args: {
 					"program": frm.doc.program,
 					"student_category": frm.doc.student_category
