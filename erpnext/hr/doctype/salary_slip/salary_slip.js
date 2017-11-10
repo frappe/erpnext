@@ -161,18 +161,15 @@ var calculate_earning_total = function(doc, dt, dn, reset_amount) {
 
 			tbl[i].amount =  Math.round(tbl[i].default_amount)*(flt(doc.payment_days) /
 				cint(doc.total_working_days)*100)/100;
-			refresh_field('amount', tbl[i].name, 'earnings');
-
 		} else if(reset_amount) {
 			tbl[i].amount = tbl[i].default_amount;
-			refresh_field('amount', tbl[i].name, 'earnings');
 		}
 		if(!tbl[i].do_not_include_in_total) {
 			total_earn += flt(tbl[i].amount);
 		}
 	}
 	doc.gross_pay = total_earn;
-	refresh_many(['amount','gross_pay']);
+	refresh_many(['earnings', 'amount','gross_pay']);
 }
 
 // Calculate deduction total
@@ -183,17 +180,15 @@ var calculate_ded_total = function(doc, dt, dn, reset_amount) {
 	for(var i = 0; i < tbl.length; i++){
 		if(cint(tbl[i].depends_on_lwp) == 1) {
 			tbl[i].amount = Math.round(tbl[i].default_amount)*(flt(doc.payment_days)/cint(doc.total_working_days)*100)/100;
-			refresh_field('amount', tbl[i].name, 'deductions');
 		} else if(reset_amount) {
 			tbl[i].amount = tbl[i].default_amount;
-			refresh_field('amount', tbl[i].name, 'deductions');
 		}
 		if(!tbl[i].do_not_include_in_total) {
 			total_ded += flt(tbl[i].amount);
 		}
 	}
 	doc.total_deduction = total_ded;
-	refresh_field('total_deduction');
+	refresh_many(['deductions', 'total_deduction']);
 }
 
 // Calculate net payable amount
