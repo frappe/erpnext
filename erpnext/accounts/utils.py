@@ -656,14 +656,14 @@ def get_companies():
 		order_by="name")]
 
 @frappe.whitelist()
-def get_children(doctype, parent, company):
+def get_children(doctype, parent, company, is_root=False):
 	from erpnext.accounts.report.financial_statements import sort_root_accounts
 
 	fieldname = frappe.db.escape(doctype.lower().replace(' ','_'))
 	doctype = frappe.db.escape(doctype)
 
 	# root
-	if parent in ("Accounts", "Cost Centers"):
+	if is_root:
 		fields = ", root_type, report_type, account_currency" if doctype=="Account" else ""
 		acc = frappe.db.sql(""" select
 			name as value, is_group as expandable {fields}

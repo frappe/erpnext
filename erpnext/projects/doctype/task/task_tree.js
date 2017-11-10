@@ -11,18 +11,17 @@ frappe.treeview_settings['Task'] = {
 			label: __("Project"),
 		},
 		{
-			fieldname: "parent",
+			fieldname: "task",
 			fieldtype:"Link",
 			options: "Task",
 			label: __("Task"),
-			get_query: function(){
+			get_query: function() {
 				return {
 					filters: [["Task", 'is_group', '=', 1]]
 				};
 			}
 		}
 	],
-	title: "Task",
 	breadcrumb: "Projects",
 	get_tree_root: false,
 	root_label: "All Tasks",
@@ -41,7 +40,7 @@ frappe.treeview_settings['Task'] = {
 					'fields': [
 						{'fieldname': 'tasks', 'label': 'Tasks', 'fieldtype': 'Text'},
 					],
-					primary_action: function(){
+					primary_action: function() {
 						d.hide();
 						return frappe.call({
 							method: "erpnext.projects.doctype.task.task.add_multiple_tasks",

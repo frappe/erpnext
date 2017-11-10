@@ -90,10 +90,10 @@ class Warehouse(NestedSet):
 	def get_new_warehouse_name_without_abbr(self, name):
 		company_abbr = frappe.db.get_value("Company", self.company, "abbr")
 		parts = name.rsplit(" - ", 1)
-		
+
 		if parts[-1].lower() == company_abbr.lower():
 			name = parts[0]
-			
+
 		return name
 
 	def recalculate_bin_qty(self, new_name):
@@ -139,25 +139,19 @@ class Warehouse(NestedSet):
 			return 1
 
 @frappe.whitelist()
-def get_children():
+def get_children(doctype, parent=None, company=None, is_root=False):
 	from erpnext.stock.utils import get_stock_value_on
-	doctype = frappe.local.form_dict.get('doctype')
-	company = frappe.local.form_dict.get('company')
 
-	parent_field = 'parent_' + doctype.lower().replace(' ', '_')
-	parent = frappe.form_dict.get("parent") or ""
-
-	if parent == "Warehouses":
+	if is_root:
 		parent = ""
 
 	warehouses = frappe.db.sql("""select name as value,
 		is_group as expandable
-		from `tab{doctype}`
+		from `tabWarehouse`
 		where docstatus < 2
-		and ifnull(`{parent_field}`,'') = %s
+		and ifnull(`parent_warehouse`,'') = %s
 		and (`company` = %s or company is null or company = '')
-		order by name""".format(doctype=frappe.db.escape(doctype),
-		parent_field=frappe.db.escape(parent_field)), (parent, company), as_dict=1)
+		order by name""", (parent, company), as_dict=1)
 
 	# return warehouses
 	for wh in warehouses:

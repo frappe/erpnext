@@ -198,11 +198,17 @@ def set_tasks_as_overdue():
 		and `status` not in ('Closed', 'Cancelled')""")
 
 @frappe.whitelist()
-def get_children(doctype, parent, project=None):
+def get_children(doctype, parent, task=None, project=None, is_root=False):
 	conditions = ''
 
-	if parent and parent != 'All Tasks':
+	if task:
+		# via filters
+		conditions += ' and parent_task = "{0}"'.format(frappe.db.escape(task))
+	elif parent and not is_root:
+		# via expand child
 		conditions += ' and parent_task = "{0}"'.format(frappe.db.escape(parent))
+	else:
+		conditions += ' and ifnull(parent_task, "")=""'
 
 	if project:
 		conditions += ' and project = "{0}"'.format(frappe.db.escape(project))
