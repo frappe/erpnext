@@ -2,7 +2,7 @@
 QUnit.module('schools');
 
 QUnit.test('Test: Assessment Plan', function(assert){
-	assert.expect(7);
+	assert.expect(6);
 	let done = assert.async();
 	let room_name, instructor_name, assessment_name;
 
