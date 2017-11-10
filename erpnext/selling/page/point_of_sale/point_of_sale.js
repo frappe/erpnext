@@ -990,18 +990,18 @@ class POSItems {
 		}
 
 		this.get_items({search_value: search_term, item_group })
-			.then(({ items, serial_no, batch_no }) => {
+			.then(({ items, serial_no, batch_no, barcode }) => {
 				if (search_term) {
 					this.search_index[search_term] = items;
 				}
 
 				this.items = items;
 				this.render_items(items);
-				this.set_item_in_the_cart(items, serial_no, batch_no);
+				this.set_item_in_the_cart(items, serial_no, batch_no, barcode);
 			});
 	}
 
-	set_item_in_the_cart(items, serial_no, batch_no) {
+	set_item_in_the_cart(items, serial_no, batch_no, barcode) {
 		if (serial_no) {
 			this.events.update_cart(items[0].item_code,
 				'serial_no', serial_no);
@@ -1016,7 +1016,7 @@ class POSItems {
 			return;
 		}
 
-		if (items.length === 1) {
+		if (items.length === 1 && (serial_no || batch_no || barcode)) {
 			this.events.update_cart(items[0].item_code,
 				'qty', '+1');
 			this.reset_search_field();
