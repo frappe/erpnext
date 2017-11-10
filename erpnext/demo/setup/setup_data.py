@@ -229,10 +229,10 @@ def setup_user_roles():
 		user.add_roles('HR User', 'Projects User')
 		frappe.db.set_global('demo_projects_user', user.name)
 
-	if not frappe.db.get_global('demo_schools_user'):
+	if not frappe.db.get_global('demo_education_user'):
 		user = frappe.get_doc('User', 'aromn@example.com')
 		user.add_roles('Academics User')
-		frappe.db.set_global('demo_schools_user', user.name)
+		frappe.db.set_global('demo_education_user', user.name)
 
 	#Add Expense Approver
 	user = frappe.get_doc('User', 'WanMai@example.com')

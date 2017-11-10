@@ -1,4 +1,4 @@
 introduction
 accounts
 projects
-schools
+education

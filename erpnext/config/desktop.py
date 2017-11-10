@@ -257,11 +257,11 @@ def get_data():
 			"type": "list"
 		},
 		{
-			"module_name": "Schools",
-			"color": "#DE2B37",
+			"module_name": "Education",
+			"color": "#428B46",
 			"icon": "octicon octicon-mortar-board",
 			"type": "module",
-			"label": _("Schools")
+			"label": _("Education")
 		},
 		{
 			"module_name": "Healthcare",
