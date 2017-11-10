@@ -22,5 +22,17 @@ frappe.ui.form.on('Crop Cycle', {
 				]);
 			});
 		}
+	},
+	test: (frm) => {
+		frm.doc.detected_pest.forEach((detected_pest, index) => {
+			frappe.model.with_doc("Pest", detected_pest.pest, function() {
+				let pest = frappe.model.get_doc("Pest", detected_pest.pest);
+				frm.call("create_task", {
+					crop_tasks: pest.treatment_task,
+					project_name: frm.doc.project_name,
+					start_date: frm.doc.detected_pest[index].start_date
+				});
+			});
+		});
 	}
 });
