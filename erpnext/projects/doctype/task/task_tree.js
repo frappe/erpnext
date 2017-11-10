@@ -1,5 +1,5 @@
 frappe.provide("frappe.treeview_settings");
-
+var glob;
 frappe.treeview_settings['Task'] = {
 	get_tree_nodes: "erpnext.projects.doctype.task.task.get_children",
 	add_tree_node: "erpnext.projects.doctype.task.task.add_node",
@@ -25,8 +25,10 @@ frappe.treeview_settings['Task'] = {
 		return node.data.value;
 	},
 	onload: function(me){
+		glob = me;
 		me.make_tree();
 		me.set_root = true;
+		me.allow_rename = false;
 	},
 	toolbar: [
 		{
@@ -36,6 +38,7 @@ frappe.treeview_settings['Task'] = {
 			},
 			click: function(node) {
 				var d = new frappe.ui.Dialog({
+					'title': __("Add Multiple Tasks"),
 					'fields': [
 						{'fieldname': 'tasks', 'label': 'Tasks', 'fieldtype': 'Text'},
 					],
@@ -45,9 +48,9 @@ frappe.treeview_settings['Task'] = {
 							method: "erpnext.projects.doctype.task.task.add_multiple_tasks",
 							args: {
 								data: d.get_values(),
-								parent: node.data.value
+								parent: node.data.name || ""
 							},
-							callback: function() { }
+							callback: function() { glob.make_tree(); }
 						});
 					}
 				});
