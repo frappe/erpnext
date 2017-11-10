@@ -64,6 +64,8 @@ class Warehouse(NestedSet):
 			where parent_warehouse = %s""", self.name)
 
 	def before_rename(self, old_name, new_name, merge=False):
+		super(Warehouse, self).before_rename(old_name, new_name, merge)
+
 		# Add company abbr if not provided
 		new_warehouse = erpnext.encode_company_abbr(new_name, self.company)
 
@@ -77,12 +79,14 @@ class Warehouse(NestedSet):
 		return new_warehouse
 
 	def after_rename(self, old_name, new_name, merge=False):
+		super(Warehouse, self).after_rename(old_name, new_name, merge)
+
 		new_warehouse_name = self.get_new_warehouse_name_without_abbr(new_name)
 		self.db_set("warehouse_name", new_warehouse_name)
-				
+
 		if merge:
 			self.recalculate_bin_qty(new_name)
-			
+
 	def get_new_warehouse_name_without_abbr(self, name):
 		company_abbr = frappe.db.get_value("Company", self.company, "abbr")
 		parts = name.rsplit(" - ", 1)
