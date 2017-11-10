@@ -630,7 +630,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 			'invoice_amount': flt(d.invoice_amount),
 			'payment_amount': flt(d.payment_amount),
 			'outstanding_amount': flt(d.invoice_amount - d.payment_amount, precision),
-			'due_date': frappe.db.get_value(d.voucher_type, d.voucher_no, 
+			'due_date': frappe.db.get_value(d.voucher_type, d.voucher_no,
 				"posting_date" if party_type=="Employee" else "due_date"),
 		}))
 
@@ -656,16 +656,14 @@ def get_companies():
 		order_by="name")]
 
 @frappe.whitelist()
-def get_children():
+def get_children(doctype, parent, company, is_root=False):
 	from erpnext.accounts.report.financial_statements import sort_root_accounts
 
-	args = frappe.local.form_dict
-	doctype, company = args['doctype'], args['company']
 	fieldname = frappe.db.escape(doctype.lower().replace(' ','_'))
 	doctype = frappe.db.escape(doctype)
 
 	# root
-	if args['parent'] in ("Accounts", "Cost Centers"):
+	if is_root:
 		fields = ", root_type, report_type, account_currency" if doctype=="Account" else ""
 		acc = frappe.db.sql(""" select
 			name as value, is_group as expandable {fields}
@@ -675,7 +673,7 @@ def get_children():
 			order by name""".format(fields=fields, fieldname = fieldname, doctype=doctype),
 				company, as_dict=1)
 
-		if args["parent"]=="Accounts":
+		if parent=="Accounts":
 			sort_root_accounts(acc)
 	else:
 		# other
@@ -686,7 +684,7 @@ def get_children():
 			where ifnull(`parent_{fieldname}`,'') = %s
 			and docstatus<2
 			order by name""".format(fields=fields, fieldname=fieldname, doctype=doctype),
-				args['parent'], as_dict=1)
+				parent, as_dict=1)
 
 	if doctype == 'Account':
 		company_currency = frappe.db.get_value("Company", company, "default_currency")

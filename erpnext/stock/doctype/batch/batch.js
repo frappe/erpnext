@@ -24,6 +24,11 @@ frappe.ui.form.on('Batch', {
 			frm.trigger('make_dashboard');
 		}
 	},
+	item: (frm) => {
+		frappe.db.get_value('Item', {name: frm.doc.item}, 'has_expiry_date', (r) => {
+			frm.toggle_reqd('expiry_date', r.has_expiry_date);
+		});
+	},
 	make_dashboard: (frm) => {
 		if(!frm.is_new()) {
 			frappe.call({

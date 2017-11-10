@@ -348,7 +348,8 @@ class SalarySlip(TransactionBase):
 					/ cint(self.total_working_days)), self.precision("amount", component_type)
 				)
 
-			elif not self.payment_days and not self.salary_slip_based_on_timesheet:
+			elif not self.payment_days and not self.salary_slip_based_on_timesheet and \
+				cint(d.depends_on_lwp):
 				d.amount = 0
 			elif not d.amount:
 				d.amount = d.default_amount

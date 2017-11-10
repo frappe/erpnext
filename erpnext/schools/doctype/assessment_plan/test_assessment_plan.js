@@ -2,7 +2,7 @@
 QUnit.module('schools');
 
 QUnit.test('Test: Assessment Plan', function(assert){
-	assert.expect(7);
+	assert.expect(6);
 	let done = assert.async();
 	let room_name, instructor_name, assessment_name;
 
@@ -49,10 +49,6 @@ QUnit.test('Test: Assessment Plan', function(assert){
 			assert.equal(cur_frm.doc.assessment_plan, assessment_name, 'Assessment correctly set');
 			assert.equal(cur_frm.doc.student_group, 'test-course-wise-group-2', 'Course for Assessment correctly set');
 		},
-		() => cur_frm.print_doc(),
-		() => frappe.timeout(1),
-		() => {assert.ok($('.btn-print-print').is(':visible'), "Print Format Available");},
-
 		() => done()
 	]);
 });

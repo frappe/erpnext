@@ -18,5 +18,8 @@ data = {
 	},
 	'Healthcare': {
 		'company_name': 'ABC Hospital Ltd.'
+	},
+	'Agriculture': {
+		'company_name': 'Schrute Farms.'
 	}
 }
