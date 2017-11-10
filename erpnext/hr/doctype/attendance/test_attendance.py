@@ -2,7 +2,7 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
+import frappe  # noqa
 import unittest
 
 test_records = frappe.get_test_records('Attendance')
