@@ -11,7 +11,7 @@ frappe.treeview_settings["BOM"] = {
 	title: "BOM",
 	breadcrumb: "Manufacturing",
 	disable_add_node: true,
-	root_label: "bom", //fieldname from filters
+	root_label: "All Bill of Materials", //fieldname from filters
 	get_label: function(node) {
 		if(node.data.qty) {
 			return node.data.qty + " x " + node.data.item_code;
