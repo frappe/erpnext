@@ -293,5 +293,92 @@ def get_data():
 			"_doctype": "Restaurant",
 			"link": "List/Restaurant",
 			"label": _("Restaurant")
+		},
+		{
+			"module_name": "Agriculture",
+			"color": "#8BC34A",
+			"icon": "octicon octicon-globe",
+			"type": "module",
+			"label": _("Agriculture")
+		},
+		{
+			"module_name": "Crop",
+			"_doctype": "Crop",
+			"color": "#8BC34A",
+			"icon": "fa fa-tree",
+			"type": "link",
+			"link": "List/Crop"
+		},
+		{
+			"module_name": "Crop Cycle",
+			"_doctype": "Crop Cycle",
+			"color": "#8BC34A",
+			"icon": "fa fa-circle-o-notch",
+			"type": "link",
+			"link": "List/Crop Cycle"
+		},
+		{
+			"module_name": "Fertilizer",
+			"_doctype": "Fertilizer",
+			"color": "#8BC34A",
+			"icon": "fa fa-leaf",
+			"type": "link",
+			"link": "List/Fertilizer"
+		},
+		{
+			"module_name": "Land Unit",
+			"_doctype": "Land Unit",
+			"color": "#8BC34A",
+			"icon": "fa fa-map",
+			"type": "link",
+			"link": "List/Land Unit"
+		},
+		{
+			"module_name": "Pest",
+			"_doctype": "Pest",
+			"color": "#8BC34A",
+			"icon": "octicon octicon-bug",
+			"type": "link",
+			"link": "List/Pest"
+		},
+		{
+			"module_name": "Plant Analysis",
+			"_doctype": "Plant Analysis",
+			"color": "#8BC34A",
+			"icon": "fa fa-pagelines",
+			"type": "link",
+			"link": "List/Plant Analysis"
+		},
+		{
+			"module_name": "Soil Analysis",
+			"_doctype": "Soil Analysis",
+			"color": "#8BC34A",
+			"icon": "fa fa-flask",
+			"type": "link",
+			"link": "List/Soil Analysis"
+		},
+		{
+			"module_name": "Soil Texture",
+			"_doctype": "Soil Texture",
+			"color": "#8BC34A",
+			"icon": "octicon octicon-beaker",
+			"type": "link",
+			"link": "List/Soil Texture"
+		},
+		{
+			"module_name": "Water Analysis",
+			"_doctype": "Water Analysis",
+			"color": "#8BC34A",
+			"icon": "fa fa-tint",
+			"type": "link",
+			"link": "List/Water Analysis"
+		},
+		{
+			"module_name": "Weather",
+			"_doctype": "Weather",
+			"color": "#8BC34A",
+			"icon": "fa fa-sun-o",
+			"type": "link",
+			"link": "List/Weather"
 		}
 	]

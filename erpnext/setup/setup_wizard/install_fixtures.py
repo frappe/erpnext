@@ -20,6 +20,7 @@ def install(country=None):
 		{ 'doctype': 'Domain', 'domain': _('Services')},
 		{ 'doctype': 'Domain', 'domain': _('Education')},
 		{ 'doctype': 'Domain', 'domain': _('Healthcare')},
+		{ 'doctype': 'Domain', 'domain': _('Agriculture')},
 
 		# Setup Progress
 		{'doctype': "Setup Progress", "actions": [
