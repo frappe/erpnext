@@ -67,6 +67,11 @@ def get_items(start, page_length, price_list, item_group, search_value=""):
 			'batch_no': batch_no
 		})
 
+	if barcode:
+		res.update({
+			'barcode': barcode
+		})
+
 	return res
 
 def get_conditions(item_code, serial_no, batch_no, barcode):
