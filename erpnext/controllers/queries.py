@@ -185,7 +185,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				"page_len": page_len
 			}, as_dict=as_dict)
 
-def bom(doctype, txt, searchfield, start, page_len, filters):
+def bom(doctype, txt, searchfield, filters, start=0, page_len=20):
 	conditions = []
 
 	return frappe.db.sql("""select tabBOM.name, tabBOM.item
