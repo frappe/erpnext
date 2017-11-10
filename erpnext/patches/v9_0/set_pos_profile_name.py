@@ -11,7 +11,7 @@ def execute():
 	for pos in frappe.get_all(doctype, filters={'disabled': 0}):
 		doc = frappe.get_doc(doctype, pos.name)
 
-		if not doc.user and doc.pos_profile_name: continue
+		if not doc.user or doc.pos_profile_name: continue
 
 		try:
 			doc.pos_profile_name = doc.user + ' - ' + doc.company
