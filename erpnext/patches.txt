@@ -448,6 +448,7 @@ erpnext.patches.v8_9.remove_employee_from_salary_structure_parent
 erpnext.patches.v8_9.delete_gst_doctypes_for_outside_india_accounts
 erpnext.patches.v8_9.set_default_fields_in_variant_settings
 erpnext.patches.v8_9.update_billing_gstin_for_indian_account
+erpnext.patches.v9_0.add_user_to_child_table_in_pos_profile
 erpnext.patches.v9_0.set_schedule_date_for_material_request_and_purchase_order
 erpnext.patches.v9_0.student_admission_childtable_migrate
 erpnext.patches.v9_0.fix_subscription_next_date #2017-10-23
@@ -455,3 +456,6 @@ erpnext.patches.v9_0.add_healthcare_domain
 erpnext.patches.v9_0.set_variant_item_description
 erpnext.patches.v9_0.set_uoms_in_variant_field
 erpnext.patches.v9_0.copy_old_fees_field_data
+execute:frappe.delete_doc_if_exists("DocType", "Program Fee")
+erpnext.patches.v9_0.set_pos_profile_name
+erpnext.patches.v9_0.remove_non_existing_warehouse_from_stock_settings

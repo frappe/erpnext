@@ -43,6 +43,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 	make() {
 		return frappe.run_serially([
+			() => frappe.dom.freeze(),
 			() => {
 				this.prepare_dom();
 				this.prepare_menu();
@@ -55,6 +56,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				frappe.timeout(1);
 				this.make_items();
 				this.bind_events();
+				frappe.dom.unfreeze();
 			},
 			() => this.page.set_title(__('Point of Sale'))
 		]);
@@ -156,6 +158,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	update_item_in_cart(item_code, field='qty', value=1) {
+		frappe.dom.freeze();
 		if(this.cart.exists(item_code)) {
 			const item = this.frm.doc.items.find(i => i.item_code === item_code);
 			frappe.flags.hide_serial_batch_dialog = false;
@@ -208,7 +211,9 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			this.update_item_in_frm(item)
 				.then(() => {
 					// update cart
-					this.remove_item_from_cart(item);
+					if (item.qty === 0) {
+						frappe.model.clear_doc(item.doctype, item.name);
+					}
 					this.update_cart_data(item);
 				});
 		}, true);
@@ -218,6 +223,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		this.cart.add_item(item);
 		this.cart.update_taxes_and_totals();
 		this.cart.update_grand_total();
+		frappe.dom.unfreeze();
 	}
 
 	update_item_in_frm(item, field, value) {
@@ -227,22 +233,16 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		}
 
 		if (field) {
-			frappe.model.set_value(item.doctype, item.name, field, value);
+			return frappe.model.set_value(item.doctype, item.name, field, value)
+				.then(() => this.frm.script_manager.trigger('qty', item.doctype, item.name))
+				.then(() => {
+					if (field === 'qty' && item.qty === 0) {
+						frappe.model.clear_doc(item.doctype, item.name);
+					}
+				})
 		}
 
-		return this.frm.script_manager
-			.trigger('qty', item.doctype, item.name)
-			.then(() => {
-				if (field === 'qty') {
-					this.remove_item_from_cart(item);
-				}
-			});
-	}
-
-	remove_item_from_cart(item) {
-		if (item.qty === 0) {
-			frappe.model.clear_doc(item.doctype, item.name);
-		}
+		return Promise.resolve();
 	}
 
 	make_payment_modal() {
@@ -285,25 +285,67 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	setup_pos_profile() {
+		return new Promise((resolve) => {
+
+			const load_default = () => {
+				this.pos_profile = {
+					company: this.company,
+					currency: frappe.defaults.get_default('currency'),
+					selling_price_list: frappe.defaults.get_default('selling_price_list')
+				};
+				resolve();
+			}
+
+			const on_submit = ({ pos_profile }) => {
+				this.get_pos_profile_doc(pos_profile)
+					.then(doc => {
+						this.pos_profile = doc;
+						if (!this.pos_profile) {
+							load_default();
+						}
+						resolve();
+					});
+			}
+
+			frappe.call({
+				method: 'erpnext.accounts.doctype.pos_profile.pos_profile.get_pos_profiles_for_user'
+			}).then((r) => {
+				if (r && r.message) {
+					const pos_profiles = r.message.filter(a => a);
+
+					if (pos_profiles.length === 0) {
+						load_default();
+					} else if(pos_profiles.length === 1) {
+						// load profile directly
+						on_submit({pos_profile: pos_profiles[0]});
+					} else {
+						// ask prompt
+						frappe.prompt(
+							[{ fieldtype: 'Select', label: 'POS Profile', options: pos_profiles }],
+							on_submit,
+							__('Select POS Profile')
+						);
+					}
+				} else {
+					frappe.dom.unfreeze();
+					frappe.throw(__("POS Profile is required to use Point-of-Sale"));
+				}
+			});
+		});
+	}
+
+	get_pos_profile_doc(pos_profile_name) {
 		return new Promise(resolve => {
 			frappe.call({
-				method: 'erpnext.stock.get_item_details.get_pos_profile',
+				method: 'erpnext.accounts.doctype.pos_profile.pos_profile.get_pos_profile',
 				args: {
-					company: this.company
+					pos_profile_name
+				},
+				callback: (r) => {
+					resolve(r.message);
 				}
-			}).then(r => {
-				this.pos_profile = r.message;
-
-				if (!this.pos_profile) {
-					this.pos_profile = {
-						company: this.company,
-						currency: frappe.defaults.get_default('currency'),
-						selling_price_list: frappe.defaults.get_default('selling_price_list')
-					};
-				}
-				resolve();
 			});
-		})
+		});
 	}
 
 	setup_company() {

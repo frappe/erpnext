@@ -200,7 +200,7 @@ def update_doc(new_document, reference_doc, args, schedule_date):
 	new_document.run_method("on_recurring", reference_doc=reference_doc, subscription_doc=args)
 
 def set_subscription_period(args, mcount, new_document):
-	if new_document.meta.get_field('from_date') and new_document.meta.get_field('to_date'):
+	if mcount and new_document.meta.get_field('from_date') and new_document.meta.get_field('to_date'):
 		last_ref_doc = frappe.db.sql("""
 			select name, from_date, to_date
 			from `tab{0}`
