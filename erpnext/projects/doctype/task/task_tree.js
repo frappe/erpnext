@@ -5,7 +5,13 @@ frappe.treeview_settings['Task'] = {
 	add_tree_node: "erpnext.projects.doctype.task.task.add_node",
 	filters: [
 		{
-			fieldname: "task",
+			fieldname: "project",
+			fieldtype:"Link",
+			options: "Project",
+			label: __("Project"),
+		},
+		{
+			fieldname: "parent",
 			fieldtype:"Link",
 			options: "Task",
 			label: __("Task"),
@@ -19,14 +25,10 @@ frappe.treeview_settings['Task'] = {
 	title: "Task",
 	breadcrumb: "Projects",
 	get_tree_root: false,
-	root_label: "task",
-	ignore_fields:["parent_task"],
-	get_label: function(node) {
-		return node.data.value;
-	},
-	onload: function(me){
+	root_label: "All Tasks",
+	ignore_fields: ["parent_task"],
+	onload: function(me) {
 		me.make_tree();
-		me.set_root = true;
 	},
 	toolbar: [
 		{

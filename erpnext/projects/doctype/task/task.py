@@ -6,7 +6,7 @@ import frappe, json
 
 from frappe.utils import getdate, date_diff, add_days, cstr
 from frappe import _, throw
-from frappe.utils.nestedset import NestedSet, rebuild_tree
+from frappe.utils.nestedset import NestedSet
 
 class CircularReferenceError(frappe.ValidationError): pass
 
@@ -118,10 +118,10 @@ class Task(NestedSet):
 		end_date = self.exp_end_date or self.act_end_date
 		if end_date:
 			for task_name in frappe.db.sql("""
-				select name from `tabTask` as parent 
-				where parent.project = %(project)s 
+				select name from `tabTask` as parent
+				where parent.project = %(project)s
 					and parent.name in (
-						select parent from `tabTask Depends On` as child 
+						select parent from `tabTask Depends On` as child
 						where child.task = %(task)s and child.project = %(project)s)
 			""", {'project': self.project, 'task':self.name }, as_dict=1):
 				task = frappe.get_doc("Task", task_name.name)
@@ -198,22 +198,22 @@ def set_tasks_as_overdue():
 		and `status` not in ('Closed', 'Cancelled')""")
 
 @frappe.whitelist()
-def get_children():
-	doctype = frappe.local.form_dict.get('doctype')
+def get_children(doctype, parent, project=None):
+	conditions = ''
 
-	parent_field = 'parent_' + doctype.lower().replace(' ', '_')
-	parent = frappe.form_dict.get("parent") or ""
+	if parent and parent != 'All Tasks':
+		conditions += ' and parent_task = "{0}"'.format(frappe.db.escape(parent))
 
-	if parent == "task":
-		parent = ""
+	if project:
+		conditions += ' and project = "{0}"'.format(frappe.db.escape(project))
 
 	tasks = frappe.db.sql("""select name as value,
+		subject as title,
 		is_group as expandable
-		from `tab{doctype}`
+		from `tabTask`
 		where docstatus < 2
-		and ifnull(`{parent_field}`,'') = %s
-		order by name""".format(doctype=frappe.db.escape(doctype),
-		parent_field=frappe.db.escape(parent_field)), (parent), as_dict=1)
+		{conditions}
+		order by name""".format(conditions=conditions), as_dict=1)
 
 	# return tasks
 	return tasks
