@@ -2,11 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
-from frappe.utils import flt, cint
-from frappe import _
 
+import frappe
+from frappe import _
+from frappe.model import no_value_fields
 from frappe.model.document import Document
+from frappe.utils import cint, flt
+
 
 class PackingSlip(Document):
 
@@ -84,11 +86,12 @@ class PackingSlip(Document):
 			* No. of Cases of this packing slip
 		"""
 
-		# also pick custom fields from delivery note
 		rows = [d.item_code for d in self.get("items")]
 
-		custom_fields = ', '.join(['dni.`{0}`'.format(d.fieldname) for d in \
-			frappe.get_meta("Delivery Note Item").get_custom_fields()])
+		# also pick custom fields from delivery note
+		custom_fields = ', '.join(['dni.`{0}`'.format(d.fieldname)
+			for d in frappe.get_meta("Delivery Note Item").get_custom_fields()
+			if d.fieldtype not in no_value_fields])
 
 		if custom_fields:
 			custom_fields = ', ' + custom_fields
