@@ -205,12 +205,10 @@ class Account(Document):
 		return new_account
 
 	def after_rename(self, old, new, merge=False):
+		super(Account, self).after_rename(old, new, merge)
+
 		if not merge:
-			frappe.db.set_value("Account", new, "account_name",
-				" - ".join(new.split(" - ")[:-1]))
-		else:
-			from frappe.utils.nestedset import rebuild_tree
-			rebuild_tree("Account", "parent_account")
+			frappe.db.set_value("Account", new, "account_name", " - ".join(new.split(" - ")[:-1]))
 
 def get_parent_account(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select name from tabAccount
