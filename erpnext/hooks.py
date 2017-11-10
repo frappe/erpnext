@@ -168,6 +168,9 @@ standard_queries = {
 }
 
 doc_events = {
+	"*": {
+        "validate": "erpnext.controllers.queries.update_custom_field",
+    },
 	"Stock Entry": {
 		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty",
 		"on_cancel": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty"

@@ -6,7 +6,7 @@ cur_frm.add_fetch("material_requester", "department", "department");
 cur_frm.add_fetch("material_requester", "user_id", "user_id");
 frappe.ui.form.on('Material Request', {
     validate: function(frm) {
-           cur_frm.refresh();
+           // cur_frm.refresh();
 
        },
     setup: function(frm) {
@@ -20,6 +20,7 @@ frappe.ui.form.on('Material Request', {
     },
     purchase_workflow: function(frm) {
         // frm.set_value("material_requester", undefined);
+        
         frm.clear_table("items");
         refresh_many(['items']);
         frm.set_value("project", undefined);
@@ -44,10 +45,6 @@ frappe.ui.form.on('Material Request', {
                 return "";
             }
         }
-    },
-    material_requester: function(frm) {
-
-
     },
     onload: function(frm) {
     	if(cur_frm.doc.__islocal){
@@ -86,7 +83,7 @@ frappe.ui.form.on('Material Request', {
 
             frm.fields_dict["items"].grid.get_field("warehouse").get_query = function(doc, cdt, cdn) {
                 return {
-                    filters: { 'company': doc.company }
+                    filters: { 'company': cur_frm.doc.company }
                 }
             }
     }
@@ -102,25 +99,29 @@ frappe.ui.form.on("Material Request Item", {
 });
 
 erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.extend({
-    onload: function(doc) {
+    onload: function() {
         this._super();
-        this.frm.set_query("item_code", "items", function() {
-        	var flts = {};
-        	if (doc.purchase_workflow == "Asset"){
-        		flts = {'is_fixed_asset': 1};
-        	}
-        	else if (doc.purchase_workflow == "Project"){
-        		flts = {'is_fixed_asset': 0};
-        	}
+        cur_frm.trigger('filter_items');
+    },
+    purchase_workflow: function(){
+        
+        cur_frm.trigger('filter_items');
+    },
+    filter_items: function(){
+        cur_frm.set_query("item_code", "items", function() {
+            var flts = {};
+            if (cur_frm.doc.purchase_workflow == "Asset"){
+                flts = {'is_fixed_asset': 1};
+            }
+            else if (cur_frm.doc.purchase_workflow == "Project"){
+                flts = {'is_fixed_asset': 0};
+            }
             return {
                 query: "erpnext.controllers.queries.item_query",
                 filters: flts
             }
         });
-
-
     },
-
     refresh: function(doc) {
 
         for (var key in cur_frm.fields_dict) {

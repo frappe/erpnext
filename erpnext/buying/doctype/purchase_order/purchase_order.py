@@ -11,11 +11,15 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
 from frappe.desk.notifications import clear_doctype_notifications
-
+from frappe.utils.print_format import download_pdf
+from frappe.desk.form.load import get_attachments
+from frappe.utils.user import get_user_fullname
+from frappe.core.doctype.communication.email import make
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
+STANDARD_USERS = ("Guest", "Administrator")
 
 class PurchaseOrder(BuyingController):
 	def __init__(self, arg1, arg2=None):
@@ -277,6 +281,37 @@ class PurchaseOrder(BuyingController):
 		for item in self.items:
 			if item.delivered_by_supplier == 1:
 				item.received_qty = item.qty
+
+	def supplier_po_mail(self):
+		if self.contact_email:
+			full_name = get_user_fullname(frappe.session['user'])
+			if full_name == "Guest":
+				full_name = "Administrator"
+
+			data = {'contact_email':self.contact_email, 'supplier': self.supplier}
+			args = {
+				'message': frappe.render_template("message_for_supplier", data),
+				'user_fullname': full_name
+			}
+
+			subject = _("Purchase Order")
+			template = "templates/emails/PO.html"
+			sender = frappe.session.user not in STANDARD_USERS and frappe.session.user or None
+			message = frappe.get_template(template).render(args)
+			attachments = self.get_attachments()
+			self.send_email(data, sender, subject, message, attachments)
+
+	def send_email(self, data, sender, subject, message, attachments):
+		make(subject = subject, content=message,recipients=data['contact_email'], 
+			sender=sender,attachments = attachments, send_email=True,
+		     	doctype=self.doctype, name=self.name)["name"]
+
+		frappe.msgprint(_("Email sent to supplier {0}").format(data['supplier']))
+
+	def get_attachments(self):
+		attachments = [d.name for d in get_attachments(self.doctype, self.name)]
+		attachments.append(frappe.attach_print(self.doctype, self.name, doc=self))
+		return attachments
 
 @frappe.whitelist()
 def close_or_unclose_purchase_orders(names, status):

@@ -23,11 +23,68 @@ frappe.ui.form.on("Purchase Order", {
     },
     onload_post_render: function(frm){
         frm.add_fetch("quotation_opening", "reason", "reason");   
+    },
+    after_save: function(frm, cdt, cdn){
+        if (frm.doc.workflow_state && frm.doc.workflow_state.indexOf("Rejected") > 0){
+            frappe.prompt([
+                {
+                    fieldtype: 'Small Text',
+                    reqd: true,
+                    fieldname: 'reason'
+                }],
+                function(args){
+                    validated = true;
+                    frappe.call({
+                        method: 'frappe.core.doctype.communication.email.make',
+                        args: {
+                            doctype: frm.doctype,
+                            name: frm.docname,
+                            subject: format(__('Reason for {0}'), [frm.doc.workflow_state]),
+                            content: args.reason,
+                            send_mail: false,
+                            send_me_a_copy: false,
+                            communication_medium: 'Other',
+                            sent_or_received: 'Sent'
+                        },
+                        callback: function(res){
+                            if (res && !res.exc){
+                                frappe.call({
+                                    method: 'frappe.client.set_value',
+                                    args: {
+                                        doctype: frm.doctype,
+                                        name: frm.docname,
+                                        fieldname: 'rejection_reason',
+                                        value: frm.doc.rejection_reason ?
+                                            [frm.doc.rejection_reason, frm.doc.workflow_state].join('\n') : frm.doc.workflow_state
+                                    },
+                                    callback: function(res){
+                                        if (res && !res.exc){
+                                            frm.reload_doc();
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                },
+                __('Reason for ') + __(frm.doc.workflow_state),
+                __('End as Rejected')
+            )
+        }
     }
 });
 
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
-    refresh: function(doc, cdt, cdn) {
+    refresh: function(doc) {
+        if (cur_frm.doc.docstatus === 1 && roles.indexOf("Purchase Manager") != -1)
+        cur_frm.add_custom_button(__("Send Supplier Emails"), function() {
+                frappe.call({
+                    method: 'supplier_po_mail',
+                    doc: cur_frm.doc,
+                    freeze: true
+                });
+            });
+
         if (!cur_frm.doc.__islocal) {
             for (var key in cur_frm.fields_dict) {
                 cur_frm.fields_dict[key].df.read_only = 1;

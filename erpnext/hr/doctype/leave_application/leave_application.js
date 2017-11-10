@@ -92,19 +92,16 @@ frappe.ui.form.on("Leave Application", {
             cur_frm.set_df_property("attachment", "reqd", 0);
             refresh_field("attachment");
         }
-        // frappe.call({
-        //     method: "validate_type_dis",
-        //     doc: frm.doc,
+        frappe.call({
+            method: "get_permitted_departments",
+            doc: frm.doc,
+            callback: function(r) {
 
-        //     callback: function(r) {
-        //         if (!r.exc && r.message) {
-        //             console.log(r.message)
-        //             if (r.message) {
-        //                 frm.page.clear_actions_menu();
-        //             }
-        //         }
-        //     }
-        // });
+                if (r.message == undefined && frappe.session.user != "Administrator") {  
+                    frm.page.clear_actions_menu();
+                }
+            }
+        });
         frm.set_df_property("naming_series", "read_only", frm.doc.__islocal ? 0 : 1);
         frm.set_df_property("leave_type", "read_only", frm.doc.__islocal ? 0 : 1);
         frm.set_df_property("employee", "read_only", frm.doc.__islocal ? 0 : 1);

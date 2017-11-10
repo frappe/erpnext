@@ -158,6 +158,14 @@ class LeaveApplication(Document):
 		unpaid_leave_switcher()
 		workflow_leave_switcher()
 
+	def get_permitted_departments(self):
+		permitted_departments = frappe.db.sql_list("select for_value from `tabUser Permission` where allow = 'Department' and user = '{0}'".format(frappe.session.user))
+		if permitted_departments: 
+			states = ["Pending", "Created By Line Manager", "Approved By Line Manager", "Created By Manager", "Approved By Manager"]
+			if (self.workflow_state in states and self.department in permitted_departments) or (self.workflow_state == "Created By Director"):
+				return True
+			else:
+				return False
 	# def validate_approval_line_manager(self):
 	# 	dd=frappe.get_doc("Employee",self.employee)
 	# 	if dd.sub_department:
@@ -1298,34 +1306,18 @@ def create_return_from_leave_statement_after_leave():
 
 			from frappe.core.doctype.communication.email import make
 			frappe.flags.sent_mail = None
-			content_msg="Please review your return from leave Statement has been creation"
+			content_msg="Please review your return from leave Statement has been Created"
 	 		prefered_email = frappe.get_value("Employee", filters = {"user_id": emp_user}, fieldname = "prefered_email")
 	
 	 		if prefered_email:
 
 				try:
-					make(subject = "Return from leave ", content=content_msg, recipients=prefered_email ,send_email=True, sender="ahmedzaqout@outlook.com")
+					make(subject = "Return from leave Statement", content=content_msg, recipients=prefered_email ,
+						send_email=True, sender="erp@tawari.sa")
 				except:
-					frappe.throw("could not send")
+					frappe.msgprint("could not send")
 
 		# print nowdate()
-
-
-#api for testing email 
-#should be deleted after finish
-
-def ahmadragheb():
-	from frappe.core.doctype.communication.email import make
-	frappe.flags.sent_mail = None
-	content_msg="Please review your return from leave Statement has been creation"
-	
-	try:
-		make(subject = "Return from leave ", content=content_msg, recipients="ahmedragheb75@gmail.com" ,send_email=True, sender="ahmedzaqout@outlook.com")
-		print("done")
-	except:
-		frappe.throw("could not send")
-		
-	
 
 
 

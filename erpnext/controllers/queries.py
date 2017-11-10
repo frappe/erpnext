@@ -396,3 +396,31 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 			'company': filters.get("company", ""),
 			'txt': "%%%s%%" % frappe.db.escape(txt)
 		})
+
+@frappe.whitelist()	
+def update_custom_field(doc, method):
+
+	workflow_qy =frappe.db.sql("select name from tabWorkflow where is_active=1 and document_type='%s'"%doc.doctype, as_dict=True)
+	if workflow_qy:
+		meta = frappe.get_meta(doc.doctype)
+		if not meta.get_field('handled_by'):
+				# create custom field
+			frappe.get_doc({
+				"doctype":"Custom Field",
+				"dt": doc.doctype,
+				"__islocal": 1,
+				"fieldname": "handled_by",
+				"label": "handled_by".replace("_", " ").title(),
+				"read_only": 1,
+				"allow_on_submit": 1,
+				"fieldtype": "Data",
+			}).save()
+		workflow_name = workflow_qy[0].name
+		workflow_transitions = frappe.db.sql("select * from `tabWorkflow Transition` where parent='%s'" %(workflow_name), as_dict=True)
+		
+		next_state=""
+		allowed=""
+		
+		for j in workflow_transitions:
+			 if j.state == doc.workflow_state:
+				doc.handled_by = j.allowed
