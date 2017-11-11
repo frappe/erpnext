@@ -6,8 +6,9 @@ frappe.ui.form.on('Medical Insurance Application', {
         
     },refresh: function(frm) {
         if (!cur_frm.doc.__islocal) {
-        	cur_frm.doc.docstatus = 1;
-            cur_frm.disable_save();
+        	for (var key in cur_frm.fields_dict) {
+            cur_frm.fields_dict[key].df.read_only = 1;
+            }
         }
         else{
         	cur_frm.enable_save();

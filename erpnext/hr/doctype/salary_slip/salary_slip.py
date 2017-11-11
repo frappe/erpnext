@@ -83,7 +83,8 @@ class SalarySlip(TransactionBase):
 			prev_month_start_date = "{0}-{1}-20".format(getdate(self.end_date).year - 1, prev_month)
 		self.set_deduction_for_return_from_leave(prev_month_start_date, end_date)
 
-		
+	def set_join_date_deducted_days(self):
+		pass	
 	# def get_emp_join_date(self,employee):
 	# 	"""  Get Employee Joinin Date"""
 	# 	date_of_joining=frappe.get_value('Employee',self.employee,'date_of_joining');
