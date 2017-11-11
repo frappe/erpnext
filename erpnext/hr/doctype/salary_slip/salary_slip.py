@@ -82,7 +82,40 @@ class SalarySlip(TransactionBase):
 		else:
 			prev_month_start_date = "{0}-{1}-20".format(getdate(self.end_date).year - 1, prev_month)
 		self.set_deduction_for_return_from_leave(prev_month_start_date, end_date)
+
 		
+	# def get_emp_join_date(self,employee):
+	# 	"""  Get Employee Joinin Date"""
+	# 	date_of_joining=frappe.get_value('Employee',self.employee,'date_of_joining');
+	# 	return date_of_joining
+
+
+	# def check_date(self,date_of_joining):
+	# 	""" return number of days differnt  """
+
+	# 	"""  check if the year, month is the same current salry slip month,year
+	# 	check the day if they are 1 start or not """
+
+	# 	start_date =self.start_date
+	# 	star_day = getdate(self.start_date).day
+	# 	star_month=getdate(self.start_date).month
+	# 	start_year=getdate(self.start_date).year
+
+	# 	join_day = getdate(date_of_joining).day
+	# 	join_month=getdate(date_of_joining).month
+	# 	join_year=getdate(date_of_joining).year
+
+
+
+	# 	if start_year ==  join_year and star_month == join_month :
+	# 		if start_day==join_day:
+	# 			pass
+	# 		elif star_day > join_day:
+	# 			pass
+	# 		elif star_day <join:
+	# 			""" get the differance """
+	# 			pass
+
 	def set_deduction_for_return_from_leave(self, start_date, end_date):
 
 		rt = frappe.db.sql(""" select to_date, return_date from `tabReturn From Leave Statement` where docstatus = 1 and

@@ -313,6 +313,15 @@ class PurchaseOrder(BuyingController):
 		attachments.append(frappe.attach_print(self.doctype, self.name, doc=self))
 		return attachments
 
+	def has_requester_perm(self):
+		if hasattr(self,'workflow_state'):
+			if self.workflow_state == "Pending":
+				pu = frappe.get_value("User Permission", filters = {"allow": "Material Request", "for_value": self.material_request}, fieldname = "user")
+				if pu:
+					return pu
+				else:
+					return frappe.session.user
+
 @frappe.whitelist()
 def close_or_unclose_purchase_orders(names, status):
 	if not frappe.has_permission("Purchase Order", "write"):

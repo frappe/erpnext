@@ -134,7 +134,6 @@ class MaterialRequest(BuyingController):
 				frappe.throw(_("The Project is not valid"))
 
 	def validate_adding_mr(self):
-		pass
 		if self.material_requester:
 			user_emp = frappe.db.sql("select user_id from `tabEmployee` where name = '{0}'".format(self.material_requester), as_dict = 1)
 			# frappe.throw(user_emp[0].user_id)

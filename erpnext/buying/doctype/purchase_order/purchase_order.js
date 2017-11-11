@@ -25,7 +25,7 @@ frappe.ui.form.on("Purchase Order", {
         frm.add_fetch("quotation_opening", "reason", "reason");   
     },
     after_save: function(frm, cdt, cdn){
-        if (frm.doc.workflow_state && frm.doc.workflow_state.indexOf("Rejected") > 0){
+        if (frm.doc.workflow_state && frm.doc.workflow_state.indexOf("Rejected") != -1){
             frappe.prompt([
                 {
                     fieldtype: 'Small Text',
@@ -54,8 +54,7 @@ frappe.ui.form.on("Purchase Order", {
                                         doctype: frm.doctype,
                                         name: frm.docname,
                                         fieldname: 'rejection_reason',
-                                        value: frm.doc.rejection_reason ?
-                                            [frm.doc.rejection_reason, frm.doc.workflow_state].join('\n') : frm.doc.workflow_state
+                                        value: args.reason
                                     },
                                     callback: function(res){
                                         if (res && !res.exc){
@@ -76,6 +75,19 @@ frappe.ui.form.on("Purchase Order", {
 
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
     refresh: function(doc) {
+        if(cur_frm.doc.workflow_state && cur_frm.doc.workflow_state == "Pending"){
+            frappe.call({
+                "method": "has_requester_perm",
+                "doc": cur_frm.doc,
+                callback: function(r) {
+                    if(frappe.session.user != "Administrator"){
+                        if (frappe.session.user != r.message){
+                            cur_frm.page.clear_actions_menu();
+                        }
+                    }
+                }
+            });
+        }
         if (cur_frm.doc.docstatus === 1 && roles.indexOf("Purchase Manager") != -1)
         cur_frm.add_custom_button(__("Send Supplier Emails"), function() {
                 frappe.call({
