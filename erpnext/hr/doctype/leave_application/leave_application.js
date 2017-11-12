@@ -93,11 +93,11 @@ frappe.ui.form.on("Leave Application", {
             refresh_field("attachment");
         }
         frappe.call({
-            method: "get_permitted_departments",
+            method: "unallowed_actions",
             doc: frm.doc,
             callback: function(r) {
 
-                if (r.message == undefined && frappe.session.user != "Administrator") {  
+                if (r.message && frappe.session.user != "Administrator") {  
                     frm.page.clear_actions_menu();
                 }
             }

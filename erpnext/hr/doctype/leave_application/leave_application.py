@@ -122,6 +122,7 @@ class LeaveApplication(Document):
 
 
 	def after_insert(self):
+		self.get_department()
 		# frappe.clear_cache(user=frappe.session.user)
 
 		# if self.workflow_state=="Approved By Manager":
@@ -130,7 +131,14 @@ class LeaveApplication(Document):
 		# 	pass
 		if self.leave_type != "Annual Leave - اجازة اعتيادية" and self.leave_type != "Without Pay - غير مدفوعة" and self.leave_type != "Compensatory off - تعويضية" and self.leave_type != "emergency -اضطرارية":
 			frappe.msgprint(_("You must attach the required file otherwise the application will be <span style='color:red;'>REJECTED!</span>"))
-	
+
+	def get_department(self):
+		dep = frappe.get_value("Employee", filters = {"name": self.employee}, fieldname = "department")
+		if not dep:
+			frappe.throw(_("The department should be set to this employee in the Employee form"))
+		else:	
+			self.department = dep
+
 	def validate_conditional_workflow_transition(self):
 
 		def unpaid_leave_switcher():
@@ -158,14 +166,13 @@ class LeaveApplication(Document):
 		unpaid_leave_switcher()
 		workflow_leave_switcher()
 
-	def get_permitted_departments(self):
-		permitted_departments = frappe.db.sql_list("select for_value from `tabUser Permission` where allow = 'Department' and user = '{0}'".format(frappe.session.user))
-		if permitted_departments: 
-			states = ["Pending", "Created By Line Manager", "Approved By Line Manager", "Created By Manager", "Approved By Manager"]
-			if (self.workflow_state in states and self.department in permitted_departments) or (self.workflow_state == "Created By Director"):
+	def unallowed_actions(self):
+		if hasattr(self,"workflow_state"):
+			permitted_departments = frappe.db.sql_list("select for_value from `tabUser Permission` where allow = 'Department' and user = '{0}'".format(frappe.session.user))
+			if self.department not in permitted_departments and u'HR Manager' in frappe.get_roles(frappe.session.user) and self.workflow_state in ["Created By Manager", "Approved By Manager"]: 
 				return True
-			else:
-				return False
+			elif self.department not in permitted_departments and u'HR Specialist' in frappe.get_roles(frappe.session.user) and self.workflow_state in ["Created By Line Manager", "Approved By Line Manager"]: 
+				return True
 	# def validate_approval_line_manager(self):
 	# 	dd=frappe.get_doc("Employee",self.employee)
 	# 	if dd.sub_department:
@@ -849,6 +856,15 @@ class LeaveApplication(Document):
 		from frappe.desk.page.chat.chat import post
 		post(**{"txt": args.message, "contact": args.message_to, "subject": args.subject,
 			"notify": cint(self.follow_via_email)})
+def insert_department():
+	las = frappe.db.sql("select name, employee from `tabLeave Application` where department is null", as_dict=True)
+	for la in las:
+		dep = frappe.get_value("Employee", filters = {"name": la.employee}, fieldname="department")
+		nla = frappe.get_doc("Leave Application", la.name)
+		nla.flags.ignore_validate_update_after_submit=True
+		nla.set("department", dep)
+		nla.save()
+		print la.name
 
 @frappe.whitelist()
 def get_approvers(doctype, txt, searchfield, start, page_len, filters):
