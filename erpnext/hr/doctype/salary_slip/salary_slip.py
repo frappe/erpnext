@@ -52,6 +52,7 @@ class SalarySlip(TransactionBase):
 				frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
 								format(max_working_hours), alert=True)
 		self.validate_return_from_leave_deduction()
+		self.get_join_date_deducted_days()
 
 	def validate_overtime(self):
 		prev_month = getdate(self.start_date).month - 1 if getdate(self.start_date).month - 1 > 0 else 12
@@ -83,8 +84,17 @@ class SalarySlip(TransactionBase):
 			prev_month_start_date = "{0}-{1}-20".format(getdate(self.end_date).year - 1, prev_month)
 		self.set_deduction_for_return_from_leave(prev_month_start_date, end_date)
 
-	def set_join_date_deducted_days(self):
-		pass	
+	def get_join_date_deducted_days(self):
+		if getdate(self.date_of_joining).month == getdate(self.start_date).month and getdate(self.date_of_joining).year == getdate(self.start_date).year:
+			date_dif = date_diff(self.date_of_joining, get_first_day(getdate(self.date_of_joining)))
+			if date_dif > 0:
+				self.jd_deducted_days = date_dif	
+				ss = frappe.get_doc("Salary Structure", self.salary_structure)
+				for doc in ss.get("earnings"):
+					if doc.get("salary_component") == "Basic":
+						doc.set("formula", "base-((base/30)*(jd_deducted_days))")
+
+				ss.save(ignore_permissions=True)
 	# def get_emp_join_date(self,employee):
 	# 	"""  Get Employee Joinin Date"""
 	# 	date_of_joining=frappe.get_value('Employee',self.employee,'date_of_joining');
