@@ -290,7 +290,7 @@ class PurchaseOrder(BuyingController):
 
 			data = {'contact_email':self.contact_email, 'supplier': self.supplier}
 			args = {
-				'message': frappe.render_template("message_for_supplier", data),
+				'message': frappe.render_template(self.msg_to_supplier, data),
 				'user_fullname': full_name
 			}
 

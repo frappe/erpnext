@@ -88,7 +88,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
                 }
             });
         }
-        if (cur_frm.doc.docstatus === 1 && roles.indexOf("Purchase Manager") != -1)
+        if (cur_frm.doc.docstatus === 1 && frappe.user_roles.indexOf("Purchase Manager") != -1 && cur_frm.doc.contact_email)
         cur_frm.add_custom_button(__("Send Supplier Emails"), function() {
                 frappe.call({
                     method: 'supplier_po_mail',
@@ -101,6 +101,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
             for (var key in cur_frm.fields_dict) {
                 cur_frm.fields_dict[key].df.read_only = 1;
             }
+            cur_frm.fields_dict["msg_to_supplier"].df.read_only = 0;
+            cur_frm.fields_dict["msg_section"].df.read_only = 0;
             cur_frm.disable_save();
         } else {
             cur_frm.enable_save();
