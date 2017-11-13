@@ -28,13 +28,22 @@ class SalarySlip(TransactionBase):
 			pen_doc.flags.ignore_permissions = True
 			if pen_doc:
 				pass
-				# ss = frappe.get_doc("Salary Structure", self.salary_structure)
-				# # if pen_doc.penalty_type=="Days":
-				# self.penalty_days=pen_doc.days_count
-				# for doc in ss.get("deductions"):
-				# 	if: pen_doc.penalty_type=="Amount":
-				# 		if doc.get("salary_component") == "Penalty" and doc.get("amount_based_on_formula") = 0:
-				# 			doc.set("amount", str(pen_doc.amount))
+				ss = frappe.get_doc("Salary Structure", self.salary_structure)
+				# if pen_doc.penalty_type=="Days":
+				self.penalty_days=pen_doc.days_count
+				for doc in ss.get("deductions"):
+					
+					if doc.get("salary_component") == "Penalty" and doc.get("amount_based_on_formula") = 0:
+						if pen_doc.penalty_type=="Amount":
+							doc.set("amount", str(pen_doc.amount))
+					else:
+						new_pen = [{
+						"salary_component": "Penalty",
+						"amount_based_on_formula": 0,
+						"amount": pen_doc.amount
+						}]
+						ss.set("deductions", new_pen)
+					elif pen_doc.penalty_type=="Days":
 		
 
 		self.validate_dates()
