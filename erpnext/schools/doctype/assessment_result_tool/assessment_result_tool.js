@@ -12,10 +12,11 @@ frappe.ui.form.on('Assessment Result Tool', {
 			frm.set_value("student_group", frappe.route_options.student_group);
 			frm.set_value("assessment_plan", frappe.route_options.assessment_plan);
 			frappe.route_options = null;
+		} else {
+			frm.trigger("assessment_plan");
 		}
 		frm.disable_save();
 		frm.page.clear_indicator();
-		frm.trigger("assessment_plan");
 	},
 
 	assessment_plan: function(frm) {
