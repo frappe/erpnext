@@ -54,4 +54,14 @@ For 'CREDIT LIMIT' check functionality, Priority (High to Low) is as below
 
 Save the changes.
 
+####Credit Limit Check
+
+By default credit limit check takes place before Sales Order is booked (i.e. Submitted).
+
+System sums up previous Outstanding Amount along with the Sales Order Amount to be booked and validates against 
+the credit limit set for the customer.
+
+If user wants to bypass the credit limit check at Sales Order , it can be done by checking "Bypass credit limit check at 
+Sales Order" at Customer > Credit Limit section, for such cases system will check the credit limit at Sales Invoice and Delivery level.
+
 {next}
