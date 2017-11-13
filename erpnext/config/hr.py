@@ -208,6 +208,33 @@ def get_data():
 				},
 			]
 		},
+
+		{
+			"label": _("Injury or Illness Management"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Injury or Illness Case"
+				},
+				{
+					"type": "doctype",
+					"name": "Injury or Illness Case Type"
+				},
+				{
+					"type": "doctype",
+					"name": "Injury or Illness Case Body Part"
+				},
+				{
+					"type": "doctype",
+					"name": "Injury or Illness Case Outcome"
+				},
+				{
+					"type": "doctype",
+					"name": "Injury or Illness Case Severity Level"
+				},
+			]
+		},
+
 		{
 			"label": _("Setup"),
 			"icon": "fa fa-cog",
