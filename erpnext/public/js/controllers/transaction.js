@@ -950,10 +950,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			method: "erpnext.stock.get_item_details.apply_price_list",
 			args: {	args: args },
 			callback: function(r) {
+				me.in_apply_price_list = false;
 				if (!r.exc) {
 					me.frm.set_value("price_list_currency", r.message.parent.price_list_currency);
 					me.frm.set_value("plc_conversion_rate", r.message.parent.plc_conversion_rate);
-					me.in_apply_price_list = false;
 
 					if(args.items.length) {
 						me._set_values_for_item_list(r.message.children);
