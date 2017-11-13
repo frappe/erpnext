@@ -95,7 +95,7 @@ def make_salary_slip(source_name, target_doc = None, employee = None, as_print =
 				"name": "salary_structure"
 			}
 		}
-	}, target_doc, postprocess, ignore_child_tables=True)
+	}, target_doc, postprocess, ignore_child_tables=True,ignore_permissions=True)
 
 	if cint(as_print):
 		doc.name = 'Preview for {0}'.format(employee)
