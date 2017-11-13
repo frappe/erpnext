@@ -177,7 +177,7 @@ def get_party_account(party_type, party, company):
 		frappe.throw(_("Please select a Company"))
 
 	if not party:
-		frappe.throw(_("Please select a Party"))
+		return
 
 	account = frappe.db.get_value("Party Account",
 		{"parenttype": party_type, "parent": party, "company": company}, "account")
