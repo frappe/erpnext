@@ -11,13 +11,13 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		this._super();
 		this.init_post_render_dialog_operations();
 		this.preset_fields_for_template();
+		this.dialog.$wrapper.find('.edit-full').text(__('Edit in full page for more options like assets, serial nos, batches etc.'))
 	},
 
 	init_post_render_dialog_operations: function() {
 		this.dialog.fields_dict.attribute_html.$wrapper.append(frappe.render_template("item_quick_entry"));
 		this.init_for_create_variant_trigger();
 		this.init_for_item_template_trigger();
-		this.init_for_view_attributes();
 		// explicitly hide manufacturing fields as hidden not working.
 		this.toggle_manufacturer_fields();
 		this.dialog.get_field("item_template").df.hidden = 1;
@@ -247,17 +247,6 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 	initiate_render_attributes: function() {
 		this.dialog.fields_dict.attribute_html.$wrapper.find(".attributes").empty();
 		this.render_attributes(this.attributes);
-	},
-
-	init_for_view_attributes: function() {
-		var me = this;
-		$(this.dialog.fields_dict.attribute_html.wrapper).find(".view-attributes").click(function() {
-			var html = frappe.render_template("variant_attribute", {
-				"attributes": me.attributes,
-				"attribute_values": me.attribute_values
-			});
-			frappe.msgprint(html);
-		});
 	},
 
 	render_attributes: function(attributes) {
