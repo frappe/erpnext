@@ -115,8 +115,8 @@ def get_patient_detail(patient, company=None):
 	if not patient_dict:
 		frappe.throw("Patient not found")
 	vital_sign = frappe.db.sql("""select * from `tabVital Signs` where patient=%s order by signs_date desc limit 1""", (patient), as_dict=1)
-
+	#TODO remove this show latest vitals in chart
 	details = patient_dict[0]
-	if vital_sign:
-		details.update(vital_sign[0])
+	if vital_sign and vital_sign[0]:
+		details["vitals"] = vital_sign[0]
 	return details
