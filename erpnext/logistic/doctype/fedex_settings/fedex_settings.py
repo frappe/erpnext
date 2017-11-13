@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from erpnext.erpnext.logistic.utils import create_shipper
+from erpnext.logistic.utils import create_shipper
 
 class FedExSettings(Document):
 	def validate_credentials(self):
