@@ -27,8 +27,14 @@ class SalarySlip(TransactionBase):
 			pen_doc=frappe.get_doc("Penalty",pan[0].name)	
 			pen_doc.flags.ignore_permissions = True
 			if pen_doc:
-				if pen_doc.penalty_type=="Days":
-					self.penalty_days=pen_doc.days_count
+				pass
+				# ss = frappe.get_doc("Salary Structure", self.salary_structure)
+				# # if pen_doc.penalty_type=="Days":
+				# self.penalty_days=pen_doc.days_count
+				# for doc in ss.get("deductions"):
+				# 	if: pen_doc.penalty_type=="Amount":
+				# 		if doc.get("salary_component") == "Penalty" and doc.get("amount_based_on_formula") = 0:
+				# 			doc.set("amount", str(pen_doc.amount))
 		
 
 		self.validate_dates()
