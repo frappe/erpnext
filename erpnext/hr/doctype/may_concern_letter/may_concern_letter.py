@@ -76,7 +76,7 @@ class MayConcernLetter(Document):
 			doc.company= "Tawari"
 			doc.posting_date= "2017-10-01"
 			
-			doc.insert()
+			doc.insert(ignore_permissions=True)
 
 
 			result =doc.gross_pay
