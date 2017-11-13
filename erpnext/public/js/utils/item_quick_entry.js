@@ -10,14 +10,13 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		this.mandatory = this.mandatory.concat(this.get_attributes_fields());
 		this._super();
 		this.init_post_render_dialog_operations();
+		this.preset_fields_for_template();
 	},
 
 	init_post_render_dialog_operations: function() {
 		this.dialog.fields_dict.attribute_html.$wrapper.append(frappe.render_template("item_quick_entry"));
 		this.init_for_create_variant_trigger();
 		this.init_for_item_template_trigger();
-		// this.init_for_next_trigger();
-		// this.init_for_prev_trigger();
 		this.init_for_view_attributes();
 		// explicitly hide manufacturing fields as hidden not working.
 		this.toggle_manufacturer_fields();
@@ -29,6 +28,7 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		var me = this;
 		this.dialog.set_primary_action(__('Save'), function() {
 			if (me.dialog.working) return;
+
 			var data = me.dialog.get_values();
 			var variant_values = {};
 
@@ -37,6 +37,8 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 				if (!Object.keys(variant_values).length) {
 					data = null;
 				}
+				variant_values.stock_uom = me.template_doc.stock_uom;
+				variant_values.item_group = me.template_doc.item_group;
 			}
 
 			if (data) {
@@ -143,9 +145,6 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 
 	get_attributes_fields: function() {
 		var attribute_fields = [{
-			fieldname: 'sec_br',
-			fieldtype: 'Section Break'
-		}, {
 			fieldname: 'attribute_html',
 			fieldtype: 'HTML'
 		}]
@@ -158,15 +157,37 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		var me = this;
 
 		this.dialog.fields_dict.create_variant.$input.on("click", function() {
-			var checked = $(this).prop("checked");
-			me.dialog.get_field("item_template").df.reqd = checked;
-			me.dialog.get_field("item_code").df.reqd = !checked;
-			me.dialog.set_value("item_template", "");
-			me.dialog.get_field("item_template").df.hidden = !checked;
-			me.dialog.get_field("item_template").refresh();
-			me.dialog.get_field("item_code").refresh();
+			me.preset_fields_for_template();
 			me.init_post_template_trigger_operations(false, [], true);
 		});
+	},
+
+	preset_fields_for_template: function() {
+		var for_variant = this.dialog.get_value('create_variant');
+
+		// setup template field, seen and mandatory if variant
+		let template_field = this.dialog.get_field("item_template");
+		template_field.df.reqd = for_variant;
+		template_field.set_value('');
+		template_field.df.hidden = !for_variant;
+		template_field.refresh();
+
+		// hide properties for variant
+		['item_code', 'item_name', 'item_group', 'stock_uom'].forEach((d) => {
+			let f = this.dialog.get_field(d);
+			f.df.hidden = for_variant;
+			f.refresh();
+		});
+
+		this.dialog.get_field('attribute_html').toggle(false);
+
+		// non mandatory for variants
+		['item_code', 'stock_uom', 'item_group'].forEach((d) => {
+			let f = this.dialog.get_field(d);
+			f.df.reqd = !for_variant;
+			f.refresh();
+		});
+
 	},
 
 	init_for_item_template_trigger: function() {
@@ -174,6 +195,7 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 
 		me.dialog.fields_dict["item_template"].df.onchange = () => {
 			var template = me.dialog.fields_dict.item_template.input.value;
+			me.template_doc = null;
 			if (template) {
 				frappe.call({
 					method: "frappe.client.get",
@@ -182,29 +204,33 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 						name: template
 					},
 					callback: function(r) {
-						var templ_doc = r.message;
+						me.template_doc = r.message;
 						me.is_manufacturer = false;
 
-						if (templ_doc.variant_based_on === "Manufacturer") {
+						if (me.template_doc.variant_based_on === "Manufacturer") {
 							me.init_post_template_trigger_operations(true, [], true);
 						} else {
 
-							me.init_post_template_trigger_operations(false, templ_doc.attributes, false);
-							me.show_attributes(templ_doc.attributes);
+							me.init_post_template_trigger_operations(false, me.template_doc.attributes, false);
+							me.render_attributes(me.template_doc.attributes);
 						}
 					}
 				});
 			} else {
+				me.dialog.get_field('attribute_html').toggle(false);
 				me.init_post_template_trigger_operations(false, [], true);
 			}
 		}
 	},
 
 	init_post_template_trigger_operations: function(is_manufacturer, attributes, attributes_flag) {
+		this.attributes = attributes;
+		this.attribute_values = {};
+		this.attributes_count = attributes.length;
+
 		this.dialog.fields_dict.attribute_html.$wrapper.find(".attributes").empty();
 		this.is_manufacturer = is_manufacturer;
 		this.toggle_manufacturer_fields();
-		// this.set_pagination_details(attributes);
 		this.dialog.fields_dict.attribute_html.$wrapper.find(".attributes").toggleClass("hide-control", attributes_flag);
 		this.dialog.fields_dict.attribute_html.$wrapper.find(".attributes-header").toggleClass("hide-control", attributes_flag);
 	},
@@ -218,47 +244,7 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		});
 	},
 
-	show_attributes: function(attributes) {
-		this.render_attributes(attributes);
-		// this.render_attributes(attributes.slice(0, 3));
-		// $(this.dialog.fields_dict.attribute_html.wrapper).find(".page-count").text(this.page_count);
-	},
-
-	// set_pagination_details: function(attributes) {
-	// 	this.attributes = attributes;
-	// 	this.attribute_values = {};
-	// 	this.attributes_count = attributes.length;
-	// 	this.current_page = 1;
-	// 	this.page_count = Math.ceil(this.attributes_count / 3);
-	// },
-
-	// init_for_next_trigger: function() {
-	// 	var me = this;
-	// 	$(this.dialog.fields_dict.attribute_html.wrapper).find(".btn-next").click(function() {
-	// 		if (me.current_page < me.page_count) {
-	// 			me.current_page += 1;
-	// 			me.initiate_render_attributes();
-	// 		} else {
-	// 			frappe.show_alert(__("Maximum page size reached."), 2);
-	// 		}
-	// 	});
-	// },
-	//
-	// init_for_prev_trigger: function() {
-	// 	var me = this;
-	// 	$(this.dialog.fields_dict.attribute_html.wrapper).find(".btn-prev").click(function() {
-	// 		if (me.current_page > 1) {
-	// 			me.current_page -= 1;
-	// 			me.initiate_render_attributes();
-	// 		} else {
-	// 			frappe.show_alert(__("Minimum page size reached."), 2);
-	// 		}
-	// 	})
-	// },
-
 	initiate_render_attributes: function() {
-		// var end_index = this.current_page * 3;
-		// var start_index = end_index - 3;
 		this.dialog.fields_dict.attribute_html.$wrapper.find(".attributes").empty();
 		this.render_attributes(this.attributes);
 	},
@@ -276,6 +262,8 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 
 	render_attributes: function(attributes) {
 		var me = this;
+
+		this.dialog.get_field('attribute_html').toggle(true);
 
 		$.each(attributes, function(index, row) {
 			var desc = "";
