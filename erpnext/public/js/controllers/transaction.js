@@ -231,8 +231,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				},
 				callback: function(r) {
 					if(!r.exc) {
-						me.frm.set_value("taxes", r.message);
-						me.calculate_taxes_and_totals();
+						frappe.run_serially([
+							() => {
+								// directly set in doc, so as not to call triggers
+								me.frm.doc.taxes_and_charges = r.message.taxes_and_charges;
+
+								// set taxes table
+								me.frm.set_value("taxes", r.message.taxes);
+							},
+							() => me.calculate_taxes_and_totals()
+						]);
 					}
 				}
 			});
@@ -935,12 +943,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			return;
 		}
 
+		if (me.in_apply_price_list == true) return;
+
+		me.in_apply_price_list = true;
 		return this.frm.call({
 			method: "erpnext.stock.get_item_details.apply_price_list",
 			args: {	args: args },
 			callback: function(r) {
 				if (!r.exc) {
-					me.in_apply_price_list = true;
 					me.frm.set_value("price_list_currency", r.message.parent.price_list_currency);
 					me.frm.set_value("plc_conversion_rate", r.message.parent.plc_conversion_rate);
 					me.in_apply_price_list = false;
