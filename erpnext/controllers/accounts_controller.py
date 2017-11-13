@@ -83,9 +83,6 @@ class AccountsController(TransactionBase):
 					self.set(fieldname, today())
 					break
 
-		# set taxes table if missing from `taxes_and_charges`
-		self.set_taxes()
-
 	def calculate_taxes_and_totals(self):
 		from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
 		calculate_taxes_and_totals(self)
