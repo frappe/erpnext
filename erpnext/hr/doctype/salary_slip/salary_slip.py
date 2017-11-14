@@ -31,7 +31,8 @@ class SalarySlip(TransactionBase):
 					self.penalty_amount=pen_doc.amount
 				elif pen_doc.penalty_type=="Days":
 					self.penalty_days=pen_doc.days_count
-
+		self.validate_return_from_leave_deduction()
+		self.get_join_date_deducted_days()
 		self.validate_dates()
 		self.check_existing()
 		self.get_date_details()
@@ -52,8 +53,6 @@ class SalarySlip(TransactionBase):
 			if self.salary_slip_based_on_timesheet and (self.total_working_hours > int(max_working_hours)):
 				frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
 								format(max_working_hours), alert=True)
-		self.validate_return_from_leave_deduction()
-		self.get_join_date_deducted_days()
 
 	def validate_overtime(self):
 		prev_month = getdate(self.start_date).month - 1 if getdate(self.start_date).month - 1 > 0 else 12
