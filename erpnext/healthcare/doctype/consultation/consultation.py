@@ -23,10 +23,6 @@ class Consultation(Document):
 		if not self.diagnosis or not self.symptoms:
 			frappe.throw("Diagnosis and Complaints cannot be left blank")
 
-		physician = frappe.get_doc("Physician",self.physician)
-		if(frappe.session.user != physician.user_id):
-			frappe.throw(_("You don't have permission to submit"))
-
 def set_sales_invoice_fields(company, patient):
 	sales_invoice = frappe.new_doc("Sales Invoice")
 	sales_invoice.customer = frappe.get_value("Patient", patient, "customer")
