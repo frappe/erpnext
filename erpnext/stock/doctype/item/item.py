@@ -58,9 +58,6 @@ class Item(WebsiteGenerator):
 		if self.is_sales_item and not self.get('is_item_from_hub'):
 			self.publish_in_hub = 1
 
-	def before_save(self):
-		self.get_doc_before_save()
-
 	def after_insert(self):
 		'''set opening stock and item price'''
 		if self.standard_rate:
@@ -70,9 +67,7 @@ class Item(WebsiteGenerator):
 			self.set_opening_stock()
 
 	def validate(self):
-		self.before_update = None
-		if frappe.db.exists('Item', self.name):
-			self.before_update = frappe.get_doc('Item', self.name)
+		self.get_doc_before_save()
 
 		super(Item, self).validate()
 
@@ -638,8 +633,9 @@ class Item(WebsiteGenerator):
 
 	def validate_stock_exists_for_template_item(self):
 		if self.stock_ledger_created():
-			if (self._doc_before_save.has_variants != self.has_variants or
-				self.variant_of != self._doc_before_save.variant_of):
+			if ((self._doc._doc_before_save
+				and self._doc_before_save.has_variants != self.has_variants)
+				or self.variant_of != self._doc_before_save.variant_of):
 				frappe.throw(_("Cannot change Variant properties after stock transction. You will have to make a new Item to do this.").format(self.name),
 					StockExistsForTemplate)
 
