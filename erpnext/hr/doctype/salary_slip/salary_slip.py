@@ -92,12 +92,12 @@ class SalarySlip(TransactionBase):
 			date_dif = date_diff(self.date_of_joining, get_first_day(getdate(self.date_of_joining)))
 			if date_dif > 0:
 				self.jd_deducted_days = date_dif	
-				ss = frappe.get_doc("Salary Structure", self.salary_structure)
-				for doc in ss.get("earnings"):
-					if doc.get("salary_component") == "Basic":
-						doc.set("formula", "base-((base/30)*(jd_deducted_days))")
+				# ss = frappe.get_doc("Salary Structure", self.salary_structure)
+				# for doc in ss.get("earnings"):
+				# 	if doc.get("salary_component") == "Basic":
+				# 		doc.set("formula", "base-((base/30)*(jd_deducted_days))")
 
-				ss.save(ignore_permissions=True)
+				# ss.save(ignore_permissions=True)
 	# def get_emp_join_date(self,employee):
 	# 	"""  Get Employee Joinin Date"""
 	# 	date_of_joining=frappe.get_value('Employee',self.employee,'date_of_joining');

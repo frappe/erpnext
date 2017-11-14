@@ -69,10 +69,7 @@ cur_frm.cscript.start_date = function(doc, dt, dn){
 		doc: locals[dt][dn],
 		callback: function(r, rt) {
 			// get_deducted_days(doc, dt, dn);
-			frappe.run_serially([
-  				() => get_jd_deducted_days(doc, dt, dn),
-  				() => calculate_all(doc, dt, dn)
-			]);
+			calculate_all(doc, dt, dn)
 			cur_frm.refresh();
 		}
 	});
@@ -106,15 +103,15 @@ cur_frm.cscript.leave_without_pay = function(doc,dt,dn){
 // 	});
 // }
 
-var get_jd_deducted_days = function(doc, dt, dn){
-	 frappe.call({
-		method: 'get_join_date_deducted_days',
-		doc: cur_frm.doc,
-		callback: function(r, rt) {
-			cur_frm.refresh_field("jd_deducted_days");
-		}
-	});
-}
+// var get_jd_deducted_days = function(doc, dt, dn){
+// 	 frappe.call({
+// 		method: 'get_join_date_deducted_days',
+// 		doc: cur_frm.doc,
+// 		callback: function(r, rt) {
+// 			cur_frm.refresh_field("jd_deducted_days");
+// 		}
+// 	});
+// }
 
 var calculate_all = function(doc, dt, dn) {
 	calculate_earning_total(doc, dt, dn);
