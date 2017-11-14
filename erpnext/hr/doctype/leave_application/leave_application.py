@@ -162,9 +162,14 @@ class LeaveApplication(Document):
 				self.workflow_state = "Approved By Director (F.T)"
 				self.status = "Approved"
 				self.docstatus = 1
+		def created_by_ceo():
+			if self.workflow_state == "Created By CEO":
+				self.status = "Approved"
+				self.docstatus = 1
 
 		unpaid_leave_switcher()
 		workflow_leave_switcher()
+		created_by_ceo()
 
 	def unallowed_actions(self):
 		if hasattr(self,"workflow_state"):
@@ -1322,13 +1327,13 @@ def create_return_from_leave_statement_after_leave():
 
 			from frappe.core.doctype.communication.email import make
 			frappe.flags.sent_mail = None
-			content_msg="Please review your return from leave Statement has been Created"
+			content_msg="Please review your Return From Leave Statement a new application has been created"
 	 		prefered_email = frappe.get_value("Employee", filters = {"user_id": emp_user}, fieldname = "prefered_email")
 	
 	 		if prefered_email:
 
 				try:
-					make(subject = "Return from leave Statement", content=content_msg, recipients=prefered_email ,
+					make(subject = "Return from leave Statement", content=content_msg, recipients=prefered_email,
 						send_email=True, sender="erp@tawari.sa")
 				except:
 					frappe.msgprint("could not send")

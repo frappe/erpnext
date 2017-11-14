@@ -68,7 +68,7 @@ cur_frm.cscript.start_date = function(doc, dt, dn){
 		method: 'get_emp_and_leave_details',
 		doc: locals[dt][dn],
 		callback: function(r, rt) {
-			get_deducted_days(doc, dt, dn);
+			// get_deducted_days(doc, dt, dn);
 			frappe.run_serially([
   				() => get_jd_deducted_days(doc, dt, dn),
   				() => calculate_all(doc, dt, dn)
@@ -96,15 +96,15 @@ cur_frm.cscript.leave_without_pay = function(doc,dt,dn){
 	}
 }
 
-var get_deducted_days = function(doc, dt, dn){
-	 frappe.call({
-		method: 'validate_return_from_leave_deduction',
-		doc: cur_frm.doc,
-		callback: function(r, rt) {
-			cur_frm.refresh_field("deducted_days");
-		}
-	});
-}
+// var get_deducted_days = function(doc, dt, dn){
+// 	 frappe.call({
+// 		method: 'validate_return_from_leave_deduction',
+// 		doc: cur_frm.doc,
+// 		callback: function(r, rt) {
+// 			cur_frm.refresh_field("deducted_days");
+// 		}
+// 	});
+// }
 
 var get_jd_deducted_days = function(doc, dt, dn){
 	 frappe.call({
