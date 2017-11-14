@@ -69,7 +69,7 @@ cur_frm.cscript.start_date = function(doc, dt, dn){
 		doc: locals[dt][dn],
 		callback: function(r, rt) {
 			// get_deducted_days(doc, dt, dn);
-			calculate_all(doc, dt, dn)
+			calculate_all(doc, dt, dn);
 			cur_frm.refresh();
 		}
 	});
