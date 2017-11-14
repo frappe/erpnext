@@ -76,14 +76,16 @@ class SalarySlip(TransactionBase):
 
 	def validate_return_from_leave_deduction(self):
 		# if self.docstatus == 0:
-		end_date = "{0}-{1}-20".format(getdate(self.end_date).year, getdate(self.end_date).month)
-		prev_month = getdate(self.end_date).month - 1 if getdate(self.end_date).month - 1 > 0 else 12
-		prev_month_start_date = ""
-		if prev_month != 12:
-			prev_month_start_date = "{0}-{1}-20".format(getdate(self.end_date).year, prev_month)
-		else:
-			prev_month_start_date = "{0}-{1}-20".format(getdate(self.end_date).year - 1, prev_month)
-		self.set_deduction_for_return_from_leave(prev_month_start_date, end_date)
+		# end_date = "{0}-{1}-20".format(getdate(self.end_date).year, getdate(self.end_date).month)
+		# prev_month = getdate(self.end_date).month - 1 if getdate(self.end_date).month - 1 > 0 else 12
+		# prev_month_start_date = ""
+		# if prev_month != 12:
+		# 	prev_month_start_date = "{0}-{1}-20".format(getdate(self.end_date).year, prev_month)
+		# else:
+		# 	prev_month_start_date = "{0}-{1}-20".format(getdate(self.end_date).year - 1, prev_month)
+		# self.set_deduction_for_return_from_leave(prev_month_start_date, end_date)
+		if self.get('__islocal'):
+			self.set_deduction_for_return_from_leave(self.start_date, self.end_date)
 
 	def get_join_date_deducted_days(self):
 		if getdate(self.date_of_joining).month == getdate(self.start_date).month and getdate(self.date_of_joining).year == getdate(self.start_date).year:
@@ -136,8 +138,8 @@ class SalarySlip(TransactionBase):
 		if rt:
 			deducted_days = 0
 			for r in rt:
+				holidays = self.get_holidays_for_employee(r.to_date, r.return_date)
 				deducted_days += date_diff(r.return_date, r.to_date)
-				holidays = self.get_holidays_for_employee(r.return_date, r.to_date)
 				deducted_days -= len(holidays)
 				if deducted_days > 1:
 					deducted_days = deducted_days - 1
