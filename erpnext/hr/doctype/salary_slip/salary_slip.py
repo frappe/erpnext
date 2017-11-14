@@ -22,29 +22,15 @@ class SalarySlip(TransactionBase):
 		# self.validate_return_from_leave_deduction()
 		self.status = self.get_status()
 
-		pan=frappe.get_list("Penalty",['name'],filters={'start_date':self.start_date,'end_date':self.end_date,'employee':self.employee}, ignore_permissions=True)
+		pan=frappe.get_value("Penalty",filters={'start_date':self.start_date,'end_date':self.end_date,'employee':self.employee, 'docstatus': 1}, fieldname="name")
 		if pan:
-			pen_doc=frappe.get_doc("Penalty",pan[0].name)	
+			pen_doc=frappe.get_doc("Penalty",pan)	
 			pen_doc.flags.ignore_permissions = True
 			if pen_doc:
-				pass
-				# ss = frappe.get_doc("Salary Structure", self.salary_structure)
-				# # if pen_doc.penalty_type=="Days":
-				# self.penalty_days=pen_doc.days_count
-				# for doc in ss.get("deductions"):
-					
-				# 	if doc.get("salary_component") == "Penalty" and doc.get("amount_based_on_formula") = 0:
-				# 		if pen_doc.penalty_type=="Amount":
-				# 			doc.set("amount", str(pen_doc.amount))
-				# 	else:
-				# 		new_pen = [{
-				# 		"salary_component": "Penalty",
-				# 		"amount_based_on_formula": 0,
-				# 		"amount": pen_doc.amount
-				# 		}]
-				# 		ss.set("deductions", new_pen)
-				# 	elif pen_doc.penalty_type="Days":
-		
+				if pen_doc.penalty_type=="Amount":
+					self.penalty_amount=pen_doc.amount
+				elif pen_doc.penalty_type=="Days":
+					self.penalty_days=pen_doc.days_count
 
 		self.validate_dates()
 		self.check_existing()
@@ -151,6 +137,8 @@ class SalarySlip(TransactionBase):
 			deducted_days = 0
 			for r in rt:
 				deducted_days += date_diff(r.return_date, r.to_date)
+				holidays = self.get_holidays_for_employee(r.return_date, r.to_date)
+				deducted_days -= len(holidays)
 				if deducted_days > 1:
 					deducted_days = deducted_days - 1
 			self.deducted_days = deducted_days
