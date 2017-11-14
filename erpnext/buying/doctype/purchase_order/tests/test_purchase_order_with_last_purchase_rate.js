@@ -96,7 +96,7 @@ QUnit.test("test: purchase order with last purchase rate", function(assert) {
 			assert.ok(cur_frm.doc.status == 'To Receive and Bill', "Submitted successfully");
 		},
 
-        // enable allow_last_purchase_rate
+		// enable allow_last_purchase_rate
 		() => frappe.tests.make('Buying Settings', [
 			// values to be set
 			{"disable_fetch_last_purchase_rate": 1}
@@ -143,7 +143,7 @@ QUnit.test("test: purchase order with last purchase rate", function(assert) {
 		() => frappe.tests.click_button('Close'),
 		() => frappe.timeout(1),
 
-        // enable allow_last_purchase_rate
+		// enable allow_last_purchase_rate
 		() => frappe.tests.make('Buying Settings', [
 			// values to be set
 			{"disable_fetch_last_purchase_rate": 0}
