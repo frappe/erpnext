@@ -9,6 +9,7 @@ import itertools
 from frappe import msgprint, _
 from frappe.utils import (cstr, flt, cint, getdate, now_datetime, formatdate,
 	strip, get_timestamp, random_string)
+from frappe.utils.html_utils import clean_html
 from frappe.website.website_generator import WebsiteGenerator
 from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for, get_parent_item_groups
 from frappe.website.render import clear_cache
@@ -82,6 +83,7 @@ class Item(WebsiteGenerator):
 			self.description = self.item_name
 
 		self.validate_uom()
+		self.validate_description()
 		self.add_default_uom_in_conversion_factor_table()
 		self.validate_conversion_factor()
 		self.validate_item_type()
@@ -113,6 +115,11 @@ class Item(WebsiteGenerator):
 		self.update_variants()
 		self.update_item_price()
 		self.update_template_item()
+
+	def validate_description(self):
+		'''Clean HTML description if set'''
+		if cint(frappe.db.get_single_value('Stock Settings', 'clean_description_html')):
+			self.description = clean_html(self.description)
 
 	def add_price(self, price_list=None):
 		'''Add a new price'''
