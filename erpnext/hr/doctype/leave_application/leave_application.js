@@ -78,6 +78,17 @@ frappe.ui.form.on("Leave Application", {
     },
 
     refresh: function(frm) {
+        frappe.call({
+            method: "unallowed_actions",
+            doc: frm.doc,
+            freeze: true,
+            callback: function(r) {
+                if (r.message && frappe.session.user != "Administrator") {  
+                    console.log(r.message);
+                    frm.page.clear_actions_menu();
+                }
+            }
+        });
         if (!cur_frm.doc.__islocal) {
             frm.disable_save();
         }
@@ -92,16 +103,6 @@ frappe.ui.form.on("Leave Application", {
             cur_frm.set_df_property("attachment", "reqd", 0);
             refresh_field("attachment");
         }
-        frappe.call({
-            method: "unallowed_actions",
-            doc: frm.doc,
-            callback: function(r) {
-
-                if (r.message && frappe.session.user != "Administrator") {  
-                    frm.page.clear_actions_menu();
-                }
-            }
-        });
         frm.set_df_property("naming_series", "read_only", frm.doc.__islocal ? 0 : 1);
         frm.set_df_property("leave_type", "read_only", frm.doc.__islocal ? 0 : 1);
         frm.set_df_property("employee", "read_only", frm.doc.__islocal ? 0 : 1);
