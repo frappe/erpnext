@@ -118,7 +118,7 @@ class Item(WebsiteGenerator):
 
 	def validate_description(self):
 		'''Clean HTML description if set'''
-		if cint(frappe.db.get_single_value('Item Settings', 'clean_description_html')):
+		if cint(frappe.db.get_single_value('Stock Settings', 'clean_description_html')):
 			self.description = clean_html(self.description)
 
 	def add_price(self, price_list=None):
