@@ -16,39 +16,36 @@ class LandUnit(NestedSet):
 	nsm_parent_field = 'parent_land_unit'
 
 	def validate(self):
-		print(self.area_difference)
+
 		if self.get('parent') and not self.is_new():
-			
 			ancestors = self.get_ancestors()
 			self_features = self.add_child_property()
-			parent_doc = frappe.get_doc('Land Unit', self.get('parent'))
-			parent_child_features, parent_non_child_features = parent_doc.feature_seperator(child_feature = self.get('land_unit_name'))
-
 			self_features = set(self_features)
-			child_features = set(parent_child_features)
 
-			if not (self_features.issubset(child_features) and child_features.issubset(self_features)): 
-				features_to_be_appended =	self_features - child_features 
-				features_to_be_discarded = 	child_features - self_features
-				for feature in features_to_be_discarded:
-					child_features.discard(feature)
-				for feature in features_to_be_appended:
-					child_features.add(feature)
-				child_features = list(child_features)
+			for ancestor in ancestors:
+				ancestor_doc = frappe.get_doc('Land Unit', ancestor)
+				ancestor_child_features, ancestor_non_child_features = ancestor_doc.feature_seperator(child_feature = self.get('land_unit_name'))
+				ancestor_features = list(set(ancestor_non_child_features))
+				child_features = set(ancestor_child_features)
 
-				for ancestor in ancestors:
-					ancestor_doc = frappe.get_doc('Land Unit', ancestor)
-					ancestor_child_features, ancestor_non_child_features = ancestor_doc.feature_seperator(child_feature = self.get('land_unit_name'))
-					ancestor_features = list(set(ancestor_non_child_features))
-					ancestor_features.extend(child_features)
-					print(ancestor_features)
-					for index,feature in enumerate(ancestor_features):
-						ancestor_features[index] = json.loads(feature)
-					ancestor_doc = frappe.get_doc('Land Unit', ancestor)	
-					ancestor_doc.set_location_value(features = ancestor_features)	
-					print(ancestor_doc.get('area') + self.area_difference)
-					ancestor_doc.db_set(fieldname='area', value=ancestor_doc.get('area')+self.area_difference,\
-					 commit=True)
+				if not (self_features.issubset(child_features) and child_features.issubset(self_features)): 
+					features_to_be_appended =	self_features - child_features 
+					features_to_be_discarded = 	child_features - self_features
+					for feature in features_to_be_discarded:
+						child_features.discard(feature)
+					for feature in features_to_be_appended:
+						child_features.add(feature)
+					child_features = list(child_features)
+
+				ancestor_features.extend(child_features)
+				print(ancestor_features)
+				for index,feature in enumerate(ancestor_features):
+					ancestor_features[index] = json.loads(feature)
+				ancestor_doc = frappe.get_doc('Land Unit', ancestor)	
+				ancestor_doc.set_location_value(features = ancestor_features)	
+				print(ancestor_doc.get('area') + self.get('area_difference'))
+				ancestor_doc.db_set(fieldname='area', value=ancestor_doc.get('area')+\
+					self.get('area_difference'),commit=True)
 
 	def set_location_value(self, features):
 		if not self.get('location'):
