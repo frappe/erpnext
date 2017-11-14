@@ -20,6 +20,8 @@ class SalarySlip(TransactionBase):
 	def validate(self):
 		self.validate_overtime()
 		# self.validate_return_from_leave_deduction()
+		self.validate_return_from_leave_deduction()
+		self.get_join_date_deducted_days()
 		self.status = self.get_status()
 
 		pan=frappe.get_value("Penalty",filters={'start_date':self.start_date,'end_date':self.end_date,'employee':self.employee, 'docstatus': 1}, fieldname="name")
@@ -43,8 +45,6 @@ class SalarySlip(TransactionBase):
 
 		# if self.salary_slip_based_on_timesheet or not self.net_pay:
 		self.calculate_net_pay()
-		self.validate_return_from_leave_deduction()
-		self.get_join_date_deducted_days()
 		company_currency = get_company_currency(self.company)
 		self.total_in_words = money_in_words(self.rounded_total, company_currency)
 
