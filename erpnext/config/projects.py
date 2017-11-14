@@ -15,6 +15,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Task",
+					"route": "Tree/Task",
 					"description": _("Project activity / task."),
 				},
 				{

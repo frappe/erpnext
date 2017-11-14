@@ -124,10 +124,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Grading Scale"
-				},
-				{
-					"type": "doctype",
 					"name": "Assessment Criteria"
 				},
 				{
@@ -143,6 +139,12 @@ def get_data():
 					"is_query_report": True,
 					"name": "Course wise Assessment Report",
 					"doctype": "Assessment Result"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Assessment Plan Status",
+					"doctype": "Assessment Plan"
 				},
 
 			]
@@ -200,6 +202,10 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Student Batch Name"
+				},
+				{
+					"type": "doctype",
+					"name": "Grading Scale"
 				},
 				{
 					"type": "doctype",

@@ -91,7 +91,7 @@ class Item(WebsiteGenerator):
 		self.validate_barcode()
 		self.cant_change()
 		self.validate_warehouse_for_reorder()
-		self.update_item_desc()
+		self.update_bom_item_desc()
 		self.synced_with_hub = 0
 
 		self.validate_has_variants()
@@ -599,13 +599,27 @@ class Item(WebsiteGenerator):
 					row.label = label
 					row.description = desc
 
-	def update_item_desc(self):
-		if frappe.db.get_value('BOM',self.name, 'description') != self.description:
-			frappe.db.sql("""update `tabBOM` set description = %s where item = %s and docstatus < 2""",(self.description, self.name))
-			frappe.db.sql("""update `tabBOM Item` set description = %s where
-				item_code = %s and docstatus < 2""",(self.description, self.name))
-			frappe.db.sql("""update `tabBOM Explosion Item` set description = %s where
-				item_code = %s and docstatus < 2""",(self.description, self.name))
+	def update_bom_item_desc(self):
+		if self.is_new(): return
+
+		if self.db_get('description') != self.description:
+			frappe.db.sql("""
+				update `tabBOM`
+				set description = %s
+				where item = %s and docstatus < 2
+			""", (self.description, self.name))
+
+			frappe.db.sql("""
+				update `tabBOM Item`
+				set description = %s
+				where item_code = %s and docstatus < 2
+			""", (self.description, self.name))
+
+			frappe.db.sql("""
+				update `tabBOM Explosion Item`
+				set description = %s
+				where item_code = %s and docstatus < 2
+			""", (self.description, self.name))
 
 	def update_template_item(self):
 		"""Set Show in Website for Template Item if True for its Variant"""
@@ -624,7 +638,8 @@ class Item(WebsiteGenerator):
 				template_item.save()
 
 	def update_variants(self):
-			if self.flags.dont_update_variants:
+			if self.flags.dont_update_variants or \
+				frappe.db.get_single_value('Item Variant Settings', 'do_not_update_variants'):
 				return
 			if self.has_variants:
 				updated = []

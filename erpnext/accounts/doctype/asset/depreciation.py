@@ -151,10 +151,13 @@ def restore_asset(asset_name):
 	asset.set_status()
 
 @frappe.whitelist()
-def get_gl_entries_on_asset_disposal(asset, selling_amount=0):
+def get_gl_entries_on_asset_disposal(asset, is_sale=False):
 	fixed_asset_account, accumulated_depr_account, depr_expense_account = get_depreciation_accounts(asset)
-	disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(asset.company)
 	accumulated_depr_amount = flt(asset.gross_purchase_amount) - flt(asset.value_after_depreciation)
+
+	expense_account, cost_center = get_disposal_account_and_cost_center(asset.company)
+	if is_sale:
+		expense_account = depr_expense_account
 
 	gl_entries = [
 		{
@@ -169,14 +172,12 @@ def get_gl_entries_on_asset_disposal(asset, selling_amount=0):
 		}
 	]
 
-	profit_amount = flt(selling_amount) - flt(asset.value_after_depreciation)
-	if flt(asset.value_after_depreciation) and profit_amount:
-		debit_or_credit = "debit" if profit_amount < 0 else "credit"
+	if flt(asset.value_after_depreciation):
 		gl_entries.append({
-			"account": disposal_account,
-			"cost_center": depreciation_cost_center,
-			debit_or_credit: abs(profit_amount),
-			debit_or_credit + "_in_account_currency": abs(profit_amount)
+			"account": expense_account,
+			"cost_center": cost_center,
+			"debit": flt(asset.value_after_depreciation),
+			"debit_in_account_currency": flt(asset.value_after_depreciation)
 		})
 
 	return gl_entries

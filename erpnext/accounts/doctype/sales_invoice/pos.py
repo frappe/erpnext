@@ -16,6 +16,8 @@ def get_pos_data():
 	doc = frappe.new_doc('Sales Invoice')
 	doc.is_pos = 1;
 	pos_profile = get_pos_profile(doc.company) or {}
+	if not pos_profile:
+		frappe.throw(_("POS Profile is required to use Point-of-Sale"))
 	if not doc.company: doc.company = pos_profile.get('company')
 	doc.update_stock = pos_profile.get('update_stock')
 
@@ -92,6 +94,7 @@ def update_pos_profile_data(doc, pos_profile, company_data):
 	doc.customer_group = pos_profile.get('customer_group') or get_root('Customer Group')
 	doc.territory = pos_profile.get('territory') or get_root('Territory')
 	doc.terms = frappe.db.get_value('Terms and Conditions', pos_profile.get('tc_name'), 'terms') or doc.terms or ''
+	doc.offline_pos_name = ''
 
 def get_root(table):
 	root = frappe.db.sql(""" select name from `tab%(table)s` having

@@ -294,7 +294,7 @@ def get_gateway_details(args):
 	if args.get("payment_gateway"):
 		return get_payment_gateway_account(args.get("payment_gateway"))
 
-	if args.cart:
+	if args.order_type == "Shopping Cart":
 		payment_gateway_account = frappe.get_doc("Shopping Cart Settings").payment_gateway_account
 		return get_payment_gateway_account(payment_gateway_account)
 

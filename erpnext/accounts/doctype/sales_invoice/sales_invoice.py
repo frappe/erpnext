@@ -70,7 +70,6 @@ class SalesInvoice(SellingController):
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
 		self.add_remarks()
 		self.validate_write_off_account()
-		self.validate_duplicate_offline_pos_entry()
 		self.validate_account_for_change_amount()
 		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
@@ -305,6 +304,7 @@ class SalesInvoice(SellingController):
 			self.account_for_change_amount = frappe.db.get_value('Company', self.company, 'default_cash_account')
 
 		if pos:
+			self.pos_profile = pos.name
 			if not for_validate and not self.customer:
 				self.customer = pos.customer
 				self.mode_of_payment = pos.mode_of_payment
@@ -462,12 +462,6 @@ class SalesInvoice(SellingController):
 
 		if flt(self.write_off_amount) and not self.write_off_account:
 			msgprint(_("Please enter Write Off Account"), raise_exception=1)
-
-	def validate_duplicate_offline_pos_entry(self):
-		if self.is_pos and self.offline_pos_name \
-			and frappe.db.get_value('Sales Invoice',
-			{'offline_pos_name': self.offline_pos_name, 'docstatus': 1}):
-			frappe.throw(_("Duplicate offline pos sales invoice {0}").format(self.offline_pos_name))
 
 	def validate_account_for_change_amount(self):
 		if flt(self.change_amount) and not self.account_for_change_amount:
@@ -696,28 +690,28 @@ class SalesInvoice(SellingController):
 		# income account gl entries
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
+				account_currency = get_account_currency(item.income_account)
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": item.income_account,
+						"against": self.customer,
+						"credit": item.base_net_amount,
+						"credit_in_account_currency": item.base_net_amount \
+							if account_currency==self.company_currency else item.net_amount,
+						"cost_center": item.cost_center
+					}, account_currency)
+				)
+
 				if item.is_fixed_asset:
 					asset = frappe.get_doc("Asset", item.asset)
 
-					fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset, item.base_net_amount)
+					fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset, is_sale=True)
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
 						gl_entries.append(self.get_gl_dict(gle))
 
 					asset.db_set("disposal_date", self.posting_date)
 					asset.set_status("Sold" if self.docstatus==1 else None)
-				else:
-					account_currency = get_account_currency(item.income_account)
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": item.income_account,
-							"against": self.customer,
-							"credit": item.base_net_amount,
-							"credit_in_account_currency": item.base_net_amount \
-								if account_currency==self.company_currency else item.net_amount,
-							"cost_center": item.cost_center
-						}, account_currency)
-					)
 
 		# expense account gl entries
 		if cint(self.update_stock) and \

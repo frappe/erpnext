@@ -382,6 +382,7 @@ erpnext.hub.Hub = class Hub {
 			},
 			method: "erpnext.hub_node.get_item_details",
 			callback: (r) => {
+				if (!r || !r.message) return;
 				let item = r.message;
 				this.item_cache[item_code] = item;
 				this.render_item_page(item);
