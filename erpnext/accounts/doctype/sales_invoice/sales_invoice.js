@@ -95,8 +95,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 		// Show buttons only when pos view is active
 		if (cint(doc.docstatus==0) && cur_frm.page.current_view_name!=="pos" && !doc.is_return) {
-			cur_frm.cscript.sales_order_btn();
-			cur_frm.cscript.delivery_note_btn();
+			this.frm.cscript.sales_order_btn();
+			this.frm.cscript.delivery_note_btn();
+			this.frm.cscript.quotation_btn();
 		}
 
 		this.set_default_print_format();
@@ -163,7 +164,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.$quotation_btn = this.frm.add_custom_button(__('Quotation'),
 			function() {
 				erpnext.utils.map_current_doc({
-					method: "erpnext.selling.doctype.quotation.quotation.make_quotation",
+					method: "erpnext.selling.doctype.quotation.quotation.make_sales_invoice",
 					source_doctype: "Quotation",
 					target: me.frm,
 					setters: {
