@@ -207,9 +207,56 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 		cur_frm.email_doc(frappe.boot.notification_settings.quotation_message);
 }
 
-frappe.ui.form.on("Quotation Item", "items_on_form_rendered", function(frm, cdt, cdn) {
-	// enable tax_amount field if Actual
-})
+frappe.ui.form.on("Quotation Item", "sub_item", function(frm, cdt, cdn) {
+    "use strict";
+    var item = locals[cdt][cdn];
+
+    if(item.sub_item) {
+        item.pricing_rule = "";
+        item.pricing_rule_for = "";
+        item.discount_percentage = 100;
+        item.margin_type = "";
+        item.margin_rate_or_amount = 0.0;
+	item.rate = 0.0;
+    }
+
+    if(!item.sub_item) {
+        frm.script_manager.trigger('item_code', item.doctype, item.name);
+    } else {
+        item.rate = 0;
+        frm.script_manager.trigger('rate', item.doctype, item.name);
+    }
+
+    frm.cscript.calculate_taxes_and_totals();
+    frm.refresh_field("items");
+});
+
+frappe.ui.form.on("Quotation", "onload_post_render", function (frm, cdt, cdn) {
+    "use strict";
+    frm.cscript.apply_pricing_rule_on_item = function(item) {
+        var old_rate = item.rate;
+        if(item.doctype=="Quotation Item" && item.sub_item) {
+            return;
+        }
+
+		if (item.margin_type == "Percentage") {
+			item.rate_with_margin = flt(item.price_list_rate) + flt(item.price_list_rate) * (flt(item.margin_rate_or_amount) / 100);
+		} else {
+			item.rate_with_margin = flt(item.price_list_rate) + flt(item.margin_rate_or_amount);
+		}
+
+		item.rate = flt(item.rate_with_margin, precision("rate", item));
+
+		if (item.discount_percentage) {
+			var discount_value = flt(item.rate_with_margin) * flt(item.discount_percentage) / 100;
+			item.rate = flt(item.rate_with_margin - discount_value, precision('rate', item));
+		}
+        if(item.rate != old_rate) {
+            frm.script_manager.trigger('rate', item.doctype, item.name);
+            frm.cscript.calculate_taxes_and_totals();
+        }
+    };
+});
 
 frappe.ui.form.on("Quotation Item", "stock_balance", function(frm, cdt, cdn) {
 	var d = frappe.model.get_doc(cdt, cdn);

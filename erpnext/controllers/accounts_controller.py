@@ -189,7 +189,8 @@ class AccountsController(TransactionBase):
 								stock_qty = item.get("stock_qty") * -1 if item.get("stock_qty") < 0 else item.get("stock_qty")
 								if stock_qty != len(get_serial_nos(item.get('serial_no'))):
 									item.set(fieldname, value)
-
+					if self.doctype in ["Quotation"] and item.sub_item:
+						continue
 					if ret.get("pricing_rule"):
 						# if user changed the discount percentage then set user's discount percentage ?
 						item.set("discount_percentage", ret.get("discount_percentage"))
@@ -403,7 +404,7 @@ class AccountsController(TransactionBase):
 			if item.get(item_ref_dn):
 				ref_amt = flt(frappe.db.get_value(ref_dt + " Item",
 					item.get(item_ref_dn), based_on), self.precision(based_on, item))
-				if not ref_amt:
+				if not ref_amt and (item.doctype not in ["Quotation"] or not item.sub_item):
 					frappe.msgprint(_("Warning: System will not check overbilling since amount for Item {0} in {1} is zero").format(item.item_code, ref_dt))
 				else:
 					already_billed = frappe.db.sql("""select sum(%s) from `tab%s`
