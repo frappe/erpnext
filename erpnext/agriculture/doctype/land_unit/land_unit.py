@@ -38,12 +38,10 @@ class LandUnit(NestedSet):
 					child_features = list(child_features)
 
 				ancestor_features.extend(child_features)
-				print(ancestor_features)
 				for index,feature in enumerate(ancestor_features):
 					ancestor_features[index] = json.loads(feature)
 				ancestor_doc = frappe.get_doc('Land Unit', ancestor)	
 				ancestor_doc.set_location_value(features = ancestor_features)	
-				print(ancestor_doc.get('area') + self.get('area_difference'))
 				ancestor_doc.db_set(fieldname='area', value=ancestor_doc.get('area')+\
 					self.get('area_difference'),commit=True)
 

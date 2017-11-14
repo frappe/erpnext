@@ -108,7 +108,6 @@ frappe.ui.form.on('Land Unit', {
 	validate(frm){
 		let new_area = parseFloat(compute_layer_area(frm.fields_dict.location.map._layers).toFixed(3));
 		area_difference =  new_area - frm.doc.area;
-		console.log(area_difference);
 		frm.doc.area_difference = area_difference;
 		frm.doc.area = new_area; 
 	},
