@@ -69,7 +69,7 @@ class Patient(Document):
 		frappe.db.set_value("Patient", self.name, "disabled", 0)
 		send_registration_sms(self)
 		if(frappe.get_value("Healthcare Settings", None, "registration_fee")>0):
-			sales_invoice = make_invoice(self.name, self.company)
+			sales_invoice = make_invoice(self.name)
 			sales_invoice.save(ignore_permissions=True)
 			return {'invoice': sales_invoice.name}
 
@@ -89,13 +89,11 @@ def create_customer(doc):
 	frappe.db.set_value("Patient", doc.name, "customer", customer.name)
 	frappe.msgprint(_("Customer {0} is created.").format(customer.name), alert=True)
 
-def make_invoice(patient, company):
+def make_invoice(patient):
 	sales_invoice = frappe.new_doc("Sales Invoice")
 	sales_invoice.customer = frappe.get_value("Patient", patient, "customer")
 	sales_invoice.due_date = getdate()
-	sales_invoice.company = company
 	sales_invoice.is_pos = '0'
-	sales_invoice.debit_to = get_receivable_account(company)
 
 	item_line = sales_invoice.append("items")
 	item_line.item_name = "Registeration Fee"
@@ -103,14 +101,13 @@ def make_invoice(patient, company):
 	item_line.qty = 1
 	item_line.uom = "Nos"
 	item_line.conversion_factor = 1
-	item_line.income_account = get_income_account(None, company)
 	item_line.rate = frappe.get_value("Healthcare Settings", None, "registration_fee")
 	item_line.amount = item_line.rate
 	sales_invoice.set_missing_values()
 	return sales_invoice
 
 @frappe.whitelist()
-def get_patient_detail(patient, company=None):
+def get_patient_detail(patient):
 	patient_dict = frappe.db.sql("""select * from tabPatient where name=%s""", (patient), as_dict=1)
 	if not patient_dict:
 		frappe.throw("Patient not found")
