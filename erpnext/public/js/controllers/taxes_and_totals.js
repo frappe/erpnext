@@ -4,11 +4,13 @@
 erpnext.taxes_and_totals = erpnext.payments.extend({
 	setup: function() {},
 	apply_pricing_rule_on_item: function(item){
+
 		if(item.margin_type == "Percentage"){
 			item.rate_with_margin = flt(item.price_list_rate)
 				+ flt(item.price_list_rate) * ( flt(item.margin_rate_or_amount) / 100);
 		} else {
 			item.rate_with_margin = flt(item.price_list_rate) + flt(item.margin_rate_or_amount);
+			item.base_rate_with_margin = flt(item.rate_with_margin) * flt(cur_frm.doc.conversion_rate);
 		}
 
 		item.rate = flt(item.rate_with_margin , precision("rate", item));
