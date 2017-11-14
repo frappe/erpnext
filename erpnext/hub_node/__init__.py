@@ -37,7 +37,9 @@ def get_categories():
 	return response
 
 @frappe.whitelist()
-def get_item_details(hub_sync_id):
+def get_item_details(hub_sync_id=None):
+	if not hub_sync_id:
+		return
 	connection = get_connection()
 	return connection.get_doc('Hub Item', hub_sync_id)
 

@@ -204,8 +204,8 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 		{
 			'txt': "%%%s%%" % frappe.db.escape(txt),
 			'_txt': txt.replace("%", ""),
-			'start': start,
-			'page_len': page_len
+			'start': start or 0,
+			'page_len': page_len or 20
 		})
 
 def get_project_name(doctype, txt, searchfield, start, page_len, filters):
