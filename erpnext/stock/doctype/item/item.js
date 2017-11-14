@@ -74,18 +74,7 @@ frappe.ui.form.on("Item", {
 		}
 
 		erpnext.item.edit_prices_button(frm);
-
-		// make sensitive fields(has_serial_no, is_stock_item, valuation_method, has_batch_no)
-		// read only if any stock ledger entry exists
-		if (!frm.doc.__islocal && frm.doc.is_stock_item) {
-			frm.toggle_enable(['has_serial_no', 'is_stock_item', 'valuation_method', 'has_batch_no'],
-				(frm.doc.__onload && frm.doc.__onload.sle_exists=="exists") ? false : true);
-		}
-
 		erpnext.item.toggle_attributes(frm);
-
-		frm.toggle_enable("is_fixed_asset", (frm.doc.__islocal || (!frm.doc.is_stock_item &&
-			((frm.doc.__onload && frm.doc.__onload.asset_exists) ? false : true))));
 
 		frm.add_custom_button(__('Duplicate'), function() {
 			var new_item = frappe.model.copy_doc(frm.doc);
@@ -103,25 +92,18 @@ frappe.ui.form.on("Item", {
 				frappe.set_route("Form", "Item Variant Settings");
 			}, __("View"));
 		}
-
-		if(frm.doc.__onload && frm.doc.__onload.stock_exists) {
-			// Hide variants section if stock exists
-			frm.toggle_display("variants_section", 0);
-		}
 	},
 
 	validate: function(frm){
 		erpnext.item.weight_to_validate(frm);
 	},
 
-	image: function(frm) {
+	image: function() {
 		refresh_field("image_view");
 	},
 
 	is_fixed_asset: function(frm) {
-		if (frm.doc.is_fixed_asset) {
-			frm.set_value("is_stock_item", 0);
-		}
+		frm.set_value("is_stock_item", frm.doc.is_fixed_asset ? 0 : 1);
 	},
 
 	page_name: frappe.utils.warn_page_name_change,
@@ -469,5 +451,6 @@ $.extend(erpnext.item, {
 			// nothing to do with attributes, hide it
 			frm.toggle_display("attributes", false);
 		}
+		frm.layout.refresh_sections();
 	}
 });
