@@ -10,6 +10,8 @@ from erpnext.selling.doctype.sales_order.sales_order \
 	import make_material_request, make_delivery_note, make_sales_invoice, WarehouseRequired
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from frappe.tests.test_permissions import set_user_permission_doctypes
+from erpnext.selling.doctype.sales_order.sales_order import make_production_orders
+import json
 
 class TestSalesOrder(unittest.TestCase):
 	def tearDown(self):
@@ -504,6 +506,40 @@ class TestSalesOrder(unittest.TestCase):
 		new_so.submit()
 
 		self.assertEquals(new_so.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
+
+	def test_make_production_order(self):
+		# Make a new Sales Order
+		so = make_sales_order(**{
+			"item_list": [{
+				"item_code": "_Test FG Item",
+				"qty": 10,
+				"rate":100	
+			},
+			{
+				"item_code": "_Test FG Item",
+				"qty": 20,
+				"rate":200	
+			}]
+		})
+
+		# Raise Production Orders
+		po_items= []
+		so_item_name= {}
+		for item in so.get_production_order_items():
+			po_items.append({
+				"warehouse": item.get("warehouse"),
+				"item_code": item.get("item_code"),
+				"pending_qty": item.get("pending_qty"),
+				"sales_order_item": item.get("sales_order_item"),
+				"bom": item.get("bom")
+			})
+			so_item_name[item.get("sales_order_item")]= item.get("pending_qty")
+		make_production_orders(json.dumps({"items":po_items}), so.name, so.company)
+		
+		# Check if Production Orders were raised
+		for item in so_item_name:
+			po_qty = frappe.db.sql("select sum(qty) from `tabProduction Order` where sales_order=%s and sales_order_item=%s", (so.name, item))
+			self.assertEquals(po_qty[0][0], so_item_name.get(item))
 
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")
