@@ -16,6 +16,7 @@ class LandUnit(NestedSet):
 	nsm_parent_field = 'parent_land_unit'
 
 	def validate(self):
+		print(self.area_difference)
 		if self.get('parent') and not self.is_new():
 			
 			ancestors = self.get_ancestors()
@@ -45,6 +46,9 @@ class LandUnit(NestedSet):
 						ancestor_features[index] = json.loads(feature)
 					ancestor_doc = frappe.get_doc('Land Unit', ancestor)	
 					ancestor_doc.set_location_value(features = ancestor_features)	
+					print(ancestor_doc.get('area') + self.area_difference)
+					ancestor_doc.db_set(fieldname='area', value=ancestor_doc.get('area')+self.area_difference,\
+					 commit=True)
 
 	def set_location_value(self, features):
 		if not self.get('location'):
