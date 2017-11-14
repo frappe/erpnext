@@ -239,3 +239,20 @@ def make_variant_item_code(template_item_code, template_item_name, variant):
 	if abbreviations:
 		variant.item_code = "{0}-{1}".format(template_item_code, "-".join(abbreviations))
 		variant.item_name = "{0}-{1}".format(template_item_name, "-".join(abbreviations))
+
+@frappe.whitelist()
+def create_variant_doc_for_quick_entry(template, args):
+	variant_based_on = frappe.db.get_value("Item", template, "variant_based_on")
+	args = json.loads(args)
+	if variant_based_on == "Manufacturer":
+		variant = get_variant(template, **args)
+	else:
+		existing_variant = get_variant(template, args)
+		if existing_variant:
+			return existing_variant
+		else:
+			variant = create_variant(template, args=args)
+			variant.name = variant.item_code
+			validate_item_variant_attributes(variant, args)
+	return variant.as_dict()
+
