@@ -87,8 +87,9 @@ class SalarySlip(TransactionBase):
 			self.set_deduction_for_return_from_leave(self.start_date, self.end_date)
 
 	def get_join_date_deducted_days(self):
-		if getdate(self.date_of_joining).month == getdate(self.start_date).month and getdate(self.date_of_joining).year == getdate(self.start_date).year:
-			date_dif = date_diff(self.date_of_joining, get_first_day(getdate(self.date_of_joining)))
+		doj = self.get_emp_join_date()
+		if getdate(doj).month == getdate(self.start_date).month and getdate(doj).year == getdate(self.start_date).year:
+			date_dif = date_diff(doj, get_first_day(getdate(doj)))
 			if date_dif > 0:
 				self.jd_deducted_days = date_dif	
 				# ss = frappe.get_doc("Salary Structure", self.salary_structure)
@@ -97,10 +98,10 @@ class SalarySlip(TransactionBase):
 				# 		doc.set("formula", "base-((base/30)*(jd_deducted_days))")
 
 				# ss.save(ignore_permissions=True)
-	# def get_emp_join_date(self,employee):
-	# 	"""  Get Employee Joinin Date"""
-	# 	date_of_joining=frappe.get_value('Employee',self.employee,'date_of_joining');
-	# 	return date_of_joining
+	def get_emp_join_date(self):
+		"""  Get Employee Joining Date"""
+		date_of_joining=frappe.get_value('Employee',self.employee,'date_of_joining');
+		return date_of_joining
 
 
 	# def check_date(self,date_of_joining):
