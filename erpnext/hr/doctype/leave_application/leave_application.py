@@ -169,9 +169,9 @@ class LeaveApplication(Document):
 	def unallowed_actions(self):
 		if hasattr(self,"workflow_state"):
 			permitted_departments = frappe.db.sql_list("select for_value from `tabUser Permission` where allow = 'Department' and user = '{0}'".format(frappe.session.user))
-			if self.department not in permitted_departments and u'HR Manager' in frappe.get_roles(frappe.session.user) and self.workflow_state in ["Created By Manager", "Approved By Manager"]: 
+			if self.department not in permitted_departments and 'HR Manager' in frappe.get_roles(frappe.session.user) and self.workflow_state in ["Created By Manager", "Approved by Manager"]: 
 				return True
-			elif self.department not in permitted_departments and u'HR Specialist' in frappe.get_roles(frappe.session.user) and self.workflow_state in ["Created By Line Manager", "Approved By Line Manager"]: 
+			elif self.department not in permitted_departments and 'HR Specialist' in frappe.get_roles(frappe.session.user) and self.workflow_state in ["Created By Line Manager", "Approved By Line Manager"]: 
 				return True
 	# def validate_approval_line_manager(self):
 	# 	dd=frappe.get_doc("Employee",self.employee)
