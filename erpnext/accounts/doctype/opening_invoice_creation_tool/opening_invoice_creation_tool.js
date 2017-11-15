@@ -35,6 +35,21 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 		});
 	},
 
+	company: function(frm) {
+		frappe.call({
+			method: 'erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool.get_temporary_opening_account',
+			args: {
+				company: frm.doc.company
+			},
+			callback: (r) => {
+				if (r.message) {
+					frm.doc.__onload.temporary_opening_account = r.message;
+					frm.trigger('update_invoice_table');
+				}
+			}
+		})
+	},
+
 	invoice_type: function(frm) {
 		$.each(frm.doc.invoices, (idx, row) => {
 			row.party_type = frm.doc.invoice_type == "Sales"? "Customer": "Supplier";
@@ -62,16 +77,20 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 			});
 			frm.dashboard.show();
 		}
-	}
-});
+	},
 
-frappe.ui.form.on('Opening Invoice Creation Tool Item', {
-	invoices_add: (frm) => {
+	update_invoice_table: function(frm) {
 		$.each(frm.doc.invoices, (idx, row) => {
 			if (!row.temporary_opening_account) {
 				row.temporary_opening_account = frm.doc.__onload.temporary_opening_account;
 			}
 			row.party_type = frm.doc.invoice_type == "Sales"? "Customer": "Supplier";
 		});
+	}
+});
+
+frappe.ui.form.on('Opening Invoice Creation Tool Item', {
+	invoices_add: (frm) => {
+		frm.trigger('update_invoice_table');
 	}
 });

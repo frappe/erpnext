@@ -14,7 +14,7 @@ class OpeningInvoiceCreationTool(Document):
 		summary, max_count = self.get_opening_invoice_summary()
 		self.set_onload('opening_invoices_summary', summary)
 		self.set_onload('max_count', max_count)
-		self.set_onload('temporary_opening_account', self.get_temporary_opening_account())
+		self.set_onload('temporary_opening_account', get_temporary_opening_account(self.company))
 
 	def get_opening_invoice_summary(self):
 		def prepare_invoice_summary(doctype, invoices):
@@ -148,12 +148,16 @@ class OpeningInvoiceCreationTool(Document):
 			"currency": frappe.db.get_value("Company", self.company, "default_currency")
 		})
 
-	def get_temporary_opening_account(self):
-		accounts = frappe.get_all("Account", filters={
-			'company': self.company,
-			'account_type': 'Temporary'
-		})
-		if not accounts:
-			frappe.throw(_("Please add a Temporary Opening account in Chart of Accounts"))
+@frappe.whitelist()
+def get_temporary_opening_account(company=None):
+	if not company:
+		return
 
-		return accounts[0].name
+	accounts = frappe.get_all("Account", filters={
+		'company': company,
+		'account_type': 'Temporary'
+	})
+	if not accounts:
+		frappe.throw(_("Please add a Temporary Opening account in Chart of Accounts"))
+
+	return accounts[0].name
