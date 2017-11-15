@@ -246,7 +246,7 @@ def make_quotation(source_name, target_doc=None):
 			"doctype": "Quotation",
 			"field_map": {
 				"enquiry_from": "quotation_to",
-				"enquiry_type": "order_type",
+				"opportunity_type": "order_type",
 				"name": "enq_no",
 			}
 		},
@@ -267,10 +267,7 @@ def make_quotation(source_name, target_doc=None):
 def make_request_for_quotation(source_name, target_doc=None):
 	doclist = get_mapped_doc("Opportunity", source_name, {
 		"Opportunity": {
-			"doctype": "Request for Quotation",
-			"validation": {
-				"enquiry_type": ["=", "Sales"]
-			}
+			"doctype": "Request for Quotation"
 		},
 		"Opportunity Item": {
 			"doctype": "Request for Quotation Item",
