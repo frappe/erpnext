@@ -52,7 +52,7 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 			customer_details.get("territory"),
 			inv.debit_to, ", ".join(mode_of_payments.get(inv.name, [])),
 			inv.project, inv.owner, inv.remarks,
-			", ".join(sales_order), ", ".join(delivery_note),", ".join(cost_center), 
+			", ".join(sales_order), ", ".join(delivery_note),", ".join(cost_center),
 			", ".join(warehouse), company_currency
 		]
 		# map income values
