@@ -9,13 +9,21 @@ QUnit.test("test: Fertilizer", function (assert) {
 	assert.expect(1);
 
 	frappe.run_serially([
+		// insert a new Item
+		() => frappe.tests.make('Item', [
+			// values to be set
+			{item_code: 'Urea'},
+			{item_name: 'Urea'},
+			{item_group: 'Fertilizer'}
+		]),
 		// insert a new Fertilizer
 		() => frappe.tests.make('Fertilizer', [
 			// values to be set
-			{key: 'value'}
+			{fertilizer_name: 'Urea'},
+			{item: 'Urea'}
 		]),
 		() => {
-			assert.equal(cur_frm.doc.key, 'value');
+			assert.equal(cur_frm.doc.name, 'Urea');
 		},
 		() => done()
 	]);

@@ -20,6 +20,6 @@ data = {
 		'company_name': 'ABC Hospital Ltd.'
 	},
 	'Agriculture': {
-		'company_name': 'Schrute Farms.'
+		'company_name': 'Schrute Farms'
 	}
 }
