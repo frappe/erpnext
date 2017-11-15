@@ -39,6 +39,18 @@ class Item(WebsiteGenerator):
 					self.item_code = make_variant_item_code(self.variant_of, self)
 			else:
 				from frappe.model.naming import make_autoname
+				
+				if self.is_fixed_asset :
+					item_name = frappe.get_list("Item Name", fields=["naming_series"],
+						filters={"asset_category": self.asset_category })
+					if item_name : 
+						self.naming_series = item_name[0]["naming_series"]
+				else :	
+					item_name = frappe.get_list("Item Name", fields=["naming_series"],
+						filters={"item_group": self.item_group })
+					if item_name : 
+						self.naming_series = item_name[0]["naming_series"]	
+				
 				self.item_code = make_autoname(self.naming_series+'.#####')
 		elif not self.item_code:
 			msgprint(_("Item Code is mandatory because Item is not automatically numbered"), raise_exception=1)
