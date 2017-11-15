@@ -1,0 +1,44 @@
+<h5 style="margin-top: 0px;">Opening Invoice Summery</h5>
+{% $.each(data, (company, summery) => { %}
+<h6><a class="company-link"> {{ company }}</a></h6>
+{% $.each(["Sales Invoice", "Purchase Invoice"], (idx, doctype) => { %}
+{% if summery[doctype] %}
+<div class="row">
+	<div class="col-xs-3">
+		<a class="small invoice-link" data-type="{{ doctype }}" data-company="{{ company }}"> {{ __("{0}", [doctype]) }}</a>
+	</div>
+	<div class="col-xs-3">
+		<span class=" small">{{ __("Total: {0}", [summery[doctype].total_invoices]) }}</span>
+	</div>
+	<div class="col-xs-6 small text-right">
+		<span class="inline-graph">
+			<span class="inline-graph-half" title="{{ __("Total Outstanding Amount") }}">
+				<span class="inline-graph-count">
+					{% let outstanding_amt = summery[doctype].outstanding_amount %}
+					{{ __("{0}", [format_currency(outstanding_amt, summery.currency, 2)]) }}
+				</span>
+				<span class="inline-graph-bar">
+					{% let max_due = max_count[doctype].max_due %}
+					<span class="inline-graph-bar-inner"
+						style="width: {{ cint(outstanding_amt/max_due * 100) }}%">
+					</span>
+				</span>
+			</span>
+			<span class="inline-graph-half" title="{{ __("Total Paid Amount") }}">
+				<span class="inline-graph-count">
+					{% let paid_amt = summery[doctype].paid_amount %}
+					{{ __("{0}", [format_currency(paid_amt, summery.currency, 2)]) }}
+				</span>
+				<span class="inline-graph-bar">
+					{% let max_paid = max_count[doctype].max_paid %}
+					<span class="inline-graph-bar-inner dark"
+						style="width: {{ cint(paid_amt/max_paid * 100) }}%">
+					</span>
+				</span>
+			</span>
+		</span>
+	</div>
+</div>
+{% endif %}
+{% }); %}
+{% }); %}
