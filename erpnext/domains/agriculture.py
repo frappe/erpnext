@@ -18,5 +18,8 @@ data = {
 	'modules': [
 		'Agriculture'
 	],
-	'default_portal_role': 'System Manager'
+	'default_portal_role': 'System Manager',
+	'fixtures': [
+		dict(doctype="Land Unit", land_unit_name="All Land Units")
+	] 
 }
