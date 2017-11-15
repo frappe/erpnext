@@ -25,6 +25,14 @@ frappe.ui.form.on('Patient Appointment', {
 			frm.add_custom_button(__('Cancel'), function() {
 				btn_update_status(frm, "Cancelled");
 			});
+
+			frm.add_custom_button(__("Consultation"),function(){
+				btn_create_consultation(frm);
+			},"Create");
+
+			frm.add_custom_button(__('Vital Signs'), function() {
+				btn_create_vital_signs(frm);
+			},"Create");
 		}
 		if(frm.doc.status == "Scheduled" && !frm.doc.__islocal){
 			frm.add_custom_button(__('Cancel'), function() {
