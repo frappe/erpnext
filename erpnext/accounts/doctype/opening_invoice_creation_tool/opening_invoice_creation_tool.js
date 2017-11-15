@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Opening Invoice Creation Tool', {
-	setup: (frm) => {
+	setup: function(frm) {
 		frm.set_query('party_type', 'invoices', function(doc, cdt, cdn) {
 			return {
 				filters: {
@@ -12,10 +12,10 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 		});
 	},
 
-	refresh: (frm) => {
+	refresh: function(frm) {
 		frm.disable_save();
-		this.trigger("make_dashboard");
-		frm.page.set_primary_action(__("Make Invoice"), () => {
+		frm.trigger("make_dashboard");
+		frm.page.set_primary_action(__("Make Invoices"), () => {
 			let btn_primary = frm.page.btn_primary.get(0);
 			return frm.call({
 				doc: frm.doc,
@@ -35,7 +35,7 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 		});
 	},
 
-	invoice_type: (frm) => {
+	invoice_type: function(frm) {
 		$.each(frm.doc.invoices, (idx, row) => {
 			row.party_type = frm.doc.invoice_type == "Sales"? "Customer": "Supplier";
 			row.party = "";
@@ -43,14 +43,13 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 		frm.refresh_fields();
 	},
 
-	make_dashboard: () => {
-		let me = this;
-		let max_count = this.frm.doc.__onload.max_count;
-		let opening_invoices_summery = this.frm.doc.__onload.opening_invoices_summery;
-		if(!$.isEmptyObject(opening_invoices_summery)) {
-			let section = this.frm.dashboard.add_section(
+	make_dashboard: function(frm) {
+		let max_count = frm.doc.__onload.max_count;
+		let opening_invoices_summary = frm.doc.__onload.opening_invoices_summary;
+		if(!$.isEmptyObject(opening_invoices_summary)) {
+			let section = frm.dashboard.add_section(
 				frappe.render_template('opening_invoice_creation_tool_dashboard', {
-					data: opening_invoices_summery,
+					data: opening_invoices_summary,
 					max_count: max_count
 				})
 			);
@@ -61,7 +60,7 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 				frappe.set_route('List', doctype,
 					{'is_opening': 'Yes', 'company': company, 'docstatus': 1});
 			});
-			this.frm.dashboard.show();
+			frm.dashboard.show();
 		}
 	}
 });
@@ -69,6 +68,9 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 frappe.ui.form.on('Opening Invoice Creation Tool Item', {
 	invoices_add: (frm) => {
 		$.each(frm.doc.invoices, (idx, row) => {
+			if (!row.temporary_opening_account) {
+				row.temporary_opening_account = frm.doc.__onload.temporary_opening_account;
+			}
 			row.party_type = frm.doc.invoice_type == "Sales"? "Customer": "Supplier";
 		});
 	}
