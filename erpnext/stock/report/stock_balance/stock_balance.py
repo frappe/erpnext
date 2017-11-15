@@ -37,17 +37,18 @@ def execute(filters=None):
 			qty_dict.bal_val, qty_dict.val_rate,
 			item_reorder_level,
 			item_reorder_qty,
-			company,
-
+			company
 		]
 
-		if filters.get('show_variants',0) == 1:
+		if filters.get('show_variant_attributes', 0) == 1:
 			variants_attributes = get_variants_attributes()
-			report_data += [item_map[item][i] for i in variants_attributes]
+			report_data += [item_map[item].get(i) for i in variants_attributes]
+
 		data.append(report_data)
 
-	if filters.get('show_variants',0) == 1:
+	if filters.get('show_variant_attributes', 0) == 1:
 		columns += ["{}:Data:100".format(i) for i in get_variants_attributes()]
+
 	return columns, data
 
 def get_columns():
@@ -72,8 +73,7 @@ def get_columns():
 		_("Valuation Rate")+":Float:90",
 		_("Reorder Level")+":Float:80",
 		_("Reorder Qty")+":Float:80",
-		_("Company")+":Link/Company:100",
-
+		_("Company")+":Link/Company:100"
 	]
 
 	return columns
@@ -198,12 +198,18 @@ def get_item_details(filters):
 		condition = "where item_code=%s"
 		value = (filters.get("item_code"),)
 
-	items = frappe.db.sql("""select name, item_name, stock_uom, item_group, brand, description
-		from tabItem {condition}""".format(condition=condition), value, as_dict=1)
+	items = frappe.db.sql("""
+		select name, item_name, stock_uom, item_group, brand, description
+		from tabItem
+		{condition}
+	""".format(condition=condition), value, as_dict=1)
+
 	item_details = dict((d.name , d) for d in items)
-	if filters.get('show_variants',0) == 1:
-		variant_values = get_variant_values_for_(item_details.keys())
-		item_details = {k:v.update(variant_values[k]) for k,v in item_details.iteritems()}
+
+	if filters.get('show_variant_attributes', 0) == 1:
+		variant_values = get_variant_values_for(item_details.keys())
+		item_details = {k: v.update(variant_values.get(k, {})) for k, v in item_details.iteritems()}
+
 	return item_details
 
 def get_item_reorder_details(filters):
@@ -213,8 +219,11 @@ def get_item_reorder_details(filters):
 		condition = "where parent=%s"
 		value = (filters.get("item_code"),)
 
-	item_reorder_details = frappe.db.sql("""select parent,warehouse,warehouse_reorder_qty,warehouse_reorder_level
-		from `tabItem Reorder` {condition}""".format(condition=condition), value, as_dict=1)
+	item_reorder_details = frappe.db.sql("""
+		select parent, warehouse, warehouse_reorder_qty, warehouse_reorder_level
+		from `tabItem Reorder`
+		{condition}
+	""".format(condition=condition), value, as_dict=1)
 
 	return dict((d.parent + d.warehouse, d) for d in item_reorder_details)
 
@@ -230,13 +239,13 @@ def get_variants_attributes():
 	return [i.name for i in frappe.get_all('Item Attribute')]
 
 
-def get_variant_values_for_(items):
+def get_variant_values_for(items):
 	'''Returns variant values for items.'''
 	attribute_map = {}
-	for attr in frappe.db.sql('''select parent, attribute,
-							attribute_value from `tabItem Variant Attribute`
-							where parent in (%s);
-							''' % ", ".join(["%s"] * len(items)), tuple(items), as_dict=1):
-		attribute_map.setdefault(attr['parent'], {})
-		attribute_map[attr['parent']].update({attr['attribute']:attr['attribute_value']})
+	for attr in frappe.db.sql('''select parent, attribute, attribute_value
+		from `tabItem Variant Attribute` where parent in (%s)
+		''' % ", ".join(["%s"] * len(items)), tuple(items), as_dict=1):
+			attribute_map.setdefault(attr['parent'], {})
+			attribute_map[attr['parent']].update({attr['attribute']: attr['attribute_value']})
+
 	return attribute_map
