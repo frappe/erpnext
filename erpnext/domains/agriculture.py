@@ -18,5 +18,6 @@ data = {
 	'modules': [
 		'Agriculture'
 	],
-	'default_portal_role': 'System Manager'
+	'default_portal_role': 'System Manager',
+	'on_setup': 'erpnext.agriculture.setup.setup_agriculture'
 }
