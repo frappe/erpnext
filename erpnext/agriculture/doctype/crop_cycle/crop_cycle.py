@@ -7,6 +7,16 @@ import frappe
 from frappe.model.document import Document
 
 class CropCycle(Document):
+	def validate(self):
+		if self.is_new():
+			crop = frappe.get_doc('Crop', self.crop)
+			self.create_project(crop.period, crop.agriculture_task)
+		if not self.project:
+			self.project = self.name
+		for detected_pest in self.detected_pest:
+			pest = frappe.get_doc('Pest', detected_pest.pest)
+			self.create_task(pest.treatment_task, self.name, detected_pest.start_date)
+
 	def create_project(self, period, crop_tasks):
 		project = frappe.new_doc("Project")
 		project.project_name = self.title

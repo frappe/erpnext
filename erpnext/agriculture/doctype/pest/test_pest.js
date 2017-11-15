@@ -12,10 +12,25 @@ QUnit.test("test: Pest", function (assert) {
 		// insert a new Pest
 		() => frappe.tests.make('Pest', [
 			// values to be set
-			{key: 'value'}
+			{common_name: 'Aphids'},
+			{scientific_name: 'Aphidoidea'},
+			{treatment_task: [
+				[
+					{subject: "Survey and find the aphid locations"},
+					{start_day: 1},
+					{end_day: 2},
+					{holiday_management: "Ignore holidays"}
+				],
+				[
+					{subject: "Apply Pesticides"},
+					{start_day: 3},
+					{end_day: 3},
+					{holiday_management: "Ignore holidays"}
+				]
+			]}
 		]),
 		() => {
-			assert.equal(cur_frm.doc.key, 'value');
+			assert.equal(cur_frm.doc.treatment_period, 3);
 		},
 		() => done()
 	]);

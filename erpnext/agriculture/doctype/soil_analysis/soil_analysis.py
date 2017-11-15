@@ -7,5 +7,4 @@ import frappe
 from frappe.model.document import Document
 
 class SoilAnalysis(Document):
-	def autoname(self):
-		self.name = self.land_unit +' '+ self.date
+	pass
