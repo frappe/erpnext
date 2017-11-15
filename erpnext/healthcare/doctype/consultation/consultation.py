@@ -23,6 +23,11 @@ class Consultation(Document):
 		if not self.diagnosis or not self.symptoms:
 			frappe.throw("Diagnosis and Complaints cannot be left blank")
 
+	def on_cancel(self):
+		if(self.appointment):
+			frappe.db.set_value("Patient Appointment",self.appointment,"status","Open")
+		delete_medical_record(self)
+
 def set_sales_invoice_fields(company, patient):
 	sales_invoice = frappe.new_doc("Sales Invoice")
 	sales_invoice.customer = frappe.get_value("Patient", patient, "customer")
@@ -111,6 +116,9 @@ def update_consultation_to_medical_record(consultation):
 	if(medical_record_id[0][0]):
 		subject = set_subject_field(consultation)
 		frappe.db.set_value("Patient Medical Record",medical_record_id[0][0],"subject",subject)
+
+def delete_medical_record(consultation):
+	frappe.db.sql("""delete from `tabPatient Medical Record` where reference_name = %s""",(consultation.name))
 
 def set_subject_field(consultation):
 	subject = "No Diagnosis "
