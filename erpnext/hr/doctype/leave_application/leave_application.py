@@ -157,10 +157,12 @@ class LeaveApplication(Document):
 			else:
 				if wf == "Approved By HR Specialist":
 					self.workflow_state = "Approved By HR Specialist (F.T)"
+					self.flags.ignore_permissions = True
 					self.status = "Approved"
 					self.docstatus = 1
 			if wf == "Approved By Director" and lt == "Compensatory off - تعويضية":
 				self.workflow_state = "Approved By Director (F.T)"
+				self.flags.ignore_permissions = True
 				self.status = "Approved"
 				self.docstatus = 1
 		def created_by_ceo():
