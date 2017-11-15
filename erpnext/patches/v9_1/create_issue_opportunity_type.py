@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	frappe.reload_doctype("Issue Type")
-	frappe.reload_doctype("Opportunity Type")
+	frappe.reload_doc('support', 'doctype', 'issue_type')
+	frappe.reload_doc('crm', 'doctype', 'opportunity_type')
 
 	for doctype in ["Issue", "Opportunity"]:
 		meta = frappe.get_meta(doctype)
