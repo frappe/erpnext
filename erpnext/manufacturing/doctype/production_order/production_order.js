@@ -33,6 +33,14 @@ frappe.ui.form.on("Production Order", {
 			}
 		});
 		
+		frm.set_query("operation", "required_items", function() {
+			return {
+				filters: {
+					'parent': frm.doc.bom_no,
+				}
+			}
+		});
+		
 		frm.set_query("fg_warehouse", function() {
 			return {
 				filters: {
