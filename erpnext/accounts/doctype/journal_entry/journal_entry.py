@@ -918,6 +918,77 @@ def get_average_exchange_rate(account):
 
 
 @frappe.whitelist()
+def reset_t():
+	from frappe.utils import getdate
+	
+	#get_all Doctype 
+	je_list = frappe.get_list("Journal Entry",order_by='name asc')
+	for je in je_list:
+		print (je.name)
+		
+	# delete all Enahanced Naming recored for doc 
+	namming =frappe.get_list("Enhanced Nameing Doc", fields=["name","name_of_doc", "index_value","year"],filters={"name_of_doc":"Journal Entry"},ignore_permissions=True)
+	for n in namming:
+		nammeing_doc = frappe.get_doc("Enhanced Nameing Doc",n["name"])
+		print (nammeing_doc.name)
+		nammeing_doc.delete()
+	
+	# add new title to docs
+	for je in je_list : 
+		print(je.name)
+		je_doc = frappe.get_doc("Journal Entry",je["name"])
+		last_title = "Not Set"
+		namming =frappe.get_list("Enhanced Nameing Doc", fields=["name","name_of_doc", "index_value","year"],
+			filters={"year": str(getdate(je_doc.posting_date).year),
+			"name_of_doc":je_doc.doctype},ignore_permissions=True)
+		if namming :
+			#~ title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ self.name[len(self.naming_series):]
+			title =je_doc.name[:len(je_doc.naming_series)] + str(getdate(je_doc.posting_date).year) +"-"+ str(namming[0]["index_value"]+1).zfill(5)
+			nammeing_doc = frappe.get_doc("Enhanced Nameing Doc",namming[0]["name"])
+			nammeing_doc.flags.ignore_permissions = True
+			nammeing_doc.index_value = nammeing_doc.index_value+1
+			nammeing_doc.save()
+			last_title =  title
+			print ("1 ",last_title)
+		else : 
+			title =je_doc.name[:len(je_doc.naming_series)] + str(getdate(je_doc.posting_date).year) +"-"+ str(1).zfill(5)
+			nammeing_doc = frappe.new_doc("Enhanced Nameing Doc")
+			nammeing_doc.flags.ignore_permissions = True
+			nammeing_doc.parent = "Enhanced Nameing"
+			nammeing_doc.parenttype = "Enhanced Nameing"
+			nammeing_doc.parentfield='enhanced_nameing'
+			nammeing_doc.index_value = 1
+			nammeing_doc.year = str(getdate(je_doc.posting_date).year)
+			nammeing_doc.name_of_doc = je_doc.doctype
+			nammeing_doc.save()
+			last_title =  title
+			print ("2",last_title)
+		je_doc.title = 	last_title
+		je_doc.save()
+		
+	
+	
+	#~ if namming :
+		#~ title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ str(namming[0]["index_value"]+1).zfill(5)
+		#~ nammeing_doc = frappe.get_doc("Enhanced Nameing Doc",namming[0]["name"])
+		#~ nammeing_doc.flags.ignore_permissions = True
+		#~ nammeing_doc.index_value = nammeing_doc.index_value+1
+		#~ nammeing_doc.save()
+		#~ return title
+	#~ else : 
+		#~ title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ str(1).zfill(5)
+		#~ nammeing_doc = frappe.new_doc("Enhanced Nameing Doc")
+		#~ nammeing_doc.flags.ignore_permissions = True
+		#~ nammeing_doc.parent = "Enhanced Nameing"
+		#~ nammeing_doc.parenttype = "Enhanced Nameing"
+		#~ nammeing_doc.parentfield='enhanced_nameing'
+		#~ nammeing_doc.index_value = 1
+		#~ nammeing_doc.year = str(getdate(self.posting_date).year)
+		#~ nammeing_doc.name_of_doc = self.doctype
+		#~ nammeing_doc.save()
+		#~ return title
+
+@frappe.whitelist()
 def make_reverse(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	def set_missing_values(source, target):
