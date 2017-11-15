@@ -38,9 +38,8 @@ class TestEmployeeLoan(unittest.TestCase):
 		self.assertEquals(employee_loan.total_interest_payable, 22712)
 		self.assertEquals(employee_loan.total_payment, 302712)
 
-
 def create_loan_type(loan_name, maximum_loan_amount, rate_of_interest):
-	if not frappe.db.get_value("Loan Type", loan_name):
+	if not frappe.db.exists("Loan Type", loan_name):
 		frappe.get_doc({
 			"doctype": "Loan Type",
 			"loan_name": loan_name,
@@ -49,6 +48,7 @@ def create_loan_type(loan_name, maximum_loan_amount, rate_of_interest):
 		}).insert()
 
 def	create_employee_loan(employee, loan_type, loan_amount, repayment_method, repayment_periods):
+	create_loan_type(loan_type, 500000, 8.4)
 	if not frappe.db.get_value("Employee Loan", {"employee":employee}):
 		employee_loan = frappe.new_doc("Employee Loan")
 		employee_loan.update({

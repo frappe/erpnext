@@ -8,12 +8,12 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
 import json
-from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account
+from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account, get_income_account
 
 class Consultation(Document):
 	def on_update(self):
 		if(self.appointment):
-			frappe.db.set_value("Patient Appointment",self.appointment,"status","Closed")
+			frappe.db.set_value("Patient Appointment", self.appointment, "status", "Closed")
 		update_consultation_to_medical_record(self)
 
 	def after_insert(self):
@@ -23,9 +23,10 @@ class Consultation(Document):
 		if not self.diagnosis or not self.symptoms:
 			frappe.throw("Diagnosis and Complaints cannot be left blank")
 
-		physician = frappe.get_doc("Physician",self.physician)
-		if(frappe.session.user != physician.user_id):
-			frappe.throw(_("You don't have permission to submit"))
+	def on_cancel(self):
+		if(self.appointment):
+			frappe.db.set_value("Patient Appointment", self.appointment, "status", "Open")
+		delete_medical_record(self)
 
 def set_sales_invoice_fields(company, patient):
 	sales_invoice = frappe.new_doc("Sales Invoice")
@@ -91,8 +92,8 @@ def create_invoice_items(physician, invoice, company):
 	item_line.qty = 1
 	item_line.uom = "Nos"
 	item_line.conversion_factor = 1
-	item_line.income_account = get_income_account(physician,company)
-	op_consulting_charge = frappe.get_value("Physician",physician,"op_consulting_charge")
+	item_line.income_account = get_income_account(physician, company)
+	op_consulting_charge = frappe.get_value("Physician", physician, "op_consulting_charge")
 	if op_consulting_charge:
 		item_line.rate = op_consulting_charge
 		item_line.amount = op_consulting_charge
@@ -111,10 +112,13 @@ def insert_consultation_to_medical_record(doc):
 	medical_record.save(ignore_permissions=True)
 
 def update_consultation_to_medical_record(consultation):
-	medical_record_id = frappe.db.sql("select name from `tabPatient Medical Record` where reference_name=%s",(consultation.name))
+	medical_record_id = frappe.db.sql("select name from `tabPatient Medical Record` where reference_name=%s", (consultation.name))
 	if(medical_record_id[0][0]):
 		subject = set_subject_field(consultation)
-		frappe.db.set_value("Patient Medical Record",medical_record_id[0][0],"subject",subject)
+		frappe.db.set_value("Patient Medical Record", medical_record_id[0][0], "subject", subject)
+
+def delete_medical_record(consultation):
+	frappe.db.sql("""delete from `tabPatient Medical Record` where reference_name = %s""", (consultation.name))
 
 def set_subject_field(consultation):
 	subject = "No Diagnosis "
