@@ -19,7 +19,5 @@ data = {
 		'Agriculture'
 	],
 	'default_portal_role': 'System Manager',
-	'fixtures': [
-		dict(doctype="Land Unit", land_unit_name="All Land Units")
-	] 
+	'on_setup': 'erpnext.agriculture.setup.setup_agriculture'
 }
