@@ -3,8 +3,8 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, getdate, cstr
-from frappe import _
+from frappe.utils import getdate, cstr, flt
+from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
 
 def execute(filters=None):
@@ -163,129 +163,89 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 	data = []
 	gle_map = initialize_gle_map(gl_entries)
 
-	opening, total_debit, total_credit, opening_in_account_currency, total_debit_in_account_currency, \
-		total_credit_in_account_currency, gle_map = get_accountwise_gle(filters, gl_entries, gle_map)
+	totals, entries = get_accountwise_gle(filters, gl_entries, gle_map)
 
 	# Opening for filtered account
-	if filters.get("account") or filters.get("party"):
-		data += [get_balance_row(_("Opening"), opening, opening_in_account_currency), {}]
+	data.append(totals.opening)
 
 	if filters.get("group_by_account"):
 		for acc, acc_dict in gle_map.items():
 			if acc_dict.entries:
-				# Opening for individual ledger, if grouped by account
-				data.append(get_balance_row(_("Opening"), acc_dict.opening,
-					acc_dict.opening_in_account_currency))
+				# opening
+				data.append({})
+				data.append(acc_dict.totals.opening)
 
 				data += acc_dict.entries
 
-				# Totals and closing for individual ledger, if grouped by account
-				account_closing = acc_dict.opening + acc_dict.total_debit - acc_dict.total_credit
-				account_closing_in_account_currency = acc_dict.opening_in_account_currency \
-					+ acc_dict.total_debit_in_account_currency - acc_dict.total_credit_in_account_currency
+				# totals
+				data.append(acc_dict.totals.total)
 
-				data += [{"account": "'" + _("Totals") + "'", "debit": acc_dict.total_debit,
-					"credit": acc_dict.total_credit},
-					get_balance_row(_("Closing (Opening + Totals)"),
-						account_closing, account_closing_in_account_currency), {}]
+				# closing
+				data.append(acc_dict.totals.closing)
+		data.append({})
 
 	else:
-		for gl in gl_entries:
-			if gl.posting_date >= getdate(filters.from_date) and gl.posting_date <= getdate(filters.to_date) \
-					and gl.is_opening == "No":
-				data.append(gl)
+		data += entries
 
+	# totals
+	data.append(totals.total)
 
-	# Total debit and credit between from and to date
-	if total_debit or total_credit:
-		data.append({
-			"account": "'" + _("Totals") + "'",
-			"debit": total_debit,
-			"credit": total_credit,
-			"debit_in_account_currency": total_debit_in_account_currency,
-			"credit_in_account_currency": total_credit_in_account_currency
-		})
-
-	# Closing for filtered account
-	if filters.get("account") or filters.get("party"):
-		closing = opening + total_debit - total_credit
-		closing_in_account_currency = opening_in_account_currency + \
-			total_debit_in_account_currency - total_credit_in_account_currency
-
-		data.append(get_balance_row(_("Closing (Opening + Totals)"),
-			closing, closing_in_account_currency))
+	# closing
+	data.append(totals.closing)
 
 	return data
+
+def get_totals_dict():
+	def _get_debit_credit_dict(label):
+		return _dict(
+			account = "'{0}'".format(label),
+			debit = 0.0,
+			credit = 0.0,
+			debit_in_account_currency = 0.0,
+			credit_in_account_currency = 0.0
+		)
+	return _dict(
+		opening = _get_debit_credit_dict(_('Opening')),
+		total = _get_debit_credit_dict(_('Total')),
+		closing = _get_debit_credit_dict(_('Closing (Opening + Total)'))
+	)
 
 def initialize_gle_map(gl_entries):
 	gle_map = frappe._dict()
 	for gle in gl_entries:
-		gle_map.setdefault(gle.account, frappe._dict({
-			"opening": 0,
-			"opening_in_account_currency": 0,
-			"entries": [],
-			"total_debit": 0,
-			"total_debit_in_account_currency": 0,
-			"total_credit": 0,
-			"total_credit_in_account_currency": 0,
-			"closing": 0,
-			"closing_in_account_currency": 0
-		}))
+		gle_map.setdefault(gle.account, _dict(totals = get_totals_dict(), entries = []))
 	return gle_map
 
 def get_accountwise_gle(filters, gl_entries, gle_map):
-	opening, total_debit, total_credit = 0, 0, 0
-	opening_in_account_currency, total_debit_in_account_currency, total_credit_in_account_currency = 0, 0, 0
+	totals = get_totals_dict()
+	entries = []
+
+	def update_value_in_dict(data, key, gle):
+		data[key].debit += flt(gle.debit)
+		data[key].credit += flt(gle.credit)
+
+		data[key].debit_in_account_currency += flt(gle.debit_in_account_currency)
+		data[key].credit_in_account_currency += flt(gle.credit_in_account_currency)
+
 
 	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
 	for gle in gl_entries:
-		amount = flt(gle.debit, 3) - flt(gle.credit, 3)
-		amount_in_account_currency = flt(gle.debit_in_account_currency, 3) - flt(gle.credit_in_account_currency, 3)
-
-		if (filters.get("account") or filters.get("party") or filters.get("group_by_account")) \
-				and (gle.posting_date < from_date or cstr(gle.is_opening) == "Yes"):
-
-			gle_map[gle.account].opening += amount
-			if filters.get("show_in_account_currency"):
-				gle_map[gle.account].opening_in_account_currency += amount_in_account_currency
-
-			if filters.get("account") or filters.get("party"):
-				opening += amount
-				if filters.get("show_in_account_currency"):
-					opening_in_account_currency += amount_in_account_currency
+		if gle.posting_date < from_date or cstr(gle.is_opening) == "Yes":
+			update_value_in_dict(gle_map[gle.account].totals, 'opening', gle)
+			update_value_in_dict(totals, 'opening', gle)
 
 		elif gle.posting_date <= to_date:
-			gle_map[gle.account].entries.append(gle)
-			gle_map[gle.account].total_debit += flt(gle.debit, 3)
-			gle_map[gle.account].total_credit += flt(gle.credit, 3)
+			update_value_in_dict(gle_map[gle.account].totals, 'total', gle)
+			update_value_in_dict(totals, 'total', gle)
+			if filters.get("group_by_account"):
+				gle_map[gle.account].entries.append(gle)
+			else:
+				entries.append(gle)
 
-			total_debit += flt(gle.debit, 3)
-			total_credit += flt(gle.credit, 3)
+		update_value_in_dict(gle_map[gle.account].totals, 'closing', gle)
+		update_value_in_dict(totals, 'closing', gle)
 
-			if filters.get("show_in_account_currency"):
-				gle_map[gle.account].total_debit_in_account_currency += flt(gle.debit_in_account_currency, 3)
-				gle_map[gle.account].total_credit_in_account_currency += flt(gle.credit_in_account_currency, 3)
-
-				total_debit_in_account_currency += flt(gle.debit_in_account_currency, 3)
-				total_credit_in_account_currency += flt(gle.credit_in_account_currency, 3)
-
-	return opening, total_debit, total_credit, opening_in_account_currency, \
-		total_debit_in_account_currency, total_credit_in_account_currency, gle_map
-
-def get_balance_row(label, balance, balance_in_account_currency=None):
-	balance_row = {
-		"account": "'" + label + "'",
-		"debit": balance if balance > 0 else 0,
-		"credit": -1*balance if balance < 0 else 0
-	}
-
-	if balance_in_account_currency != None:
-		balance_row.update({
-			"debit_in_account_currency": balance_in_account_currency if balance_in_account_currency > 0 else 0,
-			"credit_in_account_currency": -1*balance_in_account_currency if balance_in_account_currency < 0 else 0
-		})
-
-	return balance_row
+	return totals, entries
 
 def get_result_as_list(data, filters):
 	result = []

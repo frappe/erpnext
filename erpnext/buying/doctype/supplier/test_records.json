@@ -17,6 +17,11 @@
  },
  {
   "doctype": "Supplier",
+  "supplier_name": "_Test Supplier 2",
+  "supplier_type": "_Test Supplier Type"
+ },
+ {
+  "doctype": "Supplier",
   "supplier_name": "_Test Supplier USD",
   "supplier_type": "_Test Supplier Type",
   "accounts": [{
