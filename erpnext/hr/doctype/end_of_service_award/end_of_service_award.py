@@ -3,6 +3,7 @@
 # For license information, please see license.txt
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 import json
 import math
@@ -12,7 +13,7 @@ from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_li
 class EndofServiceAward(Document):
 
     def validate(self):
-        if self.workflow_state:
+        if hasattr(self,"workflow_state"):
             if "Rejected" in self.workflow_state:
                 self.docstatus = 1
                 self.docstatus = 2
@@ -24,9 +25,21 @@ class EndofServiceAward(Document):
       if result:
           return result[0][0]
       else:
-          frappe.throw("لا يوجد قسيمة راتب لهذا الموظف")
+          frappe.throw(_("No salary slip found for this employee"))
 
-
+    def validate_emp(self):
+        employee_user = frappe.get_value("Employee", filters = {"name": self.employee}, fieldname="user_id")
+        if self.get('__islocal') and employee_user:
+            if u'CEO' in frappe.get_roles(employee_user):
+                self.workflow_state = "Created By CEO"
+            elif u'Director' in frappe.get_roles(employee_user):
+                self.workflow_state = "Created By Director"
+            elif u'Manager' in frappe.get_roles(employee_user):
+                    self.workflow_state = "Created By Manager"
+            elif u'Line Manager' in frappe.get_roles(employee_user):
+                    self.workflow_state = "Created By Line Manager"
+            else:
+                self.workflow_state = "Pending"     
 
     # def get_salary(self,employee):
     #     start_date = get_first_day(getdate(nowdate()))

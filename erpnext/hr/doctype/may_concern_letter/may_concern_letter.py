@@ -64,7 +64,7 @@ class MayConcernLetter(Document):
 
 
 	def get_salary(self):
-		if self.salary_selection=='Total Salary' or self.salary_selection=='Basic Salary'  :
+		if self.salary_selection=='Total Salary' or self.salary_selection=='Basic Salary' or self.salary_selection=='Detailed Salary'   :
 			doc = frappe.new_doc("Salary Slip")
 			doc.salary_slip_based_on_timesheet="0"
 
@@ -80,6 +80,7 @@ class MayConcernLetter(Document):
 
 
 			result =doc.gross_pay
+			self.gross_pay=result
 			
 			for earning in doc.earnings:
 				if earning.salary_component =='Basic':
