@@ -200,9 +200,6 @@ def get_party_account(party_type, party, company):
 		if (account and account_currency != existing_gle_currency) or not account:
 				account = get_party_gle_account(party_type, party, company)
 
-	if not account:
-		frappe.throw(_("Party account not specified, please setup default party account in company"))
-
 	return account
 
 def get_party_account_currency(party_type, party, company):
