@@ -170,9 +170,8 @@ def check_credit_limit(customer, company):
 			throw(_("Please contact to the user who have Sales Master Manager {0} role")
 				.format(" / " + credit_controller if credit_controller else ""))
 
-#PR : 10861, Author : ashish-greycube & jigneshpshah,  Email:mr.ashish.shah@gmail.com 
 # get_customer_outstanding is a very generic function which is invoked from many places. A third non mandatory argument is added to change its behaviour based on caller .
-def get_customer_outstanding(customer, company,caller=None):
+def get_customer_outstanding(customer, company, ignore_bypass_credit_limit_check_at_sales_order=None):
 	# Outstanding based on GL Entries
 	outstanding_based_on_gle = frappe.db.sql("""select sum(debit) - sum(credit)
 		from `tabGL Entry` where party_type = 'Customer' and party = %s and company=%s""", (customer, company))
@@ -188,11 +187,10 @@ def get_customer_outstanding(customer, company,caller=None):
 
 	outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0.0
 
-	#PR : 10861, Author : ashish-greycube & jigneshpshah,  Email:mr.ashish.shah@gmail.com 
 	# Since the credit limit check is bypassed at sales order level, when customer credit balance report is run we need to treat sales order with status 'To Deliver and Bill' as not outstanding
 	outstanding_based_on_bypassed_so = 0.0
-	bypass_credit_limit_check_at_sales_order = cint(frappe.db.get_value("Customer", customer, "bypass_credit_limit_check_at_sales_order"))
-	if bypass_credit_limit_check_at_sales_order == 1 and caller=='customer_credit_balance_report':
+	bypass_credit_limit_check_at_sales_order =cint(frappe.db.get_value("Customer", customer, "bypass_credit_limit_check_at_sales_order"))
+	if bypass_credit_limit_check_at_sales_order == 1 and ignore_bypass_credit_limit_check_at_sales_order==False:
 		outstanding_based_on_bypassed_so = frappe.db.sql("""
 			select (sum(base_grand_total))
 			from `tabSales Order`
@@ -223,7 +221,7 @@ def get_customer_outstanding(customer, company,caller=None):
 		if flt(dn_item.amount) > flt(si_amount) and dn_item.base_net_total:
 			outstanding_based_on_dn += ((flt(dn_item.amount) - flt(si_amount)) \
 				/ dn_item.base_net_total) * dn_item.base_grand_total
-	#PR : 10861, Author : ashish-greycube & jigneshpshah,  Email:mr.ashish.shah@gmail.com. In return substract the bypassed SO values
+#In return substract the bypassed SO values
 	return outstanding_based_on_gle + outstanding_based_on_so + outstanding_based_on_dn - outstanding_based_on_bypassed_so
 
 
