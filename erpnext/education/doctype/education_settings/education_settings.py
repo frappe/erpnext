@@ -15,7 +15,8 @@ education_keydict = {
 	"validate_course": "validate_course"
 }
 
-class SchoolSettings(Document):
+
+class EducationSettings(Document):
 	def on_update(self):
 		"""update defaults"""
 		for key in education_keydict:

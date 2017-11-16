@@ -1,11 +1,17 @@
+/* eslint-disable */
+// rename this file from _test_[name] to test_[name] to activate
+// and remove above this line
+
 // Testing Setup Module in Education
 QUnit.module('education');
 
-QUnit.test("Test: School Settings", function(assert){
-	assert.expect(3);
+QUnit.test("test: Education Settings", function (assert) {
 	let done = assert.async();
+
+	assert.expect(3);
+
 	frappe.run_serially([
-		() => frappe.set_route("List", "School Settings"),
+		() => frappe.set_route("List", "Education Settings"),
 		() => frappe.timeout(0.4),
 		() => {
 			return frappe.tests.set_form_values(cur_frm, [

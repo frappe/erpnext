@@ -267,10 +267,10 @@
  "issingle": 1, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-11-10 19:07:56.603573", 
+ "modified": "2017-11-16 13:23:06.124735", 
  "modified_by": "Administrator", 
  "module": "Education", 
- "name": "School Settings", 
+ "name": "Education Settings", 
  "name_case": "", 
  "owner": "Administrator", 
  "permissions": [

@@ -217,7 +217,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "School Settings"
+					"name": "Education Settings"
 				}
 			]
 		},
