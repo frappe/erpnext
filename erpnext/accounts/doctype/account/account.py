@@ -5,12 +5,12 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, cstr
 from frappe import throw, _
-from frappe.model.document import Document
+from frappe.utils.nestedset import NestedSet
 
 class RootNotEditable(frappe.ValidationError): pass
 class BalanceMismatchError(frappe.ValidationError): pass
 
-class Account(Document):
+class Account(NestedSet):
 	nsm_parent_field = 'parent_account'
 
 	def onload(self):
@@ -160,26 +160,12 @@ class Account(Document):
 		if not self.report_type:
 			throw(_("Report Type is mandatory"))
 
-
-	def update_nsm_model(self):
-		"""update lft, rgt indices for nested set model"""
-		import frappe
-		import frappe.utils.nestedset
-		frappe.utils.nestedset.update_nsm(self)
-
-	def on_update(self):
-		self.update_nsm_model()
-
-	def validate_trash(self):
-		"""checks gl entries and if child exists"""
+	def on_trash(self):
+		# checks gl entries and if child exists
 		if self.check_gle_exists():
 			throw(_("Account with existing transaction can not be deleted"))
-		if self.check_if_child_exists():
-			throw(_("Child account exists for this account. You can not delete this account."))
 
-	def on_trash(self):
-		self.validate_trash()
-		self.update_nsm_model()
+		super(Account, self).on_trash()
 
 	def before_rename(self, old, new, merge=False):
 		# Add company abbr if not provided

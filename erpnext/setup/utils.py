@@ -40,7 +40,7 @@ def before_tests():
 			"company_tagline"	:"Testing",
 			"email"				:"test@erpnext.com",
 			"password"			:"test",
-			"chart_of_accounts" : "India - Chart of Accounts",
+			"chart_of_accounts" : "Standard",
 			"domain"			: "Manufacturing",
 		})
 
