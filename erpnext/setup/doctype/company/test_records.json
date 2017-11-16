@@ -6,7 +6,7 @@
   "default_currency": "INR",
   "doctype": "Company",
   "domain": "Manufacturing",
-  "chart_of_accounts": "Standard",
+  "chart_of_accounts": "India - Chart of Accounts",
   "default_holiday_list": "_Test Holiday List"
  },
  {
@@ -16,7 +16,7 @@
   "default_currency": "USD",
   "doctype": "Company",
   "domain": "Retail",
-  "chart_of_accounts": "Standard",
+  "chart_of_accounts": "India - Chart of Accounts",
   "default_holiday_list": "_Test Holiday List"
  },
  {
@@ -26,7 +26,7 @@
   "country": "Germany",
   "doctype": "Company",
   "domain": "Retail",
-  "chart_of_accounts": "Standard",
+  "chart_of_accounts": "India - Chart of Accounts",
   "default_holiday_list": "_Test Holiday List"
  }
 ]
