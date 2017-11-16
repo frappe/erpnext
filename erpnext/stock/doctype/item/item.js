@@ -57,9 +57,19 @@ frappe.ui.form.on("Item", {
 				frappe.set_route("List", "Item", {"variant_of": frm.doc.name});
 			}, __("View"));
 
-			frm.add_custom_button(__("Variant"), function() {
-				erpnext.item.make_variant(frm);
-			}, __("Make"));
+			if(frm.doc.variant_based_on==="Item Attribute") {
+				frm.add_custom_button(__("Single Variant"), function() {
+					erpnext.item.show_single_variant_dialog(frm);
+				}, __("Make"));
+				frm.add_custom_button(__("Multiple Variants"), function() {
+					erpnext.item.show_multiple_variants_dialog(frm);
+				}, __("Make"));
+			} else {
+				frm.add_custom_button(__("Variant"), function() {
+					erpnext.item.show_modal_for_manufacturers(frm);
+				}, __("Make"));
+			}
+
 			frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 		if (frm.doc.variant_of) {
@@ -263,14 +273,6 @@ $.extend(erpnext.item, {
 		}
 	},
 
-	make_variant: function(frm) {
-		if(frm.doc.variant_based_on==="Item Attribute") {
-			erpnext.item.show_modal_for_item_attribute_selection(frm);
-		} else {
-			erpnext.item.show_modal_for_manufacturers(frm);
-		}
-	},
-
 	show_modal_for_manufacturers: function(frm) {
 		var dialog = new frappe.ui.Dialog({
 			fields: [
@@ -301,7 +303,146 @@ $.extend(erpnext.item, {
 		dialog.show();
 	},
 
-	show_modal_for_item_attribute_selection: function(frm) {
+	show_multiple_variants_dialog: function(frm) {
+		var me = this;
+
+		if(me.multiple_variant_dialog) {
+			me.multiple_variant_dialog.show();
+			return;
+		}
+
+		let promises = [];
+		let attr_val_fields = {};
+
+		function make_fields_from_attribute_values(attr_dict) {
+			let fields = [];
+			Object.keys(attr_dict).forEach((name, i) => {
+				if(i % 3 === 0){
+					fields.push({fieldtype: 'Section Break'});
+				}
+				fields.push({fieldtype: 'Column Break', label: name});
+				attr_dict[name].forEach(value => {
+					fields.push({
+						fieldtype: 'Check',
+						label: value,
+						fieldname: value,
+						default: 0,
+						onchange: function() {
+							let selected_attributes = get_selected_attributes();
+							let lengths = [];
+							Object.keys(selected_attributes).map(key => {
+								lengths.push(selected_attributes[key].length);
+							});
+							if(lengths.includes(0)) {
+								me.multiple_variant_dialog.get_primary_btn().html(__("Make Variants"));
+								me.multiple_variant_dialog.disable_primary_action();
+							} else {
+								let no_of_combinations = lengths.reduce((a, b) => a * b, 1);
+								me.multiple_variant_dialog.get_primary_btn()
+									.html(__(
+										`Make ${no_of_combinations} Variant
+										${no_of_combinations === 1 ? '' : 's'}`
+									));
+								me.multiple_variant_dialog.enable_primary_action();
+							}
+						}
+					});
+				});
+			});
+			return fields;
+		}
+
+		function make_and_show_dialog(fields) {
+			me.multiple_variant_dialog = new frappe.ui.Dialog({
+				title: __("Select Attribute Values"),
+				fields: [
+					{
+						fieldtype: "HTML",
+						fieldname: "help",
+						options: `<label class="control-label">
+							${__("Select at least one value from each of the attributes.")}
+						</label>`,
+					}
+				].concat(fields)
+			});
+
+			me.multiple_variant_dialog.set_primary_action(__("Make Variants"), () => {
+				let selected_attributes = get_selected_attributes();
+
+				me.multiple_variant_dialog.hide();
+				frappe.call({
+					method:"erpnext.controllers.item_variant.enqueue_multiple_variant_creation",
+					args: {
+						"item": frm.doc.name,
+						"args": selected_attributes
+					},
+					callback: function() {
+						frappe.show_alert({
+							message: __("Variant creation has been queued."),
+							indicator: 'orange'
+						});
+					}
+				});
+			});
+
+			$($(me.multiple_variant_dialog.$wrapper.find('.form-column'))
+				.find('.frappe-control')).css('margin-bottom', '0px');
+
+			me.multiple_variant_dialog.disable_primary_action();
+			me.multiple_variant_dialog.clear();
+			me.multiple_variant_dialog.show();
+		}
+
+		function get_selected_attributes() {
+			let selected_attributes = {};
+			me.multiple_variant_dialog.$wrapper.find('.form-column').each((i, col) => {
+				if(i===0) return;
+				let attribute_name = $(col).find('label').html();
+				selected_attributes[attribute_name] = [];
+				let checked_opts = $(col).find('.checkbox input');
+				checked_opts.each((i, opt) => {
+					if($(opt).is(':checked')) {
+						selected_attributes[attribute_name].push($(opt).attr('data-fieldname'));
+					}
+				});
+			});
+
+			return selected_attributes;
+		}
+
+		let attribute_names = frm.doc.attributes.map(d => d.attribute);
+
+		attribute_names.forEach(function(attribute) {
+			let p = new Promise(resolve => {
+				frappe.call({
+					method:"frappe.client.get_list",
+					args:{
+						doctype:"Item Attribute Value",
+						filters: [
+							["parent","=", attribute]
+						],
+						fields: ["attribute_value"]
+					}
+				}).then((r) => {
+					if(r.message) {
+						attr_val_fields[attribute] = r.message.map(function(d) { return d.attribute_value; });
+						resolve();
+					}
+				});
+			});
+
+			promises.push(p);
+
+		}, this);
+
+		Promise.all(promises).then(() => {
+			let fields = make_fields_from_attribute_values(attr_val_fields);
+			make_and_show_dialog(fields);
+		})
+
+	},
+
+	show_single_variant_dialog: function(frm) {
 		var fields = []
 
 		for(var i=0;i< frm.doc.attributes.length;i++){
