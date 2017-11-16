@@ -47,6 +47,12 @@ frappe.ui.form.on('Account', {
 			// show / hide convert buttons
 			frm.trigger('add_toolbar_buttons');
 		}
+
+		if(!frm.doc.__islocal) {
+			frm.add_custom_button(__('Update Account Number'), function () {
+				frm.trigger("update_account_number");
+			});
+		}
 	},
 	account_type: function (frm) {
 		if (frm.doc.is_group == 0) {
@@ -90,6 +96,46 @@ frappe.ui.form.on('Account', {
 				});
 			});
 		}
+	},
 
+	update_account_number: function(frm) {
+		var d = new frappe.ui.Dialog({
+			title: __('Update Account Number'),
+			fields: [
+				{
+					"label": "Account Number",
+					"fieldname": "account_number",
+					"fieldtype": "Data",
+					"reqd": 1
+				}
+			],
+			primary_action: function() {
+				var data = d.get_values();
+				if(data.account_number === frm.doc.account_number) {
+					d.hide();
+					return;
+				}
+
+				frappe.call({
+					method: "erpnext.accounts.doctype.account.account.update_account_number",
+					args: {
+						account_number: data.account_number,
+						name: frm.doc.name
+					},
+					callback: function(r) {
+						if(!r.exc) {
+							if(r.message) {
+								frappe.set_route("Form", "Account", r.message);
+							} else {
+								frm.set_value("account_number", data.account_number);
+							}
+							d.hide();
+						}
+					}
+				});
+			},
+			primary_action_label: __('Update')
+		});
+		d.show();
 	}
 });

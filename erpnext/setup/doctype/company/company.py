@@ -249,10 +249,10 @@ class Company(Document):
 			frappe.db.sql("""delete from `tabWarehouse` where company=%s""", self.name)
 
 		frappe.defaults.clear_default("company", value=self.name)
+		frappe.db.sql("delete from `tabMode of Payment Account` where company=%s", self.name)
 
 		# clear default accounts, warehouses from item
 		if warehouses:
-
 			for f in ["default_warehouse", "website_warehouse"]:
 				frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
 					% (f, f, ', '.join(['%s']*len(warehouses))), tuple(warehouses))

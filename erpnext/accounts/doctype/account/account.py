@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, fmt_money
+from frappe.utils import cint, cstr
 from frappe import throw, _
 from frappe.model.document import Document
 
@@ -20,18 +20,14 @@ class Account(Document):
 			self.set_onload("can_freeze_account", True)
 
 	def autoname(self):
-		# first validate if company exists
-		company = frappe.db.get_value("Company", self.company, ["abbr", "name"], as_dict=True)
-		if not company:
-			frappe.throw(_('Company {0} does not exist').format(self.company))
-
-		self.name = self.account_name.strip() + ' - ' + company.abbr
+		self.name = get_account_autoname(self.account_number, self.account_name, self.company)
 
 	def validate(self):
 		if frappe.local.flags.allow_unverified_charts:
 			return
 		self.validate_parent()
 		self.validate_root_details()
+		validate_account_number(self.name, self.account_number, self.company)
 		self.validate_group_or_ledger()
 		self.set_root_and_report_type()
 		self.validate_mandatory()
@@ -56,12 +52,15 @@ class Account(Document):
 
 	def set_root_and_report_type(self):
 		if self.parent_account:
-			par = frappe.db.get_value("Account", self.parent_account, ["report_type", "root_type"], as_dict=1)
+			par = frappe.db.get_value("Account", self.parent_account,
+				["report_type", "root_type", "account_type"], as_dict=1)
 
 			if par.report_type:
 				self.report_type = par.report_type
 			if par.root_type:
 				self.root_type = par.root_type
+			if par.account_type and not self.account_type:
+				self.account_type = par.account_type
 
 		if self.is_group:
 			db_value = frappe.db.get_value("Account", self.name, ["report_type", "root_type"], as_dict=1)
@@ -186,6 +185,7 @@ class Account(Document):
 		# Add company abbr if not provided
 		from erpnext.setup.doctype.company.company import get_name_with_abbr
 		new_account = get_name_with_abbr(new, self.company)
+		new_account = get_name_with_number(new_account, self.account_number)
 
 		# Validate properties before merging
 		if merge:
@@ -208,7 +208,25 @@ class Account(Document):
 		super(Account, self).after_rename(old, new, merge)
 
 		if not merge:
-			frappe.db.set_value("Account", new, "account_name", " - ".join(new.split(" - ")[:-1]))
+			new_acc = frappe.db.get_value("Account", new, ["account_name", "account_number"], as_dict=1)
+
+			# exclude company abbr
+			new_parts = new.split(" - ")[:-1]
+			# update account number and remove from parts
+			if new_parts[0][0].isdigit():
+				# if account number is separate by space, split using space
+				if len(new_parts) == 1:
+					new_parts = new.split(" ")
+				if new_acc.account_number != new_parts[0]:
+					self.account_number = new_parts[0]
+					self.db_set("account_number", new_parts[0])
+				new_parts = new_parts[1:]
+
+			# update account name
+			account_name = " - ".join(new_parts)
+			if new_acc.account_name != account_name:
+				self.account_name = account_name
+				self.db_set("account_name", account_name)
 
 def get_parent_account(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select name from tabAccount
@@ -229,3 +247,46 @@ def get_account_currency(account):
 		return account_currency
 
 	return frappe.local_cache("account_currency", account, generator)
+
+def get_account_autoname(account_number, account_name, company):
+	# first validate if company exists
+	company = frappe.db.get_value("Company", company, ["abbr", "name"], as_dict=True)
+	if not company:
+		frappe.throw(_('Company {0} does not exist').format(company))
+
+	parts = [account_name.strip(), company.abbr]
+	if cstr(account_number).strip():
+		parts.insert(0, cstr(account_number).strip())
+	return ' - '.join(parts)
+
+def validate_account_number(name, account_number, company):
+	if account_number:
+		account_with_same_number = frappe.db.get_value("Account",
+			{"account_number": account_number, "company": company, "name": ["!=", name]})
+		if account_with_same_number:
+			frappe.throw(_("Account Number {0} already used in account {1}")
+				.format(account_number, account_with_same_number))
+
+@frappe.whitelist()
+def update_account_number(name, account_number):
+	account = frappe.db.get_value("Account", name, ["account_name", "company"], as_dict=True)
+
+	validate_account_number(name, account_number, account.company)
+
+	frappe.db.set_value("Account", name, "account_number", account_number)
+
+	account_name = account.account_name
+	if account_name[0].isdigit():
+		separator = " - " if " - " in account_name else " "
+		account_name = account_name.split(separator, 1)[1]
+	frappe.db.set_value("Account", name, "account_name", account_name)
+
+	new_name = get_account_autoname(account_number, account_name, account.company)
+	if name != new_name:
+		frappe.rename_doc("Account", name, new_name)
+		return new_name
+
+def get_name_with_number(new_account, account_number):
+	if account_number and not new_account[0].isdigit():
+		new_account = account_number + " - " + new_account
+	return new_account
