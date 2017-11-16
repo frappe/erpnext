@@ -87,6 +87,22 @@ frappe.ui.form.on('Employee',{
 				frm.set_value("user_id", r.message)
 			}
 		});
+	},
+	validate: function(frm){
+		if(!frm.doc.__islocal) {
+			frappe.db.get_value('Employee', {'name': frm.docname}, 'reports_to', function(r) {
+				if(r.reports_to && r.reports_to != frm.doc.reports_to){
+					return frappe.call({
+						method: "erpnext.hr.doctype.employee.employee.set_has_subordinates",
+						args: {
+							'emp': r.reports_to,
+							'deleted_doc': frm.doc.name
+						},
+						callback: function() { }
+					});
+				}
+			});
+		}
 	}
 });
 cur_frm.cscript = new erpnext.hr.EmployeeController({frm: cur_frm});
