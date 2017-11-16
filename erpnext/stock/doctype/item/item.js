@@ -57,6 +57,10 @@ frappe.ui.form.on("Item", {
 				frappe.set_route("List", "Item", {"variant_of": frm.doc.name});
 			}, __("View"));
 
+			frm.add_custom_button(__("Variant Details Report"), function() {
+				frappe.set_route("query-report", "Item Variant Details", {"item": frm.doc.name});
+			}, __("View"));
+
 			if(frm.doc.variant_based_on==="Item Attribute") {
 				frm.add_custom_button(__("Single Variant"), function() {
 					erpnext.item.show_single_variant_dialog(frm);

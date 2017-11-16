@@ -268,6 +268,12 @@ def get_data():
 					"name": "Itemwise Recommended Reorder Level",
 					"doctype": "Item"
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Item Variant Details",
+					"doctype": "Item"
+				}
 			]
 		},
 		{
