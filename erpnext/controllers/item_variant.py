@@ -221,7 +221,6 @@ def generate_keyed_value_combinations(args):
 	results = [{d[0]: d[1]} for d in results]
 
 	# Iterate the remaining
-	import copy
 	# Take the next list to fuse with existing results
 	for l in key_value_lists:
 		new_results = []

@@ -424,7 +424,7 @@ $.extend(erpnext.item, {
 
 		}, this);
 
-		Promise.all(promises).then(values => {
+		Promise.all(promises).then(() => {
 			let fields = make_fields_from_attribute_values(attr_val_fields);
 			make_and_show_dialog(fields);
 		})
