@@ -20,7 +20,7 @@ def post_process(remote_doc=None, local_doc=None, **kwargs):
 	opportunity = frappe.get_doc({
 		'doctype': 'Opportunity',
 		'naming_series': 'OPTY-',
-		'enquiry_type': 'Sales',
+		'opportunity_type': 'Hub',
 		'enquiry_from': 'Lead',
 		'status': 'Open',
 		'lead': lead.name,

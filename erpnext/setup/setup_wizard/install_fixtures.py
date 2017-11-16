@@ -212,6 +212,11 @@ def install(country=None):
 		{'doctype': "Party Type", "party_type": "Supplier"},
 		{'doctype': "Party Type", "party_type": "Employee"},
 
+		{'doctype': "Opportunity Type", "name": "Hub"},
+		{'doctype': "Opportunity Type", "name": _("Sales")},
+		{'doctype': "Opportunity Type", "name": _("Support")},
+		{'doctype': "Opportunity Type", "name": _("Maintenance")},
+
 		{'doctype': "Project Type", "project_type": "Internal"},
 		{'doctype': "Project Type", "project_type": "External"},
 		{'doctype': "Project Type", "project_type": "Other"},

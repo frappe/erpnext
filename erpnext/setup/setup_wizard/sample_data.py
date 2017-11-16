@@ -38,7 +38,7 @@ def make_opportunity(items, customer):
 		"doctype": "Opportunity",
 		"enquiry_from": "Customer",
 		"customer": customer,
-		"enquiry_type": "Sales",
+		"opportunity_type": _("Sales"),
 		"with_items": 1
 	})
 
