@@ -189,7 +189,9 @@ def get_tax_accounts(item_list, columns, company_currency,
 
 	for parent, description, item_wise_tax_detail, charge_type, tax_amount in tax_details:
 		if description not in tax_columns and tax_amount:
-			tax_columns.append(description)
+			# as description is text editor earlier and markup can break the column convention in reports
+			from frappe.utils.xlsxutils import handle_html
+			tax_columns.append(handle_html(description))
 
 		if item_wise_tax_detail:
 			try:
