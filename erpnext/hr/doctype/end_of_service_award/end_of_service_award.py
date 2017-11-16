@@ -17,6 +17,7 @@ class EndofServiceAward(Document):
             if "Rejected" in self.workflow_state:
                 self.docstatus = 1
                 self.docstatus = 2
+        self.switch_workflow_transition()
         # frappe.throw(str(self.months))
 
     def get_salary(self,employee):
@@ -27,19 +28,25 @@ class EndofServiceAward(Document):
       else:
           frappe.throw(_("No salary slip found for this employee"))
 
-    def validate_emp(self):
+    def switch_workflow_transition(self):
         employee_user = frappe.get_value("Employee", filters = {"name": self.employee}, fieldname="user_id")
-        if self.get('__islocal') and employee_user:
-            if u'CEO' in frappe.get_roles(employee_user):
-                self.workflow_state = "Created By CEO"
-            elif u'Director' in frappe.get_roles(employee_user):
-                self.workflow_state = "Created By Director"
-            elif u'Manager' in frappe.get_roles(employee_user):
-                    self.workflow_state = "Created By Manager"
-            elif u'Line Manager' in frappe.get_roles(employee_user):
-                    self.workflow_state = "Created By Line Manager"
-            else:
-                self.workflow_state = "Pending"     
+        if hasattr(self,"workflow_state") and employee_user:
+            if self.workflow_state == "Approved By IT Support":
+                if u'Director' in frappe.get_roles(employee_user):
+                    self.workflow_state = "Approved By IT Support (CEO)"
+                elif u'Manager' in frappe.get_roles(employee_user):
+                    self.workflow_state = "Approved By IT Support (Dir.)"
+    def unallowed_actions(self):
+        if hasattr(self,"workflow_state"):
+            permitted_departments = frappe.db.sql_list("select for_value from `tabUser Permission` where allow = 'Department' and user = '{0}'".format(frappe.session.user))
+            if self.department not in permitted_departments and 'Manager' in frappe.get_roles(frappe.session.user) and self.workflow_state == "Approved By IT Support": 
+                return True
+            elif self.department not in permitted_departments and 'Director' in frappe.get_roles(frappe.session.user) and self.workflow_state == "Approved By IT Support (Dir.)": 
+                return True
+            elif self.workflow_state in ["Approved by Manager", "Approved By Director", "Approved By CEO"]:
+                employee_user = frappe.get_value("Employee", filters = {"name": self.employee}, fieldname="user_id")
+                if employee_user != frappe.session.user:
+                    return True
 
     # def get_salary(self,employee):
     #     start_date = get_first_day(getdate(nowdate()))

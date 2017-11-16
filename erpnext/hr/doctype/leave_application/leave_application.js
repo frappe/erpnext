@@ -84,7 +84,6 @@ frappe.ui.form.on("Leave Application", {
             freeze: true,
             callback: function(r) {
                 if (r.message && frappe.session.user != "Administrator") {  
-                    console.log(r.message);
                     frm.page.clear_actions_menu();
                 }
             }
