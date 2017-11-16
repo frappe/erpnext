@@ -124,6 +124,17 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
     },
     refresh: function(doc) {
 
+        frappe.call({
+            method: "unallowed_actions",
+            doc: cur_frm.doc,
+            freeze: true,
+            callback: function(r) {
+                if (r.message && frappe.session.user != "Administrator") {
+                    cur_frm.page.clear_actions_menu();
+                }
+            }
+        });
+
         for (var key in cur_frm.fields_dict) {
             cur_frm.fields_dict[key].df.read_only = 1;
         }

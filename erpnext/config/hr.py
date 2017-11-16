@@ -46,21 +46,21 @@ def get_data():
 					"description":_("May Concern Letter"),
 					"hide_count": True
 				},
-				# {
-				# 	"type": "doctype",
-				# 	"name": "Job Assignment",
-				# 	"description":_("Job Assignment"),
-				# },
-				# {
-				# 	"type": "doctype",
-				# 	"name": "Employee Loan",
-				# 	"description":_("Employee Loan"),
-				# },
-				# {
-				# 	"type": "doctype",
-				# 	"name": "Employee Loan Application",
-				# 	"description":_("Employee Loan Application"),
-				# },
+				{
+					"type": "doctype",
+					"name": "Job Assignment",
+					"description":_("Job Assignment"),
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Loan",
+					"description":_("Employee Loan"),
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Loan Application",
+					"description":_("Employee Loan Application"),
+				},
 				{
 					"type": "doctype",
 					"name": "End of Service Award",
@@ -71,11 +71,11 @@ def get_data():
 					"name": "Overtime Request",
 					"description":_("Overtime Request"),
 				},
-				# {
-				# 	"type": "doctype",
-				# 	"name": "Financial Custody",
-				# 	"description":_("Financial Custody"),
-				# },
+				{
+					"type": "doctype",
+					"name": "Financial Custody",
+					"description":_("Financial Custody"),
+				},
 				{
 					"type": "doctype",
 					"name": "Employee Resignation",
@@ -96,11 +96,11 @@ def get_data():
 				# # 	"name": "Outside Job",
 				# # 	"description":_("Outside Job")
 				# # },
-				# # {
-				# # 	"type": "doctype",
-				# # 	"name": "Promotion Decision",
-				# # 	"description":_("Promotion Decision	")
-				# # },
+				{
+					"type": "doctype",
+					"name": "Promotion Decision",
+					"description":_("Promotion Decision	")
+				},
 				{
 					"type": "doctype",
 					"name": "Employee Badge Request",
@@ -142,26 +142,26 @@ def get_data():
 				},
 			]
 		},
-		# {
-		# 	"label": _("Recruitment"),
-		# 	"items": [
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Job Applicant",
-		# 			"description": _("Applicant for a Job."),
-		# 		},
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Job Opening",
-		# 			"description": _("Opening for a Job."),
-		# 		},
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Offer Letter",
-		# 			"description": _("Offer candidate a Job."),
-		# 		},
-		# 	]
-		# },
+		{
+			"label": _("Recruitment"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Job Applicant",
+					"description": _("Applicant for a Job."),
+				},
+				{
+					"type": "doctype",
+					"name": "Job Opening",
+					"description": _("Opening for a Job."),
+				},
+				{
+					"type": "doctype",
+					"name": "Offer Letter",
+					"description": _("Offer candidate a Job."),
+				},
+			]
+		},
 		{
 			"label": _("Leaves and Holiday"),
 			"items": [
@@ -240,54 +240,54 @@ def get_data():
 
 			]
 		},
-		# {
-		# 	"label": _("Expense Claims"),
-		# 	"items": [
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Expense Claim",
-		# 			"description": _("Claims for company expense."),
-		# 		},
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Expense Claim Type",
-		# 			"description": _("Types of Expense Claim.")
-		# 		},
-		# 	]
-		# },
-		# {
-		# 	"label": _("Appraisals"),
-		# 	"items": [
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Appraisal",
-		# 			"description": _("Performance appraisal."),
-		# 		},
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Appraisal Template",
-		# 			"description": _("Template for performance appraisals.")
-		# 		},
-		# 	]
-		# },
+		{
+			"label": _("Expense Claims"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Expense Claim",
+					"description": _("Claims for company expense."),
+				},
+				{
+					"type": "doctype",
+					"name": "Expense Claim Type",
+					"description": _("Types of Expense Claim.")
+				},
+			]
+		},
+		{
+			"label": _("Appraisals"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Appraisal",
+					"description": _("Performance appraisal."),
+				},
+				{
+					"type": "doctype",
+					"name": "Appraisal Template",
+					"description": _("Template for performance appraisals.")
+				},
+			]
+		},
 
-		# {
-		# 	"label": _("Training"),
-		# 	"items": [
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Training Event"
-		# 		},
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Training Result"
-		# 		},
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Training Feedback"
-		# 		},
-		# 	]
-		# },
+		{
+			"label": _("Training"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Training Event"
+				},
+				{
+					"type": "doctype",
+					"name": "Training Result"
+				},
+				{
+					"type": "doctype",
+					"name": "Training Feedback"
+				},
+			]
+		},
 
 		{
 			"label": _("Setup"),
