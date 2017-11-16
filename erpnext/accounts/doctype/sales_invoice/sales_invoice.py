@@ -918,13 +918,6 @@ def make_delivery_note(source_name, target_doc=None):
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
-	    #PR : 10861, Author : ashish-greycube & jigneshpshah,  Email:mr.ashish.shah@gmail.com 
-		# Since the credit limit check is bypassed at sales order level, we need to check it at delivery note
-		bypass_credit_limit_check_at_sales_order = cint(frappe.db.get_value("Customer", source.customer, "bypass_credit_limit_check_at_sales_order"))
-		if bypass_credit_limit_check_at_sales_order == 1:
-			from erpnext.selling.doctype.customer.customer import check_credit_limit
-			check_credit_limit(source.customer, source.company)
-
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = flt(source_doc.qty) - flt(source_doc.delivered_qty)
 		target_doc.stock_qty = target_doc.qty * flt(source_doc.conversion_factor)
