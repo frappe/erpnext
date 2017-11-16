@@ -88,10 +88,11 @@ class Bin(Document):
 				and item.source_warehouse = %s
 				and pro.status not in ("Stopped", "Completed")''', (self.item_code, self.warehouse))[0][0]
 
-		self.set_projected_qty()
+		if self.reserved_qty_for_production:
+			self.set_projected_qty()
 
-		self.db_set('reserved_qty_for_production', self.reserved_qty_for_production)
-		self.db_set('projected_qty', self.projected_qty)
+			self.db_set('reserved_qty_for_production', self.reserved_qty_for_production)
+			self.db_set('projected_qty', self.projected_qty)
 
 
 def update_item_projected_qty(item_code):
