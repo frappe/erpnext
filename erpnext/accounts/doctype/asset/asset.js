@@ -2,7 +2,6 @@
 // For license information, please see license.txt
 
 frappe.provide("erpnext.asset");
-
 frappe.ui.form.on('Asset', {
 	onload: function(frm) {
 		frm.set_query("item_code", function() {
@@ -26,6 +25,11 @@ frappe.ui.form.on('Asset', {
 	},
 	
 	refresh: function(frm) {
+		cur_frm.cscript.item_code = function(doc, cdt, cdn) {
+			frm.set_value('asset_name',frm.doc.barcode);
+			refresh_field('asset_name');
+
+		}
 		frappe.ui.form.trigger("Asset", "is_existing_asset");
 		frm.toggle_display("next_depreciation_date", frm.doc.docstatus < 1);
 		frm.events.make_schedules_editable(frm);

@@ -120,6 +120,12 @@ class MaterialRequest(BuyingController):
 				else:
 					self.workflow_state = "Pending"
 
+	def unallowed_actions(self):
+		if self.state == "Rejected":
+			employee_user = frappe.get_value("Employee", filters = {"name": self.material_requester}, fieldname="user_id")
+			if employee_user != frappe.session.user:
+				return True
+
 	def after_insert(self):
 		self.validate_adding_mr()
 

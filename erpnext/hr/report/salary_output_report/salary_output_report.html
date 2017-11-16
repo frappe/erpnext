@@ -21,7 +21,7 @@
             <th style="width: 10%">{%= __("GOSI") %}</th>
 <!--             <th style="width: 10%">{%= __("Penalty") %}</th>
  -->            
-            <th style="width: 15%">{%= __("Loan Installment") %}</th>
+<!--             <th style="width: 15%">{%= __("Loan Installment") %}</th> -->
             <th style="width: 15%">{%= __("Total Deduction") %}</th>
             <th style="width: 10%">{%= __("Net Pay") %}</th>
 
@@ -61,7 +61,7 @@
  -->
      		
 
-            <td>{%=     (Number( data[i]["Loan Installment"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
+           <!--  <td>{%=     (Number( data[i]["Loan Installment"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td> -->
 
             <td>{%= 	(Number( data[i]["Total Deduction"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
             <td>{%= 	(Number( data[i]["Net Pay"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
