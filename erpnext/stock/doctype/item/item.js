@@ -326,6 +326,7 @@ $.extend(erpnext.item, {
 						fieldtype: 'Check',
 						label: value,
 						fieldname: value,
+						default: 0,
 						onchange: function() {
 							let selected_attributes = get_selected_attributes();
 							let lengths = [];
@@ -337,7 +338,11 @@ $.extend(erpnext.item, {
 								me.multiple_variant_dialog.disable_primary_action();
 							} else {
 								let no_of_combinations = lengths.reduce((a, b) => a * b, 1);
-								me.multiple_variant_dialog.get_primary_btn().html(__(`Make ${no_of_combinations} Variants`));
+								me.multiple_variant_dialog.get_primary_btn()
+									.html(__(
+										`Make ${no_of_combinations} Variant
+										${no_of_combinations === 1 ? '' : 's'}`
+									));
 								me.multiple_variant_dialog.enable_primary_action();
 							}
 						}
@@ -371,7 +376,12 @@ $.extend(erpnext.item, {
 						"item": frm.doc.name,
 						"args": selected_attributes
 					},
-					callback: function() {}
+					callback: function() {
+						frappe.show_alert({
+							message: __("Variant creation has been queued."),
+							indicator: 'orange'
+						});
+					}
 				});
 			});
 
@@ -379,6 +389,7 @@ $.extend(erpnext.item, {
 				.find('.frappe-control')).css('margin-bottom', '0px');
 
 			me.multiple_variant_dialog.disable_primary_action();
+			me.multiple_variant_dialog.clear();
 			me.multiple_variant_dialog.show();
 		}
 

@@ -172,7 +172,8 @@ def create_variant(item, args):
 @frappe.whitelist()
 def enqueue_multiple_variant_creation(item, args):
 	# There can be innumerable attribute combinations, enqueue
-	frappe.enqueue("erpnext.controllers.item_variant.create_multiple_variants", item=item, args=args);
+	frappe.enqueue("erpnext.controllers.item_variant.create_multiple_variants",
+		item=item, args=args, now=frappe.flags.in_test);
 
 def create_multiple_variants(item, args):
 	if isinstance(args, basestring):
