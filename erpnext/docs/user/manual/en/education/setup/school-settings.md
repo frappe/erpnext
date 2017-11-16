@@ -1,6 +1,6 @@
-#School Settings
+# Education Settings
 
-The education settings page allow you to setup basic settings like **Academic Year and Term** for the education setup. 
+The Education Settings page allow you to setup basic settings like **Academic Year and Term** for the educational setup. 
 
 <img class="screenshot" alt="Student" src="/docs/assets/img/education/student/education.png">
 

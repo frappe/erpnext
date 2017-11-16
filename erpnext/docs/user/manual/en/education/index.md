@@ -1,7 +1,7 @@
-# education
+# Education
 
 
-The School Modules in ERPNext is designed to meet requirements of education, Colleges & Educational Institutes. This is a centralized system, which maintains and updates all the activities related to an Institution. This will ease the process of each and every aspect of a School, be it Students, Admission, Examination and Fee.
+The Education Domain in ERPNext is designed to meet requirements of any educational Institute whether that is a school, college or any other private firm. ERPNext provides a centralized system, which can be used to maintain and update all the activities related to an Institution. It will provide a complete package for every funcationality required in any institute like Online Admission, Fees, Attendance, Examination.
 
 <img class="screenshot" alt="Fees Section" src="/docs/assets/img/education/module.png">
 
