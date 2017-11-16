@@ -10,6 +10,7 @@ from frappe.contacts.doctype.address.address import get_address_display
 from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import get_shopping_cart_settings
 from frappe.utils.nestedset import get_root_of
 from erpnext.accounts.utils import get_account_name
+from erpnext.utilities.product import get_qty_in_stock
 
 class WebsitePriceListMissingError(frappe.ValidationError): pass
 
@@ -61,6 +62,9 @@ def place_order():
 	sales_order = frappe.get_doc(_make_sales_order(quotation.name, ignore_permissions=True))
 	for item in sales_order.get("items"):
 		item.reserved_warehouse = frappe.db.get_value("Item", item.item_code, "website_warehouse") or None
+		item_stock = get_qty_in_stock(item.item_code, "website_warehouse")
+		if item.qty > item_stock.stock_qty[0][0]:
+			throw(_("Only {0} in stock for item {1}").format(item_stock.stock_qty[0][0], item.item_code))
 
 	sales_order.flags.ignore_permissions = True
 	sales_order.insert()
