@@ -7,7 +7,7 @@ cur_frm.add_fetch('employee', 'department', 'department');
 cur_frm.add_fetch("employee", "date_of_joining", "work_start_date");
 
 frappe.ui.form.on('End of Service Award', {
-    refresh: function() {
+    refresh: function(frm) {
         if (!cur_frm.doc.__islocal) {
             for (var key in cur_frm.fields_dict) {
                 cur_frm.fields_dict[key].df.read_only = 1;
@@ -16,7 +16,16 @@ frappe.ui.form.on('End of Service Award', {
         } else {
             cur_frm.enable_save();
         }
-
+        frappe.call({
+            method: "unallowed_actions",
+            doc: frm.doc,
+            freeze: true,
+            callback: function(r) {
+                if (r.message && frappe.session.user != "Administrator") {
+                    frm.page.clear_actions_menu();
+                }
+            }
+        });
         cur_frm.add_fetch("employee", "employment_type", "type_of_contract");
         if (cur_frm.doc.employee) {
             if (cur_frm.doc.type_of_contract == "Contractor") {
