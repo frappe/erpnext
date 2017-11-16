@@ -12,7 +12,7 @@ class Instructor(Document):
 	def autoname(self):
 		naming_method = frappe.db.get_value("School Settings", None, "instructor_created_by")
 		if not naming_method:
-			frappe.throw(_("Please setup Instructor Naming System in School > School Settings"))
+			frappe.throw(_("Please setup Instructor Naming System in Education > School Settings"))
 		else:
 			if naming_method == 'Naming Series':
 				self.name = make_autoname(self.naming_series + '.####')

@@ -107,7 +107,7 @@ def make_projects(domain):
 	if domain == 'Education':
 		tasks += [
 			{
-				"title": _("Setup your School in ERPNext"),
+				"title": _("Setup your Institute in ERPNext"),
 				"start_date": current_date,
 				"end_date": frappe.utils.add_days(current_date, 1),
 				"file": "school_masters.md"
