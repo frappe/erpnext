@@ -598,7 +598,7 @@ class SalesInvoice(SellingController):
 			if update_outstanding == "No":
 				from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 				update_outstanding_amt(self.debit_to, "Customer", self.customer,
-					self.doctype, self.return_against if cint(self.is_return) else self.name)
+					self.doctype, self.return_against if cint(self.is_return) and self.return_against else self.name)
 
 			if repost_future_gle and cint(self.update_stock) \
 				and cint(auto_accounting_for_stock):
@@ -646,7 +646,7 @@ class SalesInvoice(SellingController):
 					"debit": grand_total_in_company_currency,
 					"debit_in_account_currency": grand_total_in_company_currency \
 						if self.party_account_currency==self.company_currency else self.grand_total,
-					"against_voucher": self.return_against if cint(self.is_return) else self.name,
+					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype
 				}, self.party_account_currency)
 			)
@@ -713,7 +713,7 @@ class SalesInvoice(SellingController):
 							"credit_in_account_currency": payment_mode.base_amount \
 								if self.party_account_currency==self.company_currency \
 								else payment_mode.amount,
-							"against_voucher": self.return_against if cint(self.is_return) else self.name,
+							"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 							"against_voucher_type": self.doctype,
 						}, self.party_account_currency)
 					)
@@ -742,7 +742,7 @@ class SalesInvoice(SellingController):
 						"debit": flt(self.base_change_amount),
 						"debit_in_account_currency": flt(self.base_change_amount) \
 							if self.party_account_currency==self.company_currency else flt(self.change_amount),
-						"against_voucher": self.return_against if cint(self.is_return) else self.name,
+						"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 						"against_voucher_type": self.doctype
 					}, self.party_account_currency)
 				)
@@ -772,7 +772,7 @@ class SalesInvoice(SellingController):
 					"credit": self.base_write_off_amount,
 					"credit_in_account_currency": self.base_write_off_amount \
 						if self.party_account_currency==self.company_currency else self.write_off_amount,
-					"against_voucher": self.return_against if cint(self.is_return) else self.name,
+					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype
 				}, self.party_account_currency)
 			)
@@ -961,7 +961,7 @@ def make_delivery_note(source_name, target_doc=None):
 	return doclist
 
 @frappe.whitelist()
-def make_sales_return(source_name, target_doc=None):
+def make_sales_return(source_name=None, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 	return make_return_doc("Sales Invoice", source_name, target_doc)
 

@@ -328,7 +328,7 @@ class PurchaseInvoice(BuyingController):
 
 			if update_outstanding == "No":
 				update_outstanding_amt(self.credit_to, "Supplier", self.supplier,
-					self.doctype, self.return_against if cint(self.is_return) else self.name)
+					self.doctype, self.return_against if cint(self.is_return) and self.return_against else self.name)
 
 			if repost_future_gle and cint(self.update_stock) and self.auto_accounting_for_stock:
 				from erpnext.controllers.stock_controller import update_gl_entries_after
@@ -372,7 +372,7 @@ class PurchaseInvoice(BuyingController):
 					"credit": grand_total_in_company_currency,
 					"credit_in_account_currency": grand_total_in_company_currency \
 						if self.party_account_currency==self.company_currency else self.grand_total,
-					"against_voucher": self.return_against if cint(self.is_return) else self.name,
+					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
 				}, self.party_account_currency)
 			)
@@ -541,7 +541,7 @@ class PurchaseInvoice(BuyingController):
 					"debit": self.base_paid_amount,
 					"debit_in_account_currency": self.base_paid_amount \
 						if self.party_account_currency==self.company_currency else self.paid_amount,
-					"against_voucher": self.return_against if cint(self.is_return) else self.name,
+					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
 				}, self.party_account_currency)
 			)
@@ -571,7 +571,7 @@ class PurchaseInvoice(BuyingController):
 					"debit": self.base_write_off_amount,
 					"debit_in_account_currency": self.base_write_off_amount \
 						if self.party_account_currency==self.company_currency else self.write_off_amount,
-					"against_voucher": self.return_against if cint(self.is_return) else self.name,
+					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
 				}, self.party_account_currency)
 			)
@@ -606,7 +606,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.update_status_updater_args()
 
-		if not self.is_return:
+		if not (self.is_return and self.return_against):
 			from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 			if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
 				unlink_ref_doc_from_payment_entries(self)
@@ -688,7 +688,7 @@ class PurchaseInvoice(BuyingController):
 		self.due_date = None
 
 @frappe.whitelist()
-def make_debit_note(source_name, target_doc=None):
+def make_debit_note(source_name=None, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 	return make_return_doc("Purchase Invoice", source_name, target_doc)
 

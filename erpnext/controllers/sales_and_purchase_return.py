@@ -12,41 +12,43 @@ def validate_return(doc):
 	if not doc.meta.get_field("is_return") or not doc.is_return:
 		return
 
-	validate_return_against(doc)
+	# Do not allow updating of stock if it is a Standalone Credit Note or Standalone Debit Note
+	if not doc.return_against and doc.update_stock:
+		frappe.throw(_("If {0} is selected, {1} is mandatory for Return").format(doc.meta.get_label("update_stock"), doc.meta.get_label("return_against")))
+	elif doc.return_against:
+		validate_return_against(doc)
+
 	validate_returned_items(doc)
 
 def validate_return_against(doc):
-	if not doc.return_against:
-		frappe.throw(_("{0} is mandatory for Return").format(doc.meta.get_label("return_against")))
+	filters = {"doctype": doc.doctype, "docstatus": 1, "company": doc.company}
+	if doc.meta.get_field("customer"):
+		filters["customer"] = doc.customer
+	elif doc.meta.get_field("supplier"):
+		filters["supplier"] = doc.supplier
+
+	if not frappe.db.exists(filters):
+			frappe.throw(_("Invalid {0}: {1}")
+				.format(doc.meta.get_label("return_against"), doc.return_against))
 	else:
-		filters = {"doctype": doc.doctype, "docstatus": 1, "company": doc.company}
-		if doc.meta.get_field("customer"):
-			filters["customer"] = doc.customer
-		elif doc.meta.get_field("supplier"):
-			filters["supplier"] = doc.supplier
+		ref_doc = frappe.get_doc(doc.doctype, doc.return_against)
 
-		if not frappe.db.exists(filters):
-				frappe.throw(_("Invalid {0}: {1}")
-					.format(doc.meta.get_label("return_against"), doc.return_against))
-		else:
-			ref_doc = frappe.get_doc(doc.doctype, doc.return_against)
+		# validate posting date time
+		return_posting_datetime = "%s %s" % (doc.posting_date, doc.get("posting_time") or "00:00:00")
+		ref_posting_datetime = "%s %s" % (ref_doc.posting_date, ref_doc.get("posting_time") or "00:00:00")
 
-			# validate posting date time
-			return_posting_datetime = "%s %s" % (doc.posting_date, doc.get("posting_time") or "00:00:00")
-			ref_posting_datetime = "%s %s" % (ref_doc.posting_date, ref_doc.get("posting_time") or "00:00:00")
+		if get_datetime(return_posting_datetime) < get_datetime(ref_posting_datetime):
+			frappe.throw(_("Posting timestamp must be after {0}").format(format_datetime(ref_posting_datetime)))
 
-			if get_datetime(return_posting_datetime) < get_datetime(ref_posting_datetime):
-				frappe.throw(_("Posting timestamp must be after {0}").format(format_datetime(ref_posting_datetime)))
+		# validate same exchange rate
+		if doc.conversion_rate != ref_doc.conversion_rate:
+			frappe.throw(_("Exchange Rate must be same as {0} {1} ({2})")
+				.format(doc.doctype, doc.return_against, ref_doc.conversion_rate))
 
-			# validate same exchange rate
-			if doc.conversion_rate != ref_doc.conversion_rate:
-				frappe.throw(_("Exchange Rate must be same as {0} {1} ({2})")
-					.format(doc.doctype, doc.return_against, ref_doc.conversion_rate))
-
-			# validate update stock
-			if doc.doctype == "Sales Invoice" and doc.update_stock and not ref_doc.update_stock:
-					frappe.throw(_("'Update Stock' can not be checked because items are not delivered via {0}")
-						.format(doc.return_against))
+		# validate update stock
+		if doc.doctype == "Sales Invoice" and doc.update_stock and not ref_doc.update_stock:
+			frappe.throw(_("'Update Stock' can not be checked because items are not delivered via {0}")
+				.format(doc.return_against))
 
 def validate_returned_items(doc):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -76,12 +78,12 @@ def validate_returned_items(doc):
 	items_returned = False
 	for d in doc.get("items"):
 		if flt(d.qty) < 0 or d.get('received_qty') < 0:
-			if d.item_code not in valid_items:
+			if d.item_code not in valid_items and doc.return_against:
 				frappe.throw(_("Row # {0}: Returned Item {1} does not exists in {2} {3}")
 					.format(d.idx, d.item_code, doc.doctype, doc.return_against))
-			else:
+			elif doc.return_against:
 				ref = valid_items.get(d.item_code, frappe._dict())
-				validate_quantity(doc, d, ref, valid_items, already_returned_items)
+				validate_quantity(doc, d, ref, valid_items, already_returned_items, warehouse_mandatory)
 				
 				if ref.rate and doc.doctype in ("Delivery Note", "Sales Invoice") and flt(d.rate) > ref.rate:
 					frappe.throw(_("Row # {0}: Rate cannot be greater than the rate used in {1} {2}")
@@ -108,9 +110,9 @@ def validate_returned_items(doc):
 			items_returned = True
 
 	if not items_returned:
-		frappe.throw(_("Atleast one item should be entered with negative quantity in return document"))
+		frappe.throw(_("At least one item should be entered with negative quantity in return document"))
 
-def validate_quantity(doc, args, ref, valid_items, already_returned_items):
+def validate_quantity(doc, args, ref, valid_items, already_returned_items, warehouse_mandatory):
 	fields = ['qty']
 	if doc.doctype in ['Purchase Receipt', 'Purchase Invoice']:
 		fields.extend(['received_qty', 'rejected_qty'])
@@ -125,10 +127,12 @@ def validate_quantity(doc, args, ref, valid_items, already_returned_items):
 		if reference_qty:	
 			if flt(args.get(column)) > 0:
 				frappe.throw(_("{0} must be negative in return document").format(label))
-			elif returned_qty >= reference_qty and args.get(column):
+			# Perform return quantity checking only if stock requires updating
+			elif returned_qty >= reference_qty and args.get(column) and warehouse_mandatory:
 				frappe.throw(_("Item {0} has already been returned")
 					.format(args.item_code), StockOverReturnError)
-			elif abs(args.get(column)) > max_returnable_qty:
+			# Perform return quantity checking only if stock requires updating
+			elif abs(args.get(column)) > max_returnable_qty and warehouse_mandatory:
 				frappe.throw(_("Row # {0}: Cannot return more than {1} for Item {2}")
 					.format(args.idx, reference_qty, args.item_code), StockOverReturnError)
 
@@ -256,22 +260,39 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.dn_detail = source_doc.dn_detail
 			target_doc.expense_account = source_doc.expense_account
 
-	doclist = get_mapped_doc(doctype, source_name,	{
-		doctype: {
-			"doctype": doctype,
+	if source_name == None or source_name == "":
+		doclist = frappe.new_doc(doctype)
 
-			"validation": {
-				"docstatus": ["=", 1],
-			}
-		},
-		doctype +" Item": {
-			"doctype": doctype + " Item",
-			"field_map": {
-				"serial_no": "serial_no",
-				"batch_no": "batch_no"
+		if doctype == "Sales Invoice":
+			print_heading = frappe.db.get_value("Print Heading", _("Credit Note"))
+
+		elif doctype == "Purchase Invoice":
+			print_heading = frappe.db.get_value("Print Heading", _("Debit Note"))
+
+		doclist.update({
+			"is_return": 1,
+			"ignore_pricing_rule": 1,
+			"update_stock": 0,
+			"select_print_heading": print_heading
+		})
+
+	else:
+		doclist = get_mapped_doc(doctype, source_name,  {
+			doctype: {
+				"doctype": doctype,
+
+				"validation": {
+					"docstatus": ["=", 1],
+				}
 			},
-			"postprocess": update_item
-		},
-	}, target_doc, set_missing_values)
+			doctype +" Item": {
+				"doctype": doctype + " Item",
+				"field_map": {
+					"serial_no": "serial_no",
+					"batch_no": "batch_no"
+				},
+				"postprocess": update_item
+			},
+		}, target_doc, set_missing_values)
 
 	return doclist
