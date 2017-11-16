@@ -1505,11 +1505,15 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			me.make_menu_list()
 		}, "fa fa-plus")
 
-		if (this.frm.doc.docstatus == 1) {
+		if (this.frm.doc.docstatus == 1 || this.pos_profile_data["allow_print_before_pay"]) {
 			this.page.set_secondary_action(__("Print"), function () {
+				me.create_invoice();
 				var html = frappe.render(me.print_template_data, me.frm.doc)
 				me.print_document(html)
 			})
+		}
+		
+		if (this.frm.doc.docstatus == 1) {	
 			this.page.add_menu_item(__("Email"), function () {
 				me.email_prompt()
 			})
