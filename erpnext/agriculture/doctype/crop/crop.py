@@ -7,4 +7,12 @@ import frappe
 from frappe.model.document import Document
 
 class Crop(Document):
-	pass
+	def validate(self):
+		max_period = 0
+		for task in self.agriculture_task:
+			# validate start_day is not > end_day
+			if task.start_day > task.end_day:
+				frappe.throw("Start day is greater than end day in task '{0}'".format(task.subject))
+			# to calculate the period of the Crop Cycle
+			if task.end_day > max_period: max_period = task.end_day
+		self.period = max_period
