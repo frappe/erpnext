@@ -30,5 +30,5 @@ def execute():
 
 	# fixtures
 	for name in ('Hub', _('Sales'), _('Support'), _('Maintenance')):
-		if not frappe.db.exists('Opportunity', name):
+		if not frappe.db.exists('Opportunity Type', name):
 			frappe.get_doc(dict(doctype = 'Opportunity Type', name=name)).insert()
