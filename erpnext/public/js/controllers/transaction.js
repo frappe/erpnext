@@ -1149,7 +1149,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 			if (item.warehouse) filters["warehouse"] = item.warehouse;
 
-			return s
+			return {
 				query : "erpnext.controllers.queries.get_batch_no",
 				filters: filters
 			}
