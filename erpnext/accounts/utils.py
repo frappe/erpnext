@@ -257,6 +257,8 @@ def add_ac(args=None):
 	if cint(ac.get("is_root")):
 		ac.parent_account = None
 		ac.flags.ignore_mandatory = True
+	else:
+		ac.root_type = None
 
 	ac.insert()
 
