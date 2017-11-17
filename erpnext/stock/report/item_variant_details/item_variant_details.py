@@ -82,8 +82,11 @@ def get_open_sales_orders_map(variants):
 		from
 			`tabSales Order Item`
 		where
-			qty > delivered_qty and
+			docstatus = 1 and
+			qty > ifnull(delivered_qty, 0) and
 			item_code in ({variants})
+		group by
+			item_code
 	""".format(variants=variants), as_dict=1)
 
 	order_count_map = {}
@@ -103,6 +106,8 @@ def get_stock_details_map(variants):
 			`tabBin`
 		where
 			item_code in ({variants})
+		group by
+			item_code
 	""".format(variants=variants), as_dict=1)
 
 	stock_details_map = {}
@@ -125,6 +130,8 @@ def get_buying_price_map(variants):
 			`tabItem Price`
 		where
 			item_code in ({variants}) and buying=1
+		group by
+			item_code
 		""".format(variants=variants), as_dict=1)
 
 	buying_price_map = {}
@@ -142,6 +149,8 @@ def get_selling_price_map(variants):
 			`tabItem Price`
 		where
 			item_code in ({variants}) and selling=1
+		group by
+			item_code
 		""".format(variants=variants), as_dict=1)
 
 	selling_price_map = {}
@@ -152,12 +161,13 @@ def get_selling_price_map(variants):
 
 def get_attribute_values_map(variants):
 	list_attr = frappe.db.sql("""
-	select
-		attribute, attribute_value, parent
-    from
-		`tabItem Variant Attribute`
-    where
-		parent in ({variants})""".format(variants=variants), as_dict=1)
+		select
+			attribute, attribute_value, parent
+		from
+			`tabItem Variant Attribute`
+		where
+			parent in ({variants})
+		""".format(variants=variants), as_dict=1)
 
 	attr_val_map = {}
 	for d in list_attr:
