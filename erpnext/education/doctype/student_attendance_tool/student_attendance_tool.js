@@ -1,6 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-frappe.provide("education")
+frappe.provide("education");
 
 frappe.ui.form.on('Student Attendance Tool', {
 	onload: function(frm) {
@@ -64,12 +64,12 @@ frappe.ui.form.on('Student Attendance Tool', {
 				.appendTo(frm.fields_dict.students_html.wrapper);
 		}
 		students = students || [];
-		frm.students_editor = new Education.StudentsEditor(frm, frm.students_area, students)
+		frm.students_editor = new education.StudentsEditor(frm, frm.students_area, students);
 	}
 });
 
 
-Education.StudentsEditor = Class.extend({
+education.StudentsEditor = Class.extend({
 	init: function(frm, wrapper, students) {
 		this.wrapper = wrapper;
 		this.frm = frm;

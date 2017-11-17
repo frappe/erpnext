@@ -3,12 +3,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
 
+import frappe
 from erpnext.setup.utils import insert_record
 
 
-from frappe import _
 def setup_education():
 	if frappe.db.exists('Academic Year', '2015-16'):
 		# already setup

@@ -13,7 +13,7 @@ def execute():
 		"Student Group Instructor", "Student Attendance", "Student", "Student Batch Name"]:
 		# 'Schools' module changed to the 'Education'
 		# frappe.reload_doc("schools", "doctype", frappe.scrub(doctype))
-		
+
 		frappe.reload_doc("education", "doctype", frappe.scrub(doctype))
 
 	if frappe.db.table_exists("Student Batch"):
