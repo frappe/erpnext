@@ -66,9 +66,9 @@ class AccountsController(TransactionBase):
 			if cint(is_paid) == 1:
 				if flt(self.paid_amount) == 0 and flt(self.outstanding_amount) > 0:
 					if self.cash_bank_account:
-						self.paid_amount = flt(flt(self.grand_total) - flt(self.write_off_amount),
-							self.precision("paid_amount"))
-						self.base_paid_amount = flt(self.paid_amount * self.conversion_rate, self.precision("base_paid_amount"))
+						self.paid_amount = flt(flt(self.outstanding_amount), self.precision("paid_amount"))
+						self.base_paid_amount = flt(self.paid_amount * self.conversion_rate,
+							self.precision("base_paid_amount"))
 					else:
 						# show message that the amount is not paid
 						self.paid_amount = 0
@@ -597,6 +597,12 @@ class AccountsController(TransactionBase):
 
 		for item in duplicate_list:
 			self.remove(item)
+
+	def is_rounded_total_disabled(self):
+		if self.meta.get_field("disable_rounded_total"):
+			return self.disable_rounded_total
+		else:
+			return frappe.db.get_single_value("Global Defaults", "disable_rounded_total")
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
