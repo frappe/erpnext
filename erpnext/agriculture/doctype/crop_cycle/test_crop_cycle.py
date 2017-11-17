@@ -6,32 +6,35 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 
+test_dependencies = ["Crop", "Fertilizer", "Land Unit", "Pest"]
+
 class TestCropCycle(unittest.TestCase):
 	def test_crop_cycle_creation(self):
-		# create crop cycle
-		create_list = [
-			{
-				'doctype': 'Crop Cycle',
-				'title': 'Basil from seed 2017',
-				'land_unit': 'Basil Farm',
-				'crop': 'Basil',
-				'start_date': '2017-11-11',
-				'detected_pest': [{
-					'pest': 'Aphids',
-					'start_date': '2017-11-21'
-				}]
-			}
-		]
+		# # create crop cycle
+		# create_list = [
+		# 	{
+		# 		'doctype': 'Crop Cycle',
+		# 		'title': 'Basil from seed 2017',
+		# 		'land_unit': 'Basil Farm',
+		# 		'crop': 'Basil',
+		# 		'start_date': '2017-11-11',
+		# 		'detected_pest': [{
+		# 			'pest': 'Aphids',
+		# 			'start_date': '2017-11-21'
+		# 		}]
+		# 	}
+		# ]
 
-		for x in create_list:
-			doc = frappe.get_doc(x)
-			doc.save()
+		# for x in create_list:
+		# 	doc = frappe.get_doc(x)
+		# 	doc.save()
 		
 		cycle = frappe.get_doc('Crop Cycle', 'Basil from seed 2017')
 		self.assertEquals(frappe.db.exists('Crop Cycle', 'Basil from seed 2017'), 'Basil from seed 2017')
 
 		# check if the tasks were created 
 		self.assertEquals(check_task_creation(), True)
+		self.assertEquals(check_project_creation(), True)
 
 def check_task_creation():
 	all_task_dict = {
@@ -68,7 +71,7 @@ def check_task_creation():
 			"exp_end_date": frappe.utils.datetime.date(2017,11,25)
 		}
 	}
-	all_tasks = frappe.get_all('Task');
+	all_tasks = frappe.get_all('Task')
 	for task in all_tasks:
 		sample_task = frappe.get_doc('Task', task.name)
 		if sample_task.subject in all_task_dict.keys():
@@ -78,3 +81,7 @@ def check_task_creation():
 	if all_task_dict != {}:
 		return False
 	return True
+
+def check_project_creation():
+	if frappe.db.exists('Project', 'Basil from seed 2017'): return True
+	else: return False

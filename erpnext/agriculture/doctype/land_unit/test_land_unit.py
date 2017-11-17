@@ -7,4 +7,5 @@ import frappe
 import unittest
 
 class TestLandUnit(unittest.TestCase):
-	pass
+	def test_texture_selection(self):
+		self.assertEquals(frappe.db.exists('Land Unit', 'Basil Farm'), 'Basil Farm')

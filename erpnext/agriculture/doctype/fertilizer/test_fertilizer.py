@@ -8,22 +8,22 @@ import unittest
 
 class TestFertilizer(unittest.TestCase):
 	def test_fertilizer_creation(self):
-		create_list = [
-			{
-				'doctype': 'Item',
-				'item_code': 'Urea',
-				'item_name': 'Urea',
-				'item_group': 'Fertilizer'
-			},
-			{
-				'doctype': 'Fertilizer',
-				'fertilizer_name': 'Urea',
-				'item': 'Urea'
-			}
-		]
+		# create_list = [
+		# 	{
+		# 		'doctype': 'Item',
+		# 		'item_code': 'Urea',
+		# 		'item_name': 'Urea',
+		# 		'item_group': 'Fertilizer'
+		# 	},
+		# 	{
+		# 		'doctype': 'Fertilizer',
+		# 		'fertilizer_name': 'Urea',
+		# 		'item': 'Urea'
+		# 	}
+		# ]
 
-		for x in create_list:
-			doc = frappe.get_doc(x)
-			doc.save()
+		# for x in create_list:
+		# 	doc = frappe.get_doc(x)
+		# 	doc.save()
 		
 		self.assertEquals(frappe.db.exists('Fertilizer', 'Urea'), 'Urea')
