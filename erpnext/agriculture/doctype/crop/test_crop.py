@@ -7,6 +7,13 @@ import frappe
 import unittest
 
 class TestCrop(unittest.TestCase):
+	def test_period(self):
+		create_crop()
+
+		basil = frappe.get_doc('Crop', 'Basil')
+		self.assertEquals(basil.period, 15)
+
+def create_crop():
 	create_list = [
 		{
 			'doctype': 'Item',
@@ -91,5 +98,3 @@ class TestCrop(unittest.TestCase):
 		doc = frappe.get_doc(x)
 		doc.save()
 	
-	basil = frappe.get_doc('Crop', 'Basil')
-	self.assertEquals(basil.period, 15)

@@ -7,16 +7,16 @@ import frappe
 from frappe.model.document import Document
 
 class SoilTexture(Document):
-	soil_edit_order = [0,1,2]
+	soil_edit_order = [2, 1, 0]
 	soil_types = ['clay_composition', 'sand_composition', 'silt_composition']
 
 	def validate(self):
+		self.update_soil_edit('sand_composition')
 		for soil_type in self.soil_types:
 			if self.get(soil_type) > 100 or self.get(soil_type) < 0:
 				frappe.throw("{0} should be a value between 0 and 100".format(soil_type))
 		if sum(self.get(soil_type) for soil_type in self.soil_types) != 100:
 			frappe.throw('Soil compositions do not add up to 100')
-		self.update_soil_edit('clay_composition')
 
 	def update_soil_edit(self, soil_type):
 		self.soil_edit_order[self.soil_types.index(soil_type)] = max(self.soil_edit_order)+1
