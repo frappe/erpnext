@@ -65,6 +65,9 @@ $.extend(shopping_cart, {
 
 	set_cart_count: function() {
 		var cart_count = getCookie("cart_count");
+		if(frappe.session.user==="Guest") {
+			cart_count = 0;
+		}
 
 		if(cart_count) {
 			$(".shopping-cart").toggleClass('hidden', false);
