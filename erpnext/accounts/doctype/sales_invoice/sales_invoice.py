@@ -632,7 +632,7 @@ class SalesInvoice(SellingController):
 		return gl_entries
 
 	def make_customer_gl_entry(self, gl_entries):
-    grand_total = self.rounded_total or self.grand_total
+		grand_total = self.rounded_total or self.grand_total
 		if self.get("payment_schedule"):
 			for d in self.get("payment_schedule"):
 				payment_amount_in_company_currency = flt(d.payment_amount * self.conversion_rate,
