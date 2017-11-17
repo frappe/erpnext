@@ -8,7 +8,7 @@ QUnit.test("test Shipping Rule", function(assert) {
 			return frappe.tests.make("Shipping Rule", [
 				{label: "Next Day Shipping"},
 				{shipping_rule_type: "Selling"},
-				{fixed_shipping_amount: 0},
+				{calculate_based_on: 'Net Total'},
 				{conditions:[
 					[
 						{from_value:1},

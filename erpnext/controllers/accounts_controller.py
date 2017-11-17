@@ -302,41 +302,23 @@ class AccountsController(TransactionBase):
 	def apply_shipping_rule(self):
 		if self.shipping_rule:
 			shipping_rule = frappe.get_doc("Shipping Rule", self.shipping_rule)
-			value = self.base_net_total
+			shipping_rule.apply(self)
+			self.calculate_taxes_and_totals()
 
-			# TODO
-			# shipping rule calculation based on item's net weight
+	def get_shipping_address(self):
+		'''Returns Address object from shipping address fields if present'''
 
-			shipping_amount = 0.0
-			if shipping_rule.fixed_shipping_amount:
-				shipping_amount = shipping_rule.shipping_amount
-			for condition in shipping_rule.get("conditions"):
-				if not condition.to_value or (flt(condition.from_value) <= value <= flt(condition.to_value)):
-					shipping_amount = condition.shipping_amount
-					break
+		# shipping address fields can be `shipping_address_name` or `shipping_address`
+		# try getting value from both
 
-			shipping_charge = {
-				"charge_type": "Actual",
-				"account_head": shipping_rule.account,
-				"cost_center": shipping_rule.cost_center
-			}
-			if shipping_rule.shipping_rule_type == "Selling":
-				shipping_charge["doctype"] = "Sales Taxes and Charges"
-			else:
-				shipping_charge["doctype"] = "Purchase Taxes and Charges"
-				shipping_charge["category"] = "Valuation and Total"
-				shipping_charge["add_deduct_tax"] = "Add"
+		for fieldname in ('shipping_address_name', 'shipping_address'):
+			shipping_field = self.meta.get_field(fieldname)
+			if shipping_field and shipping_field.fieldtype == 'Link':
+				if self.get(fieldname):
+					return frappe.get_doc('Address', self.get(fieldname))
 
-			existing_shipping_charge = self.get("taxes", filters=shipping_charge)
-			if existing_shipping_charge:
-				# take the last record found
-				existing_shipping_charge[-1].tax_amount = shipping_amount
-			else:
-				shipping_charge["tax_amount"] = shipping_amount
-				shipping_charge["description"] = shipping_rule.label
-				self.append("taxes", shipping_charge)
+		return {}
 
-				self.calculate_taxes_and_totals()
 
 	def get_advance_entries(self, include_unallocated=True):
 		if self.doctype == "Sales Invoice":

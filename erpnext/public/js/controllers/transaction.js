@@ -564,7 +564,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						me.calculate_taxes_and_totals();
 					}
 				}
-			})
+			}).fail(() => this.frm.set_value('shipping_rule', ''));
 		}
 	},
 

@@ -6,7 +6,13 @@ import frappe
 
 def execute():
 	frappe.reload_doctype("Shipping Rule")
-	for record in frappe.get_all("Shipping Rule"):
-		doc = frappe.get_doc("Shipping Rule", record)
-		if not doc.shipping_rule_type:
-			frappe.db.set_value("Shipping Rule", record, "shipping_rule_type", "Selling")
+
+	# default "calculate_based_on"
+	frappe.db.sql('''update `tabShipping Rule`
+		set calculate_based_on = "Net Weight"
+		where ifnull(calculate_based_on, '') = '' ''')
+
+	# default "shipping_rule_type"
+	frappe.db.sql('''update `tabShipping Rule`
+		set shipping_rule_type = "Selling"
+		where ifnull(shipping_rule_type, '') = '' ''')
