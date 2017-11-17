@@ -194,12 +194,12 @@ def get_data():
 			"type": "list"
 		},
 		{
-			"module_name": "Student Attendance",
-			"color": "#3aacba",
+			"module_name": "Student Attendance Tool",
+			"color": "#C0392B",
 			"icon": "octicon octicon-checklist",
-			"label": _("Student Attendance"),
-			"link": "List/Student Attendance",
-			"_doctype": "Student Attendance",
+			"label": _("Student Attendance Tool"),
+			"link": "List/Student Attendance Tool",
+			"_doctype": "Student Attendance Tool",
 			"type": "list"
 		},
 		{
