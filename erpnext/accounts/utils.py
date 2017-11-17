@@ -593,7 +593,9 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 				select ifnull(sum({payment_dr_or_cr}), 0)
 				from `tabGL Entry` payment_gl_entry
 				where payment_gl_entry.against_voucher_type = invoice_gl_entry.voucher_type
-					and payment_gl_entry.against_voucher = invoice_gl_entry.against_voucher
+					and if(invoice_gl_entry.voucher_type='Journal Entry',
+						payment_gl_entry.against_voucher = invoice_gl_entry.voucher_no,
+						payment_gl_entry.against_voucher = invoice_gl_entry.against_voucher)
 					and payment_gl_entry.party_type = invoice_gl_entry.party_type
 					and payment_gl_entry.party = invoice_gl_entry.party
 					and payment_gl_entry.account = invoice_gl_entry.account
