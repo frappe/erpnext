@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	frappe.reload_doc('schools', 'doctype', 'Student Admission Program')
-	frappe.reload_doctype('Student Admission')
+	frappe.reload_doc('schools', 'doctype', 'student_admission_program')
+	frappe.reload_doc('schools', 'doctype', 'student_admission')
 
 	if "program" not in frappe.db.get_table_columns("Student Admission"):
 		return
