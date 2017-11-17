@@ -25,7 +25,7 @@ def execute():
 	for opts in (('Issue', 'issue_type', 'Issue Type'),
 		('Opportunity', 'opportunity_type', 'Opportunity Type')):
 		for d in frappe.db.sql('select distinct {0} from `tab{1}`'.format(opts[1], opts[0])):
-			if not frappe.db.exists(opts[2], d[0]):
+			if d[0] and not frappe.db.exists(opts[2], d[0]):
 				frappe.get_doc(dict(doctype = opts[2], name=d[0])).insert()
 
 	# fixtures
