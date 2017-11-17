@@ -30,16 +30,17 @@ def run_setup_wizard_test():
 	time.sleep(1)
 	driver.click(".next-btn")
 
-	# # Profile slide
-	# driver.set_field("full_name", "Great Tester")
-	# driver.set_field("email", "great@example.com")
-	# driver.set_field("password", "test")
-	# driver.wait_for_ajax(True)
-	# time.sleep(1)
-	# driver.click(".next-btn")
-	# time.sleep(1)
+	# Profile slide
+	driver.set_field("full_name", "Great Tester")
+	driver.set_field("email", "great@example.com")
+	driver.set_field("password", "test")
+	driver.wait_for_ajax(True)
+	time.sleep(1)
+	driver.click(".next-btn")
+	time.sleep(1)
 
 	# domain slide
+	# time.sleep(3)
 	driver.set_select("domain", "Manufacturing")
 	time.sleep(1)
 	driver.click(".next-btn")
