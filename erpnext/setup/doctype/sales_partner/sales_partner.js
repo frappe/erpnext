@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Sales Partner', {
 	refresh: function(frm) {
-		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Sales Person'}
+		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Sales Partner'}
 
 		if(frm.doc.__islocal){
 			hide_field(['address_html', 'contact_html', 'address_contacts']);

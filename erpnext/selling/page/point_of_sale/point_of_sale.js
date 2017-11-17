@@ -1033,7 +1033,7 @@ class POSItems {
 
 		this.get_items({search_value: search_term, item_group })
 			.then(({ items, serial_no, batch_no, barcode }) => {
-				if (search_term) {
+				if (search_term && !barcode) {
 					this.search_index[search_term] = items;
 				}
 
