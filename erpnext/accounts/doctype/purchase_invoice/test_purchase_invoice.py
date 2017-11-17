@@ -555,6 +555,40 @@ class TestPurchaseInvoice(unittest.TestCase):
 		#check outstanding after advance cancellation
 		self.assertEqual(flt(pi.outstanding_amount), flt(pi.rounded_total + pi.total_advance))
 
+	def test_purchase_invoice_with_shipping_rule(self):
+		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule \
+			import create_shipping_rule
+
+		shipping_rule = create_shipping_rule(shipping_rule_type = "Buying", shipping_rule_name = "Shipping Rule - Purchase Invoice Test")
+
+		pi = frappe.copy_doc(test_records[0])
+		
+		pi.shipping_rule = shipping_rule.name
+		pi.insert()
+
+		shipping_amount = 0.0
+		for condition in shipping_rule.get("conditions"):
+			if not condition.to_value or (flt(condition.from_value) <= pi.net_total <= flt(condition.to_value)):
+				shipping_amount = condition.shipping_amount
+
+		shipping_charge = {
+			"doctype": "Purchase Taxes and Charges",
+			"category": "Valuation and Total",
+			"charge_type": "Actual",
+			"account_head": shipping_rule.account,
+			"cost_center": shipping_rule.cost_center,
+			"tax_amount": shipping_amount,
+			"description": shipping_rule.name,
+			"add_deduct_tax": "Add"
+		}	
+		pi.append("taxes", shipping_charge)
+		pi.save()
+
+		self.assertEquals(pi.net_total, 1250)
+
+		self.assertEquals(pi.total_taxes_and_charges, 462.3)
+		self.assertEquals(pi.grand_total, 1712.3)	
+
 def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
 	accounts_settings.unlink_payment_on_cancellation_of_invoice = enable

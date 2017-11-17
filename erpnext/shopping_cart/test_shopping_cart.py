@@ -127,6 +127,7 @@ class TestShoppingCart(unittest.TestCase):
 			"selling_price_list": "_Test Price List Rest of the World",
 			"currency": "USD",
 			"taxes_and_charges" : "_Test Tax 1",
+			"conversion_rate":1,
 			"transaction_date" : nowdate(),
 			"valid_till" : add_months(nowdate(), 1),
 			"items": [{
