@@ -4,7 +4,9 @@ from frappe import _
 def execute():
 	language = frappe.get_single("System Settings").language
 
-	if language.startswith('en'): return
+	if language and language.startswith('en'): return
+
+	frappe.local.lang = language
 
 	all_domains = frappe.get_hooks("domains")
 
@@ -16,11 +18,14 @@ def execute():
 	domain_settings = frappe.get_single("Domain Settings")
 	active_domains = [d.domain for d in domain_settings.active_domains]
 	
-	for domain in active_domains:
-		domain = frappe.get_doc("Domain", domain)
-		domain.setup_domain()
+	try:
+		for domain in active_domains:
+			domain = frappe.get_doc("Domain", domain)
+			domain.setup_domain()
 
-		if int(frappe.db.get_single_value('System Settings', 'setup_complete')):
-			domain.setup_sidebar_items()
-			domain.setup_desktop_icons()
-			domain.set_default_portal_role()
+			if int(frappe.db.get_single_value('System Settings', 'setup_complete')):
+				domain.setup_sidebar_items()
+				domain.setup_desktop_icons()
+				domain.set_default_portal_role()
+	except frappe.LinkValidationError:
+		pass
