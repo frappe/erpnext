@@ -344,8 +344,7 @@ $.extend(erpnext.item, {
 								let no_of_combinations = lengths.reduce((a, b) => a * b, 1);
 								me.multiple_variant_dialog.get_primary_btn()
 									.html(__(
-										`Make ${no_of_combinations} Variant
-										${no_of_combinations === 1 ? '' : 's'}`
+										`Make ${no_of_combinations} Variant${no_of_combinations === 1 ? '' : 's'}`
 									));
 								me.multiple_variant_dialog.enable_primary_action();
 							}
