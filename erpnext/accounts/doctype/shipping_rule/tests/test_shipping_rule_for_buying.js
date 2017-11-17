@@ -6,9 +6,9 @@ QUnit.test("test Shipping Rule", function(assert) {
 	frappe.run_serially([
 		() => {
 			return frappe.tests.make("Shipping Rule", [
-				{label: "Next Day Shipping"},
-				{shipping_rule_type: "Selling"},
-				{calculate_based_on: 'Net Total'},
+				{label: "Two Day Shipping"},
+				{shipping_rule_type: "Buying"},
+				{fixed_shipping_amount: 0},
 				{conditions:[
 					[
 						{from_value:1},
@@ -17,8 +17,8 @@ QUnit.test("test Shipping Rule", function(assert) {
 					],
 					[
 						{from_value:201},
-						{to_value:2000},
-						{shipping_amount:50}
+						{to_value:3000},
+						{shipping_amount:200}
 					],
 				]},
 				{countries:[
@@ -30,7 +30,7 @@ QUnit.test("test Shipping Rule", function(assert) {
 				{cost_center:'Main - '+frappe.get_abbr(frappe.defaults.get_default("Company"))}
 			]);
 		},
-		() => {assert.ok(cur_frm.doc.name=='Next Day Shipping');},
+		() => {assert.ok(cur_frm.doc.name=='Two Day Shipping');},
 		() => done()
 	]);
 });

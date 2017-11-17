@@ -299,6 +299,27 @@ class AccountsController(TransactionBase):
 				"allocated_amount": flt(d.amount) if d.against_order else 0
 			})
 
+	def apply_shipping_rule(self):
+		if self.shipping_rule:
+			shipping_rule = frappe.get_doc("Shipping Rule", self.shipping_rule)
+			shipping_rule.apply(self)
+			self.calculate_taxes_and_totals()
+
+	def get_shipping_address(self):
+		'''Returns Address object from shipping address fields if present'''
+
+		# shipping address fields can be `shipping_address_name` or `shipping_address`
+		# try getting value from both
+
+		for fieldname in ('shipping_address_name', 'shipping_address'):
+			shipping_field = self.meta.get_field(fieldname)
+			if shipping_field and shipping_field.fieldtype == 'Link':
+				if self.get(fieldname):
+					return frappe.get_doc('Address', self.get(fieldname))
+
+		return {}
+
+
 	def get_advance_entries(self, include_unallocated=True):
 		if self.doctype == "Sales Invoice":
 			party_account = self.debit_to
