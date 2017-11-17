@@ -57,11 +57,11 @@ class Warehouse(NestedSet):
 
 	def check_if_sle_exists(self):
 		return frappe.db.sql("""select name from `tabStock Ledger Entry`
-			where warehouse = %s""", self.name)
+			where warehouse = %s limit 1""", self.name)
 
 	def check_if_child_exists(self):
 		return frappe.db.sql("""select name from `tabWarehouse`
-			where parent_warehouse = %s""", self.name)
+			where parent_warehouse = %s limit 1""", self.name)
 
 	def before_rename(self, old_name, new_name, merge=False):
 		super(Warehouse, self).before_rename(old_name, new_name, merge)

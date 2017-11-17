@@ -632,6 +632,7 @@ class SalesInvoice(SellingController):
 		return gl_entries
 
 	def make_customer_gl_entry(self, gl_entries):
+    grand_total = self.rounded_total or self.grand_total
 		if self.get("payment_schedule"):
 			for d in self.get("payment_schedule"):
 				payment_amount_in_company_currency = flt(d.payment_amount * self.conversion_rate,
@@ -652,9 +653,9 @@ class SalesInvoice(SellingController):
 					}, self.party_account_currency)
 				)
 
-		elif self.grand_total:
+		elif grand_total:
 			# Didnot use base_grand_total to book rounding loss gle
-			grand_total_in_company_currency = flt(self.grand_total * self.conversion_rate,
+			grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
 				self.precision("grand_total"))
 
 			gl_entries.append(
@@ -665,7 +666,7 @@ class SalesInvoice(SellingController):
 					"against": self.against_income_account,
 					"debit": grand_total_in_company_currency,
 					"debit_in_account_currency": grand_total_in_company_currency \
-						if self.party_account_currency==self.company_currency else self.grand_total,
+						if self.party_account_currency==self.company_currency else grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype
 				}, self.party_account_currency)
