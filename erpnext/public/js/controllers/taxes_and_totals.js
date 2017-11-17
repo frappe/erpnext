@@ -422,13 +422,27 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		frappe.model.round_floats_in(this.frm.doc, ["grand_total", "base_grand_total"]);
 
 		// rounded totals
-		this.set_rounded_total()
+		this.set_rounded_total();
 	},
 
 	set_rounded_total: function() {
+		var disable_rounded_total = 0;
+		if(frappe.meta.get_docfield(this.frm.doc.doctype, "disable_rounded_total", this.frm.doc.name)) {
+			disable_rounded_total = this.frm.doc.disable_rounded_total;
+		} else if (frappe.sys_defaults.disable_rounded_total) {
+			disable_rounded_total = frappe.sys_defaults.disable_rounded_total;
+		}
+		if(disable_rounded_total) {
+			this.frm.doc.rounded_total = 0;
+			this.frm.doc.base_rounded_total = 0;
+			return;
+		}
+
 		if(frappe.meta.get_docfield(this.frm.doc.doctype, "rounded_total", this.frm.doc.name)) {
 			this.frm.doc.rounded_total = round_based_on_smallest_currency_fraction(this.frm.doc.grand_total,
 				this.frm.doc.currency, precision("rounded_total"));
+			this.frm.doc.rounding_adjustment += flt(this.frm.doc.rounded_total - this.frm.doc.grand_total,
+				precision("rounding_adjustment"));
 		}
 		if(frappe.meta.get_docfield(this.frm.doc.doctype, "base_rounded_total", this.frm.doc.name)) {
 			var company_currency = this.get_company_currency();
@@ -436,6 +450,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			this.frm.doc.base_rounded_total =
 				round_based_on_smallest_currency_fraction(this.frm.doc.base_grand_total,
 					company_currency, precision("base_rounded_total"));
+
+			this.frm.doc.base_rounding_adjustment += flt(this.frm.doc.base_rounded_total -
+				this.frm.doc.base_grand_total, precision("rounding_adjustment"));
 		}
 	},
 
@@ -560,20 +577,22 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		if(this.frm.doc.is_return || this.frm.doc.docstatus > 0) return;
 
 		frappe.model.round_floats_in(this.frm.doc, ["grand_total", "total_advance", "write_off_amount"]);
-		if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
-			var total_amount_to_pay = flt((this.frm.doc.grand_total - this.frm.doc.total_advance
-				- this.frm.doc.write_off_amount), precision("grand_total"));
-		} else {
-			var total_amount_to_pay = flt(
-				(flt(this.frm.doc.grand_total*this.frm.doc.conversion_rate, precision("grand_total"))
-					- this.frm.doc.total_advance - this.frm.doc.base_write_off_amount),
-				precision("base_grand_total")
-			);
-		}
 
-		if(this.frm.doc.doctype == "Sales Invoice" || this.frm.doc.doctype == "Purchase Invoice") {
+		if(in_list(["Sales Invoice", "Purchase Invoice"], this.frm.doc.doctype)) {
+			var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
+
+			if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
+				var total_amount_to_pay = flt((grand_total - this.frm.doc.total_advance
+					- this.frm.doc.write_off_amount), precision("grand_total"));
+			} else {
+				var total_amount_to_pay = flt(
+					(flt(grand_total*this.frm.doc.conversion_rate, precision("grand_total"))
+						- this.frm.doc.total_advance - this.frm.doc.base_write_off_amount),
+					precision("base_grand_total")
+				);
+			}
+
 			frappe.model.round_floats_in(this.frm.doc, ["paid_amount"]);
-
 			this.set_in_company_currency(this.frm.doc, ["paid_amount"]);
 
 			if(this.frm.refresh_field){
@@ -581,11 +600,10 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				this.frm.refresh_field("base_paid_amount");
 			}
 
-			if(this.frm.doc.doctype == "Sales Invoice"){
+			if(this.frm.doc.doctype == "Sales Invoice") {
 				this.set_default_payment(total_amount_to_pay, update_paid_amount);
 				this.calculate_paid_amount();
 			}
-
 			this.calculate_change_amount();
 
 			var paid_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
@@ -593,9 +611,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
 				flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
-
-		} else if(this.frm.doc.doctype == "Purchase Invoice") {
-			this.frm.doc.outstanding_amount = flt(total_amount_to_pay, precision("outstanding_amount"));
 		}
 	},
 
@@ -636,7 +651,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	calculate_change_amount: function(){
 		this.frm.doc.change_amount = 0.0;
 		this.frm.doc.base_change_amount = 0.0;
-		if(this.frm.doc.paid_amount > this.frm.doc.grand_total && !this.frm.doc.is_return) {
+		if(this.frm.doc.doctype == "Sales Invoice"
+			&& this.frm.doc.paid_amount > this.frm.doc.grand_total && !this.frm.doc.is_return) {
+
 			var payment_types = $.map(this.frm.doc.payments, function(d) { return d.type; });
 			if (in_list(payment_types, 'Cash')) {
 				this.frm.doc.change_amount = flt(this.frm.doc.paid_amount - this.frm.doc.grand_total +

@@ -28,8 +28,7 @@ class SellingController(StockController):
 		super(SellingController, self).onload()
 		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
 			for item in self.get("items"):
-				item.update(get_bin_details(item.item_code,
-					item.warehouse))
+				item.update(get_bin_details(item.item_code, item.warehouse))
 
 	def validate(self):
 		super(SellingController, self).validate()
@@ -114,14 +113,15 @@ class SellingController(StockController):
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
-		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None, "disable_rounded_total"))
 
 		if self.meta.get_field("base_in_words"):
-			self.base_in_words = money_in_words(disable_rounded_total and
-				abs(self.base_grand_total) or abs(self.base_rounded_total), self.company_currency)
+			base_amount = abs(self.base_grand_total
+				if self.is_rounded_total_disabled() else self.base_rounded_total)
+			self.base_in_words = money_in_words(base_amount, self.company_currency)
+
 		if self.meta.get_field("in_words"):
-			self.in_words = money_in_words(disable_rounded_total and
-				abs(self.grand_total) or abs(self.rounded_total), self.currency)
+			amount = abs(self.grand_total if self.is_rounded_total_disabled() else self.rounded_total)
+			self.in_words = money_in_words(amount, self.currency)
 
 	def calculate_commission(self):
 		if self.meta.get_field("commission_rate"):

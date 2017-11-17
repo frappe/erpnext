@@ -328,13 +328,17 @@ class calculate_taxes_and_totals(object):
 		self.set_rounded_total()
 
 	def set_rounded_total(self):
-		if frappe.db.get_single_value("Global Defaults", "disable_rounded_total"):
-			self.doc.rounded_total = self.doc.base_rounded_total = 0
-			return
-
 		if self.doc.meta.get_field("rounded_total"):
+			if self.doc.is_rounded_total_disabled():
+				self.doc.rounded_total = self.doc.base_rounded_total = 0
+				return
+
 			self.doc.rounded_total = round_based_on_smallest_currency_fraction(self.doc.grand_total,
 				self.doc.currency, self.doc.precision("rounded_total"))
+
+			#if print_in_rate is set, we would have already calculated rounding adjustment
+			self.doc.rounding_adjustment += flt(self.doc.rounded_total - self.doc.grand_total,
+				self.doc.precision("rounding_adjustment"))
 
 		if self.doc.meta.get_field("base_rounded_total"):
 			company_currency = erpnext.get_company_currency(self.doc.company)
@@ -342,6 +346,9 @@ class calculate_taxes_and_totals(object):
 			self.doc.base_rounded_total = \
 				round_based_on_smallest_currency_fraction(self.doc.base_grand_total,
 					company_currency, self.doc.precision("base_rounded_total"))
+
+			self.doc.base_rounding_adjustment += flt(self.doc.base_rounded_total - self.doc.base_grand_total,
+				self.doc.precision("base_rounding_adjustment"))
 
 	def _cleanup(self):
 		for tax in self.doc.get("taxes"):
@@ -404,7 +411,8 @@ class calculate_taxes_and_totals(object):
 					actual_tax_amount = flt(actual_taxes_dict.get(tax.row_id, 0)) * flt(tax.rate) / 100
 					actual_taxes_dict.setdefault(tax.idx, actual_tax_amount)
 
-			return flt(self.doc.grand_total - sum(actual_taxes_dict.values()), self.doc.precision("grand_total"))
+			return flt(self.doc.grand_total - sum(actual_taxes_dict.values()),
+				self.doc.precision("grand_total"))
 
 
 	def calculate_total_advance(self):
@@ -442,30 +450,31 @@ class calculate_taxes_and_totals(object):
 		self.doc.round_floats_in(self.doc, ["grand_total", "total_advance", "write_off_amount"])
 		self._set_in_company_currency(self.doc, ['write_off_amount'])
 
-		if self.doc.party_account_currency == self.doc.currency:
-			total_amount_to_pay = flt(self.doc.grand_total  - self.doc.total_advance
-				- flt(self.doc.write_off_amount), self.doc.precision("grand_total"))
-		else:
-			total_amount_to_pay = flt(flt(self.doc.grand_total *
-				self.doc.conversion_rate, self.doc.precision("grand_total")) - self.doc.total_advance
-					- flt(self.doc.base_write_off_amount), self.doc.precision("grand_total"))
+		if self.doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
+			grand_total = self.doc.rounded_total or self.doc.grand_total
+			if self.doc.party_account_currency == self.doc.currency:
+				total_amount_to_pay = flt(grand_total  - self.doc.total_advance
+					- flt(self.doc.write_off_amount), self.doc.precision("grand_total"))
+			else:
+				total_amount_to_pay = flt(flt(grand_total *
+					self.doc.conversion_rate, self.doc.precision("grand_total")) - self.doc.total_advance
+						- flt(self.doc.base_write_off_amount), self.doc.precision("grand_total"))
 
-		if self.doc.doctype == "Sales Invoice":			
 			self.doc.round_floats_in(self.doc, ["paid_amount"])
-			self.calculate_write_off_amount()
-			self.calculate_change_amount()
-			
+			change_amount = 0
+
+			if self.doc.doctype == "Sales Invoice":
+				self.calculate_write_off_amount()
+				self.calculate_change_amount()
+				change_amount = self.doc.change_amount \
+					if self.doc.party_account_currency == self.doc.currency else self.doc.base_change_amount
+
 			paid_amount = self.doc.paid_amount \
 				if self.doc.party_account_currency == self.doc.currency else self.doc.base_paid_amount
-			
-			change_amount = self.doc.change_amount \
-				if self.doc.party_account_currency == self.doc.currency else self.doc.base_change_amount
 
-			self.doc.outstanding_amount = flt(total_amount_to_pay - flt(paid_amount) +
-				flt(change_amount), self.doc.precision("outstanding_amount"))
 
-		elif self.doc.doctype == "Purchase Invoice":
-			self.doc.outstanding_amount = flt(total_amount_to_pay, self.doc.precision("outstanding_amount"))
+			self.doc.outstanding_amount = flt(total_amount_to_pay - flt(paid_amount) + flt(change_amount),
+				self.doc.precision("outstanding_amount"))
 
 	def calculate_paid_amount(self):
 		paid_amount = base_paid_amount = 0.0
@@ -485,7 +494,9 @@ class calculate_taxes_and_totals(object):
 	def calculate_change_amount(self):
 		self.doc.change_amount = 0.0
 		self.doc.base_change_amount = 0.0
-		if self.doc.paid_amount > self.doc.grand_total and not self.doc.is_return \
+
+		if self.doc.doctype == "Sales Invoice" \
+			and self.doc.paid_amount > self.doc.grand_total and not self.doc.is_return \
 			and any([d.type == "Cash" for d in self.doc.payments]):
 
 			self.doc.change_amount = flt(self.doc.paid_amount - self.doc.grand_total +
@@ -496,8 +507,8 @@ class calculate_taxes_and_totals(object):
 
 	def calculate_write_off_amount(self):
 		if flt(self.doc.change_amount) > 0:
-			self.doc.write_off_amount = flt(self.doc.grand_total - self.doc.paid_amount + self.doc.change_amount,
-				self.doc.precision("write_off_amount"))
+			self.doc.write_off_amount = flt(self.doc.grand_total - self.doc.paid_amount
+				+ self.doc.change_amount, self.doc.precision("write_off_amount"))
 			self.doc.base_write_off_amount = flt(self.doc.write_off_amount * self.doc.conversion_rate,
 				self.doc.precision("base_write_off_amount"))
 

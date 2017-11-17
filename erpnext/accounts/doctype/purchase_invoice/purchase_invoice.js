@@ -17,12 +17,13 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			if(!this.frm.doc.supplier && this.frm.doc.credit_to) {
 				this.frm.set_df_property("credit_to", "print_hide", 0);
 			}
+		} else {
+			this.frm.set_value("disable_rounded_total", frappe.sys_defaults.disable_rounded_total);
 		}
 
 		// formatter for material request item
 		this.frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
-
 	},
 
 	refresh: function(doc) {
