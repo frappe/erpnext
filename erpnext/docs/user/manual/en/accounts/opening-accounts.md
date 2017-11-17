@@ -1,4 +1,4 @@
-#Updating Opening Balance in Accounts
+# Updating Opening Balance in Accounts
 
 If you are a new company you can start using ERPNext accounting module by going to chart of accounts. However, if you are migrating from a legacy accounting system like Tally or a Fox Pro based software
 
@@ -13,28 +13,28 @@ If you were using another accounting software before, firstly you should close f
 > Opening entry is only for Balance Sheet accounts and not for the Accounts in the Profit and Loss statement.
 
   * For all assets (excluding Accounts Receivables): This entry will contain all your assets except the amounts you are expecting from your Customers against outstanding Sales Invoices. You will have to update your receivables by making an individual entry for each Invoice (this is because, the system will help you track the invoices which are yet to be paid). You can credit the sum of all these debits against the **Temporary Opening** account.
-  
+
   * For all liabilities: Similarly you need to pass a Journal Entry for your Opening Liabilities (except for the bills you have to pay) against **Temporary Opening** account.
 
 ###Opening Entry
 
-####Step 1: New Journal Entry
+#### Step 1: New Journal Entry
 
 To open new Journal Entry, go to:
 
 `Explore > Accounts > Journal Entry`
 
-####Step 2: Entry Type
+#### Step 2: Entry Type
 
 If Entry Type is selected as Opening Entry, all the Balance Sheet Accounts will be auto-fetched in the Journal Entry.
 
 <img class="screenshot" alt="Opening Account" src="/docs/assets/img/accounts/opening-account-1.png">
 
-####Step 3: Posting Date
+#### Step 3: Posting Date
 
 Select Posting Date on which Accounts Opening Balance will be updated.
 
-####Step 4: Enter Debit/Credit Value
+#### Step 4: Enter Debit/Credit Value
 
 For each Account, enter opening value in the Debit or Credit column. As per the double entry valuation system, Total Debit value in a entry must be equal to Total Credit value.
 
@@ -86,14 +86,22 @@ To update stock opening balance, create [Stock Reconciliation entry](/docs/user/
 
 Opening balance for the fixed asset account should be updated via Journal Entry. Assets which are not fully depreciated should be added in the [Asset master](/docs/user/manual/en/accounts/managing-fixed-assets.html). For adding Assets in your possession, ensure to check **Is Existing Asset** field.
 
-### Outstanding Invoices
+### Outstanding Payables and Receivables
 
-After opening Journal Entries are made, you will need to enter each Sales Invoice and Purchase Invoice that is yet to be paid.
+After opening Journal Entries are made, you will need to enter the Sales Invoice and Purchase Invoice that is yet to be paid.
 
 Since you have already booked the income or expense on these invoices in the previous period, select **Temporary Opening** in the “Income” and “Expense” accounts.
 
 > Note: Make sure to set each invoice as “Is Opening”!
 
 If you don’t care what items are in that invoice, just make a dummy item entry in the Invoice. Item code in the Invoice is not necessary, so it should not be such a problem.
+
+You can also do this quickly using the **Opening Invoice Creation Tool**
+
+To use this tool, just type "Opening Invoice" in the search bar and select the **Opening Invoice Creation Tool**
+
+Here, select the company and type of invoice (sales or purchase) and add a line item for each invoice you want to create.
+
+<img class="screenshot" alt="Opening Invoice Creation Tool" src="/docs/assets/img/accounts/opening-invoice-creation-tool.png">
 
 {next}

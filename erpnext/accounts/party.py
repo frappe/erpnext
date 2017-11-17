@@ -176,29 +176,31 @@ def get_party_account(party_type, party, company):
 	if not company:
 		frappe.throw(_("Please select a Company"))
 
-	if party:
+	if not party:
+		return
+
+	account = frappe.db.get_value("Party Account",
+		{"parenttype": party_type, "parent": party, "company": company}, "account")
+
+	if not account and party_type in ['Customer', 'Supplier']:
+		party_group_doctype = "Customer Group" if party_type=="Customer" else "Supplier Type"
+		group = frappe.db.get_value(party_type, party, scrub(party_group_doctype))
 		account = frappe.db.get_value("Party Account",
-			{"parenttype": party_type, "parent": party, "company": company}, "account")
+			{"parenttype": party_group_doctype, "parent": group, "company": company}, "account")
 
-		if not account and party_type in ['Customer', 'Supplier']:
-			party_group_doctype = "Customer Group" if party_type=="Customer" else "Supplier Type"
-			group = frappe.db.get_value(party_type, party, scrub(party_group_doctype))
-			account = frappe.db.get_value("Party Account",
-				{"parenttype": party_group_doctype, "parent": group, "company": company}, "account")
+	if not account and party_type in ['Customer', 'Supplier']:
+		default_account_name = "default_receivable_account" \
+			if party_type=="Customer" else "default_payable_account"
+		account = frappe.db.get_value("Company", company, default_account_name)
 
-		if not account and party_type in ['Customer', 'Supplier']:
-			default_account_name = "default_receivable_account" \
-				if party_type=="Customer" else "default_payable_account"
-			account = frappe.db.get_value("Company", company, default_account_name)
+	existing_gle_currency = get_party_gle_currency(party_type, party, company)
+	if existing_gle_currency:
+		if account:
+			account_currency = frappe.db.get_value("Account", account, "account_currency")
+		if (account and account_currency != existing_gle_currency) or not account:
+				account = get_party_gle_account(party_type, party, company)
 
-		existing_gle_currency = get_party_gle_currency(party_type, party, company)
-		if existing_gle_currency:
-			if account:
-				account_currency = frappe.db.get_value("Account", account, "account_currency")
-			if (account and account_currency != existing_gle_currency) or not account:
-					account = get_party_gle_account(party_type, party, company)
-
-		return account
+	return account
 
 def get_party_account_currency(party_type, party, company):
 	def generator():

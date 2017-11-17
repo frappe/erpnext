@@ -62,7 +62,7 @@ class calculate_taxes_and_totals(object):
 						(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
 
 				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item']:
-					item.rate_with_margin = self.calculate_margin(item)
+					item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
 
 					item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))\
 						if item.rate_with_margin > 0 else item.rate
@@ -504,6 +504,7 @@ class calculate_taxes_and_totals(object):
 
 	def calculate_margin(self, item):
 		rate_with_margin = 0.0
+		base_rate_with_margin = 0.0
 		if item.price_list_rate:
 			if item.pricing_rule and not self.doc.ignore_pricing_rule:
 				pricing_rule = frappe.get_doc('Pricing Rule', item.pricing_rule)
@@ -513,8 +514,9 @@ class calculate_taxes_and_totals(object):
 			if item.margin_type and item.margin_rate_or_amount:
 				margin_value = item.margin_rate_or_amount if item.margin_type == 'Amount' else flt(item.price_list_rate) * flt(item.margin_rate_or_amount) / 100
 				rate_with_margin = flt(item.price_list_rate) + flt(margin_value)
+				base_rate_with_margin = flt(rate_with_margin) * flt(self.doc.conversion_rate)
 
-		return rate_with_margin
+		return rate_with_margin, base_rate_with_margin
 
 	def set_item_wise_tax_breakup(self):
 		self.doc.other_charges_calculation = get_itemised_tax_breakup_html(self.doc)

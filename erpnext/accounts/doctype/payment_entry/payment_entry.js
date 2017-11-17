@@ -252,7 +252,6 @@ frappe.ui.form.on('Payment Entry', {
 					date: frm.doc.posting_date
 				},
 				callback: function(r, rt) {
-					console.log(r, rt);
 					if(r.message) {
 						if(frm.doc.payment_type == "Receive") {
 							frm.set_value("paid_from", r.message.party_account);

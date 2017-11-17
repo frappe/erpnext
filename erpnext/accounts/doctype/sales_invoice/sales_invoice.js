@@ -95,8 +95,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 		// Show buttons only when pos view is active
 		if (cint(doc.docstatus==0) && cur_frm.page.current_view_name!=="pos" && !doc.is_return) {
-			cur_frm.cscript.sales_order_btn();
-			cur_frm.cscript.delivery_note_btn();
+			this.frm.cscript.sales_order_btn();
+			this.frm.cscript.delivery_note_btn();
+			this.frm.cscript.quotation_btn();
 		}
 
 		this.set_default_print_format();
@@ -152,6 +153,26 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						docstatus: 1,
 						status: ["!=", "Closed"],
 						per_billed: ["<", 99.99],
+						company: me.frm.doc.company
+					}
+				})
+			}, __("Get items from"));
+	},
+	
+	quotation_btn: function() {
+		var me = this;
+		this.$quotation_btn = this.frm.add_custom_button(__('Quotation'),
+			function() {
+				erpnext.utils.map_current_doc({
+					method: "erpnext.selling.doctype.quotation.quotation.make_sales_invoice",
+					source_doctype: "Quotation",
+					target: me.frm,
+					setters: {
+						customer: me.frm.doc.customer || undefined,
+					},
+					get_query_filters: {
+						docstatus: 1,
+						status: ["!=", "Lost"],
 						company: me.frm.doc.company
 					}
 				})

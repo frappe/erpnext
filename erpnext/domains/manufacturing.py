@@ -18,8 +18,5 @@ data = {
 	'set_value': [
 		['Stock Settings', None, 'show_barcode_field', 1]
 	],
-	'restricted_roles': [
-		'Manufacturing User'
-	],
 	'default_portal_role': 'Customer'
 }

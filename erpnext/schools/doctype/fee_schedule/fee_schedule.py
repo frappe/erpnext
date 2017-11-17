@@ -9,6 +9,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import money_in_words
 from frappe.utils import cint, flt, cstr
 from frappe.utils.background_jobs import enqueue
+from frappe import _
 
 
 class FeeSchedule(Document):
@@ -57,6 +58,10 @@ def generate_fee(fee_schedule):
 	error = False
 	total_records = sum([int(d.total_students) for d in doc.student_groups])
 	created_records = 0
+
+	if not total_records:
+		frappe.throw(_("Please setup Students under Student Groups"))
+
 	for d in doc.student_groups:
 		students = frappe.db.sql(""" select sg.program, sg.batch, sgs.student, sgs.student_name
 			from `tabStudent Group` sg, `tabStudent Group Student` sgs

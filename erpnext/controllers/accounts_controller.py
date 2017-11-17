@@ -83,9 +83,6 @@ class AccountsController(TransactionBase):
 					self.set(fieldname, today())
 					break
 
-		# set taxes table if missing from `taxes_and_charges`
-		self.set_taxes()
-
 	def calculate_taxes_and_totals(self):
 		from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
 		calculate_taxes_and_totals(self)
@@ -209,10 +206,10 @@ class AccountsController(TransactionBase):
 
 		tax_master_doctype = self.meta.get_field("taxes_and_charges").options
 
-		if not self.get("taxes"):
+		if self.is_new() and not self.get("taxes"):
 			if not self.get("taxes_and_charges"):
 				# get the default tax master
-				self.set("taxes_and_charges", frappe.db.get_value(tax_master_doctype, {"is_default": 1}))
+				self.taxes_and_charges = frappe.db.get_value(tax_master_doctype, {"is_default": 1})
 
 			self.append_taxes_from_master(tax_master_doctype)
 
@@ -647,7 +644,10 @@ def get_tax_rate(account_head):
 @frappe.whitelist()
 def get_default_taxes_and_charges(master_doctype):
 	default_tax = frappe.db.get_value(master_doctype, {"is_default": 1})
-	return get_taxes_and_charges(master_doctype, default_tax)
+	return {
+		'taxes_and_charges': default_tax,
+		'taxes': get_taxes_and_charges(master_doctype, default_tax)
+	}
 
 @frappe.whitelist()
 def get_taxes_and_charges(master_doctype, master_name):
