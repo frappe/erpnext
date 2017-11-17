@@ -466,3 +466,6 @@ erpnext.patches.v8_10.add_payment_terms_field_to_supplier
 erpnext.patches.v8_10.change_default_customer_credit_days
 erpnext.patches.v8_10.add_payment_terms_field_to_supplier_type
 erpnext.patches.v8_10.change_default_supplier_type_credit_days
+erpnext.patches.v9_0.update_employee_loan_details
+erpnext.patches.v9_2.delete_healthcare_domain_default_items
+erpnext.patches.v9_1.create_issue_opportunity_type

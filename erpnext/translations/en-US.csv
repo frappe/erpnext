@@ -1,0 +1,1 @@
+apps/erpnext/erpnext/accounts/party.py +268,Billing currency must be equal to either default comapany's currency or party account currency,Billing currency must be equal to either default company's currency or party account currency

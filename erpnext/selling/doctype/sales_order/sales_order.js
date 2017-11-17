@@ -197,7 +197,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					});
 					return;
 				}
-				else if(!r.message.every(function(d) { return !!d.pending_qty })) {
+				else if(!r.message) {
 					frappe.msgprint({
 						title: __('Production Order not created'),
 						message: __('Production Order already created for all items with BOM'),
@@ -217,6 +217,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 									}},
 								{fieldtype:'Float', fieldname:'pending_qty', reqd: 1,
 									label: __('Qty'), in_list_view:1},
+								{fieldtype:'Data', fieldname:'sales_order_item', reqd: 1,
+									label: __('Sales Order Item'), hidden:1}
 							],
 							get_data: function() {
 								return r.message

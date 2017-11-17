@@ -2,16 +2,16 @@ DocType: Timesheet,Total Costing Amount,Monto Total Calculado
 DocType: Student Group Student,Student Group Student,Alumno de Grupo de Estudiantes
 DocType: Delivery Note,% Installed,% Instalado
 DocType: Company,Gain/Loss Account on Asset Disposal,Cuenta de ganancia/pérdida en la disposición de activos
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +467,Please enter Account for Change Amount,"Por favor, introduzca la Vuenta para el Cambio Monto"
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +468,Please enter Account for Change Amount,"Por favor, introduzca la Vuenta para el Cambio Monto"
 DocType: Sales Order,SO-,OV-
-apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +215,Please set the Item Code first,"Por favor, primero define el Código del Artículo"
+apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +223,Please set the Item Code first,"Por favor, primero define el Código del Artículo"
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.js +60,Show unclosed fiscal year's P&L balances,Mostrar saldos de Ganancias y Perdidas de año fiscal sin cerrar
 ,Support Hour Distribution,Distribución de Hora de Soporte
 apps/erpnext/erpnext/schools/report/student_batch_wise_attendance/student_batch_wise_attendance.py +42,Student Group Strength,Fortaleza de Grupo Estudiante
-apps/erpnext/erpnext/accounts/doctype/asset/depreciation.py +190,Please set 'Gain/Loss Account on Asset Disposal' in Company {0},Por favor defina la 'Cuenta de Ganacia/Pérdida  por Ventas de Activos' en la empresa {0}
+apps/erpnext/erpnext/accounts/doctype/asset/depreciation.py +191,Please set 'Gain/Loss Account on Asset Disposal' in Company {0},Por favor defina la 'Cuenta de Ganacia/Pérdida  por Ventas de Activos' en la empresa {0}
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +44,Leave Type {0} cannot be allocated since it is leave without pay,Tipo de Permiso {0} no puede ser asignado ya que es un Permiso sin paga
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +446,Show Salary Slip,Mostrar Recibo de Nómina
-apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +243,Leave Without Pay does not match with approved Leave Application records,Permiso sin sueldo no coincide con los registros de Solicitud de Permiso aprobadas
+apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +245,Leave Without Pay does not match with approved Leave Application records,Permiso sin sueldo no coincide con los registros de Solicitud de Permiso aprobadas
 DocType: Purchase Taxes and Charges Template,"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
 
 #### Note
@@ -58,16 +58,16 @@ apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +268,Accural 
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +123,Gain/Loss on Asset Disposal,Ganancia/Pérdida por la venta de activos
 DocType: Currency Exchange,Specify Exchange Rate to convert one currency into another,Especificar el Tipo de Cambio para convertir de una divisa a otra
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +52,Only Leave Applications with status 'Approved' and 'Rejected' can be submitted,"Sólo Solicitudes de Permiso con estado ""Aprobado"" y ""Rechazado"" puede ser presentado"
-apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +150,Source and target warehouse must be different,El almacén de origen y el de destino deben ser diferentes
+apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +155,Source and target warehouse must be different,El almacén de origen y el de destino deben ser diferentes
 apps/erpnext/erpnext/hr/doctype/vehicle_log/vehicle_log.py +20,"Service Item,Type,frequency and expense amount are required","El Artículo de Servico, el Tipo, la Frecuencia y la Cantidad de Gasto son requeridos"
 apps/erpnext/erpnext/accounts/doctype/asset/asset.py +62,Gross Purchase Amount is mandatory,El Importe Bruto de Compra es obligatorio
 DocType: Stock Entry,Customer or Supplier Details,Detalle de cliente o proveedor
 DocType: Lab Test Template,Standard Selling Rate,Tarifa de Venta Estándar
 DocType: Program Enrollment,School House,Casa Escuela
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +254,Please set default account in Expense Claim Type {0},"Por favor, establezca la Cuenta predeterminada en el Tipo de Reembolso de Gastos {0}"
-apps/erpnext/erpnext/schools/doctype/assessment_result/assessment_result.js +34,Score cannot be greater than Maximum Score,Los resultados no puede ser mayor que la Puntuación Máxima
+apps/erpnext/erpnext/schools/doctype/assessment_result/assessment_result.js +36,Score cannot be greater than Maximum Score,Los resultados no puede ser mayor que la Puntuación Máxima
 apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py +60,Please set Company filter blank if Group By is 'Company',"Por favor, establezca el filtro de Compañía en blanco si Agrupar Por es 'Compañía'"
 DocType: School Settings,"For Course based Student Group, the Course will be validated for every Student from the enrolled Courses in Program Enrollment.","Para Grupo de Estudiantes por Curso, el Curso será validado para cada Estudiante de los Cursos inscritos en la Inscripción del Programa."
 DocType: School Settings,"For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.","Para grupo de estudiantes por lotes, el lote de estudiantes se validará para cada estudiante de la inscripción del programa."
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +71,Leave Encashment,Cobro de Permiso
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +988,Select Items based on Delivery Date,Seleccionar Artículos según la fecha de entrega
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +992,Select Items based on Delivery Date,Seleccionar Artículos según la fecha de entrega
