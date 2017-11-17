@@ -15,101 +15,39 @@ def get_data(item):
 		return []
 	item_dicts = []
 
-	item_doc = frappe.get_doc("Item", item)
-
 	variant_results = frappe.db.sql("""select name from `tabItem`
 		where variant_of = %s""", item, as_dict=1)
 	variants = ",".join(['"' + variant['name'] + '"' for variant in variant_results])
 
-	# Open Orders
-	open_sales_orders = frappe.db.sql("""
-		select
-			count(*) as count,
-			item_code
-		from
-			`tabSales Order Item`
-		where
-			qty > delivered_qty and
-			item_code in ({variants})
-	""".format(variants=variants), as_dict=1)
+	order_count_map = get_open_sales_orders_map(variants)
+	stock_details_map = get_stock_details_map(variants)
+	buying_price_map = get_buying_price_map(variants)
+	selling_price_map = get_selling_price_map(variants)
+	attr_val_map = get_attribute_values_map(variants)
 
-	oss = {}
-	for d in open_sales_orders:
-		oss[d["item_code"]] = d["count"]
-
-	# Stock
-	stock_details = frappe.db.sql("""
-		select
-			sum(planned_qty) as planned_qty,
-			sum(actual_qty) as actual_qty,
-			sum(projected_qty) as projected_qty,
-			item_code
-		from
-			`tabBin`
-		where
-			item_code in ({variants})
-	""".format(variants=variants), as_dict=1)
-
-	sd = {}
-	for d in stock_details:
-		name = d["item_code"]
-		sd[name] = {
-			"Inventory" :d["actual_qty"],
-			"In Production" :d["planned_qty"],
-			"Available Selling" :d["projected_qty"]
-		}
-
-	# Price
-	buying = frappe.db.sql("""
-		select
-			avg(price_list_rate) as avg_rate,
-			item_code
-		from
-			`tabItem Price`
-		where
-			item_code in ({variants}) and buying=1
-		""".format(variants=variants), as_dict=1)
-
-	bu = {}
-	for d in buying:
-		bu[d["item_code"]] = d["avg_rate"]
-
-	selling = frappe.db.sql("""
-		select
-			avg(price_list_rate) as avg_rate,
-			item_code
-		from
-			`tabItem Price`
-		where
-			item_code in ({variants}) and selling=1
-		""".format(variants=variants), as_dict=1)
-
-	se = {}
-	for d in selling:
-		se[d["item_code"]] = d["avg_rate"]
-
+	attribute_list = [d[0] for d in frappe.db.sql("""select attribute
+		from `tabItem Variant Attribute`
+		where parent in ({variants}) group by attribute""".format(variants=variants))]
 
 	# Prepare dicts
 	variant_dicts = [{"variant_name": d['name']} for d in variant_results]
 	for item_dict in variant_dicts:
 		name = item_dict["variant_name"]
 
-		# Attributes
-		variant_doc = frappe.get_doc("Item", name)
-		for d in variant_doc.attributes:
-			item_dict[d.attribute] = d.attribute_value
+		for d in attribute_list:
+			item_dict[d] = attr_val_map[name][d]
 
-		item_dict["Open Orders"] = oss.get(name) or 0
+		item_dict["Open Orders"] = order_count_map.get(name) or 0
 
-		if sd.get(name):
-			item_dict["Inventory"] = sd.get(name)["Inventory"] or 0
-			item_dict["In Production"] = sd.get(name)["In Production"] or 0
-			item_dict["Available Selling"] = sd.get(name)["Available Selling"] or 0
+		if stock_details_map.get(name):
+			item_dict["Inventory"] = stock_details_map.get(name)["Inventory"] or 0
+			item_dict["In Production"] = stock_details_map.get(name)["In Production"] or 0
+			item_dict["Available Selling"] = stock_details_map.get(name)["Available Selling"] or 0
 		else:
 			item_dict["Inventory"] = item_dict["In Production"] = item_dict["Available Selling"] = 0
 
-		item_dict["Avg. Buying Price List Rate"] = bu.get(name) or 0
-		item_dict["Avg. Selling Price List Rate"] = se.get(name) or 0
+		item_dict["Avg. Buying Price List Rate"] = buying_price_map.get(name) or 0
+		item_dict["Avg. Selling Price List Rate"] = selling_price_map.get(name) or 0
 
 		item_dicts.append(item_dict)
 
@@ -135,3 +73,98 @@ def get_columns(item):
 	]
 
 	return columns
+
+def get_open_sales_orders_map(variants):
+	open_sales_orders = frappe.db.sql("""
+		select
+			count(*) as count,
+			item_code
+		from
+			`tabSales Order Item`
+		where
+			qty > delivered_qty and
+			item_code in ({variants})
+	""".format(variants=variants), as_dict=1)
+
+	order_count_map = {}
+	for d in open_sales_orders:
+		order_count_map[d["item_code"]] = d["count"]
+
+	return order_count_map
+
+def get_stock_details_map(variants):
+	stock_details = frappe.db.sql("""
+		select
+			sum(planned_qty) as planned_qty,
+			sum(actual_qty) as actual_qty,
+			sum(projected_qty) as projected_qty,
+			item_code
+		from
+			`tabBin`
+		where
+			item_code in ({variants})
+	""".format(variants=variants), as_dict=1)
+
+	stock_details_map = {}
+	for d in stock_details:
+		name = d["item_code"]
+		stock_details_map[name] = {
+			"Inventory" :d["actual_qty"],
+			"In Production" :d["planned_qty"],
+			"Available Selling" :d["projected_qty"]
+		}
+
+	return stock_details_map
+
+def get_buying_price_map(variants):
+	buying = frappe.db.sql("""
+		select
+			avg(price_list_rate) as avg_rate,
+			item_code
+		from
+			`tabItem Price`
+		where
+			item_code in ({variants}) and buying=1
+		""".format(variants=variants), as_dict=1)
+
+	buying_price_map = {}
+	for d in buying:
+		buying_price_map[d["item_code"]] = d["avg_rate"]
+
+	return buying_price_map
+
+def get_selling_price_map(variants):
+	selling = frappe.db.sql("""
+		select
+			avg(price_list_rate) as avg_rate,
+			item_code
+		from
+			`tabItem Price`
+		where
+			item_code in ({variants}) and selling=1
+		""".format(variants=variants), as_dict=1)
+
+	selling_price_map = {}
+	for d in selling:
+		selling_price_map[d["item_code"]] = d["avg_rate"]
+
+	return selling_price_map
+
+def get_attribute_values_map(variants):
+	list_attr = frappe.db.sql("""
+	select
+		attribute, attribute_value, parent
+    from
+		`tabItem Variant Attribute`
+    where
+		parent in ({variants})""".format(variants=variants), as_dict=1)
+
+	attr_val_map = {}
+	for d in list_attr:
+		name = d["parent"]
+		if not attr_val_map.get(name):
+			attr_val_map[name] = {}
+
+		attr_val_map[name][d["attribute"]] = d["attribute_value"]
+
+	return attr_val_map
