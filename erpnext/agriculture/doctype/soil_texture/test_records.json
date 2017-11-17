@@ -1,0 +1,9 @@
+[
+	{
+		"doctype": "Soil Texture",
+		"geolocation": "{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"type\":\"Point\",\"coordinates\":[72.861242,19.079153]}}]}",
+		"date": "2017-11-08",
+		"clay_composition": 20,
+		"sand_composition": 30
+	}
+]

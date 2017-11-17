@@ -8,17 +8,17 @@ import unittest
 
 class TestSoilTexture(unittest.TestCase):
 	def test_texture_selection(self):
-		sample_texture = {
-			'doctype': 'Soil Texture',
-			'geolocation': '{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[72.882185,19.076395]}}]}',
-			'date': '2017-11-08',
-			'clay_composition': 20,
-			'sand_composition': 30
-		}
+		# sample_texture = {
+		# 	'doctype': 'Soil Texture',
+		# 	'geolocation': '{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[72.882185,19.076395]}}]}',
+		# 	'date': '2017-11-08',
+		# 	'clay_composition': 20,
+		# 	'sand_composition': 30
+		# }
 
-		doc = frappe.get_doc(sample_texture)
-		doc.save()
-
-		soil_tex = frappe.get_doc('Soil Texture', doc.name)
-		self.assertEquals(soil_tex.silt_composition, 50)
-		self.assertEquals(soil_tex.soil_type, 'Silt Loam')
+		# doc = frappe.get_doc(sample_texture)
+		# doc.save()
+		soil_tex = frappe.get_all('Soil Texture', fields=['name'], filters={'date': '2017-11-08'})
+		doc = frappe.get_doc('Soil Texture', soil_tex[0].name)
+		self.assertEquals(doc.silt_composition, 50)
+		self.assertEquals(doc.soil_type, 'Silt Loam')
