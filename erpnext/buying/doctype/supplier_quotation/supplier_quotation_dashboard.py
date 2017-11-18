@@ -11,7 +11,7 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Related'),
-				'items': ['Purchase Order']
+				'items': ['Purchase Order', 'Quotation Opening']
 			},
 			{
 				'label': _('Reference'),

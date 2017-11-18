@@ -24,7 +24,7 @@ frappe.ui.form.on("Purchase Order", {
     onload_post_render: function(frm){
         frm.add_fetch("quotation_opening", "reason", "reason");   
     },
-    after_save: function(frm, cdt, cdn){
+    validate: function(frm, cdt, cdn){
         if (frm.doc.workflow_state && frm.doc.workflow_state.indexOf("Rejected") != -1){
             frappe.prompt([
                 {
@@ -79,6 +79,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
             frappe.call({
                 "method": "has_requester_perm",
                 "doc": cur_frm.doc,
+                "freeze": true,
                 callback: function(r) {
                     if(frappe.session.user != "Administrator"){
                         if (frappe.session.user != r.message){

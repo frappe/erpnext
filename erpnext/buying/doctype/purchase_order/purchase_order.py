@@ -91,9 +91,10 @@ class PurchaseOrder(BuyingController):
 			return title
 
 	def vallidate_workflow_transition(self):
-		if u"Shared Services Director" in frappe.get_roles(frappe.session.user):
-			if self.project and self.workflow_state == "Approved By Shared Services Director":
-				self.workflow_state = "Approved By Shared Services Director (Prt.)"
+		if hasattr(self,'workflow_state'):
+			if u"Shared Services Director" in frappe.get_roles(frappe.session.user):
+				if self.project and self.workflow_state == "Approved By Shared Services Director":
+					self.workflow_state = "Approved By Shared Services Director (Prt.)"
 
 
 	def validate_with_previous_doc(self):
