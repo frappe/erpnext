@@ -79,6 +79,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
             frappe.call({
                 "method": "has_requester_perm",
                 "doc": cur_frm.doc,
+                "freeze": true,
                 callback: function(r) {
                     if(frappe.session.user != "Administrator"){
                         if (frappe.session.user != r.message){
