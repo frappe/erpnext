@@ -45,11 +45,23 @@ class Item(WebsiteGenerator):
 						filters={"asset_category": self.asset_category })
 					if item_name : 
 						self.naming_series = item_name[0]["naming_series"]
-				else :	
+				else :
+					item_group = frappe.get_doc("Item Group",self.item_group)
 					item_name = frappe.get_list("Item Name", fields=["naming_series"],
-						filters={"item_group": self.item_group })
+							filters={"item_group": self.item_group })
 					if item_name : 
-						self.naming_series = item_name[0]["naming_series"]	
+						self.naming_series = item_name[0]["naming_series"]
+					else :
+						current_item_group = item_group.name
+						while  current_item_group :
+							current_item_group = item_group.parent_item_group
+							if current_item_group:
+								item_group = frappe.get_doc("Item Group",current_item_group)
+								item_name = frappe.get_list("Item Name", fields=["naming_series"],
+									filters={"item_group": item_group.name})
+								if item_name : 
+									self.naming_series = item_name[0]["naming_series"]	
+									break	
 				
 				self.item_code = make_autoname(self.naming_series+'.#####')
 		elif not self.item_code:

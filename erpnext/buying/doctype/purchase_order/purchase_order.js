@@ -24,7 +24,7 @@ frappe.ui.form.on("Purchase Order", {
     onload_post_render: function(frm){
         frm.add_fetch("quotation_opening", "reason", "reason");   
     },
-    validate: function(frm, cdt, cdn){
+    after_save: function(frm, cdt, cdn){
         if (frm.doc.workflow_state && frm.doc.workflow_state.indexOf("Rejected") != -1){
             frappe.prompt([
                 {
