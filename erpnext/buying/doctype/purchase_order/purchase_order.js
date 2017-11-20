@@ -12,7 +12,43 @@ frappe.ui.form.on("Purchase Order", {
             'Stock Entry': 'Material to Supplier'
         }
     },
+    refresh: function(frm){
+        if(cur_frm.doc.workflow_state && cur_frm.doc.workflow_state == "Pending"){
+            frappe.call({
+                "method": "has_requester_perm",
+                "doc": cur_frm.doc,
+                "freeze": true,
+                callback: function(r) {
+                    if(frappe.session.user != "Administrator"){
+                        if (frappe.session.user != r.message){
+                            cur_frm.page.clear_actions_menu();
+                        }
+                    }
+                }
+            });
+        }
+        if (cur_frm.doc.docstatus == 1 && frappe.user_roles.indexOf("Purchase Manager") != -1 && cur_frm.doc.contact_email){
+        cur_frm.add_custom_button(__("Send Supplier Emails"), function() {
+                frappe.call({
+                    method: 'supplier_po_mail',
+                    doc: cur_frm.doc,
+                    freeze: true
+                });
+            });
+        }   
+        if (!cur_frm.doc.__islocal) {
+            for (var key in cur_frm.fields_dict) {
+                cur_frm.fields_dict[key].df.read_only = 1;
+            }
+            cur_frm.fields_dict["msg_to_supplier"].df.read_only = 0;
+            cur_frm.fields_dict["msg_section"].df.read_only = 0;
+            cur_frm.disable_save();
+        } else {
+            cur_frm.enable_save();
+        }
+    },
     onload: function(frm) {
+        // frm.refresh();
         erpnext.queries.setup_queries(frm, "Warehouse", function() {
             return erpnext.queries.warehouse(frm.doc);
         });
@@ -75,39 +111,6 @@ frappe.ui.form.on("Purchase Order", {
 
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
     refresh: function(doc) {
-        if(cur_frm.doc.workflow_state && cur_frm.doc.workflow_state == "Pending"){
-            frappe.call({
-                "method": "has_requester_perm",
-                "doc": cur_frm.doc,
-                "freeze": true,
-                callback: function(r) {
-                    if(frappe.session.user != "Administrator"){
-                        if (frappe.session.user != r.message){
-                            cur_frm.page.clear_actions_menu();
-                        }
-                    }
-                }
-            });
-        }
-        if (cur_frm.doc.docstatus === 1 && frappe.user_roles.indexOf("Purchase Manager") != -1 && cur_frm.doc.contact_email)
-        cur_frm.add_custom_button(__("Send Supplier Emails"), function() {
-                frappe.call({
-                    method: 'supplier_po_mail',
-                    doc: cur_frm.doc,
-                    freeze: true
-                });
-            });
-
-        if (!cur_frm.doc.__islocal) {
-            for (var key in cur_frm.fields_dict) {
-                cur_frm.fields_dict[key].df.read_only = 1;
-            }
-            cur_frm.fields_dict["msg_to_supplier"].df.read_only = 0;
-            cur_frm.fields_dict["msg_section"].df.read_only = 0;
-            cur_frm.disable_save();
-        } else {
-            cur_frm.enable_save();
-        }
         var me = this;
         this._super();
         var allow_receipt = false;
@@ -349,11 +352,11 @@ cur_frm.fields_dict['items'].grid.get_field('bom').get_query = function(doc, cdt
     }
 }
 
-cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-    if (cint(frappe.boot.notification_settings.purchase_order)) {
-        cur_frm.email_doc(frappe.boot.notification_settings.purchase_order_message);
-    }
-}
+// cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
+//     if (cint(frappe.boot.notification_settings.purchase_order)) {
+//         cur_frm.email_doc(frappe.boot.notification_settings.purchase_order_message);
+//     }
+// }
 
 cur_frm.cscript.schedule_date = function(doc, cdt, cdn) {
     erpnext.utils.copy_value_in_all_row(doc, cdt, cdn, "items", "schedule_date");

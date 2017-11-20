@@ -5,11 +5,37 @@
 cur_frm.add_fetch("material_requester", "department", "department");
 cur_frm.add_fetch("material_requester", "user_id", "user_id");
 frappe.ui.form.on('Material Request', {
-    validate: function(frm) {
-           // cur_frm.refresh();
-
+    refresh: function(frm) {
+        // cur_frm.refresh();
+        for (var key in cur_frm.fields_dict) {
+            cur_frm.fields_dict[key].df.read_only = 1;
+            // cur_frm.refresh_field(key);
+        }
+        cur_frm.disable_save();
+        if (cur_frm.doc.__islocal || (cur_frm.doc.state == "Rejected" && cur_frm.doc.user_id == frappe.session.user)) {
+            for (var key in cur_frm.fields_dict) {
+                cur_frm.fields_dict[key].df.read_only = 0;
+            }
+            cur_frm.enable_save();
+            cur_frm.fields_dict["material_requester"].df.read_only = 1;
+            cur_frm.fields_dict["state"].df.read_only = 1;
+            cur_frm.fields_dict["suggested_grand_total"].df.read_only = 1;
+            cur_frm.fields_dict["handled_by"].df.read_only = 1;
+        }
+        cur_frm.toggle_display("project", cur_frm.doc.purchase_workflow == "Project");
+        frappe.call({
+            method: "unallowed_actions",
+            doc: cur_frm.doc,
+            freeze: true,
+            callback: function(r) {
+                if (r.message && frappe.session.user != "Administrator") {
+                    cur_frm.page.clear_actions_menu();
+                }
+            }
+        });
        },
     setup: function(frm) {
+       
         frm.custom_make_buttons = {
             'Stock Entry': 'Issue Material',
             'Purchase Order': 'Purchase Order',
@@ -24,8 +50,9 @@ frappe.ui.form.on('Material Request', {
         frm.clear_table("items");
         refresh_many(['items']);
         frm.set_value("project", undefined);
-        frm.toggle_enable("project", frm.doc.purchase_workflow == "Project");
+        frm.toggle_display("project", frm.doc.purchase_workflow == "Project");
         frm.toggle_reqd("project", frm.doc.purchase_workflow == "Project");
+        frm.refresh_field('project');
         if (frm.doc.purchase_workflow == "Project") {
             frappe.call({
                 method: "get_project_manager",
@@ -53,7 +80,7 @@ frappe.ui.form.on('Material Request', {
 	            args: {
 	                doctype: "Employee",
 	                fieldname: "name",
-	                filters: { "user_id": user }
+	                filters: { "user_id": frappe.session.user }
 	            },
 	            callback: function(r, rt) {
 	                if (r.message.name) {
@@ -102,6 +129,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
     onload: function() {
         this._super();
         cur_frm.trigger('filter_items');
+        cur_frm.refresh();
     },
     purchase_workflow: function(){
         
@@ -116,6 +144,9 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
             else if (cur_frm.doc.purchase_workflow == "Project"){
                 flts = {'is_fixed_asset': 0};
             }
+            else if (cur_frm.doc.purchase_workflow == "Service"){
+                flts = {'is_fixed_asset': 0, 'is_stock_item': 0};
+            }
             return {
                 query: "erpnext.controllers.queries.item_query",
                 filters: flts
@@ -123,33 +154,6 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
         });
     },
     refresh: function(doc) {
-
-        frappe.call({
-            method: "unallowed_actions",
-            doc: cur_frm.doc,
-            freeze: true,
-            callback: function(r) {
-                if (r.message && frappe.session.user != "Administrator") {
-                    cur_frm.page.clear_actions_menu();
-                }
-            }
-        });
-
-        for (var key in cur_frm.fields_dict) {
-            cur_frm.fields_dict[key].df.read_only = 1;
-        }
-        cur_frm.disable_save();
-        if (cur_frm.doc.__islocal || (cur_frm.doc.state == "Rejected" && cur_frm.doc.user_id == user)) {
-            for (var key in cur_frm.fields_dict) {
-                cur_frm.fields_dict[key].df.read_only = 0;
-            }
-            cur_frm.enable_save();
-            cur_frm.fields_dict["material_requester"].df.read_only = 1;
-            cur_frm.fields_dict["state"].df.read_only = 1;
-            cur_frm.fields_dict["suggested_grand_total"].df.read_only = 1;
-        }
-
-
         var me = this;
         this._super();
 
@@ -158,7 +162,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
                 cur_frm.cscript.get_items_from_bom, "fa fa-sitemap", "btn-default");
         }
 
-        if (doc.docstatus == 1 && doc.status != 'Stopped' && roles.indexOf("Purchase Manager") != -1) {
+        if (doc.docstatus == 1 && doc.status != 'Stopped' && frappe.user_roles.indexOf("Purchase Manager") != -1) {
             if (flt(doc.per_ordered, 2) < 100) {
                 // make
                 if (doc.material_request_type === "Material Transfer" && doc.status === "Submitted")

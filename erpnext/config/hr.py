@@ -397,5 +397,24 @@ def get_data():
 					"youtube_id": "apgE-f25Rm0"
 				},
 			]
+		},{
+			"label": _("Employee Interface"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Job Applicant",
+					"description": _("Applicant for a Job."),
+				},
+				{
+					"type": "doctype",
+					"name": "Job Opening",
+					"description": _("Opening for a Job."),
+				},
+				{
+					"type": "doctype",
+					"name": "Offer Letter",
+					"description": _("Offer candidate a Job."),
+				},
+			]
 		}
 	]

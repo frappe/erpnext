@@ -178,7 +178,12 @@ class MaterialRequest(BuyingController):
 			)).insert(ignore_permissions = True)
 			# user = frappe.get_doc("User", user_emp[0].user_id)
 			# frappe.permissions.add_user_permission("Material Request", self.name, user_emp[0].user_id, apply=False)
-
+	def on_trash(self):
+		user_emp = frappe.db.sql("select user_id from `tabEmployee` where name = '{0}'".format(self.material_requester), as_dict = 1)
+		mr = frappe.get_value("User Permission", filters ={'user': user_emp[0].user_id, 'allow': 'Material Request', 'for_value': self.name}, fieldname = "name")
+		if mr:
+			frappe.delete_doc("User Permission", mr)
+			
 	def validate_department(self):
 		if self.purchase_workflow == "Project":
 			self.department = None
