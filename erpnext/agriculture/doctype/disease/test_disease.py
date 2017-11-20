@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 
-class TestPest(unittest.TestCase):
+class TestDisease(unittest.TestCase):
 	def test_treatment_period(self):
-		pest = frappe.get_doc('Pest', 'Aphids')
-		self.assertEquals(pest.treatment_period, 3)
+		disease = frappe.get_doc('Disease', 'Aphids')
+		self.assertEquals(disease.treatment_period, 3)

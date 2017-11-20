@@ -14,11 +14,11 @@ QUnit.test("test: Crop Cycle", function (assert) {
 			// values to be set
 			{title: 'Basil from seed 2017'},
 			{land_unit: 'Basil Farm'},
-			{crop: 'Basil'},
+			{crop: 'Basil from seed'},
 			{start_date: '2017-11-11'},
-			{detected_pest: [
+			{detected_disease: [
 				[
-					{pest: 'Aphids'},
+					{disease: 'Aphids'},
 					{start_date: '2017-11-21'}
 				]
 			]}

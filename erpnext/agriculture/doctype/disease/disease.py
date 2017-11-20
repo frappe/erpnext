@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 
-class Pest(Document):
+class Disease(Document):
 	def validate(self):
 		max_period = 0
 		for task in self.treatment_task:

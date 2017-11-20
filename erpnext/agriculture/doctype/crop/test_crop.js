@@ -33,7 +33,8 @@ QUnit.test("test: Crop", function (assert) {
 		// insert a new Crop
 		() => frappe.tests.make('Crop', [
 			// values to be set
-			{common_name: 'Basil'},
+			{title: 'Basil from seed'},
+			{crop_name: 'Basil'},
 			{scientific_name: 'Ocimum basilicum'},
 			{materials_required: [
 				[
@@ -106,7 +107,7 @@ QUnit.test("test: Crop", function (assert) {
 		]),
 		// agriculture task list 
 		() => {
-			assert.equal(cur_frm.doc.name, 'Basil');
+			assert.equal(cur_frm.doc.name, 'Basil from seed');
 			assert.equal(cur_frm.doc.period, 15);
 		},
 		() => done()

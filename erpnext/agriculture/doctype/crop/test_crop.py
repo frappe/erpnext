@@ -10,5 +10,5 @@ test_dependencies = ["Fertilizer"]
 
 class TestCrop(unittest.TestCase):
 	def test_crop_period(self):
-		basil = frappe.get_doc('Crop', 'Basil')
+		basil = frappe.get_doc('Crop', 'Basil from seed')
 		self.assertEquals(basil.period, 15)

@@ -3,10 +3,10 @@
 		"doctype": "Crop Cycle",
 		"title": "Basil from seed 2017",
 		"land_unit": "Basil Farm",
-		"crop": "Basil",
+		"crop": "Basil from seed",
 		"start_date": "2017-11-11",
-		"detected_pest": [{
-			"pest": "Aphids",
+		"detected_disease": [{
+			"disease": "Aphids",
 			"start_date": "2017-11-21"
 		}]
 	}

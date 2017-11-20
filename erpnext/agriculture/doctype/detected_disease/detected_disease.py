@@ -6,5 +6,5 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 
-class DetectedPest(Document):
+class DetectedDisease(Document):
 	pass

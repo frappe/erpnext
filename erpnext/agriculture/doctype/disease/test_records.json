@@ -1,6 +1,6 @@
 [
 	{
-		"doctype": "Pest",
+		"doctype": "Disease",
 		"common_name": "Aphids",
 		"scientific_name": "Aphidoidea",
 		"treatment_task": [{

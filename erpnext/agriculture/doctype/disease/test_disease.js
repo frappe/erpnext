@@ -2,15 +2,15 @@
 // rename this file from _test_[name] to test_[name] to activate
 // and remove above this line
 
-QUnit.test("test: Pest", function (assert) {
+QUnit.test("test: Disease", function (assert) {
 	let done = assert.async();
 
 	// number of asserts
 	assert.expect(1);
 
 	frappe.run_serially([
-		// insert a new Pest
-		() => frappe.tests.make('Pest', [
+		// insert a new Disease
+		() => frappe.tests.make('Disease', [
 			// values to be set
 			{common_name: 'Aphids'},
 			{scientific_name: 'Aphidoidea'},
@@ -36,3 +36,4 @@ QUnit.test("test: Pest", function (assert) {
 	]);
 
 });
+

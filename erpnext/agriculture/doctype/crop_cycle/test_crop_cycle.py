@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 
-test_dependencies = ["Crop", "Fertilizer", "Land Unit", "Pest"]
+test_dependencies = ["Crop", "Fertilizer", "Land Unit", "Disease"]
 
 class TestCropCycle(unittest.TestCase):
 	def test_crop_cycle_creation(self):
