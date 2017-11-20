@@ -25,8 +25,9 @@ erpnext.setup.slides_settings = [
 					{ "label": __("Manufacturing"), "value": "Manufacturing" },
 					{ "label": __("Retail"), "value": "Retail" },
 					{ "label": __("Services"), "value": "Services" },
-					{ "label": __("Education"), "value": "Education" },
-					{"label": __("Healthcare (beta)"), "value": "Healthcare"}
+					{ "label": __("Education (beta)"), "value": "Education" },
+					{"label": __("Healthcare (beta)"), "value": "Healthcare"},
+					{"label": __("Non Profit (beta)"), "value": "Non Profit"}
 				], reqd: 1
 			},
 		],
@@ -222,20 +223,3 @@ erpnext.setup.fiscal_years = {
 	"Thailand": ["10-01", "09-30"],
 	"United Kingdom": ["04-01", "03-31"],
 };
-
-// var test_values_edu = {
-// 	"language": "english",
-// 	"domain": "Education",
-// 	"country": "India",
-// 	"timezone": "Asia/Kolkata",
-// 	"currency": "INR",
-// 	"first_name": "Tester",
-// 	"email": "test@example.com",
-// 	"password": "test",
-// 	"company_name": "Hogwarts",
-// 	"company_abbr": "HS",
-// 	"company_tagline": "School for magicians",
-// 	"bank_account": "Gringotts Wizarding Bank",
-// 	"fy_start_date": "2016-04-01",
-// 	"fy_end_date": "2017-03-31"
-// }
