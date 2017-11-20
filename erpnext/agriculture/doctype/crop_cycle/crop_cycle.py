@@ -13,9 +13,9 @@ class CropCycle(Document):
 			self.create_project(crop.period, crop.agriculture_task)
 		if not self.project:
 			self.project = self.name
-		for detected_pest in self.detected_pest:
-			pest = frappe.get_doc('Pest', detected_pest.pest)
-			self.create_task(pest.treatment_task, self.name, detected_pest.start_date)
+		for detected_disease in self.detected_disease:
+			disease = frappe.get_doc('Disease', detected_disease.disease)
+			self.create_task(disease.treatment_task, self.name, detected_disease.start_date)
 
 	def create_project(self, period, crop_tasks):
 		project = frappe.new_doc("Project")

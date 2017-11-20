@@ -334,12 +334,12 @@ def get_data():
 			"link": "List/Land Unit"
 		},
 		{
-			"module_name": "Pest",
-			"_doctype": "Pest",
+			"module_name": "Disease",
+			"_doctype": "Disease",
 			"color": "#8BC34A",
 			"icon": "octicon octicon-bug",
 			"type": "link",
-			"link": "List/Pest"
+			"link": "List/Disease"
 		},
 		{
 			"module_name": "Plant Analysis",

@@ -5,8 +5,8 @@
 		"land_unit": "Basil Farm",
 		"crop": "Basil",
 		"start_date": "2017-11-11",
-		"detected_pest": [{
-			"pest": "Aphids",
+		"detected_disease": [{
+			"disease": "Aphids",
 			"start_date": "2017-11-21"
 		}]
 	}
