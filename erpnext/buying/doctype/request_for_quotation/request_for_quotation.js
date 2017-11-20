@@ -254,7 +254,7 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 						}
 					})
 				}, __("Get items from"));
-			// Get items from Opportunity 
+			// Get items from Opportunity
             this.frm.add_custom_button(__('Opportunity'),
 				function() {
 					erpnext.utils.map_current_doc({
@@ -264,11 +264,8 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 						setters: {
 							company: me.frm.doc.company
 						},
-						get_query_filters: {
-							enquiry_type: "Sales"
-						}
 					})
-				}, __("Get items from"));  
+				}, __("Get items from"));
 			// Get items from open Material Requests based on supplier
 			this.frm.add_custom_button(__('Possible Supplier'), function() {
 				// Create a dialog window for the user to pick their supplier

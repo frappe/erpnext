@@ -190,23 +190,28 @@ class ProcessPayroll(Document):
 	def format_as_links(self, salary_slip):
 		return ['<a href="#Form/Salary Slip/{0}">{0}</a>'.format(salary_slip)]
 
-	def get_total_salary_and_loan_amounts(self):
+	def get_loan_details(self):
 		"""
-			Get total loan principal, loan interest and salary amount from submitted salary slip based on selected criteria
+			Get loan details from submitted salary slip based on selected criteria
 		"""
 		cond = self.get_filter_condition()
-		totals = frappe.db.sql("""
-			select sum(principal_amount) as total_principal_amount, sum(interest_amount) as total_interest_amount, 
-			sum(total_loan_repayment) as total_loan_repayment, sum(rounded_total) as rounded_total from `tabSalary Slip` t1
+		return frappe.db.sql(""" select eld.employee_loan_account,
+				eld.interest_income_account, eld.principal_amount, eld.interest_amount, eld.total_payment
+			from
+				`tabSalary Slip` t1, `tabSalary Slip Loan` eld
+			where
+				t1.docstatus = 1 and t1.name = eld.parent and start_date >= %s and end_date <= %s %s
+			""" % ('%s', '%s', cond), (self.start_date, self.end_date), as_dict=True) or []
+
+	def get_total_salary_amount(self):
+		"""
+			Get total salary amount from submitted salary slip based on selected criteria
+		"""
+		cond = self.get_filter_condition()
+		totals = frappe.db.sql(""" select sum(rounded_total) as rounded_total from `tabSalary Slip` t1
 			where t1.docstatus = 1 and start_date >= %s and end_date <= %s %s
 			""" % ('%s', '%s', cond), (self.start_date, self.end_date), as_dict=True)
-		return totals[0]
-	
-	def get_loan_accounts(self):
-		loan_accounts = frappe.get_all("Employee Loan", fields=["employee_loan_account", "interest_income_account"], 
-						filters = {"company": self.company, "docstatus":1})
-		if loan_accounts:
-			return loan_accounts[0]
+		return totals and totals[0] or None
 
 	def get_salary_component_account(self, salary_component):
 		account = frappe.db.get_value("Salary Component Account",
@@ -257,8 +262,7 @@ class ProcessPayroll(Document):
 		earnings = self.get_salary_component_total(component_type = "earnings") or {}
 		deductions = self.get_salary_component_total(component_type = "deductions") or {}
 		default_payroll_payable_account = self.get_default_payroll_payable_account()
-		loan_amounts = self.get_total_salary_and_loan_amounts()
-		loan_accounts = self.get_loan_accounts()
+		loan_details = self.get_loan_details()
 		jv_name = ""
 		precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
 
@@ -294,18 +298,18 @@ class ProcessPayroll(Document):
 					})
 
 			# Employee loan
-			if loan_amounts.total_loan_repayment:
+			for data in loan_details:
 				accounts.append({
-						"account": loan_accounts.employee_loan_account,
-						"credit_in_account_currency": loan_amounts.total_principal_amount
+						"account": data.employee_loan_account,
+						"credit_in_account_currency": data.principal_amount
 					})
 				accounts.append({
-						"account": loan_accounts.interest_income_account,
-						"credit_in_account_currency": loan_amounts.total_interest_amount,
+						"account": data.interest_income_account,
+						"credit_in_account_currency": data.interest_amount,
 						"cost_center": self.cost_center,
 						"project": self.project
 					})
-				payable_amount -= flt(loan_amounts.total_loan_repayment, precision)
+				payable_amount -= flt(data.total_payment, precision)
 
 			# Payable amount
 			accounts.append({
@@ -327,11 +331,11 @@ class ProcessPayroll(Document):
 
 	def make_payment_entry(self):
 		self.check_permission('write')
-		total_salary_amount = self.get_total_salary_and_loan_amounts()
+		total_salary_amount = self.get_total_salary_amount()
 		default_payroll_payable_account = self.get_default_payroll_payable_account()
 		precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
 
-		if total_salary_amount.rounded_total:
+		if total_salary_amount and total_salary_amount.rounded_total:
 			journal_entry = frappe.new_doc('Journal Entry')
 			journal_entry.voucher_type = 'Bank Entry'
 			journal_entry.user_remark = _('Payment of salary from {0} to {1}')\

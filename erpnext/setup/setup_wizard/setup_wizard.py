@@ -40,7 +40,7 @@ def setup_complete(args=None):
 
 	frappe.local.message_log = []
 	domain_settings = frappe.get_single('Domain Settings')
-	domain_settings.set_active_domains([_(args.get('domain'))])
+	domain_settings.set_active_domains([args.get('domain')])
 
 	frappe.db.commit()
 	login_as_first_user(args)
@@ -185,10 +185,6 @@ def set_defaults(args):
 	hr_settings = frappe.get_doc("HR Settings")
 	hr_settings.emp_created_by = "Naming Series"
 	hr_settings.save()
-
-	domain_settings = frappe.get_doc("Domain Settings")
-	domain_settings.append('active_domains', dict(domain=_(args.get('domain'))))
-	domain_settings.save()
 
 def create_feed_and_todo():
 	"""update Activity feed and create todo for creation of item, customer, vendor"""
