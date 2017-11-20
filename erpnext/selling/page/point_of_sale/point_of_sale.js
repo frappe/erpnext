@@ -55,7 +55,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			() => {
 				frappe.timeout(1);
 				this.make_items();
-				this.bind_events();
+				this.set_pos_profile_data();
 				frappe.dom.unfreeze();
 			},
 			() => this.page.set_title(__('Point of Sale'))
@@ -275,13 +275,30 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 					this.toggle_editing();
 					this.set_form_action();
+					this.set_primary_action_in_modal();
 				}
 			});
 		});
 	}
 
-	bind_events() {
+	set_primary_action_in_modal() {
+		this.frm.msgbox = frappe.msgprint(
+			`<a class="btn btn-primary" onclick="cur_frm.print_preview.printit(true)" style="margin-right: 5px;">
+				${__('Print')}</a>
+			<a class="btn btn-default">
+				${__('New')}</a>`
+		);
 
+		$(this.frm.msgbox.body).find('.btn-default').on('click', () => {
+			this.frm.msgbox.hide();
+			this.make_new_invoice();
+		})
+	}
+
+	set_pos_profile_data() {
+		if (this.pos_profile && this.pos_profile.print_format_for_online) {
+			this.frm.meta.default_print_format = this.pos_profile.print_format_for_online;
+		}
 	}
 
 	setup_pos_profile() {
@@ -370,6 +387,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				if (this.cart) {
 					this.cart.frm = this.frm;
 					this.cart.reset();
+					this.items.reset_search_field();
 				} else {
 					this.make_cart();
 				}
@@ -434,9 +452,6 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		if(this.frm.doc.docstatus !== 1) return;
 
 		this.page.set_secondary_action(__("Print"), () => {
-			if (this.pos_profile && this.pos_profile.print_format_for_online) {
-				this.frm.meta.default_print_format = this.pos_profile.print_format_for_online;
-			}
 			this.frm.print_preview.printit(true);
 		});
 
