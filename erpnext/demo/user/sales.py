@@ -54,7 +54,7 @@ def make_opportunity():
 		"doctype": "Opportunity",
 		"enquiry_from": "Customer",
 		"customer": get_random("Customer"),
-		"enquiry_type": "Sales",
+		"opportunity_type": "Sales",
 		"with_items": 1,
 		"transaction_date": frappe.flags.current_date,
 	})

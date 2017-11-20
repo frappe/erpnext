@@ -132,6 +132,7 @@
 		"get_url_arg": true,
 		"get_server_fields": true,
 		"set_multiple": true,
-		"QUnit": true
+		"QUnit": true,
+		"Chart": true
 	}
 }

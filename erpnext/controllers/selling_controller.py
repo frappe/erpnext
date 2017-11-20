@@ -28,8 +28,7 @@ class SellingController(StockController):
 		super(SellingController, self).onload()
 		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
 			for item in self.get("items"):
-				item.update(get_bin_details(item.item_code,
-					item.warehouse))
+				item.update(get_bin_details(item.item_code, item.warehouse))
 
 	def validate(self):
 		super(SellingController, self).validate()
@@ -67,38 +66,6 @@ class SellingController(StockController):
 		self.set_price_list_currency("Selling")
 		self.set_missing_item_details(for_validate=for_validate)
 
-	def apply_shipping_rule(self):
-		if self.shipping_rule:
-			shipping_rule = frappe.get_doc("Shipping Rule", self.shipping_rule)
-			value = self.base_net_total
-
-			# TODO
-			# shipping rule calculation based on item's net weight
-
-			shipping_amount = 0.0
-			for condition in shipping_rule.get("conditions"):
-				if not condition.to_value or (flt(condition.from_value) <= value <= flt(condition.to_value)):
-					shipping_amount = condition.shipping_amount
-					break
-
-			shipping_charge = {
-				"doctype": "Sales Taxes and Charges",
-				"charge_type": "Actual",
-				"account_head": shipping_rule.account,
-				"cost_center": shipping_rule.cost_center
-			}
-
-			existing_shipping_charge = self.get("taxes", filters=shipping_charge)
-			if existing_shipping_charge:
-				# take the last record found
-				existing_shipping_charge[-1].tax_amount = shipping_amount
-			else:
-				shipping_charge["tax_amount"] = shipping_amount
-				shipping_charge["description"] = shipping_rule.label
-				self.append("taxes", shipping_charge)
-
-			self.calculate_taxes_and_totals()
-
 	def remove_shipping_charge(self):
 		if self.shipping_rule:
 			shipping_rule = frappe.get_doc("Shipping Rule", self.shipping_rule)
@@ -114,14 +81,15 @@ class SellingController(StockController):
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
-		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None, "disable_rounded_total"))
 
 		if self.meta.get_field("base_in_words"):
-			self.base_in_words = money_in_words(disable_rounded_total and
-				abs(self.base_grand_total) or abs(self.base_rounded_total), self.company_currency)
+			base_amount = abs(self.base_grand_total
+				if self.is_rounded_total_disabled() else self.base_rounded_total)
+			self.base_in_words = money_in_words(base_amount, self.company_currency)
+
 		if self.meta.get_field("in_words"):
-			self.in_words = money_in_words(disable_rounded_total and
-				abs(self.grand_total) or abs(self.rounded_total), self.currency)
+			amount = abs(self.grand_total if self.is_rounded_total_disabled() else self.rounded_total)
+			self.in_words = money_in_words(amount, self.currency)
 
 	def calculate_commission(self):
 		if self.meta.get_field("commission_rate"):

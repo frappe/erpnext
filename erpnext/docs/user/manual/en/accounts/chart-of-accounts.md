@@ -108,12 +108,30 @@ Supplier).
 
 <img class="screenshot" alt="Chart of Accounts" src="/docs/assets/img/accounts/chart-of-accounts-2.png">
 
+### Account Number
+A standard chart of accounts is organized according to a numerical system. Each major category will begin with a certain number, and then the sub-categories within that major category will all begin with the same number. For example, if assets are classified by numbers starting with the digit 1000, then cash accounts might be labeled 1100, bank accounts might be labeled 1200, accounts receivable might be labeled 1300, and so on. A gap between account numbers is generally maintained for adding accounts in the future.
+
+You can assign a number while creating an account from Chart of Accounts page. You can also edit a number from account record, by clicking "Update Account Number" button. On updating account number, system renames the account name automatically to embed the number in the account name.
+
 ### Other Account Types
 
 In ERPNext, you can also specify more information when you create a new
 Account, this is there to help you select that particular account in a
 scenario like Bank Account or a Tax Account and has no effect on the Chart
 itself.
+
+Explanation of account types:
+- **Bank:** The account group under which bank account will be created.
+- **Cash:** The account group under which cash account will be created.
+- **Cost of Goods Sold:** The account to book the accumulated total of all costs used to manufacture / purchase a product or service, sold by a company.
+- **Depreciation:** The expense account to book the depreciation of teh fixed assets.
+- **Expenses Included In Valuation:** The account to book the expenses (apart from direct material costs) included in landed cost of an item/product, used in Perpetual Inventory, .
+- **Fixed Asset:** The account to maintain the costs of fixed assets.
+- **Payable:** The account which represents the amount owed by a company to its creditors.
+- **Receivable:** The account which represents the amount owed by a company by its debtors.
+- **Stock:** The account group under which the warehouse account will be created.
+- **Stock Adjustment:** An expense account to book any adjustment entry of stock/inventory, and generally comes at the same level of Cost of Goods Sold.
+- **Stock Received But Not Billed:** A temporary liability account which holds the value of stock received but not billed yet and used in Perpetual Inventory.
 
 ### Creating / Editing Accounts
 
@@ -124,7 +142,8 @@ will see an option to “Open” or “Add Child” a new Account.
 <img class="screenshot" alt="Chart of Accounts" src="/docs/assets/img/accounts/chart-of-accounts-3.png">
 
 Option to create will only appear if you click on a Group (folder) type
-Account.
+Account. There you need to enter account name, account number and some more
+optional details.
 
 ERPNext creates a standard structure for you when the Company is created but
 it is up to you to modify or add or remove accounts.

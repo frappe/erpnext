@@ -257,6 +257,8 @@ def add_ac(args=None):
 	if cint(ac.get("is_root")):
 		ac.parent_account = None
 		ac.flags.ignore_mandatory = True
+	else:
+		ac.root_type = None
 
 	ac.insert()
 
@@ -593,7 +595,9 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 				select ifnull(sum({payment_dr_or_cr}), 0)
 				from `tabGL Entry` payment_gl_entry
 				where payment_gl_entry.against_voucher_type = invoice_gl_entry.voucher_type
-					and payment_gl_entry.against_voucher = invoice_gl_entry.against_voucher
+					and if(invoice_gl_entry.voucher_type='Journal Entry',
+						payment_gl_entry.against_voucher = invoice_gl_entry.voucher_no,
+						payment_gl_entry.against_voucher = invoice_gl_entry.against_voucher)
 					and payment_gl_entry.party_type = invoice_gl_entry.party_type
 					and payment_gl_entry.party = invoice_gl_entry.party
 					and payment_gl_entry.account = invoice_gl_entry.account
@@ -630,7 +634,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 			'invoice_amount': flt(d.invoice_amount),
 			'payment_amount': flt(d.payment_amount),
 			'outstanding_amount': flt(d.invoice_amount - d.payment_amount, precision),
-			'due_date': frappe.db.get_value(d.voucher_type, d.voucher_no, 
+			'due_date': frappe.db.get_value(d.voucher_type, d.voucher_no,
 				"posting_date" if party_type=="Employee" else "due_date"),
 		}))
 
@@ -656,16 +660,14 @@ def get_companies():
 		order_by="name")]
 
 @frappe.whitelist()
-def get_children():
+def get_children(doctype, parent, company, is_root=False):
 	from erpnext.accounts.report.financial_statements import sort_root_accounts
 
-	args = frappe.local.form_dict
-	doctype, company = args['doctype'], args['company']
 	fieldname = frappe.db.escape(doctype.lower().replace(' ','_'))
 	doctype = frappe.db.escape(doctype)
 
 	# root
-	if args['parent'] in ("Accounts", "Cost Centers"):
+	if is_root:
 		fields = ", root_type, report_type, account_currency" if doctype=="Account" else ""
 		acc = frappe.db.sql(""" select
 			name as value, is_group as expandable {fields}
@@ -675,7 +677,7 @@ def get_children():
 			order by name""".format(fields=fields, fieldname = fieldname, doctype=doctype),
 				company, as_dict=1)
 
-		if args["parent"]=="Accounts":
+		if parent=="Accounts":
 			sort_root_accounts(acc)
 	else:
 		# other
@@ -686,7 +688,7 @@ def get_children():
 			where ifnull(`parent_{fieldname}`,'') = %s
 			and docstatus<2
 			order by name""".format(fields=fields, fieldname=fieldname, doctype=doctype),
-				args['parent'], as_dict=1)
+				parent, as_dict=1)
 
 	if doctype == 'Account':
 		company_currency = frappe.db.get_value("Company", company, "default_currency")

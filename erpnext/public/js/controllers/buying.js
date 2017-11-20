@@ -18,6 +18,14 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this.setup_queries();
 		this._super();
 
+		this.frm.set_query('shipping_rule', function() {
+			return {
+				filters: {
+					"shipping_rule_type": "Buying"
+				}
+			};
+		});
+
 		/* eslint-disable */
 		// no idea where me is coming from
 		if(this.frm.get_field('shipping_address')) {

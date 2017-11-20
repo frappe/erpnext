@@ -51,7 +51,7 @@ email_append_to = ["Job Applicant", "Lead", "Opportunity", "Issue"]
 
 calendars = ["Task", "Production Order", "Leave Application", "Sales Order", "Holiday List"]
 
-fixtures = ["Web Form"]
+
 
 domains = {
 	'Distribution': 'erpnext.domains.distribution',

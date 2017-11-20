@@ -9,7 +9,7 @@ erpnext/accounts/doctype/shipping_rule/test_shipping_rule.js
 erpnext/crm/doctype/lead/test_lead.js
 erpnext/crm/doctype/opportunity/test_opportunity.js
 erpnext/setup/doctype/company/tests/test_company_production.js
-erpnext/crm/doctype/item/test_item.js
+erpnext/stock/doctype/item/tests/test_item.js
 erpnext/selling/doctype/quotation/tests/test_quotation_with_discount_on_grand_total.js
 erpnext/selling/doctype/quotation/tests/test_quotation_with_item_wise_discount.js
 erpnext/selling/doctype/quotation/tests/test_quotation_with_multi_uom.js
@@ -50,8 +50,8 @@ erpnext/schools/doctype/room/test_room.js
 erpnext/schools/doctype/instructor/test_instructor.js
 erpnext/stock/doctype/warehouse/test_warehouse.js
 erpnext/manufacturing/doctype/production_order/test_production_order.js #long
-erpnext/selling/page/point_of_sale/tests/test_point_of_sale.js
 erpnext/accounts/page/pos/test_pos.js
+erpnext/selling/page/point_of_sale/tests/test_point_of_sale.js
 erpnext/selling/doctype/product_bundle/test_product_bundle.js
 erpnext/stock/doctype/delivery_note/test_delivery_note.js
 erpnext/stock/doctype/material_request/tests/test_material_request.js
@@ -133,3 +133,9 @@ erpnext/restaurant/doctype/restaurant/test_restaurant.js
 erpnext/restaurant/doctype/restaurant_table/test_restaurant_table.js
 erpnext/restaurant/doctype/restaurant_menu/test_restaurant_menu.js
 erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_entry.js
+erpnext/projects/doctype/task/tests/test_task_tree.js
+erpnext/stock/doctype/item_price/test_item_price.js
+erpnext/stock/doctype/delivery_note/test_delivery_note_with_margin.js
+erpnext/selling/doctype/sales_order/tests/test_sales_order_with_margin.js
+erpnext/selling/doctype/quotation/tests/test_quotation_with_margin.js
+erpnext/accounts/doctype/sales_invoice/tests/test_sales_invoice_with_margin.js
