@@ -460,3 +460,8 @@ execute:frappe.delete_doc_if_exists("DocType", "Program Fee")
 erpnext.patches.v9_0.set_pos_profile_name
 erpnext.patches.v9_0.remove_non_existing_warehouse_from_stock_settings
 execute:frappe.delete_doc_if_exists("DocType", "Program Fee")
+erpnext.patches.v9_0.update_employee_loan_details
+erpnext.patches.v9_2.delete_healthcare_domain_default_items
+erpnext.patches.v9_1.create_issue_opportunity_type
+erpnext.patches.v9_2.rename_translated_domains_in_en
+erpnext.patches.v9_0.set_shipping_type_for_existing_shipping_rules

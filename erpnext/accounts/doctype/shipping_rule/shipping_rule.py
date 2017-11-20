@@ -15,17 +15,9 @@ class ManyBlankToValuesError(frappe.ValidationError): pass
 
 class ShippingRule(Document):
 	def validate(self):
-		self.validate_value("calculate_based_on", "in", ["Net Total", "Net Weight"])
-		self.conditions = self.get("conditions")
 		self.validate_from_to_values()
 		self.sort_shipping_rule_conditions()
 		self.validate_overlapping_shipping_rule_conditions()
-
-		if self.worldwide_shipping:
-			self.countries = []
-
-		elif not len([d.country for d in self.countries if d.country]):
-			frappe.throw(_("Please specify a country for this Shipping Rule or check Worldwide Shipping"))
 
 	def validate_from_to_values(self):
 		zero_to_values = []
@@ -46,6 +38,76 @@ class ShippingRule(Document):
 		if len(zero_to_values) >= 2:
 			throw(_('There can only be one Shipping Rule Condition with 0 or blank value for "To Value"'),
 				ManyBlankToValuesError)
+
+	def apply(self, doc):
+		'''Apply shipping rule on given doc. Called from accounts controller'''
+
+		shipping_amount = 0.0
+		by_value = False
+
+		self.validate_countries(doc)
+
+		if self.calculate_based_on == 'Net Total':
+			value = doc.base_net_total
+			by_value = True
+
+		elif self.calculate_based_on == 'Fixed':
+			shipping_amount = self.shipping_amount
+
+		# shipping amount by value, apply conditions
+		if by_value:
+			shipping_amount = self.get_shipping_amount_from_rules(value)
+
+		# convert to order currency
+		if doc.currency != doc.company_currency:
+			shipping_amount = flt(shipping_amount / doc.conversion_rate, 2)
+
+		self.add_shipping_rule_to_tax_table(doc, shipping_amount)
+
+	def get_shipping_amount_from_rules(self, value):
+		for condition in self.get("conditions"):
+			if not condition.to_value or (flt(condition.from_value) <= value <= flt(condition.to_value)):
+				return condition.shipping_amount
+
+		return 0.0
+
+	def validate_countries(self, doc):
+		# validate applicable countries
+		if self.countries:
+			shipping_country = doc.get_shipping_address().get('country')
+			if not shipping_country:
+				frappe.throw(_('Shipping Address does not have country, which is required for this Shipping Rule'))
+			if shipping_country not in [d.country for d in self.countries]:
+				frappe.throw(_('Shipping rule not applicable for country {0}'.format(shipping_country)))
+
+	def add_shipping_rule_to_tax_table(self, doc, shipping_amount):
+		shipping_charge = {
+			"charge_type": "Actual",
+			"account_head": self.account,
+			"cost_center": self.cost_center
+		}
+		if self.shipping_rule_type == "Selling":
+			# check if not applied on purchase
+			if not doc.meta.get_field('taxes').options == 'Sales Taxes and Charges':
+				frappe.throw(_('Shipping rule only applicable for Selling'))
+			shipping_charge["doctype"] = "Sales Taxes and Charges"
+		else:
+			# check if not applied on sales
+			if not doc.meta.get_field('taxes').options == 'Purchase Taxes and Charges':
+				frappe.throw(_('Shipping rule only applicable for Buying'))
+
+			shipping_charge["doctype"] = "Purchase Taxes and Charges"
+			shipping_charge["category"] = "Valuation and Total"
+			shipping_charge["add_deduct_tax"] = "Add"
+
+		existing_shipping_charge = doc.get("taxes", filters=shipping_charge)
+		if existing_shipping_charge:
+			# take the last record found
+			existing_shipping_charge[-1].tax_amount = shipping_amount
+		else:
+			shipping_charge["tax_amount"] = shipping_amount
+			shipping_charge["description"] = self.label
+			doc.append("taxes", shipping_charge)
 
 	def sort_shipping_rule_conditions(self):
 		"""Sort Shipping Rule Conditions based on increasing From Value"""

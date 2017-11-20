@@ -10,25 +10,6 @@ test_dependencies = ["Crop", "Fertilizer", "Land Unit", "Pest"]
 
 class TestCropCycle(unittest.TestCase):
 	def test_crop_cycle_creation(self):
-		# # create crop cycle
-		# create_list = [
-		# 	{
-		# 		'doctype': 'Crop Cycle',
-		# 		'title': 'Basil from seed 2017',
-		# 		'land_unit': 'Basil Farm',
-		# 		'crop': 'Basil',
-		# 		'start_date': '2017-11-11',
-		# 		'detected_pest': [{
-		# 			'pest': 'Aphids',
-		# 			'start_date': '2017-11-21'
-		# 		}]
-		# 	}
-		# ]
-
-		# for x in create_list:
-		# 	doc = frappe.get_doc(x)
-		# 	doc.save()
-		
 		cycle = frappe.get_doc('Crop Cycle', 'Basil from seed 2017')
 		self.assertEquals(frappe.db.exists('Crop Cycle', 'Basil from seed 2017'), 'Basil from seed 2017')
 

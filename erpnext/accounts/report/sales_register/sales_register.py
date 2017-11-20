@@ -22,7 +22,8 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 	invoice_income_map = get_invoice_income_map(invoice_list)
 	invoice_income_map, invoice_tax_map = get_invoice_tax_map(invoice_list,
 		invoice_income_map, income_accounts)
-
+	#Cost Center & Warehouse Map
+	invoice_cc_wh_map = get_invoice_cc_wh_map(invoice_list)
 	invoice_so_dn_map = get_invoice_so_dn_map(invoice_list)
 	customers = list(set([inv.customer for inv in invoice_list]))
 	customer_map = get_customer_details(customers)
@@ -34,6 +35,8 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 		# invoice details
 		sales_order = list(set(invoice_so_dn_map.get(inv.name, {}).get("sales_order", [])))
 		delivery_note = list(set(invoice_so_dn_map.get(inv.name, {}).get("delivery_note", [])))
+		cost_center = list(set(invoice_cc_wh_map.get(inv.name, {}).get("cost_center", [])))
+		warehouse = list(set(invoice_cc_wh_map.get(inv.name, {}).get("warehouse", [])))
 
 		customer_details = customer_map.get(inv.customer, {})
 		row = [
@@ -48,8 +51,9 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 			customer_details.get("customer_group"),
 			customer_details.get("territory"),
 			inv.debit_to, ", ".join(mode_of_payments.get(inv.name, [])),
-			inv.project, inv.remarks,
-			", ".join(sales_order), ", ".join(delivery_note), company_currency
+			inv.project, inv.owner, inv.remarks,
+			", ".join(sales_order), ", ".join(delivery_note),", ".join(cost_center),
+			", ".join(warehouse), company_currency
 		]
 		# map income values
 		base_net_total = 0
@@ -89,8 +93,9 @@ def get_columns(invoice_list, additional_table_columns):
 	columns +=[
 		_("Customer Group") + ":Link/Customer Group:120", _("Territory") + ":Link/Territory:80",
 		_("Receivable Account") + ":Link/Account:120", _("Mode of Payment") + "::120",
-		_("Project") +":Link/Project:80", _("Remarks") + "::150",
+		_("Project") +":Link/Project:80", _("Owner") + "::150", _("Remarks") + "::150",
 		_("Sales Order") + ":Link/Sales Order:100", _("Delivery Note") + ":Link/Delivery Note:100",
+		_("Cost Center") + ":Link/Cost Center:100", _("Warehouse") + ":Link/Warehouse:100",
 		{
 			"fieldname": "currency",
 			"label": _("Currency"),
@@ -133,10 +138,22 @@ def get_conditions(filters):
 	if filters.get("from_date"): conditions += " and posting_date >= %(from_date)s"
 	if filters.get("to_date"): conditions += " and posting_date <= %(to_date)s"
 
+	if filters.get("owner"): conditions += " and owner = %(owner)s"
+
 	if filters.get("mode_of_payment"):
 		conditions += """ and exists(select name from `tabSales Invoice Payment`
 			 where parent=`tabSales Invoice`.name
 			 	and ifnull(`tabSales Invoice Payment`.mode_of_payment, '') = %(mode_of_payment)s)"""
+
+	if filters.get("cost_center"):
+		conditions +=  """ and exists(select name from `tabSales Invoice Item`
+			 where parent=`tabSales Invoice`.name
+			 	and ifnull(`tabSales Invoice Item`.cost_center, '') = %(cost_center)s)"""
+
+	if filters.get("warehouse"):
+		conditions +=  """ and exists(select name from `tabSales Invoice Item`
+			 where parent=`tabSales Invoice`.name
+			 	and ifnull(`tabSales Invoice Item`.warehouse, '') = %(warehouse)s)"""
 
 	return conditions
 
@@ -145,7 +162,7 @@ def get_invoices(filters, additional_query_columns):
 		additional_query_columns = ', ' + ', '.join(additional_query_columns)
 
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select name, posting_date, debit_to, project, customer, customer_name, remarks,
+	return frappe.db.sql("""select name, posting_date, debit_to, project, customer, customer_name, owner, remarks,
 		base_net_total, base_grand_total, base_rounded_total, outstanding_amount {0}
 		from `tabSales Invoice`
 		where docstatus = 1 %s order by posting_date desc, name desc""".format(additional_query_columns or '') %
@@ -205,6 +222,24 @@ def get_invoice_so_dn_map(invoice_list):
 			invoice_so_dn_map.setdefault(d.parent, frappe._dict()).setdefault("delivery_note", delivery_note_list)
 
 	return invoice_so_dn_map
+
+def get_invoice_cc_wh_map(invoice_list):
+	si_items = frappe.db.sql("""select parent, cost_center, warehouse
+		from `tabSales Invoice Item` where parent in (%s)
+		and (ifnull(cost_center, '') != '' or ifnull(warehouse, '') != '')""" %
+		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
+
+	invoice_cc_wh_map = {}
+	for d in si_items:
+		if d.cost_center:
+			invoice_cc_wh_map.setdefault(d.parent, frappe._dict()).setdefault(
+				"cost_center", []).append(d.cost_center)
+
+		if d.warehouse:
+			invoice_cc_wh_map.setdefault(d.parent, frappe._dict()).setdefault(
+				"warehouse", []).append(d.warehouse)
+
+	return invoice_cc_wh_map
 
 def get_customer_details(customers):
 	customer_map = {}

@@ -33,7 +33,7 @@ frappe.ui.form.on('Physician Schedule', {
 
 						while(cur_time < end_time) {
 							let to_time = cur_time.clone().add(values.duration, 'minutes');
-							if(to_time < end_time) {
+							if(to_time <= end_time) {
 
 								// add a new timeslot
 								frm.add_child('time_slots', {

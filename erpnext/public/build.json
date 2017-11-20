@@ -33,7 +33,9 @@
         "public/js/help_links.js",
         "public/js/schools/student_button.html",
         "public/js/schools/assessment_result_tool.html",
-        "public/js/agriculture/ternary_plot.js"
+        "public/js/agriculture/ternary_plot.js",
+        "public/js/templates/item_quick_entry.html",
+        "public/js/utils/item_quick_entry.js"
     ],
     "js/item-dashboard.min.js": [
         "stock/dashboard/item_dashboard.html",

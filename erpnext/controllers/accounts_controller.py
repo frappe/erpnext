@@ -66,9 +66,9 @@ class AccountsController(TransactionBase):
 			if cint(is_paid) == 1:
 				if flt(self.paid_amount) == 0 and flt(self.outstanding_amount) > 0:
 					if self.cash_bank_account:
-						self.paid_amount = flt(flt(self.grand_total) - flt(self.write_off_amount),
-							self.precision("paid_amount"))
-						self.base_paid_amount = flt(self.paid_amount * self.conversion_rate, self.precision("base_paid_amount"))
+						self.paid_amount = flt(flt(self.outstanding_amount), self.precision("paid_amount"))
+						self.base_paid_amount = flt(self.paid_amount * self.conversion_rate,
+							self.precision("base_paid_amount"))
 					else:
 						# show message that the amount is not paid
 						self.paid_amount = 0
@@ -82,9 +82,6 @@ class AccountsController(TransactionBase):
 				if self.meta.get_field(fieldname) and not self.get(fieldname):
 					self.set(fieldname, today())
 					break
-
-		# set taxes table if missing from `taxes_and_charges`
-		self.set_taxes()
 
 	def calculate_taxes_and_totals(self):
 		from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
@@ -209,10 +206,10 @@ class AccountsController(TransactionBase):
 
 		tax_master_doctype = self.meta.get_field("taxes_and_charges").options
 
-		if not self.get("taxes"):
+		if self.is_new() and not self.get("taxes"):
 			if not self.get("taxes_and_charges"):
 				# get the default tax master
-				self.set("taxes_and_charges", frappe.db.get_value(tax_master_doctype, {"is_default": 1}))
+				self.taxes_and_charges = frappe.db.get_value(tax_master_doctype, {"is_default": 1})
 
 			self.append_taxes_from_master(tax_master_doctype)
 
@@ -301,6 +298,27 @@ class AccountsController(TransactionBase):
 				"advance_amount": flt(d.amount),
 				"allocated_amount": flt(d.amount) if d.against_order else 0
 			})
+
+	def apply_shipping_rule(self):
+		if self.shipping_rule:
+			shipping_rule = frappe.get_doc("Shipping Rule", self.shipping_rule)
+			shipping_rule.apply(self)
+			self.calculate_taxes_and_totals()
+
+	def get_shipping_address(self):
+		'''Returns Address object from shipping address fields if present'''
+
+		# shipping address fields can be `shipping_address_name` or `shipping_address`
+		# try getting value from both
+
+		for fieldname in ('shipping_address_name', 'shipping_address'):
+			shipping_field = self.meta.get_field(fieldname)
+			if shipping_field and shipping_field.fieldtype == 'Link':
+				if self.get(fieldname):
+					return frappe.get_doc('Address', self.get(fieldname))
+
+		return {}
+
 
 	def get_advance_entries(self, include_unallocated=True):
 		if self.doctype == "Sales Invoice":
@@ -601,6 +619,12 @@ class AccountsController(TransactionBase):
 		for item in duplicate_list:
 			self.remove(item)
 
+	def is_rounded_total_disabled(self):
+		if self.meta.get_field("disable_rounded_total"):
+			return self.disable_rounded_total
+		else:
+			return frappe.db.get_single_value("Global Defaults", "disable_rounded_total")
+
 @frappe.whitelist()
 def get_tax_rate(account_head):
 	return frappe.db.get_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
@@ -608,7 +632,10 @@ def get_tax_rate(account_head):
 @frappe.whitelist()
 def get_default_taxes_and_charges(master_doctype):
 	default_tax = frappe.db.get_value(master_doctype, {"is_default": 1})
-	return get_taxes_and_charges(master_doctype, default_tax)
+	return {
+		'taxes_and_charges': default_tax,
+		'taxes': get_taxes_and_charges(master_doctype, default_tax)
+	}
 
 @frappe.whitelist()
 def get_taxes_and_charges(master_doctype, master_name):

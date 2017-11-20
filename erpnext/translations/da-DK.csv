@@ -7,7 +7,7 @@ DocType: Purchase Order,% Billed,% Billed
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +65,'Total','Total'
 DocType: Selling Settings,Selling Settings,Salg af indstillinger
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +72,Selling Amount,Selling Beløb
-apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +174,Lead must be set if Opportunity is made from Lead,"Bly skal indstilles, hvis Opportunity er lavet af Lead"
+apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +192,Lead must be set if Opportunity is made from Lead,"Bly skal indstilles, hvis Opportunity er lavet af Lead"
 DocType: Item,Default Selling Cost Center,Standard Selling Cost center
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +64,90-Above,90-Above
 DocType: Pricing Rule,Selling,Selling
