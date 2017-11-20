@@ -31,6 +31,8 @@ def execute():
 			"domains": '["Education"]' },
 		{"action_name": "Add Users", "action_doctype": "User", "min_doc_count": 4, "is_completed": 0,
 			"domains": '[]' }
+		{"action_name": "Add Letterhead", "action_doctype": "Letter Head", "min_doc_count": 1, "is_completed": 0,
+			"domains": '[]' }
 	]
 
 	setup_progress = frappe.get_doc("Setup Progress", "Setup Progress")
