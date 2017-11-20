@@ -34,12 +34,15 @@ def get_cart_quotation(doc=None):
 
 	addresses = get_address_docs(party=party)
 
+	if not doc.customer_address and addresses:
+		update_cart_address("customer_address", addresses[0].name)
+
 	return {
 		"doc": decorate_quotation_doc(doc),
 		"shipping_addresses": [{"name": address.name, "display": address.display}
-			for address in addresses if address.address_type == "Shipping"],
+			for address in addresses],
 		"billing_addresses": [{"name": address.name, "display": address.display}
-			for address in addresses if address.address_type == "Billing"],
+			for address in addresses],
 		"shipping_rules": get_applicable_shipping_rules(party)
 	}
 
@@ -47,9 +50,8 @@ def get_cart_quotation(doc=None):
 def place_order():
 	quotation = _get_cart_quotation()
 	quotation.company = frappe.db.get_value("Shopping Cart Settings", None, "company")
-	for fieldname in ["customer_address", "shipping_address_name"]:
-		if not quotation.get(fieldname):
-			throw(_("{0} is required").format(quotation.meta.get_label(fieldname)))
+	if not quotation.get("customer_address"):
+		throw(_("{0} is required").format(_(quotation.meta.get_label("customer_address"))))
 
 	quotation.flags.ignore_permissions = True
 	quotation.submit()
