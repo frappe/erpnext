@@ -19,7 +19,8 @@
 	},
 	{
 		"doctype": "Crop",
-		"common_name": "Basil",
+		"title": "Basil from seed",
+		"crop_name": "Basil",
 		"scientific_name": "Ocimum basilicum",
 		"materials_required": [{
 			"item_code": "Basil Seeds",
