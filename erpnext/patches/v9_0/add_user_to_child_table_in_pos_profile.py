@@ -7,7 +7,9 @@ import frappe
 def execute():
 	doctype = 'POS Profile'
 	frappe.reload_doc('accounts', 'doctype', doctype)
-	frappe.reload_doc('accounts', 'doctype', 'POS Profile User')
+	frappe.reload_doc('accounts', 'doctype', 'pos_profile_user')
+	frappe.reload_doc('accounts', 'doctype', 'pos_item_group')
+	frappe.reload_doc('accounts', 'doctype', 'pos_customer_group')
 
 	for doc in frappe.get_all(doctype):
 		_doc = frappe.get_doc(doctype, doc.name)
@@ -19,4 +21,7 @@ def execute():
 			'user': user
 		})
 		_doc.pos_profile_name = user + ' - ' + _doc.company
+		_doc.flags.ignore_validate  = True
+		_doc.flags.ignore_mandatory = True
 		_doc.save()
+		
