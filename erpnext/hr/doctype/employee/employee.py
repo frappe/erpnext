@@ -53,6 +53,7 @@ class Employee(Document):
 					"Employee", self.name, existing_user_id)
 
 	def on_update(self):
+		set_has_subordinates(self.reports_to)
 		if self.user_id:
 			self.update_user()
 			self.update_user_permissions()
@@ -152,14 +153,18 @@ class Employee(Document):
 	def validate_reports_to(self):
 		if self.reports_to == self.name:
 			throw(_("Employee cannot report to himself."))
+		else:
+			for d in frappe.db.get_values("Employee", {'reports_to': self.name}, as_dict=True):
+				if self.reports_to == d.name:
+					throw(_("Employee cannot report to its Subordinate."))
 
 	def on_trash(self):
+		set_has_subordinates(self.reports_to, self.name)
 		delete_events(self.doctype, self.name)
 
 	def validate_prefered_email(self):
 		if self.prefered_contact_email and not self.get(scrub(self.prefered_contact_email)):
 			frappe.msgprint(_("Please enter " + self.prefered_contact_email))
-
 
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
@@ -182,7 +187,6 @@ def get_retirement_date(date_of_birth=None):
 			ret = {}
 
 	return ret
-
 
 def validate_employee_role(doc, method):
 	# called via User hook
@@ -301,3 +305,40 @@ def get_employee_emails(employee_list):
 			employee_emails.append(user or email)
 
 	return employee_emails
+
+@frappe.whitelist()
+def set_has_subordinates(emp, deleted_doc=None):
+	check = 1
+	filters = {'reports_to': emp}
+
+	if deleted_doc:
+		filters.update(dict(name=('!=', deleted_doc)))
+
+	subordinates = frappe.db.get_values("Employee", filters)
+
+	if not subordinates:
+		check = 0
+
+	frappe.db.set_value('Employee', emp, 'has_subordinates', check)
+
+@frappe.whitelist()
+def get_children(doctype, parent=None, company=None, is_root=False, is_tree=False):
+	condition = ''
+
+	if is_root:
+		parent = ""
+	if parent and company and parent!=company:
+		condition = ' and reports_to = "{0}"'.format(frappe.db.escape(parent))
+	else:
+		condition = ' and ifnull(reports_to, "")=""'
+
+	employee = frappe.db.sql("""select name as value,
+		employee_name as title,
+		has_subordinates as expandable
+		from `tabEmployee`
+		where company='{company}'
+		{condition}
+		order by name""".format(company=company, condition=condition),  as_dict=1)
+
+	# return employee
+	return employee
