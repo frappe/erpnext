@@ -7,8 +7,8 @@ from frappe import _
 
 def execute():
 	# delete custom field if exists
-	for fieldname in ('issue_type', 'opportunity_type'):
-		custom_field = frappe.db.get_value("Custom Field", {"fieldname": fieldname})
+	for doctype, fieldname in (('Issue', 'issue_type'), ('Opportunity', 'opportunity_type')):
+		custom_field = frappe.db.get_value("Custom Field", {"fieldname": fieldname, 'dt': doctype})
 		if custom_field:
 			frappe.delete_doc("Custom Field", custom_field, ignore_permissions=True)
 
