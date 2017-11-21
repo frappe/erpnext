@@ -21,7 +21,7 @@ frappe.ui.form.on('Course Scheduling Tool', {
 					if (course_schedules) {
 						const html = `
 						<table class="table table-bordered">
-							<caption>${__('Following courses were created')}</caption>
+							<caption>${__('Following course schedules were created')}</caption>
 							<thead><tr><th>${__("Course")}</th><th>${__("Date")}</th></tr></thead>
 							<tbody>
 								${course_schedules.map(
