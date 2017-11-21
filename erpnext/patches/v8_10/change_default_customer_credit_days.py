@@ -3,67 +3,49 @@ import frappe
 
 
 def execute():
+	frappe.reload_doc("selling", "doctype", "customer")
+	frappe.reload_doc("buying", "doctype", "supplier")
+	frappe.reload_doc("setup", "doctype", "supplier_type")
 	frappe.reload_doc("accounts", "doctype", "payment_term")
 	frappe.reload_doc("accounts", "doctype", "payment_terms_template_detail")
 	frappe.reload_doc("accounts", "doctype", "payment_terms_template")
 
 	payment_terms = []
-	customers = []
-	suppliers = []
-	credit_days = frappe.db.sql(
-		"SELECT DISTINCT `credit_days`, `credit_days_based_on`, `customer_name` from "
-		"`tabCustomer` where credit_days_based_on='Fixed Days' or "
-		"credit_days_based_on='Last Day of the Next Month'")
+	records = []
+	for doctype in ("Customer", "Supplier", "Supplier Type"):
+		credit_days = frappe.db.sql("""
+			SELECT DISTINCT `credit_days`, `credit_days_based_on`, `name`
+			from `tab{0}`
+			where
+				(credit_days_based_on='Fixed Days' and credit_days is not null)
+				or credit_days_based_on='Last Day of the Next Month'
+		""".format(doctype))
 
-	credit_records = ((record[0], record[1], record[2]) for record in credit_days)
-	for days, based_on, customer_name in credit_records:
-		payment_term = make_payment_term(days, based_on)
-		template = make_template(payment_term)
-		payment_terms.append('WHEN `customer_name`="%s" THEN "%s"' % (customer_name, template.template_name))
-		customers.append(customer_name)
+		credit_records = ((record[0], record[1], record[2]) for record in credit_days)
+		for days, based_on, party_name in credit_records:
+			if based_on == "Fixed Days":
+				pyt_template_name = 'Default Payment Term - N{0}'.format(days)
+			else:
+				pyt_template_name = 'Default Payment Term - EO2M'
 
-	begin_query_str = "UPDATE `tabCustomer` SET `payment_terms` = CASE "
-	value_query_str = " ".join(payment_terms)
-	cond_query_str = " ELSE `payment_terms` END WHERE "
+			if not frappe.db.exists("Payment Terms Template", pyt_template_name):
+				payment_term = make_payment_term(days, based_on)
+				template = make_template(payment_term)
+			else:
+				template = frappe.get_doc("Payment Terms Template", pyt_template_name)
 
-	if customers:
-		frappe.db.sql(
-			begin_query_str + value_query_str + cond_query_str + '`customer_name` IN %s',
-			(customers,)
-		)
+			payment_terms.append('WHEN `name`="%s" THEN "%s"' % (party_name, template.template_name))
+			records.append(party_name)
 
-	# reset
-	payment_terms = []
-	credit_days = frappe.db.sql(
-		"SELECT DISTINCT `credit_days`, `credit_days_based_on`, `supplier_name` from "
-		"`tabSupplier` where credit_days_based_on='Fixed Days' or "
-		"credit_days_based_on='Last Day of the Next Month'")
+		begin_query_str = "UPDATE `tab{0}` SET `payment_terms` = CASE ".format(doctype)
+		value_query_str = " ".join(payment_terms)
+		cond_query_str = " ELSE `payment_terms` END WHERE "
 
-	credit_records = ((record[0], record[1], record[2]) for record in credit_days)
-	for days, based_on, supplier_name in credit_records:
-		if based_on == "Fixed Days":
-			pyt_template_name = 'Default Payment Term - N{0}'.format(days)
-		else:
-			pyt_template_name = 'Default Payment Term - EO2M'
-
-		if not frappe.db.exists("Payment Term Template", pyt_template_name):
-			payment_term = make_payment_term(days, based_on)
-			template = make_template(payment_term)
-		else:
-			template = frappe.get_doc("Payment Term Template", pyt_template_name)
-
-		payment_terms.append('WHEN `supplier_name`="%s" THEN "%s"' % (supplier_name, template.template_name))
-		suppliers.append(supplier_name)
-
-	begin_query_str = "UPDATE `tabSupplier` SET `payment_terms` = CASE "
-	value_query_str = " ".join(payment_terms)
-	cond_query_str = " ELSE `payment_terms` END WHERE "
-
-	if suppliers:
-		frappe.db.sql(
-			begin_query_str + value_query_str + cond_query_str + '`supplier_name` IN %s',
-			(suppliers,)
-		)
+		if records:
+			frappe.db.sql(
+				begin_query_str + value_query_str + cond_query_str + '`name` IN %s',
+				(records,)
+			)
 
 
 def make_template(payment_term):

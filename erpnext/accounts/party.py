@@ -320,7 +320,8 @@ def validate_due_date(posting_date, due_date, party_type, party):
 				msgprint(_("Note: Due / Reference Date exceeds allowed customer credit days by {0} day(s)")
 					.format(date_diff(due_date, default_due_date)))
 			else:
-				frappe.throw(_("Due / Reference Date cannot be after {0}").format(formatdate(default_due_date)))
+				frappe.throw(_("Due / Reference Date cannot be after {0}")
+					.format(formatdate(default_due_date)))
 
 @frappe.whitelist()
 def set_taxes(party, party_type, posting_date, company, customer_group=None, supplier_type=None,

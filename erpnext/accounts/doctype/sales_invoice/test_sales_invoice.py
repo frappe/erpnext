@@ -64,7 +64,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 
 		self.assertTrue(si.payment_schedule)
-		self.assertEqual(si.payment_schedule[0].due_date, si.due_date)
+		self.assertEqual(getdate(si.payment_schedule[0].due_date), getdate(si.due_date))
 
 	def test_sales_invoice_calculation_base_currency(self):
 		si = frappe.copy_doc(test_records[2])
