@@ -233,7 +233,7 @@ def add_node():
     })
     args = make_tree_args(**args)
 
-    if args.parent_task == 'task':
+    if args.parent_task == 'All Tasks':
         args.parent_task = None
 
     frappe.get_doc(args).insert()
