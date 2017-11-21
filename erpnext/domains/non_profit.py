@@ -5,7 +5,7 @@ data = {
 		'ToDo'
 	],
 	'modules': [
- +		'Non Profit'
- +	],
+		'Non Profit'
+	],
 	'default_portal_role': 'System Manager'
 }
