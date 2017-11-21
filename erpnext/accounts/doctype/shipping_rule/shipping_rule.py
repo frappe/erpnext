@@ -52,7 +52,7 @@ class ShippingRule(Document):
 			by_value = True
 
 		elif self.calculate_based_on == 'Net Weight':
-			value = doc.net_total_weight
+			value = doc.total_net_weight
 			by_value = True
 
 		elif self.calculate_based_on == 'Fixed':
