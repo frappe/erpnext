@@ -29,7 +29,7 @@ install:
   - cp -r $TRAVIS_BUILD_DIR/test_sites/test_site ~/frappe-bench/sites/
 
 before_script:
-  - wget http://chromedriver.storage.googleapis.com/2.27/chromedriver_linux64.zip
+  - wget http://chromedriver.storage.googleapis.com/2.32/chromedriver_linux64.zip
   - unzip chromedriver_linux64.zip
   - sudo apt-get install libnss3
   - sudo apt-get --only-upgrade install google-chrome-stable

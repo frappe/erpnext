@@ -102,6 +102,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			});
 		}
 
+		if(this.frm.fields_dict["payment_terms_template"]){
+			this.frm.trigger("payment_terms_template");
+		}
+
 		if(this.frm.fields_dict["taxes"]) {
 			this["taxes_remove"] = this.calculate_taxes_and_totals;
 		}
@@ -1155,6 +1159,46 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 		}
 	},
+
+	payment_terms_template: function() {
+		var me = this;
+		if(this.frm.doc.payment_terms_template && this.frm.doc.payment_schedule.length === 0) {
+			frappe.call({
+				method: "erpnext.controllers.accounts_controller.get_payment_terms",
+				args: {
+					terms_template: this.frm.doc.payment_terms_template,
+					posting_date: this.frm.doc.posting_date || this.frm.doc.transaction_date,
+					grand_total: this.frm.doc.rounded_total || this.frm.doc.grand_total
+				},
+				callback: function(r) {
+					if(r.message && !r.exc) {
+						me.frm.set_value("payment_schedule", r.message);
+					}
+				}
+			})
+		}
+	},
+
+	payment_term: function(doc, cdt, cdn) {
+		var row = locals[cdt][cdn];
+		if(row.payment_term) {
+			frappe.call({
+				method: "erpnext.controllers.accounts_controller.get_payment_term_details",
+				args: {
+					term: row.payment_term,
+					posting_date: this.frm.doc.posting_date || this.frm.doc.transaction_date,
+					grand_total: this.frm.doc.rounded_total || this.frm.doc.grand_total
+				},
+				callback: function(r) {
+					if(r.message && !r.exc) {
+						for (var d in r.message) {
+							frappe.model.set_value(cdt, cdn, d, r.message[d]);
+						}
+					}
+				}
+			})
+		}
+	}
 });
 
 erpnext.show_serial_batch_selector = function(frm, d, callback, show_dialog) {
