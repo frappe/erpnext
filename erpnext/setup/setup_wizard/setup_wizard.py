@@ -254,7 +254,9 @@ def make_tax_account_and_template(company, account_name, tax_rate, template_name
 
 		accounts = []
 		for i, name in enumerate(account_name):
-			accounts.append(make_tax_account(company, account_name[i], tax_rate[i]))
+			tax_account = make_tax_account(company, account_name[i], tax_rate[i])
+			if tax_account:
+				accounts.append(tax_account)
 
 		if accounts:
 			make_sales_and_purchase_tax_templates(accounts, template_name)
