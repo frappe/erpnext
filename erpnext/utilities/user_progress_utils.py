@@ -40,10 +40,10 @@ def create_customers(args_data):
 @frappe.whitelist()
 def create_letterhead(args_data):
 	args = json.loads(args_data)
-	letterhead = args.get("letterhead") 
+	letterhead = args.get("letterhead")
 	if letterhead:
 		try:
-			doc = frappe.get_doc({
+			frappe.get_doc({
 					"doctype":"Letter Head",
 					"content":"""<div><img src="{0}" style='max-width: 100%%;'><br></div>""".format(letterhead),
 					"letter_head_name": _("Standard"),
