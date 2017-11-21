@@ -650,7 +650,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			item.stock_qty = flt(item.qty * item.conversion_factor, precision("stock_qty", item));
 			refresh_field("stock_qty", item.name, item.parentfield);
 			this.toggle_conversion_factor(item);
-			if(!dont_fetch_price_list_rate) this.apply_price_list(item, true);
+			if (!dont_fetch_price_list_rate &&
+				frappe.meta.has_field(doc.doctype, "price_list_currency")) {
+				this.apply_price_list(item, true);
+			}
 		}
 	},
 
