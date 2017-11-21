@@ -231,8 +231,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				},
 				callback: function(r) {
 					if(!r.exc) {
-						me.frm.set_value("taxes", r.message);
-						me.calculate_taxes_and_totals();
+						frappe.run_serially([
+							() => {
+								// directly set in doc, so as not to call triggers
+								me.frm.doc.taxes_and_charges = r.message.taxes_and_charges;
+
+								// set taxes table
+								me.frm.set_value("taxes", r.message.taxes);
+							},
+							() => me.calculate_taxes_and_totals()
+						]);
 					}
 				}
 			});
@@ -935,19 +943,27 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			return;
 		}
 
+		if (me.in_apply_price_list == true) return;
+
+		me.in_apply_price_list = true;
 		return this.frm.call({
 			method: "erpnext.stock.get_item_details.apply_price_list",
 			args: {	args: args },
 			callback: function(r) {
 				if (!r.exc) {
-					me.in_apply_price_list = true;
-					me.frm.set_value("price_list_currency", r.message.parent.price_list_currency);
-					me.frm.set_value("plc_conversion_rate", r.message.parent.plc_conversion_rate);
-					me.in_apply_price_list = false;
+					frappe.run_serially([
+						() => me.frm.set_value("price_list_currency", r.message.parent.price_list_currency),
+						() => me.frm.set_value("plc_conversion_rate", r.message.parent.plc_conversion_rate),
+						() => {
+							if(args.items.length) {
+								me._set_values_for_item_list(r.message.children);
+							}
+						},
+						() => { me.in_apply_price_list = false; }
+					]);
 
-					if(args.items.length) {
-						me._set_values_for_item_list(r.message.children);
-					}
+				} else {
+					me.in_apply_price_list = false;
 				}
 			}
 		});
@@ -1112,11 +1128,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				filters: {'item': item.item_code}
 			}
 		} else {
-			filters = {
+			let filters = {
 				'item_code': item.item_code,
 				'posting_date': me.frm.doc.posting_date || frappe.datetime.nowdate(),
 			}
-			if(item.warehouse) filters["warehouse"] = item.warehouse
+			if (item.warehouse) filters["warehouse"] = item.warehouse
 
 			return {
 				query : "erpnext.controllers.queries.get_batch_no",

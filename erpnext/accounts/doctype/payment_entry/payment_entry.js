@@ -252,7 +252,6 @@ frappe.ui.form.on('Payment Entry', {
 					date: frm.doc.posting_date
 				},
 				callback: function(r, rt) {
-					console.log(r, rt);
 					if(r.message) {
 						if(frm.doc.payment_type == "Receive") {
 							frm.set_value("paid_from", r.message.party_account);
@@ -648,12 +647,12 @@ frappe.ui.form.on('Payment Entry', {
 
 	set_difference_amount: function(frm) {
 		var unallocated_amount = 0;
+		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
+			function(d) { return flt(d.amount) }));
+
 		if(frm.doc.party) {
 			var party_amount = frm.doc.payment_type=="Receive" ?
 				frm.doc.paid_amount : frm.doc.received_amount;
-
-			var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
-				function(d) { return flt(d.amount) }));
 
 			if(frm.doc.total_allocated_amount < party_amount) {
 				if(frm.doc.payment_type == "Receive") {

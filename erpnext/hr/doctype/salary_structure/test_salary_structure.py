@@ -17,11 +17,9 @@ class TestSalaryStructure(unittest.TestCase):
 	def setUp(self):
 		self.make_holiday_list()
 		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Structure Test Holiday List")
-		make_earning_salary_component(["Basic Salary", "Special Allowance", "HRA"])
-		make_deduction_salary_component(["Professional Tax", "TDS"])
 		make_employee("test_employee@salary.com")
 		make_employee("test_employee_2@salary.com")
-		
+
 	def make_holiday_list(self):
 		if not frappe.db.get_value("Holiday List", "Salary Structure Test Holiday List"):
 			holiday_list = frappe.get_doc({
@@ -33,7 +31,7 @@ class TestSalaryStructure(unittest.TestCase):
 			}).insert()	
 			holiday_list.get_weekly_off_dates()
 			holiday_list.save()
-		
+
 	def test_amount_totals(self):
 		sal_slip = frappe.get_value("Salary Slip", {"employee_name":"test_employee@salary.com"})
 		if not sal_slip:
@@ -64,7 +62,7 @@ class TestSalaryStructure(unittest.TestCase):
 
 		for row in salary_structure.deductions:
 			self.assertFalse(("\n" in row.formula) or ("\n" in row.condition))
-			
+
 def make_employee(user):
 	if not frappe.db.get_value("User", user):
 		frappe.get_doc({
@@ -74,7 +72,6 @@ def make_employee(user):
 			"new_password": "password",
 			"roles": [{"doctype": "Has Role", "role": "Employee"}]
 		}).insert()
-		
 
 	if not frappe.db.get_value("Employee", {"user_id": user}):
 		emp = frappe.get_doc({
@@ -95,7 +92,7 @@ def make_employee(user):
 		return emp.name
 	else:
 		return frappe.get_value("Employee", {"employee_name":user}, "name")			
-		
+
 def make_salary_slip_from_salary_structure(employee):
 	sal_struct = make_salary_structure('Salary Structure Sample')
 	sal_slip = make_salary_slip(sal_struct, employee = employee)
@@ -106,22 +103,21 @@ def make_salary_slip_from_salary_structure(employee):
 	sal_slip.insert()
 	sal_slip.submit()
 	return sal_slip	
-	
-def make_salary_structure(sal_struct):
+
+def make_salary_structure(sal_struct, employees=None):
 	if not frappe.db.exists('Salary Structure', sal_struct):
 		frappe.get_doc({
 			"doctype": "Salary Structure",
 			"name": sal_struct,
 			"company": erpnext.get_default_company(),
-			"employees": get_employee_details(),
+			"employees": employees or get_employee_details(),
 			"earnings": get_earnings_component(),
 			"deductions": get_deductions_component(),
 			"payroll_frequency": "Monthly",
 			"payment_account": frappe.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
 		}).insert()
-	return sal_struct
-			
-			
+	return sal_struct	
+
 def get_employee_details():
 	return [{"employee": frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"),
 			"base": 25000,
@@ -136,8 +132,11 @@ def get_employee_details():
 			 "idx": 2
 			}
 		]
-			
-def get_earnings_component():	
+
+def get_earnings_component():
+	make_earning_salary_component(["Basic Salary", "Special Allowance", "HRA"])
+	make_deduction_salary_component(["Professional Tax", "TDS"])
+
 	return [
 				{
 					"salary_component": 'Basic Salary',
@@ -167,7 +166,7 @@ def get_earnings_component():
 					"idx": 4
 				},
 			]
-			
+
 def get_deductions_component():	
 	return [
 				{
@@ -191,5 +190,4 @@ def get_deductions_component():
 					"formula": 'base*.1',
 					"idx": 3
 				}
-			]			
-			
+			]		

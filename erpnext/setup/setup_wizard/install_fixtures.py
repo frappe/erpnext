@@ -14,12 +14,12 @@ default_lead_sources = ["Existing Customer", "Reference", "Advertisement",
 def install(country=None):
 	records = [
 		# domains
-		{ 'doctype': 'Domain', 'domain': _('Distribution')},
-		{ 'doctype': 'Domain', 'domain': _('Manufacturing')},
-		{ 'doctype': 'Domain', 'domain': _('Retail')},
-		{ 'doctype': 'Domain', 'domain': _('Services')},
-		{ 'doctype': 'Domain', 'domain': _('Education')},
-		{ 'doctype': 'Domain', 'domain': _('Healthcare')},
+		{ 'doctype': 'Domain', 'domain': 'Distribution'},
+		{ 'doctype': 'Domain', 'domain': 'Manufacturing'},
+		{ 'doctype': 'Domain', 'domain': 'Retail'},
+		{ 'doctype': 'Domain', 'domain': 'Services'},
+		{ 'doctype': 'Domain', 'domain': 'Education'},
+		{ 'doctype': 'Domain', 'domain': 'Healthcare'},
 
 		# Setup Progress
 		{'doctype': "Setup Progress", "actions": [

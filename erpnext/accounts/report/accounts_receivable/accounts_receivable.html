@@ -36,8 +36,14 @@
 						<br>{%= data[i][__("Voucher No")] %}</td>
 					<td>
 						{% if(!(filters.customer || filters.supplier)) { %}
-							{%= data[i][__("Customer Name")] || data[i][__("Customer")] || data[i][__("Supplier Name")] || data[i][__("Supplier")] %}<br>{%= __("Remarks") %}: 
+							{%= data[i][__("Customer")] || data[i][__("Supplier")] %}
+							{% if(data[i][__("Customer Name")] && data[i][__("Customer Name")] != data[i][__("Customer")]) { %}
+								<br> {%= data[i][__("Customer Name")] %}
+							{% } else if(data[i][__("Supplier Name")] != data[i][__("Supplier")]) { %}
+								<br> {%= data[i][__("Supplier Name")] %}
+							{% } %}
 						{% } %}
+						<br>{%= __("Remarks") %}:
 						{%= data[i][__("Remarks")] %}
 					</td>
 					<td style="text-align: right">
@@ -66,8 +72,13 @@
 						<td>
 							{% if(!(filters.customer || filters.supplier)) { %}
 								{%= data[i][__("Customer")] || data[i][__("Supplier")] %}
-								<br>{%= __("Remarks") %}: 
+								{% if(data[i][__("Customer Name")] && data[i][__("Customer Name")] != data[i][__("Customer")]) { %}
+									<br> {%= data[i][__("Customer Name")] %}
+								{% } else if(data[i][__("Supplier Name")] != data[i][__("Supplier")]) { %}
+									<br> {%= data[i][__("Supplier Name")] %}
+								{% } %} 
 							{% } %}
+							<br>{%= __("Remarks") %}:
 							{%= data[i][__("Remarks")] %}
 						</td>
 					{% } else { %}

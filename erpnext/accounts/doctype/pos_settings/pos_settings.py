@@ -12,8 +12,5 @@ class POSSettings(Document):
 
 	def set_link_for_pos(self):
 		link = 'pos' if self.use_pos_in_offline_mode else 'point-of-sale'
-		desktop_icon = frappe.db.get_value('Desktop Icon',
-			{'standard': 1, 'module_name': 'POS'}, 'name')
-
-		if desktop_icon:
-			frappe.db.set_value('Desktop Icon', desktop_icon, 'link', link)
+		frappe.db.sql(""" update `tabDesktop Icon` set link = '{0}'
+			where module_name like '%pos%'""".format(link))
