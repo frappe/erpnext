@@ -6,15 +6,16 @@ from __future__ import unicode_literals
 import unittest
 import frappe, erpnext
 import frappe.model
-from frappe.utils import cint, flt, today, nowdate
+from frappe.utils import cint, flt, today, nowdate, getdate, add_days
 import frappe.defaults
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory, \
 	test_records as pr_test_records
+from erpnext.controllers.accounts_controller import get_payment_terms
 from erpnext.exceptions import InvalidCurrency
 from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 
-test_dependencies = ["Item", "Cost Center"]
+test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Template"]
 test_ignore = ["Serial No"]
 
 class TestPurchaseInvoice(unittest.TestCase):
@@ -61,6 +62,12 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.check_gle_for_pi(pi.name)
 
 		set_perpetual_inventory(0, pi.company)
+
+	def test_terms_added_after_save(self):
+		pi = frappe.copy_doc(test_records[1])
+		pi.insert()
+		self.assertTrue(pi.payment_schedule)
+		self.assertEqual(pi.payment_schedule[0].due_date, pi.due_date)
 
 	def test_payment_entry_unlink_against_purchase_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
@@ -248,6 +255,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertEqual(pi.outstanding_amount, 1212.30)
 
 		pi.disable_rounded_total = 0
+		pi.get("payment_schedule")[0].payment_amount = 1512.0
 		pi.save()
 		self.assertEqual(pi.outstanding_amount, 1212.0)
 
@@ -262,6 +270,56 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		self.assertFalse(frappe.db.sql("""select name from `tabJournal Entry Account`
 			where reference_type='Purchase Invoice' and reference_name=%s""", pi.name))
+
+	def test_invoice_with_advance_and_multi_payment_terms(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
+			import test_records as jv_test_records
+
+		jv = frappe.copy_doc(jv_test_records[1])
+		jv.insert()
+		jv.submit()
+
+		pi = frappe.copy_doc(test_records[0])
+		pi.disable_rounded_total = 1
+		pi.append("advances", {
+			"reference_type": "Journal Entry",
+			"reference_name": jv.name,
+			"reference_row": jv.get("accounts")[0].name,
+			"advance_amount": 400,
+			"allocated_amount": 300,
+			"remarks": jv.remark
+		})
+		pi.insert()
+
+		pi.update({
+			"payment_schedule": get_payment_terms("_Test Payment Term Template",
+				pi.posting_date, pi.grand_total)
+		})
+
+		pi.save()
+		pi.submit()
+		self.assertEqual(pi.payment_schedule[0].payment_amount, 756.15)
+		self.assertEqual(pi.payment_schedule[0].due_date, pi.posting_date)
+		self.assertEqual(pi.payment_schedule[1].payment_amount, 756.15)
+		self.assertEqual(pi.payment_schedule[1].due_date, add_days(pi.posting_date, 30))
+
+		pi.load_from_db()
+
+		self.assertTrue(
+			frappe.db.sql(
+				"select name from `tabJournal Entry Account` where reference_type='Purchase Invoice' and "
+				"reference_name=%s and debit_in_account_currency=300", pi.name)
+		)
+
+		self.assertEqual(pi.outstanding_amount, 1212.30)
+
+		pi.cancel()
+
+		self.assertFalse(
+			frappe.db.sql(
+				"select name from `tabJournal Entry Account` where reference_type='Purchase Invoice' and "
+				"reference_name=%s", pi.name)
+		)
 
 	def test_total_purchase_cost_for_project(self):
 		existing_purchase_cost = frappe.db.sql("""select sum(base_net_amount)
@@ -588,6 +646,55 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		self.assertEquals(pi.total_taxes_and_charges, 462.3)
 		self.assertEquals(pi.grand_total, 1712.3)	
+
+	def test_gl_entry_based_on_payment_schedule(self):
+		pi = make_purchase_invoice(do_not_save=True, supplier="_Test Supplier P")
+		pi.append("payment_schedule", {
+			"due_date": add_days(nowdate(), 15),
+			"payment_amount": 100,
+			"invoice_portion": 40.00
+		})
+		pi.append("payment_schedule", {
+			"due_date": add_days(nowdate(), 25),
+			"payment_amount": 150,
+			"invoice_portion": 60.00
+		})
+
+		pi.save()
+		pi.submit()
+
+		gl_entries = frappe.db.sql("""select account, debit, credit, due_date
+			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
+			order by account asc, debit asc""", pi.name, as_dict=1)
+		self.assertTrue(gl_entries)
+
+		expected_gl_entries = sorted([
+			[pi.credit_to, 0.0, 100.0, add_days(nowdate(), 15)],
+			[pi.credit_to, 0.0, 150.0, add_days(nowdate(), 25)],
+			["_Test Account Cost for Goods Sold - _TC", 250.0, 0.0, None]
+		])
+
+		for i, gle in enumerate(sorted(gl_entries, key=lambda gle: gle.account)):
+			self.assertEquals(expected_gl_entries[i][0], gle.account)
+			self.assertEquals(expected_gl_entries[i][1], gle.debit)
+			self.assertEquals(expected_gl_entries[i][2], gle.credit)
+			self.assertEquals(getdate(expected_gl_entries[i][3]), getdate(gle.due_date))
+
+	def test_make_pi_without_terms(self):
+		pi = make_purchase_invoice(do_not_save=1)
+
+		self.assertFalse(pi.get('payment_schedule'))
+
+		pi.insert()
+
+		self.assertTrue(pi.get('payment_schedule'))
+
+	def test_duplicate_due_date_in_terms(self):
+		pi = make_purchase_invoice(do_not_save=1)
+		pi.append('payment_schedule', dict(due_date='2017-01-01', invoice_portion=50.00, payment_amount=50))
+		pi.append('payment_schedule', dict(due_date='2017-01-01', invoice_portion=50.00, payment_amount=50))
+
+		self.assertRaises(frappe.ValidationError, pi.insert)
 
 def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
