@@ -26,9 +26,12 @@ class AccountsController(TransactionBase):
 		return self.__company_currency
 
 	def onload(self):
-		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry')
+		self.get("__onload").make_payment_via_journal_entry \
+			= frappe.db.get_single_value('Accounts Settings', 'make_payment_via_journal_entry')
+
 		if self.is_new():
-			relevant_docs = ("Quotation", "Purchase Order", "Sales Order", "Purchase Invoice", "Purchase Order")
+			relevant_docs = ("Quotation", "Purchase Order", "Sales Order",
+				"Purchase Invoice", "Sales Invoice")
 			if self.doctype in relevant_docs:
 				self.set_payment_schedule()
 
@@ -59,21 +62,18 @@ class AccountsController(TransactionBase):
 			self.validate_paid_amount()
 
 	def validate_invoice_documents_schedule(self):
-		if self.get("payment_schedule"):
-			self.set_due_date()
-			self.validate_payment_schedule()
-		else:
-			self.set_payment_schedule()
-			self.set_due_date()
+		self.validate_payment_schedule_dates()
+		self.set_due_date()
+		self.validate_invoice_portion()
+		self.set_payment_schedule()
+		self.validate_payment_schedule_amount()
 		self.validate_due_date()
 		self.validate_advance_entries()
 
 	def validate_non_invoice_documents_schedule(self):
-		if self.get("payment_schedule"):
-			self.validate_invoice_portion()
-			self.validate_payment_schedule_amount()
-		else:
-			self.set_payment_schedule()
+		self.validate_invoice_portion()
+		self.set_payment_schedule()
+		self.validate_payment_schedule_amount()
 
 	def validate_all_documents_schedule(self):
 		if self.doctype in ("Sales Invoice", "Purchase Invoice") and not self.is_return:
@@ -628,22 +628,24 @@ class AccountsController(TransactionBase):
 		posting_date = self.get("posting_date") or self.get("transaction_date")
 		date = self.get("due_date")
 		due_date = date or posting_date
+		grand_total = self.get("rounded_total") or self.grand_total
 
-		if self.get("payment_terms_template") and not self.get("payment_schedule"):
-			data = get_payment_terms(self.payment_terms_template, posting_date, self.grand_total)
-			for item in data:
-				self.append("payment_schedule", item)
-		elif not self.get("payment_schedule"):
-			data = dict(due_date=due_date, invoice_portion=100, payment_amount=self.grand_total)
-			self.append("payment_schedule", data)
+		if not self.get("payment_schedule"):
+			if self.get("payment_terms_template"):
+				data = get_payment_terms(self.payment_terms_template, posting_date, grand_total)
+				for item in data:
+					self.append("payment_schedule", item)
+			else:
+				data = dict(due_date=due_date, invoice_portion=100, payment_amount=grand_total)
+				self.append("payment_schedule", data)
+		else:
+			for d in self.get("payment_schedule"):
+				d.payment_amount = grand_total * flt(d.invoice_portion) / 100
 
 	def set_due_date(self):
-		self.due_date = max([d.due_date for d in self.get("payment_schedule")])
-
-	def validate_payment_schedule(self):
-		self.validate_payment_schedule_dates()
-		self.validate_invoice_portion()
-		self.validate_payment_schedule_amount()
+		due_dates = [d.due_date for d in self.get("payment_schedule") if d.due_date]
+		if due_dates:
+			self.due_date = max(due_dates)
 
 	def validate_payment_schedule_dates(self):
 		dates = []
@@ -661,24 +663,27 @@ class AccountsController(TransactionBase):
 
 		if li:
 			duplicates = '<br>' + '<br>'.join(li)
-			frappe.throw(_("Rows with duplicate due dates in other rows were found: {list}").format(list=duplicates))
-
+			frappe.throw(_("Rows with duplicate due dates in other rows were found: {list}")
+				.format(list=duplicates))
 
 	def validate_payment_schedule_amount(self):
-		total = 0
-		for d in self.get("payment_schedule"):
-			total += flt(d.payment_amount)
+		if self.get("payment_schedule"):
+			total = 0
+			for d in self.get("payment_schedule"):
+				total += flt(d.payment_amount)
 
-		if total != self.grand_total:
-			frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand Total"))
+			grand_total = self.get("rounded_total") or self.grand_total
+			if total != grand_total:
+				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"))
 
 	def validate_invoice_portion(self):
-		total_portion = 0
-		for term in self.payment_schedule:
-			total_portion += flt(term.get('invoice_portion', 0))
+		if self.get("payment_schedule"):
+			total_portion = 0
+			for term in self.payment_schedule:
+				total_portion += flt(term.get('invoice_portion', 0))
 
-		if flt(total_portion, 2) != 100.00:
-			frappe.msgprint(_('Combined invoice portion must equal 100%'), raise_exception=1, indicator='red')
+			if flt(total_portion, 2) != 100.00:
+				frappe.throw(_('Combined invoice portion must equal 100%'), indicator='red')
 
 	def is_rounded_total_disabled(self):
 		if self.meta.get_field("disable_rounded_total"):

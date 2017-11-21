@@ -255,6 +255,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertEqual(pi.outstanding_amount, 1212.30)
 
 		pi.disable_rounded_total = 0
+		pi.get("payment_schedule")[0].payment_amount = 1512.0
 		pi.save()
 		self.assertEqual(pi.outstanding_amount, 1212.0)
 
@@ -279,7 +280,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		jv.submit()
 
 		pi = frappe.copy_doc(test_records[0])
-
+		pi.disable_rounded_total = 1
 		pi.append("advances", {
 			"reference_type": "Journal Entry",
 			"reference_name": jv.name,
@@ -290,9 +291,10 @@ class TestPurchaseInvoice(unittest.TestCase):
 		})
 		pi.insert()
 
-		pi.update(
-			{"payment_schedule": get_payment_terms("_Test Payment Term Template", pi.posting_date, pi.grand_total)}
-		)
+		pi.update({
+			"payment_schedule": get_payment_terms("_Test Payment Term Template",
+				pi.posting_date, pi.grand_total)
+		})
 
 		pi.save()
 		pi.submit()
@@ -619,7 +621,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			"invoice_portion": 40.00
 		})
 		pi.append("payment_schedule", {
-			"due_date": add_days(nowdate(), 45),
+			"due_date": add_days(nowdate(), 25),
 			"payment_amount": 150,
 			"invoice_portion": 60.00
 		})
@@ -634,7 +636,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		expected_gl_entries = sorted([
 			[pi.credit_to, 0.0, 100.0, add_days(nowdate(), 15)],
-			[pi.credit_to, 0.0, 150.0, add_days(nowdate(), 45)],
+			[pi.credit_to, 0.0, 150.0, add_days(nowdate(), 25)],
 			["_Test Account Cost for Goods Sold - _TC", 250.0, 0.0, None]
 		])
 

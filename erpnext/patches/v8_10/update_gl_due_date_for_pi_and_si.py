@@ -6,6 +6,8 @@ import frappe
 
 
 def execute():
+	frappe.reload_doc("accounts", "doctype", "gl_entry")
+
 	kwargs = get_query_kwargs()
 
 	for kwarg in kwargs:

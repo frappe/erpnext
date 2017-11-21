@@ -1153,7 +1153,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				args: {
 					terms_template: this.frm.doc.payment_terms_template,
 					posting_date: this.frm.doc.posting_date || this.frm.doc.transaction_date,
-					grand_total: this.frm.doc.grand_total
+					grand_total: this.frm.doc.rounded_total || this.frm.doc.grand_total
 				},
 				callback: function(r) {
 					if(r.message && !r.exc) {
@@ -1172,7 +1172,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				args: {
 					term: row.payment_term,
 					posting_date: this.frm.doc.posting_date || this.frm.doc.transaction_date,
-					grand_total: this.frm.doc.grand_total
+					grand_total: this.frm.doc.rounded_total || this.frm.doc.grand_total
 				},
 				callback: function(r) {
 					if(r.message && !r.exc) {

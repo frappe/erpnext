@@ -505,12 +505,10 @@ def get_outstanding_reference_documents(args):
 	company_currency = frappe.db.get_value("Company", args.get("company"), "default_currency")
 
 	# Get negative outstanding sales /purchase invoices
-	total_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
-
 	negative_outstanding_invoices = []
-	if (args.get("party_type") != "Student"):
+	if args.get("party_type") not in ["Student", "Employee"]:
 		negative_outstanding_invoices = get_negative_outstanding_invoices(args.get("party_type"),
-			args.get("party"), args.get("party_account"), total_field)
+			args.get("party"), args.get("party_account"), party_account_currency, company_currency)
 
 	# Get positive outstanding sales /purchase invoices/ Fees
 	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"),
@@ -580,28 +578,34 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 
 	return order_list
 
-def get_negative_outstanding_invoices(party_type, party, party_account, total_field):
-	if party_type != "Employee":
-		voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
-		return frappe.db.sql("""
-			select
-				"{voucher_type}" as voucher_type, name as voucher_no,
-				{total_field} as invoice_amount, outstanding_amount, posting_date,
-				due_date, conversion_rate as exchange_rate
-			from
-				`tab{voucher_type}`
-			where
-				{party_type} = %s and {party_account} = %s and docstatus = 1 and outstanding_amount < 0
-			order by
-				posting_date, name
-			""".format(**{
-				"total_field": total_field,
-				"voucher_type": voucher_type,
-				"party_type": scrub(party_type),
-				"party_account": "debit_to" if party_type == "Customer" else "credit_to"
-			}), (party, party_account), as_dict=True)
+def get_negative_outstanding_invoices(party_type, party, party_account, party_account_currency, company_currency):
+	voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
+	if party_account_currency == company_currency:
+		grand_total_field = "base_grand_total"
+		rounded_total_field = "base_rounded_total"
 	else:
-		return []
+		grand_total_field = "grand_total"
+		rounded_total_field = "rounded_total"
+
+	return frappe.db.sql("""
+		select
+			"{voucher_type}" as voucher_type, name as voucher_no,
+			if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) as invoice_amount,
+			outstanding_amount, posting_date,
+			due_date, conversion_rate as exchange_rate
+		from
+			`tab{voucher_type}`
+		where
+			{party_type} = %s and {party_account} = %s and docstatus = 1 and outstanding_amount < 0
+		order by
+			posting_date, name
+		""".format(**{
+			"rounded_total_field": rounded_total_field,
+			"grand_total_field": grand_total_field,
+			"voucher_type": voucher_type,
+			"party_type": scrub(party_type),
+			"party_account": "debit_to" if party_type == "Customer" else "credit_to"
+		}), (party, party_account), as_dict=True)
 
 @frappe.whitelist()
 def get_party_details(company, party_type, party, date):
@@ -721,7 +725,10 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	if party_amount:
 		grand_total = outstanding_amount = party_amount
 	elif dt in ("Sales Invoice", "Purchase Invoice"):
-		grand_total = doc.base_grand_total if party_account_currency == doc.company_currency else doc.grand_total
+		if party_account_currency == doc.company_currency:
+			grand_total = doc.base_rounded_total or doc.base_grand_total
+		else:
+			grand_total = doc.rounded_total or doc.grand_total
 		outstanding_amount = doc.outstanding_amount
 	elif dt in ("Expense Claim"):
 		grand_total = doc.total_sanctioned_amount
@@ -730,8 +737,10 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		grand_total = doc.grand_total
 		outstanding_amount = doc.outstanding_amount
 	else:
-		total_field = "base_grand_total" if party_account_currency == doc.company_currency else "grand_total"
-		grand_total = flt(doc.get(total_field))
+		if party_account_currency == doc.company_currency:
+			grand_total = flt(doc.get("base_rounded_total") or doc.base_grand_total)
+		else:
+			grand_total = flt(doc.get("rounded_total") or doc.grand_total)
 		outstanding_amount = grand_total - flt(doc.advance_paid)
 
 	# bank or cash
