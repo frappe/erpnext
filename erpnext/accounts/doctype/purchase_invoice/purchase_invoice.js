@@ -343,6 +343,9 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 		cur_frm.pformat.print_heading = __("Purchase Invoice");
 }
 
+cur_frm.add_fetch('item_code','weight_per_unit','weight_per_unit');
+cur_frm.add_fetch('item_code','weight_uom','weight_uom');
+
 frappe.ui.form.on("Purchase Invoice", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {

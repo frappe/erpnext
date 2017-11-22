@@ -3,6 +3,9 @@
 
 {% include 'erpnext/public/js/controllers/buying.js' %};
 
+cur_frm.add_fetch('item_code','weight_per_unit','weight_per_unit');
+cur_frm.add_fetch('item_code','weight_uom','weight_uom');
+
 frappe.provide("erpnext.stock");
 
 frappe.ui.form.on("Purchase Receipt", {

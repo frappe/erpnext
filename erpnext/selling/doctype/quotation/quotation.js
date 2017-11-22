@@ -3,6 +3,8 @@
 
 
 {% include 'erpnext/selling/sales_common.js' %}
+cur_frm.add_fetch('item_code','weight_per_unit','weight_per_unit');
+cur_frm.add_fetch('item_code','weight_uom','weight_uom');
 
 frappe.ui.form.on('Quotation', {
 	setup: function(frm) {
