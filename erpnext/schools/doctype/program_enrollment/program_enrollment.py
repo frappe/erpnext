@@ -14,6 +14,8 @@ class ProgramEnrollment(Document):
 		self.validate_duplication()
 		if not self.student_name:
 			self.student_name = frappe.db.get_value("Student", self.student, "title")
+		if not self.courses:
+			self.extend("courses", self.get_courses())
 	
 	def on_submit(self):
 		self.update_student_joining_date()
