@@ -51,6 +51,25 @@ class DailyWorkSummary(Document):
 
 			d.sender_name = emp[0].employee_name if emp else d.sender
 			d.image = emp[0].image if emp and emp[0].image else None
+			
+			original_image = d.image
+			# make thumbnail image
+			try:
+				if original_image:
+					file_name = frappe.get_list('File', {'file_url': original_image})
+
+					if file_name:
+						file_name = file_name[0].name
+						file_doc = frappe.get_doc('File', file_name)
+						thumbnail_image = file_doc.make_thumbnail(
+							set_as_thumbnail=False,
+							width=100,
+							height=100,
+							crop=True
+						)
+						d.image = thumbnail_image
+			except:
+				d.image = original_image
 
 			if d.sender in did_not_reply:
 				did_not_reply.remove(d.sender)

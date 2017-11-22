@@ -54,19 +54,18 @@ class TestTimesheet(unittest.TestCase):
 
 	def test_sales_invoice_from_timesheet(self):
 		timesheet = make_timesheet("_T-Employee-0001", simulate=True, billable=1)
-		sales_invoice = make_sales_invoice(timesheet.name)
-		sales_invoice.customer = "_Test Customer"
+		sales_invoice = make_sales_invoice(timesheet.name, '_Test Item', '_Test Customer')
 		sales_invoice.due_date = nowdate()
-
-		item = sales_invoice.append('items', {})
-		item.item_code = '_Test Item'
-		item.qty = 2
-		item.rate = 100
-
 		sales_invoice.submit()
 		timesheet = frappe.get_doc('Timesheet', timesheet.name)
 		self.assertEquals(sales_invoice.total_billing_amount, 100)
 		self.assertEquals(timesheet.status, 'Billed')
+		self.assertEquals(sales_invoice.customer, '_Test Customer')
+
+		item = sales_invoice.items[0]
+		self.assertEquals(item.item_code, '_Test Item')
+		self.assertEquals(item.qty, 2.00)
+		self.assertEquals(item.rate, 50.00)
 
 	def test_timesheet_billing_based_on_project(self):
 		timesheet = make_timesheet("_T-Employee-0001", simulate=True, billable=1, project = '_Test Project', company='_Test Company')

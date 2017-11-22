@@ -17,6 +17,14 @@ frappe.ui.form.on("Production Order", {
 			}
 		});
 		
+		frm.set_query("source_warehouse", function() {
+			return {
+				filters: {
+					'company': frm.doc.company,
+				}
+			}
+		});
+		
 		frm.set_query("source_warehouse", "required_items", function() {
 			return {
 				filters: {
@@ -346,6 +354,7 @@ erpnext.production_order = {
 			var max = flt(frm.doc.qty) - flt(frm.doc.produced_qty);
 		}
 
+		max = flt(max, precision("qty"));
 		frappe.prompt({fieldtype:"Float", label: __("Qty for {0}", [purpose]), fieldname:"qty",
 			description: __("Max: {0}", [max]), 'default': max },
 			function(data) {

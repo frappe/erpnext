@@ -15,14 +15,15 @@ from erpnext.stock import get_warehouse_account_map
 from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entries, delete_gl_entries
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.buying.utils import check_for_closed_status
+from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
 
 class PurchaseInvoice(BuyingController):
-	def __init__(self, arg1, arg2=None):
-		super(PurchaseInvoice, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(PurchaseInvoice, self).__init__(*args, **kwargs)
 		self.status_updater = [{
 			'source_dt': 'Purchase Invoice Item',
 			'target_dt': 'Purchase Order Item',
@@ -76,8 +77,10 @@ class PurchaseInvoice(BuyingController):
 		if not self.cash_bank_account and flt(self.paid_amount):
 			frappe.throw(_("Cash or Bank Account is mandatory for making payment entry"))
 
-		if flt(self.paid_amount) + flt(self.write_off_amount) \
-				- flt(self.grand_total) > 1/(10**(self.precision("base_grand_total") + 1)):
+		if (flt(self.paid_amount) + flt(self.write_off_amount)
+			- flt(self.get("rounded_total") or self.grand_total)
+			> 1/(10**(self.precision("base_grand_total") + 1))):
+
 			frappe.throw(_("""Paid amount + Write Off Amount can not be greater than Grand Total"""))
 
 	def create_remarks(self):
@@ -92,7 +95,7 @@ class PurchaseInvoice(BuyingController):
 		if not self.credit_to:
 			self.credit_to = get_party_account("Supplier", self.supplier, self.company)
 		if not self.due_date:
-			self.due_date = get_due_date(self.posting_date, "Supplier", self.supplier, self.company)
+			self.due_date = get_due_date(self.posting_date, "Supplier", self.supplier)
 
 		super(PurchaseInvoice, self).set_missing_values(for_validate)
 
@@ -353,13 +356,35 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_payment_gl_entries(gl_entries)
 		self.make_write_off_gl_entry(gl_entries)
+		self.make_gle_for_rounding_adjustment(gl_entries)
 
 		return gl_entries
 
 	def make_supplier_gl_entry(self, gl_entries):
-		if self.grand_total:
+		grand_total = self.rounded_total or self.grand_total
+		if self.get("payment_schedule"):
+			for d in self.get("payment_schedule"):
+				payment_amount_in_company_currency = flt(d.payment_amount * self.conversion_rate,
+					d.precision("payment_amount"))
+
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": self.credit_to,
+						"party_type": "Supplier",
+						"party": self.supplier,
+						"due_date": d.due_date,
+						"against": self.against_expense_account,
+						"credit": payment_amount_in_company_currency,
+						"credit_in_account_currency": payment_amount_in_company_currency \
+							if self.party_account_currency==self.company_currency else d.payment_amount,
+						"against_voucher": self.return_against if cint(self.is_return) else self.name,
+						"against_voucher_type": self.doctype
+					}, self.party_account_currency)
+				)
+
+		elif grand_total:
 			# Didnot use base_grand_total to book rounding loss gle
-			grand_total_in_company_currency = flt(self.grand_total * self.conversion_rate,
+			grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
 				self.precision("grand_total"))
 			gl_entries.append(
 				self.get_gl_dict({
@@ -369,7 +394,7 @@ class PurchaseInvoice(BuyingController):
 					"against": self.against_expense_account,
 					"credit": grand_total_in_company_currency,
 					"credit_in_account_currency": grand_total_in_company_currency \
-						if self.party_account_currency==self.company_currency else self.grand_total,
+						if self.party_account_currency==self.company_currency else grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
 				}, self.party_account_currency)
@@ -584,6 +609,21 @@ class PurchaseInvoice(BuyingController):
 				})
 			)
 
+	def make_gle_for_rounding_adjustment(self, gl_entries):
+		if self.rounding_adjustment:
+			round_off_account, round_off_cost_center = \
+				get_round_off_account_and_cost_center(self.company)
+
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": round_off_account,
+					"against": self.supplier,
+					"debit_in_account_currency": self.rounding_adjustment,
+					"debit": self.base_rounding_adjustment,
+					"cost_center": round_off_cost_center,
+				}
+			))
+
 	def on_cancel(self):
 		self.check_for_closed_status()
 
@@ -667,7 +707,7 @@ class PurchaseInvoice(BuyingController):
 				if account_type != 'Fixed Asset':
 					frappe.throw(_("Row {0}# Account must be of type 'Fixed Asset'").format(d.idx))
 
-	def on_recurring(self, reference_doc):
+	def on_recurring(self, reference_doc, subscription_doc):
 		self.due_date = None
 
 @frappe.whitelist()

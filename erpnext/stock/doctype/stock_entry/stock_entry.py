@@ -517,7 +517,7 @@ class StockEntry(StockController):
 		args['posting_date'] = self.posting_date
 		args['posting_time'] = self.posting_time
 
-		stock_and_rate = args.get('warehouse') and get_warehouse_details(args) or {}
+		stock_and_rate = get_warehouse_details(args) if args.get('warehouse') else {}
 		ret.update(stock_and_rate)
 
 		# automatically select batch for outgoing item
@@ -631,7 +631,8 @@ class StockEntry(StockController):
 			fetch_exploded = self.use_multi_level_bom)
 
 		for item in item_dict.values():
-			item.from_warehouse = self.from_warehouse or item.default_warehouse
+			# if source warehouse presents in BOM set from_warehouse as bom source_warehouse
+			item.from_warehouse = self.from_warehouse or item.source_warehouse or item.default_warehouse
 		return item_dict
 
 	def get_bom_scrap_material(self, qty):

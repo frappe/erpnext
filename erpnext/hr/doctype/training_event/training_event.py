@@ -4,23 +4,36 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
 from frappe.model.document import Document
+from erpnext.hr.doctype.employee.employee import get_employee_emails
 
 class TrainingEvent(Document):
-	def on_update(self):
-		self.invite_employee()
-	
-	def on_update_after_submit(self):
-		self.invite_employee()
-	
-	def invite_employee(self):
-		if self.event_status == "Scheduled" and self.send_email:
-			subject = _("""You are invited for to attend {0} - {1} scheduled from {2} to {3} at {4}."""\
-				.format(self.type, self.event_name, self.start_time, self.end_time, self.location))
+	def validate(self):
+		self.employee_emails = ', '.join(get_employee_emails([d.employee
+			for d in self.employees]))
 
-			for emp in self.employees:
-				if emp.status== "Open":
-					frappe.sendmail(frappe.db.get_value("Employee", emp.employee, "company_email"), \
-						subject=subject, content= self.introduction)
-					emp.status= "Invited"
+@frappe.whitelist()
+def get_events(start, end, filters=None):
+	"""Returns events for Gantt / Calendar view rendering.
+
+	:param start: Start date-time.
+	:param end: End date-time.
+	:param filters: Filters (JSON).
+	"""
+	from frappe.desk.calendar import get_event_conditions
+	conditions = get_event_conditions("Training Event", filters)
+
+	data = frappe.db.sql("""
+		select
+			name, event_name, event_status, start_time, end_time
+		from
+			`tabTraining Event`
+		where (ifnull(start_time, '0000-00-00')!= '0000-00-00') \
+			and (start_time between %(start)s and %(end)s)
+			and docstatus < 2
+			{conditions}
+		""".format(conditions=conditions), {
+			"start": start,
+			"end": end
+		}, as_dict=True, update={"allDay": 0})
+	return data

@@ -7,6 +7,7 @@ QUnit.test("test purchase invoice", function(assert) {
 		() => {
 			return frappe.tests.make('Purchase Invoice', [
 				{supplier: 'Test Supplier'},
+				{bill_no: 'in123'},
 				{items: [
 					[
 						{'qty': 5},
@@ -19,7 +20,8 @@ QUnit.test("test purchase invoice", function(assert) {
 				{contact_person: 'Contact 3-Test Supplier'},
 				{taxes_and_charges: 'TEST In State GST'},
 				{tc_name: 'Test Term 1'},
-				{terms: 'This is Test'}
+				{terms: 'This is Test'},
+				{payment_terms_template: '_Test Payment Term Template UI'}
 			]);
 		},
 		() => cur_frm.save(),
@@ -33,10 +35,13 @@ QUnit.test("test purchase invoice", function(assert) {
 			// grand_total Calculated
 			assert.ok(cur_frm.doc.grand_total==590, "Grad Total correct");
 
+			assert.ok(cur_frm.doc.payment_terms_template, "Payment Terms Template is correct");
+			assert.ok(cur_frm.doc.payment_schedule.length > 0, "Payment Term Schedule is not empty");
+
 		},
 		() => frappe.tests.click_button('Submit'),
 		() => frappe.tests.click_button('Yes'),
-		() => frappe.timeout(0.3),
+		() => frappe.timeout(1),
 		() => done()
 	]);
 });

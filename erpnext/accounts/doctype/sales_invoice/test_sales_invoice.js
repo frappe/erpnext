@@ -1,7 +1,7 @@
 QUnit.module('Sales Invoice');
 
 QUnit.test("test sales Invoice", function(assert) {
-	assert.expect(4);
+	assert.expect(6);
 	let done = assert.async();
 	frappe.run_serially([
 		() => {
@@ -19,7 +19,8 @@ QUnit.test("test sales Invoice", function(assert) {
 				{contact_person: 'Contact 1-Test Customer 1'},
 				{taxes_and_charges: 'TEST In State GST'},
 				{tc_name: 'Test Term 1'},
-				{terms: 'This is Test'}
+				{terms: 'This is Test'},
+				{payment_terms_template: '_Test Payment Term Template UI'}
 			]);
 		},
 		() => cur_frm.save(),
@@ -31,7 +32,10 @@ QUnit.test("test sales Invoice", function(assert) {
 			// get tax account head details
 			assert.ok(cur_frm.doc.taxes[0].account_head=='CGST - '+frappe.get_abbr(frappe.defaults.get_default('Company')), " Account Head abbr correct");
 			// grand_total Calculated
-			assert.ok(cur_frm.doc.grand_total==590, "Grad Total correct");
+			assert.ok(cur_frm.doc.grand_total==590, "Grand Total correct");
+
+			assert.ok(cur_frm.doc.payment_terms_template, "Payment Terms Template is correct");
+			assert.ok(cur_frm.doc.payment_schedule.length > 0, "Payment Term Schedule is not empty");
 
 		},
 		() => frappe.tests.click_button('Submit'),
@@ -40,4 +44,3 @@ QUnit.test("test sales Invoice", function(assert) {
 		() => done()
 	]);
 });
-

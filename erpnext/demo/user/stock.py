@@ -7,6 +7,7 @@ import frappe, random
 from frappe.desk import query_report
 from erpnext.stock.stock_ledger import NegativeStockError
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoRequiredError, SerialNoQtyError
+from erpnext.stock.doctype.batch.batch import UnableToSelectBatchError
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
 
@@ -59,7 +60,7 @@ def make_delivery_note():
 			try:
 				dn.submit()
 				frappe.db.commit()
-			except (NegativeStockError, SerialNoRequiredError, SerialNoQtyError):
+			except (NegativeStockError, SerialNoRequiredError, SerialNoQtyError, UnableToSelectBatchError):
 				frappe.db.rollback()
 
 def make_stock_reconciliation():

@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import cstr, flt
-import json
+import json, copy
 
 class ItemVariantExistsError(frappe.ValidationError): pass
 class InvalidItemAttributeValueError(frappe.ValidationError): pass
@@ -169,33 +169,116 @@ def create_variant(item, args):
 
 	return variant
 
+@frappe.whitelist()
+def enqueue_multiple_variant_creation(item, args):
+	# There can be innumerable attribute combinations, enqueue
+	frappe.enqueue("erpnext.controllers.item_variant.create_multiple_variants",
+		item=item, args=args, now=frappe.flags.in_test);
+
+def create_multiple_variants(item, args):
+	if isinstance(args, basestring):
+		args = json.loads(args)
+
+	args_set = generate_keyed_value_combinations(args)
+
+	for attribute_values in args_set:
+		if not get_variant(item, args=attribute_values):
+			variant = create_variant(item, attribute_values)
+			variant.save()
+
+def generate_keyed_value_combinations(args):
+	"""
+	From this:
+
+		args = {"attr1": ["a", "b", "c"], "attr2": ["1", "2"], "attr3": ["A"]}
+
+	To this:
+
+		[
+			{u'attr1': u'a', u'attr2': u'1', u'attr3': u'A'},
+			{u'attr1': u'b', u'attr2': u'1', u'attr3': u'A'},
+			{u'attr1': u'c', u'attr2': u'1', u'attr3': u'A'},
+			{u'attr1': u'a', u'attr2': u'2', u'attr3': u'A'},
+			{u'attr1': u'b', u'attr2': u'2', u'attr3': u'A'},
+			{u'attr1': u'c', u'attr2': u'2', u'attr3': u'A'}
+		]
+
+	"""
+	# Return empty list if empty
+	if not args:
+		return []
+
+	# Turn `args` into a list of lists of key-value tuples:
+	# [
+	# 	[(u'attr2', u'1'), (u'attr2', u'2')],
+	# 	[(u'attr3', u'A')],
+	# 	[(u'attr1', u'a'), (u'attr1', u'b'), (u'attr1', u'c')]
+	# ]
+	key_value_lists = [[(key, val) for val in args[key]] for key in args.keys()]
+
+	# Store the first, but as objects
+	# [{u'attr2': u'1'}, {u'attr2': u'2'}]
+	results = key_value_lists.pop(0)
+	results = [{d[0]: d[1]} for d in results]
+
+	# Iterate the remaining
+	# Take the next list to fuse with existing results
+	for l in key_value_lists:
+		new_results = []
+		for res in results:
+			for key_val in l:
+				# create a new clone of object in result
+				obj = copy.deepcopy(res)
+				# to be used with every incoming new value
+				obj[key_val[0]] = key_val[1]
+				# and pushed into new_results
+				new_results.append(obj)
+		results = new_results
+
+	return results
+
 def copy_attributes_to_variant(item, variant):
 	from frappe.model import no_value_fields
 
 	# copy non no-copy fields
 
-	exclude_fields = ["item_code", "item_name", "show_in_website"]
+	exclude_fields = ["naming_series", "item_code", "item_name", "show_in_website",
+		"show_variant_in_website", "opening_stock", "variant_of", "valuation_rate"]
 
 	if item.variant_based_on=='Manufacturer':
 		# don't copy manufacturer values if based on part no
 		exclude_fields += ['manufacturer', 'manufacturer_part_no']
 
+	allow_fields = [d.field_name for d in frappe.get_all("Variant Field", fields = ['field_name'])]
+	if "variant_based_on" not in allow_fields:
+		allow_fields.append("variant_based_on")
 	for field in item.meta.fields:
 		# "Table" is part of `no_value_field` but we shouldn't ignore tables
-		if (field.fieldtype == 'Table' or field.fieldtype not in no_value_fields) \
-			and (not field.no_copy) and field.fieldname not in exclude_fields:
+		if (field.reqd or field.fieldname in allow_fields) and field.fieldname not in exclude_fields:
 			if variant.get(field.fieldname) != item.get(field.fieldname):
-				variant.set(field.fieldname, item.get(field.fieldname))
+				if field.fieldtype == "Table":
+					variant.set(field.fieldname, [])
+					for d in item.get(field.fieldname):
+						row = copy.deepcopy(d)
+						if row.get("name"):
+							row.name = None
+						variant.append(field.fieldname, row)
+				else:
+					variant.set(field.fieldname, item.get(field.fieldname))
+
 	variant.variant_of = item.name
 	variant.has_variants = 0
 	if not variant.description:
-		variant.description = ''
+		variant.description = ""
 
 	if item.variant_based_on=='Item Attribute':
 		if variant.attributes:
-			variant.description += "\n"
+			attributes_description = ""
 			for d in variant.attributes:
-				variant.description += "<p>" + d.attribute + ": " + cstr(d.attribute_value) + "</p>"
+				attributes_description += "<div>" + d.attribute + ": " + cstr(d.attribute_value) + "</div>"
+
+			if attributes_description not in variant.description:
+					variant.description += attributes_description
 
 def make_variant_item_code(template_item_code, template_item_name, variant):
 	"""Uses template's item code and abbreviations to make variant's item code"""
@@ -224,3 +307,20 @@ def make_variant_item_code(template_item_code, template_item_name, variant):
 	if abbreviations:
 		variant.item_code = "{0}-{1}".format(template_item_code, "-".join(abbreviations))
 		variant.item_name = "{0}-{1}".format(template_item_name, "-".join(abbreviations))
+
+@frappe.whitelist()
+def create_variant_doc_for_quick_entry(template, args):
+	variant_based_on = frappe.db.get_value("Item", template, "variant_based_on")
+	args = json.loads(args)
+	if variant_based_on == "Manufacturer":
+		variant = get_variant(template, **args)
+	else:
+		existing_variant = get_variant(template, args)
+		if existing_variant:
+			return existing_variant
+		else:
+			variant = create_variant(template, args=args)
+			variant.name = variant.item_code
+			validate_item_variant_attributes(variant, args)
+	return variant.as_dict()
+

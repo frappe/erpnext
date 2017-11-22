@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, add_days
 from frappe.utils import get_datetime_str, nowdate
 
 def get_root_of(doctype):
@@ -41,7 +41,7 @@ def before_tests():
 			"email"				:"test@erpnext.com",
 			"password"			:"test",
 			"chart_of_accounts" : "Standard",
-			"domain"			: "Manufacturing"
+			"domain"			: "Manufacturing",
 		})
 
 	frappe.db.sql("delete from `tabLeave Allocation`")
@@ -56,8 +56,6 @@ def before_tests():
 
 @frappe.whitelist()
 def get_exchange_rate(from_currency, to_currency, transaction_date=None):
-	if not transaction_date:
-		transaction_date = nowdate()
 	if not (from_currency and to_currency):
 		# manqala 19/09/2016: Should this be an empty return or should it throw and exception?
 		return
@@ -65,13 +63,27 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None):
 	if from_currency == to_currency:
 		return 1
 
+	if not transaction_date:
+		transaction_date = nowdate()
+
+	currency_settings = frappe.get_doc("Accounts Settings").as_dict()
+	allow_stale_rates = currency_settings.get("allow_stale")
+
+	filters = [
+		["date", "<=", get_datetime_str(transaction_date)],
+		["from_currency", "=", from_currency],
+		["to_currency", "=", to_currency]
+	]
+
+	if not allow_stale_rates:
+		stale_days = currency_settings.get("stale_days")
+		checkpoint_date = add_days(transaction_date, -stale_days)
+		filters.append(["date", ">", get_datetime_str(checkpoint_date)])
+
 	# cksgb 19/09/2016: get last entry in Currency Exchange with from_currency and to_currency.
-	entries = frappe.get_all("Currency Exchange", fields = ["exchange_rate"],
-		filters=[
-			["date", "<=", get_datetime_str(transaction_date)],
-			["from_currency", "=", from_currency],
-			["to_currency", "=", to_currency]
-		], order_by="date desc", limit=1)
+	entries = frappe.get_all(
+		"Currency Exchange", fields=["exchange_rate"], filters=filters, order_by="date desc",
+		limit=1)
 
 	if entries:
 		return flt(entries[0].exchange_rate)
@@ -99,26 +111,12 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None):
 
 def enable_all_roles_and_domains():
 	""" enable all roles and domain for testing """
-	roles = frappe.get_list("Role", filters={"disabled": 1})
-	for role in roles:
-		_role = frappe.get_doc("Role", role.get("name"))
-		_role.disabled = 0
-		_role.flags.ignore_mandatory = True
-		_role.flags.ignore_permissions = True
-		_role.save()
-
 	# add all roles to users
-	user = frappe.get_doc("User", "Administrator")
-	user.add_roles(*[role.get("name") for role in roles])
-
-	domains = frappe.get_list("Domain")
+	domains = frappe.get_all("Domain")
 	if not domains:
 		return
 
-	domain_settings = frappe.get_doc("Domain Settings", "Domain Settings")
-	domain_settings.set("active_domains", [])
-	for domain in domains:
-		row = domain_settings.append("active_domains", {})
-		row.domain=domain.get("name")
-
-	domain_settings.save()
+	from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
+	frappe.get_single('Domain Settings').set_active_domains(\
+		[d.name for d in domains])
+	add_all_roles_to('Administrator')

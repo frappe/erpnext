@@ -40,6 +40,10 @@ frappe.ui.form.on("Sales Order", {
 			if(!d.delivery_date) d.delivery_date = frm.doc.delivery_date;
 		});
 		refresh_field("items");
+	},
+
+	onload_post_render: function(frm) {
+		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	}
 });
 
@@ -92,7 +96,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				// delivery note
 				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
 					this.frm.add_custom_button(__('Delivery'),
-						function() { me.make_delivery_note_based_on_delivery_note(); }, __("Make"));
+						function() { me.make_delivery_note_based_on_delivery_date(); }, __("Make"));
 					this.frm.add_custom_button(__('Production Order'),
 						function() { me.make_production_order() }, __("Make"));
 
@@ -141,6 +145,12 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							function() { me.make_project() }, __("Make"));
 				}
 
+				if(!doc.subscription) {
+					this.frm.add_custom_button(__('Subscription'), function() {
+						erpnext.utils.make_subscription(doc.doctype, doc.name)
+					}, __("Make"))
+				}
+
 			} else {
 				if (this.frm.has_perm("submit")) {
 					// un-close
@@ -187,7 +197,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					});
 					return;
 				}
-				else if(!r.message.every(function(d) { return !!d.pending_qty })) {
+				else if(!r.message) {
 					frappe.msgprint({
 						title: __('Production Order not created'),
 						message: __('Production Order already created for all items with BOM'),
@@ -207,6 +217,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 									}},
 								{fieldtype:'Float', fieldname:'pending_qty', reqd: 1,
 									label: __('Qty'), in_list_view:1},
+								{fieldtype:'Data', fieldname:'sales_order_item', reqd: 1,
+									label: __('Sales Order Item'), hidden:1}
 							],
 							get_data: function() {
 								return r.message
@@ -264,7 +276,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		})
 	},
 
-	make_delivery_note_based_on_delivery_note: function() {
+	make_delivery_note_based_on_delivery_date: function() {
 		var me = this;
 		
 		var delivery_dates = [];

@@ -1,0 +1,104 @@
+/* hub */
+div[data-page-route="hub"] .page-head {
+  height: 80px;
+}
+div[data-page-route="hub"] .page-head .title-text {
+  cursor: pointer;
+}
+div[data-page-route="hub"] .page-content {
+  margin-top: 80px;
+}
+div[data-page-route="hub"] .page-title h1 {
+  margin-bottom: 0px;
+}
+div[data-page-route="hub"] .account-details {
+  margin-top: 20px;
+}
+div[data-page-route="hub"] [data-original-title="Search"] {
+  float: right;
+  width: 220px;
+}
+div[data-page-route="hub"] .hub-main-section {
+  padding: 30px;
+}
+div[data-page-route="hub"] .listing-body {
+  margin: 0;
+}
+div[data-page-route="hub"] .main-list-section {
+  padding: 0;
+}
+div[data-page-route="hub"] .side-list-section {
+  padding: 0;
+}
+div[data-page-route="hub"] .item-list-header h3 {
+  font-weight: normal;
+}
+div[data-page-route="hub"] .hub-item-page h2 {
+  margin-top: 10px;
+}
+div[data-page-route="hub"] .hub-item-page .item-header {
+  display: flex;
+}
+div[data-page-route="hub"] .hub-item-page .item-page-image {
+  flex: 1;
+}
+div[data-page-route="hub"] .hub-item-page .title-content {
+  flex: 3;
+}
+div[data-page-route="hub"] .hub-item-page .title-content .description {
+  margin: 30px 0px;
+}
+div[data-page-route="hub"] .hub-item-page .title-content .actions {
+  margin-top: 30px;
+}
+div[data-page-route="hub"] .hub-item-page .title-content .actions .rfq-btn.disabled {
+  background-color: #b1bdca;
+  color: #fff;
+  border-color: #b1bdca;
+}
+div[data-page-route="hub"] .hub-item-page .company-items {
+  margin-top: 40px;
+}
+div[data-page-route="hub"] .company-header {
+  display: flex;
+}
+div[data-page-route="hub"] .item-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+div[data-page-route="hub"] .hub-item-wrapper {
+  margin-bottom: 20px;
+}
+div[data-page-route="hub"] .img-wrapper {
+  border: 1px solid #d1d8dd;
+  border-radius: 3px;
+  padding: 12px;
+  overflow: hidden;
+  text-align: center;
+  white-space: nowrap;
+}
+div[data-page-route="hub"] .img-wrapper img {
+  max-width: 100%;
+  max-height: 100%;
+  display: inline-block;
+  vertical-align: middle;
+}
+div[data-page-route="hub"] .img-wrapper .helper {
+  height: 100%;
+  display: inline-block;
+  vertical-align: middle;
+}
+div[data-page-route="hub"] .img-wrapper .standard-image {
+  font-size: 72px;
+  border: none;
+  background-color: #fafbfc;
+}
+div[data-page-route="hub"] .hub-item-title {
+  width: 100%;
+}
+div[data-page-route="hub"] .breadcrumb {
+  padding-left: 0;
+  padding-top: 0;
+  margin-bottom: 10px;
+}

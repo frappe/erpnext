@@ -13,14 +13,39 @@ frappe.ui.form.on("Purchase Order", {
 			'Stock Entry': 'Material to Supplier'
 		}
 	},
+
 	onload: function(frm) {
+		set_schedule_date(frm);
+
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
 
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
+	},
+});
 
+frappe.ui.form.on("Purchase Order Item", {
+	item_code: function(frm) {
+		frappe.call({
+			method: "get_last_purchase_rate",
+			doc: frm.doc,
+			callback: function(r, rt) {
+				frm.trigger('calculate_taxes_and_totals');
+			}
+		})
+	},
+
+	schedule_date: function(frm, cdt, cdn) {
+		var row = locals[cdt][cdn];
+		if (row.schedule_date) {
+			if(!frm.doc.schedule_date) {
+				erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "schedule_date");
+			} else {
+				set_schedule_date(frm);
+			}
+		}
 	}
 });
 
@@ -86,8 +111,13 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			if(flt(doc.per_billed)==0 && doc.status != "Delivered") {
 				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_payment_entry, __("Make"));
 			}
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 
+			if(!doc.subscription) {
+				cur_frm.add_custom_button(__('Subscription'), function() {
+					erpnext.utils.make_subscription(doc.doctype, doc.name)
+				}, __("Make"))
+			}
+			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 	},
 
@@ -102,12 +132,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	},
 
 	validate: function() {
-		// set default schedule date as today if missing.
-		(this.frm.doc.items || []).forEach(function(d) {
-			if(!d.schedule_date) {
-				d.schedule_date = frappe.datetime.nowdate();
-			}
-		})
+		set_schedule_date(this.frm);
 	},
 
 	make_stock_entry: function() {
@@ -196,7 +221,12 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 	items_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("items", row, ["schedule_date"]);
+		if(doc.schedule_date) {
+			row.schedule_date = doc.schedule_date;
+			refresh_field("schedule_date", cdn, "items");
+		} else {
+			this.frm.script_manager.copy_from_first_row("items", row, ["schedule_date"]);
+		}
 	},
 
 	unclose_purchase_order: function(){
@@ -220,8 +250,15 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				cur_frm.cscript.calculate_taxes_and_totals();
 			}
 		})
-	}
+	},
 
+	items_on_form_rendered: function() {
+		set_schedule_date(this.frm);
+	},
+
+	schedule_date: function() {
+		set_schedule_date(this.frm);
+	}
 });
 
 // for backward compatibility: combine new and previous states
@@ -263,8 +300,10 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	}
 }
 
-cur_frm.cscript.schedule_date = function(doc, cdt, cdn) {
-	erpnext.utils.copy_value_in_all_row(doc, cdt, cdn, "items", "schedule_date");
+function set_schedule_date(frm) {
+	if(frm.doc.schedule_date){
+		erpnext.utils.copy_value_in_all_row(frm.doc, frm.doc.doctype, frm.doc.name, "items", "schedule_date");
+	}
 }
 
 frappe.provide("erpnext.buying");

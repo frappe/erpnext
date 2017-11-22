@@ -8,6 +8,7 @@ from frappe.utils import random_string, nowdate
 from erpnext.hr.doctype.expense_claim.expense_claim import make_bank_entry
 
 test_records = frappe.get_test_records('Expense Claim')
+test_dependencies = ['Employee']
 
 class TestExpenseClaim(unittest.TestCase):
 	def test_total_expense_claim_for_project(self):

@@ -79,7 +79,7 @@ def get_item_details(args):
 		and out.warehouse and out.stock_qty > 0:
 
 		if out.has_serial_no:
-			out.serial_no = get_serial_no(out)
+			out.serial_no = get_serial_no(out, args.serial_no)
 
 		if out.has_batch_no and not args.get("batch_no"):
 			out.batch_no = get_batch_no(out.item_code, out.warehouse, out.qty)
@@ -90,7 +90,7 @@ def get_item_details(args):
 			item.lead_time_days)
 
 	if args.get("is_subcontracted") == "Yes":
-		out.bom = get_default_bom(args.item_code)
+		out.bom = args.get('bom') or get_default_bom(args.item_code)
 
 	get_gross_profit(out)
 
@@ -164,6 +164,21 @@ def get_basic_details(args, item):
 
 	warehouse = user_default_warehouse or item.default_warehouse or args.warehouse
 
+	material_request_type = ''
+	if args.get('doctype') == "Material Request":
+		material_request_type = frappe.db.get_value('Material Request',
+			args.get('name'), 'material_request_type')
+
+	#Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
+	if not args.uom:
+		if args.get('doctype') in ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']:
+			args.uom = item.sales_uom if item.sales_uom else item.stock_uom
+		elif (args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']) or \
+			(args.get('doctype') == 'Material Request' and material_request_type == 'Purchase'):
+			args.uom = item.purchase_uom if item.purchase_uom else item.stock_uom
+		else:
+			args.uom = item.stock_uom
+
 	out = frappe._dict({
 		"item_code": item.name,
 		"item_name": item.item_name,
@@ -178,7 +193,7 @@ def get_basic_details(args, item):
 		"batch_no": None,
 		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in
 			item.get("taxes")))),
-		"uom": item.stock_uom,
+		"uom": args.uom,
 		"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
 		"qty": args.qty or 1.0,
 		"stock_qty": args.qty or 1.0,
@@ -554,7 +569,8 @@ def get_gross_profit(out):
 	return out
 
 @frappe.whitelist()
-def get_serial_no(args):
+def get_serial_no(args, serial_nos=None):
+	serial_no = None
 	if isinstance(args, basestring):
 		args = json.loads(args)
 		args = frappe._dict(args)
@@ -568,4 +584,9 @@ def get_serial_no(args):
 			args = json.dumps({"item_code": args.get('item_code'),"warehouse": args.get('warehouse'),"stock_qty": args.get('stock_qty')})
 			args = process_args(args)
 			serial_no = get_serial_nos_by_fifo(args)
-			return serial_no
+
+	if not serial_no and serial_nos:
+		# For POS
+		serial_no = serial_nos
+
+	return serial_no

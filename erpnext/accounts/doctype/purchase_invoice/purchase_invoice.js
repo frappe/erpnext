@@ -17,12 +17,13 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			if(!this.frm.doc.supplier && this.frm.doc.credit_to) {
 				this.frm.set_df_property("credit_to", "print_hide", 0);
 			}
+		} else {
+			this.frm.set_value("disable_rounded_total", frappe.sys_defaults.disable_rounded_total);
 		}
 
 		// formatter for material request item
 		this.frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
-
 	},
 
 	refresh: function(doc) {
@@ -45,6 +46,12 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
 				cur_frm.add_custom_button(__('Return / Debit Note'),
 					this.make_debit_note, __("Make"));
+			}
+
+			if(!doc.subscription) {
+				cur_frm.add_custom_button(__('Subscription'), function() {
+					erpnext.utils.make_subscription(doc.doctype, doc.name)
+				}, __("Make"))
 			}
 		}
 
@@ -343,6 +350,7 @@ frappe.ui.form.on("Purchase Invoice", {
 			'Payment Entry': 'Payment'
 		}
 	},
+
 	onload: function(frm) {
 		$.each(["warehouse", "rejected_warehouse"], function(i, field) {
 			frm.set_query(field, "items", function() {

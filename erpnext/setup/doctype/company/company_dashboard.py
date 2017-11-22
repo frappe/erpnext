@@ -8,8 +8,8 @@ def get_data():
 		'graph': True,
 		'graph_method': "frappe.utils.goal.get_monthly_goal_graph_data",
 		'graph_method_args': {
-			'title': 'Sales',
-			'goal_value_field': 'sales_target',
+			'title': _('Sales'),
+			'goal_value_field': 'monthly_sales_target',
 			'goal_total_field': 'total_monthly_sales',
 			'goal_history_field': 'sales_monthly_history',
 			'goal_doctype': 'Sales Invoice',

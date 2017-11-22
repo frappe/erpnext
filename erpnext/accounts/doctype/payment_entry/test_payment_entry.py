@@ -14,6 +14,7 @@ from erpnext.hr.doctype.expense_claim.test_expense_claim import make_expense_cla
 
 test_dependencies = ["Item"]
 
+
 class TestPaymentEntry(unittest.TestCase):
 	def test_payment_entry_against_order(self):
 		so = make_sales_order()
@@ -40,7 +41,7 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertEqual(so_advance_paid, 0)
 
 	def test_payment_entry_against_si_usd_to_usd(self):
-		si =  create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
+		si = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
 			currency="USD", conversion_rate=50)
 		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank USD - _TC")
 		pe.reference_no = "1"
@@ -65,8 +66,20 @@ class TestPaymentEntry(unittest.TestCase):
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, 100)
 
+	def test_payment_entry_against_si_multi_due_dates(self):
+		si = create_sales_invoice(do_not_save=1)
+		si.payment_terms_template = '_Test Payment Term Template'
+		si.insert()
+		si.submit()
+
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.reference_no = "1"
+		pe.reference_date = "2016-01-01"
+		pe.insert()
+		pe.submit()
+
 	def test_payment_entry_against_pi(self):
-		pi =  make_purchase_invoice(supplier="_Test Supplier USD", debit_to="_Test Payable USD - _TC",
+		pi = make_purchase_invoice(supplier="_Test Supplier USD", debit_to="_Test Payable USD - _TC",
 			currency="USD", conversion_rate=50)
 		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank USD - _TC")
 		pe.reference_no = "1"
@@ -88,7 +101,7 @@ class TestPaymentEntry(unittest.TestCase):
 	def test_payment_entry_against_ec(self):
 
 		payable = frappe.db.get_value('Company', "_Test Company", 'default_payable_account')
-		ec =  make_expense_claim(payable, 300, 300, "_Test Company","Travel Expenses - _TC")
+		ec = make_expense_claim(payable, 300, 300, "_Test Company", "Travel Expenses - _TC")
 		pe = get_payment_entry("Expense Claim", ec.name, bank_account="_Test Bank USD - _TC", bank_amount=300)
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
@@ -108,7 +121,7 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertEqual(outstanding_amount, 0)
 
 	def test_payment_entry_against_si_usd_to_inr(self):
-		si =  create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
+		si = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
 			currency="USD", conversion_rate=50)
 		pe = get_payment_entry("Sales Invoice", si.name, party_amount=20,
 			bank_account="_Test Bank - _TC", bank_amount=900)
@@ -212,7 +225,7 @@ class TestPaymentEntry(unittest.TestCase):
 
 		self.assertRaises(InvalidPaymentEntry, pe1.validate)
 
-		si1 =  create_sales_invoice()
+		si1 = create_sales_invoice()
 
 		# create full payment entry against si1
 		pe2 = get_payment_entry("Sales Invoice", si1.name, bank_account="_Test Cash - _TC")
@@ -267,3 +280,65 @@ class TestPaymentEntry(unittest.TestCase):
 		return frappe.db.sql("""select account, debit, credit, against_voucher
 			from `tabGL Entry` where voucher_type='Payment Entry' and voucher_no=%s
 			order by account asc""", voucher_no, as_dict=1)
+
+	def test_payment_entry_write_off_difference(self):
+		si =  create_sales_invoice()
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Cash - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = "2016-01-01"
+		pe.received_amount = pe.paid_amount = 110
+		pe.insert()
+
+		self.assertEqual(pe.unallocated_amount, 10)
+
+		pe.received_amount = pe.paid_amount = 95
+		pe.append("deductions", {
+			"account": "_Test Write Off - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"amount": 5
+		})
+		pe.save()
+
+		self.assertEqual(pe.unallocated_amount, 0)
+		self.assertEqual(pe.difference_amount, 0)
+
+		pe.submit()
+
+		expected_gle = dict((d[0], d) for d in [
+			["Debtors - _TC", 0, 100, si.name],
+			["_Test Cash - _TC", 95, 0, None],
+			["_Test Write Off - _TC", 5, 0, None]
+		])
+
+		self.validate_gl_entries(pe.name, expected_gle)
+
+	def test_payment_entry_exchange_gain_loss(self):
+		si =  create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
+			currency="USD", conversion_rate=50)
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank USD - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = "2016-01-01"
+		pe.target_exchange_rate = 55
+
+		pe.append("deductions", {
+			"account": "_Test Exchange Gain/Loss - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"amount": -500
+		})
+		pe.save()
+
+		self.assertEqual(pe.unallocated_amount, 0)
+		self.assertEqual(pe.difference_amount, 0)
+
+		pe.submit()
+
+		expected_gle = dict((d[0], d) for d in [
+			["_Test Receivable USD - _TC", 0, 5000, si.name],
+			["_Test Bank USD - _TC", 5500, 0, None],
+			["_Test Exchange Gain/Loss - _TC", 0, 500, None],
+		])
+
+		self.validate_gl_entries(pe.name, expected_gle)
+
+		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
+		self.assertEqual(outstanding_amount, 0)

@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import json
-from frappe.utils import cstr, flt
+from frappe.utils import cstr, flt, cint
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.buying_controller import BuyingController
@@ -20,8 +20,8 @@ form_grid_templates = {
 }
 
 class PurchaseOrder(BuyingController):
-	def __init__(self, arg1, arg2=None):
-		super(PurchaseOrder, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(PurchaseOrder, self).__init__(*args, **kwargs)
 		self.status_updater = [{
 			'source_dt': 'Purchase Order Item',
 			'target_dt': 'Material Request Item',
@@ -29,7 +29,7 @@ class PurchaseOrder(BuyingController):
 			'target_field': 'ordered_qty',
 			'target_parent_dt': 'Material Request',
 			'target_parent_field': 'per_ordered',
-			'target_ref_field': 'qty',
+			'target_ref_field': 'stock_qty',
 			'source_field': 'stock_qty',
 			'percent_join_field': 'material_request',
 			'overflow_type': 'order'
@@ -41,6 +41,7 @@ class PurchaseOrder(BuyingController):
 		self.set_status()
 
 		self.validate_supplier()
+		self.validate_schedule_date()
 		validate_for_items(self)
 		self.check_for_closed_status()
 
@@ -104,26 +105,26 @@ class PurchaseOrder(BuyingController):
 	def get_last_purchase_rate(self):
 		"""get last purchase rates for all items"""
 
-		conversion_rate = flt(self.get('conversion_rate')) or 1.0
+		if not cint(frappe.db.get_single_value("Buying Settings", "disable_fetch_last_purchase_rate")):
+			conversion_rate = flt(self.get('conversion_rate')) or 1.0
 
-		for d in self.get("items"):
-			if d.item_code:
-				last_purchase_details = get_last_purchase_details(d.item_code, self.name)
+			for d in self.get("items"):
+				if d.item_code:
+					last_purchase_details = get_last_purchase_details(d.item_code, self.name)
 
-				if last_purchase_details:
-					d.base_price_list_rate = (last_purchase_details['base_price_list_rate'] *
-						(flt(d.conversion_factor) or 1.0))
-					d.discount_percentage = last_purchase_details['discount_percentage']
-					d.base_rate = last_purchase_details['base_rate'] * (flt(d.conversion_factor) or 1.0)
-					d.price_list_rate = d.base_price_list_rate / conversion_rate
-					d.rate = d.base_rate / conversion_rate
-				else:
-					msgprint(_("Last purchase rate not found"))
+					if last_purchase_details:
+						d.base_price_list_rate = (last_purchase_details['base_price_list_rate'] *
+							(flt(d.conversion_factor) or 1.0))
+						d.discount_percentage = last_purchase_details['discount_percentage']
+						d.base_rate = last_purchase_details['base_rate'] * (flt(d.conversion_factor) or 1.0)
+						d.price_list_rate = d.base_price_list_rate / conversion_rate
+						d.last_purchase_rate = d.base_rate / conversion_rate
+					else:
 
-					item_last_purchase_rate = frappe.db.get_value("Item", d.item_code, "last_purchase_rate")
-					if item_last_purchase_rate:
-						d.base_price_list_rate = d.base_rate = d.price_list_rate \
-							= d.rate = item_last_purchase_rate
+						item_last_purchase_rate = frappe.db.get_value("Item", d.item_code, "last_purchase_rate")
+						if item_last_purchase_rate:
+							d.base_price_list_rate = d.base_rate = d.price_list_rate \
+								= d.last_purchase_rate = item_last_purchase_rate
 
 	# Check for Closed status
 	def check_for_closed_status(self):
@@ -295,6 +296,7 @@ def make_purchase_receipt(source_name, target_doc=None):
 			"field_map": {
 				"name": "purchase_order_item",
 				"parent": "purchase_order",
+				"bom": "bom"
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1

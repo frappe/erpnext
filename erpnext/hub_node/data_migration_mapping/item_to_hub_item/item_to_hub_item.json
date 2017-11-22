@@ -1,0 +1,55 @@
+{
+ "condition": "{\"publish_in_hub\": 1}", 
+ "creation": "2017-09-07 13:27:52.726350", 
+ "docstatus": 0, 
+ "doctype": "Data Migration Mapping", 
+ "fields": [
+  {
+   "is_child_table": 0, 
+   "local_fieldname": "item_code", 
+   "remote_fieldname": "item_code"
+  }, 
+  {
+   "is_child_table": 0, 
+   "local_fieldname": "item_name", 
+   "remote_fieldname": "item_name"
+  }, 
+  {
+   "is_child_table": 0, 
+   "local_fieldname": "eval:frappe.db.get_default(\"company\")", 
+   "remote_fieldname": "company_name"
+  }, 
+  {
+   "is_child_table": 0, 
+   "local_fieldname": "image", 
+   "remote_fieldname": "image"
+  }, 
+  {
+   "is_child_table": 0, 
+   "local_fieldname": "item_group", 
+   "remote_fieldname": "item_group"
+  }, 
+  {
+   "is_child_table": 0, 
+   "local_fieldname": "eval:frappe.session.user", 
+   "remote_fieldname": "seller"
+  }, 
+  {
+   "is_child_table": 0, 
+   "local_fieldname": "eval:frappe.db.get_default(\"country\")", 
+   "remote_fieldname": "country"
+  }
+ ], 
+ "idx": 1, 
+ "local_doctype": "Item", 
+ "mapping_name": "Item to Hub Item", 
+ "mapping_type": "Push", 
+ "migration_id_field": "hub_sync_id", 
+ "modified": "2017-10-09 17:30:17.890337", 
+ "modified_by": "Administrator", 
+ "name": "Item to Hub Item", 
+ "owner": "Administrator", 
+ "page_length": 10, 
+ "remote_objectname": "Hub Item", 
+ "remote_primary_key": "item_code"
+}

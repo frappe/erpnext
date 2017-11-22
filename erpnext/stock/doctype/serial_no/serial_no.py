@@ -20,8 +20,8 @@ class SerialNoNotExistsError(ValidationError): pass
 class SerialNoDuplicateError(ValidationError): pass
 
 class SerialNo(StockController):
-	def __init__(self, arg1, arg2=None):
-		super(SerialNo, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(SerialNo, self).__init__(*args, **kwargs)
 		self.via_stock_ledger = False
 
 	def validate(self):
@@ -240,7 +240,8 @@ def has_duplicate_serial_no(sn, sle):
 
 	status = False
 	if sn.purchase_document_no:
-		if sle.voucher_type in ['Purchase Receipt', 'Stock Entry']:
+		if sle.voucher_type in ['Purchase Receipt', 'Stock Entry'] and \
+			sn.delivery_document_type not in ['Purchase Receipt', 'Stock Entry']:
 			status = True
 
 		if status and sle.voucher_type == 'Stock Entry' and \

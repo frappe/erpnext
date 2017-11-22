@@ -1,0 +1,140 @@
+@import "../../../../frappe/frappe/public/less/variables.less";
+
+/* hub */
+div[data-page-route="hub"] {
+	.page-head {
+		height: 80px;
+
+		.title-text {
+			cursor: pointer;
+		}
+	}
+
+	.page-content {
+		margin-top: 80px;
+	}
+
+	.page-title h1 {
+		margin-bottom: 0px;
+	}
+
+	.account-details {
+		margin-top: 20px;
+	}
+
+	[data-original-title="Search"] {
+		float: right;
+		width: 220px;
+	}
+
+	.hub-main-section {
+		padding: 30px;
+	}
+
+	.listing-body {
+		margin: 0;
+	}
+
+	.main-list-section {
+		padding: 0;
+		// border-right: 1px solid #d1d8dd;
+	}
+
+	.side-list-section {
+		padding: 0;
+	}
+
+	.item-list-header h3 {
+		font-weight: normal;
+	}
+
+	.hub-item-page {
+
+		h2 {
+			margin-top: 10px;
+		}
+
+		.item-header {
+			display: flex;
+		}
+
+		.item-page-image {
+			flex: 1;
+		}
+
+		.title-content {
+			flex: 3;
+
+			.description {
+				margin: 30px 0px;
+			}
+
+			.actions {
+				margin-top: 30px;
+
+				.rfq-btn.disabled {
+					background-color: #b1bdca;
+					color: #fff;
+					border-color: #b1bdca;
+				}
+			}
+		}
+
+		.company-items {
+			margin-top: 40px;
+		}
+	}
+
+	.company-header {
+		display: flex;
+	}
+
+	.item-list {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+	}
+
+	.hub-item-wrapper {
+		margin-bottom: 20px;
+	}
+
+	.img-wrapper {
+		border: 1px solid @border-color;
+		border-radius: 3px;
+		padding: 12px;
+		overflow: hidden;
+		text-align: center;
+		white-space: nowrap;
+
+		img {
+			max-width: 100%;
+			max-height: 100%;
+			display: inline-block;
+			vertical-align: middle;
+		}
+
+		.helper {
+			height: 100%;
+			display: inline-block;
+			vertical-align: middle;
+		}
+
+		.standard-image {
+			font-size: 72px;
+			border: none;
+			background-color: @light-bg;
+		}
+	}
+
+	.hub-item-title {
+		width: 100%;
+	}
+
+	.breadcrumb {
+		padding-left: 0;
+		padding-top: 0;
+		margin-bottom: 10px;
+	}
+
+}

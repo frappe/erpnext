@@ -49,10 +49,10 @@ class Timesheet(Document):
 			self.update_time_rates(d)
 
 			self.total_hours += flt(d.hours)
+			self.total_costing_amount += flt(d.costing_amount)
 			if d.billable:
 				self.total_billable_hours += flt(d.billing_hours)
 				self.total_billable_amount += flt(d.billing_amount)
-				self.total_costing_amount += flt(d.costing_amount)
 				self.total_billed_amount += flt(d.billing_amount) if d.sales_invoice else 0.0
 				self.total_billed_hours += flt(d.billing_hours) if d.sales_invoice else 0.0
 
@@ -265,19 +265,19 @@ class Timesheet(Document):
 
 	def update_cost(self):
 		for data in self.time_logs:
-			if data.activity_type and data.billable:
+			if data.activity_type or data.billable:
 				rate = get_activity_cost(self.employee, data.activity_type)
 				hours = data.billing_hours or 0
+				costing_hours = data.billing_hours or data.hours or 0
 				if rate:
 					data.billing_rate = flt(rate.get('billing_rate')) if flt(data.billing_rate) == 0 else data.billing_rate
 					data.costing_rate = flt(rate.get('costing_rate')) if flt(data.costing_rate) == 0 else data.costing_rate
 					data.billing_amount = data.billing_rate * hours
-					data.costing_amount = data.costing_rate * hours
+					data.costing_amount = data.costing_rate * costing_hours
 
 	def update_time_rates(self, ts_detail):
 		if not ts_detail.billable:
 			ts_detail.billing_rate = 0.0
-			ts_detail.costing_rate = 0.0
 
 @frappe.whitelist()
 def get_projectwise_timesheet_data(project, parent=None):
@@ -323,17 +323,32 @@ def get_timesheet_data(name, project):
 	}
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target=None):
+def make_sales_invoice(source_name, item_code=None, customer=None):
 	target = frappe.new_doc("Sales Invoice")
 	timesheet = frappe.get_doc('Timesheet', source_name)
 
+	hours = flt(timesheet.total_billable_hours) - flt(timesheet.total_billed_hours)
+	billing_amount = flt(timesheet.total_billable_amount) - flt(timesheet.total_billed_amount)
+	billing_rate = billing_amount / hours
+
+	if customer:
+		target.customer = customer
+
+	if item_code:
+		target.append('items', {
+			'item_code': item_code,
+			'qty': hours,
+			'rate': billing_rate
+		})
+
 	target.append('timesheets', {
 		'time_sheet': timesheet.name,
-		'billing_hours': flt(timesheet.total_billable_hours) - flt(timesheet.total_billed_hours),
-		'billing_amount': flt(timesheet.total_billable_amount) - flt(timesheet.total_billed_amount)
+		'billing_hours': hours,
+		'billing_amount': billing_amount
 	})
 
 	target.run_method("calculate_billing_amount_for_timesheet")
+	target.run_method("set_missing_values")
 
 	return target
 

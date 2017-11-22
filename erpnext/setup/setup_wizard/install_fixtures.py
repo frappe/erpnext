@@ -14,11 +14,38 @@ default_lead_sources = ["Existing Customer", "Reference", "Advertisement",
 def install(country=None):
 	records = [
 		# domains
-		{ 'doctype': 'Domain', 'domain': _('Distribution')},
-		{ 'doctype': 'Domain', 'domain': _('Manufacturing')},
-		{ 'doctype': 'Domain', 'domain': _('Retail')},
-		{ 'doctype': 'Domain', 'domain': _('Services')},
-		{ 'doctype': 'Domain', 'domain': _('Education')},
+		{ 'doctype': 'Domain', 'domain': 'Distribution'},
+		{ 'doctype': 'Domain', 'domain': 'Manufacturing'},
+		{ 'doctype': 'Domain', 'domain': 'Retail'},
+		{ 'doctype': 'Domain', 'domain': 'Services'},
+		{ 'doctype': 'Domain', 'domain': 'Education'},
+		{ 'doctype': 'Domain', 'domain': 'Healthcare'},
+
+		# Setup Progress
+		{'doctype': "Setup Progress", "actions": [
+			{"action_name": "Add Company", "action_doctype": "Company", "min_doc_count": 1, "is_completed": 1,
+				"domains": '[]' },
+			{"action_name": "Set Sales Target", "action_doctype": "Company", "min_doc_count": 99,
+				"action_document": frappe.defaults.get_defaults().get("company") or '',
+				"action_field": "monthly_sales_target", "is_completed": 0,
+				"domains": '["Manufacturing", "Services", "Retail", "Distribution"]' },
+			{"action_name": "Add Customers", "action_doctype": "Customer", "min_doc_count": 1, "is_completed": 0,
+				"domains": '["Manufacturing", "Services", "Retail", "Distribution"]' },
+			{"action_name": "Add Suppliers", "action_doctype": "Supplier", "min_doc_count": 1, "is_completed": 0,
+				"domains": '["Manufacturing", "Services", "Retail", "Distribution"]' },
+			{"action_name": "Add Products", "action_doctype": "Item", "min_doc_count": 1, "is_completed": 0,
+				"domains": '["Manufacturing", "Services", "Retail", "Distribution"]' },
+			{"action_name": "Add Programs", "action_doctype": "Program", "min_doc_count": 1, "is_completed": 0,
+				"domains": '["Education"]' },
+			{"action_name": "Add Instructors", "action_doctype": "Instructor", "min_doc_count": 1, "is_completed": 0,
+				"domains": '["Education"]' },
+			{"action_name": "Add Courses", "action_doctype": "Course", "min_doc_count": 1, "is_completed": 0,
+				"domains": '["Education"]' },
+			{"action_name": "Add Rooms", "action_doctype": "Room", "min_doc_count": 1, "is_completed": 0,
+				"domains": '["Education"]' },
+			{"action_name": "Add Users", "action_doctype": "User", "min_doc_count": 4, "is_completed": 0,
+				"domains": '[]' }
+		]},
 
 		# address template
 		{'doctype':"Address Template", "country": country},
@@ -185,6 +212,11 @@ def install(country=None):
 		{'doctype': "Party Type", "party_type": "Supplier"},
 		{'doctype': "Party Type", "party_type": "Employee"},
 
+		{'doctype': "Opportunity Type", "name": "Hub"},
+		{'doctype': "Opportunity Type", "name": _("Sales")},
+		{'doctype': "Opportunity Type", "name": _("Support")},
+		{'doctype': "Opportunity Type", "name": _("Maintenance")},
+
 		{'doctype': "Project Type", "project_type": "Internal"},
 		{'doctype': "Project Type", "project_type": "External"},
 		{'doctype': "Project Type", "project_type": "Other"},
@@ -240,3 +272,8 @@ def install(country=None):
 				pass
 			else:
 				raise
+
+	# set default customer group and territory
+	selling_settings = frappe.get_doc("Selling Settings")
+	selling_settings.set_default_customer_group_and_territory()
+	selling_settings.save()

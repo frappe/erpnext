@@ -5,15 +5,15 @@ from __future__ import unicode_literals
 import frappe
 import json
 import frappe.utils
-from frappe.utils import cstr, flt, getdate, comma_and, cint
+from frappe.utils import cstr, flt, getdate, comma_and, cint, nowdate, add_days
 from frappe import _
 from frappe.model.utils import get_fetch_values
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
 from frappe.desk.notifications import clear_doctype_notifications
-from erpnext.controllers.recurring_document import month_map, get_next_date
 from frappe.contacts.doctype.address.address import get_company_address
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.accounts.doctype.subscription.subscription import get_next_schedule_date
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -22,8 +22,8 @@ form_grid_templates = {
 class WarehouseRequired(frappe.ValidationError): pass
 
 class SalesOrder(SellingController):
-	def __init__(self, arg1, arg2=None):
-		super(SalesOrder, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(SalesOrder, self).__init__(*args, **kwargs)
 
 	def validate(self):
 		super(SalesOrder, self).validate()
@@ -336,27 +336,28 @@ class SalesOrder(SellingController):
 				bom = get_default_bom_item(i.item_code)
 				if bom:
 					stock_qty = i.qty if i.doctype == 'Packed Item' else i.stock_qty
-					items.append(dict(
-						item_code= i.item_code,
-						bom = bom,
-						warehouse = i.warehouse,
-						pending_qty= stock_qty - flt(frappe.db.sql('''select sum(qty) from `tabProduction Order`
-							where production_item=%s and sales_order=%s''', (i.item_code, self.name))[0][0])
-					))
-
+					pending_qty= stock_qty - flt(frappe.db.sql('''select sum(qty) from `tabProduction Order`
+							where production_item=%s and sales_order=%s and sales_order_item = %s and docstatus<2''', (i.item_code, self.name, i.name))[0][0])
+					if pending_qty:
+						items.append(dict(
+							item_code= i.item_code,
+							bom = bom,
+							warehouse = i.warehouse,
+							pending_qty = pending_qty,
+							sales_order_item = i.name
+						))
 		return items
 
-	def on_recurring(self, reference_doc):
-		mcount = month_map[reference_doc.recurring_type]
-		self.set("delivery_date", get_next_date(reference_doc.delivery_date, mcount,
-			cint(reference_doc.repeat_on_day_of_month)))
+	def on_recurring(self, reference_doc, subscription_doc):
+		self.set("delivery_date", get_next_schedule_date(reference_doc.delivery_date,
+			subscription_doc.frequency, cint(subscription_doc.repeat_on_day)))
 
 		for d in self.get("items"):
 			reference_delivery_date = frappe.db.get_value("Sales Order Item",
 				{"parent": reference_doc.name, "item_code": d.item_code, "idx": d.idx}, "delivery_date")
 
-			d.set("delivery_date",
-				get_next_date(reference_delivery_date, mcount, cint(reference_doc.repeat_on_day_of_month)))
+			d.set("delivery_date", get_next_schedule_date(reference_delivery_date,
+				subscription_doc.frequency, cint(subscription_doc.repeat_on_day)))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
@@ -478,9 +479,11 @@ def make_delivery_note(source_name, target_doc=None):
 		target.qty = flt(source.qty) - flt(source.delivered_qty)
 
 		item = frappe.db.get_value("Item", target.item_code, ["item_group", "selling_cost_center"], as_dict=1)
-		target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
-			or item.selling_cost_center \
-			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
+
+		if item:
+			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
+				or item.selling_cost_center \
+				or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
 
 	target_doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -697,7 +700,8 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 				"contact_display",
 				"contact_mobile",
 				"contact_email",
-				"contact_person"
+				"contact_person",
+				"taxes_and_charges"
 			],
 			"validation": {
 				"docstatus": ["=", 1]
@@ -767,6 +771,7 @@ def make_production_orders(items, sales_order, company, project=None):
 			qty=i['pending_qty'],
 			company=company,
 			sales_order=sales_order,
+			sales_order_item=i['sales_order_item'],
 			project=project,
 			fg_warehouse=i['warehouse']
 		)).insert()

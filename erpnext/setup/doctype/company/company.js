@@ -8,6 +8,16 @@ frappe.ui.form.on("Company", {
 		erpnext.company.setup_queries(frm);
 	},
 
+	company_name: function(frm) {
+		if(frm.doc.__islocal) {
+			let parts = frm.doc.company_name.split();
+			let abbr = $.map(parts, function (p) {
+				return p? p.substr(0, 1) : null;
+			}).join("");
+			frm.set_value("abbr", abbr);
+		}
+	},
+
 	refresh: function(frm) {
 		if(frm.doc.abbr && !frm.doc.__islocal) {
 			frm.set_df_property("abbr", "read_only", 1);
@@ -86,6 +96,7 @@ erpnext.company.set_chart_of_accounts_options = function(doc) {
 			method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.get_charts_for_country",
 			args: {
 				"country": doc.country,
+				"with_standard": true
 			},
 			callback: function(r) {
 				if(!r.exc) {
@@ -111,8 +122,9 @@ cur_frm.cscript.change_abbr = function() {
 	dialog.fields_dict.update.$input.click(function() {
 		var args = dialog.get_values();
 		if(!args) return;
+		frappe.show_alert(__("Update in progress. It might take a while."));
 		return frappe.call({
-			method: "erpnext.setup.doctype.company.company.replace_abbr",
+			method: "erpnext.setup.doctype.company.company.enqueue_replace_abbr",
 			args: {
 				"company": cur_frm.doc.name,
 				"old": cur_frm.doc.abbr,

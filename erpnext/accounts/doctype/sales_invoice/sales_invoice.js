@@ -86,13 +86,18 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					this.make_payment_request, __("Make"));
 			}
 
-
+			if(!doc.subscription) {
+				cur_frm.add_custom_button(__('Subscription'), function() {
+					erpnext.utils.make_subscription(doc.doctype, doc.name)
+				}, __("Make"))
+			}
 		}
 
 		// Show buttons only when pos view is active
 		if (cint(doc.docstatus==0) && cur_frm.page.current_view_name!=="pos" && !doc.is_return) {
-			cur_frm.cscript.sales_order_btn();
-			cur_frm.cscript.delivery_note_btn();
+			this.frm.cscript.sales_order_btn();
+			this.frm.cscript.delivery_note_btn();
+			this.frm.cscript.quotation_btn();
 		}
 
 		this.set_default_print_format();
@@ -148,6 +153,26 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						docstatus: 1,
 						status: ["!=", "Closed"],
 						per_billed: ["<", 99.99],
+						company: me.frm.doc.company
+					}
+				})
+			}, __("Get items from"));
+	},
+	
+	quotation_btn: function() {
+		var me = this;
+		this.$quotation_btn = this.frm.add_custom_button(__('Quotation'),
+			function() {
+				erpnext.utils.map_current_doc({
+					method: "erpnext.selling.doctype.quotation.quotation.make_sales_invoice",
+					source_doctype: "Quotation",
+					target: me.frm,
+					setters: {
+						customer: me.frm.doc.customer || undefined,
+					},
+					get_query_filters: {
+						docstatus: 1,
+						status: ["!=", "Lost"],
 						company: me.frm.doc.company
 					}
 				})
@@ -335,7 +360,7 @@ $.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_
 // ------------
 cur_frm.cscript.hide_fields = function(doc) {
 	var parent_fields = ['project', 'due_date', 'is_opening', 'source', 'total_advance', 'get_advances',
-		'advances', 'sales_partner', 'commission_rate', 'total_commission', 'advances', 'from_date', 'to_date'];
+		'advances', 'advances', 'from_date', 'to_date'];
 
 	if(cint(doc.is_pos) == 1) {
 		hide_field(parent_fields);
@@ -516,6 +541,24 @@ frappe.ui.form.on('Sales Invoice', {
 			};
 		});
 	},
+	//When multiple companies are set up. in case company name is changed set default company address
+	company:function(frm){
+		if (frm.doc.company)
+		{
+			frappe.call({
+				method:"frappe.contacts.doctype.address.address.get_default_address",
+				args:{ doctype:'Company',name:frm.doc.company},
+				callback: function(r){
+					if (r.message){
+						frm.set_value("company_address",r.message)
+					}
+					else {
+						frm.set_value("company_address","")
+					}
+				}
+			})
+		}
+	},
 
 	project: function(frm){
 		frm.call({
@@ -564,3 +607,4 @@ var calculate_total_billing_amount =  function(frm) {
 
 	refresh_field('total_billing_amount')
 }
+

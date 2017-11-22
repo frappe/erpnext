@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
-from frappe.utils import flt, cstr, cint
+from frappe.utils import flt, cstr, cint, getdate
 from frappe import _
 from frappe.model.meta import get_field_precision
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
@@ -75,7 +75,8 @@ def check_if_in_list(gle, gl_map):
 			and cstr(e.get('against_voucher'))==cstr(gle.get('against_voucher')) \
 			and cstr(e.get('against_voucher_type')) == cstr(gle.get('against_voucher_type')) \
 			and cstr(e.get('cost_center')) == cstr(gle.get('cost_center')) \
-			and cstr(e.get('project')) == cstr(gle.get('project')):
+			and cstr(e.get('project')) == cstr(gle.get('project')) \
+			and getdate(e.get('due_date')) == getdate(gle.get('due_date')):
 				return e
 
 def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
@@ -136,14 +137,7 @@ def round_off_debit_credit(gl_map):
 		make_round_off_gle(gl_map, debit_credit_diff)
 
 def make_round_off_gle(gl_map, debit_credit_diff):
-	round_off_account, round_off_cost_center = frappe.db.get_value("Company", gl_map[0].company,
-		["round_off_account", "round_off_cost_center"]) or [None, None]
-	if not round_off_account:
-		frappe.throw(_("Please mention Round Off Account in Company"))
-
-	if not round_off_cost_center:
-		frappe.throw(_("Please mention Round Off Cost Center in Company"))
-
+	round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(gl_map[0].company)
 
 	round_off_gle = frappe._dict()
 	for k in ["voucher_type", "voucher_no", "company",
@@ -164,6 +158,17 @@ def make_round_off_gle(gl_map, debit_credit_diff):
 	})
 
 	gl_map.append(round_off_gle)
+
+def get_round_off_account_and_cost_center(company):
+	round_off_account, round_off_cost_center = frappe.db.get_value("Company", company,
+		["round_off_account", "round_off_cost_center"]) or [None, None]
+	if not round_off_account:
+		frappe.throw(_("Please mention Round Off Account in Company"))
+
+	if not round_off_cost_center:
+		frappe.throw(_("Please mention Round Off Cost Center in Company"))
+
+	return round_off_account, round_off_cost_center
 
 def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		adv_adj=False, update_outstanding="Yes"):

@@ -12,11 +12,11 @@ frappe.ui.form.on("Request for Quotation",{
 			'Supplier Quotation': 'Supplier Quotation'
 		}
 
-		frm.fields_dict["suppliers"].grid.get_field("contact").get_query = function(doc, cdt, cdn){
-			var d =locals[cdt][cdn];
+		frm.fields_dict["suppliers"].grid.get_field("contact").get_query = function(doc, cdt, cdn) {
+			let d = locals[cdt][cdn];
 			return {
 				query: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_supplier_contacts",
-				filters: {'supplier': doc.supplier}
+				filters: {'supplier': d.supplier}
 			}
 		}
 	},
@@ -252,6 +252,18 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 							status: ["!=", "Stopped"],
 							per_ordered: ["<", 99.99]
 						}
+					})
+				}, __("Get items from"));
+			// Get items from Opportunity
+            this.frm.add_custom_button(__('Opportunity'),
+				function() {
+					erpnext.utils.map_current_doc({
+						method: "erpnext.crm.doctype.opportunity.opportunity.make_request_for_quotation",
+						source_doctype: "Opportunity",
+						target: me.frm,
+						setters: {
+							company: me.frm.doc.company
+						},
 					})
 				}, __("Get items from"));
 			// Get items from open Material Requests based on supplier

@@ -12,8 +12,8 @@ from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amo
 from erpnext.hr.doctype.employee_loan.employee_loan import update_disbursement_status
 
 class JournalEntry(AccountsController):
-	def __init__(self, arg1, arg2=None):
-		super(JournalEntry, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(JournalEntry, self).__init__(*args, **kwargs)
 
 	def get_feed(self):
 		return self.voucher_type
@@ -54,7 +54,7 @@ class JournalEntry(AccountsController):
 	def update_advance_paid(self):
 		advance_paid = frappe._dict()
 		for d in self.get("accounts"):
-			if d.is_advance:
+			if d.is_advance == "Yes":
 				if d.reference_type in ("Sales Order", "Purchase Order"):
 					advance_paid.setdefault(d.reference_type, []).append(d.reference_name)
 
@@ -76,7 +76,7 @@ class JournalEntry(AccountsController):
 
 	def unlink_advance_entry_reference(self):
 		for d in self.get("accounts"):
-			if d.is_advance and d.reference_type in ("Sales Invoice", "Purchase Invoice"):
+			if d.is_advance == "Yes" and d.reference_type in ("Sales Invoice", "Purchase Invoice"):
 				doc = frappe.get_doc(d.reference_type, d.reference_name)
 				doc.delink_advance_entries(self.name)
 				d.reference_type = ''
@@ -436,7 +436,8 @@ class JournalEntry(AccountsController):
 						"against_voucher": d.reference_name,
 						"remarks": self.remark,
 						"cost_center": d.cost_center,
-						"project": d.project
+						"project": d.project,
+						"due_date": d.reference_due_date
 					})
 				)
 
@@ -566,17 +567,26 @@ def get_default_bank_cash_account(company, account_type=None, mode_of_payment=No
 		account = get_bank_cash_account(mode_of_payment, company).get("account")
 
 	if not account:
+		'''
+			Set the default account first. If the user hasn't set any default account then, he doesn't
+			want us to set any random account. In this case set the account only if there is single
+			account (of that type), otherwise return empty dict.
+		'''
 		if account_type=="Bank":
 			account = frappe.db.get_value("Company", company, "default_bank_account")
 			if not account:
-				account = frappe.db.get_value("Account",
-					{"company": company, "account_type": "Bank", "is_group": 0})
+				account_list = frappe.get_all("Account", filters = {"company": company,
+					"account_type": "Bank", "is_group": 0})
+				if len(account_list) == 1:
+					account = account_list[0].name
 
 		elif account_type=="Cash":
 			account = frappe.db.get_value("Company", company, "default_cash_account")
 			if not account:
-				account = frappe.db.get_value("Account",
-					{"company": company, "account_type": "Cash", "is_group": 0})
+				account_list = frappe.get_all("Account", filters = {"company": company,
+					"account_type": "Cash", "is_group": 0})
+				if len(account_list) == 1:
+					account = account_list[0].name
 
 	if account:
 		account_details = frappe.db.get_value("Account", account,
@@ -889,3 +899,14 @@ def get_average_exchange_rate(account):
 		exchange_rate = bank_balance_in_company_currency / bank_balance_in_account_currency
 
 	return exchange_rate
+
+
+@frappe.whitelist()
+def get_invoice_due_dates(name):
+	result = frappe.get_list(
+		doctype='GL Entry', group_by='name, due_date',
+		filters={'voucher_no': name, "ifnull(due_date, '')": ('!=', '')},
+		fields=['due_date'], distinct=True
+	)
+
+	return result
