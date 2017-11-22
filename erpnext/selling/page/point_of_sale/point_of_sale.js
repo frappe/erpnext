@@ -48,12 +48,14 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				this.prepare_menu();
 				this.set_online_status();
 			},
+			() => this.setup_company(),
 			() => this.setup_pos_profile(),
+			() => this.make_new_invoice(),
 			() => {
+				frappe.timeout(1);
 				this.make_items();
 				this.bind_events();
 			},
-			() => this.make_new_invoice(),
 			() => this.page.set_title(__('Point of Sale'))
 		]);
 	}
@@ -89,6 +91,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		this.cart = new POSCart({
 			frm: this.frm,
 			wrapper: this.wrapper.find('.cart-container'),
+			pos_profile: this.pos_profile,
 			events: {
 				on_customer_change: (customer) => this.frm.set_value('customer', customer),
 				on_field_change: (item_code, field, value) => {
@@ -98,6 +101,12 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					if (value == 'Pay') {
 						if (!this.payment) {
 							this.make_payment_modal();
+						} else {
+							this.frm.doc.payments.map(p => {
+								this.payment.dialog.set_value(p.mode_of_payment, p.amount);
+							});
+
+							this.payment.set_title();
 						}
 						this.payment.open_modal();
 					}
@@ -196,6 +205,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			this.update_item_in_frm(item)
 				.then(() => {
 					// update cart
+					this.remove_item_from_cart(item);
 					this.update_cart_data(item);
 				});
 		}, true);
@@ -208,6 +218,11 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	update_item_in_frm(item, field, value) {
+		if (field == 'qty' && value < 0) {
+			frappe.msgprint(__("Quantity must be positive"));
+			value = item.qty;
+		}
+
 		if (field) {
 			frappe.model.set_value(item.doctype, item.name, field, value);
 		}
@@ -215,10 +230,16 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		return this.frm.script_manager
 			.trigger('qty', item.doctype, item.name)
 			.then(() => {
-				if (field === 'qty' && value === 0) {
-					frappe.model.clear_doc(item.doctype, item.name);
+				if (field === 'qty') {
+					this.remove_item_from_cart(item);
 				}
 			});
+	}
+
+	remove_item_from_cart(item) {
+		if (item.qty === 0) {
+			frappe.model.clear_doc(item.doctype, item.name);
+		}
 	}
 
 	make_payment_modal() {
@@ -261,21 +282,40 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	setup_pos_profile() {
-		return frappe.call({
-			method: 'erpnext.stock.get_item_details.get_pos_profile',
-			args: {
-				company: frappe.sys_defaults.company
-			}
-		}).then(r => {
-			this.pos_profile = r.message;
+		return new Promise(resolve => {
+			frappe.call({
+				method: 'erpnext.stock.get_item_details.get_pos_profile',
+				args: {
+					company: this.company
+				}
+			}).then(r => {
+				this.pos_profile = r.message;
 
-			if (!this.pos_profile) {
-				this.pos_profile = {
-					currency: frappe.defaults.get_default('currency'),
-					selling_price_list: frappe.defaults.get_default('selling_price_list')
-				};
+				if (!this.pos_profile) {
+					this.pos_profile = {
+						company: this.company,
+						currency: frappe.defaults.get_default('currency'),
+						selling_price_list: frappe.defaults.get_default('selling_price_list')
+					};
+				}
+				resolve();
+			});
+		})
+	}
+
+	setup_company() {
+		this.company = frappe.sys_defaults.company;
+		return new Promise(resolve => {
+			if(!this.company) {
+				frappe.prompt({fieldname:"company", options: "Company", fieldtype:"Link",
+					label: __("Select Company"), reqd: 1}, (data) => {
+						this.company = data.company;
+						resolve(this.company);
+				}, __("Select Company"));
+			} else {
+				resolve(this.company);
 			}
-		});
+		})
 	}
 
 	make_new_invoice() {
@@ -297,22 +337,25 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		const doctype = 'Sales Invoice';
 		return new Promise(resolve => {
 			if (this.frm) {
-				this.frm = get_frm(this.frm);
+				this.frm = get_frm(this.pos_profile, this.frm);
 				resolve();
 			} else {
 				frappe.model.with_doctype(doctype, () => {
-					this.frm = get_frm();
+					this.frm = get_frm(this.pos_profile);
 					resolve();
 				});
 			}
 		});
 
-		function get_frm(_frm) {
+		function get_frm(pos_profile, _frm) {
 			const page = $('<div>');
 			const frm = _frm || new _f.Frm(doctype, page, false);
 			const name = frappe.model.make_new_doc_and_get_name(doctype, true);
 			frm.refresh(name);
 			frm.doc.items = [];
+			if(!frm.doc.company) {
+				frm.set_value('company', pos_profile.company);
+			}
 			frm.set_value('is_pos', 1);
 			frm.meta.default_print_format = 'POS Invoice';
 			return frm;
@@ -363,10 +406,11 @@ erpnext.pos.PointOfSale = class PointOfSale {
 };
 
 class POSCart {
-	constructor({frm, wrapper, events}) {
+	constructor({frm, wrapper, pos_profile, events}) {
 		this.frm = frm;
 		this.wrapper = wrapper;
 		this.events = events;
+		this.pos_profile = pos_profile;
 		this.make();
 		this.bind_events();
 	}
@@ -428,6 +472,12 @@ class POSCart {
 		this.$taxes_and_totals.html(this.get_taxes_and_totals());
 		this.numpad && this.numpad.reset_value();
 		this.customer_field.set_value("");
+
+		this.wrapper.find('.grand-total-value').text(
+			format_currency(this.frm.doc.grand_total, this.frm.currency));
+
+		const customer = this.frm.doc.customer || this.pos_profile.customer;
+		this.customer_field.set_value(customer);
 	}
 
 	get_grand_total() {
@@ -491,7 +541,7 @@ class POSCart {
 
 		// Update totals
 		this.$taxes_and_totals.find('.net-total')
-			.html(format_currency(this.frm.doc.net_total, currency));
+			.html(format_currency(this.frm.doc.total, currency));
 
 		// Update taxes
 		const taxes_html = this.frm.doc.taxes.map(tax => {
@@ -514,6 +564,7 @@ class POSCart {
 	}
 
 	make_customer_field() {
+		let customer = this.frm.doc.customer || this.pos_profile['customer'];
 		this.customer_field = frappe.ui.form.make_control({
 			df: {
 				fieldtype: 'Link',
@@ -521,7 +572,6 @@ class POSCart {
 				fieldname: 'customer',
 				options: 'Customer',
 				reqd: 1,
-				default: this.frm.doc.customer,
 				onchange: () => {
 					this.events.on_customer_change(this.customer_field.get_value());
 				}
@@ -529,6 +579,10 @@ class POSCart {
 			parent: this.wrapper.find('.customer-field'),
 			render_input: true
 		});
+
+		if (customer) {
+			this.customer_field.set_value(customer);
+		}
 	}
 
 	make_numpad() {
@@ -733,26 +787,39 @@ class POSCart {
 		// });
 
 		this.wrapper.find('.additional_discount_percentage').on('change', (e) => {
+			const discount_percentage = flt(e.target.value,
+				precision("additional_discount_percentage"));
+
 			frappe.model.set_value(this.frm.doctype, this.frm.docname,
-				'additional_discount_percentage', e.target.value)
+				'additional_discount_percentage', discount_percentage)
 				.then(() => {
 					let discount_wrapper = this.wrapper.find('.discount_amount');
-					discount_wrapper.val(this.frm.doc.discount_amount);
+					discount_wrapper.val(flt(this.frm.doc.discount_amount,
+						precision('discount_amount')));
 					discount_wrapper.trigger('change');
 				});
 		});
 
 		this.wrapper.find('.discount_amount').on('change', (e) => {
+			const discount_amount = flt(e.target.value, precision('discount_amount'));
 			frappe.model.set_value(this.frm.doctype, this.frm.docname,
-				'discount_amount', flt(e.target.value));
+				'discount_amount', discount_amount);
 			this.frm.trigger('discount_amount')
 				.then(() => {
-					let discount_wrapper = this.wrapper.find('.additional_discount_percentage');
-					discount_wrapper.val(this.frm.doc.additional_discount_percentage);
+					this.update_discount_fields();
 					this.update_taxes_and_totals();
 					this.update_grand_total();
 				});
 		});
+	}
+
+	update_discount_fields() {
+		let discount_wrapper = this.wrapper.find('.additional_discount_percentage');
+		let discount_amt_wrapper = this.wrapper.find('.discount_amount');
+		discount_wrapper.val(flt(this.frm.doc.additional_discount_percentage,
+			precision('additional_discount_percentage')));
+		discount_amt_wrapper.val(flt(this.frm.doc.discount_amount,
+			precision('discount_amount')));
 	}
 
 	set_selected_item($item) {
@@ -818,7 +885,7 @@ class POSItems {
 		this.search_field = frappe.ui.form.make_control({
 			df: {
 				fieldtype: 'Data',
-				label: 'Search Item (Ctrl + I)',
+				label: 'Search Item ( Ctrl + i )',
 				placeholder: 'Search by item code, serial number, batch no or barcode'
 			},
 			parent: this.wrapper.find('.search-field'),
@@ -869,7 +936,7 @@ class POSItems {
 		const all_items = Object.values(_items).map(item => this.get_item_html(item));
 		let row_items = [];
 
-		const row_container = '<div style="display: flex; border-bottom: 1px solid #ebeff2">';
+		const row_container = '<div class="image-view-row">';
 		let curr_row = row_container;
 
 		for (let i=0; i < all_items.length; i++) {
@@ -899,6 +966,7 @@ class POSItems {
 			if (this.search_index[search_term]) {
 				const items = this.search_index[search_term];
 				this.render_items(items);
+				this.set_item_in_the_cart(items);
 				return;
 			}
 		} else if (item_group == "All Item Groups") {
@@ -912,17 +980,35 @@ class POSItems {
 				}
 
 				this.render_items(items);
-				if(serial_no) {
-					this.events.update_cart(items[0].item_code,
-						'serial_no', serial_no);
-					this.search_field.set_value('');
-				}
-				if(batch_no) {
-					this.events.update_cart(items[0].item_code,
-						'batch_no', serial_no);
-					this.search_field.set_value('');
-				}
+				this.set_item_in_the_cart(items, serial_no, batch_no);
 			});
+	}
+
+	set_item_in_the_cart(items, serial_no, batch_no) {
+		if (serial_no) {
+			this.events.update_cart(items[0].item_code,
+				'serial_no', serial_no);
+			this.reset_search_field();
+			return;
+		}
+
+		if (batch_no) {
+			this.events.update_cart(items[0].item_code,
+				'batch_no', batch_no);
+			this.reset_search_field();
+			return;
+		}
+
+		if (items.length === 1) {
+			this.events.update_cart(items[0].item_code,
+				'qty', '+1');
+			this.reset_search_field();
+		}
+	}
+
+	reset_search_field() {
+		this.search_field.set_value('');
+		this.search_field.$input.trigger("input");
 	}
 
 	bind_events() {
@@ -1117,15 +1203,12 @@ class Payment {
 
 	make() {
 		this.set_flag();
-
-		let title = __('Total Amount {0}',
-			[format_currency(this.frm.doc.grand_total, this.frm.doc.currency)]);
-
 		this.dialog = new frappe.ui.Dialog({
-			title: title,
 			fields: this.get_fields(),
 			width: 800
 		});
+
+		this.set_title();
 
 		this.$body = this.dialog.body;
 
@@ -1143,6 +1226,13 @@ class Payment {
 				}
 			}
 		});
+	}
+
+	set_title() {
+		let title = __('Total Amount {0}',
+			[format_currency(this.frm.doc.grand_total, this.frm.doc.currency)]);
+
+		this.dialog.set_title(title);
 	}
 
 	bind_events() {

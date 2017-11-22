@@ -11,6 +11,7 @@ QUnit.test("test: purchase order with taxes and charges", function(assert) {
 				{is_subcontracted: 'No'},
 				{buying_price_list: 'Test-Buying-USD'},
 				{currency: 'USD'},
+				{"schedule_date": frappe.datetime.add_days(frappe.datetime.now_date(), 1)},
 				{items: [
 					[
 						{"item_code": 'Test Product 4'},

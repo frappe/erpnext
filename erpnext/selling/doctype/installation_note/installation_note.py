@@ -12,8 +12,8 @@ from erpnext.stock.utils import get_valid_serial_nos
 from erpnext.utilities.transaction_base import TransactionBase
 
 class InstallationNote(TransactionBase):
-	def __init__(self, arg1, arg2=None):
-		super(InstallationNote, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(InstallationNote, self).__init__(*args, **kwargs)
 		self.status_updater = [{
 			'source_dt': 'Installation Note Item',
 			'target_dt': 'Delivery Note Item',

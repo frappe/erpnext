@@ -348,6 +348,8 @@ def apply_internal_priority(pricing_rules, field_set, args):
 	return filtered_rules or pricing_rules
 
 def set_transaction_type(args):
+	if args.transaction_type:
+		return
 	if args.doctype in ("Opportunity", "Quotation", "Sales Order", "Delivery Note", "Sales Invoice"):
 		args.transaction_type = "selling"
 	elif args.doctype in ("Material Request", "Supplier Quotation", "Purchase Order",

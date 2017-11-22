@@ -16,3 +16,4 @@ Maintenance
 Schools
 Regional
 Healthcare
+Restaurant
