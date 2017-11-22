@@ -14,6 +14,14 @@ def boot_session(bootinfo):
 
 	if frappe.session['user']!='Guest':
 		update_page_info(bootinfo)
+		#get company value from `tabUser Permission` else fall back on `tabDefaultValue`
+		res=None
+		res = get_user_default_from_user_permission("company",frappe.session['user'])
+		if res==None:
+			res = get_user_default_from_default_value("company")
+			bootinfo.sysdefaults.company = res			
+		else:
+			bootinfo.user.defaults.company = res
 
 		load_country_and_currency(bootinfo)
 		bootinfo.sysdefaults.territory = frappe.db.get_single_value('Selling Settings',
@@ -36,6 +44,25 @@ def boot_session(bootinfo):
 		bootinfo.docs += frappe.db.sql("""select name, default_currency, cost_center, default_terms,
 			default_letter_head, default_bank_account, enable_perpetual_inventory from `tabCompany`""",
 			as_dict=1, update={"doctype":":Company"})
+
+def get_user_default_from_user_permission(key, user=None ):
+	d=None
+	if user:
+		if user != "Guest" and user!="Administrator":
+			#Default the oldest company when more than 1 company is there.
+			res = frappe.db.sql("""select for_value from `tabUser Permission` 
+			where allow=%s and user=%s order by creation limit 1""", (key,user))
+			if res:
+				d= res[0][0]
+	return d
+
+def get_user_default_from_default_value(key):
+	d=None
+	res = frappe.db.sql("""select defvalue from `tabDefaultValue` 
+	where defkey=%s order by creation limit 1""", (key))
+	if res:
+		d= res[0][0]
+	return d
 
 def load_country_and_currency(bootinfo):
 	country = frappe.db.get_default("country")
