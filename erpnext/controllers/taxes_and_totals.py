@@ -70,6 +70,7 @@ class calculate_taxes_and_totals(object):
 				item.net_rate = item.rate
 				item.amount = flt(item.rate * item.qty,	item.precision("amount"))
 				item.net_amount = item.amount
+				item.total_weight = flt(item.weight_per_unit * item.qty)
 
 				self._set_in_company_currency(item, ["price_list_rate", "rate", "net_rate", "amount", "net_amount"])
 
@@ -163,13 +164,13 @@ class calculate_taxes_and_totals(object):
 			return tax.rate
 
 	def calculate_net_total(self):
-		self.doc.total= self.doc.total_weight = self.doc.base_total = self.doc.net_total = self.doc.base_net_total = self.doc.total_net_weight= 0.0
+		self.doc.total = self.doc.base_total = self.doc.net_total = self.doc.base_net_total = self.doc.total_net_weight= 0.0
 		for item in self.doc.get("items"):
 			self.doc.total += item.amount
 			self.doc.base_total += item.base_amount
 			self.doc.net_total += item.net_amount
 			self.doc.base_net_total += item.base_net_amount
-			self.doc.total_net_weight += item.weight
+			self.doc.total_net_weight += item.total_weight
 
 		self.doc.round_floats_in(self.doc, ["total", "base_total", "net_total", "base_net_total"])
 
