@@ -96,16 +96,6 @@ def get_item_details(args):
 
 	return out
 
-	# print(frappe._dict({
-	# 	'has_serial_no'	: out.has_serial_no,
-	# 	'has_batch_no'	: out.has_batch_no
-	# }))
-
-	# return frappe._dict({
-	# 	'has_serial_no'	: out.has_serial_no,
-	# 	'has_batch_no'	: out.has_batch_no
-	# })
-
 def process_args(args):
 	if isinstance(args, basestring):
 		args = json.loads(args)
@@ -532,8 +522,6 @@ def get_default_bom(item_code=None):
 		bom = frappe.db.get_value("BOM", {"docstatus": 1, "is_default": 1, "is_active": 1, "item": item_code})
 		if bom:
 			return bom
-		else:
-			frappe.throw(_("No default BOM exists for Item {0}").format(item_code))
 
 def get_valuation_rate(item_code, warehouse=None):
 	item = frappe.get_doc("Item", item_code)
