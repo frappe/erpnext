@@ -34,7 +34,8 @@ erpnext.payments = erpnext.stock.StockController.extend({
 					me.submit_invoice();
 					return;
 				}
-			});		})
+			});		
+		})
 	},
 
 	make_keyboard: function(){
