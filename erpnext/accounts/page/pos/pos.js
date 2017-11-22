@@ -1638,6 +1638,14 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.si_docs = this.get_doc_from_localstorage();
 		if (this.name) {
 			this.update_invoice()
+			//to retrieve and set the default payment
+			invoice_data[this.name] = this.frm.doc;
+			invoice_data[this.name].payments[0].amount = this.frm.doc.net_total
+			invoice_data[this.name].payments[0].base_amount = this.frm.doc.net_total
+
+			this.frm.doc.paid_amount = this.frm.doc.net_total
+			this.frm.doc.outstanding_amount = 0
+			
 		} else {
 			this.name = $.now();
 			this.frm.doc.offline_pos_name = this.name;
