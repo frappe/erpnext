@@ -86,11 +86,9 @@ def get_slide_settings():
 			action_name='Add Letterhead',
 			domains=('Manufacturing', 'Services', 'Retail', 'Distribution', 'Education'),
 			title=_("Add Letterhead"),
-			help=_("Upload your letter head. (you can edit it later)."),
+			help=_("Upload your letter head (Keep it web friendly as 900px by 100px)"),
 			fields=[
 				{"fieldtype":"Attach Image", "fieldname":"letterhead",
-					"label":_("Letterhead"),
-					"description": _("Keep it web friendly 900px (w) by 100px (h)"),
 					"is_private": 0,
 					"align": "center"
 				},
