@@ -301,6 +301,46 @@ def get_data():
 			"type": "module"
 		},
 		{
+			"module_name": "Grant Application",
+			"color": "#E9AB17",
+			"icon": "fa fa-gift",
+			"_doctype": "Grant Application",
+			"link": "List/Grant Application",
+			"label": _("Grant Application")
+		},
+		{
+			"module_name": "Donor",
+			"color": "#7F5A58",
+			"icon": "fa fa-tint",
+			"_doctype": "Donor",
+			"link": "List/Donor",
+			"label": _("Donor")
+		},
+		{
+			"module_name": "Volunteer",
+			"color": "#7E587E",
+			"icon": "fa fa-angellist",
+			"_doctype": "Volunteer",
+			"link": "List/Volunteer",
+			"label": _("Volunteer")
+		},
+		{
+			"module_name": "Member",
+			"color": "#79BAEC",
+			"icon": "fa fa-users",
+			"_doctype": "Member",
+			"link": "List/Member",
+			"label": _("Member")
+		},
+		{
+			"module_name": "Chapter",
+			"color": "#3B9C9C",
+			"icon": "fa fa-handshake-o",
+			"_doctype": "Chapter",
+			"link": "List/Chapter",
+			"label": _("Chapter")
+		},
+		{
 			"module_name": "Non Profit",
 			"color": "#DE2B37",
 			"icon": "octicon octicon-heart",
