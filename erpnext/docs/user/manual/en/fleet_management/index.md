@@ -17,17 +17,17 @@ To create a new Vehicle go to:
 
 ERPNext > Vehicle
 
-* Enter License Plate,Make,Model,Odometer Value,Fuel Type and Fuel UOM for a quick entry.
+Enter License Plate,Make,Model,Odometer Value,Fuel Type and Fuel UOM for a quick entry.
 
-	<img class="screenshot" alt="Vehicle" src="/docs/assets/img/fleet-management/vehicle-1.1.png">
+<img alt="Vehicle" class="screenshot" src=src="/docs/assets/img/fleet-management/vehicle-1.1.png">
 
-* Enter details like Insurance,Chassis,Vehicle Value,Location and Employee.
+ Enter details like Insurance,Chassis,Vehicle Value,Location and Employee.
 
-	<img class="screenshot" alt="Vehicle" src="/docs/assets/img/fleet-management/vehicle-1.2.png">
+<img alt="Vehicle" class="screenshot" src=src="/docs/assets/img/fleet-management/vehicle-1.2.png">
 
-* Enter Vehicle attributes like color,wheels,doors and last carbon check 
+Enter Vehicle attributes like color,wheels,doors and last carbon check 
 
-	<img class="screenshot" alt="Vehicle" src="/docs/assets/img/fleet-management/vehicle-1.3.png">
+<img alt="Vehicle" class="screenshot" src=src="/docs/assets/img/fleet-management/vehicle-1.3.png">
 
 ### Vehicle Log
 
@@ -37,19 +37,19 @@ To create a new Vehicle Log go to:
 
 ERPNext > Vehicle Log
 
-* Enter License Plate,Employee,Date,Odometer reading for a quick entry.
+Enter License Plate,Employee,Date,Odometer reading for a quick entry.
 
-	<img class="screenshot" alt="Vehicle Log" src="/docs/assets/img/fleet-management/vehicle-log-2.1.png">
+<img alt="Vehicle Log" class="screenshot" src=src="/docs/assets/img/fleet-management/vehicle-2.1.png">
 
 * Enter Refuelling details,Service details if applicable.
 
-	<img class="screenshot" alt="Vehicle Log" src="/docs/assets/img/fleet-management/vehicle-log-2.2.png">
+<img alt="Vehicle" class="screenshot" src=src="/docs/assets/img/fleet-management/vehicle-2.2.png">
 
 ### Make Expense Claim
 
-* Click on Make Expense Claim button .This button appears only in case of Submitted Vehicle Logs.
+Click on Make Expense Claim button .This button appears only in case of Submitted Vehicle Logs.
 
-	<img class="screenshot" alt="Vehicle Log" src="/docs/assets/img/fleet-management/expense-claim-3.1.png">
+<img alt="Vehicle" class="screenshot" src=src="/docs/assets/img/fleet-management/vehicle-3.1.png">
 
 When you click on 'Make Expense Claim',
 
@@ -57,10 +57,10 @@ When you click on 'Make Expense Claim',
   2. The sum of Fuel Expenses and Service Expenses is copied over to Expense Claim Amount.
   3. Employee can submit the Expense Claim for further processing.
 
-	<img class="screenshot" alt="Vehicle Log" src="/docs/assets/img/fleet-management/expense-claim-3.2.png">
+<img alt="Vehicle" class="screenshot" src=src="/docs/assets/img/fleet-management/vehicle-3.2.png">
 
 ### Vehicle Expenses Report
 
 * To track and monitor Vehicle Expenses you can use the Vehicle Expenses report.This report gives a one stop view of all your vehicle expenses month wise.
 
-	<img class="screenshot" alt="Vehicle Log" src="/docs/assets/img/fleet-management/vehicle-expenses.png">
+<img class="screenshot" alt="Vehicle Log" src="/docs/assets/img/fleet-management/vehicle-expenses.png">
