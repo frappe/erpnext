@@ -139,6 +139,7 @@ var btn_create_vital_signs = function (frm) {
 	}
 	frappe.route_options = {
 		"patient": frm.doc.patient,
+		"appointment": frm.doc.appointment
 	};
 	frappe.new_doc("Vital Signs");
 };
