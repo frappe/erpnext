@@ -6,7 +6,7 @@ import frappe
 from frappe.utils import flt
 from frappe import msgprint, _
 from frappe.model.document import Document
-from erpnext.accounts.utils import get_outstanding_invoices
+from erpnext.accounts.utils import get_outstanding_invoices, party_type_is_buyer
 from erpnext.controllers.accounts_controller import get_advance_payment_entries
 
 class PaymentReconciliation(Document):
@@ -23,7 +23,7 @@ class PaymentReconciliation(Document):
 		self.add_payment_entries(payment_entries + journal_entries)
 		
 	def get_payment_entries(self):
-		order_doctype = "Sales Order" if self.party_type=="Customer" else "Purchase Order"
+		order_doctype = "Sales Order" if party_type_is_buyer(self.party_type) else "Purchase Order"
 		payment_entries = get_advance_payment_entries(self.party_type, self.party, 
 			self.receivable_payable_account, order_doctype, against_all_orders=True)
 			
@@ -72,13 +72,14 @@ class PaymentReconciliation(Document):
 			row = self.append('payments', {})
 			row.update(e)
 
-	def get_invoice_entries(self, paying_party=False):
+	def get_invoice_entries(self):
 		#Fetch JVs, Sales and Purchase Invoices for 'invoices' to reconcile against
 
 		condition = self.check_condition()
 
+		
 		non_reconciled_invoices = get_outstanding_invoices(self.party_type, self.party,
-			self.receivable_payable_account, condition=condition, paying_party=paying_party)
+			self.receivable_payable_account, condition=condition)
 
 		self.add_invoice_entries(non_reconciled_invoices)
 
@@ -171,7 +172,7 @@ class PaymentReconciliation(Document):
 		cond = " and posting_date >= '{0}'".format(frappe.db.escape(self.from_date)) if self.from_date else ""
 		cond += " and posting_date <= '{0}'".format(frappe.db.escape(self.to_date)) if self.to_date else ""
 
-		if self.party_type == "Customer":
+		if party_type_is_buyer(self.party_type):
 			dr_or_cr = "debit_in_account_currency"
 		else:
 			dr_or_cr = "credit_in_account_currency"
@@ -184,10 +185,7 @@ class PaymentReconciliation(Document):
 		return cond
 
 	def get_dr_or_cr(self):
-		'''Return credit_in_account_currency if not set and party is customer.'''
-		if hasattr(self, "dr_or_cr"):
-			return self.dr_or_cr
-		if self.party_type == 'Customer':
+		'''Return credit_in_account_currency if party is buyer.'''
+		if party_type_is_buyer(self.party_type):
 			return "credit_in_account_currency"
-		else:
-			return "debit_in_account_currency"
+		return "debit_in_account_currency"
