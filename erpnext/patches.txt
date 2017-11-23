@@ -334,6 +334,7 @@ execute:frappe.reload_doctype('Employee') #2016-10-18
 execute:frappe.db.sql("update `tabEmployee` set prefered_contact_email = IFNULL(prefered_contact_email,'') ")
 execute:frappe.reload_doctype("Salary Slip")
 execute:frappe.db.sql("update `tabSalary Slip` set posting_date=creation")
+execute:frappe.reload_doc("stock", "doctype", "stock_settings")
 erpnext.patches.v8_0.create_domain_docs	#16-05-2017
 erpnext.patches.v7_1.update_portal_roles
 erpnext.patches.v7_1.set_total_amount_currency_in_je
@@ -460,5 +461,12 @@ execute:frappe.delete_doc_if_exists("DocType", "Program Fee")
 erpnext.patches.v9_0.set_pos_profile_name
 erpnext.patches.v9_0.remove_non_existing_warehouse_from_stock_settings
 execute:frappe.delete_doc_if_exists("DocType", "Program Fee")
+erpnext.patches.v8_10.update_gl_due_date_for_pi_and_si
+erpnext.patches.v8_10.change_default_customer_credit_days
 erpnext.patches.v9_0.update_employee_loan_details
 erpnext.patches.v9_2.delete_healthcare_domain_default_items
+erpnext.patches.v9_1.create_issue_opportunity_type
+erpnext.patches.v9_2.rename_translated_domains_in_en
+erpnext.patches.v9_0.set_shipping_type_for_existing_shipping_rules
+erpnext.patches.v9_0.update_multi_uom_fields_in_material_request
+erpnext.patches.v10_0.rename_schools_to_education

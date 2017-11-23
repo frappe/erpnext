@@ -169,6 +169,74 @@ def create_variant(item, args):
 
 	return variant
 
+@frappe.whitelist()
+def enqueue_multiple_variant_creation(item, args):
+	# There can be innumerable attribute combinations, enqueue
+	frappe.enqueue("erpnext.controllers.item_variant.create_multiple_variants",
+		item=item, args=args, now=frappe.flags.in_test);
+
+def create_multiple_variants(item, args):
+	if isinstance(args, basestring):
+		args = json.loads(args)
+
+	args_set = generate_keyed_value_combinations(args)
+
+	for attribute_values in args_set:
+		if not get_variant(item, args=attribute_values):
+			variant = create_variant(item, attribute_values)
+			variant.save()
+
+def generate_keyed_value_combinations(args):
+	"""
+	From this:
+
+		args = {"attr1": ["a", "b", "c"], "attr2": ["1", "2"], "attr3": ["A"]}
+
+	To this:
+
+		[
+			{u'attr1': u'a', u'attr2': u'1', u'attr3': u'A'},
+			{u'attr1': u'b', u'attr2': u'1', u'attr3': u'A'},
+			{u'attr1': u'c', u'attr2': u'1', u'attr3': u'A'},
+			{u'attr1': u'a', u'attr2': u'2', u'attr3': u'A'},
+			{u'attr1': u'b', u'attr2': u'2', u'attr3': u'A'},
+			{u'attr1': u'c', u'attr2': u'2', u'attr3': u'A'}
+		]
+
+	"""
+	# Return empty list if empty
+	if not args:
+		return []
+
+	# Turn `args` into a list of lists of key-value tuples:
+	# [
+	# 	[(u'attr2', u'1'), (u'attr2', u'2')],
+	# 	[(u'attr3', u'A')],
+	# 	[(u'attr1', u'a'), (u'attr1', u'b'), (u'attr1', u'c')]
+	# ]
+	key_value_lists = [[(key, val) for val in args[key]] for key in args.keys()]
+
+	# Store the first, but as objects
+	# [{u'attr2': u'1'}, {u'attr2': u'2'}]
+	results = key_value_lists.pop(0)
+	results = [{d[0]: d[1]} for d in results]
+
+	# Iterate the remaining
+	# Take the next list to fuse with existing results
+	for l in key_value_lists:
+		new_results = []
+		for res in results:
+			for key_val in l:
+				# create a new clone of object in result
+				obj = copy.deepcopy(res)
+				# to be used with every incoming new value
+				obj[key_val[0]] = key_val[1]
+				# and pushed into new_results
+				new_results.append(obj)
+		results = new_results
+
+	return results
+
 def copy_attributes_to_variant(item, variant):
 	from frappe.model import no_value_fields
 
@@ -208,7 +276,7 @@ def copy_attributes_to_variant(item, variant):
 			attributes_description = ""
 			for d in variant.attributes:
 				attributes_description += "<div>" + d.attribute + ": " + cstr(d.attribute_value) + "</div>"
-			
+
 			if attributes_description not in variant.description:
 					variant.description += attributes_description
 

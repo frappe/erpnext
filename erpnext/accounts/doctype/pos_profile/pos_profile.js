@@ -24,11 +24,11 @@ frappe.ui.form.on("POS Profile", "onload", function(frm) {
 
 frappe.ui.form.on('POS Profile', {
 	setup: function(frm) {
-		frm.set_query("online_print_format", function() {
+		frm.set_query("print_format_for_online", function() {
 			return {
 				filters: [
 					['Print Format', 'doc_type', '=', 'Sales Invoice'],
-					['Print Format', 'print_format_type', '!=', 'Js'],
+					['Print Format', 'print_format_type', '=', 'Server'],
 				]
 			};
 		});

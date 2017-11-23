@@ -40,7 +40,7 @@ def setup_complete(args=None):
 
 	frappe.local.message_log = []
 	domain_settings = frappe.get_single('Domain Settings')
-	domain_settings.set_active_domains([_(args.get('domain'))])
+	domain_settings.set_active_domains([args.get('domain')])
 
 	frappe.db.commit()
 	login_as_first_user(args)
@@ -186,10 +186,6 @@ def set_defaults(args):
 	hr_settings.emp_created_by = "Naming Series"
 	hr_settings.save()
 
-	domain_settings = frappe.get_doc("Domain Settings")
-	domain_settings.append('active_domains', dict(domain=_(args.get('domain'))))
-	domain_settings.save()
-
 def create_feed_and_todo():
 	"""update Activity feed and create todo for creation of item, customer, vendor"""
 	add_info_comment(**{
@@ -258,7 +254,9 @@ def make_tax_account_and_template(company, account_name, tax_rate, template_name
 
 		accounts = []
 		for i, name in enumerate(account_name):
-			accounts.append(make_tax_account(company, account_name[i], tax_rate[i]))
+			tax_account = make_tax_account(company, account_name[i], tax_rate[i])
+			if tax_account:
+				accounts.append(tax_account)
 
 		if accounts:
 			make_sales_and_purchase_tax_templates(accounts, template_name)
