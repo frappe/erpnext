@@ -53,7 +53,6 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			() => this.setup_pos_profile(),
 			() => this.make_new_invoice(),
 			() => {
-				this.bind_events();
 				frappe.dom.unfreeze();
 			},
 			() => this.page.set_title(__('Point of Sale'))
