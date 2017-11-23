@@ -40,7 +40,10 @@ def setup_complete(args=None):
 
 	frappe.local.message_log = []
 	domain_settings = frappe.get_single('Domain Settings')
-	domain_settings.set_active_domains([args.get('domain')])
+
+	domains = args.get('domains')
+	domain_settings.domains = domains
+	domain_settings.set_active_domains(domains.split(','))
 
 	frappe.db.commit()
 	login_as_first_user(args)
@@ -49,7 +52,7 @@ def setup_complete(args=None):
 	frappe.clear_cache()
 
 	try:
-		make_sample_data(args.get('domain'))
+		make_sample_data(args.get('domains'))
 		frappe.clear_cache()
 	except:
 		# clear message
@@ -80,7 +83,7 @@ def create_fiscal_year_and_company(args):
 			'country': args.get('country'),
 			'create_chart_of_accounts_based_on': 'Standard Template',
 			'chart_of_accounts': args.get('chart_of_accounts'),
-			'domain': args.get('domain')
+			'domain': args.get('domains').split(',')[0]
 		}).insert()
 
 		#Enable shopping cart
