@@ -402,19 +402,10 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Job Applicant",
-					"description": _("Applicant for a Job."),
-				},
-				{
-					"type": "doctype",
-					"name": "Job Opening",
-					"description": _("Opening for a Job."),
-				},
-				{
-					"type": "doctype",
-					"name": "Offer Letter",
-					"description": _("Offer candidate a Job."),
-				},
+					"name": "General",
+					"description": _("General Employee Information."),
+				}
+				
 			]
 		}
 	]

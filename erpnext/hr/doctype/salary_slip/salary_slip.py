@@ -18,6 +18,7 @@ class SalarySlip(TransactionBase):
 		self.name = make_autoname('Sal Slip/' +self.employee + '/.#####')
 
 	def validate(self):
+		self.get_days_of_month()
 		self.validate_overtime()
 		# self.validate_return_from_leave_deduction()
 		self.validate_return_from_leave_deduction()
@@ -54,6 +55,11 @@ class SalarySlip(TransactionBase):
 				frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
 								format(max_working_hours), alert=True)
 
+	def get_days_of_month(self):
+		if self.start_date:
+			last_day_of_month = get_last_day(getdate(self.start_date))
+			self.days_of_month = getdate(last_day_of_month).day
+
 	def validate_overtime(self):
 		prev_month = getdate(self.start_date).month - 1 if getdate(self.start_date).month - 1 > 0 else 12
 		prev_month_start_date = None
@@ -74,17 +80,17 @@ class SalarySlip(TransactionBase):
 			self.overtime_hours = overtime_hours[0].total_modified_hours
 
 	def validate_return_from_leave_deduction(self):
-		# if self.docstatus == 0:
-		# end_date = "{0}-{1}-20".format(getdate(self.end_date).year, getdate(self.end_date).month)
-		# prev_month = getdate(self.end_date).month - 1 if getdate(self.end_date).month - 1 > 0 else 12
-		# prev_month_start_date = ""
-		# if prev_month != 12:
-		# 	prev_month_start_date = "{0}-{1}-20".format(getdate(self.end_date).year, prev_month)
-		# else:
-		# 	prev_month_start_date = "{0}-{1}-20".format(getdate(self.end_date).year - 1, prev_month)
-		# self.set_deduction_for_return_from_leave(prev_month_start_date, end_date)
 		if self.get('__islocal'):
-			self.set_deduction_for_return_from_leave(self.start_date, self.end_date)
+			end_date = "{0}-{1}-20".format(getdate(self.end_date).year, getdate(self.end_date).month)
+			prev_month = getdate(self.end_date).month - 1 if getdate(self.end_date).month - 1 > 0 else 12
+			prev_month_start_date = ""
+			if prev_month != 12:
+				prev_month_start_date = "{0}-{1}-20".format(getdate(self.end_date).year, prev_month)
+			else:
+				prev_month_start_date = "{0}-{1}-20".format(getdate(self.end_date).year - 1, prev_month)
+			self.set_deduction_for_return_from_leave(prev_month_start_date, end_date)
+		# if self.get('__islocal'):
+		# 	self.set_deduction_for_return_from_leave(self.start_date, self.end_date)
 
 	def get_join_date_deducted_days(self):
 		doj = self.get_emp_join_date()

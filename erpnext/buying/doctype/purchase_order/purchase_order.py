@@ -92,9 +92,12 @@ class PurchaseOrder(BuyingController):
 
 	def vallidate_workflow_transition(self):
 		if hasattr(self,'workflow_state'):
-			if u"Shared Services Director" in frappe.get_roles(frappe.session.user):
-				if self.project and self.workflow_state == "Approved By Shared Services Director":
-					self.workflow_state = "Approved By Shared Services Director (Prt.)"
+			if u"Project Budget Controller" in frappe.get_roles(frappe.session.user):
+				if self.project and self.workflow_state == "Approved By Budget Controller":
+					self.workflow_state = "Approved By Project Budget Controller"
+			# if u"Shared Services Director" in frappe.get_roles(frappe.session.user):
+			# 	if self.project and self.workflow_state == "Approved By Shared Services Director":
+			# 		self.workflow_state = "Approved By Shared Services Director (Prt.)"
 
 
 	def validate_with_previous_doc(self):
@@ -316,12 +319,11 @@ class PurchaseOrder(BuyingController):
 
 	def has_requester_perm(self):
 		if hasattr(self,'workflow_state'):
-			if self.workflow_state == "Pending":
-				pu = frappe.get_value("User Permission", filters = {"allow": "Material Request", "for_value": self.material_request}, fieldname = "user")
-				if pu:
-					return pu
-				else:
-					return frappe.session.user
+			pu = frappe.get_value("User Permission", filters = {"allow": "Material Request", "for_value": self.material_request}, fieldname = "user")
+			if pu:
+				return pu
+			else:
+				return frappe.session.user
 
 @frappe.whitelist()
 def close_or_unclose_purchase_orders(names, status):

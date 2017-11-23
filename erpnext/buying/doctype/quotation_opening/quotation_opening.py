@@ -46,7 +46,10 @@ class QuotationOpening(Document):
 					"supplier_quotation": sq.name,
 					"supplier": sq.supplier,
 					"grand_total": sq.grand_total,
-					"transaction_date": sq.transaction_date
+					"transaction_date": sq.transaction_date,
+					"delivery": sq.delivery,
+					"tc_name": sq.tc_name,
+					"terms": sq.terms
 					})
 			self.set("quotations", csq)
 		else: 
@@ -54,7 +57,7 @@ class QuotationOpening(Document):
 
 	def get_sqs(self, flt = 0):
 
-		sqs = frappe.db.sql("""select name, supplier, grand_total, transaction_date
+		sqs = frappe.db.sql("""select name, supplier, grand_total, transaction_date, delivery, tc_name, terms
 		 from `tabSupplier Quotation` where docstatus = 1 and name in (select DISTINCT parent
 		 from `tabSupplier Quotation Item` where request_for_quotation = '{0}')
 		 """.format(self.request_for_quotation), as_dict = True)

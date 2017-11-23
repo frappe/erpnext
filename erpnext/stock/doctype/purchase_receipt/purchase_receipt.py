@@ -62,7 +62,24 @@ class PurchaseReceipt(BuyingController):
 			throw(_("Posting Date cannot be future date"))
 		if self.get("__islocal") :
 				self.title = self.get_title()
-				
+
+	def after_insert(self):
+		self.get_department()
+		self.get_project()
+	def get_department(self):
+		if self.material_request:
+			dep = frappe.get_value("Material Request", filters = {"name": self.material_request}, fieldname = "department")
+			if dep:
+				self.department = dep
+
+	def get_project(self):
+		if self.material_request:
+			proj = frappe.get_value("Material Request", filters = {"name": self.material_request}, fieldname = "project")
+			if proj:
+				self.project = proj
+				for item in self.get("items"):
+					item.project = proj
+
 	def get_title(self):
 		from frappe.utils import getdate
 		

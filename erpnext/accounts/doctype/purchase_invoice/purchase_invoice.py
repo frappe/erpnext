@@ -39,7 +39,6 @@ class PurchaseInvoice(BuyingController):
 	def validate(self):
 		if not self.is_opening:
 			self.is_opening = 'No'
-
 		super(PurchaseInvoice, self).validate()
 
 		if not self.is_return:
@@ -51,7 +50,7 @@ class PurchaseInvoice(BuyingController):
 		# validate cash purchase
 		if (self.is_paid == 1):
 			self.validate_cash()
-
+		self.validate_receipt()
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advances")
@@ -93,7 +92,23 @@ class PurchaseInvoice(BuyingController):
 			nammeing_doc.name_of_doc = self.doctype
 			nammeing_doc.save()
 			return title
+	def after_insert(self):
+		self.get_project()
 		
+	def validate_receipt(self):
+		if self.material_request:
+			pr = frappe.get_value("Purchase Receipt", filters = {"material_request": self.material_request, "docstatus": 1}, fieldname="name")
+			if not pr:
+				frappe.throw(_("a purchase receipt should be created and approved before creating a purchase invoice"))
+
+	def get_project(self):
+		if self.material_request:
+			proj = frappe.get_value("Material Request", filters = {"name": self.material_request}, fieldname = "project")
+			if proj:
+				self.project = proj
+				for item in self.get("items"):
+					item.project = proj
+
 	def validate_cash(self):
 		if not self.cash_bank_account and flt(self.paid_amount):
 			frappe.throw(_("Cash or Bank Account is mandatory for making payment entry"))

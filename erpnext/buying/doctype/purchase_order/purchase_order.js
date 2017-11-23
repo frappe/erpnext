@@ -163,8 +163,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
                         function() { me.make_stock_entry(); }, __("Transfer"));
                 }
             }
-
-            if (flt(doc.per_billed, 2) < 100)
+            // && flt(doc.per_received, 2) === 100 added by ahmed madi 
+            if (flt(doc.per_billed, 2) < 100 && flt(doc.per_received, 2) === 100)
                 cur_frm.add_custom_button(__('Invoice'),
                     this.make_purchase_invoice, __("Make"));
 

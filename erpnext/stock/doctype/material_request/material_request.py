@@ -164,6 +164,9 @@ class MaterialRequest(BuyingController):
 			pro_list = frappe.get_list("Project", filters = {"project_manager": self.material_requester}, fields = ["name"])
 			if not pro_list:
 				frappe.throw(_("The Project is not valid"))
+			else:
+				for item in self.get("items"):
+					item.project = self.project
 
 	def validate_adding_mr(self):
 		if self.material_requester:
@@ -183,10 +186,15 @@ class MaterialRequest(BuyingController):
 		mr = frappe.get_value("User Permission", filters ={'user': user_emp[0].user_id, 'allow': 'Material Request', 'for_value': self.name}, fieldname = "name")
 		if mr:
 			frappe.delete_doc("User Permission", mr)
-			
+
 	def validate_department(self):
-		if self.purchase_workflow == "Project":
-			self.department = None
+		if self.get("__islocal") :
+			if self.purchase_workflow == "Project":
+				self.department = None
+			else:
+				emp_dep = frappe.get_value("Employee", filters={"name": self.material_requester}, fieldname="department")
+				if emp_dep:
+					self.department = emp_dep
 
 	def set_title(self):
 		'''Set title as comma separated list of items'''
