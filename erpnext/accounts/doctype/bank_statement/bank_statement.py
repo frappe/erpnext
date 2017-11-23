@@ -75,7 +75,7 @@ class BankStatement(Document):
 			frappe.msgprint(_("The attached statement does not contain all the columns specified in the format selected"))
 
 	def convert_to_internal_format(self, csv_column_header, csv_row_field_value, bank_statement_mapping_items, eval_data):
-		# select mapping_row from bank_statement_mapping_item where source_field = csv_column_header
+		""" select mapping row to be used """
 		mapping_row = None
 		for row in bank_statement_mapping_items:
 			if row.source_field == csv_column_header:
@@ -117,8 +117,8 @@ class BankStatement(Document):
 		self.check_file_format(csv_header_list)
 
 		intermediate_bank_statement_items = []
-		# create a list of maps, intermediate_bank_statement_items, to hold bank statement items based on internal > 
-		# < representation see "Bank Statement Item" definition
+		# create a list of maps, intermediate_bank_statement_items, to hold bank statement items based on internal
+		# representation see "Bank Statement Item" definition
 		for statement_row in data_rows:
 			bank_sta_item = dict()
 			eval_data = self.get_data_for_eval(statement_row, csv_header_list, bank_statement_mapping_items)
@@ -172,80 +172,47 @@ class BankStatement(Document):
 		return ret_dict
 
 	def process_statement(self):
-		'''To be removed. Matching of transaction type to be done on statement upload'''
-		'''
-		basic code for journal account matching
-		if not self.bank_statement_items: return
-		txn_type_derivation = frappe.db.get_value("Bank Statement Format", self.bank_statement_format, 'txn_type_derivation')
-		if not txn_type_derivation == "Derive Using Bank Transaction Type": return
-		ret_list = []
-		for idx, itm in enumerate(self.bank_statement_items):
-			match_type = []
-			if itm.credit_amount:
-				DR_or_CR = 'CR'
-			elif itm.debit_amount:
-				DR_or_CR = 'DR'
-			else:
-				DR_or_CR = None
-			bnks_txn_types = frappe.get_all('Bank Transaction Type',
-									filters={'bank_statement_format': self.bank_statement_format, 'debit_or_credit': DR_or_CR},
-									fields=['name', 'transaction_type_match_expression', 'ignore_case', 'multi_line', 'dot_all'])
-			for txn_type in bnks_txn_types:
-				re_flag = 0
-				for i,d in [('ignore_case', re.I), ('dot_all', re.S), ('multi_line', re.M)]:
-					if txn_type.get(i): re_flag = re_flag | d
-				txn_match = re.search(txn_type.transaction_type_match_expression, itm.transaction_description, flags=re_flag)
-				if txn_match:
-					match_type.append(txn_type)
-			# @innocent in the check below, we need to set the status of the bank statement item to show that either no item was found or more than one item was found
-			if len(match_type) != 1:
-				ret_list.append({'row': idx+1, 'matches': match_type})
-				continue
-			itm.transaction_type = match_type[0].name
-		get_ret_msg(ret_list)
-		self.save()
-		'''
 		for bank_statement_item in self.bank_statement_items:
 			if not bank_statement_item.transaction_type: continue
 			txn_type = frappe.get_doc('Bank Transaction Type', bank_statement_item.transaction_type)
 			if txn_type.debit_account_party_type:
-				#create new item in bank_statement_item.third_party_journal_items
-				#set debit_account_type of newly created third_party_journal_item to > 
-				#< bank_statement_item.txn_type.debit_account_party_type
+				# create new item in bank_statement_item.third_party_journal_items
+				# set debit_account_type of newly created third_party_journal_item to 
+				# bank_statement_item.txn_type.debit_account_party_type
 				if not txn_type.debit_account:
 					dr_open_items = get_open_third_party_documents_using_search_fields(
 						txn_type.search_fields_third_party_doc_dr,
 						bank_statement_item.transaction_description
 					)
 					if len(dr_open_items) >= 1:
-						#set debit_account of of newly created third_party_journal_item to > 
-						#< dr_open_items[0].third_party
+						# set debit_account of of newly created third_party_journal_item to
+						# dr_open_items[0].third_party
 						bank_statement_item.jl_credit_account = dr_open_items[0].account
 					else:
 						continue
 				else:
-					#set debit_account of of newly created third_party_journal_item to > 
-					#< bank_statement_item.txn_type.debit_account
+					# set debit_account of of newly created third_party_journal_item to
+					# bank_statement_item.txn_type.debit_account
 					bank_statement_item.jl_credit_account = txn_type.debit_account
 
 			if txn_type.credit_account_party_type:
-				#create new item in bank_statement_item.third_party_journal_items
-				#set credit_account_type of newly created third_party_journal_item to > 
-				#< bank_statement_item.txn_type.credit_account_party_type
+				# create new item in bank_statement_item.third_party_journal_items
+				# set credit_account_type of newly created third_party_journal_item to
+				# bank_statement_item.txn_type.credit_account_party_type
 				if not txn_type.credit_account:
 					cr_open_items = get_open_third_party_documents_using_search_fields(
 						txn_type.search_fields_third_party_doc_cr,
 						bank_statement_item.transaction_description
 					)
 					if len(cr_open_items) >= 1:
-						#set credit_account of of newly created third_party_journal_item to > 
-						#< cr_open_items[0].third_party
+						# set credit_account of of newly created third_party_journal_item to
+						# cr_open_items[0].third_party
 						bank_statement_item.jl_credit_account = cr_open_items[0].account
 					else:
 						continue
 			else :
-				#set credit_account of of newly created third_party_journal_item to > 
-				#< bank_statement_item.txn_type.credit_account
+				# set credit_account of of newly created third_party_journal_item to
+				# bank_statement_item.txn_type.credit_account
 				bank_statement_item.jl_credit_account = txn_type.credit_account
 		self.save()
 
@@ -293,7 +260,7 @@ def processs_statement(self, idx, itm):
 		txn_match = re.search(txn_type.transaction_type_match_expression, itm.transaction_description, flags=re_flag)
 		if txn_match:
 			match_type.append(txn_type)
-	# @innocent in the check below, we need to set the status of the bank statement item to show that either no item was found or more than one item was found
+	
 	if len(match_type) != 1:
 		ret_list.append({'row': idx, 'matches': match_type})
 		get_ret_msg(ret_list)
@@ -311,7 +278,8 @@ def get_open_third_party_documents_using_search_fields(search_fields, txn_descri
 		#contained in txn_description. Append result to found_documents
 		search_field = '_'.join(s_field.field_name.replace(' ','_').split(' ')).lower()
 		try:
-			query = """select account, against_voucher,against_voucher_type,{0} from `tabGL Entry` where against_voucher_type IS NOT NULL""".format(search_field)
+			query = """select account, against_voucher,against_voucher_type,{0} from `tabGL Entry` where
+							against_voucher_type IS NOT NULL""".format(search_field)
 			result = frappe.db.sql(query, as_dict=1)
 			if not result: continue
 			for res in result:
@@ -331,7 +299,7 @@ def get_open_third_party_documents_using_search_fields(search_fields, txn_descri
 				found = map(lambda x:x.strip() if x else x, found)
 				found = filter(lambda x:len(x)>min_len if x else x, found)
 				if not found: continue
-				ret_dict = frappe._dict({'doc':frappe.get_doc(dt,dn), 'account':result[0].account})
+				ret_dict = frappe._dict({'doc':frappe.get_doc(dt,dn), 'account':res.account})
 				if not ret_dict in found_documents: found_documents.append(ret_dict)
 		except OperationalError, ValidationError:
 			continue
