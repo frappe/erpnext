@@ -19,15 +19,19 @@ def execute(filters=None):
 
 	for d in customer_list:
 		row = []
-		#3rd argument has flag
-		outstanding_amt = get_customer_outstanding(d.name, filters.get("company"),False)
+
+		outstanding_amt = get_customer_outstanding(d.name, filters.get("company"),
+			ignore_outstanding_sales_order=d.bypass_credit_limit_check_at_sales_order)
+
 		credit_limit = get_credit_limit(d.name, filters.get("company"))		
+
 		bal = flt(credit_limit) - flt(outstanding_amt)
-		#Value of new col is passed
+
 		if customer_naming_type == "Naming Series":
-			row = [d.name, d.customer_name, d.bypass_credit_limit_check_at_sales_order, credit_limit, outstanding_amt, bal]
+			row = [d.name, d.customer_name, credit_limit, outstanding_amt, bal,
+				d.bypass_credit_limit_check_at_sales_order]
 		else:
-			row = [d.name, d.bypass_credit_limit_check_at_sales_order, credit_limit, outstanding_amt, bal]
+			row = [d.name, credit_limit, outstanding_amt, bal, d.bypass_credit_limit_check_at_sales_order]
 
 		if credit_limit:
 			data.append(row)
@@ -36,9 +40,11 @@ def execute(filters=None):
 
 def get_columns(customer_naming_type):
 	columns = [
-		# New column is added to reflect status of bypass credit limit check flag of sales order
-		_("Customer") + ":Link/Customer:120", _("Bypass credit check at Sales Order ") + ":Check:30", _("Credit Limit") + ":Currency:120",
-		_("Outstanding Amt") + ":Currency:100", _("Credit Balance") + ":Currency:120"
+		_("Customer") + ":Link/Customer:120",
+		_("Credit Limit") + ":Currency:120",
+		_("Outstanding Amt") + ":Currency:100",
+		_("Credit Balance") + ":Currency:120",
+		_("Bypass credit check at Sales Order ") + ":Check:240"
 	]
 
 	if customer_naming_type == "Naming Series":
@@ -52,6 +58,6 @@ def get_details(filters):
 	if filters.get("customer"):
 		conditions += " where name = %(customer)s"
 
-	# Return column bypass credit limit check at sales order level	
-	return frappe.db.sql("""select name, customer_name, bypass_credit_limit_check_at_sales_order from `tabCustomer` %s""" 
-		% conditions, filters, as_dict=1)
+	return frappe.db.sql("""select name, customer_name,
+		bypass_credit_limit_check_at_sales_order from `tabCustomer` %s
+	""" % conditions, filters, as_dict=1)
