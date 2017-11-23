@@ -18,8 +18,26 @@ from barcode.writer import ImageWriter
 
 class Asset(Document):
 
-	# def autoname(self):
-	# 	self.asset_name = make_autoname(self.title +'-.####')
+	def autoname(self):
+		from frappe.model.naming import make_autoname
+		asset_category = frappe.get_doc("Asset Category",self.asset_category)
+		asset_name = frappe.get_list("Asset Name", fields=["naming_series"],
+				filters={"asset_category": self.asset_category })
+		if asset_name : 
+			self.naming_series = asset_name[0]["naming_series"]
+		else :
+			current = asset_category.name
+			while  current :
+				current = asset_category.parent_asset_category
+				if current:
+					asset_category = frappe.get_doc("Asset Category",current)
+					asset_name = frappe.get_list("Asset Name", fields=["naming_series"],
+						filters={"asset_category": asset_category.name})
+					if asset_name : 
+						self.naming_series = asset_name[0]["naming_series"]	
+						break	
+		self.name = make_autoname(self.naming_series+'.#####')
+	
 	def barcode_attach(self):
 	    barcode_class = barcode.get_barcode_class('code39')
 	    ean = barcode_class(self.name, ImageWriter(), add_checksum=False)

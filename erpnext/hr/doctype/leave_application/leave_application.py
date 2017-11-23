@@ -59,6 +59,7 @@ class LeaveApplication(Document):
 		# self.set_approvals()
 		self.validate_leave_submission_dates()
 		self.validate_conditional_workflow_transition()
+		self.get_department()
 
 		#~ # self.update_leaves_allocated()
 		#~ result=frappe.db.sql("select name from tabCommunication where reference_name='{0}' and subject='Approved By Line Manager'".format(self.name))
@@ -122,7 +123,7 @@ class LeaveApplication(Document):
 
 
 	def after_insert(self):
-		self.get_department()
+		# self.get_department()
 		# frappe.clear_cache(user=frappe.session.user)
 
 		# if self.workflow_state=="Approved By Manager":
@@ -156,10 +157,12 @@ class LeaveApplication(Document):
 			else:
 				if wf == "Approved By HR Specialist":
 					self.workflow_state = "Approved By HR Specialist (F.T)"
+					self.flags.ignore_permissions = True
 					self.status = "Approved"
 					self.docstatus = 1
 			if wf == "Approved By Director" and lt == "Compensatory off - تعويضية":
 				self.workflow_state = "Approved By Director (F.T)"
+				self.flags.ignore_permissions = True
 				self.status = "Approved"
 				self.docstatus = 1
 		def created_by_ceo():

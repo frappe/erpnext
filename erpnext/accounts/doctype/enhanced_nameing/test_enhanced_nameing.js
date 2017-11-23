@@ -2,15 +2,15 @@
 // rename this file from _test_[name] to test_[name] to activate
 // and remove above this line
 
-QUnit.test("test: Exit Re Entry Application", function (assert) {
+QUnit.test("test: Enhanced Nameing", function (assert) {
 	let done = assert.async();
 
 	// number of asserts
 	assert.expect(1);
 
 	frappe.run_serially([
-		// insert a new Exit Re Entry Application
-		() => frappe.tests.make('Exit Re Entry Application', [
+		// insert a new Enhanced Nameing
+		() => frappe.tests.make('Enhanced Nameing', [
 			// values to be set
 			{key: 'value'}
 		]),

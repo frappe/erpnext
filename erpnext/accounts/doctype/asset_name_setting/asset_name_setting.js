@@ -1,7 +1,7 @@
 // Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Item Name Settings', {
+frappe.ui.form.on('Asset Name Setting', {
 	refresh: function(frm) {
 
 	}
