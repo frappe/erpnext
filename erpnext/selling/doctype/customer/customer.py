@@ -170,37 +170,30 @@ def check_credit_limit(customer, company):
 			throw(_("Please contact to the user who have Sales Master Manager {0} role")
 				.format(" / " + credit_controller if credit_controller else ""))
 
-# get_customer_outstanding is a very generic function which is invoked from many places. A third non mandatory argument is added to change its behaviour based on caller .
-def get_customer_outstanding(customer, company, ignore_bypass_credit_limit_check_at_sales_order=None):
+def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False):
 	# Outstanding based on GL Entries
-	outstanding_based_on_gle = frappe.db.sql("""select sum(debit) - sum(credit)
-		from `tabGL Entry` where party_type = 'Customer' and party = %s and company=%s""", (customer, company))
+	outstanding_based_on_gle = frappe.db.sql("""
+		select sum(debit) - sum(credit)
+		from `tabGL Entry`
+		where party_type = 'Customer' and party = %s and company=%s""", (customer, company))
 
 	outstanding_based_on_gle = flt(outstanding_based_on_gle[0][0]) if outstanding_based_on_gle else 0
 
 	# Outstanding based on Sales Order
-	outstanding_based_on_so = frappe.db.sql("""
-		select sum(base_grand_total*(100 - per_billed)/100)
-		from `tabSales Order`
-		where customer=%s and docstatus = 1 and company=%s
-		and per_billed < 100 and status != 'Closed'""", (customer, company))
+	outstanding_based_on_so = 0.0
 
-	outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0.0
-
-	# Since the credit limit check is bypassed at sales order level, when customer credit balance report is run we need to treat sales order with status 'To Deliver and Bill' as not outstanding
-	outstanding_based_on_bypassed_so = 0.0
-	bypass_credit_limit_check_at_sales_order =cint(frappe.db.get_value("Customer", customer, "bypass_credit_limit_check_at_sales_order"))
-	if bypass_credit_limit_check_at_sales_order == 1 and ignore_bypass_credit_limit_check_at_sales_order==False:
-		outstanding_based_on_bypassed_so = frappe.db.sql("""
-			select (sum(base_grand_total))
+	# if credit limit check is bypassed at sales order level,
+	# we should not consider outstanding Sales Orders, when customer credit balance report is run
+	if not ignore_outstanding_sales_order:
+		outstanding_based_on_so = frappe.db.sql("""
+			select sum(base_grand_total*(100 - per_billed)/100)
 			from `tabSales Order`
 			where customer=%s and docstatus = 1 and company=%s
-			and advance_paid = 0
-			and per_billed < 100 and status ='To Deliver and Bill'""", (customer, company))
+			and per_billed < 100 and status != 'Closed'""", (customer, company))
 
-		outstanding_based_on_bypassed_so = flt(outstanding_based_on_bypassed_so[0][0]) if outstanding_based_on_bypassed_so else 0.0
+		outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0.0
 
-	# Outstanding based on Delivery Note
+	# Outstanding based on Delivery Note, which are not created against Sales Order
 	unmarked_delivery_note_items = frappe.db.sql("""select
 			dn_item.name, dn_item.amount, dn.base_net_total, dn.base_grand_total
 		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
@@ -221,15 +214,16 @@ def get_customer_outstanding(customer, company, ignore_bypass_credit_limit_check
 		if flt(dn_item.amount) > flt(si_amount) and dn_item.base_net_total:
 			outstanding_based_on_dn += ((flt(dn_item.amount) - flt(si_amount)) \
 				/ dn_item.base_net_total) * dn_item.base_grand_total
-#In return substract the bypassed SO values
-	return outstanding_based_on_gle + outstanding_based_on_so + outstanding_based_on_dn - outstanding_based_on_bypassed_so
+
+	return outstanding_based_on_gle + outstanding_based_on_so + outstanding_based_on_dn
 
 
 def get_credit_limit(customer, company):
 	credit_limit = None
 
 	if customer:
-		credit_limit, customer_group = frappe.db.get_value("Customer", customer, ["credit_limit", "customer_group"])
+		credit_limit, customer_group = frappe.db.get_value("Customer",
+			customer, ["credit_limit", "customer_group"])
 
 		if not credit_limit:
 			credit_limit = frappe.db.get_value("Customer Group", customer_group, "credit_limit")
