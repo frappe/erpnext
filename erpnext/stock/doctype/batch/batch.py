@@ -54,19 +54,19 @@ def get_batch_qty(batch_no=None, warehouse=None, item_code=None):
 			from `tabStock Ledger Entry`
 			where warehouse=%s and batch_no=%s""",
 			(warehouse, batch_no))[0][0] or 0)
-		print("out 1:", out)
+
 	if batch_no and not warehouse:
 		out = frappe.db.sql('''select warehouse, sum(actual_qty) as qty
 			from `tabStock Ledger Entry`
 			where batch_no=%s
 			group by warehouse''', batch_no, as_dict=1)
-		print("out 2:", out)
+
 	if not batch_no and item_code and warehouse:
 		out = frappe.db.sql('''select batch_no, sum(actual_qty) as qty
 			from `tabStock Ledger Entry`
 			where item_code = %s and warehouse=%s
 			group by batch_no''', (item_code, warehouse), as_dict=1)
-		print("out 3:", out)
+
 	return out
 
 @frappe.whitelist()
