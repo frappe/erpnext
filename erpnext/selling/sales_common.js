@@ -335,7 +335,42 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		} else {
 			this.frm.set_value("company_address_display", "");
 		}
-	}
+	},
+
+	conversion_factor: function(doc, cdt, cdn, dont_fetch_price_list_rate) {
+	    this._super(doc, cdt, cdn, dont_fetch_price_list_rate);
+		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
+			this.set_batch_number(cdt, cdn);
+		}
+	},
+
+	qty: function(doc, cdt, cdn) {
+	    this._super(doc, cdt, cdn);
+		this.set_batch_number(cdt, cdn);
+	},
+
+	/* Determine appropriate batch number and set it in the form.
+	* @param {string} cdt - Document Doctype
+	* @param {string} cdn - Document name
+	*/
+	set_batch_number: function(cdt, cdn) {
+		const doc = frappe.get_doc(cdt, cdn);
+		if(doc) {
+			this._set_batch_number(doc);
+		}
+	},
+
+	_set_batch_number: function(doc) {
+		return frappe.call({
+			method: 'erpnext.stock.doctype.batch.batch.get_batch_no',
+			args: {'item_code': doc.item_code, 'warehouse': doc.warehouse, 'qty': flt(doc.qty) * flt(doc.conversion_factor)},
+			callback: function(r) {
+				if(r.message) {
+					frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message);
+				}
+			}
+		});
+	},
 });
 
 frappe.ui.form.on(cur_frm.doctype,"project", function(frm) {
