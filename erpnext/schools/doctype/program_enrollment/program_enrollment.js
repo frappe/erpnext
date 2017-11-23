@@ -1,9 +1,12 @@
 // Copyright (c) 2016, Frappe and contributors
 // For license information, please see license.txt
 
-cur_frm.add_fetch('fee_structure', 'total_amount', 'amount');
 
 frappe.ui.form.on("Program Enrollment", {
+	setup: function(frm) {
+		frm.add_fetch('fee_structure', 'total_amount', 'amount');
+	},
+
 	onload: function(frm, cdt, cdn){
 		frm.set_query("academic_term", "fees", function(){
 			return{
