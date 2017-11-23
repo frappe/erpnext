@@ -5,10 +5,16 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
+	# rename the School module as Education
 
-	# delete the school module def if exists
-	if frappe.db.exists('Module Def', 'Schools'):
+	# rename the school module
+	if frappe.db.exists('Module Def', 'Schools') and not frappe.db.exists('Module Def', 'Education'):
+		frappe.rename_doc("Module Def", "Schools", "Education")
+
+	# delete the school module
+	if frappe.db.exists('Module Def', 'Schools') and frappe.db.exists('Module Def', 'Education'):
 		frappe.db.sql("""delete from `tabModule Def` where module_name = 'Schools'""")
+
 
 	# rename "School Settings" to the "Education Settings
 	if frappe.db.exists('DocType', 'School Settings'):
