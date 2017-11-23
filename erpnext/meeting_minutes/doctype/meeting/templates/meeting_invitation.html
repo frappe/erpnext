@@ -1,0 +1,20 @@
+<p>
+	<span class="label label-default"> {{ sender }}</span> Inviting you for a Meeting
+</p>
+<blockquote style="border-left: 3px solid #d1d8dd; padding: 7px 15px; margin-left: 0px;">
+	Date: {{ date.strftime('%d %B %Y') }} <br>
+	From: {{ from_time }}
+	To: {{ to_time  }}
+</blockquote>
+
+{% if invitation_message %}
+	<h3>Invitation Message</h3>
+	<p>{{ invitation_message or '' }}</p>
+{% endif %}
+
+{% if agenda %}
+	<h4>Meeting Agenda</h4>
+	{% for each in agenda %}
+		<li>{{ each.description }}</li>
+	{% endfor %}
+{% endif %}

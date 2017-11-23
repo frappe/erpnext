@@ -293,5 +293,12 @@ def get_data():
 			"_doctype": "Restaurant",
 			"link": "List/Restaurant",
 			"label": _("Restaurant")
+		},
+		{
+			"module_name": "Meeting Minutes",
+			"color": "#FF888B",
+			"icon": "octicon octicon-briefcase",
+			"type": "module",
+			"label": _("Meeting Minutes")
 		}
 	]
