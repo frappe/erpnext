@@ -247,6 +247,7 @@ frappe.ui.form.on('Payment Entry', {
 	party_type: function(frm) {
 		frm.set_value("party", "");
 		frm.set_value("party_name", "");
+
 		if(frm.doc.party) {
 			$.each(["party", "party_balance", "paid_from", "paid_to",
 				"paid_from_account_currency", "paid_from_account_balance",
@@ -263,15 +264,6 @@ frappe.ui.form.on('Payment Entry', {
 			frm.set_value("party_name", "");
 			frm.set_value("party_name", frm.doc.party);
 		}else if(frm.doc.party_type=='Supplier'){
-			frm.set_value("party_name", "");
-			frm.set_value("party_name", frm.doc.party);
-		}else if(frm.doc.party_type=='Employee'){
-			frm.set_value("party_name", "");
-			frm.set_value("party_name", frm.doc.party);
-		}else if(frm.doc.party_type=='Imprest Permanent'){
-			frm.set_value("party_name", "");
-			frm.set_value("party_name", frm.doc.party);
-		}else if(frm.doc.party_type=='Imprest Temporary'){
 			frm.set_value("party_name", "");
 			frm.set_value("party_name", frm.doc.party);
 		}

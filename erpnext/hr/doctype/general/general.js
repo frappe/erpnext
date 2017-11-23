@@ -292,7 +292,13 @@ frappe.ui.form.on('General', {
 
 
 
+// cur_frm.add_custom_button("Open Something", function(){
+//     frappe.set_route(["query-report", "Some Report"]);
+// });
 
+frappe.ui.form.on("General", "attendance", function(frm) {
+    frappe.set_route(["query-report", "Attendance"]);
+});
 
 
 

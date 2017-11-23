@@ -54,6 +54,18 @@ class PaymentEntry(AccountsController):
 		if self.get("__islocal") :
 				self.title = self.get_title()
 
+		if self.party_type=='Imprest Permanent':
+			emp_name = frappe.get_doc("Imprest Permanent",self.party)
+			if emp_name:
+				self.party_name = emp_name.employee_name
+		elif self.party_type=='Imprest Temporary':
+			emp_name = frappe.get_doc("Imprest Temporary",self.party)
+			if emp_name:
+				self.party_name = emp_name.employee_name
+
+
+
+
 
 		# def after_save(self):
 		# 	x = frappe.get_doc('Payment Entry', self.name).get('references')

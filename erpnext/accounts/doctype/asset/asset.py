@@ -21,7 +21,7 @@ class Asset(Document):
 	def autoname(self):
 		from frappe.model.naming import make_autoname
 		asset_category = frappe.get_doc("Asset Category",self.asset_category)
-		asset_name = frappe.get_list("Asset Name", fields=["naming_series"],
+		asset_name = frappe.get_all("Asset Name", fields=["naming_series"],
 				filters={"asset_category": self.asset_category })
 		if asset_name : 
 			self.naming_series = asset_name[0]["naming_series"]
@@ -31,7 +31,7 @@ class Asset(Document):
 				current = asset_category.parent_asset_category
 				if current:
 					asset_category = frappe.get_doc("Asset Category",current)
-					asset_name = frappe.get_list("Asset Name", fields=["naming_series"],
+					asset_name = frappe.get_all("Asset Name", fields=["naming_series"],
 						filters={"asset_category": asset_category.name})
 					if asset_name : 
 						self.naming_series = asset_name[0]["naming_series"]	
