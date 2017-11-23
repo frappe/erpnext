@@ -284,6 +284,11 @@ def get_data():
 					"name": "Cheque Print Template",
 					"description": _("Setup cheque dimensions for printing")
 				},
+				{
+					"type": "doctype",
+					"name": "Opening Invoice Creation Tool",
+					"description": _("Make Opening Sales and Purchase Invoices")
+				},
 			]
 		},
 		{
@@ -468,6 +473,12 @@ def get_data():
 					"name": "Customer Credit Balance",
 					"doctype": "Customer"
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales Payment Summary",
+					"doctype": "Sales Invoice"
+				}
 			]
 		},
 		{

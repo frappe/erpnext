@@ -168,6 +168,48 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 
 	return doclist
 
+@frappe.whitelist()
+def make_sales_invoice(source_name, target_doc=None):
+	return _make_sales_invoice(source_name, target_doc)
+
+def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
+	customer = _make_customer(source_name, ignore_permissions)
+
+	def set_missing_values(source, target):
+		if customer:
+			target.customer = customer.name
+			target.customer_name = customer.customer_name
+		target.ignore_pricing_rule = 1
+		target.flags.ignore_permissions = ignore_permissions
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+
+	def update_item(obj, target, source_parent):
+		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
+
+	doclist = get_mapped_doc("Quotation", source_name, {
+			"Quotation": {
+				"doctype": "Sales Invoice",
+				"validation": {
+					"docstatus": ["=", 1]
+				}
+			},
+			"Quotation Item": {
+				"doctype": "Sales Invoice Item",
+				"postprocess": update_item
+			},
+			"Sales Taxes and Charges": {
+				"doctype": "Sales Taxes and Charges",
+				"add_if_empty": True
+			},
+			"Sales Team": {
+				"doctype": "Sales Team",
+				"add_if_empty": True
+			}
+		}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
+
+	return doclist	
+
 def _make_customer(source_name, ignore_permissions=False):
 	quotation = frappe.db.get_value("Quotation", source_name, ["lead", "order_type", "customer"])
 	if quotation and quotation[0] and not quotation[2]:

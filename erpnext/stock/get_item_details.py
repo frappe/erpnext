@@ -96,17 +96,6 @@ def get_item_details(args):
 
 	return out
 
-	# print(frappe._dict({
-	# 	'has_serial_no'	: out.has_serial_no,
-	# 	'has_batch_no'	: out.has_batch_no
-	# }))
-
-	# return frappe._dict({
-	# 	'has_serial_no'	: out.has_serial_no,
-	# 	'has_batch_no'	: out.has_batch_no
-	# })
-
-
 def process_args(args):
 	if isinstance(args, basestring):
 		args = json.loads(args)
@@ -205,11 +194,17 @@ def get_basic_details(args, item):
 
 	warehouse = user_default_warehouse or item.default_warehouse or args.warehouse
 
-	# Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
+	material_request_type = ''
+	if args.get('doctype') == "Material Request":
+		material_request_type = frappe.db.get_value('Material Request',
+			args.get('name'), 'material_request_type')
+
+	#Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
 	if not args.uom:
 		if args.get('doctype') in ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']:
 			args.uom = item.sales_uom if item.sales_uom else item.stock_uom
-		elif args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']:
+		elif (args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']) or \
+			(args.get('doctype') == 'Material Request' and material_request_type == 'Purchase'):
 			args.uom = item.purchase_uom if item.purchase_uom else item.stock_uom
 		else:
 			args.uom = item.stock_uom
@@ -574,8 +569,6 @@ def get_default_bom(item_code=None):
 		bom = frappe.db.get_value("BOM", {"docstatus": 1, "is_default": 1, "is_active": 1, "item": item_code})
 		if bom:
 			return bom
-		else:
-			frappe.throw(_("No default BOM exists for Item {0}").format(item_code))
 
 def get_valuation_rate(item_code, warehouse=None):
 	item = frappe.get_doc("Item", item_code)

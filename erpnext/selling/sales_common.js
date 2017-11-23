@@ -17,6 +17,13 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	onload: function() {
 		this._super();
 		this.setup_queries();
+		this.frm.set_query('shipping_rule', function() {
+			return {
+				filters: {
+					"shipping_rule_type": "Selling"
+				}
+			};
+		});
 	},
 
 	setup_queries: function() {
@@ -231,21 +238,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					precision("allocated_amount", sales_person));
 			}
 		});
-	},
-
-	shipping_rule: function() {
-		var me = this;
-		if(this.frm.doc.shipping_rule) {
-			return this.frm.call({
-				doc: this.frm.doc,
-				method: "apply_shipping_rule",
-				callback: function(r) {
-					if(!r.exc) {
-						me.calculate_taxes_and_totals();
-					}
-				}
-			})
-		}
 	},
 
 	batch_no: function(doc, cdt, cdn) {

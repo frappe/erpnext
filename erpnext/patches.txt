@@ -334,6 +334,7 @@ execute:frappe.reload_doctype('Employee') #2016-10-18
 execute:frappe.db.sql("update `tabEmployee` set prefered_contact_email = IFNULL(prefered_contact_email,'') ")
 execute:frappe.reload_doctype("Salary Slip")
 execute:frappe.db.sql("update `tabSalary Slip` set posting_date=creation")
+execute:frappe.reload_doc("stock", "doctype", "stock_settings")
 erpnext.patches.v8_0.create_domain_docs	#16-05-2017
 erpnext.patches.v7_1.update_portal_roles
 erpnext.patches.v7_1.set_total_amount_currency_in_je
@@ -448,6 +449,7 @@ erpnext.patches.v8_9.remove_employee_from_salary_structure_parent
 erpnext.patches.v8_9.delete_gst_doctypes_for_outside_india_accounts
 erpnext.patches.v8_9.set_default_fields_in_variant_settings
 erpnext.patches.v8_9.update_billing_gstin_for_indian_account
+erpnext.patches.v9_0.add_user_to_child_table_in_pos_profile
 erpnext.patches.v9_0.set_schedule_date_for_material_request_and_purchase_order
 erpnext.patches.v9_0.student_admission_childtable_migrate
 erpnext.patches.v9_0.fix_subscription_next_date #2017-10-23
@@ -455,9 +457,15 @@ erpnext.patches.v9_0.add_healthcare_domain
 erpnext.patches.v9_0.set_variant_item_description
 erpnext.patches.v9_0.set_uoms_in_variant_field
 erpnext.patches.v9_0.copy_old_fees_field_data
+execute:frappe.delete_doc_if_exists("DocType", "Program Fee")
 erpnext.patches.v9_0.set_pos_profile_name
 erpnext.patches.v9_0.remove_non_existing_warehouse_from_stock_settings
 execute:frappe.delete_doc_if_exists("DocType", "Program Fee")
+erpnext.patches.v8_10.update_gl_due_date_for_pi_and_si
+erpnext.patches.v8_10.change_default_customer_credit_days
 erpnext.patches.v9_0.update_employee_loan_details
 erpnext.patches.v9_2.delete_healthcare_domain_default_items
+erpnext.patches.v9_1.create_issue_opportunity_type
 erpnext.patches.v9_2.rename_translated_domains_in_en
+erpnext.patches.v9_0.set_shipping_type_for_existing_shipping_rules
+erpnext.patches.v9_0.update_multi_uom_fields_in_material_request

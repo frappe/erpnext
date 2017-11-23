@@ -113,7 +113,7 @@ class ReceivablePayableReport(object):
 						row += [self.get_party_name(gle.party_type, gle.party)]
 
 					# get due date
-					due_date = voucher_details.get(gle.voucher_no, {}).get("due_date", "")
+					due_date = gle.due_date or voucher_details.get(gle.voucher_no, {}).get("due_date", "")
 
 					row += [gle.voucher_type, gle.voucher_no, due_date]
 
@@ -162,8 +162,7 @@ class ReceivablePayableReport(object):
 
 	def get_entries_till(self, report_date, party_type):
 		# returns a generator
-		return (e for e in self.get_gl_entries(party_type)
-			if getdate(e.posting_date) <= report_date)
+		return (e for e in self.get_gl_entries(party_type) if getdate(e.posting_date) <= report_date)
 
 	def is_receivable_or_payable(self, gle, dr_or_cr, future_vouchers):
 		return (
@@ -189,7 +188,8 @@ class ReceivablePayableReport(object):
 		reverse_dr_or_cr = "credit" if dr_or_cr=="debit" else "debit"
 
 		for e in self.get_gl_entries_for(gle.party, gle.party_type, gle.voucher_type, gle.voucher_no):
-			if getdate(e.posting_date) <= report_date and e.name!=gle.name:
+			if getdate(e.posting_date) <= report_date and e.name!=gle.name \
+				and (not gle.due_date or getdate(e.due_date) == getdate(gle.due_date)):
 				amount = flt(e.get(reverse_dr_or_cr)) - flt(e.get(dr_or_cr))
 				if e.voucher_no not in return_entries:
 					payment_amount += amount
@@ -250,12 +250,12 @@ class ReceivablePayableReport(object):
 			else:
 				select_fields = "sum(debit) as debit, sum(credit) as credit"
 
-			self.gl_entries = frappe.db.sql("""select name, posting_date, account, party_type, party,
-				voucher_type, voucher_no, against_voucher_type, against_voucher,
+			self.gl_entries = frappe.db.sql("""select name, posting_date, account, party_type, party, 
+				voucher_type, voucher_no, against_voucher_type, against_voucher, due_date,
 				account_currency, remarks, {0}
 				from `tabGL Entry`
 				where docstatus < 2 and party_type=%s and (party is not null and party != '') {1}
-				group by voucher_type, voucher_no, against_voucher_type, against_voucher, party
+				group by voucher_type, voucher_no, against_voucher_type, against_voucher, party, due_date
 				order by posting_date, party"""
 				.format(select_fields, conditions), values, as_dict=True)
 
@@ -309,14 +309,16 @@ class ReceivablePayableReport(object):
 
 		rows = []
 		for d in data:
-			rows.append(d[self.ageing_col_idx_start : self.ageing_col_idx_start+4])
-
-		if rows:
-			rows.insert(0, [[d.get("label")] for d in ageing_columns])
+			rows.append(
+				{
+					'values': d[self.ageing_col_idx_start : self.ageing_col_idx_start+4]
+				}
+			)
 
 		return {
 			"data": {
-				'labels': rows
+				'labels': [d.get("label") for d in ageing_columns],
+				'datasets': rows
 			},
 			"type": 'percentage'
 		}
