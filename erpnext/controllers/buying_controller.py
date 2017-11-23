@@ -171,7 +171,7 @@ class BuyingController(StockController):
 			for item in self.get("items"):
 				if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 					item.rm_supp_cost = 0.0
-				if item.item_code in self.sub_contracted_items:
+				if item.bom and item.item_code in self.sub_contracted_items:
 					self.update_raw_materials_supplied(item, raw_material_table)
 
 					if [item.item_code, item.name] not in parent_items:
@@ -421,3 +421,4 @@ class BuyingController(StockController):
 					frappe.throw(_("Expected Date cannot be before Transaction Date"))
 		else:
 			frappe.throw(_("Please enter Schedule Date"))
+

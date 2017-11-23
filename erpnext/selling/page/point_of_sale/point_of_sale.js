@@ -53,8 +53,6 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			() => this.setup_pos_profile(),
 			() => this.make_new_invoice(),
 			() => {
-				frappe.timeout(1);
-				this.make_items();
 				this.bind_events();
 				frappe.dom.unfreeze();
 			},
@@ -275,13 +273,24 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 					this.toggle_editing();
 					this.set_form_action();
+					this.set_primary_action_in_modal();
 				}
 			});
 		});
 	}
 
-	bind_events() {
+	set_primary_action_in_modal() {
+		this.frm.msgbox = frappe.msgprint(
+			`<a class="btn btn-primary" onclick="cur_frm.print_preview.printit(true)" style="margin-right: 5px;">
+				${__('Print')}</a>
+			<a class="btn btn-default">
+				${__('New')}</a>`
+		);
 
+		$(this.frm.msgbox.body).find('.btn-default').on('click', () => {
+			this.frm.msgbox.hide();
+			this.make_new_invoice();
+		})
 	}
 
 	setup_pos_profile() {
@@ -365,16 +374,21 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 	make_new_invoice() {
 		return frappe.run_serially([
-			() => this.make_sales_invoice_frm(),
 			() => {
-				if (this.cart) {
-					this.cart.frm = this.frm;
-					this.cart.reset();
-				} else {
-					this.make_cart();
-				}
-				this.toggle_editing(true);
-			}
+				this.make_sales_invoice_frm()
+					.then(() => this.set_pos_profile_data())
+					.then(() => {
+						if (this.cart) {
+							this.cart.frm = this.frm;
+							this.cart.reset();
+							this.items.reset_search_field();
+						} else {
+							this.make_items();
+							this.make_cart();
+						}
+						this.toggle_editing(true);
+					})
+			},
 		]);
 	}
 
@@ -401,10 +415,27 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			if(!frm.doc.company) {
 				frm.set_value('company', pos_profile.company);
 			}
-			frm.set_value('is_pos', 1);
-			frm.meta.default_print_format = 'POS Invoice';
+			frm.doc.is_pos = 1;
 			return frm;
 		}
+	}
+
+	set_pos_profile_data() {
+		return new Promise(resolve => {
+			return this.frm.call({
+				doc: this.frm.doc,
+				method: "set_missing_values",
+			}).then((r) => {
+				if(!r.exc) {
+					this.frm.script_manager.trigger("update_stock");
+					frappe.model.set_default_values(this.frm.doc);
+					this.frm.cscript.calculate_taxes_and_totals();
+					this.frm.meta.default_print_format = r.message.print_format || 'POS Invoice';
+				}
+
+				resolve();
+			})
+		})
 	}
 
 	prepare_menu() {
@@ -434,9 +465,6 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		if(this.frm.doc.docstatus !== 1) return;
 
 		this.page.set_secondary_action(__("Print"), () => {
-			if (this.pos_profile && this.pos_profile.print_format_for_online) {
-				this.frm.meta.default_print_format = this.pos_profile.print_format_for_online;
-			}
 			this.frm.print_preview.printit(true);
 		});
 
@@ -1033,7 +1061,7 @@ class POSItems {
 
 		this.get_items({search_value: search_term, item_group })
 			.then(({ items, serial_no, batch_no, barcode }) => {
-				if (search_term) {
+				if (search_term && !barcode) {
 					this.search_index[search_term] = items;
 				}
 
@@ -1306,6 +1334,16 @@ class Payment {
 		$(this.dialog.body).find('.input-with-feedback').focusin(function() {
 			me.numpad.reset_value();
 			me.fieldname = $(this).prop('dataset').fieldname;
+			if (me.frm.doc.outstanding_amount > 0 &&
+				!in_list(['write_off_amount', 'change_amount'], me.fieldname)) {
+				me.frm.doc.payments.forEach((data) => {
+					if (data.mode_of_payment == me.fieldname && !data.amount) {
+						me.dialog.set_value(me.fieldname,
+							me.frm.doc.outstanding_amount / me.frm.doc.conversion_rate);
+						return;
+					}
+				})
+			}
 		});
 	}
 

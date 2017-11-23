@@ -56,6 +56,21 @@ bill this Invoice and the period for which the contract is valid.
 ERPNext will automatically create new Invoices and mail it to the Email Addresses
 you set.
 
+#### Automatically Fetching Item Batch Numbers
+
+If you are selling an item from a [Batch](/docs/user/manual/en/stock/batch),
+ERPNext will automatically fetch a batch number for you if "Update Stock" 
+is checked. The batch number will be fetched on a First Expiring First Out 
+(FEFO) basis. This is a variant of First In First Out (FIFO) that gives 
+highest priority to the soonest to expire Items. 
+
+<img class="screenshot" alt="POS Invoice" src="/docs/assets/img/accounts/sales-invoice-fetch-batch.png">
+
+Note that if the first batch in the queue cannot satisfy the order on the invoice, 
+the next batch in the queue that can satisfy the order will be selected. If there is 
+no batch that can satisfy the order, ERPNext will cancel its attempt to automatically 
+fetch a suitable batch number.
+
 #### POS Invoices
 
 Consider a scenario where retail transaction is carried out. For e.g: A retail shop.

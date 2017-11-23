@@ -15,3 +15,4 @@ website
 using-erpnext
 regional
 customize-erpnext
+education

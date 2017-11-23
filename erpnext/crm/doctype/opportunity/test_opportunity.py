@@ -30,7 +30,7 @@ class TestOpportunity(unittest.TestCase):
 		args = {
 			"doctype": "Opportunity",
 			"contact_email":"new.opportunity@example.com",
-			"enquiry_type": "Sales",
+			"opportunity_type": "Sales",
 			"with_items": 0,
 			"transaction_date": today()
 		}
@@ -65,7 +65,7 @@ def make_opportunity(**args):
 	opp_doc = frappe.get_doc({
 		"doctype": "Opportunity",
 		"enquiry_from": args.enquiry_from or "Customer",
-		"enquiry_type": "Sales",
+		"opportunity_type": "Sales",
 		"with_items": args.with_items or 0,
 		"transaction_date": today()
 	})

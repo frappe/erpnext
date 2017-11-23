@@ -8,7 +8,9 @@ import frappe
 def execute():
 	frappe.reload_doctype('Role')
 	for dt in ("assessment", "course", "fees"):
-		frappe.reload_doc("schools", "doctype", dt)
+		# 'Schools' module changed to the 'Education'
+		# frappe.reload_doc("schools", "doctype", dt)
+		frappe.reload_doc("education", "doctype", dt)
 
 	for dt in ("domain", "has_domain", "domain_settings"):
 		frappe.reload_doc("core", "doctype", dt)

@@ -436,7 +436,8 @@ class JournalEntry(AccountsController):
 						"against_voucher": d.reference_name,
 						"remarks": self.remark,
 						"cost_center": d.cost_center,
-						"project": d.project
+						"project": d.project,
+						"due_date": d.reference_due_date
 					})
 				)
 
@@ -898,3 +899,14 @@ def get_average_exchange_rate(account):
 		exchange_rate = bank_balance_in_company_currency / bank_balance_in_account_currency
 
 	return exchange_rate
+
+
+@frappe.whitelist()
+def get_invoice_due_dates(name):
+	result = frappe.get_list(
+		doctype='GL Entry', group_by='name, due_date',
+		filters={'voucher_no': name, "ifnull(due_date, '')": ('!=', '')},
+		fields=['due_date'], distinct=True
+	)
+
+	return result

@@ -52,6 +52,7 @@
 		"frappe": true,
 		"erpnext": true,
 		"schools": true,
+		"education": true,
 
 		"$": true,
 		"jQuery": true,

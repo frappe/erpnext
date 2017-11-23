@@ -57,7 +57,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 	def get_context(self, context):
 		context.show_search=True
-		context.page_length = 6
+		context.page_length = cint(frappe.db.get_single_value('Products Settings', 'products_per_page')) or 6
 		context.search_link = '/product_search'
 
 		start = int(frappe.form_dict.start or 0)
@@ -81,24 +81,26 @@ def get_product_list_for_group(product_group=None, start=0, limit=10, search=Non
 	child_groups = ", ".join(['"' + i[0] + '"' for i in get_child_groups(product_group)])
 
 	# base query
-	query = """select name, item_name, item_code, route, image, website_image, thumbnail, item_group,
-			description, web_long_description as website_description
-		from `tabItem`
-		where show_in_website = 1
-			and disabled=0
-			and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %(today)s)
-			and (variant_of = '' or variant_of is null)
-			and (item_group in ({child_groups})
-			or name in (select parent from `tabWebsite Item Group` where item_group in ({child_groups})))
+	query = """select I.name, I.item_name, I.item_code, I.route, I.image, I.website_image, I.thumbnail, I.item_group,
+			I.description, I.web_long_description as website_description,
+			case when (S.actual_qty - S.reserved_qty) > 0 then 1 else 0 end as in_stock
+		from `tabItem` I
+		left join tabBin S on I.item_code = S.item_code and I.website_warehouse = S.warehouse
+		where I.show_in_website = 1
+			and I.disabled = 0
+			and (I.end_of_life is null or I.end_of_life='0000-00-00' or I.end_of_life > %(today)s)
+			and (I.variant_of = '' or I.variant_of is null)
+			and (I.item_group in ({child_groups})
+			or I.name in (select parent from `tabWebsite Item Group` where item_group in ({child_groups})))
 			""".format(child_groups=child_groups)
 	# search term condition
 	if search:
-		query += """ and (web_long_description like %(search)s
-				or item_name like %(search)s
-				or name like %(search)s)"""
+		query += """ and (I.web_long_description like %(search)s
+				or I.item_name like %(search)s
+				or I.name like %(search)s)"""
 		search = "%" + cstr(search) + "%"
 
-	query += """order by weightage desc, item_name, modified desc limit %s, %s""" % (start, limit)
+	query += """order by I.weightage desc, in_stock desc, I.item_name limit %s, %s""" % (start, limit)
 
 	data = frappe.db.sql(query, {"product_group": product_group,"search": search, "today": nowdate()}, as_dict=1)
 
