@@ -133,17 +133,6 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 	validate: function() {
 		set_schedule_date(this.frm);
-		this.validate_bom_for_subcontracting_items(this.frm);
-	},
-
-	validate_bom_for_subcontracting_items: function(frm){
-		if(frm.doc.is_subcontracted==="Yes") {
-			$.map(frm.doc.items, function(item){
-				if(!item.bom){
-					frappe.throw(__("BOM is not specified for subcontracting item {0} at row {1}",[item.item_code, item.idx]))
-				}
-			})
-		}
 	},
 
 	make_stock_entry: function() {
