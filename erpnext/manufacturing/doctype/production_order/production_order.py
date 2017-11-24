@@ -636,3 +636,9 @@ def stop_unstop(production_order, status):
 	pro_order.notify_update()
 
 	return pro_order.status
+
+@frappe.whitelist()
+def query_sales_order(production_item):
+	out = frappe.db.sql_list("select distinct so.name from `tabSales Order` so, `tabSales Order Item` so_item\
+		where so_item.parent=so.name and so_item.item_code='{0}'".format(production_item))
+	return out
