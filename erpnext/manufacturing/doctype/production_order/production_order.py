@@ -442,7 +442,7 @@ class ProductionOrder(Document):
 				self.append('required_items', {
 					'item_code': item.item_code,
 					'item_name': item.item_name,
- +					'description': item.description,
+					'description': item.description,
 					'required_qty': item.qty,
 					'source_warehouse': item.source_warehouse or item.default_warehouse
 				})
