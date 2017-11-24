@@ -441,6 +441,8 @@ class ProductionOrder(Document):
 			for item in sorted(item_dict.values(), key=lambda d: d['idx']):
 				self.append('required_items', {
 					'item_code': item.item_code,
+					'item_name': item.item_name,
+ +					'description': item.description,
 					'required_qty': item.qty,
 					'source_warehouse': item.source_warehouse or item.default_warehouse
 				})
