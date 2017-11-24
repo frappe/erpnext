@@ -26,13 +26,14 @@ def get_data(item_code=None, warehouse=None, item_group=None,
 	return frappe.db.sql('''
 	select
 		b.item_code, b.warehouse, b.projected_qty, b.reserved_qty,
-		b.reserved_qty_for_production, b.actual_qty, b.valuation_rate, i.item_name
+		b.reserved_qty_for_production, b.reserved_qty_for_sub_contract, b.actual_qty, b.valuation_rate, i.item_name
 	from
 		tabBin b, tabItem i
 	where
 		b.item_code = i.name
 		and
-		(b.projected_qty != 0 or b.reserved_qty != 0 or b.reserved_qty_for_production != 0 or b.actual_qty != 0)
+		(b.projected_qty != 0 or b.reserved_qty != 0 or b.reserved_qty_for_production != 0 
+		or b.reserved_qty_for_sub_contract != 0 or b.actual_qty != 0)
 		{conditions}
 	order by
 		{sort_by} {sort_order}

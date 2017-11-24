@@ -12,7 +12,7 @@ from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
 from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import validate_for_items, check_for_closed_status
-
+from erpnext.stock.utils import get_bin
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -204,6 +204,8 @@ class PurchaseOrder(BuyingController):
 		self.update_prevdoc_status()
 		self.update_requested_qty()
 		self.update_ordered_qty()
+		if self.is_subcontracted == "Yes":
+			self.update_reserved_qty_for_subcontract()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
@@ -282,6 +284,17 @@ def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=
 		item_last_purchase_rate = frappe.db.get_value("Item", item_code, "last_purchase_rate")
 		if item_last_purchase_rate:
 			return item_last_purchase_rate
+
+	def update_reserved_qty_for_subcontract(self):
+		items = list(set([d.rm_item_code for d in self.get("supplied_items")]))
+		item_wh = frappe._dict(frappe.db.sql("""select item_code, default_warehouse
+			from `tabItem` where name in ({0})""".format(", ".join(["%s"] * len(items))), items))
+
+		for d in self.supplied_items:
+			if d.rm_item_code:
+				warehouse = item_wh.get(d.rm_item_code)
+				stock_bin = get_bin(d.rm_item_code, warehouse)
+				stock_bin.update_reserved_qty_for_sub_contracting(self.name, transferred_qty=0, transaction_type = "Reserve")
 
 @frappe.whitelist()
 def close_or_unclose_purchase_orders(names, status):
