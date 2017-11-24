@@ -23,6 +23,7 @@ class Lead(SellingController):
 		load_address_and_contact(self)
 
 	def validate(self):
+		self.set_lead_name()
 		self._prev = frappe._dict({
 			"contact_date": frappe.db.get_value("Lead", self.name, "contact_date") if \
 				(not cint(self.get("__islocal"))) else None,
@@ -32,7 +33,6 @@ class Lead(SellingController):
 
 		self.set_status()
 		self.check_email_id_is_unique()
-		self.set_lead_name()
 
 		if self.email_id:
 			if not self.flags.ignore_email_validation:
