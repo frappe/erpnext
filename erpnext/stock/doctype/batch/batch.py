@@ -149,7 +149,7 @@ def get_batches(item_code, warehouse, qty=1, throw=False):
 		'select batch_id, sum(actual_qty) as qty from `tabBatch` join `tabStock Ledger Entry` '
 		'on `tabBatch`.batch_id = `tabStock Ledger Entry`.batch_no '
 		'where `tabStock Ledger Entry`.item_code = %s and  `tabStock Ledger Entry`.warehouse = %s '
-		'and `tabBatch`.expiry_date >= CURDATE() or `tabBatch`.expiry_date IS NULL '
+		'and (`tabBatch`.expiry_date >= CURDATE() or `tabBatch`.expiry_date IS NULL)'
 		'group by batch_id '
 		'order by `tabBatch`.expiry_date DESC, `tabBatch`.creation ASC',
 		(item_code, warehouse),
