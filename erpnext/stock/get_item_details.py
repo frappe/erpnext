@@ -394,7 +394,7 @@ def get_pos_profile_item_details(company, args, pos_profile=None):
 	res = frappe._dict()
 
 	if not pos_profile:
-		pos_profile = get_pos_profile(company)
+		pos_profile = get_pos_profile(company, args.get('pos_profile'))
 
 	if pos_profile:
 		for fieldname in ("income_account", "cost_center", "warehouse", "expense_account"):
@@ -408,16 +408,31 @@ def get_pos_profile_item_details(company, args, pos_profile=None):
 	return res
 
 @frappe.whitelist()
-def get_pos_profile(company):
-	pos_profile = frappe.db.sql("""select * from `tabPOS Profile` where user = %s
-		and company = %s and ifnull(disabled,0) != 1""", (frappe.session['user'], company), as_dict=1)
+def get_pos_profile(company, pos_profile=None, user=None):
+	if pos_profile:
+		return frappe.get_doc('POS Profile', pos_profile)
+
+	if not user:
+		user = frappe.session['user']
+
+	pos_profile = frappe.db.sql("""select pf.*
+		from
+			`tabPOS Profile` pf, `tabPOS Profile User` pfu
+		where
+			pfu.parent = pf.name and pfu.user = %s and pf.company = %s
+			and pf.disabled = 0 and pfu.default=1""", (user, company), as_dict=1)
 
 	if not pos_profile:
-		pos_profile = frappe.db.sql("""select * from `tabPOS Profile`
-			where ifnull(user,'') = '' and company = %s and ifnull(disabled,0) != 1""", company, as_dict=1)
+		pos_profile = frappe.db.sql("""select pf.*
+			from
+				`tabPOS Profile` pf left join `tabPOS Profile User` pfu
+			on
+				pf.name = pfu.parent
+			where
+				ifnull(pfu.user, '') = '' and pf.company = %s
+				and pf.disabled = 0""", (company), as_dict=1)
 
 	return pos_profile and pos_profile[0] or None
-
 
 def get_serial_nos_by_fifo(args):
 	if frappe.db.get_single_value("Stock Settings", "automatically_set_serial_nos_based_on_fifo"):
