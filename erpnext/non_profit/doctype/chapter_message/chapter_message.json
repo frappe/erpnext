@@ -114,7 +114,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-11-20 17:43:02.485914", 
+ "modified": "2017-11-24 12:30:33.976935", 
  "modified_by": "Administrator", 
  "module": "Non Profit", 
  "name": "Chapter Message", 
@@ -149,6 +149,7 @@
  "show_name_in_global_search": 0, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
+ "title_field": "subject", 
  "track_changes": 1, 
  "track_seen": 0
 }
