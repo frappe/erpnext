@@ -1,0 +1,16 @@
+{% extends "templates/web.html" %}
+<!-- 
+{% macro chapter_button() %}
+	<p><a href="/{{ chapter.route }}" class='btn btn-primary'>
+		Go to Chapter Page</a></p>
+{% endmacro %}
+ -->
+{% block page_content %}
+
+	{% if member_deleted %}
+		<p>You are not a member of {{ chapter.title }}!</p>
+		<p>Please signup and login to join this chapter</p>
+
+		<p><a href="/join-chapter?name={{ chapter.name }}" class='btn btn-primary'>Become Member agian</a></p>
+	{% endif %}
+{% endblock %}
