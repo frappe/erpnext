@@ -32,6 +32,7 @@ class Lead(SellingController):
 
 		self.set_status()
 		self.check_email_id_is_unique()
+		self.set_lead_name()
 
 		if self.email_id:
 			if not self.flags.ignore_email_validation:
@@ -98,6 +99,10 @@ class Lead(SellingController):
 			"status": "Lost"
 		})
 
+	def set_lead_name(self):
+		if not self.lead_name:
+			self.lead_name = self.organization_name
+
 @frappe.whitelist()
 def make_customer(source_name, target_doc=None):
 	return _make_customer(source_name, target_doc)
@@ -124,11 +129,12 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 			}
 		}}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 
+	print(doclist)
 	return doclist
 
 @frappe.whitelist()
 def make_opportunity(source_name, target_doc=None):
-	target_doc = get_mapped_doc("Lead", source_name, 
+	target_doc = get_mapped_doc("Lead", source_name,
 		{"Lead": {
 			"doctype": "Opportunity",
 			"field_map": {
