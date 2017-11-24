@@ -11,6 +11,7 @@ from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError
 from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor
 from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
+from erpnext.stock.utils import get_bin
 import json
 
 class IncorrectValuationRateError(frappe.ValidationError): pass
@@ -64,6 +65,8 @@ class StockEntry(StockController):
 		update_serial_nos_after_submit(self, "items")
 		self.update_production_order()
 		self.validate_purchase_order()
+		if self.purchase_order and self.purpose == "Subcontract":
+			self.update_purchase_order_supplied_items()
 		self.make_gl_entries()
 
 	def on_cancel(self):
@@ -802,6 +805,30 @@ class StockEntry(StockController):
 					if expiry_date:
 						if getdate(self.posting_date) > getdate(expiry_date):
 							frappe.throw(_("Batch {0} of Item {1} has expired.").format(item.batch_no, item.item_code))
+
+	def update_purchase_order_supplied_items(self):
+		materials_transferred = frappe._dict(frappe.db.sql("""
+			select
+				concat(item_code, sed.s_warehouse), sum(qty)
+			from
+				`tabStock Entry` se, `tabStock Entry Detail` sed
+			where
+				se.name = sed.parent and se.docstatus=1 and se.purpose='Subcontract'
+				and se.purchase_order= %s and ifnull(sed.s_warehouse, '') != ''
+			group by sed.item_code, sed.s_warehouse
+		""", self.purchase_order))
+		#Get PO Supplied Items Details
+		po_doc =  frappe.get_doc("Purchase Order",self.purchase_order)
+		po_supplied_items = po_doc.get("supplied_items")
+		items = list(set([d.rm_item_code for d in po_supplied_items]))
+		item_wh = frappe._dict(frappe.db.sql("""select item_code as "item_code", default_warehouse as "warehouse"
+			from tabItem where name in ({0})""".format(", ".join(["%s"] * len(items))), items))
+		#Update reserved sub contracted quantity in bin based on Supplied Item Details
+		for d in po_supplied_items:
+			warehouse = item_wh.get(d.rm_item_code)
+			transferred_qty = materials_transferred.get(d.rm_item_code + warehouse)
+			stock_bin = get_bin(d.rm_item_code, warehouse)
+			stock_bin.update_reserved_qty_for_sub_contracting(self.purchase_order, transferred_qty, transaction_type = "Transfer")
 
 @frappe.whitelist()
 def get_production_order_details(production_order):
