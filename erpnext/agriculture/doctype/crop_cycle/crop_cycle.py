@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+import ast
 
 class CropCycle(Document):
 	def validate(self):
@@ -36,3 +37,28 @@ class CropCycle(Document):
 			task.exp_start_date = frappe.utils.data.add_days(start_date, crop_task.get("start_day")-1)
 			task.exp_end_date = frappe.utils.data.add_days(start_date, crop_task.get("end_day")-1)
 			task.insert()
+
+	def reload_linked_analysis(self):
+		linked_doctypes = ['Soil Texture', 'Soil Analysis', 'Plant Analysis']
+		required_fields = ['location', 'name', 'collection_datetime']
+		output = {}
+		for doctype in linked_doctypes:
+			output[doctype] = frappe.get_all(doctype, fields=required_fields)
+		output['Land Unit'] = []
+		for land in self.linked_land_unit:
+			output['Land Unit'].append(frappe.get_doc('Land Unit', land.land_unit))
+		# for doctype, docs in output.iteritems():
+		# 	for doc in docs:
+		# 		for land in self.linked_land_unit:
+		# 			land_unit = frappe.get_doc('Land Unit', land.land_unit)
+		# 			print self.get_coordinates(doc)
+		# 			print self.get_geometry_type(land_unit)
+		# 			print self.get_coordinates(land_unit)
+		# 			print ('\n')
+		frappe.publish_realtime("List of Linked Docs", output, user=frappe.session.user)
+
+	def get_coordinates(self, doc):
+		return ast.literal_eval(doc.location).get('features')[0].get('geometry').get('coordinates')
+
+	def get_geometry_type(self, doc):
+		return ast.literal_eval(doc.location).get('features')[0].get('geometry').get('type')

@@ -4,6 +4,15 @@
 frappe.provide('agriculture');
 
 frappe.ui.form.on('Soil Texture', {
+	refresh: (frm) => {
+		let map_tools = ["a.leaflet-draw-draw-polyline",
+			"a.leaflet-draw-draw-polygon",
+			"a.leaflet-draw-draw-rectangle",
+			"a.leaflet-draw-draw-circle",
+			"a.leaflet-draw-draw-circlemarker"];
+
+		map_tools.forEach((element) => $(element).hide());
+	},
 	onload: function(frm) {
 		this.ternary_plot = new agriculture.TernaryPlot({
 			parent: frm.get_field("ternary_plot").$wrapper,
