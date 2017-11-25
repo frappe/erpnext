@@ -179,6 +179,8 @@ def get_pricing_rule_for_item(args):
 		item_details.pricing_rule_for = pricing_rule.price_or_discount
 		item_details.margin_type = pricing_rule.margin_type
 		item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
+		if not pricing_rule.currency == args.currency:
+			item_details.margin_rate_or_amount /= flt(args.conversion_rate)
 		if pricing_rule.price_or_discount == "Price":
 			item_details.update({
 				"price_list_rate": (pricing_rule.price/flt(args.conversion_rate)) * args.conversion_factor or 1.0 \
