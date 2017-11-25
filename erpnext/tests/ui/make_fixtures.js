@@ -217,6 +217,25 @@ $.extend(frappe.test_data, {
 			{price_list: '_Test Price List'},
 			{price_list_rate: 200}
 		]
+	},
+	"Payment Term": {
+		"_Test Payment Term": [
+			{payment_term_name: '_Test Payment Term'},
+			{due_date_based_on: 'Day(s) after invoice date'},
+			{invoice_portion: 100},
+			{credit_days: 0}
+		]
+	},
+	"Payment Terms Template": {
+		"_Test Payment Term Template UI": [
+			{template_name: "_Test Payment Term Template UI"},
+			{terms: [
+				[
+					{payment_term: '_Test Payment Term'},
+					{invoice_portion: 100}
+				]
+			]}
+		]
 	}
 });
 

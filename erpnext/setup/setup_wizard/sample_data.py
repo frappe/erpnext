@@ -38,7 +38,7 @@ def make_opportunity(items, customer):
 		"doctype": "Opportunity",
 		"enquiry_from": "Customer",
 		"customer": customer,
-		"enquiry_type": "Sales",
+		"opportunity_type": _("Sales"),
 		"with_items": 1
 	})
 
@@ -107,16 +107,16 @@ def make_projects(domain):
 	if domain == 'Education':
 		tasks += [
 			{
-				"title": _("Setup your School in ERPNext"),
+				"title": _("Setup your Institute in ERPNext"),
 				"start_date": current_date,
 				"end_date": frappe.utils.add_days(current_date, 1),
-				"file": "school_masters.md"
+				"file": "education_masters.md"
 			},
 			{
 				"title": "Setup Master Data",
 				"start_date": current_date,
 				"end_date": frappe.utils.add_days(current_date, 1),
-				"file": "school_masters.md"
+				"file": "education_masters.md"
 			}]
 
 	else:

@@ -11,7 +11,7 @@ from frappe.model.document import Document
 
 class POSProfile(Document):
 	def validate(self):
-		self.check_for_duplicate()
+		# self.check_for_duplicate()
 		self.validate_all_link_fields()
 		self.validate_duplicate_groups()
 		self.check_default_payment()
@@ -94,3 +94,45 @@ class POSProfile(Document):
 @frappe.whitelist()
 def get_series():
 	return frappe.get_meta("Sales Invoice").get_field("naming_series").options or ""
+
+@frappe.whitelist()
+def get_pos_profiles_for_user(user=None):
+	out = []
+	if not user:
+		user = frappe.session.user
+
+	res = frappe.db.sql('''
+		select
+			parent
+		from
+			`tabPOS Profile User`
+		where
+			user = %s
+	''', (user), as_dict=1)
+
+	if not res:
+		company = frappe.defaults.get_user_default('company')
+		res = frappe.db.sql('''
+			select
+				pos_profile_name
+			from
+				`tabPOS Profile`
+			where
+				company = %s
+		''', (company), as_dict=1)
+
+		out = [r.pos_profile_name for r in res]
+
+		return out
+
+	for r in res:
+		name = frappe.db.get_value('POS Profile', r.parent, 'pos_profile_name')
+		out.append(name)
+
+	return out
+
+@frappe.whitelist()
+def get_pos_profile(pos_profile_name=None):
+	if not pos_profile_name: return
+	name = frappe.db.get_value('POS Profile', { 'pos_profile_name': pos_profile_name })
+	return frappe.get_doc('POS Profile', name)

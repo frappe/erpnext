@@ -421,3 +421,4 @@ class BuyingController(StockController):
 					frappe.throw(_("Expected Date cannot be before Transaction Date"))
 		else:
 			frappe.throw(_("Please enter Schedule Date"))
+

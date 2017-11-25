@@ -10,8 +10,14 @@ def execute():
 	if frappe.db.exists("DocType", "Examination"):
 		frappe.rename_doc("DocType", "Examination", "Assessment")
 		frappe.rename_doc("DocType", "Examination Result", "Assessment Result")
-		frappe.reload_doc("schools", "doctype", "assessment")
-		frappe.reload_doc("schools", "doctype", "assessment_result")
+
+		# 'Schools' module changed to the 'Education'
+		# frappe.reload_doc("schools", "doctype", "assessment")
+		# frappe.reload_doc("schools", "doctype", "assessment_result")
+
+		frappe.reload_doc("education", "doctype", "assessment")
+		frappe.reload_doc("education", "doctype", "assessment_result")
+
 		rename_field("Assessment", "exam_name", "assessment_name")
 		rename_field("Assessment", "exam_code", "assessment_code")
 	

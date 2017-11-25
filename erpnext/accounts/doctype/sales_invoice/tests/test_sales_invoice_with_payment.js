@@ -19,7 +19,8 @@ QUnit.test("test sales Invoice with payment", function(assert) {
 				{contact_person: 'Contact 1-Test Customer 1'},
 				{taxes_and_charges: 'TEST In State GST'},
 				{tc_name: 'Test Term 1'},
-				{terms: 'This is Test'}
+				{terms: 'This is Test'},
+				{payment_terms_template: '_Test Payment Term Template UI'}
 			]);
 		},
 		() => cur_frm.save(),
@@ -43,6 +44,7 @@ QUnit.test("test sales Invoice with payment", function(assert) {
 		() => { cur_frm.set_value('paid_to','Cash - '+frappe.get_abbr(frappe.defaults.get_default('Company')));},
 		() => {cur_frm.set_value('reference_no','TEST1234');},
 		() => {cur_frm.set_value('reference_date',frappe.datetime.add_days(frappe.datetime.nowdate(), 0));},
+		() => cur_frm.set_value("payment_schedule", []),
 		() => cur_frm.save(),
 		() => {
 			// get payment details

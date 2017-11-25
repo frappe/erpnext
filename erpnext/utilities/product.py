@@ -16,7 +16,7 @@ def get_qty_in_stock(item_code, item_warehouse_field):
 		warehouse = frappe.db.get_value("Item", template_item_code, item_warehouse_field)
 
 	if warehouse:
-		stock_qty = frappe.db.sql("""select actual_qty from tabBin where
+		stock_qty = frappe.db.sql("""select GREATEST(actual_qty - reserved_qty, 0) from tabBin where
 			item_code=%s and warehouse=%s""", (item_code, warehouse))
 		if stock_qty:
 			in_stock = stock_qty[0][0] > 0 and 1 or 0

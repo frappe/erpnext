@@ -170,23 +170,30 @@ def check_credit_limit(customer, company):
 			throw(_("Please contact to the user who have Sales Master Manager {0} role")
 				.format(" / " + credit_controller if credit_controller else ""))
 
-def get_customer_outstanding(customer, company):
+def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False):
 	# Outstanding based on GL Entries
-	outstanding_based_on_gle = frappe.db.sql("""select sum(debit) - sum(credit)
-		from `tabGL Entry` where party_type = 'Customer' and party = %s and company=%s""", (customer, company))
+	outstanding_based_on_gle = frappe.db.sql("""
+		select sum(debit) - sum(credit)
+		from `tabGL Entry`
+		where party_type = 'Customer' and party = %s and company=%s""", (customer, company))
 
 	outstanding_based_on_gle = flt(outstanding_based_on_gle[0][0]) if outstanding_based_on_gle else 0
 
 	# Outstanding based on Sales Order
-	outstanding_based_on_so = frappe.db.sql("""
-		select sum(base_grand_total*(100 - per_billed)/100)
-		from `tabSales Order`
-		where customer=%s and docstatus = 1 and company=%s
-		and per_billed < 100 and status != 'Closed'""", (customer, company))
+	outstanding_based_on_so = 0.0
 
-	outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0.0
+	# if credit limit check is bypassed at sales order level,
+	# we should not consider outstanding Sales Orders, when customer credit balance report is run
+	if not ignore_outstanding_sales_order:
+		outstanding_based_on_so = frappe.db.sql("""
+			select sum(base_grand_total*(100 - per_billed)/100)
+			from `tabSales Order`
+			where customer=%s and docstatus = 1 and company=%s
+			and per_billed < 100 and status != 'Closed'""", (customer, company))
 
-	# Outstanding based on Delivery Note
+		outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0.0
+
+	# Outstanding based on Delivery Note, which are not created against Sales Order
 	unmarked_delivery_note_items = frappe.db.sql("""select
 			dn_item.name, dn_item.amount, dn.base_net_total, dn.base_grand_total
 		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
@@ -215,7 +222,8 @@ def get_credit_limit(customer, company):
 	credit_limit = None
 
 	if customer:
-		credit_limit, customer_group = frappe.db.get_value("Customer", customer, ["credit_limit", "customer_group"])
+		credit_limit, customer_group = frappe.db.get_value("Customer",
+			customer, ["credit_limit", "customer_group"])
 
 		if not credit_limit:
 			credit_limit = frappe.db.get_value("Customer Group", customer_group, "credit_limit")

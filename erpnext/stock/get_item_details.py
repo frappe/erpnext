@@ -11,6 +11,7 @@ from erpnext.setup.utils import get_exchange_rate
 from frappe.model.meta import get_field_precision
 from erpnext.stock.doctype.batch.batch import get_batch_no
 
+
 @frappe.whitelist()
 def get_item_details(args):
 	"""
@@ -84,7 +85,6 @@ def get_item_details(args):
 		if out.has_batch_no and not args.get("batch_no"):
 			out.batch_no = get_batch_no(out.item_code, out.warehouse, out.qty)
 
-
 	if args.transaction_date and item.lead_time_days:
 		out.schedule_date = out.lead_time_date = add_days(args.transaction_date,
 			item.lead_time_days)
@@ -113,6 +113,7 @@ def process_args(args):
 	set_transaction_type(args)
 	return args
 
+
 @frappe.whitelist()
 def get_item_code(barcode=None, serial_no=None):
 	if barcode:
@@ -126,6 +127,7 @@ def get_item_code(barcode=None, serial_no=None):
 
 	return item_code
 
+
 def validate_item_details(args, item):
 	if not args.company:
 		throw(_("Please specify Company"))
@@ -133,14 +135,52 @@ def validate_item_details(args, item):
 	from erpnext.stock.doctype.item.item import validate_end_of_life
 	validate_end_of_life(item.name, item.end_of_life, item.disabled)
 
-	if args.transaction_type=="selling" and cint(item.has_variants):
+	if args.transaction_type == "selling" and cint(item.has_variants):
 		throw(_("Item {0} is a template, please select one of its variants").format(item.name))
 
-	elif args.transaction_type=="buying" and args.doctype != "Material Request":
+	elif args.transaction_type == "buying" and args.doctype != "Material Request":
 		if args.get("is_subcontracted") == "Yes" and item.is_sub_contracted_item != 1:
 			throw(_("Item {0} must be a Sub-contracted Item").format(item.name))
 
+
 def get_basic_details(args, item):
+	"""
+	:param args: {
+			"item_code": "",
+			"warehouse": None,
+			"customer": "",
+			"conversion_rate": 1.0,
+			"selling_price_list": None,
+			"price_list_currency": None,
+			"plc_conversion_rate": 1.0,
+			"doctype": "",
+			"name": "",
+			"supplier": None,
+			"transaction_date": None,
+			"conversion_rate": 1.0,
+			"buying_price_list": None,
+			"is_subcontracted": "Yes" / "No",
+			"ignore_pricing_rule": 0/1
+			"project": "",
+			barcode: "",
+			serial_no: "",
+			warehouse: "",
+			currency: "",
+			update_stock: "",
+			price_list: "",
+			company: "",
+			order_type: "",
+			is_pos: "",
+			ignore_pricing_rule: "",
+			project: "",
+			qty: "",
+			stock_qty: "",
+			conversion_factor: ""
+		}
+	:param item: `item_code` of Item object
+	:return: frappe._dict
+	"""
+
 	if not item:
 		item = frappe.get_doc("Item", args.get("item_code"))
 
@@ -150,15 +190,21 @@ def get_basic_details(args, item):
 	from frappe.defaults import get_user_default_as_list
 	user_default_warehouse_list = get_user_default_as_list('Warehouse')
 	user_default_warehouse = user_default_warehouse_list[0] \
-		if len(user_default_warehouse_list)==1 else ""
+		if len(user_default_warehouse_list) == 1 else ""
 
 	warehouse = user_default_warehouse or item.default_warehouse or args.warehouse
+
+	material_request_type = ''
+	if args.get('doctype') == "Material Request":
+		material_request_type = frappe.db.get_value('Material Request',
+			args.get('name'), 'material_request_type')
 
 	#Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
 	if not args.uom:
 		if args.get('doctype') in ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']:
 			args.uom = item.sales_uom if item.sales_uom else item.stock_uom
-		elif args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']:
+		elif (args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']) or \
+			(args.get('doctype') == 'Material Request' and material_request_type == 'Purchase'):
 			args.uom = item.purchase_uom if item.purchase_uom else item.stock_uom
 		else:
 			args.uom = item.stock_uom
@@ -201,7 +247,7 @@ def get_basic_details(args, item):
 		out.conversion_factor = 1.0
 	else:
 		out.conversion_factor = args.conversion_factor or \
-			get_conversion_factor(item.item_code, args.uom).get("conversion_factor")  or 1.0
+			get_conversion_factor(item.item_code, args.uom).get("conversion_factor") or 1.0
 
 	args.conversion_factor = out.conversion_factor
 	out.stock_qty = out.qty * out.conversion_factor
@@ -220,6 +266,7 @@ def get_basic_details(args, item):
 		out[fieldname] = item.get(fieldname)
 
 	return out
+
 
 def get_default_income_account(args, item):
 	return (item.income_account

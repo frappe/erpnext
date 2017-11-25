@@ -18,7 +18,8 @@ QUnit.test("test sales order", function(assert) {
 				]},
 				{customer_address: 'Test1-Billing'},
 				{shipping_address_name: 'Test1-Shipping'},
-				{contact_person: 'Contact 1-Test Customer 1'}
+				{contact_person: 'Contact 1-Test Customer 1'},
+				{payment_terms_template: '_Test Payment Term Template UI'}
 			]);
 		},
 		() => cur_frm.save(),
