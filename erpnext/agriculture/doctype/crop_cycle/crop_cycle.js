@@ -13,20 +13,18 @@ frappe.ui.form.on('Crop Cycle', {
 			output['Land Unit'].forEach( (land_doc) => {
 				analysis_doctypes.forEach( (doctype) => {
 					output[doctype].forEach( (analysis_doc) => {
-						// console.log(JSON.parse(analysis_doc.location).features[0].geometry.coordinates);
-						// console.log(JSON.parse(land_doc.location).features[0].geometry.coordinates[0]);
 						let point_to_be_tested = JSON.parse(analysis_doc.location).features[0].geometry.coordinates;
 						let poly_of_land = JSON.parse(land_doc.location).features[0].geometry.coordinates[0];
 						if (test(point_to_be_tested, poly_of_land)){
-							let d = frm.add_child(analysis_doctypes_docs[analysis_doctypes.indexOf(doctype)]);
-							d[analysis_doctypes_docs[analysis_doctypes.indexOf(doctype)]] = analysis_doc.name;
-							console.log(test(point_to_be_tested, poly_of_land));
-							console.log(analysis_doctypes_docs[analysis_doctypes.indexOf(doctype)]);
-							console.log(analysis_doc.name);
-							console.log('\n\n');
+							frm.call('append_to_child', {
+								child_table_name: analysis_doctypes_docs[analysis_doctypes.indexOf(doctype)],
+								doc_name: analysis_doc.name
+							});
+							// let d = frm.add_child(analysis_doctypes_docs[analysis_doctypes.indexOf(doctype)]);
+							// d[analysis_doctypes_docs[analysis_doctypes.indexOf(doctype)]] = analysis_doc.name;
+							// frm.refresh_field(analysis_doctypes_docs[analysis_doctypes.indexOf(doctype)]);
 						}
 					});
-					frm.refresh_field(analysis_doctypes_docs[analysis_doctypes.indexOf(doctype)]);
 				});
 			});
 		});
