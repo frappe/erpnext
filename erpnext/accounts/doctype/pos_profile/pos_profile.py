@@ -19,7 +19,7 @@ class POSProfile(Document):
 
 	def check_for_duplicate(self):
 		res = frappe.db.sql("""select name, user from `tabPOS Profile`
-			where ifnull(user, '') = %s and name != %s and company = %s""",
+			where ifnull(user, '') = %s and name != %s and company = %s and ifnull(disabled, 0) != 1""",
 			(self.user, self.name, self.company))
 		if res:
 			if res[0][1]:
