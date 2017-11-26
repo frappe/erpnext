@@ -71,6 +71,7 @@ jobs:
       script:
         - bench --verbose run-setup-wizard-ui-test
         - bench execute erpnext.setup.utils.enable_all_roles_and_domains
+        - bench run-ui-tests --app erpnext --test erpnext/agriculture/doctype/land_unit/test_land_unit.js
         - bench run-ui-tests --app erpnext --test erpnext/agriculture/doctype/fertilizer/test_fertilizer.js
         - bench run-ui-tests --app erpnext --test erpnext/agriculture/doctype/water_analysis/test_water_analysis.js
         - bench run-ui-tests --app erpnext --test erpnext/agriculture/doctype/disease/test_disease.js
