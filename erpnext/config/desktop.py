@@ -194,12 +194,12 @@ def get_data():
 			"type": "list"
 		},
 		{
-			"module_name": "Student Attendance",
-			"color": "#3aacba",
+			"module_name": "Student Attendance Tool",
+			"color": "#C0392B",
 			"icon": "octicon octicon-checklist",
-			"label": _("Student Attendance"),
-			"link": "List/Student Attendance",
-			"_doctype": "Student Attendance",
+			"label": _("Student Attendance Tool"),
+			"link": "List/Student Attendance Tool",
+			"_doctype": "Student Attendance Tool",
 			"type": "list"
 		},
 		{
@@ -257,11 +257,11 @@ def get_data():
 			"type": "list"
 		},
 		{
-			"module_name": "Schools",
-			"color": "#DE2B37",
+			"module_name": "Education",
+			"color": "#428B46",
 			"icon": "octicon octicon-mortar-board",
 			"type": "module",
-			"label": _("Schools")
+			"label": _("Education")
 		},
 		{
 			"module_name": "Healthcare",

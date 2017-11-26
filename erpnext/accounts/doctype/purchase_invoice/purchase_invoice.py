@@ -95,7 +95,7 @@ class PurchaseInvoice(BuyingController):
 		if not self.credit_to:
 			self.credit_to = get_party_account("Supplier", self.supplier, self.company)
 		if not self.due_date:
-			self.due_date = get_due_date(self.posting_date, "Supplier", self.supplier, self.company)
+			self.due_date = get_due_date(self.posting_date, "Supplier", self.supplier)
 
 		super(PurchaseInvoice, self).set_missing_values(for_validate)
 
@@ -362,7 +362,27 @@ class PurchaseInvoice(BuyingController):
 
 	def make_supplier_gl_entry(self, gl_entries):
 		grand_total = self.rounded_total or self.grand_total
-		if grand_total:
+		if self.get("payment_schedule"):
+			for d in self.get("payment_schedule"):
+				payment_amount_in_company_currency = flt(d.payment_amount * self.conversion_rate,
+					d.precision("payment_amount"))
+
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": self.credit_to,
+						"party_type": "Supplier",
+						"party": self.supplier,
+						"due_date": d.due_date,
+						"against": self.against_expense_account,
+						"credit": payment_amount_in_company_currency,
+						"credit_in_account_currency": payment_amount_in_company_currency \
+							if self.party_account_currency==self.company_currency else d.payment_amount,
+						"against_voucher": self.return_against if cint(self.is_return) else self.name,
+						"against_voucher_type": self.doctype
+					}, self.party_account_currency)
+				)
+
+		elif grand_total:
 			# Didnot use base_grand_total to book rounding loss gle
 			grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
 				self.precision("grand_total"))

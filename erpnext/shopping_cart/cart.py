@@ -12,7 +12,9 @@ from frappe.utils.nestedset import get_root_of
 from erpnext.accounts.utils import get_account_name
 from erpnext.utilities.product import get_qty_in_stock
 
-class WebsitePriceListMissingError(frappe.ValidationError): pass
+
+class WebsitePriceListMissingError(frappe.ValidationError):
+	pass
 
 def set_cart_count(quotation=None):
 	if cint(frappe.db.get_singles_value("Shopping Cart Settings", "enabled")):
@@ -104,6 +106,7 @@ def update_cart(item_code, qty, with_items=False):
 	apply_cart_settings(quotation=quotation)
 
 	quotation.flags.ignore_permissions = True
+	quotation.payment_schedule = []
 	if not empty_card:
 		quotation.save()
 	else:
@@ -179,6 +182,7 @@ def decorate_quotation_doc(doc):
 
 	return doc
 
+
 def _get_cart_quotation(party=None):
 	'''Return the open Quotation of type "Shopping Cart" or make a new one'''
 	if not party:
@@ -200,6 +204,7 @@ def _get_cart_quotation(party=None):
 			"status": "Draft",
 			"docstatus": 0,
 			"__islocal": 1,
+			"payment_terms_template": "_Test Payment Term Template",
 			(party.doctype.lower()): party.name
 		})
 

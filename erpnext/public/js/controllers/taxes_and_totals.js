@@ -443,16 +443,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				this.frm.doc.currency, precision("rounded_total"));
 			this.frm.doc.rounding_adjustment += flt(this.frm.doc.rounded_total - this.frm.doc.grand_total,
 				precision("rounding_adjustment"));
-		}
-		if(frappe.meta.get_docfield(this.frm.doc.doctype, "base_rounded_total", this.frm.doc.name)) {
-			var company_currency = this.get_company_currency();
 
-			this.frm.doc.base_rounded_total =
-				round_based_on_smallest_currency_fraction(this.frm.doc.base_grand_total,
-					company_currency, precision("base_rounded_total"));
-
-			this.frm.doc.base_rounding_adjustment += flt(this.frm.doc.base_rounded_total -
-				this.frm.doc.base_grand_total, precision("rounding_adjustment"));
+			this.set_in_company_currency(this.frm.doc, ["rounding_adjustment", "rounded_total"]);
 		}
 	},
 

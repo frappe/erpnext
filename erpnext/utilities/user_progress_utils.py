@@ -117,7 +117,7 @@ def make_item_price(item, price_list_name, item_price):
 		"price_list_rate": item_price
 	}).insert()
 
-# Schools
+# Education
 @frappe.whitelist()
 def create_program(args_data):
 	args = json.loads(args_data)

@@ -3,8 +3,9 @@
 from __future__ import unicode_literals
 
 import frappe
+
 import unittest, copy, time
-from frappe.utils import nowdate, add_days, flt, cint
+from frappe.utils import nowdate, add_days, flt, getdate, cint
 from frappe.model.dynamic_links import get_dynamic_link_map
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unlink_payment_on_cancel_of_invoice
@@ -57,6 +58,13 @@ class TestSalesInvoice(unittest.TestCase):
 		si.naming_series = 'TEST-'
 
 		self.assertRaises(frappe.CannotChangeConstantError, si.save)
+
+	def test_add_terms_after_save(self):
+		si = frappe.copy_doc(test_records[2])
+		si.insert()
+
+		self.assertTrue(si.payment_schedule)
+		self.assertEqual(getdate(si.payment_schedule[0].due_date), getdate(si.due_date))
 
 	def test_sales_invoice_calculation_base_currency(self):
 		si = frappe.copy_doc(test_records[2])
@@ -199,6 +207,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# additional discount
 		si.discount_amount = 100
 		si.apply_discount_on = 'Net Total'
+		si.payment_schedule = []
 
 		si.save()
 
@@ -211,6 +220,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# additional discount on grand total
 		si.discount_amount = 100
 		si.apply_discount_on = 'Grand Total'
+		si.payment_schedule = []
 
 		si.save()
 
@@ -932,20 +942,6 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertEquals(si.get("items")[0].serial_no, dn.get("items")[0].serial_no)
 
-	def test_invoice_due_date_against_customers_credit_days(self):
-		# set customer's credit days
-		frappe.db.set_value("Customer", "_Test Customer", "credit_days_based_on", "Fixed Days")
-		frappe.db.set_value("Customer", "_Test Customer", "credit_days", 10)
-
-		si = create_sales_invoice()
-		self.assertEqual(si.due_date, add_days(nowdate(), 10))
-
-		# set customer's credit days is last day of the next month
-		frappe.db.set_value("Customer", "_Test Customer", "credit_days_based_on", "Last Day of the Next Month")
-
-		si1 = create_sales_invoice(posting_date="2015-07-05")
-		self.assertEqual(si1.due_date, "2015-08-31")
-
 	def test_return_sales_invoice(self):
 		set_perpetual_inventory()
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
@@ -1325,6 +1321,40 @@ class TestSalesInvoice(unittest.TestCase):
 		})
 		si.insert()
 		return si
+	
+	def test_gl_entry_based_on_payment_schedule(self):
+		si = create_sales_invoice(do_not_save=True, customer="_Test Customer P")
+		si.append("payment_schedule", {
+			"due_date": add_days(nowdate(), 15),
+			"payment_amount": 20,
+			"invoice_portion": 20.00
+		})
+		si.append("payment_schedule", {
+			"due_date": add_days(nowdate(), 45),
+			"payment_amount": 80,
+			"invoice_portion": 80.00
+		})
+		
+		si.save()
+		si.submit()
+		
+		gl_entries = frappe.db.sql("""select account, debit, credit, due_date
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc, debit asc""", si.name, as_dict=1)
+		self.assertTrue(gl_entries)
+
+		expected_gl_entries = sorted([
+			[si.debit_to, 20.0, 0.0, add_days(nowdate(), 15)],
+			[si.debit_to, 80.0, 0.0, add_days(nowdate(), 45)],
+			["Sales - _TC", 0.0, 100.0, None]
+		])
+
+		for i, gle in enumerate(sorted(gl_entries, key=lambda gle: gle.account)):
+			self.assertEquals(expected_gl_entries[i][0], gle.account)
+			self.assertEquals(expected_gl_entries[i][1], gle.debit)
+			self.assertEquals(expected_gl_entries[i][2], gle.credit)
+			self.assertEquals(getdate(expected_gl_entries[i][3]), getdate(gle.due_date))
+
 
 	def test_company_monthly_sales(self):
 		existing_current_month_sales = frappe.db.get_value("Company", "_Test Company", "total_monthly_sales")
@@ -1404,6 +1434,20 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(si.total_taxes_and_charges, 577.05)
 		self.assertEquals(si.grand_total, 1827.05)		
 
+	def test_create_invoice_without_terms(self):
+		si = create_sales_invoice(do_not_save=1)
+		self.assertFalse(si.get('payment_schedule'))
+
+		si.insert()
+		self.assertTrue(si.get('payment_schedule'))
+
+	def test_duplicate_due_date_in_terms(self):
+		si = create_sales_invoice(do_not_save=1)
+		si.append('payment_schedule', dict(due_date='2017-01-01', invoice_portion=50.00, payment_amount=50))
+		si.append('payment_schedule', dict(due_date='2017-01-01', invoice_portion=50.00, payment_amount=50))
+
+		self.assertRaises(frappe.ValidationError, si.insert)
+
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
 	args = frappe._dict(args)
@@ -1437,6 +1481,11 @@ def create_sales_invoice(**args):
 		si.insert()
 		if not args.do_not_submit:
 			si.submit()
+		else:
+			si.payment_schedule = []
+	else:
+		si.payment_schedule = []
+
 	return si
 
 test_dependencies = ["Journal Entry", "Contact", "Address"]
