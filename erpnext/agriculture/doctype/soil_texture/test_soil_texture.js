@@ -12,8 +12,8 @@ QUnit.test("test: Soil Texture", function (assert) {
 		// insert a new Soil Texture
 		() => frappe.tests.make('Soil Texture', [
 			// values to be set
-			{geolocation: '{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[72.882185,19.076395]}}]}'},
-			{date: '2017-11-08'},
+			{location: '{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[72.882185,19.076395]}}]}'},
+			{collection_datetime: '2017-11-08'},
 			{clay_composition: 20},
 			{sand_composition: 30}
 		]),

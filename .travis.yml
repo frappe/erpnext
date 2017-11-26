@@ -50,6 +50,9 @@ before_script:
   - bench scheduler disable
   - bench start &
   - sleep 10
+  - chromedriver --version
+  - google-chrome --version
+  - google-chrome-stable --version
 
 jobs:
   include:
