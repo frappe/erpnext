@@ -13,7 +13,11 @@ QUnit.test("test: Crop Cycle", function (assert) {
 		() => frappe.tests.make('Crop Cycle', [
 			// values to be set
 			{title: 'Basil from seed 2017'},
-			{land_unit: 'Basil Farm'},
+			{linked_land_unit: [ 
+				[
+					{land_unit: 'Basil Farm'}
+				]
+			]},
 			{crop: 'Basil from seed'},
 			{start_date: '2017-11-11'},
 			{detected_disease: [
