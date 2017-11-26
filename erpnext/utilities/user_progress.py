@@ -140,7 +140,7 @@ def get_slide_settings():
 			]
 		),
 
-		# School slides begin
+		# Education slides begin
 		frappe._dict(
 			action_name='Add Programs',
 			domains=("Education"),
@@ -219,7 +219,7 @@ def get_slide_settings():
 			done_state_title_route=["List", "Room"],
 			help_links=[]
 		),
-		# School slides end
+		# Education slides end
 
 		frappe._dict(
 			action_name='Add Users',

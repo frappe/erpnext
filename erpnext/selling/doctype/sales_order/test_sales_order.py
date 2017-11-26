@@ -13,6 +13,7 @@ from frappe.tests.test_permissions import set_user_permission_doctypes
 from erpnext.selling.doctype.sales_order.sales_order import make_production_orders
 import json
 
+
 class TestSalesOrder(unittest.TestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
@@ -55,6 +56,32 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEquals(len(si.get("items")), 1)
 
 		si.insert()
+		si.submit()
+
+		si1 = make_sales_invoice(so.name)
+		self.assertEquals(len(si1.get("items")), 0)
+
+	def test_make_sales_invoice_with_terms(self):
+		so = make_sales_order(do_not_submit=True)
+
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, so.name)
+
+		so.update({"payment_terms_template": "_Test Payment Term Template"})
+
+		so.save()
+		so.submit()
+		si = make_sales_invoice(so.name)
+
+		self.assertEquals(len(si.get("items")), len(so.get("items")))
+		self.assertEquals(len(si.get("items")), 1)
+
+		si.insert()
+
+		self.assertEqual(si.payment_schedule[0].payment_amount, 500.0)
+		self.assertEqual(si.payment_schedule[0].due_date, so.transaction_date)
+		self.assertEqual(si.payment_schedule[1].payment_amount, 500.0)
+		self.assertEqual(si.payment_schedule[1].due_date, add_days(so.transaction_date, 30))
+
 		si.submit()
 
 		si1 = make_sales_invoice(so.name)
@@ -125,7 +152,6 @@ class TestSalesOrder(unittest.TestCase):
 		so = make_sales_order()
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty + 10)
 
-
 		dn = create_dn_against_so(so.name, 15)
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty)
 
@@ -180,7 +206,6 @@ class TestSalesOrder(unittest.TestCase):
 	def test_reserved_qty_for_partial_delivery_with_packing_list(self):
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
 		make_stock_entry(item="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=10, rate=100)
-
 
 		existing_reserved_qty_item1 = get_reserved_qty("_Test Item")
 		existing_reserved_qty_item2 = get_reserved_qty("_Test Item Home Desktop 100")
@@ -503,9 +528,38 @@ class TestSalesOrder(unittest.TestCase):
 
 		self.assertEquals(new_so.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
 		new_so.items[0].margin_rate_or_amount = 25
+		new_so.payment_schedule = []
+		new_so.save()
 		new_so.submit()
 
 		self.assertEquals(new_so.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
+
+	def test_terms_auto_added(self):
+		so = make_sales_order(do_not_save=1)
+
+		self.assertFalse(so.get('payment_schedule'))
+
+		so.insert()
+
+		self.assertTrue(so.get('payment_schedule'))
+
+	def test_terms_not_copied(self):
+		so = make_sales_order()
+		self.assertTrue(so.get('payment_schedule'))
+
+		si = make_sales_invoice(so.name)
+		self.assertFalse(si.get('payment_schedule'))
+
+	def test_terms_copied(self):
+		so = make_sales_order(do_not_copy=1, do_not_save=1)
+		so.payment_terms_template = '_Test Payment Term Template'
+		so.insert()
+		so.submit()
+		self.assertTrue(so.get('payment_schedule'))
+
+		si = make_sales_invoice(so.name)
+		si.insert()
+		self.assertTrue(si.get('payment_schedule'))
 
 	def test_make_production_order(self):
 		# Make a new Sales Order
@@ -575,6 +629,10 @@ def make_sales_order(**args):
 		so.insert()
 		if not args.do_not_submit:
 			so.submit()
+		else:
+			so.payment_schedule = []
+	else:
+		so.payment_schedule = []
 
 	return so
 

@@ -12,10 +12,11 @@ QUnit.test("test: Land Unit", function (assert) {
 		// insert a new Land Unit
 		() => frappe.tests.make('Land Unit', [
 			// values to be set
-			{key: 'value'}
+			{parent_land_unit: 'All Land Units'},
+			{land_unit_name: 'Basil Farm'}
 		]),
 		() => {
-			assert.equal(cur_frm.doc.key, 'value');
+			assert.equal(cur_frm.doc.name, 'Basil Farm');
 		},
 		() => done()
 	]);

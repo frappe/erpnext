@@ -13,15 +13,20 @@ QUnit.test("test: Crop Cycle", function (assert) {
 		() => frappe.tests.make('Crop Cycle', [
 			// values to be set
 			{title: 'Basil from seed 2017'},
-			{land_unit: 'Basil Farm'},
-			{crop: 'Basil from seed'},
-			{start_date: '2017-11-11'},
 			{detected_disease: [
 				[
-					{disease: 'Aphids'},
-					{start_date: '2017-11-21'}
+					{start_date: '2017-11-21'},
+					{disease: 'Aphids'}
 				]
-			]}
+			]},
+			{linked_land_unit: [ 
+				[
+					{land_unit: 'Basil Farm'}
+				]
+			]},
+			{crop: 'Basil from seed'},
+			{start_date: '2017-11-11'},
+			{cycle_type: 'Less than a year'}
 		]),
 		() => assert.equal(cur_frm.doc.name, 'Basil from seed 2017'),
 		() => done()
