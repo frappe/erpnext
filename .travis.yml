@@ -44,10 +44,6 @@ before_script:
 
   - cd ~/frappe-bench
   - bench get-app erpnext $TRAVIS_BUILD_DIR
-  - cd apps/frappe
-  - git remote add codingcoffee https://github.com/codingCoffee/frappe.git
-  - git checkout -b ui_test -t codingcoffee/ui_test
-  - cd ~/frappe-bench
   - bench use test_site
   - bench reinstall --yes
   - bench build
@@ -81,11 +77,7 @@ jobs:
       script:
         - bench --verbose run-setup-wizard-ui-test
         - bench execute erpnext.setup.utils.enable_all_roles_and_domains
-        - bench run-tests --doctype "Land Unit"
-        - bench run-tests --doctype "Disease"
-        - bench run-tests --doctype "Crop"
-        - bench run-tests --doctype "Crop Cycle"
-        - bench run-tests --doctype "Soil Texture"
+        - bench run-tests --doctype-list erpnext/tests/server/agriculture.txt
       env: Agriculture Server Side Test
     - # stage
       script:
