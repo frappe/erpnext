@@ -88,30 +88,44 @@ class Customer(TransactionBase):
 					address.append('links', dict(link_doctype='Customer', link_name=self.name))
 					address.save()
 
-			lead = frappe.db.get_value("Lead", self.lead_name, ["lead_name", "email_id", "phone", "mobile_no", "gender", "salutation"], as_dict=True)
+			lead = frappe.db.get_value("Lead", self.lead_name, ["organization_lead", "lead_name", "email_id", "phone", "mobile_no", "gender", "salutation"], as_dict=True)
 
 			if not lead.lead_name:
 				frappe.throw(_("Please mention the Lead Name in Lead {0}").format(self.lead_name))
 
-			lead.lead_name = lead.lead_name.split(" ")
-			lead.first_name = lead.lead_name[0]
-			lead.last_name = " ".join(lead.lead_name[1:])
+			if lead.organization_lead:
+				contact_names = frappe.get_all('Dynamic Link', filters={
+									"parenttype":"Contact",
+									"link_doctype":"Lead",
+									"link_name":self.lead_name
+								}, fields=["parent as name"])
 
-			# create contact from lead
-			contact = frappe.new_doc('Contact')
-			contact.first_name = lead.first_name
-			contact.last_name = lead.last_name
-			contact.gender = lead.gender
-			contact.salutation = lead.salutation
-			contact.email_id = lead.email_id
-			contact.phone = lead.phone
-			contact.mobile_no = lead.mobile_no
-			contact.is_primary_contact = 1
-			contact.append('links', dict(link_doctype='Customer', link_name=self.name))
-			contact.flags.ignore_permissions = self.flags.ignore_permissions
-			contact.autoname()
-			if not frappe.db.exists("Contact", contact.name):
-				contact.insert()
+				for contact_name in contact_names:
+					contact = frappe.get_doc('Contact', contact_name.get('name'))
+					if not contact.has_link('Customer', self.name):
+						contact.append('links', dict(link_doctype='Customer', link_name=self.name))
+						contact.save()
+
+			else:
+				lead.lead_name = lead.lead_name.split(" ")
+				lead.first_name = lead.lead_name[0]
+				lead.last_name = " ".join(lead.lead_name[1:])
+
+				# create contact from lead
+				contact = frappe.new_doc('Contact')
+				contact.first_name = lead.first_name
+				contact.last_name = lead.last_name
+				contact.gender = lead.gender
+				contact.salutation = lead.salutation
+				contact.email_id = lead.email_id
+				contact.phone = lead.phone
+				contact.mobile_no = lead.mobile_no
+				contact.is_primary_contact = 1
+				contact.append('links', dict(link_doctype='Customer', link_name=self.name))
+				contact.flags.ignore_permissions = self.flags.ignore_permissions
+				contact.autoname()
+				if not frappe.db.exists("Contact", contact.name):
+					contact.insert()
 
 	def validate_name_with_customer_group(self):
 		if frappe.db.exists("Customer Group", self.name):
