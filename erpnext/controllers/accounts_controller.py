@@ -908,7 +908,7 @@ def get_payment_term_details(term, posting_date=None, grand_total=None):
 		term_details.payment_term = term.payment_term
 	term_details.description = term.description
 	term_details.invoice_portion = term.invoice_portion
-	term_details.payment_amount = (term.invoice_portion * grand_total) / 100
+	term_details.payment_amount = flt(term.invoice_portion) * flt(grand_total) / 100
 	if posting_date:
 		term_details.due_date = get_due_date(posting_date, term)
 	return term_details
