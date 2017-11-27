@@ -122,8 +122,7 @@ def create_material_request(material_requests):
 				mr.update({
 					"company": company,
 					"transaction_date": nowdate(),
-					"material_request_type": "Material Transfer" if request_type=="Transfer" else request_type,
-					"schedule_date": add_days(nowdate(), cint(items[0].lead_time_days))
+					"material_request_type": "Material Transfer" if request_type=="Transfer" else request_type
 				})
 
 				for d in items:
@@ -152,6 +151,8 @@ def create_material_request(material_requests):
 						"brand": item.brand,
 					})
 
+				schedule_dates = [d.schedule_date for d in mr.items]
+				mr.schedule_date = max(schedule_dates or [nowdate()])
 				mr.insert()
 				mr.submit()
 				mr_list.append(mr)
