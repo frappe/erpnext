@@ -32,7 +32,7 @@ erpnext.setup.slides_settings = [
 		// help: __('Select the nature of your business.'),
 		onload: function (slide) {
 			slide.get_input("domains").on("change", function () {
-				frappe.setup.domains = $(this).val().split(',');
+				frappe.setup.domains = JSON.parse($(this).val());
 				frappe.wizard.refresh_slides();
 			});
 		},
