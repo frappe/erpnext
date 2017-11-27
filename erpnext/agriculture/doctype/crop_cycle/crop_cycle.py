@@ -57,8 +57,12 @@ class CropCycle(Document):
 		# 			print ('\n')
 		frappe.publish_realtime("List of Linked Docs", output, user=frappe.session.user)
 
-	def append_to_child(self, child_table_name, doc_name):
-		self.append(child_table_name, {child_table_name: doc_name})
+	def append_to_child(self, obj_to_append):
+		print obj_to_append
+		for doctype in obj_to_append:
+			for doc_name in set(obj_to_append[doctype]):
+				self.append(doctype, {doctype: doc_name})
+		self.save()
 
 	def get_coordinates(self, doc):
 		return ast.literal_eval(doc.location).get('features')[0].get('geometry').get('coordinates')
