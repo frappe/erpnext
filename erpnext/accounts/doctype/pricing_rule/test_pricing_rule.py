@@ -23,8 +23,8 @@ class TestPricingRule(unittest.TestCase):
 			"apply_on": "Item Code",
 			"item_code": "_Test Item",
 			"selling": 1,
-			"price_or_discount": "Discount Percentage",
-			"price": 0,
+			"rate_or_discount": "Discount Percentage",
+			"rate": 0,
 			"discount_percentage": 10,
 			"company": "_Test Company"
 		}
@@ -102,8 +102,8 @@ class TestPricingRule(unittest.TestCase):
 			"apply_on": "Item Code",
 			"item_code": "_Test FG Item 2",
 			"selling": 1,
-			"price_or_discount": "Discount Percentage",
-			"price": 0,
+			"rate_or_discount": "Discount Percentage",
+			"rate": 0,
 			"margin_type": "Percentage",
 			"margin_rate_or_amount": 10,
 			"company": "_Test Company"
@@ -169,8 +169,8 @@ class TestPricingRule(unittest.TestCase):
 			"apply_on": "Item Code",
 			"item_code": "_Test Variant Item",
 			"selling": 1,
-			"price_or_discount": "Discount Percentage",
-			"price": 0,
+			"rate_or_discount": "Discount Percentage",
+			"rate": 0,
 			"discount_percentage": 7.5,
 			"company": "_Test Company"
 		}).insert()
@@ -199,8 +199,8 @@ class TestPricingRule(unittest.TestCase):
 			"apply_on": "Item Code",
 			"item_code": "Test Variant PRT",
 			"selling": 1,
-			"price_or_discount": "Discount Percentage",
-			"price": 0,
+			"rate_or_discount": "Discount Percentage",
+			"rate": 0,
 			"discount_percentage": 17.5,
 			"company": "_Test Company"
 		}).insert()
@@ -217,8 +217,8 @@ class TestPricingRule(unittest.TestCase):
 			"apply_on": "Item Code",
 			"item_code": "_Test Item",
 			"selling": 1,
-			"price_or_discount": "Discount Percentage",
-			"price": 0,
+			"rate_or_discount": "Discount Percentage",
+			"rate": 0,
 			"min_qty": 5,
 			"max_qty": 7,
 			"discount_percentage": 17.5,
@@ -286,9 +286,9 @@ def make_pricing_rule(**args):
 		"buying": args.buying or 0,
 		"min_qty": args.min_qty or 0.0,
 		"max_qty": args.max_qty or 0.0,
-		"price_or_discount": args.price_or_discount or "Discount Percentage",
+		"rate_or_discount": args.rate_or_discount or "Discount Percentage",
 		"discount_percentage": args.discount_percentage or 0.0,
-		"price": args.price or 0.0,
+		"rate": args.rate or 0.0,
 		"margin_type": args.margin_type,
 		"margin_rate_or_amount": args.margin_rate_or_amount or 0.0
 	}).insert(ignore_permissions=True)
