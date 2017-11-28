@@ -84,6 +84,7 @@ def get_item_details(args):
 
 		if out.has_batch_no and not args.get("batch_no"):
 			out.batch_no = get_batch_no(out.item_code, out.warehouse, out.qty)
+			out.update(get_batch_qty(out.batch_no, out.warehouse, out.item_code))
 
 	if args.transaction_date and item.lead_time_days:
 		out.schedule_date = out.lead_time_date = add_days(args.transaction_date,
