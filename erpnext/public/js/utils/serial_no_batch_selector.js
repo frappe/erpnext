@@ -104,7 +104,8 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				this.dialog.fields_dict.batches.df.data.push({
 					'batch_no': d.batch_no,
 					'actual_qty': d.actual_qty,
-					'selected_qty': d.qty
+					'selected_qty': d.qty,
+					'available_qty': d.actual_batch_qty
 				});
 
 				this.dialog.fields_dict.batches.grid.refresh();
