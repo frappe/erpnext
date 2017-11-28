@@ -98,14 +98,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Item",
-				},
-				{
-					"type": "doctype",
-					"name": "Asset",
-				},
-				{
-					"type": "doctype",
-					"name": "Asset Category",
 				}
 			]
 		},
@@ -273,11 +265,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Period Closing Voucher",
 					"description": _("Close Balance Sheet and book Profit or Loss.")
-				},
-				{
-					"type": "doctype",
-					"name": "Asset Movement",
-					"description": _("Transfer an asset from one warehouse to another")
 				},
 				{
 					"type": "doctype",
