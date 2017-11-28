@@ -461,3 +461,6 @@ execute:frappe.delete_doc_if_exists("DocType", "Program Fee")
 erpnext.patches.v9_0.update_employee_loan_details
 erpnext.patches.v9_2.delete_healthcare_domain_default_items
 erpnext.patches.v9_2.rename_translated_domains_in_en
+erpnext.patches.v9_2.repost_reserved_qty_for_production
+erpnext.patches.v9_2.remove_company_from_patient
+erpnext.patches.v9_2.set_item_name_in_production_order
