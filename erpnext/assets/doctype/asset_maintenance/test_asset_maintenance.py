@@ -67,7 +67,8 @@ def create_asset():
 			"warehouse": "_Test Warehouse - _TC",
 			"company": "_Test Company",
 			"purchase_date": nowdate(),
-			"maintenance_required": 1
+			"maintenance_required": 1,
+			"asset_owner": "Company"
 		}).insert()
 
 def create_maintenance_team():

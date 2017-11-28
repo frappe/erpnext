@@ -11,14 +11,14 @@ from erpnext.assets.doctype.asset_maintenance.asset_maintenance import calculate
 
 class AssetMaintenanceLog(Document):
 	def validate(self):
-		# if getdate(self.due_date) > getdate(nowdate()):
-		# 	self.maintenance_status = "Overdue"
+		if getdate(self.due_date) < getdate(nowdate()):
+			self.maintenance_status = "Overdue"
 
 		if self.maintenance_status == "Completed" and not self.completion_date:
 			frappe.throw(_("Please select Completion Date for Completed Asset Maintenance Log"))
 
-		# if self.maintenance_status != "Completed" and self.completion_date:
-# 			frappe.throw(_("Please select Maintenance Status as Completed or remove Completion Date"))
+		if self.maintenance_status != "Completed" and self.completion_date:
+			frappe.throw(_("Please select Maintenance Status as Completed or remove Completion Date"))
 
 	def on_submit(self):
 		if self.maintenance_status not in ['Completed', 'Cancelled']:
@@ -37,7 +37,8 @@ class AssetMaintenanceLog(Document):
 		if self.maintenance_status == "Cancelled":
 			asset_maintenance_doc.maintenance_status = "Cancelled"
 			asset_maintenance_doc.save()
-
+		asset_maintenance_doc = frappe.get_doc('Asset Maintenance', self.asset_maintenance)
+		asset_maintenance_doc.save()
 
 @frappe.whitelist()
 def get_maintenance_tasks(doctype, txt, searchfield, start, page_len, filters):

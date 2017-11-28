@@ -23,7 +23,7 @@ For each asset create a Asset Maintenance record listing all the associated main
 <img class="screenshot" alt="Asset" src="/docs/assets/img/asset/asset_maintenance.png">
 
 ### Asset Maintenance Log
-For each task in Asset Maintenance create a Asset Maintenance Log which will have status, completion date and actions performed. Based on completion date here, next due date is calculated automatically.
+For each task in Asset Maintenance, Asset Maintenance Log is auto created to keep track of the upcoming Maintenances. It will have status, completion date and actions performed. Based on completion date here, next due date is calculated automatically and new Asset Maintenance Log is created.
 <img class="screenshot" alt="Asset" src="/docs/assets/img/asset/asset_maintenance_log.png">
 
 ### Asset Repair

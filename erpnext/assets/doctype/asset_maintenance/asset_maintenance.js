@@ -3,13 +3,15 @@
 
 frappe.ui.form.on('Asset Maintenance', {
 	setup: (frm) => {
-		frm.fields_dict["asset_maintenance_tasks"].grid.get_field("assign_to").get_query = function(){
+		frm.set_query("assign_to", "asset_maintenance_tasks", function(doc) {
 			return {
+				query: "erpnext.assets.doctype.asset_maintenance.asset_maintenance.get_team_members",
 				filters: {
-					parent: frm.doc.maintenance_team
+					maintenance_team: doc.maintenance_team
 				}
 			};
-		},
+		});
+
 		frm.set_indicator_formatter('maintenance_status',
 			function(doc) {
 				let indicator = 'blue';
