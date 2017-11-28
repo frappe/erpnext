@@ -14,15 +14,15 @@ def validate_gstin_for_india(doc, method):
 			if not p.match(doc.gstin):
 				frappe.throw(_("Invalid GSTIN or Enter NA for Unregistered"))
 
-		if not doc.gst_state:
-			if doc.state in states:
-				doc.gst_state = doc.state
+	if not doc.gst_state:
+		if doc.state in states:
+			doc.gst_state = doc.state
 
-		if doc.gst_state:
-			doc.gst_state_number = state_numbers[doc.gst_state]
-			if doc.gstin != "NA" and doc.gst_state_number != doc.gstin[:2]:
-				frappe.throw(_("First 2 digits of GSTIN should match with State number {0}")
-					.format(doc.gst_state_number))
+	if doc.gst_state:
+		doc.gst_state_number = state_numbers[doc.gst_state]
+		if doc.gstin and doc.gstin != "NA" and doc.gst_state_number != doc.gstin[:2]:
+			frappe.throw(_("First 2 digits of GSTIN should match with State number {0}")
+				.format(doc.gst_state_number))
 
 def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
 	if frappe.get_meta(item_doctype).has_field('gst_hsn_code'):
