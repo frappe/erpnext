@@ -206,7 +206,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 	select_batch_and_serial_no(item) {
 		erpnext.show_serial_batch_selector(this.frm, item, () => {
-			this.update_item_in_frm(item)
+			this.update_item_in_frm(item, 'qty', item.qty)
 				.then(() => {
 					// update cart
 					if (item.qty === 0) {
