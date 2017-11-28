@@ -1006,6 +1006,14 @@ class POSItems {
 						this.filter_items({ item_group: item_group });
 					}
 				},
+				get_query: () => {
+					return {
+						query: 'erpnext.selling.page.point_of_sale.point_of_sale.item_group_query',
+						filters: {
+							pos_profile: this.frm.doc.pos_profile
+						}
+					};
+				}
 			},
 			parent: this.wrapper.find('.item-group-field'),
 			render_input: true
@@ -1174,7 +1182,8 @@ class POSItems {
 					page_length,
 					'price_list': this.frm.doc.selling_price_list,
 					item_group,
-					search_value
+					search_value,
+					'pos_profile': this.frm.doc.pos_profile
 				}
 			}).then(r => {
 				// const { items, serial_no, batch_no } = r.message;

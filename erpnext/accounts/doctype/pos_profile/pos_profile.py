@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _
 from frappe.utils import cint, now
+from erpnext.accounts.doctype.sales_invoice.pos import get_child_nodes
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import set_account_for_mode_of_payment
 
 from frappe.model.document import Document
@@ -94,6 +95,17 @@ class POSProfile(Document):
 				frappe.defaults.set_user_default("is_pos", 1, user)
 			else:
 				frappe.defaults.set_global_default("is_pos", 1)
+
+def get_item_groups(pos_profile):
+	item_groups = []
+	pos_profile = frappe.get_doc('POS Profile', pos_profile)
+
+	if pos_profile.get('item_groups'):
+		# Get items based on the item groups defined in the POS profile
+		for data in pos_profile.get('item_groups'):
+			item_groups.extend(["'%s'"%d.name for d in get_child_nodes('Item Group', data.item_group)])
+
+	return list(set(item_groups))
 
 @frappe.whitelist()
 def get_series():
