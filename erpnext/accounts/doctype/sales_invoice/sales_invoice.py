@@ -294,21 +294,23 @@ class SalesInvoice(SellingController):
 			return
 
 		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
-		pos = get_pos_profile(self.company)
+		if not self.pos_profile:
+			pos_profile = get_pos_profile(self.company) or {}
+			self.pos_profile = pos_profile.get('name')
+
+		pos = {}
+		if self.pos_profile:
+			pos = frappe.get_doc('POS Profile', self.pos_profile)
 
 		if not self.get('payments') and not for_validate:
-			pos_profile = frappe.get_doc('POS Profile', pos.name) if pos else None
-			update_multi_mode_option(self, pos_profile)
+			update_multi_mode_option(self, pos)
 
 		if not self.account_for_change_amount:
 			self.account_for_change_amount = frappe.db.get_value('Company', self.company, 'default_cash_account')
 
 		if pos:
-			self.pos_profile = pos.name
 			if not for_validate and not self.customer:
 				self.customer = pos.customer
-				self.mode_of_payment = pos.mode_of_payment
-				# self.set_customer_defaults()
 
 			if pos.get('account_for_change_amount'):
 				self.account_for_change_amount = pos.get('account_for_change_amount')
