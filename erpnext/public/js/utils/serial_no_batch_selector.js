@@ -98,7 +98,9 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			let d = this.item;
 			if (d.has_serial_no && d.serial_no) {
 				this.dialog.set_value('serial_no', d.serial_no);
-			} else if (d.batch_no) {
+			}
+
+			if (d.batch_no) {
 				this.dialog.fields_dict.batches.df.data.push({
 					'batch_no': d.batch_no,
 					'actual_qty': d.actual_qty,
