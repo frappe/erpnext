@@ -207,7 +207,10 @@ erpnext.SerialNoBatchSelector = Class.extend({
 						label: __('Select Batch'),
 						in_list_view:1,
 						get_query: function() {
-							return {filters: {item: me.item_code }};
+							return {
+							    filters: {item: me.item_code },
+							    query: 'erpnext.controllers.queries.get_batch_numbers'
+					        };
 						},
 						onchange: function(e) {
 							let val = this.get_value();
