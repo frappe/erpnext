@@ -322,7 +322,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							project: item.project || me.frm.doc.project,
 							qty: item.qty || 1,
 							stock_qty: item.stock_qty,
-							conversion_factor: item.conversion_factor
+							conversion_factor: item.conversion_factor,
+							pos_profile: me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : ''
 						}
 					},
 
@@ -891,7 +892,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"name": me.frm.doc.name,
 			"is_return": cint(me.frm.doc.is_return),
 			"update_stock": in_list(['Sales Invoice', 'Purchase Invoice'], me.frm.doc.doctype) ? cint(me.frm.doc.update_stock) : 0,
-			"conversion_factor": me.frm.doc.conversion_factor
+			"conversion_factor": me.frm.doc.conversion_factor,
+			"pos_profile": me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : ''
 		};
 	},
 
