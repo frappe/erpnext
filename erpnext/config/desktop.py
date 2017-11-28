@@ -293,5 +293,11 @@ def get_data():
 			"_doctype": "Restaurant",
 			"link": "List/Restaurant",
 			"label": _("Restaurant")
-		}
+		},
+		{
+			"module_name": "Assets",
+			"color": "#4286f4",
+			"icon": "octicon octicon-database",
+			"type": "module"
+		},
 	]
