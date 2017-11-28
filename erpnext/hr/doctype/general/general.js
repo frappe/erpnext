@@ -3,6 +3,7 @@
 
 frappe.ui.form.on('General', {
     refresh: function(frm) {
+    	frm.disable_save();
 
     },
     onload: function(frm) {
@@ -10,7 +11,7 @@ frappe.ui.form.on('General', {
 
 
         // dummy user for testing 
-        user_id = "aa.alsulaiteen@tawari.sa"
+        // user_id = "aa.alsulaiteen@tawari.sa"
 
         frappe.call({
             method: 'frappe.client.get_value',
@@ -45,9 +46,9 @@ frappe.ui.form.on('General', {
                     frm.trigger("load_education");
                     frm.trigger("load_training");
                     frm.trigger("seminars");
-                    frm.trigger("employee_slip_name");
+                    // frm.trigger("employee_slip_name");
 
-
+                    frm.trigger("employee_slip");
                 }
             }
         });
@@ -185,6 +186,60 @@ frappe.ui.form.on('General', {
             }
         });
 
+    },employee_slip:function(){
+frappe.call({
+    method: 'erpnext.hr.doctype.general.general.get_sal_slip',
+    args: {
+        'employee': cur_frm.doc.employee,
+        'arabic_name': cur_frm.doc.arabic_name,
+    },
+    callback: function(r) {
+        if (!r.exc) {
+            // code snippet
+            console.log(r.message);
+
+            cur_frm.doc.deductions_total = r.message[0];
+            cur_frm.doc.earning_total = r.message[1];
+            cur_frm.doc.net_monthly_income = r.message[2];
+
+            for (var i = 0; i < r.message[3].length; i++) {
+                        var d = cur_frm.add_child("deductions");
+                        var item = r.message[3][i];
+                        for (var key in item) {
+                            if (!is_null(item[key])) {
+                                d[key] = item[key];
+                            }
+                        }
+                    }
+                    refresh_many(['deductions']);
+
+                    for (var i = 0; i < r.message[4].length; i++) {
+                        var d = cur_frm.add_child("earnings");
+                        var item = r.message[4][i];
+                        for (var key in item) {
+                            if (!is_null(item[key])) {
+                                d[key] = item[key];
+                            }
+                        }
+                    }
+                    refresh_many(['earnings']);
+
+            refresh_many(['deductions_total','earning_total','net_monthly_income']);
+
+
+            // frm.doc.sales_amount=r.message
+            // cur_frm.refresh_field("sales_amount");
+            // var income = frm.doc.sales_amount + frm.doc.cash_drawer;
+            // var rm_cache = frm.doc.remove_cach;
+            // var closing_cach = income - rm_cache;
+            // frm.doc.closing_cach=closing_cach
+            // cur_frm.refresh_field("closing_cach");
+
+            // alert(r.message.total);
+        }
+    }
+});
+
     },
     employee_slip_name: function() {
 
@@ -209,8 +264,8 @@ frappe.ui.form.on('General', {
 
                     refresh_many(['sal_slip','deductions_total','earning_total','net_monthly_income']);
 
-                    cur_frm.trigger("get_salay_component_deductions");
-                    cur_frm.trigger("get_salay_component_earnings");
+                    // cur_frm.trigger("get_salay_component_deductions");
+                    // cur_frm.trigger("get_salay_component_earnings");
 
 
                 }

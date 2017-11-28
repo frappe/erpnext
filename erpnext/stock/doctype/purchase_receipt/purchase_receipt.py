@@ -62,6 +62,7 @@ class PurchaseReceipt(BuyingController):
 			throw(_("Posting Date cannot be future date"))
 		if self.get("__islocal") :
 				self.title = self.get_title()
+		self.validate_assets()
 
 	def after_insert(self):
 		self.get_department()
@@ -147,9 +148,101 @@ class PurchaseReceipt(BuyingController):
 				pc_obj.check_for_closed_status('Purchase Order', d.purchase_order)
 
 	# on submit
+	def validate_assets(self):
+		purchase_controller = frappe.get_doc("Purchase Common")
+		#if Stock Item Spread 
+		the_data = []
+		deleted_item = []
+		for d in self.get("items"):
+			print ("IN")
+			if frappe.db.get_value("Item", d.item_code, "is_fixed_asset") ==1 :
+				print ("asdasdasdas ",d.qty)
+				print ("THE D ",d)
+				if d.qty >1:
+					for i in range(int(d.qty)):
+						deleted_item.append(d)
+						child = frappe.new_doc("Purchase Receipt Item")
+						child.barcode = d.barcode
+						child.item_code= d.item_code
+						child.item_name= d.item_name
+						child.description= d.description
+						child.image= d.image
+						#~ child.image_view= d.image_view
+						child.received_qty= 1
+						child.qty= 1
+						child.rejected_qty= 0
+						child.uom= d.uom
+						child.stock_uom= d.stock_uom
+						child.conversion_factor= d.conversion_factor
+						child.price_list_rate= d.price_list_rate
+						child.discount_percentage= d.discount_percentage
+						child.base_price_list_rate= d.base_price_list_rate
+						child.rate= d.rate
+						child.amount= child.rate
+						child.base_rate= d.base_rate
+						child.base_amount= child.base_rate
+						child.pricing_rule= d.pricing_rule
+						child.net_rate= d.net_rate
+						child.net_amount= d.net_amount
+						child.base_net_rate= d.base_net_rate
+						child.base_net_amount= d.base_net_amount
+						child.purchase_order= d.purchase_order
+						child.warehouse= d.warehouse
+						child.rejected_warehouse= d.rejected_warehouse
+						child.quality_inspection= d.quality_inspection
+						child.quality_inspection= d.quality_inspection
+						child.schedule_date= d.schedule_date
+						child.stock_qty= d.stock_qty
+						child.serial_no= d.serial_no
+						child.batch_no= d.batch_no
+						child.rejected_serial_no= d.rejected_serial_no
+						child.project= d.project
+						child.cost_center= d.cost_center
+						child.asset= d.asset
+						child.purchase_order_item= d.purchase_order_item
+						child.is_sample_item= d.is_sample_item
+						child.bom= d.bom
+						child.brand= d.brand
+						child.item_group= d.item_group
+						child.rm_supp_cost= d.rm_supp_cost
+						child.item_tax_amount= d.item_tax_amount
+						child.valuation_rate= d.valuation_rate
+						child.item_tax_rate= d.item_tax_rate
+						#~ child.billed_amt= d.billed_amt
+						#~ child.landed_cost_voucher_amount= d.landed_cost_voucher_amount
+						the_data.append(child)
+						print (child)
+		
+		for d in the_data:
+			#add Asset For it 
+			if not d.asset:
+				new_asset = frappe.new_doc("Asset")
+				new_asset.item_code = d.item_code
+				new_asset.asset_category = frappe.db.get_value("Item", d.item_code, "asset_category")
+				new_asset.posting_date = d.schedule_date
+				new_asset.gross_purchase_amount = d.base_net_rate
+				new_asset.warehouse = d.warehouse
+				new_asset.purchase_receipt = self.name
+				new_asset.depreciation_method = frappe.db.get_value("Asset Category", d.item_code, "depreciation_method")
+				new_asset.total_number_of_depreciations = frappe.db.get_value("Asset Category", d.item_code, "total_number_of_depreciations")
+				new_asset.frequency_of_depreciation = frappe.db.get_value("Asset Category", d.item_code, "frequency_of_depreciation")
+				new_asset.flags.ignore_permissions = True
+				new_asset.flags.ignore_mandatory = True
+				new_asset.flags.ignore_validate = True
+				new_asset.flags.ignore_links = True
+				new_asset.save()
+				d.asset = new_asset.name
+			child = self.append('items',d)
+		for d in deleted_item:
+			if d in self.get("items"):
+				self.items.remove(d)
+				 
+				 
+					 
+	# on submit
 	def on_submit(self):
 		purchase_controller = frappe.get_doc("Purchase Common")
-
+		
 		# Check for Approving Authority
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
@@ -219,14 +312,51 @@ class PurchaseReceipt(BuyingController):
 		from erpnext.accounts.general_ledger import process_gl_map
 
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
+		 
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 
 		gl_entries = []
 		warehouse_with_no_account = []
 		negative_expense_to_be_booked = 0.0
 		stock_items = self.get_stock_items()
+		fixed_asset_items = self.get_is_fixed_asset_items()
 		for d in self.get("items"):
-			if d.item_code in stock_items and flt(d.valuation_rate) and flt(d.qty):
+			if d.item_code in fixed_asset_items:
+				assets_category = frappe.db.get_value("Item", d.item_code, "asset_category")
+				fixed_asset_account = frappe.db.get_value("Asset Category Account",  filters={'parent': assets_category})
+				if fixed_asset_account:
+					# stock received but not billed
+					stock_rbnb_currency = get_account_currency(stock_rbnb)
+					print("stock_rbnb_currency",stock_rbnb_currency)
+					print("stock_rbnb",stock_rbnb)
+					ac_doc = frappe.get_doc("Asset Category Account",fixed_asset_account)
+					gl_entries.append(self.get_gl_dict({
+						"account": ac_doc.fixed_asset_account,
+						"against": stock_rbnb,
+						"cost_center": d.cost_center,
+						"project": d.project,
+						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+						"debit": flt(d.base_net_amount, d.precision("base_net_amount")),
+					},stock_rbnb_currency))
+					
+					gl_entries.append(self.get_gl_dict({
+						"account": stock_rbnb,
+						"against": ac_doc.fixed_asset_account,
+						"cost_center": d.cost_center,
+						"project": d.project,
+						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+						"credit": flt(d.base_net_amount, d.precision("base_net_amount")),
+						"credit_in_account_currency": flt(d.base_net_amount, d.precision("base_net_amount")) \
+							if stock_rbnb_currency==self.company_currency else flt(d.net_amount, d.precision("net_amount"))
+					}, stock_rbnb_currency))
+
+				else :
+					frappe.throw("Add Fixed Asset Account in Asset Category ",
+						frappe.db.get_value("Item", d.item_code, "asset_category"))
+				print ("Start 44")
+			
+			
+			elif d.item_code in stock_items and flt(d.valuation_rate) and flt(d.qty):
 				if warehouse_account.get(d.warehouse):
 					stock_value_diff = frappe.db.get_value("Stock Ledger Entry",
 						{"voucher_type": "Purchase Receipt", "voucher_no": self.name,
@@ -238,7 +368,8 @@ class PurchaseReceipt(BuyingController):
 						"against": stock_rbnb,
 						"cost_center": d.cost_center,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-						"debit": stock_value_diff
+						"debit": stock_value_diff,
+						"project": d.project
 					}, warehouse_account[d.warehouse]["account_currency"]))
 
 					# stock received but not billed
@@ -249,6 +380,7 @@ class PurchaseReceipt(BuyingController):
 						"cost_center": d.cost_center,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 						"credit": flt(d.base_net_amount, d.precision("base_net_amount")),
+						"project": d.project,
 						"credit_in_account_currency": flt(d.base_net_amount, d.precision("base_net_amount")) \
 							if stock_rbnb_currency==self.company_currency else flt(d.net_amount, d.precision("net_amount"))
 					}, stock_rbnb_currency))
@@ -273,7 +405,8 @@ class PurchaseReceipt(BuyingController):
 							"against": warehouse_account[d.warehouse]["name"],
 							"cost_center": d.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"credit": flt(d.rm_supp_cost)
+							"credit": flt(d.rm_supp_cost),
+							"project": d.project
 						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
 
 					# divisional loss adjustment
