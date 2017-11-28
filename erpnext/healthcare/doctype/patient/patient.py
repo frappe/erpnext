@@ -72,8 +72,6 @@ class Patient(Document):
 			company = frappe.defaults.get_user_default('company')
 			if not company:
 				company = frappe.db.get_value("Global Defaults", None, "default_company")
-			if not company:
-				frappe.throw(_("Please set Default Company in User or Global Defaults"))
 			sales_invoice = make_invoice(self.name, company)
 			sales_invoice.save(ignore_permissions=True)
 			return {'invoice': sales_invoice.name}
