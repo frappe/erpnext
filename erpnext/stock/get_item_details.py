@@ -242,7 +242,9 @@ def get_basic_details(args, item):
 		"supplier": item.default_supplier,
 		"update_stock": args.get("update_stock") if args.get('doctype') in ['Sales Invoice', 'Purchase Invoice'] else 0,
 		"delivered_by_supplier": item.delivered_by_supplier if args.get("doctype") in ["Sales Order", "Sales Invoice"] else 0,
-		"is_fixed_asset": item.is_fixed_asset
+		"is_fixed_asset": item.is_fixed_asset,
+		"weight_per_unit":item.weight_per_unit,
+		"weight_uom":item.weight_uom,
 	})
 
 	# calculate conversion factor
