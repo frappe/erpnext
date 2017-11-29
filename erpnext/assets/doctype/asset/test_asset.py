@@ -246,6 +246,7 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(gle, expected_gle)
 
 		si.cancel()
+		frappe.delete_doc("Sales Invoice", si.name)
 
 		self.assertEqual(frappe.db.get_value("Asset", "Macbook Pro 1", "status"), "Partially Depreciated")
 
@@ -293,7 +294,8 @@ def create_asset():
 		"next_depreciation_date": "2020-12-31",
 		"gross_purchase_amount": 100000,
 		"expected_value_after_useful_life": 10000,
-		"warehouse": "_Test Warehouse - _TC"
+		"warehouse": "_Test Warehouse - _TC",
+		"asset_owner": "Company"
 	})
 	try:
 		asset.save()
