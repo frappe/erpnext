@@ -367,6 +367,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			callback: function(r) {
 				if(r.message) {
 					frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message);
+				} else {
+				    frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message);
 				}
 			}
 		});
