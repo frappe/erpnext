@@ -376,7 +376,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					this.frm.script_manager.trigger("update_stock");
 					frappe.model.set_default_values(this.frm.doc);
 					this.frm.cscript.calculate_taxes_and_totals();
-					this.frm.meta.default_print_format = r.message.print_format || 'POS Invoice';
+					this.frm.meta.default_print_format = r.message ? r.message.print_format : 'POS Invoice';
 				}
 
 				resolve();
