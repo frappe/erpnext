@@ -168,7 +168,10 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				value = item.serial_no + '\n'+ value;
 			}
 
-			if(field === 'qty' && (item.serial_no || item.batch_no)) {
+            // if actual_batch_qty and actual_qty if there is only one batch. In such
+            // a case, no point showing the dialog
+			if(field === 'qty' && (item.serial_no || item.batch_no)
+			    && (item.actual_batch_qty != item.actual_qty)) {
 				this.select_batch_and_serial_no(item);
 			} else {
 				this.update_item_in_frm(item, field, value)
@@ -192,7 +195,10 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			.trigger('item_code', item.doctype, item.name)
 			.then(() => {
 				const show_dialog = item.has_serial_no || item.has_batch_no;
-				if (show_dialog && field == 'qty') {
+
+                // if actual_batch_qty and actual_qty if then there is only one batch. In such
+                // a case, no point showing the dialog
+				if (show_dialog && field == 'qty' && (item.actual_batch_qty != item.actual_qty)) {
 					// check has serial no/batch no and update cart
 					this.select_batch_and_serial_no(item);
 				} else {
