@@ -875,6 +875,12 @@ def move_sample_to_retention_warehouse(company, items):
 		#Get PO Supplied Items Details
 		po_doc =  frappe.get_doc("Purchase Order",self.purchase_order)
 		po_supplied_items = po_doc.get("supplied_items")
+		#Validate source warehouse is same as reserved warehouse
+		for item in self.get("items"):
+			if item.s_warehouse:
+				for d in po_supplied_items:
+					if item.item_code == d.rm_item_code and item.s_warehouse != d.reserve_warehouse:
+						frappe.throw(_("In case of Sub Contract Stock Entry, Source Warehouse: {0} should match with Reserved Warehouse: {1} on PO").format(item.s_warehouse,d.reserve_warehouse))
 		#Update reserved sub contracted quantity in bin based on Supplied Item Details
 		for d in po_supplied_items:
 			stock_bin = get_bin(d.rm_item_code, d.reserve_warehouse)
