@@ -2,6 +2,34 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Delivery Trip', {
+	setup: function(frm) {
+		frm.set_query("address", "delivery_stops", function(doc, cdt, cdn) {
+			var row = locals[cdt][cdn];
+			if (row.customer) {
+				return {
+					query: 'frappe.contacts.doctype.address.address.address_query',
+					filters: {
+						link_doctype: "Customer",
+						link_name: row.customer
+					}
+				};
+			}
+		})
+
+		frm.set_query("contact", "delivery_stops", function(doc, cdt, cdn) {
+			var row = locals[cdt][cdn];
+			if (row.customer) {
+				return {
+					query: 'frappe.contacts.doctype.contact.contact.contact_query',
+					filters: {
+						link_doctype: "Customer",
+						link_name: row.customer
+					}
+				};
+			}
+		})
+	},
+
 	refresh: function (frm) {
 		if (frm.doc.docstatus == 1 && frm.doc.delivery_stops.length > 0) {
 			frm.add_custom_button(__("Notify Customers via Email"), function () {
@@ -9,6 +37,7 @@ frappe.ui.form.on('Delivery Trip', {
 			});
 		}
 	},
+
 	calculate_arrival_time: function (frm) {
 		frappe.call({
 			method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.calculate_time_matrix',
@@ -19,13 +48,14 @@ frappe.ui.form.on('Delivery Trip', {
 			},
 			callback: function (r) {
 				if (r.message.error) {
-					frappe.throw(__("Malformatted address for " + r.message.error.destination.address + ", please fix to continue."));
-					return;
+					frappe.throw(__("Malformatted address for {0}, please fix to continue.",
+						[r.message.error.destination.address]));
 				}
 				frm.reload_doc();
 			}
 		});
 	},
+
 	notify_customers: function (frm) {
 		var owner_email = frm.doc.owner == "Administrator"
 			? frappe.user_info("Administrator").email
@@ -60,74 +90,62 @@ frappe.ui.form.on('Delivery Trip', {
 	}
 });
 
-cur_frm.fields_dict['delivery_stops'].grid.get_field("address").get_query = function (doc, cdt, cdn) {
-	var row = locals[cdt][cdn];
-	if (row.customer) {
-		return {
-			query: 'frappe.contacts.doctype.address.address.address_query',
-			filters: {
-				link_doctype: "Customer",
-				link_name: row.customer
-			}
-		};
-	}
-};
 
-cur_frm.fields_dict['delivery_stops'].grid.get_field("contact").get_query = function (doc, cdt, cdn) {
-	var row = locals[cdt][cdn];
-	if (row.customer) {
-		return {
-			query: 'frappe.contacts.doctype.contact.contact.contact_query',
-			filters: {
-				link_doctype: "Customer",
-				link_name: row.customer
-			}
-		};
-	}
-};
 
 frappe.ui.form.on('Delivery Stop', {
 	customer: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
-		frappe.call({
-			method: "erpnext.stock.doctype.delivery_trip.delivery_trip.get_contact_and_address",
-			args: {"name": row.customer},
-			callback: function (r) {
-				if (r.message) {
-					if (r.message["shipping_address"]) {
-						frappe.model.set_value(cdt, cdn, "address", r.message["shipping_address"].parent);
-					}
-					if (r.message["contact_person"]) {
-						frappe.model.set_value(cdt, cdn, "contact", r.message["contact_person"].parent);
+		if(row.customer) {
+			frappe.call({
+				method: "erpnext.stock.doctype.delivery_trip.delivery_trip.get_contact_and_address",
+				args: {"name": row.customer},
+				callback: function (r) {
+					if (r.message) {
+						if (r.message["shipping_address"]) {
+							frappe.model.set_value(cdt, cdn, "address", r.message["shipping_address"].parent);
+						}
+						if (r.message["contact_person"]) {
+							frappe.model.set_value(cdt, cdn, "contact", r.message["contact_person"].parent);
+						}
 					}
 				}
-			}
-		});
+			});
+		}
 	},
 	address: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
-		frappe.call({
-			method: "frappe.contacts.doctype.address.address.get_address_display",
-			args: {"address_dict": row.address},
-			callback: function (r) {
-				if (r.message) {
-					frappe.model.set_value(cdt, cdn, "customer_address", r.message);
+		if(row.address) {
+			frappe.call({
+				method: "frappe.contacts.doctype.address.address.get_address_display",
+				args: {"address_dict": row.address},
+				callback: function (r) {
+					if (r.message) {
+						frappe.model.set_value(cdt, cdn, "customer_address", r.message);
+					}
 				}
-			}
-		});
+			});
+		} else {
+			frappe.model.set_value(cdt, cdn, "customer_address", "");
+		}
 	},
+
 	contact: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
-		frappe.call({
-			method: "erpnext.stock.doctype.delivery_trip.delivery_trip.get_contact_display",
-			args: {"contact": row.contact},
-			callback: function (r) {
-				if (r.message) {
-					frappe.model.set_value(cdt, cdn, "customer_contact", r.message);
+		if(row.contact) {
+			frappe.call({
+				method: "erpnext.stock.doctype.delivery_trip.delivery_trip.get_contact_display",
+				args: {"contact": row.contact},
+				callback: function (r) {
+					if (r.message) {
+						frappe.model.set_value(cdt, cdn, "customer_contact", r.message);
+					}
 				}
-			}
-		});
+			});
+		} else {
+			frappe.model.set_value(cdt, cdn, "customer_contact", "");
+		}
 	},
+
 	select_delivery_notes: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		frappe.call({
@@ -166,7 +184,8 @@ frappe.ui.form.on('Delivery Stop', {
 					var delivery_notes_el = d.fields_dict.delivery_notes_html.$wrapper.html(html);
 
 					d.set_primary_action(__("Select"), function () {
-						var delivery_notes = delivery_notes_el.find('input[type=checkbox]:checked').map((i, el) => $(el).attr('data-delivery-note')).toArray();
+						var delivery_notes = delivery_notes_el.find('input[type=checkbox]:checked')
+							.map((i, el) => $(el).attr('data-delivery-note')).toArray();
 						if (!delivery_notes) return;
 						frappe.model.set_value(cdt, cdn, "delivery_notes", delivery_notes.join(","));
 						d.hide();
