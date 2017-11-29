@@ -159,7 +159,7 @@ class Employee(NestedSet):
 			throw(_("Employee cannot report to himself."))
 
 	def on_trash(self):
-		self.update_nsm_model()
+		super(Employee, self).on_trash()
 		delete_events(self.doctype, self.name)
 
 	def validate_prefered_email(self):
@@ -316,13 +316,14 @@ def get_children(doctype, parent=None, company=None, is_root=False, is_tree=Fals
 	else:
 		condition = ' and ifnull(reports_to, "")=""'
 
-	employee = frappe.db.sql("""select name as value,
-		employee_name as title,
-		exists(select name from `tabEmployee` where reports_to=emp.name) as expandable
-		from `tabEmployee` emp
-		where company='{company}'
-		{condition}
-		order by name""".format(company=company, condition=condition),  as_dict=1)
+	employee = frappe.db.sql("""
+		select
+			name as value, employee_name as title,
+			exists(select name from `tabEmployee` where reports_to=emp.name) as expandable
+		from
+			`tabEmployee` emp
+		where company='{company}' {condition} order by name"""
+		.format(company=company, condition=condition),  as_dict=1)
 
 	# return employee
 	return employee
