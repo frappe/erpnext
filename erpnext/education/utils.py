@@ -32,7 +32,7 @@ def get_overlap_for(doc, doctype, fieldname, value=None):
 			(to_time > %(from_time)s and to_time < %(to_time)s) or
 			(%(from_time)s > from_time and %(from_time)s < to_time) or
 			(%(from_time)s = from_time and %(to_time)s = to_time))
-		and name!=%(name)s""".format(doctype, fieldname),
+		and name!=%(name)s and docstatus!=2""".format(doctype, fieldname),
 		{
 			"schedule_date": doc.schedule_date,
 			"val": value or doc.get(fieldname),

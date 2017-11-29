@@ -51,6 +51,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_with_previous_doc()
 		self.validate_for_subcontracting()
 		self.validate_minimum_order_qty()
+		self.validate_bom_for_subcontracting_items()
 		self.create_raw_materials_supplied("supplied_items")
 		self.set_received_qty_for_drop_ship_items()
 
@@ -94,6 +95,13 @@ class PurchaseOrder(BuyingController):
 			if flt(qty) < flt(itemwise_min_order_qty.get(item_code)):
 				frappe.throw(_("Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item).").format(item_code,
 					qty, itemwise_min_order_qty.get(item_code)))
+
+	def validate_bom_for_subcontracting_items(self):
+		if self.is_subcontracted == "Yes":
+			for item in self.items:
+				if not item.bom:
+					frappe.throw(_("BOM is not specified for subcontracting item {0} at row {1}"\
+						.format(item.item_code, item.idx)))
 
 	def get_schedule_dates(self):
 		for d in self.get('items'):

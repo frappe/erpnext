@@ -10,6 +10,7 @@ Stock
 Support
 Utilities
 Shopping Cart
+Assets
 Hub Node
 Portal
 Maintenance

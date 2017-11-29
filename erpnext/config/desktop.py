@@ -380,5 +380,11 @@ def get_data():
 			"icon": "fa fa-sun-o",
 			"type": "link",
 			"link": "List/Weather"
+		},
+		{
+			"module_name": "Assets",
+			"color": "#4286f4",
+			"icon": "octicon octicon-database",
+			"type": "module"
 		}
 	]
