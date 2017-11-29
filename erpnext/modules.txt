@@ -10,6 +10,7 @@ Stock
 Support
 Utilities
 Shopping Cart
+Assets
 Hub Node
 Portal
 Maintenance
@@ -18,4 +19,3 @@ Regional
 Healthcare
 Restaurant
 ERPNext Integrations
-Assets
