@@ -5,6 +5,9 @@ frappe.provide("erpnext.buying");
 
 {% include 'erpnext/public/js/controllers/buying.js' %};
 
+cur_frm.add_fetch('item_code','weight_per_unit','weight_per_unit');
+cur_frm.add_fetch('item_code','weight_uom','weight_uom');
+
 frappe.ui.form.on("Purchase Order", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {

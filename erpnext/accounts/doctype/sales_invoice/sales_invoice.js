@@ -7,6 +7,8 @@ cur_frm.pformat.print_heading = 'Invoice';
 {% include 'erpnext/selling/sales_common.js' %};
 
 cur_frm.add_fetch('customer', 'tax_id', 'tax_id');
+cur_frm.add_fetch('item_code','weight_per_unit','weight_per_unit');
+cur_frm.add_fetch('item_code','weight_uom','weight_uom');
 
 frappe.provide("erpnext.accounts");
 erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
@@ -158,7 +160,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				})
 			}, __("Get items from"));
 	},
-	
+
 	quotation_btn: function() {
 		var me = this;
 		this.$quotation_btn = this.frm.add_custom_button(__('Quotation'),

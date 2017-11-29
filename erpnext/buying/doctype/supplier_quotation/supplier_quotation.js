@@ -12,6 +12,9 @@ frappe.ui.form.on('Suppier Quotation', {
 	}
 });
 
+cur_frm.add_fetch('item_code','weight_per_unit','weight_per_unit');
+cur_frm.add_fetch('item_code','weight_uom','weight_uom');
+
 erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.extend({
 	refresh: function() {
 		var me = this;

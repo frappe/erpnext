@@ -4,6 +4,8 @@
 {% include 'erpnext/selling/sales_common.js' %};
 
 cur_frm.add_fetch('customer', 'tax_id', 'tax_id');
+cur_frm.add_fetch('item_code','weight_per_unit','weight_per_unit');
+cur_frm.add_fetch('item_code','weight_uom','weight_uom');
 
 frappe.provide("erpnext.stock");
 frappe.provide("erpnext.stock.delivery_note");
