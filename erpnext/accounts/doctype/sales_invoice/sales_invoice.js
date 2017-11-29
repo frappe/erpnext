@@ -158,7 +158,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				})
 			}, __("Get items from"));
 	},
-	
+
 	quotation_btn: function() {
 		var me = this;
 		this.$quotation_btn = this.frm.add_custom_button(__('Quotation'),
