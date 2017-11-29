@@ -257,8 +257,8 @@ class PurchaseOrder(BuyingController):
 	def update_reserved_qty_for_subcontract(self):
 		for d in self.supplied_items:
 			if d.rm_item_code:
-				stock_bin = get_bin(d.rm_item_code, d.reserve_warehouse)
-				stock_bin.update_reserved_qty_for_sub_contracting()
+					stock_bin = get_bin(d.rm_item_code, d.reserve_warehouse)
+					stock_bin.update_reserved_qty_for_sub_contracting()
 
 @frappe.whitelist()
 def close_or_unclose_purchase_orders(names, status):
