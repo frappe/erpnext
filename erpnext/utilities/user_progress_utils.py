@@ -38,6 +38,21 @@ def create_customers(args_data):
 				pass
 
 @frappe.whitelist()
+def create_letterhead(args_data):
+	args = json.loads(args_data)
+	letterhead = args.get("letterhead")
+	if letterhead:
+		try:
+			frappe.get_doc({
+					"doctype":"Letter Head",
+					"content":"""<div><img src="{0}" style='max-width: 100%%;'><br></div>""".format(letterhead),
+					"letter_head_name": _("Standard"),
+					"is_default": 1
+			}).insert()
+		except frappe.NameError:
+			pass
+
+@frappe.whitelist()
 def create_suppliers(args_data):
 	args = json.loads(args_data)
 	defaults = frappe.defaults.get_defaults()

@@ -10,22 +10,24 @@ frappe.ui.form.on('Crop Cycle', {
 			console.log(output['Land Unit']);
 			let analysis_doctypes = ['Soil Texture', 'Plant Analysis', 'Soil Analysis'];
 			let analysis_doctypes_docs = ['soil_texture', 'plant_analysis', 'soil_analysis'];
+			let obj_to_append = {soil_analysis: [], soil_texture: [], plant_analysis: []};
 			output['Land Unit'].forEach( (land_doc) => {
 				analysis_doctypes.forEach( (doctype) => {
 					output[doctype].forEach( (analysis_doc) => {
 						let point_to_be_tested = JSON.parse(analysis_doc.location).features[0].geometry.coordinates;
 						let poly_of_land = JSON.parse(land_doc.location).features[0].geometry.coordinates[0];
 						if (test(point_to_be_tested, poly_of_land)){
-							frm.call('append_to_child', {
-								child_table_name: analysis_doctypes_docs[analysis_doctypes.indexOf(doctype)],
-								doc_name: analysis_doc.name
-							});
+							obj_to_append[analysis_doctypes_docs[analysis_doctypes.indexOf(doctype)]].push(analysis_doc.name);
 							// let d = frm.add_child(analysis_doctypes_docs[analysis_doctypes.indexOf(doctype)]);
 							// d[analysis_doctypes_docs[analysis_doctypes.indexOf(doctype)]] = analysis_doc.name;
 							// frm.refresh_field(analysis_doctypes_docs[analysis_doctypes.indexOf(doctype)]);
+							console.log("appended");
 						}
 					});
 				});
+			});
+			frm.call('append_to_child', {
+				obj_to_append: obj_to_append
 			});
 		});
 	}

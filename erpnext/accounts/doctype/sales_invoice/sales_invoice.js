@@ -158,7 +158,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				})
 			}, __("Get items from"));
 	},
-	
+
 	quotation_btn: function() {
 		var me = this;
 		this.$quotation_btn = this.frm.add_custom_button(__('Quotation'),
@@ -298,7 +298,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		var row = locals[cdt][cdn];
 		if(row.asset) {
 			frappe.call({
-				method: erpnext.accounts.doctype.asset.depreciation.get_disposal_account_and_cost_center,
+				method: erpnext.assets.doctype.asset.depreciation.get_disposal_account_and_cost_center,
 				args: {
 					"company": frm.doc.company
 				},
@@ -311,6 +311,14 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	is_pos: function(frm){
+		this.set_pos_data();
+	},
+
+	pos_profile: function() {
+		this.set_pos_data();
+	},
+
+	set_pos_data: function() {
 		if(this.frm.doc.is_pos) {
 			if(!this.frm.doc.company) {
 				this.frm.set_value("is_pos", 0);
@@ -323,7 +331,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					callback: function(r) {
 						if(!r.exc) {
 							if(r.message && r.message.print_format) {
-								frm.pos_print_format = r.message.print_format;
+								me.frm.pos_print_format = r.message.print_format;
 							}
 							me.frm.script_manager.trigger("update_stock");
 							frappe.model.set_default_values(me.frm.doc);
@@ -537,6 +545,19 @@ frappe.ui.form.on('Sales Invoice', {
 				filters: {
 					link_doctype: 'Company',
 					link_name: doc.company
+				}
+			};
+		});
+
+		frm.set_query('pos_profile', function(doc) {
+			if(!doc.company) {
+				frappe.throw(_('Please set Company'));
+			}
+
+			return {
+				query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
+				filters: {
+					company: doc.company
 				}
 			};
 		});

@@ -410,3 +410,14 @@ def get_doctype_wise_filters(filters):
 	for row in filters:
 		filter_dict[row[0]].append(row)
 	return filter_dict
+
+
+@frappe.whitelist()
+def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
+	query = 'select batch_id from `tabBatch` ' \
+			'where (`tabBatch`.expiry_date >= CURDATE() or `tabBatch`.expiry_date IS NULL)'
+
+	if filters and filters.get('item_code'):
+		query += 'where item = %(item_code)s' % filters
+
+	return frappe.db.sql(query)

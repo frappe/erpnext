@@ -20,7 +20,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 				if(frm.cscript.tax_table == "Sales Taxes and Charges") {
 					var account_type = ["Tax", "Chargeable", "Expense Account"];
 				} else {
-					var account_type = ["Tax", "Chargeable", "Income Account"];
+					var account_type = ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation"];
 				}
 
 				return {

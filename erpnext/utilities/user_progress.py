@@ -81,6 +81,24 @@ def get_slide_settings():
 				}
 			]
 		),
+
+		frappe._dict(
+			action_name='Add Letterhead',
+			domains=('Manufacturing', 'Services', 'Retail', 'Distribution', 'Education'),
+			title=_("Add Letterhead"),
+			help=_("Upload your letter head (Keep it web friendly as 900px by 100px)"),
+			fields=[
+				{"fieldtype":"Attach Image", "fieldname":"letterhead",
+					"is_private": 0,
+					"align": "center"
+				},
+			],
+			mandatory_entry=1,
+			submit_method="erpnext.utilities.user_progress_utils.create_letterhead",
+			done_state_title=_("Go to Letterheads"),
+			done_state_title_route=["List", "Letter Head"]
+		),
+
 		frappe._dict(
 			action_name='Add Suppliers',
 			domains=('Manufacturing', 'Services', 'Retail', 'Distribution'),
