@@ -160,6 +160,10 @@ class BuyingController(StockController):
 				if item in self.sub_contracted_items and not item.bom:
 					frappe.throw(_("Please select BOM in BOM field for Item {0}").format(item.item_code))
 
+			for supplied_item in self.get("supplied_items"):
+				if not supplied_item.reserve_warehouse:
+					frappe.throw(_("Reserved Warehouse is mandatory for Item {0} in Raw Materials supplied").format(supplied_item.rm_item_code))
+
 		else:
 			for item in self.get("items"):
 				if item.bom:

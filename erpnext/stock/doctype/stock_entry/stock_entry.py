@@ -72,6 +72,8 @@ class StockEntry(StockController):
 	def on_cancel(self):
 		self.update_stock_ledger()
 		self.update_production_order()
+		if self.purchase_order and self.purpose == "Subcontract":
+			self.update_purchase_order_supplied_items()
 		self.make_gl_entries_on_cancel()
 
 	def validate_purpose(self):
@@ -807,28 +809,13 @@ class StockEntry(StockController):
 							frappe.throw(_("Batch {0} of Item {1} has expired.").format(item.batch_no, item.item_code))
 
 	def update_purchase_order_supplied_items(self):
-		materials_transferred = frappe._dict(frappe.db.sql("""
-			select
-				concat(item_code, sed.s_warehouse), sum(qty)
-			from
-				`tabStock Entry` se, `tabStock Entry Detail` sed
-			where
-				se.name = sed.parent and se.docstatus=1 and se.purpose='Subcontract'
-				and se.purchase_order= %s and ifnull(sed.s_warehouse, '') != ''
-			group by sed.item_code, sed.s_warehouse
-		""", self.purchase_order))
 		#Get PO Supplied Items Details
 		po_doc =  frappe.get_doc("Purchase Order",self.purchase_order)
 		po_supplied_items = po_doc.get("supplied_items")
-		items = list(set([d.rm_item_code for d in po_supplied_items]))
-		item_wh = frappe._dict(frappe.db.sql("""select item_code as "item_code", default_warehouse as "warehouse"
-			from tabItem where name in ({0})""".format(", ".join(["%s"] * len(items))), items))
 		#Update reserved sub contracted quantity in bin based on Supplied Item Details
 		for d in po_supplied_items:
-			warehouse = item_wh.get(d.rm_item_code)
-			transferred_qty = materials_transferred.get(d.rm_item_code + warehouse)
-			stock_bin = get_bin(d.rm_item_code, warehouse)
-			stock_bin.update_reserved_qty_for_sub_contracting(self.purchase_order, transferred_qty, transaction_type = "Transfer")
+			stock_bin = get_bin(d.rm_item_code, d.reserve_warehouse)
+			stock_bin.update_reserved_qty_for_sub_contracting()
 
 @frappe.whitelist()
 def get_production_order_details(production_order):

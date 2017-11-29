@@ -202,6 +202,9 @@ class PurchaseOrder(BuyingController):
 		if self.has_drop_ship_item():
 			self.update_delivered_qty_in_sales_order()
 
+		if self.is_subcontracted == "Yes":
+			self.update_reserved_qty_for_subcontract()
+
 		self.check_for_closed_status()
 
 		frappe.db.set(self,'status','Cancelled')
@@ -252,15 +255,10 @@ class PurchaseOrder(BuyingController):
 				item.received_qty = item.qty
 
 	def update_reserved_qty_for_subcontract(self):
-		items = list(set([d.rm_item_code for d in self.get("supplied_items")]))
-		item_wh = frappe._dict(frappe.db.sql("""select item_code, default_warehouse
-			from `tabItem` where name in ({0})""".format(", ".join(["%s"] * len(items))), items))
-
 		for d in self.supplied_items:
 			if d.rm_item_code:
-				warehouse = item_wh.get(d.rm_item_code)
-				stock_bin = get_bin(d.rm_item_code, warehouse)
-				stock_bin.update_reserved_qty_for_sub_contracting(self.name, transferred_qty=0, transaction_type = "Reserve")
+				stock_bin = get_bin(d.rm_item_code, d.reserve_warehouse)
+				stock_bin.update_reserved_qty_for_sub_contracting()
 
 @frappe.whitelist()
 def close_or_unclose_purchase_orders(names, status):

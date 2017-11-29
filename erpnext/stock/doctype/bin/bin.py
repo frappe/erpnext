@@ -94,27 +94,48 @@ class Bin(Document):
 			self.db_set('reserved_qty_for_production', self.reserved_qty_for_production)
 			self.db_set('projected_qty', self.projected_qty)
 
-	def update_reserved_qty_for_sub_contracting(self, po_name, transferred_qty, transaction_type):
-		#Update Reserved Quantity for Sub Contracting in Bin
-		if transaction_type == "Reserve":
-			required_qty = frappe.db.sql('''select sum(itemsup.required_qty)
-				from `tabItem` item, `tabPurchase Order` po, `tabPurchase Order Item Supplied` itemsup
-				where
-					item.name = itemsup.rm_item_code
-					and po.name = %s
-					and itemsup.rm_item_code = %s
-					and itemsup.parent = po.name
-					and po.docstatus = 1
-					and po.is_subcontracted = 'Yes'
-					and item.default_warehouse = %s''', (po_name, self.item_code, self.warehouse))[0][0]
-		elif transaction_type == "Transfer":
-			required_qty = 0
-
-		reserved_qty_bin = self.reserved_qty_for_sub_contract
-		reserved_qty_for_sub_contract = reserved_qty_bin + required_qty - transferred_qty
+	def update_reserved_qty_for_sub_contracting(self):
+		#reserved qty
+		reserved_qty_for_sub_contract = frappe.db.sql('''select ifnull(sum(itemsup.required_qty),0)
+			from `tabPurchase Order` po, `tabPurchase Order Item Supplied` itemsup
+			where
+				itemsup.rm_item_code = %s
+				and itemsup.parent = po.name
+				and po.docstatus = 1
+				and po.is_subcontracted = 'Yes'
+				and itemsup.reserve_warehouse = %s''', (self.item_code, self.warehouse))[0][0]
+		#cancelled qty
+		reserved_qty_cancelled = frappe.db.sql('''select ifnull(sum(itemsup.required_qty),0)
+			from `tabPurchase Order` po, `tabPurchase Order Item Supplied` itemsup
+			where
+				itemsup.rm_item_code = %s
+				and itemsup.parent = po.name
+				and po.docstatus = 2
+				and po.is_subcontracted = 'Yes'
+				and itemsup.reserve_warehouse = %s''', (self.item_code, self.warehouse))[0][0]
+		#Get Transferred Entries
+		materials_transferred = frappe.db.sql("""
+			select
+				ifnull(sum(qty),0)
+			from
+				`tabStock Entry` se, `tabStock Entry Detail` sed
+			where
+				sed.item_code = %s and sed.s_warehouse = %s
+				and se.name = sed.parent and se.docstatus=1 and se.purpose='Subcontract'
+				and ifnull(se.purchase_order, '') !=''""", (self.item_code, self.warehouse))[0][0]
+		#Material Transfer Cancelled
+		materials_transfer_cancelled = frappe.db.sql("""
+			select
+				ifnull(sum(qty),0)
+			from
+				`tabStock Entry` se, `tabStock Entry Detail` sed
+			where
+				sed.item_code = %s and sed.s_warehouse = %s
+				and se.name = sed.parent and se.docstatus=2 and se.purpose='Subcontract'
+				and ifnull(se.purchase_order, '') !=''""", (self.item_code, self.warehouse))[0][0]
 
 		self.set_projected_qty()
-		self.db_set('reserved_qty_for_sub_contract', reserved_qty_for_sub_contract)
+		self.db_set('reserved_qty_for_sub_contract', (reserved_qty_for_sub_contract - reserved_qty_cancelled - materials_transferred + materials_transfer_cancelled))
 		self.db_set('projected_qty', self.projected_qty)
 
 def update_item_projected_qty(item_code):
