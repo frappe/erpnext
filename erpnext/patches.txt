@@ -473,3 +473,4 @@ erpnext.patches.v10_0.rename_schools_to_education
 erpnext.patches.v9_2.repost_reserved_qty_for_production
 erpnext.patches.v9_2.remove_company_from_patient
 erpnext.patches.v9_2.set_item_name_in_production_order
+erpnext.patches.v10_0.update_lft_rgt_for_employee
