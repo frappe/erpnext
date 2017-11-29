@@ -198,6 +198,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				},
 				callback:function(r){
 					if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+					    me.set_batch_number(cdt, cdn);
 						me.batch_no(doc, cdt, cdn);
 					}
 				}
