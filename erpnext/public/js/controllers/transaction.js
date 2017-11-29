@@ -36,7 +36,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 			cur_frm.cscript.set_gross_profit(item);
 			cur_frm.cscript.calculate_taxes_and_totals();
+
 		});
+
+
 
 		frappe.ui.form.on(this.frm.cscript.tax_table, "rate", function(frm, cdt, cdn) {
 			cur_frm.cscript.calculate_taxes_and_totals();
@@ -220,6 +223,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		erpnext.hide_company();
 		this.set_dynamic_labels();
 		this.setup_sms();
+
 	},
 
 	apply_default_taxes: function() {
@@ -323,6 +327,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							qty: item.qty || 1,
 							stock_qty: item.stock_qty,
 							conversion_factor: item.conversion_factor,
+							weight_per_unit: item.weight_per_unit,
+							weight_uom: item.weight_uom,
 							pos_profile: me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : ''
 						}
 					},
@@ -673,6 +679,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	qty: function(doc, cdt, cdn) {
 		this.conversion_factor(doc, cdt, cdn, true);
 		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
+		this.calculate_total_weight(doc, cdt, cdn, true);
+	},
+
+	calculate_total_weight: function(doc, cdt, cdn){
+		if(frappe.meta.get_docfield(cdt, "weight_per_unit", cdn)) {
+			var item = frappe.get_doc(cdt, cdn);
+			item.total_weight = flt(item.qty * item.weight_per_unit);
+			refresh_field("total_weight", item.name, item.parentfield);
+		}
 	},
 
 	set_dynamic_labels: function() {
