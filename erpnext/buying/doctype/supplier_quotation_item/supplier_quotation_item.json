@@ -607,7 +607,7 @@
    "label": "UOM",
    "length": 0,
    "no_copy": 0,
-   "options": "",
+   "options": "UOM",
    "permlevel": 0,
    "precision": "",
    "print_hide": 1,
@@ -676,7 +676,7 @@
    "read_only": 0,
    "remember_last_selected_value": 0,
    "report_hide": 0,
-   "reqd": 1,
+   "reqd": 0,
    "search_index": 0,
    "set_only_once": 0,
    "unique": 0
