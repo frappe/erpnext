@@ -20,6 +20,7 @@ class TestVehicleLog(unittest.TestCase):
 			"acquisition_date":frappe.utils.nowdate(),
 			"location": "Mumbai",
 			"chassis_no": "1234ABCD",
+			"uom": "Litre",
 			"vehicle_value":frappe.utils.flt(500000)
 		})
 		try:

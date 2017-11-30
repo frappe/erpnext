@@ -41,7 +41,7 @@ frappe.ui.form.on('Asset', {
 				});
 
 				frm.add_custom_button("Sell Asset", function() {
-					erpnext.asset.make_sales_invoice(frm);
+					frm.trigger("make_sales_invoice");
 				});
 
 			} else if (frm.doc.status=='Scrapped') {
@@ -161,6 +161,21 @@ frappe.ui.form.on('Asset', {
 				"posting_date": frm.doc.purchase_date
 			},
 			method: "erpnext.assets.doctype.asset.asset.make_purchase_invoice",
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		})
+	},
+
+	make_sales_invoice: function(frm) {
+		frappe.call({
+			args: {
+				"asset": frm.doc.name,
+				"item_code": frm.doc.item_code,
+				"company": frm.doc.company
+			},
+			method: "erpnext.accounts.doctype.asset.asset.make_sales_invoice",
 			callback: function(r) {
 				var doclist = frappe.model.sync(r.message);
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
