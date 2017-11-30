@@ -39,10 +39,10 @@ def setup_complete(args=None):
 	create_logo(args)
 
 	frappe.local.message_log = []
-	domain_settings = frappe.get_single('Domain Settings')
 
 	domains = args.get('domains')
-	domain_settings.active_domains = domains
+	domain_settings = frappe.get_single('Domain Settings')
+	domain_settings.set_active_domains(domains)
 
 	frappe.db.commit()
 	login_as_first_user(args)
