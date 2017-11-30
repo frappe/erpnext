@@ -560,10 +560,18 @@ class StockEntry(StockController):
 						frappe.throw(_("Manufacturing Quantity is mandatory"))
 
 					item_dict = self.get_bom_raw_materials(self.fg_completed_qty)
+					#Get PO Supplied Items Details
+					if self.purchase_order and self.purpose == "Subcontract":
+						#Get PO Supplied Items Details
+						item_wh = frappe._dict(frappe.db.sql("""select rm_item_code, reserve_warehouse 
+															from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
+															where po.name = poitemsup.parent
+															and po.name = %s""",self.purchase_order))
 					for item in item_dict.values():
 						if self.pro_doc and not self.pro_doc.skip_transfer:
 							item["from_warehouse"] = self.pro_doc.wip_warehouse
-
+						#Get Reserve Warehouse from PO
+						item["from_warehouse"] = item_wh.get(item.item_code)
 						item["to_warehouse"] = self.to_warehouse if self.purpose=="Subcontract" else ""
 
 					self.add_to_stock_entry_detail(item_dict)
@@ -810,17 +818,18 @@ class StockEntry(StockController):
 
 	def update_purchase_order_supplied_items(self):
 		#Get PO Supplied Items Details
-		po_doc =  frappe.get_doc("Purchase Order",self.purchase_order)
-		po_supplied_items = po_doc.get("supplied_items")
+		item_wh = frappe._dict(frappe.db.sql("""select rm_item_code, reserve_warehouse 
+											from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
+											where po.name = poitemsup.parent
+											and po.name = %s""",self.purchase_order))
 		#Validate source warehouse is same as reserved warehouse
 		for item in self.get("items"):
-			if item.s_warehouse:
-				for d in po_supplied_items:
-					if item.item_code == d.rm_item_code and item.s_warehouse != d.reserve_warehouse:
-						frappe.throw(_("In case of Sub Contract Stock Entry, Source Warehouse: {0} should match with Reserved Warehouse: {1} on PO").format(item.s_warehouse,d.reserve_warehouse))
+			reserve_warehouse = item_wh.get(item.item_code)
+			if item.s_warehouse != reserve_warehouse:
+				frappe.throw(_("In case of Sub Contract Stock Entry, Source Warehouse: {0} should match with Reserved Warehouse: {1} entered on Purchase Order {2}").format(item.s_warehouse,reserve_warehouse,self.purchase_order))
 		#Update reserved sub contracted quantity in bin based on Supplied Item Details
-		for d in po_supplied_items:
-			stock_bin = get_bin(d.rm_item_code, d.reserve_warehouse)
+		for d in self.get("items"):
+			stock_bin = get_bin(d.item_code, d.s_warehouse)
 			stock_bin.update_reserved_qty_for_sub_contracting()
 
 @frappe.whitelist()
