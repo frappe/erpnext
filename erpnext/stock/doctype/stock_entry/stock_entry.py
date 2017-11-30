@@ -591,9 +591,9 @@ class StockEntry(StockController):
 					if self.purchase_order and self.purpose == "Subcontract":
 						#Get PO Supplied Items Details
 						item_wh = frappe._dict(frappe.db.sql("""select rm_item_code, reserve_warehouse 
-															from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
-															where po.name = poitemsup.parent
-															and po.name = %s""",self.purchase_order))
+										from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
+										where po.name = poitemsup.parent
+										and po.name = %s""",self.purchase_order))
 					for item in item_dict.values():
 						if self.pro_doc and not self.pro_doc.skip_transfer:
 							item["from_warehouse"] = self.pro_doc.wip_warehouse
@@ -882,9 +882,9 @@ def move_sample_to_retention_warehouse(company, items):
 	def update_purchase_order_supplied_items(self):
 		#Get PO Supplied Items Details
 		item_wh = frappe._dict(frappe.db.sql("""select rm_item_code, reserve_warehouse 
-											from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
-											where po.name = poitemsup.parent
-											and po.name = %s""",self.purchase_order))
+						from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
+						where po.name = poitemsup.parent
+						and po.name = %s""",self.purchase_order))
 		#Validate source warehouse is same as reserved warehouse
 		for item in self.get("items"):
 			reserve_warehouse = item_wh.get(item.item_code)
