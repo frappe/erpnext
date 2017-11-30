@@ -31,15 +31,17 @@ frappe.ui.form.on('Assessment Result Tool', {
 					"student_group": frm.doc.student_group
 				},
 				callback: function(r) {
-					frm.doc.students = r.message;
-					frm.events.render_table(frm);
-					for (let value of r.message) {
-						if (!value.docstatus) {
-							frm.doc.show_submit = true;
-							break;
+					if (r.message) {
+						frm.doc.students = r.message;
+						frm.events.render_table(frm);
+						for (let value of r.message) {
+							if (!value.docstatus) {
+								frm.doc.show_submit = true;
+								break;
+							}
 						}
+						frm.events.submit_result(frm);
 					}
-					frm.events.submit_result(frm);
 				}
 			});
 		}
