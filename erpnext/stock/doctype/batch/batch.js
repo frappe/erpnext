@@ -72,15 +72,25 @@ frappe.ui.form.on('Batch', {
 							options: 'Warehouse'
 						},
 						(data) => {
+						    const args = {
+							    item_code: frm.doc.item,
+                                batch_no: frm.doc.name,
+                                qty: $btn.attr('data-qty'),
+                                from_warehouse: $btn.attr('data-warehouse'),
+                                to_warehouse: data.to_warehouse,
+                                source_document: frm.doc.reference_name,
+                                reference_doctype: frm.doc.reference_doctype
+                            };
+
+                            // Special treatment if Doctype is Batch
+                            if (frm.doc.doctype === 'Batch'){
+                                args.source_document = frm.doc.reference_name;
+                                args.reference_doctype = frm.doc.reference_doctype;
+                            }
+
 							frappe.call({
 								method: 'erpnext.stock.doctype.stock_entry.stock_entry_utils.make_stock_entry',
-								args: {
-									item_code: frm.doc.item,
-									batch_no: frm.doc.name,
-									qty: $btn.attr('data-qty'),
-									from_warehouse: $btn.attr('data-warehouse'),
-									to_warehouse: data.to_warehouse
-								},
+								args: args,
 								callback: (r) => {
 									frappe.show_alert(__('Stock Entry {0} created',
 										['<a href="#Form/Stock Entry/'+r.message.name+'">' + r.message.name+ '</a>']));
