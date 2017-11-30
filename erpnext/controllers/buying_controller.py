@@ -193,6 +193,9 @@ class BuyingController(StockController):
 	def update_raw_materials_supplied(self, item, raw_material_table):
 		bom_items = self.get_items_from_bom(item.item_code, item.bom)
 		raw_materials_cost = 0
+		items = list(set([d.item_code for d in bom_items]))
+		item_wh = frappe._dict(frappe.db.sql("""select item_code, default_warehouse
+						from `tabItem` where name in ({0})""".format(", ".join(["%s"] * len(items))), items))
 
 		for bom_item in bom_items:
 			# check if exists
@@ -213,6 +216,7 @@ class BuyingController(StockController):
 			rm.rm_item_code = bom_item.item_code
 			rm.stock_uom = bom_item.stock_uom
 			rm.required_qty = required_qty
+			rm.reserve_warehouse = bom_item.source_warehouse or item_wh.get(bom_item.item_code)
 
 			rm.conversion_factor = item.conversion_factor
 
