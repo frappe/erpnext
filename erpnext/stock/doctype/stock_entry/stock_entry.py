@@ -826,7 +826,7 @@ class StockEntry(StockController):
 		for item in self.get("items"):
 			reserve_warehouse = item_wh.get(item.item_code)
 			if item.s_warehouse != reserve_warehouse:
-				frappe.throw(_("In case of Sub Contract Stock Entry, Source Warehouse: {0} should match with Reserved Warehouse: {1} entered on Purchase Order {2}").format(item.s_warehouse,reserve_warehouse,self.purchase_order))
+				frappe.throw(_("In case of Sub Contract Stock Entry, Source Warehouse: {0} should match with Reserved Warehouse: {1} entered on Purchase Order {2}").format(frappe.bold(item.s_warehouse),frappe.bold(reserve_warehouse),frappe.bold(self.purchase_order)))
 		#Update reserved sub contracted quantity in bin based on Supplied Item Details
 		for d in self.get("items"):
 			stock_bin = get_bin(d.item_code, d.s_warehouse)

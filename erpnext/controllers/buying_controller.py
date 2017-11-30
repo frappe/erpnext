@@ -162,7 +162,7 @@ class BuyingController(StockController):
 
 			for supplied_item in self.get("supplied_items"):
 				if not supplied_item.reserve_warehouse:
-					frappe.throw(_("Reserved Warehouse is mandatory for Item {0} in Raw Materials supplied").format(supplied_item.rm_item_code))
+					frappe.throw(_("Reserved Warehouse is mandatory for Item {0} in Raw Materials supplied").format(frappe.bold(supplied_item.rm_item_code)))
 
 		else:
 			for item in self.get("items"):
