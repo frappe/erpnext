@@ -29,7 +29,7 @@ class SoilTexture(Document):
 
 		# set composition of the last edited soil 
 		self.set( self.soil_types[last_edit_index], 
-			100 - sum(self.get(soil_type) for soil_type in self.soil_types) + self.get(self.soil_types[last_edit_index]))
+			100 - sum(int(self.get(soil_type)) for soil_type in self.soil_types) + int(self.get(self.soil_types[last_edit_index])))
 
 		# calculate soil type
 		c, sa, si = self.clay_composition, self.sand_composition, self.silt_composition

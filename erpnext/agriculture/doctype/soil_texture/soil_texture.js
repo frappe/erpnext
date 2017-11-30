@@ -14,11 +14,19 @@ frappe.ui.form.on('Soil Texture', {
 		map_tools.forEach((element) => $(element).hide());
 	},
 	onload: function(frm) {
+		if (this.ternary_plot) return;
 		this.ternary_plot = new agriculture.TernaryPlot({
 			parent: frm.get_field("ternary_plot").$wrapper,
 			clay: frm.doc.clay_composition,
 			sand: frm.doc.sand_composition,
-			silt: frm.doc.silt_composition
+			silt: frm.doc.silt_composition,
+		});
+	},
+	soil_type: (frm) => {
+		let composition_types = ['clay_composition', 'sand_composition', 'silt_composition'];
+		composition_types.forEach((composition_type) => {
+			frm.doc[composition_type] = 0;
+			frm.refresh_field(composition_type);
 		});
 	},
 	clay_composition: function(frm) {
