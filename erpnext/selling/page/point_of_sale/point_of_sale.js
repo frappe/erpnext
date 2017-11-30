@@ -206,7 +206,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 	select_batch_and_serial_no(item) {
 		erpnext.show_serial_batch_selector(this.frm, item, () => {
-			this.update_item_in_frm(item)
+			this.update_item_in_frm(item, 'qty', item.qty)
 				.then(() => {
 					// update cart
 					if (item.qty === 0) {
@@ -321,19 +321,17 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 	make_new_invoice() {
 		return frappe.run_serially([
+			() => this.make_sales_invoice_frm(),
+			() => this.set_pos_profile_data(),
 			() => {
-				this.make_sales_invoice_frm()
-					.then(() => this.set_pos_profile_data())
-					.then(() => {
-						if (this.cart) {
-							this.cart.frm = this.frm;
-							this.cart.reset();
-						} else {
-							this.make_items();
-							this.make_cart();
-						}
-						this.toggle_editing(true);
-					})
+				if (this.cart) {
+					this.cart.frm = this.frm;
+					this.cart.reset();
+				} else {
+					this.make_items();
+					this.make_cart();
+				}
+				this.toggle_editing(true);
 			},
 		]);
 	}
@@ -376,7 +374,10 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					this.frm.script_manager.trigger("update_stock");
 					frappe.model.set_default_values(this.frm.doc);
 					this.frm.cscript.calculate_taxes_and_totals();
-					this.frm.meta.default_print_format = r.message.print_format || 'POS Invoice';
+
+					if (r.message) {
+						this.frm.meta.default_print_format = r.message.print_format || 'POS Invoice';
+					}
 				}
 
 				resolve();
@@ -915,7 +916,7 @@ class POSItems {
 		this.search_field = frappe.ui.form.make_control({
 			df: {
 				fieldtype: 'Data',
-				label: 'Search Item ( Ctrl + i )',
+				label: 'Search Item (Ctrl + i)',
 				placeholder: 'Search by item code, serial number, batch no or barcode'
 			},
 			parent: this.wrapper.find('.search-field'),
