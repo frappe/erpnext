@@ -822,14 +822,10 @@ class StockEntry(StockController):
 						from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
 						where po.name = poitemsup.parent
 						and po.name = %s""",self.purchase_order))
-		#Validate source warehouse is same as reserved warehouse
-		for item in self.get("items"):
-			reserve_warehouse = item_wh.get(item.item_code)
-			if item.s_warehouse != reserve_warehouse:
-				frappe.throw(_("In case of Sub Contract Stock Entry, Source Warehouse: {0} should match with Reserved Warehouse: {1} entered on Purchase Order {2}").format(frappe.bold(item.s_warehouse),frappe.bold(reserve_warehouse),frappe.bold(self.purchase_order)))
 		#Update reserved sub contracted quantity in bin based on Supplied Item Details
 		for d in self.get("items"):
-			stock_bin = get_bin(d.item_code, d.s_warehouse)
+			reserve_warehouse = item_wh.get(item.item_code)
+			stock_bin = get_bin(d.item_code, reserve_warehouse)
 			stock_bin.update_reserved_qty_for_sub_contracting()
 
 @frappe.whitelist()
