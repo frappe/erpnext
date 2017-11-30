@@ -24,6 +24,12 @@ def get_context(context):
 
 	context.enabled_checkout = frappe.get_doc("Shopping Cart Settings").enable_checkout
 
+	default_print_format = frappe.db.sql("""select value from `tabProperty Setter` where property='default_print_format' and doc_type='{0}'""".format(frappe.form_dict.doctype), as_dict=True)
+	if default_print_format:
+		context.print_format = default_print_format[0].value
+	else:
+		context.print_format = "Standard"
+
 	if not frappe.has_website_permission(context.doc):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
 
