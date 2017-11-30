@@ -39,14 +39,23 @@ class PayrollEntry(Document):
 			cond += "and t2.parent IN %(sal_struct)s "
 			emp_list = frappe.db.sql("""
 				select
-					t1.name
+					t1.name as employee, t1.employee_name, t1.department, t1.designation
 				from
 					`tabEmployee` t1, `tabSalary Structure Employee` t2
 				where
 					t1.docstatus!=2
 					and t1.name = t2.employee
-			%s """% cond, {"sal_struct": sal_struct})
+			%s """% cond, {"sal_struct": sal_struct}, as_dict=True)
 			return emp_list
+
+	def fill_employee_details(self):
+		self.set('employees', [])
+		employees = self.get_emp_list()
+		if not employees:
+			frappe.throw(_("No employees for the mentioned criteria"))
+
+		for d in employees:
+			self.append('employees', d)
 
 	def get_filter_condition(self):
 		self.check_mandatory()

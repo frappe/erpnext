@@ -121,6 +121,14 @@ let submit_salary_slip = function (frm) {
 	return $c('runserverobj', { 'method': 'submit_salary_slips', 'docs': doc });
 };
 
+cur_frm.cscript.get_employee_details = function (doc, cdt, cdn) {
+	var callback = function (r, rt) {
+		if (r.message)
+			cur_frm.refresh_field('employees');
+	}
+	return $c('runserverobj', { 'method': 'fill_employee_details', 'docs': doc }, callback);
+}
+
 let make_bank_entry = function (frm) {
 	var doc = frm.doc;
 	if (doc.company && doc.start_date && doc.end_date) {
