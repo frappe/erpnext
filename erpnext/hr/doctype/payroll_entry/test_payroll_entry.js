@@ -31,6 +31,7 @@ QUnit.test("test: Payroll Entry", function (assert) {
 		() => assert.equal(cur_list.data[0].docstatus, 0),
 
 		() => frappe.set_route('Form', 'Payroll Entry', 'Payroll 0001'),
+		() => frappe.timeout(2),
 		() => frappe.click_button('Submit Salary Slip'),
 		() => frappe.timeout(3),
 
