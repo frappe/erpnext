@@ -550,7 +550,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		}
 		// Make read only if Accounts Settings doesn't allow stale rates
-		this.frm.set_df_property("conversion_rate", "read_only", erpnext.stale_rate_allowed());
+		this.frm.set_df_property("conversion_rate", "read_only", erpnext.stale_rate_allowed() ? 0 : 1);
 	},
 
 	set_actual_charges_based_on_currency: function() {
