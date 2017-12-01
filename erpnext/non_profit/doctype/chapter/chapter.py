@@ -30,6 +30,7 @@ class Chapter(WebsiteGenerator):
 def get_list_context(context):
 	context.allow_guest = True
 	context.no_cache = True
+	context.show_sidebar = True
 	context.title = 'All Chapters'
 	context.no_breadcrumbs = True
 	context.order_by = 'creation desc'
