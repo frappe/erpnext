@@ -50,9 +50,6 @@ before_script:
   - bench scheduler disable
   - bench start &
   - sleep 10
-  - chromedriver --version
-  - google-chrome --version
-  - google-chrome-stable --version
 
 jobs:
   include:
@@ -77,7 +74,7 @@ jobs:
       script:
         - bench --verbose run-setup-wizard-ui-test
         - bench execute erpnext.setup.utils.enable_all_roles_and_domains
-        - bench run-tests --doctype-list erpnext/tests/server/agriculture.txt
+        - bench run-tests --doctype-list-path erpnext/tests/server/agriculture.txt
       env: Agriculture Server Side Test
     - # stage
       script:
