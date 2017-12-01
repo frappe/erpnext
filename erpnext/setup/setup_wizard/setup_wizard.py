@@ -82,7 +82,7 @@ def create_fiscal_year_and_company(args):
 			'country': args.get('country'),
 			'create_chart_of_accounts_based_on': 'Standard Template',
 			'chart_of_accounts': args.get('chart_of_accounts'),
-			'domain': json.loads(args.get('domains'))[0]
+			'domain': args.get('domains')[0]
 		}).insert()
 
 		#Enable shopping cart

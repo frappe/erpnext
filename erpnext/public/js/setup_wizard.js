@@ -18,7 +18,9 @@ erpnext.setup.slides_settings = [
 		title: __('Select your Domains'),
 		fields: [
 			{
-				fieldname: 'domains', label: __('Domains'), fieldtype: 'MultiCheck',
+				fieldname: 'domains',
+				label: __('Domains'),
+				fieldtype: 'MultiCheck',
 				options: [
 					{ "label": __("Distribution"), "value": "Distribution" },
 					{ "label": __("Manufacturing"), "value": "Manufacturing" },
@@ -26,15 +28,18 @@ erpnext.setup.slides_settings = [
 					{ "label": __("Services"), "value": "Services" },
 					{ "label": __("Education"), "value": "Education" },
 					{"label": __("Healthcare (beta)"), "value": "Healthcare"}
-				], reqd: 1
+				],
+				reqd: 1
 			},
 		],
 		// help: __('Select the nature of your business.'),
-		onload: function (slide) {
-			slide.get_input("domains").on("change", function () {
-				frappe.setup.domains = JSON.parse($(this).val());
-				frappe.wizard.refresh_slides();
-			});
+		validate: function () {
+			if (this.values.domains.length === 0) {
+				frappe.msgprint(__("Please select at least one domain."));
+				return false;
+			}
+			frappe.setup.domains = this.values.domains;
+			return true;
 		},
 	},
 
