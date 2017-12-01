@@ -91,7 +91,7 @@ def make_stock_entry(**args):
 		args.expense_account = frappe.get_value('Company', s.company, 'stock_adjustment_account')
 
 	# We can find out the serial number using the batch source document
-	serial_number = ''
+	serial_number = args.serial_no
 
 	if not args.serial_no and args.qty and args.batch_no:
 		serial_number_list = frappe.get_list(
