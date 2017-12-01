@@ -24,9 +24,9 @@ def get_context(context):
 
 	context.enabled_checkout = frappe.get_doc("Shopping Cart Settings").enable_checkout
 
-	default_print_format = frappe.db.sql("""select value from `tabProperty Setter` where property='default_print_format' and doc_type='{0}'""".format(frappe.form_dict.doctype), as_dict=True)
+	default_print_format = frappe.db.get_value('Property Setter', dict(property='default_print_format', doc_type=frappe.form_dict.doctype), "value")
 	if default_print_format:
-		context.print_format = default_print_format[0].value
+		context.print_format = default_print_format
 	else:
 		context.print_format = "Standard"
 
