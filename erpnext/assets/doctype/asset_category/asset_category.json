@@ -62,7 +62,7 @@
    "label": "Depreciation Method", 
    "length": 0, 
    "no_copy": 0, 
-   "options": "\nStraight Line\nDouble Declining Balance", 
+   "options": "\nStraight Line\nDouble Declining Balance\nManual", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
