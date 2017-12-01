@@ -58,6 +58,23 @@ frappe.ui.form.on('Payroll Entry', {
 
 	payroll_frequency: function (frm) {
 		frm.trigger("set_start_end_dates");
+		frm.set_value('employees', []);
+	},
+
+	company: function (frm) {
+		frm.set_value('employees', []);
+	},
+
+	department: function (frm) {
+		frm.set_value('employees', []);
+	},
+
+	designation: function (frm) {
+		frm.set_value('employees', []);
+	},
+
+	branch: function (frm) {
+		frm.set_value('employees', []);
 	},
 
 	start_date: function (frm) {
@@ -67,6 +84,11 @@ frappe.ui.form.on('Payroll Entry', {
 			// reset flag
 			in_progress = false;
 		}
+		frm.set_value('employees', []);
+	},
+
+	project: function (frm) {
+		frm.set_value('employees', []);
 	},
 
 	salary_slip_based_on_timesheet: function (frm) {
@@ -108,12 +130,6 @@ frappe.ui.form.on('Payroll Entry', {
 	},
 });
 
-// Create salary slips
-
-cur_frm.cscript.custom_before_submit = function (doc) {
-	return $c('runserverobj', { 'method': 'create_salary_slips', 'docs': doc });
-};
-
 // Submit salary slips
 
 let submit_salary_slip = function (frm) {
@@ -121,11 +137,12 @@ let submit_salary_slip = function (frm) {
 	return $c('runserverobj', { 'method': 'submit_salary_slips', 'docs': doc });
 };
 
-cur_frm.cscript.get_employee_details = function (doc, cdt, cdn) {
-	var callback = function (r, rt) {
-		if (r.message)
+cur_frm.cscript.get_employee_details = function (doc) {
+	var callback = function (r) {
+		if (r.docs[0].employees){
 			cur_frm.refresh_field('employees');
-	}
+		}
+	};
 	return $c('runserverobj', { 'method': 'fill_employee_details', 'docs': doc }, callback);
 }
 

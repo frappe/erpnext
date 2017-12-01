@@ -1,5 +1,5 @@
 import frappe
-from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
+from erpnext.hr.doctype.payroll_entry.payroll_entry import get_month_details
 from frappe.utils import cint
 
 def execute():

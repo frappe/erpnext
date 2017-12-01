@@ -1,19 +1,15 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
-
 import unittest
-
 import erpnext
 import frappe
 from dateutil.relativedelta import relativedelta
 from erpnext.accounts.utils import get_fiscal_year, getdate, nowdate
 from erpnext.hr.doctype.payroll_entry.payroll_entry import get_start_end_dates, get_end_date
 
-class TestProcessPayroll(unittest.TestCase):
+class TestPayrollEntry(unittest.TestCase):
 	def test_payroll_entry(self):
-		month = "11"
-		fiscal_year = "_Test Fiscal Year 2016"
 
 		for data in frappe.get_all('Salary Component', fields = ["name"]):
 			if not frappe.db.get_value('Salary Component Account',
@@ -132,7 +128,7 @@ def get_salary_component_account(sal_comp):
 	sc = sal_comp.append("accounts")
 	sc.company = company
 	sc.default_account = create_account(company)
-	
+
 def create_account(company):
 	salary_account = frappe.db.get_value("Account", "Salary - " + frappe.db.get_value('Company', company, 'abbr'))
 	if not salary_account:
@@ -158,7 +154,7 @@ def make_payroll_entry(**args):
 	payroll_entry.create_salary_slips()
 	payroll_entry.submit_salary_slips()
 	if payroll_entry.get_sal_slip_list(ss_status = 1):
-		r = payroll_entry.make_payment_entry()
+		payroll_entry.make_payment_entry()
 
 	return payroll_entry
 

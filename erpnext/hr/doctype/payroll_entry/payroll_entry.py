@@ -11,6 +11,10 @@ from frappe import _
 from erpnext.accounts.utils import get_fiscal_year
 
 class PayrollEntry(Document):
+
+	def on_submit(self):
+		self.create_salary_slips()
+
 	def get_emp_list(self):
 		"""
 			Returns list of active employees based on selected criteria
@@ -97,15 +101,15 @@ class PayrollEntry(Document):
 						start_date >= %s and
 						end_date <= %s and
 						company = %s
-						""", (emp[0], self.start_date, self.end_date, self.company)):
+						""", (emp['employee'], self.start_date, self.end_date, self.company)):
 					ss = frappe.get_doc({
 						"doctype": "Salary Slip",
 						"salary_slip_based_on_timesheet": self.salary_slip_based_on_timesheet,
 						"payroll_frequency": self.payroll_frequency,
 						"start_date": self.start_date,
 						"end_date": self.end_date,
-						"employee": emp[0],
-						"employee_name": frappe.get_value("Employee", {"name":emp[0]}, "employee_name"),
+						"employee": emp['employee'],
+						"employee_name": frappe.get_value("Employee", {"name":emp['employee']}, "employee_name"),
 						"company": self.company,
 						"posting_date": self.posting_date
 					})
