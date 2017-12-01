@@ -28,5 +28,18 @@ frappe.ui.form.on('Member', {
 			frappe.contacts.clear_address_and_contact(frm);
 		}
 
+		frappe.call({
+			method:"frappe.client.get_value",
+			args:{
+				'doctype':"Membership",
+				'filters':{'member': frm.doc.name},
+				'fieldname':[
+					'to_date'
+				]
+			},
+			callback: function (data) {
+				frappe.model.set_value(frm.doctype,frm.docname, "expires_on", data.message.to_date);
+			}
+		});
 	}
 });
