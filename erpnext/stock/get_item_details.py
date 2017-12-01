@@ -155,6 +155,7 @@ def get_basic_details(args, item):
 			"conversion_rate": 1.0,
 			"selling_price_list": None,
 			"price_list_currency": None,
+			"price_list_uom_dependant": None,
 			"plc_conversion_rate": 1.0,
 			"doctype": "",
 			"name": "",
@@ -311,9 +312,10 @@ def get_price_list_rate(args, item_doc, out):
 
 		out.price_list_rate = flt(price_list_rate) * flt(args.plc_conversion_rate) \
 			/ flt(args.conversion_rate)
-
-		out.price_list_rate = flt(out.price_list_rate * (args.conversion_factor or 1.0))
-
+		if args.price_list_uom_dependant == 0:
+			out.price_list_rate = flt(out.price_list_rate * (args.conversion_factor or 1.0))
+		else:
+			out.price_list_rate = flt(out.price_list_rate * (1.0))
 		if not out.price_list_rate and args.transaction_type=="buying":
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
 			out.update(get_last_purchase_details(item_doc.name,
@@ -504,6 +506,7 @@ def apply_price_list(args, as_doc=False):
 			"conversion_rate": 1.0,
 			"selling_price_list": None,
 			"price_list_currency": None,
+			"price_list_uom_dependant": None,
 			"plc_conversion_rate": 1.0,
 			"doctype": "",
 			"name": "",
@@ -530,7 +533,7 @@ def apply_price_list(args, as_doc=False):
 			children.append(item_details)
 
 	if as_doc:
-		args.price_list_currency = parent.price_list_currency
+		args.price_list_currency = parent.price_list_currency,
 		args.plc_conversion_rate = parent.plc_conversion_rate
 		if args.get('items'):
 			for i, item in enumerate(args.get('items')):
@@ -565,11 +568,23 @@ def get_price_list_currency(price_list):
 
 		return result.currency
 
+def get_price_list_uom_dependant(price_list):
+	if price_list:
+		result = frappe.db.get_value("Price List", {"name": price_list,
+			"enabled": 1}, ["name", "price_not_uom_dependant"], as_dict=True)
+
+		if not result:
+			throw(_("Price List {0} is disabled or does not exist").format(price_list))
+
+		return result.price_not_uom_dependant
+
+
 def get_price_list_currency_and_exchange_rate(args):
 	if not args.price_list:
 		return {}
 
 	price_list_currency = get_price_list_currency(args.price_list)
+	price_list_uom_dependant = get_price_list_uom_dependant(args.price_list)
 	plc_conversion_rate = args.plc_conversion_rate
 
 	if (not plc_conversion_rate) or (price_list_currency and args.price_list_currency \
@@ -580,6 +595,7 @@ def get_price_list_currency_and_exchange_rate(args):
 
 	return frappe._dict({
 		"price_list_currency": price_list_currency,
+		"price_list_uom_dependant": price_list_uom_dependant,
 		"plc_conversion_rate": plc_conversion_rate
 	})
 
