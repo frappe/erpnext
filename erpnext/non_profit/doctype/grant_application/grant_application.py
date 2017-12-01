@@ -36,16 +36,6 @@ def get_list_context(context):
 	context.order_by = 'creation desc'
 	context.introduction ='<div>Grant Application List</div><br><a class="btn btn-primary" href="/my-grant?new=1">Apply for new Grant Application</a>'
 
-#Assement Manager review grant on website and submit result
-@frappe.whitelist(allow_guest=True)
-def assessment_result(title, assessment_scale, note):
-	vote = frappe.get_doc("Grant Application", title)
-	vote.assessment_scale = assessment_scale
-	vote.note = note
-	vote.save()
-	frappe.db.commit()
-	return "Thank you for Assessment Review"
-
 
 
 @frappe.whitelist()
@@ -61,7 +51,8 @@ def send_grant_review_emails(grant_application):
 		reference_name=grant.name
 	)
 
-	grant.status = "In Progress"
+	grant.status = 'In Progress'
 	grant.save()
+	frappe.db.commit()
 
 	frappe.msgprint(_("Review Invitation Sent"))
