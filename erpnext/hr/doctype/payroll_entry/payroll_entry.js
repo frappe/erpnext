@@ -144,7 +144,7 @@ cur_frm.cscript.get_employee_details = function (doc) {
 		}
 	};
 	return $c('runserverobj', { 'method': 'fill_employee_details', 'docs': doc }, callback);
-}
+};
 
 let make_bank_entry = function (frm) {
 	var doc = frm.doc;
