@@ -19,7 +19,7 @@ def boot_session(bootinfo):
 		res = get_user_default_from_user_permission("company",frappe.session['user'])
 		if res==None:
 			res = get_user_default_from_default_value("company")
-			bootinfo.sysdefaults.company = res			
+			bootinfo.sysdefaults.company = res
 		else:
 			bootinfo.user.defaults.company = res
 
@@ -50,7 +50,7 @@ def get_user_default_from_user_permission(key, user=None ):
 	if user:
 		if user != "Guest" and user!="Administrator":
 			#Default the oldest company when more than 1 company is there.
-			res = frappe.db.sql("""select for_value from `tabUser Permission` 
+			res = frappe.db.sql("""select for_value from `tabUser Permission`
 			where allow=%s and user=%s order by creation limit 1""", (key,user))
 			if res:
 				d= res[0][0]
@@ -58,7 +58,7 @@ def get_user_default_from_user_permission(key, user=None ):
 
 def get_user_default_from_default_value(key):
 	d=None
-	res = frappe.db.sql("""select defvalue from `tabDefaultValue` 
+	res = frappe.db.sql("""select defvalue from `tabDefaultValue`
 	where defkey=%s order by creation limit 1""", (key))
 	if res:
 		d= res[0][0]
