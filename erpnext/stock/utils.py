@@ -126,7 +126,7 @@ def update_bin(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 def get_incoming_rate(args):
 	"""Get Incoming Rate based on valuation method"""
 	from erpnext.stock.stock_ledger import get_previous_sle
-	
+
 	if isinstance(args, basestring):
 		args = json.loads(args)
 
@@ -141,6 +141,8 @@ def get_incoming_rate(args):
 				return 0.0
 			previous_stock_queue = json.loads(previous_sle.get('stock_queue', '[]') or '[]')
 			in_rate = get_fifo_rate(previous_stock_queue, args.get("qty") or 0) if previous_stock_queue else 0
+			if not in_rate and not previous_stock_queue:
+				in_rate = previous_sle.get('valuation_rate') or 0
 		elif valuation_method == 'Moving Average':
 			in_rate = previous_sle.get('valuation_rate') or 0
 
