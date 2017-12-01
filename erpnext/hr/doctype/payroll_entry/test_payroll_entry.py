@@ -9,7 +9,7 @@ from erpnext.accounts.utils import get_fiscal_year, getdate, nowdate
 from erpnext.hr.doctype.payroll_entry.payroll_entry import get_start_end_dates, get_end_date
 
 class TestPayrollEntry(unittest.TestCase):
-	def test_payroll_entry(self):
+	def test_payroll_entry(self): # pylint: disable=no-self-use
 
 		for data in frappe.get_all('Salary Component', fields = ["name"]):
 			if not frappe.db.get_value('Salary Component Account',
