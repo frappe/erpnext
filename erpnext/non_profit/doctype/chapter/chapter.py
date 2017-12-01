@@ -13,6 +13,7 @@ class Chapter(WebsiteGenerator):
 
 	def get_context(self, context):
 		context.no_cache = True
+		context.show_sidebar = True
 		context.parents = [dict(label='View All Chapters',
 			route='chapters', title='View Chapters')]
 

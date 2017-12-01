@@ -22,11 +22,17 @@ class GrantApplication(WebsiteGenerator):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)
 
+	def get_context(self, context):
+		context.no_cache = True
+		context.show_sidebar = True
+		context.parents = [dict(label='View All Grant Applications',
+			route='grant-application', title='View Grants')]
 
 def get_list_context(context):
 	context.allow_guest = True
 	context.no_cache = True
 	context.no_breadcrumbs = True
+	context.show_sidebar = True
 	context.order_by = 'creation desc'
 	context.introduction ='<div>Grant Application List</div><br><a class="btn btn-primary" href="/my-grant?new=1">Apply for new Grant Application</a>'
 
