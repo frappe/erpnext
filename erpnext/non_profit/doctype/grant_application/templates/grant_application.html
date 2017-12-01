@@ -49,21 +49,7 @@
 	{% endif %}
 	<br>
 	{% if frappe.session.user == assessment_manager %}
-		{% if not assessment_scale %}
-			<div>
-				<form>
-					<div class="form-group">
-						<label for="scale">Assessment Result (0-10):</label>
-						<input type="text" class="form-control" id="scale">
-					</div>
-					<div class="form-group">
-						<label for="note">Note</label>
-						<input type="text" class="form-control" id="note">
-					</div>
-					<button type="button" class="btn btn-default" data-title= "{{ name }}" id="btn-grant-result">Submit</button>
-				</form>
-			</div>
-		{% else %}
+		{% if assessment_scale %}
 			<p> Assessment Review done </p>
 		{% endif %}
 	{% else %}
