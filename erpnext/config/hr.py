@@ -100,8 +100,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Promotion Decision",
-					"description":_("Promotion Decision	")
+					"name": "Promotion and Merit Increase",
+					"description":_("Promotion and Merit Increase")
 				},
 				{
 					"type": "doctype",
@@ -261,6 +261,11 @@ def get_data():
 		{
 			"label": _("Training and Business Trip"),
 			"items": [
+				{
+					"type": "doctype",
+					"name": "Training Trip",
+					"description":_("Training Trip"),
+				},
 				{
 					"type": "doctype",
 					"name": "Business Trip",

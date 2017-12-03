@@ -159,6 +159,7 @@ erpnext.expense_claim = {
 }
 
 frappe.ui.form.on("Expense Claim Detail", {
+
 	claim_amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		var doc = frm.doc;
@@ -168,6 +169,22 @@ frappe.ui.form.on("Expense Claim Detail", {
 		}
 
 		cur_frm.cscript.calculate_total(doc,cdt,cdn);
+	},
+
+	employee_share: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		var doc = frm.doc;
+
+		frappe.model.set_value(cdt, cdn, 'claim_amount', child.company_share+child.employee_share)
+
+	},
+
+	company_share: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		var doc = frm.doc;
+
+		frappe.model.set_value(cdt, cdn, 'claim_amount', child.employee_share+child.company_share)
+
 	},
 
 	sanctioned_amount: function(frm, cdt, cdn) {
