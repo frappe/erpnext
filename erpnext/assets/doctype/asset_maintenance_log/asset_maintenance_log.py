@@ -44,26 +44,3 @@ class AssetMaintenanceLog(Document):
 def get_maintenance_tasks(doctype, txt, searchfield, start, page_len, filters):
 	asset_maintenance_tasks = frappe.db.get_values('Asset Maintenance Task', {'parent':filters.get("asset_maintenance")}, 'maintenance_task')
 	return asset_maintenance_tasks
-
-@frappe.whitelist()
-def get_events(start, end, filters=None):
-	"""Returns events for Gantt / Calendar view rendering.
-
-	:param start: Start date-time.
-	:param end: End date-time.
-	:param filters: Filters (JSON).
-	"""
-	from frappe.desk.calendar import get_event_conditions
-	conditions = get_event_conditions("Asset Maintenance Log", filters)
-	data = frappe.db.sql("""select name, due_date, due_date,
-		task, maintenance_status, asset_name from `tabAsset Maintenance Log`
-		where ((ifnull(due_date, '0000-00-00')!= '0000-00-00') \
-				and (due_date <= %(end)s) \
-			or ((ifnull(due_date, '0000-00-00')!= '0000-00-00') \
-				and due_date >= %(start)s))
-		{conditions}""".format(conditions=conditions), {
-			"start": start,
-			"end": end
-		}, as_dict=True, update={"allDay": 0})
-
-	return data
