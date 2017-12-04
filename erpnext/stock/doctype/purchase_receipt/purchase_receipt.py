@@ -67,6 +67,14 @@ class PurchaseReceipt(BuyingController):
 	def after_insert(self):
 		self.get_department()
 		self.get_project()
+		# self.validate_requester()
+
+	# def validate_requester(self):
+	# 	if self.material_request:
+	# 		pu = frappe.get_value("User Permission", filters = {"allow": "Material Request", "for_value": self.material_request}, fieldname = "user")
+	# 		if pu != frappe.session.user and frappe.session.user != "Administrator":
+	# 			frappe.throw(_("The Requester should receive the Purchase Order"))
+
 	def get_department(self):
 		if self.material_request:
 			dep = frappe.get_value("Material Request", filters = {"name": self.material_request}, fieldname = "department")
