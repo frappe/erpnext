@@ -58,7 +58,7 @@ def get_columns():
 		{
 			"fieldname": "payment_entry",
 			"label": _("Payment Entry"),
-			"fieldtype": "Dynamic Link",
+			"fieldtype": "Data",
 			"options": "payment_document",
 			"width": 220
 		},
