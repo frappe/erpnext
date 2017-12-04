@@ -65,31 +65,38 @@ frappe.ui.form.on('Batch', {
 					// move - ask for target warehouse and make stock entry
 					rows.find('.btn-move').on('click', function() {
 						var $btn = $(this);
-						frappe.prompt({
-							fieldname: 'to_warehouse',
-							label: __('To Warehouse'),
-							fieldtype: 'Link',
-							options: 'Warehouse'
-						},
-						(data) => {
-							frappe.call({
-								method: 'erpnext.stock.doctype.stock_entry.stock_entry_utils.make_stock_entry',
-								args: {
-									item_code: frm.doc.item,
-									batch_no: frm.doc.name,
-									qty: $btn.attr('data-qty'),
-									from_warehouse: $btn.attr('data-warehouse'),
-									to_warehouse: data.to_warehouse
-								},
-								callback: (r) => {
-									frappe.show_alert(__('Stock Entry {0} created',
-										['<a href="#Form/Stock Entry/'+r.message.name+'">' + r.message.name+ '</a>']));
-									frm.refresh();
-								},
-							});
-						},
-						__('Select Target Warehouse'),
-						__('Move')
+						const fields = [
+							{
+								fieldname: 'to_warehouse',
+								label: __('To Warehouse'),
+								fieldtype: 'Link',
+								options: 'Warehouse'
+							}
+						];
+
+						frappe.prompt(
+							fields,
+							(data) => {
+								frappe.call({
+									method: 'erpnext.stock.doctype.stock_entry.stock_entry_utils.make_stock_entry',
+									args: {
+										item_code: frm.doc.item,
+										batch_no: frm.doc.name,
+										qty: $btn.attr('data-qty'),
+										from_warehouse: $btn.attr('data-warehouse'),
+										to_warehouse: data.to_warehouse,
+										source_document: frm.doc.reference_name,
+										reference_doctype: frm.doc.reference_doctype
+									},
+									callback: (r) => {
+										frappe.show_alert(__('Stock Entry {0} created',
+											['<a href="#Form/Stock Entry/'+r.message.name+'">' + r.message.name+ '</a>']));
+										frm.refresh();
+									},
+								});
+							},
+							__('Select Target Warehouse'),
+							__('Move')
 						);
 					});
 
