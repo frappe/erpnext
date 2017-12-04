@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils import flt, cint
 
 class SoilTexture(Document):
 	soil_edit_order = [2, 1, 0]
@@ -29,12 +30,12 @@ class SoilTexture(Document):
 
 		# set composition of the last edited soil 
 		self.set( self.soil_types[last_edit_index], 
-			100 - sum(int(self.get(soil_type)) for soil_type in self.soil_types) + int(self.get(self.soil_types[last_edit_index])))
+			100 - sum(cint(self.get(soil_type)) for soil_type in self.soil_types) + cint(self.get(self.soil_types[last_edit_index])))
 
 		# calculate soil type
-		c, sa, si = self.clay_composition, self.sand_composition, self.silt_composition
+		c, sa, si = flt(self.clay_composition), flt(self.sand_composition), flt(self.silt_composition)
 
-		if si + 1.5 * c < 15:
+		if si + (1.5 * c) < 15:
 			return 'Sand'
 		elif si + 1.5 * c >= 15 and si + 2 * c < 30:
 			return 'Loamy Sand'

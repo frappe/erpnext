@@ -79,7 +79,7 @@
    "collapsible": 0, 
    "columns": 0, 
    "fieldname": "date", 
-   "fieldtype": "Data", 
+   "fieldtype": "Date", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
@@ -499,7 +499,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-10-24 15:54:32.207619", 
+ "modified": "2017-12-04 17:03:30.574122", 
  "modified_by": "Administrator", 
  "module": "Agriculture", 
  "name": "Weather", 
@@ -527,7 +527,7 @@
    "write": 1
   }
  ], 
- "quick_entry": 1, 
+ "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "show_name_in_global_search": 0, 

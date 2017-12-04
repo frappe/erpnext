@@ -334,6 +334,7 @@
    "label": "Latitude", 
    "length": 0, 
    "no_copy": 0, 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -364,6 +365,7 @@
    "label": "Longitude", 
    "length": 0, 
    "no_copy": 0, 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -628,7 +630,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-11-22 18:25:36.642897", 
+ "modified": "2017-12-04 16:29:42.188102", 
  "modified_by": "Administrator", 
  "module": "Agriculture", 
  "name": "Land Unit", 
@@ -656,7 +658,7 @@
    "write": 1
   }
  ], 
- "quick_entry": 1, 
+ "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "show_name_in_global_search": 1, 

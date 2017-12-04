@@ -3,7 +3,6 @@ data = {
 		'Agriculture Task',
 		'Crop',
 		'Crop Cycle',
-		'Detected Disease',
 		'Fertilizer',
 		'Item',
 		'Land Unit',

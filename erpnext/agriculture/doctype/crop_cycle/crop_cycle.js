@@ -3,11 +3,10 @@
 
 frappe.ui.form.on('Crop Cycle', {
 	refresh: (frm) => {
-		// if (!frm.doc.__islocal)
-			frm.add_custom_button(__('Reload Linked Analsis'), () => frm.call("reload_linked_analysis"));
+		if (!frm.doc.__islocal)
+			frm.add_custom_button(__('Reload Linked Analysis'), () => frm.call("reload_linked_analysis"));
+
 		frappe.realtime.on("List of Linked Docs", (output) => {
-			console.log(output);
-			console.log(output['Land Unit']);
 			let analysis_doctypes = ['Soil Texture', 'Plant Analysis', 'Soil Analysis'];
 			let analysis_doctypes_docs = ['soil_texture', 'plant_analysis', 'soil_analysis'];
 			let obj_to_append = {soil_analysis: [], soil_texture: [], plant_analysis: []};
@@ -16,12 +15,8 @@ frappe.ui.form.on('Crop Cycle', {
 					output[doctype].forEach( (analysis_doc) => {
 						let point_to_be_tested = JSON.parse(analysis_doc.location).features[0].geometry.coordinates;
 						let poly_of_land = JSON.parse(land_doc.location).features[0].geometry.coordinates[0];
-						if (test(point_to_be_tested, poly_of_land)){
+						if (test_analysis_position(point_to_be_tested, poly_of_land)){
 							obj_to_append[analysis_doctypes_docs[analysis_doctypes.indexOf(doctype)]].push(analysis_doc.name);
-							// let d = frm.add_child(analysis_doctypes_docs[analysis_doctypes.indexOf(doctype)]);
-							// d[analysis_doctypes_docs[analysis_doctypes.indexOf(doctype)]] = analysis_doc.name;
-							// frm.refresh_field(analysis_doctypes_docs[analysis_doctypes.indexOf(doctype)]);
-							console.log("appended");
 						}
 					});
 				});
@@ -33,7 +28,7 @@ frappe.ui.form.on('Crop Cycle', {
 	}
 });
 
-function test(point, vs) {
+function test_analysis_position(point, vs) {
 	// ray-casting algorithm based on
 	// http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
 	

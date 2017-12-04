@@ -29,7 +29,6 @@ class CropCycle(Document):
 
 	def create_task(self, crop_tasks, project_name, start_date):
 		for crop_task in crop_tasks:
-			print crop_task
 			task = frappe.new_doc("Task")
 			task.subject = crop_task.get("subject")
 			task.priority = crop_task.get("priority")
@@ -47,18 +46,10 @@ class CropCycle(Document):
 		output['Land Unit'] = []
 		for land in self.linked_land_unit:
 			output['Land Unit'].append(frappe.get_doc('Land Unit', land.land_unit))
-		# for doctype, docs in output.iteritems():
-		# 	for doc in docs:
-		# 		for land in self.linked_land_unit:
-		# 			land_unit = frappe.get_doc('Land Unit', land.land_unit)
-		# 			print self.get_coordinates(doc)
-		# 			print self.get_geometry_type(land_unit)
-		# 			print self.get_coordinates(land_unit)
-		# 			print ('\n')
+
 		frappe.publish_realtime("List of Linked Docs", output, user=frappe.session.user)
 
 	def append_to_child(self, obj_to_append):
-		print obj_to_append
 		for doctype in obj_to_append:
 			for doc_name in set(obj_to_append[doctype]):
 				self.append(doctype, {doctype: doc_name})
