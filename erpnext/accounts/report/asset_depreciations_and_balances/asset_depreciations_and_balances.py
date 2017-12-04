@@ -99,7 +99,7 @@ def get_accumulated_depreciations(assets, filters):
 		
 		for schedule in asset.get("schedules"):
 			if getdate(schedule.schedule_date) < getdate(filters.from_date):
-				if not asset.disposal_date and getdate(asset.disposal_date) >= getdate(filters.from_date):
+				if not asset.disposal_date or getdate(asset.disposal_date) >= getdate(filters.from_date):
 					depr.accumulated_depreciation_as_on_from_date += flt(schedule.depreciation_amount)
 			elif getdate(schedule.schedule_date) <= getdate(filters.to_date):
 				depr.depreciation_amount_during_the_period += flt(schedule.depreciation_amount)
