@@ -18,29 +18,12 @@ class AssetMaintenance(Document):
 				task.maintenance_status = "Overdue"
 
 	def on_update(self):
-		self.sync_maintenance_tasks()
-
-	def after_insert(self):
 		for task in self.get('asset_maintenance_tasks'):
-			self.assign_tasks(task)
-
-	def assign_tasks(self, task):
-		if not task.assign_to:
-			task.db_set("assign_to", self.maintenance_manager)
-			task.db_set("assign_to_name", self.maintenance_manager_name)
-		if task.assign_to:
-			team_member = frappe.get_doc('User', task.assign_to).email
-			args = {
-				'doctype' : self.doctype,
-				'assign_to' : team_member,
-				'name' : self.name,
-				'description' : task.maintenance_task,
-				'date' : task.next_due_date
-			}
-			if not frappe.db.sql("""select owner from `tabToDo`
-				where reference_type=%(doctype)s and reference_name=%(name)s and status="Open"
-				and owner=%(assign_to)s""", args):
-				assign_to.add(args)
+			if not task.assign_to:
+				task.db_set("assign_to", self.maintenance_manager)
+				task.db_set("assign_to_name", self.maintenance_manager_name)
+			assign_tasks(self.name, task.assign_to, task.maintenance_task, task.next_due_date)
+		self.sync_maintenance_tasks()
 
 	def sync_maintenance_tasks(self):
 		tasks_names = []
@@ -53,6 +36,21 @@ class AssetMaintenance(Document):
 			for asset_maintenance_log in asset_maintenance_logs:
 				maintenance_log = frappe.get_doc('Asset Maintenance Log', asset_maintenance_log.name)
 				maintenance_log.db_set('maintenance_status', 'Cancelled')
+
+@frappe.whitelist()
+def assign_tasks(asset_maintenance_name, assign_to_member, maintenance_task, next_due_date):
+	team_member = frappe.get_doc('User', assign_to_member).email
+	args = {
+		'doctype' : 'Asset Maintenance',
+		'assign_to' : team_member,
+		'name' : asset_maintenance_name,
+		'description' : maintenance_task,
+		'date' : next_due_date
+	}
+	if not frappe.db.sql("""select owner from `tabToDo`
+		where reference_type=%(doctype)s and reference_name=%(name)s and status="Open"
+		and owner=%(assign_to)s""", args):
+		assign_to.add(args)
 
 @frappe.whitelist()
 def calculate_next_due_date(periodicity, start_date = None, end_date = None, last_completion_date = None, next_due_date = None):

@@ -66,6 +66,23 @@ frappe.ui.form.on('Stock Entry', {
 			});
 		}
 
+		if (frm.doc.docstatus===0) {
+			frm.add_custom_button(__('Purchase Invoice'), function() {
+				erpnext.utils.map_current_doc({
+					method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_stock_entry",
+					source_doctype: "Purchase Invoice",
+					target: frm,
+					date_field: "posting_date",
+					setters: {
+						supplier: frm.doc.supplier || undefined,
+					},
+					get_query_filters: {
+						docstatus: 1
+					}
+				})
+			}, __("Get items from"));
+		}
+
 		if(frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
 		}

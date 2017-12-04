@@ -1,4 +1,4 @@
-QUnit.module('Purchaes Invoice');
+QUnit.module('Purchase Invoice');
 
 QUnit.test("test purchase invoice", function(assert) {
 	assert.expect(4);

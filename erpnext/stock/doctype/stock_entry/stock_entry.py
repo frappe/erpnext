@@ -356,7 +356,7 @@ class StockEntry(StockController):
 				if not total_allowed:
 					frappe.throw(_("Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1}")
 						.format(se_item.item_code, self.purchase_order))
-				total_supplied = frappe.db.sql("""select sum(qty)
+				total_supplied = frappe.db.sql("""select sum(transfer_qty)
 					from `tabStock Entry Detail`, `tabStock Entry`
 					where `tabStock Entry`.purchase_order = %s
 						and `tabStock Entry`.docstatus = 1
@@ -365,8 +365,8 @@ class StockEntry(StockController):
 							(self.purchase_order, se_item.item_code))[0][0]
 
 				if total_supplied > total_allowed:
-					frappe.throw(_("Not allowed to tranfer more {0} than {1} against Purchase Order {2}").format(se_item.item_code,
-						total_allowed, self.purchase_order))
+					frappe.throw(_("Row {0}# Item {1} cannot be transferred more than {2} against Purchase Order {3}")
+						.format(se_item.idx, se_item.item_code, total_allowed, self.purchase_order))
 
 	def validate_bom(self):
 		for d in self.get('items'):
@@ -767,7 +767,7 @@ class StockEntry(StockController):
 			se_child.description = item_dict[d]["description"]
 			se_child.uom = stock_uom
 			se_child.stock_uom = stock_uom
-			se_child.qty = flt(item_dict[d]["qty"])
+			se_child.qty = flt(item_dict[d]["qty"], se_child.precision("qty"))
 			se_child.expense_account = item_dict[d].get("expense_account") or expense_account
 			se_child.cost_center = item_dict[d].get("cost_center") or cost_center
 
@@ -777,7 +777,7 @@ class StockEntry(StockController):
 				se_child.t_warehouse = self.to_warehouse
 
 			# in stock uom
-			se_child.transfer_qty = flt(item_dict[d]["qty"])
+			se_child.transfer_qty = flt(item_dict[d]["qty"], se_child.precision("qty"))
 			se_child.conversion_factor = 1.00
 
 			# to be assigned for finished item

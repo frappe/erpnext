@@ -14,5 +14,5 @@ frappe.views.calendar["Restaurant Reservation"] = {
 			"label": __("Customer Name")
 		}
 	],
-	get_events_method: "erpnext.restaurant.doctype.restaurant_reservation.restaurant_reservation.get_events"
+	get_events_method: "frappe.desk.calendar.get_events"
 };

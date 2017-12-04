@@ -10,5 +10,5 @@ frappe.views.calendar["Training Event"] = {
 		"allDay": "allDay"
 	},
 	gantt: true,
-	get_events_method: "erpnext.hr.doctype.training_event.training_event.get_events",
+	get_events_method: "frappe.desk.calendar.get_events",
 }
