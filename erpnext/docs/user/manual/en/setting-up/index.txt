@@ -13,6 +13,5 @@ stock-reconciliation-for-non-serialized-item
 territory
 third-party-backups
 workflows
-bar-code
 company-setup
 articles
