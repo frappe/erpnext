@@ -86,11 +86,14 @@ def get_accumulated_depreciations(assets, filters):
 	for d in assets:
 		asset = frappe.get_doc("Asset", d.name)
 		
-		asset_depreciations.setdefault(d.asset_category, frappe._dict({
-			"accumulated_depreciation_as_on_from_date": asset.opening_accumulated_depreciation,
-			"depreciation_amount_during_the_period": 0,
-			"depreciation_eliminated_during_the_period": 0
-		}))
+		if d.asset_category in asset_depreciations:
+			asset_depreciations[d.asset_category]['accumulated_depreciation_as_on_from_date'] += asset.opening_accumulated_depreciation
+		else:
+			asset_depreciations.setdefault(d.asset_category, frappe._dict({
+				"accumulated_depreciation_as_on_from_date": asset.opening_accumulated_depreciation,
+				"depreciation_amount_during_the_period": 0,
+				"depreciation_eliminated_during_the_period": 0
+			}))
 		
 		depr = asset_depreciations[d.asset_category]
 		
