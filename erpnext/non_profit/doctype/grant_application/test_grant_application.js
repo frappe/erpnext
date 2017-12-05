@@ -13,7 +13,7 @@ QUnit.test("test: Grant Application", function (assert) {
 		() => frappe.tests.make('Grant Application', [
 			// values to be set
 			{title: 'Test Organization'},
-			{grant_applicant_name:'Test Applicant'},
+			{name:'Test Applicant'},
 			{email: 'test@example.com'},
 			{grant_description:'Test message'},
 			{grant_purpose: 'Test Meesage'},

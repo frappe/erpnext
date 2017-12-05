@@ -7,5 +7,5 @@ data = {
 	'modules': [
 		'Non Profit'
 	],
-	'default_portal_role': 'System Manager'
+	'default_portal_role': 'Non Profit Manager'
 }
