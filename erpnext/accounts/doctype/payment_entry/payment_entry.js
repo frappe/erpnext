@@ -14,6 +14,8 @@ frappe.ui.form.on('Payment Entry', {
 		var party_account_type = frm.doc.party_type=="Customer" ? "Receivable" : "Payable";
 
 		frm.set_query("paid_from", function() {
+			var party_account_type = in_list(["Customer", "Employee"], frm.doc.party_type) ?
+				"Receivable" : "Payable";
 			var account_types = in_list(["Pay", "Internal Transfer"], frm.doc.payment_type) ?
 				["Bank", "Cash"] : party_account_type;
 			
@@ -51,8 +53,10 @@ frappe.ui.form.on('Payment Entry', {
 		});
 
 		frm.set_query("paid_to", function() {
+			var party_account_type = in_list(["Customer", "Employee"], frm.doc.party_type) ?
+				"Receivable" : "Payable";
 			var account_types = in_list(["Receive", "Internal Transfer"], frm.doc.payment_type) ?
-	 			["Bank", "Cash"] : party_account_type;
+				["Bank", "Cash"] : party_account_type;
 			if (frm.doc.payment_type == "Internal Transfer")
 			{
 				account_types = [
@@ -496,6 +500,7 @@ frappe.ui.form.on('Payment Entry', {
 
 	set_account_currency_and_balance: function(frm, account, currency_field,
 			balance_field, callback_function) {
+		if (account)
 		frappe.call({
 			method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_account_details",
 			args: {

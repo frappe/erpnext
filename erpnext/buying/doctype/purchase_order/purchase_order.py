@@ -92,9 +92,10 @@ class PurchaseOrder(BuyingController):
 
 	def vallidate_workflow_transition(self):
 		if hasattr(self,'workflow_state'):
-			if u"Project Budget Controller" in frappe.get_roles(frappe.session.user):
-				if self.project and self.workflow_state == "Approved By Budget Controller":
+			if u"Project Budget Controller" in frappe.get_roles(frappe.session.user) and self.project and self.workflow_state == "Approved By Budget Controller":
 					self.workflow_state = "Approved By Project Budget Controller"
+			elif u"Budget Controller" in frappe.get_roles(frappe.session.user) and not self.project and self.workflow_state == "Approved By Project Budget Controller":
+				self.workflow_state = "Approved By Budget Controller"
 			# if u"Shared Services Director" in frappe.get_roles(frappe.session.user):
 			# 	if self.project and self.workflow_state == "Approved By Shared Services Director":
 			# 		self.workflow_state = "Approved By Shared Services Director (Prt.)"
