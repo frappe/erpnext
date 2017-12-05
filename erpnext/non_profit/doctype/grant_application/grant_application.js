@@ -13,7 +13,7 @@ frappe.ui.form.on('Grant Application', {
 			frappe.contacts.clear_address_and_contact(frm);
 		}
 
-		if(frm.doc.status == 'Received'){
+		if(frm.doc.status == 'Received' && !frm.doc.email_notification_sent){
 			frm.add_custom_button(__("Send Grant Review Email"), function() {
 				frappe.call({
 					method: "erpnext.non_profit.doctype.grant_application.grant_application.send_grant_review_emails",

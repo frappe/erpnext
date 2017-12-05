@@ -52,6 +52,7 @@ def send_grant_review_emails(grant_application):
 	)
 
 	grant.status = 'In Progress'
+	grant.email_notification_sent = 1
 	grant.save()
 	frappe.db.commit()
 
