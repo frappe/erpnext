@@ -11,7 +11,7 @@ def get_context(context):
 				pass
 			elif frappe.request.method=='POST':
 				chapter.append('members', dict(
-					user=frappe.session.user, 
+					user=frappe.session.user,
 					introduction=frappe.form_dict.introduction,
 					website_url=frappe.form_dict.website_url,
 					enabled=1
