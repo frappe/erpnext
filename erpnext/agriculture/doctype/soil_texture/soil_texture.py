@@ -11,6 +11,11 @@ class SoilTexture(Document):
 	soil_edit_order = [2, 1, 0]
 	soil_types = ['clay_composition', 'sand_composition', 'silt_composition']
 
+	def load_contents(self):
+		docs = frappe.get_all("Agriculture Analysis Criteria", filters={'linked_doctype':'Soil Texture'})
+		for doc in docs:
+			self.append('soil_texture_criteria', {'title': str(doc.name)})
+
 	def validate(self):
 		self.update_soil_edit('sand_composition')
 		for soil_type in self.soil_types:

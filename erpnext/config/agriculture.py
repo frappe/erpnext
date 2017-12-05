@@ -55,6 +55,10 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Weather",
+				},
+				{
+					"type": "doctype",
+					"name": "Agriculture Analysis Criteria",
 				}
 			]
 		},

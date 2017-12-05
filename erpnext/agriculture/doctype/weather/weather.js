@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Weather', {
-	refresh: function(frm) {
-
+	onload: (frm) => {
+		if (frm.doc.weather_parameter == undefined) frm.call('load_contents');
 	}
 });

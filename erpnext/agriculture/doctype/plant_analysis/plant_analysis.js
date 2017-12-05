@@ -2,6 +2,9 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Plant Analysis', {
+	onload: (frm) => {
+		if (frm.doc.plant_analysis_criteria == undefined) frm.call('load_contents');
+	},
 	refresh: (frm) => {
 		let map_tools = ["a.leaflet-draw-draw-polyline",
 			"a.leaflet-draw-draw-polygon",

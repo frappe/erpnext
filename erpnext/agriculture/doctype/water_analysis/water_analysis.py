@@ -7,6 +7,11 @@ import frappe
 from frappe.model.document import Document
 
 class WaterAnalysis(Document):
+	def load_contents(self):
+		docs = frappe.get_all("Agriculture Analysis Criteria", filters={'linked_doctype':'Water Analysis'})
+		for doc in docs:
+			self.append('water_analysis_criteria', {'title': str(doc.name)})
+
 	def update_lab_result_date(self):
 		if not self.result_datetime:
 			self.result_datetime = self.laboratory_testing_datetime
