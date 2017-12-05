@@ -89,7 +89,10 @@ class PurchaseOrder(BuyingController):
 			nammeing_doc.name_of_doc = self.doctype
 			nammeing_doc.save()
 			return title
-
+	def on_update(self):
+		if self.workflow_state == "Approved By Requester" and not self.project:
+			self.set("handled_by", "Budget Controller")
+			
 	def vallidate_workflow_transition(self):
 		if hasattr(self,'workflow_state'):
 			if u"Project Budget Controller" in frappe.get_roles(frappe.session.user) and self.project and self.workflow_state == "Approved By Budget Controller":
@@ -249,9 +252,6 @@ class PurchaseOrder(BuyingController):
 		self.update_ordered_qty()
 
 		pc_obj.update_last_purchase_rate(self, is_submit = 0)
-
-	def on_update(self):
-		pass
 
 	def update_status_updater(self):
 		self.status_updater[0].update({
