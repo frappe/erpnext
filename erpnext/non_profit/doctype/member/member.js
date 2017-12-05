@@ -60,7 +60,7 @@ frappe.ui.form.on('Member', {
 				]
 			},
 			callback: function (data) {
-				frappe.model.set_value(frm.doctype,frm.docname, "expires_on", data.message.to_date);
+				frappe.model.set_value(frm.doctype,frm.docname, "membership_expiry_date", data.message.to_date);
 			}
 		});
 	}

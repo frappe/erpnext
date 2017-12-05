@@ -306,7 +306,9 @@ def get_data():
 			"icon": "fa fa-gift",
 			"_doctype": "Grant Application",
 			"link": "List/Grant Application",
-			"label": _("Grant Application")
+			"label": _("Grant Application"),
+			"hidden": 1
+
 		},
 		{
 			"module_name": "Donor",
@@ -314,7 +316,8 @@ def get_data():
 			"icon": "fa fa-tint",
 			"_doctype": "Donor",
 			"link": "List/Donor",
-			"label": _("Donor")
+			"label": _("Donor"),
+			"hidden": 1
 		},
 		{
 			"module_name": "Volunteer",
@@ -322,7 +325,8 @@ def get_data():
 			"icon": "fa fa-angellist",
 			"_doctype": "Volunteer",
 			"link": "List/Volunteer",
-			"label": _("Volunteer")
+			"label": _("Volunteer"),
+			"hidden": 1
 		},
 		{
 			"module_name": "Member",
@@ -330,7 +334,8 @@ def get_data():
 			"icon": "fa fa-users",
 			"_doctype": "Member",
 			"link": "List/Member",
-			"label": _("Member")
+			"label": _("Member"),
+			"hidden": 1
 		},
 		{
 			"module_name": "Chapter",
@@ -338,13 +343,15 @@ def get_data():
 			"icon": "fa fa-handshake-o",
 			"_doctype": "Chapter",
 			"link": "List/Chapter",
-			"label": _("Chapter")
+			"label": _("Chapter"),
+			"hidden": 1
 		},
 		{
 			"module_name": "Non Profit",
 			"color": "#DE2B37",
 			"icon": "octicon octicon-heart",
 			"type": "module",
-			"label": _("Non Profit")
+			"label": _("Non Profit"),
+			"hidden": 1
 		}
 	]
