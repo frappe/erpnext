@@ -9,11 +9,11 @@
 	<table class='table table-bordered small' style='max-width: 400px; margin-bottom: 0px;'>
 		<tr>
 			<td style='width: 38.2%'>Organization/Indvidual</td>
-			<td>{{ title }}</td>
+			<td>{{ organization_type }}</td>
 		</tr>
 		<tr>
 			<td>Grant Applicant Name</td>
-			<td>{{ grant_applicant_name }}</td>
+			<td>{{ title}}</td>
 		</tr>
 		<tr>
 			<td>Date</td>
@@ -30,11 +30,11 @@
 	</table>
 	<h2>Q. Please outline your current situation and why you are applying for a grant?</h2>
 	<p>	{{ grant_description }}</p>
-	<h2>Q. Please Describe the purpose of the grant and how it will benfit your organization?</h2>
+	<h2>Q. Please describe the purpose of the grant and how it will benfit your organization?</h2>
 	<p>{{ grant_purpose }}</p>
-	<h2>Q. Amount Requested Details?</h2>
+	<h2>Q. Requested grant amount details?</h2>
 	<p>{{ amount }}</p>
-	<h2>Q. Have you Recevied grant from us before?</h2>
+	<h2>Q. Have you recevied grant from us before?</h2>
 	<p>{{ grant_past_record }}</p>
 	<h3>Contact</h3>
 	{% if frappe.user != 'Guest' %}
