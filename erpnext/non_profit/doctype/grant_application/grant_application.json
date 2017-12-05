@@ -899,7 +899,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-12-05 06:08:15.602432", 
+ "modified": "2017-12-05 06:48:14.804480", 
  "modified_by": "Administrator", 
  "module": "Non Profit", 
  "name": "Grant Application", 
@@ -955,6 +955,7 @@
  "show_name_in_global_search": 0, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
+ "title_field": "", 
  "track_changes": 1, 
  "track_seen": 0
 }

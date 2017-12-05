@@ -28,28 +28,6 @@ frappe.ui.form.on('Member', {
 			frappe.contacts.clear_address_and_contact(frm);
 		}
 
-		var email_list = frappe.utils.split_emails(v);
-			if (!email_list) {
-				// invalid email
-				return '';
-			} else {
-				var invalid_email = false;
-				email_list.forEach(function(email) {
-					if (!validate_email(email)) {
-						frappe.msgprint(__("Invalid Email: {0}", [email]));
-						invalid_email = true;
-					}
-				});
-
-				if (invalid_email) {
-					// at least 1 invalid email
-					return '';
-				} else {
-					// all good
-					return v;
-				}
-			}
-
 		frappe.call({
 			method:"frappe.client.get_value",
 			args:{
