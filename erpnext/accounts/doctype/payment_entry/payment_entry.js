@@ -111,6 +111,16 @@ frappe.ui.form.on('Payment Entry', {
 		frm.events.hide_unhide_fields(frm);
 		frm.events.set_dynamic_labels(frm);
 		frm.events.show_general_ledger(frm);
+
+		if(frm.doc.docstatus === 1) {
+			frm.add_custom_button(
+				__('Return'),
+				console.log('Button has been added'),
+				__('Make')
+			);
+		}
+
+		frm.page.set_inner_btn_group_as_primary(__('Make'));
 	},
 
 	company: function(frm) {
