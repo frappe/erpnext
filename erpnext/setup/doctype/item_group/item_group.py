@@ -81,7 +81,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 @frappe.whitelist(allow_guest=True)
 def get_product_list_for_group(product_group=None, start=0, limit=10, search=None):
-	child_groups = ", ".join(['"' + i[0] + '"' for i in get_child_groups(product_group)])
+	child_groups = ", ".join(['"' + frappe.db.escape(i[0]) + '"' for i in get_child_groups(product_group)])
 
 	# base query
 	query = """select name, item_name, item_code, route, image, website_image, thumbnail, item_group,
