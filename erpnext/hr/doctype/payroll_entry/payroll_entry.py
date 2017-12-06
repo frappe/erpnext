@@ -165,7 +165,8 @@ class PayrollEntry(Document):
 					not_submitted_ss.append(ss_dict)
 		if submitted_ss:
 			jv_name = self.make_accural_jv_entry()
-			frappe.msgprint(_("Salary Slip submitted from {0} to {1}").format(ss_obj.start_date, ss_obj.end_date))
+			frappe.msgprint(_("Salary Slip submitted for period from {0} to {1}")
+				.format(ss_obj.start_date, ss_obj.end_date))
 
 		return create_submit_log(submitted_ss, not_submitted_ss, jv_name)
 
@@ -331,7 +332,9 @@ class PayrollEntry(Document):
 				},
 				{
 					"account": default_payroll_payable_account,
-					"debit_in_account_currency": payment_amount
+					"debit_in_account_currency": payment_amount,
+					"reference_type": self.doctype,
+					"reference_name": self.name
 				}
 			])
 			return journal_entry.as_dict()
@@ -445,7 +448,7 @@ def create_submit_log(submitted_ss, not_submitted_ss, jv_name):
 		frappe.msgprint("No salary slip found to submit for the above selected criteria OR salary slip already submitted")
 
 	if not_submitted_ss:
-		frappe.msgprint("Not submitted Salary Slip <br>\
+		frappe.msgprint("Could not submit any Salary Slip <br>\
 			Possible reasons: <br>\
 			1. Net pay is less than 0. <br>\
 			2. Company Email Address specified in employee master is not valid. <br>")
