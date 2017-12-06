@@ -747,7 +747,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
@@ -878,7 +878,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-11-30 18:33:38.967104", 
+ "modified": "2017-12-06 19:47:03.235021", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Payroll Entry", 
