@@ -113,16 +113,44 @@ frappe.ui.form.on('Payment Entry', {
 		frm.events.show_general_ledger(frm);
 
 		if(frm.doc.docstatus === 1 && frm.doc.payment_type === 'Receive') {
-			frm.add_custom_button(
-				__('Return'),
-				function() {
-					frm.events.show_return_journal_dialog(frm);
-				},
-				__('Make')
+			frm.events.add_journal_entry_button(
+				frm, 'Return', frm.events.show_return_journal_dialog
 			);
 		}
+	},
 
-		frm.page.set_inner_btn_group_as_primary(__('Make'));
+	add_journal_entry_button: function(frm, button_name) {
+		frappe.call({
+			method: 'erpnext.accounts.utils.payment_is_returned',
+			args:{
+				name: frm.doc.name,
+				amount: frm.doc.paid_amount,
+				posting_date: frm.doc.posting_date
+			},
+			callback: function(r) {
+				if(r.message === 'true') {
+					add_button(frm, button_name, frm.events.show_return_journal_dialog);
+					frm.page.set_inner_btn_group_as_primary(__('Make'));
+				}
+			}
+		});
+	},
+
+	/**
+	* Wrapper over `add_custom_button`
+	* @param {Frm} frm
+	* @param {string} button_name
+	* @param {function} fn
+	* @param {string} primary_button_name
+	*/
+	add_button: function(frm, button_name, fn, primary_button_name='Make') {
+		frm.add_custom_button(
+			__(button_name),
+			function() {
+				fn(frm);
+			},
+			__(primary_button_name)
+		);
 	},
 
 	show_return_journal_dialog: function(frm) {

@@ -796,3 +796,19 @@ def make_journal_entry(args):
 	journal_entry.save()
 
 	return journal_entry.name
+
+
+@frappe.whitelist()
+def payment_is_returned(name, amount, posting_date):
+	journal_entry = frappe.get_list(
+		'Journal Entry',
+		filters={
+			'cheque_no': name,
+			'cheque_date': posting_date,
+			'total_debit': amount,
+			'voucher_type': 'Contra Entry',
+			'docstatus': 1
+		}
+	)
+
+	return 'true' if len(journal_entry) == 1 else 'false'
