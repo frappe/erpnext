@@ -115,12 +115,59 @@ frappe.ui.form.on('Payment Entry', {
 		if(frm.doc.docstatus === 1) {
 			frm.add_custom_button(
 				__('Return'),
-				console.log('Button has been added'),
+				function() {
+					frm.events.show_return_journal_dialog(frm);
+				},
 				__('Make')
 			);
 		}
 
 		frm.page.set_inner_btn_group_as_primary(__('Make'));
+	},
+
+	show_return_journal_dialog: function(frm) {
+		var dialog = new frappe.ui.Dialog({
+			fields: [
+				{
+					fieldtype:'Date', reqd:1, label:'Posting Date',
+					fieldname: 'posting_date'
+				},
+				{
+					fieldtype:'Link', label:'Cost Center',
+					options: 'Cost Center', fieldname: 'cost_center',
+					filters: {'company': frm.doc.company}
+				},
+			]
+		});
+
+		dialog.set_primary_action(__('Make'), function() {
+			const data = dialog.get_values();
+			if(!data) return;
+
+			data.entry_type = 'Contra Entry';
+			data.company = frm.doc.company;
+			data.debit_account = frm.doc.paid_from;
+			data.credit_account = frm.doc.paid_to;
+			data.party = frm.doc.party;
+			data.party_type = frm.doc.party_type;
+			data.paid_amount = frm.doc.paid_amount;
+			data.payment_entry = frm.doc.name;
+			data.payment_entry_date = frm.doc.posting_date;
+
+			frappe.call({
+				method:"erpnext.accounts.utils.make_journal_entry",
+				args: {'args': data},
+				callback: function(r) {
+					dialog.hide();
+					if(r.message) {
+						console.log('Journal has been created ', r.message);
+					}
+					frappe.set_route("Form", 'Journal Entry', r.message);
+				}
+			});
+		})
+
+		dialog.show();
 	},
 
 	company: function(frm) {
