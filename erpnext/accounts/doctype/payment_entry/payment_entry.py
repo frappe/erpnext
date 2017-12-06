@@ -310,9 +310,10 @@ class PaymentEntry(AccountsController):
 		self.difference_amount = flt(self.difference_amount - total_deductions,
 			self.precision("difference_amount"))
 
+	# Paid amount is auto allocated in the reference document by default.
+	# Clear the reference document which doesn't have allocated amount on validate so that form can be loaded fast
 	def clear_unallocated_reference_document_rows(self):
 		self.set("references", self.get("references", {"allocated_amount": ["not in", [0, None, ""]]}))
-
 		frappe.db.sql("""delete from `tabPayment Entry Reference`
 			where parent = %s and allocated_amount = 0""", self.name)
 
