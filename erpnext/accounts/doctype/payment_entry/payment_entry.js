@@ -527,7 +527,7 @@ frappe.ui.form.on('Payment Entry', {
 						} else {
 							c.exchange_rate = 1;
 						}
-						if (in_list(['Sales Invoice', 'Purchase Invoice', "Expense Claim"], d.reference_doctype)){
+						if (in_list(['Sales Invoice', 'Purchase Invoice', "Expense Claim", "Fees"], d.reference_doctype)){
 							c.due_date = d.due_date;
 						}
 					});
@@ -535,7 +535,8 @@ frappe.ui.form.on('Payment Entry', {
 					if(
 						(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Customer") ||
 						(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Supplier")  ||
-						(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Employee")
+						(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Employee") ||
+						(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Student") 
 					) {
 						if(total_positive_outstanding > total_negative_outstanding)
 							frm.set_value("paid_amount",

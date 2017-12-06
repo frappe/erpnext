@@ -310,11 +310,15 @@ class PaymentEntry(AccountsController):
 		self.difference_amount = flt(self.difference_amount - total_deductions,
 			self.precision("difference_amount"))
 
+	# clear the reference document rows before submit (not on validate)
 	def clear_unallocated_reference_document_rows(self):
-		self.set("references", self.get("references", {"allocated_amount": ["not in", [0, None, ""]]}))
-
-		frappe.db.sql("""delete from `tabPayment Entry Reference`
-			where parent = %s and allocated_amount = 0""", self.name)
+		allocated_reference_document = self.get("references", {"allocated_amount": ["not in", [0, None, ""]]})
+		if self.references and not allocated_reference_document:
+			frappe.msgprint(_("Please allocate the amount in the reference documents."))
+		if self.docstatus == 1 and allocated_reference_document:
+			self.set("references",allocated_reference_document)
+			frappe.db.sql("""delete from `tabPayment Entry Reference`
+				where parent = %s and allocated_amount = 0""", self.name)
 
 	def validate_payment_against_negative_invoice(self):
 		if ((self.payment_type=="Pay" and self.party_type=="Customer")
