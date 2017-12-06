@@ -30,6 +30,7 @@ frappe.ui.form.on('Fee Schedule', {
 		frm.set_query("student_group", "student_groups", function() {
 			return {
 				"program": frm.doc.program,
+				"academic_term": frm.doc.academic_term,
 				"academic_year": frm.doc.academic_year
 			};
 		});
@@ -95,19 +96,21 @@ frappe.ui.form.on('Fee Schedule', {
 frappe.ui.form.on("Fee Schedule Student Group", {
 	student_group: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
-		frappe.call({
-			method: "erpnext.education.doctype.fee_schedule.fee_schedule.get_total_students",
-			args: {
-				"student_group": row.student_group,
-				"academic_year": frm.doc.academic_year,
-				"academic_term": frm.doc.academic_term,
-				"student_category": frm.doc.student_category
-			},
-			callback: function(r) {
-				if(!r.exc) {
-					frappe.model.set_value(cdt, cdn, "total_students", r.message);
+		if (row.student_group && frm.doc.academic_year) {
+			frappe.call({
+				method: "erpnext.education.doctype.fee_schedule.fee_schedule.get_total_students",
+				args: {
+					"student_group": row.student_group,
+					"academic_year": frm.doc.academic_year,
+					"academic_term": frm.doc.academic_term,
+					"student_category": frm.doc.student_category
+				},
+				callback: function(r) {
+					if(!r.exc) {
+						frappe.model.set_value(cdt, cdn, "total_students", r.message);
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 })

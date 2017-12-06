@@ -20,6 +20,8 @@ def install(country=None):
 		{ 'doctype': 'Domain', 'domain': 'Services'},
 		{ 'doctype': 'Domain', 'domain': 'Education'},
 		{ 'doctype': 'Domain', 'domain': 'Healthcare'},
+		{ 'doctype': 'Domain', 'domain': 'Agriculture'},
+		{ 'doctype': 'Domain', 'domain': 'Non Profit'},
 
 		# Setup Progress
 		{'doctype': "Setup Progress", "actions": [
@@ -213,6 +215,7 @@ def install(country=None):
 		{'doctype': "Party Type", "party_type": "Customer"},
 		{'doctype': "Party Type", "party_type": "Supplier"},
 		{'doctype': "Party Type", "party_type": "Employee"},
+		{'doctype': "Party Type", "party_type": "Member"},
 
 		{'doctype': "Opportunity Type", "name": "Hub"},
 		{'doctype': "Opportunity Type", "name": _("Sales")},

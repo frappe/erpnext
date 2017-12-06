@@ -576,14 +576,13 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount")
 
-	if party_type == "Customer":
+	if party_type == "Customer" or party_type == "Student":
 		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 		payment_dr_or_cr = "payment_gl_entry.credit_in_account_currency - payment_gl_entry.debit_in_account_currency"
 	else:
 		dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 		payment_dr_or_cr = "payment_gl_entry.debit_in_account_currency - payment_gl_entry.credit_in_account_currency"
 
-	invoice = 'Sales Invoice' if party_type == 'Customer' else 'Purchase Invoice'
 	invoice_list = frappe.db.sql("""
 		select
 			voucher_no,	voucher_type, posting_date, ifnull(sum({dr_or_cr}), 0) as invoice_amount, due_date,
@@ -613,7 +612,6 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 		having (invoice_amount - payment_amount) > 0.005
 		order by posting_date, name, due_date""".format(
 			dr_or_cr=dr_or_cr,
-			invoice=invoice,
 			payment_dr_or_cr=payment_dr_or_cr,
 			condition=condition or ""
 		), {
