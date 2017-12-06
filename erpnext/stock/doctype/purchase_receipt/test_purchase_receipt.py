@@ -12,6 +12,7 @@ from erpnext import set_perpetual_inventory
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 
+
 class TestPurchaseReceipt(unittest.TestCase):
 	def setUp(self):
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
@@ -259,7 +260,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		item_code = frappe.db.get_value('Item', {'has_serial_no': 1})
 		if not item_code:
-			item = make_item("Test Serial Item 1", dict(has_serial_no = 1))
+			item = make_item("Test Serial Item 1", dict(has_serial_no=1))
 			item_code = item.name
 
 		serial_no = random_string(5)
@@ -273,10 +274,12 @@ class TestPurchaseReceipt(unittest.TestCase):
 			serial_no=serial_no, basic_rate=100, do_not_submit=True)
 		self.assertRaises(SerialNoDuplicateError, se.submit)
 
+
 def get_gl_entries(voucher_type, voucher_no):
 	return frappe.db.sql("""select account, debit, credit
 		from `tabGL Entry` where voucher_type=%s and voucher_no=%s
 		order by account desc""", (voucher_type, voucher_no), as_dict=1)
+
 
 def make_purchase_receipt(**args):
 	frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
