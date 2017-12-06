@@ -134,8 +134,12 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 		"account": "'" + _("Total") + "'",
 		"account_name": "'" + _("Total") + "'",
 		"warn_if_negative": True,
+		"opening_debit": 0.0,
+		"opening_credit": 0.0,
 		"debit": 0.0,
 		"credit": 0.0,
+		"closing_debit": 0.0,
+		"closing_credit": 0.0,
 		"parent_account": None,
 		"indent": 0,
 		"has_value": True,
@@ -156,7 +160,10 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 
 		total_row["debit"] += d["debit"]
 		total_row["credit"] += d["credit"]
-
+		total_row["opening_debit"] += d["opening_debit"]
+		total_row["opening_credit"] += d["opening_credit"]
+		total_row["closing_debit"] += (d["opening_debit"] + d["debit"])
+		total_row["closing_credit"] += (d["opening_credit"] + d["credit"])
 
 	return total_row
 
