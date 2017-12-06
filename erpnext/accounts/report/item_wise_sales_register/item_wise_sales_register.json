@@ -7,12 +7,17 @@
  "doctype": "Report", 
  "idx": 1, 
  "is_standard": "Yes", 
- "modified": "2017-03-30 15:05:39.211654", 
+ "modified": "2017-11-28 11:47:46.019033", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Item-wise Sales Register", 
  "owner": "Administrator", 
  "ref_doctype": "Sales Invoice", 
  "report_name": "Item-wise Sales Register", 
- "report_type": "Script Report"
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Accounts User"
+  }
+ ]
 }

@@ -40,16 +40,33 @@ def get_data():
 					"description":_("Grade"),
 					"hide_count": True
 				},
+			]
+		},
+		{
+			"label": _("Employee Interface"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "General",
+					"description": _("General Employee Information."),
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Attendance",
+					"doctype": "Attendance"
+				}
+				
+			]
+		},
+		{
+			"label": _("Self Service"),
+			"items": [
 				{
 					"type": "doctype",
 					"name": "May Concern Letter",
 					"description":_("May Concern Letter"),
 					"hide_count": True
-				},
-				{
-					"type": "doctype",
-					"name": "Job Assignment",
-					"description":_("Job Assignment"),
 				},
 				{
 					"type": "doctype",
@@ -83,21 +100,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Cancel Leave Application",
-					"description":_("Cancel Leave Application")
-				},
-				{
-					"type": "doctype",
-					"name": "Return From Leave Statement",
-					"description":_("Return From Leave Statement")
-				},
-				# # {
-				# # 	"type": "doctype",
-				# # 	"name": "Outside Job",
-				# # 	"description":_("Outside Job")
-				# # },
-				{
-					"type": "doctype",
 					"name": "Promotion Decision",
 					"description":_("Promotion Decision	")
 				},
@@ -106,59 +108,15 @@ def get_data():
 					"name": "Employee Badge Request",
 					"description":_("Employee Badge Request")
 				},
-				# {
-				# 	"type": "report",
-				# 	"name": "Financial Custody Report",
-				# 	"description":_("Financial Custody"),
-				# 	"is_query_report": False,
-				# 	"doctype": "Financial Custody"
-				# },
 				{
 					"type": "doctype",
 					"name": "Employee Change IBAN",
 					"description":_("Employee Change IBAN")
 				},
-				# {
-				# 	"type": "report",
-				# 	"name": "Financial Custody Report",
-				# 	"description":_("Financial Custody"),
-				# 	"is_query_report": False,
-				# 	"doctype": "Financial Custody"
-				# },
-				# {
-				# 	"type": "doctype",
-				# 	"name": "Health Insurance Info",
-				# 	"description": _("Health Insurance Info."),
-				# },
-				# {
-				# 	"type": "doctype",
-				# 	"name": "Medical Examination",
-				# 	"description": _("Medical Examination."),
-				# },
 				{
 					"type": "doctype",
 					"name": "Medical Insurance Application",
 					"description": _("Medical Insurance Application."),
-				},
-			]
-		},
-		{
-			"label": _("Recruitment"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Job Applicant",
-					"description": _("Applicant for a Job."),
-				},
-				{
-					"type": "doctype",
-					"name": "Job Opening",
-					"description": _("Opening for a Job."),
-				},
-				{
-					"type": "doctype",
-					"name": "Offer Letter",
-					"description": _("Offer candidate a Job."),
 				},
 			]
 		},
@@ -169,6 +127,16 @@ def get_data():
 					"type": "doctype",
 					"name": "Leave Application",
 					"description": _("Applications for leave."),
+				},
+				{
+					"type": "doctype",
+					"name": "Cancel Leave Application",
+					"description":_("Cancel Leave Application")
+				},
+				{
+					"type": "doctype",
+					"name": "Return From Leave Statement",
+					"description":_("Return From Leave Statement")
 				},
 				{
 					"type": "doctype",
@@ -241,6 +209,26 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Recruitment"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Job Applicant",
+					"description": _("Applicant for a Job."),
+				},
+				{
+					"type": "doctype",
+					"name": "Job Opening",
+					"description": _("Opening for a Job."),
+				},
+				{
+					"type": "doctype",
+					"name": "Offer Letter",
+					"description": _("Offer candidate a Job."),
+				},
+			]
+		},
+		{
 			"label": _("Expense Claims"),
 			"items": [
 				{
@@ -270,18 +258,27 @@ def get_data():
 				},
 			]
 		},
-
 		{
-			"label": _("Training"),
+			"label": _("Training and Business Trip"),
 			"items": [
+				{
+					"type": "doctype",
+					"name": "Business Trip",
+					"description":_("Business Trip"),
+				},
+				{
+					"type": "doctype",
+					"name": "Trip Return and Reimbursement",
+					"description":_("Trip Return and Reimbursement"),
+				},
 				{
 					"type": "doctype",
 					"name": "Training Event"
 				},
-				{
-					"type": "doctype",
-					"name": "Training Result"
-				},
+				# {
+				# 	"type": "doctype",
+				# 	"name": "Training Result"
+				# },
 				{
 					"type": "doctype",
 					"name": "Training Feedback"
@@ -340,12 +337,12 @@ def get_data():
 					"name": "Employee Leave Balance",
 					"doctype": "Leave Application"
 				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Employee Birthday",
-					"doctype": "Employee"
-				},
+				# {
+				# 	"type": "report",
+				# 	"is_query_report": True,
+				# 	"name": "Employee Birthday",
+				# 	"doctype": "Employee"
+				# },
 				{
 					"type": "report",
 					"is_query_report": True,
@@ -396,16 +393,6 @@ def get_data():
 					"label": _("Processing Payroll"),
 					"youtube_id": "apgE-f25Rm0"
 				},
-			]
-		},{
-			"label": _("Employee Interface"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "General",
-					"description": _("General Employee Information."),
-				}
-				
 			]
 		}
 	]

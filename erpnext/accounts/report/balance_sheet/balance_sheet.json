@@ -7,7 +7,7 @@
  "doctype": "Report", 
  "idx": 0, 
  "is_standard": "Yes", 
- "modified": "2017-11-28 11:37:01.408312", 
+ "modified": "2017-11-28 11:41:40.366315", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Balance Sheet", 
@@ -16,6 +16,8 @@
  "report_name": "Balance Sheet", 
  "report_type": "Script Report", 
  "roles": [
-  {}
+  {
+   "role": "Accounts User"
+  }
  ]
 }

@@ -7,12 +7,17 @@
  "doctype": "Report", 
  "idx": 0, 
  "is_standard": "Yes", 
- "modified": "2016-04-08 14:56:37.235981", 
+ "modified": "2017-11-28 11:46:36.031508", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Asset Depreciations and Balances", 
  "owner": "Administrator", 
  "ref_doctype": "Asset", 
  "report_name": "Asset Depreciations and Balances", 
- "report_type": "Script Report"
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Accounts User"
+  }
+ ]
 }
