@@ -16,8 +16,6 @@ To create new Volunteer go to:
 
 **Address and Contact Section:** This Section linked to address and contact doctypes.
 
-**Accounting Section:** This section allowed to set member accounting details such as Account Receivable.
-
 **Volunteer Availability Section:** This section is child table which contains select field about volunteer availability. a volunteer can select availability such as weekly, morning etc
 
 **Volunteer Skills Section:** This section is child table which contains data field about the volunteer skills. a volunteer can add multiple skill for eg. Desk Job,
