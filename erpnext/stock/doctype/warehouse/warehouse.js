@@ -49,6 +49,16 @@ cur_frm.set_query("create_account_under", function() {
 	}
 })
 
+//~ """only show account which there parent_account is create_account_under """
+cur_frm.set_query("account", function() {
+	return {
+		filters: {
+			"parent_account": cur_frm.doc.create_account_under
+		}
+	}
+})
+
+
 function convert_to_group_or_ledger(frm){
 	frappe.call({
 		method:"erpnext.stock.doctype.warehouse.warehouse.convert_to_group_or_ledger",

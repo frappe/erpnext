@@ -23,16 +23,17 @@ class EmployeeLoanApplication(Document):
 			frappe.throw(_("Loan Amount cannot exceed Maximum Loan Amount of {0}").format(maximum_loan_limit))
 
 	def get_repayment_details(self):
-		if self.repayment_method == "Repay Over Number of Periods":
+		if self.repayment_method == "Repay over Number of Months":
 			self.repayment_amount = get_monthly_repayment_amount(self.repayment_method, self.loan_amount, self.rate_of_interest, self.repayment_periods)
 
-		if self.repayment_method == "Repay Fixed Amount per Period":
-			monthly_interest_rate = flt(self.rate_of_interest) / (12 *100)
-			self.repayment_periods = math.ceil((math.log(self.repayment_amount) - math.log(self.repayment_amount - \
-									(self.loan_amount*monthly_interest_rate)))/(math.log(1+monthly_interest_rate)))
+		if self.rate_of_interest>0:
+			if self.repayment_method == "Repay Once":
+				monthly_interest_rate = flt(self.rate_of_interest) / (12 *100)
+				self.repayment_periods = math.ceil((math.log(self.repayment_amount) - math.log(self.repayment_amount - \
+										(self.loan_amount*monthly_interest_rate)))/(math.log(1+monthly_interest_rate)))
 
-		self.total_payable_amount = self.repayment_amount * self.repayment_periods
-		self.total_payable_interest = self.total_payable_amount - self.loan_amount
+			self.total_payable_amount = self.repayment_amount * self.repayment_periods
+			self.total_payable_interest = self.total_payable_amount - self.loan_amount
 
 @frappe.whitelist()
 def make_employee_loan(source_name, target_doc = None):

@@ -11,8 +11,8 @@ frappe.ui.form.on('Employee Loan Application', {
 		frm.trigger("toggle_fields")
 	},
 	toggle_fields: function(frm) {
-		frm.toggle_enable("repayment_amount", frm.doc.repayment_method=="Repay Fixed Amount per Period")
-		frm.toggle_enable("repayment_periods", frm.doc.repayment_method=="Repay Over Number of Periods")
+		frm.toggle_enable("repayment_amount", frm.doc.repayment_method=="Repay Once")
+		frm.toggle_enable("repayment_periods", frm.doc.repayment_method=="Repay over Number of Months")
 	},
 	add_toolbar_buttons: function(frm) {
 		if (frm.doc.status == "Approved") {

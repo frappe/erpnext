@@ -48,13 +48,13 @@ cur_frm.cscript.calculate_total_score = function(doc,cdt,cdn){
 cur_frm.cscript.score = function(doc,cdt,cdn){
 	var d = locals[cdt][cdn];
 	if (d.score){
-		if (flt(d.score) > 5) {
-			msgprint(__("Score must be less than or equal to 5"));
+		if (flt(d.score) > 10) {
+			msgprint(__("Score must be less than or equal to 10"));
 			d.score = 0;
 			refresh_field('score', d.name, 'goals');
 		}
 		total = flt(d.per_weightage*d.score)/100;
-		d.score_earned = total.toPrecision(2);
+		d.score_earned = total.toPrecision(2)*10;
 		refresh_field('score_earned', d.name, 'goals');
 	}
 	else{

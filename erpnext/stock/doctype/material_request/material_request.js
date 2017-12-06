@@ -3,24 +3,29 @@
 
 {% include 'erpnext/buying/doctype/purchase_common/purchase_common.js' %};
 cur_frm.add_fetch("material_requester", "department", "department");
-cur_frm.add_fetch("material_requester", "user_id", "user_id");
+// cur_frm.add_fetch("material_requester", "user_id", "user_id");
 frappe.ui.form.on('Material Request', {
+
     refresh: function(frm) {
-        // cur_frm.refresh();
-        for (var key in cur_frm.fields_dict) {
-            cur_frm.fields_dict[key].df.read_only = 1;
-            // cur_frm.refresh_field(key);
-        }
-        cur_frm.disable_save();
-        if (cur_frm.doc.__islocal || (cur_frm.doc.state == "Rejected" && cur_frm.doc.user_id == frappe.session.user)) {
+
+        if (cur_frm.doc.__islocal || (cur_frm.doc.state == "Modified" && cur_frm.doc.user_id == frappe.session.user)) {
             for (var key in cur_frm.fields_dict) {
-                cur_frm.fields_dict[key].df.read_only = 0;
+                cur_frm.set_df_property(key, "read_only", 0);
+                // cur_frm.fields_dict[key].df.read_only = 0;
             }
             cur_frm.enable_save();
-            cur_frm.fields_dict["material_requester"].df.read_only = 1;
-            cur_frm.fields_dict["state"].df.read_only = 1;
-            cur_frm.fields_dict["suggested_grand_total"].df.read_only = 1;
-            cur_frm.fields_dict["handled_by"].df.read_only = 1;
+            cur_frm.set_df_property("material_requester", "read_only", 1);
+            cur_frm.set_df_property("state", "read_only", 1);
+            cur_frm.set_df_property("suggested_grand_total", "read_only", 1);
+            cur_frm.set_df_property("handled_by", "read_only", 1);
+        }
+        else {
+            for (var key in cur_frm.fields_dict) {
+                cur_frm.set_df_property(key, "read_only", 1);
+            // cur_frm.fields_dict[key].df.read_only = 1;
+            }
+            // cur_frm.save();
+            cur_frm.disable_save();
         }
         cur_frm.toggle_display("project", cur_frm.doc.purchase_workflow == "Project");
         frappe.call({
@@ -35,6 +40,33 @@ frappe.ui.form.on('Material Request', {
         });
        },
     setup: function(frm) {
+        // if ((cur_frm.doc.state == "Initiated" || cur_frm.doc.state == "Rejected") && (!cur_frm.doc.__islocal)){
+        //     frappe.call({
+        //         method: "frappe.client.get_value",
+        //         args: {
+        //             "doctype": "Employee",
+        //             "fieldname": "user_id",
+        //             "filters": {name: cur_frm.doc.material_requester},
+        //         },
+        //         freeze: true,
+        //         callback: function(r) {
+        //             if (r.message.user_id == frappe.session.user || frappe.session.user == "Administrator") {
+        //                 cur_frm.add_custom_button(__("Cancel"), function() {
+        //                     frappe.confirm(__("Are you sure you want to Cancel"), function() {
+        //                         if (cur_frm.doc.workflow_state){
+        //                             // console.log(cur_frm.doc.workflow_state);
+        //                             cur_frm.set_value("workflow_state", "Canceled By Material Requester");
+        //                             cur_frm.set_value("state", "Canceled");
+        //                             cur_frm.set_value("handled_by", "");
+        //                             cur_frm.save();
+        //                         }
+        //                     });
+        //                 })
+
+        //             }
+        //         }
+        //     });
+        // }
        
         frm.custom_make_buttons = {
             'Stock Entry': 'Issue Material',
@@ -129,7 +161,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
     onload: function() {
         this._super();
         cur_frm.trigger('filter_items');
-        cur_frm.refresh();
+        // cur_frm.refresh();
     },
     purchase_workflow: function(){
         

@@ -53,7 +53,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_minimum_order_qty()
 		self.create_raw_materials_supplied("supplied_items")
 		self.set_received_qty_for_drop_ship_items()
-		if self.get("__islocal") :
+		if self.get("__islocal"):
 				self.title = self.get_title()
 		self.vallidate_workflow_transition()
 
@@ -89,12 +89,16 @@ class PurchaseOrder(BuyingController):
 			nammeing_doc.name_of_doc = self.doctype
 			nammeing_doc.save()
 			return title
+	def on_update(self):
+		if self.workflow_state == "Approved By Requester" and not self.project:
+			self.set("handled_by", "Budget Controller")
 
 	def vallidate_workflow_transition(self):
 		if hasattr(self,'workflow_state'):
-			if u"Project Budget Controller" in frappe.get_roles(frappe.session.user):
-				if self.project and self.workflow_state == "Approved By Budget Controller":
+			if u"Project Budget Controller" in frappe.get_roles(frappe.session.user) and self.project and self.workflow_state == "Approved By Budget Controller":
 					self.workflow_state = "Approved By Project Budget Controller"
+			elif u"Budget Controller" in frappe.get_roles(frappe.session.user) and not self.project and self.workflow_state == "Approved By Project Budget Controller":
+				self.workflow_state = "Approved By Budget Controller"
 			# if u"Shared Services Director" in frappe.get_roles(frappe.session.user):
 			# 	if self.project and self.workflow_state == "Approved By Shared Services Director":
 			# 		self.workflow_state = "Approved By Shared Services Director (Prt.)"
@@ -248,9 +252,6 @@ class PurchaseOrder(BuyingController):
 		self.update_ordered_qty()
 
 		pc_obj.update_last_purchase_rate(self, is_submit = 0)
-
-	def on_update(self):
-		pass
 
 	def update_status_updater(self):
 		self.status_updater[0].update({

@@ -47,11 +47,14 @@ class PurchaseReceipt(BuyingController):
 
 	def validate(self):
 		super(PurchaseReceipt, self).validate()
-		
+		if self.get("__islocal"):
+			self.validate_requester()
+			self.get_department()
+			self.get_project()
 		if not self._action=="submit":
 			self.set_status()
 		self.po_required()
-		self.validate_with_previous_doc()
+		#~ self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 
@@ -65,8 +68,13 @@ class PurchaseReceipt(BuyingController):
 		self.validate_assets()
 
 	def after_insert(self):
-		self.get_department()
-		self.get_project()
+		pass
+
+	def validate_requester(self):
+		if self.material_request:
+			pu = frappe.get_value("User Permission", filters = {"allow": "Material Request", "for_value": self.material_request}, fieldname = "user")
+			if pu != frappe.session.user and frappe.session.user != "Administrator":
+				frappe.throw(_("The Requester should receive the Purchase Order"))
 	def get_department(self):
 		if self.material_request:
 			dep = frappe.get_value("Material Request", filters = {"name": self.material_request}, fieldname = "department")
@@ -393,9 +401,9 @@ class PurchaseReceipt(BuyingController):
 							"account": expenses_included_in_valuation,
 							"against": warehouse_account[d.warehouse]["name"],
 							"cost_center": d.cost_center,
+							"project": d.project,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(d.landed_cost_voucher_amount),
-							"project": d.project
 						}))
 
 					# sub-contracting warehouse
@@ -486,7 +494,7 @@ class PurchaseReceipt(BuyingController):
 			frappe.msgprint(_("No accounting entries for the following warehouses") + ": \n" +
 				"\n".join(warehouse_with_no_account))
 
-		return process_gl_map(gl_entries)
+		return process_gl_map(gl_entries,merge_entries=False)
 
 
 	def update_status(self, status):

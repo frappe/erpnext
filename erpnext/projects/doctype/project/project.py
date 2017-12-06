@@ -68,17 +68,17 @@ class Project(Document):
 			)).insert(ignore_permissions = True)
 			# frappe.permissions.add_user_permission("Project", self.name, user_emp[0].user_id)
 
-		if self.project_budget_controller:
-			user_emp = frappe.db.sql("select user_id from `tabEmployee` where name = '{0}'".format(self.project_budget_controller))
-			user = frappe.get_doc("User", user_emp[0][0])
-			user.add_roles("Project Budget Controller")
-			frappe.get_doc(dict(
-			doctype='User Permission',
-			user=user_emp[0][0],
-			allow="Project",
-			for_value=self.name,
-			apply_for_all_roles=apply
-			)).insert(ignore_permissions = True)
+		# if self.project_budget_controller:
+		# 	user_emp = frappe.db.sql("select user_id from `tabEmployee` where name = '{0}'".format(self.project_budget_controller))
+		# 	user = frappe.get_doc("User", user_emp[0][0])
+		# 	user.add_roles("Project Budget Controller")
+		# 	frappe.get_doc(dict(
+		# 	doctype='User Permission',
+		# 	user=user_emp[0][0],
+		# 	allow="Project",
+		# 	for_value=self.name,
+		# 	apply_for_all_roles=apply
+		# 	)).insert(ignore_permissions = True)
 			# frappe.permissions.add_user_permission("Project", self.name, user_emp[0].user_id)
 		pdds = frappe.db.sql("select parent from `tabUserRole` where role = 'Projects Department Director'")
 		for pdd in pdds:

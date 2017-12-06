@@ -100,8 +100,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Promotion Decision",
-					"description":_("Promotion Decision	")
+					"name": "Promotion and Merit Increase",
+					"description":_("Promotion and Merit Increase")
 				},
 				{
 					"type": "doctype",

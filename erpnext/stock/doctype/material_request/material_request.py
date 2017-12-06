@@ -82,6 +82,7 @@ class MaterialRequest(BuyingController):
 		# self.set_title()
 		if self.get("__islocal") :
 				self.title = self.get_title()
+				self.set_user_emp()
 				
 	def get_title(self):
 		from frappe.utils import getdate
@@ -129,6 +130,10 @@ class MaterialRequest(BuyingController):
 	def after_insert(self):
 		self.validate_adding_mr()
 
+	def set_user_emp(self):
+		usr = frappe.get_value("Employee", filters = {"name": self.material_requester}, fieldname="user_id")
+		if usr:
+			self.set("user_id",usr)
 	# def validate_wf_transition():
 
 	# 	if self.workflow_state:
@@ -185,7 +190,7 @@ class MaterialRequest(BuyingController):
 		user_emp = frappe.db.sql("select user_id from `tabEmployee` where name = '{0}'".format(self.material_requester), as_dict = 1)
 		mr = frappe.get_value("User Permission", filters ={'user': user_emp[0].user_id, 'allow': 'Material Request', 'for_value': self.name}, fieldname = "name")
 		if mr:
-			frappe.delete_doc("User Permission", mr)
+			frappe.delete_doc("User Permission", mr, ignore_permissions=True)
 
 	def validate_department(self):
 		if self.get("__islocal") :

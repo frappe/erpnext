@@ -155,14 +155,31 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
         }
 
         if (doc.docstatus == 1 && doc.status != "Closed") {
-            if (flt(doc.per_received, 2) < 100 && allow_receipt) {
-                cur_frm.add_custom_button(__('Receive'), this.make_purchase_receipt, __("Make"));
+            frappe.call({
+                "method": "has_requester_perm",
+                "doc": cur_frm.doc,
+                "freeze": true,
+                callback: function(r) {
+                    if(frappe.session.user == "Administrator" || frappe.session.user == r.message){
+                        if (flt(doc.per_received, 2) < 100 && allow_receipt) {
+                            cur_frm.add_custom_button(__('Receive'), me.make_purchase_receipt, __("Make"));
 
-                if (doc.is_subcontracted === "Yes") {
-                    cur_frm.add_custom_button(__('Material to Supplier'),
-                        function() { me.make_stock_entry(); }, __("Transfer"));
+                            if (doc.is_subcontracted === "Yes") {
+                                cur_frm.add_custom_button(__('Material to Supplier'),
+                                    function() { me.make_stock_entry(); }, __("Transfer"));
+                            }
+                        }
+                    }
                 }
-            }
+            });
+            // if (flt(doc.per_received, 2) < 100 && allow_receipt) {
+            //     cur_frm.add_custom_button(__('Receive'), this.make_purchase_receipt, __("Make"));
+
+            //     if (doc.is_subcontracted === "Yes") {
+            //         cur_frm.add_custom_button(__('Material to Supplier'),
+            //             function() { me.make_stock_entry(); }, __("Transfer"));
+            //     }
+            // }
             // && flt(doc.per_received, 2) === 100 added by ahmed madi 
             if (flt(doc.per_billed, 2) < 100 && flt(doc.per_received, 2) === 100)
                 cur_frm.add_custom_button(__('Invoice'),
