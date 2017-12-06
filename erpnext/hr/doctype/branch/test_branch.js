@@ -9,7 +9,8 @@ QUnit.test("Test: Branch [HR]", function (assert) {
 		() => frappe.set_route("List", "Branch", "List"),
 		() => frappe.new_doc("Branch"),
 		() => frappe.timeout(1),
-		() => frappe.click_link('Edit in full page'),
+		() => frappe.quick_entry.dialog.$wrapper.find('.edit-full').click(),
+		() => frappe.timeout(1),
 		() => cur_frm.set_value("branch", "Test Branch"),
 
 		// save form
