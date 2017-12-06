@@ -86,6 +86,12 @@ frappe.ui.form.on('Stock Entry', {
 		if(frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
 		}
+
+		if(frm.doc.docstatus==1 && frm.doc.purpose == "Material Receipt") {
+			frm.add_custom_button(__('Make Retention Stock Entry'), function () {
+				frm.trigger("make_retention_stock_entry");
+			});
+		}
 	},
 
 	purpose: function(frm) {
@@ -117,6 +123,25 @@ frappe.ui.form.on('Stock Entry', {
 			callback: function(r) {
 				if (!r.exe){
 					frappe.model.set_value(cdt, cdn, "serial_no", r.message);
+				}
+			}
+		});
+	},
+
+	make_retention_stock_entry: function(frm) {
+		frappe.call({
+			method: "erpnext.stock.doctype.stock_entry.stock_entry.move_sample_to_retention_warehouse",
+			args:{
+				"company": frm.doc.company,
+				"items": frm.doc.items
+			},
+			callback: function (r) {
+				if (r.message) {
+					var doc = frappe.model.sync(r.message)[0];
+					frappe.set_route("Form", doc.doctype, doc.name);
+				}
+				else {
+					frappe.msgprint(__("Retention Stock Entry already created or Sample Quantity not provided"));
 				}
 			}
 		});
@@ -327,8 +352,32 @@ frappe.ui.form.on('Stock Entry Detail', {
 	},
 	cost_center: function(frm, cdt, cdn) {
 		erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "cost_center");
-	}
+	},
+	sample_quantity: function(frm, cdt, cdn) {
+		validate_sample_quantity(frm, cdt, cdn);
+	},
+	batch_no: function(frm, cdt, cdn) {
+		validate_sample_quantity(frm, cdt, cdn);
+	},
 });
+
+var validate_sample_quantity = function(frm, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	if (d.sample_quantity && frm.doc.purpose == "Material Receipt") {
+		frappe.call({
+			method: 'erpnext.stock.doctype.stock_entry.stock_entry.validate_sample_quantity',
+			args: {
+				batch_no: d.batch_no,
+				item_code: d.item_code,
+				sample_quantity: d.sample_quantity,
+				qty: d.transfer_qty
+			},
+			callback: (r) => {
+				frappe.model.set_value(cdt, cdn, "sample_quantity", r.message);
+			}
+		});
+	}
+};
 
 frappe.ui.form.on('Landed Cost Taxes and Charges', {
 	amount: function(frm) {
@@ -575,6 +624,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 		this.frm.fields_dict["items"].grid.set_column_disp("s_warehouse", doc.purpose!='Material Receipt');
 		this.frm.fields_dict["items"].grid.set_column_disp("t_warehouse", doc.purpose!='Material Issue');
+		this.frm.fields_dict["items"].grid.set_column_disp("retain_sample", doc.purpose=='Material Receipt');
+		this.frm.fields_dict["items"].grid.set_column_disp("sample_quantity", doc.purpose=='Material Receipt');
 
 		this.frm.cscript.toggle_enable_bom();
 

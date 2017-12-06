@@ -34,15 +34,21 @@ class FeeSchedule(Document):
 		return info
 
 	def validate(self):
-		self.calculate_total()
+		self.calculate_total_and_program()
 
-	def calculate_total(self):
+	def calculate_total_and_program(self):
 		no_of_students = 0
 		for d in self.student_groups:
 			# if not d.total_students:
 			d.total_students = get_total_students(d.student_group, self.academic_year,
 				self.academic_term, self.student_category)
 			no_of_students += cint(d.total_students)
+
+			# validate the program of fee structure and student groups
+			student_group_program = frappe.db.get_value("Student Group", d.student_group, "program")
+			if self.program and student_group_program and self.program != student_group_program:
+				frappe.msgprint(_("Program in the Fee Structure and Student Group {0} are different.")
+					.format(d.student_group))
 		self.grand_total = no_of_students*self.total_amount
 		self.grand_total_in_words = money_in_words(self.grand_total)
 

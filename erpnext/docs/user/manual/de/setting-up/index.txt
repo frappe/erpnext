@@ -13,7 +13,6 @@ stock-reconciliation-for-non-serialized-item
 territory
 third-party-backups
 workflows
-bar-code
 company-setup
 setting-company-sales-goal
 calculate-incentive-for-sales-team

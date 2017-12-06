@@ -272,10 +272,9 @@ def get_user_progress_slides():
 	slides = []
 	slide_settings = get_slide_settings()
 
-	domain = frappe.db.get_value('Company', erpnext.get_default_company(), 'domain')
-
+	domains = frappe.get_active_domains()
 	for s in slide_settings:
-		if not s.domains or (domain and domain in s.domains):
+		if not s.domains or any(d in domains for d in s.domains):
 			s.mark_as_done_method = "erpnext.setup.doctype.setup_progress.setup_progress.set_action_completed_state"
 			s.done = get_action_completed_state(s.action_name) or 0
 			slides.append(s)

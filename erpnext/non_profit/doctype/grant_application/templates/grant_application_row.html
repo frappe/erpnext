@@ -1,0 +1,51 @@
+{% if doc.published %}
+	<div style='margin-bottom: 30px; max-width: 600px;'
+		class='with-border clickable'>
+		<a href="/{{ doc.route }}">
+			<h3 style='margin-top: 0px;'>{{ doc.name }}</h3>
+			<p>
+				<span class='label'>{{ frappe.format_date(doc.creation) }}</span>
+			</p>
+		</a>
+	</div>
+{% endif %}
+
+<style type="text/css">
+.label {
+	font-weight: normal;
+	background-color: #d1d8dd;
+	font-size: 13px;
+	padding: 3px 7px;
+	margin-right: 10px;
+}
+
+
+.with-border {
+	border: 1px solid #d1d8dd;
+	border-radius: 3px;
+	padding: 15px;
+	margin-bottom: 30px;
+}
+
+.with-border h3 {
+	margin-top: 0px;
+}
+
+a {
+	color: #5E64FF;
+}
+
+.clickable a {
+	color: #161c23;
+}
+
+.with-border.clickable:hover {
+	border-color: #36414C;
+	background-color: #fafbfc;
+
+}
+
+.with-border a, .with-border a:hover {
+	text-decoration: none;
+}
+</style>
