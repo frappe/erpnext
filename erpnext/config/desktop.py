@@ -421,7 +421,7 @@ def get_data():
 			"color": "#4286f4",
 			"icon": "octicon octicon-database",
 			"hidden": 1,
-			"label": _("Assets")
+			"label": _("Assets"),
 			"type": "module"
 		},
 		{
