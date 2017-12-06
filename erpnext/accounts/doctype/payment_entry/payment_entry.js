@@ -128,8 +128,8 @@ frappe.ui.form.on('Payment Entry', {
 				posting_date: frm.doc.posting_date
 			},
 			callback: function(r) {
-				if(r.message === 'true') {
-					add_button(frm, button_name, frm.events.show_return_journal_dialog);
+				if(r.message === 'false') {
+					frm.events.add_button(frm, button_name, frm.events.show_return_journal_dialog);
 					frm.page.set_inner_btn_group_as_primary(__('Make'));
 				}
 			}
@@ -153,8 +153,8 @@ frappe.ui.form.on('Payment Entry', {
 		);
 	},
 
-	show_return_journal_dialog: function(frm) {
-		var dialog = new frappe.ui.Dialog({
+	get_journal_dialog: function(frm) {
+		return new frappe.ui.Dialog({
 			fields: [
 				{
 					fieldtype:'Date', reqd:1, label:'Posting Date',
@@ -167,6 +167,10 @@ frappe.ui.form.on('Payment Entry', {
 				},
 			]
 		});
+	},
+
+	show_return_journal_dialog: function(frm) {
+		var dialog = frm.events.get_journal_dialog(frm);
 
 		dialog.set_primary_action(__('Make'), function() {
 			const data = dialog.get_values();
