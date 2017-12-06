@@ -53,12 +53,13 @@ class Warehouse(NestedSet):
 		self.update_nsm_model()
 
 	def create_account_head(self):
-		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
-			if not self.get_account():
-				if self.get("__islocal") or not frappe.db.get_value(
-						"Stock Ledger Entry", {"warehouse": self.name}):
+		#~ if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
+		if not self.get_account():
+			if self.get("__islocal") or not frappe.db.get_value(
+					"Stock Ledger Entry", {"warehouse": self.name}):
 
-					self.validate_parent_account()
+				self.validate_parent_account()
+				if not self.account:
 					ac_doc = frappe.get_doc({
 						"doctype": "Account",
 						'account_name': self.warehouse_name,
@@ -80,6 +81,17 @@ class Warehouse(NestedSet):
 						if not (e.args and e.args[0]=='Account'):
 							# if this is not due to creation of Account
 							raise
+				else :
+					ac_doc = frappe.get_doc ("Account",self.account)
+					ac_doc.company =self.company
+					ac_doc.account_type= "Stock"
+					ac_doc.warehouse= self.name
+					ac_doc.flags.ignore_permissions = True
+					ac_doc.flags.ignore_mandatory = True
+					try:
+						ac_doc.save()
+					except : 
+						pass
 
 	def validate_parent_account(self):
 		if not self.company:

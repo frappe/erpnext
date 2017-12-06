@@ -53,7 +53,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_minimum_order_qty()
 		self.create_raw_materials_supplied("supplied_items")
 		self.set_received_qty_for_drop_ship_items()
-		if self.get("__islocal") :
+		if self.get("__islocal"):
 				self.title = self.get_title()
 		self.vallidate_workflow_transition()
 
@@ -92,7 +92,7 @@ class PurchaseOrder(BuyingController):
 	def on_update(self):
 		if self.workflow_state == "Approved By Requester" and not self.project:
 			self.set("handled_by", "Budget Controller")
-			
+
 	def vallidate_workflow_transition(self):
 		if hasattr(self,'workflow_state'):
 			if u"Project Budget Controller" in frappe.get_roles(frappe.session.user) and self.project and self.workflow_state == "Approved By Budget Controller":

@@ -22,7 +22,7 @@ def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=False, up
 		else:
 			delete_gl_entries(gl_map, adv_adj=adv_adj, update_outstanding=update_outstanding)
 
-def process_gl_map(gl_map, merge_entries=True):
+def process_gl_map(gl_map, merge_entries=False):
 	if merge_entries:
 		gl_map = merge_similar_entries(gl_map)
 	for entry in gl_map:
