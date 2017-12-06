@@ -20,3 +20,4 @@ Healthcare
 Restaurant
 Agriculture
 ERPNext Integrations
+Non Profit
