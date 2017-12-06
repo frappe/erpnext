@@ -15,8 +15,9 @@ def execute():
 		}).insert(ignore_permissions=True)
 	
 	# set guardian roles in already created users
-	for g in frappe.get_all('Guardian', fields=['email_address'], filters={'ifnull(email_address, "")': ('!=', '')}):
-		user = frappe.get_doc('User', g.email_address)
-		user.flags.ignore_validate = True
-		user.flags.ignore_mandatory = True
-		user.save()
+	if frappe.db.exists("Doctype", "Guardian"):
+		for user in frappe.db.sql_list("""select u.name from `tabUser` u , `tabGuardian` g where g.email_address = u.name"""):
+			user = frappe.get_doc('User', user)
+			user.flags.ignore_validate = True
+			user.flags.ignore_mandatory = True
+			user.save()
