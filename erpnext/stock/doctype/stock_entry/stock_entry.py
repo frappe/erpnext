@@ -9,13 +9,14 @@ from frappe.utils import cstr, cint, flt, comma_or, getdate, nowdate, formatdate
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError
 from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor
-from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos
+from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos, get_batch_qty
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 import json
 
 class IncorrectValuationRateError(frappe.ValidationError): pass
 class DuplicateEntryForProductionOrderError(frappe.ValidationError): pass
 class OperationsNotCompleteError(frappe.ValidationError): pass
+class MaxSampleAlreadyRetainedError(frappe.ValidationError): pass
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -472,7 +473,7 @@ class StockEntry(StockController):
 	def get_item_details(self, args=None, for_update=False):
 		item = frappe.db.sql("""select stock_uom, description, image, item_name,
 				expense_account, buying_cost_center, item_group, has_serial_no,
-				has_batch_no
+				has_batch_no, sample_quantity
 			from `tabItem`
 			where name = %s
 				and disabled=0
@@ -499,7 +500,8 @@ class StockEntry(StockController):
 			'basic_rate'			: 0,
 			'serial_no'				: '',
 			'has_serial_no'			: item.has_serial_no,
-			'has_batch_no'			: item.has_batch_no
+			'has_batch_no'			: item.has_batch_no,
+			'sample_quantity'		: item.sample_quantity
 		})
 		for d in [["Account", "expense_account", "default_expense_account"],
 			["Cost Center", "cost_center", "cost_center"]]:
@@ -803,6 +805,40 @@ class StockEntry(StockController):
 						if getdate(self.posting_date) > getdate(expiry_date):
 							frappe.throw(_("Batch {0} of Item {1} has expired.").format(item.batch_no, item.item_code))
 
+
+@frappe.whitelist()
+def move_sample_to_retention_warehouse(company, items):
+	if isinstance(items, basestring):
+		items = json.loads(items)
+	retention_warehouse = frappe.db.get_single_value('Stock Settings', 'sample_retention_warehouse')
+	stock_entry = frappe.new_doc("Stock Entry")
+	stock_entry.company = company
+	stock_entry.purpose = "Material Transfer"
+	for item in items:
+		if item.get('sample_quantity') and item.get('batch_no'):
+			sample_quantity = validate_sample_quantity(item.get('item_code'), item.get('sample_quantity'), item.get('transfer_qty') or item.get('qty'), item.get('batch_no'))
+			if sample_quantity:
+				sample_serial_nos = ''
+				if item.get('serial_no'):
+					serial_nos = (item.get('serial_no')).split()
+					if serial_nos and len(serial_nos) > item.get('sample_quantity'):
+						serial_no_list = serial_nos[:-(len(serial_nos)-item.get('sample_quantity'))]
+						sample_serial_nos = '\n'.join(serial_no_list)
+				stock_entry.append("items", {
+					"item_code": item.get('item_code'),
+					"s_warehouse": item.get('t_warehouse'),
+					"t_warehouse": retention_warehouse,
+					"qty": item.get('sample_quantity'),
+					"basic_rate": item.get('valuation_rate'),
+					'uom': item.get('uom'),
+					'stock_uom': item.get('stock_uom'),
+					"conversion_factor": 1.0,
+					"serial_no": sample_serial_nos,
+					'batch_no': item.get('batch_no')
+				})
+	if stock_entry.get('items'):
+		return stock_entry.as_dict()
+
 @frappe.whitelist()
 def get_production_order_details(production_order):
 	production_order = frappe.get_doc("Production Order", production_order)
@@ -893,5 +929,24 @@ def get_warehouse_details(args):
 			"actual_qty" : get_previous_sle(args).get("qty_after_transaction") or 0,
 			"basic_rate" : get_incoming_rate(args)
 		}
-
 	return ret
+
+@frappe.whitelist()
+def validate_sample_quantity(item_code, sample_quantity, qty, batch_no = None):
+	if cint(qty) < cint(sample_quantity):
+		frappe.throw(_("Sample quantity {0} cannot be more than received quantity {1}").format(sample_quantity, qty), alert=True)
+	retention_warehouse = frappe.db.get_single_value('Stock Settings', 'sample_retention_warehouse')
+	retainted_qty = 0
+	if batch_no:
+		retainted_qty = get_batch_qty(batch_no, retention_warehouse, item_code)
+	max_retain_qty = frappe.get_value('Item', item_code, 'sample_quantity')
+	if retainted_qty >= max_retain_qty:
+		frappe.msgprint(_("Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}.").
+			format(retainted_qty, batch_no, item_code, batch_no), alert=True)
+		sample_quantity = 0
+	qty_diff = max_retain_qty-retainted_qty
+	if cint(sample_quantity) > cint(qty_diff):
+		frappe.msgprint(_("Maximum Samples - {0} can be retained for Batch {1} and Item {2}.").
+			format(max_retain_qty, batch_no, item_code), alert=True)
+		sample_quantity = qty_diff
+	return sample_quantity

@@ -97,6 +97,7 @@ class Item(WebsiteGenerator):
 		self.validate_website_image()
 		self.make_thumbnail()
 		self.validate_fixed_asset()
+		self.validate_retain_sample()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -255,6 +256,12 @@ class Item(WebsiteGenerator):
 			asset = frappe.db.get_all("Asset", filters={"item_code": self.name, "docstatus": 1}, limit=1)
 			if asset:
 				frappe.throw(_('"Is Fixed Asset" cannot be unchecked, as Asset record exists against the item'))
+
+	def validate_retain_sample(self):
+		if self.retain_sample and not frappe.db.get_single_value('Stock Settings', 'sample_retention_warehouse'):
+			frappe.throw(_("Please select Sample Retention Warehouse in Stock Settings first"));
+		if self.retain_sample and not self.has_batch_no:
+			frappe.throw(_(" {0} Retain Sample is based on batch, please check Has Batch No to retain sample of item").format(self.item_code))
 
 	def get_context(self, context):
 		context.show_search=True
