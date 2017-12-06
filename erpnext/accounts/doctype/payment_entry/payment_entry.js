@@ -160,9 +160,8 @@ frappe.ui.form.on('Payment Entry', {
 				callback: function(r) {
 					dialog.hide();
 					if(r.message) {
-						console.log('Journal has been created ', r.message);
+						frappe.set_route("Form", 'Journal Entry', r.message);
 					}
-					frappe.set_route("Form", 'Journal Entry', r.message);
 				}
 			});
 		})
