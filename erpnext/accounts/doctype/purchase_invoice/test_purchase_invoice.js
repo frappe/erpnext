@@ -1,7 +1,7 @@
 QUnit.module('Purchase Invoice');
 
 QUnit.test("test purchase invoice", function(assert) {
-	assert.expect(4);
+	assert.expect(6);
 	let done = assert.async();
 	frappe.run_serially([
 		() => {
