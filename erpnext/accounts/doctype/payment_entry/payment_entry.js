@@ -112,7 +112,7 @@ frappe.ui.form.on('Payment Entry', {
 		frm.events.set_dynamic_labels(frm);
 		frm.events.show_general_ledger(frm);
 
-		if(frm.doc.docstatus === 1) {
+		if(frm.doc.docstatus === 1 && frm.doc.payment_type === 'Receive') {
 			frm.add_custom_button(
 				__('Return'),
 				function() {
