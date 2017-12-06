@@ -114,12 +114,12 @@ frappe.ui.form.on('Payment Entry', {
 
 		if(frm.doc.docstatus === 1 && frm.doc.payment_type === 'Receive') {
 			frm.events.add_journal_entry_button(
-				frm, 'Return', frm.events.show_return_journal_dialog
+				frm, 'Return', 'Redeposit'
 			);
 		}
 	},
 
-	add_journal_entry_button: function(frm, button_name) {
+	add_journal_entry_button: function(frm, reversal_button, redeposit_button) {
 		frappe.call({
 			method: 'erpnext.accounts.utils.payment_is_returned',
 			args:{
@@ -129,7 +129,16 @@ frappe.ui.form.on('Payment Entry', {
 			},
 			callback: function(r) {
 				if(r.message === 'false') {
-					frm.events.add_button(frm, button_name, frm.events.show_return_journal_dialog);
+					frm.events.add_button(
+						frm, reversal_button, frm.events.show_return_journal_dialog
+					);
+				} else if(r.message === 'true') {
+					frm.events.add_button(
+						frm, redeposit_button, frm.events.show_redeposit_dialog
+					);
+				}
+
+				if(r.message === 'true' || r.message === 'false') {
 					frm.page.set_inner_btn_group_as_primary(__('Make'));
 				}
 			}
@@ -169,14 +178,46 @@ frappe.ui.form.on('Payment Entry', {
 		});
 	},
 
-	show_return_journal_dialog: function(frm) {
-		var dialog = frm.events.get_journal_dialog(frm);
+	show_redeposit_dialog: function(frm) {
+		const dialog = frm.events.get_journal_dialog(frm);
 
 		dialog.set_primary_action(__('Make'), function() {
 			const data = dialog.get_values();
 			if(!data) return;
 
-			data.entry_type = 'Contra Entry';
+			data.voucher_type = 'Bank Entry';
+			data.company = frm.doc.company;
+			data.debit_account = frm.doc.paid_to;
+			data.credit_account = frm.doc.paid_from;
+			data.party = frm.doc.party;
+			data.party_type = frm.doc.party_type;
+			data.paid_amount = frm.doc.paid_amount;
+			data.payment_entry = frm.doc.name;
+			data.payment_entry_date = frm.doc.posting_date;
+
+			frappe.call({
+				method:"erpnext.accounts.utils.make_journal_entry",
+				args: {'args': data},
+				callback: function(r) {
+					dialog.hide();
+					if(r.message) {
+						frappe.set_route("Form", 'Journal Entry', r.message);
+					}
+				}
+			});
+		});
+
+		dialog.show();
+	},
+
+	show_return_journal_dialog: function(frm) {
+		const dialog = frm.events.get_journal_dialog(frm);
+
+		dialog.set_primary_action(__('Make'), function() {
+			const data = dialog.get_values();
+			if(!data) return;
+
+			data.voucher_type = 'Contra Entry';
 			data.company = frm.doc.company;
 			data.debit_account = frm.doc.paid_from;
 			data.credit_account = frm.doc.paid_to;
@@ -196,7 +237,7 @@ frappe.ui.form.on('Payment Entry', {
 					}
 				}
 			});
-		})
+		});
 
 		dialog.show();
 	},

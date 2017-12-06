@@ -757,12 +757,15 @@ def make_journal_entry(args):
 		return [
 			dict(
 				account=args['debit_account'], cost_center=args['cost_center'],
-				party_type=args['party_type'], party=args['party'],
+				party_type=args['party_type'] if args['voucher_type'] == 'Contra Entry' else '',
+				party=args['party'] if args['voucher_type'] == 'Contra Entry' else '',
 				debit_in_account_currency=args['paid_amount'],
 				credit_in_account_currency=0,
 			),
 			dict(
 				account=args['credit_account'], cost_center=args['cost_center'],
+				party_type=args['party_type'] if args['voucher_type'] == 'Bank Entry' else '',
+				party=args['party'] if args['voucher_type'] == 'Bank Entry' else '',
 				debit_in_account_currency=0,
 				credit_in_account_currency=args['paid_amount'],
 			)
@@ -781,13 +784,20 @@ def make_journal_entry(args):
 			return
 
 	journal_entry = frappe.new_doc('Journal Entry')
-
 	journal_entry.company = args['company']
-	journal_entry.voucher_type = 'Contra Entry'
+	journal_entry.voucher_type = args['voucher_type']
 	journal_entry.posting_date = args['posting_date']
-	journal_entry.user_remark = _(
-		'Payment Entry {0} from {1} returned.'.format(args['payment_entry'], args['party'])
-	)
+
+	if args['voucher_type'] == 'Contra Entry':
+		remark = 'Payment Entry {0} from {1} returned.'\
+			.format(args['payment_entry'], args['party'])
+	elif args['voucher_type'] == 'Bank Entry':
+		remark = 'Cheque for Payment Entry {0} from {1} redeposited'.\
+			format(args['payment_entry'], args['party'])
+	else:
+		remark = ''
+
+	journal_entry.user_remark = _(remark)
 	journal_entry.cheque_no = args['payment_entry']
 	journal_entry.cheque_date = args['payment_entry_date']
 
