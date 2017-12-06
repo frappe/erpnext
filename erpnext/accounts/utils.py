@@ -3,6 +3,8 @@
 
 from __future__ import unicode_literals
 
+import json
+
 import frappe
 import frappe.defaults
 from frappe.utils import nowdate, cstr, flt, cint, now, getdate
@@ -746,3 +748,51 @@ def create_payment_gateway_account(gateway):
 	except frappe.DuplicateEntryError:
 		# already exists, due to a reinstall?
 		pass
+
+
+@frappe.whitelist()
+def make_journal_entry(args):
+
+	def accounts_values():
+		return [
+			dict(
+				account=args['debit_account'], cost_center=args['cost_center'],
+				party_type=args['party_type'], party=args['party'],
+				debit_in_account_currency=args['paid_amount'],
+				credit_in_account_currency=0,
+			),
+			dict(
+				account=args['credit_account'], cost_center=args['cost_center'],
+				debit_in_account_currency=0,
+				credit_in_account_currency=args['paid_amount'],
+			)
+		]
+
+	if isinstance(args, basestring):
+		args = json.loads(args)
+
+	# Since these values are coming from a Submitted document, they should never
+	# be missing
+	for key in args:
+		if not args[key]:
+			frappe.msgprint(
+				'This document has missing fields. No Journal will be created.'
+			)
+			return
+
+	journal_entry = frappe.new_doc('Journal Entry')
+
+	journal_entry.company = args['company']
+	journal_entry.voucher_type = 'Contra Entry'
+	journal_entry.posting_date = args['posting_date']
+	journal_entry.user_remark = _(
+		'Payment Entry {0} from {1} returned.'.format(args['payment_entry'], args['party'])
+	)
+	journal_entry.cheque_no = args['payment_entry']
+	journal_entry.cheque_date = args['payment_entry_date']
+
+	journal_entry.set('accounts', accounts_values())
+
+	journal_entry.submit()
+
+	return journal_entry.name
