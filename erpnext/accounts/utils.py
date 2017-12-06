@@ -793,7 +793,7 @@ def make_journal_entry(args):
 
 	journal_entry.set('accounts', accounts_values())
 
-	journal_entry.save()
+	journal_entry.submit()
 
 	return journal_entry.name
 
