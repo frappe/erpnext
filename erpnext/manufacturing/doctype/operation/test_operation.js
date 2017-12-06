@@ -7,7 +7,7 @@ QUnit.test("test: operation", function (assert) {
 
 		// Create a Keyboard operation
 		() => {
-			frappe.tests.make(
+			return frappe.tests.make(
 				"Operation", [
 					{__newname: "Assemble Keyboard"},
 					{workstation: "Keyboard assembly workstation"}
@@ -24,7 +24,7 @@ QUnit.test("test: operation", function (assert) {
 
 		// Create a Screen operation
 		() => {
-			frappe.tests.make(
+			return frappe.tests.make(
 				"Operation", [
 					{__newname: 'Assemble Screen'},
 					{workstation: "Screen assembly workstation"}
@@ -35,7 +35,7 @@ QUnit.test("test: operation", function (assert) {
 
 		// Create a CPU operation
 		() => {
-			frappe.tests.make(
+			return frappe.tests.make(
 				"Operation", [
 					{__newname: 'Assemble CPU'},
 					{workstation: "CPU assembly workstation"}
