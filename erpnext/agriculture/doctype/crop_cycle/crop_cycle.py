@@ -30,7 +30,7 @@ class CropCycle(Document):
 	def create_task(self, crop_tasks, project_name, start_date):
 		for crop_task in crop_tasks:
 			task = frappe.new_doc("Task")
-			task.subject = crop_task.get("subject")
+			task.subject = crop_task.get("task_name")
 			task.priority = crop_task.get("priority")
 			task.project = project_name
 			task.exp_start_date = frappe.utils.data.add_days(start_date, crop_task.get("start_day")-1)

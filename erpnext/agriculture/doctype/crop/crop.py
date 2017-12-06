@@ -15,4 +15,4 @@ class Crop(Document):
 				frappe.throw("Start day is greater than end day in task '{0}'".format(task.subject))
 			# to calculate the period of the Crop Cycle
 			if task.end_day > max_period: max_period = task.end_day
-		self.period = max_period
+		if max_period > self.period: self.period = max_period
