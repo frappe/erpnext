@@ -11,12 +11,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Chapter",
 					"description": _("Chapter information."),
-				},
-				{
-					"type": "doctype",
-					"name": "Chapter Message",
-					"description": _("Chapter Message."),
-				},
+				}
 			]
 		},
 		{

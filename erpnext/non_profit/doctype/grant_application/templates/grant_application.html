@@ -1,7 +1,7 @@
 {% extends "templates/web.html" %}
 
 {% block page_content %}
-	<h1>{{ title }}</h1>
+	<h1>{{ applicant_name }}</h1>
 	{% if frappe.user == owner %}
 		<p><a class='btn btn-primary btn-sm' href="/my-grant?name={{ name }}">Edit Grant</a></p>
 	{% endif %}
@@ -9,11 +9,11 @@
 	<table class='table table-bordered small' style='max-width: 400px; margin-bottom: 0px;'>
 		<tr>
 			<td style='width: 38.2%'>Organization/Indvidual</td>
-			<td>{{ organization_type }}</td>
+			<td>{{ applicant_type }}</td>
 		</tr>
 		<tr>
 			<td>Grant Applicant Name</td>
-			<td>{{ title}}</td>
+			<td>{{ applicant_name}}</td>
 		</tr>
 		<tr>
 			<td>Date</td>
@@ -30,15 +30,19 @@
 	</table>
 	<h2>Q. Please outline your current situation and why you are applying for a grant?</h2>
 	<p>	{{ grant_description }}</p>
-	<h2>Q. Please describe the purpose of the grant and how it will benfit your organization?</h2>
-	<p>{{ grant_purpose }}</p>
-	<h2>Q. Requested grant amount details?</h2>
+	<h2>Q. Requested grant amount</h2>
 	<p>{{ amount }}</p>
 	<h2>Q. Have you recevied grant from us before?</h2>
-	<p>{{ grant_past_record }}</p>
+	<p>{{ has_any_past_grant_record }}</p>
 	<h3>Contact</h3>
 	{% if frappe.user != 'Guest' %}
 		<table class='table table-bordered small' style='max-width: 400px; margin-bottom: 0px;'>
+			{% if contact_person %}
+				<tr>
+					<td style='width: 38.2%'>Contact Person</td>
+					<td>{{ contact_person }}</td>
+				</tr>
+			{% endif %}
 			<tr>
 				<td style='width: 38.2%'>Email</td>
 				<td>{{ email }}</td>
@@ -55,27 +59,4 @@
 	{% else %}
 	<p><br><a href="/my-grant?new=1" class='btn btn-primary'>Post a New Grant</a></p>
 	{% endif %}
-	<script>
-		frappe.ready(function(title) {
-			$(".btn-default").on("click", function() {
-				var scale =  $("#scale").val();
-				var note = $("#note").val();
-				var title = $(this).attr("data-title");
-				console.log(scale, note, title);
-				frappe.call({
-						method: 'erpnext.non_profit.doctype.grant_application.grant_application.assessment_result',
-						args: {
-							assessment_scale: scale,
-							note: note,
-							title: title
-						},
-						callback: function(r) {
-							if(r.message) {
-								frappe.msgprint(r.message)
-							}
-						}
-				})
-			});
-		})
-	</script>
 {% endblock %}

@@ -18,7 +18,7 @@
  "is_standard": 1, 
  "login_required": 1, 
  "max_attachment_size": 0, 
- "modified": "2017-12-05 05:48:57.961053", 
+ "modified": "2017-12-06 12:32:16.893289", 
  "modified_by": "Administrator", 
  "module": "Non Profit", 
  "name": "grant-application", 
@@ -32,10 +32,10 @@
  "title": "Grant Application", 
  "web_form_fields": [
   {
-   "fieldname": "organization_type", 
+   "fieldname": "applicant_type", 
    "fieldtype": "Select", 
    "hidden": 0, 
-   "label": "Organization Type", 
+   "label": "Applicant Type", 
    "max_length": 0, 
    "max_value": 0, 
    "options": "Individual\nOrganization", 
@@ -43,7 +43,7 @@
    "reqd": 1
   }, 
   {
-   "fieldname": "title", 
+   "fieldname": "applicant_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
    "label": "Name", 
@@ -74,33 +74,23 @@
    "reqd": 1
   }, 
   {
-   "fieldname": "grant_purpose", 
-   "fieldtype": "Text", 
-   "hidden": 0, 
-   "label": "Grant Purpose", 
-   "max_length": 0, 
-   "max_value": 0, 
-   "read_only": 0, 
-   "reqd": 1
-  }, 
-  {
    "fieldname": "amount", 
    "fieldtype": "Float", 
    "hidden": 0, 
-   "label": "Amount Request", 
+   "label": "Requested Amount", 
    "max_length": 0, 
    "max_value": 0, 
    "read_only": 0, 
    "reqd": 0
   }, 
   {
-   "fieldname": "grant_past_record", 
-   "fieldtype": "Select", 
+   "fieldname": "has_any_past_grant_record", 
+   "fieldtype": "Check", 
    "hidden": 0, 
-   "label": "Grant History", 
+   "label": "Have you received any grant from us before?", 
    "max_length": 0, 
    "max_value": 0, 
-   "options": "YES\nNO", 
+   "options": "", 
    "read_only": 0, 
    "reqd": 0
   }, 
