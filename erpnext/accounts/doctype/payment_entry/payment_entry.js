@@ -512,7 +512,7 @@ frappe.ui.form.on('Payment Entry', {
 						c.outstanding_amount = d.outstanding_amount;
 						c.bill_no = d.bill_no;
 
-						if(!in_list(["Sales Order", "Purchase Order", "Expense Claim"], d.voucher_type)) {
+						if(!in_list(["Sales Order", "Purchase Order", "Expense Claim", "Fees"], d.voucher_type)) {
 							if(flt(d.outstanding_amount) > 0)
 								total_positive_outstanding += flt(d.outstanding_amount);
 							else
@@ -580,13 +580,16 @@ frappe.ui.form.on('Payment Entry', {
 		})
 
 		var allocated_negative_outstanding = 0;
-		if ((frm.doc.payment_type=="Receive" && frm.doc.party_type=="Customer") ||
+		if (
+				(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Customer") ||
 				(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Supplier") ||
-				(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Employee")) {
-			if(total_positive_outstanding_including_order > paid_amount) {
-				var remaining_outstanding = total_positive_outstanding_including_order - paid_amount;
-				allocated_negative_outstanding = total_negative_outstanding < remaining_outstanding ?
-					total_negative_outstanding : remaining_outstanding;
+				(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Employee") ||
+				(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Student")
+			) {
+				if(total_positive_outstanding_including_order > paid_amount) {
+					var remaining_outstanding = total_positive_outstanding_including_order - paid_amount;
+					allocated_negative_outstanding = total_negative_outstanding < remaining_outstanding ?
+						total_negative_outstanding : remaining_outstanding;
 			}
 
 			var allocated_positive_outstanding =  paid_amount + allocated_negative_outstanding;
