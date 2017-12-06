@@ -64,7 +64,6 @@ erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_material_receipt.js
 erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_material_transfer.js
 erpnext/hr/doctype/salary_structure/test_salary_structure.js
 erpnext/hr/doctype/salary_slip/test_salary_slip.js
-erpnext/hr/doctype/process_payroll/test_process_payroll.js
 erpnext/hr/doctype/job_opening/test_job_opening.js
 erpnext/hr/doctype/job_applicant/test_job_applicant.js
 erpnext/hr/doctype/offer_letter/test_offer_letter.js
@@ -140,7 +139,8 @@ erpnext/stock/doctype/delivery_note/test_delivery_note_with_margin.js
 erpnext/selling/doctype/sales_order/tests/test_sales_order_with_margin.js
 erpnext/selling/doctype/quotation/tests/test_quotation_with_margin.js
 erpnext/accounts/doctype/sales_invoice/tests/test_sales_invoice_with_margin.js
-erpnext/stock/doctype/price_list/test_price_list_uom.js
+erpnext/hr/doctype/payroll_entry/test_set_salary_components.js
+erpnext/hr/doctype/payroll_entry/test_payroll_entry.js
 erpnext/agriculture/doctype/land_unit/test_land_unit.js
 erpnext/agriculture/doctype/fertilizer/test_fertilizer.js
 erpnext/agriculture/doctype/water_analysis/test_water_analysis.js

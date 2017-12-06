@@ -1,19 +1,15 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
-
 import unittest
-
 import erpnext
 import frappe
 from dateutil.relativedelta import relativedelta
 from erpnext.accounts.utils import get_fiscal_year, getdate, nowdate
-from erpnext.hr.doctype.process_payroll.process_payroll import get_start_end_dates, get_end_date
+from erpnext.hr.doctype.payroll_entry.payroll_entry import get_start_end_dates, get_end_date
 
-class TestProcessPayroll(unittest.TestCase):
-	def test_process_payroll(self):
-		month = "11"
-		fiscal_year = "_Test Fiscal Year 2016"
+class TestPayrollEntry(unittest.TestCase):
+	def test_payroll_entry(self): # pylint: disable=no-self-use
 
 		for data in frappe.get_all('Salary Component', fields = ["name"]):
 			if not frappe.db.get_value('Salary Component Account',
@@ -21,7 +17,7 @@ class TestProcessPayroll(unittest.TestCase):
 				get_salary_component_account(data.name)
 
 		if not frappe.db.get_value("Salary Slip", {"start_date": "2016-11-01", "end_date": "2016-11-30"}):
-			make_process_payroll()
+			make_payroll_entry()
 
 	def test_get_end_date(self):
 		self.assertEqual(get_end_date('2017-01-01', 'monthly'), {'end_date': '2017-01-31'})
@@ -104,7 +100,7 @@ class TestProcessPayroll(unittest.TestCase):
 			salary_strcture.save()
 
 		dates = get_start_end_dates('Monthly', nowdate())
-		make_process_payroll(start_date=dates.start_date,
+		make_payroll_entry(start_date=dates.start_date,
 			end_date=dates.end_date, branch=branch)
 
 		name = frappe.db.get_value('Salary Slip',
@@ -132,7 +128,7 @@ def get_salary_component_account(sal_comp):
 	sc = sal_comp.append("accounts")
 	sc.company = company
 	sc.default_account = create_account(company)
-	
+
 def create_account(company):
 	salary_account = frappe.db.get_value("Account", "Salary - " + frappe.db.get_value('Company', company, 'abbr'))
 	if not salary_account:
@@ -144,23 +140,23 @@ def create_account(company):
 		}).insert()
 	return salary_account
 
-def make_process_payroll(**args):
+def make_payroll_entry(**args):
 	args = frappe._dict(args)
 
-	process_payroll = frappe.get_doc("Process Payroll", "Process Payroll")
-	process_payroll.company = erpnext.get_default_company()
-	process_payroll.start_date = args.start_date or "2016-11-01"
-	process_payroll.end_date = args.end_date or "2016-11-30"
-	process_payroll.payment_account = get_payment_account()
-	process_payroll.posting_date = nowdate()
-	process_payroll.payroll_frequency = "Monthly"
-	process_payroll.branch = args.branch or None
-	process_payroll.create_salary_slips()
-	process_payroll.submit_salary_slips()
-	if process_payroll.get_sal_slip_list(ss_status = 1):
-		r = process_payroll.make_payment_entry()
+	payroll_entry = frappe.new_doc("Payroll Entry")
+	payroll_entry.company = erpnext.get_default_company()
+	payroll_entry.start_date = args.start_date or "2016-11-01"
+	payroll_entry.end_date = args.end_date or "2016-11-30"
+	payroll_entry.payment_account = get_payment_account()
+	payroll_entry.posting_date = nowdate()
+	payroll_entry.payroll_frequency = "Monthly"
+	payroll_entry.branch = args.branch or None
+	payroll_entry.create_salary_slips()
+	payroll_entry.submit_salary_slips()
+	if payroll_entry.get_sal_slip_list(ss_status = 1):
+		payroll_entry.make_payment_entry()
 
-	return process_payroll
+	return payroll_entry
 
 def get_payment_account():
 	return frappe.get_value('Account',
