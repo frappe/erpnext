@@ -20,9 +20,9 @@ def validate_return_against(doc):
 		frappe.throw(_("{0} is mandatory for Return").format(doc.meta.get_label("return_against")))
 	else:
 		filters = {"doctype": doc.doctype, "docstatus": 1, "company": doc.company}
-		if doc.meta.get_field("customer"):
+		if doc.meta.get_field("customer") and doc.customer:
 			filters["customer"] = doc.customer
-		elif doc.meta.get_field("supplier"):
+		elif doc.meta.get_field("supplier") and doc.supplier:
 			filters["supplier"] = doc.supplier
 
 		if not frappe.db.exists(filters):

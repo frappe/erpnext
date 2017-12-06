@@ -18,5 +18,8 @@ data = {
 	},
 	'Healthcare': {
 		'company_name': 'ABC Hospital Ltd.'
+	},
+	'Non Profit': {
+		'company_name': 'Erpnext Foundation'
 	}
 }

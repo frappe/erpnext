@@ -133,6 +133,16 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Fulfilment"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Delivery Trip",
+					"description": _("Delivery Trip service tours to customers.")
+				}
+			]
+		},
+		{
 			"label": _("Tools"),
 			"icon": "fa fa-wrench",
 			"items": [

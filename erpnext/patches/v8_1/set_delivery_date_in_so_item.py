@@ -18,4 +18,6 @@ def execute():
 			and so.order_type = 'Sales'
 			and (so_item.delivery_date is null or so_item.delivery_date = ''
 				or so_item.delivery_date = '0000-00-00')
+			and (so.delivery_date is not null and so.delivery_date != ''
+				and so.delivery_date != '0000-00-00')
 	""")

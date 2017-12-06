@@ -293,5 +293,65 @@ def get_data():
 			"_doctype": "Restaurant",
 			"link": "List/Restaurant",
 			"label": _("Restaurant")
+		},
+		{
+			"module_name": "Assets",
+			"color": "#4286f4",
+			"icon": "octicon octicon-database",
+			"type": "module"
+		},
+		{
+			"module_name": "Grant Application",
+			"color": "#E9AB17",
+			"icon": "fa fa-gift",
+			"_doctype": "Grant Application",
+			"link": "List/Grant Application",
+			"label": _("Grant Application"),
+			"hidden": 1
+
+		},
+		{
+			"module_name": "Donor",
+			"color": "#7F5A58",
+			"icon": "fa fa-tint",
+			"_doctype": "Donor",
+			"link": "List/Donor",
+			"label": _("Donor"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Volunteer",
+			"color": "#7E587E",
+			"icon": "fa fa-angellist",
+			"_doctype": "Volunteer",
+			"link": "List/Volunteer",
+			"label": _("Volunteer"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Member",
+			"color": "#79BAEC",
+			"icon": "fa fa-users",
+			"_doctype": "Member",
+			"link": "List/Member",
+			"label": _("Member"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Chapter",
+			"color": "#3B9C9C",
+			"icon": "fa fa-handshake-o",
+			"_doctype": "Chapter",
+			"link": "List/Chapter",
+			"label": _("Chapter"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Non Profit",
+			"color": "#DE2B37",
+			"icon": "octicon octicon-heart",
+			"type": "module",
+			"label": _("Non Profit"),
+			"hidden": 1
 		}
 	]

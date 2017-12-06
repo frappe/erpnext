@@ -84,6 +84,9 @@ def get_item_details(args):
 
 		if out.has_batch_no and not args.get("batch_no"):
 			out.batch_no = get_batch_no(out.item_code, out.warehouse, out.qty)
+			actual_batch_qty = get_batch_qty(out.batch_no, out.warehouse, out.item_code)
+			if actual_batch_qty:
+				out.update(actual_batch_qty)
 
 	if args.transaction_date and item.lead_time_days:
 		out.schedule_date = out.lead_time_date = add_days(args.transaction_date,
@@ -239,7 +242,9 @@ def get_basic_details(args, item):
 		"supplier": item.default_supplier,
 		"update_stock": args.get("update_stock") if args.get('doctype') in ['Sales Invoice', 'Purchase Invoice'] else 0,
 		"delivered_by_supplier": item.delivered_by_supplier if args.get("doctype") in ["Sales Order", "Sales Invoice"] else 0,
-		"is_fixed_asset": item.is_fixed_asset
+		"is_fixed_asset": item.is_fixed_asset,
+		"weight_per_unit":item.weight_per_unit,
+		"weight_uom":item.weight_uom,
 	})
 
 	# calculate conversion factor
@@ -394,7 +399,7 @@ def get_pos_profile_item_details(company, args, pos_profile=None):
 	res = frappe._dict()
 
 	if not pos_profile:
-		pos_profile = get_pos_profile(company)
+		pos_profile = get_pos_profile(company, args.get('pos_profile'))
 
 	if pos_profile:
 		for fieldname in ("income_account", "cost_center", "warehouse", "expense_account"):
@@ -408,16 +413,31 @@ def get_pos_profile_item_details(company, args, pos_profile=None):
 	return res
 
 @frappe.whitelist()
-def get_pos_profile(company):
-	pos_profile = frappe.db.sql("""select * from `tabPOS Profile` where user = %s
-		 and company = %s""", (frappe.session['user'], company), as_dict=1)
+def get_pos_profile(company, pos_profile=None, user=None):
+	if pos_profile:
+		return frappe.get_doc('POS Profile', pos_profile)
+
+	if not user:
+		user = frappe.session['user']
+
+	pos_profile = frappe.db.sql("""select pf.*
+		from
+			`tabPOS Profile` pf, `tabPOS Profile User` pfu
+		where
+			pfu.parent = pf.name and pfu.user = %s and pf.company = %s
+			and pf.disabled = 0 and pfu.default=1""", (user, company), as_dict=1)
 
 	if not pos_profile:
-		pos_profile = frappe.db.sql("""select * from `tabPOS Profile`
-			where ifnull(user,'') = '' and company = %s""", company, as_dict=1)
+		pos_profile = frappe.db.sql("""select pf.*
+			from
+				`tabPOS Profile` pf left join `tabPOS Profile User` pfu
+			on
+				pf.name = pfu.parent
+			where
+				ifnull(pfu.user, '') = '' and pf.company = %s
+				and pf.disabled = 0""", (company), as_dict=1)
 
 	return pos_profile and pos_profile[0] or None
-
 
 def get_serial_nos_by_fifo(args):
 	if frappe.db.get_single_value("Stock Settings", "automatically_set_serial_nos_based_on_fifo"):

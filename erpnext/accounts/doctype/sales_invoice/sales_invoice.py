@@ -15,7 +15,7 @@ from erpnext.controllers.selling_controller import SellingController
 from erpnext.accounts.utils import get_account_currency
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
-from erpnext.accounts.doctype.asset.depreciation \
+from erpnext.assets.doctype.asset.depreciation \
 	import get_disposal_account_and_cost_center, get_gl_entries_on_asset_disposal
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_delivery_note_serial_no
@@ -294,21 +294,23 @@ class SalesInvoice(SellingController):
 			return
 
 		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
-		pos = get_pos_profile(self.company)
+		if not self.pos_profile:
+			pos_profile = get_pos_profile(self.company) or {}
+			self.pos_profile = pos_profile.get('name')
+
+		pos = {}
+		if self.pos_profile:
+			pos = frappe.get_doc('POS Profile', self.pos_profile)
 
 		if not self.get('payments') and not for_validate:
-			pos_profile = frappe.get_doc('POS Profile', pos.name) if pos else None
-			update_multi_mode_option(self, pos_profile)
+			update_multi_mode_option(self, pos)
 
 		if not self.account_for_change_amount:
 			self.account_for_change_amount = frappe.db.get_value('Company', self.company, 'default_cash_account')
 
 		if pos:
-			self.pos_profile = pos.name
 			if not for_validate and not self.customer:
 				self.customer = pos.customer
-				self.mode_of_payment = pos.mode_of_payment
-				# self.set_customer_defaults()
 
 			if pos.get('account_for_change_amount'):
 				self.account_for_change_amount = pos.get('account_for_change_amount')
