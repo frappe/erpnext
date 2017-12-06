@@ -72,12 +72,6 @@ jobs:
       env: Agriculture Client Side Test
     - # stage
       script:
-        - bench --verbose run-setup-wizard-ui-test
-        - bench execute erpnext.setup.utils.enable_all_roles_and_domains
-        - bench run-tests --doctype-list-path erpnext/tests/server/agriculture.txt
-      env: Agriculture Server Side Test
-    - # stage
-      script:
         - wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz
         - bench --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz --mariadb-root-password travis
         - bench migrate
