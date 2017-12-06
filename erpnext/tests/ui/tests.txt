@@ -7,7 +7,8 @@ erpnext/accounts/doctype/pricing_rule/test_pricing_rule.js
 erpnext/accounts/doctype/sales_taxes_and_charges_template/test_sales_taxes_and_charges_template.js
 erpnext/accounts/doctype/purchase_taxes_and_charges_template/test_purchase_taxes_and_charges_template.js
 erpnext/accounts/doctype/shipping_rule/test_shipping_rule.js
-erpnext/crm/doctype/lead/test_lead.js
+erpnext/crm/doctype/lead/tests/test_lead_individual.js
+erpnext/crm/doctype/lead/tests/test_lead_organization.js
 erpnext/crm/doctype/opportunity/test_opportunity.js
 erpnext/setup/doctype/company/tests/test_company_production.js
 erpnext/stock/doctype/item/tests/test_item.js
