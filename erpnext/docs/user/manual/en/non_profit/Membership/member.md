@@ -14,10 +14,8 @@ To create new Member go to:
 
 **Membership Type:** Membership Type is link field to Membership Type Doctype. Member can select Available Doctype.
 
-**Expires On:** This Field fetch membership end date details from membership doctype.
+**Membership Expiry Date:** This Field fetch membership end date details from membership doctype.
 
 **Address and Contact Section:** This Section linked to address and contact doctypes.
-
-**Accounting Section:** This section allowed to set member accounting details such as Account Receivable.
 
 {next}
