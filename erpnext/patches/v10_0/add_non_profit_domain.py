@@ -11,3 +11,10 @@ def execute():
 			'doctype': 'Domain',
 			'domain': domain
 		}).insert(ignore_permissions=True)
+
+		frappe.get_doc({
+			'doctype': 'Role',
+			'role_name': 'Non Profit Portal User',
+			'desk_access': 0,
+			'restrict_to_domain': domain
+		}).insert(ignore_permissions=True)

@@ -147,7 +147,7 @@ standard_portal_menu_items = [
 	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role":"Student"},
 	{"title": _("Newsletter"), "route": "/newsletters", "reference_doctype": "Newsletter"},
 	{"title": _("Admission"), "route": "/admissions", "reference_doctype": "Student Admission"},
-	{"title": _("Grant Application"), "route": "/grant-application", "reference_doctype": "Grant Application"},
+	{"title": _("Grant Application"), "route": "/grant-application", "reference_doctype": "Grant Application", "role": "Non Profit Portal User"},
 	{"title": _("Chapter"), "route": "/chapters", "reference_doctype": "Chapter"}
 ]
 

@@ -12,17 +12,15 @@ QUnit.test("test: Grant Application", function (assert) {
 		// insert a new Member
 		() => frappe.tests.make('Grant Application', [
 			// values to be set
-			{title: 'Test Organization'},
-			{name:'Test Applicant'},
+			{applicant_name: 'Test Organization'},
+			{contact_person:'Test Applicant'},
 			{email: 'test@example.com'},
 			{grant_description:'Test message'},
-			{grant_purpose: 'Test Meesage'},
-			{amount: 150000},
-			{grant_past_record:'NO'}
+			{amount: 150000}
 		]),
 		() => {
-			assert.equal(cur_frm.doc.title, 'Test Organization');
-			assert.equal(cur_frm.doc.grant_applicant_name, 'Test Applicant');
+			assert.equal(cur_frm.doc.applicant_name, 'Test Organization');
+			assert.equal(cur_frm.doc.contact_person, 'Test Applicant');
 			assert.equal(cur_frm.doc.email, 'test@example.com');
 			assert.equal(cur_frm.doc.amount, 150000);
 		},

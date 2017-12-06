@@ -1,7 +1,13 @@
 data = {
 	'desktop_icons': [
 		'Non Profit',
-		'Sales Invoice',
+		'Member',
+		'Donor',
+		'Volunteer',
+		'Grant Application',
+		'Accounts',
+		'Buying',
+		'HR',
 		'ToDo'
 	],
 	'modules': [

@@ -15,12 +15,8 @@ QUnit.test("test: Volunteer", function (assert) {
 			{volunteer_name: 'Test Volunteer'},
 			{volunteer_type:'Test Work'},
 			{email:'test@example.com'},
-			{volunteer_availability_table:[
-					[
-						{'volunteer_availability': 'Weekends'},
-					]
-			]},
-			{volunteer_skills_table:[
+			{'availability': 'Weekends'},
+			{volunteer_skills:[
 					[
 						{'volunteer_skills': 'Fundraiser'},
 					]
@@ -30,7 +26,7 @@ QUnit.test("test: Volunteer", function (assert) {
 			assert.equal(cur_frm.doc.volunteer_name, 'Test Volunteer');
 			assert.equal(cur_frm.doc.volunteer_type, 'Test Work');
 			assert.equal(cur_frm.doc.email, 'test@example.com');
-			assert.equal(cur_frm.doc.volunteer_availability_table[0].volunteer_availability, 'Weekends');
+			assert.equal(cur_frm.doc.availability, 'Weekends');
 		},
 		() => done()
 	]);
