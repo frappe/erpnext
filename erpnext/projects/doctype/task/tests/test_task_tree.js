@@ -6,7 +6,7 @@ QUnit.test("test: Task Tree", function (assert) {
 	let done = assert.async();
 
 	// number of asserts
-	assert.expect(5);
+	assert.expect(4);
 
 	frappe.run_serially([
 		// insert a new Task
@@ -21,9 +21,8 @@ QUnit.test("test: Task Tree", function (assert) {
 		() => frappe.timeout(0.5),
 
 		// Creating child nodes
-		() => frappe.tests.click_link('task'),
+		() => frappe.tests.click_link('All Tasks'),
 		() => frappe.map_group.make('Test-1'),
-		() => frappe.map_group.make('Test-2'),
 		() => frappe.map_group.make('Test-3', 1),
 		() => frappe.timeout(1),
 		() => frappe.tests.click_link('Test-3'),
@@ -33,8 +32,9 @@ QUnit.test("test: Task Tree", function (assert) {
 		() => frappe.timeout(0.5),
 		() => frappe.tests.click_link('Test-1'),
 		() => frappe.tests.click_button('Edit'),
-		() => frappe.timeout(0.5),
-		() => {assert.deepEqual(frappe.get_route(), ["Form", "Task", "Test-1"], "Edit route checks");},
+		() => frappe.timeout(1),
+		() => frappe.db.get_value('Task', {'subject': 'Test-1'}, 'name'),
+		(task) => {assert.deepEqual(frappe.get_route(), ["Form", "Task", task.message.name], "Edit route checks");},
 
 		// Deleting child Node
 		() => frappe.set_route('Tree', 'Task'),
@@ -53,17 +53,6 @@ QUnit.test("test: Task Tree", function (assert) {
 		() => frappe.timeout(1),
 		() => {assert.equal(cur_dialog.title, 'Message', 'Error thrown correctly');},
 		() => frappe.tests.click_button('Close'),
-
-		// Renaming Child node
-		() => frappe.timeout(0.5),
-		() => frappe.tests.click_link('Test-2'),
-		() => frappe.tests.click_button('Rename'),
-		() => frappe.timeout(1),
-		() => cur_dialog.set_value('new_name', 'Test-5'),
-		() => frappe.timeout(1.5),
-		() => cur_dialog.get_primary_btn().click(),
-		() => frappe.timeout(1),
-		() => {assert.equal($(`a:contains("Test-5"):visible`).length, 1, 'Rename successfull');},
 
 		// Add multiple child tasks
 		() => frappe.tests.click_link('Test-3'),
