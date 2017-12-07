@@ -7,12 +7,17 @@
  "doctype": "Report", 
  "idx": 0, 
  "is_standard": "Yes", 
- "modified": "2016-08-24 05:47:09.931202", 
+ "modified": "2017-11-28 11:36:05.642540", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Profitability Analysis", 
  "owner": "Administrator", 
  "ref_doctype": "GL Entry", 
  "report_name": "Profitability Analysis", 
- "report_type": "Script Report"
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Accounts User"
+  }
+ ]
 }

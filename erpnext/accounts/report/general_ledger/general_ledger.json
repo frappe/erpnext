@@ -17,6 +17,9 @@
  "report_type": "Script Report", 
  "roles": [
   {
+   "role": "Accounts User"
+  }, 
+  {
    "role": "Accounts Manager"
   }
  ]

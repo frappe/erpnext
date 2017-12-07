@@ -7,12 +7,17 @@
  "doctype": "Report", 
  "idx": 0, 
  "is_standard": "Yes", 
- "modified": "2015-12-12 10:22:45.383203", 
+ "modified": "2017-11-28 11:36:15.491331", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Cash Flow", 
  "owner": "Administrator", 
  "ref_doctype": "GL Entry", 
  "report_name": "Cash Flow", 
- "report_type": "Script Report"
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Accounts User"
+  }
+ ]
 }
