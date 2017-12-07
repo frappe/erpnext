@@ -810,15 +810,38 @@ def make_journal_entry(args):
 
 @frappe.whitelist()
 def payment_is_returned(name, amount, posting_date):
-	journal_entry = frappe.get_list(
-		'Journal Entry',
-		filters={
-			'cheque_no': name,
-			'cheque_date': posting_date,
-			'total_debit': amount,
-			'voucher_type': 'Contra Entry',
-			'docstatus': 1
-		}
+
+	def process_journal_entry_sequence(entries):
+		response = 'unknown'
+
+		# first and even indexed items in list should be of type Contra Entry
+		# second and odd indexed items in list should be of type Bank Entry
+		for i in range(len(entries)):
+			if (i == 0 or i % 2 == 0) and entries[i].voucher_type != 'Contra Entry':
+				break
+			elif entries[i].voucher_type != 'Bank Entry':
+				break
+
+		# If loop gets to the end, sequence is ok. Use the last element in the
+		# list to return the status
+		if len(entries):
+			response = 'true' if entries[-1].voucher_type == 'Contra Entry' else 'false'
+
+		return response
+
+	journal_entry = frappe.db.sql(
+		'select name, voucher_type, posting_date, creation from `tabJournal Entry` '
+		'where (voucher_type="Bank Entry" or voucher_type="Contra Entry") '
+		'and total_amount=%s '
+		'and cheque_no=%s '
+		'and cheque_date=%s '
+		'and docstatus = 1 '
+		'order by creation ASC',
+		[amount, name, posting_date],
+		as_dict=True
 	)
 
-	return 'true' if len(journal_entry) == 1 else 'false'
+	response = 'false' if not len(journal_entry) \
+		else process_journal_entry_sequence(journal_entry)
+
+	return response
