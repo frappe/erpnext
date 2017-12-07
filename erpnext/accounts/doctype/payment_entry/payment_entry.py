@@ -792,26 +792,36 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.received_amount = received_amount
 	pe.allocate_payment_amount = 1
 	pe.letter_head = doc.get("letter_head")
-	args = {
-		'party_account': party_account, 'company': pe.company, 'party_type': pe.party_type,
-		'party': pe.party, 'posting_date': pe.posting_date
-	}
-	references = get_outstanding_reference_documents(args=args)
 
-	for reference in references:
-		if reference.voucher_no == dn:
-			allocated_amount = min(paid_amount, reference.outstanding_amount)
-			pe.append("references", {
-				'reference_doctype': reference.voucher_type,
-				'reference_name': reference.voucher_no,
-				'due_date': reference.due_date,
-				'total_amount': reference.invoice_amount,
-				'outstanding_amount': reference.outstanding_amount,
-				'allocated_amount': allocated_amount,
-				"bill_no": reference.get("bill_no")
-			})
-			if paid_amount:
-				paid_amount -= allocated_amount
+	if dt == "Employee Advance":
+		pe.append("references", {
+			'reference_doctype': dt,
+			'reference_name': dn,
+			'total_amount': grand_total,
+			'outstanding_amount': outstanding_amount,
+			'allocated_amount': outstanding_amount
+		})
+	else:
+		args = {
+			'party_account': party_account, 'company': pe.company, 'party_type': pe.party_type,
+			'party': pe.party, 'posting_date': pe.posting_date
+		}
+		references = get_outstanding_reference_documents(args=args)
+
+		for reference in references:
+			if reference.voucher_no == dn:
+				allocated_amount = min(paid_amount, reference.outstanding_amount)
+				pe.append("references", {
+					'reference_doctype': reference.voucher_type,
+					'reference_name': reference.voucher_no,
+					'due_date': reference.due_date,
+					'total_amount': reference.invoice_amount,
+					'outstanding_amount': reference.outstanding_amount,
+					'allocated_amount': allocated_amount,
+					"bill_no": reference.get("bill_no")
+				})
+				if paid_amount:
+					paid_amount -= allocated_amount
 
 	pe.setup_party_account_field()
 	pe.set_missing_values()

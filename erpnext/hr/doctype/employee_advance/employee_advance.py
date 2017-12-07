@@ -6,7 +6,10 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, cstr, nowdate
+from frappe.utils import flt, nowdate
+
+class EmployeeAdvanceOverPayment(frappe.ValidationError):
+	pass
 
 class EmployeeAdvance(Document):
 	def onload(self):
@@ -16,32 +19,21 @@ class EmployeeAdvance(Document):
 	def validate(self):
 		self.set_status()
 
-	def on_submit(self):
-		if self.approval_status=="Draft":
-			frappe.throw(_("""Approval Status must be 'Approved' or 'Rejected'"""))
-
-		self.set_status()
-
 	def on_cancel(self):
 		self.set_status()
 
 	def set_status(self):
-		self.status = {
-			"0": "Draft",
-			"1": "Submitted",
-			"2": "Cancelled"
-		}[cstr(self.docstatus or 0)]
-
+		if not self.status:
+			self.status = "Draft"
 		if self.docstatus == 1:
-			if self.approval_status == 'Approved':
-				if flt(self.claimed_amount) == flt(self.paid_amount):
-					self.status = "Claimed"
-				elif self.advance_amount == flt(self.paid_amount):
-					self.status = "Paid"
-				else:
-					self.status = "Unpaid"
-			elif self.approval_status == 'Rejected':
-				self.status = 'Rejected'
+			if flt(self.claimed_amount) == flt(self.paid_amount):
+				self.status = "Claimed"
+			elif self.advance_amount == flt(self.paid_amount):
+				self.status = "Paid"
+			else:
+				self.status = "Unpaid"
+		elif self.docstatus == 2:
+			self.status = "Cancelled"
 
 	def set_total_advance_paid(self):
 		paid_amount = frappe.db.sql("""
@@ -54,7 +46,8 @@ class EmployeeAdvance(Document):
 		""", (self.name, self.employee), as_dict=1)[0].paid_amount
 
 		if flt(paid_amount) > self.advance_amount:
-			frappe.throw(_("Row {0}# Paid Amount cannot be greater than requested advance amount"))
+			frappe.throw(_("Row {0}# Paid Amount cannot be greater than requested advance amount"),
+				EmployeeAdvanceOverPayment)
 
 		self.db_set("paid_amount", paid_amount)
 		self.set_status()

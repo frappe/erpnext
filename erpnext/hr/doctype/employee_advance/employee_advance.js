@@ -6,12 +6,6 @@ frappe.ui.form.on('Employee Advance', {
 		frm.add_fetch("employee", "company", "company");
 		frm.add_fetch("company", "default_employee_advance_account", "advance_account");
 
-		frm.set_query("approver", function() {
-			return {
-				query: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_approver"
-			};
-		});
-
 		frm.set_query("employee", function() {
 			return {
 				filters: {
@@ -32,17 +26,7 @@ frappe.ui.form.on('Employee Advance', {
 	},
 
 	refresh: function(frm) {
-		frm.toggle_enable("approver", frm.doc.approval_status=="Draft");
-
-		frm.toggle_enable("approval_status",
-			(frm.doc.approver && frm.doc.approver==frappe.session.user && frm.doc.docstatus==0));
-
-		if (frm.doc.docstatus==0 && frm.doc.approver==frappe.session.user
-				&& frm.doc.approval_status=="Approved") {
-			frm.savesubmit();
-		}
-
-		if (frm.doc.docstatus===1 && frm.doc.approval_status=="Approved"
+		if (frm.doc.docstatus===1
 			&& (flt(frm.doc.paid_amount) < flt(frm.doc.advance_amount))
 			&& frappe.model.can_create("Payment Entry")) {
 			frm.add_custom_button(__('Payment'),
