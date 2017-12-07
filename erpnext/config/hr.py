@@ -99,8 +99,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Process Payroll",
-					"label": _("Process Payroll"),
+					"name": "Payroll Entry",
+					"label": _("Payroll Entry"),
 					"description":_("Generate Salary Slips"),
 					"hide_count": True
 				},
