@@ -248,7 +248,7 @@ def install(country=None):
 
 	]
 
-	from erpnext.setup.setup_wizard.industry_type import get_industry_types
+	from erpnext.setup.setup_wizard.data.industry_type import get_industry_types
 	records += [{"doctype":"Industry Type", "industry": d} for d in get_industry_types()]
 	# records += [{"doctype":"Operation", "operation": d} for d in get_operations()]
 
