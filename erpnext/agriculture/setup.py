@@ -424,11 +424,6 @@ def setup_agriculture():
 			doctype='Agriculture Analysis Criteria',
 			title='Degree Days',
 			standard=1,
-			linked_doctype='Weather'),
-		dict(
-			doctype='Agriculture Analysis Criteria',
-			title='Degree Days',
-			standard=1,
-			linked_doctype='Water Analysis')
+			linked_doctype='Weather')
 	] 
 	insert_record(records)
