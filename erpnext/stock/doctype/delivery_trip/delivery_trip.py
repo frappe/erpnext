@@ -111,11 +111,11 @@ def calculate_time_matrix(name):
 	departure_time = doc.departure_time
 	matrix_duration = []
 
-	for i, stop in enumerate(doc.delivery_stop):
+	for i, stop in enumerate(doc.delivery_stops):
 		if i == 0:
 			# The first row is the starting pointing
 			origin = gmaps.home_address
-			destination = format_address(doc.delivery_stop[i].address)
+			destination = format_address(doc.delivery_stops[i].address)
 			distance_calc = gmaps_client.distance_matrix(origin, destination)
 			matrix_duration.append(distance_calc)
 
@@ -129,8 +129,8 @@ def calculate_time_matrix(name):
 				datetime.timedelta(minutes=15))
 		else:
 			# Calculation based on previous
-			origin = format_address(doc.delivery_stop[i - 1].address)
-			destination = format_address(doc.delivery_stop[i].address)
+			origin = format_address(doc.delivery_stops[i - 1].address)
+			destination = format_address(doc.delivery_stops[i].address)
 			distance_calc = gmaps_client.distance_matrix(origin, destination)
 			matrix_duration.append(distance_calc)
 
@@ -140,7 +140,7 @@ def calculate_time_matrix(name):
 				frappe.throw(_("Error '{0}' occured. Arguments {1}.").format(e.message, e.args))
 
 			stop.estimated_arrival = round_timedelta(
-				doc.delivery_stop[i - 1].estimated_arrival +
+				doc.delivery_stops[i - 1].estimated_arrival +
 				datetime.timedelta(0, distance_secs + secs_15min), datetime.timedelta(minutes=15))
 		stop.save()
 		frappe.db.commit()
