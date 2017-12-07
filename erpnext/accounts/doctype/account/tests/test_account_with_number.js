@@ -46,7 +46,7 @@ QUnit.test("test account with number", function(assert) {
 		},
 		() => frappe.timeout(.5),
 		() => frappe.click_button("Rename"),
-		() => frappe.timeout(1),
+		() => frappe.timeout(2),
 		() => {
 			assert.ok(cur_frm.doc.account_name=="Test Income", "account name remained same");
 			assert.ok(cur_frm.doc.account_number=="4030", "Account number updated to 4030");
