@@ -36,16 +36,16 @@ frappe.ui.form.on("Purchase Order", {
                 });
             });
         }   
-        if (!cur_frm.doc.__islocal) {
-            for (var key in cur_frm.fields_dict) {
-                cur_frm.fields_dict[key].df.read_only = 1;
-            }
-            cur_frm.fields_dict["msg_to_supplier"].df.read_only = 0;
-            cur_frm.fields_dict["msg_section"].df.read_only = 0;
-            cur_frm.disable_save();
-        } else {
-            cur_frm.enable_save();
-        }
+        // if (!cur_frm.doc.__islocal) {
+        //     for (var key in cur_frm.fields_dict) {
+        //         cur_frm.fields_dict[key].df.read_only = 1;
+        //     }
+        //     cur_frm.fields_dict["msg_to_supplier"].df.read_only = 0;
+        //     cur_frm.fields_dict["msg_section"].df.read_only = 0;
+        //     cur_frm.disable_save();
+        // } else {
+        //     cur_frm.enable_save();
+        // }
     },
     onload: function(frm) {
         // frm.refresh();
