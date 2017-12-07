@@ -4,7 +4,7 @@ QUnit.test("test: lead", function (assert) {
 	assert.expect(5);
 	let done = assert.async();
 	let lead_name = frappe.utils.get_random(10);
-    frappe.run_serially([
+	frappe.run_serially([
 		// test lead creation
 		() => frappe.set_route("List", "Lead"),
 		() => frappe.new_doc("Lead"),
@@ -37,9 +37,9 @@ QUnit.test("test: lead", function (assert) {
 		() => frappe.set_control('first_name', 'John'),
 		() => frappe.set_control('last_name', 'Doe'),
 		() => cur_frm.save(),
-        () => frappe.timeout(3),
-        () => frappe.set_route('Form', 'Lead', cur_frm.doc.links[0].link_name),
-        () => frappe.timeout(1),
+		() => frappe.timeout(3),
+		() => frappe.set_route('Form', 'Lead', cur_frm.doc.links[0].link_name),
+		() => frappe.timeout(1),
 		() => frappe.click_link('Address & Contact'),
 		() => assert.ok($('.address-box').text().includes('John'),
 			'contact is seen in contact box'),
