@@ -752,7 +752,16 @@ def create_payment_gateway_account(gateway):
 
 @frappe.whitelist()
 def make_journal_entry(args):
-
+	"""
+	:param args: {
+		'debit_account': '', 'credit_account': '', 'cost_center': '',
+		'party_type': '', 'voucher_type': '', 'party': '', 'paid_amount': '',
+		'posting_date': '', 'company': '', 'payment_entry': '',
+		'payment_entry_date': ''
+	}
+	:return: name of created Journal Entry
+	"""
+	# todo: voucher type should not be hard coded
 	def accounts_values():
 		return [
 			dict(
@@ -810,6 +819,24 @@ def make_journal_entry(args):
 
 @frappe.whitelist()
 def payment_is_returned(name, amount, posting_date):
+	"""
+	Tries to make a best guess to determine if a (receive) Payment Entry has been
+	returned/redeposited with a system generated Journal Entry.
+
+	This function expects a sequence of return and redeposits that start with a
+	return Journal entry:
+
+	Payment Entry --> Returned --> Redeposited --> Returned --> Redeposited --> ...
+
+	This function assumes this sequence when trying to determine if the Payment Entry
+	is returned or not. If Returned, it returns "true". If not, it returns "false".
+	If the sequence is not as expected, it return "unknown"
+
+	:param name: name of the Payment Entry for which a return/redeposit is being made
+	:param amount: The Payment Entry total amount
+	:param posting_date: Posting date of the Payment Entry
+	:return: one of 'true', 'false' or 'unknown'
+	"""
 
 	def process_journal_entry_sequence(entries):
 		response = 'unknown'
