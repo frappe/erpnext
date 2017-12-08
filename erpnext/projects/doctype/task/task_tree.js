@@ -16,8 +16,14 @@ frappe.treeview_settings['Task'] = {
 			options: "Task",
 			label: __("Task"),
 			get_query: function() {
+				var me = frappe.treeview_settings['Task'];
+				var project = me.page.fields_dict.project.get_value();
+				var args = [["Task", 'is_group', '=', 1]];
+				if(project){
+					args.push(["Task", 'project', "=", project]);
+				}
 				return {
-					filters: [["Task", 'is_group', '=', 1]]
+					filters: args
 				};
 			}
 		}
@@ -27,6 +33,8 @@ frappe.treeview_settings['Task'] = {
 	root_label: "All Tasks",
 	ignore_fields: ["parent_task"],
 	onload: function(me) {
+		frappe.treeview_settings['Task'].page = {};
+		$.extend(frappe.treeview_settings['Task'].page, me.page);
 		me.make_tree();
 	},
 	toolbar: [
