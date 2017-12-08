@@ -7,7 +7,8 @@ QUnit.test("test_sales_order_with_bypass_credit_limit_check", function(assert) {
 	frappe.run_serially([
 		() => frappe.new_doc('Customer'),
 		() => frappe.timeout(1),
-		() => frappe.click_link('Edit in full page'),
+		() => frappe.quick_entry.dialog.$wrapper.find('.edit-full').click(),
+		() => frappe.timeout(1),
 		() => cur_frm.set_value("customer_name", "Test Customer 10"),
 		() => cur_frm.set_value("credit_limit", 100.00),
 		() => cur_frm.set_value("bypass_credit_limit_check_at_sales_order", 1),
@@ -17,7 +18,8 @@ QUnit.test("test_sales_order_with_bypass_credit_limit_check", function(assert) {
 
 		() => frappe.new_doc('Item'),
 		() => frappe.timeout(1),
-		() => frappe.click_link('Edit in full page'),
+		() => frappe.quick_entry.dialog.$wrapper.find('.edit-full').click(),
+		() => frappe.timeout(1),
 		() => cur_frm.set_value("item_code", "Test Product 10"),
 		() => cur_frm.set_value("item_group", "Products"),
 		() => cur_frm.set_value("standard_rate", 100),	
