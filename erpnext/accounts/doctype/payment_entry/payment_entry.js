@@ -119,6 +119,12 @@ frappe.ui.form.on('Payment Entry', {
 		}
 	},
 
+	/*
+	* Return/Deposit in Make button after deciding which is appropriate.
+	* @param {Frm} frm
+	* @param {string} reversal_button - Label of button for reversal entry
+	* @param {string} redeposit_button - Label of button for redeposit entry
+	*/
 	add_journal_entry_button: function(frm, reversal_button, redeposit_button) {
 		frappe.call({
 			method: 'erpnext.accounts.utils.payment_is_returned',
