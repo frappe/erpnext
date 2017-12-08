@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, add_months, cint, nowdate, getdate
+from frappe.utils import flt, add_months, cint, nowdate, getdate, today
 from frappe.model.document import Document
 from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_fixed_asset_account
 from erpnext.assets.doctype.asset.depreciation \
@@ -174,7 +174,7 @@ class Asset(Document):
 	def set_status(self, status=None):
 		'''Get and update status'''
 		if not status:
-			status = self.get_status()
+			status = self.get_status()	
 		self.db_set("status", status)
 
 	def get_status(self):
@@ -192,6 +192,16 @@ class Asset(Document):
 		elif self.docstatus == 2:
 			status = "Cancelled"
 		return status
+
+def update_maintenance_status():
+	assets = frappe.get_all('Asset', filters = {'docstatus': 1, 'maintenance_required': 1})
+
+	for asset in assets:
+		asset = frappe.get_doc("Asset", asset.name)
+		if frappe.db.exists('Asset Maintenance Task', {'parent': asset.name, 'next_due_date': today()}):
+			asset.set_status('In Maintenance')
+		if frappe.db.exists('Asset Repair', {'asset_name': asset.name, 'repair_status': 'Pending'}):
+			asset.set_status('Out of Order')
 
 @frappe.whitelist()
 def make_purchase_invoice(asset, item_code, gross_purchase_amount, company, posting_date):
