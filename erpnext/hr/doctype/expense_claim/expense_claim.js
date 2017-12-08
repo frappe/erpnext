@@ -83,15 +83,26 @@ cur_frm.cscript.refresh = function(doc) {
 
 		if (doc.docstatus===1 && doc.approval_status=="Approved") {
 			/* eslint-disable */
-			// no idea how `me` works here 
-			if (cint(doc.total_amount_reimbursed) > 0 && frappe.model.can_read("Payment Entry")) {
+			// no idea how `me` works here
+			var entry_doctype, entry_reference_doctype, entry_reference_name;
+			if(doc.__onload.make_payment_via_journal_entry){
+				entry_doctype = "Journal Entry";
+				entry_reference_doctype = "Journal Entry Account.reference_type";
+				entry_reference_name = "Journal Entry.reference_name";
+			} else {
+				entry_doctype = "Payment Entry";
+				entry_reference_doctype = "Payment Entry Reference.reference_doctype";
+				entry_reference_name = "Payment Entry Reference.reference_name";
+			}
+
+			if (cint(doc.total_amount_reimbursed) > 0 && frappe.model.can_read(entry_doctype)) {
 				cur_frm.add_custom_button(__('Bank Entries'), function() {
 					frappe.route_options = {
-						"Payment Entry Reference.reference_doctype": me.frm.doc.doctype,
-						"Payment Entry Reference.reference_name": me.frm.doc.name,
+						entry_route_doctype: me.frm.doc.doctype,
+						entry_route_name: me.frm.doc.name,
 						company: me.frm.doc.company
 					};
-					frappe.set_route("List", "Payment Entry");
+					frappe.set_route("List", entry_doctype);
 				}, __("View"));
 			}
 			/* eslint-enable */
