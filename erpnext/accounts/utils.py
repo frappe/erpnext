@@ -761,7 +761,6 @@ def make_journal_entry(args):
 	}
 	:return: name of created Journal Entry
 	"""
-	# todo: voucher type should not be hard coded
 	def accounts_values():
 		return [
 			dict(
@@ -783,12 +782,19 @@ def make_journal_entry(args):
 	if isinstance(args, basestring):
 		args = json.loads(args)
 
+	# Make sure `voucher_type` is either Contra Entry or Bank Entry
+	if args['voucher_type'] not in ['Contra Entry', 'Bank Entry']:
+		frappe.msgprint(
+			_('Voucher Type can only be Bank Entry or Contra Entry'),
+			title='Error', raise_exception=1
+		)
+
 	# Since these values are coming from a Submitted document, they should never
-	# be missing
+	# be missing any value
 	for key in args:
 		if not args[key]:
 			frappe.msgprint(
-				'This document has missing fields. No Journal will be created.'
+				_('This document has missing fields. No Journal will be created.')
 			)
 			return
 
@@ -798,13 +804,13 @@ def make_journal_entry(args):
 	journal_entry.posting_date = args['posting_date']
 
 	if args['voucher_type'] == 'Contra Entry':
-		remark = 'Payment Entry {0} from {1} returned.'\
-			.format(args['payment_entry'], args['party'])
-	elif args['voucher_type'] == 'Bank Entry':
-		remark = 'Cheque for Payment Entry {0} from {1} redeposited'.\
-			format(args['payment_entry'], args['party'])
+		remark = _(
+			'Payment Entry %s from %s returned.' % (args['payment_entry'], args['party'])
+		)
 	else:
-		remark = ''
+		remark = _(
+			'Cheque for Payment Entry %s from %s redeposited' % (args['payment_entry'], args['party'])
+		)
 
 	journal_entry.user_remark = _(remark)
 	journal_entry.cheque_no = args['payment_entry']
@@ -837,7 +843,6 @@ def payment_is_returned(name, amount, posting_date):
 	:param posting_date: Posting date of the Payment Entry
 	:return: one of 'true', 'false' or 'unknown'
 	"""
-
 	def process_journal_entry_sequence(entries):
 		response = 'unknown'
 
