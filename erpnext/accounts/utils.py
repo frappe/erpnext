@@ -823,8 +823,8 @@ def payment_is_returned(name, amount, posting_date):
 	Tries to make a best guess to determine if a (receive) Payment Entry has been
 	returned/redeposited with a system generated Journal Entry.
 
-	This function expects a sequence of return and redeposits that start with a
-	return Journal entry:
+	This function anticipates a sequence of Contra and Bank Entries starting
+	with a Contra Journal Entry:
 
 	Payment Entry --> Returned --> Redeposited --> Returned --> Redeposited --> ...
 
