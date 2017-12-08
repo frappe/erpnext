@@ -56,7 +56,12 @@ def get_data():
 					"name": "Stock Ageing",
 					"doctype": "Item",
 				},
-
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Item Price Stock",
+					"doctype": "Item",
+				}
 			]
 		},
 		{
