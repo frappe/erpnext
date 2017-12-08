@@ -39,7 +39,6 @@ def get_item_price_qty_data(filters):
 		{conditions}"""
 		.format(conditions=conditions),filters,as_dict=1)
 
-	items = ",".join(['"' + item['name'] + '"' for item in item_results])
 	price_list_names = ",".join(['"' + item['price_list_name'] + '"' for item in item_results])
 
 	buying_price_map = get_buying_price_map(price_list_names)
@@ -48,7 +47,6 @@ def get_item_price_qty_data(filters):
 	item_dicts = [{"Item Name": d['name'],"Item Price List": d['price_list_name'],"Warehouse": d['warehouse'],
 				"Stock Available": d['actual_qty']} for d in item_results]
 	for item_dict in item_dicts:
-		name = item_dict["Item Name"]
 		price_list = item_dict["Item Price List"]
 		item_dict["Warehouse"] = item_dict["Warehouse"] or ""
 		item_dict["Stock Available"] = item_dict["Stock Available"] or 0
