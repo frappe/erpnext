@@ -1182,7 +1182,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	payment_terms_template: function() {
 		var me = this;
-		if(this.frm.doc.payment_terms_template && this.frm.doc.payment_schedule.length === 0) {
+		if(this.frm.doc.payment_terms_template && !this.frm.doc.payment_schedule) {
 			frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_payment_terms",
 				args: {
