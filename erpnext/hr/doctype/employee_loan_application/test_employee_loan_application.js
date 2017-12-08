@@ -12,7 +12,7 @@ QUnit.test("Test: Employee Loan Application [HR]", function (assert) {
 			employee_name = r.message.name;
 		},
 		() => {
-			frappe.tests.make('Employee Loan Application', [
+			return frappe.tests.make('Employee Loan Application', [
 				{ company: 'For Testing'},
 				{ employee: employee_name},
 				{ employee_name: 'Test Employee 1'},

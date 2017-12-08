@@ -10,7 +10,6 @@ QUnit.test("test: supplier", function(assert) {
 				{supplier_type: 'Hardware'},
 				{country: 'India'},
 				{default_currency: 'INR'},
-				{credit_days_based_on: 'Fixed Days'},
 				{accounts: [
 					[
 						{'company': "For Testing"},

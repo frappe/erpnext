@@ -15,7 +15,7 @@ QUnit.test("test: production order", function (assert) {
 
 	frappe.run_serially([
 		// test production order
-		() => frappe.set_route("List", "Production Order"),
+		() => frappe.set_route("List", "Production Order", "List"),
 		() => frappe.timeout(3),
 
 		// Create a laptop production order
@@ -65,7 +65,7 @@ QUnit.test("test: production order", function (assert) {
 		() => frappe.timeout(2.5),
 
 		// Start the production order process
-		() => frappe.set_route("List", "Production Order"),
+		() => frappe.set_route("List", "Production Order", "List"),
 		() => frappe.timeout(2),
 		() => frappe.click_link("Laptop"),
 		() => frappe.timeout(1),
@@ -118,7 +118,7 @@ QUnit.test("test: production order", function (assert) {
 		() => frappe.timeout(1),
 
 		// Manufacturing finished
-		() => frappe.set_route("List", "Production Order"),
+		() => frappe.set_route("List", "Production Order", "List"),
 		() => frappe.timeout(1),
 		() => frappe.click_link("Laptop"),
 		() => frappe.timeout(1),

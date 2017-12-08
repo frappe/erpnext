@@ -97,10 +97,12 @@ QUnit.test("test: purchase order with last purchase rate", function(assert) {
 		},
 
 		// enable allow_last_purchase_rate
-		() => frappe.tests.make('Buying Settings', [
-			// values to be set
-			{"disable_fetch_last_purchase_rate": 1}
-		]),
+		() => {
+			return frappe.tests.make('Buying Settings', [
+				// values to be set
+				{"disable_fetch_last_purchase_rate": 1}
+			]);
+		},
 
 		() => {
 			return frappe.tests.make('Purchase Order', [
