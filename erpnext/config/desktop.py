@@ -309,6 +309,14 @@ def get_data():
 			"hidden": 1
 		},
 		{
+			"module_name": "Hotels",
+			"color": "#EA81E8",
+			"icon": "fa fa-bed",
+			"type": "module",
+			"label": _("Hotels"),
+			"hidden": 1
+		},
+		{
 			"module_name": "Agriculture",
 			"color": "#8BC34A",
 			"icon": "octicon octicon-globe",
