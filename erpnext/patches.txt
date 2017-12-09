@@ -1,5 +1,6 @@
 execute:import unidecode # new requirement
 erpnext.patches.v8_0.move_perpetual_inventory_setting
+erpnext.patches.v10_0.rename_schools_to_education
 erpnext.patches.v4_0.validate_v3_patch
 erpnext.patches.v4_0.fix_employee_user_id
 erpnext.patches.v4_0.remove_employee_role_if_no_employee
@@ -470,7 +471,6 @@ erpnext.patches.v9_1.create_issue_opportunity_type
 erpnext.patches.v9_2.rename_translated_domains_in_en
 erpnext.patches.v9_0.set_shipping_type_for_existing_shipping_rules
 erpnext.patches.v9_0.update_multi_uom_fields_in_material_request
-erpnext.patches.v10_0.rename_schools_to_education
 erpnext.patches.v9_2.repost_reserved_qty_for_production
 erpnext.patches.v9_2.remove_company_from_patient
 erpnext.patches.v9_2.set_item_name_in_production_order

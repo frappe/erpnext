@@ -9,7 +9,8 @@ QUnit.test("Test: Employment type [HR]", function (assert) {
 		() => frappe.set_route("List", "Employment Type", "List"),
 		() => frappe.new_doc("Employment Type"),
 		() => frappe.timeout(1),
-		() => frappe.click_link('Edit in full page'),
+		() => frappe.quick_entry.dialog.$wrapper.find('.edit-full').click(),
+		() => frappe.timeout(1),
 		() => cur_frm.set_value("employee_type_name", "Test Employment type"),
 		// save form
 		() => cur_frm.save(),

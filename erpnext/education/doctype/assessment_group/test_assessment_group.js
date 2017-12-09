@@ -18,8 +18,6 @@ QUnit.test('Test: Assessment Group', function(assert){
 		// Creating child nodes
 		() => frappe.tests.click_link('All Assessment Groups'),
 		() => frappe.map_group.make('Assessment-group-1'),
-		() => frappe.map_group.make('Assessment-group-2'),
-		() => frappe.map_group.make('Assessment-group-3'),
 		() => frappe.map_group.make('Assessment-group-4', "All Assessment Groups", 1),
 		() => frappe.tests.click_link('Assessment-group-4'),
 		() => frappe.map_group.make('Assessment-group-5', "Assessment-group-3", 0),
@@ -39,27 +37,8 @@ QUnit.test('Test: Assessment Group', function(assert){
 		() => frappe.timeout(0.5),
 		() => frappe.tests.click_button('Yes'),
 
-		// Renaming Child node
-		() => frappe.timeout(0.5),
-		() => frappe.tests.click_link('Assessment-group-2'),
-		() => frappe.tests.click_button('Rename'),
-		() => frappe.timeout(0.4),
-		() => cur_dialog.set_value('new_name', 'Assessment-group-6'),
-		() => frappe.tests.click_button('Rename'),
-		() => frappe.tests.click_button('Close'),
-
-		// Merging 2 child nodes into 1
-		() => frappe.timeout(0.5),
-		() => frappe.tests.click_link('Assessment-group-6'),
-		() => frappe.tests.click_button('Rename'),
-		() => frappe.timeout(0.4),
-		() => cur_dialog.set_value('merge', 1),
-		() => cur_dialog.set_value('new_name', 'Assessment-group-3'),
-		() => frappe.tests.click_button('Rename'),
-		() => frappe.tests.click_button('Close'),
-
 		// Checking Collapse and Expand button
-		() => frappe.timeout(1),
+		() => frappe.timeout(2),
 		() => frappe.tests.click_link('Assessment-group-4'),
 		() => frappe.click_button('Collapse'),
 		() => frappe.tests.click_link('All Assessment Groups'),
