@@ -12,6 +12,7 @@ class HotelRoomReservation(Document):
 	def validate(self):
 		self.total_rooms = {}
 		self.rooms_booked = {}
+		self.set_rates()
 		self.validate_availability()
 
 	def validate_availability(self):
@@ -39,7 +40,7 @@ class HotelRoomReservation(Document):
 				and reservation.docstatus = 1
 				and reservation.name != %s
 				and %s between reservation.from_date
-					and reservation.to_date""", (item, self.name, day))[0][0]
+					and reservation.to_date""", (item, self.name, day))[0][0] or 0
 
 	def get_total_rooms(self, item):
 		if not item in self.total_rooms:
@@ -50,40 +51,43 @@ class HotelRoomReservation(Document):
 				inner join
 					`tabHotel Room` room on package.hotel_room_type = room.hotel_room_type
 				where
-					package.item = %s""", item)[0][0]
+					package.item = %s""", item)[0][0] or 0
 
 		return self.total_rooms[item]
+
+	def set_rates(self):
+		self.net_total = 0
+		for d in self.items:
+			net_rate = 0.0
+			for i in xrange(date_diff(self.to_date, self.from_date)):
+				day = add_days(self.from_date, i)
+				if not d.item:
+					continue
+				day_rate = frappe.db.sql("""
+					select 
+						item.rate 
+					from 
+						`tabHotel Room Pricing Item` item,
+						`tabHotel Room Pricing` pricing
+					where
+						item.parent = pricing.name
+						and item.item = %s
+						and %s between pricing.from_date 
+							and pricing.to_date""", (d.item, day))
+
+				if day_rate:
+					net_rate += day_rate[0][0]
+				else:
+					frappe.throw(
+						_("Please set Hotel Room Rate on {}".format(
+							frappe.format(day, dict(fieldtype="Date")))))
+			d.rate = net_rate
+			d.amount = net_rate * flt(d.qty)
+			self.net_total += d.amount
 
 @frappe.whitelist()
 def get_room_rate(hotel_room_reservation):
 	"""Calculate rate for each day as it may belong to different Hotel Room Pricing Item"""
-	doc = json.loads(hotel_room_reservation)
-	doc["net_total"] = 0
-	for d in doc.get("items"):
-		net_rate = 0.0
-		for i in xrange(date_diff(doc.get("to_date"), doc.get("from_date"))):
-			day = add_days(doc.get("from_date"), i)
-			if not d.get("item"):
-				continue
-			day_rate = frappe.db.sql("""
-				select 
-					item.rate 
-				from 
-					`tabHotel Room Pricing Item` item,
-					`tabHotel Room Pricing` pricing
-				where
-					item.parent = pricing.name
-					and item.item = %s
-					and %s between pricing.from_date 
-						and pricing.to_date""", (d.get("item"), day))
-
-			if day_rate:
-				net_rate += day_rate[0][0]
-			else:
-				frappe.throw(
-					_("Please set Hotel Room Rate on {}".format(
-						frappe.format(day, dict(fieldtype="Date")))))
-		d["rate"] = net_rate
-		d["amount"] = net_rate * flt(d.get("qty"))
-		doc["net_total"] += d["amount"]
-	return doc
+	doc = frappe.get_doc(json.loads(hotel_room_reservation))
+	doc.set_rates()
+	return doc.as_dict()
