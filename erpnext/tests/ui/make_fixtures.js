@@ -236,6 +236,18 @@ $.extend(frappe.test_data, {
 				]
 			]}
 		]
+	},
+	"Company": {
+		"Test Company Ui Test": [
+			{company_name: "Test Company Ui Test"},
+			{abbr: "TCUT"},
+			{default_currency: "INR"}
+		]
+	},
+	"Cost Center": {
+		"Test Cost Center": [
+			{cost_center_name: "Test Cost Center"},
+		]
 	}
 });
 
