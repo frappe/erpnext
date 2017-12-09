@@ -40,8 +40,7 @@ def run_setup_wizard_test():
 	time.sleep(1)
 
 	# domain slide
-	# time.sleep(3)
-	driver.set_select("domain", "Manufacturing")
+	driver.set_multicheck("domains", ["Manufacturing"])
 	time.sleep(1)
 	driver.click(".next-btn")
 

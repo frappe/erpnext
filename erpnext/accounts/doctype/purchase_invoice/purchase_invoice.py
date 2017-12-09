@@ -16,6 +16,7 @@ from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entri
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.buying.utils import check_for_closed_status
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
+from frappe.model.mapper import get_mapped_doc
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -728,3 +729,22 @@ def get_fixed_asset_account(asset, account=None):
 			filters={"parent": asset_category, "company_name": company}, fieldname="fixed_asset_account")
 
 	return account
+
+@frappe.whitelist()
+def make_stock_entry(source_name, target_doc=None):
+	doc = get_mapped_doc("Purchase Invoice", source_name, {
+		"Purchase Invoice": {
+			"doctype": "Stock Entry",
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Purchase Invoice Item": {
+			"doctype": "Stock Entry Detail",
+			"field_map": {
+				"stock_qty": "transfer_qty"
+			},
+		}
+	}, target_doc)
+
+	return doc

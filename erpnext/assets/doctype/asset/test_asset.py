@@ -292,6 +292,7 @@ def create_asset():
 		"item_code": "Macbook Pro",
 		"company": "_Test Company",
 		"purchase_date": "2015-01-01",
+		"calculate_depreciation": 1,
 		"next_depreciation_date": "2020-12-31",
 		"gross_purchase_amount": 100000,
 		"expected_value_after_useful_life": 10000,

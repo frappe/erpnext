@@ -7,13 +7,13 @@ QUnit.test("test item price", function(assert) {
 		() => {
 			return frappe.tests.make('Item Price', [
 				{price_list:'Test-Selling-USD'},
-				{item_code: 'Test Product 3'},
+				{item_code: 'Test Product 4'},
 				{price_list_rate: 200}
 			]);
 		},
 		() => cur_frm.save(),
 		() => {
-			assert.ok(cur_frm.doc.item_name == 'Test Product 3', "Item name correct");
+			assert.ok(cur_frm.doc.item_name == 'Test Product 4', "Item name correct");
 			assert.ok(cur_frm.doc.price_list_rate == 200, "Price list rate correct");
 		},
 		() => frappe.timeout(0.3),

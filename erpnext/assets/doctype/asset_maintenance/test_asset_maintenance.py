@@ -88,17 +88,18 @@ def create_maintenance_team():
 	if not frappe.db.exists("Asset Maintenance Team", "Team Awesome"):
 		frappe.get_doc({
 			"doctype": "Asset Maintenance Team",
+			"maintenance_manager": "marcus@abc.com",
 			"maintenance_team_name": "Team Awesome",
 			"company": "_Test Company",
 			"maintenance_team_members": get_maintenance_team(user_list)
 		}).insert()
 
 def get_maintenance_team(user_list):
-	return [{"team_member": user_list[0],
-			"full_name": user_list[0],
+	return [{"team_member": user,
+			"full_name": user,
 			"maintenance_role": "Technician"
 			}
-		]
+		for user in user_list[1:]]
 
 def get_maintenance_tasks():
 	return [{"maintenance_task": "Change Oil",

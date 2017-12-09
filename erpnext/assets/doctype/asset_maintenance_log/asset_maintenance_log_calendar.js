@@ -18,5 +18,5 @@ frappe.views.calendar["Asset Maintenance Log"] = {
 			"label": __("Asset Maintenance")
 		}
 	],
-	get_events_method: "erpnext.assets.doctype.asset_maintenance_log.asset_maintenance_log.get_events"
+	get_events_method: "frappe.desk.calendar.get_events"
 };
