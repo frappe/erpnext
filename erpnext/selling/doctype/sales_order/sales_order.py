@@ -110,7 +110,7 @@ class SalesOrder(SellingController):
 				for d in self.get("items"):
 					if not d.delivery_date:
 						d.delivery_date = self.delivery_date
-					
+
 					if getdate(self.transaction_date) > getdate(d.delivery_date):
 						frappe.msgprint(_("Expected Delivery Date should be after Sales Order Date"),
 							indicator='orange', title=_('Warning'))
@@ -191,7 +191,7 @@ class SalesOrder(SellingController):
 		if self.project:
 			project = frappe.get_doc("Project", self.project)
 			project.flags.dont_sync_tasks = True
-			project.update_sales_costing()
+			project.update_planned_sales()
 			project.save()
 			project_list.append(self.project)
 
@@ -492,7 +492,7 @@ def make_delivery_note(source_name, target_doc=None):
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
-		
+
 		# set company address
 		target.update(get_company_address(target.company))
 		if target.company_address:
