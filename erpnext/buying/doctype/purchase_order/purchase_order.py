@@ -54,7 +54,8 @@ class PurchaseOrder(BuyingController):
 		self.create_raw_materials_supplied("supplied_items")
 		self.set_received_qty_for_drop_ship_items()
 		if self.get("__islocal"):
-				self.title = self.get_title()
+			self.validate_project()
+			self.title = self.get_title()
 		self.vallidate_workflow_transition()
 
 		mr = frappe.get_value('Quotation Opening', filters = {"name": self.quotation_opening, "docstatus": 1}, fieldname = "material_request")
@@ -65,6 +66,10 @@ class PurchaseOrder(BuyingController):
 			if proj:
 				self.project = proj
 
+	def validate_project(self):
+		if self.project:
+			for item in self.get("items"):
+				item.project = self.project
 	def get_title(self):
 		from frappe.utils import getdate
 		
