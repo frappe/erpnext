@@ -85,7 +85,7 @@ class Item(WebsiteGenerator):
 		self.check_for_active_boms()
 		self.fill_customer_code()
 		self.check_item_tax()
-		self.validate_barcode()
+		# self.validate_barcode()
 		self.validate_warehouse_for_reorder()
 		self.update_bom_item_desc()
 		self.synced_with_hub = 0
@@ -464,14 +464,6 @@ class Item(WebsiteGenerator):
 						frappe.throw(_("{0} entered twice in Item Tax").format(d.tax_type))
 					else:
 						check_list.append(d.tax_type)
-
-	def validate_barcode(self):
-		if self.barcode:
-			duplicate = frappe.db.sql("""select name from tabItem where barcode = %s
-				and name != %s""", (self.barcode, self.name))
-			if duplicate:
-				frappe.throw(_("Barcode {0} already used in Item {1}").format(self.barcode, duplicate[0][0]))
-
 
 	def validate_warehouse_for_reorder(self):
 		'''Validate Reorder level table for duplicate and conditional mandatory'''
