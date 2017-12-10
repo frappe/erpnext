@@ -12,7 +12,7 @@ from erpnext.controllers.sales_and_purchase_return import validate_return
 from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled
 from erpnext.exceptions import InvalidCurrency
 
-force_item_fields = ("item_group", "barcode", "brand", "stock_uom")
+force_item_fields = ("item_group", "barcodes", "brand", "stock_uom")
 
 class AccountsController(TransactionBase):
 	def __init__(self, *args, **kwargs):

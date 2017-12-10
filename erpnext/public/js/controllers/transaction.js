@@ -273,6 +273,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			// barcode cleared, remove item
 			d.item_code = "";
 		}
+        console.log(d.barcode)
 		this.item_code(doc, cdt, cdn, true);
 	},
 
@@ -281,6 +282,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var item = frappe.get_doc(cdt, cdn);
 		var update_stock = 0, show_batch_dialog = 0;
 
+        console.log(from_barcode)
 		if(['Sales Invoice'].includes(this.frm.doc.doctype)) {
 			update_stock = cint(me.frm.doc.update_stock);
 			show_batch_dialog = update_stock;
@@ -294,6 +296,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if(!from_barcode) {
 			item.barcode = null;
 		}
+        console.log(item)
 		if(item.item_code || item.barcode || item.serial_no) {
 			if(!this.validate_company_and_party()) {
 				this.frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();

@@ -296,6 +296,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.customers = r.message.customers;
 		this.serial_no_data = r.message.serial_no_data;
 		this.batch_no_data = r.message.batch_no_data;
+		this.barcode_data = r.message.barcode_data;
 		this.tax_data = r.message.tax_data;
 		this.contacts = r.message.contacts;
 		this.address = r.message.address || {};
@@ -410,7 +411,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		});
 
 		this.serach_item.make_input();
-		
+
 		this.serach_item.$input.on("keypress", function (event) {
 
 			clearTimeout(me.last_search_timeout);
@@ -418,7 +419,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				if((me.serach_item.$input.val() != "") || (event.which == 13)) {
 					me.items = me.get_items();
 					me.make_item_list();
-				}				
+				}
 			}, 400);
 		});
 
@@ -1105,9 +1106,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 						search_status = false;
 						me.item_serial_no[item.item_code] = [me.serach_item.$input.val(), me.serial_no_data[item.item_code][me.serach_item.$input.val()]]
 						return true
-					} else if (item.barcode == me.serach_item.$input.val()) {
+					} else if (in_list(me.barcode_data[item.item_code], me.serach_item.$input.val())) {
 						search_status = false;
-						return item.barcode == me.serach_item.$input.val();
+						return true;
 					} else if (reg.test(item.item_code.toLowerCase()) || (item.description && reg.test(item.description.toLowerCase())) ||
 						reg.test(item.item_name.toLowerCase()) || reg.test(item.item_group.toLowerCase())) {
 						return true
@@ -1512,8 +1513,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				me.print_document(html)
 			})
 		}
-		
-		if (this.frm.doc.docstatus == 1) {	
+
+		if (this.frm.doc.docstatus == 1) {
 			this.page.add_menu_item(__("Email"), function () {
 				me.email_prompt()
 			})

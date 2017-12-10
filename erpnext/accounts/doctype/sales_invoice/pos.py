@@ -2,54 +2,64 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
-from frappe import _
-from frappe.utils import nowdate
-from erpnext.setup.utils import get_exchange_rate
-from frappe.core.doctype.communication.email import make
-from erpnext.stock.get_item_details import get_pos_profile
+
+import json
+
+import frappe
 from erpnext.accounts.party import get_party_account_currency
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
+from erpnext.setup.utils import get_exchange_rate
+from erpnext.stock.get_item_details import get_pos_profile
+from frappe import _
+from frappe.core.doctype.communication.email import make
+from frappe.utils import nowdate
+
 
 @frappe.whitelist()
 def get_pos_data():
-	doc = frappe.new_doc('Sales Invoice')
-	doc.is_pos = 1;
-	pos_profile = get_pos_profile(doc.company) or {}
-	if not pos_profile:
-		frappe.throw(_("POS Profile is required to use Point-of-Sale"))
-	if not doc.company: doc.company = pos_profile.get('company')
-	doc.update_stock = pos_profile.get('update_stock')
+    doc = frappe.new_doc('Sales Invoice')
+    doc.is_pos = 1
+    pos_profile = get_pos_profile(doc.company) or {}
+    if not pos_profile:
+        frappe.throw(_("POS Profile is required to use Point-of-Sale"))
 
-	if pos_profile.get('name'):
-		pos_profile = frappe.get_doc('POS Profile', pos_profile.get('name'))
-		pos_profile.validate()
+    if not doc.company:
+        doc.company = pos_profile.get('company')
 
-	company_data = get_company_data(doc.company)
-	update_pos_profile_data(doc, pos_profile, company_data)
-	update_multi_mode_option(doc, pos_profile)
-	default_print_format = pos_profile.get('print_format') or "Point of Sale"
-	print_template = frappe.db.get_value('Print Format', default_print_format, 'html')
-	customers = get_customers_list(pos_profile)
+    doc.update_stock = pos_profile.get('update_stock')
 
-	return {
-		'doc': doc,
-		'default_customer': pos_profile.get('customer'),
-		'items': get_items_list(pos_profile),
-		'item_groups': get_item_groups(pos_profile),
-		'customers': customers,
-		'address': get_customers_address(customers),
-		'contacts': get_contacts(customers),
-		'serial_no_data': get_serial_no_data(pos_profile, doc.company),
-		'batch_no_data': get_batch_no_data(),
-		'tax_data': get_item_tax_data(),
-		'price_list_data': get_price_list_data(doc.selling_price_list),
-		'bin_data': get_bin_data(pos_profile),
-		'pricing_rules': get_pricing_rule_data(doc),
-		'print_template': print_template,
-		'pos_profile': pos_profile,
-		'meta': get_meta()
-	}
+    if pos_profile.get('name'):
+        pos_profile = frappe.get_doc('POS Profile', pos_profile.get('name'))
+        pos_profile.validate()
+
+    company_data = get_company_data(doc.company)
+    update_pos_profile_data(doc, pos_profile, company_data)
+    update_multi_mode_option(doc, pos_profile)
+    default_print_format = pos_profile.get('print_format') or "Point of Sale"
+    print_template = frappe.db.get_value('Print Format', default_print_format, 'html')
+    items_list = get_items_list(pos_profile)
+    customers = get_customers_list(pos_profile)
+
+    return {
+        'doc': doc,
+        'default_customer': pos_profile.get('customer'),
+        'items': items_list,
+        'item_groups': get_item_groups(pos_profile),
+        'customers': customers,
+        'address': get_customers_address(customers),
+        'contacts': get_contacts(customers),
+        'serial_no_data': get_serial_no_data(pos_profile, doc.company),
+        'batch_no_data': get_batch_no_data(),
+        'barcode_data': get_barcode_data(items_list),
+        'tax_data': get_item_tax_data(),
+        'price_list_data': get_price_list_data(doc.selling_price_list),
+        'bin_data': get_bin_data(pos_profile),
+        'pricing_rules': get_pricing_rule_data(doc),
+        'print_template': print_template,
+        'pos_profile': pos_profile,
+        'meta': get_meta()
+    }
+
 
 def get_meta():
 	doctype_meta = {
@@ -57,14 +67,16 @@ def get_meta():
 		'invoice': frappe.get_meta('Sales Invoice')
 	}
 
-	for row in frappe.get_all('DocField', fields = ['fieldname', 'options'],
-		filters = {'parent': 'Sales Invoice', 'fieldtype': 'Table'}):
+	for row in frappe.get_all('DocField', fields=['fieldname', 'options'],
+		filters={'parent': 'Sales Invoice', 'fieldtype': 'Table'}):
 		doctype_meta[row.fieldname] = frappe.get_meta(row.options)
 
 	return doctype_meta
 
+
 def get_company_data(company):
-	return frappe.get_all('Company', fields = ["*"], filters= {'name': company})[0]
+	return frappe.get_all('Company', fields=["*"], filters={'name': company})[0]
+
 
 def update_pos_profile_data(doc, pos_profile, company_data):
 	doc.campaign = pos_profile.get('campaign')
@@ -93,14 +105,17 @@ def update_pos_profile_data(doc, pos_profile, company_data):
 	doc.apply_discount_on = pos_profile.get('apply_discount_on') or 'Grand Total'
 	doc.customer_group = pos_profile.get('customer_group') or get_root('Customer Group')
 	doc.territory = pos_profile.get('territory') or get_root('Territory')
-	doc.terms = frappe.db.get_value('Terms and Conditions', pos_profile.get('tc_name'), 'terms') or doc.terms or ''
+	doc.terms = frappe.db.get_value('Terms and Conditions', pos_profile.get(
+	    'tc_name'), 'terms') or doc.terms or ''
 	doc.offline_pos_name = ''
+
 
 def get_root(table):
 	root = frappe.db.sql(""" select name from `tab%(table)s` having
-		min(lft)"""%{'table': table}, as_dict=1)
+		min(lft)""" % {'table': table}, as_dict=1)
 
 	return root[0].name
+
 
 def update_multi_mode_option(doc, pos_profile):
 	from frappe.model import default_fields
@@ -123,14 +138,17 @@ def update_multi_mode_option(doc, pos_profile):
 
 		doc.append('payments', payment_mode)
 
+
 def get_mode_of_payment(doc):
 	return frappe.db.sql(""" select mpa.default_account, mpa.parent, mp.type as type from `tabMode of Payment Account` mpa,
 		 `tabMode of Payment` mp where mpa.parent = mp.name and mpa.company = %(company)s""", {'company': doc.company}, as_dict=1)
+
 
 def update_tax_table(doc):
 	taxes = get_taxes_and_charges('Sales Taxes and Charges Template', doc.taxes_and_charges)
 	for tax in taxes:
 		doc.append('taxes', tax)
+
 
 def get_items_list(pos_profile):
 	cond = "1=1"
@@ -139,18 +157,19 @@ def get_items_list(pos_profile):
 		# Get items based on the item groups defined in the POS profile
 		for d in pos_profile.get('item_groups'):
 			item_groups.extend([d.name for d in get_child_nodes('Item Group', d.item_group)])
-		cond = "item_group in (%s)"%(', '.join(['%s']*len(item_groups)))
+		cond = "item_group in (%s)" % (', '.join(['%s'] * len(item_groups)))
 
-	return frappe.db.sql(""" 
+	return frappe.db.sql("""
 		select
 			name, item_code, item_name, description, item_group, expense_account, has_batch_no,
-			has_serial_no, expense_account, selling_cost_center, stock_uom, image, 
+			has_serial_no, expense_account, selling_cost_center, stock_uom, image,
 			default_warehouse, is_stock_item, barcode, brand
 		from
 			tabItem
 		where
 			disabled = 0 and has_variants = 0 and is_sales_item = 1 and {cond}
 		""".format(cond=cond), tuple(item_groups), as_dict=1)
+
 
 def get_item_groups(pos_profile):
 	item_group_dict = {}
@@ -161,6 +180,7 @@ def get_item_groups(pos_profile):
 		item_group_dict[data.name] = [data.lft, data.rgt]
 	return item_group_dict
 
+
 def get_customers_list(pos_profile={}):
 	cond = "1=1"
 	customer_groups = []
@@ -168,11 +188,12 @@ def get_customers_list(pos_profile={}):
 		# Get customers based on the customer groups defined in the POS profile
 		for d in pos_profile.get('customer_groups'):
 			customer_groups.extend([d.name for d in get_child_nodes('Customer Group', d.customer_group)])
-		cond = "customer_group in (%s)"%(', '.join(['%s']*len(customer_groups)))
+		cond = "customer_group in (%s)" % (', '.join(['%s'] * len(customer_groups)))
 
 	return frappe.db.sql(""" select name, customer_name, customer_group,
 		territory, customer_pos_id from tabCustomer where disabled = 0
 		and {cond}""".format(cond=cond), tuple(customer_groups), as_dict=1) or {}
+
 
 def get_customers_address(customers):
 	customer_address = {}
@@ -192,25 +213,28 @@ def get_customers_address(customers):
 
 	return customer_address
 
+
 def get_contacts(customers):
 	customer_contact = {}
 	if isinstance(customers, basestring):
 		customers = [frappe._dict({'name': customers})]
 
 	for data in customers:
-		contact = frappe.db.sql(""" select email_id, phone, mobile_no from `tabContact` 
+		contact = frappe.db.sql(""" select email_id, phone, mobile_no from `tabContact`
 			where is_primary_contact =1 and name in
 			(select parent from `tabDynamic Link` where link_doctype = 'Customer' and link_name = %s
 			and parenttype = 'Contact')""", data.name, as_dict=1)
-		if contact: 
+		if contact:
 			customer_contact[data.name] = contact[0]
 
 	return customer_contact
+
 
 def get_child_nodes(group_type, root):
 	lft, rgt = frappe.db.get_value(group_type, root, ["lft", "rgt"])
 	return frappe.db.sql(""" Select name, lft, rgt from `tab{tab}` where
 			lft >= {lft} and rgt <= {rgt} order by lft""".format(tab=group_type, lft=lft, rgt=rgt), as_dict=1)
+
 
 def get_serial_no_data(pos_profile, company):
 	# get itemwise serial no data
@@ -232,6 +256,7 @@ def get_serial_no_data(pos_profile, company):
 
 	return itemwise_serial_no
 
+
 def get_batch_no_data():
 	# get itemwise batch no data
 	# exmaple: {'LED-GRE': [Batch001, Batch002]}
@@ -247,6 +272,26 @@ def get_batch_no_data():
 		itemwise_batch[batch.item].append(batch.name)
 
 	return itemwise_batch
+
+
+def get_barcode_data(items_list):
+    # get itemwise batch no data
+    # exmaple: {'LED-GRE': [Batch001, Batch002]}
+    # where LED-GRE is item code, SN0001 is serial no and Pune is warehouse
+
+    itemwise_barcode = {}
+    for item in items_list:
+        barcodes = frappe.db.sql("""
+        select barcode from `tabItem Barcode` where parent = '{0}'
+        """.format(item.item_code), as_dict=1)
+
+        for barcode in barcodes:
+            if item.item_code not in itemwise_barcode:
+                itemwise_barcode.setdefault(item.item_code, [])
+            itemwise_barcode[item.item_code].append(barcode)
+
+    return itemwise_barcode
+
 
 def get_item_tax_data():
 	# get default tax of an item
@@ -425,7 +470,7 @@ def make_contact(args,customer):
 
 def make_address(args, customer):
 	if not args.get('address_line1'): return
-	
+
 	name = args.get('name')
 
 	if not name:

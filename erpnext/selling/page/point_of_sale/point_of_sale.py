@@ -28,7 +28,7 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 				batch_no, item_code = batch_no_data
 
 		if not serial_no and not batch_no:
-			barcode_data = frappe.db.get_value('Item', {'barcode': search_value}, ['name', 'barcode'])
+			barcode_data = frappe.db.get_value('Item Barcode', {'barcode': search_value}, ['parent', 'barcode'])
 			if barcode_data:
 				item_code, barcode = barcode_data
 
