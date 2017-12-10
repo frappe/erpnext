@@ -17,9 +17,11 @@ def enable_hub():
 @frappe.whitelist()
 def get_items(start=0, limit=20, category=None, order_by=None, company=None, text=None):
 	connection = get_connection()
-	filters = {
-		'hub_category': category,
-	}
+
+	filters = {}
+
+	if category:
+		filters.update({ 'hub_category': category })
 	if text:
 		filters.update({'item_name': ('like', '%' + text + '%')})
 	if company:
