@@ -166,7 +166,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				or tabItem.item_group LIKE %(txt)s
 				or tabItem.item_name LIKE %(txt)s
 				or tabItem.description LIKE %(txt)s)
-                or tabItem.name IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
+                or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
 			{fcond} {mcond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
