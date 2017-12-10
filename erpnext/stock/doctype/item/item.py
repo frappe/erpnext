@@ -483,12 +483,18 @@ class Item(WebsiteGenerator):
                         check_list.append(d.tax_type)
 
     def validate_barcode(self):
+        from stdnum import ean
         if len(self.barcodes) > 0:
-            for barcode in self.barcodes:
-                duplicate = frappe.db.sql("""select name from `tabItem Barcode` where barcode = %s and parent != %s""", (barcode, self.name))
+            for item_barcode in self.barcodes:
+                duplicate = frappe.db.sql("""select name from `tabItem Barcode` where barcode = %s and parent != %s""", (item_barcode.barcode, self.name))
                 if duplicate:
                     frappe.throw(_("Barcode {0} already used in Item {1}").format(
-                        self.barcode, duplicate[0][0]))
+                        item_barcode.barcode, duplicate[0][0]))
+
+                if item_barcode.barcode_type:
+                    if not ean.is_valid(item_barcode.barcode):
+                        frappe.throw(_("Barcode {0} is not a valid {1} code").format(
+                            item_barcode.barcode, item_barcode.barcode_type))
 
     def validate_warehouse_for_reorder(self):
         '''Validate Reorder level table for duplicate and conditional mandatory'''
