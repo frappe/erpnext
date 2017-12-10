@@ -181,7 +181,7 @@ class Project(Document):
 
 		self.total_expense_claim = from_expense_claim.total_sanctioned_amount
 		self.update_purchase_costing()
-		self.update_planned_sales()
+		self.update_sales_amount()
 		self.update_billed_amount()
 
 		self.gross_margin = flt(self.total_billed_amount) - (flt(self.total_costing_amount) + flt(self.total_expense_claim) + flt(self.total_purchase_cost))
@@ -195,11 +195,11 @@ class Project(Document):
 
 		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
 
-	def update_planned_sales(self):
-		total_planned_sales = frappe.db.sql("""select sum(base_grand_total)
+	def update_sales_amount(self):
+		total_sales_amount = frappe.db.sql("""select sum(base_grand_total)
 			from `tabSales Order` where project = %s and docstatus=1""", self.name)
 
-		self.total_planned_sales = total_planned_sales and total_planned_sales[0][0] or 0
+		self.total_sales_amount = total_sales_amount and total_sales_amount[0][0] or 0
 
 	def update_billed_amount(self):
 		total_billed_amount = frappe.db.sql("""select sum(base_grand_total)

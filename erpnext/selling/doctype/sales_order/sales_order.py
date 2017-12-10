@@ -191,7 +191,7 @@ class SalesOrder(SellingController):
 		if self.project:
 			project = frappe.get_doc("Project", self.project)
 			project.flags.dont_sync_tasks = True
-			project.update_planned_sales()
+			project.update_sales_amount()
 			project.save()
 			project_list.append(self.project)
 
