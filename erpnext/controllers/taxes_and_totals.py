@@ -535,7 +535,7 @@ def get_itemised_tax_breakup_html(doc):
 	for tax in doc.taxes:
 		if getattr(tax, "category", None) and tax.category=="Valuation":
 			continue
-		if tax.description not in tax_accounts and tax.tax_amount_after_discount_amount:
+		if tax.description not in tax_accounts:
 			tax_accounts.append(tax.description)
 
 	headers = get_itemised_tax_breakup_header(doc.doctype + " Item", tax_accounts)
