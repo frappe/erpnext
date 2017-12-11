@@ -7,13 +7,13 @@ from frappe import _
 from frappe.utils import cstr, getdate
 from frappe.core.doctype.communication.comment import add_info_comment
 
-def set_defaults(args):
+def set_default_settings(args):
 	# enable default currency
 	frappe.db.set_value("Currency", args.get("currency"), "enabled", 1)
 
 	global_defaults = frappe.get_doc("Global Defaults", "Global Defaults")
 	global_defaults.update({
-		'current_fiscal_year': args.get('curr_fiscal_year'),
+		'current_fiscal_year': get_fy_details(args.get('fy_start_date'), args.get('fy_end_date')),
 		'default_currency': args.get('currency'),
 		'default_company':args.get('company_name')	,
 		"country": args.get("country"),
@@ -22,8 +22,12 @@ def set_defaults(args):
 	global_defaults.save()
 
 	system_settings = frappe.get_doc("System Settings")
-	system_settings.email_footer_address = args.get("company")
+	system_settings.email_footer_address = args.get("company_name")
 	system_settings.save()
+
+	domain_settings = frappe.get_single('Domain Settings')
+	domain_settings.set_active_domains(args.get('domains'))
+	domain_settings.save()
 
 	stock_settings = frappe.get_doc("Stock Settings")
 	stock_settings.item_naming_by = "Item Code"
@@ -97,6 +101,7 @@ def create_territories():
 	from frappe.utils.nestedset import get_root_of
 	country = frappe.db.get_default("country")
 	root_territory = get_root_of("Territory")
+
 	for name in (country, _("Rest Of The World")):
 		if name and not frappe.db.exists("Territory", name):
 			frappe.get_doc({

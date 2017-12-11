@@ -18,9 +18,7 @@ def create_fiscal_year_and_company(args):
 			'year_start_date': args.get('fy_start_date'),
 			'year_end_date': args.get('fy_end_date'),
 		}).insert()
-		args["curr_fiscal_year"] = curr_fiscal_year
 
-	# Company
 	if (args.get('company_name')):
 		frappe.get_doc({
 			"doctype":"Company",
@@ -34,13 +32,8 @@ def create_fiscal_year_and_company(args):
 			'domain': args.get('domains')[0]
 		}).insert()
 
-		#Enable shopping cart
-		enable_shopping_cart(args)
-
-		# Bank Account
-		create_bank_account(args)
-
 def enable_shopping_cart(args):
+	# Needs price_lists
 	frappe.get_doc({
 		"doctype": "Shopping Cart Settings",
 		"enabled": 1,
