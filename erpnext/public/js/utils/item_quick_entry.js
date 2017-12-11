@@ -6,8 +6,8 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 	},
 
 	render_dialog: function() {
-		this.mandatory = this.get_variant_fields().concat(this.mandatory);
-		this.mandatory = this.mandatory.concat(this.get_attributes_fields());
+		this.mandatory = this.get_attributes_fields().concat(this.mandatory);
+		this.mandatory = this.mandatory.concat(this.get_variant_fields());
 		this._super();
 		this.init_post_render_dialog_operations();
 		this.preset_fields_for_template();
