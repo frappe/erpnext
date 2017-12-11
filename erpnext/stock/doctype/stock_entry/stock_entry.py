@@ -934,7 +934,7 @@ def get_warehouse_details(args):
 @frappe.whitelist()
 def validate_sample_quantity(item_code, sample_quantity, qty, batch_no = None):
 	if cint(qty) < cint(sample_quantity):
-		frappe.throw(_("Sample quantity {0} cannot be more than received quantity {1}").format(sample_quantity, qty), alert=True)
+		frappe.throw(_("Sample quantity {0} cannot be more than received quantity {1}").format(sample_quantity, qty))
 	retention_warehouse = frappe.db.get_single_value('Stock Settings', 'sample_retention_warehouse')
 	retainted_qty = 0
 	if batch_no:
