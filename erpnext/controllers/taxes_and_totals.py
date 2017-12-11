@@ -524,8 +524,8 @@ class calculate_taxes_and_totals(object):
 						item.margin_type = pricing_rule.margin_type
 						item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 					else:
-						item_details.margin_type = None
-						item_details.margin_rate_or_amount = 0.0
+						item.margin_type = None
+						item.margin_rate_or_amount = 0.0
 				else:
 					item.margin_type = pricing_rule.margin_type
 					item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount

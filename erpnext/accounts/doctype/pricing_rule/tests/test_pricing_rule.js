@@ -1,4 +1,4 @@
-QUnit.module('Pricing Rule"');
+QUnit.module('Pricing Rule');
 
 QUnit.test("test pricing rule", function(assert) {
 	assert.expect(2);
