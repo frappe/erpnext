@@ -37,6 +37,16 @@ frappe.ui.form.on("Purchase Order Item", {
 		})
 	},
 
+	weight_per_unit: function(frm) {
+		frm.trigger('calculate_taxes_and_totals');
+		frm.trigger('shipping_rule');
+	},
+
+	items_remove: function(frm) {
+		frm.trigger('calculate_taxes_and_totals');
+		frm.trigger('shipping_rule');
+	},
+
 	schedule_date: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if (row.schedule_date) {
