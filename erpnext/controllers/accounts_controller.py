@@ -705,7 +705,7 @@ class AccountsController(TransactionBase):
 				total_portion += flt(term.get('invoice_portion', 0))
 
 			if flt(total_portion, 2) != 100.00:
-				frappe.throw(_('Combined invoice portion must equal 100%'), indicator='red')
+				frappe.msgprint(_('Combined invoice portion must equal 100%'), indicator='red', raise_exception=1)
 
 	def is_rounded_total_disabled(self):
 		if self.meta.get_field("disable_rounded_total"):
