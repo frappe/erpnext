@@ -419,6 +419,8 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	set_pos_profile_data() {
+		this.frm.doc.company = this.company;
+
 		return new Promise(resolve => {
 			return this.frm.call({
 				doc: this.frm.doc,
