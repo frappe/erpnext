@@ -8,6 +8,7 @@ from frappe import _
 from frappe.utils import flt
 from frappe.model.document import Document
 
+
 class OpeningInvoiceCreationTool(Document):
 	def onload(self):
 		"""Load the Opening Invoice summary"""
@@ -70,7 +71,7 @@ class OpeningInvoiceCreationTool(Document):
 			if not row.party:
 				frappe.throw(mandatory_error_msg.format(
 					idx=row.idx,
-					field= _("Party"),
+					field=_("Party"),
 					invoice_type=self.invoice_type
 				))
 			# set party type if not available
@@ -80,14 +81,14 @@ class OpeningInvoiceCreationTool(Document):
 			if not row.posting_date:
 				frappe.throw(mandatory_error_msg.format(
 					idx=row.idx,
-					field= _("Party"),
+					field=_("Party"),
 					invoice_type=self.invoice_type
 				))
 
 			if not row.outstanding_amount:
 				frappe.throw(mandatory_error_msg.format(
 					idx=row.idx,
-					field= _("Outstanding Amount"),
+					field=_("Outstanding Amount"),
 					invoice_type=self.invoice_type
 				))
 
@@ -99,10 +100,14 @@ class OpeningInvoiceCreationTool(Document):
 			doc.submit()
 			names.append(doc.name)
 
-			if(len(self.invoices) > 5):
-				frappe.publish_realtime("progress",
-					dict(progress=[row.idx, len(self.invoices)], title=_('Creating {0}').format(doc.doctype)),
-					user=frappe.session.user)
+			if len(self.invoices) > 5:
+				frappe.publish_realtime(
+					"progress", dict(
+						progress=[row.idx, len(self.invoices)],
+						title=_('Creating {0}').format(doc.doctype)
+					),
+					user=frappe.session.user
+				)
 
 		return names
 
@@ -111,7 +116,9 @@ class OpeningInvoiceCreationTool(Document):
 			default_uom = frappe.db.get_single_value("Stock Settings", "stock_uom") or _("Nos")
 			cost_center = frappe.db.get_value("Company", self.company, "cost_center")
 			if not cost_center:
-				frappe.throw(_("Please set the Default Cost Center in {0} company").format(frappe.bold(self.company)))
+				frappe.throw(
+					_("Please set the Default Cost Center in {0} company").format(frappe.bold(self.company))
+				)
 			rate = flt(row.outstanding_amount) / flt(row.qty)
 
 			return frappe._dict({
@@ -143,8 +150,7 @@ class OpeningInvoiceCreationTool(Document):
 			"due_date": row.due_date,
 			"posting_date": row.posting_date,
 			frappe.scrub(party_type): row.party,
-			"doctype": "Sales Invoice" if self.invoice_type == "Sales" \
-				else "Purchase Invoice",
+			"doctype": "Sales Invoice" if self.invoice_type == "Sales" else "Purchase Invoice",
 			"currency": frappe.db.get_value("Company", self.company, "default_currency")
 		})
 
