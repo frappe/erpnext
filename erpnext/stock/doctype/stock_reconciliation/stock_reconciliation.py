@@ -55,7 +55,7 @@ class StockReconciliation(StockController):
 
 				item.current_qty = qty
 				item.current_valuation_rate = rate
-				self.difference_amount += (flt(item.qty or qty) * flt(item.valuation_rate or rate) - (flt(qty) * flt(rate)))
+				self.difference_amount += (flt(item.qty) * flt(item.valuation_rate or rate) - (flt(qty) * flt(rate)))
 				return True
 
 		items = filter(lambda d: _changed(d), self.items)
