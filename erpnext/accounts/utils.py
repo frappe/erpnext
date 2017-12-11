@@ -848,10 +848,10 @@ def payment_is_returned(name, amount, posting_date):
 
 		# first and even indexed items in list should be of type Contra Entry
 		# second and odd indexed items in list should be of type Bank Entry
-		for i in range(len(entries)):
-			if (i == 0 or i % 2 == 0) and entries[i].voucher_type != 'Contra Entry':
+		for count, entry in enumerate(entries):
+			if (count == 0 or count % 2 == 0) and entry.voucher_type != 'Contra Entry':
 				break
-			elif entries[i].voucher_type != 'Bank Entry':
+			elif entry.voucher_type != 'Bank Entry':
 				break
 
 		# If loop gets to the end, sequence is ok. Use the last element in the
