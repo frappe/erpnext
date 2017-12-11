@@ -61,8 +61,9 @@ class PurchaseInvoice(BuyingController):
 		self.set_against_expense_account()
 		self.validate_write_off_account()
 		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount", "items")
-		self.validate_fixed_asset()
-		self.validate_fixed_asset_account()
+		#~ self.validate_fixed_asset()
+		#~ self.validate_fixed_asset_account()
+		#~ self.validate_fixed_asset_account()
 		self.create_remarks()
 		self.set_status()
 		if self.get("__islocal") :
@@ -199,6 +200,7 @@ class PurchaseInvoice(BuyingController):
 		super(PurchaseInvoice, self).validate_warehouse()
 
 	def set_expense_account(self, for_validate=False):
+		
 		auto_accounting_for_stock = cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
 
 		if auto_accounting_for_stock:
@@ -210,11 +212,22 @@ class PurchaseInvoice(BuyingController):
 			warehouse_account = get_warehouse_account()
 
 		for item in self.get("items"):
+			print("zzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
+			print(frappe.db.get_value("Item", item.item_code, "is_fixed_asset"))
+			print("zzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
+
 			# in case of auto inventory accounting,
 			# expense account is always "Stock Received But Not Billed" for a stock item
 			# except epening entry, drop-ship entry and fixed asset items
 
-			if auto_accounting_for_stock and item.item_code in stock_items \
+			#~ if auto_accounting_for_stock and item.item_code in stock_items \
+				#~ and self.is_opening == 'No' and not item.is_fixed_asset \
+				#~ and (not item.po_detail or
+					#~ not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")):
+			if frappe.db.get_value("Item", item.item_code, "is_fixed_asset") :
+				item.expense_account = stock_not_billed_account
+				
+			elif auto_accounting_for_stock and item.item_code in stock_items \
 				and self.is_opening == 'No' and not item.is_fixed_asset \
 				and (not item.po_detail or
 					not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")):
@@ -223,7 +236,7 @@ class PurchaseInvoice(BuyingController):
 					item.expense_account = warehouse_account[item.warehouse]["name"]
 				else:
 					item.expense_account = stock_not_billed_account
-
+				
 			elif not item.expense_account and for_validate:
 				throw(_("Expense account is mandatory for item {0}").format(item.item_code or item.item_name))
 
@@ -472,7 +485,7 @@ class PurchaseInvoice(BuyingController):
 					)
 
 			if self.auto_accounting_for_stock and self.is_opening == "No" and \
-				item.item_code in stock_items and item.item_tax_amount:
+				item.item_tax_amount:
 					# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
 					if item.purchase_receipt:
 						negative_expense_booked_in_pr = frappe.db.sql("""select name from `tabGL Entry`
