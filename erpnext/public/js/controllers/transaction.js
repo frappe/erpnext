@@ -114,7 +114,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		if(this.frm.fields_dict["items"]) {
-			this["items_remove"] = this.calculate_taxes_and_totals;
+			this["items_remove"] = this.weight_per_unit;
 		}
 
 		if(this.frm.fields_dict["recurring_print_format"]) {
@@ -353,6 +353,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				});
 			}
 		}
+	},
+
+	weight_per_unit: function() {
+		this.calculate_taxes_and_totals();
+		this.shipping_rule();
 	},
 
 	serial_no: function(doc, cdt, cdn) {
