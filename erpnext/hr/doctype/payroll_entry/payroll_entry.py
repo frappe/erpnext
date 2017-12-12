@@ -355,6 +355,7 @@ class PayrollEntry(Document):
 		self.update(get_start_end_dates(self.payroll_frequency,
 			self.start_date or self.posting_date, self.company))
 
+
 @frappe.whitelist()
 def get_start_end_dates(payroll_frequency, start_date=None, company=None):
 	'''Returns dict of start and end dates for given payroll frequency based on start_date'''
@@ -387,6 +388,7 @@ def get_start_end_dates(payroll_frequency, start_date=None, company=None):
 		'start_date': start_date, 'end_date': end_date
 	})
 
+
 def get_frequency_kwargs(frequency_name):
 	frequency_dict = {
 		'monthly': {'months': 1},
@@ -395,6 +397,7 @@ def get_frequency_kwargs(frequency_name):
 		'daily': {'days': 1}
 	}
 	return frequency_dict.get(frequency_name)
+
 
 @frappe.whitelist()
 def get_end_date(start_date, frequency):
@@ -409,6 +412,7 @@ def get_end_date(start_date, frequency):
 
 	else:
 		return dict(end_date='')
+
 
 def get_month_details(year, month):
 	ysd = frappe.db.get_value("Fiscal Year", year, "year_start_date")
@@ -433,14 +437,17 @@ def get_month_details(year, month):
 	else:
 		frappe.throw(_("Fiscal Year {0} not found").format(year))
 
+
 @frappe.whitelist()
 def create_log(ss_list):
 	if not ss_list or len(ss_list) < 1:
 		frappe.throw(_("No employee for the above selected criteria OR salary slip already created"))
 	return ss_list
 
+
 def format_as_links(salary_slip):
 	return ['<a href="#Form/Salary Slip/{0}">{0}</a>'.format(salary_slip)]
+
 
 def create_submit_log(submitted_ss, not_submitted_ss, jv_name):
 
