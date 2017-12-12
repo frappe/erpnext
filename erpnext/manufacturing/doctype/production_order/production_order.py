@@ -66,7 +66,7 @@ class ProductionOrder(Document):
 						and so_item.item_code = packed_item.parent_item
 						and so.docstatus = 1 and packed_item.item_code=%s
 				""", (self.sales_order, self.production_item), as_dict=1)
-				
+
 			if len(so):
 				if not self.expected_delivery_date:
 					self.expected_delivery_date = so[0].delivery_date
