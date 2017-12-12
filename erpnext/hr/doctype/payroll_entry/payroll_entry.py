@@ -487,3 +487,25 @@ def payroll_entry_has_created_slips(name):
 	response['submitted'] = 1 if submitted_salary_slips else 0
 
 	return response
+
+
+def get_payroll_entry_bank_entries(payroll_entry_name):
+	journal_entries = frappe.db.sql(
+		'select name from `tabJournal Entry Account` '
+		'where reference_type="Payroll Entry" '
+		'and reference_name=%s and docstatus=1',
+		payroll_entry_name,
+		as_dict=1
+	)
+
+	return journal_entries
+
+
+@frappe.whitelist()
+def payroll_entry_has_bank_entries(name):
+	response = {}
+
+	bank_entries = get_payroll_entry_bank_entries(name)
+	response['submitted'] = 1 if bank_entries else 0
+
+	return response
