@@ -84,7 +84,7 @@ def get_mode_of_payments(filters):
 
 def get_invoices(filters):
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select a.name,a.owner,a.posting_date
+	return frappe.db.sql("""select a.name
 		from `tabSales Invoice` a
 		where a.docstatus = 1 and {conditions}""".format(conditions=conditions),
 		filters, as_dict=1)
