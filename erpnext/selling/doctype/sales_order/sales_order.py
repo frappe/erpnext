@@ -762,10 +762,15 @@ def make_production_orders(items, sales_order, company, project=None):
 	out = []
 
 	for i in items:
+		if not i.get("bom"):
+			frappe.throw(_("Please select BOM against item {0}").format(i.get("item_code")))
+		if not i.get("pending_qty"):
+			frappe.throw(_("Please select Qty against item {0}").format(i.get("item_code")))
+
 		production_order = frappe.get_doc(dict(
 			doctype='Production Order',
 			production_item=i['item_code'],
-			bom_no=i['bom'],
+			bom_no=i.get('bom'),
 			qty=i['pending_qty'],
 			company=company,
 			sales_order=sales_order,
