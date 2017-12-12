@@ -44,10 +44,7 @@ class ProductionOrder(Document):
 
 		validate_uom_is_integer(self, "stock_uom", ["qty", "produced_qty"])
 
-		if not self.get("required_items"):
-			self.set_required_items()
-		else:
-			self.set_available_qty()
+		self.set_required_items(reset_only_qty = len(self.get("required_items")))
 
 	def validate_sales_order(self):
 		if self.sales_order:
@@ -60,6 +57,19 @@ class ProductionOrder(Document):
 					so_item.item_code=%s or
 					pk_item.item_code=%s )
 			""", (self.sales_order, self.production_item, self.production_item), as_dict=1)
+
+			if not so:
+				so = frappe.db.sql("""
+					select
+						so.name, so_item.delivery_date, so.project
+					from
+						`tabSales Order` so, `tabSales Order Item` so_item, `tabPacked Item` packed_item
+					where so.name=%s 
+						and so.name=so_item.parent
+						and so.name=packed_item.parent
+						and so_item.item_code = packed_item.parent_item
+						and so.docstatus = 1 and packed_item.item_code=%s
+				""", (self.sales_order, self.production_item), as_dict=1)
 
 			if len(so):
 				if not self.expected_delivery_date:
@@ -441,21 +451,27 @@ class ProductionOrder(Document):
 			if self.wip_warehouse:
 				d.available_qty_at_wip_warehouse = get_latest_stock_qty(d.item_code, self.wip_warehouse)
 
-	def set_required_items(self):
+	def set_required_items(self, reset_only_qty=False):
 		'''set required_items for production to keep track of reserved qty'''
-		self.required_items = []
+		if not reset_only_qty:
+			self.required_items = []
+
 		if self.bom_no and self.qty:
 			item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=self.qty,
 				fetch_exploded = self.use_multi_level_bom)
 
-			for item in sorted(item_dict.values(), key=lambda d: d['idx']):
-				self.append('required_items', {
-					'item_code': item.item_code,
-					'item_name': item.item_name,
-					'description': item.description,
-					'required_qty': item.qty,
-					'source_warehouse': item.source_warehouse or item.default_warehouse
-				})
+			if reset_only_qty:
+				for d in self.get("required_items"):
+					d.required_qty = item_dict.get(d.item_code).get("qty")
+			else:
+				for item in sorted(item_dict.values(), key=lambda d: d['idx']):
+					self.append('required_items', {
+						'item_code': item.item_code,
+						'item_name': item.item_name,
+						'description': item.description,
+						'required_qty': item.qty,
+						'source_warehouse': item.source_warehouse or item.default_warehouse
+					})
 
 			self.set_available_qty()
 
