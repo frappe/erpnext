@@ -70,6 +70,7 @@ frappe.ui.form.on('Payroll Entry', {
 						},
 						__('Make')
 					);
+					frm.page.set_inner_btn_group_as_primary(__('Make'));
 				}
 			}
 		});
