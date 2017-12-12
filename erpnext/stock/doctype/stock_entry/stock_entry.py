@@ -95,8 +95,9 @@ class StockEntry(StockController):
 
 			item_details = self.get_item_details(frappe._dict(
 				{"item_code": item.item_code, "company": self.company,
-				"project": self.project, "uom": item.uom, 's_warehouse': item.s_warehouse}),
-				for_update=True)
+				"project": self.project, "uom": item.uom, 's_warehouse': item.s_warehouse,
+				"name": item.name, "doctype": self.doctype,
+				"allow_zero_valuation": item.allow_zero_valuation_rate}), for_update=True)
 
 			for f in ("uom", "stock_uom", "description", "item_name", "expense_account",
 				"cost_center", "conversion_factor"):
@@ -274,6 +275,7 @@ class StockEntry(StockController):
 				"posting_time": self.posting_time,
 				"qty": d.s_warehouse and -1*flt(d.transfer_qty) or flt(d.transfer_qty),
 				"serial_no": d.serial_no,
+				"allow_zero_valuation": cint(d.allow_zero_valuation_rate)
 			})
 
 			# get basic rate

@@ -255,7 +255,7 @@ class GrossProfitGenerator(object):
 					from `tabPurchase Invoice Item`
 					where item_code = %s and docstatus=1""", item_code)[0][0])
 			else:
-				average_buying_rate = get_incoming_rate(row)
+				average_buying_rate = get_incoming_rate(row, allow_zero_incoming=True)
 				if not average_buying_rate:
 					average_buying_rate = get_valuation_rate(item_code, row.warehouse,
 						row.parenttype, row.parent, allow_zero_rate=True, 
