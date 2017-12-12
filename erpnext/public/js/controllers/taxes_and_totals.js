@@ -521,9 +521,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			var actual_taxes_dict = {};
 
 			$.each(this.frm.doc["taxes"] || [], function(i, tax) {
-				if (tax.charge_type == "Actual")
-					actual_taxes_dict[tax.idx] = tax.tax_amount;
-				else if (actual_taxes_dict[tax.row_id] !== null) {
+				if (tax.charge_type == "Actual") {
+					var tax_amount = (tax.category == "Valuation") ? 0.0 : tax.tax_amount;
+					tax_amount *= (tax.add_deduct_tax == "Deduct") ? -1.0 : 1.0;
+					actual_taxes_dict[tax.idx] = tax_amount;
+				} else if (actual_taxes_dict[tax.row_id] !== null) {
 					var actual_tax_amount = flt(actual_taxes_dict[tax.row_id]) * flt(tax.rate) / 100;
 					actual_taxes_dict[tax.idx] = actual_tax_amount;
 				}

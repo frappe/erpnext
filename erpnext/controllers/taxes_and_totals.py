@@ -399,7 +399,8 @@ class calculate_taxes_and_totals(object):
 
 			for tax in self.doc.get("taxes"):
 				if tax.charge_type == "Actual":
-					actual_taxes_dict.setdefault(tax.idx, tax.tax_amount)
+					tax_amount = self.get_tax_amount_if_for_valuation_or_deduction(tax.tax_amount, tax)
+					actual_taxes_dict.setdefault(tax.idx, tax_amount)
 				elif tax.row_id in actual_taxes_dict:
 					actual_tax_amount = flt(actual_taxes_dict.get(tax.row_id, 0)) * flt(tax.rate) / 100
 					actual_taxes_dict.setdefault(tax.idx, actual_tax_amount)
