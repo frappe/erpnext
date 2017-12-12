@@ -10,21 +10,61 @@ frappe.ui.form.on('Payroll Entry', {
 	},
 
 	refresh: function(frm) {
-		if (frm.doc.docstatus==1) {
-			if(frm.doc.payment_account) {
-				frm.add_custom_button("Make Bank Entry", function() {
-					make_bank_entry(frm);
-				});
+		if (frm.doc.docstatus == 1) {
+			frm.events.add_context_buttons(frm);
+		}
+	},
+
+	add_context_buttons: function(frm) {
+		frappe.call({
+			method: 'erpnext.hr.doctype.payroll_entry.payroll_entry.payroll_entry_has_created_slips',
+			args: {
+				'name': frm.doc.name
+			},
+			callback: function(r) {
+				if(r.message) {
+					frm.events.add_salary_slip_buttons(frm, r.message);
+					frm.events.add_bank_entry_button(frm, r.message);
+				}
 			}
+		});
+	},
+	
+	add_salary_slip_buttons: function(frm, slip_status) {
+		if (!slip_status.draft && !slip_status.submitted) {
+			return;
+		} else {
+			frm.add_custom_button("View Salary Slips",
+				function() {
+					frappe.set_route(
+						'List', 'Salary Slip', {posting_date: frm.doc.posting_date}
+					);
+				},
+				__('Make')
+			);
+			frm.page.set_inner_btn_group_as_primary(__('Make'));
+		}
 
-			frm.add_custom_button("Submit Salary Slip", function() {
-				submit_salary_slip(frm);
-			});
+		if (slip_status.draft) {
+			frm.add_custom_button("Submit Salary Slip",
+				function() {
+					submit_salary_slip(frm);
+				},
+				__('Make')
+			);
+		}
+	},
 
-			frm.add_custom_button("View Salary Slip", function() {
-				frappe.set_route('List', 'Salary Slip',
-					{posting_date: frm.doc.posting_date});
-			});
+	add_bank_entry_button: function(frm, slip_status) {
+		if (!slip_status.draft && !slip_status.submitted) {
+			return
+		} else if (slip_status.submitted && !slip_status.draft) {
+			frm.add_custom_button("Make Bank Entry",
+				function() {
+					make_bank_entry(frm);
+				},
+				__('Make')
+			);
 		}
 	},
 
