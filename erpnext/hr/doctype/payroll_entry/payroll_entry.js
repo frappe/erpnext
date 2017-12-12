@@ -24,7 +24,9 @@ frappe.ui.form.on('Payroll Entry', {
 			callback: function(r) {
 				if(r.message) {
 					frm.events.add_salary_slip_buttons(frm, r.message);
-					frm.events.add_bank_entry_button(frm, r.message);
+					if(r.message.submitted){
+						frm.events.add_bank_entry_button(frm);
+					}
 				}
 			}
 		});
@@ -55,17 +57,23 @@ frappe.ui.form.on('Payroll Entry', {
 		}
 	},
 
-	add_bank_entry_button: function(frm, slip_status) {
-		if (!slip_status.draft && !slip_status.submitted) {
-			return
-		} else if (slip_status.submitted && !slip_status.draft) {
-			frm.add_custom_button("Make Bank Entry",
-				function() {
-					make_bank_entry(frm);
-				},
-				__('Make')
-			);
-		}
+	add_bank_entry_button: function(frm) {
+		frappe.call({
+			method: 'erpnext.hr.doctype.payroll_entry.payroll_entry.payroll_entry_has_bank_entries',
+			args: {
+				'name': frm.doc.name
+			},
+			callback: function(r) {
+				if (r.message && !r.message.submitted) {
+					frm.add_custom_button("Make Bank Entry",
+						function() {
+							make_bank_entry(frm);
+						},
+						__('Make')
+					);
+				}
+			}
+		});
 	},
 
 	setup: function (frm) {
