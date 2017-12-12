@@ -41,10 +41,8 @@ frappe.ui.form.on('Payroll Entry', {
 					frappe.set_route(
 						'List', 'Salary Slip', {posting_date: frm.doc.posting_date}
 					);
-				},
-				__('Make')
+				}
 			);
-			frm.page.set_inner_btn_group_as_primary(__('Make'));
 		}
 
 		if (slip_status.draft) {
@@ -54,6 +52,7 @@ frappe.ui.form.on('Payroll Entry', {
 				},
 				__('Make')
 			);
+			frm.page.set_inner_btn_group_as_primary(__('Make'));
 		}
 	},
 
