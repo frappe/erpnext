@@ -436,7 +436,10 @@ def get_month_details(year, month):
 @frappe.whitelist()
 def create_log(ss_list):
 	if not ss_list or len(ss_list) < 1:
-		frappe.throw(_("No employee for the above selected criteria OR salary slip already created"))
+		frappe.throw(
+			_("There's no employee for the given criteria. Check that Salary Slips have not already been created."),
+			title='Error'
+		)
 	return ss_list
 
 def format_as_links(salary_slip):
