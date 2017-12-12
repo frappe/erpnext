@@ -27,9 +27,9 @@ def get_sales_payment_data(filters, columns):
 	data = []
 	mode_of_payments = get_mode_of_payments(filters)
 	for inv in sales_invoice_data:
-		mode_of_payment = inv["owner"]+frappe.utils.data.cstr(inv["posting_date"])
+		mode_of_payment = inv["owner"]+cstr(inv["posting_date"])
 		row = [inv.posting_date, inv.owner,", ".join(mode_of_payments.get(mode_of_payment, [])),
-		inv.net_total, 
+		inv.net_total,
 		inv.total_taxes, (inv.net_total + inv.total_taxes - inv.outstanding_amount),
 		inv.outstanding_amount]
 		data.append(row)
@@ -78,7 +78,7 @@ def get_mode_of_payments(filters):
 			and a.name in ({invoice_list_names})
 			""".format(invoice_list_names=invoice_list_names), as_dict=1)
 		for d in inv_mop:
-			mode_of_payments.setdefault(d["owner"]+frappe.utils.data.cstr(d["posting_date"]), []).append(d.mode_of_payment)
+			mode_of_payments.setdefault(d["owner"]+cstr(d["posting_date"]), []).append(d.mode_of_payment)
 	return mode_of_payments
 
 def get_invoices(filters):
