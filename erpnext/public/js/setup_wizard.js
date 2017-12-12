@@ -207,7 +207,7 @@ erpnext.setup.slides_settings = [
 // default 1st Jan - 31st Dec
 
 erpnext.setup.fiscal_years = {
-	"Afghanistan": ["12-20", "12-21"],
+	"Afghanistan": ["12-21", "12-20"],
 	"Australia": ["07-01", "06-30"],
 	"Bangladesh": ["07-01", "06-30"],
 	"Canada": ["04-01", "03-31"],
