@@ -157,6 +157,7 @@ frappe.ui.form.on("Production Order", {
 					item: frm.doc.production_item,
 					project: frm.doc.project
 				},
+				freeze: true,
 				callback: function(r) {
 					if(r.message) {
 						erpnext.in_production_item_onchange = true;
@@ -184,6 +185,7 @@ frappe.ui.form.on("Production Order", {
 		return frm.call({
 			doc: frm.doc,
 			method: "get_items_and_operations_from_bom",
+			freeze: true,
 			callback: function(r) {
 				if(r.message["set_scrap_wh_mandatory"]){
 					frm.toggle_reqd("scrap_warehouse", true);
