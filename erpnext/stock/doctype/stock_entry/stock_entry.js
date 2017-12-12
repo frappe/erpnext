@@ -281,7 +281,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 				'item_code'			: d.item_code,
 				'warehouse'			: cstr(d.s_warehouse) || cstr(d.t_warehouse),
 				'transfer_qty'		: d.transfer_qty,
-				'serial_no	'		: d.serial_no,
+				'serial_no'		: d.serial_no,
 				'bom_no'			: d.bom_no,
 				'expense_account'	: d.expense_account,
 				'cost_center'		: d.cost_center,
