@@ -42,7 +42,6 @@ def get_conditions(filters):
 	if filters.get("owner"): conditions += " and a.owner = %(owner)s"
 	if filters.get("from_date"): conditions += " and a.posting_date >= %(from_date)s"
 	if filters.get("to_date"): conditions += " and a.posting_date <= %(to_date)s"
-	if filters.get("mode_of_payment"): conditions += " and c.mode_of_payment >= %(mode_of_payment)s"
 	if filters.get("is_pos"): conditions += " and a.is_pos = %(is_pos)s"
 	return conditions
 

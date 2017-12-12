@@ -23,12 +23,6 @@ frappe.query_reports["Sales Payment Summary"] = {
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
-			"fieldname":"mode_of_payment",
-			"label": __("Mode of Payment"),
-			"fieldtype": "Link",
-			"options": "Mode of Payment"
-		},
-		{
 			"fieldname":"owner",
 			"label": __("Owner"),
 			"fieldtype": "Link",
