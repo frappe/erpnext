@@ -143,6 +143,7 @@ class SalesInvoice(SellingController):
 		self.update_time_sheet(self.name)
 
 		self.update_current_month_sales()
+		self.update_project()
 
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:
@@ -181,6 +182,7 @@ class SalesInvoice(SellingController):
 		frappe.db.set(self, 'status', 'Cancelled')
 
 		self.update_current_month_sales()
+		self.update_project()
 
 	def update_current_month_sales(self):
 		if frappe.flags.in_test:
@@ -911,6 +913,13 @@ class SalesInvoice(SellingController):
 					frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}".format(
 						serial_no, sales_invoice
 					)))
+
+	def update_project(self):
+		if self.project:
+			project = frappe.get_doc("Project", self.project)
+			project.flags.dont_sync_tasks = True
+			project.update_billed_amount()
+			project.save()
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
