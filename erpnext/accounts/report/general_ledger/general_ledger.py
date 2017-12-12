@@ -193,6 +193,17 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 	# closing
 	data.append(totals.closing)
 
+	#total closing
+	total_closing = totals.total_closing
+	total_debit = totals.closing.get('debit', 0)
+	total_credit = totals.closing.get('credit', 0)
+	debit_in_account_currency = totals.closing.get('debit_in_account_currency', 0)
+	credit_in_account_currency = totals.closing.get('credit_in_account_currency', 0)
+
+	total_closing['debit'] = total_debit - total_credit
+	total_closing['debit_in_account_currency'] = debit_in_account_currency - credit_in_account_currency
+	data.append(totals.total_closing)
+
 	return data
 
 def get_totals_dict():
@@ -207,7 +218,8 @@ def get_totals_dict():
 	return _dict(
 		opening = _get_debit_credit_dict(_('Opening')),
 		total = _get_debit_credit_dict(_('Total')),
-		closing = _get_debit_credit_dict(_('Closing (Opening + Total)'))
+		closing = _get_debit_credit_dict(_('Closing (Opening + Total)')),
+		total_closing = _get_debit_credit_dict(_('Closing Balance (Dr - Cr)'))
 	)
 
 def initialize_gle_map(gl_entries):
