@@ -217,7 +217,9 @@ class SellingController(StockController):
 							'batch_no': cstr(p.batch_no).strip(),
 							'serial_no': cstr(p.serial_no).strip(),
 							'name': d.name,
-							'target_warehouse': p.target_warehouse
+							'target_warehouse': p.target_warehouse,
+							'allow_zero_valuation': cint(d.allow_zero_valuation_rate) \
+								if d.get('allow_zero_valuation_rate') else 0
 						}))
 			else:
 				il.append(frappe._dict({
@@ -230,7 +232,9 @@ class SellingController(StockController):
 					'batch_no': cstr(d.get("batch_no")).strip(),
 					'serial_no': cstr(d.get("serial_no")).strip(),
 					'name': d.name,
-					'target_warehouse': d.target_warehouse
+					'target_warehouse': d.target_warehouse,
+					'allow_zero_valuation': cint(d.allow_zero_valuation_rate) \
+						if d.get('allow_zero_valuation_rate') else 0
 				}))
 		return il
 
@@ -325,7 +329,10 @@ class SellingController(StockController):
 								"posting_date": self.posting_date,
 								"posting_time": self.posting_time,
 								"qty": -1*flt(d.qty),
-								"serial_no": d.serial_no
+								"serial_no": d.serial_no,
+								'name': d.name,
+								'doctype': self.doctype,
+								'allow_zero_valuation': cint(d.allow_zero_valuation)
 							})
 							target_warehouse_sle.update({
 								"incoming_rate": get_incoming_rate(args)
