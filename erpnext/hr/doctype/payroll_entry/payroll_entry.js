@@ -11,6 +11,7 @@ frappe.ui.form.on('Payroll Entry', {
 
 	refresh: function(frm) {
 		if (frm.doc.docstatus == 1) {
+			if (frm.custom_buttons) frm.clear_custom_buttons();
 			frm.events.add_context_buttons(frm);
 		}
 	},
@@ -180,9 +181,20 @@ frappe.ui.form.on('Payroll Entry', {
 
 // Submit salary slips
 
-let submit_salary_slip = function (frm) {
-	var doc = frm.doc;
-	return $c('runserverobj', { 'method': 'submit_salary_slips', 'docs': doc });
+const submit_salary_slip = function (frm) {
+	frappe.confirm(
+		__('This will create a Journal Entry. Do you want to proceed?'),
+		function() {
+			var doc = frm.doc;
+			//todo: $c is deprecated
+			return $c(
+				'runserverobj', { 'method': 'submit_salary_slips', 'docs': doc },
+				function() {
+					frm.events.refresh(frm);
+				}
+			);
+		}
+	);
 };
 
 cur_frm.cscript.get_employee_details = function (doc) {
