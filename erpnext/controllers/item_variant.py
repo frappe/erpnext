@@ -56,7 +56,7 @@ def validate_item_variant_attributes(item, args=None):
 	if not args:
 		args = {d.attribute.lower():d.attribute_value for d in item.attributes}
 
-	attribute_values, numeric_values = get_attribute_values()
+	attribute_values, numeric_values = get_attribute_values(item)
 
 	for attribute, value in args.items():
 		if not value:
@@ -96,16 +96,17 @@ def validate_item_attribute_value(attributes_list, attribute, attribute_value, i
 		frappe.throw(_("Value {0} for Attribute {1} does not exist in the list of valid Item Attribute Values for Item {2}").format(
 			attribute_value, attribute, item), InvalidItemAttributeValueError, title=_('Invalid Attribute'))
 
-def get_attribute_values():
+def get_attribute_values(item):
 	if not frappe.flags.attribute_values:
 		attribute_values = {}
 		numeric_values = {}
 		for t in frappe.get_all("Item Attribute Value", fields=["parent", "attribute_value"]):
 			attribute_values.setdefault(t.parent.lower(), []).append(t.attribute_value)
 
-		for t in frappe.get_all('Item Attribute',
-			fields=["name", "from_range", "to_range", "increment"], filters={'numeric_values': 1}):
-			numeric_values[t.name.lower()] = t
+		for t in frappe.get_all('Item Variant Attribute',
+			fields=["attribute", "from_range", "to_range", "increment"],
+			filters={'numeric_values': 1, 'parent': item.variant_of}):
+			numeric_values[t.attribute.lower()] = t
 
 		frappe.flags.attribute_values = attribute_values
 		frappe.flags.numeric_values = numeric_values
