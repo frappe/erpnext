@@ -266,6 +266,7 @@ frappe.ui.form.on('Payment Entry', {
 								}
 							},
 							() => frm.set_value("party_balance", r.message.party_balance),
+							() => frm.set_value("party_name", r.message.party_name),
 							() => frm.events.get_outstanding_documents(frm),
 							() => frm.events.hide_unhide_fields(frm),
 							() => frm.events.set_dynamic_labels(frm),
