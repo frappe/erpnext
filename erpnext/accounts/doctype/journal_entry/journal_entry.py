@@ -904,7 +904,7 @@ def get_average_exchange_rate(account):
 @frappe.whitelist()
 def get_invoice_due_dates(name):
 	result = frappe.get_list(
-		doctype='GL Entry', group_by='name, due_date',
+		doctype='GL Entry',
 		filters={'voucher_no': name, "ifnull(due_date, '')": ('!=', '')},
 		fields=['due_date'], distinct=True
 	)
