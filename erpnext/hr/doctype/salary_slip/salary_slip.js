@@ -100,10 +100,10 @@ frappe.ui.form.on('Salary Detail', {
 
 frappe.ui.form.on('Salary Slip Timesheet', {
 	time_sheet: function(frm, dt, dn) {
-		total_work_hours(frm, dt, dn)
+		total_work_hours(frm, dt, dn);
 	},
 	timesheets_remove: function(frm, dt, dn) {
-		total_work_hours(frm, dt, dn)
+		total_work_hours(frm, dt, dn);
 	}
 });
 
@@ -232,7 +232,7 @@ var total_work_hours = function(frm, dt, dn) {
 	});
 	frm.refresh_field('total_working_hours');
 
-	wages_amount = frm.doc.total_working_hours * frm.doc.hour_rate;
+	var wages_amount = frm.doc.total_working_hours * frm.doc.hour_rate;
 
 	frappe.db.get_value('Salary Structure', {'name': frm.doc.salary_structure}, 'salary_component', (r) => {
 		frm.set_value('gross_pay', 0);
