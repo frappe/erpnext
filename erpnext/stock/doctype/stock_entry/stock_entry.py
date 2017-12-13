@@ -2,12 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 import frappe.defaults
 from frappe import _
 from frappe.utils import cstr, cint, flt, comma_or, getdate, nowdate, formatdate, format_time
 from erpnext.stock.utils import get_incoming_rate
-from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError
+from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError, get_valuation_rate
 from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor
 from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos, get_batch_qty
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
@@ -55,6 +55,7 @@ class StockEntry(StockController):
 		else:
 			set_batch_nos(self, 's_warehouse')
 
+		self.set_incoming_rate()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount(update_finished_item_rate=False)
 
@@ -213,6 +214,18 @@ class StockEntry(StockController):
 				frappe.throw(_("Stock Entries already created for Production Order ")
 					+ self.production_order + ":" + ", ".join(other_ste), DuplicateEntryForProductionOrderError)
 
+	def set_incoming_rate(self):
+		for d in self.items:
+			if d.s_warehouse:
+				args = self.get_args_for_incoming_rate(d)
+				d.basic_rate = get_incoming_rate(args)
+			elif d.allow_zero_valuation_rate and not d.s_warehouse:
+				d.basic_rate = 0.0
+			elif d.t_warehouse and not d.basic_rate:
+				d.basic_rate = get_valuation_rate(d.item_code, d.t_warehouse,
+					self.doctype, d.name, d.allow_zero_valuation_rate,
+					currency=erpnext.get_company_currency(self.company))
+
 	def set_actual_qty(self):
 		allow_negative_stock = cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
 
@@ -268,14 +281,7 @@ class StockEntry(StockController):
 
 		for d in self.get('items'):
 			if d.t_warehouse: fg_basic_rate = flt(d.basic_rate)
-			args = frappe._dict({
-				"item_code": d.item_code,
-				"warehouse": d.s_warehouse or d.t_warehouse,
-				"posting_date": self.posting_date,
-				"posting_time": self.posting_time,
-				"qty": d.s_warehouse and -1*flt(d.transfer_qty) or flt(d.transfer_qty),
-				"serial_no": d.serial_no,
-			})
+			args = self.get_args_for_incoming_rate(d)
 
 			# get basic rate
 			if not d.bom_no:
@@ -303,6 +309,20 @@ class StockEntry(StockController):
 		number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
 		if (fg_basic_rate == 0.0 and number_of_fg_items == 1) or update_finished_item_rate:
 			self.set_basic_rate_for_finished_goods(raw_material_cost, scrap_material_cost)
+
+	def get_args_for_incoming_rate(self, item):
+		return frappe._dict({
+			"item_code": item.item_code,
+			"warehouse": item.s_warehouse or item.t_warehouse,
+			"posting_date": self.posting_date,
+			"posting_time": self.posting_time,
+			"qty": item.s_warehouse and -1*flt(item.transfer_qty) or flt(item.transfer_qty),
+			"serial_no": item.serial_no,
+			"voucher_type": self.doctype,
+			"voucher_no": item.name,
+			"company": self.company,
+			"allow_zero_valuation": item.allow_zero_valuation_rate,
+		})
 
 	def set_basic_rate_for_finished_goods(self, raw_material_cost, scrap_material_cost):
 		if self.purpose in ["Manufacture", "Repack"]:
