@@ -46,6 +46,13 @@ frappe.ui.form.on("Project", {
 					frappe.route_options = {"project": frm.doc.name};
 					frappe.set_route("List", "Task", "Gantt");
 				});
+				
+                frm.add_custom_button(__("Project Status Report"), function () {
+                    frappe.set_route("List", "Project Status Report", {
+                        project: frm.doc.name
+                    });
+
+                });
 			}
 
 			frm.trigger('show_dashboard');

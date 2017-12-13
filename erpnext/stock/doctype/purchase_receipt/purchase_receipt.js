@@ -12,6 +12,26 @@ frappe.ui.form.on("Purchase Receipt", {
 			'Purchase Invoice': 'Invoice'
 		}
 	},
+	refresh: function(doc, cdt, cdn){
+		if (cur_frm.doc.material_request){
+			// var d = locals[cdt][cdn];
+			// cur_frm.fields_dict['items'].df.read_only = 1;
+			// for (var item in d.items[0]){}
+			frappe.meta.get_docfield("Purchase Receipt Item", "rate", cur_frm.doc.name).read_only = 1;
+			frappe.meta.get_docfield("Purchase Receipt Item", "item_code", cur_frm.doc.name).read_only = 1;
+			frappe.meta.get_docfield("Purchase Receipt Item", "item_name", cur_frm.doc.name).read_only = 1;
+			frappe.meta.get_docfield("Purchase Receipt Item", "purchase_order", cur_frm.doc.name).read_only = 1;
+			frappe.meta.get_docfield("Purchase Receipt Item", "price_list_rate", cur_frm.doc.name).read_only = 1;
+			frappe.meta.get_docfield("Purchase Receipt Item", "discount_percentage", cur_frm.doc.name).read_only = 1;
+			frappe.meta.get_docfield("Purchase Receipt Item", "bom", cur_frm.doc.name).read_only = 1;
+			frappe.meta.get_docfield("Purchase Receipt Item", "batch_no", cur_frm.doc.name).read_only = 1;
+			frappe.meta.get_docfield("Purchase Receipt Item", "conversion_factor", cur_frm.doc.name).read_only = 1;
+			frappe.meta.get_docfield("Purchase Receipt Item", "uom", cur_frm.doc.name).read_only = 1;
+			frappe.meta.get_docfield("Purchase Receipt Item", "asset", cur_frm.doc.name).read_only = 1;
+				// console.log(cstr(item));
+			refresh_many(['items']);
+		}
+	},
 	onload: function(frm) {
 		$.each(["warehouse", "rejected_warehouse"], function(i, field) {
 			frm.set_query(field, "items", function() {
