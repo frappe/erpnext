@@ -60,6 +60,7 @@ domains = {
 	'Healthcare': 'erpnext.domains.healthcare',
 	'Hospitality': 'erpnext.domains.hospitality',
 	'Manufacturing': 'erpnext.domains.manufacturing',
+	'Non Profit': 'erpnext.domains.non_profit',
 	'Retail': 'erpnext.domains.retail',
 	'Services': 'erpnext.domains.services',
 }
