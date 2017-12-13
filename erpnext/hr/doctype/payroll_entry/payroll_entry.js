@@ -65,7 +65,7 @@ frappe.ui.form.on('Payroll Entry', {
 			},
 			callback: function(r) {
 				if (r.message && !r.message.submitted) {
-					frm.add_custom_button("Make Bank Entry",
+					frm.add_custom_button("Bank Entry",
 						function() {
 							make_bank_entry(frm);
 						},
