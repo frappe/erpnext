@@ -16,7 +16,8 @@ data = {
 	'restricted_roles': [
 		'Student',
 		'Instructor',
-		'Academics User'
+		'Academics User',
+		'Education Manager'
 	],
 	'modules': [
 		'Education'
