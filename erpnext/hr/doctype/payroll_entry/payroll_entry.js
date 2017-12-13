@@ -32,7 +32,7 @@ frappe.ui.form.on('Payroll Entry', {
 			}
 		});
 	},
-	
+
 	add_salary_slip_buttons: function(frm, slip_status) {
 		if (!slip_status.draft && !slip_status.submitted) {
 			return;
@@ -186,7 +186,7 @@ const submit_salary_slip = function (frm) {
 		__('This will create a Journal Entry. Do you want to proceed?'),
 		function() {
 			var doc = frm.doc;
-			//todo: $c is deprecated
+			// todo: $c is deprecated
 			return $c(
 				'runserverobj', { 'method': 'submit_salary_slips', 'docs': doc },
 				function() {
