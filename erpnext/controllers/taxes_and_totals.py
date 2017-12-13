@@ -70,7 +70,6 @@ class calculate_taxes_and_totals(object):
 				item.net_rate = item.rate
 				item.amount = flt(item.rate * item.qty,	item.precision("amount"))
 				item.net_amount = item.amount
-				item.total_weight = flt(item.weight_per_unit * item.qty)
 
 				self._set_in_company_currency(item, ["price_list_rate", "rate", "net_rate", "amount", "net_amount"])
 

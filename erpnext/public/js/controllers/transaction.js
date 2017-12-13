@@ -351,7 +351,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 										});
 									}
 								},
-								() => me.calculate_net_weight
+								() => me.calculate_total_weight()
 							]);
 						}
 					}
@@ -684,6 +684,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.frm.fields_dict.items.grid.toggle_enable("conversion_factor",
 				(item.uom != item.stock_uom)? true: false);
 		}
+
 	},
 
 	qty: function(doc, cdt, cdn) {
@@ -700,6 +701,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if(frappe.meta.get_docfield(cdt, "weight_per_unit", cdn)) {
 			var item = frappe.get_doc(cdt, cdn);
 			item.total_weight = flt(item.stock_qty * item.weight_per_unit);
+			console.log("item", item.stock_qty);
 			refresh_field("total_weight", item.name, item.parentfield);
 		}
 		this.calculate_net_weight();
