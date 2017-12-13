@@ -15,7 +15,7 @@ def enable_hub():
 	return hub_settings
 
 @frappe.whitelist()
-def get_items(start=0, limit=20, category=None, order_by=None, company=None, text=None):
+def get_items(start=0, limit=20, fields=None, category=None, order_by=None, company=None, text=None):
 	connection = get_connection()
 
 	filters = {}
@@ -29,8 +29,13 @@ def get_items(start=0, limit=20, category=None, order_by=None, company=None, tex
 
 	response = connection.get_list('Hub Item',
 		limit_start=start, limit_page_length=limit,
-		filters=filters)
+		filters=filters, fields=fields)
 	return response
+
+@frappe.whitelist()
+def get_hub_item_meta():
+	connection = get_connection()
+	return connection.get_doc('DocType', 'Hub Item')
 
 @frappe.whitelist()
 def get_categories():
