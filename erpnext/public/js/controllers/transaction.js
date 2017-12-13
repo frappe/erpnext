@@ -114,7 +114,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		if(this.frm.fields_dict["items"]) {
-			this["items_remove"] = this.calculate_taxes_and_totals;
+			this["items_remove"] = this.calculate_net_weight;
 		}
 
 		if(this.frm.fields_dict["recurring_print_format"]) {
@@ -336,18 +336,23 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 					callback: function(r) {
 						if(!r.exc) {
-							me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
-							me.toggle_conversion_factor(item);
-							if(show_batch_dialog && !frappe.flags.hide_serial_batch_dialog) {
-								var d = locals[cdt][cdn];
-								$.each(r.message, function(k, v) {
-									if(!d[k]) d[k] = v;
-								});
+							frappe.run_serially([
+								() => me.frm.script_manager.trigger("price_list_rate", cdt, cdn),
+								() => me.toggle_conversion_factor(item),
+								() => {
+									if(show_batch_dialog && !frappe.flags.hide_serial_batch_dialog) {
+										var d = locals[cdt][cdn];
+										$.each(r.message, function(k, v) {
+											if(!d[k]) d[k] = v;
+										});
 
-								erpnext.show_serial_batch_selector(me.frm, d, (item) => {
-									me.frm.script_manager.trigger('qty', item.doctype, item.name);
-								});
-							}
+										erpnext.show_serial_batch_selector(me.frm, d, (item) => {
+											me.frm.script_manager.trigger('qty', item.doctype, item.name);
+										});
+									}
+								},
+								() => me.calculate_net_weight
+							]);
 						}
 					}
 				});
@@ -569,6 +574,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	shipping_rule: function() {
+		console.log("test from")
 		var me = this;
 		if(this.frm.doc.shipping_rule) {
 			return this.frm.call({
@@ -681,17 +687,34 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	qty: function(doc, cdt, cdn) {
+		console.log("qty");
 		this.conversion_factor(doc, cdt, cdn, true);
 		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
 		this.calculate_total_weight(doc, cdt, cdn, true);
 	},
 
+
+
 	calculate_total_weight: function(doc, cdt, cdn){
+		console.log("calculate_total_weight")
 		if(frappe.meta.get_docfield(cdt, "weight_per_unit", cdn)) {
 			var item = frappe.get_doc(cdt, cdn);
-			item.total_weight = flt(item.qty * item.weight_per_unit);
+			item.total_weight = flt(item.stock_qty * item.weight_per_unit);
 			refresh_field("total_weight", item.name, item.parentfield);
 		}
+		this.calculate_net_weight();
+	},
+
+	calculate_net_weight: function(){
+		console.log("calculate_net_weight");
+		var me = this;
+		this.frm.doc.total_net_weight= 0.0;
+
+		$.each(this.frm.doc["items"] || [], function(i, item) {
+			me.frm.doc.total_net_weight += flt(item.total_weight);
+		});
+		refresh_field("total_net_weight");
+		this.shipping_rule();
 	},
 
 	set_dynamic_labels: function() {

@@ -24,7 +24,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	calculate_taxes_and_totals: function(update_paid_amount) {
 		this.discount_amount_applied = false;
 		this._calculate_taxes_and_totals();
-		this.calculate_net_weight();
+		/*this.calculate_net_weight();*/
 		this.calculate_discount_amount();
 
 		// Advance calculation applicable to Sales /Purchase Invoice
@@ -49,7 +49,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		}
 	},
 
-	calculate_net_weight: function(){
+	/*calculate_net_weight: function(){
 		console.log("test taxes");
 		var me = this;
 		this.frm.doc.total_net_weight= 0.0;
@@ -57,7 +57,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		$.each(this.frm.doc["items"] || [], function(i, item) {
 			me.frm.doc.total_net_weight += item.total_weight;
 		});
-	},
+	},*/
 
 	_calculate_taxes_and_totals: function() {
 		this.validate_conversion_rate();
@@ -211,7 +211,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	calculate_net_total: function() {
 		var me = this;
-		this.frm.doc.total = this.frm.doc.base_total = this.frm.doc.net_total = this.frm.doc.base_net_total = this.frm.doc.total_net_weight= 0.0;
+		this.frm.doc.total = this.frm.doc.base_total = this.frm.doc.net_total = this.frm.doc.base_net_total = 0.0;
 
 		$.each(this.frm.doc["items"] || [], function(i, item) {
 			me.frm.doc.total += item.amount;
