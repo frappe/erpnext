@@ -182,7 +182,7 @@ def setup_agriculture():
 			linked_doctype='Soil Analysis'),
 		dict(
 			doctype='Agriculture Analysis Criteria',
-			title='pH',
+			title='Soil pH',
 			standard=1,
 			linked_doctype='Soil Analysis'),
 		dict(
@@ -272,7 +272,7 @@ def setup_agriculture():
 			linked_doctype='Soil Analysis'),
 		dict(
 			doctype='Agriculture Analysis Criteria',
-			title='pH',
+			title='Water pH',
 			standard=1,
 			linked_doctype='Water Analysis'),
 		dict(
