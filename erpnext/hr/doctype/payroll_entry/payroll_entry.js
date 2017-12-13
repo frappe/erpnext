@@ -182,17 +182,22 @@ frappe.ui.form.on('Payroll Entry', {
 // Submit salary slips
 
 const submit_salary_slip = function (frm) {
-	frappe.confirm(
-		__('This will create a Journal Entry. Do you want to proceed?'),
+	frappe.confirm(__('This will create a Journal Entry. Do you want to proceed?'),
 		function() {
-			var doc = frm.doc;
-			// todo: $c is deprecated
-			return $c(
-				'runserverobj', { 'method': 'submit_salary_slips', 'docs': doc },
-				function() {
-					frm.events.refresh(frm);
-				}
-			);
+			frappe.call({
+				method: 'submit_salary_slips',
+				args: {},
+				callback: function() {frm.events.refresh(frm);},
+				doc: frm.doc,
+				freeze: true,
+				freeze_message: 'Creating Journal Entries...'
+			});
+		},
+		function() {
+			if(frappe.dom.freeze_count) {
+				frappe.dom.unfreeze();
+				frm.events.refresh(frm);
+			}
 		}
 	);
 };
