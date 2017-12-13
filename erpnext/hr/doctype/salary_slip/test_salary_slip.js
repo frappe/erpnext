@@ -44,6 +44,12 @@ QUnit.test("test salary slip", function(assert) {
 		() => frappe.timeout(6),
 		() => salary_slip('Test Employee 3'),
 		() => frappe.timeout(5),
+		() => frappe.set_route('List', 'Salary Slip', 'List'),
+		() => frappe.timeout(2),
+		() => {$('.list-select-all').click();},
+		() => frappe.timeout(2),
+		() => frappe.click_button('Delete'),
+		() => frappe.click_button('Yes'),
 		() => done()
 	]);
 });

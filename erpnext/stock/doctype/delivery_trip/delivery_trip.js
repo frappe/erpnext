@@ -104,9 +104,19 @@ frappe.ui.form.on('Delivery Stop', {
 						if (r.message["shipping_address"]) {
 							frappe.model.set_value(cdt, cdn, "address", r.message["shipping_address"].parent);
 						}
+						else {
+							frappe.model.set_value(cdt, cdn, "address", '');
+						}
 						if (r.message["contact_person"]) {
 							frappe.model.set_value(cdt, cdn, "contact", r.message["contact_person"].parent);
 						}
+						else {
+							frappe.model.set_value(cdt, cdn, "contact", '');
+						}
+					}
+					else {
+						frappe.model.set_value(cdt, cdn, "address", '');
+						frappe.model.set_value(cdt, cdn, "contact", '');
 					}
 				}
 			});

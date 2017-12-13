@@ -294,7 +294,7 @@ def get_data():
 		{
 			"module_name": "Data Import Tool",
 			"color": "#7f8c8d",
-			"icon": "octicon octicon-circuit-board",
+			"icon": "octicon octicon-cloud-upload",
 			"type": "page",
 			"link": "data-import-tool",
 			"label": _("Data Import Tool")
@@ -304,6 +304,7 @@ def get_data():
 			"color": "#EA81E8",
 			"icon": "🍔",
 			"_doctype": "Restaurant",
+			"type": "list",
 			"link": "List/Restaurant",
 			"label": _("Restaurant"),
 			"hidden": 1
@@ -322,7 +323,7 @@ def get_data():
 			"label": _("Crop"),
 			"color": "#8BC34A",
 			"icon": "fa fa-tree",
-			"type": "link",
+			"type": "list",
 			"link": "List/Crop",
 			"hidden": 1
 		},
@@ -332,7 +333,7 @@ def get_data():
 			"label": _("Crop Cycle"),
 			"color": "#8BC34A",
 			"icon": "fa fa-circle-o-notch",
-			"type": "link",
+			"type": "list",
 			"link": "List/Crop Cycle",
 			"hidden": 1
 		},
@@ -342,7 +343,7 @@ def get_data():
 			"label": _("Fertilizer"),
 			"color": "#8BC34A",
 			"icon": "fa fa-leaf",
-			"type": "link",
+			"type": "list",
 			"link": "List/Fertilizer",
 			"hidden": 1
 		},
@@ -352,7 +353,7 @@ def get_data():
 			"label": _("Land Unit"),
 			"color": "#8BC34A",
 			"icon": "fa fa-map",
-			"type": "link",
+			"type": "list",
 			"link": "List/Land Unit",
 			"hidden": 1
 		},
@@ -362,7 +363,7 @@ def get_data():
 			"label": _("Disease"),
 			"color": "#8BC34A",
 			"icon": "octicon octicon-bug",
-			"type": "link",
+			"type": "list",
 			"link": "List/Disease",
 			"hidden": 1
 		},
@@ -372,7 +373,7 @@ def get_data():
 			"label": _("Plant Analysis"),
 			"color": "#8BC34A",
 			"icon": "fa fa-pagelines",
-			"type": "link",
+			"type": "list",
 			"link": "List/Plant Analysis",
 			"hidden": 1
 		},
@@ -382,7 +383,7 @@ def get_data():
 			"label": _("Soil Analysis"),
 			"color": "#8BC34A",
 			"icon": "fa fa-flask",
-			"type": "link",
+			"type": "list",
 			"link": "List/Soil Analysis",
 			"hidden": 1
 		},
@@ -392,7 +393,7 @@ def get_data():
 			"label": _("Soil Texture"),
 			"color": "#8BC34A",
 			"icon": "octicon octicon-beaker",
-			"type": "link",
+			"type": "list",
 			"link": "List/Soil Texture",
 			"hidden": 1
 		},
@@ -402,7 +403,7 @@ def get_data():
 			"label": _("Water Analysis"),
 			"color": "#8BC34A",
 			"icon": "fa fa-tint",
-			"type": "link",
+			"type": "list",
 			"link": "List/Water Analysis",
 			"hidden": 1
 		},
@@ -412,7 +413,7 @@ def get_data():
 			"label": _("Weather"),
 			"color": "#8BC34A",
 			"icon": "fa fa-sun-o",
-			"type": "link",
+			"type": "list",
 			"link": "List/Weather",
 			"hidden": 1
 		},
@@ -429,6 +430,7 @@ def get_data():
 			"color": "#E9AB17",
 			"icon": "fa fa-gift",
 			"_doctype": "Grant Application",
+			"type": "list",
 			"link": "List/Grant Application",
 			"label": _("Grant Application"),
 			"hidden": 1
@@ -439,6 +441,7 @@ def get_data():
 			"color": "#7F5A58",
 			"icon": "fa fa-tint",
 			"_doctype": "Donor",
+			"type": "list",
 			"link": "List/Donor",
 			"label": _("Donor"),
 			"hidden": 1
@@ -448,6 +451,7 @@ def get_data():
 			"color": "#7E587E",
 			"icon": "fa fa-angellist",
 			"_doctype": "Volunteer",
+			"type": "list",
 			"link": "List/Volunteer",
 			"label": _("Volunteer"),
 			"hidden": 1
@@ -457,6 +461,7 @@ def get_data():
 			"color": "#79BAEC",
 			"icon": "fa fa-users",
 			"_doctype": "Member",
+			"type": "list",
 			"link": "List/Member",
 			"label": _("Member"),
 			"hidden": 1
@@ -466,6 +471,7 @@ def get_data():
 			"color": "#3B9C9C",
 			"icon": "fa fa-handshake-o",
 			"_doctype": "Chapter",
+			"type": "list",
 			"link": "List/Chapter",
 			"label": _("Chapter"),
 			"hidden": 1

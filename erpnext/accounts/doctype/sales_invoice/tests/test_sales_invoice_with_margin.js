@@ -11,7 +11,7 @@ QUnit.test("test sales invoice with margin", function(assert) {
 				{currency: 'USD'},
 				{items: [
 					[
-						{'item_code': 'Test Product 3'},
+						{'item_code': 'Test Product 4'},
 						{'delivery_date': frappe.datetime.add_days(frappe.defaults.get_default("year_end_date"), 1)},
 						{'qty': 1},
 						{'margin_type': 'Percentage'},

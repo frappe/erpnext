@@ -11,7 +11,7 @@ QUnit.test("test delivery note with margin", function(assert) {
 				{currency: 'USD'},
 				{items: [
 					[
-						{'item_code': 'Test Product 3'},
+						{'item_code': 'Test Product 4'},
 						{'qty': 1},
 						{'margin_type': 'Amount'},
 						{'margin_rate_or_amount': 10}

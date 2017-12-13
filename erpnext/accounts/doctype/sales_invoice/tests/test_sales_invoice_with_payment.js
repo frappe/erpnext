@@ -44,7 +44,6 @@ QUnit.test("test sales Invoice with payment", function(assert) {
 		() => { cur_frm.set_value('paid_to','Cash - '+frappe.get_abbr(frappe.defaults.get_default('Company')));},
 		() => {cur_frm.set_value('reference_no','TEST1234');},
 		() => {cur_frm.set_value('reference_date',frappe.datetime.add_days(frappe.datetime.nowdate(), 0));},
-		() => cur_frm.set_value("payment_schedule", []),
 		() => cur_frm.save(),
 		() => {
 			// get payment details

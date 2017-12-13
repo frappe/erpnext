@@ -159,7 +159,7 @@ class Employee(NestedSet):
 			throw(_("Employee cannot report to himself."))
 
 	def on_trash(self):
-		super(Employee, self).on_trash()
+		self.update_nsm_model()
 		delete_events(self.doctype, self.name)
 
 	def validate_prefered_email(self):

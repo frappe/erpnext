@@ -10,7 +10,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				+ flt(item.price_list_rate) * ( flt(item.margin_rate_or_amount) / 100);
 		} else {
 			item.rate_with_margin = flt(item.price_list_rate) + flt(item.margin_rate_or_amount);
-			item.base_rate_with_margin = flt(item.rate_with_margin) * flt(cur_frm.doc.conversion_rate);
+			item.base_rate_with_margin = flt(item.rate_with_margin) * flt(this.frm.doc.conversion_rate);
 		}
 
 		item.rate = flt(item.rate_with_margin , precision("rate", item));
@@ -535,9 +535,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			var actual_taxes_dict = {};
 
 			$.each(this.frm.doc["taxes"] || [], function(i, tax) {
-				if (tax.charge_type == "Actual")
-					actual_taxes_dict[tax.idx] = tax.tax_amount;
-				else if (actual_taxes_dict[tax.row_id] !== null) {
+				if (tax.charge_type == "Actual") {
+					var tax_amount = (tax.category == "Valuation") ? 0.0 : tax.tax_amount;
+					tax_amount *= (tax.add_deduct_tax == "Deduct") ? -1.0 : 1.0;
+					actual_taxes_dict[tax.idx] = tax_amount;
+				} else if (actual_taxes_dict[tax.row_id] !== null) {
 					var actual_tax_amount = flt(actual_taxes_dict[tax.row_id]) * flt(tax.rate) / 100;
 					actual_taxes_dict[tax.idx] = actual_tax_amount;
 				}

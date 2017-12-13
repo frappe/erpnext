@@ -235,7 +235,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			return frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_default_taxes_and_charges",
 				args: {
-					"master_doctype": taxes_and_charges_field.options
+					"master_doctype": taxes_and_charges_field.options,
+					"company": me.frm.doc.company
 				},
 				callback: function(r) {
 					if(!r.exc) {
@@ -420,8 +421,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					me.frm.set_value("tc_name", company_doc.default_terms);
 				}
 
-				me.frm.script_manager.trigger("currency");
-				me.apply_pricing_rule();
+				frappe.run_serially([
+					() => me.frm.script_manager.trigger("currency"),
+					() => me.apply_default_taxes(),
+					() => me.apply_pricing_rule()
+				]);
 			}
 		}
 
@@ -1182,7 +1186,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	payment_terms_template: function() {
 		var me = this;
-		if(this.frm.doc.payment_terms_template && this.frm.doc.payment_schedule.length === 0) {
+		if(this.frm.doc.payment_terms_template) {
 			frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_payment_terms",
 				args: {
