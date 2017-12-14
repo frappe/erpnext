@@ -351,7 +351,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 										});
 									}
 								},
-								() => me.calculate_total_weight()
+								() => me.conversion_factor(doc, cdt, cdn, true)
 							]);
 						}
 					}
@@ -672,7 +672,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			refresh_field("stock_qty", item.name, item.parentfield);
 			refresh_field("total_weight", item.name, item.parentfield);
 			this.toggle_conversion_factor(item);
-			this.calculate_total_weight(doc, cdt, cdn, true);
+			this.calculate_net_weight();
 			if (!dont_fetch_price_list_rate &&
 				frappe.meta.has_field(doc.doctype, "price_list_currency")) {
 				this.apply_price_list(item, true);
@@ -692,19 +692,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	qty: function(doc, cdt, cdn) {
 		this.conversion_factor(doc, cdt, cdn, true);
 		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
-		this.calculate_total_weight(doc, cdt, cdn, true);
-	},
-
-
-
-	calculate_total_weight: function(doc, cdt, cdn){
-		/* Calculate total weight trigger on qty, item_remove and item code. */
-		if(frappe.meta.get_docfield(cdt, "weight_per_unit", cdn)) {
-			var item = frappe.get_doc(cdt, cdn);
-			item.total_weight = flt(item.stock_qty * item.weight_per_unit);
-			refresh_field("total_weight", item.name, item.parentfield);
-		}
-		this.calculate_net_weight();
 	},
 
 	calculate_net_weight: function(){
