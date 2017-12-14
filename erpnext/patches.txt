@@ -480,3 +480,4 @@ erpnext.patches.v9_2.delete_process_payroll
 erpnext.patches.v10_0.add_agriculture_domain
 erpnext.patches.v10_0.add_non_profit_domain
 erpnext.patches.v10_0.setup_vat_for_uae_and_saudi_arabia
+erpnext.patches.v10_0.copy_projects_renamed_fields
