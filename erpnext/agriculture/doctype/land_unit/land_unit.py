@@ -42,7 +42,7 @@ class LandUnit(NestedSet):
 			self.area_difference = new_area - self.area
 			self.area = new_area	
 
-			if self.get('parent'): 
+			if self.get('parent_land_unit'):
 				ancestors = self.get_ancestors()
 				self_features = self.add_child_property()
 				self_features = set(self_features)

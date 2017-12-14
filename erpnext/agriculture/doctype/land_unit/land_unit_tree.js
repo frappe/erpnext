@@ -8,8 +8,8 @@ frappe.treeview_settings["Land Unit"] = {
 			click: function(node) {
 				var lu = frappe.new_doc("Land Unit", {
 					"parent_land_unit": node.label
-				})
+				});
 			}
 		}
 	],
-}
+};
