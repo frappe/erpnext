@@ -60,3 +60,18 @@ class CropCycle(Document):
 
 	def get_geometry_type(self, doc):
 		return ast.literal_eval(doc.location).get('features')[0].get('geometry').get('type')
+
+	def test_analysis_position(self, point, vs):
+		x, y = point
+		inside = False
+		j = len(vs)-1
+		i = 0
+		while i < len(vs):
+			xi, yi = vs[i]
+			xj, yj = vs[j]
+			intersect = ((yi > y) != (yj > y)) and (x < (xj - xi) * (y - yi) / (yj - yi) + xi)
+			if intersect:
+				inside = not inside
+			i = j
+			j += 1
+		return inside
