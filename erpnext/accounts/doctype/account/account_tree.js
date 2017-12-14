@@ -79,6 +79,9 @@ frappe.treeview_settings["Account"] = {
 
 	},
 	onrender: function(node) {
+		if(!node.parent_label){
+			node.hide_add = true;
+		}
 		var dr_or_cr = node.data.balance < 0 ? "Cr" : "Dr";
 		if (node.data && node.data.balance!==undefined) {
 			$('<span class="balance-area pull-right text-muted small">'

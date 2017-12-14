@@ -18,6 +18,9 @@ frappe.treeview_settings['Warehouse'] = {
 	],
 	ignore_fields:["parent_warehouse"],
 	onrender: function(node) {
+		if(!node.parent_label){
+			node.hide_add = true;
+		}
 		if (node.data && node.data.balance!==undefined) {
 			$('<span class="balance-area pull-right text-muted small">'
 			+ format_currency(Math.abs(node.data.balance), node.data.company_currency)
