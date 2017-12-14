@@ -44,7 +44,8 @@ class ExpenseClaim(AccountsController):
 			"2": "Cancelled"
 		}[cstr(self.docstatus or 0)]
 
-		if self.total_sanctioned_amount > 0 and self.total_sanctioned_amount == self.total_amount_reimbursed \
+		paid_amount = flt(self.total_amount_reimbursed) + flt(self.total_advance_amount)
+		if self.total_sanctioned_amount > 0 and self.total_sanctioned_amount ==  paid_amount\
 			and self.docstatus == 1 and self.approval_status == 'Approved':
 			self.status = "Paid"
 		elif self.total_sanctioned_amount > 0 and self.docstatus == 1 and self.approval_status == 'Approved':
