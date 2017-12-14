@@ -574,7 +574,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	shipping_rule: function() {
-		console.log("test from")
 		var me = this;
 		if(this.frm.doc.shipping_rule) {
 			return this.frm.call({
@@ -669,8 +668,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			var item = frappe.get_doc(cdt, cdn);
 			frappe.model.round_floats_in(item, ["qty", "conversion_factor"]);
 			item.stock_qty = flt(item.qty * item.conversion_factor, precision("stock_qty", item));
+			item.total_weight = flt(item.stock_qty * item.weight_per_unit);
 			refresh_field("stock_qty", item.name, item.parentfield);
+			refresh_field("total_weight", item.name, item.parentfield);
 			this.toggle_conversion_factor(item);
+			this.calculate_total_weight(doc, cdt, cdn, true);
 			if (!dont_fetch_price_list_rate &&
 				frappe.meta.has_field(doc.doctype, "price_list_currency")) {
 				this.apply_price_list(item, true);
@@ -688,7 +690,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	qty: function(doc, cdt, cdn) {
-		console.log("qty");
 		this.conversion_factor(doc, cdt, cdn, true);
 		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
 		this.calculate_total_weight(doc, cdt, cdn, true);
@@ -697,18 +698,17 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 
 	calculate_total_weight: function(doc, cdt, cdn){
-		console.log("calculate_total_weight")
+		/* Calculate total weight trigger on qty, item_remove and item code. */
 		if(frappe.meta.get_docfield(cdt, "weight_per_unit", cdn)) {
 			var item = frappe.get_doc(cdt, cdn);
 			item.total_weight = flt(item.stock_qty * item.weight_per_unit);
-			console.log("item", item.stock_qty);
 			refresh_field("total_weight", item.name, item.parentfield);
 		}
 		this.calculate_net_weight();
 	},
 
 	calculate_net_weight: function(){
-		console.log("calculate_net_weight");
+		/* Calculate Total Net Weight then further applied shipping rule to calculate shipping charges.*/
 		var me = this;
 		this.frm.doc.total_net_weight= 0.0;
 
