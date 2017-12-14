@@ -617,10 +617,13 @@ def get_party_details(company, party_type, party, date):
 
 	account_currency = get_account_currency(party_account)
 	account_balance = get_balance_on(party_account, date)
+	_party_name = "title" if party_type == "Student" else party_type.lower() + "_name"
+	party_name = frappe.db.get_value(party_type, party, _party_name)
 	party_balance = get_balance_on(party_type=party_type, party=party)
 
 	return {
 		"party_account": party_account,
+		"party_name": party_name,
 		"party_account_currency": account_currency,
 		"party_balance": party_balance,
 		"account_balance": account_balance
