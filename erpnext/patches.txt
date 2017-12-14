@@ -481,3 +481,4 @@ erpnext.patches.v10_0.add_agriculture_domain
 erpnext.patches.v10_0.add_non_profit_domain
 erpnext.patches.v10_0.setup_vat_for_uae_and_saudi_arabia
 erpnext.patches.v10_0.set_primary_contact_for_customer
+erpnext.patches.v10_0.copy_projects_renamed_fields
