@@ -24,7 +24,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	calculate_taxes_and_totals: function(update_paid_amount) {
 		this.discount_amount_applied = false;
 		this._calculate_taxes_and_totals();
-		/*this.calculate_net_weight();*/
 		this.calculate_discount_amount();
 
 		// Advance calculation applicable to Sales /Purchase Invoice
@@ -48,16 +47,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			this.apply_discount_amount();
 		}
 	},
-
-	/*calculate_net_weight: function(){
-		console.log("test taxes");
-		var me = this;
-		this.frm.doc.total_net_weight= 0.0;
-
-		$.each(this.frm.doc["items"] || [], function(i, item) {
-			me.frm.doc.total_net_weight += item.total_weight;
-		});
-	},*/
 
 	_calculate_taxes_and_totals: function() {
 		this.validate_conversion_rate();
