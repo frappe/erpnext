@@ -7,86 +7,106 @@ import frappe
 from frappe import _
 from operations import install_fixtures, taxes_setup, defaults_setup, company_setup, sample_data
 
-def setup_complete(args=None):
-	stages = [
-		{
-			'status': 'Installing fixtures',
-			'error': 'Errored in stage 1',
-			'tasks': [
-				{
-					'f': stage_fixtures,
-					'args': args,
-					'error_msg': "Failed stage one"
-				}
-			]
-		},
-		{
-			'status': 'Setting up company and taxes',
-			'error': 'Errored in stage 1',
-			'tasks': [
-				{
-					'f': stage_two,
-					'args': args,
-					'error_msg': "Failed stage one"
-				}
-			]
-		},
-		{
-			'status': 'Setting defaults',
-			'error': 'errored in stage Two',
-			'tasks': [
-				{
-					'f': stage_three,
-					'args': args,
-					'error_msg': "Failed Stage two"
-				}
-			]
-		},
-		{
-			'status': 'Making website',
-			'error': 'errored in stage Three',
-			'tasks': [
-				{
-					'f': stage_four,
-					'args': args,
-					'error_msg': "Failed Stage two"
-				}
-			]
-		},
-		{
-			'status': 'Wrapping up',
-			'error': 'errored in stage Two',
-			'tasks': [
-				{
-					'f': fin,
-					'args': args,
-					'error_msg': "Failed fin"
-				}
-			]
-		}
-	]
+def get_setup_stages(args=None):
+	if frappe.db.sql("select name from tabCompany"):
+		stages = [
+			{
+				'status': _('Wrapping up'),
+				'error_msg': _('Failed to login'),
+				'tasks': [
+					{
+						'fn': fin,
+						'args': args,
+						'error_msg': _("Failed to login")
+					}
+				]
+			}
+		]
+	else:
+		stages = [
+			{
+				'status': _('Installing presets'),
+				'error_msg': _('Failed to install presets'),
+				'tasks': [
+					{
+						'fn': stage_fixtures,
+						'args': args,
+						'error_msg': _("Failed to install presets")
+					}
+				]
+			},
+			{
+				'status': _('Setting up company and taxes'),
+				'error_msg': _('Failed to setup company'),
+				'tasks': [
+					{
+						'fn': setup_company,
+						'args': args,
+						'error_msg': _("Failed to setup company")
+					},
+					{
+						'fn': setup_taxes,
+						'args': args,
+						'error_msg': _("Failed to setup taxes")
+					}
+				]
+			},
+			{
+				'status': _('Setting defaults'),
+				'error_msg': 'Failed to set defaults',
+				'tasks': [
+					{
+						'fn': stage_three,
+						'args': args,
+						'error_msg': _("Failed to set defaults")
+					}
+				]
+			},
+			{
+				'status': _('Making website'),
+				'error_msg': _('Failed to create website'),
+				'tasks': [
+					{
+						'fn': stage_four,
+						'args': args,
+						'error_msg': _("Failed to create website")
+					}
+				]
+			},
+			{
+				'status': _('Wrapping up'),
+				'error_msg': _('Failed to login'),
+				'tasks': [
+					{
+						'fn': fin,
+						'args': args,
+						'error_msg': _("Failed to login")
+					}
+				]
+			}
+		]
 
 	return stages
 
 
-# def setup_complete(args=None):
-# 	stage_fixtures(args)
-# 	stage_two(args)
-# 	stage_three(args)
-# 	stage_four(args)
-# 	fin(args)
+def setup_complete(args=None):
+	stage_fixtures(args)
+	setup_company(args)
+	setup_taxes(args)
+	stage_three(args)
+	stage_four(args)
+	fin(args)
 
 def stage_fixtures(args):
-	if frappe.db.sql("select name from tabCompany"):
-		frappe.throw(_("Setup Already Complete!!"))
-
 	install_fixtures.install(args.get("country"))
 
-def stage_two(args):
+def setup_company(args):
 	defaults_setup.create_price_lists(args)
 	company_setup.create_fiscal_year_and_company(args)
 	company_setup.enable_shopping_cart(args)
 	company_setup.create_bank_account(args)
+
+def setup_taxes(args):
 	taxes_setup.create_sales_tax(args)
 
 def stage_three(args):
