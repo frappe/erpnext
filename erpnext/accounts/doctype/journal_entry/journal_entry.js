@@ -237,17 +237,21 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		const d = frappe.get_doc(cdt, cdn);
 
 		if (d.reference_type && d.reference_name && d.reference_due_date) {
+			if (in_list(["Sales Invoice", "Purchase Invoice"], d.reference_type)) {
+				frappe.model.set_value(cdt, cdn, 'debit', '');
+				frappe.model.set_value(cdt, cdn, 'credit', '');
+			}
 			if (d.reference_type==="Purchase Invoice") {
-				if (flt(d.debit)) frappe.model.set_value(cdt, cdn, 'debit', '');
 				this.get_outstanding(
 					'Purchase Invoice', d.reference_name, doc.company, d, d.reference_due_date
 				);
 			} else if (d.reference_type==="Sales Invoice") {
-				if (flt(d.debit)) frappe.model.set_value(cdt, cdn, 'credit', '');
 				this.get_outstanding(
 					'Sales Invoice', d.reference_name, doc.company, d, d.reference_due_date
 				);
 			}
+
+			frappe.model.set_value(cdt, cdn, 'reference_due_date', d.reference_due_date);
 		}
 	},
 
