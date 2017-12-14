@@ -1225,7 +1225,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	}
 });
 
-erpnext.show_serial_batch_selector = function(frm, d, callback, show_dialog) {
+erpnext.show_serial_batch_selector = function(frm, d, callback, on_close, show_dialog) {
 	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
 		new erpnext.SerialNoBatchSelector({
 			frm: frm,
@@ -1234,7 +1234,8 @@ erpnext.show_serial_batch_selector = function(frm, d, callback, show_dialog) {
 				type: "Warehouse",
 				name: d.warehouse
 			},
-			callback: callback
+			callback: callback,
+			on_close: on_close
 		}, show_dialog);
 	});
 }
