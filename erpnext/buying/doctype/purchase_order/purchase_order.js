@@ -386,3 +386,23 @@ frappe.ui.form.on("Purchase Order", "is_subcontracted", function(frm) {
         erpnext.buying.get_default_bom(frm);
     }
 });
+cur_frm.cscript.custom_item_code = function(doc, cdt, cdn){
+    var d = locals[cdt][cdn];
+    if (cur_frm.doc.project){
+        frappe.call({
+            method: "frappe.client.get_list",
+            args: {
+                doctype: "Project",
+                fields: ["name", "default_warehouse"],
+                filters: { "name": cur_frm.doc.project }
+            },
+            callback: function(r, rt) {
+                console.log(r.message);
+                if (r.message) {
+                    frappe.model.set_value(d.doctype, d.name, "project", r.message[0].name);
+                    frappe.model.set_value(d.doctype, d.name, "warehouse", r.message[0].default_warehouse);
+                }
+            }
+        });
+    }
+}

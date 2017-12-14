@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
  "autoname": "GL.#######", 
@@ -12,6 +13,7 @@
  "editable_grid": 0, 
  "fields": [
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -21,7 +23,8 @@
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
-   "in_filter": 1, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
    "in_standard_filter": 0, 
    "label": "Posting Date", 
@@ -41,6 +44,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -51,6 +55,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
    "in_standard_filter": 0, 
    "label": "Transaction Date", 
@@ -70,6 +75,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -79,7 +85,8 @@
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
-   "in_filter": 1, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
    "in_standard_filter": 1, 
    "label": "Account", 
@@ -100,6 +107,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -110,6 +118,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Party Type", 
@@ -128,6 +137,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -138,6 +148,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 1, 
    "label": "Party", 
@@ -156,6 +167,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -165,7 +177,8 @@
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
-   "in_filter": 1, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
    "in_standard_filter": 0, 
    "label": "Cost Center", 
@@ -186,6 +199,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -196,6 +210,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Debit Amount", 
@@ -217,6 +232,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -227,6 +243,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Credit Amount", 
@@ -248,6 +265,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -258,6 +276,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Account Currency", 
@@ -277,6 +296,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -287,6 +307,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Debit Amount in Account Currency", 
@@ -306,6 +327,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -316,6 +338,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Credit Amount in Account Currency", 
@@ -335,6 +358,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -344,7 +368,8 @@
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
-   "in_filter": 1, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Against", 
@@ -364,6 +389,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -374,6 +400,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Against Voucher Type", 
@@ -394,6 +421,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -403,7 +431,8 @@
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
-   "in_filter": 1, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Against Voucher", 
@@ -424,6 +453,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -433,7 +463,8 @@
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
-   "in_filter": 1, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Voucher Type", 
@@ -454,6 +485,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -463,7 +495,8 @@
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
-   "in_filter": 1, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 1, 
    "label": "Voucher No", 
@@ -484,6 +517,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -494,6 +528,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Title", 
@@ -513,6 +548,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -523,6 +559,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Project", 
@@ -542,6 +579,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -551,7 +589,8 @@
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
-   "in_filter": 1, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Remarks", 
@@ -571,6 +610,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -580,7 +620,8 @@
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
-   "in_filter": 1, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Is Opening", 
@@ -601,6 +642,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -611,6 +653,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Is Advance", 
@@ -631,6 +674,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -640,7 +684,8 @@
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
-   "in_filter": 1, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Fiscal Year", 
@@ -661,6 +706,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -670,7 +716,8 @@
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
-   "in_filter": 1, 
+   "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Company", 
@@ -691,6 +738,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -701,6 +749,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Reason", 
@@ -719,6 +768,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -729,6 +779,7 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
    "in_standard_filter": 0, 
    "label": "Description", 
@@ -747,18 +798,18 @@
    "unique": 0
   }
  ], 
+ "has_web_view": 0, 
  "hide_heading": 0, 
  "hide_toolbar": 0, 
  "icon": "fa fa-list", 
  "idx": 1, 
  "image_view": 0, 
  "in_create": 1, 
- "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-08-10 12:47:26.561638", 
+ "modified": "2017-12-12 10:49:18.075765", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "GL Entry", 
@@ -774,7 +825,6 @@
    "export": 1, 
    "if_owner": 0, 
    "import": 0, 
-   "is_custom": 0, 
    "permlevel": 0, 
    "print": 1, 
    "read": 1, 
@@ -795,7 +845,6 @@
    "export": 1, 
    "if_owner": 0, 
    "import": 0, 
-   "is_custom": 0, 
    "permlevel": 0, 
    "print": 1, 
    "read": 1, 
@@ -816,7 +865,6 @@
    "export": 1, 
    "if_owner": 0, 
    "import": 0, 
-   "is_custom": 0, 
    "permlevel": 0, 
    "print": 0, 
    "read": 1, 
@@ -837,7 +885,6 @@
    "export": 1, 
    "if_owner": 0, 
    "import": 0, 
-   "is_custom": 0, 
    "permlevel": 0, 
    "print": 1, 
    "read": 1, 
@@ -853,7 +900,9 @@
  "read_only": 0, 
  "read_only_onload": 0, 
  "search_fields": "voucher_no,account,posting_date,against_voucher", 
+ "show_name_in_global_search": 0, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
+ "track_changes": 1, 
  "track_seen": 0
 }

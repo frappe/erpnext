@@ -161,7 +161,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
     onload: function() {
         this._super();
         cur_frm.trigger('filter_items');
-        // cur_frm.refresh();
+        cur_frm.refresh();
     },
     purchase_workflow: function(){
         
@@ -404,6 +404,26 @@ cur_frm.cscript.custom_qty = cur_frm.cscript.custom_suggested_price_per_unit = f
         val += parseFloat(d.suggested_total_price);
     });
     cur_frm.set_value("suggested_grand_total", val);
+}
+cur_frm.cscript.custom_item_code = function(doc, cdt, cdn){
+    var d = locals[cdt][cdn];
+    if (cur_frm.doc.project){
+        frappe.call({
+            method: "frappe.client.get_list",
+            args: {
+                doctype: "Project",
+                fields: ["name", "default_warehouse"],
+                filters: { "name": cur_frm.doc.project }
+            },
+            callback: function(r, rt) {
+                console.log(r.message);
+                if (r.message) {
+                    frappe.model.set_value(d.doctype, d.name, "project", r.message[0].name);
+                    frappe.model.set_value(d.doctype, d.name, "warehouse", r.message[0].default_warehouse);
+                }
+            }
+        });
+    }
 }
 
 // frappe.ui.form.on("Material Request", "validate", function (frm) {

@@ -578,8 +578,8 @@ class LeaveApplication(Document):
 		allocation_based_on_to_date = _get_leave_alloction_record(self.to_date)
 
 		if not (allocation_based_on_from_date or allocation_based_on_to_date):
-			# frappe.throw(_("Application period cannot be outside leave allocation period"))
-			frappe.throw(_("You should complete 3 months to be able to apply for this leave"))
+			frappe.throw(_("Application period cannot be outside leave allocation period"))
+			# frappe.throw(_("You should complete 3 months to be able to apply for this leave"))
 
 		elif allocation_based_on_from_date != allocation_based_on_to_date:
 			frappe.throw(_("Application period cannot be across two allocation records"))
