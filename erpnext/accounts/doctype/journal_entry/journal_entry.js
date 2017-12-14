@@ -221,13 +221,12 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		if(d.reference_name) {
 			if (d.reference_type==="Purchase Invoice" && !flt(d.debit)) {
 				this.get_outstanding('Purchase Invoice', d.reference_name, doc.company, d);
-			}
-			if (d.reference_type==="Sales Invoice" && !flt(d.credit)) {
+			} else if (d.reference_type==="Sales Invoice" && !flt(d.credit)) {
 				this.get_outstanding('Sales Invoice', d.reference_name, doc.company, d);
-			}
-			if (d.reference_type==="Journal Entry" && !flt(d.credit) && !flt(d.debit)) {
+			} else if (d.reference_type==="Journal Entry" && !flt(d.credit) && !flt(d.debit)) {
 				this.get_outstanding('Journal Entry', d.reference_name, doc.company, d);
 			}
+
 			if( in_list(["Sales Invoice", "Purchase Invoice"]), d.reference_type) {
 				get_invoice_due_dates(d.reference_name);
 			}
