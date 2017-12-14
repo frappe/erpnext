@@ -234,7 +234,25 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		}
 	},
 
-	get_outstanding: function(doctype, docname, company, child) {
+	reference_due_date: function(doc, cdt, cdn) {
+		const d = frappe.get_doc(cdt, cdn);
+
+		if (d.reference_type && d.reference_name && d.reference_due_date) {
+			if (d.reference_type==="Purchase Invoice") {
+				if (flt(d.debit)) frappe.model.set_value(cdt, cdn, 'debit', '');
+				this.get_outstanding(
+					'Purchase Invoice', d.reference_name, doc.company, d, d.reference_due_date
+				);
+			} else if (d.reference_type==="Sales Invoice") {
+				if (flt(d.debit)) frappe.model.set_value(cdt, cdn, 'credit', '');
+				this.get_outstanding(
+					'Sales Invoice', d.reference_name, doc.company, d, d.reference_due_date
+				);
+			}
+		}
+	},
+
+	get_outstanding: function(doctype, docname, company, child, due_date) {
 		var me = this;
 		var args = {
 			"doctype": doctype,
@@ -244,6 +262,8 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			"account_currency": child.account_currency,
 			"company": company
 		}
+
+		if (due_date) args.due_date = due_date;
 
 		return frappe.call({
 			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_outstanding",
