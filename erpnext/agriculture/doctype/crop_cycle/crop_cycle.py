@@ -12,6 +12,10 @@ class CropCycle(Document):
 		if self.is_new():
 			crop = frappe.get_doc('Crop', self.crop)
 			self.create_project(crop.period, crop.agriculture_task)
+			self.crop_spacing = crop.crop_spacing
+			self.row_spacing = crop.row_spacing
+			self.crop_spacing_uom = crop.crop_spacing_uom
+			self.row_spacing_uom = crop.row_spacing_uom
 		if not self.project:
 			self.project = self.name
 		for detected_disease in self.detected_disease:
