@@ -239,8 +239,9 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 		if (d.reference_type && d.reference_name && d.reference_due_date) {
 			if (in_list(["Sales Invoice", "Purchase Invoice"], d.reference_type)) {
-				frappe.model.set_value(cdt, cdn, 'debit', '');
-				frappe.model.set_value(cdt, cdn, 'credit', '');
+				console.log('cdt:', cdt, cdn);
+				frappe.model.set_value(cdt, cdn, 'debit_in_account_currency', '');
+				frappe.model.set_value(cdt, cdn, 'credit_in_account_currency', '');
 			}
 			if (d.reference_type==="Purchase Invoice") {
 				this.get_outstanding(
