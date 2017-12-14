@@ -124,6 +124,15 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 				};
 			}
 
+			if(jvd.reference_type==="Employee Advance") {
+				return {
+					filters: {
+						'status': ['=', 'Unpaid'],
+						'docstatus': 1
+					}
+				};
+			}
+
 			// journal entry
 			if(jvd.reference_type==="Journal Entry") {
 				frappe.model.validate_missing(jvd, "account");
