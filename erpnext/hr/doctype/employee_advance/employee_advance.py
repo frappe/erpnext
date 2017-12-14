@@ -23,12 +23,12 @@ class EmployeeAdvance(Document):
 		self.set_status()
 
 	def set_status(self):
-		if not self.status:
+		if self.docstatus == 0:
 			self.status = "Draft"
 		if self.docstatus == 1:
-			if flt(self.claimed_amount) == flt(self.paid_amount):
+			if self.claimed_amount and flt(self.claimed_amount) == flt(self.paid_amount):
 				self.status = "Claimed"
-			elif self.advance_amount == flt(self.paid_amount):
+			elif self.paid_amount and self.advance_amount == flt(self.paid_amount):
 				self.status = "Paid"
 			else:
 				self.status = "Unpaid"
