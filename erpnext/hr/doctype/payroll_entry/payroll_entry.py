@@ -462,3 +462,53 @@ def create_submit_log(submitted_ss, not_submitted_ss, jv_name):
 			Possible reasons: <br>\
 			1. Net pay is less than 0. <br>\
 			2. Company Email Address specified in employee master is not valid. <br>")
+
+
+def get_salary_slip_list(name, docstatus, as_dict=0):
+	payroll_entry = frappe.get_doc('Payroll Entry', name)
+
+	salary_slip_list = frappe.db.sql(
+		"select t1.name, t1.salary_structure from `tabSalary Slip` t1 "
+		"where t1.docstatus = %s "
+		"and t1.start_date >= %s "
+		"and t1.end_date <= %s",
+		(docstatus, payroll_entry.start_date, payroll_entry.end_date),
+		as_dict=as_dict
+	)
+
+	return salary_slip_list
+
+
+@frappe.whitelist()
+def payroll_entry_has_created_slips(name):
+	response = {}
+
+	draft_salary_slips = get_salary_slip_list(name, docstatus=0)
+	submitted_salary_slips = get_salary_slip_list(name, docstatus=1)
+
+	response['draft'] = 1 if draft_salary_slips else 0
+	response['submitted'] = 1 if submitted_salary_slips else 0
+
+	return response
+
+
+def get_payroll_entry_bank_entries(payroll_entry_name):
+	journal_entries = frappe.db.sql(
+		'select name from `tabJournal Entry Account` '
+		'where reference_type="Payroll Entry" '
+		'and reference_name=%s and docstatus=1',
+		payroll_entry_name,
+		as_dict=1
+	)
+
+	return journal_entries
+
+
+@frappe.whitelist()
+def payroll_entry_has_bank_entries(name):
+	response = {}
+
+	bank_entries = get_payroll_entry_bank_entries(name)
+	response['submitted'] = 1 if bank_entries else 0
+
+	return response
