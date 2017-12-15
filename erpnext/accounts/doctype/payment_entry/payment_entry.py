@@ -508,13 +508,18 @@ def get_outstanding_reference_documents(args):
 
 	# Get negative outstanding sales /purchase invoices
 	negative_outstanding_invoices = []
-	if args.get("party_type") not in ["Student", "Employee"]:
+	if args.get("party_type") not in ["Student", "Employee"] and not args.get("voucher_no"):
 		negative_outstanding_invoices = get_negative_outstanding_invoices(args.get("party_type"),
 			args.get("party"), args.get("party_account"), party_account_currency, company_currency)
 
 	# Get positive outstanding sales /purchase invoices/ Fees
+	condition = ""
+	if args.get("voucher_type") and args.get("voucher_no"):
+		condition = " and voucher_type='{0}' and voucher_no='{1}'"\
+			.format(frappe.db.escape(args["voucher_type"]), frappe.db.escape(args["voucher_no"]))
+
 	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"),
-		args.get("party_account"))
+		args.get("party_account"), condition=condition)
 
 	for d in outstanding_invoices:
 		d["exchange_rate"] = 1
@@ -803,8 +808,13 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		})
 	else:
 		args = {
-			'party_account': party_account, 'company': pe.company, 'party_type': pe.party_type,
-			'party': pe.party, 'posting_date': pe.posting_date
+			'party_account': party_account,
+			'company': pe.company,
+			'party_type': pe.party_type,
+			'party': pe.party,
+			'posting_date': pe.posting_date,
+			'voucher_type': dt,
+			'voucher_no': dn
 		}
 		references = get_outstanding_reference_documents(args=args)
 
