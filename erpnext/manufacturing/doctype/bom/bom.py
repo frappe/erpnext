@@ -225,6 +225,9 @@ class BOM(WebsiteGenerator):
 
 			valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
 
+		if not valuation_rate:
+			valuation_rate = frappe.db.get_value("Item", args['item_code'], "valuation_rate")
+
 		return valuation_rate
 
 	def manage_default_bom(self):
