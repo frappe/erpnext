@@ -191,16 +191,18 @@ frappe.ui.form.on('Stock Entry', {
 			'allow_zero_valuation': 1,
 		};
 
-		frappe.call({
-			method: "erpnext.stock.utils.get_incoming_rate",
-			args: {
-				args: args
-			},
-			callback: function(r) {
-				frappe.model.set_value(cdt, cdn, 'basic_rate', (r.message || 0.0));
-				frm.events.calculate_basic_amount(frm, item);
-			}
-		})
+		if (item.item_code || item.serial_no) {
+			frappe.call({
+				method: "erpnext.stock.utils.get_incoming_rate",
+				args: {
+					args: args
+				},
+				callback: function(r) {
+					frappe.model.set_value(cdt, cdn, 'basic_rate', (r.message || 0.0));
+					frm.events.calculate_basic_amount(frm, item);
+				}
+			});
+		}
 	},
 
 	get_warehouse_details: function(frm, cdt, cdn) {
