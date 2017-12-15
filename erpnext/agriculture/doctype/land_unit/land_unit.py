@@ -10,6 +10,7 @@ import math
 from  frappe import _
 
 from frappe.utils.nestedset import NestedSet
+from frappe.utils import flt
 # from frappe.model.document import Document
 
 RADIUS = 6378137
@@ -39,7 +40,7 @@ class LandUnit(NestedSet):
 			else:
 				features = json.loads(self.get('location')).get('features')
 			new_area = compute_area(features)
-			self.area_difference = new_area - self.area
+			self.area_difference = new_area - flt(self.area)
 			self.area = new_area	
 
 			if self.get('parent_land_unit'):
@@ -118,7 +119,7 @@ def compute_area(features):
 			layer_area += polygon_area(coords = feature.get('geometry').get('coordinates'))
 		elif feature.get('geometry').get('type') == 'Point' and feature.get('properties').get('point_type') == 'circle':
 			layer_area += math.pi * math.pow(feature.get('properties').get('radius'), 2)
-	return layer_area
+	return flt(layer_area)
 
 def rad(angle_in_degrees):
 	return angle_in_degrees*math.pi/180
