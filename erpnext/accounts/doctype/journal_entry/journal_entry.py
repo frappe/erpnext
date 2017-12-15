@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext, json
-from frappe.utils import cstr, flt, fmt_money, formatdate
+from frappe.utils import cstr, flt, fmt_money, formatdate, getdate
 from frappe import msgprint, _, scrub
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_account_currency
@@ -782,8 +782,7 @@ def get_outstanding(args):
 		}
 	elif args.get("doctype") in ("Sales Invoice", "Purchase Invoice"):
 		party_type = "Customer" if args.get("doctype") == "Sales Invoice" else "Supplier"
-		invoice = frappe.db.get_value(args["doctype"], args["docname"],
-			["outstanding_amount", "conversion_rate", scrub(party_type)], as_dict=1)
+		invoice = frappe.get_doc(args['doctype'], args['docname']).as_dict()
 
 		exchange_rate = invoice.conversion_rate if (args.get("account_currency") != company_currency) else 1
 
@@ -794,8 +793,17 @@ def get_outstanding(args):
 			amount_field = "debit_in_account_currency" \
 				if flt(invoice.outstanding_amount) > 0 else "credit_in_account_currency"
 
+		if args.get('due_date'):
+			outstanding = ''
+			for d in invoice.payment_schedule:
+				if d.due_date == getdate(args['due_date']):
+					outstanding = abs(flt(d.payment_amount))
+					break
+		else:
+			outstanding = abs(flt(invoice.outstanding_amount))
+
 		return {
-			amount_field: abs(flt(invoice.outstanding_amount)),
+			amount_field: outstanding,
 			"exchange_rate": exchange_rate,
 			"party_type": party_type,
 			"party": invoice.get(scrub(party_type))
@@ -902,7 +910,7 @@ def get_average_exchange_rate(account):
 @frappe.whitelist()
 def get_invoice_due_dates(name):
 	result = frappe.get_list(
-		doctype='GL Entry', group_by='name, due_date',
+		doctype='GL Entry',
 		filters={'voucher_no': name, "ifnull(due_date, '')": ('!=', '')},
 		fields=['due_date'], distinct=True
 	)
