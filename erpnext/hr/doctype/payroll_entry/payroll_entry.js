@@ -37,7 +37,7 @@ frappe.ui.form.on('Payroll Entry', {
 		if (!slip_status.draft && !slip_status.submitted) {
 			return;
 		} else {
-			frm.add_custom_button("View Salary Slips",
+			frm.add_custom_button(__("View Salary Slips"),
 				function() {
 					frappe.set_route(
 						'List', 'Salary Slip', {posting_date: frm.doc.posting_date}
@@ -47,13 +47,11 @@ frappe.ui.form.on('Payroll Entry', {
 		}
 
 		if (slip_status.draft) {
-			frm.add_custom_button("Submit Salary Slip",
+			frm.add_custom_button(__("Submit Salary Slip"),
 				function() {
 					submit_salary_slip(frm);
-				},
-				__('Make')
-			);
-			frm.page.set_inner_btn_group_as_primary(__('Make'));
+				}
+			).addClass("btn-primary");
 		}
 	},
 
@@ -182,7 +180,7 @@ frappe.ui.form.on('Payroll Entry', {
 // Submit salary slips
 
 const submit_salary_slip = function (frm) {
-	frappe.confirm(__('This will create a Journal Entry. Do you want to proceed?'),
+	frappe.confirm(__('This will submit Salary Slips and create accrual Journal Entry. Do you want to proceed?'),
 		function() {
 			frappe.call({
 				method: 'submit_salary_slips',
@@ -190,7 +188,7 @@ const submit_salary_slip = function (frm) {
 				callback: function() {frm.events.refresh(frm);},
 				doc: frm.doc,
 				freeze: true,
-				freeze_message: 'Creating Journal Entries...'
+				freeze_message: 'Submitting Salary Slips and creating Journal Entry...'
 			});
 		},
 		function() {

@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
+from frappe import _, scrub
 from frappe.utils import flt
 from frappe.model.document import Document
 
@@ -68,29 +68,18 @@ class OpeningInvoiceCreationTool(Document):
 		for row in self.invoices:
 			if not row.qty:
 				row.qty = 1.0
-			if not row.party:
-				frappe.throw(mandatory_error_msg.format(
-					idx=row.idx,
-					field=_("Party"),
-					invoice_type=self.invoice_type
-				))
+
 			# set party type if not available
 			if not row.party_type:
 				row.party_type = "Customer" if self.invoice_type == "Sales" else "Supplier"
 
-			if not row.posting_date:
-				frappe.throw(mandatory_error_msg.format(
-					idx=row.idx,
-					field=_("Party"),
-					invoice_type=self.invoice_type
-				))
-
-			if not row.outstanding_amount:
-				frappe.throw(mandatory_error_msg.format(
-					idx=row.idx,
-					field=_("Outstanding Amount"),
-					invoice_type=self.invoice_type
-				))
+			for d in ("Party", "Posting Date", "Outstanding Amount", "Due Date", "Temporary Opening Account"):
+				if not row.get(scrub(d)):
+					frappe.throw(mandatory_error_msg.format(
+						idx=row.idx,
+						field=_(d),
+						invoice_type=self.invoice_type
+					))
 
 			args = self.get_invoice_dict(row=row)
 			if not args:
