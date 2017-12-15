@@ -245,6 +245,9 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 		if gle.posting_date < from_date or cstr(gle.is_opening) == "Yes":
 			update_value_in_dict(gle_map[gle.account].totals, 'opening', gle)
 			update_value_in_dict(totals, 'opening', gle)
+			
+			update_value_in_dict(gle_map[gle.account].totals, 'closing', gle)
+			update_value_in_dict(totals, 'closing', gle)
 
 		elif gle.posting_date <= to_date:
 			update_value_in_dict(gle_map[gle.account].totals, 'total', gle)
@@ -254,8 +257,8 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 			else:
 				entries.append(gle)
 
-		update_value_in_dict(gle_map[gle.account].totals, 'closing', gle)
-		update_value_in_dict(totals, 'closing', gle)
+			update_value_in_dict(gle_map[gle.account].totals, 'closing', gle)
+			update_value_in_dict(totals, 'closing', gle)
 
 	return totals, entries
 
