@@ -707,6 +707,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			me.frm.doc.total_net_weight += flt(item.total_weight);
 		});
 		refresh_field("total_net_weight");
+		refresh_field("total");
 		this.shipping_rule();
 	},
 
@@ -943,6 +944,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"item_group": d.item_group,
 					"brand": d.brand,
 					"qty": d.qty,
+					"rate": d.rate,
 					"parenttype": d.parenttype,
 					"parent": d.parent,
 					"pricing_rule": d.pricing_rule,
@@ -993,6 +995,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		if(!price_list_rate_changed) me.calculate_taxes_and_totals();
+	},
+
+	rate: function(doc, cdt, cdn) {
+		this.shipping_rule();
 	},
 
 	apply_price_list: function(item) {
