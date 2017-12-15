@@ -102,19 +102,16 @@ class Company(Document):
 			{"warehouse_name": _("Finished Goods"), "is_group": 0}]:
 
 			if not frappe.db.exists("Warehouse", "{0} - {1}".format(wh_detail["warehouse_name"], self.abbr)):
-				stock_group = frappe.db.get_value("Account", {"account_type": "Stock",
-					"is_group": 1, "company": self.name})
-				if stock_group:
-					warehouse = frappe.get_doc({
-						"doctype":"Warehouse",
-						"warehouse_name": wh_detail["warehouse_name"],
-						"is_group": wh_detail["is_group"],
-						"company": self.name,
-						"parent_warehouse": "{0} - {1}".format(_("All Warehouses"), self.abbr) \
-							if not wh_detail["is_group"] else ""
-					})
-					warehouse.flags.ignore_permissions = True
-					warehouse.insert()
+				warehouse = frappe.get_doc({
+					"doctype":"Warehouse",
+					"warehouse_name": wh_detail["warehouse_name"],
+					"is_group": wh_detail["is_group"],
+					"company": self.name,
+					"parent_warehouse": "{0} - {1}".format(_("All Warehouses"), self.abbr) \
+						if not wh_detail["is_group"] else ""
+				})
+				warehouse.flags.ignore_permissions = True
+				warehouse.insert()
 
 	def create_default_accounts(self):
 		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
