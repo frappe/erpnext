@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext, json
-from frappe.utils import cstr, flt, fmt_money, formatdate, getdate
+from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, DATE_FORMAT
 from frappe import msgprint, _, scrub
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_account_currency
@@ -687,6 +687,11 @@ def get_payment_entry(ref_doc, args):
 		"remark": args.get("remarks")
 	})
 
+	options_ref_name_list = [
+		d.due_date.strftime(DATE_FORMAT) for d in ref_doc.payment_schedule
+		if d.get('due_date')
+	]
+
 	for payment_term in ref_doc.payment_schedule:
 		je.append("accounts", {
 			"account": args.get("party_account"),
@@ -705,6 +710,7 @@ def get_payment_entry(ref_doc, args):
 			"reference_name": ref_doc.name,
 			"reference_due_date": payment_term.due_date
 		})
+		je.set_onload(ref_doc.name, '\n'.join(options_ref_name_list))
 
 	# First multi currency check
 	for row in je.accounts:
