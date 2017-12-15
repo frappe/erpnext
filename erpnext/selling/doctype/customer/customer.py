@@ -74,7 +74,7 @@ class Customer(TransactionBase):
 				self.db_set('email_id', self.email_id)
 
 	def create_primary_address(self):
-		if self.flags.is_new_doc and self.get('address_line_1'):
+		if self.flags.is_new_doc and self.get('address_line1'):
 			make_address(self)
 
 	def update_lead_status(self):
