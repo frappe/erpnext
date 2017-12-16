@@ -243,10 +243,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						frappe.run_serially([
 							() => {
 								// directly set in doc, so as not to call triggers
-								me.frm.doc.taxes_and_charges = r.message.taxes_and_charges;
+								if(r.message.taxes_and_charges) {
+									me.frm.doc.taxes_and_charges = r.message.taxes_and_charges;
+								}
 
 								// set taxes table
-								me.frm.set_value("taxes", r.message.taxes);
+								if(r.message.taxes) {
+									me.frm.set_value("taxes", r.message.taxes);
+								}
 							},
 							() => me.calculate_taxes_and_totals()
 						]);
