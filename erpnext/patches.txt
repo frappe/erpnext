@@ -483,3 +483,4 @@ erpnext.patches.v10_0.setup_vat_for_uae_and_saudi_arabia
 erpnext.patches.v10_0.set_primary_contact_for_customer
 erpnext.patches.v10_0.copy_projects_renamed_fields
 erpnext.patches.v10_0.enabled_regional_print_format_based_on_country
+erpnext.patches.v10_0.update_asset_calculate_depreciation
