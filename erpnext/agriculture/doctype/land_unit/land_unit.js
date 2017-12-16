@@ -9,6 +9,13 @@ frappe.ui.form.on('Land Unit', {
 	setup: function(frm) {
 		frm.add_fetch("parent_land_unit", "latitude", "latitude");
 		frm.add_fetch("parent_land_unit", "longitude", "longitude");
+		frm.set_query("parent_land_unit", function() {
+			return {
+				"filters": {
+					"is_group": 1
+				}
+			};
+		});
 	},
 
 	onload_post_render(frm){
@@ -27,5 +34,8 @@ frappe.ui.form.on('Land Unit', {
 		} else {
 			frm.set_intro(null);
 		}
+	},
+	parent_land_unit: function(frm) {
+		frm.set_intro(null);
 	},
 });
