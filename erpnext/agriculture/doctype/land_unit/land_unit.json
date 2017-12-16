@@ -431,7 +431,7 @@
    "precision": "", 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
-   "read_only": 0, 
+   "read_only": 1, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 0, 
@@ -632,7 +632,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-12-13 16:50:18.581137", 
+ "modified": "2017-12-14 18:16:15.124188", 
  "modified_by": "Administrator", 
  "module": "Agriculture", 
  "name": "Land Unit", 
@@ -680,7 +680,7 @@
    "write": 1
   }
  ], 
- "quick_entry": 0, 
+ "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
  "show_name_in_global_search": 1, 
