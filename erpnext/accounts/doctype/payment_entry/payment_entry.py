@@ -536,39 +536,77 @@ def get_outstanding_reference_documents(args):
 
 	return negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
 
+
 def get_orders_to_be_billed(posting_date, party_type, party, party_account_currency, company_currency):
 	if party_type == "Customer":
 		voucher_type = 'Sales Order'
+		payment_dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 	elif party_type == "Supplier":
 		voucher_type = 'Purchase Order'
+		payment_dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 	elif party_type == "Employee":
 		voucher_type = None
 
 	orders = []
-	if voucher_type:
+	if voucher_type and party_type is "Employee":
+		ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
+
+		orders = frappe.db.sql("""
+					select
+						name as voucher_no,
+						{ref_field} as invoice_amount,
+						({ref_field} - advance_paid) as outstanding_amount,
+						transaction_date as posting_date
+					from
+						`tab{voucher_type}`
+					where
+						{party_type} = %s
+						and docstatus = 1
+						and ifnull(status, "") != "Closed"
+						and {ref_field} > advance_paid
+						and abs(100 - per_billed) > 0.01
+					order by
+						transaction_date, name
+					""".format(**{
+			"ref_field": ref_field,
+			"voucher_type": voucher_type,
+			"party_type": scrub(party_type)
+		}), party, as_dict=True)
+
+	elif voucher_type and party_type is not "Employee":
 		ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
 
 		orders = frappe.db.sql("""
 			select
-				name as voucher_no,
-				{ref_field} as invoice_amount,
-				({ref_field} - advance_paid) as outstanding_amount,
-				transaction_date as posting_date
+				VT.name as voucher_no,
+				PS.payment_amount as invoice_amount,
+				PS.payment_amount - (select
+										ifnull(sum({payment_dr_or_cr}), 0)
+										from `tabGL Entry`
+										where 
+											against_voucher = VT.name
+											and due_date = PS.due_date
+									) as outstanding_amount,
+				VT.transaction_date as posting_date,
+				PS.due_date
 			from
-				`tab{voucher_type}`
+				`tab{voucher_type}` VT
+			join 
+				`tabPayment Schedule` PS on VT.name = PS.parent
 			where
 				{party_type} = %s
-				and docstatus = 1
+				and VT.docstatus = 1
 				and ifnull(status, "") != "Closed"
 				and {ref_field} > advance_paid
 				and abs(100 - per_billed) > 0.01
 			order by
-				transaction_date, name
+				VT.transaction_date, VT.name
 			""".format(**{
 				"ref_field": ref_field,
 				"voucher_type": voucher_type,
-				"party_type": scrub(party_type)
-			}), party, as_dict = True)
+				"party_type": scrub(party_type),
+				"payment_dr_or_cr": payment_dr_or_cr
+			}), party, as_dict=True)
 
 	order_list = []
 	for d in orders:
