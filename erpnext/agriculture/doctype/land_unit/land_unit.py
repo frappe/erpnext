@@ -32,6 +32,7 @@ class LandUnit(NestedSet):
 				ancestor_features[index] = json.loads(feature)
 			ancestor_doc.set_location_value(features = ancestor_features)	
 			ancestor_doc.db_set(fieldname='area', value=ancestor_doc.get('area')-self.get('area'),commit=True)
+		super(LandUnit, self).on_update()
 
 	def validate(self):
 		if not self.is_new():
@@ -78,9 +79,6 @@ class LandUnit(NestedSet):
 		self.db_set(fieldname='location', value=json.dumps(location), commit=True)
 
 	def on_update(self):
-		super(LandUnit, self).on_update()
-
-	def on_trash(self):
 		super(LandUnit, self).on_update()
 
 	def add_child_property(self):

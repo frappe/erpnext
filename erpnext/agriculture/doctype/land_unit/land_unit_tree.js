@@ -13,9 +13,7 @@ frappe.treeview_settings["Land Unit"] = {
 			label:__("Edit"),
 			condition: function(node) { return (node.label!='All Land Units'); },
 			click: function(node) {
-				var lu = frappe.new_doc("Land Unit", {
-					"parent_land_unit": node.label
-				});
+				frappe.set_route('Form', 'Land Unit', node.data.value);
 			}
 		},
 		{
