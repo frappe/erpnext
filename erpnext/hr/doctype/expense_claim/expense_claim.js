@@ -308,7 +308,7 @@ frappe.ui.form.on("Expense Claim Advance", {
 	employee_advance: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		if(!frm.doc.employee){
-			frappe.msgprint('Select the Employee first.');
+			frappe.msgprint('Select an employee to get the employee advance.');
 			frm.get_field("advances").grid.grid_rows[child.idx-1].remove();
 			refresh_field("advances");
 		}
