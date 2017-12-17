@@ -168,11 +168,11 @@ frappe.ui.form.on("Expense Claim", {
 		frm.trigger("set_query_for_payable_account");
 		frm.add_fetch("company", "cost_center", "cost_center");
 		frm.add_fetch("company", "default_payable_account", "payable_account");
-		me.frm.set_query("employee_advance", "advances", function(doc, cdt, cdn) {
+		frm.set_query("employee_advance", "advances", function(doc) {
 			return {
 				filters: [
 					['docstatus', '=', 1],
-					['employee', '=', frm.doc.employee],
+					['employee', '=', doc.employee],
 					['paid_amount', '>', 0],
 					['paid_amount', '>', 'claimed_amount']
 				]
