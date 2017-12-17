@@ -707,7 +707,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			me.frm.doc.total_net_weight += flt(item.total_weight);
 		});
 		refresh_field("total_net_weight");
-		refresh_field("total");
+		this.calculate_taxes_and_totals();
+		refresh_field("base_net_total");
 		this.shipping_rule();
 	},
 
