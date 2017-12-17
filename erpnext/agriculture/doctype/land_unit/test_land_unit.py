@@ -9,7 +9,7 @@ import unittest
 class TestLandUnit(unittest.TestCase):
 
 	def runTest(self):
-		land_units = ['Basil Farm', 'Division 1', 'Field 1', 'Block 1']
+		land_units = ['Division 1', 'Field 1', 'Block 1']
 		area = 0                                                             
 		formatted_land_units = []	
 		for land_unit in land_units:
@@ -21,6 +21,6 @@ class TestLandUnit(unittest.TestCase):
 			temp['features'][0]['properties']['feature_of'] =	land_unit 
 			formatted_land_units.extend(temp['features'])
 		formatted_land_unit_string = str(formatted_land_units)
-		all_land_units = frappe.get_doc('Land Unit', 'All Land Units')
-		self.assertEquals(formatted_land_unit_string, str(json.loads(all_land_units.get('location'))['features']))
-		self.assertEquals(area, all_land_units.get('area'))
+		basil_farm = frappe.get_doc('Land Unit', 'Basil Farm')
+		self.assertEquals(formatted_land_unit_string, str(json.loads(basil_farm.get('location'))['features']))
+		self.assertEquals(area, basil_farm.get('area'))
