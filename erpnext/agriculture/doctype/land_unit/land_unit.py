@@ -79,7 +79,9 @@ class LandUnit(NestedSet):
 
 	def on_update(self):
 		super(LandUnit, self).on_update()
-		self.validate_one_root()
+
+	def on_trash(self):
+		super(LandUnit, self).on_update()
 
 	def add_child_property(self):
 		location = self.get('location')
@@ -163,4 +165,18 @@ def ring_area(coords):
 
 		area = area * RADIUS * RADIUS / 2
 	return area
+
+@frappe.whitelist()
+def get_children(doctype, parent, is_root=False):
+	if is_root:
+		parent = ''
+
+	land_units = frappe.db.sql("""select name as value,
+		is_group as expandable
+		from `tabLand Unit`
+		where ifnull(`parent_land_unit`,'') = %s
+		order by name""", (parent), as_dict=1)
+
+	# return nodes
+	return land_units
 		
