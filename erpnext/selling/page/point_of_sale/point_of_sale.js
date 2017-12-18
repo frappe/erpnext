@@ -193,9 +193,10 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		// add to cur_frm
 		const item = this.frm.add_child('items', args);
 		frappe.flags.hide_serial_batch_dialog = true;
-		this.frm.script_manager
-			.trigger('item_code', item.doctype, item.name)
-			.then(() => {
+
+		frappe.run_serially([
+			() => this.frm.script_manager.trigger('item_code', item.doctype, item.name),
+			() => {
 				const show_dialog = item.has_serial_no || item.has_batch_no;
 
 				// if actual_batch_qty and actual_qty if then there is only one batch. In such
@@ -208,7 +209,8 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					// update cart
 					this.update_cart_data(item);
 				}
-			});
+			}
+		]);
 	}
 
 	select_batch_and_serial_no(item) {
