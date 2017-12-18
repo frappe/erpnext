@@ -690,9 +690,11 @@ class AccountsController(TransactionBase):
 
 	def validate_payment_schedule_amount(self):
 		if self.get("payment_schedule"):
+			precision = 12
 			total = 0
 			for d in self.get("payment_schedule"):
-				total += flt(d.payment_amount)
+				total += flt(d.payment_amount, precision)
+			total = flt(total)
 
 			grand_total = self.get("rounded_total") or self.grand_total
 			if total != grand_total:
