@@ -12,6 +12,10 @@ class CropCycle(Document):
 		if self.is_new():
 			crop = frappe.get_doc('Crop', self.crop)
 			self.create_project(crop.period, crop.agriculture_task)
+			if not self.crop_spacing_uom:
+				self.crop_spacing_uom = crop.crop_spacing_uom
+			if not self.row_spacing_uom:
+				self.row_spacing_uom = crop.row_spacing_uom
 		if not self.project:
 			self.project = self.name
 		for detected_disease in self.detected_disease:
@@ -60,3 +64,18 @@ class CropCycle(Document):
 
 	def get_geometry_type(self, doc):
 		return ast.literal_eval(doc.location).get('features')[0].get('geometry').get('type')
+
+	def is_in_land_unit(self, point, vs):
+		x, y = point
+		inside = False
+		j = len(vs)-1
+		i = 0
+		while i < len(vs):
+			xi, yi = vs[i]
+			xj, yj = vs[j]
+			intersect = ((yi > y) != (yj > y)) and (x < (xj - xi) * (y - yi) / (yj - yi) + xi)
+			if intersect:
+				inside = not inside
+			i = j
+			j += 1
+		return inside

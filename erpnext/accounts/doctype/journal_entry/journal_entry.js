@@ -124,6 +124,15 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 				};
 			}
 
+			if(jvd.reference_type==="Employee Advance") {
+				return {
+					filters: {
+						'status': ['=', 'Unpaid'],
+						'docstatus': 1
+					}
+				};
+			}
+
 			// journal entry
 			if(jvd.reference_type==="Journal Entry") {
 				frappe.model.validate_missing(jvd, "account");
@@ -212,6 +221,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 						input.empty();
 						input.add_options(options);
 						frappe.model.set_value(cdt, cdn, "reference_due_date", options[0]);
+						me.frm.cur_grid.get_field("reference_due_date").df.options = options.join('\n');
 						me.due_date_options_cache[d.reference_name] = options;
 					}
 				});
@@ -221,20 +231,42 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		if(d.reference_name) {
 			if (d.reference_type==="Purchase Invoice" && !flt(d.debit)) {
 				this.get_outstanding('Purchase Invoice', d.reference_name, doc.company, d);
-			}
-			if (d.reference_type==="Sales Invoice" && !flt(d.credit)) {
+			} else if (d.reference_type==="Sales Invoice" && !flt(d.credit)) {
 				this.get_outstanding('Sales Invoice', d.reference_name, doc.company, d);
-			}
-			if (d.reference_type==="Journal Entry" && !flt(d.credit) && !flt(d.debit)) {
+			} else if (d.reference_type==="Journal Entry" && !flt(d.credit) && !flt(d.debit)) {
 				this.get_outstanding('Journal Entry', d.reference_name, doc.company, d);
 			}
+
 			if( in_list(["Sales Invoice", "Purchase Invoice"]), d.reference_type) {
 				get_invoice_due_dates(d.reference_name);
 			}
 		}
 	},
 
-	get_outstanding: function(doctype, docname, company, child) {
+	reference_due_date: function(doc, cdt, cdn) {
+		const d = frappe.get_doc(cdt, cdn);
+
+		if (d.reference_type && d.reference_name && d.reference_due_date) {
+			if (in_list(["Sales Invoice", "Purchase Invoice"], d.reference_type)) {
+				console.log('cdt:', cdt, cdn);
+				frappe.model.set_value(cdt, cdn, 'debit_in_account_currency', '');
+				frappe.model.set_value(cdt, cdn, 'credit_in_account_currency', '');
+			}
+			if (d.reference_type==="Purchase Invoice") {
+				this.get_outstanding(
+					'Purchase Invoice', d.reference_name, doc.company, d, d.reference_due_date
+				);
+			} else if (d.reference_type==="Sales Invoice") {
+				this.get_outstanding(
+					'Sales Invoice', d.reference_name, doc.company, d, d.reference_due_date
+				);
+			}
+
+			frappe.model.set_value(cdt, cdn, 'reference_due_date', d.reference_due_date);
+		}
+	},
+
+	get_outstanding: function(doctype, docname, company, child, due_date) {
 		var me = this;
 		var args = {
 			"doctype": doctype,
@@ -244,6 +276,8 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			"account_currency": child.account_currency,
 			"company": company
 		}
+
+		if (due_date) args.due_date = due_date;
 
 		return frappe.call({
 			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_outstanding",

@@ -31,8 +31,8 @@ class POSProfile(Document):
 				msgprint(_("Already set default in pos profile {0} for user {1}, kindly disabled default")
 					.format(res[0][0], row.user), raise_exception=1)
 			elif not row.default and not res:
-				msgprint(_("Row {0}: set atleast one default pos profile for user {1}")
-					.format(row.idx, row.user), raise_exception=1)
+				msgprint(_("User {0} doesn't have any default POS Profile. Check Default at Row {1} for this User.")
+					.format(row.user, row.idx), raise_exception=1)
 
 	def validate_all_link_fields(self):
 		accounts = {"Account": [self.income_account,
@@ -83,12 +83,12 @@ class POSProfile(Document):
 		frappe.defaults.clear_default("is_pos")
 
 		if not include_current_pos:
-			condition = " where name != '%s'" % self.name.replace("'", "\'")
+			condition = " where pfu.name != '%s' and pfu.default = 1 " % self.name.replace("'", "\'")
 		else:
-			condition = ""
+			condition = " where pfu.default = 1 "
 
-		pos_view_users = frappe.db.sql_list("""select user
-			from `tabPOS Profile` {0}""".format(condition))
+		pos_view_users = frappe.db.sql_list("""select pfu.user
+			from `tabPOS Profile User` as pfu {0}""".format(condition))
 
 		for user in pos_view_users:
 			if user:

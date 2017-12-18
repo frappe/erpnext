@@ -15,7 +15,7 @@ frappe.ui.form.on('Crop Cycle', {
 					output[doctype].forEach( (analysis_doc) => {
 						let point_to_be_tested = JSON.parse(analysis_doc.location).features[0].geometry.coordinates;
 						let poly_of_land = JSON.parse(land_doc.location).features[0].geometry.coordinates[0];
-						if (test_analysis_position(point_to_be_tested, poly_of_land)){
+						if (is_in_land_unit(point_to_be_tested, poly_of_land)){
 							obj_to_append[analysis_doctypes_docs[analysis_doctypes.indexOf(doctype)]].push(analysis_doc.name);
 						}
 					});
@@ -28,7 +28,7 @@ frappe.ui.form.on('Crop Cycle', {
 	}
 });
 
-function test_analysis_position(point, vs) {
+function is_in_land_unit(point, vs) {
 	// ray-casting algorithm based on
 	// http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
 	

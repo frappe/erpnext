@@ -9,6 +9,13 @@ frappe.ui.form.on('Land Unit', {
 	setup: function(frm) {
 		frm.add_fetch("parent_land_unit", "latitude", "latitude");
 		frm.add_fetch("parent_land_unit", "longitude", "longitude");
+		frm.set_query("parent_land_unit", function() {
+			return {
+				"filters": {
+					"is_group": 1
+				}
+			};
+		});
 	},
 
 	onload_post_render(frm){
@@ -18,14 +25,6 @@ frappe.ui.form.on('Land Unit', {
 		else {
 			frm.doc.latitude = frm.fields_dict.location.map.getCenter()['lat'];
 			frm.doc.longitude = frm.fields_dict.location.map.getCenter()['lng'];
-		}
-	},
-	refresh: function(frm) {
-		if(!frm.doc.parent_land_unit) {
-			frm.set_read_only();
-			frm.set_intro(__("This is a root land unit and cannot be edited."));
-		} else {
-			frm.set_intro(null);
 		}
 	},
 });
