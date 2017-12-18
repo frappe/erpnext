@@ -638,16 +638,7 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 	# reconcile both results such that we have a list that contains unique entries.
 	# Where both lists contain a record that is common, we select the one with
 	# linked Payment Schedule
-	for item in orders_without_schedule[:]:
-		found = False
-		for item2 in orders_with_schedule:
-			if item['voucher_no'] == item2['voucher_no']:
-				found = True
-				break
-		if found:
-			orders_without_schedule.remove(item)
-
-	orders = orders_with_schedule + orders_without_schedule
+	orders = _merge_query_results(orders_without_schedule, orders_with_schedule, 'voucher_no')
 
 	order_list = []
 	for d in orders:
@@ -658,6 +649,33 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 		order_list.append(d)
 
 	return order_list
+
+
+def _merge_query_results(result1, result2, dict_key):
+	"""
+	Merges two list of query results that are dictionaries.
+	For every item in result1 that is found in result2, the item is removed from
+	result1. At the end of processing result1, result1 and result2 are concatenated
+	and returned.
+
+	:param result1: List of dict
+	:param result2: List of dict
+	:return: List of dict
+	"""
+	for item in result1[:]:
+		found = False
+		for item2 in result2:
+			if item[dict_key] == item2[dict_key]:
+				found = True
+				break
+
+		if found:
+			result1.remove(item)
+
+	final_result = result1 + result2
+
+	return final_result
+
 
 def get_negative_outstanding_invoices(party_type, party, party_account, party_account_currency, company_currency):
 	voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
@@ -688,6 +706,7 @@ def get_negative_outstanding_invoices(party_type, party, party_account, party_ac
 			"party_account": "debit_to" if party_type == "Customer" else "credit_to"
 		}), (party, party_account), as_dict=True)
 
+
 @frappe.whitelist()
 def get_party_details(company, party_type, party, date):
 	if not frappe.db.exists(party_type, party):
@@ -709,6 +728,7 @@ def get_party_details(company, party_type, party, date):
 		"account_balance": account_balance
 	}
 
+
 @frappe.whitelist()
 def get_account_details(account, date):
 	frappe.has_permission('Payment Entry', throw=True)
@@ -717,6 +737,7 @@ def get_account_details(account, date):
 		"account_balance": get_balance_on(account, date),
 		"account_type": frappe.db.get_value("Account", account, "account_type")
 	})
+
 
 @frappe.whitelist()
 def get_company_defaults(company):
@@ -729,6 +750,7 @@ def get_company_defaults(company):
 				.format(frappe.get_meta("Company").get_label(fieldname), company))
 
 	return ret
+
 
 @frappe.whitelist()
 def get_reference_details(reference_doctype, reference_name, party_account_currency):
@@ -774,6 +796,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		"outstanding_amount": outstanding_amount,
 		"exchange_rate": exchange_rate
 	})
+
 
 @frappe.whitelist()
 def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=None):
