@@ -27,15 +27,4 @@ frappe.ui.form.on('Land Unit', {
 			frm.doc.longitude = frm.fields_dict.location.map.getCenter()['lng'];
 		}
 	},
-	refresh: function(frm) {
-		if(!frm.doc.parent_land_unit) {
-			frm.set_read_only();
-			frm.set_intro(__("This is a root land unit and cannot be edited."));
-		} else {
-			frm.set_intro(null);
-		}
-	},
-	parent_land_unit: function(frm) {
-		frm.set_intro(null);
-	},
 });

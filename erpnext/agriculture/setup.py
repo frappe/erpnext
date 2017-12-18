@@ -4,18 +4,13 @@ from frappe import _
 from erpnext.setup.utils import insert_record
 
 def setup_agriculture():
-	if frappe.db.exists('Land Unit', 'All Land Units'):
+	if frappe.get_all('Agriculture Analysis Criteria'):
 		# already setup
 		return
 	create_agriculture_data()
 
 def create_agriculture_data():
 	records = [
-		dict(
-			doctype="Land Unit",
-			land_unit_name="All Land Units",
-			is_group=1,
-			is_container=1),
 		dict(
 			doctype='Item Group',
 			item_group_name='Fertilizer',
