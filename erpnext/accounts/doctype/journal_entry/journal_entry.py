@@ -687,12 +687,7 @@ def get_payment_entry(ref_doc, args):
 		"remark": args.get("remarks")
 	})
 
-	options_ref_name_list = [
-		d.due_date.strftime(DATE_FORMAT) for d in ref_doc.payment_schedule
-		if d.get('due_date')
-	]
-
-	for payment_term in ref_doc.payment_schedule:
+	if not ref_doc.payment_schedule:
 		je.append("accounts", {
 			"account": args.get("party_account"),
 			"party_type": args.get("party_type"),
@@ -704,13 +699,37 @@ def get_payment_entry(ref_doc, args):
 			"balance": get_balance_on(args.get("party_account")),
 			"party_balance": get_balance_on(party=args.get("party"), party_type=args.get("party_type")),
 			"exchange_rate": exchange_rate,
-			args.get("amount_field_party"): payment_term.payment_amount,
+			args.get("amount_field_party"): args.get("amount"),
 			"is_advance": args.get("is_advance"),
 			"reference_type": ref_doc.doctype,
-			"reference_name": ref_doc.name,
-			"reference_due_date": payment_term.due_date
+			"reference_name": ref_doc.name
 		})
-		je.set_onload(ref_doc.name, '\n'.join(options_ref_name_list))
+
+	else:
+		options_ref_name_list = [
+			d.due_date.strftime(DATE_FORMAT) for d in ref_doc.payment_schedule
+			if d.get('due_date')
+		]
+
+		for payment_term in ref_doc.payment_schedule:
+			je.append("accounts", {
+				"account": args.get("party_account"),
+				"party_type": args.get("party_type"),
+				"party": ref_doc.get(args.get("party_type").lower()),
+				"cost_center": cost_center,
+				"account_type": frappe.db.get_value("Account", args.get("party_account"), "account_type"),
+				"account_currency": args.get("party_account_currency") or \
+									get_account_currency(args.get("party_account")),
+				"balance": get_balance_on(args.get("party_account")),
+				"party_balance": get_balance_on(party=args.get("party"), party_type=args.get("party_type")),
+				"exchange_rate": exchange_rate,
+				args.get("amount_field_party"): payment_term.payment_amount,
+				"is_advance": args.get("is_advance"),
+				"reference_type": ref_doc.doctype,
+				"reference_name": ref_doc.name,
+				"reference_due_date": payment_term.due_date
+			})
+			je.set_onload(ref_doc.name, '\n'.join(options_ref_name_list))
 
 	# First multi currency check
 	for row in je.accounts:
