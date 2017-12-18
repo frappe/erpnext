@@ -75,7 +75,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
@@ -100,7 +100,7 @@
    "report_hide": 0, 
    "reqd": 0, 
    "search_index": 0, 
-   "set_only_once": 1, 
+   "set_only_once": 0, 
    "unique": 0
   }, 
   {
@@ -2248,7 +2248,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-12-05 10:02:24.104130", 
+ "modified": "2017-12-17 10:18:16.990106", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Entry", 
