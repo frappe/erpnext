@@ -292,12 +292,14 @@ def get_data():
 			"label": _("Hub")
 		},
 		{
-			"module_name": "Data Import Tool",
-			"color": "#7f8c8d",
+			"module_name": "Data Import",
+			"color": "#FFF168",
+			"reverse": 1,
+			"doctype": "Data Import",
 			"icon": "octicon octicon-cloud-upload",
-			"type": "page",
-			"link": "data-import-tool",
-			"label": _("Data Import Tool")
+			"label": _("Data Import"),
+			"link": "List/Data Import",
+			"type": "list"
 		},
 		{
 			"module_name": "Restaurant",
