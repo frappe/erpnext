@@ -168,6 +168,16 @@ frappe.ui.form.on("Expense Claim", {
 		frm.trigger("set_query_for_payable_account");
 		frm.add_fetch("company", "cost_center", "cost_center");
 		frm.add_fetch("company", "default_payable_account", "payable_account");
+		frm.set_query("employee_advance", "advances", function(doc) {
+			return {
+				filters: [
+					['docstatus', '=', 1],
+					['employee', '=', doc.employee],
+					['paid_amount', '>', 0],
+					['paid_amount', '>', 'claimed_amount']
+				]
+			};
+		});
 	},
 
 	refresh: function(frm) {
@@ -291,6 +301,37 @@ frappe.ui.form.on("Expense Claim Detail", {
 	sanctioned_amount: function(frm, cdt, cdn) {
 		var doc = frm.doc;
 		cur_frm.cscript.calculate_total(doc,cdt,cdn);
+	}
+});
+
+frappe.ui.form.on("Expense Claim Advance", {
+	employee_advance: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		if(!frm.doc.employee){
+			frappe.msgprint('Select an employee to get the employee advance.');
+			frm.doc.advances = [];
+			refresh_field("advances");
+		}
+		else {
+			return frappe.call({
+				method: "erpnext.hr.doctype.expense_claim.expense_claim.get_advances",
+				args: {
+					employee: frm.doc.employee,
+					advance_id: child.employee_advance
+				},
+				callback: function(r, rt) {
+					if(r.message) {
+						child.employee_advance = r.message[0].name;
+						child.posting_date = r.message[0].posting_date;
+						child.advance_account = r.message[0].advance_account;
+						child.advance_paid = r.message[0].paid_amount;
+						child.unclaimed_amount = flt(r.message[0].paid_amount) - flt(r.message[0].claimed_amount);
+						child.allocated_amount = flt(r.message[0].paid_amount) - flt(r.message[0].claimed_amount);
+						refresh_field("advances");
+					}
+				}
+			});
+		}
 	}
 });
 
