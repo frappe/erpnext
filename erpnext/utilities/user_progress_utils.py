@@ -113,6 +113,9 @@ def create_items(args_data):
 					"default_warehouse": default_warehouse
 				}).insert()
 
+			except frappe.NameError:
+				pass
+			else:
 				if args.get("item_price_" + str(i)):
 					item_price = flt(args.get("item_price_" + str(i)))
 
@@ -121,8 +124,6 @@ def create_items(args_data):
 					price_list_name = frappe.db.get_value("Price List", {"buying": 1})
 					make_item_price(item, price_list_name, item_price)
 
-			except frappe.NameError:
-				pass
 
 def make_item_price(item, price_list_name, item_price):
 	frappe.get_doc({
