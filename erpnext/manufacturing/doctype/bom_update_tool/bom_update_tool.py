@@ -35,12 +35,12 @@ class BOMUpdateTool(Document):
 		new_bom_unitcost = flt(new_bom_unitcost[0][0]) if new_bom_unitcost else 0
 
 		frappe.db.sql("""update `tabBOM Item` set bom_no=%s,
-			rate=%s, amount=stock_qty*%s where bom_no = %s and docstatus < 2""",
+			rate=%s, amount=stock_qty*%s where bom_no = %s and docstatus < 2 and parenttype='BOM'""",
 			(self.new_bom, new_bom_unitcost, new_bom_unitcost, self.current_bom))
 
 	def get_parent_boms(self):
 		return [d[0] for d in frappe.db.sql("""select distinct parent
-			from `tabBOM Item` where ifnull(bom_no, '') = %s and docstatus < 2""",
+			from `tabBOM Item` where ifnull(bom_no, '') = %s and docstatus < 2 and parenttype='BOM'""",
 			self.new_bom)]
 
 @frappe.whitelist()
