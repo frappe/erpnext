@@ -61,6 +61,16 @@ frappe.ui.form.on("Journal Entry", {
 				}
 			}
 		});
+	},
+
+	accounts_on_form_rendered: function(frm) {
+		const options = frm.doc.__onload;
+
+		if (options && frm.cur_grid) {
+			frm.cur_grid.get_field("reference_due_date")
+				.df.options = options[frm.cur_grid.get_field('reference_name').value];
+			frm.cur_grid.refresh_field('reference_due_date');
+		}
 	}
 });
 
@@ -248,7 +258,6 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 		if (d.reference_type && d.reference_name && d.reference_due_date) {
 			if (in_list(["Sales Invoice", "Purchase Invoice"], d.reference_type)) {
-				console.log('cdt:', cdt, cdn);
 				frappe.model.set_value(cdt, cdn, 'debit_in_account_currency', '');
 				frappe.model.set_value(cdt, cdn, 'credit_in_account_currency', '');
 			}
