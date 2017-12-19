@@ -16,11 +16,28 @@ class CropCycle(Document):
 				self.crop_spacing_uom = crop.crop_spacing_uom
 			if not self.row_spacing_uom:
 				self.row_spacing_uom = crop.row_spacing_uom
-		if not self.project:
-			self.project = self.name
-		for detected_disease in self.detected_disease:
-			disease = frappe.get_doc('Disease', detected_disease.disease)
-			self.create_task(disease.treatment_task, self.name, detected_disease.start_date)
+			if not self.project:
+				self.project = self.name
+		else:
+			old_disease, new_disease = [], []
+			for detected_disease in self.detected_disease:
+				new_disease.append(detected_disease.name)
+			for detected_disease in self.get_doc_before_save().get('detected_disease'):
+				old_disease.append(detected_disease.name)
+			if list(set(new_disease)-set(old_disease)) != []:
+				self.update_disease(list(set(new_disease)-set(old_disease)))
+				frappe.msgprint("All tasks for the detected diseases were imported")
+
+	def update_disease(self, disease_hashes):
+		new_disease = []
+		for disease in self.detected_disease:
+			for disease_hash in disease_hashes:
+				if disease.name == disease_hash:
+					self.import_disease_tasks(disease.disease, disease.start_date)
+
+	def import_disease_tasks(self, disease, start_date):
+		disease_doc = frappe.get_doc('Disease', disease)
+		self.create_task(disease_doc.treatment_task, self.name, start_date)
 
 	def create_project(self, period, crop_tasks):
 		project = frappe.new_doc("Project")
