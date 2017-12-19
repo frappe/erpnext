@@ -541,11 +541,14 @@ def get_outstanding_reference_documents(args):
 
 	return negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
 
+
 def get_orders_to_be_billed(posting_date, party_type, party, party_account_currency, company_currency):
 	if party_type == "Customer":
 		voucher_type = 'Sales Order'
+		payment_dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 	elif party_type == "Supplier":
 		voucher_type = 'Purchase Order'
+		payment_dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 	elif party_type == "Employee":
 		voucher_type = None
 
@@ -554,26 +557,93 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 		ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
 
 		orders = frappe.db.sql("""
+					select
+						name as voucher_no,
+						{ref_field} as invoice_amount,
+						({ref_field} - advance_paid) as outstanding_amount,
+						transaction_date as posting_date
+					from
+						`tab{voucher_type}`
+					where
+						{party_type} = %s
+						and docstatus = 1
+						and ifnull(status, "") != "Closed"
+						and {ref_field} > advance_paid
+						and abs(100 - per_billed) > 0.01
+					order by
+						transaction_date, name
+					""".format(**{
+			"ref_field": ref_field,
+			"voucher_type": voucher_type,
+			"party_type": scrub(party_type)
+		}), party, as_dict=True)
+
+	if voucher_type and party_type is not "Employee":
+		ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
+
+		# find orders without considering if they have Payment Schedule
+		orders_without_schedule = frappe.db.sql("""
+					select
+						name as voucher_no,
+						{ref_field} as invoice_amount,
+						({ref_field} - advance_paid) as outstanding_amount,
+						transaction_date as posting_date
+					from
+						`tab{voucher_type}`
+					where
+						{party_type} = %s
+						and docstatus = 1
+						and ifnull(status, "") != "Closed"
+						and {ref_field} > advance_paid
+						and abs(100 - per_billed) > 0.01
+					order by
+						transaction_date, name
+					""".format(**{
+			"ref_field": ref_field,
+			"voucher_type": voucher_type,
+			"party_type": scrub(party_type)
+		}), party, as_dict=True)
+
+	# find orders considering if they have Payment Schedule
+	if voucher_type and party_type is not "Employee":
+		ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
+
+		orders_with_schedule = frappe.db.sql("""
 			select
-				name as voucher_no,
-				{ref_field} as invoice_amount,
-				({ref_field} - advance_paid) as outstanding_amount,
-				transaction_date as posting_date
+				VT.name as voucher_no,
+				PS.payment_amount as invoice_amount,
+				PS.payment_amount - (select
+										ifnull(sum({payment_dr_or_cr}), 0)
+										from `tabGL Entry`
+										where 
+											against_voucher = VT.name
+											and due_date = PS.due_date
+									) as outstanding_amount,
+				VT.transaction_date as posting_date,
+				PS.due_date
 			from
-				`tab{voucher_type}`
+				`tab{voucher_type}` VT
+			join 
+				`tabPayment Schedule` PS on VT.name = PS.parent
 			where
 				{party_type} = %s
-				and docstatus = 1
+				and VT.docstatus = 1
 				and ifnull(status, "") != "Closed"
 				and {ref_field} > advance_paid
 				and abs(100 - per_billed) > 0.01
 			order by
-				transaction_date, name
+				VT.transaction_date, VT.name
 			""".format(**{
 				"ref_field": ref_field,
 				"voucher_type": voucher_type,
-				"party_type": scrub(party_type)
-			}), party, as_dict = True)
+				"party_type": scrub(party_type),
+				"payment_dr_or_cr": payment_dr_or_cr
+			}), party, as_dict=True)
+
+	# reconcile both results such that we have a list that contains unique entries.
+	# Where both lists contain a record that is common, we select the one with
+	# linked Payment Schedule
+	orders = _merge_query_results(orders_without_schedule, orders_with_schedule, 'voucher_no')
 
 	order_list = []
 	for d in orders:
@@ -584,6 +654,33 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 		order_list.append(d)
 
 	return order_list
+
+
+def _merge_query_results(result1, result2, dict_key):
+	"""
+	Merges two list of query results that are dictionaries.
+	For every item in result1 that is found in result2, the item is removed from
+	result1. At the end of processing result1, result1 and result2 are concatenated
+	and returned.
+
+	:param result1: List of dict
+	:param result2: List of dict
+	:return: List of dict
+	"""
+	for item in result1[:]:
+		found = False
+		for item2 in result2:
+			if item[dict_key] == item2[dict_key]:
+				found = True
+				break
+
+		if found:
+			result1.remove(item)
+
+	final_result = result1 + result2
+
+	return final_result
+
 
 def get_negative_outstanding_invoices(party_type, party, party_account, party_account_currency, company_currency):
 	voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
@@ -614,6 +711,7 @@ def get_negative_outstanding_invoices(party_type, party, party_account, party_ac
 			"party_account": "debit_to" if party_type == "Customer" else "credit_to"
 		}), (party, party_account), as_dict=True)
 
+
 @frappe.whitelist()
 def get_party_details(company, party_type, party, date):
 	if not frappe.db.exists(party_type, party):
@@ -635,6 +733,7 @@ def get_party_details(company, party_type, party, date):
 		"account_balance": account_balance
 	}
 
+
 @frappe.whitelist()
 def get_account_details(account, date):
 	frappe.has_permission('Payment Entry', throw=True)
@@ -643,6 +742,7 @@ def get_account_details(account, date):
 		"account_balance": get_balance_on(account, date),
 		"account_type": frappe.db.get_value("Account", account, "account_type")
 	})
+
 
 @frappe.whitelist()
 def get_company_defaults(company):
@@ -655,6 +755,7 @@ def get_company_defaults(company):
 				.format(frappe.get_meta("Company").get_label(fieldname), company))
 
 	return ret
+
 
 @frappe.whitelist()
 def get_reference_details(reference_doctype, reference_name, party_account_currency):
@@ -700,6 +801,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		"outstanding_amount": outstanding_amount,
 		"exchange_rate": exchange_rate
 	})
+
 
 @frappe.whitelist()
 def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=None):
