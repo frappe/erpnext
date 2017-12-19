@@ -4,7 +4,8 @@
 frappe.provide("erpnext.crop");
 
 frappe.ui.form.on('Crop', {
-	validate: (frm) => {
+	refresh: (frm) => {
+		frm.fields_dict.materials_required.grid.set_column_disp('bom_no', false);
 	}
 });
 
