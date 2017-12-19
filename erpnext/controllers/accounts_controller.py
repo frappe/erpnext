@@ -71,6 +71,7 @@ class AccountsController(TransactionBase):
 		self.validate_advance_entries()
 
 	def validate_non_invoice_documents_schedule(self):
+		self.validate_payment_schedule_dates()
 		self.validate_invoice_portion()
 		self.set_payment_schedule()
 		self.validate_payment_schedule_amount()
@@ -672,15 +673,15 @@ class AccountsController(TransactionBase):
 	def validate_payment_schedule_dates(self):
 		dates = []
 		li = []
-		if self.due_date and getdate(self.due_date) < getdate(self.posting_date):
-			frappe.throw(_("Due Date cannot be before posting date"))
+		if self.get('posting_date'):
+			if self.due_date and getdate(self.due_date) < getdate(self.posting_date):
+				frappe.throw(_("Due Date cannot be before posting date"))
 
 		for d in self.get("payment_schedule"):
-			if getdate(d.due_date) < getdate(self.posting_date):
+			if self.get('posting_date') and getdate(d.due_date) < getdate(self.posting_date):
 				frappe.throw(_("Row {0}: Due Date cannot be before posting date").format(d.idx))
 			elif d.due_date in dates:
 				li.append('{0} in row {1}'.format(d.due_date, d.idx))
-				# frappe.throw(_("Row {0}: Duplicate due date found").format(d.idx))
 			dates.append(d.due_date)
 
 		if li:
