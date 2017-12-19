@@ -25,11 +25,15 @@ erpnext.crop.update_item_rate_uom = function(frm, cdt, cdn) {
 	material_list.forEach((material) => {
 		frm.doc[material].forEach((item, index) => {
 			if (item.name == cdn){
-				frm.call("get_item_details", {
-					item_code: item.item_code
-				}, (r) => {
-					frappe.model.set_value('BOM Item', item.name, 'uom', r.message.uom);
-					frappe.model.set_value('BOM Item', item.name, 'rate', r.message.rate);
+				frappe.call({
+					method:'erpnext.agriculture.doctype.crop.crop.get_item_details',
+					args: {
+						item_code: item.item_code
+					},
+					callback: (r) => {
+						frappe.model.set_value('BOM Item', item.name, 'uom', r.message.uom);
+						frappe.model.set_value('BOM Item', item.name, 'rate', r.message.rate);
+					}
 				});
 			}
 		});

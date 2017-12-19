@@ -17,6 +17,7 @@ class Crop(Document):
 			if task.end_day > max_period: max_period = task.end_day
 		if max_period > self.period: self.period = max_period
 
-	def get_item_details(self, item_code):
-		item = frappe.get_doc('Item', item_code)
-		return { "uom": item.stock_uom, "rate": item.valuation_rate }
+@frappe.whitelist()
+def get_item_details(item_code):
+	item = frappe.get_doc('Item', item_code)
+	return { "uom": item.stock_uom, "rate": item.valuation_rate }
