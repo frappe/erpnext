@@ -690,14 +690,12 @@ class AccountsController(TransactionBase):
 
 	def validate_payment_schedule_amount(self):
 		if self.get("payment_schedule"):
-			precision = 12
-			user_precision = frappe.get_precision(self.doctype, 'base_grand_total')
 			total = 0
 			for d in self.get("payment_schedule"):
-				total += flt(d.payment_amount, precision)
-			total = flt(total, user_precision)
+				total += flt(d.payment_amount)
+			total = flt(total, self.precision("grand_total"))
 
-			grand_total = self.get("rounded_total") or self.grand_total
+			grand_total = flt(self.get("rounded_total") or self.grand_total, self.precision('grand_total'))
 			if total != grand_total:
 				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"))
 
