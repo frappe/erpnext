@@ -640,10 +640,10 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 				"payment_dr_or_cr": payment_dr_or_cr
 			}), party, as_dict=True)
 
-	# reconcile both results such that we have a list that contains unique entries.
-	# Where both lists contain a record that is common, we select the one with
-	# linked Payment Schedule
-	orders = _merge_query_results(orders_without_schedule, orders_with_schedule, 'voucher_no')
+		# reconcile both results such that we have a list that contains unique entries.
+		# Where both lists contain a record that is common, we select the one with
+		# linked Payment Schedule
+		orders = _merge_query_results(orders_without_schedule, orders_with_schedule, 'voucher_no')
 
 	order_list = []
 	for d in orders:
