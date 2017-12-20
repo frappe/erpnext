@@ -219,11 +219,6 @@ def get_data():
 				},
 				{
 					"type": "help",
-					"label": _("Production Planning Tool"),
-					"youtube_id": "CzatSl4zJ2Y"
-				},
-				{
-					"type": "help",
 					"label": _("Production Order"),
 					"youtube_id": "ZotgLyp2YFY"
 				},

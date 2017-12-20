@@ -97,7 +97,7 @@ class ProductionPlan(Document):
 			from `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
 			where mr_item.parent = mr.name
 				and mr.material_request_type = "Manufacture"
-				and mr.docstatus = 1
+				and mr.docstatus = 1 and mr.company = %(company)s
 				and mr_item.qty > ifnull(mr_item.ordered_qty,0) {0} {1}
 				and (exists (select name from `tabBOM` bom where bom.item=mr_item.item_code
 					and bom.is_active = 1))
@@ -105,7 +105,8 @@ class ProductionPlan(Document):
 				"from_date": self.from_date,
 				"to_date": self.to_date,
 				"warehouse": self.warehouse,
-				"item": self.item_code
+				"item": self.item_code,
+				"company": self.company
 			}, as_dict=1)
 
 		self.add_mr_in_table(pending_mr)
@@ -427,7 +428,6 @@ class ProductionPlan(Document):
 			msgprint(_("No Production Orders created"))
 
 	def create_production_order(self, item):
-		"""Create production order. Called from Production Planning Tool"""
 		from erpnext.manufacturing.doctype.production_order.production_order import OverProductionError, get_default_warehouse
 		warehouse = get_default_warehouse()
 		pro = frappe.new_doc("Production Order")

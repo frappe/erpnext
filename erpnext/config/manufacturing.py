@@ -15,11 +15,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Production Plan",
-					"description": _("Orders released for production."),
-				},
-				{
-					"type": "doctype",
-					"name": "Production Planning Tool",
 					"description": _("Generate Material Requests (MRP) and Production Orders."),
 				},
 				{
@@ -145,11 +140,6 @@ def get_data():
 					"type": "help",
 					"label": _("Bill of Materials"),
 					"youtube_id": "hDV0c1OeWLo"
-				},
-				{
-					"type": "help",
-					"label": _("Production Planning Tool"),
-					"youtube_id": "CzatSl4zJ2Y"
 				},
 				{
 					"type": "help",
