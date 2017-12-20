@@ -216,11 +216,12 @@ def add_node():
 
 @frappe.whitelist()
 def add_multiple_tasks(data, parent):
-    data = json.loads(data)['tasks']
-    tasks = data.split('\n')
-    new_doc = {'doctype': 'Task', 'parent_task': parent}
+	data = json.loads(data)['tasks']
+	tasks = data.split('\n')
+	new_doc = {'doctype': 'Task', 'parent_task': parent}
+	new_doc['project'] = frappe.db.get_value('Task', {"name": parent}, 'project')
 
-    for d in tasks:
-        new_doc['subject'] = d
-        new_task = frappe.get_doc(new_doc)
-        new_task.insert()
+	for d in tasks:
+		new_doc['subject'] = d
+		new_task = frappe.get_doc(new_doc)
+		new_task.insert()
