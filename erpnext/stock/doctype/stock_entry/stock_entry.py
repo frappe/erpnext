@@ -49,6 +49,9 @@ class StockEntry(StockController):
 		self.validate_with_material_request()
 		self.validate_batch()
 
+		if not self.from_bom:
+			self.fg_completed_qty = 0.0
+
 		if self._action == 'submit':
 			self.make_batches('t_warehouse')
 		else:
