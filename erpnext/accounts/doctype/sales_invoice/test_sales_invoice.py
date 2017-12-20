@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 import unittest, copy, time
-from frappe.utils import nowdate, add_days, flt, getdate, cint
+from frappe.utils import nowdate, flt, getdate, cint
 from frappe.model.dynamic_links import get_dynamic_link_map
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unlink_payment_on_cancel_of_invoice
@@ -1321,40 +1321,6 @@ class TestSalesInvoice(unittest.TestCase):
 		})
 		si.insert()
 		return si
-	
-	def test_gl_entry_based_on_payment_schedule(self):
-		si = create_sales_invoice(do_not_save=True, customer="_Test Customer P")
-		si.append("payment_schedule", {
-			"due_date": add_days(nowdate(), 15),
-			"payment_amount": 20,
-			"invoice_portion": 20.00
-		})
-		si.append("payment_schedule", {
-			"due_date": add_days(nowdate(), 45),
-			"payment_amount": 80,
-			"invoice_portion": 80.00
-		})
-		
-		si.save()
-		si.submit()
-		
-		gl_entries = frappe.db.sql("""select account, debit, credit, due_date
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc, debit asc""", si.name, as_dict=1)
-		self.assertTrue(gl_entries)
-
-		expected_gl_entries = sorted([
-			[si.debit_to, 20.0, 0.0, add_days(nowdate(), 15)],
-			[si.debit_to, 80.0, 0.0, add_days(nowdate(), 45)],
-			["Sales - _TC", 0.0, 100.0, None]
-		])
-
-		for i, gle in enumerate(sorted(gl_entries, key=lambda gle: gle.account)):
-			self.assertEquals(expected_gl_entries[i][0], gle.account)
-			self.assertEquals(expected_gl_entries[i][1], gle.debit)
-			self.assertEquals(expected_gl_entries[i][2], gle.credit)
-			self.assertEquals(getdate(expected_gl_entries[i][3]), getdate(gle.due_date))
-
 
 	def test_company_monthly_sales(self):
 		existing_current_month_sales = frappe.db.get_value("Company", "_Test Company", "total_monthly_sales")

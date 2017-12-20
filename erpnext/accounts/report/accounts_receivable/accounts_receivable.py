@@ -113,7 +113,7 @@ class ReceivablePayableReport(object):
 						row += [self.get_party_name(gle.party_type, gle.party)]
 
 					# get due date
-					due_date = gle.due_date or voucher_details.get(gle.voucher_no, {}).get("due_date", "")
+					due_date = voucher_details.get(gle.voucher_no, {}).get("due_date", "")
 
 					row += [gle.voucher_type, gle.voucher_no, due_date]
 
@@ -188,8 +188,7 @@ class ReceivablePayableReport(object):
 		reverse_dr_or_cr = "credit" if dr_or_cr=="debit" else "debit"
 
 		for e in self.get_gl_entries_for(gle.party, gle.party_type, gle.voucher_type, gle.voucher_no):
-			if getdate(e.posting_date) <= report_date and e.name!=gle.name \
-				and (not gle.due_date or getdate(e.due_date) == getdate(gle.due_date)):
+			if getdate(e.posting_date) <= report_date and e.name!=gle.name:
 				amount = flt(e.get(reverse_dr_or_cr)) - flt(e.get(dr_or_cr))
 				if e.voucher_no not in return_entries:
 					payment_amount += amount
@@ -251,11 +250,11 @@ class ReceivablePayableReport(object):
 				select_fields = "sum(debit) as debit, sum(credit) as credit"
 
 			self.gl_entries = frappe.db.sql("""select name, posting_date, account, party_type, party, 
-				voucher_type, voucher_no, against_voucher_type, against_voucher, due_date,
+				voucher_type, voucher_no, against_voucher_type, against_voucher,
 				account_currency, remarks, {0}
 				from `tabGL Entry`
 				where docstatus < 2 and party_type=%s and (party is not null and party != '') {1}
-				group by voucher_type, voucher_no, against_voucher_type, against_voucher, party, due_date
+				group by voucher_type, voucher_no, against_voucher_type, against_voucher, party
 				order by posting_date, party"""
 				.format(select_fields, conditions), values, as_dict=True)
 
