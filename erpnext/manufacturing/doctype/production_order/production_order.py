@@ -246,7 +246,8 @@ class ProductionOrder(Document):
 				self.production_plan_item, 'ordered_qty', qty)
 
 			doc = frappe.get_doc('Production Plan', self.production_plan)
-			doc.update_ordered_status()
+			doc.set_status()
+			doc.db_set('status', doc.status)
 
 	def update_completed_qty_in_material_request(self):
 		if self.material_request:

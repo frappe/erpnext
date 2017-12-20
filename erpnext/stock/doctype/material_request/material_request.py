@@ -92,7 +92,7 @@ class MaterialRequest(BuyingController):
 	def on_submit(self):
 		# frappe.db.set(self, 'status', 'Submitted')
 		self.update_requested_qty()
-		# self.update_requested_qty_in_production_plan()
+		self.update_requested_qty_in_production_plan()
 
 	def before_save(self):
 		self.set_status(update=True)
@@ -145,6 +145,7 @@ class MaterialRequest(BuyingController):
 
 	def on_cancel(self):
 		self.update_requested_qty()
+		self.update_requested_qty_in_production_plan()
 
 	def update_completed_qty(self, mr_items=None, update_modified=True):
 		if self.material_request_type == "Purchase":
@@ -209,7 +210,8 @@ class MaterialRequest(BuyingController):
 
 		for production_plan in production_plans:
 			doc = frappe.get_doc('Production Plan', production_plan)
-			doc.update_requested_status()
+			doc.set_status()
+			doc.db_set('status', doc.status)
 
 def update_completed_and_requested_qty(stock_entry, method):
 	if stock_entry.doctype == "Stock Entry":

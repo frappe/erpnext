@@ -247,6 +247,10 @@ class ProductionPlan(Document):
 			self.status = "In Process"
 			if self.total_produced_qty == self.total_planned_qty:
 				self.status = "Completed"
+		
+		if self.status != 'Completed':
+			self.update_ordered_status()
+			self.update_requested_status()
 
 	def update_ordered_status(self):
 		update_status = False
@@ -255,9 +259,7 @@ class ProductionPlan(Document):
 				update_status = True
 
 		if update_status and self.status != 'Completed':
-			self.db_set('status', 'In Process')
-		else:
-			self.update_requested_status()
+			self.status = 'In Process'
 
 	def update_requested_status(self):
 		update_status = True
@@ -267,10 +269,6 @@ class ProductionPlan(Document):
 
 		if update_status:
 			self.status = 'Material Requested'
-		else:
-			self.set_status()
-
-		self.db_set('status', self.status)
 
 	def get_production_items(self):
 		item_dict = {}
