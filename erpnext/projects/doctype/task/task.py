@@ -202,17 +202,17 @@ def get_children(doctype, parent, task=None, project=None, is_root=False):
 
 @frappe.whitelist()
 def add_node():
-    from frappe.desk.treeview import make_tree_args
-    args = frappe.form_dict
-    args.update({
-    	"name_field": "subject"
-    })
-    args = make_tree_args(**args)
+	from frappe.desk.treeview import make_tree_args
+	args = frappe.form_dict
+	args.update({
+		"name_field": "subject"
+	})
+	args = make_tree_args(**args)
 
-    if args.parent_task == 'All Tasks':
-        args.parent_task = None
+	if args.parent_task == 'All Tasks' or args.parent_task == args.project:
+		args.parent_task = None
 
-    frappe.get_doc(args).insert()
+	frappe.get_doc(args).insert()
 
 @frappe.whitelist()
 def add_multiple_tasks(data, parent):
