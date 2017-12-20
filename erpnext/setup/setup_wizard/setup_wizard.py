@@ -12,12 +12,12 @@ def get_setup_stages(args=None):
 		stages = [
 			{
 				'status': _('Wrapping up'),
-				'error_msg': _('Failed to login'),
+				'fail_msg': _('Failed to login'),
 				'tasks': [
 					{
 						'fn': fin,
 						'args': args,
-						'error_msg': _("Failed to login")
+						'fail_msg': _("Failed to login")
 					}
 				]
 			}
@@ -26,68 +26,67 @@ def get_setup_stages(args=None):
 		stages = [
 			{
 				'status': _('Installing presets'),
-				'error_msg': _('Failed to install presets'),
+				'fail_msg': _('Failed to install presets'),
 				'tasks': [
 					{
 						'fn': stage_fixtures,
 						'args': args,
-						'error_msg': _("Failed to install presets")
+						'fail_msg': _("Failed to install presets")
 					}
 				]
 			},
 			{
 				'status': _('Setting up company and taxes'),
-				'error_msg': _('Failed to setup company'),
+				'fail_msg': _('Failed to setup company'),
 				'tasks': [
 					{
 						'fn': setup_company,
 						'args': args,
-						'error_msg': _("Failed to setup company")
+						'fail_msg': _("Failed to setup company")
 					},
 					{
 						'fn': setup_taxes,
 						'args': args,
-						'error_msg': _("Failed to setup taxes")
+						'fail_msg': _("Failed to setup taxes")
 					}
 				]
 			},
 			{
 				'status': _('Setting defaults'),
-				'error_msg': 'Failed to set defaults',
+				'fail_msg': 'Failed to set defaults',
 				'tasks': [
 					{
 						'fn': stage_three,
 						'args': args,
-						'error_msg': _("Failed to set defaults")
+						'fail_msg': _("Failed to set defaults")
 					}
 				]
 			},
 			{
 				'status': _('Making website'),
-				'error_msg': _('Failed to create website'),
+				'fail_msg': _('Failed to create website'),
 				'tasks': [
 					{
 						'fn': stage_four,
 						'args': args,
-						'error_msg': _("Failed to create website")
+						'fail_msg': _("Failed to create website")
 					}
 				]
 			},
 			{
 				'status': _('Wrapping up'),
-				'error_msg': _('Failed to login'),
+				'fail_msg': _('Failed to login'),
 				'tasks': [
 					{
 						'fn': fin,
 						'args': args,
-						'error_msg': _("Failed to login")
+						'fail_msg': _("Failed to login")
 					}
 				]
 			}
 		]
 
 	return stages
-
 
 def setup_complete(args=None):
 	stage_fixtures(args)
@@ -123,17 +122,13 @@ def stage_four(args):
 
 def fin(args):
 	frappe.local.message_log = []
-	frappe.db.commit()
 	login_as_first_user(args)
-	frappe.db.commit()
-	frappe.clear_cache()
 
 	make_sample_data(args.get('domains'))
 
 def make_sample_data(domains):
 	try:
 		sample_data.make_sample_data(domains)
-		frappe.clear_cache()
 	except:
 		# clear message
 		if frappe.message_log:
