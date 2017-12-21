@@ -369,7 +369,7 @@ class StockEntry(StockController):
 							(self.purchase_order, se_item.item_code))[0][0]
 
 				if flt(total_supplied, precision) > flt(total_allowed, precision):
-					frappe.throw(_("Not allowed to tranfer more {0} than {1} against Purchase Order {2}").format(se_item.item_code,
+					frappe.throw(_("Not allowed to transfer more {0} than {1} against Purchase Order {2}").format(se_item.item_code,
 						total_allowed, self.purchase_order))
 
 	def validate_bom(self):
