@@ -27,14 +27,19 @@ frappe.ui.form.on("Purchase Order", {
 });
 
 frappe.ui.form.on("Purchase Order Item", {
-	item_code: function(frm) {
+	item_code: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
 		frappe.call({
-			method: "get_last_purchase_rate",
+			method: "item_last_purchase_rate",
 			doc: frm.doc,
-			callback: function(r, rt) {
-				frm.trigger('calculate_taxes_and_totals');
+			args:{
+				item_code: child.item_code,
+				conversion_factor: child.conversion_factor	
+			},
+			callback: function(r, rt) {	
+				frappe.model.set_value(child.doctype, child.name, "last_purchase_rate",r.message);
 			}
-		})
+		});
 	},
 
 	schedule_date: function(frm, cdt, cdn) {
