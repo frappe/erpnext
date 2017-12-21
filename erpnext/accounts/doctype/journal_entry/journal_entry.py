@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext, json
-from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, DATE_FORMAT
+from frappe.utils import cstr, flt, fmt_money, formatdate, getdate
 from frappe import msgprint, _, scrub
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_account_currency
@@ -434,8 +434,7 @@ class JournalEntry(AccountsController):
 						"against_voucher": d.reference_name,
 						"remarks": self.remark,
 						"cost_center": d.cost_center,
-						"project": d.project,
-						"due_date": d.reference_due_date
+						"project": d.project
 					})
 				)
 
@@ -687,54 +686,22 @@ def get_payment_entry(ref_doc, args):
 		"remark": args.get("remarks")
 	})
 
-	if not ref_doc.payment_schedule:
-		je.append("accounts", {
-			"account": args.get("party_account"),
-			"party_type": args.get("party_type"),
-			"party": ref_doc.get(args.get("party_type").lower()),
-			"cost_center": cost_center,
-			"account_type": frappe.db.get_value("Account", args.get("party_account"), "account_type"),
-			"account_currency": args.get("party_account_currency") or \
-								get_account_currency(args.get("party_account")),
-			"balance": get_balance_on(args.get("party_account")),
-			"party_balance": get_balance_on(party=args.get("party"), party_type=args.get("party_type")),
-			"exchange_rate": exchange_rate,
-			args.get("amount_field_party"): args.get("amount"),
-			"is_advance": args.get("is_advance"),
-			"reference_type": ref_doc.doctype,
-			"reference_name": ref_doc.name
-		})
-
-	else:
-		options_ref_name_list = [
-			d.due_date.strftime(DATE_FORMAT) for d in ref_doc.payment_schedule
-			if d.get('due_date')
-		]
-
-		for payment_term in ref_doc.payment_schedule:
-			je.append("accounts", {
-				"account": args.get("party_account"),
-				"party_type": args.get("party_type"),
-				"party": ref_doc.get(args.get("party_type").lower()),
-				"cost_center": cost_center,
-				"account_type": frappe.db.get_value("Account", args.get("party_account"), "account_type"),
-				"account_currency": args.get("party_account_currency") or \
-									get_account_currency(args.get("party_account")),
-				"balance": get_balance_on(args.get("party_account")),
-				"party_balance": get_balance_on(party=args.get("party"), party_type=args.get("party_type")),
-				"exchange_rate": exchange_rate,
-				args.get("amount_field_party"): payment_term.payment_amount,
-				"is_advance": args.get("is_advance"),
-				"reference_type": ref_doc.doctype,
-				"reference_name": ref_doc.name,
-				"reference_due_date": payment_term.due_date
-			})
-			je.set_onload(ref_doc.name, '\n'.join(options_ref_name_list))
-
-	# First multi currency check
-	for row in je.accounts:
-		if row.account_currency != ref_doc.company_currency:
-			je.multi_currency = 1
+	party_row = je.append("accounts", {
+		"account": args.get("party_account"),
+		"party_type": args.get("party_type"),
+		"party": ref_doc.get(args.get("party_type").lower()),
+		"cost_center": cost_center,
+		"account_type": frappe.db.get_value("Account", args.get("party_account"), "account_type"),
+		"account_currency": args.get("party_account_currency") or \
+							get_account_currency(args.get("party_account")),
+		"balance": get_balance_on(args.get("party_account")),
+		"party_balance": get_balance_on(party=args.get("party"), party_type=args.get("party_type")),
+		"exchange_rate": exchange_rate,
+		args.get("amount_field_party"): args.get("amount"),
+		"is_advance": args.get("is_advance"),
+		"reference_type": ref_doc.doctype,
+		"reference_name": ref_doc.name
+	})
 
 	bank_row = je.append("accounts")
 
@@ -758,8 +725,8 @@ def get_payment_entry(ref_doc, args):
 		bank_row.set(args.get("amount_field_bank"), amount * exchange_rate)
 
 	# Multi currency check again
-	if not je.multi_currency:
-		if bank_row.account_currency and bank_row.account_currency != ref_doc.company_currency:
+	if party_row.account_currency != ref_doc.company_currency \
+		or (bank_row.account_currency and bank_row.account_currency != ref_doc.company_currency):
 			je.multi_currency = 1
 
 	je.set_amounts_in_company_currency()
@@ -816,7 +783,8 @@ def get_outstanding(args):
 		}
 	elif args.get("doctype") in ("Sales Invoice", "Purchase Invoice"):
 		party_type = "Customer" if args.get("doctype") == "Sales Invoice" else "Supplier"
-		invoice = frappe.get_doc(args['doctype'], args['docname']).as_dict()
+		invoice = frappe.db.get_value(args["doctype"], args["docname"],
+			["outstanding_amount", "conversion_rate", scrub(party_type)], as_dict=1)
 
 		exchange_rate = invoice.conversion_rate if (args.get("account_currency") != company_currency) else 1
 
@@ -827,22 +795,12 @@ def get_outstanding(args):
 			amount_field = "debit_in_account_currency" \
 				if flt(invoice.outstanding_amount) > 0 else "credit_in_account_currency"
 
-		if args.get('due_date'):
-			outstanding = ''
-			for d in invoice.payment_schedule:
-				if d.due_date == getdate(args['due_date']):
-					outstanding = abs(flt(d.payment_amount))
-					break
-		else:
-			outstanding = abs(flt(invoice.outstanding_amount))
-
 		return {
-			amount_field: outstanding,
+			amount_field: abs(flt(invoice.outstanding_amount)),
 			"exchange_rate": exchange_rate,
 			"party_type": party_type,
 			"party": invoice.get(scrub(party_type))
 		}
-
 
 @frappe.whitelist()
 def get_party_account_and_balance(company, party_type, party):
@@ -942,14 +900,3 @@ def get_average_exchange_rate(account):
 		exchange_rate = bank_balance_in_company_currency / bank_balance_in_account_currency
 
 	return exchange_rate
-
-
-@frappe.whitelist()
-def get_invoice_due_dates(name):
-	result = frappe.get_list(
-		doctype='GL Entry',
-		filters={'voucher_no': name, "ifnull(due_date, '')": ('!=', '')},
-		fields=['due_date'], distinct=True
-	)
-
-	return result
