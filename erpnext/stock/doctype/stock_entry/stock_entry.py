@@ -354,6 +354,7 @@ class StockEntry(StockController):
 		if self.purpose == "Subcontract" and self.purchase_order:
 			purchase_order = frappe.get_doc("Purchase Order", self.purchase_order)
 			for se_item in self.items:
+				precision = cint(frappe.db.get_default("float_precision")) or 3
 				total_allowed = sum([flt(d.required_qty) for d in purchase_order.supplied_items \
 					if d.rm_item_code == se_item.item_code])
 				if not total_allowed:
@@ -367,8 +368,8 @@ class StockEntry(StockController):
 						and `tabStock Entry Detail`.parent = `tabStock Entry`.name""",
 							(self.purchase_order, se_item.item_code))[0][0]
 
-				if total_supplied > total_allowed:
-					frappe.throw(_("Not allowed to tranfer more {0} than {1} against Purchase Order {2}").format(se_item.item_code,
+				if flt(total_supplied, precision) > flt(total_allowed, precision):
+					frappe.throw(_("Not allowed to transfer more {0} than {1} against Purchase Order {2}").format(se_item.item_code,
 						total_allowed, self.purchase_order))
 
 	def validate_bom(self):
