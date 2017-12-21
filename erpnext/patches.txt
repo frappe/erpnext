@@ -485,4 +485,3 @@ erpnext.patches.v10_0.enabled_regional_print_format_based_on_country
 erpnext.patches.v10_0.update_asset_calculate_depreciation
 erpnext.patches.v10_0.enabled_regional_print_format_based_on_country
 erpnext.patches.v10_0.update_asset_calculate_depreciation
-erpnext.patches.v10_0.update_due_date_in_gle_and_payment_entries
