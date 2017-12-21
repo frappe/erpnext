@@ -206,7 +206,7 @@ class PaymentEntry(AccountsController):
 
 					if d.reference_doctype != "Journal Entry":
 						if self.party != ref_doc.get(scrub(self.party_type)):
-							frappe.throw(_("{0} {1} does not associated with {2} {3}")
+							frappe.throw(_("{0} {1} is not associated with {2} {3}")
 								.format(d.reference_doctype, d.reference_name, self.party_type, self.party))
 					else:
 						self.validate_journal_entry()
