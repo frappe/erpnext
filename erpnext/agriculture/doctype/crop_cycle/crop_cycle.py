@@ -18,6 +18,11 @@ class CropCycle(Document):
 				self.row_spacing_uom = crop.row_spacing_uom
 			if not self.project:
 				self.project = self.name
+			disease = []
+			for detected_disease in self.detected_disease:
+				disease.append(detected_disease.name)
+			if disease != []:
+				self.update_disease(disease)
 		else:
 			old_disease, new_disease = [], []
 			for detected_disease in self.detected_disease:
