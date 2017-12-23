@@ -52,13 +52,13 @@ class TrainingTrip(Document):
 				self.workflow_state = "Created By Director(INT)"
 			elif (u'Director' in frappe.get_roles(frappe.session.user)) and (self.assignment_type=="External"):
 				self.workflow_state = "Created By Director(X)"
-			elif (self.handled_by="Director") and (self.assignment_type=="Internal") and (self.days>=5):
+			elif (self.handled_by=="Director") and (self.assignment_type=="Internal") and (self.days>=5):
 				self.workflow_state = "Approved By CEO(INT)"
-			elif (self.handled_by="Director") and (self.assignment_type=="External") and (self.days>=5):
+			elif (self.handled_by=="Director") and (self.assignment_type=="External") and (self.days>=5):
 				self.workflow_state = "Approved By CEO(X)"
-			elif (self.handled_by="Director") and (self.assignment_type=="Internal"):
+			elif (self.handled_by=="Director") and (self.assignment_type=="Internal"):
 				self.workflow_state = "Approved By HR Specialist"
-			elif (self.handled_by="Director") and (self.assignment_type=="External"):
+			elif (self.handled_by=="Director") and (self.assignment_type=="External"):
 				self.workflow_state = "Approved By HR Manager"
 			elif u'Manager' in frappe.get_roles(frappe.session.user):
 				self.workflow_state = "Created By Manager"
