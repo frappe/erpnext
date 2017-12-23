@@ -36,9 +36,15 @@ frappe.ui.form.on('Training Trip', {
     },
     validate: function(frm){
         cur_frm.refresh_fields(["workflow_state"]);
-        // if (cur_frm.doc.handled_by=="HR Specialist" && cur_frm.doc.other_expense>=1000){
-        //     cur_frm.doc.workflow_state = "Approve By HR Specialist"
-        //     }
+        if (cur_frm.doc.handled_by=="Director" && cur_frm.doc.assignment_type=="Internal" && cur_frm.doc.days>=5 ){
+            cur_frm.doc.workflow_state = "Approved By Director(CEO+INT)"
+        }else if(cur_frm.doc.handled_by=="Director" && cur_frm.doc.assignment_type=="External" && cur_frm.doc.days>=5 ){
+            cur_frm.doc.workflow_state = "Approved By Director(CEO+X)"
+        }else if(cur_frm.doc.handled_by=="Director" && cur_frm.doc.assignment_type=="Internal"){
+            cur_frm.doc.workflow_state = "Approved By Director(INT)"
+        }else if(cur_frm.doc.handled_by=="Director" && cur_frm.doc.assignment_type=="External"){
+            cur_frm.doc.workflow_state = "Approved By Director(X)"
+        }
 
     },
 

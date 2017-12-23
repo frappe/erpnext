@@ -44,6 +44,14 @@ class TrainingTrip(Document):
 				self.workflow_state = "Create By CEO"
 			elif u'CEO' in frappe.get_roles(frappe.session.user):
 				self.workflow_state = "Created By CEO"
+			# elif (self.handled_by=="Director") and (self.assignment_type=="Internal") and (self.days>=5):
+			# 	self.workflow_state = "Approved By Director(CEO+INT)"
+			# elif (self.handled_by=="Director") and (self.assignment_type=="External") and (self.days>=5):
+			# 	self.workflow_state = "Approved By Director(CEO+X)"
+			# elif (self.handled_by=="Director") and (self.assignment_type=="Internal"):
+			# 	self.workflow_state = "Approved By Director(INT)"
+			# elif (self.handled_by=="Director") and (self.assignment_type=="External"):
+			# 	self.workflow_state = "Approved By Director(X)"
 			elif (u'Director' in frappe.get_roles(frappe.session.user)) and (self.assignment_type=="Internal") and (self.days>=5):
 				self.workflow_state = "Created By Director(CEO+INT)"
 			elif (u'Director' in frappe.get_roles(frappe.session.user)) and (self.assignment_type=="External") and (self.days>=5):
@@ -52,14 +60,6 @@ class TrainingTrip(Document):
 				self.workflow_state = "Created By Director(INT)"
 			elif (u'Director' in frappe.get_roles(frappe.session.user)) and (self.assignment_type=="External"):
 				self.workflow_state = "Created By Director(X)"
-			elif (self.handled_by=="Director") and (self.assignment_type=="Internal") and (self.days>=5):
-				self.workflow_state = "Approved By CEO(INT)"
-			elif (self.handled_by=="Director") and (self.assignment_type=="External") and (self.days>=5):
-				self.workflow_state = "Approved By CEO(X)"
-			elif (self.handled_by=="Director") and (self.assignment_type=="Internal"):
-				self.workflow_state = "Approved By HR Specialist"
-			elif (self.handled_by=="Director") and (self.assignment_type=="External"):
-				self.workflow_state = "Approved By HR Manager"
 			elif u'Manager' in frappe.get_roles(frappe.session.user):
 				self.workflow_state = "Created By Manager"
 			elif u'Line Manager' in frappe.get_roles(frappe.session.user):
