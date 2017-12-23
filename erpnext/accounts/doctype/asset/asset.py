@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, add_months, cint, nowdate, getdate, get_last_day, date_diff
+from frappe.utils import flt, add_months, cint, nowdate, getdate, get_last_day, date_diff, add_days
 from frappe.model.document import Document
 from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_fixed_asset_account
 from erpnext.accounts.doctype.asset.depreciation \
@@ -156,22 +156,31 @@ class Asset(Document):
 		if self.depreciation_method != 'Manual':
 			self.schedules = []
 		if not self.get("schedules") and self.next_depreciation_date:
-			last_month_day = get_last_day(getdate(self.next_depreciation_date))
-			date_difference = cint(date_diff(last_month_day, self.purchase_date))
-			depreciation_amount = self.get_depreciation_amount(flt(self.value_after_depreciation))*(float(date_difference/30.41666))
-			self.append("schedules", {
-				"schedule_date": last_month_day,
-				"depreciation_amount": depreciation_amount
-			})
-			self.value_after_depreciation -= flt(self.value_after_depreciation)*(float(date_difference/30.41666)/cint(self.total_number_of_depreciations))
-			self.number_of_depreciations_booked = 1
+			added_month = 0
+			rest_of_month_days = 0
+			if getdate(self.next_depreciation_date) > getdate(self.purchase_date):
+				added_month = 1
+				rest_of_month_days = cint(getdate(self.purchase_date).day)
+				last_month_day = get_last_day(getdate(self.next_depreciation_date))
+				date_difference = cint(date_diff(last_month_day, self.purchase_date))
+				depreciation_amount = self.get_depreciation_amount(flt(self.value_after_depreciation))*(float(date_difference/30.0))
+				self.append("schedules", {
+					"schedule_date": last_month_day,
+					"depreciation_amount": depreciation_amount
+				})
+				rest_of_days_deduction = (flt(self.value_after_depreciation)*(float(rest_of_month_days/30.0)/cint(self.total_number_of_depreciations)))
+				total_deductions = (flt(self.value_after_depreciation)*(float(rest_of_month_days/30.0)/cint(self.total_number_of_depreciations))) + \
+				(flt(self.value_after_depreciation)*(float(date_difference/30.0)/cint(self.total_number_of_depreciations)))
+
+				self.value_after_depreciation -= total_deductions
+				self.number_of_depreciations_booked = 1
 			value_after_depreciation = flt(self.value_after_depreciation)
 			
 			number_of_pending_depreciations = cint(self.total_number_of_depreciations) - \
 				cint(self.number_of_depreciations_booked)
 			if number_of_pending_depreciations:
 				for n in xrange(number_of_pending_depreciations): 
-					schedule_date = add_months(self.next_depreciation_date, n * cint(self.frequency_of_depreciation)+1)
+					schedule_date = add_months(self.next_depreciation_date, n * cint(self.frequency_of_depreciation)+added_month)
 					last_month_day = get_last_day(getdate(schedule_date))
 					depreciation_amount = self.get_depreciation_amount(value_after_depreciation)
 					value_after_depreciation -= flt(depreciation_amount)
@@ -180,6 +189,13 @@ class Asset(Document):
 						"schedule_date": last_month_day,
 						"depreciation_amount": depreciation_amount
 					})
+			if getdate(self.next_depreciation_date) > getdate(self.purchase_date):
+				end_date = add_days(last_month_day, rest_of_month_days)
+				depreciation_amount = self.get_depreciation_amount(flt(self.value_after_depreciation))*(float(rest_of_month_days/30.0))
+				self.append("schedules", {
+					"schedule_date": end_date,
+					"depreciation_amount": depreciation_amount
+				})
 			# value_after_depreciation = flt(self.value_after_depreciation)
 			
 			# number_of_pending_depreciations = cint(self.total_number_of_depreciations) - \
