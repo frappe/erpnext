@@ -4,12 +4,10 @@
 
 from __future__ import unicode_literals
 import frappe
-import json
 from frappe import msgprint, _
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from frappe.utils import cstr, flt, cint, nowdate, add_days, comma_and, now_datetime
-from erpnext.stock.get_item_details import get_projected_qty
 from erpnext.manufacturing.doctype.production_order.production_order import get_item_details
 
 class ProductionPlan(Document):
@@ -70,7 +68,6 @@ class ProductionPlan(Document):
 		""" Add sales orders in the table"""
 		self.set('sales_orders', [])
 
-		so_list = []
 		for data in open_so:
 			self.append('sales_orders', {
 				'sales_order': data.name,
@@ -202,7 +199,7 @@ class ProductionPlan(Document):
 			if self.get_items_from == "Sales Order":
 				pi.sales_order = data.parent
 				pi.sales_order_item = data.name
-				
+
 			elif self.get_items_from == "Material Request":
 				pi.material_request = data.parent
 				pi.material_request_item = data.name
@@ -293,7 +290,6 @@ class ProductionPlan(Document):
 				"project": self.project or frappe.db.get_value("Sales Order", d.sales_order, "project")
 			})
 
-			""" Club similar BOM and item for processing in case of Sales Orders """
 			if self.get_items_from == "Material Request":
 				item_details.update({
 					"qty": d.planned_qty
@@ -334,7 +330,7 @@ class ProductionPlan(Document):
 
 			for item, item_details in bom_wise_item_details.items():
 				if item_details.qty > 0:
-					self.add_item_in_material_request_items(item_details, data)
+					self.add_item_in_material_request_items(item, item_details, data)
 
 	def get_subitems(self, data, bom_wise_item_details, bom_no, parent_qty):
 		items = frappe.db.sql("""
@@ -371,9 +367,9 @@ class ProductionPlan(Document):
 
 		return bom_wise_item_details
 
-	def add_item_in_material_request_items(self, row, data):
+	def add_item_in_material_request_items(self, item, row, data):
 		total_qty = row.qty * data.planned_qty
-		projected_qty, actual_qty = self.get_bin_details(row)
+		projected_qty, actual_qty = get_bin_details(row)
 
 		requested_qty = 0
 		if self.ignore_existing_ordered_qty:
@@ -386,7 +382,7 @@ class ProductionPlan(Document):
 
 		if requested_qty > 0:
 			self.append('mr_items', {
-				'item_code': row.item_code,
+				'item_code': item,
 				'item_name': row.item_name,
 				'quantity': requested_qty,
 				'warehouse': row.source_warehouse or row.default_warehouse,
@@ -394,19 +390,6 @@ class ProductionPlan(Document):
 				'min_order_qty': row.min_order_qty,
 				'sales_order': data.sales_order
 			})
-
-	def get_bin_details(self, data):
-		conditions = ""
-		warehouse = data.source_warehouse or data.default_warehouse
-		if warehouse:
-			conditions = " and warehouse='{0}'".format(frappe.db.escape(warehouse))
-
-		item_projected_qty = frappe.db.sql(""" select ifnull(sum(projected_qty),0) as projected_qty, 
-			ifnull(sum(actual_qty),0) as actual_qty from `tabBin` 
-			where item_code = %(item_code)s {conditions}
-		""".format(conditions=conditions), { "item_code": data.item_code }, as_list=1)
-
-		return item_projected_qty[0]
 
 	def make_production_order(self):
 		pro_list = []
@@ -497,3 +480,16 @@ class ProductionPlan(Document):
 				item_details.setdefault(data.item_code, [data.idx])
 
 		return item_details
+
+def get_bin_details(data):
+	conditions = ""
+	warehouse = data.source_warehouse or data.default_warehouse
+	if warehouse:
+		conditions = " and warehouse='{0}'".format(frappe.db.escape(warehouse))
+
+	item_projected_qty = frappe.db.sql(""" select ifnull(sum(projected_qty),0) as projected_qty,
+		ifnull(sum(actual_qty),0) as actual_qty from `tabBin` 
+		where item_code = %(item_code)s {conditions}
+	""".format(conditions=conditions), { "item_code": data.item_code }, as_list=1)
+
+	return item_projected_qty[0]

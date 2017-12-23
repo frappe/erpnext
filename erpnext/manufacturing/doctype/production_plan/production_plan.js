@@ -3,15 +3,13 @@
 
 frappe.ui.form.on('Production Plan', {
 	setup: function(frm) {
-		['warehouse'].forEach((fieldname) => {
-			frm.fields_dict['po_items'].grid.get_field(fieldname).get_query = function(doc) {
-				return {
-					filters: {
-						company: doc.company
-					}
+		frm.fields_dict['po_items'].grid.get_field('warehouse').get_query = function(doc) {
+			return {
+				filters: {
+					company: doc.company
 				}
 			}
-		});
+		}
 
 		frm.fields_dict['po_items'].grid.get_field('bom_no').get_query = function(doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
@@ -34,7 +32,7 @@ frappe.ui.form.on('Production Plan', {
 				frm.trigger("make_production_order");
 			}, __("Make"));
 		}
-		
+
 		if (frm.doc.docstatus === 1 && frm.doc.status != 'Material Requested') {
 			frm.add_custom_button(__("Material Request"), ()=> {
 				frm.trigger("make_material_request");
@@ -50,7 +48,7 @@ frappe.ui.form.on('Production Plan', {
 			method: "make_production_order",
 			freeze: true,
 			doc: frm.doc,
-			callback: function(r) {
+			callback: function() {
 				frm.reload_doc();
 			}
 		});
@@ -82,9 +80,9 @@ frappe.ui.form.on('Production Plan', {
 			method: "get_pending_material_requests",
 			doc: frm.doc,
 			callback: function() {
-				refresh_field('material_requests')
+				refresh_field('material_requests');
 			}
-		})
+		});
 	},
 
 	get_items: function(frm) {
@@ -93,9 +91,9 @@ frappe.ui.form.on('Production Plan', {
 			freeze: true,
 			doc: frm.doc,
 			callback: function() {
-				refresh_field('po_items')
+				refresh_field('po_items');
 			}
-		})
+		});
 	},
 	
 	get_items_for_mr: function(frm) {
@@ -104,19 +102,18 @@ frappe.ui.form.on('Production Plan', {
 			freeze: true,
 			doc: frm.doc,
 			callback: function() {
-				refresh_field('mr_items')
+				refresh_field('mr_items');
 			}
-		})
+		});
 	},
 
 	show_progress: function(frm) {
 		var bars = [];
 		var message = '';
-		var added_min = false;
 		var title = '';
 
 		// produced qty
-		item_wise_qty = {};
+		let item_wise_qty = {};
 		frm.doc.items.forEach((data) => {
 			if(!item_wise_qty[data.item_code]) {
 				item_wise_qty[data.item_code] = data.produced_qty;
@@ -138,7 +135,6 @@ frappe.ui.form.on('Production Plan', {
 		});
 		if (bars[0].width == '0%') {
 			bars[0].width = '0.5%';
-			added_min = 0.5;
 		}
 		message = title;
 		frm.dashboard.add_progress(__('Status'), bars, message);

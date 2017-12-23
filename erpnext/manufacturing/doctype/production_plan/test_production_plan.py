@@ -14,8 +14,8 @@ class TestProductionPlan(unittest.TestCase):
 		for item in ['Test Production Item 1', 'Subassembly Item 1',
 			'Raw Material Item 1', 'Raw Material Item 2']:
 			create_item(item, valuation_rate=100)
-			
-			sr = frappe.db.get_value('Stock Reconciliation Item', 
+
+			sr = frappe.db.get_value('Stock Reconciliation Item',
 				{'item_code': item, 'docstatus': 1}, 'parent')
 			if sr:
 				sr_doc = frappe.get_doc('Stock Reconciliation', sr)
@@ -87,7 +87,7 @@ class TestProductionPlan(unittest.TestCase):
 		sr2 = create_stock_reconciliation(item_code="Subassembly Item 1",
 			target="_Test Warehouse - _TC", qty=1, rate=100)
 
-		pln = create_production_plan(item_code='Test Production Item 1', 
+		pln = create_production_plan(item_code='Test Production Item 1',
 			use_multi_level_bom=0, ignore_existing_ordered_qty=0)
 		self.assertTrue(len(pln.mr_items), 0)
 
