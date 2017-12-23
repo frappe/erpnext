@@ -18,6 +18,12 @@
             <th style="width: 15%">{%= __("Communication") %}</th>
 
             <th style="width: 15%">{%= __("Gross Pay") %}</th>
+            {% if(data[0]["Unpaid Leave Adjustment"]) { %}
+
+                <th style="width: 10%">{%= __("Unpaid Leave Adjustment") %}</th>
+
+            {% } %}
+
             <th style="width: 10%">{%= __("GOSI") %}</th>
 <!--             <th style="width: 10%">{%= __("Penalty") %}</th>
  -->            
@@ -43,7 +49,14 @@
             <td>{%= 	(Number( data[i]["Housing"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
             <td>{%= 	(Number( data[i]["Communication"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
             
-	    <td>{%= 	(Number( data[i]["Gross Pay"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
+	       <td>{%= 	(Number( data[i]["Gross Pay"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
+
+            {% if(data[i]["Unpaid Leave Adjustment"]) { %}
+            
+                <td>{%= (Number( data[i]["Unpaid Leave Adjustment"] ) + 1 / Math.pow(10,Number(2) + 1)).toFixed(2)  %}</td>
+
+            {% } %}
+
             <td>{%= 	(Number( data[i]["GOSI"] ) + 1 / Math.pow(10, Number(2) + 1)).toFixed(2)  %}</td>
           
 
