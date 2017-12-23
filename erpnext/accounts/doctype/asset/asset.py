@@ -14,9 +14,10 @@ from frappe.model.naming import make_autoname
 
 import barcode
 from barcode.writer import ImageWriter
+from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.controllers.accounts_controller import AccountsController
 
-
-class Asset(Document):
+class Asset(AccountsController):
 
 	def autoname(self):
 		from frappe.model.naming import make_autoname
@@ -84,11 +85,50 @@ class Asset(Document):
 
 	def on_submit(self):
 		self.set_status()
-
+		if self.is_existing_asset:
+			self.make_gl_entries()
+				
 	def on_cancel(self):
 		self.validate_cancellation()
 		self.delete_depreciation_entries()
 		self.set_status()
+		self.make_gl_entries(cancel=1)
+	
+	def make_gl_entries(self, cancel=0, adv_adj=0):
+		gl_entries = []
+		self.add_gl_entries(gl_entries)
+		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
+
+	def add_gl_entries(self, gl_entries):
+		#~ pass
+		if not self.credit_to :
+			frappe.throw(_("Credit To Account Missing"))
+		if not self.debit_to :
+			frappe.throw(_("Debit To Account Missing"))
+		
+		gl_entries.append(
+			self.get_gl_dict({
+				"account": self.credit_to,
+				#~ "account_currency": self.paid_from_account_currency,
+				"against": self.debit_to,
+				"credit_in_account_currency": self.gross_purchase_amount,
+				"credit": self.gross_purchase_amount,
+				"against_voucher_type": self.doctype,
+				"against_voucher": self.name
+			})
+		)
+		gl_entries.append(
+			self.get_gl_dict({
+				"account": self.debit_to,
+				#~ "account_currency": self.paid_to_account_currency,
+				"against": self.credit_to,
+				"debit_in_account_currency": self.gross_purchase_amount,
+				"debit": self.gross_purchase_amount,
+				"against_voucher_type": self.doctype,
+				"against_voucher": self.name
+			})
+		)
+
 
 	def validate_item(self):
 		item = frappe.db.get_value("Item", self.item_code, 
@@ -387,6 +427,30 @@ def get_item_details(item_code):
 		
 	ret.update({
 		"asset_category": asset_category
+	})
+		
+	return ret
+
+@frappe.whitelist()
+def get_item_details_with_company(item_code , company):
+	asset_category = frappe.db.get_value("Item", item_code, "asset_category")
+	
+	if not asset_category:
+		frappe.throw(_("Please enter Asset Category in Item {0}").format(item_code))
+	
+	
+	debit_to = frappe.db.get_value("Asset Category Account",
+			filters={"parent": asset_category, "company_name": company}, fieldname="fixed_asset_account")
+			
+	if not debit_to:
+		frappe.throw(_("Please add Asset Category account").format(item_code))
+				
+	ret = frappe.db.get_value("Asset Category", asset_category, 
+		["depreciation_method", "total_number_of_depreciations", "frequency_of_depreciation"], as_dict=1)
+		
+	ret.update({
+		"asset_category": asset_category,
+		"debit_to":debit_to
 	})
 		
 	return ret

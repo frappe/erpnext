@@ -151,12 +151,14 @@ erpnext.company.setup_queries = function(frm) {
 		erpnext.company.set_custom_query(frm, v);
 	});
 
-	if (sys_defaults.auto_accounting_for_stock) {
+	if (frappe.sys_defaults.auto_accounting_for_stock) {
 		$.each([
 			["stock_adjustment_account", 
 				{"root_type": "Expense", "account_type": "Stock Adjustment"}],
 			["expenses_included_in_valuation", 
 				{"root_type": "Expense", "account_type": "Expenses Included in Valuation"}],
+			["asset_received_but_not_billed", 
+				{"root_type": "Liability", "account_type": "Stock Received But Not Billed"}],
 			["stock_received_but_not_billed", 
 				{"root_type": "Liability", "account_type": "Stock Received But Not Billed"}]
 		], function(i, v) {

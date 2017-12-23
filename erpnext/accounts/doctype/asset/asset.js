@@ -2,6 +2,8 @@
 // For license information, please see license.txt
 
 frappe.provide("erpnext.asset");
+cur_frm.add_fetch("company", "asset_received_but_not_billed", "credit_to");
+
 frappe.ui.form.on('Asset', {
 	onload: function(frm) {
 		frm.set_query("item_code", function() {
@@ -25,6 +27,7 @@ frappe.ui.form.on('Asset', {
 	},
 	
 	refresh: function(frm) {
+		frm.events.show_general_ledger(frm);
 		cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 			frm.set_value('asset_name',frm.doc.barcode);
 			refresh_field('asset_name');
@@ -62,7 +65,20 @@ frappe.ui.form.on('Asset', {
 			frm.trigger("show_graph");
 		}
 	},
-	
+	show_general_ledger: function(frm) {
+		if(frm.doc.docstatus==1) {
+			frm.add_custom_button(__('Ledger'), function() {
+				frappe.route_options = {
+					"voucher_no": frm.doc.name,
+					"from_date": frm.doc.posting_date,
+					"to_date": frm.doc.posting_date,
+					"company": frm.doc.company,
+					group_by_voucher: 0
+				};
+				frappe.set_route("query-report", "General Ledger");
+			}, "fa fa-table");
+		}
+	},
 	show_graph: function(frm) {		
 		var x_intervals = ["x", frm.doc.purchase_date];
 		var asset_values = ["Asset Value", frm.doc.gross_purchase_amount];
@@ -127,9 +143,10 @@ frappe.ui.form.on('Asset', {
 	item_code: function(frm) {
 		if(frm.doc.item_code) {
 			frappe.call({
-				method: "erpnext.accounts.doctype.asset.asset.get_item_details",
+				method: "erpnext.accounts.doctype.asset.asset.get_item_details_with_company",
 				args: {
-					item_code: frm.doc.item_code
+					item_code: frm.doc.item_code,
+					company: frm.doc.company
 				},
 				callback: function(r, rt) {
 					if(r.message) {
