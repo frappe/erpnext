@@ -29,10 +29,26 @@ class BusinessTrip(Document):
 		self.validate_city()
 		self.get_number_of_leave_days()
 		self.get_ja_cost()
-		if self.workflow_state:
-			if "Rejected" in self.workflow_state:
-				self.docstatus = 1
-				self.docstatus = 2
+		self.validate_emp()
+		if hasattr(self,"workflow_state"):
+			if self.workflow_state:
+				if "Rejected" in self.workflow_state:
+					self.docstatus = 1
+					self.docstatus = 2
+
+	def validate_emp(self):
+		if self.get('__islocal'):
+			if u'CEO' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By CEO"
+			elif u'Director' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Director"
+			elif u'Manager' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Manager"
+			elif u'Line Manager' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Line Manager"
+			elif u'Employee' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Pending"
+
 
 	def validate_dates(self):
 		if getdate(self.from_date) > getdate(self.to_date):
@@ -223,20 +239,24 @@ class BusinessTrip(Document):
 		self.total = total
 
 
+	def get_default_cost_center(self,company):
+		cost_center = frappe.get_doc('Company', company)
+		return cost_center.cost_center
 
 
-def get_permission_query_conditions(user):
-	if not user: user = frappe.session.user
-	employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
-	if employees:
-		query = ""
-		employee = frappe.get_doc('Employee', {'name': employees[0].name})
+
+# def get_permission_query_conditions(user):
+# 	if not user: user = frappe.session.user
+# 	employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
+# 	if employees:
+# 		query = ""
+# 		employee = frappe.get_doc('Employee', {'name': employees[0].name})
 		
-		if u'Employee' in frappe.get_roles(user):
-			if query != "":
-				query+=" or "
-			query+=""" employee = '{0}'""".format(employee.name)
-		return query
+# 		if u'Employee' in frappe.get_roles(user):
+# 			if query != "":
+# 				query+=" or "
+# 			query+=""" employee = '{0}'""".format(employee.name)
+# 		return query
 
 
 

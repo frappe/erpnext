@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, add_months, cint, nowdate, getdate
+from frappe.utils import flt, add_months, cint, nowdate, getdate, get_last_day, date_diff
 from frappe.model.document import Document
 from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_fixed_asset_account
 from erpnext.accounts.doctype.asset.depreciation \
@@ -147,74 +147,97 @@ class Asset(Document):
 				frappe.throw(_("Please set Next Depreciation Date"))
 
 	def make_depreciation_schedule(self):
-		import datetime
-		import time
-		from datetime import datetime
-		from datetime import timedelta
-		import dateutil.parser
+		# import datetime
+		# import time
+		# from datetime import datetime
+		# from datetime import timedelta
+		# import dateutil.parser
 
 		if self.depreciation_method != 'Manual':
 			self.schedules = []
-			
 		if not self.get("schedules") and self.next_depreciation_date:
+			last_month_day = get_last_day(getdate(self.next_depreciation_date))
+			date_difference = cint(date_diff(last_month_day, self.purchase_date))
+			depreciation_amount = self.get_depreciation_amount(flt(self.value_after_depreciation))*(float(date_difference/30.41666))
+			self.append("schedules", {
+				"schedule_date": last_month_day,
+				"depreciation_amount": depreciation_amount
+			})
+			self.value_after_depreciation -= flt(self.value_after_depreciation)*(float(date_difference/30.41666)/cint(self.total_number_of_depreciations))
+			self.number_of_depreciations_booked = 1
 			value_after_depreciation = flt(self.value_after_depreciation)
 			
 			number_of_pending_depreciations = cint(self.total_number_of_depreciations) - \
 				cint(self.number_of_depreciations_booked)
-
-			next_depre=datetime.strptime(self.next_depreciation_date,'%Y-%m-%d')
-			
-			dYear = next_depre.strftime("%Y")
-			dMonth = str(int(next_depre.strftime("%m"))%12+1)
-			dDay = "1"
-			nextMonth = datetime.strptime(dYear+"-"+dMonth+"-"+ dDay,'%Y-%m-%d')
-			delta = timedelta(seconds=1)
-			dt= nextMonth - delta
-			dd=datetime.combine(dt,datetime.min.time()).date() 
-			dayss= (int((dd-next_depre.date()).days))+1
-
 			if number_of_pending_depreciations:
-			
-
-				if number_of_pending_depreciations >0:
-					depreciation_amount = (self.get_depreciation_amount(value_after_depreciation))*(float(dayss)/30.0)
-					value_after_depreciation -= flt(depreciation_amount)
-					if dayss != 0:
-						self.append("schedules", {
-								"schedule_date": dd,
-								"depreciation_amount": depreciation_amount 
-							})
-
-
-				for n in xrange(1,number_of_pending_depreciations):
-					schedule_date = add_months(dd,
-						n * cint(self.frequency_of_depreciation))
-
+				for n in xrange(number_of_pending_depreciations): 
+					schedule_date = add_months(self.next_depreciation_date, n * cint(self.frequency_of_depreciation)+1)
+					last_month_day = get_last_day(getdate(schedule_date))
 					depreciation_amount = self.get_depreciation_amount(value_after_depreciation)
 					value_after_depreciation -= flt(depreciation_amount)
 
 					self.append("schedules", {
-						"schedule_date": schedule_date,
+						"schedule_date": last_month_day,
 						"depreciation_amount": depreciation_amount
 					})
+			# value_after_depreciation = flt(self.value_after_depreciation)
+			
+			# number_of_pending_depreciations = cint(self.total_number_of_depreciations) - \
+			# 	cint(self.number_of_depreciations_booked)
 
-				schedule_date = add_months(dd,
-					(number_of_pending_depreciations) * cint(self.frequency_of_depreciation))
-				depreciation_amount2 = (self.get_depreciation_amount(value_after_depreciation))*((30.0-float(dayss))/30.0)
+			# next_depre=datetime.strptime(self.next_depreciation_date,'%Y-%m-%d')
+			
+			# dYear = next_depre.strftime("%Y")
+			# dMonth = str(int(next_depre.strftime("%m"))%12+1)
+			# dDay = "1"
+			# nextMonth = datetime.strptime(dYear+"-"+dMonth+"-"+ dDay,'%Y-%m-%d')
+			# delta = timedelta(seconds=1)
+			# dt= nextMonth - delta
+			# dd=datetime.combine(dt,datetime.min.time()).date() 
+			# dayss= (int((dd-next_depre.date()).days))+1
 
-				depreciation_amount = self.get_depreciation_amount(value_after_depreciation)
-				value_after_depreciation = value_after_depreciation -depreciation_amount2
+			# if number_of_pending_depreciations:
+			
 
-				self.append("schedules", {
-					"schedule_date": schedule_date,
-					"depreciation_amount": depreciation_amount2
-				})
+			# 	if number_of_pending_depreciations >0:
+			# 		depreciation_amount = (self.get_depreciation_amount(value_after_depreciation))*(float(dayss)/30.0)
+			# 		value_after_depreciation -= flt(depreciation_amount)
+			# 		if dayss != 0:
+			# 			self.append("schedules", {
+			# 					"schedule_date": dd,
+			# 					"depreciation_amount": depreciation_amount 
+			# 				})
 
-				if dayss==0:
-					self.append("schedules", {
-								"schedule_date": add_months(dd,number_of_pending_depreciations * cint(self.frequency_of_depreciation)),
-								"depreciation_amount": self.get_depreciation_amount(value_after_depreciation) 
-							})
+
+			# 	for n in xrange(1,number_of_pending_depreciations):
+			# 		schedule_date = add_months(dd,
+			# 			n * cint(self.frequency_of_depreciation))
+
+			# 		depreciation_amount = self.get_depreciation_amount(value_after_depreciation)
+			# 		value_after_depreciation -= flt(depreciation_amount)
+
+			# 		self.append("schedules", {
+			# 			"schedule_date": schedule_date,
+			# 			"depreciation_amount": depreciation_amount
+			# 		})
+
+			# 	schedule_date = add_months(dd,
+			# 		(number_of_pending_depreciations) * cint(self.frequency_of_depreciation))
+			# 	depreciation_amount2 = (self.get_depreciation_amount(value_after_depreciation))*((30.0-float(dayss))/30.0)
+
+			# 	depreciation_amount = self.get_depreciation_amount(value_after_depreciation)
+			# 	value_after_depreciation = value_after_depreciation -depreciation_amount2
+
+			# 	self.append("schedules", {
+			# 		"schedule_date": schedule_date,
+			# 		"depreciation_amount": depreciation_amount2
+			# 	})
+
+			# 	if dayss==0:
+			# 		self.append("schedules", {
+			# 					"schedule_date": add_months(dd,number_of_pending_depreciations * cint(self.frequency_of_depreciation)),
+			# 					"depreciation_amount": self.get_depreciation_amount(value_after_depreciation) 
+			# 				})
 
 					
 	def set_accumulated_depreciation(self):

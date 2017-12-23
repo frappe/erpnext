@@ -160,6 +160,12 @@ erpnext.expense_claim = {
 
 frappe.ui.form.on("Expense Claim Detail", {
 
+	workflow_state: function(frm){
+        cur_frm.refresh_fields(["workflow_state"]);
+    },
+    validate: function(frm){
+        cur_frm.refresh_fields(["workflow_state"]);
+    },
 	claim_amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		var doc = frm.doc;

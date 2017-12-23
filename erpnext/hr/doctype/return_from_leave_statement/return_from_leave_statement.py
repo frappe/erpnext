@@ -53,8 +53,8 @@ class ReturnFromLeaveStatement(Document):
 	def validate_dates(self):
 		if getdate(self.return_date) <= getdate(self.to_date):
 			frappe.throw(_("Return date can not be smaller or equal than to date"))
-		if getdate(nowdate()) != getdate(self.return_date):
-			frappe.throw(_("The return date must be today date"))
+		# if getdate(nowdate()) != getdate(self.return_date):
+		# 	frappe.throw(_("The return date must be today date"))
 
 
 			

@@ -263,6 +263,11 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Training Trip",
+					"description":_("Training Trip"),
+				},
+				{
+					"type": "doctype",
 					"name": "Business Trip",
 					"description":_("Business Trip"),
 				},

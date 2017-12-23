@@ -5,6 +5,20 @@ cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.add_fetch('employee', 'employee_name', 'employee_name');
 cur_frm.add_fetch('employee', 'department', 'department');
 
+frappe.ui.form.on('Appraisal', {
+    refresh: function(frm) {},
+    workflow_state: function(frm){
+        cur_frm.refresh_fields(["workflow_state"]);
+    },
+    validate: function(frm){
+        cur_frm.refresh_fields(["workflow_state"]);
+        // if (cur_frm.doc.handled_by=="HR Specialist" && cur_frm.doc.other_expense>=1000){
+        //     cur_frm.doc.workflow_state = "Approve By HR Specialist"
+        //     }
+
+    }
+});
+
 cur_frm.cscript.onload = function(doc,cdt,cdn){
 	if(!doc.status)
 		set_multiple(cdt,cdn,{status:'Draft'});
