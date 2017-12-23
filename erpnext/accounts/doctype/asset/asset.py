@@ -234,7 +234,7 @@ class Asset(AccountsController):
 
 					self.append("schedules", {
 						"schedule_date": last_month_day,
-						"depreciation_amount": depreciation_amount
+						"depreciation_amount": flt(depreciation_amount)
 					})
 			if getdate(self.next_depreciation_date) > getdate(self.purchase_date):
 				rest_of_month_days = cint(getdate(self.purchase_date).day)
@@ -242,7 +242,7 @@ class Asset(AccountsController):
 				depreciation_amount = init_depreciation_amount - (init_depreciation_amount * (flt(rest_of_month_days)/cint(getdate(pi_last_month_day).day)))
 				self.append("schedules", {
 					"schedule_date": end_date,
-					"depreciation_amount": depreciation_amount
+					"depreciation_amount": flt(depreciation_amount)
 				})
 			# value_after_depreciation = flt(self.value_after_depreciation)
 			
@@ -308,7 +308,7 @@ class Asset(AccountsController):
 		accumulated_depreciation = flt(self.opening_accumulated_depreciation)
 		for d in self.get("schedules"):
 			accumulated_depreciation  += flt(d.depreciation_amount)
-			d.accumulated_depreciation_amount = accumulated_depreciation
+			flt(d.accumulated_depreciation_amount) = accumulated_depreciation
 
 	def get_depreciation_amount(self, depreciable_value):
 		if self.depreciation_method in ("Straight Line", "Manual"):
