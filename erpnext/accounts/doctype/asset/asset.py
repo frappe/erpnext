@@ -308,7 +308,7 @@ class Asset(AccountsController):
 		accumulated_depreciation = flt(self.opening_accumulated_depreciation)
 		for d in self.get("schedules"):
 			accumulated_depreciation  += flt(d.depreciation_amount)
-			flt(d.accumulated_depreciation_amount) = accumulated_depreciation
+			d.accumulated_depreciation_amount = flt(accumulated_depreciation)
 
 	def get_depreciation_amount(self, depreciable_value):
 		if self.depreciation_method in ("Straight Line", "Manual"):
