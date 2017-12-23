@@ -23,7 +23,27 @@ cur_frm.cscript.custom_grade = function(doc, cdt, cd) {
 };
 frappe.ui.form.on('Business Trip', {
     refresh: function(frm) {},
+    workflow_state: function(frm){
+        cur_frm.refresh_fields(["workflow_state"]);
+    },
+    validate: function(frm){
+        cur_frm.refresh_fields(["workflow_state"]);
+        // if (cur_frm.doc.handled_by=="HR Specialist" && cur_frm.doc.other_expense>=1000){
+        //     cur_frm.doc.workflow_state = "Approve By HR Specialist"
+        //     }
+
+    },
     onload: function(frm) {
+        frappe.call({
+            method: "get_default_cost_center",
+            args: {company: frappe.sys_defaults.company},
+            doc: frm.doc,
+            callback: function(r) {
+                cur_frm.set_value("cost_center", r.message);
+                cur_frm.doc.cost_center=r.message;
+            }
+        });
+
     }
 });
 

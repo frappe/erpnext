@@ -30,11 +30,42 @@ class TrainingTrip(Document):
 		self.validate_city()
 		self.get_number_of_leave_days()
 		self.get_ja_cost()
+		self.validate_emp()
 		if hasattr(self,"workflow_state"):
 			if self.workflow_state:
 				if "Rejected" in self.workflow_state:
 					self.docstatus = 1
 					self.docstatus = 2
+
+
+	def validate_emp(self):
+		if self.get('__islocal'):
+			if (u'CEO' in frappe.get_roles(frappe.session.user)) and (self.assignment_type=="External"):
+				self.workflow_state = "Create By CEO"
+			elif u'CEO' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By CEO"
+			elif (u'Director' in frappe.get_roles(frappe.session.user)) and (self.assignment_type=="Internal") and (self.days>=5):
+				self.workflow_state = "Created By Director(CEO+INT)"
+			elif (u'Director' in frappe.get_roles(frappe.session.user)) and (self.assignment_type=="External") and (self.days>=5):
+				self.workflow_state = "Created By Director(CEO+X)"
+			elif (u'Director' in frappe.get_roles(frappe.session.user)) and (self.assignment_type=="Internal"):
+				self.workflow_state = "Created By Director(INT)"
+			elif (u'Director' in frappe.get_roles(frappe.session.user)) and (self.assignment_type=="External"):
+				self.workflow_state = "Created By Director(X)"
+			elif (self.handled_by="Director") and (self.assignment_type=="Internal") and (self.days>=5):
+				self.workflow_state = "Approved By CEO(INT)"
+			elif (self.handled_by="Director") and (self.assignment_type=="External") and (self.days>=5):
+				self.workflow_state = "Approved By CEO(X)"
+			elif (self.handled_by="Director") and (self.assignment_type=="Internal"):
+				self.workflow_state = "Approved By HR Specialist"
+			elif (self.handled_by="Director") and (self.assignment_type=="External"):
+				self.workflow_state = "Approved By HR Manager"
+			elif u'Manager' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Manager"
+			elif u'Line Manager' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Line Manager"
+			elif u'Employee' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Pending"
 
 	def validate_dates(self):
 		if getdate(self.from_date) > getdate(self.to_date):

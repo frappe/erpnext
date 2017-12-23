@@ -27,6 +27,26 @@ class ExpenseClaim(Document):
 			doc =frappe.get_doc(self.reference_type,self.referance_name)
 			doc.expense_claim = self.name
 			doc.save(ignore_permissions=True)
+		self.validate_emp()
+		if self.workflow_state:
+			if "Rejected" in self.workflow_state:
+				self.docstatus = 1
+				self.docstatus = 2
+
+	def validate_emp(self):
+		if self.get('__islocal'):
+			if u'CEO' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By CEO"
+			elif u'Director' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Director"
+			elif u'Manager' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Manager"
+			elif u'Line Manager' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Line Manager"
+			elif u'Employee' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Pending"
+
+
 
 	def on_submit(self):
 		if self.reference_type and self.referance_name and self.reference_type == "Leave Application":

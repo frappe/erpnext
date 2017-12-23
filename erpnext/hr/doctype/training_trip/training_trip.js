@@ -31,6 +31,16 @@ cur_frm.cscript.custom_grade = function(doc, cdt, cd) {
 };
 frappe.ui.form.on('Training Trip', {
     refresh: function(frm) {},
+    workflow_state: function(frm){
+        cur_frm.refresh_fields(["workflow_state"]);
+    },
+    validate: function(frm){
+        cur_frm.refresh_fields(["workflow_state"]);
+        // if (cur_frm.doc.handled_by=="HR Specialist" && cur_frm.doc.other_expense>=1000){
+        //     cur_frm.doc.workflow_state = "Approve By HR Specialist"
+        //     }
+
+    },
 
     city: function(frm) {
     	if (cur_frm.doc.city=='Riyadh'){

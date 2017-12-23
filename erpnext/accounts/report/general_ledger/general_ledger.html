@@ -5,27 +5,39 @@
 <h4 class="text-center">{%= (filters.party || filters.account) && ((filters.party || filters.account) + ", ")  || "" %} {%= filters.company %}</h4>
 <h5 class="text-center">
 	{%= dateutil.str_to_user(filters.from_date) %}
-	{%= __("to") %}
+	{%= __("-") %}
 	{%= dateutil.str_to_user(filters.to_date) %}
 </h5>
 <hr>
 <table class="table table-bordered">
 	<thead>
 		<tr>
-			<th style="width: 15%">{%= __("Date") %}</th>
-			<th style="width: 15%">{%= __("Ref") %}</th>
-			<th style="width: 40%">{%= __("Party") %}</th>
+			<th style="width: 15%">{%= __("Posting date") %}</th>
+            <th style="width: 15%">{%= __("Voucher Type") %}</th>
+            <th style="width: 15%">{%= __("Voucher No") %}</th>
+            <th style="width: 20%">{%= __("Account") %}</th>
+            <th style="width: 10%">{%= __("Description") %}</th>
+
+            <th style="width: 20%">{%= __("Party") %}</th>
 			<th style="width: 15%">{%= __("Debit") %}</th>
 			<th style="width: 15%">{%= __("Credit") %}</th>
+            <th style="width: 15%">{%= __("Cost Center/Project") %}</th>
+            <th style="width: 15%">{%= __("Reason code") %}</th>
+            <th style="width: 15%">{%= __("PO No") %}</th>
+
+
 		</tr>
 	</thead>
 	<tbody>
+
 		{% for(var i=0, l=data.length; i<l; i++) { %}
 			<tr>
 			{% if(data[i][__("Posting Date")]) { %}
 				<td>{%= dateutil.str_to_user(data[i][__("Posting Date")]) %}</td>
-				<td>{%= data[i][__("Voucher Type")] %}
-					<br>{%= data[i][__("Voucher No")] %}</td>
+				<td>{%= data[i][__("Voucher Type")] %}</td>
+                <td>{%= data[i][__("Voucher No")] %}</td>
+                <td>{%= data[i][__("Account")] %}</td>
+                <td>{%= data[i][__("Description")] %}</td>
 				<td>
 					{% if(!(filters.party || filters.account)) { %}
 						{%= data[i][__("Party")] || data[i][__("Account")] %}
@@ -33,19 +45,34 @@
 					{% } %}
 
 					{{ __("Against") }}: {%= data[i][__("Against Account")] %}
-					<br>{%= __("Remarks") %}: {%= data[i][__("Remarks")] %}</td>
+					<br>{%= __("Remarks") %}: {%= data[i][__("Remarks")] %}
+                </td>
 				<td style="text-align: right">{%= format_currency(data[i][__("Debit")]) %}</td>
 				<td style="text-align: right">{%= format_currency(data[i][__("Credit")]) %}</td>
+                
+                <td>{%= data[i][__("Cost Center")] %}/{%= data[i][__("Project")] %}</td>
+                <td>{%= data[i][__("Reason")] %}</td>
+                <td>{%= data[i][__("reference_name")] %}</td>
+
 			{% } else { %}
 				<td></td>
 				<td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+
 				<td><b>{%= frappe.format(data[i][__("Account")], {fieldtype: "Link"}) || "&nbsp;" %}</b></td>
 				<td style="text-align: right">
 					{%= data[i][__("Account")] && format_currency(data[i][__("Debit")]) %}</td>
 				<td style="text-align: right">
 					{%= data[i][__("Account")] && format_currency(data[i][__("Credit")]) %}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+
 			{% } %}
 			</tr>
+
 		{% } %}
 	</tbody>
 </table>
@@ -62,3 +89,139 @@
         </tr>
 		
 		</table>
+
+
+
+
+
+
+
+
+
+
+
+		<style type="text/css">
+			@media (min-width: 1200px) {
+        .container {
+            width: 970px;
+        }
+    }
+    
+    .print-heading h2 {
+        font-size: 20px;
+        font-family: Calibri;
+        color: #00a4ad;
+    }
+    
+    .letter-block {
+        margin-bottom: 30px;
+    }
+    
+    .letter-block p {
+        margin: 0 0 2px;
+        font-size: 11px;
+    }
+    
+    .col-xs-1,
+    .col-sm-1,
+    .col-md-1,
+    .col-lg-1,
+    .col-xs-2,
+    .col-sm-2,
+    .col-md-2,
+    .col-lg-2,
+    .col-xs-3,
+    .col-sm-3,
+    .col-md-3,
+    .col-lg-3,
+    .col-xs-4,
+    .col-sm-4,
+    .col-md-4,
+    .col-lg-4,
+    .col-xs-5,
+    .col-sm-5,
+    .col-md-5,
+    .col-lg-5,
+    .col-xs-6,
+    .col-sm-6,
+    .col-md-6,
+    .col-lg-6,
+    .col-xs-7,
+    .col-sm-7,
+    .col-md-7,
+    .col-lg-7,
+    .col-xs-8,
+    .col-sm-8,
+    .col-md-8,
+    .col-lg-8,
+    .col-xs-9,
+    .col-sm-9,
+    .col-md-9,
+    .col-lg-9,
+    .col-xs-10,
+    .col-sm-10,
+    .col-md-10,
+    .col-lg-10,
+    .col-xs-11,
+    .col-sm-11,
+    .col-md-11,
+    .col-lg-11,
+    .col-xs-12,
+    .col-sm-12,
+    .col-md-12,
+    .col-lg-12 {
+        padding-right: 0px;
+        padding-left: 0px;
+    }
+    
+    table,
+    td{
+        border-collapse: collapse;
+        border-color: #95969A !important;
+        font-size: 13px;
+
+    }
+    
+     th {
+        border-collapse: collapse;
+        border-color: #95969A !important;
+        font-size: 13px;
+        color:#fff;
+
+    }
+
+    .row {
+        margin-right: 0px;
+        margin-left: 0px;
+    }
+    
+    .print-format .table th {
+        background-color: #00a4ad!important;
+        font-weight: 400;
+    }
+    
+    .col-print-4 {
+        width: 33.3333333%;
+        float: left;
+    }
+    
+    .pulled {
+        margin-top: -41px !important;
+    }
+    
+    .col-print-offset-8 {
+        float: right;
+        width: 33.33333333%;
+    }
+    .col-print-offset-6 {
+        float: right;
+        width: 50%;
+    }
+    .bordered{
+    	border-top: 1px solid #00a4ad;
+    	font-style: italic;
+    	font-size: 12px;
+    	color: #00a4ad;
+    }
+
+		</style>

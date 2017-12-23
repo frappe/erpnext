@@ -6,6 +6,12 @@ frappe.ui.form.on('Employee Loan Application', {
 		frm.trigger("toggle_fields")
 		frm.trigger("add_toolbar_buttons")
 	},
+	workflow_state: function(frm){
+        cur_frm.refresh_fields(["workflow_state"]);
+    },
+    validate: function(frm){
+        cur_frm.refresh_fields(["workflow_state"]);
+    },
 	repayment_method: function(frm) {
 		frm.doc.repayment_amount = frm.doc.repayment_periods = ""
 		frm.trigger("toggle_fields")

@@ -15,11 +15,32 @@ class Appraisal(Document):
 	def validate(self):
 		if not self.status:
 			self.status = "Draft"
+		if hasattr(self,"workflow_state"):
+			if self.workflow_state:
+				if "Rejected" in self.workflow_state:
+					self.docstatus = 1
+					self.docstatus = 2
 
 		set_employee_name(self)
 		self.validate_dates()
 		self.validate_existing_appraisal()
 		self.calculate_total()
+		self.validate_emp()
+
+
+	def validate_emp(self):
+		if self.get('__islocal'):
+			if u'CEO' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By CEO"
+			elif u'Director' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Director"
+			elif u'Manager' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Manager"
+			elif u'Line Manager' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Created By Line Manager"
+			elif u'Employee' in frappe.get_roles(frappe.session.user):
+				self.workflow_state = "Pending"
+				
 
 	def get_employee_name(self):
 		self.employee_name = frappe.db.get_value("Employee", self.employee, "employee_name")
