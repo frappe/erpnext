@@ -65,7 +65,7 @@ class PurchaseReceipt(BuyingController):
 			throw(_("Posting Date cannot be future date"))
 		if self.get("__islocal") :
 				self.title = self.get_title()
-		self.validate_assets()
+		#~ self.validate_assets()
 
 	def after_insert(self):
 		pass
@@ -220,7 +220,10 @@ class PurchaseReceipt(BuyingController):
 						#~ child.landed_cost_voucher_amount= d.landed_cost_voucher_amount
 						the_data.append(child)
 						print (child)
+				else:
+					the_data.append(d)
 		
+		self.items = []
 		for d in the_data:
 			#add Asset For it 
 			if not d.asset:
@@ -270,7 +273,7 @@ class PurchaseReceipt(BuyingController):
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 		update_serial_nos_after_submit(self, "items")
-
+		self.validate_assets()
 		self.make_gl_entries()
 
 	def check_next_docstatus(self):

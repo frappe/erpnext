@@ -45,6 +45,19 @@ class Item(WebsiteGenerator):
 						filters={"asset_category": self.asset_category })
 					if item_name : 
 						self.naming_series = item_name[0]["naming_series"]
+					else:
+						if self.asset_category :
+							current_asset_category = self.asset_category
+							while  current_asset_category :
+								cd = frappe.get_doc("Asset Category",current_asset_category)
+								current_asset_category = cd.parent_asset_category
+								if current_asset_category:
+									item_name = frappe.get_list("Item Name", fields=["naming_series"],
+										filters={"asset_category": current_asset_category })
+									if item_name : 
+										self.naming_series = item_name[0]["naming_series"]	
+										break
+							
 				else :
 					item_group = frappe.get_doc("Item Group",self.item_group)
 					item_name = frappe.get_list("Item Name", fields=["naming_series"],
