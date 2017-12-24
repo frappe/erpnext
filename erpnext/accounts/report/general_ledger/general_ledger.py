@@ -96,7 +96,9 @@ def get_columns(filters):
 		_("Against Voucher Type") + "::120", _("Against Voucher") + ":Dynamic Link/"+_("Against Voucher Type")+":160",
 		_("Remarks") + "::400",
 		_("Reson") + "::400",
-		_("Description") + "::400"
+		_("Description") + "::400",
+		_("PO") + ":Link/Purchase Order:100",
+
 	]
 
 	return columns
@@ -131,6 +133,9 @@ def get_gl_entries(filters):
 		order by posting_date, account"""\
 		.format(select_fields=select_fields, conditions=get_conditions(filters),
 			group_by_condition=group_by_condition), filters, as_dict=1)
+
+	
+
 
 	return gl_entries
 
