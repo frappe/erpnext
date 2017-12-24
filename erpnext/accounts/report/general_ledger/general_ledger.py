@@ -134,6 +134,9 @@ def get_gl_entries(filters):
 		.format(select_fields=select_fields, conditions=get_conditions(filters),
 			group_by_condition=group_by_condition), filters, as_dict=1)
 
+	# po = frappe.db.sql(""" 
+	# 	select purchase_order from `tabPurchase Invoice Item` where parent ='%s'"""\
+	# 	%(voucher_no))
 	
 
 
