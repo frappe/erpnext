@@ -225,8 +225,8 @@ class Asset(AccountsController):
 					last_month_day = get_last_day(getdate(schedule_date))
 					if n== 0 and getdate(self.next_depreciation_date) > getdate(self.purchase_date):
 						init_depreciation_amount = self.get_depreciation_amount(value_after_depreciation)
-						date_difference = cint(date_diff(last_month_day, self.purchase_date))
-						depreciation_amount = init_depreciation_amount - (init_depreciation_amount * (flt(date_difference)/cint(getdate(pi_last_month_day).day)))
+						rest_of_month_days = cint(getdate(self.purchase_date).day)
+						depreciation_amount = init_depreciation_amount - (init_depreciation_amount * (flt(getdate(self.purchase_date).day)/cint(getdate(pi_last_month_day).day)))
 						# frappe.throw(str(flt(date_difference)/cint(getdate(pi_last_month_day).day)))
 					else:
 						depreciation_amount = self.get_depreciation_amount(value_after_depreciation)
@@ -237,9 +237,11 @@ class Asset(AccountsController):
 						"depreciation_amount": flt(depreciation_amount)
 					})
 			if getdate(self.next_depreciation_date) > getdate(self.purchase_date):
-				rest_of_month_days = cint(getdate(self.purchase_date).day)
 				end_date = add_days(last_month_day, rest_of_month_days)
-				depreciation_amount = init_depreciation_amount - (init_depreciation_amount * (flt(rest_of_month_days)/cint(getdate(pi_last_month_day).day)))
+				# # start_date = add_days(last_month_day, 1)
+				# # frappe.throw(str(start_date))
+				date_difference = cint(date_diff(get_last_day(getdate(end_date)), end_date))
+				depreciation_amount = init_depreciation_amount - (init_depreciation_amount * (flt(date_difference)/cint(getdate(pi_last_month_day).day)))
 				self.append("schedules", {
 					"schedule_date": end_date,
 					"depreciation_amount": flt(depreciation_amount)
