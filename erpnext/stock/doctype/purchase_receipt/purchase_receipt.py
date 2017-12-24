@@ -323,6 +323,7 @@ class PurchaseReceipt(BuyingController):
 		from erpnext.accounts.general_ledger import process_gl_map
 
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
+		asset_rbnb = self.get_company_default("asset_received_but_not_billed")
 		 
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 
@@ -337,29 +338,29 @@ class PurchaseReceipt(BuyingController):
 				fixed_asset_account = frappe.db.get_value("Asset Category Account",  filters={'parent': assets_category})
 				if fixed_asset_account:
 					# stock received but not billed
-					stock_rbnb_currency = get_account_currency(stock_rbnb)
-					print("stock_rbnb_currency",stock_rbnb_currency)
-					print("stock_rbnb",stock_rbnb)
+					asset_rbnb_currency = get_account_currency(asset_rbnb)
+					print("asset_rbnb_currency",asset_rbnb_currency)
+					print("asset_rbnb",asset_rbnb)
 					ac_doc = frappe.get_doc("Asset Category Account",fixed_asset_account)
 					gl_entries.append(self.get_gl_dict({
 						"account": ac_doc.fixed_asset_account,
-						"against": stock_rbnb,
+						"against": asset_rbnb,
 						"cost_center": d.cost_center,
 						"project": d.project,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 						"debit": flt(d.base_net_amount, d.precision("base_net_amount")),
-					},stock_rbnb_currency))
+					},asset_rbnb_currency))
 					
 					gl_entries.append(self.get_gl_dict({
-						"account": stock_rbnb,
+						"account": asset_rbnb,
 						"against": ac_doc.fixed_asset_account,
 						"cost_center": d.cost_center,
 						"project": d.project,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 						"credit": flt(d.base_net_amount, d.precision("base_net_amount")),
 						"credit_in_account_currency": flt(d.base_net_amount, d.precision("base_net_amount")) \
-							if stock_rbnb_currency==self.company_currency else flt(d.net_amount, d.precision("net_amount"))
-					}, stock_rbnb_currency))
+							if asset_rbnb_currency==self.company_currency else flt(d.net_amount, d.precision("net_amount"))
+					}, asset_rbnb_currency))
 
 				else :
 					frappe.throw("Add Fixed Asset Account in Asset Category ",
