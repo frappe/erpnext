@@ -162,8 +162,7 @@ class ReceivablePayableReport(object):
 
 	def get_entries_till(self, report_date, party_type):
 		# returns a generator
-		return (e for e in self.get_gl_entries(party_type)
-			if getdate(e.posting_date) <= report_date)
+		return (e for e in self.get_gl_entries(party_type) if getdate(e.posting_date) <= report_date)
 
 	def is_receivable_or_payable(self, gle, dr_or_cr, future_vouchers):
 		return (
@@ -250,7 +249,7 @@ class ReceivablePayableReport(object):
 			else:
 				select_fields = "sum(debit) as debit, sum(credit) as credit"
 
-			self.gl_entries = frappe.db.sql("""select name, posting_date, account, party_type, party,
+			self.gl_entries = frappe.db.sql("""select name, posting_date, account, party_type, party, 
 				voucher_type, voucher_no, against_voucher_type, against_voucher,
 				account_currency, remarks, {0}
 				from `tabGL Entry`
@@ -309,14 +308,16 @@ class ReceivablePayableReport(object):
 
 		rows = []
 		for d in data:
-			rows.append(d[self.ageing_col_idx_start : self.ageing_col_idx_start+4])
-
-		if rows:
-			rows.insert(0, [[d.get("label")] for d in ageing_columns])
+			rows.append(
+				{
+					'values': d[self.ageing_col_idx_start : self.ageing_col_idx_start+4]
+				}
+			)
 
 		return {
 			"data": {
-				'labels': rows
+				'labels': [d.get("label") for d in ageing_columns],
+				'datasets': rows
 			},
 			"type": 'percentage'
 		}

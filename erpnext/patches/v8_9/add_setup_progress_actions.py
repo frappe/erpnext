@@ -30,6 +30,8 @@ def execute():
 		{"action_name": "Add Rooms", "action_doctype": "Room", "min_doc_count": 1, "is_completed": 0,
 			"domains": '["Education"]' },
 		{"action_name": "Add Users", "action_doctype": "User", "min_doc_count": 4, "is_completed": 0,
+			"domains": '[]' },
+		{"action_name": "Add Letterhead", "action_doctype": "Letter Head", "min_doc_count": 1, "is_completed": 0,
 			"domains": '[]' }
 	]
 

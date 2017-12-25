@@ -7,11 +7,11 @@ DocType: BOM Item,Basic Rate (Company Currency),Taza Base (Divisa de la Empresa)
 DocType: Timesheet Detail,Bill,Factura
 DocType: Activity Cost,Billing Rate,Monto de Facturación
 apps/erpnext/erpnext/config/learn.py +87,Opening Accounting Balance,Apertura de Saldos Contables
-apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py +87,Tax Rule Conflicts with {0},Regla Fiscal en conflicto con {0}
+apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py +88,Tax Rule Conflicts with {0},Regla Fiscal en conflicto con {0}
 DocType: Tax Rule,Billing County,Municipio de Facturación
 DocType: Sales Invoice Timesheet,Billing Hours,Horas de Facturación
 DocType: Timesheet,Billing Details,Detalles de Facturación
-apps/erpnext/erpnext/accounts/party.py +261,Billing currency must be equal to either default comapany's currency or party account currency,Moneda de facturación debe ser igual a la moneda de la empresa o moneda de cuenta de contraparte
+apps/erpnext/erpnext/accounts/party.py +268,Billing currency must be equal to either default comapany's currency or party account currency,Moneda de facturación debe ser igual a la moneda de la empresa o moneda de cuenta de contraparte
 DocType: Tax Rule,Billing State,Región de Facturación
 DocType: Purchase Order Item,Billed Amt,Monto Facturado
 DocType: Item Tax,Tax Rate,Tasa de Impuesto

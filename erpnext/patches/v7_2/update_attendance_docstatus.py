@@ -1,8 +1,7 @@
 import frappe
 
 def execute():
-	frappe.reload_doctype('Student Attendance')
-	# frappe.reload_doc("schools", "doctype", "student_attendance")
+	frappe.reload_doc("education", "doctype", "student_attendance")
 	frappe.db.sql('''
 		update `tabStudent Attendance` set
 			docstatus=0

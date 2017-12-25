@@ -106,11 +106,6 @@ cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) 
 	};
 };
 
-
-cur_frm.fields_dict.user.get_query = function(doc,cdt,cdn) {
-	return{	query:"frappe.core.doctype.user.user.user_query"};
-};
-
 cur_frm.fields_dict.write_off_account.get_query = function(doc) {
 	return{
 		filters:{

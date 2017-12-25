@@ -55,7 +55,7 @@ def complete_setup(domain='Manufacturing'):
 			"fy_start_date": "2015-01-01",
 			"fy_end_date": "2015-12-31",
 			"bank_account": "National Bank",
-			"domain": domain,
+			"domains": [domain],
 			"company_name": data.get(domain).get('company_name'),
 			"chart_of_accounts": "Standard",
 			"company_abbr": ''.join([d[0] for d in data.get(domain).get('company_name').split()]).upper(),
@@ -229,10 +229,10 @@ def setup_user_roles():
 		user.add_roles('HR User', 'Projects User')
 		frappe.db.set_global('demo_projects_user', user.name)
 
-	if not frappe.db.get_global('demo_schools_user'):
+	if not frappe.db.get_global('demo_education_user'):
 		user = frappe.get_doc('User', 'aromn@example.com')
 		user.add_roles('Academics User')
-		frappe.db.set_global('demo_schools_user', user.name)
+		frappe.db.set_global('demo_education_user', user.name)
 
 	#Add Expense Approver
 	user = frappe.get_doc('User', 'WanMai@example.com')

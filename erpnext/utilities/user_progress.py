@@ -81,6 +81,24 @@ def get_slide_settings():
 				}
 			]
 		),
+
+		frappe._dict(
+			action_name='Add Letterhead',
+			domains=('Manufacturing', 'Services', 'Retail', 'Distribution', 'Education'),
+			title=_("Add Letterhead"),
+			help=_("Upload your letter head (Keep it web friendly as 900px by 100px)"),
+			fields=[
+				{"fieldtype":"Attach Image", "fieldname":"letterhead",
+					"is_private": 0,
+					"align": "center"
+				},
+			],
+			mandatory_entry=1,
+			submit_method="erpnext.utilities.user_progress_utils.create_letterhead",
+			done_state_title=_("Go to Letterheads"),
+			done_state_title_route=["List", "Letter Head"]
+		),
+
 		frappe._dict(
 			action_name='Add Suppliers',
 			domains=('Manufacturing', 'Services', 'Retail', 'Distribution'),
@@ -140,7 +158,7 @@ def get_slide_settings():
 			]
 		),
 
-		# School slides begin
+		# Education slides begin
 		frappe._dict(
 			action_name='Add Programs',
 			domains=("Education"),
@@ -219,7 +237,7 @@ def get_slide_settings():
 			done_state_title_route=["List", "Room"],
 			help_links=[]
 		),
-		# School slides end
+		# Education slides end
 
 		frappe._dict(
 			action_name='Add Users',
@@ -254,10 +272,9 @@ def get_user_progress_slides():
 	slides = []
 	slide_settings = get_slide_settings()
 
-	domain = frappe.db.get_value('Company', erpnext.get_default_company(), 'domain')
-
+	domains = frappe.get_active_domains()
 	for s in slide_settings:
-		if not s.domains or (domain and domain in s.domains):
+		if not s.domains or any(d in domains for d in s.domains):
 			s.mark_as_done_method = "erpnext.setup.doctype.setup_progress.setup_progress.set_action_completed_state"
 			s.done = get_action_completed_state(s.action_name) or 0
 			slides.append(s)

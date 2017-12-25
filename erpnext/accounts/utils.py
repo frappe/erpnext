@@ -257,6 +257,8 @@ def add_ac(args=None):
 	if cint(ac.get("is_root")):
 		ac.parent_account = None
 		ac.flags.ignore_mandatory = True
+	else:
+		ac.root_type = None
 
 	ac.insert()
 
@@ -569,11 +571,12 @@ def get_stock_rbnb_difference(posting_date, company):
 	# Amount should be credited
 	return flt(stock_rbnb) + flt(sys_bal)
 
+
 def get_outstanding_invoices(party_type, party, account, condition=None):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount")
 
-	if party_type=="Customer":
+	if party_type in ("Customer", "Student"):
 		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 		payment_dr_or_cr = "payment_gl_entry.credit_in_account_currency - payment_gl_entry.debit_in_account_currency"
 	else:
@@ -583,12 +586,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 	invoice = 'Sales Invoice' if party_type == 'Customer' else 'Purchase Invoice'
 	invoice_list = frappe.db.sql("""
 		select
-			voucher_no,	voucher_type, posting_date, ifnull(sum({dr_or_cr}), 0) as invoice_amount,
-			(
-				case when (voucher_type = 'Sales Invoice' or voucher_type = 'Purchase Invoice')
-					then (select due_date from `tab{invoice}` where name = voucher_no)
-				else posting_date end
-			) as due_date,
+			voucher_no, voucher_type, posting_date, ifnull(sum({dr_or_cr}), 0) as invoice_amount,
 			(
 				select ifnull(sum({payment_dr_or_cr}), 0)
 				from `tabGL Entry` payment_gl_entry
@@ -613,10 +611,10 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 		group by voucher_type, voucher_no
 		having (invoice_amount - payment_amount) > 0.005
 		order by posting_date, name""".format(
-			dr_or_cr = dr_or_cr,
+			dr_or_cr=dr_or_cr,
 			invoice = invoice,
-			payment_dr_or_cr = payment_dr_or_cr,
-			condition = condition or ""
+			payment_dr_or_cr=payment_dr_or_cr,
+			condition=condition or ""
 		), {
 			"party_type": party_type,
 			"party": party,
@@ -624,17 +622,20 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 		}, as_dict=True)
 
 	for d in invoice_list:
-		outstanding_invoices.append(frappe._dict({
-			'voucher_no': d.voucher_no,
-			'voucher_type': d.voucher_type,
-			'due_date': d.due_date,
-			'posting_date': d.posting_date,
-			'invoice_amount': flt(d.invoice_amount),
-			'payment_amount': flt(d.payment_amount),
-			'outstanding_amount': flt(d.invoice_amount - d.payment_amount, precision),
-			'due_date': frappe.db.get_value(d.voucher_type, d.voucher_no, 
-				"posting_date" if party_type=="Employee" else "due_date"),
-		}))
+		due_date = frappe.db.get_value(d.voucher_type, d.voucher_no,
+			"posting_date" if party_type == "Employee" else "due_date")
+
+		outstanding_invoices.append(
+			frappe._dict({
+				'voucher_no': d.voucher_no,
+				'voucher_type': d.voucher_type,
+				'posting_date': d.posting_date,
+				'invoice_amount': flt(d.invoice_amount),
+				'payment_amount': flt(d.payment_amount),
+				'outstanding_amount': flt(d.invoice_amount - d.payment_amount, precision),
+				'due_date': due_date
+			})
+		)
 
 	outstanding_invoices = sorted(outstanding_invoices, key=lambda k: k['due_date'] or getdate(nowdate()))
 
@@ -658,16 +659,14 @@ def get_companies():
 		order_by="name")]
 
 @frappe.whitelist()
-def get_children():
+def get_children(doctype, parent, company, is_root=False):
 	from erpnext.accounts.report.financial_statements import sort_root_accounts
 
-	args = frappe.local.form_dict
-	doctype, company = args['doctype'], args['company']
 	fieldname = frappe.db.escape(doctype.lower().replace(' ','_'))
 	doctype = frappe.db.escape(doctype)
 
 	# root
-	if args['parent'] in ("Accounts", "Cost Centers"):
+	if is_root:
 		fields = ", root_type, report_type, account_currency" if doctype=="Account" else ""
 		acc = frappe.db.sql(""" select
 			name as value, is_group as expandable {fields}
@@ -677,7 +676,7 @@ def get_children():
 			order by name""".format(fields=fields, fieldname = fieldname, doctype=doctype),
 				company, as_dict=1)
 
-		if args["parent"]=="Accounts":
+		if parent=="Accounts":
 			sort_root_accounts(acc)
 	else:
 		# other
@@ -688,7 +687,7 @@ def get_children():
 			where ifnull(`parent_{fieldname}`,'') = %s
 			and docstatus<2
 			order by name""".format(fields=fields, fieldname=fieldname, doctype=doctype),
-				args['parent'], as_dict=1)
+				parent, as_dict=1)
 
 	if doctype == 'Account':
 		company_currency = frappe.db.get_value("Company", company, "default_currency")
@@ -702,7 +701,7 @@ def get_children():
 	return acc
 
 def create_payment_gateway_account(gateway):
-	from erpnext.setup.setup_wizard.setup_wizard import create_bank_account
+	from erpnext.setup.setup_wizard.operations.company_setup import create_bank_account
 
 	company = frappe.db.get_value("Global Defaults", None, "default_company")
 	if not company:

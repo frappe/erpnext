@@ -7,9 +7,18 @@ QUnit.test("test: Restaurant", function (assert) {
 
 	// number of asserts
 	assert.expect(2);
+	let customer =  {
+		"Test Customer 1": [
+			{customer_name: "Test Customer 1"}
+		],
+		"Test Customer 2": [
+			{customer_name: "Test Customer 2"}
+		]
+	};
 
 	frappe.run_serially([
 		// insert a new Restaurant
+		() => frappe.tests.setup_doctype('Customer', customer),				
 		() => {
 			return frappe.tests.make('Restaurant', [
 				// values to be set

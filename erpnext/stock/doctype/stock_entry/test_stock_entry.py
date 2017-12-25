@@ -15,6 +15,7 @@ from erpnext.stock.doctype.item.test_item import set_item_variant_settings, make
 from frappe.tests.test_permissions import set_user_permission_doctypes
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.stock.doctype.stock_entry.stock_entry import move_sample_to_retention_warehouse
 
 def get_sle(**args):
 	condition, values = "", []
@@ -495,10 +496,10 @@ class TestStockEntry(unittest.TestCase):
 		frappe.get_doc("User", "test2@example.com")\
 			.add_roles("Sales User", "Sales Manager", "Stock User", "Stock Manager")
 
-		frappe.set_user("test@example.com")
 		st1 = frappe.copy_doc(test_records[0])
 		st1.company = "_Test Company 1"
 		set_perpetual_inventory(0, st1.company)
+		frappe.set_user("test@example.com")
 		st1.get("items")[0].t_warehouse="_Test Warehouse 2 - _TC1"
 		self.assertRaises(frappe.PermissionError, st1.insert)
 
@@ -612,6 +613,61 @@ class TestStockEntry(unittest.TestCase):
 
 		s2.submit()
 		s2.cancel()
+
+	def test_retain_sample(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
+		
+		create_warehouse("Test Warehouse for Sample Retention")
+		frappe.db.set_value("Stock Settings", None, "sample_retention_warehouse", "Test Warehouse for Sample Retention - _TC")
+		
+		item = frappe.new_doc("Item")
+		item.item_code = "Retain Sample Item"
+		item.item_name = "Retain Sample Item"
+		item.description = "Retain Sample Item"
+		item.item_group = "All Item Groups"
+		item.is_stock_item = 1
+		item.has_batch_no = 1
+		item.create_new_batch = 1
+		item.retain_sample = 1
+		item.sample_quantity = 4
+		item.save()
+
+		receipt_entry = frappe.new_doc("Stock Entry")
+		receipt_entry.company = "_Test Company"
+		receipt_entry.purpose = "Material Receipt"
+		receipt_entry.append("items", {
+			"item_code": item.item_code,
+			"t_warehouse": "_Test Warehouse - _TC",
+			"qty": 40,
+			"basic_rate": 12,
+			"cost_center": "_Test Cost Center - _TC",
+			"sample_quantity": 4
+		})
+		receipt_entry.insert()
+		receipt_entry.submit()
+
+		retention_data = move_sample_to_retention_warehouse(receipt_entry.company, receipt_entry.get("items"))
+		retention_entry = frappe.new_doc("Stock Entry")
+		retention_entry.company = retention_data.company
+		retention_entry.purpose = retention_data.purpose
+		retention_entry.append("items", {
+			"item_code": item.item_code,
+			"t_warehouse": "Test Warehouse for Sample Retention - _TC",
+			"s_warehouse": "_Test Warehouse - _TC",
+			"qty": 4,
+			"basic_rate": 12,
+			"cost_center": "_Test Cost Center - _TC",
+			"batch_no": receipt_entry.get("items")[0].batch_no
+		})
+		retention_entry.insert()
+		retention_entry.submit()
+
+		qty_in_usable_warehouse = get_batch_qty(receipt_entry.get("items")[0].batch_no, "_Test Warehouse - _TC", "_Test Item")
+		qty_in_retention_warehouse = get_batch_qty(receipt_entry.get("items")[0].batch_no, "Test Warehouse for Sample Retention - _TC", "_Test Item")
+		
+		self.assertEquals(qty_in_usable_warehouse, 36)
+		self.assertEquals(qty_in_retention_warehouse, 4)
 
 def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se = frappe.copy_doc(test_records[0])

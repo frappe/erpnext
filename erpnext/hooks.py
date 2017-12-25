@@ -26,7 +26,7 @@ doctype_js = {
 
 # setup wizard
 setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
-setup_wizard_complete = "erpnext.setup.setup_wizard.setup_wizard.setup_complete"
+setup_wizard_stages = "erpnext.setup.setup_wizard.setup_wizard.get_setup_stages"
 setup_wizard_test = "erpnext.setup.setup_wizard.test_setup_wizard.run_setup_wizard_test"
 
 before_install = "erpnext.setup.install.check_setup_wizard_not_completed"
@@ -41,7 +41,7 @@ update_and_get_user_progress = "erpnext.utilities.user_progress_utils.update_def
 on_session_creation = "erpnext.shopping_cart.utils.set_cart_count"
 on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
 
-treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory']
+treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory', 'Assessment Group']
 
 # website
 update_website_context = "erpnext.shopping_cart.utils.update_website_context"
@@ -49,16 +49,18 @@ my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
 
 email_append_to = ["Job Applicant", "Lead", "Opportunity", "Issue"]
 
-calendars = ["Task", "Production Order", "Leave Application", "Sales Order", "Holiday List"]
+calendars = ["Task", "Production Order", "Leave Application", "Sales Order", "Holiday List", "Course Schedule"]
 
-fixtures = ["Web Form"]
+
 
 domains = {
+	'Agriculture': 'erpnext.domains.agriculture',
 	'Distribution': 'erpnext.domains.distribution',
 	'Education': 'erpnext.domains.education',
 	'Healthcare': 'erpnext.domains.healthcare',
 	'Hospitality': 'erpnext.domains.hospitality',
 	'Manufacturing': 'erpnext.domains.manufacturing',
+	'Non Profit': 'erpnext.domains.non_profit',
 	'Retail': 'erpnext.domains.retail',
 	'Services': 'erpnext.domains.services',
 }
@@ -125,6 +127,8 @@ website_route_rules = [
 	{"from_route": "/admissions", "to_route": "Student Admission"},
 	{"from_route": "/boms", "to_route": "BOM"},
 	{"from_route": "/timesheets", "to_route": "Timesheet"},
+	{"from_route": "/grant-application", "to_route": "Grant Application"},
+	{"from_route": "/chapters", "to_route": "Chapter"},
 ]
 
 standard_portal_menu_items = [
@@ -144,7 +148,9 @@ standard_portal_menu_items = [
 	{"title": _("Patient Appointment"), "route": "/patient-appointments", "reference_doctype": "Patient Appointment", "role":"Patient"},
 	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role":"Student"},
 	{"title": _("Newsletter"), "route": "/newsletters", "reference_doctype": "Newsletter"},
-	{"title": _("Admission"), "route": "/admissions", "reference_doctype": "Student Admission"}
+	{"title": _("Admission"), "route": "/admissions", "reference_doctype": "Student Admission"},
+	{"title": _("Grant Application"), "route": "/grant-application", "reference_doctype": "Grant Application", "role": "Non Profit Portal User"},
+	{"title": _("Chapter"), "route": "/chapters", "reference_doctype": "Chapter"}
 ]
 
 default_roles = [
@@ -214,12 +220,13 @@ scheduler_events = {
 		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",
 		"erpnext.hr.doctype.employee.employee.send_birthday_reminders",
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
-		"erpnext.accounts.doctype.asset.depreciation.post_depreciation_entries",
+		"erpnext.assets.doctype.asset.depreciation.post_depreciation_entries",
 		"erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary",
 		"erpnext.stock.doctype.serial_no.serial_no.update_maintenance_status",
 		"erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.refresh_scorecards",
 		"erpnext.setup.doctype.company.company.cache_companies_monthly_sales_history",
-		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms"
+		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms",
+		"erpnext.assets.doctype.asset.asset.update_maintenance_status"
 	]
 }
 

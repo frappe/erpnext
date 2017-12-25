@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
 import json
 from frappe.utils import flt, cstr, nowdate, nowtime
@@ -125,8 +125,7 @@ def update_bin(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 @frappe.whitelist()
 def get_incoming_rate(args):
 	"""Get Incoming Rate based on valuation method"""
-	from erpnext.stock.stock_ledger import get_previous_sle
-
+	from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
 	if isinstance(args, basestring):
 		args = json.loads(args)
 
@@ -137,14 +136,18 @@ def get_incoming_rate(args):
 		valuation_method = get_valuation_method(args.get("item_code"))
 		previous_sle = get_previous_sle(args)
 		if valuation_method == 'FIFO':
-			if not previous_sle:
-				return 0.0
-			previous_stock_queue = json.loads(previous_sle.get('stock_queue', '[]') or '[]')
-			in_rate = get_fifo_rate(previous_stock_queue, args.get("qty") or 0) if previous_stock_queue else 0
-			if not in_rate and not previous_stock_queue:
-				in_rate = previous_sle.get('valuation_rate') or 0
+			if previous_sle:
+				previous_stock_queue = json.loads(previous_sle.get('stock_queue', '[]') or '[]')
+				in_rate = get_fifo_rate(previous_stock_queue, args.get("qty") or 0) if previous_stock_queue else 0
 		elif valuation_method == 'Moving Average':
 			in_rate = previous_sle.get('valuation_rate') or 0
+
+	if not in_rate:
+		voucher_no = args.get('voucher_no') or args.get('name')
+
+		in_rate = get_valuation_rate(args.get('item_code'), args.get('warehouse'),
+			args.get('voucher_type'), voucher_no, args.get('allow_zero_valuation'),
+			currency=erpnext.get_company_currency(args.get('company')))
 
 	return in_rate
 

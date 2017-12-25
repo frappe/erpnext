@@ -96,6 +96,7 @@ erpnext.company.set_chart_of_accounts_options = function(doc) {
 			method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.get_charts_for_country",
 			args: {
 				"country": doc.country,
+				"with_standard": true
 			},
 			callback: function(r) {
 				if(!r.exc) {
@@ -164,7 +165,8 @@ erpnext.company.setup_queries = function(frm) {
 		["default_inventory_account", {"account_type": "Stock"}],
 		["cost_center", {}],
 		["round_off_cost_center", {}],
-		["depreciation_cost_center", {}]
+		["depreciation_cost_center", {}],
+		["default_employee_advance_account", {"root_type": "Asset"}],
 	], function(i, v) {
 		erpnext.company.set_custom_query(frm, v);
 	});
@@ -188,12 +190,14 @@ erpnext.company.set_custom_query = function(frm, v) {
 		"company": frm.doc.name,
 		"is_group": 0
 	};
-	for (var key in v[1])
+
+	for (var key in v[1]) {
 		filters[key] = v[1][key];
+	}
 
 	frm.set_query(v[0], function() {
 		return {
 			filters: filters
-		};
+		}
 	});
 }
