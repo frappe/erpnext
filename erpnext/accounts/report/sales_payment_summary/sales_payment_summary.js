@@ -7,12 +7,14 @@ frappe.query_reports["Sales Payment Summary"] = {
 			"label": __("From Date"),
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today(),
+			"reqd": 1,
 			"width": "80"
 		},
 		{
 			"fieldname":"to_date",
 			"label": __("To Date"),
 			"fieldtype": "Date",
+			"reqd": 1,
 			"default": frappe.datetime.get_today()
 		},
 		{
