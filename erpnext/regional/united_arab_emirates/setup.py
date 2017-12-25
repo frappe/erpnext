@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe, os, json
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from erpnext.setup.setup_wizard.setup_wizard import create_sales_tax
+from erpnext.setup.setup_wizard.operations.taxes_setup import create_sales_tax
 
 def setup(company=None, patch=True):
 	make_custom_fields()
