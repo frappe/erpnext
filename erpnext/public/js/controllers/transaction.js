@@ -105,7 +105,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			});
 		}
 
-		if(this.frm.fields_dict["payment_terms_template"]){
+		if(
+			this.frm.fields_dict["payment_terms_template"]
+			&& this.frm.fields_dict["payment_schedule"]
+			&& this.frm.doc.payment_terms_template
+			&& !this.frm.doc.payment_schedule.length
+		){
 			this.frm.trigger("payment_terms_template");
 		}
 
