@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 from erpnext.regional.united_arab_emirates.setup import make_custom_fields, add_print_formats
-from erpnext.setup.setup_wizard.setup_wizard import create_sales_tax
+from erpnext.setup.setup_wizard.operations.taxes_setup import create_sales_tax
 
 def setup(company=None, patch=True):
 	make_custom_fields()
