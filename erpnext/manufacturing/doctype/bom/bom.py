@@ -519,6 +519,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 	# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 	query = """select
 				bom_item.item_code,
+				bom_item.idx,
 				item.item_name,
 				sum(bom_item.stock_qty/ifnull(bom.quantity, 1)) * %(qty)s as qty,
 				item.description,

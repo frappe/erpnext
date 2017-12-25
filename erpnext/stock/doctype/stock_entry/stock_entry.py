@@ -775,6 +775,9 @@ class StockEntry(StockController):
 			se_child.expense_account = item_dict[d].get("expense_account") or expense_account
 			se_child.cost_center = item_dict[d].get("cost_center") or cost_center
 
+			if item_dict[d].get("idx"):
+				se_child.idx = item_dict[d].get("idx")
+
 			if se_child.s_warehouse==None:
 				se_child.s_warehouse = self.from_warehouse
 			if se_child.t_warehouse==None:
