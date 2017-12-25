@@ -16,3 +16,4 @@ purchase-return
 articles
 opening-stock
 stock-how-to
+retain-sample-stock

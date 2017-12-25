@@ -135,6 +135,14 @@ def get_data():
 			"label": _("POS")
 		},
 		{
+			"module_name": "Leaderboard",
+			"color": "#589494",
+			"icon": "octicon octicon-graph",
+			"type": "page",
+			"link": "leaderboard",
+			"label": _("Leaderboard")
+		},
+		{
 			"module_name": "Projects",
 			"color": "#8e44ad",
 			"icon": "fa fa-puzzle-piece",
@@ -164,7 +172,8 @@ def get_data():
 			"color": "#FF888B",
 			"icon": "octicon octicon-tools",
 			"type": "module",
-			"label": _("Maintenance")
+			"label": _("Maintenance"),
+			"hidden": 1
 		},
 		{
 			"module_name": "Student",
@@ -173,7 +182,8 @@ def get_data():
 			"label": _("Student"),
 			"link": "List/Student",
 			"_doctype": "Student",
-			"type": "list"
+			"type": "list",
+			"hidden": 1
 		},
 		{
 			"module_name": "Student Group",
@@ -182,7 +192,8 @@ def get_data():
 			"label": _("Student Group"),
 			"link": "List/Student Group",
 			"_doctype": "Student Group",
-			"type": "list"
+			"type": "list",
+			"hidden": 1
 		},
 		{
 			"module_name": "Course Schedule",
@@ -191,16 +202,18 @@ def get_data():
 			"label": _("Course Schedule"),
 			"link": "Calendar/Course Schedule",
 			"_doctype": "Course Schedule",
-			"type": "list"
+			"type": "list",
+			"hidden": 1
 		},
 		{
-			"module_name": "Student Attendance",
-			"color": "#3aacba",
+			"module_name": "Student Attendance Tool",
+			"color": "#C0392B",
 			"icon": "octicon octicon-checklist",
-			"label": _("Student Attendance"),
-			"link": "List/Student Attendance",
-			"_doctype": "Student Attendance",
-			"type": "list"
+			"label": _("Student Attendance Tool"),
+			"link": "List/Student Attendance Tool",
+			"_doctype": "Student Attendance Tool",
+			"type": "list",
+			"hidden": 1
 		},
 		{
 			"module_name": "Course",
@@ -209,7 +222,8 @@ def get_data():
 			"label": _("Course"),
 			"link": "List/Course",
 			"_doctype": "Course",
-			"type": "list"
+			"type": "list",
+			"hidden": 1
 		},
 		{
 			"module_name": "Program",
@@ -218,7 +232,8 @@ def get_data():
 			"label": _("Program"),
 			"link": "List/Program",
 			"_doctype": "Program",
-			"type": "list"
+			"type": "list",
+			"hidden": 1
 		},
 		{
 			"module_name": "Student Applicant",
@@ -227,7 +242,8 @@ def get_data():
 			"label": _("Student Applicant"),
 			"link": "List/Student Applicant",
 			"_doctype": "Student Applicant",
-			"type": "list"
+			"type": "list",
+			"hidden": 1
 		},
 		{
 			"module_name": "Fees",
@@ -236,7 +252,8 @@ def get_data():
 			"label": _("Fees"),
 			"link": "List/Fees",
 			"_doctype": "Fees",
-			"type": "list"
+			"type": "list",
+			"hidden": 1
 		},
 		{
 			"module_name": "Instructor",
@@ -245,7 +262,8 @@ def get_data():
 			"label": _("Instructor"),
 			"link": "List/Instructor",
 			"_doctype": "Instructor",
-			"type": "list"
+			"type": "list",
+			"hidden": 1
 		},
 		{
 			"module_name": "Room",
@@ -254,14 +272,16 @@ def get_data():
 			"label": _("Room"),
 			"link": "List/Room",
 			"_doctype": "Room",
-			"type": "list"
+			"type": "list",
+			"hidden": 1
 		},
 		{
-			"module_name": "Schools",
-			"color": "#DE2B37",
+			"module_name": "Education",
+			"color": "#428B46",
 			"icon": "octicon octicon-mortar-board",
 			"type": "module",
-			"label": _("Schools")
+			"label": _("Education"),
+			"hidden": 1
 		},
 		{
 			"module_name": "Healthcare",
@@ -269,6 +289,7 @@ def get_data():
 			"icon": "octicon octicon-plus",
 			"type": "module",
 			"label": _("Healthcare"),
+			"hidden": 1
 		},
 		{
 			"module_name": "Hub",
@@ -279,19 +300,198 @@ def get_data():
 			"label": _("Hub")
 		},
 		{
-			"module_name": "Data Import Tool",
-			"color": "#7f8c8d",
-			"icon": "octicon octicon-circuit-board",
-			"type": "page",
-			"link": "data-import-tool",
-			"label": _("Data Import Tool")
+			"module_name": "Data Import",
+			"color": "#FFF168",
+			"reverse": 1,
+			"doctype": "Data Import",
+			"icon": "octicon octicon-cloud-upload",
+			"label": _("Data Import"),
+			"link": "List/Data Import",
+			"type": "list"
 		},
 		{
 			"module_name": "Restaurant",
 			"color": "#EA81E8",
 			"icon": "🍔",
 			"_doctype": "Restaurant",
+			"type": "list",
 			"link": "List/Restaurant",
-			"label": _("Restaurant")
+			"label": _("Restaurant"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Agriculture",
+			"color": "#8BC34A",
+			"icon": "octicon octicon-globe",
+			"type": "module",
+			"label": _("Agriculture"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Crop",
+			"_doctype": "Crop",
+			"label": _("Crop"),
+			"color": "#8BC34A",
+			"icon": "fa fa-tree",
+			"type": "list",
+			"link": "List/Crop",
+			"hidden": 1
+		},
+		{
+			"module_name": "Crop Cycle",
+			"_doctype": "Crop Cycle",
+			"label": _("Crop Cycle"),
+			"color": "#8BC34A",
+			"icon": "fa fa-circle-o-notch",
+			"type": "list",
+			"link": "List/Crop Cycle",
+			"hidden": 1
+		},
+		{
+			"module_name": "Fertilizer",
+			"_doctype": "Fertilizer",
+			"label": _("Fertilizer"),
+			"color": "#8BC34A",
+			"icon": "fa fa-leaf",
+			"type": "list",
+			"link": "List/Fertilizer",
+			"hidden": 1
+		},
+		{
+			"module_name": "Land Unit",
+			"_doctype": "Land Unit",
+			"label": _("Land Unit"),
+			"color": "#8BC34A",
+			"icon": "fa fa-map",
+			"type": "list",
+			"link": "List/Land Unit",
+			"hidden": 1
+		},
+		{
+			"module_name": "Disease",
+			"_doctype": "Disease",
+			"label": _("Disease"),
+			"color": "#8BC34A",
+			"icon": "octicon octicon-bug",
+			"type": "list",
+			"link": "List/Disease",
+			"hidden": 1
+		},
+		{
+			"module_name": "Plant Analysis",
+			"_doctype": "Plant Analysis",
+			"label": _("Plant Analysis"),
+			"color": "#8BC34A",
+			"icon": "fa fa-pagelines",
+			"type": "list",
+			"link": "List/Plant Analysis",
+			"hidden": 1
+		},
+		{
+			"module_name": "Soil Analysis",
+			"_doctype": "Soil Analysis",
+			"label": _("Soil Analysis"),
+			"color": "#8BC34A",
+			"icon": "fa fa-flask",
+			"type": "list",
+			"link": "List/Soil Analysis",
+			"hidden": 1
+		},
+		{
+			"module_name": "Soil Texture",
+			"_doctype": "Soil Texture",
+			"label": _("Soil Texture"),
+			"color": "#8BC34A",
+			"icon": "octicon octicon-beaker",
+			"type": "list",
+			"link": "List/Soil Texture",
+			"hidden": 1
+		},
+		{
+			"module_name": "Water Analysis",
+			"_doctype": "Water Analysis",
+			"label": _("Water Analysis"),
+			"color": "#8BC34A",
+			"icon": "fa fa-tint",
+			"type": "list",
+			"link": "List/Water Analysis",
+			"hidden": 1
+		},
+		{
+			"module_name": "Weather",
+			"_doctype": "Weather",
+			"label": _("Weather"),
+			"color": "#8BC34A",
+			"icon": "fa fa-sun-o",
+			"type": "list",
+			"link": "List/Weather",
+			"hidden": 1
+		},
+		{
+			"module_name": "Assets",
+			"color": "#4286f4",
+			"icon": "octicon octicon-database",
+			"hidden": 1,
+			"label": _("Assets"),
+			"type": "module"
+		},
+		{
+			"module_name": "Grant Application",
+			"color": "#E9AB17",
+			"icon": "fa fa-gift",
+			"_doctype": "Grant Application",
+			"type": "list",
+			"link": "List/Grant Application",
+			"label": _("Grant Application"),
+			"hidden": 1
+
+		},
+		{
+			"module_name": "Donor",
+			"color": "#7F5A58",
+			"icon": "fa fa-tint",
+			"_doctype": "Donor",
+			"type": "list",
+			"link": "List/Donor",
+			"label": _("Donor"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Volunteer",
+			"color": "#7E587E",
+			"icon": "fa fa-angellist",
+			"_doctype": "Volunteer",
+			"type": "list",
+			"link": "List/Volunteer",
+			"label": _("Volunteer"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Member",
+			"color": "#79BAEC",
+			"icon": "fa fa-users",
+			"_doctype": "Member",
+			"type": "list",
+			"link": "List/Member",
+			"label": _("Member"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Chapter",
+			"color": "#3B9C9C",
+			"icon": "fa fa-handshake-o",
+			"_doctype": "Chapter",
+			"type": "list",
+			"link": "List/Chapter",
+			"label": _("Chapter"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Non Profit",
+			"color": "#DE2B37",
+			"icon": "octicon octicon-heart",
+			"type": "module",
+			"label": _("Non Profit"),
+			"hidden": 1
 		}
 	]

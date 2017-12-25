@@ -16,13 +16,15 @@ QUnit.test("test sales order with additional discount in grand total", function(
 				]},
 				{customer_address: 'Test1-Billing'},
 				{shipping_address_name: 'Test1-Shipping'},
-				{contact_person: 'Contact 1-Test Customer 1'}
+				{contact_person: 'Contact 1-Test Customer 1'},
+				{payment_terms_template: '_Test Payment Term Template UI'}
 			]);
 		},
 		() => {
 			return frappe.tests.set_form_values(cur_frm, [
 				{apply_discount_on:'Grand Total'},
-				{additional_discount_percentage:10}
+				{additional_discount_percentage:10},
+				{payment_schedule: []}
 			]);
 		},
 		() => cur_frm.save(),

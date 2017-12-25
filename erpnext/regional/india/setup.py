@@ -76,6 +76,10 @@ def add_permissions():
 
 def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "gst_tax_invoice")
+	frappe.reload_doc("accounts", "print_format", "gst_pos_invoice")
+
+	frappe.db.sql(""" update `tabPrint Format` set disabled = 0 where
+		name in('GST POS Invoice', 'GST Tax Invoice') """)
 
 def make_custom_fields():
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',

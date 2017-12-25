@@ -64,7 +64,7 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 
 		var chart_data = this.get_chart_data ? this.get_chart_data() : null;
 
-		this.chart = new frappe.chart.FrappeChart({
+		this.chart = new Chart({
 			parent: ".chart",
 			data: chart_data,
 			type: 'line'

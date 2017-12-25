@@ -98,14 +98,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Item",
-				},
-				{
-					"type": "doctype",
-					"name": "Asset",
-				},
-				{
-					"type": "doctype",
-					"name": "Asset Category",
 				}
 			]
 		},
@@ -276,13 +268,13 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Asset Movement",
-					"description": _("Transfer an asset from one warehouse to another")
+					"name": "Cheque Print Template",
+					"description": _("Setup cheque dimensions for printing")
 				},
 				{
 					"type": "doctype",
-					"name": "Cheque Print Template",
-					"description": _("Setup cheque dimensions for printing")
+					"name": "Opening Invoice Creation Tool",
+					"description": _("Make Opening Sales and Purchase Invoices")
 				},
 			]
 		},
@@ -402,18 +394,6 @@ def get_data():
 			"label": _("Other Reports"),
 			"icon": "fa fa-table",
 			"items": [
-				{
-					"type": "report",
-					"name": "Asset Depreciation Ledger",
-					"doctype": "Asset",
-					"is_query_report": True,
-				},
-				{
-					"type": "report",
-					"name": "Asset Depreciations and Balances",
-					"doctype": "Asset",
-					"is_query_report": True,
-				},
 				{
 					"type": "report",
 					"name": "Trial Balance for Party",

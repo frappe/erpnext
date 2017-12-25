@@ -35,6 +35,7 @@ class ProductionOrder(Document):
 			validate_bom_no(self.production_item, self.bom_no)
 
 		self.validate_sales_order()
+		self.set_default_warehouse()
 		self.validate_warehouse_belongs_to_company()
 		self.calculate_operating_cost()
 		self.validate_qty()
@@ -49,10 +50,13 @@ class ProductionOrder(Document):
 		if self.sales_order:
 			so = frappe.db.sql("""
 				select so.name, so_item.delivery_date, so.project
-				from `tabSales Order` so, `tabSales Order Item` so_item
-				where so.name=%s and so.name=so_item.parent
-					and so.docstatus = 1 and so_item.item_code=%s
-			""", (self.sales_order, self.production_item), as_dict=1)
+				from `tabSales Order` so
+				inner join `tabSales Order Item` so_item on so_item.parent = so.name
+				left join `tabProduct Bundle Item` pk_item on so_item.item_code = pk_item.parent
+				where so.name=%s and so.docstatus = 1 and (
+					so_item.item_code=%s or
+					pk_item.item_code=%s )
+			""", (self.sales_order, self.production_item, self.production_item), as_dict=1)
 
 			if not so:
 				so = frappe.db.sql("""
@@ -79,6 +83,12 @@ class ProductionOrder(Document):
 			else:
 				frappe.throw(_("Sales Order {0} is not valid").format(self.sales_order))
 
+	def set_default_warehouse(self):
+		if not self.wip_warehouse:
+			self.wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
+		if not self.fg_warehouse:
+			self.fg_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_fg_warehouse")
+	
 	def validate_warehouse_belongs_to_company(self):
 		warehouses = [self.fg_warehouse, self.wip_warehouse]
 		for d in self.get("required_items"):
@@ -571,30 +581,6 @@ def make_stock_entry(production_order_id, purpose, qty=None):
 	return stock_entry.as_dict()
 
 @frappe.whitelist()
-def get_events(start, end, filters=None):
-	"""Returns events for Gantt / Calendar view rendering.
-
-	:param start: Start date-time.
-	:param end: End date-time.
-	:param filters: Filters (JSON).
-	"""
-	from frappe.desk.calendar import get_event_conditions
-	conditions = get_event_conditions("Production Order", filters)
-
-	data = frappe.db.sql("""select name, production_item, planned_start_date,
-		planned_end_date, status
-		from `tabProduction Order`
-		where ((ifnull(planned_start_date, '0000-00-00')!= '0000-00-00') \
-				and (planned_start_date <= %(end)s) \
-			and ((ifnull(planned_start_date, '0000-00-00')!= '0000-00-00') \
-				and ifnull(planned_end_date, '2199-12-31 00:00:00') >= %(start)s)) {conditions}
-		""".format(conditions=conditions), {
-			"start": start,
-			"end": end
-		}, as_dict=True, update={"allDay": 0})
-	return data
-
-@frappe.whitelist()
 def make_timesheet(production_order, company):
 	timesheet = frappe.new_doc("Timesheet")
 	timesheet.employee = ""
@@ -645,3 +631,15 @@ def stop_unstop(production_order, status):
 	pro_order.notify_update()
 
 	return pro_order.status
+
+@frappe.whitelist()
+def query_sales_order(production_item):
+	out = frappe.db.sql_list("""
+		select distinct so.name from `tabSales Order` so, `tabSales Order Item` so_item
+		where so_item.parent=so.name and so_item.item_code=%s and so.docstatus=1
+	union
+		select distinct so.name from `tabSales Order` so, `tabPacked Item` pi_item
+		where pi_item.parent=so.name and pi_item.item_code=%s and so.docstatus=1
+	""", (production_item, production_item))
+	
+	return out

@@ -27,8 +27,8 @@
               ERPNext for Retailers</a>
             <span class="text-muted pull-right">39:21</span>
         </li>
-        <li><a href="/docs/user/videos/learn/schools.html">
-              ERPNext for Schools</a>
+        <li><a href="/docs/user/videos/learn/education.html">
+              ERPNext for Education</a>
             <span class="text-muted pull-right">39:21</span>
         </li>
     </ul>

@@ -13,8 +13,6 @@ from erpnext.accounts.utils import get_currency_precision
 def get_leaderboard(doctype, timespan, field, start=0):
 	"""return top 10 items for that doctype based on conditions"""
 
-	print('doctype', doctype, timespan, field, start)
-
 	filters = {"modified":(">=", get_date_from_string(timespan))}
 	items = []
 	if doctype == "Customer":
@@ -84,8 +82,6 @@ def get_all_items(doctype, filters, items, field, start=0, limit=20):
 			"href":"#Form/Item/" + val.name,
 			"value": value}
 		items.append(item_obj)
-
-	print(items)
 
 	items.sort(key=lambda k: k['value'], reverse=True)
 	return items

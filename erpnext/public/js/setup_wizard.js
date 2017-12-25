@@ -15,34 +15,38 @@ erpnext.setup.slides_settings = [
 	{
 		// Domain
 		name: 'domain',
-		domains: ["all"],
-		title: __('Select your Domain'),
+		title: __('Select your Domains'),
 		fields: [
 			{
-				fieldname: 'domain', label: __('Domain'), fieldtype: 'Select',
+				fieldname: 'domains',
+				label: __('Domains'),
+				fieldtype: 'MultiCheck',
 				options: [
 					{ "label": __("Distribution"), "value": "Distribution" },
+					{ "label": __("Education"), "value": "Education" },
 					{ "label": __("Manufacturing"), "value": "Manufacturing" },
 					{ "label": __("Retail"), "value": "Retail" },
 					{ "label": __("Services"), "value": "Services" },
-					{ "label": __("Education (beta)"), "value": "Education" },
-					{"label": __("Healthcare (beta)"), "value": "Healthcare"}
+					{ "label": __("Agriculture (beta)"), "value": "Agriculture" },
+					{ "label": __("Healthcare (beta)"), "value": "Healthcare" },
+					{ "label": __("Non Profit (beta)"), "value": "Non Profit" }
 				], reqd: 1
 			},
 		],
 		// help: __('Select the nature of your business.'),
-		onload: function (slide) {
-			slide.get_input("domain").on("change", function () {
-				frappe.setup.domain = $(this).val();
-				frappe.wizard.refresh_slides();
-			});
+		validate: function () {
+			if (this.values.domains.length === 0) {
+				frappe.msgprint(__("Please select at least one domain."));
+				return false;
+			}
+			frappe.setup.domains = this.values.domains;
+			return true;
 		},
 	},
 
 	{
 		// Brand
 		name: 'brand',
-		domains: ["all"],
 		icon: "fa fa-bookmark",
 		title: __("The Brand"),
 		// help: __('Upload your letter head and logo. (you can edit them later).'),
@@ -56,14 +60,14 @@ erpnext.setup.slides_settings = [
 			},
 			{
 				fieldname: 'company_name',
-				label: frappe.setup.domain === 'Education' ?
+				label: frappe.setup.domains.includes('Education') ?
 					__('Institute Name') : __('Company Name'),
 				fieldtype: 'Data',
 				reqd: 1
 			},
 			{
 				fieldname: 'company_abbr',
-				label: frappe.setup.domain === 'Education' ?
+				label: frappe.setup.domains.includes('Education') ?
 					__('Institute Abbreviation') : __('Company Abbreviation'),
 				fieldtype: 'Data'
 			}
@@ -99,10 +103,9 @@ erpnext.setup.slides_settings = [
 	{
 		// Organisation
 		name: 'organisation',
-		domains: ["all"],
 		title: __("Your Organization"),
 		icon: "fa fa-building",
-		// help: (frappe.setup.domain === 'Education' ?
+		// help: frappe.setup.domains.includes('Education') ?
 		// 	__('The name of the institute for which you are setting up this system.') :
 		// 	__('The name of your company for which you are setting up this system.')),
 		fields: [
@@ -110,7 +113,7 @@ erpnext.setup.slides_settings = [
 				fieldname: 'company_tagline',
 				label: __('What does it do?'),
 				fieldtype: 'Data',
-				placeholder: frappe.setup.domain === 'Education' ?
+				placeholder: frappe.setup.domains.includes('Education') ?
 					__('e.g. "Primary School" or "University"') :
 					__('e.g. "Build tools for builders"'),
 				reqd: 1
@@ -204,7 +207,7 @@ erpnext.setup.slides_settings = [
 // default 1st Jan - 31st Dec
 
 erpnext.setup.fiscal_years = {
-	"Afghanistan": ["12-20", "12-21"],
+	"Afghanistan": ["12-21", "12-20"],
 	"Australia": ["07-01", "06-30"],
 	"Bangladesh": ["07-01", "06-30"],
 	"Canada": ["04-01", "03-31"],
@@ -222,20 +225,3 @@ erpnext.setup.fiscal_years = {
 	"Thailand": ["10-01", "09-30"],
 	"United Kingdom": ["04-01", "03-31"],
 };
-
-// var test_values_edu = {
-// 	"language": "english",
-// 	"domain": "Education",
-// 	"country": "India",
-// 	"timezone": "Asia/Kolkata",
-// 	"currency": "INR",
-// 	"first_name": "Tester",
-// 	"email": "test@example.com",
-// 	"password": "test",
-// 	"company_name": "Hogwarts",
-// 	"company_abbr": "HS",
-// 	"company_tagline": "School for magicians",
-// 	"bank_account": "Gringotts Wizarding Bank",
-// 	"fy_start_date": "2016-04-01",
-// 	"fy_end_date": "2017-03-31"
-// }

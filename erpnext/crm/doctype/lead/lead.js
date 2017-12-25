@@ -11,6 +11,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 	},
 
 	onload: function() {
+
 		if(cur_frm.fields_dict.lead_owner.df.options.match(/^User/)) {
 			cur_frm.fields_dict.lead_owner.get_query = function(doc, cdt, cdn) {
 				return { query: "frappe.core.doctype.user.user.user_query" }
@@ -61,10 +62,21 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 			method: "erpnext.crm.doctype.lead.lead.make_quotation",
 			frm: cur_frm
 		})
+	},
+
+	organization_lead: function() {
+		if (this.frm.doc.organization_lead == 1) {
+			this.frm.set_df_property('company_name', 'reqd', 1);
+		} else {
+			this.frm.set_df_property('company_name', 'reqd', 0);
+		}
+	},
+
+	company_name: function() {
+		if (this.frm.doc.organization_lead == 1) {
+			this.frm.set_value("lead_name", this.frm.doc.company_name);
+		}
 	}
 });
 
 $.extend(cur_frm.cscript, new erpnext.LeadController({frm: cur_frm}));
-
-
-

@@ -124,6 +124,15 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 				};
 			}
 
+			if(jvd.reference_type==="Employee Advance") {
+				return {
+					filters: {
+						'status': ['=', 'Unpaid'],
+						'docstatus': 1
+					}
+				};
+			}
+
 			// journal entry
 			if(jvd.reference_type==="Journal Entry") {
 				frappe.model.validate_missing(jvd, "account");
@@ -187,20 +196,19 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 	reference_name: function(doc, cdt, cdn) {
 		var d = frappe.get_doc(cdt, cdn);
+
 		if(d.reference_name) {
 			if (d.reference_type==="Purchase Invoice" && !flt(d.debit)) {
 				this.get_outstanding('Purchase Invoice', d.reference_name, doc.company, d);
-			}
-			if (d.reference_type==="Sales Invoice" && !flt(d.credit)) {
+			} else if (d.reference_type==="Sales Invoice" && !flt(d.credit)) {
 				this.get_outstanding('Sales Invoice', d.reference_name, doc.company, d);
-			}
-			if (d.reference_type==="Journal Entry" && !flt(d.credit) && !flt(d.debit)) {
+			} else if (d.reference_type==="Journal Entry" && !flt(d.credit) && !flt(d.debit)) {
 				this.get_outstanding('Journal Entry', d.reference_name, doc.company, d);
 			}
 		}
 	},
 
-	get_outstanding: function(doctype, docname, company, child) {
+	get_outstanding: function(doctype, docname, company, child, due_date) {
 		var me = this;
 		var args = {
 			"doctype": doctype,
