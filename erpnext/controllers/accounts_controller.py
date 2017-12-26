@@ -646,7 +646,20 @@ class AccountsController(TransactionBase):
 			self.remove(item)
 
 	def set_payment_schedule(self):
-		posting_date = self.get("posting_date") or self.get("transaction_date")
+		# sales/purchase invoice - posting_date
+		# sales order - delivery_date/transaction_date
+		# purchase order - scheduled_date/transaction_date
+		def get_relevant_date():
+			if self.doctype in ('Sales Invoice', 'Purchase Invoice'):
+				return self.posting_date
+			elif self.doctype == 'Sales Order':
+				return self.delivery_date or self.transaction_date
+			elif self.doctype == 'Purchase Order':
+				return self.schedule_date or self.transaction_date
+			elif self.doctype == 'Quotation':
+				return self.transaction_date
+
+		posting_date = get_relevant_date()
 		date = self.get("due_date")
 		due_date = date or posting_date
 		grand_total = self.get("rounded_total") or self.grand_total

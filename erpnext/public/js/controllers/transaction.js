@@ -1200,14 +1200,37 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
+	get_relevant_date: function() {
+		const doctype = this.frm.doc.doctype;
+		const doc = this.frm.doc;
+
+		relevant_doctypes = [
+			'Sales Invoice', 'Purchase Invoice', 'Sales Order', 'Purchase Order',
+			'Quotation'
+		];
+
+		switch (doctype) {
+			case 'Sales Invoice':
+			case 'Purchase Invoice':
+				return doc.posting_date;
+			case 'Sales Order':
+				return doc.delivery_date || doc.transaction_date;
+			case 'Purchase Order':
+				return doc.schedule_date || doc.transaction_date;
+			case 'Quotation':
+				return doc.transaction_date;
+		}
+	},
+
 	payment_terms_template: function() {
-		var me = this;
+		const me = this;
+
 		if(this.frm.doc.payment_terms_template) {
 			frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_payment_terms",
 				args: {
 					terms_template: this.frm.doc.payment_terms_template,
-					posting_date: this.frm.doc.posting_date || this.frm.doc.transaction_date,
+					posting_date: this.get_relevant_date(),
 					grand_total: this.frm.doc.rounded_total || this.frm.doc.grand_total
 				},
 				callback: function(r) {
@@ -1220,13 +1243,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	payment_term: function(doc, cdt, cdn) {
+		const me = this;
 		var row = locals[cdt][cdn];
+
 		if(row.payment_term) {
 			frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_payment_term_details",
 				args: {
 					term: row.payment_term,
-					posting_date: this.frm.doc.posting_date || this.frm.doc.transaction_date,
+					posting_date: this.get_relevant_date(),
 					grand_total: this.frm.doc.rounded_total || this.frm.doc.grand_total
 				},
 				callback: function(r) {
