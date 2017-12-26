@@ -94,6 +94,7 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
 		pe.source_exchange_rate = 1
+		pe.paid_to = payable
 		pe.insert()
 		pe.submit()
 

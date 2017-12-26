@@ -27,6 +27,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		unlink_payment_on_cancel_of_invoice(0)
 
 	def test_gl_entries_without_perpetual_inventory(self):
+		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
 		wrapper = frappe.copy_doc(test_records[0])
 		set_perpetual_inventory(0, wrapper.company)
 		self.assertTrue(not cint(erpnext.is_perpetual_inventory_enabled(wrapper.company)))
