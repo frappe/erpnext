@@ -129,7 +129,6 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 			}
 		}}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 
-	print(doclist)
 	return doclist
 
 @frappe.whitelist()

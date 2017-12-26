@@ -12,6 +12,7 @@ from erpnext.stock.doctype.item.item import StockExistsForTemplate
 
 from frappe.model.rename_doc import rename_doc
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.get_item_details import get_item_details
 
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse"]
@@ -53,12 +54,8 @@ class TestItem(unittest.TestCase):
 		return item
 
 	def test_get_item_details(self):
-		from erpnext.stock.get_item_details import get_item_details
-
 		# delete modified item price record and make as per test_records
-		frappe.db.sql("""delete from `tabItem Price`
-			where price_list='_Test Price List' and item_code='_Test Item'""")
-		frappe.get_test_records("Item Price")
+		frappe.db.sql("""delete from `tabItem Price`""")
 
 		to_check = {
 			"item_code": "_Test Item",
