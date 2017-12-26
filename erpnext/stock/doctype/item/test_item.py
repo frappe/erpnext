@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 
-from frappe.test_runner import make_test_records
+from frappe.test_runner import make_test_objects
 from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsError,
 	InvalidItemAttributeValueError, get_variant)
 from erpnext.stock.doctype.item.item import StockExistsForTemplate
@@ -79,7 +79,7 @@ class TestItem(unittest.TestCase):
 			"conversion_factor": 1.0,
 		}
 
-		make_test_records("Item Price")
+		make_test_objects("Item Price")
 
 		details = get_item_details({
 			"item_code": "_Test Item",
