@@ -175,7 +175,7 @@ frappe.ui.form.on('Asset', {
 				"item_code": frm.doc.item_code,
 				"company": frm.doc.company
 			},
-			method: "erpnext.accounts.doctype.asset.asset.make_sales_invoice",
+			method: "erpnext.assets.doctype.asset.asset.make_sales_invoice",
 			callback: function(r) {
 				var doclist = frappe.model.sync(r.message);
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
