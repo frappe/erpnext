@@ -54,6 +54,12 @@ class TestItem(unittest.TestCase):
 
 	def test_get_item_details(self):
 		from erpnext.stock.get_item_details import get_item_details
+
+		# delete modified item price record and make as per test_records
+		frappe.db.sql("""delete from `tabItem Price`
+			where price_list='_Test Price List' and item_code='_Test Item'""")
+		frappe.get_test_records("Item Price")
+
 		to_check = {
 			"item_code": "_Test Item",
 			"item_name": "_Test Item",
