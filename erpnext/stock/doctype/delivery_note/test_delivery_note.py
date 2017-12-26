@@ -28,6 +28,7 @@ class TestDeliveryNote(unittest.TestCase):
 		if not frappe.db.exists("Account", target_warehouse):
 			parent_account = frappe.db.get_value('Account',
 				{'company': company, 'is_group':1, 'account_type': 'Stock'},'name')
+
 			account = create_account(account_name="_Test Warehouse 1", \
 				account_type="Stock", parent_account= parent_account, company=company)
 			frappe.db.set_value('Warehouse', target_warehouse, 'account', account)

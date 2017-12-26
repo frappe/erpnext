@@ -9,6 +9,7 @@ import itertools
 from frappe import msgprint, _
 from frappe.utils import (cstr, flt, cint, getdate, now_datetime, formatdate,
 	strip, get_timestamp, random_string)
+from frappe.utils.html_utils import clean_html
 from frappe.website.website_generator import WebsiteGenerator
 from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for, get_parent_item_groups
 from frappe.website.render import clear_cache
@@ -30,13 +31,10 @@ class Item(WebsiteGenerator):
 	def onload(self):
 		super(Item, self).onload()
 
-		self.set_onload('sle_exists', self.check_if_sle_exists())
+		self.set_onload('stock_exists', self.stock_ledger_created())
 		if self.is_fixed_asset:
 			asset = frappe.db.get_all("Asset", filters={"item_code": self.name, "docstatus": 1}, limit=1)
 			self.set_onload("asset_exists", True if asset else False)
-
-		if frappe.db.get_value('Stock Ledger Entry', {'item_code': self.name}):
-			self.set_onload('stock_exists', True)
 
 	def autoname(self):
 		if frappe.db.get_default("item_naming_by")=="Naming Series":
@@ -69,9 +67,7 @@ class Item(WebsiteGenerator):
 			self.set_opening_stock()
 
 	def validate(self):
-		self.before_update = None
-		if frappe.db.exists('Item', self.name):
-			self.before_update = frappe.get_doc('Item', self.name)
+		self.get_doc_before_save()
 
 		super(Item, self).validate()
 
@@ -82,6 +78,7 @@ class Item(WebsiteGenerator):
 			self.description = self.item_name
 
 		self.validate_uom()
+		self.validate_description()
 		self.add_default_uom_in_conversion_factor_table()
 		self.validate_conversion_factor()
 		self.validate_item_type()
@@ -89,7 +86,6 @@ class Item(WebsiteGenerator):
 		self.fill_customer_code()
 		self.check_item_tax()
 		self.validate_barcode()
-		self.cant_change()
 		self.validate_warehouse_for_reorder()
 		self.update_bom_item_desc()
 		self.synced_with_hub = 0
@@ -101,6 +97,7 @@ class Item(WebsiteGenerator):
 		self.validate_website_image()
 		self.make_thumbnail()
 		self.validate_fixed_asset()
+		self.validate_retain_sample()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -114,6 +111,11 @@ class Item(WebsiteGenerator):
 		self.update_variants()
 		self.update_item_price()
 		self.update_template_item()
+
+	def validate_description(self):
+		'''Clean HTML description if set'''
+		if cint(frappe.db.get_single_value('Stock Settings', 'clean_description_html')):
+			self.description = clean_html(self.description)
 
 	def add_price(self, price_list=None):
 		'''Add a new price'''
@@ -246,6 +248,20 @@ class Item(WebsiteGenerator):
 
 			if not self.asset_category:
 				frappe.throw(_("Asset Category is mandatory for Fixed Asset item"))
+
+			if self.stock_ledger_created():
+				frappe.throw(_("Cannot be a fixed asset item as Stock Ledger is created."))
+
+		if not self.is_fixed_asset:
+			asset = frappe.db.get_all("Asset", filters={"item_code": self.name, "docstatus": 1}, limit=1)
+			if asset:
+				frappe.throw(_('"Is Fixed Asset" cannot be unchecked, as Asset record exists against the item'))
+
+	def validate_retain_sample(self):
+		if self.retain_sample and not frappe.db.get_single_value('Stock Settings', 'sample_retention_warehouse'):
+			frappe.throw(_("Please select Sample Retention Warehouse in Stock Settings first"));
+		if self.retain_sample and not self.has_batch_no:
+			frappe.throw(_(" {0} Retain Sample is based on batch, please check Has Batch No to retain sample of item").format(self.item_code))
 
 	def get_context(self, context):
 		context.show_search=True
@@ -456,62 +472,27 @@ class Item(WebsiteGenerator):
 			if duplicate:
 				frappe.throw(_("Barcode {0} already used in Item {1}").format(self.barcode, duplicate[0][0]))
 
-	def cant_change(self):
-		if not self.get("__islocal"):
-			to_check = ("has_serial_no", "is_stock_item",
-				"valuation_method", "has_batch_no", "is_fixed_asset")
 
-			vals = frappe.db.get_value("Item", self.name, to_check, as_dict=True)
-			if not vals.get('valuation_method') and self.get('valuation_method'):
-				vals['valuation_method'] = frappe.db.get_single_value("Stock Settings", "valuation_method") or "FIFO"
-
-			if vals:
-				for key in to_check:
-					if cstr(self.get(key)) != cstr(vals.get(key)):
-						if not self.check_if_linked_document_exists(key):
-							break # no linked document, allowed
-						else:
-							frappe.throw(_("As there are existing transactions against item {0}, you can not change the value of {1}").format(self.name, frappe.bold(self.meta.get_label(key))))
-
-			if vals and not self.is_fixed_asset and self.is_fixed_asset != vals.is_fixed_asset:
-				asset = frappe.db.get_all("Asset", filters={"item_code": self.name, "docstatus": 1}, limit=1)
-				if asset:
-					frappe.throw(_('"Is Fixed Asset" cannot be unchecked, as Asset record exists against the item'))
-
-	def check_if_linked_document_exists(self, key):
-		linked_doctypes = ["Delivery Note Item", "Sales Invoice Item", "Purchase Receipt Item",
-			"Purchase Invoice Item", "Stock Entry Detail", "Stock Reconciliation Item"]
-
-		# For "Is Stock Item", following doctypes is important
-		# because reserved_qty, ordered_qty and requested_qty updated from these doctypes
-		if key == "is_stock_item":
-			linked_doctypes += ["Sales Order Item", "Purchase Order Item", "Material Request Item"]
-
-		for doctype in linked_doctypes:
-			if frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}) or \
-				frappe.db.get_value("Production Order",
-					filters={"production_item": self.name, "docstatus": 1}):
-				return True
-
+	def validate_warehouse_for_reorder(self):
+		'''Validate Reorder level table for duplicate and conditional mandatory'''
+		warehouse = []
 		for d in self.get("reorder_levels"):
+			if not d.warehouse_group:
+				d.warehouse_group = d.warehouse
+			if d.get("warehouse") and d.get("warehouse") not in warehouse:
+				warehouse += [d.get("warehouse")]
+			else:
+				frappe.throw(_("Row {0}: An Reorder entry already exists for this warehouse {1}")
+					.format(d.idx, d.warehouse), DuplicateReorderRows)
+
 			if d.warehouse_reorder_level and not d.warehouse_reorder_qty:
 				frappe.throw(_("Row #{0}: Please set reorder quantity").format(d.idx))
 
-	def validate_warehouse_for_reorder(self):
-		warehouse = []
-		for i in self.get("reorder_levels"):
-			if not i.warehouse_group:
-				i.warehouse_group = i.warehouse
-			if i.get("warehouse") and i.get("warehouse") not in warehouse:
-				warehouse += [i.get("warehouse")]
-			else:
-				frappe.throw(_("Row {0}: An Reorder entry already exists for this warehouse {1}")
-					.format(i.idx, i.warehouse), DuplicateReorderRows)
-
-	def check_if_sle_exists(self):
-		sle = frappe.db.sql("""select name from `tabStock Ledger Entry`
-			where item_code = %s""", self.name)
-		return sle and 'exists' or 'not exists'
+	def stock_ledger_created(self):
+		if not hasattr(self, '_stock_ledger_created'):
+			self._stock_ledger_created = len(frappe.db.sql("""select name from `tabStock Ledger Entry`
+				where item_code = %s limit 1""", self.name))
+		return self._stock_ledger_created
 
 	def validate_name_with_item_group(self):
 		# causes problem with tree build
@@ -638,19 +619,19 @@ class Item(WebsiteGenerator):
 				template_item.save()
 
 	def update_variants(self):
-			if self.flags.dont_update_variants or \
-				frappe.db.get_single_value('Item Variant Settings', 'do_not_update_variants'):
-				return
-			if self.has_variants:
-				updated = []
-				variants = frappe.db.get_all("Item", fields=["item_code"], filters={"variant_of": self.name })
-				for d in variants:
-					variant = frappe.get_doc("Item", d)
-					copy_attributes_to_variant(self, variant)
-					variant.save()
-					updated.append(d.item_code)
-				if updated:
-					frappe.msgprint(_("Item Variants {0} updated").format(", ".join(updated)))
+		if self.flags.dont_update_variants or \
+			frappe.db.get_single_value('Item Variant Settings', 'do_not_update_variants'):
+			return
+		if self.has_variants:
+			updated = []
+			variants = frappe.db.get_all("Item", fields=["item_code"], filters={"variant_of": self.name })
+			for d in variants:
+				variant = frappe.get_doc("Item", d)
+				copy_attributes_to_variant(self, variant)
+				variant.save()
+				updated.append(d.item_code)
+			if updated:
+				frappe.msgprint(_("Item Variants {0} updated").format(", ".join(updated)))
 
 	def validate_has_variants(self):
 		if not self.has_variants and frappe.db.get_value("Item", self.name, "has_variants"):
@@ -658,10 +639,15 @@ class Item(WebsiteGenerator):
 				frappe.throw(_("Item has variants."))
 
 	def validate_stock_exists_for_template_item(self):
-		if self.has_variants and \
-			frappe.db.get_value('Stock Ledger Entry', {'item_code': self.name}):
-			frappe.throw(_("As stock exists against an item {0}, you can not enable has variants property")
-				.format(self.name), StockExistsForTemplate)
+		if self.stock_ledger_created() and self._doc_before_save:
+			if (self._doc_before_save.has_variants != self.has_variants
+				or self._doc_before_save.variant_of != self.variant_of):
+				frappe.throw(_("Cannot change Variant properties after stock transction. You will have to make a new Item to do this.").format(self.name),
+					StockExistsForTemplate)
+
+			if self.has_variants or self.variant_of:
+				if not self.is_child_table_same('attributes'):
+					frappe.throw(_('Cannot change Attributes after stock transaction. Make a new Item and transfer stock to the new Item'))
 
 	def validate_uom(self):
 		if not self.get("__islocal"):

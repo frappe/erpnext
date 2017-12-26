@@ -5,28 +5,37 @@ frappe.treeview_settings['Task'] = {
 	add_tree_node: "erpnext.projects.doctype.task.task.add_node",
 	filters: [
 		{
+			fieldname: "project",
+			fieldtype:"Link",
+			options: "Project",
+			label: __("Project"),
+		},
+		{
 			fieldname: "task",
 			fieldtype:"Link",
 			options: "Task",
 			label: __("Task"),
-			get_query: function(){
+			get_query: function() {
+				var me = frappe.treeview_settings['Task'];
+				var project = me.page.fields_dict.project.get_value();
+				var args = [["Task", 'is_group', '=', 1]];
+				if(project){
+					args.push(["Task", 'project', "=", project]);
+				}
 				return {
-					filters: [["Task", 'is_group', '=', 1]]
+					filters: args
 				};
 			}
 		}
 	],
-	title: "Task",
 	breadcrumb: "Projects",
 	get_tree_root: false,
-	root_label: "task",
-	ignore_fields:["parent_task"],
-	get_label: function(node) {
-		return node.data.value;
-	},
-	onload: function(me){
+	root_label: "All Tasks",
+	ignore_fields: ["parent_task"],
+	onload: function(me) {
+		frappe.treeview_settings['Task'].page = {};
+		$.extend(frappe.treeview_settings['Task'].page, me.page);
 		me.make_tree();
-		me.set_root = true;
 	},
 	toolbar: [
 		{
@@ -39,7 +48,7 @@ frappe.treeview_settings['Task'] = {
 					'fields': [
 						{'fieldname': 'tasks', 'label': 'Tasks', 'fieldtype': 'Text'},
 					],
-					primary_action: function(){
+					primary_action: function() {
 						d.hide();
 						return frappe.call({
 							method: "erpnext.projects.doctype.task.task.add_multiple_tasks",

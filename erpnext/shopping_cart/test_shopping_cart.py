@@ -8,6 +8,9 @@ from frappe.utils import nowdate, add_months
 from erpnext.shopping_cart.cart import _get_cart_quotation, update_cart, get_party
 from erpnext.tests.utils import create_test_contact_and_address
 
+
+test_dependencies = ['Payment Terms Template']
+
 class TestShoppingCart(unittest.TestCase):
 	"""
 		Note:
@@ -61,7 +64,6 @@ class TestShoppingCart(unittest.TestCase):
 		self.assertEquals(quotation.get("items")[0].item_code, "_Test Item")
 		self.assertEquals(quotation.get("items")[0].qty, 1)
 		self.assertEquals(quotation.get("items")[0].amount, 10)
-
 
 		# add second item
 		update_cart("_Test Item 2", 1)
@@ -127,6 +129,7 @@ class TestShoppingCart(unittest.TestCase):
 			"selling_price_list": "_Test Price List Rest of the World",
 			"currency": "USD",
 			"taxes_and_charges" : "_Test Tax 1",
+			"conversion_rate":1,
 			"transaction_date" : nowdate(),
 			"valid_till" : add_months(nowdate(), 1),
 			"items": [{

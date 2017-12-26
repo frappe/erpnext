@@ -29,7 +29,7 @@ install:
   - cp -r $TRAVIS_BUILD_DIR/test_sites/test_site ~/frappe-bench/sites/
 
 before_script:
-  - wget http://chromedriver.storage.googleapis.com/2.27/chromedriver_linux64.zip
+  - wget http://chromedriver.storage.googleapis.com/2.33/chromedriver_linux64.zip
   - unzip chromedriver_linux64.zip
   - sudo apt-get install libnss3
   - sudo apt-get --only-upgrade install google-chrome-stable
@@ -64,4 +64,21 @@ jobs:
         - bench execute erpnext.setup.utils.enable_all_roles_and_domains
         - bench run-ui-tests --app erpnext
       env: Client Side Test
-
+    - # stage
+      script:
+        - bench --verbose run-setup-wizard-ui-test
+        - bench execute erpnext.setup.utils.enable_all_roles_and_domains
+        - bench run-ui-tests --app erpnext --test-list erpnext/tests/ui/tests2.txt
+      env: Client Side Test - 2
+    - # stage
+      script:
+        - bench --verbose run-setup-wizard-ui-test
+        - bench execute erpnext.setup.utils.enable_all_roles_and_domains
+        - bench run-ui-tests --app erpnext --test-list erpnext/tests/ui/agriculture.txt
+      env: Agriculture Client Side Test
+    - # stage
+      script:
+        - wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz
+        - bench --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz --mariadb-root-password travis
+        - bench migrate
+      env: Patch Testing

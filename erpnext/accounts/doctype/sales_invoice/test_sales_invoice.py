@@ -3,8 +3,9 @@
 from __future__ import unicode_literals
 
 import frappe
+
 import unittest, copy, time
-from frappe.utils import nowdate, add_days, flt, cint
+from frappe.utils import nowdate, flt, getdate, cint
 from frappe.model.dynamic_links import get_dynamic_link_map
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unlink_payment_on_cancel_of_invoice
@@ -57,6 +58,13 @@ class TestSalesInvoice(unittest.TestCase):
 		si.naming_series = 'TEST-'
 
 		self.assertRaises(frappe.CannotChangeConstantError, si.save)
+
+	def test_add_terms_after_save(self):
+		si = frappe.copy_doc(test_records[2])
+		si.insert()
+
+		self.assertTrue(si.payment_schedule)
+		self.assertEqual(getdate(si.payment_schedule[0].due_date), getdate(si.due_date))
 
 	def test_sales_invoice_calculation_base_currency(self):
 		si = frappe.copy_doc(test_records[2])
@@ -199,6 +207,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# additional discount
 		si.discount_amount = 100
 		si.apply_discount_on = 'Net Total'
+		si.payment_schedule = []
 
 		si.save()
 
@@ -211,6 +220,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# additional discount on grand total
 		si.discount_amount = 100
 		si.apply_discount_on = 'Grand Total'
+		si.payment_schedule = []
 
 		si.save()
 
@@ -546,7 +556,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_outstanding(self):
 		w = self.make()
-		self.assertEquals(w.outstanding_amount, w.base_grand_total)
+		self.assertEquals(w.outstanding_amount, w.base_rounded_total)
 
 	def test_payment(self):
 		w = self.make()
@@ -560,7 +570,7 @@ class TestSalesInvoice(unittest.TestCase):
 		jv.insert()
 		jv.submit()
 
-		self.assertEquals(frappe.db.get_value("Sales Invoice", w.name, "outstanding_amount"), 161.8)
+		self.assertEquals(frappe.db.get_value("Sales Invoice", w.name, "outstanding_amount"), 162.0)
 
 		link_data = get_dynamic_link_map().get('Sales Invoice', [])
 		link_doctypes = [d.parent for d in link_data]
@@ -569,7 +579,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertTrue(link_doctypes.index('GL Entry') > link_doctypes.index('Journal Entry Account'))
 
 		jv.cancel()
-		self.assertEquals(frappe.db.get_value("Sales Invoice", w.name, "outstanding_amount"), 561.8)
+		self.assertEquals(frappe.db.get_value("Sales Invoice", w.name, "outstanding_amount"), 562.0)
 
 	def test_sales_invoice_gl_entry_without_perpetual_inventory(self):
 		si = frappe.copy_doc(test_records[1])
@@ -848,7 +858,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
 			where reference_name=%s and credit_in_account_currency=300""", si.name))
 
-		self.assertEqual(si.outstanding_amount, 261.8)
+		self.assertEqual(si.outstanding_amount, 262.0)
 
 		si.cancel()
 
@@ -931,20 +941,6 @@ class TestSalesInvoice(unittest.TestCase):
 		si.save()
 
 		self.assertEquals(si.get("items")[0].serial_no, dn.get("items")[0].serial_no)
-
-	def test_invoice_due_date_against_customers_credit_days(self):
-		# set customer's credit days
-		frappe.db.set_value("Customer", "_Test Customer", "credit_days_based_on", "Fixed Days")
-		frappe.db.set_value("Customer", "_Test Customer", "credit_days", 10)
-
-		si = create_sales_invoice()
-		self.assertEqual(si.due_date, add_days(nowdate(), 10))
-
-		# set customer's credit days is last day of the next month
-		frappe.db.set_value("Customer", "_Test Customer", "credit_days_based_on", "Last Day of the Next Month")
-
-		si1 = create_sales_invoice(posting_date="2015-07-05")
-		self.assertEqual(si1.due_date, "2015-08-31")
 
 	def test_return_sales_invoice(self):
 		set_perpetual_inventory()
@@ -1152,7 +1148,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.load_from_db()
 
 		#check outstanding after advance allocation
-		self.assertEqual(flt(si.outstanding_amount), flt(si.grand_total - si.total_advance, si.precision("outstanding_amount")))
+		self.assertEqual(flt(si.outstanding_amount),
+			flt(si.rounded_total - si.total_advance, si.precision("outstanding_amount")))
 
 		#added to avoid Document has been modified exception
 		jv = frappe.get_doc("Journal Entry", jv.name)
@@ -1160,7 +1157,8 @@ class TestSalesInvoice(unittest.TestCase):
 
 		si.load_from_db()
 		#check outstanding after advance cancellation
-		self.assertEqual(flt(si.outstanding_amount), flt(si.grand_total + si.total_advance, si.precision("outstanding_amount")))
+		self.assertEqual(flt(si.outstanding_amount),
+			flt(si.rounded_total + si.total_advance, si.precision("outstanding_amount")))
 
 	def test_outstanding_amount_after_advance_payment_entry_cancelation(self):
 		pe = frappe.get_doc({
@@ -1199,7 +1197,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.load_from_db()
 
 		#check outstanding after advance allocation
-		self.assertEqual(flt(si.outstanding_amount), flt(si.grand_total - si.total_advance, si.precision("outstanding_amount")))
+		self.assertEqual(flt(si.outstanding_amount),
+			flt(si.rounded_total - si.total_advance, si.precision("outstanding_amount")))
 
 		#added to avoid Document has been modified exception
 		pe = frappe.get_doc("Payment Entry", pe.name)
@@ -1207,7 +1206,8 @@ class TestSalesInvoice(unittest.TestCase):
 
 		si.load_from_db()
 		#check outstanding after advance cancellation
-		self.assertEqual(flt(si.outstanding_amount), flt(si.grand_total + si.total_advance, si.precision("outstanding_amount")))
+		self.assertEqual(flt(si.outstanding_amount),
+			flt(si.rounded_total + si.total_advance, si.precision("outstanding_amount")))
 
 	def test_multiple_uom_in_selling(self):
 		frappe.db.sql("""delete from `tabItem Price`
@@ -1367,6 +1367,53 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEquals(expected_values[gle.account][1], gle.debit)
 			self.assertEquals(expected_values[gle.account][2], gle.credit)
 
+	def test_sales_invoice_with_shipping_rule(self):
+		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule \
+			import create_shipping_rule
+
+		shipping_rule = create_shipping_rule(shipping_rule_type = "Selling", shipping_rule_name = "Shipping Rule - Sales Invoice Test")
+
+		si = frappe.copy_doc(test_records[2])
+		
+		si.shipping_rule = shipping_rule.name
+		si.insert()
+
+		shipping_amount = 0.0
+		for condition in shipping_rule.get("conditions"):
+			if not condition.to_value or (flt(condition.from_value) <= si.net_total <= flt(condition.to_value)):
+				shipping_amount = condition.shipping_amount
+
+		shipping_charge = {
+			"doctype": "Sales Taxes and Charges",
+			"category": "Valuation and Total",
+			"charge_type": "Actual",
+			"account_head": shipping_rule.account,
+			"cost_center": shipping_rule.cost_center,
+			"tax_amount": shipping_amount,
+			"description": shipping_rule.name
+		}	
+		si.append("taxes", shipping_charge)
+		si.save()
+
+		self.assertEquals(si.net_total, 1250)
+
+		self.assertEquals(si.total_taxes_and_charges, 577.05)
+		self.assertEquals(si.grand_total, 1827.05)		
+
+	def test_create_invoice_without_terms(self):
+		si = create_sales_invoice(do_not_save=1)
+		self.assertFalse(si.get('payment_schedule'))
+
+		si.insert()
+		self.assertTrue(si.get('payment_schedule'))
+
+	def test_duplicate_due_date_in_terms(self):
+		si = create_sales_invoice(do_not_save=1)
+		si.append('payment_schedule', dict(due_date='2017-01-01', invoice_portion=50.00, payment_amount=50))
+		si.append('payment_schedule', dict(due_date='2017-01-01', invoice_portion=50.00, payment_amount=50))
+
+		self.assertRaises(frappe.ValidationError, si.insert)
+
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
 	args = frappe._dict(args)
@@ -1400,6 +1447,11 @@ def create_sales_invoice(**args):
 		si.insert()
 		if not args.do_not_submit:
 			si.submit()
+		else:
+			si.payment_schedule = []
+	else:
+		si.payment_schedule = []
+
 	return si
 
 test_dependencies = ["Journal Entry", "Contact", "Address"]

@@ -20,9 +20,9 @@ def validate_return_against(doc):
 		frappe.throw(_("{0} is mandatory for Return").format(doc.meta.get_label("return_against")))
 	else:
 		filters = {"doctype": doc.doctype, "docstatus": 1, "company": doc.company}
-		if doc.meta.get_field("customer"):
+		if doc.meta.get_field("customer") and doc.customer:
 			filters["customer"] = doc.customer
-		elif doc.meta.get_field("supplier"):
+		elif doc.meta.get_field("supplier") and doc.supplier:
 			filters["supplier"] = doc.supplier
 
 		if not frappe.db.exists(filters):
@@ -256,6 +256,9 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.dn_detail = source_doc.dn_detail
 			target_doc.expense_account = source_doc.expense_account
 
+	def update_terms(source_doc, target_doc, source_parent):
+		target_doc.payment_amount = -source_doc.payment_amount
+
 	doclist = get_mapped_doc(doctype, source_name,	{
 		doctype: {
 			"doctype": doctype,
@@ -272,6 +275,10 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			},
 			"postprocess": update_item
 		},
+		"Payment Schedule": {
+			"doctype": "Payment Schedule",
+			"postprocess": update_terms
+		}
 	}, target_doc, set_missing_values)
 
 	return doclist

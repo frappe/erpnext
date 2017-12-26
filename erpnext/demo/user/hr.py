@@ -17,32 +17,32 @@ def work():
 	mark_attendance()
 	make_leave_application()
 
-	# process payroll
+	# payroll entry
 	if not frappe.db.sql('select name from `tabSalary Slip` where month(adddate(start_date, interval 1 month))=month(curdate())'):
 		# process payroll for previous month
-		process_payroll = frappe.get_doc("Process Payroll", "Process Payroll")
-		process_payroll.company = frappe.flags.company
-		process_payroll.payroll_frequency = 'Monthly'
+		payroll_entry = frappe.new_doc("Payroll Entry")
+		payroll_entry.company = frappe.flags.company
+		payroll_entry.payroll_frequency = 'Monthly'
 
 		# select a posting date from the previous month
-		process_payroll.posting_date = get_last_day(getdate(frappe.flags.current_date) - datetime.timedelta(days=10))
-		process_payroll.payment_account = frappe.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
+		payroll_entry.posting_date = get_last_day(getdate(frappe.flags.current_date) - datetime.timedelta(days=10))
+		payroll_entry.payment_account = frappe.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
 
-		process_payroll.set_start_end_dates()
+		payroll_entry.set_start_end_dates()
 
 		# based on frequency
-		process_payroll.salary_slip_based_on_timesheet = 0
-		process_payroll.create_salary_slips()
-		process_payroll.submit_salary_slips()
-		process_payroll.make_accural_jv_entry()
-		# process_payroll.make_journal_entry(reference_date=frappe.flags.current_date,
+		payroll_entry.salary_slip_based_on_timesheet = 0
+		payroll_entry.create_salary_slips()
+		payroll_entry.submit_salary_slips()
+		payroll_entry.make_accural_jv_entry()
+		# payroll_entry.make_journal_entry(reference_date=frappe.flags.current_date,
 		# 	reference_number=random_string(10))
 
-		process_payroll.salary_slip_based_on_timesheet = 1
-		process_payroll.create_salary_slips()
-		process_payroll.submit_salary_slips()
-		process_payroll.make_accural_jv_entry()
-		# process_payroll.make_journal_entry(reference_date=frappe.flags.current_date,
+		payroll_entry.salary_slip_based_on_timesheet = 1
+		payroll_entry.create_salary_slips()
+		payroll_entry.submit_salary_slips()
+		payroll_entry.make_accural_jv_entry()
+		# payroll_entry.make_journal_entry(reference_date=frappe.flags.current_date,
 		# 	reference_number=random_string(10))
 
 	if frappe.db.get_global('demo_hr_user'):
