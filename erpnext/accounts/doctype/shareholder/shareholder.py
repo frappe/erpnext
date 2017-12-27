@@ -16,3 +16,10 @@ class Shareholder(Document):
 		for share_transfer in sold_shares:
 			transfer = frappe.get_doc('Share Transfer', share_transfer.name)
 			# remove from shares child table
+		self.update_amount()
+
+	def update_amount(self):
+		total_amount = 0
+		for ledger in self.share_ledger:
+			total_amount += ledger.amount
+		self.total_amount = total_amount
