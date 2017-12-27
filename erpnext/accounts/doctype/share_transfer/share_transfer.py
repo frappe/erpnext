@@ -21,8 +21,15 @@ class ShareTransfer(Document):
 	def basic_validations(self):
 		if self.transfer_type == 'Purchase':
 			self.to_shareholder = ''
+			if self.from_shareholder is None:
+				frappe.throw('The field \'From Shareholder\' cannot be blank')
 		elif (self.transfer_type == 'Issue'):
 			self.from_shareholder = ''
+			if self.to_shareholder is None:
+				frappe.throw('The field \'To Shareholder\' cannot be blank')
+		else:
+			if self.from_shareholder is None:
+				frappe.throw('The fields \'From Shareholder\' and \'To Shareholder\' cannot be blank')
 		if self.from_shareholder == self.to_shareholder:
 			frappe.throw('The seller and the buyer cannot be the same')
 		if self.amount is None:
