@@ -1,7 +1,47 @@
 <div style="margin-bottom: 7px;" class="text-center">
 	{%= frappe.boot.letter_heads[filters.letter_head || frappe.get_doc(":Company", filters.company).default_letter_head || frappe.defaults.get_default("letter_head")] %}
 </div>
-<h2 class="text-center">{%= __("Statement of Account") %}</h2>
+
+{% for(var i=0, l=data.length; i<l-2; i++) { %}
+    
+  {% if(data[i][__("Voucher Type")] != data[i+1][__("Voucher Type")] ) { %}
+
+    <h2 class="text-center">{%= __("General Ledger") %}</h2>
+
+            {% break ;%}
+
+            {% } %}
+
+
+
+{% } %}
+
+
+
+{% for(var i=0, l=data.length; i<l-2; i++) { %}
+    
+  {% if(data[i][__("Voucher Type")] == data[i+1][__("Voucher Type")] ) { %}
+
+     {% var indecator = true %}
+
+            {% } else { %}
+
+            {% break ;%}
+
+            {% } %}
+
+  {% if(indecator==true && i == data.length-3) { %}
+
+      <h2 class="text-center">{%= __(data[1][__("Voucher Type")]) %}</h2>
+
+               {% } %}
+
+
+
+
+{% } %}
+
+
 <h4 class="text-center">{%= (filters.party || filters.account) && ((filters.party || filters.account) + ", ")  || "" %} {%= filters.company %}</h4>
 <h5 class="text-center">
 	{%= dateutil.str_to_user(filters.from_date) %}
@@ -50,9 +90,10 @@
 				<td style="text-align: right">{%= format_currency(data[i][__("Debit")]) %}</td>
 				<td style="text-align: right">{%= format_currency(data[i][__("Credit")]) %}</td>
                 
-                <td>{%= data[i][__("Cost Center")] %}/{%= data[i][__("Project")] %}</td>
+                <td>{%= data[i][__("Cost Center")] %}
+                {% if(data[i][__("Project")]) { %} / {%= data[i][__("Project")] %} {% } %}</td>
                 <td>{%= data[i][__("Reason")] %}</td>
-                <td>{%= data[i][__("reference_name")] %}</td>
+                <td>{%= data[i][__("PO")] %}</td>
 
 			{% } else { %}
 				<td></td>

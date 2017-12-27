@@ -120,25 +120,35 @@ def get_gl_entries(filters):
 	group_by_condition = "group by voucher_type, voucher_no, account, cost_center" \
 		if filters.get("group_by_voucher") else "group by name"
 
-	gl_entries = frappe.db.sql("""
-		select
-			posting_date, account, party_type, party,
-			sum(debit) as debit, sum(credit) as credit,
-			voucher_type, voucher_no,title, cost_center, project,
-			against_voucher_type, against_voucher,
-			remarks,reason,description, against, is_opening {select_fields}
-		from `tabGL Entry`
+	""" Original Queery before modifed and add Purchase Order field to it as a left join """
+
+	# gl_entries = frappe.db.sql("""
+	# 	select
+	# 		posting_date, account, party_type, party,
+	# 		sum(debit) as debit, sum(credit) as credit,
+	# 		voucher_type, voucher_no,title, cost_center, project,
+	# 		against_voucher_type, against_voucher,
+	# 		remarks,reason,description, against, is_opening {select_fields}
+	# 	from `tabGL Entry`
+	# 	where company=%(company)s {conditions}
+	# 	{group_by_condition}
+	# 	order by posting_date, account"""\
+	# 	.format(select_fields=select_fields, conditions=get_conditions(filters),
+	# 		group_by_condition=group_by_condition), filters, as_dict=1)
+ 
+
+ 	gl_entries = frappe.db.sql("""
+		select * from 
+		(select posting_date, account, party_type, party, sum(debit) as debit,
+		sum(credit) as credit, voucher_type, voucher_no,title, cost_center,
+		project, against_voucher_type, against_voucher, remarks,reason,description, 
+		against, is_opening {select_fields} from `tabGL Entry` 
 		where company=%(company)s {conditions}
-		{group_by_condition}
-		order by posting_date, account"""\
+		{group_by_condition} order by posting_date , account ) a 
+		left join (select purchase_order,parent from `tabPurchase Invoice Item`) b
+		on a.voucher_no = b.parent """\
 		.format(select_fields=select_fields, conditions=get_conditions(filters),
-			group_by_condition=group_by_condition), filters, as_dict=1)
-
-	# po = frappe.db.sql(""" 
-	# 	select purchase_order from `tabPurchase Invoice Item` where parent ='%s'"""\
-	# 	%(voucher_no))
-	
-
+		group_by_condition=group_by_condition), filters, as_dict=1)
 
 	return gl_entries
 
@@ -304,7 +314,7 @@ def get_result_as_list(data, filters):
 			row += [d.get("debit_in_account_currency"), d.get("credit_in_account_currency")]
 
 		row += [d.get("voucher_type"), d.get("voucher_no"), d.get("title"), d.get("against"),
-			d.get("party_type"), d.get("party"), d.get("project"), d.get("cost_center"), d.get("against_voucher_type"), d.get("against_voucher"), d.get("remarks"), d.get("reason"), d.get("description")
+			d.get("party_type"), d.get("party"), d.get("project"), d.get("cost_center"), d.get("against_voucher_type"), d.get("against_voucher"), d.get("remarks"), d.get("reason"), d.get("description"),d.get("purchase_order")
 		]
 
 		result.append(row)
