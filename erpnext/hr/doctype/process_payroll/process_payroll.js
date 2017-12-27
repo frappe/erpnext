@@ -1,5 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
+cur_frm.add_fetch('company', 'cost_center', 'payroll_cost_center');
 
 frappe.ui.form.on("Process Payroll", {
 	onload: function(frm) {
@@ -45,6 +46,7 @@ frappe.ui.form.on("Process Payroll", {
 
 	payment_account: function(frm) {
 		frm.toggle_display(['make_bank_entry'], (frm.doc.payment_account!="" && frm.doc.payment_account!="undefined"));
+		//~ frm.toggle_display(['cost_center'], (frm.doc.payment_account!="" && frm.doc.payment_account!="undefined"));
 	},
 
 	set_start_end_dates: function(frm) {
