@@ -18,6 +18,13 @@ class TestPurchaseOrder(unittest.TestCase):
 		pr = create_pr_against_po(po.name)
 		self.assertEquals(len(pr.get("items")), 1)
 
+	def test_purchase_order_payment_terms_due_date(self):
+		po = create_purchase_order(do_not_submit=True)
+		po.schedule_date = ''
+		po.submit()
+
+		self.assertEquals(po.payment_schedule[0].due_date, po.schedule_date)
+
 	def test_ordered_qty(self):
 		existing_ordered_qty = get_ordered_qty()
 
@@ -97,9 +104,9 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.submit()
 
 		self.assertEqual(po.payment_schedule[0].payment_amount, 2500.0)
-		self.assertEqual(po.payment_schedule[0].due_date, po.transaction_date)
+		self.assertEqual(po.payment_schedule[0].due_date, po.schedule_date)
 		self.assertEqual(po.payment_schedule[1].payment_amount, 2500.0)
-		self.assertEqual(po.payment_schedule[1].due_date, add_days(po.transaction_date, 30))
+		self.assertEqual(po.payment_schedule[1].due_date, add_days(po.schedule_date, 30))
 		pi = make_purchase_invoice(po.name)
 		pi.save()
 
@@ -107,9 +114,9 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(len(pi.get("items", [])), 1)
 
 		self.assertEqual(pi.payment_schedule[0].payment_amount, 2500.0)
-		self.assertEqual(pi.payment_schedule[0].due_date, po.transaction_date)
+		self.assertEqual(pi.payment_schedule[0].due_date, pi.posting_date)
 		self.assertEqual(pi.payment_schedule[1].payment_amount, 2500.0)
-		self.assertEqual(pi.payment_schedule[1].due_date, add_days(po.transaction_date, 30))
+		self.assertEqual(pi.payment_schedule[1].due_date, add_days(pi.posting_date, 30))
 
 	def test_subcontracting(self):
 		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")

@@ -22,6 +22,10 @@ class TestSalesOrder(unittest.TestCase):
 			set_user_permission_doctypes(doctypes="Sales Order", role=role,
 				apply_user_permissions=0, user_permission_doctypes=None)
 
+	def test_sales_order_payment_terms_due_date(self):
+		so = make_sales_order()
+		self.assertEquals(so.payment_schedule[0].due_date, so.delivery_date)
+
 	def test_make_material_request(self):
 		so = make_sales_order(do_not_submit=True)
 
