@@ -1204,7 +1204,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		const doctype = this.frm.doc.doctype;
 		const doc = this.frm.doc;
 
-		relevant_doctypes = [
+		const relevant_doctypes = [
 			'Sales Invoice', 'Purchase Invoice', 'Sales Order', 'Purchase Order',
 			'Quotation'
 		];
@@ -1243,7 +1243,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	payment_term: function(doc, cdt, cdn) {
-		const me = this;
 		var row = locals[cdt][cdn];
 
 		if(row.payment_term) {
