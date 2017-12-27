@@ -494,9 +494,20 @@ class LeaveApplication(Document):
 			if allocation_records:
 				from_date = allocation_records[self.employee][self.leave_type].from_date
 				applied_days = get_approved_leaves_for_period(self.employee, self.leave_type, from_date, self.to_date)
-				# frappe.throw(str(applied_days + self.total_leave_days))
+				
+				prev_year_date = frappe.utils.data.add_years(self.from_date, -1)
+				prev_year_allocation_records = get_leave_allocation_records(prev_year_date, self.employee, "Annual Leave - اجازة اعتيادية")
+				if prev_year_allocation_records:
+					from_date = prev_year_allocation_records[self.employee]["Annual Leave - اجازة اعتيادية"].from_date
+					to_date = prev_year_allocation_records[self.employee]["Annual Leave - اجازة اعتيادية"].to_date
+					prev_year_total_leaves_allocated = prev_year_allocation_records[self.employee]["Annual Leave - اجازة اعتيادية"].total_leaves_allocated
+					prev_year_applied_days = get_approved_leaves_for_period(self.employee, "Annual Leave - اجازة اعتيادية", from_date, to_date)
+					prev_year_remain_balance = prev_year_total_leaves_allocated - prev_year_applied_days
+
 				date_dif = date_diff(self.to_date, from_date)
-				period_balance = (date_dif) * (allocation_records[self.employee][self.leave_type].total_leaves_allocated/360)
+				period_balance = (date_dif) * (allocation_records[self.employee][self.leave_type].total_leaves_allocated/360)+prev_year_remain_balance
+				if period_balance > 33:
+					period_balance=33
 				if period_balance < applied_days + self.total_leave_days: 
 					frappe.throw(_("Your monthly leave balance is not sufficient"))
 
@@ -903,7 +914,19 @@ def get_monthly_accumulated_leave(from_date, to_date, leave_type, employee):
 			# al_from_date_month = getdate(allocation_records[employee][leave_type].from_date).month
 			# al_to_date_month = getdate(allocation_records[employee][leave_type].to_date).month
 			# frappe.throw(str(date_dif))
-			period_balance = (date_dif) * (allocation_records[employee][leave_type].total_leaves_allocated/360)
+
+			prev_year_date = frappe.utils.data.add_years(from_date, -1)
+			prev_year_allocation_records = get_leave_allocation_records(prev_year_date, employee, "Annual Leave - اجازة اعتيادية")
+			if prev_year_allocation_records:
+				from_date = prev_year_allocation_records[employee]["Annual Leave - اجازة اعتيادية"].from_date
+				to_date = prev_year_allocation_records[employee]["Annual Leave - اجازة اعتيادية"].to_date
+				prev_year_total_leaves_allocated = prev_year_allocation_records[employee]["Annual Leave - اجازة اعتيادية"].total_leaves_allocated
+				prev_year_applied_days = get_approved_leaves_for_period(employee, "Annual Leave - اجازة اعتيادية", from_date, to_date)
+				prev_year_remain_balance = prev_year_total_leaves_allocated - prev_year_applied_days
+
+			period_balance = (date_dif) * (allocation_records[employee][leave_type].total_leaves_allocated/360)+prev_year_remain_balance
+			if period_balance > 33:
+				period_balance=33
 			balance = period_balance - applied_days - total_leave_days
 			# getdate(to_date).month
 			

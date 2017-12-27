@@ -329,3 +329,42 @@ erpnext.asset.transfer_asset = function(frm) {
 	});
 	dialog.show();
 }
+
+
+// Generate Bar Code button 
+
+frappe.ui.form.on("Asset", "refresh", function(frm) {
+    frm.add_custom_button(__("Generate Barcode"), function() {
+        // When this button is clicked, do this
+
+        // we take asset name to create a barcode for it 
+        var name = frm.doc.name;
+
+        // do something with these values, like an ajax request 
+        // or call a server side frappe function using frappe.call
+		frappe.call({
+		    method: 'barcode_attach2',
+		    doc: frm.doc,
+		    args: {
+		            'name':name ,
+		    },
+		    callback: function(r) {
+		        if (!r.exc) {
+		            // code snippet
+
+		            if (r.message){ 
+		            	cur_frm.set_value('barcode_img',String(r.message));
+
+		            	cur_frm.refresh_field('barcode_img');
+		            	console.log(' barcode updated ')
+		            }
+
+		        }
+		    }
+		});
+
+
+
+
+    });
+});
