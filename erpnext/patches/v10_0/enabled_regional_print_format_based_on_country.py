@@ -7,8 +7,8 @@ import frappe
 def execute():
 	print_format_mapper = {
 		'India': ['GST POS Invoice', 'GST Tax Invoice'],
-		'Saudi Arabia': ['Simplified Tax Invoice', 'Detailed Tax Invoice'],
-		'United Arab Emirates': ['Simplified Tax Invoice', 'Detailed Tax Invoice']
+		'Saudi Arabia': ['Simplified Tax Invoice', 'Detailed Tax Invoice', 'Tax Invoice'],
+		'United Arab Emirates': ['Simplified Tax Invoice', 'Detailed Tax Invoice', 'Tax Invoice']
 	}
 
 	frappe.db.sql(""" update `tabPrint Format` set disabled = 1 where name
