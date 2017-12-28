@@ -12,7 +12,7 @@ from frappe.utils import getdate
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
-from erpnext.buying.utils import check_for_closed_status, update_last_purchase_rate
+from erpnext.buying.utils import check_for_closed_status
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -111,6 +111,8 @@ class PurchaseReceipt(BuyingController):
 
 	# on submit
 	def on_submit(self):
+		super(PurchaseReceipt, self).on_submit()
+
 		# Check for Approving Authority
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
@@ -118,9 +120,6 @@ class PurchaseReceipt(BuyingController):
 		self.update_prevdoc_status()
 		if self.per_billed < 100:
 			self.update_billing_status()
-
-		if not self.is_return:
-			update_last_purchase_rate(self, 1)
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
@@ -140,6 +139,8 @@ class PurchaseReceipt(BuyingController):
 			frappe.throw(_("Purchase Invoice {0} is already submitted").format(self.submit_rv[0][0]))
 
 	def on_cancel(self):
+		super(PurchaseReceipt, self).on_cancel()
+
 		self.check_for_closed_status()
 		# Check if Purchase Invoice has been submitted against current Purchase Order
 		submitted = frappe.db.sql("""select t1.name
@@ -151,9 +152,6 @@ class PurchaseReceipt(BuyingController):
 
 		self.update_prevdoc_status()
 		self.update_billing_status()
-
-		if not self.is_return:
-			update_last_purchase_rate(self, 0)
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
