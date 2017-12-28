@@ -47,7 +47,7 @@ def make_tax_account(company, account_name, tax_rate):
 			"root_type": "Liability",
 			"account_type": "Tax",
 			"tax_rate": flt(tax_rate) if tax_rate else None
-		}).insert(ignore_permissions=True)
+		}).insert(ignore_permissions=True, ignore_mandatory=True)
 
 def make_sales_and_purchase_tax_templates(accounts, template_name=None):
 	if not template_name:
