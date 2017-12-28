@@ -544,7 +544,7 @@ def get_itemised_tax_breakup_html(doc):
 
 	get_rounded_tax_amount(itemised_tax, doc.precision("tax_amount", "taxes"))
 
-	update_itemwised_tax_data(doc)
+	update_itemised_tax_data(doc)
 	frappe.flags.company = None
 
 	return frappe.render_template(
@@ -559,7 +559,7 @@ def get_itemised_tax_breakup_html(doc):
 
 
 @erpnext.allow_regional
-def update_itemwised_tax_data(doc):
+def update_itemised_tax_data(doc):
 	#Don't delete this method, used for localization
 	pass
 

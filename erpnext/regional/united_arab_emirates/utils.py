@@ -1,7 +1,7 @@
 from frappe.utils import flt
 from erpnext.controllers.taxes_and_totals import get_itemised_tax
 
-def update_itemwised_tax_data(doc):
+def update_itemised_tax_data(doc):
 	if not doc.taxes: return
 
 	itemised_tax = get_itemised_tax(doc.taxes)
