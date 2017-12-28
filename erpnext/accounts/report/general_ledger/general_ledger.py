@@ -200,8 +200,15 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 	debit_in_account_currency = totals.closing.get('debit_in_account_currency', 0)
 	credit_in_account_currency = totals.closing.get('credit_in_account_currency', 0)
 
-	total_closing['debit'] = total_debit - total_credit
-	total_closing['debit_in_account_currency'] = debit_in_account_currency - credit_in_account_currency
+	total_amount = total_debit - total_credit
+
+	if total_amount > 0:
+		total_closing['debit'] = total_amount
+		total_closing['debit_in_account_currency'] = debit_in_account_currency - credit_in_account_currency
+	else:
+		total_closing['credit'] = abs(total_amount)
+		total_closing['credit_in_account_currency'] = abs(debit_in_account_currency - credit_in_account_currency)
+
 	data.append(totals.total_closing)
 
 	return data
