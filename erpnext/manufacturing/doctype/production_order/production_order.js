@@ -226,6 +226,7 @@ frappe.ui.form.on("Production Order", {
 				args: { production_item: frm.doc.production_item },
 				callback: function(r) {
 					frm.set_query("sales_order", function() {
+						erpnext.in_production_item_onchange = true;
 						return {
 							filters: [
 								["Sales Order","name", "in", r.message]
