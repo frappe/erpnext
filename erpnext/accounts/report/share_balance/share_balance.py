@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
+# Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, cint, getdate
 from frappe import msgprint, _
 
 def execute(filters=None):
@@ -27,26 +25,40 @@ def execute(filters=None):
 		pass
 	else:
 		transfers = get_all_transfers(date, filters.get("shareholder"), company)
+		transfer_type, share_type, no_of_shares, rate, amount, company = 1, 2, 3, 4, 5, 6
 		for transfer in transfers:
-			row = [filters.get("shareholder"), transfer.date, transfer.transfer_type,
-				transfer.share_type, transfer.no_of_shares, transfer.rate, transfer.amount,
-				transfer.company, transfer.name]
-			
-			data.append(row)
+			row = None
+			for datum in data:
+				if datum[company] == transfer.company and datum[share_type] == transfer.share_type:
+					if transfer.to_shareholder == filters.get("shareholder"):
+						datum[no_of_shares] += transfer.no_of_shares
+						datum[amount] += transfer.amount
+						datum[rate]    =  datum[amount] / ( datum[no_of_shares] + transfer.no_of_shares ) 
+					else:
+						print ("\n\n\n\n\n\n\nHERE\n\n\n\n\n\n")
+						datum[no_of_shares] -= transfer.no_of_shares
+						datum[amount] -= transfer.amount
+						datum[rate]    =  datum[amount] / ( datum[no_of_shares] - transfer.no_of_shares ) 
+					row = 'already exists'
+					break
+			# new entry
+			if not row:
+				row = [filters.get("shareholder"), transfer.transfer_type,
+					transfer.share_type, transfer.no_of_shares, transfer.rate, transfer.amount,
+					transfer.company]
+				data.append(row)
 
 	return columns, data
 
 def get_columns(filters):
 	columns = [ 
 		_("Shareholder") + ":Link/Shareholder:150", 
-		_("Date") + "::100",
 		_("Transfer Type") + "::140",
 		_("Share Type") + "::90",
 		_("No of Shares") + "::90", 
-		_("Rate") + "::90",
+		_("Average Rate") + "::90",
 		_("Amount") + "::90",
-		_("Company") + "::150",
-		_("Share Transfer") + ":Link/Share Transfer:90"
+		_("Company") + "::150"
 	]
 	return columns
 

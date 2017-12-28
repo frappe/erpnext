@@ -48,20 +48,13 @@ class ShareTransfer(Document):
 		shareholder = self.share_exists_with()
 		if shareholder:
 			frappe.throw('These shares already exist with the shareholder {0}'.format(shareholder))
-		else:
-			self.add_shares()
 
 	def validate_purchase(self):
-		if self.share_exists_with(self.from_shareholder):
-			self.remove_shares()
-		else:
+		if not self.share_exists_with(self.from_shareholder):
 			frappe.throw('The shareholder {0} doesn\'t own these shares'.format(self.from_shareholder))
 
 	def validate_transfer(self):
-		if self.share_exists_with(self.from_shareholder):
-			self.remove_shares()
-			self.add_shares()
-		else:
+		if not self.share_exists_with(self.from_shareholder):
 			frappe.throw('The shareholder {0} doesn\'t own these shares'.format(self.from_shareholder))
 
 	def share_exists_with(self, shareholder_name=False):
@@ -94,11 +87,6 @@ class ShareTransfer(Document):
 					return shareholder
 			else:
 				return False
-
-		# if shareholder_name and :
-		# 	return True
-		# else:
-		# 	return shareholder
 
 	def recursive_test(self, shareholder_shares, share_transfer_shares):
 		# return True if shares exist with the person
@@ -141,97 +129,3 @@ class ShareTransfer(Document):
 			return False
 		else:
 			return [shareholder_share[end]+1, share_transfer_share[end]]
-
-	def add_shares(self):
-		# add list of shares to to_shareholder
-		shareholder = frappe.get_doc("Shareholder", self.to_shareholder)
-		for share in self.shares:
-			shareholder.append('share_ledger', {
-				'company': self.company,
-				'from_no': share.from_no,
-				'to_no': share.to_no,
-				'no_of_shares': (share.to_no - share.from_no + 1),
-				'amount': self.rate * (share.to_no - share.from_no + 1),
-				'rate': self.rate,
-			})
-		shareholder.save()
-
-	def remove_shares(self):
-		# remove share from from_shareholder
-		shareholder = frappe.get_doc("Shareholder", self.from_shareholder)
-		new_ledger = []
-		
-		shareholder = self.recursive_shareholder_edit(shareholder, 0, 0)
-		shareholder.save()
-
-	def recursive_shareholder_edit(self, shareholder, ledger_pointer, share_pointer):
-		if share_pointer == len(self.shares):
-			return shareholder
-		if ledger_pointer == len(shareholder.share_ledger):
-			frappe.throw('Something went wrong!')
-
-		# shareholder_ledger : ======
-		# sharetransfer_share:         ===
-		if shareholder.share_ledger[ledger_pointer].to_no < self.shares[share_pointer].from_no:
-			return self.recursive_shareholder_edit(shareholder, ledger_pointer+1, share_pointer)
-
-		# shareholder_ledger : ======
-		# sharetransfer_share:      ===
-		if self.shares[share_pointer].from_no < shareholder.share_ledger[ledger_pointer].to_no < self.shares[share_pointer].to_no and \
-			self.shares[share_pointer].from_no > shareholder.share_ledger[ledger_pointer].to_no:
-			shareholder.share_ledger[ledger_pointer].to_no = self.shares[share_pointer].from_no - 1
-			return self.recursive_shareholder_edit(shareholder, ledger_pointer, share_pointer)
-
-		# shareholder_ledger :   ======
-		# sharetransfer_share: ===
-		if self.shares[share_pointer].from_no < shareholder.share_ledger[ledger_pointer].from_no < self.shares[share_pointer].to_no and \
-			self.shares[share_pointer].from_no < shareholder.share_ledger[ledger_pointer].from_no:
-			shareholder.share_ledger[ledger_pointer].from_no = self.shares[share_pointer].to_no + 1
-			return self.recursive_shareholder_edit(shareholder, ledger_pointer, share_pointer+1)
-
-		# shareholder_ledger : ======
-		# sharetransfer_share:  ===
-		if self.shares[share_pointer].from_no >= shareholder.share_ledger[ledger_pointer].from_no and \
-			self.shares[share_pointer].to_no <= shareholder.share_ledger[ledger_pointer].to_no:
-			# shareholder_ledger : ======
-			# sharetransfer_share: ======
-			if self.shares[share_pointer].from_no == shareholder.share_ledger[ledger_pointer].from_no or \
-				self.shares[share_pointer].to_no == shareholder.share_ledger[ledger_pointer].to_no:
-				shareholder.share_ledger[ledger_pointer].from_no = -1
-				shareholder.share_ledger[ledger_pointer].to_no = -1
-				return self.recursive_shareholder_edit(shareholder, ledger_pointer+1, share_pointer+1)
-
-			# shareholder_ledger : ======
-			# sharetransfer_share: ===
-			elif self.shares[share_pointer].from_no == shareholder.share_ledger[ledger_pointer].from_no:
-				shareholder.share_ledger[ledger_pointer].from_no = self.shares[share_pointer].to_no + 1
-				return self.recursive_shareholder_edit(shareholder, ledger_pointer, share_pointer+1)
-
-			# shareholder_ledger : ======
-			# sharetransfer_share:    ===
-			elif self.shares[share_pointer].to_no == shareholder.share_ledger[ledger_pointer].to_no:
-				shareholder.share_ledger[ledger_pointer].to_no = self.shares[share_pointer].from_no - 1
-				return self.recursive_shareholder_edit(shareholder, ledger_pointer, share_pointer+1)
-
-			# shareholder_ledger : ======
-			# sharetransfer_share:  ====
-			elif self.shares[share_pointer].from_no == shareholder.share_ledger[ledger_pointer].from_no or \
-				self.shares[share_pointer].to_no == shareholder.share_ledger[ledger_pointer].to_no:
-				shareholder.append('share_ledger', {
-					'company': self.company,
-					'from_no': self.shares[share_pointer].to_no + 1,
-					'to_no': shareholder.share_ledger[ledger_pointer].to_no,
-					'no_of_shares': (shareholder.share_ledger[ledger_pointer].to_no - self.shares[share_pointer].to_no),
-					'amount': self.rate * (shareholder.share_ledger[ledger_pointer].to_no - self.shares[share_pointer].to_no),
-					'rate': self.rate
-				})
-				shareholder.share_ledger[ledger_pointer].to_no = self.shares[share_pointer].from_no - 1
-				return self.recursive_shareholder_edit(shareholder, ledger_pointer, share_pointer+1)
-
-		# shareholder_ledger :  ====
-		# sharetransfer_share: ======
-		if self.shares[share_pointer].from_no < shareholder.share_ledger[ledger_pointer].from_no and \
-			self.shares[share_pointer].to_no > shareholder.share_ledger[ledger_pointer].to_no:
-			shareholder.share_ledger[ledger_pointer].from_no = -1
-			shareholder.share_ledger[ledger_pointer].to_no = -1
-			return self.recursive_shareholder_edit(shareholder, ledger_pointer+1, share_pointer)
