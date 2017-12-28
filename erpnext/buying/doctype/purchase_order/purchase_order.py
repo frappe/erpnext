@@ -11,8 +11,7 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
 from frappe.desk.notifications import clear_doctype_notifications
-from erpnext.buying.utils import (validate_for_items, check_for_closed_status,
-	update_last_purchase_rate)
+from erpnext.buying.utils import validate_for_items, check_for_closed_status
 
 
 form_grid_templates = {
@@ -189,6 +188,8 @@ class PurchaseOrder(BuyingController):
 		clear_doctype_notifications(self)
 
 	def on_submit(self):
+		super(PurchaseOrder, self).on_submit()
+
 		if self.is_against_so():
 			self.update_status_updater()
 
@@ -199,9 +200,9 @@ class PurchaseOrder(BuyingController):
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
 
-		update_last_purchase_rate(self, is_submit = 1)
-
 	def on_cancel(self):
+		super(PurchaseOrder, self).on_cancel()
+
 		if self.is_against_so():
 			self.update_status_updater()
 
@@ -217,8 +218,6 @@ class PurchaseOrder(BuyingController):
 		# Must be called after updating ordered qty in Material Request
 		self.update_requested_qty()
 		self.update_ordered_qty()
-
-		update_last_purchase_rate(self, is_submit = 0)
 
 	def on_update(self):
 		pass

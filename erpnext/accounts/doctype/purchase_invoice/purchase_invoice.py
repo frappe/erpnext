@@ -277,6 +277,8 @@ class PurchaseInvoice(BuyingController):
 						.format(item.purchase_receipt))
 
 	def on_submit(self):
+		super(PurchaseInvoice, self).on_submit()
+
 		self.check_prev_docstatus()
 		self.update_status_updater_args()
 
@@ -606,6 +608,8 @@ class PurchaseInvoice(BuyingController):
 			))
 
 	def on_cancel(self):
+		super(PurchaseInvoice, self).on_cancel()
+
 		self.check_for_closed_status()
 
 		self.update_status_updater_args()
