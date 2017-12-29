@@ -501,8 +501,8 @@ class Item(WebsiteGenerator):
 
 	def update_item_price(self):
 		frappe.db.sql("""update `tabItem Price` set item_name=%s,
-			item_description=%s, modified=NOW() where item_code=%s""",
-			(self.item_name, self.description, self.name))
+			item_description=%s,price_list_rate=%s, modified=NOW() where item_code=%s""",
+			(self.item_name, self.description, self.standard_rate,self.name))
 
 	def on_trash(self):
 		super(Item, self).on_trash()

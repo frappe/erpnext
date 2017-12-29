@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 
+from frappe import _
 from frappe.test_runner import make_test_objects
 from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsError,
 	InvalidItemAttributeValueError, get_variant)
@@ -43,6 +44,15 @@ def make_item(item_code, properties=None):
 class TestItem(unittest.TestCase):
 	def setUp(self):
 		frappe.flags.attribute_values = None
+
+	def tearDown(self):
+		frappe.delete_doc("Item", "_Test Item 999")
+		frappe.delete_doc("Item Price",{
+				"item_code": "_Test Item 999",
+				"price_list": (frappe.db.get_single_value('Selling Settings', 'selling_price_list')
+				or frappe.db.get_value('Price List', _('Standard Selling')))
+			}
+		)
 
 	def get_item(self, idx):
 		item_code = test_records[idx].get("item_code")
@@ -276,10 +286,42 @@ class TestItem(unittest.TestCase):
 		stock_item = frappe.get_all('Stock Ledger Entry', fields = ["item_code"], limit=1)
 		if stock_item:
 			item_code = stock_item[0].item_code
-
 			item_doc = frappe.get_doc('Item', item_code)
 			item_doc.has_variants = 1
 			self.assertRaises(StockExistsForTemplate, item_doc.save)
+
+	def test_standard_selling_rate_item_price(self):
+		def fetch_item_price_list_rate():
+			return frappe.db.get_value("Item Price", {
+				"item_code": "_Test Item 999",
+				"price_list": (frappe.db.get_single_value('Selling Settings', 'selling_price_list')
+				or frappe.db.get_value('Price List', _('Standard Selling')))
+			}
+			, "price_list_rate")
+
+		test_item = frappe.new_doc("Item")
+
+		test_item.item_code = "_Test Item 999"
+		test_item.item_group = "_Test Item Group"
+		test_item.item_name = "_Test Item 999"
+		test_item.stock_uom = "_Test UOM"
+		test_item.standard_rate = 101.2
+
+		test_item.save()
+		frappe.db.commit()
+
+		test_item_price = fetch_item_price_list_rate()
+		self.assertEquals(test_item_price, 101.2)
+
+		test_item = frappe.get_doc("Item", "_Test Item 999")
+		test_item.standard_rate = 1111.11
+		test_item.save()
+		frappe.db.commit()
+
+		test_item_price = fetch_item_price_list_rate()
+
+		self.assertEquals(test_item_price, 1111.11)
+
 
 def set_item_variant_settings(fields):
 	doc = frappe.get_doc('Item Variant Settings')
