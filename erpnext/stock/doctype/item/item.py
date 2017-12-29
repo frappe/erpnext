@@ -112,26 +112,6 @@ class Item(WebsiteGenerator):
 		self.update_item_price()
 		self.update_template_item()
 
-	# def add_or_update(self,price_list=None):
-	# 	if not price_list:
-	# 		price_list = (frappe.db.get_single_value('Selling Settings', 'selling_price_list')
-	# 			or frappe.db.get_value('Price List', _('Standard Selling')))
-		
-	# 	if price_list:
-	# 		if not frappe.db.get_doc('Item Price', filters={"item_code":self.name,"price_list":price_list}):
-	# 			item_price = frappe.get_doc({
-	# 						"doctype": "Item Price",
-	# 						"price_list": price_list,
-	# 						"item_code": self.name,
-	# 						"currency": erpnext.get_default_currency(),
-	# 						"price_list_rate": self.standard_rate
-	# 					})
-	# 		else:
-	# 			item_price = frappe.db.get_doc('Item Price', filters={"item_code":self.name,"price_list":price_list})
-	# 			item_price.price_list_rate = self.standard_rate
-
-	# 		item_price.insert()
-
 	def validate_description(self):
 		'''Clean HTML description if set'''
 		if cint(frappe.db.get_single_value('Stock Settings', 'clean_description_html')):

@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 
+from frappe import _
 from frappe.test_runner import make_test_objects
 from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsError,
 	InvalidItemAttributeValueError, get_variant)
@@ -46,8 +47,7 @@ class TestItem(unittest.TestCase):
 
 	def tearDown(self):
 		frappe.delete_doc("Item", "_Test Item 999")
-		frappe.delete_doc("Item Price", 
-			{
+		frappe.delete_doc("Item Price",{
 				"item_code": "_Test Item 999",
 				"price_list": (frappe.db.get_single_value('Selling Settings', 'selling_price_list')
 				or frappe.db.get_value('Price List', _('Standard Selling')))
@@ -286,15 +286,13 @@ class TestItem(unittest.TestCase):
 		stock_item = frappe.get_all('Stock Ledger Entry', fields = ["item_code"], limit=1)
 		if stock_item:
 			item_code = stock_item[0].item_code
-
 			item_doc = frappe.get_doc('Item', item_code)
 			item_doc.has_variants = 1
 			self.assertRaises(StockExistsForTemplate, item_doc.save)
 
 	def test_standard_selling_rate_item_price(self):
 		def fetch_item_price_list_rate():
-			return frappe.db.get_value("Item Price", 
-			{
+			return frappe.db.get_value("Item Price", {
 				"item_code": "_Test Item 999",
 				"price_list": (frappe.db.get_single_value('Selling Settings', 'selling_price_list')
 				or frappe.db.get_value('Price List', _('Standard Selling')))
