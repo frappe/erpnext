@@ -222,6 +222,20 @@ class PurchaseOrder(BuyingController):
 	def on_update(self):
 		pass
 
+	def before_update_after_submit(self):	
+		tot_qty, received_qty = 0.0, 0.0			
+		for item in self.items:
+			received_qty += item.received_qty
+			tot_qty += item.qty
+			if item.qty < item.received_qty:
+				frappe.throw(_("Item {0}'s qantity {1} can not be less than received quantity {2}").format(item.item_code,item.qty,item.received_qty))		
+		self.validate_schedule_date()
+		#validate_for_items(self)  #this will reset qty_received as 0 which is not as expected.		 
+		self.validate_uom_is_integer("uom", "qty")
+		self.validate_uom_is_integer("stock_uom", "stock_qty")	
+		self.db_set("per_received", flt(received_qty/tot_qty) * 100, update_modified=False)
+		self.set_status()
+
 	def update_status_updater(self):
 		self.status_updater[0].update({
 			"target_parent_dt": "Sales Order",
