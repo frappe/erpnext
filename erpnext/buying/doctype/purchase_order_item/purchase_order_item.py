@@ -14,3 +14,12 @@ class PurchaseOrderItem(Document):
 
 def on_doctype_update():
 	frappe.db.add_index("Purchase Order Item", ["item_code", "warehouse"])
+	
+@frappe.whitelist()
+def check_item_delete(cdt, cdn):
+	dn = frappe.db.sql_list("""select t1.name from `tabPurchase Receipt` t1,`tabPurchase Receipt Item` t2
+			where t1.name = t2.parent and t2.purchase_order_item = %s""", cdn)
+	if dn:	
+		return {"code": "no_delete" , "msg": dn}
+	else:
+		return {"code": "" , "msg": ""}
