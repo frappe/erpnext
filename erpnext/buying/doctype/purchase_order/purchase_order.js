@@ -46,6 +46,20 @@ frappe.ui.form.on("Purchase Order Item", {
 				set_schedule_date(frm);
 			}
 		}
+	},
+	before_items_remove: function(frm, dct, dcn){
+         frappe.call({
+		method: "erpnext.buying.doctype.purchase_order_item.purchase_order_item.check_item_delete",
+		args: {
+			cdt: dct,
+			cdn: dcn
+		},
+		always: function(r){
+		    if(r.message.code == "no_delete"){
+		       	frappe.throw(__("You cannot delete this row, as there is linked object {0}.", [r.message.msg]))
+		    }
+		}
+	  })	
 	}
 });
 
