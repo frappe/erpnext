@@ -538,7 +538,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.payment_terms_template();
 		} else if (doc.payment_schedule) {
 			const me = this;
-			const payment_schedule = doc.payment_schedule;
 
 			doc.payment_schedule.forEach(
 				function(term) {
