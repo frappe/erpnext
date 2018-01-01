@@ -25,7 +25,7 @@ erpnext.crop.update_item_rate_uom = function(frm, cdt, cdn) {
 	let material_list = ['materials_required', 'produce', 'byproducts'];
 	material_list.forEach((material) => {
 		frm.doc[material].forEach((item, index) => {
-			if (item.name == cdn){
+			if (item.name == cdn && item.item_code){
 				frappe.call({
 					method:'erpnext.agriculture.doctype.crop.crop.get_item_details',
 					args: {
