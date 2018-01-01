@@ -205,6 +205,7 @@ class PurchaseInvoice(BuyingController):
 
 		if auto_accounting_for_stock:
 			stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
+			asset_not_billed_account = self.get_company_default("asset_received_but_not_billed")
 			stock_items = self.get_stock_items()
 
 		if self.update_stock:
@@ -225,7 +226,7 @@ class PurchaseInvoice(BuyingController):
 				#~ and (not item.po_detail or
 					#~ not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")):
 			if frappe.db.get_value("Item", item.item_code, "is_fixed_asset") :
-				item.expense_account = stock_not_billed_account
+				item.expense_account = asset_not_billed_account
 				
 			elif auto_accounting_for_stock and item.item_code in stock_items \
 				and self.is_opening == 'No' and not item.is_fixed_asset \

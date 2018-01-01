@@ -14,10 +14,10 @@ class FixedAssetCustody(Document):
 		self.validate_duplicate_custody()
 
 	def validate_duplicate_custody(self):
-		
-		fa=frappe.db.sql("select item_code, employee from `tabFixed Asset Custody` where item_code ='{0}' and name <> '{1}' and docstatus <> 2".format(self.item_code, self.name))
-		if fa:
-			frappe.throw(_("This Asset is already a custody with '{0}'".format(fa[0][1])))
+		pass
+		#~ fa=frappe.db.sql("select item_code, employee from `tabFixed Asset Custody` where item_code ='{0}' and name <> '{1}' and docstatus <> 2".format(self.item_code, self.name))
+		#~ if fa:
+			#~ frappe.throw(_("This Asset is already a custody with '{0}'".format(fa[0][1])))
 	
 	def before_update_after_submit(self):
 		

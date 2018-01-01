@@ -145,7 +145,7 @@ def get_gl_entries(filters):
 		against, is_opening {select_fields} from `tabGL Entry` 
 		where company=%(company)s {conditions}
 		{group_by_condition} order by posting_date , account ) a 
-		left join (select purchase_order,parent from `tabPurchase Invoice Item`) b
+		left join (select DISTINCT purchase_order,parent from `tabPurchase Invoice Item` ) b
 		on a.voucher_no = b.parent """\
 		.format(select_fields=select_fields, conditions=get_conditions(filters),
 		group_by_condition=group_by_condition), filters, as_dict=1)
