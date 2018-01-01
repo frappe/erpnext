@@ -63,7 +63,11 @@ class POSProfile(Document):
 
 			if len(default_mode_of_payment) > 1:
 				frappe.throw(_("Multiple default mode of payment is not allowed"))
+
 	def validate_customer_territory_group(self):
+		if not frappe.db.get_single_value('POS Settings', 'use_pos_in_offline_mode'):
+			return
+
 		if not self.territory:
 			frappe.throw(_("Territory is Required in POS Profile"), title="Mandatory Field")
 
