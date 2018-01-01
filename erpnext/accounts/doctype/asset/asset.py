@@ -261,12 +261,12 @@ class Asset(AccountsController):
 						"schedule_date": last_month_day,
 						"depreciation_amount": flt(depreciation_amount)
 					})
-			if getdate(self.next_depreciation_date) > getdate(self.purchase_date):
+			if getdate(self.next_depreciation_date) > getdate(self.purchase_date) and number_of_pending_depreciations:
 				end_date = add_days(last_month_day, rest_of_month_days)
 				end_date_last_month = (get_last_day(getdate(end_date)))
 				# # start_date = add_days(last_month_day, 1)
 				# # frappe.throw(str(start_date))
-				date_difference = cint(date_diff(get_last_day(getdate(end_date)), end_date))
+				date_difference = cint(date_diff(get_last_day(getdate(self.purchase_date)), self.purchase_date))
 				depreciation_amount = init_depreciation_amount - (init_depreciation_amount * (flt(date_difference+1)/cint(getdate(pi_last_month_day).day)))
 				self.append("schedules", {
 					"schedule_date": end_date_last_month,

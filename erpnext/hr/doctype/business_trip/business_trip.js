@@ -28,9 +28,10 @@ frappe.ui.form.on('Business Trip', {
     },
     validate: function(frm){
         cur_frm.refresh_fields(["workflow_state"]);
-        // if (cur_frm.doc.handled_by=="HR Specialist" && cur_frm.doc.other_expense>=1000){
-        //     cur_frm.doc.workflow_state = "Approve By HR Specialist"
-        //     }
+
+        if (cur_frm.doc.handled_by=="Director" && cur_frm.doc.days<4){
+            cur_frm.doc.workflow_state = "Approve By Director"
+            }
 
     },
     onload: function(frm) {
