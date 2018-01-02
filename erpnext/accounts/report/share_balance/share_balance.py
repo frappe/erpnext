@@ -27,7 +27,7 @@ def execute(filters=None):
 		transfers = get_all_transfers(date, filters.get("shareholder"), company)
 		transfer_type, share_type, no_of_shares, rate, amount, company = 1, 2, 3, 4, 5, 6
 		for transfer in transfers:
-			row = None
+			row = False
 			for datum in data:
 				if datum[company] == transfer.company and datum[share_type] == transfer.share_type:
 					if transfer.to_shareholder == filters.get("shareholder"):
@@ -35,17 +35,24 @@ def execute(filters=None):
 						datum[amount] += transfer.amount
 						datum[rate]    =  datum[amount] / ( datum[no_of_shares] + transfer.no_of_shares ) 
 					else:
-						print ("\n\n\n\n\n\n\nHERE\n\n\n\n\n\n")
 						datum[no_of_shares] -= transfer.no_of_shares
 						datum[amount] -= transfer.amount
-						datum[rate]    =  datum[amount] / ( datum[no_of_shares] - transfer.no_of_shares ) 
-					row = 'already exists'
+						if datum[no_of_shares] == 0:
+							datum[rate] = 0
+						else:
+							datum[rate] = datum[amount] / ( datum[no_of_shares] - transfer.no_of_shares ) 
+					row = True
 					break
 			# new entry
 			if not row:
-				row = [filters.get("shareholder"), transfer.transfer_type,
-					transfer.share_type, transfer.no_of_shares, transfer.rate, transfer.amount,
-					transfer.company]
+				if transfer.to_shareholder == filters.get("shareholder"):
+					row = [filters.get("shareholder"), transfer.transfer_type,
+						transfer.share_type, transfer.no_of_shares, transfer.rate, transfer.amount,
+						transfer.company]
+				else:
+					row = [filters.get("shareholder"), transfer.transfer_type,
+						transfer.share_type, -transfer.no_of_shares, -transfer.rate, -transfer.amount,
+						transfer.company]
 				data.append(row)
 
 	return columns, data
