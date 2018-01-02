@@ -1204,11 +1204,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		const doctype = this.frm.doc.doctype;
 		const doc = this.frm.doc;
 
-		const relevant_doctypes = [
-			'Sales Invoice', 'Purchase Invoice', 'Sales Order', 'Purchase Order',
-			'Quotation'
-		];
-
 		switch (doctype) {
 			case 'Sales Invoice':
 			case 'Purchase Invoice':
