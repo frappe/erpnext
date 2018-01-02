@@ -49,7 +49,7 @@ frappe.ui.form.on("Company", {
 			}, __("View"));
 
 			frm.add_custom_button(__('Default Tax Template'), function() {
-				frm.trigger("make_default_tax_template")
+				frm.trigger("make_default_tax_template");
 			}, __("Make"));
 
 			frm.page.set_inner_btn_group_as_primary(__("View"));
@@ -66,7 +66,7 @@ frappe.ui.form.on("Company", {
 			doc: frm.doc,
 			freeze: true,
 			callback: function() {
-				frappe.msgprint(__("Default tax templates for sales and purchase are created."))
+				frappe.msgprint(__("Default tax templates for sales and purchase are created."));
 			}
 		})
 	},
