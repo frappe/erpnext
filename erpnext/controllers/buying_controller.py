@@ -8,7 +8,7 @@ from frappe.utils import flt,cint, cstr, getdate
 
 from erpnext.accounts.party import get_party_details
 from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.buying.utils import validate_for_items
+from erpnext.buying.utils import validate_for_items, update_last_purchase_rate
 from erpnext.stock.stock_ledger import get_valuation_rate
 
 from erpnext.controllers.stock_controller import StockController
@@ -409,6 +409,18 @@ class BuyingController(StockController):
 					"actual_qty": -1*flt(d.consumed_qty),
 				}))
 
+	def on_submit(self):
+		if self.get('is_return'):
+			return
+
+		update_last_purchase_rate(self, is_submit = 1)
+
+	def on_cancel(self):
+		if self.get('is_return'):
+			return
+
+		update_last_purchase_rate(self, is_submit = 0)
+
 	def validate_schedule_date(self):
 		if not self.schedule_date:
 			self.schedule_date = min([d.schedule_date for d in self.get("items")])
@@ -419,7 +431,7 @@ class BuyingController(StockController):
 					d.schedule_date = self.schedule_date
 
 				if d.schedule_date and getdate(d.schedule_date) < getdate(self.transaction_date):
-					frappe.throw(_("Expected Date cannot be before Transaction Date"))
+					frappe.throw(_("Row #{0}: Reqd by Date cannot be before Transaction Date").format(d.idx))
 		else:
-			frappe.throw(_("Please enter Schedule Date"))
+			frappe.throw(_("Please enter Reqd by Date"))
 

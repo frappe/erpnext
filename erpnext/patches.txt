@@ -478,9 +478,10 @@ erpnext.patches.v9_2.rename_net_weight_in_item_master
 erpnext.patches.v9_2.delete_process_payroll
 erpnext.patches.v10_0.add_agriculture_domain
 erpnext.patches.v10_0.add_non_profit_domain
-erpnext.patches.v10_0.setup_vat_for_uae_and_saudi_arabia
+erpnext.patches.v10_0.setup_vat_for_uae_and_saudi_arabia #2017-12-28
 erpnext.patches.v10_0.set_primary_contact_for_customer
 erpnext.patches.v10_0.copy_projects_renamed_fields
 erpnext.patches.v10_0.enabled_regional_print_format_based_on_country
 erpnext.patches.v10_0.update_asset_calculate_depreciation
 erpnext.patches.v10_0.add_guardian_role_for_parent_portal
+erpnext.patches.v10_0.set_numeric_ranges_in_template_if_blank
