@@ -431,7 +431,7 @@ class BuyingController(StockController):
 					d.schedule_date = self.schedule_date
 
 				if d.schedule_date and getdate(d.schedule_date) < getdate(self.transaction_date):
-					frappe.throw(_("Expected Date cannot be before Transaction Date"))
+					frappe.throw(_("Row #{0}: Reqd by Date cannot be before Transaction Date").format(d.idx))
 		else:
-			frappe.throw(_("Please enter Schedule Date"))
+			frappe.throw(_("Please enter Reqd by Date"))
 
