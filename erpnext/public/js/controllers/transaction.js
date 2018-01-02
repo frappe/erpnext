@@ -1207,13 +1207,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	payment_terms_template: function() {
 		var me = this;
-		if(this.frm.doc.payment_terms_template) {
+		const doc = this.frm.doc;
+		if(doc.payment_terms_template && doc.doctype !== 'Delivery Note') {
 			frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_payment_terms",
 				args: {
-					terms_template: this.frm.doc.payment_terms_template,
-					posting_date: this.frm.doc.posting_date || this.frm.doc.transaction_date,
-					grand_total: this.frm.doc.rounded_total || this.frm.doc.grand_total
+					terms_template: doc.payment_terms_template,
+					posting_date: doc.posting_date || doc.transaction_date,
+					grand_total: doc.rounded_total || doc.grand_total
 				},
 				callback: function(r) {
 					if(r.message && !r.exc) {
