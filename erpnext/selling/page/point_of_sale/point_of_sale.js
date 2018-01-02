@@ -50,11 +50,11 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				this.set_online_status();
 			},
 			() => this.setup_company(),
-
 			() => this.make_new_invoice(),
 			() => {
 				frappe.dom.unfreeze();
 			},
+			() => this.fetch_pos_profile_data(),
 			() => this.page.set_title(__('Point of Sale'))
 		]);
 	}
@@ -464,6 +464,23 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		});
 	}
 
+	fetch_pos_profile_data() {
+		var me = this;
+		me.frm.doc["allow_print_before_pay"] = 0;
+		return new Promise(resolve => {
+			return this.frm.call({
+				method: "erpnext.selling.page.point_of_sale.point_of_sale.fetch_pos_profile_detail",
+				args:{
+						pos_profile : me.frm.doc.pos_profile
+					 }
+			}).then((r) => {
+				me.frm.doc["allow_print_before_pay"] = r.message;
+				this.set_form_action();
+				resolve();
+			});
+		});
+	}	
+
 	prepare_menu() {
 		var me = this;
 		this.page.clear_menu();
@@ -492,19 +509,20 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	set_form_action() {
-		if(this.frm.doc.docstatus !== 1) return;
+		if(this.frm.doc.docstatus == 1 || this.frm.doc.allow_print_before_pay == 1){
 
-		this.page.set_secondary_action(__("Print"), () => {
-			this.frm.print_preview.printit(true);
-		});
+			this.page.set_secondary_action(__("Print"), () => {
+				this.frm.print_preview.printit(true);
+			});
 
-		this.page.set_primary_action(__("New"), () => {
-			this.make_new_invoice();
-		});
+			this.page.set_primary_action(__("New"), () => {
+				this.make_new_invoice();
+			});
 
-		this.page.add_menu_item(__("Email"), () => {
-			this.frm.email_doc();
-		});
+			this.page.add_menu_item(__("Email"), () => {
+				this.frm.email_doc();
+			});
+		}
 	}
 };
 
