@@ -521,12 +521,36 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						if(r.message) {
 							me.frm.set_value("due_date", r.message);
 							frappe.ui.form.trigger(me.frm.doc.doctype, "currency");
+							me.recalculate_terms();
 						}
 					}
 				})
 			} else {
 				frappe.ui.form.trigger(me.frm.doc.doctype, "currency");
 			}
+		}
+	},
+
+	recalculate_terms: function() {
+		const doc = this.frm.doc;
+
+		if (doc.payment_terms_template) {
+			this.payment_terms_template();
+		} else if (doc.payment_schedule) {
+			const me = this;
+
+			doc.payment_schedule.forEach(
+				function(term) {
+					if (term.payment_term) {
+						me.payment_term(doc, term.doctype, term.name);
+					} else {
+						frappe.model.set_value(
+							term.doctype, term.name, 'due_date',
+							doc.posting_date || doc.transaction_date
+						);
+					}
+				}
+			);
 		}
 	},
 
