@@ -23,19 +23,19 @@ class BuyingSettings(Document):
 			frappe.db.sql(""" update tabDocField set allow_on_submit=1 where (fieldtype in ('Currency','Float','Percent') or
 				fieldname in ('items','base_in_words','in_words','status')) and
 				parent = "Purchase Order" """)
-			frappe.db.sql("""update tabDocField set allow_on_submit=1 where fieldtype in ('Currency','Float','Percent') and				
+			frappe.db.sql("""update tabDocField set allow_on_submit=1 where fieldtype in ('Currency','Float','Percent') and			
 				parent = 'Purchase Order Item' """)
 			frappe.db.sql(""" update tabDocField set allow_on_submit=1 where fieldtype in ('Currency','Float','Percent') and
 				parent = 'Purchase Taxes and Charges' """)
 			if self.allow_item_price_submit == 'No':
-				frappe.db.sql("""update tabDocField set allow_on_submit=0 where fieldname = 'rate' and				
-					parent = 'Purchase Order Item'""")
+				frappe.db.sql("""update tabDocField set allow_on_submit=0 where fieldname = 'rate' and
+				parent = 'Purchase Order Item'""")
 			if self.allow_item_qty_submit == 'No':
-				frappe.db.sql(""" update tabDocField set allow_on_submit=0 where fieldname = 'qty' and				
+				frappe.db.sql(""" update tabDocField set allow_on_submit=0 where fieldname = 'qty' and
 					parent = 'Purchase Order Item' """)
 		if self.allow_item_qty_submit == 'No' and self.allow_item_price_submit == 'No':
 			frappe.db.sql(""" update tabDocField set allow_on_submit=0 where (fieldtype in ('Currency','Float','Percent') or
 				fieldname in ('items','base_in_words','in_words','status')) and	parent = 'Purchase Order' """)
-			frappe.db.sql("""update tabDocField set allow_on_submit=0 where fieldtype in ('Currency','Float','Percent') and				
+			frappe.db.sql("""update tabDocField set allow_on_submit=0 where fieldtype in ('Currency','Float','Percent') and
 				parent = 'Purchase Order Item' """)
 
