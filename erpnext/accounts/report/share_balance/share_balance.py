@@ -33,14 +33,17 @@ def execute(filters=None):
 					if transfer.to_shareholder == filters.get("shareholder"):
 						datum[no_of_shares] += transfer.no_of_shares
 						datum[amount] += transfer.amount
-						datum[rate]    =  datum[amount] / ( datum[no_of_shares] + transfer.no_of_shares ) 
+						if datum[no_of_shares] == 0:
+							datum[rate] = 0
+						else:
+							datum[rate]    =  datum[amount] / datum[no_of_shares] 
 					else:
 						datum[no_of_shares] -= transfer.no_of_shares
 						datum[amount] -= transfer.amount
 						if datum[no_of_shares] == 0:
 							datum[rate] = 0
 						else:
-							datum[rate] = datum[amount] / ( datum[no_of_shares] - transfer.no_of_shares ) 
+							datum[rate] = datum[amount] / datum[no_of_shares] 
 					row = True
 					break
 			# new entry
@@ -54,6 +57,8 @@ def execute(filters=None):
 						transfer.share_type, -transfer.no_of_shares, -transfer.rate, -transfer.amount,
 						transfer.company]
 				data.append(row)
+				
+		data = [datum for datum in data if datum[no_of_shares] > 0]
 
 	return columns, data
 
