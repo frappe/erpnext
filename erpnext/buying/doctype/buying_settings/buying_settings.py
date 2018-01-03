@@ -23,7 +23,7 @@ class BuyingSettings(Document):
 			frappe.db.sql(""" update tabDocField set allow_on_submit=1 where (fieldtype in ('Currency','Float','Percent') or
 				fieldname in ('items','base_in_words','in_words','status')) and
 				parent = "Purchase Order" """)
-			frappe.db.sql("""update tabDocField set allow_on_submit=1 where fieldtype in ('Currency','Float','Percent') and			
+			frappe.db.sql("""update tabDocField set allow_on_submit=1 where fieldtype in ('Currency','Float','Percent') and
 				parent = 'Purchase Order Item' """)
 			frappe.db.sql(""" update tabDocField set allow_on_submit=1 where fieldtype in ('Currency','Float','Percent') and
 				parent = 'Purchase Taxes and Charges' """)
