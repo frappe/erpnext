@@ -1,0 +1,97 @@
+
+[
+	{
+		"doctype": "Company",
+		"company_name": "Stark Tower",
+		"abbr": "ST"
+	},
+	{
+		"doctype": "Company",
+		"company_name": "Hammer Industries",
+		"abbr": "HI"
+	},
+	{
+		"doctype": "Share Transfer",
+		"transfer_type": "Issue",
+		"date": "2018-01-01",
+		"to_shareholder": "SH00000",
+		"share_type": "Class A",
+		"no_of_shares": 500,
+		"rate": 10,
+		"company": "Stark Tower"
+	},
+	{
+		"doctype": "Share Transfer",
+		"transfer_type": "Issue",
+		"date": "2018-01-01",
+		"to_shareholder": "SH00002",
+		"share_type": "Class A",
+		"no_of_shares": 100,
+		"rate": 10,
+		"company": "Stark Tower"
+	},
+	{
+		"doctype": "Share Transfer",
+		"transfer_type": "Issue",
+		"date": "2018-01-01",
+		"to_shareholder": "SH00001",
+		"share_type": "Class A",
+		"no_of_shares": 100,
+		"rate": 10,
+		"company": "Hammer Industries"
+	},
+	{
+		"doctype": "Share Transfer",
+		"transfer_type": "Transfer",
+		"date": "2018-01-02",
+		"from_shareholder": "SH00001",
+		"to_shareholder": "SH00002",
+		"share_type": "Class A",
+		"no_of_shares": 50,
+		"rate": 10,
+		"company": "Hammer Industries"
+	},
+	{
+		"doctype": "Share Transfer",
+		"transfer_type": "Transfer",
+		"date": "2018-01-02",
+		"from_shareholder": "SH00002",
+		"to_shareholder": "SH00000",
+		"share_type": "Class A",
+		"no_of_shares": 50,
+		"rate": 50,
+		"company": "Stark Tower"
+	},
+	{
+		"doctype": "Share Transfer",
+		"transfer_type": "Transfer",
+		"date": "2018-01-02",
+		"from_shareholder": "SH00002",
+		"to_shareholder": "SH00001",
+		"share_type": "Class A",
+		"no_of_shares": 50,
+		"rate": 12,
+		"company": "Stark Tower"
+	},
+	{
+		"doctype": "Share Transfer",
+		"transfer_type": "Transfer",
+		"date": "2018-01-02",
+		"from_shareholder": "SH00001",
+		"to_shareholder": "SH00000",
+		"share_type": "Class A",
+		"no_of_shares": 50,
+		"rate": 20,
+		"company": "Hammer Industries"
+	},
+	{
+		"doctype": "Share Transfer",
+		"transfer_type": "Purchase",
+		"date": "2018-01-03",
+		"from_shareholder": "SH00001",
+		"share_type": "Class A",
+		"no_of_shares": 50,
+		"rate": 25,
+		"company": "Stark Tower"
+	}
+]

@@ -28,6 +28,11 @@ def execute(filters=None):
 	else:
 		transfers = get_all_transfers(date, filters.get("shareholder"), company)
 		for transfer in transfers:
+			if transfer.transfer_type == 'Transfer':
+				if transfer.from_shareholder == filters.get("shareholder"):
+					transfer.transfer_type += ' from'
+				else:
+					transfer.transfer_type += ' to'
 			row = [filters.get("shareholder"), transfer.date, transfer.transfer_type,
 				transfer.share_type, transfer.no_of_shares, transfer.rate, transfer.amount,
 				transfer.company, transfer.name]

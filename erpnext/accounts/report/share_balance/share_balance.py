@@ -25,7 +25,7 @@ def execute(filters=None):
 		pass
 	else:
 		transfers = get_all_transfers(date, filters.get("shareholder"), company)
-		transfer_type, share_type, no_of_shares, rate, amount, company = 1, 2, 3, 4, 5, 6
+		share_type, no_of_shares, rate, amount, company = 1, 2, 3, 4, 5
 		for transfer in transfers:
 			row = False
 			for datum in data:
@@ -49,11 +49,11 @@ def execute(filters=None):
 			# new entry
 			if not row:
 				if transfer.to_shareholder == filters.get("shareholder"):
-					row = [filters.get("shareholder"), transfer.transfer_type,
+					row = [filters.get("shareholder"),
 						transfer.share_type, transfer.no_of_shares, transfer.rate, transfer.amount,
 						transfer.company]
 				else:
-					row = [filters.get("shareholder"), transfer.transfer_type,
+					row = [filters.get("shareholder"),
 						transfer.share_type, -transfer.no_of_shares, -transfer.rate, -transfer.amount,
 						transfer.company]
 				data.append(row)
@@ -65,7 +65,6 @@ def execute(filters=None):
 def get_columns(filters):
 	columns = [ 
 		_("Shareholder") + ":Link/Shareholder:150", 
-		_("Transfer Type") + "::140",
 		_("Share Type") + "::90",
 		_("No of Shares") + "::90", 
 		_("Average Rate") + "::90",

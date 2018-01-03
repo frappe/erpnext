@@ -1,0 +1,14 @@
+[
+	{
+		"doctype": "Shareholder",
+		"shareholder": "Tony Stark"
+	},
+	{
+		"doctype": "Shareholder",
+		"shareholder": "Thor"
+	},
+	{
+		"doctype": "Shareholder",
+		"shareholder": "Bruce Banner"
+	}
+]
