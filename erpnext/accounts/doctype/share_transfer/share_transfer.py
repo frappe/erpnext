@@ -35,7 +35,7 @@ class ShareTransfer(Document):
 			for index, share in enumerate(self.shares):
 				if share.from_no > share.to_no:
 					frappe.throw('The starting share number cannot be greater than the ending share number for line {0}'.format(index+1))
-				total_no_of_shares += share.to_no - share.from_no + 1 
+				total_no_of_shares += share.to_no - share.from_no + 1
 			if total_no_of_shares != self.no_of_shares:
 				frappe.throw('There\'s inconsistency between the total no. of shares and the share numbers')
 

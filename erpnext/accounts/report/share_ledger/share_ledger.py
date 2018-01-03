@@ -12,11 +12,11 @@ def execute(filters=None):
 
 	if not filters.get("date"):
 		frappe.throw(_("Please select date"))
-	
+
 	columns = get_columns(filters)
-	
+
 	date = filters.get("date")
-	
+
 	company = None
 	if filters.get("company"):
 		company = filters.get("company")
@@ -42,12 +42,12 @@ def execute(filters=None):
 	return columns, data
 
 def get_columns(filters):
-	columns = [ 
-		_("Shareholder") + ":Link/Shareholder:150", 
+	columns = [
+		_("Shareholder") + ":Link/Shareholder:150",
 		_("Date") + "::100",
 		_("Transfer Type") + "::140",
 		_("Share Type") + "::90",
-		_("No of Shares") + "::90", 
+		_("No of Shares") + "::90",
 		_("Rate") + "::90",
 		_("Amount") + "::90",
 		_("Company") + "::150",
@@ -61,8 +61,8 @@ def get_all_transfers(date, shareholder, company):
 	else:
 		condition = ' '
 
-	return frappe.db.sql("""SELECT * FROM `tabShare Transfer` 
+	return frappe.db.sql("""SELECT * FROM `tabShare Transfer`
 		WHERE (DATE(date) <= %(date)s AND from_shareholder = %(shareholder)s {condition})
 		OR (DATE(date) <= %(date)s AND to_shareholder = %(shareholder)s {condition})
-		ORDER BY date""".format(condition=condition), 
+		ORDER BY date""".format(condition=condition),
 		{'date': date, 'shareholder': shareholder, 'company': company}, as_dict=1)

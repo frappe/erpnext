@@ -3,12 +3,14 @@
 	{
 		"doctype": "Company",
 		"company_name": "Stark Tower",
-		"abbr": "ST"
+		"abbr": "ST",
+		"default_currency": "INR"
 	},
 	{
 		"doctype": "Company",
 		"company_name": "Hammer Industries",
-		"abbr": "HI"
+		"abbr": "HI",
+		"default_currency": "INR"
 	},
 	{
 		"doctype": "Share Transfer",
