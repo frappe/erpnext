@@ -71,9 +71,10 @@ class PaymentEntry(AccountsController):
 	def validate_duplicate_entry(self):
 		reference_names = []
 		for d in self.get("references"):
-			if (d.reference_doctype, d.reference_name, d.due_date) in reference_names:
-				frappe.throw(_("Row #{0}: Duplicate entry in References {1} {2}").format(d.idx, d.reference_doctype, d.reference_name))
-			reference_names.append((d.reference_doctype, d.reference_name, d.due_date))
+			if (d.reference_doctype, d.reference_name) in reference_names:
+				frappe.throw(_("Row #{0}: Duplicate entry in References {1} {2}")
+					.format(d.idx, d.reference_doctype, d.reference_name))
+			reference_names.append((d.reference_doctype, d.reference_name))
 
 	def validate_allocated_amount(self):
 		for d in self.get("references"):
@@ -205,7 +206,7 @@ class PaymentEntry(AccountsController):
 
 					if d.reference_doctype != "Journal Entry":
 						if self.party != ref_doc.get(scrub(self.party_type)):
-							frappe.throw(_("{0} {1} does not associated with {2} {3}")
+							frappe.throw(_("{0} {1} is not associated with {2} {3}")
 								.format(d.reference_doctype, d.reference_name, self.party_type, self.party))
 					else:
 						self.validate_journal_entry()
@@ -413,8 +414,7 @@ class PaymentEntry(AccountsController):
 				gle = party_gl_dict.copy()
 				gle.update({
 					"against_voucher_type": d.reference_doctype,
-					"against_voucher": d.reference_name,
-					"due_date": d.due_date
+					"against_voucher": d.reference_name
 				})
 
 				allocated_amount_in_company_currency = flt(flt(d.allocated_amount) * flt(d.exchange_rate),
@@ -541,6 +541,7 @@ def get_outstanding_reference_documents(args):
 
 	return negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
 
+
 def get_orders_to_be_billed(posting_date, party_type, party, party_account_currency, company_currency):
 	if party_type == "Customer":
 		voucher_type = 'Sales Order'
@@ -569,18 +570,17 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 				and abs(100 - per_billed) > 0.01
 			order by
 				transaction_date, name
-			""".format(**{
-				"ref_field": ref_field,
-				"voucher_type": voucher_type,
-				"party_type": scrub(party_type)
-			}), party, as_dict = True)
+		""".format(**{
+			"ref_field": ref_field,
+			"voucher_type": voucher_type,
+			"party_type": scrub(party_type)
+		}), party, as_dict=True)
 
 	order_list = []
 	for d in orders:
 		d["voucher_type"] = voucher_type
 		# This assumes that the exchange rate required is the one in the SO
-		d["exchange_rate"] = get_exchange_rate(party_account_currency,
-			company_currency, posting_date)
+		d["exchange_rate"] = get_exchange_rate(party_account_currency, company_currency, posting_date)
 		order_list.append(d)
 
 	return order_list
@@ -614,6 +614,7 @@ def get_negative_outstanding_invoices(party_type, party, party_account, party_ac
 			"party_account": "debit_to" if party_type == "Customer" else "credit_to"
 		}), (party, party_account), as_dict=True)
 
+
 @frappe.whitelist()
 def get_party_details(company, party_type, party, date):
 	if not frappe.db.exists(party_type, party):
@@ -635,6 +636,7 @@ def get_party_details(company, party_type, party, date):
 		"account_balance": account_balance
 	}
 
+
 @frappe.whitelist()
 def get_account_details(account, date):
 	frappe.has_permission('Payment Entry', throw=True)
@@ -643,6 +645,7 @@ def get_account_details(account, date):
 		"account_balance": get_balance_on(account, date),
 		"account_type": frappe.db.get_value("Account", account, "account_type")
 	})
+
 
 @frappe.whitelist()
 def get_company_defaults(company):
@@ -655,6 +658,7 @@ def get_company_defaults(company):
 				.format(frappe.get_meta("Company").get_label(fieldname), company))
 
 	return ret
+
 
 @frappe.whitelist()
 def get_reference_details(reference_doctype, reference_name, party_account_currency):
@@ -700,6 +704,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		"outstanding_amount": outstanding_amount,
 		"exchange_rate": exchange_rate
 	})
+
 
 @frappe.whitelist()
 def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=None):
@@ -798,40 +803,15 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.allocate_payment_amount = 1
 	pe.letter_head = doc.get("letter_head")
 
-	if dt == "Employee Advance":
-		pe.append("references", {
-			'reference_doctype': dt,
-			'reference_name': dn,
-			'total_amount': grand_total,
-			'outstanding_amount': outstanding_amount,
-			'allocated_amount': outstanding_amount
-		})
-	else:
-		args = {
-			'party_account': party_account,
-			'company': pe.company,
-			'party_type': pe.party_type,
-			'party': pe.party,
-			'posting_date': pe.posting_date,
-			'voucher_type': dt,
-			'voucher_no': dn
-		}
-		references = get_outstanding_reference_documents(args=args)
-
-		for reference in references:
-			if reference.voucher_no == dn:
-				allocated_amount = min(paid_amount, reference.outstanding_amount)
-				pe.append("references", {
-					'reference_doctype': reference.voucher_type,
-					'reference_name': reference.voucher_no,
-					'due_date': reference.due_date,
-					'total_amount': reference.invoice_amount,
-					'outstanding_amount': reference.outstanding_amount,
-					'allocated_amount': allocated_amount,
-					"bill_no": reference.get("bill_no")
-				})
-				if paid_amount:
-					paid_amount -= allocated_amount
+	pe.append("references", {
+		'reference_doctype': dt,
+		'reference_name': dn,
+		"bill_no": doc.get("bill_no"),
+		"due_date": doc.get("due_date"),
+		'total_amount': grand_total,
+		'outstanding_amount': outstanding_amount,
+		'allocated_amount': outstanding_amount
+	})
 
 	pe.setup_party_account_field()
 	pe.set_missing_values()

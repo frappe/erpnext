@@ -50,6 +50,9 @@ class StockEntry(StockController):
 		self.validate_with_material_request()
 		self.validate_batch()
 
+		if not self.from_bom:
+			self.fg_completed_qty = 0.0
+
 		if self._action == 'submit':
 			self.make_batches('t_warehouse')
 		else:
@@ -372,6 +375,7 @@ class StockEntry(StockController):
 		if self.purpose == "Subcontract" and self.purchase_order:
 			purchase_order = frappe.get_doc("Purchase Order", self.purchase_order)
 			for se_item in self.items:
+				precision = cint(frappe.db.get_default("float_precision")) or 3
 				total_allowed = sum([flt(d.required_qty) for d in purchase_order.supplied_items \
 					if d.rm_item_code == se_item.item_code])
 				if not total_allowed:
@@ -385,7 +389,7 @@ class StockEntry(StockController):
 						and `tabStock Entry Detail`.parent = `tabStock Entry`.name""",
 							(self.purchase_order, se_item.item_code))[0][0]
 
-				if total_supplied > total_allowed:
+				if flt(total_supplied, precision) > flt(total_allowed, precision):
 					frappe.throw(_("Row {0}# Item {1} cannot be transferred more than {2} against Purchase Order {3}")
 						.format(se_item.idx, se_item.item_code, total_allowed, self.purchase_order))
 
@@ -792,6 +796,9 @@ class StockEntry(StockController):
 			se_child.qty = flt(item_dict[d]["qty"], se_child.precision("qty"))
 			se_child.expense_account = item_dict[d].get("expense_account") or expense_account
 			se_child.cost_center = item_dict[d].get("cost_center") or cost_center
+
+			if item_dict[d].get("idx"):
+				se_child.idx = item_dict[d].get("idx")
 
 			if se_child.s_warehouse==None:
 				se_child.s_warehouse = self.from_warehouse

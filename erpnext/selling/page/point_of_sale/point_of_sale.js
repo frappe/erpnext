@@ -674,6 +674,11 @@ class POSCart {
 				fieldname: 'customer',
 				options: 'Customer',
 				reqd: 1,
+				get_query: function() {
+					return {
+						query: 'erpnext.controllers.queries.customer_query'
+					}
+				},
 				onchange: () => {
 					this.events.on_customer_change(this.customer_field.get_value());
 				}
@@ -1076,7 +1081,7 @@ class POSItems {
 			}
 			curr_row += all_items[i];
 
-			if(i == all_items.length - 1 && all_items.length % 4 !== 0) {
+			if(i == all_items.length - 1) {
 				row_items.push(curr_row);
 			}
 		}

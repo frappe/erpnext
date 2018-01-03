@@ -194,39 +194,8 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		})
 	},
 
-	due_date_options_cache: {},
-
 	reference_name: function(doc, cdt, cdn) {
 		var d = frappe.get_doc(cdt, cdn);
-		var me = this;
-
-		const get_invoice_due_dates = invoice_name => {
-			const options = this.due_date_options_cache[invoice_name];
-			const input = $(cur_frm.fields_dict["accounts"].wrapper).find("select[data-fieldname=reference_due_date]");
-
-			if (options) {
-				input.empty();
-				input.add_options(options);
-				frappe.model.set_value(cdt, cdn, "reference_due_date", options[0]);
-			}
-			else {
-				frappe.call({
-					method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_invoice_due_dates",
-					args: {name: invoice_name},
-					callback: function(r) {
-						const options = [];
-						$.each(r.message, function(key, value) {
-							options.push(value.due_date);
-						});
-						input.empty();
-						input.add_options(options);
-						frappe.model.set_value(cdt, cdn, "reference_due_date", options[0]);
-						me.frm.cur_grid.get_field("reference_due_date").df.options = options.join('\n');
-						me.due_date_options_cache[d.reference_name] = options;
-					}
-				});
-			}
-		}
 
 		if(d.reference_name) {
 			if (d.reference_type==="Purchase Invoice" && !flt(d.debit)) {
@@ -236,33 +205,6 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			} else if (d.reference_type==="Journal Entry" && !flt(d.credit) && !flt(d.debit)) {
 				this.get_outstanding('Journal Entry', d.reference_name, doc.company, d);
 			}
-
-			if( in_list(["Sales Invoice", "Purchase Invoice"]), d.reference_type) {
-				get_invoice_due_dates(d.reference_name);
-			}
-		}
-	},
-
-	reference_due_date: function(doc, cdt, cdn) {
-		const d = frappe.get_doc(cdt, cdn);
-
-		if (d.reference_type && d.reference_name && d.reference_due_date) {
-			if (in_list(["Sales Invoice", "Purchase Invoice"], d.reference_type)) {
-				console.log('cdt:', cdt, cdn);
-				frappe.model.set_value(cdt, cdn, 'debit_in_account_currency', '');
-				frappe.model.set_value(cdt, cdn, 'credit_in_account_currency', '');
-			}
-			if (d.reference_type==="Purchase Invoice") {
-				this.get_outstanding(
-					'Purchase Invoice', d.reference_name, doc.company, d, d.reference_due_date
-				);
-			} else if (d.reference_type==="Sales Invoice") {
-				this.get_outstanding(
-					'Sales Invoice', d.reference_name, doc.company, d, d.reference_due_date
-				);
-			}
-
-			frappe.model.set_value(cdt, cdn, 'reference_due_date', d.reference_due_date);
 		}
 	},
 
@@ -276,8 +218,6 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			"account_currency": child.account_currency,
 			"company": company
 		}
-
-		if (due_date) args.due_date = due_date;
 
 		return frappe.call({
 			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_outstanding",

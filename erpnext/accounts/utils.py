@@ -252,6 +252,9 @@ def add_ac(args=None):
 	if not ac.parent_account:
 		ac.parent_account = args.get("parent")
 
+	if ac.is_root:
+		ac.parent_account=''
+
 	ac.old_parent = ""
 	ac.freeze_account = "No"
 	if cint(ac.get("is_root")):
@@ -583,9 +586,10 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 		dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 		payment_dr_or_cr = "payment_gl_entry.debit_in_account_currency - payment_gl_entry.credit_in_account_currency"
 
+	invoice = 'Sales Invoice' if party_type == 'Customer' else 'Purchase Invoice'
 	invoice_list = frappe.db.sql("""
 		select
-			voucher_no,	voucher_type, posting_date, ifnull(sum({dr_or_cr}), 0) as invoice_amount, due_date,
+			voucher_no, voucher_type, posting_date, ifnull(sum({dr_or_cr}), 0) as invoice_amount,
 			(
 				select ifnull(sum({payment_dr_or_cr}), 0)
 				from `tabGL Entry` payment_gl_entry
@@ -596,7 +600,6 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 					and payment_gl_entry.party_type = invoice_gl_entry.party_type
 					and payment_gl_entry.party = invoice_gl_entry.party
 					and payment_gl_entry.account = invoice_gl_entry.account
-					and payment_gl_entry.due_date = invoice_gl_entry.due_date
 					and {payment_dr_or_cr} > 0
 			) as payment_amount
 		from
@@ -608,10 +611,11 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 			and ((voucher_type = 'Journal Entry'
 					and (against_voucher = '' or against_voucher is null))
 				or (voucher_type not in ('Journal Entry', 'Payment Entry')))
-		group by voucher_type, voucher_no, due_date
+		group by voucher_type, voucher_no
 		having (invoice_amount - payment_amount) > 0.005
-		order by posting_date, name, due_date""".format(
+		order by posting_date, name""".format(
 			dr_or_cr=dr_or_cr,
+			invoice = invoice,
 			payment_dr_or_cr=payment_dr_or_cr,
 			condition=condition or ""
 		), {
@@ -621,12 +625,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 		}, as_dict=True)
 
 	for d in invoice_list:
-		due_date = d.due_date or (
-			frappe.db.get_value(
-				d.voucher_type, d.voucher_no,
-				"posting_date" if party_type == "Employee" else "due_date"
-			)
-		)
+		due_date = frappe.db.get_value(d.voucher_type, d.voucher_no,
+			"posting_date" if party_type == "Employee" else "due_date")
 
 		outstanding_invoices.append(
 			frappe._dict({
@@ -704,7 +704,7 @@ def get_children(doctype, parent, company, is_root=False):
 	return acc
 
 def create_payment_gateway_account(gateway):
-	from erpnext.setup.setup_wizard.setup_wizard import create_bank_account
+	from erpnext.setup.setup_wizard.operations.company_setup import create_bank_account
 
 	company = frappe.db.get_value("Global Defaults", None, "default_company")
 	if not company:
