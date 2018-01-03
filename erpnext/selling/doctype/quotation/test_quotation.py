@@ -18,6 +18,11 @@ class TestQuotation(unittest.TestCase):
 
 		self.assertTrue(quotation.payment_schedule)
 
+	def test_quotation_payment_terms_due_date(self):
+		quotation = make_quotation()
+
+		self.assertEquals(quotation.payment_schedule[0].due_date, quotation.transaction_date)
+
 	def test_make_sales_order_terms_not_copied(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 
@@ -50,7 +55,7 @@ class TestQuotation(unittest.TestCase):
 		self.assertEquals(sales_order.get("items")[0].prevdoc_docname, quotation.name)
 		self.assertEquals(sales_order.customer, "_Test Customer")
 
-		sales_order.delivery_date = "2014-01-01"
+		sales_order.delivery_date = nowdate()
 		sales_order.naming_series = "_T-Quotation-"
 		sales_order.transaction_date = nowdate()
 		sales_order.insert()
@@ -83,7 +88,7 @@ class TestQuotation(unittest.TestCase):
 		self.assertEquals(sales_order.get("items")[0].prevdoc_docname, quotation.name)
 		self.assertEquals(sales_order.customer, "_Test Customer")
 
-		sales_order.delivery_date = "2014-01-01"
+		sales_order.delivery_date = nowdate()
 		sales_order.naming_series = "_T-Quotation-"
 		sales_order.transaction_date = nowdate()
 		sales_order.insert()
