@@ -177,6 +177,12 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Supplier Balance report",
+					"doctype": "Supplier"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Supplier Addresses and Contacts",
 					"doctype": "Supplier"
 				},

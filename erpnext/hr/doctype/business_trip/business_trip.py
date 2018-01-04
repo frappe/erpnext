@@ -30,6 +30,7 @@ class BusinessTrip(Document):
 		self.get_number_of_leave_days()
 		self.get_ja_cost()
 		self.validate_emp()
+
 		if hasattr(self,"workflow_state"):
 			if self.workflow_state:
 				if "Rejected" in self.workflow_state:
@@ -38,9 +39,13 @@ class BusinessTrip(Document):
 
 	def validate_emp(self):
 		if self.get('__islocal'):
+			# if self.handled_by== "Director" and self.days < 4 and self.workflow_state != "Created By Requester" :
+			# 	self.workflow_state = "Approve By Director"
 			if u'CEO' in frappe.get_roles(frappe.session.user):
 				self.workflow_state = "Created By CEO"
-			elif u'Director' in frappe.get_roles(frappe.session.user):
+			elif u'Director' in frappe.get_roles(frappe.session.user) and self.request_employee==1 :
+				self.workflow_state = "Created By Requester"
+			elif u'Director' in frappe.get_roles(frappe.session.user) and self.request_employee==0 :
 				self.workflow_state = "Created By Director"
 			elif u'Manager' in frappe.get_roles(frappe.session.user):
 				self.workflow_state = "Created By Manager"
