@@ -473,6 +473,39 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		//
 		// }).addClass('visible-xs');
 
+        //POS Cashier shift closing #12273
+        this.page.add_menu_item(__("Shift Start"), function() {
+
+            frappe.call({
+                method: "erpnext.selling.doctype.pos_cashier_closing.pos_cashier_closing.get_last_POS_Closing",
+                args: {},
+                callback: function(r) {
+                    if (r.message) {
+                        frappe.set_route("Form", 'POS Cashier Closing', r.message[0]["name"]);
+                    } else {
+                        //create a new POS Cashier Closing doc as there is no doc matching user/star_date
+                        var doc = frappe.model.get_new_doc('POS Cashier Closing');
+                        doc.start_date = frappe.datetime.get_today();
+                        frappe.set_route("Form", 'POS Cashier Closing', doc.name);
+                    }
+                }
+            });
+        });
+
+        this.page.add_menu_item(__("Shift End"), function() {
+            frappe.call({
+                method: "erpnext.selling.doctype.pos_cashier_closing.pos_cashier_closing.get_last_POS_Closing",
+                args: {},
+                callback: function(r) {
+                    if (r.message.length == 1) {
+                        frappe.set_route("Form", 'POS Cashier Closing', r.message[0]["name"]);
+                    } else {
+                        frappe.msgprint(__("No POS entry found for Closing"))
+                    }
+                }
+            });
+        });
+        
 		this.page.add_menu_item(__("Form View"), function () {
 			frappe.model.sync(me.frm.doc);
 			frappe.set_route("Form", me.frm.doc.doctype, me.frm.doc.name);
