@@ -45,7 +45,7 @@ def make_opportunity(items, customer):
 		"item_code": ["Item"]
 	}, unique="item_code")
 
-	b.insert(ignore_permissions=True)
+	b.insert(ignore_permissions=True, ignore_if_duplicate=True)
 
 	b.add_comment('Comment', text="This is a dummy record")
 
@@ -62,7 +62,7 @@ def make_quote(items, customer):
 		"item_code": ["Item"]
 	}, unique="item_code")
 
-	qtn.insert(ignore_permissions=True)
+	qtn.insert(ignore_permissions=True, ignore_if_duplicate=True)
 
 	qtn.add_comment('Comment', text="This is a dummy record")
 
@@ -78,7 +78,7 @@ def make_material_request(items):
 				"qty": 10
 			}]
 		})
-		mr.insert()
+		mr.insert(ignore_if_duplicate=True)
 		mr.submit()
 
 		mr.add_comment('Comment', text="This is a dummy record")
@@ -157,13 +157,13 @@ def make_projects(domains):
 
 		project.append('tasks', t)
 
-	project.insert(ignore_permissions=True)
+	project.insert(ignore_permissions=True, ignore_if_duplicate=True)
 
 def import_email_alert():
 	'''Import email alert for task start'''
 	with open (os.path.join(os.path.dirname(__file__), "tasks/task_alert.json")) as f:
 		email_alert = frappe.get_doc(json.loads(f.read())[0])
-		email_alert.insert()
+		email_alert.insert(ignore_if_duplicate=True)
 
 	# trigger the first message!
 	from frappe.email.doctype.email_alert.email_alert import trigger_daily_alerts

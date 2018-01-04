@@ -56,14 +56,14 @@ class website_maker(object):
 		blogger.full_name = user.first_name + (" " + user.last_name if user.last_name else "")
 		blogger.short_name = user.first_name.lower()
 		blogger.avatar = user.user_image
-		blogger.insert()
+		blogger.insert(ignore_if_duplicate=True)
 
 		blog_category = frappe.get_doc({
 			"doctype": "Blog Category",
 			"category_name": "general",
 			"published": 1,
 			"title": _("General")
-		}).insert()
+		}).insert(ignore_if_duplicate=True)
 
 		frappe.get_doc({
 			"doctype": "Blog Post",
@@ -74,7 +74,7 @@ class website_maker(object):
 			"blog_category": blog_category.name,
 			"blog_intro": "My First Blog",
 			"content": frappe.get_template("setup/setup_wizard/data/sample_blog_post.html").render(),
-		}).insert()
+		}).insert(ignore_if_duplicate=True)
 
 def test():
 	frappe.delete_doc("Web Page", "test-company")

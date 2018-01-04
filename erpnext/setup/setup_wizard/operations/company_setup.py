@@ -9,48 +9,62 @@ from frappe.utils.file_manager import save_file
 from .default_website import website_maker
 from erpnext.accounts.doctype.account.account import RootNotEditable
 
-def create_fiscal_year_and_company(args):
-	if (args.get('fy_start_date')):
-		curr_fiscal_year = get_fy_details(args.get('fy_start_date'), args.get('fy_end_date'))
-		frappe.get_doc({
-			"doctype":"Fiscal Year",
-			'year': curr_fiscal_year,
-			'year_start_date': args.get('fy_start_date'),
-			'year_end_date': args.get('fy_end_date'),
-		}).insert()
+def get_company_records(args):
+	records = []
 
-	if (args.get('company_name')):
-		frappe.get_doc({
-			"doctype":"Company",
-			'company_name':args.get('company_name'),
-			'enable_perpetual_inventory': 1,
-			'abbr':args.get('company_abbr'),
-			'default_currency':args.get('currency'),
-			'country': args.get('country'),
-			'create_chart_of_accounts_based_on': 'Standard Template',
-			'chart_of_accounts': args.get('chart_of_accounts'),
-			'domain': args.get('domains')[0]
-		}).insert()
+	# Price lists
+	for pl_type, pl_name in (("Selling", _("Standard Selling")), ("Buying", _("Standard Buying"))):
+		records.append({
+			"doctype": "Price List",
+			"price_list_name": pl_name,
+			"enabled": 1,
+			"buying": 1 if pl_type == "Buying" else 0,
+			"selling": 1 if pl_type == "Selling" else 0,
+			"currency": args["currency"]
+		})
 
-def enable_shopping_cart(args):
-	# Needs price_lists
-	frappe.get_doc({
+	curr_fiscal_year = get_fy_details(args.get('fy_start_date'), args.get('fy_end_date'))
+
+	# Fiscal year
+	records.append({
+		"doctype":"Fiscal Year",
+		'year': curr_fiscal_year,
+		'year_start_date': args.get('fy_start_date'),
+		'year_end_date': args.get('fy_end_date'),
+	})
+
+	# Company
+	records.append({
+		"doctype":"Company",
+		'company_name':args.get('company_name'),
+		'enable_perpetual_inventory': 1,
+		'abbr':args.get('company_abbr'),
+		'default_currency':args.get('currency'),
+		'country': args.get('country'),
+		'create_chart_of_accounts_based_on': 'Standard Template',
+		'chart_of_accounts': args.get('chart_of_accounts'),
+		'domain': args.get('domains')[0]
+	})
+
+	# Shopping cart
+	# Needs Price List
+	records.append({
 		"doctype": "Shopping Cart Settings",
 		"enabled": 1,
 		'company': args.get('company_name')	,
 		'price_list': frappe.db.get_value("Price List", {"selling": 1}),
 		'default_customer_group': _("Individual"),
 		'quotation_series': "QTN-",
-	}).insert()
+	})
 
-def create_bank_account(args):
+	# Bank Account
 	if args.get("bank_account"):
 		company_name = args.get('company_name')
 		bank_account_group =  frappe.db.get_value("Account",
 			{"account_type": "Bank", "is_group": 1, "root_type": "Asset",
 				"company": company_name})
 		if bank_account_group:
-			bank_account = frappe.get_doc({
+			records.append({
 				"doctype": "Account",
 				'account_name': args.get("bank_account"),
 				'parent_account': bank_account_group,
@@ -58,19 +72,15 @@ def create_bank_account(args):
 				'company': company_name,
 				"account_type": "Bank",
 			})
-			try:
-				return bank_account.insert()
-			except RootNotEditable:
-				frappe.throw(_("Bank account cannot be named as {0}").format(args.get("bank_account")))
-			except frappe.DuplicateEntryError:
-				# bank account same as a CoA entry
-				pass
 
-def create_email_digest():
+	return records
+
+def get_email_digest():
 	from frappe.utils.user import get_system_managers
 	system_managers = get_system_managers(only_name=True)
 	if not system_managers:
 		return
+	records = []
 
 	companies = frappe.db.sql_list("select name FROM `tabCompany`")
 	for company in companies:
@@ -85,14 +95,14 @@ def create_email_digest():
 
 			for df in edigest.meta.get("fields", {"fieldtype": "Check"}):
 				if df.fieldname != "scheduler_errors":
-					edigest.set(df.fieldname, 1)
+					edigest[df.fieldname] = 1
 
-			edigest.insert()
+			records.append(edigest)
 
 	# scheduler errors digest
 	if companies:
-		edigest = frappe.new_doc("Email Digest")
-		edigest.update({
+		records.append({
+			"doctype": "Email Digest",
 			"name": "Scheduler Errors",
 			"company": companies[0],
 			"frequency": "Daily",
@@ -100,7 +110,7 @@ def create_email_digest():
 			"scheduler_errors": 1,
 			"enabled": 1
 		})
-		edigest.insert()
+	return records
 
 def create_logo(args):
 	if args.get("attach_logo"):

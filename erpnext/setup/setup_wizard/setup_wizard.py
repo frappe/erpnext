@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from operations import install_fixtures, taxes_setup, defaults_setup, company_setup, sample_data
+from erpnext.setup.doctype.company.company import install_country_fixtures
 
 def get_setup_stages(args=None):
 	if frappe.db.sql("select name from tabCompany"):
@@ -30,8 +31,7 @@ def get_setup_stages(args=None):
 				'tasks': [
 					{
 						'fn': stage_fixtures,
-						'args': args,
-						'fail_msg': _("Failed to install presets")
+						'args': args.get("country"),
 					}
 				]
 			},
@@ -96,29 +96,41 @@ def setup_complete(args=None):
 	stage_four(args)
 	fin(args)
 
-def stage_fixtures(args):
-	install_fixtures.install(args.get("country"))
+def post_setup(args=None):
+	install_country_fixtures(frappe.defaults.get_defaults().get("company"))
+
+def stage_fixtures(country):
+	return install_fixtures.install(country)
 
 def setup_company(args):
-	defaults_setup.create_price_lists(args)
-	company_setup.create_fiscal_year_and_company(args)
-	company_setup.enable_shopping_cart(args)
-	company_setup.create_bank_account(args)
+	# set default customer group and territory
+	selling_settings = frappe.get_doc("Selling Settings")
+	selling_settings.set_default_customer_group_and_territory()
+	selling_settings.save()
+
+	domain_settings = frappe.get_single('Domain Settings')
+	domain_settings.set_active_domains(args.get('domains'))
+	domain_settings.save()
+
+	variant_settings = frappe.get_doc('Item Variant Settings')
+	variant_settings.set_default_fields()
+	variant_settings.save()
+
+	return company_setup.get_company_records(args)
 
 def setup_taxes(args):
-	taxes_setup.create_sales_tax(args)
+	return taxes_setup.create_sales_tax(args)
 
 def stage_three(args):
 	defaults_setup.create_employee_for_self(args)
 	defaults_setup.set_default_settings(args)
 	defaults_setup.create_territories()
 	defaults_setup.create_feed_and_todo()
-	defaults_setup.set_no_copy_fields_in_variant_settings()
 
 def stage_four(args):
-	company_setup.create_website(args)
-	company_setup.create_email_digest()
 	company_setup.create_logo(args)
+	company_setup.create_website(args)
+	return company_setup.get_email_digest()
 
 def fin(args):
 	frappe.local.message_log = []

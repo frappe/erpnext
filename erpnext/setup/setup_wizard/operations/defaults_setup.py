@@ -18,16 +18,11 @@ def set_default_settings(args):
 		'default_company':args.get('company_name')	,
 		"country": args.get("country"),
 	})
-
-	global_defaults.save()
+	global_defaults.insert()
 
 	system_settings = frappe.get_doc("System Settings")
 	system_settings.email_footer_address = args.get("company_name")
-	system_settings.save()
-
-	domain_settings = frappe.get_single('Domain Settings')
-	domain_settings.set_active_domains(args.get('domains'))
-	domain_settings.save()
+	system_settings.insert()
 
 	stock_settings = frappe.get_doc("Stock Settings")
 	stock_settings.item_naming_by = "Item Code"
@@ -37,14 +32,14 @@ def set_default_settings(args):
 	stock_settings.auto_indent = 1
 	stock_settings.auto_insert_price_list_rate_if_missing = 1
 	stock_settings.automatically_set_serial_nos_based_on_fifo = 1
-	stock_settings.save()
+	stock_settings.insert()
 
 	selling_settings = frappe.get_doc("Selling Settings")
 	selling_settings.cust_master_name = "Customer Name"
 	selling_settings.so_required = "No"
 	selling_settings.dn_required = "No"
 	selling_settings.allow_multiple_items = 1
-	selling_settings.save()
+	selling_settings.insert()
 
 	buying_settings = frappe.get_doc("Buying Settings")
 	buying_settings.supp_master_name = "Supplier Name"
@@ -52,34 +47,17 @@ def set_default_settings(args):
 	buying_settings.pr_required = "No"
 	buying_settings.maintain_same_rate = 1
 	buying_settings.allow_multiple_items = 1
-	buying_settings.save()
+	buying_settings.insert()
 
 	notification_control = frappe.get_doc("Notification Control")
 	notification_control.quotation = 1
 	notification_control.sales_invoice = 1
 	notification_control.purchase_order = 1
-	notification_control.save()
+	notification_control.insert()
 
 	hr_settings = frappe.get_doc("HR Settings")
 	hr_settings.emp_created_by = "Naming Series"
-	hr_settings.save()
-
-def set_no_copy_fields_in_variant_settings():
-	# set no copy fields of an item doctype to item variant settings
-	doc = frappe.get_doc('Item Variant Settings')
-	doc.set_default_fields()
-	doc.save()
-
-def create_price_lists(args):
-	for pl_type, pl_name in (("Selling", _("Standard Selling")), ("Buying", _("Standard Buying"))):
-		frappe.get_doc({
-			"doctype": "Price List",
-			"price_list_name": pl_name,
-			"enabled": 1,
-			"buying": 1 if pl_type == "Buying" else 0,
-			"selling": 1 if pl_type == "Selling" else 0,
-			"currency": args["currency"]
-		}).insert()
+	hr_settings.insert()
 
 def create_employee_for_self(args):
 	if frappe.session.user == 'Administrator':
@@ -94,7 +72,7 @@ def create_employee_for_self(args):
 		"company": args.get("company_name")
 	})
 	emp.flags.ignore_mandatory = True
-	emp.insert(ignore_permissions = True)
+	emp.insert(ignore_permissions = True, ignore_if_duplicate=True)
 
 def create_territories():
 	"""create two default territories, one for home country and one named Rest of the World"""
@@ -109,7 +87,7 @@ def create_territories():
 				"territory_name": name.replace("'", ""),
 				"parent_territory": root_territory,
 				"is_group": "No"
-			}).insert()
+			}).insert(ignore_if_duplicate=True)
 
 def create_feed_and_todo():
 	"""update Activity feed and create todo for creation of item, customer, vendor"""
