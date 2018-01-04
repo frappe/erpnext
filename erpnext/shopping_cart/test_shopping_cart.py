@@ -4,7 +4,12 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
+from frappe.utils import nowdate, add_months
 from erpnext.shopping_cart.cart import _get_cart_quotation, update_cart, get_party
+from erpnext.tests.utils import create_test_contact_and_address
+
+
+test_dependencies = ['Payment Terms Template']
 
 class TestShoppingCart(unittest.TestCase):
 	"""
@@ -13,6 +18,7 @@ class TestShoppingCart(unittest.TestCase):
 	"""
 	def setUp(self):
 		frappe.set_user("Administrator")
+		create_test_contact_and_address()
 		self.enable_shopping_cart()
 
 	def tearDown(self):
@@ -25,8 +31,8 @@ class TestShoppingCart(unittest.TestCase):
 		# test if lead is created and quotation with new lead is fetched
 		quotation = _get_cart_quotation()
 		self.assertEquals(quotation.quotation_to, "Customer")
-		self.assertEquals(frappe.db.get_value("Contact", {"customer": quotation.customer}, "email_id"),
-			"test_cart_user@example.com")
+		self.assertEquals(quotation.contact_person,
+			frappe.db.get_value("Contact", dict(email_id="test_cart_user@example.com")))
 		self.assertEquals(quotation.lead, None)
 		self.assertEquals(quotation.contact_email, frappe.session.user)
 
@@ -58,7 +64,6 @@ class TestShoppingCart(unittest.TestCase):
 		self.assertEquals(quotation.get("items")[0].item_code, "_Test Item")
 		self.assertEquals(quotation.get("items")[0].qty, 1)
 		self.assertEquals(quotation.get("items")[0].amount, 10)
-
 
 		# add second item
 		update_cart("_Test Item 2", 1)
@@ -101,7 +106,7 @@ class TestShoppingCart(unittest.TestCase):
 		quotation = self.create_quotation()
 
 		from erpnext.accounts.party import set_taxes
-		
+
 		tax_rule_master = set_taxes(quotation.customer, "Customer", \
 			quotation.transaction_date, quotation.company, None, None, \
 			quotation.customer_address, quotation.shipping_address_name, 1)
@@ -124,6 +129,9 @@ class TestShoppingCart(unittest.TestCase):
 			"selling_price_list": "_Test Price List Rest of the World",
 			"currency": "USD",
 			"taxes_and_charges" : "_Test Tax 1",
+			"conversion_rate":1,
+			"transaction_date" : nowdate(),
+			"valid_till" : add_months(nowdate(), 1),
 			"items": [{
 				"item_code": "_Test Item",
 				"qty": 1

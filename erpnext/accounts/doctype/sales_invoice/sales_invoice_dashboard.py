@@ -8,11 +8,11 @@ def get_data():
 			'Journal Entry': 'reference_name',
 			'Payment Entry': 'reference_name',
 			'Payment Request': 'reference_name',
-			'Sales Invoice': 'return_against'
+			'Sales Invoice': 'return_against',
+			'Subscription': 'reference_document',
 		},
 		'internal_links': {
-			'Sales Order': ['items', 'sales_order'],
-			'Delivery Note': ['items', 'delivery_note'],
+			'Sales Order': ['items', 'sales_order']
 		},
 		'transactions': [
 			{
@@ -26,6 +26,10 @@ def get_data():
 			{
 				'label': _('Returns'),
 				'items': ['Sales Invoice']
+			},
+			{
+				'label': _('Subscription'),
+				'items': ['Subscription']
 			},
 		]
 	}

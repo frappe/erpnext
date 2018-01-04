@@ -2,10 +2,11 @@ from frappe import _
 
 def get_data():
 	return {
-		'fieldname': 'delivery_note_no',
+		'fieldname': 'delivery_note',
 		'non_standard_fieldnames': {
-			'Sales Invoice': 'delivery_note',
-			'Packing Slip': 'delivery_note',
+			'Stock Entry': 'delivery_note_no',
+			'Quality Inspection': 'reference_name',
+			'Subscription': 'reference_document',
 		},
 		'internal_links': {
 			'Sales Order': ['items', 'against_sales_order'],
@@ -22,6 +23,10 @@ def get_data():
 			{
 				'label': _('Returns'),
 				'items': ['Stock Entry']
+			},
+			{
+				'label': _('Subscription'),
+				'items': ['Subscription']
 			},
 		]
 	}

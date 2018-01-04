@@ -15,7 +15,7 @@ Da der Kunde 5.000 Euro bar angezahlt hat, wird dieser Betrag als Habenbuchung z
 
 #### Abbildung 1: Journalbuchung bei Vorkasse
 
-<img class="screenshot" alt="Anzahlung" src="{{docs_base_url}}/assets/img/accounts/advance-payment-1.png">
+<img class="screenshot" alt="Anzahlung" src="/docs/assets/img/accounts/advance-payment-1.png">
 
 ### Doppelte Buchführung
 
@@ -23,7 +23,7 @@ Bei der doppelten Buchführung hat jede Transaktion einen positiven oder negativ
 
 #### Abbildung 2: Transaktion und Ausgleichsbuchung
 
-<img class="screenshot" alt="Anzahlung" src="{{docs_base_url}}/assets/img/accounts/advance-payment-2.png">
+<img class="screenshot" alt="Anzahlung" src="/docs/assets/img/accounts/advance-payment-2.png">
 
 Speichern und übertragen Sie den Buchungssatz. Wenn das Dokument nicht gespeichert wird, dann wird es in anderen Buchungsdokumenten nicht übernommen.
 
@@ -33,7 +33,7 @@ Um die Ausgangsrechnung mit einem Buchungssatz zu verknüpfen, der die Buchung z
 
 #### Abbildung 3: Anzahlung erhalten
 
-<img class="screenshot" alt="Anzahlung" src="{{docs_base_url}}/assets/img/accounts/advance-payment-3.png">
+<img class="screenshot" alt="Anzahlung" src="/docs/assets/img/accounts/advance-payment-3.png">
 
 Speichern und übertragen Sie die Ausgangsrechnung
 

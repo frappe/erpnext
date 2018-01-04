@@ -8,16 +8,19 @@ from frappe.utils import cstr
 from frappe import msgprint, throw, _
 
 from frappe.model.document import Document
+from frappe.model.naming import parse_naming_series
+from frappe.permissions import get_doctypes_with_read
 
 class NamingSeriesNotSetError(frappe.ValidationError): pass
 
 class NamingSeries(Document):
 	def get_transactions(self, arg=None):
 		doctypes = list(set(frappe.db.sql_list("""select parent
-				from `tabDocField` where fieldname='naming_series'""")
+				from `tabDocField` df where fieldname='naming_series'""")
 			+ frappe.db.sql_list("""select dt from `tabCustom Field`
 				where fieldname='naming_series'""")))
 
+		doctypes = list(set(get_doctypes_with_read()) | set(doctypes))
 		prefixes = ""
 		for d in doctypes:
 			options = ""
@@ -30,9 +33,8 @@ class NamingSeries(Document):
 
 			if options:
 				prefixes = prefixes + "\n" + options
-
 		prefixes.replace("\n\n", "\n")
-		prefixes = "\n".join(sorted(prefixes.split()))
+		prefixes = "\n".join(sorted(prefixes.split("\n")))
 
 		return {
 			"transactions": "\n".join([''] + sorted(doctypes)),
@@ -108,9 +110,7 @@ class NamingSeries(Document):
 				where dt.name = df.dt and df.fieldname='naming_series' and dt.name != %s""",
 				self.select_doc_for_series)
 			))
-		sr = [[frappe.get_meta(p).get_field("naming_series").options, p]
-			for p in parent]
-
+		sr = [[frappe.get_meta(p).get_field("naming_series").options, p] for p in parent]
 		dt = frappe.get_doc("DocType", self.select_doc_for_series)
 		options = self.scrub_options_list(self.set_options.split("\n"))
 		for series in options:
@@ -127,28 +127,41 @@ class NamingSeries(Document):
 			throw(_('Special Characters except "-", "#", "." and "/" not allowed in naming series'))
 
 	def get_options(self, arg=None):
-		return frappe.get_meta(arg or self.select_doc_for_series).get_field("naming_series").options
+		if frappe.get_meta(arg or self.select_doc_for_series).get_field("naming_series"):
+			return frappe.get_meta(arg or self.select_doc_for_series).get_field("naming_series").options
 
 	def get_current(self, arg=None):
 		"""get series current"""
 		if self.prefix:
+			prefix = self.parse_naming_series()
 			self.current_value = frappe.db.get_value("Series",
-				self.prefix.split('.')[0], "current")
+				prefix, "current", order_by = "name")
 
 	def insert_series(self, series):
 		"""insert series if missing"""
-		if not frappe.db.exists('Series', series):
+		if not frappe.db.get_value('Series', series, 'name', order_by="name"):
 			frappe.db.sql("insert into tabSeries (name, current) values (%s, 0)", (series))
 
 	def update_series_start(self):
 		if self.prefix:
-			prefix = self.prefix.split('.')[0]
+			prefix = self.parse_naming_series()
 			self.insert_series(prefix)
 			frappe.db.sql("update `tabSeries` set current = %s where name = %s",
 				(self.current_value, prefix))
 			msgprint(_("Series Updated Successfully"))
 		else:
 			msgprint(_("Please select prefix first"))
+
+	def parse_naming_series(self):
+		parts = self.prefix.split('.')
+		# If series contain date format like INV.YYYY.MM.#####
+		if len(parts) > 2:
+			del parts[-1] # Removed ### from the series
+			prefix = parse_naming_series(parts)
+		else:
+			prefix = parts[0]
+
+		return prefix
 
 def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True):
 	from frappe.custom.doctype.property_setter.property_setter import make_property_setter

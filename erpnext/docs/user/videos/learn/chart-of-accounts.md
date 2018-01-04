@@ -1,8 +1,8 @@
 # Chart of Accounts
 
-<iframe width="660" height="371" src="https://www.youtube.com/embed/DyR-DST-PyA" frameborder="0" allowfullscreen></iframe>
+<iframe width="660" height="371" src="https://www.youtube.com/embed/AcfMCT7wLLo" frameborder="0" allowfullscreen></iframe>
 
-**Duration: 2:26**
+**Duration: 3:10**
 
 This tutorial walks you through setting up Accounts in the Chart of Account master. This is the most crucial master for getting your financial statement and other accounting reports correct.
 

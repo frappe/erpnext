@@ -17,9 +17,11 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		if party_naming_by == "Naming Series":
 			columns += [ args.get("party_type") + " Name::140"]
 
+		credit_debit_label = _("Credit Note Amt") if args.get('party_type') == 'Customer' else _("Debit Note Amt")
 		columns += [
 			_("Total Invoiced Amt") + ":Currency/currency:140",
 			_("Total Paid Amt") + ":Currency/currency:140",
+			credit_debit_label + ":Currency/currency:140",
 			_("Total Outstanding Amt") + ":Currency/currency:160",
 			"0-" + str(self.filters.range1) + ":Currency/currency:100",
 			str(self.filters.range1) + "-" + str(self.filters.range2) + ":Currency/currency:100",
@@ -27,7 +29,10 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			str(self.filters.range3) + _("-Above") + ":Currency/currency:100"]
 
 		if args.get("party_type") == "Customer":
-			columns += [_("Territory") + ":Link/Territory:80"]
+			columns += [
+				_("Territory") + ":Link/Territory:80", 
+				_("Customer Group") + ":Link/Customer Group:120"
+			]
 		if args.get("party_type") == "Supplier":
 			columns += [_("Supplier Type") + ":Link/Supplier Type:80"]
 			
@@ -53,12 +58,12 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 				row += [self.get_party_name(args.get("party_type"), party)]
 
 			row += [
-				party_dict.invoiced_amt, party_dict.paid_amt, party_dict.outstanding_amt,
+				party_dict.invoiced_amt, party_dict.paid_amt, party_dict.credit_amt, party_dict.outstanding_amt,
 				party_dict.range1, party_dict.range2, party_dict.range3, party_dict.range4,
 			]
 
 			if args.get("party_type") == "Customer":
-				row += [self.get_territory(party)]
+				row += [self.get_territory(party), self.get_customer_group(party)]
 			if args.get("party_type") == "Supplier":
 				row += [self.get_supplier_type(party)]
 				
@@ -74,6 +79,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 				frappe._dict({
 					"invoiced_amt": 0,
 					"paid_amt": 0,
+					"credit_amt": 0,
 					"outstanding_amt": 0,
 					"range1": 0,
 					"range2": 0,
@@ -101,13 +107,13 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		if args.get("party_type") == "Supplier":
 			cols += ["bill_no", "bill_date"]
 
-		cols += ["invoiced_amt", "paid_amt",
+		cols += ["invoiced_amt", "paid_amt", "credit_amt",
 		"outstanding_amt", "age", "range1", "range2", "range3", "range4", "currency"]
 
 		if args.get("party_type") == "Supplier":
 			cols += ["supplier_type", "remarks"]
 		if args.get("party_type") == "Customer":
-			cols += ["territory", "remarks"]
+			cols += ["territory", "customer_group", "remarks"]
 
 		return self.make_data_dict(cols, voucherwise_data)
 

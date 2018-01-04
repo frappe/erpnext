@@ -6,6 +6,8 @@ from erpnext.patches.v7_0.migrate_schools_to_erpnext import reload_doctypes_for_
 
 def execute():
 	'''hide new style icons if old ones are set'''
+	frappe.reload_doc('desk', 'doctype', 'desktop_icon')
+
 	reload_doctypes_for_schools_icons()
 
 	sync_desktop_icons()

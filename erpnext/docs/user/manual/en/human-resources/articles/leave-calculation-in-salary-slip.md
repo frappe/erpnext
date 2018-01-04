@@ -27,7 +27,7 @@ a scenario to understand how leaves impact employees Salary Slip.
     <li>Create Holiday List (if any), and link it with Employee master.</li>
 </ol>
 <p>When creating Salary Slip for an Employee, following is what you will see:</p>
-<img src="{{docs_base_url}}/assets/img/articles/SGrab_282.png">
+<img src="/docs/assets/img/articles/SGrab_282.png">
 <br>
 <br><b>Working Days:</b> Working Days in Salary Slip are calculated based on number of days selected above. If you don't wish to consider holiday in Working Days, then you should do following setting.
 <br>
@@ -46,7 +46,7 @@ Leave Type as "Leave Without Pay".
 <br>As indicated above, if you have LWP checked for components in the earning and deducted table, you will notice a reduction in Amount based on no. of LWP of an Employee for that month.
 <br>
 <br>
-<img src="{{docs_base_url}}/assets/img/articles/SGrab_283.png" width="760"><br>
+<img src="/docs/assets/img/articles/SGrab_283.png" width="760"><br>
 
 
 <!-- markdown -->

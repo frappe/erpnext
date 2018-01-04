@@ -1,0 +1,26 @@
+{
+ "creation": "2017-09-07 11:39:38.445902", 
+ "docstatus": 0, 
+ "doctype": "Data Migration Plan", 
+ "idx": 1, 
+ "mappings": [
+  {
+   "enabled": 1, 
+   "mapping": "Company to Hub Company"
+  }, 
+  {
+   "enabled": 1, 
+   "mapping": "Item to Hub Item"
+  }, 
+  {
+   "enabled": 1, 
+   "mapping": "Hub Message to Lead"
+  }
+ ], 
+ "modified": "2017-10-09 17:30:17.680059", 
+ "modified_by": "Administrator", 
+ "module": "Hub Node", 
+ "name": "Hub Sync", 
+ "owner": "Administrator", 
+ "plan_name": "Hub Sync"
+}

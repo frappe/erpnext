@@ -1,0 +1,9 @@
+{{ address_line1 }}<br>{% if address_line2 %}{{ address_line2 }}<br>{% endif -%}{{ city }}<br>
+{% if gst_state %}{{ gst_state }}{% endif -%},
+{% if gst_state_number %}State Code: {{ gst_state_number }}<br>{% endif -%}
+{% if pincode %}PIN: {{ pincode }}<br>{% endif -%}
+{{ country }}<br>
+{% if phone %}Phone: {{ phone }}<br>{% endif -%}
+{% if fax %}Fax: {{ fax }}<br>{% endif -%}
+{% if email_id %}Email: {{ email_id }}<br>{% endif -%}
+{% if gstin %}GSTIN: {{ gstin }}<br>{% endif -%}

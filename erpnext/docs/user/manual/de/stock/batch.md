@@ -13,7 +13,7 @@ Bei jeder für einen Chargenartikel generierten Lagertransaktion (Kaufbeleg, Lie
 
 Die Chargenstammdaten werden vor der Ausfertigung des Kaufbelegs erstellt. Somit erstellen Sie immer dann, wenn für einen Chargenartikel ein Kaufbeleg oder ein Produktionsauftrag ausgegeben werden, zuerst die Chargennummer des Artikels und wählen diese dann im Kaufbeleg oder im Produktionsauftrag aus.
 
-<img class="screenshot" alt="Charge" src="{{docs_base_url}}/assets/img/stock/batch.png">
+<img class="screenshot" alt="Charge" src="/docs/assets/img/stock/batch.png">
 
 > Anmerkung: Bei Lagertransaktionen werden die Chargen-IDs basierend auf dem Code, dem Lager, dem Verfallsdatum der Charge (verglichen mit dem Veröffentlichungsdatum der Transaktion) und der aktuellen Menge im Lager gefiltert.
 

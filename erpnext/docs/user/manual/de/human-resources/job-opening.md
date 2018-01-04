@@ -7,6 +7,6 @@ Um eine neue Offene Stelle anzulegen, gehen Sie zu:
 
 > Personalwesen > Dokumente > Offene Stellen > Neu
 
-<img class="screenshot" alt="Offene Stellen" src="{{docs_base_url}}/assets/img/human-resources/job-opening.png">
+<img class="screenshot" alt="Offene Stellen" src="/docs/assets/img/human-resources/job-opening.png">
 
 {next}

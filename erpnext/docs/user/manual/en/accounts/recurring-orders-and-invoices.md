@@ -10,7 +10,7 @@ Feature of setting document as recurring is available in Sales Order, Sales Invo
 
 Option to set document as recurring will be visible only after submission. Recurring is last section in document. Check **Is Recurring** to set document as recurring.
 
-<img alt="Recurring Invoice" class="screenshot" src="{{docs_base_url}}/assets/img/accounts/recurring.gif">
+<img alt="Recurring Invoice" class="screenshot" src="/docs/assets/img/accounts/recurring.gif">
 
 **From Date and To Date:** This defines contract period with the customer.
 
@@ -28,6 +28,8 @@ Option to set document as recurring will be visible only after submission. Recur
 
 In a situation where recurring invoice is not created successfully, user with System Manager role is notified about it via email. Also the document on which recurring event failed, "Is Recurring" field is unchecked for it. This means system doesn't try creating recurring invoice for that document again.
 	
-Failure in creation of recurring invoice could be due to multiple reasons like wrong email id mentioned in the Email Notification field in Recurring section etc.
+Failure in creation of recurring invoice could be due to multiple reasons like wrong Email Address mentioned in the Email Notification field in Recurring section etc.
 
-On receipt of notification, if cause of failure is fixed (like correcting email id) within 24 hours, then recurring invoice will be generated automatically. If issue is not fixed within the said time, then document should be created for that month/year manually.
+On receipt of notification, if cause of failure is fixed (like correcting Email Address) within 24 hours, then recurring invoice will be generated automatically. If issue is not fixed within the said time, then document should be created for that month/year manually.
+
+{next}

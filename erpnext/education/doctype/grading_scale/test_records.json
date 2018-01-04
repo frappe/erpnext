@@ -1,0 +1,19 @@
+[
+ {
+  "grading_scale_name": "_Test Grading Scale",
+  "intervals": [
+      {
+         "grade_code": "A",
+         "threshold": 75
+      },
+      {
+          "grade_code": "B",
+          "threshold": 50
+      },
+      {
+          "grade_code": "C",
+          "threshold": 0
+      }
+  ]
+ }
+]

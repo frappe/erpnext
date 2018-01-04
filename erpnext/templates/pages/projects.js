@@ -47,7 +47,6 @@ frappe.ready(function() {
 				project: '{{ doc.name }}',
 				item_status: item_status,
 			},
-			dataType: "json",
 			success: function(data) {
 				if(typeof data.message == 'undefined') {
 					$('.project-'+ item).html("No "+ item_status +" "+ item);
@@ -68,8 +67,7 @@ frappe.ready(function() {
 	}
 
 	var more_items = function(item, item_status){
-		if(item_status)
-		{
+		if(item_status) {
 			var item_status = $('.project-'+ item +'-section .btn-group .bold').hasClass('btn-closed-'+ item)
 				? 'closed' : 'open';
 		}
@@ -83,14 +81,13 @@ frappe.ready(function() {
 				start: start,
 				item_status: item_status,
 			},
-			dataType: "json",
 			success: function(data) {
 
 				$(data.message).appendTo('.project-'+ item);
 				if(typeof data.message == 'undefined') {
 					$(".more-"+ item).toggle(false);
 				}
-			start = start+10;
+				start = start+10;
 			}
 		});
 	}

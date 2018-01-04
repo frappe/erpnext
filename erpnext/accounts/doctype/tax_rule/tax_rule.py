@@ -7,6 +7,9 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cstr, cint
+from frappe.contacts.doctype.address.address import get_default_address
+from frappe.utils.nestedset import get_root_of
+from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
 
 class IncorrectCustomerGroup(frappe.ValidationError): pass
 class IncorrectSupplierType(frappe.ValidationError): pass
@@ -96,27 +99,31 @@ class TaxRule(Document):
 @frappe.whitelist()
 def get_party_details(party, party_type, args=None):
 	out = {}
+	billing_address, shipping_address = None, None
 	if args:
-		billing_filters=	{"name": args.get("billing_address")}
-		shipping_filters=	{"name": args.get("shipping_address")}
+		if args.get('billing_address'):
+			billing_address = frappe.get_doc('Address', args.get('billing_address'))
+		if args.get('shipping_address'):
+			shipping_address = frappe.get_doc('Address', args.get('shipping_address'))
 	else:
-		billing_filters=	{party_type: party, "is_primary_address": 1}
-		shipping_filters=	{party_type:party, "is_shipping_address": 1}
-
-	billing_address=	frappe.get_all("Address", fields=["city", "county", "state", "country"], filters= billing_filters)
-	shipping_address=	frappe.get_all("Address", fields=["city", "county", "state", "country"], filters= shipping_filters)
+		billing_address_name = get_default_address(party_type, party)
+		shipping_address_name = get_default_address(party_type, party, 'is_shipping_address')
+		if billing_address_name:
+			billing_address = frappe.get_doc('Address', billing_address_name)
+		if shipping_address_name:
+			shipping_address = frappe.get_doc('Address', shipping_address_name)
 
 	if billing_address:
-		out["billing_city"]= billing_address[0].city
-		out["billing_county"]= billing_address[0].county
-		out["billing_state"]= billing_address[0].state
-		out["billing_country"]= billing_address[0].country
+		out["billing_city"]= billing_address.city
+		out["billing_county"]= billing_address.county
+		out["billing_state"]= billing_address.state
+		out["billing_country"]= billing_address.country
 
 	if shipping_address:
-		out["shipping_city"]= shipping_address[0].city
-		out["shipping_county"]= shipping_address[0].county
-		out["shipping_state"]= shipping_address[0].state
-		out["shipping_country"]= shipping_address[0].country
+		out["shipping_city"]= shipping_address.city
+		out["shipping_county"]= shipping_address.county
+		out["shipping_state"]= shipping_address.state
+		out["shipping_country"]= shipping_address.country
 
 	return out
 
@@ -129,6 +136,10 @@ def get_tax_template(posting_date, args):
 	for key, value in args.iteritems():
 		if key=="use_for_shopping_cart":
 			conditions.append("use_for_shopping_cart = {0}".format(1 if value else 0))
+		if key == 'customer_group':
+			if not value: value = get_root_of("Customer Group")
+			customer_group_condition = get_customer_group_condition(value)
+			conditions.append("ifnull({0}, '') in ('', {1})".format(key, customer_group_condition))
 		else:
 			conditions.append("ifnull({0}, '') in ('', '{1}')".format(key, frappe.db.escape(cstr(value))))
 
@@ -152,3 +163,10 @@ def get_tax_template(posting_date, args):
 		return None
 
 	return tax_template
+
+def get_customer_group_condition(customer_group):
+	condition = ""
+	customer_groups = ["'%s'"%(frappe.db.escape(d.name)) for d in get_parent_customer_groups(customer_group)]
+	if customer_groups:
+		condition = ",".join(['%s'] * len(customer_groups))%(tuple(customer_groups))
+	return condition

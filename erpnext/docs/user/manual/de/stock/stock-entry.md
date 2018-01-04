@@ -7,7 +7,7 @@ Wenn Sie eine Lagerbuchung erstellen möchten, gehen Sie zu:
 
 > Lagerbestand > Dokumente > Lagerbuchung > Neu
 
-<img class="screenshot" alt="Lagerbuchung" src="{{docs_base_url}}/assets/img/stock/stock-entry.png">
+<img class="screenshot" alt="Lagerbuchung" src="/docs/assets/img/stock/stock-entry.png">
 
 Lagerbuchungen können aus folgenden Gründen erstellt werden:
 
@@ -27,15 +27,15 @@ Wenn die Lagerbuchung eine Eingangsbuchung ist, d. h. wenn ein beliebiger Artike
 
 Um Zusatzkosten hinzuzufügen, geben Sie die Beschreibung und den Betrag der Kosten in die Tabelle Zusatzkosten ein.
 
-<img class="screenshot" alt="Lagerbuchung Zusatzlkosten" src="{{docs_base_url}}/assets/img/stock/additional-costs-table.png">
+<img class="screenshot" alt="Lagerbuchung Zusatzlkosten" src="/docs/assets/img/stock/additional-costs-table.png">
 
 Die hinzugefügten Zusatzkosten werden basierend auf dem Grundwert der Artikel proportional auf die erhaltenen Artikel verteilt. Dann werden die verteilten Zusatzkosten zum Grundpreis hinzugerechnet, um den Wert neu zu berechnen.
 
-<img class="screenshot" alt="Lagerbuchung Preis für Artikelvarianten" src="{{docs_base_url}}/assets/img/stock/stock-entry-item-valuation-rate.png">
+<img class="screenshot" alt="Lagerbuchung Preis für Artikelvarianten" src="/docs/assets/img/stock/stock-entry-item-valuation-rate.png">
 
 Wenn die laufende Inventur aktiviert ist, werden Zusatzkosten auf das Konto "Aufwendungen im Wert beinhaltet" gebucht.
 
-<img class="screenshot" alt="Zusatzkosten Hauptbuch" src="{{docs_base_url}}/assets/img/stock/additional-costs-general-ledger.png">
+<img class="screenshot" alt="Zusatzkosten Hauptbuch" src="/docs/assets/img/stock/additional-costs-general-ledger.png">
 > Hinweis: Um den Lagerbestand über eine Tabellenkalkulation zu aktualisieren, bitte unter Lagerabgleich nachlesen.
 
 {next}

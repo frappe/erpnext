@@ -11,7 +11,7 @@ Sie können einen Kaufbeleg direkt erstellen über:
 
 oder aus einer "übertragenen" Einkaufsbestellung heraus, in dem Sie auf die Schaltfläche "Kaufbeleg erstellen" klicken.
 
-<img class="screenshot" alt="Kaufbeleg" src="{{docs_base_url}}/assets/img/stock/purchase-receipt.png">
+<img class="screenshot" alt="Kaufbeleg" src="/docs/assets/img/stock/purchase-receipt.png">
 
 ### Ausschuss
 

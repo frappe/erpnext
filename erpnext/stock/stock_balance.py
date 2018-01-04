@@ -1,7 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 import frappe
 
 from frappe.utils import flt, cstr, nowdate, nowtime
@@ -67,7 +67,7 @@ def get_balance_qty_from_sle(item_code, warehouse):
 def get_reserved_qty(item_code, warehouse):
 	reserved_qty = frappe.db.sql("""
 		select
-			sum((dnpi_qty / so_item_qty) * (so_item_qty - so_item_delivered_qty))
+			sum(dnpi_qty * ((so_item_qty - so_item_delivered_qty) / so_item_qty))
 		from
 			(
 				(select
@@ -94,7 +94,7 @@ def get_reserved_qty(item_code, warehouse):
 					where name = dnpi_in.parent and docstatus = 1 and status != 'Closed')
 				) dnpi)
 			union
-				(select qty as dnpi_qty, qty as so_item_qty,
+				(select stock_qty as dnpi_qty, qty as so_item_qty,
 					delivered_qty as so_item_delivered_qty, parent, name
 				from `tabSales Order Item` so_item
 				where item_code = %s and warehouse = %s
@@ -132,7 +132,7 @@ def get_ordered_qty(item_code, warehouse):
 def get_planned_qty(item_code, warehouse):
 	planned_qty = frappe.db.sql("""
 		select sum(qty - produced_qty) from `tabProduction Order`
-		where production_item = %s and fg_warehouse = %s and status != "Stopped"
+		where production_item = %s and fg_warehouse = %s and status not in ("Stopped", "Completed")
 		and docstatus=1 and qty > produced_qty""", (item_code, warehouse))
 
 	return flt(planned_qty[0][0]) if planned_qty else 0
@@ -170,7 +170,7 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 			where item_code=%s and warehouse=%s and docstatus < 2""", (d[0], d[1]))
 
 		if serial_nos and flt(serial_nos[0][0]) != flt(d[2]):
-			print d[0], d[1], d[2], serial_nos[0][0]
+			print(d[0], d[1], d[2], serial_nos[0][0])
 
 		sle = frappe.db.sql("""select valuation_rate, company from `tabStock Ledger Entry`
 			where item_code = %s and warehouse = %s and ifnull(is_cancelled, 'No') = 'No'
@@ -244,7 +244,7 @@ def repost_all_stock_vouchers():
 	i = 0
 	for voucher_type, voucher_no in vouchers:
 		i+=1
-		print i, "/", len(vouchers), voucher_type, voucher_no
+		print(i, "/", len(vouchers), voucher_type, voucher_no)
 		try:
 			for dt in ["Stock Ledger Entry", "GL Entry"]:
 				frappe.db.sql("""delete from `tab%s` where voucher_type=%s and voucher_no=%s"""%
@@ -259,9 +259,9 @@ def repost_all_stock_vouchers():
 			doc.update_stock_ledger()
 			doc.make_gl_entries(repost_future_gle=False)
 			frappe.db.commit()
-		except Exception, e:
-			print frappe.get_traceback()
+		except Exception as e:
+			print(frappe.get_traceback())
 			rejected.append([voucher_type, voucher_no])
 			frappe.db.rollback()
 
-	print rejected
+	print(rejected)

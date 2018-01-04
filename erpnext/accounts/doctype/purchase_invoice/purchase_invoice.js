@@ -2,10 +2,13 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.accounts");
-{% include 'erpnext/buying/doctype/purchase_common/purchase_common.js' %};
-
+{% include 'erpnext/public/js/controllers/buying.js' %};
 
 erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
+	setup: function(doc) {
+		this.setup_posting_date_time_check();
+		this._super(doc);
+	},
 	onload: function() {
 		this._super();
 
@@ -14,12 +17,13 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			if(!this.frm.doc.supplier && this.frm.doc.credit_to) {
 				this.frm.set_df_property("credit_to", "print_hide", 0);
 			}
+		} else {
+			this.frm.set_value("disable_rounded_total", frappe.sys_defaults.disable_rounded_total);
 		}
 
 		// formatter for material request item
 		this.frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
-
 	},
 
 	refresh: function(doc) {
@@ -40,35 +44,50 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			}
 
 			if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
-				cur_frm.add_custom_button(doc.update_stock ? __('Purchase Return') : __('Debit Note'),
+				cur_frm.add_custom_button(__('Return / Debit Note'),
 					this.make_debit_note, __("Make"));
+			}
+
+			if(!doc.subscription) {
+				cur_frm.add_custom_button(__('Subscription'), function() {
+					erpnext.utils.make_subscription(doc.doctype, doc.name)
+				}, __("Make"))
 			}
 		}
 
 		if(doc.docstatus===0) {
-			cur_frm.add_custom_button(__('Purchase Order'), function() {
+			var me = this;
+			this.frm.add_custom_button(__('Purchase Order'), function() {
 				erpnext.utils.map_current_doc({
 					method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
 					source_doctype: "Purchase Order",
+					target: me.frm,
+					setters: {
+						supplier: me.frm.doc.supplier || undefined,
+					},
 					get_query_filters: {
-						supplier: cur_frm.doc.supplier || undefined,
 						docstatus: 1,
 						status: ["!=", "Closed"],
 						per_billed: ["<", 99.99],
-						company: cur_frm.doc.company
+						company: me.frm.doc.company
 					}
 				})
 			}, __("Get items from"));
 
-			cur_frm.add_custom_button(__('Purchase Receipt'), function() {
+			this.frm.add_custom_button(__('Purchase Receipt'), function() {
 				erpnext.utils.map_current_doc({
 					method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
 					source_doctype: "Purchase Receipt",
+					target: me.frm,
+					date_field: "posting_date",
+					setters: {
+						supplier: me.frm.doc.supplier || undefined,
+					},
 					get_query_filters: {
-						supplier: cur_frm.doc.supplier || undefined,
 						docstatus: 1,
-						status: ["!=", "Closed"],
-						company: cur_frm.doc.company
+						status: ["not in", ["Closed", "Completed"]],
+						company: me.frm.doc.company,
+						is_return: 0
 					}
 				})
 			}, __("Get items from"));
@@ -89,8 +108,8 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				account: this.frm.doc.credit_to,
 				price_list: this.frm.doc.buying_price_list,
 			}, function() {
-			me.apply_pricing_rule();
-		})
+				me.apply_pricing_rule();
+			})
 	},
 
 	credit_to: function() {
@@ -117,8 +136,8 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		hide_fields(this.frm.doc);
 		if(cint(this.frm.doc.is_paid)) {
 			if(!this.frm.doc.company) {
-				cur_frm.set_value("is_paid", 0)
-				msgprint(__("Please specify Company to proceed"));
+				this.frm.set_value("is_paid", 0)
+				frappe.msgprint(__("Please specify Company to proceed"));
 			}
 		}
 		this.calculate_outstanding_amount();
@@ -183,50 +202,39 @@ cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
 // Hide Fields
 // ------------
 function hide_fields(doc) {
-	parent_fields = ['due_date', 'is_opening', 'advances_section', 'from_date', 'to_date'];
+	var parent_fields = ['due_date', 'is_opening', 'advances_section', 'from_date', 'to_date'];
 
 	if(cint(doc.is_paid) == 1) {
 		hide_field(parent_fields);
 	} else {
-		for (i in parent_fields) {
+		for (var i in parent_fields) {
 			var docfield = frappe.meta.docfield_map[doc.doctype][parent_fields[i]];
 			if(!docfield.hidden) unhide_field(parent_fields[i]);
 		}
 
 	}
 
-	item_fields_stock = ['warehouse_section', 'received_qty', 'rejected_qty'];
+	var item_fields_stock = ['warehouse_section', 'received_qty', 'rejected_qty'];
 
 	cur_frm.fields_dict['items'].grid.set_column_disp(item_fields_stock,
-		(cint(doc.update_stock)==1 ? true : false));
+		(cint(doc.update_stock)==1 || cint(doc.is_return)==1 ? true : false));
 
 	cur_frm.refresh_fields();
 }
 
 cur_frm.cscript.update_stock = function(doc, dt, dn) {
 	hide_fields(doc, dt, dn);
+	this.frm.fields_dict.items.grid.toggle_reqd("item_code", doc.update_stock? true: false)
 }
 
 cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
 	return {
 		filters: [
 			["Account", "account_type", "in", ["Cash", "Bank"]],
-			["Account", "root_type", "=", "Asset"],
 			["Account", "is_group", "=",0],
-			["Account", "company", "=", doc.company]
+			["Account", "company", "=", doc.company],
+			["Account", "report_type", "=", "Balance Sheet"]
 		]
-	}
-}
-
-cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
-	return{
-		filters:{'supplier':  doc.supplier}
-	}
-}
-
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return{
-		filters:{'supplier':  doc.supplier}
 	}
 }
 
@@ -336,6 +344,13 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 }
 
 frappe.ui.form.on("Purchase Invoice", {
+	setup: function(frm) {
+		frm.custom_make_buttons = {
+			'Purchase Invoice': 'Debit Note',
+			'Payment Entry': 'Payment'
+		}
+	},
+
 	onload: function(frm) {
 		$.each(["warehouse", "rejected_warehouse"], function(i, field) {
 			frm.set_query(field, "items", function() {

@@ -24,30 +24,60 @@ frappe.treeview_settings["Account"] = {
 	fields: [
 		{fieldtype:'Data', fieldname:'account_name', label:__('New Account Name'), reqd:true,
 			description: __("Name of new Account. Note: Please don't create accounts for Customers and Suppliers")},
+		{fieldtype:'Data', fieldname:'account_number', label:__('Account Number'),
+			description: __("Number of new Account, it will be included in the account name as a prefix")},
 		{fieldtype:'Check', fieldname:'is_group', label:__('Is Group'),
 			description: __('Further accounts can be made under Groups, but entries can be made against non-Groups')},
 		{fieldtype:'Select', fieldname:'root_type', label:__('Root Type'),
-			options: ['Asset', 'Liability', 'Equity', 'Income', 'Expense'].join('\n')},
+			options: ['Asset', 'Liability', 'Equity', 'Income', 'Expense'].join('\n'),
+			depends_on: 'eval:doc.is_group && !doc.parent_account'},
 		{fieldtype:'Select', fieldname:'account_type', label:__('Account Type'),
-			options: ['', 'Bank', 'Cash', 'Stock', 'Tax', 'Chargeable', 'Fixed Asset'].join('\n'),
+			options: ['', 'Accumulated Depreciation', 'Bank', 'Cash', 'Chargeable', 'Cost of Goods Sold', 'Depreciation',
+				'Equity', 'Expense Account', 'Expenses Included In Valuation', 'Fixed Asset', 'Income Account', 'Payable', 'Receivable',
+				'Round Off', 'Stock', 'Stock Adjustment', 'Stock Received But Not Billed', 'Tax', 'Temporary'].join('\n'),
 			description: __("Optional. This setting will be used to filter in various transactions.")
 		},
 		{fieldtype:'Float', fieldname:'tax_rate', label:__('Tax Rate'),
-			depends_on: 'eval:doc.is_group==1&&doc.account_type=="Tax"'},
-		{fieldtype:'Link', fieldname:'warehouse', label:__('Warehouse'), options:"Warehouse",
-			depends_on: 'eval:(!doc.is_group&&doc.account_type=="Stock")',
-			get_query: function() {
-				return {
-					filters:{
-						"company": frappe.treeview_settings.filters["company"]
-					}
-				}
-			}
-		},
+			depends_on: 'eval:doc.is_group==0&&doc.account_type=="Tax"'},
 		{fieldtype:'Link', fieldname:'account_currency', label:__('Currency'), options:"Currency",
 			description: __("Optional. Sets company's default currency, if not specified.")}
 	],
 	ignore_fields:["parent_account"],
+	onload: function(treeview) {
+		function get_company() {
+			return treeview.page.fields_dict.company.get_value();
+		}
+
+		// tools
+		treeview.page.add_inner_button(__("Chart of Cost Centers"), function() {
+			frappe.set_route('Tree', 'Cost Center', {company: get_company()});
+		}, __('View'));
+
+		treeview.page.add_inner_button(__("Opening Invoice Creation Tool"), function() {
+			frappe.set_route('Form', 'Opening Invoice Creation Tool', {company: get_company()});
+		}, __('View'));
+
+		treeview.page.add_inner_button(__("Period Closing Voucher"), function() {
+			frappe.set_route('List', 'Period Closing Voucher', {company: get_company()});
+		}, __('View'));
+
+		// make
+		treeview.page.add_inner_button(__("Journal Entry"), function() {
+			frappe.new_doc('Journal Entry', {company: get_company()});
+		}, __('Make'));
+		treeview.page.add_inner_button(__("New Company"), function() {
+			frappe.new_doc('Company');
+		}, __('Make'));
+
+		// financial statements
+		for (let report of ['Trial Balance', 'General Ledger', 'Balance Sheet',
+			'Profit and Loss', 'Cash Flow Statement', 'Accounts Payable', 'Accounts Receivable']) {
+			treeview.page.add_inner_button(__(report), function() {
+				frappe.set_route('query-report', report, {company: get_company()});
+			}, __('Financial Statements'));
+		}
+
+	},
 	onrender: function(node) {
 		var dr_or_cr = node.data.balance < 0 ? "Cr" : "Dr";
 		if (node.data && node.data.balance!==undefined) {
@@ -69,8 +99,8 @@ frappe.treeview_settings["Account"] = {
 			click: function(node, btn) {
 				frappe.route_options = {
 					"account": node.label,
-					"from_date": sys_defaults.year_start_date,
-					"to_date": sys_defaults.year_end_date,
+					"from_date": frappe.sys_defaults.year_start_date,
+					"to_date": frappe.sys_defaults.year_end_date,
 					"company": frappe.defaults.get_default('company') ? frappe.defaults.get_default('company'): ""
 				};
 				frappe.set_route("query-report", "General Ledger");

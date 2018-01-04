@@ -3,18 +3,28 @@
 
 frappe.provide("erpnext.maintenance");
 
-frappe.ui.form.on_change("Maintenance Schedule", "customer", function(frm) {
-	erpnext.utils.get_party_details(frm) });
-frappe.ui.form.on_change("Maintenance Schedule", "customer_address", function(){
-	erpnext.utils.get_address_display(cur_frm, 'customer_address', 'address_display');
-});
-frappe.ui.form.on_change("Maintenance Schedule", "contact_person", function(){
-  erpnext.utils.get_contact_details(cur_frm);	
-});
+frappe.ui.form.on('Maintenance Schedule', {
+	setup: function(frm) {
+		frm.set_query('contact_person', erpnext.queries.contact_query);
+		frm.set_query('customer_address', erpnext.queries.address_query);
+	},
+	customer: function(frm) {
+		erpnext.utils.get_party_details(frm)
+	},
+	customer_address: function(frm) {
+		erpnext.utils.get_address_display(frm, 'customer_address', 'address_display');
+	},
+	contact_person: function(frm) {
+		erpnext.utils.get_contact_details(frm);
+	}
+
+})
 
 // TODO commonify this code
 erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 	refresh: function() {
+		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
+
 		var me = this;
 
 		if (this.frm.doc.docstatus === 0) {
@@ -23,10 +33,12 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_schedule",
 						source_doctype: "Sales Order",
+						target: me.frm,
+						setters: {
+							customer: me.frm.doc.customer || undefined
+						},
 						get_query_filters: {
 							docstatus: 1,
-							order_type: me.frm.doc.order_type,
-							customer: me.frm.doc.customer || undefined,
 							company: me.frm.doc.company
 						}
 					});
@@ -59,7 +71,7 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 
 		if (item.start_date && item.end_date && item.periodicity) {
 			if(item.start_date > item.end_date) {
-				msgprint(__("Row {0}:Start Date must be before End Date", [item.idx]));
+				frappe.msgprint(__("Row {0}:Start Date must be before End Date", [item.idx]));
 				return;
 			}
 
@@ -85,7 +97,7 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(!doc.status) set_multiple(dt,dn,{status:'Draft'});
 
 	if(doc.__islocal){
-		set_multiple(dt,dn,{transaction_date:get_today()});
+		set_multiple(dt,dn,{transaction_date: frappe.datetime.get_today()});
 	}
 
 	// set add fetch for item_code's item_name and description
@@ -94,26 +106,14 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 
 }
 
-cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
-	return {
-		filters:{ 'customer': doc.customer }
-	}
-}
-
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return {
-		filters:{ 'customer': doc.customer }
-	}
-}
-
 cur_frm.cscript.generate_schedule = function(doc, cdt, cdn) {
 	if (!doc.__islocal) {
-		return $c('runserverobj', args={'method':'generate_schedule', 'docs':doc},
+		return $c('runserverobj', {'method':'generate_schedule', 'docs':doc},
 			function(r, rt) {
 				refresh_field('schedules');
 			});
 	} else {
-		msgprint(__("Please save the document before generating maintenance schedule"));
+		frappe.msgprint(__("Please save the document before generating maintenance schedule"));
 	}
 }
 

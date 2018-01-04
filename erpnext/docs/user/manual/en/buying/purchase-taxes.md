@@ -1,3 +1,5 @@
+# Purchase Taxes
+
 For Tax Accounts that you want to use in the tax templates, you must mention
 them as type “Tax” in your Chart of Accounts.
 
@@ -8,9 +10,8 @@ Orders and Purchase Invoices.
 > Buying > Setup > Purchase Taxes and Charges Template > New Purchase Taxes and Charges
 Master
 
-![Purchase-Taxes]({{docs_base_url}}/assets/old_images/erpnext/purchase-taxes.png)
+<img class="screenshot" alt="Purchase taxes" src="/docs/assets/img/buying/purchase-taxes.png">
 
-  
 
 You can specify if the tax / charge is only for valuation (not a part of
 total) or only for total (does not add value to the item) or for both.

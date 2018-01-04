@@ -48,13 +48,19 @@ frappe.query_reports["General Ledger"] = {
 			"fieldtype": "Data",
 		},
 		{
+			"fieldname":"project",
+			"label": __("Project"),
+			"fieldtype": "Link",
+			"options": "Project"
+		},
+		{
 			"fieldtype": "Break",
 		},
 		{
 			"fieldname":"party_type",
 			"label": __("Party Type"),
-			"fieldtype": "Select",
-			"options": ["", "Customer", "Supplier"],
+			"fieldtype": "Link",
+			"options": "Party Type",
 			"default": ""
 		},
 		{
@@ -68,7 +74,26 @@ frappe.query_reports["General Ledger"] = {
 					frappe.throw(__("Please select Party Type first"));
 				}
 				return party_type;
+			},
+			on_change: function() {
+				var party_type = frappe.query_report_filters_by_name.party_type.get_value();
+				var party = frappe.query_report_filters_by_name.party.get_value();
+				if(!party_type || !party) {
+					frappe.query_report_filters_by_name.party_name.set_value("");
+					return;
+				}
+
+				var fieldname = frappe.scrub(party_type) + "_name";
+				frappe.db.get_value(party_type, party, fieldname, function(value) {
+					frappe.query_report_filters_by_name.party_name.set_value(value[fieldname]);
+				});
 			}
+		},
+		{
+			"fieldname":"party_name",
+			"label": __("Party Name"),
+			"fieldtype": "Data",
+			"hidden": 1
 		},
 		{
 			"fieldname":"group_by_voucher",
@@ -80,13 +105,6 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname":"group_by_account",
 			"label": __("Group by Account"),
 			"fieldtype": "Check",
-		},
-		{
-			"fieldname":"letter_head",
-			"label": __("Letter Head"),
-			"fieldtype": "Link",
-			"options": "Letter Head",
-			"default": frappe.defaults.get_default("letter_head"),
 		}
 	]
 }

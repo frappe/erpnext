@@ -24,6 +24,15 @@ frappe.ui.form.on("Customer", {
 				filters: filters
 			}
 		});
+
+		frm.set_query('customer_primary_contact', function(doc) {
+			return {
+				query: "erpnext.selling.doctype.customer.customer.get_customer_primary_contact",
+				filters: {
+					'customer': doc.name
+				}
+			}
+		})
 	},
 	refresh: function(frm) {
 		if(frappe.defaults.get_default("cust_master_name")!="Naming Series") {
@@ -32,10 +41,12 @@ frappe.ui.form.on("Customer", {
 			erpnext.toggle_naming_series();
 		}
 
+		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Customer'}
+
 		frm.toggle_display(['address_html','contact_html'], !frm.doc.__islocal);
 
 		if(!frm.doc.__islocal) {
-			erpnext.utils.render_address_and_contact(frm);
+			frappe.contacts.render_address_and_contact(frm);
 
 			// custom buttons
 			frm.add_custom_button(__('Accounting Ledger'), function() {
@@ -51,7 +62,7 @@ frappe.ui.form.on("Customer", {
 			erpnext.utils.set_party_dashboard_indicators(frm);
 
 		} else {
-			erpnext.utils.clear_address_and_contact(frm);
+			frappe.contacts.clear_address_and_contact(frm);
 		}
 
 		var grid = cur_frm.get_field("sales_team").grid;

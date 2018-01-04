@@ -1,0 +1,16 @@
+<div class="pos-bill-toolbar col-xs-9" style="display: flex; width: 70%;">
+	<div class="party-area" style="flex: 1;">
+		<span class="edit-customer-btn text-muted" style="display: inline;">
+			<a class="btn-open no-decoration" title="Edit Customer">
+				<i class="octicon octicon-pencil"></i>
+			</a>	
+		</span>
+	</div>
+	<button class="btn btn-default list-customers-btn" style="margin-left: 12px">
+		<i class="octicon octicon-organization"></i>
+	</button>
+	</button> {% if (allow_delete) { %}
+	<button class="btn btn-default btn-danger" style="margin: 0 5px 0 5px">
+			<i class="octicon octicon-trashcan"></i>
+		</button> {% } %}
+</div>

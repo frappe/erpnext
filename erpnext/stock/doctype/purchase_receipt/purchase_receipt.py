@@ -12,14 +12,15 @@ from frappe.utils import getdate
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
+from erpnext.buying.utils import check_for_closed_status
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
 
 class PurchaseReceipt(BuyingController):
-	def __init__(self, arg1, arg2=None):
-		super(PurchaseReceipt, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(PurchaseReceipt, self).__init__(*args, **kwargs)
 		self.status_updater = [{
 			'source_dt': 'Purchase Receipt Item',
 			'target_dt': 'Purchase Order Item',
@@ -46,22 +47,23 @@ class PurchaseReceipt(BuyingController):
 		}]
 
 	def validate(self):
+		self.validate_posting_time()
 		super(PurchaseReceipt, self).validate()
-		
-		if not self._action=="submit":
+
+		if self._action=="submit":
+			self.make_batches('warehouse')
+		else:
 			self.set_status()
+
 		self.po_required()
 		self.validate_with_previous_doc()
-		self.validate_inspection()
 		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 
-		pc_obj = frappe.get_doc('Purchase Common')
-		self.check_for_closed_status(pc_obj)
-		
+		self.check_for_closed_status()
+
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
-		
 
 	def validate_with_previous_doc(self):
 		super(PurchaseReceipt, self).validate_with_previous_doc({
@@ -72,7 +74,8 @@ class PurchaseReceipt(BuyingController):
 			"Purchase Order Item": {
 				"ref_dn_field": "purchase_order_item",
 				"compare_fields": [["project", "="], ["uom", "="], ["item_code", "="]],
-				"is_child_table": True
+				"is_child_table": True,
+				"allow_duplicate_prev_row_id": True
 			}
 		})
 
@@ -81,9 +84,9 @@ class PurchaseReceipt(BuyingController):
 
 	def po_required(self):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
-			 for d in self.get('items'):
-				 if not d.purchase_order:
-					 frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
+			for d in self.get('items'):
+				if not d.purchase_order:
+					frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
 
 	def get_already_received_qty(self, po, po_detail):
 		qty = frappe.db.sql("""select sum(qty) from `tabPurchase Receipt Item`
@@ -97,37 +100,26 @@ class PurchaseReceipt(BuyingController):
 			["qty", "warehouse"])
 		return po_qty, po_warehouse
 
-	def validate_inspection(self):
-		for d in self.get('items'):		 #Enter inspection date for all items that require inspection
-			if frappe.db.get_value("Item", d.item_code, "inspection_required") and not d.qa_no:
-				frappe.msgprint(_("Quality Inspection required for Item {0}").format(d.item_code))
-				if self.docstatus==1:
-					raise frappe.ValidationError
-
 	# Check for Closed status
-	def check_for_closed_status(self, pc_obj):
+	def check_for_closed_status(self):
 		check_list =[]
 		for d in self.get('items'):
-			if d.meta.get_field('purchase_order') and d.purchase_order and d.purchase_order not in check_list:
+			if (d.meta.get_field('purchase_order') and d.purchase_order
+				and d.purchase_order not in check_list):
 				check_list.append(d.purchase_order)
-				pc_obj.check_for_closed_status('Purchase Order', d.purchase_order)
+				check_for_closed_status('Purchase Order', d.purchase_order)
 
 	# on submit
 	def on_submit(self):
-		purchase_controller = frappe.get_doc("Purchase Common")
+		super(PurchaseReceipt, self).on_submit()
 
 		# Check for Approving Authority
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
 
-		# Set status as Submitted
-		frappe.db.set(self, 'status', 'Submitted')
-
 		self.update_prevdoc_status()
-		self.update_billing_status()
-
-		if not self.is_return:
-			purchase_controller.update_last_purchase_rate(self, 1)
+		if self.per_billed < 100:
+			self.update_billing_status()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
@@ -147,9 +139,9 @@ class PurchaseReceipt(BuyingController):
 			frappe.throw(_("Purchase Invoice {0} is already submitted").format(self.submit_rv[0][0]))
 
 	def on_cancel(self):
-		pc_obj = frappe.get_doc('Purchase Common')
+		super(PurchaseReceipt, self).on_cancel()
 
-		self.check_for_closed_status(pc_obj)
+		self.check_for_closed_status()
 		# Check if Purchase Invoice has been submitted against current Purchase Order
 		submitted = frappe.db.sql("""select t1.name
 			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2
@@ -158,13 +150,8 @@ class PurchaseReceipt(BuyingController):
 		if submitted:
 			frappe.throw(_("Purchase Invoice {0} is already submitted").format(submitted[0][0]))
 
-		frappe.db.set(self,'status','Cancelled')
-
 		self.update_prevdoc_status()
 		self.update_billing_status()
-
-		if not self.is_return:
-			pc_obj.update_last_purchase_rate(self, 0)
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
@@ -176,9 +163,6 @@ class PurchaseReceipt(BuyingController):
 			if self.supplier_warehouse:
 				bin = frappe.db.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.rm_item_code, self.supplier_warehouse), as_dict = 1)
 				d.current_stock = bin and flt(bin[0]['actual_qty']) or 0
-
-	def get_rate(self,arg):
-		return frappe.get_doc('Purchase Common').get_rate(arg,self)
 
 	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import process_gl_map
@@ -199,7 +183,7 @@ class PurchaseReceipt(BuyingController):
 					if not stock_value_diff:
 						continue
 					gl_entries.append(self.get_gl_dict({
-						"account": warehouse_account[d.warehouse]["name"],
+						"account": warehouse_account[d.warehouse]["account"],
 						"against": stock_rbnb,
 						"cost_center": d.cost_center,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
@@ -210,7 +194,7 @@ class PurchaseReceipt(BuyingController):
 					stock_rbnb_currency = get_account_currency(stock_rbnb)
 					gl_entries.append(self.get_gl_dict({
 						"account": stock_rbnb,
-						"against": warehouse_account[d.warehouse]["name"],
+						"against": warehouse_account[d.warehouse]["account"],
 						"cost_center": d.cost_center,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 						"credit": flt(d.base_net_amount, d.precision("base_net_amount")),
@@ -224,7 +208,7 @@ class PurchaseReceipt(BuyingController):
 					if flt(d.landed_cost_voucher_amount):
 						gl_entries.append(self.get_gl_dict({
 							"account": expenses_included_in_valuation,
-							"against": warehouse_account[d.warehouse]["name"],
+							"against": warehouse_account[d.warehouse]["account"],
 							"cost_center": d.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(d.landed_cost_voucher_amount),
@@ -234,8 +218,8 @@ class PurchaseReceipt(BuyingController):
 					# sub-contracting warehouse
 					if flt(d.rm_supp_cost) and warehouse_account.get(self.supplier_warehouse):
 						gl_entries.append(self.get_gl_dict({
-							"account": warehouse_account[self.supplier_warehouse]["name"],
-							"against": warehouse_account[d.warehouse]["name"],
+							"account": warehouse_account[self.supplier_warehouse]["account"],
+							"against": warehouse_account[d.warehouse]["account"],
 							"cost_center": d.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(d.rm_supp_cost)
@@ -256,7 +240,7 @@ class PurchaseReceipt(BuyingController):
 
 						gl_entries.append(self.get_gl_dict({
 							"account": loss_account,
-							"against": warehouse_account[d.warehouse]["name"],
+							"against": warehouse_account[d.warehouse]["account"],
 							"cost_center": d.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"debit": divisional_loss,

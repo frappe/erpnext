@@ -9,7 +9,10 @@ manufacturing
 projects
 support
 human-resources
+subscription
 customer-portal
 website
 using-erpnext
+regional
 customize-erpnext
+education

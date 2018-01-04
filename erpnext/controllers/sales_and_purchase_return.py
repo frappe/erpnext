@@ -20,9 +20,9 @@ def validate_return_against(doc):
 		frappe.throw(_("{0} is mandatory for Return").format(doc.meta.get_label("return_against")))
 	else:
 		filters = {"doctype": doc.doctype, "docstatus": 1, "company": doc.company}
-		if doc.meta.get_field("customer"):
+		if doc.meta.get_field("customer") and doc.customer:
 			filters["customer"] = doc.customer
-		elif doc.meta.get_field("supplier"):
+		elif doc.meta.get_field("supplier") and doc.supplier:
 			filters["supplier"] = doc.supplier
 
 		if not frappe.db.exists(filters):
@@ -53,8 +53,8 @@ def validate_returned_items(doc):
 
 	valid_items = frappe._dict()
 
-	select_fields = "item_code, qty, parenttype" if doc.doctype=="Purchase Invoice" \
-		else "item_code, qty, serial_no, batch_no, parenttype"
+	select_fields = "item_code, qty, rate, parenttype" if doc.doctype=="Purchase Invoice" \
+		else "item_code, qty, rate, serial_no, batch_no, parenttype"
 
 	if doc.doctype in ['Purchase Invoice', 'Purchase Receipt']:
 		select_fields += ",rejected_qty, received_qty"
@@ -71,7 +71,7 @@ def validate_returned_items(doc):
 	already_returned_items = get_already_returned_items(doc)
 
 	# ( not mandatory when it is Purchase Invoice or a Sales Invoice without Update Stock )
-	warehouse_mandatory = not (doc.doctype=="Purchase Invoice" or (doc.doctype=="Sales Invoice" and not doc.update_stock))
+	warehouse_mandatory = not ((doc.doctype=="Purchase Invoice" or doc.doctype=="Sales Invoice") and not doc.update_stock)
 
 	items_returned = False
 	for d in doc.get("items"):
@@ -82,10 +82,15 @@ def validate_returned_items(doc):
 			else:
 				ref = valid_items.get(d.item_code, frappe._dict())
 				validate_quantity(doc, d, ref, valid_items, already_returned_items)
-
-				if ref.batch_no and d.batch_no not in ref.batch_no:
+				
+				if ref.rate and doc.doctype in ("Delivery Note", "Sales Invoice") and flt(d.rate) > ref.rate:
+					frappe.throw(_("Row # {0}: Rate cannot be greater than the rate used in {1} {2}")
+						.format(d.idx, doc.doctype, doc.return_against))
+							
+				elif ref.batch_no and d.batch_no not in ref.batch_no:
 					frappe.throw(_("Row # {0}: Batch No must be same as {1} {2}")
 						.format(d.idx, doc.doctype, doc.return_against))
+						
 				elif ref.serial_no:
 					if not d.serial_no:
 						frappe.throw(_("Row # {0}: Serial No is mandatory").format(d.idx))
@@ -96,8 +101,9 @@ def validate_returned_items(doc):
 								frappe.throw(_("Row # {0}: Serial No {1} does not match with {2} {3}")
 									.format(d.idx, s, doc.doctype, doc.return_against))
 
-				if warehouse_mandatory and not d.get("warehouse"):
-					frappe.throw(_("Warehouse is mandatory"))
+				if warehouse_mandatory and frappe.db.get_value("Item", d.item_code, "is_stock_item") \
+					and not d.get("warehouse"):
+						frappe.throw(_("Warehouse is mandatory"))
 
 			items_returned = True
 
@@ -106,30 +112,32 @@ def validate_returned_items(doc):
 
 def validate_quantity(doc, args, ref, valid_items, already_returned_items):
 	fields = ['qty']
-	if doc.doctype in ['Purchase Invoice', 'Purchase Receipt']:
+	if doc.doctype in ['Purchase Receipt', 'Purchase Invoice']:
 		fields.extend(['received_qty', 'rejected_qty'])
 
 	already_returned_data = already_returned_items.get(args.item_code) or {}
 
 	for column in fields:
-		return_qty = flt(already_returned_data.get(column, 0)) if len(already_returned_data) > 0 else 0
-		referenced_qty = ref.get(column)
-		max_return_qty = flt(referenced_qty) - return_qty
+		returned_qty = flt(already_returned_data.get(column, 0)) if len(already_returned_data) > 0 else 0
+		reference_qty = ref.get(column)
+		max_returnable_qty = flt(reference_qty) - returned_qty
 		label = column.replace('_', ' ').title()
-
-		if flt(args.get(column)) > 0:
-			frappe.throw(_("{0} must be negative in return document").format(label))
-		elif return_qty >= referenced_qty and flt(args.get(column)) != 0:
-			frappe.throw(_("Item {0} has already been returned").format(args.item_code), StockOverReturnError)
-		elif abs(args.get(column)) > max_return_qty:
-			frappe.throw(_("Row # {0}: Cannot return more than {1} for Item {2}")
-				.format(args.idx, referenced_qty, args.item_code), StockOverReturnError)
+		if reference_qty:	
+			if flt(args.get(column)) > 0:
+				frappe.throw(_("{0} must be negative in return document").format(label))
+			elif returned_qty >= reference_qty and args.get(column):
+				frappe.throw(_("Item {0} has already been returned")
+					.format(args.item_code), StockOverReturnError)
+			elif abs(args.get(column)) > max_returnable_qty:
+				frappe.throw(_("Row # {0}: Cannot return more than {1} for Item {2}")
+					.format(args.idx, reference_qty, args.item_code), StockOverReturnError)
 
 def get_ref_item_dict(valid_items, ref_item_row):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 	
 	valid_items.setdefault(ref_item_row.item_code, frappe._dict({
 		"qty": 0,
+		"rate": 0,
 		"rejected_qty": 0,
 		"received_qty": 0,
 		"serial_no": [],
@@ -137,6 +145,8 @@ def get_ref_item_dict(valid_items, ref_item_row):
 	}))
 	item_dict = valid_items[ref_item_row.item_code]
 	item_dict["qty"] += ref_item_row.qty
+	if ref_item_row.get("rate", 0) > item_dict["rate"]:
+		item_dict["rate"] = ref_item_row.get("rate", 0)
 
 	if ref_item_row.parenttype in ['Purchase Invoice', 'Purchase Receipt']:
 		item_dict["received_qty"] += ref_item_row.received_qty
@@ -184,7 +194,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		doc.return_against = source.name
 		doc.ignore_pricing_rule = 1
 		if doctype == "Sales Invoice":
-			doc.is_pos = 0
+			doc.is_pos = source.is_pos
 
 			# look for Print Heading "Credit Note"
 			if not doc.select_print_heading:
@@ -198,6 +208,21 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			if tax.charge_type == "Actual":
 				tax.tax_amount = -1 * tax.tax_amount
 
+		if doc.get("is_return"):
+			if doc.doctype == 'Sales Invoice':
+				doc.set('payments', [])
+				for data in source.payments:
+					doc.append('payments', {
+						'mode_of_payment': data.mode_of_payment,
+						'type': data.type,
+						'amount': -1 * data.amount,
+						'base_amount': -1 * data.base_amount
+					})
+			elif doc.doctype == 'Purchase Invoice':
+				doc.paid_amount = -1 * source.paid_amount
+				doc.base_paid_amount = -1 * source.base_paid_amount
+
+		doc.discount_amount = -1 * source.discount_amount
 		doc.run_method("calculate_taxes_and_totals")
 
 	def update_item(source_doc, target_doc, source_parent):
@@ -231,6 +256,9 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.dn_detail = source_doc.dn_detail
 			target_doc.expense_account = source_doc.expense_account
 
+	def update_terms(source_doc, target_doc, source_parent):
+		target_doc.payment_amount = -source_doc.payment_amount
+
 	doclist = get_mapped_doc(doctype, source_name,	{
 		doctype: {
 			"doctype": doctype,
@@ -247,6 +275,10 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			},
 			"postprocess": update_item
 		},
+		"Payment Schedule": {
+			"doctype": "Payment Schedule",
+			"postprocess": update_terms
+		}
 	}, target_doc, set_missing_values)
 
 	return doclist

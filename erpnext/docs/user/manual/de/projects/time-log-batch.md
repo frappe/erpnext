@@ -9,17 +9,17 @@ ODER
 
 Öffnen Sie einfach Ihre Übersicht der Zeitprotokolle und kreuzen Sie die Artikel an, die Sie dem Zeitprotokollstapel hinzufügen möchten. Klicken Sie dann auf die Schaltfläche "Zeitprotokollstapel erstellen" und diese Zeitprotokolle werden ausgewählt.
 
-<img class="screenshot" alt="Zeitprotokoll - Kalender aufziehen" src="{{docs_base_url}}/assets/img/project/time_sheet.gif">
+<img class="screenshot" alt="Zeitprotokoll - Kalender aufziehen" src="/docs/assets/img/project/time_sheet.gif">
 
 ### Ausgangsrechnungen erstellen
 
 * Sobald Sie einen Zeitprotokollstapel übertragen haben, sollte die Schaltfläche "Rechnung erstellen" erscheinen.
 
-<img class="screenshot" alt="Zeitprotokoll - Kalender aufziehen" src="{{docs_base_url}}/assets/img/project/time_sheet_make_invoice.png">
+<img class="screenshot" alt="Zeitprotokoll - Kalender aufziehen" src="/docs/assets/img/project/time_sheet_make_invoice.png">
 
 * Klicken Sie auf diese Schaltfläche und erstellen Sie eine Ausgangsrechnung zu einem Zeitprotokollstapel.
 
-<img class="screenshot" alt="Zeitprotokoll - Kalender aufziehen" src="{{docs_base_url}}/assets/img/project/time_sheet_sales_invoice.png">
+<img class="screenshot" alt="Zeitprotokoll - Kalender aufziehen" src="/docs/assets/img/project/time_sheet_sales_invoice.png">
 
 * Wenn Sie die Ausgangsrechnung "übertragen", wird die Nummer der Ausgangsrechnung in den Zeitprotokollen und im Zeitprotokollstapel aktualisiert und ihr Status wird auf "abgerechnet" geändert.
 

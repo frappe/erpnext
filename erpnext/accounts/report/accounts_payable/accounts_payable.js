@@ -20,13 +20,13 @@ frappe.query_reports["Accounts Payable"] = {
 			"fieldname":"report_date",
 			"label": __("As on Date"),
 			"fieldtype": "Date",
-			"default": get_today()
+			"default": frappe.datetime.get_today()
 		},
 		{
 			"fieldname":"ageing_based_on",
 			"label": __("Ageing Based On"),
 			"fieldtype": "Select",
-			"options": 'Posting Date' + NEWLINE + 'Due Date',
+			"options": 'Posting Date\nDue Date',
 			"default": "Posting Date"
 		},
 		{
@@ -53,5 +53,11 @@ frappe.query_reports["Accounts Payable"] = {
 			"default": "90",
 			"reqd": 1
 		}
-	]
+	],
+	onload: function(report) {
+		report.page.add_inner_button(__("Accounts Payable Summary"), function() {
+			var filters = report.get_values();
+			frappe.set_route('query-report', 'Accounts Payable Summary', {company: filters.company});
+		});
+	}
 }

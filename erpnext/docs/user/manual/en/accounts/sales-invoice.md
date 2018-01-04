@@ -1,3 +1,5 @@
+# Sales Invoice
+
 A Sales Invoice is a bill that you send to your customers, against which the customer processes the payment. Sales Invoice is an accounting transaction. On submission of Sales Invoice,  the system updates the receivable and books income against a Customer Account.
 
 You can create a Sales Invoice directly from
@@ -6,7 +8,7 @@ You can create a Sales Invoice directly from
 
 or you can Make a new Sales Invoice after you submit the Delivery Note.
 
-<img class="screenshot" alt="Sales Invoice" src="{{docs_base_url}}/assets/img/accounts/sales-invoice.png">
+<img class="screenshot" alt="Sales Invoice" src="/docs/assets/img/accounts/sales-invoice.png">
 
 #### Accounting Impact
 
@@ -51,8 +53,23 @@ monthly, quarterly, half-yearly or annual basis, you can check the “Recurring
 Invoice” box. Here you can fill in the details of how frequently you want to
 bill this Invoice and the period for which the contract is valid.
 
-ERPNext will automatically create new Invoices and mail it to the email ids
+ERPNext will automatically create new Invoices and mail it to the Email Addresses
 you set.
+
+#### Automatically Fetching Item Batch Numbers
+
+If you are selling an item from a [Batch](/docs/user/manual/en/stock/batch),
+ERPNext will automatically fetch a batch number for you if "Update Stock" 
+is checked. The batch number will be fetched on a First Expiring First Out 
+(FEFO) basis. This is a variant of First In First Out (FIFO) that gives 
+highest priority to the soonest to expire Items. 
+
+<img class="screenshot" alt="POS Invoice" src="/docs/assets/img/accounts/sales-invoice-fetch-batch.png">
+
+Note that if the first batch in the queue cannot satisfy the order on the invoice, 
+the next batch in the queue that can satisfy the order will be selected. If there is 
+no batch that can satisfy the order, ERPNext will cancel its attempt to automatically 
+fetch a suitable batch number.
 
 #### POS Invoices
 
@@ -62,7 +79,7 @@ into the Sales Invoice and you can easily make payments.
 Also, if you check the **Update Stock** the stock will also update automatically,
 without the need of a Delivery Note.
 
-<img class="screenshot" alt="POS Invoice" src="{{docs_base_url}}/assets/img/accounts/pos-sales-invoice.png">
+<img class="screenshot" alt="POS Invoice" src="/docs/assets/img/accounts/pos-sales-invoice.png">
 
 #### Billing Timesheet with Project
 
@@ -71,7 +88,7 @@ they can fill out Timesheets which consists their billing rate. When you make a 
 Sales Invoice, select the Project for which the billing is to be made, and the
 corresponding Timesheet entries for that Project will be fetched.
 
-<img class="screenshot" alt="POS Invoice" src="{{docs_base_url}}/assets/img/accounts/billing-timesheet-sales-invoice.png">
+<img class="screenshot" alt="POS Invoice" src="/docs/assets/img/accounts/billing-timesheet-sales-invoice.png">
 
 * * *
 
@@ -88,5 +105,5 @@ not ideal as your Customer may or may not decide to pay up. But since your
 Customer wants an “Invoice”, you could give the Customer a Quotation (in
 ERPNext) titled as “Pro Forma Invoice”. This way everyone is happy.
 
-This is a fairly common practice. We follow this at Frappe too.
+This is a fairly common practice. We follow this at Frappé too.
 {next}

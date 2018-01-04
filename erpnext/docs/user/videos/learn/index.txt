@@ -40,3 +40,7 @@ file-manager
 publish-items-on-website
 shopping-cart
 report-builder
+services
+distributors
+manufacturing-make-to-order
+manufacturing-enigneer-to-order

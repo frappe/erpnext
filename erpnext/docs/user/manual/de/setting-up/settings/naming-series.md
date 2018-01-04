@@ -33,6 +33,6 @@ Sie können auch den Startpunkt eines Nummernkreises auswählen, indem Sie den N
 
 Sehen Sie hier, wie der Nummernkreis eingestellt wird.
 
-<img class="screenshot" alt="Nummernkreise" src="{{docs_base_url}}/assets/img/setup/settings/naming-series.gif">
+<img class="screenshot" alt="Nummernkreise" src="/docs/assets/img/setup/settings/naming-series.gif">
 
 {next}

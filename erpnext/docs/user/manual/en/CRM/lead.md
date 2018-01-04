@@ -1,3 +1,5 @@
+# Lead
+
 To get the customer through the door, you may be doing all or any of the
 following:
 
@@ -22,9 +24,9 @@ Leads are the  entities constituting a first contact. Leads can be created by a 
 
 To create a Lead, go to:
 
-> Selling > Lead > New Lead
+> CRM > Lead > New Lead
 
-<img class="screenshot" alt="Lead" src="{{docs_base_url}}/assets/img/crm/lead.png">
+<img class="screenshot" alt="Lead" src="/docs/assets/img/crm/lead.png">
 
 ERPNext gives you a lot of options you may want to store about your Leads. For
 example what is the source, how likely are they to give you business etc. If
@@ -37,15 +39,19 @@ has to contact the lead next.
 
 ### Difference between Lead, Contact and Customer
 
-The difference is that a Lead is a potential Customer, someone who can give
-you business. A Customer is an organization or individual who has given you
-business before (and has an Account in your system). A Contact is a person who
-belongs to the Customer.
+A Lead is a potential Customer, someone who can give you business. A Customer is an
+organization or individual who has given you business before (and has an Account
+in your system). A Contact is a person who belongs to the Customer.
 
-A Lead can be converted to a Customer by clicking on the “Create Customer”
-button. Once the Customer is created, the Lead becomes “Converted” and any
-further Opportunities from the same source can be created against the
+A Lead can sometimes be an organization you are trying to make a deal with. In this case you can select "Lead is an Organization" and add as many contacts within this organization as you want.
+It is useful if you are establishing a relationship with several people within the same organization.
+
+A Lead can be converted to a Customer by selecting “Customer” from the **Make**
+dropdown. Once the Customer is created, the Lead becomes “Converted” and any
+further Opportunities from the same source can be created against this
 Customer.
+
+<img class="screenshot" alt="Create Customer" src="/docs/assets/img/crm/lead-to-customer.gif">
 
 ---
 

@@ -23,7 +23,7 @@ Sie können die Einstandskosten an jedem zukünftigen Zeitpunkt über einen Eins
 
 Im Dokument können Sie verschiedene Kaufbelege auswählen und alle Artikel daraus abrufen. Dann sollten Sie zutreffende Abgaben aus der Tabelle "Steuern und Abgaben" hinzufügen. Die hinzugefügten Abgaben werden proportional auf die Artikel aufgeteilt, basierend auf ihrem Wert.
 
-<img class="screenshot" alt="Einstandskostenbeleg" src="{{docs_base_url}}/assets/img/stock/landed-cost.png">
+<img class="screenshot" alt="Einstandskostenbeleg" src="/docs/assets/img/stock/landed-cost.png">
 
 ### Was passiert bei der Ausgabe?
 

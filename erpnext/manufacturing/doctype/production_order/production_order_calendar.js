@@ -7,7 +7,10 @@ frappe.views.calendar["Production Order"] = {
 		"end": "planned_end_date",
 		"id": "name",
 		"title": "name",
-		"allDay": "allDay"
+		"allDay": "allDay",
+		"progress": function(data) {
+			return flt(data.produced_qty) / data.qty * 100;
+		}
 	},
 	gantt: true,
 	get_css_class: function(data) {
@@ -39,5 +42,5 @@ frappe.views.calendar["Production Order"] = {
 			"label": __("WIP Warehouse")
 		}
 	],
-	get_events_method: "erpnext.manufacturing.doctype.production_order.production_order.get_events"
+	get_events_method: "frappe.desk.calendar.get_events"
 }

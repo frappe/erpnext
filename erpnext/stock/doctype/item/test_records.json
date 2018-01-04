@@ -15,6 +15,8 @@
   "item_group": "_Test Item Group",
   "item_name": "_Test Item",
   "apply_warehouse_wise_reorder_level": 1,
+  "gst_hsn_code": "999800",
+  "valuation_rate": 100,
   "reorder_levels": [
    {
     "material_request_type": "Purchase",
@@ -22,6 +24,16 @@
     "warehouse_reorder_level": 20,
     "warehouse_reorder_qty": 20
    }
+  ],
+  "uoms": [
+    {
+      "uom": "_Test UOM",
+      "conversion_factor": 1.0
+    },
+    {
+      "uom": "_Test UOM 1",
+      "conversion_factor": 10.0
+    }
   ],
   "stock_uom": "_Test UOM",
   "show_in_website": 1,
@@ -61,6 +73,7 @@
   "item_code": "_Test Item Home Desktop 100",
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Item Home Desktop 100",
+  "valuation_rate": 100,
   "taxes": [
    {
     "doctype": "Item Tax",

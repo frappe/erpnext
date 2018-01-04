@@ -12,30 +12,30 @@ Um das Werkzeug zur Fertigungsplanung zu nutzen, gehen Sie zu:
 
 > Fertigung > Werkzeuge > Werkzeug zur Fertigungsplanung
 
-<img class="screenshot" alt="Werkzeug zur Fertigungsplanung" src="{{docs_base_url}}/assets/img/manufacturing/ppt.png">
+<img class="screenshot" alt="Werkzeug zur Fertigungsplanung" src="/docs/assets/img/manufacturing/ppt.png">
 
 ### Schritt 1: Auswahl und Kundenauftrag
 
 * Wählen Sie einen Kundenauftrag für die Materialanforderung über die Filterfunktion (Zeit, Artikel und Kunde) aus.
 * Klicken Sie auf "Kundenaufträge aufrufen" um eine Übersicht zu erhalten.
 
-<img class="screenshot" alt="Werkzeug zur Fertigungsplanung" src="{{docs_base_url}}/assets/img/manufacturing/ppt-get-sales-orders.png">
+<img class="screenshot" alt="Werkzeug zur Fertigungsplanung" src="/docs/assets/img/manufacturing/ppt-get-sales-orders.png">
 
 ### Schritt 2: Artikel aus Kundenaufträgen abrufen
 
 Sie können Artikel hinzufügen, entfernen oder die Menge dieser Artikel verändern.
 
-<img class="screenshot" alt="Werkzeug zur Fertigungsplanung" src="{{docs_base_url}}/assets/img/manufacturing/ppt-get-item.png">
+<img class="screenshot" alt="Werkzeug zur Fertigungsplanung" src="/docs/assets/img/manufacturing/ppt-get-item.png">
 
 ### Schritt 3: Fertigungsaufträge erstellen
 
-<img class="screenshot" alt="Werkzeug zur Fertigungsplanung" src="{{docs_base_url}}/assets/img/manufacturing/ppt-create-production-order.png">
+<img class="screenshot" alt="Werkzeug zur Fertigungsplanung" src="/docs/assets/img/manufacturing/ppt-create-production-order.png">
 
 ### Schritt 4: Materialanfragen erstellen
 
 Erstellen Sie für Artikel mit prognostiziertem Engpass Materialanfragen.
 
-<img class="screenshot" alt="Werkzeug zur Fertigungsplanung" src="{{docs_base_url}}/assets/img/manufacturing/ppt-create-material-request.png">
+<img class="screenshot" alt="Werkzeug zur Fertigungsplanung" src="/docs/assets/img/manufacturing/ppt-create-material-request.png">
 
 Das Werkzeug zur Fertigungsplanung wird auf zwei Ebenend verwendet:
 

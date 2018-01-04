@@ -11,7 +11,7 @@ from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journ
 
 class TestPeriodClosingVoucher(unittest.TestCase):
 	def test_closing_entry(self):
-		year_start_date = get_fiscal_year(today())[1]
+		year_start_date = get_fiscal_year(today(), company="_Test Company")[1]
 
 		make_journal_entry("_Test Bank - _TC", "Sales - _TC", 400,
 			"_Test Cost Center - _TC", posting_date=now(), submit=True)
@@ -70,7 +70,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			"doctype": "Period Closing Voucher",
 			"closing_account_head": "_Test Account Reserves and Surplus - _TC",
 			"company": "_Test Company",
-			"fiscal_year": get_fiscal_year(today())[0],
+			"fiscal_year": get_fiscal_year(today(), company="_Test Company")[0],
 			"posting_date": today(),
 			"remarks": "test"
 		})

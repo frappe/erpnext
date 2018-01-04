@@ -22,7 +22,7 @@ Das **Transaktionsdatum** ist das Datum, zu dem der Periodenabschlussbeleg erste
 
 Das **abzuschließende Geschäftsjahr** ist das Jahr, für das Sie Ihre Finanzbuchhaltung abschliessen.
 
-<img class="screenshot" alt="Periodenabschlussbeleg" src="{{docs_base_url}}/assets/img/accounts/period-closing-voucher.png">
+<img class="screenshot" alt="Periodenabschlussbeleg" src="/docs/assets/img/accounts/period-closing-voucher.png">
 
 Dieser Beleg überträgt den Gewinn oder Verlust (über die GuV ermittelt) in die Schlußbilanz. Sie sollten ein Konto vom Typ Verbindlichkeiten, wie Gewinnrücklagen oder Überschuss, oder vom Typ Kapital als Schlußkonto auswählen.
 

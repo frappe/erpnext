@@ -32,7 +32,7 @@ This field will give you date and time picker. Current date and time (as provide
 
 - Dynamic Link
 
-Click [here]({{docs_base_url}}/user/manual/en/customize-erpnext/articles/managing-dynamic-link-fields.html) to learn how Dynamic Link Field function.
+Click [here](/docs/user/manual/en/customize-erpnext/articles/managing-dynamic-link-fields.html) to learn how Dynamic Link Field function.
 
 - Float
 
@@ -55,6 +55,17 @@ Integer field holds numeric value, without decimal place.
 - Link
 
 Link field is connected to another master from where it fetches data. For example, in the Quotation master, Customer is a Link field.
+
+- Geolocation
+
+Use Geolocation field to store GeoJSON <a href="https://tools.ietf.org/html/rfc7946#section-3.3">featurecollection</a>. Stores polygons, lines and points. Internally it uses following custom properties for identifying a circle.
+
+```
+{
+	"point_type": "circle",
+	"radius": 10.00
+}
+```
 
 - Password
 

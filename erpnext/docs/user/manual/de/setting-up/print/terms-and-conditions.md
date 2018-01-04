@@ -9,13 +9,13 @@ Um die Vorlage für die Allgemeinen Geschäftsbedingungen zu erstellen, gehen Si
 
 > Vertrieb > Einstellungen > Vorlage für Allgemeine Geschäftsbedingungen > Neu
 
-<img class="screenshot" alt="Geschäftsbedingungen" src="{{docs_base_url}}/assets/img/setup/print/terms-1.png">
+<img class="screenshot" alt="Geschäftsbedingungen" src="/docs/assets/img/setup/print/terms-1.png">
 
 ### 2\. Bearbeitung in HTML
 
 Der Inhalt der Allgemeinen Geschäftsbedingungen kann nach Ihren Vorstellungen formatiert werden und es können bei Bedarf auch Bilder eingefügt werden. Für diejenigen, die sich in HTML auskennen, findet Sich auch eine Möglichkeit den Inhalt der Allgemeinen Geschäftsbedingungen in HTML zu formatieren.
 
-<img class="screenshot" alt="Geschäfsbedingungen - HTML bearbeiten" src="{{docs_base_url}}/assets/img/setup/print/terms-2.png">
+<img class="screenshot" alt="Geschäfsbedingungen - HTML bearbeiten" src="/docs/assets/img/setup/print/terms-2.png">
 
 Dies erlaubt es Ihnen auch die Vorlage für die Allgemeinen Geschäftsbedingungen als Fußzeile zu verwenden, was sonst in ERPNext nicht als dedizierte Funktionalität zur Verfügung steht. Da die Inhalte der Allgemeinen Geschäftsbedingungen im Druckformat immer zuletzt erscheinen, sollten die Einzelheiten zur Fußzeile am Ende des Inhaltes eingefügt werden.
 
@@ -23,6 +23,6 @@ Dies erlaubt es Ihnen auch die Vorlage für die Allgemeinen Geschäftsbedingunge
 
 In Transaktionen finden Sie den Abschnitt Allgemeine Geschäftsbedingungen, wo Sie nach einer Vorlage für die Allgemeinen Geschäftsbedingungen suchen und diese auswählen können.
 
-<img class="screenshot" alt="Geschäfsbedingungen - Im Dokument auswählen" src="{{docs_base_url}}/assets/img/setup/print/terms-3.png">
+<img class="screenshot" alt="Geschäfsbedingungen - Im Dokument auswählen" src="/docs/assets/img/setup/print/terms-3.png">
 
 {next}

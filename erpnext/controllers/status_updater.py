@@ -6,7 +6,6 @@ import frappe
 from frappe.utils import flt, comma_or, nowdate, getdate
 from frappe import _
 from frappe.model.document import Document
-from erpnext.accounts.party_status import notify_status
 
 def validate_status(status, options):
 	if status not in options:
@@ -14,15 +13,17 @@ def validate_status(status, options):
 
 status_map = {
 	"Lead": [
-		["Converted", "has_customer"],
+		["Lost Quotation", "has_lost_quotation"],
 		["Opportunity", "has_opportunity"],
+		["Quotation", "has_quotation"],
+		["Converted", "has_customer"],
 	],
 	"Opportunity": [
-		["Quotation", "has_quotation"],
-		["Converted", "has_ordered_quotation"],
 		["Lost", "eval:self.status=='Lost'"],
+		["Lost", "has_lost_quotation"],
+		["Quotation", "has_active_quotation"],
+		["Converted", "has_ordered_quotation"],
 		["Closed", "eval:self.status=='Closed'"]
-
 	],
 	"Quotation": [
 		["Draft", None],
@@ -45,8 +46,8 @@ status_map = {
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
 		["Return", "eval:self.is_return==1 and self.docstatus==1"],
-		["Credit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1"],
-		["Paid", "eval:self.outstanding_amount==0 and self.docstatus==1 and self.is_return==0"],
+		["Paid", "eval:self.outstanding_amount<=0 and self.docstatus==1 and self.is_return==0"],
+		["Credit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1 and self.is_return==0 and get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1})"],
 		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
 		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
 		["Cancelled", "eval:self.docstatus==2"],
@@ -55,8 +56,8 @@ status_map = {
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
 		["Return", "eval:self.is_return==1 and self.docstatus==1"],
-		["Debit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1"],
-		["Paid", "eval:self.outstanding_amount==0 and self.docstatus==1 and self.is_return==0"],
+		["Paid", "eval:self.outstanding_amount<=0 and self.docstatus==1 and self.is_return==0"],
+		["Debit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1 and self.is_return==0 and get_value('Purchase Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1})"],
 		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
 		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
 		["Cancelled", "eval:self.docstatus==2"],
@@ -84,6 +85,16 @@ status_map = {
 		["Completed", "eval:self.per_billed == 100 and self.docstatus == 1"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed'"],
+	],
+	"Material Request": [
+		["Draft", None],
+		["Stopped", "eval:self.status == 'Stopped'"],
+		["Cancelled", "eval:self.docstatus == 2"],
+		["Pending", "eval:self.status != 'Stopped' and self.per_ordered == 0 and self.docstatus == 1"],
+		["Partially Ordered", "eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1"],
+		["Ordered", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
+		["Transferred", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Transfer'"],
+		["Issued", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Issue'"]
 	]
 }
 
@@ -101,6 +112,8 @@ class StatusUpdater(Document):
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
+			if self.get('amended_from'):
+				self.status = 'Draft'
 			return
 
 		if self.doctype in status_map:
@@ -116,14 +129,16 @@ class StatusUpdater(Document):
 					self.status = s[0]
 					break
 				elif s[1].startswith("eval:"):
-					if eval(s[1][5:]):
+					if frappe.safe_eval(s[1][5:], None, { "self": self.as_dict(), "getdate": getdate, 
+							"nowdate": nowdate, "get_value": frappe.db.get_value }):
 						self.status = s[0]
 						break
 				elif getattr(self, s[1])():
 					self.status = s[0]
 					break
 
-			if self.status != _status and self.status not in ("Submitted", "Cancelled"):
+			if self.status != _status and self.status not in ("Cancelled", "Partially Ordered",
+																"Ordered", "Issued", "Transferred"):
 				self.add_comment("Label", _(self.status))
 
 			if update:
@@ -283,7 +298,6 @@ class StatusUpdater(Document):
 				target = frappe.get_doc(args["target_parent_dt"], args["name"])
 				target.set_status(update=True)
 				target.notify_update()
-				notify_status(target)
 
 	def _update_modified(self, args, update_modified):
 		args['update_modified'] = ''

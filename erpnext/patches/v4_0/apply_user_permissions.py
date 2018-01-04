@@ -12,8 +12,6 @@ def execute():
 	frappe.clear_cache()
 
 def update_hr_permissions():
-	from frappe.core.page.user_permissions import user_permissions
-
 	# add set user permissions rights to HR Manager
 	frappe.db.sql("""update `tabDocPerm` set `set_user_permissions`=1 where parent in ('Employee', 'Leave Application')
 		and role='HR Manager' and permlevel=0 and `read`=1""")

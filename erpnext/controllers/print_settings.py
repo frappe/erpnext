@@ -16,14 +16,13 @@ def print_settings_for_item_table(doc):
 
 	if doc.flags.compact_item_print:
 		doc.print_templates["description"] = "templates/print_formats/includes/item_table_description.html"
-		doc.hide_in_print_layout += ["item_code", "item_name", "image"]
-
 		doc.flags.compact_item_fields = ["description", "qty", "rate", "amount"]
-		doc.flags.show_in_description = []
+		doc.flags.format_columns = format_columns
 
-		for df in doc.meta.fields:
-			if df.fieldtype not in ("Section Break", "Column Break", "Button"):
-				if not doc.is_print_hide(df.fieldname):
-					if df.fieldname not in doc.hide_in_print_layout and df.fieldname not in doc.flags.compact_item_fields:
-						doc.hide_in_print_layout.append(df.fieldname)
-						doc.flags.show_in_description.append(df.fieldname)
+def format_columns(display_columns, compact_fields):
+	compact_fields = compact_fields + ["image", "item_code", "item_name"]
+	final_columns = []
+	for column in display_columns:
+		if column not in compact_fields:
+			final_columns.append(column)
+	return final_columns

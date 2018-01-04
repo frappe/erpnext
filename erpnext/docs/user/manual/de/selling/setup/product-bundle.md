@@ -11,7 +11,7 @@ Um ein neues Produkt-Bundle zu erstellen, gehen Sie zu:
 
 > Vertrieb > Einstellungen > Produkt-Bundle > Neu
 
-<img class="screenshot" alt="Produkt-Bundle" src="{{docs_base_url}}/assets/img/selling/product-bundle.png">
+<img class="screenshot" alt="Produkt-Bundle" src="/docs/assets/img/selling/product-bundle.png">
 
 ### Hauptartikel auswählen
 
@@ -27,7 +27,7 @@ Im Abschnitt Paketartikel listen Sie alle Unterartikel auf, die über das Lager 
 
 Wenn Vertriebstransaktionen erstellt werden, wie z. B. Ausgangsrechnung, Kundenauftrag und Lieferschein, dann wird der übergeordnete Artikel aus der Hauptartikelliste ausgewählt.
 
-<img class="screenshot" alt="Produkt-Bundle" src="{{docs_base_url}}/assets/img/selling/product-bundle.gif">
+<img class="screenshot" alt="Produkt-Bundle" src="/docs/assets/img/selling/product-bundle.gif">
 
 Beim Auswählen des übergeordneten Artikels aus der Hauptartikelliste werden die Unterartikel aus der Tabelle "Packliste" der Transaktion angezogen. Wenn der Unterartikel ein serialisierter Artikel ist, können Sie seine Seriennummer direkt in der Packlistentabelle angeben. Wenn die Transaktion versendet wird, reduziert das System den Lagerbestand der Unterartikel auf dem Lager der in der Packlistentabelle angegeben ist.
 

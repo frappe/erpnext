@@ -1,191 +1,164 @@
 [
  {
-  "customer": "Adaptas", 
-  "email_id": "JanVaclavik@example.com", 
-  "first_name": "January", 
-  "last_name": "V\u00e1clav\u00edk", 
-  "supplier": null
- }, 
+  "email_id": "JanVaclavik@example.com",
+  "first_name": "January",
+  "last_name": "V\u00e1clav\u00edk",
+  "links": [{"link_doctype": "Customer", "link_name": "Adaptas"}]
+ },
  {
-  "customer": "Asian Fusion", 
-  "email_id": "ChidumagaTobeolisa@example.com", 
-  "first_name": "Chidumaga", 
-  "last_name": "Tobeolisa", 
-  "supplier": null
- }, 
+  "email_id": "ChidumagaTobeolisa@example.com",
+  "first_name": "Chidumaga",
+  "last_name": "Tobeolisa",
+  "links": [{"link_doctype": "Customer", "link_name": "Asian Fusion"}]
+ },
  {
-  "customer": "Asian Junction", 
-  "email_id": "JanaKubanova@example.com", 
-  "first_name": "Jana", 
-  "last_name": "Kub\u00e1\u0148ov\u00e1", 
-  "supplier": null
- }, 
+  "email_id": "JanaKubanova@example.com",
+  "first_name": "Jana",
+  "last_name": "Kub\u00e1\u0148ov\u00e1",
+  "links": [{"link_doctype": "Customer", "link_name": "Asian Junction"}]
+ },
  {
-  "customer": "Big D Supermarkets", 
-  "email_id": "XuChaoXuan@example.com", 
-  "first_name": "\u7d39\u8431", 
-  "last_name": "\u4e8e", 
-  "supplier": null
- }, 
+  "email_id": "XuChaoXuan@example.com",
+  "first_name": "\u7d39\u8431",
+  "last_name": "\u4e8e",
+  "links": [{"link_doctype": "Customer", "link_name": "Big D Supermarkets"}]
+ },
  {
-  "customer": "Buttrey Food & Drug", 
-  "email_id": "OzlemVerwijmeren@example.com", 
-  "first_name": "\u00d6zlem", 
-  "last_name": "Verwijmeren", 
-  "supplier": null
- }, 
+  "email_id": "OzlemVerwijmeren@example.com",
+  "first_name": "\u00d6zlem",
+  "last_name": "Verwijmeren",
+  "links": [{"link_doctype": "Customer", "link_name": "Buttrey Food & Drug"}]
+ },
  {
-  "customer": "Chi-Chis", 
-  "email_id": "HansRasmussen@example.com", 
-  "first_name": "Hans", 
-  "last_name": "Rasmussen", 
-  "supplier": null
- }, 
+  "email_id": "HansRasmussen@example.com",
+  "first_name": "Hans",
+  "last_name": "Rasmussen",
+  "links": [{"link_doctype": "Customer", "link_name": "Chi-Chis"}]
+ },
  {
-  "customer": "Choices", 
-  "email_id": "SatomiShigeki@example.com", 
-  "first_name": "Satomi", 
-  "last_name": "Shigeki", 
-  "supplier": null
- }, 
+  "email_id": "SatomiShigeki@example.com",
+  "first_name": "Satomi",
+  "last_name": "Shigeki",
+  "links": [{"link_doctype": "Customer", "link_name": "Choices"}]
+ },
  {
-  "customer": "Consumers and Consumers Express", 
-  "email_id": "SimonVJessen@example.com", 
-  "first_name": "Simon", 
-  "last_name": "Jessen", 
-  "supplier": null
- }, 
+  "email_id": "SimonVJessen@example.com",
+  "first_name": "Simon",
+  "last_name": "Jessen",
+  "links": [{"link_doctype": "Customer", "link_name": "Consumers and Consumers Express"}]
+ },
  {
-  "customer": "Crafts Canada", 
-  "email_id": "NeguaranShahsaah@example.com", 
-  "first_name": "\u0646\u06af\u0627\u0631\u06cc\u0646", 
-  "last_name": "\u0634\u0627\u0647 \u0633\u06cc\u0627\u0647", 
-  "supplier": null
- }, 
+  "email_id": "NeguaranShahsaah@example.com",
+  "first_name": "\u0646\u06af\u0627\u0631\u06cc\u0646",
+  "last_name": "\u0634\u0627\u0647 \u0633\u06cc\u0627\u0647",
+  "links": [{"link_doctype": "Customer", "link_name": "Crafts Canada"}]
+ },
  {
-  "customer": "Endicott Shoes", 
-  "email_id": "Lom-AliBataev@example.com", 
-  "first_name": "Lom-Ali", 
-  "last_name": "Bataev", 
-  "supplier": null
- }, 
+  "email_id": "Lom-AliBataev@example.com",
+  "first_name": "Lom-Ali",
+  "last_name": "Bataev",
+  "links": [{"link_doctype": "Customer", "link_name": "Endicott Shoes"}]
+ },
  {
-  "customer": "Fayva", 
-  "email_id": "VanNgocTien@example.com", 
-  "first_name": "Ti\u00ean", 
-  "last_name": "V\u0103n", 
-  "supplier": null
- }, 
+  "email_id": "VanNgocTien@example.com",
+  "first_name": "Ti\u00ean",
+  "last_name": "V\u0103n",
+  "links": [{"link_doctype": "Customer", "link_name": "Fayva"}]
+ },
  {
-  "customer": "Intelacard", 
-  "email_id": "QuimeyOsorioRuelas@example.com", 
-  "first_name": "Quimey", 
-  "last_name": "Osorio", 
-  "supplier": null
- }, 
+  "email_id": "QuimeyOsorioRuelas@example.com",
+  "first_name": "Quimey",
+  "last_name": "Osorio",
+  "links": [{"link_doctype": "Customer", "link_name": "Intelacard"}]
+ },
  {
-  "customer": "Landskip Yard Care", 
-  "email_id": "EdgardaSalcedoRaya@example.com", 
-  "first_name": "Edgarda", 
-  "last_name": "Salcedo", 
-  "supplier": null
- }, 
+  "email_id": "EdgardaSalcedoRaya@example.com",
+  "first_name": "Edgarda",
+  "last_name": "Salcedo",
+  "links": [{"link_doctype": "Customer", "link_name": "Landskip Yard Care"}]
+ },
  {
-  "customer": "Life Plan Counselling", 
-  "email_id": "HafsteinnBjarnarsonar@example.com", 
-  "first_name": "Hafsteinn", 
-  "last_name": "Bjarnarsonar", 
-  "supplier": null
- }, 
+  "email_id": "HafsteinnBjarnarsonar@example.com",
+  "first_name": "Hafsteinn",
+  "last_name": "Bjarnarsonar",
+  "links": [{"link_doctype": "Customer", "link_name": "Life Plan Counselling"}]
+ },
  {
-  "customer": "Mr Fables", 
-  "email_id": "\u0434\u0430\u043d\u0438\u0438\u043b@example.com", 
-  "first_name": "\u0414\u0430\u043d\u0438\u0438\u043b", 
-  "last_name": "\u041a\u043e\u043d\u043e\u0432\u0430\u043b\u043e\u0432", 
-  "supplier": null
- }, 
+  "email_id": "\u0434\u0430\u043d\u0438\u0438\u043b@example.com",
+  "first_name": "\u0414\u0430\u043d\u0438\u0438\u043b",
+  "last_name": "\u041a\u043e\u043d\u043e\u0432\u0430\u043b\u043e\u0432",
+  "links": [{"link_doctype": "Customer", "link_name": "Mr Fables"}]
+ },
  {
-  "customer": "Nelson Brothers", 
-  "email_id": "SelmaMAndersen@example.com", 
-  "first_name": "Selma", 
-  "last_name": "Andersen", 
-  "supplier": null
- }, 
+  "email_id": "SelmaMAndersen@example.com",
+  "first_name": "Selma",
+  "last_name": "Andersen",
+  "links": [{"link_doctype": "Customer", "link_name": "Nelson Brothers"}]
+ },
  {
-  "customer": "Netobill", 
-  "email_id": "LadislavKolaja@example.com", 
-  "first_name": "Ladislav", 
-  "last_name": "Kolaja", 
-  "supplier": null
- }, 
+  "email_id": "LadislavKolaja@example.com",
+  "first_name": "Ladislav",
+  "last_name": "Kolaja",
+  "links": [{"link_doctype": "Customer", "link_name": "Netobill"}]
+ },
  {
-  "customer": null, 
-  "email_id": "TewoldeAbaalom@example.com", 
-  "first_name": "Tewolde", 
-  "last_name": "Abaalom", 
-  "supplier": "Helios Air"
- }, 
+  "links": [{"link_doctype": "Supplier", "link_name": "Helios Air"}],
+  "email_id": "TewoldeAbaalom@example.com",
+  "first_name": "Tewolde",
+  "last_name": "Abaalom"
+ },
  {
-  "customer": null, 
-  "email_id": "LeilaFernandesRodrigues@example.com", 
-  "first_name": "Leila", 
-  "last_name": "Rodrigues", 
-  "supplier": "Ks Merchandise"
- }, 
+  "links": [{"link_doctype": "Supplier", "link_name": "Ks Merchandise"}],
+  "email_id": "LeilaFernandesRodrigues@example.com",
+  "first_name": "Leila",
+  "last_name": "Rodrigues"
+ },
  {
-  "customer": null, 
-  "email_id": "DmitryBulgakov@example.com", 
-  "first_name": "Dmitry", 
-  "last_name": "Bulgakov", 
-  "supplier": "HomeBase"
- }, 
+  "links": [{"link_doctype": "Supplier", "link_name": "HomeBase"}],
+  "email_id": "DmitryBulgakov@example.com",
+  "first_name": "Dmitry",
+  "last_name": "Bulgakov"
+ },
  {
-  "customer": null, 
-  "email_id": "HaiducWhitfoot@example.com", 
-  "first_name": "Haiduc", 
-  "last_name": "Whitfoot", 
-  "supplier": "Scott Ties"
- }, 
+  "links": [{"link_doctype": "Supplier", "link_name": "Scott Ties"}],
+  "email_id": "HaiducWhitfoot@example.com",
+  "first_name": "Haiduc",
+  "last_name": "Whitfoot"
+ },
  {
-  "customer": null, 
-  "email_id": "SesseljaPetursdottir@example.com", 
-  "first_name": "Sesselja", 
-  "last_name": "P\u00e9tursd\u00f3ttir", 
-  "supplier": "Reliable Investments"
- }, 
+  "links": [{"link_doctype": "Supplier", "link_name": "Reliable Investments"}],
+  "email_id": "SesseljaPetursdottir@example.com",
+  "first_name": "Sesselja",
+  "last_name": "P\u00e9tursd\u00f3ttir"
+ },
  {
-  "customer": null, 
-  "email_id": "HajdarPignar@example.com", 
-  "first_name": "Hajdar", 
-  "last_name": "Pignar", 
-  "supplier": "Nan Duskin"
- }, 
+  "links": [{"link_doctype": "Supplier", "link_name": "Nan Duskin"}],
+  "email_id": "HajdarPignar@example.com",
+  "first_name": "Hajdar",
+  "last_name": "Pignar"
+ },
  {
-  "customer": null, 
-  "email_id": "GustavaLorenzo@example.com", 
-  "first_name": "Gustava", 
-  "last_name": "Lorenzo", 
-  "supplier": "Rainbow Records"
- }, 
+  "links": [{"link_doctype": "Supplier", "link_name": "Rainbow Records"}],
+  "email_id": "GustavaLorenzo@example.com",
+  "first_name": "Gustava",
+  "last_name": "Lorenzo"
+ },
  {
-  "customer": null, 
-  "email_id": "BethanyWood@example.com", 
-  "first_name": "Bethany", 
-  "last_name": "Wood", 
-  "supplier": "New World Realty"
- }, 
+  "links": [{"link_doctype": "Supplier", "link_name": "New World Realty"}],
+  "email_id": "BethanyWood@example.com",
+  "first_name": "Bethany",
+  "last_name": "Wood"
+ },
  {
-  "customer": null, 
-  "email_id": "GlorianaBrownlock@example.com", 
-  "first_name": "Gloriana", 
-  "last_name": "Brownlock", 
-  "supplier": "Asiatic Solutions"
- }, 
+  "links": [{"link_doctype": "Supplier", "link_name": "Asiatic Solutions"}],
+  "email_id": "GlorianaBrownlock@example.com",
+  "first_name": "Gloriana",
+  "last_name": "Brownlock"
+ },
  {
-  "customer": null, 
-  "email_id": "JensonFraser@gustr.com", 
-  "first_name": "Jenson", 
-  "last_name": "Fraser", 
-  "supplier": "Eagle Hardware"
+  "links": [{"link_doctype": "Supplier", "link_name": "Eagle Hardware"}],
+  "email_id": "JensonFraser@gustr.com",
+  "first_name": "Jenson",
+  "last_name": "Fraser"
  }
 ]

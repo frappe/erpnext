@@ -11,7 +11,7 @@ Sie können eine neue Preisliste erstellen über:
 
 > Vertrieb/Einkauf/Lagerbestand > Einstellungen > Preisliste > Neu
 
-<img class="screenshot" alt="Preisliste" src="{{docs_base_url}}/assets/img/price-list/price-list.png">
+<img class="screenshot" alt="Preisliste" src="/docs/assets/img/price-list/price-list.png">
 
 * Diese Preislisten werden verwendet, wenn der Datensatz zum Artikelpreis erstellt wird, um den Verkaufs- oder Einkaufspreis eines Artikels nachvollziehen zu können. Klicken Sie hier, wenn Sie mehr über Artikelpreise erfahren wollen.
 * Um eine bestimmte Preisliste zu deaktivieren, deaktivieren Sie das Feld "Aktiviert" im der Preisliste. Die deaktivierte Preisliste ist dann in der Auswahl nicht mehr in Verkaufs- oder Einkaufstransaktionen verfügbar.

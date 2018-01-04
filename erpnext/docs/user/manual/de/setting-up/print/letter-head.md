@@ -15,10 +15,10 @@ Sie können Briefköpfe erstellen/verwalten über:
 
 #### Beispiel
 
-<img class="screenshot" alt="Briefkopf" src="{{docs_base_url}}/assets/img/setup/print/letter-head.png">
+<img class="screenshot" alt="Briefkopf" src="/docs/assets/img/setup/print/letter-head.png">
 
 So sieht der Briefkopf eines Ausdruckes aus:
 
-<img class="screenshot" alt="Briefkopf" src="{{docs_base_url}}/assets/img/setup/print/letter-head-1.png">
+<img class="screenshot" alt="Briefkopf" src="/docs/assets/img/setup/print/letter-head-1.png">
 
 {next}

@@ -8,18 +8,21 @@ from frappe.utils import flt, cint
 
 from frappe import msgprint, _
 import frappe.defaults
+from frappe.model.utils import get_fetch_values
 from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.selling_controller import SellingController
 from frappe.desk.notifications import clear_doctype_notifications
-
+from erpnext.stock.doctype.batch.batch import set_batch_nos
+from frappe.contacts.doctype.address.address import get_company_address
+from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
 
 class DeliveryNote(SellingController):
-	def __init__(self, arg1, arg2=None):
-		super(DeliveryNote, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(DeliveryNote, self).__init__(*args, **kwargs)
 		self.status_updater = [{
 			'source_dt': 'Delivery Note Item',
 			'target_dt': 'Sales Order Item',
@@ -89,11 +92,12 @@ class DeliveryNote(SellingController):
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
 		if frappe.db.get_value("Selling Settings", None, 'so_required') == 'Yes':
-			 for d in self.get('items'):
-				 if not d.against_sales_order:
-					 frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
+			for d in self.get('items'):
+				if not d.against_sales_order:
+					frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
 
 	def validate(self):
+		self.validate_posting_time()
 		super(DeliveryNote, self).validate()
 		self.set_status()
 		self.so_required()
@@ -101,9 +105,12 @@ class DeliveryNote(SellingController):
 		self.check_close_sales_order("against_sales_order")
 		self.validate_for_items()
 		self.validate_warehouse()
-		self.validate_uom_is_integer("stock_uom", "qty")
+		self.validate_uom_is_integer("stock_uom", "stock_qty")
+		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
-		self.validate_inspection()
+
+		if self._action != 'submit' and not self.is_return:
+			set_batch_nos(self, 'warehouse', True)
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
@@ -112,26 +119,32 @@ class DeliveryNote(SellingController):
 
 		if not self.installation_status: self.installation_status = 'Not Installed'
 
-	def validate_inspection(self):
-		for d in self.get('items'):		 #Enter inspection date for all items that require inspection
-			if frappe.db.get_value("Item", d.item_code, "inspection_required_before_delivery") and not d.qa_no:
-				frappe.msgprint(_("Quality Inspection required for Item {0}").format(d.item_code))
-				if self.docstatus==1:
-					raise frappe.ValidationError
-
 	def validate_with_previous_doc(self):
-		for fn in (("Sales Order", "against_sales_order", "so_detail"),
-				("Sales Invoice", "against_sales_invoice", "si_detail")):
-			if filter(None, [getattr(d, fn[1], None) for d in self.get("items")]):
-				super(DeliveryNote, self).validate_with_previous_doc({
-					fn[0]: {
-						"ref_dn_field": fn[1],
-						"compare_fields": [["customer", "="], ["company", "="], ["project", "="],
-							["currency", "="]],
-					},
-				})
+		super(DeliveryNote, self).validate_with_previous_doc({
+			"Sales Order": {
+				"ref_dn_field": "against_sales_order",
+				"compare_fields": [["customer", "="], ["company", "="], ["project", "="], ["currency", "="]]
+			},
+			"Sales Order Item": {
+				"ref_dn_field": "so_detail",
+				"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="]],
+				"is_child_table": True,
+				"allow_duplicate_prev_row_id": True
+			},
+			"Sales Invoice": {
+				"ref_dn_field": "against_sales_invoice",
+				"compare_fields": [["customer", "="], ["company", "="], ["project", "="], ["currency", "="]]
+			},
+			"Sales Invoice Item": {
+				"ref_dn_field": "si_detail",
+				"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="]],
+				"is_child_table": True,
+				"allow_duplicate_prev_row_id": True
+			},
+		})
 
-		if cint(frappe.db.get_single_value('Selling Settings', 'maintain_same_sales_rate')) and not self.is_return:
+		if cint(frappe.db.get_single_value('Selling Settings', 'maintain_same_sales_rate')) \
+				and not self.is_return:
 			self.validate_rate_with_reference_doc([["Sales Order", "against_sales_order", "so_detail"],
 				["Sales Invoice", "against_sales_invoice", "si_detail"]])
 
@@ -361,7 +374,7 @@ def get_invoiced_qty_map(delivery_note):
 def make_sales_invoice(source_name, target_doc=None):
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
-	def update_accounts(source, target):
+	def set_missing_values(source, target):
 		target.is_pos = 0
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
@@ -371,8 +384,16 @@ def make_sales_invoice(source_name, target_doc=None):
 
 		target.run_method("calculate_taxes_and_totals")
 
+		# set company address
+		target.update(get_company_address(target.company))
+		if target.company_address:
+			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))	
+
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
+		if source_doc.serial_no and source_parent.per_billed > 0:
+			target_doc.serial_no = get_delivery_note_serial_no(source_doc.item_code,
+				target_doc.qty, source_parent.name)
 
 	doc = get_mapped_doc("Delivery Note", source_name, 	{
 		"Delivery Note": {
@@ -388,7 +409,8 @@ def make_sales_invoice(source_name, target_doc=None):
 				"parent": "delivery_note",
 				"so_detail": "so_detail",
 				"against_sales_order": "sales_order",
-				"serial_no": "serial_no"
+				"serial_no": "serial_no",
+				"cost_center": "cost_center"
 			},
 			"postprocess": update_item,
 			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0
@@ -404,7 +426,7 @@ def make_sales_invoice(source_name, target_doc=None):
 			},
 			"add_if_empty": True
 		}
-	}, target_doc, update_accounts)
+	}, target_doc, set_missing_values)
 
 	return doc
 

@@ -3,6 +3,6 @@
 
 Filialen Ihres Unternehmens
 
-<img class="screenshot" alt="Filiale" src="{{docs_base_url}}/assets/img/human-resources/branch.png">
+<img class="screenshot" alt="Filiale" src="/docs/assets/img/human-resources/branch.png">
 
 {next}

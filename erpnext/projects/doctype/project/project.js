@@ -2,6 +2,24 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("Project", {
+	setup: function(frm) {
+		frm.set_indicator_formatter('title',
+			function(doc) {
+				let indicator = 'orange';
+				if (doc.status == 'Overdue') {
+					indicator = 'red';
+				}
+				else if (doc.status == 'Cancelled') {
+					indicator = 'dark grey';
+				}
+				else if (doc.status == 'Closed') {
+					indicator = 'green';
+				}
+				return indicator;
+			}
+		);
+	},
+
 	onload: function(frm) {
 		var so = frappe.meta.get_docfield("Project", "sales_order");
 		so.get_route_options_for_new_doc = function(field) {
@@ -13,12 +31,12 @@ frappe.ui.form.on("Project", {
 		}
 
 		frm.set_query('customer', 'erpnext.controllers.queries.customer_query');
-		
+
 		frm.set_query("user", "users", function() {
-					return {
-						query:"erpnext.projects.doctype.project.project.get_users_for_project"
-					}
-				});
+			return {
+				query:"erpnext.projects.doctype.project.project.get_users_for_project"
+			}
+		});
 
 		// sales order
 		frm.set_query('sales_order', function() {
@@ -35,6 +53,7 @@ frappe.ui.form.on("Project", {
 			}
 		});
 	},
+
 	refresh: function(frm) {
 		if(frm.doc.__islocal) {
 			frm.web_link && frm.web_link.remove();
@@ -89,11 +108,27 @@ frappe.ui.form.on("Project Task", {
 		if(doc.task_id) {
 			frappe.set_route("Form", "Task", doc.task_id);
 		} else {
-			msgprint(__("Save the document first."));
+			frappe.msgprint(__("Save the document first."));
 		}
 	},
+	edit_timesheet: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		frappe.route_options = {"project": frm.doc.project_name, "task": child.task_id};
+		frappe.set_route("List", "Timesheet");
+	},
+
+	make_timesheet: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		frappe.model.with_doctype('Timesheet', function() {
+				var doc = frappe.model.get_new_doc('Timesheet');
+				var row = frappe.model.add_child(doc, 'time_logs');
+				row.project = frm.doc.project_name;
+				row.task = child.task_id;
+				frappe.set_route('Form', doc.doctype, doc.name);
+			})
+	},
+
 	status: function(frm, doctype, name) {
 		frm.trigger('tasks_refresh');
 	},
 });
-

@@ -48,7 +48,7 @@ frappe.pages['stock-balance'].on_page_load = function(wrapper) {
 				{fieldname: 'projected_qty', label: __('Projected qty')},
 				{fieldname: 'reserved_qty', label: __('Reserved for sale')},
 				{fieldname: 'reserved_qty_for_production', label: __('Reserved for manufacturing')},
-				{fieldname: 'actual_qty', label: __('Acutal qty in stock')},
+				{fieldname: 'actual_qty', label: __('Actual qty in stock')},
 			]
 		},
 		change: function(sort_by, sort_order) {

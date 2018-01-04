@@ -17,7 +17,7 @@ Als Manager werden Sie zu schätzen wissen, wenn Sie beurteilen können wie Ihr 
 
 Sie können in ERPNext leicht die finanzielle Lage Ihres Unternehmens einsehen. Ein Beispiel für eine Finanzanalyse sehen Sie unten abgebildet.
 
-<img class="screenshot" alt="Finanzanalyse Bilanz" src="{{docs_base_url}}/assets/img/accounts/financial-analytics-bl.png">
+<img class="screenshot" alt="Finanzanalyse Bilanz" src="/docs/assets/img/accounts/financial-analytics-bl.png">
 
 Um Ihren Kontenplan in ERPNext zu bearbeiten gehen Sie zu:
 
@@ -27,7 +27,7 @@ Im Kontenplan erhalten Sie eine Baumstruktur der Konten(bezeichnungen) und Konte
 
 Lassen Sie uns die Hauptgruppen des Kontenplans besser verstehen lernen.
 
-<img class="screenshot" alt="Kontenplan" src="{{docs_base_url}}/assets/img/accounts/chart-of-accounts-1.png">
+<img class="screenshot" alt="Kontenplan" src="/docs/assets/img/accounts/chart-of-accounts-1.png">
 
 ### Bilanzkonten
 
@@ -47,7 +47,7 @@ Entgegen den Bilanzkonten, repräsentieren Gewinn und Verlustkonnten (GuV) keine
 
 In ERPNext ist es einfach eine graphische Auswertung von Gewinn und Verlust zu erstellen. Im Folgenden ist ein Beispiel einer GuV-Analyse abgebildet:
 
-<img class="screenshot" alt="Finanzanalyse GuV" src="{{docs_base_url}}/assets/img/accounts/financial-analytics-pl.png">
+<img class="screenshot" alt="Finanzanalyse GuV" src="/docs/assets/img/accounts/financial-analytics-pl.png">
 
 (Am ersten Tag eines Jahres haben Sie noch keinen Gewinn oder Verlust gemacht, aber Sie haben bereits Vermögen, deshalb haben Bestandskonten zum Anfang oder Ende eines Zeitraums einen Wert.)
 
@@ -61,7 +61,7 @@ Buchungstransaktionen können nur zu Kontobüchern erstellt werden (nicht zu Gru
 
 > Anmerkung: Ein Kontenbuch wird manchmal auch als Kontokopf bezeichnet.
 
-<img class="screenshot" alt="Kontenplan" src="{{docs_base_url}}/assets/img/accounts/chart-of-accounts-2.png">
+<img class="screenshot" alt="Kontenplan" src="/docs/assets/img/accounts/chart-of-accounts-2.png">
 
 ### Andere Kontentypen
 
@@ -71,7 +71,7 @@ Wenn sie in ERPNext ein neues Konto anlegen, können Sie dazu auch Informationen
 
 Um ein neues Konto zu erstellen, gehen Sie Ihren Kontenplan durch und klicken Sie auf die Kontengruppe unter der Sie das neue Konto erstellen wollen. Auf der rechten Seite finden Sie die Option ein neues Konto zu "öffnen" oder ein Unterkonto zu erstellen.
 
-<img class="screenshot" alt="Kontenplan" src="{{docs_base_url}}/assets/img/accounts/chart-of-accounts-3.png">
+<img class="screenshot" alt="Kontenplan" src="/docs/assets/img/accounts/chart-of-accounts-3.png">
 
 Die Option zum Erstellen erscheint nur dann, wenn Sie auf ein Konto vom Typ Gruppe (Ordner) klicken.
 

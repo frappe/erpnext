@@ -27,6 +27,10 @@ def delete_company_transactions(company_name):
 			"Purchase Taxes and Charges Template", "POS Profile", 'BOM'):
 				delete_for_doctype(doctype, company_name)
 
+	# reset company values
+	doc.total_monthly_sales = 0
+	doc.sales_monthly_history = None
+	doc.save()
 	# Clear notification counts
 	clear_notifications()
 
@@ -73,11 +77,25 @@ def delete_bins(company_name):
 
 def delete_lead_addresses(company_name):
 	"""Delete addresses to which leads are linked"""
-	for lead in frappe.get_all("Lead", filters={"company": company_name}):
-		frappe.db.sql("""delete from `tabAddress`
-			where lead=%s and (customer='' or customer is null) and (supplier='' or supplier is null)""", lead.name)
+	leads = frappe.get_all("Lead", filters={"company": company_name})
+	leads = [ "'%s'"%row.get("name") for row in leads ]
+	addresses = []
+	if leads:
+		addresses = frappe.db.sql_list("""select parent from `tabDynamic Link` where link_name 
+			in ({leads})""".format(leads=",".join(leads)))
 
-		frappe.db.sql("""update `tabAddress` set lead=null, lead_name=null where lead=%s""", lead.name)
+		if addresses:
+			addresses = ["'%s'"%addr for addr in addresses]
+
+			frappe.db.sql("""delete from tabAddress where name in ({addresses}) and 
+				name not in (select distinct dl1.parent from `tabDynamic Link` dl1 
+				inner join `tabDynamic Link` dl2 on dl1.parent=dl2.parent 
+				and dl1.link_doctype<>dl2.link_doctype)""".format(addresses=",".join(addresses)))
+
+			frappe.db.sql("""delete from `tabDynamic Link` where link_doctype='Lead' 
+				and parenttype='Address' and link_name in ({leads})""".format(leads=",".join(leads)))
+
+		frappe.db.sql("""update tabCustomer set lead_name=NULL where lead_name in ({leads})""".format(leads=",".join(leads)))
 
 def delete_communications(doctype, company_name, company_fieldname):
 		frappe.db.sql("""

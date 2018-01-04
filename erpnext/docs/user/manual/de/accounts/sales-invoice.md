@@ -9,7 +9,7 @@ Sie können eine Ausgangsrechnung direkt erstellen über:
 
 oder indem Sie in der rechten Ecke des Lieferscheins auf "Rechnung erstellen" klicken.
 
-<img class="screenshot" alt="Ausgangsrechnung" src="{{docs_base_url}}/assets/img/accounts/sales-invoice.png">
+<img class="screenshot" alt="Ausgangsrechnung" src="/docs/assets/img/accounts/sales-invoice.png">
 
 ### Auswirkung auf die Buchhaltung
 
@@ -53,6 +53,6 @@ Wenn Sie einem Kunden eine Rechnung ausstellen wollen, damit dieser eine Anzahlu
 
 "Proforma" bezieht sich auf eine Formsache. Warum sollte man das tun? Wenn Sie eine Ausgangsrechnung buchen, dann erscheint diese bei den Forderungen und den Erträgen. Das ist genau dann nicht optimal, wenn nicht sicher ist, ob Ihr Kunden die Anzahlung auch wirklich leistet. Wenn Ihr Kunden aber dennoch eine "Rechnung" will, dann geben Sie ihm ein Angebot (in ERPNext) das als "Proforma-Rechnung" bezeichnet wird. Auf diese Weise ist jeder glücklich.
 
-Das ist ein weithin gebräuchliches Verfahren. Wir bei Frappe machen das genauso.
+Das ist ein weithin gebräuchliches Verfahren. Wir bei Frappé machen das genauso.
 
 {next}

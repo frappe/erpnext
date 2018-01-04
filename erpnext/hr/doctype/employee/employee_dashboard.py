@@ -15,6 +15,10 @@ def get_data():
 				'items': ['Salary Structure', 'Salary Slip', 'Timesheet']
 			},
 			{
+				'label': _('Training Events/Results'),
+				'items': ['Training Event', 'Training Result']
+			},
+			{
 				'label': _('Expense'),
 				'items': ['Expense Claim']
 			},

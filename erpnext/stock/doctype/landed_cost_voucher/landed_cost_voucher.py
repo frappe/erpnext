@@ -2,9 +2,10 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
 from frappe.utils import flt
+from frappe.model.meta import get_field_precision
 from frappe.model.document import Document
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -12,25 +13,25 @@ class LandedCostVoucher(Document):
 	def get_items_from_purchase_receipts(self):
 		self.set("items", [])
 		for pr in self.get("purchase_receipts"):
-			pr_items = frappe.db.sql("""select pr_item.item_code, pr_item.description,
-				pr_item.qty, pr_item.base_rate, pr_item.base_amount, pr_item.name
-				from `tab{doctype} Item` pr_item where parent = %s
-				and exists(select name from tabItem where name = pr_item.item_code and is_stock_item = 1)
-				""".format(doctype=pr.receipt_document_type), pr.receipt_document, as_dict=True)
+			if pr.receipt_document_type and pr.receipt_document:
+				pr_items = frappe.db.sql("""select pr_item.item_code, pr_item.description,
+					pr_item.qty, pr_item.base_rate, pr_item.base_amount, pr_item.name, pr_item.cost_center
+					from `tab{doctype} Item` pr_item where parent = %s
+					and exists(select name from tabItem where name = pr_item.item_code and is_stock_item = 1)
+					""".format(doctype=pr.receipt_document_type), pr.receipt_document, as_dict=True)
 
-			for d in pr_items:
-				item = self.append("items")
-				item.item_code = d.item_code
-				item.description = d.description
-				item.qty = d.qty
-				item.rate = d.base_rate
-				item.amount = d.base_amount
-				item.receipt_document_type = pr.receipt_document_type
-				item.receipt_document = pr.receipt_document
-				item.purchase_receipt_item = d.name
-
-		if self.get("taxes"):
-			self.set_applicable_charges_for_item()
+				for d in pr_items:
+					item = self.append("items")
+					item.item_code = d.item_code
+					item.description = d.description
+					item.qty = d.qty
+					item.rate = d.base_rate
+					item.cost_center = d.cost_center or \
+						erpnext.get_default_cost_center(self.company)
+					item.amount = d.base_amount
+					item.receipt_document_type = pr.receipt_document_type
+					item.receipt_document = pr.receipt_document
+					item.purchase_receipt_item = d.name
 
 	def validate(self):
 		self.check_mandatory()
@@ -39,15 +40,13 @@ class LandedCostVoucher(Document):
 		if not self.get("items"):
 			self.get_items_from_purchase_receipts()
 		else:
-			self.set_applicable_charges_for_item()
+			self.validate_applicable_charges_for_item()
 
 	def check_mandatory(self):
 		if not self.get("purchase_receipts"):
 			frappe.throw(_("Please enter Receipt Document"))
 
-		if not self.get("taxes"):
-			frappe.throw(_("Please enter Taxes and Charges"))
-
+		
 	def validate_purchase_receipts(self):
 		receipt_documents = []
 		
@@ -64,18 +63,35 @@ class LandedCostVoucher(Document):
 				frappe.throw(_("Item Row {idx}: {doctype} {docname} does not exist in above '{doctype}' table")
 					.format(idx=item.idx, doctype=item.receipt_document_type, docname=item.receipt_document))
 
+			if not item.cost_center:
+				frappe.throw(_("Row {0}: Cost center is required for an item {1}")
+					.format(item.idx, item.item_code))
+
 	def set_total_taxes_and_charges(self):
 		self.total_taxes_and_charges = sum([flt(d.amount) for d in self.get("taxes")])
 
-	def set_applicable_charges_for_item(self):
+	def validate_applicable_charges_for_item(self):
 		based_on = self.distribute_charges_based_on.lower()
+		
 		total = sum([flt(d.get(based_on)) for d in self.get("items")])
-
+		
 		if not total:
-			frappe.throw(_("Total {0} for all items is zero, may you should change 'Distribute Charges Based On'").format(based_on))
+			frappe.throw(_("Total {0} for all items is zero, may be you should change 'Distribute Charges Based On'").format(based_on))
+		
+		total_applicable_charges = sum([flt(d.applicable_charges) for d in self.get("items")])
 
-		for item in self.get("items"):
-			item.applicable_charges = flt(item.get(based_on)) *  flt(self.total_taxes_and_charges) / flt(total)
+		precision = get_field_precision(frappe.get_meta("Landed Cost Item").get_field("applicable_charges"),
+		currency=frappe.db.get_value("Company", self.company, "default_currency", cache=True))
+
+		diff = flt(self.total_taxes_and_charges) - flt(total_applicable_charges)
+		diff = flt(diff, precision)
+
+		if abs(diff) < (2.0 / (10**precision)):
+			self.items[-1].applicable_charges += diff
+		else:
+			frappe.throw(_("Total Applicable Charges in Purchase Receipt Items table must be same as Total Taxes and Charges"))
+
+
 
 	def on_submit(self):
 		self.update_landed_cost()

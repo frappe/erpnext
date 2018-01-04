@@ -13,7 +13,7 @@ Wenn Ihr Artikel serialisiert ist, müssen Sie die Seriennummern in der entsprec
 
 Der Lagerbestand eines Artikels kann nur dann beeinflusst werden, wenn die Seriennummer mit Hilfe einer Lagertransaktion (Lagerbuchung, Kaufbeleg, Lieferschein, Ausgangsrechnung) übertragen wird. Wenn eine neue Seriennummer direkt erstellt wird, kann der Lagerort nicht eingestellt werden.
 
-<img class="screenshot" alt="Seriennummer" src="{{docs_base_url}}/assets/img/stock/serial-no.png">
+<img class="screenshot" alt="Seriennummer" src="/docs/assets/img/stock/serial-no.png">
 
 * Der Status wird aufgrund der Lagerbuchung eingestellt.
 * Nur Seriennummern mit dem Status "Verfügbar" können geliefert werden.

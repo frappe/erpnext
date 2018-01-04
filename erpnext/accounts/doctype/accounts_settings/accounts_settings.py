@@ -5,27 +5,27 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
-from frappe.utils import cint, comma_and
+from frappe.utils import cint
 from frappe.model.document import Document
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
 
 class AccountsSettings(Document):
 	def on_update(self):
-		frappe.db.set_default("auto_accounting_for_stock", self.auto_accounting_for_stock)
+		pass
 
-		if cint(self.auto_accounting_for_stock):
-			# set default perpetual account in company
-			for company in frappe.db.sql("select name from tabCompany"):
-				company = frappe.get_doc("Company", company[0])
-				company.flags.ignore_permissions = True
-				company.save()
+	def validate(self):
+		self.validate_stale_days()
+		self.enable_payment_schedule_in_print()
 
-			# Create account head for warehouses
-			warehouse_list = frappe.db.sql("select name, company from tabWarehouse", as_dict=1)
-			warehouse_with_no_company = [d.name for d in warehouse_list if not d.company]
-			if warehouse_with_no_company:
-				frappe.throw(_("Company is missing in warehouses {0}").format(comma_and(warehouse_with_no_company)))
-			for wh in warehouse_list:
-				wh_doc = frappe.get_doc("Warehouse", wh.name)
-				wh_doc.flags.ignore_permissions = True
-				wh_doc.save()
+	def validate_stale_days(self):
+		if not self.allow_stale and cint(self.stale_days) <= 0:
+			frappe.msgprint(
+				"Stale Days should start from 1.", title='Error', indicator='red',
+				raise_exception=1)
+
+	def enable_payment_schedule_in_print(self):
+		show_in_print = cint(self.show_payment_schedule_in_print)
+		for doctype in ("Sales Order", "Sales Invoice", "Purchase Order", "Purchase Invoice"):
+			make_property_setter(doctype, "due_date", "print_hide", show_in_print, "Check")
+			make_property_setter(doctype, "payment_schedule", "print_hide",  0 if show_in_print else 1, "Check")

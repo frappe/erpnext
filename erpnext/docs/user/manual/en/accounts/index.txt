@@ -6,10 +6,12 @@ purchase-invoice
 payments
 journal-entry
 payment-entry
+subscription
 multi-currency-accounting
 advance-payment-entry
 payment-request
 credit-limit
+bank-guarantee
 accounting-reports
 accounting-entries
 managing-fixed-assets

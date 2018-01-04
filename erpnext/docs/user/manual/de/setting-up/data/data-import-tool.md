@@ -5,7 +5,7 @@ Das Werkzeug zum Datenimport ist ein großartiger Weg um große Mengen an Daten,
 
 Um das Werkzeug zum Datenimport zu öffnen, gehen Sie entweder zu den Einstellungen oder zur Transaktion, für die Sie importieren wollen. Wenn der Datenimport erlaubt ist, sehen Sie eine Importschaltfläche:
 
-<img alt="Importvorgang starten" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/data-import-1.png">
+<img alt="Importvorgang starten" class="screenshot" src="/docs/assets/img/setup/data-import/data-import-1.png">
 
 Das Werkzeug hat zwei Abschnitte, einen um eine Vorlage herunter zu laden, und einen zweiten um Daten hoch zu laden.
 
@@ -15,7 +15,7 @@ Das Werkzeug hat zwei Abschnitte, einen um eine Vorlage herunter zu laden, und e
 
 Daten werden in ERPNext in Tabellen gespeichert, sehr ähnlich einer Tabellenkalkulation mit Spalten und Zeilen voller Daten. Jede Instanz in ERPNext kann mehrere verschiedene mit Ihr verbundene Untertabellen haben. Die Untertabellen sind mit Ihren übergeordneten Tabellen verknüpft und werden dort eingesetzt, wo es für eine Eigenschaft mehrere verschiedene Werte gibt. So kann z. B. ein Artikel mehrere verschiedene Preise haben, eine Rechnung hat mehrere verschiedene Artikel usw.
 
-<img alt="Vorlage herunterladen" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/data-import-2.png">
+<img alt="Vorlage herunterladen" class="screenshot" src="/docs/assets/img/setup/data-import/data-import-2.png">
 
 * Klicken Sie auf die Tabelle, die Sie herunter laden wollen, oder auf "Alle Tabellen".
 * Für Massenbearbeitung klicken Sie auf "Mit Daten herunterladen".
@@ -24,17 +24,17 @@ Daten werden in ERPNext in Tabellen gespeichert, sehr ähnlich einer Tabellenkal
 
 Öffnen Sie die Vorlage nach dem Herunterladen in einer Tabellenkalkulationsanwendung und fügen Sie die Daten unterhalb der Spaltenköpfe ein.
 
-![Tabellenblatt]({{docs_base_url}}/assets/old_images/erpnext/import-3.png)
+![Tabellenblatt](/docs/assets/old_images/erpnext/import-3.png)
 
 Exportieren Sie dann Ihre Vorlage oder speichern Sie sie im CSV-Format (**Comma Separated Values**).
 
-![Tabellenblatt]({{docs_base_url}}/assets/old_images/erpnext/import-4.png)
+![Tabellenblatt](/docs/assets/old_images/erpnext/import-4.png)
 
 ### 3. Hochladen der CSV-Datei
 
 Fügen Sie abschliessend die CSV-Datei im Abschnitt Import hinzu. Klicken Sie auf die Schaltfläche "Hochladen und Importieren".
 
-<img alt="Upload" class="screenshot" src="{{docs_base_url}}/assets/img/setup/data-import/data-import-3.png">
+<img alt="Upload" class="screenshot" src="/docs/assets/img/setup/data-import/data-import-3.png">
 
 #### Anmerkungen
 

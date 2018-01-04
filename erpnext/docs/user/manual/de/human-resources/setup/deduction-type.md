@@ -7,6 +7,6 @@ Um eine neue Abzugsart anzulegen, gehen Sie zu:
 
 > Personalwesen > Einstellungen > Abzugsart > Neu
 
-<img class="screenshot" alt="Abzugsart" src="{{docs_base_url}}/assets/img/human-resources/deduction-type.png">
+<img class="screenshot" alt="Abzugsart" src="/docs/assets/img/human-resources/deduction-type.png">
 
 {next}

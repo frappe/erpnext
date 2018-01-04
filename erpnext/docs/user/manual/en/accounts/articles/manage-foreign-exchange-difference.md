@@ -6,7 +6,7 @@ In ERPNext, you can create transactions in the foriegn currency as well. When cr
 
 To mange currency difference, create Account **Foreign Exchange Gain/Loss**. This account is generally created on the Expense side of P&L statement. However, you can place it under another group as per your accounting requirement.
 
-<img alt="Accounts Frozen Date" class="screenshot" src="{{docs_base_url}}/assets/img/articles/exchange-rate-difference-1.png">
+<img alt="Accounts Frozen Date" class="screenshot" src="/docs/assets/img/articles/exchange-rate-difference-1.png">
 
 #### Book Payment Entry
 
@@ -16,7 +16,7 @@ In the below scenario, Sales Invoice was made EUR, at the exchange rate of 1.090
 
 One receipt of payment, exchange rate changed. As per the new exchange rate, payment received in the base currency was $1080. This means gain of $80 due to change in exchange rate. Following is how Foreign Exchange Gain will be booked in this scenerio.
 
-<img alt="Accounts Frozen Date" class="screenshot" src="{{docs_base_url}}/assets/img/articles/exchange-rate-difference-2.gif">
+<img alt="Accounts Frozen Date" class="screenshot" src="/docs/assets/img/articles/exchange-rate-difference-2.gif">
 
 In case you incur loss due to change foriegn exchnage rate, then different amount about be updated in the debit of Foreign Exchange Gain/Loss account. Also you can add another row to update another expenses like bank charges, remittance charges etc.
 

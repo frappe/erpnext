@@ -5,7 +5,7 @@ def get_data():
 	return [
 		{
 			"label": _("Purchasing"),
-			"icon": "icon-star",
+			"icon": "fa fa-star",
 			"items": [
 				{
 					"type": "doctype",
@@ -57,7 +57,7 @@ def get_data():
 		},
 		{
 			"label": _("Setup"),
-			"icon": "icon-cog",
+			"icon": "fa fa-cog",
 			"items": [
 				{
 					"type": "doctype",
@@ -98,7 +98,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Item Group",
-					"icon": "icon-sitemap",
+					"icon": "fa fa-sitemap",
 					"label": _("Item Group"),
 					"link": "Tree/Item Group",
 					"description": _("Tree of Item Groups."),
@@ -119,13 +119,13 @@ def get_data():
 		},
 		{
 			"label": _("Analytics"),
-			"icon": "icon-table",
+			"icon": "fa fa-table",
 			"items": [
 				{
 					"type": "page",
 					"name": "purchase-analytics",
 					"label": _("Purchase Analytics"),
-					"icon": "icon-bar-chart",
+					"icon": "fa fa-bar-chart",
 				},
 				{
 					"type": "report",
@@ -142,8 +142,34 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Supplier Scorecard"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Supplier Scorecard",
+					"description": _("All Supplier scorecards."),
+				},
+				{
+					"type": "doctype",
+					"name": "Supplier Scorecard Variable",
+					"description": _("Templates of supplier scorecard variables.")
+				},
+				{
+					"type": "doctype",
+					"name": "Supplier Scorecard Criteria",
+					"description": _("Templates of supplier scorecard criteria."),
+				},
+				{
+					"type": "doctype",
+					"name": "Supplier Scorecard Standing",
+					"description": _("Templates of supplier standings."),
+				},
+
+			]
+		},
+		{
 			"label": _("Other Reports"),
-			"icon": "icon-list",
+			"icon": "fa fa-list",
 			"items": [
 				{
 					"type": "report",
@@ -172,8 +198,12 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Supplier Addresses and Contacts",
-					"doctype": "Supplier"
+					"name": "Addresses And Contacts",
+					"label": "Supplier Addresses And Contacts",
+					"doctype": "Address",
+					"route_options": {
+						"party_type": "Supplier"
+					}
 				},
 			]
 		},

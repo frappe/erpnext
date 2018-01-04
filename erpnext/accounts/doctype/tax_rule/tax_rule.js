@@ -20,20 +20,22 @@ frappe.ui.form.on("Tax Rule", "refresh", function(frm) {
 })
 
 frappe.ui.form.on("Tax Rule", "customer", function(frm) {
-	frappe.call({
-		method:"erpnext.accounts.doctype.tax_rule.tax_rule.get_party_details",
-		args: {
-			"party": frm.doc.customer,
-			"party_type": "customer"
-		},
-		callback: function(r) {
-			if(!r.exc) {
-				$.each(r.message, function(k, v) {
-					frm.set_value(k, v);
-				});
+	if(frm.doc.customer) {
+		frappe.call({
+			method:"erpnext.accounts.doctype.tax_rule.tax_rule.get_party_details",
+			args: {
+				"party": frm.doc.customer,
+				"party_type": "customer"
+			},
+			callback: function(r) {
+				if(!r.exc) {
+					$.each(r.message, function(k, v) {
+						frm.set_value(k, v);
+					});
+				}
 			}
-		}
-	});
+		});
+	}
 });
 
 frappe.ui.form.on("Tax Rule", "supplier", function(frm) {

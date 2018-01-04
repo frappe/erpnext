@@ -1,3 +1,5 @@
+# Price Lists
+
 ERPNext lets you maintain multiple selling and buying prices for an Item using Price Lists. A PriceList is a name you can give to a set of Item prices. 
 
 Why would you want Price Lists? You have different prices for different zones (based on the shipping costs), for different currencies etc.
@@ -8,7 +10,7 @@ You can create new Price List
 
 > Selling/Buying/Stock  > Setup > Price List >> New
 
-<img class="screenshot" alt="Price List" src="{{docs_base_url}}/assets/img/price-list/price-list.png">
+<img class="screenshot" alt="Price List" src="/docs/assets/img/price-list/price-list.png">
 
 * These Price List will be used when creating Item Price record to track selling or buying price of an item. Click here to learn more about Item Price.
 

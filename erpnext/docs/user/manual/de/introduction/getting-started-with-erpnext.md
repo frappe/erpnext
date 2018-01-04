@@ -11,7 +11,7 @@ Wenn Sie die Benutzerschnittstelle ausprobieren wollen und wissen wollen, wie si
 
 ### 2\. Richten Sie sich ein kostenloses Konto bei ERPNext.com ein
 
-ERPNext.com wird von der Organisation (Frappe), die ERPNext veröffentlicht, verwaltet. Sie können sich ein eigenes Konto anlegen, indem Sie sich auf der [Internetseite registrieren](https://erpnext.com).
+ERPNext.com wird von der Organisation (Frappé), die ERPNext veröffentlicht, verwaltet. Sie können sich ein eigenes Konto anlegen, indem Sie sich auf der [Internetseite registrieren](https://erpnext.com).
 
 Sie können Sich außerdem auch dazu entscheiden, Ihre Software auf ERPNext.com zu speichern, wenn Sie einen Hostingvertrag abschliessen. Das ist eine Möglichkeit, wie Sie die Organisation, die ERPNext entwickelt und verbessert, unterstützen können. In diesem Fall bekommen Sie zusätzlich direkten Support bei Hostingfragen.
 
@@ -23,6 +23,6 @@ Um Ärgernisse bei der Installation von Instanzen zu vermeiden, ist ERPNext als 
 
 ### 4\. Installieren Sie ERPNext auf Ihrem Unix/Linux/Mac-Rechner
 
-Wenn Sie sich mit der Installation von Anwendungen auf *nix-Plattformen auskennen, lesen Sie die Anweisungen zur Installation des [Frappe Bench](https://github.com/frappe/bench).
+Wenn Sie sich mit der Installation von Anwendungen auf *nix-Plattformen auskennen, lesen Sie die Anweisungen zur Installation des [Frappé Bench](https://github.com/frappe/bench).
 
 {next}

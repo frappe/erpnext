@@ -1,6 +1,6 @@
 {% extends "templates/web.html" %}
 
-{% block title %} {{ "Shopping Cart" }} {% endblock %}
+{% block title %} {{ _("Shopping Cart") }} {% endblock %}
 
 {% block header %}<h2>{{ _("My Cart") }}</h2>{% endblock %}
 
@@ -60,7 +60,7 @@
 				{{doc.terms}}
 			</div>
 			<div class="cart-link">
-				<a href="#" onclick="show_terms();return false;">*Terms and Conditions</a>
+				<a href="#" onclick="show_terms();return false;">*{{ __("Terms and Conditions") }}</a>
 			</div>
 		{% endif %}
 

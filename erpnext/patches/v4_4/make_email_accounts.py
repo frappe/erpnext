@@ -78,7 +78,7 @@ def execute():
 def insert_or_update(account):
 	try:
 		account.insert()
-	except frappe.NameError, e:
+	except frappe.NameError as e:
 		if e.args[0]=="Email Account":
 			existing_account = frappe.get_doc("Email Account", e.args[1])
 			for key, value in account.as_dict().items():

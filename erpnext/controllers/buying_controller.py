@@ -4,17 +4,20 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
-from frappe.utils import flt,cint, cstr
+from frappe.utils import flt,cint, cstr, getdate
 
-from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.party import get_party_details
 from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.buying.utils import validate_for_items, update_last_purchase_rate
+from erpnext.stock.stock_ledger import get_valuation_rate
 
 from erpnext.controllers.stock_controller import StockController
 
 class BuyingController(StockController):
 	def __setup__(self):
 		if hasattr(self, "taxes"):
+			self.flags.print_taxes_with_zero_amount = cint(frappe.db.get_single_value("Print Settings",
+				 "print_taxes_with_zero_amount"))
 			self.print_templates = {
 				"taxes": "templates/print_formats/includes/taxes.html"
 			}
@@ -40,9 +43,7 @@ class BuyingController(StockController):
 			# self.validate_purchase_return()
 			self.validate_rejected_warehouse()
 			self.validate_accepted_rejected_qty()
-
-			pc_obj = frappe.get_doc('Purchase Common')
-			pc_obj.validate_for_items(self)
+			validate_for_items(self)
 
 			#sub-contracting
 			self.validate_for_subcontracting()
@@ -60,7 +61,7 @@ class BuyingController(StockController):
 
 		# set contact and address details for supplier, if they are not mentioned
 		if getattr(self, "supplier", None):
-			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier", ignore_permissions=self.flags.ignore_permissions))
+			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier", ignore_permissions=self.flags.ignore_permissions, doctype=self.doctype, company=self.company))
 
 		self.set_missing_item_details(for_validate)
 
@@ -74,23 +75,27 @@ class BuyingController(StockController):
 
 	def validate_stock_or_nonstock_items(self):
 		if self.meta.get_field("taxes") and not self.get_stock_items():
-			tax_for_valuation = [d.account_head for d in self.get("taxes")
+			tax_for_valuation = [d for d in self.get("taxes")
 				if d.category in ["Valuation", "Valuation and Total"]]
+
 			if tax_for_valuation:
-				frappe.throw(_("Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items"))
+				for d in tax_for_valuation:
+					d.category = 'Total'
+				msgprint(_('Tax Category has been changed to "Total" because all the Items are non-stock items'))
 
 	def set_landed_cost_voucher_amount(self):
 		for d in self.get("items"):
-			lc_voucher_amount = frappe.db.sql("""select sum(applicable_charges)
+			lc_voucher_data = frappe.db.sql("""select sum(applicable_charges), cost_center
 				from `tabLanded Cost Item`
 				where docstatus = 1 and purchase_receipt_item = %s""", d.name)
-			d.landed_cost_voucher_amount = lc_voucher_amount[0][0] if lc_voucher_amount else 0.0
+			d.landed_cost_voucher_amount = lc_voucher_data[0][0] if lc_voucher_data else 0.0
+			if not d.cost_center and lc_voucher_data and lc_voucher_data[0][1]:
+				d.db_set('cost_center', lc_voucher_data[0][1])
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
-		company_currency = get_company_currency(self.company)
 		if self.meta.get_field("base_in_words"):
-			self.base_in_words = money_in_words(self.base_grand_total, company_currency)
+			self.base_in_words = money_in_words(self.base_grand_total, self.company_currency)
 		if self.meta.get_field("in_words"):
 			self.in_words = money_in_words(self.grand_total, self.currency)
 
@@ -166,7 +171,7 @@ class BuyingController(StockController):
 			for item in self.get("items"):
 				if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 					item.rm_supp_cost = 0.0
-				if item.item_code in self.sub_contracted_items:
+				if item.bom and item.item_code in self.sub_contracted_items:
 					self.update_raw_materials_supplied(item, raw_material_table)
 
 					if [item.item_code, item.name] not in parent_items:
@@ -177,6 +182,9 @@ class BuyingController(StockController):
 		elif self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 			for item in self.get("items"):
 				item.rm_supp_cost = 0.0
+
+		if self.is_subcontracted == "No" and self.get("supplied_items"):
+			self.set('supplied_items', [])
 
 	def update_raw_materials_supplied(self, item, raw_material_table):
 		bom_items = self.get_items_from_bom(item.item_code, item.bom)
@@ -194,7 +202,8 @@ class BuyingController(StockController):
 			if not exists:
 				rm = self.append(raw_material_table, {})
 
-			required_qty = flt(bom_item.qty_consumed_per_unit) * flt(item.qty) * flt(item.conversion_factor)
+			required_qty = flt(flt(bom_item.qty_consumed_per_unit) * flt(item.qty) *
+				flt(item.conversion_factor), rm.precision("required_qty"))
 			rm.reference_name = item.name
 			rm.bom_detail_no = bom_item.name
 			rm.main_item_code = item.item_code
@@ -222,8 +231,8 @@ class BuyingController(StockController):
 					"serial_no": rm.serial_no
 				})
 				if not rm.rate:
-					from erpnext.stock.stock_ledger import get_valuation_rate
-					rm.rate = get_valuation_rate(bom_item.item_code, self.supplier_warehouse)
+					rm.rate = get_valuation_rate(bom_item.item_code, self.supplier_warehouse,
+						self.doctype, self.name, currency=self.company_currency, company = self.company)
 			else:
 				rm.rate = bom_item.rate
 
@@ -251,7 +260,7 @@ class BuyingController(StockController):
 
 	def get_items_from_bom(self, item_code, bom):
 		bom_items = frappe.db.sql("""select t2.item_code,
-			t2.qty / ifnull(t1.quantity, 1) as qty_consumed_per_unit,
+			t2.stock_qty / ifnull(t1.quantity, 1) as qty_consumed_per_unit,
 			t2.rate, t2.stock_uom, t2.name, t2.description
 			from `tabBOM` t1, `tabBOM Item` t2, tabItem t3
 			where t2.parent = t1.name and t1.item = %s
@@ -302,6 +311,7 @@ class BuyingController(StockController):
 	# validate accepted and rejected qty
 	def validate_accepted_rejected_qty(self):
 		for d in self.get("items"):
+			self.validate_negative_quantity(d, ["received_qty","qty", "rejected_qty"])
 			if not flt(d.received_qty) and flt(d.qty):
 				d.received_qty = flt(d.qty) - flt(d.rejected_qty)
 
@@ -314,6 +324,16 @@ class BuyingController(StockController):
 			# Check Received Qty = Accepted Qty + Rejected Qty
 			if ((flt(d.qty) + flt(d.rejected_qty)) != flt(d.received_qty)):
 				frappe.throw(_("Accepted + Rejected Qty must be equal to Received quantity for Item {0}").format(d.item_code))
+
+	def validate_negative_quantity(self, item_row, field_list):
+		if self.is_return:
+			return
+
+		item_row = item_row.as_dict()
+		for fieldname in field_list:
+			if flt(item_row[fieldname]) < 0:
+				frappe.throw(_("Row #{0}: {1} can not be negative for item {2}".format(item_row['idx'],
+					frappe.get_meta(item_row.doctype).get_label(fieldname), item_row['item_code'])))
 
 	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
 		self.update_ordered_qty()
@@ -388,4 +408,30 @@ class BuyingController(StockController):
 					"warehouse": self.supplier_warehouse,
 					"actual_qty": -1*flt(d.consumed_qty),
 				}))
+
+	def on_submit(self):
+		if self.get('is_return'):
+			return
+
+		update_last_purchase_rate(self, is_submit = 1)
+
+	def on_cancel(self):
+		if self.get('is_return'):
+			return
+
+		update_last_purchase_rate(self, is_submit = 0)
+
+	def validate_schedule_date(self):
+		if not self.schedule_date:
+			self.schedule_date = min([d.schedule_date for d in self.get("items")])
+
+		if self.schedule_date:
+			for d in self.get('items'):
+				if not d.schedule_date:
+					d.schedule_date = self.schedule_date
+
+				if d.schedule_date and getdate(d.schedule_date) < getdate(self.transaction_date):
+					frappe.throw(_("Row #{0}: Reqd by Date cannot be before Transaction Date").format(d.idx))
+		else:
+			frappe.throw(_("Please enter Reqd by Date"))
 

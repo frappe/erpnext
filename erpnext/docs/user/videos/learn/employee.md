@@ -1,7 +1,7 @@
 # Employee
 
-<iframe width="660" height="371" src="https://www.youtube.com/embed/USfIUdZlUhw" frameborder="0" allowfullscreen></iframe>
+<iframe width="660" height="371" src="https://www.youtube.com/embed/kkwOzeU4wFU" frameborder="0" allowfullscreen></iframe>
 
-**Duration: 1:59**
+**Duration: 3:26**
 
-This video walks you through adding Employee in ERPNext.
+This is a help video on how to add and manage Employees in ERPNext.

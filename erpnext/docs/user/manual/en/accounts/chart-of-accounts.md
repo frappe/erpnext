@@ -1,3 +1,5 @@
+# Chart Of Accounts
+
 The Chart of Accounts forms the blueprint of your organization. The overall
 structure of your Chart of Accounts is based on a system of double entry
 accounting that has become a standard all over the world to quantify how a
@@ -25,13 +27,13 @@ such as  Balance Sheet, Profit and Loss statement and Cash flow statement.
 An Example of various financial statement are given below:
 
 #### Cash Flow Report
-<img class="screenshot" alt="Cash Flow Report" src="{{docs_base_url}}/assets/img/accounts/cash_flow_report.png">
+<img class="screenshot" alt="Cash Flow Report" src="/docs/assets/img/accounts/cash_flow_report.png">
 
 #### Profit and Loss Report
-<img class="screenshot" alt="Profit and Loss Report" src="{{docs_base_url}}/assets/img/accounts/profit_n_loss_report.png">
+<img class="screenshot" alt="Profit and Loss Report" src="/docs/assets/img/accounts/profit_n_loss_report.png">
 
 #### Balance Sheet Report
-<img class="screenshot" alt="Balance Sheet Report" src="{{docs_base_url}}/assets/img/accounts/balance_sheet_report.png">
+<img class="screenshot" alt="Balance Sheet Report" src="/docs/assets/img/accounts/balance_sheet_report.png">
 
 To edit your Chart of Accounts in ERPNext go to:
 
@@ -46,7 +48,7 @@ based on statutory (tax, compliance to government regulations) requirements.
 
 Let us understand the main groups of the Chart of Accounts.
 
-<img class="screenshot" alt="Chart of Accounts" src="{{docs_base_url}}/assets/img/accounts/chart-of-accounts-1.png">
+<img class="screenshot" alt="Chart of Accounts" src="/docs/assets/img/accounts/chart-of-accounts-1.png">
 
 ### Balance Sheet Accounts
 
@@ -84,7 +86,7 @@ beginning and end of your Fiscal Year, they become zero.
 In ERPNext it is easy to create a Profit and Loss analysis chart. An example
 of a Profit and Loss analysis chart is given below:
 
-<img class="screenshot" alt="Financial Analytics Profit and Loss Statement" src="{{docs_base_url}}/assets/img/accounts/financial-analytics-pl.png">
+<img class="screenshot" alt="Financial Analytics Profit and Loss Statement" src="/docs/assets/img/accounts/financial-analytics-pl.png">
 
 (On the first day of the year you have not made any profit or loss, but you
 still have assets, hence balance sheet accounts never become zero at the
@@ -104,7 +106,12 @@ Supplier).
 
 > Note: An Account “Ledger” is also sometimes called as Account “Head”.
 
-<img class="screenshot" alt="Chart of Accounts" src="{{docs_base_url}}/assets/img/accounts/chart-of-accounts-2.png">
+<img class="screenshot" alt="Chart of Accounts" src="/docs/assets/img/accounts/chart-of-accounts-2.png">
+
+### Account Number
+A standard chart of accounts is organized according to a numerical system. Each major category will begin with a certain number, and then the sub-categories within that major category will all begin with the same number. For example, if assets are classified by numbers starting with the digit 1000, then cash accounts might be labeled 1100, bank accounts might be labeled 1200, accounts receivable might be labeled 1300, and so on. A gap between account numbers is generally maintained for adding accounts in the future.
+
+You can assign a number while creating an account from Chart of Accounts page. You can also edit a number from account record, by clicking "Update Account Number" button. On updating account number, system renames the account name automatically to embed the number in the account name.
 
 ### Other Account Types
 
@@ -113,16 +120,30 @@ Account, this is there to help you select that particular account in a
 scenario like Bank Account or a Tax Account and has no effect on the Chart
 itself.
 
+Explanation of account types:
+- **Bank:** The account group under which bank account will be created.
+- **Cash:** The account group under which cash account will be created.
+- **Cost of Goods Sold:** The account to book the accumulated total of all costs used to manufacture / purchase a product or service, sold by a company.
+- **Depreciation:** The expense account to book the depreciation of teh fixed assets.
+- **Expenses Included In Valuation:** The account to book the expenses (apart from direct material costs) included in landed cost of an item/product, used in Perpetual Inventory, .
+- **Fixed Asset:** The account to maintain the costs of fixed assets.
+- **Payable:** The account which represents the amount owed by a company to its creditors.
+- **Receivable:** The account which represents the amount owed by a company by its debtors.
+- **Stock:** The account group under which the warehouse account will be created.
+- **Stock Adjustment:** An expense account to book any adjustment entry of stock/inventory, and generally comes at the same level of Cost of Goods Sold.
+- **Stock Received But Not Billed:** A temporary liability account which holds the value of stock received but not billed yet and used in Perpetual Inventory.
+
 ### Creating / Editing Accounts
 
 To create new Accounts, explore your Chart of Accounts and click on an Account
 group under which you want to create the new Account. On the right side, you
 will see an option to “Open” or “Add Child” a new Account.
 
-<img class="screenshot" alt="Chart of Accounts" src="{{docs_base_url}}/assets/img/accounts/chart-of-accounts-3.png">
+<img class="screenshot" alt="Chart of Accounts" src="/docs/assets/img/accounts/chart-of-accounts-3.png">
 
 Option to create will only appear if you click on a Group (folder) type
-Account.
+Account. There you need to enter account name, account number and some more
+optional details.
 
 ERPNext creates a standard structure for you when the Company is created but
 it is up to you to modify or add or remove accounts.

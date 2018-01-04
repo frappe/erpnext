@@ -1,12 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 
 import frappe, random
 from frappe.desk import query_report
 from erpnext.stock.stock_ledger import NegativeStockError
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoRequiredError, SerialNoQtyError
+from erpnext.stock.doctype.batch.batch import UnableToSelectBatchError
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
 
@@ -36,6 +37,7 @@ def make_purchase_receipt():
 			try:
 				pr.submit()
 			except NegativeStockError:
+				print('Negative stock for {0}'.format(po))
 				pass
 			frappe.db.commit()
 
@@ -58,7 +60,7 @@ def make_delivery_note():
 			try:
 				dn.submit()
 				frappe.db.commit()
-			except (NegativeStockError, SerialNoRequiredError, SerialNoQtyError):
+			except (NegativeStockError, SerialNoRequiredError, SerialNoQtyError, UnableToSelectBatchError):
 				frappe.db.rollback()
 
 def make_stock_reconciliation():
@@ -85,7 +87,7 @@ def make_stock_reconciliation():
 
 def submit_draft_stock_entries():
 	from erpnext.stock.doctype.stock_entry.stock_entry import IncorrectValuationRateError, \
-		DuplicateEntryForProductionOrderError, OperationsNotCompleteError	
+		DuplicateEntryForProductionOrderError, OperationsNotCompleteError
 
 	# try posting older drafts (if exists)
 	frappe.db.commit()
@@ -101,23 +103,25 @@ def submit_draft_stock_entries():
 			frappe.db.rollback()
 
 def make_sales_return_records():
-	for data in frappe.get_all('Delivery Note', fields=["name"], filters={"docstatus": 1}):
-		if random.random() < 0.2:
-			try:
-				dn = make_sales_return(data.name)
-				dn.insert()
-				dn.submit()
-				frappe.db.commit()
-			except Exception:
-				frappe.db.rollback()
+	if random.random() < 0.1:
+		for data in frappe.get_all('Delivery Note', fields=["name"], filters={"docstatus": 1}):
+			if random.random() < 0.1:
+				try:
+					dn = make_sales_return(data.name)
+					dn.insert()
+					dn.submit()
+					frappe.db.commit()
+				except Exception:
+					frappe.db.rollback()
 
 def make_purchase_return_records():
-	for data in frappe.get_all('Purchase Receipt', fields=["name"], filters={"docstatus": 1}):
-		if random.random() < 0.2:
-			try:
-				pr = make_purchase_return(data.name)
-				pr.insert()
-				pr.submit()
-				frappe.db.commit()
-			except Exception:
-				frappe.db.rollback()
+	if random.random() < 0.1:
+		for data in frappe.get_all('Purchase Receipt', fields=["name"], filters={"docstatus": 1}):
+			if random.random() < 0.1:
+				try:
+					pr = make_purchase_return(data.name)
+					pr.insert()
+					pr.submit()
+					frappe.db.commit()
+				except Exception:
+					frappe.db.rollback()

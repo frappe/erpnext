@@ -6,7 +6,6 @@ def get_data():
 		'fieldname': 'request_for_quotation',
 		'transactions': [
 			{
-				'label': _('Related'),
 				'items': ['Supplier Quotation']
 			},
 		]

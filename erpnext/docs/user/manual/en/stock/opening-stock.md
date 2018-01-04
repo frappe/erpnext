@@ -10,6 +10,6 @@ In both cases, you should enter "Difference/Expense Account" as **Temporary Open
 
 If you are not making opening Stock Entry, you can select "Stock Adjustment" account in Difference/Expense Account field which is an expense account.
 
-To understand Opening Stock for serialized Items visit [Stock Reconciliation]({{docs_base_url}}/user/manual/en/setting-up/stock-reconciliation-for-non-serialized-item.html)
+To understand Opening Stock for serialized Items visit [Stock Reconciliation](/docs/user/manual/en/setting-up/stock-reconciliation-for-non-serialized-item.html)
 
 {next}

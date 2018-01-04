@@ -18,7 +18,7 @@ Um ein neues **Webformular** zu erstellen, gehen Sie zu:
 3. Geben Sie an, ob sich der Benutzer einloggen muss, Daten ändern muss, mehrere verschiedene Datensätze verwalten soll, etc.
 4. Fügen Sie die Felder, die Sie in den Datensätzen haben wollen, hinzu.
 
-<img class="screenshot" alt="Webformular" src="{{docs_base_url}}/assets/img/website/web-form.png">
+<img class="screenshot" alt="Webformular" src="/docs/assets/img/website/web-form.png">
 
 * * *
 
@@ -26,7 +26,7 @@ Um ein neues **Webformular** zu erstellen, gehen Sie zu:
 
 Wenn Sie das Web-Formular erstellt haben, können Sie es unter der URL ansehen und ausprobieren!
 
-<img class="screenshot" alt="Webformular" src="{{docs_base_url}}/assets/img/website/web-form-view.png">
+<img class="screenshot" alt="Webformular" src="/docs/assets/img/website/web-form-view.png">
 
 * * *
 

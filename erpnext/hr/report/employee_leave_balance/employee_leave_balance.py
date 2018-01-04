@@ -30,28 +30,31 @@ def get_columns(leave_types):
 	return columns
 	
 def get_data(filters, leave_types):
-
+	user = frappe.session.user
 	allocation_records_based_on_to_date = get_leave_allocation_records(filters.to_date)
 
 	active_employees = frappe.get_all("Employee", 
 		filters = { "status": "Active", "company": filters.company}, 
-		fields = ["name", "employee_name", "department"])
+		fields = ["name", "employee_name", "department", "user_id"])
 	
 	data = []
 	for employee in active_employees:
-		row = [employee.name, employee.employee_name, employee.department]
+		leave_approvers = [l.leave_approver for l in frappe.db.sql("""select leave_approver from `tabEmployee Leave Approver` where parent = %s""",
+							(employee.name),as_dict=True)]
+		if (len(leave_approvers) and user in leave_approvers) or (user in ["Administrator", employee.user_id]) or ("HR Manager" in frappe.get_roles(user)):
+			row = [employee.name, employee.employee_name, employee.department]
 
-		for leave_type in leave_types:	
-			# leaves taken
-			leaves_taken = get_approved_leaves_for_period(employee.name, leave_type, 
-				filters.from_date, filters.to_date)
+			for leave_type in leave_types:
+				# leaves taken
+				leaves_taken = get_approved_leaves_for_period(employee.name, leave_type,
+					filters.from_date, filters.to_date)
 	
-			# closing balance
-			closing = get_leave_balance_on(employee.name, leave_type, filters.to_date, 
-				allocation_records_based_on_to_date.get(employee.name, frappe._dict()))
+				# closing balance
+				closing = get_leave_balance_on(employee.name, leave_type, filters.to_date,
+					allocation_records_based_on_to_date.get(employee.name, frappe._dict()))
 
-			row += [leaves_taken, closing]
+				row += [leaves_taken, closing]
 			
-		data.append(row)
+			data.append(row)
 		
 	return data

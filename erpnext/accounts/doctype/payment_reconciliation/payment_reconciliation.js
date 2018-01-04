@@ -6,17 +6,15 @@ frappe.provide("erpnext.accounts");
 erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.extend({
 	onload: function() {
 		var me = this
-		this.frm.set_query('party_type', function() {
-			return {
-				filters: {
-					"name": ["in", ["Customer", "Supplier"]]
-				}
-			};
+		this.frm.set_query("party_type", function() {
+			return{
+				query: "erpnext.setup.doctype.party_type.party_type.get_party_type"
+			}
 		});
 
 		this.frm.set_query('receivable_payable_account', function() {
 			if(!me.frm.doc.company || !me.frm.doc.party_type) {
-				msgprint(__("Please select Company and Party Type first"));
+				frappe.msgprint(__("Please select Company and Party Type first"));
 			} else {
 				return{
 					filters: {
@@ -31,7 +29,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 
 		this.frm.set_query('bank_cash_account', function() {
 			if(!me.frm.doc.company) {
-				msgprint(__("Please select Company first"));
+				frappe.msgprint(__("Please select Company first"));
 			} else {
 				return{
 					filters:[
@@ -98,10 +96,11 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 	},
 
 	set_invoice_options: function() {
+		var me = this;
 		var invoices = [];
 
 		$.each(me.frm.doc.invoices || [], function(i, row) {
-			if (row.invoice_number && !inList(invoices, row.invoice_number))
+			if (row.invoice_number && !in_list(invoices, row.invoice_number))
 				invoices.push(row.invoice_type + " | " + row.invoice_number);
 		});
 
@@ -110,7 +109,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 				me.frm.doc.name).options = "\n" + invoices.join("\n");
 
 			$.each(me.frm.doc.payments || [], function(i, p) {
-				if(!inList(invoices, cstr(p.invoice_number))) p.invoice_number = null;
+				if(!in_list(invoices, cstr(p.invoice_number))) p.invoice_number = null;
 			});
 		}
 

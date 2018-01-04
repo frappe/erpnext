@@ -5,6 +5,10 @@ def get_data():
 		'fieldname': 'sales_order',
 		'non_standard_fieldnames': {
 			'Delivery Note': 'against_sales_order',
+			'Journal Entry': 'reference_name',
+			'Payment Entry': 'reference_name',
+			'Payment Request': 'reference_name',
+			'Subscription': 'reference_document',
 		},
 		'internal_links': {
 			'Quotation': ['items', 'prevdoc_docname']
@@ -28,7 +32,11 @@ def get_data():
 			},
 			{
 				'label': _('Reference'),
-				'items': ['Quotation']
+				'items': ['Quotation', 'Subscription']
+			},
+			{
+				'label': _('Payment'),
+				'items': ['Payment Entry', 'Payment Request', 'Journal Entry']
 			},
 		]
 	}

@@ -75,8 +75,13 @@ erpnext.stock.ItemDashboard = Class.extend({
 			this.content.find('.more').addClass('hidden');
 		}
 
-		$(frappe.render_template('item_dashboard_list', context)).appendTo(this.result);
-
+        // If not any stock in any warehouses provide a message to end user
+		if (context.data.length > 0) {
+			$(frappe.render_template('item_dashboard_list', context)).appendTo(this.result);
+		} else {
+			var message = __(" Currently no stock available in any warehouse")
+			$("<span class='text-muted small'>"+message+"</span>").appendTo(this.result);
+		}
 	},
 	get_item_dashboard_data: function(data, max_count, show_item) {
 		if(!max_count) max_count = 0;
@@ -171,11 +176,13 @@ erpnext.stock.move_item = function(item, source, target, actual_qty, rate, callb
 				var doc = frappe.model.get_new_doc('Stock Entry');
 				doc.from_warehouse = dialog.get_value('source');
 				doc.to_warehouse = dialog.get_value('target');
-				row = frappe.model.add_child(doc, 'items');
+				var row = frappe.model.add_child(doc, 'items');
 				row.item_code = dialog.get_value('item_code');
 				row.f_warehouse = dialog.get_value('target');
 				row.t_warehouse = dialog.get_value('target');
 				row.qty = dialog.get_value('qty');
+				row.conversion_factor = 1;
+				row.transfer_qty = dialog.get_value('qty');
 				row.basic_rate = dialog.get_value('rate');
 				frappe.set_route('Form', doc.doctype, doc.name);
 			})

@@ -7,13 +7,13 @@ frappe.query_reports["Itemwise Recommended Reorder Level"] = {
 			"fieldname":"from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
-			"default": sys_defaults.year_start_date
+			"default": frappe.sys_defaults.year_start_date
 		},
 		{
 			"fieldname":"to_date",
 			"label": __("To Date"),
 			"fieldtype": "Date",
-			"default": get_today()
+			"default": frappe.datetime.get_today()
 		}
 	]
 }

@@ -20,8 +20,8 @@ class SerialNoNotExistsError(ValidationError): pass
 class SerialNoDuplicateError(ValidationError): pass
 
 class SerialNo(StockController):
-	def __init__(self, arg1, arg2=None):
-		super(SerialNo, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(SerialNo, self).__init__(*args, **kwargs)
 		self.via_stock_ledger = False
 
 	def validate(self):
@@ -85,6 +85,10 @@ class SerialNo(StockController):
 				self.supplier, self.supplier_name = \
 					frappe.db.get_value("Purchase Receipt", purchase_sle.voucher_no,
 						["supplier", "supplier_name"])
+
+			# If sales return entry
+			if self.purchase_document_type == 'Delivery Note':
+				self.sales_invoice = None
 		else:
 			for fieldname in ("purchase_document_type", "purchase_document_no",
 				"purchase_date", "purchase_time", "purchase_rate", "supplier", "supplier_name"):
@@ -160,12 +164,12 @@ class SerialNo(StockController):
 	def after_rename(self, old, new, merge=False):
 		"""rename serial_no text fields"""
 		for dt in frappe.db.sql("""select parent from tabDocField
-			where fieldname='serial_no' and fieldtype='Text'"""):
+			where fieldname='serial_no' and fieldtype in ('Text', 'Small Text')"""):
 
 			for item in frappe.db.sql("""select name, serial_no from `tab%s`
 				where serial_no like '%%%s%%'""" % (dt[0], frappe.db.escape(old))):
 
-				serial_nos = map(lambda i: i==old and new or i, item[1].split('\n'))
+				serial_nos = map(lambda i: new if i.upper()==old.upper() else i, item[1].split('\n'))
 				frappe.db.sql("""update `tab%s` set serial_no = %s
 					where name=%s""" % (dt[0], '%s', '%s'),
 					('\n'.join(serial_nos), item[0]))
@@ -209,7 +213,7 @@ def validate_serial_no(sle, item_det):
 							frappe.throw(_("Serial No {0} does not belong to Item {1}").format(serial_no,
 								sle.item_code), SerialNoItemError)
 
-					if sr.warehouse and sle.actual_qty > 0:
+					if sle.actual_qty > 0 and has_duplicate_serial_no(sr, sle):
 						frappe.throw(_("Serial No {0} has already been received").format(serial_no),
 							SerialNoDuplicateError)
 
@@ -229,6 +233,22 @@ def validate_serial_no(sle, item_det):
 		elif sle.actual_qty < 0 or not item_det.serial_no_series:
 			frappe.throw(_("Serial Nos Required for Serialized Item {0}").format(sle.item_code),
 				SerialNoRequiredError)
+
+def has_duplicate_serial_no(sn, sle):
+	if sn.warehouse:
+		return True
+
+	status = False
+	if sn.purchase_document_no:
+		if sle.voucher_type in ['Purchase Receipt', 'Stock Entry'] and \
+			sn.delivery_document_type not in ['Purchase Receipt', 'Stock Entry']:
+			status = True
+
+		if status and sle.voucher_type == 'Stock Entry' and \
+			frappe.db.get_value('Stock Entry', sle.voucher_no, 'purpose') != 'Material Receipt':
+			status = False
+
+	return status
 
 def allow_serial_nos_with_different_item(sle_serial_no, sle):
 	"""
@@ -324,3 +344,26 @@ def update_serial_nos_after_submit(controller, parentfield):
 						update_rejected_serial_nos = False
 						if accepted_serial_nos_updated:
 							break
+
+def update_maintenance_status():
+	serial_nos = frappe.db.sql('''select name from `tabSerial No` where (amc_expiry_date<%s or
+		warranty_expiry_date<%s) and maintenance_status not in ('Out of Warranty', 'Out of AMC')''',
+		(nowdate(), nowdate()))
+	for serial_no in serial_nos:
+		doc = frappe.get_doc("Serial No", serial_no[0])
+		doc.set_maintenance_status()
+		frappe.db.set_value('Serial No', doc.name, 'maintenance_status', doc.maintenance_status)
+
+def get_delivery_note_serial_no(item_code, qty, delivery_note):
+	serial_nos = ''
+	dn_serial_nos = frappe.db.sql_list(""" select name from `tabSerial No`
+		where item_code = %(item_code)s and delivery_document_no = %(delivery_note)s
+		and sales_invoice is null limit {0}""".format(cint(qty)), {
+		'item_code': item_code,
+		'delivery_note': delivery_note
+	})
+
+	if dn_serial_nos and len(dn_serial_nos)>0:
+		serial_nos = '\n'.join(dn_serial_nos)
+
+	return serial_nos

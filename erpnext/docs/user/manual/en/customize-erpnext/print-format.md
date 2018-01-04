@@ -1,3 +1,5 @@
+# Print Format
+
 Print Formats are the layouts that are generated when you want to Print or
 Email a transaction like a Sales Invoice. There are two types of Print
 Formats,
@@ -16,7 +18,7 @@ To create your own versions, open an existing template from:
 
 `Setup > Printing > Print Formats`
 
-<img alt="Print Format" class="screenshot" src="{{docs_base_url}}/assets/img/customize/print-format.png">
+<img alt="Print Format" class="screenshot" src="/docs/assets/img/customize/print-format.png">
 
 Select the type of Print Format you want to edit and click on the “Copy”
 button on the right column. A new Print Format will open up with “Is Standard”
@@ -43,7 +45,7 @@ To edit / update your print and PDF settings, go to:
 
 `Setup > Printing and Branding > Print Settings`
 
-<img alt="Print Format" class="screenshot" src="{{docs_base_url}}/assets/img/customize/print-settings.png">
+<img alt="Print Format" class="screenshot" src="/docs/assets/img/customize/print-settings.png">
 
 #### Example
 

@@ -7,7 +7,7 @@ Wenn Sie über die Einstellung "Steuern und andere Abgaben" Steuern auswählen, 
 
 Die Artikelstammdaten beinhalten eine Tabelle, in der Sie Steuern, die angewendet werden sollen, auflisten können.
 
-![Artikelbezogene Steuer]({{docs_base_url}}/assets/old_images/erpnext/item-wise-tax.png)
+![Artikelbezogene Steuer](/docs/assets/old_images/erpnext/item-wise-tax.png)
 
 Der im Artikelstamm angegebene Steuersatz hat gegenüber dem Steuersatz, der in Transaktionen angegeben wird, Vorrang.
 
@@ -19,7 +19,7 @@ In den Stammdaten für Steuern und andere Abgaben sollten Sie alle auf Artikel a
 
 Beispiel: Wenn Sie Artikel mit 5% Umsatzsteuer haben, bei anderen eine Dienstleistungssteuer anfällt und bei wieder anderen eine Luxussteuer, dann sollten Ihre Steuerstammdaten auch alle drei Steuern enthalten.
 
-![Vorlage für artikelbezogene Steuer]({{docs_base_url}}/assets/old_images/erpnext/item-wise-tax-master.png)
+![Vorlage für artikelbezogene Steuer](/docs/assets/old_images/erpnext/item-wise-tax-master.png)
 
 #### Schritt 3: Steuersatz in den Stammdaten für Steuern und Abgaben auf 0 einstellen
 
@@ -27,6 +27,6 @@ In den Stammdaten für Steuern und andere Abgaben wird der Steuersatz mit 0% ein
 
 Basierend auf den obigen Einstellungen werden Steuern also wie in den Artikelstammdaten angegeben angewendet. Probieren Sie beispielsweise Folgendes aus:
 
-![Artikelbezogene Steuerkalkulation]({{docs_base_url}}/assets/old_images/erpnext/item-wise-tax-calc.png)
+![Artikelbezogene Steuerkalkulation](/docs/assets/old_images/erpnext/item-wise-tax-calc.png)
 
 {next}

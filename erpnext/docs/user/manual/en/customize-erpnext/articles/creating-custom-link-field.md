@@ -11,9 +11,9 @@ You can insert Custom Link Field by following steps below.
 
 ####Step 2: Select Form
 
-In Customize Form, select Document Type (Quotation, Sales Order, Purchase Invoice Item etc.). Once field are updated in table, open field before which you wish to insert Custom Field. Then click on "Insert Above" to insert new Custom Field.
+In Customize Form, select Document Type (Quotation, Sales Order, Purchase Invoice Item etc.). Once fields are updated in the accompanying table below, open a field above the one you wish to insert your Custom Field. Then click on "Insert Above" to insert the new Custom Field.
 
-<img alt="Select Docytpe" class="screenshot" src="{{docs_base_url}}/assets/img/articles/link-field-1.gif">
+<img alt="Select Docytpe" class="screenshot" src="/docs/assets/img/articles/link-field-1.gif">
 
 ####Step 4: Custom Field Values
 
@@ -24,6 +24,6 @@ To set field as Link, enter values as below.
 1. Name: Desired name for the field
 1. Options: Enter the name of the Doctype to which the field is linked
 
-<img alt="Enter Values" class="screenshot" src="{{docs_base_url}}/assets/img/articles/link-field-2.png">
+<img alt="Enter Values" class="screenshot" src="/docs/assets/img/articles/link-field-2.png">
 
 <!-- markdown -->
