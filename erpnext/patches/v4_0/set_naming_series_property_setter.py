@@ -19,6 +19,7 @@ doctype_series_map = {
 	'Opportunity': 'OPTY-',
 	'Packing Slip': 'PS-',
 	'Production Order': 'PRO-',
+	'Work Order': 'WO-',
 	'Purchase Invoice': 'PINV-',
 	'Purchase Order': 'PO-',
 	'Purchase Receipt': 'PREC-',

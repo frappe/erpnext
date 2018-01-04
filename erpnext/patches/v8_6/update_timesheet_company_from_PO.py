@@ -11,5 +11,5 @@ def execute():
 	#Check more than one company exists
 	if len(company) > 1:
 		frappe.db.sql(""" update `tabTimesheet` set `tabTimesheet`.company =
-			(select company from `tabProduction Order` where name = `tabTimesheet`.production_order)
+			(select company from `tabWork Order` where name = `tabTimesheet`.production_order)
 			where production_order is not null and production_order !=''""")

@@ -107,7 +107,7 @@ class Timesheet(Document):
 
 	def validate_mandatory_fields(self):
 		if self.production_order:
-			production_order = frappe.get_doc("Production Order", self.production_order)
+			production_order = frappe.get_doc("Work Order", self.production_order)
 			pending_qty = flt(production_order.qty) - flt(production_order.produced_qty)
 
 		for data in self.time_logs:
@@ -129,7 +129,7 @@ class Timesheet(Document):
 
 	def update_production_order(self, time_sheet):
 		if self.production_order:
-			pro = frappe.get_doc('Production Order', self.production_order)
+			pro = frappe.get_doc('Work Order', self.production_order)
 
 			for timesheet in self.time_logs:
 				for data in pro.operations:

@@ -168,7 +168,7 @@ class MaterialRequest(BuyingController):
 
 				elif self.material_request_type == "Manufacture":
 					d.ordered_qty = flt(frappe.db.sql("""select sum(qty)
-						from `tabProduction Order` where material_request = %s
+						from `tabWork Order` where material_request = %s
 						and material_request_item = %s and docstatus = 1""",
 						(self.name, d.name))[0][0])
 
@@ -423,7 +423,7 @@ def raise_production_orders(material_request):
 	for d in mr.items:
 		if (d.qty - d.ordered_qty) >0:
 			if frappe.db.get_value("BOM", {"item": d.item_code, "is_default": 1}):
-				prod_order = frappe.new_doc("Production Order")
+				prod_order = frappe.new_doc("Work Order")
 				prod_order.production_item = d.item_code
 				prod_order.qty = d.qty - d.ordered_qty
 				prod_order.fg_warehouse = d.warehouse
@@ -442,9 +442,9 @@ def raise_production_orders(material_request):
 			else:
 				errors.append(_("Row {0}: Bill of Materials not found for the Item {1}").format(d.idx, d.item_code))
 	if production_orders:
-		message = ["""<a href="#Form/Production Order/%s" target="_blank">%s</a>""" % \
+		message = ["""<a href="#Form/Work Order/%s" target="_blank">%s</a>""" % \
 			(p, p) for p in production_orders]
-		msgprint(_("The following Production Orders were created:") + '\n' + new_line_sep(message))
+		msgprint(_("The following Work Orders were created:") + '\n' + new_line_sep(message))
 	if errors:
 		frappe.throw(_("Productions Orders cannot be raised for:") + '\n' + new_line_sep(errors))
 	return production_orders

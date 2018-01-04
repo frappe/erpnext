@@ -10,7 +10,7 @@ frappe.ui.form.on('Material Request', {
 			'Purchase Order': 'Purchase Order',
 			'Request for Quotation': 'Request for Quotation',
 			'Supplier Quotation': 'Supplier Quotation',
-			'Production Order': 'Production Order'
+			'Production Order': 'Work Order'
 		}
 
 		// formatter for material request item
@@ -98,7 +98,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 					this.make_supplier_quotation, __("Make"));
 
 				if(doc.material_request_type === "Manufacture")
-					cur_frm.add_custom_button(__("Production Order"),
+					cur_frm.add_custom_button(__("Work Order"),
 					function() { me.raise_production_orders() }, __("Make"));
 
 				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));

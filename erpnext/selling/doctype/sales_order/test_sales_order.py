@@ -545,7 +545,7 @@ class TestSalesOrder(unittest.TestCase):
 			}]
 		})
 
-		# Raise Production Orders
+		# Raise Work Orders
 		po_items= []
 		so_item_name= {}
 		for item in so.get_production_order_items():
@@ -559,10 +559,10 @@ class TestSalesOrder(unittest.TestCase):
 			so_item_name[item.get("sales_order_item")]= item.get("pending_qty")
 		make_production_orders(json.dumps({"items":po_items}), so.name, so.company)
 
-		# Check if Production Orders were raised
+		# Check if Work Orders were raised
 		for item in so_item_name:
-			po_qty = frappe.db.sql("select sum(qty) from `tabProduction Order` where sales_order=%s and sales_order_item=%s", (so.name, item))
-			self.assertEqual(po_qty[0][0], so_item_name.get(item))
+			wo_qty = frappe.db.sql("select sum(qty) from `tabWork Order` where sales_order=%s and sales_order_item=%s", (so.name, item))
+			self.assertEquals(wo_qty[0][0], so_item_name.get(item))
 
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")

@@ -7,6 +7,7 @@ data = {
 		'Sales Order',
 		'Purchase Order',
 		'Production Order',
+		'Work Order',
 		'Task',
 		'Accounts',
 		'HR',

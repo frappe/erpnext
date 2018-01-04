@@ -544,7 +544,7 @@ class TestStockEntry(unittest.TestCase):
 		bom_no, bom_operation_cost = frappe.db.get_value("BOM", {"item": "_Test FG Item 2",
 			"is_default": 1, "docstatus": 1}, ["name", "operating_cost"])
 
-		production_order = frappe.new_doc("Production Order")
+		production_order = frappe.new_doc("Work Order")
 		production_order.update({
 			"company": "_Test Company",
 			"fg_warehouse": "_Test Warehouse 1 - _TC",
@@ -576,7 +576,7 @@ class TestStockEntry(unittest.TestCase):
 		bom_no = frappe.db.get_value("BOM", {"item": "_Test Variant Item",
 			"is_default": 1, "docstatus": 1})
 
-		production_order = frappe.new_doc("Production Order")
+		production_order = frappe.new_doc("Work Order")
 		production_order.update({
 			"company": "_Test Company",
 			"fg_warehouse": "_Test Warehouse 1 - _TC",

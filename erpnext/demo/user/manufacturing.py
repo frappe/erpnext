@@ -25,9 +25,9 @@ def work():
 	ppt.run_method("raise_material_requests")
 	frappe.db.commit()
 
-	# submit production orders
-	for pro in frappe.db.get_values("Production Order", {"docstatus": 0}, "name"):
-		b = frappe.get_doc("Production Order", pro[0])
+	# submit work orders
+	for pro in frappe.db.get_values("Work Order", {"docstatus": 0}, "name"):
+		b = frappe.get_doc("Work Order", pro[0])
 		b.wip_warehouse = "Work in Progress - WPL"
 		b.submit()
 		frappe.db.commit()

@@ -14,6 +14,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Production Order",
+					"description": _("Orders released for production."),
+				},
+				{
+					"type": "doctype",
 					"name": "Production Plan",
 					"description": _("Generate Material Requests (MRP) and Production Orders."),
 				},

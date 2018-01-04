@@ -537,7 +537,7 @@ class TestMaterialRequest(unittest.TestCase):
 			item_code= %s and warehouse= %s """, (mr.items[0].item_code, mr.items[0].warehouse))[0][0]
 
 		prod_order = raise_production_orders(mr.name)
-		po = frappe.get_doc("Production Order", prod_order[0])
+		po = frappe.get_doc("Work Order", prod_order[0])
 		po.wip_warehouse = "_Test Warehouse 1 - _TC"
 		po.submit()
 		

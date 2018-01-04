@@ -7,9 +7,9 @@ frappe.ui.form.on('Stock Entry', {
 		frm.set_query('production_order', function() {
 			return {
 				filters: [
-					['Production Order', 'docstatus', '=', 1],
-					['Production Order', 'qty', '>','`tabProduction Order`.produced_qty'],
-					['Production Order', 'company', '=', frm.doc.company]
+					['Work Order', 'docstatus', '=', 1],
+					['Work Order', 'qty', '>','`tabWork Order`.produced_qty'],
+					['Work Order', 'company', '=', frm.doc.company]
 				]
 			}
 		});
@@ -565,10 +565,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	clean_up: function() {
-		// Clear Production Order record from locals, because it is updated via Stock Entry
+		// Clear Work Order record from locals, because it is updated via Stock Entry
 		if(this.frm.doc.production_order &&
 				in_list(["Manufacture", "Material Transfer for Manufacture"], this.frm.doc.purpose)) {
-			frappe.model.remove_from_locals("Production Order",
+			frappe.model.remove_from_locals("Work Order",
 				this.frm.doc.production_order);
 		}
 	},
@@ -579,7 +579,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			frappe.throw(__("BOM and Manufacturing Quantity are required"));
 
 		if(this.frm.doc.production_order || this.frm.doc.bom_no) {
-			// if production order / bom is mentioned, get items
+			// if work order / bom is mentioned, get items
 			return this.frm.call({
 				doc: me.frm.doc,
 				method: "get_items",
