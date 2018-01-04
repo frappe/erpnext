@@ -386,6 +386,12 @@ def get_data():
 			"items": [
 				{
 					"type": "report",
+					"is_query_report": True,
+					"name": "Asset Report",
+					"doctype": "Asset"
+				},
+				{
+					"type": "report",
 					"name": "Asset Depreciation Ledger",
 					"doctype": "Asset",
 					"is_query_report": True,
@@ -450,6 +456,7 @@ def get_data():
 					"name": "Customer Credit Balance",
 					"doctype": "Customer"
 				},
+				
 			]
 		},
 		{

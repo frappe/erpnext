@@ -26,15 +26,35 @@ frappe.ui.form.on('Business Trip', {
     workflow_state: function(frm){
         cur_frm.refresh_fields(["workflow_state"]);
     },
+    requested_department: function(frm){
+        frm.set_query("requested_employee", function () {
+            return {
+                "filters": {
+                    "department": frm.doc.requested_department
+                }
+            };
+        });
+
+    },
     validate: function(frm){
         cur_frm.refresh_fields(["workflow_state"]);
 
-        if (cur_frm.doc.handled_by=="Director" && cur_frm.doc.days<4){
+        if (cur_frm.doc.workflow_state=="Approved by Manager" && cur_frm.doc.days<4 ){
             cur_frm.doc.workflow_state = "Approve By Director"
-            }
+        }
+    
 
     },
     onload: function(frm) {
+
+        // cur_frm.set_query("requested_department", function () {
+        //     return {
+        //         "filters": {
+        //             "is_group": 0
+        //         }
+        //     };
+        // });
+
         frappe.call({
             method: "get_default_cost_center",
             args: {company: frappe.sys_defaults.company},
