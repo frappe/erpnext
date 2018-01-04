@@ -65,7 +65,7 @@ class PurchaseReceipt(BuyingController):
 			throw(_("Posting Date cannot be future date"))
 		if self.get("__islocal") :
 				self.title = self.get_title()
-		#~ self.validate_assets()
+		self.validate_assets()
 
 	def after_insert(self):
 		pass
@@ -222,11 +222,14 @@ class PurchaseReceipt(BuyingController):
 						print (child)
 				else:
 					the_data.append(d)
+			else:
+				the_data.append(d)
+			
 		
 		self.items = []
 		for d in the_data:
 			#add Asset For it 
-			if not d.asset:
+			if not d.asset and frappe.db.get_value("Item", d.item_code, "is_fixed_asset") ==1:
 				new_asset = frappe.new_doc("Asset")
 				new_asset.item_code = d.item_code
 				new_asset.asset_category = frappe.db.get_value("Item", d.item_code, "asset_category")
@@ -252,6 +255,7 @@ class PurchaseReceipt(BuyingController):
 					 
 	# on submit
 	def on_submit(self):
+		#~ self.validate_assets()
 		purchase_controller = frappe.get_doc("Purchase Common")
 		
 		# Check for Approving Authority
@@ -273,7 +277,6 @@ class PurchaseReceipt(BuyingController):
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 		update_serial_nos_after_submit(self, "items")
-		self.validate_assets()
 		self.make_gl_entries()
 
 	def check_next_docstatus(self):
