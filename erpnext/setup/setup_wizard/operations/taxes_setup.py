@@ -7,32 +7,31 @@ from frappe.utils import flt
 from erpnext.accounts.doctype.account.account import RootNotEditable
 
 def create_sales_tax(args):
+	records = []
 	country_wise_tax = get_country_wise_tax(args.get("country"))
 	if country_wise_tax and len(country_wise_tax) > 0:
 		for sales_tax, tax_data in country_wise_tax.items():
-			make_tax_account_and_template(
+			records += make_tax_account_and_template(
 				args.get("company_name"),
 				tax_data.get('account_name'),
 				tax_data.get('tax_rate'), sales_tax)
+	return records
 
 def make_tax_account_and_template(company, account_name, tax_rate, template_name=None):
-	try:
-		if not isinstance(account_name, (list, tuple)):
-			account_name = [account_name]
-			tax_rate = [tax_rate]
+	if not isinstance(account_name, (list, tuple)):
+		account_name = [account_name]
+		tax_rate = [tax_rate]
 
-		accounts = []
-		for i, name in enumerate(account_name):
-			tax_account = make_tax_account(company, account_name[i], tax_rate[i])
-			if tax_account:
-				accounts.append(tax_account)
+	accounts = []
+	for i, name in enumerate(account_name):
+		tax_account = make_tax_account(company, account_name[i], tax_rate[i])
+		if tax_account:
+			accounts.append(tax_account)
 
-		if accounts:
-			make_sales_and_purchase_tax_templates(accounts, template_name)
-	except frappe.NameError:
-		pass
-	except RootNotEditable:
-		pass
+	if accounts:
+		return get_sales_and_purchase_tax_templates(accounts, template_name)
+	else:
+		return []
 
 def make_tax_account(company, account_name, tax_rate):
 	tax_group = get_tax_account_group(company)
@@ -47,9 +46,13 @@ def make_tax_account(company, account_name, tax_rate):
 			"root_type": "Liability",
 			"account_type": "Tax",
 			"tax_rate": flt(tax_rate) if tax_rate else None
-		}).insert(ignore_permissions=True, ignore_mandatory=True)
+		}).insert(ignore_permissions=True,
+			ignore_mandatory=True,
+			ignore_if_duplicate=True
+		)
 
-def make_sales_and_purchase_tax_templates(accounts, template_name=None):
+def get_sales_and_purchase_tax_templates(accounts, template_name=None):
+	records = []
 	if not template_name:
 		template_name = accounts[0].name
 
@@ -69,14 +72,14 @@ def make_sales_and_purchase_tax_templates(accounts, template_name=None):
 			"rate": account.tax_rate
 		})
 	# Sales
-	frappe.get_doc(copy.deepcopy(sales_tax_template)).insert(ignore_permissions=True)
+	records.append(copy.deepcopy(sales_tax_template))
 
 	# Purchase
 	purchase_tax_template = copy.deepcopy(sales_tax_template)
 	purchase_tax_template["doctype"] = "Purchase Taxes and Charges Template"
 
-	doc = frappe.get_doc(purchase_tax_template)
-	doc.insert(ignore_permissions=True)
+	records.append(purchase_tax_template)
+	return records
 
 def get_tax_account_group(company):
 	tax_group = frappe.db.get_value("Account",

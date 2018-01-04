@@ -28,6 +28,7 @@ doctype_js = {
 setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
 setup_wizard_stages = "erpnext.setup.setup_wizard.setup_wizard.get_setup_stages"
 setup_wizard_test = "erpnext.setup.setup_wizard.test_setup_wizard.run_setup_wizard_test"
+setup_wizard_success = "erpnext.setup.setup_wizard.setup_wizard.post_setup"
 
 before_install = "erpnext.setup.install.check_setup_wizard_not_completed"
 after_install = "erpnext.setup.install.after_install"
@@ -50,8 +51,6 @@ my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
 email_append_to = ["Job Applicant", "Lead", "Opportunity", "Issue"]
 
 calendars = ["Task", "Production Order", "Leave Application", "Sales Order", "Holiday List", "Course Schedule"]
-
-
 
 domains = {
 	'Agriculture': 'erpnext.domains.agriculture',

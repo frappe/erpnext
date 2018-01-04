@@ -75,7 +75,8 @@ class Company(Document):
 			if not frappe.local.flags.ignore_chart_of_accounts:
 				self.create_default_accounts()
 				self.create_default_warehouses()
-				install_country_fixtures(self.name)
+				if int(frappe.db.get_single_value('System Settings', 'setup_complete')):
+					install_country_fixtures(self.name)
 
 		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
 			self.create_default_cost_center()
