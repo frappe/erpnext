@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
  "beta": 0, 
@@ -11,6 +12,7 @@
  "editable_grid": 1, 
  "fields": [
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -21,7 +23,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
+   "in_standard_filter": 0, 
    "label": "Activity Type", 
    "length": 0, 
    "no_copy": 0, 
@@ -38,6 +42,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -48,7 +53,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
+   "in_standard_filter": 0, 
    "label": "From Time", 
    "length": 0, 
    "no_copy": 0, 
@@ -65,6 +72,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -75,7 +83,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "length": 0, 
    "no_copy": 0, 
    "permlevel": 0, 
@@ -91,6 +101,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -101,7 +112,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
+   "in_standard_filter": 0, 
    "label": "Hrs", 
    "length": 0, 
    "no_copy": 0, 
@@ -117,6 +130,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -127,7 +141,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "label": "To Time", 
    "length": 0, 
    "no_copy": 0, 
@@ -144,6 +160,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -154,7 +171,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "length": 0, 
    "no_copy": 0, 
    "permlevel": 0, 
@@ -170,18 +189,21 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "depends_on": "eval:parent.production_order", 
+   "depends_on": "eval:parent.work_order", 
    "fieldname": "completed_qty", 
    "fieldtype": "Float", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "label": "Completed Qty", 
    "length": 0, 
    "no_copy": 0, 
@@ -198,18 +220,21 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "depends_on": "eval:parent.production_order", 
+   "depends_on": "eval:parent.work_order", 
    "fieldname": "workstation", 
    "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "label": "Workstation", 
    "length": 0, 
    "no_copy": 0, 
@@ -227,6 +252,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -237,7 +263,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "length": 0, 
    "no_copy": 0, 
    "permlevel": 0, 
@@ -253,18 +281,21 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "depends_on": "eval:parent.production_order", 
+   "depends_on": "eval:parent.work_order", 
    "fieldname": "operation", 
    "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "label": "Operation", 
    "length": 0, 
    "no_copy": 0, 
@@ -282,18 +313,21 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "depends_on": "eval:parent.production_order", 
+   "depends_on": "eval:parent.work_order", 
    "fieldname": "operation_id", 
    "fieldtype": "Data", 
    "hidden": 1, 
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "label": "Operation Id", 
    "length": 0, 
    "no_copy": 0, 
@@ -310,6 +344,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -320,7 +355,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "length": 0, 
    "no_copy": 0, 
    "permlevel": 0, 
@@ -336,6 +373,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -346,7 +384,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
+   "in_standard_filter": 0, 
    "label": "Project", 
    "length": 0, 
    "no_copy": 0, 
@@ -364,6 +404,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -374,7 +415,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "length": 0, 
    "no_copy": 0, 
    "permlevel": 0, 
@@ -390,6 +433,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -401,7 +445,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "label": "Task", 
    "length": 0, 
    "no_copy": 0, 
@@ -419,6 +465,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -429,7 +476,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "length": 0, 
    "no_copy": 0, 
    "permlevel": 0, 
@@ -445,6 +494,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
@@ -456,7 +506,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
+   "in_standard_filter": 0, 
    "label": "Bill", 
    "length": 0, 
    "no_copy": 0, 
@@ -473,6 +525,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -483,7 +536,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "length": 0, 
    "no_copy": 0, 
    "permlevel": 0, 
@@ -499,6 +554,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
@@ -510,7 +566,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "label": "Billing Hours", 
    "length": 0, 
    "no_copy": 0, 
@@ -527,6 +585,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -538,7 +597,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "length": 0, 
    "no_copy": 0, 
    "permlevel": 0, 
@@ -554,6 +615,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -565,7 +627,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "label": "Billing Rate", 
    "length": 0, 
    "no_copy": 0, 
@@ -582,6 +646,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
@@ -595,7 +660,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "label": "Billing Amount", 
    "length": 0, 
    "no_copy": 0, 
@@ -612,6 +679,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -622,7 +690,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "length": 0, 
    "no_copy": 0, 
    "permlevel": 0, 
@@ -638,6 +708,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -648,7 +719,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "label": "Costing Rate", 
    "length": 0, 
    "no_copy": 0, 
@@ -665,6 +738,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
@@ -677,7 +751,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "label": "Costing Amount", 
    "length": 0, 
    "no_copy": 0, 
@@ -694,6 +770,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -704,7 +781,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "label": "Reference", 
    "length": 0, 
    "no_copy": 0, 
@@ -721,6 +800,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
@@ -731,7 +811,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "label": "Sales Invoice", 
    "length": 0, 
    "no_copy": 1, 
@@ -749,17 +831,17 @@
    "unique": 0
   }
  ], 
+ "has_web_view": 0, 
  "hide_heading": 0, 
  "hide_toolbar": 0, 
  "idx": 1, 
  "image_view": 0, 
  "in_create": 0, 
- "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2016-11-03 16:01:10.519549", 
+ "modified": "2018-01-07 11:46:04.045313", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Timesheet Detail", 
@@ -768,6 +850,8 @@
  "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
+ "show_name_in_global_search": 0, 
  "sort_order": "ASC", 
+ "track_changes": 0, 
  "track_seen": 0
 }
