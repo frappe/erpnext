@@ -35,7 +35,7 @@ def make_depreciation_entry(asset_name, date=None):
 	#~ depreciation_cost_center = frappe.db.get_value("Company", asset.company, "depreciation_cost_center")
 
 	for d in asset.get("schedules"):
-		if not d.journal_entry and getdate(d.schedule_date) <= getdate(date):
+		if not d.journal_entry and getdate(d.schedule_date) == getdate(date):
 			je = frappe.new_doc("Journal Entry")
 			je.voucher_type = "Depreciation Entry"
 			je.posting_date = d.schedule_date
@@ -60,7 +60,54 @@ def make_depreciation_entry(asset_name, date=None):
 			})
 
 			je.flags.ignore_permissions = True
-			je.submit()
+			je.save()
+
+			d.db_set("journal_entry", je.name)
+			asset.value_after_depreciation -= d.depreciation_amount
+
+	asset.db_set("value_after_depreciation", asset.value_after_depreciation)
+	asset.set_status()
+
+	return je
+@frappe.whitelist()
+def make_depreciation_entry_bulk(asset_name, date=None):
+	frappe.has_permission('Journal Entry', throw=True)
+	
+	if not date:
+		date = today()
+	frappe.msgprint(date)
+	asset = frappe.get_doc("Asset", asset_name)
+	fixed_asset_account, accumulated_depreciation_account, depreciation_expense_account = \
+		get_depreciation_accounts(asset)
+
+
+	for d in asset.get("schedules"):
+		if not d.journal_entry and getdate(d.schedule_date) == getdate(date):
+			je = frappe.new_doc("Journal Entry")
+			je.voucher_type = "Depreciation Entry"
+			je.posting_date = d.schedule_date
+			je.company = asset.company
+			je.remark = "Depreciation Entry against {0} worth {1}".format(asset_name, d.depreciation_amount)
+
+			je.append("accounts", {
+				"account": accumulated_depreciation_account,
+				"credit_in_account_currency": d.depreciation_amount,
+				"reference_type": "Asset",
+				"reference_name": asset.name,
+				"cost_center": asset.depreciation_cost_center
+				
+			})
+
+			je.append("accounts", {
+				"account": depreciation_expense_account,
+				"debit_in_account_currency": d.depreciation_amount,
+				"reference_type": "Asset",
+				"reference_name": asset.name,
+				"cost_center": asset.depreciation_cost_center
+			})
+
+			je.flags.ignore_permissions = True
+			je.save()
 
 			d.db_set("journal_entry", je.name)
 			asset.value_after_depreciation -= d.depreciation_amount
