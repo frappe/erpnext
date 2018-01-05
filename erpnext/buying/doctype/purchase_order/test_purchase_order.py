@@ -182,7 +182,21 @@ class TestPurchaseOrder(unittest.TestCase):
 		pi.insert()
 		self.assertTrue(pi.get('payment_schedule'))
 
-		
+	def test_reserved_qty_subcontract_po(self):
+		bin = frappe.get_all("Bin", filters={"warehouse": "_Test Warehouse - _TC"},
+			fields=["item_code","reserved_qty_for_sub_contract"])
+
+		item_supplied = frappe.get_all("Purchase Order Item Supplied", filters={"main_item_code": "_Test FG Item", "reserve_warehouse": "_Test Warehouse - _TC"},
+			fields=["rm_item_code","required_qty"])
+
+		for item_bin in bin:
+			total_sup_qty = 0
+			for item_sup in item_supplied:
+				if item_bin["item_code"] == item_sup["rm_item_code"]:
+					total_sup_qty = total_sup_qty + item_sup["required_qty"]
+
+		self.assertEquals(item_bin["reserved_qty_for_sub_contract"],total_sup_qty)
+
 def get_same_items():
 	return [
 				{
@@ -224,6 +238,10 @@ def create_purchase_order(**args):
 	if not args.do_not_save:
 		po.insert()
 		if not args.do_not_submit:
+			if po.is_subcontracted == "Yes":
+				supp_items = po.get("supplied_items")
+				for d in supp_items:
+					d.reserve_warehouse = args.warehouse or "_Test Warehouse - _TC"
 			po.submit()
 
 	return po

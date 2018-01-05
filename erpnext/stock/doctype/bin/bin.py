@@ -93,6 +93,31 @@ class Bin(Document):
 		self.db_set('reserved_qty_for_production', flt(self.reserved_qty_for_production))
 		self.db_set('projected_qty', self.projected_qty)
 
+	def update_reserved_qty_for_sub_contracting(self):
+		#reserved qty
+		reserved_qty_for_sub_contract = frappe.db.sql('''select ifnull(sum(itemsup.required_qty),0)
+			from `tabPurchase Order` po, `tabPurchase Order Item Supplied` itemsup
+			where
+				itemsup.rm_item_code = %s
+				and itemsup.parent = po.name
+				and po.docstatus = 1
+				and po.is_subcontracted = 'Yes'
+				and itemsup.reserve_warehouse = %s''', (self.item_code, self.warehouse))[0][0]
+		#Get Transferred Entries
+		materials_transferred = frappe.db.sql("""
+			select
+				ifnull(sum(qty),0)
+			from
+				`tabStock Entry` se, `tabStock Entry Detail` sed, `tabPurchase Order` po
+			where
+				sed.item_code = %s
+				and se.name = sed.parent and se.docstatus=1 and se.purpose='Subcontract'
+				and se.purchase_order = po.name
+				and ifnull(se.purchase_order, '') !=''""", (self.item_code))[0][0]
+
+		self.set_projected_qty()
+		self.db_set('reserved_qty_for_sub_contract', (reserved_qty_for_sub_contract - materials_transferred))
+		self.db_set('projected_qty', self.projected_qty)
 
 def update_item_projected_qty(item_code):
 	'''Set total_projected_qty in Item as sum of projected qty in all warehouses'''
