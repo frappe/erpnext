@@ -46,7 +46,7 @@ QUnit.test("test salary slip", function(assert) {
 		() => frappe.timeout(5),
 		() => frappe.set_route('List', 'Salary Slip', 'List'),
 		() => frappe.timeout(2),
-		() => {$('.list-select-all').click();},
+		() => {$('.list-row-checkbox').click();},
 		() => frappe.timeout(2),
 		() => frappe.click_button('Delete'),
 		() => frappe.click_button('Yes'),

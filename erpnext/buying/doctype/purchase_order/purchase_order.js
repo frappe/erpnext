@@ -12,6 +12,15 @@ frappe.ui.form.on("Purchase Order", {
 			'Purchase Invoice': 'Invoice',
 			'Stock Entry': 'Material to Supplier'
 		}
+		
+		frm.set_query("reserve_warehouse", "supplied_items", function() {
+			return {
+				filters: {
+					"company": frm.doc.company,
+					"is_group": 0
+				}
+			}
+		});
 	},
 
 	onload: function(frm) {
@@ -289,7 +298,8 @@ cur_frm.fields_dict['items'].grid.get_field('bom').get_query = function(doc, cdt
 		filters: [
 			['BOM', 'item', '=', d.item_code],
 			['BOM', 'is_active', '=', '1'],
-			['BOM', 'docstatus', '=', '1']
+			['BOM', 'docstatus', '=', '1'],
+			['BOM', 'company', '=', doc.company]
 		]
 	}
 }

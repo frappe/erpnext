@@ -485,3 +485,4 @@ erpnext.patches.v10_0.enabled_regional_print_format_based_on_country
 erpnext.patches.v10_0.update_asset_calculate_depreciation
 erpnext.patches.v10_0.add_guardian_role_for_parent_portal
 erpnext.patches.v10_0.set_numeric_ranges_in_template_if_blank
+erpnext.patches.v10_0.update_reserved_qty_for_purchase_order
