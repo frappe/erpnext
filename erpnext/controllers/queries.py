@@ -420,5 +420,4 @@ def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
 	if filters and filters.get('item_code'):
 		query += 'and item = %(item_code)s'
 
-	print query
 	return frappe.db.sql(query, filters)
