@@ -169,10 +169,10 @@ class Account(NestedSet):
 		# Add company abbr if not provided
 		from erpnext.setup.doctype.company.company import get_name_with_abbr
 		new_account = get_name_with_abbr(new, self.company)
-		new_account = get_name_with_number(new_account, self.account_number)
-
-		# Validate properties before merging
-		if merge:
+		if not merge:
+			new_account = get_name_with_number(new_account, self.account_number)
+		else:
+			# Validate properties before merging
 			if not frappe.db.exists("Account", new):
 				throw(_("Account {0} does not exist").format(new))
 

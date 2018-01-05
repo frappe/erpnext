@@ -71,8 +71,10 @@ class PurchaseOrder(BuyingController):
 	def validate_supplier(self):
 		prevent_po = frappe.db.get_value("Supplier", self.supplier, 'prevent_pos')
 		if prevent_po:
-			standing = frappe.db.get_value("Supplier Scorecard",self.supplier, 'status')
-			frappe.throw(_("Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.").format(self.supplier, standing))
+			standing = frappe.db.get_value("Supplier Scorecard", self.supplier, 'status')
+			if standing:
+				frappe.throw(_("Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.")
+					.format(self.supplier, standing))
 
 		warn_po = frappe.db.get_value("Supplier", self.supplier, 'warn_pos')
 		if warn_po:
@@ -184,6 +186,9 @@ class PurchaseOrder(BuyingController):
 		self.set_status(update=True, status=status)
 		self.update_requested_qty()
 		self.update_ordered_qty()
+		if self.is_subcontracted == "Yes":
+			self.update_reserved_qty_for_subcontract()
+
 		self.notify_update()
 		clear_doctype_notifications(self)
 

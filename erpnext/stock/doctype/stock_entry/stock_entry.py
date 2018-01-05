@@ -586,13 +586,15 @@ class StockEntry(StockController):
 						frappe.throw(_("Manufacturing Quantity is mandatory"))
 
 					item_dict = self.get_bom_raw_materials(self.fg_completed_qty)
+
 					#Get PO Supplied Items Details
 					if self.purchase_order and self.purpose == "Subcontract":
 						#Get PO Supplied Items Details
-						item_wh = frappe._dict(frappe.db.sql("""select rm_item_code, reserve_warehouse 
-										from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
-										where po.name = poitemsup.parent
-										and po.name = %s""",self.purchase_order))
+						item_wh = frappe._dict(frappe.db.sql("""
+							select rm_item_code, reserve_warehouse 
+							from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
+							where po.name = poitemsup.parent
+								and po.name = %s""",self.purchase_order))
 					for item in item_dict.values():
 						if self.pro_doc and not self.pro_doc.skip_transfer:
 							item["from_warehouse"] = self.pro_doc.wip_warehouse
@@ -602,11 +604,13 @@ class StockEntry(StockController):
 
 					self.add_to_stock_entry_detail(item_dict)
 
-					scrap_item_dict = self.get_bom_scrap_material(self.fg_completed_qty)
-					for item in scrap_item_dict.values():
-						if self.pro_doc and self.pro_doc.scrap_warehouse:
-							item["to_warehouse"] = self.pro_doc.scrap_warehouse
-					self.add_to_stock_entry_detail(scrap_item_dict, bom_no=self.bom_no)
+					if self.purpose != "Subcontract":
+						scrap_item_dict = self.get_bom_scrap_material(self.fg_completed_qty)
+						for item in scrap_item_dict.values():
+							if self.pro_doc and self.pro_doc.scrap_warehouse:
+								item["to_warehouse"] = self.pro_doc.scrap_warehouse
+
+						self.add_to_stock_entry_detail(scrap_item_dict, bom_no=self.bom_no)
 
 			# fetch the serial_no of the first stock entry for the second stock entry
 			if self.production_order and self.purpose == "Manufacture":
@@ -846,6 +850,20 @@ class StockEntry(StockController):
 							frappe.throw(_("Batch {0} of Item {1} has expired.")
 								.format(item.batch_no, item.item_code))
 
+	def update_purchase_order_supplied_items(self):
+		#Get PO Supplied Items Details
+		item_wh = frappe._dict(frappe.db.sql("""
+			select rm_item_code, reserve_warehouse 
+			from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
+			where po.name = poitemsup.parent
+			and po.name = %s""", self.purchase_order))
+
+		#Update reserved sub contracted quantity in bin based on Supplied Item Details
+		for d in self.get("items"):
+			reserve_warehouse = item_wh.get(d.item_code)
+			stock_bin = get_bin(d.item_code, reserve_warehouse)
+			stock_bin.update_reserved_qty_for_sub_contracting()
+	
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):
 	if isinstance(items, basestring):
@@ -880,18 +898,6 @@ def move_sample_to_retention_warehouse(company, items):
 				})
 	if stock_entry.get('items'):
 		return stock_entry.as_dict()
-
-	def update_purchase_order_supplied_items(self):
-		#Get PO Supplied Items Details
-		item_wh = frappe._dict(frappe.db.sql("""select rm_item_code, reserve_warehouse 
-						from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
-						where po.name = poitemsup.parent
-						and po.name = %s""",self.purchase_order))
-		#Update reserved sub contracted quantity in bin based on Supplied Item Details
-		for d in self.get("items"):
-			reserve_warehouse = item_wh.get(item.item_code)
-			stock_bin = get_bin(d.item_code, reserve_warehouse)
-			stock_bin.update_reserved_qty_for_sub_contracting()
 
 @frappe.whitelist()
 def get_production_order_details(production_order):
