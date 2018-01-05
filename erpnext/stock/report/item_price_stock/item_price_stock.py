@@ -37,9 +37,10 @@ def get_item_price_qty_data(filters):
 		from `tabItem Price` a left join `tabBin` b
 		ON a.item_code = b.item_code
 		{conditions}"""
-		.format(conditions=conditions),filters,as_dict=1)
+		.format(conditions=conditions), filters, as_dict=1)
 
-	price_list_names = ",".join(['"' + item['price_list_name'] + '"' for item in item_results])
+	price_list_names = ",".join(['"' + frappe.db.escape(item['price_list_name']) + '"'
+		for item in item_results])
 
 	buying_price_map = get_buying_price_map(price_list_names)
 	selling_price_map = get_selling_price_map(price_list_names)
@@ -66,7 +67,8 @@ def get_buying_price_map(price_list_names):
 			`tabItem Price`
 		where
 			name in ({price_list_names}) and buying=1
-		""".format(price_list_names=price_list_names),as_dict=1)
+		""".format(price_list_names=price_list_names), as_dict=1)
+
 	buying_price_map = {}
 	for d in buying_price:
 		name = d["name"]
@@ -84,7 +86,8 @@ def get_selling_price_map(price_list_names):
 			`tabItem Price`
 		where
 			name in ({price_list_names}) and selling=1
-		""".format(price_list_names=price_list_names),as_dict=1)
+		""".format(price_list_names=price_list_names), as_dict=1)
+
 	selling_price_map = {}
 	for d in selling_price:
 		name = d["name"]
