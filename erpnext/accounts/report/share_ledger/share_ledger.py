@@ -48,8 +48,8 @@ def get_columns(filters):
 		_("Transfer Type") + "::140",
 		_("Share Type") + "::90",
 		_("No of Shares") + "::90",
-		_("Rate") + "::90",
-		_("Amount") + "::90",
+		_("Rate") + ":Currency:90",
+		_("Amount") + ":Currency:90",
 		_("Company") + "::150",
 		_("Share Transfer") + ":Link/Share Transfer:90"
 	]

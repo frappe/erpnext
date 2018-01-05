@@ -67,8 +67,8 @@ def get_columns(filters):
 		_("Shareholder") + ":Link/Shareholder:150",
 		_("Share Type") + "::90",
 		_("No of Shares") + "::90",
-		_("Average Rate") + "::90",
-		_("Amount") + "::90",
+		_("Average Rate") + ":Currency:90",
+		_("Amount") + ":Currency:90",
 		_("Company") + "::150"
 	]
 	return columns
