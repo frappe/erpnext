@@ -17,7 +17,7 @@ QUnit.test("test sales Invoice with serialize item", function(assert) {
 				{customer_address: 'Test1-Billing'},
 				{shipping_address_name: 'Test1-Shipping'},
 				{contact_person: 'Contact 1-Test Customer 1'},
-				{taxes_and_charges: 'TEST In State GST'},
+				{taxes_and_charges: 'TEST In State GST - FT'},
 				{tc_name: 'Test Term 1'},
 				{terms: 'This is Test'}
 			]);
@@ -27,7 +27,7 @@ QUnit.test("test sales Invoice with serialize item", function(assert) {
 			// get_item_details
 			assert.ok(cur_frm.doc.items[0].item_name=='Test Product 4', "Item name correct");
 			// get tax details
-			assert.ok(cur_frm.doc.taxes_and_charges=='TEST In State GST', "Tax details correct");
+			assert.ok(cur_frm.doc.taxes_and_charges=='TEST In State GST - FT', "Tax details correct");
 			// get tax account head details
 			assert.ok(cur_frm.doc.taxes[0].account_head=='CGST - '+frappe.get_abbr(frappe.defaults.get_default('Company')), " Account Head abbr correct");
 			// get batch number
