@@ -150,7 +150,7 @@ def update_bin_qty(item_code, warehouse, qty_dict=None):
 	if mismatch:
 		bin.projected_qty = (flt(bin.actual_qty) + flt(bin.ordered_qty) +
 			flt(bin.indented_qty) + flt(bin.planned_qty) - flt(bin.reserved_qty)
-			- flt(bin.reserved_qty_for_production))
+			- flt(bin.reserved_qty_for_production)) - flt(bin.reserved_qty_for_sub_contract)
 
 		bin.save()
 

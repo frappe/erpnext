@@ -160,6 +160,10 @@ class BuyingController(StockController):
 				if item in self.sub_contracted_items and not item.bom:
 					frappe.throw(_("Please select BOM in BOM field for Item {0}").format(item.item_code))
 
+			for supplied_item in self.get("supplied_items"):
+				if not supplied_item.reserve_warehouse:
+					frappe.throw(_("Reserved Warehouse is mandatory for Item {0} in Raw Materials supplied").format(frappe.bold(supplied_item.rm_item_code)))
+
 		else:
 			for item in self.get("items"):
 				if item.bom:
@@ -189,6 +193,9 @@ class BuyingController(StockController):
 	def update_raw_materials_supplied(self, item, raw_material_table):
 		bom_items = self.get_items_from_bom(item.item_code, item.bom)
 		raw_materials_cost = 0
+		items = list(set([d.item_code for d in bom_items]))
+		item_wh = frappe._dict(frappe.db.sql("""select item_code, default_warehouse
+						from `tabItem` where name in ({0})""".format(", ".join(["%s"] * len(items))), items))
 
 		for bom_item in bom_items:
 			# check if exists
@@ -210,6 +217,7 @@ class BuyingController(StockController):
 			rm.rm_item_code = bom_item.item_code
 			rm.stock_uom = bom_item.stock_uom
 			rm.required_qty = required_qty
+			rm.reserve_warehouse = bom_item.source_warehouse or item_wh.get(bom_item.item_code)
 
 			rm.conversion_factor = item.conversion_factor
 
@@ -261,7 +269,7 @@ class BuyingController(StockController):
 	def get_items_from_bom(self, item_code, bom):
 		bom_items = frappe.db.sql("""select t2.item_code,
 			t2.stock_qty / ifnull(t1.quantity, 1) as qty_consumed_per_unit,
-			t2.rate, t2.stock_uom, t2.name, t2.description
+			t2.rate, t2.stock_uom, t2.name, t2.description, t2.source_warehouse
 			from `tabBOM` t1, `tabBOM Item` t2, tabItem t3
 			where t2.parent = t1.name and t1.item = %s
 			and t1.docstatus = 1 and t1.is_active = 1 and t1.name = %s
