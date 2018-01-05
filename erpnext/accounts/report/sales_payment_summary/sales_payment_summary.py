@@ -66,12 +66,12 @@ def get_mode_of_payments(filters):
 	invoice_list = get_invoices(filters)
 	invoice_list_names = ",".join(['"' + invoice['name'] + '"' for invoice in invoice_list])
 	if invoice_list:
-		inv_mop = frappe.db.sql("""select a.owner,a.posting_date, ifnull(b.mode_of_payment, '')
+		inv_mop = frappe.db.sql("""select a.owner,a.posting_date, ifnull(b.mode_of_payment, '') as mode_of_payment
 			from `tabSales Invoice` a, `tabSales Invoice Payment` b
 			where a.name = b.parent
 			and a.name in ({invoice_list_names})
 			union
-			select a.owner,a.posting_date, ifnull(b.mode_of_payment, '')
+			select a.owner,a.posting_date, ifnull(b.mode_of_payment, '') as mode_of_payment
 			from `tabSales Invoice` a, `tabPayment Entry` b,`tabPayment Entry Reference` c
 			where a.name = c.reference_name 
 			and b.name = c.parent
