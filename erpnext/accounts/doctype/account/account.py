@@ -53,14 +53,12 @@ class Account(NestedSet):
 	def set_root_and_report_type(self):
 		if self.parent_account:
 			par = frappe.db.get_value("Account", self.parent_account,
-				["report_type", "root_type", "account_type"], as_dict=1)
+				["report_type", "root_type"], as_dict=1)
 
 			if par.report_type:
 				self.report_type = par.report_type
 			if par.root_type:
 				self.root_type = par.root_type
-			if par.account_type and not self.account_type:
-				self.account_type = par.account_type
 
 		if self.is_group:
 			db_value = frappe.db.get_value("Account", self.name, ["report_type", "root_type"], as_dict=1)
