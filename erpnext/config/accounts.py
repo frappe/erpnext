@@ -476,5 +476,38 @@ def get_data():
 					"youtube_id": "nQ1zZdPgdaQ"
 				}
 			]
+		},
+		{
+			"label": _("Share Management"),
+			"icon": "fa fa-microchip ",
+			"items": [
+				{
+					"type": "doctype",
+					"name":"Shareholder",
+					"description": _("List of available Shareholders")
+				},
+				{
+					"type": "doctype",
+					"name":"Shareholder Party",
+					"description": _("List of entities with folio numbers"),
+				},
+				{
+					"type": "doctype",
+					"name":"Share Transfer",
+					"description": _("List of all share transactions"),
+				},
+				{
+					"type": "report",
+					"name": "Share Ledger",
+					"doctype": "Share Transfer",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Share Balance",
+					"doctype": "Share Transfer",
+					"is_query_report": True
+				}
+			]
 		}
 	]

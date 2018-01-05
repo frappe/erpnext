@@ -247,6 +247,11 @@ def install(country=None):
 		{'doctype': 'Assessment Group', 'assessment_group_name': _('All Assessment Groups'),
 			'is_group': 1, 'parent_assessment_group': ''},
 
+		# Share Management
+		{"doctype": "Share Type", "title": _("Equity")},
+		{"doctype": "Share Type", "title": _("Preference")},
+
+
 	]
 
 	from erpnext.setup.setup_wizard.data.industry_type import get_industry_types

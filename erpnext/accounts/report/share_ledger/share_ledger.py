@@ -44,7 +44,7 @@ def execute(filters=None):
 def get_columns(filters):
 	columns = [
 		_("Shareholder") + ":Link/Shareholder:150",
-		_("Date") + "::100",
+		_("Date") + ":Date:100",
 		_("Transfer Type") + "::140",
 		_("Share Type") + "::90",
 		_("No of Shares") + "::90",
