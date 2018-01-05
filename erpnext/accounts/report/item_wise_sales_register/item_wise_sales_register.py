@@ -6,6 +6,7 @@ import frappe, erpnext
 from frappe import _
 from frappe.utils import flt
 from frappe.model.meta import get_field_precision
+from frappe.utils.xlsxutils import handle_html
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
 
 def execute(filters=None):
@@ -188,10 +189,10 @@ def get_tax_accounts(item_list, columns, company_currency,
 		tuple([doctype] + invoice_item_row.keys()))
 
 	for parent, description, item_wise_tax_detail, charge_type, tax_amount in tax_details:
+		description = handle_html(description)
 		if description not in tax_columns and tax_amount:
 			# as description is text editor earlier and markup can break the column convention in reports
-			from frappe.utils.xlsxutils import handle_html
-			tax_columns.append(handle_html(description))
+			tax_columns.append(description)
 
 		if item_wise_tax_detail:
 			try:
