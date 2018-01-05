@@ -6,7 +6,7 @@ states = [
  'Assam',
  'Bihar',
  'Chandigarh',
- 'Chattisgarh',
+ 'Chhattisgarh',
  'Dadra and Nagar Haveli',
  'Daman and Diu',
  'Delhi',
