@@ -236,7 +236,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var taxes_and_charges_field = frappe.meta.get_docfield(me.frm.doc.doctype, "taxes_and_charges",
 			me.frm.doc.name);
 
-		if(taxes_and_charges_field) {
+		if (!this.frm.doc.taxes_and_charges && this.frm.doc.taxes) {
+			return;
+		}
+
+		if (taxes_and_charges_field) {
 			return frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_default_taxes_and_charges",
 				args: {
