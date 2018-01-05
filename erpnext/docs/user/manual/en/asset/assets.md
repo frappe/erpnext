@@ -50,6 +50,13 @@ On the scheduled date, system creates depreciation entry by creating a Journal E
 
 In the depreciation entry, the "Accumulated Depreciation Account" is credited and "Depreciation Expense Account" is debited. The related accounts can be set in the Asset Category or Company.
 
+If you are required to calculate the depreciation based on your Fiscal Year and prorated by the number of days left, select the corresponding option in "Account Settings".
+
+The system will automatically set the fiscal year end date as the next depreciation date and calculate the depreciation amount prorata temporis based on the Available-for-use Date (IFRS16)
+
+<img class="screenshot" alt="Asset" src="/docs/assets/img/asset/asset-prorated-depreciation.png">
+
+
 For better visibility, net value of the asset on different depreciation dates are shown in a line graph.
 
 <img class="screenshot" alt="Asset" src="/docs/assets/img/asset/asset-graph.png">

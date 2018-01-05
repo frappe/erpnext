@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, add_months, cint, nowdate, getdate, today
+from frappe.utils import flt, add_months, cint, nowdate, getdate, today, date_diff, nowdate
 from frappe.model.document import Document
 from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_fixed_asset_account
 from erpnext.assets.doctype.asset.depreciation \
@@ -87,11 +87,15 @@ class Asset(Document):
 		if self.next_depreciation_date and getdate(self.next_depreciation_date) < getdate(self.purchase_date):
 			frappe.throw(_("Next Depreciation Date cannot be before Purchase Date"))
 
+		if self.next_depreciation_date and getdate(self.next_depreciation_date) < getdate(self.available_for_use_date):
+			frappe.throw(_("Next Depreciation Date cannot be before Available-for-use Date"))
+
 		if (flt(self.value_after_depreciation) > flt(self.expected_value_after_useful_life)
 			and not self.next_depreciation_date and self.calculate_depreciation):
 				frappe.throw(_("Please set Next Depreciation Date"))
 
 	def make_depreciation_schedule(self):
+
 		if self.depreciation_method != 'Manual':
 			self.schedules = []
 
@@ -101,17 +105,42 @@ class Asset(Document):
 			number_of_pending_depreciations = cint(self.total_number_of_depreciations) - \
 				cint(self.number_of_depreciations_booked)
 			if number_of_pending_depreciations:
-				for n in xrange(number_of_pending_depreciations):
-					schedule_date = add_months(self.next_depreciation_date,
-						n * cint(self.frequency_of_depreciation))
+				if  (cint(frappe.db.get_value("Asset Settings", None, "schedule_based_on_fiscal_year")) == 1) and getdate(self.next_depreciation_date) < getdate(add_months(self.available_for_use_date, number_of_pending_depreciations * 12)):
+					number_of_pending_depreciations += 1
 
-					depreciation_amount = self.get_depreciation_amount(value_after_depreciation)
-					value_after_depreciation -= flt(depreciation_amount)
+					for n in xrange(number_of_pending_depreciations):
+						if n == xrange(number_of_pending_depreciations)[-1]:
+							schedule_date = add_months(self.available_for_use_date, n * 12)
+							previous_scheduled_date = add_months(self.next_depreciation_date, (n-1) * 12)
+							depreciation_amount = self.get_depreciation_amount_prorata_temporis(value_after_depreciation, previous_scheduled_date, schedule_date)
 
-					self.append("schedules", {
-						"schedule_date": schedule_date,
-						"depreciation_amount": depreciation_amount
-					})
+						elif n == xrange(number_of_pending_depreciations)[0]:
+							schedule_date = self.next_depreciation_date
+							depreciation_amount = self.get_depreciation_amount_prorata_temporis(value_after_depreciation, self.available_for_use_date, schedule_date)
+
+						else:
+							schedule_date = add_months(self.next_depreciation_date, n * 12)
+							depreciation_amount = self.get_depreciation_amount_prorata_temporis(value_after_depreciation)
+
+						if value_after_depreciation != 0:
+							value_after_depreciation -= flt(depreciation_amount)
+
+							self.append("schedules", {
+								"schedule_date": schedule_date,
+								"depreciation_amount": depreciation_amount
+							})
+				else:
+					for n in xrange(number_of_pending_depreciations):
+						schedule_date = add_months(self.next_depreciation_date,
+							n * cint(self.frequency_of_depreciation))
+
+						depreciation_amount = self.get_depreciation_amount(value_after_depreciation)
+						value_after_depreciation -= flt(depreciation_amount)
+
+						self.append("schedules", {
+							"schedule_date": schedule_date,
+							"depreciation_amount": depreciation_amount
+						})
 
 	def set_accumulated_depreciation(self):
 		accumulated_depreciation = flt(self.opening_accumulated_depreciation)
@@ -142,6 +171,21 @@ class Asset(Document):
 				depreciation_amount = flt(depreciable_value) - flt(self.expected_value_after_useful_life)
 
 		return depreciation_amount
+
+	def get_depreciation_amount_prorata_temporis(self, depreciable_value, start_date=None, end_date=None):
+		if start_date and end_date:
+			prorata_temporis =  min(abs(flt(date_diff(str(end_date), str(start_date)))) / flt(frappe.db.get_value("Asset Settings", None, "number_of_days_in_fiscal_year")), 1)
+		else:
+			prorata_temporis = 1
+
+		if self.depreciation_method in ("Straight Line", "Manual"):
+			depreciation_amount = (flt(self.value_after_depreciation) -
+				flt(self.expected_value_after_useful_life)) / (cint(self.total_number_of_depreciations) -
+				cint(self.number_of_depreciations_booked)) * prorata_temporis
+
+			return depreciation_amount
+		else:
+			self.get_depreciation_amount(depreciable_value)
 
 	def validate_expected_value_after_useful_life(self):
 		accumulated_depreciation_after_full_schedule = \
@@ -174,7 +218,7 @@ class Asset(Document):
 	def set_status(self, status=None):
 		'''Get and update status'''
 		if not status:
-			status = self.get_status()	
+			status = self.get_status()
 		self.db_set("status", status)
 
 	def get_status(self):

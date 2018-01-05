@@ -13,6 +13,10 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Asset Category",
+				},
+				{
+					"type": "doctype",
+					"name": "Asset Settings",
 				}
 			]
 		},
