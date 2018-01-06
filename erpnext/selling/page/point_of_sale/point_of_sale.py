@@ -88,11 +88,15 @@ def get_conditions(item_code, serial_no, batch_no, barcode):
 	return '%%%s%%'%(frappe.db.escape(item_code)), condition
 
 @frappe.whitelist()
-def submit_invoice(doc):
+def submit_invoice(doc,islocal_dummy):
 	if isinstance(doc, basestring):
 		args = json.loads(doc)
 
-	doc = frappe.new_doc('Sales Invoice')
+	if islocal_dummy:
+		doc = frappe.get_doc('Sales Invoice',args["name"])
+	else:
+		doc = frappe.new_doc('Sales Invoice')	
+	
 	doc.update(args)
 	doc.run_method("set_missing_values")
 	doc.run_method("calculate_taxes_and_totals")
