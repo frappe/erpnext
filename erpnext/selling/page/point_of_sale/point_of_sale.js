@@ -474,17 +474,17 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		me.frm.doc["allow_print_before_pay"] = 0;
 		return new Promise(resolve => {
 			return this.frm.call({
-				method: "erpnext.selling.page.point_of_sale.point_of_sale.fetch_pos_profile_detail",
+				method:"erpnext.selling.page.point_of_sale.point_of_sale.fetch_pos_profile_detail",
 				args:{
-						pos_profile : me.frm.doc.pos_profile
-					 }
+					pos_profile:me.frm.doc.pos_profile
+				}
 			}).then((r) => {
 				me.frm.doc["allow_print_before_pay"] = r.message;
 				this.set_form_action();
 				resolve();
 			});
 		});
-	}	
+	}
 
 	prepare_menu() {
 		var me = this;
