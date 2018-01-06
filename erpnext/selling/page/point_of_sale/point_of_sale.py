@@ -96,7 +96,7 @@ def submit_invoice(doc,islocal_dummy):
 		doc = frappe.get_doc('Sales Invoice',args["name"])
 	else:
 		doc = frappe.new_doc('Sales Invoice')
-	
+
 	doc.update(args)
 	doc.run_method("set_missing_values")
 	doc.run_method("calculate_taxes_and_totals")
