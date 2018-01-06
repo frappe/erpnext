@@ -45,7 +45,7 @@ def get_conditions(filters):
 
 def get_data(filters):
 	# conditions = get_conditions(filters)
-	li_list=frappe.db.sql("select * from `tabAsset` where docstatus = 0 ",as_dict=1)
+	li_list=frappe.db.sql("select * from `tabAsset` where docstatus = 1 ",as_dict=1)
 
 	data = []
 	for asset in li_list:

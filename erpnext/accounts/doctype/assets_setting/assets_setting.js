@@ -30,27 +30,23 @@ refresh: function(frm) {
 			}
 	},
 	make_depreciation_entry: function(frm) {
-	l=frm.doc.assets
-	for (asset in l )
-	{
-	if (!l[asset]['journal_entry']) {
-		console.log(l[asset]['asset_name'])
+	
 		frappe.call({
-			method: "erpnext.accounts.doctype.asset.depreciation.make_depreciation_entry",
-			args: {
-				"asset_name": l[asset]['asset_name'],
-				"date": frm.doc.scrape_date
-			},
+			doc:frm.doc,
+			method: "make_depreciation_entry_bulk",
 			callback: function(r) {
-
+				console.log(r.message)
+				show_alert('Journal Entry Created '+r.message, 5);
+				msgprint("<b>Journal Entry Created</b>"
+					+ "<hr>"
+					+ "<ul>"
+						+ "<li><b>"+r.message+"</b> Memory</li>"
+					+ "</ul>")
 				frm.set_value('assets',[])
-	                    	
+				frm.set_value('last_journal_entry',r.message)
 				cur_frm.refresh_fields("assets");
 			}
 		})
-	}
-}
-
 	
 }
 });
