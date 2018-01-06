@@ -17,7 +17,7 @@ QUnit.test("test: supplier quotation with taxes and charges", function(assert) {
 						{"warehouse": 'Stores - '+frappe.get_abbr(frappe.defaults.get_default('Company'))},
 					]
 				]},
-				{taxes_and_charges:'TEST In State GST'},
+				{taxes_and_charges:'TEST In State GST - FT'},
 			]);
 		},
 		() => {supplier_quotation_name = cur_frm.doc.name;},

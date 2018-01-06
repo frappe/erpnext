@@ -364,6 +364,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			fieldtype: 'Link',
 			label: __('POS Profile'),
 			options: 'POS Profile',
+			reqd: 1,
 			get_query: () => {
 				return {
 					query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
@@ -1239,6 +1240,7 @@ class POSItems {
 		return new Promise(res => {
 			frappe.call({
 				method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
+				freeze: true,
 				args: {
 					start,
 					page_length,

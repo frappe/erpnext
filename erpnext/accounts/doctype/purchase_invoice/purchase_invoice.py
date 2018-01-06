@@ -277,6 +277,8 @@ class PurchaseInvoice(BuyingController):
 						.format(item.purchase_receipt))
 
 	def on_submit(self):
+		super(PurchaseInvoice, self).on_submit()
+
 		self.check_prev_docstatus()
 		self.update_status_updater_args()
 
@@ -347,7 +349,6 @@ class PurchaseInvoice(BuyingController):
 		self.expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 		self.negative_expense_to_be_booked = 0.0
 		gl_entries = []
-
 
 		self.make_supplier_gl_entry(gl_entries)
 		self.make_item_gl_entries(gl_entries)
@@ -422,7 +423,10 @@ class PurchaseInvoice(BuyingController):
 
 					# sub-contracting warehouse
 					if flt(item.rm_supp_cost):
-						supplier_warehouse_account = warehouse_account[self.supplier_warehouse]["name"]
+						supplier_warehouse_account = warehouse_account[self.supplier_warehouse]["account"]
+						if not supplier_warehouse_account:
+							frappe.throw(_("Please set account in Warehouse {0}")
+								.format(self.supplier_warehouse))
 						gl_entries.append(self.get_gl_dict({
 							"account": supplier_warehouse_account,
 							"against": item.expense_account,
@@ -606,6 +610,8 @@ class PurchaseInvoice(BuyingController):
 			))
 
 	def on_cancel(self):
+		super(PurchaseInvoice, self).on_cancel()
+
 		self.check_for_closed_status()
 
 		self.update_status_updater_args()

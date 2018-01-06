@@ -43,9 +43,25 @@ def make_custom_fields():
 				options='customer.customer_name_in_arabic', print_hide=1),
 		]
 
-	tax_code_field = dict(fieldname='tax_code', label='Tax Code',
-		fieldtype='Read Only', options='item_code.tax_code', insert_after='description',
-		allow_on_submit=1, print_hide=1)
+	invoice_item_fields = [
+		dict(fieldname='tax_code', label='Tax Code',
+			fieldtype='Read Only', options='item_code.tax_code', insert_after='description',
+			allow_on_submit=1, print_hide=1),
+		dict(fieldname='tax_rate', label='Tax Rate',
+			fieldtype='Float', insert_after='tax_code',
+			print_hide=1, hidden=1, read_only=1),
+		dict(fieldname='tax_amount', label='Tax Amount',
+			fieldtype='Currency', insert_after='tax_rate',
+			print_hide=1, hidden=1, read_only=1, options="currency"),
+		dict(fieldname='total_amount', label='Total Amount',
+			fieldtype='Currency', insert_after='tax_amount',
+			print_hide=1, hidden=1, read_only=1, options="currency"),
+	]
+
+	delivery_date_field = [
+		dict(fieldname='delivery_date', label='Delivery Date',
+			fieldtype='Date', insert_after='item_name', print_hide=1)
+	]
 
 	custom_fields = {
 		'Item': [
@@ -61,9 +77,19 @@ def make_custom_fields():
 				fieldtype='Data', insert_after='supplier_name'),
 		],
 		'Purchase Invoice': purchase_invoice_fields + invoice_fields,
+		'Purchase Order': purchase_invoice_fields + invoice_fields,
+		'Purchase Receipt': purchase_invoice_fields + invoice_fields,
 		'Sales Invoice': sales_invoice_fields + invoice_fields,
-		'Sales Invoice Item': [tax_code_field],
-		'Purchase Invoice Item': [tax_code_field]
+		'Sales Order': sales_invoice_fields + invoice_fields,
+		'Delivery Note': sales_invoice_fields + invoice_fields,
+		'Sales Invoice Item': invoice_item_fields + delivery_date_field,
+		'Purchase Invoice Item': invoice_item_fields,
+		'Sales Order Item': invoice_item_fields,
+		'Delivery Note Item': invoice_item_fields,
+		'Quotation Item': invoice_item_fields,
+		'Purchase Order Item': invoice_item_fields,
+		'Purchase Receipt Item': invoice_item_fields,
+		'Supplier Quotation Item': invoice_item_fields,
 	}
 
 	create_custom_fields(custom_fields)
@@ -71,6 +97,7 @@ def make_custom_fields():
 def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "detailed_tax_invoice")
 	frappe.reload_doc("regional", "print_format", "simplified_tax_invoice")
+	frappe.reload_doc("regional", "print_format", "tax_invoice")
 
 	frappe.db.sql(""" update `tabPrint Format` set disabled = 0 where
-		name in('Simplified Tax Invoice', 'Detailed Tax Invoice') """)
+		name in('Simplified Tax Invoice', 'Detailed Tax Invoice', 'Tax Invoice') """)
