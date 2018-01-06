@@ -4,6 +4,8 @@
 
 cur_frm.add_fetch("employee", "employee_name", "employee_name");
 cur_frm.add_fetch('employee','department','department');
+cur_frm.add_fetch('requested_employee','department','requested_department');
+
 cur_frm.cscript.custom_grade = function(doc, cdt, cd) {
     // console.log(cd);
     frappe.call({
@@ -22,19 +24,30 @@ cur_frm.cscript.custom_grade = function(doc, cdt, cd) {
 
 };
 frappe.ui.form.on('Business Trip', {
-    refresh: function(frm) {},
+    refresh: function(frm) {
+    	get_current_user();
+    },
     workflow_state: function(frm){
         cur_frm.refresh_fields(["workflow_state"]);
     },
-    requested_department: function(frm){
-        frm.set_query("requested_employee", function () {
-            return {
-                "filters": {
-                    "department": frm.doc.requested_department
-                }
-            };
-        });
+    request_employee: function(frm){
 
+		frm.toggle_reqd(['requested_employee'], frm.doc.request_employee);
+
+		if (cur_frm.doc.request_employee){
+			cur_frm.set_value("department", );
+		}else{
+			cur_frm.set_value("requested_department", );
+			get_current_user();
+		}
+    },
+
+    employee: function(frm){
+    	if (cur_frm.doc.request_employee){
+			cur_frm.set_value("department", );
+		}else{
+			cur_frm.set_value("requested_department", );
+		}
     },
     validate: function(frm){
         cur_frm.refresh_fields(["workflow_state"]);
@@ -42,11 +55,22 @@ frappe.ui.form.on('Business Trip', {
         if (cur_frm.doc.workflow_state=="Approved by Manager" && cur_frm.doc.days<4 ){
             cur_frm.doc.workflow_state = "Approve By Director"
         }
-    
+    	cur_frm.set_df_property("request_employee", "read_only", 1);
+    	cur_frm.set_df_property("requested_employee", "read_only", 1);
 
     },
     onload: function(frm) {
+    	get_current_user();
 
+
+        cur_frm.set_query("requested_employee", function() {
+                return {
+                    filters: [
+                        ["Employee", "name", "!=", cur_frm.doc.employee],
+                    ]
+                };
+            });
+        
         // cur_frm.set_query("requested_department", function () {
         //     return {
         //         "filters": {
@@ -185,4 +209,28 @@ function numbersonly(e) {
         if (unicode < 46 || unicode > 57) //if not a number
             return false; //disable key press
     }
+}
+
+
+
+
+
+function get_current_user(){
+
+	frappe.call({
+            "method": "get_current_user",
+            doc: cur_frm.doc,
+            callback: function(data) {
+                if (data) {
+                    cur_frm.set_value('employee', data.message.name);
+                    cur_frm.set_value('employee_name', data.message.employee_name);
+                    cur_frm.set_value('reports_to', data.message.reports_to);
+                    cur_frm.set_value('department', data.message.department);
+                    cur_frm.set_value('grade', data.message.grade);
+                }else{
+                    // cur_frm.set_value('salary', 0);
+                }
+            }
+        });
+
 }
