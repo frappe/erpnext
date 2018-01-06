@@ -127,7 +127,6 @@ def item_group_query(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def fetch_pos_profile_detail(pos_profile):
-	doc_detail=frappe.get_doc("POS Profile",pos_profile)
-	print_check=doc_detail.allow_print_before_pay
-	return print_check
-
+	pos_profile_doc = frappe.get_doc("POS Profile",pos_profile)
+	allow_print_before_pay_check = pos_profile_doc.allow_print_before_pay
+	return allow_print_before_pay_check

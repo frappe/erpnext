@@ -512,13 +512,20 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		if(this.frm.doc.docstatus == 1 || this.frm.doc.allow_print_before_pay == 1){
 
 			this.page.set_secondary_action(__("Print"), () => {
-				this.frm.print_preview.printit(true);
+				if(this.frm.doc.docstatus != 1 ){
+					this.frm.save();				
+					setTimeout(() => {this.frm.print_preview.printit(true);}, 1700);
+				}else{
+					this.frm.print_preview.printit(true);
+				}
 			});
-
-			this.page.set_primary_action(__("New"), () => {
-				this.make_new_invoice();
-			});
-
+		}
+			
+		this.page.set_primary_action(__("New"), () => {
+			this.make_new_invoice();
+		});
+		
+		if (this.frm.doc.docstatus == 1) {
 			this.page.add_menu_item(__("Email"), () => {
 				this.frm.email_doc();
 			});
