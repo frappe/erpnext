@@ -35,6 +35,11 @@ frappe.query_reports["Sales Payment Summary"] = {
 			"fieldname":"is_pos",
 			"label": __("POS?"),
 			"fieldtype": "Check"
-		}
+		},
+		{
+			"fieldname":"payment_detail",
+			"label": __("Payment Detail?"),
+			"fieldtype": "Check"
+		},
 	]
 };
