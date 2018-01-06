@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, add_months, cint, nowdate, getdate, today, date_diff, nowdate
+from frappe.utils import flt, add_months, cint, nowdate, getdate, today, date_diff
 from frappe.model.document import Document
 from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_fixed_asset_account
 from erpnext.assets.doctype.asset.depreciation \
