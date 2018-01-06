@@ -150,8 +150,8 @@ permission_query_conditions = {
 	"End of Service Award": "erpnext.hr.doctype.end_of_service_award.end_of_service_award.get_permission_query_conditions",
 	"Overtime Request": "erpnext.hr.doctype.overtime_request.overtime_request.get_permission_query_conditions",
 	"Employee Resignation": "erpnext.hr.doctype.employee_resignation.employee_resignation.get_permission_query_conditions",
-	"Cancel Leave Application": "erpnext.hr.doctype.cancel_leave_application.cancel_leave_application.get_permission_query_conditions"
-
+	"Cancel Leave Application": "erpnext.hr.doctype.cancel_leave_application.cancel_leave_application.get_permission_query_conditions",
+	"Business Trip": "erpnext.hr.doctype.business_trip.business_trip.get_permission_query_conditions"
 }
 
 has_permission = {

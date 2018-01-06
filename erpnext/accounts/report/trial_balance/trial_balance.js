@@ -13,6 +13,13 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"reqd": 1
 			},
 			{
+				"fieldname": "account",
+				"label": __("Account"),
+				"fieldtype": "Link",
+				"options": "Account",
+				"reqd": 0
+			},
+			{
 				"fieldname": "fiscal_year",
 				"label": __("Fiscal Year"),
 				"fieldtype": "Link",
