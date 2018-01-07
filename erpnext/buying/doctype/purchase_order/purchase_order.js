@@ -21,27 +21,17 @@ frappe.ui.form.on("Purchase Order", {
 			return erpnext.queries.warehouse(frm.doc);
 		});
 
+		frappe.db.get_value('Buying Settings', {name: 'Buying Settings'}, 'disable_fetch_last_purchase_rate', (r) => {
+			value = r && cint(r.disable_fetch_last_purchase_rate);
+			frm.toggle_display('get_last_purchase_rate', !value);
+		});
+
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
 	},
 });
 
 frappe.ui.form.on("Purchase Order Item", {
-	item_code: function(frm, cdt, cdn) {
-		var child = locals[cdt][cdn];
-		frappe.call({
-			method: "item_last_purchase_rate",
-			doc: frm.doc,
-			args:{
-				item_code: child.item_code,
-				conversion_factor: child.conversion_factor	
-			},
-			callback: function(r, rt) {	
-				frappe.model.set_value(child.doctype, child.name, "last_purchase_rate",r.message);
-			}
-		});
-	},
-
 	schedule_date: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if (row.schedule_date) {

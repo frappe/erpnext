@@ -111,40 +111,26 @@ class PurchaseOrder(BuyingController):
 
 	def get_last_purchase_rate(self):
 		"""get last purchase rates for all items"""
+		if cint(frappe.db.get_single_value("Buying Settings", "disable_fetch_last_purchase_rate")): return
 
-			conversion_rate = flt(self.get('conversion_rate')) or 1.0
+		conversion_rate = flt(self.get('conversion_rate')) or 1.0
+		for d in self.get("items"):
+			if d.item_code:
+				last_purchase_details = get_last_purchase_details(d.item_code, self.name)
+				if last_purchase_details:
+					d.base_price_list_rate = (last_purchase_details['base_price_list_rate'] *
+						(flt(d.conversion_factor) or 1.0))
+					d.discount_percentage = last_purchase_details['discount_percentage']
+					d.base_rate = last_purchase_details['base_rate'] * (flt(d.conversion_factor) or 1.0)
+					d.price_list_rate = d.base_price_list_rate / conversion_rate
+					d.rate = d.base_rate / conversion_rate
+					d.last_purchase_rate = d.rate
+				else:
 
-			for d in self.get("items"):
-				if d.item_code:
-					last_purchase_details = get_last_purchase_details(d.item_code, self.name)
-
-					if last_purchase_details:
-						d.base_price_list_rate = (last_purchase_details['base_price_list_rate'] *
-							(flt(d.conversion_factor) or 1.0))
-						d.discount_percentage = last_purchase_details['discount_percentage']
-						d.base_rate = last_purchase_details['base_rate'] * (flt(d.conversion_factor) or 1.0)
-						d.price_list_rate = d.base_price_list_rate / conversion_rate
-						d.rate = d.base_rate / conversion_rate
-					else:
-
-						item_last_purchase_rate = frappe.db.get_value("Item", d.item_code, "last_purchase_rate")
-						if item_last_purchase_rate:
-							d.base_price_list_rate = d.base_rate = d.price_list_rate \
-								= d.rate = item_last_purchase_rate
-
-	def item_last_purchase_rate(self, item_code, conversion_factor= 1.0):
-		"""get last purchase rate for an item"""
-		if not cint(frappe.db.get_single_value("Buying Settings", "disable_fetch_last_purchase_rate")):
-			conversion_rate = flt(self.get('conversion_rate')) or 1.0
-
-		last_purchase_details =  get_last_purchase_details(item_code, self.name)
-		if last_purchase_details:
-			last_purchase_rate = (last_purchase_details['base_rate'] * (flt(conversion_factor) or 1.0)) / conversion_rate
-			return last_purchase_rate
-		else:
-			item_last_purchase_rate = frappe.db.get_value("Item", item_code, "last_purchase_rate")
-			if item_last_purchase_rate:
-				return item_last_purchase_rate
+					item_last_purchase_rate = frappe.db.get_value("Item", d.item_code, "last_purchase_rate")
+					if item_last_purchase_rate:
+						d.base_price_list_rate = d.base_rate = d.price_list_rate \
+							= d.rate = d.last_purchase_rate = item_last_purchase_rate
 
 	# Check for Closed status
 	def check_for_closed_status(self):
@@ -268,6 +254,21 @@ class PurchaseOrder(BuyingController):
 		for item in self.items:
 			if item.delivered_by_supplier == 1:
 				item.received_qty = item.qty
+
+def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor= 1.0):
+	"""get last purchase rate for an item"""
+	if cint(frappe.db.get_single_value("Buying Settings", "disable_fetch_last_purchase_rate")): return
+
+	conversion_rate = flt(conversion_rate) or 1.0
+
+	last_purchase_details =  get_last_purchase_details(item_code, name)
+	if last_purchase_details:
+		last_purchase_rate = (last_purchase_details['base_rate'] * (flt(conversion_factor) or 1.0)) / conversion_rate
+		return last_purchase_rate
+	else:
+		item_last_purchase_rate = frappe.db.get_value("Item", item_code, "last_purchase_rate")
+		if item_last_purchase_rate:
+			return item_last_purchase_rate
 
 @frappe.whitelist()
 def close_or_unclose_purchase_orders(names, status):
