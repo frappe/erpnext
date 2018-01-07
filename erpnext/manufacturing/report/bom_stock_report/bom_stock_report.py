@@ -8,7 +8,12 @@ from frappe import _
 def execute(filters=None):
     if not filters: filters = {}
     columns = get_columns()
-    data = get_bom_stock(filters)
+
+    if filters.get('multilevel'):
+        data = get_exploded_bom_stock(filters)
+    else:
+        data = get_bom_stock(filters)
+    
     return columns, data
 
 def get_columns():
@@ -55,3 +60,20 @@ def get_bom_stock(filters):
     	        bom_item.parent = '%s' and bom_item.parenttype='BOM'
 
             GROUP BY bom_item.item_code""" % (conditions, bom))
+
+
+def get_exploded_bom_stock(filters):
+    root_bom_name = filters.get("bom")
+    root_bom = frappe.get_doc("BOM", root_bom_name)
+
+    bom_tree_list = root_bom.traverse_tree()
+
+    out = ()
+
+    filters_for_multilevel = frappe._dict(bom=None, warehouse=filters.get("warehouse"))
+
+    for sub_bom in bom_tree_list:
+        filters_for_multilevel.bom = sub_bom
+        out += get_bom_stock(filters_for_multilevel)
+
+    return out
