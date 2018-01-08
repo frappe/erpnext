@@ -148,7 +148,6 @@ frappe.ui.form.on('Batch', {
 })
 
 frappe.ui.form.on('Batch', 'manufacturing_date', function (frm){
-	console.log ('manufacturing_date changed');
 	frappe.db.get_value('Item', {name: frm.doc.item}, ['shelf_life_in_days', 'has_expiry_date'], (r) => {
 		if (r.has_expiry_date){
 			// Calculate expiry date based on shelf_life_in_days
