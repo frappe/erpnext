@@ -1,18 +1,20 @@
 # Instructor
 
-An instructoe is a teacher, or professor, of a specialised subject that involves skill. 
+An Instructor can be a teacher, tutor, coach, or professor, of a specialised subject that involves any skill.
 
-You can create an Instructor and link it to the Employee master and a Departmemt.
+To create new Instructor go to:
+
+> Education > Instructor > New
 
 <img class="screenshot" alt="Instructor" src="/docs/assets/img/education/setup/instructor.png">
 
-An **Instructor** is further linked to a **Course Schedule**, where you can define the schedule for a **Course** for a give date and **Room no**.
+An **Instructor** can also be linked to a **Course Schedule**, where you can define the schedule for a **Course** for a give date and **Room no**.
 
-<img class="screenshot" alt="Instructor" src="/docs/assets/img/education/setup/instructor.gif">
-It is also linked to **Student group** where an **Instructor** is assigned to the Student group.
+It is also linked to **Student group** where an **Instructor** is assigned to the Student Group.
 
-<img class="screenshot" alt="Instructor" src="/docs/assets/img/education/setup/student-group-instructor.gif">
+While creating the **Assessment Plan** for a Student Group, **Instructor** can be linked as the Examiner or the Supervisor for that assessment.
 
-An **Instructor** is also linked to an **Assesment Plan** for a Student group. The Instructor can be an Examiner or the supervisor for the assesment. 
+Further, the log for the Instructor can be entered in the Instructor Log table which can be used for keeping the records of subjects taught by that Instructor.
+
 
 {next}

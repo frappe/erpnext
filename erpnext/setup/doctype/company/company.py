@@ -50,6 +50,13 @@ class Company(Document):
 		if frappe.db.sql("select abbr from tabCompany where name!=%s and abbr=%s", (self.name, self.abbr)):
 			frappe.throw(_("Abbreviation already used for another company"))
 
+	def create_default_tax_template(self):
+		from erpnext.setup.setup_wizard.operations.taxes_setup import create_sales_tax
+		create_sales_tax({
+			'country': self.country,
+			'company_name': self.name
+		})
+
 	def validate_default_accounts(self):
 		for field in ["default_bank_account", "default_cash_account",
 			"default_receivable_account", "default_payable_account",

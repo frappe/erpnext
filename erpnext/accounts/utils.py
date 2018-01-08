@@ -252,6 +252,9 @@ def add_ac(args=None):
 	if not ac.parent_account:
 		ac.parent_account = args.get("parent")
 
+	if ac.is_root:
+		ac.parent_account=''
+
 	ac.old_parent = ""
 	ac.freeze_account = "No"
 	if cint(ac.get("is_root")):
@@ -610,7 +613,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None):
 				or (voucher_type not in ('Journal Entry', 'Payment Entry')))
 		group by voucher_type, voucher_no
 		having (invoice_amount - payment_amount) > 0.005
-		order by posting_date, name, due_date""".format(
+		order by posting_date, name""".format(
 			dr_or_cr=dr_or_cr,
 			invoice = invoice,
 			payment_dr_or_cr=payment_dr_or_cr,

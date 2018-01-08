@@ -16,38 +16,44 @@ def create_sales_tax(args):
 				tax_data.get('tax_rate'), sales_tax)
 
 def make_tax_account_and_template(company, account_name, tax_rate, template_name=None):
+	if not isinstance(account_name, (list, tuple)):
+		account_name = [account_name]
+		tax_rate = [tax_rate]
+
+	accounts = []
+	for i, name in enumerate(account_name):
+		tax_account = make_tax_account(company, account_name[i], tax_rate[i])
+		if tax_account:
+			accounts.append(tax_account)
+
 	try:
-		if not isinstance(account_name, (list, tuple)):
-			account_name = [account_name]
-			tax_rate = [tax_rate]
-
-		accounts = []
-		for i, name in enumerate(account_name):
-			tax_account = make_tax_account(company, account_name[i], tax_rate[i])
-			if tax_account:
-				accounts.append(tax_account)
-
 		if accounts:
 			make_sales_and_purchase_tax_templates(accounts, template_name)
 	except frappe.NameError:
-		pass
+		frappe.message_log.pop()
 	except RootNotEditable:
 		pass
 
 def make_tax_account(company, account_name, tax_rate):
 	tax_group = get_tax_account_group(company)
 	if tax_group:
-		return frappe.get_doc({
-			"doctype":"Account",
-			"company": company,
-			"parent_account": tax_group,
-			"account_name": account_name,
-			"is_group": 0,
-			"report_type": "Balance Sheet",
-			"root_type": "Liability",
-			"account_type": "Tax",
-			"tax_rate": flt(tax_rate) if tax_rate else None
-		}).insert(ignore_permissions=True)
+		try:
+			return frappe.get_doc({
+				"doctype":"Account",
+				"company": company,
+				"parent_account": tax_group,
+				"account_name": account_name,
+				"is_group": 0,
+				"report_type": "Balance Sheet",
+				"root_type": "Liability",
+				"account_type": "Tax",
+				"tax_rate": flt(tax_rate) if tax_rate else None
+			}).insert(ignore_permissions=True, ignore_mandatory=True)
+		except frappe.NameError:
+			frappe.message_log.pop()
+			abbr = frappe.db.get_value('Company', company, 'abbr')
+			account = '{0} - {1}'.format(account_name, abbr)
+			return frappe.get_doc('Account', account)
 
 def make_sales_and_purchase_tax_templates(accounts, template_name=None):
 	if not template_name:
@@ -62,7 +68,7 @@ def make_sales_and_purchase_tax_templates(accounts, template_name=None):
 
 	for account in accounts:
 		sales_tax_template['taxes'].append({
-			"category": "Valuation and Total",
+			"category": "Total",
 			"charge_type": "On Net Total",
 			"account_head": account.name,
 			"description": "{0} @ {1}".format(account.account_name, account.tax_rate),
