@@ -418,6 +418,6 @@ def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
 			'where (`tabBatch`.expiry_date >= CURDATE() or `tabBatch`.expiry_date IS NULL)'
 
 	if filters and filters.get('item_code'):
-		query += 'where item = %(item_code)s' % filters
+		query += 'and item = %(item_code)s'
 
-	return frappe.db.sql(query)
+	return frappe.db.sql(query, filters)
