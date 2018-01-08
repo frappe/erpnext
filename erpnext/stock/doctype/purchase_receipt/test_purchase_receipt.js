@@ -17,7 +17,7 @@ QUnit.test("test Purchase Receipt", function(assert) {
 						{'rejected_warehouse':'Work In Progress - '+frappe.get_abbr(frappe.defaults.get_default('Company'))},
 					]
 				]},
-				{taxes_and_charges: 'TEST In State GST'},
+				{taxes_and_charges: 'TEST In State GST - FT'},
 				{tc_name: 'Test Term 1'},
 				{terms: 'This is Test'}
 			]);
@@ -27,7 +27,7 @@ QUnit.test("test Purchase Receipt", function(assert) {
 			// get_item_details
 			assert.ok(cur_frm.doc.items[0].item_name=='Test Product 1', "Item name correct");
 			// get tax details
-			assert.ok(cur_frm.doc.taxes_and_charges=='TEST In State GST', "Tax details correct");
+			assert.ok(cur_frm.doc.taxes_and_charges=='TEST In State GST - FT', "Tax details correct");
 			// get tax account head details
 			assert.ok(cur_frm.doc.taxes[0].account_head=='CGST - '+frappe.get_abbr(frappe.defaults.get_default('Company')), " Account Head abbr correct");
 			// grand_total Calculated

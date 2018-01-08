@@ -350,7 +350,6 @@ class PurchaseInvoice(BuyingController):
 		self.negative_expense_to_be_booked = 0.0
 		gl_entries = []
 
-
 		self.make_supplier_gl_entry(gl_entries)
 		self.make_item_gl_entries(gl_entries)
 		self.make_tax_gl_entries(gl_entries)
@@ -424,7 +423,10 @@ class PurchaseInvoice(BuyingController):
 
 					# sub-contracting warehouse
 					if flt(item.rm_supp_cost):
-						supplier_warehouse_account = warehouse_account[self.supplier_warehouse]["name"]
+						supplier_warehouse_account = warehouse_account[self.supplier_warehouse]["account"]
+						if not supplier_warehouse_account:
+							frappe.throw(_("Please set account in Warehouse {0}")
+								.format(self.supplier_warehouse))
 						gl_entries.append(self.get_gl_dict({
 							"account": supplier_warehouse_account,
 							"against": item.expense_account,
