@@ -15,22 +15,18 @@ def execute(filters=None):
 	
 	date = filters.get("date")
 
-	company = None
-	if filters.get("company"):
-		company = filters.get("company")
-
 	data = []
 
-	if not filters.get("shareholder"):
+	if not filters.get("shareholder_party"):
 		pass
 	else:
-		transfers = get_all_transfers(date, filters.get("shareholder"), company)
+		transfers = get_all_transfers(date, filters.get("shareholder_party"))
 		share_type, no_of_shares, rate, amount, company = 1, 2, 3, 4, 5
 		for transfer in transfers:
 			row = False
 			for datum in data:
 				if datum[company] == transfer.company and datum[share_type] == transfer.share_type:
-					if transfer.to_shareholder == filters.get("shareholder"):
+					if transfer.to_party == filters.get("shareholder_party"):
 						datum[no_of_shares] += transfer.no_of_shares
 						datum[amount] += transfer.amount
 						if datum[no_of_shares] == 0:
@@ -48,12 +44,12 @@ def execute(filters=None):
 					break
 			# new entry
 			if not row:
-				if transfer.to_shareholder == filters.get("shareholder"):
-					row = [filters.get("shareholder"),
+				if transfer.to_party == filters.get("shareholder_party"):
+					row = [filters.get("shareholder_party"),
 						transfer.share_type, transfer.no_of_shares, transfer.rate, transfer.amount,
 						transfer.company]
 				else:
-					row = [filters.get("shareholder"),
+					row = [filters.get("shareholder_party"),
 						transfer.share_type, -transfer.no_of_shares, -transfer.rate, -transfer.amount,
 						transfer.company]
 				data.append(row)
@@ -64,7 +60,7 @@ def execute(filters=None):
 
 def get_columns(filters):
 	columns = [
-		_("Shareholder") + ":Link/Shareholder:150",
+		_("Shareholder") + ":Link/Shareholder Party:150",
 		_("Share Type") + "::90",
 		_("No of Shares") + "::90",
 		_("Average Rate") + ":Currency:90",
@@ -73,14 +69,12 @@ def get_columns(filters):
 	]
 	return columns
 
-def get_all_transfers(date, shareholder, company):
-	if company:
-		condition = 'AND company = %(company)s '
-	else:
-		condition = ' '
-
+def get_all_transfers(date, party):
+	condition = ' '
+	# if company:
+	# 	condition = 'AND company = %(company)s '
 	return frappe.db.sql("""SELECT * FROM `tabShare Transfer`
-		WHERE (DATE(date) <= %(date)s AND from_shareholder = %(shareholder)s {condition})
-		OR (DATE(date) <= %(date)s AND to_shareholder = %(shareholder)s {condition})
+		WHERE (DATE(date) <= %(date)s AND from_party = %(party)s {condition})
+		OR (DATE(date) <= %(date)s AND to_party = %(party)s {condition})
 		ORDER BY date""".format(condition=condition),
-		{'date': date, 'shareholder': shareholder, 'company': company}, as_dict=1)
+		{'date': date, 'party': party}, as_dict=1)

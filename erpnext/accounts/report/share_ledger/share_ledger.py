@@ -17,33 +17,29 @@ def execute(filters=None):
 
 	date = filters.get("date")
 
-	company = None
-	if filters.get("company"):
-		company = filters.get("company")
-
 	data = []
 
-	if not filters.get("shareholder"):
+	if not filters.get("shareholder_party"):
 		pass
 	else:
-		transfers = get_all_transfers(date, filters.get("shareholder"), company)
+		transfers = get_all_transfers(date, filters.get("shareholder_party"))
 		for transfer in transfers:
 			if transfer.transfer_type == 'Transfer':
-				if transfer.from_shareholder == filters.get("shareholder"):
+				if transfer.from_party == filters.get("shareholder_party"):
 					transfer.transfer_type += ' from'
 				else:
 					transfer.transfer_type += ' to'
-			row = [filters.get("shareholder"), transfer.date, transfer.transfer_type,
+			row = [filters.get("shareholder_party"), transfer.date, transfer.transfer_type,
 				transfer.share_type, transfer.no_of_shares, transfer.rate, transfer.amount,
 				transfer.company, transfer.name]
-			
+
 			data.append(row)
 
 	return columns, data
 
 def get_columns(filters):
 	columns = [
-		_("Shareholder") + ":Link/Shareholder:150",
+		_("Shareholder Party") + ":Link/Shareholder Party:150",
 		_("Date") + ":Date:100",
 		_("Transfer Type") + "::140",
 		_("Share Type") + "::90",
@@ -55,14 +51,12 @@ def get_columns(filters):
 	]
 	return columns
 
-def get_all_transfers(date, shareholder, company):
-	if company:
-		condition = 'AND company = %(company)s '
-	else:
-		condition = ' '
-
+def get_all_transfers(date, party):
+	condition = ' '
+	# if company:
+	# 	condition = 'AND company = %(company)s '
 	return frappe.db.sql("""SELECT * FROM `tabShare Transfer`
-		WHERE (DATE(date) <= %(date)s AND from_shareholder = %(shareholder)s {condition})
-		OR (DATE(date) <= %(date)s AND to_shareholder = %(shareholder)s {condition})
+		WHERE (DATE(date) <= %(date)s AND from_party = %(party)s {condition})
+		OR (DATE(date) <= %(date)s AND to_party = %(party)s {condition})
 		ORDER BY date""".format(condition=condition),
-		{'date': date, 'shareholder': shareholder, 'company': company}, as_dict=1)
+		{'date': date, 'party': party}, as_dict=1)

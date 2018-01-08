@@ -5,43 +5,27 @@ frappe.provide("erpnext.share_transfer");
 
 frappe.ui.form.on('Share Transfer', {
 	refresh: function(frm) {
-		if (frm.doc.transfer_type == 'Purchase'){
-			frm.fields_dict.to_name.$wrapper.hide();
-			frm.fields_dict.to_shareholder.$wrapper.hide();
-			frm.fields_dict.from_name.$wrapper.show();
-			frm.fields_dict.from_shareholder.$wrapper.show();
-		} else if (frm.doc.transfer_type == 'Issue') {
-			frm.fields_dict.from_name.$wrapper.hide();
-			frm.fields_dict.from_shareholder.$wrapper.hide();
-			frm.fields_dict.to_name.$wrapper.show();
-			frm.fields_dict.from_name.$wrapper.show();
-		} else if (frm.doc.transfer_type == 'Transfer') {
-			frm.fields_dict.from_name.$wrapper.show();
-			frm.fields_dict.from_shareholder.$wrapper.show();
-			frm.fields_dict.to_name.$wrapper.show();
-			frm.fields_dict.to_shareholder.$wrapper.show();
-		}
 	},
 	transfer_type: (frm) => {
 		if (frm.doc.transfer_type == 'Purchase'){
-			frm.doc.to_shareholder = '';
-			frm.refresh_field("to_shareholder");
-			frm.fields_dict.to_name.$wrapper.hide();
-			frm.fields_dict.to_shareholder.$wrapper.hide();
-			frm.fields_dict.from_name.$wrapper.show();
-			frm.fields_dict.from_shareholder.$wrapper.show();
+			frm.doc.to_party = '';
+			frm.refresh_field("to_party");
+			frm.fields_dict.to_party.$wrapper.hide();
+			frm.fields_dict.to_folio_no.$wrapper.hide();
+			frm.fields_dict.from_party.$wrapper.show();
+			frm.fields_dict.from_folio_no.$wrapper.show();
 		} else if (frm.doc.transfer_type == 'Issue') {
-			frm.doc.from_shareholder = '';
-			frm.refresh_field("from_shareholder");
-			frm.fields_dict.from_name.$wrapper.hide();
-			frm.fields_dict.from_shareholder.$wrapper.hide();
-			frm.fields_dict.to_name.$wrapper.show();
-			frm.fields_dict.to_shareholder.$wrapper.show();
+			frm.doc.from_party = '';
+			frm.refresh_field("from_party");
+			frm.fields_dict.from_party.$wrapper.hide();
+			frm.fields_dict.from_folio_no.$wrapper.hide();
+			frm.fields_dict.to_party.$wrapper.show();
+			frm.fields_dict.to_folio_no.$wrapper.show();
 		} else if (frm.doc.transfer_type == 'Transfer') {
-			frm.fields_dict.from_name.$wrapper.show();
-			frm.fields_dict.from_shareholder.$wrapper.show();
-			frm.fields_dict.to_name.$wrapper.show();
-			frm.fields_dict.to_shareholder.$wrapper.show();
+			frm.fields_dict.from_party.$wrapper.show();
+			frm.fields_dict.from_folio_no.$wrapper.show();
+			frm.fields_dict.to_party.$wrapper.show();
+			frm.fields_dict.to_folio_no.$wrapper.show();
 		}
 	},
 	no_of_shares: (frm) => {

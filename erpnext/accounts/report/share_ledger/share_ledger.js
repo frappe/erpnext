@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 // Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-
+/* eslint-disable */
 
 frappe.query_reports["Share Ledger"] = {
 	"filters": [
@@ -13,16 +13,10 @@ frappe.query_reports["Share Ledger"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname":"shareholder",
-			"label": __("Shareholder"),
+			"fieldname":"shareholder_party",
+			"label": __("Shareholder Party"),
 			"fieldtype": "Link",
-			"options": "Shareholder"
-		},
-		{
-			"fieldname":"company",
-			"label": __("Company"),
-			"fieldtype": "Link",
-			"options": "Company"
+			"options": "Shareholder Party"
 		}
 	]
 };
