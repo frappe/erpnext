@@ -10,6 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 from erpnext.controllers.queries import get_filters_cond
 from frappe.desk.reportview import get_match_cond
+import datetime
 
 class Project(Document):
 	def get_feed(self):
@@ -326,3 +327,40 @@ def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 def get_cost_center_name(project):
 	return frappe.db.get_value("Project", project, "cost_center")
+
+
+def experiment():
+    now = datetime.datetime.now()
+    print now
+
+
+@frappe.whitelist()
+def hourly_reminder():
+    msg = "How is your project? Please update your project"
+    data = []
+    email = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE `tabProject`.frequency = "Hourly";""")
+    for emails in email:
+        recipients = emails[0]
+        data.append(recipients)
+
+    print("===================")
+    test_rani(data)
+
+def twice_daily_reminder():
+    print ("")
+
+def daily_reminder():
+    print ("")
+
+def weekly():
+    print ("")
+
+def test_rani(data):
+    for datas in data:
+	    frappe.sendmail(
+		    recipients= datas[0],
+		    subject=frappe._("Multiple Recipient"),
+		    template="upcoming_events",
+		    header=[frappe._("Events in Today's Calendar"), 'blue'],
+            message="This is a message"
+	)
