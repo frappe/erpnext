@@ -4,7 +4,7 @@ frappe.provide("erpnext.stock");
 
 frappe.ui.form.on('Stock Entry', {
 	setup: function(frm) {
-		frm.set_query('production_order', function() {
+		frm.set_query('work_order', function() {
 			return {
 				filters: [
 					['Work Order', 'docstatus', '=', 1],
@@ -566,10 +566,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 	clean_up: function() {
 		// Clear Work Order record from locals, because it is updated via Stock Entry
-		if(this.frm.doc.production_order &&
+		if(this.frm.doc.work_order &&
 				in_list(["Manufacture", "Material Transfer for Manufacture"], this.frm.doc.purpose)) {
 			frappe.model.remove_from_locals("Work Order",
-				this.frm.doc.production_order);
+				this.frm.doc.work_order);
 		}
 	},
 
@@ -578,7 +578,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(!this.frm.doc.fg_completed_qty || !this.frm.doc.bom_no)
 			frappe.throw(__("BOM and Manufacturing Quantity are required"));
 
-		if(this.frm.doc.production_order || this.frm.doc.bom_no) {
+		if(this.frm.doc.work_order || this.frm.doc.bom_no) {
 			// if work order / bom is mentioned, get items
 			return this.frm.call({
 				doc: me.frm.doc,
@@ -590,17 +590,17 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		}
 	},
 
-	production_order: function() {
+	work_order: function() {
 		var me = this;
 		this.toggle_enable_bom();
-		if(!me.frm.doc.production_order) {
+		if(!me.frm.doc.work_order) {
 			return;
 		}
 
 		return frappe.call({
-			method: "erpnext.stock.doctype.stock_entry.stock_entry.get_production_order_details",
+			method: "erpnext.stock.doctype.stock_entry.stock_entry.get_work_order_details",
 			args: {
-				production_order: me.frm.doc.production_order
+				work_order: me.frm.doc.work_order
 			},
 			callback: function(r) {
 				if (!r.exc) {
@@ -630,7 +630,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	toggle_enable_bom: function() {
-		this.frm.toggle_enable("bom_no", !!!this.frm.doc.production_order);
+		this.frm.toggle_enable("bom_no", !!!this.frm.doc.work_order);
 	},
 
 	add_excise_button: function() {

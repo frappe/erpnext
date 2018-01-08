@@ -347,7 +347,7 @@ class SalesOrder(SellingController):
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
 
-	def get_production_order_items(self):
+	def get_work_order_items(self):
 		'''Returns items with BOM that already do not have a linked work order'''
 		items = []
 
@@ -775,7 +775,7 @@ def get_supplier(doctype, txt, searchfield, start, page_len, filters):
 		})
 
 @frappe.whitelist()
-def make_production_orders(items, sales_order, company, project=None):
+def make_work_orders(items, sales_order, company, project=None):
 	'''Make Work Orders against the given Sales Order for the given `items`'''
 	items = json.loads(items).get('items')
 	out = []
@@ -786,7 +786,7 @@ def make_production_orders(items, sales_order, company, project=None):
 		if not i.get("pending_qty"):
 			frappe.throw(_("Please select Qty against item {0}").format(i.get("item_code")))
 
-		production_order = frappe.get_doc(dict(
+		work_order = frappe.get_doc(dict(
 			doctype='Work Order',
 			production_item=i['item_code'],
 			bom_no=i.get('bom'),
@@ -797,9 +797,9 @@ def make_production_orders(items, sales_order, company, project=None):
 			project=project,
 			fg_warehouse=i['warehouse']
 		)).insert()
-		production_order.set_production_order_operations()
-		production_order.save()
-		out.append(production_order)
+		work_order.set_work_order_operations()
+		work_order.save()
+		out.append(work_order)
 
 	return [p.name for p in out]
 

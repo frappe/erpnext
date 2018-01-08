@@ -107,7 +107,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					this.frm.add_custom_button(__('Delivery'),
 						function() { me.make_delivery_note_based_on_delivery_date(); }, __("Make"));
 					this.frm.add_custom_button(__('Work Order'),
-						function() { me.make_production_order() }, __("Make"));
+						function() { me.make_work_order() }, __("Make"));
 
 					this.frm.page.set_inner_btn_group_as_primary(__("Make"));
 				}
@@ -192,11 +192,11 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		this.order_type(doc);
 	},
 
-	make_production_order() {
+	make_work_order() {
 		var me = this;
 		this.frm.call({
 			doc: this.frm.doc,
-			method: 'get_production_order_items',
+			method: 'get_work_order_items',
 			callback: function(r) {
 				if(!r.message) {
 					frappe.msgprint({
@@ -240,7 +240,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						primary_action: function() {
 							var data = d.get_values();
 							me.frm.call({
-								method: 'make_production_orders',
+								method: 'make_work_orders',
 								args: {
 									items: data,
 									company: me.frm.doc.company,

@@ -6,7 +6,7 @@ from frappe.utils import cint
 import frappe
 
 def execute(filters=None):
-	prod_list = get_production_orders()
+	prod_list = get_work_orders()
 	data = get_item_list(prod_list, filters)
 	columns = get_columns()
 	return columns, data
@@ -18,7 +18,7 @@ def get_item_list(prod_list, filters):
 	for prod_details in prod_list:
 		desc = frappe.db.get_value("BOM", prod_details.bom_no, "description")
 
-		for prod_item_details in frappe.db.get_values("Production Order Item",
+		for prod_item_details in frappe.db.get_values("Work Order Item",
 			{"parent": prod_details.name}, ["item_code", "source_warehouse"], as_dict=1):
 
 			item_list = frappe.db.sql("""SELECT
@@ -54,7 +54,7 @@ def get_item_list(prod_list, filters):
 				build = "N"
 
 			row = frappe._dict({
-				"production_order": prod_details.name,
+				"work_order": prod_details.name,
 				"status": prod_details.status,
 				"req_items": cint(count),
 				"instock": stock_qty,
@@ -71,18 +71,18 @@ def get_item_list(prod_list, filters):
 
 	return out
 	
-def get_production_orders():
-	out =  frappe.get_all("Production Order", filters={"docstatus": 1, "status": ( "!=","Completed")},
+def get_work_orders():
+	out =  frappe.get_all("Work Order", filters={"docstatus": 1, "status": ( "!=","Completed")},
 		fields=["name","status", "bom_no", "qty", "produced_qty"], order_by='name')
 
 	return out
 	
 def get_columns():
 	columns = [{
-		"fieldname": "production_order",
-		"label": "Production Order",
+		"fieldname": "work_order",
+		"label": "Work Order",
 		"fieldtype": "Link",
-		"options": "Production Order",
+		"options": "Work Order",
 		"width": 110
 	}, {
 		"fieldname": "bom_no",

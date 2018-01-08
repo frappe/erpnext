@@ -12,7 +12,7 @@ from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
 from erpnext.controllers.buying_controller import BuyingController
-from erpnext.manufacturing.doctype.production_order.production_order import get_item_details
+from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.buying.utils import check_for_closed_status, validate_for_items
 
 from six import string_types
@@ -415,10 +415,10 @@ def make_stock_entry(source_name, target_doc=None):
 	return doclist
 
 @frappe.whitelist()
-def raise_production_orders(material_request):
+def raise_work_orders(material_request):
 	mr= frappe.get_doc("Material Request", material_request)
 	errors =[]
-	production_orders = []
+	work_orders = []
 	default_wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
 	for d in mr.items:
 		if (d.qty - d.ordered_qty) >0:
@@ -438,13 +438,13 @@ def raise_production_orders(material_request):
 				prod_order.planned_start_date = mr.transaction_date
 				prod_order.company = mr.company
 				prod_order.save()
-				production_orders.append(prod_order.name)
+				work_orders.append(prod_order.name)
 			else:
 				errors.append(_("Row {0}: Bill of Materials not found for the Item {1}").format(d.idx, d.item_code))
-	if production_orders:
+	if work_orders:
 		message = ["""<a href="#Form/Work Order/%s" target="_blank">%s</a>""" % \
-			(p, p) for p in production_orders]
+			(p, p) for p in work_orders]
 		msgprint(_("The following Work Orders were created:") + '\n' + new_line_sep(message))
 	if errors:
 		frappe.throw(_("Productions Orders cannot be raised for:") + '\n' + new_line_sep(errors))
-	return production_orders
+	return work_orders
