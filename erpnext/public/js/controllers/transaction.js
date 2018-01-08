@@ -555,7 +555,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 
 				frappe.msgprint(final_message);
-	        }
+			}
 
 	    }
 	},
@@ -1277,7 +1277,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	payment_term: function(doc, cdt, cdn) {
-		const me = this;
 		var row = locals[cdt][cdn];
 		if(row.payment_term) {
 			frappe.call({
