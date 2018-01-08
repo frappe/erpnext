@@ -198,6 +198,10 @@ def get_data():
 					"type": "doctype",
 					"name": "Item Variant Settings",
 				},
+				{
+					"type": "doctype",
+					"name": "Item Alternative"
+				}
 			]
 		},
 		{
