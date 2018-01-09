@@ -375,6 +375,17 @@ class AccountsController(TransactionBase):
 
 		return res
 
+	def is_inclusive_tax(self):
+		is_inclusive = cint(frappe.db.get_single_value("Accounts Settings",
+			"show_inclusive_tax_in_print"))
+
+		if is_inclusive:
+			is_inclusive = 0
+			if self.get("taxes", filters={"included_in_print_rate": 1}):
+				is_inclusive = 1
+
+		return is_inclusive
+
 	def validate_advance_entries(self):
 		order_field = "sales_order" if self.doctype == "Sales Invoice" else "purchase_order"
 		order_list = list(set([d.get(order_field)
