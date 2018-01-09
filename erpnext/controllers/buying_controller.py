@@ -18,7 +18,10 @@ class BuyingController(StockController):
 		if hasattr(self, "taxes"):
 			self.flags.print_taxes_with_zero_amount = cint(frappe.db.get_single_value("Print Settings",
 				 "print_taxes_with_zero_amount"))
+			self.flags.show_inclusive_tax_in_print = self.is_inclusive_tax()
+
 			self.print_templates = {
+				"total": "templates/print_formats/includes/total.html",
 				"taxes": "templates/print_formats/includes/taxes.html"
 			}
 
@@ -430,7 +433,8 @@ class BuyingController(StockController):
 				if not d.schedule_date:
 					d.schedule_date = self.schedule_date
 
-				if d.schedule_date and getdate(d.schedule_date) < getdate(self.transaction_date):
+				if (d.schedule_date and self.transaction_date and
+					getdate(d.schedule_date) < getdate(self.transaction_date)):
 					frappe.throw(_("Row #{0}: Reqd by Date cannot be before Transaction Date").format(d.idx))
 		else:
 			frappe.throw(_("Please enter Reqd by Date"))
