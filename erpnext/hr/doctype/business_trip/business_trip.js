@@ -57,20 +57,47 @@ frappe.ui.form.on('Business Trip', {
         }
     	cur_frm.set_df_property("request_employee", "read_only", 1);
     	cur_frm.set_df_property("requested_employee", "read_only", 1);
+    	cur_frm.set_df_property("trip_reason", "read_only", 1);
+    	cur_frm.set_df_property("from_date", "read_only", 1);
+    	cur_frm.set_df_property("to_date", "read_only", 1);
+    	cur_frm.set_df_property("payment_encashment", "read_only", 1);
+    	cur_frm.set_df_property("cost_center", "read_only", 1);
+    	cur_frm.set_df_property("assignment_type", "read_only", 1);
+    	cur_frm.set_df_property("world_countries", "read_only", 1);
+    	// cur_frm.set_df_property("city", "read_only", 1);
+    	cur_frm.set_df_property("ticket", "read_only", 1);
+    	cur_frm.set_df_property("ticket_cost", "read_only", 1);
 
     },
     onload: function(frm) {
     	get_current_user();
 
+    	if (cur_frm.doc.workflow_state!= "Pending"){
+    	cur_frm.set_df_property("request_employee", "read_only", 1);
+    	cur_frm.set_df_property("requested_employee", "read_only", 1);
+    	cur_frm.set_df_property("trip_reason", "read_only", 1);
+    	cur_frm.set_df_property("from_date", "read_only", 1);
+    	cur_frm.set_df_property("to_date", "read_only", 1);
+    	cur_frm.set_df_property("payment_encashment", "read_only", 1);
+    	cur_frm.set_df_property("cost_center", "read_only", 1);
+    	cur_frm.set_df_property("assignment_type", "read_only", 1);
+    	cur_frm.set_df_property("world_countries", "read_only", 1);
+    	cur_frm.set_df_property("city", "read_only", 1);
+    	cur_frm.set_df_property("ticket", "read_only", 1);
+    	cur_frm.set_df_property("ticket_cost", "read_only", 1);
+}
 
         cur_frm.set_query("requested_employee", function() {
                 return {
+                	query: "erpnext.hr.doctype.business_trip.business_trip.get_approvers",
                     filters: [
                         ["Employee", "name", "!=", cur_frm.doc.employee],
                     ]
                 };
             });
-        
+       
+
+
         // cur_frm.set_query("requested_department", function () {
         //     return {
         //         "filters": {
@@ -228,7 +255,7 @@ function get_current_user(){
                     cur_frm.set_value('department', data.message.department);
                     cur_frm.set_value('grade', data.message.grade);
                 }else{
-                    // cur_frm.set_value('salary', 0);
+
                 }
             }
         });

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
@@ -51,16 +52,32 @@ def validate_filters(filters):
 		filters.to_date = filters.year_end_date
 
 def get_data(filters):
-	accounts = frappe.db.sql("""select name, parent_account, account_name, root_type, report_type, lft, rgt
-		from `tabAccount` where company=%s order by lft""", filters.company, as_dict=True)
+	if filters.account:
+		selected_account = frappe.db.sql("""select name, account_name, lft, rgt
+		from `tabAccount` where company='{0}' and name = '{1}' order by lft""".format(filters.company, filters.account), as_dict=True)
+
+		if selected_account:
+			if selected_account[0].rgt - selected_account[0].lft > 1 :
+				accounts = frappe.db.sql("""select name, parent_account, account_name, root_type, report_type, lft, rgt
+					from `tabAccount` where company='{0}' and lft >= {1} and rgt <= {2} order by lft""".format(filters.company, selected_account[0].lft, selected_account[0].rgt), as_dict=True)
+			else:
+				accounts = selected_account
+		else:
+			return None
+	else:
+		accounts = frappe.db.sql("""select name, parent_account, account_name, root_type, report_type, lft, rgt
+			from `tabAccount` where company='{0}' order by lft""".format(filters.company), as_dict=True)
 
 	if not accounts:
 		return None
 
 	accounts, accounts_by_name, parent_children_map = filter_accounts(accounts)
+	account_condition = ""
+	if filters.account:
+		account_condition = " and name = '{0}'".format(filters.account)
 
 	min_lft, max_rgt = frappe.db.sql("""select min(lft), max(rgt) from `tabAccount`
-		where company=%s""", (filters.company,))[0]
+		where company=%s"""+account_condition, (filters.company,))[0]
 
 	gl_entries_by_account = {}
 
@@ -70,7 +87,7 @@ def get_data(filters):
 	opening_balances = get_opening_balances(filters)
 
 	total_row = calculate_values(accounts, gl_entries_by_account, opening_balances, filters)
-	accumulate_values_into_parents(accounts, accounts_by_name)
+	accumulate_values_into_parents(accounts, accounts_by_name, filters)
 
 	data = prepare_data(accounts, filters, total_row, parent_children_map)
 	data = filter_out_zero_value_rows(data, parent_children_map, 
@@ -81,7 +98,6 @@ def get_data(filters):
 def get_opening_balances(filters):
 	balance_sheet_opening = get_rootwise_opening_balances(filters, "Balance Sheet")
 	pl_opening = get_rootwise_opening_balances(filters, "Profit and Loss")
-
 	balance_sheet_opening.update(pl_opening)
 	return balance_sheet_opening
 
@@ -116,7 +132,6 @@ def get_rootwise_opening_balances(filters, report_type):
 	opening = frappe._dict()
 	for d in gle:
 		opening.setdefault(d.account, d)
-
 	return opening
 
 def calculate_values(accounts, gl_entries_by_account, opening_balances, filters):
@@ -143,7 +158,6 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters)
 		# add opening
 		d["opening_debit"] = opening_balances.get(d.name, {}).get("opening_debit", 0)
 		d["opening_credit"] = opening_balances.get(d.name, {}).get("opening_credit", 0)
-
 		for entry in gl_entries_by_account.get(d.name, []):
 			if cstr(entry.is_opening) != "Yes":
 				d["debit"] += flt(entry.debit)
@@ -151,32 +165,41 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters)
 
 		total_row["debit"] += d["debit"]
 		total_row["credit"] += d["credit"]
-
-
 	return total_row
 
-def accumulate_values_into_parents(accounts, accounts_by_name):
+def accumulate_values_into_parents(accounts, accounts_by_name, filters):
 	for d in reversed(accounts):
 		if d.parent_account:
 			for key in value_fields:
+				if d.parent_account not in accounts_by_name.keys():
+					continue
+				# frappe.throw(str(accounts_by_name[d.parent_account]["parent_account"]))
+				# if selected_parent == accounts_by_name[d.parent_account]["parent_account"]:
+				# if filters.account:
+				# 	# frappe.throw(d.parent_account)
+				# 	# frappe.throw(str(accounts_by_name[d.parent_account][key]))
+				# 	frappe.throw(str(accounts_by_name))
+				# 	accounts_by_name[d.parent_account][key] += d[key]
 				accounts_by_name[d.parent_account][key] += d[key]
 
 def prepare_data(accounts, filters, total_row, parent_children_map):
+	selected_parent=frappe.get_value("Account", filters={"name": filters.account}, fieldname="parent_account")
 	data = []
 	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
-	
 	for d in accounts:
 		has_value = False
 		row = {
 			"account_name": d.account_name,
 			"account": d.name,
-			"parent_account": d.parent_account,
+			# "parent_account": d.parent_account,
 			"indent": d.indent,
 			"from_date": filters.from_date,
 			"to_date": filters.to_date,
 			"currency": company_currency
 		}
-
+		if selected_parent != d.parent_account:
+			row["parent_account"] = d.parent_account
+			
 		prepare_opening_and_closing(d)
 
 		for key in value_fields:

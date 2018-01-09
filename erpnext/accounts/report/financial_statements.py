@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
@@ -247,12 +248,13 @@ def get_accounts(company, root_type):
 def filter_accounts(accounts, depth=10):
 	parent_children_map = {}
 	accounts_by_name = {}
+	# frappe.throw(str(accounts[0].parent_account))
+	# if accounts[0].parent_account:
+	# 	accounts_by_name[accounts[0].parent_account] = accounts[0]
 	for d in accounts:
 		accounts_by_name[d.name] = d
 		parent_children_map.setdefault(d.parent_account or None, []).append(d)
-
 	filtered_accounts = []
-
 	def add_to_list(parent, level):
 		if level < depth:
 			children = parent_children_map.get(parent) or []
@@ -264,8 +266,10 @@ def filter_accounts(accounts, depth=10):
 				filtered_accounts.append(child)
 				add_to_list(child.name, level + 1)
 
-	add_to_list(None, 0)
-
+	if accounts[0].parent_account:
+		add_to_list(accounts[0].parent_account, 0)
+	else:
+		add_to_list(None, 0)
 	return filtered_accounts, accounts_by_name, parent_children_map
 
 def sort_root_accounts(roots):
@@ -308,7 +312,6 @@ def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, f
 
 	for entry in gl_entries:
 		gl_entries_by_account.setdefault(entry.account, []).append(entry)
-
 	return gl_entries_by_account
 
 def get_additional_conditions(from_date, ignore_closing_entries, filters):

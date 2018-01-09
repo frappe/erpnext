@@ -26,14 +26,13 @@ class BusinessTrip(Document):
         # self.get_grade_info()
         self.validate_dates()
         # self.validate_leave_overlap()
-        self.validate_city()
         self.get_number_of_leave_days()
         self.get_ja_cost()
         self.validate_emp()
 
         if hasattr(self,"workflow_state"):
             if not self.get('__islocal') and self.workflow_state == "Wait For Exceptional Approval":
-                frappe.throw("Waiting For Approval")
+                frappe.throw("Waiting For Business Trip Exceptional Approval")
 
             if self.workflow_state:
                 if "Rejected" in self.workflow_state:
@@ -52,14 +51,17 @@ class BusinessTrip(Document):
                 "business_trip": self.name,
                 "from_date": self.from_date,
                 "to_date": self.to_date,
+                "days": self.days,
                 "assignment_type": self.assignment_type,
                 "city": self.city,
                 "status": 'Pending',
+                "workflow_state": 'Created By Requester',
                 "employee": self.requested_employee,
                 "employee_name": self.requested_employee_name,
                 "department": self.requested_department
             }).insert(ignore_permissions=True)
             msg = """Exceptional Approval has been created: <b><a href="#Form/Business Trip Exceptional Approval/{0}">{0}</a></b>""".format(btea_doc.name)
+            self.business_trip_exceptional_approval = btea_doc.name
             frappe.msgprint(msg)
 
     def validate_emp(self):
@@ -85,10 +87,6 @@ class BusinessTrip(Document):
         if getdate(self.from_date) > getdate(self.to_date):
             frappe.throw(_('To Date field must be less than To Date field'))
 
-    def validate_city(self):
-        if self.assignment_type=="Internal" or self.assignment_type=="External":
-            if not self.city :
-                frappe.throw(_('Select Target City'))
 
     # def validate_leave_overlap(self):
     #   if not self.name:
@@ -282,6 +280,8 @@ class BusinessTrip(Document):
             employee = frappe.get_doc('Employee', {'name': employees[0].name})
             return employee
 
+def get_approvers(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql(""" select name,employee_name from `tabEmployee` """)
 
 
 # def get_permission_query_conditions(user):
@@ -302,8 +302,7 @@ class BusinessTrip(Document):
 
 
 
-def get_permission_query_conditions(user):
-    pass
+# def get_permission_query_conditions(user):
     # if not user: user = frappe.session.user
     # employees = frappe.get_list("Employee", fields=["name"], filters={'user_id': user}, ignore_permissions=True)
     # if employees:

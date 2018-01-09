@@ -17,7 +17,9 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"label": __("Account"),
 				"fieldtype": "Link",
 				"options": "Account",
-				"reqd": 0
+				"filters": {
+					is_group: ["in", ["0","1"]]
+				}
 			},
 			{
 				"fieldname": "fiscal_year",
