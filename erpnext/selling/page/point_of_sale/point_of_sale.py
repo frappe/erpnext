@@ -128,9 +128,3 @@ def item_group_query(doctype, txt, searchfield, start, page_len, filters):
 			where {condition} and (name like %(txt)s) limit {start}, {page_len}"""
 		.format(condition = cond, start=start, page_len= page_len),
 			{'txt': '%%%s%%' % txt})
-
-@frappe.whitelist()
-def fetch_pos_profile_detail(pos_profile):
-	pos_profile_doc = frappe.get_doc("POS Profile",pos_profile)
-	allow_print_before_pay_check = pos_profile_doc.allow_print_before_pay
-	return allow_print_before_pay_check
