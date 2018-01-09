@@ -51,10 +51,10 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			},
 			() => this.setup_company(),
 			() => this.make_new_invoice(),
+			() => this.set_form_action(),
 			() => {
 				frappe.dom.unfreeze();
 			},
-			() => this.fetch_pos_profile_data(),
 			() => this.page.set_title(__('Point of Sale'))
 		]);
 	}
@@ -464,23 +464,6 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					}
 				}
 
-				resolve();
-			});
-		});
-	}
-
-	fetch_pos_profile_data() {
-		var me = this;
-		me.frm.doc["allow_print_before_pay"] = 0;
-		return new Promise(resolve => {
-			return this.frm.call({
-				method:"erpnext.selling.page.point_of_sale.point_of_sale.fetch_pos_profile_detail",
-				args:{
-					pos_profile:me.frm.doc.pos_profile
-				}
-			}).then((r) => {
-				me.frm.doc["allow_print_before_pay"] = r.message;
-				this.set_form_action();
 				resolve();
 			});
 		});
