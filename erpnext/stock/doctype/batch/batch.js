@@ -153,5 +153,5 @@ frappe.ui.form.on('Batch', 'manufacturing_date', function (frm){
 			// Calculate expiry date based on shelf_life_in_days
 			frm.set_value('expiry_date', frappe.datetime.add_days(frm.doc.manufacturing_date, r.shelf_life_in_days));
 		}
-;	});
+	})
 })
