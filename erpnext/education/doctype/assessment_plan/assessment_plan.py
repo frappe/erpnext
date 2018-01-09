@@ -9,9 +9,21 @@ from frappe import _
 
 class AssessmentPlan(Document):
 	def validate(self):
+		self.set_missing_field()
 		self.validate_overlap()
 		self.validate_max_score()
 		self.validate_assessment_criteria()
+
+	def set_missing_field(self):
+		if self.student_group:
+			academic_term, academic_year, program, course = frappe.get_value("Student Group", self.student_group,
+				["academic_term", "academic_year", "program", "course"])
+			self.academic_term = academic_term
+			self.academic_year = academic_year
+			if program:
+				self.program = program
+			if course and not self.course:
+				self.course = course
 
 	def validate_overlap(self):
 		"""Validates overlap for Student Group, Instructor, Room"""
