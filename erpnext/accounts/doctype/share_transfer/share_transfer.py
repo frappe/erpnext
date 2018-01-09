@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.model.naming   import make_autoname
 
 class ShareTransfer(Document):
 	def validate(self):
@@ -19,13 +20,13 @@ class ShareTransfer(Document):
 			if self.from_party is None or self.from_party is '':
 				frappe.throw('The field \'From Shareholder Party\' cannot be blank')
 			if self.from_folio_no is None or self.from_folio_no is '':
-				frappe.throw('The field \'From folio no\' cannot be blank')
+				self.to_folio_no = self.autoname_folio(self.to_party)
 		elif (self.transfer_type == 'Issue'):
 			self.from_party = ''
 			if self.to_party is None or self.to_party == '':
 				frappe.throw('The field \'To Shareholder Party\' cannot be blank')
-			if self.to_folio_no is None or self.from_folio_no is '':
-				frappe.throw('The field \'To folio no\' cannot be blank')
+			if self.to_folio_no is None or self.to_folio_no is '':
+				self.to_folio_no = self.autoname_folio(self.to_party)
 		else:
 			if self.from_party is None or self.to_party is None:
 				frappe.throw('The fields \'From Shareholder\' and \'To Shareholder\' cannot be blank')
@@ -90,5 +91,11 @@ class ShareTransfer(Document):
 				doc.folio_no = self.from_folio_no if (party == 'from_party') else self.to_folio_no;
 				doc.save()
 			else:
-				if doc.folio_no != self.from_folio_no if (party == 'from_party') else self.to_folio_no:
+				if doc.folio_no != (self.from_folio_no if (party == 'from_party') else self.to_folio_no):
 					frappe.throw('The folio numbers are not matching')
+
+	def autoname_folio(self, party):
+		doc = frappe.get_doc('Shareholder Party', party)
+		doc.folio_no = make_autoname('FN.#####')
+		doc.save()
+		return doc.folio_no

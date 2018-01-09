@@ -1,0 +1,26 @@
+[
+	{
+		"doctype": "Shareholder Party",
+		"title": "Hulk",
+		"company": "Stark Tower",
+		"shareholder_list": {
+			"shareholder": "SH00002"
+		}
+	},
+	{
+		"doctype": "Shareholder Party",
+		"title": "Iron Man",
+		"company": "Stark Tower",
+		"shareholder_list": {
+			"shareholder": "SH00001"
+		}
+	},
+	{
+		"doctype": "Shareholder Party",
+		"title": "Thor",
+		"company": "Stark Tower",
+		"shareholder_list": {
+			"shareholder": "SH00000"
+		}
+	}
+]

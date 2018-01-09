@@ -7,7 +7,7 @@ import frappe
 import unittest
 from frappe import ValidationError
 
-test_dependencies = ["Shareholder", "Share Type"]
+test_dependencies = ["Shareholder", "Share Type", "Shareholder Party"]
 
 class TestShareTransfer(unittest.TestCase):
 	def test_invalid_share_purchase(self):
@@ -15,7 +15,7 @@ class TestShareTransfer(unittest.TestCase):
 			"doctype": "Share Transfer",
 			"transfer_type": "Purchase",
 			"date": "2018-01-04",
-			"from_shareholder": "SH00001",
+			"from_party": "Tony Stark",
 			"share_type": "Class A",
 			"no_of_shares": 10,
 			"rate": 10.00,
@@ -28,8 +28,8 @@ class TestShareTransfer(unittest.TestCase):
 			"doctype": "Share Transfer",
 			"transfer_type": "Transfer",
 			"date": "2018-01-04",
-			"from_shareholder": "SH00001",
-			"to_shareholder": "SH00000",
+			"from_party": "Tony Stark",
+			"to_party": "Hulk",
 			"share_type": "Class A",
 			"no_of_shares": 10,
 			"rate": 10.00,
