@@ -32,7 +32,7 @@ def make_depreciation_entry_bulk_manage(date=None):
 			get_depreciation_accounts(asset)
 
 		for d in asset.get("schedules"):
-			if not d.journal_entry and getdate(d.schedule_date) == getdate(date) and asset.freeze ==0:
+			if not d.journal_entry and getdate(d.schedule_date) == getdate(date) and asset.freeze == 0  and asset.docstatus == 1:
 				
 
 				je.append("accounts", {
@@ -106,15 +106,16 @@ def get_scrapped_assets(sc_date,settings):
 	from datetime import timedelta
 	import dateutil.parser
 	dep=[]
-	schedules=frappe.get_all("Depreciation Schedule",['*'],filters={"schedule_date":sc_date,"journal_entry":None})
+	schedules=frappe.get_all("Depreciation Schedule",['*'],filters={"schedule_date":sc_date,"journal_entry":None,"docstatus":1})
 	if schedules:
 		for l in schedules:
 			if not l.journal_entry:
-				dep.append({
-					'asset_name':l.parent,
-					'depreciation_amount':l.depreciation_amount,
-					'accumulated_depreciation_amount':l.accumulated_depreciation_amount,
-					'journal_entry':l.journal_entry,
-					})
+				if frappe.db.get_value("Asset", l.parent, "freeze")==0 and frappe.db.get_value("Asset", l.parent, "docstatus")==1:
+					dep.append({
+						'asset_name':l.parent,
+						'depreciation_amount':l.depreciation_amount,
+						'accumulated_depreciation_amount':l.accumulated_depreciation_amount,
+						'journal_entry':l.journal_entry,
+						})
 	return dep
 	

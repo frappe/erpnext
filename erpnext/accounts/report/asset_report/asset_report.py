@@ -49,10 +49,10 @@ def get_data(filters):
 
 	data = []
 	for asset in li_list:
-		depreciation_schedule=frappe.db.sql("select sum(depreciation_amount) from `tabDepreciation Schedule` where parent ='{0}' and journal_entry != null ".format(asset.name))
+		depreciation_schedule=frappe.db.sql("select sum(depreciation_amount) from `tabDepreciation Schedule` where parent ='{0}' and journal_entry is not null ".format(asset.name))
 		item_name=frappe.db.sql("select item_name from `tabItem` where item_code ='{0}' ".format(asset.item_code))
 		asset_parent_category=frappe.db.sql("select parent_asset_category from `tabAsset Category` where name ='{0}' ".format(asset.asset_category))
-		book_value = (flt(asset.gross_purchase_amount)-flt(depreciation_schedule[0][0]))
+		book_value = (flt(asset.gross_purchase_amount)-flt(depreciation_schedule[0][0])) - flt(asset.expected_value_after_useful_life)
 
 		row = [
 		asset.name,
