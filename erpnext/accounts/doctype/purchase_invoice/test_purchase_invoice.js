@@ -1,7 +1,7 @@
 QUnit.module('Purchase Invoice');
 
 QUnit.test("test purchase invoice", function(assert) {
-	assert.expect(6);
+	assert.expect(9);
 	let done = assert.async();
 	frappe.run_serially([
 		() => {
@@ -39,6 +39,33 @@ QUnit.test("test purchase invoice", function(assert) {
 			assert.ok(cur_frm.doc.payment_schedule.length > 0, "Payment Term Schedule is not empty");
 
 		},
+		() => {
+			let date = cur_frm.doc.due_date;
+			frappe.tests.set_control('due_date', frappe.datetime.add_days(date, 1));
+			frappe.timeout(0.5);
+			assert.ok(cur_dialog && cur_dialog.is_visible, 'Message is displayed to user');
+		},
+		() => frappe.timeout(1),
+		() => frappe.tests.click_button('Close'),
+		() => frappe.timeout(0.5),
+		() => frappe.tests.set_form_values(cur_frm, [{'payment_terms_schedule': ''}]),
+		() => {
+			let date = cur_frm.doc.due_date;
+			frappe.tests.set_control('due_date', frappe.datetime.add_days(date, 1));
+			frappe.timeout(0.5);
+			assert.ok(cur_dialog && cur_dialog.is_visible, 'Message is displayed to user');
+		},
+		() => frappe.timeout(1),
+		() => frappe.tests.click_button('Close'),
+		() => frappe.timeout(0.5),
+		() => frappe.tests.set_form_values(cur_frm, [{'payment_schedule': []}]),
+		() => {
+			let date = cur_frm.doc.due_date;
+			frappe.tests.set_control('due_date', frappe.datetime.add_days(date, 1));
+			frappe.timeout(0.5);
+			assert.ok(!cur_dialog, 'Message is not shown');
+		},
+		() => cur_frm.save(),
 		() => frappe.tests.click_button('Submit'),
 		() => frappe.tests.click_button('Yes'),
 		() => frappe.timeout(1),
