@@ -86,7 +86,7 @@ class ShareTransfer(Document):
 		for party in parties:
 			doc = frappe.get_doc('Shareholder Party', self.get(party))
 			if doc.company != self.company:
-				frape.throw('The shareholder party doesn\'t belong to this company')
+				frappe.throw('The shareholder party doesn\'t belong to this company')
 			if doc.folio_no is '' or doc.folio_no is None:
 				doc.folio_no = self.from_folio_no if (party == 'from_party') else self.to_folio_no;
 				doc.save()
