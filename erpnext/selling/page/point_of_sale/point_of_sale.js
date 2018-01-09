@@ -324,7 +324,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		return new Promise((resolve) => {
 			const on_submit = ({ pos_profile, set_as_default }) => {
 				if (pos_profile) {
-					this.frm.doc.pos_profile = pos_profile;
+					this.pos_profile = pos_profile;
 				}
 
 				if (set_as_default) {
@@ -350,13 +350,19 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	on_change_pos_profile() {
-		this.set_pos_profile_data()
-			.then(() => {
-				this.reset_cart();
-				if (this.items) {
-					this.items.reset_items();
-				}
-			});
+		return frappe.run_serially([
+			() => this.make_sales_invoice_frm(),
+			() => {
+				this.frm.doc.pos_profile = this.pos_profile;
+				this.set_pos_profile_data()
+					.then(() => {
+						this.reset_cart();
+						if (this.items) {
+							this.items.reset_items();
+						}
+					});
+			}
+		]);
 	}
 
 	get_promopt_fields() {
