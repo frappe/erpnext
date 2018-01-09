@@ -19,10 +19,10 @@ frappe.ui.form.on('Timesheet Creation Tool', {
 				freeze: true,
 				btn: $(btn_primary),
 				method: "make_timesheet",
-				freeze_message: __("Creating Timesheet"),
+				freeze_message: __("Creating Timesheets"),
 				callback: (r) => {
 					if(!r.exc){
-						frappe.msgprint(__("Timesheets submitted"));
+						frappe.msgprint(__("Timesheets submitted."));
 						frm.clear_table("employees");
 						frm.clear_table("time_logs");
 						frm.refresh_fields();

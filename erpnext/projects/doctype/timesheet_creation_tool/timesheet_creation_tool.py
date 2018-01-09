@@ -10,6 +10,12 @@ from frappe.model.document import Document
 class TimesheetCreationTool(Document):
 	def onload(self):
 		self.get("__onload").maintain_bill_work_hours_same = frappe.db.get_single_value('HR Settings', 'maintain_bill_work_hours_same')
+		self.total_hours = 0.0
+		self.total_billable_hours = 0.0
+		self.total_billed_hours = 0.0
+		self.total_billable_amount = 0.0
+		self.total_costing_amount = 0.0
+		self.total_billed_amount = 0.0
 	def make_timesheet(self):
 		names = []
 		if not self.company:
@@ -26,7 +32,8 @@ class TimesheetCreationTool(Document):
 							"time_logs": time_log,
 							"note": self.note
 						})
-			doc = timesheet.insert()
+			doc = timesheet.insert();
+			doc.submit();
 			names.append(doc.name)
 		return names
 
