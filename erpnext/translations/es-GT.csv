@@ -1,4 +1,4 @@
-DocType: Purchase Receipt,Other Details,Otros Detalles
+DocType: Instructor Log,Other Details,Otros Detalles
 DocType: Material Request Item,Lead Time Date,Fecha de la Iniciativa
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +41,Lead Time Days,Tiempo de ejecución en días
 apps/erpnext/erpnext/selling/report/customer_credit_balance/customer_credit_balance.py +45,Outstanding Amt,Saldo Pendiente
