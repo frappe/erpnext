@@ -42,6 +42,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Timesheet Creation Tool",
+					"description": _("Create Timesheets for multiple employees."),
+				},
+				{
+					"type": "doctype",
 					"name": "Activity Type",
 					"description": _("Types of activities for Time Logs"),
 				},
