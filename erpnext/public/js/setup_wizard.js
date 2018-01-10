@@ -23,13 +23,13 @@ erpnext.setup.slides_settings = [
 				fieldtype: 'MultiCheck',
 				options: [
 					{ "label": __("Distribution"), "value": "Distribution" },
+					{ "label": __("Education"), "value": "Education" },
 					{ "label": __("Manufacturing"), "value": "Manufacturing" },
 					{ "label": __("Retail"), "value": "Retail" },
 					{ "label": __("Services"), "value": "Services" },
+					{ "label": __("Agriculture (beta)"), "value": "Agriculture" },
 					{ "label": __("Healthcare (beta)"), "value": "Healthcare" },
-					{ "label": __("Education"), "value": "Education" },
-					{ "label": __("Agriculture (alpha)"), "value": "Agriculture" },
-					{"label": __("Non Profit (beta)"), "value": "Non Profit"}
+					{ "label": __("Non Profit (beta)"), "value": "Non Profit" }
 				], reqd: 1
 			},
 		],
@@ -207,7 +207,7 @@ erpnext.setup.slides_settings = [
 // default 1st Jan - 31st Dec
 
 erpnext.setup.fiscal_years = {
-	"Afghanistan": ["12-20", "12-21"],
+	"Afghanistan": ["12-21", "12-20"],
 	"Australia": ["07-01", "06-30"],
 	"Bangladesh": ["07-01", "06-30"],
 	"Canada": ["04-01", "03-31"],

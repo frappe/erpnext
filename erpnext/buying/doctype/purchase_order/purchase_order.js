@@ -12,6 +12,15 @@ frappe.ui.form.on("Purchase Order", {
 			'Purchase Invoice': 'Invoice',
 			'Stock Entry': 'Material to Supplier'
 		}
+		
+		frm.set_query("reserve_warehouse", "supplied_items", function() {
+			return {
+				filters: {
+					"company": frm.doc.company,
+					"is_group": 0
+				}
+			}
+		});
 	},
 
 	onload: function(frm) {
@@ -21,22 +30,17 @@ frappe.ui.form.on("Purchase Order", {
 			return erpnext.queries.warehouse(frm.doc);
 		});
 
+		frappe.db.get_value('Buying Settings', {name: 'Buying Settings'}, 'disable_fetch_last_purchase_rate', (r) => {
+			value = r && cint(r.disable_fetch_last_purchase_rate);
+			frm.toggle_display('get_last_purchase_rate', !value);
+		});
+
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
 	},
 });
 
 frappe.ui.form.on("Purchase Order Item", {
-	item_code: function(frm) {
-		frappe.call({
-			method: "get_last_purchase_rate",
-			doc: frm.doc,
-			callback: function(r, rt) {
-				frm.trigger('calculate_taxes_and_totals');
-			}
-		})
-	},
-
 	schedule_date: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if (row.schedule_date) {
@@ -289,7 +293,8 @@ cur_frm.fields_dict['items'].grid.get_field('bom').get_query = function(doc, cdt
 		filters: [
 			['BOM', 'item', '=', d.item_code],
 			['BOM', 'is_active', '=', '1'],
-			['BOM', 'docstatus', '=', '1']
+			['BOM', 'docstatus', '=', '1'],
+			['BOM', 'company', '=', doc.company]
 		]
 	}
 }

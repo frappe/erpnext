@@ -440,7 +440,7 @@ erpnext.patches.v8_7.add_more_gst_fields #21-09-2017
 erpnext.patches.v8_7.fix_purchase_receipt_status
 erpnext.patches.v8_6.rename_bom_update_tool
 erpnext.patches.v8_7.set_offline_in_pos_settings #11-09-17
-erpnext.patches.v8_9.add_setup_progress_actions #08-09-2017 #26-09-2017 #22-11-2017
+erpnext.patches.v8_9.add_setup_progress_actions #08-09-2017 #26-09-2017 #22-11-2017 #15-12-2017
 erpnext.patches.v8_9.rename_company_sales_target_field
 erpnext.patches.v8_8.set_bom_rate_as_per_uom
 erpnext.patches.v8_8.add_new_fields_in_accounts_settings
@@ -463,7 +463,6 @@ execute:frappe.delete_doc_if_exists("DocType", "Program Fee")
 erpnext.patches.v9_0.set_pos_profile_name
 erpnext.patches.v9_0.remove_non_existing_warehouse_from_stock_settings
 execute:frappe.delete_doc_if_exists("DocType", "Program Fee")
-erpnext.patches.v8_10.update_gl_due_date_for_pi_and_si
 erpnext.patches.v8_10.change_default_customer_credit_days
 erpnext.patches.v9_0.update_employee_loan_details
 erpnext.patches.v9_2.delete_healthcare_domain_default_items
@@ -479,4 +478,12 @@ erpnext.patches.v9_2.rename_net_weight_in_item_master
 erpnext.patches.v9_2.delete_process_payroll
 erpnext.patches.v10_0.add_agriculture_domain
 erpnext.patches.v10_0.add_non_profit_domain
+erpnext.patches.v10_0.setup_vat_for_uae_and_saudi_arabia #2017-12-28
+erpnext.patches.v10_0.set_primary_contact_for_customer
+erpnext.patches.v10_0.copy_projects_renamed_fields
+erpnext.patches.v10_0.enabled_regional_print_format_based_on_country
+erpnext.patches.v10_0.update_asset_calculate_depreciation
+erpnext.patches.v10_0.add_guardian_role_for_parent_portal
+erpnext.patches.v10_0.set_numeric_ranges_in_template_if_blank
+erpnext.patches.v10_0.update_reserved_qty_for_purchase_order
 erpnext.patches.v10_0.item_barcode_childtable_migrate

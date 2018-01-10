@@ -31,8 +31,8 @@ class POSProfile(Document):
 				msgprint(_("Already set default in pos profile {0} for user {1}, kindly disabled default")
 					.format(res[0][0], row.user), raise_exception=1)
 			elif not row.default and not res:
-				msgprint(_("Row {0}: set atleast one default pos profile for user {1}")
-					.format(row.idx, row.user), raise_exception=1)
+				msgprint(_("User {0} doesn't have any default POS Profile. Check Default at Row {1} for this User.")
+					.format(row.user, row.idx), raise_exception=1)
 
 	def validate_all_link_fields(self):
 		accounts = {"Account": [self.income_account,
@@ -63,7 +63,11 @@ class POSProfile(Document):
 
 			if len(default_mode_of_payment) > 1:
 				frappe.throw(_("Multiple default mode of payment is not allowed"))
+
 	def validate_customer_territory_group(self):
+		if not frappe.db.get_single_value('POS Settings', 'use_pos_in_offline_mode'):
+			return
+
 		if not self.territory:
 			frappe.throw(_("Territory is Required in POS Profile"), title="Mandatory Field")
 
@@ -83,12 +87,12 @@ class POSProfile(Document):
 		frappe.defaults.clear_default("is_pos")
 
 		if not include_current_pos:
-			condition = " where name != '%s'" % self.name.replace("'", "\'")
+			condition = " where pfu.name != '%s' and pfu.default = 1 " % self.name.replace("'", "\'")
 		else:
-			condition = ""
+			condition = " where pfu.default = 1 "
 
-		pos_view_users = frappe.db.sql_list("""select user
-			from `tabPOS Profile` {0}""".format(condition))
+		pos_view_users = frappe.db.sql_list("""select pfu.user
+			from `tabPOS Profile User` as pfu {0}""".format(condition))
 
 		for user in pos_view_users:
 			if user:
@@ -103,7 +107,7 @@ def get_item_groups(pos_profile):
 	if pos_profile.get('item_groups'):
 		# Get items based on the item groups defined in the POS profile
 		for data in pos_profile.get('item_groups'):
-			item_groups.extend(["'%s'"%d.name for d in get_child_nodes('Item Group', data.item_group)])
+			item_groups.extend(["'%s'" % frappe.db.escape(d.name) for d in get_child_nodes('Item Group', data.item_group)])
 
 	return list(set(item_groups))
 

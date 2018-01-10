@@ -10,6 +10,11 @@ data = {
 		'HR',
 		'ToDo'
 	],
+	'restricted_roles': [
+		'Non Profit Manager',
+		'Non Profit Member',
+		'Non Profit Portal User'
+	],
 	'modules': [
 		'Non Profit'
 	],

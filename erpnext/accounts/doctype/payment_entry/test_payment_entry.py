@@ -66,18 +66,6 @@ class TestPaymentEntry(unittest.TestCase):
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, 100)
 
-	def test_payment_entry_against_si_multi_due_dates(self):
-		si = create_sales_invoice(do_not_save=1)
-		si.payment_terms_template = '_Test Payment Term Template'
-		si.insert()
-		si.submit()
-
-		pe = get_payment_entry(si.doctype, si.name)
-		pe.reference_no = "1"
-		pe.reference_date = "2016-01-01"
-		pe.insert()
-		pe.submit()
-
 	def test_payment_entry_against_pi(self):
 		pi = make_purchase_invoice(supplier="_Test Supplier USD", debit_to="_Test Payable USD - _TC",
 			currency="USD", conversion_rate=50)
@@ -106,6 +94,7 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
 		pe.source_exchange_rate = 1
+		pe.paid_to = payable
 		pe.insert()
 		pe.submit()
 

@@ -101,7 +101,7 @@ class Lead(SellingController):
 
 	def set_lead_name(self):
 		if not self.lead_name:
-			frappe.db.set_value("Lead", self.name, "lead_name", self.organization_name)
+			frappe.db.set_value("Lead", self.name, "lead_name", self.company_name)
 
 @frappe.whitelist()
 def make_customer(source_name, target_doc=None):
@@ -129,7 +129,6 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 			}
 		}}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 
-	print(doclist)
 	return doclist
 
 @frappe.whitelist()
