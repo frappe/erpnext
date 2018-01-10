@@ -4,18 +4,17 @@
 frappe.query_reports["Course wise Assessment Report"] = {
 	"filters": [
 		{
-			"fieldname":"assessment_group",
-			"label": __("Assessment Group"),
+			"fieldname":"academic_year",
+			"label": __("Academic Year"),
 			"fieldtype": "Link",
-			"options": "Assessment Group",
-			"reqd": 1,
-			"get_query": function() {
-				return{
-					filters: {
-						'is_group': 0
-					}
-				};
-			}
+			"options": "Academic Year",
+			"reqd": 1
+		},
+		{
+			"fieldname":"academic_term",
+			"label": __("Academic Term"),
+			"fieldtype": "Link",
+			"options": "Academic Term"
 		},
 		{
 			"fieldname":"course",
@@ -29,6 +28,13 @@ frappe.query_reports["Course wise Assessment Report"] = {
 			"label": __("Student Group"),
 			"fieldtype": "Link",
 			"options": "Student Group"
+		},
+		{
+			"fieldname":"assessment_group",
+			"label": __("Assessment Group"),
+			"fieldtype": "Link",
+			"options": "Assessment Group",
+			"reqd": 1
 		}
 	]
 };
