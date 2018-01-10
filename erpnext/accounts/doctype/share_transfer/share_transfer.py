@@ -10,15 +10,6 @@ from frappe.model.naming   import make_autoname
 class ShareTransfer(Document):
 	def before_save(self):
 		if self.transfer_type == 'Issue':
-			#todo if 1st make a Shareholder Party under Company Name
-			if not frappe.db.exists('Shareholder Party', self.company):
-				company_party_doc = frappe.get_doc({
-					'doctype': 'Shareholder Party',
-					'title': self.company,
-					'company': self.company,
-					'is_company': 1 
-					})
-				company_party_doc.insert()
 			#todo make entry in company party
 			company_party_doc = frappe.get_doc('Shareholder Party', self.company)
 			company_party_doc.append('share_balance', {
@@ -42,6 +33,7 @@ class ShareTransfer(Document):
 				'amount': self.amount,
 				'no_of_shares': self.no_of_shares
 			})
+			doc.save()
 		elif self.transfer_type == 'Purchase':
 			#todo remove the necessary entry from the required Shareholder Party's Share Balance
 			self.remove_shares(self.from_party)
@@ -60,11 +52,21 @@ class ShareTransfer(Document):
 				'amount': self.amount,
 				'no_of_shares': self.no_of_shares
 			})
+			doc.save()
 
 	def validate(self):
 		self.basic_validations()
 		self.folio_no_validation()
 		if self.transfer_type == 'Issue':
+			#todo if 1st make a Shareholder Party under Company Name
+			if not frappe.db.exists('Shareholder Party', self.company):
+				company_party_doc = frappe.get_doc({
+					'doctype': 'Shareholder Party',
+					'title': self.company,
+					'company': self.company,
+					'is_company': 1 
+				})
+				company_party_doc.insert()
 			# validate share doesnt exist in company
 			ret_val = self.share_exists(self.company)
 			if ret_val != False:
@@ -93,7 +95,7 @@ class ShareTransfer(Document):
 				frappe.throw('The fields \'From Shareholder\' and \'To Shareholder\' cannot be blank')
 		if self.from_party == self.to_party:
 			frappe.throw('The seller and the buyer cannot be the same')
-		if self.no_of_shares != self.from_no - self.to_no + 1:
+		if self.no_of_shares != self.to_no - self.from_no + 1:
 			frappe.throw('The number of shares and the share numbers are inconsistent!') 
 		if self.amount is None:
 			self.amount = self.rate * self.no_of_shares
@@ -106,7 +108,7 @@ class ShareTransfer(Document):
 		# 		 False	 			if completely doesn't exist,
 		#		 'partially exists' if partailly doesn't exist
 		ret_val = self.recursive_share_check(party, self.share_type,
-			{
+			query = {
 				'from_no': self.from_no,
 				'to_no': self.to_no
 			}
@@ -129,18 +131,18 @@ class ShareTransfer(Document):
 		does_share_exist = []
 		doc = frappe.get_doc('Shareholder Party', party)
 		for entry in doc.share_balance:
-			if entry.share_type != share_type or
-				entry.from_no > query.to_no or
-				entry.to_no < query.from_no:
+			if entry.share_type != share_type or \
+				entry.from_no > query['to_no'] or \
+				entry.to_no < query['from_no']:
 				continue # since query lies outside bounds
-			elif entry.from_no <= query.from_no and entry.to_no >= query.to_no:
+			elif entry.from_no <= query['from_no'] and entry.to_no >= query['to_no']:
 				return [True] # absolute truth!
-			elif entry.from_no >= query.from_no and entry.to_no <= query.to_no:
+			elif entry.from_no >= query['from_no'] and entry.to_no <= query['to_no']:
 				# split and check
 				does_share_exist.extend(self.recursive_share_check(party,
 					share_type,
 					{
-						'from_no': query.from_no,
+						'from_no': query['from_no'],
 						'to_no': entry.from_no - 1
 					}
 				))
@@ -149,23 +151,23 @@ class ShareTransfer(Document):
 					share_type,
 					{
 						'from_no': entry.to_no + 1,
-						'to_no': query.to_no
+						'to_no': query['to_no']
 					}
 				))
-			elif query.from_no <= entry.from_no <= query.to_no and entry.to_no >= query.to_no:
+			elif query['from_no'] <= entry.from_no <= query['to_no'] and entry.to_no >= query['to_no']:
 				does_share_exist.extend(self.recursive_share_check(party,
 					share_type,
 					{
-						'from_no': query.from_no,
+						'from_no': query['from_no'],
 						'to_no': entry.from_no - 1
 					}
 				))
-			elif query.from_no <= entry.to_no <= query.to_no and entry.from_no <= query.from_no:
+			elif query['from_no'] <= entry.to_no <= query['to_no'] and entry.from_no <= query['from_no']:
 				does_share_exist.extend(self.recursive_share_check(party,
 					share_type,
 					{
 						'from_no': entry.to_no + 1,
-						'to_no': query.to_no
+						'to_no': query['to_no']
 					}
 				))
 
@@ -213,36 +215,37 @@ class ShareTransfer(Document):
 
 		for entry in current_entries:
 			# use spaceage logic here
-			if entry.share_type != share_type or
-				entry.from_no > query.to_no or
-				entry.to_no < query.from_no:
+			if entry.share_type != share_type or \
+				entry.from_no > query['to_no'] or \
+				entry.to_no < query['from_no']:
 				continue # since query lies outside bounds
-			elif entry.from_no <= query.from_no and entry.to_no >= query.to_no:
+			elif entry.from_no <= query['from_no'] and entry.to_no >= query['to_no']:
 				#split
-				if entry.from_no == query.from_no:
-					if entry.to_no == query.to_no:
+				if entry.from_no == query['from_no']:
+					if entry.to_no == query['to_no']:
 						pass #nothing to append
 					else:
-						new_entries.append(return_share_balance_entry(query.to_no+1, entry.to_no))
+						new_entries.append(self.return_share_balance_entry(query['to_no']+1, entry.to_no))
 				else:
-					if entry.to_no == query.to_no:
-						new_entries.append(return_share_balance_entry(entry.from_no, query.from_no-1))
+					if entry.to_no == query['to_no']:
+						new_entries.append(self.return_share_balance_entry(entry.from_no, query['from_no']-1))
 					else:
-						new_entries.append(return_share_balance_entry(entry.from_no, query.from_no-1))
-						new_entries.append(return_share_balance_entry(query.to_no+1, entry.to_no))
-			elif entry.from_no >= query.from_no and entry.to_no <= query.to_no:
+						new_entries.append(self.return_share_balance_entry(entry.from_no, query['from_no']-1))
+						new_entries.append(self.return_share_balance_entry(query['to_no']+1, entry.to_no))
+			elif entry.from_no >= query['from_no'] and entry.to_no <= query['to_no']:
 				# split and check
 				pass #nothing to append
-			elif query.from_no <= entry.from_no <= query.to_no and entry.to_no >= query.to_no:
-				new_entries.append(return_share_balance_entry(query.to_no+1, entry.to_no))
-			elif query.from_no <= entry.to_no <= query.to_no and entry.from_no <= query.from_no:
-				new_entries.append(return_share_balance_entry(entry.from_no, query.from_no-1))
+			elif query['from_no'] <= entry.from_no <= query['to_no'] and entry.to_no >= query['to_no']:
+				new_entries.append(self.return_share_balance_entry(query['to_no']+1, entry.to_no))
+			elif query['from_no'] <= entry.to_no <= query['to_no'] and entry.from_no <= query['from_no']:
+				new_entries.append(self.return_share_balance_entry(entry.from_no, query['from_no']-1))
 			else:
 				new_entries.append(entry)
 
 		doc.share_balance = []
 		for entry in new_entries:
 			doc.append('share_balance', entry)
+		doc.save()
 
 	def return_share_balance_entry(self, from_no, to_no):
 		# return an entry as a dict
