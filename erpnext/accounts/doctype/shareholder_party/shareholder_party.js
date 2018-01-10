@@ -3,6 +3,7 @@
 
 frappe.ui.form.on('Shareholder Party', {
 	refresh: (frm) => {
+		frm.set_df_property('shareholder_list', "reqd", frm.doc.is_company ? 0 : 1);
 		if (frm.doc.folio_no){
 			frm.add_custom_button(__("Share Balance"), function(){
 				frappe.route_options = {
