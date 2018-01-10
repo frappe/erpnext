@@ -5,6 +5,7 @@ QUnit.test("test account with number", function(assert) {
 	let done = assert.async();
 	frappe.run_serially([
 		() => frappe.set_route('Tree', 'Account'),
+		() => frappe.click_button('Expand All'),
 		() => frappe.click_link('Income'),
 		() => frappe.click_button('Add Child'),
 		() => frappe.timeout(.5),
@@ -29,7 +30,7 @@ QUnit.test("test account with number", function(assert) {
 		() => cur_dialog.primary_action(),
 		() => frappe.timeout(1),
 		() => cur_frm.refresh_fields(),
-		() => frappe.timeout(.5),
+		() => frappe.timeout(2),
 		() => {
 			var abbr = frappe.get_abbr(frappe.defaults.get_default("Company"));
 			var new_account = "4020 - Test Income - " + abbr;

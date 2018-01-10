@@ -59,9 +59,6 @@ $.extend(frappe.test_data, {
 		],
 		"LEAD-00002": [
 			{lead_name: "Test Lead 2"}
-		],
-		"LEAD-00003": [
-			{lead_name: "Test Lead 3"}
 		]
 	},
 	"Address": {

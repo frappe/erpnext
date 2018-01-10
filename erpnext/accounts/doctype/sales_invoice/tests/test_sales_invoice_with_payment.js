@@ -1,7 +1,7 @@
 QUnit.module('Sales Invoice');
 
 QUnit.test("test sales Invoice with payment", function(assert) {
-	assert.expect(4);
+	assert.expect(6);
 	let done = assert.async();
 	frappe.run_serially([
 		() => {
@@ -31,6 +31,8 @@ QUnit.test("test sales Invoice with payment", function(assert) {
 			assert.ok(cur_frm.doc.taxes_and_charges=='TEST In State GST - FT', "Tax details correct");
 			// grand_total Calculated
 			assert.ok(cur_frm.doc.grand_total==590, "Grad Total correct");
+			assert.ok(cur_frm.doc.payment_terms_template, "Payment Terms Template is correct");
+			assert.ok(cur_frm.doc.payment_schedule.length > 0, "Payment Term Schedule is not empty");
 
 		},
 		() => frappe.tests.click_button('Submit'),
@@ -39,7 +41,7 @@ QUnit.test("test sales Invoice with payment", function(assert) {
 		() => frappe.tests.click_button('Close'),
 		() => frappe.tests.click_button('Make'),
 		() => frappe.tests.click_link('Payment'),
-		() => frappe.timeout(0.2),
+		() => frappe.timeout(1),
 		() => { cur_frm.set_value('mode_of_payment','Cash');},
 		() => { cur_frm.set_value('paid_to','Cash - '+frappe.get_abbr(frappe.defaults.get_default('Company')));},
 		() => {cur_frm.set_value('reference_no','TEST1234');},

@@ -6,11 +6,22 @@ QUnit.test("Test: Employee Loan Application [HR]", function (assert) {
 	let employee_name;
 
 	frappe.run_serially([
+		() => {
+			frappe.tests.make('Loan Type', [
+				{ loan_name: 'Test Loan'},
+				{ maximum_loan_amount: 400000},
+				{ rate_of_interest: 14},
+				{ description:
+					'This is just a test.'}
+			]);
+		},
+		() => frappe.timeout(2),
 		//  Creation of Loan Application
 		() => frappe.db.get_value('Employee', {'employee_name': 'Test Employee 1'}, 'name'),
 		(r) => {
 			employee_name = r.message.name;
 		},
+		() => frappe.timeout(2),
 		() => {
 			return frappe.tests.make('Employee Loan Application', [
 				{ company: 'For Testing'},
