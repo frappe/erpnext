@@ -48,7 +48,7 @@ QUnit.test("test: Timesheet Creation Tool", function (assert) {
 			assert.ok(cur_frm.doc.total_costing_amount = 100, "total costing correct");
 		},
 
-		() => frappe.click_button('Make Timesheets'),
+		() => frappe.click_button('Create Timesheet as Draft'),
 		() => frappe.timeout(3),
 		() => frappe.set_route('List', 'Timesheet'),
 		() => frappe.timeout(2),

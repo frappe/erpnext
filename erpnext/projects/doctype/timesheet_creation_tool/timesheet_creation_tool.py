@@ -16,10 +16,14 @@ class TimesheetCreationTool(Document):
 		self.total_billable_amount = 0.0
 		self.total_costing_amount = 0.0
 		self.total_billed_amount = 0.0
-	def make_timesheet(self):
-		names = []
+
+	def create_timesheet(self):
 		if not self.company:
-			frappe.throw(_("Please select the Company"))
+			frappe.throw(_("Please select the Company."))
+		elif not self.employees:
+			frappe.throw(_("Please add atleast one employee."))
+		elif not self.time_logs:
+			frappe.throw(_("Mandatory field: Time Logs"))
 		for emp in self.employees:
 			if not emp:
 				return None
@@ -29,13 +33,14 @@ class TimesheetCreationTool(Document):
 							"doctype": "Timesheet",
 							"company": self.company,
 							"employee": emp.employee,
-							"time_logs": time_log,
-							"note": self.note
+							"time_logs": time_log
 						})
 			doc = timesheet.insert();
-			doc.submit();
-			names.append(doc.name)
-		return names
+		return doc
+
+	def submit_timesheet(self):
+		doc = self.create_timesheet()
+		doc.submit()
 
 def get_timelogs_dict(time_logs):
 	logs = []
