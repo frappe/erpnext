@@ -2,15 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 import frappe.defaults
 from frappe import _
 from frappe.utils import cstr, cint, flt, comma_or, getdate, nowdate, formatdate, format_time
 from erpnext.stock.utils import get_incoming_rate
-from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError
+from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError, get_valuation_rate
 from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor
 from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos, get_batch_qty
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
+from erpnext.stock.utils import get_bin
 import json
 
 class IncorrectValuationRateError(frappe.ValidationError): pass
@@ -50,11 +51,15 @@ class StockEntry(StockController):
 		self.validate_with_material_request()
 		self.validate_batch()
 
+		if not self.from_bom:
+			self.fg_completed_qty = 0.0
+
 		if self._action == 'submit':
 			self.make_batches('t_warehouse')
 		else:
 			set_batch_nos(self, 's_warehouse')
 
+		self.set_incoming_rate()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount(update_finished_item_rate=False)
 
@@ -65,11 +70,15 @@ class StockEntry(StockController):
 		update_serial_nos_after_submit(self, "items")
 		self.update_production_order()
 		self.validate_purchase_order()
+		if self.purchase_order and self.purpose == "Subcontract":
+			self.update_purchase_order_supplied_items()
 		self.make_gl_entries()
 
 	def on_cancel(self):
 		self.update_stock_ledger()
 		self.update_production_order()
+		if self.purchase_order and self.purpose == "Subcontract":
+			self.update_purchase_order_supplied_items()
 		self.make_gl_entries_on_cancel()
 
 	def validate_purpose(self):
@@ -213,6 +222,18 @@ class StockEntry(StockController):
 				frappe.throw(_("Stock Entries already created for Production Order ")
 					+ self.production_order + ":" + ", ".join(other_ste), DuplicateEntryForProductionOrderError)
 
+	def set_incoming_rate(self):
+		for d in self.items:
+			if d.s_warehouse:
+				args = self.get_args_for_incoming_rate(d)
+				d.basic_rate = get_incoming_rate(args)
+			elif d.allow_zero_valuation_rate and not d.s_warehouse:
+				d.basic_rate = 0.0
+			elif d.t_warehouse and not d.basic_rate:
+				d.basic_rate = get_valuation_rate(d.item_code, d.t_warehouse,
+					self.doctype, d.name, d.allow_zero_valuation_rate,
+					currency=erpnext.get_company_currency(self.company))
+
 	def set_actual_qty(self):
 		allow_negative_stock = cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
 
@@ -268,14 +289,7 @@ class StockEntry(StockController):
 
 		for d in self.get('items'):
 			if d.t_warehouse: fg_basic_rate = flt(d.basic_rate)
-			args = frappe._dict({
-				"item_code": d.item_code,
-				"warehouse": d.s_warehouse or d.t_warehouse,
-				"posting_date": self.posting_date,
-				"posting_time": self.posting_time,
-				"qty": d.s_warehouse and -1*flt(d.transfer_qty) or flt(d.transfer_qty),
-				"serial_no": d.serial_no,
-			})
+			args = self.get_args_for_incoming_rate(d)
 
 			# get basic rate
 			if not d.bom_no:
@@ -303,6 +317,20 @@ class StockEntry(StockController):
 		number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
 		if (fg_basic_rate == 0.0 and number_of_fg_items == 1) or update_finished_item_rate:
 			self.set_basic_rate_for_finished_goods(raw_material_cost, scrap_material_cost)
+
+	def get_args_for_incoming_rate(self, item):
+		return frappe._dict({
+			"item_code": item.item_code,
+			"warehouse": item.s_warehouse or item.t_warehouse,
+			"posting_date": self.posting_date,
+			"posting_time": self.posting_time,
+			"qty": item.s_warehouse and -1*flt(item.transfer_qty) or flt(item.transfer_qty),
+			"serial_no": item.serial_no,
+			"voucher_type": self.doctype,
+			"voucher_no": item.name,
+			"company": self.company,
+			"allow_zero_valuation": item.allow_zero_valuation_rate,
+		})
 
 	def set_basic_rate_for_finished_goods(self, raw_material_cost, scrap_material_cost):
 		if self.purpose in ["Manufacture", "Repack"]:
@@ -352,6 +380,7 @@ class StockEntry(StockController):
 		if self.purpose == "Subcontract" and self.purchase_order:
 			purchase_order = frappe.get_doc("Purchase Order", self.purchase_order)
 			for se_item in self.items:
+				precision = cint(frappe.db.get_default("float_precision")) or 3
 				total_allowed = sum([flt(d.required_qty) for d in purchase_order.supplied_items \
 					if d.rm_item_code == se_item.item_code])
 				if not total_allowed:
@@ -365,7 +394,7 @@ class StockEntry(StockController):
 						and `tabStock Entry Detail`.parent = `tabStock Entry`.name""",
 							(self.purchase_order, se_item.item_code))[0][0]
 
-				if total_supplied > total_allowed:
+				if flt(total_supplied, precision) > flt(total_allowed, precision):
 					frappe.throw(_("Row {0}# Item {1} cannot be transferred more than {2} against Purchase Order {3}")
 						.format(se_item.idx, se_item.item_code, total_allowed, self.purchase_order))
 
@@ -557,19 +586,31 @@ class StockEntry(StockController):
 						frappe.throw(_("Manufacturing Quantity is mandatory"))
 
 					item_dict = self.get_bom_raw_materials(self.fg_completed_qty)
+
+					#Get PO Supplied Items Details
+					if self.purchase_order and self.purpose == "Subcontract":
+						#Get PO Supplied Items Details
+						item_wh = frappe._dict(frappe.db.sql("""
+							select rm_item_code, reserve_warehouse 
+							from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
+							where po.name = poitemsup.parent
+								and po.name = %s""",self.purchase_order))
 					for item in item_dict.values():
 						if self.pro_doc and not self.pro_doc.skip_transfer:
 							item["from_warehouse"] = self.pro_doc.wip_warehouse
-
+						#Get Reserve Warehouse from PO
+						item["from_warehouse"] = item_wh.get(item.item_code) if self.purchase_order and self.purpose=="Subcontract" else ""
 						item["to_warehouse"] = self.to_warehouse if self.purpose=="Subcontract" else ""
 
 					self.add_to_stock_entry_detail(item_dict)
 
-					scrap_item_dict = self.get_bom_scrap_material(self.fg_completed_qty)
-					for item in scrap_item_dict.values():
-						if self.pro_doc and self.pro_doc.scrap_warehouse:
-							item["to_warehouse"] = self.pro_doc.scrap_warehouse
-					self.add_to_stock_entry_detail(scrap_item_dict, bom_no=self.bom_no)
+					if self.purpose != "Subcontract":
+						scrap_item_dict = self.get_bom_scrap_material(self.fg_completed_qty)
+						for item in scrap_item_dict.values():
+							if self.pro_doc and self.pro_doc.scrap_warehouse:
+								item["to_warehouse"] = self.pro_doc.scrap_warehouse
+
+						self.add_to_stock_entry_detail(scrap_item_dict, bom_no=self.bom_no)
 
 			# fetch the serial_no of the first stock entry for the second stock entry
 			if self.production_order and self.purpose == "Manufacture":
@@ -773,6 +814,9 @@ class StockEntry(StockController):
 			se_child.expense_account = item_dict[d].get("expense_account") or expense_account
 			se_child.cost_center = item_dict[d].get("cost_center") or cost_center
 
+			if item_dict[d].get("idx"):
+				se_child.idx = item_dict[d].get("idx")
+
 			if se_child.s_warehouse==None:
 				se_child.s_warehouse = self.from_warehouse
 			if se_child.t_warehouse==None:
@@ -803,9 +847,23 @@ class StockEntry(StockController):
 					expiry_date = frappe.db.get_value("Batch", item.batch_no, "expiry_date")
 					if expiry_date:
 						if getdate(self.posting_date) > getdate(expiry_date):
-							frappe.throw(_("Batch {0} of Item {1} has expired.").format(item.batch_no, item.item_code))
+							frappe.throw(_("Batch {0} of Item {1} has expired.")
+								.format(item.batch_no, item.item_code))
 
+	def update_purchase_order_supplied_items(self):
+		#Get PO Supplied Items Details
+		item_wh = frappe._dict(frappe.db.sql("""
+			select rm_item_code, reserve_warehouse 
+			from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
+			where po.name = poitemsup.parent
+			and po.name = %s""", self.purchase_order))
 
+		#Update reserved sub contracted quantity in bin based on Supplied Item Details
+		for d in self.get("items"):
+			reserve_warehouse = item_wh.get(d.item_code)
+			stock_bin = get_bin(d.item_code, reserve_warehouse)
+			stock_bin.update_reserved_qty_for_sub_contracting()
+	
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):
 	if isinstance(items, basestring):
@@ -816,7 +874,8 @@ def move_sample_to_retention_warehouse(company, items):
 	stock_entry.purpose = "Material Transfer"
 	for item in items:
 		if item.get('sample_quantity') and item.get('batch_no'):
-			sample_quantity = validate_sample_quantity(item.get('item_code'), item.get('sample_quantity'), item.get('transfer_qty') or item.get('qty'), item.get('batch_no'))
+			sample_quantity = validate_sample_quantity(item.get('item_code'), item.get('sample_quantity'),
+				item.get('transfer_qty') or item.get('qty'), item.get('batch_no'))
 			if sample_quantity:
 				sample_serial_nos = ''
 				if item.get('serial_no'):
@@ -824,6 +883,7 @@ def move_sample_to_retention_warehouse(company, items):
 					if serial_nos and len(serial_nos) > item.get('sample_quantity'):
 						serial_no_list = serial_nos[:-(len(serial_nos)-item.get('sample_quantity'))]
 						sample_serial_nos = '\n'.join(serial_no_list)
+
 				stock_entry.append("items", {
 					"item_code": item.get('item_code'),
 					"s_warehouse": item.get('t_warehouse'),
@@ -934,7 +994,7 @@ def get_warehouse_details(args):
 @frappe.whitelist()
 def validate_sample_quantity(item_code, sample_quantity, qty, batch_no = None):
 	if cint(qty) < cint(sample_quantity):
-		frappe.throw(_("Sample quantity {0} cannot be more than received quantity {1}").format(sample_quantity, qty), alert=True)
+		frappe.throw(_("Sample quantity {0} cannot be more than received quantity {1}").format(sample_quantity, qty))
 	retention_warehouse = frappe.db.get_single_value('Stock Settings', 'sample_retention_warehouse')
 	retainted_qty = 0
 	if batch_no:

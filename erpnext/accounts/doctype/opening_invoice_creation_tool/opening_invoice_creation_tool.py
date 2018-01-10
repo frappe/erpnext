@@ -4,9 +4,10 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
-from frappe.utils import flt
+from frappe import _, scrub
+from frappe.utils import flt, nowdate
 from frappe.model.document import Document
+
 
 class OpeningInvoiceCreationTool(Document):
 	def onload(self):
@@ -67,29 +68,25 @@ class OpeningInvoiceCreationTool(Document):
 		for row in self.invoices:
 			if not row.qty:
 				row.qty = 1.0
-			if not row.party:
-				frappe.throw(mandatory_error_msg.format(
-					idx=row.idx,
-					field= _("Party"),
-					invoice_type=self.invoice_type
-				))
-			# set party type if not available
-			if not row.party_type:
-				row.party_type = "Customer" if self.invoice_type == "Sales" else "Supplier"
 
+			# always mandatory fields for the invoices
+			if not row.temporary_opening_account:
+				row.temporary_opening_account = get_temporary_opening_account(self.company)
+			row.party_type = "Customer" if self.invoice_type == "Sales" else "Supplier"
+			if not row.item_name:
+				row.item_name = _("Opening Invoice Item")
 			if not row.posting_date:
-				frappe.throw(mandatory_error_msg.format(
-					idx=row.idx,
-					field= _("Party"),
-					invoice_type=self.invoice_type
-				))
+				row.posting_date = nowdate()
+			if not row.due_date:
+				row.due_date = nowdate()
 
-			if not row.outstanding_amount:
-				frappe.throw(mandatory_error_msg.format(
-					idx=row.idx,
-					field= _("Outstanding Amount"),
-					invoice_type=self.invoice_type
-				))
+			for d in ("Party", "Outstanding Amount", "Temporary Opening Account"):
+				if not row.get(scrub(d)):
+					frappe.throw(mandatory_error_msg.format(
+						idx=row.idx,
+						field=_(d),
+						invoice_type=self.invoice_type
+					))
 
 			args = self.get_invoice_dict(row=row)
 			if not args:
@@ -99,10 +96,14 @@ class OpeningInvoiceCreationTool(Document):
 			doc.submit()
 			names.append(doc.name)
 
-			if(len(self.invoices) > 5):
-				frappe.publish_realtime("progress",
-					dict(progress=[row.idx, len(self.invoices)], title=_('Creating {0}').format(doc.doctype)),
-					user=frappe.session.user)
+			if len(self.invoices) > 5:
+				frappe.publish_realtime(
+					"progress", dict(
+						progress=[row.idx, len(self.invoices)],
+						title=_('Creating {0}').format(doc.doctype)
+					),
+					user=frappe.session.user
+				)
 
 		return names
 
@@ -111,8 +112,10 @@ class OpeningInvoiceCreationTool(Document):
 			default_uom = frappe.db.get_single_value("Stock Settings", "stock_uom") or _("Nos")
 			cost_center = frappe.db.get_value("Company", self.company, "cost_center")
 			if not cost_center:
-				frappe.throw(_("Please set the Default Cost Center in {0} company").format(frappe.bold(self.company)))
-			rate = flt(row.outstanding_amount) / row.qty
+				frappe.throw(
+					_("Please set the Default Cost Center in {0} company").format(frappe.bold(self.company))
+				)
+			rate = flt(row.outstanding_amount) / flt(row.qty)
 
 			return frappe._dict({
 				"uom": default_uom,
@@ -143,8 +146,7 @@ class OpeningInvoiceCreationTool(Document):
 			"due_date": row.due_date,
 			"posting_date": row.posting_date,
 			frappe.scrub(party_type): row.party,
-			"doctype": "Sales Invoice" if self.invoice_type == "Sales" \
-				else "Purchase Invoice",
+			"doctype": "Sales Invoice" if self.invoice_type == "Sales" else "Purchase Invoice",
 			"currency": frappe.db.get_value("Company", self.company, "default_currency")
 		})
 

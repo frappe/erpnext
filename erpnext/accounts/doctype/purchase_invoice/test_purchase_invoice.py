@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe, erpnext
 import frappe.model
-from frappe.utils import cint, flt, today, nowdate, getdate, add_days
+from frappe.utils import cint, flt, today, nowdate, add_days
 import frappe.defaults
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory, \
 	test_records as pr_test_records
@@ -27,6 +27,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		unlink_payment_on_cancel_of_invoice(0)
 
 	def test_gl_entries_without_perpetual_inventory(self):
+		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
 		wrapper = frappe.copy_doc(test_records[0])
 		set_perpetual_inventory(0, wrapper.company)
 		self.assertTrue(not cint(erpnext.is_perpetual_inventory_enabled(wrapper.company)))
@@ -646,39 +647,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		self.assertEquals(pi.total_taxes_and_charges, 462.3)
 		self.assertEquals(pi.grand_total, 1712.3)	
-
-	def test_gl_entry_based_on_payment_schedule(self):
-		pi = make_purchase_invoice(do_not_save=True, supplier="_Test Supplier P")
-		pi.append("payment_schedule", {
-			"due_date": add_days(nowdate(), 15),
-			"payment_amount": 100,
-			"invoice_portion": 40.00
-		})
-		pi.append("payment_schedule", {
-			"due_date": add_days(nowdate(), 25),
-			"payment_amount": 150,
-			"invoice_portion": 60.00
-		})
-
-		pi.save()
-		pi.submit()
-
-		gl_entries = frappe.db.sql("""select account, debit, credit, due_date
-			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
-			order by account asc, debit asc""", pi.name, as_dict=1)
-		self.assertTrue(gl_entries)
-
-		expected_gl_entries = sorted([
-			[pi.credit_to, 0.0, 100.0, add_days(nowdate(), 15)],
-			[pi.credit_to, 0.0, 150.0, add_days(nowdate(), 25)],
-			["_Test Account Cost for Goods Sold - _TC", 250.0, 0.0, None]
-		])
-
-		for i, gle in enumerate(sorted(gl_entries, key=lambda gle: gle.account)):
-			self.assertEquals(expected_gl_entries[i][0], gle.account)
-			self.assertEquals(expected_gl_entries[i][1], gle.debit)
-			self.assertEquals(expected_gl_entries[i][2], gle.credit)
-			self.assertEquals(getdate(expected_gl_entries[i][3]), getdate(gle.due_date))
 
 	def test_make_pi_without_terms(self):
 		pi = make_purchase_invoice(do_not_save=1)

@@ -50,6 +50,13 @@ class Company(Document):
 		if frappe.db.sql("select abbr from tabCompany where name!=%s and abbr=%s", (self.name, self.abbr)):
 			frappe.throw(_("Abbreviation already used for another company"))
 
+	def create_default_tax_template(self):
+		from erpnext.setup.setup_wizard.operations.taxes_setup import create_sales_tax
+		create_sales_tax({
+			'country': self.country,
+			'company_name': self.name
+		})
+
 	def validate_default_accounts(self):
 		for field in ["default_bank_account", "default_cash_account",
 			"default_receivable_account", "default_payable_account",
@@ -102,19 +109,16 @@ class Company(Document):
 			{"warehouse_name": _("Finished Goods"), "is_group": 0}]:
 
 			if not frappe.db.exists("Warehouse", "{0} - {1}".format(wh_detail["warehouse_name"], self.abbr)):
-				stock_group = frappe.db.get_value("Account", {"account_type": "Stock",
-					"is_group": 1, "company": self.name})
-				if stock_group:
-					warehouse = frappe.get_doc({
-						"doctype":"Warehouse",
-						"warehouse_name": wh_detail["warehouse_name"],
-						"is_group": wh_detail["is_group"],
-						"company": self.name,
-						"parent_warehouse": "{0} - {1}".format(_("All Warehouses"), self.abbr) \
-							if not wh_detail["is_group"] else ""
-					})
-					warehouse.flags.ignore_permissions = True
-					warehouse.insert()
+				warehouse = frappe.get_doc({
+					"doctype":"Warehouse",
+					"warehouse_name": wh_detail["warehouse_name"],
+					"is_group": wh_detail["is_group"],
+					"company": self.name,
+					"parent_warehouse": "{0} - {1}".format(_("All Warehouses"), self.abbr) \
+						if not wh_detail["is_group"] else ""
+				})
+				warehouse.flags.ignore_permissions = True
+				warehouse.insert()
 
 	def create_default_accounts(self):
 		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
@@ -324,7 +328,7 @@ def install_country_fixtures(company):
 	path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(company_doc.country))
 	if os.path.exists(path.encode("utf-8")):
 		frappe.get_attr("erpnext.regional.{0}.setup.setup"
-			.format(company_doc.country.lower()))(company_doc)
+			.format(frappe.scrub(company_doc.country)))(company_doc)
 
 def update_company_current_month_sales(company):
 	current_month_year = formatdate(today(), "MM-yyyy")

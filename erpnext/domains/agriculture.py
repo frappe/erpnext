@@ -14,6 +14,10 @@ data = {
 		'Water Analysis',
 		'Weather'
 	],
+	'restricted_roles': [
+		'Agriculture Manager',
+		'Agriculture User'
+	],
 	'modules': [
 		'Agriculture'
 	],

@@ -10,6 +10,7 @@ def execute():
 	frappe.reload_doc("core", "doctype", "domain")
 	frappe.reload_doc("core", "doctype", "domain_settings")
 	frappe.reload_doc("core", "doctype", "has_domain")
+	frappe.reload_doc("core", "doctype", "role")
 
 	for domain in ("Distribution", "Manufacturing", "Retail", "Services", "Education"):
 		if not frappe.db.exists({"doctype": "Domain", "domain": domain}):

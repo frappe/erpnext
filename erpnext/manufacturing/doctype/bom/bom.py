@@ -192,7 +192,7 @@ class BOM(WebsiteGenerator):
 		# update parent BOMs
 		if self.total_cost != existing_bom_cost and update_parent:
 			parent_boms = frappe.db.sql_list("""select distinct parent from `tabBOM Item`
-				where bom_no = %s and docstatus=1""", self.name)
+				where bom_no = %s and docstatus=1 and parenttype='BOM'""", self.name)
 
 			for bom in parent_boms:
 				frappe.get_doc("BOM", bom).update_cost(from_child_bom=True)
@@ -224,6 +224,9 @@ class BOM(WebsiteGenerator):
 				order by posting_date desc, posting_time desc, name desc limit 1""", args['item_code'])
 
 			valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
+
+		if not valuation_rate:
+			valuation_rate = frappe.db.get_value("Item", args['item_code'], "valuation_rate")
 
 		return valuation_rate
 
@@ -327,7 +330,7 @@ class BOM(WebsiteGenerator):
 		for d in check_list:
 			bom_list, count = [self.name], 0
 			while (len(bom_list) > count ):
-				boms = frappe.db.sql(" select %s from `tabBOM Item` where %s = %s " %
+				boms = frappe.db.sql(" select %s from `tabBOM Item` where %s = %s and parenttype='BOM'" %
 					(d[0], d[1], '%s'), cstr(bom_list[count]))
 				count = count + 1
 				for b in boms:
@@ -347,7 +350,7 @@ class BOM(WebsiteGenerator):
 	def traverse_tree(self, bom_list=None):
 		def _get_children(bom_no):
 			return [cstr(d[0]) for d in frappe.db.sql("""select bom_no from `tabBOM Item`
-				where parent = %s and ifnull(bom_no, '') != ''""", bom_no)]
+				where parent = %s and ifnull(bom_no, '') != '' and parenttype='BOM'""", bom_no)]
 
 		count = 0
 		if not bom_list:
@@ -493,7 +496,7 @@ class BOM(WebsiteGenerator):
 	def validate_bom_links(self):
 		if not self.is_active:
 			act_pbom = frappe.db.sql("""select distinct bom_item.parent from `tabBOM Item` bom_item
-				where bom_item.bom_no = %s and bom_item.docstatus = 1
+				where bom_item.bom_no = %s and bom_item.docstatus = 1 and bom_item.parenttype='BOM'
 				and exists (select * from `tabBOM` where name = bom_item.parent
 					and docstatus = 1 and is_active = 1)""", self.name)
 
@@ -519,6 +522,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 	# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 	query = """select
 				bom_item.item_code,
+				bom_item.idx,
 				item.item_name,
 				sum(bom_item.stock_qty/ifnull(bom.quantity, 1)) * %(qty)s as qty,
 				item.description,
@@ -542,7 +546,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 
 	if fetch_exploded:
 		query = query.format(table="BOM Explosion Item",
-			where_conditions="""and item.is_sub_contracted_item = 0""",
+			where_conditions="",
 			select_columns = ", bom_item.source_warehouse, (Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s ) as idx")
 		items = frappe.db.sql(query, { "parent": bom, "qty": qty,	"bom": bom }, as_dict=True)
 	elif fetch_scrap_items:
@@ -587,7 +591,7 @@ def validate_bom_no(item, bom_no):
 		frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
 
 @frappe.whitelist()
-def get_children(doctype, parent=None, is_tree=False):
+def get_children(doctype, parent=None, is_root=False, **filters):
 	if not parent:
 		frappe.msgprint(_('Please select a BOM'))
 		return
@@ -609,7 +613,7 @@ def get_children(doctype, parent=None, is_tree=False):
 def get_boms_in_bottom_up_order(bom_no=None):
 	def _get_parent(bom_no):
 		return frappe.db.sql_list("""select distinct parent from `tabBOM Item`
-			where bom_no = %s and docstatus=1""", bom_no)
+			where bom_no = %s and docstatus=1 and parenttype='BOM'""", bom_no)
 
 	count = 0
 	bom_list = []

@@ -4,12 +4,13 @@ from frappe import _
 from erpnext.setup.utils import insert_record
 
 def setup_agriculture():
+	if frappe.get_all('Agriculture Analysis Criteria'):
+		# already setup
+		return
+	create_agriculture_data()
+
+def create_agriculture_data():
 	records = [
-		dict(
-			doctype="Land Unit",
-			land_unit_name="All Land Units",
-			is_group=1,
-			is_container=1),
 		dict(
 			doctype='Item Group',
 			item_group_name='Fertilizer',
@@ -182,7 +183,7 @@ def setup_agriculture():
 			linked_doctype='Soil Analysis'),
 		dict(
 			doctype='Agriculture Analysis Criteria',
-			title='pH',
+			title='Soil pH',
 			standard=1,
 			linked_doctype='Soil Analysis'),
 		dict(
@@ -272,7 +273,7 @@ def setup_agriculture():
 			linked_doctype='Soil Analysis'),
 		dict(
 			doctype='Agriculture Analysis Criteria',
-			title='pH',
+			title='Water pH',
 			standard=1,
 			linked_doctype='Water Analysis'),
 		dict(
@@ -424,11 +425,6 @@ def setup_agriculture():
 			doctype='Agriculture Analysis Criteria',
 			title='Degree Days',
 			standard=1,
-			linked_doctype='Weather'),
-		dict(
-			doctype='Agriculture Analysis Criteria',
-			title='Degree Days',
-			standard=1,
-			linked_doctype='Water Analysis')
+			linked_doctype='Weather')
 	] 
 	insert_record(records)

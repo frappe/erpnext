@@ -1,10 +1,16 @@
 [
 	{
 		"doctype": "Land Unit",
+		"land_unit_name": "Test Land",
+		"is_group": 1,
+		"is_container": 1
+	},
+	{
+		"doctype": "Land Unit",
 		"land_unit_name": "Basil Farm",
 		"location": "{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"properties\":{\"point_type\":\"circle\",\"radius\":884.5625420736483},\"geometry\":{\"type\":\"Point\",\"coordinates\":[72.875834,19.100566]}}]}",
-		"parent_land_unit": "All Land Units",
-		"parent": "All Land Units",
+		"parent_land_unit": "Test Land",
+		"parent": "Test Land",
 		"is_group": 1,
 		"is_container": 1
 	},

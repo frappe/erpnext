@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
-from frappe.utils import flt, cstr, cint, getdate
+from frappe.utils import flt, cstr, cint
 from frappe import _
 from frappe.model.meta import get_field_precision
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
@@ -75,8 +75,7 @@ def check_if_in_list(gle, gl_map):
 			and cstr(e.get('against_voucher'))==cstr(gle.get('against_voucher')) \
 			and cstr(e.get('against_voucher_type')) == cstr(gle.get('against_voucher_type')) \
 			and cstr(e.get('cost_center')) == cstr(gle.get('cost_center')) \
-			and cstr(e.get('project')) == cstr(gle.get('project')) \
-			and getdate(e.get('due_date')) == getdate(gle.get('due_date')):
+			and cstr(e.get('project')) == cstr(gle.get('project')):
 				return e
 
 def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):

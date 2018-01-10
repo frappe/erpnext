@@ -99,7 +99,6 @@ erpnext/stock/doctype/stock_entry/tests/test_stock_entry_for_repack.js
 erpnext/accounts/doctype/sales_invoice/tests/test_sales_invoice_with_serialize_item.js
 erpnext/accounts/doctype/payment_entry/tests/test_payment_against_invoice.js
 erpnext/buying/doctype/purchase_order/tests/test_purchase_order_with_last_purchase_rate.js
-erpnext/projects/doctype/task/tests/test_task_tree.js
 erpnext/stock/doctype/item_price/test_item_price.js
 erpnext/stock/doctype/delivery_note/test_delivery_note_with_margin.js
 erpnext/selling/doctype/sales_order/tests/test_sales_order_with_margin.js

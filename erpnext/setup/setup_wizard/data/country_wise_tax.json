@@ -1077,6 +1077,29 @@
 		}
 	},
 
+	"Saudi Arabia": {
+		"KSA VAT 5%": {
+			"account_name": "VAT 5%",
+			"tax_rate": 5.00
+		},
+		"KSA VAT Zero": {
+			"account_name": "VAT Zero",
+			"tax_rate": 0.00
+		},
+		"KSA VAT Exempted": {
+			"account_name": "VAT Exempted",
+			"tax_rate": 0.00
+		},
+		"KSA Excise 50%": {
+			"account_name": "Excise 50%",
+			"tax_rate": 50.00
+		},
+		"KSA Excise 100%": {
+			"account_name": "Excise 100%",
+			"tax_rate": 100.00
+		}
+	},
+
 	"Serbia": {
 		"Serbia Tax": {
 			"account_name": "VAT",
@@ -1308,6 +1331,29 @@
 		"Ukraine Tax": {
 			"account_name": "VAT",
 			"tax_rate": 20.00
+		}
+	},
+
+	"United Arab Emirates": {
+		"UAE VAT 5%": {
+			"account_name": "VAT 5%",
+			"tax_rate": 5.00
+		},
+		"UAE VAT Zero": {
+			"account_name": "VAT Zero",
+			"tax_rate": 0.00
+		},
+		"UAE VAT Exempted": {
+			"account_name": "VAT Exempted",
+			"tax_rate": 0.00
+		},
+		"UAE Excise 50%": {
+			"account_name": "Excise 50%",
+			"tax_rate": 50.00
+		},
+		"UAE Excise 100%": {
+			"account_name": "Excise 100%",
+			"tax_rate": 100.00
 		}
 	},
 

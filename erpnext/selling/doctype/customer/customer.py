@@ -56,12 +56,26 @@ class Customer(TransactionBase):
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
+		self.create_primary_contact()
+		self.create_primary_address()
 
 		if self.flags.old_lead != self.lead_name:
 			self.update_lead_status()
 
 		if self.flags.is_new_doc:
 			self.create_lead_address_contact()
+
+	def create_primary_contact(self):
+		if not self.customer_primary_contact:
+			if self.mobile_no or self.email_id:
+				contact = make_contact(self)
+				self.db_set('customer_primary_contact', contact.name)
+				self.db_set('mobile_no', self.mobile_no)
+				self.db_set('email_id', self.email_id)
+
+	def create_primary_address(self):
+		if self.flags.is_new_doc and self.get('address_line1'):
+			make_address(self)
 
 	def update_lead_status(self):
 		'''If Customer created from Lead, update lead status to "Converted"
@@ -246,3 +260,48 @@ def get_credit_limit(customer, company):
 		credit_limit = frappe.db.get_value("Company", company, "credit_limit")
 
 	return flt(credit_limit)
+
+def make_contact(args, is_primary_contact=1):
+	contact = frappe.get_doc({
+		'doctype': 'Contact',
+		'first_name': args.get('name'),
+		'mobile_no': args.get('mobile_no'),
+		'email_id': args.get('email_id'),
+		'is_primary_contact': is_primary_contact,
+		'links': [{
+			'link_doctype': args.get('doctype'),
+			'link_name': args.get('name')
+		}]
+	}).insert()
+
+	return contact
+
+def make_address(args, is_primary_address=1):
+	address = frappe.get_doc({
+		'doctype': 'Address',
+		'address_title': args.get('name'),
+		'address_line1': args.get('address_line1'),
+		'address_line2': args.get('address_line2'),
+		'city': args.get('city'),
+		'state': args.get('state'),
+		'pincode': args.get('pincode'),
+		'country': args.get('country'),
+		'links': [{
+			'link_doctype': args.get('doctype'),
+			'link_name': args.get('name')
+		}]
+	}).insert()
+
+	return address
+
+def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, filters):
+	customer = frappe.db.escape(filters.get('customer'))
+	return frappe.db.sql("""
+		select `tabContact`.name from `tabContact`, `tabDynamic Link`
+			where `tabContact`.name = `tabDynamic Link`.parent and `tabDynamic Link`.link_name = %(customer)s
+			and `tabDynamic Link`.link_doctype = 'Customer' and `tabContact`.is_primary_contact = 1
+			and `tabContact`.name like %(txt)s
+		""", {
+			'customer': customer,
+			'txt': '%%%s%%' % txt
+		})

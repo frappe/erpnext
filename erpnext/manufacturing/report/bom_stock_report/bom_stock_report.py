@@ -52,6 +52,6 @@ def get_bom_stock(filters):
     		    ON bom_item.item_code = ledger.item_code
     		    %s
             WHERE
-    	        bom_item.parent = '%s'
+    	        bom_item.parent = '%s' and bom_item.parenttype='BOM'
 
             GROUP BY bom_item.item_code""" % (conditions, bom))

@@ -10,6 +10,7 @@ import math
 from  frappe import _
 
 from frappe.utils.nestedset import NestedSet
+from frappe.utils import flt
 # from frappe.model.document import Document
 
 RADIUS = 6378137
@@ -31,6 +32,7 @@ class LandUnit(NestedSet):
 				ancestor_features[index] = json.loads(feature)
 			ancestor_doc.set_location_value(features = ancestor_features)	
 			ancestor_doc.db_set(fieldname='area', value=ancestor_doc.get('area')-self.get('area'),commit=True)
+		super(LandUnit, self).on_update()
 
 	def validate(self):
 		if not self.is_new():
@@ -39,10 +41,10 @@ class LandUnit(NestedSet):
 			else:
 				features = json.loads(self.get('location')).get('features')
 			new_area = compute_area(features)
-			self.area_difference = new_area - self.area
+			self.area_difference = new_area - flt(self.area)
 			self.area = new_area	
 
-			if self.get('parent'): 
+			if self.get('parent_land_unit'):
 				ancestors = self.get_ancestors()
 				self_features = self.add_child_property()
 				self_features = set(self_features)
@@ -78,7 +80,6 @@ class LandUnit(NestedSet):
 
 	def on_update(self):
 		super(LandUnit, self).on_update()
-		self.validate_one_root()
 
 	def add_child_property(self):
 		location = self.get('location')
@@ -118,7 +119,7 @@ def compute_area(features):
 			layer_area += polygon_area(coords = feature.get('geometry').get('coordinates'))
 		elif feature.get('geometry').get('type') == 'Point' and feature.get('properties').get('point_type') == 'circle':
 			layer_area += math.pi * math.pow(feature.get('properties').get('radius'), 2)
-	return layer_area
+	return flt(layer_area)
 
 def rad(angle_in_degrees):
 	return angle_in_degrees*math.pi/180
@@ -162,4 +163,18 @@ def ring_area(coords):
 
 		area = area * RADIUS * RADIUS / 2
 	return area
+
+@frappe.whitelist()
+def get_children(doctype, parent, is_root=False):
+	if is_root:
+		parent = ''
+
+	land_units = frappe.db.sql("""select name as value,
+		is_group as expandable
+		from `tabLand Unit`
+		where ifnull(`parent_land_unit`,'') = %s
+		order by name""", (parent), as_dict=1)
+
+	# return nodes
+	return land_units
 		
