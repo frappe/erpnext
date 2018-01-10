@@ -38,7 +38,20 @@ class ShareTransfer(Document):
 			#todo remove the necessary entry from the required Shareholder Party's Share Balance
 			self.remove_shares(self.from_party)
 			#todo edit in company party
-			self.remove_shares(self.company, is_company=1)
+			self.remove_shares(self.company)
+			#todo add shares as purchased to cimpany
+			company_party_doc = frappe.get_doc('Shareholder Party', self.company)
+			company_party_doc.append('share_balance', {
+				'share_type': self.share_type,
+				'from_no': self.from_no,
+				'to_no': self.to_no,
+				'rate': self.rate,
+				'amount': self.amount,
+				'no_of_shares': self.no_of_shares,
+				'is_company': 1,
+				'current_state': 'Purchased'
+			})
+			company_party_doc.save()
 		elif self.transfer_type == 'Transfer':
 			#todo remove the necessary entries from the from Shareholder Party's Share Balance
 			self.remove_shares(self.from_party)
@@ -194,18 +207,17 @@ class ShareTransfer(Document):
 		doc.save()
 		return doc.folio_no
 
-	def remove_shares(self, party, is_company=0):
+	def remove_shares(self, party):
 		self.iterative_share_removal(party, self.share_type,
 			{
 				'from_no': self.from_no,
 				'to_no'  : self.to_no
 			},
 			rate       = self.rate,
-			amount	   = self.amount,
-			is_company = is_company
+			amount	   = self.amount
 		)
 
-	def iterative_share_removal(self, party, share_type, query, rate, amount, is_company=0):
+	def iterative_share_removal(self, party, share_type, query, rate, amount):
 		# query = {'from_no': share_starting_no, 'to_no': share_ending_no}
 		# Shares exist for sure
 		# Iterate over all entries and modify entry if in entry
@@ -218,6 +230,7 @@ class ShareTransfer(Document):
 			if entry.share_type != share_type or \
 				entry.from_no > query['to_no'] or \
 				entry.to_no < query['from_no']:
+				new_entries.append(entry)
 				continue # since query lies outside bounds
 			elif entry.from_no <= query['from_no'] and entry.to_no >= query['to_no']:
 				#split
