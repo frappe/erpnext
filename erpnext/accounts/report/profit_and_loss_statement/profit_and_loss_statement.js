@@ -17,11 +17,30 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 			"label": __("Project"),
 			"fieldtype": "Link",
 			"options": "Project"
-		},
+		}
+		,
 		{
 			"fieldname": "accumulated_values",
 			"label": __("Accumulated Values"),
 			"fieldtype": "Check"
 		}
+		,
+		{
+			"fieldname": "included_cost_centers",
+			"label": __("Included Cost Centers"),
+			"fieldtype": "Data"
+		}
+		//~ ,
+		//~ {
+			//~ "fieldname": "from_date",
+			//~ "label": __("From Date"),
+			//~ "fieldtype": "Date"
+		//~ }
+		//~ ,
+		//~ {
+			//~ "fieldname": "to_date",
+			//~ "label": __("To Date"),
+			//~ "fieldtype": "Date"
+		//~ }
 	);
 });

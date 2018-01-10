@@ -328,12 +328,55 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 			additional_conditions.append("project = '%s'"%(frappe.db.escape(filters.get("project"))))
 		if filters.get("cost_center"):
 			additional_conditions.append(get_cost_center_cond(filters.get("cost_center")))
+		if filters.get("included_cost_centers"):
+			additional_conditions.append(get_included_cost_center_cond(filters.get("included_cost_centers")))
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 
 def get_cost_center_cond(cost_center):
 	lft, rgt = frappe.db.get_value("Cost Center", cost_center, ["lft", "rgt"])
 	return (""" cost_center in (select name from `tabCost Center` where lft >=%s and rgt <=%s)"""%(lft, rgt))
+
+def get_included_cost_center_cond(included_cost_centers):
+	#~ try:
+	query = ""
+	cost_center_list = [] 
+	cost_centers = included_cost_centers.split(",") 
+	for cost_center in cost_centers : 
+		lft, rgt = frappe.db.get_value("Cost Center", cost_center, ["lft", "rgt"])
+		#~ cost_center_list = frappe.get_list("Cost Center", filters={"lft": (">=", lft),"rgt": ("<=", rgt) })
+		for c in frappe.db.sql("""select name from `tabCost Center` where lft >=%s and rgt <=%s"""%(lft, rgt), as_list=1):
+			cost_center_list.append(c[0])
+	
+	
+	cost_center_list  = list(set(cost_center_list))
+	print cost_center_list
+	print (""" cost_center in ("%s")"""%("\",\"".join(cost_center_list)))
+	print (""" cost_center in ("%s")"""%("\",\"".join(cost_center_list)))
+	print (""" cost_center in ("%s")"""%("\",\"".join(cost_center_list)))
+	print (""" cost_center in ("%s")"""%("\",\"".join(cost_center_list)))
+	print (""" cost_center in ("%s")"""%("\",\"".join(cost_center_list)))
+	print (""" cost_center in ("%s")"""%("\",\"".join(cost_center_list)))
+	print (""" cost_center in ("%s")"""%("\",\"".join(cost_center_list)))
+	print (""" cost_center in ("%s")"""%("\",\"".join(cost_center_list)))
+	print (""" cost_center in ("%s")"""%("\",\"".join(cost_center_list)))
+	print (""" cost_center in ("%s")"""%("\",\"".join(cost_center_list)))
+	print (""" cost_center in ("%s")"""%("\",\"".join(cost_center_list)))
+	print (""" cost_center in ("%s")"""%("\",\"".join(cost_center_list)))
+	print (""" cost_center in ("%s")"""%("\",\"".join(cost_center_list)))
+	print (""" cost_center in ("%s")"""%("\",\"".join(cost_center_list)))
+	print (""" cost_center in ("%s")"""%("\",\"".join(cost_center_list)))
+	print (""" cost_center in ("%s")"""%("\",\"".join(cost_center_list)))
+	print (""" cost_center in ("%s")"""%("\",\"".join(cost_center_list)))
+	return (""" cost_center in ("%s")"""%("\",\"".join(cost_center_list)))
+
+			#~ if query == "":
+				#~ query = (""" cost_center in (select name from `tabCost Center` where lft >=%s and rgt <=%s)"""%(lft, rgt))
+			#~ else:
+				#~ query = (""" and cost_center in (select name from `tabCost Center` where lft >=%s and rgt <=%s)"""%(lft, rgt))
+	#~ except Exception , e: 
+		#~ frappe.throw ("Bad Entry for Included Cost Centers " ,str(e))
+			
 
 def get_columns(periodicity, period_list, accumulated_values=1, company=None):
 	columns = [{
