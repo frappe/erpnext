@@ -45,6 +45,14 @@ class BusinessTrip(Document):
         self.create_exceptional_approval()
 
     def create_exceptional_approval(self):
+
+        cur_user=frappe.db.sql("select user_id from `tabEmployee` where name='{0}'".format(self.requested_employee))
+
+        if u'CEO' in frappe.get_roles(cur_user[0][0]) or u'Director' in frappe.get_roles(cur_user[0][0]):
+            state = 'Create By Requester'
+        else:
+            state = 'Created By Requester'
+        
         if self.request_employee==1:
             btea_doc = frappe.get_doc({
                 "doctype":"Business Trip Exceptional Approval",
@@ -55,7 +63,7 @@ class BusinessTrip(Document):
                 "assignment_type": self.assignment_type,
                 "city": self.city,
                 "status": 'Pending',
-                "workflow_state": 'Created By Requester',
+                "workflow_state": state,
                 "employee": self.requested_employee,
                 "employee_name": self.requested_employee_name,
                 "department": self.requested_department
@@ -63,6 +71,7 @@ class BusinessTrip(Document):
             msg = """Exceptional Approval has been created: <b><a href="#Form/Business Trip Exceptional Approval/{0}">{0}</a></b>""".format(btea_doc.name)
             self.business_trip_exceptional_approval = btea_doc.name
             frappe.msgprint(msg)
+
 
     def validate_emp(self):
         if self.get('__islocal'):

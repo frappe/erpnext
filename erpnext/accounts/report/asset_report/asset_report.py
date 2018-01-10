@@ -26,7 +26,7 @@ def get_columns(filters):
 		_("Purchase Date") + "::120",
 		_("Next Depreciation Date") + "::120",
 		_("Gross Purchase Amount") + "::120",
-		_("Opening Accumulated Depreciation") + "::120",
+		_("Accumulated Depreciation") + "::120",
 		_("book value") + "::120",
 		]
 
@@ -53,6 +53,7 @@ def get_data(filters):
 		item_name=frappe.db.sql("select item_name from `tabItem` where item_code ='{0}' ".format(asset.item_code))
 		asset_parent_category=frappe.db.sql("select parent_asset_category from `tabAsset Category` where name ='{0}' ".format(asset.asset_category))
 		book_value = (flt(asset.gross_purchase_amount)-flt(depreciation_schedule[0][0])) - flt(asset.expected_value_after_useful_life)
+		accumulated_depreciation = flt(depreciation_schedule[0][0]) - flt(asset.expected_value_after_useful_life)
 
 		row = [
 		asset.name,
@@ -63,11 +64,12 @@ def get_data(filters):
 		asset_parent_category[0][0],
 		asset.purchase_date,
 		asset.next_depreciation_date,
-		"{:,}".format(round(asset.gross_purchase_amount, 2)),
-		asset.opening_accumulated_depreciation,
-		"{:,}".format(round(book_value, 2)) ,
+		"{:.2f}".format(flt(asset.gross_purchase_amount, precision=2)),
+		"{:.2f}".format(flt(accumulated_depreciation, precision=2)),
+		"{:.2f}".format(flt(book_value, precision=2)),
 		]
 		data.append(row)
+		# data.extend([{}])
 	return data
 
 
