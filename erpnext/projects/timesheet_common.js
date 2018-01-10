@@ -14,7 +14,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 			}
 		}
 		else {
-			frm.fields_dict['employees'].grid.get_field('employee').get_query = function(frm, cdt, cdn) {
+			frm.fields_dict['employees'].grid.get_field('employee').get_query = function() {
 				return {
 					filters:{
 						'status': 'Active'
@@ -61,20 +61,20 @@ frappe.ui.form.on("Timesheet Detail", {
 	},
 
 	hours: function(frm, cdt, cdn) {
-		calculate_end_time(frm, cdt, cdn)
-		calculate_time_and_amount(frm)
+		calculate_end_time(frm, cdt, cdn);
+		calculate_time_and_amount(frm);
 	},
 
 	billing_hours: function(frm, cdt, cdn) {
-		calculate_billing_costing_amount(frm, cdt, cdn)
+		calculate_billing_costing_amount(frm, cdt, cdn);
 	},
 
 	billing_rate: function(frm, cdt, cdn) {
-		calculate_billing_costing_amount(frm, cdt, cdn)
+		calculate_billing_costing_amount(frm, cdt, cdn);
 	},
 
 	costing_rate: function(frm, cdt, cdn) {
-		calculate_billing_costing_amount(frm, cdt, cdn)
+		calculate_billing_costing_amount(frm, cdt, cdn);
 	},
 
 	billable: function(frm, cdt, cdn) {

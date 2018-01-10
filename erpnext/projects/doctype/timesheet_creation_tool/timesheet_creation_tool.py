@@ -59,4 +59,4 @@ def get_timelogs_dict(time_logs):
 		})
 		logs.append(items)
 
-	return logs	
+	return logs
