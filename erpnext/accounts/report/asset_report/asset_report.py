@@ -47,7 +47,7 @@ def get_conditions(filters):
 def get_data(filters):
 	# conditions = get_conditions(filters)
 	li_list=frappe.db.sql("""select name, asset_name, item_code, asset_category, 
-		purchase_date, next_depreciation_date, total_number_of_depreciations from `tabAsset`
+		purchase_date, gross_purchase_amount,next_depreciation_date, total_number_of_depreciations from `tabAsset`
 		where docstatus = 1 order by asset_category""",as_dict=1)
 
 	data=[]
