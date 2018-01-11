@@ -4,7 +4,7 @@ DocType: Delivery Note,% Installed,% Instalado
 DocType: Company,Gain/Loss Account on Asset Disposal,Cuenta de ganancia/pérdida en la disposición de activos
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +472,Please enter Account for Change Amount,"Por favor, introduzca la Vuenta para el Cambio Monto"
 DocType: Sales Order,SO-,OV-
-apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +245,Please set the Item Code first,"Por favor, primero define el Código del Artículo"
+apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +246,Please set the Item Code first,"Por favor, primero define el Código del Artículo"
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.js +60,Show unclosed fiscal year's P&L balances,Mostrar saldos de Ganancias y Perdidas de año fiscal sin cerrar
 ,Support Hour Distribution,Distribución de Hora de Soporte
 apps/erpnext/erpnext/education/report/student_batch_wise_attendance/student_batch_wise_attendance.py +42,Student Group Strength,Fortaleza de Grupo Estudiante
