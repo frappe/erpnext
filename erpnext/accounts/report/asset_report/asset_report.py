@@ -16,21 +16,21 @@ from dateutil.relativedelta import relativedelta
 def execute(filters=None):
 	columns, data = get_columns(filters), get_data(filters)
 	return columns, data
-	
+
 def get_columns(filters):
 	return [
-		_("Name") + ":Link/Asset:120",
-		_("Asset Serial Number") + "::200",
-		_("Item Code") + "::120",
-		_("Item Name") + "::120",
-		_("Asset Category") + "::120",
-		_("Asset Parent Category") + "::140",
-		_("Purchase Date") + "::120",
-		_("Next Depreciation Date") + "::120",
-		_("Gross Purchase Amount") + ":Currency:120",
-		_("Accumulated Depreciation") + ":Currency:120",
-		_("book value") + ":Currency:120",
-		_("Total Number of Depreciations") + ":Currency:120"
+		_("Name") + ":Link/Asset:150",
+		_("Asset Serial Number") + "::150",
+		_("Item Code") + "::150",
+		_("Item Name") + "::150",
+		_("Asset Category") + "::150",
+		_("Asset Parent Category") + "::150",
+		_("Purchase Date") + ":Date:150",
+		_("Next Depreciation Date") + ":Date:150",
+		_("Gross Purchase Amount") + ":Currency:150",
+		_("Accumulated Depreciation") + ":Currency:150",
+		_("book value") + ":Currency:150",
+		_("Total Number of Depreciations") + "::150"
 		]
 
 
@@ -42,13 +42,13 @@ def get_conditions(filters):
 
 	if filters.get("from_date"): conditions += " and date_of_joining>=%(from_date)s"
 	if filters.get("to_date"): conditions += " and date_of_joining<=%(to_date)s"
-	
+
 	return conditions
 
 
 def get_data(filters):
 	# conditions = get_conditions(filters)
-	li_list=frappe.db.sql("""select name, asset_name, item_code, asset_category, 
+	li_list=frappe.db.sql("""select name, asset_name, item_code, asset_category,
 		purchase_date,expected_value_after_useful_life, gross_purchase_amount, next_depreciation_date, total_number_of_depreciations from `tabAsset`
 		where docstatus = 1""",as_dict=1)
 
@@ -60,7 +60,7 @@ def get_data(filters):
 		item_name=frappe.db.sql("select item_name from `tabItem` where item_code ='{0}' ".format(asset.item_code))
 		asset_parent_category=frappe.db.sql("select parent_asset_category from `tabAsset Category` where name ='{0}' ".format(asset.asset_category))
 		book_value = (flt(asset.gross_purchase_amount)-flt(depreciation_schedule[0][0])) - flt(asset.expected_value_after_useful_life)
-		accumulated_depreciation = flt(depreciation_schedule[0][0]) - flt(asset.expected_value_after_useful_life)
+		accumulated_depreciation = flt(depreciation_schedule[0][0])
 		asset_parent_categories.add(asset_parent_category[0][0])
 
 		row = [
@@ -96,7 +96,7 @@ def get_data(filters):
 		asset_category_bv_total=0.0
 		totals_list=[""]*len(row)
 
-		for items in data:	
+		for items in data:
 			if asset_cat == items[5]:
 				asset_category_gpa_total+=flt(re.findall("\d+\.\d+", items[8])[0])
 				asset_category_ad_total+=flt(re.findall("\d+\.\d+", items[9])[0])
@@ -122,6 +122,3 @@ def get_data(filters):
 	data.append(grand_totals_list)
 
 	return data
-
-
-

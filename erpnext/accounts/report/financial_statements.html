@@ -1,5 +1,5 @@
 {%
-	if (report.columns.length > 15) {
+	if (report.columns.length > 150) {
 		frappe.throw(__("Too many columns. Export the report and print it using a spreadsheet application."));
 	}
 %}
@@ -18,13 +18,24 @@
 </div>
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
 <h4 class="text-center">{%= filters.company %}</h4>
-<h4 class="text-center">{%= Object.values(filters) %}</h4>
-<h4 >{%=filters.included_cost_centers %}</h4>
+
 {% if (filters.from_date) { %}
 	<h4 class="text-center">{%= dateutil.str_to_user(filters.from_date) %} - {%= dateutil.str_to_user(filters.to_date) %}</h4>
 {% } %}
 {% if (filters.included_cost_centers) { %}
-	
+<h4 >Included Cost Centers: {%=filters.included_cost_centers %}</h4>
+{% } %}
+{% if (filters.cost_center) { %}
+<h4 >Included Cost Center: {%=filters.cost_center %}</h4>
+{% } %}
+{% if (filters.from_fiscal_year) { %}
+<h4 >Start Fiscal Year: {%=filters.from_fiscal_year %}</h4>
+{% } %}
+{% if (filters.to_fiscal_year) { %}
+<h4 >End Fiscal Year: {%=filters.to_fiscal_year %}</h4>
+{% } %}
+{% if (filters.project) { %}
+<h4 >Project: {%=filters.project %}</h4>
 {% } %}
 <hr>
 <table class="table table-bordered">
@@ -71,5 +82,5 @@
 				{%= frappe.boot.user.first_name %} {% if (frappe.boot.user.last_name) { %} {%= frappe.boot.user.last_name %} {% } %}
 			</td>
         </tr>
-		
+
 		</table>
