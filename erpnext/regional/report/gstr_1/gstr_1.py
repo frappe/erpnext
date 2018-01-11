@@ -24,7 +24,7 @@ def get_columns(filters):
 		"Taxable Value:Currency:120",
 		"Cess Amount:Currency:120"
 	]
-	
+
 def get_data(filters):
 	gst_accounts = get_gst_accounts(filters)
 	invoices = get_invoice_data(filters)
@@ -120,7 +120,7 @@ def get_invoice_items(invoices):
 	for d in items:
 		invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, d.base_net_amount)
 	return invoice_items
-	
+
 def get_items_based_on_tax_rate(invoices, gst_accounts):
 	tax_details = frappe.db.sql("""
 		select
@@ -135,6 +135,7 @@ def get_items_based_on_tax_rate(invoices, gst_accounts):
 
 	items_based_on_tax_rate = {}
 	invoice_cess = frappe._dict()
+	unidentified_gst_accounts = []
 
 	for parent, account, item_wise_tax_detail, tax_amount in tax_details:
 		if account in gst_accounts.cess_account:
@@ -147,15 +148,25 @@ def get_items_based_on_tax_rate(invoices, gst_accounts):
 					if account in gst_accounts.cgst_account or account in gst_accounts.sgst_account:
 						cgst_or_sgst = True
 
+					if not (cgst_or_sgst or account in gst_accounts.igst_account):
+						if "gst" in account.lower() and account not in unidentified_gst_accounts:
+							unidentified_gst_accounts.append(account)
+						continue
+
 					for item_code, tax_amounts in item_wise_tax_detail.items():
 						tax_rate = tax_amounts[0]
 						if cgst_or_sgst:
 							tax_rate *= 2
 
-						rate_based_dict = items_based_on_tax_rate.setdefault(parent, {}).setdefault(tax_rate, [])
+						rate_based_dict = items_based_on_tax_rate.setdefault(parent, {})\
+							.setdefault(tax_rate, [])
 						if item_code not in rate_based_dict:
 							rate_based_dict.append(item_code)
 
 				except ValueError:
 					continue
+	if unidentified_gst_accounts:
+		frappe.msgprint(_("Following accounts might be selected in GST Settings:")
+			+ "<br>" + "<br>".join(unidentified_gst_accounts), alert=True)
+
 	return items_based_on_tax_rate, invoice_cess
