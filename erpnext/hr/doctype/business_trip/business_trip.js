@@ -25,7 +25,9 @@ cur_frm.cscript.custom_grade = function(doc, cdt, cd) {
 };
 frappe.ui.form.on('Business Trip', {
     refresh: function(frm) {
-    	get_current_user();
+    	if (cur_frm.doc.workflow_state=="Pending"){
+        get_current_user();
+        }
     },
     workflow_state: function(frm){
         cur_frm.refresh_fields(["workflow_state"]);
@@ -48,6 +50,17 @@ frappe.ui.form.on('Business Trip', {
 		}else{
 			cur_frm.set_value("requested_department", );
 		}
+
+
+        frappe.call({
+                method: "get_default_cost_center",
+                args: {company: frappe.sys_defaults.company},
+                doc: frm.doc,
+                callback: function(r) {
+                    cur_frm.set_value("cost_center", r.message);
+                }
+            });
+
     },
     validate: function(frm){
         cur_frm.refresh_fields(["workflow_state"]);
@@ -68,9 +81,24 @@ frappe.ui.form.on('Business Trip', {
     	cur_frm.set_df_property("ticket", "read_only", 1);
     	cur_frm.set_df_property("ticket_cost", "read_only", 1);
 
-    },
+    }
+    ,
     onload: function(frm) {
-    	get_current_user();
+    	if (cur_frm.doc.workflow_state=="Pending"){
+            get_current_user();
+
+            cur_frm.set_query("requested_employee", function() {
+                    return {
+                        query: "erpnext.hr.doctype.business_trip.business_trip.get_approvers",
+                        filters: [
+                            ["Employee", "name", "!=", cur_frm.doc.employee],
+                        ]
+                    };
+                });
+
+        }
+
+        
 
     	if (cur_frm.doc.workflow_state!= "Pending"){
     	cur_frm.set_df_property("request_employee", "read_only", 1);
@@ -87,14 +115,7 @@ frappe.ui.form.on('Business Trip', {
     	cur_frm.set_df_property("ticket_cost", "read_only", 1);
 }
 
-        cur_frm.set_query("requested_employee", function() {
-                return {
-                	query: "erpnext.hr.doctype.business_trip.business_trip.get_approvers",
-                    filters: [
-                        ["Employee", "name", "!=", cur_frm.doc.employee],
-                    ]
-                };
-            });
+        
        
 
 
@@ -106,15 +127,7 @@ frappe.ui.form.on('Business Trip', {
         //     };
         // });
 
-        frappe.call({
-            method: "get_default_cost_center",
-            args: {company: frappe.sys_defaults.company},
-            doc: frm.doc,
-            callback: function(r) {
-                cur_frm.set_value("cost_center", r.message);
-                cur_frm.doc.cost_center=r.message;
-            }
-        });
+        
 
     }
 });
@@ -122,7 +135,7 @@ frappe.ui.form.on('Business Trip', {
 cur_frm.cscript.custom_assignment_type =
     cur_frm.cscript.custom_employee = function(doc, cdt, cd) {
         // get_grade_info(cur_frm);
-        cur_frm.set_value("city", "");
+        // cur_frm.set_value("city", "");
         if (doc.assignment_type === 'Internal') {
             cur_frm.set_query("city", function() {
                 return {
@@ -145,7 +158,7 @@ cur_frm.cscript.custom_assignment_type =
     };
 cur_frm.cscript.custom_external_city_type = cur_frm.cscript.custom_world_countries = function(doc, cdt, cd) {
     // get_grade_info(cur_frm);
-    cur_frm.set_value("city", "");
+    // cur_frm.set_value("city", "");
     cur_frm.fields_dict.city.get_query = function(doc) {
         return {
             filters: [
