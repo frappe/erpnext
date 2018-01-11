@@ -51,8 +51,6 @@ frappe.ui.form.on("Company", {
 			frm.add_custom_button(__('Purchase Tax Template'), function() {
 				frappe.set_route('List', 'Purchase Taxes and Charges Template', {'company': frm.doc.name});
 			}, __("View"));
-
-			frm.page.set_inner_btn_group_as_primary(__("View"));
 		}
 
 		erpnext.company.set_chart_of_accounts_options(frm.doc);
