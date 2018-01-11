@@ -18,6 +18,7 @@ class TimesheetCreationTool(Document):
 		self.total_billed_amount = 0.0
 
 	def create_timesheet(self):
+		docs = []
 		if not self.company:
 			frappe.throw(_("Please select the Company."))
 		elif not self.employees:
@@ -36,11 +37,13 @@ class TimesheetCreationTool(Document):
 							"time_logs": time_log
 						})
 			doc = timesheet.insert();
-		return doc
+			docs.append(doc)
+		return docs
 
 	def submit_timesheet(self):
-		doc = self.create_timesheet()
-		doc.submit()
+		docs = self.create_timesheet()
+		for doc in docs:
+			doc.submit()
 
 def get_timelogs_dict(time_logs):
 	logs = []

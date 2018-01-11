@@ -22,7 +22,7 @@ frappe.ui.form.on('Timesheet Creation Tool', {
 			freeze_message: __("Creating Timesheets"),
 			callback: (r) => {	
 				if(!r.exc){
-					frappe.msgprint(__("Timesheets Created. " + `<a href= "#List/Timesheet">View Timesheets</a>`));
+					frappe.msgprint(__("Timesheets Created. " + `<a href= "#List/Timesheet" style='text-decoration: underline'>View Timesheets</a>`));
 					frm.clear_table("employees");
 					frm.clear_table("time_logs");
 					frm.refresh_fields();
@@ -41,7 +41,7 @@ frappe.ui.form.on('Timesheet Creation Tool', {
 				freeze_message: __("Submitting Timesheets"),
 				callback: (r) => {
 					if(!r.exc){
-						frappe.msgprint(__("Timesheets submitted. " + `<a href= "#List/Timesheet">View Timesheets</a>`));
+						frappe.msgprint(__("Timesheets submitted. " + `<a href= "#List/Timesheet" style='text-decoration: underline'>View Timesheets</a>`));
 						frm.clear_table("employees");
 						frm.clear_table("time_logs");
 						frm.refresh_fields();
