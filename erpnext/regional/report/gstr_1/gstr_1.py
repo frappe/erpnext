@@ -149,10 +149,8 @@ def get_items_based_on_tax_rate(invoices, gst_accounts):
 						cgst_or_sgst = True
 
 					if not (cgst_or_sgst or account in gst_accounts.igst_account):
-						print(account)
 						if "gst" in account.lower() and account not in unidentified_gst_accounts:
 							unidentified_gst_accounts.append(account)
-							print(unidentified_gst_accounts)
 						continue
 
 					for item_code, tax_amounts in item_wise_tax_detail.items():
