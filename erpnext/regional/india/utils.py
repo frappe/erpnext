@@ -29,12 +29,12 @@ def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
 		return [_("HSN/SAC"), _("Taxable Amount")] + tax_accounts
 	else:
 		return [_("Item"), _("Taxable Amount")] + tax_accounts
-	
+
 def get_itemised_tax_breakup_data(doc):
 	itemised_tax = get_itemised_tax(doc.taxes)
 
 	itemised_taxable_amount = get_itemised_taxable_amount(doc.items)
-	
+
 	if not frappe.get_meta(doc.doctype + " Item").has_field('gst_hsn_code'):
 		return itemised_tax, itemised_taxable_amount
 
@@ -59,6 +59,14 @@ def get_itemised_tax_breakup_data(doc):
 		hsn_taxable_amount[hsn_code] += itemised_taxable_amount.get(item)
 
 	return hsn_tax, hsn_taxable_amount
+
+def set_place_of_supply(doc, method):
+	if not hasattr(doc, 'customer_gstin'):
+		return
+
+	address_name = doc.shipping_address_name or doc.customer_address
+	address = frappe.db.get_value("Address", address_name, ["gst_state", "gst_state_number"], as_dict=1)
+	doc.place_of_supply = str(address.gst_state_number) + "-" + address.gst_state
 
 # don't remove this function it is used in tests
 def test_method():
