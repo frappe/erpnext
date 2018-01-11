@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import formatdate, getdate, flt, add_days
 from datetime import datetime
 import datetime
+# import operator
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
@@ -25,10 +26,10 @@ def get_columns(filters):
 		_("Asset Parent Category") + "::140",
 		_("Purchase Date") + "::120",
 		_("Next Depreciation Date") + "::120",
-		_("Gross Purchase Amount") + "::120",
-		_("Accumulated Depreciation") + "::120",
-		_("book value") + "::120",
-		_("Total Number of Depreciations") + "::120"
+		_("Gross Purchase Amount") + ":Currency:120",
+		_("Accumulated Depreciation") + ":Currency:120",
+		_("book value") + ":Currency:120",
+		_("Total Number of Depreciations") + ":Currency:120"
 		]
 
 
@@ -48,10 +49,10 @@ def get_data(filters):
 	# conditions = get_conditions(filters)
 	li_list=frappe.db.sql("""select name, asset_name, item_code, asset_category, 
 		purchase_date,expected_value_after_useful_life, gross_purchase_amount, next_depreciation_date, total_number_of_depreciations from `tabAsset`
-		where docstatus = 1 order by asset_category""",as_dict=1)
+		where docstatus = 1""",as_dict=1)
 
 	data=[]
-	asset_categories=set()
+	asset_parent_categories=set()
 
 	for asset in li_list:
 		depreciation_schedule=frappe.db.sql("select sum(depreciation_amount) from `tabDepreciation Schedule` where parent ='{0}' and journal_entry is not null ".format(asset.name))
@@ -59,7 +60,7 @@ def get_data(filters):
 		asset_parent_category=frappe.db.sql("select parent_asset_category from `tabAsset Category` where name ='{0}' ".format(asset.asset_category))
 		book_value = (flt(asset.gross_purchase_amount)-flt(depreciation_schedule[0][0])) - flt(asset.expected_value_after_useful_life)
 		accumulated_depreciation = flt(depreciation_schedule[0][0]) - flt(asset.expected_value_after_useful_life)
-		asset_categories.add(asset.asset_category)
+		asset_parent_categories.add(asset_parent_category[0][0])
 
 		row = [
 		asset.name,
@@ -80,13 +81,14 @@ def get_data(filters):
 
 	"""Adding totals for each asset category assets
 	list comprehension may adds complixity to this snippet- Ahmed Madi"""
-
-	asset_categories = list(asset_categories)
+	asset_parent_categories = list(asset_parent_categories)
+	# frappe.throw(str(asset_parent_categories))
+	data.sort(key=lambda x: x[5])
 	grand_totals_list=[""]*len(row)
 	gpa_grand_total=0.0
 	ad_grand_total=0.0
 	bv_grand_total=0.0
-	for asset_cat in asset_categories:
+	for asset_cat in asset_parent_categories:
 
 		asset_category_gpa_total=0.0
 		asset_category_ad_total=0.0
@@ -94,7 +96,7 @@ def get_data(filters):
 		totals_list=[""]*len(row)
 
 		for items in data:	
-			if asset_cat == items[4]:
+			if asset_cat == items[5]:
 				asset_category_gpa_total+=flt(items[8])
 				asset_category_ad_total+=flt(items[9])
 				asset_category_bv_total+=flt(items[10])
