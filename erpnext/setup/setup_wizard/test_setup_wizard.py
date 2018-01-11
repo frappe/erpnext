@@ -29,6 +29,7 @@ def run_setup_wizard_test():
 	driver.wait_for_ajax(True)
 	time.sleep(1)
 	driver.click(".next-btn")
+	time.sleep(1)
 
 	# domain slide
 	driver.set_multicheck("domains", ["Manufacturing"])
