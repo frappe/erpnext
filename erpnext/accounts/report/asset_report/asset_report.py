@@ -8,6 +8,7 @@ from frappe.utils import formatdate, getdate, flt, add_days
 from datetime import datetime
 import datetime
 # import operator
+import re
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
@@ -97,14 +98,14 @@ def get_data(filters):
 
 		for items in data:	
 			if asset_cat == items[5]:
-				asset_category_gpa_total+=flt(items[8])
-				asset_category_ad_total+=flt(items[9])
-				asset_category_bv_total+=flt(items[10])
+				asset_category_gpa_total+=flt(re.findall("\d+\.\d+", items[8])[0])
+				asset_category_ad_total+=flt(re.findall("\d+\.\d+", items[9])[0])
+				asset_category_bv_total+=flt(re.findall("\d+\.\d+", items[10])[0])
 				idx=data.index(items)+1
-		totals_list.insert(0,"<b>{0} Total</b>".format(asset_cat))
-		totals_list.insert(8,"<b>{:.2f}</b>".format(asset_category_gpa_total)) 
-		totals_list.insert(9,"<b>{:.2f}</b>".format(asset_category_ad_total)) 
-		totals_list.insert(10,"<b>{:.2f}</b>".format(asset_category_bv_total))
+		totals_list.insert(0,asset_cat)
+		totals_list.insert(8,asset_category_gpa_total)
+		totals_list.insert(9,asset_category_ad_total)
+		totals_list.insert(10,asset_category_bv_total)
 
 		data.insert(idx,totals_list)
 
@@ -113,9 +114,9 @@ def get_data(filters):
 		bv_grand_total+=asset_category_bv_total
 
 	grand_totals_list.insert(0,"<b>Grand Total</b>")
-	grand_totals_list.insert(8,"<b>{:.2f}</b>".format(gpa_grand_total)) 
-	grand_totals_list.insert(9,"<b>{:.2f}</b>".format(ad_grand_total)) 
-	grand_totals_list.insert(10,"<b>{:.2f}</b>".format(bv_grand_total))
+	grand_totals_list.insert(8,gpa_grand_total)
+	grand_totals_list.insert(9,ad_grand_total)
+	grand_totals_list.insert(10,bv_grand_total)
 
 	data.append([])
 	data.append(grand_totals_list)
