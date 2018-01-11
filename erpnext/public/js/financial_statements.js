@@ -91,7 +91,6 @@ function get_filters(){
 			"options": [
 				{ "value": "Monthly", "label": __("Monthly") },
 				{ "value": "Quarterly", "label": __("Quarterly") },
-				{ "value": "Half-Yearly", "label": __("Half-Yearly") },
 				{ "value": "Yearly", "label": __("Yearly") }
 			],
 			"default": "Monthly",

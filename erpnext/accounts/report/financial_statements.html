@@ -1,5 +1,5 @@
 {%
-	if (report.columns.length > 8) {
+	if (report.columns.length > 15) {
 		frappe.throw(__("Too many columns. Export the report and print it using a spreadsheet application."));
 	}
 %}
@@ -17,10 +17,14 @@
 	{%= frappe.boot.letter_heads[frappe.get_doc(":Company", filters.company).default_letter_head || frappe.defaults.get_default("letter_head")] %}
 </div>
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
-<h4 class="text-center">{%= filters.company %}</h3>
-<h4 class="text-center">{%= filters.fiscal_year %}</h3>
+<h4 class="text-center">{%= filters.company %}</h4>
+<h4 class="text-center">{%= Object.values(filters) %}</h4>
+<h4 >{%=filters.included_cost_centers %}</h4>
 {% if (filters.from_date) { %}
-	<h4 class="text-center">{%= dateutil.str_to_user(filters.from_date) %} - {%= dateutil.str_to_user(filters.to_date) %}</h3>
+	<h4 class="text-center">{%= dateutil.str_to_user(filters.from_date) %} - {%= dateutil.str_to_user(filters.to_date) %}</h4>
+{% } %}
+{% if (filters.included_cost_centers) { %}
+	
 {% } %}
 <hr>
 <table class="table table-bordered">

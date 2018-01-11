@@ -9,20 +9,23 @@ from frappe import _
 from frappe.utils import (flt, getdate, get_first_day, get_last_day, date_diff,
 	add_months, add_days, formatdate, cint)
 
+def diff_month(d1, d2):
+    return (d1.year - d2.year) * 12 + d1.month - d2.month
+    
 def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, company):
 	"""Get a list of dict {"from_date": from_date, "to_date": to_date, "key": key, "label": label}
 		Periodicity can be (Yearly, Quarterly, Monthly)"""
 
 	fiscal_year = get_fiscal_year_data(from_fiscal_year, to_fiscal_year)
 	validate_fiscal_year(fiscal_year, from_fiscal_year, to_fiscal_year)
-
+	
 	# start with first day, so as to avoid year to_dates like 2-April if ever they occur]
 	year_start_date = getdate(fiscal_year.year_start_date)
 	year_end_date = getdate(fiscal_year.year_end_date)
 
 	months_to_add = {
-		"Yearly": 12,
-		"Half-Yearly": 6,
+		"Yearly": get_months(year_start_date, year_end_date),
+		"Half-Yearly": get_months(year_start_date, year_end_date) /2,
 		"Quarterly": 3,
 		"Monthly": 1
 	}[periodicity]
@@ -31,8 +34,8 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, company):
 
 	start_date = year_start_date
 	months = get_months(year_start_date, year_end_date)
-
-	for i in xrange(months / months_to_add):
+	limit = months / months_to_add
+	for i in xrange(limit):
 		period = frappe._dict({
 			"from_date": start_date
 		})
@@ -47,6 +50,8 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, company):
 		if to_date <= year_end_date:
 			# the normal case
 			period.to_date = to_date
+			if i == limit : 
+				period.to_date = year_end_date
 		else:
 			# if a fiscal year ends before a 12 month period
 			period.to_date = year_end_date
