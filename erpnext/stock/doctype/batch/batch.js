@@ -147,3 +147,11 @@ frappe.ui.form.on('Batch', {
 	}
 })
 
+frappe.ui.form.on('Batch', 'manufacturing_date', function (frm){
+	frappe.db.get_value('Item', {name: frm.doc.item}, ['shelf_life_in_days', 'has_expiry_date'], (r) => {
+		if (r.has_expiry_date && r.shelf_life_in_days) {
+			// Calculate expiry date based on shelf_life_in_days
+			frm.set_value('expiry_date', frappe.datetime.add_days(frm.doc.manufacturing_date, r.shelf_life_in_days));
+		}
+	})
+})
