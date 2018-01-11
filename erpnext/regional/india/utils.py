@@ -60,6 +60,14 @@ def get_itemised_tax_breakup_data(doc):
 
 	return hsn_tax, hsn_taxable_amount
 
+def set_place_of_supply(doc, method):
+	if not hasattr(doc, 'customer_gstin'):
+		return
+
+	address_name = doc.shipping_address_name or doc.customer_address
+	address = frappe.db.get_value("Address", address_name, ["gst_state", "gst_state_number"], as_dict=1)
+	doc.place_of_supply = address.gst_state_number + "-" + address.gst_state
+
 # don't remove this function it is used in tests
 def test_method():
 	'''test function'''

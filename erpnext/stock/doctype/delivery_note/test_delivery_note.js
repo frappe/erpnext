@@ -15,7 +15,7 @@ QUnit.test("test delivery note", function(assert) {
 				]},
 				{shipping_address_name: 'Test1-Shipping'},
 				{contact_person: 'Contact 1-Test Customer 1'},
-				{taxes_and_charges: 'TEST In State GST'},
+				{taxes_and_charges: 'TEST In State GST - FT'},
 				{tc_name: 'Test Term 1'},
 				{transporter_name:'TEST TRANSPORT'},
 				{lr_no:'MH-04-FG 1111'}

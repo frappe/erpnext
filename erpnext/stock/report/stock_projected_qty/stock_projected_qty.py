@@ -16,6 +16,7 @@ def get_columns():
 		_("UOM") + ":Link/UOM:100", _("Actual Qty") + ":Float:100", _("Planned Qty") + ":Float:100",
 		_("Requested Qty") + ":Float:110", _("Ordered Qty") + ":Float:100",
 		_("Reserved Qty") + ":Float:100", _("Reserved Qty for Production") + ":Float:100",
+		_("Reserved for sub contracting") + ":Float:100",
 		_("Projected Qty") + ":Float:100", _("Reorder Level") + ":Float:100", _("Reorder Qty") + ":Float:100",
 		_("Shortage Qty") + ":Float:100"]
 
@@ -33,7 +34,8 @@ def get_data(filters):
 			continue
 
 		# item = item_map.setdefault(bin.item_code, get_item(bin.item_code))
-		company = warehouse_company.setdefault(bin.warehouse, frappe.db.get_value("Warehouse", bin.warehouse, "company"))
+		company = warehouse_company.setdefault(bin.warehouse,
+			frappe.db.get_value("Warehouse", bin.warehouse, "company"))
 
 		if filters.brand and filters.brand != item.brand:
 			continue
@@ -52,7 +54,8 @@ def get_data(filters):
 
 		data.append([item.name, item.item_name, item.description, item.item_group, item.brand, bin.warehouse,
 			item.stock_uom, bin.actual_qty, bin.planned_qty, bin.indented_qty, bin.ordered_qty,
-			bin.reserved_qty, bin.reserved_qty_for_production, bin.projected_qty, re_order_level, re_order_qty, shortage_qty])
+			bin.reserved_qty, bin.reserved_qty_for_production, bin.reserved_qty_for_sub_contract,
+			bin.projected_qty, re_order_level, re_order_qty, shortage_qty])
 
 	return data
 
@@ -71,7 +74,7 @@ def get_bin_list(filters):
 				warehouse_details.rgt))
 
 	bin_list = frappe.db.sql("""select item_code, warehouse, actual_qty, planned_qty, indented_qty,
-		ordered_qty, reserved_qty, reserved_qty_for_production, projected_qty
+		ordered_qty, reserved_qty, reserved_qty_for_production, reserved_qty_for_sub_contract, projected_qty
 		from tabBin bin {conditions} order by item_code, warehouse
 		""".format(conditions=" where " + " and ".join(conditions) if conditions else ""), as_dict=1)
 

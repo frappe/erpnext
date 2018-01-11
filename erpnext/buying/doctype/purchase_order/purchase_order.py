@@ -12,7 +12,7 @@ from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
 from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import validate_for_items, check_for_closed_status
-
+from erpnext.stock.utils import get_bin
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -71,8 +71,10 @@ class PurchaseOrder(BuyingController):
 	def validate_supplier(self):
 		prevent_po = frappe.db.get_value("Supplier", self.supplier, 'prevent_pos')
 		if prevent_po:
-			standing = frappe.db.get_value("Supplier Scorecard",self.supplier, 'status')
-			frappe.throw(_("Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.").format(self.supplier, standing))
+			standing = frappe.db.get_value("Supplier Scorecard", self.supplier, 'status')
+			if standing:
+				frappe.throw(_("Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.")
+					.format(self.supplier, standing))
 
 		warn_po = frappe.db.get_value("Supplier", self.supplier, 'warn_pos')
 		if warn_po:
@@ -111,27 +113,26 @@ class PurchaseOrder(BuyingController):
 
 	def get_last_purchase_rate(self):
 		"""get last purchase rates for all items"""
+		if cint(frappe.db.get_single_value("Buying Settings", "disable_fetch_last_purchase_rate")): return
 
-		if not cint(frappe.db.get_single_value("Buying Settings", "disable_fetch_last_purchase_rate")):
-			conversion_rate = flt(self.get('conversion_rate')) or 1.0
+		conversion_rate = flt(self.get('conversion_rate')) or 1.0
+		for d in self.get("items"):
+			if d.item_code:
+				last_purchase_details = get_last_purchase_details(d.item_code, self.name)
+				if last_purchase_details:
+					d.base_price_list_rate = (last_purchase_details['base_price_list_rate'] *
+						(flt(d.conversion_factor) or 1.0))
+					d.discount_percentage = last_purchase_details['discount_percentage']
+					d.base_rate = last_purchase_details['base_rate'] * (flt(d.conversion_factor) or 1.0)
+					d.price_list_rate = d.base_price_list_rate / conversion_rate
+					d.rate = d.base_rate / conversion_rate
+					d.last_purchase_rate = d.rate
+				else:
 
-			for d in self.get("items"):
-				if d.item_code:
-					last_purchase_details = get_last_purchase_details(d.item_code, self.name)
-
-					if last_purchase_details:
-						d.base_price_list_rate = (last_purchase_details['base_price_list_rate'] *
-							(flt(d.conversion_factor) or 1.0))
-						d.discount_percentage = last_purchase_details['discount_percentage']
-						d.base_rate = last_purchase_details['base_rate'] * (flt(d.conversion_factor) or 1.0)
-						d.price_list_rate = d.base_price_list_rate / conversion_rate
-						d.last_purchase_rate = d.base_rate / conversion_rate
-					else:
-
-						item_last_purchase_rate = frappe.db.get_value("Item", d.item_code, "last_purchase_rate")
-						if item_last_purchase_rate:
-							d.base_price_list_rate = d.base_rate = d.price_list_rate \
-								= d.last_purchase_rate = item_last_purchase_rate
+					item_last_purchase_rate = frappe.db.get_value("Item", d.item_code, "last_purchase_rate")
+					if item_last_purchase_rate:
+						d.base_price_list_rate = d.base_rate = d.price_list_rate \
+							= d.rate = d.last_purchase_rate = item_last_purchase_rate
 
 	# Check for Closed status
 	def check_for_closed_status(self):
@@ -184,6 +185,9 @@ class PurchaseOrder(BuyingController):
 		self.set_status(update=True, status=status)
 		self.update_requested_qty()
 		self.update_ordered_qty()
+		if self.is_subcontracted == "Yes":
+			self.update_reserved_qty_for_subcontract()
+
 		self.notify_update()
 		clear_doctype_notifications(self)
 
@@ -196,6 +200,8 @@ class PurchaseOrder(BuyingController):
 		self.update_prevdoc_status()
 		self.update_requested_qty()
 		self.update_ordered_qty()
+		if self.is_subcontracted == "Yes":
+			self.update_reserved_qty_for_subcontract()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
@@ -208,6 +214,9 @@ class PurchaseOrder(BuyingController):
 
 		if self.has_drop_ship_item():
 			self.update_delivered_qty_in_sales_order()
+
+		if self.is_subcontracted == "Yes":
+			self.update_reserved_qty_for_subcontract()
 
 		self.check_for_closed_status()
 
@@ -255,6 +264,27 @@ class PurchaseOrder(BuyingController):
 		for item in self.items:
 			if item.delivered_by_supplier == 1:
 				item.received_qty = item.qty
+
+	def update_reserved_qty_for_subcontract(self):
+		for d in self.supplied_items:
+			if d.rm_item_code:
+				stock_bin = get_bin(d.rm_item_code, d.reserve_warehouse)
+				stock_bin.update_reserved_qty_for_sub_contracting()
+
+def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor= 1.0):
+	"""get last purchase rate for an item"""
+	if cint(frappe.db.get_single_value("Buying Settings", "disable_fetch_last_purchase_rate")): return
+
+	conversion_rate = flt(conversion_rate) or 1.0
+
+	last_purchase_details =  get_last_purchase_details(item_code, name)
+	if last_purchase_details:
+		last_purchase_rate = (last_purchase_details['base_rate'] * (flt(conversion_factor) or 1.0)) / conversion_rate
+		return last_purchase_rate
+	else:
+		item_last_purchase_rate = frappe.db.get_value("Item", item_code, "last_purchase_rate")
+		if item_last_purchase_rate:
+			return item_last_purchase_rate
 
 @frappe.whitelist()
 def close_or_unclose_purchase_orders(names, status):
