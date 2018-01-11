@@ -124,3 +124,19 @@ def item_group_query(doctype, txt, searchfield, start, page_len, filters):
 			where {condition} and (name like %(txt)s) limit {start}, {page_len}"""
 		.format(condition = cond, start=start, page_len= page_len),
 			{'txt': '%%%s%%' % txt})
+
+@frappe.whitelist()
+def get_extrafields():
+	req_fields = []
+	pos_settings_doc = frappe.get_doc("POS Settings")
+
+	for field in pos_settings_doc.sales_invoice_fields_table:
+		field_type = frappe.db.get_value("DocField",{"parent":"Sales Invoice","fieldname":field.field_name},"fieldtype")
+		field_label = frappe.db.get_value("DocField",{"parent":"Sales Invoice","fieldname":field.field_name},"label")
+		fdict = {
+			"name":field.field_name,
+			"label":field_label,
+			"type":field_type
+		}
+		req_fields.append(fdict)
+	return req_fields

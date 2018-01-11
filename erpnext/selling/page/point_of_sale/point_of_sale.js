@@ -30,6 +30,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	constructor(wrapper) {
 		this.wrapper = $(wrapper).find('.layout-main-section');
 		this.page = wrapper.page;
+		this.additional_si_fields = [];
 
 		const assets = [
 			'assets/erpnext/js/pos/clusterize.js',
@@ -55,8 +56,55 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			() => {
 				frappe.dom.unfreeze();
 			},
-			() => this.page.set_title(__('Point of Sale'))
+			() => this.page.set_title(__('Point of Sale')),
+			() => {
+				if(this.frm.doc.show_additional_customer_details){
+					frappe.call({
+						method: 'erpnext.selling.page.point_of_sale.point_of_sale.get_extrafields',
+						args: {
+							doc: this.frm.doc
+						},
+						callback: r => {
+							if (r.message) {
+								this.render_sales_invoice_fields(r.message);	
+							}
+						}
+					});
+				}
+			}
 		]);
+	}
+
+	render_sales_invoice_fields(required_fields){
+		for(var i=0;i<required_fields.length;i++){
+			if(i%2 == 0){
+				var parent_class = '.customer-details-left'
+			}else{
+				var parent_class = '.customer-details-right'
+			}
+
+			this.additional_si_fields[i] = frappe.ui.form.make_control({
+				df: {
+					fieldtype: required_fields[i].type,
+					label: required_fields[i].label,
+					fieldname: required_fields[i].name,
+					onchange: () => {
+						this.set_new_values();
+					}
+				},
+				parent: this.wrapper.find(parent_class),
+				render_input: true
+			});
+		}
+	}
+
+	set_new_values(){
+		if(this.additional_si_fields.length>0){
+			for(var i=0;i<this.additional_si_fields.length;i++){
+				// Refactor to save the value
+				// this.frm.doc./this.additional_si_fields[i].name = this.additional_si_fields[i].value
+			}
+		}
 	}
 
 	set_online_status() {
@@ -76,11 +124,15 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	prepare_dom() {
 		this.wrapper.append(`
 			<div class="pos">
+				<section class="col-md-12 customer-details">
+					<div class="col-md-5 customer-details-left">
+					</div>
+					<div class="col-md-7 customer-details-right">
+					</div>
+				</section>
 				<section class="cart-container">
-
 				</section>
 				<section class="item-container">
-
 				</section>
 			</div>
 		`);
