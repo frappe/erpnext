@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import format_datetime
 from frappe import _
-from erpnext.accounts.utils import get_account_currency
 
 
 def execute(filters=None):
@@ -34,9 +33,7 @@ def validate_filters(filters, account_details):
 
 def set_account_currency(filters):
 
-	filters["company_currency"] = frappe.db.get_value(
-		"Company", filters.company, "default_currency")
-	account_currency = None
+	filters["company_currency"] = frappe.db.get_value("Company", filters.company, "default_currency")
 
 	return filters
 
