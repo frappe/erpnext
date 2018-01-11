@@ -15,9 +15,8 @@ class Member(Document):
 
 
 	def validate(self):
-		if self.name not in STANDARD_USERS:
+		if self.email not in STANDARD_USERS:
 			self.validate_email_type(self.email)
-			self.validate_email_type(self.name)
 
 
 	def validate_email_type(self, email):
