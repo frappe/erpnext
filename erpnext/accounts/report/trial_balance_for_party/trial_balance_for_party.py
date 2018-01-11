@@ -21,7 +21,14 @@ def execute(filters=None):
 def get_data(filters, show_party_name):
 	party_name_field = "customer_name" if filters.get("party_type")=="Customer" else "supplier_name" if filters.get("party_type")=="Supplier" else "employee_name"
 	party_filters = {"name": filters.get("party")} if filters.get("party") else {}
-	parties = frappe.get_all(filters.get("party_type"), fields = ["name", party_name_field], 
+	fields = ["name", party_name_field]
+	if filters.get("party_type")=="Customer":
+		fields.append("customer_group")
+
+	elif filters.get("party_type")=="Supplier":
+		fields.append("supplier_type")
+	
+	parties = frappe.get_all(filters.get("party_type"), fields = fields, 
 		filters = party_filters, order_by="name")
 	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
 	opening_balances = get_opening_balances(filters)
@@ -41,7 +48,10 @@ def get_data(filters, show_party_name):
 		row = { "party": party.name }
 		if show_party_name:
 			row["party_name"] = party.get(party_name_field)
-		
+		if filters.get("party_type")=="Customer":
+			row["customer_group"] = party.get("customer_group")
+		elif filters.get("party_type")=="Supplier":
+			row["supplier_type"] = party.get("supplier_type")
 		# opening
 		opening_debit, opening_credit = opening_balances.get(party.name, [0, 0])
 		row.update({
@@ -206,7 +216,20 @@ def get_columns(filters, show_party_name):
 			"fieldtype": "Data",
 			"width": 200
 		})
-		
+	if filters.get("party_type")=="Customer":
+		columns.insert(-1, {
+			"fieldname": "customer_group",
+			"label": _("Customer group"),
+			"fieldtype": "Data",
+			"width": 200
+		})
+	elif filters.get("party_type")=="Supplier":
+		columns.insert(-1, {
+			"fieldname": "supplier_type",
+			"label": _("Supplier Type"),
+			"fieldtype": "Data",
+			"width": 200
+		})
 	return columns
 		
 def is_party_name_visible(filters):
