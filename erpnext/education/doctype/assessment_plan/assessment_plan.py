@@ -22,7 +22,7 @@ class AssessmentPlan(Document):
 			self.academic_year = academic_year
 			if program:
 				self.program = program
-			if course and not self.course:
+			if course and not self.course:	#pylint: disable=E0203
 				self.course = course
 
 	def validate_overlap(self):
