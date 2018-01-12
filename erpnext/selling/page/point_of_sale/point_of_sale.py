@@ -133,6 +133,13 @@ def get_extrafields():
 	for field in pos_settings_doc.sales_invoice_fields_table:
 		field_type = frappe.db.get_value("DocField",{"parent":"Sales Invoice","fieldname":field.field_name},"fieldtype")
 		field_label = frappe.db.get_value("DocField",{"parent":"Sales Invoice","fieldname":field.field_name},"label")
+
+		# for custom fields
+		if(field_type==None or field_label==None):
+			cf_attributes = frappe.get_all("Custom Field",fields=["fieldtype","label"],filters={"dt":"Sales Invoice","fieldname":field.field_name})
+			field_type = cf_attributes[0].fieldtype
+			field_label = cf_attributes[0].label
+
 		fdict = {
 			"name":field.field_name,
 			"label":field_label,

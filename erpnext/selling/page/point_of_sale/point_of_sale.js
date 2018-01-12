@@ -54,10 +54,6 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 			() => this.make_new_invoice(),
 			() => {
-				frappe.dom.unfreeze();
-			},
-			() => this.page.set_title(__('Point of Sale')),
-			() => {
 				if(this.frm.doc.show_additional_customer_details){
 					frappe.call({
 						method: 'erpnext.selling.page.point_of_sale.point_of_sale.get_extrafields',
@@ -71,7 +67,11 @@ erpnext.pos.PointOfSale = class PointOfSale {
 						}
 					});
 				}
-			}
+			},
+			() => {
+				frappe.dom.unfreeze();
+			},
+			() => this.page.set_title(__('Point of Sale')),
 		]);
 	}
 
@@ -101,8 +101,8 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	set_new_values(){
 		if(this.additional_si_fields.length>0){
 			for(var i=0;i<this.additional_si_fields.length;i++){
-				// Refactor to save the value
-				// this.frm.doc./this.additional_si_fields[i].name = this.additional_si_fields[i].value
+				// Saves value of custom/extra fields in doc
+				this.frm.set_value(this.additional_si_fields[i].df.fieldname,this.additional_si_fields[i].value);
 			}
 		}
 	}
@@ -124,10 +124,10 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	prepare_dom() {
 		this.wrapper.append(`
 			<div class="pos">
-				<section class="col-md-12 customer-details">
-					<div class="col-md-5 customer-details-left">
+				<section class="col-md-12 col-sm-12 customer-details">
+					<div class="col-md-5 col-sm-5 customer-details-left">
 					</div>
-					<div class="col-md-7 customer-details-right">
+					<div class="col-md-7 col-sm-7 customer-details-right">
 					</div>
 				</section>
 				<section class="cart-container">
