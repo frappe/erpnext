@@ -283,10 +283,11 @@ class Company(Document):
 
 		# delete BOMs
 		boms = frappe.db.sql_list("select name from tabBOM where company=%s", self.name)
-		frappe.db.sql("delete from tabBOM where company=%s", self.name)
-		for dt in ("BOM Operation", "BOM Item", "BOM Scrap Item", "BOM Explosion Item"):
-			frappe.db.sql("delete from `tab%s` where parent in (%s)"""
-				% (dt, ', '.join(['%s']*len(boms))), tuple(boms))
+		if boms:
+			frappe.db.sql("delete from tabBOM where company=%s", self.name)
+			for dt in ("BOM Operation", "BOM Item", "BOM Scrap Item", "BOM Explosion Item"):
+				frappe.db.sql("delete from `tab%s` where parent in (%s)"""
+					% (dt, ', '.join(['%s']*len(boms))), tuple(boms), debug=1)
 
 @frappe.whitelist()
 def enqueue_replace_abbr(company, old, new):
