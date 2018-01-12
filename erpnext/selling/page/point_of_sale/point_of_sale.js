@@ -51,7 +51,6 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			},
 			() => this.setup_company(),
 			() => this.make_new_invoice(),
-			() => this.set_form_action(),
 			() => {
 				frappe.dom.unfreeze();
 			},
@@ -111,6 +110,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				},
 				on_select_change: () => {
 					this.cart.numpad.set_inactive();
+					this.set_form_action();
 				},
 				get_item_details: (item_code) => {
 					return this.items.get(item_code);
@@ -180,6 +180,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					.then(() => {
 						// update cart
 						this.update_cart_data(item);
+						this.set_form_action();
 					});
 			}
 			return;
@@ -503,8 +504,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	set_form_action() {
-		if(this.frm.doc.docstatus == 1 || this.frm.doc.allow_print_before_pay == 1){
-
+		if(this.frm.doc.docstatus == 1 || (this.frm.doc.allow_print_before_pay == 1&&this.frm.doc.items.length>0)){
 			this.page.set_secondary_action(__("Print"), () => {
 				if(this.frm.doc.docstatus != 1 ){
 					this.frm.save();
@@ -513,6 +513,9 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					this.frm.print_preview.printit(true);
 				}
 			});
+		}
+		if(this.frm.doc.items.length == 0){
+			this.page.clear_secondary_action();
 		}
 
 		if (this.frm.doc.docstatus == 1) {
