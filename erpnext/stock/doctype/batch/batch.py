@@ -37,7 +37,11 @@ class Batch(Document):
 		'''Generate random ID for batch if not specified'''
 		if not self.batch_id:
 			if frappe.db.get_value('Item', self.item, 'create_new_batch'):
-				self.batch_id = get_name_from_hash()
+				use_naming_series = frappe.db.get_single_value('Stock Settings', 'use_naming_series')
+				if use_naming_series:
+					self.batch_id = get_name_from_naming_series()
+				else:
+					self.batch_id = get_name_from_hash()
 			else:
 				frappe.throw(_('Batch ID is mandatory'), frappe.MandatoryError)
 
