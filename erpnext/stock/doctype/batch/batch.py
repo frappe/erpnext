@@ -12,6 +12,16 @@ from frappe.utils import flt, cint
 class UnableToSelectBatchError(frappe.ValidationError): pass
 
 
+def get_name_from_naming_series():
+	naming_series_prefix = frappe.db.get_single_value('Stock Settings', 'naming_series_prefix')
+	if not naming_series_prefix:
+		naming_series_prefix = 'BATCH-'
+
+	name = make_autoname(naming_series_prefix + '.#####')
+
+	return name
+
+
 def get_name_from_hash():
 	temp = None
 	while not temp:
