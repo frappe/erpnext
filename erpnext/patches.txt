@@ -487,3 +487,4 @@ erpnext.patches.v10_0.add_guardian_role_for_parent_portal
 erpnext.patches.v10_0.set_numeric_ranges_in_template_if_blank
 erpnext.patches.v10_0.update_assessment_plan
 erpnext.patches.v10_0.update_assessment_result
+erpnext.patches.v10_0.add_has_serial_no_to_item_variant_settings
