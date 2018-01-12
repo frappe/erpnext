@@ -281,6 +281,13 @@ class Company(Document):
 		# delete mode of payment account
 		frappe.db.sql("delete from `tabMode of Payment Account` where company=%s", self.name)
 
+		# delete BOMs
+		boms = frappe.db.sql_list("select name from tabBOM where company=%s", self.name)
+		if boms:
+			frappe.db.sql("delete from tabBOM where company=%s", self.name)
+			for dt in ("BOM Operation", "BOM Item", "BOM Scrap Item", "BOM Explosion Item"):
+				frappe.db.sql("delete from `tab%s` where parent in (%s)"""
+					% (dt, ', '.join(['%s']*len(boms))), tuple(boms), debug=1)
 
 @frappe.whitelist()
 def enqueue_replace_abbr(company, old, new):
