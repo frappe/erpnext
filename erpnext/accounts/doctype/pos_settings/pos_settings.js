@@ -13,7 +13,7 @@ frappe.ui.form.on('POS Settings', {
 				}
 			});
 			fields.unshift({"label":"Name (Doc Name)","value":"name"});
-			frappe.meta.get_docfield("POS Sales Invoice Fields", "field_name", cur_frm.doc.name).options = [""].concat(fields);
+			frappe.meta.get_docfield("POS Sales Invoice Fields", "field_name", frm.doc.name).options = [""].concat(fields);
 		});
 	}
 });

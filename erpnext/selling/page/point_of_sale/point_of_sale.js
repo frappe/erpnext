@@ -62,7 +62,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 						},
 						callback: r => {
 							if (r.message) {
-								this.render_sales_invoice_fields(r.message);	
+								this.render_sales_invoice_fields(r.message);
 							}
 						}
 					});
@@ -77,10 +77,11 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 	render_sales_invoice_fields(required_fields){
 		for(var i=0;i<required_fields.length;i++){
+			var parent_class = null;
 			if(i%2 == 0){
-				var parent_class = '.customer-details-left'
+				parent_class = '.customer-details-left';
 			}else{
-				var parent_class = '.customer-details-right'
+				parent_class = '.customer-details-right';
 			}
 
 			this.additional_si_fields[i] = frappe.ui.form.make_control({
