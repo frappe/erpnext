@@ -36,3 +36,15 @@ def get_list_context(context):
 	context.no_breadcrumbs = True
 	context.order_by = 'creation desc'
 	context.introduction = '<p>All Chapters</p>'
+
+
+@frappe.whitelist()
+def leave(title, user_id, leave_reason):
+	chapter = frappe.get_doc("Chapter", title)
+	for member in chapter.members:
+		if member.user == user_id:
+			member.enabled = 0
+			member.leave_reason = leave_reason
+	chapter.save(ignore_permissions=1)
+	frappe.db.commit()
+	return "Thank you for Feedback"
