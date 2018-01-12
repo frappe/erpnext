@@ -585,16 +585,28 @@ class POSCart {
 
 		this.wrapper.find('.grand-total-value').text(
 			format_currency(this.frm.doc.grand_total, this.frm.currency));
+		this.wrapper.find('.rounded-total-value').text(
+			format_currency(this.frm.doc.rounded_total, this.frm.currency));
 
 		const customer = this.frm.doc.customer;
 		this.customer_field.set_value(customer);
 	}
 
 	get_grand_total() {
+		let total = this.get_total_template('Grand Total', 'grand-total-value');
+
+		if (!cint(frappe.sys_defaults.disable_rounded_total)) {
+			total += this.get_total_template('Rounded Total', 'rounded-total-value');
+		}
+
+		return total;
+	}
+
+	get_total_template(label, class_name) {
 		return `
 			<div class="list-item">
-				<div class="list-item__content text-muted">${__('Grand Total')}</div>
-				<div class="list-item__content list-item__content--flex-2 grand-total-value">0.00</div>
+				<div class="list-item__content text-muted">${__(label)}</div>
+				<div class="list-item__content list-item__content--flex-2 ${class_name}">0.00</div>
 			</div>
 		`;
 	}
@@ -670,6 +682,10 @@ class POSCart {
 	update_grand_total() {
 		this.$grand_total.find('.grand-total-value').text(
 			format_currency(this.frm.doc.grand_total, this.frm.currency)
+		);
+
+		this.$grand_total.find('.rounded-total-value').text(
+			format_currency(this.frm.doc.rounded_total, this.frm.currency)
 		);
 	}
 
@@ -1381,7 +1397,8 @@ class Payment {
 
 	set_title() {
 		let title = __('Total Amount {0}',
-			[format_currency(this.frm.doc.grand_total, this.frm.doc.currency)]);
+			[format_currency(this.frm.doc.rounded_total || this.frm.doc.grand_total,
+			this.frm.doc.currency)]);
 
 		this.dialog.set_title(title);
 	}

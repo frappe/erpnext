@@ -462,7 +462,8 @@ class ProductionOrder(Document):
 
 			if reset_only_qty:
 				for d in self.get("required_items"):
-					d.required_qty = item_dict.get(d.item_code).get("qty")
+					if item_dict.get(d.item_code):
+						d.required_qty = item_dict.get(d.item_code).get("qty")
 			else:
 				for item in sorted(item_dict.values(), key=lambda d: d['idx']):
 					self.append('required_items', {
