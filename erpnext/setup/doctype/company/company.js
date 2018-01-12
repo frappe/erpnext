@@ -32,6 +32,10 @@ frappe.ui.form.on("Company", {
 			frm.toggle_enable("default_currency", (frm.doc.__onload &&
 				!frm.doc.__onload.transactions_exist));
 
+			frm.add_custom_button(__('Make Tax Template'), function() {
+				frm.trigger("make_default_tax_template");
+			});
+
 			frm.add_custom_button(__('Cost Centers'), function() {
 				frappe.set_route('Tree', 'Cost Center', {'company': frm.doc.name})
 			}, __("View"));
@@ -47,13 +51,6 @@ frappe.ui.form.on("Company", {
 			frm.add_custom_button(__('Purchase Tax Template'), function() {
 				frappe.set_route('List', 'Purchase Taxes and Charges Template', {'company': frm.doc.name});
 			}, __("View"));
-
-			frm.add_custom_button(__('Default Tax Template'), function() {
-				frm.trigger("make_default_tax_template");
-			}, __("Make"));
-
-			frm.page.set_inner_btn_group_as_primary(__("View"));
-			frm.page.set_inner_btn_group_as_primary(__("Make"));
 		}
 
 		erpnext.company.set_chart_of_accounts_options(frm.doc);
