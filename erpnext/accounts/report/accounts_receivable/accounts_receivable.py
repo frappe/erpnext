@@ -283,9 +283,9 @@ class ReceivablePayableReport(object):
 					where exists(select name from `tabCustomer Group` where lft >= {0} and rgt <= {1}
 						and name=tabCustomer.customer_group))""".format(lft, rgt))
 
-			if self.filters.get("credit_days_based_on"):
-				conditions.append("party in (select name from tabCustomer where credit_days_based_on=%s)")
-				values.append(self.filters.get("credit_days_based_on"))
+			if self.filters.get("payment_terms_template"):
+				conditions.append("party in (select name from tabCustomer where payment_terms=%s)")
+				values.append(self.filters.get("payment_terms_template"))
 
 		return " and ".join(conditions), values
 
