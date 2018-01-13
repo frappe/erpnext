@@ -165,6 +165,7 @@ frappe.ui.form.on("Production Order", {
 					item: frm.doc.production_item,
 					project: frm.doc.project
 				},
+				freeze: true,
 				callback: function(r) {
 					if(r.message) {
 						frm.set_value('sales_order', "");
@@ -194,6 +195,7 @@ frappe.ui.form.on("Production Order", {
 		return frm.call({
 			doc: frm.doc,
 			method: "get_items_and_operations_from_bom",
+			freeze: true,
 			callback: function(r) {
 				if(r.message["set_scrap_wh_mandatory"]){
 					frm.toggle_reqd("scrap_warehouse", true);
@@ -224,6 +226,7 @@ frappe.ui.form.on("Production Order", {
 				args: { production_item: frm.doc.production_item },
 				callback: function(r) {
 					frm.set_query("sales_order", function() {
+						erpnext.in_production_item_onchange = true;
 						return {
 							filters: [
 								["Sales Order","name", "in", r.message]

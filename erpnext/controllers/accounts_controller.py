@@ -64,15 +64,14 @@ class AccountsController(TransactionBase):
 	def validate_invoice_documents_schedule(self):
 		self.validate_payment_schedule_dates()
 		self.set_due_date()
-		self.validate_invoice_portion()
 		self.set_payment_schedule()
 		self.validate_payment_schedule_amount()
 		self.validate_due_date()
 		self.validate_advance_entries()
 
 	def validate_non_invoice_documents_schedule(self):
-		self.validate_invoice_portion()
 		self.set_payment_schedule()
+		self.validate_payment_schedule_dates()
 		self.validate_payment_schedule_amount()
 
 	def validate_all_documents_schedule(self):
@@ -233,9 +232,10 @@ class AccountsController(TransactionBase):
 		tax_master_doctype = self.meta.get_field("taxes_and_charges").options
 
 		if self.is_new() and not self.get("taxes"):
-			if not self.get("taxes_and_charges"):
+			if self.company and not self.get("taxes_and_charges"):
 				# get the default tax master
-				self.taxes_and_charges = frappe.db.get_value(tax_master_doctype, {"is_default": 1})
+				self.taxes_and_charges = frappe.db.get_value(tax_master_doctype,
+					{"is_default": 1, 'company': self.company})
 
 			self.append_taxes_from_master(tax_master_doctype)
 
@@ -374,6 +374,17 @@ class AccountsController(TransactionBase):
 		res = journal_entries + payment_entries
 
 		return res
+
+	def is_inclusive_tax(self):
+		is_inclusive = cint(frappe.db.get_single_value("Accounts Settings",
+			"show_inclusive_tax_in_print"))
+
+		if is_inclusive:
+			is_inclusive = 0
+			if self.get("taxes", filters={"included_in_print_rate": 1}):
+				is_inclusive = 1
+
+		return is_inclusive
 
 	def validate_advance_entries(self):
 		order_field = "sales_order" if self.doctype == "Sales Invoice" else "purchase_order"
@@ -650,6 +661,8 @@ class AccountsController(TransactionBase):
 		date = self.get("due_date")
 		due_date = date or posting_date
 		grand_total = self.get("rounded_total") or self.grand_total
+		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
+			grand_total = grand_total - flt(self.write_off_amount)
 
 		if not self.get("payment_schedule"):
 			if self.get("payment_terms_template"):
@@ -661,7 +674,8 @@ class AccountsController(TransactionBase):
 				self.append("payment_schedule", data)
 		else:
 			for d in self.get("payment_schedule"):
-				d.payment_amount = grand_total * flt(d.invoice_portion) / 100
+				if d.invoice_portion:
+					d.payment_amount = grand_total * flt(d.invoice_portion) / 100
 
 	def set_due_date(self):
 		due_dates = [d.due_date for d in self.get("payment_schedule") if d.due_date]
@@ -671,15 +685,12 @@ class AccountsController(TransactionBase):
 	def validate_payment_schedule_dates(self):
 		dates = []
 		li = []
-		if self.due_date and getdate(self.due_date) < getdate(self.posting_date):
-			frappe.throw(_("Due Date cannot be before posting date"))
 
 		for d in self.get("payment_schedule"):
-			if getdate(d.due_date) < getdate(self.posting_date):
+			if self.doctype == "Sales Order" and getdate(d.due_date) < getdate(self.transaction_date):
 				frappe.throw(_("Row {0}: Due Date cannot be before posting date").format(d.idx))
 			elif d.due_date in dates:
 				li.append('{0} in row {1}'.format(d.due_date, d.idx))
-				# frappe.throw(_("Row {0}: Duplicate due date found").format(d.idx))
 			dates.append(d.due_date)
 
 		if li:
@@ -692,19 +703,13 @@ class AccountsController(TransactionBase):
 			total = 0
 			for d in self.get("payment_schedule"):
 				total += flt(d.payment_amount)
+			total = flt(total, self.precision("grand_total"))
 
-			grand_total = self.get("rounded_total") or self.grand_total
+			grand_total = flt(self.get("rounded_total") or self.grand_total, self.precision('grand_total'))
+			if self.doctype in ("Sales Invoice", "Purchase Invoice"):
+				grand_total = grand_total - flt(self.write_off_amount)
 			if total != grand_total:
 				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"))
-
-	def validate_invoice_portion(self):
-		if self.get("payment_schedule"):
-			total_portion = 0
-			for term in self.payment_schedule:
-				total_portion += flt(term.get('invoice_portion', 0))
-
-			if flt(total_portion, 2) != 100.00:
-				frappe.throw(_('Combined invoice portion must equal 100%'), indicator='red')
 
 	def is_rounded_total_disabled(self):
 		if self.meta.get_field("disable_rounded_total"):
@@ -717,8 +722,12 @@ def get_tax_rate(account_head):
 	return frappe.db.get_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
 
 @frappe.whitelist()
-def get_default_taxes_and_charges(master_doctype):
-	default_tax = frappe.db.get_value(master_doctype, {"is_default": 1})
+def get_default_taxes_and_charges(master_doctype, company=None):
+	if not company: return {}
+
+	default_tax = frappe.db.get_value(master_doctype,
+		{"is_default": 1, "company": company})
+
 	return {
 		'taxes_and_charges': default_tax,
 		'taxes': get_taxes_and_charges(master_doctype, default_tax)

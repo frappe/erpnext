@@ -20,6 +20,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		this.item_code = this.item.item_code;
 		this.qty = this.item.qty;
 		this.make_dialog();
+		this.on_close_dialog();
 	},
 
 	make_dialog: function() {
@@ -115,6 +116,12 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		this.dialog.show();
 	},
 
+	on_close_dialog: function() {
+		this.dialog.get_close_btn().on('click', () => {
+			this.on_close && this.on_close(this.item);
+		});
+	},
+
 	validate: function() {
 		let values = this.values;
 		if(!values.warehouse) {
@@ -208,7 +215,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 						in_list_view:1,
 						get_query: function() {
 							return {
-							    filters: {item: me.item_code },
+							    filters: {item_code: me.item_code },
 							    query: 'erpnext.controllers.queries.get_batch_numbers'
 					        };
 						},

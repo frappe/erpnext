@@ -24,6 +24,15 @@ frappe.ui.form.on("Customer", {
 				filters: filters
 			}
 		});
+
+		frm.set_query('customer_primary_contact', function(doc) {
+			return {
+				query: "erpnext.selling.doctype.customer.customer.get_customer_primary_contact",
+				filters: {
+					'customer': doc.name
+				}
+			}
+		})
 	},
 	refresh: function(frm) {
 		if(frappe.defaults.get_default("cust_master_name")!="Naming Series") {

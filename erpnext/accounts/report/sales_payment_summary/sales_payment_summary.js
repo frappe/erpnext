@@ -1,6 +1,5 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
-
 frappe.query_reports["Sales Payment Summary"] = {
 	"filters": [
 		{
@@ -8,12 +7,14 @@ frappe.query_reports["Sales Payment Summary"] = {
 			"label": __("From Date"),
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today(),
+			"reqd": 1,
 			"width": "80"
 		},
 		{
 			"fieldname":"to_date",
 			"label": __("To Date"),
 			"fieldtype": "Date",
+			"reqd": 1,
 			"default": frappe.datetime.get_today()
 		},
 		{
@@ -24,12 +25,6 @@ frappe.query_reports["Sales Payment Summary"] = {
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
-			"fieldname":"mode_of_payment",
-			"label": __("Mode of Payment"),
-			"fieldtype": "Link",
-			"options": "Mode of Payment"
-		},
-		{
 			"fieldname":"owner",
 			"label": __("Owner"),
 			"fieldtype": "Link",
@@ -37,21 +32,14 @@ frappe.query_reports["Sales Payment Summary"] = {
 			"defaults": user
 		},
 		{
-			"fieldname":"cost_center",
-			"label": __("Cost Center"),
-			"fieldtype": "Link",
-			"options": "Cost Center"
-		},
-		{
-			"fieldname":"warehouse",
-			"label": __("Warehouse"),
-			"fieldtype": "Link",
-			"options": "Warehouse"
-		},
-		{
 			"fieldname":"is_pos",
-			"label": __("POS?"),
+			"label": __("Show only POS"),
 			"fieldtype": "Check"
-		}
+		},
+		{
+			"fieldname":"payment_detail",
+			"label": __("Show Payment Details"),
+			"fieldtype": "Check"
+		},
 	]
 };

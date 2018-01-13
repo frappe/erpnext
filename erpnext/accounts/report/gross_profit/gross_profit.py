@@ -255,10 +255,12 @@ class GrossProfitGenerator(object):
 					from `tabPurchase Invoice Item`
 					where item_code = %s and docstatus=1""", item_code)[0][0])
 			else:
+				row.voucher_type = row.parenttype
+				row.voucher_no = row.parent
 				average_buying_rate = get_incoming_rate(row)
 				if not average_buying_rate:
 					average_buying_rate = get_valuation_rate(item_code, row.warehouse,
-						row.parenttype, row.parent, allow_zero_rate=True, 
+						row.parenttype, row.parent, allow_zero_rate=row.allow_zero_valuation,
 						currency=self.filters.currency, company=self.filters.company)
 
 				self.average_buying_rate[item_code] =  flt(average_buying_rate)
@@ -309,7 +311,8 @@ class GrossProfitGenerator(object):
 				`tabSales Invoice Item`.brand, `tabSales Invoice Item`.dn_detail,
 				`tabSales Invoice Item`.delivery_note, `tabSales Invoice Item`.stock_qty as qty,
 				`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount,
-				`tabSales Invoice Item`.name as "item_row", `tabSales Invoice`.is_return
+				`tabSales Invoice Item`.name as "item_row", `tabSales Invoice`.is_return,
+				`tabSales Invoice Item`.allow_zero_valuation_rate as "allow_zero_valuation"
 				{sales_person_cols}
 			from
 				`tabSales Invoice` inner join `tabSales Invoice Item`

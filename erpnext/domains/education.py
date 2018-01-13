@@ -12,11 +12,12 @@ data = {
 		'Student Attendance Tool',
 		'Student Applicant'
 	],
-	'default_portal_role': 'Student',
+	'default_portal_role': 'Guardian',
 	'restricted_roles': [
 		'Student',
 		'Instructor',
-		'Academics User'
+		'Academics User',
+		'Education Manager'
 	],
 	'modules': [
 		'Education'

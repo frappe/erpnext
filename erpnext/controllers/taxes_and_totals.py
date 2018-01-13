@@ -70,7 +70,6 @@ class calculate_taxes_and_totals(object):
 				item.net_rate = item.rate
 				item.amount = flt(item.rate * item.qty,	item.precision("amount"))
 				item.net_amount = item.amount
-				item.total_weight = flt(item.weight_per_unit * item.qty)
 
 				self._set_in_company_currency(item, ["price_list_rate", "rate", "net_rate", "amount", "net_amount"])
 
@@ -164,13 +163,12 @@ class calculate_taxes_and_totals(object):
 			return tax.rate
 
 	def calculate_net_total(self):
-		self.doc.total = self.doc.base_total = self.doc.net_total = self.doc.base_net_total = self.doc.total_net_weight= 0.0
+		self.doc.total = self.doc.base_total = self.doc.net_total = self.doc.base_net_total = 0.0
 		for item in self.doc.get("items"):
 			self.doc.total += item.amount
 			self.doc.base_total += item.base_amount
 			self.doc.net_total += item.net_amount
 			self.doc.base_net_total += item.base_net_amount
-			self.doc.total_net_weight += item.total_weight
 
 		self.doc.round_floats_in(self.doc, ["total", "base_total", "net_total", "base_net_total"])
 
@@ -400,7 +398,8 @@ class calculate_taxes_and_totals(object):
 
 			for tax in self.doc.get("taxes"):
 				if tax.charge_type == "Actual":
-					actual_taxes_dict.setdefault(tax.idx, tax.tax_amount)
+					tax_amount = self.get_tax_amount_if_for_valuation_or_deduction(tax.tax_amount, tax)
+					actual_taxes_dict.setdefault(tax.idx, tax_amount)
 				elif tax.row_id in actual_taxes_dict:
 					actual_tax_amount = flt(actual_taxes_dict.get(tax.row_id, 0)) * flt(tax.rate) / 100
 					actual_taxes_dict.setdefault(tax.idx, actual_tax_amount)
@@ -535,7 +534,7 @@ def get_itemised_tax_breakup_html(doc):
 	for tax in doc.taxes:
 		if getattr(tax, "category", None) and tax.category=="Valuation":
 			continue
-		if tax.description not in tax_accounts and tax.tax_amount_after_discount_amount:
+		if tax.description not in tax_accounts:
 			tax_accounts.append(tax.description)
 
 	headers = get_itemised_tax_breakup_header(doc.doctype + " Item", tax_accounts)
@@ -545,6 +544,7 @@ def get_itemised_tax_breakup_html(doc):
 
 	get_rounded_tax_amount(itemised_tax, doc.precision("tax_amount", "taxes"))
 
+	update_itemised_tax_data(doc)
 	frappe.flags.company = None
 
 	return frappe.render_template(
@@ -556,6 +556,12 @@ def get_itemised_tax_breakup_html(doc):
 			company_currency=erpnext.get_company_currency(doc.company)
 		)
 	)
+
+
+@erpnext.allow_regional
+def update_itemised_tax_data(doc):
+	#Don't delete this method, used for localization
+	pass
 
 @erpnext.allow_regional
 def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
