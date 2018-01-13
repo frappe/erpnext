@@ -11,7 +11,8 @@ data = {
 	],
 	'restricted_roles': [
 		'Restaurant Manager',
-		'Hotel Manager'
+		'Hotel Manager',
+		'Hotel Reservation User'
 	],
 	'custom_fields': {
 		'Sales Invoice': [
