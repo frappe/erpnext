@@ -217,14 +217,14 @@ def get_columns(filters, show_party_name):
 			"width": 200
 		})
 	if filters.get("party_type")=="Customer":
-		columns.insert(-1, {
+		columns.insert(1, {
 			"fieldname": "customer_group",
 			"label": _("Customer group"),
 			"fieldtype": "Data",
 			"width": 200
 		})
 	elif filters.get("party_type")=="Supplier":
-		columns.insert(-1, {
+		columns.insert(2, {
 			"fieldname": "supplier_type",
 			"label": _("Supplier Type"),
 			"fieldtype": "Data",
