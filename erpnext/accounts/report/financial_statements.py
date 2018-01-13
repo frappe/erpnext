@@ -346,12 +346,15 @@ def get_included_cost_center_cond(included_cost_centers):
 	#~ try:
 	query = ""
 	cost_center_list = [] 
-	cost_centers = included_cost_centers.split(",") 
-	for cost_center in cost_centers : 
-		lft, rgt = frappe.db.get_value("Cost Center", cost_center, ["lft", "rgt"])
-		#~ cost_center_list = frappe.get_list("Cost Center", filters={"lft": (">=", lft),"rgt": ("<=", rgt) })
-		for c in frappe.db.sql("""select name from `tabCost Center` where lft >=%s and rgt <=%s"""%(lft, rgt), as_list=1):
-			cost_center_list.append(c[0])
+	try:
+		cost_centers = included_cost_centers.split(",") 
+		for cost_center in cost_centers : 
+			lft, rgt = frappe.db.get_value("Cost Center", cost_center, ["lft", "rgt"])
+			#~ cost_center_list = frappe.get_list("Cost Center", filters={"lft": (">=", lft),"rgt": ("<=", rgt) })
+			for c in frappe.db.sql("""select name from `tabCost Center` where lft >=%s and rgt <=%s"""%(lft, rgt), as_list=1):
+				cost_center_list.append(c[0])
+	except :
+		frappe.throw("Bad Entry for Included Cost Centers")
 	
 	
 	cost_center_list  = list(set(cost_center_list))
