@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.model.naming import make_autoname
+from frappe.model.naming import make_autoname, revert_series_if_last
 from frappe.utils import flt, cint
 
 
@@ -32,13 +32,17 @@ def get_name_from_hash():
 	return temp
 
 
+def batch_uses_naming_series():
+	use_naming_series = cint(frappe.db.get_single_value('Stock Settings', 'use_naming_series'))
+	return bool(use_naming_series)
+
+
 class Batch(Document):
 	def autoname(self):
 		"""Generate random ID for batch if not specified"""
 		if not self.batch_id:
 			if frappe.db.get_value('Item', self.item, 'create_new_batch'):
-				use_naming_series = frappe.db.get_single_value('Stock Settings', 'use_naming_series')
-				if use_naming_series:
+				if batch_uses_naming_series():
 					self.batch_id = get_name_from_naming_series()
 				else:
 					self.batch_id = get_name_from_hash()
