@@ -42,7 +42,8 @@ class BusinessTrip(Document):
 
 
     def after_insert(self):
-        self.create_exceptional_approval()
+        if self.request_employee==1:
+            self.create_exceptional_approval()
 
     def create_exceptional_approval(self):
 
@@ -90,6 +91,8 @@ class BusinessTrip(Document):
                 self.workflow_state = "Created By Line Manager"
             elif u'Employee' in frappe.get_roles(frappe.session.user):
                 self.workflow_state = "Pending"
+
+            self.requested_department=self.department
 
 
     def validate_dates(self):

@@ -77,7 +77,7 @@ frappe.ui.form.on('Business Trip', {
     	cur_frm.set_df_property("cost_center", "read_only", 1);
     	cur_frm.set_df_property("assignment_type", "read_only", 1);
     	cur_frm.set_df_property("world_countries", "read_only", 1);
-    	// cur_frm.set_df_property("city", "read_only", 1);
+    	cur_frm.set_df_property("city", "read_only", 1);
     	cur_frm.set_df_property("ticket", "read_only", 1);
     	cur_frm.set_df_property("ticket_cost", "read_only", 1);
 

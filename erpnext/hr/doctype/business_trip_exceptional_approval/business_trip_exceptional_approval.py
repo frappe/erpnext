@@ -19,29 +19,22 @@ class BusinessTripExceptionalApproval(Document):
     def on_submit(self):
         employee = frappe.get_doc('Employee', {'name': self.employee})
         if employee:
-            if self.status=='Pending':
-                frappe.throw(_("Please change the status before sumbit"))
-            else:
-                if self.status =="Approved":
-                    # state = 'Approved By Employee'
-                    if u'CEO' in frappe.get_roles(employee.user_id):
-                        state = "Approved By CEO"
-                    elif u'Director' in frappe.get_roles(employee.user_id) and self.days<4:
-                        state = "Approve By Director"
-                    elif u'Director' in frappe.get_roles(employee.user_id) and self.days>4:
-                        state = "Approved By Director"
-                    elif u'Manager' in frappe.get_roles(employee.user_id):
-                        state = "Approved by Manager"
-                    elif u'Line Manager' in frappe.get_roles(employee.user_id):
-                        state = "Approved By Line Manager"
-                    elif u'Employee' in frappe.get_roles(employee.user_id):
-                        state = "Approved By Employee"
-                else:
-                    state = 'Rejected By Employee'
+            if u'CEO' in frappe.get_roles(employee.user_id):
+                state = "Approved By CEO"
+            elif u'Director' in frappe.get_roles(employee.user_id) and self.days<4:
+                state = "Approve By Director"
+            elif u'Director' in frappe.get_roles(employee.user_id) and self.days>4:
+                state = "Approved By Director"
+            elif u'Manager' in frappe.get_roles(employee.user_id):
+                state = "Approved by Manager"
+            elif u'Line Manager' in frappe.get_roles(employee.user_id):
+                state = "Approved By Line Manager"
+            elif u'Employee' in frappe.get_roles(employee.user_id):
+                state = "Approved By Employee"
 
-                doc = frappe.get_doc('Business Trip', self.business_trip )
-                doc.workflow_state = state
-                doc.save(ignore_permissions=True)
+            doc = frappe.get_doc('Business Trip', self.business_trip )
+            doc.workflow_state = state
+            doc.save(ignore_permissions=True)
     
 
     def get_user_id(self,employee):
