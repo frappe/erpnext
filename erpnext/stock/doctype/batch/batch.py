@@ -9,7 +9,8 @@ from frappe.model.naming import make_autoname, revert_series_if_last
 from frappe.utils import flt, cint
 
 
-class UnableToSelectBatchError(frappe.ValidationError): pass
+class UnableToSelectBatchError(frappe.ValidationError):
+	pass
 
 
 def get_name_from_naming_series():
@@ -116,8 +117,9 @@ class Batch(Document):
 		self.item_has_batch_enabled()
 
 	def item_has_batch_enabled(self):
-		if frappe.db.get_value("Item",self.item,"has_batch_no") == 0:
+		if frappe.db.get_value("Item", self.item, "has_batch_no") == 0:
 			frappe.throw(_("The selected item cannot have Batch"))
+
 
 @frappe.whitelist()
 def get_batch_qty(batch_no=None, warehouse=None, item_code=None):
@@ -151,16 +153,18 @@ def get_batch_qty(batch_no=None, warehouse=None, item_code=None):
 
 	return out
 
+
 @frappe.whitelist()
 def get_batches_by_oldest(item_code, warehouse):
 	"""Returns the oldest batch and qty for the given item_code and warehouse"""
-	batches = get_batch_qty(item_code = item_code, warehouse = warehouse)
+	batches = get_batch_qty(item_code=item_code, warehouse=warehouse)
 	batches_dates = [[batch, frappe.get_value('Batch', batch.batch_no, 'expiry_date')] for batch in batches]
 	batches_dates.sort(key=lambda tup: tup[1])
 	return batches_dates
 
+
 @frappe.whitelist()
-def split_batch(batch_no, item_code, warehouse, qty, new_batch_id = None):
+def split_batch(batch_no, item_code, warehouse, qty, new_batch_id=None):
 	"""Split the batch into a new batch"""
 	batch = frappe.get_doc(dict(doctype='Batch', item=item_code, batch_id=new_batch_id)).insert()
 	stock_entry = frappe.get_doc(dict(
@@ -168,16 +172,16 @@ def split_batch(batch_no, item_code, warehouse, qty, new_batch_id = None):
 		purpose='Repack',
 		items=[
 			dict(
-				item_code = item_code,
-				qty = float(qty or 0),
-				s_warehouse = warehouse,
-				batch_no = batch_no
+				item_code=item_code,
+				qty=float(qty or 0),
+				s_warehouse=warehouse,
+				batch_no=batch_no
 			),
 			dict(
-				item_code = item_code,
-				qty = float(qty or 0),
-				t_warehouse = warehouse,
-				batch_no = batch.name
+				item_code=item_code,
+				qty=float(qty or 0),
+				t_warehouse=warehouse,
+				batch_no=batch.name
 			),
 		]
 	))
@@ -186,7 +190,8 @@ def split_batch(batch_no, item_code, warehouse, qty, new_batch_id = None):
 
 	return batch.name
 
-def set_batch_nos(doc, warehouse_field, throw = False):
+
+def set_batch_nos(doc, warehouse_field, throw=False):
 	"""Automatically select `batch_no` for outgoing items in item table"""
 	for d in doc.items:
 		qty = d.get('stock_qty') or d.get('transfer_qty') or d.get('qty') or 0
@@ -199,6 +204,7 @@ def set_batch_nos(doc, warehouse_field, throw = False):
 				batch_qty = get_batch_qty(batch_no=d.batch_no, warehouse=warehouse)
 				if flt(batch_qty) < flt(qty):
 					frappe.throw(_("Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches").format(d.idx, d.batch_no, batch_qty, d.qty))
+
 
 @frappe.whitelist()
 def get_batch_no(item_code, warehouse, qty=1, throw=False):
