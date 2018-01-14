@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import getdate, cstr, flt
+from frappe.utils import getdate, cstr, flt, fmt_money
 from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
 
@@ -75,28 +75,6 @@ def set_account_currency(filters):
 			filters["show_in_account_currency"] = 1
 
 		return filters
-
-def get_columns(filters):
-	columns = [
-		_("Posting Date") + ":Date:90", _("Account") + ":Link/Account:200",
-		_("Debit") + ":Float:100", _("Credit") + ":Float:100"
-	]
-
-	if filters.get("show_in_account_currency"):
-		columns += [
-			_("Debit") + " (" + filters.account_currency + ")" + ":Float:100",
-			_("Credit") + " (" + filters.account_currency + ")" + ":Float:100"
-		]
-
-	columns += [
-		_("Voucher Type") + "::120", _("Voucher No") + ":Dynamic Link/"+_("Voucher Type")+":160",
-		_("Against Account") + "::120", _("Party Type") + "::80", _("Party") + "::150",
-		_("Project") + ":Link/Project:100", _("Cost Center") + ":Link/Cost Center:100",
-		_("Against Voucher Type") + "::120", _("Against Voucher") + ":Dynamic Link/"+_("Against Voucher Type")+":160",
-		_("Remarks") + "::400"
-	]
-
-	return columns
 
 def get_result(filters, account_details):
 	gl_entries = get_gl_entries(filters)
@@ -193,24 +171,6 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 	# closing
 	data.append(totals.closing)
 
-	#total closing
-	total_closing = totals.total_closing
-	total_debit = totals.closing.get('debit', 0)
-	total_credit = totals.closing.get('credit', 0)
-	debit_in_account_currency = totals.closing.get('debit_in_account_currency', 0)
-	credit_in_account_currency = totals.closing.get('credit_in_account_currency', 0)
-
-	total_amount = total_debit - total_credit
-
-	if total_amount > 0:
-		total_closing['debit'] = total_amount
-		total_closing['debit_in_account_currency'] = debit_in_account_currency - credit_in_account_currency
-	else:
-		total_closing['credit'] = abs(total_amount)
-		total_closing['credit_in_account_currency'] = abs(debit_in_account_currency - credit_in_account_currency)
-
-	data.append(totals.total_closing)
-
 	return data
 
 def get_totals_dict():
@@ -225,8 +185,7 @@ def get_totals_dict():
 	return _dict(
 		opening = _get_debit_credit_dict(_('Opening')),
 		total = _get_debit_credit_dict(_('Total')),
-		closing = _get_debit_credit_dict(_('Closing (Opening + Total)')),
-		total_closing = _get_debit_credit_dict(_('Closing Balance (Dr - Cr)'))
+		closing = _get_debit_credit_dict(_('Closing (Opening + Total)'))
 	)
 
 def initialize_gle_map(gl_entries):
@@ -270,17 +229,158 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 	return totals, entries
 
 def get_result_as_list(data, filters):
-	result = []
+	balance, balance_in_account_currency = 0, 0
+
 	for d in data:
-		row = [d.get("posting_date"), d.get("account"), d.get("debit"), d.get("credit")]
+		if not d.posting_date:
+			balance, balance_in_account_currency = 0, 0
+
+		balance, label = get_balance(d, balance, 'debit', 'credit')
+		d['balance'] = '{0} {1}'.format(fmt_money(abs(balance)), label)
 
 		if filters.get("show_in_account_currency"):
-			row += [d.get("debit_in_account_currency"), d.get("credit_in_account_currency")]
+			balance_in_account_currency, label = get_balance(d, balance_in_account_currency,
+				'debit_in_account_currency', 'credit_in_account_currency')
 
-		row += [d.get("voucher_type"), d.get("voucher_no"), d.get("against"),
-			d.get("party_type"), d.get("party"), d.get("project"), d.get("cost_center"), d.get("against_voucher_type"), d.get("against_voucher"), d.get("remarks")
-		]
+			d['balance_in_account_currency'] = '{0} {1}'.format(fmt_money(abs(balance_in_account_currency)), label)
 
-		result.append(row)
+		d['account_currency'] = filters.account_currency
 
-	return result
+	return data
+
+def get_balance(row, balance, debit_field, credit_field):
+	balance += (row.get(debit_field, 0) -  row.get(credit_field, 0))
+	label = 'DR' if balance > 0 else 'CR'
+
+	return balance, label
+
+def get_columns(filters):
+	columns = [
+		{
+			"label": _("Posting Date"),
+			"fieldname": "posting_date",
+			"fieldtype": "Date",
+			"width": 90
+		},
+		{
+			"label": _("Account"),
+			"fieldname": "account",
+			"fieldtype": "Link",
+			"options": "Account",
+			"width": 180
+		},
+		{
+			"label": _("Debit"),
+			"fieldname": "debit",
+			"fieldtype": "Float",
+			"width": 100
+		},
+		{
+			"label": _("Credit"),
+			"fieldname": "credit",
+			"fieldtype": "Float",
+			"width": 100
+		}
+	]
+
+	if filters.get("show_in_account_currency"):
+		columns.extend([
+			{
+				"label": _("Debit") + " (" + filters.account_currency + ")",
+				"fieldname": "debit_in_account_currency",
+				"fieldtype": "Float",
+				"width": 100
+			},
+			{
+				"label": _("Credit") + " (" + filters.account_currency + ")",
+				"fieldname": "credit_in_account_currency",
+				"fieldtype": "Float",
+				"width": 100
+			}
+		])
+
+	columns.extend([
+		{
+			"label": _("Balance"),
+			"fieldname": "balance",
+			"fieldtype": "Data",
+			"width": 100
+		}
+	])
+
+	if filters.get("show_in_account_currency"):
+		columns.extend([
+			{
+				"label": _("Balance") + " (" + filters.account_currency + ")",
+				"fieldname": "balance_in_account_currency",
+				"fieldtype": "Float",
+				"width": 100
+			}
+		])
+
+	columns.extend([
+		{
+			"label": _("Voucher Type"),
+			"fieldname": "voucher_type",
+			"width": 120
+		},
+		{
+			"label": _("Voucher No"),
+			"fieldname": "voucher_no",
+			"fieldtype": "Dynamic Link",
+			"options": "voucher_type",
+			"width": 180
+		},
+		{
+			"label": _("Against Account"),
+			"fieldname": "against",
+			"width": 120
+		},
+		{
+			"label": _("Party Type"),
+			"fieldname": "party_type",
+			"width": 100
+		},
+		{
+			"label": _("Party"),
+			"fieldname": "party",
+			"width": 100
+		},
+		{
+			"label": _("Project"),
+			"options": "Project",
+			"fieldname": "project",
+			"width": 100
+		},
+		{
+			"label": _("Cost Center"),
+			"options": "Cost Center",
+			"fieldname": "cost_center",
+			"width": 100
+		},
+		{
+			"label": _("Against Voucher Type"),
+			"fieldname": "against_voucher_type",
+			"width": 100
+		},
+		{
+			"label": _("Against Voucher"),
+			"fieldname": "against_voucher",
+			"fieldtype": "Dynamic Link",
+			"options": "against_voucher_type",
+			"width": 100
+		},
+		{
+			"label": _("Remarks"),
+			"fieldname": "remarks",
+			"width": 400
+		},
+		{
+			"label": _("Currency"),
+			"fieldname": "account_currency",
+			"width": 10,
+			"hidden": 1
+		},
+	])
+
+	return columns
