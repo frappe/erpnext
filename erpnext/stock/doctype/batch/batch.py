@@ -13,11 +13,9 @@ class UnableToSelectBatchError(frappe.ValidationError): pass
 
 
 def get_name_from_naming_series():
-	naming_series_prefix = frappe.db.get_single_value('Stock Settings', 'naming_series_prefix')
-	if not naming_series_prefix:
-		naming_series_prefix = 'BATCH-'
-
-	name = make_autoname(naming_series_prefix + '.#####')
+	naming_series_prefix = get_batch_prefix()
+	key = get_batch_naming_series_key(naming_series_prefix)
+	name = make_autoname(key)
 
 	return name
 
@@ -37,6 +35,31 @@ def batch_uses_naming_series():
 	return bool(use_naming_series)
 
 
+def get_batch_prefix():
+	naming_series_prefix = frappe.db.get_single_value('Stock Settings', 'naming_series_prefix')
+	if not naming_series_prefix:
+		naming_series_prefix = 'BATCH-'
+
+	return naming_series_prefix
+
+
+def get_batch_naming_series_key(prefix):
+	if not unicode(prefix):
+		return ''
+	else:
+		return prefix.upper() + '.#####'
+
+
+def get_batch_naming_series():
+	series = ''
+	if batch_uses_naming_series():
+		prefix = get_batch_prefix()
+		key = get_batch_naming_series_key(prefix)
+		series = key
+
+	return series
+
+
 class Batch(Document):
 	def autoname(self):
 		"""Generate random ID for batch if not specified"""
@@ -53,6 +76,9 @@ class Batch(Document):
 
 	def onload(self):
 		self.image = frappe.db.get_value('Item', self.item, 'image')
+
+	def after_delete(self):
+		revert_series_if_last(get_batch_naming_series(), self.name)
 
 	def validate(self):
 		self.item_has_batch_enabled()
