@@ -9,7 +9,7 @@ def execute(filters=None):
     if not filters: filters = {}
     columns = get_columns()
 
-    if filters.get('multilevel'):
+    if filters.get('show_exploded_view'):
         data = get_exploded_bom_stock(filters)
     else:
         data = get_bom_stock(filters)
@@ -70,10 +70,10 @@ def get_exploded_bom_stock(filters):
 
     out = ()
 
-    filters_for_multilevel = frappe._dict(bom=None, warehouse=filters.get("warehouse"))
+    exploded_view_filters = frappe._dict(bom=None, warehouse=filters.get("warehouse"))
 
     for sub_bom in bom_tree_list:
-        filters_for_multilevel.bom = sub_bom
-        out += get_bom_stock(filters_for_multilevel)
+        exploded_view_filters.bom = sub_bom
+        out += get_bom_stock(exploded_view_filters)
 
     return out
