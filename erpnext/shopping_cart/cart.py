@@ -204,7 +204,6 @@ def _get_cart_quotation(party=None):
 			"status": "Draft",
 			"docstatus": 0,
 			"__islocal": 1,
-			"payment_terms_template": "_Test Payment Term Template",
 			(party.doctype.lower()): party.name
 		})
 
