@@ -434,7 +434,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		} else if (frappe.sys_defaults.disable_rounded_total) {
 			disable_rounded_total = frappe.sys_defaults.disable_rounded_total;
 		}
-		if(disable_rounded_total) {
+
+		if (cint(disable_rounded_total)) {
 			this.frm.doc.rounded_total = 0;
 			this.frm.doc.base_rounded_total = 0;
 			return;

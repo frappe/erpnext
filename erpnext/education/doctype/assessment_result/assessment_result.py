@@ -14,15 +14,25 @@ from frappe.utils.csvutils import getlink
 
 class AssessmentResult(Document):
 	def validate(self):
-		if self.student and not self.student_name:
-			self.student_name = frappe.db.get_value("Student", self.student, "title")
-		self.grading_scale = frappe.db.get_value("Assessment Plan", self.assessment_plan, "grading_scale")
+		self.set_missing_values()
 		self.validate_maximum_score()
 		self.validate_grade()
 		self.validate_duplicate()
 
+	def set_missing_values(self):
+		if self.student and not self.student_name:
+			self.student_name = frappe.db.get_value("Student", self.student, "title")
+		assessment_plan_details = frappe.get_value("Assessment Plan", self.assessment_plan, ["academic_term",
+			"academic_year", "program", "course", "grading_scale", "assessment_group", "student_group",
+			"maximum_assessment_score"], as_dict=1)
+
+		for field in assessment_plan_details:
+			if field != "maximum_assessment_score":
+				setattr(self, field, assessment_plan_details[field])
+			else:
+				self.maximum_score = assessment_plan_details[field]
+
 	def validate_maximum_score(self):
-		self.maximum_score = frappe.db.get_value("Assessment Plan", self.assessment_plan, "maximum_assessment_score")
 		assessment_details = get_assessment_details(self.assessment_plan)
 		max_scores = {}
 		for d in assessment_details:
