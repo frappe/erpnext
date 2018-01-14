@@ -13,14 +13,22 @@ class UnableToSelectBatchError(frappe.ValidationError): pass
 
 
 def get_name_from_naming_series():
-	naming_series_prefix = get_batch_prefix()
-	key = get_batch_naming_series_key(naming_series_prefix)
+	"""
+	Get a name generated for a Batch from the Batch's naming series.
+	:return: The string that was generated.
+	"""
+	naming_series_prefix = _get_batch_prefix()
+	key = _make_naming_series_key(naming_series_prefix)
 	name = make_autoname(key)
 
 	return name
 
 
 def get_name_from_hash():
+	"""
+	Get a name for a Batch by generating a unique hash.
+	:return: The hash that was generated.
+	"""
 	temp = None
 	while not temp:
 		temp = frappe.generate_hash()[:7].upper()
@@ -31,11 +39,22 @@ def get_name_from_hash():
 
 
 def batch_uses_naming_series():
+	"""
+	Verify if the Batch is to be named using a naming series
+	:return: bool
+	"""
 	use_naming_series = cint(frappe.db.get_single_value('Stock Settings', 'use_naming_series'))
 	return bool(use_naming_series)
 
 
-def get_batch_prefix():
+def _get_batch_prefix():
+	"""
+	Get the naming series prefix set in Stock Settings.
+
+	It does not do any sanity checks so make sure to use it after checking if the Batch
+	is set to use naming series.
+	:return: The naming series.
+	"""
 	naming_series_prefix = frappe.db.get_single_value('Stock Settings', 'naming_series_prefix')
 	if not naming_series_prefix:
 		naming_series_prefix = 'BATCH-'
@@ -43,7 +62,14 @@ def get_batch_prefix():
 	return naming_series_prefix
 
 
-def get_batch_naming_series_key(prefix):
+def _make_naming_series_key(prefix):
+	"""
+	Make naming series key for a Batch.
+
+	Naming series key is in the format [prefix].[#####]
+	:param prefix: Naming series prefix gotten from Stock Settings
+	:return: The derived key. If no prefix is given, an empty string is returned
+	"""
 	if not unicode(prefix):
 		return ''
 	else:
@@ -51,10 +77,16 @@ def get_batch_naming_series_key(prefix):
 
 
 def get_batch_naming_series():
+	"""
+	Get naming series key for a Batch.
+
+	Naming series key is in the format [prefix].[#####]
+	:return: The naming series or empty string if not available
+	"""
 	series = ''
 	if batch_uses_naming_series():
-		prefix = get_batch_prefix()
-		key = get_batch_naming_series_key(prefix)
+		prefix = _get_batch_prefix()
+		key = _make_naming_series_key(prefix)
 		series = key
 
 	return series
