@@ -39,7 +39,11 @@
 					{% } %}
 
 					{{ __("Against") }}: {%= data[i].against %}
-					<br>{%= __("Remarks") %}: {%= data[i].remarks %}</td>
+					<br>{%= __("Remarks") %}: {%= data[i].remarks %}
+					{% if(data[i].bill_no) { %}
+						<br>{%= __("Supplier Invoice No") %}: {%= data[i].bill_no %}
+					{% } %}
+					</td>
 				{% if(filters.print_in_account_currency) { %}
 					<td style="text-align: right">
 						{%= format_currency(data[i].debit_in_account_currency, data[i].account_currency) %}
@@ -49,9 +53,9 @@
 					</td>
 				{% } else { %}
 					<td style="text-align: right">
-						{%= format_currency(data[i].debit, data[i].account_currency) %}</td>
+						{%= format_currency(data[i].debit) %}</td>
 					<td style="text-align: right">
-						{%= format_currency(data[i].credit, data[i].account_currency) %}</td>
+						{%= format_currency(data[i].credit) %}</td>
 				{% } %}
 			{% } else { %}
 				<td></td>
@@ -64,10 +68,10 @@
 						{%= data[i].account && format_currency(data[i].credit_in_account_currency, data[i].account_currency) %}</td>
 				{% } else { %}
 					<td style="text-align: right">
-						{%= data[i].account && format_currency(data[i].debit, data[i].account_currency) %}
+						{%= data[i].account && format_currency(data[i].debit) %}
 					</td>
 					<td style="text-align: right">
-						{%= data[i].account && format_currency(data[i].credit, data[i].account_currency) %}
+						{%= data[i].account && format_currency(data[i].credit) %}
 					</td>
 				{% } %}
 			{% } %}

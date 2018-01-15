@@ -9,6 +9,11 @@ from erpnext.accounts.utils import get_account_currency
 
 def execute(filters=None):
 	account_details = {}
+
+	if filters and filters.get('print_in_account_currency') and \
+		not filters.get('account'):
+		frappe.throw(_("Select an account to print in account currency"))
+
 	for acc in frappe.db.sql("""select name, is_group from tabAccount""", as_dict=1):
 		account_details.setdefault(acc.name, acc)
 
@@ -230,6 +235,7 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 
 def get_result_as_list(data, filters):
 	balance, balance_in_account_currency = 0, 0
+	inv_details = get_supplier_invoice_details()
 
 	for d in data:
 		if not d.posting_date:
@@ -241,12 +247,24 @@ def get_result_as_list(data, filters):
 		if filters.get("show_in_account_currency"):
 			balance_in_account_currency, label = get_balance(d, balance_in_account_currency,
 				'debit_in_account_currency', 'credit_in_account_currency')
-
 			d['balance_in_account_currency'] = '{0} {1}'.format(fmt_money(abs(balance_in_account_currency)), label)
+		else:
+			d['debit_in_account_currency'] = d.get('debit', 0)
+			d['credit_in_account_currency'] = d.get('credit', 0)
+			d['balance_in_account_currency'] = d.get('balance')
 
 		d['account_currency'] = filters.account_currency
+		d['bill_no'] = inv_details.get(d.against_voucher, '')
 
 	return data
+
+def get_supplier_invoice_details():
+	inv_details = {}
+	for d in frappe.db.sql(""" select name, bill_no from `tabPurchase Invoice`
+		where docstatus = 1 and bill_no is not null and bill_no != '' """, as_dict=1):
+		inv_details[d.name] = d.bill_no
+
+	return inv_details
 
 def get_balance(row, balance, debit_field, credit_field):
 	balance += (row.get(debit_field, 0) -  row.get(credit_field, 0))
@@ -280,6 +298,12 @@ def get_columns(filters):
 			"fieldname": "credit",
 			"fieldtype": "Float",
 			"width": 100
+		},
+		{
+			"label": _("Balance"),
+			"fieldname": "balance",
+			"fieldtype": "Data",
+			"width": 100
 		}
 	]
 
@@ -296,24 +320,11 @@ def get_columns(filters):
 				"fieldname": "credit_in_account_currency",
 				"fieldtype": "Float",
 				"width": 100
-			}
-		])
-
-	columns.extend([
-		{
-			"label": _("Balance"),
-			"fieldname": "balance",
-			"fieldtype": "Data",
-			"width": 100
-		}
-	])
-
-	if filters.get("show_in_account_currency"):
-		columns.extend([
+			},
 			{
 				"label": _("Balance") + " (" + filters.account_currency + ")",
 				"fieldname": "balance_in_account_currency",
-				"fieldtype": "Float",
+				"fieldtype": "Data",
 				"width": 100
 			}
 		])
@@ -371,16 +382,16 @@ def get_columns(filters):
 			"width": 100
 		},
 		{
+			"label": _("Supplier Invoice No"),
+			"fieldname": "bill_no",
+			"fieldtype": "Data",
+			"width": 100
+		},
+		{
 			"label": _("Remarks"),
 			"fieldname": "remarks",
 			"width": 400
-		},
-		{
-			"label": _("Currency"),
-			"fieldname": "account_currency",
-			"width": 10,
-			"hidden": 1
-		},
+		}
 	])
 
 	return columns
