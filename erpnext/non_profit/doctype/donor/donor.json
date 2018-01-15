@@ -295,7 +295,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-12-05 07:02:06.690416", 
+ "modified": "2018-01-15 09:40:41.153561", 
  "modified_by": "Administrator", 
  "module": "Non Profit", 
  "name": "Donor", 
@@ -330,6 +330,7 @@
  "show_name_in_global_search": 0, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
+ "title_field": "donor_name", 
  "track_changes": 1, 
  "track_seen": 0
 }
