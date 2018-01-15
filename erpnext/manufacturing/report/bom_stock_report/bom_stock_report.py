@@ -9,10 +9,7 @@ def execute(filters=None):
 	if not filters: filters = {}
 	columns = get_columns()
 
-	if filters.get('show_exploded_view'):
-		data = get_exploded_bom_stock(filters)
-	else:
-		data = get_bom_stock(filters)
+	data = get_bom_stock(filters)
 
 	return columns, data
 
@@ -32,6 +29,13 @@ def get_bom_stock(filters):
 	conditions = ""
 	bom = filters.get("bom")
 
+	table = "`tabBOM Item`"
+	qty_field = "qty"
+
+	if filters.get("show_exploded_view"):
+		table = "`tabBOM Explosion Item`"
+		qty_field = "stock_qty"
+
 	if filters.get("warehouse"):
 		warehouse_details = frappe.db.get_value("Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1)
 		if warehouse_details:
@@ -48,32 +52,19 @@ def get_bom_stock(filters):
 			SELECT
 				bom_item.item_code ,
 				bom_item.description ,
-				bom_item.qty,
+				bom_item.{qty_field},
 				sum(ledger.actual_qty) as actual_qty,
-				sum(FLOOR(ledger.actual_qty /bom_item.qty))as to_build
+				sum(FLOOR(ledger.actual_qty / bom_item.{qty_field}))as to_build
 			FROM
-				`tabBOM Item` AS bom_item
+				{table} AS bom_item
 				LEFT JOIN `tabBin` AS ledger
 				ON bom_item.item_code = ledger.item_code
-				%s
+				{conditions}
 			WHERE
-				bom_item.parent = '%s' and bom_item.parenttype='BOM'
+				bom_item.parent = '{bom}' and bom_item.parenttype='BOM'
 
-			GROUP BY bom_item.item_code""" % (conditions, bom))
-
-
-def get_exploded_bom_stock(filters):
-	root_bom_name = filters.get("bom")
-	root_bom = frappe.get_doc("BOM", root_bom_name)
-
-	bom_tree_list = root_bom.traverse_tree()
-
-	out = ()
-
-	exploded_view_filters = frappe._dict(bom=None, warehouse=filters.get("warehouse"))
-
-	for sub_bom in bom_tree_list:
-		exploded_view_filters.bom = sub_bom
-		out += get_bom_stock(exploded_view_filters)
-
-	return out
+			GROUP BY bom_item.item_code""".format(
+				qty_field=qty_field,
+				table=table, 
+				conditions=conditions, 
+				bom=bom))
