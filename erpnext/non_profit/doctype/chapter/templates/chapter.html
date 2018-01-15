@@ -5,34 +5,39 @@
 <h3>Details</h3>
 <p>{{ introduction }}</p>
 {% if meetup_embed_html %}
-{{ meetup_embed_html }}
+	{{ meetup_embed_html }}
 {% endif %}
 <h3>List of Members</h3>
-{% if members %}
+
+{% if members  %}
 	<table class="table table-bordered small" style="max-width: 500px;">
 		<tr>
 			<th width="15%" ></th>
 			<th>Member Details</th>
 		</tr>
+		{% set index = [1] %}
 		{% for user in members %}
-			<tr>
-				<td>{{ loop.index }}</td>
-				<td>
-					<div class="row">
-						<div class="col-lg-6 col-md-6 col-sm-6">{{ frappe.db.get_value('User', user.user, 'full_name') }}</div>
-						<div class="col-lg-6 col-md-6 col-sm-6 text-right">
-							{% if user.website_url %}
-								<a href="{{ user.website_url }}">{{ user.website_url or '' }}</a>
+			{% if user.enabled == 1 %}
+				<tr>
+					<td>{{ index|length }}</td>
+					<td>
+						<div class="row">
+							<div class="col-lg-6 col-md-6 col-sm-6">{{ frappe.db.get_value('User', user.user, 'full_name') }}</div>
+							<div class="col-lg-6 col-md-6 col-sm-6 text-right">
+								{% if user.website_url %}
+									<a href="{{ user.website_url }}">{{ user.website_url or '' }}</a>
+								{% endif %}
+							</div>
+							<div class="col-lg-12">
+							{% if user.introduction %}
+								{{ user.introduction }}
 							{% endif %}
+							</div>
 						</div>
-						<div class="col-lg-12">
-						{% if user.introduction %}
-							{{ user.introduction }}
-						{% endif %}
-						</div>
-					</div>
-				</td>
-			</tr>
+					</td>
+				</tr>
+				{% set __ = index.append(1) %}
+			{% endif %}
 		{% endfor %}
 	</table>
 {% else %}
