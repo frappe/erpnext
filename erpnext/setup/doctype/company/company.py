@@ -34,6 +34,7 @@ class Company(Document):
 		self.validate_currency()
 		self.validate_coa_input()
 		self.validate_perpetual_inventory()
+		self.check_country_change()
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -80,9 +81,12 @@ class Company(Document):
 		if not frappe.db.sql("""select name from tabAccount
 				where company=%s and docstatus<2 limit 1""", self.name):
 			if not frappe.local.flags.ignore_chart_of_accounts:
+				frappe.flags.country_change = True
 				self.create_default_accounts()
 				self.create_default_warehouses()
-				install_country_fixtures(self.name)
+
+		if frappe.flags.country_change:
+			install_country_fixtures(self.name)
 
 		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
 			self.create_default_cost_center()
@@ -146,6 +150,13 @@ class Company(Document):
 			if cint(self.enable_perpetual_inventory) == 1 and not self.default_inventory_account:
 				frappe.msgprint(_("Set default inventory account for perpetual inventory"),
 					alert=True, indicator='orange')
+
+	def check_country_change(self):
+		frappe.flags.country_change = False
+
+		if not self.get('__islocal') and \
+			self.country != frappe.db.get_value('Company', self.name, 'country'):
+			frappe.flags.country_change = True
 
 	def set_default_accounts(self):
 		self._set_default_account("default_cash_account", "Cash")
