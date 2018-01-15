@@ -67,7 +67,7 @@ def set_place_of_supply(doc, method):
 	address_name = doc.shipping_address_name or doc.customer_address
 	if address_name:
 		address = frappe.db.get_value("Address", address_name, ["gst_state", "gst_state_number"], as_dict=1)
-		doc.place_of_supply = cstr(address.gst_state_number) + "-" + address.gst_state
+		doc.place_of_supply = cstr(address.gst_state_number) + "-" + cstr(address.gst_state)
 
 # don't remove this function it is used in tests
 def test_method():
