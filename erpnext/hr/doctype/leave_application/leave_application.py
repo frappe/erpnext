@@ -313,7 +313,7 @@ class LeaveApplication(Document):
 					template = "new_message",
 					args     = {
 						   "from": sender['full_name'],
-						"message": txt,
+						"message": args.message,
 						   "link": frappe.utils.get_url()
 					},
 					header	 = [_('New Message'), 'orange']
