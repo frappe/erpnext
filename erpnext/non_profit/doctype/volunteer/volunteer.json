@@ -506,7 +506,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-12-06 12:03:08.624579", 
+ "modified": "2018-01-15 09:40:25.229551", 
  "modified_by": "Administrator", 
  "module": "Non Profit", 
  "name": "Volunteer", 
@@ -540,6 +540,7 @@
  "show_name_in_global_search": 0, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
+ "title_field": "volunteer_name", 
  "track_changes": 1, 
  "track_seen": 0
 }
