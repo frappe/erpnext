@@ -283,7 +283,6 @@ class LeaveApplication(Document):
 		})
 
 	def notify(self, args):
-		# Yeh code test nahi kiya gaya hain. Ekdum vishwas se likha hain.
 		args = frappe._dict(args)
 		# args -> message, message_to, subject
 
