@@ -2,14 +2,14 @@
 {% block page_content %}
 
 	{% if member_deleted %}
-		<p>You are not a member of {{ chapter.title }}!</p>
+		<p>You are not a member of {{ chapter.name }}!</p>
 		<div>
 			<form>
 				<div class="form-group">
 					<label for="leave">Why do you want to leave this chapter</label>
 					<input type="text" name="leave" class="form-control" id="leave">
 				</div>
-				<button type="button" class="btn btn-default btn-leave" data-title= "{{ chapter.title }}" id="btn-leave">Submit
+				<button type="button" class="btn btn-default btn-leave" data-title= "{{ chapter.name }}" id="btn-leave">Submit
 				</button>
 			</form>
 		</div>
