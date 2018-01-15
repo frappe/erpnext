@@ -7,6 +7,8 @@ from frappe.exceptions import ValidationError
 import unittest
 
 from erpnext.stock.doctype.batch.batch import get_batch_qty, UnableToSelectBatchError, get_batch_no
+from frappe.utils import cint
+
 
 class TestBatch(unittest.TestCase):
 
@@ -21,7 +23,7 @@ class TestBatch(unittest.TestCase):
 	def make_batch_item(cls, item_name):
 		from erpnext.stock.doctype.item.test_item import make_item
 		if not frappe.db.exists(item_name):
-			make_item(item_name, dict(has_batch_no = 1, create_new_batch = 1))
+			return make_item(item_name, dict(has_batch_no = 1, create_new_batch = 1))
 
 	def test_purchase_receipt(self, batch_qty = 100):
 		'''Test automated batch creation from Purchase Receipt'''
@@ -192,3 +194,37 @@ class TestBatch(unittest.TestCase):
 			]
 		)).insert()
 		stock_entry.submit()
+
+	def test_batch_name_with_naming_series(self):
+		stock_settings = frappe.get_single('Stock Settings')
+		use_naming_series = cint(stock_settings.use_naming_series)
+
+		if not use_naming_series:
+			frappe.set_value('Stock Settings', 'Stock Settings', 'use_naming_series', 1)
+
+		batch = self.make_new_batch('_Test Stock Item For Batch Test1')
+		batch_name = batch.name
+
+		self.assertTrue(batch_name.startswith('BATCH-'))
+
+		batch.delete()
+		batch = self.make_new_batch('_Test Stock Item For Batch Test2')
+
+		self.assertEqual(batch_name, batch.name)
+
+		# reset Stock Settings
+		if not use_naming_series:
+			frappe.set_value('Stock Settings', 'Stock Settings', 'use_naming_series', 0)
+
+	def make_new_batch(self, item_name, batch_id=None, do_not_insert=0):
+		batch = frappe.new_doc('Batch')
+		item = self.make_batch_item(item_name)
+		batch.item = item.name
+
+		if batch_id:
+			batch.batch_id = batch_id
+
+		if not do_not_insert:
+			batch.insert()
+
+		return batch
