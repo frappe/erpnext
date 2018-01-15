@@ -3,6 +3,6 @@
 
 Sie können Urlaub für ein bestimmtes Jahr über die Urlaubsübersicht planen.
 
-<img class="screenshot" alt="Urlaubsübersicht" src="/docs/assets/img/human-resources/holiday-list.png">
+<img class="screenshot" alt="Urlaubsübersicht" src="/assets/erpnext_docs/assets/img/human-resources/holiday-list.png">
 
 {next}

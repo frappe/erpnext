@@ -6,7 +6,7 @@ To create a new Web Page, go to:
 
 > Website > Web Page > New
 
-<img class="screenshot" alt="Web Page" src="/docs/assets/img/website/web-page.png">
+<img class="screenshot" alt="Web Page" src="/assets/erpnext_docs/assets/img/website/web-page.png">
 
 #### Title
 

@@ -3,6 +3,6 @@
 
 Globale Einstellungen zu Dokumenten des Personalwesens
 
-<img class="screenshot" alt="Einstellungen zum Personalwesen" src="/docs/assets/img/human-resources/hr-settings.png">
+<img class="screenshot" alt="Einstellungen zum Personalwesen" src="/assets/erpnext_docs/assets/img/human-resources/hr-settings.png">
 
 {next}

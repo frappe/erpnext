@@ -7,7 +7,7 @@ Um eine neue Webseite zu erstellen, gehen Sie zu:
 
 > Webseite > Webseite > Neu
 
-<img class="screenshot" alt="Webseit" src="/docs/assets/img/website/web-page.png">
+<img class="screenshot" alt="Webseit" src="/assets/erpnext_docs/assets/img/website/web-page.png">
 
 ### Bezeichnung
 

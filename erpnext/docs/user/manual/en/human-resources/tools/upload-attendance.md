@@ -6,6 +6,6 @@ To upload the attendance go to:
 
 > Human Resources > Upload Attendance
 
-<img class="screenshot" alt="Attendence upload" src="/docs/assets/img/human-resources/attendence-upload.png">
+<img class="screenshot" alt="Attendence upload" src="/assets/erpnext_docs/assets/img/human-resources/attendence-upload.png">
 
 {next}

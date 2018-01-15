@@ -7,6 +7,6 @@ Um eine Anwesenheit hochzuladen, gehen Sie zu:
 
 > Personalwesen > Werkzeuge > Anwesenheit hochladen
 
-<img class="screenshot" alt="Anwesenheit hochladen" src="/docs/assets/img/human-resources/attendence-upload.png">
+<img class="screenshot" alt="Anwesenheit hochladen" src="/assets/erpnext_docs/assets/img/human-resources/attendence-upload.png">
 
 {next}

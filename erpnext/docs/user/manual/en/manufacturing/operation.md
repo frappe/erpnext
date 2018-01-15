@@ -8,6 +8,6 @@ You can also create a Operation by:
 
 > Manufacturing > Documents > Operation > New
 
-<img class="screenshot" alt="Operation" src="/docs/assets/img/manufacturing/operation.png">
+<img class="screenshot" alt="Operation" src="/assets/erpnext_docs/assets/img/manufacturing/operation.png">
 
 {next}

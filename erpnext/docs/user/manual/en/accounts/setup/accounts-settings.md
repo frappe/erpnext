@@ -1,7 +1,7 @@
 # Accounts Settings
 
 
-<img class="screenshot" alt="Account Settings" src="/docs/assets/img/accounts/account-settings.png">
+<img class="screenshot" alt="Account Settings" src="/assets/erpnext_docs/assets/img/accounts/account-settings.png">
 
 * Accounts Frozen Upto: Freeze accounting transactions upto specified date, nobody can make / modify entry except specified role.
 

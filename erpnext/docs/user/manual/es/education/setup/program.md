@@ -1,5 +1,5 @@
 # Programa
 
-<img class="screenshot" alt="Program" src="/docs/assets/img/education/setup/program.png">
+<img class="screenshot" alt="Program" src="/assets/erpnext_docs/assets/img/education/setup/program.png">
 
 {next}

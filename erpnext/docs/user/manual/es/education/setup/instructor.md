@@ -1,5 +1,5 @@
 # Instructor
 
-<img class="screenshot" alt="Instructor" src="/docs/assets/img/education/setup/instructor.png">
+<img class="screenshot" alt="Instructor" src="/assets/erpnext_docs/assets/img/education/setup/instructor.png">
 
 {next}

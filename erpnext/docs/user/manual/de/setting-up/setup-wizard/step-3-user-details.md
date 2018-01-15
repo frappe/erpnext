@@ -4,7 +4,7 @@
 Geben Sie Details zum Benutzerprofil, wie Name, Benutzer-ID und das bevorzugte Passwort ein.
 
 <img alt="Benutzer" class="screenshot"
-src="/docs/assets/img/setup-wizard/step-3.png">
+src="/assets/erpnext_docs/assets/img/setup-wizard/step-3.png">
 
 ---
 
