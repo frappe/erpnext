@@ -252,7 +252,7 @@ def add_ac(args=None):
 	if not ac.parent_account:
 		ac.parent_account = args.get("parent")
 
-	if ac.is_root:
+	if getattr(ac, 'is_root', None):
 		ac.parent_account=''
 
 	ac.old_parent = ""
