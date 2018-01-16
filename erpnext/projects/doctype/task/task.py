@@ -202,25 +202,26 @@ def get_children(doctype, parent, task=None, project=None, is_root=False):
 
 @frappe.whitelist()
 def add_node():
-    from frappe.desk.treeview import make_tree_args
-    args = frappe.form_dict
-    args.update({
-    	"name_field": "subject"
-    })
-    args = make_tree_args(**args)
+	from frappe.desk.treeview import make_tree_args
+	args = frappe.form_dict
+	args.update({
+		"name_field": "subject"
+	})
+	args = make_tree_args(**args)
 
-    if args.parent_task == 'All Tasks':
-        args.parent_task = None
+	if args.parent_task == 'All Tasks' or args.parent_task == args.project:
+		args.parent_task = None
 
-    frappe.get_doc(args).insert()
+	frappe.get_doc(args).insert()
 
 @frappe.whitelist()
 def add_multiple_tasks(data, parent):
-    data = json.loads(data)['tasks']
-    tasks = data.split('\n')
-    new_doc = {'doctype': 'Task', 'parent_task': parent}
+	data = json.loads(data)['tasks']
+	tasks = data.split('\n')
+	new_doc = {'doctype': 'Task', 'parent_task': parent}
+	new_doc['project'] = frappe.db.get_value('Task', {"name": parent}, 'project')
 
-    for d in tasks:
-        new_doc['subject'] = d
-        new_task = frappe.get_doc(new_doc)
-        new_task.insert()
+	for d in tasks:
+		new_doc['subject'] = d
+		new_task = frappe.get_doc(new_doc)
+		new_task.insert()

@@ -5,6 +5,7 @@ QUnit.test("test Stock Reconciliation", function(assert) {
 	let done = assert.async();
 	frappe.run_serially([
 		() => frappe.set_route('List', 'Stock Reconciliation'),
+		() => frappe.timeout(1),
 		() => frappe.click_button('New'),
 		() => cur_frm.set_value('company','For Testing'),
 		() => frappe.click_button('Items'),

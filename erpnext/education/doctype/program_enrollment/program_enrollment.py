@@ -22,8 +22,14 @@ class ProgramEnrollment(Document):
 		self.make_fee_records()
 	
 	def validate_duplication(self):
-		enrollment = frappe.db.sql("""select name from `tabProgram Enrollment` where student= %s and program= %s 
-			and academic_year= %s and docstatus<2 and name != %s""", (self.student, self.program, self.academic_year, self.name))
+		enrollment = frappe.get_all("Program Enrollment", filters={
+			"student": self.student,
+			"program": self.program,
+			"academic_year": self.academic_year,
+			"academic_term": self.academic_term,
+			"docstatus": ("<", 2),
+			"name": ("!=", self.name)
+		})
 		if enrollment:
 			frappe.throw(_("Student is already enrolled."))
 	

@@ -105,7 +105,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			});
 		}
 
-		if(this.frm.fields_dict["payment_terms_template"]){
+		if(
+			this.frm.fields_dict["payment_terms_template"]
+			&& this.frm.fields_dict["payment_schedule"]
+			&& this.frm.doc.payment_terms_template
+			&& !this.frm.doc.payment_schedule.length
+		){
 			this.frm.trigger("payment_terms_template");
 		}
 
@@ -223,7 +228,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		erpnext.hide_company();
 		this.set_dynamic_labels();
 		this.setup_sms();
-
 	},
 
 	apply_default_taxes: function() {
@@ -231,15 +235,20 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var taxes_and_charges_field = frappe.meta.get_docfield(me.frm.doc.doctype, "taxes_and_charges",
 			me.frm.doc.name);
 
-		if(taxes_and_charges_field) {
+		if (!this.frm.doc.taxes_and_charges && this.frm.doc.taxes) {
+			return;
+		}
+
+		if (taxes_and_charges_field) {
 			return frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_default_taxes_and_charges",
 				args: {
 					"master_doctype": taxes_and_charges_field.options,
+					"tax_template": me.frm.doc.taxes_and_charges,
 					"company": me.frm.doc.company
 				},
 				callback: function(r) {
-					if(!r.exc) {
+					if(!r.exc && r.message) {
 						frappe.run_serially([
 							() => {
 								// directly set in doc, so as not to call triggers
@@ -516,12 +525,61 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						if(r.message) {
 							me.frm.set_value("due_date", r.message);
 							frappe.ui.form.trigger(me.frm.doc.doctype, "currency");
+							me.recalculate_terms();
 						}
 					}
 				})
 			} else {
 				frappe.ui.form.trigger(me.frm.doc.doctype, "currency");
 			}
+		}
+	},
+
+	due_date: function() {
+		// due_date is to be changed, payment terms template and/or payment schedule must
+		// be removed as due_date is automatically changed based on payment terms
+		if (this.frm.doc.due_date) {
+			if (this.frm.doc.payment_terms_template || this.frm.doc.payment_schedule.length) {
+				var message1 = "";
+				var message2 = "";
+				var final_message = "Please clear the ";
+
+				if (this.frm.doc.payment_terms_template) {
+					message1 = "selected Payment Terms Template";
+					final_message = final_message + message1;
+				}
+
+				if (this.frm.doc.payment_schedule.length) {
+					message2 = "Payment Schedule Table";
+					if (message1.length !== 0) message2 = " and " + message2;
+					final_message = final_message + message2;
+				}
+
+				frappe.msgprint(final_message);
+			}
+
+	    }
+	},
+
+	recalculate_terms: function() {
+		const doc = this.frm.doc;
+
+		if (doc.payment_terms_template) {
+			this.payment_terms_template();
+		} else if (doc.payment_schedule) {
+			const me = this;
+			doc.payment_schedule.forEach(
+				function(term) {
+					if (term.payment_term) {
+						me.payment_term(doc, term.doctype, term.name);
+					} else {
+						frappe.model.set_value(
+							term.doctype, term.name, 'due_date',
+							doc.posting_date || doc.transaction_date
+						);
+					}
+				}
+			);
 		}
 	},
 
@@ -688,7 +746,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		// toggle read only property for conversion factor field if the uom and stock uom are same
 		if(this.frm.get_field('items').grid.fields_map.conversion_factor) {
 			this.frm.fields_dict.items.grid.toggle_enable("conversion_factor",
-				(item.uom != item.stock_uom)? true: false);
+				((item.uom != item.stock_uom) && !frappe.meta.get_docfield(cur_frm.fields_dict.items.grid.doctype, "conversion_factor").read_only)? true: false);
 		}
 
 	},
@@ -1202,13 +1260,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	payment_terms_template: function() {
 		var me = this;
-		if(this.frm.doc.payment_terms_template) {
+		const doc = this.frm.doc;
+		if(doc.payment_terms_template && doc.doctype !== 'Delivery Note') {
 			frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_payment_terms",
 				args: {
-					terms_template: this.frm.doc.payment_terms_template,
-					posting_date: this.frm.doc.posting_date || this.frm.doc.transaction_date,
-					grand_total: this.frm.doc.rounded_total || this.frm.doc.grand_total
+					terms_template: doc.payment_terms_template,
+					posting_date: doc.posting_date || doc.transaction_date,
+					grand_total: doc.rounded_total || doc.grand_total
 				},
 				callback: function(r) {
 					if(r.message && !r.exc) {

@@ -320,7 +320,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		return new Promise((resolve) => {
 			const on_submit = ({ pos_profile, set_as_default }) => {
 				if (pos_profile) {
-					this.frm.doc.pos_profile = pos_profile;
+					this.pos_profile = pos_profile;
 				}
 
 				if (set_as_default) {
@@ -346,13 +346,19 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	on_change_pos_profile() {
-		this.set_pos_profile_data()
-			.then(() => {
-				this.reset_cart();
-				if (this.items) {
-					this.items.reset_items();
-				}
-			});
+		return frappe.run_serially([
+			() => this.make_sales_invoice_frm(),
+			() => {
+				this.frm.doc.pos_profile = this.pos_profile;
+				this.set_pos_profile_data()
+					.then(() => {
+						this.reset_cart();
+						if (this.items) {
+							this.items.reset_items();
+						}
+					});
+			}
+		]);
 	}
 
 	get_promopt_fields() {
@@ -360,6 +366,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			fieldtype: 'Link',
 			label: __('POS Profile'),
 			options: 'POS Profile',
+			reqd: 1,
 			get_query: () => {
 				return {
 					query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
@@ -578,16 +585,28 @@ class POSCart {
 
 		this.wrapper.find('.grand-total-value').text(
 			format_currency(this.frm.doc.grand_total, this.frm.currency));
+		this.wrapper.find('.rounded-total-value').text(
+			format_currency(this.frm.doc.rounded_total, this.frm.currency));
 
 		const customer = this.frm.doc.customer;
 		this.customer_field.set_value(customer);
 	}
 
 	get_grand_total() {
+		let total = this.get_total_template('Grand Total', 'grand-total-value');
+
+		if (!cint(frappe.sys_defaults.disable_rounded_total)) {
+			total += this.get_total_template('Rounded Total', 'rounded-total-value');
+		}
+
+		return total;
+	}
+
+	get_total_template(label, class_name) {
 		return `
 			<div class="list-item">
-				<div class="list-item__content text-muted">${__('Grand Total')}</div>
-				<div class="list-item__content list-item__content--flex-2 grand-total-value">0.00</div>
+				<div class="list-item__content text-muted">${__(label)}</div>
+				<div class="list-item__content list-item__content--flex-2 ${class_name}">0.00</div>
 			</div>
 		`;
 	}
@@ -664,6 +683,10 @@ class POSCart {
 		this.$grand_total.find('.grand-total-value').text(
 			format_currency(this.frm.doc.grand_total, this.frm.currency)
 		);
+
+		this.$grand_total.find('.rounded-total-value').text(
+			format_currency(this.frm.doc.rounded_total, this.frm.currency)
+		);
 	}
 
 	make_customer_field() {
@@ -674,6 +697,11 @@ class POSCart {
 				fieldname: 'customer',
 				options: 'Customer',
 				reqd: 1,
+				get_query: function() {
+					return {
+						query: 'erpnext.controllers.queries.customer_query'
+					}
+				},
 				onchange: () => {
 					this.events.on_customer_change(this.customer_field.get_value());
 				}
@@ -1076,7 +1104,7 @@ class POSItems {
 			}
 			curr_row += all_items[i];
 
-			if(i == all_items.length - 1 && all_items.length % 4 !== 0) {
+			if(i == all_items.length - 1) {
 				row_items.push(curr_row);
 			}
 		}
@@ -1206,6 +1234,7 @@ class POSItems {
 		return new Promise(res => {
 			frappe.call({
 				method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
+				freeze: true,
 				args: {
 					start,
 					page_length,
@@ -1368,7 +1397,8 @@ class Payment {
 
 	set_title() {
 		let title = __('Total Amount {0}',
-			[format_currency(this.frm.doc.grand_total, this.frm.doc.currency)]);
+			[format_currency(this.frm.doc.rounded_total || this.frm.doc.grand_total,
+			this.frm.doc.currency)]);
 
 		this.dialog.set_title(title);
 	}

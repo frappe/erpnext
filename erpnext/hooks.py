@@ -26,7 +26,7 @@ doctype_js = {
 
 # setup wizard
 setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
-setup_wizard_complete = "erpnext.setup.setup_wizard.setup_wizard.setup_complete"
+setup_wizard_stages = "erpnext.setup.setup_wizard.setup_wizard.get_setup_stages"
 setup_wizard_test = "erpnext.setup.setup_wizard.test_setup_wizard.run_setup_wizard_test"
 
 before_install = "erpnext.setup.install.check_setup_wizard_not_completed"
@@ -203,6 +203,9 @@ doc_events = {
 	},
 	'Address': {
 		'validate': 'erpnext.regional.india.utils.validate_gstin_for_india'
+	},
+	'Sales Invoice': {
+		'validate': 'erpnext.regional.india.utils.set_place_of_supply'
 	}
 }
 
@@ -258,5 +261,11 @@ regional_overrides = {
 		'erpnext.tests.test_regional.test_method': 'erpnext.regional.india.utils.test_method',
 		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_header': 'erpnext.regional.india.utils.get_itemised_tax_breakup_header',
 		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_data': 'erpnext.regional.india.utils.get_itemised_tax_breakup_data'
+	},
+	'United Arab Emirates': {
+		'erpnext.controllers.taxes_and_totals.update_itemised_tax_data': 'erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data'
+	},
+	'Saudi Arabia': {
+		'erpnext.controllers.taxes_and_totals.update_itemised_tax_data': 'erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data'
 	}
 }

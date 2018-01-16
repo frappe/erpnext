@@ -111,6 +111,23 @@ frappe.ui.form.on("Project Task", {
 			frappe.msgprint(__("Save the document first."));
 		}
 	},
+	edit_timesheet: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		frappe.route_options = {"project": frm.doc.project_name, "task": child.task_id};
+		frappe.set_route("List", "Timesheet");
+	},
+
+	make_timesheet: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		frappe.model.with_doctype('Timesheet', function() {
+				var doc = frappe.model.get_new_doc('Timesheet');
+				var row = frappe.model.add_child(doc, 'time_logs');
+				row.project = frm.doc.project_name;
+				row.task = child.task_id;
+				frappe.set_route('Form', doc.doctype, doc.name);
+			})
+	},
+
 	status: function(frm, doctype, name) {
 		frm.trigger('tasks_refresh');
 	},

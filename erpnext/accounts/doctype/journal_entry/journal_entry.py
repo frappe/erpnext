@@ -434,8 +434,7 @@ class JournalEntry(AccountsController):
 						"against_voucher": d.reference_name,
 						"remarks": self.remark,
 						"cost_center": d.cost_center,
-						"project": d.project,
-						"due_date": d.reference_due_date
+						"project": d.project
 					})
 				)
 
@@ -647,9 +646,8 @@ def get_payment_entry_against_invoice(dt, dn, amount=None,  debit_in_account_cur
 		party_type = "Supplier"
 		party_account = ref_doc.credit_to
 
-
-	if (dt=="Sales Invoice" and ref_doc.outstanding_amount > 0) \
-		or (dt=="Purchase Invoice" and ref_doc.outstanding_amount < 0):
+	if (dt == "Sales Invoice" and ref_doc.outstanding_amount > 0) \
+		or (dt == "Purchase Invoice" and ref_doc.outstanding_amount < 0):
 			amount_field_party = "credit_in_account_currency"
 			amount_field_bank = "debit_in_account_currency"
 	else:
@@ -669,6 +667,7 @@ def get_payment_entry_against_invoice(dt, dn, amount=None,  debit_in_account_cur
 		"bank_account": bank_account,
 		"journal_entry": journal_entry
 	})
+
 
 def get_payment_entry(ref_doc, args):
 	cost_center = frappe.db.get_value("Company", ref_doc.company, "cost_center")
@@ -694,7 +693,7 @@ def get_payment_entry(ref_doc, args):
 		"cost_center": cost_center,
 		"account_type": frappe.db.get_value("Account", args.get("party_account"), "account_type"),
 		"account_currency": args.get("party_account_currency") or \
-			get_account_currency(args.get("party_account")),
+							get_account_currency(args.get("party_account")),
 		"balance": get_balance_on(args.get("party_account")),
 		"party_balance": get_balance_on(party=args.get("party"), party_type=args.get("party_type")),
 		"exchange_rate": exchange_rate,
@@ -706,7 +705,7 @@ def get_payment_entry(ref_doc, args):
 
 	bank_row = je.append("accounts")
 
-	#make it bank_details
+	# Make it bank_details
 	bank_account = get_default_bank_cash_account(ref_doc.company, "Bank", account=args.get("bank_account"))
 	if bank_account:
 		bank_row.update(bank_account)
@@ -725,7 +724,7 @@ def get_payment_entry(ref_doc, args):
 	else:
 		bank_row.set(args.get("amount_field_bank"), amount * exchange_rate)
 
-	# set multi currency check
+	# Multi currency check again
 	if party_row.account_currency != ref_doc.company_currency \
 		or (bank_row.account_currency and bank_row.account_currency != ref_doc.company_currency):
 			je.multi_currency = 1
@@ -734,6 +733,7 @@ def get_payment_entry(ref_doc, args):
 	je.set_total_debit_credit()
 
 	return je if args.get("journal_entry") else je.as_dict()
+
 
 @frappe.whitelist()
 def get_opening_accounts(company):
@@ -756,6 +756,7 @@ def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 		and (jv_detail.reference_type is null or jv_detail.reference_type = '')
 		and jv.docstatus = 1 and jv.`{0}` like %s order by jv.name desc limit %s, %s""".format(frappe.db.escape(searchfield)),
 		(filters.get("account"), cstr(filters.get("party")), "%{0}%".format(txt), start, page_len))
+
 
 @frappe.whitelist()
 def get_outstanding(args):
@@ -782,7 +783,8 @@ def get_outstanding(args):
 		}
 	elif args.get("doctype") in ("Sales Invoice", "Purchase Invoice"):
 		party_type = "Customer" if args.get("doctype") == "Sales Invoice" else "Supplier"
-		invoice = frappe.get_doc(args['doctype'], args['docname']).as_dict()
+		invoice = frappe.db.get_value(args["doctype"], args["docname"],
+			["outstanding_amount", "conversion_rate", scrub(party_type)], as_dict=1)
 
 		exchange_rate = invoice.conversion_rate if (args.get("account_currency") != company_currency) else 1
 
@@ -793,17 +795,8 @@ def get_outstanding(args):
 			amount_field = "debit_in_account_currency" \
 				if flt(invoice.outstanding_amount) > 0 else "credit_in_account_currency"
 
-		if args.get('due_date'):
-			outstanding = ''
-			for d in invoice.payment_schedule:
-				if d.due_date == getdate(args['due_date']):
-					outstanding = abs(flt(d.payment_amount))
-					break
-		else:
-			outstanding = abs(flt(invoice.outstanding_amount))
-
 		return {
-			amount_field: outstanding,
+			amount_field: abs(flt(invoice.outstanding_amount)),
 			"exchange_rate": exchange_rate,
 			"party_type": party_type,
 			"party": invoice.get(scrub(party_type))
@@ -825,6 +818,7 @@ def get_party_account_and_balance(company, party_type, party):
 		"party_balance": party_balance,
 		"account_currency": frappe.db.get_value("Account", account, "account_currency")
 	}
+
 
 @frappe.whitelist()
 def get_account_balance_and_party_type(account, date, company, debit=None, credit=None, exchange_rate=None):
@@ -863,7 +857,7 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 
 	return grid_values
 
-# Added posting_date as one of the parameters of get_exchange_rate
+
 @frappe.whitelist()
 def get_exchange_rate(posting_date, account=None, account_currency=None, company=None,
 		reference_type=None, reference_name=None, debit=None, credit=None, exchange_rate=None):
@@ -896,6 +890,7 @@ def get_exchange_rate(posting_date, account=None, account_currency=None, company
 	# don't return None or 0 as it is multipled with a value and that value could be lost
 	return exchange_rate or 1
 
+
 @frappe.whitelist()
 def get_average_exchange_rate(account):
 	exchange_rate = 0
@@ -905,14 +900,3 @@ def get_average_exchange_rate(account):
 		exchange_rate = bank_balance_in_company_currency / bank_balance_in_account_currency
 
 	return exchange_rate
-
-
-@frappe.whitelist()
-def get_invoice_due_dates(name):
-	result = frappe.get_list(
-		doctype='GL Entry',
-		filters={'voucher_no': name, "ifnull(due_date, '')": ('!=', '')},
-		fields=['due_date'], distinct=True
-	)
-
-	return result

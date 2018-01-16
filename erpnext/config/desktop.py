@@ -135,6 +135,14 @@ def get_data():
 			"label": _("POS")
 		},
 		{
+			"module_name": "Leaderboard",
+			"color": "#589494",
+			"icon": "octicon octicon-graph",
+			"type": "page",
+			"link": "leaderboard",
+			"label": _("Leaderboard")
+		},
+		{
 			"module_name": "Projects",
 			"color": "#8e44ad",
 			"icon": "fa fa-puzzle-piece",

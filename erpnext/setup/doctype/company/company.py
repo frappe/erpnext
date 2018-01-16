@@ -50,6 +50,13 @@ class Company(Document):
 		if frappe.db.sql("select abbr from tabCompany where name!=%s and abbr=%s", (self.name, self.abbr)):
 			frappe.throw(_("Abbreviation already used for another company"))
 
+	def create_default_tax_template(self):
+		from erpnext.setup.setup_wizard.operations.taxes_setup import create_sales_tax
+		create_sales_tax({
+			'country': self.country,
+			'company_name': self.name
+		})
+
 	def validate_default_accounts(self):
 		for field in ["default_bank_account", "default_cash_account",
 			"default_receivable_account", "default_payable_account",
@@ -274,6 +281,13 @@ class Company(Document):
 		# delete mode of payment account
 		frappe.db.sql("delete from `tabMode of Payment Account` where company=%s", self.name)
 
+		# delete BOMs
+		boms = frappe.db.sql_list("select name from tabBOM where company=%s", self.name)
+		if boms:
+			frappe.db.sql("delete from tabBOM where company=%s", self.name)
+			for dt in ("BOM Operation", "BOM Item", "BOM Scrap Item", "BOM Explosion Item"):
+				frappe.db.sql("delete from `tab%s` where parent in (%s)"""
+					% (dt, ', '.join(['%s']*len(boms))), tuple(boms), debug=1)
 
 @frappe.whitelist()
 def enqueue_replace_abbr(company, old, new):
