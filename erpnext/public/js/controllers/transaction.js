@@ -549,7 +549,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					final_message = final_message + message1;
 				}
 
-				if (this.frm.doc.payment_schedule.length) {
+				if ((this.frm.doc.payment_schedule || []).length) {
 					message2 = "Payment Schedule Table";
 					if (message1.length !== 0) message2 = " and " + message2;
 					final_message = final_message + message2;
