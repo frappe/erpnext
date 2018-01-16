@@ -14,8 +14,6 @@ class Shareholder(Document):
 
 	def on_trash(self):
 		delete_contact_and_address('Shareholder', self.name)
-		if self.lead_name:
-			frappe.db.sql("update `tabLead` set status='Interested' where name=%s", self.lead_name)
-	
+
 	def validate(self):
 		pass
