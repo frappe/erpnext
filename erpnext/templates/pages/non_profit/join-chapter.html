@@ -11,18 +11,18 @@
 	<p><a href="/login?redirect-to=/{{ chapter.route }}" class='btn btn-primary'>Login</a></p>
 {% else %}
 	{% if already_member %}
-		<p>You are already a member of {{ chapter.title }}!</p>
+		<p>You are already a member of {{ chapter.name }}!</p>
 		{{ chapter_button() }}
 		<p><a href="">Leave Chapter</a></p>
 	{% else %}
 		{% if frappe.local.request.method=='POST' %}
-			<p>Welcome to chapter {{ chapter.title }}!</p>
+			<p>Welcome to chapter {{ chapter.name }}!</p>
 			{{ chapter_button() }}
 		{% else %}
 			<div style="padding: 20px 0;">
 				<div class="row">
 					<div class="col-lg-8 col-md-8">
-						<form name="user-intro" action="/join-chapter" method='POST'>
+						<form name="user-intro" action="/non_profit/join-chapter" method='POST'>
 							<div class="form-group">
 								<input name="name" class="hidden form-control" type="text"
 									value="{{chapter.name}}">

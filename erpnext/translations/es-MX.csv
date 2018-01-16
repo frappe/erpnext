@@ -65,7 +65,7 @@ DocType: Stock Entry,Customer or Supplier Details,Detalle de cliente o proveedor
 DocType: Lab Test Template,Standard Selling Rate,Tarifa de Venta Estándar
 DocType: Program Enrollment,School House,Casa Escuela
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +305,Please set default account in Expense Claim Type {0},"Por favor, establezca la Cuenta predeterminada en el Tipo de Reembolso de Gastos {0}"
-apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.js +36,Score cannot be greater than Maximum Score,Los resultados no puede ser mayor que la Puntuación Máxima
+apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.js +54,Score cannot be greater than Maximum Score,Los resultados no puede ser mayor que la Puntuación Máxima
 apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py +60,Please set Company filter blank if Group By is 'Company',"Por favor, establezca el filtro de Compañía en blanco si Agrupar Por es 'Compañía'"
 DocType: Education Settings,"For Course based Student Group, the Course will be validated for every Student from the enrolled Courses in Program Enrollment.","Para Grupo de Estudiantes por Curso, el Curso será validado para cada Estudiante de los Cursos inscritos en la Inscripción del Programa."
 DocType: Education Settings,"For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.","Para grupo de estudiantes por lotes, el lote de estudiantes se validará para cada estudiante de la inscripción del programa."
