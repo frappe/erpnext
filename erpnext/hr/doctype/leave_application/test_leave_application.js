@@ -34,7 +34,7 @@ QUnit.test("Test: Leave application [HR]", function (assert) {
 		() => frappe.set_route("List", "Leave Application", "List"),
 		() => frappe.timeout(1),
 		// // check approved application in list
-		() => assert.deepEqual(["Test Employee 1", "Approved"], [cur_list.data[0].employee_name, cur_list.data[0].workflow_state],
+		() => assert.deepEqual(["Test Employee 1", "Approved"], [cur_list.data[0].employee_name, cur_list.data[0].workflow_state]),
 		// 	"leave for correct employee is approved"),
 		() => done()
 	]);

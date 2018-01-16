@@ -58,12 +58,14 @@ jobs:
     - stage: test
       script:
         - set -e
+        - bench execute erpnext.patches.v10_0.workflow_leave_application.execute
         - bench run-tests
       env: Server Side Test
     - # stage
       script:
         - bench --verbose run-setup-wizard-ui-test
         - bench execute erpnext.setup.utils.enable_all_roles_and_domains
+        - bench execute erpnext.patches.v10_0.workflow_leave_application.execute
         - bench run-ui-tests --app erpnext
       env: Client Side Test
     - # stage
