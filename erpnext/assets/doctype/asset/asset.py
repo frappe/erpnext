@@ -51,9 +51,6 @@ class Asset(Document):
 				if not self.get(field):
 					self.set(field, value)
 
-		self.value_after_depreciation = (flt(self.gross_purchase_amount) -
-			flt(self.opening_accumulated_depreciation))
-
 	def validate_asset_values(self):
 		if flt(self.expected_value_after_useful_life) >= flt(self.gross_purchase_amount):
 			frappe.throw(_("Expected Value After Useful Life must be less than Gross Purchase Amount"))
@@ -61,7 +58,10 @@ class Asset(Document):
 		if not flt(self.gross_purchase_amount):
 			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
 
-		if not self.is_existing_asset and self.calculate_depreciation:
+		if not self.calculate_depreciation:
+			return
+
+		if not self.is_existing_asset:
 			self.opening_accumulated_depreciation = 0
 			self.number_of_depreciations_booked = 0
 			if not self.next_depreciation_date:
@@ -80,6 +80,9 @@ class Asset(Document):
 
 			if cint(self.number_of_depreciations_booked) > cint(self.total_number_of_depreciations):
 				frappe.throw(_("Number of Depreciations Booked cannot be greater than Total Number of Depreciations"))
+
+		self.value_after_depreciation = (flt(self.gross_purchase_amount) -
+			flt(self.opening_accumulated_depreciation))
 
 		if self.next_depreciation_date and getdate(self.next_depreciation_date) < getdate(nowdate()):
 			frappe.msgprint(_("Next Depreciation Date is entered as past date"), title=_('Warning'), indicator='red')
@@ -106,12 +109,13 @@ class Asset(Document):
 						n * cint(self.frequency_of_depreciation))
 
 					depreciation_amount = self.get_depreciation_amount(value_after_depreciation)
-					value_after_depreciation -= flt(depreciation_amount)
+					if depreciation_amount:
+						value_after_depreciation -= flt(depreciation_amount)
 
-					self.append("schedules", {
-						"schedule_date": schedule_date,
-						"depreciation_amount": depreciation_amount
-					})
+						self.append("schedules", {
+							"schedule_date": schedule_date,
+							"depreciation_amount": depreciation_amount
+						})
 
 	def set_accumulated_depreciation(self):
 		accumulated_depreciation = flt(self.opening_accumulated_depreciation)
