@@ -142,7 +142,7 @@ class SalesInvoice(SellingController):
 
 		self.update_time_sheet(self.name)
 
-		self.update_current_month_sales()
+		update_company_current_month_sales(self.company)
 		self.update_project()
 
 	def validate_pos_paid_amount(self):
@@ -181,15 +181,8 @@ class SalesInvoice(SellingController):
 		self.make_gl_entries_on_cancel()
 		frappe.db.set(self, 'status', 'Cancelled')
 
-		self.update_current_month_sales()
+		update_company_current_month_sales(self.company)
 		self.update_project()
-
-	def update_current_month_sales(self):
-		if frappe.flags.in_test:
-			update_company_current_month_sales(self.company)
-		else:
-			frappe.enqueue('erpnext.setup.doctype.company.company.update_company_current_month_sales',
-				company=self.company)
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
