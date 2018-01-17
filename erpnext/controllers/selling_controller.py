@@ -281,6 +281,11 @@ class SellingController(StockController):
 				# On cancellation or if return entry submission, make stock ledger entry for
 				# target warehouse first, to update serial no values properly
 
+				if self.update_stock and not return_rate and \
+					not(d.allow_zero_valuation) and not self.is_return:
+					args = self.get_args_for_incoming_rate(d)
+					return_rate = get_incoming_rate(args)
+
 				if d.warehouse and ((not cint(self.is_return) and self.docstatus==1)
 					or (cint(self.is_return) and self.docstatus==2)):
 						sl_entries.append(self.get_sl_entries(d, {
@@ -296,18 +301,7 @@ class SellingController(StockController):
 
 					if self.docstatus == 1:
 						if not cint(self.is_return):
-							args = frappe._dict({
-								"item_code": d.item_code,
-								"warehouse": d.warehouse,
-								"posting_date": self.posting_date,
-								"posting_time": self.posting_time,
-								"qty": -1*flt(d.qty),
-								"serial_no": d.serial_no,
-								"company": d.company,
-								"voucher_type": d.voucher_type,
-								"voucher_no": d.name,
-								"allow_zero_valuation": d.allow_zero_valuation
-							})
+							args = self.get_args_for_incoming_rate(d)
 							target_warehouse_sle.update({
 								"incoming_rate": get_incoming_rate(args)
 							})
@@ -325,6 +319,20 @@ class SellingController(StockController):
 						}))
 
 		self.make_sl_entries(sl_entries)
+
+	def get_args_for_incoming_rate(self, d):
+		return frappe._dict({
+			"item_code": d.item_code,
+			"warehouse": d.warehouse,
+			"posting_date": self.posting_date,
+			"posting_time": self.posting_time,
+			"qty": -1*flt(d.qty),
+			"serial_no": d.serial_no,
+			"company": d.company,
+			"voucher_type": d.voucher_type,
+			"voucher_no": d.name,
+			"allow_zero_valuation": d.allow_zero_valuation
+		})
 
 def check_active_sales_items(obj):
 	for d in obj.get("items"):
