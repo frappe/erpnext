@@ -130,7 +130,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	prepare_dom() {
 		this.wrapper.append(`
 			<div class="pos">
-				<section class="col-md-12 col-sm-12 customer-details">
+				<section class="col-md-12 col-sm-12 customer-details" style="padding:0px;">
 					<div class="col-md-5 col-sm-5 customer-details-left">
 					</div>
 					<div class="col-md-7 col-sm-7 customer-details-right">
