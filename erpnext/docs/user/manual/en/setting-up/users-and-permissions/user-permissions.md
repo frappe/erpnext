@@ -39,7 +39,7 @@ For example you don't want Assets to be restricited for any user, then select **
 
 <img src="/assets/erpnext_docs/assets/img/users-and-permissions/user-perms/ignore-user-user-permissions.png" class="screenshot" alt="Ignore User Permissions on specific properties">
 
-### Strict Permisssions
+### Strict Permissions
 
 Since User Permissions are applied via Roles, there may be many users belonging to a particular Role. Suppose you have three users belonging to Role "Accounts User" and you have applied **User Permissions** to only one user, then the permissions will only be restricted to that user.
 

@@ -48,7 +48,7 @@ Leave Application is a good **example** that encompasses all areas of Permission
    1. **An Employee should only be able to access his/her Leave Application.**
      Hence, Apply User Permissions should be enabled for Employee Role, and a User Permission record should be created for each User Employee combination. (This effort is reduced for Employee Document Type, by programmatically creating User Permission records.)
 
-<img class="screenshot" alt="Limiting access to Leave Applications for a user with Employee Role via User Permissions Manager" src="/docs/assets/old_images/erpnext/setting-up-permissions-employee-user-permissions.png">
+<img class="screenshot" alt="Limiting access to Leave Applications for a user with Employee Role via User Permissions Manager" src="/docs/assets/img/users-and-permissions/setting-up-permissions-employee-user-permissions.png">
 
    1. **HR Manager should be able to see all Leave Applications.**
      Create a Permission Rule for HR Manager at Level 0, with Read permissions. Apply User Permissions should be disabled.
@@ -63,7 +63,7 @@ Leave Application is a good **example** that encompasses all areas of Permission
    3. **It should be Approved / Rejected only by HR User or Leave Approver.**
      The Status field of Leave Application is set at Level 1. HR User and Leave Approver are given Read and Write permissions for Level 1, while everyone else (All) are given Read permission for Level 1.
 
-<img class="screenshot" alt="Limiting read access for a set of fields to certain Roles" src="/docs/assets/old_images/erpnext/setting-up-permissions-level-1.png">
+<img class="screenshot" alt="Limiting read access for a set of fields to certain Roles" src="/docs/assets/img/users-and-permissions/setting-up-permissions-level-1.png">
 
 
    4. **HR User should be able to delegate Leave Applications to his/her subordinates**
