@@ -140,6 +140,8 @@ class SalesInvoice(SellingController):
 		if not cint(self.is_pos) == 1 and not self.is_return:
 			self.update_against_document_in_jv()
 
+		frappe.db.commit()
+	
 		self.update_time_sheet(self.name)
 
 		self.update_current_month_sales()
@@ -180,6 +182,8 @@ class SalesInvoice(SellingController):
 
 		self.make_gl_entries_on_cancel()
 		frappe.db.set(self, 'status', 'Cancelled')
+
+		frappe.db.commit()
 
 		self.update_current_month_sales()
 		self.update_project()
