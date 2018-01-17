@@ -299,8 +299,7 @@ def get_data():
 			"type": "list",
 			"link": "List/Lab Test",
 			"label": _("Lab Test")
-			
-		},
+        },
         {
 			"module_name": "Consultation",
 			"color": "#2ecc71",
@@ -308,8 +307,7 @@ def get_data():
 			"doctype": "Consultation",
 			"type": "link",
 			"label": _("Consultationt")
-			
-		},
+        },
         {
 			"module_name": "Patient",
 			"color": "#6BE273",
@@ -317,8 +315,7 @@ def get_data():
 			"doctype": "Patient",
 			"type": "link",
 			"label": _("Patient")
-			
-		},
+        },
         {
 			"module_name": "Patient Appointment",
 			"color": "#934F92",
@@ -326,8 +323,7 @@ def get_data():
 			"doctype": "Patient Appointment",
 			"type": "link",
 			"label": _("Patient Appointment")
-			
-		},
+        },
 		{
 			"module_name": "Hub",
 			"color": "#009248",
