@@ -283,14 +283,47 @@ def get_data():
 			"label": _("Education"),
 			"hidden": 1
 		},
-		{
+        {
 			"module_name": "Healthcare",
 			"color": "#FF888B",
-			"icon": "octicon octicon-plus",
+			"icon": "fa fa-heartbeat",
 			"type": "module",
 			"label": _("Healthcare"),
 			"hidden": 1
 		},
+        {
+			"module_name": "Lab Test",
+			"color": "#7578f6",
+			"icon": "octicon octicon-beaker",
+			"doctype": "Lab Test",
+			"type": "list",
+			"link": "List/Lab Test",
+			"label": _("Lab Test")
+        },
+        {
+			"module_name": "Consultation",
+			"color": "#2ecc71",
+			"icon": "fa fa-stethoscope",
+			"doctype": "Consultation",
+			"type": "link",
+			"label": _("Consultationt")
+        },
+        {
+			"module_name": "Patient",
+			"color": "#6BE273",
+			"icon": "fa fa-user",
+			"doctype": "Patient",
+			"type": "link",
+			"label": _("Patient")
+        },
+        {
+			"module_name": "Patient Appointment",
+			"color": "#934F92",
+			"icon": "fa fa-calendar-plus-o",
+			"doctype": "Patient Appointment",
+			"type": "link",
+			"label": _("Patient Appointment")
+        },
 		{
 			"module_name": "Hub",
 			"color": "#009248",
