@@ -170,6 +170,8 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 							d.description = item.description;
 							d.warehouse = values.warehouse;
 							d.uom = item.stock_uom;
+							d.stock_uom = item.stock_uom;
+							d.conversion_factor = 1;
 							d.qty = item.qty;
 						});
 					}
