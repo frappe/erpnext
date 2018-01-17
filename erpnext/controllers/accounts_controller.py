@@ -666,7 +666,7 @@ class AccountsController(TransactionBase):
 			self.remove(item)
 
 	def set_payment_schedule(self):
-		posting_date = self.get("posting_date") or self.get("transaction_date")
+		posting_date = self.get("bill_date") or self.get("posting_date") or self.get("transaction_date")
 		date = self.get("due_date")
 		due_date = date or posting_date
 		grand_total = self.get("rounded_total") or self.grand_total

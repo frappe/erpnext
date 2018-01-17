@@ -287,7 +287,9 @@ class Company(Document):
 			frappe.db.sql("delete from tabBOM where company=%s", self.name)
 			for dt in ("BOM Operation", "BOM Item", "BOM Scrap Item", "BOM Explosion Item"):
 				frappe.db.sql("delete from `tab%s` where parent in (%s)"""
-					% (dt, ', '.join(['%s']*len(boms))), tuple(boms), debug=1)
+					% (dt, ', '.join(['%s']*len(boms))), tuple(boms))
+
+		frappe.db.sql("delete from tabEmployee where company=%s", self.name)
 
 @frappe.whitelist()
 def enqueue_replace_abbr(company, old, new):
@@ -356,7 +358,6 @@ def update_company_current_month_sales(company):
 	monthly_total = results[0]['total'] if len(results) > 0 else 0
 
 	frappe.db.set_value("Company", company, "total_monthly_sales", monthly_total)
-	frappe.db.commit()
 
 def update_company_monthly_sales(company):
 	'''Cache past year monthly sales of every company based on sales invoices'''
@@ -367,7 +368,6 @@ def update_company_monthly_sales(company):
 		"posting_date", filter_str, "sum")
 
 	frappe.db.set_value("Company", company, "sales_monthly_history", json.dumps(month_to_value_dict))
-	frappe.db.commit()
 
 def cache_companies_monthly_sales_history():
 	companies = [d['name'] for d in frappe.get_list("Company")]
