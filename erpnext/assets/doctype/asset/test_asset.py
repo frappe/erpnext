@@ -234,9 +234,8 @@ class TestAsset(unittest.TestCase):
 
 		expected_gle = (
 			("_Test Accumulated Depreciations - _TC", 30000.0, 0.0),
-			("_Test Depreciations - _TC", 70000.0, 0.0),
 			("_Test Fixed Asset - _TC", 0.0, 100000.0),
-			("_Test Gain/Loss on Asset Disposal - _TC", 0.0, 25000.0),
+			("_Test Gain/Loss on Asset Disposal - _TC", 45000.0, 0.0),
 			("Debtors - _TC", 25000.0, 0.0)
 		)
 
