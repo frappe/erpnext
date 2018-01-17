@@ -63,8 +63,4 @@ def get_bom_stock(filters):
 			WHERE
 				bom_item.parent = '{bom}' and bom_item.parenttype='BOM'
 
-			GROUP BY bom_item.item_code""".format(
-				qty_field=qty_field,
-				table=table, 
-				conditions=conditions, 
-				bom=bom))
+			GROUP BY bom_item.item_code""".format(qty_field=qty_field, table=table, conditions=conditions, bom=bom))
