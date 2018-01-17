@@ -10,11 +10,11 @@ cur_frm.add_fetch('employee', 'department', 'department');
 cur_frm.add_fetch('employee', 'designation', 'designation');
 cur_frm.add_fetch('employee', 'employment_type', 'employment_type');
 cur_frm.add_fetch('employee', 'civil_id', 'civil_id');
-cur_frm.add_fetch('employee', 'date_of_joining', 'date_of_joining');
+// cur_frm.add_fetch('employee', 'date_of_joining', 'date_of_joining');
 // cur_frm.add_fetch('employee', 'nationality', 'nationality');
 // cur_frm.add_fetch('employee', 'gender', 'gender');
 
-cur_frm.add_fetch('job_opening', 'grade', 'new_grade');
+// cur_frm.add_fetch('job_opening', 'grade', 'new_grade');
 // cur_frm.add_fetch('job_opening', 'level', 'new_level');
 // cur_frm.add_fetch('job_opening', 'branch', 'new_branch');
 cur_frm.add_fetch('job_opening', 'department', 'new_department');
@@ -30,7 +30,7 @@ cur_frm.add_fetch('employee', 'department', 'new_department');
 cur_frm.add_fetch('employee', 'designation', 'new_designation');
 cur_frm.add_fetch('employee', 'employment_type', 'new_employment_type');
 
-cur_frm.add_fetch('new_grade', 'main_payment', 'main_payment');
+// cur_frm.add_fetch('new_grade', 'main_payment', 'main_payment');
 // cur_frm.add_fetch('new_grade', 'total_earning', 'total_earning');
 // cur_frm.add_fetch('new_grade', 'total_deduction', 'total_deduction');
 // cur_frm.add_fetch('new_grade', 'net_pay', 'net_pay');
@@ -40,8 +40,8 @@ cur_frm.add_fetch('new_grade', 'main_payment', 'main_payment');
 // cur_frm.add_fetch('new_grade', 'transportation_costs', 'transportation_costs');
 
 
-cur_frm.add_fetch('Grade', 'base', 'basic');
-cur_frm.add_fetch('Grade', 'base', 'new_basic');
+// cur_frm.add_fetch('Grade', 'base', 'basic');
+// cur_frm.add_fetch('Grade', 'base', 'new_basic');
 
 
 
@@ -57,26 +57,30 @@ frappe.ui.form.on('Promotion and Merit Increase', {
         cur_frm.refresh_fields(["workflow_state"]);
     },
 	employee: function(frm) {
-		frappe.call({
-            doc: frm.doc,
-            method: "update_base",
-            callback: function(r) {
-                // console.log(r.message)
-                cur_frm.set_value('base', r.message);
+        if (frm.doc.employee){
+    		frappe.call({
+                doc: frm.doc,
+                method: "get_basic_salary",
+                callback: function(r) {
+                    // console.log(r.message)
+                    cur_frm.set_value('base', r.message);
 
-            }
-        });	
-
-        frappe.call({
-            doc: frm.doc,
-            method: "update_newbase",
-            callback: function(r) {
-                // console.log(r.message)
-                cur_frm.set_value('new_base', r.message);
-
-            }
-        });	
-
+                }
+            });	
+        }
+        // frappe.call({
+        //     method: "get_salary_slip_info",
+        //     doc: frm.doc,
+        //     callback: function(r) {
+        //         if (r.message){
+        //             data = JSON.parse(r.message)
+        //             console.log(data["earnings"]);
+        //         }
+        //         // var new_window = window.open();
+        //         // new_window.document.write(r.message);
+        //         // frappe.msgprint(r.message);
+        //     }
+        // });	
         // frappe.call({
         //     doc: frm.doc,
         //     method: "update_newlevel",
@@ -86,7 +90,25 @@ frappe.ui.form.on('Promotion and Merit Increase', {
 
         //     }
         // });
-	}
+	},
+    new_level: function(frm) {
+        frm.trigger("calculate_main_basic");
+    },
+    new_grade: function(frm){
+        frm.trigger("calculate_main_basic");
+    },
+    calculate_main_basic: function(frm){
+       if (frm.doc.new_level && frm.doc.new_grade){
+            frappe.call({
+                doc: frm.doc,
+                method: "calculate_main_basic",
+                callback: function(r) {
+                    cur_frm.set_value('new_base', r.message);
+
+                }
+            });
+        } 
+    }
 	
 });
 // cur_frm.cscript.custom_new_grade = function(doc, cdt, cd) {

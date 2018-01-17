@@ -63,6 +63,16 @@ frappe.query_reports["Trial Balance for Party"] = {
 				return party_type;
 			}
 		},
+		// {
+		// 	"fieldname": "party_group_or_type",
+		// 	"label": __("Party Group or Type"),
+		// 	"fieldtype": "Dynamic Link",
+		// 	"get_options": function() {
+		// 		frappe.call({
+					
+		// 		})
+		// 	}
+		// },
 		{
 			"fieldname": "show_zero_values",
 			"label": __("Show zero values"),

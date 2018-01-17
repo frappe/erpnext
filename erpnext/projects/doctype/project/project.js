@@ -53,6 +53,20 @@ frappe.ui.form.on("Project", {
                     });
 
                 });
+
+                frm.add_custom_button(__("Project Charter"), function () {
+                    frappe.call({
+			            "method": "existing_project_charter",
+			            doc: cur_frm.doc,
+			            callback: function(r) {
+			            	frappe.set_route("Form", "Project Charter", r.message);
+			            }
+		        	});
+
+
+	          		
+
+                });
 			}
 
 			frm.trigger('show_dashboard');
@@ -104,3 +118,20 @@ frappe.ui.form.on("Project Task", {
 	},
 });
 
+
+
+
+frappe.listview_settings['Project'] = {
+	add_fields: ["status"],
+	get_indicator: function (doc) {
+		return [__(doc.status), {
+			"Started": "green",
+			"Ongoing": "orange",
+			"Cancelled": "red",
+			"On hold": "orange",
+			"Completed": "green",
+			"Open": "green",
+			"Pending PO": "green"
+		}[doc.status], "status,=," + doc.status];
+	}
+};

@@ -9,6 +9,7 @@ from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name
+from frappe.utils import flt, getdate, add_days, get_last_day, get_first_day, nowdate, add_months
 
 class SalaryStructure(Document):
 	
@@ -108,7 +109,14 @@ def make_salary_slip(source_name, target_doc = None, employee = None, as_print =
 def get_employees(**args):
 	return frappe.get_list('Employee',filters=args['filters'], fields=['name', 'employee_name'])
 
-
+def set_salary_structure_active():
+	ss_list = frappe.db.sql("""select parent, from_date from `tabSalary Structure Employee`""", as_dict=True)
+	for ss in ss_list:
+		if getdate(ss.from_date) <= getdate(nowdate()):
+			ss_doc = frappe.get_doc("Salary Structure", ss.parent)
+			if ss_doc.is_active == "No":
+				ss_doc.is_active == "Yes"
+				ss_doc.save(ignore_permissions=True)
 def get_permission_query_conditions(user):
 	pass
 	# if not user: user = frappe.session.user
