@@ -549,7 +549,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					final_message = final_message + message1;
 				}
 
-				if (this.frm.doc.payment_schedule.length) {
+				if ((this.frm.doc.payment_schedule || []).length) {
 					message2 = "Payment Schedule Table";
 					if (message1.length !== 0) message2 = " and " + message2;
 					final_message = final_message + message2;
@@ -1261,11 +1261,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	payment_terms_template: function() {
 		var me = this;
 		if(this.frm.doc.payment_terms_template) {
+			var posting_date = this.frm.doc.bill_date ||
+				this.frm.doc.posting_date || this.frm.doc.transaction_date;
+
 			frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_payment_terms",
 				args: {
 					terms_template: this.frm.doc.payment_terms_template,
-					posting_date: this.frm.doc.posting_date || this.frm.doc.transaction_date,
+					posting_date: posting_date,
 					grand_total: this.frm.doc.rounded_total || this.frm.doc.grand_total
 				},
 				callback: function(r) {
