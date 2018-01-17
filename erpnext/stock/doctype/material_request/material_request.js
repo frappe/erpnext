@@ -165,7 +165,6 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 						erpnext.utils.remove_empty_first_row(cur_frm, "items");
 						$.each(r.message, function(i, item) {
 							var d = frappe.model.add_child(cur_frm.doc, "Material Request Item", "items");
-							console.log(d);
 							d.item_code = item.item_code;
 							d.item_name = item.item_name;
 							d.description = item.description;
