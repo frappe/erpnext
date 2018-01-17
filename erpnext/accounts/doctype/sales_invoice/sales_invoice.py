@@ -675,28 +675,28 @@ class SalesInvoice(SellingController):
 		# income account gl entries
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
-				account_currency = get_account_currency(item.income_account)
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": item.income_account,
-						"against": self.customer,
-						"credit": item.base_net_amount,
-						"credit_in_account_currency": item.base_net_amount \
-							if account_currency==self.company_currency else item.net_amount,
-						"cost_center": item.cost_center
-					}, account_currency)
-				)
-
 				if item.is_fixed_asset:
 					asset = frappe.get_doc("Asset", item.asset)
 
-					fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset, is_sale=True)
+					fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset, item.base_net_amount)
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
 						gl_entries.append(self.get_gl_dict(gle))
 
 					asset.db_set("disposal_date", self.posting_date)
 					asset.set_status("Sold" if self.docstatus==1 else None)
+				else:
+					account_currency = get_account_currency(item.income_account)
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": item.income_account,
+							"against": self.customer,
+							"credit": item.base_net_amount,
+							"credit_in_account_currency": item.base_net_amount \
+								if account_currency==self.company_currency else item.net_amount,
+							"cost_center": item.cost_center
+						}, account_currency)
+					)
 
 		# expense account gl entries
 		if cint(self.update_stock) and \
