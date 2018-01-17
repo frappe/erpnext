@@ -37,9 +37,9 @@ Another way of allowing documents to be seen that have been restricited by User 
 
 For example you don't want Assets to be restricited for any user, then select **Asset** in **Customize Form** and in the Company field, check on "Ignore User Permissions"
 
-<img src="/docs/assets/img/users-and-permissions/user-perms/ignore-user-user-permissions.png" class="screenshot" alt="Ignore User Permissions on specific properties">
+<img src="/docs/assets/img/users-and-permissions/user-perms/ignore-user-permissions.png" class="screenshot" alt="Ignore User Permissions on specific properties">
 
-### Strict Permisssions
+### Strict Permissions
 
 Since User Permissions are applied via Roles, there may be many users belonging to a particular Role. Suppose you have three users belonging to Role "Accounts User" and you have applied **User Permissions** to only one user, then the permissions will only be restricted to that user.
 
