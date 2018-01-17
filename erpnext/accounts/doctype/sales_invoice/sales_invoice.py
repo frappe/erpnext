@@ -183,6 +183,8 @@ class SalesInvoice(SellingController):
 		self.make_gl_entries_on_cancel()
 		frappe.db.set(self, 'status', 'Cancelled')
 
+		frappe.db.commit()
+
 		self.update_current_month_sales()
 		self.update_project()
 
