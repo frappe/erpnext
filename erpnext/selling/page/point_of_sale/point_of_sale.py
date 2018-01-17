@@ -92,7 +92,7 @@ def submit_invoice(doc,is_saved):
 	if isinstance(doc, basestring):
 		args = json.loads(doc)
 
-	if(is_saved == 1):
+	if(int(is_saved) == 1):
 		doc = frappe.get_doc('Sales Invoice',args["name"])
 	else:
 		doc = frappe.new_doc('Sales Invoice')
