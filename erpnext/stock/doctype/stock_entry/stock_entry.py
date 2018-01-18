@@ -288,7 +288,7 @@ class StockEntry(StockController):
 
 			# get basic rate
 			if not d.bom_no:
-				if not flt(d.basic_rate) or d.s_warehouse or force:
+				if (not flt(d.basic_rate) and not d.allow_zero_valuation_rate) or d.s_warehouse or force:
 					basic_rate = flt(get_incoming_rate(args), self.precision("basic_rate", d))
 					if basic_rate > 0:
 						d.basic_rate = basic_rate
@@ -299,7 +299,8 @@ class StockEntry(StockController):
 
 			# get scrap items basic rate
 			if d.bom_no:
-				if not flt(d.basic_rate) and getattr(self, "pro_doc", frappe._dict()).scrap_warehouse == d.t_warehouse:
+				if not flt(d.basic_rate) and not d.allow_zero_valuation_rate and \
+					getattr(self, "pro_doc", frappe._dict()).scrap_warehouse == d.t_warehouse:
 					basic_rate = flt(get_incoming_rate(args), self.precision("basic_rate", d))
 					if basic_rate > 0:
 						d.basic_rate = basic_rate
