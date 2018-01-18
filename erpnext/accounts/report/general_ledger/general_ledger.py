@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from erpnext import get_company_currency, get_default_company
 from frappe.utils import getdate, cstr, flt
 from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
@@ -77,9 +78,19 @@ def set_account_currency(filters):
 		return filters
 
 def get_columns(filters):
+	if filters.get("presentation_currency"):
+		currency = filters["presentation_currency"]
+	else:
+		if filters.get("company"):
+			currency = get_company_currency(filters["company"])
+		else:
+			company = get_default_company()
+			currency = get_company_currency(company)
+
 	columns = [
 		_("Posting Date") + ":Date:90", _("Account") + ":Link/Account:200",
-		_("Debit") + ":Float:100", _("Credit") + ":Float:100"
+		_("Debit ({0})".format(currency)) + ":Float:100",
+		_("Credit ({0})".format(currency)) + ":Float:100"
 	]
 
 	if filters.get("show_in_account_currency"):
