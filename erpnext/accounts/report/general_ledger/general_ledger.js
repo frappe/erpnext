@@ -105,6 +105,12 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname":"group_by_account",
 			"label": __("Group by Account"),
 			"fieldtype": "Check",
+		},
+		{
+			"fieldname": "presentation_currency",
+			"label": __("Currency"),
+			"fieldtype": "Select",
+			"options": "NGN\nINR\nUSD"
 		}
 	]
 }
