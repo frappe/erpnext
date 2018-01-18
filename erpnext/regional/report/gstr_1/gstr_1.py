@@ -12,7 +12,7 @@ class Gstr1Report(object):
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 		self.customer_type = "Company" if self.filters.get("type_of_business") ==  "B2B" else "Individual"
-		
+
 	def run(self):
 		self.get_columns()
 		self.get_data()
@@ -66,7 +66,9 @@ class Gstr1Report(object):
 				place_of_supply,
 				ecommerce_gstin,
 				reverse_charge,
-				invoice_type
+				invoice_type,
+				return_against,
+				is_return
 			from `tabSales Invoice`
 			where docstatus = 1 %s
 			order by posting_date desc
@@ -96,6 +98,8 @@ class Gstr1Report(object):
 				SUBSTR(place_of_supply, 1, 2) = SUBSTR(company_gstin, 1, 2)
 				or grand_total <= 250000
 			)"""
+		elif self.filters.get("type_of_business") ==  "CDNR":
+			conditions += """ and is_return = 1 """
 
 		return conditions
 
@@ -118,7 +122,7 @@ class Gstr1Report(object):
 			where
 				parenttype = 'Sales Invoice' and docstatus = 1
 				and parent in (%s)
-				and tax_amount_after_discount_amount > 0
+
 			order by account_head
 		""" % (', '.join(['%s']*len(self.invoices.keys()))), tuple(self.invoices.keys()))
 
@@ -291,6 +295,58 @@ class Gstr1Report(object):
 					"label": "E-Commerce GSTIN",
 					"fieldtype": "Data",
 					"width": 130
+				}
+			]
+		elif self.filters.get("type_of_business") ==  "CDNR":
+			self.invoice_columns = [
+				{
+					"fieldname": "customer_gstin",
+					"label": "GSTIN/UIN of Recipient",
+					"fieldtype": "Data",
+					"width": 120
+				},
+				{
+					"fieldname": "customer_name",
+					"label": "Receiver Name",
+					"fieldtype": "Data",
+					"width": 120
+				},
+				{
+					"fieldname": "return_against",
+					"label": "Invoice/Advance Receipt Number",
+					"fieldtype": "Link",
+					"options": "Sales Invoice",
+					"width": 120
+				},
+				{
+					"fieldname": "posting_date",
+					"label": "Invoice/Advance Receipt date",
+					"fieldtype": "Date",
+					"width": 120
+				},
+				{
+					"fieldname": "invoice_number",
+					"label": "Invoice/Advance Receipt Number",
+					"fieldtype": "Link",
+					"options": "Sales Invoice"
+				},
+				{
+					"fieldname": "posting_date",
+					"label": "Invoice/Advance Receipt date",
+					"fieldtype": "Date",
+					"width": 120
+				},
+				{
+					"fieldname": "place_of_supply",
+					"label": "Place of Supply",
+					"fieldtype": "Data",
+					"width": 120
+				},
+				{
+					"fieldname": "invoice_value",
+					"label": "Invoice Value",
+					"fieldtype": "Currency",
+					"width": 120
 				}
 			]
 			self.other_columns = [
