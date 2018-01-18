@@ -82,6 +82,15 @@ erpnext.stock.ItemDashboard = Class.extend({
 			var message = __(" Currently no stock available in any warehouse")
 			$("<span class='text-muted small'>"+message+"</span>").appendTo(this.result);
 		}
+
+		if (roles.indexOf("Stock Manager") > -1 || roles.indexOf("Stock User") > -1){
+			$(".btn-move").show();
+ 			$(".btn-add").show();
+		} else {
+			$(".btn-move").hide();
+ 			$(".btn-add").hide();
+		}
+
 	},
 	get_item_dashboard_data: function(data, max_count, show_item) {
 		if(!max_count) max_count = 0;
