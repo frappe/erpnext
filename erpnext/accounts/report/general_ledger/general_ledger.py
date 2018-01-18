@@ -118,7 +118,30 @@ def get_result(filters, account_details):
 
 	return result
 
+
+def get_currency(filters):
+	"""
+	Returns the currency to used in the report. It considers presentation currency and company
+	(in that order) in order to determine what currency to use.
+	:param filters: Report filters
+	:type filters: dict
+
+	:return: str - Currency
+	"""
+	if filters.get("presentation_currency"):
+		currency = filters["presentation_currency"]
+	else:
+		if filters.get("company"):
+			currency = get_company_currency(filters["company"])
+		else:
+			company = get_default_company()
+			currency = get_company_currency(company)
+
+	return currency
+
+
 def get_gl_entries(filters):
+	currency = get_currency(filters)
 	select_fields = """, sum(debit_in_account_currency) as debit_in_account_currency,
 		sum(credit_in_account_currency) as credit_in_account_currency""" \
 		if filters.get("show_in_account_currency") else ""
@@ -131,7 +154,7 @@ def get_gl_entries(filters):
 			posting_date, account, party_type, party,
 			sum(debit) as debit, sum(credit) as credit,
 			voucher_type, voucher_no, cost_center, project,
-			against_voucher_type, against_voucher,
+			against_voucher_type, against_voucher, account_currency
 			remarks, against, is_opening {select_fields}
 		from `tabGL Entry`
 		where company=%(company)s {conditions}
@@ -140,7 +163,10 @@ def get_gl_entries(filters):
 		.format(select_fields=select_fields, conditions=get_conditions(filters),
 			group_by_condition=group_by_condition), filters, as_dict=1)
 
+	print('GL entries:', gl_entries)
+
 	return gl_entries
+
 
 def get_conditions(filters):
 	conditions = []
