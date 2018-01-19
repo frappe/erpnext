@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe import _
+from datetime import date
 
 def execute(filters=None):
 	return Gstr1Report(filters).run()
@@ -49,6 +50,10 @@ class Gstr1Report(object):
 				if self.filters.get("type_of_business") ==  "B2C Small":
 					row.append("E" if invoice_details.ecommerce_gstin else "OE")
 
+				if self.filters.get("type_of_business") ==  "CDNR":
+					row.append("Y" if invoice_details.posting_date <= date(2017, 7, 1) else "N")
+					row.append("C" if invoice_details.return_against else "R")
+
 				self.data.append(row)
 
 	def get_invoice_data(self):
@@ -87,20 +92,24 @@ class Gstr1Report(object):
 					conditions += opts[1]
 
 		customers = frappe.get_all("Customer", filters={"customer_type": self.customer_type})
-		conditions += " and customer in ('{0}')".format("', '".join([frappe.db.escape(c.name)
-			for c in customers]))
+
+		if self.filters.get("type_of_business") ==  "B2B":
+			conditions += " and is_return != 1 and customer in ('{0}')".\
+				format("', '".join([frappe.db.escape(c.name) for c in customers]))
 
 		if self.filters.get("type_of_business") ==  "B2C Large":
 			conditions += """ and SUBSTR(place_of_supply, 1, 2) != SUBSTR(company_gstin, 1, 2)
-				and grand_total > 250000"""
+				and grand_total > 250000 and is_return != 1 and customer in ('{0}')""".\
+					format("', '".join([frappe.db.escape(c.name) for c in customers]))
+
 		elif self.filters.get("type_of_business") ==  "B2C Small":
 			conditions += """ and (
 				SUBSTR(place_of_supply, 1, 2) = SUBSTR(company_gstin, 1, 2)
-				or grand_total <= 250000
-			)"""
+					or grand_total <= 250000 ) and is_return != 1 and customer in ('{0}')""".\
+						format("', '".join([frappe.db.escape(c.name) for c in customers]))
+
 		elif self.filters.get("type_of_business") ==  "CDNR":
 			conditions += """ and is_return = 1 """
-
 		return conditions
 
 	def get_invoice_items(self):
@@ -156,7 +165,6 @@ class Gstr1Report(object):
 								.setdefault(tax_rate, [])
 							if item_code not in rate_based_dict:
 								rate_based_dict.append(item_code)
-
 					except ValueError:
 						continue
 		if unidentified_gst_accounts:
@@ -282,21 +290,6 @@ class Gstr1Report(object):
 					"width": 130
 				}
 			]
-		elif self.filters.get("type_of_business") ==  "B2C Small":
-			self.invoice_columns = [
-				{
-					"fieldname": "place_of_supply",
-					"label": "Place of Supply",
-					"fieldtype": "Data",
-					"width": 120
-				},
-				{
-					"fieldname": "ecommerce_gstin",
-					"label": "E-Commerce GSTIN",
-					"fieldtype": "Data",
-					"width": 130
-				}
-			]
 		elif self.filters.get("type_of_business") ==  "CDNR":
 			self.invoice_columns = [
 				{
@@ -337,6 +330,12 @@ class Gstr1Report(object):
 					"width": 120
 				},
 				{
+					"fieldname": "",
+					"label": "Reason For Issuing document",
+					"fieldtype": "Data",
+					"width": 120
+				},
+				{
 					"fieldname": "place_of_supply",
 					"label": "Place of Supply",
 					"fieldtype": "Data",
@@ -347,6 +346,35 @@ class Gstr1Report(object):
 					"label": "Invoice Value",
 					"fieldtype": "Currency",
 					"width": 120
+				}
+			]
+			self.other_columns = [
+				{
+					"fieldname": "pre_gst",
+					"label": "PRE GST",
+					"fieldtype": "Data",
+					"width": 50
+				},
+				{
+					"fieldname": "document_type",
+					"label": "Document Type",
+					"fieldtype": "Data",
+					"width": 50
+				}
+			]
+		elif self.filters.get("type_of_business") ==  "B2C Small":
+			self.invoice_columns = [
+				{
+					"fieldname": "place_of_supply",
+					"label": "Place of Supply",
+					"fieldtype": "Data",
+					"width": 120
+				},
+				{
+					"fieldname": "ecommerce_gstin",
+					"label": "E-Commerce GSTIN",
+					"fieldtype": "Data",
+					"width": 130
 				}
 			]
 			self.other_columns = [
