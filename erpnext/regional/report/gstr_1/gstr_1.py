@@ -73,7 +73,9 @@ class Gstr1Report(object):
 				reverse_charge,
 				invoice_type,
 				return_against,
-				is_return
+				is_return,
+				invoice_type,
+				export_type
 			from `tabSales Invoice`
 			where docstatus = 1 %s
 			order by posting_date desc
@@ -110,6 +112,9 @@ class Gstr1Report(object):
 
 		elif self.filters.get("type_of_business") ==  "CDNR":
 			conditions += """ and is_return = 1 """
+
+		elif self.filters.get("type_of_business") ==  "EXPORT":
+			conditions += """ and is_return !=1 and invoice_type = 'Export' """
 		return conditions
 
 	def get_invoice_items(self):
@@ -384,5 +389,50 @@ class Gstr1Report(object):
 					"fieldtype": "Data",
 					"width": 50
 				}
+			]
+		elif self.filters.get("type_of_business") ==  "EXPORT":
+			self.invoice_columns = [
+				{
+					"fieldname": "export_type",
+					"label": "Export Type",
+					"fieldtype": "Data",
+				},
+				{
+					"fieldname": "invoice_number",
+					"label": "Invoice Number",
+					"fieldtype": "Link",
+					"options": "Sales Invoice"
+				},
+				{
+					"fieldname": "posting_date",
+					"label": "Invoice date",
+					"fieldtype": "Date",
+					"width": 120
+				},
+				{
+					"fieldname": "invoice_value",
+					"label": "Invoice Value",
+					"fieldtype": "Currency",
+					"width": 120
+				},
+				{
+					"fieldname": "port_code",
+					"label": "Port Code",
+					"fieldtype": "Data",
+					"width": 120
+				},
+				{
+					"fieldname": "shipping_bill_number",
+					"label": "Shipping Bill Number",
+					"fieldtype": "Data",
+					"width": 120
+				},
+				{
+					"fieldname": "shipping_bill_date",
+					"label": "Shipping Bill Date",
+					"fieldtype": "Currency",
+					"width": 120
+				}
+
 			]
 		self.columns = self.invoice_columns + self.tax_columns + self.other_columns
