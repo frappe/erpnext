@@ -207,9 +207,18 @@ doc_events = {
 }
 
 scheduler_events = {
+    "all": [
+		#"erpnext.projects.doctype.project.project.hourly_reminder"
+        #"erpnext.projects.doctype.project.project.hourly_reminder",
+		#"erpnext.projects.doctype.project.project.twice_daily_reminder"
+    ],
+
 	"hourly": [
 		"erpnext.accounts.doctype.subscription.subscription.make_subscription_entry",
-		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.trigger_emails'
+		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.trigger_emails',
+        "erpnext.projects.doctype.project.project.hourly_reminder",
+		"erpnext.projects.doctype.project.project.twice_daily_reminder",
+		"erpnext.projects.doctype.project.project.daily_reminder"
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
