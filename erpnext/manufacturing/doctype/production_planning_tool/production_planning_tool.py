@@ -310,6 +310,7 @@ class ProductionPlanningTool(Document):
 			}
 		"""
 		item_list = []
+		precision = frappe.get_precision("BOM Item", "stock_qty")
 
 		for bom, so_wise_qty in bom_dict.items():
 			bom_wise_item_details = {}
@@ -334,8 +335,9 @@ class ProductionPlanningTool(Document):
 
 			for item, item_details in bom_wise_item_details.items():
 				for so_qty in so_wise_qty:
-					item_list.append([item, flt(item_details.qty) * so_qty[1], item_details.description,
-						item_details.stock_uom, item_details.min_order_qty, so_qty[0]])
+					item_list.append([item, flt(flt(item_details.qty) * so_qty[1], precision),
+						item_details.description, item_details.stock_uom, item_details.min_order_qty,
+						so_qty[0]])
 
 		self.make_items_dict(item_list)
 
