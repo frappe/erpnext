@@ -75,7 +75,11 @@ class Gstr1Report(object):
 				return_against,
 				is_return,
 				invoice_type,
-				export_type
+				export_type,
+				port_code,
+				shipping_bill_number,
+				shipping_bill_date,
+				reason_for_issuing_document
 			from `tabSales Invoice`
 			where docstatus = 1 %s
 			order by posting_date desc
@@ -335,7 +339,7 @@ class Gstr1Report(object):
 					"width": 120
 				},
 				{
-					"fieldname": "",
+					"fieldname": "reason_for_issuing_document",
 					"label": "Reason For Issuing document",
 					"fieldtype": "Data",
 					"width": 120
@@ -430,7 +434,7 @@ class Gstr1Report(object):
 				{
 					"fieldname": "shipping_bill_date",
 					"label": "Shipping Bill Date",
-					"fieldtype": "Currency",
+					"fieldtype": "Date",
 					"width": 120
 				}
 
