@@ -44,7 +44,7 @@ frappe.ui.form.on("Customer", {
 	},
 	customer_primary_address: function(frm){
 		if(!frm.doc.customer_primary_address){
-			frm.doc.primary_address = ""
+			frm.doc.primary_address = "";
 		}
 	},
 	customer_primary_contact: function(frm){
