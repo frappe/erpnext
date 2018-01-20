@@ -69,11 +69,9 @@ Set the frequency to download your site backups to your Dropbox account.
 
 ####Step 7: Input Keys from your Dropbox App window
 
-From your Dropbox App page, enter the app key and (unhidden) app secret into the ERPnext Dropbox settings page. 
+From your Dropbox App page, enter the app key and (unhidden) app secret into the ERPnext Dropbox settings page.
 
-*WARNING: If you copy and paste the app secret key, you will get an error. You must first copy and paste it into a code editor or plain text editor and then copy and paste it from there into ERPnext. Or you can type it by hand into the app secret field.*
-
-Additionally, you can enter it manually in `sites/{sitename}/site_config.json` as follows,
+Alternatively, you can enter it manually in `sites/{sitename}/site_config.json` as follows,
 
 <div>
 	<pre>
@@ -87,11 +85,11 @@ Additionally, you can enter it manually in `sites/{sitename}/site_config.json` a
 	</pre>
 </div>
 
-####Step 8: Click Save in the Dropbox Settings form before continuing!!!
+####Step 8: Click Save before continuing!!!
 
-####Step 9: After saving, click Allow Dropbox Access
+####Step 9: After saving, click "Allow Dropbox Access"
 
-After setting frequency and updating other details, make sure to click save and then click on `Allow Dropbox Access`. Upon clicking this, the Dropbox login page will open in the new tab. This might require you to allow pop-up for your ERPNext account.
+The Dropbox login page will open in the new tab. This might require you to allow pop-up for your ERPNext account.
 
 ####Step 11: Allow Dropbox Access
 
