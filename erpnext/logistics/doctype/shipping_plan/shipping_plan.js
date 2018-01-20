@@ -7,8 +7,8 @@ frappe.ui.form.on('Shipping Plan', {
 	}
 });
 
-cur_frm.fields_dict['delivery_note'].get_query = function(doc,cdt,cdn) {
+cur_frm.fields_dict['delivery_note'].get_query = function(doc) {
 	return{
 		filters:{ 'docstatus': 0}
-	}
+	};
 };

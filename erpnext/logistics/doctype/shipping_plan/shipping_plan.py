@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe import scrub, _
+from frappe import _
 from frappe.utils import cint
 from erpnext.logistics.controller.fedex_controller import FedExController
 
@@ -29,7 +29,7 @@ class ShippingPlan(Document):
 		if not len(self.items):
 			frappe.msgprint(_("No Items for Shipping Plan"), raise_exception=1)
 
-	def validate_for_existing_shipping_plan(doc, method):
+	def validate_for_existing_shipping_plan(self):
 		# check if Shipping Plan is already created against self.delivery_note
 		shipping_plan = frappe.db.get_value("Shipping Plan", {"name":["not in", [self.name]],\
 			"delivery_note":self.delivery_note, "docstatus":["in", ["0"]]}, "name")
