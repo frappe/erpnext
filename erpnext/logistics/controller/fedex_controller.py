@@ -1,7 +1,7 @@
 import frappe
 from fedex_config import fedex_config
 
-class FedexController():
+class FedExController():
 	""" A Higher-Level wrapper for Fedex python library 
 		which handles API like Shipment, Tracking, GET Rate
 		& other supplementary tasks. """
