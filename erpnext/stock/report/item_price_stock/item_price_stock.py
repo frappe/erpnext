@@ -81,6 +81,10 @@ def get_item_price_qty_data(filters):
 	price_list_names = ",".join(['"' + frappe.db.escape(item['price_list_name']) + '"'
 		for item in item_results])
 
+	if not price_list_names:
+		frappe.msgprint(_("No records found"))
+		return price_list_names
+
 	buying_price_map = get_buying_price_map(price_list_names)
 	selling_price_map = get_selling_price_map(price_list_names)
 
@@ -110,6 +114,7 @@ def get_item_price_qty_data(filters):
 	return result
 
 def get_buying_price_map(price_list_names):
+
 	buying_price = frappe.db.sql("""
 		select
 			name,price_list,price_list_rate
@@ -129,6 +134,7 @@ def get_buying_price_map(price_list_names):
 	return buying_price_map
 
 def get_selling_price_map(price_list_names):
+
 	selling_price = frappe.db.sql("""
 		select
 			name,price_list,price_list_rate
