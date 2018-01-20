@@ -75,7 +75,7 @@ erpnext.stock.ItemDashboard = Class.extend({
 			this.content.find('.more').addClass('hidden');
 		}
 
-        // If not any stock in any warehouses provide a message to end user
+		// If not any stock in any warehouses provide a message to end user
 		if (context.data.length > 0) {
 			$(frappe.render_template('item_dashboard_list', context)).appendTo(this.result);
 		} else {
@@ -83,12 +83,12 @@ erpnext.stock.ItemDashboard = Class.extend({
 			$("<span class='text-muted small'>"+message+"</span>").appendTo(this.result);
 		}
 
-		if (roles.indexOf("Stock Manager") > -1 || roles.indexOf("Stock User") > -1){
+		if (frappe.user_roles.indexOf("Stock Manager") > -1 || frappe.user_roles.indexOf("Stock User") > -1){
 			$(".btn-move").show();
- 			$(".btn-add").show();
+			$(".btn-add").show();
 		} else {
 			$(".btn-move").hide();
- 			$(".btn-add").hide();
+			$(".btn-add").hide();
 		}
 
 	},
