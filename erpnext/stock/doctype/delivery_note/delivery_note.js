@@ -15,6 +15,7 @@ frappe.ui.form.on("Delivery Note", {
 			'Installation Note': 'Installation Note',
 			'Sales Invoice': 'Invoice',
 			'Stock Entry': 'Return',
+			'Shipping Plan': 'Shipping Plan'
 		},
 		frm.set_indicator_formatter('item_code',
 			function(doc) {
@@ -112,6 +113,12 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 				this.frm.add_custom_button(__('Packing Slip'), function() {
 					frappe.model.open_mapped_doc({
 						method: "erpnext.stock.doctype.delivery_note.delivery_note.make_packing_slip",
+						frm: me.frm
+					}) }, __("Make"));
+
+				this.frm.add_custom_button(__('Shipping Plan'), function() {
+					frappe.model.open_mapped_doc({
+						method: "erpnext.stock.doctype.delivery_note.delivery_note.make_shipping_plan",
 						frm: me.frm
 					}) }, __("Make"));
 			}
