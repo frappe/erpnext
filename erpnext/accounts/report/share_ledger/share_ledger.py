@@ -22,14 +22,14 @@ def execute(filters=None):
 	if not filters.get("shareholder_party"):
 		pass
 	else:
-		transfers = get_all_transfers(date, filters.get("shareholder_party"))
+		transfers = get_all_transfers(date, filters.get("shareholder"))
 		for transfer in transfers:
 			if transfer.transfer_type == 'Transfer':
-				if transfer.from_party == filters.get("shareholder_party"):
+				if transfer.from_party == filters.get("shareholder"):
 					transfer.transfer_type += ' from'
 				else:
 					transfer.transfer_type += ' to'
-			row = [filters.get("shareholder_party"), transfer.date, transfer.transfer_type,
+			row = [filters.get("shareholder"), transfer.date, transfer.transfer_type,
 				transfer.share_type, transfer.no_of_shares, transfer.rate, transfer.amount,
 				transfer.company, transfer.name]
 
@@ -39,7 +39,7 @@ def execute(filters=None):
 
 def get_columns(filters):
 	columns = [
-		_("Shareholder Party") + ":Link/Shareholder Party:150",
+		_("Shareholder") + ":Link/Shareholder:150",
 		_("Date") + ":Date:100",
 		_("Transfer Type") + "::140",
 		_("Share Type") + "::90",

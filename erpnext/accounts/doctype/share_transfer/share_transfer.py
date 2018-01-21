@@ -11,7 +11,7 @@ class ShareTransfer(Document):
 	def before_save(self):
 		if self.transfer_type == 'Issue':
 			#todo make entry in company party
-			company_party_doc = frappe.get_doc('Shareholder Party', self.company)
+			company_party_doc = frappe.get_doc('Shareholder', self.company)
 			company_party_doc.append('share_balance', {
 				'share_type': self.share_type,
 				'from_no': self.from_no,
@@ -23,8 +23,8 @@ class ShareTransfer(Document):
 				'current_state': 'Issued'
 			})
 			company_party_doc.save()
-			#todo add an entry in the required Shareholder Party's Share Balance
-			doc = frappe.get_doc('Shareholder Party', self.to_party)
+			#todo add an entry in the required Shareholder's Share Balance
+			doc = frappe.get_doc('Shareholder', self.to_party)
 			doc.append('share_balance', {
 				'share_type': self.share_type,
 				'from_no': self.from_no,
@@ -35,12 +35,12 @@ class ShareTransfer(Document):
 			})
 			doc.save()
 		elif self.transfer_type == 'Purchase':
-			#todo remove the necessary entry from the required Shareholder Party's Share Balance
+			#todo remove the necessary entry from the required Shareholder's Share Balance
 			self.remove_shares(self.from_party)
 			#todo edit in company party
 			self.remove_shares(self.company)
 			#todo add shares as purchased to cimpany
-			company_party_doc = frappe.get_doc('Shareholder Party', self.company)
+			company_party_doc = frappe.get_doc('Shareholder', self.company)
 			company_party_doc.append('share_balance', {
 				'share_type': self.share_type,
 				'from_no': self.from_no,
@@ -53,10 +53,10 @@ class ShareTransfer(Document):
 			})
 			company_party_doc.save()
 		elif self.transfer_type == 'Transfer':
-			#todo remove the necessary entries from the from Shareholder Party's Share Balance
+			#todo remove the necessary entries from the from Shareholder's Share Balance
 			self.remove_shares(self.from_party)
-			#todo add an entry in the to Shareholder Party's Share Balance
-			doc = frappe.get_doc('Shareholder Party', self.to_party)
+			#todo add an entry in the to Shareholder's Share Balance
+			doc = frappe.get_doc('Shareholder', self.to_party)
 			doc.append('share_balance', {
 				'share_type': self.share_type,
 				'from_no': self.from_no,
@@ -71,10 +71,10 @@ class ShareTransfer(Document):
 		self.basic_validations()
 		self.folio_no_validation()
 		if self.transfer_type == 'Issue':
-			#todo if 1st make a Shareholder Party under Company Name
-			if not frappe.db.exists('Shareholder Party', self.company):
+			#todo if 1st make a Shareholder under Company Name
+			if not frappe.db.exists('Shareholder', self.company):
 				company_party_doc = frappe.get_doc({
-					'doctype': 'Shareholder Party',
+					'doctype': 'Shareholder',
 					'title': self.company,
 					'company': self.company,
 					'is_company': 1 
@@ -94,13 +94,13 @@ class ShareTransfer(Document):
 		if self.transfer_type == 'Purchase':
 			self.to_party = ''
 			if self.from_party is None or self.from_party is '':
-				frappe.throw('The field \'From Shareholder Party\' cannot be blank')
+				frappe.throw('The field \'From Shareholder\' cannot be blank')
 			if self.from_folio_no is None or self.from_folio_no is '':
 				self.to_folio_no = self.autoname_folio(self.to_party)
 		elif (self.transfer_type == 'Issue'):
 			self.from_party = ''
 			if self.to_party is None or self.to_party == '':
-				frappe.throw('The field \'To Shareholder Party\' cannot be blank')
+				frappe.throw('The field \'To Shareholder\' cannot be blank')
 			if self.to_folio_no is None or self.to_folio_no is '':
 				self.to_folio_no = self.autoname_folio(self.to_party)
 		else:
@@ -142,7 +142,7 @@ class ShareTransfer(Document):
 		# All False implies its completely outside
 		# A   mix   implies its partially  inside/outside
 		does_share_exist = []
-		doc = frappe.get_doc('Shareholder Party', party)
+		doc = frappe.get_doc('Shareholder', party)
 		for entry in doc.share_balance:
 			if entry.share_type != share_type or \
 				entry.from_no > query['to_no'] or \
@@ -191,9 +191,9 @@ class ShareTransfer(Document):
 		parties = ['from_party', 'to_party']
 		parties = [party for party in parties if self.get(party) is not '']
 		for party in parties:
-			doc = frappe.get_doc('Shareholder Party', self.get(party))
+			doc = frappe.get_doc('Shareholder', self.get(party))
 			if doc.company != self.company:
-				frappe.throw('The shareholder party doesn\'t belong to this company')
+				frappe.throw('The shareholder doesn\'t belong to this company')
 			if doc.folio_no is '' or doc.folio_no is None:
 				doc.folio_no = self.from_folio_no if (party == 'from_party') else self.to_folio_no;
 				doc.save()
@@ -202,7 +202,7 @@ class ShareTransfer(Document):
 					frappe.throw('The folio numbers are not matching')
 
 	def autoname_folio(self, party):
-		doc = frappe.get_doc('Shareholder Party', party)
+		doc = frappe.get_doc('Shareholder', party)
 		doc.folio_no = make_autoname('FN.#####')
 		doc.save()
 		return doc.folio_no
@@ -221,7 +221,7 @@ class ShareTransfer(Document):
 		# query = {'from_no': share_starting_no, 'to_no': share_ending_no}
 		# Shares exist for sure
 		# Iterate over all entries and modify entry if in entry
-		doc = frappe.get_doc('Shareholder Party', party)
+		doc = frappe.get_doc('Shareholder', party)
 		current_entries = doc.share_balance
 		new_entries = []
 

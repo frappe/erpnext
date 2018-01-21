@@ -15,18 +15,6 @@ frappe.ui.form.on('Shareholder', {
 			if (frm.doc.is_company){
 				hide_field(['company']);
 			} else {
-				frm.add_custom_button(__("Share Balance"), function(){
-					frappe.route_options = {
-						"shareholder": frm.doc.name,
-					};
-					frappe.set_route("query-report", "Share Balance");
-				});
-				frm.add_custom_button(__("Share Ledger"), function(){
-					frappe.route_options = {
-						"shareholder": frm.doc.name,
-					};
-					frappe.set_route("query-report", "Share Ledger");
-				});
 				// #todo on contact load if title empty fill 1st contactname in title
 				unhide_field(['contact_html']);
 				frappe.contacts.render_address_and_contact(frm);
@@ -34,6 +22,18 @@ frappe.ui.form.on('Shareholder', {
 		}
 
 		if (frm.doc.folio_no != undefined){
+			frm.add_custom_button(__("Share Balance"), function(){
+				frappe.route_options = {
+					"shareholder": frm.doc.name,
+				};
+				frappe.set_route("query-report", "Share Balance");
+			});
+			frm.add_custom_button(__("Share Ledger"), function(){
+				frappe.route_options = {
+					"shareholder": frm.doc.name,
+				};
+				frappe.set_route("query-report", "Share Ledger");
+			});
 			let fields = ['title', 'folio_no', 'company'];
 			fields.forEach((fieldname) => {
 				frm.fields_dict[fieldname].df.read_only = 1;
@@ -42,5 +42,14 @@ frappe.ui.form.on('Shareholder', {
 			$(`.btn:contains("New Contact"):visible`).hide();
 			$(`.btn:contains("Edit"):visible`).hide();
 		}
+	},
+	validate: (frm) => {
+		let contact_list = {
+			contacts: []
+		};
+		$('div[data-fieldname=contact_html] > .address-box').each( (index, ele) => {
+			contact_list.contacts.push(ele.innerText.replace(' Edit', ''));
+		});
+		frm.doc.contact_list = JSON.stringify(contact_list);
 	}
 });

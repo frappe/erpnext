@@ -11,7 +11,7 @@ frappe.ui.form.on('Share Transfer', {
 			frm.fields_dict[party].get_query = function() {
 				return {
 					filters: [
-						["Shareholder Party", "is_company", "=", 0]
+						["Shareholder", "is_company", "=", 0]
 					]
 				};
 			};

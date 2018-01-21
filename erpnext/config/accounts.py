@@ -484,12 +484,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name":"Shareholder",
-					"description": _("List of available Shareholders")
-				},
-				{
-					"type": "doctype",
-					"name":"Shareholder Party",
-					"description": _("List of entities with folio numbers"),
+					"description": _("List of available Shareholders with folio numbers")
 				},
 				{
 					"type": "doctype",

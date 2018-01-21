@@ -60,7 +60,7 @@ def execute(filters=None):
 
 def get_columns(filters):
 	columns = [
-		_("Shareholder") + ":Link/Shareholder Party:150",
+		_("Shareholder") + ":Link/Shareholder:150",
 		_("Share Type") + "::90",
 		_("No of Shares") + "::90",
 		_("Average Rate") + ":Currency:90",

@@ -1,6 +1,6 @@
 [
 	{
-		"doctype": "Shareholder Party",
+		"doctype": "Shareholder",
 		"title": "Hulk",
 		"company": "Stark Tower",
 		"shareholder_list": {
@@ -8,7 +8,7 @@
 		}
 	},
 	{
-		"doctype": "Shareholder Party",
+		"doctype": "Shareholder",
 		"title": "Iron Man",
 		"company": "Stark Tower",
 		"shareholder_list": {
@@ -16,7 +16,7 @@
 		}
 	},
 	{
-		"doctype": "Shareholder Party",
+		"doctype": "Shareholder",
 		"title": "Thor",
 		"company": "Stark Tower",
 		"shareholder_list": {

@@ -13,10 +13,10 @@ frappe.query_reports["Share Ledger"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname":"shareholder_party",
-			"label": __("Shareholder Party"),
+			"fieldname":"shareholder",
+			"label": __("Shareholder"),
 			"fieldtype": "Link",
-			"options": "Shareholder Party"
+			"options": "Shareholder"
 		}
 	]
 };

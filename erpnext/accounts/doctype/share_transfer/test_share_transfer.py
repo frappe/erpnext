@@ -7,7 +7,7 @@ import frappe
 import unittest
 from frappe import ValidationError
 
-test_dependencies = ["Shareholder", "Share Type", "Shareholder Party"]
+test_dependencies = ["Shareholder", "Share Type", "Shareholder"]
 
 class TestShareTransfer(unittest.TestCase):
 	def test_invalid_share_purchase(self):
