@@ -126,7 +126,11 @@ class StockEntry(StockController):
 		"""perform various (sometimes conditional) validations on warehouse"""
 
 		source_mandatory = ["Material Issue", "Material Transfer", "Subcontract", "Material Transfer for Manufacture"]
-		target_mandatory = ["Material Receipt", "Material Transfer", "Subcontract", "Material Transfer for Manufacture"]
+		#Allow creation of draft subcontract entries without target warehouse
+		if self.purpose == "Subcontract" and not frappe.db.exists("Stock Entry",{"name": self.name}):
+			target_mandatory = ["Material Receipt", "Material Transfer", "Material Transfer for Manufacture"]
+		else:
+			target_mandatory = ["Material Receipt", "Material Transfer", "Subcontract", "Material Transfer for Manufacture"]
 
 		validate_for_manufacture_repack = any([d.bom_no for d in self.get("items")])
 
@@ -672,7 +676,7 @@ class StockEntry(StockController):
 		# item dict = { item_code: {qty, description, stock_uom} }
 		item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=qty,
 			fetch_exploded = self.use_multi_level_bom)
-
+		print item_dict
 		for item in item_dict.values():
 			# if source warehouse presents in BOM set from_warehouse as bom source_warehouse
 			item.from_warehouse = self.from_warehouse or item.source_warehouse or item.default_warehouse
