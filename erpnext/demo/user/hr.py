@@ -61,7 +61,7 @@ def work():
 		rand = random.random()
 
 		if rand < 0.4:
-			expense_claim.approval_status = "Approved"
+			expense_claim.workflow_state = "Approved"
 			update_sanctioned_amount(expense_claim)
 			expense_claim.submit()
 
@@ -75,7 +75,7 @@ def work():
 				je.submit()
 
 		elif rand < 0.2:
-			expense_claim.approval_status = "Rejected"
+			expense_claim.workflow_state = "Rejected"
 			expense_claim.submit()
 
 def get_expenses():
