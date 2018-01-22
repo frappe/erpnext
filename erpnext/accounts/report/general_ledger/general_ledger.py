@@ -9,6 +9,19 @@ from frappe.utils import getdate, cstr, flt, cint
 from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
 
+EXCHANGE_RATE = frappe.get_list(
+			'Currency Exchange', fields=['date', 'from_currency', 'to_currency', 'exchange_rate'])
+
+
+def get_appropriate_company(filters):
+	if filters.get('company'):
+		company = filters['company']
+	else:
+		company = get_default_company()
+
+	return company
+
+
 def execute(filters=None):
 	account_details = {}
 	for acc in frappe.db.sql("""select name, is_group from tabAccount""", as_dict=1):
@@ -130,10 +143,7 @@ def get_currency(filters):
 	:return: str - Currency
 	"""
 	# Get the company
-	if filters.get('company'):
-		company = filters['company']
-	else:
-		company = get_default_company()
+	company = get_appropriate_company(filters)
 
 	# Get the currency
 	company_currency = get_company_currency(company)
@@ -145,9 +155,19 @@ def get_currency(filters):
 
 
 def convert(value, from_, to, date):
-	rate = get_exchange_rate(from_, to, date)
-	converted_value = value / rate
+	rate = get_rate_as_at(date, from_, to)
+	if not rate:
+		rate = get_exchange_rate(from_, to, date)
+	converted_value = value / (rate or 1)
 	return converted_value
+
+
+def get_rate_as_at(date, from_curr, to_currency):
+	for rate in EXCHANGE_RATE:
+		if rate.get('date') == getdate(date) \
+				and rate.get('from_currency') == from_curr	\
+				and rate.get('to_currency') == to_currency:
+			return rate.get('exchange_rate')
 
 
 def convert_to_presentation_currency(gl_entries, currency_info):
@@ -164,10 +184,8 @@ def convert_to_presentation_currency(gl_entries, currency_info):
 			converted_value = convert(value, presentation_currency, company_currency, date)
 
 			if entry.get('debit'):
-				print entry['debit_in_account_currency']
 				entry['debit'] = converted_value
 			else:
-				print entry['credit']
 				entry['credit'] = converted_value
 
 		elif currency_info['company_currency'] != currency_info['presentation_currency']:
