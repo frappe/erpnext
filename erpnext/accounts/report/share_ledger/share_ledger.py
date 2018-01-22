@@ -19,16 +19,16 @@ def execute(filters=None):
 
 	data = []
 
-	if not filters.get("shareholder_party"):
+	if not filters.get("shareholder"):
 		pass
 	else:
 		transfers = get_all_transfers(date, filters.get("shareholder"))
 		for transfer in transfers:
 			if transfer.transfer_type == 'Transfer':
-				if transfer.from_party == filters.get("shareholder"):
-					transfer.transfer_type += ' from'
+				if transfer.from_shareholder == filters.get("shareholder"):
+					transfer.transfer_type += ' to {}'.format(transfer.to_shareholder)
 				else:
-					transfer.transfer_type += ' to'
+					transfer.transfer_type += ' to {}'.format(transfer.from_shareholder)
 			row = [filters.get("shareholder"), transfer.date, transfer.transfer_type,
 				transfer.share_type, transfer.no_of_shares, transfer.rate, transfer.amount,
 				transfer.company, transfer.name]
@@ -51,12 +51,12 @@ def get_columns(filters):
 	]
 	return columns
 
-def get_all_transfers(date, party):
+def get_all_transfers(date, shareholder):
 	condition = ' '
 	# if company:
 	# 	condition = 'AND company = %(company)s '
 	return frappe.db.sql("""SELECT * FROM `tabShare Transfer`
-		WHERE (DATE(date) <= %(date)s AND from_party = %(party)s {condition})
-		OR (DATE(date) <= %(date)s AND to_party = %(party)s {condition})
+		WHERE (DATE(date) <= %(date)s AND from_shareholder = %(shareholder)s {condition})
+		OR (DATE(date) <= %(date)s AND to_shareholder = %(shareholder)s {condition})
 		ORDER BY date""".format(condition=condition),
-		{'date': date, 'party': party}, as_dict=1)
+		{'date': date, 'shareholder': shareholder}, as_dict=1)

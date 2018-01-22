@@ -15,7 +15,6 @@ frappe.ui.form.on('Shareholder', {
 			if (frm.doc.is_company){
 				hide_field(['company']);
 			} else {
-				// #todo on contact load if title empty fill 1st contactname in title
 				unhide_field(['contact_html']);
 				frappe.contacts.render_address_and_contact(frm);
 			}

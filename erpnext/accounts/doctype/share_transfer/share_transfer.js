@@ -6,9 +6,9 @@ frappe.provide("erpnext.share_transfer");
 frappe.ui.form.on('Share Transfer', {
 	refresh: function(frm) {
 		// Don't show Parties which are a Company
-		let parties = ['from_party', 'to_party'];
-		parties.forEach((party) => {
-			frm.fields_dict[party].get_query = function() {
+		let shareholders = ['from_shareholder', 'to_shareholder'];
+		shareholders.forEach((shareholder) => {
+			frm.fields_dict[shareholder].get_query = function() {
 				return {
 					filters: [
 						["Shareholder", "is_company", "=", 0]

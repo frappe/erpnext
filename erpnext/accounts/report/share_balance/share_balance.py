@@ -17,44 +17,30 @@ def execute(filters=None):
 
 	data = []
 
-	if not filters.get("shareholder_party"):
+	if not filters.get("shareholder"):
 		pass
 	else:
-		transfers = get_all_transfers(date, filters.get("shareholder_party"))
-		share_type, no_of_shares, rate, amount, company = 1, 2, 3, 4, 5
-		for transfer in transfers:
+		share_type, no_of_shares, rate, amount = 1, 2, 3, 4
+
+		all_shares = get_all_shares(filters.get("shareholder"))
+		for share_entry in all_shares:
 			row = False
 			for datum in data:
-				if datum[company] == transfer.company and datum[share_type] == transfer.share_type:
-					if transfer.to_party == filters.get("shareholder_party"):
-						datum[no_of_shares] += transfer.no_of_shares
-						datum[amount] += transfer.amount
-						if datum[no_of_shares] == 0:
-							datum[rate] = 0
-						else:
-							datum[rate] = datum[amount] / datum[no_of_shares]
+				if datum[share_type] == share_entry.share_type:
+					datum[no_of_shares] += share_entry.no_of_shares
+					datum[amount] += share_entry.amount
+					if datum[no_of_shares] == 0:
+						datum[rate] = 0
 					else:
-						datum[no_of_shares] -= transfer.no_of_shares
-						datum[amount] -= transfer.amount
-						if datum[no_of_shares] == 0:
-							datum[rate] = 0
-						else:
-							datum[rate] = datum[amount] / datum[no_of_shares]
+						datum[rate] = datum[amount] / datum[no_of_shares]
 					row = True
 					break
 			# new entry
 			if not row:
-				if transfer.to_party == filters.get("shareholder_party"):
-					row = [filters.get("shareholder_party"),
-						transfer.share_type, transfer.no_of_shares, transfer.rate, transfer.amount,
-						transfer.company]
-				else:
-					row = [filters.get("shareholder_party"),
-						transfer.share_type, -transfer.no_of_shares, -transfer.rate, -transfer.amount,
-						transfer.company]
+				row = [filters.get("shareholder"),
+					share_entry.share_type, share_entry.no_of_shares, share_entry.rate, share_entry.amount]
+
 				data.append(row)
-				
-		data = [datum for datum in data if datum[no_of_shares] > 0]
 
 	return columns, data
 
@@ -64,17 +50,9 @@ def get_columns(filters):
 		_("Share Type") + "::90",
 		_("No of Shares") + "::90",
 		_("Average Rate") + ":Currency:90",
-		_("Amount") + ":Currency:90",
-		_("Company") + "::150"
+		_("Amount") + ":Currency:90"
 	]
 	return columns
 
-def get_all_transfers(date, party):
-	condition = ' '
-	# if company:
-	# 	condition = 'AND company = %(company)s '
-	return frappe.db.sql("""SELECT * FROM `tabShare Transfer`
-		WHERE (DATE(date) <= %(date)s AND from_party = %(party)s {condition})
-		OR (DATE(date) <= %(date)s AND to_party = %(party)s {condition})
-		ORDER BY date""".format(condition=condition),
-		{'date': date, 'party': party}, as_dict=1)
+def get_all_shares(shareholder):
+	return frappe.get_doc('Shareholder', shareholder).share_balance
