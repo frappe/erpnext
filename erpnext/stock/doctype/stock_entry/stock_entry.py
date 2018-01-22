@@ -676,7 +676,7 @@ class StockEntry(StockController):
 		# item dict = { item_code: {qty, description, stock_uom} }
 		item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=qty,
 			fetch_exploded = self.use_multi_level_bom)
-		print item_dict
+
 		for item in item_dict.values():
 			# if source warehouse presents in BOM set from_warehouse as bom source_warehouse
 			item.from_warehouse = self.from_warehouse or item.source_warehouse or item.default_warehouse
