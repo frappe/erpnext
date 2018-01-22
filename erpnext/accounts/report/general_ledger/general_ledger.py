@@ -129,21 +129,18 @@ def get_currency(filters):
 
 	:return: str - Currency
 	"""
-	currency_map = {}
-	company = None
-	presentation_currency = None
-	company_currency = None
-
+	# Get the company
 	if filters.get('company'):
 		company = filters['company']
 	else:
 		company = get_default_company()
 
+	# Get the currency
 	company_currency = get_company_currency(company)
 	presentation_currency = filters['presentation_currency'] if filters.get('presentation_currency') else company_currency
-	currency_map = dict(
-		company=company, company_currency=company_currency, presentation_currency=presentation_currency
-	)
+
+	currency_map = dict(company=company, company_currency=company_currency, presentation_currency=presentation_currency)
+
 	return currency_map
 
 
@@ -185,10 +182,10 @@ def convert_to_presentation_currency(gl_entries, currency_info):
 
 
 def get_gl_entries(filters):
-	currency = get_currency(filters)
+	currency_map = get_currency(filters)
 	select_fields = """, sum(debit_in_account_currency) as debit_in_account_currency,
 		sum(credit_in_account_currency) as credit_in_account_currency""" \
-		if filters.get("show_in_account_currency") else ""
+
 
 	group_by_condition = "group by voucher_type, voucher_no, account, cost_center" \
 		if filters.get("group_by_voucher") else "group by name"
@@ -198,7 +195,7 @@ def get_gl_entries(filters):
 			posting_date, account, party_type, party,
 			sum(debit) as debit, sum(credit) as credit,
 			voucher_type, voucher_no, cost_center, project,
-			against_voucher_type, against_voucher, account_currency
+			against_voucher_type, against_voucher, account_currency,
 			remarks, against, is_opening {select_fields}
 		from `tabGL Entry`
 		where company=%(company)s {conditions}
@@ -207,9 +204,10 @@ def get_gl_entries(filters):
 		.format(select_fields=select_fields, conditions=get_conditions(filters),
 			group_by_condition=group_by_condition), filters, as_dict=1)
 
-	print('GL entries:', gl_entries)
-
-	return gl_entries
+	if filters.get('presentation_currency'):
+		return convert_to_presentation_currency(gl_entries, currency_map)
+	else:
+		return gl_entries
 
 
 def get_conditions(filters):
