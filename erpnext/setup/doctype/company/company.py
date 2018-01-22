@@ -162,8 +162,14 @@ class Company(Document):
 			self._set_default_account("default_expense_account", "Cost of Goods Sold")
 
 		if not self.default_income_account:
-			self.db_set("default_income_account", frappe.db.get_value("Account",
-				{"account_name": _("Sales"), "company": self.name}))
+			income_account = frappe.db.get_value("Account",
+				{"account_name": _("Sales"), "company": self.name, "is_group": 0})
+
+			if not income_account:
+				income_account = frappe.db.get_value("Account",
+					{"account_name": _("Sales Account"), "company": self.name})
+
+			self.db_set("default_income_account", income_account)
 
 		if not self.default_payable_account:
 			self.db_set("default_payable_account", self.default_payable_account)
