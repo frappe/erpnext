@@ -36,8 +36,8 @@ def get_sales_payment_data(filters, columns):
 	return data
 
 def get_conditions(filters):
-	conditions = ""
-	if filters.get("from_date"): conditions += "a.posting_date >= %(from_date)s"
+	conditions = "1=1"
+	if filters.get("from_date"): conditions += " and a.posting_date >= %(from_date)s"
 	if filters.get("to_date"): conditions += " and a.posting_date <= %(to_date)s"
 	if filters.get("company"): conditions += " and a.company=%(company)s"
 	if filters.get("customer"): conditions += " and a.customer = %(customer)s"
