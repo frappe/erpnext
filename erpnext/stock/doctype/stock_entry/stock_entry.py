@@ -64,6 +64,13 @@ class StockEntry(StockController):
 		self.calculate_rate_and_amount(update_finished_item_rate=False)
 
 	def on_submit(self):
+		for d in self.items:
+			if self.purpose == "Subcontract" and not d.t_warehouse:
+				if self.to_warehouse:
+					d.t_warehouse = self.to_warehouse
+				else:
+					frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
+
 		self.update_stock_ledger()
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
@@ -126,11 +133,7 @@ class StockEntry(StockController):
 		"""perform various (sometimes conditional) validations on warehouse"""
 
 		source_mandatory = ["Material Issue", "Material Transfer", "Subcontract", "Material Transfer for Manufacture"]
-		#Allow creation of draft subcontract entries without target warehouse
-		if self.purpose == "Subcontract" and not frappe.db.exists("Stock Entry",{"name": self.name}):
-			target_mandatory = ["Material Receipt", "Material Transfer", "Material Transfer for Manufacture"]
-		else:
-			target_mandatory = ["Material Receipt", "Material Transfer", "Subcontract", "Material Transfer for Manufacture"]
+		target_mandatory = ["Material Receipt", "Material Transfer", "Subcontract", "Material Transfer for Manufacture"]
 
 		validate_for_manufacture_repack = any([d.bom_no for d in self.get("items")])
 
@@ -161,7 +164,9 @@ class StockEntry(StockController):
 				if self.to_warehouse:
 					d.t_warehouse = self.to_warehouse
 				else:
-					frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
+					#move validation for sub contract to submit
+					if self.purpose != "Subcontract":
+						frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
 
 			if self.purpose in ["Manufacture", "Repack"]:
 				if validate_for_manufacture_repack:
