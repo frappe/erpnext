@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from erpnext import get_company_currency, get_default_company
 from erpnext.setup.utils import get_exchange_rate
-from frappe.utils import getdate, cstr, flt
+from frappe.utils import getdate, cstr, flt, cint
 from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
 
@@ -151,6 +151,37 @@ def convert(value, from_, to, date):
 	rate = get_exchange_rate(from_, to, date)
 	converted_value = value / rate
 	return converted_value
+
+
+def convert_to_presentation_currency(gl_entries, currency_info):
+	converted_gl_list = []
+	for entry in gl_entries:
+		if currency_info['company_currency'] != currency_info['presentation_currency'] and \
+				entry['account_currency'] != currency_info['presentation_currency']:
+
+			value = cint(entry['debit'] or cint(entry['credit']))
+			date = entry['posting_date']
+			presentation_currency = currency_info['presentation_currency']
+			company_currency = currency_info['company_currency']
+
+			converted_value = convert(value, presentation_currency, company_currency, date)
+
+			if entry.get('debit'):
+				print entry['debit_in_account_currency']
+				entry['debit'] = converted_value
+			else:
+				print entry['credit']
+				entry['credit'] = converted_value
+
+		elif currency_info['company_currency'] != currency_info['presentation_currency']:
+			if entry.get('debit'):
+				entry['debit'] = entry['debit_in_account_currency']
+			else:
+				entry['credit'] = entry['credit_in_account_currency']
+
+		converted_gl_list.append(entry)
+
+	return converted_gl_list
 
 
 def get_gl_entries(filters):
