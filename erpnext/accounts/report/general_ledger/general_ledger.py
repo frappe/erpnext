@@ -238,7 +238,7 @@ def get_result_as_list(data, filters):
 	inv_details = get_supplier_invoice_details()
 
 	for d in data:
-		if not d.posting_date:
+		if not d.get('posting_date'):
 			balance, balance_in_account_currency = 0, 0
 
 		balance, label = get_balance(d, balance, 'debit', 'credit')
@@ -254,7 +254,7 @@ def get_result_as_list(data, filters):
 			d['balance_in_account_currency'] = d.get('balance')
 
 		d['account_currency'] = filters.account_currency
-		d['bill_no'] = inv_details.get(d.against_voucher, '')
+		d['bill_no'] = inv_details.get(d.get('against_voucher'), '')
 
 	return data
 
