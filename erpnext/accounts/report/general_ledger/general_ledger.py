@@ -128,16 +128,22 @@ def get_currency(filters):
 
 	:return: str - Currency
 	"""
-	if filters.get("presentation_currency"):
-		currency = filters["presentation_currency"]
-	else:
-		if filters.get("company"):
-			currency = get_company_currency(filters["company"])
-		else:
-			company = get_default_company()
-			currency = get_company_currency(company)
+	currency_map = {}
+	company = None
+	presentation_currency = None
+	company_currency = None
 
-	return currency
+	if filters.get('company'):
+		company = filters['company']
+	else:
+		company = get_default_company()
+
+	company_currency = get_company_currency(company)
+	presentation_currency = filters['presentation_currency'] if filters.get('presentation_currency') else company_currency
+	currency_map = dict(
+		company=company, company_currency=company_currency, presentation_currency=presentation_currency
+	)
+	return currency_map
 
 
 def get_gl_entries(filters):
