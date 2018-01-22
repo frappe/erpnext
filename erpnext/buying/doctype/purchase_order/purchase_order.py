@@ -38,7 +38,7 @@ class PurchaseOrder(BuyingController):
 		super(PurchaseOrder, self).onload()
 
 		self.set_onload('disable_fetch_last_purchase_rate',
-		cint(frappe.db.get_single_value("Buying Settings", "disable_fetch_last_purchase_rate")))
+			cint(frappe.db.get_single_value("Buying Settings", "disable_fetch_last_purchase_rate")))
 
 	def validate(self):
 		super(PurchaseOrder, self).validate()
