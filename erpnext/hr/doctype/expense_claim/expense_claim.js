@@ -38,13 +38,13 @@ cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.add_fetch('employee','employee_name','employee_name');
 
 cur_frm.cscript.onload = function(doc) {
-	if(!doc.approval_status)
-		cur_frm.set_value("approval_status", "Draft");
+	if(!doc.workflow_state)
+		cur_frm.set_value("workflow_state", "Draft");
 
 	if (doc.__islocal) {
 		cur_frm.set_value("posting_date", frappe.datetime.get_today());
 		if(doc.amended_from)
-			cur_frm.set_value("approval_status", "Draft");
+			cur_frm.set_value("workflow_state", "Draft");
 		cur_frm.cscript.clear_sanctioned(doc);
 	}
 
@@ -75,13 +75,13 @@ cur_frm.cscript.refresh = function(doc) {
 	cur_frm.cscript.set_help(doc);
 
 	if(!doc.__islocal) {
-		cur_frm.toggle_enable("exp_approver", doc.approval_status=="Draft");
-		cur_frm.toggle_enable("approval_status", (doc.exp_approver==frappe.session.user && doc.docstatus==0));
+		cur_frm.toggle_enable("exp_approver", doc.workflow_state=="Draft");
+		// cur_frm.toggle_enable("workflow_state", (doc.exp_approver==frappe.session.user && doc.docstatus==0));
 
-		if (doc.docstatus==0 && doc.exp_approver==frappe.session.user && doc.approval_status=="Approved")
+		if (doc.docstatus==0 && doc.exp_approver==frappe.session.user && doc.workflow_state=="Approved")
 			cur_frm.savesubmit();
 
-		if (doc.docstatus===1 && doc.approval_status=="Approved") {
+		if (doc.docstatus===1 && doc.workflow_state=="Approved") {
 			/* eslint-disable */
 			// no idea how `me` works here
 			var entry_doctype, entry_reference_doctype, entry_reference_name;
@@ -115,11 +115,11 @@ cur_frm.cscript.set_help = function(doc) {
 	if(doc.__islocal && !in_list(frappe.user_roles, "HR User")) {
 		cur_frm.set_intro(__("Fill the form and save it"));
 	} else {
-		if(doc.docstatus==0 && doc.approval_status=="Draft") {
+		if(doc.docstatus==0 && doc.workflow_state=="Draft") {
 			if(frappe.session.user==doc.exp_approver) {
-				cur_frm.set_intro(__("You are the Expense Approver for this record. Please Update the 'Status' and Save"));
+				cur_frm.set_intro(__("You are the Expense Approver for this record. Please Approve and Submit"));
 			} else {
-				cur_frm.set_intro(__("Expense Claim is pending approval. Only the Expense Approver can update status."));
+				cur_frm.set_intro(__("Expense Claim is pending approval. Only the Expense Approver can Approve / Reject."));
 			}
 		}
 	}
@@ -183,7 +183,7 @@ frappe.ui.form.on("Expense Claim", {
 	refresh: function(frm) {
 		frm.trigger("toggle_fields");
 
-		if(frm.doc.docstatus == 1 && frm.doc.approval_status == 'Approved') {
+		if(frm.doc.docstatus == 1 && frm.doc.workflow_state == 'Approved') {
 			frm.add_custom_button(__('Accounting Ledger'), function() {
 				frappe.route_options = {
 					voucher_no: frm.doc.name,
@@ -194,7 +194,7 @@ frappe.ui.form.on("Expense Claim", {
 			}, __("View"));
 		}
 
-		if (frm.doc.docstatus===1 && frm.doc.approval_status=="Approved"
+		if (frm.doc.docstatus===1 && frm.doc.workflow_state=="Approved"
 				&& (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total_sanctioned_amount))
 				&& frappe.model.can_create("Payment Entry")) {
 			frm.add_custom_button(__('Payment'),
