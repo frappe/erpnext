@@ -34,6 +34,12 @@ class PurchaseOrder(BuyingController):
 			'overflow_type': 'order'
 		}]
 
+	def onload(self):
+		super(PurchaseOrder, self).onload()
+
+		self.set_onload('disable_fetch_last_purchase_rate',
+		cint(frappe.db.get_single_value("Buying Settings", "disable_fetch_last_purchase_rate")))
+
 	def validate(self):
 		super(PurchaseOrder, self).validate()
 
@@ -393,6 +399,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 @frappe.whitelist()
 def make_stock_entry(purchase_order, item_code):
 	purchase_order = frappe.get_doc("Purchase Order", purchase_order)
+
 	stock_entry = frappe.new_doc("Stock Entry")
 	stock_entry.purpose = "Subcontract"
 	stock_entry.purchase_order = purchase_order.name
@@ -437,6 +444,7 @@ def make_rm_stock_entry(purchase_order, rm_items):
 			stock_entry.supplier_address = purchase_order.supplier_address
 			stock_entry.address_display = purchase_order.address_display
 			stock_entry.company = purchase_order.company
+			stock_entry.docstatus = 0
 			stock_entry.from_bom = 1
 			po_item = [d for d in purchase_order.items if d.item_code == item_code][0]
 			stock_entry.fg_completed_qty = po_item.qty
