@@ -48,4 +48,4 @@ def execute():
 	}).insert(ignore_permissions=True)
 
 	frappe.db.sql("""update `tabExpense Claim` set workflow_state = approval_status""")
-	# frappe.db.sql("""alter table `tabExpense Claim` drop column approval_status""")
+	frappe.db.sql("""alter table `tabExpense Claim` drop column approval_status""")
