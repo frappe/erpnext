@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from erpnext import get_company_currency, get_default_company
+from erpnext.setup.utils import get_exchange_rate
 from frappe.utils import getdate, cstr, flt
 from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
@@ -144,6 +145,12 @@ def get_currency(filters):
 		company=company, company_currency=company_currency, presentation_currency=presentation_currency
 	)
 	return currency_map
+
+
+def convert(value, from_, to, date):
+	rate = get_exchange_rate(from_, to, date)
+	converted_value = value / rate
+	return converted_value
 
 
 def get_gl_entries(filters):
