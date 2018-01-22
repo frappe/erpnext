@@ -24,31 +24,34 @@ def execute(filters=None):
 	if args["assessment_group"] == "All Assessment Groups":
 		frappe.throw(_("Please select the assessment group other than 'All Assessment Groups'"))
 
-	student_dict, result_dict, assessment_criteria_dict = get_formatted_result(args)
+	returned_values = get_formatted_result(args, get_assessment_criteria=True)
+	student_dict = returned_values["student_details"]
+	result_dict = returned_values["assessment_result"]
+	assessment_criteria_dict = returned_values["assessment_criteria"]
 
 	for student in result_dict:
-		tmp_dict = {}
-		tmp_dict["student"] = student
-		tmp_dict["student_name"] = student_dict[student]
+		student_row = {}
+		student_row["student"] = student
+		student_row["student_name"] = student_dict[student]
 		for criteria in assessment_criteria_dict:
 			scrub_criteria = frappe.scrub(criteria)
 			if criteria in result_dict[student][args.course][args.assessment_group]:
-				tmp_dict[scrub_criteria] = result_dict[student][args.course][args.assessment_group][criteria]["grade"]
-				tmp_dict[scrub_criteria + "_score"] = result_dict[student][args.course][args.assessment_group][criteria]["score"]
+				student_row[scrub_criteria] = result_dict[student][args.course][args.assessment_group][criteria]["grade"]
+				student_row[scrub_criteria + "_score"] = result_dict[student][args.course][args.assessment_group][criteria]["score"]
 
 				# create the list of possible grades
-				if tmp_dict[scrub_criteria] not in grades:
-					grades.append(tmp_dict[scrub_criteria])
+				if student_row[scrub_criteria] not in grades:
+					grades.append(student_row[scrub_criteria])
 				
 				# create the dict of for gradewise analysis
-				if tmp_dict[scrub_criteria] not in grade_wise_analysis[criteria]:
-					grade_wise_analysis[criteria][tmp_dict[scrub_criteria]] = 1
+				if student_row[scrub_criteria] not in grade_wise_analysis[criteria]:
+					grade_wise_analysis[criteria][student_row[scrub_criteria]] = 1
 				else:
-					grade_wise_analysis[criteria][tmp_dict[scrub_criteria]] += 1
+					grade_wise_analysis[criteria][student_row[scrub_criteria]] += 1
 			else:
-				tmp_dict[frappe.scrub(criteria)] = ""
-				tmp_dict[frappe.scrub(criteria)+ "_score"] = ""
-		data.append(tmp_dict)
+				student_row[frappe.scrub(criteria)] = ""
+				student_row[frappe.scrub(criteria)+ "_score"] = ""
+		data.append(student_row)
 
 	assessment_criteria_list = [d for d in assessment_criteria_dict]
 	columns = get_column(assessment_criteria_dict)
@@ -57,7 +60,7 @@ def execute(filters=None):
 	return columns, data, None, chart
 
 
-def get_formatted_result(args):
+def get_formatted_result(args, get_assessment_criteria=False, get_course=False):
 	cond, cond1, cond2, cond3, cond4 = " ", " ", " ", " ", " "
 	args_list = [args.academic_year]
 
@@ -85,9 +88,9 @@ def get_formatted_result(args):
 		cond3 = " and ar.assessment_group=%s"
 	args_list += assessment_groups
 
-	if args.student:
-		cond4 = " and ar.student=%s"
-		args_list.append(args.student)
+	if args.students:
+		cond4 = " and ar.student in (%s)"%(', '.join(['%s']*len(args.students)))
+		args_list += args.students
 
 	assessment_result = frappe.db.sql('''
 		SELECT
@@ -109,6 +112,7 @@ def get_formatted_result(args):
 	student_details = {}
 	formatted_assessment_result = defaultdict(dict)
 	assessment_criteria_dict = OrderedDict()
+	course_dict = OrderedDict()
 	total_maximum_score = None
 	if not (len(assessment_groups) == 1 and assessment_groups[0] == args.assessment_group):
 		create_total_dict = True
@@ -164,14 +168,23 @@ def get_formatted_result(args):
 
 			add_total_score(result, args.assessment_group)
 
-		assessment_criteria_dict[result.assessment_criteria] = formatted_assessment_result[result.student][result.course]\
-			[args.assessment_group][result.assessment_criteria]["maximum_score"]
-		total_maximum_score = formatted_assessment_result[result.student][result.course][args.assessment_group]["Total Score"]["maximum_score"]
+		total_maximum_score = formatted_assessment_result[result.student][result.course][args.assessment_group]\
+			["Total Score"]["maximum_score"]
+		if get_assessment_criteria:
+			assessment_criteria_dict[result.assessment_criteria] = formatted_assessment_result[result.student][result.course]\
+				[args.assessment_group][result.assessment_criteria]["maximum_score"]
+		if get_course:
+			course_dict[result.course] = total_maximum_score
 
-	if total_maximum_score:
+	if get_assessment_criteria and total_maximum_score:
 		assessment_criteria_dict["Total Score"] = total_maximum_score
 
-	return student_details, formatted_assessment_result, assessment_criteria_dict
+	return {
+		"student_details": student_details,
+		"assessment_result": formatted_assessment_result,
+		"assessment_criteria": assessment_criteria_dict,
+		"course_dict": course_dict
+	}
 
 
 def get_column(assessment_criteria):
@@ -205,13 +218,13 @@ def get_column(assessment_criteria):
 	return columns
 
 
-def get_chart_data(grades, assessment_criteria_list, kounter):
+def get_chart_data(grades, criteria_list, kounter):
 	grades = sorted(grades)
 	datasets = []
 
 	for grade in grades:
 		tmp = frappe._dict({"values":[], "title": grade})
-		for criteria in assessment_criteria_list:
+		for criteria in criteria_list:
 			if grade in kounter[criteria]:
 				tmp["values"].append(kounter[criteria][grade])
 			else:
@@ -220,7 +233,7 @@ def get_chart_data(grades, assessment_criteria_list, kounter):
 
 	return {
 		"data": {
-			"labels": assessment_criteria_list,
+			"labels": criteria_list,
 			"datasets": datasets
 		},
 		"type": 'bar',
