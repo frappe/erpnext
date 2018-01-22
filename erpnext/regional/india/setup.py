@@ -112,7 +112,10 @@ def make_custom_fields():
 				options='supplier_address.gstin', print_hide=1),
 			dict(fieldname='company_gstin', label='Company GSTIN',
 				fieldtype='Data', insert_after='shipping_address',
-				options='shipping_address.gstin', print_hide=1)
+				options='shipping_address.gstin', print_hide=1),
+			dict(fieldname='place_of_supply', label='Place of Supply',
+				fieldtype='Data', insert_after='shipping_address',
+				print_hide=1, read_only=0),
 		]
 
 	sales_invoice_gst_fields = [
