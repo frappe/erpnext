@@ -206,12 +206,6 @@ class Gstr1Report(object):
 				"label": "Taxable Value",
 				"fieldtype": "Currency",
 				"width": 100
-			},
-			{
-				"fieldname": "cess_amount",
-				"label": "Cess Amount",
-				"fieldtype": "Currency",
-				"width": 100
 			}
 		]
 		self.other_columns = []
@@ -265,6 +259,15 @@ class Gstr1Report(object):
 					"fieldtype": "Data"
 				}
 			]
+			self.other_columns = [
+					{
+						"fieldname": "cess_amount",
+						"label": "Cess Amount",
+						"fieldtype": "Currency",
+						"width": 100
+					}
+				]
+
 		elif self.filters.get("type_of_business") ==  "B2C Large":
 			self.invoice_columns = [
 				{
@@ -299,6 +302,14 @@ class Gstr1Report(object):
 					"width": 130
 				}
 			]
+			self.other_columns = [
+					{
+						"fieldname": "cess_amount",
+						"label": "Cess Amount",
+						"fieldtype": "Currency",
+						"width": 100
+					}
+				]
 		elif self.filters.get("type_of_business") ==  "CDNR":
 			self.invoice_columns = [
 				{
@@ -359,6 +370,12 @@ class Gstr1Report(object):
 			]
 			self.other_columns = [
 				{
+						"fieldname": "cess_amount",
+						"label": "Cess Amount",
+						"fieldtype": "Currency",
+						"width": 100
+				},
+				{
 					"fieldname": "pre_gst",
 					"label": "PRE GST",
 					"fieldtype": "Data",
@@ -387,6 +404,12 @@ class Gstr1Report(object):
 				}
 			]
 			self.other_columns = [
+				{
+						"fieldname": "cess_amount",
+						"label": "Cess Amount",
+						"fieldtype": "Currency",
+						"width": 100
+				},
 				{
 					"fieldname": "type",
 					"label": "Type",
@@ -437,6 +460,5 @@ class Gstr1Report(object):
 					"fieldtype": "Date",
 					"width": 120
 				}
-
 			]
 		self.columns = self.invoice_columns + self.tax_columns + self.other_columns
