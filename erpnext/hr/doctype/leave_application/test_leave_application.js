@@ -20,13 +20,15 @@ QUnit.test("Test: Leave application [HR]", function (assert) {
 				{follow_via_email: 0}
 			]);
 		},
-		() => frappe.timeout(1),
 
+		() => frappe.timeout(1),
 		() => frappe.click_button('Actions'),
-		() => frappe.timeout(0.5),
-		() => frappe.click_button('Approve'), // approve the application [as administrator]
+		() => frappe.click_link('Approve'), // approve the application [as administrator]
+		() => frappe.click_button('Yes'),
+		() => frappe.timeout(1),
 		() => assert.ok(cur_frm.doc.docstatus,
 			"leave application submitted after approval"),
+
 		// check auto filled posting date [today]
 
 		() => assert.equal(today_date, cur_frm.doc.posting_date,
