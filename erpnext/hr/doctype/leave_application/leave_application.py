@@ -24,6 +24,7 @@ class LeaveApplication(Document):
 		return _("{0}: From {0} of type {1}").format(self.workflow_state, self.employee_name, self.leave_type)
 
 	def validate(self):
+		if self.get("__islocal"): self.workflow_state = 'Open'
 		if not getattr(self, "__islocal", None) and frappe.db.exists(self.doctype, self.name):
 			self.previous_doc = frappe.get_value(self.doctype, self.name, "leave_approver", as_dict=True)
 		else:
@@ -180,9 +181,9 @@ class LeaveApplication(Document):
 				self.throw_overlap_error(d)
 
 	def throw_overlap_error(self, d):
-		msg = _("Employee {0} has already applied for {1} between {2} and {3}").format(self.employee,
+		msg = _("Employee {0} has already applied for {1} between {2} and {3} : ").format(self.employee,
 			d['leave_type'], formatdate(d['from_date']), formatdate(d['to_date'])) \
-			+ """ <br><b><a href="#Form/Leave Application/{0}">{0}</a></b>""".format(d["name"])
+			+ """ <b><a href="#Form/Leave Application/{0}">{0}</a></b>""".format(d["name"])
 		frappe.throw(msg, OverlapError)
 
 	def get_total_leaves_on_half_day(self):

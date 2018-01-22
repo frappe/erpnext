@@ -48,4 +48,3 @@ def execute():
 	}).insert(ignore_permissions=True)
 
 	frappe.db.sql("""update `tabLeave Application` set workflow_state = status""")
-	# frappe.db.sql("""alter table `tabLeave Application` drop column status""")
