@@ -9,8 +9,7 @@ from frappe.utils import getdate, cstr, flt, cint, nowdate
 from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
 
-EXCHANGE_RATE = frappe.get_list(
-	'Currency Exchange', fields=['date', 'from_currency', 'to_currency', 'exchange_rate'])
+EXCHANGE_RATE = {}
 
 P_OR_L_ACCOUNTS = list(
 	sum(frappe.get_list('Account', fields=['account_name'], or_filters=[{'root_type': 'Income'}, {'root_type': 'Expense'}], as_list=True), ())
