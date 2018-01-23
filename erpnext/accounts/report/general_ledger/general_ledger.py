@@ -160,18 +160,17 @@ def get_currency(filters):
 
 def convert(value, from_, to, date):
 	rate = get_rate_as_at(date, from_, to)
-	if not rate:
-		rate = get_exchange_rate(from_, to, date)
 	converted_value = value / (rate or 1)
 	return converted_value
 
 
-def get_rate_as_at(date, from_curr, to_currency):
-	for rate in __exchange_rates:
-		if rate.get('date') == getdate(date) \
-				and rate.get('from_currency') == from_curr	\
-				and rate.get('to_currency') == to_currency:
-			return rate.get('exchange_rate')
+def get_rate_as_at(date, from_currency, to_currency):
+	rate = __exchange_rates.get('{0}-{1}@{2}'.format(from_currency, to_currency, date))
+	if not rate:
+		rate = get_exchange_rate(from_currency, to_currency, date) or 1
+		__exchange_rates['{0}-{1}@{2}'.format(from_currency, to_currency, date)] = rate
+
+	return rate
 
 
 def is_p_or_l_account(account_name):
