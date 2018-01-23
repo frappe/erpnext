@@ -12,6 +12,14 @@ frappe.ui.form.on('Employee Loan Application', {
     validate: function(frm){
         cur_frm.refresh_fields(["workflow_state"]);
     },
+    repayment_amount: function(frm) {
+        if(cur_frm.doc.repayment_method == "Repay Once"){
+            if(cur_frm.doc.repayment_amount < cur_frm.doc.loan_amount){
+                cur_frm.set_value("repayment_amount", );
+                frappe.msgprint("Monthly repayment amount must be more than loan amount")
+            }
+        }
+    },
 	repayment_method: function(frm) {
 		frm.doc.repayment_amount = frm.doc.repayment_periods = ""
 		frm.trigger("toggle_fields")

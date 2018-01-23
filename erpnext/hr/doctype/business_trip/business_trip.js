@@ -81,10 +81,11 @@ frappe.ui.form.on('Business Trip', {
     	cur_frm.set_df_property("ticket", "read_only", 1);
     	cur_frm.set_df_property("ticket_cost", "read_only", 1);
 
-    }
-    ,
+    },
     onload: function(frm) {
     	if (cur_frm.doc.workflow_state=="Pending"){
+            cur_frm.set_value("cost_center", 'TOP MANAGEMENT - T');
+            
             get_current_user();
 
             cur_frm.set_query("requested_employee", function() {
@@ -95,6 +96,17 @@ frappe.ui.form.on('Business Trip', {
                         ]
                     };
                 });
+
+
+
+            frappe.call({
+                method: "get_default_cost_center",
+                args: {company: frappe.sys_defaults.company},
+                doc: frm.doc,
+                callback: function(r) {
+                    cur_frm.set_value("cost_center", r.message);
+                }
+            });
 
         }
 
@@ -117,7 +129,15 @@ frappe.ui.form.on('Business Trip', {
 
         
        
-
+        if (!cur_frm.doc.world_countries) {
+            cur_frm.set_query("city", function() {
+                return {
+                    filters: [
+                        ["City", "name", "=", ""]
+                    ]
+                };
+            });
+        }
 
         // cur_frm.set_query("requested_department", function () {
         //     return {
@@ -129,6 +149,20 @@ frappe.ui.form.on('Business Trip', {
 
         
 
+    },
+    city: function(frm) {
+        if(cur_frm.doc.city && cur_frm.doc.world_countries){
+            cur_frm.set_value("target_city", cur_frm.doc.world_countries+'-'+cur_frm.doc.city);
+        }else{
+            cur_frm.set_value("target_city", "");
+        }
+    },
+    world_countries: function(frm) {
+        if(cur_frm.doc.city && cur_frm.doc.world_countries){
+            cur_frm.set_value("target_city", cur_frm.doc.world_countries+'-'+cur_frm.doc.city);
+        }else{
+            cur_frm.set_value("target_city", "");
+        }
     }
 });
 

@@ -222,7 +222,7 @@ class TrainingTrip(Document):
 			if number_of_days<0:
 				self.days = 0
 				return 0
-			self.days=number_of_days
+			self.days=number_of_days+1
 			# return number_of_days+1
 
 	def get_grade_info(self):
