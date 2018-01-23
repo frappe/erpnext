@@ -1,4 +1,4 @@
-// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 const get_currencies = () => {
@@ -16,9 +16,7 @@ const flatten = (array) => {
 	return [].concat.apply([], array);
 }
 
-get_currencies()
-.then((r) => flatten(r))
-.then((currency_list) => {
+const show_report = (currency_list) => {
 	frappe.query_reports["General Ledger"] = {
 		"filters": [
 			{
@@ -132,4 +130,8 @@ get_currencies()
 			}
 		]
 	}
-});
+}
+
+get_currencies()
+.then((currency_list) => flatten(currency_list))
+.then((currency_list) => show_report(currency_list));

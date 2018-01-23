@@ -4,6 +4,8 @@
 from __future__ import unicode_literals
 import frappe
 import re
+
+from erpnext.accounts.report.general_ledger.general_ledger import convert_to_presentation_currency, get_currency
 from frappe import _
 from frappe.utils import (flt, getdate, get_first_day, get_last_day, date_diff,
 	add_months, add_days, formatdate, cint)
@@ -305,7 +307,7 @@ def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, f
 
 	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters)
 
-	gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year from `tabGL Entry`
+	gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year, debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
 		where company=%(company)s
 		{additional_conditions}
 		and posting_date <= %(to_date)s
@@ -320,6 +322,10 @@ def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, f
 			"rgt": root_rgt
 		},
 		as_dict=True)
+
+	if filters and filters.get('presentation_currency'):
+		gl = convert_to_presentation_currency(gl_entries, get_currency(filters))
+		print('presentation currency - ', gl[0:2])
 
 	for entry in gl_entries:
 		gl_entries_by_account.setdefault(entry.account, []).append(entry)

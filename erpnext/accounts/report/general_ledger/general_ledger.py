@@ -153,7 +153,7 @@ def get_currency(filters):
 	company = get_appropriate_company(filters)
 	company_currency = get_company_currency(company)
 	presentation_currency = filters['presentation_currency'] if filters.get('presentation_currency') else company_currency
-	report_date = filters['to_date']
+	report_date = filters.get('to_date') or filters.get('to_fiscal_year')
 
 	currency_map = dict(company=company, company_currency=company_currency, presentation_currency=presentation_currency, report_date=report_date)
 
