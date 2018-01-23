@@ -5,12 +5,16 @@ from __future__ import unicode_literals
 import frappe
 from erpnext import get_company_currency, get_default_company
 from erpnext.setup.utils import get_exchange_rate
-from frappe.utils import getdate, cstr, flt, cint
+from frappe.utils import getdate, cstr, flt, cint, nowdate
 from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
 
 EXCHANGE_RATE = frappe.get_list(
-			'Currency Exchange', fields=['date', 'from_currency', 'to_currency', 'exchange_rate'])
+	'Currency Exchange', fields=['date', 'from_currency', 'to_currency', 'exchange_rate'])
+
+P_OR_L_ACCOUNTS = list(
+	sum(frappe.get_list('Account', fields=['account_name'], or_filters=[{'root_type': 'Income'}, {'root_type': 'Expense'}], as_list=True), ())
+)
 
 
 def get_appropriate_company(filters):
@@ -148,8 +152,9 @@ def get_currency(filters):
 	# Get the currency
 	company_currency = get_company_currency(company)
 	presentation_currency = filters['presentation_currency'] if filters.get('presentation_currency') else company_currency
+	report_date = filters['to_date']
 
-	currency_map = dict(company=company, company_currency=company_currency, presentation_currency=presentation_currency)
+	currency_map = dict(company=company, company_currency=company_currency, presentation_currency=presentation_currency, report_date=report_date)
 
 	return currency_map
 
@@ -170,16 +175,31 @@ def get_rate_as_at(date, from_curr, to_currency):
 			return rate.get('exchange_rate')
 
 
+def is_p_or_l_account(account_name):
+	# Remove company abbreviation part
+	abbr_start = account_name.rfind('-')
+	account_name = account_name[:abbr_start].strip()
+
+	return account_name in P_OR_L_ACCOUNTS
+
+
 def convert_to_presentation_currency(gl_entries, currency_info):
 	converted_gl_list = []
-	for entry in gl_entries:
-		if currency_info['company_currency'] != currency_info['presentation_currency'] and \
-				entry['account_currency'] != currency_info['presentation_currency']:
+	presentation_currency = currency_info['presentation_currency']
+	company_currency = currency_info['company_currency']
 
-			value = cint(entry['debit'] or cint(entry['credit']))
-			date = entry['posting_date']
-			presentation_currency = currency_info['presentation_currency']
-			company_currency = currency_info['company_currency']
+	for entry in gl_entries:
+		account = entry['account']
+		debit = cint(entry['debit'])
+		credit = cint(entry['credit'])
+		debit_in_account_currency = cint(entry['debit_in_account_currency'])
+		credit_in_account_currency = cint(entry['credit_in_account_currency'])
+		account_currency = entry['account_currency']
+
+		if account_currency != presentation_currency or (account_currency == presentation_currency and not is_p_or_l_account(account)):
+			value = debit or credit
+
+			date = currency_info['report_date'] if not is_p_or_l_account(account) else entry['posting_date']
 
 			converted_value = convert(value, presentation_currency, company_currency, date)
 
@@ -188,11 +208,11 @@ def convert_to_presentation_currency(gl_entries, currency_info):
 			else:
 				entry['credit'] = converted_value
 
-		elif currency_info['company_currency'] != currency_info['presentation_currency']:
+		elif account_currency == presentation_currency:
 			if entry.get('debit'):
-				entry['debit'] = entry['debit_in_account_currency']
+				entry['debit'] = debit_in_account_currency
 			else:
-				entry['credit'] = entry['credit_in_account_currency']
+				entry['credit'] = credit_in_account_currency
 
 		converted_gl_list.append(entry)
 
