@@ -16,8 +16,11 @@ def get_qty_in_stock(item_code, item_warehouse_field):
 		warehouse = frappe.db.get_value("Item", template_item_code, item_warehouse_field)
 
 	if warehouse:
-		stock_qty = frappe.db.sql("""select GREATEST(actual_qty - reserved_qty, 0) from tabBin where
-			item_code=%s and warehouse=%s""", (item_code, warehouse))
+		stock_qty = frappe.db.sql("""select GREATEST(S.actual_qty - S.reserved_qty, 0) / IFNULL(C.conversion_factor, 1) 
+			from tabBin S
+			inner join `tabItem` I on S.item_code = I.Item_code
+			left join `tabUOM Conversion Detail` C on I.sales_uom = C.uom and C.parent = I.Item_code 
+			where S.item_code=%s and S.warehouse=%s""", (item_code, warehouse))
 		if stock_qty:
 			in_stock = stock_qty[0][0] > 0 and 1 or 0
 
