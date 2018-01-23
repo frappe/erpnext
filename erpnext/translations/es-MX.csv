@@ -2,7 +2,7 @@ DocType: Timesheet,Total Costing Amount,Monto Total Calculado
 DocType: Student Group Student,Student Group Student,Alumno de Grupo de Estudiantes
 DocType: Delivery Note,% Installed,% Instalado
 DocType: Company,Gain/Loss Account on Asset Disposal,Cuenta de ganancia/pérdida en la disposición de activos
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +472,Please enter Account for Change Amount,"Por favor, introduzca la Vuenta para el Cambio Monto"
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +465,Please enter Account for Change Amount,"Por favor, introduzca la Vuenta para el Cambio Monto"
 DocType: Sales Order,SO-,OV-
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +246,Please set the Item Code first,"Por favor, primero define el Código del Artículo"
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.js +60,Show unclosed fiscal year's P&L balances,Mostrar saldos de Ganancias y Perdidas de año fiscal sin cerrar
@@ -60,7 +60,7 @@ DocType: Currency Exchange,Specify Exchange Rate to convert one currency into an
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +52,Only Leave Applications with status 'Approved' and 'Rejected' can be submitted,"Sólo Solicitudes de Permiso con estado ""Aprobado"" y ""Rechazado"" puede ser presentado"
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +155,Source and target warehouse must be different,El almacén de origen y el de destino deben ser diferentes
 apps/erpnext/erpnext/hr/doctype/vehicle_log/vehicle_log.py +20,"Service Item,Type,frequency and expense amount are required","El Artículo de Servico, el Tipo, la Frecuencia y la Cantidad de Gasto son requeridos"
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +62,Gross Purchase Amount is mandatory,El Importe Bruto de Compra es obligatorio
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +59,Gross Purchase Amount is mandatory,El Importe Bruto de Compra es obligatorio
 DocType: Stock Entry,Customer or Supplier Details,Detalle de cliente o proveedor
 DocType: Lab Test Template,Standard Selling Rate,Tarifa de Venta Estándar
 DocType: Program Enrollment,School House,Casa Escuela
