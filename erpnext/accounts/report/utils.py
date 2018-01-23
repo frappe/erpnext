@@ -1,6 +1,5 @@
 import frappe
-from erpnext import get_company_currency
-from erpnext.accounts.report.general_ledger.general_ledger import get_appropriate_company
+from erpnext import get_company_currency, get_default_company
 from erpnext.setup.utils import get_exchange_rate
 from frappe.utils import cint
 
@@ -122,3 +121,12 @@ def convert_to_presentation_currency(gl_entries, currency_info):
 		converted_gl_list.append(entry)
 
 	return converted_gl_list
+
+
+def get_appropriate_company(filters):
+	if filters.get('company'):
+		company = filters['company']
+	else:
+		company = get_default_company()
+
+	return company

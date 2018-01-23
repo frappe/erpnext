@@ -10,15 +10,6 @@ from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
 
 
-def get_appropriate_company(filters):
-	if filters.get('company'):
-		company = filters['company']
-	else:
-		company = get_default_company()
-
-	return company
-
-
 def execute(filters=None):
 	account_details = {}
 	for acc in frappe.db.sql("""select name, is_group from tabAccount""", as_dict=1):
