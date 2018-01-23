@@ -36,17 +36,20 @@ class Gstr1Report(object):
 			for rate, items in items_based_on_rate.items():
 				row = []
 				for fieldname in invoice_fields:
-					if fieldname == "invoice_value":
+					if self.filters.get("type_of_business") ==  "CDNR" and fieldname == "invoice_value":
+						row.append(abs(invoice_details.base_rounded_total) or abs(invoice_details.base_grand_total))
+					elif fieldname == "invoice_value":
 						row.append(invoice_details.base_rounded_total or invoice_details.base_grand_total)
 					else:
 						row.append(invoice_details.get(fieldname))
 
 				row += [rate,
-					sum([net_amount for item_code, net_amount in self.invoice_items.get(inv).items()
+					sum([abs(net_amount) for item_code, net_amount in self.invoice_items.get(inv).items()
 						if item_code in items]),
 					self.invoice_cess.get(inv)
 				]
-
+				for x in xrange(1,10):
+					print("item", row)
 				if self.filters.get("type_of_business") ==  "B2C Small":
 					row.append("E" if invoice_details.ecommerce_gstin else "OE")
 
@@ -215,33 +218,39 @@ class Gstr1Report(object):
 				{
 					"fieldname": "customer_gstin",
 					"label": "GSTIN/UIN of Recipient",
-					"fieldtype": "Data"
+					"fieldtype": "Data",
+					"width": 150
 				},
 				{
 					"fieldname": "customer_name",
 					"label": "Receiver Name",
-					"fieldtype": "Data"
+					"fieldtype": "Data",
+					"width":100
 				},
 				{
 					"fieldname": "invoice_number",
 					"label": "Invoice Number",
 					"fieldtype": "Link",
-					"options": "Sales Invoice"
+					"options": "Sales Invoice",
+					"width":100
 				},
 				{
 					"fieldname": "posting_date",
 					"label": "Invoice date",
-					"fieldtype": "Date"
+					"fieldtype": "Date",
+					"width":80
 				},
 				{
 					"fieldname": "invoice_value",
 					"label": "Invoice Value",
-					"fieldtype": "Currency"
+					"fieldtype": "Currency",
+					"width":100
 				},
 				{
 					"fieldname": "place_of_supply",
 					"label": "Place of Supply",
-					"fieldtype": "Data"
+					"fieldtype": "Data",
+					"width":100
 				},
 				{
 					"fieldname": "reverse_charge",
@@ -256,7 +265,8 @@ class Gstr1Report(object):
 				{
 					"fieldname": "ecommerce_gstin",
 					"label": "E-Commerce GSTIN",
-					"fieldtype": "Data"
+					"fieldtype": "Data",
+					"width":120
 				}
 			]
 			self.other_columns = [
@@ -316,7 +326,7 @@ class Gstr1Report(object):
 					"fieldname": "customer_gstin",
 					"label": "GSTIN/UIN of Recipient",
 					"fieldtype": "Data",
-					"width": 120
+					"width": 150
 				},
 				{
 					"fieldname": "customer_name",
@@ -341,7 +351,8 @@ class Gstr1Report(object):
 					"fieldname": "invoice_number",
 					"label": "Invoice/Advance Receipt Number",
 					"fieldtype": "Link",
-					"options": "Sales Invoice"
+					"options": "Sales Invoice",
+					"width":120
 				},
 				{
 					"fieldname": "posting_date",
@@ -353,7 +364,7 @@ class Gstr1Report(object):
 					"fieldname": "reason_for_issuing_document",
 					"label": "Reason For Issuing document",
 					"fieldtype": "Data",
-					"width": 120
+					"width": 140
 				},
 				{
 					"fieldname": "place_of_supply",
@@ -379,13 +390,13 @@ class Gstr1Report(object):
 					"fieldname": "pre_gst",
 					"label": "PRE GST",
 					"fieldtype": "Data",
-					"width": 50
+					"width": 80
 				},
 				{
 					"fieldname": "document_type",
 					"label": "Document Type",
 					"fieldtype": "Data",
-					"width": 50
+					"width": 80
 				}
 			]
 		elif self.filters.get("type_of_business") ==  "B2C Small":
@@ -423,12 +434,14 @@ class Gstr1Report(object):
 					"fieldname": "export_type",
 					"label": "Export Type",
 					"fieldtype": "Data",
+					"width":120
 				},
 				{
 					"fieldname": "invoice_number",
 					"label": "Invoice Number",
 					"fieldtype": "Link",
-					"options": "Sales Invoice"
+					"options": "Sales Invoice",
+					"width":120
 				},
 				{
 					"fieldname": "posting_date",
