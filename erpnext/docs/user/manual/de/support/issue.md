@@ -7,7 +7,7 @@ Bei einem Fall handelt es ich um eine eingehende Nachricht vom Kunden, normalerw
 
 > Support > Dokumente > Anfrage > Neu
 
-<img class="screenshot" alt="Fall" src="/docs/assets/img/support/issue.png">
+<img class="screenshot" alt="Fall" src="/assets/erpnext_docs/assets/img/support/issue.png">
 
 ### Gesprächsaufzeichnung
 

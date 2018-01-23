@@ -1,6 +1,6 @@
 # Configuración
 
-<img class="screenshot" alt="Setup Section" src="/docs/assets/img/education/setup/setup-section.png">
+<img class="screenshot" alt="Setup Section" src="/assets/erpnext_docs/assets/img/education/setup/setup-section.png">
 
 ### Temas
 

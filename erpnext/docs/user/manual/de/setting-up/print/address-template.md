@@ -28,6 +28,6 @@ Hier sehen Sie die Standardvorlage:
 
 ### Beispiel
 
-<img class="screenshot" alt="Adressvorlage" src="/docs/assets/img/setup/print/address-format.png">
+<img class="screenshot" alt="Adressvorlage" src="/assets/erpnext_docs/assets/img/setup/print/address-format.png">
 
 {next}

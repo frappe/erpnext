@@ -9,7 +9,7 @@ Um einen neuen Wartungsplan zu erstellen, gehen Sie zu:
 
 > Support > Dokumente > Wartungsplan > Neu
 
-<img class="screenshot" alt="Wartungsplan" src="/docs/assets/img/support/maintenance-schedule.png">
+<img class="screenshot" alt="Wartungsplan" src="/assets/erpnext_docs/assets/img/support/maintenance-schedule.png">
 
 Im Wartungsplan gibt es zwei Abschnitte:
 

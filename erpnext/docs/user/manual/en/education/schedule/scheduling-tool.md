@@ -2,7 +2,7 @@
 
 This tool can be used to create 'Course Schedules'. 
 
-<img class="screenshot" alt="Scheduling Tool" src="/docs/assets/img/education/schedule/scheduling-tool.png">
+<img class="screenshot" alt="Scheduling Tool" src="/assets/erpnext_docs/assets/img/education/schedule/scheduling-tool.png">
 
 ### Creating Course Schedules
 

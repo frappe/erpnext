@@ -7,7 +7,7 @@ So können Sie einen neuen Lieferanten erstellen:
 
 > Einkauf > Dokumente > Lieferant > Neu
 
-<img class="screenshot" alt="Lieferant" src="/docs/assets/img/buying/supplier-master.png">
+<img class="screenshot" alt="Lieferant" src="/assets/erpnext_docs/assets/img/buying/supplier-master.png">
 
 ### Kontakte und Adressen
 

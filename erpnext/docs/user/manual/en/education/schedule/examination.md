@@ -2,7 +2,7 @@
 
 The Examination record can be used to track the exam schedule and the results of that exam.
 
-<img class="screenshot" alt="Examination" src="/docs/assets/img/education/schedule/examination.png">
+<img class="screenshot" alt="Examination" src="/assets/erpnext_docs/assets/img/education/schedule/examination.png">
 
 
 {next}

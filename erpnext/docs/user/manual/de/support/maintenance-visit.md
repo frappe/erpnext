@@ -5,7 +5,7 @@ Ein Wartungsbesuch ist ein Datensatz über einen Besuch eines Technikers bei ein
 
 > Support > Dokumente > Wartungsbesuch > Neu
 
-<img class="screenshot" alt="Wartungsbesuch" src="/docs/assets/img/support/maintenance-visit.png">
+<img class="screenshot" alt="Wartungsbesuch" src="/assets/erpnext_docs/assets/img/support/maintenance-visit.png">
 
 Der Wartungsbesuch inhält Informationen über:
 

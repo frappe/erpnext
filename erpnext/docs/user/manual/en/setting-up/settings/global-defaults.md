@@ -6,6 +6,6 @@ You can set default values for your documents from Global Defaults
 
 Whenever a new document is created, these values will be set as default.
 
-<img class="screenshot" alt="Global Defaults" src="/docs/assets/img/setup/settings/global-defaults.png">
+<img class="screenshot" alt="Global Defaults" src="/assets/erpnext_docs/assets/img/setup/settings/global-defaults.png">
 
 {next}

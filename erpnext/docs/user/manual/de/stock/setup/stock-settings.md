@@ -3,6 +3,6 @@
 
 Sie können Standardeinstellungen für Ihre mit dem Lager verbundenen Transaktionen hier voreinstellen.
 
-<img class="screenshot" alt="Lagereinstellungen" src="/docs/assets/img/stock/stock-settings.png">
+<img class="screenshot" alt="Lagereinstellungen" src="/assets/erpnext_docs/assets/img/stock/stock-settings.png">
 
 {next}
