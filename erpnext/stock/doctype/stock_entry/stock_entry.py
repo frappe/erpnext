@@ -64,12 +64,13 @@ class StockEntry(StockController):
 		self.calculate_rate_and_amount(update_finished_item_rate=False)
 
 	def on_submit(self):
-		for d in self.items:
-			if self.purpose == "Subcontract" and not d.t_warehouse:
-				if self.to_warehouse:
-					d.t_warehouse = self.to_warehouse
-				else:
-					frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
+		if self.purpose == "Subcontract":
+			for d in self.items:
+				if not d.t_warehouse:
+					if self.to_warehouse:
+						d.t_warehouse = self.to_warehouse
+					else:
+						frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
 
 		self.update_stock_ledger()
 
