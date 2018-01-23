@@ -30,6 +30,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	constructor(wrapper) {
 		this.wrapper = $(wrapper).find('.layout-main-section');
 		this.page = wrapper.page;
+		this.additional_si_fields = [];
 
 		const assets = [
 			'assets/erpnext/js/pos/clusterize.js',
@@ -53,10 +54,63 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 			() => this.make_new_invoice(),
 			() => {
+				if(this.frm.doc.show_additional_customer_details){
+					frappe.call({
+						method: 'erpnext.selling.page.point_of_sale.point_of_sale.get_extrafields',
+						args: {
+							doc: this.frm.doc
+						},
+						callback: r => {
+							if (r.message) {
+								this.render_sales_invoice_fields(r.message);
+							}
+						}
+					});
+				}
+			},
+			() => {
 				frappe.dom.unfreeze();
 			},
-			() => this.page.set_title(__('Point of Sale'))
+			() => this.page.set_title(__('Point of Sale')),
 		]);
+	}
+
+	render_sales_invoice_fields(required_fields){
+		for(var i=0;i<required_fields.length;i++){
+			var parent_class = null;
+			if(i%2 == 0){
+				parent_class = '.customer-details-left';
+			}else{
+				parent_class = '.customer-details-right';
+			}
+
+			this.additional_si_fields[i] = frappe.ui.form.make_control({
+				df: {
+					fieldtype: required_fields[i].type,
+					label: required_fields[i].label,
+					fieldname: required_fields[i].name,
+					onchange: () => {
+						this.set_additional_fields();
+					}
+				},
+				parent: this.wrapper.find(parent_class),
+				render_input: true
+			});
+		}
+	}
+
+	set_additional_fields(){
+		if(this.additional_si_fields.length>0){
+			for(var i=0;i<this.additional_si_fields.length;i++){
+				// Saves value of custom/extra fields in doc
+				this.frm.set_value(this.additional_si_fields[i].df.fieldname,this.additional_si_fields[i].value);
+			}
+		}
+	}
+
+	clear_additional_fields(){
+		// clears additional fields value
+		this.wrapper.find("input").val("");
 	}
 
 	set_online_status() {
@@ -76,11 +130,15 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	prepare_dom() {
 		this.wrapper.append(`
 			<div class="pos">
+				<section class="col-md-12 col-sm-12 customer-details" style="padding:0px;">
+					<div class="col-md-5 col-sm-5 customer-details-left">
+					</div>
+					<div class="col-md-7 col-sm-7 customer-details-right">
+					</div>
+				</section>
 				<section class="cart-container">
-
 				</section>
 				<section class="item-container">
-
 				</section>
 			</div>
 		`);
@@ -398,6 +456,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 	make_new_invoice() {
 		return frappe.run_serially([
+			() => this.clear_additional_fields(),
 			() => this.make_sales_invoice_frm(),
 			() => this.set_pos_profile_data(),
 			() => {
