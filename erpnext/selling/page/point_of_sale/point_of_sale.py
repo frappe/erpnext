@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe.utils.nestedset import get_root_of
+from frappe.utils import cint
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
 
 @frappe.whitelist()
@@ -92,7 +93,7 @@ def submit_invoice(doc,is_saved):
 	if isinstance(doc, basestring):
 		args = json.loads(doc)
 
-	if(int(is_saved) == 1):
+	if(cint(is_saved) == 1):
 		doc = frappe.get_doc('Sales Invoice',args["name"])
 	else:
 		doc = frappe.new_doc('Sales Invoice')
