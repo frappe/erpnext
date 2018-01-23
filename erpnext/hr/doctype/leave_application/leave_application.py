@@ -284,10 +284,42 @@ class LeaveApplication(Document):
 
 	def notify(self, args):
 		args = frappe._dict(args)
-		from frappe.desk.page.chat.chat import post
-		post(**{"txt": args.message, "contact": args.message_to, "subject": args.subject,
-			"notify": cint(self.follow_via_email)})
+		# args -> message, message_to, subject
 
+		d = frappe.new_doc('Communication')
+		d.communication_type = 'Notification'
+		d.subject            = args.subject
+		d.content            = args.message
+		d.reference_doctype  = 'User'
+		d.reference_name	 = args.message_to
+		d.sender             = frappe.session.user
+
+		d.insert(ignore_permissions = True)
+
+		if cint(self.follow_via_email):
+			contact = args.message_to
+			if not isinstance(contact, list):
+				contact = [frappe.get_doc('User', contact).email or contact]
+
+			sender      	    = dict()
+			sender['email']     = frappe.get_doc('User', frappe.session.user).email
+			sender['full_name'] = frappe.utils.get_fullname(sender['email'])
+
+			try:
+				frappe.sendmail(recipients = contact,
+					sender   = sender['email'],
+					subject  = args.subject or _("New Message from {sender}").format(sender = sender['full_name']),
+					template = "new_message",
+					args     = {
+						   "from": sender['full_name'],
+						"message": args.message,
+						   "link": frappe.utils.get_url()
+					},
+					header	 = [_('New Message'), 'orange']
+				)
+			except frappe.OutgoingEmailError:
+				# Arrey!
+				pass
 
 @frappe.whitelist()
 def get_approvers(doctype, txt, searchfield, start, page_len, filters):

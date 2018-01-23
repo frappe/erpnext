@@ -30,10 +30,10 @@ frappe.ui.form.on("Purchase Order", {
 			return erpnext.queries.warehouse(frm.doc);
 		});
 
-		frappe.db.get_value('Buying Settings', {name: 'Buying Settings'}, 'disable_fetch_last_purchase_rate', (r) => {
-			value = r && cint(r.disable_fetch_last_purchase_rate);
-			frm.toggle_display('get_last_purchase_rate', !value);
-		});
+		if (frm.doc.__onload) {
+			frm.toggle_display('get_last_purchase_rate',
+				frm.doc.__onload.disable_fetch_last_purchase_rate);
+		}
 
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })

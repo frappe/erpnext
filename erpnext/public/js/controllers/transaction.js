@@ -244,10 +244,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				method: "erpnext.controllers.accounts_controller.get_default_taxes_and_charges",
 				args: {
 					"master_doctype": taxes_and_charges_field.options,
+					"tax_template": me.frm.doc.taxes_and_charges,
 					"company": me.frm.doc.company
 				},
 				callback: function(r) {
-					if(!r.exc) {
+					if(!r.exc && r.message) {
 						frappe.run_serially([
 							() => {
 								// directly set in doc, so as not to call triggers
@@ -548,7 +549,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					final_message = final_message + message1;
 				}
 
-				if (this.frm.doc.payment_schedule.length) {
+				if ((this.frm.doc.payment_schedule || []).length) {
 					message2 = "Payment Schedule Table";
 					if (message1.length !== 0) message2 = " and " + message2;
 					final_message = final_message + message2;
@@ -646,6 +647,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					}
 				}
 			}).fail(() => this.frm.set_value('shipping_rule', ''));
+		}
+		else {
+			me.calculate_taxes_and_totals();
 		}
 	},
 
@@ -1261,11 +1265,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		const doc = this.frm.doc;
 		if(doc.payment_terms_template && doc.doctype !== 'Delivery Note') {
+			var posting_date = doc.bill_date || doc.posting_date || doc.transaction_date;
+
 			frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_payment_terms",
 				args: {
 					terms_template: doc.payment_terms_template,
-					posting_date: doc.posting_date || doc.transaction_date,
+					posting_date: posting_date,
 					grand_total: doc.rounded_total || doc.grand_total
 				},
 				callback: function(r) {
