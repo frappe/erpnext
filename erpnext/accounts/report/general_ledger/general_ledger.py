@@ -138,17 +138,19 @@ def get_result(filters, account_details):
 
 def get_currency(filters):
 	"""
-	Returns the currency to used in the report. It considers presentation currency and company
-	(in that order) in order to determine what currency to use.
+	Returns a dictionary containing currency information. The keys of the dict are
+	- company: The company for which we are fetching currency information. if no
+	company is specified, it will fallback to the default company.
+	- company currency: The functional currency of the said company.
+	- presentation currency: The presentation currency to use. Only currencies that
+	have been used for transactions will be allowed.
+	- report date: The report date.
 	:param filters: Report filters
 	:type filters: dict
 
 	:return: str - Currency
 	"""
-	# Get the company
 	company = get_appropriate_company(filters)
-
-	# Get the currency
 	company_currency = get_company_currency(company)
 	presentation_currency = filters['presentation_currency'] if filters.get('presentation_currency') else company_currency
 	report_date = filters['to_date']
@@ -159,12 +161,30 @@ def get_currency(filters):
 
 
 def convert(value, from_, to, date):
+	"""
+	convert `value` from `from_` to `to` on `date`
+	:param value: Amount to be converted
+	:param from_: Currency of `value`
+	:param to: Currency to convert to
+	:param date: exchange rate as at this date
+	:return: Result of converting `value`
+	"""
 	rate = get_rate_as_at(date, from_, to)
 	converted_value = value / (rate or 1)
 	return converted_value
 
 
 def get_rate_as_at(date, from_currency, to_currency):
+	"""
+	Gets exchange rate as at `date` for `from_currency` - `to_currency` exchange rate.
+	This calls `get_exchange_rate` so that we can get the correct exchange rate as per
+	the user's Accounts Settings.
+	It is made efficient by memoising results to `__exchange_rates`
+	:param date: exchange rate as at this date
+	:param from_currency: Base currency
+	:param to_currency: Quote currency
+	:return: Retrieved exchange rate
+	"""
 	rate = __exchange_rates.get('{0}-{1}@{2}'.format(from_currency, to_currency, date))
 	if not rate:
 		rate = get_exchange_rate(from_currency, to_currency, date) or 1
@@ -174,6 +194,12 @@ def get_rate_as_at(date, from_currency, to_currency):
 
 
 def is_p_or_l_account(account_name):
+	"""
+	Check if the given `account_name` is an `Account` with `root_type` of either 'Income'
+	or 'Expense'.
+	:param account_name:
+	:return: Boolean
+	"""
 	# Remove company abbreviation part
 	abbr_start = account_name.rfind('-')
 	account_name = account_name[:abbr_start].strip()
@@ -182,6 +208,13 @@ def is_p_or_l_account(account_name):
 
 
 def convert_to_presentation_currency(gl_entries, currency_info):
+	"""
+	Take a list of GL Entries and change the 'debit' and 'credit' values to currencies
+	in `currency_info`.
+	:param gl_entries:
+	:param currency_info:
+	:return:
+	"""
 	converted_gl_list = []
 	presentation_currency = currency_info['presentation_currency']
 	company_currency = currency_info['company_currency']
