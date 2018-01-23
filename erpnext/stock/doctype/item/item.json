@@ -1180,7 +1180,7 @@
    "report_hide": 0, 
    "reqd": 0, 
    "search_index": 0, 
-   "set_only_once": 1, 
+   "set_only_once": 0, 
    "unique": 0
   }, 
   {
@@ -1370,7 +1370,7 @@
    "report_hide": 0, 
    "reqd": 0, 
    "search_index": 0, 
-   "set_only_once": 1, 
+   "set_only_once": 0, 
    "unique": 0
   }, 
   {
@@ -3453,7 +3453,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 1, 
- "modified": "2017-12-27 15:47:17.039337", 
+ "modified": "2018-01-23 12:21:16.641517", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 
