@@ -36,6 +36,7 @@ def execute(filters=None):
 
 	return columns, res
 
+
 def validate_filters(filters, account_details):
 	if not filters.get('company'):
 		frappe.throw(_('{0} is mandatory').format(_('Company')))
@@ -44,7 +45,7 @@ def validate_filters(filters, account_details):
 		frappe.throw(_("Account {0} does not exists").format(filters.account))
 
 	if filters.get("account") and filters.get("group_by_account") \
-			and account_details[filters.account].is_group == 0:
+		and account_details[filters.account].is_group == 0:
 		frappe.throw(_("Can not filter based on Account, if grouped by Account"))
 
 	if filters.get("voucher_no") and filters.get("group_by_voucher"):
@@ -63,6 +64,7 @@ def validate_party(filters):
 		elif not frappe.db.exists(party_type, party):
 			frappe.throw(_("Invalid {0}: {1}").format(party_type, party))
 
+
 def set_account_currency(filters):
 	if not (filters.get("account") or filters.get("party")):
 		return filters
@@ -73,8 +75,13 @@ def set_account_currency(filters):
 		if filters.get("account"):
 			account_currency = get_account_currency(filters.account)
 		elif filters.get("party"):
-			gle_currency = frappe.db.get_value("GL Entry", {"party_type": filters.party_type,
-				"party": filters.party, "company": filters.company}, "account_currency")
+			gle_currency = frappe.db.get_value(
+				"GL Entry", {
+					"party_type": filters.party_type, "party": filters.party, "company": filters.company
+				},
+				"account_currency"
+			)
+
 			if gle_currency:
 				account_currency = gle_currency
 			else:
@@ -87,6 +94,7 @@ def set_account_currency(filters):
 			filters["show_in_account_currency"] = 1
 
 		return filters
+
 
 def get_columns(filters):
 	if filters.get("presentation_currency"):
@@ -120,6 +128,7 @@ def get_columns(filters):
 
 	return columns
 
+
 def get_result(filters, account_details):
 	gl_entries = get_gl_entries(filters)
 
@@ -139,7 +148,8 @@ def get_gl_entries(filters):
 	group_by_condition = "group by voucher_type, voucher_no, account, cost_center" \
 		if filters.get("group_by_voucher") else "group by name"
 
-	gl_entries = frappe.db.sql("""
+	gl_entries = frappe.db.sql(
+		"""
 		select
 			posting_date, account, party_type, party,
 			sum(debit) as debit, sum(credit) as credit,
@@ -149,9 +159,12 @@ def get_gl_entries(filters):
 		from `tabGL Entry`
 		where company=%(company)s {conditions}
 		{group_by_condition}
-		order by posting_date, account"""\
-		.format(select_fields=select_fields, conditions=get_conditions(filters),
-			group_by_condition=group_by_condition), filters, as_dict=1)
+		order by posting_date, account
+		""".format(
+			select_fields=select_fields, conditions=get_conditions(filters),
+			group_by_condition=group_by_condition
+		),
+		filters, as_dict=1)
 
 	if filters.get('presentation_currency'):
 		return convert_to_presentation_currency(gl_entries, currency_map)
@@ -184,9 +197,12 @@ def get_conditions(filters):
 
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
-	if match_conditions: conditions.append(match_conditions)
+
+	if match_conditions:
+		conditions.append(match_conditions)
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
+
 
 def get_data_with_opening_closing(filters, account_details, gl_entries):
 	data = []
@@ -222,7 +238,7 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 	# closing
 	data.append(totals.closing)
 
-	#total closing
+	# total closing
 	total_closing = totals.total_closing
 	total_debit = totals.closing.get('debit', 0)
 	total_credit = totals.closing.get('credit', 0)
@@ -242,27 +258,30 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 
 	return data
 
+
 def get_totals_dict():
 	def _get_debit_credit_dict(label):
 		return _dict(
-			account = "'{0}'".format(label),
-			debit = 0.0,
-			credit = 0.0,
-			debit_in_account_currency = 0.0,
-			credit_in_account_currency = 0.0
+			account="'{0}'".format(label),
+			debit=0.0,
+			credit=0.0,
+			debit_in_account_currency=0.0,
+			credit_in_account_currency=0.0
 		)
 	return _dict(
-		opening = _get_debit_credit_dict(_('Opening')),
-		total = _get_debit_credit_dict(_('Total')),
-		closing = _get_debit_credit_dict(_('Closing (Opening + Total)')),
-		total_closing = _get_debit_credit_dict(_('Closing Balance (Dr - Cr)'))
+		opening=_get_debit_credit_dict(_('Opening')),
+		total=_get_debit_credit_dict(_('Total')),
+		closing=_get_debit_credit_dict(_('Closing (Opening + Total)')),
+		total_closing=_get_debit_credit_dict(_('Closing Balance (Dr - Cr)'))
 	)
+
 
 def initialize_gle_map(gl_entries):
 	gle_map = frappe._dict()
 	for gle in gl_entries:
-		gle_map.setdefault(gle.account, _dict(totals = get_totals_dict(), entries = []))
+		gle_map.setdefault(gle.account, _dict(totals=get_totals_dict(), entries=[]))
 	return gle_map
+
 
 def get_accountwise_gle(filters, gl_entries, gle_map):
 	totals = get_totals_dict()
@@ -275,13 +294,12 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 		data[key].debit_in_account_currency += flt(gle.debit_in_account_currency)
 		data[key].credit_in_account_currency += flt(gle.credit_in_account_currency)
 
-
 	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
 	for gle in gl_entries:
 		if gle.posting_date < from_date or cstr(gle.is_opening) == "Yes":
 			update_value_in_dict(gle_map[gle.account].totals, 'opening', gle)
 			update_value_in_dict(totals, 'opening', gle)
-			
+
 			update_value_in_dict(gle_map[gle.account].totals, 'closing', gle)
 			update_value_in_dict(totals, 'closing', gle)
 
@@ -298,6 +316,7 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 
 	return totals, entries
 
+
 def get_result_as_list(data, filters):
 	result = []
 	for d in data:
@@ -306,8 +325,10 @@ def get_result_as_list(data, filters):
 		if filters.get("show_in_account_currency"):
 			row += [d.get("debit_in_account_currency"), d.get("credit_in_account_currency")]
 
-		row += [d.get("voucher_type"), d.get("voucher_no"), d.get("against"),
-			d.get("party_type"), d.get("party"), d.get("project"), d.get("cost_center"), d.get("against_voucher_type"), d.get("against_voucher"), d.get("remarks")
+		row += [
+			d.get("voucher_type"), d.get("voucher_no"), d.get("against"), d.get("party_type"),
+			d.get("party"), d.get("project"), d.get("cost_center"), d.get("against_voucher_type"),
+			d.get("against_voucher"), d.get("remarks")
 		]
 
 		result.append(row)
