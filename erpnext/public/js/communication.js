@@ -19,17 +19,16 @@ frappe.ui.form.on("Communication", {
 		if(!in_list(["Lead", "Opportunity"], frm.doc.reference_doctype)) {
 			frm.add_custom_button(__("Lead"), () => {
 				frappe.confirm(__(confirm_msg, [__("Lead")]), () => {
-					frm.trigger('make_lead_from_communication');	
+					frm.trigger('make_lead_from_communication');
 				})
-			}, "Make");
+			}, __("Make"));
 
 			frm.add_custom_button(__("Opportunity"), () => {
 				frappe.confirm(__(confirm_msg, [__("Opportunity")]), () => {
 					frm.trigger('make_opportunity_from_communication');
 				})
-			}, "Make");
+			}, __("Make"));
 		}
-		frm.page.set_inner_btn_group_as_primary(__("Make"));
 	},
 
 	make_lead_from_communication: (frm) => {
