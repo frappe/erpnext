@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import re
 
-from erpnext.accounts.report.general_ledger.general_ledger import convert_to_presentation_currency, get_currency
+from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
 from frappe import _
 from frappe.utils import (flt, getdate, get_first_day, get_last_day, date_diff,
 	add_months, add_days, formatdate, cint)
