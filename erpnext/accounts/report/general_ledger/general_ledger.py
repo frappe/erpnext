@@ -9,7 +9,7 @@ from frappe.utils import getdate, cstr, flt, cint, nowdate
 from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
 
-EXCHANGE_RATE = {}
+__exchange_rates = {}
 
 P_OR_L_ACCOUNTS = list(
 	sum(frappe.get_list('Account', fields=['account_name'], or_filters=[{'root_type': 'Income'}, {'root_type': 'Expense'}], as_list=True), ())
@@ -167,7 +167,7 @@ def convert(value, from_, to, date):
 
 
 def get_rate_as_at(date, from_curr, to_currency):
-	for rate in EXCHANGE_RATE:
+	for rate in __exchange_rates:
 		if rate.get('date') == getdate(date) \
 				and rate.get('from_currency') == from_curr	\
 				and rate.get('to_currency') == to_currency:
