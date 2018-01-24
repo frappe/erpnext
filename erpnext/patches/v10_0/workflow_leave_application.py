@@ -8,11 +8,12 @@ def execute():
 	frappe.reload_doc("hr", "doctype", "leave_application")
 	frappe.reload_doc("workflow", "doctype", "workflow")
 
-	frappe.get_doc({
-		'doctype': 'Workflow State',
-		'workflow_state_name': 'Open',
-		'style': 'Warning'
-	}).insert(ignore_permissions=True)
+	if not frappe.db.exists("Workflow State", "Open"):
+		frappe.get_doc({
+			'doctype': 'Workflow State',
+			'workflow_state_name': 'Open',
+			'style': 'Warning'
+		}).insert(ignore_permissions=True)
 
 	frappe.get_doc({
 		'doctype': 'Workflow',
