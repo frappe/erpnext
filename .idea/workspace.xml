@@ -2,6 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2c78ff50-3188-4568-80e9-89be95a8b91d" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/dataSources.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/dataSources/3e8c695f-0bc9-4bbd-9b96-e3a96b8b2d46.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/erpnext/projects/doctype/project/project.js" afterPath="$PROJECT_DIR$/erpnext/projects/doctype/project/project.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/erpnext/projects/doctype/project/project.json" afterPath="$PROJECT_DIR$/erpnext/projects/doctype/project/project.json" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/erpnext/projects/doctype/project/project.py" afterPath="$PROJECT_DIR$/erpnext/projects/doctype/project/project.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -46,7 +52,38 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="project.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/erpnext/projects/doctype/project/project.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="419">
+              <caret line="422" column="0" lean-forward="false" selection-start-line="422" selection-start-column="0" selection-end-line="422" selection-end-column="8" />
+              <folding>
+                <marker date="1516788826518" expanded="true" signature="763:930" ph="select activ... tabTimesheet Detail" />
+                <marker date="1516788826518" expanded="true" signature="4707:4755" ph="select count... tabTask" />
+                <marker date="1516788826518" expanded="true" signature="5047:5137" ph="select count... tabTask" />
+                <marker date="1516788826518" expanded="true" signature="5349:5403" ph="select sum(p... tabTask" />
+                <marker date="1516788826518" expanded="true" signature="5608:5665" ph="select sum(t... tabTask" />
+                <marker date="1516788826518" expanded="true" signature="5772:5834" ph="select progr... tabTask" />
+                <marker date="1516788826518" expanded="true" signature="6153:6394" ph="select sum(c... " />
+                <marker date="1516788826518" expanded="true" signature="6471:6634" ph="select sum(t... tabExpense Claim" />
+                <marker date="1516788826518" expanded="true" signature="7583:7680" ph="select sum(b... tabPurchase Invoice Item" />
+                <marker date="1516788826518" expanded="true" signature="7869:7957" ph="select sum(b... tabSales Order" />
+                <marker date="1516788826518" expanded="true" signature="8145:8235" ph="select sum(b... tabSales Invoice" />
+                <marker date="1516788826518" expanded="true" signature="10643:10836" ph="select unix_... tabTimesheet Detail" />
+                <marker date="1516788826518" expanded="true" signature="10979:11226" ph="select disti... tabProject" />
+                <marker date="1516788826518" expanded="true" signature="11846:12276" ph="select name,... tabUser" />
+                <marker date="1516788826518" expanded="true" signature="12910:13144" ph="SELECT `tabP... tabProject User" />
+                <marker date="1516788826518" expanded="true" signature="13473:13902" ph="SELECT `tabP... tabProject User" />
+                <marker date="1516788826518" expanded="true" signature="14144:14448" ph="SELECT `tabP... tabProject User" />
+                <marker date="1516788826518" expanded="true" signature="14734:15076" ph="SELECT `tabP... tabProject User" />
+                <marker date="1516788826518" expanded="true" signature="16580:16648" ph="SELECT holid... tabHoliday" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
@@ -78,6 +115,7 @@
     <option name="width" value="1368" />
     <option name="height" value="780" />
   </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
       <flattenPackages />
@@ -245,6 +283,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-1" y="-11" width="1368" height="780" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25378788" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -254,7 +293,7 @@
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32972136" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.9040248" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.9040248" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -334,25 +373,25 @@
         <state relative-caret-position="6984">
           <caret line="388" column="0" lean-forward="true" selection-start-line="388" selection-start-column="0" selection-end-line="388" selection-end-column="0" />
           <folding>
-            <element signature="e#128#167#0" expanded="true" />
-            <marker date="1516787426263" expanded="true" signature="763:930" ph="select activ... tabTimesheet Detail" />
-            <marker date="1516787426263" expanded="true" signature="4707:4755" ph="select count... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="5047:5137" ph="select count... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="5349:5403" ph="select sum(p... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="5608:5665" ph="select sum(t... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="5772:5834" ph="select progr... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="6153:6394" ph="select sum(c... " />
-            <marker date="1516787426263" expanded="true" signature="6471:6634" ph="select sum(t... tabExpense Claim" />
-            <marker date="1516787426263" expanded="true" signature="7583:7680" ph="select sum(b... tabPurchase Invoice Item" />
-            <marker date="1516787426263" expanded="true" signature="7869:7957" ph="select sum(b... tabSales Order" />
-            <marker date="1516787426263" expanded="true" signature="8145:8235" ph="select sum(b... tabSales Invoice" />
-            <marker date="1516787426263" expanded="true" signature="10643:10836" ph="select unix_... tabTimesheet Detail" />
-            <marker date="1516787426263" expanded="true" signature="10979:11226" ph="select disti... tabProject" />
-            <marker date="1516787426263" expanded="true" signature="11846:12276" ph="select name,... tabUser" />
-            <marker date="1516787426263" expanded="true" signature="12910:13144" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516787426263" expanded="true" signature="13473:13902" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516787426263" expanded="true" signature="14144:14448" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516787426263" expanded="true" signature="14714:15056" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="763:930" ph="select activ... tabTimesheet Detail" />
+            <marker date="1516788826518" expanded="true" signature="4707:4755" ph="select count... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5047:5137" ph="select count... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5349:5403" ph="select sum(p... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5608:5665" ph="select sum(t... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5772:5834" ph="select progr... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="6153:6394" ph="select sum(c... " />
+            <marker date="1516788826518" expanded="true" signature="6471:6634" ph="select sum(t... tabExpense Claim" />
+            <marker date="1516788826518" expanded="true" signature="7583:7680" ph="select sum(b... tabPurchase Invoice Item" />
+            <marker date="1516788826518" expanded="true" signature="7869:7957" ph="select sum(b... tabSales Order" />
+            <marker date="1516788826518" expanded="true" signature="8145:8235" ph="select sum(b... tabSales Invoice" />
+            <marker date="1516788826518" expanded="true" signature="10643:10836" ph="select unix_... tabTimesheet Detail" />
+            <marker date="1516788826518" expanded="true" signature="10979:11226" ph="select disti... tabProject" />
+            <marker date="1516788826518" expanded="true" signature="11846:12276" ph="select name,... tabUser" />
+            <marker date="1516788826518" expanded="true" signature="12910:13144" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="13473:13902" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="14144:14448" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="14734:15076" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="16580:16648" ph="SELECT holid... tabHoliday" />
           </folding>
         </state>
       </provider>
@@ -405,25 +444,25 @@
         <state relative-caret-position="6714">
           <caret line="373" column="335" lean-forward="true" selection-start-line="373" selection-start-column="335" selection-end-line="373" selection-end-column="335" />
           <folding>
-            <element signature="e#128#167#0" expanded="true" />
-            <marker date="1516787426263" expanded="true" signature="763:930" ph="select activ... tabTimesheet Detail" />
-            <marker date="1516787426263" expanded="true" signature="4707:4755" ph="select count... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="5047:5137" ph="select count... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="5349:5403" ph="select sum(p... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="5608:5665" ph="select sum(t... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="5772:5834" ph="select progr... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="6153:6394" ph="select sum(c... " />
-            <marker date="1516787426263" expanded="true" signature="6471:6634" ph="select sum(t... tabExpense Claim" />
-            <marker date="1516787426263" expanded="true" signature="7583:7680" ph="select sum(b... tabPurchase Invoice Item" />
-            <marker date="1516787426263" expanded="true" signature="7869:7957" ph="select sum(b... tabSales Order" />
-            <marker date="1516787426263" expanded="true" signature="8145:8235" ph="select sum(b... tabSales Invoice" />
-            <marker date="1516787426263" expanded="true" signature="10643:10836" ph="select unix_... tabTimesheet Detail" />
-            <marker date="1516787426263" expanded="true" signature="10979:11226" ph="select disti... tabProject" />
-            <marker date="1516787426263" expanded="true" signature="11846:12276" ph="select name,... tabUser" />
-            <marker date="1516787426263" expanded="true" signature="12910:13144" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516787426263" expanded="true" signature="13473:13902" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516787426263" expanded="true" signature="14144:14448" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516787426263" expanded="true" signature="14714:15056" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="763:930" ph="select activ... tabTimesheet Detail" />
+            <marker date="1516788826518" expanded="true" signature="4707:4755" ph="select count... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5047:5137" ph="select count... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5349:5403" ph="select sum(p... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5608:5665" ph="select sum(t... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5772:5834" ph="select progr... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="6153:6394" ph="select sum(c... " />
+            <marker date="1516788826518" expanded="true" signature="6471:6634" ph="select sum(t... tabExpense Claim" />
+            <marker date="1516788826518" expanded="true" signature="7583:7680" ph="select sum(b... tabPurchase Invoice Item" />
+            <marker date="1516788826518" expanded="true" signature="7869:7957" ph="select sum(b... tabSales Order" />
+            <marker date="1516788826518" expanded="true" signature="8145:8235" ph="select sum(b... tabSales Invoice" />
+            <marker date="1516788826518" expanded="true" signature="10643:10836" ph="select unix_... tabTimesheet Detail" />
+            <marker date="1516788826518" expanded="true" signature="10979:11226" ph="select disti... tabProject" />
+            <marker date="1516788826518" expanded="true" signature="11846:12276" ph="select name,... tabUser" />
+            <marker date="1516788826518" expanded="true" signature="12910:13144" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="13473:13902" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="14144:14448" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="14734:15076" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="16580:16648" ph="SELECT holid... tabHoliday" />
           </folding>
         </state>
       </provider>
@@ -479,25 +518,25 @@
         <state relative-caret-position="6228">
           <caret line="346" column="0" lean-forward="true" selection-start-line="346" selection-start-column="0" selection-end-line="346" selection-end-column="0" />
           <folding>
-            <element signature="e#128#167#0" expanded="true" />
-            <marker date="1516787426263" expanded="true" signature="763:930" ph="select activ... tabTimesheet Detail" />
-            <marker date="1516787426263" expanded="true" signature="4707:4755" ph="select count... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="5047:5137" ph="select count... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="5349:5403" ph="select sum(p... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="5608:5665" ph="select sum(t... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="5772:5834" ph="select progr... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="6153:6394" ph="select sum(c... " />
-            <marker date="1516787426263" expanded="true" signature="6471:6634" ph="select sum(t... tabExpense Claim" />
-            <marker date="1516787426263" expanded="true" signature="7583:7680" ph="select sum(b... tabPurchase Invoice Item" />
-            <marker date="1516787426263" expanded="true" signature="7869:7957" ph="select sum(b... tabSales Order" />
-            <marker date="1516787426263" expanded="true" signature="8145:8235" ph="select sum(b... tabSales Invoice" />
-            <marker date="1516787426263" expanded="true" signature="10643:10836" ph="select unix_... tabTimesheet Detail" />
-            <marker date="1516787426263" expanded="true" signature="10979:11226" ph="select disti... tabProject" />
-            <marker date="1516787426263" expanded="true" signature="11846:12276" ph="select name,... tabUser" />
-            <marker date="1516787426263" expanded="true" signature="12910:13144" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516787426263" expanded="true" signature="13473:13902" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516787426263" expanded="true" signature="14144:14448" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516787426263" expanded="true" signature="14714:15056" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="763:930" ph="select activ... tabTimesheet Detail" />
+            <marker date="1516788826518" expanded="true" signature="4707:4755" ph="select count... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5047:5137" ph="select count... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5349:5403" ph="select sum(p... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5608:5665" ph="select sum(t... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5772:5834" ph="select progr... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="6153:6394" ph="select sum(c... " />
+            <marker date="1516788826518" expanded="true" signature="6471:6634" ph="select sum(t... tabExpense Claim" />
+            <marker date="1516788826518" expanded="true" signature="7583:7680" ph="select sum(b... tabPurchase Invoice Item" />
+            <marker date="1516788826518" expanded="true" signature="7869:7957" ph="select sum(b... tabSales Order" />
+            <marker date="1516788826518" expanded="true" signature="8145:8235" ph="select sum(b... tabSales Invoice" />
+            <marker date="1516788826518" expanded="true" signature="10643:10836" ph="select unix_... tabTimesheet Detail" />
+            <marker date="1516788826518" expanded="true" signature="10979:11226" ph="select disti... tabProject" />
+            <marker date="1516788826518" expanded="true" signature="11846:12276" ph="select name,... tabUser" />
+            <marker date="1516788826518" expanded="true" signature="12910:13144" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="13473:13902" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="14144:14448" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="14734:15076" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="16580:16648" ph="SELECT holid... tabHoliday" />
           </folding>
         </state>
       </provider>
@@ -532,34 +571,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/erpnext/projects/doctype/project/project.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="496">
-          <caret line="406" column="0" lean-forward="true" selection-start-line="406" selection-start-column="0" selection-end-line="406" selection-end-column="0" />
-          <folding>
-            <element signature="e#128#167#0" expanded="true" />
-            <marker date="1516787426263" expanded="true" signature="763:930" ph="select activ... tabTimesheet Detail" />
-            <marker date="1516787426263" expanded="true" signature="4707:4755" ph="select count... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="5047:5137" ph="select count... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="5349:5403" ph="select sum(p... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="5608:5665" ph="select sum(t... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="5772:5834" ph="select progr... tabTask" />
-            <marker date="1516787426263" expanded="true" signature="6153:6394" ph="select sum(c... " />
-            <marker date="1516787426263" expanded="true" signature="6471:6634" ph="select sum(t... tabExpense Claim" />
-            <marker date="1516787426263" expanded="true" signature="7583:7680" ph="select sum(b... tabPurchase Invoice Item" />
-            <marker date="1516787426263" expanded="true" signature="7869:7957" ph="select sum(b... tabSales Order" />
-            <marker date="1516787426263" expanded="true" signature="8145:8235" ph="select sum(b... tabSales Invoice" />
-            <marker date="1516787426263" expanded="true" signature="10643:10836" ph="select unix_... tabTimesheet Detail" />
-            <marker date="1516787426263" expanded="true" signature="10979:11226" ph="select disti... tabProject" />
-            <marker date="1516787426263" expanded="true" signature="11846:12276" ph="select name,... tabUser" />
-            <marker date="1516787426263" expanded="true" signature="12910:13144" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516787426263" expanded="true" signature="13473:13902" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516787426263" expanded="true" signature="14144:14448" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516787426263" expanded="true" signature="14714:15056" ph="SELECT `tabP... tabProject User" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/erpnext/hooks.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="149">
@@ -574,8 +585,34 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="18">
           <caret line="9" column="17" lean-forward="false" selection-start-line="9" selection-start-column="17" selection-end-line="9" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/erpnext/projects/doctype/project/project.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="419">
+          <caret line="422" column="0" lean-forward="false" selection-start-line="422" selection-start-column="0" selection-end-line="422" selection-end-column="8" />
           <folding>
-            <element signature="e#0#39#0" expanded="false" />
+            <marker date="1516788826518" expanded="true" signature="763:930" ph="select activ... tabTimesheet Detail" />
+            <marker date="1516788826518" expanded="true" signature="4707:4755" ph="select count... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5047:5137" ph="select count... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5349:5403" ph="select sum(p... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5608:5665" ph="select sum(t... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5772:5834" ph="select progr... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="6153:6394" ph="select sum(c... " />
+            <marker date="1516788826518" expanded="true" signature="6471:6634" ph="select sum(t... tabExpense Claim" />
+            <marker date="1516788826518" expanded="true" signature="7583:7680" ph="select sum(b... tabPurchase Invoice Item" />
+            <marker date="1516788826518" expanded="true" signature="7869:7957" ph="select sum(b... tabSales Order" />
+            <marker date="1516788826518" expanded="true" signature="8145:8235" ph="select sum(b... tabSales Invoice" />
+            <marker date="1516788826518" expanded="true" signature="10643:10836" ph="select unix_... tabTimesheet Detail" />
+            <marker date="1516788826518" expanded="true" signature="10979:11226" ph="select disti... tabProject" />
+            <marker date="1516788826518" expanded="true" signature="11846:12276" ph="select name,... tabUser" />
+            <marker date="1516788826518" expanded="true" signature="12910:13144" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="13473:13902" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="14144:14448" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="14734:15076" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="16580:16648" ph="SELECT holid... tabHoliday" />
           </folding>
         </state>
       </provider>
