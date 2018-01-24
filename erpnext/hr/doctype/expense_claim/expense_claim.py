@@ -14,6 +14,7 @@ from erpnext.controllers.accounts_controller import AccountsController
 from frappe.utils.csvutils import getlink
 
 class InvalidExpenseApproverError(frappe.ValidationError): pass
+class ExpenseApproverIdentityError(frappe.ValidationError): pass
 
 class ExpenseClaim(AccountsController):
 	def onload(self):
@@ -197,6 +198,11 @@ class ExpenseClaim(AccountsController):
 		if self.exp_approver and "Expense Approver" not in frappe.get_roles(self.exp_approver):
 			frappe.throw(_("{0} ({1}) must have role 'Expense Approver'")\
 				.format(get_fullname(self.exp_approver), self.exp_approver), InvalidExpenseApproverError)
+
+		elif self.docstatus == 1 and self.exp_approver != frappe.session.user:
+			frappe.throw(_("Only the selected Expense Approver can submit this Expense Claim."),
+				ExpenseApproverIdentityError)
+
 
 	def update_task(self):
 		task = frappe.get_doc("Task", self.task)
