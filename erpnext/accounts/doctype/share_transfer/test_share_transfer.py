@@ -7,32 +7,36 @@ import frappe
 import unittest
 from frappe import ValidationError
 
-test_dependencies = ["Shareholder", "Share Type", "Shareholder"]
+test_dependencies = ["Share Type", "Shareholder"]
 
 class TestShareTransfer(unittest.TestCase):
-	def test_invalid_share_purchase(self):
+	def test_invalid_share_transfer(self):
 		doc = frappe.get_doc({
-			"doctype": "Share Transfer",
-			"transfer_type": "Purchase",
-			"date": "2018-01-04",
-			"from_party": "Tony Stark",
-			"share_type": "Class A",
-			"no_of_shares": 10,
-			"rate": 10.00,
-			"company": "Stark Tower"
+			"doctype"			: "Share Transfer",
+			"transfer_type"		: "Transfer",
+			"date"				: "2018-01-05",
+			"from_no"			: "SH-00003",
+			"to_shareholder"	: "SH-00002",
+			"share_type"		: "Equity",
+			"from_no"			: 1,
+			"to_no"				: 100,
+			"no_of_shares"		: 100,
+			"rate"				: 15,
+			"company"			: "Stark Tower"
 		})
 		self.assertRaises(ValidationError, doc.insert)
 
-	def test_invalid_share_transfer(self):
+	def test_invalid_share_purchase(self):
 		doc = frappe.get_doc({
-			"doctype": "Share Transfer",
-			"transfer_type": "Transfer",
-			"date": "2018-01-04",
-			"from_party": "Tony Stark",
-			"to_party": "Hulk",
-			"share_type": "Class A",
-			"no_of_shares": 10,
-			"rate": 10.00,
-			"company": "Stark Tower"
+			"doctype"			: "Share Transfer",
+			"transfer_type"		: "Purchase",
+			"date"				: "2018-01-02",
+			"from_no"			: "SH-00001",
+			"share_type"		: "Equity",
+			"from_no"			: 1,
+			"to_no"				: 200,
+			"no_of_shares"		: 200,
+			"rate"				: 15,
+			"company"			: "Stark Tower"
 		})
 		self.assertRaises(ValidationError, doc.insert)

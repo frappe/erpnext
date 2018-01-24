@@ -1,14 +1,17 @@
 [
 	{
 		"doctype": "Shareholder",
-		"shareholder": "Tony Stark"
+		"series": "SH-",
+		"title": "Iron Man"
 	},
 	{
 		"doctype": "Shareholder",
-		"shareholder": "Thor"
+		"name": "SH-",
+		"title": "Thor"
 	},
 	{
 		"doctype": "Shareholder",
-		"shareholder": "Bruce Banner"
+		"name": "SH-",
+		"title": "Hulk"
 	}
 ]
