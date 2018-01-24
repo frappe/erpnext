@@ -12,7 +12,7 @@ def boot_session(bootinfo):
 	bootinfo.custom_css = frappe.db.get_value('Style Settings', None, 'custom_css') or ''
 	bootinfo.website_settings = frappe.get_doc('Website Settings')
 
-	if frappe.session['user']!='Guest':
+	if frappe.session['user'] != 'Guest':
 		update_page_info(bootinfo)
 
 		load_country_and_currency(bootinfo)
@@ -22,7 +22,9 @@ def boot_session(bootinfo):
 			'customer_group')
 		bootinfo.sysdefaults.allow_stale = cint(frappe.db.get_single_value('Accounts Settings',
 			'allow_stale'))
-
+		bootinfo.sysdefaults.presentation_currency = [
+			d.currency for d in frappe.get_doc('Accounts Settings', 'Accounts Settings').presentation_currency
+		]
 		bootinfo.notification_settings = frappe.get_doc("Notification Control",
 			"Notification Control")
 
