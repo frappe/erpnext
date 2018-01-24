@@ -85,10 +85,10 @@ erpnext.stock.ItemDashboard = Class.extend({
 
 		if (frappe.boot.user.can_write.indexOf("Stock Entry")>=0){
 			$(".btn-move").show();
- +			$(".btn-add").show();
+			$(".btn-add").show();
 		}else{
 			$(".btn-move").hide();
- +			$(".btn-add").hide();
+			$(".btn-add").hide();
 		}
 	},
 	get_item_dashboard_data: function(data, max_count, show_item) {
