@@ -489,3 +489,4 @@ erpnext.patches.v10_0.update_reserved_qty_for_purchase_order
 erpnext.patches.v10_0.fichier_des_ecritures_comptables_for_france
 erpnext.patches.v10_0.update_assessment_plan
 erpnext.patches.v10_0.update_assessment_result
+erpnext.patches.v10_0.workflow_leave_application
