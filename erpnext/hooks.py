@@ -208,9 +208,9 @@ doc_events = {
 
 scheduler_events = {
     "all": [
-		#"erpnext.projects.doctype.project.project.hourly_reminder"
-        #"erpnext.projects.doctype.project.project.hourly_reminder",
-		#"erpnext.projects.doctype.project.project.twice_daily_reminder"
+		"erpnext.projects.doctype.project.project.hourly_reminder"
+        "erpnext.projects.doctype.project.project.hourly_reminder",
+		"erpnext.projects.doctype.project.project.twice_daily_reminder"
     ],
 
 	"hourly": [

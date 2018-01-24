@@ -343,6 +343,8 @@ def hourly_reminder():
     for emails in email:
         recipients = emails[0]
         data.append(recipients)
+    print("==========================================")
+    print("hourly")
     email_sending(data,header)
 
 @frappe.whitelist()
