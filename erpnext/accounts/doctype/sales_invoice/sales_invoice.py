@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, add_days
 from frappe import _, msgprint, throw
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.controllers.stock_controller import update_gl_entries_after
@@ -146,6 +146,8 @@ class SalesInvoice(SellingController):
 
 		update_company_current_month_sales(self.company)
 		self.update_project()
+		if not self.is_return:
+			self.make_loyalty_point_entry()
 
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:
@@ -185,6 +187,7 @@ class SalesInvoice(SellingController):
 
 		update_company_current_month_sales(self.company)
 		self.update_project()
+		self.delete_loyalty_point_entry()
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
@@ -911,6 +914,29 @@ class SalesInvoice(SellingController):
 		for entry in self.payments:
 			if entry.amount < 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be positive").format(entry.idx))
+
+	def make_loyalty_point_entry(self):
+		loyalty_program = frappe.db.get_value("Customer", self.customer, "loyalty_program")
+		print (loyalty_program)
+		if loyalty_program:
+			from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_program_tier
+			loyalty_program_details = get_loyalty_program_tier(self.customer, loyalty_program)
+			doc = frappe.get_doc({
+				"doctype": "Loyalty Point Entry",
+				"loyalty_program": loyalty_program,
+				"loyalty_program_tier": loyalty_program_details.tier_name,
+				"customer": self.customer,
+				"sales_invoice": self.name,
+				"points_earned": int(self.grand_total/loyalty_program_details.collection_factor),
+				"purchase_amount": self.grand_total,
+				"expiry_date": add_days(self.posting_date, loyalty_program_details.expiry_duration)
+			})
+			doc.save()
+			frappe.db.set_value("Customer", self.customer, "loyalty_program_tier", loyalty_program_details.tier_name)
+	
+	def delete_loyalty_point_entry(self):
+		frappe.db.sql('''delete from `tabLoyalty Point Entry` where customer=%s and sales_invoice=%s''', (self.customer, self.name))
+
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
