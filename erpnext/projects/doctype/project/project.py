@@ -365,6 +365,7 @@ def daily_reminder():
         data.append(recipients)
     email_sending(data, header)
 
+@frappe.whitelist()
 def weekly():
     data = []
     header = "Weekly Reminder"
@@ -375,11 +376,17 @@ def weekly():
         data.append(recipients)
     email_sending(data, header)
 
+
 def email_sending(data,header):
-    for datas in data:
-        frappe.sendmail(
-            recipients=datas,
-            subject=frappe._(header),
-            header=[frappe._("Please Update your Project Status"), 'blue'],
-            message= header
-    )
+    holiday = frappe.db.sql("""SELECT holiday_date FROM `tabHoliday` where holiday_date = CURDATE();""")
+    if len(holiday) == 0:
+        for datas in data:
+            print datas
+            frappe.sendmail(
+                recipients=datas,
+                subject=frappe._(header),
+                header=[frappe._("Please Update your Project Status"), 'blue'],
+                message= header
+            )
+    else:
+        pass
