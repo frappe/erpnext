@@ -61,13 +61,26 @@ def get_itemised_tax_breakup_data(doc):
 
 	return hsn_tax, hsn_taxable_amount
 
-def set_place_of_supply(doc, method):
+#Add Event on Sales Invoice.
+def set_place_of_supply_for_sales_invoice(doc, method):
 	if not frappe.get_meta('Address').has_field('gst_state'): return
 
 	address_name = doc.shipping_address_name or doc.customer_address
+	doc.place_of_supply = set_place_of_supply(address_name)
+
+#Add Event on Purchase Invoice.
+def set_place_of_supply_for_purchase_invoice(doc, method):
+	if not frappe.get_meta('Address').has_field('gst_state'): return
+
+	address_name = doc.shipping_address or doc.supplier_address
+	doc.place_of_supply = set_place_of_supply(address_name)
+
+
+def set_place_of_supply(address_name):
+	"""Set place of Supply in Sales and Purchase Invoice. Eg. 27-Maharashtra"""
 	if address_name:
 		address = frappe.db.get_value("Address", address_name, ["gst_state", "gst_state_number"], as_dict=1)
-		doc.place_of_supply = cstr(address.gst_state_number) + "-" + cstr(address.gst_state)
+		return cstr(address.gst_state_number) + "-" + cstr(address.gst_state)
 
 # don't remove this function it is used in tests
 def test_method():
