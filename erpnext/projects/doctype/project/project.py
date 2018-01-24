@@ -380,14 +380,18 @@ def weekly():
 
 
 def email_sending(data,header):
-<<<<<<< HEAD
-    for datas in data:
-        frappe.sendmail(
-            recipients=datas,
-            subject=frappe._(header),
-            header=[frappe._("Please Update your Project Status"), 'blue'],
-            message= header
-    )
+    holiday = frappe.db.sql("""SELECT holiday_date FROM `tabHoliday` where holiday_date = CURDATE();""")
+    if len(holiday) == 0:
+        for datas in data:
+            print datas
+            frappe.sendmail(
+                recipients=datas,
+                subject=frappe._(header),
+                header=[frappe._("Please Update your Project Status"), 'blue'],
+                message= header
+            )
+    else:
+        pass
 
 @frappe.whitelist()
 def times_check(from1,to,first_email,second_email,daily_time_to_send,weekly_time_to_send):
@@ -407,17 +411,4 @@ def times_check(from1,to,first_email,second_email,daily_time_to_send,weekly_time
     weekly_time_to_send_reminder = datetime.time(hoursWE, 00, 00)
 
     return from_reminder.strftime('%H:%M:%S'),to_reminder.strftime('%H:%M:%S'),first_email_reminder.strftime('%H:%M:%S'),second_email_reminder.strftime('%H:%M:%S'),daily_time_to_send_reminder.strftime('%H:%M:%S'),weekly_time_to_send_reminder.strftime('%H:%M:%S')
-=======
-    holiday = frappe.db.sql("""SELECT holiday_date FROM `tabHoliday` where holiday_date = CURDATE();""")
-    if len(holiday) == 0:
-        for datas in data:
-            print datas
-            frappe.sendmail(
-                recipients=datas,
-                subject=frappe._(header),
-                header=[frappe._("Please Update your Project Status"), 'blue'],
-                message= header
-            )
-    else:
-        pass
->>>>>>> 563bf28ddb15ff49e8c86a10253e0851d8039d95
+
