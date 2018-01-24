@@ -88,7 +88,7 @@ DocType: Lab Prescription,Lab Prescription,การกําหนด Lab
 apps/erpnext/erpnext/hub_node/page/hub/hub.js +185,Sort by Price,เรียงตามราคา
 ,Delay Days,Delay Days
 apps/erpnext/erpnext/hr/report/vehicle_expenses/vehicle_expenses.py +26,Service Expense,ค่าใช้จ่ายในการให้บริการ
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +893,Serial Number: {0} is already referenced in Sales Invoice: {1},หมายเลขซีเรียล: {0} มีการอ้างถึงในใบแจ้งหนี้การขายแล้ว: {1}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +886,Serial Number: {0} is already referenced in Sales Invoice: {1},หมายเลขซีเรียล: {0} มีการอ้างถึงในใบแจ้งหนี้การขายแล้ว: {1}
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +878,Invoice,ใบกำกับสินค้า
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +109,Make Retention Stock Entry,Make Entry Stock Entry
 DocType: Purchase Invoice Item,Item Weight Details,รายละเอียดน้ำหนักรายการ
@@ -139,7 +139,7 @@ DocType: Packed Item,Parent Detail docname,docname รายละเอีย�
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +69,"Reference: {0}, Item Code: {1} and Customer: {2}",ข้อมูลอ้างอิง: {0} รหัสรายการ: {1} และลูกค้า: {2}
 apps/erpnext/erpnext/utilities/user_progress.py +143,Kg,กิโลกรัม
 apps/erpnext/erpnext/config/hr.py +45,Opening for a Job.,เปิดงาน
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +104,BOM is not specified for subcontracting item {0} at row {1},ไม่ได้ระบุ BOM สำหรับรายการรับเหมาช่วง {0} ที่แถว {1}
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +110,BOM is not specified for subcontracting item {0} at row {1},ไม่ได้ระบุ BOM สำหรับรายการรับเหมาช่วง {0} ที่แถว {1}
 apps/erpnext/erpnext/education/doctype/assessment_result_tool/assessment_result_tool.js +149,{0} Result submittted,{0} ผลลัพธ์ที่ส่งมา
 DocType: Item Attribute,Increment,การเพิ่มขึ้น
 apps/erpnext/erpnext/utilities/page/leaderboard/leaderboard.js +61,Timespan,ช่วงเวลา
@@ -150,7 +150,7 @@ DocType: Patient,Married,แต่งงาน
 apps/erpnext/erpnext/accounts/party.py +44,Not permitted for {0},ไม่อนุญาตสำหรับ {0}
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +593,Get items from,รับรายการจาก
 DocType: Price List,Price Not UOM Dependant,ราคาไม่ขึ้นอยู่ UOM
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +461,Stock cannot be updated against Delivery Note {0},หุ้น ไม่สามารถปรับปรุง กับ การจัดส่งสินค้า หมายเหตุ {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +454,Stock cannot be updated against Delivery Note {0},หุ้น ไม่สามารถปรับปรุง กับ การจัดส่งสินค้า หมายเหตุ {0}
 apps/erpnext/erpnext/templates/pages/home.py +25,Product {0},สินค้า {0}
 apps/erpnext/erpnext/templates/generators/item_group.html +43,No items listed,ไม่มีรายการที่ระบุไว้
 DocType: Asset Repair,Error Description,คำอธิบายข้อผิดพลาด
@@ -158,7 +158,7 @@ DocType: Payment Reconciliation,Reconcile,คืนดี
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +30,Grocery,ร้านขายของชำ
 DocType: Quality Inspection Reading,Reading 1,Reading 1
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +40,Pension Funds,กองทุน บำเหน็จบำนาญ
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +88,Next Depreciation Date cannot be before Purchase Date,ถัดไปวันที่ค่าเสื่อมราคาที่ไม่สามารถจะซื้อก่อนวันที่
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +91,Next Depreciation Date cannot be before Purchase Date,ถัดไปวันที่ค่าเสื่อมราคาที่ไม่สามารถจะซื้อก่อนวันที่
 DocType: Crop,Perennial,ตลอดกาล
 DocType: Consultation,Consultation Date,วันที่ปรึกษา
 apps/erpnext/erpnext/hub_node/page/hub/hub.js +131,Product listing and discovery for ERPNext users,รายชื่อผลิตภัณฑ์และการค้นพบสำหรับผู้ใช้ ERPNext
@@ -173,7 +173,7 @@ DocType: POS Profile,Write Off Cost Center,เขียนปิดศูนย�
 apps/erpnext/erpnext/public/js/setup_wizard.js +117,"e.g. ""Primary School"" or ""University""",เช่น &quot;โรงเรียนประถม&quot; หรือ &quot;มหาวิทยาลัย&quot;
 apps/erpnext/erpnext/config/stock.py +28,Stock Reports,รายงานสต็อกสินค้า
 DocType: Warehouse,Warehouse Detail,รายละเอียดคลังสินค้า
-apps/erpnext/erpnext/selling/doctype/customer/customer.py +192,Credit limit has been crossed for customer {0} {1}/{2},วงเงินสินเชื่อที่ได้รับการข้ามสำหรับลูกค้า {0} {1} / {2}
+apps/erpnext/erpnext/selling/doctype/customer/customer.py +193,Credit limit has been crossed for customer {0} {1}/{2},วงเงินสินเชื่อที่ได้รับการข้ามสำหรับลูกค้า {0} {1} / {2}
 apps/erpnext/erpnext/education/doctype/academic_term/academic_term.py +33,The Term End Date cannot be later than the Year End Date of the Academic Year to which the term is linked (Academic Year {}). Please correct the dates and try again.,วันที่สิ้นสุดระยะเวลาที่ไม่สามารถจะช้ากว่าปีวันที่สิ้นสุดปีการศึกษาที่คำว่ามีการเชื่อมโยง (ปีการศึกษา {}) โปรดแก้ไขวันและลองอีกครั้ง
 apps/erpnext/erpnext/stock/doctype/item/item.py +258,"""Is Fixed Asset"" cannot be unchecked, as Asset record exists against the item","ไม่สามารถเพิกถอน ""คือสินทรัพย์ถาวร"" ได้เพราะมีบันทึกสินทรัพย์ที่อยู่กับรายการ"
 DocType: Delivery Trip,Departure Time,เวลาออกเดินทาง
@@ -193,7 +193,7 @@ DocType: Student Log,Student Log,เข้าสู่ระบบนักศ�
 DocType: Quality Inspection,Get Specification Details,ดูรายละเอียดสเปค
 apps/erpnext/erpnext/config/buying.py +165,Templates of supplier standings.,แม่แบบของ standings ผู้จัดจำหน่าย
 DocType: Lead,Interested,สนใจ
-apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +226,Opening,การเปิด
+apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +191,Opening,การเปิด
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +30,From {0} to {1},จาก {0} เป็น {1}
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +50,Failed to setup taxes,ไม่สามารถตั้งค่าภาษีได้
 DocType: Item,Copy From Item Group,คัดลอกจากกลุ่มสินค้า
@@ -365,7 +365,7 @@ apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +224,Only
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +121,Relieving Date must be greater than Date of Joining,บรรเทา วันที่ ต้องมากกว่า วันที่ เข้าร่วม
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +238,Leaves per Year,การลาต่อปี
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +128,Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.,แถว {0}: โปรดตรวจสอบ 'เป็นล่วงหน้า' กับบัญชี {1} ถ้านี้เป็นรายการล่วงหน้า
-apps/erpnext/erpnext/stock/utils.py +217,Warehouse {0} does not belong to company {1},คลังสินค้า {0} ไม่ได้เป็นของ บริษัท {1}
+apps/erpnext/erpnext/stock/utils.py +216,Warehouse {0} does not belong to company {1},คลังสินค้า {0} ไม่ได้เป็นของ บริษัท {1}
 DocType: Email Digest,Profit & Loss,กำไรขาดทุน
 apps/erpnext/erpnext/utilities/user_progress.py +144,Litre,ลิตร
 DocType: Task,Total Costing Amount (via Time Sheet),รวมคำนวณต้นทุนจำนวนเงิน (ผ่านใบบันทึกเวลา)
@@ -457,6 +457,7 @@ DocType: BOM Item,Rate & Amount,อัตราและจำนวนเงิ
 apps/erpnext/erpnext/setup/doctype/company/company_dashboard.py +6,This is based on transactions against this Company. See timeline below for details,นี้ขึ้นอยู่กับการทำธุรกรรมกับ บริษัท นี้ ดูรายละเอียดเพิ่มเติมเกี่ยวกับเส้นเวลาด้านล่าง
 DocType: Stock Settings,Notify by Email on creation of automatic Material Request,แจ้งทางอีเมล์เมื่อการสร้างการร้องขอวัสดุโดยอัตโนมัติ
 apps/erpnext/erpnext/healthcare/setup.py +259,Resistant,ต้านทาน
+apps/erpnext/erpnext/config/desktop.py +309,Consultationt,Consultationt
 DocType: Journal Entry,Multi Currency,หลายสกุลเงิน
 DocType: Opening Invoice Creation Tool,Invoice Type,ประเภทใบแจ้งหนี้
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +933,Delivery Note,หมายเหตุจัดส่งสินค้า
@@ -532,7 +533,6 @@ DocType: Email Digest,Credit Balance,เครดิตบาลานซ์
 DocType: Employee,Widowed,เป็นม่าย
 DocType: Request for Quotation,Request for Quotation,ขอใบเสนอราคา
 DocType: Healthcare Settings,Require Lab Test Approval,ต้องได้รับอนุมัติจาก Lab Test
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,รหัสรายการ&gt; กลุ่มสินค้า&gt; แบรนด์
 DocType: Salary Slip Timesheet,Working Hours,เวลาทำการ
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool_dashboard.html +10,Total Outstanding,รวมดีเด่น
 DocType: Naming Series,Change the starting / current sequence number of an existing series.,เปลี่ยนหมายเลขลำดับเริ่มต้น / ปัจจุบันของชุดที่มีอยู่
@@ -561,7 +561,7 @@ DocType: Subscription,Yearly,ประจำปี
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +230,Please enter Cost Center,กรุณาใส่ ศูนย์ต้นทุน
 DocType: Drug Prescription,Dosage,ปริมาณ
 DocType: Journal Entry Account,Sales Order,สั่งซื้อขาย
-apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +70,Avg. Selling Rate,เฉลี่ย อัตราการขาย
+apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +69,Avg. Selling Rate,เฉลี่ย อัตราการขาย
 DocType: Assessment Plan,Examiner Name,ชื่อผู้ตรวจสอบ
 DocType: Lab Test Template,No Result,ไม่มีผล
 DocType: Purchase Invoice Item,Quantity and Rate,จำนวนและอัตรา
@@ -611,6 +611,7 @@ DocType: Employee,Health Concerns,ความกังวลเรื่อง�
 DocType: Payroll Entry,Select Payroll Period,เลือกระยะเวลาการจ่ายเงินเดือน
 DocType: Purchase Invoice,Unpaid,ไม่ได้ค่าจ้าง
 apps/erpnext/erpnext/stock/page/stock_balance/stock_balance.js +49,Reserved for sale,สงวนไว้สำหรับขาย
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,กรุณาติดตั้ง System Employee Naming System ใน Human Resource&gt; HR Settings
 DocType: Packing Slip,From Package No.,จากเลขที่แพคเกจ
 DocType: Item Attribute,To Range,ช่วง
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +29,Securities and Deposits,หลักทรัพย์และ เงินฝาก
@@ -635,11 +636,11 @@ DocType: Pricing Rule,Valid Upto,ที่ถูกต้องไม่เก�
 DocType: Training Event,Workshop,โรงงาน
 DocType: Supplier Scorecard Scoring Standing,Warn Purchase Orders,เตือนคำสั่งซื้อ
 apps/erpnext/erpnext/utilities/user_progress.py +64,List a few of your customers. They could be organizations or individuals.,รายการ บางส่วนของ ลูกค้าของคุณ พวกเขาจะเป็น องค์กร หรือบุคคล
-apps/erpnext/erpnext/manufacturing/report/bom_stock_report/bom_stock_report.py +21,Enough Parts to Build,อะไหล่พอที่จะสร้าง
+apps/erpnext/erpnext/manufacturing/report/bom_stock_report/bom_stock_report.py +23,Enough Parts to Build,อะไหล่พอที่จะสร้าง
 DocType: POS Profile User,POS Profile User,ผู้ใช้โปรไฟล์ POS
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +128,Direct Income,รายได้ โดยตรง
 DocType: Patient Appointment,Date TIme,วันเวลา
-apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +36,"Can not filter based on Account, if grouped by Account",ไม่สามารถกรอง ตาม บัญชี ถ้า จัดกลุ่มตาม บัญชี
+apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +41,"Can not filter based on Account, if grouped by Account",ไม่สามารถกรอง ตาม บัญชี ถ้า จัดกลุ่มตาม บัญชี
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +130,Administrative Officer,พนักงานธุรการ
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +39,Setting up company and taxes,การตั้ง บริษัท และภาษี
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py +22,Please select Course,กรุณาเลือกหลักสูตร
@@ -650,7 +651,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +350,Please
 DocType: Stock Entry Detail,Difference Account,บัญชี ที่แตกต่างกัน
 DocType: Purchase Invoice,Supplier GSTIN,ผู้จัดจำหน่าย GSTIN
 apps/erpnext/erpnext/projects/doctype/task/task.py +47,Cannot close task as its dependant task {0} is not closed.,ไม่สามารถปิดงานเป็นงานขึ้นอยู่กับ {0} ไม่ได้ปิด
-apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +433,Please enter Warehouse for which Material Request will be raised,กรุณากรอก คลังสินค้า ที่ ขอ วัสดุ จะ ได้รับการเลี้ยงดู
+apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +435,Please enter Warehouse for which Material Request will be raised,กรุณากรอก คลังสินค้า ที่ ขอ วัสดุ จะ ได้รับการเลี้ยงดู
 DocType: Production Order,Additional Operating Cost,เพิ่มเติมต้นทุนการดำเนินงาน
 DocType: Lab Test Template,Lab Routine,Lab Routine
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +20,Cosmetics,เครื่องสำอาง
@@ -821,7 +822,7 @@ DocType: Employee,Passport Number,หมายเลขหนังสือเ�
 apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +60,Relation with Guardian2,ความสัมพันธ์กับ Guardian2
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +124,Manager,ผู้จัดการ
 DocType: Payment Entry,Payment From / To,การชำระเงินจาก / ถึง
-apps/erpnext/erpnext/selling/doctype/customer/customer.py +155,New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0},วงเงินสินเชื่อใหม่น้อยกว่าจำนวนเงินที่ค้างในปัจจุบันสำหรับลูกค้า วงเงินสินเชื่อจะต้องมีอย่างน้อย {0}
+apps/erpnext/erpnext/selling/doctype/customer/customer.py +156,New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0},วงเงินสินเชื่อใหม่น้อยกว่าจำนวนเงินที่ค้างในปัจจุบันสำหรับลูกค้า วงเงินสินเชื่อจะต้องมีอย่างน้อย {0}
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +428,Please set account in Warehouse {0},โปรดตั้งค่าบัญชีในคลังสินค้า {0}
 apps/erpnext/erpnext/controllers/trends.py +39,'Based On' and 'Group By' can not be same,'ขึ้นอยู่กับ' และ 'จัดกลุ่มโดย' ต้องไม่เหมือนกัน
 DocType: Sales Person,Sales Person Targets,ขายเป้าหมายคน
@@ -832,7 +833,7 @@ DocType: Lab Test Template,Compound,สารประกอบ
 DocType: Student Batch Name,Batch Name,ชื่อแบทช์
 DocType: Fee Validity,Max number of visit,จำนวนการเข้าชมสูงสุด
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +339,Timesheet created:,Timesheet สร้าง:
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +920,Please set default Cash or Bank account in Mode of Payment {0},กรุณาตั้ง ค่าเริ่มต้น เงินสด หรือ บัญชีเงินฝากธนาคาร ใน โหมด ของ การชำระเงิน {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +913,Please set default Cash or Bank account in Mode of Payment {0},กรุณาตั้ง ค่าเริ่มต้น เงินสด หรือ บัญชีเงินฝากธนาคาร ใน โหมด ของ การชำระเงิน {0}
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.js +24,Enroll,ลงทะเบียน
 DocType: GST Settings,GST Settings,การตั้งค่า GST
 DocType: Selling Settings,Customer Naming By,การตั้งชื่อตามลูกค้า
@@ -959,7 +960,7 @@ DocType: Delivery Note,Customer's Purchase Order No,ใบสั่งซื้�
 DocType: Budget,Budget Against,งบประมาณป้องกันและปราบปราม
 DocType: Employee,Cell Number,จำนวนเซลล์
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +445,There's no employee for the given criteria. Check that Salary Slips have not already been created.,ไม่มีพนักงานสำหรับเกณฑ์ที่ระบุ ตรวจสอบว่าไม่มีการสร้างสลากเงินเดือนแล้ว
-apps/erpnext/erpnext/stock/reorder_item.py +190,Auto Material Requests Generated,Auto วัสดุการขอสร้าง
+apps/erpnext/erpnext/stock/reorder_item.py +194,Auto Material Requests Generated,Auto วัสดุการขอสร้าง
 apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation_list.js +7,Lost,สูญหาย
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +150,You can not enter current voucher in 'Against Journal Entry' column,คุณไม่สามารถใส่บัตรกำนัลในปัจจุบัน 'กับอนุทิน' คอลัมน์
 apps/erpnext/erpnext/stock/page/stock_balance/stock_balance.js +50,Reserved for manufacturing,สงวนไว้สำหรับการผลิต
@@ -967,7 +968,7 @@ DocType: Soil Texture,Sand,ทราย
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +25,Energy,พลังงาน
 DocType: Opportunity,Opportunity From,โอกาสจาก
 apps/erpnext/erpnext/config/hr.py +98,Monthly salary statement.,งบเงินเดือน
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +881,Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.,แถว {0}: {1} ต้องระบุหมายเลขผลิตภัณฑ์สำหรับรายการ {2} คุณได้ให้ {3} แล้ว
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +874,Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.,แถว {0}: {1} ต้องระบุหมายเลขผลิตภัณฑ์สำหรับรายการ {2} คุณได้ให้ {3} แล้ว
 apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_entry.py +79,Please select a table,โปรดเลือกตาราง
 DocType: BOM,Website Specifications,ข้อมูลจำเพาะเว็บไซต์
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py +78,{0} is an invalid email address in 'Recipients',{0} คือที่อยู่อีเมลที่ไม่ถูกต้องใน &quot;ผู้รับ&quot;
@@ -1055,7 +1056,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +764,No Per
 apps/erpnext/erpnext/hub_node/page/hub/hub.js +438,Quote Requested,อ้างสิทธิ์ที่ร้องขอ
 DocType: Vital Signs,Heart Rate / Pulse,อัตราหัวใจ / ชีพจร
 DocType: Company,Default Bank Account,บัญชีธนาคารเริ่มต้น
-apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +50,"To filter based on Party, select Party Type first",ในการกรองขึ้นอยู่กับพรรคเลือกพรรคพิมพ์ครั้งแรก
+apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +55,"To filter based on Party, select Party Type first",ในการกรองขึ้นอยู่กับพรรคเลือกพรรคพิมพ์ครั้งแรก
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +48,'Update Stock' can not be checked because items are not delivered via {0},'การปรับสต็อก' ไม่สามารถตรวจสอบได้เพราะรายการไม่ได้จัดส่งผ่านทาง {0}
 DocType: Vehicle,Acquisition Date,การได้มาซึ่งวัน
 apps/erpnext/erpnext/utilities/user_progress.py +143,Nos,Nos
@@ -1080,7 +1081,7 @@ apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +111,{0} {1}: Cost Ce
 apps/erpnext/erpnext/utilities/user_progress.py +89,Upload your letter head (Keep it web friendly as 900px by 100px),อัปโหลดหัวจดหมายของคุณ (เก็บไว้ในรูปแบบเว็บที่ใช้งานได้ง่ายราว 900px โดย 100px)
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +88,{0} {1}: Account {2} cannot be a Group,{0} {1}: บัญชี {2} ไม่สามารถเป็นกลุ่ม
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +63,Item Row {idx}: {doctype} {docname} does not exist in above '{doctype}' table,รายการแถว {IDX}: {DOCTYPE} {} DOCNAME ไม่อยู่ในข้างต้น &#39;{} DOCTYPE&#39; ตาราง
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +291,Timesheet {0} is already completed or cancelled,Timesheet {0} เสร็จสมบูรณ์แล้วหรือยกเลิก
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +284,Timesheet {0} is already completed or cancelled,Timesheet {0} เสร็จสมบูรณ์แล้วหรือยกเลิก
 apps/erpnext/erpnext/templates/pages/projects.html +42,No tasks,ไม่มีงาน
 DocType: Item Variant Settings,Copy Fields to Variant,คัดลอกช่องข้อมูลเป็น Variant
 DocType: Asset,Opening Accumulated Depreciation,เปิดค่าเสื่อมราคาสะสม
@@ -1192,9 +1193,10 @@ apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py 
 DocType: Production Order,Plan material for sub-assemblies,วัสดุแผนประกอบย่อย
 apps/erpnext/erpnext/config/selling.py +97,Sales Partners and Territory,พันธมิตรการขายและดินแดน
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +585,BOM {0} must be active,BOM {0} จะต้องใช้งาน
-apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +228,Closing (Opening + Total),การปิดบัญชี (การเปิด + ยอดรวม)
+apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +193,Closing (Opening + Total),การปิดบัญชี (การเปิด + ยอดรวม)
 DocType: Journal Entry,Depreciation Entry,รายการค่าเสื่อมราคา
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +36,Please select the document type first,เลือกประเภทของเอกสารที่แรก
+apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.js +111,Print in Account Currency,พิมพ์ในสกุลเงินของบัญชี
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,ยกเลิก การเข้าชม วัสดุ {0} ก่อนที่จะ ยกเลิก การบำรุงรักษา นี้ เยี่ยมชม
 DocType: Crop Cycle,ISO 8016 standard,มาตรฐาน ISO 8016
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +213,Serial No {0} does not belong to Item {1},อนุกรม ไม่มี {0} ไม่ได้อยู่ใน รายการ {1}
@@ -1220,7 +1222,7 @@ DocType: Purchase Receipt,Range,เทือกเขา
 DocType: Supplier,Default Payable Accounts,บัญชีเจ้าหนี้เริ่มต้น
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +49,Employee {0} is not active or does not exist,พนักงาน {0} ไม่ได้ ใช้งานอยู่หรือ ไม่อยู่
 DocType: Fee Structure,Components,ส่วนประกอบ
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +272,Please enter Asset Category in Item {0},กรุณากรอกประเภทสินทรัพย์ในข้อ {0}
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +276,Please enter Asset Category in Item {0},กรุณากรอกประเภทสินทรัพย์ในข้อ {0}
 apps/erpnext/erpnext/stock/doctype/item/item.py +634,Item Variants {0} updated,สินค้าหลากหลายรูปแบบ {0} ปรับปรุง
 DocType: Quality Inspection Reading,Reading 6,Reading 6
 apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +9,"to be generated. If delayed, you will have to manually change the ""Repeat on Day of Month"" field
@@ -1272,6 +1274,7 @@ apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_repo
 ,Company Name,ชื่อ บริษัท
 DocType: SMS Center,Total Message(s),ข้อความ รวม (s)
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +917,Select Item for Transfer,เลือกรายการสำหรับการโอนเงิน
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +201,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,โปรดตั้งค่าชุดการตั้งชื่อสำหรับ {0} ผ่านการตั้งค่า&gt; การตั้งค่า&gt; การตั้งชื่อซีรี่ส์
 DocType: Purchase Invoice,Additional Discount Percentage,เพิ่มเติมร้อยละส่วนลด
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +24,View a list of all the help videos,ดูรายการทั้งหมดวิดีโอความช่วยเหลือที่
 DocType: Agriculture Analysis Criteria,Soil Texture,พื้นผิวดิน
@@ -1300,7 +1303,7 @@ apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14
 DocType: BOM Website Item,BOM Website Item,BOM รายการเว็บไซต์
 apps/erpnext/erpnext/public/js/setup_wizard.js +52,Upload your letter head and logo. (you can edit them later).,อัปโหลดหัวจดหมายของคุณและโลโก้ (คุณสามารถแก้ไขได้ในภายหลัง)
 DocType: Timesheet Detail,Bill,บิล
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +85,Next Depreciation Date is entered as past date,ถัดไปวันที่มีการป้อนค่าเสื่อมราคาเป็นวันที่ผ่านมา
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +88,Next Depreciation Date is entered as past date,ถัดไปวันที่มีการป้อนค่าเสื่อมราคาเป็นวันที่ผ่านมา
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +208,White,ขาว
 DocType: SMS Center,All Lead (Open),ช่องทางทั้งหมด (เปิด)
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +253,Row {0}: Qty not available for {4} in warehouse {1} at posting time of the entry ({2} {3}),แถว {0}: จำนวนไม่สามารถใช้ได้สำหรับ {4} ในคลังสินค้า {1} ที่โพสต์เวลาของรายการ ({2} {3})
@@ -1316,7 +1319,7 @@ apps/erpnext/erpnext/controllers/selling_controller.py +129,Order Type must be o
 DocType: Lead,Next Contact Date,วันที่ถัดไปติดต่อ
 apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py +36,Opening Qty,เปิด จำนวน
 DocType: Healthcare Settings,Appointment Reminder,นัดหมายเตือน
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +472,Please enter Account for Change Amount,กรุณากรอกบัญชีเพื่อการเปลี่ยนแปลงจำนวน
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +465,Please enter Account for Change Amount,กรุณากรอกบัญชีเพื่อการเปลี่ยนแปลงจำนวน
 DocType: Program Enrollment Tool Student,Student Batch Name,นักศึกษาชื่อชุด
 DocType: Consultation,Doctor,คุณหมอ
 DocType: Holiday List,Holiday List Name,ชื่อรายการวันหยุด
@@ -1332,6 +1335,7 @@ DocType: Patient,Patient Relation,ความสัมพันธ์ของ�
 apps/erpnext/erpnext/config/hr.py +80,Leave Allocation Tool,เครื่องมือการจัดสรรการลา
 DocType: Item,Hub Category to Publish,ฮับประเภทที่จะเผยแพร่
 DocType: Leave Block List,Leave Block List Dates,ไม่ระบุวันที่รายการบล็อก
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,กรุณาตั้งหมายเลขชุดสำหรับการเข้าร่วมประชุมผ่านทาง Setup&gt; Numbering Series
 DocType: Sales Invoice,Billing Address GSTIN,ที่อยู่การเรียกเก็บเงิน GSTIN
 DocType: Assessment Plan,Evaluate,ประเมินผล
 DocType: Workstation,Net Hour Rate,อัตราชั่วโมงสุทธิ
@@ -1366,7 +1370,7 @@ DocType: Landed Cost Item,Purchase Receipt Item,ซื้อสินค้า�
 DocType: Purchase Receipt,PREC-RET-,PREC-RET-
 DocType: POS Profile,Sales Invoice Payment,การชำระเงินการขายใบแจ้งหนี้
 DocType: Production Plan Item,Reserved Warehouse in Sales Order / Finished Goods Warehouse,คลังสินค้าสำรองในการขายการสั่งซื้อ / โกดังสินค้าสำเร็จรูป
-apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +72,Selling Amount,ปริมาณการขาย
+apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +71,Selling Amount,ปริมาณการขาย
 DocType: Repayment Schedule,Interest Amount,จำนวนเงินที่น่าสนใจ
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +120,You are the Expense Approver for this record. Please Update the 'Status' and Save,คุณเป็น ผู้อนุมัติ ค่าใช้จ่าย สำหรับการ บันทึก นี้ กรุณา อัปเดต 'สถานะ ' และ บันทึก
 DocType: Serial No,Creation Document No,การสร้าง เอกสาร ไม่มี
@@ -1459,7 +1463,7 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +421,Finished Item
 apps/erpnext/erpnext/config/learn.py +87,Opening Accounting Balance,เปิดยอดคงเหลือบัญชี
 ,GST Sales Register,ลงทะเบียนการขาย GST
 DocType: Sales Invoice Advance,Sales Invoice Advance,ขายใบแจ้งหนี้ล่วงหน้า
-apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +550,Nothing to request,ไม่มีอะไรที่จะ ขอ
+apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +552,Nothing to request,ไม่มีอะไรที่จะ ขอ
 apps/erpnext/erpnext/public/js/setup_wizard.js +18,Select your Domains,เลือกโดเมนของคุณ
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +34,Another Budget record '{0}' already exists against {1} '{2}' for fiscal year {3},บันทึกงบประมาณอีก &#39;{0}&#39; อยู่แล้วกับ {1} &quot;{2} &#39;สำหรับปีงบการเงิน {3}
 DocType: Item Variant Settings,Fields will be copied over only at time of creation.,ฟิลด์จะถูกคัดลอกเฉพาะช่วงเวลาของการสร้างเท่านั้น
@@ -1469,11 +1473,11 @@ DocType: Cheque Print Template,Payer Settings,การตั้งค่าก�
 DocType: Item Attribute Value,"This will be appended to the Item Code of the variant. For example, if your abbreviation is ""SM"", and the item code is ""T-SHIRT"", the item code of the variant will be ""T-SHIRT-SM""","นี้จะถูกผนวกเข้ากับรหัสสินค้าของตัวแปร ตัวอย่างเช่นถ้าย่อของคุณคือ ""เอสเอ็ม"" และรหัสรายการคือ ""เสื้อยืด"" รหัสรายการของตัวแปรจะเป็น ""เสื้อ-SM"""
 DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary Slip.,จ่ายสุทธิ (คำ) จะสามารถมองเห็นได้เมื่อคุณบันทึกสลิปเงินเดือน
 DocType: Purchase Invoice,Is Return,คือการกลับมา
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +82,Caution,ความระมัดระวัง
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +88,Caution,ความระมัดระวัง
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +813,Return / Debit Note,ย้อนกลับ / เดบิตหมายเหตุ
 DocType: Price List Country,Price List Country,ราคาประเทศ
 DocType: Item,UOMs,UOMs
-apps/erpnext/erpnext/stock/utils.py +210,{0} valid serial nos for Item {1},{0} หมายเลขประจำเครื่องที่ถูกต้องสำหรับรายการ {1}
+apps/erpnext/erpnext/stock/utils.py +209,{0} valid serial nos for Item {1},{0} หมายเลขประจำเครื่องที่ถูกต้องสำหรับรายการ {1}
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,รหัสสินค้า ไม่สามารถ เปลี่ยนเป็น เลข อนุกรม
 DocType: Purchase Invoice Item,UOM Conversion Factor,ปัจจัยการแปลง UOM
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +40,Please enter Item Code to get Batch Number,กรุณากรอกรหัสสินค้าที่จะได้รับหมายเลข Batch
@@ -1579,7 +1583,7 @@ DocType: Journal Entry,Get Outstanding Invoices,รับใบแจ้งห�
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +84,Sales Order {0} is not valid,การขายสินค้า {0} ไม่ถูกต้อง
 DocType: Supplier Scorecard,Warn for new Request for Quotations,แจ้งเตือนคำขอใหม่สำหรับใบเสนอราคา
 apps/erpnext/erpnext/utilities/activation.py +91,Purchase orders help you plan and follow up on your purchases,คำสั่งซื้อที่ช่วยให้คุณวางแผนและติดตามในการซื้อสินค้าของคุณ
-apps/erpnext/erpnext/setup/doctype/company/company.py +222,"Sorry, companies cannot be merged",ขออภัย บริษัท ไม่สามารถ รวม
+apps/erpnext/erpnext/setup/doctype/company/company.py +228,"Sorry, companies cannot be merged",ขออภัย บริษัท ไม่สามารถ รวม
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +151,Lab Test Prescriptions,ข้อกำหนดการทดสอบในแล็บ
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +162,"The total Issue / Transfer quantity {0} in Material Request {1}  \
 							cannot be greater than requested quantity {2} for Item {3}",ปริมาณการเบิก / โอนทั้งหมด {0} วัสดุในการจอง {1} \ ไม่สามารถจะสูงกว่าปริมาณการร้องขอ {2} สำหรับรายการ {3}
@@ -1617,7 +1621,6 @@ DocType: Vehicle,Fuel UOM,เชื้อเพลิง UOM
 DocType: Warehouse,Warehouse Contact Info,ข้อมูลติดต่อคลังสินค้า
 DocType: Payment Entry,Write Off Difference Amount,จำนวนหนี้สูญความแตกต่าง
 DocType: Volunteer,Volunteer Name,อาสาสมัครชื่อ
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,โปรดตั้งค่าระบบการตั้งชื่อผู้สอนในการศึกษา&gt; การตั้งค่าการศึกษา
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +434,"{0}: Employee email not found, hence email not sent",{0}: ไม่พบอีเมลของพนักงาน อีเมล์นี้จึงไม่ได้ถูกส่ง
 apps/erpnext/erpnext/accounts/doctype/shipping_rule/shipping_rule.py +85,Shipping rule not applicable for country {0},กฎการจัดส่งไม่สามารถใช้ได้กับประเทศ {0}
 DocType: Item,Foreign Trade Details,รายละเอียดการค้าต่างประเทศ
@@ -1630,7 +1633,7 @@ DocType: Student Group Student,Group Roll Number,หมายเลขกลุ�
 DocType: Student Group Student,Group Roll Number,หมายเลขกลุ่ม
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +143,"For {0}, only credit accounts can be linked against another debit entry",มีบัญชีประเภทเครดิตเท่านั้น ที่สามารถเชื่อมโยงกับรายการประเภทเดบิต สำหรับ {0}
 apps/erpnext/erpnext/projects/doctype/project/project.py +80,Total of all task weights should be 1. Please adjust weights of all Project tasks accordingly,รวมทุกน้ำหนักงานควรจะ 1. โปรดปรับน้ำหนักของงานโครงการทั้งหมดตาม
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +582,Delivery Note {0} is not submitted,หมายเหตุ การจัดส่ง {0} ไม่ได้ ส่ง
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +575,Delivery Note {0} is not submitted,หมายเหตุ การจัดส่ง {0} ไม่ได้ ส่ง
 apps/erpnext/erpnext/stock/get_item_details.py +146,Item {0} must be a Sub-contracted Item,รายการ {0} จะต้องเป็น รายการ ย่อย หด
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +43,Capital Equipments,อุปกรณ์ ทุน
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +33,"Pricing Rule is first selected based on 'Apply On' field, which can be Item, Item Group or Brand.",กฎข้อแรกคือการกำหนดราคาเลือกตาม 'สมัครในสนามซึ่งจะมีรายการกลุ่มสินค้าหรือยี่ห้อ
@@ -1655,7 +1658,7 @@ apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +27,Note: This 
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +54,Child warehouse exists for this warehouse. You can not delete this warehouse.,คลังสินค้าที่มีอยู่สำหรับเด็กคลังสินค้านี้ คุณไม่สามารถลบคลังสินค้านี้
 DocType: Item,Website Item Groups,กลุ่มรายการเว็บไซต์
 DocType: Purchase Invoice,Total (Company Currency),รวม (บริษัท สกุลเงิน)
-apps/erpnext/erpnext/stock/utils.py +205,Serial number {0} entered more than once,หมายเลข {0} เข้ามา มากกว่าหนึ่งครั้ง
+apps/erpnext/erpnext/stock/utils.py +204,Serial number {0} entered more than once,หมายเลข {0} เข้ามา มากกว่าหนึ่งครั้ง
 DocType: Journal Entry,Journal Entry,รายการบันทึก
 DocType: Expense Claim Advance,Unclaimed amount,จำนวนที่ไม่มีการอ้างสิทธิ์
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +148,{0} items in progress,{0} รายการ อยู่ระหว่างดำเนินการ
@@ -1752,7 +1755,7 @@ DocType: Email Digest,For Company,สำหรับ บริษัท
 apps/erpnext/erpnext/config/support.py +17,Communication log.,บันทึกการสื่อสาร
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +193,"Request for Quotation is disabled to access from portal, for more check portal settings.",ขอให้เสนอราคาถูกปิดใช้งานในการเข้าถึงจากพอร์ทัลสำหรับการตั้งค่าพอร์ทัลการตรวจสอบมากขึ้น
 DocType: Supplier Scorecard Scoring Variable,Supplier Scorecard Scoring Variable,ตัวชี้วัดการให้คะแนน Scorecard ของซัพพลายเออร์
-apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +73,Buying Amount,จำนวนซื้อ
+apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +72,Buying Amount,จำนวนซื้อ
 DocType: Sales Invoice,Shipping Address Name,การจัดส่งสินค้าที่อยู่ชื่อ
 DocType: Material Request,Terms and Conditions Content,ข้อตกลงและเงื่อนไขเนื้อหา
 apps/erpnext/erpnext/education/doctype/course_scheduling_tool/course_scheduling_tool.js +18,There were errors creating Course Schedule,มีข้อผิดพลาดในการสร้างตารางเรียน
@@ -2017,7 +2020,7 @@ DocType: Expense Claim,Total Amount Reimbursed,รวมจำนวนเงิ
 apps/erpnext/erpnext/hr/doctype/vehicle/vehicle_dashboard.py +5,This is based on logs against this Vehicle. See timeline below for details,แห่งนี้ตั้งอยู่บนพื้นฐานของบันทึกกับรถคันนี้ ดูระยะเวลารายละเอียดด้านล่าง
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +90,Against Supplier Invoice {0} dated {1},กับผู้ผลิตใบแจ้งหนี้ {0} วัน {1}
 DocType: Customer,Default Price List,รายการราคาเริ่มต้น
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +265,Asset Movement record {0} created,บันทึกการเคลื่อนไหวของสินทรัพย์ {0} สร้าง
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +269,Asset Movement record {0} created,บันทึกการเคลื่อนไหวของสินทรัพย์ {0} สร้าง
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +51,You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global Settings,คุณไม่สามารถลบปีงบประมาณ {0} ปีงบประมาณ {0} ตั้งเป็นค่าเริ่มต้นในการตั้งค่าส่วนกลาง
 apps/erpnext/erpnext/setup/doctype/customer_group/customer_group.py +20,A customer with the same name already exists,มีลูกค้าที่มีชื่อเดียวกันอยู่แล้ว
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.js +183,This will submit Salary Slips and create accrual Journal Entry. Do you want to proceed?,การดำเนินการนี้จะส่งสลากเงินเดือนและสร้างสมุดบันทึกรายวันคงค้าง คุณต้องการดำเนินการต่อหรือไม่?
@@ -2031,6 +2034,7 @@ apps/erpnext/erpnext/config/accounts.py +140,Update bank payment dates with jour
 apps/erpnext/erpnext/stock/doctype/item/item_dashboard.py +21,Pricing,การตั้งราคา
 DocType: Quotation,Term Details,รายละเอียดคำ
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py +30,Cannot enroll more than {0} students for this student group.,ไม่สามารถลงทะเบียนมากกว่า {0} นักเรียนสำหรับนักเรียนกลุ่มนี้
+apps/erpnext/erpnext/templates/print_formats/includes/total.html +4,Total (Without Tax),รวม (ไม่มีภาษี)
 apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py +17,Lead Count,นับตะกั่ว
 apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py +17,Lead Count,นับตะกั่ว
 apps/erpnext/erpnext/assets/doctype/asset_category/asset_category.py +15,{0} must be greater than 0,{0} ต้องมากกว่า 0
@@ -2051,7 +2055,6 @@ DocType: Lab Test,Technician Name,ชื่อช่างเทคนิค
 DocType: Accounts Settings,Unlink Payment on Cancellation of Invoice,ยกเลิกการเชื่อมโยงการชำระเงินในการยกเลิกใบแจ้งหนี้
 apps/erpnext/erpnext/hr/doctype/vehicle_log/vehicle_log.py +16,Current Odometer reading entered should be greater than initial Vehicle Odometer {0},อ่านวัดระยะทางที่ปัจจุบันเข้ามาควรจะมากกว่าครั้งแรกยานพาหนะ Odometer {0}
 DocType: Restaurant Reservation,No Show,ไม่แสดง
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +201,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,โปรดตั้งค่าชุดการตั้งชื่อสำหรับ {0} ผ่านการตั้งค่า&gt; การตั้งค่า&gt; การตั้งชื่อซีรี่ส์
 DocType: Shipping Rule Country,Shipping Rule Country,กฎการจัดส่งสินค้าประเทศ
 apps/erpnext/erpnext/hr/doctype/employee/employee_dashboard.py +10,Leave and Attendance,การลา และการเข้าร่วม
 DocType: Maintenance Visit,Partially Completed,เสร็จบางส่วน
@@ -2144,7 +2147,7 @@ DocType: Student Group Instructor,Student Group Instructor,ผู้สอนก
 DocType: Student Group Instructor,Student Group Instructor,ผู้สอนกลุ่มนักเรียน
 DocType: Grant Application,Assessment  Mark (Out of 10),เครื่องหมายประเมิน (จาก 10)
 apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +61,Guardian2 Mobile No,Guardian2 มือถือไม่มี
-apps/erpnext/erpnext/setup/doctype/company/company.py +201,Main,หลัก
+apps/erpnext/erpnext/setup/doctype/company/company.py +207,Main,หลัก
 apps/erpnext/erpnext/stock/doctype/item/item.js +72,Variant,ตัวแปร
 DocType: Naming Series,Set prefix for numbering series on your transactions,กำหนดคำนำหน้าสำหรับหมายเลขชุดทำธุรกรรมของคุณ
 DocType: Employee Attendance Tool,Employees HTML,พนักงาน HTML
@@ -2194,7 +2197,7 @@ DocType: Crop,Crop Spacing,ระยะปลูกพืช
 DocType: Course,Course Abbreviation,ชื่อย่อแน่นอน
 DocType: Student Leave Application,Student Leave Application,แอพลิเคชันออกจากนักศึกษา
 DocType: Item,Will also apply for variants,นอกจากนี้ยังจะใช้สำหรับสายพันธุ์
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +160,"Asset cannot be cancelled, as it is already {0}",สินทรัพย์ที่ไม่สามารถยกเลิกขณะที่มันมีอยู่แล้ว {0}
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +164,"Asset cannot be cancelled, as it is already {0}",สินทรัพย์ที่ไม่สามารถยกเลิกขณะที่มันมีอยู่แล้ว {0}
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +29,Employee {0} on Half day on {1},พนักงาน {0} ในครึ่งวันในวันที่ {1}
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +42,Total working hours should not be greater than max working hours {0},ชั่วโมงการทำงานรวมไม่ควรมากกว่าชั่วโมงการทำงานสูงสุด {0}
 apps/erpnext/erpnext/templates/pages/task_info.html +90,On,บน
@@ -2382,9 +2385,10 @@ apps/erpnext/erpnext/assets/doctype/asset/depreciation.py +193,Please set 'Asset
 DocType: Task,Actual End Date (via Time Sheet),ที่เกิดขึ้นจริงวันที่สิ้นสุด (ผ่านใบบันทึกเวลา)
 DocType: Soil Texture,Soil Type,ชนิดของดิน
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +374,Amount {0} {1} against {2} {3},จำนวน {0} {1} กับ {2} {3}
+apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +318,New Message,ข้อความใหม่
 ,Quotation Trends,ใบเสนอราคา แนวโน้ม
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +159,Item Group not mentioned in item master for item {0},กลุ่มสินค้าไม่ได้กล่าวถึงในหลักรายการสำหรับรายการที่ {0}
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +362,Debit To account must be a Receivable account,เดบิตในการบัญชีจะต้องเป็นบัญชีลูกหนี้
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +355,Debit To account must be a Receivable account,เดบิตในการบัญชีจะต้องเป็นบัญชีลูกหนี้
 DocType: Shipping Rule,Shipping Amount,จำนวนการจัดส่งสินค้า
 DocType: Supplier Scorecard Period,Period Score,ระยะเวลาคะแนน
 apps/erpnext/erpnext/utilities/user_progress.py +63,Add Customers,เพิ่มลูกค้า
@@ -2395,7 +2399,7 @@ DocType: Purchase Order,Delivered,ส่ง
 ,Vehicle Expenses,ค่าใช้จ่ายในยานพาหนะ
 DocType: Serial No,Invoice Details,รายละเอียดใบแจ้งหนี้
 DocType: Grant Application,Show on Website,แสดงบนเว็บไซต์
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +155,Expected value after useful life must be greater than or equal to {0},ค่าที่คาดหวังหลังจากที่อายุการใช้งานจะต้องมากกว่าหรือเท่ากับ {0}
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +159,Expected value after useful life must be greater than or equal to {0},ค่าที่คาดหวังหลังจากที่อายุการใช้งานจะต้องมากกว่าหรือเท่ากับ {0}
 apps/erpnext/erpnext/education/doctype/student_admission/templates/student_admission.html +29,Start on,เริ่มต้นเมื่อ
 DocType: Hub Category,Hub Category,หมวดหมู่ฮับ
 DocType: Purchase Invoice,SEZ,SEZ
@@ -2426,7 +2430,7 @@ DocType: Patient,Patient Details,รายละเอียดผู้ป่�
 DocType: Patient,B Positive,B บวก
 apps/erpnext/erpnext/controllers/accounts_controller.py +595,"Row #{0}: Qty must be 1, as item is a fixed asset. Please use separate row for multiple qty.",แถว # {0}: จำนวนต้องเป็น 1 เป็นรายการที่เป็นสินทรัพย์ถาวร โปรดใช้แถวแยกต่างหากสำหรับจำนวนหลาย
 DocType: Leave Block List Allow,Leave Block List Allow,ฝากรายการบล็อกอนุญาตให้
-apps/erpnext/erpnext/setup/doctype/company/company.py +302,Abbr can not be blank or space,เงื่อนไขที่ไม่สามารถเป็นที่ว่างเปล่าหรือพื้นที่
+apps/erpnext/erpnext/setup/doctype/company/company.py +310,Abbr can not be blank or space,เงื่อนไขที่ไม่สามารถเป็นที่ว่างเปล่าหรือพื้นที่
 DocType: Patient Medical Record,Patient Medical Record,บันทึกการแพทย์ของผู้ป่วย
 apps/erpnext/erpnext/accounts/doctype/account/account.js +68,Group to Non-Group,กลุ่มที่ไม่ใช่กลุ่ม
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +50,Sports,กีฬา
@@ -2477,6 +2481,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +913,Quotat
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js +982,Cannot set a received RFQ to No Quote,ไม่สามารถตั้งค่า RFQ ที่ได้รับเป็น No Quote
 DocType: Quotation,QTN-,QTN-
 DocType: Salary Slip,Total Deduction,หักรวม
+apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +15,Select an account to print in account currency,เลือกบัญชีที่จะพิมพ์ในสกุลเงินของบัญชี
 ,Production Analytics,Analytics ผลิต
 apps/erpnext/erpnext/healthcare/doctype/patient/patient_dashboard.py +6,This is based on transactions against this Patient. See timeline below for details,นี้ขึ้นอยู่กับการทำธุรกรรมกับผู้ป่วยรายนี้ ดูรายละเอียดจากเส้นเวลาด้านล่าง
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +201,Cost Updated,ค่าใช้จ่ายในการปรับปรุง
@@ -2532,7 +2537,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.js +105,Item Variant Settings,ก�
 apps/erpnext/erpnext/manufacturing/page/production_analytics/production_analytics.js +39,Select Company...,เลือก บริษัท ...
 DocType: Leave Control Panel,Leave blank if considered for all departments,เว้นไว้หากพิจารณาให้หน่วยงานทั้งหมด
 apps/erpnext/erpnext/config/hr.py +228,"Types of employment (permanent, contract, intern etc.).",ประเภท ของการจ้างงาน ( ถาวร สัญญา ฝึกงาน ฯลฯ )
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +428,{0} is mandatory for Item {1},{0} ต้องระบุสำหรับ รายการ {1}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +421,{0} is mandatory for Item {1},{0} ต้องระบุสำหรับ รายการ {1}
 DocType: Payroll Entry,Fortnightly,รายปักษ์
 DocType: Currency Exchange,From Currency,จากสกุลเงิน
 DocType: Vital Signs,Weight (In Kilogram),น้ำหนัก (เป็นกิโลกรัม)
@@ -2610,7 +2615,7 @@ DocType: BOM Scrap Item,Basic Amount (Company Currency),จำนวนเงิ
 DocType: Student,Guardians,ผู้ปกครอง
 DocType: Shopping Cart Settings,Prices will not be shown if Price List is not set,ราคาจะไม่แสดงถ้าราคาไม่ได้ตั้งค่า
 DocType: Stock Entry,Total Incoming Value,ค่าเข้ามาทั้งหมด
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +356,Debit To is required,เดบิตในการที่จะต้อง
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +349,Debit To is required,เดบิตในการที่จะต้อง
 apps/erpnext/erpnext/utilities/activation.py +109,"Timesheets help keep track of time, cost and billing for activites done by your team",Timesheets ช่วยให้การติดตามของเวลาค่าใช้จ่ายและการเรียกเก็บเงินสำหรับกิจกรรมที่ทำโดยทีมงานของคุณ
 apps/erpnext/erpnext/stock/report/item_prices/item_prices.py +39,Purchase Price List,ซื้อราคา
 apps/erpnext/erpnext/config/buying.py +155,Templates of supplier scorecard variables.,เทมเพลตของตัวแปรชี้วัดของซัพพลายเออร์
@@ -2713,7 +2718,7 @@ apps/erpnext/erpnext/crm/doctype/lead/lead.py +51,Next Contact Date cannot be in
 DocType: Company,For Reference Only.,สำหรับการอ้างอิงเท่านั้น
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js +99,Physician {0} not available on {1},แพทย์ {0} ไม่มีให้บริการใน {1}
 apps/erpnext/erpnext/accounts/page/pos/pos.js +2539,Select Batch No,เลือกแบทช์
-apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +52,Invalid {0}: {1},ไม่ถูกต้อง {0}: {1}
+apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +57,Invalid {0}: {1},ไม่ถูกต้อง {0}: {1}
 ,GSTR-1,GSTR-1
 DocType: Purchase Invoice,PINV-RET-,PINV-RET-
 DocType: Fee Validity,Reference Inv,Inv อ้างอิง
@@ -2750,8 +2755,8 @@ DocType: Fees,Send Payment Request,ส่งคำขอการชำระเ
 DocType: BOM,"Specify the operations, operating cost and give a unique Operation no to your operations.",ระบุการดำเนินการ ค่าใช้จ่าย ในการดำเนินงาน และให้การดำเนินการ ที่ไม่ซ้ำกัน ในการ ดำเนินงานของคุณ
 DocType: Water Analysis,Origin,ที่มา
 apps/erpnext/erpnext/controllers/status_updater.py +201,This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?,เอกสารนี้เป็นเกินขีด จำกัด โดย {0} {1} สำหรับรายการ {4} คุณกำลังทำอีก {3} กับเดียวกัน {2}?
-apps/erpnext/erpnext/public/js/controllers/transaction.js +1139,Please set recurring after saving,กรุณาตั้งค่าที่เกิดขึ้นหลังจากการบันทึก
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +763,Select change amount account,บัญชีจำนวนเงินที่เลือกเปลี่ยน
+apps/erpnext/erpnext/public/js/controllers/transaction.js +1142,Please set recurring after saving,กรุณาตั้งค่าที่เกิดขึ้นหลังจากการบันทึก
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +756,Select change amount account,บัญชีจำนวนเงินที่เลือกเปลี่ยน
 DocType: Purchase Invoice,Price List Currency,สกุลเงินรายการราคา
 DocType: Naming Series,User must always select,ผู้ใช้จะต้องเลือก
 DocType: Stock Settings,Allow Negative Stock,อนุญาตให้สต็อกเชิงลบ
@@ -2807,7 +2812,7 @@ DocType: Maintenance Schedule Detail,Maintenance Schedule Detail,รายละ
 DocType: Supplier Scorecard,Warn for new Purchase Orders,เตือนคำสั่งซื้อใหม่
 DocType: Quality Inspection Reading,Reading 9,อ่าน 9
 DocType: Supplier,Is Frozen,ถูกแช่แข็ง
-apps/erpnext/erpnext/stock/utils.py +222,Group node warehouse is not allowed to select for transactions,คลังสินค้าโหนดกลุ่มไม่ได้รับอนุญาตให้เลือกสำหรับการทำธุรกรรม
+apps/erpnext/erpnext/stock/utils.py +221,Group node warehouse is not allowed to select for transactions,คลังสินค้าโหนดกลุ่มไม่ได้รับอนุญาตให้เลือกสำหรับการทำธุรกรรม
 DocType: Buying Settings,Buying Settings,ตั้งค่าการซื้อ
 DocType: Stock Entry Detail,BOM No. for a Finished Good Item,หมายเลข BOM สำหรับรายการที่ดีสำเร็จรูป
 DocType: Upload Attendance,Attendance To Date,วันที่เข้าร่วมประชุมเพื่อ
@@ -2822,6 +2827,7 @@ DocType: Grant Application,Organization,องค์กร
 DocType: Grant Application,Organization,องค์กร
 DocType: BOM Update Tool,BOM Update Tool,เครื่องมืออัปเดต BOM
 DocType: SG Creation Tool Course,Student Group Name,ชื่อกลุ่มนักศึกษา
+apps/erpnext/erpnext/manufacturing/report/bom_stock_report/bom_stock_report.js +17,Show exploded view,แสดงมุมมองแบบหล่นลง
 apps/erpnext/erpnext/education/doctype/fee_schedule/fee_schedule_list.js +7,Creating Fees,การสร้างค่าธรรมเนียม
 apps/erpnext/erpnext/setup/doctype/company/company.js +91,Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone.,โปรดตรวจสอบว่าคุณต้องการที่จะลบการทำธุรกรรมทั้งหมดของ บริษัท นี้ ข้อมูลหลักของคุณจะยังคงอยู่อย่างที่มันเป็น การดำเนินการนี้ไม่สามารถยกเลิกได้
 DocType: Room,Room Number,หมายเลขห้อง
@@ -2832,7 +2838,7 @@ DocType: Journal Entry Account,Payroll Entry,รายการบัญชี�
 apps/erpnext/erpnext/setup/doctype/company/company.js +35,Make Tax Template,ทำแม่แบบภาษี
 apps/erpnext/erpnext/public/js/conf.js +28,User Forum,ผู้ใช้งานฟอรั่ม
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +308,Raw Materials cannot be blank.,วัตถุดิบไม่สามารถมีช่องว่าง
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +492,"Could not update stock, invoice contains drop shipping item.","ไม่สามารถอัปเดสต็อก, ใบแจ้งหนี้ที่มีรายการการขนส่งลดลง"
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +485,"Could not update stock, invoice contains drop shipping item.","ไม่สามารถอัปเดสต็อก, ใบแจ้งหนี้ที่มีรายการการขนส่งลดลง"
 DocType: Lab Test Sample,Lab Test Sample,Lab Test Sample
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +492,Quick Journal Entry,วารสารรายการด่วน
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js +200,You can not change rate if BOM mentioned agianst any item,คุณไม่สามารถเปลี่ยน อัตรา ถ้า BOM กล่าว agianst รายการใด ๆ
@@ -2903,7 +2909,7 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 DocType: Membership,USD,ดอลล่าร์
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js +28,Make Invoice,ทำให้ ใบแจ้งหนี้
 DocType: Selling Settings,Auto close Opportunity after 15 days,รถยนต์ใกล้โอกาสหลังจาก 15 วัน
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +76,Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.,คำสั่งซื้อซื้อไม่ได้รับอนุญาตสำหรับ {0} เนื่องจากมีการจดแต้มที่ {1}
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +82,Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.,คำสั่งซื้อซื้อไม่ได้รับอนุญาตสำหรับ {0} เนื่องจากมีการจดแต้มที่ {1}
 apps/erpnext/erpnext/public/js/financial_statements.js +83,End Year,ปีที่จบ
 apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py +23,Quot/Lead %,Quot / Lead%
 apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py +23,Quot/Lead %,Quot / Lead%
@@ -3015,7 +3021,6 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +64,90-Above,90-ขึ้นไป
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +241,Row #{0}: Journal Entry {1} does not have account {2} or already matched against another voucher,แถว # {0}: วารสารรายการ {1} ไม่มีบัญชี {2} หรือมีอยู่แล้วจับคู่กับบัตรกำนัลอื่น
 DocType: Supplier Scorecard Criteria,Criteria Weight,เกณฑ์น้ำหนัก
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,ผู้จัดจำหน่าย&gt; ประเภทผู้จัดจำหน่าย
 DocType: Buying Settings,Default Buying Price List,รายการราคาซื้อเริ่มต้น
 DocType: Payroll Entry,Salary Slip Based on Timesheet,สลิปเงินเดือนจาก Timesheet
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py +43,Buying Rate,อัตราการซื้อ
@@ -3105,7 +3110,7 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +17,"If selec
 apps/erpnext/erpnext/config/selling.py +174,Track Leads by Industry Type.,ติดตาม ช่องทาง ตามประเภทอุตสาหกรรม
 apps/erpnext/erpnext/utilities/user_progress.py +98,Go to Letterheads,ไปที่หัวจดหมาย
 DocType: Item Supplier,Item Supplier,ผู้ผลิตรายการ
-apps/erpnext/erpnext/public/js/controllers/transaction.js +1240,Please enter Item Code to get batch no,กรุณากรอก รหัสสินค้า ที่จะได้รับ ชุด ไม่
+apps/erpnext/erpnext/public/js/controllers/transaction.js +1243,Please enter Item Code to get batch no,กรุณากรอก รหัสสินค้า ที่จะได้รับ ชุด ไม่
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.js +874,Please select a value for {0} quotation_to {1},กรุณาเลือก ค่าสำหรับ {0} quotation_to {1}
 apps/erpnext/erpnext/config/selling.py +46,All Addresses.,ที่อยู่ทั้งหมด
 DocType: Company,Stock Settings,การตั้งค่าหุ้น
@@ -3295,6 +3300,7 @@ DocType: Employee Loan,Loan Details,รายละเอียดเงิน�
 DocType: Company,Default Inventory Account,บัญชีพื้นที่โฆษณาเริ่มต้น
 apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.py +124,Row {0}: Completed Qty must be greater than zero.,แถว {0}: เสร็จสมบูรณ์จำนวนจะต้องมากกว่าศูนย์
 DocType: Antibiotic,Antibiotic Name,ชื่อยาปฏิชีวนะ
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,รหัสรายการ&gt; กลุ่มสินค้า&gt; แบรนด์
 DocType: Purchase Invoice,Apply Additional Discount On,สมัครสมาชิกเพิ่มเติมส่วนลด
 apps/erpnext/erpnext/healthcare/page/appointment_analytic/appointment_analytic.js +69,Select Type...,เลือกประเภท ...
 DocType: Crop Cycle,A link to all the Land Units in which the Crop is growing,ลิงก์ไปยังหน่วยที่ดินทั้งหมดที่พืชมีการเจริญเติบโต
@@ -3490,6 +3496,7 @@ DocType: Guardian Student,Guardian Student,นักศึกษาผู้ป�
 DocType: Supplier,Credit Limit,วงเงินสินเชื่อ
 apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +70,Avg. Selling Price List Rate,เฉลี่ย ราคารายการขายราคา
 DocType: Production Plan Sales Order,Salse Order Date,Salse วันที่สั่งซื้อ
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,ผู้จัดจำหน่าย&gt; ประเภทผู้จัดจำหน่าย
 DocType: Salary Component,Salary Component,เงินเดือนที่ต้องการตัวแทน
 apps/erpnext/erpnext/accounts/utils.py +495,Payment Entries {0} are un-linked,รายการชำระเงิน {0} ยกเลิกการเชื่อมโยง
 DocType: GL Entry,Voucher No,บัตรกำนัลไม่มี
@@ -3499,7 +3506,7 @@ apps/erpnext/erpnext/hub_node/page/hub/hub.js +195,Most Popular,ที่นิ�
 DocType: Leave Allocation,Leave Allocation,การจัดสรรการลา
 DocType: Payment Request,Recipient Message And Payment Details,ผู้รับข้อความและรายละเอียดการชำระเงิน
 DocType: Training Event,Trainer Email,เทรนเนอร์อีเมล์
-apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +548,Material Requests {0} created,ขอ วัสดุ {0} สร้าง
+apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +550,Material Requests {0} created,ขอ วัสดุ {0} สร้าง
 DocType: Restaurant Reservation,No of People,ไม่มีผู้คน
 DocType: Production Planning Tool,Include sub-contracted raw materials,รวมถึงวัตถุดิบย่อยหด
 apps/erpnext/erpnext/config/selling.py +164,Template of terms or contract.,แม่ของข้อตกลงหรือสัญญา
@@ -3565,7 +3572,7 @@ DocType: Landed Cost Item,Receipt Document,เอกสารใบเสร็�
 DocType: Production Planning Tool,Create Material Requests,ขอสร้างวัสดุ
 DocType: Employee Education,School/University,โรงเรียน / มหาวิทยาลัย
 DocType: Payment Request,Reference Details,รายละเอียดอ้างอิง
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +59,Expected Value After Useful Life must be less than Gross Purchase Amount,ค่าที่คาดหวังหลังจากที่มีชีวิตที่มีประโยชน์จะต้องน้อยกว่ามวลรวมสั่งซื้อ
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +56,Expected Value After Useful Life must be less than Gross Purchase Amount,ค่าที่คาดหวังหลังจากที่มีชีวิตที่มีประโยชน์จะต้องน้อยกว่ามวลรวมสั่งซื้อ
 DocType: Sales Invoice Item,Available Qty at Warehouse,จำนวนที่คลังสินค้า
 apps/erpnext/erpnext/accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py +20,Billed Amount,จำนวนเงินที่ เรียกเก็บเงิน
 DocType: Asset,Double Declining Balance,ยอดลดลงสองครั้ง
@@ -3577,7 +3584,7 @@ DocType: Attendance,On Leave,ลา
 apps/erpnext/erpnext/templates/includes/footer/footer_extension.html +7,Get Updates,ได้รับการปรับปรุง
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +96,{0} {1}: Account {2} does not belong to Company {3},{0} {1}: บัญชี {2} ไม่ได้เป็นของ บริษัท {3}
 apps/erpnext/erpnext/stock/doctype/item/item.js +366,Select at least one value from each of the attributes.,เลือกค่าอย่างน้อยหนึ่งค่าจากแต่ละแอตทริบิวต์
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +156,Material Request {0} is cancelled or stopped,คำขอใช้วัสดุ {0} ถูกยกเลิก หรือ ระงับแล้ว
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +162,Material Request {0} is cancelled or stopped,คำขอใช้วัสดุ {0} ถูกยกเลิก หรือ ระงับแล้ว
 apps/erpnext/erpnext/config/hr.py +310,Leave Management,ออกจากการบริหารจัดการ
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.js +106,Group by Account,จัดกลุ่มตามบัญชี
 DocType: Sales Order,Fully Delivered,จัดส่งอย่างเต็มที่
@@ -3588,14 +3595,13 @@ apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py 
 apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.py +107,Disbursed Amount cannot be greater than Loan Amount {0},การเบิกจ่ายจำนวนเงินที่ไม่สามารถจะสูงกว่าจำนวนเงินกู้ {0}
 apps/erpnext/erpnext/utilities/user_progress.py +173,Go to Programs,ไปที่ Programs
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +219,Row {0}# Allocated amount {1} cannot be greater than unclaimed amount {2},แถว {0} # จำนวนที่จัดสรรไว้ {1} จะต้องไม่เกินจำนวนที่ไม่มีการอ้างสิทธิ์ {2}
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,กรุณาตั้งหมายเลขชุดสำหรับการเข้าร่วมประชุมผ่านทาง Setup&gt; Numbering Series
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +89,Purchase Order number required for Item {0},จำนวน การสั่งซื้อ สินค้า ที่จำเป็นสำหรับ {0}
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +943,Production Order not created,ใบสั่งผลิตไม่ได้สร้าง
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +18,'From Date' must be after 'To Date','จาก วันที่ ' ต้อง เป็นหลังจากที่ ' นัด '
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.py +39,Cannot change status as student {0} is linked with student application {1},ไม่สามารถเปลี่ยนสถานะเป็นนักเรียน {0} มีการเชื่อมโยงกับโปรแกรมนักเรียน {1}
 DocType: Asset,Fully Depreciated,ค่าเสื่อมราคาหมด
 ,Stock Projected Qty,หุ้น ที่คาดการณ์ จำนวน
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +438,Customer {0} does not belong to project {1},ลูกค้า {0} ไม่ได้อยู่ใน โครงการ {1}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +431,Customer {0} does not belong to project {1},ลูกค้า {0} ไม่ได้อยู่ใน โครงการ {1}
 DocType: Employee Attendance Tool,Marked Attendance HTML,ผู้เข้าร่วมการทำเครื่องหมาย HTML
 apps/erpnext/erpnext/utilities/activation.py +73,"Quotations are proposals, bids you have sent to your customers",ใบเสนอราคาข้อเสนอการเสนอราคาที่คุณส่งให้กับลูกค้าของคุณ
 DocType: Sales Order,Customer's Purchase Order,การสั่งซื้อของลูกค้า
@@ -3680,7 +3686,7 @@ DocType: Salary Slip,Hour Rate,อัตราชั่วโมง
 DocType: Stock Settings,Item Naming By,รายการการตั้งชื่อตาม
 apps/erpnext/erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py +46,Another Period Closing Entry {0} has been made after {1},อีก รายการ ระยะเวลา ปิด {0} ได้รับการทำ หลังจาก {1}
 DocType: Production Order,Material Transferred for Manufacturing,โอนวัสดุเพื่อไปผลิต
-apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +32,Account {0} does not exists,บัญชี {0} ไม่อยู่
+apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +37,Account {0} does not exists,บัญชี {0} ไม่อยู่
 DocType: Project,Project Type,ประเภทโครงการ
 apps/erpnext/erpnext/projects/doctype/task/task.py +142,Child Task exists for this Task. You can not delete this Task.,งานลูกมีอยู่สำหรับงานนี้ คุณไม่สามารถลบงานนี้ได้
 apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.py +16,Either target qty or target amount is mandatory.,ทั้ง จำนวน เป้าหมาย หรือจำนวน เป้าหมายที่ มีผลบังคับใช้
@@ -3784,11 +3790,11 @@ DocType: C-Form,I,ผม
 DocType: Company,Asset Depreciation Cost Center,สินทรัพย์ศูนย์ต้นทุนค่าเสื่อมราคา
 DocType: Sales Order Item,Sales Order Date,วันที่สั่งซื้อขาย
 DocType: Sales Invoice Item,Delivered Qty,จำนวนส่ง
-apps/erpnext/erpnext/templates/print_formats/includes/total.html +4,Total Excl. Tax,รวมทั้งหมด ภาษี
 DocType: Production Planning Tool,"If checked, all the children of each production item will be included in the Material Requests.",หากตรวจสอบเด็กทุกคนของรายการการผลิตแต่ละคนจะถูกรวมอยู่ในการร้องขอวัสดุ
 DocType: Assessment Plan,Assessment Plan,แผนการประเมิน
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.py +93,Customer {0} is created.,สร้างลูกค้า {0} แล้ว
 DocType: Stock Settings,Limit Percent,ร้อยละขีด จำกัด
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,โปรดตั้งค่าระบบการตั้งชื่อผู้สอนในการศึกษา&gt; การตั้งค่าการศึกษา
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +82, Currently no stock available in any warehouse,ไม่มีคลังสินค้าในคลังสินค้าใด ๆ
 ,Payment Period Based On Invoice Date,ระยะเวลา ในการชำระเงิน ตาม ใบแจ้งหนี้ ใน วันที่
 DocType: Sample Collection,No. of print,จำนวนการพิมพ์
@@ -3804,12 +3810,12 @@ apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.py +113,Please enter
 apps/erpnext/erpnext/shopping_cart/cart.py +375,Debtors ({0}),ลูกหนี้ ({0})
 DocType: Pricing Rule,Margin,ขอบ
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +57,New Customers,ลูกค้าใหม่
-apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +75,Gross Profit %,% กำไรขั้นต้น
+apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +74,Gross Profit %,% กำไรขั้นต้น
 DocType: Appraisal Goal,Weightage (%),weightage (%)
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +496,Change POS Profile,เปลี่ยนโพรไฟล์ POS
 DocType: Bank Reconciliation Detail,Clearance Date,วันที่กวาดล้าง
 apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_assessment_report.html +7,Assessment Report,รายงานการประเมินผล
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +62,Gross Purchase Amount is mandatory,จำนวนการสั่งซื้อขั้นต้นมีผลบังคับใช้
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +59,Gross Purchase Amount is mandatory,จำนวนการสั่งซื้อขั้นต้นมีผลบังคับใช้
 DocType: Lead,Address Desc,ลักษณะ ของ ที่อยู่
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +102,Party is mandatory,พรรคมีผลบังคับใช้
 DocType: Journal Entry,JV-,JV-
@@ -3841,7 +3847,6 @@ DocType: Account,Accumulated Depreciation,ค่าเสื่อมราค�
 DocType: Supplier Scorecard Scoring Standing,Standing Name,ชื่อยืน
 DocType: Stock Entry,Customer or Supplier Details,ลูกค้าหรือผู้ผลิตรายละเอียด
 DocType: Employee Loan Application,Required by Date,จำเป็นโดยวันที่
-apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +229,Closing Balance (Dr - Cr),ยอดคงเหลือปลายงวด (Dr - Cr)
 DocType: Lead,Lead Owner,เจ้าของช่องทาง
 DocType: Bin,Requested Quantity,จำนวนการขอใช้บริการ
 DocType: Patient,Marital Status,สถานภาพการสมรส
@@ -3855,7 +3860,7 @@ apps/erpnext/erpnext/hr/doctype/employee/employee.py +118,Date Of Retirement mus
 apps/erpnext/erpnext/stock/doctype/item/item.js +68,Multiple Variants,หลายรูปแบบ
 DocType: Sales Invoice,Against Income Account,กับบัญชีรายได้
 apps/erpnext/erpnext/controllers/website_list_for_contact.py +117,{0}% Delivered,{0}% ส่งแล้ว
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +97,Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item).,รายการ {0}: จำนวนสั่ง {1} ไม่สามารถจะน้อยกว่าจำนวนสั่งซื้อขั้นต่ำ {2} (ที่กำหนดไว้ในรายการ)
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +103,Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item).,รายการ {0}: จำนวนสั่ง {1} ไม่สามารถจะน้อยกว่าจำนวนสั่งซื้อขั้นต่ำ {2} (ที่กำหนดไว้ในรายการ)
 DocType: Monthly Distribution Percentage,Monthly Distribution Percentage,การกระจายรายเดือนร้อยละ
 apps/erpnext/erpnext/hub_node/page/hub/hub.js +90,Please login as another user.,โปรดเข้าสู่ระบบในฐานะผู้ใช้รายอื่น
 DocType: Territory,Territory Targets,เป้าหมายดินแดน
@@ -3956,7 +3961,7 @@ DocType: Program Enrollment,School House,โรงเรียนบ้าน
 DocType: Serial No,Out of AMC,ออกของ AMC
 apps/erpnext/erpnext/assets/doctype/asset/asset.py +82,Number of Depreciations Booked cannot be greater than Total Number of Depreciations,จำนวนค่าเสื่อมราคาจองไม่สามารถจะสูงกว่าจำนวนค่าเสื่อมราคา
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.js +47,Make Maintenance Visit,ทำให้ การบำรุงรักษา เยี่ยมชม
-apps/erpnext/erpnext/selling/doctype/customer/customer.py +198,Please contact to the user who have Sales Master Manager {0} role,กรุณาติดต่อผู้ใช้ที่มีผู้จัดการฝ่ายขายโท {0} บทบาท
+apps/erpnext/erpnext/selling/doctype/customer/customer.py +199,Please contact to the user who have Sales Master Manager {0} role,กรุณาติดต่อผู้ใช้ที่มีผู้จัดการฝ่ายขายโท {0} บทบาท
 DocType: Company,Default Cash Account,บัญชีเงินสดเริ่มต้น
 apps/erpnext/erpnext/config/accounts.py +62,Company (not Customer or Supplier) master.,บริษัท (ไม่ใช่ ลูกค้า หรือ ซัพพลายเออร์ ) เจ้านาย
 apps/erpnext/erpnext/education/doctype/student/student_dashboard.py +6,This is based on the attendance of this Student,นี้ขึ้นอยู่กับการเข้าร่วมประชุมของนักศึกษานี้
@@ -4108,7 +4113,6 @@ DocType: Delivery Note Item,From Warehouse,จากคลังสินค้�
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +59,No employees for the mentioned criteria,ไม่มีพนักงานสำหรับเกณฑ์ดังกล่าว
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +944,No Items with Bill of Materials to Manufacture,ไม่มีรายการที่มี Bill of Materials การผลิต
 DocType: Restaurant,Default Customer,ลูกค้าเริ่มต้น
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,กรุณาติดตั้ง System Employee Naming System ใน Human Resource&gt; HR Settings
 DocType: Assessment Plan,Supervisor Name,ชื่อผู้บังคับบัญชา
 DocType: Healthcare Settings,Do not confirm if appointment is created for the same day,อย่ายืนยันว่ามีการสร้างการนัดหมายสำหรับวันเดียวกันหรือไม่
 DocType: Program Enrollment Course,Program Enrollment Course,หลักสูตรการลงทะเบียนเรียน
@@ -4230,7 +4234,7 @@ apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +201,
 DocType: BOM,Website Description,คำอธิบายเว็บไซต์
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +42,Net Change in Equity,เปลี่ยนแปลงสุทธิในส่วนของเจ้าของ
 apps/erpnext/erpnext/hub_node/page/hub/hub.js +196,Newest,ใหม่ล่าสุด
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +163,Please cancel Purchase Invoice {0} first,กรุณายกเลิกการซื้อใบแจ้งหนี้ {0} แรก
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +167,Please cancel Purchase Invoice {0} first,กรุณายกเลิกการซื้อใบแจ้งหนี้ {0} แรก
 apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +43,"Email Address must be unique, already exists for {0}",อีเมล์ต้องไม่ซ้ำกันอยู่แล้วสำหรับ {0}
 DocType: Serial No,AMC Expiry Date,วันที่หมดอายุ AMC
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +869,Receipt,ใบเสร็จรับเงิน
@@ -4247,7 +4251,7 @@ apps/erpnext/erpnext/public/js/pos/pos.html +98,No Customers yet!,ยังไ�
 apps/erpnext/erpnext/public/js/financial_statements.js +56,Cash Flow Statement,งบกระแสเงินสด
 apps/erpnext/erpnext/hr/doctype/employee_loan_application/employee_loan_application.py +23,Loan Amount cannot exceed Maximum Loan Amount of {0},วงเงินกู้ไม่เกินจำนวนเงินกู้สูงสุดของ {0}
 apps/erpnext/erpnext/hr/report/vehicle_expenses/vehicle_expenses.py +22,License,การอนุญาต
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +485,Please remove this Invoice {0} from C-Form {1},กรุณาลบนี้ใบแจ้งหนี้ {0} จาก C-แบบฟอร์ม {1}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +478,Please remove this Invoice {0} from C-Form {1},กรุณาลบนี้ใบแจ้งหนี้ {0} จาก C-แบบฟอร์ม {1}
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,เลือกดำเนินการต่อถ้าคุณยังต้องการที่จะรวมถึงความสมดุลในปีงบประมาณก่อนหน้านี้ออกไปในปีงบการเงิน
 DocType: GL Entry,Against Voucher Type,กับประเภทบัตร
 DocType: Physician,Phone (R),โทรศัพท์ (R)
@@ -4259,7 +4263,7 @@ apps/erpnext/erpnext/selling/report/inactive_customers/inactive_customers.py +71
 DocType: Patient,B Negative,B เชิงลบ
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py +25,Maintenance Status has to be Cancelled or Completed to Submit,สถานะการบำรุงรักษาต้องถูกยกเลิกหรือเสร็จสมบูรณ์เพื่อส่ง
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +47,Account {0} does not belongs to company {1},บัญชี {0} ไม่ได้เป็นของ บริษัท {1}
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +878,Serial Numbers in row {0} does not match with Delivery Note,หมายเลขซีเรียลในแถว {0} ไม่ตรงกับหมายเหตุการจัดส่ง
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +871,Serial Numbers in row {0} does not match with Delivery Note,หมายเลขซีเรียลในแถว {0} ไม่ตรงกับหมายเหตุการจัดส่ง
 DocType: Student,Guardian Details,รายละเอียดผู้ปกครอง
 DocType: C-Form,C-Form,C-Form
 apps/erpnext/erpnext/config/hr.py +18,Mark Attendance for multiple employees,มาร์คเข้าร่วมสำหรับพนักงานหลาย
@@ -4301,7 +4305,7 @@ DocType: Opening Invoice Creation Tool,Sales,ขาย
 DocType: Stock Entry Detail,Basic Amount,จํานวนเงินขั้นพื้นฐาน
 DocType: Training Event,Exam,การสอบ
 DocType: Complaint,Complaint,การร้องเรียน
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +456,Warehouse required for stock Item {0},คลังสินค้า ที่จำเป็นสำหรับ รายการ หุ้น {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +449,Warehouse required for stock Item {0},คลังสินค้า ที่จำเป็นสำหรับ รายการ หุ้น {0}
 DocType: Leave Allocation,Unused leaves,ใบที่ไม่ได้ใช้
 DocType: Patient,Alcohol Past Use,การใช้แอลกอฮอล์ในอดีต
 DocType: Fertilizer Content,Fertilizer Content,เนื้อหาปุ๋ย
@@ -4430,6 +4434,7 @@ apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +66,Opening Val
 DocType: Salary Detail,Formula,สูตร
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +47,Serial #,Serial #
 DocType: Lab Test Template,Lab Test Template,เทมเพลตการทดสอบ Lab
+apps/erpnext/erpnext/setup/doctype/company/company.py +170,Sales Account,บัญชีขาย
 DocType: Purchase Invoice Item,Total Weight,น้ำหนักรวม
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +94,Commission on Sales,สำนักงานคณะกรรมการกำกับ การขาย
 DocType: Offer Letter Term,Value / Description,ค่า / รายละเอียด
@@ -4587,7 +4592,7 @@ Updated via 'Time Log'",เป็นนาที ปรับปรุงผ่�
 DocType: Customer,From Lead,จากช่องทาง
 apps/erpnext/erpnext/config/manufacturing.py +13,Orders released for production.,คำสั่งปล่อยให้การผลิต
 apps/erpnext/erpnext/public/js/account_tree_grid.js +66,Select Fiscal Year...,เลือกปีงบประมาณ ...
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +561,POS Profile required to make POS Entry,รายละเอียด จุดขาย จำเป็นต้องทำให้ จุดขาย บันทึกได้
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +554,POS Profile required to make POS Entry,รายละเอียด จุดขาย จำเป็นต้องทำให้ จุดขาย บันทึกได้
 DocType: Program Enrollment Tool,Enroll Students,รับสมัครนักเรียน
 DocType: Lab Test,Approved Date,วันที่อนุมัติ
 apps/erpnext/erpnext/patches/v4_0/create_price_list_if_missing.py +21,Standard Selling,ขาย มาตรฐาน
@@ -4664,7 +4669,7 @@ DocType: Employee,Held On,จัดขึ้นเมื่อวันที่
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order_calendar.js +36,Production Item,การผลิตสินค้า
 ,Employee Information,ข้อมูลของพนักงาน
 DocType: Stock Entry Detail,Additional Cost,ค่าใช้จ่ายเพิ่มเติม
-apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +39,"Can not filter based on Voucher No, if grouped by Voucher",ไม่สามารถกรอง ตาม คูปอง ไม่ ถ้า จัดกลุ่มตาม คูปอง
+apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +44,"Can not filter based on Voucher No, if grouped by Voucher",ไม่สามารถกรอง ตาม คูปอง ไม่ ถ้า จัดกลุ่มตาม คูปอง
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js +916,Make Supplier Quotation,ทำ ใบเสนอราคา ของผู้ผลิต
 DocType: Quality Inspection,Incoming,ขาเข้า
 apps/erpnext/erpnext/setup/doctype/company/company.js +70,Default tax templates for sales and purchase are created.,เทมเพลตภาษีที่เป็นค่าเริ่มต้นสำหรับการขายและซื้อจะสร้างขึ้น
@@ -4681,7 +4686,7 @@ DocType: Batch,Batch ID,ID ชุด
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +378,Note: {0},หมายเหตุ : {0}
 ,Delivery Note Trends,แนวโน้มหมายเหตุการจัดส่งสินค้า
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +112,This Week's Summary,ข้อมูลอย่างนี้สัปดาห์
-apps/erpnext/erpnext/manufacturing/report/bom_stock_report/bom_stock_report.py +20,In Stock Qty,ในสต็อกจำนวน
+apps/erpnext/erpnext/manufacturing/report/bom_stock_report/bom_stock_report.py +22,In Stock Qty,ในสต็อกจำนวน
 DocType: Delivery Trip,Calculate Estimated Arrival Times,คำนวณเวลาเข้าพักโดยประมาณ
 apps/erpnext/erpnext/accounts/general_ledger.py +111,Account: {0} can only be updated via Stock Transactions,บัญชี: {0} เท่านั้นที่สามารถได้รับการปรับปรุงผ่านการทำธุรกรรมสต็อก
 DocType: Student Group Creation Tool,Get Courses,รับหลักสูตร
@@ -4697,7 +4702,7 @@ DocType: Purchase Order,To Bill,บิล
 DocType: Material Request,% Ordered,% สั่งแล้ว
 DocType: Education Settings,"For Course based Student Group, the Course will be validated for every Student from the enrolled Courses in Program Enrollment.",สำหรับกลุ่มนักศึกษาหลักสูตรจะมีการตรวจสอบหลักสูตรสำหรับนักเรียนทุกคนจากหลักสูตรที่ลงทะเบียนเรียนในการลงทะเบียนหลักสูตร
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +103,Piecework,งานเหมา
-apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +71,Avg. Buying Rate,ราคาซื้อเฉลี่ย
+apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +70,Avg. Buying Rate,ราคาซื้อเฉลี่ย
 DocType: Task,Actual Time (in Hours),เวลาที่เกิดขึ้นจริง (ในชั่วโมง)
 DocType: Employee,History In Company,ประวัติใน บริษัท
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +311,New Message from {sender},ข้อความใหม่จาก {sender}
@@ -4745,7 +4750,7 @@ DocType: Asset Repair,Asset Repair,การซ่อมแซมสินทร
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +140,Row {0}: Currency of the BOM #{1} should be equal to the selected currency {2},แถว {0}: สกุลเงินของ BOM # {1} ควรจะเท่ากับสกุลเงินที่เลือก {2}
 DocType: Journal Entry Account,Exchange Rate,อัตราแลกเปลี่ยน
 DocType: Patient,Additional information regarding the patient,ข้อมูลเพิ่มเติมเกี่ยวกับผู้ป่วย
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +579,Sales Order {0} is not submitted,การขายสินค้า {0} ไม่ได้ ส่ง
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +572,Sales Order {0} is not submitted,การขายสินค้า {0} ไม่ได้ ส่ง
 DocType: Homepage,Tag Line,สายแท็ก
 DocType: Fee Component,Fee Component,ค่าบริการตัวแทน
 apps/erpnext/erpnext/config/hr.py +204,Fleet Management,การจัดการ Fleet
@@ -4960,7 +4965,7 @@ DocType: Assessment Result Detail,Assessment Result Detail,การประเ
 DocType: Employee Education,Employee Education,การศึกษาการทำงานของพนักงาน
 apps/erpnext/erpnext/accounts/doctype/pos_profile/pos_profile.py +53,Duplicate item group found in the item group table,กลุ่มรายการที่ซ้ำกันที่พบในตารางกลุ่มรายการ
 DocType: Land Unit,Parent Land Unit,หน่วยที่ดินปกครอง
-apps/erpnext/erpnext/public/js/controllers/transaction.js +1098,It is needed to fetch Item Details.,มันเป็นสิ่งจำเป็นที่จะดึงรายละเอียดสินค้า
+apps/erpnext/erpnext/public/js/controllers/transaction.js +1101,It is needed to fetch Item Details.,มันเป็นสิ่งจำเป็นที่จะดึงรายละเอียดสินค้า
 DocType: Fertilizer,Fertilizer Name,ชื่อปุ๋ย
 DocType: Salary Slip,Net Pay,จ่ายสุทธิ
 DocType: Account,Account,บัญชี
@@ -5039,7 +5044,7 @@ DocType: Stock Entry Detail,Actual Qty (at source/target),จำนวนที�
 DocType: Item Customer Detail,Ref Code,รหัส Ref
 apps/erpnext/erpnext/accounts/doctype/pos_profile/pos_profile.py +75,Customer Group is Required in POS Profile,ลูกค้าจำเป็นต้องมีในโปรไฟล์ POS
 apps/erpnext/erpnext/config/hr.py +12,Employee records.,ระเบียนพนักงาน
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +92,Please set Next Depreciation Date,กรุณาตั้งค่าถัดไปวันที่ค่าเสื่อมราคา
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +95,Please set Next Depreciation Date,กรุณาตั้งค่าถัดไปวันที่ค่าเสื่อมราคา
 DocType: HR Settings,Payroll Settings,การตั้งค่า บัญชีเงินเดือน
 apps/erpnext/erpnext/config/accounts.py +146,Match non-linked Invoices and Payments.,ตรงกับใบแจ้งหนี้ไม่ได้เชื่อมโยงและการชำระเงิน
 DocType: POS Settings,POS Settings,การตั้งค่า POS
@@ -5207,7 +5212,7 @@ DocType: Item,Customer Code,รหัสลูกค้า
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +220,Birthday Reminder for {0},เตือนวันเกิดสำหรับ {0}
 DocType: Asset Maintenance Task,Last Completion Date,วันที่เสร็จสมบูรณ์ล่าสุด
 apps/erpnext/erpnext/selling/report/inactive_customers/inactive_customers.py +72,Days Since Last Order,ตั้งแต่ วันที่ สั่งซื้อ ล่าสุด
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +359,Debit To account must be a Balance Sheet account,เพื่อเดบิตบัญชีจะต้องเป็นบัญชีงบดุล
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +352,Debit To account must be a Balance Sheet account,เพื่อเดบิตบัญชีจะต้องเป็นบัญชีงบดุล
 DocType: Buying Settings,Naming Series,การตั้งชื่อซีรีส์
 DocType: Leave Block List,Leave Block List Name,ฝากชื่อรายการที่ถูกบล็อก
 apps/erpnext/erpnext/hr/doctype/vehicle/vehicle.py +14,Insurance Start date should be less than Insurance End date,วันประกันเริ่มต้นควรจะน้อยกว่าวันประกันสิ้นสุด
@@ -5338,6 +5343,7 @@ apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +273,Installat
 DocType: Bank Reconciliation,Get Payment Entries,ได้รับรายการการชำระเงิน
 DocType: Quotation Item,Against Docname,กับ ชื่อเอกสาร
 DocType: SMS Center,All Employee (Active),พนักงาน (อยู่ในระบบ) ทั้งหมด
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,ลูกค้า&gt; กลุ่มลูกค้า&gt; เขตแดน
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +9,View Now,ดู ตอนนี้
 DocType: BOM,Raw Material Cost,วัตถุดิบต้นทุน
 DocType: Item Reorder,Re-Order Level,ระดับ Re-Order
@@ -5438,7 +5444,6 @@ apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invo
 DocType: Room,Seating Capacity,ความจุของที่นั่ง
 DocType: Issue,ISS-,ISS-
 DocType: Lab Test Groups,Lab Test Groups,กลุ่มการทดสอบในห้องปฏิบัติการ
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,ลูกค้า&gt; กลุ่มลูกค้า&gt; เขตแดน
 DocType: Project,Total Expense Claim (via Expense Claims),การเรียกร้องค่าใช้จ่ายรวม (ผ่านการเรียกร้องค่าใช้จ่าย)
 DocType: GST Settings,GST Summary,สรุป GST
 DocType: Assessment Result,Total Score,คะแนนรวม
@@ -5452,7 +5457,7 @@ DocType: Batch,Source Document Type,ประเภทเอกสารต้�
 apps/erpnext/erpnext/education/doctype/course_scheduling_tool/course_scheduling_tool.js +24,Following course schedules were created,สร้างตารางเวลาหลักสูตรขึ้นแล้ว
 DocType: Journal Entry,Total Debit,เดบิตรวม
 DocType: Manufacturing Settings,Default Finished Goods Warehouse,เริ่มต้นโกดังสินค้าสำเร็จรูป
-apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +77,Sales Person,พนักงานขาย
+apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +76,Sales Person,พนักงานขาย
 apps/erpnext/erpnext/config/accounts.py +233,Budget and Cost Center,งบประมาณและศูนย์ต้นทุน
 apps/erpnext/erpnext/accounts/doctype/pos_profile/pos_profile.py +65,Multiple default mode of payment is not allowed,โหมดการชำระเงินเริ่มต้นหลายรูปแบบไม่ได้รับอนุญาต
 apps/erpnext/erpnext/templates/emails/recurring_document_failed.html +5,for the,สำหรับ
@@ -5628,7 +5633,7 @@ DocType: Program,Program Name,ชื่อโครงการ
 DocType: Purchase Taxes and Charges,Consider Tax or Charge for,พิจารณาภาษีหรือคิดค่าบริการสำหรับ
 DocType: Driver,Driving License Category,ประเภทใบอนุญาตขับรถ
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +57,Actual Qty is mandatory,จำนวนที่เกิดขึ้นจริงมีผลบังคับใช้
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +82,"{0} currently has a {1} Supplier Scorecard standing, and Purchase Orders to this supplier should be issued with caution.",{0} ปัจจุบันมีสถานะ {1} Scorecard ของผู้จัดหาและใบสั่งซื้อของผู้จัดจำหน่ายรายนี้ควรได้รับการเตือนด้วยความระมัดระวัง
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +88,"{0} currently has a {1} Supplier Scorecard standing, and Purchase Orders to this supplier should be issued with caution.",{0} ปัจจุบันมีสถานะ {1} Scorecard ของผู้จัดหาและใบสั่งซื้อของผู้จัดจำหน่ายรายนี้ควรได้รับการเตือนด้วยความระมัดระวัง
 DocType: Asset Maintenance Team,Asset Maintenance Team,ทีมงานบำรุงรักษาสินทรัพย์
 DocType: Employee Loan,Loan Type,ประเภทเงินกู้
 DocType: Scheduling Tool,Scheduling Tool,เครื่องมือการตั้งเวลา
