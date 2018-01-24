@@ -66,7 +66,6 @@ def get_data(filters, columns):
 	return item_price_qty_data
 
 def get_item_price_qty_data(filters):
-	item_dicts = []
 	conditions = ""
 	if filters.get("item_code"):
 		conditions += "where a.item_code=%(item_code)s"
@@ -78,11 +77,10 @@ def get_item_price_qty_data(filters):
 		{conditions}"""
 		.format(conditions=conditions), filters, as_dict=1)
 
-	price_list_names = ",".join(['"' + frappe.db.escape(item['price_list_name']) + '"'
-		for item in item_results])
+	price_list_names = list(set([frappe.db.escape(item.price_list_name) for item in item_results]))
 
-	buying_price_map = get_buying_price_map(price_list_names)
-	selling_price_map = get_selling_price_map(price_list_names)
+	buying_price_map = get_price_map(price_list_names, buying=1)
+	selling_price_map = get_price_map(price_list_names, selling=1)
 
 	result = []
 	if item_results:
@@ -109,40 +107,31 @@ def get_item_price_qty_data(filters):
 
 	return result
 
-def get_buying_price_map(price_list_names):
-	buying_price = frappe.db.sql("""
+def get_price_map(price_list_names, buying=0, selling=0):
+	price_map = {}
+
+	if not price_list_names:
+		return price_map
+
+	rate_key = "Buying Rate" if buying else "Selling Rate"
+	price_list_key = "Buying Price List" if buying else "Selling Price List"
+	price_list_condition = " and buying=1" if buying else " and selling=1"
+
+	pricing_details = frappe.db.sql("""
 		select
 			name,price_list,price_list_rate
 		from
 			`tabItem Price`
 		where
-			name in ({price_list_names}) and buying=1
-		""".format(price_list_names=price_list_names), as_dict=1)
+			name in ({price_list_names}) {price_list_condition}
+		""".format(price_list_names=', '.join(['%s']*len(price_list_names)),
+	price_list_condition=price_list_condition), price_list_names, as_dict=1)
 
-	buying_price_map = {}
-	for d in buying_price:
+	for d in pricing_details:
 		name = d["name"]
-		buying_price_map[name] = {
-			"Buying Price List" :d["price_list"],
-			"Buying Rate" :d["price_list_rate"]
+		price_map[name] = {
+			price_list_key :d["price_list"],
+			rate_key :d["price_list_rate"]
 		}
-	return buying_price_map
 
-def get_selling_price_map(price_list_names):
-	selling_price = frappe.db.sql("""
-		select
-			name,price_list,price_list_rate
-		from
-			`tabItem Price`
-		where
-			name in ({price_list_names}) and selling=1
-		""".format(price_list_names=price_list_names), as_dict=1)
-
-	selling_price_map = {}
-	for d in selling_price:
-		name = d["name"]
-		selling_price_map[name] = {
-			"Selling Price List" :d["price_list"],
-			"Selling Rate" :d["price_list_rate"]
-		}
-	return selling_price_map
+	return price_map
