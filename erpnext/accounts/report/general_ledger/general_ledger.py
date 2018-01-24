@@ -3,15 +3,21 @@
 
 from __future__ import unicode_literals
 import frappe
+
 from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
-from frappe.utils import getdate, cstr, flt
+from frappe.utils import getdate, cstr, flt, fmt_money
 from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
 
 
 def execute(filters=None):
 	account_details = {}
+
+	if filters and filters.get('print_in_account_currency') and \
+		not filters.get('account'):
+		frappe.throw(_("Select an account to print in account currency"))
+
 	for acc in frappe.db.sql("""select name, is_group from tabAccount""", as_dict=1):
 		account_details.setdefault(acc.name, acc)
 
@@ -260,10 +266,9 @@ def get_totals_dict():
 			credit_in_account_currency=0.0
 		)
 	return _dict(
-		opening=_get_debit_credit_dict(_('Opening')),
-		total=_get_debit_credit_dict(_('Total')),
-		closing=_get_debit_credit_dict(_('Closing (Opening + Total)')),
-		total_closing=_get_debit_credit_dict(_('Closing Balance (Dr - Cr)'))
+		opening = _get_debit_credit_dict(_('Opening')),
+		total = _get_debit_credit_dict(_('Total')),
+		closing = _get_debit_credit_dict(_('Closing (Opening + Total)'))
 	)
 
 
@@ -309,19 +314,164 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 
 
 def get_result_as_list(data, filters):
-	result = []
+	balance, balance_in_account_currency = 0, 0
+	inv_details = get_supplier_invoice_details()
+
 	for d in data:
-		row = [d.get("posting_date"), d.get("account"), d.get("debit"), d.get("credit")]
+		if not d.get('posting_date'):
+			balance, balance_in_account_currency = 0, 0
+
+		balance, label = get_balance(d, balance, 'debit', 'credit')
+		d['balance'] = '{0} {1}'.format(fmt_money(abs(balance)), label)
 
 		if filters.get("show_in_account_currency"):
-			row += [d.get("debit_in_account_currency"), d.get("credit_in_account_currency")]
+			balance_in_account_currency, label = get_balance(d, balance_in_account_currency,
+				'debit_in_account_currency', 'credit_in_account_currency')
+			d['balance_in_account_currency'] = '{0} {1}'.format(fmt_money(abs(balance_in_account_currency)), label)
+		else:
+			d['debit_in_account_currency'] = d.get('debit', 0)
+			d['credit_in_account_currency'] = d.get('credit', 0)
+			d['balance_in_account_currency'] = d.get('balance')
 
-		row += [
-			d.get("voucher_type"), d.get("voucher_no"), d.get("against"), d.get("party_type"),
-			d.get("party"), d.get("project"), d.get("cost_center"), d.get("against_voucher_type"),
-			d.get("against_voucher"), d.get("remarks")
-		]
+		d['account_currency'] = filters.account_currency
+		d['bill_no'] = inv_details.get(d.get('against_voucher'), '')
 
-		result.append(row)
+	return data
 
-	return result
+def get_supplier_invoice_details():
+	inv_details = {}
+	for d in frappe.db.sql(""" select name, bill_no from `tabPurchase Invoice`
+		where docstatus = 1 and bill_no is not null and bill_no != '' """, as_dict=1):
+		inv_details[d.name] = d.bill_no
+
+	return inv_details
+
+def get_balance(row, balance, debit_field, credit_field):
+	balance += (row.get(debit_field, 0) -  row.get(credit_field, 0))
+	label = 'DR' if balance > 0 else 'CR'
+
+	return balance, label
+
+def get_columns(filters):
+	columns = [
+		{
+			"label": _("Posting Date"),
+			"fieldname": "posting_date",
+			"fieldtype": "Date",
+			"width": 90
+		},
+		{
+			"label": _("Account"),
+			"fieldname": "account",
+			"fieldtype": "Link",
+			"options": "Account",
+			"width": 180
+		},
+		{
+			"label": _("Debit"),
+			"fieldname": "debit",
+			"fieldtype": "Float",
+			"width": 100
+		},
+		{
+			"label": _("Credit"),
+			"fieldname": "credit",
+			"fieldtype": "Float",
+			"width": 100
+		},
+		{
+			"label": _("Balance"),
+			"fieldname": "balance",
+			"fieldtype": "Data",
+			"width": 100
+		}
+	]
+
+	if filters.get("show_in_account_currency"):
+		columns.extend([
+			{
+				"label": _("Debit") + " (" + filters.account_currency + ")",
+				"fieldname": "debit_in_account_currency",
+				"fieldtype": "Float",
+				"width": 100
+			},
+			{
+				"label": _("Credit") + " (" + filters.account_currency + ")",
+				"fieldname": "credit_in_account_currency",
+				"fieldtype": "Float",
+				"width": 100
+			},
+			{
+				"label": _("Balance") + " (" + filters.account_currency + ")",
+				"fieldname": "balance_in_account_currency",
+				"fieldtype": "Data",
+				"width": 100
+			}
+		])
+
+	columns.extend([
+		{
+			"label": _("Voucher Type"),
+			"fieldname": "voucher_type",
+			"width": 120
+		},
+		{
+			"label": _("Voucher No"),
+			"fieldname": "voucher_no",
+			"fieldtype": "Dynamic Link",
+			"options": "voucher_type",
+			"width": 180
+		},
+		{
+			"label": _("Against Account"),
+			"fieldname": "against",
+			"width": 120
+		},
+		{
+			"label": _("Party Type"),
+			"fieldname": "party_type",
+			"width": 100
+		},
+		{
+			"label": _("Party"),
+			"fieldname": "party",
+			"width": 100
+		},
+		{
+			"label": _("Project"),
+			"options": "Project",
+			"fieldname": "project",
+			"width": 100
+		},
+		{
+			"label": _("Cost Center"),
+			"options": "Cost Center",
+			"fieldname": "cost_center",
+			"width": 100
+		},
+		{
+			"label": _("Against Voucher Type"),
+			"fieldname": "against_voucher_type",
+			"width": 100
+		},
+		{
+			"label": _("Against Voucher"),
+			"fieldname": "against_voucher",
+			"fieldtype": "Dynamic Link",
+			"options": "against_voucher_type",
+			"width": 100
+		},
+		{
+			"label": _("Supplier Invoice No"),
+			"fieldname": "bill_no",
+			"fieldtype": "Data",
+			"width": 100
+		},
+		{
+			"label": _("Remarks"),
+			"fieldname": "remarks",
+			"width": 400
+		}
+	])
+
+	return columns

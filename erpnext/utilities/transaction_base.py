@@ -26,7 +26,7 @@ class TransactionBase(StatusUpdater):
 			now = now_datetime()
 			self.posting_date = now.strftime('%Y-%m-%d')
 			self.posting_time = now.strftime('%H:%M:%S.%f')
-		else:
+		elif self.posting_time:
 			try:
 				get_time(self.posting_time)
 			except ValueError:
