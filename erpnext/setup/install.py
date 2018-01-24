@@ -31,6 +31,13 @@ def leave_application_workflow():
 				'style': style
 			}).insert(ignore_permissions=True)
 
+	for action in ['Approve', 'Reject']:
+		if not frappe.db.exists("Workflow Action", action):
+			frappe.get_doc({
+				'doctype': 'Workflow Action',
+				'workflow_action_name': action
+			}).insert(ignore_permissions=True)
+
 	if not frappe.db.exists("Workflow", "Leave Approval"):
 		frappe.get_doc({
 			'doctype': 'Workflow',
