@@ -6,7 +6,6 @@ import frappe
 from frappe.utils import format_datetime
 from frappe import _
 
-
 def execute(filters=None):
 	account_details = {}
 	for acc in frappe.db.sql("""select name, is_group from tabAccount""", as_dict=1):
