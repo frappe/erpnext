@@ -12,7 +12,7 @@ def execute(filters=None):
 		frappe.throw(_("Please select date"))
 
 	columns = get_columns(filters)
-	
+
 	date = filters.get("date")
 
 	data = []

@@ -7,9 +7,6 @@ import frappe
 from frappe.model.document import Document
 from frappe.model.naming   import make_autoname
 
-# imports - frappe module imports
-from frappe.chat.util import squashify
-
 class ShareTransfer(Document):
 	def before_save(self):
 		if self.transfer_type == 'Issue':
@@ -63,7 +60,7 @@ class ShareTransfer(Document):
 					'doctype': 'Shareholder',
 					'title': self.company,
 					'company': self.company,
-					'is_company': 1 
+					'is_company': 1
 				})
 				company_doc.insert()
 			# validate share doesnt exist in company
@@ -71,7 +68,7 @@ class ShareTransfer(Document):
 			if ret_val != False:
 				frappe.throw('The shares already exist')
 		else:
-			# validate share exists with from_shareholder 
+			# validate share exists with from_shareholder
 			ret_val = self.share_exists(self.from_shareholder)
 			if ret_val != True:
 				frappe.throw('The shares don\'t exist with the {0}'.format(self.from_shareholder))
@@ -95,12 +92,11 @@ class ShareTransfer(Document):
 		if self.from_shareholder == self.to_shareholder:
 			frappe.throw('The seller and the buyer cannot be the same')
 		if self.no_of_shares != self.to_no - self.from_no + 1:
-			frappe.throw('The number of shares and the share numbers are inconsistent!') 
+			frappe.throw('The number of shares and the share numbers are inconsistent!')
 		if self.amount is None:
 			self.amount = self.rate * self.no_of_shares
 		if self.amount != self.rate * self.no_of_shares:
 			frappe.throw('There\'s inconsistency between the rate, no of shares and the amount calculated')
-		total_no_of_shares = 0
 
 	def share_exists(self, shareholder):
 		# return True				if exits,
@@ -262,7 +258,7 @@ class ShareTransfer(Document):
 
 	def get_shareholder_doc(self, shareholder):
 		# Get Shareholder doc based on the Shareholder title
-		doc = frappe.get_list('Shareholder', 
+		doc = frappe.get_list('Shareholder',
 			filters = [
 				('Shareholder', 'title', '=', shareholder)
 			]

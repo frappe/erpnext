@@ -7,9 +7,6 @@ import frappe
 from frappe.model.document import Document
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
 
-# module imports - 
-import json
-
 class Shareholder(Document):
 	def onload(self):
 		"""Load address and contacts in `__onload`"""

@@ -6,12 +6,12 @@
 	},
 	{
 		"doctype": "Shareholder",
-		"name": "SH-",
+		"series": "SH-",
 		"title": "Thor"
 	},
 	{
 		"doctype": "Shareholder",
-		"name": "SH-",
+		"series": "SH-",
 		"title": "Hulk"
 	}
 ]
