@@ -8,13 +8,13 @@ def execute():
 	frappe.reload_doc("hr", "doctype", "leave_application")
 	frappe.reload_doc("workflow", "doctype", "workflow")
 
-	doc = frappe.get_doc({
+	frappe.get_doc({
 		'doctype': 'Workflow State',
 		'workflow_state_name': 'Open',
 		'style': 'Warning'
-		}).insert(ignore_permissions=True)
+	}).insert(ignore_permissions=True)
 
-	doc = frappe.get_doc({
+	frappe.get_doc({
 		'doctype': 'Workflow',
 		'workflow_name': 'Leave Approval',
 		'document_type': 'Leave Application',
