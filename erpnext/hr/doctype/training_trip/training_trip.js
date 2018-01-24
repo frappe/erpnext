@@ -57,6 +57,29 @@ frappe.ui.form.on('Training Trip', {
     },
     
     onload: function(frm) {
+        if (!cur_frm.doc.world_countries) {
+            cur_frm.set_query("city", function() {
+                return {
+                    filters: [
+                        ["City", "name", "=", ""]
+                    ]
+                };
+            });
+        }
+    },
+    city: function(frm) {
+        if(cur_frm.doc.city && cur_frm.doc.world_countries){
+            cur_frm.set_value("target_city", cur_frm.doc.world_countries+'-'+cur_frm.doc.city);
+        }else{
+            cur_frm.set_value("target_city", "");
+        }
+    },
+    world_countries: function(frm) {
+        if(cur_frm.doc.city && cur_frm.doc.world_countries){
+            cur_frm.set_value("target_city", cur_frm.doc.world_countries+'-'+cur_frm.doc.city);
+        }else{
+            cur_frm.set_value("target_city", "");
+        }
     }
 });
 
