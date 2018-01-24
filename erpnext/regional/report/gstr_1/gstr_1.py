@@ -48,8 +48,7 @@ class Gstr1Report(object):
 						if item_code in items]),
 					self.invoice_cess.get(inv)
 				]
-				for x in xrange(1,10):
-					print("item", row)
+
 				if self.filters.get("type_of_business") ==  "B2C Small":
 					row.append("E" if invoice_details.ecommerce_gstin else "OE")
 
