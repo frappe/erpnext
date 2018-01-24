@@ -15,17 +15,17 @@ develop_version = '9.x.x-develop'
 
 error_report_email = "support@erpnext.com"
 
-app_include_js = "assets/js/erpnext.min.js"
-app_include_css = "assets/css/erpnext.css"
-web_include_js = "assets/js/erpnext-web.min.js"
-web_include_css = "assets/erpnext/css/website.css"
+app_include_js = "assets/bundles/erpnext/js/erpnext.bundle.js"
+app_include_css = "assets/bundles/erpnext/css/erpnext.css"
+web_include_js = "assets/bundles/erpnext/js/erpnext-web.bundle.js"
+web_include_css = "assets/bundles/erpnext/css/erpnext-web.css"
 
 doctype_js = {
 	"Communication": "public/js/communication.js",
 }
 
 # setup wizard
-setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
+setup_wizard_requires = "assets/erpnext/js/erpnext/setup_wizard.js"
 setup_wizard_stages = "erpnext.setup.setup_wizard.setup_wizard.get_setup_stages"
 setup_wizard_test = "erpnext.setup.setup_wizard.test_setup_wizard.run_setup_wizard_test"
 
