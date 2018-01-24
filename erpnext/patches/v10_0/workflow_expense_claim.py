@@ -8,13 +8,13 @@ def execute():
 	frappe.reload_doc("hr", "doctype", "expense_claim")
 	frappe.reload_doc("workflow", "doctype", "workflow")
 
-	doc = frappe.get_doc({
+	frappe.get_doc({
 		'doctype': 'Workflow State',
 		'workflow_state_name': 'Draft',
 		'style': 'Warning'
-		}).insert(ignore_permissions=True)
+	}).insert(ignore_permissions=True)
 
-	doc = frappe.get_doc({
+	frappe.get_doc({
 		'doctype': 'Workflow',
 		'workflow_name': 'Expense Approval',
 		'document_type': 'Expense Claim',
@@ -48,4 +48,3 @@ def execute():
 	}).insert(ignore_permissions=True)
 
 	frappe.db.sql("""update `tabExpense Claim` set workflow_state = approval_status""")
-	frappe.db.sql("""alter table `tabExpense Claim` drop column approval_status""")
