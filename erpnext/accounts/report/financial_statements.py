@@ -129,7 +129,7 @@ def get_data(
 
 	accounts, accounts_by_name, parent_children_map = filter_accounts(accounts)
 
-	company_currency = frappe.db.get_value("Company", company, "default_currency")
+	company_currency = get_appropriate_currency(filters, company)
 
 	gl_entries_by_account = {}
 	for root in frappe.db.sql("""select lft, rgt from tabAccount
@@ -153,6 +153,13 @@ def get_data(
 		add_total_row(out, root_type, balance_must_be, period_list, company_currency)
 
 	return out
+
+
+def get_appropriate_currency(filters, company):
+	if filters.get("presentation_currency"):
+		return filters["presentation_currency"]
+	else:
+		return frappe.db.get_value("Company", company, "default_currency")
 
 
 def calculate_values(
