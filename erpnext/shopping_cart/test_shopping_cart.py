@@ -9,7 +9,7 @@ from erpnext.shopping_cart.cart import _get_cart_quotation, update_cart, get_par
 from erpnext.tests.utils import create_test_contact_and_address
 
 
-test_dependencies = ['Payment Terms Template']
+# test_dependencies = ['Payment Terms Template']
 
 class TestShoppingCart(unittest.TestCase):
 	"""

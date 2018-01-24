@@ -144,10 +144,9 @@ def get_incoming_rate(args):
 
 	if not in_rate:
 		voucher_no = args.get('voucher_no') or args.get('name')
-
 		in_rate = get_valuation_rate(args.get('item_code'), args.get('warehouse'),
 			args.get('voucher_type'), voucher_no, args.get('allow_zero_valuation'),
-			currency=erpnext.get_company_currency(args.get('company')))
+			currency=erpnext.get_company_currency(args.get('company')), company=args.get('company'))
 
 	return in_rate
 
