@@ -8,11 +8,12 @@ def execute():
 	frappe.reload_doc("hr", "doctype", "expense_claim")
 	frappe.reload_doc("workflow", "doctype", "workflow")
 
-	frappe.get_doc({
-		'doctype': 'Workflow State',
-		'workflow_state_name': 'Draft',
-		'style': 'Warning'
-	}).insert(ignore_permissions=True)
+	if not frappe.db.exists("Workflow State", "Draft"):
+		frappe.get_doc({
+			'doctype': 'Workflow State',
+			'workflow_state_name': 'Draft',
+			'style': 'Warning'
+		}).insert(ignore_permissions=True)
 
 	frappe.get_doc({
 		'doctype': 'Workflow',
