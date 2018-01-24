@@ -82,18 +82,11 @@ erpnext.stock.ItemDashboard = Class.extend({
 			var message = __(" Currently no stock available in any warehouse")
 			$("<span class='text-muted small'>"+message+"</span>").appendTo(this.result);
 		}
-
-		if (frappe.boot.user.can_write.indexOf("Stock Entry")>=0){
-			$(".btn-move").show();
-			$(".btn-add").show();
-		}else{
-			$(".btn-move").hide();
-			$(".btn-add").hide();
-		}
 	},
 	get_item_dashboard_data: function(data, max_count, show_item) {
 		if(!max_count) max_count = 0;
 		if(!data) data = [];
+
 		data.forEach(function(d) {
 			d.actual_or_pending = d.projected_qty + d.reserved_qty + d.reserved_qty_for_production;
 			d.pending_qty = 0;
@@ -105,9 +98,16 @@ erpnext.stock.ItemDashboard = Class.extend({
 			max_count = Math.max(d.actual_or_pending, d.actual_qty,
 				d.total_reserved, max_count);
 		});
+
+		var can_write = 0;
+		if(frappe.boot.user.can_write.indexOf("Stock Entry")>=0){
+			can_write = 1;
+		}
+
 		return {
 			data: data,
 			max_count: max_count,
+			can_write:can_write,
 			show_item: show_item || false
 		}
 	}
