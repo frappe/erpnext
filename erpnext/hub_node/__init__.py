@@ -15,7 +15,7 @@ def enable_hub():
 	return hub_settings
 
 @frappe.whitelist()
-def get_items(start=0, limit=20, category=None, order_by=None, company=None, text=None):
+def get_items(start=0, limit=20, fields=["*"], category=None, order_by=None, company=None, text=None):
 	connection = get_client_connection()
 
 	filters = {}
@@ -29,8 +29,22 @@ def get_items(start=0, limit=20, category=None, order_by=None, company=None, tex
 
 	response = connection.get_list('Hub Item',
 		limit_start=start, limit_page_length=limit,
-		filters=filters)
+		filters=filters, fields=fields)
 	return response
+
+#
+
+@frappe.whitelist()
+def get_hub_item_meta():
+	connection = get_client_connection()
+	meta = connection.get_doc('DocType', 'Hub Item')
+	return meta
+
+@frappe.whitelist()
+def get_hub_company_meta():
+	connection = get_client_connection()
+	meta = connection.get_doc('DocType', 'Hub Company')
+	return meta
 
 @frappe.whitelist()
 def get_categories():
@@ -43,7 +57,10 @@ def get_item_details(hub_sync_id=None):
 	if not hub_sync_id:
 		return
 	connection = get_client_connection()
-	return connection.get_doc('Hub Item', hub_sync_id)
+	item_details = connection.get_doc('Hub Item', hub_sync_id)
+	print("============details=============")
+	print(item_details)
+	return item_details
 
 @frappe.whitelist()
 def get_company_details(hub_sync_id):
