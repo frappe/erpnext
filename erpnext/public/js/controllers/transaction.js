@@ -539,7 +539,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		// due_date is to be changed, payment terms template and/or payment schedule must
 		// be removed as due_date is automatically changed based on payment terms
 		if (this.frm.doc.due_date) {
-			if (this.frm.doc.payment_terms_template || this.frm.doc.payment_schedule.length) {
+			if (this.frm.doc.payment_terms_template ||
+				(this.frm.doc.payment_schedule && this.frm.doc.payment_schedule.length)) {
 				var message1 = "";
 				var message2 = "";
 				var final_message = "Please clear the ";
@@ -647,6 +648,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					}
 				}
 			}).fail(() => this.frm.set_value('shipping_rule', ''));
+		}
+		else {
+			me.calculate_taxes_and_totals();
 		}
 	},
 
