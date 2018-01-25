@@ -377,7 +377,7 @@ def weekly():
         data.append(recipients)
     email_sending(data, header)
 
-
+#sample
 def email_sending(data,header):
     holiday = frappe.db.sql("""SELECT holiday_date FROM `tabHoliday` where holiday_date = CURDATE();""")
     if len(holiday) == 0:
