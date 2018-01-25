@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="eb73f0e7-7ef7-41a2-9336-aada075237ad" name="Default" comment="">
+    <list default="true" id="2c78ff50-3188-4568-80e9-89be95a8b91d" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/dataSources.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/dataSources/3e8c695f-0bc9-4bbd-9b96-e3a96b8b2d46.xml" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/erpnext/projects/doctype/project/project.js" afterPath="$PROJECT_DIR$/erpnext/projects/doctype/project/project.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/erpnext/projects/doctype/project/project.json" afterPath="$PROJECT_DIR$/erpnext/projects/doctype/project/project.json" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/erpnext/projects/doctype/project/project.py" afterPath="$PROJECT_DIR$/erpnext/projects/doctype/project/project.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -11,68 +16,47 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_TABLE_DETAILS" value="true" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <PATH>
+      <PATH_ELEMENT>
+        <option name="myItemId" />
+        <option name="myItemType" value="com.intellij.database.view.DatabaseStructure$Root" />
+      </PATH_ELEMENT>
+      <PATH_ELEMENT>
+        <option name="myItemId" value="@localhost" />
+        <option name="myItemType" value="com.intellij.database.view.DbNodeDescriptor" />
+      </PATH_ELEMENT>
+    </PATH>
+    <PATH>
+      <PATH_ELEMENT>
+        <option name="myItemId" />
+        <option name="myItemType" value="com.intellij.database.view.DatabaseStructure$Root" />
+      </PATH_ELEMENT>
+      <PATH_ELEMENT>
+        <option name="myItemId" value="@localhost" />
+        <option name="myItemType" value="com.intellij.database.view.DbNodeDescriptor" />
+      </PATH_ELEMENT>
+      <PATH_ELEMENT>
+        <option name="myItemId" value="90c7b0dc055ef1aa" />
+        <option name="myItemType" value="com.intellij.database.view.DbNodeDescriptor" />
+      </PATH_ELEMENT>
+    </PATH>
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="project_update.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/erpnext/projects/doctype/project_update/project_update.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="126">
-              <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
-              <folding>
-                <element signature="n#!!doc" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="project.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/erpnext/projects/doctype/project/project.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2736">
-              <caret line="161" column="29" lean-forward="false" selection-start-line="161" selection-start-column="29" selection-end-line="161" selection-end-column="29" />
-              <folding>
-                <element signature="e#128#167#0" expanded="true" />
-                <marker date="1516786530277" expanded="true" signature="763:930" ph="select activ... tabTimesheet Detail" />
-                <marker date="1516786530277" expanded="true" signature="4707:4755" ph="select count... tabTask" />
-                <marker date="1516786530277" expanded="true" signature="5047:5137" ph="select count... tabTask" />
-                <marker date="1516786530277" expanded="true" signature="5349:5403" ph="select sum(p... tabTask" />
-                <marker date="1516786530277" expanded="true" signature="5608:5665" ph="select sum(t... tabTask" />
-                <marker date="1516786530277" expanded="true" signature="5772:5834" ph="select progr... tabTask" />
-                <marker date="1516786530277" expanded="true" signature="6153:6394" ph="select sum(c... " />
-                <marker date="1516786530277" expanded="true" signature="6471:6634" ph="select sum(t... tabExpense Claim" />
-                <marker date="1516786530277" expanded="true" signature="7583:7680" ph="select sum(b... tabPurchase Invoice Item" />
-                <marker date="1516786530277" expanded="true" signature="7869:7957" ph="select sum(b... tabSales Order" />
-                <marker date="1516786530277" expanded="true" signature="8145:8235" ph="select sum(b... tabSales Invoice" />
-                <marker date="1516786530277" expanded="true" signature="10643:10836" ph="select unix_... tabTimesheet Detail" />
-                <marker date="1516786530277" expanded="true" signature="10979:11226" ph="select disti... tabProject" />
-                <marker date="1516786530277" expanded="true" signature="11845:12275" ph="select name,... tabUser" />
-                <marker date="1516786530277" expanded="true" signature="12909:13143" ph="SELECT `tabP... tabProject User" />
-                <marker date="1516786530277" expanded="true" signature="13472:13901" ph="SELECT `tabP... tabProject User" />
-                <marker date="1516786530277" expanded="true" signature="14143:14447" ph="SELECT `tabP... tabProject User" />
-                <marker date="1516786530277" expanded="true" signature="14733:15075" ph="SELECT `tabP... tabProject User" />
-                <marker date="1516786530277" expanded="true" signature="15272:15340" ph="SELECT holid... tabHoliday" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="project_time.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/erpnext/projects/doctype/project/project_time.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="108">
-              <caret line="12" column="46" lean-forward="false" selection-start-line="12" selection-start-column="46" selection-end-line="12" selection-end-column="46" />
-              <folding>
-                <element signature="e#0#39#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>def times_check(from1,to,first_email,second_email,daily_time_to_send,weekly_time_to_send):</find>
+      <find>scheduler</find>
+      <find>hour</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -81,6 +65,8 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
+        <option value="$PROJECT_DIR$/erpnext/hooks.py" />
+        <option value="$PROJECT_DIR$/erpnext/projects/doctype/project/project_time.py" />
         <option value="$PROJECT_DIR$/erpnext/projects/doctype/project/project.py" />
       </list>
     </option>
@@ -91,12 +77,13 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="69" />
-    <option name="y" value="24" />
-    <option name="width" value="1297" />
-    <option name="height" value="700" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="-1" />
+    <option name="y" value="-11" />
+    <option name="width" value="1368" />
+    <option name="height" value="780" />
   </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
       <flattenPackages />
@@ -112,61 +99,108 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="Scratches" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
-          <expand>
-            <path>
-              <item name="erpnext" type="b2602c69:ProjectViewProjectNode" />
-              <item name="erpnext" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="erpnext" type="b2602c69:ProjectViewProjectNode" />
-              <item name="erpnext" type="462c0819:PsiDirectoryNode" />
-              <item name="erpnext" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="erpnext" type="b2602c69:ProjectViewProjectNode" />
-              <item name="erpnext" type="462c0819:PsiDirectoryNode" />
-              <item name="erpnext" type="462c0819:PsiDirectoryNode" />
-              <item name="projects" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="erpnext" type="b2602c69:ProjectViewProjectNode" />
-              <item name="erpnext" type="462c0819:PsiDirectoryNode" />
-              <item name="erpnext" type="462c0819:PsiDirectoryNode" />
-              <item name="projects" type="462c0819:PsiDirectoryNode" />
-              <item name="doctype" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="erpnext" type="b2602c69:ProjectViewProjectNode" />
-              <item name="erpnext" type="462c0819:PsiDirectoryNode" />
-              <item name="erpnext" type="462c0819:PsiDirectoryNode" />
-              <item name="projects" type="462c0819:PsiDirectoryNode" />
-              <item name="doctype" type="462c0819:PsiDirectoryNode" />
-              <item name="project" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="erpnext" type="b2602c69:ProjectViewProjectNode" />
-              <item name="erpnext" type="462c0819:PsiDirectoryNode" />
-              <item name="erpnext" type="462c0819:PsiDirectoryNode" />
-              <item name="projects" type="462c0819:PsiDirectoryNode" />
-              <item name="doctype" type="462c0819:PsiDirectoryNode" />
-              <item name="project_update" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="erpnext" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="erpnext" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="erpnext" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="erpnext" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="erpnext" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="erpnext" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="erpnext" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="erpnext" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="projects" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="erpnext" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="erpnext" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="erpnext" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="projects" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="doctype" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="erpnext" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="erpnext" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="erpnext" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="projects" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="doctype" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="project" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="node.js.path.for.package.eslint" value="project" />
-    <property name="nodejs_interpreter_path" value="/usr/bin/node" />
-    <property name="node.js.detected.package.eslint" value="true" />
-    <property name="node.js.selected.package.eslint" value="" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="com.intellij.database.dataSource.DataSourceTemplate" value="MySQL" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -185,26 +219,48 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="eb73f0e7-7ef7-41a2-9336-aada075237ad" name="Default" comment="" />
-      <created>1516786063118</created>
+      <changelist id="2c78ff50-3188-4568-80e9-89be95a8b91d" name="Default" comment="" />
+      <created>1516605733453</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1516786063118</updated>
+      <updated>1516605733453</updated>
     </task>
+    <task id="LOCAL-00001" summary="&quot;My first commit&quot;">
+      <created>1516606074046</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1516606074046</updated>
+    </task>
+    <task id="LOCAL-00002" summary="&quot;My second commit&quot;">
+      <created>1516779654344</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1516779654344</updated>
+    </task>
+    <task id="LOCAL-00003" summary="&quot;My second commit&quot;">
+      <created>1516779968612</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1516779968612</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="69" y="24" width="1303" height="780" extended-state="6" />
+    <frame x="-1" y="-11" width="1368" height="780" extended-state="6" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25737053" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25378788" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29548988" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32970452" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32972136" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22424242" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32972136" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32972136" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32970452" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.9040248" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -218,17 +274,7 @@
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="1" />
-  </component>
-  <component name="Vcs.Log.History.Properties">
-    <option name="COLUMN_ORDER">
-      <list>
-        <option value="0" />
-        <option value="2" />
-        <option value="3" />
-        <option value="1" />
-      </list>
-    </option>
+    <option name="processedProjectFiles" value="true" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -259,165 +305,281 @@
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="&quot;My first commit&quot;" />
+    <MESSAGE value="&quot;My second commit&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="&quot;My second commit&quot;" />
+  </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/erpnext/projects/doctype/project_update/project_update.js">
+    <entry file="file://$PROJECT_DIR$/erpnext/config/projects.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+        <state relative-caret-position="144">
+          <caret line="9" column="17" lean-forward="false" selection-start-line="9" selection-start-column="17" selection-end-line="9" selection-end-column="17" />
           <folding>
-            <element signature="n#!!doc" expanded="true" />
+            <element signature="e#0#39#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/erpnext/hooks.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3762">
+          <caret line="210" column="65" lean-forward="false" selection-start-line="210" selection-start-column="9" selection-end-line="210" selection-end-column="65" />
+          <folding>
+            <element signature="e#0#39#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/erpnext/projects/doctype/project/project.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2898">
-          <caret line="161" column="29" lean-forward="true" selection-start-line="161" selection-start-column="29" selection-end-line="161" selection-end-column="29" />
+        <state relative-caret-position="6984">
+          <caret line="388" column="0" lean-forward="true" selection-start-line="388" selection-start-column="0" selection-end-line="388" selection-end-column="0" />
           <folding>
-            <element signature="e#128#167#0" expanded="true" />
-            <marker date="1516786530277" expanded="true" signature="763:930" ph="select activ... tabTimesheet Detail" />
-            <marker date="1516786530277" expanded="true" signature="4707:4755" ph="select count... tabTask" />
-            <marker date="1516786530277" expanded="true" signature="5047:5137" ph="select count... tabTask" />
-            <marker date="1516786530277" expanded="true" signature="5349:5403" ph="select sum(p... tabTask" />
-            <marker date="1516786530277" expanded="true" signature="5608:5665" ph="select sum(t... tabTask" />
-            <marker date="1516786530277" expanded="true" signature="5772:5834" ph="select progr... tabTask" />
-            <marker date="1516786530277" expanded="true" signature="6153:6394" ph="select sum(c... " />
-            <marker date="1516786530277" expanded="true" signature="6471:6634" ph="select sum(t... tabExpense Claim" />
-            <marker date="1516786530277" expanded="true" signature="7583:7680" ph="select sum(b... tabPurchase Invoice Item" />
-            <marker date="1516786530277" expanded="true" signature="7869:7957" ph="select sum(b... tabSales Order" />
-            <marker date="1516786530277" expanded="true" signature="8145:8235" ph="select sum(b... tabSales Invoice" />
-            <marker date="1516786530277" expanded="true" signature="10643:10836" ph="select unix_... tabTimesheet Detail" />
-            <marker date="1516786530277" expanded="true" signature="10979:11226" ph="select disti... tabProject" />
-            <marker date="1516786530277" expanded="true" signature="11845:12275" ph="select name,... tabUser" />
-            <marker date="1516786530277" expanded="true" signature="12909:13143" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516786530277" expanded="true" signature="13472:13901" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516786530277" expanded="true" signature="14143:14447" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516786530277" expanded="true" signature="14733:15075" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516786530277" expanded="true" signature="15272:15340" ph="SELECT holid... tabHoliday" />
+            <marker date="1516788826518" expanded="true" signature="763:930" ph="select activ... tabTimesheet Detail" />
+            <marker date="1516788826518" expanded="true" signature="4707:4755" ph="select count... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5047:5137" ph="select count... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5349:5403" ph="select sum(p... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5608:5665" ph="select sum(t... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5772:5834" ph="select progr... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="6153:6394" ph="select sum(c... " />
+            <marker date="1516788826518" expanded="true" signature="6471:6634" ph="select sum(t... tabExpense Claim" />
+            <marker date="1516788826518" expanded="true" signature="7583:7680" ph="select sum(b... tabPurchase Invoice Item" />
+            <marker date="1516788826518" expanded="true" signature="7869:7957" ph="select sum(b... tabSales Order" />
+            <marker date="1516788826518" expanded="true" signature="8145:8235" ph="select sum(b... tabSales Invoice" />
+            <marker date="1516788826518" expanded="true" signature="10643:10836" ph="select unix_... tabTimesheet Detail" />
+            <marker date="1516788826518" expanded="true" signature="10979:11226" ph="select disti... tabProject" />
+            <marker date="1516788826518" expanded="true" signature="11846:12276" ph="select name,... tabUser" />
+            <marker date="1516788826518" expanded="true" signature="12910:13144" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="13473:13902" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="14144:14448" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="14734:15076" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="16580:16648" ph="SELECT holid... tabHoliday" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="dbDummy://dbtable:/b1fcf94a/3e8c695f-0bc9-4bbd-9b96-e3a96b8b2d46/90c7b0dc055ef1aa.tabProject">
+      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
+        <state>
+          <filtering enabled="true" />
+        </state>
+      </provider>
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/erpnext/projects/doctype/project/project_time.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="11" column="21" lean-forward="false" selection-start-line="11" selection-start-column="21" selection-end-line="11" selection-end-column="21" />
+        <state relative-caret-position="36">
+          <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="22" selection-end-column="45" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/erpnext/projects/doctype/project_update/project_update.js">
+    <entry file="file://$PROJECT_DIR$/erpnext/config/projects.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+        <state relative-caret-position="144">
+          <caret line="9" column="17" lean-forward="false" selection-start-line="9" selection-start-column="17" selection-end-line="9" selection-end-column="17" />
           <folding>
-            <element signature="n#!!doc" expanded="true" />
+            <element signature="e#0#39#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/erpnext/hooks.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4230">
+          <caret line="235" column="56" lean-forward="false" selection-start-line="235" selection-start-column="56" selection-end-line="235" selection-end-column="56" />
+          <folding>
+            <element signature="e#0#39#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/erpnext/projects/doctype/project/project.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="522">
-          <caret line="29" column="0" lean-forward="true" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+        <state relative-caret-position="6714">
+          <caret line="373" column="335" lean-forward="true" selection-start-line="373" selection-start-column="335" selection-end-line="373" selection-end-column="335" />
           <folding>
-            <element signature="e#128#167#0" expanded="true" />
-            <marker date="1516786530277" expanded="true" signature="763:930" ph="select activ... tabTimesheet Detail" />
-            <marker date="1516786530277" expanded="true" signature="4707:4755" ph="select count... tabTask" />
-            <marker date="1516786530277" expanded="true" signature="5047:5137" ph="select count... tabTask" />
-            <marker date="1516786530277" expanded="true" signature="5349:5403" ph="select sum(p... tabTask" />
-            <marker date="1516786530277" expanded="true" signature="5608:5665" ph="select sum(t... tabTask" />
-            <marker date="1516786530277" expanded="true" signature="5772:5834" ph="select progr... tabTask" />
-            <marker date="1516786530277" expanded="true" signature="6153:6394" ph="select sum(c... " />
-            <marker date="1516786530277" expanded="true" signature="6471:6634" ph="select sum(t... tabExpense Claim" />
-            <marker date="1516786530277" expanded="true" signature="7583:7680" ph="select sum(b... tabPurchase Invoice Item" />
-            <marker date="1516786530277" expanded="true" signature="7869:7957" ph="select sum(b... tabSales Order" />
-            <marker date="1516786530277" expanded="true" signature="8145:8235" ph="select sum(b... tabSales Invoice" />
-            <marker date="1516786530277" expanded="true" signature="10643:10836" ph="select unix_... tabTimesheet Detail" />
-            <marker date="1516786530277" expanded="true" signature="10979:11226" ph="select disti... tabProject" />
-            <marker date="1516786530277" expanded="true" signature="11845:12275" ph="select name,... tabUser" />
-            <marker date="1516786530277" expanded="true" signature="12909:13143" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516786530277" expanded="true" signature="13472:13901" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516786530277" expanded="true" signature="14143:14447" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516786530277" expanded="true" signature="14733:15075" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516786530277" expanded="true" signature="15272:15340" ph="SELECT holid... tabHoliday" />
+            <marker date="1516788826518" expanded="true" signature="763:930" ph="select activ... tabTimesheet Detail" />
+            <marker date="1516788826518" expanded="true" signature="4707:4755" ph="select count... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5047:5137" ph="select count... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5349:5403" ph="select sum(p... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5608:5665" ph="select sum(t... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5772:5834" ph="select progr... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="6153:6394" ph="select sum(c... " />
+            <marker date="1516788826518" expanded="true" signature="6471:6634" ph="select sum(t... tabExpense Claim" />
+            <marker date="1516788826518" expanded="true" signature="7583:7680" ph="select sum(b... tabPurchase Invoice Item" />
+            <marker date="1516788826518" expanded="true" signature="7869:7957" ph="select sum(b... tabSales Order" />
+            <marker date="1516788826518" expanded="true" signature="8145:8235" ph="select sum(b... tabSales Invoice" />
+            <marker date="1516788826518" expanded="true" signature="10643:10836" ph="select unix_... tabTimesheet Detail" />
+            <marker date="1516788826518" expanded="true" signature="10979:11226" ph="select disti... tabProject" />
+            <marker date="1516788826518" expanded="true" signature="11846:12276" ph="select name,... tabUser" />
+            <marker date="1516788826518" expanded="true" signature="12910:13144" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="13473:13902" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="14144:14448" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="14734:15076" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="16580:16648" ph="SELECT holid... tabHoliday" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/erpnext/projects/doctype/project/project.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="12" column="44" lean-forward="true" selection-start-line="12" selection-start-column="44" selection-end-line="12" selection-end-column="44" />
+    <entry file="dbDummy://dbtable:/b1fcf94a/3e8c695f-0bc9-4bbd-9b96-e3a96b8b2d46/90c7b0dc055ef1aa.tabProject">
+      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
+        <state>
+          <filtering enabled="true" />
+        </state>
+      </provider>
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/erpnext/projects/doctype/project/project_dashboard.html">
+    <entry file="file://$PROJECT_DIR$/erpnext/config/projects.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="144">
+          <caret line="9" column="17" lean-forward="false" selection-start-line="9" selection-start-column="17" selection-end-line="9" selection-end-column="17" />
+          <folding>
+            <element signature="e#0#39#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/erpnext/hooks.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3798">
+          <caret line="211" column="67" lean-forward="false" selection-start-line="211" selection-start-column="67" selection-end-line="211" selection-end-column="67" />
+          <folding>
+            <element signature="e#0#39#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="dbDummy://dbtable:/b1fcf94a/3e8c695f-0bc9-4bbd-9b96-e3a96b8b2d46/90c7b0dc055ef1aa.tabProject">
+      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
+        <state>
+          <filtering enabled="true" />
+        </state>
+      </provider>
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/erpnext/projects/doctype/project/project.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6228">
+          <caret line="346" column="0" lean-forward="true" selection-start-line="346" selection-start-column="0" selection-end-line="346" selection-end-column="0" />
+          <folding>
+            <marker date="1516788826518" expanded="true" signature="763:930" ph="select activ... tabTimesheet Detail" />
+            <marker date="1516788826518" expanded="true" signature="4707:4755" ph="select count... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5047:5137" ph="select count... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5349:5403" ph="select sum(p... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5608:5665" ph="select sum(t... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5772:5834" ph="select progr... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="6153:6394" ph="select sum(c... " />
+            <marker date="1516788826518" expanded="true" signature="6471:6634" ph="select sum(t... tabExpense Claim" />
+            <marker date="1516788826518" expanded="true" signature="7583:7680" ph="select sum(b... tabPurchase Invoice Item" />
+            <marker date="1516788826518" expanded="true" signature="7869:7957" ph="select sum(b... tabSales Order" />
+            <marker date="1516788826518" expanded="true" signature="8145:8235" ph="select sum(b... tabSales Invoice" />
+            <marker date="1516788826518" expanded="true" signature="10643:10836" ph="select unix_... tabTimesheet Detail" />
+            <marker date="1516788826518" expanded="true" signature="10979:11226" ph="select disti... tabProject" />
+            <marker date="1516788826518" expanded="true" signature="11846:12276" ph="select name,... tabUser" />
+            <marker date="1516788826518" expanded="true" signature="12910:13144" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="13473:13902" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="14144:14448" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="14734:15076" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="16580:16648" ph="SELECT holid... tabHoliday" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/3e8c695f-0bc9-4bbd-9b96-e3a96b8b2d46/console.sql">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/erpnext/projects/doctype/project_update/project_update.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
+    <entry file="dbDummy://dbtable:/b1fcf94a/3e8c695f-0bc9-4bbd-9b96-e3a96b8b2d46/90c7b0dc055ef1aa.tabProject">
+      <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
+        <state>
+          <filtering enabled="true" />
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/erpnext/projects/doctype/project/project.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1386">
-          <caret line="77" column="20" lean-forward="true" selection-start-line="77" selection-start-column="20" selection-end-line="77" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/erpnext/projects/doctype/project/project.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2736">
-          <caret line="161" column="29" lean-forward="false" selection-start-line="161" selection-start-column="29" selection-end-line="161" selection-end-column="29" />
-          <folding>
-            <element signature="e#128#167#0" expanded="true" />
-            <marker date="1516786530277" expanded="true" signature="763:930" ph="select activ... tabTimesheet Detail" />
-            <marker date="1516786530277" expanded="true" signature="4707:4755" ph="select count... tabTask" />
-            <marker date="1516786530277" expanded="true" signature="5047:5137" ph="select count... tabTask" />
-            <marker date="1516786530277" expanded="true" signature="5349:5403" ph="select sum(p... tabTask" />
-            <marker date="1516786530277" expanded="true" signature="5608:5665" ph="select sum(t... tabTask" />
-            <marker date="1516786530277" expanded="true" signature="5772:5834" ph="select progr... tabTask" />
-            <marker date="1516786530277" expanded="true" signature="6153:6394" ph="select sum(c... " />
-            <marker date="1516786530277" expanded="true" signature="6471:6634" ph="select sum(t... tabExpense Claim" />
-            <marker date="1516786530277" expanded="true" signature="7583:7680" ph="select sum(b... tabPurchase Invoice Item" />
-            <marker date="1516786530277" expanded="true" signature="7869:7957" ph="select sum(b... tabSales Order" />
-            <marker date="1516786530277" expanded="true" signature="8145:8235" ph="select sum(b... tabSales Invoice" />
-            <marker date="1516786530277" expanded="true" signature="10643:10836" ph="select unix_... tabTimesheet Detail" />
-            <marker date="1516786530277" expanded="true" signature="10979:11226" ph="select disti... tabProject" />
-            <marker date="1516786530277" expanded="true" signature="11845:12275" ph="select name,... tabUser" />
-            <marker date="1516786530277" expanded="true" signature="12909:13143" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516786530277" expanded="true" signature="13472:13901" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516786530277" expanded="true" signature="14143:14447" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516786530277" expanded="true" signature="14733:15075" ph="SELECT `tabP... tabProject User" />
-            <marker date="1516786530277" expanded="true" signature="15272:15340" ph="SELECT holid... tabHoliday" />
-          </folding>
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/erpnext/projects/doctype/project/project_time.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="108">
-          <caret line="12" column="46" lean-forward="false" selection-start-line="12" selection-start-column="46" selection-end-line="12" selection-end-column="46" />
+        <state relative-caret-position="414">
+          <caret line="23" column="0" lean-forward="true" selection-start-line="5" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/erpnext/hooks.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="149">
+          <caret line="210" column="65" lean-forward="false" selection-start-line="210" selection-start-column="9" selection-end-line="210" selection-end-column="65" />
+          <folding>
+            <element signature="e#0#39#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/erpnext/config/projects.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="18">
+          <caret line="9" column="17" lean-forward="false" selection-start-line="9" selection-start-column="17" selection-end-line="9" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/erpnext/projects/doctype/project/project.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="419">
+          <caret line="422" column="0" lean-forward="false" selection-start-line="422" selection-start-column="0" selection-end-line="422" selection-end-column="8" />
+          <folding>
+            <marker date="1516788826518" expanded="true" signature="763:930" ph="select activ... tabTimesheet Detail" />
+            <marker date="1516788826518" expanded="true" signature="4707:4755" ph="select count... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5047:5137" ph="select count... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5349:5403" ph="select sum(p... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5608:5665" ph="select sum(t... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="5772:5834" ph="select progr... tabTask" />
+            <marker date="1516788826518" expanded="true" signature="6153:6394" ph="select sum(c... " />
+            <marker date="1516788826518" expanded="true" signature="6471:6634" ph="select sum(t... tabExpense Claim" />
+            <marker date="1516788826518" expanded="true" signature="7583:7680" ph="select sum(b... tabPurchase Invoice Item" />
+            <marker date="1516788826518" expanded="true" signature="7869:7957" ph="select sum(b... tabSales Order" />
+            <marker date="1516788826518" expanded="true" signature="8145:8235" ph="select sum(b... tabSales Invoice" />
+            <marker date="1516788826518" expanded="true" signature="10643:10836" ph="select unix_... tabTimesheet Detail" />
+            <marker date="1516788826518" expanded="true" signature="10979:11226" ph="select disti... tabProject" />
+            <marker date="1516788826518" expanded="true" signature="11846:12276" ph="select name,... tabUser" />
+            <marker date="1516788826518" expanded="true" signature="12910:13144" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="13473:13902" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="14144:14448" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="14734:15076" ph="SELECT `tabP... tabProject User" />
+            <marker date="1516788826518" expanded="true" signature="16580:16648" ph="SELECT holid... tabHoliday" />
           </folding>
         </state>
       </provider>
