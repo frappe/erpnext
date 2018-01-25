@@ -39,8 +39,8 @@
 					</span>
 				</span>
 			</div>
+			{% if can_write %}
 			<div class="col-sm-2 text-right" style="margin-top: 8px;">
-				{% if can_write %}
 					{% if d.actual_qty %}
 						<button class="btn btn-default btn-xs btn-move"
 							data-warehouse="{{ d.warehouse }}"
@@ -52,8 +52,8 @@
 							data-actual_qty="{{ d.actual_qty }}"
 							data-item="{{ d.item_code }}"
 							data-rate="{{ d.valuation_rate }}">{{ __("Add") }}</a>
-				{% endif %}
 			</div>
+			{% endif %}
 		</div>
 	</div>
 {% endfor %}
