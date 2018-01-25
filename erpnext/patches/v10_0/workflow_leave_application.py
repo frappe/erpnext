@@ -9,4 +9,5 @@ def execute():
 	frappe.reload_doc("hr", "doctype", "leave_application")
 	frappe.reload_doc("workflow", "doctype", "workflow")
 	leave_application_workflow()
-	frappe.db.sql("""update `tabLeave Application` set workflow_state = status""")
+	if frappe.db.has_column("Leave Application", "status"):
+		frappe.db.sql("""update `tabLeave Application` set workflow_state = status""")
