@@ -340,7 +340,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	conversion_factor: function(doc, cdt, cdn, dont_fetch_price_list_rate) {
 	    this._super(doc, cdt, cdn, dont_fetch_price_list_rate);
-		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
+		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn) &&
+			in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
 			this.set_batch_number(cdt, cdn);
 		}
 	},
