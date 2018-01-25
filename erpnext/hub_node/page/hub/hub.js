@@ -9,7 +9,7 @@ frappe.pages['hub'].on_page_load = function(wrapper) {
 		single_col: false
 	});
 
-	wrapper.hub_page = new erpnext.hub.Hub({ page });
+	// wrapper.hub_page = new erpnext.hub.Hub({ page });
 };
 
 frappe.pages['hub'].on_page_show = function(wrapper) {
@@ -776,7 +776,7 @@ erpnext.hub.HubList = class HubList {
 			limit: this.page_length + 1
 		};
 		Object.assign(args, this.filters);
-		console.log("filters: ", args);
+		// console.log("filters: ", args);
 		args.order_by = this.order_by;
 		args.by_item_codes = this.by_item_codes;
 
@@ -785,7 +785,7 @@ erpnext.hub.HubList = class HubList {
 			args: args,
 			callback: (r) => {
 				let items = r.message;
-				console.log("items: ", items);
+				// console.log("items: ", items);
 				this.render_items(items);
 			}
 		});
@@ -796,7 +796,6 @@ erpnext.hub.HubList = class HubList {
 			// clear any filler divs
 			this.$list.find('.filler').remove();
 			let done = 0;
-			console.log("items length", items.length);
 			if(items.length && items.length > this.page_length) {
 				// remove the extra queried
 				items.pop();

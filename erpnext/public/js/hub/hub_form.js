@@ -8,7 +8,7 @@ erpnext.hub.HubForm = class HubForm extends frappe.views.BaseList {
 	}
 
 	setup_fields() {
-
+		this.fields = ['hub_item_code', 'item_name', 'item_code', 'description', 'seller', 'company_name', 'country'];
 	}
 
 	set_breadcrumbs() {
@@ -40,9 +40,12 @@ erpnext.hub.HubForm = class HubForm extends frappe.views.BaseList {
 		};
 	}
 
+	prepare_data(r) {
+		this.data = r.message;
+	}
+
 	update_data(r) {
-		const data = r.message;
-		this.data = data;
+		this.data = r.message;
 	}
 
 	render() {
@@ -51,13 +54,14 @@ erpnext.hub.HubForm = class HubForm extends frappe.views.BaseList {
 		});
 
 		let fields = [];
-		for (let fieldname in this.data) {
+		this.fields.map(fieldname => {
 			fields.push({
-				label: toTitle(fieldname),
+				label: toTitle(frappe.model.unscrub(fieldname)),
 				fieldname,
-				fieldtype: 'Data'
+				fieldtype: 'Data',
+				read_only: 1
 			});
-		}
+		});
 
 		this.form = new frappe.ui.FieldGroup({
 			parent: this.$result,
