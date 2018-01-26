@@ -29,7 +29,7 @@ frappe.ui.form.on("Leave Application", {
 
 	refresh: function(frm) {
 		if (frm.is_new()) {
-			frm.set_value("status", "Open");
+			frm.set_value("workflow_state", "Open");
 			frm.trigger("calculate_total_days");
 		}
 	},
