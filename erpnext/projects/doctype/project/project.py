@@ -338,7 +338,7 @@ def get_cost_center_name(project):
 def hourly_reminder():
     data = []
     header = "Hourly Reminder"
-    email = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE `tabProject`.frequency = "Hourly" and (CURTIME() BETWEEN `tabProject`.from and `tabProject`.to);""")
+    email = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE `tabProject`.frequency = "Hourly" and (CURTIME() BETWEEN `tabProject`.from and `tabProject`.to) AND `tabProject`.collect_progress = 1;""")
     for emails in email:
         recipients = emails[0]
         data.append(recipients)
@@ -350,7 +350,7 @@ def hourly_reminder():
 def twice_daily_reminder():
     data = []
     header = "Twice Daily Reminder"
-    email = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE (`tabProject`.frequency = "Twice Daily") AND ((`tabProject`.first_email BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE)) OR (`tabProject`.second_email BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE)));""")
+    email = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE (`tabProject`.frequency = "Twice Daily") AND ((`tabProject`.first_email BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE)) OR (`tabProject`.second_email BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE))) AND `tabProject`.collect_progress = 1;""")
     for emails in email:
         recipients = emails[0]
         data.append(recipients)
@@ -360,7 +360,7 @@ def twice_daily_reminder():
 def daily_reminder():
     data = []
     header = "Daily Reminder"
-    email = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE (`tabProject`.frequency = "Daily") AND (`tabProject`.daily_time_to_send BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE));""")
+    email = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE (`tabProject`.frequency = "Daily") AND (`tabProject`.daily_time_to_send BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE)) AND `tabProject`.collect_progress = 1;""")
     for emails in email:
         recipients = emails[0]
         data.append(recipients)
@@ -371,13 +371,12 @@ def weekly():
     data = []
     header = "Weekly Reminder"
     today = datetime.datetime.now().strftime("%A")
-    email = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE (`tabProject`.frequency = "Weekly") AND (`tabProject`.day_to_send = %s) AND (`tabProject`.weekly_time_to_send BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE))""", today)
+    email = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE (`tabProject`.frequency = "Weekly") AND (`tabProject`.day_to_send = %s) AND (`tabProject`.weekly_time_to_send BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE)) AND `tabProject`.collect_progress = 1""", today)
     for emails in email:
         recipients = emails[0]
         data.append(recipients)
     email_sending(data, header)
 
-#sample
 def email_sending(data,header):
     holiday = frappe.db.sql("""SELECT holiday_date FROM `tabHoliday` where holiday_date = CURDATE();""")
     if len(holiday) == 0:
