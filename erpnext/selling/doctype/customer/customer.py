@@ -146,7 +146,8 @@ class Customer(TransactionBase):
 			frappe.throw(_("A Customer Group exists with same name please change the Customer name or rename the Customer Group"), frappe.NameError)
 
 	def validate_credit_limit_on_change(self):
-		if self.get("__islocal") or self.credit_limit == frappe.db.get_value("Customer", self.name, "credit_limit"):
+		if self.get("__islocal") or not self.credit_limit \
+			or self.credit_limit == frappe.db.get_value("Customer", self.name, "credit_limit"):
 			return
 
 		for company in frappe.get_all("Company"):

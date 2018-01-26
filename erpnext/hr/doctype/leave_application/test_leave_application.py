@@ -103,7 +103,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		application = self.get_application(_test_records[0])
 		application.insert()
-		application.status = "Approved"
+		application.workflow_state = "Approved"
 		self.assertRaises(LeaveDayBlockedError, application.submit)
 
 		frappe.set_user("test1@example.com")
@@ -257,7 +257,7 @@ class TestLeaveApplication(unittest.TestCase):
 		application.insert()
 
 		frappe.set_user("test@example.com")
-		application.status = "Approved"
+		application.workflow_state = "Approved"
 
 		# clear permlevel access cache on change user
 		del application._has_access_to
@@ -297,7 +297,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		# submit leave application by Leave Approver
 		frappe.set_user("test1@example.com")
-		application.status = "Approved"
+		application.workflow_state = "Approved"
 		del application._has_access_to
 		application.submit()
 		self.assertEqual(frappe.db.get_value("Leave Application", application.name,
@@ -339,7 +339,7 @@ class TestLeaveApplication(unittest.TestCase):
 		application.insert()
 		frappe.set_user("test1@example.com")
 		del application._has_access_to
-		application.status = "Approved"
+		application.workflow_state = "Approved"
 
 		from erpnext.hr.doctype.leave_application.leave_application import LeaveApproverIdentityError
 		self.assertRaises(LeaveApproverIdentityError, application.submit)
@@ -364,7 +364,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		# change to valid leave approver and try to submit leave application
 		frappe.set_user("test2@example.com")
-		application.status = "Approved"
+		application.workflow_state = "Approved"
 		del application._has_access_to
 		application.submit()
 		self.assertEqual(frappe.db.get_value("Leave Application", application.name,

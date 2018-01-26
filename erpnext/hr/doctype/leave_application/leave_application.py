@@ -21,9 +21,10 @@ class AttendanceAlreadyMarkedError(frappe.ValidationError): pass
 from frappe.model.document import Document
 class LeaveApplication(Document):
 	def get_feed(self):
-		return _("{0}: From {0} of type {1}").format(self.status, self.employee_name, self.leave_type)
+		return _("{0}: From {0} of type {1}").format(self.workflow_state, self.employee_name, self.leave_type)
 
 	def validate(self):
+		if self.get("__islocal"): self.workflow_state = 'Open'
 		if not getattr(self, "__islocal", None) and frappe.db.exists(self.doctype, self.name):
 			self.previous_doc = frappe.get_value(self.doctype, self.name, "leave_approver", as_dict=True)
 		else:
@@ -43,18 +44,16 @@ class LeaveApplication(Document):
 
 	def on_update(self):
 		if (not self.previous_doc and self.leave_approver) or (self.previous_doc and \
-				self.status == "Open" and self.previous_doc.leave_approver != self.leave_approver):
+				self.workflow_state == "Open" and self.previous_doc.leave_approver != self.leave_approver):
 			# notify leave approver about creation
 			self.notify_leave_approver()
 
 	def on_submit(self):
-		if self.status == "Open":
-			frappe.throw(_("Only Leave Applications with status 'Approved' and 'Rejected' can be submitted"))
 
 		self.validate_back_dated_application()
 
 		# notify leave applier about approval
-		self.notify_employee(self.status)
+		self.notify_employee(self.workflow_state)
 
 	def on_cancel(self):
 		# notify leave applier about cancellation
@@ -71,10 +70,10 @@ class LeaveApplication(Document):
 				frappe.throw(_("Half Day Date should be between From Date and To Date"))
 
 		if not is_lwp(self.leave_type):
-			self.validate_dates_acorss_allocation()
+			self.validate_dates_across_allocation()
 			self.validate_back_dated_application()
 
-	def validate_dates_acorss_allocation(self):
+	def validate_dates_across_allocation(self):
 		def _get_leave_alloction_record(date):
 			allocation = frappe.db.sql("""select name from `tabLeave Allocation`
 				where employee=%s and leave_type=%s and docstatus=1
@@ -89,7 +88,7 @@ class LeaveApplication(Document):
 			frappe.throw(_("Application period cannot be outside leave allocation period"))
 
 		elif allocation_based_on_from_date != allocation_based_on_to_date:
-			frappe.throw(_("Application period cannot be across two alocation records"))
+			frappe.throw(_("Application period cannot be across two allocation records"))
 
 	def validate_back_dated_application(self):
 		future_allocation = frappe.db.sql("""select name, from_date from `tabLeave Allocation`
@@ -129,7 +128,7 @@ class LeaveApplication(Document):
 		block_dates = get_applicable_block_dates(self.from_date, self.to_date,
 			self.employee, self.company)
 
-		if block_dates and self.status == "Approved":
+		if block_dates and self.workflow_state == "Approved":
 			frappe.throw(_("You are not authorized to approve leaves on Block Dates"), LeaveDayBlockedError)
 
 	def validate_balance_leaves(self):
@@ -144,7 +143,7 @@ class LeaveApplication(Document):
 				self.leave_balance = get_leave_balance_on(self.employee, self.leave_type, self.from_date,
 					consider_all_leaves_in_the_allocation_period=True)
 
-				if self.status != "Rejected" and self.leave_balance < self.total_leave_days:
+				if self.workflow_state != "Rejected" and self.leave_balance < self.total_leave_days:
 					if frappe.db.get_value("Leave Type", self.leave_type, "allow_negative"):
 						frappe.msgprint(_("Note: There is not enough leave balance for Leave Type {0}")
 							.format(self.leave_type))
@@ -161,7 +160,7 @@ class LeaveApplication(Document):
 			select
 				name, leave_type, posting_date, from_date, to_date, total_leave_days, half_day_date
 			from `tabLeave Application`
-			where employee = %(employee)s and docstatus < 2 and status in ("Open", "Approved")
+			where employee = %(employee)s and docstatus < 2 and workflow_state in ("Open", "Approved")
 			and to_date >= %(from_date)s and from_date <= %(to_date)s
 			and name != %(name)s""", {
 				"employee": self.employee,
@@ -182,16 +181,16 @@ class LeaveApplication(Document):
 				self.throw_overlap_error(d)
 
 	def throw_overlap_error(self, d):
-		msg = _("Employee {0} has already applied for {1} between {2} and {3}").format(self.employee,
+		msg = _("Employee {0} has already applied for {1} between {2} and {3} : ").format(self.employee,
 			d['leave_type'], formatdate(d['from_date']), formatdate(d['to_date'])) \
-			+ """ <br><b><a href="#Form/Leave Application/{0}">{0}</a></b>""".format(d["name"])
+			+ """ <b><a href="#Form/Leave Application/{0}">{0}</a></b>""".format(d["name"])
 		frappe.throw(msg, OverlapError)
 
 	def get_total_leaves_on_half_day(self):
 		leave_count_on_half_day_date = frappe.db.sql("""select count(name) from `tabLeave Application`
 			where employee = %(employee)s
 			and docstatus < 2
-			and status in ("Open", "Approved")
+			and workflow_state in ("Open", "Approved")
 			and half_day = 1
 			and half_day_date = %(half_day_date)s
 			and name != %(name)s""", {
@@ -232,7 +231,7 @@ class LeaveApplication(Document):
 			frappe.throw(_("Attendance for employee {0} is already marked for this day").format(self.employee),
 				AttendanceAlreadyMarkedError)
 
-	def notify_employee(self, status):
+	def notify_employee(self, workflow_state):
 		employee = frappe.get_doc("Employee", self.employee)
 		if not employee.user_id:
 			return
@@ -247,14 +246,14 @@ class LeaveApplication(Document):
 			message += "Leave Type: {leave_type}".format(leave_type=self.leave_type)+"<br>"
 			message += "From Date: {from_date}".format(from_date=self.from_date)+"<br>"
 			message += "To Date: {to_date}".format(to_date=self.to_date)+"<br>"
-			message += "Status: {status}".format(status=_(status))
+			message += "Status: {workflow_state}".format(workflow_state=_(workflow_state))
 			return message
 
 		self.notify({
 			# for post in messages
 			"message": _get_message(url=True),
 			"message_to": employee.user_id,
-			"subject": (_("Leave Application") + ": %s - %s") % (self.name, _(status))
+			"subject": (_("Leave Application") + ": %s - %s") % (self.name, _(workflow_state))
 		})
 
 	def notify_leave_approver(self):
@@ -372,7 +371,7 @@ def get_approved_leaves_for_period(employee, leave_type, from_date, to_date):
 		select employee, leave_type, from_date, to_date, total_leave_days
 		from `tabLeave Application`
 		where employee=%(employee)s and leave_type=%(leave_type)s
-			and status="Approved" and docstatus=1
+			and workflow_state="Approved" and docstatus=1
 			and (from_date between %(from_date)s and %(to_date)s
 				or to_date between %(from_date)s and %(to_date)s
 				or (from_date < %(from_date)s and to_date > %(to_date)s))
@@ -472,11 +471,11 @@ def add_department_leaves(events, start, end, employee, company):
 
 def add_leaves(events, start, end, match_conditions=None):
 	query = """select name, from_date, to_date, employee_name, half_day,
-		status, employee, docstatus
+		workflow_state, employee, docstatus
 		from `tabLeave Application` where
 		from_date <= %(end)s and to_date >= %(start)s <= to_date
 		and docstatus < 2
-		and status!="Rejected" """
+		and workflow_state!="Rejected" """
 	if match_conditions:
 		query += match_conditions
 
@@ -486,7 +485,7 @@ def add_leaves(events, start, end, match_conditions=None):
 			"doctype": "Leave Application",
 			"from_date": d.from_date,
 			"to_date": d.to_date,
-			"status": d.status,
+			"workflow_state": d.workflow_state,
 			"title": cstr(d.employee_name) + \
 				(d.half_day and _(" (Half Day)") or ""),
 			"docstatus": d.docstatus
