@@ -203,6 +203,9 @@ doc_events = {
 	},
 	'Address': {
 		'validate': 'erpnext.regional.india.utils.validate_gstin_for_india'
+	},
+	'Project Update':{
+		"validate":'erpnext.projects.doctype.project_update.project_update.current_day_time'
 	}
 }
 
@@ -210,7 +213,8 @@ scheduler_events = {
     "all": [
 		"erpnext.projects.doctype.project.project.hourly_reminder"
         "erpnext.projects.doctype.project.project.hourly_reminder",
-		"erpnext.projects.doctype.project.project.twice_daily_reminder"
+		"erpnext.projects.doctype.project.project.twice_daily_reminder",
+		"erpnext.projects.doctype.project.project.morning_reminder"
     ],
 
 	"hourly": [
@@ -219,6 +223,7 @@ scheduler_events = {
         "erpnext.projects.doctype.project.project.hourly_reminder",
 		"erpnext.projects.doctype.project.project.twice_daily_reminder",
 		"erpnext.projects.doctype.project.project.daily_reminder"
+
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",

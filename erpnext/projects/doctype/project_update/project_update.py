@@ -8,3 +8,8 @@ from frappe.model.document import Document
 
 class ProjectUpdate(Document):
 	pass
+
+@frappe.whitelist()
+def current_day_time(doc,method):
+	doc.date = frappe.utils.today()
+	doc.time = frappe.utils.now_datetime().strftime('%H:%M:%S')
