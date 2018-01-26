@@ -50,7 +50,6 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				this.set_online_status();
 			},
 			() => this.setup_company(),
-
 			() => this.make_new_invoice(),
 			() => {
 				frappe.dom.unfreeze();
@@ -111,6 +110,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				},
 				on_select_change: () => {
 					this.cart.numpad.set_inactive();
+					this.set_form_action();
 				},
 				get_item_details: (item_code) => {
 					return this.items.get(item_code);
@@ -180,6 +180,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					.then(() => {
 						// update cart
 						this.update_cart_data(item);
+						this.set_form_action();
 					});
 			}
 			return;
@@ -278,13 +279,17 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	submit_sales_invoice() {
-
+		var is_saved = 0;
+		if(!this.frm.doc.__islocal){
+			is_saved = 1;
+		}
 		frappe.confirm(__("Permanently Submit {0}?", [this.frm.doc.name]), () => {
 			frappe.call({
 				method: 'erpnext.selling.page.point_of_sale.point_of_sale.submit_invoice',
 				freeze: true,
 				args: {
-					doc: this.frm.doc
+					doc: this.frm.doc,
+					is_saved: is_saved
 				}
 			}).then(r => {
 				if(r.message) {
@@ -320,7 +325,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		return new Promise((resolve) => {
 			const on_submit = ({ pos_profile, set_as_default }) => {
 				if (pos_profile) {
-					this.frm.doc.pos_profile = pos_profile;
+					this.pos_profile = pos_profile;
 				}
 
 				if (set_as_default) {
@@ -346,13 +351,19 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	on_change_pos_profile() {
-		this.set_pos_profile_data()
-			.then(() => {
-				this.reset_cart();
-				if (this.items) {
-					this.items.reset_items();
-				}
-			});
+		return frappe.run_serially([
+			() => this.make_sales_invoice_frm(),
+			() => {
+				this.frm.doc.pos_profile = this.pos_profile;
+				this.set_pos_profile_data()
+					.then(() => {
+						this.reset_cart();
+						if (this.items) {
+							this.items.reset_items();
+						}
+					});
+			}
+		]);
 	}
 
 	get_promopt_fields() {
@@ -360,6 +371,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			fieldtype: 'Link',
 			label: __('POS Profile'),
 			options: 'POS Profile',
+			reqd: 1,
 			get_query: () => {
 				return {
 					query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
@@ -492,19 +504,26 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	set_form_action() {
-		if(this.frm.doc.docstatus !== 1) return;
+		if(this.frm.doc.docstatus == 1 || (this.frm.doc.allow_print_before_pay == 1&&this.frm.doc.items.length>0)){
+			this.page.set_secondary_action(__("Print"), async() => {
+				if(this.frm.doc.docstatus != 1 ){
+					await this.frm.save();
+				}
+				this.frm.print_preview.printit(true);
+			});
+		}
+		if(this.frm.doc.items.length == 0){
+			this.page.clear_secondary_action();
+		}
 
-		this.page.set_secondary_action(__("Print"), () => {
-			this.frm.print_preview.printit(true);
-		});
-
-		this.page.set_primary_action(__("New"), () => {
-			this.make_new_invoice();
-		});
-
-		this.page.add_menu_item(__("Email"), () => {
-			this.frm.email_doc();
-		});
+		if (this.frm.doc.docstatus == 1) {
+			this.page.set_primary_action(__("New"), () => {
+				this.make_new_invoice();
+			});
+			this.page.add_menu_item(__("Email"), () => {
+				this.frm.email_doc();
+			});
+		}
 	}
 };
 
@@ -578,16 +597,28 @@ class POSCart {
 
 		this.wrapper.find('.grand-total-value').text(
 			format_currency(this.frm.doc.grand_total, this.frm.currency));
+		this.wrapper.find('.rounded-total-value').text(
+			format_currency(this.frm.doc.rounded_total, this.frm.currency));
 
 		const customer = this.frm.doc.customer;
 		this.customer_field.set_value(customer);
 	}
 
 	get_grand_total() {
+		let total = this.get_total_template('Grand Total', 'grand-total-value');
+
+		if (!cint(frappe.sys_defaults.disable_rounded_total)) {
+			total += this.get_total_template('Rounded Total', 'rounded-total-value');
+		}
+
+		return total;
+	}
+
+	get_total_template(label, class_name) {
 		return `
 			<div class="list-item">
-				<div class="list-item__content text-muted">${__('Grand Total')}</div>
-				<div class="list-item__content list-item__content--flex-2 grand-total-value">0.00</div>
+				<div class="list-item__content text-muted">${__(label)}</div>
+				<div class="list-item__content list-item__content--flex-2 ${class_name}">0.00</div>
 			</div>
 		`;
 	}
@@ -663,6 +694,10 @@ class POSCart {
 	update_grand_total() {
 		this.$grand_total.find('.grand-total-value').text(
 			format_currency(this.frm.doc.grand_total, this.frm.currency)
+		);
+
+		this.$grand_total.find('.rounded-total-value').text(
+			format_currency(this.frm.doc.rounded_total, this.frm.currency)
 		);
 	}
 
@@ -1211,6 +1246,7 @@ class POSItems {
 		return new Promise(res => {
 			frappe.call({
 				method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
+				freeze: true,
 				args: {
 					start,
 					page_length,
@@ -1373,7 +1409,8 @@ class Payment {
 
 	set_title() {
 		let title = __('Total Amount {0}',
-			[format_currency(this.frm.doc.grand_total, this.frm.doc.currency)]);
+			[format_currency(this.frm.doc.rounded_total || this.frm.doc.grand_total,
+			this.frm.doc.currency)]);
 
 		this.dialog.set_title(title);
 	}

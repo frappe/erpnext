@@ -64,7 +64,7 @@ frappe.ready(function() {
 			// then chose the closest available one
 
 			var attribute = $(this).attr("data-attribute");
-			var attribute_value = $(this).val()
+			var attribute_value = $(this).val();
 			var item_code = find_closest_match(attribute, attribute_value);
 
 			if (!item_code) {

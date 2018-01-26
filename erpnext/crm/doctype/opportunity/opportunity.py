@@ -232,7 +232,7 @@ def make_quotation(source_name, target_doc=None):
 		quotation.conversion_rate = exchange_rate
 
 		# get default taxes
-		taxes = get_default_taxes_and_charges("Sales Taxes and Charges Template", quotation.company)
+		taxes = get_default_taxes_and_charges("Sales Taxes and Charges Template", company=quotation.company)
 		if taxes.get('taxes'):
 			quotation.update(taxes)
 

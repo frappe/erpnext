@@ -11,7 +11,7 @@ from frappe import _
 import datetime
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account
-
+from erpnext.hr.doctype.employee.employee import is_holiday
 
 class PatientAppointment(Document):
 	def on_update(self):
@@ -82,6 +82,34 @@ def get_availability_data(date, physician):
 	physician_schedule_name = None
 	physician_schedule = None
 	time_per_appointment = None
+	employee = None
+
+	physician_obj = frappe.get_doc("Physician", physician)
+
+	# Get Physician employee relation
+	if physician_obj.employee:
+		employee = physician_obj.employee
+	elif physician_obj.user_id:
+		if frappe.db.exists({
+			"doctype": "Employee",
+			"user_id": physician_obj.user_id
+			}):
+			employee = frappe.get_doc("Employee", {"user_id": physician_obj.user_id}).name
+
+	if employee:
+		# Check if it is Holiday
+		if is_holiday(employee, date):
+			frappe.throw(_("{0} is a company holiday".format(date)))
+
+		# Check if He/She on Leave
+		leave_record = frappe.db.sql("""select half_day from `tabLeave Application`
+			where employee = %s and %s between from_date and to_date and status = 'Approved'
+			and docstatus = 1""", (employee, date), as_dict=True)
+		if leave_record:
+			if leave_record[0].half_day:
+				frappe.throw(_("Dr {0} on Half day Leave on {1}").format(physician, date))
+			else:
+				frappe.throw(_("Dr {0} on Leave on {1}").format(physician, date))
 
 	# get physicians schedule
 	physician_schedule_name = frappe.db.get_value("Physician", physician, "physician_schedule")

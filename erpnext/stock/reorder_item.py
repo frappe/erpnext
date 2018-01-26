@@ -85,18 +85,22 @@ def get_item_warehouse_projected_qty(items_to_consider):
 		from tabBin where item_code in ({0})
 			and (warehouse != "" and warehouse is not null)"""\
 		.format(", ".join(["%s"] * len(items_to_consider))), items_to_consider):
-		
-		item_warehouse_projected_qty.setdefault(item_code, {})[warehouse] = flt(projected_qty)
-		
+
+		if item_code not in item_warehouse_projected_qty:
+			item_warehouse_projected_qty.setdefault(item_code, {})
+
+		if warehouse not in item_warehouse_projected_qty.get(item_code):
+			item_warehouse_projected_qty[item_code][warehouse] = flt(projected_qty)
+
 		warehouse_doc = frappe.get_doc("Warehouse", warehouse)
-		
+
 		while warehouse_doc.parent_warehouse:
 			if not item_warehouse_projected_qty.get(item_code, {}).get(warehouse_doc.parent_warehouse):
 				item_warehouse_projected_qty.setdefault(item_code, {})[warehouse_doc.parent_warehouse] = flt(projected_qty)
 			else:
 				item_warehouse_projected_qty[item_code][warehouse_doc.parent_warehouse] += flt(projected_qty)
 			warehouse_doc = frappe.get_doc("Warehouse", warehouse_doc.parent_warehouse)
-				
+
 	return item_warehouse_projected_qty
 
 def create_material_request(material_requests):

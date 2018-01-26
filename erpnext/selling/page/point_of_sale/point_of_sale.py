@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe.utils.nestedset import get_root_of
+from frappe.utils import cint
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
 
 @frappe.whitelist()
@@ -88,11 +89,15 @@ def get_conditions(item_code, serial_no, batch_no, barcode):
 	return '%%%s%%'%(frappe.db.escape(item_code)), condition
 
 @frappe.whitelist()
-def submit_invoice(doc):
+def submit_invoice(doc,is_saved):
 	if isinstance(doc, basestring):
 		args = json.loads(doc)
 
-	doc = frappe.new_doc('Sales Invoice')
+	if(cint(is_saved) == 1):
+		doc = frappe.get_doc('Sales Invoice',args["name"])
+	else:
+		doc = frappe.new_doc('Sales Invoice')
+
 	doc.update(args)
 	doc.run_method("set_missing_values")
 	doc.run_method("calculate_taxes_and_totals")

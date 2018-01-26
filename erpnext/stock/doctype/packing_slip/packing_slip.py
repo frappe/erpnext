@@ -137,10 +137,10 @@ class PackingSlip(Document):
 
 		for d in self.get("items"):
 			res = frappe.db.get_value("Item", d.item_code,
-				["net_weight", "weight_uom"], as_dict=True)
+				["weight_per_unit", "weight_uom"], as_dict=True)
 
 			if res and len(res)>0:
-				d.net_weight = res["net_weight"]
+				d.net_weight = res["weight_per_unit"]
 				d.weight_uom = res["weight_uom"]
 
 	def get_recommended_case_no(self):

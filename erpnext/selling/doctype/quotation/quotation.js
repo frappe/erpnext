@@ -82,8 +82,8 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 						get_query_filters: {
 							status: ["not in", ["Lost", "Closed"]],
 							company: me.frm.doc.company,
-							// cannot set enquiry_type as setter, as the fieldname is order_type
-							enquiry_type: me.frm.doc.order_type,
+							// cannot set opportunity_type as setter, as the fieldname is order_type
+							opportunity_type: me.frm.doc.order_type,
 						}
 					})
 				}, __("Get items from"), "btn-default");

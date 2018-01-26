@@ -25,7 +25,7 @@ class POSProfile(Document):
 					`tabPOS Profile User` pfu, `tabPOS Profile` pf
 				where
 					pf.name = pfu.parent and pfu.user = %s and pf.name != %s and pf.company = %s
-					and pfu.default=1""", (row.user, self.name, self.company))
+					and pfu.default=1 and pf.disabled = 0""", (row.user, self.name, self.company))
 
 			if row.default and res:
 				msgprint(_("Already set default in pos profile {0} for user {1}, kindly disabled default")

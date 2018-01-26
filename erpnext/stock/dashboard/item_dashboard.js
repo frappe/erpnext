@@ -89,7 +89,7 @@ erpnext.stock.ItemDashboard = Class.extend({
 		data.forEach(function(d) {
 			d.actual_or_pending = d.projected_qty + d.reserved_qty + d.reserved_qty_for_production;
 			d.pending_qty = 0;
-			d.total_reserved = d.reserved_qty + d.reserved_qty_for_production;
+			d.total_reserved = d.reserved_qty + d.reserved_qty_for_production + d.reserved_qty_for_sub_contract;
 			if(d.actual_or_pending > d.actual_qty) {
 				d.pending_qty = d.actual_or_pending - d.actual_qty;
 			}

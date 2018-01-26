@@ -41,8 +41,9 @@ def get_columns():
 
 def get_product_bundle_items():
 	sbom_item_map = {}
-	for sbom in frappe.db.sql("""select parent, item_code, qty from `tabProduct Bundle Item` 
-		where docstatus < 2""", as_dict=1):
+	for sbom in frappe.db.sql("""select pb.new_item_code as parent, pbi.item_code, pbi.qty 
+			from `tabProduct Bundle Item` as pbi, `tabProduct Bundle` as pb
+		where pb.docstatus < 2 and pb.name = pbi.parent""", as_dict=1):
 			sbom_item_map.setdefault(sbom.parent, {}).setdefault(sbom.item_code, sbom.qty)
 			
 	return sbom_item_map

@@ -53,14 +53,12 @@ class Account(NestedSet):
 	def set_root_and_report_type(self):
 		if self.parent_account:
 			par = frappe.db.get_value("Account", self.parent_account,
-				["report_type", "root_type", "account_type"], as_dict=1)
+				["report_type", "root_type"], as_dict=1)
 
 			if par.report_type:
 				self.report_type = par.report_type
 			if par.root_type:
 				self.root_type = par.root_type
-			if par.account_type and not self.account_type:
-				self.account_type = par.account_type
 
 		if self.is_group:
 			db_value = frappe.db.get_value("Account", self.name, ["report_type", "root_type"], as_dict=1)
@@ -165,16 +163,16 @@ class Account(NestedSet):
 		if self.check_gle_exists():
 			throw(_("Account with existing transaction can not be deleted"))
 
-		super(Account, self).on_trash()
+		super(Account, self).on_trash(True)
 
 	def before_rename(self, old, new, merge=False):
 		# Add company abbr if not provided
 		from erpnext.setup.doctype.company.company import get_name_with_abbr
 		new_account = get_name_with_abbr(new, self.company)
-		new_account = get_name_with_number(new_account, self.account_number)
-
-		# Validate properties before merging
-		if merge:
+		if not merge:
+			new_account = get_name_with_number(new_account, self.account_number)
+		else:
+			# Validate properties before merging
 			if not frappe.db.exists("Account", new):
 				throw(_("Account {0} does not exist").format(new))
 
