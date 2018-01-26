@@ -15,24 +15,14 @@ def enable_hub():
 	return hub_settings
 
 @frappe.whitelist()
-def get_items(start=0, limit=20, fields=["*"], category=None, order_by=None, company=None, text=None):
+def get_items(doctype, start=0, limit=20, fields=["*"], filters="{}", order_by=None):
 	connection = get_client_connection()
+	filters = json.loads(filters)
 
-	filters = {}
-
-	if category:
-		filters.update({ 'hub_category': category })
-	if text:
-		filters.update({'item_name': ('like', '%' + text + '%')})
-	if company:
-		filters.update({'company_name': company})
-
-	response = connection.get_list('Hub Item',
+	response = connection.get_list(doctype,
 		limit_start=start, limit_page_length=limit,
 		filters=filters, fields=fields)
 	return response
-
-#
 
 @frappe.whitelist()
 def get_hub_item_meta():

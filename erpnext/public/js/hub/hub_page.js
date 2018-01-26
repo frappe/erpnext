@@ -1,6 +1,6 @@
 frappe.provide('erpnext.hub');
 
-erpnext.hub.HubPage = class HubPage extends frappe.views.BaseList {
+erpnext.hub.ItemListing = class ItemListing extends frappe.views.BaseList {
 	setup_defaults() {
 		super.setup_defaults();
 		this.page_title = __('Hub');
@@ -23,16 +23,12 @@ erpnext.hub.HubPage = class HubPage extends frappe.views.BaseList {
 	}
 
 	setup_fields() {
-		this.fields = ['name', 'hub_item_code', 'image', 'item_name', 'item_code'];
+		this.fields = ['name', 'hub_item_code', 'image', 'item_name', 'item_code', 'company_name'];
 	}
 
-	set_breadcrumbs() {
+	set_breadcrumbs() { }
 
-	}
-
-	setup_side_bar() {
-
-	}
+	setup_side_bar() { }
 
 	setup_filter_area() {
 		this.custom_filter_configs = [
@@ -53,29 +49,41 @@ erpnext.hub.HubPage = class HubPage extends frappe.views.BaseList {
 		this.filter_area = new FilterArea(this);
 	}
 
-	setup_sort_selector() {
+	setup_sort_selector() { }
 
-	}
+	setup_view() { }
 
-	setup_view() {
-
+	get_filters_for_args() {
+		let filters = {};
+		this.filter_area.get().forEach(f => {
+			let field = f[1] !== 'name' ? f[1] : 'item_name';
+			filters[field] = [f[2], f[3]];
+		});
+		if(this.current_category) {
+			filters['hub_category'] = this.current_category;
+		}
+		return filters;
 	}
 
 	get_args() {
+		console.log('filters', this.get_filters_for_args());
 		return {
+			doctype: 'Hub Item'
 			start: this.start,
 			limit: this.page_length,
-			category: this.category || '',
 			order_by: this.order_by,
-			company: this.company || '',
-			text: this.search_text || '',
-			fields: this.fields
+			fields: this.fields,
+			filters: this.get_filters_for_args()
+
+			// category: this.category || '',
+			// company: this.company || '',
+			// text: this.search_text || '',
 		};
 	}
 
 	update_data(r) {
 		const data = r.message;
-		console.log('update data', data);
+		// console.log('update data', data);
 
 		if (this.start === 0) {
 			this.data = data;
@@ -103,7 +111,7 @@ erpnext.hub.HubPage = class HubPage extends frappe.views.BaseList {
 
 	render_image_view() {
 		let data = this.data;
-		console.log('this.data render', this.data);
+		// console.log('this.data render', this.data);
 		if (this.start === 0) {
 			this.$result.html('<div class="image-view-container small padding-top">');
 			data = this.data.slice(this.start);
@@ -117,6 +125,8 @@ erpnext.hub.HubPage = class HubPage extends frappe.views.BaseList {
 		item._name = encodeURI(item.name);
 		const encoded_name = item._name;
 		const title = strip_html(item['item_name' || 'item_code']);
+		console.log(item);
+		const company_name = item['company_name'];
 
 		const route = `#Hub/Item/${item.hub_item_code}`;
 
@@ -137,9 +147,14 @@ erpnext.hub.HubPage = class HubPage extends frappe.views.BaseList {
 						<h5 class="bold">
 							${ title }
 						</h5>
+						<p>${ company_name }</p>
 					</div>
 				</a>
 			</div>
 		`;
 	}
+};
+
+erpnext.hub.CompanyListing = class CompanyListing extends frappe.views.BaseList {
+
 };
