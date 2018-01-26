@@ -21,7 +21,15 @@ frappe.views.HubFactory = frappe.views.Factory.extend({
 			console.log("pages?");
 			if (page === 'Item' && !route[2]) {
 				frappe.require(assets['List'], () => {
-					erpnext.hub.pages[page_name] = new erpnext.hub.HubPage({
+					erpnext.hub.pages[page_name] = new erpnext.hub.ItemListing({
+						doctype: 'Hub Settings',
+						parent: this.make_page(true, page_name)
+					});
+					window.hub_page = erpnext.hub.pages[page_name];
+				});
+			} if (page === 'Company' && !route[2]) {
+				frappe.require(assets['List'], () => {
+					erpnext.hub.pages[page_name] = new erpnext.hub.CompanyListing({
 						doctype: 'Hub Settings',
 						parent: this.make_page(true, page_name)
 					});
