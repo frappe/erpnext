@@ -40,7 +40,7 @@ def create_customers(args_data):
 @frappe.whitelist()
 def create_letterhead(args_data):
 	args = json.loads(args_data)
-	letterhead = args.get("letterhead")
+	letterhead = args.get("letterhead").encode('utf-8')
 	if letterhead:
 		try:
 			frappe.get_doc({

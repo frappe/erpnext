@@ -302,11 +302,11 @@ A type of leave (e.g., Sick Leave, Maternity Leave, etc.).
 
 > Human Resource > Leave and Attendance > Leave Type
 
-#### Process Payroll
+#### Payroll Entry
 
 A tool that helps in creation of multiple Salary Slips for Employees.
 
-> Human Resource > Salary and Payroll > Process Payroll
+> Human Resource > Payroll Entry
 
 #### Salary Slip
 
