@@ -103,7 +103,20 @@ def make_custom_fields():
 			depends_on='eval:in_list(["SEZ", "Export", "Deemed Export"], doc.invoice_type)',
 			options='\nWith Payment of Tax\nWithout Payment of Tax'),
 		dict(fieldname='ecommerce_gstin', label='E-commerce GSTIN',
-			fieldtype='Data', insert_after='export_type', print_hide=1)
+			fieldtype='Data', insert_after='export_type', print_hide=1),
+		dict(fieldname='reason_for_issuing_document', label='Reason For Issuing document',
+			fieldtype='Select', insert_after='ecommerce_gstin', print_hide=1,
+			depends_on='eval:doc.is_return==1',
+			options='\n01-Sales Return\n02-Post Sale Discount\n03-Deficiency in services\n04-Correction in Invoice\n05-Change in POS\n06-Finalization of Provisional assessment\n07-Others'),
+		dict(fieldname='port_code', label='Port Code',
+			fieldtype='Data', insert_after='reason_for_issuing_document', print_hide=1,
+			depends_on="eval:doc.invoice_type=='Export' "),
+		dict(fieldname='shipping_bill_number', label=' Shipping Bill Number',
+			fieldtype='Data', insert_after='port_code', print_hide=1,
+			depends_on="eval:doc.invoice_type=='Export' "),
+		dict(fieldname='shipping_bill_date', label='Shipping Bill Date',
+			fieldtype='Date', insert_after='shipping_bill_number', print_hide=1,
+			depends_on="eval:doc.invoice_type=='Export' "),
 	]
 
 	purchase_invoice_gst_fields = [
