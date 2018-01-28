@@ -31,26 +31,35 @@ def get_leaderboard(doctype, timespan, field, start=0):
 def get_all_customers(doctype, filters, items, field, start=0, limit=20):
 	"""return all customers"""
 
-	x = frappe.get_list(doctype, filters=filters, limit_start=start, limit_page_length=limit)
+	customer_list = frappe.get_list(doctype, filters=filters, limit_start=start, limit_page_length=limit)
 
-	for val in x:
-		y = dict(frappe.db.sql('''select name, grand_total from `tabSales Invoice`\
-			where customer = %s and docstatus != 2''', (val.name)))
-		invoice_list = y.keys()
+	for customer in customer_list:
+		y = frappe.db.sql("""select name, grand_total, base_net_total, outstanding_amount\
+			from `tabSales Invoice`\
+			where customer = %s and docstatus != 2""", {customer.name},as_dict=1)
+
+		invoice_list = [x['name'] for x in y]
+
 		if len(invoice_list) > 0:
 			item_count = frappe.db.sql('''select count(name) from `tabSales Invoice Item` where parent in (%s)''' % ", ".join(
 				['%s'] * len(invoice_list)), tuple(invoice_list))
-
+			print("item_count", item_count)
 			value = 0
 			if(field=="total_amount"):
-				value = sum(y.values())
+				value = sum([x['grand_total'] for x in y])
+			elif(field == "total_sales"):
+				value = sum([x['base_net_total'] for x in y])
+			elif(field == "receivable_amount"):
+				value = sum([x['outstanding_amount'] for x in y])
 			elif(field=="total_item_purchased"):
 				value = sum(destructure_tuple_of_tuples(item_count))
 
-			item_obj = {"name": val.name,
-				"total_amount": get_formatted_value(sum(y.values())),
+			item_obj = {"name": customer.name,
+				"total_amount": get_formatted_value(sum([x['grand_total'] for x in y])),
 				"total_item_purchased": sum(destructure_tuple_of_tuples(item_count)),
-				"href":"#Form/Customer/" + val.name,
+				"total_sales": get_formatted_value(sum([x['base_net_total'] for x in y])),
+				"receivable_amount":get_formatted_value(sum([x['outstanding_amount'] for x in y])),
+				"href":"#Form/Customer/" + customer.name,
 				"value": value}
 			items.append(item_obj)
 
@@ -90,26 +99,42 @@ def get_all_items(doctype, filters, items, field, start=0, limit=20):
 def get_all_suppliers(doctype, filters, items, field, start=0, limit=20):
 	"""return all suppliers"""
 
-	x = frappe.get_list(doctype, filters=filters, limit_start=start, limit_page_length=limit)
+	supplier_list = frappe.get_list(doctype, filters=filters, limit_start=start, limit_page_length=limit)
 
-	for val in x:
+	for supplier in supplier_list:
+		y = frappe.db.sql("""select name, grand_total, base_net_total, outstanding_amount\
+			from `tabPurchase Invoice`\
+			where supplier = %s and docstatus != 2""", {supplier.name},as_dict=1)
+		
+		invoice_list = [x['name'] for x in y]
+		print(invoice_list)
 
-		info = get_dashboard_info(doctype, val.name)
-		value = 0
-		if(field=="annual_billing"):
-			value = info["billing_this_year"]
-		elif(field=="total_unpaid"):
-			value = abs(info["total_unpaid"])
+		if len(invoice_list) > 0:
+			item_count = frappe.db.sql('''select count(name) from `tabPurchase Invoice Item` where parent in (%s)''' % ", ".join(
+				['%s'] * len(invoice_list)), tuple(invoice_list))
+			print("item_count", item_count)
+			value = 0
+			if(field=="total_amount"):
+				value = sum([x['grand_total'] for x in y])
+			elif(field == "total_purchase"):
+				value = sum([x['base_net_total'] for x in y])
+			elif(field == "payable_amount"):
+				value = sum([x['outstanding_amount'] for x in y])
+			elif(field=="total_item_sales"):
+				value = sum(destructure_tuple_of_tuples(item_count))
 
-		item_obj = {"name": val.name,
-			"annual_billing":  get_formatted_value(info["billing_this_year"]),
-			"total_unpaid": get_formatted_value(abs(info["total_unpaid"])),
-			"href":"#Form/Supplier/" + val.name,
-			"value": value}
-		items.append(item_obj)
+			item_obj = {"name": supplier.name,
+				"total_amount": get_formatted_value(sum([x['grand_total'] for x in y])),
+				"total_item_sales": sum(destructure_tuple_of_tuples(item_count)),
+				"total_purchase": get_formatted_value(sum([x['base_net_total'] for x in y])),
+				"payable_amount":get_formatted_value(sum([x['outstanding_amount'] for x in y])),
+				"href":"#Form/Customer/" + supplier.name,
+				"value": value}
+			items.append(item_obj)
 
 	items.sort(key=lambda k: k['value'], reverse=True)
 	return items
+
 
 def get_all_sales_partner(doctype, filters, items, field, start=0, limit=20):
 	"""return all sales partner"""
