@@ -281,7 +281,7 @@ class ReceivablePayableReport(object):
 
 				conditions.append("""party in (select name from tabCustomer
 					where exists(select name from `tabCustomer Group` where lft >= {0} and rgt <= {1}
-					and name=tabCustomer.customer_group))""".format(lft, rgt))
+						and name=tabCustomer.customer_group))""".format(lft, rgt))
 			
 			if self.filters.get("territory"):
 				lft, rgt = frappe.db.get_value("Territory",
