@@ -202,7 +202,7 @@ def set_batch_nos(doc, warehouse_field, throw=False):
 				d.batch_no = get_batch_no(d.item_code, warehouse, qty, throw)
 			else:
 				batch_qty = get_batch_qty(batch_no=d.batch_no, warehouse=warehouse)
-				if flt(batch_qty, d.precision("stock_qty")) < flt(qty, d.precision("stock_qty")):
+				if flt(batch_qty, d.precision("qty")) < flt(qty, d.precision("qty")):
 					frappe.throw(_("Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches").format(d.idx, d.batch_no, batch_qty, d.stock_qty))
 
 
