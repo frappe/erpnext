@@ -29,6 +29,24 @@ frappe.query_reports["Accounts Receivable"] = {
 			"options": "Payment Terms Template"
 		},
 		{
+			"fieldname":"territory",
+			"label": __("Territory"),
+			"fieldtype": "Link",
+			"options": "Territory"
+		},
+		{
+			"fieldname":"sales_partner",
+			"label": __("Sales Partner"),
+			"fieldtype": "Link",
+			"options": "Sales Partner"
+		},
+		{
+			"fieldname":"sales_person",
+			"label": __("Sales Person"),
+			"fieldtype": "Link",
+			"options": "Sales Person"
+		},
+		{
 			"fieldtype": "Break",
 		},
 		{
