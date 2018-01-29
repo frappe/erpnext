@@ -394,12 +394,12 @@ def email_sending(data,header):
 @frappe.whitelist()
 def times_check(from1,to,first_email,second_email,daily_time_to_send,weekly_time_to_send):
 
-    hoursF, min, sec = map(int,from1.split(':'))
-    hoursT, min, sec = map(int, to.split(':'))
-    hoursFE,min, sec = map(int, first_email.split(':'))
-    hoursSE,min, sec = map(int, second_email.split(':'))
-    hoursDE,min, sec = map(int, daily_time_to_send.split(':'))
-    hoursWE,min, sec = map(int, weekly_time_to_send.split(':'))
+    hoursF, minF, secF = map(int,from1.split(':'))
+    hoursT, minT, secT = map(int, to.split(':'))
+    hoursFE,minFE, secFE = map(int, first_email.split(':'))
+    hoursSE,minSE, secSE = map(int, second_email.split(':'))
+    hoursDE,minDE, secDE = map(int, daily_time_to_send.split(':'))
+    hoursWE,minWE, secWE = map(int, weekly_time_to_send.split(':'))
 
     from_reminder = datetime.time(hoursF, 00, 00)
     to_reminder = datetime.time(hoursT, 00, 00)
