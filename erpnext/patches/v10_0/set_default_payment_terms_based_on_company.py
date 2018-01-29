@@ -21,7 +21,7 @@ def execute():
 				update `tab{0}`
 				set `payment_terms` = %s
 				where name = %s
-			""".format(dt), (template, d.name))
+			""".format(dt), (template.name, d.name))
 
 def create_payment_terms_template(data):
 	if data.credit_days_based_on == "Fixed Days":
