@@ -491,3 +491,4 @@ erpnext.patches.v10_0.update_assessment_result
 erpnext.patches.v10_0.added_extra_gst_custom_field
 erpnext.patches.v10_0.workflow_leave_application #2018-01-24
 erpnext.patches.v10_0.set_default_payment_terms_based_on_company
+erpnext.patches.v10_0.added_extra_gst_custom_field_in_gstr2

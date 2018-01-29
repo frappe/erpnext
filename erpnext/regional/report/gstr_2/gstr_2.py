@@ -32,9 +32,9 @@ class Gstr2Report(object):
 
 		for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
 			invoice_details = self.invoices.get(inv)
-			for x in xrange(1,10):
-				print(invoice_details)
+			
 			for rate, items in items_based_on_rate.items():
+				# for is_igst, items in account.items():
 				row = []
 				for fieldname in invoice_fields:
 					if fieldname == "invoice_value":
@@ -42,11 +42,21 @@ class Gstr2Report(object):
 					else:
 						row.append(invoice_details.get(fieldname))
 
+				print("items", items.items())
+
+				# for k, v in items.items():
+				# 	print(k,v[1], items.items().)
 				row += [rate,
 					sum([net_amount for item_code, net_amount in self.invoice_items.get(inv).items()
-						if item_code in items]),
+						if item_code in [v[0] for k, v in items.items()]]),
+					[v[1] if k == True else 0.00 for k, v in items.items()],
+					[v[1] if k == False else 0.00 for k, v in items.items()],
+					[v[1] if k == False else 0.00 for k, v in items.items()],
+					# [x for x in items if is_igst == False],
 					self.invoice_cess.get(inv),
 				]
+
+
 
 
 				if self.filters.get("type_of_business") ==  "CDNR":
@@ -152,16 +162,24 @@ class Gstr2Report(object):
 							if "gst" in account.lower() and account not in unidentified_gst_accounts:
 								unidentified_gst_accounts.append(account)
 							continue
-
+						is_igst = False
 						for item_code, tax_amounts in item_wise_tax_detail.items():
 							tax_rate = tax_amounts[0]
+							tax_amt = tax_amounts[1]
 							if cgst_or_sgst:
 								tax_rate *= 2
+								tax_amt *= 2
+
+							else:
+								is_igst =True
+								
 
 							rate_based_dict = self.items_based_on_tax_rate.setdefault(parent, {})\
-								.setdefault(tax_rate, [])
+								.setdefault(tax_rate, {}).setdefault(is_igst, [])
+							print("rate_base_dict", rate_based_dict)
 							if item_code not in rate_based_dict:
 								rate_based_dict.append(item_code)
+								rate_based_dict.append(tax_amt if is_igst else tax_amt / 2 )
 					except ValueError:
 						continue
 		if unidentified_gst_accounts:
