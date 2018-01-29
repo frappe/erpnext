@@ -539,7 +539,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	due_date: function() {
 		// due_date is to be changed, payment terms template and/or payment schedule must
 		// be removed as due_date is automatically changed based on payment terms
-		if (this.frm.doc.due_date && !this.frm.updating_party_details) {
+		if (this.frm.doc.due_date && !this.frm.updating_party_details && !this.frm.doc.is_pos) {
 			if (this.frm.doc.payment_terms_template ||
 				(this.frm.doc.payment_schedule && this.frm.doc.payment_schedule.length)) {
 				var message1 = "";
