@@ -183,7 +183,6 @@ erpnext.patches.v5_0.index_on_account_and_gl_entry
 execute:frappe.db.sql("""delete from `tabProject Task`""")
 erpnext.patches.v5_0.update_item_desc_in_invoice
 erpnext.patches.v5_1.fix_against_account
-erpnext.patches.v5_1.fix_credit_days_based_on
 execute:frappe.rename_doc("DocType", "Salary Manager", "Process Payroll", force=True)
 erpnext.patches.v5_1.rename_roles
 erpnext.patches.v5_1.default_bom
@@ -487,3 +486,4 @@ erpnext.patches.v10_0.add_guardian_role_for_parent_portal
 erpnext.patches.v10_0.set_numeric_ranges_in_template_if_blank
 erpnext.patches.v10_0.update_assessment_plan
 erpnext.patches.v10_0.update_assessment_result
+erpnext.patches.v10_0.set_default_payment_terms_based_on_company
