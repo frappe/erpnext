@@ -21,4 +21,3 @@ Restaurant
 Agriculture
 ERPNext Integrations
 Non Profit
-Shopping Cart Coupon Code
