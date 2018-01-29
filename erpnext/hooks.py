@@ -200,12 +200,6 @@ doc_events = {
 	},
 	"Payment Entry": {
 		"on_submit": "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"
-	},
-	'Address': {
-		'validate': 'erpnext.regional.india.utils.validate_gstin_for_india'
-	},
-	'Project Update':{
-		"validate":'erpnext.projects.doctype.project_update.project_update.current_day_time'
 	}
 }
 
