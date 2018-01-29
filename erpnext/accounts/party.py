@@ -305,7 +305,6 @@ def get_due_date_from_template(template_name, posting_date):
 
 	return due_date
 
-
 def validate_due_date(posting_date, due_date, party_type, party, company=None):
 	if getdate(due_date) < getdate(posting_date):
 		frappe.throw(_("Due Date cannot be before Posting Date"))
@@ -366,7 +365,13 @@ def get_pyt_term_template(party_name, party_type, company=None):
 
 	template = None
 	if party_type == 'Customer':
-		template = frappe.db.get_value("Customer", party_name, fieldname='payment_terms')
+		customer = frappe.db.get_value("Customer", party_name,
+			fieldname=['payment_terms', "customer_group"], as_dict=1)
+		template = customer.payment_terms
+
+		if not template and customer.customer_group:
+			template = frappe.db.get_value("Customer Group",
+				customer.customer_group, fieldname='payment_terms')
 	else:
 		supplier = frappe.db.get_value("Supplier", party_name,
 			fieldname=['payment_terms', "supplier_type"], as_dict=1)
