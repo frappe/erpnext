@@ -523,7 +523,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					},
 					callback: function(r, rt) {
 						if(r.message) {
-							me.frm.set_value("due_date", r.message);
+							me.frm.doc.due_date = r.message;
+							refresh_field("due_date");
 							frappe.ui.form.trigger(me.frm.doc.doctype, "currency");
 							me.recalculate_terms();
 						}
@@ -538,7 +539,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	due_date: function() {
 		// due_date is to be changed, payment terms template and/or payment schedule must
 		// be removed as due_date is automatically changed based on payment terms
-		if (this.frm.doc.due_date) {
+		if (this.frm.doc.due_date && !this.frm.updating_party_details) {
 			if (this.frm.doc.payment_terms_template ||
 				(this.frm.doc.payment_schedule && this.frm.doc.payment_schedule.length)) {
 				var message1 = "";
@@ -555,11 +556,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					if (message1.length !== 0) message2 = " and " + message2;
 					final_message = final_message + message2;
 				}
-
 				frappe.msgprint(final_message);
 			}
-
-	    }
+		}
 	},
 
 	recalculate_terms: function() {
