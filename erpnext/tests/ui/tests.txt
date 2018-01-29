@@ -106,3 +106,4 @@ erpnext/selling/doctype/quotation/tests/test_quotation_with_margin.js
 erpnext/accounts/doctype/sales_invoice/tests/test_sales_invoice_with_margin.js
 erpnext/hr/doctype/payroll_entry/test_set_salary_components.js
 erpnext/hr/doctype/payroll_entry/test_payroll_entry.js
+erpnext/projects/doctype/timesheet_creation_tool/test_timesheet_creation_tool.js
