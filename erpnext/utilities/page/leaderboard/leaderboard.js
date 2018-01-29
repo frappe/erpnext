@@ -17,14 +17,15 @@ frappe.Leaderboard = Class.extend({
 		this.$sidebar_list = this.page.sidebar.find('ul');
 
 		// const list of doctypes
-		this.doctypes = ["Customer", "Item", "Supplier", "Sales Partner"];
+		this.doctypes = ["Customer", "Item", "Supplier", "Sales Partner","Sales Person"];
 		this.timespans = ["Week", "Month", "Quarter", "Year"];
-		this.desc_fields = ["total_amount", "total_request", "annual_billing", "commission_rate"];
+		this.desc_fields = ["total_amount", "total_request", "commission_rate"];
 		this.filters = {
 			"Customer": ["total_amount", "total_item_purchased", "total_sales","receivable_amount"],
 			"Item": ["total_request", "total_purchase", "avg_price"],
 			"Supplier": ["total_amount", "total_item_sales", "total_purchase","payable_amount"],
 			"Sales Partner": ["commission_rate", "target_qty", "target_amount"],
+			"Sales Person": ["commission_rate", "target_qty", "target_amount"],
 		};
 
 		// for saving current selected filters

@@ -23,6 +23,8 @@ def get_leaderboard(doctype, timespan, field, start=0):
 		items = get_all_suppliers(doctype, filters, [], field)
 	elif  doctype == "Sales Partner":
 		items = get_all_sales_partner(doctype, filters, [], field)
+	# elif doctype == "Sales Person":
+	# 	items = get_all_sales_person(doctype, filters, [], field)
 
 	if len(items) > 0:
 		return items
@@ -163,6 +165,12 @@ def get_all_sales_partner(doctype, filters, items, field, start=0, limit=20):
 
 	items.sort(key=lambda k: k['value'], reverse=True)
 	return items
+
+
+
+def get_all_sales_person(doctype, filters, items, field, start=0, limit=20):
+	"""return all items"""
+	
 
 
 def destructure_tuple_of_tuples(tup_of_tup):
