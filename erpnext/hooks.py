@@ -217,8 +217,12 @@ scheduler_events = {
 	"hourly": [
 		"erpnext.accounts.doctype.subscription.subscription.make_subscription_entry",
 		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.trigger_emails',
+        "erpnext.projects.doctype.project.project.hourly_reminder",
+		"erpnext.projects.doctype.project.project.twice_daily_reminder",
+		"erpnext.projects.doctype.project.project.daily_reminder"
 
 	],
+
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
 		"erpnext.setup.doctype.email_digest.email_digest.send",
