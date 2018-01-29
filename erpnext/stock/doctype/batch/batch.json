@@ -456,11 +456,7 @@
  "issingle": 0,
  "istable": 0,
  "max_attachments": 5,
-<<<<<<< HEAD
  "modified": "2018-01-23 17:41:06.862477",
-=======
- "modified": "2018-01-08 21:55:54.306693",
->>>>>>> da3202092218b1389e8bfb83302d7b9547c679ac
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
