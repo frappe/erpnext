@@ -47,18 +47,18 @@ def get_all_customers(doctype, filters, items, field, start=0, limit=20):
 				['%s'] * len(invoice_list)), tuple(invoice_list))
 			print("item_count", item_count)
 			value = 0
-			if(field == "total_sales"):
+			if(field == "total_sales(amount)"):
 				value = sum([x['base_net_total'] for x in y])
-			elif(field == "receivable_amount"):
+			elif(field == "receivable_amount(outstanding_amount)"):
 				value = sum([x['outstanding_amount'] for x in y])
-			elif(field=="total_item_purchased"):
+			elif(field=="total_item_purchased(qty)"):
 				value = sum(destructure_tuple_of_tuples(item_count))
 
 			item_obj = {"name": customer.name,
 			
-				"total_item_purchased": sum(destructure_tuple_of_tuples(item_count)),
-				"total_sales": get_formatted_value(sum([x['base_net_total'] for x in y])),
-				"receivable_amount":get_formatted_value(sum([x['outstanding_amount'] for x in y])),
+				"total_item_purchased(qty)": sum(destructure_tuple_of_tuples(item_count)),
+				"total_sales(amount)": get_formatted_value(sum([x['base_net_total'] for x in y])),
+				"receivable_amount(outstanding_amount)":get_formatted_value(sum([x['outstanding_amount'] for x in y])),
 				"href":"#Form/Customer/" + customer.name,
 				"value": value}
 			items.append(item_obj)
@@ -115,20 +115,17 @@ def get_all_suppliers(doctype, filters, items, field, start=0, limit=20):
 				['%s'] * len(invoice_list)), tuple(invoice_list))
 			print("item_count", item_count)
 			value = 0
-			if(field=="total_amount"):
-				value = sum([x['grand_total'] for x in y])
-			elif(field == "total_purchase"):
+			if(field == "total_purchase(amount)"):
 				value = sum([x['base_net_total'] for x in y])
-			elif(field == "payable_amount"):
+			elif(field == "payable_amount(outstanding_amount)"):
 				value = sum([x['outstanding_amount'] for x in y])
-			elif(field=="total_item_sales"):
+			elif(field=="total_item_sold(qty)"):
 				value = sum(destructure_tuple_of_tuples(item_count))
 
 			item_obj = {"name": supplier.name,
-				"total_amount": get_formatted_value(sum([x['grand_total'] for x in y])),
-				"total_item_sales": sum(destructure_tuple_of_tuples(item_count)),
-				"total_purchase": get_formatted_value(sum([x['base_net_total'] for x in y])),
-				"payable_amount":get_formatted_value(sum([x['outstanding_amount'] for x in y])),
+				"total_item_sold(qty)": sum(destructure_tuple_of_tuples(item_count)),
+				"total_purchase(amount)": get_formatted_value(sum([x['base_net_total'] for x in y])),
+				"payable_amount(outstanding_amount)":get_formatted_value(sum([x['outstanding_amount'] for x in y])),
 				"href":"#Form/Customer/" + supplier.name,
 				"value": value}
 			items.append(item_obj)
@@ -161,13 +158,13 @@ def get_all_sales_partner(doctype, filters, items, field, start=0, limit=20):
 		elif(field=="target_amount"):
 			value = target_amount
 		elif len(invoice_list) > 0:
-			if(field=="total_sales"):
+			if(field=="total_sales(amount)"):
 				value = total_commission
 		item_obj = {"name": sales_partner.name,
 			"commission_rate": get_formatted_value(sales_partner.commission_rate, False),
 			"target_qty": target_qty,
 			"target_amount": get_formatted_value(target_amount),
-			"total_sales": get_formatted_value(total_commission),
+			"total_sales(amount)": get_formatted_value(total_commission),
 			"href":"#Form/Sales Partner/" + sales_partner.name,
 			"value": value}
 		items.append(item_obj)
@@ -200,14 +197,12 @@ def get_all_sales_person(doctype, filters, items, field, start=0, limit=20):
 				value = target_qty
 			elif(field=="target_amount"):
 				value = target_amount
-			
-			elif(field=="total_sales"):
+			elif(field=="total_sales(amount)"):
 				value = sales
 			item_obj = {"name": sales_person.name,
-				# "commission_rate": get_formatted_value(sales_person.commission_rate, False),
 				"target_qty": target_qty,
 				"target_amount": get_formatted_value(target_amount),
-				"total_sales": sales,
+				"total_sales(amount)": get_formatted_value(sales),
 				"href":"#Form/Sales Partner/" + sales_person.name,
 				"value": value}
 			items.append(item_obj)
