@@ -103,3 +103,9 @@ class Supplier(TransactionBase):
 		frappe.db.sql("""update `tabAddress` set address_title=%(newdn)s
 			{set_field} where supplier=%(newdn)s"""\
 			.format(set_field=set_field), ({"newdn": newdn}))
+
+
+
+
+	def item_query():
+		return 'value'

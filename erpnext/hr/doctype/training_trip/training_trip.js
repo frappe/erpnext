@@ -80,6 +80,11 @@ frappe.ui.form.on('Training Trip', {
         }else{
             cur_frm.set_value("target_city", "");
         }
+    },
+    assignment_type: function(frm) {
+        if(cur_frm.doc.assignment_type=="Internal"){
+            cur_frm.set_value("world_countries", "Saudi Arabia");
+        }
     }
 });
 

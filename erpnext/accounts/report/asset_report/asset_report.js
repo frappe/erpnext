@@ -4,6 +4,11 @@
 
 frappe.query_reports["Asset Report"] = {
 	"filters": [
-
+		{
+			"fieldname":"asset_category",
+			"label": __("Asset Category"),
+			"fieldtype": "Link",
+			"options": "Asset Category"
+		},
 	]
 }

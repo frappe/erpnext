@@ -698,7 +698,8 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "depends_on": "", 
+   "default": "", 
+   "depends_on": "eval:doc.assignment_type == \"External\"", 
    "fieldname": "world_countries", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -1072,10 +1073,14 @@
  "istable": 0, 
  "max_attachments": 0, 
 <<<<<<< HEAD
+ "modified": "2018-01-25 14:05:44.239136", 
+=======
+<<<<<<< HEAD
  "modified": "2018-01-23 14:27:20.202249", 
 =======
  "modified": "2018-01-23 12:29:18.456386", 
 >>>>>>> 12d9eb1f4a7f8bc374db69cea8c174e3a2b5b7ae
+>>>>>>> 92e1b5444afe1e7d4d1bb81da3cf085cf7373010
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Business Trip", 

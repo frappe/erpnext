@@ -37,20 +37,21 @@ def get_columns(filters):
 def get_conditions(filters):
 	conditions = ""
 
-	if filters.get("company"): conditions += " and company=%(company)s"
-	if filters.get("employee"): conditions += " and employee = %(employee)s"
+	if filters.get("asset_category"): conditions += " and asset_category= '{0}' ".format(filters.get("asset_category"))
 
-	if filters.get("from_date"): conditions += " and date_of_joining>=%(from_date)s"
-	if filters.get("to_date"): conditions += " and date_of_joining<=%(to_date)s"
+	# if filters.get("employee"): conditions += " and employee = %(employee)s"
+
+	# if filters.get("from_date"): conditions += " and date_of_joining>=%(from_date)s"
+	# if filters.get("to_date"): conditions += " and date_of_joining<=%(to_date)s"
 
 	return conditions
 
 
 def get_data(filters):
-	# conditions = get_conditions(filters)
+	conditions = get_conditions(filters)
 	li_list=frappe.db.sql("""select name, asset_name, item_code, asset_category,
 		purchase_date,expected_value_after_useful_life, gross_purchase_amount, next_depreciation_date, total_number_of_depreciations from `tabAsset`
-		where docstatus = 1""",as_dict=1)
+		where docstatus = 1 {0} """.format(conditions),as_dict=1)
 
 	data=[]
 	asset_parent_categories=set()
@@ -85,41 +86,43 @@ def get_data(filters):
 	list comprehension may adds complixity to this snippet- Ahmed Madi"""
 	asset_parent_categories = list(asset_parent_categories)
 	# frappe.throw(str(asset_parent_categories))
-	data.sort(key=lambda x: x[5])
-	grand_totals_list=[""]*len(row)
-	gpa_grand_total=0.0
-	ad_grand_total=0.0
-	bv_grand_total=0.0
-	for asset_cat in asset_parent_categories:
+	
+	if data:
+		data.sort(key=lambda x: x[5])
+		grand_totals_list=[""]*len(row)
+		gpa_grand_total=0.0
+		ad_grand_total=0.0
+		bv_grand_total=0.0
+		for asset_cat in asset_parent_categories:
 
-		asset_category_gpa_total=0.0
-		asset_category_ad_total=0.0
-		asset_category_bv_total=0.0
-		totals_list=[""]*len(row)
+			asset_category_gpa_total=0.0
+			asset_category_ad_total=0.0
+			asset_category_bv_total=0.0
+			totals_list=[""]*len(row)
 
-		for items in data:
-			if asset_cat == items[5]:
-				asset_category_gpa_total+=flt(re.findall("\d+\.\d+", items[8])[0])
-				asset_category_ad_total+=flt(re.findall("\d+\.\d+", items[9])[0])
-				asset_category_bv_total+=flt(re.findall("\d+\.\d+", items[10])[0])
-				idx=data.index(items)+1
-		totals_list.insert(0,asset_cat)
-		totals_list.insert(8,asset_category_gpa_total)
-		totals_list.insert(9,asset_category_ad_total)
-		totals_list.insert(10,asset_category_bv_total)
+			for items in data:
+				if asset_cat == items[5]:
+					asset_category_gpa_total+=flt(re.findall("\d+\.\d+", items[8])[0])
+					asset_category_ad_total+=flt(re.findall("\d+\.\d+", items[9])[0])
+					asset_category_bv_total+=flt(re.findall("\d+\.\d+", items[10])[0])
+					idx=data.index(items)+1
+			totals_list.insert(0,asset_cat)
+			totals_list.insert(8,asset_category_gpa_total)
+			totals_list.insert(9,asset_category_ad_total)
+			totals_list.insert(10,asset_category_bv_total)
 
-		data.insert(idx,totals_list)
+			data.insert(idx,totals_list)
 
-		gpa_grand_total+=asset_category_gpa_total
-		ad_grand_total+=asset_category_ad_total
-		bv_grand_total+=asset_category_bv_total
+			gpa_grand_total+=asset_category_gpa_total
+			ad_grand_total+=asset_category_ad_total
+			bv_grand_total+=asset_category_bv_total
 
-	grand_totals_list.insert(0,"<b>Grand Total</b>")
-	grand_totals_list.insert(8,gpa_grand_total)
-	grand_totals_list.insert(9,ad_grand_total)
-	grand_totals_list.insert(10,bv_grand_total)
+		grand_totals_list.insert(0,"<b>Grand Total</b>")
+		grand_totals_list.insert(8,gpa_grand_total)
+		grand_totals_list.insert(9,ad_grand_total)
+		grand_totals_list.insert(10,bv_grand_total)
 
-	data.append([])
-	data.append(grand_totals_list)
+		data.append([])
+		data.append(grand_totals_list)
 
 	return data
