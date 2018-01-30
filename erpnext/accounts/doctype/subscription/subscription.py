@@ -232,6 +232,8 @@ def get_next_date(dt, mcount, day=None):
 def send_notification(new_rv, subscription_doc, print_format='Standard'):
 	"""Notify concerned persons about recurring document generation"""
 	print_format = print_format
+	subject = subscription_doc.subject or ''
+	message = subscription_doc.message or ''
 
 	if not subscription_doc.subject:
 		subject = _("New {0}: #{1}").format(new_rv.doctype, new_rv.name)
