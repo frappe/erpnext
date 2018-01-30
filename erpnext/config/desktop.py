@@ -293,7 +293,7 @@ def get_data():
 		},
         {
 			"module_name": "Patient",
-			"color": "#FF888B",
+			"color": "#6BE273",
 			"icon": "fa fa-user",
 			"doctype": "Patient",
 			"type": "link",
@@ -303,7 +303,7 @@ def get_data():
         },
         {
 			"module_name": "Patient Appointment",
-			"color": "#FF888B",
+			"color": "#934F92",
 			"icon": "fa fa-calendar-plus-o",
 			"doctype": "Patient Appointment",
 			"type": "link",
@@ -313,7 +313,7 @@ def get_data():
         },
         {
 			"module_name": "Consultation",
-			"color": "#FF888B",
+			"color": "#2ecc71",
 			"icon": "fa fa-stethoscope",
 			"doctype": "Consultation",
 			"type": "link",
