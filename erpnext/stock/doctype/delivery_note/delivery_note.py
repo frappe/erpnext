@@ -235,13 +235,22 @@ class DeliveryNote(SellingController):
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
 
+		extra_amount = 0
 		validate_against_credit_limit = False
-		for d in self.get("items"):
-			if not (d.against_sales_order or d.against_sales_invoice):
-				validate_against_credit_limit = True
-				break
+		bypass_credit_limit_check_at_sales_order = cint(frappe.db.get_value("Customer", self.customer,
+			"bypass_credit_limit_check_at_sales_order"))
+		if bypass_credit_limit_check_at_sales_order:
+			validate_against_credit_limit = True
+			extra_amount = self.base_grand_total
+		else:
+			for d in self.get("items"):
+				if not (d.against_sales_order or d.against_sales_invoice):
+					validate_against_credit_limit = True
+					break
+
 		if validate_against_credit_limit:
-			check_credit_limit(self.customer, self.company)
+			check_credit_limit(self.customer, self.company,
+				bypass_credit_limit_check_at_sales_order, extra_amount)
 
 	def validate_packed_qty(self):
 		"""
