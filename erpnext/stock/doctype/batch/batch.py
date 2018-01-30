@@ -7,22 +7,12 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
 from frappe.utils import flt, cint
-
+from frappe.utils.jinja import render_template, validate_template
+from frappe.utils.data import add_days
+import json
 
 class UnableToSelectBatchError(frappe.ValidationError):
 	pass
-
-
-def get_name_from_naming_series():
-	"""
-	Get a name generated for a Batch from the Batch's naming series.
-	:return: The string that was generated.
-	"""
-	naming_series_prefix = _get_batch_prefix()
-	key = _make_naming_series_key(naming_series_prefix)
-	name = make_autoname(key)
-
-	return name
 
 
 def get_name_from_hash():
@@ -99,7 +89,7 @@ class Batch(Document):
 		if not self.batch_id:
 			if frappe.db.get_value('Item', self.item, 'create_new_batch'):
 				if batch_uses_naming_series():
-					self.batch_id = get_name_from_naming_series()
+					self.batch_id = self.get_name_from_naming_series()
 				else:
 					self.batch_id = get_name_from_hash()
 			else:
@@ -119,6 +109,28 @@ class Batch(Document):
 	def item_has_batch_enabled(self):
 		if frappe.db.get_value("Item", self.item, "has_batch_no") == 0:
 			frappe.throw(_("The selected item cannot have Batch"))
+
+	def before_save(self):
+		has_expiry_date, shelf_life_in_days = frappe.db.get_value('Item', self.item, ['has_expiry_date', 'shelf_life_in_days'])
+		if not self.expiry_date and has_expiry_date and shelf_life_in_days:
+			self.expiry_date = add_days(self.manufacturing_date, shelf_life_in_days)
+
+		if has_expiry_date and not self.expiry_date:
+			frappe.throw('Expiry date is mandatory for selected item')
+			frappe.msgprint('Set items shelf life in days, to set expiry based on manufacturing_date plus self life ')
+
+	def get_name_from_naming_series(self):
+		"""
+		Get a name generated for a Batch from the Batch's naming series.
+		:return: The string that was generated.
+		"""
+		naming_series_prefix = _get_batch_prefix()
+		# validate_template(naming_series_prefix)
+		naming_series_prefix = render_template(str(naming_series_prefix), self.__dict__)
+		key = _make_naming_series_key(naming_series_prefix)
+		name = make_autoname(key)
+
+		return name
 
 
 @frappe.whitelist()
