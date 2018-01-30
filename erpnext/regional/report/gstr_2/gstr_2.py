@@ -44,16 +44,19 @@ class Gstr2Report(object):
 
 				print("items", items.items())
 
-				# for k, v in items.items():
-				# 	print(k,v[1], items.items().)
+				
 				row += [rate,
 					sum([net_amount for item_code, net_amount in self.invoice_items.get(inv).items()
 						if item_code in [v[0] for k, v in items.items()]]),
 					[v[1] if k == True else 0.00 for k, v in items.items()],
 					[v[1] if k == False else 0.00 for k, v in items.items()],
 					[v[1] if k == False else 0.00 for k, v in items.items()],
-					# [x for x in items if is_igst == False],
 					self.invoice_cess.get(inv),
+					invoice_details.get('eligibility_for_itc'),
+					invoice_details.get('itc_integrated_tax'),
+					invoice_details.get('itc_central_tax'),
+					invoice_details.get('itc_state_tax'),
+					invoice_details.get('itc_cess_amount'),
 				]
 
 
