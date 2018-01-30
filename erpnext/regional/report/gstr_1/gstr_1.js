@@ -31,7 +31,7 @@ frappe.query_reports["GSTR-1"] = {
 			"label": __("Type of Business"),
 			"fieldtype": "Select",
 			"reqd": 1,
-			"options": ["B2B", "B2C Large", "B2C Small"],
+			"options": ["B2B", "B2C Large", "B2C Small","CDNR", "EXPORT"],
 			"default": "B2B"
 		}
 	]

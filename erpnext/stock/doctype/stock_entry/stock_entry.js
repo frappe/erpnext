@@ -72,6 +72,7 @@ frappe.ui.form.on('Stock Entry', {
 						mr_item.item_code = item.item_code;
 						mr_item.item_name = item.item_name;
 						mr_item.uom = item.uom;
+						mr_item.conversion_factor = item.conversion_factor;
 						mr_item.item_group = item.item_group;
 						mr_item.description = item.description;
 						mr_item.image = item.image;
