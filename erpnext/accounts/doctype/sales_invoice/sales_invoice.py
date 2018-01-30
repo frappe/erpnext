@@ -242,7 +242,10 @@ class SalesInvoice(SellingController):
 		super(SalesInvoice, self).set_missing_values(for_validate)
 
 		if pos:
-			return {"print_format": pos.get("print_format_for_online") }
+			return {
+				"print_format": pos.get("print_format_for_online"),
+				"allow_edit_rate": pos.get("allow_user_to_edit_rate")
+			}
 
 	def update_time_sheet(self, sales_invoice):
 		for d in self.timesheets:
