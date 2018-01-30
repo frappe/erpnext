@@ -24,8 +24,8 @@ frappe.Leaderboard = Class.extend({
 			"Customer": ["total_amount", "total_item_purchased", "total_sales","receivable_amount"],
 			"Item": ["total_request", "total_purchase", "avg_price"],
 			"Supplier": ["total_amount", "total_item_sales", "total_purchase","payable_amount"],
-			"Sales Partner": ["commission_rate", "target_qty", "target_amount", "total_sales", "communications"],
-			"Sales Person": ["commission_rate", "target_qty", "target_amount"],
+			"Sales Partner": ["commission_rate", "target_qty", "target_amount", "total_sales"],
+			"Sales Person": ["commission_rate", "target_qty", "target_amount", "total_sales"],
 		};
 
 		// for saving current selected filters

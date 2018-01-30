@@ -23,8 +23,8 @@ def get_leaderboard(doctype, timespan, field, start=0):
 		items = get_all_suppliers(doctype, filters, [], field)
 	elif  doctype == "Sales Partner":
 		items = get_all_sales_partner(doctype, filters, [], field)
-	# elif doctype == "Sales Person":
-	# 	items = get_all_sales_person(doctype, filters, [], field)
+	elif doctype == "Sales Person":
+		items = get_all_sales_person(doctype, filters, [], field)
 
 	if len(items) > 0:
 		return items
@@ -47,9 +47,7 @@ def get_all_customers(doctype, filters, items, field, start=0, limit=20):
 				['%s'] * len(invoice_list)), tuple(invoice_list))
 			print("item_count", item_count)
 			value = 0
-			if(field=="total_amount"):
-				value = sum([x['grand_total'] for x in y])
-			elif(field == "total_sales"):
+			if(field == "total_sales"):
 				value = sum([x['base_net_total'] for x in y])
 			elif(field == "receivable_amount"):
 				value = sum([x['outstanding_amount'] for x in y])
@@ -57,7 +55,7 @@ def get_all_customers(doctype, filters, items, field, start=0, limit=20):
 				value = sum(destructure_tuple_of_tuples(item_count))
 
 			item_obj = {"name": customer.name,
-				"total_amount": get_formatted_value(sum([x['grand_total'] for x in y])),
+			
 				"total_item_purchased": sum(destructure_tuple_of_tuples(item_count)),
 				"total_sales": get_formatted_value(sum([x['base_net_total'] for x in y])),
 				"receivable_amount":get_formatted_value(sum([x['outstanding_amount'] for x in y])),
@@ -79,6 +77,7 @@ def get_all_items(doctype, filters, items, field, start=0, limit=20):
 		avg_price = get_avg(destructure_tuple_of_tuples(data))
 		data = frappe.db.sql('''select item_code from `tabPurchase Invoice Item` where item_code = %s''', (val.name), as_list=1)
 		purchases = destructure_tuple_of_tuples(data)
+		print("purchase", purchases)
 
 		value = 0
 		if(field=="total_request"):
@@ -148,11 +147,11 @@ def get_all_sales_partner(doctype, filters, items, field, start=0, limit=20):
 		target_amount = sum([f["target_amount"] for f in y])
 
 		invoices = frappe.db.sql("""select name, count(name) as inv, sum(total_commission) as sales\
-			from `tabSales Invoice`\
+			from `tabSales Order`\
 			where sales_partner = %s and docstatus !=2""", {sales_partner.name}, as_dict=1)
 
 		invoice_list =  [x['name'] for x in invoices]
-		total_commission = sum([x['sales'] for x in invoices])
+		total_commission = sum([x['sales'] if x['sales'] else 0 for x in invoices])
 
 		value = 0
 		if(field=="commission_rate"):
@@ -164,14 +163,11 @@ def get_all_sales_partner(doctype, filters, items, field, start=0, limit=20):
 		elif len(invoice_list) > 0:
 			if(field=="total_sales"):
 				value = total_commission
-			elif(field=="communications"):
-				value = sum([x['inv'] for x in invoices]),
 		item_obj = {"name": sales_partner.name,
 			"commission_rate": get_formatted_value(sales_partner.commission_rate, False),
 			"target_qty": target_qty,
 			"target_amount": get_formatted_value(target_amount),
 			"total_sales": get_formatted_value(total_commission),
-			"communications":  sum([x['inv'] for x in invoices]),
 			"href":"#Form/Sales Partner/" + sales_partner.name,
 			"value": value}
 		items.append(item_obj)
@@ -179,7 +175,45 @@ def get_all_sales_partner(doctype, filters, items, field, start=0, limit=20):
 	items.sort(key=lambda k: k['value'], reverse=True)
 	return items
 
+def get_all_sales_person(doctype, filters, items, field, start=0, limit=20):
+	"""return all sales partner"""
 
+	sales_person_list = frappe.get_list(doctype, fields=["name", "is_group", "employee", "modified"], filters=filters, limit_start=start, limit_page_length=limit)
+	for sales_person in sales_person_list :
+		y = frappe.db.sql('''select target_qty, target_amount from `tabTarget Detail` where parent = %s''', (sales_person.name), as_dict=1)
+		if not sales_person.is_group:
+			target_qty = sum([f["target_qty"] for f in y])	
+			target_amount = sum([f["target_amount"] for f in y])
+
+			data = frappe.db.sql('''select allocated_amount from `tabSales Team` where sales_person = %s''', (sales_person.name), as_list=1)
+			sales = sum(destructure_tuple_of_tuples(data))
+			print('sales', sales)
+			# invoices = frappe.db.sql("""select name, count(name) as inv, sum(total_commission) as sales\
+			# 	from `tabSales Order`\
+			# 	where sales_ = %s and docstatus !=2""", {sales_partner.name}, as_dict=1)
+
+			# invoice_list =  [x['name'] for x in invoices]
+			# total_commission = sum([x['sales'] if x['sales'] else 0 for x in invoices])
+
+			value = 0
+			if(field=="target_qty"):
+				value = target_qty
+			elif(field=="target_amount"):
+				value = target_amount
+			
+			elif(field=="total_sales"):
+				value = sales
+			item_obj = {"name": sales_person.name,
+				# "commission_rate": get_formatted_value(sales_person.commission_rate, False),
+				"target_qty": target_qty,
+				"target_amount": get_formatted_value(target_amount),
+				"total_sales": sales,
+				"href":"#Form/Sales Partner/" + sales_person.name,
+				"value": value}
+			items.append(item_obj)
+
+	items.sort(key=lambda k: k['value'], reverse=True)
+	return items
 
 def destructure_tuple_of_tuples(tup_of_tup):
 	"""return tuple(tuples) as list"""
