@@ -141,36 +141,44 @@ def get_all_suppliers(doctype, filters, items, field, start=0, limit=20):
 def get_all_sales_partner(doctype, filters, items, field, start=0, limit=20):
 	"""return all sales partner"""
 
-	x = frappe.get_list(doctype, fields=["name", "commission_rate", "modified"], filters=filters, limit_start=start, limit_page_length=limit)
-	for val in x:
-		y = frappe.db.sql('''select target_qty, target_amount from `tabTarget Detail` where parent = %s''', (val.name), as_dict=1)
+	sales_partner_list = frappe.get_list(doctype, fields=["name", "commission_rate", "modified"], filters=filters, limit_start=start, limit_page_length=limit)
+	for sales_partner in sales_partner_list :
+		y = frappe.db.sql('''select target_qty, target_amount from `tabTarget Detail` where parent = %s''', (sales_partner.name), as_dict=1)
 		target_qty = sum([f["target_qty"] for f in y])
 		target_amount = sum([f["target_amount"] for f in y])
 
+		invoices = frappe.db.sql("""select name, count(name) as inv, sum(total_commission) as sales\
+			from `tabSales Invoice`\
+			where sales_partner = %s and docstatus !=2""", {sales_partner.name}, as_dict=1)
+
+		invoice_list =  [x['name'] for x in invoices]
+		total_commission = sum([x['sales'] for x in invoices])
+
 		value = 0
 		if(field=="commission_rate"):
-			value = val.commission_rate
+			value = sales_partner.commission_rate
 		elif(field=="target_qty"):
 			value = target_qty
 		elif(field=="target_amount"):
-			value = target_qty
-
-		item_obj = {"name": val.name,
-			"commission_rate": get_formatted_value(val.commission_rate, False),
+			value = target_amount
+		elif len(invoice_list) > 0:
+			if(field=="total_sales"):
+				value = total_commission
+			elif(field=="communications"):
+				value = sum([x['inv'] for x in invoices]),
+		item_obj = {"name": sales_partner.name,
+			"commission_rate": get_formatted_value(sales_partner.commission_rate, False),
 			"target_qty": target_qty,
-			"target_amount": get_formatted_value(target_qty),
-			"href":"#Form/Sales Partner/" + val.name,
+			"target_amount": get_formatted_value(target_amount),
+			"total_sales": get_formatted_value(total_commission),
+			"communications":  sum([x['inv'] for x in invoices]),
+			"href":"#Form/Sales Partner/" + sales_partner.name,
 			"value": value}
 		items.append(item_obj)
 
 	items.sort(key=lambda k: k['value'], reverse=True)
 	return items
 
-
-
-def get_all_sales_person(doctype, filters, items, field, start=0, limit=20):
-	"""return all items"""
-	
 
 
 def destructure_tuple_of_tuples(tup_of_tup):
