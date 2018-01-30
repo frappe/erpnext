@@ -424,7 +424,8 @@ $.extend(erpnext.item, {
 						filters: [
 							["parent","=", attribute]
 						],
-						fields: ["attribute_value"]
+						fields: ["attribute_value"],
+						limit_page_length: null
 					}
 				}).then((r) => {
 					if(r.message) {

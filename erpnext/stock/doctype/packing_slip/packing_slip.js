@@ -48,7 +48,7 @@ cur_frm.cscript.validate = function(doc, cdt, cdn) {
 cur_frm.cscript.validate_case_nos = function(doc) {
 	doc = locals[doc.doctype][doc.name];
 	if(cint(doc.from_case_no)==0) {
-		frappe.msgprint(__("Case No. cannot be 0"))
+		frappe.msgprint(__("The 'From Package No.' field must neither be empty nor it's value less than 1."));
 		frappe.validated = false;
 	} else if(!cint(doc.to_case_no)) {
 		doc.to_case_no = doc.from_case_no;
@@ -124,3 +124,5 @@ cur_frm.pformat.net_weight_pkg= function(doc){
 cur_frm.pformat.gross_weight_pkg= function(doc){
 	return '<table style="width:100%">' + make_row('Gross Weight', doc.gross_weight_pkg) + '</table>'
 }
+
+// TODO: validate gross weight field

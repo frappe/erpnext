@@ -599,7 +599,7 @@ class StockEntry(StockController):
 						if self.pro_doc and not self.pro_doc.skip_transfer:
 							item["from_warehouse"] = self.pro_doc.wip_warehouse
 						#Get Reserve Warehouse from PO
-						item["from_warehouse"] = item_wh.get(item.item_code)
+						item["from_warehouse"] = item_wh.get(item.item_code) if self.purchase_order and self.purpose=="Subcontract" else ""
 						item["to_warehouse"] = self.to_warehouse if self.purpose=="Subcontract" else ""
 
 					self.add_to_stock_entry_detail(item_dict)

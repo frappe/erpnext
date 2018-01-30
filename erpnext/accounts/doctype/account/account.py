@@ -163,7 +163,7 @@ class Account(NestedSet):
 		if self.check_gle_exists():
 			throw(_("Account with existing transaction can not be deleted"))
 
-		super(Account, self).on_trash()
+		super(Account, self).on_trash(True)
 
 	def before_rename(self, old, new, merge=False):
 		# Add company abbr if not provided

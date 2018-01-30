@@ -27,9 +27,13 @@ other items which go into the making of pen, will be categorized as sub-items.
 
 <img class="screenshot" alt="Sub-Contracting" src="/docs/assets/img/manufacturing/subcontract2.png">
 
-__Step 2:__ Make a Purchase Order for the processed Item. When you “Save”, in the “Raw Materials Supplied”, all your un-processed Items will be updated based on your Bill of Materials.
+__Step 2:__ Make a Purchase Order for the processed Item. When you “Save”, in the “Raw Materials Supplied”, all your un-processed Items will be updated based on your Bill of Materials. You can also select the warehouse from which the material would be reserved for sub contracting.
 
 <img class="screenshot" alt="Sub-Contracting" src="/docs/assets/img/manufacturing/subcontract3.png">
+
+Once the PO is submitted, you can view the reserved quantity of the item from the item dashboard as well.
+
+<img class="screenshot" alt="Sub-Contracting" src="/docs/assets/img/manufacturing/subcontract3-reserved-material.png">
 
 __Step 3:__ Make a Stock Entry to deliver the raw material Items to your Supplier.
 
@@ -45,6 +49,10 @@ correct stock is maintained at the Supplier’s end.
 
 > Note 2: ERPNext will automatically add the raw material rate for your
 valuation purpose when you receive the finished Item in your stock.
+
+> Note 3: ERPNext will automatically default the Reserve Warehouse in the PO
+from the BOM. If not found in the BOM, it would default it from the default
+warehouse setup in the Item.
 
 ### Video Help
 

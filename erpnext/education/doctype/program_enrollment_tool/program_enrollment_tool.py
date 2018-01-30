@@ -10,6 +10,7 @@ from erpnext.education.api import enroll_student
 
 class ProgramEnrollmentTool(Document):
 	def get_students(self):
+		students = []
 		if not self.get_students_from:
 			frappe.throw(_("Mandatory field - Get Students From"))
 		elif not self.program:
