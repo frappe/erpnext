@@ -14,7 +14,6 @@ QUnit.test("Test: Employee [HR]", function (assert) {
 					{ company: 'For Testing'},
 					{ date_of_joining: joining_date},
 					{ date_of_birth: birth_date},
-					{ employment_type: 'Test Employment Type'},
 					{ holiday_list: 'Test Holiday List'},
 					{ branch: 'Test Branch'},
 					{ department: 'Test Department'},
@@ -31,6 +30,17 @@ QUnit.test("Test: Employee [HR]", function (assert) {
 		]);
 	};
 	frappe.run_serially([
+		() => { frappe.tests.make('Branch', [{ "branch": "Test Branch"}]); },
+		() => frappe.timeout(3),
+		() => { frappe.tests.make('Designation', [{ "designation_name": "Test Designation"}]); },
+		() => frappe.timeout(3),
+		() => {
+			frappe.tests.make('Department', [{
+				"department_name": "Test Department",
+				"leave_block_list": "Test Leave block list"
+			}]);
+		},
+		() => frappe.timeout(3),
 		() => employee_creation('Test Employee 1','2017-04-01','1992-02-02'),
 		() => frappe.timeout(10),
 		() => employee_creation('Test Employee 3','2017-04-01','1992-02-02'),

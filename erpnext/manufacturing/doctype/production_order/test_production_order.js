@@ -24,7 +24,7 @@ QUnit.test("test: production order", function (assert) {
 				{production_item: 'Laptop'},
 				{company: 'For Testing'},
 				{qty: laptop_quantity},
-				{scrap_warehouse: "Laptop Scrap Warehouse - FT"},
+				{scrap_warehouse: "Stores - FT"},
 				{wip_warehouse: "Work In Progress - FT"},
 				{fg_warehouse: "Finished Goods - FT"}
 			]);
@@ -90,9 +90,9 @@ QUnit.test("test: production order", function (assert) {
 
 		// Finish the production order by sending for manufacturing
 		() => frappe.set_route("List", "Production Order"),
-		() => frappe.timeout(1),
+		() => frappe.timeout(2),
 		() => frappe.click_link("Laptop"),
-		() => frappe.timeout(1),
+		() => frappe.timeout(2),
 
 		() => {
 			assert.ok(frappe.tests.is_visible("5 items in progress", 'p'), "Production order initiated");
@@ -100,8 +100,9 @@ QUnit.test("test: production order", function (assert) {
 		},
 
 		() => frappe.click_button("Finish"),
-		() => frappe.timeout(0.5),
+		() => frappe.timeout(1),
 		() => click_make(),
+		() => frappe.timeout(1),
 		() => {
 			assert.equal(cur_frm.doc.total_incoming_value, "105700",
 				"Incoming cost is correct "+cur_frm.doc.total_incoming_value); // Price of each item x5, values are in INR

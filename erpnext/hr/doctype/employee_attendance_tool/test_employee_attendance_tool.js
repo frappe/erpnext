@@ -15,7 +15,6 @@ QUnit.test("Test: Employee attendance tool [HR]", function (assert) {
 				{company: "For Testing"},
 				{date_of_joining: frappe.datetime.add_months(today_date, -2)},	// joined 2 month from now
 				{date_of_birth: frappe.datetime.add_months(today_date, -240)},	// age is 20 years
-				{employment_type: "Test Employment type"},
 				{holiday_list: "Test Holiday list"},
 				{branch: "Test Branch"},
 				{department: "Test Department"},
