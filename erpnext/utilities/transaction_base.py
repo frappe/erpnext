@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import frappe.share
 from frappe import _
-from frappe.utils import cstr, now_datetime, cint, flt
+from frappe.utils import cstr, now_datetime, cint, flt, get_time
 from erpnext.controllers.status_updater import StatusUpdater
 
 class UOMMustBeIntegerError(frappe.ValidationError): pass
@@ -26,6 +26,11 @@ class TransactionBase(StatusUpdater):
 			now = now_datetime()
 			self.posting_date = now.strftime('%Y-%m-%d')
 			self.posting_time = now.strftime('%H:%M:%S.%f')
+		elif self.posting_time:
+			try:
+				get_time(self.posting_time)
+			except ValueError:
+				frappe.throw(_('Invalid Posting Time'))
 
 	def add_calendar_event(self, opts, force=False):
 		if cstr(self.contact_by) != cstr(self._prev.contact_by) or \

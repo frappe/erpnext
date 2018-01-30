@@ -6,9 +6,15 @@
 {% } %}
 <h4 class="text-center">{%= __("Assessment Report") %}</h4>
 <hr>
+<h5 class="text-center">{%= __("Academic Year: ") %} {%= filters.academic_year %} </h5>
+{% if (filters.academic_term){ %}
+<h5 class="text-center">{%= __("Academic Term: ") %} {%= filters.academic_term %} </h5>
+{% } %}
 <h5 class="text-center">{%= __("Course Code: ") %} {%= filters.course %}</h5>
 <h5 class="text-center">{%= __("Assessment Group: ") %} {%= filters.assessment_group %}</h5>
-<h5 class="text-center">{%= __("Assessment Plan: ") %} {%= data_to_be_printed[0]["assessment_plan"] %} </h5>
+{% if (filters.student_group){ %}
+<h5 class="text-center">{%= __("Student Group: ") %} {%= filters.student_group %} </h5>
+{% } %}
 <hr>
 
 <table class="table table-bordered">

@@ -10,7 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 from erpnext.controllers.queries import get_filters_cond
 from frappe.desk.reportview import get_match_cond
-import datetime
+import datetime, time
 
 class Project(Document):
     def get_feed(self):
@@ -304,7 +304,6 @@ def get_list_context(context=None):
         "row_template": "templates/includes/projects/project_row.html"
     }
 
-
 def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
     conditions = []
     return frappe.db.sql("""select name, concat_ws(' ', first_name, middle_name, last_name)
@@ -339,17 +338,19 @@ def get_cost_center_name(project):
 def hourly_reminder():
     data = []
     header = "Hourly Reminder"
-    email = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE `tabProject`.frequency = "Hourly" and (CURTIME() BETWEEN `tabProject`.from and `tabProject`.to);""")
+    email = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE `tabProject`.frequency = "Hourly" and (CURTIME() BETWEEN `tabProject`.from and `tabProject`.to) AND `tabProject`.collect_progress = 1;""")
     for emails in email:
         recipients = emails[0]
         data.append(recipients)
+    print("==========================================")
+    print("hourly")
     email_sending(data,header)
 
 @frappe.whitelist()
 def twice_daily_reminder():
     data = []
     header = "Twice Daily Reminder"
-    email = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE (`tabProject`.frequency = "Twice Daily") AND ((`tabProject`.first_email BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE)) OR (`tabProject`.second_email BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE)));""")
+    email = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE (`tabProject`.frequency = "Twice Daily") AND ((`tabProject`.first_email BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE)) OR (`tabProject`.second_email BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE))) AND `tabProject`.collect_progress = 1;""")
     for emails in email:
         recipients = emails[0]
         data.append(recipients)
@@ -359,27 +360,40 @@ def twice_daily_reminder():
 def daily_reminder():
     data = []
     header = "Daily Reminder"
-    email = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE (`tabProject`.frequency = "Daily") AND (`tabProject`.daily_time_to_send BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE));""")
+    email = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE (`tabProject`.frequency = "Daily") AND (`tabProject`.daily_time_to_send BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE)) AND `tabProject`.collect_progress = 1;""")
     for emails in email:
         recipients = emails[0]
         data.append(recipients)
     email_sending(data, header)
 
+@frappe.whitelist()
 def weekly():
     data = []
     header = "Weekly Reminder"
     today = datetime.datetime.now().strftime("%A")
-    email = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE (`tabProject`.frequency = "Weekly") AND (`tabProject`.day_to_send = %s) AND (`tabProject`.weekly_time_to_send BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE))""", today)
+    email = frappe.db.sql("""SELECT `tabProject User`.user FROM `tabProject User` INNER JOIN `tabProject` ON `tabProject`.project_name = `tabProject User`.parent WHERE (`tabProject`.frequency = "Weekly") AND (`tabProject`.day_to_send = %s) AND (`tabProject`.weekly_time_to_send BETWEEN DATE_ADD(curtime(), INTERVAL -15 MINUTE) AND DATE_ADD(curtime(), INTERVAL 15 MINUTE)) AND `tabProject`.collect_progress = 1""", today)
     for emails in email:
         recipients = emails[0]
         data.append(recipients)
     email_sending(data, header)
 
 def email_sending(data,header):
-    for datas in data:
-        frappe.sendmail(
-            recipients=datas,
-            subject=frappe._(header),
-            header=[frappe._("Please Update your Project Status"), 'blue'],
-            message= header
-    )
+    holiday = frappe.db.sql("""SELECT holiday_date FROM `tabHoliday` where holiday_date = CURDATE();""")
+    if len(holiday) == 0:
+        for datas in data:
+            print datas
+            frappe.sendmail(
+                recipients=datas,
+                subject=frappe._(header),
+                header=[frappe._("Please Update your Project Status"), 'blue'],
+                message= header
+            )
+    else:
+        pass
+
+@frappe.whitelist()
+def times_check(from1):
+
+    from1 = datetime.datetime.strptime(from1, "%H:%M:%S")
+    from1 = from1.strftime("%H:00:00")
+    return {"from1": from1}

@@ -45,7 +45,7 @@ def create_letterhead(args_data):
 		try:
 			frappe.get_doc({
 					"doctype":"Letter Head",
-					"content":"""<div><img src="{0}" style='max-width: 100%%;'><br></div>""".format(letterhead),
+					"content":"""<div><img src="{0}" style='max-width: 100%%;'><br></div>""".format(letterhead.encode('utf-8')),
 					"letter_head_name": _("Standard"),
 					"is_default": 1
 			}).insert()
