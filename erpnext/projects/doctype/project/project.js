@@ -138,33 +138,15 @@ frappe.ui.form.on("Project Task", {
 });
 
 
-cur_frm.cscript.validate = function () {
-
-    var from = cur_frm.doc.from,
-        to = cur_frm.doc.to,
-        first_email = cur_frm.doc.first_email,
-        second_email = cur_frm.doc.second_email,
-        daily_time_to_send = cur_frm.doc.daily_time_to_send,
-        weekly_time_to_send = cur_frm.doc.weekly_time_to_send;
-
+frappe.ui.form.on("Project", "validate", function (frm) {
     frappe.call({
-        method: "erpnext.projects.doctype.project.project.times_check",
-        args: {
-            "from1": from,
-            "to": to,
-            "first_email": first_email,
-            "second_email": second_email,
-            "daily_time_to_send": daily_time_to_send,
-            "weekly_time_to_send": weekly_time_to_send,
-        },
-
-        callback: function (r) {
-            cur_frm.doc.from = r.message[0],
-                cur_frm.doc.to = r.message[1],
-                cur_frm.doc.first_email = r.message[2],
-                cur_frm.doc.second_email = r.message[3],
-                cur_frm.doc.daily_time_to_send = r.message[4],
-                cur_frm.doc.weekly_time_to_send = r.message[5];
+            method:"erpnext.projects.doctype.project.project.times_check",
+            args:{
+                "from1": frm.doc.from
+            },
+        callback: function(r) {
+            frm.set_value("from", r.message.from1);
         }
-    });
-}
+	});
+});
+
