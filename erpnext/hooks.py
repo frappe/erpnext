@@ -200,23 +200,20 @@ doc_events = {
 	},
 	"Payment Entry": {
 		"on_submit": "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"
+	},
+	'Address': {
+		'validate': 'erpnext.regional.india.utils.validate_gstin_for_india'
+	},
+	'Sales Invoice': {
+		'validate': 'erpnext.regional.india.utils.set_place_of_supply'
 	}
 }
 
 scheduler_events = {
-    "all": [
-
-    ],
-
 	"hourly": [
 		"erpnext.accounts.doctype.subscription.subscription.make_subscription_entry",
-		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.trigger_emails',
-        "erpnext.projects.doctype.project.project.hourly_reminder",
-		"erpnext.projects.doctype.project.project.twice_daily_reminder",
-		"erpnext.projects.doctype.project.project.daily_reminder"
-
+		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.trigger_emails'
 	],
-
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
 		"erpnext.setup.doctype.email_digest.email_digest.send",
