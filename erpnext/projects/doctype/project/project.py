@@ -10,7 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 from erpnext.controllers.queries import get_filters_cond
 from frappe.desk.reportview import get_match_cond
-import datetime, time
+import datetime
 
 class Project(Document):
     def get_feed(self):
@@ -392,8 +392,19 @@ def email_sending(data,header):
         pass
 
 @frappe.whitelist()
-def times_check(from1):
+def times_check(from1,to,first_email,second_email,daily_time_to_send,weekly_time_to_send):
 
     from1 = datetime.datetime.strptime(from1, "%H:%M:%S")
     from1 = from1.strftime("%H:00:00")
-    return {"from1": from1}
+    to = datetime.datetime.strptime(to, "%H:%M:%S")
+    to = to.strftime("%H:00:00")
+    first_email = datetime.datetime.strptime(first_email, "%H:%M:%S")
+    first_email = first_email.strftime("%H:00:00")
+    second_email = datetime.datetime.strptime(second_email, "%H:%M:%S")
+    second_email = second_email.strftime("%H:00:00")
+    daily_time_to_send = datetime.datetime.strptime(daily_time_to_send, "%H:%M:%S")
+    daily_time_to_send = daily_time_to_send.strftime("%H:00:00")
+    weekly_time_to_send = datetime.datetime.strptime(weekly_time_to_send, "%H:%M:%S")
+    weekly_time_to_send = weekly_time_to_send.strftime("%H:00:00")
+
+    return {"from1": from1,"to":to,"first_email":first_email,"second_email":second_email,"daily_time_to_send":daily_time_to_send,"weekly_time_to_send":weekly_time_to_send}
