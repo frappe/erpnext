@@ -12,13 +12,52 @@ def execute(filters=None):
 
 def get_columns():
 	return [
-		_("Item Name") + ":Link/Item:150",
-		_("Warehouse") + ":Link/Warehouse:130",
-		_("Stock Available") + ":Float:120",
-		_("Buying Price List") + ":Data:130",
-		_("Buying Rate") + ":Currency:110",
-		_("Selling Price List") + ":Data:130",
-		_("Selling Rate") + ":Currency:110"
+		{
+			"label": _("Item Name"),
+			"fieldname": "item_name",
+			"fieldtype": "Link",
+			"options": "Item",
+			"width": 120
+		},
+		{
+			"label": _("Warehouse"),
+			"fieldname": "warehouse",
+			"fieldtype": "Link",
+			"options": "Warehouse",
+			"width": 120
+		},
+		{
+			"label": _("Stock Available"),
+			"fieldname": "stock_available",
+			"fieldtype": "Float",
+			"width": 120
+		},
+		{
+			"label": _("Buying Price List"),
+			"fieldname": "buying_price_list",
+			"fieldtype": "Link",
+			"options": "Price List",
+			"width": 120
+		},
+		{
+			"label": _("Buying Rate"),
+			"fieldname": "buying_rate",
+			"fieldtype": "Currency",
+			"width": 120
+		},
+		{
+			"label": _("Selling Price List"),
+			"fieldname": "selling_price_list",
+			"fieldtype": "Link",
+			"options": "Price List",
+			"width": 120
+		},
+		{
+			"label": _("Selling Rate"),
+			"fieldname": "selling_rate",
+			"fieldtype": "Currency",
+			"width": 120
+		}
 	]
 
 def get_data(filters, columns):
@@ -27,72 +66,72 @@ def get_data(filters, columns):
 	return item_price_qty_data
 
 def get_item_price_qty_data(filters):
-	item_dicts = []
 	conditions = ""
 	if filters.get("item_code"):
 		conditions += "where a.item_code=%(item_code)s"
 
-	item_results = frappe.db.sql("""select a.item_code as name,a.name as price_list_name,
-		b.warehouse as warehouse,b.actual_qty as actual_qty
+	item_results = frappe.db.sql("""select a.item_code as item_name, a.name as price_list_name,
+		b.warehouse as warehouse, b.actual_qty as actual_qty
 		from `tabItem Price` a left join `tabBin` b
 		ON a.item_code = b.item_code
 		{conditions}"""
 		.format(conditions=conditions), filters, as_dict=1)
 
-	price_list_names = ",".join(['"' + frappe.db.escape(item['price_list_name']) + '"'
-		for item in item_results])
+	price_list_names = list(set([frappe.db.escape(item.price_list_name) for item in item_results]))
 
-	buying_price_map = get_buying_price_map(price_list_names)
-	selling_price_map = get_selling_price_map(price_list_names)
+	buying_price_map = get_price_map(price_list_names, buying=1)
+	selling_price_map = get_price_map(price_list_names, selling=1)
 
-	item_dicts = [{"Item Name": d['name'],"Item Price List": d['price_list_name'],"Warehouse": d['warehouse'],
-				"Stock Available": d['actual_qty']} for d in item_results]
-	for item_dict in item_dicts:
-		price_list = item_dict["Item Price List"]
-		item_dict["Warehouse"] = item_dict["Warehouse"] or ""
-		item_dict["Stock Available"] = item_dict["Stock Available"] or 0
-		if buying_price_map.get(price_list):
-			item_dict["Buying Price List"] = buying_price_map.get(price_list)["Buying Price List"] or ""
-			item_dict["Buying Rate"] = buying_price_map.get(price_list)["Buying Rate"] or 0
-		if selling_price_map.get(price_list):
-			item_dict["Selling Price List"] = selling_price_map.get(price_list)["Selling Price List"] or ""
-			item_dict["Selling Rate"] = selling_price_map.get(price_list)["Selling Rate"] or 0
-	return item_dicts
+	result = []
+	if item_results:
+		for item_dict in item_results:
+			data = {
+				'item_name': item_dict.item_name,
+				'warehouse': item_dict.warehouse,
+				'stock_available': item_dict.actual_qty or 0,
+				'buying_price_list': "",
+				'buying_rate': 0.0,
+				'selling_price_list': "",
+				'selling_rate': 0.0
+			}
 
-def get_buying_price_map(price_list_names):
-	buying_price = frappe.db.sql("""
+			price_list = item_dict["price_list_name"]
+			if buying_price_map.get(price_list):
+				data["buying_price_list"] = buying_price_map.get(price_list)["Buying Price List"] or ""
+				data["buying_rate"] = buying_price_map.get(price_list)["Buying Rate"] or 0
+			if selling_price_map.get(price_list):
+				data["selling_price_list"] = selling_price_map.get(price_list)["Selling Price List"] or ""
+				data["selling_rate"] = selling_price_map.get(price_list)["Selling Rate"] or 0
+
+			result.append(data)
+
+	return result
+
+def get_price_map(price_list_names, buying=0, selling=0):
+	price_map = {}
+
+	if not price_list_names:
+		return price_map
+
+	rate_key = "Buying Rate" if buying else "Selling Rate"
+	price_list_key = "Buying Price List" if buying else "Selling Price List"
+	price_list_condition = " and buying=1" if buying else " and selling=1"
+
+	pricing_details = frappe.db.sql("""
 		select
 			name,price_list,price_list_rate
 		from
 			`tabItem Price`
 		where
-			name in ({price_list_names}) and buying=1
-		""".format(price_list_names=price_list_names), as_dict=1)
+			name in ({price_list_names}) {price_list_condition}
+		""".format(price_list_names=', '.join(['%s']*len(price_list_names)),
+	price_list_condition=price_list_condition), price_list_names, as_dict=1)
 
-	buying_price_map = {}
-	for d in buying_price:
+	for d in pricing_details:
 		name = d["name"]
-		buying_price_map[name] = {
-			"Buying Price List" :d["price_list"],
-			"Buying Rate" :d["price_list_rate"]
+		price_map[name] = {
+			price_list_key :d["price_list"],
+			rate_key :d["price_list_rate"]
 		}
-	return buying_price_map
 
-def get_selling_price_map(price_list_names):
-	selling_price = frappe.db.sql("""
-		select
-			name,price_list,price_list_rate
-		from
-			`tabItem Price`
-		where
-			name in ({price_list_names}) and selling=1
-		""".format(price_list_names=price_list_names), as_dict=1)
-
-	selling_price_map = {}
-	for d in selling_price:
-		name = d["name"]
-		selling_price_map[name] = {
-			"Selling Price List" :d["price_list"],
-			"Selling Rate" :d["price_list_rate"]
-		}
-	return selling_price_map
+	return price_map

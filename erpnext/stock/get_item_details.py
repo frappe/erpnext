@@ -246,6 +246,7 @@ def get_basic_details(args, item):
 		"is_fixed_asset": item.is_fixed_asset,
 		"weight_per_unit":item.weight_per_unit,
 		"weight_uom":item.weight_uom,
+		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0
 	})
 
 	# calculate conversion factor
@@ -257,6 +258,10 @@ def get_basic_details(args, item):
 
 	args.conversion_factor = out.conversion_factor
 	out.stock_qty = out.qty * out.conversion_factor
+
+	# calculate last purchase rate
+	from erpnext.buying.doctype.purchase_order.purchase_order import item_last_purchase_rate
+	out.last_purchase_rate = item_last_purchase_rate(args.name, args.conversion_rate, item.item_code, out.conversion_factor)
 
 	# if default specified in item is for another company, fetch from company
 	for d in [

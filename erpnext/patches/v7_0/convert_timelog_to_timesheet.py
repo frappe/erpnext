@@ -16,7 +16,7 @@ def execute():
 		else:
 			company = frappe.db.get_single_value('Global Defaults', 'default_company')
 		
-		time_sheet = make_timesheet(data.production_order)
+		time_sheet = make_timesheet(data.production_order, company)
 		args = get_timelog_data(data)
 		add_timesheet_detail(time_sheet, args)
 		if data.docstatus == 2:

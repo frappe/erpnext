@@ -12,6 +12,7 @@ def execute():
 	if not po_item:
 		return
 
+	frappe.reload_doc("buying", "doctype", "purchase_order_item_supplied")
 	company_warehouse = frappe._dict(frappe.db.sql("""select company, min(name) from `tabWarehouse`
 		where is_group = 0 group by company"""))
 

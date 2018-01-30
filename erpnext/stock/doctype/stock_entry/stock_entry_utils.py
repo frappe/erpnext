@@ -23,7 +23,7 @@ def make_stock_entry(**args):
 
 	def process_serial_numbers(serial_nos_list):
 		serial_nos_list = [
-			'\n'.join(serial_num['serial_no'] for serial_num in serial_nos_list)
+			'\n'.join(serial_num['serial_no'] for serial_num in serial_nos_list if serial_num.serial_no)
 		]
 
 		uniques = list(set(serial_nos_list[0].split('\n')))

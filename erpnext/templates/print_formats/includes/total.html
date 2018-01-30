@@ -1,0 +1,15 @@
+<div class="row">
+	{% if doc.flags.show_inclusive_tax_in_print %}
+		<div class="col-xs-5 {%- if doc._align_labels_right %} text-right{%- endif -%}">
+			<label>{{ _("Total (Without Tax)") }}</label></div>
+		<div class="col-xs-7 text-right">
+			{{ doc.get_formatted("net_total", doc) }}
+		</div>
+	{% else %}
+		<div class="col-xs-5 {%- if doc._align_labels_right %} text-right{%- endif -%}">
+			<label>{{ _(doc.meta.get_label('total')) }}</label></div>
+		<div class="col-xs-7 text-right">
+			{{ doc.get_formatted("total", doc) }}
+		</div>
+	{% endif %}
+</div>

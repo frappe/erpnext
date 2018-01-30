@@ -23,10 +23,28 @@ frappe.query_reports["Accounts Receivable"] = {
 			"options": "Customer Group"
 		},
 		{
-			"fieldname":"credit_days_based_on",
-			"label": __("Credit Days Based On"),
-			"fieldtype": "Select",
-			"options": "\nFixed Days\nLast Day of the Next Month"
+			"fieldname":"payment_terms_template",
+			"label": __("Payment Terms Template"),
+			"fieldtype": "Link",
+			"options": "Payment Terms Template"
+		},
+		{
+			"fieldname":"territory",
+			"label": __("Territory"),
+			"fieldtype": "Link",
+			"options": "Territory"
+		},
+		{
+			"fieldname":"sales_partner",
+			"label": __("Sales Partner"),
+			"fieldtype": "Link",
+			"options": "Sales Partner"
+		},
+		{
+			"fieldname":"sales_person",
+			"label": __("Sales Person"),
+			"fieldtype": "Link",
+			"options": "Sales Person"
 		},
 		{
 			"fieldtype": "Break",
