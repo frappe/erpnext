@@ -37,7 +37,9 @@ class Gstr2Report(object):
 				# for is_igst, items in account.items():
 				row = []
 				for fieldname in invoice_fields:
-					if fieldname == "invoice_value":
+					if self.filters.get("type_of_business") ==  "CDNR" and fieldname == "invoice_value":
+						row.append(abs(invoice_details.base_rounded_total) or abs(invoice_details.base_grand_total))
+					elif fieldname == "invoice_value":
 						row.append(invoice_details.base_rounded_total or invoice_details.base_grand_total)
 					else:
 						row.append(invoice_details.get(fieldname))
@@ -46,11 +48,11 @@ class Gstr2Report(object):
 
 				
 				row += [rate,
-					sum([net_amount for item_code, net_amount in self.invoice_items.get(inv).items()
+					sum([abs(net_amount) for item_code, net_amount in self.invoice_items.get(inv).items()
 						if item_code in [v[0] for k, v in items.items()]]),
-					[v[1] if k == True else 0.00 for k, v in items.items()],
-					[v[1] if k == False else 0.00 for k, v in items.items()],
-					[v[1] if k == False else 0.00 for k, v in items.items()],
+					[abs(v[1]) if k == True else 0.00 for k, v in items.items()],
+					[abs(v[1]) if k == False else 0.00 for k, v in items.items()],
+					[abs(v[1]) if k == False else 0.00 for k, v in items.items()],
 					self.invoice_cess.get(inv),
 					invoice_details.get('eligibility_for_itc'),
 					invoice_details.get('itc_integrated_tax'),
