@@ -900,7 +900,7 @@
    "precision": "", 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
-   "read_only": 0, 
+   "read_only": 1, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 0, 
@@ -931,6 +931,8 @@
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
    "read_only": 1, 
+<<<<<<< HEAD
+=======
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 0, 
@@ -961,6 +963,7 @@
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
    "read_only": 1, 
+>>>>>>> 12d9eb1f4a7f8bc374db69cea8c174e3a2b5b7ae
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 0, 
@@ -1069,7 +1072,15 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
+<<<<<<< HEAD
  "modified": "2018-01-25 14:05:44.239136", 
+=======
+<<<<<<< HEAD
+ "modified": "2018-01-23 14:27:20.202249", 
+=======
+ "modified": "2018-01-23 12:29:18.456386", 
+>>>>>>> 12d9eb1f4a7f8bc374db69cea8c174e3a2b5b7ae
+>>>>>>> 92e1b5444afe1e7d4d1bb81da3cf085cf7373010
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Business Trip", 
@@ -1251,26 +1262,6 @@
    "read": 1, 
    "report": 1, 
    "role": "Director", 
-   "set_user_permissions": 0, 
-   "share": 1, 
-   "submit": 0, 
-   "write": 1
-  }, 
-  {
-   "amend": 0, 
-   "apply_user_permissions": 0, 
-   "cancel": 0, 
-   "create": 0, 
-   "delete": 1, 
-   "email": 1, 
-   "export": 1, 
-   "if_owner": 0, 
-   "import": 0, 
-   "permlevel": 1, 
-   "print": 1, 
-   "read": 1, 
-   "report": 1, 
-   "role": "CEO", 
    "set_user_permissions": 0, 
    "share": 1, 
    "submit": 0, 

@@ -865,6 +865,8 @@
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
    "read_only": 1, 
+<<<<<<< HEAD
+=======
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 0, 
@@ -895,6 +897,7 @@
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
    "read_only": 1, 
+>>>>>>> 12d9eb1f4a7f8bc374db69cea8c174e3a2b5b7ae
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 0, 
@@ -1003,7 +1006,15 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
+<<<<<<< HEAD
  "modified": "2018-01-25 14:36:44.407458", 
+=======
+<<<<<<< HEAD
+ "modified": "2018-01-23 14:27:49.128857", 
+=======
+ "modified": "2018-01-23 12:54:39.903259", 
+>>>>>>> 12d9eb1f4a7f8bc374db69cea8c174e3a2b5b7ae
+>>>>>>> 92e1b5444afe1e7d4d1bb81da3cf085cf7373010
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Training Trip", 
