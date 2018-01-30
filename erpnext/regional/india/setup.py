@@ -87,7 +87,7 @@ def make_custom_fields():
 		allow_on_submit=1, print_hide=1)
 	invoice_gst_fields = [
 		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
-			insert_after='select_print_heading', print_hide=1, collapsible=1),
+			insert_after='language', print_hide=1, collapsible=1),
 		dict(fieldname='invoice_copy', label='Invoice Copy',
 			fieldtype='Select', insert_after='gst_section', print_hide=1, allow_on_submit=1,
 			options='Original for Recipient\nDuplicate for Transporter\nDuplicate for Supplier\nTriplicate for Supplier'),
@@ -96,7 +96,7 @@ def make_custom_fields():
 			options='Y\nN', default='N'),
 		dict(fieldname='gst_col_break', fieldtype='Column Break', insert_after='reverse_charge'),
 		dict(fieldname='invoice_type', label='Invoice Type',
-			fieldtype='Select', insert_after='reverse_charge', print_hide=1,
+			fieldtype='Select', insert_after='gst_col_break', print_hide=1,
 			options='Regular\nSEZ\nExport\nDeemed Export', default='Regular'),
 		dict(fieldname='export_type', label='Export Type',
 			fieldtype='Select', insert_after='invoice_type', print_hide=1,
