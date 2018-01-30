@@ -408,3 +408,17 @@ def times_check(from1,to,first_email,second_email,daily_time_to_send,weekly_time
     weekly_time_to_send = weekly_time_to_send.strftime("%H:00:00")
 
     return {"from1": from1,"to":to,"first_email":first_email,"second_email":second_email,"daily_time_to_send":daily_time_to_send,"weekly_time_to_send":weekly_time_to_send}
+
+#Call this function in order to generate the Project Update for a specific project
+def create_project_update(project):
+    date_today = datetime.date.today()
+    project_update_dict = {
+        "doctype" : "Project Update",
+        "project" : project,
+        "date":date_today,
+        "naming_series": "UPDATE-.project.-.YY.MM.DD.-.####"
+    }
+    project_update = frappe.get_doc(project_update_dict)
+    project_update.insert()
+    project_update_url = "<a class = 'btn btn-primary' href=%s target='_blank'>" % ("/desk#Form/Project%20Update/" + (project_update.name)) + ("CREATE PROJECT UPDATE" + "</a>")
+    return project_update.name, project_update_url
