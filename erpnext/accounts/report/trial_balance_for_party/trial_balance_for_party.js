@@ -48,7 +48,17 @@ frappe.query_reports["Trial Balance for Party"] = {
 			"label": __("Party Type"),
 			"fieldtype": "Select",
 			"options": ["Customer", "Supplier","Employee","Imprest Permanent","Imprest Temporary"],
-			"default": "Customer"
+			"default": "Customer",
+			"on_change": function(query_report) {
+				var party_type = frappe.query_report_filters_by_name.party_type.get_value();
+				frappe.query_report_filters_by_name.party_group_or_type.set_value('');
+				if(party_type=='Supplier' || party_type=='Customer'){
+					document.querySelector("[data-fieldname='party_group_or_type']").style.display = "block";
+				}else{
+					document.querySelector("[data-fieldname='party_group_or_type']").style.display = "none";
+				}
+
+			}
 		},
 		{
 			"fieldname":"party",
@@ -63,6 +73,29 @@ frappe.query_reports["Trial Balance for Party"] = {
 				return party_type;
 			}
 		},
+		{
+		"fieldname":"party_group_or_type",
+		"label": __("Party Group or Type"),
+		"fieldtype": "Link",
+		"options": "Supplier Type",
+		"default": "",
+		"get_query": function() {
+			var party_type = frappe.query_report_filters_by_name.party_type.get_value();
+			if(party_type=='Supplier'){
+				result = "erpnext.accounts.report.trial_balance_for_party.trial_balance_for_party.get_supplier_type"
+			}else if(party_type=='Customer'){
+				result = "erpnext.accounts.report.trial_balance_for_party.trial_balance_for_party.get_customer_group"
+			}else{
+				result= ""
+			}
+
+			return {
+                query: result
+            };
+
+			}
+	},
+
 		// {
 		// 	"fieldname": "party_group_or_type",
 		// 	"label": __("Party Group or Type"),

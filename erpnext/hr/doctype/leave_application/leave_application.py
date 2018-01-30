@@ -503,7 +503,8 @@ class LeaveApplication(Document):
 					prev_year_total_leaves_allocated = prev_year_allocation_records[self.employee]["Annual Leave - اجازة اعتيادية"].total_leaves_allocated
 					prev_year_applied_days = get_approved_leaves_for_period(self.employee, "Annual Leave - اجازة اعتيادية", from_date, to_date)
 					prev_year_remain_balance = prev_year_total_leaves_allocated - prev_year_applied_days
-
+				else:
+					prev_year_remain_balance = 0
 				date_dif = date_diff(self.to_date, from_date)
 				period_balance = (date_dif) * (allocation_records[self.employee][self.leave_type].total_leaves_allocated/360)+prev_year_remain_balance
 				if period_balance > 33:
@@ -923,6 +924,8 @@ def get_monthly_accumulated_leave(from_date, to_date, leave_type, employee):
 				prev_year_total_leaves_allocated = prev_year_allocation_records[employee]["Annual Leave - اجازة اعتيادية"].total_leaves_allocated
 				prev_year_applied_days = get_approved_leaves_for_period(employee, "Annual Leave - اجازة اعتيادية", from_date, to_date)
 				prev_year_remain_balance = prev_year_total_leaves_allocated - prev_year_applied_days
+			else:
+				prev_year_remain_balance = 0
 
 			period_balance = (date_dif) * (allocation_records[employee][leave_type].total_leaves_allocated/360)+prev_year_remain_balance
 			if period_balance > 33:

@@ -83,8 +83,10 @@ class BusinessTrip(Document):
                 self.workflow_state = "Wait For Exceptional Approval"
             elif u'CEO' in frappe.get_roles(frappe.session.user):
                 self.workflow_state = "Created By CEO"
-            elif u'Director' in frappe.get_roles(frappe.session.user):
+            elif u'Director' in frappe.get_roles(frappe.session.user) and self.days>4:
                 self.workflow_state = "Created By Director"
+            elif u'Director' in frappe.get_roles(frappe.session.user) and self.days<4:
+                self.workflow_state = "Create By Director"
             elif u'Manager' in frappe.get_roles(frappe.session.user):
                 self.workflow_state = "Created By Manager"
             elif u'Line Manager' in frappe.get_roles(frappe.session.user):
@@ -291,6 +293,7 @@ class BusinessTrip(Document):
         if employees:
             employee = frappe.get_doc('Employee', {'name': employees[0].name})
             return employee
+
 
 def get_approvers(doctype, txt, searchfield, start, page_len, filters):
     return frappe.db.sql(""" select name,employee_name from `tabEmployee` """)

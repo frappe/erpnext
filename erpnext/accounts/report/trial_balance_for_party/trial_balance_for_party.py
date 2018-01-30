@@ -99,18 +99,47 @@ def get_data(filters, show_party_name):
 	return data
 	
 def get_opening_balances(filters):
-	gle = frappe.db.sql("""
-		select party, sum(debit) as opening_debit, sum(credit) as opening_credit 
-		from `tabGL Entry`
-		where company=%(company)s 
-			and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''
-			and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
-		group by party""", {
-			"company": filters.company,
-			"from_date": filters.from_date,
-			"party_type": filters.party_type
-		}, as_dict=True)
-		
+	if filters.party_type=='Customer' and filters.party_group_or_type is not None:
+		gle = frappe.db.sql("""
+			select party, sum(debit) as opening_debit, sum(credit) as opening_credit 
+			from `tabGL Entry`
+			where company=%(company)s 
+				and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''
+				and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
+				and party in (select name from `tabCustomer` where customer_group= %(party_group_or_type)s )
+			group by party""", {
+				"company": filters.company,
+				"from_date": filters.from_date,
+				"party_type": filters.party_type,
+				"party_group_or_type": filters.party_group_or_type
+			}, as_dict=True)
+	elif filters.party_type=='Supplier' and filters.party_group_or_type is not None:
+		gle = frappe.db.sql("""
+			select party, sum(debit) as opening_debit, sum(credit) as opening_credit 
+			from `tabGL Entry`
+			where company=%(company)s 
+				and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''
+				and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
+				and party in (select name from `tabSupplier` where supplier_type= %(party_group_or_type)s )
+			group by party""", {
+				"company": filters.company,
+				"from_date": filters.from_date,
+				"party_type": filters.party_type,
+				"party_group_or_type": filters.party_group_or_type
+			}, as_dict=True)
+	else:
+		gle = frappe.db.sql("""
+			select party, sum(debit) as opening_debit, sum(credit) as opening_credit 
+			from `tabGL Entry`
+			where company=%(company)s 
+				and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''
+				and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
+			group by party""", {
+				"company": filters.company,
+				"from_date": filters.from_date,
+				"party_type": filters.party_type
+			}, as_dict=True)
+			
 	opening = frappe._dict()
 	for d in gle:
 		opening_debit, opening_credit = toggle_debit_credit(d.opening_debit, d.opening_credit)
@@ -119,20 +148,54 @@ def get_opening_balances(filters):
 	return opening
 	
 def get_balances_within_period(filters):
-	gle = frappe.db.sql("""
-		select party, sum(debit) as debit, sum(credit) as credit 
-		from `tabGL Entry`
-		where company=%(company)s 
-			and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''
-			and posting_date >= %(from_date)s and posting_date <= %(to_date)s 
-			and ifnull(is_opening, 'No') = 'No'
-		group by party""", {
-			"company": filters.company,
-			"from_date": filters.from_date,
-			"to_date": filters.to_date,
-			"party_type": filters.party_type
-		}, as_dict=True)
-		
+	if filters.party_type=='Customer' and filters.party_group_or_type is not None:
+		gle = frappe.db.sql("""
+			select party, sum(debit) as debit, sum(credit) as credit 
+			from `tabGL Entry`
+			where company=%(company)s 
+				and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''
+				and posting_date >= %(from_date)s and posting_date <= %(to_date)s 
+				and ifnull(is_opening, 'No') = 'No'
+				and party in (select name from `tabCustomer` where customer_group= %(party_group_or_type)s )
+			group by party""", {
+				"company": filters.company,
+				"from_date": filters.from_date,
+				"to_date": filters.to_date,
+				"party_type": filters.party_type,
+				"party_group_or_type": filters.party_group_or_type
+			}, as_dict=True)
+	elif filters.party_type=='Supplier' and filters.party_group_or_type is not None:
+		gle = frappe.db.sql("""
+			select party, sum(debit) as debit, sum(credit) as credit 
+			from `tabGL Entry`
+			where company=%(company)s 
+				and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''
+				and posting_date >= %(from_date)s and posting_date <= %(to_date)s 
+				and ifnull(is_opening, 'No') = 'No'
+				and party in (select name from `tabSupplier` where supplier_type= %(party_group_or_type)s )
+			group by party""", {
+				"company": filters.company,
+				"from_date": filters.from_date,
+				"to_date": filters.to_date,
+				"party_type": filters.party_type,
+				"party_group_or_type": filters.party_group_or_type
+			}, as_dict=True)
+	else:
+		gle = frappe.db.sql("""
+			select party, sum(debit) as debit, sum(credit) as credit 
+			from `tabGL Entry`
+			where company=%(company)s 
+				and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''
+				and posting_date >= %(from_date)s and posting_date <= %(to_date)s 
+				and ifnull(is_opening, 'No') = 'No'
+			group by party""", {
+				"company": filters.company,
+				"from_date": filters.from_date,
+				"to_date": filters.to_date,
+				"party_type": filters.party_type
+			}, as_dict=True)
+
+
 	balances_within_period = frappe._dict()
 	for d in gle:
 		balances_within_period.setdefault(d.party, [d.debit, d.credit])
@@ -243,3 +306,11 @@ def is_party_name_visible(filters):
 		show_party_name = True
 		
 	return show_party_name
+
+
+def get_supplier_type(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql(""" select name from `tabSupplier Type` """)
+
+
+def get_customer_group(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql(""" select name from `tabCustomer Group` """)

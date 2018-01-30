@@ -68,11 +68,11 @@ def get_data():
 					"description":_("May Concern Letter"),
 					"hide_count": True
 				},
-				{
-					"type": "doctype",
-					"name": "Employee Loan",
-					"description":_("Employee Loan"),
-				},
+				# {
+				# 	"type": "doctype",
+				# 	"name": "Employee Loan",
+				# 	"description":_("Employee Loan"),
+				# },
 				{
 					"type": "doctype",
 					"name": "Employee Loan Application",

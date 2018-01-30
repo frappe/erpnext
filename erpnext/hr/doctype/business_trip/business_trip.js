@@ -31,6 +31,11 @@ frappe.ui.form.on('Business Trip', {
     },
     workflow_state: function(frm){
         cur_frm.refresh_fields(["workflow_state"]);
+
+        if (cur_frm.doc.workflow_state=="Approved by Manager" && cur_frm.doc.days<4 ){
+            cur_frm.doc.workflow_state = "Approve By Director"
+        }
+        
     },
     request_employee: function(frm){
 
@@ -65,21 +70,18 @@ frappe.ui.form.on('Business Trip', {
     validate: function(frm){
         cur_frm.refresh_fields(["workflow_state"]);
 
-        if (cur_frm.doc.workflow_state=="Approved by Manager" && cur_frm.doc.days<4 ){
-            cur_frm.doc.workflow_state = "Approve By Director"
-        }
-    	cur_frm.set_df_property("request_employee", "read_only", 1);
-    	cur_frm.set_df_property("requested_employee", "read_only", 1);
-    	cur_frm.set_df_property("trip_reason", "read_only", 1);
-    	cur_frm.set_df_property("from_date", "read_only", 1);
-    	cur_frm.set_df_property("to_date", "read_only", 1);
-    	cur_frm.set_df_property("payment_encashment", "read_only", 1);
-    	cur_frm.set_df_property("cost_center", "read_only", 1);
-    	cur_frm.set_df_property("assignment_type", "read_only", 1);
-    	cur_frm.set_df_property("world_countries", "read_only", 1);
-    	cur_frm.set_df_property("city", "read_only", 1);
-    	cur_frm.set_df_property("ticket", "read_only", 1);
-    	cur_frm.set_df_property("ticket_cost", "read_only", 1);
+        cur_frm.set_df_property("request_employee", "read_only", 1);
+        cur_frm.set_df_property("requested_employee", "read_only", 1);
+        cur_frm.set_df_property("trip_reason", "read_only", 1);
+        cur_frm.set_df_property("from_date", "read_only", 1);
+        cur_frm.set_df_property("to_date", "read_only", 1);
+        cur_frm.set_df_property("payment_encashment", "read_only", 1);
+        cur_frm.set_df_property("cost_center", "read_only", 1);
+        cur_frm.set_df_property("assignment_type", "read_only", 1);
+        cur_frm.set_df_property("world_countries", "read_only", 1);
+        cur_frm.set_df_property("city", "read_only", 1);
+        cur_frm.set_df_property("ticket", "read_only", 1);
+        cur_frm.set_df_property("ticket_cost", "read_only", 1);
 
     },
     onload: function(frm) {
@@ -162,6 +164,11 @@ frappe.ui.form.on('Business Trip', {
             cur_frm.set_value("target_city", cur_frm.doc.world_countries+'-'+cur_frm.doc.city);
         }else{
             cur_frm.set_value("target_city", "");
+        }
+    },
+    assignment_type: function(frm) {
+        if(cur_frm.doc.assignment_type=="Internal"){
+            cur_frm.set_value("world_countries", "Saudi Arabia");
         }
     }
 });
