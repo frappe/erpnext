@@ -592,14 +592,13 @@ def get_price_list_currency_and_exchange_rate(args):
 	price_list_uom_dependant = get_price_list_uom_dependant(args.price_list)
 	plc_conversion_rate = args.plc_conversion_rate
 	company_currency = get_company_currency(args.company)
-	print('conversion rate:', plc_conversion_rate)
 
 	if (not plc_conversion_rate) or (price_list_currency and args.price_list_currency \
 		and price_list_currency != args.price_list_currency):
 			# cksgb 19/09/2016: added args.transaction_date as posting_date argument for get_exchange_rate
 			plc_conversion_rate = get_exchange_rate(price_list_currency, company_currency,
 				args.transaction_date) or plc_conversion_rate
-	print('conversion rate:', plc_conversion_rate)
+
 	return frappe._dict({
 		"price_list_currency": price_list_currency,
 		"price_list_uom_dependant": price_list_uom_dependant,
