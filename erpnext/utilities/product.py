@@ -23,7 +23,7 @@ def get_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
 			item_code=%s and warehouse=%s""", (item_code, warehouse))
 
 	if stock_qty[0][0]:
-		stock_qty = adjust_for_expired_items(item_code, stock_qty, warehouse)
+		stock_qty = adjust_qty_for_expired_items(item_code, stock_qty, warehouse)
 
 	if stock_qty[0][0]:
 		in_stock = stock_qty[0][0] > 0 and 1 or 0
@@ -34,20 +34,20 @@ def get_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
 	return frappe._dict({"in_stock": in_stock, "stock_qty": stock_qty, "is_stock_item": is_stock_item})
 
 
-def adjust_for_expired_items(item_code, stock_qty, warehouse):
-	batches = frappe.get_list('Batch', filters=[{'item': item_code}], fields=['expiry_date', 'name'])
+def adjust_qty_for_expired_items(item_code, stock_qty, warehouse):
+	batches = frappe.get_all('Batch', filters=[{'item': item_code}], fields=['expiry_date', 'name'])
 	expired_batches = get_expired_batches(batches)
 	stock_qty = [list(item) for item in stock_qty]
 	
-	if expired_batches:
-		for batch in expired_batches:
-			if warehouse:
-				stock_qty[0][0] = max(0, stock_qty[0][0] - get_batch_qty(batch, warehouse))
-			else:
-				stock_qty[0][0] = max(0, stock_qty[0][0] - qty_from_all_warehouses(get_batch_qty(batch)))
+	for batch in expired_batches:
+		if warehouse:
+			stock_qty[0][0] = max(0, stock_qty[0][0] - get_batch_qty(batch, warehouse))
+		else:
+			stock_qty[0][0] = max(0, stock_qty[0][0] - qty_from_all_warehouses(get_batch_qty(batch)))
 
-			if not stock_qty[0][0]:
-				break
+		if not stock_qty[0][0]:
+			break
+
 	return stock_qty
 
 
