@@ -20,6 +20,7 @@ class Customer(TransactionBase):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)
 		self.load_dashboard_info()
+		self.fetch_primary_address_and_contact_detail()
 
 	def load_dashboard_info(self):
 		info = get_dashboard_info(self.doctype, self.name)
@@ -53,6 +54,7 @@ class Customer(TransactionBase):
 		self.flags.old_lead = self.lead_name
 		validate_party_accounts(self)
 		self.validate_credit_limit_on_change()
+		self.fetch_primary_address_and_contact_detail()
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
@@ -64,6 +66,16 @@ class Customer(TransactionBase):
 
 		if self.flags.is_new_doc:
 			self.create_lead_address_contact()
+
+	def fetch_primary_address_and_contact_detail(self):
+		if(self.customer_primary_contact):
+			primary_contact_doc = frappe.get_doc("Contact",self.customer_primary_contact)
+			self.db_set('mobile_no', primary_contact_doc.mobile_no)
+			self.db_set('email_id', primary_contact_doc.email_id)
+
+		if(self.customer_primary_address):
+			primary_address_doc = frappe.get_doc("Address",self.customer_primary_address)
+			self.db_set('primary_address', "<br>" + primary_address_doc.get_display())
 
 	def create_primary_contact(self):
 		if not self.customer_primary_contact and not self.lead_name:
