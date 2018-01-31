@@ -224,12 +224,17 @@ class SalesInvoice(SellingController):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
 
 		validate_against_credit_limit = False
+		bypass_credit_limit_check_at_sales_order = cint(frappe.db.get_value("Customer", self.customer,
+			"bypass_credit_limit_check_at_sales_order"))
+		if bypass_credit_limit_check_at_sales_order:
+			validate_against_credit_limit = True
+
 		for d in self.get("items"):
 			if not (d.sales_order or d.delivery_note):
 				validate_against_credit_limit = True
 				break
 		if validate_against_credit_limit:
-			check_credit_limit(self.customer, self.company)
+			check_credit_limit(self.customer, self.company, bypass_credit_limit_check_at_sales_order)
 
 	def set_missing_values(self, for_validate=False):
 		pos = self.set_pos_fields(for_validate)
@@ -242,7 +247,10 @@ class SalesInvoice(SellingController):
 		super(SalesInvoice, self).set_missing_values(for_validate)
 
 		if pos:
-			return {"print_format": pos.get("print_format_for_online") }
+			return {
+				"print_format": pos.get("print_format_for_online"),
+				"allow_edit_rate": pos.get("allow_user_to_edit_rate")
+			}
 
 	def update_time_sheet(self, sales_invoice):
 		for d in self.timesheets:
