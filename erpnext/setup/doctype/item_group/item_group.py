@@ -106,12 +106,12 @@ def get_product_list_for_group(product_group=None, start=0, limit=10, search=Non
 
 	data = frappe.db.sql(query, {"product_group": product_group,"search": search, "today": nowdate()}, as_dict=1)
 
-	data = adjust_for_expired_items(data)
+	data = adjust_qty_for_expired_items(data)
 
 	return [get_item_for_list_in_html(r) for r in data]
 
 
-def adjust_for_expired_items(data):
+def adjust_qty_for_expired_items(data):
 	adjusted_data = []
 
 	for item in data:
