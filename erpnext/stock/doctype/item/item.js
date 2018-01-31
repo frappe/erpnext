@@ -317,11 +317,6 @@ $.extend(erpnext.item, {
 	show_multiple_variants_dialog: function(frm) {
 		var me = this;
 
-		if(me.multiple_variant_dialog) {
-			me.multiple_variant_dialog.show();
-			return;
-		}
-
 		let promises = [];
 		let attr_val_fields = {};
 
