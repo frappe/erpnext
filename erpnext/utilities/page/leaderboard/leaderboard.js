@@ -17,14 +17,15 @@ frappe.Leaderboard = Class.extend({
 		this.$sidebar_list = this.page.sidebar.find('ul');
 
 		// const list of doctypes
-		this.doctypes = ["Customer", "Item", "Supplier", "Sales Partner"];
+		this.doctypes = ["Customer", "Item", "Supplier", "Sales Partner","Sales Person"];
 		this.timespans = ["Week", "Month", "Quarter", "Year"];
-		this.desc_fields = ["total_amount", "total_request", "annual_billing", "commission_rate"];
+		this.desc_fields = ["total_sales(amount)", "total_request","total_purchase(amount)","commission_rate"];
 		this.filters = {
-			"Customer": ["total_amount", "total_item_purchased"],
+			"Customer": ["total_item_purchased(qty)", "total_sales(amount)","receivable_amount(outstanding_amount)"],
 			"Item": ["total_request", "total_purchase", "avg_price"],
-			"Supplier": ["annual_billing", "total_unpaid"],
-			"Sales Partner": ["commission_rate", "target_qty", "target_amount"],
+			"Supplier": ["total_item_sold(qty)", "total_purchase(amount)","payable_amount(outstanding_amount)"],
+			"Sales Partner": ["commission_rate", "target_qty", "target_amount", "total_sales(amount)"],
+			"Sales Person": ["target_qty", "target_amount", "total_sales(amount)"],
 		};
 
 		// for saving current selected filters
