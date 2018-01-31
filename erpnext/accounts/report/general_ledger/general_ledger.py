@@ -91,7 +91,6 @@ def set_account_currency(filters):
 
 		return filters
 
-
 def get_result(filters, account_details):
 	gl_entries = get_gl_entries(filters)
 
