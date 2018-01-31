@@ -274,14 +274,15 @@ class StockEntry(StockController):
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
 
-	def calculate_rate_and_amount(self, force=False, update_finished_item_rate=True):
+	def calculate_rate_and_amount(self, force=False,
+			update_finished_item_rate=True, raise_error_if_no_rate=True):
 		self.set_basic_rate(force, update_finished_item_rate)
 		self.distribute_additional_costs()
 		self.update_valuation_rate()
 		self.set_total_incoming_outgoing_value()
 		self.set_total_amount()
 
-	def set_basic_rate(self, force=False, update_finished_item_rate=True):
+	def set_basic_rate(self, force=False, update_finished_item_rate=True, raise_error_if_no_rate=True):
 		"""get stock and incoming rate on posting date"""
 		raw_material_cost = 0.0
 		scrap_material_cost = 0.0
@@ -294,7 +295,7 @@ class StockEntry(StockController):
 			# get basic rate
 			if not d.bom_no:
 				if (not flt(d.basic_rate) and not d.allow_zero_valuation_rate) or d.s_warehouse or force:
-					basic_rate = flt(get_incoming_rate(args), self.precision("basic_rate", d))
+					basic_rate = flt(get_incoming_rate(args, raise_error_if_no_rate), self.precision("basic_rate", d))
 					if basic_rate > 0:
 						d.basic_rate = basic_rate
 
@@ -306,7 +307,8 @@ class StockEntry(StockController):
 			if d.bom_no:
 				if not flt(d.basic_rate) and not d.allow_zero_valuation_rate and \
 					getattr(self, "pro_doc", frappe._dict()).scrap_warehouse == d.t_warehouse:
-					basic_rate = flt(get_incoming_rate(args), self.precision("basic_rate", d))
+					basic_rate = flt(get_incoming_rate(args, raise_error_if_no_rate),
+						self.precision("basic_rate", d))
 					if basic_rate > 0:
 						d.basic_rate = basic_rate
 					d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
@@ -600,7 +602,8 @@ class StockEntry(StockController):
 						if self.pro_doc and not self.pro_doc.skip_transfer:
 							item["from_warehouse"] = self.pro_doc.wip_warehouse
 						#Get Reserve Warehouse from PO
-						item["from_warehouse"] = item_wh.get(item.item_code) if self.purchase_order and self.purpose=="Subcontract" else ""
+						if self.purchase_order and self.purpose=="Subcontract":
+							item["from_warehouse"] = item_wh.get(item.item_code)
 						item["to_warehouse"] = self.to_warehouse if self.purpose=="Subcontract" else ""
 
 					self.add_to_stock_entry_detail(item_dict)
@@ -622,7 +625,7 @@ class StockEntry(StockController):
 				self.load_items_from_bom()
 
 		self.set_actual_qty()
-		self.calculate_rate_and_amount()
+		self.calculate_rate_and_amount(raise_error_if_no_rate=False)
 
 	def set_production_order_details(self):
 		if not getattr(self, "pro_doc", None):
