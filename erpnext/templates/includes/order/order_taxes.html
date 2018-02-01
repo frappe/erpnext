@@ -67,7 +67,7 @@
 {% endif %}
 {% if doc.doctype == 'Sales Order' %}
 <div class="row tax-grand-total-row" style="padding-bottom:0px;padding-top:0px;">
-    <div class="col-xs-6 text-right text-uppercase h6 text-muted" style="margin-bottom:1px"";>{{ _("Grand Total") }}</div>
+    <div class="col-xs-6 text-right text-uppercase h6 text-muted" style="margin-bottom:1px";>{{ _("Grand Total") }}</div>
     <div class="col-xs-6 text-right">
         <span class="tax-grand-total bold">
                   {{_("{0}").format(doc.get_formatted("grand_total")) }}
