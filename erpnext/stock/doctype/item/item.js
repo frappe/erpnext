@@ -119,50 +119,6 @@ frappe.ui.form.on("Item", {
 		erpnext.item.weight_to_validate(frm);
 	},
 
-	image_preview: function(frm){
-
-		if (frm.doc.list_all_image.length == 0)
-		{
-			frappe.msgprint(__("Images not avalilable !!"));
-		}
-		else if (frm.doc.list_all_image){
-				var image_path = frm.doc.image;
-				fields = []
-				for(var i=0;i< frm.doc.list_all_image.length;i++){
-//					fieldname = 'image'
-//					fieldname = 'title'
-//					fieldname = 'description'
-				    image_dict = {
-							fieldtype:'Data',
-							fieldname: 'title'
-						   }
-					image_dict1 = {
-							fieldtype:'Data',
-							fieldname: 'description'
-						   }
-					image_dict3 = {
-							fieldtype:'Data',
-							fieldname: 'description'
-						   }
-					image_dict['default'] = frm.doc.list_all_image[i].title;
-					var $img = $( '<img>' ).attr({'src':frm.doc.list_all_image[i].image});
-					image_dict1['default'] = $img;
-					image_dict3['default'] = frm.doc.list_all_image[i].description;
-
-					fields.push(image_dict);
-					fields.push(image_dict1);
-					fields.push(image_dict3);
-				}
-			}
-			var d = new frappe.ui.Dialog({
-				fields: fields
-			});
-			d.show();
-			$('.control-value.like-disabled-input').css('display','block');
-			$("#myImg").css('display','block');
-			$('.form-control').attr('id', 'fc').hide();
-	},
-
 	image: function() {
 		refresh_field("image_view");
 	},

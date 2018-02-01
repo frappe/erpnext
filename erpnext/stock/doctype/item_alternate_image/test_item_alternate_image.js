@@ -2,15 +2,15 @@
 // rename this file from _test_[name] to test_[name] to activate
 // and remove above this line
 
-QUnit.test("test: Item Multi Image", function (assert) {
+QUnit.test("test: Item Alternate Image", function (assert) {
 	let done = assert.async();
 
 	// number of asserts
 	assert.expect(1);
 
 	frappe.run_serially([
-		// insert a new Item Multi Image
-		() => frappe.tests.make('Item Multi Image', [
+		// insert a new Item Alternate Image
+		() => frappe.tests.make('Item Alternate Image', [
 			// values to be set
 			{key: 'value'}
 		]),

@@ -11,7 +11,7 @@
 <div class="item-content" style="margin-top:20px;">
 	<div class="product-page-content" itemscope itemtype="http://schema.org/Product">
 		<div class="row">
-		    {% if not list_all_image %}
+		{%- if not list_all_image -%}
                 <div class="col-sm-3">
                     {% if slideshow %}
                         {% include "templates/includes/slideshow.html" %}
@@ -72,10 +72,11 @@
                 </div>
         {% else %}
         </div>
+        
         <div class="col-md-12">
             <div class="col-md-3">
                 <style>
-                    div.b1 img:hover {
+                    div.list_all_images img:hover {
                         border: 2px solid blue;
                     }
                     .gallery img{
@@ -99,11 +100,11 @@
                     }
                 </script>
                 {% for c in list_all_image %}
-                    <div class="b1">
+                    <div class="list_all_images">
                         {% set image_src = c['image'] %}
                         {% if image_src %}
-                            <p id="myImg" onmouseover="changeImage('{{image_src}}')">
-                                <img id="img1" src="{{ c['image'] }}"
+                            <p id="image_hover" onmouseover="changeImage('{{image_src}}')">
+                                <img id="img_one" src="{{ c['image'] }}"
                                      height="50" weight="50"/>
                             </p>
                         {% endif %}
