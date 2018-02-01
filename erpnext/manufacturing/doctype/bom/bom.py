@@ -544,7 +544,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				group by item_code, stock_uom
 				order by idx"""
 
-	if fetch_exploded:
+	if cint(fetch_exploded):
 		query = query.format(table="BOM Explosion Item",
 			where_conditions="",
 			select_columns = ", bom_item.source_warehouse, (Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s ) as idx")
@@ -592,7 +592,7 @@ def validate_bom_no(item, bom_no):
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, is_root=False, **filters):
-	if not parent:
+	if not parent or parent=="BOM":
 		frappe.msgprint(_('Please select a BOM'))
 		return
 
