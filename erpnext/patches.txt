@@ -183,7 +183,6 @@ erpnext.patches.v5_0.index_on_account_and_gl_entry
 execute:frappe.db.sql("""delete from `tabProject Task`""")
 erpnext.patches.v5_0.update_item_desc_in_invoice
 erpnext.patches.v5_1.fix_against_account
-erpnext.patches.v5_1.fix_credit_days_based_on
 execute:frappe.rename_doc("DocType", "Salary Manager", "Process Payroll", force=True)
 erpnext.patches.v5_1.rename_roles
 erpnext.patches.v5_1.default_bom
@@ -346,7 +345,7 @@ erpnext.patches.v7_0.repost_bin_qty_and_item_projected_qty
 erpnext.patches.v7_1.set_prefered_contact_email
 execute:frappe.reload_doc('accounts', 'doctype', 'accounts_settings')
 execute:frappe.db.set_value("Accounts Settings", "Accounts Settings", "unlink_payment_on_cancellation_of_invoice", 0)
-execute:frappe.db.sql("update `tabStock Entry` set total_amount = null where purpose in('Repack', 'Manufacture')")
+execute:frappe.db.sql("update `tabStock Entry` set total_amount = 0 where purpose in('Repack', 'Manufacture')")
 erpnext.patches.v7_1.save_stock_settings
 erpnext.patches.v7_0.repost_gle_for_pi_with_update_stock #2016-11-01
 erpnext.patches.v7_1.add_account_user_role_for_timesheet
@@ -487,3 +486,5 @@ erpnext.patches.v10_0.add_guardian_role_for_parent_portal
 erpnext.patches.v10_0.set_numeric_ranges_in_template_if_blank
 erpnext.patches.v10_0.update_assessment_plan
 erpnext.patches.v10_0.update_assessment_result
+erpnext.patches.v10_0.set_default_payment_terms_based_on_company
+erpnext.patches.v10_0.update_sales_order_link_to_purchase_order
