@@ -407,7 +407,12 @@ def get_previous_sle(args, for_update=False):
 
 def get_stock_ledger_entries(previous_sle, operator=None, order="desc", limit=None, for_update=False, debug=False):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
-	conditions = "timestamp(posting_date, posting_time) {0} timestamp(%(posting_date)s, %(posting_time)s)".format(operator)
+	conditions = " and timestamp(posting_date, posting_time) {0} timestamp(%(posting_date)s, %(posting_time)s)".format(operator)
+	if previous_sle.get("warehouse"):
+		conditions += " and warehouse = %(warehouse)s"
+	elif previous_sle.get("warehouse_condition"):
+		conditions += " and " + previous_sle.get("warehouse_condition")
+
 	if not previous_sle.get("posting_date"):
 		previous_sle["posting_date"] = "1900-01-01"
 	if not previous_sle.get("posting_time"):
@@ -418,9 +423,8 @@ def get_stock_ledger_entries(previous_sle, operator=None, order="desc", limit=No
 
 	return frappe.db.sql("""select *, timestamp(posting_date, posting_time) as "timestamp" from `tabStock Ledger Entry`
 		where item_code = %%(item_code)s
-		and warehouse = %%(warehouse)s
 		and ifnull(is_cancelled, 'No')='No'
-		and %(conditions)s
+		%(conditions)s
 		order by timestamp(posting_date, posting_time) %(order)s, name %(order)s
 		%(limit)s %(for_update)s""" % {
 			"conditions": conditions,
