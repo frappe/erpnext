@@ -123,7 +123,7 @@ def update_bin(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 		frappe.msgprint(_("Item {0} ignored since it is not a stock item").format(args.get("item_code")))
 
 @frappe.whitelist()
-def get_incoming_rate(args):
+def get_incoming_rate(args, raise_error_if_no_rate=True):
 	"""Get Incoming Rate based on valuation method"""
 	from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
 	if isinstance(args, basestring):
@@ -146,7 +146,8 @@ def get_incoming_rate(args):
 		voucher_no = args.get('voucher_no') or args.get('name')
 		in_rate = get_valuation_rate(args.get('item_code'), args.get('warehouse'),
 			args.get('voucher_type'), voucher_no, args.get('allow_zero_valuation'),
-			currency=erpnext.get_company_currency(args.get('company')), company=args.get('company'))
+			currency=erpnext.get_company_currency(args.get('company')), company=args.get('company'),
+			raise_error_if_no_rate=True)
 
 	return in_rate
 
