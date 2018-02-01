@@ -28,7 +28,7 @@ def execute(filters=None):
 				if transfer.from_shareholder == filters.get("shareholder"):
 					transfer.transfer_type += ' to {}'.format(transfer.to_shareholder)
 				else:
-					transfer.transfer_type += ' to {}'.format(transfer.from_shareholder)
+					transfer.transfer_type += ' from {}'.format(transfer.from_shareholder)
 			row = [filters.get("shareholder"), transfer.date, transfer.transfer_type,
 				transfer.share_type, transfer.no_of_shares, transfer.rate, transfer.amount,
 				transfer.company, transfer.name]

@@ -457,27 +457,6 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Help"),
-			"icon": "fa fa-facetime-video",
-			"items": [
-				{
-					"type": "help",
-					"label": _("Chart of Accounts"),
-					"youtube_id": "DyR-DST-PyA"
-				},
-				{
-					"type": "help",
-					"label": _("Opening Accounting Balance"),
-					"youtube_id": "kdgM20Q-q68"
-				},
-				{
-					"type": "help",
-					"label": _("Setting up Taxes"),
-					"youtube_id": "nQ1zZdPgdaQ"
-				}
-			]
-		},
-		{
 			"label": _("Share Management"),
 			"icon": "fa fa-microchip ",
 			"items": [
@@ -502,6 +481,27 @@ def get_data():
 					"name": "Share Balance",
 					"doctype": "Share Transfer",
 					"is_query_report": True
+				}
+			]
+		},
+		{
+			"label": _("Help"),
+			"icon": "fa fa-facetime-video",
+			"items": [
+				{
+					"type": "help",
+					"label": _("Chart of Accounts"),
+					"youtube_id": "DyR-DST-PyA"
+				},
+				{
+					"type": "help",
+					"label": _("Opening Accounting Balance"),
+					"youtube_id": "kdgM20Q-q68"
+				},
+				{
+					"type": "help",
+					"label": _("Setting up Taxes"),
+					"youtube_id": "nQ1zZdPgdaQ"
 				}
 			]
 		}

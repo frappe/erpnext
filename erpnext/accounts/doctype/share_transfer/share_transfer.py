@@ -89,6 +89,8 @@ class ShareTransfer(Document):
 		else:
 			if self.from_shareholder is None or self.to_shareholder is None:
 				frappe.throw('The fields \'From Shareholder\' and \'To Shareholder\' cannot be blank')
+			if self.to_folio_no is None or self.to_folio_no is '':
+				self.to_folio_no = self.autoname_folio(self.to_shareholder)
 		if self.from_shareholder == self.to_shareholder:
 			frappe.throw('The seller and the buyer cannot be the same')
 		if self.no_of_shares != self.to_no - self.from_no + 1:
