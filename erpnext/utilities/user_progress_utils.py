@@ -38,6 +38,21 @@ def create_customers(args_data):
 				pass
 
 @frappe.whitelist()
+def create_letterhead(args_data):
+	args = json.loads(args_data)
+	letterhead = args.get("letterhead")
+	if letterhead:
+		try:
+			frappe.get_doc({
+					"doctype":"Letter Head",
+					"content":"""<div><img src="{0}" style='max-width: 100%%;'><br></div>""".format(letterhead.encode('utf-8')),
+					"letter_head_name": _("Standard"),
+					"is_default": 1
+			}).insert()
+		except frappe.NameError:
+			pass
+
+@frappe.whitelist()
 def create_suppliers(args_data):
 	args = json.loads(args_data)
 	defaults = frappe.defaults.get_defaults()
@@ -98,6 +113,9 @@ def create_items(args_data):
 					"default_warehouse": default_warehouse
 				}).insert()
 
+			except frappe.NameError:
+				pass
+			else:
 				if args.get("item_price_" + str(i)):
 					item_price = flt(args.get("item_price_" + str(i)))
 
@@ -106,8 +124,6 @@ def create_items(args_data):
 					price_list_name = frappe.db.get_value("Price List", {"buying": 1})
 					make_item_price(item, price_list_name, item_price)
 
-			except frappe.NameError:
-				pass
 
 def make_item_price(item, price_list_name, item_price):
 	frappe.get_doc({
@@ -117,7 +133,7 @@ def make_item_price(item, price_list_name, item_price):
 		"price_list_rate": item_price
 	}).insert()
 
-# Schools
+# Education
 @frappe.whitelist()
 def create_program(args_data):
 	args = json.loads(args_data)

@@ -20,6 +20,16 @@ def make_stock_entry(**args):
 	:do_not_save: Optional flag
 	:do_not_submit: Optional flag
 	'''
+
+	def process_serial_numbers(serial_nos_list):
+		serial_nos_list = [
+			'\n'.join(serial_num['serial_no'] for serial_num in serial_nos_list if serial_num.serial_no)
+		]
+
+		uniques = list(set(serial_nos_list[0].split('\n')))
+
+		return '\n'.join(uniques)
+
 	s = frappe.new_doc("Stock Entry")
 	args = frappe._dict(args)
 
@@ -76,6 +86,25 @@ def make_stock_entry(**args):
 	s.sales_invoice_no = args.sales_invoice_no
 	if not args.cost_center:
 		args.cost_center = frappe.get_value('Company', s.company, 'cost_center')
+
+	if not args.expense_account:
+		args.expense_account = frappe.get_value('Company', s.company, 'stock_adjustment_account')
+
+	# We can find out the serial number using the batch source document
+	serial_number = args.serial_no
+
+	if not args.serial_no and args.qty and args.batch_no:
+		serial_number_list = frappe.get_list(
+			doctype='Stock Ledger Entry',
+			fields=['serial_no'],
+			filters={
+				'batch_no': args.batch_no,
+				'warehouse': args.from_warehouse
+			}
+		)
+		serial_number = process_serial_numbers(serial_number_list)
+
+	args.serial_no = serial_number
 
 	s.append("items", {
 		"item_code": args.item,

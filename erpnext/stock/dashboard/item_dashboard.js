@@ -75,21 +75,22 @@ erpnext.stock.ItemDashboard = Class.extend({
 			this.content.find('.more').addClass('hidden');
 		}
 
-        // If not any stock in any warehouses provide a message to end user
+		// If not any stock in any warehouses provide a message to end user
 		if (context.data.length > 0) {
 			$(frappe.render_template('item_dashboard_list', context)).appendTo(this.result);
 		} else {
 			var message = __(" Currently no stock available in any warehouse")
-			$("<span class='small'> <i class='fa fa-exclamation-triangle' aria-hidden='true'></i>"+message+"</span>").appendTo(this.result);
+			$("<span class='text-muted small'>"+message+"</span>").appendTo(this.result);
 		}
 	},
 	get_item_dashboard_data: function(data, max_count, show_item) {
 		if(!max_count) max_count = 0;
 		if(!data) data = [];
+
 		data.forEach(function(d) {
 			d.actual_or_pending = d.projected_qty + d.reserved_qty + d.reserved_qty_for_production;
 			d.pending_qty = 0;
-			d.total_reserved = d.reserved_qty + d.reserved_qty_for_production;
+			d.total_reserved = d.reserved_qty + d.reserved_qty_for_production + d.reserved_qty_for_sub_contract;
 			if(d.actual_or_pending > d.actual_qty) {
 				d.pending_qty = d.actual_or_pending - d.actual_qty;
 			}
@@ -97,9 +98,16 @@ erpnext.stock.ItemDashboard = Class.extend({
 			max_count = Math.max(d.actual_or_pending, d.actual_qty,
 				d.total_reserved, max_count);
 		});
+
+		var can_write = 0;
+		if(frappe.boot.user.can_write.indexOf("Stock Entry")>=0){
+			can_write = 1;
+		}
+
 		return {
 			data: data,
 			max_count: max_count,
+			can_write:can_write,
 			show_item: show_item || false
 		}
 	}

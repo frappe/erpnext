@@ -1,8 +1,10 @@
 employee
 leave
+employee-advance
 expense-claim
 attendance
 salary-and-payroll
+payroll-entry
 appraisal
 job-applicant
 job-opening

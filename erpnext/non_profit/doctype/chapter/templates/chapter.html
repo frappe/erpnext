@@ -1,0 +1,71 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<h1>{{ title }}</h1>
+<h3>Details</h3>
+<p>{{ introduction }}</p>
+{% if meetup_embed_html %}
+	{{ meetup_embed_html }}
+{% endif %}
+<h3>List of Members</h3>
+
+{% if members  %}
+	<table class="table table-bordered small" style="max-width: 500px;">
+		<tr>
+			<th width="15%" ></th>
+			<th>Member Details</th>
+		</tr>
+		{% set index = [1] %}
+		{% for user in members %}
+			{% if user.enabled == 1 %}
+				<tr>
+					<td>{{ index|length }}</td>
+					<td>
+						<div class="row">
+							<div class="col-lg-6 col-md-6 col-sm-6">{{ frappe.db.get_value('User', user.user, 'full_name') }}</div>
+							<div class="col-lg-6 col-md-6 col-sm-6 text-right">
+								{% if user.website_url %}
+									<a href="{{ user.website_url }}">{{ user.website_url or '' }}</a>
+								{% endif %}
+							</div>
+							<div class="col-lg-12">
+							{% if user.introduction %}
+								{{ user.introduction }}
+							{% endif %}
+							</div>
+						</div>
+					</td>
+				</tr>
+				{% set __ = index.append(1) %}
+			{% endif %}
+		{% endfor %}
+	</table>
+{% else %}
+	<p>No member yet.</p>
+{% endif %}
+
+<h3>Chapter Head</h3>
+<table class="table table-bordered small" style="max-width: 500px;">
+	<tr>
+		<td style='width: 15%'>Name</td>
+		<td>{{ frappe.db.get_value('User', chapter_head, 'full_name') }}</td>
+	</tr>
+	<tr>
+		<td>Email</td>
+		<td>{{ frappe.db.get_value('User', chapter_head, 'email') or '' }}</td>
+	</tr>
+	<tr>
+		<td>Phone</td>
+		<td>{{ frappe.db.get_value('User', chapter_head, 'phone') or '' }}</td>
+	</tr>
+</table>
+<h3>Address</h3>
+<p>{{ address }}</p>
+
+<p style="margin: 20px 0 30px;"><a href="/non_profit/join-chapter?name={{ name }}" class='btn btn-primary'>Join this Chapter</a></p>
+<p style="margin: 20px 0 30px;"><a href="/non_profit/leave-chapter?name={{ name }}" class=''>Leave this Chapter</a></p>
+
+
+{% endblock %}
+
+<!-- this is a sample default web page template -->

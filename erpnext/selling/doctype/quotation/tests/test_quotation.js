@@ -1,5 +1,5 @@
 QUnit.test("test: quotation", function (assert) {
-	assert.expect(10);
+	assert.expect(12);
 	let done = assert.async();
 	frappe.run_serially([
 		() => {
@@ -10,7 +10,8 @@ QUnit.test("test: quotation", function (assert) {
 						{"item_code": "Test Product 1"},
 						{"qty": 5}
 					]]
-				}
+				},
+				{payment_terms_template: '_Test Payment Term Template UI'}
 			]);
 		},
 		() => {
@@ -18,7 +19,7 @@ QUnit.test("test: quotation", function (assert) {
 			assert.ok(cur_frm.doc.items[0].item_name == "Test Product 1", "Added Test Product 1");
 
 			// calculate_taxes_and_totals
-			assert.ok(cur_frm.doc.grand_total === 500, "Total Amount is correct");
+			assert.ok(cur_frm.doc.grand_total === 500, String(cur_frm.doc.grand_total));
 		},
 		() => cur_frm.set_value("customer_address", "Test1-Billing"),
 		() => cur_frm.set_value("shipping_address_name", "Test1-Warehouse"),
@@ -30,6 +31,7 @@ QUnit.test("test: quotation", function (assert) {
 		() => cur_frm.doc.items[0].rate = 200,
 		() => frappe.timeout(0.3),
 		() => cur_frm.set_value("tc_name", "Test Term 1"),
+		() => cur_frm.set_value("payment_schedule", []),
 		() => frappe.timeout(0.5),
 		() => cur_frm.save(),
 		() => {
@@ -46,6 +48,9 @@ QUnit.test("test: quotation", function (assert) {
 
 			// Check Terms and Condtions
 			assert.ok(cur_frm.doc.tc_name == "Test Term 1", "Terms and Conditions Checked");
+
+			assert.ok(cur_frm.doc.payment_terms_template, "Payment Terms Template is correct");
+			assert.ok(cur_frm.doc.payment_schedule.length > 0, "Payment Term Schedule is not empty");
 
 		},
 		() => done()

@@ -82,8 +82,8 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			$.each(this.frm.doc.accounts || [], function(i, jvd) {
 				frappe.model.set_default_values(jvd);
 			});
-
-			if(!this.frm.doc.amended_from) this.frm.doc.posting_date = this.frm.posting_date || frappe.datetime.get_today();
+			var posting_date = this.frm.posting_date;
+			if(!this.frm.doc.amended_from) this.frm.set_value('posting_date', posting_date || frappe.datetime.get_today());
 		}
 	},
 
@@ -119,6 +119,15 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 						'approval_status': 'Approved',
 						'total_sanctioned_amount': ['>', 0],
 						'status': ['!=', 'Paid'],
+						'docstatus': 1
+					}
+				};
+			}
+
+			if(jvd.reference_type==="Employee Advance") {
+				return {
+					filters: {
+						'status': ['=', 'Unpaid'],
 						'docstatus': 1
 					}
 				};
@@ -187,20 +196,19 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 	reference_name: function(doc, cdt, cdn) {
 		var d = frappe.get_doc(cdt, cdn);
+
 		if(d.reference_name) {
 			if (d.reference_type==="Purchase Invoice" && !flt(d.debit)) {
 				this.get_outstanding('Purchase Invoice', d.reference_name, doc.company, d);
-			}
-			if (d.reference_type==="Sales Invoice" && !flt(d.credit)) {
+			} else if (d.reference_type==="Sales Invoice" && !flt(d.credit)) {
 				this.get_outstanding('Sales Invoice', d.reference_name, doc.company, d);
-			}
-			if (d.reference_type==="Journal Entry" && !flt(d.credit) && !flt(d.debit)) {
+			} else if (d.reference_type==="Journal Entry" && !flt(d.credit) && !flt(d.debit)) {
 				this.get_outstanding('Journal Entry', d.reference_name, doc.company, d);
 			}
 		}
 	},
 
-	get_outstanding: function(doctype, docname, company, child) {
+	get_outstanding: function(doctype, docname, company, child, due_date) {
 		var me = this;
 		var args = {
 			"doctype": doctype,

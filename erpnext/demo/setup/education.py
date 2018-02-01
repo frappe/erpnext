@@ -31,7 +31,7 @@ def make_masters():
 	frappe.db.commit()
 
 def setup_item():
-	items = json.loads(open(frappe.get_app_path('erpnext', 'demo', 'data', 'item_schools.json')).read())
+	items = json.loads(open(frappe.get_app_path('erpnext', 'demo', 'data', 'item_education.json')).read())
 	for i in items:
 		item = frappe.new_doc('Item')
 		item.update(i)

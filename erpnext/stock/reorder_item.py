@@ -85,17 +85,22 @@ def get_item_warehouse_projected_qty(items_to_consider):
 		from tabBin where item_code in ({0})
 			and (warehouse != "" and warehouse is not null)"""\
 		.format(", ".join(["%s"] * len(items_to_consider))), items_to_consider):
-		
-		item_warehouse_projected_qty.setdefault(item_code, {})[warehouse] = flt(projected_qty)
-		
+
+		if item_code not in item_warehouse_projected_qty:
+			item_warehouse_projected_qty.setdefault(item_code, {})
+
+		if warehouse not in item_warehouse_projected_qty.get(item_code):
+			item_warehouse_projected_qty[item_code][warehouse] = flt(projected_qty)
+
 		warehouse_doc = frappe.get_doc("Warehouse", warehouse)
-		
-		if warehouse_doc.parent_warehouse:
+
+		while warehouse_doc.parent_warehouse:
 			if not item_warehouse_projected_qty.get(item_code, {}).get(warehouse_doc.parent_warehouse):
 				item_warehouse_projected_qty.setdefault(item_code, {})[warehouse_doc.parent_warehouse] = flt(projected_qty)
 			else:
 				item_warehouse_projected_qty[item_code][warehouse_doc.parent_warehouse] += flt(projected_qty)
-				
+			warehouse_doc = frappe.get_doc("Warehouse", warehouse_doc.parent_warehouse)
+
 	return item_warehouse_projected_qty
 
 def create_material_request(material_requests):
@@ -127,19 +132,31 @@ def create_material_request(material_requests):
 				for d in items:
 					d = frappe._dict(d)
 					item = frappe.get_doc("Item", d.item_code)
+					uom = item.stock_uom
+					conversion_factor = 1.0
+
+					if request_type == 'Purchase':
+						uom = item.purchase_uom or item.stock_uom
+						if uom != item.stock_uom:
+							conversion_factor = frappe.db.get_value("UOM Conversion Detail", 
+								{'parent': item.name, 'uom': uom}, 'conversion_factor') or 1.0
+
 					mr.append("items", {
 						"doctype": "Material Request Item",
 						"item_code": d.item_code,
 						"schedule_date": add_days(nowdate(),cint(item.lead_time_days)),
-						"uom":	item.stock_uom,
+						"qty": d.reorder_qty / conversion_factor,
+						"uom": uom,
+						"stock_uom": item.stock_uom,
 						"warehouse": d.warehouse,
 						"item_name": item.item_name,
 						"description": item.description,
 						"item_group": item.item_group,
-						"qty": d.reorder_qty,
 						"brand": item.brand,
 					})
 
+				schedule_dates = [d.schedule_date for d in mr.items]
+				mr.schedule_date = max(schedule_dates or [nowdate()])
 				mr.insert()
 				mr.submit()
 				mr_list.append(mr)

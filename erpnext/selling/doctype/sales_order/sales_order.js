@@ -34,12 +34,16 @@ frappe.ui.form.on("Sales Order", {
 
 		erpnext.queries.setup_warehouse_query(frm);
 	},
-	
+
 	delivery_date: function(frm) {
 		$.each(frm.doc.items || [], function(i, d) {
 			if(!d.delivery_date) d.delivery_date = frm.doc.delivery_date;
 		});
 		refresh_field("items");
+	},
+
+	onload_post_render: function(frm) {
+		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	}
 });
 
@@ -48,7 +52,7 @@ frappe.ui.form.on("Sales Order Item", {
 		if(!frm.doc.delivery_date) {
 			erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "delivery_date");
 		}
-	}	
+	}
 });
 
 erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend({
@@ -193,7 +197,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					});
 					return;
 				}
-				else if(!r.message.every(function(d) { return !!d.pending_qty })) {
+				else if(!r.message) {
 					frappe.msgprint({
 						title: __('Production Order not created'),
 						message: __('Production Order already created for all items with BOM'),
@@ -213,6 +217,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 									}},
 								{fieldtype:'Float', fieldname:'pending_qty', reqd: 1,
 									label: __('Qty'), in_list_view:1},
+								{fieldtype:'Data', fieldname:'sales_order_item', reqd: 1,
+									label: __('Sales Order Item'), hidden:1}
 							],
 							get_data: function() {
 								return r.message
@@ -272,21 +278,21 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 	make_delivery_note_based_on_delivery_date: function() {
 		var me = this;
-		
+
 		var delivery_dates = [];
 		$.each(this.frm.doc.items || [], function(i, d) {
 			if(!delivery_dates.includes(d.delivery_date)) {
 				delivery_dates.push(d.delivery_date);
 			}
 		});
-		
+
 		var item_grid = this.frm.fields_dict["items"].grid;
 		if(!item_grid.get_selected().length && delivery_dates.length > 1) {
 			var dialog = new frappe.ui.Dialog({
 				title: __("Select Items based on Delivery Date"),
 				fields: [{fieldtype: "HTML", fieldname: "dates_html"}]
 			});
-			
+
 			var html = $(`
 				<div style="border: 1px solid #d1d8dd">
 					<div class="list-item list-item--head">
@@ -315,7 +321,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					.map((i, el) => $(el).attr('data-date')).toArray();
 
 				if(!dates) return;
-				
+
 				$.each(dates, function(i, d) {
 					$.each(item_grid.grid_rows || [], function(j, row) {
 						if(row.doc.delivery_date == d) {

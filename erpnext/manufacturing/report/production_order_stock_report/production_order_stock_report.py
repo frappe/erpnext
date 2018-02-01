@@ -15,62 +15,66 @@ def get_item_list(prod_list, filters):
 	out = []
 	
 	#Add a row for each item/qty
-	for prod_order in prod_list:
-		prod_details = frappe.db.get_value("Production Order", prod_order.name, 
-			["bom_no", "source_warehouse", "qty", "produced_qty"], as_dict=1)
-		
+	for prod_details in prod_list:
 		desc = frappe.db.get_value("BOM", prod_details.bom_no, "description")
-		
-		item_list = frappe.db.sql("""SELECT 
-				bom_item.item_code as item_code,
-				ifnull(ledger.actual_qty*bom.quantity/bom_item.stock_qty,0) as build_qty
-			FROM
-				`tabBOM` as bom, `tabBOM Item` AS bom_item
-				LEFT JOIN `tabBin` AS ledger	
-					ON bom_item.item_code = ledger.item_code 
-					AND ledger.warehouse = ifnull(%(warehouse)s,%(filterhouse)s)
-			WHERE
-				bom.name = bom_item.parent
-				and bom.name = %(bom)s 
-			GROUP BY 
-				bom_item.item_code""", 
-		{"bom": prod_details.bom_no, "warehouse": prod_details.source_warehouse, 
-			"filterhouse": filters.warehouse}, as_dict=1)
-				
-		stock_qty = 0
-		count = 0
-		buildable_qty = prod_details.qty
-		for item in item_list:
-			count = count + 1
-			if item.build_qty >= (prod_details.qty - prod_details.produced_qty):
-				stock_qty = stock_qty + 1
-			elif buildable_qty >= item.build_qty:
-				buildable_qty = item.build_qty
-					
-		if count == stock_qty:
-			build = "Y"
-		else:
-			build = "N"
-		
-		row = frappe._dict({
-			"production_order": prod_order.name,
-			"status": prod_order.status,
-			"req_items": cint(count),
-			"instock": stock_qty,
-			"description": desc,
-			"bom_no": prod_details.bom_no,
-			"qty": prod_details.qty,
-			"buildable_qty": buildable_qty,
-			"ready_to_build": build
-		})
-		
-		out.append(row)
+
+		for prod_item_details in frappe.db.get_values("Production Order Item",
+			{"parent": prod_details.name}, ["item_code", "source_warehouse"], as_dict=1):
+
+			item_list = frappe.db.sql("""SELECT
+					bom_item.item_code as item_code,
+					ifnull(ledger.actual_qty*bom.quantity/bom_item.stock_qty,0) as build_qty
+				FROM
+					`tabBOM` as bom, `tabBOM Item` AS bom_item
+					LEFT JOIN `tabBin` AS ledger
+						ON bom_item.item_code = ledger.item_code
+						AND ledger.warehouse = ifnull(%(warehouse)s,%(filterhouse)s)
+				WHERE
+					bom.name = bom_item.parent
+					and bom_item.item_code = %(item_code)s
+					and bom.name = %(bom)s
+				GROUP BY
+					bom_item.item_code""",
+			{"bom": prod_details.bom_no, "warehouse": prod_item_details.source_warehouse,
+				"filterhouse": filters.warehouse, "item_code": prod_item_details.item_code}, as_dict=1)
+
+			stock_qty = 0
+			count = 0
+			buildable_qty = prod_details.qty
+			for item in item_list:
+				count = count + 1
+				if item.build_qty >= (prod_details.qty - prod_details.produced_qty):
+					stock_qty = stock_qty + 1
+				elif buildable_qty >= item.build_qty:
+					buildable_qty = item.build_qty
+
+			if count == stock_qty:
+				build = "Y"
+			else:
+				build = "N"
+
+			row = frappe._dict({
+				"production_order": prod_details.name,
+				"status": prod_details.status,
+				"req_items": cint(count),
+				"instock": stock_qty,
+				"description": desc,
+				"source_warehouse": prod_item_details.source_warehouse,
+				"item_code": prod_item_details.item_code,
+				"bom_no": prod_details.bom_no,
+				"qty": prod_details.qty,
+				"buildable_qty": buildable_qty,
+				"ready_to_build": build
+			})
+
+			out.append(row)
 
 	return out
 	
 def get_production_orders():
-	
-	out =  frappe.get_all("Production Order", filters={"docstatus": 1, "status": ( "!=","Completed")}, fields=["name","status"], order_by='name')
+	out =  frappe.get_all("Production Order", filters={"docstatus": 1, "status": ( "!=","Completed")},
+		fields=["name","status", "bom_no", "qty", "produced_qty"], order_by='name')
+
 	return out
 	
 def get_columns():
@@ -93,6 +97,18 @@ def get_columns():
 		"options": "",
 		"width": 230
 	}, {
+		"fieldname": "item_code",
+		"label": "Item Code",
+		"fieldtype": "Link",
+		"options": "Item",
+		"width": 110
+	},{
+		"fieldname": "source_warehouse",
+		"label": "Source Warehouse",
+		"fieldtype": "Link",
+		"options": "Warehouse",
+		"width": 110
+	},{
 		"fieldname": "qty",
 		"label": "Qty to Build",
 		"fieldtype": "Data",

@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe import _
+from erpnext.setup.utils import insert_record
 
 def setup_healthcare():
 	if frappe.db.exists('Medical Department', 'Cardiology'):
@@ -259,17 +260,3 @@ def create_sensitivity():
 		{"doctype": "Sensitivity", "sensitivity": _("Intermediate")}
 	]
 	insert_record(records)
-
-def insert_record(records):
-	for r in records:
-		doc = frappe.new_doc(r.get("doctype"))
-		doc.update(r)
-		try:
-			doc.insert(ignore_permissions=True)
-		except frappe.DuplicateEntryError, e:
-			# pass DuplicateEntryError and continue
-			if e.args and e.args[0]==doc.doctype and e.args[1]==doc.name:
-				# make sure DuplicateEntryError is for the exact same doc and not a related doc
-				pass
-			else:
-				raise

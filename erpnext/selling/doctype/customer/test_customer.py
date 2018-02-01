@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 
+from erpnext.accounts.party import get_due_date
 from frappe.test_runner import make_test_records
 from erpnext.exceptions import PartyFrozen, PartyDisabled
 from frappe.utils import flt
@@ -13,7 +14,7 @@ from erpnext.selling.doctype.customer.customer import get_credit_limit, get_cust
 from erpnext.tests.utils import create_test_contact_and_address
 
 test_ignore = ["Price List"]
-
+test_dependencies = ['Payment Term', 'Payment Terms Template']
 test_records = frappe.get_test_records('Customer')
 
 class TestCustomer(unittest.TestCase):
@@ -180,6 +181,35 @@ class TestCustomer(unittest.TestCase):
 		customer = frappe.get_doc("Customer", '_Test Customer')
 		customer.credit_limit = flt(outstanding_amt - 100)
 		self.assertRaises(frappe.ValidationError, customer.save)
+
+	def test_customer_payment_terms(self):
+		frappe.db.set_value(
+			"Customer", "_Test Customer With Template", "payment_terms", "_Test Payment Term Template 3")
+
+		due_date = get_due_date("2016-01-22", "Customer", "_Test Customer With Template")
+		self.assertEqual(due_date, "2016-02-21")
+
+		due_date = get_due_date("2017-01-22", "Customer", "_Test Customer With Template")
+		self.assertEqual(due_date, "2017-02-21")
+
+		frappe.db.set_value(
+			"Customer", "_Test Customer With Template", "payment_terms", "_Test Payment Term Template 1")
+
+		due_date = get_due_date("2016-01-22", "Customer", "_Test Customer With Template")
+		self.assertEqual(due_date, "2016-02-29")
+
+		due_date = get_due_date("2017-01-22", "Customer", "_Test Customer With Template")
+		self.assertEqual(due_date, "2017-02-28")
+
+		frappe.db.set_value("Customer", "_Test Customer With Template", "payment_terms", "")
+
+		# No default payment term template attached
+		due_date = get_due_date("2016-01-22", "Customer", "_Test Customer")
+		self.assertEqual(due_date, "2016-01-22")
+
+		due_date = get_due_date("2017-01-22", "Customer", "_Test Customer")
+		self.assertEqual(due_date, "2017-01-22")
+
 
 def get_customer_dict(customer_name):
 	return {

@@ -16,6 +16,8 @@ def get_pos_data():
 	doc = frappe.new_doc('Sales Invoice')
 	doc.is_pos = 1;
 	pos_profile = get_pos_profile(doc.company) or {}
+	if not pos_profile:
+		frappe.throw(_("POS Profile is required to use Point-of-Sale"))
 	if not doc.company: doc.company = pos_profile.get('company')
 	doc.update_stock = pos_profile.get('update_stock')
 
@@ -88,10 +90,11 @@ def update_pos_profile_data(doc, pos_profile, company_data):
 	doc.naming_series = pos_profile.get('naming_series') or 'SINV-'
 	doc.letter_head = pos_profile.get('letter_head') or company_data.default_letter_head
 	doc.ignore_pricing_rule = pos_profile.get('ignore_pricing_rule') or 0
-	doc.apply_discount_on = pos_profile.get('apply_discount_on') or ''
+	doc.apply_discount_on = pos_profile.get('apply_discount_on') or 'Grand Total'
 	doc.customer_group = pos_profile.get('customer_group') or get_root('Customer Group')
 	doc.territory = pos_profile.get('territory') or get_root('Territory')
 	doc.terms = frappe.db.get_value('Terms and Conditions', pos_profile.get('tc_name'), 'terms') or doc.terms or ''
+	doc.offline_pos_name = ''
 
 def get_root(table):
 	root = frappe.db.sql(""" select name from `tab%(table)s` having
@@ -486,17 +489,21 @@ def submit_invoice(si_doc, name, doc, name_list):
 		if frappe.message_log: frappe.message_log.pop()
 		frappe.db.rollback()
 		frappe.log_error(frappe.get_traceback())
-		name_list = save_invoice(e, si_doc, name, name_list)
+		name_list = save_invoice(doc, name, name_list)
 
 	return name_list
 
-def save_invoice(e, si_doc, name, name_list):
+def save_invoice(doc, name, name_list):
 	try:
 		if not frappe.db.exists('Sales Invoice', {'offline_pos_name': name}):
-			si_doc.docstatus = 0
-			si_doc.flags.ignore_mandatory = True
-			si_doc.due_date = si_doc.posting_date
-			si_doc.insert()
+			si = frappe.new_doc('Sales Invoice')
+			si.update(doc)
+			si.set_posting_time = 1
+			si.customer = get_customer_id(doc)
+			si.due_date = doc.get('posting_date')
+			si.flags.ignore_mandatory = True
+			si.insert(ignore_permissions=True)
+			frappe.db.commit()
 			name_list.append(name)
 	except Exception:
 		frappe.log_error(frappe.get_traceback())

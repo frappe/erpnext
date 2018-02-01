@@ -23,5 +23,30 @@ frappe.treeview_settings["Cost Center"] = {
 		{fieldtype:'Check', fieldname:'is_group', label:__('Is Group'),
 			description:__('Further cost centers can be made under Groups but entries can be made against non-Groups')}
 	],
-	ignore_fields:["parent_cost_center"]
+	ignore_fields:["parent_cost_center"],
+	onload: function(treeview) {
+		function get_company() {
+			return treeview.page.fields_dict.company.get_value();
+		}
+
+		// tools
+		treeview.page.add_inner_button(__("Chart of Accounts"), function() {
+			frappe.set_route('Tree', 'Account', {company: get_company()});
+		}, __('View'));
+
+		// make
+		treeview.page.add_inner_button(__("Budget List"), function() {
+			frappe.set_route('List', 'Budget', {company: get_company()});
+		}, __('Budget'));
+
+		treeview.page.add_inner_button(__("Monthly Distribution"), function() {
+			frappe.set_route('List', 'Monthly Distribution', {company: get_company()});
+		}, __('Budget'));
+
+		treeview.page.add_inner_button(__("Budget Variance Report"), function() {
+			frappe.set_route('query-report', 'Budget Variance Report', {company: get_company()});
+		}, __('Budget'));
+
+	},
+
 }

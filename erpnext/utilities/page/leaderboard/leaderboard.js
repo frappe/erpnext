@@ -132,21 +132,21 @@ frappe.Leaderboard = Class.extend({
 
 				me.$graph_area.show().empty();
 				let args = {
-					parent: me.$graph_area,
-					y: [
-						{
-							color: 'light-green',
-							values: graph_items.map(d=>d.value),
-							formatted: graph_items.map(d=>d[me.options.selected_filter_item])
-						}
-					],
-					x: {
-						values: graph_items.map(d=>d.name)
+					parent: '.leaderboard-graph',
+					data: {
+						datasets: [
+							{
+								values: graph_items.map(d=>d.value)
+							}
+						],
+						labels: graph_items.map(d=>d.name)
 					},
-					mode: 'bar',
+					colors: ['light-green'],
+					format_tooltip_x: d=>d[me.options.selected_filter_item],
+					type: 'bar',
 					height: 140
 				};
-				new frappe.ui.Graph(args);
+				new Chart(args);
 
 				notify(me, r, $container);
 			}

@@ -9,6 +9,7 @@ frappe.ui.form.on('Healthcare Settings', {
 				filters: {
 					'account_type': 'Receivable',
 					'company': d.company,
+					'is_group': 0
 				}
 			};
 		});
@@ -18,6 +19,7 @@ frappe.ui.form.on('Healthcare Settings', {
 				filters: {
 					'root_type': 'Income',
 					'company': d.company,
+					'is_group': 0
 				}
 			};
 		});

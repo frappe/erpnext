@@ -98,6 +98,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 				if(flt(this.frm.doc.per_billed) < 100) {
 					cur_frm.add_custom_button(__('Invoice'), this.make_purchase_invoice, __("Make"));
 				}
+				cur_frm.add_custom_button(__('Retention Stock Entry'), this.make_retention_stock_entry, __("Make"));
 
 				if(!this.frm.doc.subscription) {
 					cur_frm.add_custom_button(__('Subscription'), function() {
@@ -137,7 +138,26 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 
 	reopen_purchase_receipt: function() {
 		cur_frm.cscript.update_status("Submitted");
-	}
+	},
+
+	make_retention_stock_entry: function() {
+		frappe.call({
+			method: "erpnext.stock.doctype.stock_entry.stock_entry.move_sample_to_retention_warehouse",
+			args:{
+				"company": cur_frm.doc.company,
+				"items": cur_frm.doc.items
+			},
+			callback: function (r) {
+				if (r.message) {
+					var doc = frappe.model.sync(r.message)[0];
+					frappe.set_route("Form", doc.doctype, doc.name);
+				}
+				else {
+					frappe.msgprint(__("Retention Stock Entry already created or Sample Quantity not provided"));
+				}
+			}
+		});
+	},
 
 });
 
@@ -206,3 +226,36 @@ frappe.ui.form.on("Purchase Receipt", "is_subcontracted", function(frm) {
 	}
 	frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted==="Yes");
 });
+
+frappe.ui.form.on('Purchase Receipt Item', {
+	item_code: function(frm, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		frappe.db.get_value('Item', {name: d.item_code}, 'sample_quantity', (r) => {
+			frappe.model.set_value(cdt, cdn, "sample_quantity", r.sample_quantity);
+		});
+	},
+	sample_quantity: function(frm, cdt, cdn) {
+		validate_sample_quantity(frm, cdt, cdn);
+	},
+	batch_no: function(frm, cdt, cdn) {
+		validate_sample_quantity(frm, cdt, cdn);
+	},
+});
+
+var validate_sample_quantity = function(frm, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	if (d.sample_quantity) {
+		frappe.call({
+			method: 'erpnext.stock.doctype.stock_entry.stock_entry.validate_sample_quantity',
+			args: {
+				batch_no: d.batch_no,
+				item_code: d.item_code,
+				sample_quantity: d.sample_quantity,
+				qty: d.qty
+			},
+			callback: (r) => {
+				frappe.model.set_value(cdt, cdn, "sample_quantity", r.message);
+			}
+		});
+	}
+};

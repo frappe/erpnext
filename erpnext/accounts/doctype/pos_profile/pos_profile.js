@@ -24,11 +24,11 @@ frappe.ui.form.on("POS Profile", "onload", function(frm) {
 
 frappe.ui.form.on('POS Profile', {
 	setup: function(frm) {
-		frm.set_query("online_print_format", function() {
+		frm.set_query("print_format_for_online", function() {
 			return {
 				filters: [
 					['Print Format', 'doc_type', '=', 'Sales Invoice'],
-					['Print Format', 'print_format_type', '!=', 'Js'],
+					['Print Format', 'print_format_type', '=', 'Server'],
 				]
 			};
 		});
@@ -104,11 +104,6 @@ cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) 
 			['Print Heading', 'docstatus', '!=', 2]
 		]
 	};
-};
-
-
-cur_frm.fields_dict.user.get_query = function(doc,cdt,cdn) {
-	return{	query:"frappe.core.doctype.user.user.user_query"};
 };
 
 cur_frm.fields_dict.write_off_account.get_query = function(doc) {

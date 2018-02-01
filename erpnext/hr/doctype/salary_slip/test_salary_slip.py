@@ -9,8 +9,8 @@ import calendar
 from erpnext.accounts.utils import get_fiscal_year
 from frappe.utils import getdate, nowdate, add_days, add_months, flt
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
-from erpnext.hr.doctype.process_payroll.test_process_payroll import get_salary_component_account
-from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
+from erpnext.hr.doctype.payroll_entry.test_payroll_entry import get_salary_component_account
+from erpnext.hr.doctype.payroll_entry.payroll_entry import get_month_details
 
 class TestSalarySlip(unittest.TestCase):
 	def setUp(self):

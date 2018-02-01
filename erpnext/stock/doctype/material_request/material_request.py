@@ -158,7 +158,7 @@ class MaterialRequest(BuyingController):
 						and material_request_item = %s and docstatus = 1""",
 						(self.name, d.name))[0][0])
 
-					if d.ordered_qty and d.ordered_qty > d.qty:
+					if d.ordered_qty and d.ordered_qty > d.stock_qty:
 						frappe.throw(_("The total Issue / Transfer quantity {0} in Material Request {1}  \
 							cannot be greater than requested quantity {2} for Item {3}").format(d.ordered_qty, d.parent, d.qty, d.item_code))
 
@@ -170,11 +170,12 @@ class MaterialRequest(BuyingController):
 
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
 
+		target_ref_field = 'qty' if self.material_request_type == "Manufacture" else 'stock_qty'
 		self._update_percent_field({
 			"target_dt": "Material Request Item",
 			"target_parent_dt": self.doctype,
 			"target_parent_field": "per_ordered",
-			"target_ref_field": "qty",
+			"target_ref_field": target_ref_field,
 			"target_field": "ordered_qty",
 			"name": self.name,
 		}, update_modified)
@@ -216,9 +217,9 @@ def set_missing_values(source, target_doc):
 	target_doc.run_method("calculate_taxes_and_totals")
 
 def update_item(obj, target, source_parent):
-	target.conversion_factor = 1
-	target.qty = flt(obj.qty) - flt(obj.ordered_qty)
-	target.stock_qty = target.qty
+	target.conversion_factor = obj.conversion_factor
+	target.qty = flt(flt(obj.stock_qty) - flt(obj.ordered_qty))/ target.conversion_factor
+	target.stock_qty = (target.qty * target.conversion_factor)
 
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):
@@ -242,7 +243,7 @@ def make_purchase_order(source_name, target_doc=None):
 				["uom", "uom"]
 			],
 			"postprocess": update_item,
-			"condition": lambda doc: doc.ordered_qty < doc.qty
+			"condition": lambda doc: doc.ordered_qty < doc.stock_qty
 		}
 	}, target_doc, postprocess)
 
@@ -353,11 +354,11 @@ def make_supplier_quotation(source_name, target_doc=None):
 @frappe.whitelist()
 def make_stock_entry(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
-		qty = flt(obj.qty) - flt(obj.ordered_qty) \
-			if flt(obj.qty) > flt(obj.ordered_qty) else 0
+		qty = flt(flt(obj.stock_qty) - flt(obj.ordered_qty))/ target.conversion_factor \
+			if flt(obj.stock_qty) > flt(obj.ordered_qty) else 0
 		target.qty = qty
-		target.transfer_qty = qty
-		target.conversion_factor = 1
+		target.transfer_qty = qty * obj.conversion_factor
+		target.conversion_factor = obj.conversion_factor
 
 		if source_parent.material_request_type == "Material Transfer":
 			target.t_warehouse = obj.warehouse
@@ -384,7 +385,7 @@ def make_stock_entry(source_name, target_doc=None):
 				"uom": "stock_uom",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.ordered_qty < doc.qty
+			"condition": lambda doc: doc.ordered_qty < doc.stock_qty
 		}
 	}, target_doc, set_missing_values)
 
@@ -405,7 +406,7 @@ def raise_production_orders(material_request):
 				prod_order.fg_warehouse = d.warehouse
 				prod_order.wip_warehouse = default_wip_warehouse
 				prod_order.description = d.description
-				prod_order.stock_uom = d.uom
+				prod_order.stock_uom = d.stock_uom
 				prod_order.expected_delivery_date = d.schedule_date
 				prod_order.sales_order = d.sales_order
 				prod_order.bom_no = get_item_details(d.item_code).bom_no

@@ -230,7 +230,7 @@ def get_employee_by_user_id(user_id):
 def insert_lab_test_to_medical_record(doc):
 	subject = str(doc.test_name)
 	if(doc.test_comment):
-		subject += ", \n"+str(doc.test_comment)
+		subject += ", "+str(doc.test_comment)
 	medical_record = frappe.new_doc("Patient Medical Record")
 	medical_record.patient = doc.patient
 	medical_record.subject = subject
@@ -291,5 +291,5 @@ def create_invoice(company, patient, lab_tests, prescriptions):
 
 @frappe.whitelist()
 def get_lab_test_prescribed(patient):
-	return frappe.db.sql(_("""select cp.name, cp.test_code, cp.parent, cp.invoice, ct.physician, ct.consultation_date from tabConsultation ct,
-	`tabLab Prescription` cp where ct.patient='{0}' and cp.parent=ct.name and cp.test_created=0""").format(patient))
+	return frappe.db.sql("""select cp.name, cp.test_code, cp.parent, cp.invoice, ct.physician, ct.consultation_date from tabConsultation ct,
+	`tabLab Prescription` cp where ct.patient=%s and cp.parent=ct.name and cp.test_created=0""", (patient))

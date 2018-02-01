@@ -76,6 +76,10 @@ def add_permissions():
 
 def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "gst_tax_invoice")
+	frappe.reload_doc("accounts", "print_format", "gst_pos_invoice")
+
+	frappe.db.sql(""" update `tabPrint Format` set disabled = 0 where
+		name in('GST POS Invoice', 'GST Tax Invoice') """)
 
 def make_custom_fields():
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
@@ -99,7 +103,20 @@ def make_custom_fields():
 			depends_on='eval:in_list(["SEZ", "Export", "Deemed Export"], doc.invoice_type)',
 			options='\nWith Payment of Tax\nWithout Payment of Tax'),
 		dict(fieldname='ecommerce_gstin', label='E-commerce GSTIN',
-			fieldtype='Data', insert_after='export_type', print_hide=1)
+			fieldtype='Data', insert_after='export_type', print_hide=1),
+		dict(fieldname='reason_for_issuing_document', label='Reason For Issuing document',
+			fieldtype='Select', insert_after='ecommerce_gstin', print_hide=1,
+			depends_on='eval:doc.is_return==1',
+			options='\n01-Sales Return\n02-Post Sale Discount\n03-Deficiency in services\n04-Correction in Invoice\n05-Change in POS\n06-Finalization of Provisional assessment\n07-Others'),
+		dict(fieldname='port_code', label='Port Code',
+			fieldtype='Data', insert_after='reason_for_issuing_document', print_hide=1,
+			depends_on="eval:doc.invoice_type=='Export' "),
+		dict(fieldname='shipping_bill_number', label=' Shipping Bill Number',
+			fieldtype='Data', insert_after='port_code', print_hide=1,
+			depends_on="eval:doc.invoice_type=='Export' "),
+		dict(fieldname='shipping_bill_date', label='Shipping Bill Date',
+			fieldtype='Date', insert_after='shipping_bill_number', print_hide=1,
+			depends_on="eval:doc.invoice_type=='Export' "),
 	]
 
 	purchase_invoice_gst_fields = [
@@ -119,8 +136,8 @@ def make_custom_fields():
 				fieldtype='Data', insert_after='shipping_address',
 				options='shipping_address_name.gstin', print_hide=1),
 			dict(fieldname='place_of_supply', label='Place of Supply',
-				fieldtype='Data', insert_after='customer_gstin', print_hide=1,
-				options='shipping_address_name.gst_state_number', read_only=0),
+				fieldtype='Data', insert_after='customer_gstin',
+				print_hide=1, read_only=0),
 			dict(fieldname='company_gstin', label='Company GSTIN',
 				fieldtype='Data', insert_after='company_address',
 				options='company_address.gstin', print_hide=1)

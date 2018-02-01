@@ -59,9 +59,8 @@ class CostCenter(NestedSet):
 		return new_cost_center
 
 	def after_rename(self, olddn, newdn, merge=False):
+		super(CostCenter, self).after_rename(olddn, newdn, merge)
+
 		if not merge:
 			frappe.db.set_value("Cost Center", newdn, "cost_center_name",
 				" - ".join(newdn.split(" - ")[:-1]))
-		else:
-			super(CostCenter, self).after_rename(olddn, newdn, merge)
-

@@ -7,6 +7,7 @@
   "doctype": "Shipping Rule",
   "label": "_Test Shipping Rule",
   "name": "_Test Shipping Rule",
+  "shipping_rule_type": "Selling",
   "conditions": [
    {
     "doctype": "Shipping Rule Condition",
@@ -26,8 +27,11 @@
     "doctype": "Shipping Rule Condition",
     "from_value": 201,
     "parentfield": "conditions",
-    "shipping_amount": 0.0
+    "shipping_amount": 200.0
    }
+  ],
+  "countries": [
+	  {"country": "India"}
   ],
   "worldwide_shipping": 1
  },
@@ -73,6 +77,7 @@
   "doctype": "Shipping Rule",
   "label": "_Test Shipping Rule - Rest of the World",
   "name": "_Test Shipping Rule - Rest of the World",
+  "shipping_rule_type": "Buying",
   "conditions": [
    {
     "doctype": "Shipping Rule Condition",
@@ -95,6 +100,9 @@
     "shipping_amount": 1500.0
    }
   ],
-  "worldwide_shipping": 1
+  "worldwide_shipping": 1,
+  "countries": [
+	  {"country": "Germany"}
+  ]
  }
 ]

@@ -24,7 +24,7 @@ def get_data():
 				{
 					"type": "help",
 					"label": _("Report Builder"),
-					"youtube_id": "y0o5iYZOioU"
+					"youtube_id": "TxJGUNarcQs"
 				},
 			]
 
@@ -40,7 +40,7 @@ def get_data():
 				{
 					"type": "help",
 					"label": _("Opening Stock Balance"),
-					"youtube_id": "0yPgrtfeCTs"
+					"youtube_id": "nlHX0ZZ84Lw"
 				},
 				{
 					"type": "help",
@@ -55,7 +55,7 @@ def get_data():
 				{
 					"type": "help",
 					"label": _("Users and Permissions"),
-					"youtube_id": "fnBoRhBrwR4"
+					"youtube_id": "8Slw1hsTmUI"
 				},
 				{
 					"type": "help",
@@ -120,7 +120,7 @@ def get_data():
 				{
 					"type": "help",
 					"label": _("Sales Order to Payment"),
-					"youtube_id": "7AMq4lqkN4A"
+					"youtube_id": "1eP90MWoDQM"
 				},
 				{
 					"type": "help",
@@ -195,12 +195,12 @@ def get_data():
 				{
 					"type": "help",
 					"label": _("Material Request to Purchase Order"),
-					"youtube_id": "4TN9kPyfIqM"
+					"youtube_id": "55Gk2j7Q8Zw"
 				},
 				{
 					"type": "help",
 					"label": _("Purchase Order to Payment"),
-					"youtube_id": "EK65tLdVUDk"
+					"youtube_id": "efFajTTQBa8"
 				},
 				{
 					"type": "help",
@@ -261,7 +261,7 @@ def get_data():
 				{
 					"type": "help",
 					"label": _("Managing Projects"),
-					"youtube_id": "egxIGwtoKI4"
+					"youtube_id": "gCzShu9Niu4"
 				},
 			]
 		},
