@@ -463,6 +463,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 					if (r.message) {
 						this.frm.meta.default_print_format = r.message.print_format || 'POS Invoice';
+						this.frm.allow_edit_rate = r.message.allow_edit_rate;
 					}
 				}
 
@@ -727,6 +728,7 @@ class POSCart {
 			disable_highlight: ['Qty', 'Disc', 'Rate', 'Pay'],
 			reset_btns: ['Qty', 'Disc', 'Rate', 'Pay'],
 			del_btn: 'Del',
+			disable_btns: !this.frm.allow_edit_rate ? ['Rate']: [],
 			wrapper: this.wrapper.find('.number-pad-container'),
 			onclick: (btn_value) => {
 				// on click
@@ -1257,7 +1259,7 @@ class NumberPad {
 	constructor({
 		wrapper, onclick, button_array,
 		add_class={}, disable_highlight=[],
-		reset_btns=[], del_btn='',
+		reset_btns=[], del_btn='', disable_btns
 	}) {
 		this.wrapper = wrapper;
 		this.onclick = onclick;
@@ -1266,6 +1268,7 @@ class NumberPad {
 		this.disable_highlight = disable_highlight;
 		this.reset_btns = reset_btns;
 		this.del_btn = del_btn;
+		this.disable_btns = disable_btns || [];
 		this.make_dom();
 		this.bind_events();
 		this.value = '';
@@ -1296,6 +1299,14 @@ class NumberPad {
 		}
 
 		this.set_class();
+
+		this.disable_btns.forEach((btn) => {
+			const $btn = this.get_btn(btn);
+			$btn.prop("disabled", true)
+			$btn.hover(() => {
+				$btn.css('cursor','not-allowed');
+			})
+		})
 	}
 
 	set_class() {

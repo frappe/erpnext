@@ -17,7 +17,8 @@ def execute():
 			SELECT DISTINCT `credit_days`, `credit_days_based_on`, `name`
 			from `tab{0}`
 			where
-				(credit_days_based_on='Fixed Days' and credit_days is not null)
+				((credit_days_based_on='Fixed Days' or credit_days_based_on is null)
+					and credit_days is not null)
 				or credit_days_based_on='Last Day of the Next Month'
 		""".format(doctype))
 

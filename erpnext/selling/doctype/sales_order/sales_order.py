@@ -484,11 +484,6 @@ def make_delivery_note(source_name, target_doc=None):
 			else:
 				target.po_no = source.po_no
 
-		# Since the credit limit check is bypassed at sales order level,
-		# we need to check it at delivery note
-		if cint(frappe.db.get_value("Customer", source.customer, "bypass_credit_limit_check_at_sales_order")):
-			check_credit_limit(source.customer, source.company)
-
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
@@ -552,10 +547,6 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.flags.ignore_permissions = True
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
-
-		# Since the credit limit check is bypassed at sales order level, we need to check it at sales invoice
-		if cint(frappe.db.get_value("Customer", source.customer, "bypass_credit_limit_check_at_sales_order")):
-			check_credit_limit(source.customer, source.company)
 
 		# set company address
 		target.update(get_company_address(target.company))

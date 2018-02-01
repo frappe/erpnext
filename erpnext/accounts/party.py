@@ -51,7 +51,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	set_other_values(out, party, party_type)
 	set_price_list(out, party, party_type, price_list)
 	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group, out.supplier_type)
-	out["payment_terms_template"] = get_pyt_term_template(party.name, party_type)
+	out["payment_terms_template"] = get_pyt_term_template(party.name, party_type, company)
 
 	if not out.get("currency"):
 		out["currency"] = currency
@@ -164,7 +164,7 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 	out = {
 		party_type.lower(): party,
 		account_fieldname : account,
-		"due_date": get_due_date(posting_date, party_type, party)
+		"due_date": get_due_date(posting_date, party_type, party, company)
 	}
 	return out
 
@@ -267,12 +267,12 @@ def validate_party_accounts(doc):
 
 
 @frappe.whitelist()
-def get_due_date(posting_date, party_type, party):
+def get_due_date(posting_date, party_type, party, company=None):
 	"""Get due date from `Payment Terms Template`"""
 	due_date = None
 	if posting_date and party:
 		due_date = posting_date
-		template_name = get_pyt_term_template(party, party_type)
+		template_name = get_pyt_term_template(party, party_type, company)
 		if template_name:
 			due_date = get_due_date_from_template(template_name, posting_date).strftime("%Y-%m-%d")
 		else:
@@ -305,12 +305,11 @@ def get_due_date_from_template(template_name, posting_date):
 
 	return due_date
 
-
-def validate_due_date(posting_date, due_date, party_type, party):
+def validate_due_date(posting_date, due_date, party_type, party, company=None):
 	if getdate(due_date) < getdate(posting_date):
 		frappe.throw(_("Due Date cannot be before Posting Date"))
 	else:
-		default_due_date = get_due_date(posting_date, party_type, party)
+		default_due_date = get_due_date(posting_date, party_type, party, company)
 		if not default_due_date:
 			return
 
@@ -360,13 +359,31 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 
 
 @frappe.whitelist()
-def get_pyt_term_template(party_name, party_type):
+def get_pyt_term_template(party_name, party_type, company=None):
+	if party_type not in ("Customer", "Supplier"):
+		return
+
 	template = None
-	if party_type in ('Customer', 'Supplier'):
-		template = frappe.db.get_value(party_type, party_name, fieldname='payment_terms')
+	if party_type == 'Customer':
+		customer = frappe.db.get_value("Customer", party_name,
+			fieldname=['payment_terms', "customer_group"], as_dict=1)
+		template = customer.payment_terms
+
+		if not template and customer.customer_group:
+			template = frappe.db.get_value("Customer Group",
+				customer.customer_group, fieldname='payment_terms')
+	else:
+		supplier = frappe.db.get_value("Supplier", party_name,
+			fieldname=['payment_terms', "supplier_type"], as_dict=1)
+		template = supplier.payment_terms
+
+		if not template and supplier.supplier_type:
+			template = frappe.db.get_value("Supplier Type", supplier.supplier_type, fieldname='payment_terms')
+
+	if not template and company:
+		template = frappe.db.get_value("Company", company, fieldname='payment_terms')
 
 	return template
-
 
 def validate_party_frozen_disabled(party_type, party_name):
 	if party_type and party_name:
