@@ -557,12 +557,13 @@ class TestStockEntry(unittest.TestCase):
 		production_order.submit()
 
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
+		make_stock_entry(item_code="_Test Item 2", target="_Test Warehouse - _TC", qty=50, basic_rate=20)
 
 		stock_entry = _make_stock_entry(production_order.name, "Manufacture", 1)
 
 		rm_cost = 0
 		for d in stock_entry.get("items"):
-			if d.s_warehouse:
+			if d.item_code != "_Test FG Item 2":
 				rm_cost += flt(d.amount)
 
 		fg_cost = filter(lambda x: x.item_code=="_Test FG Item 2", stock_entry.get("items"))[0].amount
