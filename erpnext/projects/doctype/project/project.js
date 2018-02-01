@@ -83,7 +83,7 @@ frappe.ui.form.on("Project", {
 	show_dashboard: function (frm) {
 		if (frm.doc.__onload.activity_summary.length) {
 			var hours = $.map(frm.doc.__onload.activity_summary, function (d) {
-				return d.total_hours
+				return d.total_hours;
 			});
 			var max_count = Math.max.apply(null, hours);
 			var sum = hours.reduce(function (a, b) {
