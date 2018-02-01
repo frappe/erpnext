@@ -176,7 +176,8 @@ def accumulate_values_into_parents(accounts, accounts_by_name):
 def prepare_data(accounts, filters, total_row, parent_children_map, company_currency):
 	data = []
 	tmpaccnt = sorted(accounts)
-	accounts = tmpaccnt
+	if accounts[0].account_name[0].isnumeric():
+		accounts = tmpaccnt
 	
 	for d in accounts:
 		has_value = False
