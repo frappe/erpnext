@@ -8,21 +8,28 @@ def execute():
 	if not frappe.db.exists("DocType", "Grading Scale Interval"):
 		frappe.rename_doc("DocType", "Grade Interval", "Grading Scale Interval", force=True)
 
-	frappe.reload_doc("schools", "doctype", "grading_scale_interval")
+	# frappe.reload_doc("schools", "doctype", "grading_scale_interval")
+	frappe.reload_doc("education", "doctype", "grading_scale_interval")
 	if "to_score" in frappe.db.get_table_columns("Grading Scale Interval"):
 		rename_field("Grading Scale Interval", "to_score", "threshold")
 
 	if not frappe.db.exists("DocType", "Assessment Plan"):
 		frappe.rename_doc("DocType", "Assessment", "Assessment Plan", force=True)
 
+	# 'Schools' module changed to the 'Education'
+	# frappe.reload_doc("schools", "doctype", "assessment_plan")
+
 	#Rename Assessment Results
-	frappe.reload_doc("schools", "doctype", "assessment_plan")
+	frappe.reload_doc("education", "doctype", "assessment_plan")
 	if "grading_structure" in frappe.db.get_table_columns("Assessment Plan"):
 		rename_field("Assessment Plan", "grading_structure", "grading_scale")
 
-	frappe.reload_doc("schools", "doctype", "assessment_result")
-	frappe.reload_doc("schools", "doctype", "assessment_result_detail")
-	frappe.reload_doc("schools", "doctype", "assessment_criteria")
+	# frappe.reload_doc("schools", "doctype", "assessment_result")
+	# frappe.reload_doc("schools", "doctype", "assessment_result_detail")
+	# frappe.reload_doc("schools", "doctype", "assessment_criteria")
+	frappe.reload_doc("education", "doctype", "assessment_result")
+	frappe.reload_doc("education", "doctype", "assessment_result_detail")
+	frappe.reload_doc("education", "doctype", "assessment_criteria")
 
 
 	for assessment in frappe.get_all("Assessment Plan", 

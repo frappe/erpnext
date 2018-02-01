@@ -19,13 +19,13 @@ class TestFeeValidity(unittest.TestCase):
 			patient = frappe.new_doc("Patient")
 			patient.patient_name = "Test Patient"
 			patient.sex = "Male"
-			patient.save(ignore_permissions = True)
+			patient.save(ignore_permissions=True)
 			patient = patient.name
 
 		if not physician:
 			physician = frappe.new_doc("Physician")
-			physician.first_name= "Amit Jain"
-			physician.save(ignore_permissions = True)
+			physician.first_name = "Amit Jain"
+			physician.save(ignore_permissions=True)
 			physician = physician.name
 
 		frappe.db.set_value("Healthcare Settings", None, "max_visit", 2)
@@ -50,5 +50,5 @@ def create_appointment(patient, physician, appointment_date):
 	appointment.patient = patient
 	appointment.physician = physician
 	appointment.appointment_date = appointment_date
-	appointment.save(ignore_permissions = True)
+	appointment.save(ignore_permissions=True)
 	return appointment

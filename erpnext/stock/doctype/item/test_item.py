@@ -5,12 +5,14 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 
-from frappe.test_runner import make_test_records
+from frappe.test_runner import make_test_objects
 from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsError,
 	InvalidItemAttributeValueError, get_variant)
+from erpnext.stock.doctype.item.item import StockExistsForTemplate
 
 from frappe.model.rename_doc import rename_doc
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.get_item_details import get_item_details
 
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse"]
@@ -52,7 +54,9 @@ class TestItem(unittest.TestCase):
 		return item
 
 	def test_get_item_details(self):
-		from erpnext.stock.get_item_details import get_item_details
+		# delete modified item price record and make as per test_records
+		frappe.db.sql("""delete from `tabItem Price`""")
+
 		to_check = {
 			"item_code": "_Test Item",
 			"item_name": "_Test Item",
@@ -75,7 +79,7 @@ class TestItem(unittest.TestCase):
 			"conversion_factor": 1.0,
 		}
 
-		make_test_records("Item Price")
+		make_test_objects("Item Price")
 
 		details = get_item_details({
 			"item_code": "_Test Item",
@@ -87,7 +91,10 @@ class TestItem(unittest.TestCase):
 			"price_list_currency": "_Test Currency",
 			"plc_conversion_rate": 1,
 			"order_type": "Sales",
-			"customer": "_Test Customer"
+			"customer": "_Test Customer",
+			"conversion_factor": 1,
+			"price_list_uom_dependant": 1,
+			"ignore_pricing_rule": 1
 		})
 
 		for key, value in to_check.iteritems():
@@ -190,7 +197,8 @@ class TestItem(unittest.TestCase):
 					"increment": 0.5
 				}
 			],
-			"default_warehouse": "_Test Warehouse - _TC"
+			"default_warehouse": "_Test Warehouse - _TC",
+			"has_variants": 1
 		})
 
 		variant = create_variant("_Test Numeric Template Item",
@@ -262,6 +270,15 @@ class TestItem(unittest.TestCase):
 		self.assertEquals(variant.description, '_Test Variant Mfg')
 		self.assertEquals(variant.manufacturer, 'MSG1')
 		self.assertEquals(variant.manufacturer_part_no, '007')
+
+	def test_stock_exists_against_template_item(self):
+		stock_item = frappe.get_all('Stock Ledger Entry', fields = ["item_code"], limit=1)
+		if stock_item:
+			item_code = stock_item[0].item_code
+
+			item_doc = frappe.get_doc('Item', item_code)
+			item_doc.has_variants = 1
+			self.assertRaises(StockExistsForTemplate, item_doc.save)
 
 def set_item_variant_settings(fields):
 	doc = frappe.get_doc('Item Variant Settings')

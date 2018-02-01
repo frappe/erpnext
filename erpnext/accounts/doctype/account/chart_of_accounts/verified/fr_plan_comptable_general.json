@@ -1,6 +1,6 @@
 {
     "country_code": "fr", 
-    "name": "France - Plan Comptable G\u00e9n\u00e9ral", 
+    "name": "France - Plan Comptable General", 
     "tree": {
         "1-Comptes de Capitaux": {
             "10-Capital et R\u00e9serves": {
@@ -851,7 +851,7 @@
                     "4457-Taxes sur le chiffre d'affaires collect\u00e9es par l'entreprise": {
                         "44571-TVA collect\u00e9e": {
                             "account_type": "Tax", 
-                            "tax_rate": 20.0
+                            "is_group": 1
                         }, 
                         "44578-Taxes assimil\u00e9es \u00e0 la TVA": {}
                     }, 

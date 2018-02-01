@@ -152,7 +152,7 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	conditions = []
 
-	return frappe.db.sql("""select tabItem.name, tabItem.item_group, tabItem.image,
+	return frappe.db.sql("""select tabItem.name, tabItem.item_group,
 		if(length(tabItem.item_name) > 40,
 			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name,
 		if(length(tabItem.description) > 40, \
@@ -204,8 +204,8 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 		{
 			'txt': "%%%s%%" % frappe.db.escape(txt),
 			'_txt': txt.replace("%", ""),
-			'start': start,
-			'page_len': page_len
+			'start': start or 0,
+			'page_len': page_len or 20
 		})
 
 def get_project_name(doctype, txt, searchfield, start, page_len, filters):
@@ -257,7 +257,7 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	cond = ""
 	if filters.get("posting_date"):
-		cond = "and (ifnull(batch.expiry_date, '')='' or batch.expiry_date >= %(posting_date)s)"
+		cond = "and (batch.expiry_date is null or batch.expiry_date >= %(posting_date)s)"
 
 	batch_nos = None
 	args = {
@@ -410,3 +410,15 @@ def get_doctype_wise_filters(filters):
 	for row in filters:
 		filter_dict[row[0]].append(row)
 	return filter_dict
+
+
+@frappe.whitelist()
+def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
+	query = """select batch_id from `tabBatch`
+			where (expiry_date >= CURDATE() or expiry_date IS NULL)
+			and name like '{txt}'""".format(txt = frappe.db.escape('%{0}%'.format(txt)))
+
+	if filters and filters.get('item'):
+		query += " and item = '{item}'".format(item = frappe.db.escape(filters.get('item')))
+
+	return frappe.db.sql(query, filters)

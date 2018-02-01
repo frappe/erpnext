@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -24,6 +24,8 @@ class Project(Document):
 			sum(hours) as total_hours
 			from `tabTimesheet Detail` where project=%s and docstatus < 2 group by activity_type
 			order by total_hours desc''', self.name, as_dict=True))
+
+		self.update_costing()
 
 	def __setup__(self):
 		self.onload()
@@ -68,7 +70,7 @@ class Project(Document):
 		if self.expected_start_date and self.expected_end_date:
 			if getdate(self.expected_end_date) < getdate(self.expected_start_date):
 				frappe.throw(_("Expected End Date can not be less than Expected Start Date"))
-				
+
 	def validate_weights(self):
 		sum = 0
 		for task in self.tasks:
@@ -174,28 +176,37 @@ class Project(Document):
 		self.actual_end_date = from_time_sheet.end_date
 
 		self.total_costing_amount = from_time_sheet.costing_amount
-		self.total_billing_amount = from_time_sheet.billing_amount
+		self.total_billable_amount = from_time_sheet.billing_amount
 		self.actual_time = from_time_sheet.time
 
 		self.total_expense_claim = from_expense_claim.total_sanctioned_amount
+		self.update_purchase_costing()
+		self.update_sales_amount()
+		self.update_billed_amount()
 
-		self.gross_margin = flt(self.total_billing_amount) - flt(self.total_costing_amount)
+		self.gross_margin = flt(self.total_billed_amount) - (flt(self.total_costing_amount) + flt(self.total_expense_claim) + flt(self.total_purchase_cost))
 
-		if self.total_billing_amount:
-			self.per_gross_margin = (self.gross_margin / flt(self.total_billing_amount)) *100
+		if self.total_billed_amount:
+			self.per_gross_margin = (self.gross_margin / flt(self.total_billed_amount)) *100
 
 	def update_purchase_costing(self):
 		total_purchase_cost = frappe.db.sql("""select sum(base_net_amount)
 			from `tabPurchase Invoice Item` where project = %s and docstatus=1""", self.name)
 
 		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
-		
-	def update_sales_costing(self):
-		total_sales_cost = frappe.db.sql("""select sum(base_grand_total)
+
+	def update_sales_amount(self):
+		total_sales_amount = frappe.db.sql("""select sum(base_grand_total)
 			from `tabSales Order` where project = %s and docstatus=1""", self.name)
 
-		self.total_sales_cost = total_sales_cost and total_sales_cost[0][0] or 0
-				
+		self.total_sales_amount = total_sales_amount and total_sales_amount[0][0] or 0
+
+	def update_billed_amount(self):
+		total_billed_amount = frappe.db.sql("""select sum(base_grand_total)
+			from `tabSales Invoice` where project = %s and docstatus=1""", self.name)
+
+		self.total_billed_amount = total_billed_amount and total_billed_amount[0][0] or 0
+
 
 	def send_welcome_email(self):
 		url = get_url("/project/?name={0}".format(self.name))
@@ -219,7 +230,7 @@ class Project(Document):
 		self.load_tasks()
 		self.sync_tasks()
 		self.update_dependencies_on_duplicated_project()
-	
+
 	def update_dependencies_on_duplicated_project(self):
 		if self.flags.dont_sync_tasks: return
 		if not self.copied_from:
@@ -289,10 +300,10 @@ def get_list_context(context=None):
 
 def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
-	return frappe.db.sql("""select name, concat_ws(' ', first_name, middle_name, last_name) 
+	return frappe.db.sql("""select name, concat_ws(' ', first_name, middle_name, last_name)
 		from `tabUser`
 		where enabled=1
-			and name not in ("Guest", "Administrator") 
+			and name not in ("Guest", "Administrator")
 			and ({key} like %(txt)s
 				or full_name like %(txt)s)
 			{fcond} {mcond}

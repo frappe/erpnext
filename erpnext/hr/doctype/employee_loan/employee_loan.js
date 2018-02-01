@@ -87,22 +87,24 @@ frappe.ui.form.on('Employee Loan', {
 	},
 
 	employee_loan_application: function (frm) {
-		return frappe.call({
-			method: "erpnext.hr.doctype.employee_loan.employee_loan.get_employee_loan_application",
-			args: {
-				"employee_loan_application": frm.doc.employee_loan_application
-			},
-			callback: function (r) {
-				if (!r.exc && r.message) {
-					frm.set_value("loan_type", r.message.loan_type);
-					frm.set_value("loan_amount", r.message.loan_amount);
-					frm.set_value("repayment_method", r.message.repayment_method);
-					frm.set_value("monthly_repayment_amount", r.message.repayment_amount);
-					frm.set_value("repayment_periods", r.message.repayment_periods);
-					frm.set_value("rate_of_interest", r.message.rate_of_interest);
-				}
-			}
-		})
+	    if(frm.doc.employee_loan_application){
+            return frappe.call({
+                method: "erpnext.hr.doctype.employee_loan.employee_loan.get_employee_loan_application",
+                args: {
+                    "employee_loan_application": frm.doc.employee_loan_application
+                },
+                callback: function (r) {
+                    if (!r.exc && r.message) {
+                        frm.set_value("loan_type", r.message.loan_type);
+                        frm.set_value("loan_amount", r.message.loan_amount);
+                        frm.set_value("repayment_method", r.message.repayment_method);
+                        frm.set_value("monthly_repayment_amount", r.message.repayment_amount);
+                        frm.set_value("repayment_periods", r.message.repayment_periods);
+                        frm.set_value("rate_of_interest", r.message.rate_of_interest);
+                    }
+                }
+            });
+        }
 	},
 
 	repayment_method: function (frm) {

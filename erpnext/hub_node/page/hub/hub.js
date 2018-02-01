@@ -215,7 +215,7 @@ erpnext.hub.Hub = class Hub {
 			.on('click', '.company-link a', function(e) {
 				e.preventDefault();
 				const company_name = $(this).attr('data-company-name');
-				me.get_company_details(company_name);
+				frappe.set_route('hub', 'Company', company_name);
 			})
 			.on('click', '.breadcrumb li', function(e) {
 				e.preventDefault();
@@ -382,6 +382,7 @@ erpnext.hub.Hub = class Hub {
 			},
 			method: "erpnext.hub_node.get_item_details",
 			callback: (r) => {
+				if (!r || !r.message) return;
 				let item = r.message;
 				this.item_cache[item_code] = item;
 				this.render_item_page(item);
@@ -475,26 +476,34 @@ erpnext.hub.Hub = class Hub {
 	}
 
 	get_company_details(company_id) {
-		// get from cache if exists
-		let company_details = this.company_cache[company_id];
-		if(this.company_cache[company_id]) {
-			this.go_to_company_page(company_details);
-			return;
-		}
-		frappe.call({
-			method: 'erpnext.hub_node.get_company_details',
-			args: {company_id: company_id}
-		}).then((r) => {
-			if (r.message) {
-				const company_details = r.message.company_details;
-				this.company_cache[company_id] = company_details;
-				this.go_to_company_page(company_details)
+		this.company_cache = this.company_cache || {};
+
+		return new Promise(resolve => {
+			// get from cache if exists
+			let company_details = this.company_cache[company_id];
+			if(company_details) {
+				resolve(company_details);
+				return;
 			}
-		});
+			frappe.call({
+				method: 'erpnext.hub_node.get_company_details',
+				args: {hub_sync_id: company_id}
+			}).then((r) => {
+				if (r.message) {
+					const company_details = r.message;
+					this.company_cache[company_id] = company_details;
+					resolve(company_details)
+				}
+			});
+		})
 	}
 
-	go_to_company_page(company_details) {
-		frappe.set_route('hub', 'Company', company_details.company_name);
+	go_to_company_page(company_id) {
+		this.get_company_details(company_id)
+			.then(this.show_company_page.bind(this));
+	}
+
+	show_company_page(company_details) {
 		this.$hub_main_section.empty();
 
 		let $company_page =
@@ -573,10 +582,10 @@ erpnext.hub.Hub = class Hub {
 							<h2>${ company_details.company_name }</h2>
 						</div>
 						<div class="company">
-							<span class="">${ company_details.seller_city }</span>
+							<span class="">${ company_details.country }</span>
 						</div>
 						<div class="description">
-							<span class="small">${ company_details.seller_description }</span>
+							<span class="small">${ company_details.site_name }</span>
 						</div>
 					</div>
 
@@ -835,7 +844,7 @@ erpnext.hub.HubList = class HubList {
 					</div>
 				</a>
 				<div class="company-link">
-					<a data-company-name="${ item.company_id }" class="">${ item.company_name }</a>
+					<a data-company-name="${ item.company_name }" class="">${ item.company_name }</a>
 				</div>
 				<div>${ item.formatted_price ? item.formatted_price : ''}</div>
 			</div>

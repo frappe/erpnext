@@ -5,9 +5,15 @@ def execute():
 	if frappe.db.exists("DocType", "Student"):
 		student_table_cols = frappe.db.get_table_columns("Student")
 		if "father_name" in student_table_cols:
-			frappe.reload_doc("schools", "doctype", "student")
-			frappe.reload_doc("schools", "doctype", "guardian")
-			frappe.reload_doc("schools", "doctype", "guardian_interest")
+
+			# 'Schools' module changed to the 'Education'
+			# frappe.reload_doc("schools", "doctype", "student")
+			# frappe.reload_doc("schools", "doctype", "guardian")
+			# frappe.reload_doc("schools", "doctype", "guardian_interest")
+
+			frappe.reload_doc("education", "doctype", "student")
+			frappe.reload_doc("education", "doctype", "guardian")
+			frappe.reload_doc("education", "doctype", "guardian_interest")
 			frappe.reload_doc("hr", "doctype", "interest")
 		
 			fields = ["name", "father_name", "mother_name"]

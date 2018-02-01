@@ -69,7 +69,10 @@ class Patient(Document):
 		frappe.db.set_value("Patient", self.name, "disabled", 0)
 		send_registration_sms(self)
 		if(frappe.get_value("Healthcare Settings", None, "registration_fee")>0):
-			sales_invoice = make_invoice(self.name, self.company)
+			company = frappe.defaults.get_user_default('company')
+			if not company:
+				company = frappe.db.get_value("Global Defaults", None, "default_company")
+			sales_invoice = make_invoice(self.name, company)
 			sales_invoice.save(ignore_permissions=True)
 			return {'invoice': sales_invoice.name}
 
@@ -110,11 +113,11 @@ def make_invoice(patient, company):
 	return sales_invoice
 
 @frappe.whitelist()
-def get_patient_detail(patient, company=None):
-	patient_dict = frappe.db.sql(_("""select * from tabPatient where name='{0}'""").format(patient), as_dict=1)
+def get_patient_detail(patient):
+	patient_dict = frappe.db.sql("""select * from tabPatient where name=%s""", (patient), as_dict=1)
 	if not patient_dict:
 		frappe.throw("Patient not found")
-	vital_sign = frappe.db.sql(_("""select * from `tabVital Signs` where patient='{0}' order by signs_date desc limit 1""").format(patient), as_dict=1)
+	vital_sign = frappe.db.sql("""select * from `tabVital Signs` where patient=%s order by signs_date desc limit 1""", (patient), as_dict=1)
 
 	details = patient_dict[0]
 	if vital_sign:

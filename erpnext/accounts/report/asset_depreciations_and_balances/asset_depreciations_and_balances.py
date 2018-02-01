@@ -86,17 +86,20 @@ def get_accumulated_depreciations(assets, filters):
 	for d in assets:
 		asset = frappe.get_doc("Asset", d.name)
 		
-		asset_depreciations.setdefault(d.asset_category, frappe._dict({
-			"accumulated_depreciation_as_on_from_date": asset.opening_accumulated_depreciation,
-			"depreciation_amount_during_the_period": 0,
-			"depreciation_eliminated_during_the_period": 0
-		}))
+		if d.asset_category in asset_depreciations:
+			asset_depreciations[d.asset_category]['accumulated_depreciation_as_on_from_date'] += asset.opening_accumulated_depreciation
+		else:
+			asset_depreciations.setdefault(d.asset_category, frappe._dict({
+				"accumulated_depreciation_as_on_from_date": asset.opening_accumulated_depreciation,
+				"depreciation_amount_during_the_period": 0,
+				"depreciation_eliminated_during_the_period": 0
+			}))
 		
 		depr = asset_depreciations[d.asset_category]
 		
 		for schedule in asset.get("schedules"):
 			if getdate(schedule.schedule_date) < getdate(filters.from_date):
-				if not asset.disposal_date and getdate(asset.disposal_date) >= getdate(filters.from_date):
+				if not asset.disposal_date or getdate(asset.disposal_date) >= getdate(filters.from_date):
 					depr.accumulated_depreciation_as_on_from_date += flt(schedule.depreciation_amount)
 			elif getdate(schedule.schedule_date) <= getdate(filters.to_date):
 				depr.depreciation_amount_during_the_period += flt(schedule.depreciation_amount)

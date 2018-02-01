@@ -11,8 +11,8 @@ def get_data():
 				'items': ['Patient Appointment', 'Consultation']
 			},
 			{
-				'label': _('Lab Tests'),
-				'items': ['Lab Test']
+				'label': _('Lab Tests and Vital Signs'),
+ 				'items': ['Lab Test', 'Vital Signs']
 			}
 		]
 	}

@@ -9,7 +9,8 @@ QUnit.test("Test: Department [HR]", function (assert) {
 		() => frappe.set_route("List", "Department", "List"),
 		() => frappe.new_doc("Department"),
 		() => frappe.timeout(1),
-		() => frappe.click_link('Edit in full page'),
+		() => frappe.quick_entry.dialog.$wrapper.find('.edit-full').click(),
+		() => frappe.timeout(1),
 		() => cur_frm.set_value("department_name", "Test Department"),
 		() => cur_frm.set_value("leave_block_list", "Test Leave block list"),
 		// save form

@@ -21,8 +21,7 @@ frappe.ui.form.on("Job Applicant", {
 						"designation": frm.doc.job_opening,
 					};
 					frappe.new_doc("Offer Letter");
-				}, __("Make"));
-				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+				});
 			}
 		}
 

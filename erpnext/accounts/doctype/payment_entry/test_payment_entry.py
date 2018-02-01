@@ -14,6 +14,7 @@ from erpnext.hr.doctype.expense_claim.test_expense_claim import make_expense_cla
 
 test_dependencies = ["Item"]
 
+
 class TestPaymentEntry(unittest.TestCase):
 	def test_payment_entry_against_order(self):
 		so = make_sales_order()
@@ -40,7 +41,7 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertEqual(so_advance_paid, 0)
 
 	def test_payment_entry_against_si_usd_to_usd(self):
-		si =  create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
+		si = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
 			currency="USD", conversion_rate=50)
 		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank USD - _TC")
 		pe.reference_no = "1"
@@ -66,7 +67,7 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertEqual(outstanding_amount, 100)
 
 	def test_payment_entry_against_pi(self):
-		pi =  make_purchase_invoice(supplier="_Test Supplier USD", debit_to="_Test Payable USD - _TC",
+		pi = make_purchase_invoice(supplier="_Test Supplier USD", debit_to="_Test Payable USD - _TC",
 			currency="USD", conversion_rate=50)
 		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank USD - _TC")
 		pe.reference_no = "1"
@@ -88,11 +89,12 @@ class TestPaymentEntry(unittest.TestCase):
 	def test_payment_entry_against_ec(self):
 
 		payable = frappe.db.get_value('Company', "_Test Company", 'default_payable_account')
-		ec =  make_expense_claim(payable, 300, 300, "_Test Company","Travel Expenses - _TC")
+		ec = make_expense_claim(payable, 300, 300, "_Test Company", "Travel Expenses - _TC")
 		pe = get_payment_entry("Expense Claim", ec.name, bank_account="_Test Bank USD - _TC", bank_amount=300)
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
 		pe.source_exchange_rate = 1
+		pe.paid_to = payable
 		pe.insert()
 		pe.submit()
 
@@ -108,7 +110,7 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertEqual(outstanding_amount, 0)
 
 	def test_payment_entry_against_si_usd_to_inr(self):
-		si =  create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
+		si = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
 			currency="USD", conversion_rate=50)
 		pe = get_payment_entry("Sales Invoice", si.name, party_amount=20,
 			bank_account="_Test Bank - _TC", bank_amount=900)
@@ -212,7 +214,7 @@ class TestPaymentEntry(unittest.TestCase):
 
 		self.assertRaises(InvalidPaymentEntry, pe1.validate)
 
-		si1 =  create_sales_invoice()
+		si1 = create_sales_invoice()
 
 		# create full payment entry against si1
 		pe2 = get_payment_entry("Sales Invoice", si1.name, bank_account="_Test Cash - _TC")

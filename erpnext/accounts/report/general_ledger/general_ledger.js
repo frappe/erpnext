@@ -83,7 +83,7 @@ frappe.query_reports["General Ledger"] = {
 					return;
 				}
 
-				var fieldname = party_type.toLowerCase() + "_name";
+				var fieldname = frappe.scrub(party_type) + "_name";
 				frappe.db.get_value(party_type, party, fieldname, function(value) {
 					frappe.query_report_filters_by_name.party_name.set_value(value[fieldname]);
 				});
@@ -104,6 +104,11 @@ frappe.query_reports["General Ledger"] = {
 		{
 			"fieldname":"group_by_account",
 			"label": __("Group by Account"),
+			"fieldtype": "Check",
+		},
+		{
+			"fieldname":"print_in_account_currency",
+			"label": __("Print in Account Currency"),
 			"fieldtype": "Check",
 		}
 	]

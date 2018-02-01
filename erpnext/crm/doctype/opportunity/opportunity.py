@@ -48,16 +48,16 @@ class Opportunity(TransactionBase):
 			# check if customer is already created agains the self.contact_email
 			customer = frappe.db.sql("""select
 				distinct `tabDynamic Link`.link_name as customer
-				from 
+				from
 					`tabContact`,
 					`tabDynamic Link`
 				where `tabContact`.email_id='{0}'
-				and 
+				and
 					`tabContact`.name=`tabDynamic Link`.parent
 				and
-					ifnull(`tabDynamic Link`.link_name, '')<>'' 
-				and 
-					`tabDynamic Link`.link_doctype='Customer' 
+					ifnull(`tabDynamic Link`.link_name, '')<>''
+				and
+					`tabDynamic Link`.link_doctype='Customer'
 			""".format(self.contact_email), as_dict=True)
 			if customer and customer[0].customer:
 				self.customer = customer[0].customer
@@ -118,9 +118,9 @@ class Opportunity(TransactionBase):
 
 	def has_ordered_quotation(self):
 		return frappe.db.sql("""
-			select q.name 
+			select q.name
 			from `tabQuotation` q, `tabQuotation Item` qi
-			where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s 
+			where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s
 			and q.status = 'Ordered'""", self.name)
 
 	def has_lost_quotation(self):
@@ -232,9 +232,9 @@ def make_quotation(source_name, target_doc=None):
 		quotation.conversion_rate = exchange_rate
 
 		# get default taxes
-		taxes = get_default_taxes_and_charges("Sales Taxes and Charges Template")
-		if taxes:
-			quotation.extend("taxes", taxes)
+		taxes = get_default_taxes_and_charges("Sales Taxes and Charges Template", company=quotation.company)
+		if taxes.get('taxes'):
+			quotation.update(taxes)
 
 		quotation.run_method("set_missing_values")
 		quotation.run_method("calculate_taxes_and_totals")
@@ -246,7 +246,7 @@ def make_quotation(source_name, target_doc=None):
 			"doctype": "Quotation",
 			"field_map": {
 				"enquiry_from": "quotation_to",
-				"enquiry_type": "order_type",
+				"opportunity_type": "order_type",
 				"name": "enq_no",
 			}
 		},
@@ -267,10 +267,7 @@ def make_quotation(source_name, target_doc=None):
 def make_request_for_quotation(source_name, target_doc=None):
 	doclist = get_mapped_doc("Opportunity", source_name, {
 		"Opportunity": {
-			"doctype": "Request for Quotation",
-			"validation": {
-				"enquiry_type": ["=", "Sales"]
-			}
+			"doctype": "Request for Quotation"
 		},
 		"Opportunity Item": {
 			"doctype": "Request for Quotation Item",

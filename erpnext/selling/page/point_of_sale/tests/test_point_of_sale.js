@@ -4,7 +4,7 @@ QUnit.test("test:Point of Sales", function(assert) {
 
 	frappe.run_serially([
 		() => frappe.set_route('point-of-sale'),
-		() => frappe.timeout(2),
+		() => frappe.timeout(3),
 		() => frappe.set_control('customer', 'Test Customer 1'),
 		() => frappe.timeout(0.2),
 		() => cur_frm.set_value('customer', 'Test Customer 1'),

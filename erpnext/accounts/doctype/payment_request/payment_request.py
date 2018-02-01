@@ -246,7 +246,7 @@ def make_payment_request(**args):
 			"currency": ref_doc.currency,
 			"grand_total": grand_total,
 			"email_to": args.recipient_id or "",
-			"subject": "Payment Request for %s"%args.dn,
+			"subject": _("Payment Request for {0}").format(args.dn),
 			"message": gateway_account.get("message") or get_dummy_message(ref_doc),
 			"reference_doctype": args.dt,
 			"reference_name": args.dn
@@ -294,7 +294,7 @@ def get_gateway_details(args):
 	if args.get("payment_gateway"):
 		return get_payment_gateway_account(args.get("payment_gateway"))
 
-	if args.cart:
+	if args.order_type == "Shopping Cart":
 		payment_gateway_account = frappe.get_doc("Shopping Cart Settings").payment_gateway_account
 		return get_payment_gateway_account(payment_gateway_account)
 

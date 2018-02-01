@@ -11,7 +11,12 @@ from erpnext.controllers.accounts_controller import validate_taxes_and_charges, 
 class SalesTaxesandChargesTemplate(Document):
 	def validate(self):
 		valdiate_taxes_and_charges_template(self)
-		
+
+	def autoname(self):
+		if self.company and self.title:
+			abbr = frappe.db.get_value('Company', self.company, 'abbr')
+			self.name = '{0} - {1}'.format(self.title, abbr)
+
 	def set_missing_values(self):
 		for data in self.taxes:
 			if data.charge_type == 'On Net Total' and flt(data.rate) == 0.0:

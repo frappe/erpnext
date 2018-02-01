@@ -8,7 +8,7 @@
  "currency": "INR",
  "customer_1": "Test Customer 1",
  "customer_2": "Test Customer 2",
- "domain": "Manufacturing",
+ "domains": ["Manufacturing"],
  "email": "great@example.com",
  "full_name": "Great Tester",
  "fy_end_date": "2018-03-31",

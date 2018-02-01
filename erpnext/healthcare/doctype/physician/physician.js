@@ -9,6 +9,7 @@ frappe.ui.form.on('Physician', {
 				filters: {
 					'root_type': 'Income',
 					'company': d.company,
+					'is_group': 0
 				}
 			};
 		});

@@ -19,5 +19,5 @@ frappe.views.calendar["Task"] = {
 			"label": __("Project")
 		}
 	],
-	get_events_method: "erpnext.projects.doctype.task.task.get_events"
+	get_events_method: "frappe.desk.calendar.get_events"
 }

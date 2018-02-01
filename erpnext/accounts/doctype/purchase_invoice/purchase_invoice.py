@@ -16,6 +16,7 @@ from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entri
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.buying.utils import check_for_closed_status
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
+from frappe.model.mapper import get_mapped_doc
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -77,8 +78,10 @@ class PurchaseInvoice(BuyingController):
 		if not self.cash_bank_account and flt(self.paid_amount):
 			frappe.throw(_("Cash or Bank Account is mandatory for making payment entry"))
 
-		if flt(self.paid_amount) + flt(self.write_off_amount) \
-				- flt(self.grand_total) > 1/(10**(self.precision("base_grand_total") + 1)):
+		if (flt(self.paid_amount) + flt(self.write_off_amount)
+			- flt(self.get("rounded_total") or self.grand_total)
+			> 1/(10**(self.precision("base_grand_total") + 1))):
+
 			frappe.throw(_("""Paid amount + Write Off Amount can not be greater than Grand Total"""))
 
 	def create_remarks(self):
@@ -274,6 +277,8 @@ class PurchaseInvoice(BuyingController):
 						.format(item.purchase_receipt))
 
 	def on_submit(self):
+		super(PurchaseInvoice, self).on_submit()
+
 		self.check_prev_docstatus()
 		self.update_status_updater_args()
 
@@ -345,7 +350,6 @@ class PurchaseInvoice(BuyingController):
 		self.negative_expense_to_be_booked = 0.0
 		gl_entries = []
 
-
 		self.make_supplier_gl_entry(gl_entries)
 		self.make_item_gl_entries(gl_entries)
 		self.make_tax_gl_entries(gl_entries)
@@ -359,9 +363,10 @@ class PurchaseInvoice(BuyingController):
 		return gl_entries
 
 	def make_supplier_gl_entry(self, gl_entries):
-		if self.grand_total:
+		grand_total = self.rounded_total or self.grand_total
+		if grand_total:
 			# Didnot use base_grand_total to book rounding loss gle
-			grand_total_in_company_currency = flt(self.grand_total * self.conversion_rate,
+			grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
 				self.precision("grand_total"))
 			gl_entries.append(
 				self.get_gl_dict({
@@ -371,7 +376,7 @@ class PurchaseInvoice(BuyingController):
 					"against": self.against_expense_account,
 					"credit": grand_total_in_company_currency,
 					"credit_in_account_currency": grand_total_in_company_currency \
-						if self.party_account_currency==self.company_currency else self.grand_total,
+						if self.party_account_currency==self.company_currency else grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
 				}, self.party_account_currency)
@@ -418,7 +423,10 @@ class PurchaseInvoice(BuyingController):
 
 					# sub-contracting warehouse
 					if flt(item.rm_supp_cost):
-						supplier_warehouse_account = warehouse_account[self.supplier_warehouse]["name"]
+						supplier_warehouse_account = warehouse_account[self.supplier_warehouse]["account"]
+						if not supplier_warehouse_account:
+							frappe.throw(_("Please set account in Warehouse {0}")
+								.format(self.supplier_warehouse))
 						gl_entries.append(self.get_gl_dict({
 							"account": supplier_warehouse_account,
 							"against": item.expense_account,
@@ -602,6 +610,8 @@ class PurchaseInvoice(BuyingController):
 			))
 
 	def on_cancel(self):
+		super(PurchaseInvoice, self).on_cancel()
+
 		self.check_for_closed_status()
 
 		self.update_status_updater_args()
@@ -705,3 +715,22 @@ def get_fixed_asset_account(asset, account=None):
 			filters={"parent": asset_category, "company_name": company}, fieldname="fixed_asset_account")
 
 	return account
+
+@frappe.whitelist()
+def make_stock_entry(source_name, target_doc=None):
+	doc = get_mapped_doc("Purchase Invoice", source_name, {
+		"Purchase Invoice": {
+			"doctype": "Stock Entry",
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Purchase Invoice Item": {
+			"doctype": "Stock Entry Detail",
+			"field_map": {
+				"stock_qty": "transfer_qty"
+			},
+		}
+	}, target_doc)
+
+	return doc

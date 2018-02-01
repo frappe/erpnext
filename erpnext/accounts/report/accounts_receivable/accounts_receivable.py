@@ -162,8 +162,7 @@ class ReceivablePayableReport(object):
 
 	def get_entries_till(self, report_date, party_type):
 		# returns a generator
-		return (e for e in self.get_gl_entries(party_type)
-			if getdate(e.posting_date) <= report_date)
+		return (e for e in self.get_gl_entries(party_type) if getdate(e.posting_date) <= report_date)
 
 	def is_receivable_or_payable(self, gle, dr_or_cr, future_vouchers):
 		return (
@@ -250,7 +249,7 @@ class ReceivablePayableReport(object):
 			else:
 				select_fields = "sum(debit) as debit, sum(credit) as credit"
 
-			self.gl_entries = frappe.db.sql("""select name, posting_date, account, party_type, party,
+			self.gl_entries = frappe.db.sql("""select name, posting_date, account, party_type, party, 
 				voucher_type, voucher_no, against_voucher_type, against_voucher,
 				account_currency, remarks, {0}
 				from `tabGL Entry`
@@ -283,11 +282,27 @@ class ReceivablePayableReport(object):
 				conditions.append("""party in (select name from tabCustomer
 					where exists(select name from `tabCustomer Group` where lft >= {0} and rgt <= {1}
 						and name=tabCustomer.customer_group))""".format(lft, rgt))
+			
+			if self.filters.get("territory"):
+				lft, rgt = frappe.db.get_value("Territory",
+					self.filters.get("territory"), ["lft", "rgt"])
 
-			if self.filters.get("credit_days_based_on"):
-				conditions.append("party in (select name from tabCustomer where credit_days_based_on=%s)")
-				values.append(self.filters.get("credit_days_based_on"))
+				conditions.append("""party in (select name from tabCustomer
+					where exists(select name from `tabTerritory` where lft >= {0} and rgt <= {1}
+						and name=tabCustomer.territory))""".format(lft, rgt))
 
+			if self.filters.get("payment_terms_template"):
+				conditions.append("party in (select name from tabCustomer where payment_terms=%s)")
+				values.append(self.filters.get("payment_terms_template"))
+
+			if self.filters.get("sales_partner"):
+				conditions.append("party in (select name from tabCustomer where default_sales_partner=%s)")
+				values.append(self.filters.get("sales_partner"))
+
+			if self.filters.get("sales_person"):
+				conditions.append("""party in (select parent
+					from `tabSales Team` where sales_person=%s and parenttype = 'Customer')""")
+				values.append(self.filters.get("sales_person"))
 		return " and ".join(conditions), values
 
 	def get_gl_entries_for(self, party, party_type, against_voucher_type, against_voucher):
@@ -309,14 +324,16 @@ class ReceivablePayableReport(object):
 
 		rows = []
 		for d in data:
-			rows.append(d[self.ageing_col_idx_start : self.ageing_col_idx_start+4])
-
-		if rows:
-			rows.insert(0, [[d.get("label")] for d in ageing_columns])
+			rows.append(
+				{
+					'values': d[self.ageing_col_idx_start : self.ageing_col_idx_start+4]
+				}
+			)
 
 		return {
 			"data": {
-				'labels': rows
+				'labels': [d.get("label") for d in ageing_columns],
+				'datasets': rows
 			},
 			"type": 'percentage'
 		}

@@ -1,5 +1,5 @@
 {
- "add_total_row": 0, 
+ "add_total_row": 1, 
  "apply_user_permissions": 1, 
  "creation": "2013-07-30 17:28:49", 
  "disabled": 0, 
@@ -7,7 +7,7 @@
  "doctype": "Report", 
  "idx": 3, 
  "is_standard": "Yes", 
- "modified": "2017-02-24 20:20:20.613388", 
+ "modified": "2017-11-06 13:04:36.338268", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Delivered Items To Be Billed", 

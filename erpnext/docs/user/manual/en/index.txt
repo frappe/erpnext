@@ -1,6 +1,7 @@
 introduction
 setting-up
 accounts
+asset
 stock
 CRM
 selling
@@ -15,3 +16,4 @@ website
 using-erpnext
 regional
 customize-erpnext
+education

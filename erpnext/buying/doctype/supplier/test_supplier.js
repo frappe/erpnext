@@ -10,7 +10,6 @@ QUnit.test("test: supplier", function(assert) {
 				{supplier_type: 'Hardware'},
 				{country: 'India'},
 				{default_currency: 'INR'},
-				{credit_days_based_on: 'Fixed Days'},
 				{accounts: [
 					[
 						{'company': "For Testing"},
@@ -56,7 +55,8 @@ QUnit.test("test: supplier", function(assert) {
 		() => frappe.click_button('New Contact'),
 		() => {
 			return frappe.tests.set_form_values(cur_frm, [
-				{first_name: "Contact 3"}
+				{first_name: "Contact 3"},
+				{email_id: "test@supplier.com"}
 			]);
 		},
 		() => cur_frm.save(),

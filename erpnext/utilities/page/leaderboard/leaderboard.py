@@ -13,8 +13,6 @@ from erpnext.accounts.utils import get_currency_precision
 def get_leaderboard(doctype, timespan, field, start=0):
 	"""return top 10 items for that doctype based on conditions"""
 
-	print('doctype', doctype, timespan, field, start)
-
 	filters = {"modified":(">=", get_date_from_string(timespan))}
 	items = []
 	if doctype == "Customer":
@@ -36,7 +34,8 @@ def get_all_customers(doctype, filters, items, field, start=0, limit=20):
 	x = frappe.get_list(doctype, filters=filters, limit_start=start, limit_page_length=limit)
 
 	for val in x:
-		y = dict(frappe.db.sql('''select name, grand_total from `tabSales Invoice` where customer = %s''', (val.name)))
+		y = dict(frappe.db.sql('''select name, grand_total from `tabSales Invoice`\
+			where customer = %s and docstatus != 2''', (val.name)))
 		invoice_list = y.keys()
 		if len(invoice_list) > 0:
 			item_count = frappe.db.sql('''select count(name) from `tabSales Invoice Item` where parent in (%s)''' % ", ".join(
@@ -84,8 +83,6 @@ def get_all_items(doctype, filters, items, field, start=0, limit=20):
 			"href":"#Form/Item/" + val.name,
 			"value": value}
 		items.append(item_obj)
-
-	print(items)
 
 	items.sort(key=lambda k: k['value'], reverse=True)
 	return items

@@ -36,7 +36,7 @@ Fields are much more than database columns, they can be:
 1. Actions (button)
 1. Attachments or Images
 
-<img alt="Doc fields" class="screenshot" src="/docs/assets/img/setup/customize/doctype-all-fields.png">
+<img alt="Doc fields" class="screenshot" src="/docs/assets/img/setup/customize/Doctype-all-fields.png">
 
 When you add fields, you need to enter the **Type**. **Label** is optional for Section Break and Column Break. **Name** (`fieldname`) is the name of the database table column.
 
@@ -52,13 +52,13 @@ In this section, you can define criteria based on which document for this doctyp
 
 In this table, you should select roles and define permission roles for them for this Doctype.
 
-<img alt="Doctype Permissions" class="screenshot" src="/docs/assets/img/setup/customize/doctype-permissions.png">
+<img alt="Doctype Permissions" class="screenshot" src="/docs/assets/img/setup/customize/Doctype-permissions.png">
 
 #### Save DocType
 
 On saving doctype, you will get pop-up to provide name for this Doctype.
 
-<img alt="Doctype Save" class="screenshot" src="/docs/assets/img/setup/customize/doctype-save.png">
+<img alt="Doctype Save" class="screenshot" src="/docs/assets/img/setup/customize/Doctype-save.png">
 
 #### DocType in System
 
@@ -67,12 +67,12 @@ Human Resource module, to access this doctype, go to:
 
 `Human Resource > Document > Book`
 
-<img alt="Doctype List" class="screenshot" src="/docs/assets/img/setup/customize/doctype-list-view.png">
+<img alt="Doctype List" class="screenshot" src="/docs/assets/img/setup/customize/Doctype-list-view.png">
 
 #### Book master
 
 Using the fields entered, following is the master one book.
 
-<img alt="Doctype Form" class="screenshot" src="/docs/assets/img/setup/customize/doctype-book-added.png">
+<img alt="Doctype Form" class="screenshot" src="/docs/assets/img/setup/customize/Doctype-book-added.png">
 
 {next}

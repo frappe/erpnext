@@ -24,7 +24,7 @@ QUnit.test("test: purchase order with taxes and charges", function(assert) {
 					]
 				]},
 
-				{taxes_and_charges: 'TEST In State GST'}
+				{taxes_and_charges: 'TEST In State GST - FT'}
 			]);
 		},
 

@@ -24,6 +24,8 @@ frappe.treeview_settings["Account"] = {
 	fields: [
 		{fieldtype:'Data', fieldname:'account_name', label:__('New Account Name'), reqd:true,
 			description: __("Name of new Account. Note: Please don't create accounts for Customers and Suppliers")},
+		{fieldtype:'Data', fieldname:'account_number', label:__('Account Number'),
+			description: __("Number of new Account, it will be included in the account name as a prefix")},
 		{fieldtype:'Check', fieldname:'is_group', label:__('Is Group'),
 			description: __('Further accounts can be made under Groups, but entries can be made against non-Groups')},
 		{fieldtype:'Select', fieldname:'root_type', label:__('Root Type'),
@@ -41,16 +43,53 @@ frappe.treeview_settings["Account"] = {
 			description: __("Optional. Sets company's default currency, if not specified.")}
 	],
 	ignore_fields:["parent_account"],
+	onload: function(treeview) {
+		function get_company() {
+			return treeview.page.fields_dict.company.get_value();
+		}
+
+		// tools
+		treeview.page.add_inner_button(__("Chart of Cost Centers"), function() {
+			frappe.set_route('Tree', 'Cost Center', {company: get_company()});
+		}, __('View'));
+
+		treeview.page.add_inner_button(__("Opening Invoice Creation Tool"), function() {
+			frappe.set_route('Form', 'Opening Invoice Creation Tool', {company: get_company()});
+		}, __('View'));
+
+		treeview.page.add_inner_button(__("Period Closing Voucher"), function() {
+			frappe.set_route('List', 'Period Closing Voucher', {company: get_company()});
+		}, __('View'));
+
+		// make
+		treeview.page.add_inner_button(__("Journal Entry"), function() {
+			frappe.new_doc('Journal Entry', {company: get_company()});
+		}, __('Make'));
+		treeview.page.add_inner_button(__("New Company"), function() {
+			frappe.new_doc('Company');
+		}, __('Make'));
+
+		// financial statements
+		for (let report of ['Trial Balance', 'General Ledger', 'Balance Sheet',
+			'Profit and Loss', 'Cash Flow Statement', 'Accounts Payable', 'Accounts Receivable']) {
+			treeview.page.add_inner_button(__(report), function() {
+				frappe.set_route('query-report', report, {company: get_company()});
+			}, __('Financial Statements'));
+		}
+
+	},
 	onrender: function(node) {
-		var dr_or_cr = node.data.balance < 0 ? "Cr" : "Dr";
-		if (node.data && node.data.balance!==undefined) {
-			$('<span class="balance-area pull-right text-muted small">'
-				+ (node.data.balance_in_account_currency ?
-					(format_currency(Math.abs(node.data.balance_in_account_currency),
-						node.data.account_currency) + " / ") : "")
-				+ format_currency(Math.abs(node.data.balance), node.data.company_currency)
-				+ " " + dr_or_cr
-				+ '</span>').insertBefore(node.$ul);
+		if(frappe.boot.user.can_read.indexOf("GL Entry") !== -1){
+			var dr_or_cr = node.data.balance < 0 ? "Cr" : "Dr";
+			if (node.data && node.data.balance!==undefined) {
+				$('<span class="balance-area pull-right text-muted small">'
+					+ (node.data.balance_in_account_currency ?
+						(format_currency(Math.abs(node.data.balance_in_account_currency),
+							node.data.account_currency) + " / ") : "")
+					+ format_currency(Math.abs(node.data.balance), node.data.company_currency)
+					+ " " + dr_or_cr
+					+ '</span>').insertBefore(node.$ul);
+			}
 		}
 	},
 	toolbar: [

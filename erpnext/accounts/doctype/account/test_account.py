@@ -2,9 +2,40 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+import unittest
 import frappe
 from erpnext.stock import get_warehouse_account, get_company_default_inventory_account
 
+class TestAccount(unittest.TestCase):
+	def test_rename_account(self):
+		if not frappe.db.exists("Account", "1210 - Debtors - _TC"):
+			acc = frappe.new_doc("Account")
+			acc.account_name = "Debtors"
+			acc.parent_account = "Accounts Receivable - _TC"
+			acc.account_number = "1210"
+			acc.company = "_Test Company"
+			acc.insert()
+
+		account_number, account_name = frappe.db.get_value("Account", "1210 - Debtors - _TC",
+			["account_number", "account_name"])
+		self.assertEqual(account_number, "1210")
+		self.assertEqual(account_name, "Debtors")
+
+		frappe.rename_doc("Account", "1210 - Debtors - _TC", "1211 - Debtors 1 - _TC")
+
+		new_acc = frappe.db.get_value("Account", "1211 - Debtors 1 - _TC",
+			["account_name", "account_number"], as_dict=1)
+		self.assertEqual(new_acc.account_name, "Debtors 1")
+		self.assertEqual(new_acc.account_number, "1211")
+
+		frappe.rename_doc("Account", "1211 - Debtors 1 - _TC", "Debtors 2")
+
+		new_acc = frappe.db.get_value("Account", "1211 - Debtors 2 - _TC",
+			["account_name", "account_number"], as_dict=1)
+		self.assertEqual(new_acc.account_name, "Debtors 2")
+		self.assertEqual(new_acc.account_number, "1211")
+
+		frappe.delete_doc("Account", "1211 - Debtors 2 - _TC")
 
 def _make_test_records(verbose):
 	from frappe.test_runner import make_test_objects
@@ -21,6 +52,7 @@ def _make_test_records(verbose):
 		["_Test Account Customs Duty", "_Test Account Stock Expenses", 0, "Tax", None],
 		["_Test Account Insurance Charges", "_Test Account Stock Expenses", 0, "Chargeable", None],
 		["_Test Account Stock Adjustment", "_Test Account Stock Expenses", 0, "Stock Adjustment", None],
+		["_Test Employee Advance", "Current Liabilities", 0, None, None],
 
 		["_Test Account Tax Assets", "Current Assets", 1, None, None],
 		["_Test Account VAT", "_Test Account Tax Assets", 0, "Tax", None],

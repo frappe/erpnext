@@ -30,7 +30,7 @@ class TestSubscription(unittest.TestCase):
 
 		new_quotation = frappe.get_doc('Quotation', new_quotation)
 
-		for fieldname in ['customer', 'company', 'order_type', 'total', 'grand_total']:
+		for fieldname in ['customer', 'company', 'order_type', 'total', 'net_total']:
 			self.assertEquals(quotation.get(fieldname), new_quotation.get(fieldname))
 
 		for fieldname in ['item_code', 'qty', 'rate', 'amount']:

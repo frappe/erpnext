@@ -1,7 +1,7 @@
 QUnit.module('Sales Taxes and Charges Template');
 
 QUnit.test("test sales taxes and charges template", function(assert) {
-	assert.expect(1);
+	assert.expect(2);
 	let done = assert.async();
 	frappe.run_serially([
 		() => {
@@ -19,7 +19,10 @@ QUnit.test("test sales taxes and charges template", function(assert) {
 				]}
 			]);
 		},
-		() => {assert.ok(cur_frm.doc.title=='TEST In State GST');},
+		() => {
+			assert.ok(cur_frm.doc.title=='TEST In State GST');
+			assert.ok(cur_frm.doc.name=='TEST In State GST - FT');
+		},
 		() => done()
 	]);
 });

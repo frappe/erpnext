@@ -3,10 +3,9 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
 
 def execute():
-	domain = _('Healthcare')
+	domain = 'Healthcare'
 	if not frappe.db.exists('Domain', domain):
 		frappe.get_doc({
 			'doctype': 'Domain',

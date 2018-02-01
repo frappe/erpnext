@@ -6,7 +6,7 @@
 
 from __future__ import unicode_literals
 import frappe, unittest, erpnext
-from frappe.utils import flt
+from frappe.utils import flt, today
 from erpnext.stock.doctype.material_request.material_request import raise_production_orders
 
 class TestMaterialRequest(unittest.TestCase):
@@ -557,6 +557,49 @@ class TestMaterialRequest(unittest.TestCase):
 		new_requested_qty = frappe.db.sql("""select indented_qty from `tabBin` where \
 			item_code= %s and warehouse= %s """, (mr.items[0].item_code, mr.items[0].warehouse))[0][0]
 		self.assertEquals(requested_qty, new_requested_qty)
+
+	def test_multi_uom_for_purchase(self):
+		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+
+		mr = frappe.copy_doc(test_records[0])
+		mr.material_request_type = 'Purchase'
+		item = mr.items[0]
+		mr.schedule_date = today()
+
+		if not frappe.db.get_value('UOM Conversion Detail',
+			 {'parent': item.item_code, 'uom': 'Kg'}):
+			 item_doc = frappe.get_doc('Item', item.item_code)
+			 item_doc.append('uoms', {
+				 'uom': 'Kg',
+				 'conversion_factor': 5
+			 })
+			 item_doc.save(ignore_permissions=True)
+
+		item.uom = 'Kg'
+		for item in mr.items:
+			item.schedule_date = mr.schedule_date
+
+		mr.insert()
+		self.assertRaises(frappe.ValidationError, make_purchase_order,
+			mr.name)
+
+		mr = frappe.get_doc("Material Request", mr.name)
+		mr.submit()
+		item = mr.items[0]
+
+		self.assertEquals(item.uom, "Kg")
+		self.assertEquals(item.conversion_factor, 5.0)
+		self.assertEquals(item.stock_qty, flt(item.qty * 5))
+
+		po = make_purchase_order(mr.name)
+		self.assertEquals(po.doctype, "Purchase Order")
+		self.assertEquals(len(po.get("items")), len(mr.get("items")))
+
+		po.supplier = '_Test Supplier'
+		po.insert()
+		po.submit()
+		mr = frappe.get_doc("Material Request", mr.name)
+		self.assertEquals(mr.per_ordered, 100)
 
 test_dependencies = ["Currency Exchange", "BOM"]
 test_records = frappe.get_test_records('Material Request')

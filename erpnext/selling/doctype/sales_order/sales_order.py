@@ -14,6 +14,7 @@ from frappe.desk.notifications import clear_doctype_notifications
 from frappe.contacts.doctype.address.address import get_company_address
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.accounts.doctype.subscription.subscription import get_next_schedule_date
+from erpnext.selling.doctype.customer.customer import check_credit_limit
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -103,13 +104,13 @@ class SalesOrder(SellingController):
 	def validate_delivery_date(self):
 		if self.order_type == 'Sales':
 			if not self.delivery_date:
-				self.delivery_date = max([d.delivery_date for d in self.get("items")])
+				self.delivery_date = max([d.delivery_date for d in self.get("items") if d.delivery_date])
 
 			if self.delivery_date:
 				for d in self.get("items"):
 					if not d.delivery_date:
 						d.delivery_date = self.delivery_date
-					
+
 					if getdate(self.transaction_date) > getdate(d.delivery_date):
 						frappe.msgprint(_("Expected Delivery Date should be after Sales Order Date"),
 							indicator='orange', title=_('Warning'))
@@ -188,49 +189,68 @@ class SalesOrder(SellingController):
 	def update_project(self):
 		project_list = []
 		if self.project:
-				project = frappe.get_doc("Project", self.project)
-				project.flags.dont_sync_tasks = True
-				project.update_sales_costing()
-				project.save()
-				project_list.append(self.project)
+			project = frappe.get_doc("Project", self.project)
+			project.flags.dont_sync_tasks = True
+			project.update_sales_amount()
+			project.save()
+			project_list.append(self.project)
 
 	def check_credit_limit(self):
-		from erpnext.selling.doctype.customer.customer import check_credit_limit
-		check_credit_limit(self.customer, self.company)
+		# if bypass credit limit check is set to true (1) at sales order level,
+		# then we need not to check credit limit and vise versa
+		if not cint(frappe.db.get_value("Customer", self.customer, "bypass_credit_limit_check_at_sales_order")):
+			check_credit_limit(self.customer, self.company)
 
 	def check_nextdoc_docstatus(self):
 		# Checks Delivery Note
-		submit_dn = frappe.db.sql_list("""select t1.name from `tabDelivery Note` t1,`tabDelivery Note Item` t2
+		submit_dn = frappe.db.sql_list("""
+			select t1.name
+			from `tabDelivery Note` t1,`tabDelivery Note Item` t2
 			where t1.name = t2.parent and t2.against_sales_order = %s and t1.docstatus = 1""", self.name)
+
 		if submit_dn:
-			frappe.throw(_("Delivery Notes {0} must be cancelled before cancelling this Sales Order").format(comma_and(submit_dn)))
+			frappe.throw(_("Delivery Notes {0} must be cancelled before cancelling this Sales Order")
+				.format(comma_and(submit_dn)))
 
 		# Checks Sales Invoice
 		submit_rv = frappe.db.sql_list("""select t1.name
 			from `tabSales Invoice` t1,`tabSales Invoice Item` t2
 			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus = 1""",
 			self.name)
+
 		if submit_rv:
-			frappe.throw(_("Sales Invoice {0} must be cancelled before cancelling this Sales Order").format(comma_and(submit_rv)))
+			frappe.throw(_("Sales Invoice {0} must be cancelled before cancelling this Sales Order")
+				.format(comma_and(submit_rv)))
 
 		#check maintenance schedule
-		submit_ms = frappe.db.sql_list("""select t1.name from `tabMaintenance Schedule` t1,
-			`tabMaintenance Schedule Item` t2
+		submit_ms = frappe.db.sql_list("""
+			select t1.name
+			from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2
 			where t2.parent=t1.name and t2.sales_order = %s and t1.docstatus = 1""", self.name)
+
 		if submit_ms:
-			frappe.throw(_("Maintenance Schedule {0} must be cancelled before cancelling this Sales Order").format(comma_and(submit_ms)))
+			frappe.throw(_("Maintenance Schedule {0} must be cancelled before cancelling this Sales Order")
+				.format(comma_and(submit_ms)))
 
 		# check maintenance visit
-		submit_mv = frappe.db.sql_list("""select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2
+		submit_mv = frappe.db.sql_list("""
+			select t1.name
+			from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2
 			where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1""",self.name)
+
 		if submit_mv:
-			frappe.throw(_("Maintenance Visit {0} must be cancelled before cancelling this Sales Order").format(comma_and(submit_mv)))
+			frappe.throw(_("Maintenance Visit {0} must be cancelled before cancelling this Sales Order")
+				.format(comma_and(submit_mv)))
 
 		# check production order
-		pro_order = frappe.db.sql_list("""select name from `tabProduction Order`
+		pro_order = frappe.db.sql_list("""
+			select name
+			from `tabProduction Order`
 			where sales_order = %s and docstatus = 1""", self.name)
+
 		if pro_order:
-			frappe.throw(_("Production Order {0} must be cancelled before cancelling this Sales Order").format(comma_and(pro_order)))
+			frappe.throw(_("Production Order {0} must be cancelled before cancelling this Sales Order")
+				.format(comma_and(pro_order)))
 
 	def check_modified_date(self):
 		mod_db = frappe.db.get_value("Sales Order", self.name, "modified")
@@ -336,26 +356,28 @@ class SalesOrder(SellingController):
 				bom = get_default_bom_item(i.item_code)
 				if bom:
 					stock_qty = i.qty if i.doctype == 'Packed Item' else i.stock_qty
-					items.append(dict(
-						item_code= i.item_code,
-						bom = bom,
-						warehouse = i.warehouse,
-						pending_qty= stock_qty - flt(frappe.db.sql('''select sum(qty) from `tabProduction Order`
-							where production_item=%s and sales_order=%s''', (i.item_code, self.name))[0][0])
-					))
-
+					pending_qty= stock_qty - flt(frappe.db.sql('''select sum(qty) from `tabProduction Order`
+							where production_item=%s and sales_order=%s and sales_order_item = %s and docstatus<2''', (i.item_code, self.name, i.name))[0][0])
+					if pending_qty:
+						items.append(dict(
+							item_code= i.item_code,
+							bom = bom,
+							warehouse = i.warehouse,
+							pending_qty = pending_qty,
+							sales_order_item = i.name
+						))
 		return items
 
 	def on_recurring(self, reference_doc, subscription_doc):
-		self.set("delivery_date", get_next_schedule_date(reference_doc.delivery_date, subscription_doc.frequency,
-			cint(subscription_doc.repeat_on_day)))
+		self.set("delivery_date", get_next_schedule_date(reference_doc.delivery_date,
+			subscription_doc.frequency, cint(subscription_doc.repeat_on_day)))
 
 		for d in self.get("items"):
 			reference_delivery_date = frappe.db.get_value("Sales Order Item",
 				{"parent": reference_doc.name, "item_code": d.item_code, "idx": d.idx}, "delivery_date")
 
-			d.set("delivery_date",
-				get_next_schedule_date(reference_delivery_date, subscription_doc.frequency, cint(subscription_doc.repeat_on_day)))
+			d.set("delivery_date", get_next_schedule_date(reference_delivery_date,
+				subscription_doc.frequency, cint(subscription_doc.repeat_on_day)))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
@@ -465,7 +487,7 @@ def make_delivery_note(source_name, target_doc=None):
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
-		
+
 		# set company address
 		target.update(get_company_address(target.company))
 		if target.company_address:
@@ -477,9 +499,11 @@ def make_delivery_note(source_name, target_doc=None):
 		target.qty = flt(source.qty) - flt(source.delivered_qty)
 
 		item = frappe.db.get_value("Item", target.item_code, ["item_group", "selling_cost_center"], as_dict=1)
-		target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
-			or item.selling_cost_center \
-			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
+
+		if item:
+			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
+				or item.selling_cost_center \
+				or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
 
 	target_doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -534,10 +558,12 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = target.amount / flt(source.rate) if (source.rate and source.billed_amt) else source.qty
 
-		item = frappe.db.get_value("Item", target.item_code, ["item_group", "selling_cost_center"], as_dict=1)
-		target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center") \
-			or item.selling_cost_center \
-			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
+		if source_parent.project:
+			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center")
+		if not target.cost_center and target.item_code:
+			item = frappe.db.get_value("Item", target.item_code, ["item_group", "selling_cost_center"], as_dict=1)
+			target.cost_center = item.selling_cost_center \
+				or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -635,7 +661,7 @@ def get_events(start, end, filters=None):
 
 	data = frappe.db.sql("""
 		select
-			`tabSales Order`.name, `tabSales Order`.customer_name, `tabSales Order`.status,
+			distinct `tabSales Order`.name, `tabSales Order`.customer_name, `tabSales Order`.status,
 			`tabSales Order`.delivery_status, `tabSales Order`.billing_status,
 			`tabSales Order Item`.delivery_date
 		from
@@ -760,13 +786,19 @@ def make_production_orders(items, sales_order, company, project=None):
 	out = []
 
 	for i in items:
+		if not i.get("bom"):
+			frappe.throw(_("Please select BOM against item {0}").format(i.get("item_code")))
+		if not i.get("pending_qty"):
+			frappe.throw(_("Please select Qty against item {0}").format(i.get("item_code")))
+
 		production_order = frappe.get_doc(dict(
 			doctype='Production Order',
 			production_item=i['item_code'],
-			bom_no=i['bom'],
+			bom_no=i.get('bom'),
 			qty=i['pending_qty'],
 			company=company,
 			sales_order=sales_order,
+			sales_order_item=i['sales_order_item'],
 			project=project,
 			fg_warehouse=i['warehouse']
 		)).insert()

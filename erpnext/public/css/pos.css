@@ -34,7 +34,7 @@
   margin-left: 15px;
 }
 .cart-wrapper {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .cart-wrapper .list-item__content:not(:first-child) {
   justify-content: flex-end;
@@ -121,7 +121,6 @@ input[type=number]::-webkit-outer-spin-button {
   border-collapse: collapse;
   cursor: pointer;
   display: table;
-  margin: auto;
 }
 .num-row {
   display: table-row;
@@ -170,5 +169,8 @@ input[type=number]::-webkit-outer-spin-button {
   height: 60px;
 }
 .grand-total .grand-total-value {
-  font-size: 24px;
+  font-size: 18px;
+}
+.rounded-total-value {
+  font-size: 18px;
 }

@@ -1,0 +1,69 @@
+{% if doc.published %}
+	<div style="margin-bottom: 30px; max-width: 600px" class="with-border clickable">
+		<a href={{ route }}>
+			<h3>{{ doc.name }}</h3>
+			<p>
+				<span class="label"> Chapter Head : {{ frappe.db.get_value('User', chapter_head, 'full_name') }} </span>
+				<span class="label">
+					{% if members %}
+						{% set index = [] %}
+						{% for user in members %}
+							{% if user.enabled == 1 %}
+								{% set __ = index.append(1) %}
+							{% endif %}
+						{% endfor %}
+						Members: {{ index|length }}
+					{% else %}
+						Members: 0
+					{% endif %}
+					</span>
+				<!-- Assignment of value to global variable not working in jinja -->
+			</p>
+			<p>{{ html2text(doc.introduction[:200]) }}{% if introduction|len > 200 %}...{% endif %}</p>
+		</a>
+	</div>
+{% endif %}
+
+<!-- this is a sample default list template -->
+<style type="text/css">
+
+.label {
+	font-weight: normal;
+	background-color: #d1d8dd;
+	font-size: 13px;
+	padding: 3px 7px;
+	margin-right: 10px;
+}
+
+
+.with-border {
+	border: 1px solid #d1d8dd;
+	border-radius: 3px;
+	padding: 15px;
+	margin-bottom: 30px;
+}
+
+.with-border h3 {
+	margin-top: 0px;
+}
+
+a {
+	color: #5E64FF;
+}
+
+.clickable a {
+	color: #161c23;
+}
+
+.with-border.clickable:hover {
+	border-color: #36414C;
+	background-color: #fafbfc;
+
+}
+
+.with-border a, .with-border a:hover {
+	text-decoration: none;
+}
+
+
+</style>

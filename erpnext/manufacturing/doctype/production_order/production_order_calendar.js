@@ -42,5 +42,5 @@ frappe.views.calendar["Production Order"] = {
 			"label": __("WIP Warehouse")
 		}
 	],
-	get_events_method: "erpnext.manufacturing.doctype.production_order.production_order.get_events"
+	get_events_method: "frappe.desk.calendar.get_events"
 }

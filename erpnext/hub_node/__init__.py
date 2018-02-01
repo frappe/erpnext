@@ -15,13 +15,16 @@ def enable_hub():
 	return hub_settings
 
 @frappe.whitelist()
-def get_items(start=0, limit=20, category=None, order_by=None, text=None):
-	connection = get_connection()
+def get_items(start=0, limit=20, category=None, order_by=None, company=None, text=None):
+	connection = get_client_connection()
 	filters = {
 		'hub_category': category,
 	}
 	if text:
 		filters.update({'item_name': ('like', '%' + text + '%')})
+	if company:
+		filters.update({'company_name': company})
+
 	response = connection.get_list('Hub Item',
 		limit_start=start, limit_page_length=limit,
 		filters=filters)
@@ -29,26 +32,32 @@ def get_items(start=0, limit=20, category=None, order_by=None, text=None):
 
 @frappe.whitelist()
 def get_categories():
-	connection = get_connection()
+	connection = get_client_connection()
 	response = connection.get_list('Hub Category')
 	return response
 
 @frappe.whitelist()
-def get_item_details(hub_sync_id):
-	connection = get_connection()
+def get_item_details(hub_sync_id=None):
+	if not hub_sync_id:
+		return
+	connection = get_client_connection()
 	return connection.get_doc('Hub Item', hub_sync_id)
 
 @frappe.whitelist()
 def get_company_details(hub_sync_id):
-	connection = get_connection()
+	connection = get_client_connection()
 	return connection.get_doc('Hub Company', hub_sync_id)
 
-def get_connection():
+def get_client_connection():
+	# frappeclient connection
+	hub_connection = get_hub_connection()
+	return hub_connection.connection
+
+def get_hub_connection():
 	hub_connector = frappe.get_doc(
 		'Data Migration Connector', 'Hub Connector')
 	hub_connection = hub_connector.get_connection()
-	# frappeclient connection
-	return hub_connection.connection
+	return hub_connection
 
 def make_opportunity(buyer_name, email_id):
 	buyer_name = "HUB-" + buyer_name
@@ -169,7 +178,7 @@ def send_opportunity(contact):
 		user=contact.email_id
 	))
 
-	connection = get_connection()
+	connection = get_hub_connection()
 	response = connection.insert('Hub Message', args)
 
 	return response.ok

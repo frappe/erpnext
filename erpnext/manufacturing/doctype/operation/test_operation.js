@@ -7,14 +7,14 @@ QUnit.test("test: operation", function (assert) {
 
 		// Create a Keyboard operation
 		() => {
-			frappe.tests.make(
+			return frappe.tests.make(
 				"Operation", [
 					{__newname: "Assemble Keyboard"},
 					{workstation: "Keyboard assembly workstation"}
 				]
 			);
 		},
-		() => frappe.timeout(1),
+		() => frappe.timeout(3),
 		() => {
 			assert.ok(cur_frm.docname.includes('Assemble Keyboard'),
 				'Assemble Keyboard created successfully');
@@ -24,25 +24,25 @@ QUnit.test("test: operation", function (assert) {
 
 		// Create a Screen operation
 		() => {
-			frappe.tests.make(
+			return frappe.tests.make(
 				"Operation", [
 					{__newname: 'Assemble Screen'},
 					{workstation: "Screen assembly workstation"}
 				]
 			);
 		},
-		() => frappe.timeout(1),
+		() => frappe.timeout(3),
 
 		// Create a CPU operation
 		() => {
-			frappe.tests.make(
+			return frappe.tests.make(
 				"Operation", [
 					{__newname: 'Assemble CPU'},
 					{workstation: "CPU assembly workstation"}
 				]
 			);
 		},
-		() => frappe.timeout(1),
+		() => frappe.timeout(3),
 
 		() => done()
 	]);

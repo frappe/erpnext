@@ -17,6 +17,13 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	onload: function() {
 		this._super();
 		this.setup_queries();
+		this.frm.set_query('shipping_rule', function() {
+			return {
+				filters: {
+					"shipping_rule_type": "Selling"
+				}
+			};
+		});
 	},
 
 	setup_queries: function() {
@@ -191,6 +198,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				},
 				callback:function(r){
 					if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+					    me.set_batch_number(cdt, cdn);
 						me.batch_no(doc, cdt, cdn);
 					}
 				}
@@ -231,21 +239,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					precision("allocated_amount", sales_person));
 			}
 		});
-	},
-
-	shipping_rule: function() {
-		var me = this;
-		if(this.frm.doc.shipping_rule) {
-			return this.frm.call({
-				doc: this.frm.doc,
-				method: "apply_shipping_rule",
-				callback: function(r) {
-					if(!r.exc) {
-						me.calculate_taxes_and_totals();
-					}
-				}
-			})
-		}
 	},
 
 	batch_no: function(doc, cdt, cdn) {
@@ -343,7 +336,45 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		} else {
 			this.frm.set_value("company_address_display", "");
 		}
-	}
+	},
+
+	conversion_factor: function(doc, cdt, cdn, dont_fetch_price_list_rate) {
+	    this._super(doc, cdt, cdn, dont_fetch_price_list_rate);
+		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn) &&
+			in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+			this.set_batch_number(cdt, cdn);
+		}
+	},
+
+	qty: function(doc, cdt, cdn) {
+	    this._super(doc, cdt, cdn);
+		this.set_batch_number(cdt, cdn);
+	},
+
+	/* Determine appropriate batch number and set it in the form.
+	* @param {string} cdt - Document Doctype
+	* @param {string} cdn - Document name
+	*/
+	set_batch_number: function(cdt, cdn) {
+		const doc = frappe.get_doc(cdt, cdn);
+		if (doc && doc.has_batch_no) {
+			this._set_batch_number(doc);
+		}
+	},
+
+	_set_batch_number: function(doc) {
+		return frappe.call({
+			method: 'erpnext.stock.doctype.batch.batch.get_batch_no',
+			args: {'item_code': doc.item_code, 'warehouse': doc.warehouse, 'qty': flt(doc.qty) * flt(doc.conversion_factor)},
+			callback: function(r) {
+				if(r.message) {
+					frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message);
+				} else {
+				    frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message);
+				}
+			}
+		});
+	},
 });
 
 frappe.ui.form.on(cur_frm.doctype,"project", function(frm) {
