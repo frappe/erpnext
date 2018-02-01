@@ -54,7 +54,6 @@ class Customer(TransactionBase):
 		self.flags.old_lead = self.lead_name
 		validate_party_accounts(self)
 		self.validate_credit_limit_on_change()
-		self.fetch_primary_address_and_contact_detail()
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
@@ -75,7 +74,7 @@ class Customer(TransactionBase):
 
 		if(self.customer_primary_address):
 			primary_address_doc = frappe.get_doc("Address",self.customer_primary_address)
-			self.primary_address = "<br>" + primary_address_doc.get_display()	
+			self.primary_address = primary_address_doc.complete_address
 
 	def create_primary_contact(self):
 		if not self.customer_primary_contact and not self.lead_name:
