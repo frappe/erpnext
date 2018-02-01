@@ -185,12 +185,14 @@ def get_customer_list(doctype, txt, searchfield, start, page_len, filters):
 		("%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, start, page_len))
 
 
-def check_credit_limit(customer, company):
-	customer_outstanding = get_customer_outstanding(customer, company)
+def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, extra_amount=0):
+	customer_outstanding = get_customer_outstanding(customer, company, ignore_outstanding_sales_order)
+	if extra_amount > 0:
+		customer_outstanding += flt(extra_amount)
 
 	credit_limit = get_credit_limit(customer, company)
 	if credit_limit > 0 and flt(customer_outstanding) > credit_limit:
-		msgprint(_("Credit limit has been crossed for customer {0} {1}/{2}")
+		msgprint(_("Credit limit has been crossed for customer {0} ({1}/{2})")
 			.format(customer, customer_outstanding, credit_limit))
 
 		# If not authorized person raise exception
@@ -231,7 +233,8 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 			and dn.customer=%s and dn.company=%s
 			and dn.docstatus = 1 and dn.status not in ('Closed', 'Stopped')
 			and ifnull(dn_item.against_sales_order, '') = ''
-			and ifnull(dn_item.against_sales_invoice, '') = ''""", (customer, company), as_dict=True)
+			and ifnull(dn_item.against_sales_invoice, '') = ''
+		""", (customer, company), as_dict=True)
 
 	outstanding_based_on_dn = 0.0
 

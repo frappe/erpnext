@@ -31,7 +31,7 @@ $.extend(shopping_cart, {
 			method: "erpnext.shopping_cart.cart.apply_coupon_code",
 			btn: btn,
 			args : {
-				applyed_code : $('.txtcoupon').val()
+				applied_code : $('.txtcoupon').val()
 			},
 			callback: function(r) {
 				if (r && r.message){
