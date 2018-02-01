@@ -160,4 +160,3 @@ frappe.ui.form.on("Project", "validate", function (frm) {
         }
     });
 });
-
