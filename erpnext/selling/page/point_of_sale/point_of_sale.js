@@ -464,7 +464,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					if (r.message) {
 						this.frm.meta.default_print_format = r.message.print_format || 'POS Invoice';
 						this.frm.allow_edit_rate = r.message.allow_edit_rate;
-            this.frm.allow_edit_discount = r.message.allow_edit_discount;
+            			this.frm.allow_edit_discount = r.message.allow_edit_discount;
 					}
 				}
 
@@ -715,7 +715,7 @@ class POSCart {
 		this.customer_field.set_value(this.frm.doc.customer);
 	}
 
-  disable_numpad_control() {
+  	disable_numpad_control() {
 		if(!this.frm.allow_edit_rate && !this.frm.allow_edit_discount) {
 			return ['Rate', 'Disc'];
 		}
@@ -1316,15 +1316,15 @@ class NumberPad {
 
 		this.set_class();
 
-    if(this.disable_btns) {
-  		this.disable_btns.forEach((btn) => {
-  			const $btn = this.get_btn(btn);
-  			$btn.prop("disabled", true)
-  			$btn.hover(() => {
-  				$btn.css('cursor','not-allowed');
-  			})
-  		})
-    }
+		if(this.disable_btns) {
+			this.disable_btns.forEach((btn) => {
+				const $btn = this.get_btn(btn);
+				$btn.prop("disabled", true)
+				$btn.hover(() => {
+					$btn.css('cursor','not-allowed');
+				})
+			})
+		}
 	}
 
 	set_class() {
