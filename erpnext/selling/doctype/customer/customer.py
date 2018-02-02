@@ -20,7 +20,6 @@ class Customer(TransactionBase):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)
 		self.load_dashboard_info()
-		self.fetch_primary_address_and_contact_detail()
 
 	def load_dashboard_info(self):
 		info = get_dashboard_info(self.doctype, self.name)
@@ -65,16 +64,6 @@ class Customer(TransactionBase):
 
 		if self.flags.is_new_doc:
 			self.create_lead_address_contact()
-
-	def fetch_primary_address_and_contact_detail(self):
-		if(self.customer_primary_contact):
-			primary_contact_doc = frappe.get_doc("Contact",self.customer_primary_contact)
-			self.mobile_no = primary_contact_doc.mobile_no
-			self.email_id = primary_contact_doc.email_id
-
-		if(self.customer_primary_address):
-			primary_address_doc = frappe.get_doc("Address",self.customer_primary_address)
-			self.primary_address = primary_address_doc.complete_address
 
 	def create_primary_contact(self):
 		if not self.customer_primary_contact and not self.lead_name:
