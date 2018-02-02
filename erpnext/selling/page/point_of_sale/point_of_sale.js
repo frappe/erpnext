@@ -464,6 +464,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					if (r.message) {
 						this.frm.meta.default_print_format = r.message.print_format || 'POS Invoice';
 						this.frm.allow_edit_rate = r.message.allow_edit_rate;
+						this.frm.allow_edit_discount = r.message.allow_edit_discount;
 					}
 				}
 
@@ -553,9 +554,9 @@ class POSCart {
 						<div class="taxes-and-totals">
 							${this.get_taxes_and_totals()}
 						</div>
-						<div class="discount-amount">
-							${this.get_discount_amount()}
-						</div>
+						<div class="discount-amount">`+
+						(!this.frm.allow_edit_discount ? `` : `${this.get_discount_amount()}`)+
+						`</div>
 						<div class="grand-total">
 							${this.get_grand_total()}
 						</div>
@@ -584,6 +585,7 @@ class POSCart {
 		this.numpad && this.numpad.reset_value();
 		this.customer_field.set_value("");
 
+		this.$discount_amount.find('input:text').val('');
 		this.wrapper.find('.grand-total-value').text(
 			format_currency(this.frm.doc.grand_total, this.frm.currency));
 		this.wrapper.find('.rounded-total-value').text(
@@ -714,6 +716,17 @@ class POSCart {
 		this.customer_field.set_value(this.frm.doc.customer);
 	}
 
+	disable_numpad_control() {
+		let disabled_btns = [];
+		if(!this.frm.allow_edit_rate) {
+			disabled_btns.push('Rate');
+		}
+		if(!this.frm.allow_edit_discount) {
+			disabled_btns.push('Disc');
+		}
+		return disabled_btns;
+	}
+
 	make_numpad() {
 		this.numpad = new NumberPad({
 			button_array: [
@@ -728,7 +741,7 @@ class POSCart {
 			disable_highlight: ['Qty', 'Disc', 'Rate', 'Pay'],
 			reset_btns: ['Qty', 'Disc', 'Rate', 'Pay'],
 			del_btn: 'Del',
-			disable_btns: !this.frm.allow_edit_rate ? ['Rate']: [],
+			disable_btns: this.disable_numpad_control(),
 			wrapper: this.wrapper.find('.number-pad-container'),
 			onclick: (btn_value) => {
 				// on click
@@ -1300,13 +1313,15 @@ class NumberPad {
 
 		this.set_class();
 
-		this.disable_btns.forEach((btn) => {
-			const $btn = this.get_btn(btn);
-			$btn.prop("disabled", true)
-			$btn.hover(() => {
-				$btn.css('cursor','not-allowed');
+		if(this.disable_btns) {
+			this.disable_btns.forEach((btn) => {
+				const $btn = this.get_btn(btn);
+				$btn.prop("disabled", true)
+				$btn.hover(() => {
+					$btn.css('cursor','not-allowed');
+				})
 			})
-		})
+		}
 	}
 
 	set_class() {
