@@ -464,7 +464,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					if (r.message) {
 						this.frm.meta.default_print_format = r.message.print_format || 'POS Invoice';
 						this.frm.allow_edit_rate = r.message.allow_edit_rate;
-            			this.frm.allow_edit_discount = r.message.allow_edit_discount;
+						this.frm.allow_edit_discount = r.message.allow_edit_discount;
 					}
 				}
 
@@ -585,6 +585,7 @@ class POSCart {
 		this.numpad && this.numpad.reset_value();
 		this.customer_field.set_value("");
 
+		this.$discount_amount.find('input:text').val('');
 		this.wrapper.find('.grand-total-value').text(
 			format_currency(this.frm.doc.grand_total, this.frm.currency));
 		this.wrapper.find('.rounded-total-value').text(
@@ -715,19 +716,15 @@ class POSCart {
 		this.customer_field.set_value(this.frm.doc.customer);
 	}
 
-  	disable_numpad_control() {
-		if(!this.frm.allow_edit_rate && !this.frm.allow_edit_discount) {
-			return ['Rate', 'Disc'];
+	disable_numpad_control() {
+		let disabled_btns = [];
+		if(!this.frm.allow_edit_rate) {
+			disabled_btns.push('Rate');
 		}
-		if(!this.frm.allow_edit_rate || !this.frm.allow_edit_discount) {
-			if(!this.frm.allow_edit_rate) {
-				return ['Rate'];
-			} else {
-				return ['Disc'];
-			}
-		} else {
-			return [];
+		if(!this.frm.allow_edit_discount) {
+			disabled_btns.push('Disc');
 		}
+		return disabled_btns;
 	}
 
 	make_numpad() {
