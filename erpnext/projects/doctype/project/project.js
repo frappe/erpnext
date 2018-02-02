@@ -95,7 +95,6 @@ frappe.ui.form.on("Project", {
 		};
 		frappe.set_route("List", "Timesheet");
 	},
-
 	make_timesheet: function (frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		frappe.model.with_doctype('Timesheet', function () {
