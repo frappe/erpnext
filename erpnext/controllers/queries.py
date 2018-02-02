@@ -152,7 +152,7 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	conditions = []
 
-	return frappe.db.sql("""select tabItem.name, tabItem.item_group, tabItem.image,
+	return frappe.db.sql("""select tabItem.name, tabItem.item_group,
 		if(length(tabItem.item_name) > 40,
 			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name,
 		if(length(tabItem.description) > 40, \
@@ -257,7 +257,7 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	cond = ""
 	if filters.get("posting_date"):
-		cond = "and (ifnull(batch.expiry_date, '')='' or batch.expiry_date >= %(posting_date)s)"
+		cond = "and (batch.expiry_date is null or batch.expiry_date >= %(posting_date)s)"
 
 	batch_nos = None
 	args = {
@@ -270,13 +270,14 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	}
 
 	if args.get('warehouse'):
-		batch_nos = frappe.db.sql("""select sle.batch_no, round(sum(sle.actual_qty),2), sle.stock_uom, batch.expiry_date
+		batch_nos = frappe.db.sql("""select sle.batch_no, round(sum(sle.actual_qty),2), sle.stock_uom, batch.expiry_date, batch.manufacturing_date
 				from `tabStock Ledger Entry` sle
 				    INNER JOIN `tabBatch` batch on sle.batch_no = batch.name
 				where
 					sle.item_code = %(item_code)s
 					and sle.warehouse = %(warehouse)s
 					and sle.batch_no like %(txt)s
+					or batch.manufacturing_date like %(txt)s
 					and batch.docstatus < 2
 					{0}
 					{match_conditions}
@@ -287,9 +288,10 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	if batch_nos:
 		return batch_nos
 	else:
-		return frappe.db.sql("""select name, expiry_date from `tabBatch` batch
+		return frappe.db.sql("""select name, expiry_date, manufacturing_date from `tabBatch` batch
 			where item = %(item_code)s
 			and name like %(txt)s
+			or manufacturing_date like %(txt)s
 			and docstatus < 2
 			{0}
 			{match_conditions}
