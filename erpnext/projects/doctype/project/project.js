@@ -1,18 +1,15 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
-
 frappe.ui.form.on("Project", {
-	setup: function (frm) {
+	setup: function(frm) {
 		frm.set_indicator_formatter('title',
-			function (doc) {
+			function(doc) {
 				let indicator = 'orange';
 				if (doc.status == 'Overdue') {
 					indicator = 'red';
-				}
-				else if (doc.status == 'Cancelled') {
+				} else if (doc.status == 'Cancelled') {
 					indicator = 'dark grey';
-				}
-				else if (doc.status == 'Closed') {
+				} else if (doc.status == 'Closed') {
 					indicator = 'green';
 				}
 				return indicator;
@@ -20,9 +17,9 @@ frappe.ui.form.on("Project", {
 		);
 	},
 
-	onload: function (frm) {
+	onload: function(frm) {
 		var so = frappe.meta.get_docfield("Project", "sales_order");
-		so.get_route_options_for_new_doc = function (field) {
+		so.get_route_options_for_new_doc = function(field) {
 			if (frm.is_new()) return;
 			return {
 				"customer": frm.doc.customer,
@@ -32,14 +29,14 @@ frappe.ui.form.on("Project", {
 
 		frm.set_query('customer', 'erpnext.controllers.queries.customer_query');
 
-		frm.set_query("user", "users", function () {
+		frm.set_query("user", "users", function() {
 			return {
 				query: "erpnext.projects.doctype.project.project.get_users_for_project"
 			}
 		});
 
 		// sales order
-		frm.set_query('sales_order', function () {
+		frm.set_query('sales_order', function() {
 			var filters = {
 				'project': ["in", frm.doc.__islocal ? [""] : [frm.doc.name, ""]]
 			};
@@ -54,15 +51,17 @@ frappe.ui.form.on("Project", {
 		});
 	},
 
-	refresh: function (frm) {
+	refresh: function(frm) {
 		if (frm.doc.__islocal) {
 			frm.web_link && frm.web_link.remove();
 		} else {
 			frm.add_web_link("/projects?project=" + encodeURIComponent(frm.doc.name));
 
 			if (frappe.model.can_read("Task")) {
-				frm.add_custom_button(__("Gantt Chart"), function () {
-					frappe.route_options = {"project": frm.doc.name};
+				frm.add_custom_button(__("Gantt Chart"), function() {
+					frappe.route_options = {
+						"project": frm.doc.name
+					};
 					frappe.set_route("List", "Task", "Gantt");
 				});
 			}
@@ -70,9 +69,9 @@ frappe.ui.form.on("Project", {
 			frm.trigger('show_dashboard');
 		}
 	},
-	tasks_refresh: function (frm) {
+	tasks_refresh: function(frm) {
 		var grid = frm.get_field('tasks').grid;
-		grid.wrapper.find('select[data-fieldname="status"]').each(function () {
+		grid.wrapper.find('select[data-fieldname="status"]').each(function() {
 			if ($(this).val() === 'Open') {
 				$(this).addClass('input-indicator-open');
 			} else {
@@ -80,34 +79,7 @@ frappe.ui.form.on("Project", {
 			}
 		});
 	},
-	show_dashboard: function (frm) {
-		if (frm.doc.__onload.activity_summary.length) {
-			var hours = $.map(frm.doc.__onload.activity_summary, function (d) {
-				return d.total_hours;
-			});
-			var max_count = Math.max.apply(null, hours);
-			var sum = hours.reduce(function (a, b) {
-				return a + b;
-			}, 0);
-			var section = frm.dashboard.add_section(
-				frappe.render_template('project_dashboard',
-					{
-						data: frm.doc.__onload.activity_summary,
-						max_count: max_count,
-						sum: sum
-					}));
-
-			section.on('click', '.time-sheet-link', function () {
-				var activity_type = $(this).attr('data-activity_type');
-				frappe.set_route('List', 'Timesheet',
-					{'activity_type': activity_type, 'project': frm.doc.name, 'status': ["!=", "Cancelled"]});
-			});
-		}
-	}
-});
-
-frappe.ui.form.on("Project Task", {
-	edit_task: function (frm, doctype, name) {
+	edit_task: function(frm, doctype, name) {
 		var doc = frappe.get_doc(doctype, name);
 		if (doc.task_id) {
 			frappe.set_route("Form", "Task", doc.task_id);
@@ -115,15 +87,18 @@ frappe.ui.form.on("Project Task", {
 			frappe.msgprint(__("Save the document first."));
 		}
 	},
-	edit_timesheet: function (frm, cdt, cdn) {
+	edit_timesheet: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		frappe.route_options = {"project": frm.doc.project_name, "task": child.task_id};
+		frappe.route_options = {
+			"project": frm.doc.project_name,
+			"task": child.task_id
+		};
 		frappe.set_route("List", "Timesheet");
 	},
 
-	make_timesheet: function (frm, cdt, cdn) {
+	make_timesheet: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		frappe.model.with_doctype('Timesheet', function () {
+		frappe.model.with_doctype('Timesheet', function() {
 			var doc = frappe.model.get_new_doc('Timesheet');
 			var row = frappe.model.add_child(doc, 'time_logs');
 			row.project = frm.doc.project_name;
@@ -132,13 +107,13 @@ frappe.ui.form.on("Project Task", {
 		})
 	},
 
-	status: function (frm, doctype, name) {
+	status: function(frm, doctype, name) {
 		frm.trigger('tasks_refresh');
 	},
 });
 
 
-frappe.ui.form.on("Project", "validate", function (frm) {
+frappe.ui.form.on("Project", "validate", function(frm) {
 	frappe.call({
 		method: "erpnext.projects.doctype.project.project.times_check",
 		args: {
@@ -150,7 +125,7 @@ frappe.ui.form.on("Project", "validate", function (frm) {
 			"weekly_time_to_send": frm.doc.weekly_time_to_send
 
 		},
-		callback: function (r) {
+		callback: function(r) {
 			frm.set_value("from", r.message.from1);
 			frm.set_value("to", r.message.to);
 			frm.set_value("first_email", r.message.first_email);
