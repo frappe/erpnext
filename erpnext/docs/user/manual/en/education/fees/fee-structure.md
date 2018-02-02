@@ -20,4 +20,16 @@ You can set the "Income Account" and "Receivable Account" in the Accounts sectio
 
 If you are going to use this in the Fee Schedule, you must select the Accounts carefully as Fee Schedule updates the respected Accounts in bulk. 
 
+#### Video Tutorial for Fee Structure
+
+
+<div>
+    <style>.embed-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; } .embed-container iframe, .embed-container object, .embed-container embed { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    </style>
+    <div class='embed-container'>
+        <iframe src='https://www.youtube.com/embed//_ZkvyVnWgYk' frameborder='0' allowfullscreen>
+        </iframe>
+    </div>
+</div>
+
 {next}
