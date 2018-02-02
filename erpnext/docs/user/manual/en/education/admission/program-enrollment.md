@@ -17,5 +17,15 @@ Student Batch: To categorize student into different sections/batches, you can as
 
 Student Category: For the Institutions having multiple Fees Structure, this field can be used to differentiate the student enrollment in a given fee category. 
 
+#### Video Tutorial For Program Enrollment
+
+
+<div>
+    <style>.embed-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; } .embed-container iframe, .embed-container object, .embed-container embed { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }</style>
+    <div class='embed-container'>
+        <iframe src='https://www.youtube.com/embed//5nxWYBRHY_o?start=0&end=88' frameborder='0' allowfullscreen>
+        </iframe>
+    </div>
+</div>
 
 {next}

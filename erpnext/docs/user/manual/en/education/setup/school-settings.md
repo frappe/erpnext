@@ -2,7 +2,7 @@
 
 The Education Settings page allow you to setup basic settings like **Academic Year and Term** for the educational setup. 
 
-<img class="screenshot" alt="Student" src="/docs/assets/img/education/student/education.png">
+<img class="screenshot" alt="Student" src="/docs/assets/img/education/student/schools-settings.png">
 
 The checkbox to Validate Batch for Students in Student Group enables the Student Batch validation for every Student from the Program Enrollment for the **Batch** based on **Student Group** 
 
