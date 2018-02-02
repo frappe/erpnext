@@ -287,7 +287,7 @@ class PaymentEntry(AccountsController):
 
 			total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
 
-			if self.total_allocated_amount < party_amount:
+			if (self.total_allocated_amount - total_deductions) < party_amount:
 				if self.payment_type == "Receive":
 					self.unallocated_amount = party_amount - (self.total_allocated_amount - total_deductions)
 				else:
