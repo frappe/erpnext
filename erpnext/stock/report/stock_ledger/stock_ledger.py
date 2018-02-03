@@ -106,11 +106,10 @@ def get_opening_balance(filters, columns):
 	from erpnext.stock.stock_ledger import get_previous_sle
 	last_entry = get_previous_sle({
 		"item_code": filters.item_code,
-		"warehouse": get_warehouse_condition(filters.warehouse),
+		"warehouse_condition": get_warehouse_condition(filters.warehouse),
 		"posting_date": filters.from_date,
 		"posting_time": "00:00:00"
 	})
-
 	row = [""]*len(columns)
 	row[1] = _("'Opening'")
 	for i, v in ((9, 'qty_after_transaction'), (11, 'valuation_rate'), (12, 'stock_value')):
@@ -122,7 +121,7 @@ def get_warehouse_condition(warehouse):
 	warehouse_details = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"], as_dict=1)
 	if warehouse_details:
 		return " exists (select name from `tabWarehouse` wh \
-			where wh.lft >= %s and wh.rgt <= %s and sle.warehouse = wh.name)"%(warehouse_details.lft,
+			where wh.lft >= %s and wh.rgt <= %s and warehouse = wh.name)"%(warehouse_details.lft,
 			warehouse_details.rgt)
 
 	return ''

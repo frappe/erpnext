@@ -172,6 +172,7 @@ def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts):
 		else sum(base_tax_amount_after_discount_amount) * -1 end as tax_amount
 		from `tabPurchase Taxes and Charges`
 		where parent in (%s) and category in ('Total', 'Valuation and Total')
+			and base_tax_amount_after_discount_amount != 0
 		group by parent, account_head, add_deduct_tax
 	""" % ', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 
