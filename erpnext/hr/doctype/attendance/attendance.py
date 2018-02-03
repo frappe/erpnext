@@ -68,7 +68,7 @@ def employee():
 			'user_id="%s"' % frappe.session.user,
 			'company_email="%s"' % frappe.session.user
 		],
-		fields=['name', 'employee_name']
+		fields=['name', 'employee_name', 'company']
 	)
 
 	if len(employee_details) > 1:
@@ -107,7 +107,8 @@ def check_in():
 		'employee_name': employee_details['employee_name'],
 		'status': "Present",
 		'attendance_date': frappe.utils.data.nowdate(),
-		'check_in': frappe.utils.data.now()
+		'check_in': frappe.utils.data.now(),
+		'company': employee_details['company']
 	})
 	attendance.insert()
 	return True

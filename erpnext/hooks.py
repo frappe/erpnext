@@ -269,3 +269,5 @@ regional_overrides = {
 		'erpnext.controllers.taxes_and_totals.update_itemised_tax_data': 'erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data'
 	}
 }
+
+page_js = {"desktop": "public/js/checkin_checkout_attendance.js"}
