@@ -131,7 +131,7 @@ def get_batch_qty(batch_no=None, warehouse=None, item_code=None):
 	:param batch_no: Optional - give qty for this batch no
 	:param warehouse: Optional - give qty for this warehouse
 	:param item_code: Optional - give qty for this item"""
-	frappe.has_permission('Batch', throw=True)
+
 	out = 0
 	if batch_no and warehouse:
 		out = float(frappe.db.sql("""select sum(actual_qty)

@@ -4,24 +4,69 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.utils import cint, fmt_money, flt
+from frappe.utils import cint, fmt_money, flt, nowdate, getdate
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
+from erpnext.stock.doctype.batch.batch import get_batch_qty
 
-def get_qty_in_stock(item_code, item_warehouse_field):
+def get_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
 	in_stock, stock_qty = 0, ''
 	template_item_code, is_stock_item = frappe.db.get_value("Item", item_code, ["variant_of", "is_stock_item"])
 
-	warehouse = frappe.db.get_value("Item", item_code, item_warehouse_field)
+	if not warehouse:
+		warehouse = frappe.db.get_value("Item", item_code, item_warehouse_field)
+
 	if not warehouse and template_item_code and template_item_code != item_code:
 		warehouse = frappe.db.get_value("Item", template_item_code, item_warehouse_field)
 
 	if warehouse:
 		stock_qty = frappe.db.sql("""select GREATEST(actual_qty - reserved_qty, 0) from tabBin where
 			item_code=%s and warehouse=%s""", (item_code, warehouse))
-		if stock_qty:
+
+	if stock_qty:
+		stock_qty = adjust_qty_for_expired_items(item_code, stock_qty, warehouse)
+
+	if stock_qty:
+		in_stock = stock_qty[0][0] > 0 and 1 or 0
+
+	if stock_qty:
 			in_stock = stock_qty[0][0] > 0 and 1 or 0
 
 	return frappe._dict({"in_stock": in_stock, "stock_qty": stock_qty, "is_stock_item": is_stock_item})
+
+
+def adjust_qty_for_expired_items(item_code, stock_qty, warehouse):
+	batches = frappe.get_all('Batch', filters=[{'item': item_code}], fields=['expiry_date', 'name'])
+	expired_batches = get_expired_batches(batches)
+	stock_qty = [list(item) for item in stock_qty]
+	
+	for batch in expired_batches:
+		if warehouse:
+			stock_qty[0][0] = max(0, stock_qty[0][0] - get_batch_qty(batch, warehouse))
+		else:
+			stock_qty[0][0] = max(0, stock_qty[0][0] - qty_from_all_warehouses(get_batch_qty(batch)))
+
+		if not stock_qty[0][0]:
+			break
+
+	return stock_qty
+
+
+def get_expired_batches(batches):
+	"""
+	:param batches: A list of dict in the form [{'expiry_date': datetime.date(20XX, 1, 1), 'name': 'batch_id'}, ...]
+	"""
+	return [b.name for b in batches if b.expiry_date and b.expiry_date <= getdate(nowdate())]
+
+
+def qty_from_all_warehouses(batch_info):
+	"""
+	:param batch_info: A list of dict in the form [{u'warehouse': u'Stores - I', u'qty': 0.8}, ...]
+	"""
+	qty = 0
+	for batch in batch_info:
+		qty = qty + batch.qty
+
+	return qty
 
 def get_price(item_code, price_list, customer_group, company, qty=1):
 	template_item_code = frappe.db.get_value("Item", item_code, "variant_of")
