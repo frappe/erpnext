@@ -8,8 +8,7 @@
  {
   "doctype": "Supplier",
   "supplier_name": "_Test Supplier P",
-  "supplier_type": "_Test Supplier Type",
-  "credit_days_based_on": "Fixed Days"
+  "supplier_type": "_Test Supplier Type"
  },
  {
   "doctype": "Supplier",

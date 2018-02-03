@@ -34,6 +34,7 @@ class Company(Document):
 		self.validate_currency()
 		self.validate_coa_input()
 		self.validate_perpetual_inventory()
+		self.check_country_change()
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -80,9 +81,12 @@ class Company(Document):
 		if not frappe.db.sql("""select name from tabAccount
 				where company=%s and docstatus<2 limit 1""", self.name):
 			if not frappe.local.flags.ignore_chart_of_accounts:
+				frappe.flags.country_change = True
 				self.create_default_accounts()
 				self.create_default_warehouses()
-				install_country_fixtures(self.name)
+
+		if frappe.flags.country_change:
+			install_country_fixtures(self.name)
 
 		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
 			self.create_default_cost_center()
@@ -147,6 +151,13 @@ class Company(Document):
 				frappe.msgprint(_("Set default inventory account for perpetual inventory"),
 					alert=True, indicator='orange')
 
+	def check_country_change(self):
+		frappe.flags.country_change = False
+
+		if not self.get('__islocal') and \
+			self.country != frappe.db.get_value('Company', self.name, 'country'):
+			frappe.flags.country_change = True
+
 	def set_default_accounts(self):
 		self._set_default_account("default_cash_account", "Cash")
 		self._set_default_account("default_bank_account", "Bank")
@@ -162,8 +173,14 @@ class Company(Document):
 			self._set_default_account("default_expense_account", "Cost of Goods Sold")
 
 		if not self.default_income_account:
-			self.db_set("default_income_account", frappe.db.get_value("Account",
-				{"account_name": _("Sales"), "company": self.name}))
+			income_account = frappe.db.get_value("Account",
+				{"account_name": _("Sales"), "company": self.name, "is_group": 0})
+
+			if not income_account:
+				income_account = frappe.db.get_value("Account",
+					{"account_name": _("Sales Account"), "company": self.name})
+
+			self.db_set("default_income_account", income_account)
 
 		if not self.default_payable_account:
 			self.db_set("default_payable_account", self.default_payable_account)
@@ -287,7 +304,9 @@ class Company(Document):
 			frappe.db.sql("delete from tabBOM where company=%s", self.name)
 			for dt in ("BOM Operation", "BOM Item", "BOM Scrap Item", "BOM Explosion Item"):
 				frappe.db.sql("delete from `tab%s` where parent in (%s)"""
-					% (dt, ', '.join(['%s']*len(boms))), tuple(boms), debug=1)
+					% (dt, ', '.join(['%s']*len(boms))), tuple(boms))
+
+		frappe.db.sql("delete from tabEmployee where company=%s", self.name)
 
 @frappe.whitelist()
 def enqueue_replace_abbr(company, old, new):
@@ -356,7 +375,6 @@ def update_company_current_month_sales(company):
 	monthly_total = results[0]['total'] if len(results) > 0 else 0
 
 	frappe.db.set_value("Company", company, "total_monthly_sales", monthly_total)
-	frappe.db.commit()
 
 def update_company_monthly_sales(company):
 	'''Cache past year monthly sales of every company based on sales invoices'''
@@ -367,7 +385,6 @@ def update_company_monthly_sales(company):
 		"posting_date", filter_str, "sum")
 
 	frappe.db.set_value("Company", company, "sales_monthly_history", json.dumps(month_to_value_dict))
-	frappe.db.commit()
 
 def cache_companies_monthly_sales_history():
 	companies = [d['name'] for d in frappe.get_list("Company")]
