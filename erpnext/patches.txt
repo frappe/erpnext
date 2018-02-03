@@ -487,3 +487,4 @@ erpnext.patches.v10_0.set_numeric_ranges_in_template_if_blank
 erpnext.patches.v10_0.update_assessment_plan
 erpnext.patches.v10_0.update_assessment_result
 erpnext.patches.v10_0.set_default_payment_terms_based_on_company
+erpnext.patches.v10_0.update_sales_order_link_to_purchase_order
