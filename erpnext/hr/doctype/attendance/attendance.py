@@ -21,7 +21,7 @@ class Attendance(Document):
 
 	def check_leave_record(self):
 		leave_record = frappe.db.sql("""select leave_type, half_day from `tabLeave Application`
-			where employee = %s and %s between from_date and to_date and workflow_state = 'Approved'
+			where employee = %s and %s between from_date and to_date and status = 'Approved'
 			and docstatus = 1""", (self.employee, self.attendance_date), as_dict=True)
 		if leave_record:
 			if leave_record[0].half_day:
@@ -44,7 +44,7 @@ class Attendance(Document):
 
 	def validate_employee(self):
 		emp = frappe.db.sql("select name from `tabEmployee` where name = %s and status = 'Active'",
-		 	self.employee)
+			self.employee)
 		if not emp:
 			frappe.throw(_("Employee {0} is not active or does not exist").format(self.employee))
 
@@ -54,3 +54,60 @@ class Attendance(Document):
 		self.validate_attendance_date()
 		self.validate_duplicate_record()
 		self.check_leave_record()
+
+
+def employee():
+	"""
+	Retun employee id
+
+	:param email: employee company email id
+	"""
+	employee_details = frappe.get_all(
+		"Employee",
+		or_filters=[
+			'user_id="%s"' % frappe.session.user,
+			'company_email="%s"' % frappe.session.user
+		],
+		fields=['name', 'employee_name']
+	)
+
+	if len(employee_details) > 1:
+		frappe.throw(_("Two or more employees mapped to same user id"))
+	return employee_details[0]
+
+
+@frappe.whitelist()
+def validate_attendance():
+	"""
+	Check If attendance is already marked
+	"""
+	if frappe.session.user == 'Administrator':
+		return False
+
+	employee_details = employee()
+	attendance = frappe.get_value(
+		"Attendance",
+		filters=
+			{
+				'attendance_date': frappe.utils.nowdate(),
+				'employee': employee_details.name
+			}
+	)
+	if attendance:
+		return True
+
+	return False
+
+@frappe.whitelist()
+def check_in():
+	employee_details = employee()
+	attendance = frappe.get_doc({
+		'doctype': 'Attendance',
+		'employee': employee_details['name'],
+		'employee_name': employee_details['employee_name'],
+		'status': "Present",
+		'attendance_date': frappe.utils.data.nowdate(),
+		'check_in': frappe.utils.data.now()
+	})
+	attendance.insert()
+	return True
