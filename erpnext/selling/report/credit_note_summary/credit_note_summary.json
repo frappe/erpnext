@@ -1,0 +1,30 @@
+{
+ "add_total_row": 1, 
+ "apply_user_permissions": 1, 
+ "creation": "2018-01-13 17:51:56.357911", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "letter_head": "Company LetterHead", 
+ "modified": "2018-01-13 17:52:06.603604", 
+ "modified_by": "Administrator", 
+ "module": "Selling", 
+ "name": "Credit Note Summary", 
+ "owner": "Administrator", 
+ "ref_doctype": "Sales Invoice", 
+ "report_name": "Credit Note Summary", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Accounts Manager"
+  }, 
+  {
+   "role": "Accounts User"
+  }, 
+  {
+   "role": "Sales Manager"
+  }
+ ]
+}
