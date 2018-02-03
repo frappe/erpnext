@@ -10,7 +10,7 @@ frappe.ui.form.on('Material Request', {
 			'Purchase Order': 'Purchase Order',
 			'Request for Quotation': 'Request for Quotation',
 			'Supplier Quotation': 'Supplier Quotation',
-			'Production Order': 'Work Order'
+			'Work Order': 'Work Order'
 		}
 
 		// formatter for material request item
