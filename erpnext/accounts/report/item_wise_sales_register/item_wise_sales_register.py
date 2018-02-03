@@ -168,11 +168,11 @@ def get_tax_accounts(item_list, columns, company_currency,
 
 	for d in item_list:
 		invoice_item_row.setdefault(d.parent, []).append(d)
-		item_row_map.setdefault(d.parent, {}).setdefault(d.item_code, []).append(d)
+		item_row_map.setdefault(d.parent, {}).setdefault(d.item_code or d.item_name, []).append(d)
 
 	conditions = ""
 	if doctype == "Purchase Invoice":
-		conditions = " and category in ('Total', 'Valuation and Total')"
+		conditions = " and category in ('Total', 'Valuation and Total') and base_tax_amount_after_discount_amount != 0"
 
 	tax_details = frappe.db.sql("""
 		select
