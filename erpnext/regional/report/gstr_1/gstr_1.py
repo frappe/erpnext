@@ -12,15 +12,32 @@ def execute(filters=None):
 class Gstr1Report(object):
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
+		self.doctype = "Sales Invoice"
+		self.tax_doctype = "Sales Taxes and Charges"
+		self.select_columns = """
+			name as invoice_number,
+			customer_name,
+			posting_date,
+			base_grand_total,
+			base_rounded_total,
+			customer_gstin,
+			place_of_supply,
+			ecommerce_gstin,
+			reverse_charge,
+			invoice_type,
+			return_against,
+			is_return,
+			invoice_type,
+			export_type,
+			port_code,
+			shipping_bill_number,
+			shipping_bill_date,
+			reason_for_issuing_document
+		"""
 		self.customer_type = "Company" if self.filters.get("type_of_business") ==  "B2B" else "Individual"
 
 	def run(self):
 		self.get_columns()
-		self.get_data()
-		return self.columns, self.data
-
-	def get_data(self):
-		self.data = []
 		self.get_gst_accounts()
 		self.get_invoice_data()
 
@@ -28,27 +45,16 @@ class Gstr1Report(object):
 
 		self.get_invoice_items()
 		self.get_items_based_on_tax_rate()
-		invoice_fields = [d["fieldname"] for d in self.invoice_columns]
+		self.invoice_fields = [d["fieldname"] for d in self.invoice_columns]
+		self.get_data()
+		return self.columns, self.data
 
-
+	def get_data(self):
+		self.data = []
 		for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
 			invoice_details = self.invoices.get(inv)
 			for rate, items in items_based_on_rate.items():
-				row = []
-				for fieldname in invoice_fields:
-					if self.filters.get("type_of_business") ==  "CDNR" and fieldname == "invoice_value":
-						row.append(abs(invoice_details.base_rounded_total) or abs(invoice_details.base_grand_total))
-					elif fieldname == "invoice_value":
-						row.append(invoice_details.base_rounded_total or invoice_details.base_grand_total)
-					else:
-						row.append(invoice_details.get(fieldname))
-
-				row += [rate,
-					sum([abs(net_amount) for item_code, net_amount in self.invoice_items.get(inv).items()
-						if item_code in items]),
-					self.invoice_cess.get(inv)
-				]
-
+				row, taxable_value = self.get_row_data_for_invoice(inv, invoice_details, rate, items)
 				if self.filters.get("type_of_business") ==  "B2C Small":
 					row.append("E" if invoice_details.ecommerce_gstin else "OE")
 
@@ -58,34 +64,33 @@ class Gstr1Report(object):
 
 				self.data.append(row)
 
+	def get_row_data_for_invoice(self, invoice, invoice_details, tax_rate, items):
+		row = []
+		for fieldname in self.invoice_fields:
+			if self.filters.get("type_of_business") ==  "CDNR" and fieldname == "invoice_value":
+				row.append(abs(invoice_details.base_rounded_total) or abs(invoice_details.base_grand_total))
+			elif fieldname == "invoice_value":
+				row.append(invoice_details.base_rounded_total or invoice_details.base_grand_total)
+			else:
+				row.append(invoice_details.get(fieldname))
+
+		taxable_value = sum([abs(net_amount)
+			for item_code, net_amount in self.invoice_items.get(invoice).items() if item_code in items])
+		row += [tax_rate, taxable_value]
+
+		return row, taxable_value
+
 	def get_invoice_data(self):
 		self.invoices = frappe._dict()
 		conditions = self.get_conditions()
-
 		invoice_data = frappe.db.sql("""
 			select
-				name as invoice_number,
-				customer_name,
-				posting_date,
-				base_grand_total,
-				base_rounded_total,
-				customer_gstin,
-				place_of_supply,
-				ecommerce_gstin,
-				reverse_charge,
-				invoice_type,
-				return_against,
-				is_return,
-				invoice_type,
-				export_type,
-				port_code,
-				shipping_bill_number,
-				shipping_bill_date,
-				reason_for_issuing_document
-			from `tabSales Invoice`
-			where docstatus = 1 %s
+				{select_columns}
+			from `tab{doctype}`
+			where docstatus = 1 {where_conditions}
 			order by posting_date desc
-			""" % (conditions), self.filters, as_dict=1)
+			""".format(select_columns=self.select_columns, doctype=self.doctype,
+				where_conditions=conditions), self.filters, as_dict=1)
 
 		for d in invoice_data:
 			self.invoices.setdefault(d.invoice_number, d)
@@ -127,30 +132,29 @@ class Gstr1Report(object):
 		self.invoice_items = frappe._dict()
 		items = frappe.db.sql("""
 			select item_code, parent, base_net_amount
-			from `tabSales Invoice Item`
+			from `tab%s Item`
 			where parent in (%s)
-		""" % (', '.join(['%s']*len(self.invoices))), tuple(self.invoices), as_dict=1)
+		""" % (self.doctype, ', '.join(['%s']*len(self.invoices))), tuple(self.invoices), as_dict=1)
 
 		for d in items:
 			self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, d.base_net_amount)
 
 	def get_items_based_on_tax_rate(self):
-		tax_details = frappe.db.sql("""
+		self.tax_details = frappe.db.sql("""
 			select
 				parent, account_head, item_wise_tax_detail, base_tax_amount_after_discount_amount
-			from `tabSales Taxes and Charges`
+			from `tab%s`
 			where
-				parenttype = 'Sales Invoice' and docstatus = 1
+				parenttype = %s and docstatus = 1
 				and parent in (%s)
-
 			order by account_head
-		""" % (', '.join(['%s']*len(self.invoices.keys()))), tuple(self.invoices.keys()))
+		""" % (self.tax_doctype, '%s', ', '.join(['%s']*len(self.invoices.keys()))),
+			tuple([self.doctype] + self.invoices.keys()))
 
 		self.items_based_on_tax_rate = {}
 		self.invoice_cess = frappe._dict()
 		unidentified_gst_accounts = []
-
-		for parent, account, item_wise_tax_detail, tax_amount in tax_details:
+		for parent, account, item_wise_tax_detail, tax_amount in self.tax_details:
 			if account in self.gst_accounts.cess_account:
 				self.invoice_cess.setdefault(parent, tax_amount)
 			else:
@@ -172,8 +176,8 @@ class Gstr1Report(object):
 							if cgst_or_sgst:
 								tax_rate *= 2
 
-							rate_based_dict = self.items_based_on_tax_rate.setdefault(parent, {})\
-								.setdefault(tax_rate, [])
+							rate_based_dict = self.items_based_on_tax_rate\
+								.setdefault(parent, {}).setdefault(tax_rate, [])
 							if item_code not in rate_based_dict:
 								rate_based_dict.append(item_code)
 					except ValueError:
