@@ -17,48 +17,48 @@ from frappe.utils import nowdate
 
 @frappe.whitelist()
 def get_pos_data():
-    doc = frappe.new_doc('Sales Invoice')
-    doc.is_pos = 1
-    pos_profile = get_pos_profile(doc.company) or {}
-    if not pos_profile:
-        frappe.throw(_("POS Profile is required to use Point-of-Sale"))
+	doc = frappe.new_doc('Sales Invoice')
+	doc.is_pos = 1
+	pos_profile = get_pos_profile(doc.company) or {}
+	if not pos_profile:
+		frappe.throw(_("POS Profile is required to use Point-of-Sale"))
 
-    if not doc.company:
-        doc.company = pos_profile.get('company')
+	if not doc.company:
+		doc.company = pos_profile.get('company')
 
-    doc.update_stock = pos_profile.get('update_stock')
+	doc.update_stock = pos_profile.get('update_stock')
 
-    if pos_profile.get('name'):
-        pos_profile = frappe.get_doc('POS Profile', pos_profile.get('name'))
-        pos_profile.validate()
+	if pos_profile.get('name'):
+		pos_profile = frappe.get_doc('POS Profile', pos_profile.get('name'))
+		pos_profile.validate()
 
-    company_data = get_company_data(doc.company)
-    update_pos_profile_data(doc, pos_profile, company_data)
-    update_multi_mode_option(doc, pos_profile)
-    default_print_format = pos_profile.get('print_format') or "Point of Sale"
-    print_template = frappe.db.get_value('Print Format', default_print_format, 'html')
-    items_list = get_items_list(pos_profile)
-    customers = get_customers_list(pos_profile)
+	company_data = get_company_data(doc.company)
+	update_pos_profile_data(doc, pos_profile, company_data)
+	update_multi_mode_option(doc, pos_profile)
+	default_print_format = pos_profile.get('print_format') or "Point of Sale"
+	print_template = frappe.db.get_value('Print Format', default_print_format, 'html')
+	items_list = get_items_list(pos_profile)
+	customers = get_customers_list(pos_profile)
 
-    return {
-        'doc': doc,
-        'default_customer': pos_profile.get('customer'),
-        'items': items_list,
-        'item_groups': get_item_groups(pos_profile),
-        'customers': customers,
-        'address': get_customers_address(customers),
-        'contacts': get_contacts(customers),
-        'serial_no_data': get_serial_no_data(pos_profile, doc.company),
-        'batch_no_data': get_batch_no_data(),
-        'barcode_data': get_barcode_data(items_list),
-        'tax_data': get_item_tax_data(),
-        'price_list_data': get_price_list_data(doc.selling_price_list),
-        'bin_data': get_bin_data(pos_profile),
-        'pricing_rules': get_pricing_rule_data(doc),
-        'print_template': print_template,
-        'pos_profile': pos_profile,
-        'meta': get_meta()
-    }
+	return {
+		'doc': doc,
+		'default_customer': pos_profile.get('customer'),
+		'items': items_list,
+		'item_groups': get_item_groups(pos_profile),
+		'customers': customers,
+		'address': get_customers_address(customers),
+		'contacts': get_contacts(customers),
+		'serial_no_data': get_serial_no_data(pos_profile, doc.company),
+		'batch_no_data': get_batch_no_data(),
+		'barcode_data': get_barcode_data(items_list),
+		'tax_data': get_item_tax_data(),
+		'price_list_data': get_price_list_data(doc.selling_price_list),
+		'bin_data': get_bin_data(pos_profile),
+		'pricing_rules': get_pricing_rule_data(doc),
+		'print_template': print_template,
+		'pos_profile': pos_profile,
+		'meta': get_meta()
+	}
 
 
 def get_meta():
@@ -68,7 +68,7 @@ def get_meta():
 	}
 
 	for row in frappe.get_all('DocField', fields=['fieldname', 'options'],
-		filters={'parent': 'Sales Invoice', 'fieldtype': 'Table'}):
+							  filters={'parent': 'Sales Invoice', 'fieldtype': 'Table'}):
 		doctype_meta[row.fieldname] = frappe.get_meta(row.options)
 
 	return doctype_meta
@@ -106,7 +106,7 @@ def update_pos_profile_data(doc, pos_profile, company_data):
 	doc.customer_group = pos_profile.get('customer_group') or get_root('Customer Group')
 	doc.territory = pos_profile.get('territory') or get_root('Territory')
 	doc.terms = frappe.db.get_value('Terms and Conditions', pos_profile.get(
-	    'tc_name'), 'terms') or doc.terms or ''
+		'tc_name'), 'terms') or doc.terms or ''
 	doc.offline_pos_name = ''
 
 
@@ -140,8 +140,8 @@ def update_multi_mode_option(doc, pos_profile):
 
 
 def get_mode_of_payment(doc):
-	return frappe.db.sql(""" select mpa.default_account, mpa.parent, mp.type as type from `tabMode of Payment Account` mpa,
-		 `tabMode of Payment` mp where mpa.parent = mp.name and mpa.company = %(company)s""", {'company': doc.company}, as_dict=1)
+	return frappe.db.sql(""" select mpa.default_account, mpa.parent, mp.type as type from `tabMode of Payment Account` mpa, \
+						`tabMode of Payment` mp where mpa.parent = mp.name and mpa.company = %(company)s""", {'company': doc.company}, as_dict=1)
 
 
 def update_tax_table(doc):
@@ -206,7 +206,8 @@ def get_customers_address(customers):
 			(select parent from `tabDynamic Link` where link_doctype = 'Customer' and link_name = %s
 			and parenttype = 'Address')""", data.name, as_dict=1)
 		address_data = {}
-		if address: address_data = address[0]
+		if address:
+			address_data = address[0]
 
 		address_data.update({'full_name': data.customer_name, 'customer_pos_id': data.customer_pos_id})
 		customer_address[data.name] = address_data
@@ -275,27 +276,27 @@ def get_batch_no_data():
 
 
 def get_barcode_data(items_list):
-    # get itemwise batch no data
-    # exmaple: {'LED-GRE': [Batch001, Batch002]}
-    # where LED-GRE is item code, SN0001 is serial no and Pune is warehouse
+	# get itemwise batch no data
+	# exmaple: {'LED-GRE': [Batch001, Batch002]}
+	# where LED-GRE is item code, SN0001 is serial no and Pune is warehouse
 
-    itemwise_barcode = {}
-    for item in items_list:
-        barcodes = frappe.db.sql("""
-        select barcode from `tabItem Barcode` where parent = '{0}'
-        """.format(item.item_code), as_dict=1)
+	itemwise_barcode = {}
+	for item in items_list:
+		barcodes = frappe.db.sql("""
+		select barcode from `tabItem Barcode` where parent = '{0}'
+		""".format(item.item_code), as_dict=1)
 
-        for barcode in barcodes:
-            if item.item_code not in itemwise_barcode:
-                itemwise_barcode.setdefault(item.item_code, [])
-            itemwise_barcode[item.item_code].append(barcode)
+		for barcode in barcodes:
+			if item.item_code not in itemwise_barcode:
+				itemwise_barcode.setdefault(item.item_code, [])
+			itemwise_barcode[item.item_code].append(barcode)
 
-    return itemwise_barcode
+	return itemwise_barcode
 
 
 def get_item_tax_data():
-	# get default tax of an item
-	# example: {'Consulting Services': {'Excise 12 - TS': '12.000'}}
+		# get default tax of an item
+		# example: {'Consulting Services': {'Excise 12 - TS': '12.000'}}
 
 	itemwise_tax = {}
 	taxes = frappe.db.sql(""" select parent, tax_type, tax_rate from `tabItem Tax`""", as_dict=1)
@@ -307,16 +308,18 @@ def get_item_tax_data():
 
 	return itemwise_tax
 
+
 def get_price_list_data(selling_price_list):
 	itemwise_price_list = {}
 	price_lists = frappe.db.sql("""Select ifnull(price_list_rate, 0) as price_list_rate,
 		item_code from `tabItem Price` ip where price_list = %(price_list)s""",
-		{'price_list': selling_price_list}, as_dict=1)
+								{'price_list': selling_price_list}, as_dict=1)
 
 	for item in price_lists:
 		itemwise_price_list[item.item_code] = item.price_list_rate
 
 	return itemwise_price_list
+
 
 def get_bin_data(pos_profile):
 	itemwise_bin_data = {}
@@ -334,6 +337,7 @@ def get_bin_data(pos_profile):
 
 	return itemwise_bin_data
 
+
 def get_pricing_rule_data(doc):
 	pricing_rules = ""
 	if doc.ignore_pricing_rule == 0:
@@ -342,8 +346,9 @@ def get_pricing_rule_data(doc):
 						and ifnull(company, '') in (%(company)s, '') and disable = 0 and %(date)s
 						between ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')
 						order by priority desc, name desc""",
-						{'company': doc.company, 'price_list': doc.selling_price_list, 'date': nowdate()}, as_dict=1)
+									  {'company': doc.company, 'price_list': doc.selling_price_list, 'date': nowdate()}, as_dict=1)
 	return pricing_rules
+
 
 @frappe.whitelist()
 def make_invoice(doc_list={}, email_queue_list={}, customers_list={}):
@@ -383,14 +388,16 @@ def make_invoice(doc_list={}, email_queue_list={}, customers_list={}):
 		'synced_contacts': get_contacts(customers)
 	}
 
+
 def validate_records(doc):
 	validate_item(doc)
+
 
 def get_customer_id(doc, customer=None):
 	cust_id = None
 	if doc.get('customer_pos_id'):
 		cust_id = frappe.db.get_value('Customer',
-			{'customer_pos_id': doc.get('customer_pos_id')}, 'name')
+									  {'customer_pos_id': doc.get('customer_pos_id')}, 'name')
 
 	if not cust_id:
 		customer = customer or doc.get('customer')
@@ -400,6 +407,7 @@ def get_customer_id(doc, customer=None):
 			cust_id = add_customer(doc)
 
 	return cust_id
+
 
 def make_customer_and_address(customers):
 	customers_list = []
@@ -417,6 +425,7 @@ def make_customer_and_address(customers):
 	frappe.db.commit()
 	return customers_list
 
+
 def add_customer(data):
 	customer_doc = frappe.new_doc('Customer')
 	customer_doc.customer_name = data.get('full_name') or data.get('customer')
@@ -425,28 +434,31 @@ def add_customer(data):
 	customer_doc.customer_group = get_customer_group(data)
 	customer_doc.territory = get_territory(data)
 	customer_doc.flags.ignore_mandatory = True
-	customer_doc.save(ignore_permissions = True)
+	customer_doc.save(ignore_permissions=True)
 	frappe.db.commit()
 	return customer_doc.name
+
 
 def get_territory(data):
 	if data.get('territory'):
 		return data.get('territory')
 
 	return frappe.db.get_single_value('Selling Settings',
-		'territory') or _('All Territories')
+										'territory') or _('All Territories')
+
 
 def get_customer_group(data):
 	if data.get('customer_group'):
 		return data.get('customer_group')
 
 	return frappe.db.get_single_value('Selling Settings',
-		'customer_group') or frappe.db.get_value('Customer Group', {'is_group': 0}, 'name')
+										'customer_group') or frappe.db.get_value('Customer Group', {'is_group': 0}, 'name')
 
-def make_contact(args,customer):
+
+def make_contact(args, customer):
 	if args.get('email_id') or args.get('phone'):
 		name = frappe.db.get_value('Dynamic Link',
-			{'link_doctype': 'Customer', 'link_name': customer, 'parenttype': 'Contact'}, 'parent')
+									{'link_doctype': 'Customer', 'link_name': customer, 'parenttype': 'Contact'}, 'parent')
 
 		args = {
 			'first_name': args.get('full_name'),
@@ -461,15 +473,17 @@ def make_contact(args,customer):
 		doc.update(args)
 		doc.is_primary_contact = 1
 		if not name:
-			doc.append('links',{
+			doc.append('links', {
 				'link_doctype': 'Customer',
 				'link_name': customer
 			})
 		doc.flags.ignore_mandatory = True
 		doc.save(ignore_permissions=True)
 
+
 def make_address(args, customer):
-	if not args.get('address_line1'): return
+	if not args.get('address_line1'):
+		return
 
 	name = args.get('name')
 
@@ -482,7 +496,7 @@ def make_address(args, customer):
 	else:
 		address = frappe.new_doc('Address')
 		address.country = frappe.db.get_value('Company', args.get('company'), 'country')
-		address.append('links',{
+		address.append('links', {
 			'link_doctype': 'Customer',
 			'link_name': customer
 		})
@@ -491,7 +505,8 @@ def make_address(args, customer):
 	address.is_shipping_address = 1
 	address.update(args)
 	address.flags.ignore_mandatory = True
-	address.save(ignore_permissions = True)
+	address.save(ignore_permissions=True)
+
 
 def make_email_queue(email_queue):
 	name_list = []
@@ -500,14 +515,15 @@ def make_email_queue(email_queue):
 		data = json.loads(data)
 		sender = frappe.session.user
 		print_format = "POS Invoice"
-		attachments = [frappe.attach_print('Sales Invoice', name, print_format= print_format)]
+		attachments = [frappe.attach_print('Sales Invoice', name, print_format=print_format)]
 
-		make(subject = data.get('subject'), content = data.get('content'), recipients = data.get('recipients'),
-			sender=sender,attachments = attachments, send_email=True,
+		make(subject=data.get('subject'), content=data.get('content'), recipients=data.get('recipients'),
+			sender=sender, attachments=attachments, send_email=True,
 			doctype='Sales Invoice', name=name)
 		name_list.append(key)
 
 	return name_list
+
 
 def validate_item(doc):
 	for item in doc.get('items'):
@@ -531,12 +547,14 @@ def submit_invoice(si_doc, name, doc, name_list):
 		frappe.db.commit()
 		name_list.append(name)
 	except Exception as e:
-		if frappe.message_log: frappe.message_log.pop()
+		if frappe.message_log:
+			frappe.message_log.pop()
 		frappe.db.rollback()
 		frappe.log_error(frappe.get_traceback())
 		name_list = save_invoice(doc, name, name_list)
 
 	return name_list
+
 
 def save_invoice(doc, name, name_list):
 	try:
