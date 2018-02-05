@@ -9,6 +9,8 @@ import unittest
 from erpnext.restaurant.doctype.restaurant_order_entry.restaurant_order_entry \
 	import (sync, make_invoice, item_query_restaurant)
 
+test_dependencies = ["Restaurant Table"]
+
 class TestRestaurantOrderEntry(unittest.TestCase):
 	def setUp(self):
 		# save the menus as Price List is deleted before tests...
