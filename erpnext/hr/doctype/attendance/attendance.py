@@ -20,9 +20,10 @@ class Attendance(Document):
 		set_employee_name(self)
 
 	def check_leave_record(self):
-		leave_record = frappe.db.sql("""select leave_type, half_day from `tabLeave Application`
-			where employee = %s and %s between from_date and to_date and workflow_state = 'Approved'
-			and docstatus = 1""", (self.employee, self.attendance_date), as_dict=True)
+		if frappe.db.has_column("Leave Application", "workflow_state"):
+			leave_record = frappe.db.sql("""select leave_type, half_day from `tabLeave Application`
+				where employee = %s and %s between from_date and to_date and workflow_state = 'Approved'
+				and docstatus = 1""", (self.employee, self.attendance_date), as_dict=True)
 		if leave_record:
 			if leave_record[0].half_day:
 				self.status = 'Half Day'
