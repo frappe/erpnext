@@ -249,7 +249,8 @@ class SalesInvoice(SellingController):
 		if pos:
 			return {
 				"print_format": pos.get("print_format_for_online"),
-				"allow_edit_rate": pos.get("allow_user_to_edit_rate")
+				"allow_edit_rate": pos.get("allow_user_to_edit_rate"),
+				"allow_edit_discount": pos.get("allow_user_to_edit_discount")
 			}
 
 	def update_time_sheet(self, sales_invoice):
