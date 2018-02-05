@@ -31,7 +31,7 @@ def get_notification_config():
 			},
 			"Payment Entry": {"docstatus": 0},
 			"Leave Application": {"docstatus": 0},
-			"Expense Claim": {"approval_status": "Draft"},
+			"Expense Claim": {"docstatus": 0},
 			"Job Applicant": {"status": "Open"},
 			"Delivery Note": {
 				"status": ("not in", ("Completed", "Closed")),
