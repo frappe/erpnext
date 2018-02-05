@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import frappe
-from erpnext.setup.install import leave_application_workflow
 
 def execute():
 	frappe.reload_doc("hr", "doctype", "leave_application")

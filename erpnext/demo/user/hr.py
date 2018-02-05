@@ -172,7 +172,6 @@ def make_leave_application():
 				"from_date": frappe.flags.current_date,
 				"to_date": to_date,
 				"leave_type": allocated_leave.leave_type,
-				"status": "Approved"
 			})
 			try:
 				leave_application.insert()
@@ -196,10 +195,10 @@ def mark_attendance():
 					where employee = %s and %s between from_date and to_date and workflow_state = 'Approved'
 					and docstatus = 1""", (employee.name, attendance_date))
 
-			if leave:
-				attendance.status = "Absent"
-			else:
-				attendance.status = "Present"
-			attendance.save()
-			attendance.submit()
-			frappe.db.commit()
+				if leave:
+					attendance.status = "Absent"
+				else:
+					attendance.status = "Present"
+				attendance.save()
+				attendance.submit()
+				frappe.db.commit()

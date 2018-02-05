@@ -24,16 +24,16 @@ class Attendance(Document):
 			leave_record = frappe.db.sql("""select leave_type, half_day from `tabLeave Application`
 				where employee = %s and %s between from_date and to_date and workflow_state = 'Approved'
 				and docstatus = 1""", (self.employee, self.attendance_date), as_dict=True)
-		if leave_record:
-			if leave_record[0].half_day:
-				self.status = 'Half Day'
-				frappe.msgprint(_("Employee {0} on Half day on {1}").format(self.employee, self.attendance_date))
-			else:
-				self.status = 'On Leave'
-				self.leave_type = leave_record[0].leave_type
-				frappe.msgprint(_("Employee {0} on Leave on {1}").format(self.employee, self.attendance_date))
-		if self.status == "On Leave" and not leave_record:
-			frappe.throw(_("No leave record found for employee {0} for {1}").format(self.employee, self.attendance_date))
+			if leave_record:
+				if leave_record[0].half_day:
+					self.status = 'Half Day'
+					frappe.msgprint(_("Employee {0} on Half day on {1}").format(self.employee, self.attendance_date))
+				else:
+					self.status = 'On Leave'
+					self.leave_type = leave_record[0].leave_type
+					frappe.msgprint(_("Employee {0} on Leave on {1}").format(self.employee, self.attendance_date))
+			if self.status == "On Leave" and not leave_record:
+				frappe.throw(_("No leave record found for employee {0} for {1}").format(self.employee, self.attendance_date))
 
 	def validate_attendance_date(self):
 		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")

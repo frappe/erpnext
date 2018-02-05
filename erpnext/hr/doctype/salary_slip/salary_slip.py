@@ -307,8 +307,8 @@ class SalarySlip(TransactionBase):
 					WHEN t2.include_holiday THEN %(dt)s between from_date and to_date
 					END
 					""".format(holidays), {"employee": self.employee, "dt": dt})
-			if leave:
-				lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
+				if leave:
+					lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
 		return lwp
 
 	def check_existing(self):
