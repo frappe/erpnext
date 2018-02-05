@@ -20,7 +20,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Task",
-					"route": "Tree/Task",
+					"route": "List/Task",
 					"description": _("Project activity / task."),
 				},
 				{
