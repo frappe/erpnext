@@ -930,9 +930,7 @@
    "precision": "", 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
-   "read_only": 1, 
-<<<<<<< HEAD
-=======
+   "read_only": 1,
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 0, 
@@ -962,8 +960,7 @@
    "precision": "", 
    "print_hide": 0, 
    "print_hide_if_no_value": 0, 
-   "read_only": 1, 
->>>>>>> 12d9eb1f4a7f8bc374db69cea8c174e3a2b5b7ae
+   "read_only": 1,
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
    "reqd": 0, 
@@ -1071,16 +1068,8 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
- "max_attachments": 0, 
-<<<<<<< HEAD
+ "max_attachments": 0,
  "modified": "2018-01-25 14:05:44.239136", 
-=======
-<<<<<<< HEAD
- "modified": "2018-01-23 14:27:20.202249", 
-=======
- "modified": "2018-01-23 12:29:18.456386", 
->>>>>>> 12d9eb1f4a7f8bc374db69cea8c174e3a2b5b7ae
->>>>>>> 92e1b5444afe1e7d4d1bb81da3cf085cf7373010
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Business Trip", 
