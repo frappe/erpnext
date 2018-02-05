@@ -5,19 +5,17 @@ from __future__ import unicode_literals
 
 import itertools
 import json
-
 import erpnext
 import frappe
 from erpnext.controllers.item_variant import (ItemVariantExistsError,
-											  copy_attributes_to_variant,
-											  get_variant,
-											  make_variant_item_code,
-											  validate_item_variant_attributes)
-from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups,
-														 invalidate_cache_for)
+												copy_attributes_to_variant,
+												get_variant,
+												make_variant_item_code,
+												validate_item_variant_attributes)
+from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
 from frappe import _, msgprint
 from frappe.utils import (cint, cstr, flt, formatdate, get_timestamp, getdate,
-						  now_datetime, random_string, strip)
+							now_datetime, random_string, strip)
 from frappe.utils.html_utils import clean_html
 from frappe.website.doctype.website_slideshow.website_slideshow import \
 	get_slideshow
@@ -487,7 +485,8 @@ class Item(WebsiteGenerator):
 		if len(self.barcodes) > 0:
 			for item_barcode in self.barcodes:
 				if item_barcode.barcode:
-					duplicate = frappe.db.sql("""select parent from `tabItem Barcode` where barcode = %s and parent != %s""", (item_barcode.barcode, self.name))
+					duplicate = frappe.db.sql(
+						"""select parent from `tabItem Barcode` where barcode = %s and parent != %s""", (item_barcode.barcode, self.name))
 					if duplicate:
 						frappe.throw(_("Barcode {0} already used in Item {1}").format(
 							item_barcode.barcode, duplicate[0][0]))
