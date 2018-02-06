@@ -64,7 +64,11 @@ def get_itemised_tax_breakup_data(doc):
 def set_place_of_supply(doc, method):
 	if not frappe.get_meta('Address').has_field('gst_state'): return
 
-	address_name = doc.shipping_address_name or doc.customer_address
+	if doc.doctype == "Sales Invoice":
+		address_name = doc.shipping_address_name or doc.customer_address
+	elif doc.doctype == "Purchase Invoice":
+		address_name = doc.shipping_address or doc.supplier_address
+
 	if address_name:
 		address = frappe.db.get_value("Address", address_name, ["gst_state", "gst_state_number"], as_dict=1)
 		doc.place_of_supply = cstr(address.gst_state_number) + "-" + cstr(address.gst_state)

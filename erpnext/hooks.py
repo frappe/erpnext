@@ -204,7 +204,7 @@ doc_events = {
 	'Address': {
 		'validate': 'erpnext.regional.india.utils.validate_gstin_for_india'
 	},
-	'Sales Invoice': {
+	('Sales Invoice', 'Purchase Invoice'): {
 		'validate': 'erpnext.regional.india.utils.set_place_of_supply'
 	}
 }
