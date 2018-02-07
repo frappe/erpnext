@@ -5,4 +5,5 @@ blogger
 setup
 add-products-to-website
 shopping-cart
+setting-multilingual-website
 articles
