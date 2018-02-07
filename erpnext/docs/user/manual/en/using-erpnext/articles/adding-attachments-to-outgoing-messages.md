@@ -4,6 +4,6 @@ ERPNext has in-built file manager. Click [here](/docs/user/videos/learn/file-man
 
 If you have file attached to the document (say Purchase Order), and same file needs to be emailed as attachment, following is how you can achieve it.
 
-<img alt="Emailing Attachments" class="screenshot" src="/docs/assets/img/articles/email-file-attachment.gif">
+<img alt="Emailing Attachments" class="screenshot" src="{{docs_base_url}}/assets/img/articles/email-file-attachment.gif">
 
 <!-- markdown -->

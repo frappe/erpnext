@@ -15,7 +15,7 @@ To setup Dropbox Backup,
 
 Set Frequency to download backup in your Dropbox account.
 
-<img class="screenshot" alt="set frequency" src="/docs/assets/img/setup/integrations/setup-backup-frequency.png">
+<img class="screenshot" alt="set frequency" src="{{docs_base_url}}/assets/img/setup/integrations/setup-backup-frequency.png">
 
 ####Step 2: Allow Dropbox Access
 
@@ -25,13 +25,13 @@ After setting frequency and updating other details, click on `Allow Dropbox acce
 
 Login to your Dropbox account by entering login credentials.
 
-<img class="screenshot" alt="Login" src="/docs/assets/img/setup/integrations/dropbox-2.png">
+<img class="screenshot" alt="Login" src="{{docs_base_url}}/assets/img/setup/integrations/dropbox-2.png">
 
 ####Step 4: Allow
 
 On successful login, you will find a confirmation message as following. Click on "Allow" to let your ERPNext account have access to your Dropbox account.
 
-<img class="screenshot" alt="Allow" src="/docs/assets/img/setup/integrations/dropbox-3.png">
+<img class="screenshot" alt="Allow" src="{{docs_base_url}}/assets/img/setup/integrations/dropbox-3.png">
 
 With this, a folder called "ERPNext" will be created in your Dropbox account, and database backup will start to auto-download in it.
 
@@ -44,20 +44,20 @@ With this, a folder called "ERPNext" will be created in your Dropbox account, an
 
 ####Step 2: Create a new Dropbox app
 
-<img class="screenshot" alt="Create new" src="/docs/assets/img/setup/integrations/dropbox-open-3.png">
+<img class="screenshot" alt="Create new" src="{{docs_base_url}}/assets/img/setup/integrations/dropbox-open-3.png">
 
 ####Step 3: Fill in the details for your new app
 
-<img class="screenshot" alt="Choose Dropbox API and type as APP Folder" src="/docs/assets/img/setup/integrations/dropbox-open-1.png">
+<img class="screenshot" alt="Choose Dropbox API and type as APP Folder" src="{{docs_base_url}}/assets/img/setup/integrations/dropbox-open-1.png">
 
 -
-<img class="screenshot" alt="Setup APP Name" src="/docs/assets/img/setup/integrations/dropbox-open-2.png">
+<img class="screenshot" alt="Setup APP Name" src="{{docs_base_url}}/assets/img/setup/integrations/dropbox-open-2.png">
 
 ####Step 4: Insert your custom domain Redirect URI
 
 `https://{yourwebsite.com}/api/method/frappe.integrations.doctype.dropbox_settings.dropbox_settings.dropbox_auth_finish`
 
-<img class="screenshot" alt="Set Redirect URL" src="/docs/assets/img/setup/integrations/dropbox_redirect_uri.png">
+<img class="screenshot" alt="Set Redirect URL" src="{{docs_base_url}}/assets/img/setup/integrations/dropbox_redirect_uri.png">
 
 ####Step 5: In a new window, open the Dropbox Settings page in your ERPnext installation
 

@@ -8,7 +8,7 @@ To create new Donor go to:
 
 > Non Profit > Donor > New
 
-<img class="screenshot" alt="Student" src="/docs/assets/img/non_profit/donor/donor.png">
+<img class="screenshot" alt="Student" src="{{docs_base_url}}/assets/img/non_profit/donor/donor.png">
 
 **Email:** Email field is the id of Member doctype.
 

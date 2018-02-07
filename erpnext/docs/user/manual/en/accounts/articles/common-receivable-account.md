@@ -2,7 +2,7 @@
 
 As per the party model, a common receivable account called **Debtor** is auto-created. This is a default Receivable Account for all the Customers.
 
-<img alt="Role Desk Permission" class="screenshot" src="/docs/assets/img/articles/common-receivable.png">
+<img alt="Role Desk Permission" class="screenshot" src="{{docs_base_url}}/assets/img/articles/common-receivable.png">
 
 If needed, you can also create a new receivable account and update in the Customer master.
 

@@ -4,10 +4,10 @@ La estructura del grupo de evaluación es un maestro donde se puede definir la j
 
 Por ejemplo, si realiza dos evaluaciones en un año académico, configure el Grupo de evaluación de la siguiente manera.
 
-<img class="screenshot" alt="Assessment Group Term" src="/docs/assets/img/education/assessment/assessment-group-term.png">
+<img class="screenshot" alt="Assessment Group Term" src="{{docs_base_url}}/assets/img/education/assessment/assessment-group-term.png">
 
 En la misma línea, también puede definir varios Grupo de Evaluación basado sobre la evaluación llevada a cabo en su instituto.
 
-<img class="screenshot" alt="Assessment Group Term" src="/docs/assets/img/education/assessment/assessment-group-details.png">
+<img class="screenshot" alt="Assessment Group Term" src="{{docs_base_url}}/assets/img/education/assessment/assessment-group-details.png">
 
 {next}

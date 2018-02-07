@@ -8,7 +8,7 @@ You can create the Fee Structure directly from
 
 or you can create the Fee Structure from Program also.
 
-<img class="screenshot" alt="Fees Structure" src="/docs/assets/img/education/fees/fee-structure.png">
+<img class="screenshot" alt="Fees Structure" src="{{docs_base_url}}/assets/img/education/fees/fee-structure.png">
 
 #### Academic Year Impact
 
