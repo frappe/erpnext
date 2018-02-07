@@ -3,9 +3,9 @@
  "allow_guest_to_view": 0, 
  "allow_import": 1, 
  "allow_rename": 0, 
- "autoname": "FPC.#########", 
+ "autoname": "field:postal_code", 
  "beta": 0, 
- "creation": "2018-01-20 15:16:26.433690", 
+ "creation": "2018-02-07 08:50:35.576206", 
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -115,10 +115,10 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-01-20 15:19:05.280792", 
+ "modified": "2018-02-07 08:51:09.402195", 
  "modified_by": "Administrator", 
  "module": "Logistics", 
- "name": "FedEx Postal Code", 
+ "name": "Postal Code", 
  "name_case": "", 
  "owner": "Administrator", 
  "permissions": [
@@ -189,6 +189,6 @@
  "show_name_in_global_search": 0, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
- "track_changes": 1, 
+ "track_changes": 0, 
  "track_seen": 0
 }
