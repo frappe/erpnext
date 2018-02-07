@@ -321,7 +321,7 @@ class PayrollEntry(Document):
 			journal_entry.user_remark = _('Payment of salary from {0} to {1}')\
 				.format(self.start_date, self.end_date)
 			journal_entry.company = self.company
-			journal_entry.posting_date = nowdate()
+			journal_entry.posting_date = self.posting_date
 
 			payment_amount = flt(total_salary_amount.rounded_total, precision)
 

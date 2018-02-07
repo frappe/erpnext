@@ -15,6 +15,7 @@ frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 			window.cur_pos = wrapper.pos;
 		} else {
 			// offline
+			frappe.flags.is_offline = true;
 			frappe.set_route('pos');
 		}
 	});
@@ -23,6 +24,10 @@ frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 frappe.pages['point-of-sale'].refresh = function(wrapper) {
 	if (wrapper.pos) {
 		cur_frm = wrapper.pos.frm;
+	}
+
+	if (frappe.flags.is_offline) {
+		frappe.set_route('pos');
 	}
 }
 
