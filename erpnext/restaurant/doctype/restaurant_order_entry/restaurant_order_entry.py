@@ -35,11 +35,6 @@ def get_invoice(table):
 @frappe.whitelist()
 def sync(table, items):
 	'''Sync the sales order related to the table'''
-	print("-"*30)
-	print(frappe.get_meta("Sales Invoice").get_field("restaurant_table"))
-	print(frappe.get_list("Domain"))
-	print(frappe.get_active_domains())
-	print("-"*30)
 	invoice = get_invoice(table)
 	items = json.loads(items)
 
