@@ -72,6 +72,18 @@ class ReceivablePayableReport(object):
 			"options": "Currency",
 			"width": 100
 		})
+
+		columns += [
+			_("PDC/LC Date") + ":Date:110",
+			_("PDC/LC Ref") + ":Data:110",
+			_("PDC/LC Amount") + ":Currency/currency:130",
+			_("Remaining Balance") + ":Currency/currency:130"
+		]
+
+		if args.get('party_type') == 'Customer':
+			columns += [_("Customer LPO") + ":Data:100"]
+			columns += [_("Delivery Note") + ":Data:100"]
+
 		if args.get("party_type") == "Customer":
 			columns += [
 				_("Territory") + ":Link/Territory:80",
@@ -89,7 +101,8 @@ class ReceivablePayableReport(object):
 		currency_precision = get_currency_precision() or 2
 		dr_or_cr = "debit" if args.get("party_type") == "Customer" else "credit"
 
-		voucher_details = self.get_voucher_details(args.get("party_type"))
+		dn_details = get_dn_details(args.get("party_type"))
+		voucher_details = self.get_voucher_details(args.get("party_type"), dn_details)
 
 		future_vouchers = self.get_entries_after(self.filters.report_date, args.get("party_type"))
 
@@ -101,6 +114,8 @@ class ReceivablePayableReport(object):
 		return_entries = self.get_return_entries(args.get("party_type"))
 
 		data = []
+		pdc_details = get_pdc_details(args.get("party_type"))
+
 		for gle in self.get_entries_till(self.filters.report_date, args.get("party_type")):
 			if self.is_receivable_or_payable(gle, dr_or_cr, future_vouchers):
 				outstanding_amount, credit_note_amount = self.get_outstanding_amount(gle,
@@ -143,6 +158,18 @@ class ReceivablePayableReport(object):
 						row.append(gle.account_currency)
 					else:
 						row.append(company_currency)
+
+					pdc = pdc_details.get(gle.voucher_no, {})
+					remaining_balance = outstanding_amount - flt(pdc.get("pdc_amount"))
+					row += [pdc.get("pdc_date"), pdc.get("pdc_ref"),
+						flt(pdc.get("pdc_amount")), remaining_balance]
+
+					if args.get('party_type') == 'Customer':
+						# customer LPO
+						row += [voucher_details.get(gle.voucher_no, {}).get("po_no")]
+
+						# Delivery Note
+						row += [voucher_details.get(gle.voucher_no, {}).get("delivery_note")]
 
 					# customer territory / supplier type
 					if args.get("party_type") == "Customer":
@@ -225,12 +252,13 @@ class ReceivablePayableReport(object):
 
 		return self.party_map
 
-	def get_voucher_details(self, party_type):
+	def get_voucher_details(self, party_type, dn_details):
 		voucher_details = frappe._dict()
 
 		if party_type == "Customer":
-			for si in frappe.db.sql("""select name, due_date
+			for si in frappe.db.sql("""select name, due_date, po_no
 				from `tabSales Invoice` where docstatus=1""", as_dict=1):
+					si['delivery_note'] = dn_details.get(si.name)
 					voucher_details.setdefault(si.name, si)
 
 		if party_type == "Supplier":
@@ -347,3 +375,39 @@ def get_ageing_data(first_range, second_range, third_range, age_as_on, entry_dat
 	outstanding_range[index] = outstanding_amount
 
 	return [age] + outstanding_range
+
+def get_pdc_details(party_type):
+	pdc_details = frappe._dict()
+
+	for pdc in frappe.db.sql("""
+		select
+			pref.reference_name as invoice_no, pent.party, pent.party_type,
+			max(pent.reference_date) as pdc_date, sum(ifnull(pref.allocated_amount,0)) as pdc_amount,
+			GROUP_CONCAT(pent.reference_no SEPARATOR ', ') as pdc_ref
+		from
+			`tabPayment Entry` as pent inner join `tabPayment Entry Reference` as pref
+		on
+			(pref.parent = pent.name)
+		where
+			pent.docstatus = 0 and pent.reference_date > pent.posting_date
+			and pent.party_type = %s
+			group by pref.reference_name""", party_type, as_dict=1):
+			pdc_details.setdefault(pdc.invoice_no, pdc)
+
+	return pdc_details
+
+def get_dn_details(party_type):
+	dn_details = frappe._dict()
+
+	if party_type == "Customer":
+		for si in frappe.db.sql("""select parent, GROUP_CONCAT(delivery_note SEPARATOR ', ') as dn
+			from `tabSales Invoice Item`
+			where docstatus=1 and delivery_note is not null and delivery_note != '' group by parent
+		Union
+			select against_sales_invoice as parent, GROUP_CONCAT(parent SEPARATOR ', ') as dn
+			from `tabDelivery Note Item`
+			where docstatus=1 and against_sales_invoice is not null
+			and against_sales_invoice != '' group by against_sales_invoice""", as_dict=1):
+				dn_details.setdefault(si.parent, si.dn)
+
+	return dn_details
