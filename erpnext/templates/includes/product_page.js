@@ -15,7 +15,7 @@ frappe.ready(function() {
 			$(".item-cart").toggleClass("hide", (!!!r.message.price || !!!r.message.in_stock));
 			if(r.message && r.message.price) {
 				$(".item-price")
-					.html(r.message.price.formatted_price + " {{ _("per") }} " + r.message.uom);
+					.html(r.message.price.formatted_price + " / " + r.message.uom);
 
 				if(r.message.in_stock==0) {
 					$(".item-stock").html("<div style='color: red'> <i class='fa fa-close'></i> {{ _("Not in stock") }}</div>");
@@ -44,7 +44,7 @@ frappe.ready(function() {
 
 		erpnext.shopping_cart.update_cart({
 			item_code: get_item_code(),
-			qty: 1,
+			qty: $("#item-spinner .cart-qty").val(),
 			callback: function(r) {
 				if(!r.exc) {
 					toggle_update_cart(1);
@@ -53,6 +53,25 @@ frappe.ready(function() {
 			},
 			btn: this,
 		});
+	});
+
+	$("#item-spinner").on('click', '.number-spinner button', function () {
+		var btn = $(this),
+			input = btn.closest('.number-spinner').find('input'),
+			oldValue = input.val().trim(),
+			newVal = 0;
+
+		if (btn.attr('data-dir') == 'up') {
+			newVal = parseInt(oldValue) + 1;
+		} else if (btn.attr('data-dir') == 'dwn')  {
+			if (parseInt(oldValue) > 1) {
+				newVal = parseInt(oldValue) - 1;
+			}
+			else {
+				newVal = parseInt(oldValue);
+			}
+		}
+		input.val(newVal);
 	});
 
 	$("[itemscope] .item-view-attribute .form-control").on("change", function() {
@@ -86,6 +105,7 @@ var toggle_update_cart = function(qty) {
 	$("#item-update-cart")
 		.toggle(qty ? true : false)
 		.find("input").val(qty);
+	$("#item-spinner").toggle(qty ? false : true);
 }
 
 function get_item_code() {

@@ -749,7 +749,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		// toggle read only property for conversion factor field if the uom and stock uom are same
 		if(this.frm.get_field('items').grid.fields_map.conversion_factor) {
 			this.frm.fields_dict.items.grid.toggle_enable("conversion_factor",
-				(item.uom != item.stock_uom)? true: false);
+				((item.uom != item.stock_uom) && !frappe.meta.get_docfield(cur_frm.fields_dict.items.grid.doctype, "conversion_factor").read_only)? true: false);
 		}
 
 	},
@@ -1263,16 +1263,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	payment_terms_template: function() {
 		var me = this;
-		if(this.frm.doc.payment_terms_template) {
-			var posting_date = this.frm.doc.bill_date ||
-				this.frm.doc.posting_date || this.frm.doc.transaction_date;
+		const doc = this.frm.doc;
+		if(doc.payment_terms_template && doc.doctype !== 'Delivery Note') {
+			var posting_date = doc.bill_date || doc.posting_date || doc.transaction_date;
 
 			frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_payment_terms",
 				args: {
-					terms_template: this.frm.doc.payment_terms_template,
+					terms_template: doc.payment_terms_template,
 					posting_date: posting_date,
-					grand_total: this.frm.doc.rounded_total || this.frm.doc.grand_total
+					grand_total: doc.rounded_total || doc.grand_total
 				},
 				callback: function(r) {
 					if(r.message && !r.exc) {

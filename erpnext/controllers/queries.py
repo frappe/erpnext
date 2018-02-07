@@ -421,4 +421,4 @@ def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
 	if filters and filters.get('item'):
 		query += " and item = '{item}'".format(item = frappe.db.escape(filters.get('item')))
 
-	return frappe.db.sql(query)
+	return frappe.db.sql(query, filters)

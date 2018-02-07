@@ -123,10 +123,10 @@ def delete_medical_record(consultation):
 def set_subject_field(consultation):
 	subject = "No Diagnosis "
 	if(consultation.diagnosis):
-		subject = "Diagnosis: \n"+ str(consultation.diagnosis)+". "
+		subject = "Diagnosis: "+ str(consultation.diagnosis)+". "
 	if(consultation.drug_prescription):
 		subject +="\nDrug(s) Prescribed. "
 	if(consultation.test_prescription):
-		subject += " Test(s) Prescribed."
+		subject += "\nTest(s) Prescribed."
 
 	return subject
