@@ -305,6 +305,7 @@ class SalesInvoice(SellingController):
 		pos = {}
 		if self.pos_profile:
 			pos = frappe.get_doc('POS Profile', self.pos_profile)
+			self.company = pos.company
 
 		if not self.get('payments') and not for_validate:
 			update_multi_mode_option(self, pos)
