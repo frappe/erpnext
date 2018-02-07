@@ -284,7 +284,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			}
 			,
 			callback: function(r) {
-				frappe.set_route("List", "Stock Entry", "List",{"purchase_order":r.message,"doc_status":0})
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
 		});
 	},

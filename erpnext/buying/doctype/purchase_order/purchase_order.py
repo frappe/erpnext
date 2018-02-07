@@ -435,30 +435,29 @@ def make_rm_stock_entry(purchase_order, rm_items):
 		item_wh = frappe._dict(frappe.db.sql("""select item_code, description
 										from `tabItem` where name in ({0})""".
 										format(", ".join(["%s"] * len(item_code_list))), item_code_list))
+		stock_entry = frappe.new_doc("Stock Entry")
+		stock_entry.purpose = "Subcontract"
+		stock_entry.purchase_order = purchase_order.name
+		stock_entry.supplier = purchase_order.supplier
+		stock_entry.supplier_name = purchase_order.supplier_name
+		stock_entry.supplier_address = purchase_order.supplier_address
+		stock_entry.address_display = purchase_order.address_display
+		stock_entry.company = purchase_order.company
+		stock_entry.from_bom = 1
 		for item_code in item_code_list:
-			stock_entry = frappe.new_doc("Stock Entry")
-			stock_entry.purpose = "Subcontract"
-			stock_entry.purchase_order = purchase_order.name
-			stock_entry.supplier = purchase_order.supplier
-			stock_entry.supplier_name = purchase_order.supplier_name
-			stock_entry.supplier_address = purchase_order.supplier_address
-			stock_entry.address_display = purchase_order.address_display
-			stock_entry.company = purchase_order.company
-			stock_entry.docstatus = 0
-			stock_entry.from_bom = 1
 			po_item = [d for d in purchase_order.items if d.item_code == item_code][0]
-			stock_entry.fg_completed_qty = po_item.qty
-			stock_entry.bom_no = po_item.bom
+			bom_no = po_item.bom
 			for rm_item_data in rm_items_list:
 				if rm_item_data["item_code"] == item_code:
 					items_dict = {rm_item_data["rm_item_code"]:
-					{"item_name":rm_item_data["item_name"],
-					"description":item_wh.get(rm_item_data["rm_item_code"]),
-					'qty':rm_item_data["qty"],
-					'from_warehouse':rm_item_data["warehouse"],
-					'stock_uom':rm_item_data["stock_uom"]}}
-					stock_entry.add_to_stock_entry_detail(items_dict)
-			stock_entry.save()
+								{"item_name":rm_item_data["item_name"],
+								"description":item_wh.get(rm_item_data["rm_item_code"]),
+								'qty':rm_item_data["qty"],
+								'from_warehouse':rm_item_data["warehouse"],
+								'stock_uom':rm_item_data["stock_uom"],
+								'bom_no':bom_no}}
+					stock_entry.add_to_stock_entry_detail(items_dict, bom_no)
+		return stock_entry.as_dict()
 	else:
 		frappe.throw(_("No Items selected for transfer"))
 	return purchase_order.name
