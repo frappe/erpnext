@@ -19,7 +19,7 @@ Save the new Crop Cycle
 
 It should now look something like this
 
-<img class="screenshot" alt="Task" src="/docs/assets/img/agriculture/crops_and_land/crop_cycle.png">
+<img class="screenshot" alt="Task" src="{{docs_base_url}}/assets/img/agriculture/crops_and_land/crop_cycle.png">
 
 Repeat these for every Crop Cycle you need
 
@@ -27,4 +27,4 @@ As you can see a Project was created, with the same name as the Crop Cycle and l
 
 > Projects > Project
 
-<img class="screenshot" alt="Task" src="/docs/assets/img/agriculture/crops_and_land/projects.png">
+<img class="screenshot" alt="Task" src="{{docs_base_url}}/assets/img/agriculture/crops_and_land/projects.png">

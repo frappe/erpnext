@@ -8,11 +8,11 @@ You can create the Program Enrollment for :
 
 1. **Student Applicants**: List of Student Applicants will be fetched for the selected **Program**, **Academic year** and **Academic Term** (if provided). 
 
-<img class="screenshot" alt="Student Applicant Enrollment" src="/docs/assets/img/education/admission/program-enrollment-tool.gif">
+<img class="screenshot" alt="Student Applicant Enrollment" src="{{docs_base_url}}/assets/img/education/admission/program-enrollment-tool.gif">
 
 2. **Program Enrollment**: List of students already enrolled in selected **Program** for the given **Academic Year**, **Academic Term** (if provided) and **Student Batch** will be fetched and can be used to enroll students from one academic year/term to another in the same **Program** or a new **Program**.
 
-<img class="screenshot" alt="Student Applicant Enrollment" src="/docs/assets/img/education/admission/program-enrollment-tool01.gif">
+<img class="screenshot" alt="Student Applicant Enrollment" src="{{docs_base_url}}/assets/img/education/admission/program-enrollment-tool01.gif">
 
 **New Student Batch**: This can be selected for the entire students fetched in the table. Priority will be given to the Batch selected in the table (for individual students).
 

@@ -4,7 +4,7 @@
 Fügen Sie einen Firmenbriefkopf und ein Firmenlogo hinzu.
 
 <img alt="Firmenlogo und Briefkopf" class="screenshot"
-src="/docs/assets/img/setup-wizard/step-5.png">
+src="{{docs_base_url}}/assets/img/setup-wizard/step-5.png">
 
 ---
 

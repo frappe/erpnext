@@ -2,7 +2,7 @@
 
 If you have a contract with the Customer where your organization gives bill to the Customer on a monthly, quarterly, half-yearly or annual basis, you can use subscription feature to make auto invoicing.
 
-<img class="screenshot" alt="Subscription" src="/docs/assets/img/accounts/subscription.png">
+<img class="screenshot" alt="Subscription" src="{{docs_base_url}}/assets/img/accounts/subscription.png">
 
 #### Scenario
 
@@ -11,7 +11,7 @@ Subscription for your hosted ERPNext account requires yearly renewal. We use Sal
 To set the subscription for the sales invoice
 Goto Subscription > select base doctype "Sales Invoice" > select base docname "Invoice No" > Save
 
-<img class="screenshot" alt="Subscription" src="/docs/assets/img/accounts/subscription.gif">
+<img class="screenshot" alt="Subscription" src="{{docs_base_url}}/assets/img/accounts/subscription.gif">
 
 **From Date and To Date**: This defines contract period with the customer.
 

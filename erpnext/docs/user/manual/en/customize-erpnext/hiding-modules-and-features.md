@@ -4,7 +4,7 @@ To hide modules (icons) from the home page, go to:
 
 `Setup > Permissions > Show / Hide Modules`
 
-<img alt="Hide Features" class="screenshot" src="/docs/assets/img/customize/show-hide-modules.png">
+<img alt="Hide Features" class="screenshot" src="{{docs_base_url}}/assets/img/customize/show-hide-modules.png">
 
 Click [here](/docs/user/manual/en/customize-erpnext/articles/module-visibility.html) to learn about other features from where icons from the desktop can be hidden.
 

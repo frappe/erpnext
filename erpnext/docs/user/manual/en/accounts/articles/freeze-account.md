@@ -6,8 +6,8 @@ Once an Account is Frozen, you won't be able to use it any accounting transactio
 
 To freeze an Account, go to Chart of Accounts, and edit an Account.
 
-<img class="screenshot" alt="Download Backup" src="/docs/assets/img/articles/freeze-account-1.png">
+<img class="screenshot" alt="Download Backup" src="{{docs_base_url}}/assets/img/articles/freeze-account-1.png">
 
 If User has Role define in the  Account Setting assigned, then he/she will be able to set an Account as Frozen.
 
-<img class="screenshot" alt="Download Backup" src="/docs/assets/img/articles/freeze-account-2.png">
+<img class="screenshot" alt="Download Backup" src="{{docs_base_url}}/assets/img/articles/freeze-account-2.png">

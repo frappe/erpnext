@@ -3,7 +3,7 @@
 
 Hier können Sie Werte einstellen, die in den Transaktionen des Moduls Einkauf zugrunde gelegt werden.
 
-![Einkaufseinstellungen](/docs/assets/img/buying/buying-settings.png)
+![Einkaufseinstellungen]({{docs_base_url}}/assets/img/buying/buying-settings.png)
 
 Lassen Sie uns die verschiedenen Optionen durckgehen.
 

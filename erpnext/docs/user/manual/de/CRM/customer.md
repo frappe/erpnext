@@ -7,7 +7,7 @@ Sie können Ihre Kunden entweder direkt erstellen über
 
 > CRM > Dokumente > Kunde > Neu
 
-<img class="screenshot" alt="Kunde" src="/docs/assets/img/crm/create-customer.gif">
+<img class="screenshot" alt="Kunde" src="{{docs_base_url}}/assets/img/crm/create-customer.gif">
 
 oder einen Upload über ein Datenimportwerkzeug durchführen.
 

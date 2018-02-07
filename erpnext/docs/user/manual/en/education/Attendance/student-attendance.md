@@ -8,7 +8,7 @@ To create Attendance record :
 
 Select the **Student, Course Schedule and Student Group** for which attendance is to be marked for the given date. Set the Status to Present/Absent and save. 
 
-<img class="screenshot" alt="Student Attendance" src="/docs/assets/img/education/schedule/student-attendance.gif">
+<img class="screenshot" alt="Student Attendance" src="{{docs_base_url}}/assets/img/education/schedule/student-attendance.gif">
 
 **Student Attendance tool** can be used for bulk updation of the attendance based on **Batch, Course or Activity**.
 

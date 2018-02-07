@@ -8,7 +8,7 @@ To create Student group using this tool go to
 
 Select the **Academic Term** and the **Program** for which a student group is to be created. 
 
-<img class="screenshot" alt="Student Group Creation Tool" src="/docs/assets/img/education/student/student-group-creation-tool.gif">
+<img class="screenshot" alt="Student Group Creation Tool" src="{{docs_base_url}}/assets/img/education/student/student-group-creation-tool.gif">
 
 By default the student group is created based on the **Course** only. The check box for "Separate course based Group for every Batch" allows you to create batchwise Student groups for a course.
 
