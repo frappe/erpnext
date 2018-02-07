@@ -588,7 +588,6 @@
 						"5592. Munk\u00e1ltat\u00f3 \u00e1ltal \u00f6nk\u00e9ntes p\u00e9nzt\u00e1rba befizetett munk\u00e1ltat\u00f3i tagd\u00edj hozz\u00e1j\u00e1rul\u00e1s": {}, 
 						"5593. Munk\u00e1ltat\u00f3t terhel\u0151 szem\u00e9lyi j\u00f6vedelemad\u00f3": {}, 
 						"5594. Munk\u00e1ltat\u00f3i hozz\u00e1j\u00e1rul\u00e1s a korengedm\u00e9nyes nyugd\u00edj ig\u00e9nybev\u00e9tel\u00e9hez": {}, 
-						"5595. Tal\u00e1lm\u00e1nyi d\u00edj, szabadalom v\u00e9tel\u00e1ra \u00e9s hasznos\u00edt\u00e1si d\u00edja, az \u00faj\u00edt\u00e1si d\u00edj \u00e9s ezekkel kapcsolatos k\u00f6zrem\u0171k\u00f6d\u00e9si d\u00edjak": {}, 
 						"5596. Fizetett szerz\u0151i, \u00edr\u00f3i \u00e9s m\u00e1s jogv\u00e9delmet \u00e9lvez\u0151 munk\u00e1k d\u00edjai \u00e9s ezekkel kapcsolatos k\u00f6zrem\u0171k\u00f6d\u0151i d\u00edjak": {}, 
 						"5597. Fizetett \u00f6szt\u00f6nd\u00edjak": {}, 
 						"5598. Reprezent\u00e1ci\u00f3s k\u00f6lts\u00e9gek, \u00e9tkez\u00e9si hozz\u00e1j\u00e1rul\u00e1s": {}, 
@@ -731,7 +730,7 @@
 					"8684. K\u00f6vetel\u00e9sek \u00e9rt\u00e9kveszt\u00e9se": {}
 				}, 
 				"869. K\u00fcl\u00f6nf\u00e9le egy\u00e9b r\u00e1ford\u00edt\u00e1sok": {
-					"8691. T\u00e1rsas\u00e1gba bevitt, \u00e9rt\u00e9kpap\u00edrnak vagy r\u00e9szesed\u00e9snek nem min\u0151s\u00fcl\u0151 vagyont. k\u00f6nyv szerinti \u00e9s l\u00e9t. okir. meghat. veszt. k\u00fcl\u00f6nb\u00f6zet": {}, 
+					"8691. T\u00e1rsas\u00e1gba bevitt, \u00e9rt\u00e9kpap\u00edrnak vagy r\u00e9szesed\u00e9snek nem min\u0151s\u00fcl\u0151 vagyont.": {}, 
 					"8692. Ellent\u00e9telez\u00e9s n\u00e9lk\u00fcl \u00e1tv\u00e1llalt k\u00f6telezetts\u00e9g szerz\u0151d\u00e9s szerinti \u00f6sszege": {}, 
 					"8693. T\u00e9r\u00edt\u00e9s n\u00e9lk\u00fcl \u00e1tadott, r\u00e9szesed\u00e9snek vagy \u00e9rt\u00e9kpap\u00edrnak nem min\u0151s\u00fcl\u0151 eszk\u00f6z\u00f6k nyilv\u00e1ntart\u00e1s szerinti \u00e9rt\u00e9ke": {}, 
 					"8694. T\u00e9r\u00edt\u00e9s n\u00e9lk\u00fcl ny\u00fajtott szolg\u00e1ltat\u00e1sok beker\u00fcl\u00e9si \u00e9rt\u00e9ke": {}, 
@@ -813,12 +812,7 @@
 					"9684. R\u00e9szesed\u00e9sek \u00e9rt\u00e9kveszt\u00e9s\u00e9nek vissza\u00edr\u00e1sa": {}
 				}, 
 				"969. K\u00fcl\u00f6nf\u00e9le egy\u00e9b bev\u00e9telek": {
-					"9691. Gazdas\u00e1gi t\u00e1rsas\u00e1gba bevitt, \u00e9rt\u00e9kp. vagy r\u00e9szesed\u00e9snek nem min\u0151s\u00fcl\u0151 vagyont. \u00e9rt\u00e9ke \u00e9s l\u00e9tes\u00edt\u0151 okir. \u00e9rt. nyer. jell . k\u00fcl\u00f6nb.": {}, 
-					"9692. El\u00e9v\u00fclt k\u00f6telezetts\u00e9g k\u00f6nyv szerinti \u00e9rt\u00e9ke": {}, 
-					"9693. T\u00e9r\u00edt\u00e9s n\u00e9lk\u00fcl \u00e1tvett, aj\u00e1nd\u00e9kk\u00e9nt, hagyat\u00e9kk\u00e9nt kapott, fellelt eszk\u00f6z\u00f6k piaci vagy jogszab\u00e1ly szerinti \u00e9rt\u00e9ke": {}, 
-					"9694. T\u00e9r\u00edt\u00e9s n\u00e9lk\u00fcl kapott szolg\u00e1ltat\u00e1sok piaci vagy jogszab\u00e1ly szerinti \u00e9rt\u00e9ke": {}, 
-					"9695. Elengedett \u00e9s ellent\u00e9telez\u00e9s n\u00e9lk\u00fcl \u00e1tv\u00e1llalt k\u00f6telezetts\u00e9g \u00e9rt\u00e9ke": {}, 
-					"9696. Egy\u00e9b, vagyonn\u00f6veked\u00e9ssel j\u00e1r\u00f3 bev\u00e9telek": {}
+					"is_group": 1
 				}
 			}, 
 			"97. P\u00c9NZ\u00dcGYI M\u0170VELETEK BEV\u00c9TELEI": {

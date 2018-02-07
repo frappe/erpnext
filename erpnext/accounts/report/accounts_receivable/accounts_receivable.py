@@ -282,11 +282,27 @@ class ReceivablePayableReport(object):
 				conditions.append("""party in (select name from tabCustomer
 					where exists(select name from `tabCustomer Group` where lft >= {0} and rgt <= {1}
 						and name=tabCustomer.customer_group))""".format(lft, rgt))
+			
+			if self.filters.get("territory"):
+				lft, rgt = frappe.db.get_value("Territory",
+					self.filters.get("territory"), ["lft", "rgt"])
+
+				conditions.append("""party in (select name from tabCustomer
+					where exists(select name from `tabTerritory` where lft >= {0} and rgt <= {1}
+						and name=tabCustomer.territory))""".format(lft, rgt))
 
 			if self.filters.get("payment_terms_template"):
 				conditions.append("party in (select name from tabCustomer where payment_terms=%s)")
 				values.append(self.filters.get("payment_terms_template"))
 
+			if self.filters.get("sales_partner"):
+				conditions.append("party in (select name from tabCustomer where default_sales_partner=%s)")
+				values.append(self.filters.get("sales_partner"))
+
+			if self.filters.get("sales_person"):
+				conditions.append("""party in (select parent
+					from `tabSales Team` where sales_person=%s and parenttype = 'Customer')""")
+				values.append(self.filters.get("sales_person"))
 		return " and ".join(conditions), values
 
 	def get_gl_entries_for(self, party, party_type, against_voucher_type, against_voucher):

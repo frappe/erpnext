@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe import _
+from datetime import date
 
 def execute(filters=None):
 	return Gstr1Report(filters).run()
@@ -11,15 +12,32 @@ def execute(filters=None):
 class Gstr1Report(object):
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
+		self.doctype = "Sales Invoice"
+		self.tax_doctype = "Sales Taxes and Charges"
+		self.select_columns = """
+			name as invoice_number,
+			customer_name,
+			posting_date,
+			base_grand_total,
+			base_rounded_total,
+			customer_gstin,
+			place_of_supply,
+			ecommerce_gstin,
+			reverse_charge,
+			invoice_type,
+			return_against,
+			is_return,
+			invoice_type,
+			export_type,
+			port_code,
+			shipping_bill_number,
+			shipping_bill_date,
+			reason_for_issuing_document
+		"""
 		self.customer_type = "Company" if self.filters.get("type_of_business") ==  "B2B" else "Individual"
-		
+
 	def run(self):
 		self.get_columns()
-		self.get_data()
-		return self.columns, self.data
-
-	def get_data(self):
-		self.data = []
 		self.get_gst_accounts()
 		self.get_invoice_data()
 
@@ -27,50 +45,52 @@ class Gstr1Report(object):
 
 		self.get_invoice_items()
 		self.get_items_based_on_tax_rate()
-		invoice_fields = [d["fieldname"] for d in self.invoice_columns]
+		self.invoice_fields = [d["fieldname"] for d in self.invoice_columns]
+		self.get_data()
+		return self.columns, self.data
 
-
+	def get_data(self):
+		self.data = []
 		for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
 			invoice_details = self.invoices.get(inv)
 			for rate, items in items_based_on_rate.items():
-				row = []
-				for fieldname in invoice_fields:
-					if fieldname == "invoice_value":
-						row.append(invoice_details.base_rounded_total or invoice_details.base_grand_total)
-					else:
-						row.append(invoice_details.get(fieldname))
-
-				row += [rate,
-					sum([net_amount for item_code, net_amount in self.invoice_items.get(inv).items()
-						if item_code in items]),
-					self.invoice_cess.get(inv)
-				]
-
+				row, taxable_value = self.get_row_data_for_invoice(inv, invoice_details, rate, items)
 				if self.filters.get("type_of_business") ==  "B2C Small":
 					row.append("E" if invoice_details.ecommerce_gstin else "OE")
 
+				if self.filters.get("type_of_business") ==  "CDNR":
+					row.append("Y" if invoice_details.posting_date <= date(2017, 7, 1) else "N")
+					row.append("C" if invoice_details.return_against else "R")
+
 				self.data.append(row)
+
+	def get_row_data_for_invoice(self, invoice, invoice_details, tax_rate, items):
+		row = []
+		for fieldname in self.invoice_fields:
+			if self.filters.get("type_of_business") ==  "CDNR" and fieldname == "invoice_value":
+				row.append(abs(invoice_details.base_rounded_total) or abs(invoice_details.base_grand_total))
+			elif fieldname == "invoice_value":
+				row.append(invoice_details.base_rounded_total or invoice_details.base_grand_total)
+			else:
+				row.append(invoice_details.get(fieldname))
+
+		taxable_value = sum([abs(net_amount)
+			for item_code, net_amount in self.invoice_items.get(invoice).items() if item_code in items])
+		row += [tax_rate, taxable_value]
+
+		return row, taxable_value
 
 	def get_invoice_data(self):
 		self.invoices = frappe._dict()
 		conditions = self.get_conditions()
-
 		invoice_data = frappe.db.sql("""
 			select
-				name as invoice_number,
-				customer_name,
-				posting_date,
-				base_grand_total,
-				base_rounded_total,
-				customer_gstin,
-				place_of_supply,
-				ecommerce_gstin,
-				reverse_charge,
-				invoice_type
-			from `tabSales Invoice`
-			where docstatus = 1 %s
+				{select_columns}
+			from `tab{doctype}`
+			where docstatus = 1 {where_conditions}
 			order by posting_date desc
-			""" % (conditions), self.filters, as_dict=1)
+			""".format(select_columns=self.select_columns, doctype=self.doctype,
+				where_conditions=conditions), self.filters, as_dict=1)
 
 		for d in invoice_data:
 			self.invoices.setdefault(d.invoice_number, d)
@@ -85,48 +105,56 @@ class Gstr1Report(object):
 					conditions += opts[1]
 
 		customers = frappe.get_all("Customer", filters={"customer_type": self.customer_type})
-		conditions += " and customer in ('{0}')".format("', '".join([frappe.db.escape(c.name)
-			for c in customers]))
+
+		if self.filters.get("type_of_business") ==  "B2B":
+			conditions += " and invoice_type != 'Export' and is_return != 1 and customer in ('{0}')".\
+				format("', '".join([frappe.db.escape(c.name) for c in customers]))
 
 		if self.filters.get("type_of_business") ==  "B2C Large":
 			conditions += """ and SUBSTR(place_of_supply, 1, 2) != SUBSTR(company_gstin, 1, 2)
-				and grand_total > 250000"""
+				and grand_total > 250000 and is_return != 1 and customer in ('{0}')""".\
+					format("', '".join([frappe.db.escape(c.name) for c in customers]))
+
 		elif self.filters.get("type_of_business") ==  "B2C Small":
 			conditions += """ and (
 				SUBSTR(place_of_supply, 1, 2) = SUBSTR(company_gstin, 1, 2)
-				or grand_total <= 250000
-			)"""
+					or grand_total <= 250000 ) and is_return != 1 and customer in ('{0}')""".\
+						format("', '".join([frappe.db.escape(c.name) for c in customers]))
 
+		elif self.filters.get("type_of_business") ==  "CDNR":
+			conditions += """ and is_return = 1 """
+
+		elif self.filters.get("type_of_business") ==  "EXPORT":
+			conditions += """ and is_return !=1 and invoice_type = 'Export' """
 		return conditions
 
 	def get_invoice_items(self):
 		self.invoice_items = frappe._dict()
 		items = frappe.db.sql("""
 			select item_code, parent, base_net_amount
-			from `tabSales Invoice Item`
+			from `tab%s Item`
 			where parent in (%s)
-		""" % (', '.join(['%s']*len(self.invoices))), tuple(self.invoices), as_dict=1)
+		""" % (self.doctype, ', '.join(['%s']*len(self.invoices))), tuple(self.invoices), as_dict=1)
 
 		for d in items:
 			self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, d.base_net_amount)
 
 	def get_items_based_on_tax_rate(self):
-		tax_details = frappe.db.sql("""
+		self.tax_details = frappe.db.sql("""
 			select
 				parent, account_head, item_wise_tax_detail, base_tax_amount_after_discount_amount
-			from `tabSales Taxes and Charges`
+			from `tab%s`
 			where
-				parenttype = 'Sales Invoice' and docstatus = 1
+				parenttype = %s and docstatus = 1
 				and parent in (%s)
-				and tax_amount_after_discount_amount > 0
 			order by account_head
-		""" % (', '.join(['%s']*len(self.invoices.keys()))), tuple(self.invoices.keys()))
+		""" % (self.tax_doctype, '%s', ', '.join(['%s']*len(self.invoices.keys()))),
+			tuple([self.doctype] + self.invoices.keys()))
 
 		self.items_based_on_tax_rate = {}
 		self.invoice_cess = frappe._dict()
 		unidentified_gst_accounts = []
-
-		for parent, account, item_wise_tax_detail, tax_amount in tax_details:
+		for parent, account, item_wise_tax_detail, tax_amount in self.tax_details:
 			if account in self.gst_accounts.cess_account:
 				self.invoice_cess.setdefault(parent, tax_amount)
 			else:
@@ -148,11 +176,10 @@ class Gstr1Report(object):
 							if cgst_or_sgst:
 								tax_rate *= 2
 
-							rate_based_dict = self.items_based_on_tax_rate.setdefault(parent, {})\
-								.setdefault(tax_rate, [])
+							rate_based_dict = self.items_based_on_tax_rate\
+								.setdefault(parent, {}).setdefault(tax_rate, [])
 							if item_code not in rate_based_dict:
 								rate_based_dict.append(item_code)
-
 					except ValueError:
 						continue
 		if unidentified_gst_accounts:
@@ -185,12 +212,6 @@ class Gstr1Report(object):
 				"label": "Taxable Value",
 				"fieldtype": "Currency",
 				"width": 100
-			},
-			{
-				"fieldname": "cess_amount",
-				"label": "Cess Amount",
-				"fieldtype": "Currency",
-				"width": 100
 			}
 		]
 		self.other_columns = []
@@ -200,33 +221,39 @@ class Gstr1Report(object):
 				{
 					"fieldname": "customer_gstin",
 					"label": "GSTIN/UIN of Recipient",
-					"fieldtype": "Data"
+					"fieldtype": "Data",
+					"width": 150
 				},
 				{
 					"fieldname": "customer_name",
 					"label": "Receiver Name",
-					"fieldtype": "Data"
+					"fieldtype": "Data",
+					"width":100
 				},
 				{
 					"fieldname": "invoice_number",
 					"label": "Invoice Number",
 					"fieldtype": "Link",
-					"options": "Sales Invoice"
+					"options": "Sales Invoice",
+					"width":100
 				},
 				{
 					"fieldname": "posting_date",
 					"label": "Invoice date",
-					"fieldtype": "Date"
+					"fieldtype": "Date",
+					"width":80
 				},
 				{
 					"fieldname": "invoice_value",
 					"label": "Invoice Value",
-					"fieldtype": "Currency"
+					"fieldtype": "Currency",
+					"width":100
 				},
 				{
 					"fieldname": "place_of_supply",
 					"label": "Place of Supply",
-					"fieldtype": "Data"
+					"fieldtype": "Data",
+					"width":100
 				},
 				{
 					"fieldname": "reverse_charge",
@@ -241,9 +268,19 @@ class Gstr1Report(object):
 				{
 					"fieldname": "ecommerce_gstin",
 					"label": "E-Commerce GSTIN",
-					"fieldtype": "Data"
+					"fieldtype": "Data",
+					"width":120
 				}
 			]
+			self.other_columns = [
+					{
+						"fieldname": "cess_amount",
+						"label": "Cess Amount",
+						"fieldtype": "Currency",
+						"width": 100
+					}
+				]
+
 		elif self.filters.get("type_of_business") ==  "B2C Large":
 			self.invoice_columns = [
 				{
@@ -278,6 +315,93 @@ class Gstr1Report(object):
 					"width": 130
 				}
 			]
+			self.other_columns = [
+					{
+						"fieldname": "cess_amount",
+						"label": "Cess Amount",
+						"fieldtype": "Currency",
+						"width": 100
+					}
+				]
+		elif self.filters.get("type_of_business") ==  "CDNR":
+			self.invoice_columns = [
+				{
+					"fieldname": "customer_gstin",
+					"label": "GSTIN/UIN of Recipient",
+					"fieldtype": "Data",
+					"width": 150
+				},
+				{
+					"fieldname": "customer_name",
+					"label": "Receiver Name",
+					"fieldtype": "Data",
+					"width": 120
+				},
+				{
+					"fieldname": "return_against",
+					"label": "Invoice/Advance Receipt Number",
+					"fieldtype": "Link",
+					"options": "Sales Invoice",
+					"width": 120
+				},
+				{
+					"fieldname": "posting_date",
+					"label": "Invoice/Advance Receipt date",
+					"fieldtype": "Date",
+					"width": 120
+				},
+				{
+					"fieldname": "invoice_number",
+					"label": "Invoice/Advance Receipt Number",
+					"fieldtype": "Link",
+					"options": "Sales Invoice",
+					"width":120
+				},
+				{
+					"fieldname": "posting_date",
+					"label": "Invoice/Advance Receipt date",
+					"fieldtype": "Date",
+					"width": 120
+				},
+				{
+					"fieldname": "reason_for_issuing_document",
+					"label": "Reason For Issuing document",
+					"fieldtype": "Data",
+					"width": 140
+				},
+				{
+					"fieldname": "place_of_supply",
+					"label": "Place of Supply",
+					"fieldtype": "Data",
+					"width": 120
+				},
+				{
+					"fieldname": "invoice_value",
+					"label": "Invoice Value",
+					"fieldtype": "Currency",
+					"width": 120
+				}
+			]
+			self.other_columns = [
+				{
+						"fieldname": "cess_amount",
+						"label": "Cess Amount",
+						"fieldtype": "Currency",
+						"width": 100
+				},
+				{
+					"fieldname": "pre_gst",
+					"label": "PRE GST",
+					"fieldtype": "Data",
+					"width": 80
+				},
+				{
+					"fieldname": "document_type",
+					"label": "Document Type",
+					"fieldtype": "Data",
+					"width": 80
+				}
+			]
 		elif self.filters.get("type_of_business") ==  "B2C Small":
 			self.invoice_columns = [
 				{
@@ -295,10 +419,62 @@ class Gstr1Report(object):
 			]
 			self.other_columns = [
 				{
+						"fieldname": "cess_amount",
+						"label": "Cess Amount",
+						"fieldtype": "Currency",
+						"width": 100
+				},
+				{
 					"fieldname": "type",
 					"label": "Type",
 					"fieldtype": "Data",
 					"width": 50
+				}
+			]
+		elif self.filters.get("type_of_business") ==  "EXPORT":
+			self.invoice_columns = [
+				{
+					"fieldname": "export_type",
+					"label": "Export Type",
+					"fieldtype": "Data",
+					"width":120
+				},
+				{
+					"fieldname": "invoice_number",
+					"label": "Invoice Number",
+					"fieldtype": "Link",
+					"options": "Sales Invoice",
+					"width":120
+				},
+				{
+					"fieldname": "posting_date",
+					"label": "Invoice date",
+					"fieldtype": "Date",
+					"width": 120
+				},
+				{
+					"fieldname": "invoice_value",
+					"label": "Invoice Value",
+					"fieldtype": "Currency",
+					"width": 120
+				},
+				{
+					"fieldname": "port_code",
+					"label": "Port Code",
+					"fieldtype": "Data",
+					"width": 120
+				},
+				{
+					"fieldname": "shipping_bill_number",
+					"label": "Shipping Bill Number",
+					"fieldtype": "Data",
+					"width": 120
+				},
+				{
+					"fieldname": "shipping_bill_date",
+					"label": "Shipping Bill Date",
+					"fieldtype": "Date",
+					"width": 120
 				}
 			]
 		self.columns = self.invoice_columns + self.tax_columns + self.other_columns

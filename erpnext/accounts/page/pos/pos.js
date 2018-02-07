@@ -15,6 +15,7 @@ frappe.pages['pos'].on_page_load = function (wrapper) {
 			cur_pos = wrapper.pos;
 		} else {
 			// online
+			frappe.flags.is_online = true
 			frappe.set_route('point-of-sale');
 		}
 	});
@@ -23,6 +24,10 @@ frappe.pages['pos'].on_page_load = function (wrapper) {
 frappe.pages['pos'].refresh = function (wrapper) {
 	window.onbeforeunload = function () {
 		return wrapper.pos.beforeunload()
+	}
+
+	if (frappe.flags.is_online) {
+		frappe.set_route('point-of-sale');
 	}
 }
 
@@ -1620,8 +1625,16 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 		var invoice_data = {};
 		this.si_docs = this.get_doc_from_localstorage();
+    
 		if (this.frm.doc.offline_pos_name) {
-			this.update_invoice();
+			this.update_invoice()
+			//to retrieve and set the default payment
+			invoice_data[this.frm.doc.offline_pos_name] = this.frm.doc;
+			invoice_data[this.frm.doc.offline_pos_name].payments[0].amount = this.frm.doc.net_total
+			invoice_data[this.frm.doc.offline_pos_name].payments[0].base_amount = this.frm.doc.net_total
+
+			this.frm.doc.paid_amount = this.frm.doc.net_total
+			this.frm.doc.outstanding_amount = 0
 		} else {
 			this.frm.doc.offline_pos_name = $.now();
 			this.frm.doc.posting_date = frappe.datetime.get_today();

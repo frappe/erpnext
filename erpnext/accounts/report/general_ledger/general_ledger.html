@@ -17,38 +17,70 @@
 <table class="table table-bordered">
 	<thead>
 		<tr>
-			<th style="width: 15%">{%= __("Date") %}</th>
+			<th style="width: 12%">{%= __("Date") %}</th>
 			<th style="width: 15%">{%= __("Ref") %}</th>
-			<th style="width: 40%">{%= __("Party") %}</th>
+			<th style="width: 25%">{%= __("Party") %}</th>
 			<th style="width: 15%">{%= __("Debit") %}</th>
 			<th style="width: 15%">{%= __("Credit") %}</th>
+			<th style="width: 18%">{%= __("Balance (Dr - Cr)") %}</th>
 		</tr>
 	</thead>
 	<tbody>
 		{% for(var i=0, l=data.length; i<l; i++) { %}
 			<tr>
-			{% if(data[i][__("Posting Date")]) { %}
-				<td>{%= dateutil.str_to_user(data[i][__("Posting Date")]) %}</td>
-				<td>{%= data[i][__("Voucher Type")] %}
-					<br>{%= data[i][__("Voucher No")] %}</td>
+			{% if(data[i].posting_date) { %}
+				<td>{%= dateutil.str_to_user(data[i].posting_date) %}</td>
+				<td>{%= data[i].voucher_type %}
+					<br>{%= data[i].voucher_no %}</td>
 				<td>
 					{% if(!(filters.party || filters.account)) { %}
-						{%= data[i][__("Party")] || data[i][__("Account")] %}
+						{%= data[i].party || data[i].account %}
 						<br>
 					{% } %}
 
-					{{ __("Against") }}: {%= data[i][__("Against Account")] %}
-					<br>{%= __("Remarks") %}: {%= data[i][__("Remarks")] %}</td>
-				<td style="text-align: right">{%= format_currency(data[i][__("Debit")]) %}</td>
-				<td style="text-align: right">{%= format_currency(data[i][__("Credit")]) %}</td>
+					{{ __("Against") }}: {%= data[i].against %}
+					<br>{%= __("Remarks") %}: {%= data[i].remarks %}
+					{% if(data[i].bill_no) { %}
+						<br>{%= __("Supplier Invoice No") %}: {%= data[i].bill_no %}
+					{% } %}
+					</td>
+				{% if(filters.print_in_account_currency) { %}
+					<td style="text-align: right">
+						{%= format_currency(data[i].debit_in_account_currency, data[i].account_currency) %}
+					</td>
+					<td style="text-align: right">
+						{%= format_currency(data[i].credit_in_account_currency, data[i].account_currency) %}
+					</td>
+				{% } else { %}
+					<td style="text-align: right">
+						{%= format_currency(data[i].debit) %}</td>
+					<td style="text-align: right">
+						{%= format_currency(data[i].credit) %}</td>
+				{% } %}
 			{% } else { %}
 				<td></td>
 				<td></td>
-				<td><b>{%= frappe.format(data[i][__("Account")], {fieldtype: "Link"}) || "&nbsp;" %}</b></td>
+				<td><b>{%= frappe.format(data[i].account, {fieldtype: "Link"}) || "&nbsp;" %}</b></td>
+				{% if(filters.print_in_account_currency) { %}
+					<td style="text-align: right">
+						{%= data[i].account && format_currency(data[i].debit_in_account_currency, data[i].account_currency) %}</td>
+					<td style="text-align: right">
+						{%= data[i].account && format_currency(data[i].credit_in_account_currency, data[i].account_currency) %}</td>
+				{% } else { %}
+					<td style="text-align: right">
+						{%= data[i].account && format_currency(data[i].debit) %}
+					</td>
+					<td style="text-align: right">
+						{%= data[i].account && format_currency(data[i].credit) %}
+					</td>
+				{% } %}
+			{% } %}
+			{% if(filters.print_in_account_currency) { %}
 				<td style="text-align: right">
-					{%= data[i][__("Account")] && format_currency(data[i][__("Debit")]) %}</td>
-				<td style="text-align: right">
-					{%= data[i][__("Account")] && format_currency(data[i][__("Credit")]) %}</td>
+					{%= format_currency(data[i].balance_in_account_currency, data[i].account_currency) %}
+				</td>
+			{% } else { %}
+				<td style="text-align: right">{%= format_currency(data[i].balance) %}</td>
 			{% } %}
 			</tr>
 		{% } %}

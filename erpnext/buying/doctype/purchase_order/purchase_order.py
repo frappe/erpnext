@@ -34,6 +34,12 @@ class PurchaseOrder(BuyingController):
 			'overflow_type': 'order'
 		}]
 
+	def onload(self):
+		super(PurchaseOrder, self).onload()
+
+		self.set_onload('disable_fetch_last_purchase_rate',
+			cint(frappe.db.get_single_value("Buying Settings", "disable_fetch_last_purchase_rate")))
+
 	def validate(self):
 		super(PurchaseOrder, self).validate()
 
@@ -62,11 +68,15 @@ class PurchaseOrder(BuyingController):
 			},
 			"Supplier Quotation Item": {
 				"ref_dn_field": "supplier_quotation_item",
-				"compare_fields": [["rate", "="], ["project", "="], ["item_code", "="], 
+				"compare_fields": [["project", "="], ["item_code", "="], 
 					["uom", "="], ["conversion_factor", "="]],
 				"is_child_table": True
 			}
 		})
+
+
+		if cint(frappe.db.get_single_value('Buying Settings', 'maintain_same_rate')):
+			self.validate_rate_with_reference_doc([["Supplier Quotation", "supplier_quotation", "supplier_quotation_item"]])
 
 	def validate_supplier(self):
 		prevent_po = frappe.db.get_value("Supplier", self.supplier, 'prevent_pos')

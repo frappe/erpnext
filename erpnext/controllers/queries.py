@@ -152,7 +152,7 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	conditions = []
 
-	return frappe.db.sql("""select tabItem.name, tabItem.item_group, tabItem.image,
+	return frappe.db.sql("""select tabItem.name, tabItem.item_group,
 		if(length(tabItem.item_name) > 40,
 			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name,
 		if(length(tabItem.description) > 40, \
@@ -257,7 +257,7 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	cond = ""
 	if filters.get("posting_date"):
-		cond = "and (ifnull(batch.expiry_date, '')='' or batch.expiry_date >= %(posting_date)s)"
+		cond = "and (batch.expiry_date is null or batch.expiry_date >= %(posting_date)s)"
 
 	batch_nos = None
 	args = {

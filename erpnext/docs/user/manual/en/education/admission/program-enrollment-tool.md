@@ -18,4 +18,16 @@ You can create the Program Enrollment for :
 
 For promoting the students, the new academic year, academic term and program can also be selected for the enrollment of the fetched students list.
 
+#### Video Tutorial for Program Enrollment Tool
+
+
+<div>
+    <style>.embed-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; } .embed-container iframe, .embed-container object, .embed-container embed { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    </style>
+    <div class='embed-container'>
+        <iframe src='https://www.youtube.com/embed//5nxWYBRHY_o?start=82' frameborder='0' allowfullscreen>
+        </iframe>
+    </div>
+</div>    
+
 {next}

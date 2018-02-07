@@ -7,7 +7,7 @@ Payroll is the administration of financial records of employees' salaries, wages
 To process Payroll in ERPNext,
 
   1. Create Salary Structures for all Employees.
-  2. Generate Salary Slips via Process Payroll.
+  2. Generate Salary Slips via [Payroll Entry](/docs/user/manual/en/human-resources/payroll-entry.html).
   3. Book the Salary in your Accounts.
 
 ### Salary Structure
@@ -115,7 +115,7 @@ Earning Types and Deduction Types.
 ### Creating Salary Slips
 
 Once the Salary Structure is created, you can make a salary slip from the same
-form or you can process your payroll for the month using Process Payroll.
+form or you can process your payroll for the month using Payroll Entry.
 
 To create a new Salary Slip go to:
 
@@ -124,6 +124,7 @@ To create a new Salary Slip go to:
 #### Figure 2: Salary Slip
 
 <img class="screenshot" alt="Salary Slip" src="{{docs_base_url}}/assets/img/human-resources/salary-slip.png">
+
 
 You can also create salary slip for multiple employees using Process Payroll:
 
@@ -167,6 +168,7 @@ created.
 #### Figure 3.1: Make Bank Entry
 
 <img class="screenshot" alt="Process Payroll" src="{{docs_base_url}}/assets/img/human-resources/bank-entry.png">
+
 
 
 {next}

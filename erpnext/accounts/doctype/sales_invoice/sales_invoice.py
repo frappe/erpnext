@@ -142,7 +142,7 @@ class SalesInvoice(SellingController):
 
 		self.update_time_sheet(self.name)
 
-		self.update_current_month_sales()
+		update_company_current_month_sales(self.company)
 		self.update_project()
 
 	def validate_pos_paid_amount(self):
@@ -181,15 +181,8 @@ class SalesInvoice(SellingController):
 		self.make_gl_entries_on_cancel()
 		frappe.db.set(self, 'status', 'Cancelled')
 
-		self.update_current_month_sales()
+		update_company_current_month_sales(self.company)
 		self.update_project()
-
-	def update_current_month_sales(self):
-		if frappe.flags.in_test:
-			update_company_current_month_sales(self.company)
-		else:
-			frappe.enqueue('erpnext.setup.doctype.company.company.update_company_current_month_sales',
-				company=self.company)
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
@@ -231,12 +224,17 @@ class SalesInvoice(SellingController):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
 
 		validate_against_credit_limit = False
+		bypass_credit_limit_check_at_sales_order = cint(frappe.db.get_value("Customer", self.customer,
+			"bypass_credit_limit_check_at_sales_order"))
+		if bypass_credit_limit_check_at_sales_order:
+			validate_against_credit_limit = True
+
 		for d in self.get("items"):
 			if not (d.sales_order or d.delivery_note):
 				validate_against_credit_limit = True
 				break
 		if validate_against_credit_limit:
-			check_credit_limit(self.customer, self.company)
+			check_credit_limit(self.customer, self.company, bypass_credit_limit_check_at_sales_order)
 
 	def set_missing_values(self, for_validate=False):
 		pos = self.set_pos_fields(for_validate)
@@ -244,12 +242,16 @@ class SalesInvoice(SellingController):
 		if not self.debit_to:
 			self.debit_to = get_party_account("Customer", self.customer, self.company)
 		if not self.due_date and self.customer:
-			self.due_date = get_due_date(self.posting_date, "Customer", self.customer)
+			self.due_date = get_due_date(self.posting_date, "Customer", self.customer, self.company)
 
 		super(SalesInvoice, self).set_missing_values(for_validate)
 
 		if pos:
-			return {"print_format": pos.get("print_format_for_online") }
+			return {
+				"print_format": pos.get("print_format_for_online"),
+				"allow_edit_rate": pos.get("allow_user_to_edit_rate"),
+				"allow_edit_discount": pos.get("allow_user_to_edit_discount")
+			}
 
 	def update_time_sheet(self, sales_invoice):
 		for d in self.timesheets:
@@ -311,6 +313,8 @@ class SalesInvoice(SellingController):
 			self.account_for_change_amount = frappe.db.get_value('Company', self.company, 'default_cash_account')
 
 		if pos:
+			self.allow_print_before_pay = pos.allow_print_before_pay
+
 			if not for_validate and not self.customer:
 				self.customer = pos.customer
 
@@ -675,28 +679,28 @@ class SalesInvoice(SellingController):
 		# income account gl entries
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
-				account_currency = get_account_currency(item.income_account)
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": item.income_account,
-						"against": self.customer,
-						"credit": item.base_net_amount,
-						"credit_in_account_currency": item.base_net_amount \
-							if account_currency==self.company_currency else item.net_amount,
-						"cost_center": item.cost_center
-					}, account_currency)
-				)
-
 				if item.is_fixed_asset:
 					asset = frappe.get_doc("Asset", item.asset)
 
-					fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset, is_sale=True)
+					fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset, item.base_net_amount)
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
 						gl_entries.append(self.get_gl_dict(gle))
 
 					asset.db_set("disposal_date", self.posting_date)
 					asset.set_status("Sold" if self.docstatus==1 else None)
+				else:
+					account_currency = get_account_currency(item.income_account)
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": item.income_account,
+							"against": self.customer,
+							"credit": item.base_net_amount,
+							"credit_in_account_currency": item.base_net_amount \
+								if account_currency==self.company_currency else item.net_amount,
+							"cost_center": item.cost_center
+						}, account_currency)
+					)
 
 		# expense account gl entries
 		if cint(self.update_stock) and \

@@ -15,6 +15,7 @@ frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 			window.cur_pos = wrapper.pos;
 		} else {
 			// offline
+			frappe.flags.is_offline = true;
 			frappe.set_route('pos');
 		}
 	});
@@ -23,6 +24,10 @@ frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 frappe.pages['point-of-sale'].refresh = function(wrapper) {
 	if (wrapper.pos) {
 		cur_frm = wrapper.pos.frm;
+	}
+
+	if (frappe.flags.is_offline) {
+		frappe.set_route('pos');
 	}
 }
 
@@ -50,7 +55,6 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				this.set_online_status();
 			},
 			() => this.setup_company(),
-
 			() => this.make_new_invoice(),
 			() => {
 				frappe.dom.unfreeze();
@@ -111,6 +115,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				},
 				on_select_change: () => {
 					this.cart.numpad.set_inactive();
+					this.set_form_action();
 				},
 				get_item_details: (item_code) => {
 					return this.items.get(item_code);
@@ -180,6 +185,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					.then(() => {
 						// update cart
 						this.update_cart_data(item);
+						this.set_form_action();
 					});
 			}
 			return;
@@ -278,13 +284,17 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	submit_sales_invoice() {
-
+		var is_saved = 0;
+		if(!this.frm.doc.__islocal){
+			is_saved = 1;
+		}
 		frappe.confirm(__("Permanently Submit {0}?", [this.frm.doc.name]), () => {
 			frappe.call({
 				method: 'erpnext.selling.page.point_of_sale.point_of_sale.submit_invoice',
 				freeze: true,
 				args: {
-					doc: this.frm.doc
+					doc: this.frm.doc,
+					is_saved: is_saved
 				}
 			}).then(r => {
 				if(r.message) {
@@ -463,6 +473,8 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 					if (r.message) {
 						this.frm.meta.default_print_format = r.message.print_format || 'POS Invoice';
+						this.frm.allow_edit_rate = r.message.allow_edit_rate;
+						this.frm.allow_edit_discount = r.message.allow_edit_discount;
 					}
 				}
 
@@ -499,19 +511,26 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	set_form_action() {
-		if(this.frm.doc.docstatus !== 1) return;
+		if(this.frm.doc.docstatus == 1 || (this.frm.doc.allow_print_before_pay == 1&&this.frm.doc.items.length>0)){
+			this.page.set_secondary_action(__("Print"), async() => {
+				if(this.frm.doc.docstatus != 1 ){
+					await this.frm.save();
+				}
+				this.frm.print_preview.printit(true);
+			});
+		}
+		if(this.frm.doc.items.length == 0){
+			this.page.clear_secondary_action();
+		}
 
-		this.page.set_secondary_action(__("Print"), () => {
-			this.frm.print_preview.printit(true);
-		});
-
-		this.page.set_primary_action(__("New"), () => {
-			this.make_new_invoice();
-		});
-
-		this.page.add_menu_item(__("Email"), () => {
-			this.frm.email_doc();
-		});
+		if (this.frm.doc.docstatus == 1) {
+			this.page.set_primary_action(__("New"), () => {
+				this.make_new_invoice();
+			});
+			this.page.add_menu_item(__("Email"), () => {
+				this.frm.email_doc();
+			});
+		}
 	}
 };
 
@@ -552,9 +571,9 @@ class POSCart {
 						<div class="taxes-and-totals">
 							${this.get_taxes_and_totals()}
 						</div>
-						<div class="discount-amount">
-							${this.get_discount_amount()}
-						</div>
+						<div class="discount-amount">`+
+						(!this.frm.allow_edit_discount ? `` : `${this.get_discount_amount()}`)+
+						`</div>
 						<div class="grand-total">
 							${this.get_grand_total()}
 						</div>
@@ -583,6 +602,7 @@ class POSCart {
 		this.numpad && this.numpad.reset_value();
 		this.customer_field.set_value("");
 
+		this.$discount_amount.find('input:text').val('');
 		this.wrapper.find('.grand-total-value').text(
 			format_currency(this.frm.doc.grand_total, this.frm.currency));
 		this.wrapper.find('.rounded-total-value').text(
@@ -713,6 +733,17 @@ class POSCart {
 		this.customer_field.set_value(this.frm.doc.customer);
 	}
 
+	disable_numpad_control() {
+		let disabled_btns = [];
+		if(!this.frm.allow_edit_rate) {
+			disabled_btns.push('Rate');
+		}
+		if(!this.frm.allow_edit_discount) {
+			disabled_btns.push('Disc');
+		}
+		return disabled_btns;
+	}
+
 	make_numpad() {
 		this.numpad = new NumberPad({
 			button_array: [
@@ -727,6 +758,7 @@ class POSCart {
 			disable_highlight: ['Qty', 'Disc', 'Rate', 'Pay'],
 			reset_btns: ['Qty', 'Disc', 'Rate', 'Pay'],
 			del_btn: 'Del',
+			disable_btns: this.disable_numpad_control(),
 			wrapper: this.wrapper.find('.number-pad-container'),
 			onclick: (btn_value) => {
 				// on click
@@ -1257,7 +1289,7 @@ class NumberPad {
 	constructor({
 		wrapper, onclick, button_array,
 		add_class={}, disable_highlight=[],
-		reset_btns=[], del_btn='',
+		reset_btns=[], del_btn='', disable_btns
 	}) {
 		this.wrapper = wrapper;
 		this.onclick = onclick;
@@ -1266,6 +1298,7 @@ class NumberPad {
 		this.disable_highlight = disable_highlight;
 		this.reset_btns = reset_btns;
 		this.del_btn = del_btn;
+		this.disable_btns = disable_btns || [];
 		this.make_dom();
 		this.bind_events();
 		this.value = '';
@@ -1296,6 +1329,16 @@ class NumberPad {
 		}
 
 		this.set_class();
+
+		if(this.disable_btns) {
+			this.disable_btns.forEach((btn) => {
+				const $btn = this.get_btn(btn);
+				$btn.prop("disabled", true)
+				$btn.hover(() => {
+					$btn.css('cursor','not-allowed');
+				})
+			})
+		}
 	}
 
 	set_class() {

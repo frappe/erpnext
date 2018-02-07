@@ -106,6 +106,13 @@ frappe.ui.form.on("Item", {
 				frappe.set_route("Form", "Item Variant Settings");
 			}, __("View"));
 		}
+
+		const stock_exists = (frm.doc.__onload
+			&& frm.doc.__onload.stock_exists) ? 1 : 0;
+
+		['has_serial_no', 'has_batch_no'].forEach((fieldname) => {
+			frm.set_df_property(fieldname, 'read_only', stock_exists);
+		});
 	},
 
 	validate: function(frm){
@@ -309,11 +316,6 @@ $.extend(erpnext.item, {
 
 	show_multiple_variants_dialog: function(frm) {
 		var me = this;
-
-		if(me.multiple_variant_dialog) {
-			me.multiple_variant_dialog.show();
-			return;
-		}
 
 		let promises = [];
 		let attr_val_fields = {};
