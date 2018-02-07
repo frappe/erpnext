@@ -15,10 +15,8 @@ frappe.views.HubFactory = frappe.views.Factory.extend({
 				'/assets/erpnext/css/hub.css',
 			]
 		};
-		console.log("make factory?");
 
 		if (!erpnext.hub.pages[page_name]) {
-			console.log("pages?");
 			if (page === 'Item' && !route[2]) {
 				frappe.require(assets['List'], () => {
 					erpnext.hub.pages[page_name] = new erpnext.hub.ItemListing({
@@ -36,7 +34,6 @@ frappe.views.HubFactory = frappe.views.Factory.extend({
 					window.hub_page = erpnext.hub.pages[page_name];
 				});
 			} else if(route[2]) {
-				console.log("form?");
 				frappe.require(assets['Form'], () => {
 					erpnext.hub.pages[page_name] = new erpnext.hub.HubForm({
 						hub_item_code: route[2],
@@ -47,7 +44,6 @@ frappe.views.HubFactory = frappe.views.Factory.extend({
 				});
 			}
 		} else {
-			console.log("else?");
 			frappe.container.change_to(page_name);
 			window.hub_page = erpnext.hub.pages[page_name];
 		}
