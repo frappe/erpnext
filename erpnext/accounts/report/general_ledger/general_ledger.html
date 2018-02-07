@@ -22,7 +22,7 @@
 			<th style="width: 25%">{%= __("Party") %}</th>
 			<th style="width: 15%">{%= __("Debit") %}</th>
 			<th style="width: 15%">{%= __("Credit") %}</th>
-			<th style="width: 18%">{%= __("Balance") %}</th>
+			<th style="width: 18%">{%= __("Balance (Dr - Cr)") %}</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -76,11 +76,11 @@
 				{% } %}
 			{% } %}
 			{% if(filters.print_in_account_currency) { %}
-				<td style="text-align: right">{%= get_currency_symbol(data[i].account_currency)%} 
-					{%= data[i].balance_in_account_currency %}</td>
+				<td style="text-align: right">
+					{%= format_currency(data[i].balance_in_account_currency, data[i].account_currency) %}
+				</td>
 			{% } else { %}
-				<td style="text-align: right">{%= get_currency_symbol()%} 
-					{%= data[i].balance %}</td>
+				<td style="text-align: right">{%= format_currency(data[i].balance) %}</td>
 			{% } %}
 			</tr>
 		{% } %}
