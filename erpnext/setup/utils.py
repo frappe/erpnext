@@ -117,8 +117,11 @@ def enable_all_roles_and_domains():
 		return
 
 	from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
+	print("set_active_domains")
+	print([d.name for d in domains])
 	frappe.get_single('Domain Settings').set_active_domains(\
 		[d.name for d in domains])
+	print([d.name for d in frappe.get_all("Domain")])
 	add_all_roles_to('Administrator')
 
 

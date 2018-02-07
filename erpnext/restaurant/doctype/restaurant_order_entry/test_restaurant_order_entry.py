@@ -9,6 +9,7 @@ import unittest
 from erpnext.restaurant.doctype.restaurant_order_entry.restaurant_order_entry \
 	import (sync, make_invoice, item_query_restaurant)
 
+
 class TestRestaurantOrderEntry(unittest.TestCase):
 	def setUp(self):
 		# save the menus as Price List is deleted before tests...
@@ -19,6 +20,13 @@ class TestRestaurantOrderEntry(unittest.TestCase):
 			restaurant = frappe.get_doc('Restaurant', 'Test Restaurant 1')
 			restaurant.active_menu = 'Test Restaurant 1 Menu 1'
 			restaurant.save()
+		table = frappe.db.get_value('Restaurant Table', dict(restaurant = 'Test Restaurant 1'))
+		if not table:
+			table = frappe.new_doc('Restaurant Table')
+			table.restaurant = 'Test Restaurant 1'
+			table.no_of_seats = 5
+			table.minimum_seating = 1
+			table.save()
 
 	def test_update_order(self):
 		table = frappe.db.get_value('Restaurant Table', dict(restaurant = 'Test Restaurant 1'))
