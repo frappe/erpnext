@@ -241,13 +241,13 @@ def get_result_as_list(data, filters):
 		if not d.get('posting_date'):
 			balance, balance_in_account_currency = 0, 0
 
-		balance, label = get_balance(d, balance, 'debit', 'credit')
-		d['balance'] = '{0} {1}'.format(fmt_money(abs(balance)), label)
+		balance = get_balance(d, balance, 'debit', 'credit')
+		d['balance'] = balance
 
 		if filters.get("show_in_account_currency"):
-			balance_in_account_currency, label = get_balance(d, balance_in_account_currency,
+			balance_in_account_currency = get_balance(d, balance_in_account_currency,
 				'debit_in_account_currency', 'credit_in_account_currency')
-			d['balance_in_account_currency'] = '{0} {1}'.format(fmt_money(abs(balance_in_account_currency)), label)
+			d['balance_in_account_currency'] = balance_in_account_currency
 		else:
 			d['debit_in_account_currency'] = d.get('debit', 0)
 			d['credit_in_account_currency'] = d.get('credit', 0)
@@ -268,9 +268,8 @@ def get_supplier_invoice_details():
 
 def get_balance(row, balance, debit_field, credit_field):
 	balance += (row.get(debit_field, 0) -  row.get(credit_field, 0))
-	label = 'DR' if balance > 0 else 'CR'
 
-	return balance, label
+	return balance
 
 def get_columns(filters):
 	columns = [
@@ -300,10 +299,10 @@ def get_columns(filters):
 			"width": 100
 		},
 		{
-			"label": _("Balance"),
+			"label": _("Balance (Dr - Cr)"),
 			"fieldname": "balance",
-			"fieldtype": "Data",
-			"width": 100
+			"fieldtype": "Float",
+			"width": 130
 		}
 	]
 
