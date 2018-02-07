@@ -299,7 +299,7 @@ def get_columns(filters):
 			"width": 100
 		},
 		{
-			"label": _("Balance (DR - CR)"),
+			"label": _("Balance (Dr - Cr)"),
 			"fieldname": "balance",
 			"fieldtype": "Float",
 			"width": 130
