@@ -31,7 +31,7 @@ In ERPNext, you can select different type of Warehouses to stock your different 
 These numbers help to track individual units or batches of Items which you sell. It also tracks warranty and returns. In case any individual Item is recalled by the supplier the number system helps to track individual Item. The numbering system also manages expiry dates. Please note that if you sell your items in thousands, and if the items are very small like pens or erasers, you need not serialize them. In ERPNext, you will have to mention the serial number in some accounting entries. To create serial numbers you will have to manually create all the numbers in your entries. If your product is not a big consumer durable Item, if it has no warranty and has no chances of being recalled, avoid giving serial numbers.
 
 > Tip: While entering an item code in an items table, if the table requires inventory details, then depending on whether the entered item is batched or serialized, you can enter serial or batch numbers right away in a pop-up dialog.
-<img alt="Serial No modal" class="screenshot" src="/docs/assets/img/stock/serial_no_modal.gif"><img alt="Batch No modal" class="screenshot" src="/docs/assets/img/stock/batch_no_modal.png">
+<img alt="Serial No modal" class="screenshot" src="{{docs_base_url}}/assets/img/stock/serial_no_modal.gif"><img alt="Batch No modal" class="screenshot" src="{{docs_base_url}}/assets/img/stock/batch_no_modal.png">
 
 > Important: Once you mark an item as serialized or batched or neither, you cannot change it after you have made any stock entry.
 
@@ -57,9 +57,9 @@ Inspection Criteria: If a Quality Inspection is prepared for this Item, then thi
 
 ### Purchase Details
 
-<img alt="Item Purchase Details" class="screenshot" src="/docs/assets/img/stock/item-purchase.png">
+<img alt="Item Purchase Details" class="screenshot" src="{{docs_base_url}}/assets/img/stock/item-purchase.png">
 
-<img class="screenshot" alt="Purchase details" src="/docs/assets/img/stock/item-purchase.png">
+<img class="screenshot" alt="Purchase details" src="{{docs_base_url}}/assets/img/stock/item-purchase.png">
 
 * **Lead time days:** Lead time days are the number of days required for the Item to reach the warehouse.
 
@@ -69,7 +69,7 @@ Inspection Criteria: If a Quality Inspection is prepared for this Item, then thi
 
 ###Supplier Details
 
-<img alt="Item Supplier Details" class="screenshot" src="/docs/assets/img/stock/item-supplier.png">
+<img alt="Item Supplier Details" class="screenshot" src="{{docs_base_url}}/assets/img/stock/item-supplier.png">
 
 * **Default Supplier:** Supplier from whom you generally purchase this item.
 
@@ -79,23 +79,23 @@ Inspection Criteria: If a Quality Inspection is prepared for this Item, then thi
 
 ### Sales Details
 
-<img alt="Item Sales Details" class="screenshot" src="/docs/assets/img/stock/item-sales.png">
+<img alt="Item Sales Details" class="screenshot" src="{{docs_base_url}}/assets/img/stock/item-sales.png">
 
 * **Default Income Account:** Income account selected here will be fetched automatically in sales invoice for this item.
 
-<img class="screenshot" alt="Sales details" src="/docs/assets/img/stock/item-sales.png)">
+<img class="screenshot" alt="Sales details" src="{{docs_base_url}}/assets/img/stock/item-sales.png)">
 
-<img class="screenshot" alt="Sales details" src="/docs/assets/img/stock/item-sales.png">
+<img class="screenshot" alt="Sales details" src="{{docs_base_url}}/assets/img/stock/item-sales.png">
 
 ***Cost Centre:** Cost center selected here will be fetched automatically in sales invoice for this item.
 
 ***Customer Codes:** Track Item Code assigned by the Customers for this Item. This will help you in searching item while creating Sales Order based on the Item Code in the Customer's Purchase Order.
 
-<img class="screenshot" alt="Sales details" src="/docs/assets/img/stock/item-sales.png)">
+<img class="screenshot" alt="Sales details" src="{{docs_base_url}}/assets/img/stock/item-sales.png)">
 
 ### Manufacturing And Website
 
-<img class="screenshot" alt="Manufaturing details" src="/docs/assets/img/stock/item-manufacturing-website.png">
+<img class="screenshot" alt="Manufaturing details" src="{{docs_base_url}}/assets/img/stock/item-manufacturing-website.png">
 
 Visit [Manufacturing](/docs/user/manual/en/manufacturing.html) and [Website ](/docs/user/manual/en/website.html)to understand these topics in detail.
 

@@ -6,7 +6,7 @@ To create Student category go to Setup >> Student Category >> New.
 
 We can create new student category by adding a name and save it
 
-<img class="screenshot" alt="Student" src="/docs/assets/img/education/student/student-category.gif">
+<img class="screenshot" alt="Student" src="{{docs_base_url}}/assets/img/education/student/student-category.gif">
 
 
 {next}
