@@ -2,7 +2,7 @@
 
 Enter Company Name, Abbreviation and add a logo.
 
-<img alt="Company Details" class="screenshot" src="/docs/assets/img/setup-wizard/step-5.png">
+<img alt="Company Details" class="screenshot" src="{{docs_base_url}}/assets/img/setup-wizard/step-5.png">
 
 ### Company Abbreviation
 

@@ -2,7 +2,7 @@
 
 In the Sales Taxes and Purchase Taxes master, you will find a column called Type. Following a brief on a meaning of each Type and how you can use it.
 
-<img alt="Role Desk Permission" class="screenshot" src="/docs/assets/img/articles/types-in-tax-masters.png">
+<img alt="Role Desk Permission" class="screenshot" src="{{docs_base_url}}/assets/img/articles/types-in-tax-masters.png">
 
 **Actual:** This allows you to enter expense amount directly. For example, Rs. 500 incurred for Shipping.
 

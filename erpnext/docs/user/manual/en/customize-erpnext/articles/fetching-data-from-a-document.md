@@ -8,12 +8,12 @@ For example, if you want Customer's PO No. and PO Date to be fetched from Sales 
 
 Sales Order (standard fields)
 
-<img class="screenshot" alt="Standard fields in Sales Order" src="/docs/assets/img/articles/fetching-1.png">
+<img class="screenshot" alt="Standard fields in Sales Order" src="{{docs_base_url}}/assets/img/articles/fetching-1.png">
 
 Sales Invoice (custom fields)
 
-<img class="screenshot" alt="Custom Field in Sales Invoice" src="/docs/assets/img/articles/fetching-2.png">
+<img class="screenshot" alt="Custom Field in Sales Invoice" src="{{docs_base_url}}/assets/img/articles/fetching-2.png">
 
 Since names for the Customer's PO related fields are same in the Sales Order and Sales Invoice, when creating Sales Invoice from the Sales Order, values in these fields are auto-fetched.
 
-<img class="screenshot" alt="Values fetching from Sales Order to Sales Invoice" src="/docs/assets/img/articles/fetching-3.gif">
+<img class="screenshot" alt="Values fetching from Sales Order to Sales Invoice" src="{{docs_base_url}}/assets/img/articles/fetching-3.gif">

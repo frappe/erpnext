@@ -7,7 +7,7 @@ Um einen neuen Bewerber anzulegen, gehen Sie zu:
 
 > Personalwesen > Dokumente > Bewerber > Neu
 
-<img class="screenshot" alt="Bewerber" src="/docs/assets/img/human-resources/job-applicant.png">
+<img class="screenshot" alt="Bewerber" src="{{docs_base_url}}/assets/img/human-resources/job-applicant.png">
 
 ### Verknüpfung mit einem E-Mail-Konto
 
@@ -20,6 +20,6 @@ Sie können die Bewerbersuche mit einem E-Mail-Konto verknüpfen. Wenn wir anneh
 * Geben Sie die E-Mail-ID und das Passwort ein und aktivieren Sie "Eingehend aktivieren".
 * Unter "Anhängen an" geben Sie "Bewerber" an.
 
-<img class="screenshot" alt="E-Mail-Konto" src="/docs/assets/img/human-resources/email-account.png">
+<img class="screenshot" alt="E-Mail-Konto" src="{{docs_base_url}}/assets/img/human-resources/email-account.png">
 
 {next}

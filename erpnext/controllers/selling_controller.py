@@ -156,7 +156,7 @@ class SellingController(StockController):
 
 			last_purchase_rate, is_stock_item = frappe.db.get_value("Item", it.item_code, ["last_purchase_rate", "is_stock_item"])
 			last_purchase_rate_in_sales_uom = last_purchase_rate / (it.conversion_factor or 1)
-			if flt(it.base_rate) < flt(last_purchase_rate_in_sales_uom):
+			if flt(it.base_rate) < flt(last_purchase_rate_in_sales_uom) and not self.is_return:
 				throw_message(it.item_name, last_purchase_rate_in_sales_uom, "last purchase rate")
 
 			last_valuation_rate = frappe.db.sql("""
@@ -166,7 +166,7 @@ class SellingController(StockController):
 				""", (it.item_code, it.warehouse))
 			if last_valuation_rate:
 				last_valuation_rate_in_sales_uom = last_valuation_rate[0][0] / (it.conversion_factor or 1)
-				if is_stock_item and flt(it.base_rate) < flt(last_valuation_rate_in_sales_uom):
+				if is_stock_item and flt(it.base_rate) < flt(last_valuation_rate_in_sales_uom) and not self.is_return:
 					throw_message(it.name, last_valuation_rate_in_sales_uom, "valuation rate")
 
 

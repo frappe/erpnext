@@ -14,7 +14,7 @@ To set credit limit go to Customer - Master
   
 #### Figure 1: Credit Limit
 
-<img class="screenshot" alt="Credit Limit" src="/docs/assets/img/accounts/credit-limit-1.png">
+<img class="screenshot" alt="Credit Limit" src="{{docs_base_url}}/assets/img/accounts/credit-limit-1.png">
 
 Go to the 'CREDIT LIMIT' section and enter the amount in the field Credit Limit.
 
@@ -50,7 +50,7 @@ For 'CREDIT LIMIT' check functionality, Priority (High to Low) is as below
   
 #### Figure 2: Credit Controller
 
-<img class="screenshot" alt="Credit Limit" src="/docs/assets/img/accounts/credit-limit-2.png">
+<img class="screenshot" alt="Credit Limit" src="{{docs_base_url}}/assets/img/accounts/credit-limit-2.png">
 
 Save the changes.
 

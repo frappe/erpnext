@@ -16,4 +16,4 @@ How to check if Role is for System User or Website User?
 
 In the Role master, if field "Desk Access" is checked, that Role is for System User. If Desk Access field is unchecked, then that Role is for Website User.
 
-<img alt="Role Desk Permission" class="screenshot" src="/docs/assets/img/articles/role-deskperm.png">
+<img alt="Role Desk Permission" class="screenshot" src="{{docs_base_url}}/assets/img/articles/role-deskperm.png">

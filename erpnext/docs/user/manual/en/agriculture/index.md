@@ -4,7 +4,7 @@ Farmers know that even a small operation requires intensive recordkeeping. A wel
 
 A farm requires additional attention to manage its productive units (plots of land), time sensitive crop activities (such as planting, irrigating, fertilizing, etc.), recording environmental and crop data for analysis, and reports to help make effective decisions.
 
-<img class="screenshot" alt="Task" src="/docs/assets/img/agriculture/agri_desk.png">
+<img class="screenshot" alt="Task" src="{{docs_base_url}}/assets/img/agriculture/agri_desk.png">
 
 The Agriculture module in ERPNext helps you keep track of your farming operations. It allows you keep records for each field where you farm, such as geospatial and soil texture characteristics. It allows you to:
 
@@ -15,7 +15,7 @@ The Agriculture module in ERPNext helps you keep track of your farming operation
 * Record sale of the harvest or transfer to warehouse for further processing
 * View reports
 
-<img class="screenshot" alt="Task" src="/docs/assets/img/agriculture/agri_doctypes.png">
+<img class="screenshot" alt="Task" src="{{docs_base_url}}/assets/img/agriculture/agri_doctypes.png">
 
 ### Topics
 
