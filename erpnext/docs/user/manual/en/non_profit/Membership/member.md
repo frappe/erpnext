@@ -8,7 +8,7 @@ To create new Member go to:
 
 > Non Profit > Member > New
 
-<img class="screenshot" alt="Student" src="/docs/assets/img/non_profit/membership/member.png">
+<img class="screenshot" alt="Student" src="{{docs_base_url}}/assets/img/non_profit/membership/member.png">
 
 **Email:** Email field is the id of Member doctype.
 

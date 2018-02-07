@@ -5,7 +5,7 @@ Ein Anwesenheitsdatensatz der wiedergibt, dass ein Mitarbeiter zu einem bestimmt
 
 > Personalwesen > Dokumente > Anwesenheit > Neu
 
-<img class="screenshot" alt="Anwesenheit" src="/docs/assets/img/human-resources/attendence.png">
+<img class="screenshot" alt="Anwesenheit" src="{{docs_base_url}}/assets/img/human-resources/attendence.png">
 
 Sie können einen monatlichen Report über Ihre Anwesenheiten erhalten, indem Sie zum "Monatlichen Anwesenheitsbericht" gehen.
 

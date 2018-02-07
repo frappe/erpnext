@@ -8,7 +8,7 @@ To create new Volunteer go to:
 
 > Non Profit > Volunteer > New
 
-<img class="screenshot" alt="Volunteer" src="/docs/assets/img/non_profit/volunteer/volunteer.png">
+<img class="screenshot" alt="Volunteer" src="{{docs_base_url}}/assets/img/non_profit/volunteer/volunteer.png">
 
 **Email:** Email field is the id of Member doctype.
 
