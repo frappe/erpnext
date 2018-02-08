@@ -111,7 +111,7 @@ class LeaveApplication(Document):
 		block_dates = get_applicable_block_dates(self.from_date, self.to_date,
 			self.employee, self.company)
 
-		if block_dates:
+		if block_dates and self.docstatus == 1:
 			frappe.throw(_("You are not authorized to approve leaves on Block Dates"), LeaveDayBlockedError)
 
 	def validate_balance_leaves(self):
