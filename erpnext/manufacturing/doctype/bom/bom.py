@@ -589,9 +589,11 @@ def validate_bom_no(item, bom_no):
 	if item:
 		rm_item_exists = False
 		for d in bom.items:
-			if (d.item_code.lower() == item.lower() or \
-		d.item_code.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower()):
+			if (d.item_code.lower() == item.lower()):
 				rm_item_exists = True
+		if bom.item.lower() == item.lower() or \
+			bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower():
+ 				rm_item_exists = True
 		if not rm_item_exists:
 			frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
 
