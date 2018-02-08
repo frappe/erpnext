@@ -41,7 +41,7 @@ def execute():
 				"allow_edit": 'Leave Approver'
 			}, {
 				"state": 'Rejected',
-				"doc_status": 1,
+				"doc_status": 0,
 				"allow_edit": 'Leave Approver'
 			}],
 			'transitions': [{
@@ -57,3 +57,9 @@ def execute():
 				"allowed": 'Leave Approver'
 			}]
 		}).insert(ignore_permissions=True)
+
+		if frappe.db.has_column("Leave Application", "status"):
+			frappe.db.sql("""update `tabLeave Application` set workflow_state = status""")
+
+		if frappe.db.has_column("Leave Application", "workflow_state"):
+			frappe.db.sql("""update `tabLeave Application` set docstatus = 2  where workflow_state = "Rejected" and docstatus = 1""")

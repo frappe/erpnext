@@ -102,15 +102,14 @@ def get_availability_data(date, physician):
 			frappe.throw(_("{0} is a company holiday".format(date)))
 
 		# Check if He/She on Leave
-		if frappe.db.has_column("Leave Application", "workflow_state"):
-			leave_record = frappe.db.sql("""select half_day from `tabLeave Application`
-				where employee = %s and %s between from_date and to_date and workflow_state = 'Approved'
-				and docstatus = 1""", (employee, date), as_dict=True)
-			if leave_record:
-				if leave_record[0].half_day:
-					frappe.throw(_("Dr {0} on Half day Leave on {1}").format(physician, date))
-				else:
-					frappe.throw(_("Dr {0} on Leave on {1}").format(physician, date))
+		leave_record = frappe.db.sql("""select half_day from `tabLeave Application`
+			where employee = %s and %s between from_date and to_date
+			and docstatus = 1""", (employee, date), as_dict=True)
+		if leave_record:
+			if leave_record[0].half_day:
+				frappe.throw(_("Dr {0} on Half day Leave on {1}").format(physician, date))
+			else:
+				frappe.throw(_("Dr {0} on Leave on {1}").format(physician, date))
 
 	# get physicians schedule
 	physician_schedule_name = frappe.db.get_value("Physician", physician, "physician_schedule")
