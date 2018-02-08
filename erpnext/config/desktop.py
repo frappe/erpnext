@@ -336,7 +336,7 @@ def get_data():
 			"color": "#009248",
 			"icon": "/assets/erpnext/images/hub_logo.svg",
 			"type": "page",
-			"link": "hub",
+			"link": "Hub/Home",
 			"label": _("Hub")
 		},
 		{
