@@ -8,7 +8,7 @@ Using Renaming feature, you can change ID of a master documents like Item, Wareh
 
 #### 2. Rename
 
-<img alt="Renamed Item" class="screenshot" src="/docs/assets/img/articles/rename-a-doc.gif">
+<img alt="Renamed Item" class="screenshot" src="{{docs_base_url}}/assets/img/articles/rename-a-doc.gif">
 
 ###Effect of Renaming
 

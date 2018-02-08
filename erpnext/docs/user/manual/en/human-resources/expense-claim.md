@@ -6,14 +6,14 @@ To make a new Expense Claim, go to:
 
 > HR > Expense Claim > New Expense Claim
 
-<img class="screenshot" alt="Expense Claim" src="/docs/assets/img/human-resources/expense_claim.png">
+<img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/expense_claim.png">
 
 Set the Employee ID, date and the list of expenses that are to be claimed and
 “Submit” the record.
 
 ### Set Account for Employee
 Set employee's expense account on the employee form, system books an expense amount of an employee under this account.
-<img class="screenshot" alt="Expense Claim" src="/docs/assets/img/human-resources/employee_account.png">
+<img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/employee_account.png">
 
 ### Approving Expenses
 
@@ -27,16 +27,16 @@ Comments can be added in the Comments section explaining why the claim was appro
 ### Booking the Expense
 
 On submission of Expense Claim, system books an expense against the expense account and the employee account
-<img class="screenshot" alt="Expense Claim" src="/docs/assets/img/human-resources/expense_claim_book.png">
+<img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/expense_claim_book.png">
 
 User can view unpaid expense claim using report "Unclaimed Expense Claims"
-<img class="screenshot" alt="Expense Claim" src="/docs/assets/img/human-resources/unclaimed_expense_claims.png">
+<img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/unclaimed_expense_claims.png">
 
 ### Payment for Expense Claim
 
 To make payment against the expense claim, user has to click on Make > Bank Entry
 #### Expense Claim
-<img class="screenshot" alt="Expense Claim" src="/docs/assets/img/human-resources/payment.png">
+<img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/payment.png">
 
 #### Payment Entry
 <img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/payment_entry.png">
@@ -55,6 +55,6 @@ from. All outstanding expense claims will be pulled in and payments amounts can 
 
 * To Link Expense Claim with Task or Project specify the Task or the Project while making an Expense Claim
 
-<img class="screenshot" alt="Expense Claim - Project Link" src="/docs/assets/img/project/project_expense_claim_link.png">
+<img class="screenshot" alt="Expense Claim - Project Link" src="{{docs_base_url}}/assets/img/project/project_expense_claim_link.png">
 
 {next}

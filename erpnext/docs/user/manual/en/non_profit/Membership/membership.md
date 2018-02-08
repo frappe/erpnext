@@ -9,7 +9,7 @@ To create new Membership go to:
 
 > Non Profit > Membership > New
 
-<img class="screenshot" alt="Membership" src="/docs/assets/img/non_profit/membership/membership.png">
+<img class="screenshot" alt="Membership" src="{{docs_base_url}}/assets/img/non_profit/membership/membership.png">
 
 **Member:** Member is a link field fetch member details from Member doctype.
 

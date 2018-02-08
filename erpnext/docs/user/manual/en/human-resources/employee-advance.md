@@ -6,7 +6,7 @@ To make a new Employee Advance, go to:
 
 > HR > Employee Advance > New Employee Advance
 
-<img class="screenshot" alt="Expense Claim" src="/docs/assets/img/human-resources/employee_advance.png">
+<img class="screenshot" alt="Expense Claim" src="{{docs_base_url}}/assets/img/human-resources/employee_advance.png">
 
 Set the Employee ID, date, purpose and requested amount and “Save” the record.
 
@@ -21,12 +21,12 @@ After verification, approver can submit the Employee Advance form or reject the 
 ### Make Payment Entry
 After submission of Employee Advance record, accounts user will be able to create payment entry via Journal Entry or Payment Entry form.
 The payment entry will look like following:
-<img class="screenshot" alt="Employee Advance Payment via Journal Entry" src="/docs/assets/img/human-resources/employee_advance_journal_entry.png">
+<img class="screenshot" alt="Employee Advance Payment via Journal Entry" src="{{docs_base_url}}/assets/img/human-resources/employee_advance_journal_entry.png">
 
-<img class="screenshot" alt="Employee Advance Payment via Payment Entry" src="/docs/assets/img/human-resources/employee_advance_payment_entry.png">
+<img class="screenshot" alt="Employee Advance Payment via Payment Entry" src="{{docs_base_url}}/assets/img/human-resources/employee_advance_payment_entry.png">
 
 On submission of payment entry, the paid amount and status will be updated in Employee Advance record.
 
 ### Adjust advances on Expense Claim
 Later when employee claims the expense and advance record can be fetched in Expense Claim and linked to the claim record.
-<img class="screenshot" alt="Employee Advance Payment via Payment Entry" src="/docs/assets/img/human-resources/expense_claim_advances.png">
+<img class="screenshot" alt="Employee Advance Payment via Payment Entry" src="{{docs_base_url}}/assets/img/human-resources/expense_claim_advances.png">

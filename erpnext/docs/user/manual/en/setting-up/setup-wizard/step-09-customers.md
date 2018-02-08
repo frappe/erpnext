@@ -2,11 +2,11 @@
 
 Add known customers to the system.
 
-<img alt="Language" class="screenshot" src="/docs/assets/img/setup-wizard/step-9.png">
+<img alt="Language" class="screenshot" src="{{docs_base_url}}/assets/img/setup-wizard/step-9.png">
 
 If customers are not known, then clicking **Mark as Done** will complete the step.
 
-<img alt="Language" class="screenshot" src="/docs/assets/img/setup-wizard/step-9a.png"> 
+<img alt="Language" class="screenshot" src="{{docs_base_url}}/assets/img/setup-wizard/step-9a.png"> 
 
 ---
 

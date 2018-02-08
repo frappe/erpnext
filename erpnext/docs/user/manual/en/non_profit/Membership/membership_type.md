@@ -9,7 +9,7 @@ To create new Membership Type go to:
 > Non Profit > Membership Type > New
 
 
-<img class="screenshot" alt="Student" src="/docs/assets/img/non_profit/membership/membership_type.png">
+<img class="screenshot" alt="Student" src="{{docs_base_url}}/assets/img/non_profit/membership/membership_type.png">
 
 **Membership Type:** The Membership Type is displayed throughout the system, on both public and backend pages so spend some time thinking about a membership type name that is appropriate to both audiences. It can be changed at a later date
 

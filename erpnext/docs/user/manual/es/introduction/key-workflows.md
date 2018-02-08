@@ -6,7 +6,7 @@ Este diagrama no cubre toda la funcionalidad o características de ERPNext.
 ![](/docs/assets/old_images/erpnext/overview.png)
 
 
-<img class="screenshot" alt="Workflow" src="/docs/assets/img/setup/overview.png">
+<img class="screenshot" alt="Workflow" src="{{docs_base_url}}/assets/img/setup/overview.png">
 
 _Nota: No todos los pasos son obligatorios. ERPNext te permite pasar algunos pasos si deseas simplificar el proceso._
 

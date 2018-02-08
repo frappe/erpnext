@@ -13,7 +13,7 @@ Go to Customize Form from:
 
 You can also reach the Customize Form tool from the List Views.
 
-<img alt="Customize Form List" class="screenshot" src="/docs/assets/img/customize/customize-form-from-list-view.gif">
+<img alt="Customize Form List" class="screenshot" src="{{docs_base_url}}/assets/img/customize/customize-form-from-list-view.gif">
 
 ####Step 2: Select Document Type
 
@@ -21,7 +21,7 @@ If navigate from the list view, Document Type will be automatically set in the C
 
 If you reach customize form from the Setup module, or from awesome bar, then you will have to manually select Document Type in which customization needs to be made.
 
-<img alt="Customize Form select doctype" class="screenshot" src="/docs/assets/img/customize/customize-form-select-doctype.png">
+<img alt="Customize Form select doctype" class="screenshot" src="{{docs_base_url}}/assets/img/customize/customize-form-select-doctype.png">
 
 ####Step 3: Edit Property
 
@@ -29,7 +29,7 @@ On selecting Document Type, all the fields of the Document Type will updated as 
 
 To customized Project field, click on the respective row, and check "Mandatory". With this, Project field will become mandatory in the Sales Order.
 
-<img alt="Customize Form select doctype" class="screenshot" src="/docs/assets/img/customize/customize-form-edit-property.gif">
+<img alt="Customize Form select doctype" class="screenshot" src="{{docs_base_url}}/assets/img/customize/customize-form-edit-property.gif">
 
 Like setting setting field Mandatory, following are the other customization options in the Customize Form tool.
 
