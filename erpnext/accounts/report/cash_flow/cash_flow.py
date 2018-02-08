@@ -9,6 +9,11 @@ from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement
 from erpnext.accounts.utils import get_fiscal_year
 
 
+def get_mapper_for(mappers, position):
+	mapper_list = filter(lambda x: x['position'] == position, mappers)
+	return mapper_list[0] if mapper_list else []
+
+
 def execute(filters=None):
 	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, 
 		filters.periodicity, filters.accumulated_values, filters.company)
@@ -21,8 +26,6 @@ def execute(filters=None):
 			'name', 'position'],
 		order_by='position'
 	)
-
-	print(mappers)
 
 	cash_flow_accounts = []
 
@@ -38,7 +41,7 @@ def execute(filters=None):
 			(mapping_names,)
 		)
 
-		mapping['account_types'] += [dict(account=account[0], label=account[1]) for account in accounts]
+		mapping['account_types'] += [dict(accounts=account[0], label=account[1]) for account in accounts]
 
 		cash_flow_accounts.append(mapping)
 	
@@ -69,7 +72,7 @@ def execute(filters=None):
 			if net_profit_loss:
 				net_profit_loss.update({
 					"indent": 1, 
-					"parent_account": operation_accounts['section_header']
+					"parent_account": get_mapper_for(mappers, position=1)['section_header']
 				})
 				data.append(net_profit_loss)
 				section_data.append(net_profit_loss)
