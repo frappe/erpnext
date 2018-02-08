@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe import _
+import datetime
 
 class ProjectUpdate(Document):
     pass
@@ -14,22 +14,37 @@ class ProjectUpdate(Document):
 def current_day_time(doc,method):
     doc.date = frappe.utils.today()
     doc.time = frappe.utils.now_datetime().strftime('%H:%M:%S')
-
-@frappe.whitelist()
-def add_communication(doc,method):
-
-    add_communication = frappe.db.sql("""SELECT `tabProject Update`.name FROM `tabProject Update` WHERE `tabProject Update`.project = %s""",doc.project)
-    for ac in add_communication:
-        name = ac[0]
-
-    doc = frappe.get_doc({
-        "doctype": "Communication",
-        "subject": name,
-        "reference_doctype": "Project Update",
-        "comment_type": "Created"
-    })
-    doc.insert()
-    doc.save()
+#pending code
+# @frappe.whitelist()
+# def add_communication(doc,method):
+#
+#     data = []
+#     add_communication = frappe.db.sql("""SELECT `tabProject User`.user,`tabProject Update`.name,`tabProject Update`.progress FROM `tabProject User` INNER JOIN `tabProject Update` ON `tabProject Update`.project = `tabProject User`.parent WHERE `tabProject Update`.project = %s""",doc.project)
+#     for ac in add_communication:
+#         email = ac[0]
+#         name = ac[1]
+#         progress = ac[2]
+#     data.append(email)
+#     print(data)
+#     if len(data)>0:
+#         for datas in data:
+#             print datas
+#             frappe.sendmail(
+#                 recipients=datas,
+#                 subject=frappe._(name),
+#                 header=[frappe._("Project Update Status"), 'blue'],
+#                 message="Progress: " + progress
+#             )
+#         doc = frappe.get_doc({
+#             "doctype": "Communication",
+#             "subject": name,
+#             "reference_doctype": "Project Update",
+#             "comment_type": "Created"
+#         })
+#         doc.insert()
+#         doc.save()
+#     else:
+#         pass
 
 @frappe.whitelist()
 def daily_reminder():
@@ -40,41 +55,30 @@ def daily_reminder():
         recipients = emails[0]
         project_name = emails[1]
         frequency = emails[2]
+        date_start = emails[3]
+        date_end = emails [4]
+        progress = emails [5]
+
     data.append(recipients)
-    update = frappe.db.sql("""SELECT name,time,progress FROM `tabProject Update` WHERE `tabProject Update`.project = %s""",project_name)
-    email_sending(data, project_name,frequency,update)
+    update = frappe.db.sql("""SELECT name,date,time,progress FROM `tabProject Update` WHERE `tabProject Update`.project = %s""",project_name)
+    email_sending(data, project_name,frequency,date_start,date_end,progress,update)
 
 
-def email_sending(data,project_name,frequency,update):
+def email_sending(data, project_name,frequency,date_start,date_end,progress,update):
+    date_start = date_start.strftime("%Y-%m-%d")
+    date_end = date_end.strftime("%Y-%m-%d")
+
     holiday = frappe.db.sql("""SELECT holiday_date FROM `tabHoliday` where holiday_date = CURDATE();""")
-    print _("Project Name: {0}".format(project_name))
-    print _("Project Name: {0}".format(frequency))
+    msg = "<p>Project Name:" + " " + project_name + "</p><p>Project Name: " + " " + frequency + "</p><p>Update Reminder:" + " " + date_start + "</p><p>Expected Date End:" + " " + date_end + "</p><p>Percent Progress:" + " " + str(progress)
+    msg += """</u></b></p><table class='table table-bordered'><tr>
+                <th>Project ID</th><th>Date Updated</th><th>Time Updated</th><th>Project Status</th>"""
     for updates in update:
-        id = updates[0]
-        time = updates[1]
-    messages = (
-        _("Project Name: {0}".format(project_name)),
-        _("Update Reminder: {0}".format(frequency)),
-        _("{0}".format(id)),
-        _("{0}".format(update))
-    )
+        msg += "<tr><td>" + str(updates[0]) + "</td><td>" + str(updates[1]) + "</td><td>" + str(updates[2]) + "</td><td>" + str(updates[3]) + "</td></tr>"
 
-    content = """
-	<p>{0}.</p>
-	<p>{1}</p>
-	<table class="table table-bordered">
-		<th>Project ID</th><th>Time Updated</th>
-	{% for updates in update %}
-	<tr>
-		<td>{{updates[0]}}</td><td>{{updates[1]}}</td>
-	</tr>
-	{% endfor %}
-	</table>
-	<p>{3}</p>
-	<hr>"""
-
+    msg += "</table>"
     if len(holiday) == 0:
     	for datas in data:
-    		frappe.sendmail(recipients=datas,subject=frappe._(project_name + ' ' + 'Summary'),content=content.format(*messages))
+    		frappe.sendmail(recipients=datas,subject=frappe._(project_name + ' ' + 'Summary'),message = msg)
     else:
     	pass
+
