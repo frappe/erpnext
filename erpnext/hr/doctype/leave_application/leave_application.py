@@ -24,13 +24,7 @@ class LeaveApplication(Document):
 		return _("{0}: From {0} of type {1}").format(self.employee_name, self.leave_type)
 
 	def validate(self):
-		if not getattr(self, "__islocal", None) and frappe.db.exists(self.doctype, self.name):
-			self.previous_doc = frappe.get_value(self.doctype, self.name, "leave_approver", as_dict=True)
-		else:
-			self.previous_doc = None
-
 		set_employee_name(self)
-
 		self.validate_dates()
 		self.validate_balance_leaves()
 		self.validate_leave_overlap()
@@ -285,23 +279,6 @@ class LeaveApplication(Document):
 			except frappe.OutgoingEmailError:
 				# Arrey!
 				pass
-
-@frappe.whitelist()
-def get_approvers(doctype, txt, searchfield, start, page_len, filters):
-	if not filters.get("employee"):
-		frappe.throw(_("Please select Employee Record first."))
-
-	employee_user = frappe.get_value("Employee", filters.get("employee"), "user_id")
-
-	approvers_list = frappe.db.sql("""select user.name, user.first_name, user.last_name from
-		tabUser user, `tabEmployee Leave Approver` approver where
-		approver.parent = %s
-		and user.name like %s
-		and approver.leave_approver=user.name""", (filters.get("employee"), "%" + txt + "%"))
-
-	if not approvers_list:
-		approvers_list = get_approver_list(employee_user)
-	return approvers_list
 
 @frappe.whitelist()
 def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day = None, half_day_date = None):

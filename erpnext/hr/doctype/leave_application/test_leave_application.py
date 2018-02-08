@@ -245,6 +245,7 @@ class TestLeaveApplication(unittest.TestCase):
 		application.insert()
 
 		frappe.set_user("test@example.com")
+
 		# clear permlevel access cache on change user
 		del application._has_access_to
 

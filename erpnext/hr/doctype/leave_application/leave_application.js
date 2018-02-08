@@ -22,6 +22,10 @@ frappe.ui.form.on("Leave Application", {
 		if (frm.is_new()) {
 			frm.trigger("calculate_total_days");
 		}
+		cur_frm.set_intro("");
+		if(frm.doc.__islocal && !in_list(frappe.user_roles, "Employee")) {
+			frm.set_intro(__("Fill the form and save it"));
+		}
 	},
 
 	employee: function(frm) {

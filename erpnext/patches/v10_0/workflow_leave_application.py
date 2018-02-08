@@ -58,8 +58,10 @@ def execute():
 			}]
 		}).insert(ignore_permissions=True)
 
-		if frappe.db.has_column("Leave Application", "status"):
-			frappe.db.sql("""update `tabLeave Application` set workflow_state = status""")
+	if frappe.db.has_column("Leave Application", "status"):
+		frappe.db.sql("""update `tabLeave Application` set workflow_state = status""")
 
-		if frappe.db.has_column("Leave Application", "workflow_state"):
-			frappe.db.sql("""update `tabLeave Application` set docstatus = 2  where workflow_state = "Rejected" and docstatus = 1""")
+	if frappe.db.has_column("Leave Application", "workflow_state"):
+		frappe.db.sql("""update `tabWorkflow Document State` set doc_status = 0 where parent = "Leave Approval" \
+		and state = "Rejected" and doc_status = 1""")
+		frappe.db.sql("""update `tabLeave Application` set docstatus = 2  where workflow_state = "Rejected" and docstatus = 1""")
