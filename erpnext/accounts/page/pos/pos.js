@@ -1177,8 +1177,17 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		$(this.wrapper).on("change", ".pos-item-disc", function () {
 			var item_code = $(this).parents(".pos-selected-item-action").attr("data-item-code");
 			var discount = $(this).val();
-			me.update_discount(item_code, discount)
-			me.update_value()
+			if(discount > 100){
+				discount = $(this).val('');
+				frappe.show_alert({
+					indicator: 'red',
+					message: __('Discount amount cannot be greater than 100%')
+				});
+				me.update_discount(item_code, discount);
+			}else{	
+				me.update_discount(item_code, discount);
+				me.update_value();
+			}
 		})
 	},
 

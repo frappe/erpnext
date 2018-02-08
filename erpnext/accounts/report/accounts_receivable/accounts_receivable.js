@@ -64,6 +64,11 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldtype": "Int",
 			"default": "90",
 			"reqd": 1
+		},
+		{
+			"fieldname":"show_pdc_in_print",
+			"label": __("Show PDC in Print"),
+			"fieldtype": "Check",
 		}
 	],
 
