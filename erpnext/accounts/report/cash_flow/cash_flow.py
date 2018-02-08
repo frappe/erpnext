@@ -13,13 +13,20 @@ def execute(filters=None):
 	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, 
 		filters.periodicity, filters.accumulated_values, filters.company)
 
-	tmp = frappe.get_all('Cash Flow Mapper', fields=[
-		'section_name', 'section_header', 'section_leader', 'section_footer', 'name']
+	# let's make sure mapper's is sorted by its 'position' field
+	mappers = frappe.get_all(
+		'Cash Flow Mapper', 
+		fields=[
+			'section_name', 'section_header', 'section_leader', 'section_footer', 
+			'name', 'position'],
+		order_by='position'
 	)
+
+	print(mappers)
 
 	cash_flow_accounts = []
 
-	for mapping in tmp:
+	for mapping in mappers:
 		mapping['account_types'] = []
 		doc = frappe.get_doc('Cash Flow Mapper', mapping['name'])
 		mapping_names = [item.name for item in doc.accounts]
