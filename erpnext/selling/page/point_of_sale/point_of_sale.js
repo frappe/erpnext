@@ -250,6 +250,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		this.cart.add_item(item);
 		this.cart.update_taxes_and_totals();
 		this.cart.update_grand_total();
+		this.cart.update_qty_total();
 		frappe.dom.unfreeze();
 	}
 
@@ -577,6 +578,9 @@ class POSCart {
 						<div class="grand-total">
 							${this.get_grand_total()}
 						</div>
+						<div class="quantity-total">
+							${this.get_item_qty_total()}
+						</div>
 					</div>
 				</div>
 				<div class="number-pad-container">
@@ -588,6 +592,7 @@ class POSCart {
 		this.$taxes_and_totals = this.wrapper.find('.taxes-and-totals');
 		this.$discount_amount = this.wrapper.find('.discount-amount');
 		this.$grand_total = this.wrapper.find('.grand-total');
+		this.$qty_total = this.wrapper.find('.quantity-total');
 
 		this.toggle_taxes_and_totals(false);
 		this.$grand_total.on('click', () => {
@@ -619,6 +624,11 @@ class POSCart {
 			total += this.get_total_template('Rounded Total', 'rounded-total-value');
 		}
 
+		return total;
+	}
+
+	get_item_qty_total() {
+		let total = this.get_total_template('Total Qty', 'quantity-total');
 		return total;
 	}
 
@@ -707,6 +717,17 @@ class POSCart {
 		this.$grand_total.find('.rounded-total-value').text(
 			format_currency(this.frm.doc.rounded_total, this.frm.currency)
 		);
+	}
+
+	update_qty_total() {		
+		var total_item_qty = 0;
+		$.each(this.frm.doc["items"] || [], function (i, d) {
+				if (d.qty > 0) {
+					total_item_qty += d.qty;
+				}
+		});
+		this.$qty_total.find('.quantity-total').text(total_item_qty)
+		this.frm.set_value("pos_total_qty",total_item_qty);
 	}
 
 	make_customer_field() {
