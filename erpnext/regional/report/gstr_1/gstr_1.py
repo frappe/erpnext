@@ -116,8 +116,7 @@ class Gstr1Report(object):
 			conditions += """ and SUBSTR(place_of_supply, 1, 2) != SUBSTR(company_gstin, 1, 2)
 				and grand_total > {0} and is_return != 1 and customer in ('{1}')""".\
 					format(self.gst_limit.b2b_limit, "', '".join([frappe.db.escape(c.name) for c in customers])	)
-			for x in xrange(1,10):
-				print("cond", conditions)
+					
 		elif self.filters.get("type_of_business") ==  "B2C Small":
 			conditions += """ and (
 				SUBSTR(place_of_supply, 1, 2) = SUBSTR(company_gstin, 1, 2)
