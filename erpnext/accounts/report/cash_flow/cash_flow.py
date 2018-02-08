@@ -41,7 +41,7 @@ def execute(filters=None):
 			(mapping_names,)
 		)
 
-		mapping['account_types'] += [dict(accounts=account[0], label=account[1]) for account in accounts]
+		mapping['account_types'] += [dict(name=account[0], label=account[1]) for account in accounts]
 
 		cash_flow_accounts.append(mapping)
 	
@@ -79,10 +79,10 @@ def execute(filters=None):
 
 		for account in cash_flow_account['account_types']:
 			account_data = get_account_type_based_data(filters.company, 
-				account['account_type'], period_list, filters.accumulated_values)
+				account['name'], period_list, filters.accumulated_values)
 			account_data.update({
 				"account_name": account['label'],
-				"account": account['label'], 
+				"account": account['name'], 
 				"indent": 1,
 				"parent_account": cash_flow_account['section_header'],
 				"currency": company_currency
@@ -98,7 +98,7 @@ def execute(filters=None):
 
 	return columns, data
 
-def get_account_type_based_data(company, account_type, period_list, accumulated_values):
+def get_account_type_based_data(company, account_name, period_list, accumulated_values):
 	data = {}
 	total = 0
 	for period in period_list:
@@ -108,13 +108,13 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 			from `tabGL Entry`
 			where company=%s and posting_date >= %s and posting_date <= %s 
 				and voucher_type != 'Period Closing Voucher'
-				and account in ( SELECT name FROM tabAccount WHERE account_type = %s)
+				and account in ( SELECT name FROM tabAccount WHERE name = %s)
 		""", (company, start_date if accumulated_values else period['from_date'],
-			period['to_date'], account_type))
+			period['to_date'], account_name))
 
 		if gl_sum and gl_sum[0]:
 			amount = gl_sum[0]
-			if account_type == "Depreciation":
+			if account_name == "Depreciation":
 				amount *= -1
 		else:
 			amount = 0
