@@ -13,41 +13,29 @@ def execute(filters=None):
 	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, 
 		filters.periodicity, filters.accumulated_values, filters.company)
 
-	operation_accounts = {
-		"section_name": "Operations",
-		"section_footer": _("Net Cash from Operations"),
-		"section_header": _("Cash Flow from Operations"),
-		"account_types": [
-			{"account_type": "Depreciation", "label": _("Depreciation")},
-			{"account_type": "Receivable", "label": _("Net Change in Accounts Receivable")},
-			{"account_type": "Payable", "label": _("Net Change in Accounts Payable")},
-			{"account_type": "Stock", "label": _("Net Change in Inventory")}
-		]
-	}
+	tmp = frappe.get_all('Cash Flow Mapper', fields=[
+		'section_name', 'section_header', 'section_leader', 'section_footer', 'name']
+	)
 
-	investing_accounts = {
-		"section_name": "Investing",
-		"section_footer": _("Net Cash from Investing"),
-		"section_header": _("Cash Flow from Investing"),
-		"account_types": [
-			{"account_type": "Fixed Asset", "label": _("Net Change in Fixed Asset")}
-		]
-	}
-
-	financing_accounts = {
-		"section_name": "Financing",
-		"section_footer": _("Net Cash from Financing"),
-		"section_header": _("Cash Flow from Financing"),
-		"account_types": [
-			{"account_type": "Equity", "label": _("Net Change in Equity")}
-		]
-	}
-
-	# combine all cash flow accounts for iteration
 	cash_flow_accounts = []
-	cash_flow_accounts.append(operation_accounts)
-	cash_flow_accounts.append(investing_accounts)
-	cash_flow_accounts.append(financing_accounts)
+
+	for mapping in tmp:
+		mapping['account_types'] = []
+		doc = frappe.get_doc('Cash Flow Mapper', mapping['name'])
+		mapping_names = [item.name for item in doc.accounts]
+
+		accounts = frappe.db.sql(
+			'select cfma.name, cfm.label from `tabCash Flow Mapping Accounts` cfma '
+			'join `tabCash Flow Mapping` cfm on cfma.parent=cfm.name '
+			'where cfma.parent in %s', 
+			(mapping_names,)
+		)
+
+		mapping['account_types'] += [dict(account=account[0], label=account[1]) for account in accounts]
+
+		cash_flow_accounts.append(mapping)
+	
+	doc = frappe.get_doc('Cash Flow Mapper', 'Operating Activities (Working Capital)')
 
 	# compute net profit / loss
 	income = get_data(filters.company, "Income", "Credit", period_list, 
