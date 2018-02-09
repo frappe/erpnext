@@ -43,6 +43,18 @@ frappe.ui.form.on("Customer", {
 		})
 	},
 	customer_primary_address: function(frm){
+		if(frm.doc.customer_primary_address){
+			frappe.call({
+				doc: frm.doc,
+				args: {
+					"address_title":frm.doc.customer_primary_address
+				},
+				method: 'get_display',
+				callback: function(r) {
+					frm.set_value("primary_address",r.message);
+				}
+			});
+		}
 		if(!frm.doc.customer_primary_address){
 			frm.set_value("primary_address", "");
 		}
