@@ -77,6 +77,7 @@ class Customer(TransactionBase):
 		if self.flags.is_new_doc and self.get('address_line1'):
 			make_address(self)
 
+	@classmethod
 	def get_display(self,address_title):
 		from frappe.contacts.doctype.address.address import get_address_display
 		return get_address_display(address_title)
