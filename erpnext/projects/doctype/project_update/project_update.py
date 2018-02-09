@@ -61,11 +61,9 @@ def daily_reminder():
         email_sending(project_name,frequency,date_start,date_end,progress,update)
 
 def email_sending( project_name,frequency,date_start,date_end,progress,update):
-    date_start = date_start.strftime("%Y-%m-%d")
-    date_end = date_end.strftime("%Y-%m-%d")
 
     holiday = frappe.db.sql("""SELECT holiday_date FROM `tabHoliday` where holiday_date = CURDATE();""")
-    msg = "<p>Project Name:" + " " + project_name + "</p><p>Project Name: " + " " + frequency + "</p><p>Update Reminder:" + " " + date_start + "</p><p>Expected Date End:" + " " + date_end + "</p><p>Percent Progress:" + " " + str(progress) + "</p><p>Number of Updates:" + " " + str(len(update)) + "</p>"
+    msg = "<p>Project Name:" + " " + project_name + "</p><p>Project Name: " + " " + frequency + "</p><p>Update Reminder:" + " " + str(date_start) + "</p><p>Expected Date End:" + " " + str(date_end) + "</p><p>Percent Progress:" + " " + str(progress) + "</p><p>Number of Updates:" + " " + str(len(update)) + "</p>"
     msg += """</u></b></p><table class='table table-bordered'><tr>
                 <th>Project ID</th><th>Date Updated</th><th>Time Updated</th><th>Project Status</th>"""
     for updates in update:
