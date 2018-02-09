@@ -12,6 +12,8 @@ def execute(filters=None):
 class Gstr2Report(Gstr1Report):
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
+		self.columns = []
+		self.data = []
 		self.doctype = "Purchase Invoice"
 		self.tax_doctype = "Purchase Taxes and Charges"
 		self.select_columns = """
@@ -39,7 +41,6 @@ class Gstr2Report(Gstr1Report):
 
 	def get_data(self):
 		self.get_igst_invoices()
-		self.data = []
 		for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
 			invoice_details = self.invoices.get(inv)
 			for rate, items in items_based_on_rate.items():
