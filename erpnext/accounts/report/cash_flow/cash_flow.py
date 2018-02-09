@@ -44,8 +44,6 @@ def execute(filters=None):
 		mapping['account_types'] += [dict(name=account[0], label=account[1]) for account in accounts]
 
 		cash_flow_accounts.append(mapping)
-	
-	doc = frappe.get_doc('Cash Flow Mapper', 'Operating Activities (Working Capital)')
 
 	# compute net profit / loss
 	income = get_data(filters.company, "Income", "Credit", period_list, 
@@ -80,23 +78,28 @@ def execute(filters=None):
 		for account in cash_flow_account['account_types']:
 			account_data = get_account_type_based_data(filters.company, 
 				account['name'], period_list, filters.accumulated_values)
-			account_data.update({
-				"account_name": account['label'],
-				"account": account['name'], 
-				"indent": 1,
-				"parent_account": cash_flow_account['section_header'],
-				"currency": company_currency
-			})
-			data.append(account_data)
-			section_data.append(account_data)
+			if account_data['total'] != 0:
+				account_data.update({
+					"account_name": account['label'],
+					"account": account['name'], 
+					"indent": 1,
+					"parent_account": cash_flow_account['section_header'],
+					"currency": company_currency
+				})
+				data.append(account_data)
+				section_data.append(account_data)
 
 		add_total_row_account(data, section_data, cash_flow_account['section_footer'], 
 			period_list, company_currency)
 
+		# print('section data', section_data)
+
+	# deduplicate_data(data)
 	add_total_row_account(data, data, _("Net Change in Cash"), period_list, company_currency)
 	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
 
 	return columns, data
+
 
 def get_account_type_based_data(company, account_name, period_list, accumulated_values):
 	data = {}
