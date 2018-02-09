@@ -41,7 +41,11 @@ def execute(filters=None):
 			(mapping_names,)
 		)
 
-		mapping['account_types'] += [dict(name=account[0], label=account[1]) for account in accounts]
+		tmp_dict = [dict(name=account[0], label=account[1]) for account in accounts]
+		unique_labels = set([d['label'] for d in tmp_dict])
+		for label in unique_labels:
+			names = [d['name'] for d in tmp_dict if d['label'] == label]
+			mapping['account_types'].append(dict(label=label, names=names))
 
 		cash_flow_accounts.append(mapping)
 
@@ -50,12 +54,12 @@ def execute(filters=None):
 		accumulated_values=filters.accumulated_values, ignore_closing_entries=True, ignore_accumulated_values_for_fy= True)
 	expense = get_data(filters.company, "Expense", "Debit", period_list, 
 		accumulated_values=filters.accumulated_values, ignore_closing_entries=True, ignore_accumulated_values_for_fy= True)
-		
+
 	net_profit_loss = get_net_profit_loss(income, expense, period_list, filters.company)
 
 	data = []
 	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
-	
+
 	for cash_flow_account in cash_flow_accounts:
 		section_data = []
 		data.append({
@@ -77,11 +81,11 @@ def execute(filters=None):
 
 		for account in cash_flow_account['account_types']:
 			account_data = get_account_type_based_data(filters.company, 
-				account['name'], period_list, filters.accumulated_values)
+				account['names'], period_list, filters.accumulated_values)
 			if account_data['total'] != 0:
 				account_data.update({
 					"account_name": account['label'],
-					"account": account['name'], 
+					"account": account['names'], 
 					"indent": 1,
 					"parent_account": cash_flow_account['section_header'],
 					"currency": company_currency
@@ -92,16 +96,13 @@ def execute(filters=None):
 		add_total_row_account(data, section_data, cash_flow_account['section_footer'], 
 			period_list, company_currency)
 
-		# print('section data', section_data)
-
-	# deduplicate_data(data)
 	add_total_row_account(data, data, _("Net Change in Cash"), period_list, company_currency)
 	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
 
 	return columns, data
 
 
-def get_account_type_based_data(company, account_name, period_list, accumulated_values):
+def get_account_type_based_data(company, account_names, period_list, accumulated_values):
 	data = {}
 	total = 0
 	for period in period_list:
@@ -111,13 +112,13 @@ def get_account_type_based_data(company, account_name, period_list, accumulated_
 			from `tabGL Entry`
 			where company=%s and posting_date >= %s and posting_date <= %s 
 				and voucher_type != 'Period Closing Voucher'
-				and account in ( SELECT name FROM tabAccount WHERE name = %s)
+				and account in ( SELECT name FROM tabAccount WHERE name IN %s)
 		""", (company, start_date if accumulated_values else period['from_date'],
-			period['to_date'], account_name))
+			period['to_date'], account_names))
 
 		if gl_sum and gl_sum[0]:
 			amount = gl_sum[0]
-			if account_name == "Depreciation":
+			if account_names == "Depreciation":
 				amount *= -1
 		else:
 			amount = 0
