@@ -49,48 +49,23 @@ def get_cart_quotation(doc=None):
 	}
 
 @frappe.whitelist()
-def get_coupon_code_discount(applied_code, pricelist_doc, doc=None):
-	discount_tot = 0.0
-	if applied_code and pricelist_doc and doc:
-		pricing_rule = frappe.db.sql("select apply_on,item_code,\
-                        item_group,brand,discount_percentage \
-                        from `tabPricing Rule` where \
-                        for_price_list=%s order by priority desc, name desc limit 1", pricelist_doc.name, as_dict=1)
-		if pricing_rule:
-			p_rule = pricing_rule[0] or {}
-			apply_on = p_rule.get("apply_on", '')
-			item_code = p_rule.get("item_code", '')
-			item_group = p_rule.get("item_group", '')
-			item_brand = p_rule.get("brand", '')
-			if apply_on == "Item Code":
-				for i in doc.items:
-					if i.item_code == item_code:
-						discount_tot += (i.amount * p_rule['discount_percentage']) / 100
-			elif apply_on == "Item Group":
-				for i in doc.items:
-					if i.item_group == item_group:
-						discount_tot += (i.amount * p_rule['discount_percentage']) / 100
-			elif apply_on == "Brand":
-				for i in doc.items:
-					if i.brand == item_brand:
-						discount_tot += (i.amount * p_rule['discount_percentage']) / 100
-	return discount_tot
-
-@frappe.whitelist()
 def apply_coupon_code(applied_code):
-	discount_tot = 0.0
+	quotation = True
 	if applied_code:
-		pricelist_data_list = frappe.db.sql("select name from `tabPrice List` where coupon_code=%s limit 1", applied_code, as_dict=1)
-		if pricelist_data_list:
-			pricelist_doc = frappe.get_doc("Price List", pricelist_data_list[0].name)
+		coupon_price_list = frappe.db.sql("select name, coupon_price_list "
+			"from `tabCoupon` where coupon_code=%s limit 1", applied_code,
+		                                  as_dict=1)
+		if coupon_price_list:
+			pricelist_doc = frappe.get_doc("Price List", coupon_price_list[0].coupon_price_list)
 			quotation = _get_cart_quotation()
-			discount_tot = get_coupon_code_discount(applied_code,pricelist_doc, quotation)
-			frappe.db.sql("update `tabQuotation` Set selling_price_list=(%s),total_amount_without_discount=(%s), discount=(%s),applied_coupon_code=(%s) Where name=(%s)", (pricelist_doc.price_list_name,quotation.total, discount_tot,pricelist_doc.coupon_code,quotation.name))
+			frappe.set_value("Quotation", quotation.name, "coupon",
+					coupon_price_list[0].name)
+			frappe.set_value("Quotation", quotation.name,"selling_price_list", pricelist_doc.name)
 		else:
 			frappe.throw(_("Please enter valid coupon code !!"))
 	else:
 		frappe.throw(_("Please enter coupon code !!"))
-	return discount_tot
+	return quotation
 
 @frappe.whitelist()
 def place_order():
