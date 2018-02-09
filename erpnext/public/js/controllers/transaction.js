@@ -458,7 +458,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 
 				var party = me.frm.doc[frappe.model.scrub(party_type)];
-				if(party) {
+				if(party && me.frm.doc.company) {
 					return frappe.call({
 						method: "erpnext.accounts.party.get_party_account",
 						args: {
