@@ -12,6 +12,8 @@ def execute(filters=None):
 class Gstr1Report(object):
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
+		self.columns = []
+		self.data = []
 		self.doctype = "Sales Invoice"
 		self.tax_doctype = "Sales Taxes and Charges"
 		self.select_columns = """
@@ -41,16 +43,15 @@ class Gstr1Report(object):
 		self.get_gst_accounts()
 		self.get_invoice_data()
 
-		if not self.invoices: return
+		if self.invoices:
+			self.get_invoice_items()
+			self.get_items_based_on_tax_rate()
+			self.invoice_fields = [d["fieldname"] for d in self.invoice_columns]
+			self.get_data()
 
-		self.get_invoice_items()
-		self.get_items_based_on_tax_rate()
-		self.invoice_fields = [d["fieldname"] for d in self.invoice_columns]
-		self.get_data()
 		return self.columns, self.data
 
 	def get_data(self):
-		self.data = []
 		for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
 			invoice_details = self.invoices.get(inv)
 			for rate, items in items_based_on_rate.items():
