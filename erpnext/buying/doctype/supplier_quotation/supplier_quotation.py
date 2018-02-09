@@ -124,7 +124,8 @@ def make_purchase_order(source_name, target_doc=None):
 				["name", "supplier_quotation_item"],
 				["parent", "supplier_quotation"],
 				["material_request", "material_request"],
-				["material_request_item", "material_request_item"]
+				["material_request_item", "material_request_item"],
+				["sales_order", "sales_order"]
 			],
 			"postprocess": update_item
 		},

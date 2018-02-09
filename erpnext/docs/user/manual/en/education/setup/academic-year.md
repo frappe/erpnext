@@ -4,7 +4,7 @@ An academic year is a period of time which education, colleges and universities 
 
 The **Academic year** form have the Start and End date for the Academic year.
 
-<img class="screenshot" alt="Academic Year" src="/docs/assets/img/education/setup/academic-year.png">
+<img class="screenshot" alt="Academic Year" src="{{docs_base_url}}/assets/img/education/setup/academic-year.png">
 
 **Student group** link is given to view or add the respective groups to the Academic year.
 

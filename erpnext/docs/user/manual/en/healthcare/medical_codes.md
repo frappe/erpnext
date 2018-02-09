@@ -4,6 +4,6 @@ Medical Coding are in many countries required for regulatory compliance and many
 
 Medical Code Standard document is used to name the Code Standard and act as a container for all the medical codes which are standardized under it. Medical Codes and descriptions can then be imported to the Medical Code document, after ensuring that you set the Medical Code Standard field to the appropriate Standard name.
 
-<img class="screenshot" alt="ERPNext Healthcare" src="/docs/assets/img/healthcare/medical_code_1.png">
+<img class="screenshot" alt="ERPNext Healthcare" src="{{docs_base_url}}/assets/img/healthcare/medical_code_1.png">
 
 {next}

@@ -2,7 +2,7 @@
 
 Esta herramienta puede ser usada para crear los Horarios de los Cursos.
 
-<img class="screenshot" alt="Scheduling Tool" src="/docs/assets/img/education/schedule/scheduling-tool.png">
+<img class="screenshot" alt="Scheduling Tool" src="{{docs_base_url}}/assets/img/education/schedule/scheduling-tool.png">
 
 ### Creando Horarios de Cursos
 

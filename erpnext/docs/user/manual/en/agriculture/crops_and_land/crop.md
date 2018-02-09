@@ -45,6 +45,6 @@ Click 'Save'
 
 You form should now look something like this
 
-<img class="screenshot" alt="Task" src="/docs/assets/img/agriculture/crops_and_land/crop.png">
+<img class="screenshot" alt="Task" src="{{docs_base_url}}/assets/img/agriculture/crops_and_land/crop.png">
 
 Repeat step 2 for as many crops as you need. You can save some time by duplicating existing crops and modifying only the necessary items
