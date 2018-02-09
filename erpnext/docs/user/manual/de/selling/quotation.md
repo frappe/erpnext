@@ -11,11 +11,11 @@ Um ein neues Angebot zu erstellen gehen Sie zu:
 
 Sie können auch ein Angebot aus einer Opportunity heraus erstellen.
 
-<img class="screenshot" alt="Angebot aus Opportunity erstellen" src="/docs/assets/img/selling/make-quote-from-opp.png">
+<img class="screenshot" alt="Angebot aus Opportunity erstellen" src="{{docs_base_url}}/assets/img/selling/make-quote-from-opp.png">
 
 Oder Sie erstellen ein neues Angebot und übernehmen Details aus der Opportunity.
 
-<img class="screenshot" alt="Angebot aus Opportunity erstellen" src="/docs/assets/img/selling/make-quotation.gif">
+<img class="screenshot" alt="Angebot aus Opportunity erstellen" src="{{docs_base_url}}/assets/img/selling/make-quotation.gif">
 
 Ein Angebot enthält Informationen über:
 

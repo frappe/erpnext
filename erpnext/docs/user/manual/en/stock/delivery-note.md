@@ -15,7 +15,7 @@ create a new Delivery Note from:
 or from a “Submitted” Sales Order (that is not already shipped) by clicking on
 “Make Delivery Note”.
 
-<img class="screenshot" alt="Delivery Note" src="/docs/assets/img/stock/delivery-note.png">
+<img class="screenshot" alt="Delivery Note" src="{{docs_base_url}}/assets/img/stock/delivery-note.png">
 
 You can also “fetch” the details from an unshipped Sales Order.
 

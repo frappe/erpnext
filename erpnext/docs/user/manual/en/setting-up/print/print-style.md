@@ -10,6 +10,6 @@ To set a default style, you can go to [Print Settings](/docs/setup/print/print-s
 
 All Print Format styles are based on Bootstrap (Version 3) CSS Framework.
 
-<img class="screenshot" alt="Print Style" src="/docs/assets/img/setup/print/print-style.png">
+<img class="screenshot" alt="Print Style" src="{{docs_base_url}}/assets/img/setup/print/print-style.png">
 
 {next}

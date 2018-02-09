@@ -6,7 +6,7 @@ To create a new Job Applicant go to
 
 > Human Resource > Job Applicant > New
 
-<img class="screenshot" alt="Job Applicant" src="/docs/assets/img/human-resources/job-applicant.png">
+<img class="screenshot" alt="Job Applicant" src="{{docs_base_url}}/assets/img/human-resources/job-applicant.png">
 
 ### Linking with an Email Account
 
@@ -22,6 +22,6 @@ system shall create a New Job Applicant against each email received on the mailb
 
 * In 'Append To' select 'Job Applicant'
 
-<img class="screenshot" alt="Email Account" src="/docs/assets/img/human-resources/email-account.png">
+<img class="screenshot" alt="Email Account" src="{{docs_base_url}}/assets/img/human-resources/email-account.png">
 
 {next}
