@@ -780,11 +780,19 @@ class POSCart {
 						return;
 					}
 
-					const item_code = this.selected_item.attr('data-item-code');
-					const field = this.selected_item.active_field;
-					const value = this.numpad.get_value();
+					if (this.selected_item.active_field == 'discount_percentage' && this.numpad.get_value() > cint(100)) {
+						frappe.show_alert({
+							indicator: 'red',
+							message: __('Discount amount cannot be greater than 100%')
+						});
+						this.numpad.reset_value();
+					} else {
+						const item_code = this.selected_item.attr('data-item-code');
+						const field = this.selected_item.active_field;
+						const value = this.numpad.get_value();
 
-					this.events.on_field_change(item_code, field, value);
+						this.events.on_field_change(item_code, field, value);
+					}
 				}
 
 				this.events.on_numpad(btn_value);
