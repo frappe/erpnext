@@ -472,8 +472,8 @@ def get_projected_qty(item_code, warehouse):
 @frappe.whitelist()
 def get_bin_details(item_code, warehouse):
 	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
-			["projected_qty", "actual_qty", "ordered_qty"], as_dict=True) \
-			or {"projected_qty": 0, "actual_qty": 0, "ordered_qty": 0}
+			["projected_qty", "actual_qty"], as_dict=True) \
+			or {"projected_qty": 0, "actual_qty": 0}
 
 @frappe.whitelist()
 def get_serial_no_details(item_code, warehouse, stock_qty, serial_no):
