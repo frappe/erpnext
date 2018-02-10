@@ -35,9 +35,10 @@ def execute(filters=None):
 		mapping_names = [item.name for item in doc.accounts]
 
 		accounts = frappe.db.sql(
-			'select cfma.name, cfm.label from `tabCash Flow Mapping Accounts` cfma '
+			'select cfma.name, cfm.label, cfm.is_working_capital from `tabCash Flow Mapping Accounts` cfma '
 			'join `tabCash Flow Mapping` cfm on cfma.parent=cfm.name '
-			'where cfma.parent in %s', 
+			'where cfma.parent in %s '
+			'order by cfm.is_working_capital', 
 			(mapping_names,)
 		)
 
@@ -74,10 +75,17 @@ def execute(filters=None):
 			if net_profit_loss:
 				net_profit_loss.update({
 					"indent": 1, 
-					"parent_account": get_mapper_for(mappers, position=1)['section_header']
+					"parent_account": get_mapper_for(mappers, position=0)['section_header']
 				})
 				data.append(net_profit_loss)
 				section_data.append(net_profit_loss)
+
+				data.append({
+					"account_name": cash_flow_account["section_leader"],
+					"parent_account": None,
+					"indent": 1.0,
+					"account": cash_flow_account["section_leader"]
+				})
 
 		for account in cash_flow_account['account_types']:
 			account_data = get_account_type_based_data(filters.company, 
