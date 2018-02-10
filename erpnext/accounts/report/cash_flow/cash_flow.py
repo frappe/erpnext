@@ -9,17 +9,13 @@ from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement
 from erpnext.accounts.utils import get_fiscal_year
 
 
-def get_mapper_for(mappers, position):
+def _get_mapper_for(mappers, position):
 	mapper_list = filter(lambda x: x['position'] == position, mappers)
 	return mapper_list[0] if mapper_list else []
 
 
-def execute(filters=None):
-	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, 
-		filters.periodicity, filters.accumulated_values, filters.company)
-
-	# let's make sure mapper's is sorted by its 'position' field
-	mappers = frappe.get_all(
+def _get_mappers_from_db():
+	return frappe.get_all(
 		'Cash Flow Mapper', 
 		fields=[
 			'section_name', 'section_header', 'section_leader', 'section_footer', 
@@ -27,6 +23,18 @@ def execute(filters=None):
 		order_by='position'
 	)
 
+
+def _get_accounts_in_mappers(mapping_names):
+	return frappe.db.sql(
+		'select cfma.name, cfm.label, cfm.is_working_capital from `tabCash Flow Mapping Accounts` cfma '
+		'join `tabCash Flow Mapping` cfm on cfma.parent=cfm.name '
+		'where cfma.parent in %s '
+		'order by cfm.is_working_capital', 
+		(mapping_names,)
+	)
+
+
+def _setup_mappers(mappers):
 	cash_flow_accounts = []
 
 	for mapping in mappers:
@@ -34,13 +42,7 @@ def execute(filters=None):
 		doc = frappe.get_doc('Cash Flow Mapper', mapping['name'])
 		mapping_names = [item.name for item in doc.accounts]
 
-		accounts = frappe.db.sql(
-			'select cfma.name, cfm.label, cfm.is_working_capital from `tabCash Flow Mapping Accounts` cfma '
-			'join `tabCash Flow Mapping` cfm on cfma.parent=cfm.name '
-			'where cfma.parent in %s '
-			'order by cfm.is_working_capital', 
-			(mapping_names,)
-		)
+		accounts = _get_accounts_in_mappers(mapping_names)
 
 		tmp_dict = [dict(name=account[0], label=account[1], is_working_capital=account[2]) for account in accounts]
 
@@ -55,6 +57,121 @@ def execute(filters=None):
 
 		cash_flow_accounts.append(mapping)
 
+	return cash_flow_accounts
+
+
+def _add_data_for_operating_activites(
+	filters, company_currency, profit_data, period_list, light_mappers, mapper, data):
+	has_added_working_capital_header = False
+	section_data = []
+
+	data.append({
+			"account_name": mapper['section_header'], 
+			"parent_account": None,
+			"indent": 0.0, 
+			"account": mapper['section_header']
+		})
+
+	if profit_data:
+		profit_data.update({
+			"indent": 1, 
+			"parent_account": _get_mapper_for(light_mappers, position=0)['section_header']
+		})
+		data.append(profit_data)
+		section_data.append(profit_data)
+
+		data.append({
+			"account_name": mapper["section_leader"],
+			"parent_account": None,
+			"indent": 1.0,
+			"account": mapper["section_leader"]
+		})
+
+	for account in mapper['account_types']:
+		if account['is_working_capital'] and not has_added_working_capital_header:
+			data.append({
+				"account_name": 'Movement in working capital',
+				"parent_account": None,
+				"indent": 1.0,
+				"account": ""
+			})
+			has_added_working_capital_header = True
+
+		account_data = get_account_type_based_data(filters.company, 
+			account['names'], period_list, filters.accumulated_values)
+		if account_data['total'] != 0:
+			account_data.update({
+				"account_name": account['label'],
+				"account": account['names'], 
+				"indent": 1,
+				"parent_account": mapper['section_header'],
+				"currency": company_currency
+			})
+			data.append(account_data)
+			section_data.append(account_data)
+
+	add_total_row_account(data, section_data, mapper['section_footer'], 
+		period_list, company_currency)
+
+
+def _add_data_for_other_activities(
+	filters, company_currency, profit_data, period_list, light_mappers, mapper_list, data):
+	for mapper in mapper_list:
+		section_data = []
+		data.append({
+			"account_name": mapper['section_header'], 
+			"parent_account": None,
+			"indent": 0.0, 
+			"account": mapper['section_header']
+		})
+
+		for account in mapper['account_types']:
+			account_data = get_account_type_based_data(filters.company, 
+				account['names'], period_list, filters.accumulated_values)
+			if account_data['total'] != 0:
+				account_data.update({
+					"account_name": account['label'],
+					"account": account['names'], 
+					"indent": 1,
+					"parent_account": mapper['section_header'],
+					"currency": company_currency
+				})
+				data.append(account_data)
+				section_data.append(account_data)
+
+		add_total_row_account(data, section_data, mapper['section_footer'], 
+			period_list, company_currency)
+
+
+def _compute_data(filters, company_currency, profit_data, period_list, light_mappers, full_mapper):
+	data = []
+
+	operating_activities_mapper = _get_mapper_for(light_mappers, position=0)
+	other_mappers = [
+		_get_mapper_for(light_mappers, position=1),
+		_get_mapper_for(light_mappers, position=2)
+	]
+
+	_add_data_for_operating_activites(
+		filters, company_currency, profit_data, period_list, light_mappers, operating_activities_mapper, data
+	)
+
+	_add_data_for_other_activities(
+		filters, company_currency, profit_data, period_list, light_mappers, other_mappers, data
+	)
+
+	return data
+
+
+def execute(filters=None):
+	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, 
+		filters.periodicity, filters.accumulated_values, filters.company)
+
+	# let's make sure mapper's is sorted by its 'position' field
+	mappers = _get_mappers_from_db()
+
+	cash_flow_accounts = _setup_mappers(mappers)
+
 	# compute net profit / loss
 	income = get_data(filters.company, "Income", "Credit", period_list, 
 		accumulated_values=filters.accumulated_values, ignore_closing_entries=True, ignore_accumulated_values_for_fy= True)
@@ -63,61 +180,9 @@ def execute(filters=None):
 
 	net_profit_loss = get_net_profit_loss(income, expense, period_list, filters.company)
 
-	data = []
 	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
 
-	for cash_flow_account in cash_flow_accounts:
-		has_added_working_capital_header = False
-		section_data = []
-		data.append({
-			"account_name": cash_flow_account['section_header'], 
-			"parent_account": None,
-			"indent": 0.0, 
-			"account": cash_flow_account['section_header']
-		})
-
-		if len(data) == 1:
-			# add first net income in operations section
-			if net_profit_loss:
-				net_profit_loss.update({
-					"indent": 1, 
-					"parent_account": get_mapper_for(mappers, position=0)['section_header']
-				})
-				data.append(net_profit_loss)
-				section_data.append(net_profit_loss)
-
-				data.append({
-					"account_name": cash_flow_account["section_leader"],
-					"parent_account": None,
-					"indent": 1.0,
-					"account": cash_flow_account["section_leader"]
-				})
-
-		for account in cash_flow_account['account_types']:
-			if account['is_working_capital'] and not has_added_working_capital_header:
-				data.append({
-					"account_name": 'Movement in working capital',
-					"parent_account": None,
-					"indent": 1.0,
-					"account": ""
-				})
-				has_added_working_capital_header = True
-
-			account_data = get_account_type_based_data(filters.company, 
-				account['names'], period_list, filters.accumulated_values)
-			if account_data['total'] != 0:
-				account_data.update({
-					"account_name": account['label'],
-					"account": account['names'], 
-					"indent": 1,
-					"parent_account": cash_flow_account['section_header'],
-					"currency": company_currency
-				})
-				data.append(account_data)
-				section_data.append(account_data)
-
-		add_total_row_account(data, section_data, cash_flow_account['section_footer'], 
-			period_list, company_currency)
+	data = _compute_data(filters, company_currency, net_profit_loss, period_list, mappers, cash_flow_accounts)
 
 	add_total_row_account(data, data, _("Net Change in Cash"), period_list, company_currency)
 	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
