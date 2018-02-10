@@ -112,9 +112,10 @@ def get_account_type_based_data(company, account_names, period_list, accumulated
 			from `tabGL Entry`
 			where company=%s and posting_date >= %s and posting_date <= %s 
 				and voucher_type != 'Period Closing Voucher'
-				and account in ( SELECT name FROM tabAccount WHERE name IN %s)
+				and account in ( SELECT name FROM tabAccount WHERE name IN %s
+				OR parent_account IN %s)
 		""", (company, start_date if accumulated_values else period['from_date'],
-			period['to_date'], account_names))
+			period['to_date'], account_names, account_names))
 
 		if gl_sum and gl_sum[0]:
 			amount = gl_sum[0]
