@@ -67,6 +67,7 @@ def execute(filters=None):
 	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
 
 	for cash_flow_account in cash_flow_accounts:
+		has_added_working_capital_header = False
 		section_data = []
 		data.append({
 			"account_name": cash_flow_account['section_header'], 
@@ -93,6 +94,15 @@ def execute(filters=None):
 				})
 
 		for account in cash_flow_account['account_types']:
+			if account['is_working_capital'] and not has_added_working_capital_header:
+				data.append({
+					"account_name": 'Movement in working capital',
+					"parent_account": None,
+					"indent": 1.0,
+					"account": ""
+				})
+				has_added_working_capital_header = True
+
 			account_data = get_account_type_based_data(filters.company, 
 				account['names'], period_list, filters.accumulated_values)
 			if account_data['total'] != 0:
