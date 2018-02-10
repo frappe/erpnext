@@ -42,11 +42,16 @@ def execute(filters=None):
 			(mapping_names,)
 		)
 
-		tmp_dict = [dict(name=account[0], label=account[1]) for account in accounts]
-		unique_labels = set([d['label'] for d in tmp_dict])
+		tmp_dict = [dict(name=account[0], label=account[1], is_working_capital=account[2]) for account in accounts]
+
+		# ordering gets lost here
+		unique_labels = sorted(
+			set([(d['label'], d['is_working_capital']) for d in tmp_dict]), 
+			key=lambda x: x[1]
+		)
 		for label in unique_labels:
-			names = [d['name'] for d in tmp_dict if d['label'] == label]
-			mapping['account_types'].append(dict(label=label, names=names))
+			names = [d['name'] for d in tmp_dict if d['label'] == label[0]]
+			mapping['account_types'].append(dict(label=label[0], names=names, is_working_capital=label[1]))
 
 		cash_flow_accounts.append(mapping)
 
