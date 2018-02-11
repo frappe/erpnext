@@ -13,19 +13,21 @@ frappe.ui.form.on("Purchase Order", {
         }
     },
     refresh: function(frm){
-        if(cur_frm.doc.workflow_state && cur_frm.doc.workflow_state == "Pending"){
-            frappe.call({
-                "method": "has_requester_perm",
-                "doc": cur_frm.doc,
-                "freeze": true,
-                callback: function(r) {
-                    if(frappe.session.user != "Administrator"){
-                        if (frappe.session.user != r.message){
-                            cur_frm.page.clear_actions_menu();
+        if (cur_frm.doc.workflow_state){
+            if(cur_frm.doc.workflow_state == "Pending" || cur_frm.doc.workflow_state == "Reviewed By Purchase Manager"){
+                frappe.call({
+                    "method": "has_requester_perm",
+                    "doc": cur_frm.doc,
+                    "freeze": true,
+                    callback: function(r) {
+                        if(frappe.session.user != "Administrator"){
+                            if (frappe.session.user != r.message){
+                                cur_frm.page.clear_actions_menu();
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
         }
         if (cur_frm.doc.docstatus == 1 && frappe.user_roles.indexOf("Purchase Manager") != -1 && cur_frm.doc.contact_email){
         cur_frm.add_custom_button(__("Send Supplier Emails"), function() {

@@ -87,8 +87,10 @@ class BusinessTrip(Document):
                 self.workflow_state = "Created By Director"
             elif u'Director' in frappe.get_roles(frappe.session.user) and self.days<4:
                 self.workflow_state = "Create By Director"
-            elif u'Manager' in frappe.get_roles(frappe.session.user):
+            elif u'Manager' in frappe.get_roles(frappe.session.user) and self.days>4:
                 self.workflow_state = "Created By Manager"
+            elif u'Manager' in frappe.get_roles(frappe.session.user) and self.days<4:
+                self.workflow_state = "Create By Manager"
             elif u'Line Manager' in frappe.get_roles(frappe.session.user):
                 self.workflow_state = "Created By Line Manager"
             elif u'Employee' in frappe.get_roles(frappe.session.user):

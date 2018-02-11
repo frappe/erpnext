@@ -127,8 +127,8 @@ frappe.ui.form.on('Material Request', {
             }
             return {
                 filters: {
-                    "project_manager": frm.doc.material_requester,
-                    "status": "Open"
+                    "project_manager": frm.doc.material_requester
+                    // "status": "Open"
                 }
 
             }

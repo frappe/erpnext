@@ -240,6 +240,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 
+		// console.log(item);
+
 		// clear barcode if setting item (else barcode will take priority)
 		if(!from_barcode) {
 			item.barcode = null;
@@ -281,6 +283,18 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					callback: function(r) {
 						if(!r.exc) {
 							me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
+							if(r.message){
+								var df = frappe.meta.get_docfield(r.message.doctype + " Item", "warehouse", r.message.name);
+								if (r.message.is_fixed_asset === 1){
+									df.hidden = 1;
+									me.frm.refresh_field("items");
+								}
+								else{
+									df.hidden = 0;
+									me.frm.refresh_field("items");
+									// console.log(df);
+								}
+							}
 						}
 					}
 				});

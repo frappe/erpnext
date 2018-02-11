@@ -62,9 +62,10 @@ def get_item_details(args):
 
 	if args.customer and cint(args.is_pos):
 		out.update(get_pos_profile_item_details(args.company, args))
-		
+
 	if out.get("warehouse"):
 		out.update(get_bin_details(args.item_code, out.warehouse))
+		out.warehouse = None
 
 	# update args with out, if key or value not exists
 	for key, value in out.iteritems():
