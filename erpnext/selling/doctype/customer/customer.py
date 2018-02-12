@@ -77,6 +77,11 @@ class Customer(TransactionBase):
 		if self.flags.is_new_doc and self.get('address_line1'):
 			make_address(self)
 
+	@classmethod
+	def get_display(self,address_title):
+		from frappe.contacts.doctype.address.address import get_address_display
+		return get_address_display(address_title)
+
 	def update_lead_status(self):
 		'''If Customer created from Lead, update lead status to "Converted"
 		update Customer link in Quotation, Opportunity'''
@@ -305,6 +310,18 @@ def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, fil
 			where `tabContact`.name = `tabDynamic Link`.parent and `tabDynamic Link`.link_name = %(customer)s
 			and `tabDynamic Link`.link_doctype = 'Customer' and `tabContact`.is_primary_contact = 1
 			and `tabContact`.name like %(txt)s
+		""", {
+			'customer': customer,
+			'txt': '%%%s%%' % txt
+		})
+
+def get_customer_primary_address(doctype, txt, searchfield, start, page_len, filters):
+	customer = frappe.db.escape(filters.get('customer'))
+	return frappe.db.sql("""
+		select `tabAddress`.name from `tabAddress`, `tabDynamic Link`
+			where `tabAddress`.name = `tabDynamic Link`.parent and `tabDynamic Link`.link_name = %(customer)s
+			and `tabDynamic Link`.link_doctype = 'Customer' and `tabAddress`.is_primary_address = 1
+			and `tabAddress`.name like %(txt)s
 		""", {
 			'customer': customer,
 			'txt': '%%%s%%' % txt
