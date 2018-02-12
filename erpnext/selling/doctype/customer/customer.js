@@ -47,11 +47,11 @@ frappe.ui.form.on("Customer", {
 			frappe.call({
 				doc: frm.doc,
 				args: {
-					"address_title":frm.doc.customer_primary_address
+					"address_title": frm.doc.customer_primary_address
 				},
-				method: 'get_display',
+				method: 'frappe.contacts.doctype.address.address.get_address_display',
 				callback: function(r) {
-					frm.set_value("primary_address",r.message);
+					frm.set_value("primary_address", r.message);
 				}
 			});
 		}
