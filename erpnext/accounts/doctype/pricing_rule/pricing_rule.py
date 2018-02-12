@@ -177,34 +177,32 @@ def get_pricing_rule_for_item(args):
 	if pricing_rule:
 		item_details.pricing_rule = pricing_rule.name
 		item_details.pricing_rule_for = pricing_rule.rate_or_discount
-		if pricing_rule.currency:
-			if pricing_rule.margin_type == 'Amount' and pricing_rule.currency == args.currency:
-				item_details.margin_type = pricing_rule.margin_type
-				item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 
-			elif pricing_rule.margin_type == 'Percentage':
-				item_details.margin_type = pricing_rule.margin_type
-				item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
-			else:
-				item_details.margin_type = None
-				item_details.margin_rate_or_amount = 0.0
-		else:
+		if pricing_rule.margin_type == 'Amount' and pricing_rule.currency == args.currency:
 			item_details.margin_type = pricing_rule.margin_type
 			item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
-			if pricing_rule.rate_or_discount == 'Rate':
+
+		elif pricing_rule.margin_type == 'Percentage':
+			item_details.margin_type = pricing_rule.margin_type
+			item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
+		else:
+			item_details.margin_type = None
+			item_details.margin_rate_or_amount = 0.0
+
+		if pricing_rule.rate_or_discount == 'Rate':
+			if pricing_rule.currency == args.currency:
 				item_details.update({
-					"price_list_rate": (pricing_rule.rate/flt(args.conversion_rate)) * args.conversion_factor or 1.0 \
-						if args.conversion_rate else 0.0,
+					"price_list_rate": pricing_rule.rate,
 					"discount_percentage": 0.0
 				})
-			else:
-				item_details.discount_percentage = pricing_rule.discount_percentage or args.discount_percentage
 
-		if pricing_rule.rate_or_discount == 'Rate' and pricing_rule.currency == args.currency:
-			item_details.update({
-				"price_list_rate": pricing_rule.rate,
-				"discount_percentage": 0.0
-			})
+			else:
+				item_details.update({
+					"price_list_rate": 0.0,
+					"discount_percentage": 0.0
+				})
+		else:
+			item_details.discount_percentage = pricing_rule.discount_percentage or args.discount_percentage
 
 	elif args.get('pricing_rule'):
 		item_details = remove_pricing_rule_for_item(args.get("pricing_rule"), item_details)
