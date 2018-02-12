@@ -646,7 +646,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 3, 
- "modified": "2018-02-05 12:00:05.466479", 
+ "modified": "2018-02-12 13:10:05.766762", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Application", 
@@ -795,7 +795,7 @@
    "submit": 0, 
    "write": 1
   }
- ], 
+ ],
  "quick_entry": 0, 
  "read_only": 0, 
  "read_only_onload": 0, 
