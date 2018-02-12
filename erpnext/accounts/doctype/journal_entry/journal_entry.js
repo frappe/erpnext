@@ -116,7 +116,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			if(jvd.reference_type==="Expense Claim") {
 				return {
 					filters: {
-						'approval_status': 'Approved',
+						'workflow_state': 'Approved',
 						'total_sanctioned_amount': ['>', 0],
 						'status': ['!=', 'Paid'],
 						'docstatus': 1

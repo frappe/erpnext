@@ -87,7 +87,7 @@ class TestExpenseClaim(unittest.TestCase):
 			 "doctype": "Expense Claim",
 			 "employee": "_T-Employee-0001",
 			 "payable_account": payable_account,
-			 "approval_status": "Rejected",
+			 "workflow_state": "Rejected",
 			 "expenses":
 			 	[{ "expense_type": "Travel", "default_account": "Travel Expenses - WP", "claim_amount": 300, "sanctioned_amount": 200 }]
 		})
@@ -107,7 +107,7 @@ def make_expense_claim(payable_account,claim_amount, sanctioned_amount, company,
 		 "doctype": "Expense Claim",
 		 "employee": "_T-Employee-0001",
 		 "payable_account": payable_account,
-		 "approval_status": "Approved",
+		 "workflow_state": "Approved",
 		 "company": company,
 		 "expenses":
 			[{ "expense_type": "Travel", "default_account": account, "claim_amount": claim_amount, "sanctioned_amount": sanctioned_amount }]

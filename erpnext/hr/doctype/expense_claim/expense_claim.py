@@ -14,6 +14,7 @@ from erpnext.controllers.accounts_controller import AccountsController
 from frappe.utils.csvutils import getlink
 
 class InvalidExpenseApproverError(frappe.ValidationError): pass
+class ExpenseApproverIdentityError(frappe.ValidationError): pass
 
 class ExpenseClaim(AccountsController):
 	def onload(self):
@@ -21,7 +22,7 @@ class ExpenseClaim(AccountsController):
 			'make_payment_via_journal_entry')
 
 	def get_feed(self):
-		return _("{0}: From {0} for {1}").format(self.approval_status,
+		return _("{0}: From {0} for {1}").format(self.workflow_state,
 			self.employee_name, self.total_claimed_amount)
 
 	def validate(self):
@@ -46,11 +47,11 @@ class ExpenseClaim(AccountsController):
 
 		paid_amount = flt(self.total_amount_reimbursed) + flt(self.total_advance_amount)
 		if self.total_sanctioned_amount > 0 and self.total_sanctioned_amount ==  paid_amount\
-			and self.docstatus == 1 and self.approval_status == 'Approved':
+			and self.docstatus == 1 and self.workflow_state == 'Approved':
 			self.status = "Paid"
-		elif self.total_sanctioned_amount > 0 and self.docstatus == 1 and self.approval_status == 'Approved':
+		elif self.total_sanctioned_amount > 0 and self.docstatus == 1 and self.workflow_state == 'Approved':
 			self.status = "Unpaid"
-		elif self.docstatus == 1 and self.approval_status == 'Rejected':
+		elif self.docstatus == 1 and self.workflow_state == 'Rejected':
 			self.status = 'Rejected'
 
 	def set_payable_account(self):
@@ -62,8 +63,6 @@ class ExpenseClaim(AccountsController):
 			self.cost_center = frappe.db.get_value('Company', self.company, 'cost_center')
 
 	def on_submit(self):
-		if self.approval_status=="Draft":
-			frappe.throw(_("""Approval Status must be 'Approved' or 'Rejected'"""))
 
 		self.update_task_and_project()
 		self.make_gl_entries()
@@ -189,7 +188,7 @@ class ExpenseClaim(AccountsController):
 		self.total_claimed_amount = 0
 		self.total_sanctioned_amount = 0
 		for d in self.get('expenses'):
-			if self.approval_status == 'Rejected':
+			if self.workflow_state == 'Rejected':
 				d.sanctioned_amount = 0.0
 
 			self.total_claimed_amount += flt(d.claim_amount)
@@ -199,6 +198,11 @@ class ExpenseClaim(AccountsController):
 		if self.exp_approver and "Expense Approver" not in frappe.get_roles(self.exp_approver):
 			frappe.throw(_("{0} ({1}) must have role 'Expense Approver'")\
 				.format(get_fullname(self.exp_approver), self.exp_approver), InvalidExpenseApproverError)
+
+		elif self.docstatus == 1 and self.exp_approver != frappe.session.user:
+			frappe.throw(_("Only the selected Expense Approver can submit this Expense Claim."),
+				ExpenseApproverIdentityError)
+
 
 	def update_task(self):
 		task = frappe.get_doc("Task", self.task)
