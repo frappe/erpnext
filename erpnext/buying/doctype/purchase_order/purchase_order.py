@@ -38,6 +38,7 @@ class PurchaseOrder(BuyingController):
 		}]
 
 	def validate(self):
+
 		super(PurchaseOrder, self).validate()
 
 		self.set_status()
@@ -99,11 +100,11 @@ class PurchaseOrder(BuyingController):
 			if self.workflow_state == "Approved By Requester" and not self.project:
 				self.set("handled_by", "Budget Controller")
 
-	def on_update_after_submit(self):
-		pass
-		# if hasattr(self,'workflow_state'):
-		# 	if self.workflow_state == "Approved By CEO":
-		# 		self.set("workflow_state", "Change Terms & Conditions")
+	def before_update_after_submit(self):
+		if hasattr(self,'workflow_state'):
+			self.flags.ignore_validate_update_after_submit = True
+			if self.workflow_state == "Approved By CEO":
+				self.set("workflow_state", "Change Terms & Conditions")
 				# self.workflow_state = "Change Terms & Conditions"
 			# elif self.workflow_state == "Change Terms & Conditions":
 			#  	self.flags.ignore_validate_update_after_submit = True
