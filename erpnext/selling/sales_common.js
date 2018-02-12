@@ -120,6 +120,10 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.apply_price_list();
 	},
 
+	coupon: function() {
+		this.apply_coupon_price_list();
+	},
+
 	price_list_rate: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
