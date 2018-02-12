@@ -3,6 +3,8 @@
 
 from __future__ import unicode_literals
 
+import json
+
 import frappe
 import frappe.defaults
 from frappe.utils import nowdate, cstr, flt, cint, now, getdate
@@ -744,3 +746,132 @@ def create_payment_gateway_account(gateway):
 	except frappe.DuplicateEntryError:
 		# already exists, due to a reinstall?
 		pass
+
+
+@frappe.whitelist()
+def make_journal_entry(args):
+	"""
+	:param args: {
+		'debit_account': '', 'credit_account': '', 'cost_center': '',
+		'party_type': '', 'voucher_type': '', 'party': '', 'paid_amount': '',
+		'posting_date': '', 'company': '', 'payment_entry': '',
+		'payment_entry_date': ''
+	}
+	:return: name of created Journal Entry
+	"""
+	def accounts_values():
+		return [
+			dict(
+				account=args['debit_account'], cost_center=args['cost_center'],
+				party_type=args['party_type'] if args['voucher_type'] == 'Contra Entry' else '',
+				party=args['party'] if args['voucher_type'] == 'Contra Entry' else '',
+				debit_in_account_currency=args['paid_amount'],
+				credit_in_account_currency=0,
+			),
+			dict(
+				account=args['credit_account'], cost_center=args['cost_center'],
+				party_type=args['party_type'] if args['voucher_type'] == 'Bank Entry' else '',
+				party=args['party'] if args['voucher_type'] == 'Bank Entry' else '',
+				debit_in_account_currency=0,
+				credit_in_account_currency=args['paid_amount'],
+			)
+		]
+
+	if isinstance(args, basestring):
+		args = json.loads(args)
+
+	# Make sure `voucher_type` is either Contra Entry or Bank Entry
+	if args['voucher_type'] not in ['Contra Entry', 'Bank Entry']:
+		frappe.msgprint(
+			_('Voucher Type can only be Bank Entry or Contra Entry'),
+			title='Error', raise_exception=1
+		)
+
+	# Since these values are coming from a Submitted document, they should never
+	# be missing any value
+	for key in args:
+		if not args[key]:
+			frappe.msgprint(
+				_('This document has missing fields. No Journal will be created.')
+			)
+			return
+
+	journal_entry = frappe.new_doc('Journal Entry')
+	journal_entry.company = args['company']
+	journal_entry.voucher_type = args['voucher_type']
+	journal_entry.posting_date = args['posting_date']
+
+	if args['voucher_type'] == 'Contra Entry':
+		remark = _(
+			'Payment Entry %s from %s returned.' % (args['payment_entry'], args['party'])
+		)
+	else:
+		remark = _(
+			'Cheque for Payment Entry %s from %s redeposited' % (args['payment_entry'], args['party'])
+		)
+
+	journal_entry.user_remark = _(remark)
+	journal_entry.cheque_no = args['payment_entry']
+	journal_entry.cheque_date = args['payment_entry_date']
+
+	journal_entry.set('accounts', accounts_values())
+
+	journal_entry.submit()
+
+	return journal_entry.name
+
+
+@frappe.whitelist()
+def payment_is_returned(name, amount, posting_date):
+	"""
+	Tries to make a best guess to determine if a (receive) Payment Entry has been
+	returned/redeposited with a system generated Journal Entry.
+
+	This function anticipates a sequence of Contra and Bank Entries starting
+	with a Contra Journal Entry:
+
+	Payment Entry --> Returned --> Redeposited --> Returned --> Redeposited --> ...
+
+	This function assumes this sequence when trying to determine if the Payment Entry
+	is returned or not. If Returned, it returns "true". If not, it returns "false".
+	If the sequence is not as expected, it return "unknown"
+
+	:param name: name of the Payment Entry for which a return/redeposit is being made
+	:param amount: The Payment Entry total amount
+	:param posting_date: Posting date of the Payment Entry
+	:return: one of 'true', 'false' or 'unknown'
+	"""
+	def process_journal_entry_sequence(entries):
+		response = 'unknown'
+
+		# first and even indexed items in list should be of type Contra Entry
+		# second and odd indexed items in list should be of type Bank Entry
+		for count, entry in enumerate(entries):
+			if (count == 0 or count % 2 == 0) and entry.voucher_type != 'Contra Entry':
+				break
+			elif entry.voucher_type != 'Bank Entry':
+				break
+
+		# If loop gets to the end, sequence is ok. Use the last element in the
+		# list to return the status
+		if len(entries):
+			response = 'true' if entries[-1].voucher_type == 'Contra Entry' else 'false'
+
+		return response
+
+	journal_entry = frappe.db.sql(
+		'select name, voucher_type, posting_date, creation from `tabJournal Entry` '
+		'where (voucher_type="Bank Entry" or voucher_type="Contra Entry") '
+		'and total_amount=%s '
+		'and cheque_no=%s '
+		'and cheque_date=%s '
+		'and docstatus = 1 '
+		'order by creation ASC',
+		[amount, name, posting_date],
+		as_dict=True
+	)
+
+	response = 'false' if not len(journal_entry) \
+		else process_journal_entry_sequence(journal_entry)
+
+	return response
