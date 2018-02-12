@@ -1,0 +1,122 @@
+@import 'https://fonts.googleapis.com/css?family=Open+Sans:300,600,800';
+/*html,
+body {
+  background-color: #000;
+  color: #fff;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}*/
+
+.stopwatch {
+  height: 50%;
+  width: 100%;
+  display: inline-flex;
+  transition: all .5s ease;
+  -moz-transition: all .5s ease;
+  -ms-transition: all .5s ease;
+  -webkit-transition: all .5s ease;
+  -o-transition: all .5s ease;
+}
+
+.stopwatch span {
+  display: table-cell;
+  width: 33%;
+  font-size: 5em;
+  font-family: 'Open Sans', sans serif;
+  text-align: center;
+  vertical-align: middle;
+  transition: all .5s ease;
+  -moz-transition: all .5s ease;
+  -ms-transition: all .5s ease;
+  -webkit-transition: all .5s ease;
+  -o-transition: all .5s ease;
+}
+
+.stopwatch .hours {
+  font-weight: 800;
+}
+
+.stopwatch .minutes {
+  font-weight: 600;
+}
+
+.stopwatch .seconds {
+  font-weight: 300;
+}
+
+.stopcontrols {
+  height: 50%;
+  width: 100%;
+  display: table;
+  transition: all .5s ease;
+  -moz-transition: all .5s ease;
+  -ms-transition: all .5s ease;
+  -webkit-transition: all .5s ease;
+  -o-transition: all .5s ease;
+}
+
+.stopcontrols div {
+  display: table-cell;
+  width: 50%;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.playpause {
+  border-right: 1px dashed #fff;
+  border-bottom: 1px dashed #fff;
+}
+
+.playpause .play {
+  display: inline-block;
+  border-top: 28px solid transparent;
+  border-left: 37px solid #000;
+  border-bottom: 28px solid transparent;
+}
+
+.playpause .pause {
+  border-right: 5px solid #000;
+  border-left: 5px solid #000;
+  padding: 20px 10px;
+}
+
+.stop {
+  border-bottom: 1px dashed #fff;
+}
+
+.stop span {
+  display: inline-block;
+  background-color: #e74c3c;
+  width: 45px;
+  height: 45px;
+}
+
+@media screen and (max-width: 500px) {
+  .stopwatch span {
+    font-size: 6em;
+  }
+}
+
+@media screen and (max-width: 390px) {
+  .stopwatch {
+    height: 75%;
+    display: block;
+  }
+  .stopcontrols {
+    height: 25%;
+  }
+  .stopwatch span {
+    width: 100%;
+    height: 33%;
+    display: block;
+  }
+}

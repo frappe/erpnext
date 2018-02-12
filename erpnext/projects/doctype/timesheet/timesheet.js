@@ -50,9 +50,124 @@ frappe.ui.form.on("Timesheet", {
 			}
 		}
 
+		if (frm.doc.total_hours) {
+			frm.add_custom_button(__('Start Timer'), function() {
+				frm.trigger("timer")
+			}).addClass("btn-primary");
+		}
+
 		if(frm.doc.per_billed > 0) {
 			frm.fields_dict["time_logs"].grid.toggle_enable("billing_hours", false);
 			frm.fields_dict["time_logs"].grid.toggle_enable("billable", false);
+		}
+	},
+
+	timer: function(frm) {
+		let dialog = new frappe.ui.Dialog({
+			title: __("Timer"),
+			fields: [
+				{"fieldtype": "Select", "label": __("Activity"),
+					"fieldname": "activity",
+					"options": frm.doc.time_logs.map(d => d.activity_type),
+					"reqd": 1 },
+				{"fieldtype": "Select", "label": __("Project"),
+					"fieldname": "project",
+					"options": frm.doc.time_logs.map(d => d.project)},
+				{"fieldtype": "Select", "label": __("Hours"),
+					"fieldname": "hours",
+					"options": frm.doc.time_logs.map(d => d.hours)}
+			]
+		});
+
+		dialog.wrapper.append(frappe.render_template("timesheet"));
+		frm.trigger("control_timer");
+		dialog.show();
+	},
+
+	control_timer: function() {
+		var interval = null;
+		var currentIncrement = 0;
+		var isPaused = false;
+		var initialised = false;
+		var clicked = false;
+		var paused_time = 0;
+
+		$(".playpause").click(function(e) {
+			if (clicked) {
+				e.preventDefault();
+				return false;
+			}
+
+			if (!initialised) {
+				initialised = true;
+				isPaused = false;
+				$(".playpause span").removeClass();
+				$(".playpause span").addClass("pause");
+				initialiseTimer();
+			}
+			else {
+				$(".playpause span").removeClass();
+				if (isPaused) {
+					isPaused = false;
+					$(".playpause span").addClass("pause");
+				}
+				else {
+					isPaused = true;
+					$(".playpause span").addClass("play");
+					paused_time = currentIncrement;
+				}
+			}
+		});
+
+		$(".stop").click(function() {
+			reset();
+		});
+
+		function initialiseTimer() {
+			interval = setInterval(function() {
+				if (isPaused) return;
+				var current = setCurrentIncrement();
+				updateStopwatch(current);
+			}, 1000);
+		}
+
+		function updateStopwatch(increment) {
+			var hours = Math.floor(increment / 3600);
+			var minutes = Math.floor((increment - (hours * 3600)) / 60);
+			var seconds = increment - (hours * 3600) - (minutes * 60);
+			// if(!$('modal-open:visible')){
+			// 	reset();
+			// }
+			if (!$('.modal-dialog').is(':visible')) {
+				reset();
+			}
+			if(hours > 99)
+			reset();
+			if(cur_dialog && cur_dialog.get_value('hours') == hours) {
+				isPaused = true;
+				initialised = false;
+				frappe.msgprint(__("Timer exceeded the given hours"));
+			}
+			$(".hours").text(hours < 10 ? ("0" + hours.toString()) : hours.toString());
+			$(".minutes").text(minutes < 10 ? ("0" + minutes.toString()) : minutes.toString());
+			$(".seconds").text(seconds < 10 ? ("0" + seconds.toString()) : seconds.toString());
+		}
+
+		function setCurrentIncrement() {
+			currentIncrement += 1;
+			return currentIncrement;
+		}
+
+		function reset() {
+			currentIncrement = 0;
+			isPaused = true;
+			initialised = false;
+			clearInterval(interval);
+			$(".hours").text("00");
+			$(".minutes").text("00");
+			$(".seconds").text("00");
+			$(".playpause span").removeClass();
+			$(".playpause span").addClass("play");
 		}
 	},
 
