@@ -176,7 +176,7 @@
                         "Eingeforderte Nachsch\u00fcsse (gegenkonto 2929)": {}
                     }, 
                     "Eingeforderte- noch ausstehende Kapitaleinlagen": {
-                        "Ausstehende Einlagen auf das gezeichnete Kapital- eingefordert (Forderungen- nicht eingeforderte ausstehende Einlagen s. Konto 2910)": {}
+                        "Ausstehende Einlagen auf das gezeichnete Kapital- eingefordert": {}
                     }, 
                     "Forderungen aus Lieferungen und Leistungen H-Saldo": {
                         "Einzelwertberechtigungen zu Forderungen mit einer Restlaufzeit bis zu 1 Jahr": {}, 
@@ -685,7 +685,6 @@
                         "Umsatzsteuer aus innergemeinschaftlichem Erwerb 16%": {}, 
                         "Umsatzsteuer aus innergemeinschaftlichem Erwerb 19%": {}, 
                         "Umsatzsteuer aus innergemeinschaftlichem Erwerb ohne Vorsteuerabzug": {}, 
-                        "Umsatzsteuer aus innergemeinschaftlichem Erwerb von Neufahrzeugen von Lieferanten ohne Umsatzsteuer-Identifikationsnummer": {}, 
                         "Umsatzsteuer fr\u00fchere Jahre": {}, 
                         "Umsatzsteuer laufendes Jahr": {}, 
                         "Umsatzsteuer nach \u00a713b UStG": {}, 
@@ -747,7 +746,7 @@
                     "Verbindlichkeiten gegen\u00fcber Kreditinstituten ": {
                         "Gegenkonto 3159-3209 bei Aufteilung der Konten 3210-3248": {}
                     }, 
-                    "Verbindlichkeiten gegen\u00fcber Kreditinstituten oder Kassenbestand- Bundesbankguthaben- Guthaben bei Kreditinstituten und Schecks": {
+                    "Verbindlichkeiten gegen\u00fcber Kreditinstituten - Bundesbankguthaben- Guthaben bei Kreditinstituten und Schecks": {
                         "Verbindlichkeiten gegen\u00fcber Kreditinstituten  1": {
                             "(frei- in Bilanz kein Restlaufzeit vermerkt) 1": {}, 
                             "Verbindlichkeiten gegen\u00fcber Kreditinstituten Restlaufzeit 1 bis 5 Jahre": {}, 
@@ -778,8 +777,8 @@
         }, 
         "Gewinn u. Verlust - Aufwendungen": {
             "Betriebliche Aufwendungen": {
-                "Abschreibungen a. Verm\u00f6gensgeg.  d. Umlaufverm\u00f6gens- soweit diese die in der Kapitalgesellschaft \u00fcblichen Abschreibungen \u00fcberschreiten": {
-                    "Abschreibungen a. Verm\u00f6gensgeg. d. Umlaufverm\u00f6gens- soweit diese die in der Kapitalgesellschaft \u00fcblichen Abschreibungen \u00fcberschreiten": {
+                "Abschreibungen a. Verm\u00f6gensgeg. d.  Umlaufverm\u00f6gens- soweit diese die in der Abschreibungen \u00fcberschreiten": {
+                    "Abschreibungen a. Verm\u00f6gensgeg. d. Umlaufverm\u00f6gens- soweit diese die in der Abschreibungen \u00fcberschreiten": {
                         "Abschreibungen auf Umlaufverm\u00f6gen- steuerrechtlich bedingt (soweit un\u00fcblich hoch)": {}, 
                         "Abschreibungen auf Verm\u00f6gensgegenst\u00e4nde des Umlaufverm\u00f6gens (soweit un\u00fcblich hoch)": {}, 
                         "Forderungsverluste (soweit un\u00fcblich hoch)": {}, 
@@ -852,7 +851,7 @@
                 "Sonstige betriebliche Aufwendungen 3": {
                     "Sonstige betriebliche Aufwendungen 4": {
                         "Abgaben f\u00fcr betrieblich genutzten Grundbesitz": {}, 
-                        "Abgang von Wirtschaftsg\u00fctern des Umlaufverm\u00f6gens 100% / 50% nicht abzugsf\u00e4hig (inlandische Kap. Ges.) nach \u00a7 4 Abs. 3 Satz 4 EStG": {}, 
+                        "Abgang von Wirtschaftsg\u00fctern des Umlaufverm\u00f6gens 100% / 50% nicht abzugsf\u00e4hig (inlandische Kap. Ges.) nach": {}, 
                         "Abgang von Wirtschaftsg\u00fctern des Umlaufverm\u00f6gens nach \u00a7 4 Abs. 3 Satz 4 EStG": {}, 
                         "Abschluss- und Pr\u00fcfungskosten": {}, 
                         "Abschreibung auf Umlaufverm\u00f6gen au\u00dfer Vorr\u00e4te und Wertpapieren des UV (\u00fcbliche H\u00f6he)": {}, 
@@ -867,7 +866,7 @@
                         "Aufwendungen aus Anteilen an Kapitalgesellschaften 100% / 50% nicht abzugsf\u00e4hig (inlandische Kap. Ges.)": {}, 
                         "Aufwendungen aus Bewertung Finanzmittelfonds": {}, 
                         "Aufwendungen aus Kursdifferenzen": {}, 
-                        "Aufwendungen aus der Ver\u00e4u\u00dferung von Anteilen an Kapitalgesellschaften 100% / 50% nicht abzugsf\u00e4hig (inl\u00e4ndische Kap. Ges.)": {}, 
+                        "Aufwendungen aus der Ver\u00e4u\u00dferung von Anteilen an Kapitalgesellschaften 100% / 50% nicht abzugsf\u00e4hig": {}, 
                         "Aufwendungen aus der Zuschreibung von steuertlich niedriger bewerteten R\u00fcckstellungen": {}, 
                         "Aufwendungen aus der Zuschreibung von steuertlich niedriger bewerteten Verbindlichkeiten": {}, 
                         "Aufwendungen f\u00fcr Abraum- und Abfallbeseitigung": {}, 
@@ -987,9 +986,9 @@
                         "Verg\u00fctungen an Mitunternehmer \u00a7 15 EStG": {}, 
                         "Verkaufsprovisionen": {}, 
                         "Verluste aus dem Abgang von Gegenst\u00e4nden des Anlageverm\u00f6gens": {}, 
-                        "Verluste aus dem Abgang von Gegenst\u00e4nden des Umlaufverm\u00f6gens (au\u00dfer Vorr\u00e4te) 100% / 50% nicht anzugsf\u00e4hig (inlandische Kap. Ges.)": {}, 
+                        "Verluste aus dem Abgang von Gegenst\u00e4nden des Umlaufverm\u00f6gens (au\u00dfer Vorr\u00e4te) 100%/50% nicht anzugsf\u00e4hig": {}, 
                         "Verluste aus dem Abgang von Gegenst\u00e4nden des Umlaufverm\u00f6gens au\u00dfer Vorr\u00e4te": {}, 
-                        "Verluste aus der Ver\u00e4u\u00dferung von Anteilen an Kapitalgesellschaften 100% / 50% nicht abzugsf\u00e4hig (inl\u00e4ndische Kap. Ges.)": {}, 
+                        "Verluste aus der Ver\u00e4u\u00dferung von Anteilen an Kapitalgesellschaften 100% / 50% nicht abzugsf\u00e4hig": {}, 
                         "Verpackungsmaterial": {}, 
                         "Versicherungen": {}, 
                         "Versicherungen f\u00fcr Geb\u00e4ude": {}, 
@@ -1020,10 +1019,10 @@
                         }, 
                         "Abschreibungen auf Finanzanlagen 100% / 50% nicht abzugsf\u00e4hig (inl\u00e4ndische Kap. Ges.)": {}, 
                         "Abschreibungen auf Finanzanlagen auf Grund steuerlicher Sondervorschriften": {}, 
-                        "Abschreibungen auf Finanzanlagen auf Grund steuerlicher Sondervorschriften 100% / 50% nicht abzugsf\u00e4hig (inl\u00e4ndische Kap. Ges.)": {}, 
+                        "Abschreibungen auf Finanzanlagen auf Grund steuerlicher Sondervorschriften 100% / 50% nicht abzugsf\u00e4hig": {}, 
                         "Abschreibungen auf Grund von Verlustanteilen an Mitunternehmerschaften \u00a7 8 GewStG": {}, 
                         "Abschreibungen auf Wertpapiere des Umlaufverm\u00f6gens": {}, 
-                        "Abschreibungen auf Wertpapiere des Umlaufverm\u00f6gens 100% / 50% nicht abzugsf\u00e4hig (inl\u00e4ndische Kap. Ges.)": {}, 
+                        "Abschreibungen auf Wertpapiere des Umlaufverm\u00f6gens 100% / 50% nicht abzugsf\u00e4hig": {}, 
                         "Vorwegnahme k\u00fcnftiger Wertschwankungen bei Wertpapieren des Umlaufverm\u00f6gens": {}
                     }, 
                     "account_type": "Depreciation"
@@ -1123,15 +1122,15 @@
                     }
                 }, 
                 "Erh\u00f6hung oder Verminderung des Bestands an fertigen und unfertige Erzeugnissen": {
-                    "Erh\u00f6hung des Bestands an fertigen und unfertigen Erzeugnissen oder Verminderung des Bestands an fertigen und unfertigen Erzeugnissen": {
+                    "Erh\u00f6hung / Verminderung des Bestands an fertigen und unfertigen Erzeugnissen": {
                         "Bestandsver\u00e4nderungen - fertige Erzeugnisse": {}, 
                         "Bestandsver\u00e4nderungen - unfertige Erzeugnisse": {}, 
                         "Bestandsver\u00e4nderungen - unfertige Leistungen": {}
                     }, 
-                    "Erh\u00f6hung des Bestands in Arbeit befindlicher Auftr\u00e4ge oder Verminderung des Bestands in Arbeit befindlicher Auftr\u00e4ge": {
+                    "Erh\u00f6hung / Verminderung des Bestands in Arbeit befindlicher Auftr\u00e4ge": {
                         "Bestandsver\u00e4nderungen in Arbeit befindlicher Auftr\u00e4ge": {}
                     }, 
-                    "Erh\u00f6hung des Bestands in Ausf\u00fchrung befindlicher Bauaftr\u00e4ge oder Verminderung des Bestands in Ausf\u00fchrung befindlicher Bauauftr\u00e4ge": {
+                    "Erh\u00f6hung / Verminderung des Bestands in Ausf\u00fchrung befindlicher Bauaftr\u00e4ge": {
                         "Bestandsver\u00e4nderungen in Ausf\u00fchrung befindliche Bauauftr\u00e4ge": {}
                     }
                 }, 
@@ -1384,8 +1383,8 @@
                     "Sonstige Zinsen und \u00e4hnliche Ertr\u00e4ge 1": {
                         "Diskontertr\u00e4ge": {}, 
                         "Diskontertr\u00e4ge aus verbundenen Unternehmen": {}, 
-                        "Laufende Ertr\u00e4ge aus Anteilen an Kapitalgesellschaften (Umlaufverm\u00f6gen) 100% / 50% steuerfrei (inl\u00e4ndische Kap. Ges.)": {}, 
-                        "Laufende Ertr\u00e4ge aus Anteilen an Kapitalgesellschaften (verbundene Unternehmen) 100% / 50% steuerfrei (inl\u00e4ndische Kap. Ges.)": {}, 
+                        "Laufende Ertr\u00e4ge aus Anteilen an Kapitalgesellschaften 100% / 50% steuerfrei": {}, 
+                        "Laufende Ertr\u00e4ge aus Anteilen an Kapitalgesellschaften 100% / 50% steuerfrei": {}, 
                         "Sonstige Zinsen und \u00e4hnliche Ertr\u00e4ge 2": {}, 
                         "Sonstige Zinsen und \u00e4hnliche Ertr\u00e4ge aus verbundenen Unternehmen": {}, 
                         "Sonstige Zinsertr\u00e4ge": {}, 

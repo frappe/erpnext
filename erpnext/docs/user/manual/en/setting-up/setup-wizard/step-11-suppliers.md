@@ -2,11 +2,11 @@
 
 Add known suppliers to the system.
 
-<img alt="Language" class="screenshot" src="/docs/assets/img/setup-wizard/step-11.png">
+<img alt="Language" class="screenshot" src="{{docs_base_url}}/assets/img/setup-wizard/step-11.png">
 
 If suppliers are not known, then clicking **Mark as Done** will complete the step.
 
-<img alt="Language" class="screenshot" src="/docs/assets/img/setup-wizard/step-11a.png"> 
+<img alt="Language" class="screenshot" src="{{docs_base_url}}/assets/img/setup-wizard/step-11a.png"> 
 
 
 ## Step 11a: Other Domain Specific Steps

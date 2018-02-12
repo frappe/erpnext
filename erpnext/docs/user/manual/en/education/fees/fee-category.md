@@ -2,6 +2,6 @@
 
 List of all different type of fees collected.
 
-<img class="screenshot" alt="Fees Category" src="/docs/assets/img/education/fees/fee-category.png">
+<img class="screenshot" alt="Fees Category" src="{{docs_base_url}}/assets/img/education/fees/fee-category.png">
 
 {next}

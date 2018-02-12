@@ -8,7 +8,7 @@ To create new volunteer Type go to:
 
 > Non Profit > Volunteer Type > New
 
-<img class="screenshot" alt="Volunteer" src="/docs/assets/img/non_profit/volunteer/volunteer_type.png">
+<img class="screenshot" alt="Volunteer" src="{{docs_base_url}}/assets/img/non_profit/volunteer/volunteer_type.png">
 
 
 **Volunteer Type:** The Volunteer Type is displayed throughout the system, on both public and backend pages so spend some time thinking about a membership type name that is appropriate to both audiences. It can be changed at a later date

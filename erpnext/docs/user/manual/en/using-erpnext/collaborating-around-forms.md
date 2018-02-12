@@ -11,13 +11,13 @@ If some document requires an action from User, you can Assign that document to t
 Comments are a great way to add information about a transaction that is not a
 part of the transactions. Like some background information etc.
 
-<img class="screenshot" alt="Assign" src="/docs/assets/img/collaboration-tools/comments-1.png">
+<img class="screenshot" alt="Assign" src="{{docs_base_url}}/assets/img/collaboration-tools/comments-1.png">
 
 ###Share
 
 You can share document with the specific User. If Document is shared with the specific User, he/she will be able to access it, even if that User doesn't have permission to access that document or Document Type.
 
-<img class="screenshot" alt="Assign" src="/docs/assets/img/collaboration-tools/share-1.gif">
+<img class="screenshot" alt="Assign" src="{{docs_base_url}}/assets/img/collaboration-tools/share-1.gif">
 
 ### Tags
 

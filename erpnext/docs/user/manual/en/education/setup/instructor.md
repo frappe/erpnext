@@ -6,7 +6,7 @@ To create new Instructor go to:
 
 > Education > Instructor > New
 
-<img class="screenshot" alt="Instructor" src="/docs/assets/img/education/setup/instructor.png">
+<img class="screenshot" alt="Instructor" src="{{docs_base_url}}/assets/img/education/setup/instructor.png">
 
 An **Instructor** can also be linked to a **Course Schedule**, where you can define the schedule for a **Course** for a give date and **Room no**.
 
