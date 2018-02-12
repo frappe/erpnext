@@ -7,14 +7,13 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "letter_head": "Digital Link Letter Head - Invoice",
  "modified": "2018-02-12 16:46:30.302152",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse wise Item Balance Age and Value",
  "owner": "Administrator",
  "ref_doctype": "Stock Ledger Entry",
- "report_name": "Warehouse wise Item Balance Age and Value",
+ "report_name": "Warehouse wise Item Balance, Age and Value",
  "report_type": "Script Report",
  "roles": [
   {
