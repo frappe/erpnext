@@ -457,6 +457,34 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Share Management"),
+			"icon": "fa fa-microchip ",
+			"items": [
+				{
+					"type": "doctype",
+					"name":"Shareholder",
+					"description": _("List of available Shareholders with folio numbers")
+				},
+				{
+					"type": "doctype",
+					"name":"Share Transfer",
+					"description": _("List of all share transactions"),
+				},
+				{
+					"type": "report",
+					"name": "Share Ledger",
+					"doctype": "Share Transfer",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Share Balance",
+					"doctype": "Share Transfer",
+					"is_query_report": True
+				}
+			]
+		},
+		{
 			"label": _("Help"),
 			"icon": "fa fa-facetime-video",
 			"items": [
