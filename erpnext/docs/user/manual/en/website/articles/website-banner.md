@@ -6,4 +6,4 @@ Each ERPNext account website automatically generated from it. On a website, logo
 
 For the exact steps on how to upload a Website Banner and resize it, please refer to the help given below.
 
-<img class="screenshot" alt="Website Banner image" src="/docs/assets/img/articles/brand-logo.gif">
+<img class="screenshot" alt="Website Banner image" src="{{docs_base_url}}/assets/img/articles/brand-logo.gif">

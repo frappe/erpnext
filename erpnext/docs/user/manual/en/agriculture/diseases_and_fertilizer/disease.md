@@ -19,6 +19,6 @@ Click Save
 
 Now it should look something like this
 
-<img class="screenshot" alt="Task" src="/docs/assets/img/agriculture/diseases_and_fertilizer/disease.png">
+<img class="screenshot" alt="Task" src="{{docs_base_url}}/assets/img/agriculture/diseases_and_fertilizer/disease.png">
 
 These Tasks will be imported into the Crop Cycle Project if you choose to add this Disease to the list of Detected Diesase in Crop Cycle

@@ -2,11 +2,11 @@
 
 Add a company logo to be used as a standard letter head on all printed invoices and other document types. Ideally the logo is 900px by 100px.
 
-<img alt="Language" class="screenshot" src="/docs/assets/img/setup-wizard/step-10.png">
+<img alt="Language" class="screenshot" src="{{docs_base_url}}/assets/img/setup-wizard/step-10.png">
 
 If a letter head logo file is not available, the clicking **Mark as Done** will complete the step.
 
-<img alt="Language" class="screenshot" src="/docs/assets/img/setup-wizard/step-10a.png">
+<img alt="Language" class="screenshot" src="{{docs_base_url}}/assets/img/setup-wizard/step-10a.png">
 
 ---
 

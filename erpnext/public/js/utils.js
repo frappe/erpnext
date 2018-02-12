@@ -13,6 +13,12 @@ $.extend(erpnext, {
 			return frappe.boot.sysdefaults.currency;
 	},
 
+	get_presentation_currency_list: () => {
+		const docs = frappe.boot.docs;
+		const currency_list = docs.filter(d => d.doctype === ":Currency").map(d => d.name);
+		return currency_list;
+	},
+
 	toggle_naming_series: function() {
 		if(cur_frm.fields_dict.naming_series) {
 			cur_frm.toggle_display("naming_series", cur_frm.doc.__islocal?true:false);

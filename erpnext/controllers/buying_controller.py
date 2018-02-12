@@ -218,7 +218,7 @@ class BuyingController(StockController):
 			if not exists:
 				rm = self.append(raw_material_table, {})
 
-			required_qty = flt(flt(bom_item.qty_consumed_per_unit) * flt(item.qty) *
+			required_qty = flt(flt(bom_item.qty_consumed_per_unit) * (flt(item.qty) + getattr(item, 'rejected_qty', 0)) *
 				flt(item.conversion_factor), rm.precision("required_qty"))
 			rm.reference_name = item.name
 			rm.bom_detail_no = bom_item.name

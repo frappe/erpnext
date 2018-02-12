@@ -7,7 +7,7 @@ Type and the period for which the leave is taken.
 
 > Human Resources > Leave Application > New Leave Application
 
-<img class="screenshot" alt="Leave Application" src="/docs/assets/img/human-resources/leave-application.png">
+<img class="screenshot" alt="Leave Application" src="{{docs_base_url}}/assets/img/human-resources/leave-application.png">
 
 ###Setting Leave Approver
 
@@ -15,7 +15,7 @@ Type and the period for which the leave is taken.
 
 * You need to mention a list of Leave Approvers against an Employee in the Employee Master.
 
-<img class="screenshot" alt="Leave Approver" src="/docs/assets/img/human-resources/employee-leave-approver.png">
+<img class="screenshot" alt="Leave Approver" src="{{docs_base_url}}/assets/img/human-resources/employee-leave-approver.png">
 
 > Tip : If you want all users to create their own Leave Applications, you can set
 their “Employee ID” as a match rule in the Leave Application Permission

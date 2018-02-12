@@ -17,7 +17,7 @@ Click Save
 
 It should look something like this
 
-<img class="screenshot" alt="Task" src="/docs/assets/img/agriculture/crops_and_land/land_unit.png">
+<img class="screenshot" alt="Task" src="{{docs_base_url}}/assets/img/agriculture/crops_and_land/land_unit.png">
 
 With the farm created, we can now create our first Carrot Field! Click on New 
 

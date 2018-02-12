@@ -107,7 +107,7 @@ def make_custom_fields():
 		dict(fieldname='reason_for_issuing_document', label='Reason For Issuing document',
 			fieldtype='Select', insert_after='gst_col_break', print_hide=1,
 			depends_on='eval:doc.is_return==1', reqd=1,
-			options='\n01-Sales Return\n02-Post Sale Discount\n03-Deficiency in services\n04-Correction in Invoice\n05-Change in POS\n06-Finalization of Provisional assessment\n07-Others', default='01-Sales Return')
+			options='\n01-Sales Return\n02-Post Sale Discount\n03-Deficiency in services\n04-Correction in Invoice\n05-Change in POS\n06-Finalization of Provisional assessment\n07-Others')
 	]
 
 	purchase_invoice_gst_fields = [

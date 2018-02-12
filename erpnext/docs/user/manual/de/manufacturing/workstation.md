@@ -9,7 +9,7 @@ Sie können einen Arbeitsplatz erstellen über:
 
 > Fertigung > Dokumente > Arbeitsplatz > Neu 
 
-<img class="screenshot" alt="Arbeitsplatz" src="/docs/assets/img/manufacturing/workstation.png">
+<img class="screenshot" alt="Arbeitsplatz" src="{{docs_base_url}}/assets/img/manufacturing/workstation.png">
 
 Geben Sie unter "Arbeitszeit" die Betriebszeiten des Arbeitsplatzes an. Sie können die Betriebszeiten auch mit Hilfe von Schichten angeben. Wenn Sie einen Fertigungauftrag einplanen, prüft das System die Verfügbarkeit des Arbeitsplatzes basierend auf den angegebenen Betrieszeiten.
 

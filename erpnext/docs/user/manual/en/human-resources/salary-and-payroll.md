@@ -46,7 +46,7 @@ To create a new Salary Structure go to:
 
 #### Figure 1.1:Salary Structure
 
-<img class="screenshot" alt="Salary Structure" src="/docs/assets/img/human-resources/salary-structure.png">
+<img class="screenshot" alt="Salary Structure" src="{{docs_base_url}}/assets/img/human-resources/salary-structure.png">
 
 ### In the Salary Structure,
 
@@ -55,7 +55,7 @@ To create a new Salary Structure go to:
 
 #### Figure 1.2:Salary Structure for Salary Slip based on Timesheet
 
-<img class="screenshot" alt="Salary Structure" src="/docs/assets/img/human-resources/salary-timesheet.png">
+<img class="screenshot" alt="Salary Structure" src="{{docs_base_url}}/assets/img/human-resources/salary-timesheet.png">
   
 ### Salary Slip Based on Timesheet 
 
@@ -72,20 +72,20 @@ In the “Earnings” and “Deductions” tables, you can calculate the values 
 
 #### Figure 1.3:Condition and Formula
 
-<img class="screenshot" alt="Salary Structure" src="/docs/assets/img/human-resources/condition-formula.png">
+<img class="screenshot" alt="Salary Structure" src="{{docs_base_url}}/assets/img/human-resources/condition-formula.png">
 
   * Condition and Amount
   
 #### Figure 1.4:Condition and Amount
 
-<img class="screenshot" alt="Salary Structure" src="/docs/assets/img/human-resources/condition-amount.png">  
+<img class="screenshot" alt="Salary Structure" src="{{docs_base_url}}/assets/img/human-resources/condition-amount.png">  
 
   * Only Formula  
   * Only Amount
   
 #### Figure 1.5:Account Details
 
-<img class="screenshot" alt="Salary Structure" src="/docs/assets/img/human-resources/salary-structure-account.png">  
+<img class="screenshot" alt="Salary Structure" src="{{docs_base_url}}/assets/img/human-resources/salary-structure-account.png">  
 
   * Select Mode of Payment and Payment Account for the Salary Slips which will be generated using this Salary Structure
   
@@ -123,6 +123,52 @@ To create a new Salary Slip go to:
 
 #### Figure 2: Salary Slip
 
-<img class="screenshot" alt="Salary Slip" src="/docs/assets/img/human-resources/salary-slip.png">
+<img class="screenshot" alt="Salary Slip" src="{{docs_base_url}}/assets/img/human-resources/salary-slip.png">
+
+
+You can also create salary slip for multiple employees using Process Payroll:
+
+> Human Resources > Process Payroll
+
+#### Figure 3: Process Payroll
+
+<img class="screenshot" alt="Process Payroll" src="{{docs_base_url}}/assets/img/human-resources/process-payroll.png">
+
+In Process Payroll,
+
+  1. Select the Company for which you want to create the Salary Slips.
+  2. Check "Salary Slip based on Timesheet" if you want to process timesheet based Salary Slips.
+  3. Select the From Date and To Date or Fiscal year and month for which you want to create the Salary Slips.
+  3. Select the Payment Account.
+  3. Click on “Create Salary Slips”. This will create Salary Slip records for each active Employee for the time period selected. If the Salary Slips are created, the system will not create any more Salary Slips. All updates will be shown in the “Activity Log” section.
+  4. Once all Salary Slips are created, you can check if they are created correctly or edit it if you want to deduct Leave Without Pay (LWP).
+  5. After checking, you can “Submit” them all together by clicking on “Submit Salary Slips”. 1. If you want them to be automatically emailed to the Employee, make sure to check the “Send Email” box.
+
+### Booking Salaries in Accounts
+
+The final step is to book the Salaries in your Accounts.
+
+Salaries in businesses are usually dealt with extreme privacy. In most cases,
+the companies issues a single payment to the bank combining all salaries and
+the bank distributes the salaries to each employee’s salary account. This way
+there is only one payment entry in the company’s books of accounts and anyone
+with access to the company’s accounts will not have access to the individual
+salaries.
+
+The salary payment entry is a Journal Entry that debits the total of the
+earning type salary component and credits the total of deduction type salary 
+component of all Employees to the default account set at Salary Component level 
+for each component.
+
+To generate your salary payment voucher from Process Payroll, click on
+“Make Bank Entry”. It will ask to enter the Bank Transaction Reference Number and date.
+Click on "Make" and a new Journal Entry with the total salary components will be
+created.
+
+#### Figure 3.1: Make Bank Entry
+
+<img class="screenshot" alt="Process Payroll" src="{{docs_base_url}}/assets/img/human-resources/bank-entry.png">
+
+
 
 {next}
