@@ -30,9 +30,9 @@ rfq = Class.extend({
 	change_qty: function(){
 		var me = this;
 		$('.rfq-items').on("change", ".rfq-qty", function(){
-			me.idx = parseFloat($(this).attr('data-idx'));
-			me.qty = parseFloat($(this).val()) || 0;
-			me.rate = parseFloat($(repl('.rfq-rate[data-idx=%(idx)s]',{'idx': me.idx})).val());
+			me.idx = parse_float_with_locale($(this).attr('data-idx'));
+			me.qty = parse_float_with_locale($(this).val()) || 0;
+			me.rate = parse_float_with_locale($(repl('.rfq-rate[data-idx=%(idx)s]',{'idx': me.idx})).val());
 			me.update_qty_rate();
 			$(this).val(format_number(me.qty, doc.number_format, 2));
 		})
@@ -41,9 +41,9 @@ rfq = Class.extend({
 	change_rate: function(){
 		var me = this;
 		$(".rfq-items").on("change", ".rfq-rate", function(){
-			me.idx = parseFloat($(this).attr('data-idx'));
-			me.rate = parseFloat($(this).val()) || 0;
-			me.qty = parseFloat($(repl('.rfq-qty[data-idx=%(idx)s]',{'idx': me.idx})).val());
+			me.idx = parse_float_with_locale($(this).attr('data-idx'));
+			me.rate = parse_float_with_locale($(this).val()) || 0;
+			me.qty = parse_float_with_locale($(repl('.rfq-qty[data-idx=%(idx)s]',{'idx': me.idx})).val());
 			me.update_qty_rate();
 			$(this).val(format_number(me.rate, doc.number_format, 2));
 		})
@@ -99,3 +99,26 @@ rfq = Class.extend({
 		})
 	}
 })
+
+
+function get_user_locale(){
+	var locale = (navigator.languages && navigator.languages.length)? navigator.languages[0] : navigator.language;
+	locale = locale || navigator.browserLanguage || navigator.systemLanguage || navigator.userLanguage;
+	return locale;			
+}
+
+
+function parse_float_with_locale(number_str){
+	var user_locale = get_user_locale();
+	
+	try{	
+		numeral.locale(locale);	
+		var locale_number = numeral(number_str);
+		
+	}catch(err){
+		numeral.locale('en-gb');
+		var locale_number = numeral(number_str);
+		
+	}
+	return locale_number.value();
+}
