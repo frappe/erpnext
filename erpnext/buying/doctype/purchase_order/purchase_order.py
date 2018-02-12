@@ -240,8 +240,7 @@ class PurchaseOrder(BuyingController):
 			'join_field': 'sales_order_item',
 			'source_dt': 'Purchase Order Item',
 			'target_ref_field': 'stock_qty',
-			'source_field': 'stock_qty',
-			'percent_join_field': 'material_request'
+			'source_field': 'stock_qty'
 		})
 
 	def update_delivered_qty_in_sales_order(self):
