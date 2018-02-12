@@ -136,7 +136,10 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
         if (doc.docstatus == 1 && !in_list(["Closed", "Delivered"], doc.status)) {
             if (this.frm.has_perm("submit")) {
                 if (flt(doc.per_billed, 2) < 100 || doc.per_received < 100) {
-                    cur_frm.add_custom_button(__('Close'), this.close_purchase_order, __("Status"));
+                    //Added as this allowed for accounts manager role
+                    if(frappe.user_roles.indexOf("Accounts Manager") != -1){
+                        cur_frm.add_custom_button(__('Close'), this.close_purchase_order, __("Status"));
+                    }
                 }
             }
 
@@ -152,7 +155,10 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
         if (doc.docstatus == 1 && in_list(["Closed", "Delivered"], doc.status)) {
             if (this.frm.has_perm("submit")) {
-                cur_frm.add_custom_button(__('Re-open'), this.unclose_purchase_order, __("Status"));
+                //Added as this allowed for accounts manager role
+                if(frappe.user_roles.indexOf("Accounts Manager") != -1){
+                    cur_frm.add_custom_button(__('Re-open'), this.unclose_purchase_order, __("Status"));
+                }
             }
         }
 
