@@ -5,7 +5,7 @@ from frappe.utils import cint
 
 __exchange_rates = {}
 P_OR_L_ACCOUNTS = list(
-	sum(frappe.get_list('Account', fields=['account_name'], or_filters=[{'root_type': 'Income'}, {'root_type': 'Expense'}], as_list=True), ())
+	sum(frappe.get_list('Account', fields=['name'], or_filters=[{'root_type': 'Income'}, {'root_type': 'Expense'}], as_list=True), ())
 )
 
 
@@ -68,15 +68,11 @@ def get_rate_as_at(date, from_currency, to_currency):
 
 def is_p_or_l_account(account_name):
 	"""
-	Check if the given `account_name` is an `Account` with `root_type` of either 'Income'
+	Check if the given `account name` is an `Account` with `root_type` of either 'Income'
 	or 'Expense'.
 	:param account_name:
 	:return: Boolean
 	"""
-	# Remove company abbreviation part
-	abbr_start = account_name.rfind('-')
-	account_name = account_name[:abbr_start].strip()
-
 	return account_name in P_OR_L_ACCOUNTS
 
 
