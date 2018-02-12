@@ -7,9 +7,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
 from frappe.utils import flt, cint
-from frappe.utils.jinja import render_template, validate_template
+from frappe.utils.jinja import render_template
 from frappe.utils.data import add_days
-import json
 
 class UnableToSelectBatchError(frappe.ValidationError):
 	pass
@@ -27,60 +26,6 @@ def get_name_from_hash():
 			temp = None
 
 	return temp
-
-
-def batch_uses_naming_series():
-	"""
-	Verify if the Batch is to be named using a naming series
-	:return: bool
-	"""
-	use_naming_series = cint(frappe.db.get_single_value('Stock Settings', 'use_naming_series'))
-	return bool(use_naming_series)
-
-
-def _get_batch_prefix():
-	"""
-	Get the naming series prefix set in Stock Settings.
-
-	It does not do any sanity checks so make sure to use it after checking if the Batch
-	is set to use naming series.
-	:return: The naming series.
-	"""
-	naming_series_prefix = frappe.db.get_single_value('Stock Settings', 'naming_series_prefix')
-	if not naming_series_prefix:
-		naming_series_prefix = 'BATCH-'
-
-	return naming_series_prefix
-
-
-def _make_naming_series_key(prefix):
-	"""
-	Make naming series key for a Batch.
-
-	Naming series key is in the format [prefix].[#####]
-	:param prefix: Naming series prefix gotten from Stock Settings
-	:return: The derived key. If no prefix is given, an empty string is returned
-	"""
-	if not unicode(prefix):
-		return ''
-	else:
-		return prefix.upper() + '.#####'
-
-
-def get_batch_naming_series():
-	"""
-	Get naming series key for a Batch.
-
-	Naming series key is in the format [prefix].[#####]
-	:return: The naming series or empty string if not available
-	"""
-	series = ''
-	if batch_uses_naming_series():
-		prefix = _get_batch_prefix()
-		key = _make_naming_series_key(prefix)
-		series = key
-
-	return series
 
 
 def batch_uses_naming_series():
