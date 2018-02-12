@@ -10,15 +10,6 @@ frappe.ui.form.on("Leave Application", {
 			frm.set_value("posting_date", frappe.datetime.get_today());
 		}
 
-		frm.set_query("leave_approver", function() {
-			return {
-				query: "erpnext.hr.doctype.leave_application.leave_application.get_approvers",
-				filters: {
-					employee: frm.doc.employee
-				}
-			};
-		});
-
 		frm.set_query("employee", erpnext.queries.employee);
 
 	},
@@ -29,14 +20,11 @@ frappe.ui.form.on("Leave Application", {
 
 	refresh: function(frm) {
 		if (frm.is_new()) {
-			frm.set_value("workflow_state", "Open");
 			frm.trigger("calculate_total_days");
 		}
-	},
-
-	leave_approver: function(frm) {
-		if(frm.doc.leave_approver){
-			frm.set_value("leave_approver_name", frappe.user.full_name(frm.doc.leave_approver));
+		cur_frm.set_intro("");
+		if(frm.doc.__islocal && !in_list(frappe.user_roles, "Employee")) {
+			frm.set_intro(__("Fill the form and save it"));
 		}
 	},
 
