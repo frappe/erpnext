@@ -15,7 +15,10 @@ develop_version = '9.x.x-develop'
 
 error_report_email = "support@erpnext.com"
 
-app_include_js = "assets/bundles/erpnext/js/erpnext.bundle.js"
+app_include_js = [
+	"assets/bundles/erpnext/js/erpnext.bundle.js",
+	"assets/bundles/erpnext/js/item-dashboard.bundle.js"
+]
 app_include_css = "assets/bundles/erpnext/css/erpnext.css"
 web_include_js = "assets/bundles/erpnext/js/erpnext-web.bundle.js"
 web_include_css = "assets/bundles/erpnext/css/erpnext-web.css"
