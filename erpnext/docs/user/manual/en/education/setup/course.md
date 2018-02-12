@@ -8,8 +8,6 @@ To create a **Course** enter the Course name and Code. Code for the course shoul
 
 Once a **Course** is created, a course schedule can defined for the same.
 
-<img class="screenshot" alt="Course" src="{{docs_base_url}}/assets/img/education/setup/Course.gif">
-
 The Course form is further linked to **Program, Student Group and Assessment Plan** doctypes. The links allow to view/create the related documents for a **Course**.
 
 #### Video Tutorial for Course

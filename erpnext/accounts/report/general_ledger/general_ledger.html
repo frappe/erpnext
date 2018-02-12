@@ -44,44 +44,24 @@
 						<br>{%= __("Supplier Invoice No") %}: {%= data[i].bill_no %}
 					{% } %}
 					</td>
-				{% if(filters.print_in_account_currency) { %}
 					<td style="text-align: right">
-						{%= format_currency(data[i].debit_in_account_currency, data[i].account_currency) %}
-					</td>
+						{%= format_currency(data[i].debit, filters.presentation_currency) %}</td>
 					<td style="text-align: right">
-						{%= format_currency(data[i].credit_in_account_currency, data[i].account_currency) %}
-					</td>
-				{% } else { %}
-					<td style="text-align: right">
-						{%= format_currency(data[i].debit) %}</td>
-					<td style="text-align: right">
-						{%= format_currency(data[i].credit) %}</td>
-				{% } %}
+						{%= format_currency(data[i].credit, filters.presentation_currency) %}</td>
 			{% } else { %}
 				<td></td>
 				<td></td>
 				<td><b>{%= frappe.format(data[i].account, {fieldtype: "Link"}) || "&nbsp;" %}</b></td>
-				{% if(filters.print_in_account_currency) { %}
-					<td style="text-align: right">
-						{%= data[i].account && format_currency(data[i].debit_in_account_currency, data[i].account_currency) %}</td>
-					<td style="text-align: right">
-						{%= data[i].account && format_currency(data[i].credit_in_account_currency, data[i].account_currency) %}</td>
-				{% } else { %}
-					<td style="text-align: right">
-						{%= data[i].account && format_currency(data[i].debit) %}
-					</td>
-					<td style="text-align: right">
-						{%= data[i].account && format_currency(data[i].credit) %}
-					</td>
-				{% } %}
-			{% } %}
-			{% if(filters.print_in_account_currency) { %}
 				<td style="text-align: right">
-					{%= format_currency(data[i].balance_in_account_currency, data[i].account_currency) %}
+					{%= data[i].account && format_currency(data[i].debit, filters.presentation_currency) %}
 				</td>
-			{% } else { %}
-				<td style="text-align: right">{%= format_currency(data[i].balance) %}</td>
-			{% } %}
+				<td style="text-align: right">
+					{%= data[i].account && format_currency(data[i].credit, filters.presentation_currency) %}
+				</td>
+			{% } %}			
+				<td style="text-align: right">
+					{%= format_currency(data[i].balance, filters.presentation_currency) %}
+				</td>
 			</tr>
 		{% } %}
 	</tbody>
