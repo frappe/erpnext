@@ -1,0 +1,27 @@
+{
+ "add_total_row": 1, 
+ "apply_user_permissions": 1, 
+ "creation": "2018-01-02 10:24:03.936761", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2018-01-04 18:30:23.833827", 
+ "modified_by": "Administrator", 
+ "module": "Selling", 
+ "name": "POS Sales Reconciliation", 
+ "owner": "Administrator", 
+ "query": "select\na.name AS `Sales Invoice:Link/Sales Invoice`,\na.owner AS `Sales Person:Data`, \na.posting_date As `Invoice Date:Date:200`, \na.paid_amount AS `Total Paid Amt:Currency:80`\t\t\t\nfrom `tabSales Invoice` a\nwhere\na.docstatus !=2 \nand a.is_pos =1\nand a.posting_date >= %(from_date)s\nand a.posting_date <= %(to_date)s\nand a.posting_time >= (select start_time from `tabPOS Shift Detail` where shift_name=%(shift)s)\nand a.posting_time <= (select end_time from `tabPOS Shift Detail` where shift_name=%(shift)s)\nand a.owner = %(owner)s", 
+ "ref_doctype": "Sales Invoice", 
+ "report_name": "POS Sales Reconciliation", 
+ "report_type": "Query Report", 
+ "roles": [
+  {
+   "role": "Accounts User"
+  }, 
+  {
+   "role": "Accounts Manager"
+  }
+ ]
+}
