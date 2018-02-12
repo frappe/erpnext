@@ -1,4 +1,4 @@
-rom __future__ import unicode_literals
+from __future__ import unicode_literals
 import frappe
 
 def execute():

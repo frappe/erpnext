@@ -108,4 +108,3 @@ erpnext/hr/doctype/payroll_entry/test_set_salary_components.js
 erpnext/hr/doctype/payroll_entry/test_payroll_entry.js
 erpnext/accounts/doctype/pricing_rule/tests/test_pricing_rule_with_same_currency.js
 erpnext/accounts/doctype/pricing_rule/tests/test_pricing_rule_with_different_currency.js
-erpnext/accounts/doctype/pricing_rule/tests/test_pricing_rule_with_no_currency.js

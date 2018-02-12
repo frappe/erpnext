@@ -516,19 +516,17 @@ class calculate_taxes_and_totals(object):
 		if item.price_list_rate:
 			if item.pricing_rule and not self.doc.ignore_pricing_rule:
 				pricing_rule = frappe.get_doc('Pricing Rule', item.pricing_rule)
-				if pricing_rule.currency:
-					if pricing_rule.margin_type == 'Amount' and pricing_rule.currency == self.doc.currency:
-						item.margin_type = pricing_rule.margin_type
-						item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
-					elif pricing_rule.margin_type == 'Percentage':
-						item.margin_type = pricing_rule.margin_type
-						item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
-					else:
-						item.margin_type = None
-						item.margin_rate_or_amount = 0.0
-				else:
+
+				if pricing_rule.margin_type == 'Amount' and pricing_rule.currency == self.doc.currency:
 					item.margin_type = pricing_rule.margin_type
 					item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
+				elif pricing_rule.margin_type == 'Percentage':
+					item.margin_type = pricing_rule.margin_type
+					item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
+				else:
+					item.margin_type = None
+					item.margin_rate_or_amount = 0.0
+
 			if item.margin_type and item.margin_rate_or_amount:
 				margin_value = item.margin_rate_or_amount if item.margin_type == 'Amount' else flt(item.price_list_rate) * flt(item.margin_rate_or_amount) / 100
 				rate_with_margin = flt(item.price_list_rate) + flt(margin_value)
