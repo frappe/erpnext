@@ -143,12 +143,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		var items = $.map(cur_frm.doc.items, function(d) { return d.bom ? d.item_code : false; });
 		var me = this;
 
-		if(items.length===1) {
-			me._make_stock_entry(items[0]);
-			return;
-		}
-
-		if(items.length > 1){
+		if(items.length >= 1){
 			me.raw_material_data = [];
 			me.show_dialog = 1;
 			let title = "";
@@ -157,17 +152,15 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			{fieldname: 'sub_con_rm_items', fieldtype: 'Table',
 				fields: [
 					{
-						fieldtype:'Link',
+						fieldtype:'Data',
 						fieldname:'item_code',
-						options: 'Item',
 						label: __('Item'),
 						read_only:1,
 						in_list_view:1
 					},
 					{
-						fieldtype:'Link',
+						fieldtype:'Data',
 						fieldname:'rm_item_code',
-						options:'Item',
 						label: __('Raw Material'),
 						read_only:1,
 						in_list_view:1
@@ -181,11 +174,10 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						in_list_view:1
 					},
 					{
-						fieldtype:'Link',
+						fieldtype:'Data',
 						read_only:1,
 						fieldname:'warehouse',
 						label: __('Reserve Warehouse'),
-						read_only:1,
 						in_list_view:1
 					},
 					{
@@ -259,20 +251,6 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			me.dialog.hide();
 		});
 
-	},
-
-	_make_stock_entry: function(item) {
-		frappe.call({
-			method:"erpnext.buying.doctype.purchase_order.purchase_order.make_stock_entry",
-			args: {
-				purchase_order: cur_frm.doc.name,
-				item_code: item
-			},
-			callback: function(r) {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			}
-		});
 	},
 
 	_make_rm_stock_entry: function(rm_items) {
