@@ -381,11 +381,12 @@ def create_project_update(project):
 			"doctype" : "Project Update",
 			"project" : projects[0],
 			"date": date_today,
-			"naming_series": "UPDATE-.project.-.YY.MM.DD.-.####"
+			"naming_series": "UPDATE-.project.-.YY.MM.DD.-"
 		}
 		project_update = frappe.get_doc(project_update_dict)
 		project_update.insert()
-		project_update_url = "<a class = 'btn btn-primary' href=%s target='_blank'>" % ("/desk#Form/Project%20Update/" + (project_update.name)) + ("CREATE PROJECT UPDATE" + "</a>")
+		local_host = "http://0.0.0.0:8001"
+		project_update_url = "<a class = 'btn btn-primary' href=%s target='_blank'>" % (local_host +"/desk#Form/Project%20Update/" + (project_update.name)) + ("CREATE PROJECT UPDATE" + "</a>")
 		data.append(project_update_url)
 
 		email = frappe.db.sql("""SELECT user from `tabProject User` WHERE parent = %s;""", project[0])
