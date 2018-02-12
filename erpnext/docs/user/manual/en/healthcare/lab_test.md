@@ -6,11 +6,11 @@ ERPNext Healthcare allows you to manage a clinical laboratory efficiently by all
 Once you have all necessary Lab Test Templates configured, you can start creating Lab Tests by selecting a Test Template every time you create a Test. To create a new Lab Test
 >Healthcare > Laboratory > Lab Test > New Lab Test
 
-<img class="screenshot" alt="ERPNext Healthcare" src="/docs/assets/img/healthcare/lab_test_1.png">
+<img class="screenshot" alt="ERPNext Healthcare" src="{{docs_base_url}}/assets/img/healthcare/lab_test_1.png">
 
 You can record the test results in the Lab Test document as the results gets ready.
 
-<img class="screenshot" alt="ERPNext Healthcare" src="/docs/assets/img/healthcare/lab_test_2.png">
+<img class="screenshot" alt="ERPNext Healthcare" src="{{docs_base_url}}/assets/img/healthcare/lab_test_2.png">
 
 > Note: To create Sample Collection documents for every Lab Test, check "Manage Sample Collection" flag in Healthcare Settings and select Sample in the Lab Test Template
 

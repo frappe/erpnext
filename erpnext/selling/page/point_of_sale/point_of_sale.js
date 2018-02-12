@@ -15,6 +15,7 @@ frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 			window.cur_pos = wrapper.pos;
 		} else {
 			// offline
+			frappe.flags.is_offline = true;
 			frappe.set_route('pos');
 		}
 	});
@@ -23,6 +24,10 @@ frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 frappe.pages['point-of-sale'].refresh = function(wrapper) {
 	if (wrapper.pos) {
 		cur_frm = wrapper.pos.frm;
+	}
+
+	if (frappe.flags.is_offline) {
+		frappe.set_route('pos');
 	}
 }
 
@@ -245,6 +250,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		this.cart.add_item(item);
 		this.cart.update_taxes_and_totals();
 		this.cart.update_grand_total();
+		this.cart.update_qty_total();
 		frappe.dom.unfreeze();
 	}
 
@@ -572,6 +578,9 @@ class POSCart {
 						<div class="grand-total">
 							${this.get_grand_total()}
 						</div>
+						<div class="quantity-total">
+							${this.get_item_qty_total()}
+						</div>
 					</div>
 				</div>
 				<div class="number-pad-container">
@@ -583,6 +592,7 @@ class POSCart {
 		this.$taxes_and_totals = this.wrapper.find('.taxes-and-totals');
 		this.$discount_amount = this.wrapper.find('.discount-amount');
 		this.$grand_total = this.wrapper.find('.grand-total');
+		this.$qty_total = this.wrapper.find('.quantity-total');
 
 		this.toggle_taxes_and_totals(false);
 		this.$grand_total.on('click', () => {
@@ -614,6 +624,11 @@ class POSCart {
 			total += this.get_total_template('Rounded Total', 'rounded-total-value');
 		}
 
+		return total;
+	}
+
+	get_item_qty_total() {
+		let total = this.get_total_template('Total Qty', 'quantity-total');
 		return total;
 	}
 
@@ -704,6 +719,17 @@ class POSCart {
 		);
 	}
 
+	update_qty_total() {		
+		var total_item_qty = 0;
+		$.each(this.frm.doc["items"] || [], function (i, d) {
+				if (d.qty > 0) {
+					total_item_qty += d.qty;
+				}
+		});
+		this.$qty_total.find('.quantity-total').text(total_item_qty)
+		this.frm.set_value("pos_total_qty",total_item_qty);
+	}
+
 	make_customer_field() {
 		this.customer_field = frappe.ui.form.make_control({
 			df: {
@@ -775,11 +801,19 @@ class POSCart {
 						return;
 					}
 
-					const item_code = this.selected_item.attr('data-item-code');
-					const field = this.selected_item.active_field;
-					const value = this.numpad.get_value();
+					if (this.selected_item.active_field == 'discount_percentage' && this.numpad.get_value() > cint(100)) {
+						frappe.show_alert({
+							indicator: 'red',
+							message: __('Discount amount cannot be greater than 100%')
+						});
+						this.numpad.reset_value();
+					} else {
+						const item_code = this.selected_item.attr('data-item-code');
+						const field = this.selected_item.active_field;
+						const value = this.numpad.get_value();
 
-					this.events.on_field_change(item_code, field, value);
+						this.events.on_field_change(item_code, field, value);
+					}
 				}
 
 				this.events.on_numpad(btn_value);

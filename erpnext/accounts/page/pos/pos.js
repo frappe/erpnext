@@ -15,6 +15,7 @@ frappe.pages['pos'].on_page_load = function (wrapper) {
 			cur_pos = wrapper.pos;
 		} else {
 			// online
+			frappe.flags.is_online = true
 			frappe.set_route('point-of-sale');
 		}
 	});
@@ -23,6 +24,10 @@ frappe.pages['pos'].on_page_load = function (wrapper) {
 frappe.pages['pos'].refresh = function (wrapper) {
 	window.onbeforeunload = function () {
 		return wrapper.pos.beforeunload()
+	}
+
+	if (frappe.flags.is_online) {
+		frappe.set_route('point-of-sale');
 	}
 }
 
@@ -1172,8 +1177,17 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		$(this.wrapper).on("change", ".pos-item-disc", function () {
 			var item_code = $(this).parents(".pos-selected-item-action").attr("data-item-code");
 			var discount = $(this).val();
-			me.update_discount(item_code, discount)
-			me.update_value()
+			if(discount > 100){
+				discount = $(this).val('');
+				frappe.show_alert({
+					indicator: 'red',
+					message: __('Discount amount cannot be greater than 100%')
+				});
+				me.update_discount(item_code, discount);
+			}else{	
+				me.update_discount(item_code, discount);
+				me.update_value();
+			}
 		})
 	},
 

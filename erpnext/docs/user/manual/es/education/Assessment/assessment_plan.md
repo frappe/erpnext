@@ -10,10 +10,10 @@ Para programar una evaluación/examinación para un Grupo de Estudiantes, para u
 
 4. Examinador y Supervisor
 
-<img class="screenshot" alt="Assessment Plan Details" src="/docs/assets/img/education/assessment/assessment-plan-details.png">
+<img class="screenshot" alt="Assessment Plan Details" src="{{docs_base_url}}/assets/img/education/assessment/assessment-plan-details.png">
 
 5. Los Criterios de Evaluación son la lista de criterios basados ​​en que cada estudiante en será evaluado y los grados serán asignados.
 
-<img class="screenshot" alt="Assessment Plan Criteria" src="/docs/assets/img/education/assessment/assessment-plan-criteria.png">
+<img class="screenshot" alt="Assessment Plan Criteria" src="{{docs_base_url}}/assets/img/education/assessment/assessment-plan-criteria.png">
 
 {next}

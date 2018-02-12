@@ -1,3 +1,29 @@
+body[data-route^="Hub/"] .freeze .image-view-container .list-row-col {
+  background-color: #fafbfc;
+  color: #fafbfc;
+}
+body[data-route^="Hub/"] .freeze .image-view-container .placeholder-text {
+  color: #fafbfc;
+}
+body[data-route^="Hub/"] .freeze {
+  display: none;
+}
+body[data-route^="Hub/"] .image-view-container {
+  justify-content: space-around;
+}
+.img-wrapper {
+  border: 1px solid #d1d8dd;
+  border-radius: 3px;
+  padding: 12px;
+  overflow: hidden;
+  text-align: center;
+  white-space: nowrap;
+}
+.img-wrapper .helper {
+  height: 100%;
+  display: inline-block;
+  vertical-align: middle;
+}
 /* hub */
 div[data-page-route="hub"] .page-head {
   height: 80px;

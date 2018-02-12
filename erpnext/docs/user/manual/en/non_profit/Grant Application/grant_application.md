@@ -7,11 +7,11 @@ To Generate Online Grant Application go to:
 > My Account on website > Grant Application from sidebar > Apply for new Grant Application.
 
 
-<img class="screenshot" alt="Online Grant Application row" src="/docs/assets/img/non_profit/grant_application/grant_application_row.png">
+<img class="screenshot" alt="Online Grant Application row" src="{{docs_base_url}}/assets/img/non_profit/grant_application/grant_application_row.png">
 
-<img class="screenshot" alt="Online Grant Application" src="/docs/assets/img/non_profit/grant_application/online_grant_application_1.png">
+<img class="screenshot" alt="Online Grant Application" src="{{docs_base_url}}/assets/img/non_profit/grant_application/online_grant_application_1.png">
 
-<img class="screenshot" alt="Online Grant Application" src="/docs/assets/img/non_profit/grant_application/grant_portal.png">
+<img class="screenshot" alt="Online Grant Application" src="{{docs_base_url}}/assets/img/non_profit/grant_application/grant_portal.png">
 
 
 To Generate Grant Application go to:
@@ -19,7 +19,7 @@ To Generate Grant Application go to:
 > Non Profit > Grant Application > New.
 
 
-<img class="screenshot" alt="Grant Application" src="/docs/assets/img/non_profit/grant_application/grant_application.png">
+<img class="screenshot" alt="Grant Application" src="{{docs_base_url}}/assets/img/non_profit/grant_application/grant_application.png">
 
 
 **Email:** Email is a mandatory field.

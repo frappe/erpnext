@@ -4,7 +4,7 @@
 Geben Sie bis zu drei Steuerarten an, die Sie regelmäßig in Bezug auf Ihr Gehalt zahlen. Dieser Assistent erstellt eine Steuervorlage, die die Steuren für jede Steuerart berechnet.
 
 <img alt="Steuerdetails" class="screenshot"
-src="/docs/assets/img/setup-wizard/step-7.png">
+src="{{docs_base_url}}/assets/img/setup-wizard/step-7.png">
 
 Geben Sie einfach den Namen der Steuerart und den Steuersatz ein.
 

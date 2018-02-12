@@ -3,11 +3,11 @@
 In ERPNext Healthcare, the Patient document corresponds any individual who is the recipient of healthcare services you provide. For every ERPNext Healthcare document, it is important to have a Patient associated with it. You can create a new Patient from
 > Healthcare > Masters > Patient > New Patient
 
-<img class="screenshot" alt="ERPNext Healthcare" src="/docs/assets/img/healthcare/patient_1.png">
+<img class="screenshot" alt="ERPNext Healthcare" src="{{docs_base_url}}/assets/img/healthcare/patient_1.png">
 
 The Patient document holds most details that are required to identify and qualify a patient. You can enter as much information available while creating the Patient. All information in the patient document is presented on the Consultation screen for easy lookup and you can always update this information. Other data like observations, vital signs etc. are not part of the Patient document. These could be recorded during patient encounters and will be available as part of the Patient Medical Record.
 
-<img class="screenshot" alt="ERPNext Healthcare" src="/docs/assets/img/healthcare/patient_2.png">
+<img class="screenshot" alt="ERPNext Healthcare" src="{{docs_base_url}}/assets/img/healthcare/patient_2.png">
 
 ### Patient as a Customer
 
@@ -16,7 +16,7 @@ ERPNext Accounts makes use of "Customer" document for booking all transactions. 
 
 In many cases, you may want to associate multiple Patients to a single Customer against whom you want to book the transactions. For instance, a Veterinarian would require the care services provided to different pets of an individual invoiced against a single Customer.
 
-<img class="screenshot" alt="ERPNext Healthcare" src="/docs/assets/img/healthcare/patient_3.png">
+<img class="screenshot" alt="ERPNext Healthcare" src="{{docs_base_url}}/assets/img/healthcare/patient_3.png">
 
 The Patient Relation section of the Patient allows you to select how a Patient is related to another Patient in the system. This is optional, but will be quite handy if you want to use ERPNext in a fertility clinic, for example.
 

@@ -198,6 +198,19 @@ frappe.ui.form.on('Asset', {
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
 		})
+	},
+
+	calculate_depreciation: function(frm) {
+		frappe.db.get_value("Asset Settings", {'name':"Asset Settings"}, 'schedule_based_on_fiscal_year', (data) => {
+			if (data.schedule_based_on_fiscal_year == 1) {
+				frm.set_df_property("depreciation_method", "options", "\nStraight Line\nManual");
+				frm.toggle_reqd("available_for_use_date", true);
+				frm.toggle_display("frequency_of_depreciation", false);
+				frappe.db.get_value("Fiscal Year", {'name': frappe.sys_defaults.fiscal_year}, "year_end_date", (data) => {
+					frm.set_value("next_depreciation_date", data.year_end_date);
+				})
+			}
+		})
 	}
 });
 
