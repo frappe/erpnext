@@ -95,8 +95,19 @@ class PurchaseOrder(BuyingController):
 			nammeing_doc.save()
 			return title
 	def on_update(self):
-		if self.workflow_state == "Approved By Requester" and not self.project:
-			self.set("handled_by", "Budget Controller")
+		if hasattr(self,'workflow_state'):
+			if self.workflow_state == "Approved By Requester" and not self.project:
+				self.set("handled_by", "Budget Controller")
+
+	def on_update_after_submit(self):
+		pass
+		# if hasattr(self,'workflow_state'):
+		# 	if self.workflow_state == "Approved By CEO":
+		# 		self.set("workflow_state", "Change Terms & Conditions")
+				# self.workflow_state = "Change Terms & Conditions"
+			# elif self.workflow_state == "Change Terms & Conditions":
+			#  	self.flags.ignore_validate_update_after_submit = True
+			#  	self.workflow_state = "Reviewed By CEO"
 
 	def vallidate_workflow_transition(self):
 		if hasattr(self,'workflow_state'):
@@ -107,7 +118,6 @@ class PurchaseOrder(BuyingController):
 			# if u"Shared Services Director" in frappe.get_roles(frappe.session.user):
 			# 	if self.project and self.workflow_state == "Approved By Shared Services Director":
 			# 		self.workflow_state = "Approved By Shared Services Director (Prt.)"
-
 
 	def validate_with_previous_doc(self):
 		super(PurchaseOrder, self).validate_with_previous_doc({
