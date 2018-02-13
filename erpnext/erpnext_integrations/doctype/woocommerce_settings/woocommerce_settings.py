@@ -8,57 +8,82 @@ import frappe, requests
 from frappe import _
 from frappe.utils.password import get_decrypted_password
 from frappe.model.document import Document
-from requests.auth import HTTPBasicAuth
+from woocommerce import API
+from six.moves.urllib.parse import urlparse
 
 class WoocommerceSettings(Document):
 	def validate(self):
-		# self.validate_settings()
-		self.create_webhooks()
+		self.validate_settings()
 
 	def validate_settings(self):
 		if not self.secret:
-			frappe.throw(_("Please Generate Secret"))
+			self.set("secret", frappe.generate_hash())
+
 		if not self.woocommerce_server_url:
-			pass
+			frappe.throw(_("Please enter Woocommerce Server URL"))
+
+		if not self.api_consumer_key:
+			frappe.throw(_("Please enter API Consumer Key"))
+
+		if not self.api_consumer_secret:
+			frappe.throw(_("Please enter API Consumer Secret"))
 
 	def create_webhooks(self):
-		api_consumer_secret = self.api_consumer_secret
-		if self.coupon:
-			# coupon_created_webhook = self.generate_webhook_data("Coupon Created",
-			# 	"coupon.created",
-			# 	frappe.local.site + "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.coupon_created"
-			# )
-			# requests.post(self.woocommerce_server_url, auth=HTTPBasicAuth(self.api_consumer_key, api_consumer_secret), headers={
-			# 	"Content-Type":"application/json"
-			# }, data=coupon_created_webhook)
-			# requests.post(self.woocommerce_server_url+"/wp-json/wc/v2/webhooks", auth=requests.auth.HTTPBasicAuth(self.api_consumer_key, self.api_consumer_secret), data=data).json()
-			server_url = frappe.local.site
+		self.create_coupon_webhooks()
 
-			coupon_updated_webhook = self.generate_webhook_data(
-				name="Coupon Updated",
-				topic="coupon.updated",
-				delivery_url= "https://"+ frappe.local.site + "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.coupon_updated",
-				event="coupon",
-				hooks=['woocommerce_process_shop_coupon_meta', 'woocommerce_new_coupon'],
-				resource='coupon'
-			)
-			r = requests.post(
-				url=self.woocommerce_server_url+"/wp-json/wc/v2/webhooks",
-				auth=HTTPBasicAuth(self.api_consumer_key, api_consumer_secret),
-				data=coupon_updated_webhook
-			)
+	def create_coupon_webhooks(self):
+		# Coupon Created
+		create_coupon_data = self.generate_webhook_data(
+			name="ERPNext Coupon Created",
+			topic="coupon.created",
+			endpoint= "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.create_coupon"
+		)
+		self.woocommerce_request("webhooks", create_coupon_data)
 
-	def generate_webhook_data(self, name, topic, delivery_url, event, hooks, resource):
+		# Coupon Updated
+		update_coupon_data = self.generate_webhook_data(
+			name="ERPNext Coupon Updated",
+			topic="coupon.updated",
+			endpoint= "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.update_coupon"
+		)
+		self.woocommerce_request("webhooks", update_coupon_data)
+
+		# Coupon Deleted
+		delete_coupon_data = self.generate_webhook_data(
+			name="ERPNext Coupon Deleted",
+			topic="coupon.deleted",
+			endpoint= "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.delete_coupon"
+		)
+		self.woocommerce_request("webhooks", delete_coupon_data)
+
+		# Coupon Restored
+		delete_coupon_data = self.generate_webhook_data(
+			name="ERPNext Coupon Restored",
+			topic="coupon.restored",
+			endpoint= "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.restore_coupon"
+		)
+		self.woocommerce_request("webhooks", delete_coupon_data)
+
+	def generate_webhook_data(self, name, topic, endpoint):
+		server_url = '{uri.scheme}://{uri.netloc}'.format(
+			uri=urlparse(frappe.request.url)
+		)
 		return {
 			'name': name,
-			'delivery_url': delivery_url,
-			'event': event,
-			'hooks': hooks,
-			'resource': resource,
+			'delivery_url': server_url + endpoint,
 			'secret': self.secret,
-			'status': 'active',
 			'topic': topic
 		}
+
+	def woocommerce_request(self, endpoint, data):
+		wcapi = API(
+			url = self.woocommerce_server_url,
+			consumer_key = self.api_consumer_key,
+			consumer_secret = self.api_consumer_secret,
+			wp_api = True,
+			version = "wc/v2"
+		)
+		wcapi.post(endpoint, data)
 
 @frappe.whitelist()
 def generate_secret():

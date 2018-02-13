@@ -5,6 +5,7 @@ frappe.ui.form.on('Woocommerce Settings', {
 	refresh (frm) {
 		add_button_generate_secret(frm);
 		add_button_force_delete(frm);
+		// add_button_install_webhooks(frm);
 		check_enabled(frm);
 	},
 
@@ -41,6 +42,28 @@ add_button_force_delete = (frm) => {
 			}
 		)
 	});
+}
+
+add_button_install_webhooks = (frm) => {
+	if (frm.doc.enable_sync &&
+		frm.doc.woocommerce_server_url != null &&
+		frm.doc.api_consumer_key != null &&
+		frm.doc.api_consumer_secret != null &&
+		frm.doc.secret != null) {
+		frm.add_custom_button(__('Install'), () => {
+			frappe.confirm(
+				__("This will create Webhooks on Woocommerce Server"),
+				() => {
+					frappe.call({
+						type:"POST",
+						doc: frm.doc,
+						method:"create_webhooks",
+					}).done(r=>frm.reload_doc())
+					.fail(r=>frappe.msgprint(__("Could not create Webhooks on Woocommerce")));
+				}
+			)
+		});
+	}
 }
 
 check_enabled = (frm) => {
