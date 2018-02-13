@@ -11,6 +11,7 @@ from frappe import throw, _
 from frappe.utils import flt, cint
 from frappe.model.document import Document
 
+from six import string_types
 
 class MultiplePricingRuleConflict(frappe.ValidationError): pass
 
@@ -96,7 +97,7 @@ def apply_pricing_rule(args):
 			"ignore_pricing_rule": "something"
 		}
 	"""
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	args = frappe._dict(args)
