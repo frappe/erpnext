@@ -2,38 +2,49 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Woocommerce Settings', {
-	refresh: function(frm) {
+	refresh (frm) {
+		add_button_generate_secret(frm);
+		add_button_force_delete(frm);
+		check_enabled(frm);
+	},
 
-		frm.add_custom_button(__('Generate Secret'), () => {
-			frappe.confirm(
-				__("Apps using current key won't be able to access, are you sure?"),
-				() => {					
-					frappe.call({
-						type:"POST",
-						//method:"agrinext.agrinext.doctype.agrinext_settings.agrinext_settings.generate_guest_key",
-						method:"erpnext.erpnext_integrations.doctype.woocommerce_settings.woocommerce_settings.generate_secret",
-					}).done(r=>frm.reload_doc())
-					.fail(r=>frappe.msgprint(__("Could not generate Secret")));
-				}
-			)
-		});
-
-
-		frm.add_custom_button(__('Force Delete'), () => {
-			frappe.confirm(
-				__("This will clear all your Woocommerce Data, are you sure?"),
-				() => {					
-					frappe.call({
-						type:"POST",
-						//method:"agrinext.agrinext.doctype.agrinext_settings.agrinext_settings.generate_guest_key",
-						method:"erpnext.erpnext_integrations.doctype.woocommerce_settings.woocommerce_settings.force_delete",
-					}).done(r=>frm.reload_doc())
-					.fail(r=>frappe.msgprint(__("Could not Delete Woocommerce Data")));
-				}
-			)
-		});
-		
-
+	enable_sync (frm) {
+		check_enabled(frm);
 	}
-
 });
+
+add_button_generate_secret = (frm) => {
+	frm.add_custom_button(__('Generate Secret'), () => {
+		frappe.confirm(
+			__("Apps using current key won't be able to access, are you sure?"),
+			() => {
+				frappe.call({
+					type:"POST",
+					method:"erpnext.erpnext_integrations.doctype.woocommerce_settings.woocommerce_settings.generate_secret",
+				}).done(r=>frm.reload_doc())
+				.fail(r=>frappe.msgprint(__("Could not generate Secret")));
+			}
+		)
+	});
+}
+
+add_button_force_delete = (frm) => {
+	frm.add_custom_button(__('Force Delete'), () => {
+		frappe.confirm(
+			__("This will clear all your Woocommerce Data, are you sure?"),
+			() => {
+				frappe.call({
+					type:"POST",
+					method:"erpnext.erpnext_integrations.doctype.woocommerce_settings.woocommerce_settings.force_delete",
+				}).done(r=>frm.reload_doc())
+				.fail(r=>frappe.msgprint(__("Could not Delete Woocommerce Data")));
+			}
+		)
+	});
+}
+
+check_enabled = (frm) => {
+	frm.set_df_property("woocommerce_server_url", "reqd", frm.doc.enable_sync);
+	frm.set_df_property("api_consumer_key", "reqd", frm.doc.enable_sync);
+	frm.set_df_property("api_consumer_secret", "reqd", frm.doc.enable_sync);
+}
