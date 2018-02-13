@@ -63,7 +63,7 @@ class Appraisal(Document):
 		total, total_w  = 0, 0
 		for d in self.get('goals'):
 			if d.score:
-				d.score_earned = flt(d.score) * flt(d.per_weightage) / 100
+				d.score_earned = flt(d.score) * flt(d.per_weightage) * 2 / 100
 				total = total + d.score_earned
 			total_w += flt(d.per_weightage)
 
