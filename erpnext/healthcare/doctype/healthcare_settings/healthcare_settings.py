@@ -15,7 +15,7 @@ class HealthcareSettings(Document):
             frappe.db.set_default(key, self.get(key, ""))
         if(self.collect_registration_fee):
             if self.registration_fee <= 0 :
-                frappe.throw("Registration fee can not be Zero")
+                frappe.throw(_("Registration fee can not be Zero"))
 
 @frappe.whitelist()
 def get_sms_text(doc):

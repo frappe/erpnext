@@ -194,7 +194,7 @@ class Opportunity(TransactionBase):
 				self.customer = None
 		elif self.enquiry_from == 'Customer':
 			if not self.customer:
-				msgprint("Customer is mandatory if 'Opportunity From' is selected as Customer", raise_exception=1)
+				msgprint(_("Customer is mandatory if 'Opportunity From' is selected as Customer"), raise_exception=1)
 			else:
 				self.lead = None
 
