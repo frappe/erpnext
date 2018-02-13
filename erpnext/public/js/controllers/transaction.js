@@ -776,7 +776,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.frm.toggle_reqd("plc_conversion_rate",
 			!!(this.frm.doc.price_list_name && this.frm.doc.price_list_currency));
 
-		if(this.frm.doc_currency!==this.frm.doc.currency) {
+		if(this.frm.doc_currency!==this.frm.doc.currency
+			|| this.frm.doc_currency!==this.frm.doc.price_list_currency) {
 			// reset names only when the currency is different
 
 			var company_currency = this.get_company_currency();
