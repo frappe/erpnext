@@ -7,19 +7,10 @@ import unittest
 from erpnext.stock.doctype.item.test_item import set_item_variant_settings
 from erpnext.controllers.item_variant import copy_attributes_to_variant, make_variant_item_code
 
-# python 3 compatibility stuff
-try:
-	unicode = unicode
-except NameError:
-	# Python 3
-	basestring = (str, bytes)
-else:
-	# Python 2
-	basestring = basestring
-
+from six import string_types
 
 def create_variant_with_tables(item, args):
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	template = frappe.get_doc("Item", item)
