@@ -172,7 +172,6 @@ def make_leave_application():
 				"from_date": frappe.flags.current_date,
 				"to_date": to_date,
 				"leave_type": allocated_leave.leave_type,
-				"status": "Approved"
 			})
 			try:
 				leave_application.insert()
@@ -191,8 +190,9 @@ def mark_attendance():
 				"employee": employee.name,
 				"attendance_date": attendance_date
 			})
+
 			leave = frappe.db.sql("""select name from `tabLeave Application`
-				where employee = %s and %s between from_date and to_date and workflow_state = 'Approved'
+				where employee = %s and %s between from_date and to_date
 				and docstatus = 1""", (employee.name, attendance_date))
 
 			if leave:
