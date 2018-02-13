@@ -28,7 +28,7 @@ def _get_mappers_from_db():
 def _get_accounts_in_mappers(mapping_names):
 	return frappe.db.sql(
 		'select cfma.name, cfm.label, cfm.is_working_capital, cfm.is_income_tax_liability, '
-		'cfm.is_income_tax_expense '
+		'cfm.is_income_tax_expense, cfm.is_finance_cost '
 		'from `tabCash Flow Mapping Accounts` cfma '
 		'join `tabCash Flow Mapping` cfm on cfma.parent=cfm.name '
 		'where cfma.parent in %s '
@@ -45,6 +45,7 @@ def _setup_mappers(mappers):
 		mapping['account_types'] = []
 		mapping['tax_liabilities'] = []
 		mapping['tax_expenses'] = []
+		mapping['finance_costs'] = []
 		doc = frappe.get_doc('Cash Flow Mapper', mapping['name'])
 		mapping_names = [item.name for item in doc.accounts]
 
@@ -54,7 +55,7 @@ def _setup_mappers(mappers):
 			dict(
 				name=account[0], label=account[1], is_working_capital=account[2], 
 				is_income_tax_liability=account[3], is_income_tax_expense=account[4]
-			) for account in accounts if account[3] != 1]
+			) for account in accounts if account[3] != 1 and account[5] != 1]
 
 		tax_liabilities = [
 			dict(name=account[0], label=account[1], is_income_tax_liability=account[3],
@@ -65,6 +66,10 @@ def _setup_mappers(mappers):
 			dict(name=account[0], label=account[1], is_income_tax_liability=account[3],
 				is_income_tax_expense=account[4])
 				for account in accounts if account[4] == 1]
+
+		finance_costs = [
+			dict(name=account[0], label=account[1], is_finance_cost=account[5])
+			for account in accounts if account[5] == 1]
 
 		# ordering gets lost here
 		unique_labels = sorted(
@@ -77,10 +82,7 @@ def _setup_mappers(mappers):
 		for label in unique_labels:
 			names = [d['name'] for d in tmp_dict if d['label'] == label[0]]
 			m = dict(label=label[0], names=names, is_working_capital=label[1])
-			if label[2]:	# i.e is_income_tax_paid == 1
-				tax_paid_mappers.append(m)
-			else:
-				mapping['account_types'].append(m)
+			mapping['account_types'].append(m)
 
 		unique_liability_labels = sorted(
 			set(
@@ -97,6 +99,13 @@ def _setup_mappers(mappers):
 			),
 			key=lambda x: x[0]
 		)
+		
+		unique_finance_costs_labels = sorted(
+			set(
+				[(d['label'], d['is_finance_cost']) for d in finance_costs]
+			),
+			key=lambda x: x[0]
+		)
 
 		for label in unique_liability_labels:
 			names = [d['name'] for d in tax_liabilities if d['label'] == label[0]]
@@ -108,9 +117,14 @@ def _setup_mappers(mappers):
 			m = dict(label=label[0], names=names, tax_liability=label[1], tax_expense=label[2])
 			mapping['tax_expenses'].append(m)
 
+		for label in unique_finance_costs_labels:
+			names = [d['name'] for d in finance_costs if d['label'] == label[0]]
+			m = dict(label=label[0], names=names, is_finance_cost=label[1])
+			mapping['finance_costs'].append(m)
+
 		cash_flow_accounts.append(mapping)
 
-	return cash_flow_accounts, tax_paid_mappers
+	return cash_flow_accounts, tax_paid_mappers, 
 
 
 def _add_data_for_operating_activites(
@@ -150,7 +164,7 @@ def _add_data_for_operating_activites(
 			})
 			has_added_working_capital_header = True
 
-		account_data = get_account_type_based_data(filters.company, 
+		account_data = get_account_type_based_data(filters, 
 			account['names'], period_list, filters.accumulated_values)
 		if account_data['total'] != 0:
 			account_data.update({
@@ -166,9 +180,24 @@ def _add_data_for_operating_activites(
 	add_total_row_account(data, section_data, mapper['section_subtotal'],
 		period_list, company_currency, indent=1)
 
+	for account in mapper['finance_costs']:
+		account_data = get_account_type_based_data(filters, 
+			account['names'], period_list, filters.accumulated_values)
+		if account_data['total'] != 0:
+			account_data.update({
+				"account_name": account['label'],
+				"account": account['names'], 
+				"indent": 1,
+				"parent_account": mapper['section_header'],
+				"currency": company_currency
+			})
+			data.append(account_data)
+			section_data.append(account_data)
+
+	# calculate adjustment for tax paid and add to data
 	for account in mapper['tax_liabilities']:
 		tax_paid = _calculate_tax_paid(
-			filters.company, mapper['tax_liabilities'], mapper['tax_expenses'], 
+			filters, mapper['tax_liabilities'], mapper['tax_expenses'], 
 			filters.accumulated_values, period_list)
 
 		if tax_paid:
@@ -185,18 +214,18 @@ def _add_data_for_operating_activites(
 		period_list, company_currency)
 
 
-def _calculate_tax_paid(company, liability_mapper, expense_mapper, use_accumulated_values, period_list):
+def _calculate_tax_paid(filters, liability_mapper, expense_mapper, use_accumulated_values, period_list):
 	liability_accounts = liability_mapper[0]['names']
 	expense_accounts = expense_mapper[0]['names']
 
 	liability_data_closing = get_account_type_based_data(
-		company, liability_accounts, period_list, 0)
+		filters, liability_accounts, period_list, 0)
 
 	liability_data_opening = get_account_type_based_data(
-		company, liability_accounts, period_list, use_accumulated_values, opening_balances=1)
+		filters, liability_accounts, period_list, use_accumulated_values, opening_balances=1)
 
 	expense_data = get_account_type_based_data(
-		company, expense_accounts, period_list, use_accumulated_values)
+		filters, expense_accounts, period_list, use_accumulated_values)
 
 	data = __calculate_tax_paid(liability_data_closing, liability_data_opening, expense_data)
 	return data
@@ -207,6 +236,7 @@ def __calculate_tax_paid(liability_data_closing, liability_data_opening, expense
 	for month in liability_data_opening.keys():
 		if liability_data_opening[month] and liability_data_closing[month]:
 			account_data[month] = liability_data_opening[month] - expense_data[month] + liability_data_closing[month]
+
 	return account_data
 
 
@@ -222,7 +252,7 @@ def _add_data_for_other_activities(
 		})
 
 		for account in mapper['account_types']:
-			account_data = get_account_type_based_data(filters.company, 
+			account_data = get_account_type_based_data(filters, 
 				account['names'], period_list, filters.accumulated_values)
 			if account_data['total'] != 0:
 				account_data.update({
@@ -288,13 +318,28 @@ def execute(filters=None):
 	return columns, data
 
 
-def get_account_type_based_data(company, account_names, period_list, accumulated_values, opening_balances=0):
+def get_account_type_based_data(filters, account_names, period_list, accumulated_values, opening_balances=0):
+	company = filters.company
 	data = {}
 	total = 0
 	for period in period_list:
 		start_date = get_start_date(period, accumulated_values, company)
 
 		if opening_balances:
+			date_info = dict(date=start_date)
+			months_map = {'Monthly': -1, 'Quarterly': -3, 'Half-Yearly': -6}
+			years_map = {'Yearly': -1}
+
+			if months_map.get(filters.periodicity):
+				date_info.update(months=months_map[filters.periodicity])
+			else:
+				date_info.update(years=years_map[filters.periodicity])
+
+			if accumulated_values:
+				start, end = add_to_date(start_date, years=-1), add_to_date(period['to_date'], years=-1)
+			else:
+				start, end = add_to_date(**date_info), add_to_date(**date_info)
+
 			gl_sum = frappe.db.sql_list("""
 				select sum(credit) - sum(debit)
 				from `tabGL Entry`
@@ -302,8 +347,7 @@ def get_account_type_based_data(company, account_names, period_list, accumulated
 					and voucher_type != 'Period Closing Voucher'
 					and account in ( SELECT name FROM tabAccount WHERE name IN %s
 					OR parent_account IN %s)
-			""", (company, add_to_date((start_date if accumulated_values else period['from_date']), months=-1),
-				add_to_date(period['to_date'], months=-1), account_names, account_names))
+			""", (company, start, end, account_names, account_names))
 		else:
 			gl_sum = frappe.db.sql_list("""
 				select sum(credit) - sum(debit)
