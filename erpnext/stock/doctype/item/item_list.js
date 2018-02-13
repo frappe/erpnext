@@ -1,6 +1,6 @@
 frappe.listview_settings['Item'] = {
 	add_fields: ["item_name", "stock_uom", "item_group", "image", "variant_of",
-		"has_variants", "end_of_life", "disabled", "total_projected_qty"],
+		"has_variants", "end_of_life", "disabled"],
 	filters: [["disabled", "=", "0"]],
 
 	get_indicator: function(doc) {
@@ -8,8 +8,6 @@ frappe.listview_settings['Item'] = {
 			return [__("Disabled"), "grey", "disabled,=,Yes"];
 		} else if (doc.end_of_life && doc.end_of_life < frappe.datetime.get_today()) {
 			return [__("Expired"), "grey", "end_of_life,<,Today"];
-		} else if(doc.total_projected_qty < 0) {
-			return [__("Shortage"), "red", "total_projected_qty,<,0"];
 		} else if (doc.has_variants) {
 			return [__("Template"), "orange", "has_variants,=,Yes"];
 		} else if (doc.variant_of) {
