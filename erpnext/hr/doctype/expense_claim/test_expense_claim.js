@@ -11,7 +11,6 @@ QUnit.test("Test: Expense Claim [HR]", function (assert) {
 		() => frappe.timeout(0.3),
 		() => frappe.click_button('New'),
 		() => {
-			cur_frm.set_value('exp_approver','Administrator'),
 			cur_frm.set_value('is_paid',1),
 			cur_frm.set_value('expenses',[]),
 			d = frappe.model.add_child(cur_frm.doc,'Expense Claim Detail','expenses'),
@@ -29,8 +28,7 @@ QUnit.test("Test: Expense Claim [HR]", function (assert) {
 		() => cur_frm.set_value('cost_center','Main - FT'),
 		() => cur_frm.set_value('mode_of_payment','Cash'),
 		() => cur_frm.save(),
-		() => frappe.click_button('Actions'),
-		() => frappe.click_link('Approve'),
+		() => frappe.click_button('Submit'),
 		() => frappe.click_button('Yes'),
 		() => frappe.timeout(3),
 

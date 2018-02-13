@@ -1,6 +1,5 @@
 frappe.listview_settings['Expense Claim'] = {
-	add_fields: ["workflow_state", "total_claimed_amount", "docstatus"],
-	filters:[["workflow_state","!=", "Rejected"]],
+	add_fields: ["total_claimed_amount", "docstatus"],
 	get_indicator: function(doc) {
 		if(doc.status == "Paid") {
 			return [__("Paid"), "green", "status,=,'Paid'"];
