@@ -167,9 +167,9 @@ def make_holiday(holiday_list_name):
 		current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
 		dt = getdate(nowdate())
 
-		new_year = dt + relativedelta(month=01, day=01, year=dt.year)
-		republic_day = dt + relativedelta(month=01, day=26, year=dt.year)
-		test_holiday = dt + relativedelta(month=02, day=02, year=dt.year)
+		new_year = dt + relativedelta(month=1, day=1, year=dt.year)
+		republic_day = dt + relativedelta(month=1, day=26, year=dt.year)
+		test_holiday = dt + relativedelta(month=2, day=2, year=dt.year)
 
 		frappe.get_doc({
 			'doctype': 'Holiday List',
