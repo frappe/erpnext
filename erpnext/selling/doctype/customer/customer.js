@@ -34,6 +34,12 @@ frappe.ui.form.on("Customer", {
 			}
 		})
 	},
+	customer_primary_contact: function(frm){
+		if(!frm.doc.customer_primary_contact){
+			frm.set_value("mobile_no", "");
+			frm.set_value("email_id", "");
+		}
+	},
 	refresh: function(frm) {
 		if(frappe.defaults.get_default("cust_master_name")!="Naming Series") {
 			frm.toggle_display("naming_series", false);

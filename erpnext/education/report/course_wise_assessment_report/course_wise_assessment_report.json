@@ -7,7 +7,7 @@
  "doctype": "Report", 
  "idx": 0, 
  "is_standard": "Yes", 
- "modified": "2017-11-10 19:41:46.641227", 
+ "modified": "2018-02-08 15:11:24.904628", 
  "modified_by": "Administrator", 
  "module": "Education", 
  "name": "Course wise Assessment Report", 
@@ -17,7 +17,10 @@
  "report_type": "Script Report", 
  "roles": [
   {
-   "role": "Academics User"
+   "role": "Instructor"
+  }, 
+  {
+   "role": "Education Manager"
   }
  ]
 }
