@@ -64,7 +64,7 @@ $.extend(shopping_cart, {
 	},
 
 	set_cart_count: function() {
-		var cart_count = getCookie("cart_count");
+		var cart_count = frappe.get_cookie("cart_count");
 		if(frappe.session.user==="Guest") {
 			cart_count = 0;
 		}
