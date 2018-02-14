@@ -21,7 +21,7 @@ from six import iteritems
 
 def get_sle(**args):
 	condition, values = "", []
-	for key, value in iteritems(args.iteritems):
+	for key, value in iteritems(args):
 		condition += " and " if condition else " where "
 		condition += "`{0}`=%s".format(key)
 		values.append(value)
