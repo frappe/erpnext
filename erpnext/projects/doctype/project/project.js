@@ -109,6 +109,7 @@ frappe.ui.form.on("Project", {
 	status: function (frm, doctype, name) {
 		frm.trigger('tasks_refresh');
 	},
+
 });
 
 
