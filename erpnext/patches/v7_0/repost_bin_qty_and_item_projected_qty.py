@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import frappe
-from erpnext.stock.doctype.bin.bin import update_item_projected_qty
 
 def execute():
 	repost_bin_qty()
