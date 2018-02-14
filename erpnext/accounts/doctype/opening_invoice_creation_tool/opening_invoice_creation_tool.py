@@ -10,9 +10,6 @@ from frappe.model.document import Document
 
 
 class OpeningInvoiceCreationTool(Document):
-	def validate(self):
-		self.validate_party()
-
 	def onload(self):
 		"""Load the Opening Invoice summary"""
 		summary, max_count = self.get_opening_invoice_summary()
