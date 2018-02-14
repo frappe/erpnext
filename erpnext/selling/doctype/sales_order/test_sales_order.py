@@ -5,7 +5,6 @@ import frappe
 from frappe.utils import flt, add_days
 import frappe.permissions
 import unittest
-from erpnext.stock.doctype.item.test_item import get_total_projected_qty
 from erpnext.selling.doctype.sales_order.sales_order \
 	import make_material_request, make_delivery_note, make_sales_invoice, WarehouseRequired
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -155,16 +154,8 @@ class TestSalesOrder(unittest.TestCase):
 		dn = create_dn_against_so(so.name, 15)
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty)
 
-		total_projected_qty = get_total_projected_qty('_Test Item')
-		item_doc_before_cancel = frappe.get_doc('Item', '_Test Item')
-		self.assertEqual(total_projected_qty,  item_doc_before_cancel.total_projected_qty)
-
 		dn.cancel()
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty + 10)
-
-		total_projected_qty = get_total_projected_qty('_Test Item')
-		item_doc_after_cancel = frappe.get_doc('Item', '_Test Item')
-		self.assertEqual(total_projected_qty,  item_doc_after_cancel.total_projected_qty)
 
 	def test_reserved_qty_for_over_delivery_via_sales_invoice(self):
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
@@ -183,10 +174,6 @@ class TestSalesOrder(unittest.TestCase):
 		si.insert()
 		si.submit()
 
-		total_projected_qty = get_total_projected_qty('_Test Item')
-		item_doc = frappe.get_doc('Item', '_Test Item')
-		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
-
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty)
 
 		so.load_from_db()
@@ -195,9 +182,6 @@ class TestSalesOrder(unittest.TestCase):
 
 		si.cancel()
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty + 10)
-		total_projected_qty = get_total_projected_qty('_Test Item')
-		item_doc = frappe.get_doc('Item', '_Test Item')
-		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
 
 		so.load_from_db()
 		self.assertEqual(so.get("items")[0].delivered_qty, 0)
@@ -228,10 +212,6 @@ class TestSalesOrder(unittest.TestCase):
 
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1)
 		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"), existing_reserved_qty_item2)
-
-		total_projected_qty = get_total_projected_qty('_Test Item')
-		item_doc = frappe.get_doc('Item', '_Test Item')
-		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
 
 		# unclose so
 		so.load_from_db()
@@ -268,10 +248,6 @@ class TestSalesOrder(unittest.TestCase):
 			existing_reserved_qty_item2 + 20)
 
 		dn = create_dn_against_so(so.name, 15)
-
-		total_projected_qty = get_total_projected_qty('_Test Item')
-		item_doc = frappe.get_doc('Item', '_Test Item')
-		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
 
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1)
 		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"),
@@ -495,13 +471,6 @@ class TestSalesOrder(unittest.TestCase):
 
 		self.assertEquals(abs(flt(reserved_qty)), existing_reserved_qty_for_dn_item)
 
-	def test_total_projected_qty_against_sales_order(self):
-		so = make_sales_order(item = '_Test Item')
-		total_projected_qty = get_total_projected_qty('_Test Item')
-
-		item_doc = frappe.get_doc('Item', '_Test Item')
-		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
-
 	def test_reserved_qty_for_closing_so(self):
 		bin = frappe.get_all("Bin", filters={"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},
 			fields=["reserved_qty"])
@@ -567,12 +536,12 @@ class TestSalesOrder(unittest.TestCase):
 			"item_list": [{
 				"item_code": "_Test FG Item",
 				"qty": 10,
-				"rate":100	
+				"rate":100
 			},
 			{
 				"item_code": "_Test FG Item",
 				"qty": 20,
-				"rate":200	
+				"rate":200
 			}]
 		})
 
@@ -589,7 +558,7 @@ class TestSalesOrder(unittest.TestCase):
 			})
 			so_item_name[item.get("sales_order_item")]= item.get("pending_qty")
 		make_production_orders(json.dumps({"items":po_items}), so.name, so.company)
-		
+
 		# Check if Production Orders were raised
 		for item in so_item_name:
 			po_qty = frappe.db.sql("select sum(qty) from `tabProduction Order` where sales_order=%s and sales_order_item=%s", (so.name, item))

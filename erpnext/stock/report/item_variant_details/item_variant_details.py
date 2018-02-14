@@ -17,7 +17,7 @@ def get_data(item):
 
 	variant_results = frappe.db.sql("""select name from `tabItem`
 		where variant_of = %s""", item, as_dict=1)
-	variants = ",".join(['"' + variant['name'] + '"' for variant in variant_results])
+	variants = ",".join(['"' + frappe.db.escape(variant['name']) + '"' for variant in variant_results])
 
 	order_count_map = get_open_sales_orders_map(variants)
 	stock_details_map = get_stock_details_map(variants)
