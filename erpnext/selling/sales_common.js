@@ -118,6 +118,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	selling_price_list: function() {
 		this.apply_price_list();
+		this.set_dynamic_labels();
 	},
 
 	price_list_rate: function(doc, cdt, cdn) {

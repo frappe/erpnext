@@ -12,6 +12,10 @@ frappe.ui.form.on('Material Request', {
 			'Supplier Quotation': 'Supplier Quotation',
 			'Production Order': 'Production Order'
 		}
+
+		// formatter for material request item
+		frm.set_indicator_formatter('item_code',
+			function(doc) { return (doc.qty<=doc.ordered_qty) ? "green" : "orange" })
 	},
 	onload: function(frm) {
 		// add item, if previous view was item
@@ -19,11 +23,6 @@ frappe.ui.form.on('Material Request', {
 
 		//set schedule_date
 		set_schedule_date(frm);
-
-		// formatter for material request item
-		frm.set_indicator_formatter('item_code',
-			function(doc) { return (doc.qty<=doc.ordered_qty) ? "green" : "orange" }),
-
 		frm.fields_dict["items"].grid.get_field("warehouse").get_query = function(doc, cdt, cdn){
 			return{
 				filters: {'company': doc.company}

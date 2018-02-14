@@ -12,7 +12,7 @@ frappe.ui.form.on("Purchase Order", {
 			'Purchase Invoice': 'Invoice',
 			'Stock Entry': 'Material to Supplier'
 		}
-		
+
 		frm.set_query("reserve_warehouse", "supplied_items", function() {
 			return {
 				filters: {
@@ -21,6 +21,9 @@ frappe.ui.form.on("Purchase Order", {
 				}
 			}
 		});
+
+		frm.set_indicator_formatter('item_code',
+			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
 	},
 
 	onload: function(frm) {
@@ -34,9 +37,6 @@ frappe.ui.form.on("Purchase Order", {
 			frm.toggle_display('get_last_purchase_rate',
 				frm.doc.__onload.disable_fetch_last_purchase_rate);
 		}
-
-		frm.set_indicator_formatter('item_code',
-			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
 	},
 });
 
