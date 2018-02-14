@@ -13,6 +13,10 @@ frappe.ui.form.on("Sales Order", {
 			'Project': 'Project'
 		}
 		frm.add_fetch('customer', 'tax_id', 'tax_id');
+
+		// formatter for material request item
+		frm.set_indicator_formatter('item_code',
+			function(doc) { return (doc.stock_qty<=doc.delivered_qty) ? "green" : "orange" })
 	},
 	onload: function(frm) {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
@@ -27,10 +31,6 @@ frappe.ui.form.on("Sales Order", {
 				}
 			}
 		});
-
-		// formatter for material request item
-		frm.set_indicator_formatter('item_code',
-			function(doc) { return (doc.stock_qty<=doc.delivered_qty) ? "green" : "orange" })
 
 		erpnext.queries.setup_warehouse_query(frm);
 	},

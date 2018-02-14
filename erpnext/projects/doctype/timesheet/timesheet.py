@@ -156,14 +156,18 @@ class Timesheet(Document):
 			(self.production_order, operation_id), as_dict=1)[0]
 
 	def update_task_and_project(self):
+		tasks, projects = [], []
+
 		for data in self.time_logs:
-			if data.task:
+			if data.task and data.task not in tasks:
 				task = frappe.get_doc("Task", data.task)
 				task.update_time_and_costing()
 				task.save()
+				tasks.append(data.task)
 
-			elif data.project:
+			elif data.project and data.project not in projects:
 				frappe.get_doc("Project", data.project).update_project()
+				projects.append(data.project)
 
 	def validate_dates(self):
 		for data in self.time_logs:
