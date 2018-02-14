@@ -17,26 +17,19 @@ frappe.views.HubFactory = frappe.views.Factory.extend({
 		};
 
 		if (!erpnext.hub.pages[page_name]) {
-			if (page === 'Item' && !route[2]) {
+			if (!route[2]) {
+				// page === 'Item' &&
 				frappe.require(assets['List'], () => {
-					erpnext.hub.pages[page_name] = new erpnext.hub.ItemListing({
+					erpnext.hub.pages[page_name] = new erpnext.hub[page+'Listing']({
 						doctype: 'Hub Settings',
 						parent: this.make_page(true, page_name)
 					});
 					window.hub_page = erpnext.hub.pages[page_name];
 				});
-			} if (page === 'Company' && !route[2]) {
-				frappe.require(assets['List'], () => {
-					erpnext.hub.pages[page_name] = new erpnext.hub.CompanyListing({
-						doctype: 'Hub Settings',
-						parent: this.make_page(true, page_name)
-					});
-					window.hub_page = erpnext.hub.pages[page_name];
-				});
-			} else if(route[2]) {
+			} else {
 				frappe.require(assets['Form'], () => {
-					erpnext.hub.pages[page_name] = new erpnext.hub.HubForm({
-						hub_item_code: route[2],
+					erpnext.hub.pages[page_name] = new erpnext.hub[page+'Page']({
+						unique_id: route[2],
 						doctype: 'Hub Settings',
 						parent: this.make_page(true, page_name)
 					});

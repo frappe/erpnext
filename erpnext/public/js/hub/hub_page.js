@@ -13,21 +13,26 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 	setup_fields() {
 		return this.get_meta()
 			.then(r => {
-				console.log('fields then', this.doctype);
+				// console.log('fields then', this.doctype);
 				this.meta = r.message || this.meta;
 				frappe.model.sync(this.meta);
 			});
 	}
 
 	get_meta() {
-		console.log('get_meta', this.doctype);
+		// console.log('get_meta', this.doctype);
 		return new Promise(resolve =>
 			frappe.call('erpnext.hub_node.get_meta', {doctype: this.doctype}, resolve));
 	}
 
 	set_breadcrumbs() { }
 
-	setup_side_bar() { }
+	setup_side_bar() {
+		this.sidebar = new frappe.ui.Sidebar({
+			wrapper: this.page.wrapper.find('.layout-side-section'),
+			css_class: 'hub-sidebar'
+		});
+	}
 
 	setup_sort_selector() { }
 
@@ -108,6 +113,26 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 		];
 	}
 
+	setup_side_bar() {
+		super.setup_side_bar();
+		this.category_tree = new frappe.ui.Tree({
+			parent: this.sidebar.$sidebar,
+			label: 'All Categories',
+			expandable: true,
+
+			args: {},
+			method: 'erpnext.hub_node.get_categories',
+			on_click: (node) => {
+				this.update_category(node.label);
+			}
+		});
+	}
+
+	update_category(label) {
+		this.current_category = (label=='All Categories') ? undefined : label;
+		this.refresh();
+	}
+
 	get_filters_for_args() {
 		let filters = {};
 		this.filter_area.get().forEach(f => {
@@ -139,7 +164,7 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 				<a href="${route}">
 					<div class="hub-item-image">
 						<div class="img-wrapper" style="height: 200px; width: 200px">
-							${image_html}
+							${ image_html }
 						</div>
 					</div>
 					<div class="hub-item-title">
@@ -158,7 +183,7 @@ erpnext.hub.CompanyListing = class CompanyListing extends erpnext.hub.HubListing
 	setup_defaults() {
 		super.setup_defaults();
 		this.doctype = 'Hub Company';
-		this.fields = ['name', 'site_name', 'seller_city', 'seller_description', 'seller', 'country', 'company_name'];
+		this.fields = ['company_logo', 'name', 'site_name', 'seller_city', 'seller_description', 'seller', 'country', 'company_name'];
 		this.filters = [];
 		this.custom_filter_configs = [
 			{
@@ -186,33 +211,26 @@ erpnext.hub.CompanyListing = class CompanyListing extends erpnext.hub.HubListing
 		return filters;
 	}
 
-	card_html(item) {
-		item._name = encodeURI(item.name);
-		const encoded_name = item._name;
-		const title = strip_html(item['item_name' || 'item_code']);
-		// console.log(item);
-		const company_name = item['company_name'];
+	card_html(company) {
+		company._name = encodeURI(company.name);
+		const route = `#Hub/Company/${company.company_name}`;
 
-		const route = `#Hub/Item/${item.hub_item_code}`;
-
-		const image_html = item.image ?
-			`<img src="${item.image}">
-			<span class="helper"></span>` :
-			`<div class="standard-image">${frappe.get_abbr(title)}</div>`;
+		let image_html = company.company_logo ?
+			`<img src="${company.company_logo}"><span class="helper"></span>` :
+			`<div class="standard-image">${frappe.get_abbr(company.company_name)}</div>`;
 
 		return `
 			<div class="hub-item-wrapper margin-bottom" style="width: 200px;">
 				<a href="${route}">
 					<div class="hub-item-image">
 						<div class="img-wrapper" style="height: 200px; width: 200px">
-							${image_html}
+							${ image_html }
 						</div>
 					</div>
 					<div class="hub-item-title">
 						<h5 class="bold">
-							${ title }
+							${ company.company_name }
 						</h5>
-						<p>${ company_name }</p>
 					</div>
 				</a>
 			</div>
