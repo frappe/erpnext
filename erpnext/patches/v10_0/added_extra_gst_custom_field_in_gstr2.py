@@ -13,6 +13,6 @@ def execute():
 		set reqd = 0, `default` = ''
 		where fieldname = 'reason_for_issuing_document'
 	""")
-	
+
 	frappe.db.sql("""delete from `tabCustom Field` where dt = 'Purchase Invoice'
 		and fieldname in ('port_code', 'shipping_bill_number', 'shipping_bill_date')""")

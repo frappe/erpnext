@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-test_dependents = ["Hotel Room Package"]
+test_dependencies = ["Hotel Room Package"]
 test_records = [
 	dict(doctype="Hotel Room", name="1001",
 		hotel_room_type="Basic Room"),
