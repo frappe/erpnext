@@ -379,25 +379,25 @@ erpnext.work_order = {
 
 		max = flt(max, precision("qty"));
 		frappe.prompt({fieldtype:"Float", label: __("Qty for {0}", [purpose]), fieldname:"qty",
-			description: __("Max: {0}", [max]), 'default': max },
-			function(data) {
-				if(data.qty > max) {
-					frappe.msgprint(__("Quantity must not be more than {0}", [max]));
-					return;
+			description: __("Max: {0}", [max]), 'default': max }, function(data)
+		{
+			if(data.qty > max) {
+				frappe.msgprint(__("Quantity must not be more than {0}", [max]));
+				return;
+			}
+			frappe.call({
+				method:"erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry",
+				args: {
+					"work_order_id": frm.doc.name,
+					"purpose": purpose,
+					"qty": data.qty
+				},
+				callback: function(r) {
+					var doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 				}
-				frappe.call({
-					method:"erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry",
-					args: {
-						"work_order_id": frm.doc.name,
-						"purpose": purpose,
-						"qty": data.qty
-					},
-					callback: function(r) {
-						var doclist = frappe.model.sync(r.message);
-						frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-					}
-				});
-			}, __("Select Quantity"), __("Make"));
+			});
+		}, __("Select Quantity"), __("Make"));
 	},
 	
 	stop_work_order: function(frm, status) {

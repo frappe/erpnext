@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-from frappe.model.rename_doc import rename_doc, get_link_fields, update_link_field_values
+from frappe.model.rename_doc import rename_doc, get_link_fields
 import frappe
 
 def execute():

@@ -206,7 +206,7 @@ class TestWorkOrder(unittest.TestCase):
 			cint(bin1_on_start_production.reserved_qty_for_production))
 		self.assertEqual(cint(bin1_on_end_production.projected_qty),
 			cint(bin1_on_end_production.projected_qty))
-			
+
 	def test_reserved_qty_for_stopped_production(self):
 		test_stock_entry.make_stock_entry(item_code="_Test Item",
 			target= self.warehouse, qty=100, basic_rate=100)
@@ -214,18 +214,18 @@ class TestWorkOrder(unittest.TestCase):
 			target= self.warehouse, qty=100, basic_rate=100)
 
 		# 	0 0 0
-		
+
 		self.test_reserved_qty_for_production_submit()
-		
+
 		#2 0 -2
 
 		s = frappe.get_doc(make_stock_entry(self.wo_order.name,
 			"Material Transfer for Manufacture", 1))
 
 		s.submit()
-		
+
 		#1 -1 0
-		
+
 		bin1_on_start_production = get_bin(self.item, self.warehouse)
 
 		# reserved_qty_for_producion updated
@@ -235,10 +235,10 @@ class TestWorkOrder(unittest.TestCase):
 		# projected qty will now be 2 less (becuase of item movement)
 		self.assertEqual(cint(self.bin1_at_start.projected_qty),
 			cint(bin1_on_start_production.projected_qty) + 2)
-			
+
 		# STOP
 		stop_unstop(self.wo_order.name, "Stopped")
-		
+
 		bin1_on_stop_production = get_bin(self.item, self.warehouse)
 
 		# no change in reserved / projected
