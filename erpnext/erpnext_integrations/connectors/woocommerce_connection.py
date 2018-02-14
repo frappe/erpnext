@@ -13,13 +13,15 @@ def verify_request():
 			hashlib.sha256
 		).digest()
 	)
-
-	return sig == frappe.get_request_header("X-Wc-Webhook-Signature")
+	if frappe.request.data and \
+		frappe.get_request_header("X-Wc-Webhook-Signature") and \
+		not sig == frappe.get_request_header("X-Wc-Webhook-Signature"):
+			frappe.throw(_("Unverified Webhook Data"))
 
 @frappe.whitelist(allow_guest=True)
 def create_coupon():
-	if not verify_request():
-		frappe.throw(_("Unverified Webhook Data"))
+	verify_request()
+	print("yay!")
 
 @frappe.whitelist(allow_guest=True)
 def update_coupon():
