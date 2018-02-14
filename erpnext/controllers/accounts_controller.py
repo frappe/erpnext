@@ -137,7 +137,7 @@ class AccountsController(TransactionBase):
 
 			validate_due_date(self.posting_date, self.due_date, "Customer", self.customer, self.company)
 		elif self.doctype == "Purchase Invoice":
-			validate_due_date(self.posting_date, self.due_date, self.bill_date, "Supplier", self.supplier, self.company)
+			validate_due_date(self.posting_date, self.due_date, "Supplier", self.supplier, self.company, self.bill_date)
 
 	def set_price_list_currency(self, buying_or_selling):
 		if self.meta.get_field("posting_date"):
@@ -668,7 +668,7 @@ class AccountsController(TransactionBase):
 	def set_payment_schedule(self):
 		posting_date = self.get("bill_date") or self.get("posting_date") or self.get("transaction_date")
 		date = self.get("due_date")
-		due_date = date or bill_date or posting_date
+		due_date = date or posting_date
 		grand_total = self.get("rounded_total") or self.grand_total
 		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 			grand_total = grand_total - flt(self.write_off_amount)

@@ -161,7 +161,7 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 	out = {
 		party_type.lower(): party,
 		account_fieldname : account,
-		"due_date": get_due_date(posting_date, party_type, party, bill_date, company)
+		"due_date": get_due_date(posting_date, party_type, party, company, bill_date)
 	}
 
 	return out
@@ -265,7 +265,7 @@ def validate_party_accounts(doc):
 
 
 @frappe.whitelist()
-def get_due_date(posting_date, party_type, party, bill_date=None, company=None):
+def get_due_date(posting_date, party_type, party, company=None, bill_date=None):
 	"""Get due date from `Payment Terms Template`"""
 	due_date = None
 	if (bill_date or posting_date) and party:
@@ -304,11 +304,11 @@ def get_due_date_from_template(template_name, posting_date, bill_date):
 			due_date = max(due_date, add_months(get_last_day(due_date), term.credit_months))
 	return due_date
 
-def validate_due_date(posting_date, due_date, bill_date, party_type, party, company=None):
+def validate_due_date(posting_date, due_date, party_type, party, company=None, bill_date=None):
 	if getdate(due_date) < getdate(posting_date):
 		frappe.throw(_("Due Date cannot be before Posting Date"))
 	else:
-		default_due_date = get_due_date(posting_date, party_type, party, bill_date, company)
+		default_due_date = get_due_date(posting_date, party_type, party, company, bill_date)
 		if not default_due_date:
 			return
 
