@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from erpnext.hotels.doctype.hotel_room_reservation.hotel_room_reservation import HotelRoomPricingNotSetError, HotelRoomUnavailableError
-test_dependencies = ["Hotel Room Pricing", "Hotel Room"]
+test_dependencies = ["Hotel Room Package", "Hotel Room Pricing", "Hotel Room"]
 
 class TestHotelRoomReservation(unittest.TestCase):
 	def setUp(self):

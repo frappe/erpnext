@@ -95,7 +95,7 @@ def make_custom_fields():
 			fieldtype='Select', insert_after='invoice_copy', print_hide=1,
 			options='Y\nN', default='N'),
 		dict(fieldname='invoice_type', label='Invoice Type',
-			fieldtype='Select', insert_after='gst_col_break', print_hide=1,
+			fieldtype='Select', insert_after='invoice_copy', print_hide=1,
 			options='Regular\nSEZ\nExport\nDeemed Export', default='Regular'),
 		dict(fieldname='export_type', label='Export Type',
 			fieldtype='Select', insert_after='invoice_type', print_hide=1,
@@ -103,10 +103,10 @@ def make_custom_fields():
 			options='\nWith Payment of Tax\nWithout Payment of Tax'),
 		dict(fieldname='ecommerce_gstin', label='E-commerce GSTIN',
 			fieldtype='Data', insert_after='export_type', print_hide=1),
-		dict(fieldname='gst_col_break', fieldtype='Column Break', insert_after='reason_for_issuing_document'),
+		dict(fieldname='gst_col_break', fieldtype='Column Break', insert_after='ecommerce_gstin'),
 		dict(fieldname='reason_for_issuing_document', label='Reason For Issuing document',
 			fieldtype='Select', insert_after='gst_col_break', print_hide=1,
-			depends_on='eval:doc.is_return==1', reqd=1,
+			depends_on='eval:doc.is_return==1',
 			options='\n01-Sales Return\n02-Post Sale Discount\n03-Deficiency in services\n04-Correction in Invoice\n05-Change in POS\n06-Finalization of Provisional assessment\n07-Others')
 	]
 
