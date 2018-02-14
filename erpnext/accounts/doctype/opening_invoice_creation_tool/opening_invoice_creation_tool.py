@@ -63,7 +63,7 @@ class OpeningInvoiceCreationTool(Document):
 	# 	party = frappe.get_doc('Party', )
 	def make_invoices(self):
 		names = []
-		party_type = frappe.get_all("Customer") if self.invoice_type == "Sales" else frappe.get_all("Suppplier")
+		# party_type = frappe.get_all("Customer") if self.invoice_type == "Sales" else frappe.get_all("Suppplier")
 		mandatory_error_msg = _("Row {idx}: {field} is required to create the Opening {invoice_type} Invoices")
 		if not self.company:
 			frappe.throw(_("Please select the Company"))
@@ -77,9 +77,13 @@ class OpeningInvoiceCreationTool(Document):
 			if not row.temporary_opening_account:
 				row.temporary_opening_account = get_temporary_opening_account(self.company)
 			row.party_type = "Customer" if self.invoice_type == "Sales" else "Supplier"
-			for x in party_type:
-				if x.name != row.party:
-					frappe.throw(_(" Party {0} not present in {1}").format(frappe.bold(row.party), frappe.bold(row.party_type)));
+			
+			party_type = frappe.get_all(row.party_type, filters={
+				'name': row.party
+			})
+			
+			if not party_type: 	
+				frappe.throw(_(" Party {0} not present in {1}").format(frappe.bold(row.party), frappe.bold(row.party_type)));
 			if not row.item_name:
 				row.item_name = _("Opening Invoice Item")
 			if not row.posting_date:
