@@ -82,7 +82,11 @@ class OpeningInvoiceCreationTool(Document):
 				'name': row.party
 			})
 			
-			if not party_type: 	
+			for x in xrange(1,10):
+				print("create_missing:", self.create_missing_party, party_type)
+			if not party_type and self.create_missing_party:
+				self.add_party(row.party_type, row.party)
+			elif not self.create_missing_party:
 				frappe.throw(_(" Party {0} not present in {1}").format(frappe.bold(row.party), frappe.bold(row.party_type)));
 			if not row.item_name:
 				row.item_name = _("Opening Invoice Item")
@@ -117,6 +121,21 @@ class OpeningInvoiceCreationTool(Document):
 				)
 
 		return names
+
+	def add_party(self, party_type, party):
+		for x in xrange(1,10):
+			print("x", party)
+		party_doc = frappe.new_doc(party_type)
+		if party_type == "Customer":
+			party_doc.customer_name = party
+			party_doc.customer_type = 'Company'
+		else:
+			party_doc.supplier_name = party
+			party_doc.supplier_type = frappe.get_doc("Buying Settings", supplier_type)
+		party_doc.flags.ignore_mandatory = True
+		party_doc.save(ignore_permissions=True)
+		frappe.db.commit()
+		
 
 	def get_invoice_dict(self, row=None):
 		def get_item_dict():
@@ -174,3 +193,5 @@ def get_temporary_opening_account(company=None):
 		frappe.throw(_("Please add a Temporary Opening account in Chart of Accounts"))
 
 	return accounts[0].name
+
+
