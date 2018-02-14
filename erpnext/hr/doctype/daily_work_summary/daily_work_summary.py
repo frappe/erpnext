@@ -13,7 +13,7 @@ from markdown2 import markdown
 
 class DailyWorkSummary(Document):
 	def send_mails(self, settings, emails):
-		'''Send emails to get daily work summary to all employees'''
+		'''Send emails to get daily work summary to all users in selected daily work summary setting'''
 		incoming_email_account = frappe.db.get_value('Email Account',
 			dict(enable_incoming=1, default_incoming=1), 'email_id')
 
@@ -25,18 +25,18 @@ class DailyWorkSummary(Document):
 	def send_summary(self):
 		'''Send summary of all replies. Called at midnight'''
 		args = self.get_message_details()
-
-		frappe.sendmail(recipients = get_employee_emails(self.company, False),
+		emails = get_user_emails_from_setting(self.setting)
+		frappe.sendmail(recipients = emails,
 			template='daily_work_summary',
 			args=args,
-			subject = _('Daily Work Summary for {0}').format(self.company),
+			subject = _(self.setting),
 			reference_doctype=self.doctype, reference_name=self.name)
 
 		self.db_set('status', 'Sent')
 
 	def get_message_details(self):
 		'''Return args for template'''
-		settings = frappe.get_doc('Daily Work Summary Settings')
+		settings = frappe.get_doc('Daily Work Summary Setting', self.setting)
 
 		replies = frappe.get_all('Communication', fields=['content', 'text_content', 'sender'],
 			filters=dict(reference_doctype=self.doctype, reference_name=self.name,
@@ -46,11 +46,11 @@ class DailyWorkSummary(Document):
 		did_not_reply = self.email_sent_to.split()
 
 		for d in replies:
-			emp = frappe.db.get_values("Employee", {"user_id": d.sender},
-				["employee_name", "image"], as_dict=True)
+			user = frappe.db.get_values("User", {"email": d.sender},
+				["full_name", "user_image"], as_dict=True)
 
-			d.sender_name = emp[0].employee_name if emp else d.sender
-			d.image = emp[0].image if emp and emp[0].image else None
+			d.sender_name = user[0].full_name if user else d.sender
+			d.image = user[0].image if user and user[0].image else None
 			
 			original_image = d.image
 			# make thumbnail image
@@ -77,31 +77,23 @@ class DailyWorkSummary(Document):
 				d.content = markdown(EmailReplyParser.parse_reply(d.text_content))
 
 
-		did_not_reply = [(frappe.db.get_value("Employee", {"user_id": email}, "employee_name") or email)
+		did_not_reply = [(frappe.db.get_value("User", {"email": email}, "full_name") or email)
 			for email in did_not_reply]
 
 		return dict(replies=replies,
 			original_message=settings.message,
-			title=_('Daily Work Summary for {0}'.format(global_date_format(self.creation))),
+			title=_('Work Summary for {0}'.format(global_date_format(self.creation))),
 			did_not_reply= ', '.join(did_not_reply) or '',
 			did_not_reply_title = _('No replies from'))
 
 
-def get_employee_emails(company, only_working=True):
-	'''Returns list of Employee user ids for the given company who are working today
+def get_user_emails_from_setting(setting):
+	'''Returns list of email of users from the given setting
 
-	:param company: Company `name`'''
-	employee_list = frappe.get_all('Employee', fields=['name', 'user_id'],
-		filters={'status': 'Active', 'company': company})
+	:param setting: Daily Work Summary Setting `name`'''
+	setting_doc = frappe.get_doc('Daily Work Summary Setting', setting)
+	emails = [d.email for d in setting_doc.users]
 
-	out = []
-	for e in employee_list:
-		if e.user_id:
-			if only_working and is_holiday(e.name):
-				# don't add if holiday
-				continue
-			out.append(e.user_id)
-
-	return out
+	return emails
 
 
