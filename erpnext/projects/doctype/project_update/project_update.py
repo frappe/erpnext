@@ -24,8 +24,7 @@ def daily_reminder():
         date_start = projects[2]
         date_end = projects [3]
         progress = projects [4]
-        #put draft query
-        draft = frappe.db.sql("""SELECT count(docstatus) from `tabProject Update` WHERE `tabProject Update`.project = %s AND `tabProject Update`.docstatus = 1;""",project_name)
+        draft = frappe.db.sql("""SELECT count(docstatus) from `tabProject Update` WHERE `tabProject Update`.project = %s AND `tabProject Update`.docstatus = 0;""",project_name)
         for drafts in draft:
             number_of_drafts = drafts[0]
         update = frappe.db.sql("""SELECT name,date,time,progress FROM `tabProject Update` WHERE `tabProject Update`.project = %s;""",project_name)
