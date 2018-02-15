@@ -494,3 +494,4 @@ erpnext.patches.v10_0.set_default_payment_terms_based_on_company
 erpnext.patches.v10_0.update_sales_order_link_to_purchase_order
 erpnext.patches.v10_0.added_extra_gst_custom_field_in_gstr2 #2018-02-13
 erpnext.patches.v10_0.item_barcode_childtable_migrate
+erpnext.patches.v10_0.set_b2c_limit
