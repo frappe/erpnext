@@ -161,7 +161,7 @@ def get_all_sales_partner(filters, items, field, start=0, limit=20):
 	items.sort(key=lambda k: k['value'], reverse=True)
 	return items
 
-def get_all_sales_person(doctype, filters, items, field, start=0, limit=20):
+def get_all_sales_person(filters, items, field, start=0, limit=20):
 	"""return all sales partner"""
 
 	sales_person_list = frappe.db.sql('''select A.name, A.is_group, B.target_qty, B.target_amount, sum(C.allocated_amount) as allocated_amount from `tabSales Person` as 
