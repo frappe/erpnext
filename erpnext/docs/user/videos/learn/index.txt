@@ -19,7 +19,6 @@ opening-account-balances
 opening-stock
 point-of-sale
 printing-and-branding
-processing-payroll
 product-bundle
 production-order
 production-planning
