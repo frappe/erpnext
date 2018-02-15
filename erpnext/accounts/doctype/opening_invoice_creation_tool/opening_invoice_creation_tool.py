@@ -69,7 +69,6 @@ class OpeningInvoiceCreationTool(Document):
 			if not row.qty:
 				row.qty = 1.0
 
-			
 			# always mandatory fields for the invoices
 			if not row.temporary_opening_account:
 				row.temporary_opening_account = get_temporary_opening_account(self.company)
@@ -79,7 +78,7 @@ class OpeningInvoiceCreationTool(Document):
 			if not frappe.db.exists(row.party_type, row.party) and self.create_missing_party:
 				self.add_party(row.party_type, row.party)
 			elif not frappe.db.exists(row.party_type, row.party) and not self.create_missing_party:
-				frappe.throw(_("{0} {1} does not exist.").format(frappe.bold(row.party_type), frappe.bold(row.party)));	
+				frappe.throw(_("{0} {1} does not exist.").format(frappe.bold(row.party_type), frappe.bold(row.party)));
 			if not row.item_name:
 				row.item_name = _("Opening Invoice Item")
 			if not row.posting_date:
