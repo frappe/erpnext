@@ -106,7 +106,7 @@ erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubForm{
 			category_field.read_only = 1;
 		}
 
-		fields.push(category_field);
+		fields.unshift(category_field);
 
 		return fields;
 	}
