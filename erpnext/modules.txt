@@ -21,4 +21,4 @@ Restaurant
 Agriculture
 ERPNext Integrations
 Non Profit
-Meter
+Hotels

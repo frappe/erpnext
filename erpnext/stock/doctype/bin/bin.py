@@ -15,9 +15,6 @@ class Bin(Document):
 		self.validate_mandatory()
 		self.set_projected_qty()
 
-	def on_update(self):
-		update_item_projected_qty(self.item_code)
-
 	def validate_mandatory(self):
 		qf = ['actual_qty', 'reserved_qty', 'ordered_qty', 'indented_qty']
 		for f in qf:
@@ -129,12 +126,6 @@ class Bin(Document):
 		self.db_set('reserved_qty_for_sub_contract', (reserved_qty_for_sub_contract - materials_transferred))
 		self.set_projected_qty()
 		self.db_set('projected_qty', self.projected_qty)
-
-def update_item_projected_qty(item_code):
-	'''Set total_projected_qty in Item as sum of projected qty in all warehouses'''
-	frappe.db.sql('''update tabItem set
-		total_projected_qty = ifnull((select sum(projected_qty) from tabBin where item_code=%s), 0)
-		where name=%s''', (item_code, item_code))
 
 def on_doctype_update():
 	frappe.db.add_index("Bin", ["item_code", "warehouse"])

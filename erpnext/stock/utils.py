@@ -7,6 +7,8 @@ from frappe import _
 import json
 from frappe.utils import flt, cstr, nowdate, nowtime
 
+from six import string_types
+
 class InvalidWarehouseCompany(frappe.ValidationError): pass
 
 def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
@@ -126,7 +128,7 @@ def update_bin(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 def get_incoming_rate(args, raise_error_if_no_rate=True):
 	"""Get Incoming Rate based on valuation method"""
 	from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	in_rate = 0

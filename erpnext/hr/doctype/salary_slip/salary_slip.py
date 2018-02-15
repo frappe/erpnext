@@ -300,7 +300,6 @@ class SalarySlip(TransactionBase):
 				where t2.name = t1.leave_type
 				and t2.is_lwp = 1
 				and t1.docstatus = 1
-				and t1.workflow_state = 'Approved'
 				and t1.employee = %(employee)s
 				and CASE WHEN t2.include_holiday != 1 THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date
 				WHEN t2.include_holiday THEN %(dt)s between from_date and to_date

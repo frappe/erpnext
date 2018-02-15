@@ -41,7 +41,7 @@ frappe.ui.form.on('Consultation', {
 				frappe.route_options = {"patient": frm.doc.patient};
 				frappe.set_route("medical_record");
 			} else {
-				frappe.msgprint("Please select Patient");
+				frappe.msgprint(__("Please select Patient"));
 			}
 		},"View");
 		frm.add_custom_button(__('Vital Signs'), function() {
@@ -121,7 +121,7 @@ var btn_invoice_consultation = function(frm){
 
 var create_medical_record = function (frm) {
 	if(!frm.doc.patient){
-		frappe.throw("Please select patient");
+		frappe.throw(__("Please select patient"));
 	}
 	frappe.route_options = {
 		"patient": frm.doc.patient,
@@ -134,7 +134,7 @@ var create_medical_record = function (frm) {
 
 var btn_create_vital_signs = function (frm) {
 	if(!frm.doc.patient){
-		frappe.throw("Please select patient");
+		frappe.throw(__("Please select patient"));
 	}
 	frappe.route_options = {
 		"patient": frm.doc.patient,

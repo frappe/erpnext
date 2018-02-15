@@ -103,7 +103,7 @@ def get_availability_data(date, physician):
 
 		# Check if He/She on Leave
 		leave_record = frappe.db.sql("""select half_day from `tabLeave Application`
-			where employee = %s and %s between from_date and to_date and status = 'Approved'
+			where employee = %s and %s between from_date and to_date
 			and docstatus = 1""", (employee, date), as_dict=True)
 		if leave_record:
 			if leave_record[0].half_day:
