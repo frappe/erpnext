@@ -87,8 +87,7 @@ def get_contact_display(contact):
 def get_delivery_notes(customer):
 	return frappe.db.get_all("Delivery Note", filters={
 		'customer': customer,
-		'docstatus': 1,
-		'status': ('!=', 'Completed')
+		'docstatus': 1
 	})
 
 @frappe.whitelist()
