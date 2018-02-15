@@ -4,20 +4,16 @@ erpnext.hub.HubForm = class HubForm extends frappe.views.BaseList {
 	setup_defaults() {
 		super.setup_defaults();
 		this.method = 'erpnext.hub_node.get_details';
-		//doctype, unique_id,
+		const route = frappe.get_route();
+		this.page_name = route[2];
 	}
 
 	set_breadcrumbs() {
-		this.set_title();
 		frappe.breadcrumbs.add({
 			label: __('Hub'),
 			route: '#Hub/' + this.doctype,
 			type: 'Custom'
 		});
-	}
-
-	set_title() {
-		this.page_title = this.data.item_name || this.hub_item_code || 'Hub' + this.doctype;
 	}
 
 	setup_side_bar() {
@@ -56,15 +52,7 @@ erpnext.hub.HubForm = class HubForm extends frappe.views.BaseList {
 			label: image_html
 		});
 
-		let fields = [];
-		this.fields.map(fieldname => {
-			fields.push({
-				label: toTitle(frappe.model.unscrub(fieldname)),
-				fieldname,
-				fieldtype: 'Data',
-				read_only: 1
-			});
-		});
+		let fields = this.get_field_configs();
 
 		this.form = new frappe.ui.FieldGroup({
 			parent: this.$result,
@@ -93,38 +81,50 @@ erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubForm{
 		this.image_field_name = 'image';
 	}
 
-	setup_fields() {
-		this.fields = ['hub_item_code', 'item_name', 'item_code', 'description',
-			'seller', 'company_name', 'country', 'hub_category'];
+	get_field_configs() {
+		let fields = [];
+		this.fields.map(fieldname => {
+			fields.push({
+				label: toTitle(frappe.model.unscrub(fieldname)),
+				fieldname,
+				fieldtype: 'Data',
+				read_only: 1
+			});
+		});
+
+		let category_field = {
+			label: 'Hub Category',
+			fieldname: 'hub_category',
+			fieldtype: 'Data'
+		}
+
+		if(this.data.company_name === this.hub_settings.company) {
+			this.page.set_primary_action(__('Update'), () => {
+				this.update_on_hub();
+			}, 'octicon octicon-plus');
+		} else {
+			category_field.read_only = 1;
+		}
+
+		fields.push(category_field);
+
+		return fields;
 	}
 
-	show_action_modal(item) {
-		return new Promise(res => {
-			let fields = [
-				{ label: __('Item Code'), fieldtype: 'Data', fieldname: 'item_code', default: item.item_code },
-				{ fieldtype: 'Column Break' },
-				{ label: __('Item Group'), fieldtype: 'Link', fieldname: 'item_group', default: item.item_group },
-				{ label: __('Supplier Details'), fieldtype: 'Section Break' },
-				{ label: __('Supplier Name'), fieldtype: 'Data', fieldname: 'supplier_name', default: item.company_name },
-				{ label: __('Supplier Email'), fieldtype: 'Data', fieldname: 'supplier_email', default: item.seller },
-				{ fieldtype: 'Column Break' },
-				{ label: __('Supplier Type'), fieldname: 'supplier_type',
-					fieldtype: 'Link', options: 'Supplier Type' }
-			];
-			fields = fields.map(f => { f.reqd = 1; return f; });
-
-			const d = new frappe.ui.Dialog({
-				title: __('Request for Quotation'),
-				fields: fields,
-				primary_action_label: __('Send'),
-				primary_action: (values) => {
-					res(values);
-					d.hide();
-				}
-			});
-
-			d.show();
+	update_on_hub() {
+		return new Promise((resolve, reject) => {
+			frappe.call({
+				method: 'erpnext.hub_node.update_category',
+				args: { item: this.unique_id, category: this.form.get_value('hub_category') },
+				callback: resolve,
+				freeze: true
+			}).fail(reject);
 		});
+	}
+
+	setup_fields() {
+		this.fields = ['hub_item_code', 'item_name', 'item_code', 'description',
+			'seller', 'company_name', 'country'];
 	}
 }
 
@@ -133,6 +133,20 @@ erpnext.hub.CompanyPage = class CompanyPage extends erpnext.hub.HubForm{
 		super.setup_defaults();
 		this.doctype = 'Company';
 		this.image_field_name = 'company_logo';
+	}
+
+	get_field_configs() {
+		let fields = [];
+		this.fields.map(fieldname => {
+			fields.push({
+				label: toTitle(frappe.model.unscrub(fieldname)),
+				fieldname,
+				fieldtype: 'Data',
+				read_only: 1
+			});
+		});
+
+		return fields;
 	}
 
 	setup_fields() {

@@ -35,15 +35,17 @@ def get_categories(parent='All Categories'):
 	# get categories info with parent category and stuff
 	connection = get_client_connection()
 	categories = connection.get_list('Hub Category', filters={'parent_hub_category': parent})
-	# print("============================================================")
-	# print(categories)
+
 	response = [{'value': c.get('name'), 'expandable': c.get('is_group')} for c in categories]
 	return response
 
-	# return [
-	# 	{'value': 'Men', 'expandable': 1},
-	# 	{'value': 'Women', 'expandable': 0}
-	# ]
+@frappe.whitelist()
+def update_category(item_name, category):
+	connection = get_hub_connection()
+	response = connection.update('Hub Item', dict(
+		hub_category = category
+	), item_name)
+	return response.ok
 
 @frappe.whitelist()
 def get_details(hub_sync_id=None, doctype='Hub Item'):
@@ -52,11 +54,6 @@ def get_details(hub_sync_id=None, doctype='Hub Item'):
 	connection = get_client_connection()
 	details = connection.get_doc(doctype, hub_sync_id)
 	return details
-
-# @frappe.whitelist()
-# def get_company_details(hub_sync_id):
-# 	connection = get_client_connection()
-# 	return connection.get_doc('Hub Company', hub_sync_id)
 
 def get_client_connection():
 	# frappeclient connection
