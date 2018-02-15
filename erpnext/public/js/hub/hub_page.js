@@ -124,14 +124,14 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 		});
 
 		this.sidebar.add_item({
-			label: this.hub_settings.company,
-			on_click: () => frappe.set_route('Form', 'Company', this.hub_settings.company)
-		}, __("Account"));
-
-		this.sidebar.add_item({
 			label: __('Companies'),
 			on_click: () => frappe.set_route('Hub', 'Company')
 		});
+
+		this.sidebar.add_item({
+			label: this.hub_settings.company,
+			on_click: () => frappe.set_route('Form', 'Company', this.hub_settings.company)
+		}, __("Account"));
 
 		this.sidebar.add_item({
 			label: __("My Orders"),
