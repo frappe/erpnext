@@ -126,6 +126,21 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 				this.update_category(node.label);
 			}
 		});
+
+		this.sidebar.add_item({
+			label: this.hub_settings.company,
+			on_click: () => frappe.set_route('Form', 'Company', this.hub_settings.company)
+		}, __("Account"));
+
+		this.sidebar.add_item({
+			label: __('Companies'),
+			on_click: () => frappe.set_route('Hub', 'Company')
+		});
+
+		this.sidebar.add_item({
+			label: __("My Orders"),
+			on_click: () => frappe.set_route('List', 'Request for Quotation')
+		}, __("Account"));
 	}
 
 	update_category(label) {
@@ -171,9 +186,10 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 						<h5 class="bold">
 							${ title }
 						</h5>
-						<p>${ company_name }</p>
+
 					</div>
 				</a>
+				<a href="${'#Hub/Company/'+company_name}"><p>${ company_name }</p></a>
 			</div>
 		`;
 	}
