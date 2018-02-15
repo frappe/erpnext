@@ -5,6 +5,8 @@ import frappe
 from frappe.utils import nowdate, add_days
 from erpnext.demo.setup.setup_data import import_json
 
+from six import iteritems
+
 def setup_data():
 	import_json("Asset Category")
 	setup_item()
