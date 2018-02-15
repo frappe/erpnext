@@ -11,7 +11,7 @@ class ProjectUpdate(Document):
     pass
 
 @frappe.whitelist()
-def current_day_time(doc,method):
+def current_day_time(doc):
     doc.date = frappe.utils.today()
     doc.time = frappe.utils.now_datetime().strftime('%H:%M:%S')
 
