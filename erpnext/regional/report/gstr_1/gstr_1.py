@@ -15,7 +15,6 @@ class Gstr1Report(object):
 		self.columns = []
 		self.data = []
 		self.doctype = "Sales Invoice"
-		self.gst_limit = frappe.get_doc("GST Settings")
 		self.tax_doctype = "Sales Taxes and Charges"
 		self.select_columns = """
 			name as invoice_number,
@@ -112,19 +111,21 @@ class Gstr1Report(object):
 			conditions += " and invoice_type != 'Export' and is_return != 1 and customer in ('{0}')".\
 				format("', '".join([frappe.db.escape(c.name) for c in customers]))
 
-		if not self.gst_limit.b2c_limit:
-			frappe.throw(_("Please set B2C Limit in GST Settings."))
+		if self.filters.get("type_of_business") in ("B2C Large", "B2C Small"):
+			b2c_limit = frappe.db.get_single_value('GSt Settings', 'b2c_limit')
+			if not b2c_limit:
+				frappe.throw(_("Please set B2C Limit in GST Settings."))
 
 		if self.filters.get("type_of_business") ==  "B2C Large":
 			conditions += """ and SUBSTR(place_of_supply, 1, 2) != SUBSTR(company_gstin, 1, 2)
 				and grand_total > {0} and is_return != 1 and customer in ('{1}')""".\
-					format(self.gst_limit.b2c_limit, "', '".join([frappe.db.escape(c.name) for c in customers])	)
+					format((flt(b2c_limit), "', '".join([frappe.db.escape(c.name) for c in customers])	)
 					
 		elif self.filters.get("type_of_business") ==  "B2C Small":
 			conditions += """ and (
 				SUBSTR(place_of_supply, 1, 2) = SUBSTR(company_gstin, 1, 2)
 					or grand_total <= {0}) and is_return != 1 and customer in ('{1}')""".\
-						format(self.gst_limit.b2c_limit, "', '".join([frappe.db.escape(c.name) for c in customers]))
+						format(flt(b2c_limit), "', '".join([frappe.db.escape(c.name) for c in customers]))
 
 		elif self.filters.get("type_of_business") ==  "CDNR":
 			conditions += """ and is_return = 1 """
