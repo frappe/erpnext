@@ -872,7 +872,7 @@ class StockEntry(StockController):
 	
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):
-	if isinstance(items, basestring):
+	if isinstance(items, string_types):
 		items = json.loads(items)
 	retention_warehouse = frappe.db.get_single_value('Stock Settings', 'sample_retention_warehouse')
 	stock_entry = frappe.new_doc("Stock Entry")

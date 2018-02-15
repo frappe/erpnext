@@ -52,7 +52,7 @@ def make_variant_based_on_manufacturer(template, manufacturer, manufacturer_part
 	return variant
 
 def validate_item_variant_attributes(item, args=None):
-	if isinstance(item, basestring):
+	if isinstance(item, string_types):
 		item = frappe.get_doc('Item', item)
 
 	if not args:
