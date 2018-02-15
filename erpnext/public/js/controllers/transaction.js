@@ -458,7 +458,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 
 				var party = me.frm.doc[frappe.model.scrub(party_type)];
-				if(party) {
+				if(party && me.frm.doc.company) {
 					return frappe.call({
 						method: "erpnext.accounts.party.get_party_account",
 						args: {
@@ -704,7 +704,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		if(!this.in_apply_price_list) {
-			this.apply_price_list();
+			this.apply_price_list(null, true);
 		}
 	},
 
@@ -776,7 +776,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.frm.toggle_reqd("plc_conversion_rate",
 			!!(this.frm.doc.price_list_name && this.frm.doc.price_list_currency));
 
-		if(this.frm.doc_currency!==this.frm.doc.currency) {
+		if(this.frm.doc_currency!==this.frm.doc.currency
+			|| this.frm.doc_currency!==this.frm.doc.price_list_currency) {
 			// reset names only when the currency is different
 
 			var company_currency = this.get_company_currency();
@@ -1056,7 +1057,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if(!price_list_rate_changed) me.calculate_taxes_and_totals();
 	},
 
-	apply_price_list: function(item) {
+	apply_price_list: function(item, reset_plc_conversion) {
+		// We need to reset plc_conversion_rate sometimes because the call to
+		// `erpnext.stock.get_item_details.apply_price_list` is sensitive to its value
+		if (!reset_plc_conversion) {
+			this.frm.set_value("plc_conversion_rate", "");
+		}
+
 		var me = this;
 		var args = this._get_args(item);
 		if (!((args.items && args.items.length) || args.price_list)) {

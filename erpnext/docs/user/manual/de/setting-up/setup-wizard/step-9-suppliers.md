@@ -4,7 +4,7 @@
 Geben Sie ein paar Namen Ihrer Lieferanten ein.
 
 <img alt="Lieferanten" class="screenshot"
-src="/docs/assets/img/setup-wizard/step-9.png">
+src="{{docs_base_url}}/assets/img/setup-wizard/step-9.png">
 
 ---
 

@@ -8,10 +8,10 @@ You can make a Delivery directly from:
 
 Delivery
 
-<img class="screenshot" alt="Delivery" src="/docs/assets/img/stock/delivery_trip.png">
+<img class="screenshot" alt="Delivery" src="{{docs_base_url}}/assets/img/stock/delivery_trip.png">
 
 Delivery Stops
 
-<img class="screenshot" alt="Delivery" src="/docs/assets/img/stock/delivery_stops.png">
+<img class="screenshot" alt="Delivery" src="{{docs_base_url}}/assets/img/stock/delivery_stops.png">
 
 {next}

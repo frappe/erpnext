@@ -11,13 +11,13 @@ You can either directly create your Customers via
 
 > Selling > Customer
 
-<img class="screenshot" alt="Create Customer" src="/docs/assets/img/crm/create-customer.gif">
+<img class="screenshot" alt="Create Customer" src="{{docs_base_url}}/assets/img/crm/create-customer.gif">
 
 or upload it via the [Data Import Tool](/docs/user/manual/en/setting-up/data/data-import-tool.html).
 
 A Customer can avail the features (operations) in the selling process. The general flow can be summarised as:
 
-<img class="screenshot" alt="Customer" src="/docs/assets/img/crm/customer-to selling-flowchart.jpeg">
+<img class="screenshot" alt="Customer" src="{{docs_base_url}}/assets/img/crm/customer-to selling-flowchart.jpeg">
 
 > Note: Customers are separate from Contacts and Addresses. A Customer can
 have multiple Contacts and Addresses.

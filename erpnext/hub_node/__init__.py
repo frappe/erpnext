@@ -15,38 +15,45 @@ def enable_hub():
 	return hub_settings
 
 @frappe.whitelist()
-def get_items(start=0, limit=20, category=None, order_by=None, company=None, text=None):
+def get_list(doctype, start=0, limit=20, fields=["*"], filters="{}", order_by=None):
 	connection = get_client_connection()
-	filters = {
-		'hub_category': category,
-	}
-	if text:
-		filters.update({'item_name': ('like', '%' + text + '%')})
-	if company:
-		filters.update({'company_name': company})
+	filters = json.loads(filters)
 
-	response = connection.get_list('Hub Item',
+	response = connection.get_list(doctype,
 		limit_start=start, limit_page_length=limit,
-		filters=filters)
+		filters=filters, fields=fields)
 	return response
 
 @frappe.whitelist()
-def get_categories():
+def get_meta(doctype):
 	connection = get_client_connection()
-	response = connection.get_list('Hub Category')
+	meta = connection.get_doc('DocType', doctype)
+	return meta
+
+@frappe.whitelist()
+def get_categories(parent='All Categories'):
+	# get categories info with parent category and stuff
+	connection = get_client_connection()
+	categories = connection.get_list('Hub Category', filters={'parent_hub_category': parent})
+
+	response = [{'value': c.get('name'), 'expandable': c.get('is_group')} for c in categories]
 	return response
 
 @frappe.whitelist()
-def get_item_details(hub_sync_id=None):
+def update_category(item_name, category):
+	connection = get_hub_connection()
+	response = connection.update('Hub Item', dict(
+		hub_category = category
+	), item_name)
+	return response.ok
+
+@frappe.whitelist()
+def get_details(hub_sync_id=None, doctype='Hub Item'):
 	if not hub_sync_id:
 		return
 	connection = get_client_connection()
-	return connection.get_doc('Hub Item', hub_sync_id)
-
-@frappe.whitelist()
-def get_company_details(hub_sync_id):
-	connection = get_client_connection()
-	return connection.get_doc('Hub Company', hub_sync_id)
+	details = connection.get_doc(doctype, hub_sync_id)
+	return details
 
 def get_client_connection():
 	# frappeclient connection

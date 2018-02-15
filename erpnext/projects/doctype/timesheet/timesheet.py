@@ -156,14 +156,18 @@ class Timesheet(Document):
 			(self.production_order, operation_id), as_dict=1)[0]
 
 	def update_task_and_project(self):
+		tasks, projects = [], []
+
 		for data in self.time_logs:
-			if data.task:
+			if data.task and data.task not in tasks:
 				task = frappe.get_doc("Task", data.task)
 				task.update_time_and_costing()
 				task.save()
+				tasks.append(data.task)
 
-			elif data.project:
+			elif data.project and data.project not in projects:
 				frappe.get_doc("Project", data.project).update_project()
+				projects.append(data.project)
 
 	def validate_dates(self):
 		for data in self.time_logs:
@@ -310,22 +314,28 @@ def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def get_timesheet_data(name, project):
+	data = None
 	if project and project!='':
 		data = get_projectwise_timesheet_data(project, name)
 	else:
 		data = frappe.get_all('Timesheet',
 			fields = ["(total_billable_amount - total_billed_amount) as billing_amt", "total_billable_hours as billing_hours"], filters = {'name': name})
-
 	return {
-		'billing_hours': data[0].billing_hours,
-		'billing_amount': data[0].billing_amt,
-		'timesheet_detail': data[0].name if project and project!= '' else None
+		'billing_hours': data[0].billing_hours if data else None,
+		'billing_amount': data[0].billing_amt if data else None,
+		'timesheet_detail': data[0].name if data and project and project!= '' else None
 	}
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, item_code=None, customer=None):
 	target = frappe.new_doc("Sales Invoice")
 	timesheet = frappe.get_doc('Timesheet', source_name)
+
+	if not timesheet.total_billable_hours:
+		frappe.throw(_("Invoice can't be made for zero billing hour"))
+
+	if timesheet.total_billable_hours == timesheet.total_billed_hours:
+		frappe.throw(_("Invoice already created for all billing hours"))
 
 	hours = flt(timesheet.total_billable_hours) - flt(timesheet.total_billed_hours)
 	billing_amount = flt(timesheet.total_billable_amount) - flt(timesheet.total_billed_amount)

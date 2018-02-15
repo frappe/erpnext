@@ -252,7 +252,7 @@ class PayrollEntry(Document):
 			journal_entry.user_remark = _('Accural Journal Entry for salaries from {0} to {1}')\
 				.format(self.start_date, self.end_date)
 			journal_entry.company = self.company
-			journal_entry.posting_date = nowdate()
+			journal_entry.posting_date = self.posting_date
 
 			accounts = []
 			payable_amount = 0
@@ -321,7 +321,7 @@ class PayrollEntry(Document):
 			journal_entry.user_remark = _('Payment of salary from {0} to {1}')\
 				.format(self.start_date, self.end_date)
 			journal_entry.company = self.company
-			journal_entry.posting_date = nowdate()
+			journal_entry.posting_date = self.posting_date
 
 			payment_amount = flt(total_salary_amount.rounded_total, precision)
 
@@ -455,13 +455,13 @@ def format_as_links(salary_slip):
 def create_submit_log(submitted_ss, not_submitted_ss, jv_name):
 
 	if not submitted_ss and not not_submitted_ss:
-		frappe.msgprint("No salary slip found to submit for the above selected criteria OR salary slip already submitted")
+		frappe.msgprint(_("No salary slip found to submit for the above selected criteria OR salary slip already submitted"))
 
 	if not_submitted_ss:
-		frappe.msgprint("Could not submit any Salary Slip <br>\
+		frappe.msgprint(_("Could not submit any Salary Slip <br>\
 			Possible reasons: <br>\
 			1. Net pay is less than 0. <br>\
-			2. Company Email Address specified in employee master is not valid. <br>")
+			2. Company Email Address specified in employee master is not valid. <br>"))
 
 
 def get_salary_slip_list(name, docstatus, as_dict=0):

@@ -84,7 +84,7 @@ erpnext.setup.slides_settings = [
 
 			slide.get_input("company_abbr").on("change", function () {
 				if (slide.get_input("company_abbr").val().length > 5) {
-					frappe.msgprint("Company Abbreviation cannot have more than 5 characters");
+					frappe.msgprint(__("Company Abbreviation cannot have more than 5 characters"));
 					slide.get_field("company_abbr").set_value("");
 				}
 			});

@@ -33,7 +33,38 @@ frappe.ui.form.on("Customer", {
 				}
 			}
 		})
+		frm.set_query('customer_primary_address', function(doc) {
+			return {
+				query: "erpnext.selling.doctype.customer.customer.get_customer_primary_address",
+				filters: {
+					'customer': doc.name
+				}
+			}
+		})
 	},
+	customer_primary_address: function(frm){
+		if(frm.doc.customer_primary_address){
+			frappe.call({
+				method: 'frappe.contacts.doctype.address.address.get_address_display',
+				args: {
+					"address_dict": frm.doc.customer_primary_address
+				},
+				callback: function(r) {
+					frm.set_value("primary_address", r.message);
+				}
+			});
+		}
+		if(!frm.doc.customer_primary_address){
+			frm.set_value("primary_address", "");
+		}
+	},
+	customer_primary_contact: function(frm){
+		if(!frm.doc.customer_primary_contact){
+			frm.set_value("mobile_no", "");
+			frm.set_value("email_id", "");
+		}
+	},
+
 	refresh: function(frm) {
 		if(frappe.defaults.get_default("cust_master_name")!="Naming Series") {
 			frm.toggle_display("naming_series", false);
@@ -43,7 +74,7 @@ frappe.ui.form.on("Customer", {
 
 		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Customer'}
 
-		frm.toggle_display(['address_html','contact_html','primary_contact_detail'], !frm.doc.__islocal);
+		frm.toggle_display(['address_html','contact_html','primary_address_and_contact_detail'], !frm.doc.__islocal);
 
 		if(!frm.doc.__islocal) {
 			frappe.contacts.render_address_and_contact(frm);

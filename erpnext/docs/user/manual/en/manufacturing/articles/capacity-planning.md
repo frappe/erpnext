@@ -2,7 +2,7 @@
 
 Capacity Planning functionality helps you in tracking production jobs allocated on each Workstation.
 
-<img alt="Role Desk Permission" class="screenshot" src="/docs/assets/img/articles/capacity-1.png">
+<img alt="Role Desk Permission" class="screenshot" src="{{docs_base_url}}/assets/img/articles/capacity-1.png">
 
 Follow are the steps to use Capacity Planning Feature in your ERPNext account.
 
@@ -32,7 +32,7 @@ Follow are the steps to use Capacity Planning Feature in your ERPNext account.
 
 **Question:** On Submission of Production Order, we are getting following error message.
 
-<img alt="Role Desk Permission" class="screenshot" src="/docs/assets/img/articles/capacity-2.png">
+<img alt="Role Desk Permission" class="screenshot" src="{{docs_base_url}}/assets/img/articles/capacity-2.png">
 
 **Answer: **Please check if you have updated Working Hours in the Workstation master? If not, then please update it and then try to submit Production Order.
 
@@ -45,7 +45,7 @@ If you have update working hours in the Workstation, but still getting this issu
 If you want to ignore above validation and allow scheduling of production job beyond the working hours of the Workstation, enable
 Overtime in the Manufacturing Settings.
 
-<img alt="Role Desk Permission" class="screenshot" src="/docs/assets/img/articles/capacity-3.png">
+<img alt="Role Desk Permission" class="screenshot" src="{{docs_base_url}}/assets/img/articles/capacity-3.png">
 
 If you want to complete disable Capacity Planning feature, in the Manufacturing Settings, check field "Disable Capacity Planning and Time Tracking".
 

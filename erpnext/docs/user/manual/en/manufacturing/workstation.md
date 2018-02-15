@@ -10,7 +10,7 @@ You can also create a Workstation by:
 
 > Manufacturing > Documents > Workstation > New
 
-<img class="screenshot" alt="Workstation" src="/docs/assets/img/manufacturing/workstation.png">
+<img class="screenshot" alt="Workstation" src="{{docs_base_url}}/assets/img/manufacturing/workstation.png">
 
 In workstation specify the workstation working hours under the 'working hour' section. 
 You can also specify the working hours based on shifts.

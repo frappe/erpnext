@@ -2,7 +2,7 @@
 
 Select the domain(s) that will be enabled after setup.
 
-<img alt="Domains" class="screenshot" src="/docs/assets/img/setup-wizard/step-4.png">
+<img alt="Domains" class="screenshot" src="{{docs_base_url}}/assets/img/setup-wizard/step-4.png">
 
 ---
 

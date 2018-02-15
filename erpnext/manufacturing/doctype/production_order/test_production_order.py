@@ -10,7 +10,6 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_per
 from erpnext.manufacturing.doctype.production_order.production_order \
 	import make_stock_entry, ItemHasVariantError, stop_unstop
 from erpnext.stock.doctype.stock_entry import test_stock_entry
-from erpnext.stock.doctype.item.test_item import get_total_projected_qty
 from erpnext.stock.utils import get_bin
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
@@ -81,7 +80,7 @@ class TestProductionOrder(unittest.TestCase):
 		prod_order.set_production_order_operations()
 		prod_order.insert()
 		prod_order.submit()
-		
+
 		d = prod_order.operations[0]
 		d.completed_qty = flt(d.completed_qty)
 
@@ -89,7 +88,7 @@ class TestProductionOrder(unittest.TestCase):
 		time_sheet_doc = frappe.get_doc('Timesheet', name)
 		self.assertEqual(prod_order.company, time_sheet_doc.company)
 		time_sheet_doc.submit()
-		
+
 
 		self.assertEqual(prod_order.name, time_sheet_doc.production_order)
 		self.assertEqual((prod_order.qty - d.completed_qty),
@@ -108,7 +107,7 @@ class TestProductionOrder(unittest.TestCase):
 
 		self.assertEqual(prod_order.operations[0].actual_operation_time, 60)
 		self.assertEqual(prod_order.operations[0].actual_operating_cost, 6000)
-		
+
 		time_sheet_doc1 = make_timesheet(prod_order.name, prod_order.company)
 		self.assertEqual(len(time_sheet_doc1.get('time_logs')), 0)
 
@@ -176,28 +175,6 @@ class TestProductionOrder(unittest.TestCase):
 		self.assertEqual(self.bin1_at_start.projected_qty,
 			cint(bin1_on_cancel.projected_qty))
 
-	def test_projected_qty_for_production_and_sales_order(self):
-		before_production_order = get_bin(self.item, self.warehouse)
-		before_production_order.update_reserved_qty_for_production()
-
-		self.pro_order = make_prod_order_test_record(item="_Test FG Item", qty=2,
-			source_warehouse=self.warehouse)
-
-		after_production_order = get_bin(self.item, self.warehouse)
-
-		sales_order = make_sales_order(item = self.item, qty = 2)
-		after_sales_order = get_bin(self.item, self.warehouse)
-
-		self.assertEqual(cint(before_production_order.reserved_qty_for_production) + 2,
-			cint(after_sales_order.reserved_qty_for_production))
-		self.assertEqual(cint(before_production_order.projected_qty),
-			cint(after_sales_order.projected_qty) + 2)
-
-		total_projected_qty = get_total_projected_qty(self.item)
-
-		item_doc = frappe.get_doc('Item', self.item)
-		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
-
 	def test_reserved_qty_for_production_on_stock_entry(self):
 		test_stock_entry.make_stock_entry(item_code="_Test Item",
 			target= self.warehouse, qty=100, basic_rate=100)
@@ -230,7 +207,7 @@ class TestProductionOrder(unittest.TestCase):
 			cint(bin1_on_start_production.reserved_qty_for_production))
 		self.assertEqual(cint(bin1_on_end_production.projected_qty),
 			cint(bin1_on_end_production.projected_qty))
-			
+
 	def test_reserved_qty_for_stopped_production(self):
 		test_stock_entry.make_stock_entry(item_code="_Test Item",
 			target= self.warehouse, qty=100, basic_rate=100)
@@ -238,18 +215,18 @@ class TestProductionOrder(unittest.TestCase):
 			target= self.warehouse, qty=100, basic_rate=100)
 
 		# 	0 0 0
-		
+
 		self.test_reserved_qty_for_production_submit()
-		
+
 		#2 0 -2
 
 		s = frappe.get_doc(make_stock_entry(self.pro_order.name,
 			"Material Transfer for Manufacture", 1))
 
 		s.submit()
-		
+
 		#1 -1 0
-		
+
 		bin1_on_start_production = get_bin(self.item, self.warehouse)
 
 		# reserved_qty_for_producion updated
@@ -259,10 +236,10 @@ class TestProductionOrder(unittest.TestCase):
 		# projected qty will now be 2 less (becuase of item movement)
 		self.assertEqual(cint(self.bin1_at_start.projected_qty),
 			cint(bin1_on_start_production.projected_qty) + 2)
-			
+
 		# STOP
 		stop_unstop(self.pro_order.name, "Stopped")
-		
+
 		bin1_on_stop_production = get_bin(self.item, self.warehouse)
 
 		# no change in reserved / projected

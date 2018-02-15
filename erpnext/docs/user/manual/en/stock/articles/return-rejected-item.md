@@ -10,4 +10,4 @@ If you are creating Purchase Return for the items received in the Rejected Wareh
 
 For detailed steps on how to create Purchase Return Entry for the Rejected Item, refer to the below example.
 
-<img class="screenshot" alt="Returning Rejected Items" src="/docs/assets/img/articles/purchase-return.gif">
+<img class="screenshot" alt="Returning Rejected Items" src="{{docs_base_url}}/assets/img/articles/purchase-return.gif">

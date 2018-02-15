@@ -4,7 +4,7 @@ Enter in a short sentence of what your company does. This is often a mission sta
 
 Add the name of the organization's primary financial institution. This information will populate **Accounts**.
 
-<img alt="Company Details" class="screenshot" src="/docs/assets/img/setup-wizard/step-6.png">
+<img alt="Company Details" class="screenshot" src="{{docs_base_url}}/assets/img/setup-wizard/step-6.png">
 
 ### Chart of Accounts
 

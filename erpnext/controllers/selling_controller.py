@@ -150,6 +150,9 @@ class SellingController(StockController):
 		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
 			return
 
+		if hasattr(self, "is_return") and self.is_return:
+			return
+
 		for it in self.get("items"):
 			if not it.item_code:
 				continue

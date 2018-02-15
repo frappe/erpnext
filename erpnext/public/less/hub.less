@@ -1,5 +1,41 @@
 @import "../../../../frappe/frappe/public/less/variables.less";
 
+body[data-route^="Hub/"] {
+	.freeze .image-view-container {
+		.list-row-col {
+			background-color: @light-bg;
+			color: @light-bg;
+		}
+
+		.placeholder-text {
+			color: @light-bg;
+		}
+	}
+
+	.freeze {
+		display: none;
+	}
+
+	.image-view-container {
+		justify-content: space-around;
+	}
+}
+
+.img-wrapper {
+	border: 1px solid #d1d8dd;
+	border-radius: 3px;
+	padding: 12px;
+	overflow: hidden;
+	text-align: center;
+	white-space: nowrap;
+
+	.helper {
+		height: 100%;
+		display: inline-block;
+		vertical-align: middle;
+	}
+}
+
 /* hub */
 div[data-page-route="hub"] {
 	.page-head {

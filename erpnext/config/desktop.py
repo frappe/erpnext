@@ -336,7 +336,7 @@ def get_data():
 			"color": "#009248",
 			"icon": "/assets/erpnext/images/hub_logo.svg",
 			"type": "page",
-			"link": "hub",
+			"link": "Hub/Home",
 			"label": _("Hub")
 		},
 		{
@@ -357,6 +357,14 @@ def get_data():
 			"type": "list",
 			"link": "List/Restaurant",
 			"label": _("Restaurant"),
+			"hidden": 1
+		},
+		{
+			"module_name": "Hotels",
+			"color": "#EA81E8",
+			"icon": "fa fa-bed",
+			"type": "module",
+			"label": _("Hotels"),
 			"hidden": 1
 		},
 		{
