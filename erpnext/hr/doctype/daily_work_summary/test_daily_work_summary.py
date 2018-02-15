@@ -36,8 +36,8 @@ class TestDailyWorkSummary(unittest.TestCase):
 		self.setup_and_prepare_test()
 
 		with open(os.path.join(os.path.dirname(__file__), "test_data", "test-reply.raw"), "r") as f:
-			test_mails = [f.read().replace('{{ sender }}', 
-			self.users[-1].email).replace('{{ message_id }}', 
+			test_mails = [f.read().replace('{{ sender }}',
+			self.users[-1].email).replace('{{ message_id }}',
 			self.emails[-1].message_id)]
 		# pull the mail
 		email_account = frappe.get_doc("Email Account", "_Test Email Account 1")
