@@ -19,6 +19,8 @@ from frappe.website.doctype.website_slideshow.website_slideshow import \
 from frappe.website.render import clear_cache
 from frappe.website.website_generator import WebsiteGenerator
 
+from six import iteritems
+
 
 class DuplicateReorderRows(frappe.ValidationError):
 	pass
@@ -720,7 +722,7 @@ def get_timeline_data(doctype, name):
 			and posting_date > date_sub(curdate(), interval 1 year)
 			group by posting_date''', name))
 
-	for date, count in items.iteritems():
+	for date, count in iteritems(items):
 		timestamp = get_timestamp(date)
 		out.update({timestamp: count})
 
