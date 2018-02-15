@@ -39,7 +39,6 @@ def _get_accounts_in_mappers(mapping_names):
 
 def _setup_mappers(mappers):
 	cash_flow_accounts = []
-	tax_paid_mappers = []
 
 	for mapping in mappers:
 		mapping['account_types'] = []
@@ -49,6 +48,9 @@ def _setup_mappers(mappers):
 		mapping['finance_costs_adjustments'] = []
 		doc = frappe.get_doc('Cash Flow Mapper', mapping['name'])
 		mapping_names = [item.name for item in doc.accounts]
+
+		if not mapping_names:
+			continue
 
 		accounts = _get_accounts_in_mappers(mapping_names)
 
@@ -142,11 +144,11 @@ def _setup_mappers(mappers):
 
 		cash_flow_accounts.append(mapping)
 
-	return cash_flow_accounts, tax_paid_mappers, 
+	return cash_flow_accounts
 
 
 def _add_data_for_operating_activites(
-	filters, company_currency, profit_data, period_list, light_mappers, mapper, tax_paid_mappers, data):
+	filters, company_currency, profit_data, period_list, light_mappers, mapper, data):
 	has_added_working_capital_header = False
 	section_data = []
 
@@ -304,7 +306,7 @@ def _add_data_for_other_activities(
 			period_list, company_currency)
 
 
-def _compute_data(filters, company_currency, profit_data, period_list, light_mappers, full_mapper, tax_paid_mappers):
+def _compute_data(filters, company_currency, profit_data, period_list, light_mappers, full_mapper):
 	data = []
 
 	operating_activities_mapper = _get_mapper_for(light_mappers, position=0)
@@ -316,7 +318,7 @@ def _compute_data(filters, company_currency, profit_data, period_list, light_map
 	if operating_activities_mapper:
 		_add_data_for_operating_activites(
 			filters, company_currency, profit_data, period_list, light_mappers, 
-			operating_activities_mapper, tax_paid_mappers, data
+			operating_activities_mapper, data
 		)
 
 	if all(other_mappers):
@@ -334,7 +336,7 @@ def execute(filters=None):
 	# let's make sure mapper's is sorted by its 'position' field
 	mappers = _get_mappers_from_db()
 
-	cash_flow_accounts, tax_paid_mappers = _setup_mappers(mappers)
+	cash_flow_accounts = _setup_mappers(mappers)
 
 	# compute net profit / loss
 	income = get_data(filters.company, "Income", "Credit", period_list, 
@@ -347,7 +349,7 @@ def execute(filters=None):
 
 	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
 
-	data = _compute_data(filters, company_currency, net_profit_loss, period_list, mappers, cash_flow_accounts, tax_paid_mappers)
+	data = _compute_data(filters, company_currency, net_profit_loss, period_list, mappers, cash_flow_accounts)
 
 	add_total_row_account(data, data, _("Net Change in Cash"), period_list, company_currency)
 	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
