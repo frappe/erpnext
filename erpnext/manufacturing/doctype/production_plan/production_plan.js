@@ -20,6 +20,14 @@ frappe.ui.form.on('Production Plan', {
 				}
 			} else frappe.msgprint(__("Please enter Item first"));
 		}
+
+		frm.fields_dict['mr_items'].grid.get_field('warehouse').get_query = function(doc) {
+			return {
+				filters: {
+					company: doc.company
+				}
+			}
+		}
 	},
 
 	refresh: function(frm) {
@@ -27,20 +35,21 @@ frappe.ui.form.on('Production Plan', {
 			frm.trigger("show_progress");
 		}
 
-		if (frm.doc.docstatus === 1) {
+		if (frm.doc.docstatus === 1 && frm.doc.po_items
+			&& frm.doc.status != 'Completed') {
 			frm.add_custom_button(__("Production Order"), ()=> {
 				frm.trigger("make_production_order");
 			}, __("Make"));
 		}
 
-		if (frm.doc.docstatus === 1 && frm.doc.status != 'Material Requested') {
+		if (frm.doc.docstatus === 1 && frm.doc.mr_items
+			&& !in_list(['Material Requested', 'Completed'], frm.doc.status)) {
 			frm.add_custom_button(__("Material Request"), ()=> {
 				frm.trigger("make_material_request");
 			}, __("Make"));
 		}
 
 		frm.trigger("material_requirement");
-		frm.page.set_inner_btn_group_as_primary(__("Make"));
 	},
 
 	make_production_order: function(frm) {
@@ -114,7 +123,7 @@ frappe.ui.form.on('Production Plan', {
 
 		// produced qty
 		let item_wise_qty = {};
-		frm.doc.items.forEach((data) => {
+		frm.doc.po_items.forEach((data) => {
 			if(!item_wise_qty[data.item_code]) {
 				item_wise_qty[data.item_code] = data.produced_qty;
 			} else {
@@ -140,3 +149,20 @@ frappe.ui.form.on('Production Plan', {
 		frm.dashboard.add_progress(__('Status'), bars, message);
 	},
 });
+
+frappe.ui.form.on("Material Request Plan Item", {
+	warehouse: function(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (row.warehouse && row.item_code) {
+			frappe.call({
+				method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_bin_details",
+				args: {
+					row: row
+				},
+				callback: function(r) {
+					frappe.model.set_value(cdt, cdn, 'actual_qty', r.message[1])
+				}
+			})
+		}
+	}
+})

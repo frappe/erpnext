@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, json
 from frappe import msgprint, _
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
@@ -245,7 +245,7 @@ class ProductionPlan(Document):
 			self.status = "In Process"
 			if self.total_produced_qty == self.total_planned_qty:
 				self.status = "Completed"
-		
+
 		if self.status != 'Completed':
 			self.update_ordered_status()
 			self.update_requested_status()
@@ -481,15 +481,19 @@ class ProductionPlan(Document):
 
 		return item_details
 
-def get_bin_details(data):
+@frappe.whitelist()
+def get_bin_details(row):
+	if isinstance(row, basestring):
+		row = frappe._dict(json.loads(row))
+
 	conditions = ""
-	warehouse = data.source_warehouse or data.default_warehouse
+	warehouse = row.source_warehouse or row.default_warehouse or row.warehouse
 	if warehouse:
 		conditions = " and warehouse='{0}'".format(frappe.db.escape(warehouse))
 
 	item_projected_qty = frappe.db.sql(""" select ifnull(sum(projected_qty),0) as projected_qty,
 		ifnull(sum(actual_qty),0) as actual_qty from `tabBin` 
 		where item_code = %(item_code)s {conditions}
-	""".format(conditions=conditions), { "item_code": data.item_code }, as_list=1)
+	""".format(conditions=conditions), { "item_code": row.item_code }, as_list=1)
 
-	return item_projected_qty[0]
+	return item_projected_qty and item_projected_qty[0] or (0,0)
