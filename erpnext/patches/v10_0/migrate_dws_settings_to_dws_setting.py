@@ -28,8 +28,7 @@ def get_setting_companies():
 
 def get_previous_setting():
 	obj = {}
-	setting_data = frappe.db.sql(
-		"select field, value from tabSingles where doctype='Daily Work Summary Settings'")
+	setting_data = frappe.db.sql("select field, value from tabSingles where doctype='Daily Work Summary Settings'")
 	for field, value in setting_data:
 		obj[field] = value
 	obj["companies"] = get_setting_companies()
