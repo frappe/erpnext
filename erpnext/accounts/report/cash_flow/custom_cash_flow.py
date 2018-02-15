@@ -151,11 +151,11 @@ def _add_data_for_operating_activites(
 	section_data = []
 
 	data.append({
-			"account_name": mapper['section_header'], 
-			"parent_account": None,
-			"indent": 0.0, 
-			"account": mapper['section_header']
-		})
+		"account_name": mapper['section_header'], 
+		"parent_account": None,
+		"indent": 0.0, 
+		"account": mapper['section_header']
+	})
 
 	if profit_data:
 		profit_data.update({
@@ -313,14 +313,16 @@ def _compute_data(filters, company_currency, profit_data, period_list, light_map
 		_get_mapper_for(light_mappers, position=2)
 	]
 
-	_add_data_for_operating_activites(
-		filters, company_currency, profit_data, period_list, light_mappers, 
-		operating_activities_mapper, tax_paid_mappers, data
-	)
+	if operating_activities_mapper:
+		_add_data_for_operating_activites(
+			filters, company_currency, profit_data, period_list, light_mappers, 
+			operating_activities_mapper, tax_paid_mappers, data
+		)
 
-	_add_data_for_other_activities(
-		filters, company_currency, profit_data, period_list, light_mappers, other_mappers, data
-	)
+	if all(other_mappers):
+		_add_data_for_other_activities(
+			filters, company_currency, profit_data, period_list, light_mappers, other_mappers, data
+		)
 
 	return data
 
