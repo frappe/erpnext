@@ -7,12 +7,11 @@ frappe.ui.form.on('Project Update', {
 	},
 
 	onload: function (frm) {
-		frm.set_value("naming_series", "UPDATE-.project.-.YY.MM.DD.-.####")
+		frm.set_value("naming_series", "UPDATE-.project.-.YY.MM.DD.-.####");
 	},
 
 	validate: function (frm) {
-		frm.set_value("time", frappe.datetime.now_time())
-        frm.set_value("date", frappe.datetime.nowdate())
-
-    }
+		frm.set_value("time", frappe.datetime.now_time());
+		frm.set_value("date", frappe.datetime.nowdate());
+	}
 });

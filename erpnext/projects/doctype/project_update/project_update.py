@@ -11,11 +11,6 @@ class ProjectUpdate(Document):
     pass
 
 @frappe.whitelist()
-def current_day_time(doc):
-    doc.date = frappe.utils.today()
-    doc.time = frappe.utils.now_datetime().strftime('%H:%M:%S')
-
-@frappe.whitelist()
 def daily_reminder():
     project = frappe.db.sql("""SELECT `tabProject`.project_name,`tabProject`.frequency,`tabProject`.expected_start_date,`tabProject`.expected_end_date,`tabProject`.percent_complete FROM `tabProject`;""")
     for projects in project:
