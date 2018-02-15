@@ -6,8 +6,9 @@ import unittest
 import frappe
 import frappe.defaults
 from frappe.utils import flt, add_days, nowdate
-from erpnext.buying.doctype.purchase_order.purchase_order import (make_purchase_receipt, make_purchase_invoice, make_stock_entry as make_subcontract_transfer_entry)
+from erpnext.buying.doctype.purchase_order.purchase_order import (make_purchase_receipt, make_purchase_invoice, make_rm_stock_entry as make_subcontract_transfer_entry)
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+import json
 
 class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_receipt(self):
@@ -202,11 +203,11 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(bin2.projected_qty, bin1.projected_qty - 10)
 
 		# Create stock transfer
-		se = frappe.get_doc(make_subcontract_transfer_entry(po.name, "_Test FG Item"))
+		rm_item = [{"item_code":"_Test FG Item","rm_item_code":"_Test Item","item_name":"_Test Item",
+					"qty":6,"warehouse":"_Test Warehouse - _TC","rate":100,"amount":600,"stock_uom":"Nos"}]
+		rm_item_string = json.dumps(rm_item)
+		se = frappe.get_doc(make_subcontract_transfer_entry(po.name, rm_item_string))
 		se.to_warehouse = "_Test Warehouse 1 - _TC"
-		for d in se.get("items"):
-			if d.item_code == "_Test Item":
-				d.qty = 6
 		se.save()
 		se.submit()
 
