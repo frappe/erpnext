@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 
+
 class CashFlowMapping(Document):
 	def validate(self):
 		self.validate_checked_options()

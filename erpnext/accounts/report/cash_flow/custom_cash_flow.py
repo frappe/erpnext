@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
+# Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -54,7 +54,7 @@ def setup_mappers(mappers):
 
 		accounts = get_accounts_in_mappers(mapping_names)
 
-		tmp_dict = [
+		account_types = [
 			dict(
 				name=account[0], label=account[1], is_working_capital=account[2], 
 				is_income_tax_liability=account[3], is_income_tax_expense=account[4]
@@ -79,18 +79,13 @@ def setup_mappers(mappers):
 			dict(name=account[0], label=account[1], is_finance_cost=account[5])
 			for account in accounts if account[5]]
 
-		# ordering gets lost here
-		unique_labels = sorted(
+		account_types_labels = sorted(
 			set(
 				[(d['label'], d['is_working_capital'], d['is_income_tax_liability'], d['is_income_tax_expense']) 
-					for d in tmp_dict]
+					for d in account_types]
 			), 
 			key=lambda x: x[1]
 		)
-		for label in unique_labels:
-			names = [d['name'] for d in tmp_dict if d['label'] == label[0]]
-			m = dict(label=label[0], names=names, is_working_capital=label[1])
-			mapping['account_types'].append(m)
 
 		fc_adjustment_labels = sorted(
 			set(
@@ -99,10 +94,6 @@ def setup_mappers(mappers):
 			), 
 			key=lambda x: x[2]
 		)
-		for label in fc_adjustment_labels:
-			names = [d['name'] for d in finance_costs_adjustments if d['label'] == label[0]]
-			m = dict(label=label[0], names=names)
-			mapping['finance_costs_adjustments'].append(m)
 
 		unique_liability_labels = sorted(
 			set(
@@ -126,6 +117,16 @@ def setup_mappers(mappers):
 			),
 			key=lambda x: x[0]
 		)
+
+		for label in account_types_labels:
+			names = [d['name'] for d in account_types if d['label'] == label[0]]
+			m = dict(label=label[0], names=names, is_working_capital=label[1])
+			mapping['account_types'].append(m)
+
+		for label in fc_adjustment_labels:
+			names = [d['name'] for d in finance_costs_adjustments if d['label'] == label[0]]
+			m = dict(label=label[0], names=names)
+			mapping['finance_costs_adjustments'].append(m)
 
 		for label in unique_liability_labels:
 			names = [d['name'] for d in tax_liabilities if d['label'] == label[0]]

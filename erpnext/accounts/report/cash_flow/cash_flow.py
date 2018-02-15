@@ -49,10 +49,7 @@ def execute(filters=None):
 	}
 
 	# combine all cash flow accounts for iteration
-	cash_flow_accounts = []
-	cash_flow_accounts.append(operation_accounts)
-	cash_flow_accounts.append(investing_accounts)
-	cash_flow_accounts.append(financing_accounts)
+	cash_flow_accounts = [operation_accounts, investing_accounts, financing_accounts]
 
 	# compute net profit / loss
 	income = get_data(filters.company, "Income", "Credit", period_list, 
@@ -105,6 +102,7 @@ def execute(filters=None):
 
 	return columns, data
 
+
 def get_account_type_based_data(company, account_type, period_list, accumulated_values):
 	data = {}
 	total = 0
@@ -132,12 +130,14 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 	data["total"] = total
 	return data
 
+
 def get_start_date(period, accumulated_values, company):
 	start_date = period["year_start_date"]
 	if accumulated_values:
 		start_date = get_fiscal_year(period.to_date, company=company)[1]
 
 	return start_date
+
 
 def add_total_row_account(out, data, label, period_list, currency):
 	total_row = {
