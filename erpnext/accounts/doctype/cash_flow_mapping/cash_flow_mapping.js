@@ -36,5 +36,8 @@ frappe.ui.form.on('Cash Flow Mapping', {
 	},
 	is_income_tax_expense: function(frm) {
 		frm.events.disable_unchecked_fields(frm);
+	},
+	is_finance_cost_adjustment: function(frm) {
+		frm.events.disable_unchecked_fields(frm);
 	}
 });
