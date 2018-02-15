@@ -14,6 +14,26 @@ from six.moves.urllib.parse import urlparse
 class WoocommerceSettings(Document):
 	def validate(self):
 		self.validate_settings()
+		self.create_delete_custom_fields()
+
+	def create_delete_custom_fields(self):
+		if self.enable_sync:
+			# create
+			names = ["Customer","Sales Order"]
+			for name in names:
+				custom = frappe.new_doc("Custom Field")
+				custom.dt = name
+				custom.label = "woocommerce_id"
+				custom.save()
+
+		elif not self.enable_sync:
+			# delete
+			names = ["Customer-woocommerce_id","Sales Order-woocommerce_id"]
+			for name in names:
+				delete = frappe.delete_doc("Custom Field",name)
+				delete.save()
+
+		frappe.db.commit()
 
 	def validate_settings(self):
 		if not self.secret:
@@ -30,6 +50,9 @@ class WoocommerceSettings(Document):
 
 	def create_webhooks(self):
 		self.create_coupon_webhooks()
+		self.create_customer_webhooks()
+		self.create_order_webhooks()
+		self.create_product_webhooks()
 
 	def create_coupon_webhooks(self):
 		# Coupon Created
@@ -63,6 +86,97 @@ class WoocommerceSettings(Document):
 			endpoint= "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.restore_coupon"
 		)
 		self.woocommerce_request("webhooks", delete_coupon_data)
+
+	def create_customer_webhooks(self):
+		# Customer Created
+		create_customer_data = self.generate_webhook_data(
+			name = "ERPNext Customer Created",
+			topic = "customer.created",
+			endpoint = "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.customer"
+			)
+		self.woocommerce_request("webhooks", create_customer_data)
+
+		# Customer Updated
+		update_customer_data = self.generate_webhook_data(
+			name = "ERPNext Customer Updated",
+			topic = "customer.updated",
+			endpoint = "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.customer"
+			)
+		self.woocommerce_request("webhooks", update_customer_data)
+
+		# Customer Deleted
+		delete_customer_data = self.generate_webhook_data(
+			name = "ERPNext Customer Deleted",
+			topic = "customer.deleted",
+			endpoint = "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.customer"
+			)
+		self.woocommerce_request("webhooks", delete_customer_data)
+
+	def create_order_webhooks(self):
+		# Order Created
+		create_order_data = self.generate_webhook_data(
+			name = "ERPNext Order Created",
+			topic = "order.created",
+			endpoint = "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.order"
+			)
+		self.woocommerce_request("webhooks", create_order_data)
+
+		# Order Updated
+		update_order_data = self.generate_webhook_data(
+			name = "ERPNext Order Updated",
+			topic = "order.updated",
+			endpoint = "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.order"
+			)
+		self.woocommerce_request("webhooks", update_order_data)
+
+		# Order Deleted
+		delete_order_data = self.generate_webhook_data(
+			name = "ERPNext Order Deleted",
+			topic = "order.deleted",
+			endpoint = "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.order"
+			)
+		self.woocommerce_request("webhooks", delete_order_data)
+
+		# Order Restored
+		restore_order_data = self.generate_webhook_data(
+			name = "ERPNext Order Restored",
+			topic = "order.restored",
+			endpoint = "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.order"
+			)
+		self.woocommerce_request("webhooks", restore_order_data)
+
+	def create_product_webhooks(self):
+		# Product Created
+		create_product_data = self.generate_webhook_data(
+			name = "ERPNext Product Created",
+			topic = "product.created",
+			endpoint = "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.product"
+			)
+		self.woocommerce_request("webhooks", create_product_data)
+
+		# Product Updated
+		update_product_data = self.generate_webhook_data(
+			name = "ERPNext Product Updated",
+			topic = "product.updated",
+			endpoint = "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.product"
+			)
+		self.woocommerce_request("webhooks", update_product_data)
+
+		# Product Deleted
+		delete_product_data = self.generate_webhook_data(
+			name = "ERPNext Product Deleted",
+			topic = "product.deleted",
+			endpoint = "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.product"
+			)
+		self.woocommerce_request("webhooks", delete_product_data)
+
+		# Product Restored
+		restore_product_data = self.generate_webhook_data(
+			name = "ERPNext Product Restored",
+			topic = "product.restored",
+			endpoint = "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.product"
+			)
+		self.woocommerce_request("webhooks", restore_product_data)
 
 	def generate_webhook_data(self, name, topic, endpoint):
 		server_url = '{uri.scheme}://{uri.netloc}'.format(

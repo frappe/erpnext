@@ -5,7 +5,7 @@ frappe.ui.form.on('Woocommerce Settings', {
 	refresh (frm) {
 		add_button_generate_secret(frm);
 		add_button_force_delete(frm);
-		// add_button_install_webhooks(frm);
+		add_button_install_webhooks(frm);
 		check_enabled(frm);
 	},
 
