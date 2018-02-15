@@ -78,16 +78,17 @@ class OpeningInvoiceCreationTool(Document):
 				row.temporary_opening_account = get_temporary_opening_account(self.company)
 			row.party_type = "Customer" if self.invoice_type == "Sales" else "Supplier"
 			
+			# fetch party type for e.g Customer or Suplier.
 			party_type = frappe.get_all(row.party_type, filters={
 				'name': row.party
 			})
 			
-			for x in xrange(1,10):
-				print("create_missing:", self.create_missing_party, party_type)
+			# Allow to create invoice even if no party present in customer or supplier.
 			if not party_type and self.create_missing_party:
 				self.add_party(row.party_type, row.party)
-			elif not self.create_missing_party:
-				frappe.throw(_(" Party {0} not present in {1}").format(frappe.bold(row.party), frappe.bold(row.party_type)));
+			elif not party_type and not self.create_missing_party:
+				frappe.throw(_(" Party {0} not present in {1}. Please check Create Missing Party checkbox to create new party.").format(frappe.bold(row.party), frappe.bold(row.party_type)));
+			
 			if not row.item_name:
 				row.item_name = _("Opening Invoice Item")
 			if not row.posting_date:
@@ -123,15 +124,18 @@ class OpeningInvoiceCreationTool(Document):
 		return names
 
 	def add_party(self, party_type, party):
-		for x in xrange(1,10):
-			print("x", party)
+		supplier = frappe.get_doc("Buying Settings")
+		# fetch default supplier type if not present show message.
+		if not supplier.supplier_type:
+			frappe.throw(_("Please Set Supplier Type in Buying Settings."))
+
 		party_doc = frappe.new_doc(party_type)
 		if party_type == "Customer":
 			party_doc.customer_name = party
-			party_doc.customer_type = 'Company'
 		else:
 			party_doc.supplier_name = party
-			party_doc.supplier_type = frappe.get_doc("Buying Settings", supplier_type)
+			party_doc.supplier_type = supplier.supplier_type
+
 		party_doc.flags.ignore_mandatory = True
 		party_doc.save(ignore_permissions=True)
 		frappe.db.commit()
@@ -143,7 +147,7 @@ class OpeningInvoiceCreationTool(Document):
 			cost_center = frappe.db.get_value("Company", self.company, "cost_center")
 			if not cost_center:
 				frappe.throw(
-					_("Please set the Default Cost Center in {0} company").format(frappe.bold(self.company))
+					_("Please set the Default Cost Center in {0} company.").format(frappe.bold(self.company))
 				)
 			rate = flt(row.outstanding_amount) / flt(row.qty)
 
