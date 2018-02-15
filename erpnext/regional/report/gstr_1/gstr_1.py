@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, json
+from frappe.utils import flt
 from frappe import _
 from datetime import date
 
