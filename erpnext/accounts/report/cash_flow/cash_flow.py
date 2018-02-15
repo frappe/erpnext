@@ -4,15 +4,16 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import cint
 from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data)
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import get_net_profit_loss
 from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):
-	if filters.use_custom_format:
+	if cint(frappe.db.get_single_value('Accounts Settings', 'use_custom_cash_flow')):
 		from erpnext.accounts.report.cash_flow.custom_cash_flow import execute as execute_custom
-		execute_custom(filters=filters)
+		return execute_custom(filters=filters)
 		
 	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, 
 		filters.periodicity, filters.accumulated_values, filters.company)
