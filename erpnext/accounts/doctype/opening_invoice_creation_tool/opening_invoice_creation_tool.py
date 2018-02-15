@@ -59,11 +59,8 @@ class OpeningInvoiceCreationTool(Document):
 
 		return invoices_summary, max_count
 
-	# def validate_party(self):
-	# 	party = frappe.get_doc('Party', )
 	def make_invoices(self):
 		names = []
-		# party_type = frappe.get_all("Customer") if self.invoice_type == "Sales" else frappe.get_all("Suppplier")
 		mandatory_error_msg = _("Row {idx}: {field} is required to create the Opening {invoice_type} Invoices")
 		if not self.company:
 			frappe.throw(_("Please select the Company"))
@@ -78,17 +75,11 @@ class OpeningInvoiceCreationTool(Document):
 				row.temporary_opening_account = get_temporary_opening_account(self.company)
 			row.party_type = "Customer" if self.invoice_type == "Sales" else "Supplier"
 			
-			# fetch party type for e.g Customer or Suplier.
-			party_type = frappe.get_all(row.party_type, filters={
-				'name': row.party
-			})
-			
 			# Allow to create invoice even if no party present in customer or supplier.
-			if not party_type and self.create_missing_party:
+			if not frappe.db.exists(row.party_type, row.party) and self.create_missing_party:
 				self.add_party(row.party_type, row.party)
-			elif not party_type and not self.create_missing_party:
-				frappe.throw(_(" Party {0} not present in {1}. Please check Create Missing Party checkbox to create new party.").format(frappe.bold(row.party), frappe.bold(row.party_type)));
-			
+			elif not frappe.db.exists(row.party_type, row.party) and not self.create_missing_party:
+				frappe.throw(_("{0} {1} does not exist.").format(frappe.bold(row.party_type), frappe.bold(row.party)));	
 			if not row.item_name:
 				row.item_name = _("Opening Invoice Item")
 			if not row.posting_date:
