@@ -12,7 +12,7 @@ class DailyWorkSummarySetting(Document):
 	def validate(self):
 		if self.users:
 			if not frappe.flags.in_test and not frappe.db.get_value('Email Account', dict(enable_incoming=1,
-				default_incoming=1)):
+																						  default_incoming=1)):
 				frappe.throw(_('There must be a default incoming Email Account enabled for this to work. Please setup a default incoming Email Account (POP/IMAP) and try again.'))
 
 def trigger_emails():
@@ -21,14 +21,12 @@ def trigger_emails():
 	settings = frappe.get_all("Daily Work Summary Setting")
 	for d in settings:
 		setting_doc = frappe.get_doc("Daily Work Summary Setting", d)
-		print(d.setting)
-		print(setting_doc.enabled)
 		if is_current_hour(setting_doc.send_emails_at) and not is_holiday_today(setting_doc.holiday_list) and setting_doc.enabled:
 			emails = [d.email for d in setting_doc.users]
 			# find emails relating to a company
 			if emails:
 				daily_work_summary = frappe.get_doc(dict(doctype='Daily Work Summary',
-					setting=setting_doc.name)).insert()
+														 setting=setting_doc.name)).insert()
 				daily_work_summary.send_mails(setting_doc, emails)
 
 def is_current_hour(hour):
