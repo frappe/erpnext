@@ -208,7 +208,7 @@ def remove_pricing_rule_for_item(pricing_rule, item_details):
 
 @frappe.whitelist()
 def remove_pricing_rules(item_list):
-	if isinstance(item_list, basestring):
+	if isinstance(item_list, string_types):
 		item_list = json.loads(item_list)
 	
 	out = []	
