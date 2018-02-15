@@ -13,14 +13,12 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 	setup_fields() {
 		return this.get_meta()
 			.then(r => {
-				// console.log('fields then', this.doctype);
 				this.meta = r.message || this.meta;
 				frappe.model.sync(this.meta);
 			});
 	}
 
 	get_meta() {
-		// console.log('get_meta', this.doctype);
 		return new Promise(resolve =>
 			frappe.call('erpnext.hub_node.get_meta', {doctype: this.doctype}, resolve));
 	}
@@ -51,7 +49,6 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 
 	update_data(r) {
 		const data = r.message;
-		console.log('update data', data);
 
 		if (this.start === 0) {
 			this.data = data;
@@ -79,7 +76,6 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 
 	render_image_view() {
 		let data = this.data;
-		// console.log('this.data render', this.data);
 		if (this.start === 0) {
 			this.$result.html('<div class="image-view-container small padding-top">');
 			data = this.data.slice(this.start);
@@ -164,7 +160,6 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 		item._name = encodeURI(item.name);
 		const encoded_name = item._name;
 		const title = strip_html(item['item_name' || 'item_code']);
-		// console.log(item);
 		const company_name = item['company_name'];
 
 		const route = `#Hub/Item/${item.hub_item_code}`;
