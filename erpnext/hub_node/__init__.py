@@ -31,12 +31,12 @@ def get_meta(doctype):
 	return meta
 
 @frappe.whitelist()
-def get_categories():
+def get_categories(parent='All Categories'):
 	# get categories info with parent category and stuff
 	connection = get_client_connection()
-	categories = connection.get_list('Hub Category')
-	print("============================================================")
-	print(categories)
+	categories = connection.get_list('Hub Category', filters={'parent_hub_category': parent})
+	# print("============================================================")
+	# print(categories)
 	response = [{'value': c.get('name'), 'expandable': c.get('is_group')} for c in categories]
 	return response
 

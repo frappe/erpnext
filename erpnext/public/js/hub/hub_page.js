@@ -120,7 +120,7 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 			label: 'All Categories',
 			expandable: true,
 
-			args: {},
+			args: {parent: this.current_category},
 			method: 'erpnext.hub_node.get_categories',
 			on_click: (node) => {
 				this.update_category(node.label);
@@ -186,12 +186,6 @@ erpnext.hub.CompanyListing = class CompanyListing extends erpnext.hub.HubListing
 		this.fields = ['company_logo', 'name', 'site_name', 'seller_city', 'seller_description', 'seller', 'country', 'company_name'];
 		this.filters = [];
 		this.custom_filter_configs = [
-			{
-				fieldtype: 'Data',
-				label: 'Company',
-				condition: 'like',
-				fieldname: 'company_name',
-			},
 			{
 				fieldtype: 'Link',
 				label: 'Country',
