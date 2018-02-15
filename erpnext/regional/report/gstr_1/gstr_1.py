@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe import _
+from frappe.utils import flt
 from datetime import date
 
 def execute(filters=None):
