@@ -259,7 +259,7 @@ frappe.Leaderboard = Class.extend({
 		var me = this;
 		const _selected_filter = me.options.selected_filter
 			.map(i => frappe.model.unscrub(i));
-		const fields = ['name', me.options.selected_filter_item];
+		const fields = ['name', 'value'];
 
 		const html =
 			`<div class="list-item">
@@ -276,7 +276,7 @@ frappe.Leaderboard = Class.extend({
 							${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}">
 							${
 								col === "Name"
-									? `<a class="grey list-id ellipsis" href="${item["href"]}"> ${val} </a>`
+									? `<a class="grey list-id ellipsis" href="#Form/${me.options.selected_doctype}/${item["name"]}"> ${val} </a>`
 									: `<span class="text-muted ellipsis"> ${val}</span>`
 							}
 						</div>`);
