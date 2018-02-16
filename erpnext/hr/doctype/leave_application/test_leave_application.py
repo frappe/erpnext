@@ -235,52 +235,6 @@ class TestLeaveApplication(unittest.TestCase):
 		application.half_day_date = "2013-01-05"
 		application.insert()
 
-	def test_global_block_list(self):
-		self._clear_roles()
-
-		from frappe.utils.user import add_role
-		add_role("test1@example.com", "Employee")
-		add_role("test@example.com", "Leave Approver")
-		self._add_employee_leave_approver("_T-Employee-0002", "test@example.com")
-
-		make_allocation_record(employee="_T-Employee-0002")
-
-		application = self.get_application(_test_records[1])
-		application.leave_approver = "test@example.com"
-
-		frappe.db.set_value("Leave Block List", "_Test Leave Block List",
-			"applies_to_all_departments", 1)
-		frappe.db.set_value("Employee", "_T-Employee-0002", "department",
-			"_Test Department")
-
-		frappe.set_user("test1@example.com")
-		application.insert()
-
-		frappe.set_user("test@example.com")
-		application.status = "Approved"
-
-		# clear permlevel access cache on change user
-		del application._has_access_to
-
-		self.assertRaises(LeaveDayBlockedError, application.submit)
-
-		frappe.db.set_value("Leave Block List", "_Test Leave Block List",
-			"applies_to_all_departments", 0)
-
-	def test_leave_approval(self):
-		self._clear_roles()
-
-		from frappe.utils.user import add_role
-		add_role("test@example.com", "Employee")
-		add_role("test1@example.com", "HR User")
-		add_role("test1@example.com", "Leave Approver")
-		add_role("test2@example.com", "Leave Approver")
-
-		self._test_leave_approval_basic_case()
-		self._test_leave_approval_invalid_leave_approver_insert()
-		self._test_leave_approval_invalid_leave_approver_submit()
-		self._test_leave_approval_valid_leave_approver_insert()
-
 	def _test_leave_approval_basic_case(self):
 		self._clear_applications()
 
