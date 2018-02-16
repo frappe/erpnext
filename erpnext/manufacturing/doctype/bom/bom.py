@@ -9,6 +9,8 @@ from erpnext.setup.utils import get_exchange_rate
 from frappe.website.website_generator import WebsiteGenerator
 from erpnext.stock.get_item_details import get_conversion_factor
 
+from six import string_types
+
 from operator import itemgetter
 
 form_grid_templates = {
@@ -109,7 +111,7 @@ class BOM(WebsiteGenerator):
 		if not args:
 			args = frappe.form_dict.get('args')
 
-		if isinstance(args, basestring):
+		if isinstance(args, string_types):
 			import json
 			args = json.loads(args)
 
@@ -586,9 +588,16 @@ def validate_bom_no(item, bom_no):
 	if bom.docstatus != 1:
 		if not getattr(frappe.flags, "in_test", False):
 			frappe.throw(_("BOM {0} must be submitted").format(bom_no))
-	if item and not (bom.item.lower() == item.lower() or \
-		bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower()):
-		frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
+	if item:
+		rm_item_exists = False
+		for d in bom.items:
+			if (d.item_code.lower() == item.lower()):
+				rm_item_exists = True
+		if bom.item.lower() == item.lower() or \
+			bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower():
+ 				rm_item_exists = True
+		if not rm_item_exists:
+			frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, is_root=False, **filters):

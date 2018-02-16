@@ -8,7 +8,7 @@
  "idx": 0, 
  "is_standard": "Yes", 
  "letter_head": "Shishuvan Secondary School", 
- "modified": "2018-01-22 17:04:43.412054", 
+ "modified": "2018-02-08 15:11:35.339434", 
  "modified_by": "Administrator", 
  "module": "Education", 
  "name": "Final Assessment Grades", 
@@ -16,5 +16,12 @@
  "ref_doctype": "Assessment Result", 
  "report_name": "Final Assessment Grades", 
  "report_type": "Script Report", 
- "roles": []
+ "roles": [
+  {
+   "role": "Instructor"
+  }, 
+  {
+   "role": "Education Manager"
+  }
+ ]
 }

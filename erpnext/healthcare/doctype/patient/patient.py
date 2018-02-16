@@ -116,8 +116,9 @@ def make_invoice(patient, company):
 def get_patient_detail(patient):
 	patient_dict = frappe.db.sql("""select * from tabPatient where name=%s""", (patient), as_dict=1)
 	if not patient_dict:
-		frappe.throw("Patient not found")
-	vital_sign = frappe.db.sql("""select * from `tabVital Signs` where patient=%s order by signs_date desc limit 1""", (patient), as_dict=1)
+		frappe.throw(_("Patient not found"))
+	vital_sign = frappe.db.sql("""select * from `tabVital Signs` where patient=%s
+		order by signs_date desc limit 1""", (patient), as_dict=1)
 
 	details = patient_dict[0]
 	if vital_sign:

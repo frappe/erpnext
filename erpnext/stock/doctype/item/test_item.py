@@ -14,6 +14,8 @@ from frappe.model.rename_doc import rename_doc
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
 
+from six import iteritems
+
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse"]
 
@@ -97,7 +99,7 @@ class TestItem(unittest.TestCase):
 			"ignore_pricing_rule": 1
 		})
 
-		for key, value in to_check.iteritems():
+		for key, value in iteritems(to_check):
 			self.assertEquals(value, details.get(key))
 
 	def test_item_attribute_change_after_variant(self):
@@ -128,7 +130,7 @@ class TestItem(unittest.TestCase):
 
 	def test_copy_fields_from_template_to_variants(self):
 		frappe.delete_doc_if_exists("Item", "_Test Variant Item-XL", force=1)
-		
+
 		fields = [{'field_name': 'item_group'}, {'field_name': 'is_stock_item'}]
 		allow_fields = [d.get('field_name') for d in fields]
 		set_item_variant_settings(fields)
@@ -291,12 +293,6 @@ def make_item_variant():
 		variant.item_code = "_Test Variant Item-S"
 		variant.item_name = "_Test Variant Item-S"
 		variant.save()
-
-def get_total_projected_qty(item):
-	total_qty = frappe.db.sql(""" select sum(projected_qty) as projected_qty from tabBin
-		where item_code = %(item)s""", {'item': item}, as_dict=1)
-
-	return total_qty[0].projected_qty if total_qty else 0.0
 
 test_records = frappe.get_test_records('Item')
 

@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 class WaterAnalysis(Document):
@@ -18,6 +19,6 @@ class WaterAnalysis(Document):
 
 	def validate(self):
 		if self.collection_datetime > self.laboratory_testing_datetime:
-			frappe.throw('Lab testing datetime cannot be before collection datetime')
+			frappe.throw(_('Lab testing datetime cannot be before collection datetime'))
 		if self.laboratory_testing_datetime > self.result_datetime:
-			frappe.throw('Lab result datetime cannot be before testing datetime')
+			frappe.throw(_('Lab result datetime cannot be before testing datetime'))

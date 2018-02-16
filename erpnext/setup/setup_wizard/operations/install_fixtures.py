@@ -216,6 +216,7 @@ def install(country=None):
 		{'doctype': "Party Type", "party_type": "Supplier"},
 		{'doctype': "Party Type", "party_type": "Employee"},
 		{'doctype': "Party Type", "party_type": "Member"},
+		{'doctype': "Party Type", "party_type": "Shareholder"},
 
 		{'doctype': "Opportunity Type", "name": "Hub"},
 		{'doctype': "Opportunity Type", "name": _("Sales")},
@@ -245,6 +246,11 @@ def install(country=None):
 		# Assessment Group
 		{'doctype': 'Assessment Group', 'assessment_group_name': _('All Assessment Groups'),
 			'is_group': 1, 'parent_assessment_group': ''},
+
+		# Share Management
+		{"doctype": "Share Type", "title": _("Equity")},
+		{"doctype": "Share Type", "title": _("Preference")},
+
 
 	]
 

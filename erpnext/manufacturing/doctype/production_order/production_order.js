@@ -79,6 +79,10 @@ frappe.ui.form.on("Production Order", {
 				]
 			}
 		});
+
+		// formatter for production order operation
+		frm.set_indicator_formatter('operation',
+			function(doc) { return (frm.doc.qty==doc.completed_qty) ? "green" : "orange" });
 	},
 	
 	onload: function(frm) {
@@ -94,10 +98,6 @@ frappe.ui.form.on("Production Order", {
 			});
 			erpnext.production_order.set_default_warehouse(frm);
 		}
-
-		// formatter for production order operation
-		frm.set_indicator_formatter('operation',
-			function(doc) { return (frm.doc.qty==doc.completed_qty) ? "green" : "orange" });
 	},
 
 	refresh: function(frm) {
