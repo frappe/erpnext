@@ -9,7 +9,7 @@ import frappe.utils
 from frappe import _
 
 
-class DailyWorkSummarySetting(Document):
+class DailyWorkSummaryGroup(Document):
 	def validate(self):
 		if self.users:
 			if not frappe.flags.in_test and not is_incoming_account_enabled():
@@ -20,19 +20,19 @@ class DailyWorkSummarySetting(Document):
 def trigger_emails():
 	'''Send emails to Employees at the given hour asking
 					them what did they work on today'''
-	settings = frappe.get_all("Daily Work Summary Setting")
-	for d in settings:
-		setting_doc = frappe.get_doc("Daily Work Summary Setting", d)
-		if (is_current_hour(setting_doc.send_emails_at)
-				and not is_holiday_today(setting_doc.holiday_list)
-				and setting_doc.enabled):
-			emails = [d.email for d in setting_doc.users]
+	groups = frappe.get_all("Daily Work Summary Group")
+	for d in groups:
+		group_doc = frappe.get_doc("Daily Work Summary Group", d)
+		if (is_current_hour(group_doc.send_emails_at)
+				and not is_holiday_today(group_doc.holiday_list)
+				and group_doc.enabled):
+			emails = [d.email for d in group_doc.users]
 			# find emails relating to a company
 			if emails:
 				daily_work_summary = frappe.get_doc(
-					dict(doctype='Daily Work Summary', setting=setting_doc.name)
+					dict(doctype='Daily Work Summary', daily_work_summary_group=group_doc.name)
 				).insert()
-				daily_work_summary.send_mails(setting_doc, emails)
+				daily_work_summary.send_mails(group_doc, emails)
 
 
 def is_current_hour(hour):

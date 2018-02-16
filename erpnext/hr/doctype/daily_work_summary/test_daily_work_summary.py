@@ -15,8 +15,8 @@ class TestDailyWorkSummary(unittest.TestCase):
 		self.setup_and_prepare_test()
 		for d in self.users:
 			# check that email is sent to users
-			self.assertTrue(d.email in [d.recipient for d in self.emails \
-				if self.settings.subject in d.message])
+			self.assertTrue(d.email in [d.recipient for d in self.emails 
+				if self.groups.subject in d.message])
 
 	def test_email_trigger_failed(self):
 		hour = '00:00'
@@ -27,8 +27,8 @@ class TestDailyWorkSummary(unittest.TestCase):
 
 		for d in self.users:
 			# check that email is not sent to users
-			self.assertFalse(d.email in [d.recipient for d in self.emails \
-				if self.settings.subject in d.message])
+			self.assertFalse(d.email in [d.recipient for d in self.emails 
+				if self.groups.subject in d.message])
 
 	def test_incoming(self):
 		# get test mail with message-id as in-reply-to
@@ -56,14 +56,14 @@ class TestDailyWorkSummary(unittest.TestCase):
 		frappe.db.sql('delete from `tabEmail Queue`')
 		frappe.db.sql('delete from `tabEmail Queue Recipient`')
 		frappe.db.sql('delete from `tabCommunication`')
-		frappe.db.sql('delete from `tabDaily Work Summary Setting`')
+		frappe.db.sql('delete from `tabDaily Work Summary Group`')
 
-		self.users = frappe.get_all('User', 
+		self.users = frappe.get_all('User',
 						fields=['email'],
 						filters=dict(email=('!=', 'test@example.com')))
-		self.setup_settings(hour)
+		self.setup_groups(hour)
 
-		from erpnext.hr.doctype.daily_work_summary_setting.daily_work_summary_setting \
+		from erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group \
 			import trigger_emails
 		trigger_emails()
 
@@ -75,19 +75,19 @@ class TestDailyWorkSummary(unittest.TestCase):
 
 		frappe.db.commit()
 
-	def setup_settings(self, hour=None):
+	def setup_groups(self, hour=None):
 		# setup email to trigger at this hour
 		if not hour:
 			hour = frappe.utils.nowtime().split(':')[0]
 			hour = hour+':00'
 
-		settings = frappe.get_doc(dict(doctype="Daily Work Summary Setting",
+		groups = frappe.get_doc(dict(doctype="Daily Work Summary Group",
 						name="Daily Work Summary",
 						users=self.users,
 						send_emails_at=hour,
 						subject="this is a subject for testing summary emails",
 						message='this is a message for testing summary emails'))
-		settings.insert()
+		groups.insert()
 
-		self.settings = settings
-		self.settings.save()
+		self.groups = groups
+		self.groups.save()

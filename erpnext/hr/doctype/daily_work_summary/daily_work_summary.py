@@ -13,33 +13,33 @@ from markdown2 import markdown
 
 
 class DailyWorkSummary(Document):
-	def send_mails(self, settings, emails):
-		'''Send emails to get daily work summary to all users in selected daily work summary setting'''
+	def send_mails(self, dws_group, emails):
+		'''Send emails to get daily work summary to all users in selected daily work summary group'''
 		incoming_email_account = frappe.db.get_value('Email Account',
 													 dict(enable_incoming=1,
 														  default_incoming=1),
 													 'email_id')
 
 		self.db_set('email_sent_to', '\n'.join(emails))
-		frappe.sendmail(recipients=emails, message=settings.message,
-						subject=settings.subject, reference_doctype=self.doctype,
+		frappe.sendmail(recipients=emails, message=dws_group.message,
+						subject=dws_group.subject, reference_doctype=self.doctype,
 						reference_name=self.name, reply_to=incoming_email_account)
 
 	def send_summary(self):
 		'''Send summary of all replies. Called at midnight'''
 		args = self.get_message_details()
-		emails = get_user_emails_from_setting(self.setting)
+		emails = get_user_emails_from_group(self.daily_work_summary_group)
 		frappe.sendmail(recipients=emails,
 						template='daily_work_summary',
 						args=args,
-						subject=_(self.setting),
+						subject=_(self.daily_work_summary_group),
 						reference_doctype=self.doctype, reference_name=self.name)
 
 		self.db_set('status', 'Sent')
 
 	def get_message_details(self):
 		'''Return args for template'''
-		settings = frappe.get_doc('Daily Work Summary Setting', self.setting)
+		dws_group = frappe.get_doc('Daily Work Summary Group', self.daily_work_summary_group)
 
 		replies = frappe.get_all('Communication', fields=['content', 'text_content', 'sender'],
 								 filters=dict(reference_doctype=self.doctype, reference_name=self.name,
@@ -87,18 +87,18 @@ class DailyWorkSummary(Document):
 						 for email in did_not_reply]
 
 		return dict(replies=replies,
-					original_message=settings.message,
+					original_message=dws_group.message,
 					title=_('Work Summary for {0}'.format(
 						global_date_format(self.creation))),
 					did_not_reply=', '.join(did_not_reply) or '',
 					did_not_reply_title=_('No replies from'))
 
 
-def get_user_emails_from_setting(setting):
-	'''Returns list of email of users from the given setting
+def get_user_emails_from_group(group):
+	'''Returns list of email of users from the given group
 
-	:param setting: Daily Work Summary Setting `name`'''
-	setting_doc = frappe.get_doc('Daily Work Summary Setting', setting)
-	emails = [d.email for d in setting_doc.users]
+	:param group: Daily Work Summary Group `name`'''
+	group_doc = frappe.get_doc('Daily Work Summary Group', group)
+	emails = [d.email for d in group_doc.users]
 
 	return emails
