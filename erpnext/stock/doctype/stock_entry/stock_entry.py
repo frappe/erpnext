@@ -66,6 +66,7 @@ class StockEntry(StockController):
 		self.calculate_rate_and_amount(update_finished_item_rate=False)
 
 	def on_submit(self):
+
 		self.update_stock_ledger()
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
@@ -412,7 +413,7 @@ class StockEntry(StockController):
 		"""validation: finished good quantity should be same as manufacturing quantity"""
 		items_with_target_warehouse = []
 		for d in self.get('items'):
-			if d.bom_no and flt(d.transfer_qty) != flt(self.fg_completed_qty) and (d.t_warehouse != getattr(self, "pro_doc", frappe._dict()).scrap_warehouse):
+			if self.purpose != "Subcontract" and d.bom_no and flt(d.transfer_qty) != flt(self.fg_completed_qty) and (d.t_warehouse != getattr(self, "pro_doc", frappe._dict()).scrap_warehouse):
 				frappe.throw(_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}"). \
 					format(d.idx, d.transfer_qty, self.fg_completed_qty))
 
@@ -804,7 +805,7 @@ class StockEntry(StockController):
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None):
 		expense_account, cost_center = frappe.db.get_values("Company", self.company, \
 			["default_expense_account", "cost_center"])[0]
-				
+
 		for d in item_dict:
 			stock_uom = item_dict[d].get("stock_uom") or frappe.db.get_value("Item", d, "stock_uom")
 			
