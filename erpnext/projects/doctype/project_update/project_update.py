@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-import datetime
 
 class ProjectUpdate(Document):
     pass
@@ -22,7 +21,7 @@ def daily_reminder():
         draft = frappe.db.sql("""SELECT count(docstatus) from `tabProject Update` WHERE `tabProject Update`.project = %s AND `tabProject Update`.docstatus = 0;""",project_name)
         for drafts in draft:
             number_of_drafts = drafts[0]
-        update = frappe.db.sql("""SELECT name,date,time,progress,progress_details FROM `tabProject Update` WHERE `tabProject Update`.project = %s;""",project_name)
+        update = frappe.db.sql("""SELECT name,date,time,progress,progress_details FROM `tabProject Update` WHERE `tabProject Update`.project = %s AND date = DATE_ADD(CURDATE(), INTERVAL -1 DAY);""",project_name)
         email_sending(project_name,frequency,date_start,date_end,progress,number_of_drafts,update)
 
 def email_sending(project_name,frequency,date_start,date_end,progress,number_of_drafts,update):
