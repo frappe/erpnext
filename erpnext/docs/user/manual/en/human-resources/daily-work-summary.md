@@ -19,6 +19,6 @@ You can also choose to customize the _Message_ you send to users.
 
 **Note:**
 >1. If no holiday list is selected then the email will be sent every day.
->2. Group name will be sent as the title of daily summary email.
->3. Deactivated groups will be skipped from daily check.
+>2. Name of a "Daily Work Summary Group" will be sent as the title for daily summary email.
+>3. Mail will not be sent to the users of a disabled Daily Work Summary Group.
 
