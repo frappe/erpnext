@@ -11,25 +11,29 @@ from erpnext.hr.doctype.employee.employee import is_holiday
 from frappe.utils import global_date_format
 from markdown2 import markdown
 
+
 class DailyWorkSummary(Document):
 	def send_mails(self, settings, emails):
 		'''Send emails to get daily work summary to all users in selected daily work summary setting'''
-		incoming_email_account = frappe.db.get_value('Email Account', dict(enable_incoming=1, default_incoming=1), 'email_id')
+		incoming_email_account = frappe.db.get_value('Email Account',
+													 dict(enable_incoming=1,
+														  default_incoming=1),
+													 'email_id')
 
 		self.db_set('email_sent_to', '\n'.join(emails))
 		frappe.sendmail(recipients=emails, message=settings.message,
-			subject=settings.subject, reference_doctype=self.doctype,
-			reference_name=self.name, reply_to=incoming_email_account)
+						subject=settings.subject, reference_doctype=self.doctype,
+						reference_name=self.name, reply_to=incoming_email_account)
 
 	def send_summary(self):
 		'''Send summary of all replies. Called at midnight'''
 		args = self.get_message_details()
 		emails = get_user_emails_from_setting(self.setting)
 		frappe.sendmail(recipients=emails,
-			template='daily_work_summary',
-			args=args,
-			subject=_(self.setting),
-			reference_doctype=self.doctype, reference_name=self.name)
+						template='daily_work_summary',
+						args=args,
+						subject=_(self.setting),
+						reference_doctype=self.doctype, reference_name=self.name)
 
 		self.db_set('status', 'Sent')
 
@@ -38,16 +42,17 @@ class DailyWorkSummary(Document):
 		settings = frappe.get_doc('Daily Work Summary Setting', self.setting)
 
 		replies = frappe.get_all('Communication', fields=['content', 'text_content', 'sender'],
-					filters=dict(reference_doctype=self.doctype, reference_name=self.name,
-						communication_type='Communication', sent_or_received='Received'),
-						order_by='creation asc')
+								 filters=dict(reference_doctype=self.doctype, reference_name=self.name,
+											  communication_type='Communication', sent_or_received='Received'),
+								 order_by='creation asc')
 
 		did_not_reply = self.email_sent_to.split()
 
 		for d in replies:
-			user = frappe.db.get_values("User", {"email": d.sender},
-						["full_name", "user_image"],
-						as_dict=True)
+			user = frappe.db.get_values("User",
+										{"email": d.sender},
+										["full_name", "user_image"],
+										as_dict=True)
 
 			d.sender_name = user[0].full_name if user else d.sender
 			d.image = user[0].image if user and user[0].image else None
@@ -83,7 +88,8 @@ class DailyWorkSummary(Document):
 
 		return dict(replies=replies,
 					original_message=settings.message,
-					title=_('Work Summary for {0}'.format(global_date_format(self.creation))),
+					title=_('Work Summary for {0}'.format(
+						global_date_format(self.creation))),
 					did_not_reply=', '.join(did_not_reply) or '',
 					did_not_reply_title=_('No replies from'))
 

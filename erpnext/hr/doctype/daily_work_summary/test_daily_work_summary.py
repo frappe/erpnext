@@ -10,12 +10,11 @@ import frappe.utils
 
 # test_records = frappe.get_test_records('Daily Work Summary')
 
-
 class TestDailyWorkSummary(unittest.TestCase):
 	def test_email_trigger(self):
 		self.setup_and_prepare_test()
 		for d in self.users:
-			# check that email is sent to this user
+			# check that email is sent to users
 			self.assertTrue(d.email in [d.recipient for d in self.emails \
 				if self.settings.subject in d.message])
 
@@ -27,7 +26,7 @@ class TestDailyWorkSummary(unittest.TestCase):
 		self.setup_and_prepare_test(hour)
 
 		for d in self.users:
-			# check that email is sent to this user
+			# check that email is not sent to users
 			self.assertFalse(d.email in [d.recipient for d in self.emails \
 				if self.settings.subject in d.message])
 
@@ -39,6 +38,7 @@ class TestDailyWorkSummary(unittest.TestCase):
 			test_mails = [f.read().replace('{{ sender }}',
 			self.users[-1].email).replace('{{ message_id }}',
 			self.emails[-1].message_id)]
+
 		# pull the mail
 		email_account = frappe.get_doc("Email Account", "_Test Email Account 1")
 		email_account.db_set('enable_incoming', 1)
@@ -58,7 +58,8 @@ class TestDailyWorkSummary(unittest.TestCase):
 		frappe.db.sql('delete from `tabCommunication`')
 		frappe.db.sql('delete from `tabDaily Work Summary Setting`')
 
-		self.users = frappe.get_all('User', fields=['email'],
+		self.users = frappe.get_all('User', 
+						fields=['email'],
 						filters=dict(email=('!=', 'test@example.com')))
 		self.setup_settings(hour)
 
@@ -68,8 +69,9 @@ class TestDailyWorkSummary(unittest.TestCase):
 
 		# check if emails are created
 
-		self.emails = frappe.db.sql(
-			"""select r.recipient, q.message, q.message_id from `tabEmail Queue` as q, `tabEmail Queue Recipient` as r where q.name = r.parent""", as_dict=1)
+		self.emails = frappe.db.sql("""select r.recipient, q.message, q.message_id \
+			from `tabEmail Queue` as q, `tabEmail Queue Recipient` as r \
+			where q.name = r.parent""", as_dict=1)
 
 		frappe.db.commit()
 
@@ -78,6 +80,7 @@ class TestDailyWorkSummary(unittest.TestCase):
 		if not hour:
 			hour = frappe.utils.nowtime().split(':')[0]
 			hour = hour+':00'
+
 		settings = frappe.get_doc(dict(doctype="Daily Work Summary Setting",
 						name="Daily Work Summary",
 						users=self.users,
@@ -85,6 +88,6 @@ class TestDailyWorkSummary(unittest.TestCase):
 						subject="this is a subject for testing summary emails",
 						message='this is a message for testing summary emails'))
 		settings.insert()
+
 		self.settings = settings
-		self.settings.test_subject = "this is a subject for testing summary emails"
 		self.settings.save()
