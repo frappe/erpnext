@@ -101,7 +101,7 @@ def get_warehouse_list(filters):
 
 def add_warehouse_column(columns, warehouse_list):
 	if len(warehouse_list) > 1:
-		columns += [_("Total")+":Int:40"]
+		columns += [_("Total Qty")+":Int:50"]
 
 	for wh in warehouse_list:
 		columns += [_(wh.name)+":Int:54"]
