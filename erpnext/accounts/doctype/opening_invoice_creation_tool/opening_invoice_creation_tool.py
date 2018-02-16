@@ -75,10 +75,12 @@ class OpeningInvoiceCreationTool(Document):
 			row.party_type = "Customer" if self.invoice_type == "Sales" else "Supplier"
 			
 			# Allow to create invoice even if no party present in customer or supplier.
-			if not frappe.db.exists(row.party_type, row.party) and self.create_missing_party:
-				self.add_party(row.party_type, row.party)
-			elif not frappe.db.exists(row.party_type, row.party) and not self.create_missing_party:
-				frappe.throw(_("{0} {1} does not exist.").format(frappe.bold(row.party_type), frappe.bold(row.party)));
+			if not frappe.db.exists(row.party_type, row.party):
+				if self.create_missing_party:
+					self.add_party(row.party_type, row.party)
+				else:
+					frappe.throw(_("{0} {1} does not exist.").format(frappe.bold(row.party_type), frappe.bold(row.party)))
+
 			if not row.item_name:
 				row.item_name = _("Opening Invoice Item")
 			if not row.posting_date:
@@ -114,22 +116,19 @@ class OpeningInvoiceCreationTool(Document):
 		return names
 
 	def add_party(self, party_type, party):
-		supplier = frappe.get_doc("Buying Settings")
-		# fetch default supplier type if not present show message.
-		if not supplier.supplier_type:
-			frappe.throw(_("Please Set Supplier Type in Buying Settings."))
-
 		party_doc = frappe.new_doc(party_type)
 		if party_type == "Customer":
 			party_doc.customer_name = party
 		else:
+			supplier_type = frappe.db.get_single_value("Buying Settings", "supplier_type")
+			if not supplier_type:
+				frappe.throw(_("Please Set Supplier Type in Buying Settings."))
+
 			party_doc.supplier_name = party
-			party_doc.supplier_type = supplier.supplier_type
+			party_doc.supplier_type = supplier_type
 
 		party_doc.flags.ignore_mandatory = True
-		party_doc.save(ignore_permissions=True)
-		frappe.db.commit()
-		
+		party_doc.save(ignore_permissions=True)		
 
 	def get_invoice_dict(self, row=None):
 		def get_item_dict():
