@@ -8,21 +8,21 @@ frappe.ui.form.on("Payment Reconciliation Payment", {
 		var row = locals[cdt][cdn];
 		if(row.invoice_number) {
 			var parts = row.invoice_number.split(' | ');
-			invoice_type = parts[0];
-			invoice_number = parts[1];
+			var invoice_type = parts[0];
+			var invoice_number = parts[1];
 
 			var invoice_amount = frm.doc.invoices.filter(function(d) {
-				return d.invoice_type === invoice_type && d.invoice_number == invoice_number;
-			})[0].outstanding_amount
+				return d.invoice_type === invoice_type && d.invoice_number === invoice_number;
+			})[0].outstanding_amount;
 
 			frappe.model.set_value(cdt, cdn, "allocated_amount", Math.min(invoice_amount, row.amount));
 		}
 	}
-})
+});
 
 erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.extend({
 	onload: function() {
-		var me = this
+		var me = this;
 		this.frm.set_query("party_type", function() {
 			return{
 				query: "erpnext.setup.doctype.party_type.party_type.get_party_type"
