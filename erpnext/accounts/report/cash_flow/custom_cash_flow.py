@@ -94,7 +94,7 @@ def setup_mappers(mappers):
 			set(
 				[(d['label'], d['is_finance_cost'], d['is_finance_cost_adjustment'])
 					for d in finance_costs_adjustments if d['is_finance_cost_adjustment']]
-			), 
+			),
 			key=lambda x: x[2]
 		)
 
@@ -108,7 +108,7 @@ def setup_mappers(mappers):
 
 		unique_expense_labels = sorted(
 			set(
-				[(d['label'], d['is_income_tax_liability'], d['is_income_tax_expense']) 
+				[(d['label'], d['is_income_tax_liability'], d['is_income_tax_expense'])
 					for d in tax_expenses]
 			),
 			key=lambda x: x[0]
@@ -165,7 +165,7 @@ def add_data_for_operating_activities(
 
 	if profit_data:
 		profit_data.update({
-			"indent": 1, 
+			"indent": 1,
 			"parent_account": get_mapper_for(light_mappers, position=0)['section_header']
 		})
 		data.append(profit_data)
@@ -190,7 +190,7 @@ def add_data_for_operating_activities(
 
 		account_data = _get_account_type_based_data(
 			filters, account['names'], period_list, filters.accumulated_values)
-		
+
 		if not account['is_working_capital']:
 			for key in account_data:
 				if key != 'total':
@@ -286,9 +286,9 @@ def add_data_for_other_activities(
 	for mapper in mapper_list:
 		section_data = []
 		data.append({
-			"account_name": mapper['section_header'], 
+			"account_name": mapper['section_header'],
 			"parent_account": None,
-			"indent": 0.0, 
+			"indent": 0.0,
 			"account": mapper['section_header']
 		})
 
@@ -298,7 +298,7 @@ def add_data_for_other_activities(
 			if account_data['total'] != 0:
 				account_data.update({
 					"account_name": account['label'],
-					"account": account['names'], 
+					"account": account['names'],
 					"indent": 1,
 					"parent_account": mapper['section_header'],
 					"currency": company_currency
