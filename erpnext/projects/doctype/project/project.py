@@ -170,7 +170,7 @@ class Project(Document):
 
 		from_expense_claim = frappe.db.sql("""select
 			sum(total_sanctioned_amount) as total_sanctioned_amount
-			from `tabExpense Claim` where project = %s and approval_status='Approved'
+			from `tabExpense Claim` where project = %s
 			and docstatus = 1""",
 			self.name, as_dict=1)[0]
 
