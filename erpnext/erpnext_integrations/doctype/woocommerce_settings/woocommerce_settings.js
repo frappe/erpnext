@@ -58,6 +58,7 @@ add_button_install_webhooks = (frm) => {
 						type:"POST",
 						doc: frm.doc,
 						method:"create_webhooks",
+						freeze:true,
 					}).done(r=>frm.reload_doc())
 					.fail(r=>frappe.msgprint(__("Could not create Webhooks on Woocommerce")));
 				}
