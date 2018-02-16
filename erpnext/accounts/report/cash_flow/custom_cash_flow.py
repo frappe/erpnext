@@ -435,7 +435,7 @@ def _add_total_row_account(out, data, label, period_list, currency, indent=0.0):
 			for period in period_list:
 				total_row.setdefault(period.key, 0.0)
 				total_row[period.key] += row.get(period.key, 0.0)
-			
+
 			total_row.setdefault("total", 0.0)
 			total_row["total"] += row["total"]
 
