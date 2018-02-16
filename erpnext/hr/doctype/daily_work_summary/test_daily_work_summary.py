@@ -15,7 +15,7 @@ class TestDailyWorkSummary(unittest.TestCase):
 		self.setup_and_prepare_test()
 		for d in self.users:
 			# check that email is sent to users
-			self.assertTrue(d.email in [d.recipient for d in self.emails 
+			self.assertTrue(d.email in [d.recipient for d in self.emails
 				if self.groups.subject in d.message])
 
 	def test_email_trigger_failed(self):
@@ -27,7 +27,7 @@ class TestDailyWorkSummary(unittest.TestCase):
 
 		for d in self.users:
 			# check that email is not sent to users
-			self.assertFalse(d.email in [d.recipient for d in self.emails 
+			self.assertFalse(d.email in [d.recipient for d in self.emails
 				if self.groups.subject in d.message])
 
 	def test_incoming(self):
