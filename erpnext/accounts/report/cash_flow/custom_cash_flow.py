@@ -7,7 +7,6 @@ from frappe import _
 from frappe.utils import add_to_date
 from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data)
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import get_net_profit_loss
-from erpnext.accounts.utils import get_fiscal_year
 
 
 def get_mapper_for(mappers, position):
@@ -61,22 +60,26 @@ def setup_mappers(mappers):
 			) for account in accounts if not account[3]]
 
 		finance_costs_adjustments = [
-			dict(name=account[0], label=account[1], is_finance_cost=account[5], 
-				is_finance_cost_adjustment=account[6])
-				for account in accounts if account[6]]
+			dict(
+				name=account[0], label=account[1], is_finance_cost=account[5],
+				is_finance_cost_adjustment=account[6]
+			) for account in accounts if account[6]]
 
 		tax_liabilities = [
-			dict(name=account[0], label=account[1], is_income_tax_liability=account[3],
-				is_income_tax_expense=account[4])
-				for account in accounts if account[3]]
+			dict(
+				name=account[0], label=account[1], is_income_tax_liability=account[3],
+				is_income_tax_expense=account[4]
+			) for account in accounts if account[3]]
 
 		tax_expenses = [
-			dict(name=account[0], label=account[1], is_income_tax_liability=account[3],
-				is_income_tax_expense=account[4])
-				for account in accounts if account[4]]
+			dict(
+				name=account[0], label=account[1], is_income_tax_liability=account[3],
+				is_income_tax_expense=account[4]
+			) for account in accounts if account[4]]
 
 		finance_costs = [
-			dict(name=account[0], label=account[1], is_finance_cost=account[5])
+			dict(
+				name=account[0], label=account[1], is_finance_cost=account[5])
 			for account in accounts if account[5]]
 
 		account_types_labels = sorted(
@@ -185,8 +188,8 @@ def add_data_for_operating_activities(
 			})
 			has_added_working_capital_header = True
 
-		account_data = _get_account_type_based_data(filters, 
-			account['names'], period_list, filters.accumulated_values)
+		account_data = _get_account_type_based_data(
+			filters, account['names'], period_list, filters.accumulated_values)
 		
 		if not account['is_working_capital']:
 			for key in account_data:
@@ -197,15 +200,15 @@ def add_data_for_operating_activities(
 			account_data.update({
 				"account_name": account['label'],
 				"account": account['names'], 
-				"indent": 1,
+				"indent": 1.0,
 				"parent_account": mapper['section_header'],
 				"currency": company_currency
 			})
 			data.append(account_data)
 			section_data.append(account_data)
 
-	_add_total_row_account(data, section_data, mapper['section_subtotal'],
-		period_list, company_currency, indent=1)
+	_add_total_row_account(
+		data, section_data, mapper['section_subtotal'], period_list, company_currency, indent=1)
 
 	# calculate adjustment for tax paid and add to data
 	if not mapper['tax_liabilities']:
@@ -246,8 +249,8 @@ def add_data_for_operating_activities(
 			data.append(interest_paid)
 			section_data.append(interest_paid)
 
-	_add_total_row_account(data, section_data, mapper['section_footer'], 
-		period_list, company_currency)
+	_add_total_row_account(
+		data, section_data, mapper['section_footer'], period_list, company_currency)
 
 
 def calculate_adjustment(filters, non_expense_mapper, expense_mapper, use_accumulated_values, period_list):
@@ -331,20 +334,27 @@ def compute_data(filters, company_currency, profit_data, period_list, light_mapp
 
 
 def execute(filters=None):
-	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, 
-		filters.periodicity, filters.accumulated_values, filters.company)
+	period_list = get_period_list(
+		filters.from_fiscal_year, filters.to_fiscal_year, filters.periodicity,
+		filters.accumulated_values, filters.company
+	)
 
-	# let's make sure mapper's is sorted by its 'position' field
 	mappers = get_mappers_from_db()
 
 	cash_flow_accounts = setup_mappers(mappers)
 
 	# compute net profit / loss
-	income = get_data(filters.company, "Income", "Credit", period_list, 
-		accumulated_values=filters.accumulated_values, ignore_closing_entries=True, ignore_accumulated_values_for_fy= True)
+	income = get_data(
+		filters.company, "Income", "Credit", period_list,
+		accumulated_values=filters.accumulated_values, ignore_closing_entries=True,
+		ignore_accumulated_values_for_fy=True
+	)
 
-	expense = get_data(filters.company, "Expense", "Debit", period_list, 
-		accumulated_values=filters.accumulated_values, ignore_closing_entries=True, ignore_accumulated_values_for_fy= True)
+	expense = get_data(
+		filters.company, "Expense", "Debit", period_list,
+		accumulated_values=filters.accumulated_values, ignore_closing_entries=True,
+		ignore_accumulated_values_for_fy=True
+	)
 
 	net_profit_loss = get_net_profit_loss(income, expense, period_list, filters.company)
 
@@ -401,11 +411,8 @@ def _get_account_type_based_data(filters, account_names, period_list, accumulate
 			""", (company, start_date if accumulated_values else period['from_date'],
 				period['to_date'], account_names, account_names))
 
-
 		if gl_sum and gl_sum[0]:
 			amount = gl_sum[0]
-			if account_names == "Depreciation":
-				amount *= -1
 		else:
 			amount = 0
 
