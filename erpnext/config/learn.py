@@ -247,12 +247,7 @@ def get_data():
 					"type": "help",
 					"label": _("Expense Claims"),
 					"youtube_id": "5SZHJF--ZFY"
-				},
-				{
-					"type": "help",
-					"label": _("Processing Payroll"),
-					"youtube_id": "apgE-f25Rm0"
-				},
+				}
 			]
 		},
 		{
