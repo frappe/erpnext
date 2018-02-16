@@ -159,8 +159,7 @@ erpnext.setup.slides_settings = [
 						if(r.message){
 							exist = r.message;
 							me.get_field("bank_account").set_value("");
-							frappe.msgprint(__(`Account named ${me.values.bank_account} already exists.
-								Enter Bank Name to create a unique Bank Account.`));
+							frappe.msgprint(__(`Account ${me.values.bank_account} already exists, enter a different name for your bank account`));
 						}
 					}
 				});
