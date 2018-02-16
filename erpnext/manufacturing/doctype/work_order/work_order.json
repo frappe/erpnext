@@ -1449,11 +1449,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
-<<<<<<< HEAD
- "modified": "2017-12-20 05:31:56.636724", 
-=======
  "modified": "2018-02-13 02:58:11.328693", 
->>>>>>> resolve minor conflict issues and reports
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Work Order", 

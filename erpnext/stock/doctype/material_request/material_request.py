@@ -423,22 +423,22 @@ def raise_work_orders(material_request):
 	for d in mr.items:
 		if (d.qty - d.ordered_qty) >0:
 			if frappe.db.get_value("BOM", {"item": d.item_code, "is_default": 1}):
-				prod_order = frappe.new_doc("Work Order")
-				prod_order.production_item = d.item_code
-				prod_order.qty = d.qty - d.ordered_qty
-				prod_order.fg_warehouse = d.warehouse
-				prod_order.wip_warehouse = default_wip_warehouse
-				prod_order.description = d.description
-				prod_order.stock_uom = d.stock_uom
-				prod_order.expected_delivery_date = d.schedule_date
-				prod_order.sales_order = d.sales_order
-				prod_order.bom_no = get_item_details(d.item_code).bom_no
-				prod_order.material_request = mr.name
-				prod_order.material_request_item = d.name
-				prod_order.planned_start_date = mr.transaction_date
-				prod_order.company = mr.company
-				prod_order.save()
-				work_orders.append(prod_order.name)
+				wo_order = frappe.new_doc("Work Order")
+				wo_order.production_item = d.item_code
+				wo_order.qty = d.qty - d.ordered_qty
+				wo_order.fg_warehouse = d.warehouse
+				wo_order.wip_warehouse = default_wip_warehouse
+				wo_order.description = d.description
+				wo_order.stock_uom = d.stock_uom
+				wo_order.expected_delivery_date = d.schedule_date
+				wo_order.sales_order = d.sales_order
+				wo_order.bom_no = get_item_details(d.item_code).bom_no
+				wo_order.material_request = mr.name
+				wo_order.material_request_item = d.name
+				wo_order.planned_start_date = mr.transaction_date
+				wo_order.company = mr.company
+				wo_order.save()
+				work_orders.append(wo_order.name)
 			else:
 				errors.append(_("Row {0}: Bill of Materials not found for the Item {1}").format(d.idx, d.item_code))
 	if work_orders:

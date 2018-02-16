@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 from frappe.model.rename_doc import rename_doc, get_link_fields
+from frappe.model.utils.rename_field import rename_field
 import frappe
 
 def execute():
@@ -25,21 +26,4 @@ def execute():
 
     for d in link_fields:
         if d['parent'] not in [old, new]:
-            frappe.db.sql(""" update `tab{0}` set {1}={2} """
-                .format(d['parent'], frappe.scrub(new), frappe.scrub(old)))
-
-    update_naming_series()
-
-def update_naming_series():
-    work_order = frappe.get_all('Work Order')
-
-    for doc in work_order:
-        if "PRO-" in doc.name:
-            new_name = doc.name.replace('PRO-', 'WO-')
-            frappe.rename_doc('Work Order', doc.name, new_name, ignore_permissions=True)
-
-    naming = frappe.get_doc('Naming Series')
-    naming.prefix = 'PRO-'
-    naming.get_current() # fetch current count for 'PRO-'
-    naming.prefix = 'WO-'
-    naming.update_series_start() # Update the count
+            rename_field(d['parent'], frappe.scrub(old), frappe.scrub(new))

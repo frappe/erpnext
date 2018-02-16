@@ -16,7 +16,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Production Plan",
 					"description": _("Generate Material Requests (MRP) and Work Orders."),
-
 				},
 				{
 					"type": "doctype",
@@ -144,7 +143,7 @@ def get_data():
 				},
 				{
 					"type": "help",
-					"label": _("Production Order"),
+					"label": _("Work Order"),
 					"youtube_id": "ZotgLyp2YFY"
 				},
 			]

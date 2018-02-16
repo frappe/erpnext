@@ -204,7 +204,7 @@ class ProductionPlanningTool(Document):
 			if not flt(d.planned_qty):
 				frappe.throw(_("Please enter Planned Qty for Item {0} at row {1}").format(d.item_code, d.idx))
 
-	def raise_production_orders(self):
+	def raise_work_orders(self):
 		"""It will raise work order (Draft) for all distinct FG items"""
 		self.validate_data()
 
@@ -213,20 +213,20 @@ class ProductionPlanningTool(Document):
 
 		items = self.get_production_items()
 
-		pro_list = []
+		wo_list = []
 		frappe.flags.mute_messages = True
 
 		for key in items:
 			work_order = self.create_work_order(items[key])
 			if work_order:
-				pro_list.append(work_order)
+				wo_list.append(work_order)
 
 		frappe.flags.mute_messages = False
 
-		if pro_list:
-			pro_list = ["""<a href="#Form/Work Order/%s" target="_blank">%s</a>""" % \
-				(p, p) for p in pro_list]
-			msgprint(_("{0} created").format(comma_and(pro_list)))
+		if wo_list:
+			wo_list = ["""<a href="#Form/Work Order/%s" target="_blank">%s</a>""" % \
+				(p, p) for p in wo_list]
+			msgprint(_("{0} created").format(comma_and(wo_list)))
 		else :
 			msgprint(_("No Work Orders created"))
 
