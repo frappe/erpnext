@@ -23,6 +23,7 @@ To use the Production Plan, go to:
 * Click on Get Items for Production Order to fetch the items from the above sales orders.
 
 <img class="screenshot" alt="Sales Order Item" src="/docs/assets/img/manufacturing/sales_order_items.png">
+	* Include Exploded Items :- To include subassembly items of raw materials in the production.
 
 #### Production Against Material Requests
 
@@ -44,7 +45,7 @@ To use the Production Plan, go to:
 <img class="screenshot" alt="Material Request Plan" src="/docs/assets/img/manufacturing/material_request_plan.png">
 
   * Include Non Stock Items :- To add non stock items in the material request planning.
-  * Include Subcontracted Items :- To add subcontracted item's raw materials if use multi level bom is disabled
+  * Include Subcontracted Items :- To add subcontracted item's raw materials if include exploded items is disabled
   * Ignore Existing Ordered Quantity :- If enabled then system will not check the projected quantity to make material request.
 
 # Options To Make Production Order and Material Request

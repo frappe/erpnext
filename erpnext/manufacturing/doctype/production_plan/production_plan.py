@@ -185,7 +185,7 @@ class ProductionPlan(Document):
 		for data in items:
 			item_details = get_item_details(data.item_code)
 			pi = self.append('po_items', {
-				'use_multi_level_bom': 1,
+				'include_exploded_items': 1,
 				'warehouse': data.warehouse,
 				'item_code': data.item_code,
 				'description': item_details and item_details.description or '',
@@ -273,7 +273,7 @@ class ProductionPlan(Document):
 		for d in self.po_items:
 			item_details= {
 				"production_item"		: d.item_code,
-				"use_multi_level_bom"   : d.use_multi_level_bom,
+				"use_multi_level_bom"   : d.include_exploded_items,
 				"sales_order"			: d.sales_order,
 				"material_request"		: d.material_request,
 				"material_request_item"	: d.material_request_item,
@@ -312,7 +312,7 @@ class ProductionPlan(Document):
 			if not data.planned_qty:
 				frappe.throw(_("For row {0}: Enter planned qty").format(data.idx))
 
-			if data.use_multi_level_bom and data.bom_no and self.include_subcontracted_items:
+			if data.include_exploded_items and data.bom_no and self.include_subcontracted_items:
 				for d in frappe.db.sql("""select bei.item_code, item.default_bom as bom,
 						ifnull(sum(bei.stock_qty/ifnull(bom.quantity, 1)), 0) as qty, item.item_name,
 						bei.description, bei.stock_uom, item.min_order_qty, bei.source_warehouse,
@@ -353,13 +353,13 @@ class ProductionPlan(Document):
 			}, as_dict=1)
 
 		for d in items:
-			if not data.use_multi_level_bom or not d.default_bom:
+			if not data.include_exploded_items or not d.default_bom:
 				if d.item_code in bom_wise_item_details:
 					bom_wise_item_details[d.item_code].qty = bom_wise_item_details[d.item_code].qty + d.qty
 				else:
 					bom_wise_item_details[d.item_code] = d
 
-			if data.use_multi_level_bom and d.default_bom:
+			if data.include_exploded_items and d.default_bom:
 				if ((d.default_material_request_type in ["Manufacture", "Purchase"] and
 					not d.is_sub_contracted) or (d.is_sub_contracted and self.include_subcontracted_items)):
 					if d.qty > 0:
