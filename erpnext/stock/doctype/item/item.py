@@ -490,6 +490,7 @@ class Item(WebsiteGenerator):
 						frappe.throw(_("Barcode {0} already used in Item {1}").format(
 							item_barcode.barcode, duplicate[0][0]))
 
+					item_barcode.barcode_type = "" if item_barcode.barcode_type not in ["EAN", "UPC-A"] else item_barcode.barcode_type
 					if item_barcode.barcode_type:
 						if not ean.is_valid(item_barcode.barcode):
 							frappe.throw(_("Barcode {0} is not a valid {1} code").format(
