@@ -483,6 +483,7 @@ class Item(WebsiteGenerator):
 		from stdnum import ean
 		if len(self.barcodes) > 0:
 			for item_barcode in self.barcodes:
+				options = frappe.get_meta("Item Barcode").get_options("barcode_type").split()
 				if item_barcode.barcode:
 					duplicate = frappe.db.sql(
 						"""select parent from `tabItem Barcode` where barcode = %s and parent != %s""", (item_barcode.barcode, self.name))
@@ -490,7 +491,7 @@ class Item(WebsiteGenerator):
 						frappe.throw(_("Barcode {0} already used in Item {1}").format(
 							item_barcode.barcode, duplicate[0][0]))
 
-					item_barcode.barcode_type = "" if item_barcode.barcode_type not in ["EAN", "UPC-A"] else item_barcode.barcode_type
+					item_barcode.barcode_type = "" if item_barcode.barcode_type not in options else item_barcode.barcode_type
 					if item_barcode.barcode_type:
 						if not ean.is_valid(item_barcode.barcode):
 							frappe.throw(_("Barcode {0} is not a valid {1} code").format(
