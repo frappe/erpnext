@@ -16,9 +16,9 @@ def get_mapper_for(mappers, position):
 
 def get_mappers_from_db():
 	return frappe.get_all(
-		'Cash Flow Mapper', 
+		'Cash Flow Mapper',
 		fields=[
-			'section_name', 'section_header', 'section_leader', 'section_subtotal', 
+			'section_name', 'section_header', 'section_leader', 'section_subtotal',
 			'section_footer', 'name', 'position'],
 		order_by='position'
 	)
@@ -31,7 +31,7 @@ def get_accounts_in_mappers(mapping_names):
 		'from `tabCash Flow Mapping Accounts` cfma '
 		'join `tabCash Flow Mapping` cfm on cfma.parent=cfm.name '
 		'where cfma.parent in %s '
-		'order by cfm.is_working_capital', 
+		'order by cfm.is_working_capital',
 		(mapping_names,)
 	)
 
@@ -55,7 +55,7 @@ def setup_mappers(mappers):
 
 		account_types = [
 			dict(
-				name=account[0], label=account[1], is_working_capital=account[2], 
+				name=account[0], label=account[1], is_working_capital=account[2],
 				is_income_tax_liability=account[3], is_income_tax_expense=account[4]
 			) for account in accounts if not account[3]]
 
@@ -84,15 +84,15 @@ def setup_mappers(mappers):
 
 		account_types_labels = sorted(
 			set(
-				[(d['label'], d['is_working_capital'], d['is_income_tax_liability'], d['is_income_tax_expense']) 
+				[(d['label'], d['is_working_capital'], d['is_income_tax_liability'], d['is_income_tax_expense'])
 					for d in account_types]
-			), 
+			),
 			key=lambda x: x[1]
 		)
 
 		fc_adjustment_labels = sorted(
 			set(
-				[(d['label'], d['is_finance_cost'], d['is_finance_cost_adjustment']) 
+				[(d['label'], d['is_finance_cost'], d['is_finance_cost_adjustment'])
 					for d in finance_costs_adjustments if d['is_finance_cost_adjustment']]
 			), 
 			key=lambda x: x[2]
@@ -100,7 +100,7 @@ def setup_mappers(mappers):
 
 		unique_liability_labels = sorted(
 			set(
-				[(d['label'], d['is_income_tax_liability'], d['is_income_tax_expense']) 
+				[(d['label'], d['is_income_tax_liability'], d['is_income_tax_expense'])
 					for d in tax_liabilities]
 			),
 			key=lambda x: x[0]
@@ -113,7 +113,7 @@ def setup_mappers(mappers):
 			),
 			key=lambda x: x[0]
 		)
-		
+
 		unique_finance_costs_labels = sorted(
 			set(
 				[(d['label'], d['is_finance_cost']) for d in finance_costs]
@@ -157,9 +157,9 @@ def add_data_for_operating_activities(
 	section_data = []
 
 	data.append({
-		"account_name": mapper['section_header'], 
+		"account_name": mapper['section_header'],
 		"parent_account": None,
-		"indent": 0.0, 
+		"indent": 0.0,
 		"account": mapper['section_header']
 	})
 
@@ -199,7 +199,7 @@ def add_data_for_operating_activities(
 		if account_data['total'] != 0:
 			account_data.update({
 				"account_name": account['label'],
-				"account": account['names'], 
+				"account": account['names'],
 				"indent": 1.0,
 				"parent_account": mapper['section_header'],
 				"currency": company_currency
@@ -217,7 +217,7 @@ def add_data_for_operating_activities(
 
 	for account in mapper['tax_liabilities']:
 		tax_paid = calculate_adjustment(
-			filters, mapper['tax_liabilities'], mapper['tax_expenses'], 
+			filters, mapper['tax_liabilities'], mapper['tax_expenses'],
 			filters.accumulated_values, period_list)
 
 		if tax_paid:
@@ -293,7 +293,7 @@ def add_data_for_other_activities(
 		})
 
 		for account in mapper['account_types']:
-			account_data = _get_account_type_based_data(filters, 
+			account_data = _get_account_type_based_data(filters,
 				account['names'], period_list, filters.accumulated_values)
 			if account_data['total'] != 0:
 				account_data.update({
@@ -306,7 +306,7 @@ def add_data_for_other_activities(
 				data.append(account_data)
 				section_data.append(account_data)
 
-		_add_total_row_account(data, section_data, mapper['section_footer'], 
+		_add_total_row_account(data, section_data, mapper['section_footer'],
 			period_list, company_currency)
 
 
@@ -321,7 +321,7 @@ def compute_data(filters, company_currency, profit_data, period_list, light_mapp
 
 	if operating_activities_mapper:
 		add_data_for_operating_activities(
-			filters, company_currency, profit_data, period_list, light_mappers, 
+			filters, company_currency, profit_data, period_list, light_mappers,
 			operating_activities_mapper, data
 		)
 
