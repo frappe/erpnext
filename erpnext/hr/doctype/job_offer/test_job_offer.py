@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 
-# test_records = frappe.get_test_records('Offer Letter')
+# test_records = frappe.get_test_records('Job Offer')
 
-class TestOfferLetter(unittest.TestCase):
+class TestJobOffer(unittest.TestCase):
 	pass

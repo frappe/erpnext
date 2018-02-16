@@ -31,25 +31,29 @@ def get_meta(doctype):
 	return meta
 
 @frappe.whitelist()
-def get_categories():
+def get_categories(parent='All Categories'):
 	# get categories info with parent category and stuff
 	connection = get_client_connection()
-	response = connection.get_list('Hub Category')
+	categories = connection.get_list('Hub Category', filters={'parent_hub_category': parent})
+
+	response = [{'value': c.get('name'), 'expandable': c.get('is_group')} for c in categories]
 	return response
 
 @frappe.whitelist()
-def get_item_details(hub_sync_id=None):
+def update_category(item_name, category):
+	connection = get_hub_connection()
+	response = connection.update('Hub Item', dict(
+		hub_category = category
+	), item_name)
+	return response.ok
+
+@frappe.whitelist()
+def get_details(hub_sync_id=None, doctype='Hub Item'):
 	if not hub_sync_id:
 		return
 	connection = get_client_connection()
-	item_details = connection.get_doc('Hub Item', hub_sync_id)
-	print(item_details)
-	return item_details
-
-@frappe.whitelist()
-def get_company_details(hub_sync_id):
-	connection = get_client_connection()
-	return connection.get_doc('Hub Company', hub_sync_id)
+	details = connection.get_doc(doctype, hub_sync_id)
+	return details
 
 def get_client_connection():
 	# frappeclient connection
