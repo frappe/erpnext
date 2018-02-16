@@ -6,15 +6,15 @@ import frappe
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
-class OfferLetter(Document):
+class JobOffer(Document):
 	pass
 
 @frappe.whitelist()
 def make_employee(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.personal_email = frappe.db.get_value("Job Applicant", source.job_applicant, "email_id")
-	doc = get_mapped_doc("Offer Letter", source_name, {
-			"Offer Letter": {
+	doc = get_mapped_doc("Job Offer", source_name, {
+			"Job Offer": {
 				"doctype": "Employee",
 				"field_map": {
 					"applicant_name": "employee_name",

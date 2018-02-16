@@ -17,6 +17,8 @@ test_ignore = ["Price List"]
 test_dependencies = ['Payment Term', 'Payment Terms Template']
 test_records = frappe.get_test_records('Customer')
 
+from six import iteritems
+
 class TestCustomer(unittest.TestCase):
 	def setUp(self):
 		if not frappe.get_value('Item', '_Test Item'):
@@ -51,7 +53,7 @@ class TestCustomer(unittest.TestCase):
 
 		details = get_party_details("_Test Customer")
 
-		for key, value in to_check.iteritems():
+		for key, value in iteritems(to_check):
 			self.assertEquals(value, details.get(key))
 
 	def test_rename(self):

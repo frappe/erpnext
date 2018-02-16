@@ -6,7 +6,7 @@ salary-and-payroll
 appraisal
 job-applicant
 job-opening
-offer-letter
+job-offer
 tools
 human-resources-reports
 setup
