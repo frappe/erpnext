@@ -25,7 +25,7 @@ This is what the cash flow report looks like at the moment:
 <img alt="Default cash flow report" class="screenshot" src="{{docs_base_url}}/assets/img/articles/default-cash-flow-report.png">
 
 We don't like the report for the following reasons:
-- The reporting format is too scant. Jane feels it's not informative enough.
+- The reporting format is too scant.
 - The 'Net Cash From Operations' figure is wrong
 
 ### Customisation Process
@@ -69,7 +69,7 @@ With this information, let's go ahead and create the Cash Flow Mapping Document 
 <img alt="custom cash flow statement" class="screenshot" src="{{docs_base_url}}/assets/img/articles/cash-flow-mapping-1.png">
 
 I have named it 'Income Tax Charge' and given it a label 'Income taxes recognised in profit or loss'. We want this 
-line to reflect income tax charges from our profit or loss statement. The account where this happens in Jane's chart 
+line to reflect income tax charges from our profit or loss statement. The account where this happens in our chart 
 of account is named 'Income Taxes' (an expense) so I have added 'Income Taxes' into the accounts table. If you have 
 more accounts representing income tax expenses, you should add all of them here.
 
