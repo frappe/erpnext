@@ -32,7 +32,9 @@ def execute():
         }
     ]
 
+    frappe.reload_doc('accounts', 'doctype', frappe.scrub('Cash Flow Mapping'))
     frappe.reload_doc('accounts', 'doctype', frappe.scrub('Cash Flow Mapper'))
+    frappe.reload_doc('accounts', 'doctype', frappe.scrub('Cash Flow Mapping Template Details'))
 
     for mapper in mappers:
         if not frappe.db.exists('Cash Flow Mapper', mapper['section_name']):
