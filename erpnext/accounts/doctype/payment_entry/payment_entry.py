@@ -129,14 +129,14 @@ class PaymentEntry(AccountsController):
 
 		self.set_missing_ref_details()
 
-	def set_missing_ref_details(self):
+	def set_missing_ref_details(self, force=False):
 		for d in self.get("references"):
 			if d.allocated_amount:
 				ref_details = get_reference_details(d.reference_doctype,
 					d.reference_name, self.party_account_currency)
 
 				for field, value in ref_details.items():
-					if not d.get(field):
+					if not d.get(field) or force:
 						d.set(field, value)
 
 	def validate_payment_type(self):
