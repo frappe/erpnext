@@ -118,7 +118,7 @@ def get_mode_of_payment_details(filters):
 	invoice_list_names = ",".join(['"' + invoice['name'] + '"' for invoice in invoice_list])
 	if invoice_list:
 		inv_mop_detail = frappe.db.sql("""select a.owner, a.posting_date,
-			ifnull(b.mode_of_payment, '') as mode_of_payment, sum(b.base_amount) as paid_amount
+			ifnull(b.mode_of_payment, '') as mode_of_payment, sum(b.base_amount - a.base_change_amount) as paid_amount
 			from `tabSales Invoice` a, `tabSales Invoice Payment` b
 			where a.name = b.parent
 			and a.name in ({invoice_list_names})
