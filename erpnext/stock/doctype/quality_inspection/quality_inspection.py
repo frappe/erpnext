@@ -60,24 +60,21 @@ class QualityInspection(Document):
 def item_query(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("from"):
 		from frappe.desk.reportview import get_match_cond
-		filters.update({
-			"txt": txt,
-			"mcond": get_match_cond(filters["from"]),
-			"start": start,
-			"page_len": page_len,
-			"cond": ""
-		})
+		mcond = get_match_cond(filters["from"])
+		cond = ""
 
 		if filters.get('from') in ['Purchase Invoice Item', 'Purchase Receipt Item']:
-			filters["cond"] = """and item_code in (select name from `tabItem` where
+			cond = """and item_code in (select name from `tabItem` where
 				inspection_required_before_purchase = 1)"""
 		elif filters.get('from') in ['Sales Invoice Item', 'Delivery Note Item']:
-			filters["cond"] = """and item_code in (select name from `tabItem` where
+			cond = """and item_code in (select name from `tabItem` where
 				inspection_required_before_delivery = 1)"""
 		elif filters.get('from') == 'Stock Entry Detail':
-			filters["cond"] = """and s_warehouse is null"""
+			cond = """and s_warehouse is null"""
 
-		return frappe.db.sql("""select item_code from `tab%(from)s`
-			where parent='%(parent)s' and docstatus < 2 and item_code like '%%%(txt)s%%'
-			and (quality_inspection is null or quality_inspection = '') %(cond)s
-			%(mcond)s order by item_code limit %(start)s, %(page_len)s""" % filters)
+		return frappe.db.sql(""" select item_code from `tab{doc}`
+			where parent=%(parent)s and docstatus < 2 and item_code like %(txt)s
+			and (quality_inspection is null or quality_inspection = '')
+			{cond} {mcond} order by item_code limit {start}, {page_len}""".format(doc=filters.get('from'),
+			parent=filters.get('parent'), cond=cond, mcond=mcond, start=start, page_len = page_len),
+			{'parent': filters.get('parent'), 'txt': "%%%s%%" % txt})

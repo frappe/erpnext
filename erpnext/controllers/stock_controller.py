@@ -330,7 +330,7 @@ class StockController(AccountsController):
 			if (inspection_required_fieldname and not d.quality_inspection and
 				frappe.db.get_value("Item", d.item_code, inspection_required_fieldname)):
 				raise_exception = True
-			elif self.doctype == "Stock Entry" and not d.quality_inspection and not d.s_warehouse:
+			elif self.doctype == "Stock Entry" and not d.quality_inspection and d.t_warehouse:
 				raise_exception = True
 
 			if raise_exception:

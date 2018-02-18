@@ -9,8 +9,8 @@ frappe.ui.form.on("Quality Inspection", {
 			return frm.call({
 				method: "get_quality_inspection_template",
 				doc: frm.doc,
-				callback: function(r) {
-					refresh_field(['quality_inspection_template', 'readings'])
+				callback: function() {
+					refresh_field(['quality_inspection_template', 'readings']);
 				}
 			});
 		}
@@ -22,7 +22,7 @@ frappe.ui.form.on("Quality Inspection", {
 				method: "get_item_specification_details",
 				doc: frm.doc,
 				callback: function() {
-					refresh_field('readings')
+					refresh_field('readings');
 				}
 			});
 		}
