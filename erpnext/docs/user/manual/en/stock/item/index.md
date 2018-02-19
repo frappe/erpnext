@@ -5,8 +5,6 @@ An Item is your companys' product or a service. The term Item is applicable to t
 ERPNext is optimised for itemised management of your sales and purchase. If you are in services, you can create an Item for each services that your offer. Completing the Item Master is very essential for successful implementation of ERPNext.
 
 <div>
-  <style>.embed-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; } .embed-container iframe, .embed-container object, .embed-container embed { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-  </style>
   <div class='embed-container'>
     <iframe src='https://www.youtube.com/embed/FcOsV-e8ymE?end=192' frameborder='0' allowfullscreen>
     </iframe>
@@ -92,22 +90,10 @@ Inspection Criteria: If a Quality Inspection is prepared for this Item, then thi
 
 * **Default Income Account:** Income account selected here will be fetched automatically in sales invoice for this item.
 
-<<<<<<< HEAD
-=======
-<img class="screenshot" alt="Sales details" src="{{docs_base_url}}/assets/img/stock/item-sales.png)">
-
-<img class="screenshot" alt="Sales details" src="{{docs_base_url}}/assets/img/stock/item-sales.png">
-
->>>>>>> b005950ba7801029f00221067d36b7da2e56b0f8
 ***Cost Centre:** Cost center selected here will be fetched automatically in sales invoice for this item.
 
 ***Customer Codes:** Track Item Code assigned by the Customers for this Item. This will help you in searching item while creating Sales Order based on the Item Code in the Customer's Purchase Order.
 
-<<<<<<< HEAD
-=======
-<img class="screenshot" alt="Sales details" src="{{docs_base_url}}/assets/img/stock/item-sales.png)">
-
->>>>>>> b005950ba7801029f00221067d36b7da2e56b0f8
 ### Manufacturing And Website
 
 <img class="screenshot" alt="Manufaturing details" src="{{docs_base_url}}/assets/img/stock/item-manufacturing-website.png">
