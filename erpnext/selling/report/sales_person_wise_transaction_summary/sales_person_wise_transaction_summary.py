@@ -13,10 +13,8 @@ def execute(filters=None):
 	entries = get_entries(filters)
 	item_details = get_item_details()
 	data = []
-	total_contribution_amount = 0
-	for d in entries:
-		total_contribution_amount += flt(d.contribution_amt)
 
+	for d in entries:
 		data.append([
 			d.name, d.customer, d.territory, d.posting_date, d.item_code,
 			item_details.get(d.item_code, {}).get("item_group"), item_details.get(d.item_code, {}).get("brand"),
@@ -25,8 +23,6 @@ def execute(filters=None):
 
 	if data:
 		total_row = [""]*len(data[0])
-		total_row[0] = _("Total")
-		total_row[-1] = total_contribution_amount
 		data.append(total_row)
 
 	return columns, data
