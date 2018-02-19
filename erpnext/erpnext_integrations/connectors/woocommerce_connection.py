@@ -13,33 +13,33 @@ def verify_request():
 			hashlib.sha256
 		).digest()
 	)
-	print(sig, frappe.get_request_header("X-Wc-Webhook-Signature"))
+	print("verify_request", sig, frappe.get_request_header("X-Wc-Webhook-Signature"))
 	if frappe.request.data and \
 		frappe.get_request_header("X-Wc-Webhook-Signature") and \
 		not sig == frappe.get_request_header("X-Wc-Webhook-Signature"):
 			frappe.throw(_("Unverified Webhook Data"))
 	frappe.set_user("Administrator")
 
-@frappe.whitelist(allow_guest=True)
-def create_coupon():
-	verify_request()
-	print("yay!")
+# @frappe.whitelist(allow_guest=True)
+# def create_coupon():
+# 	verify_request()
+# 	print("yay!")
 
-@frappe.whitelist(allow_guest=True)
-def update_coupon():
-	print(frappe.request.headers)
-	print(frappe.request.headers.get("X-Wc-Webhook-Event"))
-	print(frappe.request.headers.get("X-Wc-Webhook-Resource"))
-	verify_request()
-	print("yay!")
+# @frappe.whitelist(allow_guest=True)
+# def update_coupon():
+# 	print(frappe.request.headers)
+# 	print(frappe.request.headers.get("X-Wc-Webhook-Event"))
+# 	print(frappe.request.headers.get("X-Wc-Webhook-Resource"))
+# 	verify_request()
+# 	print("yay!")
 
-@frappe.whitelist(allow_guest=True)
-def delete_coupon():
-	pass
+# @frappe.whitelist(allow_guest=True)
+# def delete_coupon():
+# 	pass
 
-@frappe.whitelist(allow_guest=True)
-def restore_coupon():
-	pass
+# @frappe.whitelist(allow_guest=True)
+# def restore_coupon():
+# 	pass
 
 @frappe.whitelist(allow_guest=True)
 def customer():
@@ -50,12 +50,25 @@ def customer():
 
 	if event == "updated":
 		try:
-			new_customer = frappe.new_doc("Customer")
-			# new_customer.customer_name = fd.get("first_name")+" "+fd.get("last_name")
-			new_customer.customer_name = "WC {id}".format(id=str(fd.get("id"))) if not fd.get("first_name") else str(fd.get("first_name"))
-			new_customer.woocommerce_id = str(fd.get("id"))
-			new_customer.save()
+			existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
 
+			existing_customer.customer_name = "WC {id}".format(id=str(fd.get("id"))) if not fd.get("first_name") else str(fd.get("first_name"))
+			existing_customer.save()
+
+			# if (fd.get("first_name") == "" and fd.get("last_name") == ""):
+			# 	existing_customer.customer_name = "WC {id}".format(id=str(fd.get("id")))
+
+			# else if(fd.get("first_name") and fd.get("last_name") == ""):
+			# 	existing_customer.customer_name = str(fd.get("first_name"))
+
+			# else if(fd.get("first_name") == "" and fd.get("last_name")):
+			# 	existing_customer.customer_name = str(fd.get("last_name"))
+
+			# else:
+			# 	existing_customer.customer_name = str(fd.get("first_name"))+ " "+str(fd.get("last_name"))
+
+			# existing_customer.save()
+			
 			# make_address = frappe.new_doc("Address")
 			# make_address.address_line1 = "None" if (fd.get("address_1") == None) else str(fd.get("address_1"))
 			# make_address.address_line2 = "None" if (fd.get("address_2") == None) else str(fd.get("address_2"))
@@ -74,6 +87,26 @@ def customer():
 			
 			# make_address.save()
 			
+		except frappe.DoesNotExistError as e:
+			new_customer = frappe.new_doc("Customer")
+			# new_customer.customer_name = fd.get("first_name")+" "+fd.get("last_name")
+			new_customer.customer_name = "WC {id}".format(id=str(fd.get("id"))) if not fd.get("first_name") else str(fd.get("first_name"))
+
+			# if not (fd.get("first_name") and fd.get("last_name")):
+			# 	new_customer.customer_name = "WC {id}".format(id=str(fd.get("id")))
+
+			# else if(fd.get("first_name") and fd.get("last_name") == None):
+			# 	new_customer.customer_name = str(fd.get("first_name"))
+
+			# else if(fd.get("first_name") == None and fd.get("last_name")):
+			# 	new_customer.customer_name = str(fd.get("last_name"))
+				
+			# else:
+			# 	new_customer.customer_name = str(fd.get("first_name"))+ " "+str(fd.get("last_name"))
+
+			new_customer.woocommerce_id = str(fd.get("id"))
+			new_customer.save()
+
 		except Exception as e:
 			print("Error ",e)
 
@@ -85,71 +118,71 @@ def customer():
 	frappe.db.commit()
 
 
-@frappe.whitelist(allow_guest=True)
-def product():
-	# print("hello"*1000)
-	verify_request()
-	print(frappe.local.form_dict)
-	fd = json.loads(frappe.request.data)
-	event = frappe.get_request_header("X-Wc-Webhook-Event")
-	print(event)
-	if event == "created":
-		print("inif?")
-		print(
-			fd.get("name"),
-			"woocommerce - " + str(fd.get("id")),
-			str(fd.get("id")),
-			0 if (fd.get("stock_quantity") == None) else fd.get("stock_quantity")
-		)
-		try:
-			item = frappe.new_doc("Item")
-			item.item_name = str(fd.get("name"))
-			item.item_code = "woocommerce - " + str(fd.get("id"))
-			# item.woocommerce_id = str(fd.get("id"))
-			item.item_group = "Products"
-			item.opening_stock = 0 if (fd.get("stock_quantity") == None) else str(fd.get("stock_quantity"))
-			item.save()
+# @frappe.whitelist(allow_guest=True)
+# def product():
+# 	# print("hello"*1000)
+# 	verify_request()
+# 	print(frappe.local.form_dict)
+# 	fd = json.loads(frappe.request.data)
+# 	event = frappe.get_request_header("X-Wc-Webhook-Event")
+# 	print(event)
+# 	if event == "created":
+# 		print("inif?")
+# 		print(
+# 			fd.get("name"),
+# 			"woocommerce - " + str(fd.get("id")),
+# 			str(fd.get("id")),
+# 			0 if (fd.get("stock_quantity") == None) else fd.get("stock_quantity")
+# 		)
+# 		try:
+# 			item = frappe.new_doc("Item")
+# 			item.item_name = str(fd.get("name"))
+# 			item.item_code = "woocommerce - " + str(fd.get("id"))
+# 			# item.woocommerce_id = str(fd.get("id"))
+# 			item.item_group = "Products"
+# 			item.opening_stock = 0 if (fd.get("stock_quantity") == None) else str(fd.get("stock_quantity"))
+# 			item.save()
 
-			# note = frappe.new_doc("Note")
-			# note.title = str(fd.get("name"))
-			# # note.content = fd.get("name")
-			# note.save(ignore_permissions=True)
-			frappe.db.commit()
-		except Exception as e:
-			print("Exception", e)
+# 			# note = frappe.new_doc("Note")
+# 			# note.title = str(fd.get("name"))
+# 			# # note.content = fd.get("name")
+# 			# note.save(ignore_permissions=True)
+# 			frappe.db.commit()
+# 		except Exception as e:
+# 			print("Exception", e)
 
-	elif event == "updated":
-		item = frappe.get_doc({"doctype":"Item", "item_code":fd.get("id")})
+# 	elif event == "updated":
+# 		item = frappe.get_doc({"doctype":"Item", "item_code":fd.get("id")})
 
-	elif event == "restored":
-		pass
-	elif event == "deleted":
-		pass
+# 	elif event == "restored":
+# 		pass
+# 	elif event == "deleted":
+# 		pass
 
 
-@frappe.whitelist(allow_guest=True)
-def order():
-	pass
-	# verify_request()
-	# print(frappe.local.form_dict)
-	# fd = frappe.local.form_dict
-	# event = frappe.get_request_header("X-Wc-Webhook-Event")
+# @frappe.whitelist(allow_guest=True)
+# def order():
+# 	pass
+# 	verify_request()
+# 	print(frappe.local.form_dict)
+# 	fd = frappe.local.form_dict
+# 	event = frappe.get_request_header("X-Wc-Webhook-Event")
 
-	# if event == "created":
-	# 	new_sales_order = frappe.new_doc("Sales Order")
-	# 	new_sales_order.customer = fd.get("first_name")+" "+fd.get("last_name")
-	# 	created_date = fd.get("date_created").split("T")
-	# 	new_sales_order.transaction_date = created_date[0]
-	# 	new_sales_order.po_no = fd.get("id")
-	# 	new_sales_order.Sales Order-woocommerce_id = fd.get("id")
-	# 	# new_sales_order.append("taxes",{
-	# 	# 				"charge_type":"Actual",
-	# 	# 				"account_head": "VAT 5% - Woo",
-	# 	# 				"tax_amount": charge_amount,
-	# 	# 				"description": charge_type
-	# 	# 				})
-	# 	ordered_items = fd.get("line_items")
-	# 	for item in ordered_items:
+# 	if event == "created":
+# 		new_sales_order = frappe.new_doc("Sales Order")
+# 		new_sales_order.customer = fd.get("first_name")+" "+fd.get("last_name")
+# 		created_date = fd.get("date_created").split("T")
+# 		new_sales_order.transaction_date = created_date[0]
+# 		new_sales_order.po_no = fd.get("id")
+# 		new_sales_order.Sales Order-woocommerce_id = fd.get("id")
+# 		# new_sales_order.append("taxes",{
+# 		# 				"charge_type":"Actual",
+# 		# 				"account_head": "VAT 5% - Woo",
+# 		# 				"tax_amount": charge_amount,
+# 		# 				"description": charge_type
+# 		# 				})
+# 		ordered_items = fd.get("line_items")
+# 		for item in ordered_items:
 
 # # 			found_item = frappe.get_doc({"doctype":"Item","item_name":item.get("name")})
 # # 			new_sales_order.append("items",{
