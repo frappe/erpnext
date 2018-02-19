@@ -59,8 +59,8 @@ class TestDailyWorkSummary(unittest.TestCase):
 		frappe.db.sql('delete from `tabDaily Work Summary Group`')
 
 		self.users = frappe.get_all('User',
-						fields=['email'],
-						filters=dict(email=('!=', 'test@example.com')))
+			fields=['email'],
+			filters=dict(email=('!=', 'test@example.com')))
 		self.setup_groups(hour)
 
 		from erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group \
@@ -82,11 +82,11 @@ class TestDailyWorkSummary(unittest.TestCase):
 			hour = hour+':00'
 
 		groups = frappe.get_doc(dict(doctype="Daily Work Summary Group",
-						name="Daily Work Summary",
-						users=self.users,
-						send_emails_at=hour,
-						subject="this is a subject for testing summary emails",
-						message='this is a message for testing summary emails'))
+			name="Daily Work Summary",
+			users=self.users,
+			send_emails_at=hour,
+			subject="this is a subject for testing summary emails",
+			message='this is a message for testing summary emails'))
 		groups.insert()
 
 		self.groups = groups

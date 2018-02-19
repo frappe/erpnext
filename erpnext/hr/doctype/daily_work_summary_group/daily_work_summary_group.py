@@ -14,12 +14,12 @@ class DailyWorkSummaryGroup(Document):
 		if self.users:
 			if not frappe.flags.in_test and not is_incoming_account_enabled():
 				frappe.throw(_('There must be a default incoming Email Account enabled for this to work. '
-							   'Please setup a default incoming Email Account (POP/IMAP) and try again.'))
+					'Please setup a default incoming Email Account (POP/IMAP) and try again.'))
 
 
 def trigger_emails():
 	'''Send emails to Employees at the given hour asking
-					them what did they work on today'''
+			them what did they work on today'''
 	groups = frappe.get_all("Daily Work Summary Group")
 	for d in groups:
 		group_doc = frappe.get_doc("Daily Work Summary Group", d)
@@ -43,7 +43,7 @@ def is_holiday_today(holiday_list):
 	date = frappe.utils.today()
 	if holiday_list:
 		return frappe.get_all('Holiday List',
-							  dict(name=holiday_list, holiday_date=date)) and True or False
+			dict(name=holiday_list, holiday_date=date)) and True or False
 	else:
 		return False
 

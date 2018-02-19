@@ -12,7 +12,7 @@ QUnit.test("test: Daily Work Summary", function (assert) {
 		// insert a new Daily Work Summary
 		() => frappe.tests.make('Daily Work Summary', [
 			// values to be set
-			{key: 'value'}
+			{ key: 'value' }
 		]),
 		() => {
 			assert.equal(cur_frm.doc.key, 'value');
