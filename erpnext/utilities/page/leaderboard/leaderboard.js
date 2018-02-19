@@ -17,7 +17,7 @@ frappe.Leaderboard = Class.extend({
 		this.$sidebar_list = this.page.sidebar.find('ul');
 
 		// const list of doctypes
-		this.doctypes = ["Customer", "Item", "Supplier", "Sales Partner","Sales Person"];
+		this.doctypes = ["Customer", "Item", "Supplier", "Sales Partner","Sales Person"];	
 		this.timespans = ["Week", "Month", "Quarter", "Year"];
 		this.desc_fields = ["total_sales_amount", "total_request","total_purchase_amount","commission_rate"];
 		this.filters = {
@@ -142,7 +142,7 @@ frappe.Leaderboard = Class.extend({
 						],
 						labels: graph_items.map(d=>d.name)
 					},
-					colors: ['orange'],
+					colors: ['light-green'],
 					format_tooltip_x: d=>d[me.options.selected_filter_item],
 					type: 'bar',
 					height: 140
