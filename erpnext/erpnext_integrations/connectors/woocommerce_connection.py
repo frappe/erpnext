@@ -52,23 +52,35 @@ def customer():
 		try:
 			existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
 
-			existing_customer.customer_name = "WC {id}".format(id=str(fd.get("id"))) if not fd.get("first_name") else str(fd.get("first_name"))
-			existing_customer.save()
-
-			# if (fd.get("first_name") == "" and fd.get("last_name") == ""):
-			# 	existing_customer.customer_name = "WC {id}".format(id=str(fd.get("id")))
-
-			# else if(fd.get("first_name") and fd.get("last_name") == ""):
-			# 	existing_customer.customer_name = str(fd.get("first_name"))
-
-			# else if(fd.get("first_name") == "" and fd.get("last_name")):
-			# 	existing_customer.customer_name = str(fd.get("last_name"))
-
-			# else:
-			# 	existing_customer.customer_name = str(fd.get("first_name"))+ " "+str(fd.get("last_name"))
-
+			# existing_customer.customer_name = "WC {id}".format(id=str(fd.get("id"))) if not fd.get("first_name") else str(fd.get("first_name"))
 			# existing_customer.save()
-			
+
+			# if not (fd.get("first_name") and fd.get("last_name")):
+			# 	print("THis is if 11")
+			# 	existing_customer.customer_name = "WC {id}".format(id=str(fd.get("id")))
+			# print("""if(fd.get("first_name") != None and fd.get("last_name") == None):""", (fd.get("first_name") != None and fd.get("last_name") == None), (fd.get("first_name") != None), (fd.get("last_name") == None))
+			# print("""elif(fd.get("first_name") == None and fd.get("last_name") != None):""", (fd.get("first_name") == None and fd.get("last_name") != None), (fd.get("first_name") == None), (fd.get("last_name") != None))
+
+			if(fd.get("first_name") and not fd.get("last_name")):
+				# print("THis is if 12")
+				existing_customer.customer_name = fd.get("first_name")
+				existing_customer.save()
+				frappe.db.commit()
+
+			elif(not fd.get("first_name") and fd.get("last_name")):
+				# print("THis is if 13")
+				existing_customer.customer_name = str(fd.get("last_name"))
+				existing_customer.save()
+				frappe.db.commit()
+
+			else:
+				# print("THis is if 14")
+				existing_customer.customer_name = str(fd.get("first_name"))+ " "+str(fd.get("last_name"))
+				existing_customer.save()
+				frappe.db.commit()
+
+			# print("THis Complete 1", existing_customer.customer_name)
+
 			# make_address = frappe.new_doc("Address")
 			# make_address.address_line1 = "None" if (fd.get("address_1") == None) else str(fd.get("address_1"))
 			# make_address.address_line2 = "None" if (fd.get("address_2") == None) else str(fd.get("address_2"))
@@ -90,22 +102,40 @@ def customer():
 		except frappe.DoesNotExistError as e:
 			new_customer = frappe.new_doc("Customer")
 			# new_customer.customer_name = fd.get("first_name")+" "+fd.get("last_name")
-			new_customer.customer_name = "WC {id}".format(id=str(fd.get("id"))) if not fd.get("first_name") else str(fd.get("first_name"))
+			# new_customer.customer_name = "WC {id}".format(id=str(fd.get("id"))) if not fd.get("first_name") else str(fd.get("first_name"))
 
-			# if not (fd.get("first_name") and fd.get("last_name")):
-			# 	new_customer.customer_name = "WC {id}".format(id=str(fd.get("id")))
+			if (not fd.get("first_name") and not fd.get("last_name")):
+				# print("THis is if 21")
+				new_customer.customer_name = "WC {id}".format(id=str(fd.get("id")))
+				new_customer.woocommerce_id = str(fd.get("id"))
+				new_customer.save()
+				frappe.db.commit()
+				# print("Completed 21")
 
-			# else if(fd.get("first_name") and fd.get("last_name") == None):
-			# 	new_customer.customer_name = str(fd.get("first_name"))
+			elif(fd.get("first_name") and not fd.get("last_name")):
+				# print("THis is if 22")
+				new_customer.customer_name = str(fd.get("first_name"))
+				new_customer.woocommerce_id = str(fd.get("id"))
+				new_customer.save()
+				frappe.db.commit()
 
-			# else if(fd.get("first_name") == None and fd.get("last_name")):
-			# 	new_customer.customer_name = str(fd.get("last_name"))
+			elif(not fd.get("first_name") and fd.get("last_name")):
+				# print("THis is if 23")
+				new_customer.customer_name = str(fd.get("last_name"))
+				new_customer.woocommerce_id = str(fd.get("id"))
+				new_customer.save()
+				frappe.db.commit()
 				
-			# else:
-			# 	new_customer.customer_name = str(fd.get("first_name"))+ " "+str(fd.get("last_name"))
+			else:
+				# print("THis is if 24")
+				new_customer.customer_name = str(fd.get("first_name"))+ " "+str(fd.get("last_name"))
+				new_customer.woocommerce_id = str(fd.get("id"))
+				new_customer.save()
+				frappe.db.commit()
 
-			new_customer.woocommerce_id = str(fd.get("id"))
-			new_customer.save()
+			
+			# print("THis Complete 2")
+			
 
 		except Exception as e:
 			print("Error ",e)
@@ -115,7 +145,6 @@ def customer():
 	# elif event == "deleted":
 	# 	pass
 
-	frappe.db.commit()
 
 
 # @frappe.whitelist(allow_guest=True)
