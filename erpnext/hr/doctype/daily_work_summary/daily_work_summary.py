@@ -36,7 +36,7 @@ class DailyWorkSummary(Document):
 			template='daily_work_summary',
 			args=args,
 			subject=_(self.daily_work_summary_group),
-			reference_doctype=self.doctype, 
+			reference_doctype=self.doctype,
 			reference_name=self.name)
 
 		self.db_set('status', 'Sent')
@@ -46,7 +46,7 @@ class DailyWorkSummary(Document):
 		dws_group = frappe.get_doc('Daily Work Summary Group',
 			self.daily_work_summary_group)
 
-		replies = frappe.get_all('Communication', 
+		replies = frappe.get_all('Communication',
 			fields=['content', 'text_content', 'sender'],
 			filters=dict(reference_doctype=self.doctype,
 				reference_name=self.name,
