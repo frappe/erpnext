@@ -500,3 +500,4 @@ erpnext.patches.v10_0.workflow_expense_claim
 erpnext.patches.v10_0.set_b2c_limit
 erpnext.patches.v10_0.update_translatable_fields
 erpnext.patches.v10_0.rename_offer_letter_to_job_offer
+execute:frappe.delete_doc('DocType', 'Production Planning Tool', ignore_missing=True)
