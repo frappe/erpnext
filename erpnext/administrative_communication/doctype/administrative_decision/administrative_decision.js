@@ -63,14 +63,29 @@ frappe.ui.form.on('Administrative Decision', {
 
 
 	type: function(frm) {
-		if (frm.doc.type == "Coming"){
-			frm.set_value('naming_series', "AD-IN/")
-		}else if (frm.doc.type == "Out"){
-			frm.set_value('naming_series', "AD-OUT/")
-		}else if (frm.doc.type == "Inside"){
-			frm.set_value('naming_series', "AD-INSIDE/")
+		if (frm.doc.type == "Received Document"){
+			frm.set_value('naming_series', "AD-IN-")
+		}else if (frm.doc.type == "Sent Document"){
+			frm.set_value('naming_series', "AD-OUT-")
+		}else if (frm.doc.type == "Inside Document"){
+			frm.set_value('naming_series', "AD-INSIDE-")
 		}else{
-			frm.set_value('naming_series', "AD/")
+			frm.set_value('naming_series', "AD-")
+		}
+	},
+
+	reply_required: function(frm) {
+		if (frm.doc.reply_required == 1){
+			cur_frm.toggle_reqd("deadline", true)
+		}else{
+			cur_frm.toggle_reqd("deadline", false)
+		}
+	},
+	replied_document: function(frm) {
+		if (frm.doc.replied_document == 1){
+			cur_frm.toggle_reqd("replied_administrative_decision", true)
+		}else{
+			cur_frm.toggle_reqd("replied_administrative_decision", false)
 		}
 	}
 
@@ -104,3 +119,46 @@ cur_frm.cscript.onload_post_render = function(doc,cdt,cdn){
 // 		]
 // 	};
 // };
+
+
+
+
+
+
+// Generate Bar Code button 
+
+frappe.ui.form.on("Administrative Decision", "refresh", function(frm) {
+    frm.add_custom_button(__("Generate Barcode"), function() {
+        // When this button is clicked, do this
+
+        // we take Administrative Decision Transaction Number to create a barcode for it 
+        var name = frm.doc.name;
+
+        // do something with these values, like an ajax request 
+        // or call a server side frappe function using frappe.call
+		frappe.call({
+		    method: 'barcode_attach2',
+		    doc: frm.doc,
+		    args: {
+		            'name':name ,
+		    },
+		    callback: function(r) {
+		        if (!r.exc) {
+		            // code snippet
+
+		            if (r.message){ 
+		            	cur_frm.set_value('barcode_img',String(r.message));
+
+		            	cur_frm.refresh_field('barcode_img');
+		            	console.log(' barcode updated ')
+		            }
+
+		        }
+		    }
+		});
+
+
+
+
+    });
+});

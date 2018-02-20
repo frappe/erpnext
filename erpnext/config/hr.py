@@ -115,6 +115,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Health Insurance Info",
+					"description":_("Health Insurance Info")
+				},
+				{
+					"type": "doctype",
 					"name": "Medical Insurance Application",
 					"description": _("Medical Insurance Application."),
 				},
@@ -317,6 +322,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"label": _("Department Tree"),
 					"name": "Department",
 					"route": "Tree/Department",
 					"description": _("Organization unit (department) master.")

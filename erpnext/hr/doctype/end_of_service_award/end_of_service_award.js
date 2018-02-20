@@ -170,7 +170,7 @@ frappe.ui.form.on('End of Service Award', {
                     }
                     // calculate
                     result = (firstPeriod * cur_frm.doc.salary * 0.5) + (secondPeriod * cur_frm.doc.salary);
-                    cur_frm.set_value('award', result);
+                    cur_frm.set_value('award', Math.round(result*100)/100);
 
                 }
             } else if (cur_frm.doc.type_of_contract == "Full-time") {
@@ -189,9 +189,9 @@ frappe.ui.form.on('End of Service Award', {
                         result = (0.5 * cur_frm.doc.salary * 5) + (cur_frm.doc.salary * (years - 5));
                     }
                     if (typeof(result) === 'number') {
-                        cur_frm.set_value('award', result);
+                        cur_frm.set_value('award', Math.round(result*100)/100 );
                     } else {
-                        cur_frm.set_value('award', result);
+                        cur_frm.set_value('award', Math.round(result*100)/100);
                     }
                     // (result).toFixed(2)
                     console.log(result);
@@ -202,11 +202,11 @@ frappe.ui.form.on('End of Service Award', {
                         result = (0.5 * cur_frm.doc.salary * 5) + (cur_frm.doc.salary * (years - 5));
                     }
                     if (typeof(result) === 'number') {
-                        cur_frm.set_value('award', result);
+                        cur_frm.set_value('award', Math.round(result*100)/100);
                     } else {
-                        cur_frm.set_value('award', result);
+                        cur_frm.set_value('award', Math.round(result*100)/100);
                     }
-                    console.log(result);
+                    console.log(Math.round(result*100)/100);
                 }
 
 

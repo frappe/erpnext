@@ -17,5 +17,20 @@ class AppraisalTemplate(Document):
 		for d in self.get("goals"):
 			total_points += int(d.per_weightage or 0)
 
+		for d in self.get("quality_of_work_goals"):
+			total_points += int(d.per_weightage or 0)
+
+		for d in self.get("work_habits_goals"):
+			total_points += int(d.per_weightage or 0)
+
+		for d in self.get("job_knowledge_goals"):
+			total_points += int(d.per_weightage or 0)
+
+		for d in self.get("interpersonal_relations_goals"):
+			total_points += int(d.per_weightage or 0)
+
+		for d in self.get("leadership_goals"):
+			total_points += int(d.per_weightage or 0)
+
 		if cint(total_points) != 100:
 			frappe.throw(_("Sum of points for all goals should be 100. It is {0}").format(total_points))

@@ -292,7 +292,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 								else{
 									df.hidden = 0;
 									me.frm.refresh_field("items");
-									// console.log(df);
 								}
 							}
 						}

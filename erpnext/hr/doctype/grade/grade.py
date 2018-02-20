@@ -10,7 +10,8 @@ from frappe.utils import cstr
 
 class Grade(Document):
     def validate(self):
-        self.set_gosi()
+        pass
+        # self.set_gosi()
         #self.validate_grade_level()
     def validate_grade_level(self):
         other_grade = frappe.get_list("Grade", fields=["name"], filters={"grade_level": self.grade_level}, ignore_permissions=True)

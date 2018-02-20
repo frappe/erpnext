@@ -122,3 +122,6 @@ def validate_carry_forward(leave_type):
 	if not frappe.db.get_value("Leave Type", leave_type, "is_carry_forward"):
 		frappe.throw(_("Leave Type {0} cannot be carry-forwarded").format(leave_type))
 	
+
+def check_max_allocation_balance():
+	pass

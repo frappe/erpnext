@@ -18,7 +18,11 @@ def execute(filters=None):
 
 	data = []
 	for ss in salary_slips:
-		row = [ ss.employee, ss.employee_name, ss.department, ss.designation, ss.leave_withut_pay]
+		
+		row = [ ss.employee, ss.employee_name, ss.department, ss.designation]
+		
+		if ss.leave_withut_pay:
+			row.append(ss.leave_withut_pay)
 
 		for e in earning_types:
 			row.append(ss_earning_map.get(ss.name, {}).get(e))
@@ -39,11 +43,11 @@ def execute(filters=None):
 
 	for row in data:
 		for i, col in enumerate(row):
-			if i >4:
+			if i >3:
 				total_col[i] = flt(total_col[i]) + flt(col)
 			
 	for i, col in enumerate(total_col):
-		if i >4:
+		if i >3:
 			total_col[i] = flt(total_col[i],2)
 
 
@@ -55,8 +59,14 @@ def execute(filters=None):
 
 def get_columns(salary_slips):
 	columns = [_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140", 
-		_("Department") + ":Link/Department:120", _("Designation") + ":Link/Designation:120", _("Leave Without Pay") + ":Float:130",
+		_("Department") + ":Link/Department:120", _("Designation") + ":Link/Designation:120",
 	]
+
+	for ss in salary_slips:
+		
+		if ss.leave_withut_pay:
+			columns.append(_("Leave Without Pay") + ":Float:130")
+
 
 	salary_components = {_("Earning"): [], _("Deduction"): []}
 
