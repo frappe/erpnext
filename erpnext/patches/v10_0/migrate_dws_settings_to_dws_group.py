@@ -29,7 +29,7 @@ def check_if_dwsc_exists():
 	try:
 		frappe.db.sql('DESC `tabDaily Work Summary Settings Company`')
 		return True
-	except:
+	except Exception:
 		return False
 
 def get_setting_companies():
