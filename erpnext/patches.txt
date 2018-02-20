@@ -502,3 +502,4 @@ erpnext.patches.v10_0.update_translatable_fields
 erpnext.patches.v10_0.rename_offer_letter_to_job_offer
 execute:frappe.delete_doc('DocType', 'Production Planning Tool', ignore_missing=True)
 erpnext.patches.v10_0.migrate_daily_work_summary_settings_to_daily_work_summary_group
+erpnext.patches.v10_0.update_territory_and_customer_group
