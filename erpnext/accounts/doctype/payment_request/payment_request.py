@@ -60,7 +60,7 @@ class PaymentRequest(Document):
 
 	def payment_gateway_validation(self):
 		controller = get_payment_gateway_controller(self.payment_gateway)
-		controller.on_payment_request_submission(self)
+		return controller.on_payment_request_submission(self)
 
 	def set_payment_request_url(self):
 		if self.payment_account:
