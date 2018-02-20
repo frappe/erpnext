@@ -1,4 +1,4 @@
-QUnit.module('Pricing Rule"');
+QUnit.module('Pricing Rule');
 
 QUnit.test("test pricing rule", function(assert) {
 	assert.expect(2);
@@ -11,6 +11,7 @@ QUnit.test("test pricing rule", function(assert) {
 				{selling:1},
 				{applicable_for:'Customer'},
 				{customer:'Test Customer 3'},
+				{currency: frappe.defaults.get_default("currency")}
 				{min_qty:1},
 				{max_qty:20},
 				{valid_upto: frappe.datetime.add_days(frappe.defaults.get_default("year_end_date"), 1)},
