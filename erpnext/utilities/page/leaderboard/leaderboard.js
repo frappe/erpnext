@@ -17,14 +17,15 @@ frappe.Leaderboard = Class.extend({
 		this.$sidebar_list = this.page.sidebar.find('ul');
 
 		// const list of doctypes
-		this.doctypes = ["Customer", "Item", "Supplier", "Sales Partner"];
+		this.doctypes = ["Customer", "Item", "Supplier", "Sales Partner","Sales Person"];
 		this.timespans = ["Week", "Month", "Quarter", "Year"];
-		this.desc_fields = ["total_amount", "total_request", "annual_billing", "commission_rate"];
+		this.desc_fields = ["total_sales_amount", "total_request","total_purchase_amount","commission_rate"];
 		this.filters = {
-			"Customer": ["total_amount", "total_item_purchased"],
-			"Item": ["total_request", "total_purchase", "avg_price"],
-			"Supplier": ["annual_billing", "total_unpaid"],
-			"Sales Partner": ["commission_rate", "target_qty", "target_amount"],
+			"Customer": ["total_item_purchased_qty", "total_sales_amount","receivable_amount_outstanding_amount"],
+			"Item": ["total_purchase_amount", "total_purchased_qty", "total_sales_amount", "total_sold_qty","available_stock_qty"],
+			"Supplier": ["total_item_sold_qty", "total_purchase_amount","payable_amount_outstanding_amount"],
+			"Sales Partner": ["commission_rate", "target_qty", "target_amount", "total_sales_amount"],
+			"Sales Person": ["target_qty", "target_amount", "total_sales_amount"],
 		};
 
 		// for saving current selected filters
@@ -258,7 +259,7 @@ frappe.Leaderboard = Class.extend({
 		var me = this;
 		const _selected_filter = me.options.selected_filter
 			.map(i => frappe.model.unscrub(i));
-		const fields = ['name', me.options.selected_filter_item];
+		const fields = ['name', 'value'];
 
 		const html =
 			`<div class="list-item">
@@ -272,11 +273,8 @@ frappe.Leaderboard = Class.extend({
 					return (
 						`<div class="list-item_content ellipsis list-item__content--flex-2
 							${(col !== "Name" && col !== "Modified") ? "hidden-xs" : ""}
-							${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}">
-							${
-								col === "Name"
-									? `<a class="grey list-id ellipsis" href="${item["href"]}"> ${val} </a>`
-									: `<span class="text-muted ellipsis"> ${val}</span>`
+							${(filter == "value") ? "text-right" : ""}">
+							${ col === "Name" ? `<a class="grey list-id ellipsis" href="#Form/${me.options.selected_doctype}/${item["name"]}"> ${val} </a>` : `<span class="text-muted ellipsis"> ${val}</span>`
 							}
 						</div>`);
 					}).join("")
