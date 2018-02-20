@@ -62,7 +62,7 @@ class PaymentRequest(Document):
 		try:
 			controller = get_payment_gateway_controller(self.payment_gateway)
 			return controller.on_payment_request_submission(self)
-		except:
+		except Exception:
 			return False
 
 	def set_payment_request_url(self):
