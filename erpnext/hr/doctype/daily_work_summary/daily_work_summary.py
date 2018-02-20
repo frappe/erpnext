@@ -18,7 +18,7 @@ class DailyWorkSummary(Document):
 			in selected daily work summary group'''
 		incoming_email_account = frappe.db.get_value('Email Account',
 			dict(enable_incoming=1, default_incoming=1),
-			'email_id')
+				'email_id')
 
 		self.db_set('email_sent_to', '\n'.join(emails))
 		frappe.sendmail(recipients=emails,
@@ -70,7 +70,7 @@ class DailyWorkSummary(Document):
 			try:
 				if original_image:
 					file_name = frappe.get_list('File',
-					{'file_url': original_image})
+						{'file_url': original_image})
 
 					if file_name:
 						file_name = file_name[0].name
@@ -89,16 +89,17 @@ class DailyWorkSummary(Document):
 				did_not_reply.remove(d.sender)
 			if d.text_content:
 				d.content = markdown(
-					EmailReplyParser.parse_reply(d.text_content))
+					EmailReplyParser.parse_reply(d.text_content)
+				)
 
 		did_not_reply = [(frappe.db.get_value("User", {"email": email}, "full_name") or email)
-						 for email in did_not_reply]
+			for email in did_not_reply]
 
 		return dict(replies=replies,
 			original_message=dws_group.message,
 			title=_('Work Summary for {0}'.format(
-					global_date_format(self.creation)
-				)),
+				global_date_format(self.creation)
+			)),
 			did_not_reply=', '.join(did_not_reply) or '',
 			did_not_reply_title=_('No replies from'))
 
