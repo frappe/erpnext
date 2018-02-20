@@ -19,7 +19,7 @@ class WoocommerceSettings(Document):
 	def create_delete_custom_fields(self):
 		if self.enable_sync:
 			# create
-			names = ["Customer","Sales Order","Item"]
+			names = ["Customer","Sales Order","Item","Address"]
 			for name in names:
 				custom = frappe.new_doc("Custom Field")
 				custom.dt = name
@@ -28,7 +28,7 @@ class WoocommerceSettings(Document):
 
 		elif not self.enable_sync:
 			# delete
-			names = ["Customer-woocommerce_id","Sales Order-woocommerce_id","Item-woocommerce_id"]
+			names = ["Customer-woocommerce_id","Sales Order-woocommerce_id","Item-woocommerce_id","Address-woocommerce_id"]
 			for name in names:
 				delete = frappe.delete_doc("Custom Field",name)
 				# delete.save()

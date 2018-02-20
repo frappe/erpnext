@@ -53,31 +53,22 @@ def customer():
 			existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
 
 			edit_existing_customer(existing_customer,fd)
-
 			# print("THis Complete 1", existing_customer.customer_name)
+			existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
+			create_or_edit_address(existing_customer,fd,1)
 
-			# make_address = frappe.new_doc("Address")
-			# make_address.address_line1 = "Not Provided" if not fd.get("address_1") else fd.get("address_1")
-			# make_address.address_line2 = "Not Provided" if not fd.get("address_2") else fd.get("address_2")
-			# make_address.city = "Not Provided" if not fd.get("city") else fd.get("city")
-			# make_address.country = fd.get("country")
-			# make_address.state = fd.get("state")
-			# make_address.pincode = str(fd.get("postcode"))
-			# make_address.phone = str(fd.get("phone"))
-			# make_address.email = str(fd.get("email"))
-
-			# make_address.append("links", {
-			# 	"link_doctype": "Customer",
-			# 	"link_name": str(fd.get("first_name"))
-			# })
-
-			
-			# make_address.save()
 			
 		except frappe.DoesNotExistError as e:
 
+			# new_customer = frappe.new_doc("Customer")
 			create_customer(fd)
+			new_existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
+			create_or_edit_address(new_existing_customer,fd,0)
 			# print("THis Complete 2")
+
+		# except frappe.MandatoryError as e:
+		# 	new_existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
+		# 	create_or_edit_address(new_existing_customer,fd,0)
 			
 		except Exception as e:
 			print("Error ",e)
@@ -219,29 +210,75 @@ def edit_existing_customer(existing_customer,fd):
 
 	if (not fd.get("first_name") and not fd.get("last_name")):
 		# print("THis is if 11")
-		existing_customer.customer_name = "WC {id}".format(id=str(fd.get("id")))
-		existing_customer.save()
-		frappe.db.commit()
+
+		# existing_customer.customer_name = "WC {id}".format(id=str(fd.get("id")))
+		# existing_customer.save()
+		# frappe.db.commit()
+		name =  "WC {id}".format(id=str(fd.get("id")))
+		frappe.rename_doc("Customer", existing_customer.customer_name, name)
 	# print("""if(fd.get("first_name") != None and fd.get("last_name") == None):""", (fd.get("first_name") != None and fd.get("last_name") == None), (fd.get("first_name") != None), (fd.get("last_name") == None))
 	# print("""elif(fd.get("first_name") == None and fd.get("last_name") != None):""", (fd.get("first_name") == None and fd.get("last_name") != None), (fd.get("first_name") == None), (fd.get("last_name") != None))
 
 	elif(fd.get("first_name") and not fd.get("last_name")):
 		# print("THis is if 12")
-		existing_customer.customer_name = fd.get("first_name")
-		existing_customer.save()
-		frappe.db.commit()
+
+		# existing_customer.customer_name = fd.get("first_name")
+		name = fd.get("first_name")
+		frappe.rename_doc("Customer", existing_customer.customer_name, name)
+		# existing_customer.save()
+		# frappe.db.commit()
 
 	elif(not fd.get("first_name") and fd.get("last_name")):
 		# print("THis is if 13")
-		existing_customer.customer_name = str(fd.get("last_name"))
-		existing_customer.save()
-		frappe.db.commit()
+
+		# existing_customer.customer_name = str(fd.get("last_name"))
+		name = str(fd.get("last_name"))
+		frappe.rename_doc("Customer", existing_customer.customer_name, name)
+		# existing_customer.save()
+		# frappe.db.commit()
 
 	else:
 		# print("THis is if 14")
-		existing_customer.customer_name = str(fd.get("first_name"))+ " "+str(fd.get("last_name"))
-		existing_customer.save()
-		frappe.db.commit()
+
+		# existing_customer.customer_name = str(fd.get("first_name"))+ " "+str(fd.get("last_name"))
+		name = str(fd.get("first_name"))+ " "+str(fd.get("last_name"))
+		frappe.rename_doc("Customer", existing_customer.customer_name, name)
+		# existing_customer.save()
+		# frappe.db.commit()
 
 
+def create_or_edit_address(customer,fd,customer_status):
 
+	if customer_status == 0:
+		make_address = frappe.new_doc("Address")
+
+	if customer_status == 1:
+		make_address = frappe.get_doc("Address",{"woocommerce_id": fd.get("id")})
+		new_address_title = customer.customer_name+"-billing"
+		frappe.rename_doc("Address",make_address.name,new_address_title)
+		# make_address.address_title = customer.customer_name
+
+
+	raw_address = fd.get("billing")
+	print("This is address")
+	print(raw_address)
+
+	make_address.address_line1 = "Not Provided" if not fd.get("address_1") else fd.get("address_1")
+	make_address.address_line2 = "Not Provided" if not fd.get("address_2") else fd.get("address_2")
+	make_address.city = "Not Provided" if not fd.get("city") else fd.get("city")
+	make_address.woocommerce_id = str(fd.get("id"))
+	make_address.address_type = "Shipping"
+	make_address.country = fd.get("country")
+	make_address.state = fd.get("state")
+	make_address.pincode = str(fd.get("postcode"))
+	make_address.phone = str(fd.get("phone"))
+	make_address.email = str(fd.get("email"))
+
+	make_address.append("links", {
+		"link_doctype": "Customer",
+		"link_name": customer.customer_name
+	})
+
+	make_address.save()
+
+	frappe.db.commit()
