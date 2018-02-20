@@ -6,6 +6,7 @@ import frappe
 
 
 def execute():
+	if not check_if_dwsc_exists(): return
 	# get the previously saved settings
 	previous_setting = get_previous_setting()
 	if previous_setting["companies"]:
@@ -24,6 +25,12 @@ def execute():
 	# frappe.delete_doc("Daily Work Summary Settings")
 	# frappe.delete_doc("Daily Work Summary Settings Company")
 
+def check_if_dwsc_exists():
+	try:
+		frappe.db.sql('DESC `tabDaily Work Summary Settings Company`')
+		return True
+	except:
+		return False
 
 def get_setting_companies():
 	return frappe.db.sql("select * from `tabDaily Work Summary Settings Company`", as_dict=True)
