@@ -59,8 +59,11 @@ class PaymentRequest(Document):
 			si.submit()
 
 	def payment_gateway_validation(self):
-		controller = get_payment_gateway_controller(self.payment_gateway)
-		return controller.on_payment_request_submission(self)
+		try:
+			controller = get_payment_gateway_controller(self.payment_gateway)
+			return controller.on_payment_request_submission(self)
+		except:
+			return False
 
 	def set_payment_request_url(self):
 		if self.payment_account:
