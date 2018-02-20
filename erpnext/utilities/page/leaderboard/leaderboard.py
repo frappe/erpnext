@@ -78,7 +78,7 @@ def get_all_items(filters, items, field, start=0, limit=20):
 			item.name as name , {0} as value
 		from `tabItem` as item  join {1} as B on item.name = B.item_code and item.modified >= "{2}"
 		group by item.name""".format(select_field, select_doctype, filters), as_dict=1)
-	
+
 def get_all_suppliers(filters, items, field, start=0, limit=20):
 	"""return all suppliers"""
 

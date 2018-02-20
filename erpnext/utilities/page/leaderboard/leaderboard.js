@@ -17,7 +17,7 @@ frappe.Leaderboard = Class.extend({
 		this.$sidebar_list = this.page.sidebar.find('ul');
 
 		// const list of doctypes
-		this.doctypes = ["Customer", "Item", "Supplier", "Sales Partner","Sales Person"];	
+		this.doctypes = ["Customer", "Item", "Supplier", "Sales Partner","Sales Person"];
 		this.timespans = ["Week", "Month", "Quarter", "Year"];
 		this.desc_fields = ["total_sales_amount", "total_request","total_purchase_amount","commission_rate"];
 		this.filters = {
@@ -274,10 +274,7 @@ frappe.Leaderboard = Class.extend({
 						`<div class="list-item_content ellipsis list-item__content--flex-2
 							${(col !== "Name" && col !== "Modified") ? "hidden-xs" : ""}
 							${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}">
-							${
-								col === "Name"
-									? `<a class="grey list-id ellipsis" href="#Form/${me.options.selected_doctype}/${item["name"]}"> ${val} </a>`
-									: `<span class="text-muted ellipsis"> ${val}</span>`
+							${ col === "Name" ? `<a class="grey list-id ellipsis" href="#Form/${me.options.selected_doctype}/${item["name"]}"> ${val} </a>` : `<span class="text-muted ellipsis"> ${val}</span>`
 							}
 						</div>`);
 					}).join("")
