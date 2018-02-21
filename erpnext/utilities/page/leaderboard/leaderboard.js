@@ -273,7 +273,7 @@ frappe.Leaderboard = Class.extend({
 
 	get_item_html: function (item) {
 		var me = this;
-		const company = frappe.defaults.get_default('Company');
+		const company = me.options.selected_company
 		const currency = frappe.get_doc(":Company", company).default_currency;
 		const _selected_filter = me.options.selected_filter
 			.map(i => frappe.model.unscrub(i));

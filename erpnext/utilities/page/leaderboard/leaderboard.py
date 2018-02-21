@@ -115,15 +115,15 @@ def get_all_sales_partner(filters, items, field, start=0, limit=20):
 	elif field == "target_amount":
 		select_field = "target_detail.target_amount"
 	elif field == "total_sales_amount":
-		select_field = "sum(sales_invoice.total_commission)"
+		select_field = "sum(sales_order.total_commission)"
 
 	return frappe.db.sql("""select sales_partner.partner_name as name, {0} as value
 		from 
 			`tabSales Partner` as sales_partner inner join `tabTarget Detail` as target_detail ON sales_partner.name = target_detail.parent 
 		inner join 
-			`tabSales Invoice` as sales_invoice ON sales_invoice.sales_partner = sales_partner.name
+			`tabSales Order` as sales_order ON sales_order.sales_partner = sales_partner.name
 	 	where 
-	 		sales_invoice.docstatus = 1 and  sales_invoice.modified >= "{1}"
+	 		sales_order.docstatus = 1 and  sales_order.modified >= "{1}"
 	 	group by 
 	 		sales_partner.partner_name
 	 	order by value DESC
