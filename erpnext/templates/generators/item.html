@@ -12,7 +12,6 @@
     <div class="product-page-content" itemscope itemtype="http://schema.org/Product">
         <div class="row">
         {%- if slideshow -%}
-        <p>11111111111111111</p>
                 <div class="col-sm-3">
                     {% if slideshow %}
                         {% include "templates/includes/slideshow.html" %}
@@ -20,7 +19,120 @@
                         {{ product_image(website_image, "product-full-image") }}
                     {% endif %}
                 </div>
+
                 <div class="col-sm-6" style="padding-left:20px;">
+                    <h2 itemprop="name" style="margin-top: 0px;">{{ item_name }}</h2>
+                    <p class="text-muted">
+                        {{ _("Item Code") }}: <span itemprop="productID">{{ variant and variant.name or name }}</span></p>
+                    <br>
+                    <div class="item-attribute-selectors">
+                        {% if has_variants %}
+                        {% for d in attributes %}
+                        {% if attribute_values[d.attribute] -%}
+                        <div class="item-view-attribute {% if (attribute_values[d.attribute] | len)==1 -%} hidden {%- endif %}"
+                                style="margin-bottom: 10px;">
+                            <h6 class="text-muted">{{ _(d.attribute) }}</h6>
+                            <select class="form-control"
+                                style="max-width: 140px"
+                                data-attribute="{{ d.attribute }}">
+                            {% for value in attribute_values[d.attribute] %}
+                            <option value="{{ value }}"
+                            {% if selected_attributes and selected_attributes[d.attribute]==value -%}
+                                selected
+                            {%- elif disabled_attributes and value in disabled_attributes.get(d.attribute, []) -%}
+                                disabled
+                            {%- endif %}>
+                                {{ _(value) }}
+                            </option>
+                            {% endfor %}
+                            </select>
+                        </div>
+                        {%- endif %}
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                    <br>
+                    <div style="min-height: 100px; margin: 10px 0;">
+                        <div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+                            <h4 class="item-price" itemprop="price"></h4>
+                            <div class="item-stock" itemprop="availability"></div>
+                        </div>
+                        <div class="item-cart hide">
+                            <div id="item-add-to-cart">
+                                <button class="btn btn-primary btn-sm">
+                                    {{ _("Add to Cart") }}</button>
+                            </div>
+                            <div id="item-update-cart" style="display: none;">
+                                <a href="/cart" class='btn btn-sm btn-default'>
+                                    <i class='octicon octicon-check'></i>
+                                    {{ _("View in Cart") }}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+        {% else %}
+            {% if item_zooming %}
+                    <div class="col-md-12">
+                        <div class="col-md-3">
+                            <style>
+                                div.list_all_images img:hover {
+                                    border: 2px solid blue;
+                                }
+                                .gallery img{
+                                    height: 300px;
+                                    width: 300px;
+                                    -webkit-transition: all 2s ease;
+                                    -moz-transition: all 2s ease;
+                                    -ms-transition: all 2s ease;
+                                    transition: all 2s ease;
+                                }
+                                .gallery img:hover {
+                                    transform: scale(1.5);
+                                }
+                                #selectedImage{
+                                    margin-left: -200px;
+                                }
+                            </style>
+                            <script>
+                                function changeImage(image_src){
+                                    document.getElementById("selectedImage").src = image_src;
+                                }
+                            </script>
+                            {%- for c in frappe.get_list(doctype="Website Slideshow Item", 
+                                    fields=["image"],
+                                    filters={ "parent":doc.item_zooming}) -%}
+                                <div class="list_all_images">
+                                    {% set image_src = c['image'] %}
+                                    {% if image_src %}
+                                        <p id="image_hover" onmouseover="changeImage('{{image_src}}')">
+                                            <img id="img_one" src="{{ c['image'] }}"
+                                                 height="50" weight="50"/>
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                    </div>
+                    <div class="col-md-6" style="padding-left:200px;" >
+                        <div class="gallery">
+                            {%- for image_slice in frappe.get_list(doctype="Website Slideshow Item", 
+                                    fields=["image"],
+                                    filters={ "image":doc.image} )[0:1] -%}
+                             {% set image_src = image_slice['image'] %}
+                             {% if image_src %}
+                                 <div class="images">
+                                    <img id="selectedImage" width="500px" height="500px" src="{{ image_src }}">
+                                 </div>
+                             {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+          {% else %}
+              <div class="col-sm-3">
+              {{ product_image(website_image, "product-full-image") }}
+              </div>
+          {% endif %}
+                <div class="col-md-3" style="padding-left:20px;">
                     <h2 itemprop="name" style="margin-top: 0px;">{{ item_name }}</h2>
 
                     <p class="text-muted">
@@ -70,124 +182,8 @@
                             </div>
                         </div>
                     </div>
-                </div>
-        {% else %}
-        </div>
-        
-        <div class="col-md-12">
-            <div class="col-md-3">
-            <p>222222222222222222222 {{ item_zooming.slideshow_items }}
-            
-            
-              
-            
-            </p>
-                <style>
-                    div.list_all_images img:hover {
-                        border: 2px solid blue;
-                    }
-                    .gallery img{
-                        height: 300px;
-                        width: 300px;
-                        -webkit-transition: all 2s ease;
-                        -moz-transition: all 2s ease;
-                        -ms-transition: all 2s ease;
-                        transition: all 2s ease;
-                    }
-                    .gallery img:hover {
-                        transform: scale(1.5);
-                    }
-                    #selectedImage{
-                        margin-left: -200px;
-                    }
-                </style>
-                <script>
-                    function changeImage(image_src){
-                        document.getElementById("selectedImage").src = image_src;
-                    }
-                </script>
-                {% for c in item_zooming.slideshow_items %}
-                    <div class="list_all_images">
-                        {% set image_src = c['image'] %}
-                        {% if image_src %}
-                            <p id="image_hover" onmouseover="changeImage('{{image_src}}')">
-                                <img id="img_one" src="{{ c['image'] }}"
-                                     height="50" weight="50"/>
-                            </p>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-        </div>
-
-        {% if item_zooming.slideshow_items %}
-        <div class="col-md-6" style="padding-left:200px;" >
-            <div class="gallery">
-                {% for image_slice in item_zooming.slideshow_items[0:1] %}
-                 {% set image_src = image_slice['image'] %}
-                 {% if image_src %}
-                 <div class="images">
-                    <img id="selectedImage" width="500px" height="500px" src="{{ image_src }}">
-                 </div>
-                 {% endif %}
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-            <div class="col-md-3">
-                <div class="ABC" style="padding-left:0px;">
-                    <h2 itemprop="name" style="margin-top: 20px;">{{ item_name }}</h2>
-                    <p class="text-muted">
-                        {{ _("Item Code") }}: <span itemprop="productID">{{ variant and variant.name or name }}</span></p>
-                    <br>
-                    <div class="item-attribute-selectors">
-                        {% if has_variants %}
-                        {% for d in attributes %}
-                        {% if attribute_values[d.attribute] -%}
-                        <div class="item-view-attribute {% if (attribute_values[d.attribute] | len)==1 -%} hidden {%- endif %}"
-                                style="margin-bottom: 10px;">
-                            <h6 class="text-muted">{{ _(d.attribute) }}</h6>
-                            <select class="form-control"
-                                style="max-width: 140px"
-                                data-attribute="{{ d.attribute }}">
-                            {% for value in attribute_values[d.attribute] %}
-                            <option value="{{ value }}"
-                            {% if selected_attributes and selected_attributes[d.attribute]==value -%}
-                                selected
-                            {%- elif disabled_attributes and value in disabled_attributes.get(d.attribute, []) -%}
-                                disabled
-                            {%- endif %}>
-                                {{ _(value) }}
-                            </option>
-                            {% endfor %}
-                            </select>
-                        </div>
-                        {%- endif %}
-                        {% endfor %}
-                        {% endif %}
-                    </div>
-                    <br>
-                    <div style="min-height: 100px; margin: 10px 0;">
-                        <div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
-                            <h4 class="item-price" itemprop="price"></h4>
-                            <div class="item-stock" itemprop="availability"></div>
-                        </div>
-                        <div class="item-cart hide">
-                            <div id="item-add-to-cart">
-                                <button class="btn btn-primary btn-sm">
-                                    {{ _("Add to Cart") }}</button>
-                            </div>
-                            <div id="item-update-cart" style="display: none;">
-                                <a href="/cart" class='btn btn-sm btn-default'>
-                                    <i class='octicon octicon-check'></i>
-                                    {{ _("View in Cart") }}</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
- {% endif %}
+               </div>  
+            {% endif %}
 <div class="row item-website-description" style="margin-top:30px; margin-bottom:20px">
         <div class="col-md-12">
         <div class="h6 text-uppercase">{{ _("Description") }}</div>
@@ -195,8 +191,7 @@
         {{ web_long_description or description or _("No description given") }}
         </div>
         </div>
-        </div>
-        
+</div>
         {% if website_specifications -%}
         <div class="row item-website-specification" style="margin-top: 40px">
             <div class="col-md-12">
@@ -215,7 +210,7 @@
         {%- endif %}
     </div>
 </div>
-                    
+</div>
 <script>
     {% include "templates/includes/product_page.js" %}
 
