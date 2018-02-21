@@ -41,10 +41,12 @@ class TransactionBase(StatusUpdater):
 
 	def delete_events(self):
 		events = frappe.db.sql_list("""select name from `tabEvent`
-			where ref_type=%s and ref_name=%s""", (self.doctype, self.name))
+			where ref_type="{doctype}" and ref_name="{name}"
+			""".format(doctype = self.doctype, name = self.name))
+
 		if events:
-			frappe.db.sql("delete from `tabEvent` where name in (%s)"
-				.format(", ".join(['%s']*len(events))), tuple(events))
+			frappe.db.sql("""delete from `tabEvent` where name in ({list})
+				""".format(list = ", ".join(["'{name}'".format(name = name) for name in events])))
 
 	def _add_calendar_event(self, opts):
 		opts = frappe._dict(opts)
