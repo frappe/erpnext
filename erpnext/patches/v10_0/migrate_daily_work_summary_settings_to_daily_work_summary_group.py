@@ -9,7 +9,6 @@ def execute():
 	# check if Daily Work Summary Settings Company table exists
 	try:
 		frappe.db.sql('DESC `tabDaily Work Summary Settings Company`')
-		pass
 	except Exception:
 		return
 
