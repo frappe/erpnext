@@ -198,13 +198,19 @@ doc_events = {
 	"Website Settings": {
 		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
 	},
+	"Sales Invoice": {
+		'validate': 'erpnext.regional.india.utils.set_place_of_supply',
+		"on_submit": "erpnext.regional.france.utils.create_transaction_log",
+		"on_trash": "erpnext.regional.france.utils.check_deletion_permission"
+	},
 	"Payment Entry": {
-		"on_submit": "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"
+		"on_submit": ["erpnext.regional.france.utils.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"],
+		"on_trash": "erpnext.regional.france.utils.check_deletion_permission"
 	},
 	'Address': {
 		'validate': 'erpnext.regional.india.utils.validate_gstin_for_india'
 	},
-	('Sales Invoice', 'Purchase Invoice'): {
+	'Purchase Invoice': {
 		'validate': 'erpnext.regional.india.utils.set_place_of_supply'
 	}
 }
@@ -257,6 +263,9 @@ get_site_info = 'erpnext.utilities.get_site_info'
 payment_gateway_enabled = "erpnext.accounts.utils.create_payment_gateway_account"
 
 regional_overrides = {
+	'France': {
+		'erpnext.tests.test_regional.test_method': 'erpnext.regional.france.utils.test_method'
+	},
 	'India': {
 		'erpnext.tests.test_regional.test_method': 'erpnext.regional.india.utils.test_method',
 		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_header': 'erpnext.regional.india.utils.get_itemised_tax_breakup_header',
