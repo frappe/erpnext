@@ -19,6 +19,7 @@ def after_install():
 	create_compact_item_print_custom_field()
 	create_print_zero_amount_taxes_custom_field()
 	add_all_roles_to("Administrator")
+	create_default_cash_flow_mapper_templates()
 	frappe.db.commit()
 
 
