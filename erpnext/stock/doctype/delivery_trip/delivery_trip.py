@@ -163,9 +163,9 @@ def notify_customers(docname, date, driver, vehicle, sender_email, delivery_noti
 
 		if delivery_stop_info.delivery_notes:
 			delivery_notes = (delivery_stop_info.delivery_notes).split(",")
+			default_print_format = frappe.get_meta('Delivery Note').default_print_format
 			attachments = []
 			for delivery_note in delivery_notes:
-				default_print_format = frappe.get_value('Delivery Note', delivery_note, 'default_print_format')
 				attachments.append(
 					frappe.attach_print('Delivery Note',
 	 					 delivery_note,
