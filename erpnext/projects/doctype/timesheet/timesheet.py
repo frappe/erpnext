@@ -188,7 +188,7 @@ class Timesheet(Document):
 			self.validate_overlap_for("employee", data, self.employee, settings.ignore_employee_time_overlap)
 
 	def validate_overlap_for(self, fieldname, args, value, ignore_validation=False):
-		if not value or ignore_validation: 
+		if not value or ignore_validation:
 			return
 
 		existing = self.get_overlap_for(fieldname, args, value)
