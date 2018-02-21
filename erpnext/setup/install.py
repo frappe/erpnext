@@ -4,6 +4,7 @@
 from __future__ import print_function, unicode_literals
 
 import frappe
+from erpnext.accounts.doctype.cash_flow_mapper.default_cash_flow_mapper import DEFAULT_MAPPERS
 from frappe import _
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
@@ -62,3 +63,12 @@ def create_print_zero_amount_taxes_custom_field():
 		'default': 0,
 		'insert_after': 'allow_print_for_cancelled'
 	})
+
+
+def create_default_cash_flow_mapper_templates():
+	mappers = DEFAULT_MAPPERS
+
+	for mapper in mappers:
+		if not frappe.db.exists('Cash Flow Mapper', mapper['section_name']):
+			doc = frappe.get_doc(mapper)
+			doc.insert(ignore_permissions=True)
