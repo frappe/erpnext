@@ -23,8 +23,8 @@ def trigger_emails():
 	for d in groups:
 		group_doc = frappe.get_doc("Daily Work Summary Group", d)
 		if (is_current_hour(group_doc.send_emails_at)
-				and not is_holiday_today(group_doc.holiday_list)
-				and group_doc.enabled):
+			and not is_holiday_today(group_doc.holiday_list)
+			and group_doc.enabled):
 			emails = [d.email for d in group_doc.users]
 			# find emails relating to a company
 			if emails:
