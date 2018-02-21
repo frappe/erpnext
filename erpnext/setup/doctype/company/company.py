@@ -234,10 +234,6 @@ class Company(Document):
 		frappe.db.set(self, "round_off_cost_center", _("Main") + " - " + self.abbr)
 		frappe.db.set(self, "depreciation_cost_center", _("Main") + " - " + self.abbr)
 
-	def before_rename(self, olddn, newdn, merge=False):
-		if merge:
-			frappe.throw(_("Sorry, companies cannot be merged"))
-
 	def after_rename(self, olddn, newdn, merge=False):
 		frappe.db.set(self, "company_name", newdn)
 

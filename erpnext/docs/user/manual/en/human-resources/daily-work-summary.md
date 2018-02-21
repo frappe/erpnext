@@ -1,15 +1,24 @@
 # Daily Work Summary
 
-Daily Work Summary is way to get a automated way to get a summary of work done by all employees in a company. Once you set it up, each active Employee of the Company gets an email asking them what did they work on during the day.
+Daily Work Summary is way to get a automated way to get a summary of work done by users.
 
-Replies of all employees who choose to respond is collected and sent as a summary at midnight. Emails are only sent based on the Holiday List setup in the Company or Employee master.
+Replies of all users who choose to respond is collected and sent as a summary at midnight. Emails are only sent based on the Holiday List selected for the group 
 
-*Note:* You must have one active incoming email account setup for this to work.
+**Note:**
+> You must have one active incoming email account setup for this to work.
+
+
 
 ### How to Use
 
-Go to "Daily Work Summary Settings" via HR module or search bar and set the company for which you want to activate this feature.
+Go to "Daily Work Summary Group" via HR module or search bar and set the users for whom you want to send the reminder.
 
-You can also choose to Customize the Message you send to your employees:
+You can set multiple groups with different set of _users_ from your user list with different _time to send emails_ and with separate _holiday list_ for each.
 
-<img class="screenshot" alt="Department" src="{{docs_base_url}}/assets/img/human-resources/department.png">
+You can also choose to customize the _Message_ you send to users.
+
+**Note:**
+>1. If no holiday list is selected then the email will be sent every day.
+>2. Name of a "Daily Work Summary Group" will be sent as the title for daily summary email.
+>3. Mail will not be sent to the users of a disabled Daily Work Summary Group.
+
