@@ -13,8 +13,7 @@ class DailyWorkSummaryGroup(Document):
 	def validate(self):
 		if self.users:
 			if not frappe.flags.in_test and not is_incoming_account_enabled():
-				frappe.throw(_('There must be a default incoming Email Account enabled for this to work. '
-					'Please setup a default incoming Email Account (POP/IMAP) and try again.'))
+				frappe.throw(_('Please enable default incoming account before creating Daily Work Summary Group'))
 
 
 def trigger_emails():
