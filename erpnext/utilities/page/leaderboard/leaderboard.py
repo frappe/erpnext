@@ -12,8 +12,6 @@ from erpnext.accounts.utils import get_currency_precision
 @frappe.whitelist()
 def get_leaderboard(doctype, timespan, company, field, start=0):
 	"""return top 10 items for that doctype based on conditions"""
-	for x in xrange(1,10):
-		print('company', company)
 	filters = get_date_from_string(timespan)
 	items = []
 	if doctype == "Customer":
@@ -94,7 +92,7 @@ def get_all_suppliers(filters, company, items, field, start=0, limit=20):
 	        where purchase_invoice.docstatus = 1 and purchase_invoice.modified >= "{0}" and purchase_invoice.company = "{1}"
 	        group by purchase_invoice.supplier
 	        order by value DESC
-	        limit {1}""".format(filters, company, limit), as_dict=1)
+	        limit {2}""".format(filters, company, limit), as_dict=1)
 
 	return frappe.db.sql("""
 		select purchase_order.supplier as name, {0} as value
@@ -103,7 +101,7 @@ def get_all_suppliers(filters, company, items, field, start=0, limit=20):
         where purchase_order.docstatus = 1 and  purchase_order.modified >= "{1}" and  purchase_order.company =  "{2}"
         group by purchase_order.supplier
         order by value DESC
-        limit {3}""".format(select_field, filters, company,  limit), as_dict=1)
+        limit {3}""".format(select_field, filters, company, limit), as_dict=1)
 
 
 

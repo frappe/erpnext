@@ -39,7 +39,6 @@ frappe.Leaderboard = Class.extend({
 			selected_filter: _initial_filter,
 			selected_filter_item: _initial_filter[0],
 			selected_timespan: _initial_timespan,
-			/*selected_company: frappe.defaults.get_default('company')*/
 		};
 
 		this.message = null;
@@ -60,22 +59,18 @@ frappe.Leaderboard = Class.extend({
 			this.get_sidebar_item(doctype).appendTo(this.$sidebar_list);
 		});
 
-
 		this.company_select = this.page.add_field({
 			fieldname: 'company',
 			label: __('Company'),
 			fieldtype:'Link',
 			options:'Company',
 			default:frappe.defaults.get_default('company'),
-			change: function(fieldname) {
+			change: function() {
 				me.options.selected_company = this.value;
 				me.make_request($container);
 			}
 			
 		});
-
-		console.log("com", this.company_select);
-
 		this.timespan_select = this.page.add_select(__("Timespan"),
 			this.timespans.map(d => {
 				return {"label": __(d), value: d }
@@ -96,7 +91,7 @@ frappe.Leaderboard = Class.extend({
 			let $li = $(this);
 			let doctype = $li.find('span').html();
 
-			me.options.selected_company = frappe.defaults.get_default('company')
+			me.options.selected_company = frappe.defaults.get_default('company');
 			me.options.selected_doctype = doctype;
 			me.options.selected_filter = me.filters[doctype];
 			me.options.selected_filter_item = me.filters[doctype][0];
@@ -136,7 +131,6 @@ frappe.Leaderboard = Class.extend({
 	},
 
 	get_leaderboard: function (notify, $container, start=0) {
-		console.log("get", notify) 
 		var me = this;
 
 		frappe.call({
@@ -177,7 +171,6 @@ frappe.Leaderboard = Class.extend({
 	},
 
 	get_leaderboard_data: function (me, res, $container) {
-		console.log("me res", me, res)
 		if (res && res.message) {
 			me.message = null;
 			$container.find(".leaderboard-list").html(me.render_list_view(res.message));
@@ -280,8 +273,8 @@ frappe.Leaderboard = Class.extend({
 
 	get_item_html: function (item) {
 		var me = this;
-		const company = frappe.defaults.get_default('Company')
-		const currency = frappe.get_doc(":Company", company).default_currency
+		const company = frappe.defaults.get_default('Company');
+		const currency = frappe.get_doc(":Company", company).default_currency;
 		const _selected_filter = me.options.selected_filter
 			.map(i => frappe.model.unscrub(i));
 		const fields = ['name','value'];
