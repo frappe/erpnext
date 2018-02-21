@@ -10,27 +10,28 @@ from erpnext.accounts.party import get_dashboard_info
 from erpnext.accounts.utils import get_currency_precision
 
 @frappe.whitelist()
-def get_leaderboard(doctype, timespan, field, start=0):
+def get_leaderboard(doctype, timespan, company, field, start=0):
 	"""return top 10 items for that doctype based on conditions"""
-
+	for x in xrange(1,10):
+		print('company', company)
 	filters = get_date_from_string(timespan)
 	items = []
 	if doctype == "Customer":
-		items = get_all_customers(filters, [], field)
+		items = get_all_customers(filters, company, [], field)
 	elif  doctype == "Item":
 		items = get_all_items(filters, [], field)
 	elif  doctype == "Supplier":
-		items = get_all_suppliers(filters, [], field)
+		items = get_all_suppliers(filters, company, [], field)
 	elif  doctype == "Sales Partner":
 		items = get_all_sales_partner(filters, [], field)
 	elif doctype == "Sales Person":
-		items = get_all_sales_person(filters, [], field)
+		items = get_all_sales_person(filters,  [], field)
 
 	if len(items) > 0:
 		return items
 	return []
 
-def get_all_customers(filters, items,  field, start=0, limit=20):
+def get_all_customers(filters, company, items,  field, start=0, limit=20):
 	"""return all customers"""
 	if field == "total_sales_amount":
 		select_field = "sum(sales_order_item.base_net_amount)"
@@ -40,19 +41,19 @@ def get_all_customers(filters, items,  field, start=0, limit=20):
 		return frappe.db.sql("""
 			select sales_invoice.customer as name, sum(sales_invoice.outstanding_amount) as value
 	        FROM `tabSales Invoice` as sales_invoice
-	        where sales_invoice.docstatus = 1 and sales_invoice.modified >= "{0}"
+	        where sales_invoice.docstatus = 1 and sales_invoice.modified >= "{0}" and sales_invoice.company = "{1}"
 	        group by sales_invoice.customer
 	        order by value DESC
-	        limit {1}""".format(filters, limit), as_dict=1)
+	        limit {2}""".format(filters, company, limit), as_dict=1)
 
 	return frappe.db.sql("""
 		select sales_order.customer as name, {0} as value
         FROM `tabSales Order` as sales_order LEFT JOIN `tabSales Order Item`
         	as sales_order_item ON sales_order.name = sales_order_item.parent
-        where sales_order.docstatus = 1  and sales_order.modified >= "{1}"
+        where sales_order.docstatus = 1  and sales_order.modified >= "{1}" and sales_order.company = "{2}"
         group by sales_order.customer
         order by value DESC
-        limit {2}""".format(select_field, filters, limit), as_dict=1)
+        limit {3}""".format(select_field, filters, company, limit), as_dict=1)
 
 
 
@@ -79,7 +80,7 @@ def get_all_items(filters, items, field, start=0, limit=20):
 		from `tabItem` as item  join {1} as B on item.name = B.item_code and item.modified >= "{2}"
 		group by item.name""".format(select_field, select_doctype, filters), as_dict=1)
 
-def get_all_suppliers(filters, items, field, start=0, limit=20):
+def get_all_suppliers(filters, company, items, field, start=0, limit=20):
 	"""return all suppliers"""
 
 	if field == "total_purchase_amount":
@@ -90,19 +91,19 @@ def get_all_suppliers(filters, items, field, start=0, limit=20):
 		return frappe.db.sql("""
 			select purchase_invoice.supplier as name, sum(purchase_invoice.outstanding_amount) as value
 	        FROM `tabPurchase Invoice` as purchase_invoice
-	        where purchase_invoice.docstatus = 1 and purchase_invoice.modified >= "{0}"
+	        where purchase_invoice.docstatus = 1 and purchase_invoice.modified >= "{0}" and purchase_invoice.company = "{1}"
 	        group by purchase_invoice.supplier
 	        order by value DESC
-	        limit {1}""".format(filters, limit), as_dict=1)
+	        limit {1}""".format(filters, company, limit), as_dict=1)
 
 	return frappe.db.sql("""
 		select purchase_order.supplier as name, {0} as value
         FROM `tabPurchase Order` as purchase_order LEFT JOIN `tabPurchase Order Item`
         	as purchase_order_item ON purchase_order.name = purchase_order_item.parent
-        where purchase_order.docstatus = 1 and  purchase_order.modified >= "{1}"
+        where purchase_order.docstatus = 1 and  purchase_order.modified >= "{1}" and  purchase_order.company =  "{2}"
         group by purchase_order.supplier
         order by value DESC
-        limit {2}""".format(select_field, filters, limit), as_dict=1)
+        limit {3}""".format(select_field, filters, company,  limit), as_dict=1)
 
 
 
@@ -166,3 +167,5 @@ def get_date_from_string(seleted_timespan):
 		days = -7
 
 	return add_to_date(None, years=years, months=months, days=days, as_string=True, as_datetime=True)
+
+
