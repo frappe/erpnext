@@ -69,7 +69,6 @@ frappe.Leaderboard = Class.extend({
 				me.options.selected_company = this.value;
 				me.make_request($container);
 			}
-			
 		});
 		this.timespan_select = this.page.add_select(__("Timespan"),
 			this.timespans.map(d => {
@@ -273,7 +272,7 @@ frappe.Leaderboard = Class.extend({
 
 	get_item_html: function (item) {
 		var me = this;
-		const company = me.options.selected_company
+		const company = me.options.selected_company;
 		const currency = frappe.get_doc(":Company", company).default_currency;
 		const _selected_filter = me.options.selected_filter
 			.map(i => frappe.model.unscrub(i));
