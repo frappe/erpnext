@@ -8,9 +8,9 @@ frappe.pages['team-updates'].on_page_load = function(wrapper) {
 	frappe.team_updates.make(page);
 	frappe.team_updates.run();
 
-	if(frappe.model.can_read('Daily Work Summary Settings')) {
-		page.add_menu_item(__('Daily Work Summary Settings'), function() {
-			frappe.set_route('Form', 'Daily Work Summary Settings');
+	if(frappe.model.can_read('Daily Work Summary Group')) {
+		page.add_menu_item(__('Daily Work Summary Group'), function() {
+			frappe.set_route('Form', 'Daily Work Summary Group');
 		});
 	}
 }
