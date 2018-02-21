@@ -11,7 +11,7 @@ from frappe.desk.reportview import build_match_conditions
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
-from frappe.model.rename_doc import get_link_fields
+from frappe.model.rename_doc import update_linked_doctypes
 
 class Customer(TransactionBase):
 	def get_feed(self):
@@ -54,9 +54,9 @@ class Customer(TransactionBase):
 		self.flags.old_lead = self.lead_name
 		validate_party_accounts(self)
 		self.validate_credit_limit_on_change()
-		self.check_cgroup_or_terr_change()
+		self.check_customer_group_or_territory_change()
 
-	def check_cgroup_or_terr_change(self):
+	def check_customer_group_or_territory_change(self):
 		frappe.flags.customer_group, frappe.flags.territory = False, False
 
 		if not self.get('__islocal'):
@@ -337,48 +337,3 @@ def get_customer_primary_address(doctype, txt, searchfield, start, page_len, fil
 			'customer': customer,
 			'txt': '%%%s%%' % txt
 		})
-
-def update_linked_doctypes(parent, child, name, value):
-	"""
-		parent = Master DocType in which the changes are being made
-		child = DocType name of the field thats being updated
-		name = docname
-		value = updated value of the field
-	"""
-	parent_list = get_link_fields(parent)
-	child_list = get_link_fields(child)
-
-	product_list = list_combinatrix(parent_list, child_list)
-
-	for d in product_list:
-		frappe.db.sql("""
-			update
-				`tab{doctype}`
-			set
-				{fieldname} = "{value}"
-			where
-				{parent_fieldname} = "{docname}"
-				and {fieldname} != "{value}"
-		""".format(
-			doctype = d['parent']['parent'],
-			fieldname = d['child']['fieldname'],
-			parent_fieldname = d['parent']['fieldname'],
-			value = value,
-			docname = name
-		))
-
-def list_combinatrix(dict1, dict2):
-	""" form all possible products with the given lists elements """
-	out, dict3 = [], {}
-
-	from itertools import product
-	prod = product(dict1, dict2)
-
-	for d in prod:
-		if d[0]['parent'] == d[1]['parent']:
-			dict3['parent'] = d[0]
-			dict3['child'] = d[1]
-			out.append(dict3)
-			dict3 = {}
-
-	return out
