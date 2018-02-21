@@ -180,7 +180,7 @@ class Timesheet(Document):
 			self.validate_overlap(data)
 
 	def validate_overlap(self, data):
-		settings = frappe.get_single('Accounts Settings')
+		settings = frappe.get_single('Projects Settings')
 		if self.production_order:
 			self.validate_overlap_for("workstation", data, data.workstation, settings.ignore_workstation_time_overlap)
 		else:

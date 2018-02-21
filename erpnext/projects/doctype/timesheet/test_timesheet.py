@@ -78,7 +78,7 @@ class TestTimesheet(unittest.TestCase):
 		self.assertEquals(ts.time_logs[0].sales_invoice, sales_invoice.name)
 
 	def test_timesheet_time_overlap(self):
-		settings = frappe.get_single('Accounts Settings')
+		settings = frappe.get_single('Projects Settings')
 		initial_setting = settings.ignore_employee_time_overlap
 		settings.ignore_employee_time_overlap = 0
 		settings.save()
@@ -111,7 +111,7 @@ class TestTimesheet(unittest.TestCase):
 
 		settings.ignore_employee_time_overlap = 1
 		settings.save()
-		timesheet.save()	# should not throw an error
+		timesheet.save()  # should not throw an error
 
 		settings.ignore_employee_time_overlap = initial_setting
 		settings.save()
