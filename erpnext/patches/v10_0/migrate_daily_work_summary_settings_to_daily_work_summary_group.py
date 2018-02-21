@@ -18,18 +18,19 @@ def execute():
 	if previous_setting["companies"]:
 		for d in previous_setting["companies"]:
 			users = frappe.get_list("Employee", dict(
-				company=d.company), "user_id as user")
-			# create new group entry for each company entry
-			new_group = frappe.get_doc(dict(doctype="Daily Work Summary Group",
-				name="Daily Work Summary for " + d.company,
-				users=users,
-				send_emails_at=d.send_emails_at,
-				subject=previous_setting["subject"],
-				message=previous_setting["message"]))
-			new_group.insert(ignore_permissions=True)
-			new_group.save()
-	# frappe.delete_doc("Daily Work Summary Settings")
-	# frappe.delete_doc("Daily Work Summary Settings Company")
+				company=d.company, user_id=("!=", " ")), "user_id as user")
+			if(len(users)):
+				# create new group entry for each company entry
+				new_group = frappe.get_doc(dict(doctype="Daily Work Summary Group",
+					name="Daily Work Summary for " + d.company,
+					users=users,
+					send_emails_at=d.send_emails_at,
+					subject=previous_setting["subject"],
+					message=previous_setting["message"]))
+				new_group.insert(ignore_permissions=True)
+				new_group.save()
+	frappe.delete_doc("Daily Work Summary Settings")
+	frappe.delete_doc("Daily Work Summary Settings Company")
 
 def get_setting_companies():
 	return frappe.db.sql("select * from `tabDaily Work Summary Settings Company`", as_dict=True)
