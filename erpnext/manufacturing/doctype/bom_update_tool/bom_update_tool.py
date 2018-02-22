@@ -13,11 +13,14 @@ class BOMUpdateTool(Document):
 	def replace_bom(self):
 		self.validate_bom()
 		self.update_new_bom()
-		bom_list = self.get_parent_boms()
+		bom_list = self.get_parent_boms(self.new_bom)
 		updated_bom = []
 		for bom in bom_list:
 			bom_obj = frappe.get_doc("BOM", bom)
 			updated_bom = bom_obj.update_cost_and_exploded_items(updated_bom)
+			bom_obj.calculate_cost()
+			bom_obj.update_parent_cost()
+			bom_obj.db_update()
 
 		frappe.msgprint(_("BOM replaced"))
 
@@ -38,10 +41,18 @@ class BOMUpdateTool(Document):
 			rate=%s, amount=stock_qty*%s where bom_no = %s and docstatus < 2 and parenttype='BOM'""",
 			(self.new_bom, new_bom_unitcost, new_bom_unitcost, self.current_bom))
 
-	def get_parent_boms(self):
-		return [d[0] for d in frappe.db.sql("""select distinct parent
-			from `tabBOM Item` where ifnull(bom_no, '') = %s and docstatus < 2 and parenttype='BOM'""",
-			self.new_bom)]
+	def get_parent_boms(self, bom, bom_list=None):
+		if not bom_list:
+			bom_list = []
+
+		data = frappe.db.sql(""" select distinct parent from `tabBOM Item`
+			where ifnull(bom_no, '') = %s and docstatus < 2 and parenttype='BOM'""", bom)
+
+		for d in data:
+			bom_list.append(d[0])
+			self.get_parent_boms(d[0], bom_list)
+
+		return bom_list
 
 @frappe.whitelist()
 def enqueue_update_cost():
