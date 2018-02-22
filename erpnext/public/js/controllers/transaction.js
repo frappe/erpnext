@@ -204,6 +204,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				filters: {
 					docstatus: 1,
 					inspection_type: inspection_type,
+					reference_name: doc.name,
 					item_code: d.item_code
 				}
 			}
