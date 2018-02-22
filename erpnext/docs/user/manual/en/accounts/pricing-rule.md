@@ -52,7 +52,6 @@ Using Price List Rule, you can ultimately define rate or %discount to be applied
 Rate or Discount specified in the Pricing Rule will be applied only if above applicability rules are matched with values in the transaction. Rate mentioned in Pricing Rule will be given priority over item's Price List rate.
 
 <img alt="Applicable Rate" class="screenshot" src="/docs/assets/img/articles/pricing-rule-price.png">
->>>>>>> Renamed price to rate in pricing rule
 
 #### 2.2 Discount Percentage
 

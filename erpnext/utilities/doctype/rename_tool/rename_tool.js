@@ -13,6 +13,9 @@ frappe.ui.form.on("Rename Tool", {
 	},
 	refresh: function(frm) {
 		frm.disable_save();
+		if (!frm.doc.file_to_rename) {
+			frm.get_field("rename_log").$wrapper.html("");
+		}
 		frm.page.set_primary_action(__("Rename"), function() {
 			frm.get_field("rename_log").$wrapper.html("<p>Renaming...</p>");
 			frappe.call({
