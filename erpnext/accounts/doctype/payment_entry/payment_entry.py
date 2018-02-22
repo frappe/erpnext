@@ -58,15 +58,20 @@ class PaymentEntry(AccountsController):
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
 		self.make_gl_entries()
+		self.update_outstanding_amounts()
 		self.update_advance_paid()
 		self.update_expense_claim()
 
 	def on_cancel(self):
 		self.setup_party_account_field()
 		self.make_gl_entries(cancel=1)
+		self.update_outstanding_amounts()
 		self.update_advance_paid()
 		self.update_expense_claim()
 		self.delink_advance_entry_references()
+
+	def update_outstanding_amounts(self):
+		self.set_missing_ref_details(force=True)
 
 	def validate_duplicate_entry(self):
 		reference_names = []
@@ -129,14 +134,14 @@ class PaymentEntry(AccountsController):
 
 		self.set_missing_ref_details()
 
-	def set_missing_ref_details(self):
+	def set_missing_ref_details(self, force=False):
 		for d in self.get("references"):
 			if d.allocated_amount:
 				ref_details = get_reference_details(d.reference_doctype,
 					d.reference_name, self.party_account_currency)
 
 				for field, value in ref_details.items():
-					if not d.get(field):
+					if not d.get(field) or force:
 						d.set(field, value)
 
 	def validate_payment_type(self):

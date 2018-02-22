@@ -32,7 +32,7 @@ class POSProfile(Document):
 					.format(res[0][0], row.user), raise_exception=1)
 			elif not row.default and not res:
 				msgprint(_("User {0} doesn't have any default POS Profile. Check Default at Row {1} for this User.")
-					.format(row.user, row.idx), raise_exception=1)
+					.format(row.user, row.idx))
 
 	def validate_all_link_fields(self):
 		accounts = {"Account": [self.income_account,
