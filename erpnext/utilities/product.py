@@ -28,9 +28,6 @@ def get_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
 	if stock_qty:
 		in_stock = stock_qty[0][0] > 0 and 1 or 0
 
-	if stock_qty:
-			in_stock = stock_qty[0][0] > 0 and 1 or 0
-
 	return frappe._dict({"in_stock": in_stock, "stock_qty": stock_qty, "is_stock_item": is_stock_item})
 
 
