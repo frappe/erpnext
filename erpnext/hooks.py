@@ -11,7 +11,7 @@ app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
-develop_version = '9.x.x-develop'
+develop_version = '10.x.x-develop'
 
 error_report_email = "support@erpnext.com"
 
@@ -203,6 +203,9 @@ doc_events = {
 	},
 	'Address': {
 		'validate': 'erpnext.regional.india.utils.validate_gstin_for_india'
+	},
+	('Sales Invoice', 'Purchase Invoice'): {
+		'validate': 'erpnext.regional.india.utils.set_place_of_supply'
 	}
 }
 

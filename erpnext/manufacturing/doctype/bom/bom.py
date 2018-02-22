@@ -200,6 +200,14 @@ class BOM(WebsiteGenerator):
 		if not from_child_bom:
 			frappe.msgprint(_("Cost Updated"))
 
+	def update_parent_cost(self):
+		if self.total_cost:
+			cost = self.total_cost / self.quantity
+
+			frappe.db.sql("""update `tabBOM Item` set rate=%s, amount=stock_qty*%s
+				where bom_no = %s and docstatus < 2 and parenttype='BOM'""",
+				(cost, cost, self.name))
+
 	def get_bom_unitcost(self, bom_no):
 		bom = frappe.db.sql("""select name, base_total_cost/quantity as unit_cost from `tabBOM`
 			where is_active = 1 and name = %s""", bom_no, as_dict=1)
