@@ -441,7 +441,7 @@ def make_sales_invoice(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_delivery_trip(source_name, target_doc=None):
-	def update_stop(source_doc, target_doc, source_parent):
+	def update_stop_details(source_doc, target_doc, source_parent):
 		target_doc.customer = source_parent.customer
 		target_doc.address = source_parent.shipping_address_name
 		target_doc.customer_address = source_parent.shipping_address
@@ -460,7 +460,7 @@ def make_delivery_trip(source_name, target_doc=None):
 			"field_map": {
 				"parent": "delivery_note"
 			},
-			"postprocess": update_stop,
+			"postprocess": update_stop_details,
 		}
 	}, target_doc)
 
