@@ -255,24 +255,27 @@ def create_or_edit_address(customer,fd,customer_status):
 	if customer_status == 1:
 		make_address = frappe.get_doc("Address",{"woocommerce_id": fd.get("id")})
 		new_address_title = customer.customer_name+"-billing"
-		frappe.rename_doc("Address",make_address.name,new_address_title)
-		# make_address.address_title = customer.customer_name
+		make_address.address_title = customer.customer_name
+		make_address.save()
 
+		frappe.rename_doc("Address",make_address.name,new_address_title)
+
+		make_address = frappe.get_doc("Address",{"woocommerce_id": fd.get("id")})
 
 	raw_address = fd.get("billing")
 	print("This is address")
 	print(raw_address)
 
-	make_address.address_line1 = "Not Provided" if not fd.get("address_1") else fd.get("address_1")
-	make_address.address_line2 = "Not Provided" if not fd.get("address_2") else fd.get("address_2")
-	make_address.city = "Not Provided" if not fd.get("city") else fd.get("city")
+	make_address.address_line1 = raw_address.get("address_1", "Not Provided")
+	make_address.address_line2 = raw_address.get("address_2", "Not Provided")
+	make_address.city = raw_address.get("city", "Not Provided")
 	make_address.woocommerce_id = str(fd.get("id"))
 	make_address.address_type = "Shipping"
-	make_address.country = fd.get("country")
-	make_address.state = fd.get("state")
-	make_address.pincode = str(fd.get("postcode"))
-	make_address.phone = str(fd.get("phone"))
-	make_address.email = str(fd.get("email"))
+	make_address.country = frappe.get_value("Country", filters={"code":raw_address.get("country", "IN").lower()})
+	make_address.state =  raw_address.get("state")
+	make_address.pincode =  str(raw_address.get("postcode"))
+	make_address.phone = str(raw_address.get("phone"))
+	make_address.email_id = str(raw_address.get("email"))
 
 	make_address.append("links", {
 		"link_doctype": "Customer",
