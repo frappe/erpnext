@@ -61,7 +61,10 @@ class PaymentRequest(Document):
 	def payment_gateway_validation(self):
 		try:
 			controller = get_payment_gateway_controller(self.payment_gateway)
-			return controller.on_payment_request_submission(self)
+			if hasattr(controller, 'on_payment_request_submission'):
+				return controller.on_payment_request_submission(self)
+			else:
+				return True
 		except Exception:
 			return False
 
