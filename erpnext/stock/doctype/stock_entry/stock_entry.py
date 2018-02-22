@@ -52,6 +52,7 @@ class StockEntry(StockController):
 		self.validate_finished_goods()
 		self.validate_with_material_request()
 		self.validate_batch()
+		self.validate_inspection()
 
 		if not self.from_bom:
 			self.fg_completed_qty = 0.0
