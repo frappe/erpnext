@@ -36,8 +36,8 @@ def execute(filters=None):
 def get_net_profit_loss(income, expense, period_list, company):
 	total = 0
 	net_profit_loss = {
-		"account_name": "'" + _("Net Profit / Loss") + "'",
-		"account": "'" + _("Net Profit / Loss") + "'",
+		"account_name": "'" + _("Profit for the year") + "'",
+		"account": "'" + _("Profit for the year") + "'",
 		"warn_if_negative": True,
 		"currency": frappe.db.get_value("Company", company, "default_currency")
 	}
