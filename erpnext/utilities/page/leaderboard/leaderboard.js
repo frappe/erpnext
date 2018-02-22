@@ -19,13 +19,13 @@ frappe.Leaderboard = Class.extend({
 		// const list of doctypes
 		this.doctypes = ["Customer", "Item", "Supplier", "Sales Partner","Sales Person"];
 		this.timespans = ["Week", "Month", "Quarter", "Year"];
-		this.desc_fields = ["total_sales_amount", "total_request","total_purchase_amount","commission_rate"];
 		this.filters = {
-			"Customer": ["total_item_purchased_qty", "total_sales_amount","receivable_amount_outstanding_amount"],
-			"Item": ["total_purchase_amount", "total_purchased_qty", "total_sales_amount", "total_sold_qty","available_stock_qty"],
-			"Supplier": ["total_item_sold_qty", "total_purchase_amount","payable_amount_outstanding_amount"],
-			"Sales Partner": ["commission_rate", "target_qty", "target_amount", "total_sales_amount"],
-			"Sales Person": ["target_qty", "target_amount", "total_sales_amount"],
+			"Customer": ["total_sales_amount", "total_qty_sold", "outstanding_amount", ],
+			"Item": ["total_sales_amount", "total_qty_sold", "total_purchase_amount",
+				"total_qty_purchased", "available_stock_qty", "available_stock_value"],
+			"Supplier": ["total_purchase_amount", "total_qty_purchased", "outstanding_amount"],
+			"Sales Partner": ["total_sales_amount", "total_commision"],
+			"Sales Person": ["total_sales_amount"],
 		};
 
 		// for saving current selected filters
@@ -65,6 +65,7 @@ frappe.Leaderboard = Class.extend({
 			fieldtype:'Link',
 			options:'Company',
 			default:frappe.defaults.get_default('company'),
+			reqd: 1,
 			change: function() {
 				me.options.selected_company = this.value;
 				me.make_request($container);
@@ -75,10 +76,6 @@ frappe.Leaderboard = Class.extend({
 				return {"label": __(d), value: d }
 			})
 		);
-
-
-	
-		// this.timespan_select.val(this.timespans[1]);
 
 		this.type_select = this.page.add_select(__("Type"),
 			me.options.selected_filter.map(d => {
@@ -129,9 +126,11 @@ frappe.Leaderboard = Class.extend({
 		});
 	},
 
-	get_leaderboard: function (notify, $container, start=0) {
+	get_leaderboard: function (notify, $container) {
 		var me = this;
-
+		if(!me.options.selected_company) {
+			frappe.throw(__("Please select Company"));
+		}
 		frappe.call({
 			method: "erpnext.utilities.page.leaderboard.leaderboard.get_leaderboard",
 			args: {
@@ -139,7 +138,6 @@ frappe.Leaderboard = Class.extend({
 				timespan: me.options.selected_timespan,
 				company: me.options.selected_company,
 				field: me.options.selected_filter_item,
-				start: start
 			},
 			callback: function (r) {
 				let results = r.message || [];
@@ -274,25 +272,25 @@ frappe.Leaderboard = Class.extend({
 		var me = this;
 		const company = me.options.selected_company;
 		const currency = frappe.get_doc(":Company", company).default_currency;
-		const _selected_filter = me.options.selected_filter
-			.map(i => frappe.model.unscrub(i));
 		const fields = ['name','value'];
 
 		const html =
 			`<div class="list-item">
 				${
-			fields.map(filter => {
-					const col = frappe.model.unscrub(filter);
-					let val = item[filter];
-					if (col === "Modified") {
-						val = comment_when(val);
+			fields.map(col => {
+					let val = item[col];
+					if(col=="name") {
+						var formatted_value = `<a class="grey list-id ellipsis" 
+							href="#Form/${me.options.selected_doctype}/${item["name"]}"> ${val} </a>`
+					} else {
+						var formatted_value = `<span class="text-muted ellipsis">
+							${(me.options.selected_filter_item.indexOf('qty') == -1) ? format_currency(val, currency) : val}</span>`
 					}
+
 					return (
 						`<div class="list-item_content ellipsis list-item__content--flex-2
-							${(col !== "Name" && col !== "Modified") ? "hidden-xs" : ""}
-							${(filter == "value") ? "text-right" : ""}">
-							${ col === "Name" ? `<a class="grey list-id ellipsis" href="#Form/${me.options.selected_doctype}/${item["name"]}"> ${val} </a>` : `<span class="text-muted ellipsis"> ${format_currency(val, currency)}</span>`
-							}
+							${(col == "value") ? "text-right" : ""}">
+							${formatted_value}
 						</div>`);
 					}).join("")
 				}

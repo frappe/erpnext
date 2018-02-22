@@ -3,156 +3,141 @@
 
 from __future__ import unicode_literals, print_function
 import frappe
-import json
-from operator import itemgetter
-from frappe.utils import add_to_date, fmt_money
-from erpnext.accounts.party import get_dashboard_info
-from erpnext.accounts.utils import get_currency_precision
+from frappe.utils import add_to_date
 
 @frappe.whitelist()
-def get_leaderboard(doctype, timespan, company, field, start=0):
+def get_leaderboard(doctype, timespan, company, field):
 	"""return top 10 items for that doctype based on conditions"""
-	filters = get_date_from_string(timespan)
-	items = []
+	from_date = get_from_date(timespan)
+	records = []
 	if doctype == "Customer":
-		items = get_all_customers(filters, company, [], field)
+		records = get_all_customers(from_date, company, field)
 	elif  doctype == "Item":
-		items = get_all_items(filters, [], field)
+		records = get_all_items(from_date, company, field)
 	elif  doctype == "Supplier":
-		items = get_all_suppliers(filters, company, [], field)
+		records = get_all_suppliers(from_date, company, field)
 	elif  doctype == "Sales Partner":
-		items = get_all_sales_partner(filters, [], field)
+		records = get_all_sales_partner(from_date, company, field)
 	elif doctype == "Sales Person":
-		items = get_all_sales_person(filters,  [], field)
+		records = get_all_sales_person(from_date, company)
 
-	if len(items) > 0:
-		return items
-	return []
+	return records
 
-def get_all_customers(filters, company, items,  field, start=0, limit=20):
-	"""return all customers"""
-	if field == "total_sales_amount":
-		select_field = "sum(sales_order_item.base_net_amount)"
-	elif field == "total_item_purchased_qty":
-		select_field = "count(sales_order_item.name)"
-	elif field == "receivable_amount_outstanding_amount":
+def get_all_customers(from_date, company, field):
+	if field == "outstanding_amount":
 		return frappe.db.sql("""
-			select sales_invoice.customer as name, sum(sales_invoice.outstanding_amount) as value
-	        FROM `tabSales Invoice` as sales_invoice
-	        where sales_invoice.docstatus = 1 and sales_invoice.modified >= "{0}" and sales_invoice.company = "{1}"
-	        group by sales_invoice.customer
-	        order by value DESC
-	        limit {2}""".format(filters, company, limit), as_dict=1)
+			select customer as name, sum(outstanding_amount) as value
+			FROM `tabSales Invoice`
+			where docstatus = 1 and posting_date >= %s and company = %s
+			group by customer
+			order by value DESC
+			limit 20
+		""", (from_date, company), as_dict=1)
+	else:
+		if field == "total_sales_amount":
+			select_field = "sum(so_item.base_net_amount)"
+		elif field == "total_qty_sold":
+			select_field = "sum(so_item.stock_qty)"
+
+		return frappe.db.sql("""
+			select so.customer as name, {0} as value
+			FROM `tabSales Order` as so JOIN `tabSales Order Item` as so_item
+				ON so.name = so_item.parent
+			where so.docstatus = 1 and so.transaction_date >= %s and so.company = %s
+			group by so.customer
+			order by value DESC
+			limit 20
+		""".format(select_field), (from_date, company), as_dict=1)
+
+def get_all_items(from_date, company, field):
+	if field in ("available_stock_qty", "available_stock_value"):
+		return frappe.db.sql("""
+			select item_code as name, {0} as value
+			from tabBin
+			group by item_code
+			order by value desc
+			limit 20
+		""".format("sum(actual_qty)" if field=="available_stock_qty" else "sum(stock_value)"), as_dict=1)
+	else:
+		if field == "total_sales_amount":
+			select_field = "sum(order_item.base_net_amount)"
+			select_doctype = "Sales Order"
+		elif field == "total_purchase_amount":
+			select_field = "sum(order_item.base_net_amount)"
+			select_doctype = "Purchase Order"
+		elif field == "total_qty_sold":
+			select_field = "sum(order_item.stock_qty)"
+			select_doctype = "Sales Order"
+		elif field == "total_qty_purchased":
+			select_field = "sum(order_item.stock_qty)"
+			select_doctype = "Purchase Order"
+
+		return frappe.db.sql("""
+			select order_item.item_code as name, {0} as value
+			from `tab{1}` sales_order join `tab{1} Item` as order_item
+				on sales_order.name = order_item.parent
+			where sales_order.docstatus = 1
+				and sales_order.company = %s and sales_order.transaction_date >= %s
+			group by order_item.item_code
+			order by value desc
+			limit 20
+		""".format(select_field, select_doctype), (company, from_date), as_dict=1)
+
+def get_all_suppliers(from_date, company, field):
+	if field == "outstanding_amount":
+		return frappe.db.sql("""
+			select supplier as name, sum(outstanding_amount) as value
+			FROM `tabPurchase Invoice`
+			where docstatus = 1 and posting_date >= %s and company = %s
+			group by supplier
+			order by value DESC
+			limit 20""", (from_date, company), as_dict=1)
+	else:
+		if field == "total_purchase_amount":
+			select_field = "sum(purchase_order_item.base_net_amount)"
+		elif field == "total_qty_purchased":
+			select_field = "sum(purchase_order_item.stock_qty)"
+
+		return frappe.db.sql("""
+			select purchase_order.supplier as name, {0} as value
+			FROM `tabPurchase Order` as purchase_order LEFT JOIN `tabPurchase Order Item`
+				as purchase_order_item ON purchase_order.name = purchase_order_item.parent
+			where purchase_order.docstatus = 1 and  purchase_order.modified >= %s
+				and  purchase_order.company = %s
+			group by purchase_order.supplier
+			order by value DESC
+			limit 20""".format(select_field), (from_date, company), as_dict=1)
+
+def get_all_sales_partner(from_date, company, field):
+	if field == "total_sales_amount":
+		select_field = "sum(base_net_total)"
+	elif field == "total_commission":
+		select_field = "sum(total_commission)"
 
 	return frappe.db.sql("""
-		select sales_order.customer as name, {0} as value
-        FROM `tabSales Order` as sales_order LEFT JOIN `tabSales Order Item`
-        	as sales_order_item ON sales_order.name = sales_order_item.parent
-        where sales_order.docstatus = 1  and sales_order.modified >= "{1}" and sales_order.company = "{2}"
-        group by sales_order.customer
-        order by value DESC
-        limit {3}""".format(select_field, filters, company, limit), as_dict=1)
+		select sales_partner as name, {0} as value
+		from `tabSales Order`
+	 	where ifnull(sales_partner, '') != '' and docstatus = 1
+			and transaction_date >= %s and company = %s
+	 	group by sales_partner
+	 	order by value DESC
+	 	limit 20
+	""".format(select_field), (from_date, company), as_dict=1)
 
-
-
-
-def get_all_items(filters, items, field, start=0, limit=20):
-	"""return all items"""
-	if field == "total_sales_amount":
-		select_field = "sum(B.amount)"
-		select_doctype = "`tabSales Order Item`"
-	if field == "total_purchase_amount":
-		select_field = "sum(B.amount)"
-		select_doctype = "`tabPurchase Order Item`"
-	if field == "total_sold_qty":
-		select_field = "sum(B.qty)"
-		select_doctype = "`tabSales Order Item`"
-	if field == "total_purchased_qty":
-		select_field = "sum(B.qty)"
-		select_doctype = "`tabPurchase Order Item`"
-	if field == "available_stock_qty":
-		select_field = "sum(B.actual_qty)"
-		select_doctype = "`tabBin`"
-	return frappe.db.sql("""select
-			item.name as name , {0} as value
-		from `tabItem` as item  join {1} as B on item.name = B.item_code and item.modified >= "{2}"
-		group by item.name""".format(select_field, select_doctype, filters), as_dict=1)
-
-def get_all_suppliers(filters, company, items, field, start=0, limit=20):
-	"""return all suppliers"""
-
-	if field == "total_purchase_amount":
-		select_field = "sum(purchase_order_item.base_net_amount)"
-	elif field == "total_item_sold_qty":
-		select_field = "count(purchase_order_item.name)"
-	elif field == "payable_amount_outstanding_amount":
-		return frappe.db.sql("""
-			select purchase_invoice.supplier as name, sum(purchase_invoice.outstanding_amount) as value
-	        FROM `tabPurchase Invoice` as purchase_invoice
-	        where purchase_invoice.docstatus = 1 and purchase_invoice.modified >= "{0}" and purchase_invoice.company = "{1}"
-	        group by purchase_invoice.supplier
-	        order by value DESC
-	        limit {2}""".format(filters, company, limit), as_dict=1)
-
+def get_all_sales_person(from_date, company):
 	return frappe.db.sql("""
-		select purchase_order.supplier as name, {0} as value
-        FROM `tabPurchase Order` as purchase_order LEFT JOIN `tabPurchase Order Item`
-        	as purchase_order_item ON purchase_order.name = purchase_order_item.parent
-        where purchase_order.docstatus = 1 and  purchase_order.modified >= "{1}" and  purchase_order.company =  "{2}"
-        group by purchase_order.supplier
-        order by value DESC
-        limit {3}""".format(select_field, filters, company, limit), as_dict=1)
-
-
-
-def get_all_sales_partner(filters, items, field, start=0, limit=20):
-	"""return all sales partner"""
-
-	if field == "commission_rate":
-		select_field = "sales_partner.commission_rate"
-	elif field == "target_qty":
-		select_field = "target_detail.target_qty"
-	elif field == "target_amount":
-		select_field = "target_detail.target_amount"
-	elif field == "total_sales_amount":
-		select_field = "sum(sales_order.total_commission)"
-
-	return frappe.db.sql("""select sales_partner.partner_name as name, {0} as value
-		from 
-			`tabSales Partner` as sales_partner inner join `tabTarget Detail` as target_detail ON sales_partner.name = target_detail.parent 
-		inner join 
-			`tabSales Order` as sales_order ON sales_order.sales_partner = sales_partner.name
-	 	where 
-	 		sales_order.docstatus = 1 and  sales_order.modified >= "{1}"
-	 	group by 
-	 		sales_partner.partner_name
+		select sales_team.sales_person as name, sum(sales_order.base_net_total) as value
+		from `tabSales Order` as sales_order join `tabSales Team` as sales_team
+			on sales_order.name = sales_team.parent and sales_team.parenttype = 'Sales Order'
+	 	where sales_order.docstatus = 1
+			and sales_order.transaction_date >= %s
+			and sales_order.company = %s
+	 	group by sales_team.sales_person
 	 	order by value DESC
-	 	limit {2}""".format(select_field, filters, limit), as_dict=1)
+	 	limit 20
+	""", (from_date, company), as_dict=1)
 
-
-def get_all_sales_person(filters, items, field, start=0, limit=20):
-	"""return all sales partner"""
-	if field == "target_qty":
-		select_field = "target_detail.target_qty"
-	elif field == "target_amount":
-		select_field = "target_detail.target_amount"
-	elif field == "total_sales_amount":
-		select_field = "sum(sales_team.allocated_amount)"
-
-	return frappe.db.sql("""select sales_person.name as name, {0} as value
-		from 
-			`tabSales Person` as sales_person
-		inner join 
-			`tabTarget Detail` as target_detail ON sales_person.name = target_detail.parent 
-		inner join 
-			`tabSales Team` as sales_team ON sales_team.sales_person = sales_person.name 
-		where sales_person.is_group = 0 and sales_team.modified >= "{1}"
-		group by sales_person.name
-	 	order by value DESC
-	 	limit {2}""".format(select_field,filters,limit), as_dict=1)
-
-
-def get_date_from_string(seleted_timespan):
+def get_from_date(seleted_timespan):
 	"""return string for ex:this week as date:string"""
 	days = months = years = 0
 	if "month" == seleted_timespan.lower():
@@ -164,6 +149,5 @@ def get_date_from_string(seleted_timespan):
 	else:
 		days = -7
 
-	return add_to_date(None, years=years, months=months, days=days, as_string=True, as_datetime=True)
-
-
+	return add_to_date(None, years=years, months=months, days=days,
+		as_string=True, as_datetime=True)
