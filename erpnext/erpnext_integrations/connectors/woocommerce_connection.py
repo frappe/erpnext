@@ -43,83 +43,99 @@ def verify_request():
 
 @frappe.whitelist(allow_guest=True)
 def customer():
+
+	if frappe.request.data:
+		verify_request()
+		fd = json.loads(frappe.request.data)
+		print(fd)
+		event = frappe.get_request_header("X-Wc-Webhook-Event")
+
+		if event == "updated":
+			try:
+				existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
+
+				edit_existing_customer(existing_customer,fd)
+				# print("THis Complete 1", existing_customer.customer_name)
+				existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
+				create_or_edit_address(existing_customer,fd,1)
+
+				
+			except frappe.DoesNotExistError as e:
+
+				# new_customer = frappe.new_doc("Customer")
+				create_customer(fd)
+				new_existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
+				create_or_edit_address(new_existing_customer,fd,0)
+				# print("THis Complete 2")
+
+			# except frappe.MandatoryError as e:
+			# 	new_existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
+			# 	create_or_edit_address(new_existing_customer,fd,0)
+				
+			except Exception as e:
+				print("Error ",e)
+
+		# elif event == "updated":
+		# 	pass
+
+	# 	if event == "deleted":
+	# 		try:
+	# 			delete_customer = frappe.get_doc("Customer",{"woocommerce_id":fd.get("id")})
+	# +			delete = frappe.delete_doc("Customer",delete_customer.name)
+	# +			frappe.db.commit()
+				
+	# 		except Exception as e:
+	# 			print ("delete Error", e)
+
+
+
+
+@frappe.whitelist(allow_guest=True)
+def product():
+	# pass
+	print("hello"*1000)
 	verify_request()
+	print(frappe.local.form_dict)
 	fd = json.loads(frappe.request.data)
-	print(fd)
 	event = frappe.get_request_header("X-Wc-Webhook-Event")
+	print(event)
+	if event == "created":
+		print("inif?")
+		print(
+			fd.get("name"),
+			"woocommerce - " + str(fd.get("id")),
+			str(fd.get("id")),
+			0 if (fd.get("stock_quantity") == None) else fd.get("stock_quantity")
+		)
 
-	if event == "updated":
+		print (fd)
+		product_raw_image = fd.get("images") 
 		try:
-			existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
+			item = frappe.new_doc("Item")
+			item.item_name = str(fd.get("name"))
+			item.item_code = "woocommerce - " + str(fd.get("id"))
+			item.woocommerce_id = str(fd.get("id"))
+			item.item_group = "Products"
+			item.description = str(fd.get("description"))
+			item.image = product_raw_image[0].get("src")
+			item.opening_stock = 0 if (fd.get("stock_quantity") == None) else str(fd.get("stock_quantity"))
+			item.save()
 
-			edit_existing_customer(existing_customer,fd)
-			# print("THis Complete 1", existing_customer.customer_name)
-			existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
-			create_or_edit_address(existing_customer,fd,1)
-
-			
-		except frappe.DoesNotExistError as e:
-
-			# new_customer = frappe.new_doc("Customer")
-			create_customer(fd)
-			new_existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
-			create_or_edit_address(new_existing_customer,fd,0)
-			# print("THis Complete 2")
-
-		# except frappe.MandatoryError as e:
-		# 	new_existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
-		# 	create_or_edit_address(new_existing_customer,fd,0)
-			
+			# note = frappe.new_doc("Note")
+			# note.title = str(fd.get("name"))
+			# # note.content = fd.get("name")
+			# note.save(ignore_permissions=True)
+			frappe.db.commit()
 		except Exception as e:
-			print("Error ",e)
+			print("Exception", e)
 
 	# elif event == "updated":
+	# 	item = frappe.get_doc({"doctype":"Item", "item_code":fd.get("id")})
+
+	# elif event == "restored":
 	# 	pass
 	# elif event == "deleted":
 	# 	pass
-
-
-
-# @frappe.whitelist(allow_guest=True)
-# def product():
-# 	# print("hello"*1000)
-# 	verify_request()
-# 	print(frappe.local.form_dict)
-# 	fd = json.loads(frappe.request.data)
-# 	event = frappe.get_request_header("X-Wc-Webhook-Event")
-# 	print(event)
-# 	if event == "created":
-# 		print("inif?")
-# 		print(
-# 			fd.get("name"),
-# 			"woocommerce - " + str(fd.get("id")),
-# 			str(fd.get("id")),
-# 			0 if (fd.get("stock_quantity") == None) else fd.get("stock_quantity")
-# 		)
-# 		try:
-# 			item = frappe.new_doc("Item")
-# 			item.item_name = str(fd.get("name"))
-# 			item.item_code = "woocommerce - " + str(fd.get("id"))
-# 			# item.woocommerce_id = str(fd.get("id"))
-# 			item.item_group = "Products"
-# 			item.opening_stock = 0 if (fd.get("stock_quantity") == None) else str(fd.get("stock_quantity"))
-# 			item.save()
-
-# 			# note = frappe.new_doc("Note")
-# 			# note.title = str(fd.get("name"))
-# 			# # note.content = fd.get("name")
-# 			# note.save(ignore_permissions=True)
-# 			frappe.db.commit()
-# 		except Exception as e:
-# 			print("Exception", e)
-
-# 	elif event == "updated":
-# 		item = frappe.get_doc({"doctype":"Item", "item_code":fd.get("id")})
-
-# 	elif event == "restored":
-# 		pass
-# 	elif event == "deleted":
-# 		pass
 
 
 # @frappe.whitelist(allow_guest=True)
