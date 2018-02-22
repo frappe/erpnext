@@ -6,6 +6,9 @@ import frappe
 
 
 def execute():
+	frappe.reload_doc("hr", "doctype", "daily_work_summary_group")
+	frappe.reload_doc("hr", "doctype", "daily_work_summary_group_user")
+
 	# check if Daily Work Summary Settings Company table exists
 	try:
 		frappe.db.sql('DESC `tabDaily Work Summary Settings Company`')
@@ -26,8 +29,9 @@ def execute():
 					send_emails_at=d.send_emails_at,
 					subject=previous_setting["subject"],
 					message=previous_setting["message"]))
-				new_group.insert(ignore_permissions=True)
-				new_group.save()
+				new_group.flags.ignore_permissions = True
+				new_group.flags.ignore_validate = True
+				new_group.insert(ignore_if_duplicate = True)
 	frappe.delete_doc("Daily Work Summary Settings")
 	frappe.delete_doc("Daily Work Summary Settings Company")
 
