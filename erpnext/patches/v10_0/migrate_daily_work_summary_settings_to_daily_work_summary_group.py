@@ -7,12 +7,14 @@ import frappe
 
 def execute():
 	frappe.reload_doc("hr", "doctype", "daily_work_summary_group")
+	frappe.reload_doc("hr", "doctype", "daily_work_summary_group_user")
+
 	# check if Daily Work Summary Settings Company table exists
 	try:
 		frappe.db.sql('DESC `tabDaily Work Summary Settings Company`')
 	except Exception:
 		return
-	
+
 	# get the previously saved settings
 	previous_setting = get_previous_setting()
 	if previous_setting["companies"]:
