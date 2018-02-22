@@ -11,6 +11,7 @@ from frappe.desk.reportview import build_match_conditions
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
+from frappe.model.rename_doc import update_linked_doctypes
 
 class Customer(TransactionBase):
 	def get_feed(self):
@@ -53,6 +54,16 @@ class Customer(TransactionBase):
 		self.flags.old_lead = self.lead_name
 		validate_party_accounts(self)
 		self.validate_credit_limit_on_change()
+		self.check_customer_group_or_territory_change()
+
+	def check_customer_group_or_territory_change(self):
+		frappe.flags.customer_group, frappe.flags.territory = False, False
+
+		if not self.get('__islocal'):
+			if self.customer_group != frappe.db.get_value('Customer', self.name, 'customer_group'):
+				frappe.flags.customer_group = True
+			if self.territory != frappe.db.get_value('Customer', self.name, 'territory'):
+				frappe.flags.territory = True
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
@@ -64,6 +75,11 @@ class Customer(TransactionBase):
 
 		if self.flags.is_new_doc:
 			self.create_lead_address_contact()
+
+		if frappe.flags.territory:
+			update_linked_doctypes("Customer", "Territory", self.name, self.territory)
+		if frappe.flags.customer_group:
+			update_linked_doctypes("Customer", "Customer Group", self.name, self.customer_group)
 
 	def create_primary_contact(self):
 		if not self.customer_primary_contact and not self.lead_name:
