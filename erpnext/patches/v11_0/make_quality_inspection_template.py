@@ -15,7 +15,7 @@ def execute():
 		qc_doc.flags.ignore_mandatory = True
 		qc_doc.save(ignore_permissions=True)
 
-		frappe.db.set_value('Item', data.parent, "quality_inspection_template", qc_doc.name)
+		frappe.db.set_value('Item', data.parent, "quality_inspection_template", qc_doc.name, update_modified=False)
 		frappe.db.sql(""" update `tabItem Quality Inspection Parameter`
 			set parentfield = 'item_quality_inspection_parameter', parenttype = 'Quality Inspection Template',
 			parent = %s where parenttype = 'Item' and parent = %s""", (qc_doc.name, data.parent))
