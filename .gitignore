@@ -11,3 +11,5 @@ erpnext/docs/current
 *.swp
 *.swo
 *~
+.kdev4/
+*.kdev4
