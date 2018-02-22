@@ -49,7 +49,8 @@ def customer():
 		fd = json.loads(frappe.request.data)
 		print(fd)
 		event = frappe.get_request_header("X-Wc-Webhook-Event")
-
+		for x in xrange(1,10):
+			print(event)
 		if event == "updated":
 			try:
 				existing_customer = frappe.get_doc("Customer",{"woocommerce_id": fd.get("id")})
@@ -96,7 +97,10 @@ def product():
 	print("hello"*1000)
 	verify_request()
 	print(frappe.local.form_dict)
-	fd = json.loads(frappe.request.data)
+	if frappe.request.data:
+		fd = json.loads(frappe.request.data)
+	else:
+		return "success"
 	event = frappe.get_request_header("X-Wc-Webhook-Event")
 	print(event)
 	if event == "created":
