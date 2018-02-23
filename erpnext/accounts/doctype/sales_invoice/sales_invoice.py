@@ -101,6 +101,8 @@ class SalesInvoice(SellingController):
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
 		self.set_status()
+		if self.is_pos and not self.is_return:
+			self.verify_payment_amount_is_positive()
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
@@ -904,6 +906,11 @@ class SalesInvoice(SellingController):
 			project.flags.dont_sync_tasks = True
 			project.update_billed_amount()
 			project.save()
+
+	def verify_payment_amount_is_positive(self):
+		for entry in self.payments:
+			if entry.amount < 0:
+				frappe.throw(_("Row #{0} (Payment Table): Amount must be positive").format(entry.idx))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
