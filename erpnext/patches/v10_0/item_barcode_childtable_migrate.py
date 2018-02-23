@@ -17,7 +17,7 @@ def execute():
 		barcode = barcode.strip()
 
 		if barcode and '<' not in barcode:
-			doc = frappe.get_doc({
+			frappe.get_doc({
 				'idx': 0,
 				'doctype': 'Item Barcode',
 				'barcode': barcode,
