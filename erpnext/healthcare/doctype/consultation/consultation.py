@@ -19,10 +19,6 @@ class Consultation(Document):
 	def after_insert(self):
 		insert_consultation_to_medical_record(self)
 
-	def on_submit(self):
-		if not self.diagnosis or not self.symptoms:
-			frappe.throw(_("Diagnosis and Complaints cannot be left blank"))
-
 	def on_cancel(self):
 		if(self.appointment):
 			frappe.db.set_value("Patient Appointment", self.appointment, "status", "Open")
