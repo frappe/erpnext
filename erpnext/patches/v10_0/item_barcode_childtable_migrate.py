@@ -13,8 +13,7 @@ def execute():
 	frappe.reload_doc("stock", "doctype", "item_barcode")
 
 	for item in items_barcode:
-		barcode = frappe.db.get_value('Item', item.name, 'barcode')
-		barcode = barcode.strip()
+		barcode = item.barcode.strip()
 
 		if barcode and '<' not in barcode:
 			frappe.get_doc({
