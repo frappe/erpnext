@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, cint
 
@@ -20,9 +21,9 @@ class SoilTexture(Document):
 		self.update_soil_edit('sand_composition')
 		for soil_type in self.soil_types:
 			if self.get(soil_type) > 100 or self.get(soil_type) < 0:
-				frappe.throw("{0} should be a value between 0 and 100".format(soil_type))
+				frappe.throw(_("{0} should be a value between 0 and 100").format(soil_type))
 		if sum(self.get(soil_type) for soil_type in self.soil_types) != 100:
-			frappe.throw('Soil compositions do not add up to 100')
+			frappe.throw(_('Soil compositions do not add up to 100'))
 
 	def update_soil_edit(self, soil_type):
 		self.soil_edit_order[self.soil_types.index(soil_type)] = max(self.soil_edit_order)+1

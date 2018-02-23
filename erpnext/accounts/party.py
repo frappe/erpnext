@@ -17,27 +17,25 @@ from erpnext.exceptions import PartyFrozen, PartyDisabled, InvalidAccountCurrenc
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext import get_default_currency, get_company_currency
 
+from six import iteritems
 
 class DuplicatePartyAccountError(frappe.ValidationError): pass
 
 @frappe.whitelist()
 def get_party_details(party=None, account=None, party_type="Customer", company=None,
-	posting_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False):
+	posting_date=None, bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False):
 
 	if not party:
 		return {}
-
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("{0}: {1} does not exists").format(party_type, party))
-
 	return _get_party_details(party, account, party_type,
-		company, posting_date, price_list, currency, doctype, ignore_permissions)
+		company, posting_date, bill_date, price_list, currency, doctype, ignore_permissions)
 
 def _get_party_details(party=None, account=None, party_type="Customer", company=None,
-	posting_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False):
+	posting_date=None, bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False):
 
-	out = frappe._dict(set_account_and_due_date(party, account, party_type, company, posting_date, doctype))
-
+	out = frappe._dict(set_account_and_due_date(party, account, party_type, company, posting_date, bill_date, doctype))
 	party = out[party_type.lower()]
 
 	if not ignore_permissions and not frappe.has_permission(party_type, "read", party):
@@ -149,7 +147,7 @@ def set_price_list(out, party, party_type, given_price_list):
 	out["selling_price_list" if party.doctype=="Customer" else "buying_price_list"] = price_list
 
 
-def set_account_and_due_date(party, account, party_type, company, posting_date, doctype):
+def set_account_and_due_date(party, account, party_type, company, posting_date, bill_date, doctype):
 	if doctype not in ["Sales Invoice", "Purchase Invoice"]:
 		# not an invoice
 		return {
@@ -160,12 +158,12 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 		account = get_party_account(party_type, party, company)
 
 	account_fieldname = "debit_to" if party_type=="Customer" else "credit_to"
-
 	out = {
 		party_type.lower(): party,
 		account_fieldname : account,
-		"due_date": get_due_date(posting_date, party_type, party, company)
+		"due_date": get_due_date(posting_date, party_type, party, company, bill_date)
 	}
+
 	return out
 
 @frappe.whitelist()
@@ -267,32 +265,34 @@ def validate_party_accounts(doc):
 
 
 @frappe.whitelist()
-def get_due_date(posting_date, party_type, party, company=None):
+def get_due_date(posting_date, party_type, party, company=None, bill_date=None):
 	"""Get due date from `Payment Terms Template`"""
 	due_date = None
-	if posting_date and party:
-		due_date = posting_date
+	if (bill_date or posting_date) and party:
+		due_date = bill_date or posting_date
 		template_name = get_pyt_term_template(party, party_type, company)
 		if template_name:
-			due_date = get_due_date_from_template(template_name, posting_date).strftime("%Y-%m-%d")
+			due_date = get_due_date_from_template(template_name, posting_date, bill_date).strftime("%Y-%m-%d")
 		else:
 			if party_type == "Supplier":
 				supplier_type = frappe.db.get_value(party_type, party, fieldname="supplier_type")
 				template_name = frappe.db.get_value("Supplier Type", supplier_type, fieldname="payment_terms")
 				if template_name:
-					due_date = get_due_date_from_template(template_name, posting_date).strftime("%Y-%m-%d")
-
+					due_date = get_due_date_from_template(template_name, posting_date, bill_date).strftime("%Y-%m-%d")
+	# If due date is calculated from bill_date, check this condition
+	if getdate(due_date) < getdate(posting_date):
+		due_date = posting_date
 	return due_date
 
-
-def get_due_date_from_template(template_name, posting_date):
+def get_due_date_from_template(template_name, posting_date, bill_date):
 	"""
 	Inspects all `Payment Term`s from the a `Payment Terms Template` and returns the due
 	date after considering all the `Payment Term`s requirements.
 	:param template_name: Name of the `Payment Terms Template`
 	:return: String representing the calculated due date
 	"""
-	due_date = getdate(posting_date)
+	due_date = getdate(bill_date or posting_date)
+
 	template = frappe.get_doc('Payment Terms Template', template_name)
 
 	for term in template.terms:
@@ -302,14 +302,13 @@ def get_due_date_from_template(template_name, posting_date):
 			due_date = max(due_date, add_days(get_last_day(due_date), term.credit_days))
 		else:
 			due_date = max(due_date, add_months(get_last_day(due_date), term.credit_months))
-
 	return due_date
 
-def validate_due_date(posting_date, due_date, party_type, party, company=None):
+def validate_due_date(posting_date, due_date, party_type, party, company=None, bill_date=None):
 	if getdate(due_date) < getdate(posting_date):
 		frappe.throw(_("Due Date cannot be before Posting Date"))
 	else:
-		default_due_date = get_due_date(posting_date, party_type, party, company)
+		default_due_date = get_due_date(posting_date, party_type, party, company, bill_date)
 		if not default_due_date:
 			return
 
@@ -362,7 +361,6 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 def get_pyt_term_template(party_name, party_type, company=None):
 	if party_type not in ("Customer", "Supplier"):
 		return
-
 	template = None
 	if party_type == 'Customer':
 		customer = frappe.db.get_value("Customer", party_name,
@@ -376,13 +374,11 @@ def get_pyt_term_template(party_name, party_type, company=None):
 		supplier = frappe.db.get_value("Supplier", party_name,
 			fieldname=['payment_terms', "supplier_type"], as_dict=1)
 		template = supplier.payment_terms
-
 		if not template and supplier.supplier_type:
 			template = frappe.db.get_value("Supplier Type", supplier.supplier_type, fieldname='payment_terms')
 
 	if not template and company:
 		template = frappe.db.get_value("Company", company, fieldname='payment_terms')
-
 	return template
 
 def validate_party_frozen_disabled(party_type, party_name):
@@ -412,7 +408,7 @@ def get_timeline_data(doctype, name):
 
 	timeline_items = dict(data)
 
-	for date, count in timeline_items.iteritems():
+	for date, count in iteritems(timeline_items):
 		timestamp = get_timestamp(date)
 		out.update({ timestamp: count })
 

@@ -410,6 +410,21 @@ def get_pdc_details(party_type):
 			group by pref.reference_name""", party_type, as_dict=1):
 			pdc_details.setdefault(pdc.invoice_no, pdc)
 
+	for pdc in frappe.db.sql("""
+		select
+			jea.reference_name as invoice_no, jea.party, jea.party_type,
+			max(je.cheque_date) as pdc_date, sum(ifnull(je.total_amount,0)) as pdc_amount,
+			GROUP_CONCAT(je.cheque_no SEPARATOR ', ') as pdc_ref
+		from
+			`tabJournal Entry` as je inner join `tabJournal Entry Account` as jea
+		on
+			(jea.parent = je.name)
+		where
+			je.docstatus = 0 and je.cheque_date > je.posting_date
+			and jea.party_type = %s
+			group by jea.reference_name""", party_type, as_dict=1):
+			pdc_details.setdefault(pdc.invoice_no, pdc)
+
 	return pdc_details
 
 def get_dn_details(party_type):

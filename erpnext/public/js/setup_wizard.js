@@ -84,7 +84,7 @@ erpnext.setup.slides_settings = [
 
 			slide.get_input("company_abbr").on("change", function () {
 				if (slide.get_input("company_abbr").val().length > 5) {
-					frappe.msgprint("Company Abbreviation cannot have more than 5 characters");
+					frappe.msgprint(__("Company Abbreviation cannot have more than 5 characters"));
 					slide.get_field("company_abbr").set_value("");
 				}
 			});
@@ -137,11 +137,35 @@ erpnext.setup.slides_settings = [
 		},
 
 		validate: function () {
+			let me = this;
+			let exist;
+
 			// validate fiscal year start and end dates
 			if (this.values.fy_start_date == 'Invalid date' || this.values.fy_end_date == 'Invalid date') {
 				frappe.msgprint(__("Please enter valid Financial Year Start and End Dates"));
 				return false;
 			}
+
+			// Validate bank name
+			if(me.values.bank_account){
+				frappe.call({
+					async: false,
+					method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.validate_bank_account",
+					args: {
+						"coa": me.values.chart_of_accounts,
+						"bank_account": me.values.bank_account
+					},
+					callback: function (r) {
+						if(r.message){
+							exist = r.message;
+							me.get_field("bank_account").set_value("");
+							frappe.msgprint(__(`Account ${me.values.bank_account} already exists, enter a different name for your bank account`));
+						}
+					}
+				});
+				return !exist; // Return False if exist = true
+			}
+
 			return true;
 		},
 

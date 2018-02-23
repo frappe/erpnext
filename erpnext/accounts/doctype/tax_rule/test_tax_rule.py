@@ -9,6 +9,8 @@ from erpnext.accounts.doctype.tax_rule.tax_rule import IncorrectCustomerGroup, I
 
 test_records = frappe.get_test_records('Tax Rule')
 
+from six import iteritems
+
 class TestTaxRule(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql("delete from `tabTax Rule`")
@@ -129,7 +131,7 @@ def make_tax_rule(**args):
 
 	tax_rule = frappe.new_doc("Tax Rule")
 
-	for key, val in args.iteritems():
+	for key, val in iteritems(args):
 		if key != "save":
 			tax_rule.set(key, val)
 

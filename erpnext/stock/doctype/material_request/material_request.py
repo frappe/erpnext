@@ -15,6 +15,8 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.production_order.production_order import get_item_details
 from erpnext.buying.utils import check_for_closed_status, validate_for_items
 
+from six import string_types
+
 form_grid_templates = {
 	"items": "templates/form_grid/material_request_grid.html"
 }
@@ -90,6 +92,7 @@ class MaterialRequest(BuyingController):
 	def on_submit(self):
 		# frappe.db.set(self, 'status', 'Submitted')
 		self.update_requested_qty()
+		self.update_requested_qty_in_production_plan()
 
 	def before_save(self):
 		self.set_status(update=True)
@@ -142,6 +145,7 @@ class MaterialRequest(BuyingController):
 
 	def on_cancel(self):
 		self.update_requested_qty()
+		self.update_requested_qty_in_production_plan()
 
 	def update_completed_qty(self, mr_items=None, update_modified=True):
 		if self.material_request_type == "Purchase":
@@ -192,6 +196,22 @@ class MaterialRequest(BuyingController):
 			update_bin_qty(item_code, warehouse, {
 				"indented_qty": get_indented_qty(item_code, warehouse)
 			})
+
+	def update_requested_qty_in_production_plan(self):
+		production_plans = []
+		for d in self.get('items'):
+			if d.production_plan and d.material_request_plan_item:
+				qty = d.qty if self.docstatus == 1 else 0
+				frappe.db.set_value('Material Request Plan Item',
+					d.material_request_plan_item, 'requested_qty', qty)
+
+				if d.production_plan not in production_plans:
+					production_plans.append(d.production_plan)
+
+		for production_plan in production_plans:
+			doc = frappe.get_doc('Production Plan', production_plan)
+			doc.set_status()
+			doc.db_set('status', doc.status)
 
 def update_completed_and_requested_qty(stock_entry, method):
 	if stock_entry.doctype == "Stock Entry":
@@ -275,7 +295,7 @@ def make_request_for_quotation(source_name, target_doc=None):
 @frappe.whitelist()
 def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 	if target_doc:
-		if isinstance(target_doc, basestring):
+		if isinstance(target_doc, string_types):
 			import json
 			target_doc = frappe.get_doc(json.loads(target_doc))
 		target_doc.set("items", [])
