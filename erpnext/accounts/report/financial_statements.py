@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 
 import re
 
+import functools
+
 import frappe
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
 from erpnext.accounts.utils import get_fiscal_year
@@ -325,7 +327,7 @@ def sort_root_accounts(roots):
 			return -1
 		return 1
 
-	roots.sort(compare_roots)
+	roots.sort(key = functools.cmp_to_key(compare_roots))
 
 
 def set_gl_entries_by_account(
