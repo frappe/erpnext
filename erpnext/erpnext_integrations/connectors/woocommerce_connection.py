@@ -159,10 +159,26 @@ def product():
 	# except Exception as a:
 	# 	print("This is main exception in product",a*10)
 
-	# elif event == "restored":
-	# 	pass
-	# elif event == "deleted":
-	# 	pass
+	elif event == "restored":
+		print("Inside product restore")
+		print(fd)
+
+		restoring_item = frappe.get_doc("Item",{"woocommerce_id":fd.get("id")})
+		restoring_item.woocommerce_check = 0
+		restoring_item.save()
+
+		frappe.db.commit()
+		print("Successfully restored")
+
+	elif event == "deleted":
+		print("Inside product delete")
+		print(fd)
+		deleting_item = frappe.get_doc("Item",{"woocommerce_id":fd.get("id")})
+		deleting_item.woocommerce_check = 1
+		deleting_item.save()
+
+		frappe.db.commit()
+		print("Successfully deleted")
 
 
 # @frappe.whitelist(allow_guest=True)
