@@ -1,13 +1,13 @@
 import frappe
-from frappe.model.rename_doc import update_linked_doctypes
+from frappe.model.rename_doc import update_linked_doctypes, get_fetch_fields
 
 def execute():
-	customers = frappe.get_all('Customer')
+	customers = frappe.get_all('Customer', fields=["name", "territory", "customer_group"])
+	territory_fetch = get_fetch_fields('Customer', 'Territory')
+	customer_group_fetch = get_fetch_fields('Customer', 'Customer Group')
+
 	for customer in customers:
 		# Update Territory across all transaction
-		terr = frappe.get_value('Customer', customer, 'territory')
-		update_linked_doctypes("Customer", "Territory", customer.name, terr)
-
+		update_linked_doctypes(territory_fetch, customer.name, customer.territory_value)
 		# Update Territory across all transaction
-		cust_group = frappe.get_value('Customer', customer, 'customer_group')
-		update_linked_doctypes("Customer", "Customer Group", customer.name, cust_group)
+		update_linked_doctypes(customer_group_fetch, customer.name, customer.customer_group_value)
