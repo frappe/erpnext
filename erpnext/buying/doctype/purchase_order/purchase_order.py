@@ -430,6 +430,7 @@ def make_rm_stock_entry(purchase_order, rm_items):
 		stock_entry.supplier_address = purchase_order.supplier_address
 		stock_entry.address_display = purchase_order.address_display
 		stock_entry.company = purchase_order.company
+		stock_entry.to_warehouse = purchase_order.supplier_warehouse
 		stock_entry.from_bom = 1
 		for item_code in item_code_list:
 			po_item = [d for d in purchase_order.items if d.item_code == item_code][0]
