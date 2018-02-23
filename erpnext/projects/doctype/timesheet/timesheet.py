@@ -290,7 +290,7 @@ def get_projectwise_timesheet_data(project, parent=None):
 		cond = "and parent = %(parent)s"
 
 	return frappe.db.sql("""select name, parent, billing_hours, billing_amount as billing_amt
-			from `tabTimesheet Detail` where docstatus=1 and project = %(project)s {0} and billable = 1
+			from `tabTimesheet Detail` where parenttype = 'Timesheet' and docstatus=1 and project = %(project)s {0} and billable = 1
 			and sales_invoice is null""".format(cond), {'project': project, 'parent': parent}, as_dict=1)
 
 @frappe.whitelist()
