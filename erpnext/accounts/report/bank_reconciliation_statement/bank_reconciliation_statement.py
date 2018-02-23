@@ -127,7 +127,7 @@ def get_columns():
 			"width": 110
 		},
 		{
-			"fieldname": "cheque_status",
+			"fieldname": "deposit_status",
 			"label": _("Cheque Status"),
 			"fieldtype": "Select",
 			"width": 110
@@ -169,7 +169,7 @@ def get_entries(filters):
 	payment_entries = frappe.db.sql("""
 		select 
 			"Payment Entry" as payment_document, name as payment_entry, 
-			reference_no, reference_date as ref_date,receipt_date,deposited_date,deposited_to,cheque_status,return_date,
+			reference_no, reference_date as ref_date,receipt_date,deposited_date,deposited_to,deposit_status,return_date,
 			if(paid_to=%(account)s, received_amount, 0) as debit, 
 			if(paid_from=%(account)s, paid_amount, 0) as credit, 
 			posting_date, ifnull(party,if(paid_from=%(account)s,paid_to,paid_from)) as against_account, clearance_date,

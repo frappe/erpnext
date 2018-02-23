@@ -90,9 +90,9 @@ class BankReconciliation(Document):
 					where name=%s""".format(d.payment_document), 
 				(d.clearance_date, nowdate(), d.payment_entry))
 				
-				cheque_status = "Done"
-				frappe.db.sql("update `tabPayment Entry` set cheque_status=%s where clearance_date=%s",
-							(cheque_status, d.clearance_date))
+				deposit_status = "Done"
+				frappe.db.sql("update `tabPayment Entry` set deposit_status=%s where clearance_date=%s",
+							(deposit_status, d.clearance_date))
 				clearance_date_updated = True
 
 		if clearance_date_updated:
@@ -127,9 +127,9 @@ class BankReconciliation(Document):
 			if d.return_date:
 				payment_ref = frappe.get_doc(d.payment_document, d.payment_entry)
 				
-				cheque_status = "Return"
-				frappe.db.sql("update `tabPayment Entry` set cheque_status=%s where name=%s",
-							(cheque_status, payment_ref.name))
+				deposit_status = "Return"
+				frappe.db.sql("update `tabPayment Entry` set deposit_status=%s where name=%s",
+							(deposit_status, payment_ref.name))
 				
 				gl_entries=frappe.db.sql("select *, debit,credit,debit_in_account_currency,credit_in_account_currency from `tabGL Entry` where voucher_no=%s",
 						(payment_ref.name), as_dict=1)

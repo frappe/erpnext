@@ -14,6 +14,14 @@ frappe.ui.form.on('Quotation', {
 	refresh: function(frm) {
 		frm.trigger("set_label");
 	},
+	
+	bom_details: function(frm) {
+		console.log("::::::::XYZ:::::::", frm)
+		frappe.route_options = {
+			"bom": frm.doc.items
+		};
+		frappe.set_route("Tree", "BOM");
+	},
 
 	quotation_to: function(frm) {
 		frm.trigger("set_label");
@@ -23,6 +31,8 @@ frappe.ui.form.on('Quotation', {
 		frm.fields_dict.customer_address.set_label(__(frm.doc.quotation_to + " Address"));
 	}
 });
+
+
 
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {
