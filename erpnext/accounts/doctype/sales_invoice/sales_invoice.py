@@ -101,6 +101,8 @@ class SalesInvoice(SellingController):
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
 		self.set_status()
+		if not self.is_return:
+			self.verify_amount_is_positive()
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
@@ -904,6 +906,11 @@ class SalesInvoice(SellingController):
 			project.flags.dont_sync_tasks = True
 			project.update_billed_amount()
 			project.save()
+
+	def verify_amount_is_positive(self):
+		for entry in self.taxes:
+			if entry.tax_amount < 0:
+				frappe.throw("Please make sure the amount in the taxes table is positve!")
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
