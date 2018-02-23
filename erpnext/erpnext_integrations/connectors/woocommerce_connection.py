@@ -94,7 +94,7 @@ def customer():
 @frappe.whitelist(allow_guest=True)
 def product():
 	# pass
-	print("hello"*1000)
+	# print("hello"*1000)
 	verify_request()
 	print(frappe.local.form_dict)
 	if frappe.request.data:
@@ -102,7 +102,9 @@ def product():
 	else:
 		return "success"
 	event = frappe.get_request_header("X-Wc-Webhook-Event")
-	print(event)
+	print(event*100	)
+	# try:
+		
 	if event == "created":
 		print("inif?")
 		print(
@@ -119,7 +121,7 @@ def product():
 			item.item_name = str(fd.get("name"))
 			item.item_code = "woocommerce - " + str(fd.get("id"))
 			item.woocommerce_id = str(fd.get("id"))
-			item.item_group = "Products"
+			item.item_group = "WooCommerce Products"
 			item.description = str(fd.get("description"))
 			item.image = product_raw_image[0].get("src")
 			item.opening_stock = 0 if (fd.get("stock_quantity") == None) else str(fd.get("stock_quantity"))
@@ -133,8 +135,29 @@ def product():
 		except Exception as e:
 			print("Exception", e)
 
-	# elif event == "updated":
-	# 	item = frappe.get_doc({"doctype":"Item", "item_code":fd.get("id")})
+	elif event == "updated":
+		print("Entered into updated")
+		
+		# print("I am into updated method")
+		# try:
+		print(fd)
+		existing_item = frappe.get_doc("Item",{"woocommerce_id":fd.get("id")})
+		print(existing_item.item_name)
+		existing_item.item_name = str(fd.get("name")) 
+		existing_item.description = str(fd.get("description"))
+		existing_item.opening_stock = 0 if (fd.get("stock_quantity") == None) else str(fd.get("stock_quantity"))
+
+		product_raw_image = fd.get("images") 
+		existing_item.image = "" if not product_raw_image[0].get("src") else product_raw_image[0].get("src")
+		existing_item.save()
+		frappe.db.commit()
+			
+		# except Exception as e:
+		# 	print("This is product exception", e*10)
+		# print("Completed updated method")
+		# pass
+	# except Exception as a:
+	# 	print("This is main exception in product",a*10)
 
 	# elif event == "restored":
 	# 	pass
