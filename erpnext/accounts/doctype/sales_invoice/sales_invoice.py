@@ -908,7 +908,7 @@ class SalesInvoice(SellingController):
 	def verify_payment_amount_is_positive(self):
 		for entry in self.payments:
 			if entry.amount < 0:
-				frappe.throw("Row #{0} (Payment Table): Amount must be positive".format(entry.idx))
+				frappe.throw(_("Row #{0} (Payment Table): Amount must be positive").format(entry.idx))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
