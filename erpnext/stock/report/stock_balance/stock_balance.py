@@ -57,8 +57,8 @@ def get_columns():
 	columns = [
 		_("Item")+":Link/Item:100",
 		_("Item Name")+"::150",
-		_("Item Group")+"::100",
-		_("Brand")+"::90",
+		_("Item Group")+":Link/Item Group:100",
+		_("Brand")+":Link/Brand:90",
 		_("Description")+"::140",
 		_("Warehouse")+":Link/Warehouse:100",
 		_("Stock UOM")+":Link/UOM:90",
