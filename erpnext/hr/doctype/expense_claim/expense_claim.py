@@ -311,6 +311,7 @@ def get_expense_claim(
 	expense_claim.employee = employee_name
 	expense_claim.payable_account = default_payable_account
 	expense_claim.cost_center = default_cost_center
+	expense_claim.is_paid = 1 if flt(paid_amount) else 0
 	expense_claim.append(
 		'advances',
 		{
