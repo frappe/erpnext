@@ -22,7 +22,7 @@ def boot_session(bootinfo):
 			'customer_group')
 		bootinfo.sysdefaults.allow_stale = cint(frappe.db.get_single_value('Accounts Settings',
 			'allow_stale'))
-		bootinfo.sysdefaults.quotation_valid_till = cint(frappe.db.get_single_value('Selling Settings', 
+		bootinfo.sysdefaults.quotation_valid_till = cint(frappe.db.get_single_value('Selling Settings',
 			'default_valid_till'))
 
 		bootinfo.notification_settings = frappe.get_doc("Notification Control",
