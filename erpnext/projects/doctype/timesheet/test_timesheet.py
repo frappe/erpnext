@@ -77,6 +77,46 @@ class TestTimesheet(unittest.TestCase):
 		self.assertEquals(ts.per_billed, 100)
 		self.assertEquals(ts.time_logs[0].sales_invoice, sales_invoice.name)
 
+	def test_timesheet_time_overlap(self):
+		settings = frappe.get_single('Projects Settings')
+		initial_setting = settings.ignore_employee_time_overlap
+		settings.ignore_employee_time_overlap = 0
+		settings.save()
+
+		update_activity_type("_Test Activity Type")
+		timesheet = frappe.new_doc("Timesheet")
+		timesheet.employee = "_T-Employee-0001"
+		timesheet.append(
+			'time_logs',
+			{
+				"billable": 1,
+				"activity_type": "_Test Activity Type",
+				"from_type": now_datetime(),
+				"hours": 3,
+				"company": "_Test Company"
+			}
+		)
+		timesheet.append(
+			'time_logs',
+			{
+				"billable": 1,
+				"activity_type": "_Test Activity Type",
+				"from_type": now_datetime(),
+				"hours": 3,
+				"company": "_Test Company"
+			}
+		)
+
+		self.assertRaises(frappe.ValidationError, timesheet.save)
+
+		settings.ignore_employee_time_overlap = 1
+		settings.save()
+		timesheet.save()  # should not throw an error
+
+		settings.ignore_employee_time_overlap = initial_setting
+		settings.save()
+
+
 def make_salary_structure(employee):
 	name = frappe.db.get_value('Salary Structure Employee', {'employee': employee}, 'parent')
 	if name:
