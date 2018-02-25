@@ -11,7 +11,7 @@ from frappe.desk.reportview import build_match_conditions
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
-from frappe.model.rename_doc import update_linked_doctypes, get_fetch_fields
+from frappe.model.rename_doc import update_linked_doctypes
 
 class Customer(TransactionBase):
 	def get_feed(self):
@@ -76,12 +76,15 @@ class Customer(TransactionBase):
 		if self.flags.is_new_doc:
 			self.create_lead_address_contact()
 
+		self.update_territory_and_customer_groups()
+
+	def update_territory_and_customer_groups(self):
+		ignore_doctypes = ["Lead", "Opportunity", "POS Profile", "Tax Rule", "Pricing Rule"]
 		if frappe.flags.territory_changed:
-			territory_fetch = get_fetch_fields('Customer', 'Territory')
-			update_linked_doctypes(territory_fetch, self.name, self.territory)
+			update_linked_doctypes('Customer', self.name, 'Territory', self.territory, ignore_doctypes)
 		if frappe.flags.customer_group_changed:
-			customer_group_fetch = get_fetch_fields('Customer', 'Customer Group')
-			update_linked_doctypes(customer_group_fetch, self.name, self.customer_group)
+			update_linked_doctypes('Customer', self.name, 'Customer Group',
+				self.customer_group, ignore_doctypes)
 
 	def create_primary_contact(self):
 		if not self.customer_primary_contact and not self.lead_name:
