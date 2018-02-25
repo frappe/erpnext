@@ -1,5 +1,4 @@
 import frappe
-from frappe.utils import now, time_diff_in_seconds
 from frappe.model.rename_doc import get_fetch_fields
 
 def execute():
@@ -11,7 +10,6 @@ def execute():
 
 	batch_size = 1000
 	for i in range(0, len(customers), batch_size):
-		print(i)
 		batch_customers = customers[i:i + batch_size]
 		for source_fieldname, linked_doctypes_info in [["customer_group", customer_group_fetch], ["territory", territory_fetch]]:
 			for d in linked_doctypes_info:
