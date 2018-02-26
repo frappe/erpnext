@@ -24,6 +24,8 @@ class Subscriptions(Document):
 	def set_current_invoice_start(self, date=None):
 		if not date:
 			self.current_invoice_start = nowdate()
+		elif self.trial_period_start and self.is_trialling():
+			self.current_invoice_start = self.trial_period_start
 
 	def set_current_invoice_end(self):
 		self.current_invoice_end = get_last_day(self.current_invoice_start)
@@ -153,3 +155,5 @@ class Subscriptions(Document):
 			)
 			return item_names
 
+	def subscription_updated(self, invoice):
+		pass
