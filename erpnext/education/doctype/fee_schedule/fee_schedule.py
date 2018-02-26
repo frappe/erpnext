@@ -56,8 +56,15 @@ class FeeSchedule(Document):
 		self.db_set("fee_creation_status", "In Process")
 		frappe.publish_realtime("fee_schedule_progress",
 			{"progress": "0", "reload": 1}, user=frappe.session.user)
-		enqueue(generate_fee, queue='default', timeout=6000, event='generate_fee',
-			fee_schedule=self.name)
+
+		total_records = sum([int(d.total_students) for d in self.student_groups])
+		if total_records > 10:
+			frappe.msgprint(_('''Fee records will be created in the background.
+				In case of any error the error message will be updated in the Schedule.'''))
+			enqueue(generate_fee, queue='default', timeout=6000, event='generate_fee',
+				fee_schedule=self.name)
+		else:
+			generate_fee(self.name)
 
 def generate_fee(fee_schedule):
 	doc = frappe.get_doc("Fee Schedule", fee_schedule)
@@ -69,10 +76,7 @@ def generate_fee(fee_schedule):
 		frappe.throw(_("Please setup Students under Student Groups"))
 
 	for d in doc.student_groups:
-		students = frappe.db.sql(""" select sg.program, sg.batch, sgs.student, sgs.student_name
-			from `tabStudent Group` sg, `tabStudent Group Student` sgs
-			where sg.name=%s and sg.name=sgs.parent and sgs.active=1""", d.student_group, as_dict=1)
-
+		students = get_students(d.student_group, doc.academic_year, doc.academic_term, doc.student_category)
 		for student in students:
 			try:
 				fees_doc = get_mapped_doc("Fee Schedule", fee_schedule,	{
@@ -86,7 +90,7 @@ def generate_fee(fee_schedule):
 				fees_doc.student = student.student
 				fees_doc.student_name = student.student_name
 				fees_doc.program = student.program
-				fees_doc.student_batch = student.batch
+				fees_doc.student_batch = student.student_batch_name
 				fees_doc.send_payment_request = doc.send_email
 				fees_doc.save()
 				fees_doc.submit()
@@ -110,6 +114,30 @@ def generate_fee(fee_schedule):
 		{"progress": "100", "reload": 1}, user=frappe.session.user)
 
 
+def get_students(student_group, academic_year, academic_term=None, student_category=None):
+	conditions = ""
+	if student_category:
+		conditions = " and pe.student_category='{}'".format(frappe.db.escape(student_category))
+	if academic_term:
+		conditions = " and pe.academic_term='{}'".format(frappe.db.escape(academic_term))
+
+	students = frappe.db.sql("""
+		select pe.student, pe.student_name, pe.program, pe.student_batch_name
+		from `tabStudent Group Student` sgs, `tabProgram Enrollment` pe
+		where 
+			pe.student = sgs.student and pe.academic_year = %s
+			and sgs.parent = %s and sgs.active = 1
+			{conditions}
+		""".format(conditions=conditions), (academic_year, student_group), as_dict=1)
+	return students
+
+
+@frappe.whitelist()
+def get_total_students(student_group, academic_year, academic_term=None, student_category=None):
+	total_students = get_students(student_group, academic_year, academic_term, student_category)
+	return len(total_students)
+
+
 @frappe.whitelist()
 def get_fee_structure(source_name,target_doc=None):
 	fee_request = get_mapped_doc("Fee Structure", source_name,
@@ -117,23 +145,3 @@ def get_fee_structure(source_name,target_doc=None):
 			"doctype": "Fee Schedule"
 		}}, ignore_permissions=True)
 	return fee_request
-
-@frappe.whitelist()
-def get_total_students(student_group, academic_year, academic_term=None, student_category=None):
-	conditions = ""
-	if student_category:
-		conditions = " and pe.student_category='{}'".format(frappe.db.escape(student_category))
-	if academic_term:
-		conditions = " and pe.academic_term='{}'".format(frappe.db.escape(academic_term))
-
-
-	return frappe.db.sql("""
-		select count(pe.name)
-		from `tabStudent Group Student` sgs, `tabProgram Enrollment` pe
-		where 
-			pe.student = sgs.student
-			and pe.academic_year = %s
-			and sgs.parent = %s
-			and sgs.active = 1
-			{conditions}
-	""".format(conditions=conditions), (academic_year, student_group))[0][0]
