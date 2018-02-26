@@ -25,18 +25,59 @@ def execute(filters=None):
 
 
 def get_columns():
-	columns = [
-		_("Title") + ":Link/Employee Advance:120",
-		_("Employee") + ":Link/Employee:120",
-		_("Company") + ":Link/Company:120",
-		_("Posting Date") + ":Date:120",
-		_("Advance Amount") + ":Currency:120",
-		_("Paid Amount") + ":Currency:120",
-		_("Claimed Amount") + ":Currency:120",
-		_("Status") + "::120"
+	return [
+		{
+			"label": _("Title"),
+			"fieldname": "title",
+			"fieldtype": "Link",
+			"options": "Employee Advance",
+			"width": 120
+		},
+		{
+			"label": _("Employee"),
+			"fieldname": "employee",
+			"fieldtype": "Link",
+			"options": "Employee",
+			"width": 120
+		},
+		{
+			"label": _("Company"),
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"options": "Company",
+			"width": 120
+		},
+		{
+			"label": _("Posting Date"),
+			"fieldname": "posting_date",
+			"fieldtype": "Date",
+			"width": 120
+		},
+		{
+			"label": _("Advance Amount"),
+			"fieldname": "advance_amount",
+			"fieldtype": "Currency",
+			"width": 120
+		},
+		{
+			"label": _("Paid Amount"),
+			"fieldname": "paid_amount",
+			"fieldtype": "Currency",
+			"width": 120
+		},
+		{
+			"label": _("Claimed Amount"),
+			"fieldname": "claimed_amount",
+			"fieldtype": "Currency",
+			"width": 120
+		},
+		{
+			"label": _("Status"),
+			"fieldname": "status",
+			"fieldtype": "Data",
+			"width": 120
+		}
 	]
-
-	return columns
 
 def get_conditions(filters):
 	conditions = ""
