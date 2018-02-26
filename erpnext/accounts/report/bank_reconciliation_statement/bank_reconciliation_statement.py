@@ -188,7 +188,7 @@ def get_entries(filters):
 		return_date is not null and credit > 0.0 
 	""", filters, as_dict=1)
 	
-	return sorted(list(payment_entries)+list(journal_entries)+list(gl_entries), 
+	return sorted(list(payment_entries)+list(journal_entries)+list(gl_entries),
 			key=lambda k: k['posting_date'] or getdate(nowdate()))
 			
 def get_amounts_not_reflected_in_system(filters):

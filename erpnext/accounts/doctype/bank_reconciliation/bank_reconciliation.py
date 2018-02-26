@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt, getdate, nowdate, fmt_money
 from frappe import msgprint, _
-from erpnext.accounts.doctype.payment_entry.payment_entry import make_gl_entries
 from frappe.model.document import Document
 
 form_grid_templates = {
@@ -118,8 +117,8 @@ class BankReconciliation(Document):
 					d.return_date = None
 				
 				frappe.db.set_value(d.payment_document, d.payment_entry, "return_date", d.return_date)
-				frappe.db.sql("""update `tab{0}` set return_date = %s, modified = %s 
-					where name=%s""".format(d.payment_document), 
+				frappe.db.sql("""update `tab{0}` set return_date=%s, modified=%s
+					where name=%s""".format(d.payment_document),
 				(d.return_date, nowdate(), d.payment_entry))
 				
 				return_date_updated = True
@@ -151,7 +150,6 @@ class BankReconciliation(Document):
 						"account": i.get('account'),
 						"name": i.get('name'),
 						"party_type": i.get('party_type'),
-						"remarks": i.get('remarks'),
 						"_assign": i.get('_assign'),
 						"is_advance": i.get('is_advance'),
 						"remarks": 'RETURN CHEQUE ENTRY',

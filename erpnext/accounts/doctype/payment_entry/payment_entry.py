@@ -387,7 +387,6 @@ class PaymentEntry(AccountsController):
 			self.setup_party_account_field()
 
 		gl_entries = []
-		
 		self.add_party_gl_entries(gl_entries)
 		
 		self.add_bank_gl_entries(gl_entries)
