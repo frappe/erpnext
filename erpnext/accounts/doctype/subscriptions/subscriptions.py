@@ -28,7 +28,10 @@ class Subscriptions(Document):
 			self.current_invoice_start = self.trial_period_start
 
 	def set_current_invoice_end(self):
-		self.current_invoice_end = get_last_day(self.current_invoice_start)
+		if self.is_trialling():
+			self.current_invoice_end = self.trial_period_end
+		else:
+			self.current_invoice_end = get_last_day(self.current_invoice_start)
 
 	def before_save(self):
 		self.set_status()
