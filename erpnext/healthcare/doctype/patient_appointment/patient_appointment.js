@@ -15,6 +15,20 @@ frappe.ui.form.on('Patient Appointment', {
 				filters: {"disabled": 0}
 			};
 		});
+		frm.set_query("physician", function() {
+			return {
+				filters: {
+					'department': frm.doc.department
+				}
+			};
+		});
+		frm.set_query("service_unit", function(){
+			return {
+				filters: {
+					"is_group": false,
+				}
+			};
+		});
 		if(frm.doc.patient){
 			frm.add_custom_button(__('Medical Record'), function() {
 				frappe.route_options = {"patient": frm.doc.patient};
@@ -85,9 +99,9 @@ frappe.ui.form.on('Patient Appointment', {
 			callback: (r) => {
 				// console.log(r);
 				var data = r.message;
-				if(data.available_slots.length > 0) {
+				if(data.slot_details.length > 0){
 					show_availability(data);
-				} else {
+				}else{
 					show_empty_state();
 				}
 			}
@@ -99,7 +113,7 @@ frappe.ui.form.on('Patient Appointment', {
 				message: __("Physician {0} not available on {1}", [physician.bold(), appointment_date.bold()]),
 				indicator: 'red'
 			});
-		}
+		};
 
 		function show_availability(data) {
 			var d = new frappe.ui.Dialog({
@@ -109,25 +123,37 @@ frappe.ui.form.on('Patient Appointment', {
 				primary_action: function() {
 					// book slot
 					frm.set_value('appointment_time', selected_slot);
-					frm.set_value('duration', data.time_per_appointment);
+					if(service_unit != 'null'){
+						frm.set_value('service_unit', service_unit);
+					}
+					frm.set_value('duration', duration);
 					d.hide();
 					frm.save();
 				}
 			});
 			var $wrapper = d.fields_dict.available_slots.$wrapper;
 			var selected_slot = null;
+			var service_unit = null;
+			var duration = null;
 
 			// disable dialog action initially
 			d.get_primary_btn().attr('disabled', true);
 
-			// make buttons for each slot
-			var slot_html = data.available_slots.map(slot => {
-				return `<button class="btn btn-default"
-					data-name=${slot.from_time}
-					style="margin: 0 10px 10px 0; width: 72px">
-					${slot.from_time.substring(0, slot.from_time.length - 3)}
-				</button>`;
-			}).join("");
+			var slot_details = data.slot_details
+			var slot_html = ""
+			$.each(slot_details, function(i, slot_detail){
+				slot_html = slot_html + `<label>${slot_detail['slot_name']}</label>`
+				slot_html = slot_html + `<br/>` + slot_detail['avil_slot'].map(slot => {
+					return `<button class="btn btn-default"
+						data-name=${slot.from_time}
+						data-to-time=${slot.to_time}
+						data-serviceunit="${slot_detail['service_unit']}"
+						style="margin: 0 10px 10px 0; width: 72px">
+						${slot.from_time.substring(0, slot.from_time.length - 3)}
+					</button>`;
+				}).join("");
+				slot_html = slot_html + `<br/>`
+			});
 
 			$wrapper
 				.css('margin-bottom', 0)
@@ -138,7 +164,7 @@ frappe.ui.form.on('Patient Appointment', {
 			data.appointments.map(slot => {
 				if(slot.status == "Scheduled" || slot.status == "Open" || slot.status == "Closed"){
 					$wrapper
-						.find(`button[data-name="${slot.appointment_time}"]`)
+						.find(`button[data-name="${slot.appointment_time}"][data-serviceunit="${slot.service_unit}"]`)
 						.attr('disabled', true);
 				}
 			});
@@ -149,13 +175,14 @@ frappe.ui.form.on('Patient Appointment', {
 				$wrapper.find('button').removeClass('btn-primary');
 				$btn.addClass('btn-primary');
 				selected_slot = $btn.attr('data-name');
-
+				service_unit = $btn.attr('data-serviceunit')
+				duration = (moment($btn.attr('data-to-time'), "HH:mm:ss")._d - moment($btn.attr('data-name'), "HH:mm:ss")._d)/60000;
 				// enable dialog action
 				d.get_primary_btn().attr('disabled', null);
 			});
 
 			d.show();
-		}
+		};
 	},
 	onload:function(frm){
 		if(frm.is_new()) {
@@ -211,10 +238,8 @@ var btn_update_status = function(frm, status){
 var btn_invoice_consultation = function(frm){
 	var doc = frm.doc;
 	frappe.call({
-		method:
-		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.create_invoice",
-		args: {company: doc.company, physician:doc.physician, patient: doc.patient,
-			appointment_id: doc.name, appointment_date:doc.appointment_date },
+		doc: frm.doc,
+		method:"create_invoice",
 		callback: function(data){
 			if(!data.exc){
 				if(data.message){
