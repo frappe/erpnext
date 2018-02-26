@@ -72,12 +72,12 @@ class Subscriptions(Document):
 		if not current_invoice:
 			return False
 		else:
-			return nowdate() > current_invoice.due_date
+			return getdate(nowdate()) > getdate(current_invoice.due_date)
 
 	def get_current_invoice(self):
 		if len(self.invoices):
 			current = self.invoices[-1]
-			doc = frappe.get_doc('Sales Invoice', current)
+			doc = frappe.get_doc('Sales Invoice', current.invoice)
 			return doc
 
 	def is_new_subscription(self):
@@ -103,6 +103,7 @@ class Subscriptions(Document):
 		invoice.save()
 		invoice.submit()
 		self.append('invoices', {'invoice': invoice.name})
+		self.save()	# Validates all over again but we don't mind
 		self.subscription_updated(invoice)
 
 		return invoice
