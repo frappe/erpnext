@@ -1,6 +1,8 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
+{% include 'erpnext/hr/loan_common.js' %};
+
 frappe.ui.form.on('Loan', {
 	onload: function (frm) {
 		frm.set_query("loan_application", function () {
@@ -23,16 +25,6 @@ frappe.ui.form.on('Loan', {
 			};
 		});
 
-		if (frm.doc.applicant_type == 'Employee') {
-			frm.set_query("applicant", function() {
-				return {
-					"filters": {
-						"company": frm.doc.company,
-					}
-				};
-			});
-		}
-
 		$.each(["payment_account", "loan_account"], function (i, field) {
 			frm.set_query(field, function () {
 				return {
@@ -52,29 +44,12 @@ frappe.ui.form.on('Loan', {
 				frm.trigger("make_jv");
 			})
 		}
-		if(frm.doc.docstatus == 1 && (frm.doc.applicant_type == 'Member' || frm.doc.repay_from_salary == 0)) {
+		if (frm.doc.docstatus == 1 && (frm.doc.applicant_type == 'Member' || frm.doc.repay_from_salary == 0)) {
 			frm.add_custom_button(__('Make Repayment Entry'), function() {
 				frm.trigger("make_jv");
 			})
 		}
-		if (!frappe.boot.active_domains.includes("Non Profit")) {
-			frm.set_df_property('applicant_type', 'options', ['Employee']);
-			frm.refresh_field('applicant_type');
-		}
 		frm.trigger("toggle_fields");
-	},
-	applicant: function(frm) {
-		if (frm.doc.applicant) {
-			frappe.model.with_doc(frm.doc.applicant_type, frm.doc.applicant, function() {
-				var applicant = frappe.model.get_doc(frm.doc.applicant_type, frm.doc.applicant);
-				frm.set_value("applicant_name",
-					applicant.employee_name || applicant.member_name);
-			})
-		}
-		else {
-			console.log(frappe.boot.active_domains);
-			frm.set_value("applicant_name", null);
-		}
 	},
 	make_jv: function (frm) {
 		frappe.call({
@@ -86,6 +61,7 @@ frappe.ui.form.on('Loan', {
 				"applicant": frm.doc.applicant,
 				"loan_amount": frm.doc.loan_amount,
 				"payment_account": frm.doc.payment_account,
+				"interest_income_account": frm.doc.interest_income_account,
 				"repay_from_salary": frm.doc.repay_from_salary
 			},
 			method: "erpnext.hr.doctype.loan.loan.make_jv_entry",
