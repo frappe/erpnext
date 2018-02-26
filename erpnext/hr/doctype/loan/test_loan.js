@@ -17,7 +17,7 @@ QUnit.test("Test Loan [HR]", function(assert) {
 				return frappe.tests.make('Loan', [
 					{ company: 'For Testing'},
 					{ posting_date: '2017-08-26'},
-					{ employee: employee_name},
+					{ applicant: employee_name},
 					{ loan_application: r.message.name},
 					{ disbursement_date: '2018-08-26'},
 					{ mode_of_payment: 'Cash'},
@@ -33,7 +33,7 @@ QUnit.test("Test Loan [HR]", function(assert) {
 
 			// Checking if all the amounts are correctly calculated
 			() => {
-				assert.ok(cur_frm.get_field('employee_name').value=='Test Employee 1'&&
+				assert.ok(cur_frm.get_field('applicant_name').value=='Test Employee 1'&&
 					(cur_frm.get_field('status').value=='Sanctioned'),
 				'Loan Sanctioned for correct employee');
 

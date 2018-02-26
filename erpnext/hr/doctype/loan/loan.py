@@ -37,8 +37,8 @@ class Loan(AccountsController):
 
 		account_amt_list.append({
 			"account": self.loan_account,
-			"party_type": "Employee",
-			"party": self.employee,
+			"party_type": self.applicant_type,
+			"party": self.applicant,
 			"debit_in_account_currency": self.loan_amount,
 			"reference_type": "Loan",
 			"reference_name": self.name,
@@ -135,18 +135,19 @@ def get_loan_application(loan_application):
 		return loan.as_dict()
 
 @frappe.whitelist()
-def make_jv_entry(loan, company, loan_account, employee, loan_amount, payment_account=None):
+def make_jv_entry(loan, company, loan_account, applicant_type, applicant, loan_amount, payment_account=None, repay_from_salary=None):
 	journal_entry = frappe.new_doc('Journal Entry')
 	journal_entry.voucher_type = 'Bank Entry'
 	journal_entry.user_remark = _('Against Loan: {0}').format(loan)
 	journal_entry.company = company
 	journal_entry.posting_date = nowdate()
-
 	account_amt_list = []
 
 	account_amt_list.append({
 		"account": loan_account,
 		"debit_in_account_currency": loan_amount,
+		"party_type": applicant_type,
+		"party": applicant,
 		"reference_type": "Loan",
 		"reference_name": loan,
 		})

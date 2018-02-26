@@ -35,7 +35,7 @@ class TestPayrollEntry(unittest.TestCase):
 		from erpnext.hr.doctype.loan.test_loan import create_loan
 
 		branch = "Test Employee Branch"
-		employee = make_employee("test_employee@loan.com")
+		applicant = make_employee("test_employee@loan.com")
 		company = erpnext.get_default_company()
 		holiday_list = make_holiday("test holiday for loan")
 
@@ -72,12 +72,12 @@ class TestPayrollEntry(unittest.TestCase):
 				'branch': branch
 			}).insert()
 
-		employee_doc = frappe.get_doc('Employee', employee)
+		employee_doc = frappe.get_doc('Employee', applicant)
 		employee_doc.branch = branch
 		employee_doc.holiday_list = holiday_list
 		employee_doc.save()
 
-		loan = create_loan(employee,
+		loan = create_loan(applicant,
 			"Personal Loan", 280000, "Repay Over Number of Periods", 20)
 		loan.repay_from_salary = 1
 		loan.submit()
@@ -85,7 +85,7 @@ class TestPayrollEntry(unittest.TestCase):
 		salary_strcture = "Test Salary Structure for Loan"
 		if not frappe.db.exists('Salary Structure', salary_strcture):
 			salary_strcture = make_salary_structure(salary_strcture, [{
-				'employee': employee,
+				'employee': applicant,
 				'from_date': '2017-01-01',
 				'base': 30000
 			}])
@@ -104,7 +104,7 @@ class TestPayrollEntry(unittest.TestCase):
 			end_date=dates.end_date, branch=branch)
 
 		name = frappe.db.get_value('Salary Slip',
-			{'posting_date': nowdate(), 'employee': employee}, 'name')
+			{'posting_date': nowdate(), 'employee': applicant}, 'name')
 
 		salary_slip = frappe.get_doc('Salary Slip', name)
 		for row in salary_slip.loans:

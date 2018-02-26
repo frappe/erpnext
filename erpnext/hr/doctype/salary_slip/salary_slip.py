@@ -401,7 +401,7 @@ class SalarySlip(TransactionBase):
 				`tabRepayment Schedule` as rps, `tabLoan` as l
 			where
 				l.name = rps.parent and rps.payment_date between %s and %s and
-				l.repay_from_salary = 1 and l.docstatus = 1 and l.employee = %s""",
+				l.repay_from_salary = 1 and l.docstatus = 1 and l.applicant = %s""",
 			(self.start_date, self.end_date, self.employee), as_dict=True) or []
 
 	def on_submit(self):

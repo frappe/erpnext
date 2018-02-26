@@ -135,9 +135,9 @@ class TestSalarySlip(unittest.TestCase):
 
 	def test_loan_repayment_salary_slip(self):
 		from erpnext.hr.doctype.loan.test_loan import create_loan_type, create_loan
-		employee = self.make_employee("test_employee@salary.com")
+		applicant = self.make_employee("test_employee@salary.com")
 		create_loan_type("Car Loan", 500000, 6.4)
-		loan = create_loan(employee, "Car Loan", 11000, "Repay Over Number of Periods", 20)
+		loan = create_loan(applicant, "Car Loan", 11000, "Repay Over Number of Periods", 20)
 		loan.repay_from_salary = 1
 		loan.submit()
 		ss = frappe.get_doc("Salary Slip",

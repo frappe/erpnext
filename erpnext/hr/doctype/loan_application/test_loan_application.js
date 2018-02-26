@@ -14,8 +14,8 @@ QUnit.test("Test: Loan Application [HR]", function (assert) {
 		() => {
 			return frappe.tests.make('Loan Application', [
 				{ company: 'For Testing'},
-				{ employee: employee_name},
-				{ employee_name: 'Test Employee 1'},
+				{ applicant: employee_name},
+				{ applicant_name: 'Test Employee 1'},
 				{ status: 'Approved'},
 				{ loan_type: 'Test Loan '},
 				{ loan_amount: 200000},
@@ -33,7 +33,7 @@ QUnit.test("Test: Loan Application [HR]", function (assert) {
 		() => {
 			// To check if all the amounts are correctly calculated
 
-			assert.ok(cur_frm.get_field('employee_name').value == 'Test Employee 1',
+			assert.ok(cur_frm.get_field('applicant_name').value == 'Test Employee 1',
 				'Application created successfully');
 
 			assert.ok(cur_frm.get_field('status').value=='Approved',

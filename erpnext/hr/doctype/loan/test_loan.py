@@ -12,11 +12,11 @@ from erpnext.hr.doctype.salary_structure.test_salary_structure import make_emplo
 class TestLoan(unittest.TestCase):
 	def setUp(self):
 		create_loan_type("Personal Loan", 500000, 8.4)
-		self.employee = make_employee("robert_loan@loan.com")
-		create_loan(self.employee, "Personal Loan", 280000, "Repay Over Number of Periods", 20)
+		self.applicant = make_employee("robert_loan@loan.com")
+		create_loan(self.applicant, "Personal Loan", 280000, "Repay Over Number of Periods", 20)
 	
 	def test_loan(self):
-		loan = frappe.get_doc("Loan", {"employee":self.employee})
+		loan = frappe.get_doc("Loan", {"applicant":self.applicant})
 		self.assertEquals(loan.monthly_repayment_amount, 15052)
 		self.assertEquals(loan.total_interest_payable, 21034)
 		self.assertEquals(loan.total_payment, 301034)
@@ -53,12 +53,12 @@ def create_loan_type(loan_name, maximum_loan_amount, rate_of_interest):
 			"rate_of_interest": rate_of_interest
 		}).insert()
 
-def	create_loan(employee, loan_type, loan_amount, repayment_method, repayment_periods):
+def	create_loan(applicant, loan_type, loan_amount, repayment_method, repayment_periods):
 	create_loan_type(loan_type, 500000, 8.4)
-	if not frappe.db.get_value("Loan", {"employee":employee}):
+	if not frappe.db.get_value("Loan", {"applicant":applicant}):
 		loan = frappe.new_doc("Loan")
 		loan.update({
-				"employee": employee,
+				"applicant": applicant,
 				"loan_type": loan_type,
 				"loan_amount": loan_amount,
 				"repayment_method": repayment_method,
@@ -72,4 +72,4 @@ def	create_loan(employee, loan_type, loan_amount, repayment_method, repayment_pe
 		loan.insert()
 		return loan
 	else:
-		return frappe.get_doc("Loan", {"employee":employee})
+		return frappe.get_doc("Loan", {"applicant":applicant})
