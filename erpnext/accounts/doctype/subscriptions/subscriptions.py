@@ -51,7 +51,7 @@ class Subscriptions(Document):
 			return True
 
 		end_date = getdate(end_date)
-		return nowdate() > end_date
+		return getdate(nowdate()) > getdate(end_date)
 
 	def is_past_grace_period(self):
 		current_invoice = self.get_current_invoice()
@@ -83,7 +83,7 @@ class Subscriptions(Document):
 
 	def validate_trial_period(self):
 		if self.trial_period_start and self.trial_period_end:
-			if getdate(self.trial_period_end) > getdate(self.trial_period_start):
+			if getdate(self.trial_period_end) < getdate(self.trial_period_start):
 				frappe.throw(_('Trial Period End Date Cannot be before Trial Period Start Date'))
 
 		elif self.trial_period_start or self.trial_period_end:
