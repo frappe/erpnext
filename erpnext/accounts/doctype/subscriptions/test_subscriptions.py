@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils.data import nowdate, add_days, get_last_day
+from frappe.utils.data import nowdate, add_days, get_last_day, cint, getdate
 
 
 class TestSubscriptions(unittest.TestCase):
@@ -54,8 +54,33 @@ class TestSubscriptions(unittest.TestCase):
 
 		self.assertEqual(subscription.trial_period_start, None)
 		self.assertEqual(subscription.trial_period_end, None)
-		self.assertEqual(subscription.current_invoice_start, nowdate())
+		self.assertEqual(subscription.current_invoice_start, getdate(nowdate()))
 		self.assertEqual(subscription.current_invoice_end, get_last_day(nowdate()))
 		self.assertEqual(len(subscription.invoices), 1)
+
+		subscription.delete()
+
+	def test_create_subscription_trial_with_wrong_dates(self):
+		subscription = frappe.new_doc('Subscriptions')
+		subscription.subscriber = '_Test Customer'
+		subscription.trial_period_end = nowdate()
+		subscription.trial_period_start = add_days(nowdate(), 30)
+		subscription.append('plans', {'plan': '_Test Plan Name'})
+
+		self.assertRaises(frappe.ValidationError, subscription.save)
+
+	def test_subscription_invoice_days_until_due(self):
+		subscription = frappe.new_doc('Subscriptions')
+		subscription.subscriber = '_Test Customer'
+		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.save()
+
+		generated_invoice_name = subscription.invoices[-1].invoice
+		invoice = frappe.get_doc('Sales Invoice', generated_invoice_name)
+
+		self.assertEqual(
+			invoice.due_date, 
+			add_days(subscription.current_invoice_end, cint(subscription.days_until_due))
+		)
 
 		subscription.delete()

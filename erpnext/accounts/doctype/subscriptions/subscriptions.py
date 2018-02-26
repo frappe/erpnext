@@ -22,10 +22,14 @@ class Subscriptions(Document):
 		self.set_current_invoice_end()
 
 	def set_current_invoice_start(self, date=None):
-		if not date:
-			self.current_invoice_start = nowdate()
-		elif self.trial_period_start and self.is_trialling():
+		if self.trial_period_start and self.is_trialling():
 			self.current_invoice_start = self.trial_period_start
+		elif not date:
+			current_invoice = self.get_current_invoice()
+			if not current_invoice:
+				self.current_invoice_start = nowdate()
+			else:
+				self.current_invoice_start = current_invoice.posting_date
 
 	def set_current_invoice_end(self):
 		if self.is_trialling():
@@ -100,8 +104,6 @@ class Subscriptions(Document):
 
 	def generate_invoice(self):
 		invoice = self.create_invoice()
-		invoice.save()
-		invoice.submit()
 		self.append('invoices', {'invoice': invoice.name})
 		self.save()	# Validates all over again but we don't mind
 		self.subscription_updated(invoice)
@@ -125,14 +127,13 @@ class Subscriptions(Document):
 			invoice.taxes_and_charges = self.tax_template
 
 		# Due date
-		if cint(self.days_until_due):
-			invoice.append(
-				'payment_schedule', 
-				{
-					'due_date': add_days(nowdate(), cint(self.days_until_due)),
-					'invoice_portion': 100
-				}
-			)
+		invoice.append(
+			'payment_schedule', 
+			{
+				'due_date': add_days(self.current_invoice_end, cint(self.days_until_due)),
+				'invoice_portion': 100
+			}
+		)
 
 		# Discounts
 		if self.apply_additional_discount:
@@ -143,6 +144,9 @@ class Subscriptions(Document):
 
 		if self.additional_discount_amount:
 			invoice.additional_discount_amount = self.additional_discount_amount
+
+		invoice.save()
+		invoice.submit()
 
 		return invoice
 
@@ -160,4 +164,4 @@ class Subscriptions(Document):
 			return item_names
 
 	def subscription_updated(self, invoice):
-		pass
+		self.update_subscription_period()
