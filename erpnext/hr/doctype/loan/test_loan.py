@@ -9,19 +9,19 @@ import unittest
 from frappe.utils import nowdate
 from erpnext.hr.doctype.salary_structure.test_salary_structure import make_employee
 
-class TestEmployeeLoan(unittest.TestCase):
+class TestLoan(unittest.TestCase):
 	def setUp(self):
 		create_loan_type("Personal Loan", 500000, 8.4)
 		self.employee = make_employee("robert_loan@loan.com")
-		create_employee_loan(self.employee, "Personal Loan", 280000, "Repay Over Number of Periods", 20)
+		create_loan(self.employee, "Personal Loan", 280000, "Repay Over Number of Periods", 20)
 	
-	def test_employee_loan(self):
-		employee_loan = frappe.get_doc("Employee Loan", {"employee":self.employee})
-		self.assertEqual(employee_loan.monthly_repayment_amount, 15052)
-		self.assertEqual(employee_loan.total_interest_payable, 21034)
-		self.assertEqual(employee_loan.total_payment, 301034)
+	def test_loan(self):
+		loan = frappe.get_doc("Loan", {"employee":self.employee})
+		self.assertEquals(loan.monthly_repayment_amount, 15052)
+		self.assertEquals(loan.total_interest_payable, 21034)
+		self.assertEquals(loan.total_payment, 301034)
 
-		schedule = employee_loan.repayment_schedule
+		schedule = loan.repayment_schedule
 
 		self.assertEqual(len(schedule), 20)
 
@@ -30,13 +30,19 @@ class TestEmployeeLoan(unittest.TestCase):
 			self.assertEqual(schedule[idx].interest_amount, interest_amount)
 			self.assertEqual(schedule[idx].balance_loan_amount, balance_loan_amount)
 
-		employee_loan.repayment_method = "Repay Fixed Amount per Period"
-		employee_loan.monthly_repayment_amount = 14000
-		employee_loan.save()
+		loan.repayment_method = "Repay Fixed Amount per Period"
+		loan.monthly_repayment_amount = 14000
+		loan.save()
 
+<<<<<<< HEAD:erpnext/hr/doctype/employee_loan/test_employee_loan.py
 		self.assertEqual(len(employee_loan.repayment_schedule), 22)
 		self.assertEqual(employee_loan.total_interest_payable, 22712)
 		self.assertEqual(employee_loan.total_payment, 302712)
+=======
+		self.assertEquals(len(loan.repayment_schedule), 22)
+		self.assertEquals(loan.total_interest_payable, 22712)
+		self.assertEquals(loan.total_payment, 302712)
+>>>>>>> Renamed - Employee Loan Application to Loan Application, Employee Loan to Loan and field Employee Loan Account to Loan Account:erpnext/hr/doctype/loan/test_loan.py
 
 def create_loan_type(loan_name, maximum_loan_amount, rate_of_interest):
 	if not frappe.db.exists("Loan Type", loan_name):
@@ -47,11 +53,11 @@ def create_loan_type(loan_name, maximum_loan_amount, rate_of_interest):
 			"rate_of_interest": rate_of_interest
 		}).insert()
 
-def	create_employee_loan(employee, loan_type, loan_amount, repayment_method, repayment_periods):
+def	create_loan(employee, loan_type, loan_amount, repayment_method, repayment_periods):
 	create_loan_type(loan_type, 500000, 8.4)
-	if not frappe.db.get_value("Employee Loan", {"employee":employee}):
-		employee_loan = frappe.new_doc("Employee Loan")
-		employee_loan.update({
+	if not frappe.db.get_value("Loan", {"employee":employee}):
+		loan = frappe.new_doc("Loan")
+		loan.update({
 				"employee": employee,
 				"loan_type": loan_type,
 				"loan_amount": loan_amount,
@@ -60,10 +66,10 @@ def	create_employee_loan(employee, loan_type, loan_amount, repayment_method, rep
 				"disbursement_date": nowdate(),
 				"mode_of_payment": frappe.db.get_value('Mode of Payment', {'type': 'Cash'}, 'name'),
 				"payment_account": frappe.db.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name"),
-				"employee_loan_account": frappe.db.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name"),
+				"loan_account": frappe.db.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name"),
 				"interest_income_account": frappe.db.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
 			})
-		employee_loan.insert()
-		return employee_loan
+		loan.insert()
+		return loan
 	else:
-		return frappe.get_doc("Employee Loan", {"employee":employee})
+		return frappe.get_doc("Loan", {"employee":employee})

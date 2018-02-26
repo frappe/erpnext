@@ -29,10 +29,10 @@ class TestPayrollEntry(unittest.TestCase):
 		self.assertEqual(get_end_date('2017-02-15', 'monthly'), {'end_date': '2017-03-14'})
 		self.assertEqual(get_end_date('2017-02-15', 'daily'), {'end_date': '2017-02-15'})
 
-	def test_employee_loan(self):
+	def test_loan(self):
 		from erpnext.hr.doctype.salary_structure.test_salary_structure import (make_employee,
 			make_salary_structure)
-		from erpnext.hr.doctype.employee_loan.test_employee_loan import create_employee_loan
+		from erpnext.hr.doctype.loan.test_loan import create_loan
 
 		branch = "Test Employee Branch"
 		employee = make_employee("test_employee@loan.com")
@@ -77,10 +77,10 @@ class TestPayrollEntry(unittest.TestCase):
 		employee_doc.holiday_list = holiday_list
 		employee_doc.save()
 
-		employee_loan = create_employee_loan(employee,
+		loan = create_loan(employee,
 			"Personal Loan", 280000, "Repay Over Number of Periods", 20)
-		employee_loan.repay_from_salary = 1
-		employee_loan.submit()
+		loan.repay_from_salary = 1
+		loan.submit()
 
 		salary_strcture = "Test Salary Structure for Loan"
 		if not frappe.db.exists('Salary Structure', salary_strcture):
@@ -108,9 +108,9 @@ class TestPayrollEntry(unittest.TestCase):
 
 		salary_slip = frappe.get_doc('Salary Slip', name)
 		for row in salary_slip.loans:
-			if row.employee_loan == employee_loan.name:
+			if row.loan == loan.name:
 				interest_amount = (280000 * 8.4)/(12*100)
-				principal_amount = employee_loan.monthly_repayment_amount - interest_amount
+				principal_amount = loan.monthly_repayment_amount - interest_amount
 				self.assertEqual(row.interest_amount, interest_amount)
 				self.assertEqual(row.principal_amount, principal_amount)
 				self.assertEqual(row.total_payment,
@@ -119,8 +119,8 @@ class TestPayrollEntry(unittest.TestCase):
 		if salary_slip.docstatus == 0:
 			frappe.delete_doc('Salary Slip', name)
 
-		employee_loan.cancel()
-		frappe.delete_doc('Employee Loan', employee_loan.name)
+		loan.cancel()
+		frappe.delete_doc('Loan', loan.name)
 
 def get_salary_component_account(sal_comp):
 	company = erpnext.get_default_company()

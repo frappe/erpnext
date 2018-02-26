@@ -1,16 +1,16 @@
-<h1>Employees Loan Management</h1>
+<h1>Loan Management</h1>
 
-Employee Loan is an sum of money paid by Employer to Employee based on certain terms and condition. There are multiple ways accounting for the Employee loan can be managed. Company could collect loan from an employee separately. Or they can choose to deduct loan installment from the employee's salary.
+Loan is an sum of money paid by Employer to Employee based on certain terms and condition. There are multiple ways accounting for the loan can be managed. Company could collect loan from an employee separately. Or they can choose to deduct loan installment from the employee's salary.
 
-Let's check below how accounting can be managed for Employee Loan in ERPNext.
+Let's check below how accounting can be managed for Loan in ERPNext.
 
 ### 1. Setup Masters
 
 Create following Groups and Ledgers in Chart of Accounts if not there.
       
-#### 1.1  Employee Loan Account
+#### 1.1  Loan Account
 
-Create Group as 'Employees Loans' under Current Assets and create employee loan A/C (Ledger) under it. [Check this link for new account creation](/docs/user/manual/en/setting-up/articles/managing-tree-structure-masters)
+Create Group as 'Loans' under Current Assets and create loan A/C (Ledger) under it. [Check this link for new account creation](/docs/user/manual/en/setting-up/articles/managing-tree-structure-masters)
 
 ![CoA]({{docs_base_url}}/assets/img/articles/Selection_433.png)
 
@@ -26,7 +26,7 @@ Create Ledger as 'Interest on Loan' under Indirect Income.
 
 ### 2. Book Loan Amount
 
-Once loan amount is finalized, make journal voucher to book loan payment entry. You should Credit Loan amount to Bank/Cash account and Debit Loan amount employee loan account.  
+Once loan amount is finalized, make journal voucher to book loan payment entry. You should Credit Loan amount to Bank/Cash account and Debit Loan amount loan account.  
 
 ![Loan Entry]({{docs_base_url}}/assets/img/articles/Selection_435.png)
 

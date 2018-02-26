@@ -9,7 +9,7 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Employee'),
-				'items': ['Employee Loan Application', 'Salary Slip']
+				'items': ['Loan Application', 'Salary Slip']
 			},
 			{
 				'label': _('Account'),

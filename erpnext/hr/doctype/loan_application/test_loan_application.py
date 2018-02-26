@@ -7,7 +7,7 @@ import frappe
 import unittest
 from erpnext.hr.doctype.salary_structure.test_salary_structure import make_employee
 
-class TestEmployeeLoanApplication(unittest.TestCase):
+class TestLoanApplication(unittest.TestCase):
 	def setUp(self):
 		self.create_loan_type()
 		self.employee = make_employee("kate_loan@loan.com")
@@ -23,8 +23,8 @@ class TestEmployeeLoanApplication(unittest.TestCase):
 			}).insert()
 
 	def create_loan_application(self):
-		if not frappe.db.get_value("Employee Loan Application", {"employee":self.employee}, "name"):
-			loan_application = frappe.new_doc("Employee Loan Application")
+		if not frappe.db.get_value("Loan Application", {"employee":self.employee}, "name"):
+			loan_application = frappe.new_doc("Loan Application")
 			loan_application.update({
 				"employee": self.employee,
 				"loan_type": "Home Loan",
@@ -37,10 +37,11 @@ class TestEmployeeLoanApplication(unittest.TestCase):
 	
 
 	def test_loan_totals(self):
-		loan_application = frappe.get_doc("Employee Loan Application", {"employee":self.employee})
-		self.assertEqual(loan_application.repayment_amount, 11445)
-		self.assertEqual(loan_application.total_payable_interest, 24657)
-		self.assertEqual(loan_application.total_payable_amount, 274657)
+
+		loan_application = frappe.get_doc("Loan Application", {"employee":self.employee})
+		self.assertEquals(loan_application.repayment_amount, 11445)
+		self.assertEquals(loan_application.total_payable_interest, 24657)
+		self.assertEquals(loan_application.total_payable_amount, 274657)
 
 		loan_application.repayment_method = "Repay Fixed Amount per Period"
 		loan_application.repayment_amount = 15000

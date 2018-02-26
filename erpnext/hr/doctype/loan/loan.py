@@ -9,7 +9,7 @@ from frappe import _
 from frappe.utils import flt, rounded, add_months, nowdate
 from erpnext.controllers.accounts_controller import AccountsController
 
-class EmployeeLoan(AccountsController):
+class Loan(AccountsController):
 	def validate(self):
 		check_repayment_method(self.repayment_method, self.loan_amount, self.monthly_repayment_amount, self.repayment_periods)
 		if not self.company:
@@ -29,24 +29,24 @@ class EmployeeLoan(AccountsController):
 		self.check_permission('write')
 		journal_entry = frappe.new_doc('Journal Entry')
 		journal_entry.voucher_type = 'Bank Entry'
-		journal_entry.user_remark = _('Against Employee Loan: {0}').format(self.name)
+		journal_entry.user_remark = _('Against Loan: {0}').format(self.name)
 		journal_entry.company = self.company
 		journal_entry.posting_date = nowdate()
 
 		account_amt_list = []
 
 		account_amt_list.append({
-			"account": self.employee_loan_account,
+			"account": self.loan_account,
 			"party_type": "Employee",
 			"party": self.employee,
 			"debit_in_account_currency": self.loan_amount,
-			"reference_type": "Employee Loan",
+			"reference_type": "Loan",
 			"reference_name": self.name,
 			})
 		account_amt_list.append({
 			"account": self.payment_account,
 			"credit_in_account_currency": self.loan_amount,
-			"reference_type": "Employee Loan",
+			"reference_type": "Loan",
 			"reference_name": self.name,
 			})
 		journal_entry.set("accounts", account_amt_list)
@@ -95,18 +95,18 @@ class EmployeeLoan(AccountsController):
 
 def update_disbursement_status(doc):
 	disbursement = frappe.db.sql("""select posting_date, ifnull(sum(debit_in_account_currency), 0) as disbursed_amount 
-		from `tabGL Entry` where against_voucher_type = 'Employee Loan' and against_voucher = %s""", 
+		from `tabGL Entry` where against_voucher_type = 'Loan' and against_voucher = %s""", 
 		(doc.name), as_dict=1)[0]
 	if disbursement.disbursed_amount == doc.loan_amount:
-		frappe.db.set_value("Employee Loan", doc.name , "status", "Fully Disbursed")
+		frappe.db.set_value("Loan", doc.name , "status", "Fully Disbursed")
 	if disbursement.disbursed_amount < doc.loan_amount and disbursement.disbursed_amount != 0:
-		frappe.db.set_value("Employee Loan", doc.name , "status", "Partially Disbursed")
+		frappe.db.set_value("Loan", doc.name , "status", "Partially Disbursed")
 	if disbursement.disbursed_amount == 0:
-		frappe.db.set_value("Employee Loan", doc.name , "status", "Sanctioned")
+		frappe.db.set_value("Loan", doc.name , "status", "Sanctioned")
 	if disbursement.disbursed_amount > doc.loan_amount:
 		frappe.throw(_("Disbursed Amount cannot be greater than Loan Amount {0}").format(doc.loan_amount))
 	if disbursement.disbursed_amount > 0:
-		frappe.db.set_value("Employee Loan", doc.name , "disbursement_date", disbursement.posting_date)	
+		frappe.db.set_value("Loan", doc.name , "disbursement_date", disbursement.posting_date)	
 	
 def check_repayment_method(repayment_method, loan_amount, monthly_repayment_amount, repayment_periods):
 	if repayment_method == "Repay Over Number of Periods" and not repayment_periods:
@@ -129,32 +129,32 @@ def get_monthly_repayment_amount(repayment_method, loan_amount, rate_of_interest
 	return monthly_repayment_amount
 
 @frappe.whitelist()
-def get_employee_loan_application(employee_loan_application):
-	employee_loan = frappe.get_doc("Employee Loan Application", employee_loan_application)
-	if employee_loan:
-		return employee_loan.as_dict()
+def get_loan_application(loan_application):
+	loan = frappe.get_doc("Loan Application", loan_application)
+	if loan:
+		return loan.as_dict()
 
 @frappe.whitelist()
-def make_jv_entry(employee_loan, company, employee_loan_account, employee, loan_amount, payment_account=None):
+def make_jv_entry(loan, company, loan_account, employee, loan_amount, payment_account=None):
 	journal_entry = frappe.new_doc('Journal Entry')
 	journal_entry.voucher_type = 'Bank Entry'
-	journal_entry.user_remark = _('Against Employee Loan: {0}').format(employee_loan)
+	journal_entry.user_remark = _('Against Loan: {0}').format(loan)
 	journal_entry.company = company
 	journal_entry.posting_date = nowdate()
 
 	account_amt_list = []
 
 	account_amt_list.append({
-		"account": employee_loan_account,
+		"account": loan_account,
 		"debit_in_account_currency": loan_amount,
-		"reference_type": "Employee Loan",
-		"reference_name": employee_loan,
+		"reference_type": "Loan",
+		"reference_name": loan,
 		})
 	account_amt_list.append({
 		"account": payment_account,
 		"credit_in_account_currency": loan_amount,
-		"reference_type": "Employee Loan",
-		"reference_name": employee_loan,
+		"reference_type": "Loan",
+		"reference_name": loan,
 		})
 	journal_entry.set("accounts", account_amt_list)
 	return journal_entry.as_dict()

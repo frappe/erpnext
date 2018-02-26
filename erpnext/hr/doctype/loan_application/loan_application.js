@@ -1,7 +1,7 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Employee Loan Application', {
+frappe.ui.form.on('Loan Application', {
 	refresh: function(frm) {
 		frm.trigger("toggle_fields")
 		frm.trigger("add_toolbar_buttons")
@@ -16,10 +16,10 @@ frappe.ui.form.on('Employee Loan Application', {
 	},
 	add_toolbar_buttons: function(frm) {
 		if (frm.doc.status == "Approved") {
-			frm.add_custom_button(__('Employee Loan'), function() {
+			frm.add_custom_button(__('Loan'), function() {
 				frappe.call({
 					type: "GET",
-					method: "erpnext.hr.doctype.employee_loan_application.employee_loan_application.make_employee_loan",
+					method: "erpnext.hr.doctype.loan_application.loan_application.make_loan",
 					args: {
 						"source_name": frm.doc.name
 					},

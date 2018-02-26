@@ -1,9 +1,9 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Employee Loan', {
+frappe.ui.form.on('Loan', {
 	onload: function (frm) {
-		frm.set_query("employee_loan_application", function () {
+		frm.set_query("loan_application", function () {
 			return {
 				"filters": {
 					"employee": frm.doc.employee,
@@ -31,7 +31,7 @@ frappe.ui.form.on('Employee Loan', {
 			};
 		});
 
-		$.each(["payment_account", "employee_loan_account"], function (i, field) {
+		$.each(["payment_account", "loan_account"], function (i, field) {
 			frm.set_query(field, function () {
 				return {
 					"filters": {
@@ -56,14 +56,14 @@ frappe.ui.form.on('Employee Loan', {
 	make_jv: function (frm) {
 		frappe.call({
 			args: {
-				"employee_loan": frm.doc.name,
+				"loan": frm.doc.name,
 				"company": frm.doc.company,
-				"employee_loan_account": frm.doc.employee_loan_account,
+				"loan_account": frm.doc.loan_account,
 				"employee": frm.doc.employee,
 				"loan_amount": frm.doc.loan_amount,
 				"payment_account": frm.doc.payment_account
 			},
-			method: "erpnext.hr.doctype.employee_loan.employee_loan.make_jv_entry",
+			method: "erpnext.hr.doctype.loan.loan.make_jv_entry",
 			callback: function (r) {
 				if (r.message)
 					var doc = frappe.model.sync(r.message)[0];
@@ -86,12 +86,12 @@ frappe.ui.form.on('Employee Loan', {
 		});
 	},
 
-	employee_loan_application: function (frm) {
-	    if(frm.doc.employee_loan_application){
+	loan_application: function (frm) {
+	    if(frm.doc.loan_application){
             return frappe.call({
-                method: "erpnext.hr.doctype.employee_loan.employee_loan.get_employee_loan_application",
+                method: "erpnext.hr.doctype.loan.loan.get_loan_application",
                 args: {
-                    "employee_loan_application": frm.doc.employee_loan_application
+                    "loan_application": frm.doc.loan_application
                 },
                 callback: function (r) {
                     if (!r.exc && r.message) {

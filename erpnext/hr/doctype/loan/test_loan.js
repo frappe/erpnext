@@ -11,17 +11,17 @@ QUnit.test("Test Loan [HR]", function(assert) {
 			(r) => {
 				employee_name = r.message.name;
 			},
-			() => frappe.db.get_value('Employee Loan Application', {'loan_type': lname}, 'name'),
+			() => frappe.db.get_value('Loan Application', {'loan_type': lname}, 'name'),
 			(r) => {
 				// Creating loan for an employee
-				return frappe.tests.make('Employee Loan', [
+				return frappe.tests.make('Loan', [
 					{ company: 'For Testing'},
 					{ posting_date: '2017-08-26'},
 					{ employee: employee_name},
-					{ employee_loan_application: r.message.name},
+					{ loan_application: r.message.name},
 					{ disbursement_date: '2018-08-26'},
 					{ mode_of_payment: 'Cash'},
-					{ employee_loan_account: 'Temporary Opening - FT'},
+					{ loan_account: 'Temporary Opening - FT'},
 					{ interest_income_account: 'Service - FT'}
 				]);
 			},
@@ -62,7 +62,7 @@ QUnit.test("Test Loan [HR]", function(assert) {
 					'Balance amount after last instalment is correctly calculated');
 
 			},
-			() => frappe.set_route('List','Employee Loan','List'),
+			() => frappe.set_route('List','Loan','List'),
 			() => frappe.timeout(2),
 
 			// Checking the submission of Loan

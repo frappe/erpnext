@@ -9,9 +9,9 @@ from frappe.utils import flt, rounded
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 
-from erpnext.hr.doctype.employee_loan.employee_loan import get_monthly_repayment_amount, check_repayment_method
+from erpnext.hr.doctype.loan.loan import get_monthly_repayment_amount, check_repayment_method
 
-class EmployeeLoanApplication(Document):
+class LoanApplication(Document):
 	def validate(self):
 		check_repayment_method(self.repayment_method, self.loan_amount, self.repayment_amount, self.repayment_periods)
 		self.validate_loan_amount()
@@ -51,10 +51,10 @@ class EmployeeLoanApplication(Document):
 		self.total_payable_amount = self.loan_amount + self.total_payable_interest
 		
 @frappe.whitelist()
-def make_employee_loan(source_name, target_doc = None):
-	doclist = get_mapped_doc("Employee Loan Application", source_name, {
-		"Employee Loan Application": {
-			"doctype": "Employee Loan",
+def make_loan(source_name, target_doc = None):
+	doclist = get_mapped_doc("Loan Application", source_name, {
+		"Loan Application": {
+			"doctype": "Loan",
 			"validation": {
 				"docstatus": ["=", 1]
 			}
