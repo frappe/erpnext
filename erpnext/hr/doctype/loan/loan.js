@@ -6,7 +6,7 @@ frappe.ui.form.on('Loan', {
 		frm.set_query("loan_application", function () {
 			return {
 				"filters": {
-					"employee": frm.doc.employee,
+					"applicant": frm.doc.applicant,
 					"docstatus": 1,
 					"status": "Approved"
 				}
@@ -23,13 +23,15 @@ frappe.ui.form.on('Loan', {
 			};
 		});
 
-		frm.set_query("employee", function() {
-			return {
-				"filters": {
-					"company": frm.doc.company,
-				}
-			};
-		});
+		if (frm.doc.applicant_type == 'Employee') {
+			frm.set_query("applicant", function() {
+				return {
+					"filters": {
+						"company": frm.doc.company,
+					}
+				};
+			});
+		}
 
 		$.each(["payment_account", "loan_account"], function (i, field) {
 			frm.set_query(field, function () {
@@ -46,22 +48,45 @@ frappe.ui.form.on('Loan', {
 
 	refresh: function (frm) {
 		if (frm.doc.docstatus == 1 && (frm.doc.status == "Sanctioned" || frm.doc.status == "Partially Disbursed")) {
-			frm.add_custom_button(__('Make Disbursement Entry'), function () {
+			frm.add_custom_button(__('Make Disbursement Entry'), function() {
 				frm.trigger("make_jv");
 			})
 		}
+		if(frm.doc.docstatus == 1 && (frm.doc.applicant_type == 'Member' || frm.doc.repay_from_salary == 0)) {
+			frm.add_custom_button(__('Make Repayment Entry'), function() {
+				frm.trigger("make_jv");
+			})
+		}
+		if (!frappe.boot.active_domains.includes("Non Profit")) {
+			frm.set_df_property('applicant_type', 'options', ['Employee']);
+			frm.refresh_field('applicant_type');
+		}
 		frm.trigger("toggle_fields");
 	},
-
+	applicant: function(frm) {
+		if (frm.doc.applicant) {
+			frappe.model.with_doc(frm.doc.applicant_type, frm.doc.applicant, function() {
+				var applicant = frappe.model.get_doc(frm.doc.applicant_type, frm.doc.applicant);
+				frm.set_value("applicant_name",
+					applicant.employee_name || applicant.member_name);
+			})
+		}
+		else {
+			console.log(frappe.boot.active_domains);
+			frm.set_value("applicant_name", null);
+		}
+	},
 	make_jv: function (frm) {
 		frappe.call({
 			args: {
 				"loan": frm.doc.name,
 				"company": frm.doc.company,
 				"loan_account": frm.doc.loan_account,
-				"employee": frm.doc.employee,
+				"applicant_type": frm.doc.applicant_type,
+				"applicant": frm.doc.applicant,
 				"loan_amount": frm.doc.loan_amount,
-				"payment_account": frm.doc.payment_account
+				"payment_account": frm.doc.payment_account,
+				"repay_from_salary": frm.doc.repay_from_salary
 			},
 			method: "erpnext.hr.doctype.loan.loan.make_jv_entry",
 			callback: function (r) {
