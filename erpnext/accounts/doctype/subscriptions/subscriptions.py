@@ -141,7 +141,8 @@ class Subscriptions(Document):
 			frappe.throw(_('Both Trial Period Start Date and Trial Period End Date must be set'))
 
 	def after_insert(self):
-		if not self.is_trialling():
+		# todo: deal with users who collect prepayments. Maybe a new Subscription Invoice doctype?
+		if not self.is_trialling() and nowdate() > self.current_invoice_end:
 			self.generate_invoice()
 
 	def generate_invoice(self):
