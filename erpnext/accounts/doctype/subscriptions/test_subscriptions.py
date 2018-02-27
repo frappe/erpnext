@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils.data import nowdate, add_days, get_last_day, cint, getdate
+from frappe.utils.data import nowdate, add_days, get_last_day, cint, getdate, add_to_date
 
 
 class TestSubscriptions(unittest.TestCase):
@@ -17,6 +17,24 @@ class TestSubscriptions(unittest.TestCase):
 			plan.cost = 999.99
 			plan.billing_interval = 'Month'
 			plan.billing_interval_count = 1
+			plan.insert()
+
+		if not frappe.db.exists('Subscription Plan', '_Test Plan Name 2'):
+			plan = frappe.new_doc('Subscription Plan')
+			plan.plan_name = '_Test Plan Name 2'
+			plan.item = '_Test Non Stock Item'
+			plan.cost = 1999.99
+			plan.billing_interval = 'Month'
+			plan.billing_interval_count = 1
+			plan.insert()
+
+		if not frappe.db.exists('Subscription Plan', '_Test Plan Name 3'):
+			plan = frappe.new_doc('Subscription Plan')
+			plan.plan_name = '_Test Plan Name 3'
+			plan.item = '_Test Non Stock Item'
+			plan.cost = 1999.99
+			plan.billing_interval = 'Day'
+			plan.billing_interval_count = 14
 			plan.insert()
 
 	def create_subscriber(self):
@@ -55,9 +73,10 @@ class TestSubscriptions(unittest.TestCase):
 
 		self.assertEqual(subscription.trial_period_start, None)
 		self.assertEqual(subscription.trial_period_end, None)
-		self.assertEqual(subscription.current_invoice_start, getdate(nowdate()))
-		self.assertEqual(subscription.current_invoice_end, get_last_day(nowdate()))
-		self.assertEqual(len(subscription.invoices), 1)
+		self.assertEqual(subscription.current_invoice_start, nowdate())
+		self.assertEqual(subscription.current_invoice_end, add_to_date(nowdate(), months=1, days=-1))
+		# No invoice is created
+		self.assertEqual(len(subscription.invoices), 0)
 		self.assertEqual(subscription.status, 'Active')
 
 		subscription.delete()
@@ -71,18 +90,31 @@ class TestSubscriptions(unittest.TestCase):
 
 		self.assertRaises(frappe.ValidationError, subscription.save)
 
-	def test_subscription_invoice_days_until_due(self):
+	def test_create_subscription_multi_with_different_billing_fails(self):
 		subscription = frappe.new_doc('Subscriptions')
 		subscription.subscriber = '_Test Customer'
+		subscription.trial_period_end = nowdate()
+		subscription.trial_period_start = add_days(nowdate(), 30)
 		subscription.append('plans', {'plan': '_Test Plan Name'})
-		subscription.save()
+		subscription.append('plans', {'plan': '_Test Plan Name 3'})
 
-		generated_invoice_name = subscription.invoices[-1].invoice
-		invoice = frappe.get_doc('Sales Invoice', generated_invoice_name)
+		self.assertRaises(frappe.ValidationError, subscription.save)
 
-		self.assertEqual(
-			invoice.due_date, 
-			add_days(subscription.current_invoice_end, cint(subscription.days_until_due))
-		)
+	# def test_subscription_invoice_days_until_due(self):
+	# 	subscription = frappe.new_doc('Subscriptions')
+	# 	subscription.subscriber = '_Test Customer'
+	# 	subscription.append('plans', {'plan': '_Test Plan Name'})
+	# 	subscription.save()
 
-		subscription.delete()
+	# 	generated_invoice_name = subscription.invoices[-1].invoice
+	# 	invoice = frappe.get_doc('Sales Invoice', generated_invoice_name)
+
+	# 	self.assertEqual(
+	# 		invoice.due_date, 
+	# 		add_days(subscription.current_invoice_end, cint(subscription.days_until_due))
+	# 	)
+
+	# 	subscription.delete()
+
+	def test_subscription_creation_with_multiple_plans(self):
+		pass
