@@ -216,6 +216,7 @@ def order():
 		new_sales_order.po_no = fd.get("id")
 		new_sales_order.woocommerce_id = fd.get("id")
 		ordered_items = fd.get("line_items")
+		new_sales_order.naming_series = "SO-"
 		
 		for item in ordered_items:
 			woocomm_item_id = item.get("product_id")
@@ -231,11 +232,11 @@ def order():
 				"rate": item.get("price")
 				})
 		
-		print(new_sales_order.as_dict)
+		print(new_sales_order.as_dict().get("name", "NAME_NOT_FOUND "*100))
 		
 
 		try:
-			new_sales_order.save(ignore_permissions=True)
+			new_sales_order.submit()
 		except Exception as e:
 			for x in xrange(1,10):
 				print("SO.SAVE", e)
