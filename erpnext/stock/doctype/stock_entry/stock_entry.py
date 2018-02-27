@@ -32,8 +32,15 @@ class StockEntry(StockController):
 		return _("From {0} to {1}").format(self.from_warehouse, self.to_warehouse)
 
 	def onload(self):
+		self.set_onload("allow_alternative_item", self.check_alternative_item())
 		for item in self.get("items"):
 			item.update(get_bin_details(item.item_code, item.s_warehouse))
+
+	def check_alternative_item(self):
+		if not self.items: return False
+
+		for d in self.items:
+			if d.allow_alternative_item: return True
 
 	def validate(self):
 		self.pro_doc = frappe._dict()
@@ -400,9 +407,10 @@ class StockEntry(StockController):
 		if self.purpose == "Subcontract" and self.purchase_order:
 			purchase_order = frappe.get_doc("Purchase Order", self.purchase_order)
 			for se_item in self.items:
+				item_code = se_item.original_item or se_item.item_code
 				precision = cint(frappe.db.get_default("float_precision")) or 3
 				total_allowed = sum([flt(d.required_qty) for d in purchase_order.supplied_items \
-					if d.rm_item_code == se_item.item_code])
+					if d.rm_item_code == item_code])
 				if not total_allowed:
 					frappe.throw(_("Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1}")
 						.format(se_item.item_code, self.purchase_order))
@@ -421,7 +429,8 @@ class StockEntry(StockController):
 	def validate_bom(self):
 		for d in self.get('items'):
 			if d.bom_no and (d.t_warehouse != getattr(self, "pro_doc", frappe._dict()).scrap_warehouse):
-				validate_bom_no(d.item_code, d.bom_no)
+				item_code = d.original_item or d.item_code
+				validate_bom_no(item_code, d.bom_no)
 
 	def validate_finished_goods(self):
 		"""validation: finished good quantity should be same as manufacturing quantity"""
@@ -805,16 +814,19 @@ class StockEntry(StockController):
 			wip_warehouse = pro_order.wip_warehouse
 		else:
 			wip_warehouse = None
-			
+
 		for d in pro_order.get("required_items"):
 			if flt(d.required_qty) > flt(d.transferred_qty):
 				item_row = d.as_dict()
 				if d.source_warehouse and not frappe.db.get_value("Warehouse", d.source_warehouse, "is_group"):
 					item_row["from_warehouse"] = d.source_warehouse
-				
+
 				item_row["to_warehouse"] = wip_warehouse
+				if item_row["allow_alternative_item"]:
+					item_row["allow_alternative_item"] = pro_order.allow_alternative_item
+
 				item_dict.setdefault(d.item_code, item_row)
-			
+
 		return item_dict
 
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None):
@@ -835,6 +847,7 @@ class StockEntry(StockController):
 			se_child.qty = flt(item_dict[d]["qty"], se_child.precision("qty"))
 			se_child.expense_account = item_dict[d].get("expense_account") or expense_account
 			se_child.cost_center = item_dict[d].get("cost_center") or cost_center
+			se_child.allow_alternative_item = item_dict[d].get("allow_alternative_item", 0)
 
 			if item_dict[d].get("idx"):
 				se_child.idx = item_dict[d].get("idx")

@@ -199,7 +199,13 @@ class BuyingController(StockController):
 		if hasattr(item, 'include_exploded_items'):
 			exploded_item = item.get('include_exploded_items')
 
-		bom_items = get_items_from_bom(item.item_code, item.bom, exploded_item)
+		bom_items = []
+		if self.doctype == 'Purchase Receipt' and item.purchase_order:
+			bom_items = get_items_from_stock_entry(item.purchase_order)
+
+		if not bom_items:
+			bom_items = get_items_from_bom(item.item_code, item.bom, exploded_item)
+
 		raw_materials_cost = 0
 		items = list(set([d.item_code for d in bom_items]))
 		item_wh = frappe._dict(frappe.db.sql("""select item_code, default_warehouse
@@ -464,3 +470,12 @@ def get_items_from_bom(item_code, bom, exploded_item=1):
 		msgprint(_("Specified BOM {0} does not exist for Item {1}").format(bom, item_code), raise_exception=1)
 
 	return bom_items
+
+def get_items_from_stock_entry(purchase_order):
+	return frappe.db.sql(""" select sted.item_code, sted.transfer_qty as qty_consumed_per_unit,
+			sted.basic_rate, sted.stock_uom, sted.name, sted.description, sted.s_warehouse
+		from
+			`tabStock Entry` ste, `tabStock Entry Detail` sted
+		where
+			sted.parent = ste.name and ste.docstatus = 1 and ste.purpose = 'Subcontract'
+			and ste.purchase_order = %s""", purchase_order, as_dict=1)

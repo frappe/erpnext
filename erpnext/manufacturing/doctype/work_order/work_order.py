@@ -489,6 +489,7 @@ class WorkOrder(Document):
 						'item_code': item.item_code,
 						'item_name': item.item_name,
 						'description': item.description,
+						'allow_alternative_item': item.allow_alternative_item,
 						'required_qty': item.qty,
 						'source_warehouse': item.source_warehouse or item.default_warehouse
 					})
@@ -548,6 +549,7 @@ def get_item_details(item, project = None):
 			frappe.throw(_("Default BOM for {0} not found").format(item))
 
 	res['project'] = project or frappe.db.get_value('BOM', res['bom_no'], 'project')
+	res['allow_alternative_item'] = frappe.db.get_value('BOM', res['bom_no'], 'allow_alternative_item')
 	res.update(check_if_scrap_warehouse_mandatory(res["bom_no"]))
 
 	return res
@@ -586,6 +588,7 @@ def make_stock_entry(work_order_id, purpose, qty=None):
 	stock_entry.bom_no = work_order.bom_no
 	stock_entry.use_multi_level_bom = work_order.use_multi_level_bom
 	stock_entry.fg_completed_qty = qty or (flt(work_order.qty) - flt(work_order.produced_qty))
+	stock_entry.allow_alternative_item = work_order.allow_alternative_item
 	if work_order.bom_no:
 		stock_entry.inspection_required = frappe.db.get_value('BOM',
 			work_order.bom_no, 'inspection_required')

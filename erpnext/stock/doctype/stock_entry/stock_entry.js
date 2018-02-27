@@ -120,6 +120,22 @@ frappe.ui.form.on('Stock Entry', {
 			});
 		}
 
+		if (frm.doc.docstatus == 0 && frm.doc.__onload &&
+			frm.doc.__onload.allow_alternative_item) {
+			frm.add_custom_button(__('Alternate Item'), () => {
+				erpnext.utils.select_alternate_items({
+					frm: frm,
+					child_docname: "items",
+					warehouse_field: "s_warehouse",
+					child_doctype: "Stock Entry Detail",
+					original_item_field: "original_item",
+					condition: (d) => {
+						if (d.s_warehouse && d.allow_alternative_item) {return true;}
+					}
+				})
+			});
+		}
+
 		if (frm.doc.docstatus===0) {
 			frm.add_custom_button(__('Purchase Invoice'), function() {
 				erpnext.utils.map_current_doc({
