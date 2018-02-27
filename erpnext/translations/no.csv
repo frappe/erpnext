@@ -89,7 +89,7 @@ DocType: Hotel Room Reservation,Guest Name,Gjestenavn
 DocType: Lab Prescription,Lab Prescription,Lab Prescription
 ,Delay Days,Forsinkelsesdager
 apps/erpnext/erpnext/hr/report/vehicle_expenses/vehicle_expenses.py +26,Service Expense,tjenesten Expense
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +897,Serial Number: {0} is already referenced in Sales Invoice: {1},Serienummer: {0} er allerede referert i salgsfaktura: {1}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +899,Serial Number: {0} is already referenced in Sales Invoice: {1},Serienummer: {0} er allerede referert i salgsfaktura: {1}
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +880,Invoice,Faktura
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +145,Make Retention Stock Entry,Lag Retention Stock Entry
 DocType: Purchase Invoice Item,Item Weight Details,Vektdetaljer
@@ -122,6 +122,7 @@ DocType: Delivery Trip,Initial Email Notification Sent,Innledende e-postvarsling
 DocType: Soil Texture,Sandy Clay Loam,Sandy Clay Loam
 DocType: Purchase Invoice,Rounding Adjustment,Avrundingsjustering
 apps/erpnext/erpnext/setup/doctype/company/company.py +46,Abbreviation cannot have more than 5 characters,Forkortelse kan ikke ha mer enn fem tegn
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Kunde&gt; Kundegruppe&gt; Territorium
 DocType: Physician Schedule Time Slot,Physician Schedule Time Slot,Leger Schedule Time Slot
 DocType: Payment Request,Payment Request,Betaling Request
 DocType: Asset,Value After Depreciation,Verdi etter avskrivninger
@@ -151,7 +152,7 @@ DocType: Patient,Married,Gift
 apps/erpnext/erpnext/accounts/party.py +42,Not permitted for {0},Ikke tillatt for {0}
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +593,Get items from,Få elementer fra
 DocType: Price List,Price Not UOM Dependant,Pris Ikke UOM Avhengig
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +465,Stock cannot be updated against Delivery Note {0},Stock kan ikke oppdateres mot følgeseddel {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +467,Stock cannot be updated against Delivery Note {0},Stock kan ikke oppdateres mot følgeseddel {0}
 apps/erpnext/erpnext/templates/pages/home.py +25,Product {0},Produkt {0}
 apps/erpnext/erpnext/templates/generators/item_group.html +43,No items listed,Ingen elementer oppført
 DocType: Asset Repair,Error Description,Feilbeskrivelse
@@ -258,13 +259,14 @@ apps/erpnext/erpnext/controllers/buying_controller.py +344,Accepted + Rejected Q
 DocType: Request for Quotation,RFQ-,RFQ-
 DocType: Item,Supply Raw Materials for Purchase,Leverer råvare til Purchase
 DocType: Agriculture Analysis Criteria,Fertilizer,Gjødsel
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +150,At least one mode of payment is required for POS invoice.,I det minste én modus av betaling er nødvendig for POS faktura.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +152,At least one mode of payment is required for POS invoice.,I det minste én modus av betaling er nødvendig for POS faktura.
 DocType: Products Settings,Show Products as a List,Vis produkter på en liste
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +519,Item {0} is not active or end of life has been reached,Element {0} er ikke aktiv eller slutten av livet er nådd
 DocType: Student Admission Program,Minimum Age,Minimumsalder
 apps/erpnext/erpnext/utilities/user_progress.py +187,Example: Basic Mathematics,Eksempel: Grunnleggende matematikk
 DocType: Customer,Primary Address,hoved adresse
 DocType: Production Plan,Material Request Detail,Material Request Detail
+DocType: Selling Settings,Default Quotation Validity Days,Standard Quotation Gyldighetsdager
 apps/erpnext/erpnext/controllers/accounts_controller.py +793,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","For å inkludere skatt i rad {0} i Element rente, skatt i rader {1} må også inkluderes"
 apps/erpnext/erpnext/config/hr.py +223,Settings for HR Module,Innstillinger for HR Module
 DocType: SMS Center,SMS Center,SMS-senter
@@ -513,7 +515,7 @@ apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +425,Please see attac
 DocType: Purchase Order,% Received,% Mottatt
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.js +3,Create Student Groups,Opprett studentgrupper
 DocType: Volunteer,Weekends,helger
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +105,Credit Note Amount,Kreditt Note Beløp
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +113,Credit Note Amount,Kreditt Note Beløp
 DocType: Setup Progress Action,Action Document,Handlingsdokument
 DocType: Chapter Member,Website URL,Website URL
 ,Finished Goods,Ferdigvarer
@@ -543,7 +545,7 @@ DocType: Employee,Widowed,Enke
 DocType: Request for Quotation,Request for Quotation,Forespørsel om kostnadsoverslag
 DocType: Healthcare Settings,Require Lab Test Approval,Krever godkjenning av laboratorietest
 DocType: Salary Slip Timesheet,Working Hours,Arbeidstid
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +49,Total Outstanding,Totalt Utestående
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +54,Total Outstanding,Totalt Utestående
 DocType: Naming Series,Change the starting / current sequence number of an existing series.,Endre start / strøm sekvensnummer av en eksisterende serie.
 DocType: Dosage Strength,Strength,Styrke
 apps/erpnext/erpnext/accounts/page/pos/pos.js +1533,Create a new Customer,Opprett en ny kunde
@@ -837,7 +839,7 @@ DocType: Employee,Passport Number,Passnummer
 apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py +60,Relation with Guardian2,Relasjon med Guardian2
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +124,Manager,Manager
 DocType: Payment Entry,Payment From / To,Betaling fra / til
-apps/erpnext/erpnext/selling/doctype/customer/customer.py +172,New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0},Ny kredittgrensen er mindre enn dagens utestående beløp for kunden. Kredittgrense må være atleast {0}
+apps/erpnext/erpnext/selling/doctype/customer/customer.py +177,New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0},Ny kredittgrensen er mindre enn dagens utestående beløp for kunden. Kredittgrense må være atleast {0}
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +428,Please set account in Warehouse {0},Vennligst sett inn konto i Lager {0}
 apps/erpnext/erpnext/controllers/trends.py +39,'Based On' and 'Group By' can not be same,&quot;Based On&quot; og &quot;Grupper etter&quot; ikke kan være det samme
 DocType: Sales Person,Sales Person Targets,Sales Person Targets
@@ -849,7 +851,7 @@ DocType: Student Batch Name,Batch Name,batch Name
 DocType: Fee Validity,Max number of visit,Maks antall besøk
 ,Hotel Room Occupancy,Hotellrom Occupancy
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +358,Timesheet created:,Timeregistrering opprettet:
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +924,Please set default Cash or Bank account in Mode of Payment {0},Vennligst angi standard kontanter eller bankkontoen i modus for betaling {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +931,Please set default Cash or Bank account in Mode of Payment {0},Vennligst angi standard kontanter eller bankkontoen i modus for betaling {0}
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.js +24,Enroll,Registrere
 DocType: GST Settings,GST Settings,GST-innstillinger
 DocType: Selling Settings,Customer Naming By,Kunden Naming Av
@@ -990,7 +992,7 @@ DocType: Soil Texture,Sand,Sand
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +25,Energy,Energy
 DocType: Opportunity,Opportunity From,Opportunity Fra
 apps/erpnext/erpnext/config/hr.py +98,Monthly salary statement.,Månedslønn uttalelse.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +885,Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.,Row {0}: {1} Serienummer som kreves for element {2}. Du har oppgitt {3}.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +887,Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.,Row {0}: {1} Serienummer som kreves for element {2}. Du har oppgitt {3}.
 apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_entry.py +79,Please select a table,Vennligst velg en tabell
 DocType: BOM,Website Specifications,Nettstedet Spesifikasjoner
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py +78,{0} is an invalid email address in 'Recipients',{0} er en ugyldig e-postadresse i &quot;Mottakere&quot;
@@ -1084,7 +1086,7 @@ apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +111,{0} {1}: Cost Ce
 apps/erpnext/erpnext/utilities/user_progress.py +89,Upload your letter head (Keep it web friendly as 900px by 100px),Last opp brevhodet ditt (Hold det nettvennlig som 900px ved 100px)
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +88,{0} {1}: Account {2} cannot be a Group,{0} {1}: Account {2} kan ikke være en gruppe
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +63,Item Row {idx}: {doctype} {docname} does not exist in above '{doctype}' table,Sak Row {idx}: {doctype} {DOCNAME} finnes ikke i oven {doctype} tabellen
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +293,Timesheet {0} is already completed or cancelled,Timeregistrering {0} er allerede gjennomført eller kansellert
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +295,Timesheet {0} is already completed or cancelled,Timeregistrering {0} er allerede gjennomført eller kansellert
 apps/erpnext/erpnext/templates/pages/projects.html +42,No tasks,ingen oppgaver
 DocType: Item Variant Settings,Copy Fields to Variant,Kopier felt til variant
 DocType: Asset,Opening Accumulated Depreciation,Åpning akkumulerte avskrivninger
@@ -1138,7 +1140,6 @@ apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +130,Open
 DocType: Notification Control,Delivery Note Message,Levering Note Message
 DocType: Lab Test Template,Result Format,Resultatformat
 DocType: Expense Claim,Expenses,Utgifter
-DocType: Delivery Stop,Delivery Notes,Leverings notater
 DocType: Item Variant Attribute,Item Variant Attribute,Sak Variant Egenskap
 ,Purchase Receipt Trends,Kvitteringen Trender
 DocType: Payroll Entry,Bimonthly,annenhver måned
@@ -1329,7 +1330,7 @@ apps/erpnext/erpnext/controllers/selling_controller.py +129,Order Type must be o
 DocType: Lead,Next Contact Date,Neste Kontakt Dato
 apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py +36,Opening Qty,Antall åpne
 DocType: Healthcare Settings,Appointment Reminder,Avtale påminnelse
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +476,Please enter Account for Change Amount,Vennligst oppgi konto for Change Beløp
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +478,Please enter Account for Change Amount,Vennligst oppgi konto for Change Beløp
 DocType: Program Enrollment Tool Student,Student Batch Name,Student Batch Name
 DocType: Consultation,Doctor,Doktor
 DocType: Holiday List,Holiday List Name,Holiday Listenavn
@@ -1396,7 +1397,7 @@ DocType: Lead,Organization Name,Organization Name
 DocType: Tax Rule,Shipping State,Shipping State
 ,Projected Quantity as Source,Anslått Antall som kilde
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +61,Item must be added using 'Get Items from Purchase Receipts' button,Elementet må legges til med &quot;Get Elementer fra innkjøps Receipts &#39;knappen
-DocType: Delivery Trip,Delivery Trip,Leveringsreise
+apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +858,Delivery Trip,Leveringsreise
 DocType: Student,A-,EN-
 DocType: Share Transfer,Transfer Type,Overføringstype
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +117,Sales Expenses,Salgs Utgifter
@@ -1418,7 +1419,7 @@ DocType: Holiday List,Get Weekly Off Dates,Få Ukentlig Off Datoer
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +33,End Date can not be less than Start Date,Sluttdato kan ikke være mindre enn startdato
 apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.py +337,Invoice can't be made for zero billing hour,Fakturaen kan ikke gjøres for null faktureringstid
 DocType: Sales Person,Select company name first.,Velg firmanavn først.
-apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.py +201,Email sent to {0},E-post sendt til {0}
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.py +189,Email sent to {0},E-post sendt til {0}
 apps/erpnext/erpnext/config/buying.py +23,Quotations received from Suppliers.,Sitater mottatt fra leverandører.
 apps/erpnext/erpnext/config/manufacturing.py +74,Replace BOM and update latest price in all BOMs,Erstatt BOM og oppdater siste pris i alle BOMs
 apps/erpnext/erpnext/controllers/selling_controller.py +27,To {0} | {1} {2},Til {0} | {1} {2}
@@ -1465,7 +1466,7 @@ DocType: Leave Allocation,LAL/,LAL /
 DocType: Setup Progress Action,Action Name,Handlingsnavn
 apps/erpnext/erpnext/public/js/financial_statements.js +75,Start Year,start-år
 apps/erpnext/erpnext/regional/india/utils.py +25,First 2 digits of GSTIN should match with State number {0},De to første sifrene i GSTIN skal samsvare med statens nummer {0}
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +58,PDC/LC,PDC / LC
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +63,PDC/LC,PDC / LC
 DocType: Purchase Invoice,Start date of current invoice's period,Startdato for nåværende fakturaperiode
 DocType: Salary Slip,Leave Without Pay,La Uten Pay
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +385,Capacity Planning Error,Kapasitetsplanlegging Error
@@ -1512,7 +1513,7 @@ DocType: Course,Course Intro,kurs Intro
 apps/erpnext/erpnext/stock/doctype/batch/batch.js +105,Stock Entry {0} created,Stock Entry {0} er opprettet
 apps/erpnext/erpnext/controllers/buying_controller.py +316,Row #{0}: Rejected Qty can not be entered in Purchase Return,Row # {0}: Avvist Antall kan ikke legges inn i innkjøpsliste
 ,Purchase Order Items To Be Billed,Purchase Order Elementer som skal faktureres
-apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +45,Updating estimated arrival times.,Oppdaterer estimerte ankomsttider.
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +63,Updating estimated arrival times.,Oppdaterer estimerte ankomsttider.
 DocType: Program Enrollment Tool,Enrollment Details,Registreringsdetaljer
 DocType: Purchase Invoice Item,Net Rate,Net Rate
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +152,Please select a customer,Vennligst velg en kunde
@@ -1651,7 +1652,7 @@ DocType: Student Group Student,Group Roll Number,Gruppe-nummer
 DocType: Student Group Student,Group Roll Number,Gruppe-nummer
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +145,"For {0}, only credit accounts can be linked against another debit entry",For {0} kan bare kredittkontoer kobles mot en annen belastning oppføring
 apps/erpnext/erpnext/projects/doctype/project/project.py +82,Total of all task weights should be 1. Please adjust weights of all Project tasks accordingly,Summen av alle oppgave vekter bør være 1. Juster vekter av alle prosjektoppgaver tilsvar
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +586,Delivery Note {0} is not submitted,Levering Note {0} er ikke innsendt
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +588,Delivery Note {0} is not submitted,Levering Note {0} er ikke innsendt
 apps/erpnext/erpnext/stock/get_item_details.py +148,Item {0} must be a Sub-contracted Item,Elementet {0} må være en underleverandør Element
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +43,Capital Equipments,Capital Equipments
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +33,"Pricing Rule is first selected based on 'Apply On' field, which can be Item, Item Group or Brand.","Prising Rule først valgt basert på &quot;Apply On-feltet, som kan være varen, varegruppe eller Brand."
@@ -1772,6 +1773,7 @@ apps/erpnext/erpnext/projects/report/daily_timesheet_summary/daily_timesheet_sum
 DocType: Email Digest,For Company,For selskapet
 apps/erpnext/erpnext/config/support.py +17,Communication log.,Kommunikasjonsloggen.
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +195,"Request for Quotation is disabled to access from portal, for more check portal settings.",Forespørsel om prisanslag er deaktivert tilgang fra portal for flere sjekkportalinnstillingene.
+apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,Vennligst oppsett Medarbeiders navngivningssystem i menneskelig ressurs&gt; HR-innstillinger
 DocType: Supplier Scorecard Scoring Variable,Supplier Scorecard Scoring Variable,Leverandør Scorecard Scoring Variable
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +72,Buying Amount,Kjøpe Beløp
 DocType: Sales Invoice,Shipping Address Name,Leveringsadresse Navn
@@ -1833,7 +1835,7 @@ DocType: Asset Movement,Stock Manager,Stock manager
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +158,Source warehouse is mandatory for row {0},Kilde lageret er obligatorisk for rad {0}
 apps/erpnext/erpnext/accounts/doctype/payment_terms_template/payment_terms_template.py +38,The Payment Term at row {0} is possibly a duplicate.,Betalingsperioden i rad {0} er muligens en duplikat.
 apps/erpnext/erpnext/public/js/setup_wizard.js +30,Agriculture (beta),Jordbruk (beta)
-apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +858,Packing Slip,Pakkseddel
+apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js +863,Packing Slip,Pakkseddel
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +110,Office Rent,Kontor Leie
 apps/erpnext/erpnext/config/setup.py +111,Setup SMS gateway settings,Oppsett SMS gateway-innstillinger
 DocType: Disease,Common Name,Vanlig navn
@@ -1872,6 +1874,7 @@ DocType: Student Attendance Tool,Students HTML,studenter HTML
 DocType: POS Profile,Apply Discount,Bruk rabatt
 DocType: GST HSN Code,GST HSN Code,GST HSN-kode
 DocType: Employee External Work History,Total Experience,Total Experience
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Vennligst oppsett nummereringsserie for Tilstedeværelse via Oppsett&gt; Nummereringsserie
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +70,Open Projects,åpne Prosjekter
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +295,Packing Slip(s) cancelled,Pakking Slip (s) kansellert
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +36,Cash Flow from Investing,Kontantstrøm fra investerings
@@ -1953,6 +1956,7 @@ apps/erpnext/erpnext/config/stock.py +314,Opening Stock Balance,Åpning Stock Ba
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +58,{0} must appear only once,{0} må vises bare en gang
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.py +59,Leaves Allocated Successfully for {0},Etterlater Avsatt Vellykket for {0}
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +42,No Items to pack,Ingenting å pakke
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,Vennligst oppsett Instruktør Navngivningssystem under utdanning&gt; Utdanningsinnstillinger
 DocType: Shipping Rule Condition,From Value,Fra Verdi
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +593,Manufacturing Quantity is mandatory,Manufacturing Antall er obligatorisk
 DocType: Employee Loan,Repayment Method,tilbakebetaling Method
@@ -2051,7 +2055,7 @@ DocType: Journal Entry,Entry Type,Entry Type
 ,Customer Credit Balance,Customer Credit Balance
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py +28,Net Change in Accounts Payable,Netto endring i leverandørgjeld
 apps/erpnext/erpnext/regional/report/fichier_des_ecritures_comptables_[fec]/fichier_des_ecritures_comptables_[fec].py +48,EcritureLet,EcritureLet
-apps/erpnext/erpnext/selling/doctype/customer/customer.py +211,Credit limit has been crossed for customer {0} ({1}/{2}),Kredittgrensen er krysset for kunden {0} ({1} / {2})
+apps/erpnext/erpnext/selling/doctype/customer/customer.py +216,Credit limit has been crossed for customer {0} ({1}/{2}),Kredittgrensen er krysset for kunden {0} ({1} / {2})
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +42,Customer required for 'Customerwise Discount',Kunden nødvendig for &#39;Customerwise Discount&#39;
 apps/erpnext/erpnext/config/accounts.py +140,Update bank payment dates with journals.,Oppdatere bankbetalings datoer med tidsskrifter.
 apps/erpnext/erpnext/stock/doctype/item/item_dashboard.py +21,Pricing,Priser
@@ -2084,7 +2088,7 @@ apps/erpnext/erpnext/healthcare/setup.py +257,Moderate Sensitivity,Moderat føls
 DocType: Leave Type,Include holidays within leaves as leaves,Inkluder hellig innen blader som løv
 DocType: Sales Invoice,Packed Items,Lunsj Items
 apps/erpnext/erpnext/config/support.py +27,Warranty Claim against Serial No.,Garantikrav mot Serial No.
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +178,'Total',&#39;Total&#39;
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +192,'Total',&#39;Total&#39;
 DocType: Shopping Cart Settings,Enable Shopping Cart,Aktiver Handlevogn
 DocType: Employee,Permanent Address,Permanent Adresse
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +260,"Advance paid against {0} {1} cannot be greater \
@@ -2136,7 +2140,7 @@ DocType: Packing Slip,PS-,PS
 DocType: Member,Non Profit Member,Ikke-profittmedlem
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +67,{0} {1}: Cost Center is required for 'Profit and Loss' account {2}. Please set up a default Cost Center for the Company.,{0} {1}: Det kreves kostnadssted for &#39;resultat&#39; konto {2}. Sett opp en standardkostnadssted for selskapet.
 DocType: Payment Schedule,Payment Term,Betalingsperiode
-apps/erpnext/erpnext/selling/doctype/customer/customer.py +162,A Customer Group exists with same name please change the Customer name or rename the Customer Group,En kundegruppe eksisterer med samme navn kan du endre Kundens navn eller endre navn på Kundegruppe
+apps/erpnext/erpnext/selling/doctype/customer/customer.py +167,A Customer Group exists with same name please change the Customer name or rename the Customer Group,En kundegruppe eksisterer med samme navn kan du endre Kundens navn eller endre navn på Kundegruppe
 DocType: Land Unit,Area,Område
 apps/erpnext/erpnext/public/js/templates/contact_list.html +37,New Contact,Ny kontakt
 DocType: Territory,Parent Territory,Parent Territory
@@ -2201,6 +2205,7 @@ DocType: Shipping Rule Condition,A condition for a Shipping Rule,En forutsetning
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +167,Please enter ,Vennligst skriv inn
 apps/erpnext/erpnext/assets/doctype/asset_maintenance/asset_maintenance.js +43,Maintenance Log,Vedlikeholdslogg
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +236,Please set filter based on Item or Warehouse,Vennligst sette filter basert på varen eller Warehouse
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Varenummer&gt; Varegruppe&gt; Varemerke
 DocType: Packing Slip,The net weight of this package. (calculated automatically as sum of net weight of items),Nettovekten av denne pakken. (Automatisk beregnet som summen av nettovekt elementer)
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +798,Discount amount cannot be greater than 100%,Rabattbeløp kan ikke være større enn 100%
 DocType: Sales Order,To Deliver and Bill,Å levere og Bill
@@ -2397,8 +2402,8 @@ DocType: Mode of Payment Account,Default account will be automatically updated i
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +961,Select BOM and Qty for Production,Velg BOM og Stk for produksjon
 DocType: Asset,Depreciation Schedule,avskrivninger Schedule
 apps/erpnext/erpnext/config/selling.py +124,Sales Partner Addresses And Contacts,Salgspartneradresser og kontakter
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +48,Item Code &gt; Item Group &gt; Brand,Varenummer&gt; Varegruppe&gt; Varemerke
 DocType: Bank Reconciliation Detail,Against Account,Mot konto
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,Leverandør&gt; Leverandør Type
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +53,Half Day Date should be between From Date and To Date,Half Day Date bør være mellom Fra dato og Til dato
 DocType: Maintenance Schedule Detail,Actual Date,Selve Dato
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py +139,Please set the Default Cost Center in {0} company.,Angi standardkostnadssenteret i {0} selskapet.
@@ -2419,7 +2424,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +380,Amount
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +277,New Message,Ny melding
 ,Quotation Trends,Anførsels Trender
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +160,Item Group not mentioned in item master for item {0},Varegruppe ikke nevnt i punkt master for elementet {0}
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +366,Debit To account must be a Receivable account,Uttak fra kontoen må være en fordring konto
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +368,Debit To account must be a Receivable account,Uttak fra kontoen må være en fordring konto
 DocType: Shipping Rule,Shipping Amount,Fraktbeløp
 DocType: Supplier Scorecard Period,Period Score,Periodepoeng
 apps/erpnext/erpnext/utilities/user_progress.py +63,Add Customers,Legg til kunder
@@ -2473,7 +2478,6 @@ DocType: Loan Type,Loan Name,lån Name
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.py +56,Total Actual,Total Actual
 DocType: Lab Test UOM,Test UOM,Test UOM
 DocType: Student Siblings,Student Siblings,student Søsken
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +54,Supplier &gt; Supplier Type,Leverandør&gt; Leverandør Type
 apps/erpnext/erpnext/utilities/user_progress.py +143,Unit,Enhet
 apps/erpnext/erpnext/stock/get_item_details.py +138,Please specify Company,Vennligst oppgi selskapet
 ,Customer Acquisition and Loyalty,Kunden Oppkjøp og Loyalty
@@ -2505,7 +2509,6 @@ DocType: Item,Retain Sample,Behold prøve
 apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.py +115,Row {0}: From Time and To Time is mandatory.,Rad {0}: Fra tid og Tid er obligatorisk.
 DocType: Stock Reconciliation Item,Amount Difference,beløp Difference
 apps/erpnext/erpnext/stock/get_item_details.py +356,Item Price added for {0} in Price List {1},Varen Pris lagt for {0} i Prisliste {1}
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py +15,Please setup Instructor Naming System in Education &gt; Education Settings,Vennligst oppsett Instruktør Navngivningssystem under utdanning&gt; Utdanningsinnstillinger
 apps/erpnext/erpnext/setup/doctype/sales_person/sales_person_tree.js +8,Please enter Employee Id of this sales person,Skriv inn Employee Id av denne salgs person
 DocType: Territory,Classification of Customers by region,Klassifisering av kunder etter region
 apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +71,In Production,I produksjon
@@ -2577,7 +2580,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.js +105,Item Variant Settings,Varia
 apps/erpnext/erpnext/manufacturing/page/production_analytics/production_analytics.js +39,Select Company...,Velg Company ...
 DocType: Leave Control Panel,Leave blank if considered for all departments,La stå tom hvis vurderes for alle avdelinger
 apps/erpnext/erpnext/config/hr.py +228,"Types of employment (permanent, contract, intern etc.).","Typer arbeid (fast, kontrakt, lærling etc.)."
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +432,{0} is mandatory for Item {1},{0} er obligatorisk for Element {1}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +434,{0} is mandatory for Item {1},{0} er obligatorisk for Element {1}
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js +136,"Item {0}: {1} qty produced, ","Vare {0}: {1} Antall produsert,"
 DocType: Payroll Entry,Fortnightly,hver fjortende dag
 DocType: Currency Exchange,From Currency,Fra Valuta
@@ -2661,7 +2664,7 @@ DocType: BOM Scrap Item,Basic Amount (Company Currency),Grunnbeløpet (Selskap V
 DocType: Student,Guardians,Voktere
 DocType: Shopping Cart Settings,Prices will not be shown if Price List is not set,Prisene vil ikke bli vist hvis prislisten er ikke satt
 DocType: Stock Entry,Total Incoming Value,Total Innkommende Verdi
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +360,Debit To is required,Debet Å kreves
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +362,Debit To is required,Debet Å kreves
 apps/erpnext/erpnext/utilities/activation.py +109,"Timesheets help keep track of time, cost and billing for activites done by your team","Timelister bidra til å holde styr på tid, kostnader og fakturering for aktiviteter gjort av teamet ditt"
 apps/erpnext/erpnext/stock/report/item_prices/item_prices.py +39,Purchase Price List,Kjøp Prisliste
 apps/erpnext/erpnext/config/buying.py +155,Templates of supplier scorecard variables.,Maler av leverandørens scorecard-variabler.
@@ -2676,7 +2679,7 @@ apps/erpnext/erpnext/public/js/utils.js +108,Total Unpaid: {0},Total Ubetalte: {
 DocType: BOM Website Operation,BOM Website Operation,BOM Nettstedet Operasjon
 apps/erpnext/erpnext/config/manufacturing.py +18,Generate Material Requests (MRP) and Production Orders.,Generere Material Requests (MRP) og produksjonsordrer.
 DocType: Supplier Scorecard,Supplier Score,Leverandørpoeng
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +194,Total Invoiced Amt,Total Fakturert Amt
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +208,Total Invoiced Amt,Total Fakturert Amt
 DocType: Supplier,Warn RFQs,Advarsel RFQs
 DocType: BOM,Conversion Rate,konverterings~~POS=TRUNC
 apps/erpnext/erpnext/templates/pages/product_search.html +3,Product Search,Produktsøk
@@ -2802,7 +2805,7 @@ DocType: BOM,"Specify the operations, operating cost and give a unique Operation
 DocType: Water Analysis,Origin,Opprinnelse
 apps/erpnext/erpnext/controllers/status_updater.py +201,This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?,Dette dokumentet er over grensen av {0} {1} for elementet {4}. Er du gjør en annen {3} mot samme {2}?
 apps/erpnext/erpnext/public/js/controllers/transaction.js +1154,Please set recurring after saving,Vennligst sett gjentakende etter lagring
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +767,Select change amount account,Velg endring mengde konto
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +769,Select change amount account,Velg endring mengde konto
 DocType: Purchase Invoice,Price List Currency,Prisliste Valuta
 DocType: Naming Series,User must always select,Brukeren må alltid velge
 DocType: Stock Settings,Allow Negative Stock,Tillat Negative Stock
@@ -2888,7 +2891,7 @@ DocType: Journal Entry Account,Payroll Entry,Lønninngang
 apps/erpnext/erpnext/setup/doctype/company/company.js +35,Make Tax Template,Lag skatteremne
 apps/erpnext/erpnext/public/js/conf.js +28,User Forum,bruker~~POS=TRUNC
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +318,Raw Materials cannot be blank.,Råvare kan ikke være blank.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +496,"Could not update stock, invoice contains drop shipping item.","Kunne ikke oppdatere lager, inneholder faktura slippe frakt element."
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +498,"Could not update stock, invoice contains drop shipping item.","Kunne ikke oppdatere lager, inneholder faktura slippe frakt element."
 DocType: Lab Test Sample,Lab Test Sample,Lab Test prøve
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +491,Quick Journal Entry,Hurtig Journal Entry
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js +200,You can not change rate if BOM mentioned agianst any item,Du kan ikke endre prisen dersom BOM nevnt agianst ethvert element
@@ -2896,7 +2899,7 @@ DocType: Restaurant,Invoice Series Prefix,Faktura Serie Prefiks
 DocType: Employee,Previous Work Experience,Tidligere arbeidserfaring
 DocType: Stock Entry,For Quantity,For Antall
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +205,Please enter Planned Qty for Item {0} at row {1},Skriv inn Planned Antall for Element {0} på rad {1}
-apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.py +101,Google Maps integration is not enabled,Integrasjon med Google Maps er ikke aktivert
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.py +93,Google Maps integration is not enabled,Integrasjon med Google Maps er ikke aktivert
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +241,{0} {1} is not submitted,{0} {1} ikke er sendt
 DocType: Member,Membership Expiry Date,Medlemskapets utløpsdato
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +127,{0} must be negative in return document,{0} må være negativ i retur dokument
@@ -3008,6 +3011,7 @@ DocType: Grant Application,Grant Application Details ,Gi søknadsdetaljer
 DocType: Purchase Receipt Item,Recd Quantity,Recd Antall
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py +65,Fee Records Created - {0},Fee Records Laget - {0}
 DocType: Asset Category Account,Asset Category Account,Asset Kategori konto
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +913,Row #{0} (Payment Table): Amount must be positive,Row # {0} (Betalingstabell): Beløpet må være positivt
 apps/erpnext/erpnext/regional/report/fichier_des_ecritures_comptables_[fec]/fichier_des_ecritures_comptables_[fec].py +44,CompteNum,CompteNum
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +137,Cannot produce more Item {0} than Sales Order quantity {1},Kan ikke produsere mer Element {0} enn Salgsordre kvantitet {1}
 apps/erpnext/erpnext/stock/doctype/item/item.js +362,Select Attribute Values,Velg Attributtverdier
@@ -3134,10 +3138,9 @@ apps/erpnext/erpnext/non_profit/doctype/grant_application/grant_application.js +
 apps/erpnext/erpnext/accounts/page/pos/pos.js +848,"LocalStorage is full, did not save","Localstorage er full, ikke redde"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +99,Row {0}: UOM Conversion Factor is mandatory,Rad {0}: målenheter omregningsfaktor er obligatorisk
 apps/erpnext/erpnext/utilities/user_progress.py +232,Room Capacity,Romkapasitet
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +85,Ref,Ref
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +90,Ref,Ref
 DocType: Lab Test,LP-,LP-
 DocType: Healthcare Settings,Registration Fee,Registreringsavgift
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +201,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Vennligst still inn navngivningsserien for {0} via Setup&gt; Settings&gt; Naming Series
 DocType: Budget,Cost Center,Kostnadssted
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +45,Voucher #,Kupong #
 DocType: Notification Control,Purchase Order Message,Innkjøpsordre Message
@@ -3154,7 +3157,7 @@ apps/erpnext/erpnext/config/selling.py +174,Track Leads by Industry Type.,Spor L
 apps/erpnext/erpnext/utilities/user_progress.py +98,Go to Letterheads,Gå til Letterheads
 DocType: Item Supplier,Item Supplier,Sak Leverandør
 apps/erpnext/erpnext/public/js/controllers/transaction.js +1255,Please enter Item Code to get batch no,Skriv inn Element kode for å få batch no
-apps/erpnext/erpnext/selling/doctype/quotation/quotation.js +876,Please select a value for {0} quotation_to {1},Velg en verdi for {0} quotation_to {1}
+apps/erpnext/erpnext/selling/doctype/quotation/quotation.js +880,Please select a value for {0} quotation_to {1},Velg en verdi for {0} quotation_to {1}
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +414,No Items selected for transfer,Ingen elementer valgt for overføring
 apps/erpnext/erpnext/config/selling.py +46,All Addresses.,Alle adresser.
 DocType: Company,Stock Settings,Aksje Innstillinger
@@ -3223,7 +3226,7 @@ DocType: Sensitivity Test Items,Sensitivity Test Items,Sensitivitetstestelemente
 DocType: Fees,Fees,avgifter
 DocType: Currency Exchange,Specify Exchange Rate to convert one currency into another,Spesifiser Exchange Rate å konvertere en valuta til en annen
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +159,Quotation {0} is cancelled,Sitat {0} er kansellert
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +106,Total Outstanding Amount,Totalt utestående beløp
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +114,Total Outstanding Amount,Totalt utestående beløp
 DocType: Sales Partner,Targets,Targets
 apps/erpnext/erpnext/regional/report/fichier_des_ecritures_comptables_[fec]/fichier_des_ecritures_comptables_[fec].js +54,Please register the SIREN number in the company information file,Vennligst registrer SIREN-nummeret i bedriftsinformasjonsfilen
 DocType: Price List,Price List Master,Prisliste Master
@@ -3408,7 +3411,7 @@ DocType: Purchase Invoice,Availed ITC Cess,Benyttet ITC Cess
 ,Student Monthly Attendance Sheet,Student Månedlig Oppmøte Sheet
 apps/erpnext/erpnext/accounts/doctype/shipping_rule/shipping_rule.py +96,Shipping rule only applicable for Selling,Fraktregel gjelder kun for salg
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +30,Project Start Date,Prosjekt startdato
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +13,Until,Inntil
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +18,Until,Inntil
 DocType: Rename Tool,Rename Log,Rename Logg
 apps/erpnext/erpnext/education/doctype/student_attendance/student_attendance.py +27,Student Group or Course Schedule is mandatory,Studentgruppe eller kursplan er obligatorisk
 apps/erpnext/erpnext/education/doctype/student_attendance/student_attendance.py +27,Student Group or Course Schedule is mandatory,Studentgruppe eller kursplan er obligatorisk
@@ -3433,6 +3436,7 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +137,Rese
 DocType: Program Enrollment Tool Student,Program Enrollment Tool Student,Program Påmelding Tool Student
 apps/erpnext/erpnext/assets/doctype/asset_maintenance/asset_maintenance.py +16,Start date should be less than end date for task {0},Startdato bør være mindre enn sluttdato for oppgaven {0}
 apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +25,Name or Email is mandatory,Navn eller E-post er obligatorisk
+DocType: Member,MEM-,med-
 DocType: Instructor,Instructor Log,Instruktørlogg
 DocType: Purchase Order Item,Returned Qty,Returnerte Stk
 DocType: Student,Exit,Utgang
@@ -3464,7 +3468,7 @@ DocType: Purchase Receipt Item Supplied,Purchase Receipt Item Supplied,Kvitterin
 apps/erpnext/erpnext/projects/report/daily_timesheet_summary/daily_timesheet_summary.py +24,To Datetime,Til Datetime
 apps/erpnext/erpnext/config/selling.py +297,Logs for maintaining sms delivery status,Logger for å opprettholde sms leveringsstatus
 DocType: Accounts Settings,Make Payment via Journal Entry,Utfør betaling via bilagsregistrering
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +204,Printed On,Trykt på
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +218,Printed On,Trykt på
 DocType: Item,Inspection Required before Delivery,Inspeksjon Påkrevd før Levering
 DocType: Item,Inspection Required before Purchase,Inspeksjon Påkrevd før kjøp
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +93,Pending Activities,Ventende Aktiviteter
@@ -3502,7 +3506,6 @@ apps/erpnext/erpnext/assets/doctype/asset_repair/asset_repair.py +14,Please sele
 DocType: Student Batch Attendance Tool,Student Batch Attendance Tool,Student Batch Oppmøte Tool
 apps/erpnext/erpnext/controllers/status_updater.py +210,Limit Crossed,Limit Krysset
 apps/erpnext/erpnext/education/report/assessment_plan_status/assessment_plan_status.js +22,Scheduled Upto,Planlagt Upto
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +51,Customer &gt; Customer Group &gt; Territory,Kunde&gt; Kundegruppe&gt; Territorium
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +55,Venture Capital,Venture Capital
 apps/erpnext/erpnext/education/doctype/academic_term/academic_term.py +40,An academic term with this 'Academic Year' {0} and 'Term Name' {1} already exists. Please modify these entries and try again.,Et semester med denne &#39;Academic Year&#39; {0} og &quot;Term Name {1} finnes allerede. Vennligst endre disse oppføringene og prøv igjen.
 DocType: UOM,Must be Whole Number,Må være hele tall
@@ -3641,7 +3644,7 @@ apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.py +3
 DocType: Asset,Fully Depreciated,fullt avskrevet
 DocType: Item Barcode,UPC-A,UPC-A
 ,Stock Projected Qty,Lager Antall projiserte
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +442,Customer {0} does not belong to project {1},Kunden {0} ikke hører til prosjektet {1}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +444,Customer {0} does not belong to project {1},Kunden {0} ikke hører til prosjektet {1}
 DocType: Employee Attendance Tool,Marked Attendance HTML,Merket Oppmøte HTML
 apps/erpnext/erpnext/utilities/activation.py +73,"Quotations are proposals, bids you have sent to your customers","Sitater er forslag, bud du har sendt til dine kunder"
 DocType: Sales Invoice,Customer's Purchase Order,Kundens innkjøpsordre
@@ -3812,7 +3815,7 @@ DocType: Purchase Invoice Item,Landed Cost Voucher Amount,Landed Cost Voucher Be
 ,Item Balance (Simple),Varebalanse (Enkel)
 apps/erpnext/erpnext/config/accounts.py +17,Bills raised by Suppliers.,Regninger oppdratt av leverandører.
 DocType: POS Profile,Write Off Account,Skriv Off konto
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +196,Debit Note Amt,Debet notat Amt
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +210,Debit Note Amt,Debet notat Amt
 apps/erpnext/erpnext/templates/print_formats/includes/taxes.html +5,Discount Amount,Rabattbeløp
 DocType: Purchase Invoice,Return Against Purchase Invoice,Tilbake mot fakturaen
 DocType: Item,Warranty Period (in days),Garantiperioden (i dager)
@@ -3989,6 +3992,7 @@ apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +16,{0}: F
 DocType: Task,depends_on,kommer an på
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py +60,Queued for updating latest price in all Bill of Materials. It may take a few minutes.,I kø for å oppdatere siste pris i alle Materialebevis. Det kan ta noen minutter.
 apps/erpnext/erpnext/accounts/doctype/account/account_tree.js +26,Name of new Account. Note: Please don't create accounts for Customers and Suppliers,Navn på ny konto. Merk: Vennligst ikke opprette kontoer for kunder og leverandører
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +201,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Vennligst still inn navngivningsserien for {0} via Setup&gt; Settings&gt; Naming Series
 apps/erpnext/erpnext/config/setup.py +37,Country wise default Address Templates,Country klok standardadresse Maler
 DocType: Water Analysis,Appearance,Utseende
 apps/erpnext/erpnext/stock/report/item_variant_details/item_variant_details.py +70,Avg. Buying Price List Rate,Nr. Kjøpe prisliste rate
@@ -4017,7 +4021,7 @@ DocType: Program Enrollment,School House,school House
 DocType: Serial No,Out of AMC,Ut av AMC
 apps/erpnext/erpnext/assets/doctype/asset/asset.py +82,Number of Depreciations Booked cannot be greater than Total Number of Depreciations,Antall Avskrivninger reservert kan ikke være større enn Totalt antall Avskrivninger
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.js +47,Make Maintenance Visit,Gjør Vedlikehold Visit
-apps/erpnext/erpnext/selling/doctype/customer/customer.py +217,Please contact to the user who have Sales Master Manager {0} role,Ta kontakt for brukeren som har salgs Master manager {0} rolle
+apps/erpnext/erpnext/selling/doctype/customer/customer.py +222,Please contact to the user who have Sales Master Manager {0} role,Ta kontakt for brukeren som har salgs Master manager {0} rolle
 DocType: Company,Default Cash Account,Standard Cash konto
 apps/erpnext/erpnext/config/accounts.py +62,Company (not Customer or Supplier) master.,Company (ikke kunde eller leverandør) mester.
 apps/erpnext/erpnext/education/doctype/student/student_dashboard.py +6,This is based on the attendance of this Student,Dette er basert på tilstedeværelse av denne Student
@@ -4086,10 +4090,10 @@ apps/erpnext/erpnext/assets/doctype/asset/asset.py +43,Item {0} must be a Fixed 
 apps/erpnext/erpnext/stock/doctype/item/item.js +343,Make Variants,Lag variasjoner
 DocType: Item,Default BOM,Standard BOM
 DocType: Project,Total Billed Amount (via Sales Invoices),Sum fakturert beløp (via salgsfakturaer)
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +105,Debit Note Amount,Debet Note Beløp
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +113,Debit Note Amount,Debet Note Beløp
 apps/erpnext/erpnext/accounts/doctype/share_transfer/share_transfer.py +106,"There are inconsistencies between the rate, no of shares and the amount calculated","Det er uoverensstemmelser mellom rente, antall aksjer og beregnet beløp"
 apps/erpnext/erpnext/setup/doctype/company/company.js +89,Please re-type company name to confirm,Vennligst re-type firmanavn for å bekrefte
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +197,Total Outstanding Amt,Total Outstanding Amt
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +211,Total Outstanding Amt,Total Outstanding Amt
 DocType: Journal Entry,Printing Settings,Utskriftsinnstillinger
 DocType: Employee Advance,Advance Account,Forhåndskonto
 DocType: Job Offer,Job Offer Terms,Jobbtilbudsbetingelser
@@ -4312,7 +4316,6 @@ apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +871,Receip
 ,Sales Register,Salg Register
 DocType: Daily Work Summary Group,Send Emails At,Send e-post til
 DocType: Quotation,Quotation Lost Reason,Sitat av Lost Reason
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +88,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Vennligst oppsett nummereringsserie for Tilstedeværelse via Oppsett&gt; Nummereringsserie
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py +374,Transaction reference no {0} dated {1},Transaksjonsreferanse ikke {0} datert {1}
 apps/erpnext/erpnext/setup/doctype/supplier_type/supplier_type.js +5,There is nothing to edit.,Det er ingenting å redigere.
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +116,Summary for this month and pending activities,Oppsummering for denne måneden og ventende aktiviteter
@@ -4323,7 +4326,7 @@ apps/erpnext/erpnext/public/js/financial_statements.js +56,Cash Flow Statement,K
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py +472,No material request created,Ingen materiell forespørsel opprettet
 apps/erpnext/erpnext/hr/doctype/employee_loan_application/employee_loan_application.py +23,Loan Amount cannot exceed Maximum Loan Amount of {0},Lånebeløp kan ikke overstige maksimalt lånebeløp på {0}
 apps/erpnext/erpnext/hr/report/vehicle_expenses/vehicle_expenses.py +22,License,Tillatelse
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +489,Please remove this Invoice {0} from C-Form {1},Vennligst fjern denne Faktura {0} fra C-Form {1}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +491,Please remove this Invoice {0} from C-Form {1},Vennligst fjern denne Faktura {0} fra C-Form {1}
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,Vennligst velg bære frem hvis du også vil ha med forrige regnskapsår balanse later til dette regnskapsåret
 DocType: GL Entry,Against Voucher Type,Mot Voucher Type
 DocType: Physician,Phone (R),Telefon (R)
@@ -4336,7 +4339,7 @@ DocType: Patient,B Negative,B Negativ
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py +25,Maintenance Status has to be Cancelled or Completed to Submit,Vedlikeholdsstatus må avbrytes eller fullføres for å sende inn
 DocType: Hotel Room,Hotel Room,Hotellrom
 apps/erpnext/erpnext/accounts/doctype/budget/budget.py +47,Account {0} does not belongs to company {1},Konto {0} ikke tilhører selskapet {1}
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +882,Serial Numbers in row {0} does not match with Delivery Note,Serienumre i rad {0} stemmer ikke overens med leveringsnotat
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +884,Serial Numbers in row {0} does not match with Delivery Note,Serienumre i rad {0} stemmer ikke overens med leveringsnotat
 DocType: Student,Guardian Details,Guardian Detaljer
 DocType: C-Form,C-Form,C-Form
 apps/erpnext/erpnext/config/hr.py +18,Mark Attendance for multiple employees,Mark Oppmøte for flere ansatte
@@ -4382,7 +4385,7 @@ DocType: Opening Invoice Creation Tool,Sales,Salgs
 DocType: Stock Entry Detail,Basic Amount,Grunnbeløp
 DocType: Training Event,Exam,Eksamen
 DocType: Complaint,Complaint,Klage
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +460,Warehouse required for stock Item {0},Warehouse nødvendig for lager Element {0}
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +462,Warehouse required for stock Item {0},Warehouse nødvendig for lager Element {0}
 DocType: Leave Allocation,Unused leaves,Ubrukte blader
 DocType: Patient,Alcohol Past Use,Alkohol Tidligere Bruk
 DocType: Fertilizer Content,Fertilizer Content,Gjødselinnhold
@@ -4414,7 +4417,6 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +28,Retail,Retail
 DocType: Student Attendance,Absent,Fraværende
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +591,Product Bundle,Produktet Bundle
 apps/erpnext/erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.py +38,Unable to find score starting at {0}. You need to have standing scores covering 0 to 100,Kan ikke finne poeng som starter ved {0}. Du må ha stående poeng som dekker 0 til 100
-apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +206,No submitted Delivery Notes found,Ingen sendte leveringsnotater funnet
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +212,Row {0}: Invalid reference {1},Rad {0}: Ugyldig referanse {1}
 DocType: Purchase Taxes and Charges Template,Purchase Taxes and Charges Template,Kjøpe skatter og avgifter Mal
 DocType: Timesheet,TS-,TS-
@@ -4442,7 +4444,6 @@ apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py +68,Next Date
 DocType: Lab Prescription,Test Code,Testkode
 apps/erpnext/erpnext/config/website.py +11,Settings for website homepage,Innstillinger for nettstedet hjemmeside
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py +40,RFQs are not allowed for {0} due to a scorecard standing of {1},RFQ er ikke tillatt for {0} på grunn av et resultatkort som står for {1}
-DocType: Delivery Stop,Select/Unselect Delivery Notes,Velg / avmarker leveringsnotater
 DocType: Job Offer,Awaiting Response,Venter på svar
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +60,Above,Fremfor
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js +1462,Total Amount {0},Totalt beløp {0}
@@ -4571,7 +4572,7 @@ apps/erpnext/erpnext/config/hr.py +115,Salary Components,lønn Components
 DocType: Program Enrollment Tool,New Academic Year,Nytt studieår
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +811,Return / Credit Note,Retur / kreditnota
 DocType: Stock Settings,Auto insert Price List rate if missing,Auto innsats Prisliste rente hvis mangler
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +104,Total Paid Amount,Totalt innbetalt beløp
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +112,Total Paid Amount,Totalt innbetalt beløp
 DocType: GST Settings,B2C Limit,B2C Limit
 DocType: Production Order Item,Transferred Qty,Overført Antall
 apps/erpnext/erpnext/config/learn.py +11,Navigating,Navigere
@@ -4633,7 +4634,7 @@ DocType: Products Settings,Products Settings,Produkter Innstillinger
 DocType: Lab Prescription,Test Created,Test laget
 DocType: Healthcare Settings,Custom Signature in Print,Tilpasset signatur i utskrift
 DocType: Account,Temporary,Midlertidig
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +95,Customer LPO No.,Kunde LPO nr.
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +102,Customer LPO No.,Kunde LPO nr.
 DocType: Program,Courses,kurs
 DocType: Monthly Distribution Percentage,Percentage Allocation,Prosentvis Allocation
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +128,Secretary,Sekretær
@@ -4684,7 +4685,7 @@ Updated via 'Time Log'",Minutter Oppdatert via &#39;Time Logg&#39;
 DocType: Customer,From Lead,Fra Lead
 apps/erpnext/erpnext/config/manufacturing.py +13,Orders released for production.,Bestillinger frigitt for produksjon.
 apps/erpnext/erpnext/public/js/account_tree_grid.js +66,Select Fiscal Year...,Velg regnskapsår ...
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +565,POS Profile required to make POS Entry,POS Profile nødvendig å foreta POS Entry
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +567,POS Profile required to make POS Entry,POS Profile nødvendig å foreta POS Entry
 DocType: Program Enrollment Tool,Enroll Students,Meld Studenter
 DocType: Lab Test,Approved Date,Godkjent dato
 apps/erpnext/erpnext/patches/v4_0/create_price_list_if_missing.py +21,Standard Selling,Standard Selling
@@ -4811,7 +4812,7 @@ DocType: Purchase Invoice,Tax ID,Skatt ID
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +192,Item {0} is not setup for Serial Nos. Column must be blank,Element {0} er ikke oppsett for Serial Nos. Kolonne må være tomt
 DocType: Accounts Settings,Accounts Settings,Regnskap Innstillinger
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.js +11,Approve,Vedta
-apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +51,"Malformatted address for {0}, please fix to continue.","Malformatted adresse for {0}, vær så snill å fikse for å fortsette."
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +69,"Malformatted address for {0}, please fix to continue.","Malformatted adresse for {0}, vær så snill å fikse for å fortsette."
 apps/erpnext/erpnext/accounts/doctype/account/account_tree.js +28,"Number of new Account, it will be included in the account name as a prefix","Antall ny konto, den vil bli inkludert i kontonavnet som prefiks"
 DocType: Maintenance Team Member,Team Member,Teammedlem
 apps/erpnext/erpnext/education/doctype/assessment_result_tool/assessment_result_tool.js +151,No Result to submit,Ingen resultat å sende inn
@@ -4840,7 +4841,7 @@ apps/erpnext/erpnext/public/js/utils/item_quick_entry.js +14,"Edit in full page 
 apps/erpnext/erpnext/healthcare/doctype/patient/patient_dashboard.py +10,Appointments and Consultations,Utnevnelser og konsultasjoner
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py +41,{0} - {1} is not enrolled in the Batch {2},{0} - {1} er ikke påmeldt i batch {2}
 apps/erpnext/erpnext/assets/doctype/asset/depreciation.py +113,"Asset {0} cannot be scrapped, as it is already {1}","Asset {0} kan ikke bli vraket, som det er allerede {1}"
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +67,Cheques Required,Sjekker påkrevd
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +72,Cheques Required,Sjekker påkrevd
 DocType: Task,Total Expense Claim (via Expense Claim),Total Expense krav (via Expense krav)
 apps/erpnext/erpnext/hr/doctype/employee_attendance_tool/employee_attendance_tool.js +177,Mark Absent,Mark Fraværende
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +40,Failed to setup company,Kunne ikke opprette selskapet
@@ -4848,7 +4849,7 @@ DocType: Asset Repair,Asset Repair,Asset Repair
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +142,Row {0}: Currency of the BOM #{1} should be equal to the selected currency {2},Rad {0}: valuta BOM # {1} bør være lik den valgte valutaen {2}
 DocType: Journal Entry Account,Exchange Rate,Vekslingskurs
 DocType: Patient,Additional information regarding the patient,Ytterligere informasjon om pasienten
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +583,Sales Order {0} is not submitted,Salgsordre {0} er ikke innsendt
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +585,Sales Order {0} is not submitted,Salgsordre {0} er ikke innsendt
 DocType: Homepage,Tag Line,tag Linje
 DocType: Fee Component,Fee Component,Fee Component
 apps/erpnext/erpnext/config/hr.py +204,Fleet Management,Flåtestyring
@@ -4891,7 +4892,7 @@ DocType: Project,Total Billable Amount (via Timesheets),Totalt fakturerbart bel�
 DocType: Agriculture Task,Previous Business Day,Tidligere arbeidsdag
 DocType: Employee Loan,Repay Fixed Amount per Period,Smelle fast beløp per periode
 apps/erpnext/erpnext/buying/utils.py +47,Please enter quantity for Item {0},Skriv inn antall for Element {0}
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +196,Credit Note Amt,Kreditt notat Amt
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +210,Credit Note Amt,Kreditt notat Amt
 DocType: Employee External Work History,Employee External Work History,Ansatt Ekstern Work History
 DocType: Opening Invoice Creation Tool,Purchase,Kjøp
 apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py +37,Balance Qty,Balanse Antall
@@ -4994,7 +4995,7 @@ DocType: Item Price,Item Price,Sak Pris
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +48,Soap & Detergent,Såpe og vaskemiddel
 DocType: BOM,Show Items,Vis Items
 apps/erpnext/erpnext/education/doctype/course_schedule/course_schedule.py +30,From Time cannot be greater than To Time.,Fra tid kan ikke være større enn til annen.
-apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +74,Do you want to notify all the customers by email?,Vil du varsle alle kundene via e-post?
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +92,Do you want to notify all the customers by email?,Vil du varsle alle kundene via e-post?
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +36,Motion Picture & Video,Motion Picture &amp; Video
 apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation_list.js +5,Ordered,Bestilt
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.js +51,Resume,Gjenoppta
@@ -5088,7 +5089,7 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py +22,Department Sto
 ,Item Delivery Date,Leveringsdato for vare
 DocType: Production Plan,Material Requested,Materiale som kreves
 DocType: Warehouse,PIN,PIN
-apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.py +124,Error '{0}' occured. Arguments {1}.,Feil &#39;{0}&#39; oppstod. Argumenter {1}.
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.py +116,Error '{0}' occured. Arguments {1}.,Feil &#39;{0}&#39; oppstod. Argumenter {1}.
 DocType: Bin,Reserved Qty for sub contract,Reservert antall for kontrakt
 DocType: Sales Invoice,Base Change Amount (Company Currency),Base Endre Beløp (Selskap Valuta)
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +304,No accounting entries for the following warehouses,Ingen regnskapspostene for følgende varehus
@@ -5189,7 +5190,6 @@ DocType: Project,Expected Start Date,Tiltredelse
 DocType: Purchase Invoice,04-Correction in Invoice,04-korreksjon i faktura
 apps/erpnext/erpnext/stock/doctype/item/item.js +60,Variant Details Report,Variant Detaljer Report
 DocType: Setup Progress Action,Setup Progress Action,Oppsett Progress Action
-apps/erpnext/erpnext/hr/doctype/employee/employee.py +24,Please setup Employee Naming System in Human Resource &gt; HR Settings,Vennligst oppsett Medarbeiders navngivningssystem i menneskelig ressurs&gt; HR-innstillinger
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py +36,Buying Price List,Kjøpe prisliste
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +49,Remove item if charges is not applicable to that item,Fjern artikkel om avgifter er ikke aktuelt til dette elementet
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py +21,Please select Maintenance Status as Completed or remove Completion Date,"Vennligst velg Vedlikeholdsstatus som Fullført, eller fjern sluttdato"
@@ -5255,7 +5255,7 @@ DocType: Cost Center,Cost Center Name,Kostnadssteds Name
 DocType: Student,B+,B +
 DocType: HR Settings,Max working hours against Timesheet,Max arbeidstid mot Timeregistrering
 DocType: Maintenance Schedule Detail,Scheduled Date,Planlagt dato
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +195,Total Paid Amt,Sum innskutt Amt
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +209,Total Paid Amt,Sum innskutt Amt
 DocType: SMS Center,Messages greater than 160 characters will be split into multiple messages,Meldinger som er større enn 160 tegn vil bli delt inn i flere meldinger
 DocType: Purchase Receipt Item,Received and Accepted,Mottatt og akseptert
 DocType: Hub Settings,Company and Seller Profile,Bedrift og selgerprofil
@@ -5322,7 +5322,7 @@ DocType: Item,Customer Code,Kunden Kode
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +220,Birthday Reminder for {0},Bursdag Påminnelse for {0}
 DocType: Asset Maintenance Task,Last Completion Date,Siste sluttdato
 apps/erpnext/erpnext/selling/report/inactive_customers/inactive_customers.py +72,Days Since Last Order,Dager siden siste Bestill
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +363,Debit To account must be a Balance Sheet account,Uttak fra kontoen må være en balansekonto
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +365,Debit To account must be a Balance Sheet account,Uttak fra kontoen må være en balansekonto
 DocType: Buying Settings,Naming Series,Navngi Series
 DocType: Leave Block List,Leave Block List Name,La Block List Name
 apps/erpnext/erpnext/hr/doctype/vehicle/vehicle.py +14,Insurance Start date should be less than Insurance End date,Forsikring Startdatoen må være mindre enn Forsikring Sluttdato
@@ -5348,11 +5348,11 @@ DocType: Vehicle Log,Refuelling Details,Fylle drivstoff Detaljer
 apps/erpnext/erpnext/config/hr.py +104,Generate Salary Slips,Generere lønnsslipper
 apps/erpnext/erpnext/agriculture/doctype/water_analysis/water_analysis.py +24,Lab result datetime cannot be before testing datetime,Lab-resultat datetime kan ikke være før testing av datetime
 DocType: POS Profile,Allow user to edit Discount,Tillat brukeren å redigere rabatt
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +55,Get customers from,Få kunder fra
 DocType: Production Plan Item,Include Exploded Items,Inkluder eksploderte elementer
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +45,"Buying must be checked, if Applicable For is selected as {0}","Kjøper må sjekkes, hvis dette gjelder for er valgt som {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,Rabatt må være mindre enn 100
 DocType: Shipping Rule,Restrict to Countries,Begrens til land
-apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +171,Select Delivery Notes,Velg Leveringsnotater
 DocType: Purchase Invoice,Write Off Amount (Company Currency),Skriv Off Beløp (Selskap Valuta)
 DocType: Sales Invoice Timesheet,Billing Hours,fakturerings~~POS=TRUNC Timer
 DocType: Project,Total Sales Amount (via Sales Order),Total salgsbeløp (via salgsordre)
@@ -5385,7 +5385,7 @@ DocType: Purchase Invoice,Y,Y
 DocType: Maintenance Visit,Maintenance Date,Vedlikehold Dato
 DocType: Purchase Invoice Item,Rejected Serial No,Avvist Serial No
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +82,Year start date or end date is overlapping with {0}. To avoid please set company,År startdato eller sluttdato er overlappende med {0}. For å unngå vennligst sett selskap
-apps/erpnext/erpnext/selling/doctype/customer/customer.py +124,Please mention the Lead Name in Lead {0},Vennligst nevne Lead Name in Lead {0}
+apps/erpnext/erpnext/selling/doctype/customer/customer.py +129,Please mention the Lead Name in Lead {0},Vennligst nevne Lead Name in Lead {0}
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py +156,Start date should be less than end date for Item {0},Startdato skal være mindre enn sluttdato for Element {0}
 DocType: Item,"Example: ABCD.#####
 If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Eksempel:. ABCD ##### Hvis serien er satt og serienummer er ikke nevnt i transaksjoner, og deretter automatisk serienummer vil bli opprettet basert på denne serien. Hvis du alltid vil eksplisitt nevne Serial Nos for dette elementet. la dette stå tomt."
@@ -5394,7 +5394,7 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +571,BOM and Manuf
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +44,Ageing Range 2,Aldring Range 2
 DocType: SG Creation Tool Course,Max Strength,Max Strength
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +28,Installing presets,Installere forhåndsinnstillinger
-apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +67,No Delivery Note selected for Customer {},Ingen leveringsnotering valgt for kunden {}
+apps/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.js +85,No Delivery Note selected for Customer {},Ingen leveringsnotering valgt for kunden {}
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py +25,BOM replaced,BOM erstattet
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1043,Select Items based on Delivery Date,Velg elementer basert på leveringsdato
 DocType: Grant Application,Has any past Grant Record,Har noen tidligere Grant Record
@@ -5485,7 +5485,7 @@ DocType: Shareholder,Hidden list maintaining the list of contacts linked to Shar
 apps/erpnext/erpnext/config/non_profit.py +63,Donor Type information.,Donor Type informasjon.
 DocType: Request for Quotation,Supplier Detail,Leverandør Detalj
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +100,Error in formula or condition: {0},Feil i formel eller betingelse: {0}
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +87,Invoiced Amount,Fakturert beløp
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +94,Invoiced Amount,Fakturert beløp
 apps/erpnext/erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.py +47,Criteria weights must add up to 100%,Kriterievekter må legge opp til 100%
 apps/erpnext/erpnext/education/doctype/course_schedule/course_schedule.js +7,Attendance,Oppmøte
 apps/erpnext/erpnext/public/js/pos/pos.html +104,Stock Items,lager~~POS=TRUNC
