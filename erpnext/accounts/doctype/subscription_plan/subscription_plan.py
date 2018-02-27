@@ -7,4 +7,9 @@ import frappe
 from frappe.model.document import Document
 
 class SubscriptionPlan(Document):
-	pass
+	def validate(self):
+		self.validate_interval_count()
+
+	def validate_interval_count(self):
+		if self.billing_interval_count < 1:
+			frappe.throw('Billing Interval Count cannot be less than 1')
