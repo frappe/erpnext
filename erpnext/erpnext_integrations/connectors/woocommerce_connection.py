@@ -181,42 +181,77 @@ def product():
 		print("Successfully deleted")
 
 
-# @frappe.whitelist(allow_guest=True)
-# def order():
-# 	pass
-# 	verify_request()
-# 	print(frappe.local.form_dict)
-# 	fd = frappe.local.form_dict
-# 	event = frappe.get_request_header("X-Wc-Webhook-Event")
+@frappe.whitelist(allow_guest=True)
+def order():
+	# pass
+	verify_request()
+	print(frappe.local.form_dict)
+	# fd = frappe.local.form_dict
 
-# 	if event == "created":
-# 		new_sales_order = frappe.new_doc("Sales Order")
-# 		new_sales_order.customer = fd.get("first_name")+" "+fd.get("last_name")
-# 		created_date = fd.get("date_created").split("T")
-# 		new_sales_order.transaction_date = created_date[0]
-# 		new_sales_order.po_no = fd.get("id")
-# 		new_sales_order.Sales Order-woocommerce_id = fd.get("id")
-# 		# new_sales_order.append("taxes",{
-# 		# 				"charge_type":"Actual",
-# 		# 				"account_head": "VAT 5% - Woo",
-# 		# 				"tax_amount": charge_amount,
-# 		# 				"description": charge_type
-# 		# 				})
-# 		ordered_items = fd.get("line_items")
-# 		for item in ordered_items:
+	if frappe.request.data:
+		fd = json.loads(frappe.request.data)
+	else:
+		return "success"
 
-# # 			found_item = frappe.get_doc({"doctype":"Item","item_name":item.get("name")})
-# # 			new_sales_order.append("items",{
-# # 				"item_code": found_item.item_code,
-# # 				"item_name": found_item.item_name,
-# # 				"description": found_item.description,
-# # 				"delivery_date":created_date[0],   #change delivery date after testing
-# # 				"uom": "Nos",
-# # 				"qty": item.get("quantity"),
-# # 				"rate": item.get("price")
-# # 				})
+	event = frappe.get_request_header("X-Wc-Webhook-Event")
+	print(event*10)
 
-# # 		new_sales_order.save()
+	print("This is Actual Data: ")
+	print(fd)
+
+	if event == "updated":
+		print("Inside updated of order")
+
+		raw_billing_data = fd.get("billing")  
+		customer_name = raw_billing_data.get("first_name") + " " + raw_billing_data.get("last_name")
+
+		print(raw_billing_data)
+
+		print(customer_name)
+
+		new_sales_order = frappe.new_doc("Sales Order")
+		new_sales_order.customer = customer_name
+		created_date = fd.get("date_created").split("T")
+		new_sales_order.transaction_date = created_date[0]
+		new_sales_order.po_no = fd.get("id")
+		new_sales_order.woocommerce_id = fd.get("id")
+		ordered_items = fd.get("line_items")
+		
+		for item in ordered_items:
+			woocomm_item_id = item.get("product_id")
+			found_item = frappe.get_doc("Item",{"woocommerce_id": woocomm_item_id})
+
+			new_sales_order.append("items",{
+				"item_code": found_item.item_code,
+				"item_name": found_item.item_name,
+				"description": found_item.description,
+				"delivery_date":created_date[0],   #change delivery date after testing
+				"uom": "Nos",
+				"qty": item.get("quantity"),
+				"rate": item.get("price")
+				})
+		
+		print(new_sales_order.as_dict)
+		
+
+		try:
+			new_sales_order.save(ignore_permissions=True)
+		except Exception as e:
+			for x in xrange(1,10):
+				print("SO.SAVE", e)
+	
+
+			# new_sales_order.append("taxes",{
+			# 				"charge_type":"Actual",
+			# 				"account_head": "VAT 5% - Woo",
+			# 				"tax_amount": charge_amount,
+			# 				"description": charge_type
+			# 				})
+
+			# frappe.db.commit()
+			
+
+		print("Order Completed")
 
 # # 	elif event == "updated":
 # # 		pass
