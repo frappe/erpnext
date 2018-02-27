@@ -43,6 +43,7 @@ class TestSubscriptions(unittest.TestCase):
 		self.assertEqual(subscription.trial_period_start, subscription.current_invoice_start)
 		self.assertEqual(subscription.trial_period_end, subscription.current_invoice_end)
 		self.assertEqual(subscription.invoices, [])
+		self.assertEqual(subscription.status, 'Trialling')
 
 		subscription.delete()
 
@@ -57,6 +58,7 @@ class TestSubscriptions(unittest.TestCase):
 		self.assertEqual(subscription.current_invoice_start, getdate(nowdate()))
 		self.assertEqual(subscription.current_invoice_end, get_last_day(nowdate()))
 		self.assertEqual(len(subscription.invoices), 1)
+		self.assertEqual(subscription.status, 'Active')
 
 		subscription.delete()
 
