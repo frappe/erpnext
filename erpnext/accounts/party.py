@@ -439,7 +439,6 @@ def get_dashboard_info(party_type, party):
 		where {2}=%s and docstatus=1 and posting_date between %s and %s
 	""".format(total_field, doctype, party_type.lower()),
 	(party, current_fiscal_year.year_start_date, current_fiscal_year.year_end_date))
-	
 	total_unpaid = frappe.db.sql("""
 		select sum(debit_in_account_currency) - sum(credit_in_account_currency)
 		from `tabGL Entry`
