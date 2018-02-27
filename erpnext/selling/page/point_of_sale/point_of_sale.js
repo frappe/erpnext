@@ -257,12 +257,16 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			frappe.msgprint(__("Quantity must be positive"));
 			value = item.qty;
 		} else {
-			item[field] = value;
-			if (field == "serial_no" && value) {
-				let serial_nos = value.split("\n");
-				item["qty"] = serial_nos.filter(d => {
-					return d!=="";
-				}).length;
+			if (in_list(["qty", "serial_no", "batch"], field)) {
+				item[field] = value;
+				if (field == "serial_no" && value) {
+					let serial_nos = value.split("\n");
+					item["qty"] = serial_nos.filter(d => {
+						return d!=="";
+					}).length;
+				}
+			} else {
+				return frappe.model.set_value(item.doctype, item.name, field, value);
 			}
 		}
 
@@ -1475,7 +1479,7 @@ class Payment {
 				fieldname: p.mode_of_payment,
 				default: p.amount,
 				onchange: () => {
-					const value = this.dialog.get_value(this.fieldname);
+					const value = this.dialog.get_value(this.fieldname) || 0;
 					me.update_payment_value(this.fieldname, value);
 				}
 			};
