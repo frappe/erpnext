@@ -158,8 +158,8 @@ class Subscriptions(Document):
 
 		if plan_items:
 			item_names = frappe.db.sql(
-				'select item as item_code, cost as rate from `tabSubscription Plan` where name=%s',
-				plan_items, as_dict=1
+				'select item as item_code, cost as rate from `tabSubscription Plan` where name in %s',
+				(plan_items,), as_dict=1
 			)
 			return item_names
 
