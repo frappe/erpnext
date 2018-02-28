@@ -504,4 +504,4 @@ execute:frappe.delete_doc('DocType', 'Production Planning Tool', ignore_missing=
 erpnext.patches.v10_0.migrate_daily_work_summary_settings_to_daily_work_summary_group
 erpnext.patches.v10_0.add_default_cash_flow_mappers
 erpnext.patches.v11_0.make_quality_inspection_template
-erpnext.patches.v10_0.update_territory_and_customer_group
+# erpnext.patches.v10_0.update_territory_and_customer_group

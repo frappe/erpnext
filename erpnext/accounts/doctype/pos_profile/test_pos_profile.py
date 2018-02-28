@@ -25,8 +25,8 @@ class TestPOSProfile(unittest.TestCase):
 			products_count = frappe.db.sql(""" select count(name) from tabItem where item_group = '_Test Item Group'""", as_list=1)
 			customers_count = frappe.db.sql(""" select count(name) from tabCustomer where customer_group = '_Test Customer Group'""")
 
-			self.assertEquals(len(items), products_count[0][0])
-			self.assertEquals(len(customers), customers_count[0][0])
+			self.assertEqual(len(items), products_count[0][0])
+			self.assertEqual(len(customers), customers_count[0][0])
 
 		frappe.db.sql("delete from `tabPOS Profile`")
 

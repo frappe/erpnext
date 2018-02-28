@@ -45,7 +45,7 @@ class TestPricingRule(unittest.TestCase):
 			"name": None
 		})
 		details = get_item_details(args)
-		self.assertEquals(details.get("discount_percentage"), 10)
+		self.assertEqual(details.get("discount_percentage"), 10)
 
 		prule = frappe.get_doc(test_record.copy())
 		prule.applicable_for = "Customer"
@@ -56,7 +56,7 @@ class TestPricingRule(unittest.TestCase):
 		prule.discount_percentage = 20
 		prule.insert()
 		details = get_item_details(args)
-		self.assertEquals(details.get("discount_percentage"), 20)
+		self.assertEqual(details.get("discount_percentage"), 20)
 
 		prule = frappe.get_doc(test_record.copy())
 		prule.apply_on = "Item Group"
@@ -67,7 +67,7 @@ class TestPricingRule(unittest.TestCase):
 
 		args.customer = "_Test Customer 1"
 		details = get_item_details(args)
-		self.assertEquals(details.get("discount_percentage"), 10)
+		self.assertEqual(details.get("discount_percentage"), 10)
 
 		prule = frappe.get_doc(test_record.copy())
 		prule.applicable_for = "Campaign"
@@ -79,7 +79,7 @@ class TestPricingRule(unittest.TestCase):
 
 		args.campaign = "_Test Campaign"
 		details = get_item_details(args)
-		self.assertEquals(details.get("discount_percentage"), 5)
+		self.assertEqual(details.get("discount_percentage"), 5)
 
 		frappe.db.sql("update `tabPricing Rule` set priority=NULL where campaign='_Test Campaign'")
 		from erpnext.accounts.doctype.pricing_rule.pricing_rule	import MultiplePricingRuleConflict
@@ -87,7 +87,7 @@ class TestPricingRule(unittest.TestCase):
 
 		args.item_code = "_Test Item 2"
 		details = get_item_details(args)
-		self.assertEquals(details.get("discount_percentage"), 15)
+		self.assertEqual(details.get("discount_percentage"), 15)
 
 		frappe.db.sql("delete from `tabPricing Rule`")
 
@@ -135,8 +135,8 @@ class TestPricingRule(unittest.TestCase):
 			"name": None
 		})
 		details = get_item_details(args)
-		self.assertEquals(details.get("margin_type"), "Percentage")
-		self.assertEquals(details.get("margin_rate_or_amount"), 10)
+		self.assertEqual(details.get("margin_type"), "Percentage")
+		self.assertEqual(details.get("margin_rate_or_amount"), 10)
 
 		frappe.db.sql("delete from `tabPricing Rule`")
 
@@ -193,7 +193,7 @@ class TestPricingRule(unittest.TestCase):
 		})
 
 		details = get_item_details(args)
-		self.assertEquals(details.get("discount_percentage"), 7.5)
+		self.assertEqual(details.get("discount_percentage"), 7.5)
 
 		# add a new pricing rule for that item code, it should take priority
 		frappe.get_doc({
@@ -210,7 +210,7 @@ class TestPricingRule(unittest.TestCase):
 		}).insert()
 
 		details = get_item_details(args)
-		self.assertEquals(details.get("discount_percentage"), 17.5)
+		self.assertEqual(details.get("discount_percentage"), 17.5)
 
 	def test_pricing_rule_for_stock_qty(self):
 		frappe.db.sql("delete from `tabPricing Rule`")
@@ -245,16 +245,16 @@ class TestPricingRule(unittest.TestCase):
 		so.items[0].price_list_rate = 100
 		so.submit()
 		so = frappe.get_doc('Sales Order', so.name)
-		self.assertEquals(so.items[0].discount_percentage, 17.5)
-		self.assertEquals(so.items[0].rate, 82.5)
+		self.assertEqual(so.items[0].discount_percentage, 17.5)
+		self.assertEqual(so.items[0].rate, 82.5)
 
 		# Without pricing rule
 		so = make_sales_order(item_code="_Test Item", qty=2, uom="Box", do_not_submit=True)
 		so.items[0].price_list_rate = 100
 		so.submit()
 		so = frappe.get_doc('Sales Order', so.name)
-		self.assertEquals(so.items[0].discount_percentage, 0)
-		self.assertEquals(so.items[0].rate, 100)
+		self.assertEqual(so.items[0].discount_percentage, 0)
+		self.assertEqual(so.items[0].rate, 100)
 
 	def test_pricing_rule_with_margin_and_discount(self):
 		frappe.delete_doc_if_exists('Pricing Rule', '_Test Pricing Rule')
@@ -265,16 +265,16 @@ class TestPricingRule(unittest.TestCase):
 		si.insert(ignore_permissions=True)
 
 		item = si.items[0]
-		self.assertEquals(item.rate, 1100)
-		self.assertEquals(item.margin_rate_or_amount, 10)
+		self.assertEqual(item.rate, 1100)
+		self.assertEqual(item.margin_rate_or_amount, 10)
 
 		# With discount
 		item.discount_percentage = 10
 		si.payment_schedule = []
 		si.save()
 		item = si.items[0]
-		self.assertEquals(item.rate, 990)
-		self.assertEquals(item.discount_percentage, 10)
+		self.assertEqual(item.rate, 990)
+		self.assertEqual(item.discount_percentage, 10)
 		frappe.db.sql("delete from `tabPricing Rule`")
 
 def make_pricing_rule(**args):

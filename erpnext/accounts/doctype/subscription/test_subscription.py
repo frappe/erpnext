@@ -18,12 +18,12 @@ class TestSubscription(unittest.TestCase):
 		qo.submit()
 
 		doc = make_subscription(reference_document=qo.name)
-		self.assertEquals(doc.next_schedule_date, today())
+		self.assertEqual(doc.next_schedule_date, today())
 		make_subscription_entry()
 		frappe.db.commit()
 
 		quotation = frappe.get_doc(doc.reference_doctype, doc.reference_document)
-		self.assertEquals(quotation.subscription, doc.name)
+		self.assertEqual(quotation.subscription, doc.name)
 
 		new_quotation = frappe.db.get_value('Quotation',
 			{'subscription': doc.name, 'name': ('!=', quotation.name)}, 'name')
@@ -31,10 +31,10 @@ class TestSubscription(unittest.TestCase):
 		new_quotation = frappe.get_doc('Quotation', new_quotation)
 
 		for fieldname in ['customer', 'company', 'order_type', 'total', 'net_total']:
-			self.assertEquals(quotation.get(fieldname), new_quotation.get(fieldname))
+			self.assertEqual(quotation.get(fieldname), new_quotation.get(fieldname))
 
 		for fieldname in ['item_code', 'qty', 'rate', 'amount']:
-			self.assertEquals(quotation.items[0].get(fieldname),
+			self.assertEqual(quotation.items[0].get(fieldname),
 				new_quotation.items[0].get(fieldname))
 
 	def test_monthly_subscription_for_so(self):
@@ -60,7 +60,7 @@ class TestSubscription(unittest.TestCase):
 
 		make_subscription_entry()
 		docnames = frappe.get_all(doc.reference_doctype, {'subscription': doc.name})
-		self.assertEquals(len(docnames), 1)
+		self.assertEqual(len(docnames), 1)
 
 		doc = frappe.get_doc('Subscription', doc.name)
 		doc.disabled = 0
@@ -70,7 +70,7 @@ class TestSubscription(unittest.TestCase):
 		make_subscription_entry()
 
 		docnames = frappe.get_all(doc.reference_doctype, {'subscription': doc.name})
-		self.assertEquals(len(docnames), months)
+		self.assertEqual(len(docnames), months)
 
 quotation_records = frappe.get_test_records('Quotation')
 

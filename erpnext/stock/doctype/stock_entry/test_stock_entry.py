@@ -310,9 +310,9 @@ class TestStockEntry(unittest.TestCase):
 		sle.sort(key=lambda x: x[0])
 
 		for i, sle in enumerate(sle):
-			self.assertEquals(expected_sle[i][0], sle[0])
-			self.assertEquals(expected_sle[i][1], sle[1])
-			self.assertEquals(expected_sle[i][2], sle[2])
+			self.assertEqual(expected_sle[i][0], sle[0])
+			self.assertEqual(expected_sle[i][1], sle[1])
+			self.assertEqual(expected_sle[i][2], sle[2])
 
 	def check_gl_entries(self, voucher_type, voucher_no, expected_gl_entries):
 		expected_gl_entries.sort(key=lambda x: x[0])
@@ -324,9 +324,9 @@ class TestStockEntry(unittest.TestCase):
 		self.assertTrue(gl_entries)
 		gl_entries.sort(key=lambda x: x[0])
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_gl_entries[i][0], gle[0])
-			self.assertEquals(expected_gl_entries[i][1], gle[1])
-			self.assertEquals(expected_gl_entries[i][2], gle[2])
+			self.assertEqual(expected_gl_entries[i][0], gle[0])
+			self.assertEqual(expected_gl_entries[i][1], gle[1])
+			self.assertEqual(expected_gl_entries[i][2], gle[2])
 
 	def test_serial_no_not_reqd(self):
 		se = frappe.copy_doc(test_records[0])
@@ -669,8 +669,8 @@ class TestStockEntry(unittest.TestCase):
 		qty_in_usable_warehouse = get_batch_qty(receipt_entry.get("items")[0].batch_no, "_Test Warehouse - _TC", "_Test Item")
 		qty_in_retention_warehouse = get_batch_qty(receipt_entry.get("items")[0].batch_no, "Test Warehouse for Sample Retention - _TC", "_Test Item")
 		
-		self.assertEquals(qty_in_usable_warehouse, 36)
-		self.assertEquals(qty_in_retention_warehouse, 4)
+		self.assertEqual(qty_in_usable_warehouse, 36)
+		self.assertEqual(qty_in_retention_warehouse, 4)
 
 	def test_quality_check(self):
 		item_code = "_Test Item For QC"
