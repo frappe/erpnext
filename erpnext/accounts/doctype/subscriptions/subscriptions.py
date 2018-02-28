@@ -13,6 +13,9 @@ SUBSCRIPTION_SETTINGS = frappe.get_single('Subscription Settings')
 
 
 class Subscriptions(Document):
+	def before_save(self):
+		self.set_status()
+
 	def before_insert(self):
 		# update start just before the subscription doc is created
 		self.update_subscription_period()
@@ -78,14 +81,13 @@ class Subscriptions(Document):
 
 			return data
 
-	def before_save(self):
-		self.set_status()
-
 	def set_status(self):
 		if self.is_trialling():
 			self.status = 'Trialling'
 		elif self.status == 'Past Due' and self.is_past_grace_period():
 			self.status = 'Canceled' if cint(SUBSCRIPTION_SETTINGS.cancel_after_grace) else 'Unpaid'
+		elif self.status == 'Past Due' and not self.has_outstanding_invoice():
+			self.status = 'Active'
 		elif self.current_invoice_is_past_due():
 			self.status = 'Past Due'
 		elif self.is_new_subscription():
@@ -142,8 +144,7 @@ class Subscriptions(Document):
 
 	def after_insert(self):
 		# todo: deal with users who collect prepayments. Maybe a new Subscription Invoice doctype?
-		if not self.is_trialling() and nowdate() > self.current_invoice_end:
-			self.generate_invoice()
+		pass
 
 	def generate_invoice(self):
 		invoice = self.create_invoice()
@@ -208,3 +209,39 @@ class Subscriptions(Document):
 
 	def subscription_updated(self, invoice):
 		self.update_subscription_period()
+
+	def process(self):
+		"""
+		To be called by task periodically. It checks the subscription and takes appropriate action
+		as need be. It calls these methods in this order:
+		1. `process_for_active`
+		2. `process_for_past_due`
+		3. 
+		"""
+		if self.status == 'Active':
+			self.process_for_active()
+		elif self.status == 'Past Due':
+			self.process_for_past_due_date()
+		# process_for_unpaid()
+
+	def process_for_active(self):
+		print 'processing for active'
+		if nowdate() > self.current_invoice_end and not self.has_outstanding_invoice():
+			print 'generating invoice'
+			self.generate_invoice()
+			print 'invoice generated'
+
+		if self.current_invoice_is_past_due():
+			print 'current invoice is past due'
+			self.status = 'Past Due'
+
+	def process_for_past_due_date(self):
+		if not self.has_outstanding_invoice():
+			self.status = 'Active'
+			self.update_subscription_period()
+		else:
+			self.set_status()
+
+	def has_outstanding_invoice(self):
+		current_invoice = self.get_current_invoice()
+		return current_invoice.posting_date != self.current_invoice_start
