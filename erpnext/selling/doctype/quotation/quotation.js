@@ -42,7 +42,11 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		var me = this;
 
 		if (doc.__islocal) {
-			this.frm.set_value('valid_till', frappe.datetime.add_months(doc.transaction_date, 1))
+			if(frappe.boot.sysdefaults.quotation_valid_till){
+				this.frm.set_value('valid_till', frappe.datetime.add_days(doc.transaction_date, frappe.boot.sysdefaults.quotation_valid_till));
+			} else {
+				this.frm.set_value('valid_till', frappe.datetime.add_months(doc.transaction_date, 1));
+			}
 		}
 
 		if(doc.docstatus == 1 && doc.status!=='Lost') {

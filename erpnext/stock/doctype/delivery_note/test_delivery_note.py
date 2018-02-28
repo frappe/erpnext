@@ -12,7 +12,7 @@ from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.accounts.utils import get_balance_on
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
 	import get_gl_entries, set_perpetual_inventory
-from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice, make_delivery_trip
 from erpnext.stock.doctype.stock_entry.test_stock_entry \
 	import make_stock_entry, make_serialized_item, get_qty_after_transaction
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, SerialNoWarehouseError
@@ -563,6 +563,11 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEqual(dn.get("items")[0].billed_amt, 1000)
 		self.assertEqual(dn.per_billed, 100)
 		self.assertEqual(dn.status, "Completed")
+
+	def test_delivery_trip(self):
+		dn = create_delivery_note()
+		dt = make_delivery_trip(dn.name)
+		self.assertEqual(dn.name, dt.delivery_stops[0].delivery_note)
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")

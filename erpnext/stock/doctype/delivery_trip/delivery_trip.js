@@ -36,6 +36,24 @@ frappe.ui.form.on('Delivery Trip', {
 				frm.trigger('notify_customers');
 			});
 		}
+
+		if (frm.doc.docstatus===0) {
+			frm.add_custom_button(__('Delivery Note'), () => {
+				erpnext.utils.map_current_doc({
+					method: "erpnext.stock.doctype.delivery_note.delivery_note.make_delivery_trip",
+					source_doctype: "Delivery Note",
+					target: frm,
+					date_field: "posting_date",
+					setters: {
+						company: frm.doc.company,
+					},
+					get_query_filters: {
+						docstatus: 1,
+						company: frm.doc.company,
+					}
+				})
+			}, __("Get customers from"));
+		}
 	},
 
 	calculate_arrival_time: function (frm) {
@@ -154,58 +172,5 @@ frappe.ui.form.on('Delivery Stop', {
 		} else {
 			frappe.model.set_value(cdt, cdn, "customer_contact", "");
 		}
-	},
-
-	select_delivery_notes: function (frm, cdt, cdn) {
-		var row = locals[cdt][cdn];
-		frappe.call({
-			method: "erpnext.stock.doctype.delivery_trip.delivery_trip.get_delivery_notes",
-			args: {"customer": row.customer},
-			callback: function (r) {
-				var delivery_notes = [];
-				$.each(r.message, function (field, value) {
-					delivery_notes.push(value.name);
-				});
-				if (r.message) {
-					var d = new frappe.ui.Dialog({
-						title: __("Select Delivery Notes"),
-						fields: [{fieldtype: "HTML", fieldname: "delivery_notes_html"}]
-					});
-					var html = $(`
-						<div style="border: 1px solid #d1d8dd">
-							<div class="list-item list-item--head">
-								<div class="list-item__content list-item__content--flex-2">
-									${__('Delivery Notes')}
-								</div>
-							</div>
-							${delivery_notes.map(delivery_note => `
-								<div class="list-item">
-									<div class="list-item__content list-item__content--flex-2">
-										<label>
-										<input type="checkbox" data-delivery-note="${delivery_note}" checked="checked"/>
-										${delivery_note}
-										</label>
-									</div>
-								</div>
-							`).join("")}
-						</div>
-					`);
-
-					var delivery_notes_el = d.fields_dict.delivery_notes_html.$wrapper.html(html);
-
-					d.set_primary_action(__("Select"), function () {
-						var delivery_notes = delivery_notes_el.find('input[type=checkbox]:checked')
-							.map((i, el) => $(el).attr('data-delivery-note')).toArray();
-						if (!delivery_notes) return;
-						frappe.model.set_value(cdt, cdn, "delivery_notes", delivery_notes.join(","));
-						d.hide();
-					});
-					d.show();
-				}
-				else {
-					frappe.msgprint(__("No submitted Delivery Notes found"));
-				}
-			}
-		});
 	}
 });
