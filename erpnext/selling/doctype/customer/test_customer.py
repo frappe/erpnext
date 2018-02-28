@@ -54,7 +54,7 @@ class TestCustomer(unittest.TestCase):
 		details = get_party_details("_Test Customer")
 
 		for key, value in iteritems(to_check):
-			self.assertEquals(value, details.get(key))
+			self.assertEqual(value, details.get(key))
 
 	def test_rename(self):
 		# delete communication linked to these 2 customers
@@ -74,7 +74,7 @@ class TestCustomer(unittest.TestCase):
 		self.assertFalse(frappe.db.exists("Customer", "_Test Customer 1"))
 
 		# test that comment gets linked to renamed doc
-		self.assertEquals(frappe.db.get_value("Communication", {
+		self.assertEqual(frappe.db.get_value("Communication", {
 			"communication_type": "Comment",
 			"reference_doctype": "Customer",
 			"reference_name": "_Test Customer 1 Renamed"
@@ -125,9 +125,9 @@ class TestCustomer(unittest.TestCase):
 		duplicate_customer = frappe.get_doc(
 			get_customer_dict('_Test Customer 1')).insert(ignore_permissions=True)
 
-		self.assertEquals("_Test Customer 1", test_customer_1.name)
-		self.assertEquals("_Test Customer 1 - 1", duplicate_customer.name)
-		self.assertEquals(test_customer_1.customer_name, duplicate_customer.customer_name)
+		self.assertEqual("_Test Customer 1", test_customer_1.name)
+		self.assertEqual("_Test Customer 1 - 1", duplicate_customer.name)
+		self.assertEqual(test_customer_1.customer_name, duplicate_customer.customer_name)
 
 	def get_customer_outstanding_amount(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
