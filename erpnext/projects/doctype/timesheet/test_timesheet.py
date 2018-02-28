@@ -17,21 +17,21 @@ class TestTimesheet(unittest.TestCase):
 		make_salary_structure("_T-Employee-0001")
 		timesheet = make_timesheet("_T-Employee-0001", simulate=True, billable=1)
 
-		self.assertEquals(timesheet.total_hours, 2)
-		self.assertEquals(timesheet.total_billable_hours, 2)
-		self.assertEquals(timesheet.time_logs[0].billing_rate, 50)
-		self.assertEquals(timesheet.time_logs[0].billing_amount, 100)
-		self.assertEquals(timesheet.total_billable_amount, 100)
+		self.assertEqual(timesheet.total_hours, 2)
+		self.assertEqual(timesheet.total_billable_hours, 2)
+		self.assertEqual(timesheet.time_logs[0].billing_rate, 50)
+		self.assertEqual(timesheet.time_logs[0].billing_amount, 100)
+		self.assertEqual(timesheet.total_billable_amount, 100)
 
 	def test_timesheet_billing_amount_not_billable(self):
 		make_salary_structure("_T-Employee-0001")
 		timesheet = make_timesheet("_T-Employee-0001", simulate=True, billable=0)
 
-		self.assertEquals(timesheet.total_hours, 2)
-		self.assertEquals(timesheet.total_billable_hours, 0)
-		self.assertEquals(timesheet.time_logs[0].billing_rate, 0)
-		self.assertEquals(timesheet.time_logs[0].billing_amount, 0)
-		self.assertEquals(timesheet.total_billable_amount, 0)
+		self.assertEqual(timesheet.total_hours, 2)
+		self.assertEqual(timesheet.total_billable_hours, 0)
+		self.assertEqual(timesheet.time_logs[0].billing_rate, 0)
+		self.assertEqual(timesheet.time_logs[0].billing_amount, 0)
+		self.assertEqual(timesheet.total_billable_amount, 0)
 
 	def test_salary_slip_from_timesheet(self):
 		salary_structure = make_salary_structure("_T-Employee-0001")
@@ -39,18 +39,18 @@ class TestTimesheet(unittest.TestCase):
 		salary_slip = make_salary_slip(timesheet.name)
 		salary_slip.submit()
 
-		self.assertEquals(salary_slip.total_working_hours, 2)
-		self.assertEquals(salary_slip.hour_rate, 50)
-		self.assertEquals(salary_slip.net_pay, 150)
-		self.assertEquals(salary_slip.timesheets[0].time_sheet, timesheet.name)
-		self.assertEquals(salary_slip.timesheets[0].working_hours, 2)
+		self.assertEqual(salary_slip.total_working_hours, 2)
+		self.assertEqual(salary_slip.hour_rate, 50)
+		self.assertEqual(salary_slip.net_pay, 150)
+		self.assertEqual(salary_slip.timesheets[0].time_sheet, timesheet.name)
+		self.assertEqual(salary_slip.timesheets[0].working_hours, 2)
 		
 		timesheet = frappe.get_doc('Timesheet', timesheet.name)
-		self.assertEquals(timesheet.status, 'Payslip')
+		self.assertEqual(timesheet.status, 'Payslip')
 		salary_slip.cancel()
 
 		timesheet = frappe.get_doc('Timesheet', timesheet.name)
-		self.assertEquals(timesheet.status, 'Submitted')
+		self.assertEqual(timesheet.status, 'Submitted')
 
 	def test_sales_invoice_from_timesheet(self):
 		timesheet = make_timesheet("_T-Employee-0001", simulate=True, billable=1)
@@ -58,14 +58,14 @@ class TestTimesheet(unittest.TestCase):
 		sales_invoice.due_date = nowdate()
 		sales_invoice.submit()
 		timesheet = frappe.get_doc('Timesheet', timesheet.name)
-		self.assertEquals(sales_invoice.total_billing_amount, 100)
-		self.assertEquals(timesheet.status, 'Billed')
-		self.assertEquals(sales_invoice.customer, '_Test Customer')
+		self.assertEqual(sales_invoice.total_billing_amount, 100)
+		self.assertEqual(timesheet.status, 'Billed')
+		self.assertEqual(sales_invoice.customer, '_Test Customer')
 
 		item = sales_invoice.items[0]
-		self.assertEquals(item.item_code, '_Test Item')
-		self.assertEquals(item.qty, 2.00)
-		self.assertEquals(item.rate, 50.00)
+		self.assertEqual(item.item_code, '_Test Item')
+		self.assertEqual(item.qty, 2.00)
+		self.assertEqual(item.rate, 50.00)
 
 	def test_timesheet_billing_based_on_project(self):
 		timesheet = make_timesheet("_T-Employee-0001", simulate=True, billable=1, project = '_Test Project', company='_Test Company')
@@ -74,8 +74,8 @@ class TestTimesheet(unittest.TestCase):
 		sales_invoice.submit()
 
 		ts = frappe.get_doc('Timesheet', timesheet.name)
-		self.assertEquals(ts.per_billed, 100)
-		self.assertEquals(ts.time_logs[0].sales_invoice, sales_invoice.name)
+		self.assertEqual(ts.per_billed, 100)
+		self.assertEqual(ts.time_logs[0].sales_invoice, sales_invoice.name)
 
 	def test_timesheet_time_overlap(self):
 		settings = frappe.get_single('Projects Settings')
