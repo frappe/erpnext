@@ -3,10 +3,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, math
+import frappe, math, json
 import erpnext
 from frappe import _
 from frappe.utils import flt, rounded, add_months, nowdate
+from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.accounts_controller import AccountsController
 
 class Loan(AccountsController):
@@ -56,7 +57,6 @@ class Loan(AccountsController):
 		self.repayment_schedule = []
 		payment_date = self.disbursement_date
 		balance_amount = self.loan_amount
-
 		while(balance_amount > 0):
 			interest_amount = rounded(balance_amount * flt(self.rate_of_interest) / (12*100))
 			principal_amount = self.monthly_repayment_amount - interest_amount
@@ -67,7 +67,6 @@ class Loan(AccountsController):
 				balance_amount = 0.0
 
 			total_payment = principal_amount + interest_amount
-
 			self.append("repayment_schedule", {
 				"payment_date": payment_date,
 				"principal_amount": principal_amount,
@@ -75,7 +74,6 @@ class Loan(AccountsController):
 				"total_payment": total_payment,
 				"balance_loan_amount": balance_amount
 			})
-
 			next_payment_date = add_months(payment_date, 1)
 			payment_date = next_payment_date
 
@@ -88,10 +86,21 @@ class Loan(AccountsController):
 	def calculate_totals(self):
 		self.total_payment = 0
 		self.total_interest_payable = 0
+		self.total_amount_paid = 0
 		for data in self.repayment_schedule:
 			self.total_payment += data.total_payment
 			self.total_interest_payable +=data.interest_amount
+			if data.paid:
+				self.total_amount_paid += data.total_payment
 
+def update_total_amount_paid(doc):
+	paid_amount = frappe.db.sql("""
+		select ifnull(sum(debit_in_account_currency), 0) as paid_amount
+		from `tabGL Entry`
+		where against_voucher_type = 'Loan' and against_voucher = %s
+	""", (doc.name), as_dict=1)[0].paid_amount
+
+	frappe.db.set_value("Loan", doc.name, "total_amount_paid", paid_amount)
 
 def update_disbursement_status(doc):
 	disbursement = frappe.db.sql("""select posting_date, ifnull(sum(debit_in_account_currency), 0) as disbursed_amount 
@@ -135,7 +144,60 @@ def get_loan_application(loan_application):
 		return loan.as_dict()
 
 @frappe.whitelist()
-def make_jv_entry(loan, company, loan_account, applicant_type, applicant, loan_amount, payment_account=None, repay_from_salary=None):
+def make_repayment_entry(payment_rows, loan, company, loan_account, applicant_type, applicant, \
+	payment_account=None, interest_income_account=None):
+
+	if isinstance(payment_rows, basestring):
+		payment_rows_list = json.loads(payment_rows)
+	else:
+		frappe.throw(_("No repayments available for Journal Entry"))
+
+	if payment_rows_list:
+		row_id = list(set(d["idx"] for d in payment_rows_list))
+	else:
+		frappe.throw(_("No repayments selected for Journal Entry"))
+	total_payment = 0
+	principal_amount = 0
+	interest_amount = 0
+	for d in payment_rows_list:
+		total_payment += d["total_payment"]
+		principal_amount += d["principal_amount"]
+		interest_amount += d["interest_amount"]
+
+	journal_entry = frappe.new_doc('Journal Entry')
+	journal_entry.voucher_type = 'Bank Entry'
+	journal_entry.user_remark = _('Against Loan: {0}').format(loan)
+	journal_entry.company = company
+	journal_entry.posting_date = nowdate()
+	account_amt_list = []
+
+	account_amt_list.append({
+		"account": payment_account,
+		"debit_in_account_currency": total_payment,
+		"party_type": applicant_type,
+		"party": applicant,
+		"reference_type": "Loan",
+		"reference_name": loan,
+		})
+	account_amt_list.append({
+		"account": loan_account,
+		"credit_in_account_currency": principal_amount,
+		"reference_type": "Loan",
+		"reference_name": loan,
+		})
+	account_amt_list.append({
+		"account": interest_income_account,
+		"credit_in_account_currency": interest_amount,
+		"reference_type": "Loan",
+		"reference_name": loan,
+		})
+	journal_entry.set("accounts", account_amt_list)
+
+	return journal_entry.as_dict()
+
+@frappe.whitelist()
+def make_jv_entry(loan, company, loan_account, applicant_type, applicant, loan_amount,payment_account=None):
+
 	journal_entry = frappe.new_doc('Journal Entry')
 	journal_entry.voucher_type = 'Bank Entry'
 	journal_entry.user_remark = _('Against Loan: {0}').format(loan)
