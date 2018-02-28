@@ -9,9 +9,6 @@ from frappe.utils.data import now, nowdate, getdate, cint, add_days, date_diff, 
 from frappe import _
 
 
-SUBSCRIPTION_SETTINGS = frappe.get_single('Subscription Settings')
-
-
 class Subscriptions(Document):
 	def before_insert(self):
 		# update start just before the subscription doc is created
@@ -81,14 +78,16 @@ class Subscriptions(Document):
 			return data
 
 	def set_status_grace_period(self):
+		subscription_settings = frappe.get_single('Subscription Settings')
 		if self.status == 'Past Due Date' and self.is_past_grace_period():
-			self.status = 'Canceled' if cint(SUBSCRIPTION_SETTINGS.cancel_after_grace) else 'Unpaid'
+			self.status = 'Canceled' if cint(subscription_settings.cancel_after_grace) else 'Unpaid'
 
 	def set_subscription_status(self):
 		if self.is_trialling():
 			self.status = 'Trialling'
 		elif self.status == 'Past Due Date' and self.is_past_grace_period():
-			self.status = 'Canceled' if cint(SUBSCRIPTION_SETTINGS.cancel_after_grace) else 'Unpaid'
+			subscription_settings = frappe.get_single('Subscription Settings')
+			self.status = 'Canceled' if cint(subscription_settings.cancel_after_grace) else 'Unpaid'
 		elif self.status == 'Past Due Date' and not self.has_outstanding_invoice():
 			self.status = 'Active'
 		elif self.current_invoice_is_past_due():
@@ -111,7 +110,8 @@ class Subscriptions(Document):
 	def is_past_grace_period(self):
 		current_invoice = self.get_current_invoice()
 		if self.current_invoice_is_past_due(current_invoice):
-			grace_period = cint(SUBSCRIPTION_SETTINGS.grace_period)
+			subscription_settings = frappe.get_single('Subscription Settings')
+			grace_period = cint(subscription_settings.grace_period)
 
 			return getdate(nowdate()) > add_days(current_invoice.due_date, grace_period)
 

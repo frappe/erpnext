@@ -173,6 +173,29 @@ class TestSubscriptions(unittest.TestCase):
 		settings.save()
 		subscription.delete()
 
+	def test_subscription_unpaid_after_grace_period(self):
+		settings = frappe.get_single('Subscription Settings')
+		default_grace_period_action = settings.cancel_after_grace
+		settings.cancel_after_grace = 0
+		settings.save()
+
+		subscription = frappe.new_doc('Subscriptions')
+		subscription.subscriber = '_Test Customer'
+		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.insert()
+		subscription.set_current_invoice_start('2018-01-01')
+		subscription.set_current_invoice_end()
+		subscription.process()	# generate first invoice
+
+		self.assertEqual(subscription.status, 'Past Due Date')
+
+		subscription.process()	
+		# This should change status to Canceled since grace period is 0
+		self.assertEqual(subscription.status, 'Unpaid')
+
+		settings.cancel_after_grace = default_grace_period_action
+		settings.save()
+		subscription.delete()
 
 	def test_subscription_invoice_days_until_due(self):
 		subscription = frappe.new_doc('Subscriptions')
