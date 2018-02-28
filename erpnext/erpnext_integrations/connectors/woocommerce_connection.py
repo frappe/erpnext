@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import frappe, base64, hashlib, hmac, json
 from frappe import _
 
+
 def verify_request():
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
 	sig = base64.b64encode(
@@ -217,10 +218,13 @@ def order():
 		new_sales_order.woocommerce_id = fd.get("id")
 		ordered_items = fd.get("line_items")
 		new_sales_order.naming_series = "SO-"
-		
+
 		for item in ordered_items:
 			woocomm_item_id = item.get("product_id")
 			found_item = frappe.get_doc("Item",{"woocommerce_id": woocomm_item_id})
+
+			# ordered_items_cost = item.get("total")
+			ordered_items_tax = item.get("total_tax")
 
 			new_sales_order.append("items",{
 				"item_code": found_item.item_code,
@@ -231,8 +235,36 @@ def order():
 				"qty": item.get("quantity"),
 				"rate": item.get("price")
 				})
-		
+
+			try:
+				add_tax_details(new_sales_order,ordered_items_tax,"Ordered Item tax")
+			except Exception as v:
+				print("Error during tax inside ordered_items", v)
+			# add_tax_details(new_sales_order,ordered_items_cost,"Item Cost")
+			
+
 		print(new_sales_order.as_dict().get("name", "NAME_NOT_FOUND "*100))
+		
+
+		try:
+			shipping_details = fd.get("shipping_lines")
+			shipping_total = fd.get("shipping_total")
+			shipping_tax = fd.get("shipping_tax")
+
+			add_tax_details(new_sales_order,shipping_tax,"Shipping Tax")
+			add_tax_details(new_sales_order,shipping_total,"Shipping Total")
+			
+		except Exception as t:
+			print("Error during total taxing",t)
+
+
+		# new_sales_order.append("taxes",{
+		# 				"charge_type":"Actual",
+		# 				"account_head": "VAT 5% - Woo",
+		# 				"tax_amount": charge_amount,
+		# 				"description": charge_type
+		# 				})
+
 		
 
 		try:
@@ -242,14 +274,7 @@ def order():
 				print("SO.SAVE", e)
 	
 
-			# new_sales_order.append("taxes",{
-			# 				"charge_type":"Actual",
-			# 				"account_head": "VAT 5% - Woo",
-			# 				"tax_amount": charge_amount,
-			# 				"description": charge_type
-			# 				})
-
-			# frappe.db.commit()
+		frappe.db.commit()
 			
 
 		print("Order Completed")
@@ -259,6 +284,9 @@ def order():
 # # 	elif event == "restored":
 # # 		pass
 # # 	elif event == "deleted":
+			# existing_sales_order = frappe.get_doc("Sales Order",{"woocommerce_id":fd.get("id")})
+			# existing_sales_order.cancel()
+			# frappe.db.commit()
 # # 		pass
 
 # # 	frappe.db.commit()	
@@ -380,3 +408,13 @@ def create_or_edit_address(customer,fd,customer_status):
 	make_address.save()
 
 	frappe.db.commit()
+
+
+def add_tax_details(sales_order,price,desc):
+
+	sales_order.append("taxes",{
+							"charge_type":"Actual",
+							"account_head": "VAT 5% - Woo",
+							"tax_amount": price,
+							"description": desc
+							})

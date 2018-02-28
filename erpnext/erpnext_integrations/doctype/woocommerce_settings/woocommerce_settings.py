@@ -24,6 +24,7 @@ class WoocommerceSettings(Document):
 				custom = frappe.new_doc("Custom Field")
 				custom.dt = name
 				custom.label = "woocommerce_id"
+				custom.read_only = 1
 				custom.save()
 
 				custom = frappe.new_doc("Custom Field")
