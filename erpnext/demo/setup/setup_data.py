@@ -80,7 +80,7 @@ def setup_demo_page():
 
 def setup_fiscal_year():
 	fiscal_year = None
-	for year in xrange(2010, now_datetime().year + 1, 1):
+	for year in range(2010, now_datetime().year + 1, 1):
 		try:
 			fiscal_year = frappe.get_doc({
 				"doctype": "Fiscal Year",

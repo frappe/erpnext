@@ -418,7 +418,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		si.get("items")[0].price_list_rate = 62.5
 		si.get("items")[0].price_list_rate = 191
-		for i in xrange(6):
+		for i in range(6):
 			si.get("taxes")[i].included_in_print_rate = 1
 
 		# tax type "Actual" cannot be inclusive
