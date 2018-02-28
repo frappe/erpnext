@@ -26,12 +26,8 @@ class Warehouse(NestedSet):
 
 		if account:
 			self.set_onload('account', account)
-			
 		load_address_and_contact(self)
 
-	def validate(self):
-		if self.email_id:
-			validate_email_add(self.email_id, True)
 
 	def on_update(self):
 		self.update_nsm_model()

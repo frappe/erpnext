@@ -279,14 +279,14 @@ frappe.ui.form.on('Stock Entry', {
 			flt(total_additional_costs, precision("total_additional_costs")));
 	},
 
-	source_warehouse_address: function(frm, cdt, cdn) {
+	source_warehouse_address: function(frm) {
 		erpnext.utils.get_address_display(frm, 'source_warehouse_address', 'source_address_display', false);
 	},
 
-	target_warehouse_address: function(frm, cdt, cdn) {
+	target_warehouse_address: function(frm) {
 		erpnext.utils.get_address_display(frm, 'target_warehouse_address', 'target_address_display', false);
 	},
-	
+
 	contact_person: erpnext.utils.get_contact_details,
 })
 
