@@ -96,16 +96,18 @@ class Loan(AccountsController):
 def update_total_amount_paid(doc):
 	paid_amount = frappe.db.sql("""
 		select ifnull(sum(debit_in_account_currency), 0) as paid_amount
-		from `tabGL Entry`
-		where against_voucher_type = 'Loan' and against_voucher = %s
-	""", (doc.name), as_dict=1)[0].paid_amount
+		from `tabGL Entry` 
+		where account = %s and against_voucher_type = 'Loan' and against_voucher = %s
+		""", (doc.payment_account, doc.name), as_dict=1)[0]
+
+	if flt(paid_amount) > doc.total_payment:
+		frappe.throw(_("Total Payment Amount cannot be greater than total payment."))
 
 	frappe.db.set_value("Loan", doc.name, "total_amount_paid", paid_amount)
-
 def update_disbursement_status(doc):
-	disbursement = frappe.db.sql("""select posting_date, ifnull(sum(debit_in_account_currency), 0) as disbursed_amount 
-		from `tabGL Entry` where against_voucher_type = 'Loan' and against_voucher = %s""", 
-		(doc.name), as_dict=1)[0]
+	disbursement = frappe.db.sql("""select posting_date, ifnull(sum(credit_in_account_currency), 0) as disbursed_amount 
+		from `tabGL Entry` where account = %s and against_voucher_type = 'Loan' and against_voucher = %s""", 
+		(doc.payment_account, doc.name), as_dict=1)[0]
 	if disbursement.disbursed_amount == doc.loan_amount:
 		frappe.db.set_value("Loan", doc.name , "status", "Fully Disbursed")
 	if disbursement.disbursed_amount < doc.loan_amount and disbursement.disbursed_amount != 0:
@@ -115,7 +117,7 @@ def update_disbursement_status(doc):
 	if disbursement.disbursed_amount > doc.loan_amount:
 		frappe.throw(_("Disbursed Amount cannot be greater than Loan Amount {0}").format(doc.loan_amount))
 	if disbursement.disbursed_amount > 0:
-		frappe.db.set_value("Loan", doc.name , "disbursement_date", disbursement.posting_date)	
+		frappe.db.set_value("Loan", doc.name , "disbursement_date", disbursement.posting_date)
 	
 def check_repayment_method(repayment_method, loan_amount, monthly_repayment_amount, repayment_periods):
 	if repayment_method == "Repay Over Number of Periods" and not repayment_periods:
@@ -144,25 +146,12 @@ def get_loan_application(loan_application):
 		return loan.as_dict()
 
 @frappe.whitelist()
-def make_repayment_entry(payment_rows, loan, company, loan_account, applicant_type, applicant, \
+def make_repayment_entry(payments, loan, company, loan_account, applicant_type, applicant, \
 	payment_account=None, interest_income_account=None):
-
-	if isinstance(payment_rows, basestring):
-		payment_rows_list = json.loads(payment_rows)
+	if isinstance(payments, basestring):
+		payments = json.loads(payments)
 	else:
-		frappe.throw(_("No repayments available for Journal Entry"))
-
-	if payment_rows_list:
-		row_id = list(set(d["idx"] for d in payment_rows_list))
-	else:
-		frappe.throw(_("No repayments selected for Journal Entry"))
-	total_payment = 0
-	principal_amount = 0
-	interest_amount = 0
-	for d in payment_rows_list:
-		total_payment += d["total_payment"]
-		principal_amount += d["principal_amount"]
-		interest_amount += d["interest_amount"]
+		frappe.throw(_("No repayments to be made for the month."))
 
 	journal_entry = frappe.new_doc('Journal Entry')
 	journal_entry.voucher_type = 'Bank Entry'
@@ -170,29 +159,28 @@ def make_repayment_entry(payment_rows, loan, company, loan_account, applicant_ty
 	journal_entry.company = company
 	journal_entry.posting_date = nowdate()
 	account_amt_list = []
-
-	account_amt_list.append({
-		"account": payment_account,
-		"debit_in_account_currency": total_payment,
-		"party_type": applicant_type,
-		"party": applicant,
-		"reference_type": "Loan",
-		"reference_name": loan,
-		})
-	account_amt_list.append({
-		"account": loan_account,
-		"credit_in_account_currency": principal_amount,
-		"reference_type": "Loan",
-		"reference_name": loan,
-		})
-	account_amt_list.append({
-		"account": interest_income_account,
-		"credit_in_account_currency": interest_amount,
-		"reference_type": "Loan",
-		"reference_name": loan,
-		})
+	for data in payments:
+		account_amt_list.append({
+			"account": payment_account,
+			"debit_in_account_currency": data["total_payment"],
+			"reference_type": "Loan",
+			"reference_name": loan,
+			})
+		account_amt_list.append({
+			"account": loan_account,
+			"credit_in_account_currency": data["principal_amount"],
+			"party_type": applicant_type,
+			"party": applicant,
+			"reference_type": "Loan",
+			"reference_name": loan,
+			})
+		account_amt_list.append({
+			"account": interest_income_account,
+			"credit_in_account_currency": data["interest_amount"],
+			"reference_type": "Loan",
+			"reference_name": loan,
+			})
 	journal_entry.set("accounts", account_amt_list)
-
 	return journal_entry.as_dict()
 
 @frappe.whitelist()
