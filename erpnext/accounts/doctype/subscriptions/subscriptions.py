@@ -234,7 +234,7 @@ class Subscriptions(Document):
 		# process_for_unpaid()
 
 	def process_for_active(self):
-		if nowdate() > self.current_invoice_end and not self.has_outstanding_invoice():
+		if getdate(nowdate()) > getdate(self.current_invoice_end) and not self.has_outstanding_invoice():
 			self.generate_invoice()
 
 		if self.current_invoice_is_past_due():
