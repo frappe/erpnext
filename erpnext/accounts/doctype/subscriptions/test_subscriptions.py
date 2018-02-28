@@ -211,5 +211,61 @@ class TestSubscriptions(unittest.TestCase):
 
 		subscription.delete()
 
+	def test_subcription_is_past_due_doesnt_change_within_grace_period(self):
+		settings = frappe.get_single('Subscription Settings')
+		grace_period = settings.grace_period
+		settings.grace_period = 1000
+		settings.save()
+
+		subscription = frappe.new_doc('Subscriptions')
+		subscription.subscriber = '_Test Customer'
+		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.insert()
+		subscription.set_current_invoice_start('2018-01-01')
+		subscription.set_current_invoice_end()
+		subscription.process()	# generate first invoice
+
+		self.assertEqual(subscription.status, 'Past Due Date')
+
+		subscription.process()	
+		# Grace period is 1000 days so status should remain as Past Due Date
+		self.assertEqual(subscription.status, 'Past Due Date')
+
+		subscription.process()
+		self.assertEqual(subscription.status, 'Past Due Date')
+
+		subscription.process()
+		self.assertEqual(subscription.status, 'Past Due Date')
+
+		settings.grace_period = grace_period
+		settings.save()
+		subscription.delete()
+
+	def test_subscription_remains_active_during_invoice_period(self):
+		subscription = frappe.new_doc('Subscriptions')
+		subscription.subscriber = '_Test Customer'
+		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.save()
+		subscription.process()	# no changes expected
+
+		self.assertEqual(subscription.status, 'Active')
+		self.assertEqual(subscription.current_invoice_start, nowdate())
+		self.assertEqual(subscription.current_invoice_end, add_to_date(nowdate(), months=1, days=-1))
+		self.assertEqual(len(subscription.invoices), 0)
+		
+		subscription.process()	# no changes expected still
+		self.assertEqual(subscription.status, 'Active')
+		self.assertEqual(subscription.current_invoice_start, nowdate())
+		self.assertEqual(subscription.current_invoice_end, add_to_date(nowdate(), months=1, days=-1))
+		self.assertEqual(len(subscription.invoices), 0)
+
+		subscription.process()	# no changes expected yet still
+		self.assertEqual(subscription.status, 'Active')
+		self.assertEqual(subscription.current_invoice_start, nowdate())
+		self.assertEqual(subscription.current_invoice_end, add_to_date(nowdate(), months=1, days=-1))
+		self.assertEqual(len(subscription.invoices), 0)
+
+		subscription.delete()
+
 	def test_subscription_creation_with_multiple_plans(self):
 		pass
