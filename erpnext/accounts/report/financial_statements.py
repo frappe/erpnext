@@ -38,7 +38,7 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_v
 	start_date = year_start_date
 	months = get_months(year_start_date, year_end_date)
 
-	for i in xrange(months / months_to_add):
+	for i in range(months // months_to_add):
 		period = frappe._dict({
 			"from_date": start_date
 		})

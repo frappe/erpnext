@@ -182,7 +182,7 @@ def get_period_date_ranges(period, fiscal_year=None, year_start_date=None):
 	}.get(period)
 
 	period_date_ranges = []
-	for i in xrange(1, 13, increment):
+	for i in range(1, 13, increment):
 		period_end_date = getdate(year_start_date) + relativedelta(months=increment, days=-1)
 		if period_end_date > getdate(year_end_date):
 			period_end_date = year_end_date
