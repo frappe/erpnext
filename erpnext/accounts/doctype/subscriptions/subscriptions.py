@@ -13,9 +13,6 @@ SUBSCRIPTION_SETTINGS = frappe.get_single('Subscription Settings')
 
 
 class Subscriptions(Document):
-	def before_save(self):
-		self.set_status()
-
 	def before_insert(self):
 		# update start just before the subscription doc is created
 		self.update_subscription_period()
@@ -29,6 +26,8 @@ class Subscriptions(Document):
 			self.current_invoice_start = self.trial_period_start
 		elif not date:
 			self.current_invoice_start = nowdate()
+		elif date:
+			self.current_invoice_start = date
 
 	def set_current_invoice_end(self):
 		if self.is_trialling():
@@ -81,15 +80,19 @@ class Subscriptions(Document):
 
 			return data
 
-	def set_status(self):
+	def set_status_grace_period(self):
+		if self.status == 'Past Due Date' and self.is_past_grace_period():
+			self.status = 'Canceled' if cint(SUBSCRIPTION_SETTINGS.cancel_after_grace) else 'Unpaid'
+
+	def set_subscription_status(self):
 		if self.is_trialling():
 			self.status = 'Trialling'
-		elif self.status == 'Past Due' and self.is_past_grace_period():
+		elif self.status == 'Past Due Date' and self.is_past_grace_period():
 			self.status = 'Canceled' if cint(SUBSCRIPTION_SETTINGS.cancel_after_grace) else 'Unpaid'
-		elif self.status == 'Past Due' and not self.has_outstanding_invoice():
+		elif self.status == 'Past Due Date' and not self.has_outstanding_invoice():
 			self.status = 'Active'
 		elif self.current_invoice_is_past_due():
-			self.status = 'Past Due'
+			self.status = 'Past Due Date'
 		elif self.is_new_subscription():
 			self.status = 'Active'
 			# todo: then generate new invoice
@@ -110,7 +113,7 @@ class Subscriptions(Document):
 		if self.current_invoice_is_past_due(current_invoice):
 			grace_period = cint(SUBSCRIPTION_SETTINGS.grace_period)
 
-			return nowdate() > add_days(current_invoice.due_date, grace_period)
+			return getdate(nowdate()) > add_days(current_invoice.due_date, grace_period)
 
 	def current_invoice_is_past_due(self, current_invoice=None):
 		if not current_invoice:
@@ -124,8 +127,11 @@ class Subscriptions(Document):
 	def get_current_invoice(self):
 		if len(self.invoices):
 			current = self.invoices[-1]
-			doc = frappe.get_doc('Sales Invoice', current.invoice)
-			return doc
+			if frappe.db.exists('Sales Invoice', current.invoice):
+				doc = frappe.get_doc('Sales Invoice', current.invoice)
+				return doc
+			else:
+				frappe.throw(_('Invoice {0} no longer exists'.format(invoice.invoice)))
 
 	def is_new_subscription(self):
 		return len(self.invoices) == 0
@@ -144,7 +150,7 @@ class Subscriptions(Document):
 
 	def after_insert(self):
 		# todo: deal with users who collect prepayments. Maybe a new Subscription Invoice doctype?
-		pass
+		self.set_subscription_status()
 
 	def generate_invoice(self):
 		invoice = self.create_invoice()
@@ -156,6 +162,8 @@ class Subscriptions(Document):
 
 	def create_invoice(self):
 		invoice = frappe.new_doc('Sales Invoice')
+		invoice.set_posting_time = 1
+		invoice.posting_date = self.current_invoice_start
 		invoice.customer = self.get_customer(self.subscriber)
 
 		# Subscription is better suited for service items. I won't update `update_stock`
@@ -220,28 +228,36 @@ class Subscriptions(Document):
 		"""
 		if self.status == 'Active':
 			self.process_for_active()
-		elif self.status == 'Past Due':
+		elif self.status == 'Past Due Date':
 			self.process_for_past_due_date()
+		self.save()
 		# process_for_unpaid()
 
 	def process_for_active(self):
-		print 'processing for active'
 		if nowdate() > self.current_invoice_end and not self.has_outstanding_invoice():
-			print 'generating invoice'
 			self.generate_invoice()
-			print 'invoice generated'
 
 		if self.current_invoice_is_past_due():
-			print 'current invoice is past due'
-			self.status = 'Past Due'
+			self.status = 'Past Due Date'
 
 	def process_for_past_due_date(self):
-		if not self.has_outstanding_invoice():
-			self.status = 'Active'
-			self.update_subscription_period()
+		current_invoice = self.get_current_invoice()
+		if not current_invoice:
+			frappe.throw('Current invoice is missing')
 		else:
-			self.set_status()
+			if self.is_not_outstanding(current_invoice):
+				self.status = 'Active'
+				self.update_subscription_period()
+			else:
+				self.set_status_grace_period()
+
+	def is_not_outstanding(self, invoice):
+		return invoice.status == 'Paid'
 
 	def has_outstanding_invoice(self):
 		current_invoice = self.get_current_invoice()
-		return current_invoice.posting_date != self.current_invoice_start
+		if not current_invoice:
+			return False
+		else:
+			return not self.is_not_outstanding(current_invoice)
+		return True
