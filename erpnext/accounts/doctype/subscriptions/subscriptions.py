@@ -243,7 +243,7 @@ class Subscriptions(Document):
 	def process_for_past_due_date(self):
 		current_invoice = self.get_current_invoice()
 		if not current_invoice:
-			frappe.throw('Current invoice is missing')
+			frappe.throw(_('Current invoice {0} is missing'.format(current_invoice.invoice)))
 		else:
 			if self.is_not_outstanding(current_invoice):
 				self.status = 'Active'
