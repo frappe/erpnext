@@ -8,7 +8,7 @@ def execute():
 	warehouse = frappe.db.sql("""select name, email_id, phone_no, mobile_no, address_line_1,
 		address_line_2, city, state, pin from `tabWarehouse` where ifnull(address_line_1, '') != '' """,as_dict=1)
 
-	for d in warehouse:                                                                                                                    
+	for d in warehouse:
 		address = frappe.new_doc('Address')
 		address.address_title = d.name
 		address.address_line1 = d.address_line_1
