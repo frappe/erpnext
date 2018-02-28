@@ -187,11 +187,11 @@ def process_serial_no(sle):
 	update_serial_nos(sle, item_det)
 
 def validate_serial_no(sle, item_det):
-	if item_det.has_serial_no==0 and sle.is_cancelled == "No":
+	if item_det.has_serial_no==0:
 		if sle.serial_no:
 			frappe.throw(_("Item {0} is not setup for Serial Nos. Column must be blank").format(sle.item_code),
 				SerialNoNotRequiredError)
-	else:
+	elif sle.is_cancelled == "No":
 		if sle.serial_no:
 			serial_nos = get_serial_nos(sle.serial_no)
 			if cint(sle.actual_qty) != flt(sle.actual_qty):
