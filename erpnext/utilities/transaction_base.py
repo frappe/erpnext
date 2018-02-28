@@ -71,6 +71,8 @@ class TransactionBase(StatusUpdater):
 		validate_uom_is_integer(self, uom_field, qty_fields)
 
 	def validate_with_previous_doc(self, ref):
+		self.exclude_fields = ["conversion_factor", "uom"] if self.get('is_return') else []
+
 		for key, val in ref.items():
 			is_child = val.get("is_child_table")
 			ref_doc = {}
@@ -101,7 +103,7 @@ class TransactionBase(StatusUpdater):
 					frappe.throw(_("Invalid reference {0} {1}").format(reference_doctype, reference_name))
 
 				for field, condition in fields:
-					if prevdoc_values[field] is not None:
+					if prevdoc_values[field] is not None and field not in self.exclude_fields:
 						self.validate_value(field, condition, prevdoc_values[field], doc)
 
 
