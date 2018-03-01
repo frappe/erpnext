@@ -43,7 +43,7 @@ class TransactionBase(StatusUpdater):
 		events = frappe.db.sql_list("""select name from `tabEvent`
 			where ref_type=%s and ref_name=%s""", (self.doctype, self.name))
 		if events:
-			frappe.db.sql("delete from `tabEvent` where name in (%s)"
+			frappe.db.sql("delete from `tabEvent` where name in ({0})"
 				.format(", ".join(['%s']*len(events))), tuple(events))
 
 	def _add_calendar_event(self, opts):
