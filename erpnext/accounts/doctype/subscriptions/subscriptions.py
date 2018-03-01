@@ -277,7 +277,7 @@ class Subscriptions(Document):
 		subscription but new trial periods will not be allowed.
 		"""
 		self.status = 'Active'
-		self.cancelation_date = None
+		self.start = nowdate()
 		self.update_subscription_period(nowdate())
 		self.invoices = []
 		self.save()
