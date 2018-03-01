@@ -100,7 +100,7 @@ class TestItem(unittest.TestCase):
 		})
 
 		for key, value in iteritems(to_check):
-			self.assertEquals(value, details.get(key))
+			self.assertEqual(value, details.get(key))
 
 	def test_item_attribute_change_after_variant(self):
 		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
@@ -155,7 +155,7 @@ class TestItem(unittest.TestCase):
 
 		variant = frappe.get_doc('Item', '_Test Variant Item-XL')
 		for fieldname in allow_fields:
-			self.assertEquals(template.get(fieldname), variant.get(fieldname))
+			self.assertEqual(template.get(fieldname), variant.get(fieldname))
 
 		template = frappe.get_doc('Item', '_Test Variant Item')
 		template.item_group = "_Test Item Group Desktops"
@@ -205,14 +205,14 @@ class TestItem(unittest.TestCase):
 
 		variant = create_variant("_Test Numeric Template Item",
 			{"Test Size": "Large", "Test Item Length": 1.1})
-		self.assertEquals(variant.item_code, "_Test Numeric Template Item-L-1.1")
+		self.assertEqual(variant.item_code, "_Test Numeric Template Item-L-1.1")
 		variant.item_code = "_Test Numeric Variant-L-1.1"
 		variant.item_name = "_Test Numeric Variant Large 1.1m"
 		self.assertRaises(InvalidItemAttributeValueError, variant.save)
 
 		variant = create_variant("_Test Numeric Template Item",
 			{"Test Size": "Large", "Test Item Length": 1.5})
-		self.assertEquals(variant.item_code, "_Test Numeric Template Item-L-1.5")
+		self.assertEqual(variant.item_code, "_Test Numeric Template Item-L-1.5")
 		variant.item_code = "_Test Numeric Variant-L-1.5"
 		variant.item_name = "_Test Numeric Variant Large 1.5m"
 		variant.save()
@@ -261,17 +261,17 @@ class TestItem(unittest.TestCase):
 		)).insert()
 
 		variant = get_variant(template.name, manufacturer=manufacturer.name)
-		self.assertEquals(variant.item_code, '_Test Variant Mfg-1')
-		self.assertEquals(variant.description, '_Test Variant Mfg')
-		self.assertEquals(variant.manufacturer, 'MSG1')
+		self.assertEqual(variant.item_code, '_Test Variant Mfg-1')
+		self.assertEqual(variant.description, '_Test Variant Mfg')
+		self.assertEqual(variant.manufacturer, 'MSG1')
 		variant.insert()
 
 		variant = get_variant(template.name, manufacturer=manufacturer.name,
 			manufacturer_part_no='007')
-		self.assertEquals(variant.item_code, '_Test Variant Mfg-2')
-		self.assertEquals(variant.description, '_Test Variant Mfg')
-		self.assertEquals(variant.manufacturer, 'MSG1')
-		self.assertEquals(variant.manufacturer_part_no, '007')
+		self.assertEqual(variant.item_code, '_Test Variant Mfg-2')
+		self.assertEqual(variant.description, '_Test Variant Mfg')
+		self.assertEqual(variant.manufacturer, 'MSG1')
+		self.assertEqual(variant.manufacturer_part_no, '007')
 
 	def test_stock_exists_against_template_item(self):
 		stock_item = frappe.get_all('Stock Ledger Entry', fields = ["item_code"], limit=1)

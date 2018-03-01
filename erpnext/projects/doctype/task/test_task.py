@@ -78,16 +78,16 @@ class TestTask(unittest.TestCase):
 
 		assign()
 		todo = get_owner_and_status()
-		self.assertEquals(todo.owner, "test@example.com")
-		self.assertEquals(todo.status, "Open")
+		self.assertEqual(todo.owner, "test@example.com")
+		self.assertEqual(todo.status, "Open")
 
 		# assignment should be
 		task.load_from_db()
 		task.status = "Closed"
 		task.save()
 		todo = get_owner_and_status()
-		self.assertEquals(todo.owner, "test@example.com")
-		self.assertEquals(todo.status, "Closed")
+		self.assertEqual(todo.owner, "test@example.com")
+		self.assertEqual(todo.status, "Closed")
 
 	def test_overdue(self):
 		task = create_task("Testing Overdue", add_days(nowdate(), -10), add_days(nowdate(), -5))
@@ -95,7 +95,7 @@ class TestTask(unittest.TestCase):
 		from erpnext.projects.doctype.task.task import set_tasks_as_overdue
 		set_tasks_as_overdue()
 
-		self.assertEquals(frappe.db.get_value("Task", task.name, "status"), "Overdue")
+		self.assertEqual(frappe.db.get_value("Task", task.name, "status"), "Overdue")
 
 def create_task(subject, start=None, end=None, depends_on=None, project=None):
 	if not frappe.db.exists("Task", subject):
