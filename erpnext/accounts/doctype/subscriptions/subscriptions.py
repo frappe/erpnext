@@ -290,6 +290,25 @@ class Subscriptions(Document):
 		self.save()
 
 
+def process_all():
+	subscriptions = get_all_subscriptions()
+	for subscription in subscriptions:
+		process(subscription)
+
+
+def get_all_subscriptions():
+	return frappe.db.sql(
+		'select name from `tabSubscriptions` where status != "Canceled"',
+		as_dict=1
+	)
+
+
+def process(data):
+	if data:
+		subscription = frappe.get_doc('Subscriptions', data['name'])
+		subscription.process()
+
+
 @frappe.whitelist()
 def cancel_subscription(name):
 	subscription = frappe.get_doc('Subscriptions', name)
