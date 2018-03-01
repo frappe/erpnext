@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils.data import nowdate, add_days, get_last_day, cint, getdate, add_to_date, get_datetime_str
+from frappe.utils.data import nowdate, add_days, get_last_day, cint, getdate, add_to_date, get_datetime_str, add_months
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
 
@@ -196,7 +196,7 @@ class TestSubscriptions(unittest.TestCase):
 		subscription.subscriber = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name'})
 		subscription.days_until_due = 10
-		subscription.start = get_datetime_str(add_to_date(nowdate(), months=-1))
+		subscription.start = add_months(nowdate(), -1)
 		subscription.insert()
 		subscription.process()	# generate first invoice
 		self.assertEqual(len(subscription.invoices), 1)
