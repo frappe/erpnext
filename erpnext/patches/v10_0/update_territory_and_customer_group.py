@@ -21,8 +21,8 @@ def execute():
 					'''.format(
 						master_fieldname=d["master_fieldname"],
 						linked_to_fieldname=d["linked_to_fieldname"],
-						docname=frappe.db.escape(customer.name).encode("utf-8"),
-						value=frappe.db.escape(customer.get(source_fieldname)).encode("utf-8")))
+						docname=frappe.db.escape(frappe.as_unicode(customer.name)),
+						value=frappe.db.escape(frappe.as_unicode(customer.get(source_fieldname)))))
 				
 				frappe.db.sql("""
 					update
