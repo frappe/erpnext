@@ -155,8 +155,7 @@ class Subscriptions(Document):
 	def generate_invoice(self):
 		invoice = self.create_invoice()
 		self.append('invoices', {'invoice': invoice.name})
-		self.save()	# Validates all over again but we don't mind
-		self.subscription_updated(invoice)
+		self.save()
 
 		return invoice
 
@@ -174,9 +173,9 @@ class Subscriptions(Document):
 			invoice.append('items',	item)
 
 		# Taxes
-		# todo: tax template does not populate tax table
 		if self.tax_template:
 			invoice.taxes_and_charges = self.tax_template
+			invoice.set_taxes()
 
 		# Due date
 		invoice.append(
@@ -214,9 +213,6 @@ class Subscriptions(Document):
 				(plan_items,), as_dict=1
 			)
 			return item_names
-
-	def subscription_updated(self, invoice):
-		self.update_subscription_period()
 
 	def process(self):
 		"""

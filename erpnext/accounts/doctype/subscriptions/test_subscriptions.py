@@ -119,7 +119,7 @@ class TestSubscriptions(unittest.TestCase):
 		subscription.process()
 
 		self.assertEqual(len(subscription.invoices), 1)
-		self.assertEqual(subscription.current_invoice_start, nowdate())
+		self.assertEqual(subscription.current_invoice_start, '2018-01-01')
 		self.assertEqual(subscription.status, 'Past Due Date')
 		subscription.delete()
 
