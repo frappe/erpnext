@@ -267,5 +267,123 @@ class TestSubscriptions(unittest.TestCase):
 
 		subscription.delete()
 
+	def test_subcription_cancelation(self):
+		subscription = frappe.new_doc('Subscriptions')
+		subscription.subscriber = '_Test Customer'
+		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.save()
+		subscription.cancel_subscription()
+
+		self.assertEqual(subscription.status, 'Canceled')
+
+		subscription.delete()
+
+	def test_subcription_cancelation_and_process(self):
+		settings = frappe.get_single('Subscription Settings')
+		default_grace_period_action = settings.cancel_after_grace
+		settings.cancel_after_grace = 1
+		settings.save()
+
+		subscription = frappe.new_doc('Subscriptions')
+		subscription.subscriber = '_Test Customer'
+		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.insert()
+		subscription.set_current_invoice_start('2018-01-01')
+		subscription.set_current_invoice_end()
+		subscription.process()	# generate first invoice
+		invoices = len(subscription.invoices)
+
+		self.assertEqual(subscription.status, 'Past Due Date')
+		self.assertEqual(len(subscription.invoices), invoices)
+
+		subscription.cancel_subscription()	
+		self.assertEqual(subscription.status, 'Canceled')
+		self.assertEqual(len(subscription.invoices), invoices)
+
+		subscription.process()
+		self.assertEqual(subscription.status, 'Canceled')
+		self.assertEqual(len(subscription.invoices), invoices)
+
+		subscription.process()
+		self.assertEqual(subscription.status, 'Canceled')
+		self.assertEqual(len(subscription.invoices), invoices)
+
+		settings.cancel_after_grace = default_grace_period_action
+		settings.save()
+		subscription.delete()
+
+	def test_subscription_restart_and_process(self):
+		settings = frappe.get_single('Subscription Settings')
+		default_grace_period_action = settings.cancel_after_grace
+		settings.grace_period = 0
+		settings.cancel_after_grace = 0
+		settings.save()
+
+		subscription = frappe.new_doc('Subscriptions')
+		subscription.subscriber = '_Test Customer'
+		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.insert()
+		subscription.set_current_invoice_start('2018-01-01')
+		subscription.set_current_invoice_end()
+		subscription.process()	# generate first invoice
+
+		self.assertEqual(subscription.status, 'Past Due Date')
+
+		subscription.process()	
+		self.assertEqual(subscription.status, 'Unpaid')
+
+		subscription.cancel_subscription()
+		self.assertEqual(subscription.status, 'Canceled')
+
+		subscription.restart_subscription()
+		self.assertEqual(subscription.status, 'Active')
+		self.assertEqual(len(subscription.invoices), 0)
+
+		subscription.process()
+		self.assertEqual(subscription.status, 'Active')
+		self.assertEqual(len(subscription.invoices), 0)
+
+		subscription.process()
+		self.assertEqual(subscription.status, 'Active')
+		self.assertEqual(len(subscription.invoices), 0)
+
+		settings.cancel_after_grace = default_grace_period_action
+		settings.save()
+		subscription.delete()
+
+	def test_subscription_unpaid_back_to_active(self):
+		settings = frappe.get_single('Subscription Settings')
+		default_grace_period_action = settings.cancel_after_grace
+		settings.cancel_after_grace = 0
+		settings.save()
+
+		subscription = frappe.new_doc('Subscriptions')
+		subscription.subscriber = '_Test Customer'
+		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.insert()
+		subscription.set_current_invoice_start('2018-01-01')
+		subscription.set_current_invoice_end()
+		subscription.process()	# generate first invoice
+
+		self.assertEqual(subscription.status, 'Past Due Date')
+
+		subscription.process()	
+		# This should change status to Canceled since grace period is 0
+		self.assertEqual(subscription.status, 'Unpaid')
+
+		invoice = subscription.get_current_invoice()
+		invoice.db_set('outstanding_amount', 0)
+		invoice.db_set('status', 'Paid')
+
+		subscription.process()
+		self.assertEqual(subscription.status, 'Active')
+
+		subscription.process()
+		self.assertEqual(subscription.status, 'Active')
+
+		settings.cancel_after_grace = default_grace_period_action
+		settings.save()
+		subscription.delete()
+
 	def test_subscription_creation_with_multiple_plans(self):
 		pass
