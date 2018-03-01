@@ -424,8 +424,15 @@ def process(data):
 	Checks a `Subscription` and updates it status as necessary
 	"""
 	if data:
-		subscription = frappe.get_doc('Subscriptions', data['name'])
-		subscription.process()
+		try:
+			subscription = frappe.get_doc('Subscriptions', data['name'])
+			subscription.process()
+			frappe.db.commit()
+		except frappe.ValidationError:
+			frappe.db.rollback()
+			frappe.db.begin()
+			frappe.log_error(frappe.get_traceback())
+			frappe.db.commit()
 
 
 @frappe.whitelist()
