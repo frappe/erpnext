@@ -15,10 +15,24 @@ class Subscriptions(Document):
 		self.update_subscription_period(self.start)
 
 	def update_subscription_period(self, date=None):
+		"""
+		Subscription period is the period to be billed. This method updates the
+		beginning of the billing period and end of the billing period.
+
+		The beginning of the billing period is represented in the doctype as
+		`current_invoice_start` and the end of the billing period is represented
+		as `current_invoice_end`.
+		"""
 		self.set_current_invoice_start(date)
 		self.set_current_invoice_end()
 
 	def set_current_invoice_start(self, date=None):
+		"""
+		This sets the date of the beginning of the current billing period. 
+		
+		If the `date` parameter is not given , it will be automatically set as today's 
+		date.
+		"""
 		if self.trial_period_start and self.is_trialling():
 			self.current_invoice_start = self.trial_period_start
 		elif not date:
@@ -27,6 +41,16 @@ class Subscriptions(Document):
 			self.current_invoice_start = date
 
 	def set_current_invoice_end(self):
+		"""
+		This sets the date of the end of the current billing period.
+
+		If the subscription is in trial period, it will be set as the end of the
+		trial period.
+
+		If is not in a trial period, it will be `x` days from the beginning of the
+		current billing period where `x` is the billing interval from the 
+		`Subscription Plan` in the `Subscription`.
+		"""
 		if self.is_trialling():
 			self.current_invoice_end = self.trial_period_end
 		else:
@@ -37,13 +61,26 @@ class Subscriptions(Document):
 				self.current_invoice_end = get_last_day(self.current_invoice_start)
 
 	def get_billing_cycle(self):
+		"""
+		Returns a dict containing billing cycle information deduced from the 
+		`Subscription Plan` in the `Subscription`.
+		"""
 		return self.get_billing_cycle_data()
 
 	def validate_plans_billing_cycle(self, billing_cycle_data):
+		"""
+		Makes sure that all `Subscription Plan` in the `Subscription` have the
+		same billing interval
+		"""
 		if billing_cycle_data and len(billing_cycle_data) != 1:
 			frappe.throw(_('You can only have Plans with the same billing cycle in a Subscription'))
 
 	def get_billing_cycle_and_interval(self):
+		"""
+		Returns a dict representing the billing interval and cycle for this `Subscription`.
+
+		You shouldn't need to call this directly. Use `get_billing_cycle` instead.
+		"""
 		plan_names = [plan.plan for plan in self.plans]
 		billing_info = frappe.db.sql(
 			'select distinct `billing_interval`, `billing_interval_count` '
@@ -55,6 +92,11 @@ class Subscriptions(Document):
 		return billing_info
 
 	def get_billing_cycle_data(self):
+		"""
+		Returns dict contain the billing cycle data.
+
+		You shouldn't need to call this directly. Use `get_billing_cycle` instead.
+		"""
 		billing_info = self.get_billing_cycle_and_interval()
 
 		self.validate_plans_billing_cycle(billing_info)
@@ -78,11 +120,20 @@ class Subscriptions(Document):
 			return data
 
 	def set_status_grace_period(self):
+		"""
+		Sets the `Subscription` `status` based on the preference set in `Subscription Settings`.
+
+		Used when the `Subscription` needs to decide what to do after the current generated 
+		invoice is past it's due date and grace period.
+		"""
 		subscription_settings = frappe.get_single('Subscription Settings')
 		if self.status == 'Past Due Date' and self.is_past_grace_period():
 			self.status = 'Canceled' if cint(subscription_settings.cancel_after_grace) else 'Unpaid'
 
 	def set_subscription_status(self):
+		"""
+		Sets the status of the `Subscription`
+		"""
 		if self.is_trialling():
 			self.status = 'Trialling'
 		elif self.status == 'Past Due Date' and self.is_past_grace_period():
@@ -98,9 +149,15 @@ class Subscriptions(Document):
 		self.save()
 
 	def is_trialling(self):
+		"""
+		Returns `True` if the `Subscription` is trial period.
+		"""
 		return not self.period_has_passed(self.trial_period_end) and self.is_new_subscription()
 
 	def period_has_passed(self, end_date):
+		"""
+		Returns true if the given `end_date` has passed
+		"""
 		# todo: test for illegal time
 		if not end_date:
 			return True
@@ -109,6 +166,9 @@ class Subscriptions(Document):
 		return getdate(nowdate()) > getdate(end_date)
 
 	def is_past_grace_period(self):
+		"""
+		Returns `True` if the grace period for the `Subscription` has passed
+		"""
 		current_invoice = self.get_current_invoice()
 		if self.current_invoice_is_past_due(current_invoice):
 			subscription_settings = frappe.get_single('Subscription Settings')
@@ -117,6 +177,9 @@ class Subscriptions(Document):
 			return getdate(nowdate()) > add_days(current_invoice.due_date, grace_period)
 
 	def current_invoice_is_past_due(self, current_invoice=None):
+		"""
+		Returns `True` if the current generated invoice is overdue
+		"""
 		if not current_invoice:
 			current_invoice = self.get_current_invoice()
 
@@ -126,6 +189,9 @@ class Subscriptions(Document):
 			return getdate(nowdate()) > getdate(current_invoice.due_date)
 
 	def get_current_invoice(self):
+		"""
+		Returns the most recent generated invoice.
+		"""
 		if len(self.invoices):
 			current = self.invoices[-1]
 			if frappe.db.exists('Sales Invoice', current.invoice):
@@ -135,6 +201,9 @@ class Subscriptions(Document):
 				frappe.throw(_('Invoice {0} no longer exists'.format(invoice.invoice)))
 
 	def is_new_subscription(self):
+		"""
+		Returns `True` if `Subscription` has never generated an invoice
+		"""
 		return len(self.invoices) == 0
 
 	def validate(self):
@@ -142,6 +211,9 @@ class Subscriptions(Document):
 		self.validate_plans_billing_cycle(self.get_billing_cycle_and_interval())
 
 	def validate_trial_period(self):
+		"""
+		Runs sanity checks on trial period dates for the `Subscription`
+		"""
 		if self.trial_period_start and self.trial_period_end:
 			if getdate(self.trial_period_end) < getdate(self.trial_period_start):
 				frappe.throw(_('Trial Period End Date Cannot be before Trial Period Start Date'))
@@ -154,6 +226,10 @@ class Subscriptions(Document):
 		self.set_subscription_status()
 
 	def generate_invoice(self):
+		"""
+		Creates a `Sales Invoice` for the `Subscription`, updates `self.invoices` and
+		saves the `Subscription`.
+		"""
 		invoice = self.create_invoice()
 		self.append('invoices', {'invoice': invoice.name})
 		self.save()
@@ -161,6 +237,9 @@ class Subscriptions(Document):
 		return invoice
 
 	def create_invoice(self):
+		"""
+		Creates a `Sales Invoice`, submits it and returns it
+		"""
 		invoice = frappe.new_doc('Sales Invoice')
 		invoice.set_posting_time = 1
 		invoice.posting_date = self.current_invoice_start
@@ -203,9 +282,15 @@ class Subscriptions(Document):
 		return invoice
 
 	def get_customer(self, subscriber_name):
+		"""
+		Returns the `Customer` linked to the `Subscriber`
+		"""
 		return frappe.get_value('Subscriber', subscriber_name)
 
 	def get_items_from_plans(self, plans):
+		"""
+		Returns the `Item`s linked to `Subscription Plan`
+		"""
 		plan_items = [plan.plan for plan in plans]
 
 		if plan_items:
@@ -218,10 +303,9 @@ class Subscriptions(Document):
 	def process(self):
 		"""
 		To be called by task periodically. It checks the subscription and takes appropriate action
-		as need be. It calls these methods in this order:
+		as need be. It calls either of these methods depending the `Subscription` status:
 		1. `process_for_active`
 		2. `process_for_past_due`
-		3. 
 		"""
 		if self.status == 'Active':
 			self.process_for_active()
@@ -231,6 +315,14 @@ class Subscriptions(Document):
 		self.save()
 
 	def process_for_active(self):
+		"""
+		Called by `process` if the status of the `Subscription` is 'Active'. 
+		
+		The possible outcomes of this method are:
+		1. Generate a new invoice
+		2. Change the `Subscription` status to 'Past Due Date'
+		3. Change the `Subscription` status to 'Canceled'
+		"""
 		if getdate(nowdate()) > getdate(self.current_invoice_end) and not self.has_outstanding_invoice():
 			self.generate_invoice()
 			if self.current_invoice_is_past_due():
@@ -243,11 +335,22 @@ class Subscriptions(Document):
 			self.cancel_subscription_at_period_end()
 
 	def cancel_subscription_at_period_end(self):
+		"""
+		Called when `Subscription.cancel_at_period_end` is truthy
+		"""
 		self.status = 'Canceled'
 		if not self.cancelation_date:
 			self.cancelation_date = nowdate()
 
 	def process_for_past_due_date(self):
+		"""
+		Called by `process` if the status of the `Subscription` is 'Past Due Date'. 
+		
+		The possible outcomes of this method are:
+		1. Change the `Subscription` status to 'Active'
+		2. Change the `Subscription` status to 'Canceled'
+		3. Change the `Subscription` status to 'Unpaid'
+		"""
 		current_invoice = self.get_current_invoice()
 		if not current_invoice:
 			frappe.throw(_('Current invoice {0} is missing'.format(current_invoice.invoice)))
@@ -259,9 +362,15 @@ class Subscriptions(Document):
 				self.set_status_grace_period()
 
 	def is_not_outstanding(self, invoice):
+		"""
+		Return `True` if the given invoice is paid
+		"""
 		return invoice.status == 'Paid'
 
 	def has_outstanding_invoice(self):
+		"""
+		Returns `True` if the most recent invoice for the `Subscription` is not paid
+		"""
 		current_invoice = self.get_current_invoice()
 		if not current_invoice:
 			return False
@@ -281,7 +390,8 @@ class Subscriptions(Document):
 	def restart_subscription(self):
 		"""
 		This sets the subscription as active. The subscription will be made to be like a new
-		subscription.
+		subscription and the `Subscription` will lose all the history of generated invoices
+		it has.
 		"""
 		self.status = 'Active'
 		self.db_set('start', nowdate())
@@ -291,12 +401,18 @@ class Subscriptions(Document):
 
 
 def process_all():
+	"""
+	Task to updates the status of all `Subscription` apart from those that are cancelled
+	"""
 	subscriptions = get_all_subscriptions()
 	for subscription in subscriptions:
 		process(subscription)
 
 
 def get_all_subscriptions():
+	"""
+	Returns all `Subscription` documents
+	"""
 	return frappe.db.sql(
 		'select name from `tabSubscriptions` where status != "Canceled"',
 		as_dict=1
@@ -304,6 +420,9 @@ def get_all_subscriptions():
 
 
 def process(data):
+	"""
+	Checks a `Subscription` and updates it status as necessary
+	"""
 	if data:
 		subscription = frappe.get_doc('Subscriptions', data['name'])
 		subscription.process()
@@ -311,17 +430,28 @@ def process(data):
 
 @frappe.whitelist()
 def cancel_subscription(name):
+	"""
+	Cancels a `Subscription`. This will stop the `Subscription` from further invoicing the
+	`Subscriber` but all already outstanding invoices will not be affected.
+	"""
 	subscription = frappe.get_doc('Subscriptions', name)
 	subscription.cancel_subscription()
 
 
 @frappe.whitelist()
 def restart_subscription(name):
+	"""
+	Restarts a cancelled `Subscription`. The `Subscription` will 'forget' the history of
+	all invoices it has generated
+	"""
 	subscription = frappe.get_doc('Subscriptions', name)
 	subscription.restart_subscription()
 
 
 @frappe.whitelist()
 def get_subscription_updates(name):
+	"""
+	Use this to get the latest state of the given `Subscription`
+	"""
 	subscription = frappe.get_doc('Subscriptions', name)
 	subscription.process()
