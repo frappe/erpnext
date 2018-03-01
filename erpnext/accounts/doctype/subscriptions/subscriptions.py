@@ -267,16 +267,15 @@ class Subscriptions(Document):
 		)
 
 		# Discounts
-		if self.apply_additional_discount:
-			invoice.apply_discount_on = self.apply_additional_discount
-		else:
-			invoice.apply_discount_on = 'Grand Total'
-
 		if self.additional_discount_percentage:
 			invoice.additional_discount_percentage = self.additional_discount_percentage
 
 		if self.additional_discount_amount:
 			invoice.additional_discount_amount = self.additional_discount_amount
+
+		if (self.additional_discount_percentage or self.additional_discount_amount) \
+			and not self.apply_additional_discount:
+			self.apply_additional_discount = 'Grand Total'
 
 		invoice.save()
 		invoice.submit()
