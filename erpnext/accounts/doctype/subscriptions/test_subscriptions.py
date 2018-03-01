@@ -106,14 +106,11 @@ class TestSubscriptions(unittest.TestCase):
 	def test_invoice_is_generated_at_end_of_billing_period(self):
 		subscription = frappe.new_doc('Subscriptions')
 		subscription.subscriber = '_Test Customer'
+		subscription.start = '2018-01-01'
 		subscription.append('plans', {'plan': '_Test Plan Name'})
 		subscription.insert()
 
 		self.assertEqual(subscription.status, 'Active')
-
-		subscription.set_current_invoice_start('2018-01-01')
-		subscription.set_current_invoice_end()
-
 		self.assertEqual(subscription.current_invoice_start, '2018-01-01')
 		self.assertEqual(subscription.current_invoice_end, '2018-01-31')
 		subscription.process()
@@ -127,9 +124,8 @@ class TestSubscriptions(unittest.TestCase):
 		subscription = frappe.new_doc('Subscriptions')
 		subscription.subscriber = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.start = '2018-01-01'
 		subscription.insert()
-		subscription.set_current_invoice_start('2018-01-01')
-		subscription.set_current_invoice_end()
 		subscription.process()	# generate first invoice
 		self.assertEqual(len(subscription.invoices), 1)
 		self.assertEqual(subscription.status, 'Past Due Date')
@@ -158,9 +154,8 @@ class TestSubscriptions(unittest.TestCase):
 		subscription = frappe.new_doc('Subscriptions')
 		subscription.subscriber = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.start = '2018-01-01'
 		subscription.insert()
-		subscription.set_current_invoice_start('2018-01-01')
-		subscription.set_current_invoice_end()
 		subscription.process()	# generate first invoice
 
 		self.assertEqual(subscription.status, 'Past Due Date')
@@ -182,9 +177,8 @@ class TestSubscriptions(unittest.TestCase):
 		subscription = frappe.new_doc('Subscriptions')
 		subscription.subscriber = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.start = '2018-01-01'
 		subscription.insert()
-		subscription.set_current_invoice_start('2018-01-01')
-		subscription.set_current_invoice_end()
 		subscription.process()	# generate first invoice
 
 		self.assertEqual(subscription.status, 'Past Due Date')
@@ -202,9 +196,8 @@ class TestSubscriptions(unittest.TestCase):
 		subscription.subscriber = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name'})
 		subscription.days_until_due = 10
+		subscription.start = get_datetime_str(add_to_date(nowdate(), months=-1))
 		subscription.insert()
-		subscription.set_current_invoice_start(get_datetime_str(add_to_date(nowdate(), months=-1)))
-		subscription.set_current_invoice_end()
 		subscription.process()	# generate first invoice
 		self.assertEqual(len(subscription.invoices), 1)
 		self.assertEqual(subscription.status, 'Active')
@@ -220,9 +213,8 @@ class TestSubscriptions(unittest.TestCase):
 		subscription = frappe.new_doc('Subscriptions')
 		subscription.subscriber = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.start = '2018-01-01'
 		subscription.insert()
-		subscription.set_current_invoice_start('2018-01-01')
-		subscription.set_current_invoice_end()
 		subscription.process()	# generate first invoice
 
 		self.assertEqual(subscription.status, 'Past Due Date')
@@ -287,9 +279,8 @@ class TestSubscriptions(unittest.TestCase):
 		subscription = frappe.new_doc('Subscriptions')
 		subscription.subscriber = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.start = '2018-01-01'
 		subscription.insert()
-		subscription.set_current_invoice_start('2018-01-01')
-		subscription.set_current_invoice_end()
 		subscription.process()	# generate first invoice
 		invoices = len(subscription.invoices)
 
@@ -322,9 +313,8 @@ class TestSubscriptions(unittest.TestCase):
 		subscription = frappe.new_doc('Subscriptions')
 		subscription.subscriber = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.start = '2018-01-01'
 		subscription.insert()
-		subscription.set_current_invoice_start('2018-01-01')
-		subscription.set_current_invoice_end()
 		subscription.process()	# generate first invoice
 
 		self.assertEqual(subscription.status, 'Past Due Date')
@@ -360,9 +350,8 @@ class TestSubscriptions(unittest.TestCase):
 		subscription = frappe.new_doc('Subscriptions')
 		subscription.subscriber = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.start = '2018-01-01'
 		subscription.insert()
-		subscription.set_current_invoice_start('2018-01-01')
-		subscription.set_current_invoice_end()
 		subscription.process()	# generate first invoice
 
 		self.assertEqual(subscription.status, 'Past Due Date')
@@ -384,6 +373,3 @@ class TestSubscriptions(unittest.TestCase):
 		settings.cancel_after_grace = default_grace_period_action
 		settings.save()
 		subscription.delete()
-
-	def test_subscription_creation_with_multiple_plans(self):
-		pass

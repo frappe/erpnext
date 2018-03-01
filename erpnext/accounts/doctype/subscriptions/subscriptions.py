@@ -228,8 +228,7 @@ class Subscriptions(Document):
 		elif self.status in ['Past Due Date', 'Unpaid']:
 			self.process_for_past_due_date()
 
-		if self.status != 'Canceled':
-			self.save()
+		self.save()
 
 	def process_for_active(self):
 		if getdate(nowdate()) > getdate(self.current_invoice_end) and not self.has_outstanding_invoice():
@@ -239,6 +238,14 @@ class Subscriptions(Document):
 
 		if self.current_invoice_is_past_due() and getdate(nowdate()) > getdate(self.current_invoice_end):
 			self.status = 'Past Due Date'
+
+		if self.cancel_at_period_end and getdate(nowdate()) > self.current_invoice_end:
+			self.cancel_subscription_at_period_end()
+
+	def cancel_subscription_at_period_end(self):
+		self.status = 'Canceled'
+		if not self.cancelation_date:
+			self.cancelation_date = nowdate()
 
 	def process_for_past_due_date(self):
 		current_invoice = self.get_current_invoice()
@@ -274,10 +281,10 @@ class Subscriptions(Document):
 	def restart_subscription(self):
 		"""
 		This sets the subscription as active. The subscription will be made to be like a new
-		subscription but new trial periods will not be allowed.
+		subscription.
 		"""
 		self.status = 'Active'
-		self.start = nowdate()
+		self.db_set('start', nowdate())
 		self.update_subscription_period(nowdate())
 		self.invoices = []
 		self.save()
