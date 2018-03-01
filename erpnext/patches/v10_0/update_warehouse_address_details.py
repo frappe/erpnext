@@ -6,15 +6,30 @@ import frappe
 
 def execute():
 	warehouse = frappe.db.sql("""select name, email_id, phone_no, mobile_no, address_line_1,
-		address_line_2, city, state, pin from `tabWarehouse` where ifnull(address_line_1, '') != '' """,as_dict=1)
+		address_line_2, city, state, pin from `tabWarehouse` where ifnull(address_line_1, '') != '' 
+		or ifnull(mobile_no, '') != '' 
+		or ifnull(email_id, '') != '' """, as_dict=1)
 
 	for d in warehouse:
-		address = frappe.new_doc('Address')
-		address.address_title = d.name
-		address.address_line1 = d.address_line_1
-		address.city = d.city
-		address.state = d.state
-		address.pincode = d.pin
-		address.db_insert()
-		address.append('links',{'link_doctype':'Warehouse','link_name':d.name})
-		address.links[0].db_insert()
+		if not frappe.db.sql("select name from `tabAddress` where address_title=%s", d.name):
+			address = frappe.new_doc('Address')
+			address.address_title = d.name
+			address.address_line1 = d.address_line_1
+			address.city = d.city
+			address.state = d.state
+			address.pincode = d.pin
+			address.db_insert()
+			address.append('links',{'link_doctype':'Warehouse','link_name':d.name})
+			address.links[0].db_insert()
+		if d.name and (d.email_id or d.mobile_no or d.phone_no):
+			if not frappe.db.sql("select name from `tabContact` where name= %s", (d.name)):
+				contact = frappe.new_doc('Contact')
+				contact.name = d.name
+				contact.first_name = d.name
+				contact.mobile_no = d.mobile_no
+				contact.email_id = d.email_id
+				contact.phone = d.phone_no
+				contact.db_insert()
+				contact.append('links',{'link_doctype':'Warehouse','link_name':d.name})
+				contact.links[0].db_insert()
+				
