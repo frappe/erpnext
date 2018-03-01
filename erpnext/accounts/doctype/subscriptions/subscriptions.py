@@ -14,8 +14,8 @@ class Subscriptions(Document):
 		# update start just before the subscription doc is created
 		self.update_subscription_period()
 
-	def update_subscription_period(self):
-		self.set_current_invoice_start()
+	def update_subscription_period(self, date=None):
+		self.set_current_invoice_start(date)
 		self.set_current_invoice_end()
 
 	def set_current_invoice_start(self, date=None):
@@ -228,16 +228,19 @@ class Subscriptions(Document):
 		"""
 		if self.status == 'Active':
 			self.process_for_active()
-		elif self.status == 'Past Due Date':
+		elif self.status in ['Past Due Date', 'Unpaid']:
 			self.process_for_past_due_date()
-		self.save()
-		# process_for_unpaid()
+
+		if self.status != 'Canceled':
+			self.save()
 
 	def process_for_active(self):
 		if getdate(nowdate()) > getdate(self.current_invoice_end) and not self.has_outstanding_invoice():
 			self.generate_invoice()
+			if self.current_invoice_is_past_due():
+				self.status = 'Past Due Date'
 
-		if self.current_invoice_is_past_due():
+		if self.current_invoice_is_past_due() and getdate(nowdate()) > getdate(self.current_invoice_end):
 			self.status = 'Past Due Date'
 
 	def process_for_past_due_date(self):
@@ -247,7 +250,7 @@ class Subscriptions(Document):
 		else:
 			if self.is_not_outstanding(current_invoice):
 				self.status = 'Active'
-				self.update_subscription_period()
+				self.update_subscription_period(nowdate())
 			else:
 				self.set_status_grace_period()
 
@@ -261,3 +264,41 @@ class Subscriptions(Document):
 		else:
 			return not self.is_not_outstanding(current_invoice)
 		return True
+
+	def cancel_subscription(self):
+		"""
+		This sets the subscription as cancelled. It will stop invoices from being generated
+		but it will not affect already created invoices.
+		"""
+		self.status = 'Canceled'
+		self.cancelation_date = nowdate()
+		self.save()
+
+	def restart_subscription(self):
+		"""
+		This sets the subscription as active. The subscription will be made to be like a new
+		subscription but new trial periods will not be allowed.
+		"""
+		self.status = 'Active'
+		self.cancelation_date = None
+		self.update_subscription_period(nowdate())
+		self.invoices = []
+		self.save()
+
+
+@frappe.whitelist()
+def cancel_subscription(name):
+	subscription = frappe.get_doc('Subscriptions', name)
+	subscription.cancel_subscription()
+
+
+@frappe.whitelist()
+def restart_subscription(name):
+	subscription = frappe.get_doc('Subscriptions', name)
+	subscription.restart_subscription()
+
+
+@frappe.whitelist()
+def get_subscription_updates(name):
+	subscription = frappe.get_doc('Subscriptions', name)
+	subscription.process()
