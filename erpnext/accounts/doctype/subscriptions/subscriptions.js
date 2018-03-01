@@ -67,6 +67,7 @@ frappe.ui.form.on('Subscriptions', {
 			method:
 			"erpnext.accounts.doctype.subscriptions.subscriptions.get_subscription_updates",
 			args: {name: doc.name},
+			freeze: true,
 			callback: function(data){
 				if(!data.exc){
 					frm.reload_doc();
