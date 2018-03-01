@@ -12,7 +12,7 @@ from frappe import _
 class Subscriptions(Document):
 	def before_insert(self):
 		# update start just before the subscription doc is created
-		self.update_subscription_period()
+		self.update_subscription_period(self.start)
 
 	def update_subscription_period(self, date=None):
 		self.set_current_invoice_start(date)
@@ -95,6 +95,7 @@ class Subscriptions(Document):
 		elif self.is_new_subscription():
 			self.status = 'Active'
 			# todo: then generate new invoice
+		self.save()
 
 	def is_trialling(self):
 		return not self.period_has_passed(self.trial_period_end) and self.is_new_subscription()
