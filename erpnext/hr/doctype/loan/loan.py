@@ -21,7 +21,10 @@ class Loan(AccountsController):
 			self.rate_of_interest = frappe.db.get_value("Loan Type", self.loan_type, "rate_of_interest")
 		if self.repayment_method == "Repay Over Number of Periods":
 			self.monthly_repayment_amount = get_monthly_repayment_amount(self.repayment_method, self.loan_amount, self.rate_of_interest, self.repayment_periods)
-
+		if self.status == "Fully Disbursed" and not self.disbursement_date:
+			self.disbursement_date = nowdate()
+		if self.status == "Repaid/Closed":
+			self.total_amount_paid = self.total_payment
 		self.make_repayment_schedule()
 		self.set_repayment_period()
 		self.calculate_totals()
@@ -86,7 +89,6 @@ class Loan(AccountsController):
 	def calculate_totals(self):
 		self.total_payment = 0
 		self.total_interest_payable = 0
-		self.total_amount_paid = 0
 		for data in self.repayment_schedule:
 			self.total_payment += data.total_payment
 			self.total_interest_payable +=data.interest_amount
