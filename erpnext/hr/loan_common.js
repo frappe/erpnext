@@ -9,7 +9,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 		}
 	},
 	applicant_type: function(frm) {
-		frm.set_value("applicant", null);		
+		frm.set_value("applicant", null);
 		frm.set_value("applicant_name", null);
 	},
 	applicant: function(frm) {
@@ -18,7 +18,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 				var applicant = frappe.model.get_doc(frm.doc.applicant_type, frm.doc.applicant);
 				frm.set_value("applicant_name",
 					applicant.employee_name || applicant.member_name);
-			})
+			});
 		}
 		else {
 			frm.set_value("applicant_name", null);

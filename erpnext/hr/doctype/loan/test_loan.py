@@ -34,15 +34,9 @@ class TestLoan(unittest.TestCase):
 		loan.monthly_repayment_amount = 14000
 		loan.save()
 
-<<<<<<< HEAD:erpnext/hr/doctype/employee_loan/test_employee_loan.py
-		self.assertEqual(len(employee_loan.repayment_schedule), 22)
-		self.assertEqual(employee_loan.total_interest_payable, 22712)
-		self.assertEqual(employee_loan.total_payment, 302712)
-=======
 		self.assertEquals(len(loan.repayment_schedule), 22)
 		self.assertEquals(loan.total_interest_payable, 22712)
 		self.assertEquals(loan.total_payment, 302712)
->>>>>>> Renamed - Employee Loan Application to Loan Application, Employee Loan to Loan and field Employee Loan Account to Loan Account:erpnext/hr/doctype/loan/test_loan.py
 
 def create_loan_type(loan_name, maximum_loan_amount, rate_of_interest):
 	if not frappe.db.exists("Loan Type", loan_name):

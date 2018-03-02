@@ -7,7 +7,6 @@ import frappe, math, json
 import erpnext
 from frappe import _
 from frappe.utils import flt, rounded, add_months, nowdate
-from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.accounts_controller import AccountsController
 
 class Loan(AccountsController):
@@ -21,7 +20,7 @@ class Loan(AccountsController):
 			self.rate_of_interest = frappe.db.get_value("Loan Type", self.loan_type, "rate_of_interest")
 		if self.repayment_method == "Repay Over Number of Periods":
 			self.monthly_repayment_amount = get_monthly_repayment_amount(self.repayment_method, self.loan_amount, self.rate_of_interest, self.repayment_periods)
-		if self.status == "Fully Disbursed" and not self.disbursement_date:
+		if not self.disbursement_date and self.status == "Fully Disbursed":
 			self.disbursement_date = nowdate()
 		if self.status == "Repaid/Closed":
 			self.total_amount_paid = self.total_payment
@@ -105,8 +104,8 @@ def update_total_amount_paid(doc):
 	frappe.db.set_value("Loan", doc.name, "total_amount_paid", paid_amount.paid_amount)
 
 def update_disbursement_status(doc):
-	disbursement = frappe.db.sql("""select posting_date, ifnull(sum(credit_in_account_currency), 0) as disbursed_amount 
-		from `tabGL Entry` where account = %s and against_voucher_type = 'Loan' and against_voucher = %s""", 
+	disbursement = frappe.db.sql("""select posting_date, ifnull(sum(credit_in_account_currency), 0) as disbursed_amount
+		from `tabGL Entry` where account = %s and against_voucher_type = 'Loan' and against_voucher = %s""",
 		(doc.payment_account, doc.name), as_dict=1)[0]
 	if disbursement.disbursed_amount == doc.loan_amount:
 		frappe.db.set_value("Loan", doc.name , "status", "Fully Disbursed")
