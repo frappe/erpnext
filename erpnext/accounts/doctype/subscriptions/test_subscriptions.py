@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils.data import nowdate, add_days, get_last_day, cint, getdate, add_to_date, get_datetime_str, add_months
+from frappe.utils.data import nowdate, add_days, get_last_day, cint, getdate, add_to_date, get_datetime_str, add_months, date_diff
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
 
@@ -267,6 +267,77 @@ class TestSubscriptions(unittest.TestCase):
 		subscription.cancel_subscription()
 
 		self.assertEqual(subscription.status, 'Canceled')
+
+		subscription.delete()
+
+	def test_subscription_cancelation_invoices(self):
+		subscription = frappe.new_doc('Subscriptions')
+		subscription.subscriber = '_Test Customer'
+		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.save()
+
+		self.assertEqual(subscription.status, 'Active')
+
+		subscription.cancel_subscription()
+		# Invoice must have been generated
+		self.assertEqual(len(subscription.invoices), 1)
+
+		invoice = subscription.get_current_invoice()
+		diff = date_diff(nowdate(), subscription.current_invoice_start) + 1
+		plan_days = date_diff(subscription.current_invoice_end, subscription.current_invoice_start) + 1
+		prorate_factor = diff/plan_days
+
+		self.assertEqual(
+			subscription.get_proration_factor(
+				subscription.current_invoice_end, 
+				subscription.current_invoice_start
+			), prorate_factor)
+		self.assertEqual(invoice.grand_total, prorate_factor * 900)
+		self.assertEqual(subscription.status, 'Canceled')
+
+		subscription.delete()
+
+	def test_subscription_cancellation_invoices_with_proration_false(self):
+		settings = frappe.get_single('Subscription Settings')
+		to_prorate = settings.prorate
+		settings.prorate = 0
+		settings.save()
+
+		subscription = frappe.new_doc('Subscriptions')
+		subscription.subscriber = '_Test Customer'
+		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.save()
+		subscription.cancel_subscription()
+		invoice = subscription.get_current_invoice()
+
+		self.assertEqual(invoice.grand_total, 900)
+
+		settings.prorate = to_prorate
+		settings.save()
+
+		subscription.delete()
+
+	def test_subscription_cancellation_invoices_with_proration_true(self):
+		settings = frappe.get_single('Subscription Settings')
+		to_prorate = settings.prorate
+		settings.prorate = 1
+		settings.save()
+
+		subscription = frappe.new_doc('Subscriptions')
+		subscription.subscriber = '_Test Customer'
+		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.save()
+		subscription.cancel_subscription()
+
+		invoice = subscription.get_current_invoice()
+		diff = date_diff(nowdate(), subscription.current_invoice_start) + 1
+		plan_days = date_diff(subscription.current_invoice_end, subscription.current_invoice_start) + 1
+		prorate_factor = diff/plan_days
+
+		self.assertEqual(invoice.grand_total, prorate_factor * 900)
+
+		settings.prorate = to_prorate
+		settings.save()
 
 		subscription.delete()
 
