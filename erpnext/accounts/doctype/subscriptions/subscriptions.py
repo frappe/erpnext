@@ -225,18 +225,18 @@ class Subscriptions(Document):
 		# todo: deal with users who collect prepayments. Maybe a new Subscription Invoice doctype?
 		self.set_subscription_status()
 
-	def generate_invoice(self):
+	def generate_invoice(self, prorate=0):
 		"""
 		Creates a `Sales Invoice` for the `Subscription`, updates `self.invoices` and
 		saves the `Subscription`.
 		"""
-		invoice = self.create_invoice()
+		invoice = self.create_invoice(prorate)
 		self.append('invoices', {'invoice': invoice.name})
 		self.save()
 
 		return invoice
 
-	def create_invoice(self):
+	def create_invoice(self, prorate):
 		"""
 		Creates a `Sales Invoice`, submits it and returns it
 		"""
@@ -247,7 +247,7 @@ class Subscriptions(Document):
 
 		# Subscription is better suited for service items. I won't update `update_stock`
 		# for that reason
-		items_list = self.get_items_from_plans(self.plans)
+		items_list = self.get_items_from_plans(self.plans, prorate)
 		for item in items_list:
 			item['qty'] = self.quantity
 			invoice.append('items',	item)
@@ -288,18 +288,35 @@ class Subscriptions(Document):
 		"""
 		return frappe.get_value('Subscriber', subscriber_name)
 
-	def get_items_from_plans(self, plans):
+	def get_items_from_plans(self, plans, prorate=0):
 		"""
 		Returns the `Item`s linked to `Subscription Plan`
 		"""
 		plan_items = [plan.plan for plan in plans]
+		item_names = None
 
-		if plan_items:
+		if plan_items and not prorate:
 			item_names = frappe.db.sql(
 				'select item as item_code, cost as rate from `tabSubscription Plan` where name in %s',
 				(plan_items,), as_dict=1
 			)
-			return item_names
+
+		elif plan_items:
+			prorate_factor = self.get_proration_factor(self.current_invoice_end, self.current_invoice_start)
+
+			item_names = frappe.db.sql(
+				'select item as item_code, cost * %s as rate from `tabSubscription Plan` where name in %s',
+				(prorate_factor, plan_items,), as_dict=1
+			)
+
+		return item_names
+
+	def get_proration_factor(self, period_end, period_start):
+		diff = date_diff(nowdate(), period_start) + 1
+		plan_days = date_diff(period_end, period_start) + 1
+		prorate_factor = diff/plan_days
+
+		return prorate_factor
 
 	def process(self):
 		"""
@@ -384,8 +401,12 @@ class Subscriptions(Document):
 		This sets the subscription as cancelled. It will stop invoices from being generated
 		but it will not affect already created invoices.
 		"""
+		to_generate_invoice = True if self.status == 'Active' else False
+		to_prorate = frappe.db.get_single_value('Subscription Settings', 'prorate')
 		self.status = 'Canceled'
 		self.cancelation_date = nowdate()
+		if to_generate_invoice:
+			self.generate_invoice(prorate=to_prorate)
 		self.save()
 
 	def restart_subscription(self):
