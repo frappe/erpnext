@@ -104,4 +104,12 @@ Here, select the company and type of invoice (sales or purchase) and add a line 
 
 <img class="screenshot" alt="Opening Invoice Creation Tool" src="{{docs_base_url}}/assets/img/accounts/opening-invoice-creation-tool.png">
 
+
+<div>
+  <div class='embed-container'>
+    <iframe src='https://www.youtube.com/embed//U5wPIvEn-0c' frameborder='0' allowfullscreen>
+    </iframe>
+  </div>
+</div>
+
 {next}

@@ -71,4 +71,9 @@ After inserting required details for the Custom Field, Update Customize Form. On
 
 Given a permission, user will be able to delete Custom Fields. Incase Custom Field is deleted by mistake, if you add another Custom Field with same name. Then you shall see new field auto-mapped with old-deleted Custom Field.
 
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/pJhL9mmxV_U?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+    </iframe>
+</div>
+
 {next}
