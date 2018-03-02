@@ -3,10 +3,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
-from frappe.utils.data import now, nowdate, getdate, cint, add_days, date_diff, get_last_day, get_first_day, add_to_date
 from frappe import _
+from frappe.model.document import Document
+from frappe.utils.data import nowdate, getdate, cint, add_days, date_diff, get_last_day, add_to_date
 
 
 class Subscriptions(Document):
@@ -67,7 +68,8 @@ class Subscriptions(Document):
 		"""
 		return self.get_billing_cycle_data()
 
-	def validate_plans_billing_cycle(self, billing_cycle_data):
+	@staticmethod
+	def validate_plans_billing_cycle(billing_cycle_data):
 		"""
 		Makes sure that all `Subscription Plan` in the `Subscription` have the
 		same billing interval
@@ -112,7 +114,7 @@ class Subscriptions(Document):
 			elif interval == 'Month':
 				data['months'] = interval_count
 			elif interval == 'Year':
-				data['years'] == interval_count
+				data['years'] = interval_count
 			# todo: test week
 			elif interval == 'Week':
 				data['days'] = interval_count * 7 - 1
@@ -154,7 +156,8 @@ class Subscriptions(Document):
 		"""
 		return not self.period_has_passed(self.trial_period_end) and self.is_new_subscription()
 
-	def period_has_passed(self, end_date):
+	@staticmethod
+	def period_has_passed(end_date):
 		"""
 		Returns true if the given `end_date` has passed
 		"""
@@ -198,7 +201,7 @@ class Subscriptions(Document):
 				doc = frappe.get_doc('Sales Invoice', current.invoice)
 				return doc
 			else:
-				frappe.throw(_('Invoice {0} no longer exists'.format(invoice.invoice)))
+				frappe.throw(_('Invoice {0} no longer exists'.format(current.invoice)))
 
 	def is_new_subscription(self):
 		"""
@@ -282,7 +285,8 @@ class Subscriptions(Document):
 
 		return invoice
 
-	def get_customer(self, subscriber_name):
+	@staticmethod
+	def get_customer(subscriber_name):
 		"""
 		Returns the `Customer` linked to the `Subscriber`
 		"""
@@ -302,7 +306,7 @@ class Subscriptions(Document):
 			)
 
 		elif plan_items:
-			prorate_factor = self.get_proration_factor(self.current_invoice_end, self.current_invoice_start)
+			prorate_factor = get_prorata_factor(self.current_invoice_end, self.current_invoice_start)
 
 			item_names = frappe.db.sql(
 				'select item as item_code, cost * %s as rate from `tabSubscription Plan` where name in %s',
@@ -310,13 +314,6 @@ class Subscriptions(Document):
 			)
 
 		return item_names
-
-	def get_proration_factor(self, period_end, period_start):
-		diff = date_diff(nowdate(), period_start) + 1
-		plan_days = date_diff(period_end, period_start) + 1
-		prorate_factor = diff/plan_days
-
-		return prorate_factor
 
 	def process(self):
 		"""
@@ -379,7 +376,8 @@ class Subscriptions(Document):
 			else:
 				self.set_status_grace_period()
 
-	def is_not_outstanding(self, invoice):
+	@staticmethod
+	def is_not_outstanding(invoice):
 		"""
 		Return `True` if the given invoice is paid
 		"""
@@ -394,7 +392,6 @@ class Subscriptions(Document):
 			return False
 		else:
 			return not self.is_not_outstanding(current_invoice)
-		return True
 
 	def cancel_subscription(self):
 		"""
@@ -455,6 +452,14 @@ def process(data):
 			frappe.db.begin()
 			frappe.log_error(frappe.get_traceback())
 			frappe.db.commit()
+
+
+def get_prorata_factor(period_end, period_start):
+	diff = date_diff(nowdate(), period_start) + 1
+	plan_days = date_diff(period_end, period_start) + 1
+	prorate_factor = diff/plan_days
+
+	return prorate_factor
 
 
 @frappe.whitelist()
