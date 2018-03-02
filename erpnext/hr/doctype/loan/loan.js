@@ -44,8 +44,7 @@ frappe.ui.form.on('Loan', {
 				frm.trigger("make_jv");
 			})
 		}
-		if (frm.doc.docstatus == 1 && frm.doc.disbursement_date && \
-			(frm.doc.applicant_type == 'Member' || frm.doc.repay_from_salary == 0)) {
+		if (frm.doc.docstatus == 1 && frm.doc.disbursement_date && (frm.doc.applicant_type == 'Member' || frm.doc.repay_from_salary == 0)) {
 			frm.add_custom_button(__('Make Repayment Entry'), function() {
 				frm.trigger("make_repayment_entry");
 			})

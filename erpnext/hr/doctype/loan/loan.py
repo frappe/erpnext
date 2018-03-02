@@ -90,8 +90,6 @@ class Loan(AccountsController):
 		for data in self.repayment_schedule:
 			self.total_payment += data.total_payment
 			self.total_interest_payable +=data.interest_amount
-			if data.paid:
-				self.total_amount_paid += data.total_payment
 
 def update_total_amount_paid(doc):
 	paid_amount = frappe.db.sql("""
@@ -102,8 +100,8 @@ def update_total_amount_paid(doc):
 
 	if flt(paid_amount) > doc.total_payment:
 		frappe.throw(_("Total Payment Amount cannot be greater than total payment."))
+	frappe.db.set_value("Loan", doc.name, "total_amount_paid", paid_amount.paid_amount)
 
-	frappe.db.set_value("Loan", doc.name, "total_amount_paid", paid_amount)
 def update_disbursement_status(doc):
 	disbursement = frappe.db.sql("""select posting_date, ifnull(sum(credit_in_account_currency), 0) as disbursed_amount 
 		from `tabGL Entry` where account = %s and against_voucher_type = 'Loan' and against_voucher = %s""", 
