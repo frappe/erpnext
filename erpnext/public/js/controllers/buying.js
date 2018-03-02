@@ -252,10 +252,12 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 							d.qty = d.qty  - my_qty;
 							cur_frm.doc.items[i].stock_qty = my_qty*cur_frm.doc.items[i].conversion_factor;
 							cur_frm.doc.items[i].qty = my_qty;
-
-							frappe.msgprint("Assigning " + d.mr_name + " to " + d.item_code + " (row " + cur_frm.doc.items[i].idx + ")");
+							
+							frappe.msgprint(__("Assigning {0} to {1} (row {2})", 
+								[d.mr_name, d.item_code, cur_frm.doc.items[i].idx]));
+							
 							if (qty > 0) {
-								frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
+								frappe.msgprint(__("Splitting {0} units of {1}", [qty, d.item_code]));
 								var newrow = frappe.model.add_child(cur_frm.doc, cur_frm.doc.items[i].doctype, "items");
 								item_length++;
 

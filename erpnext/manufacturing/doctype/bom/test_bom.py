@@ -18,7 +18,7 @@ class TestBOM(unittest.TestCase):
 			company="_Test Company", qty=1, fetch_exploded=0)
 		self.assertTrue(test_records[2]["items"][0]["item_code"] in items_dict)
 		self.assertTrue(test_records[2]["items"][1]["item_code"] in items_dict)
-		self.assertEquals(len(items_dict.values()), 2)
+		self.assertEqual(len(items_dict.values()), 2)
 
 	def test_get_items_exploded(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
@@ -28,11 +28,11 @@ class TestBOM(unittest.TestCase):
 		self.assertFalse(test_records[2]["items"][1]["item_code"] in items_dict)
 		self.assertTrue(test_records[0]["items"][0]["item_code"] in items_dict)
 		self.assertTrue(test_records[0]["items"][1]["item_code"] in items_dict)
-		self.assertEquals(len(items_dict.values()), 3)
+		self.assertEqual(len(items_dict.values()), 3)
 
 	def test_get_items_list(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items
-		self.assertEquals(len(get_bom_items(bom=get_default_bom(), company="_Test Company")), 3)
+		self.assertEqual(len(get_bom_items(bom=get_default_bom(), company="_Test Company")), 3)
 
 	def test_default_bom(self):
 		def _get_default_bom_in_item():

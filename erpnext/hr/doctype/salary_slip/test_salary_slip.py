@@ -37,14 +37,14 @@ class TestSalarySlip(unittest.TestCase):
 		ss = frappe.get_doc("Salary Slip",
 			self.make_employee_salary_slip("test_employee@salary.com", "Monthly"))
 
-		self.assertEquals(ss.total_working_days, no_of_days[0])
-		self.assertEquals(ss.payment_days, no_of_days[0])
-		self.assertEquals(ss.earnings[0].amount, 25000)
-		self.assertEquals(ss.earnings[1].amount, 3000)
-		self.assertEquals(ss.deductions[0].amount, 5000)
-		self.assertEquals(ss.deductions[1].amount, 5000)
-		self.assertEquals(ss.gross_pay, 40500)
-		self.assertEquals(ss.net_pay, 29918)
+		self.assertEqual(ss.total_working_days, no_of_days[0])
+		self.assertEqual(ss.payment_days, no_of_days[0])
+		self.assertEqual(ss.earnings[0].amount, 25000)
+		self.assertEqual(ss.earnings[1].amount, 3000)
+		self.assertEqual(ss.deductions[0].amount, 5000)
+		self.assertEqual(ss.deductions[1].amount, 5000)
+		self.assertEqual(ss.gross_pay, 40500)
+		self.assertEqual(ss.net_pay, 29918)
 
 	def test_salary_slip_with_holidays_excluded(self):
 		no_of_days = self.get_no_of_days()
@@ -55,15 +55,15 @@ class TestSalarySlip(unittest.TestCase):
 		ss = frappe.get_doc("Salary Slip",
 			self.make_employee_salary_slip("test_employee@salary.com", "Monthly"))
 
-		self.assertEquals(ss.total_working_days, no_of_days[0] - no_of_days[1])
-		self.assertEquals(ss.payment_days, no_of_days[0] - no_of_days[1])
-		self.assertEquals(ss.earnings[0].amount, 25000)
-		self.assertEquals(ss.earnings[0].default_amount, 25000)
-		self.assertEquals(ss.earnings[1].amount, 3000)
-		self.assertEquals(ss.deductions[0].amount, 5000)
-		self.assertEquals(ss.deductions[1].amount, 5000)
-		self.assertEquals(ss.gross_pay, 40500)
-		self.assertEquals(ss.net_pay, 29918)
+		self.assertEqual(ss.total_working_days, no_of_days[0] - no_of_days[1])
+		self.assertEqual(ss.payment_days, no_of_days[0] - no_of_days[1])
+		self.assertEqual(ss.earnings[0].amount, 25000)
+		self.assertEqual(ss.earnings[0].default_amount, 25000)
+		self.assertEqual(ss.earnings[1].amount, 3000)
+		self.assertEqual(ss.deductions[0].amount, 5000)
+		self.assertEqual(ss.deductions[1].amount, 5000)
+		self.assertEqual(ss.gross_pay, 40500)
+		self.assertEqual(ss.net_pay, 29918)
 
 	def test_payment_days(self):
 		no_of_days = self.get_no_of_days()
@@ -95,8 +95,8 @@ class TestSalarySlip(unittest.TestCase):
 		ss = frappe.get_doc("Salary Slip",
 			self.make_employee_salary_slip("test_employee@salary.com", "Monthly"))
 
-		self.assertEquals(ss.total_working_days, no_of_days[0])
-		self.assertEquals(ss.payment_days, (no_of_days[0] - getdate(date_of_joining).day + 1))
+		self.assertEqual(ss.total_working_days, no_of_days[0])
+		self.assertEqual(ss.payment_days, (no_of_days[0] - getdate(date_of_joining).day + 1))
 
 		# set relieving date in the same month
 		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "date_of_joining", (add_days(nowdate(),-60)))
@@ -104,8 +104,8 @@ class TestSalarySlip(unittest.TestCase):
 		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "status", "Left")
 		ss.save()
 
-		self.assertEquals(ss.total_working_days, no_of_days[0])
-		self.assertEquals(ss.payment_days, getdate(relieving_date).day)
+		self.assertEqual(ss.total_working_days, no_of_days[0])
+		self.assertEqual(ss.payment_days, getdate(relieving_date).day)
 
 		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "relieving_date", None)
 		frappe.db.set_value("Employee", frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"), "status", "Active")
@@ -143,8 +143,8 @@ class TestSalarySlip(unittest.TestCase):
 		ss = frappe.get_doc("Salary Slip",
 			self.make_employee_salary_slip("test_employee@salary.com", "Monthly"))
 		ss.submit()
-		self.assertEquals(ss.total_loan_repayment, 582)
-		self.assertEquals(ss.net_pay, (flt(ss.gross_pay) - (flt(ss.total_deduction) + flt(ss.total_loan_repayment))))
+		self.assertEqual(ss.total_loan_repayment, 582)
+		self.assertEqual(ss.net_pay, (flt(ss.gross_pay) - (flt(ss.total_deduction) + flt(ss.total_loan_repayment))))
 
 	def test_payroll_frequency(self):
 		fiscal_year = get_fiscal_year(nowdate(), company="_Test Company")[0]

@@ -45,11 +45,10 @@ frappe.ui.form.on("Customer", {
 	customer_primary_address: function(frm){
 		if(frm.doc.customer_primary_address){
 			frappe.call({
-				doc: frm.doc,
-				args: {
-					"address_title": frm.doc.customer_primary_address
-				},
 				method: 'frappe.contacts.doctype.address.address.get_address_display',
+				args: {
+					"address_dict": frm.doc.customer_primary_address
+				},
 				callback: function(r) {
 					frm.set_value("primary_address", r.message);
 				}

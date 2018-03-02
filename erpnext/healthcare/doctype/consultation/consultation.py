@@ -21,7 +21,7 @@ class Consultation(Document):
 
 	def on_submit(self):
 		if not self.diagnosis or not self.symptoms:
-			frappe.throw("Diagnosis and Complaints cannot be left blank")
+			frappe.throw(_("Diagnosis and Complaints cannot be left blank"))
 
 	def on_cancel(self):
 		if(self.appointment):

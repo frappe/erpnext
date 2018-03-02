@@ -114,15 +114,15 @@ class Asset(Document):
 					and getdate(self.next_depreciation_date) < next_depr_date):
 
 					number_of_pending_depreciations += 1
-					for n in xrange(number_of_pending_depreciations):
-						if n == xrange(number_of_pending_depreciations)[-1]:
+					for n in range(number_of_pending_depreciations):
+						if n == range(number_of_pending_depreciations)[-1]:
 							schedule_date = add_months(self.available_for_use_date, n * 12)
 							previous_scheduled_date = add_months(self.next_depreciation_date, (n-1) * 12)
 							depreciation_amount = \
 								self.get_depreciation_amount_prorata_temporis(value_after_depreciation,
 									previous_scheduled_date, schedule_date)
 
-						elif n == xrange(number_of_pending_depreciations)[0]:
+						elif n == range(number_of_pending_depreciations)[0]:
 							schedule_date = self.next_depreciation_date
 							depreciation_amount = \
 								self.get_depreciation_amount_prorata_temporis(value_after_depreciation,
@@ -141,7 +141,7 @@ class Asset(Document):
 								"depreciation_amount": depreciation_amount
 							})
 				else:
-					for n in xrange(number_of_pending_depreciations):
+					for n in range(number_of_pending_depreciations):
 						schedule_date = add_months(self.next_depreciation_date,
 							n * cint(self.frequency_of_depreciation))
 

@@ -7,16 +7,20 @@ import frappe
 
 
 def execute():
-	items_barcode = frappe.db.sql("""SELECT name, barcode FROM tabItem
-		WHERE barcode IS NOT NULL and barcode != ''""", as_dict=1)
+	items_barcode = frappe.get_list('Item', ['name', 'barcode'], { 'barcode': ('!=', '') })
 
 	frappe.reload_doc("stock", "doctype", "item")
 	frappe.reload_doc("stock", "doctype", "item_barcode")
 
 	for item in items_barcode:
-		doc = frappe.get_doc("Item", item.get("name"))
-		if item.get("barcode"):
-			doc.append("barcodes", {"barcode": item.get("barcode")})
-			doc.flags.ignore_validate = True
-			doc.flags.ignore_mandatory = True
-			doc.save()
+		barcode = item.barcode.strip()
+
+		if barcode and '<' not in barcode:
+			frappe.get_doc({
+				'idx': 0,
+				'doctype': 'Item Barcode',
+				'barcode': barcode,
+				'parenttype': 'Item',
+				'parent': item.name,
+				'parentfield': 'barcodes'
+			}).insert()

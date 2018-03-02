@@ -53,7 +53,7 @@ frappe.ui.form.on("Patient", "dob", function(frm) {
 		var today = new Date();
 		var birthDate = new Date(frm.doc.dob);
 		if(today < birthDate){
-			frappe.msgprint("Please select a valid Date");
+			frappe.msgprint(__("Please select a valid Date"));
 			frappe.model.set_value(frm.doctype,frm.docname, "dob", "");
 		}
 		else{
@@ -83,7 +83,7 @@ var get_age = function (birth) {
 
 var btn_create_vital_signs = function (frm) {
 	if (!frm.doc.name) {
-		frappe.throw("Please save the patient first");
+		frappe.throw(__("Please save the patient first"));
 	}
 	frappe.route_options = {
 		"patient": frm.doc.name,
@@ -93,7 +93,7 @@ var btn_create_vital_signs = function (frm) {
 
 var btn_create_consultation = function (frm) {
 	if (!frm.doc.name) {
-		frappe.throw("Please save the patient first");
+		frappe.throw(__("Please save the patient first"));
 	}
 	frappe.route_options = {
 		"patient": frm.doc.name,

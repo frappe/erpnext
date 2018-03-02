@@ -50,7 +50,7 @@ class Task(NestedSet):
 			clear(self.doctype, self.name)
 
 	def validate_progress(self):
-		if self.progress > 100:
+		if (self.progress or 0) > 100:
 			frappe.throw(_("Progress % for a task cannot be more than 100."))
 
 	def update_depends_on(self):
@@ -77,7 +77,7 @@ class Task(NestedSet):
 
 	def update_total_expense_claim(self):
 		self.total_expense_claim = frappe.db.sql("""select sum(total_sanctioned_amount) from `tabExpense Claim`
-			where project = %s and task = %s and approval_status = "Approved" and docstatus=1""",(self.project, self.name))[0][0]
+			where project = %s and task = %s and docstatus=1""",(self.project, self.name))[0][0]
 
 	def update_time_and_costing(self):
 		tl = frappe.db.sql("""select min(from_time) as start_date, max(to_time) as end_date,

@@ -14,6 +14,10 @@
 	margin-bottom: -4px;
 }
 
+.medical_record-row > * {
+	z-index: -999;
+}
+
 .date-indicator {
     background:none;
     font-size:12px;
@@ -48,7 +52,6 @@
 .medical_record-date {
 	padding: 15px;
 	padding-right: 0px;
-	z-index: 1;
 }
 
 #page-medical_record .plot-wrapper {
