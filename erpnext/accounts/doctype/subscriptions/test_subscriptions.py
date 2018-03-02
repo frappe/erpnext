@@ -10,45 +10,48 @@ from erpnext.accounts.doctype.subscriptions.subscriptions import get_prorata_fac
 from frappe.utils.data import nowdate, add_days, add_to_date, add_months, date_diff
 
 
+def create_plan():
+	if not frappe.db.exists('Subscription Plan', '_Test Plan Name'):
+		plan = frappe.new_doc('Subscription Plan')
+		plan.plan_name = '_Test Plan Name'
+		plan.item = '_Test Non Stock Item'
+		plan.cost = 900
+		plan.billing_interval = 'Month'
+		plan.billing_interval_count = 1
+		plan.insert()
+
+	if not frappe.db.exists('Subscription Plan', '_Test Plan Name 2'):
+		plan = frappe.new_doc('Subscription Plan')
+		plan.plan_name = '_Test Plan Name 2'
+		plan.item = '_Test Non Stock Item'
+		plan.cost = 1999
+		plan.billing_interval = 'Month'
+		plan.billing_interval_count = 1
+		plan.insert()
+
+	if not frappe.db.exists('Subscription Plan', '_Test Plan Name 3'):
+		plan = frappe.new_doc('Subscription Plan')
+		plan.plan_name = '_Test Plan Name 3'
+		plan.item = '_Test Non Stock Item'
+		plan.cost = 1999
+		plan.billing_interval = 'Day'
+		plan.billing_interval_count = 14
+		plan.insert()
+
+
+def create_subscriber():
+	if not frappe.db.exists('Subscriber', '_Test Customer'):
+		subscriber = frappe.new_doc('Subscriber')
+		subscriber.subscriber_name = '_Test Customer'
+		subscriber.customer = '_Test Customer'
+		subscriber.insert()
+
+
 class TestSubscriptions(unittest.TestCase):
-	def create_plan(self):
-		if not frappe.db.exists('Subscription Plan', '_Test Plan Name'):
-			plan = frappe.new_doc('Subscription Plan')
-			plan.plan_name = '_Test Plan Name'
-			plan.item = '_Test Non Stock Item'
-			plan.cost = 900
-			plan.billing_interval = 'Month'
-			plan.billing_interval_count = 1
-			plan.insert()
-
-		if not frappe.db.exists('Subscription Plan', '_Test Plan Name 2'):
-			plan = frappe.new_doc('Subscription Plan')
-			plan.plan_name = '_Test Plan Name 2'
-			plan.item = '_Test Non Stock Item'
-			plan.cost = 1999
-			plan.billing_interval = 'Month'
-			plan.billing_interval_count = 1
-			plan.insert()
-
-		if not frappe.db.exists('Subscription Plan', '_Test Plan Name 3'):
-			plan = frappe.new_doc('Subscription Plan')
-			plan.plan_name = '_Test Plan Name 3'
-			plan.item = '_Test Non Stock Item'
-			plan.cost = 1999
-			plan.billing_interval = 'Day'
-			plan.billing_interval_count = 14
-			plan.insert()
-
-	def create_subscriber(self):
-		if not frappe.db.exists('Subscriber', '_Test Customer'):
-			subscriber = frappe.new_doc('Subscriber')
-			subscriber.subscriber_name = '_Test Customer'
-			subscriber.customer = '_Test Customer'
-			subscriber.insert()
 
 	def setUp(self):
-		self.create_plan()
-		self.create_subscriber()
+		create_plan()
+		create_subscriber()
 
 	def test_create_subscription_with_trial_with_correct_period(self):
 		subscription = frappe.new_doc('Subscriptions')
@@ -161,7 +164,7 @@ class TestSubscriptions(unittest.TestCase):
 
 		self.assertEqual(subscription.status, 'Past Due Date')
 
-		subscription.process()	
+		subscription.process()
 		# This should change status to Canceled since grace period is 0
 		self.assertEqual(subscription.status, 'Canceled')
 
@@ -245,7 +248,7 @@ class TestSubscriptions(unittest.TestCase):
 		self.assertEqual(subscription.current_invoice_start, nowdate())
 		self.assertEqual(subscription.current_invoice_end, add_to_date(nowdate(), months=1, days=-1))
 		self.assertEqual(len(subscription.invoices), 0)
-		
+
 		subscription.process()		# no changes expected still
 		self.assertEqual(subscription.status, 'Active')
 		self.assertEqual(subscription.current_invoice_start, nowdate())
@@ -358,7 +361,7 @@ class TestSubscriptions(unittest.TestCase):
 		self.assertEqual(subscription.status, 'Past Due Date')
 		self.assertEqual(len(subscription.invoices), invoices)
 
-		subscription.cancel_subscription()	
+		subscription.cancel_subscription()
 		self.assertEqual(subscription.status, 'Canceled')
 		self.assertEqual(len(subscription.invoices), invoices)
 
