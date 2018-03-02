@@ -36,12 +36,12 @@ class TestSalaryStructure(unittest.TestCase):
 		sal_slip = frappe.get_value("Salary Slip", {"employee_name":"test_employee@salary.com"})
 		if not sal_slip:
 			sal_slip = make_salary_slip_from_salary_structure(employee=frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}))
-			self.assertEquals(sal_slip.get("salary_structure"), 'Salary Structure Sample')
-			self.assertEquals(sal_slip.get("earnings")[0].amount, 5000)
-			self.assertEquals(sal_slip.get("deductions")[0].amount, 5000)
-			self.assertEquals(sal_slip.get("deductions")[1].amount, 2500)
-			self.assertEquals(sal_slip.get("total_deduction"), 7500)
-			self.assertEquals(sal_slip.get("net_pay"), 7500)
+			self.assertEqual(sal_slip.get("salary_structure"), 'Salary Structure Sample')
+			self.assertEqual(sal_slip.get("earnings")[0].amount, 5000)
+			self.assertEqual(sal_slip.get("deductions")[0].amount, 5000)
+			self.assertEqual(sal_slip.get("deductions")[1].amount, 2500)
+			self.assertEqual(sal_slip.get("total_deduction"), 7500)
+			self.assertEqual(sal_slip.get("net_pay"), 7500)
 
 	def test_whitespaces_in_formula_conditions_fields(self):
 		make_salary_structure("Salary Structure Sample")

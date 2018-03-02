@@ -12,6 +12,7 @@ def execute():
 	if not po_item:
 		return
 
+	frappe.reload_doc("stock", "doctype", "bin")
 	frappe.reload_doc("buying", "doctype", "purchase_order_item_supplied")
 	company_warehouse = frappe._dict(frappe.db.sql("""select company, min(name) from `tabWarehouse`
 		where is_group = 0 group by company"""))
@@ -30,7 +31,7 @@ def execute():
 
 	# Update bin
 	item_wh_bin = frappe.db.sql(("""
-		select distinct poitemsup.rm_item_code as rm_item_code, 
+		select distinct poitemsup.rm_item_code as rm_item_code,
 			poitemsup.reserve_warehouse as reserve_warehouse
 		from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
 		where po.name = poitemsup.parent

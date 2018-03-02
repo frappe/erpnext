@@ -9,6 +9,8 @@ from erpnext.setup.utils import get_exchange_rate
 from frappe.website.website_generator import WebsiteGenerator
 from erpnext.stock.get_item_details import get_conversion_factor
 
+import functools
+
 from six import string_types
 
 from operator import itemgetter
@@ -585,7 +587,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 @frappe.whitelist()
 def get_bom_items(bom, company, qty=1, fetch_exploded=1):
 	items = get_bom_items_as_dict(bom, company, qty, fetch_exploded).values()
-	items.sort(lambda a, b: a.item_code > b.item_code and 1 or -1)
+	items.sort(key = functools.cmp_to_key(lambda a, b: a.item_code > b.item_code and 1 or -1))
 	return items
 
 def validate_bom_no(item, bom_no):
