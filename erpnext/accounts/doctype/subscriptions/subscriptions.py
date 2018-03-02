@@ -29,9 +29,8 @@ class Subscriptions(Document):
 
 	def set_current_invoice_start(self, date=None):
 		"""
-		This sets the date of the beginning of the current billing period. 
-		
-		If the `date` parameter is not given , it will be automatically set as today's 
+		This sets the date of the beginning of the current billing period.
+		If the `date` parameter is not given , it will be automatically set as today's
 		date.
 		"""
 		if self.trial_period_start and self.is_trialling():
@@ -49,7 +48,7 @@ class Subscriptions(Document):
 		trial period.
 
 		If is not in a trial period, it will be `x` days from the beginning of the
-		current billing period where `x` is the billing interval from the 
+		current billing period where `x` is the billing interval from the
 		`Subscription Plan` in the `Subscription`.
 		"""
 		if self.is_trialling():
@@ -63,7 +62,7 @@ class Subscriptions(Document):
 
 	def get_billing_cycle(self):
 		"""
-		Returns a dict containing billing cycle information deduced from the 
+		Returns a dict containing billing cycle information deduced from the
 		`Subscription Plan` in the `Subscription`.
 		"""
 		return self.get_billing_cycle_data()
@@ -125,7 +124,7 @@ class Subscriptions(Document):
 		"""
 		Sets the `Subscription` `status` based on the preference set in `Subscription Settings`.
 
-		Used when the `Subscription` needs to decide what to do after the current generated 
+		Used when the `Subscription` needs to decide what to do after the current generated
 		invoice is past it's due date and grace period.
 		"""
 		subscription_settings = frappe.get_single('Subscription Settings')
@@ -262,7 +261,7 @@ class Subscriptions(Document):
 
 		# Due date
 		invoice.append(
-			'payment_schedule', 
+			'payment_schedule',
 			{
 				'due_date': add_days(self.current_invoice_end, cint(self.days_until_due)),
 				'invoice_portion': 100
@@ -276,8 +275,7 @@ class Subscriptions(Document):
 		if self.additional_discount_amount:
 			invoice.additional_discount_amount = self.additional_discount_amount
 
-		if (self.additional_discount_percentage or self.additional_discount_amount) \
-			and not self.apply_additional_discount:
+		if not self.apply_additional_discount and (self.additional_discount_percentage or self.additional_discount_amount):
 			self.apply_additional_discount = 'Grand Total'
 
 		invoice.save()
@@ -331,7 +329,7 @@ class Subscriptions(Document):
 
 	def process_for_active(self):
 		"""
-		Called by `process` if the status of the `Subscription` is 'Active'. 
+		Called by `process` if the status of the `Subscription` is 'Active'.
 		
 		The possible outcomes of this method are:
 		1. Generate a new invoice
@@ -359,8 +357,8 @@ class Subscriptions(Document):
 
 	def process_for_past_due_date(self):
 		"""
-		Called by `process` if the status of the `Subscription` is 'Past Due Date'. 
-		
+		Called by `process` if the status of the `Subscription` is 'Past Due Date'.
+
 		The possible outcomes of this method are:
 		1. Change the `Subscription` status to 'Active'
 		2. Change the `Subscription` status to 'Canceled'
