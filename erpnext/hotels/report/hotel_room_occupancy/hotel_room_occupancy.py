@@ -24,7 +24,7 @@ def get_data(filters):
 	out = []
 	for room_type in frappe.get_all('Hotel Room Type'):
 		total_booked = 0
-		for i in xrange(date_diff(filters.to_date, filters.from_date)):
+		for i in range(date_diff(filters.to_date, filters.from_date)):
 			day = add_days(filters.from_date, i)
 			total_booked += get_rooms_booked(room_type.name, day)
 

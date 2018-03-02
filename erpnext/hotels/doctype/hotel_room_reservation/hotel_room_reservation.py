@@ -18,7 +18,7 @@ class HotelRoomReservation(Document):
 		self.validate_availability()
 
 	def validate_availability(self):
-		for i in xrange(date_diff(self.to_date, self.from_date)):
+		for i in range(date_diff(self.to_date, self.from_date)):
 			day = add_days(self.from_date, i)
 			self.rooms_booked = {}
 
@@ -54,7 +54,7 @@ class HotelRoomReservation(Document):
 		self.net_total = 0
 		for d in self.items:
 			net_rate = 0.0
-			for i in xrange(date_diff(self.to_date, self.from_date)):
+			for i in range(date_diff(self.to_date, self.from_date)):
 				day = add_days(self.from_date, i)
 				if not d.item:
 					continue

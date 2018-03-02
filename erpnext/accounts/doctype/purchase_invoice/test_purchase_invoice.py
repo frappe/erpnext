@@ -121,9 +121,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 		])
 
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_values[gle.account][0], gle.account)
-			self.assertEquals(expected_values[gle.account][1], gle.debit)
-			self.assertEquals(expected_values[gle.account][2], gle.credit)
+			self.assertEqual(expected_values[gle.account][0], gle.account)
+			self.assertEqual(expected_values[gle.account][1], gle.debit)
+			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 	def test_purchase_invoice_change_naming_series(self):
 		pi = frappe.copy_doc(test_records[1])
@@ -161,9 +161,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 		])
 
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_values[i][0], gle.account)
-			self.assertEquals(expected_values[i][1], gle.debit)
-			self.assertEquals(expected_values[i][2], gle.credit)
+			self.assertEqual(expected_values[i][0], gle.account)
+			self.assertEqual(expected_values[i][1], gle.debit)
+			self.assertEqual(expected_values[i][2], gle.credit)
 		set_perpetual_inventory(0, pi.company)
 
 	def test_purchase_invoice_calculation(self):
@@ -363,8 +363,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		}
 
 		for gle in gl_entries:
-			self.assertEquals(expected_values[gle.account][0], gle.debit)
-			self.assertEquals(expected_values[gle.account][1], gle.credit)
+			self.assertEqual(expected_values[gle.account][0], gle.debit)
+			self.assertEqual(expected_values[gle.account][1], gle.credit)
 
 		set_perpetual_inventory(0)
 
@@ -400,7 +400,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		for field in ("account_currency", "debit", "debit_in_account_currency", "credit", "credit_in_account_currency"):
 			for i, gle in enumerate(gl_entries):
-				self.assertEquals(expected_values[gle.account][field], gle[field])
+				self.assertEqual(expected_values[gle.account][field], gle[field])
 
 
 		# Check for valid currency
@@ -437,9 +437,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 		])
 
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_gl_entries[gle.account][0], gle.account)
-			self.assertEquals(expected_gl_entries[gle.account][1], gle.debit)
-			self.assertEquals(expected_gl_entries[gle.account][2], gle.credit)
+			self.assertEqual(expected_gl_entries[gle.account][0], gle.account)
+			self.assertEqual(expected_gl_entries[gle.account][1], gle.debit)
+			self.assertEqual(expected_gl_entries[gle.account][2], gle.credit)
 
 	def test_purchase_invoice_for_is_paid_and_update_stock_gl_entry_with_perpetual_inventory(self):
 		set_perpetual_inventory()
@@ -461,9 +461,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 		])
 
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_gl_entries[gle.account][0], gle.account)
-			self.assertEquals(expected_gl_entries[gle.account][1], gle.debit)
-			self.assertEquals(expected_gl_entries[gle.account][2], gle.credit)
+			self.assertEqual(expected_gl_entries[gle.account][0], gle.account)
+			self.assertEqual(expected_gl_entries[gle.account][1], gle.debit)
+			self.assertEqual(expected_gl_entries[gle.account][2], gle.credit)
 
 	def test_auto_batch(self):
 		item_code = frappe.db.get_value('Item',
@@ -493,20 +493,20 @@ class TestPurchaseInvoice(unittest.TestCase):
 			posting_time=frappe.utils.nowtime())
 
 		actual_qty_1 = get_qty_after_transaction()
-		self.assertEquals(actual_qty_0 + 5, actual_qty_1)
+		self.assertEqual(actual_qty_0 + 5, actual_qty_1)
 
 		# return entry
 		pi1 = make_purchase_invoice(is_return=1, return_against=pi.name, qty=-2, rate=50, update_stock=1)
 
 		actual_qty_2 = get_qty_after_transaction()
-		self.assertEquals(actual_qty_1 - 2, actual_qty_2)
+		self.assertEqual(actual_qty_1 - 2, actual_qty_2)
 
 		pi1.cancel()
-		self.assertEquals(actual_qty_1, get_qty_after_transaction())
+		self.assertEqual(actual_qty_1, get_qty_after_transaction())
 
 		pi.reload()
 		pi.cancel()
-		self.assertEquals(actual_qty_0, get_qty_after_transaction())
+		self.assertEqual(actual_qty_0, get_qty_after_transaction())
 
 	def test_subcontracting_via_purchase_invoice(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -518,20 +518,20 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi = make_purchase_invoice(item_code="_Test FG Item", qty=10, rate=500,
 			update_stock=1, is_subcontracted="Yes")
 
-		self.assertEquals(len(pi.get("supplied_items")), 2)
+		self.assertEqual(len(pi.get("supplied_items")), 2)
 
 		rm_supp_cost = sum([d.amount for d in pi.get("supplied_items")])
-		self.assertEquals(pi.get("items")[0].rm_supp_cost, flt(rm_supp_cost, 2))
+		self.assertEqual(pi.get("items")[0].rm_supp_cost, flt(rm_supp_cost, 2))
 
 	def test_rejected_serial_no(self):
 		pi = make_purchase_invoice(item_code="_Test Serialized Item With Series", received_qty=2, qty=1,
 			rejected_qty=1, rate=500, update_stock=1,
 			rejected_warehouse = "_Test Rejected Warehouse - _TC")
 
-		self.assertEquals(frappe.db.get_value("Serial No", pi.get("items")[0].serial_no, "warehouse"),
+		self.assertEqual(frappe.db.get_value("Serial No", pi.get("items")[0].serial_no, "warehouse"),
 			pi.get("items")[0].warehouse)
 
-		self.assertEquals(frappe.db.get_value("Serial No", pi.get("items")[0].rejected_serial_no,
+		self.assertEqual(frappe.db.get_value("Serial No", pi.get("items")[0].rejected_serial_no,
 			"warehouse"), pi.get("items")[0].rejected_warehouse)
 	
 	def test_outstanding_amount_after_advance_jv_cancelation(self):
@@ -643,10 +643,10 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.append("taxes", shipping_charge)
 		pi.save()
 
-		self.assertEquals(pi.net_total, 1250)
+		self.assertEqual(pi.net_total, 1250)
 
-		self.assertEquals(pi.total_taxes_and_charges, 462.3)
-		self.assertEquals(pi.grand_total, 1712.3)	
+		self.assertEqual(pi.total_taxes_and_charges, 462.3)
+		self.assertEqual(pi.grand_total, 1712.3)	
 
 	def test_make_pi_without_terms(self):
 		pi = make_purchase_invoice(do_not_save=1)

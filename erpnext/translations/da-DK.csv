@@ -1,10 +1,10 @@
-apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +115,'Opening','Åbning'
+apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +114,'Opening','Åbning'
 DocType: Lead,Lead,Bly
 apps/erpnext/erpnext/config/selling.py +153,Default settings for selling transactions.,Standardindstillinger for at sælge transaktioner.
 DocType: Timesheet,% Amount Billed,% Beløb Billed
 DocType: Purchase Order,% Billed,% Billed
 ,Lead Id,Bly Id
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +71,'Total','Total'
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +192,'Total','Total'
 DocType: Selling Settings,Selling Settings,Salg af indstillinger
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +71,Selling Amount,Selling Beløb
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +192,Lead must be set if Opportunity is made from Lead,"Bly skal indstilles, hvis Opportunity er lavet af Lead"

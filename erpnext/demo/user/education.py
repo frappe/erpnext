@@ -15,7 +15,7 @@ from erpnext.education.api import get_student_group_students, make_attendance_re
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_education_user'))
-	for d in xrange(20):
+	for d in range(20):
 		approve_random_student_applicant()
 		enroll_random_student(frappe.flags.current_date)
 	# if frappe.flags.current_date.weekday()== 0:
@@ -94,7 +94,7 @@ def make_course_schedule(start_date, end_date):
 		cs.course_start_date = cstr(start_date)
 		cs.course_end_date = cstr(end_date)
 		day = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-		for x in xrange(3):
+		for x in range(3):
 			random_day = random.choice(day)
 			cs.day = random_day
 			cs.from_time = timedelta(hours=(random.randrange(7, 17,1)))

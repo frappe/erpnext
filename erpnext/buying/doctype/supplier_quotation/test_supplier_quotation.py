@@ -20,8 +20,8 @@ class TestPurchaseOrder(unittest.TestCase):
 		sq.submit()
 		po = make_purchase_order(sq.name)
 
-		self.assertEquals(po.doctype, "Purchase Order")
-		self.assertEquals(len(po.get("items")), len(sq.get("items")))
+		self.assertEqual(po.doctype, "Purchase Order")
+		self.assertEqual(len(po.get("items")), len(sq.get("items")))
 
 		po.naming_series = "_T-Purchase Order-"
 
