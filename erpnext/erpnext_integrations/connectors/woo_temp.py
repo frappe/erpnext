@@ -78,6 +78,75 @@ def order():
 				link_item(item,0)
 			except Exception as i:
 				print("THis is different Item Error",i)
+
+
+		customer_name = raw_billing_data.get("first_name") + " " + raw_billing_data.get("last_name")
+
+		new_sales_order = frappe.new_doc("Sales Order")
+		new_sales_order.customer = customer_name
+
+		created_date = fd.get("date_created").split("T")
+		new_sales_order.transaction_date = created_date[0]
+
+		new_sales_order.po_no = fd.get("id")
+		new_sales_order.woocommerce_id = fd.get("id")
+		new_sales_order.naming_series = "SO-"
+
+		for item in items_list:
+			woocomm_item_id = item.get("product_id")
+			found_item = frappe.get_doc("Item",{"woocommerce_id": woocomm_item_id})
+
+			# ordered_items_cost = item.get("total")
+			ordered_items_tax = item.get("total_tax")
+
+			new_sales_order.append("items",{
+				"item_code": found_item.item_code,
+				"item_name": found_item.item_name,
+				"description": found_item.item_name,
+				"delivery_date":created_date[0],   #change delivery date after testing
+				"uom": "Nos",
+				"qty": item.get("quantity"),
+				"rate": item.get("price")
+				})
+
+			try:
+				add_tax_details(new_sales_order,ordered_items_tax,"Ordered Item tax")
+			except Exception as s:
+				print("Error during tax inside ordered_items", s)
+
+
+
+		print(new_sales_order.as_dict().get("name", "NAME_NOT_FOUND "*100))
+			
+
+		try:
+			shipping_details = fd.get("shipping_lines")
+			shipping_total = fd.get("shipping_total")
+			shipping_tax = fd.get("shipping_tax")
+
+			add_tax_details(new_sales_order,shipping_tax,"Shipping Tax")
+			add_tax_details(new_sales_order,shipping_total,"Shipping Total")
+			
+		except Exception as t:
+			print("Error during total taxing",t)
+				
+
+
+		try:
+			new_sales_order.submit()
+		except Exception as g:
+			for x in xrange(1,10):
+				print("SO.SAVE", g)
+	
+
+		frappe.db.commit()
+			
+
+		print("Order Completed")
+
+
+
+
 				
 
 
@@ -155,3 +224,15 @@ def link_item(item_data,item_status):
 	item.item_group = "WooCommerce Products"
 	item.save()
 	frappe.db.commit()
+
+
+
+
+def add_tax_details(sales_order,price,desc):
+
+	sales_order.append("taxes",{
+							"charge_type":"Actual",
+							"account_head": "VAT 5% - Woo",
+							"tax_amount": price,
+							"description": desc
+							})
