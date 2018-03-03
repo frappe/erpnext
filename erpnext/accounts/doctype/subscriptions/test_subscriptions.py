@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import unittest
 
 import frappe
+from erpnext.accounts.doctype.subscriptions.subscriptions import get_prorata_factor
 from frappe.utils.data import nowdate, add_days, add_to_date, add_months, date_diff, flt
 
 
@@ -297,7 +298,7 @@ class TestSubscriptions(unittest.TestCase):
 
 		self.assertEqual(
 			flt(
-				subscription.get_prorata_factor(subscription.current_invoice_end, subscription.current_invoice_start),
+				get_prorata_factor(subscription.current_invoice_end, subscription.current_invoice_start),
 				2),
 			flt(prorate_factor, 2)
 		)
