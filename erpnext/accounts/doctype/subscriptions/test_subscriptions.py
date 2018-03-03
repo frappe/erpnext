@@ -402,7 +402,7 @@ class TestSubscriptions(unittest.TestCase):
 
 		self.assertEqual(subscription.status, 'Past Due Date')
 
-		subscription.process()	
+		subscription.process()
 		self.assertEqual(subscription.status, 'Unpaid')
 
 		subscription.cancel_subscription()
