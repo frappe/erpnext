@@ -410,11 +410,14 @@ class Subscriptions(Document):
 		subscription and the `Subscription` will lose all the history of generated invoices
 		it has.
 		"""
-		self.status = 'Active'
-		self.db_set('start', nowdate())
-		self.update_subscription_period(nowdate())
-		self.invoices = []
-		self.save()
+		if self.status == 'Canceled':
+			self.status = 'Active'
+			self.db_set('start', nowdate())
+			self.update_subscription_period(nowdate())
+			self.invoices = []
+			self.save()
+		else:
+			frappe.throw(_('You cannot restart a Subscription that is not cancelled.'))
 
 
 def process_all():

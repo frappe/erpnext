@@ -447,3 +447,13 @@ class TestSubscriptions(unittest.TestCase):
 		settings.cancel_after_grace = default_grace_period_action
 		settings.save()
 		subscription.delete()
+
+	def test_restart_active_subscription(self):
+		subscription = frappe.new_doc('Subscriptions')
+		subscription.subscriber = '_Test Customer'
+		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.save()
+
+		self.assertRaises(frappe.ValidationError, subscription.restart_subscription)
+
+		subscription.delete()
