@@ -222,13 +222,14 @@ scheduler_events = {
 		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary',
 		'erpnext.hr.doctype.attendance.attendance.validate_absence_and_notify',
 		'erpnext.hr.doctype.leave_application.leave_application.hooked_leave_allocation_builder',
+		'erpnext.hr.doctype.leave_allocation.leave_allocation.check_max_allocation_balance',
 		'erpnext.hr.doctype.salary_structure.salary_structure.set_salary_structure_active'
 	]
 }
 
 default_mail_footer = """<div style="text-align: center;">
 	<a href="https://erpnext.com?source=via_email_footer" target="_blank" style="color: #8d99a6;">
-		Sent via ERPNext
+		Sent via Tawari ERP
 	</a>
 </div>"""
 

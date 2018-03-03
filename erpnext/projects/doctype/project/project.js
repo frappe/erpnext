@@ -70,7 +70,111 @@ frappe.ui.form.on("Project", {
 			}
 
 			frm.trigger('show_dashboard');
+
+			$('.layout-main-section .form-inner-toolbar :nth-child(3)').after('<hr style="border: solid 0.5px #ccc !important;margin:0 !important;"><p style="text-align: center;">Project Phase</p>');
+			
 		}
+
+
+
+		frm.add_custom_button(__("Closure"), function () {
+			frm.toggle_display("project_initiation", false);
+            frm.toggle_display("customer_details", false);
+            frm.toggle_display("project_financial_details", false);
+            frm.toggle_display("planning", false);
+            frm.toggle_display("communication_management_plan", false);
+            frm.toggle_display("control", false);
+            frm.toggle_display("section_break_5", false);
+            frm.toggle_display("project_management_plan_section", false);
+            frm.toggle_display("scope_of_work", false);
+            frm.toggle_display("procurement_plan_section", false);
+            frm.toggle_display("quality_management_plan", false);
+            frm.toggle_display("risk_register_section", false);
+            frm.toggle_display("responsibilities", false);
+            frm.toggle_display("hd_cheanging_request", false);
+            frm.toggle_display("project_issues_summary", false);
+
+            frm.toggle_display("closure", true);
+            frm.toggle_display("project_information", true);
+            frm.toggle_display("customer_decision", true);
+            frm.toggle_display("approvals", true);
+
+        });
+
+		frm.add_custom_button(__("Controlling"), function () {
+			frm.toggle_display("project_initiation", false);
+            frm.toggle_display("customer_details", false);
+            frm.toggle_display("project_financial_details", false);
+            frm.toggle_display("planning", false);
+            frm.toggle_display("communication_management_plan", false);
+            frm.toggle_display("closure", false);
+            frm.toggle_display("section_break_5", false);
+            frm.toggle_display("project_management_plan_section", false);
+            frm.toggle_display("scope_of_work", false);
+            frm.toggle_display("procurement_plan_section", false);
+            frm.toggle_display("quality_management_plan", false);
+            frm.toggle_display("risk_register_section", false);
+            frm.toggle_display("responsibilities", false);
+            frm.toggle_display("project_information", false);
+            frm.toggle_display("customer_decision", false);
+            frm.toggle_display("approvals", false);
+            
+            frm.toggle_display("control", true);
+            frm.toggle_display("hd_cheanging_request", true);
+            frm.toggle_display("project_issues_summary", true);
+
+        });
+
+        frm.add_custom_button(__("Planning"), function () {
+            frm.toggle_display("project_initiation", false);
+            frm.toggle_display("customer_details", false);
+            frm.toggle_display("project_financial_details", false);
+            frm.toggle_display("control", false);
+            frm.toggle_display("closure", false);
+            frm.toggle_display("section_break_5", false);
+            frm.toggle_display("hd_cheanging_request", false);
+            frm.toggle_display("project_issues_summary", false);
+            frm.toggle_display("project_information", false);
+            frm.toggle_display("customer_decision", false);
+            frm.toggle_display("approvals", false);
+
+            frm.toggle_display("planning", true);
+            frm.toggle_display("communication_management_plan", true);
+            frm.toggle_display("project_management_plan_section", true);
+            frm.toggle_display("scope_of_work", true);
+            frm.toggle_display("procurement_plan_section", true);
+            frm.toggle_display("quality_management_plan", true);
+            frm.toggle_display("risk_register_section", true);
+            frm.toggle_display("responsibilities", true);
+
+        });
+
+		frm.add_custom_button(__("Initiation"), function () {
+			frm.toggle_display("planning", false);
+            frm.toggle_display("communication_management_plan", false);
+            frm.toggle_display("control", false);
+            frm.toggle_display("closure", false);
+            frm.toggle_display("project_management_plan_section", false);
+            frm.toggle_display("scope_of_work", false);
+            frm.toggle_display("procurement_plan_section", false);
+            frm.toggle_display("quality_management_plan", false);
+            frm.toggle_display("risk_register_section", false);
+            frm.toggle_display("responsibilities", false);
+            frm.toggle_display("hd_cheanging_request", false);
+            frm.toggle_display("project_issues_summary", false);
+            frm.toggle_display("project_information", false);
+            frm.toggle_display("customer_decision", false);
+            frm.toggle_display("approvals", false);
+
+            frm.toggle_display("project_initiation", true);
+            frm.toggle_display("customer_details", true);
+            frm.toggle_display("project_financial_details", true);
+            frm.toggle_display("section_break_5", true);
+
+        });
+
+
+
 	},
 	tasks_refresh: function(frm) {
 		var grid = frm.get_field('tasks').grid;

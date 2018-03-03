@@ -263,8 +263,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							supplier: me.frm.doc.supplier,
 							currency: me.frm.doc.currency,
 							conversion_rate: me.frm.doc.conversion_rate,
-							price_list: me.frm.doc.selling_price_list ||
-								 me.frm.doc.buying_price_list,
+							price_list: me.frm.doc.selling_price_list || me.frm.doc.buying_price_list,
 							price_list_currency: me.frm.doc.price_list_currency,
 							plc_conversion_rate: me.frm.doc.plc_conversion_rate,
 							company: me.frm.doc.company,
@@ -292,6 +291,29 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 								else{
 									df.hidden = 0;
 									me.frm.refresh_field("items");
+								}
+								if (r.message.expense_account || r.message.income_account){
+									// console.log(r.message.expense_account + " --- " + r.message.income_account);
+									var account = r.message.expense_account || r.message.income_account;
+									frappe.call({
+								        "method": "frappe.client.get_value",
+								        "args": {
+								            "doctype": "Account",
+								            "filters":{"name": account},
+								            "fieldname": "account_type"
+								        },
+								        callback: function(r){
+								            // console.log(r.message);
+								            if (!r.exc) {
+								                if (r.message){
+								                    me.frm.fields_dict.items.grid.toggle_reqd("cost_center", (r.message.account_type == "Expense Account") || (r.message.account_type == "Income Account"));
+								                }
+								                else{
+								                    me.frm.fields_dict.items.grid.toggle_reqd("cost_center", false);
+								                }
+								            }
+								        }
+    								}); 
 								}
 							}
 						}

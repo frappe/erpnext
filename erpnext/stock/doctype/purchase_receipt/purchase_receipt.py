@@ -54,7 +54,7 @@ class PurchaseReceipt(BuyingController):
 		if not self._action=="submit":
 			self.set_status()
 		self.po_required()
-		#~ self.validate_with_previous_doc()
+		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 
@@ -66,6 +66,19 @@ class PurchaseReceipt(BuyingController):
 		if self.get("__islocal") :
 				self.title = self.get_title()
 		self.validate_assets()
+		self.validate_project_items()
+	
+	def validate_project_items(self):
+		if self.project : 
+			warehouse = frappe.db.get_value("Project", self.project, "default_warehouse")
+			if not warehouse :
+				frappe.throw(_("Set Default Warehouse in Project %s"%self.project))
+			else:
+				for row in self.get("items"):
+					if not row.warehouse :
+						row.warehouse = warehouse
+					elif row.warehouse !=warehouse : 
+						frappe.throw(_("Bad Warehouse in row  %s default warehouse is %s"%(row.idx,warehouse)))
 
 	def after_insert(self):
 		pass
@@ -92,7 +105,7 @@ class PurchaseReceipt(BuyingController):
 	def get_title(self):
 		from frappe.utils import getdate
 		
-		namming =frappe.get_list("Enhanced Nameing Doc", fields=["name","name_of_doc", "index_value","year"],filters={"year": str(getdate(self.posting_date).year),"name_of_doc":self.doctype},ignore_permissions=True)
+		namming =frappe.get_list("Enhanced Nameing Doc", fields=["name","name_of_doc", "index_value","year"],filters={"year": str(getdate(self.posting_date).year),"name_of_doc":self.doctype,"naming_series":self.naming_series},ignore_permissions=True)
 		if namming :
 			#~ title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ self.name[len(self.naming_series):]
 			title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ str(namming[0]["index_value"]+1).zfill(5)
@@ -110,6 +123,7 @@ class PurchaseReceipt(BuyingController):
 			nammeing_doc.index_value = 1
 			nammeing_doc.year = str(getdate(self.posting_date).year)
 			nammeing_doc.name_of_doc = self.doctype
+			nammeing_doc.naming_series = self.naming_series
 			nammeing_doc.save()
 			return title
 

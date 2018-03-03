@@ -25,6 +25,55 @@ class Project(Document):
             from `tabTimesheet Detail` where project=%s and docstatus < 2 group by activity_type
             order by total_hours desc''', self.name, as_dict=True))
 
+
+        roles_and_responsibilities = frappe.db.sql("select name1,party,project_role from `tabRoles And Responsibilities` where parent='{0}'".format(self.name))
+        
+        self.client_steering_name = ''
+        self.client_ownership_name = ''
+        self.client_management_name = ''
+        self.client_technical_name = ''
+        self.tawari_steering_name = ''
+        self.tawari_ownership_name = ''
+        self.tawari_management_name = ''
+        self.tawari_technical_name = ''
+        self.partner_steering_name = ''
+        self.partner_ownership_name = ''
+        self.partner_management_name = ''
+        self.partner_technical_name = ''
+                
+        for row in roles_and_responsibilities:
+            if row:
+                if row[1] == 'Client':
+                    if row[2] == 'Steering Committee':
+                        self.client_steering_name = row[0]
+                    if row[2] == 'Ownership level':
+                        self.client_ownership_name = row[0]
+                    if row[2] == 'Project Management':
+                        self.client_management_name = row[0]
+                    if row[2] == 'Technical management':
+                        self.client_technical_name = row[0]
+                if row[1] == 'Tawari':
+                    if row[2] == 'Steering Committee':
+                        self.tawari_steering_name = row[0]
+                    if row[2] == 'Ownership level':
+                        self.tawari_ownership_name = row[0]
+                    if row[2] == 'Project Management':
+                        self.tawari_management_name = row[0]
+                    if row[2] == 'Technical management':
+                        self.tawari_technical_name = row[0]
+                if row[1] == 'Partner/Supplier':
+                    if row[2] == 'Steering Committee':
+                        self.partner_steering_name = row[0]
+                    if row[2] == 'Ownership level':
+                        self.partner_ownership_name = row[0]
+                    if row[2] == 'Project Management':
+                        self.partner_management_name = row[0]
+                    if row[2] == 'Technical management':
+                        self.partner_technical_name = row[0]
+
+
+
+
     def __setup__(self):
         self.onload()
 
@@ -98,8 +147,8 @@ class Project(Document):
                 #~ )).insert(ignore_permissions = True)
 
     def validate_dates(self):
-        if self.expected_start_date and self.expected_end_date:
-            if getdate(self.expected_end_date) < getdate(self.expected_start_date):
+        if self.start_date and self.end_date:
+            if getdate(self.end_date) < getdate(self.start_date):
                 frappe.throw(_("Expected End Date can not be less than Expected Start Date"))
                 
     def validate_weights(self):
@@ -247,8 +296,8 @@ class Project(Document):
                 "doctype":"Project Charter",
                 "project": self.name,
                 "project_manager": self.project_manager,
-                "expected_start_date": self.expected_start_date,
-                "expected_end_date": self.expected_end_date,
+                "expected_start_date": self.start_date,
+                "expected_end_date": self.end_date,
                 "customer": self.customer,
                 "project_sponsor": self.project_sponsor,
                 "project_impact": "",

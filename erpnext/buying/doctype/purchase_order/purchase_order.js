@@ -37,7 +37,35 @@ frappe.ui.form.on("Purchase Order", {
                     freeze: true
                 });
             });
-        }   
+        }  
+    	// if (cur_frm.doc.workflow_state && cur_frm.doc.workflow_state == "Rejected By CEO(tc)"){
+	    //     frappe.call({
+	    //         "method": "frappe.client.get_value",
+	    //         "order_by": "modified asc",
+	    //         "args": {
+	    //             "doctype": "Version",
+	    //             "filters": {"docname":cur_frm.doc.name},
+	    //             "fieldname": "data"
+	    //         },
+	    //         callback: function(res){
+	    //             if (res && !res.exc){
+	    //             	var data = JSON.parse(res.message.data);
+	    //             	// console.log(JSON.parse(res.message.data));
+	    //             	if ("changed" in data){
+	    //             		var fields = ["tc_name", "terms", "payment_plan", "shipment_terms", "definitions"];
+		   //              	for(var i in data.changed){
+		   //              		console.log(data.changed[i][0]);
+		   //              		if (fields.indexOf(data.changed[i][0]) != -1){
+		   //              			cur_frm.set_value(data.changed[i][0], data.changed[i][1]);
+		   //              		}
+		   //              	}
+	    //             	}
+	    //                 // console.log(JSON.parse(res.message));
+	    //             }
+	    //         }
+	    //     });
+	    // }
+
         // if (!cur_frm.doc.__islocal) {
         //     for (var key in cur_frm.fields_dict) {
         //         cur_frm.fields_dict[key].df.read_only = 1;
@@ -64,6 +92,7 @@ frappe.ui.form.on("Purchase Order", {
     },
     after_save: function(frm, cdt, cdn){
         if (frm.doc.workflow_state && frm.doc.workflow_state.indexOf("Rejected") != -1){
+
             frappe.prompt([
                 {
                     fieldtype: 'Small Text',
@@ -96,6 +125,13 @@ frappe.ui.form.on("Purchase Order", {
                                     },
                                     callback: function(res){
                                         if (res && !res.exc){
+                                         	// if (cur_frm.doc.workflow_state == "Rejected By CEO(tc)"){
+									        // 	cur_frm.set_value("tc_name", cur_frm.doc.old_tc_name);
+									        // 	cur_frm.set_value("terms", cur_frm.doc.old_terms);
+									        // 	cur_frm.set_value("payment_plan", cur_frm.doc.old_payment_plan);
+									        // 	cur_frm.set_value("shipment_terms", cur_frm.doc.old_shipment_terms);
+									        // 	cur_frm.set_value("definitions", cur_frm.doc.old_definitions);
+								        	// }
                                             frm.reload_doc();
                                         }
                                     }
@@ -109,6 +145,9 @@ frappe.ui.form.on("Purchase Order", {
             )
         }
     }
+
+
+
 });
 
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
@@ -199,6 +238,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
             cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 
         }
+
+  
     },
 
     get_items_from_open_material_requests: function() {
@@ -217,9 +258,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
             if (!d.schedule_date) {
                 d.schedule_date = frappe.datetime.nowdate();
             }
-        })
+        });
     },
-
     make_stock_entry: function() {
         var items = $.map(cur_frm.doc.items, function(d) { return d.bom ? d.item_code : false; });
         var me = this;
@@ -405,7 +445,7 @@ cur_frm.cscript.custom_item_code = function(doc, cdt, cdn){
                 filters: { "name": cur_frm.doc.project }
             },
             callback: function(r, rt) {
-                console.log(r.message);
+                // console.log(r.message);
                 if (r.message) {
                     frappe.model.set_value(d.doctype, d.name, "project", r.message[0].name);
                     frappe.model.set_value(d.doctype, d.name, "warehouse", r.message[0].default_warehouse);
@@ -414,3 +454,6 @@ cur_frm.cscript.custom_item_code = function(doc, cdt, cdn){
         });
     }
 }
+// cur_frm.cscript.custom_on_update_after_submit = function(){
+// 	alert("ddffd");
+// }

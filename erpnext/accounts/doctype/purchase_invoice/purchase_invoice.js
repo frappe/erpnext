@@ -208,9 +208,61 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
         //~ }
     //~ }
 });
-erpnext.accounts.PurchaseInvoice.prototype.item_code = function(cdt, cdn, from_barcode){
-    return erpnext.TransactionController.prototype.item_code.call(this, cdt, cdn, from_barcode);
+
+cur_frm.cscript.expense_account = function(doc, cdt, cdn) {
+    var d = locals[cdt][cdn];
+    if (d.idx == 1 && d.expense_account) {
+        var cl = doc.items || [];
+        for (var i = 0; i < cl.length; i++) {
+            if (!cl[i].expense_account) cl[i].expense_account = d.expense_account;
+        }
+    }
+    refresh_field('items');
+    check_account_type_for_mandatory(d);
 }
+
+// cur_frm.cscript.item_code = function(doc, cdt, cdn){
+//     // var d = locals[cdt][cdn];
+//     // check_account_type_for_mandatory();
+// }
+// cur_frm.fields_dict.items.grid.get_field('project').get_query = function(doc, cdt, cdn) {
+
+// }
+// erpnext.accounts.PurchaseInvoice.prototype.item_code
+// erpnext.accounts.PurchaseInvoice.prototype.item_code = function(cdt, cdn, from_barcode){
+// 	// var d = locals[cdt][cdn];
+//     erpnext.TransactionController.prototype.item_code.call(this, cdt, cdn, from_barcode);
+//     console.log(cur_frm.fields_dict.items.grid.get_field("expense_account"));
+//     // toggle_reqd("cost_center", true);
+
+// }
+// erpnext.TransactionController.prototype.item_code.call(this, cdt, cdn, from_barcode){
+// 	alert("kkkkk");
+// }
+
+
+function check_account_type_for_mandatory(d){
+    frappe.call({
+        "method": "frappe.client.get_value",
+        "args": {
+            "doctype": "Account",
+            "filters":{"name": d.expense_account},
+            "fieldname": "account_type"
+        },
+        callback: function(r){
+            console.log(r.message);
+            if (!r.exc) {
+                if (r.message){
+                    cur_frm.fields_dict.items.grid.toggle_reqd("cost_center", (r.message.account_type == "Expense Account") || (r.message.account_type == "Income Account"));
+                }
+                else{
+                    cur_frm.fields_dict.items.grid.toggle_reqd("cost_center", false);
+                }
+            }
+        }
+    }); 
+}
+
 cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
 
 // Hide Fields
@@ -323,47 +375,6 @@ cur_frm.set_query("asset", "items", function(doc, cdt, cdn) {
 
 // }
 
-cur_frm.cscript.expense_account = function(doc, cdt, cdn) {
-    var d = locals[cdt][cdn];
-    if (d.idx == 1 && d.expense_account) {
-        var cl = doc.items || [];
-        for (var i = 0; i < cl.length; i++) {
-            if (!cl[i].expense_account) cl[i].expense_account = d.expense_account;
-        }
-    }
-    refresh_field('items');
-    check_account_type_for_mandatory(d);
-}
-
-// cur_frm.cscript.item_code = function(doc, cdt, cdn){
-//     // var d = locals[cdt][cdn];
-//     // check_account_type_for_mandatory();
-// }
-// cur_frm.fields_dict.items.grid.get_field('project').get_query = function(doc, cdt, cdn) {
-
-// }
-
-function check_account_type_for_mandatory(d){
-    frappe.call({
-        "method": "frappe.client.get_value",
-        "args": {
-            "doctype": "Account",
-            "filters":{"name": d.expense_account},
-            "fieldname": "account_type"
-        },
-        callback: function(r){
-            console.log(r.message);
-            if (!r.exc) {
-                if (r.message){
-                    cur_frm.fields_dict.items.grid.toggle_reqd("cost_center", r.message.account_type == "Expense Account");
-                }
-                else{
-                    cur_frm.fields_dict.items.grid.toggle_reqd("cost_center", false);
-                }
-            }
-        }
-    }); 
-}
 
 cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function(doc) {
     return {

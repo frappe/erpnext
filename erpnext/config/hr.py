@@ -350,7 +350,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Employee Leave Balance",
+					"name": "Leave Balance",
 					"doctype": "Leave Application"
 				},
 				# {

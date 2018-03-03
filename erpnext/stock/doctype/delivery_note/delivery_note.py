@@ -110,7 +110,20 @@ class DeliveryNote(SellingController):
 		self.update_current_stock()
 
 		if not self.installation_status: self.installation_status = 'Not Installed'
-
+		self.validate_project()
+	
+	def validate_project(self):
+		if self.project : 
+			warehouse = frappe.db.get_value("Project", self.project, "default_warehouse")
+			if not warehouse :
+				frappe.throw(_("Set Default Warehouse in Project %s"%self.project))
+			else:
+				for row in self.get("items"):
+					if not row.warehouse :
+						row.warehouse = warehouse
+					elif row.warehouse !=warehouse : 
+						frappe.throw(_("Bad Warehouse in row  %s default warehouse is %s"%(row.idx,warehouse)))
+						
 	def validate_with_previous_doc(self):
 		for fn in (("Sales Order", "against_sales_order", "so_detail"),
 				("Sales Invoice", "against_sales_invoice", "si_detail")):

@@ -57,6 +57,7 @@ class PurchaseOrder(BuyingController):
 		if self.get("__islocal"):
 			self.validate_project()
 			self.title = self.get_title()
+		self.validate_project_items()
 		self.vallidate_workflow_transition()
 
 		mr = frappe.get_value('Quotation Opening', filters = {"name": self.quotation_opening, "docstatus": 1}, fieldname = "material_request")
@@ -71,6 +72,18 @@ class PurchaseOrder(BuyingController):
 		if self.project:
 			for item in self.get("items"):
 				item.project = self.project
+	
+	def validate_project_items(self):
+		if self.project : 
+			warehouse = frappe.db.get_value("Project", self.project, "default_warehouse")
+			if not warehouse :
+				frappe.throw(_("Set Default Warehouse in Project %s"%self.project))
+			else:
+				for row in self.get("items"):
+					if not row.warehouse :
+						row.warehouse = warehouse
+					elif row.warehouse !=warehouse : 
+						frappe.throw(_("Bad Warehouse in row  %s default warehouse is %s"%(row.idx,warehouse)))
 	def get_title(self):
 		from frappe.utils import getdate
 		
@@ -109,6 +122,17 @@ class PurchaseOrder(BuyingController):
 			# elif self.workflow_state == "Change Terms & Conditions":
 			#  	self.flags.ignore_validate_update_after_submit = True
 			#  	self.workflow_state = "Reviewed By CEO"
+
+	def on_update_after_submit(self):
+		if hasattr(self,'workflow_state'):
+			self.flags.ignore_validate_update_after_submit = True
+			if self.workflow_state == "Rejected By CEO(tc)":
+				frappe.db.set_value("Purchase Order", self.name, "tc_name", self.old_tc_name)
+				frappe.db.set_value("Purchase Order", self.name,"terms", self.old_terms)
+				frappe.db.set_value("Purchase Order", self.name,"payment_plan", self.old_payment_plan)
+				frappe.db.set_value("Purchase Order", self.name,"shipment_terms", self.old_shipment_terms)
+				frappe.db.set_value("Purchase Order", self.name,"definitions", self.old_definitions)
+			
 
 	def vallidate_workflow_transition(self):
 		if hasattr(self,'workflow_state'):
@@ -248,6 +272,13 @@ class PurchaseOrder(BuyingController):
 			self.company, self.base_grand_total)
 
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
+
+		# fields = ["tc_name", "terms", "payment_plan", "shipment_terms", "definitions"]
+		self.old_tc_name = self.tc_name
+		self.old_terms = self.terms
+		self.old_payment_plan = self.payment_plan
+		self.old_shipment_terms = self.shipment_terms
+		self.old_definitions = self.definitions
 
 	def on_cancel(self):
 		if self.is_against_so():
