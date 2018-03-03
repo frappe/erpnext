@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils.data import nowdate, getdate, cint, add_days, date_diff, get_last_day, add_to_date
+from frappe.utils.data import nowdate, getdate, cint, add_days, date_diff, get_last_day, add_to_date, flt
 
 
 class Subscriptions(Document):
@@ -304,7 +304,7 @@ class Subscriptions(Document):
 			)
 
 		elif plan_items:
-			prorate_factor = get_prorata_factor(self.current_invoice_end, self.current_invoice_start)
+			prorate_factor = self.get_prorata_factor(self.current_invoice_end, self.current_invoice_start)
 
 			item_names = frappe.db.sql(
 				'select item as item_code, cost * %s as rate from `tabSubscription Plan` where name in %s',
@@ -420,6 +420,18 @@ class Subscriptions(Document):
 		else:
 			frappe.throw(_('You cannot restart a Subscription that is not cancelled.'))
 
+	def get_prorata_factor(self, period_end, period_start):
+		diff = flt(date_diff(nowdate(), period_start) + 1)
+		plan_days = flt(date_diff(period_end, period_start) + 1)
+		prorate_factor = diff / plan_days
+
+		return prorate_factor
+
+	def get_precision(self):
+		invoice = self.get_current_invoice()
+		if invoice:
+			return invoice.precision('grand_total')
+
 
 def process_all():
 	"""
@@ -454,14 +466,6 @@ def process(data):
 			frappe.db.begin()
 			frappe.log_error(frappe.get_traceback())
 			frappe.db.commit()
-
-
-def get_prorata_factor(period_end, period_start):
-	diff = date_diff(nowdate(), period_start) + 1
-	plan_days = date_diff(period_end, period_start) + 1
-	prorate_factor = diff/plan_days
-
-	return prorate_factor
 
 
 @frappe.whitelist()
