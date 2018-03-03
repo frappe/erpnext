@@ -439,7 +439,7 @@ class TestSubscriptions(unittest.TestCase):
 
 		self.assertEqual(subscription.status, 'Past Due Date')
 
-		subscription.process()	
+		subscription.process()
 		# This should change status to Canceled since grace period is 0
 		self.assertEqual(subscription.status, 'Unpaid')
 
