@@ -396,13 +396,14 @@ class Subscriptions(Document):
 		This sets the subscription as cancelled. It will stop invoices from being generated
 		but it will not affect already created invoices.
 		"""
-		to_generate_invoice = True if self.status == 'Active' else False
-		to_prorate = frappe.db.get_single_value('Subscription Settings', 'prorate')
-		self.status = 'Canceled'
-		self.cancelation_date = nowdate()
-		if to_generate_invoice:
-			self.generate_invoice(prorate=to_prorate)
-		self.save()
+		if self.status != 'Canceled':
+			to_generate_invoice = True if self.status == 'Active' else False
+			to_prorate = frappe.db.get_single_value('Subscription Settings', 'prorate')
+			self.status = 'Canceled'
+			self.cancelation_date = nowdate()
+			if to_generate_invoice:
+				self.generate_invoice(prorate=to_prorate)
+			self.save()
 
 	def restart_subscription(self):
 		"""
