@@ -34,16 +34,29 @@ class WoocommerceSettings(Document):
 				custom.read_only = 1
 				custom.save()
 
+			names = ["Customer","Address"]
+			for name in names:
+				custom = frappe.new_doc("Custom Field")
+				custom.dt = name
+				custom.label = "woocommerce_email"
+				custom.read_only = 1
+				custom.save()
+
 		elif not self.enable_sync:
 			# delete
 			names = ["Customer-woocommerce_id","Sales Order-woocommerce_id","Item-woocommerce_id","Address-woocommerce_id"]
 			names_check_box = ["Customer-woocommerce_check","Sales Order-woocommerce_check","Item-woocommerce_check","Address-woocommerce_check"]
+			email_names = ["Customer-woocommerce_email","Address-woocommerce_email"]
 			for name in names:
 				delete = frappe.delete_doc("Custom Field",name)
 				# delete.save()
 
 			for name in names_check_box:
 				delete = frappe.delete_doc("Custom Field",name)
+
+			for name in email_names:
+				delete = frappe.delete_doc("Custom Field",name)
+
 				
 		frappe.db.commit()
 
