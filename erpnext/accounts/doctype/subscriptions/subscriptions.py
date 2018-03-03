@@ -305,7 +305,7 @@ class Subscriptions(Document):
 			)
 
 		elif plan_items:
-			prorate_factor = self.get_prorata_factor(self.current_invoice_end, self.current_invoice_start)
+			prorate_factor = get_prorata_factor(self.current_invoice_end, self.current_invoice_start)
 
 			item_names = frappe.db.sql(
 				'select item as item_code, cost * %s as rate from `tabSubscription Plan` where name in %s',
@@ -331,7 +331,7 @@ class Subscriptions(Document):
 	def process_for_active(self):
 		"""
 		Called by `process` if the status of the `Subscription` is 'Active'.
-		
+
 		The possible outcomes of this method are:
 		1. Generate a new invoice
 		2. Change the `Subscription` status to 'Past Due Date'
@@ -421,17 +421,18 @@ class Subscriptions(Document):
 		else:
 			frappe.throw(_('You cannot restart a Subscription that is not cancelled.'))
 
-	def get_prorata_factor(self, period_end, period_start):
-		diff = flt(date_diff(nowdate(), period_start) + 1)
-		plan_days = flt(date_diff(period_end, period_start) + 1)
-		prorate_factor = diff / plan_days
-
-		return prorate_factor
-
 	def get_precision(self):
 		invoice = self.get_current_invoice()
 		if invoice:
 			return invoice.precision('grand_total')
+
+
+def get_prorata_factor(period_end, period_start):
+	diff = flt(date_diff(nowdate(), period_start) + 1)
+	plan_days = flt(date_diff(period_end, period_start) + 1)
+	prorate_factor = diff / plan_days
+
+	return prorate_factor
 
 
 def process_all():
