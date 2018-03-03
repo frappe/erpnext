@@ -223,7 +223,7 @@ class TestSubscriptions(unittest.TestCase):
 
 		self.assertEqual(subscription.status, 'Past Due Date')
 
-		subscription.process()	
+		subscription.process()
 		# Grace period is 1000 days so status should remain as Past Due Date
 		self.assertEqual(subscription.status, 'Past Due Date')
 
