@@ -186,7 +186,7 @@ class TestSubscriptions(unittest.TestCase):
 
 		self.assertEqual(subscription.status, 'Past Due Date')
 
-		subscription.process()	
+		subscription.process()
 		# This should change status to Canceled since grace period is 0
 		self.assertEqual(subscription.status, 'Unpaid')
 
@@ -463,5 +463,35 @@ class TestSubscriptions(unittest.TestCase):
 		subscription.save()
 
 		self.assertRaises(frappe.ValidationError, subscription.restart_subscription)
+
+		subscription.delete()
+
+	def test_subscription_invoice_discount_percentage(self):
+		subscription = frappe.new_doc('Subscriptions')
+		subscription.subscriber = '_Test Customer'
+		subscription.additional_discount_percentage = 10
+		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.save()
+		subscription.cancel_subscription()
+
+		invoice = subscription.get_current_invoice()
+
+		self.assertEqual(invoice.additional_discount_percentage, 10)
+		self.assertEqual(invoice.apply_discount_on, 'Grand Total')
+
+		subscription.delete()
+
+	def test_subscription_invoice_discount_amount(self):
+		subscription = frappe.new_doc('Subscriptions')
+		subscription.subscriber = '_Test Customer'
+		subscription.additional_discount_amount = 11
+		subscription.append('plans', {'plan': '_Test Plan Name'})
+		subscription.save()
+		subscription.cancel_subscription()
+
+		invoice = subscription.get_current_invoice()
+
+		self.assertEqual(invoice.discount_amount, 11)
+		self.assertEqual(invoice.apply_discount_on, 'Grand Total')
 
 		subscription.delete()
