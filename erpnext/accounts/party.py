@@ -443,7 +443,6 @@ def get_dashboard_info(party_type, party):
 		select sum(debit_in_account_currency) - sum(credit_in_account_currency)
 		from `tabGL Entry`
 		where party_type = %s and party=%s """, (party_type, party))
-	
 	info = {}
 	info["billing_this_year"] = flt(billing_this_year[0][0]) if billing_this_year else 0
 	info["currency"] = party_account_currency
@@ -452,7 +451,6 @@ def get_dashboard_info(party_type, party):
 		info["total_unpaid"] = -1 * info["total_unpaid"]
 
 	return info
-
 
 def get_party_shipping_address(doctype, name):
 	"""
