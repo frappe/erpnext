@@ -24,6 +24,8 @@ class Employee(NestedSet):
 			throw(_("Please setup Employee Naming System in Human Resource > HR Settings"))
 		else:
 			if naming_method == 'Naming Series':
+				if not self.naming_series:
+					frappe.throw(_("Enter naming series"))
 				self.name = make_autoname(self.naming_series + '.####')
 			elif naming_method == 'Employee Number':
 				self.name = self.employee_number
