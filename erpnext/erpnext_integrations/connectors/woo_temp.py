@@ -14,7 +14,7 @@ def verify_request():
 			hashlib.sha256
 		).digest()
 	)
-	print("verify_request", sig, frappe.get_request_header("X-Wc-Webhook-Signature"))
+	# print("verify_request", sig, frappe.get_request_header("X-Wc-Webhook-Signature"))
 	if frappe.request.data and \
 		frappe.get_request_header("X-Wc-Webhook-Signature") and \
 		not sig == frappe.get_request_header("X-Wc-Webhook-Signature"):
@@ -25,8 +25,7 @@ def verify_request():
 def order():
 
 	verify_request()
-	print(frappe.local.form_dict)
-	# fd = frappe.local.form_dict
+	# print(frappe.local.form_dict)
 
 	if frappe.request.data:
 		fd = json.loads(frappe.request.data)
@@ -34,13 +33,11 @@ def order():
 		return "success"
 
 	event = frappe.get_request_header("X-Wc-Webhook-Event")
-	print(event*10)
-
-	print("This is Actual Data: ")
-	print(fd)
+	# print(event*10)
+	# print(fd)
 
 	if event == "created":
-		print("Inside updated of order")
+		# print("Inside updated of order")
 
 		raw_billing_data = fd.get("billing")
 		customer_woo_com_email = raw_billing_data.get("email")
@@ -56,13 +53,6 @@ def order():
 
 		except Exception as e:
 			print("THis is different Error",e)
-
-		# if not search_customer:
-		# 	# create
-		# 	link_customer_and_address(raw_billing_data,0)
-		# else:
-		# 	#Edit existing
-		# 	link_customer_and_address(raw_billing_data,1)
 
 
 		items_list = fd.get("line_items")
@@ -105,14 +95,13 @@ def order():
 			woocomm_item_id = item.get("product_id")
 			found_item = frappe.get_doc("Item",{"woocommerce_id": woocomm_item_id})
 
-			# ordered_items_cost = item.get("total")
 			ordered_items_tax = item.get("total_tax")
 
 			new_sales_order.append("items",{
 				"item_code": found_item.item_code,
 				"item_name": found_item.item_name,
 				"description": found_item.item_name,
-				"delivery_date":order_delivery_date,   #change delivery date after testing
+				"delivery_date":order_delivery_date, 
 				"uom": "Nos",
 				"qty": item.get("quantity"),
 				"rate": item.get("price")
@@ -124,8 +113,7 @@ def order():
 				print("Error during tax inside ordered_items", s)
 
 
-
-		print(new_sales_order.as_dict().get("name", "NAME_NOT_FOUND "*100))
+		# print(new_sales_order.as_dict().get("name", "NAME_NOT_FOUND "*100))
 			
 
 		try:
@@ -140,23 +128,13 @@ def order():
 			print("Error during total taxing",t)
 				
 
-
 		try:
 			new_sales_order.submit()
 		except Exception as g:
 			for x in xrange(1,10):
 				print("SO.SAVE", g)
 	
-
 		frappe.db.commit()
-			
-
-		print("Order Completed")
-
-
-
-
-				
 
 
 def link_customer_and_address(raw_billing_data,customer_status):
@@ -235,14 +213,14 @@ def link_item(item_data,item_status):
 	frappe.db.commit()
 
 
-
-
 def add_tax_details(sales_order,price,desc,status):
 
 	if status == 0:
+		# Product taxes
 		account_head_type = "VAT 5% - W"
 
 	if status == 1:
+		# Shipping taxes
 		account_head_type = frappe.get_value("Account",{"account_name":"Freight and Forwarding Charges"},["name"])
 
 	sales_order.append("taxes",{
