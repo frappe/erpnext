@@ -244,8 +244,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Daily Work Summary Settings"
-				},
+					"name": "Daily Work Summary Group"
+				}
 			]
 		},
 		{

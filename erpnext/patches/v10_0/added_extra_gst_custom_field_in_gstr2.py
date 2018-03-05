@@ -6,6 +6,10 @@ def execute():
 	if not company:
 		return
 
+	for doctype in ["Sales Invoice", "Delivery Note", "Purchase Invoice"]:
+		frappe.db.sql("""delete from `tabCustom Field` where dt = %s
+			and fieldname in ('port_code', 'shipping_bill_number', 'shipping_bill_date')""", doctype)
+
 	make_custom_fields()
 
 	frappe.db.sql("""
@@ -13,6 +17,5 @@ def execute():
 		set reqd = 0, `default` = ''
 		where fieldname = 'reason_for_issuing_document'
 	""")
-
-	frappe.db.sql("""delete from `tabCustom Field` where dt = 'Purchase Invoice'
-		and fieldname in ('port_code', 'shipping_bill_number', 'shipping_bill_date')""")
+	
+	

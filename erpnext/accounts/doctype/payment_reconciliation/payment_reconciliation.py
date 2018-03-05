@@ -55,6 +55,7 @@ class PaymentReconciliation(Document):
 					THEN 1=1
 					ELSE {bank_account_condition}
 				END)
+			order by t1.posting_date
 			""".format(**{
 				"dr_or_cr": dr_or_cr,
 				"bank_account_condition": bank_account_condition,

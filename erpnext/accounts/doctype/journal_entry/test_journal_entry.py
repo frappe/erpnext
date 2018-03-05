@@ -130,7 +130,7 @@ class TestJournalEntry(unittest.TestCase):
 
 		for field in ("account_currency", "debit", "debit_in_account_currency", "credit", "credit_in_account_currency"):
 			for i, gle in enumerate(gl_entries):
-				self.assertEquals(expected_values[gle.account][field], gle[field])
+				self.assertEqual(expected_values[gle.account][field], gle[field])
 
 		# cancel
 		jv.cancel()

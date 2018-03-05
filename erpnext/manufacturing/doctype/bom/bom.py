@@ -9,6 +9,8 @@ from erpnext.setup.utils import get_exchange_rate
 from frappe.website.website_generator import WebsiteGenerator
 from erpnext.stock.get_item_details import get_conversion_factor
 
+import functools
+
 from six import string_types
 
 from operator import itemgetter
@@ -201,6 +203,14 @@ class BOM(WebsiteGenerator):
 
 		if not from_child_bom:
 			frappe.msgprint(_("Cost Updated"))
+
+	def update_parent_cost(self):
+		if self.total_cost:
+			cost = self.total_cost / self.quantity
+
+			frappe.db.sql("""update `tabBOM Item` set rate=%s, amount=stock_qty*%s
+				where bom_no = %s and docstatus < 2 and parenttype='BOM'""",
+				(cost, cost, self.name))
 
 	def get_bom_unitcost(self, bom_no):
 		bom = frappe.db.sql("""select name, base_total_cost/quantity as unit_cost from `tabBOM`
@@ -577,7 +587,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 @frappe.whitelist()
 def get_bom_items(bom, company, qty=1, fetch_exploded=1):
 	items = get_bom_items_as_dict(bom, company, qty, fetch_exploded).values()
-	items.sort(lambda a, b: a.item_code > b.item_code and 1 or -1)
+	items.sort(key = functools.cmp_to_key(lambda a, b: a.item_code > b.item_code and 1 or -1))
 	return items
 
 def validate_bom_no(item, bom_no):
