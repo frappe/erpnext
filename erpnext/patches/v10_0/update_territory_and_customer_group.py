@@ -13,22 +13,17 @@ def execute():
 		for d in customer_group_fetch:
 			when_then = []
 			for customer in batch_customers:
+				value = frappe.db.escape(frappe.as_unicode(customer.get("customer_group")))
+
 				when_then.append('''
-					WHEN `{master_fieldname}` = "{docname}" and {linked_to_fieldname} != "{value}"
-					THEN "{value}"
-				'''.format(
-					master_fieldname=d["master_fieldname"],
-					linked_to_fieldname=d["linked_to_fieldname"],
-					docname=frappe.db.escape(frappe.as_unicode(customer.name)),
-					value=frappe.db.escape(frappe.as_unicode(customer.get("customer_group")))))
+					WHEN `%s` = "%s" and %s != "%s"
+					THEN "%s"
+				'''%(d["master_fieldname"], frappe.db.escape(frappe.as_unicode(customer.name)),
+					d["linked_to_fieldname"], value, value))
 
 			frappe.db.sql("""
 				update
-					`tab{doctype}`
+					`tab%s`
 				set
-					{linked_to_fieldname} = CASE {when_then_cond}  ELSE `{linked_to_fieldname}` END
-			""".format(
-				doctype = d['doctype'],
-				when_then_cond=" ".join(when_then),
-				linked_to_fieldname=d.linked_to_fieldname
-			))
+					%s = CASE %s  ELSE `%s` END
+			"""%(d['doctype'], d.linked_to_fieldname, " ".join(when_then), d.linked_to_fieldname))

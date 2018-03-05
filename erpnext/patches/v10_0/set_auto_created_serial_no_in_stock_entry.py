@@ -7,6 +7,9 @@ import frappe
 def execute():
 	serialised_items = [d.name for d in frappe.get_all("Item", filters={"has_serial_no": 1})]
 
+	if not serialised_items:
+		return
+
 	for dt in ["Stock Entry Detail", "Purchase Receipt Item", "Purchase Invoice Item"]:
 		cond = ""
 		if dt=="Purchase Invoice Item":
