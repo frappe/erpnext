@@ -8,7 +8,7 @@ def execute():
 
 
 	# update the sales order item in the material request
-	frappe.reload_doc('stock', 'doctype', 'material_request')
+	frappe.reload_doc('stock', 'doctype', 'material_request_item')
 	frappe.db.sql('''update `tabMaterial Request Item` mri set sales_order_item = (select name from
 		`tabSales Order Item` soi where soi.parent=mri.sales_order and soi.item_code=mri.item_code) where docstatus = 1 and
 		ifnull(mri.sales_order, "")!="" 
@@ -33,7 +33,6 @@ def execute():
 			# update the so in the status updater
 			po_doc.update_status_updater()
 			po_doc.update_qty(update_modified=False)
-			po_doc.validate_qty()
 
 		except Exception:
 			pass
