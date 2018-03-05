@@ -110,7 +110,7 @@ def order():
 				})
 
 			try:
-				add_tax_details(new_sales_order,ordered_items_tax,"Ordered Item tax")
+				add_tax_details(new_sales_order,ordered_items_tax,"Ordered Item tax",0)
 			except Exception as s:
 				print("Error during tax inside ordered_items", s)
 
@@ -124,8 +124,8 @@ def order():
 			shipping_total = fd.get("shipping_total")
 			shipping_tax = fd.get("shipping_tax")
 
-			add_tax_details(new_sales_order,shipping_tax,"Shipping Tax")
-			add_tax_details(new_sales_order,shipping_total,"Shipping Total")
+			add_tax_details(new_sales_order,shipping_tax,"Shipping Tax",1)
+			add_tax_details(new_sales_order,shipping_total,"Shipping Total",1)
 			
 		except Exception as t:
 			print("Error during total taxing",t)
@@ -228,11 +228,17 @@ def link_item(item_data,item_status):
 
 
 
-def add_tax_details(sales_order,price,desc):
+def add_tax_details(sales_order,price,desc,status):
 
+	if status == 0:
+		account_head_type = "VAT 5% - W"
+
+	if status == 1:
+		account_head_type = frappe.get_value("Account",{"account_name":"Freight and Forwarding Charges"},["name"])
+		
 	sales_order.append("taxes",{
 							"charge_type":"Actual",
-							"account_head": "VAT 5% - W",
+							"account_head": account_head_type,
 							"tax_amount": price,
 							"description": desc
 							})
