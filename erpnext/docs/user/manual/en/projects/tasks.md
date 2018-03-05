@@ -58,4 +58,8 @@ The system shall update the total amount from expense claims in the costing sect
 
 <img class="screenshot" alt="Task - Total Expense Claim" src="{{docs_base_url}}/assets/img/project/task_total_expense_claim.png">
 
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/IxY-rSJsA6U?end=126rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>
+
 {next}

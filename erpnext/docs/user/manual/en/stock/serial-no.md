@@ -15,6 +15,11 @@ If your Item is _serialized_ you will have to enter the Serial Nos in the
 related column with each Serial No in a new line.
 You can maintain single units of serialized items using Serial Number.
 
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/gvOVlEwFDAkrel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+    </iframe>
+</div>
+
 ### Serial Nos and Inventory
 
 Inventory of an Item can only be affected if the Serial No is transacted via a

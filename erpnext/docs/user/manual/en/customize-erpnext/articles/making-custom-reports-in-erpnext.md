@@ -6,7 +6,10 @@ There are three kind of reports in ERPNext.
 
 Report Builder is an in-built report customization tool in ERPNext. This allows you to define specific fields of the form which shall be added in the report. Also you can set required filters, sorting and give preferred name to report.
 
-<iframe width="660" height="371" src="https://www.youtube.com/watch?v=TxJGUNarcQs" frameborder="0" allowfullscreen></iframe>
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/watch?v=TxJGUNarcQs?rel=0" frameborder="0" allowfullscreen>
+    </iframe>
+</div>
 
 ### 2. Query Report
 

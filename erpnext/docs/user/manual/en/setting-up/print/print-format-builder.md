@@ -8,6 +8,11 @@ You can create a new Print Format either by going to:
 
 or Open the document for which you want to make a print format. Click the Printer icon, or go to Menu > Print and click on the **Edit** button. Note: You must have System Manager permission to do this.
 
+<div class="embed-container">
+  <iframe src="https://www.youtube.com/embed/cKZHcx1znMc?start=82&rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+  </iframe>
+</div>
+
 ### Step 1: Make a new Format
 
 <img class="screenshot" alt="Send Email" src="{{docs_base_url}}/assets/img/setup/print/print-format-builder-1.gif">
