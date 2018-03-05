@@ -1,6 +1,7 @@
 
 from __future__ import unicode_literals
 import frappe, base64, hashlib, hmac, json
+import datetime
 from frappe import _
 
 
@@ -92,6 +93,14 @@ def order():
 		new_sales_order.woocommerce_id = fd.get("id")
 		new_sales_order.naming_series = "SO-"
 
+		placed_order_date = created_date[0]
+		raw_date = datetime.datetime.strptime(placed_order_date, "%Y-%m-%d")
+		raw_delivery_date = frappe.utils.add_to_date(raw_date,days = 7)
+		order_delivery_date_str = raw_delivery_date.strftime('%Y-%m-%d')
+		order_delivery_date = unicode(order_delivery_date_str, "utf-8")
+
+		new_sales_order.delivery_date = order_delivery_date
+
 		for item in items_list:
 			woocomm_item_id = item.get("product_id")
 			found_item = frappe.get_doc("Item",{"woocommerce_id": woocomm_item_id})
@@ -103,7 +112,7 @@ def order():
 				"item_code": found_item.item_code,
 				"item_name": found_item.item_name,
 				"description": found_item.item_name,
-				"delivery_date":created_date[0],   #change delivery date after testing
+				"delivery_date":order_delivery_date,   #change delivery date after testing
 				"uom": "Nos",
 				"qty": item.get("quantity"),
 				"rate": item.get("price")
@@ -235,7 +244,7 @@ def add_tax_details(sales_order,price,desc,status):
 
 	if status == 1:
 		account_head_type = frappe.get_value("Account",{"account_name":"Freight and Forwarding Charges"},["name"])
-		
+
 	sales_order.append("taxes",{
 							"charge_type":"Actual",
 							"account_head": account_head_type,
