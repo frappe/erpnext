@@ -273,6 +273,12 @@ class PurchaseOrder(BuyingController):
 			if item.delivered_by_supplier == 1:
 				item.received_qty = item.qty
 
+	def update_reserved_qty_for_subcontract(self):
+		for d in self.supplied_items:
+			if d.rm_item_code:
+				stock_bin = get_bin(d.rm_item_code, d.reserve_warehouse)
+				stock_bin.update_reserved_qty_for_sub_contracting()
+
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor= 1.0):
 	"""get last purchase rate for an item"""
 	if cint(frappe.db.get_single_value("Buying Settings", "disable_fetch_last_purchase_rate")): return
@@ -287,12 +293,6 @@ def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=
 		item_last_purchase_rate = frappe.db.get_value("Item", item_code, "last_purchase_rate")
 		if item_last_purchase_rate:
 			return item_last_purchase_rate
-
-	def update_reserved_qty_for_subcontract(self):
-		for d in self.supplied_items:
-			if d.rm_item_code:
-				stock_bin = get_bin(d.rm_item_code, d.reserve_warehouse)
-				stock_bin.update_reserved_qty_for_sub_contracting()
 
 @frappe.whitelist()
 def close_or_unclose_purchase_orders(names, status):
