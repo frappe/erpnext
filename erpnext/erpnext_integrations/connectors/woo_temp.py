@@ -232,7 +232,7 @@ def add_tax_details(sales_order,price,desc):
 
 	sales_order.append("taxes",{
 							"charge_type":"Actual",
-							"account_head": "VAT 5% - Woo",
+							"account_head": "VAT 5% - W",
 							"tax_amount": price,
 							"description": desc
 							})
