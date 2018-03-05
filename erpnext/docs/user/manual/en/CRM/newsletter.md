@@ -18,4 +18,9 @@ send the email to all the intended receipients by clicking on the send button.
 
 <img class="screenshot" alt="Newsletter - Test" src="{{docs_base_url}}/assets/img/crm/newsletter-test.png">
 
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/muLKsCrrDRo?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+    </iframe>
+</div>
+
 {next}

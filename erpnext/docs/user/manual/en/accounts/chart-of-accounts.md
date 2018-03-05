@@ -155,4 +155,14 @@ Typically, you might want to create Accounts for
   * Types of Sales (for example, Product Sales, Service Sales etc.) under Income.
   * Types of Assets (building, machinery, furniture etc.) under Fixed Assets.
 
+
+<div>
+  <div class="embed-container">
+    <iframe src='https://www.youtube.com/embed//AcfMCT7wLLo' frameborder='0' allowfullscreen>
+    </iframe>
+  </div>
+</div>
+
+
+
 {next}

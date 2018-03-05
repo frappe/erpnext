@@ -56,3 +56,15 @@ To update the value in the variants items from the template item, select the res
 To set the fields Goto Stock > Item Variant Settings
 <img class='screenshot' alt='Item Variant Settings'
 	src='{{docs_base_url}}/assets/img/stock/item_variants_settings.png'>
+
+<div class - "embed-container">
+	<iframe src="https://www.youtube.com/embed/kogIricF40I?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+	</iframe>
+</div>
+
+<div class="embed-container">
+	<iframe src="https://www.youtube.com/embed/SngZtDIMdiQ?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+	</iframe>
+<div>
+
+{next}

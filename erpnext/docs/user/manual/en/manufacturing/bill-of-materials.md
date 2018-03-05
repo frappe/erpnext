@@ -5,6 +5,12 @@ The **BOM** is a list of all materials (either bought or made) and operations
 that go into a finished product or sub-Item. In ERPNext, the component could
 have its own BOM hence forming a tree of Items with multiple levels.
 
+<div class="embed-container">
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/9J9QBYBpD0M?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+  </iframe>
+</div>
+
+
 To make accurate Purchase Requests, you must always maintain correct BOMs.
 To make a new BOM:
 
