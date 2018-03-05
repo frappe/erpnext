@@ -492,3 +492,4 @@ erpnext.patches.v10_0.added_extra_gst_custom_field_in_gstr2 #2018-02-13
 erpnext.patches.v10_0.set_b2c_limit
 erpnext.patches.v10_0.set_auto_created_serial_no_in_stock_entry
 erpnext.patches.v10_0.update_territory_and_customer_group
+erpnext.patches.v10_0.update_warehouse_address_details
