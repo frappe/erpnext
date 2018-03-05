@@ -95,12 +95,6 @@ def validate_item_attribute_value(attributes_list, attribute, attribute_value, i
 	allow_rename_attribute_value = frappe.db.get_single_value('Item Variant Settings', 'allow_rename_attribute_value')
 	if allow_rename_attribute_value:
 		pass
-		# for value in attributes_list:
-		# 	# if s == attribute_value:
-		# 	if value == attribute_value:
-		#  		break
-		# 	elif not value == attribute_value:
-		# 		frappe.db.set_value('Item Variant Attribute', frappe.get_value("Item Variant Attribute", {"parent":item}, "name"), "attribute_value", value)
 	elif attribute_value not in attributes_list:
 		frappe.throw(_("Value {0} for Attribute {1} does not exist in the list of valid Item Attribute Values for Item {2}").format(
 			attribute_value, attribute, item), InvalidItemAttributeValueError, title=_('Invalid Attribute'))
