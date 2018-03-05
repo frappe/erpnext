@@ -63,6 +63,13 @@ def get_columns():
 			"width": 220
 		},
 		{
+			"fieldname": "voucher_no",
+			"label": _("Return Payment Entry"),
+			"fieldtype": "Dynamic Link",
+			"options": "voucher_type",
+			"width": 220
+		},
+		{
 			"fieldname": "debit",
 			"label": _("Debit"),
 			"fieldtype": "Currency",
@@ -75,6 +82,12 @@ def get_columns():
 			"fieldtype": "Currency",
 			"options": "account_currency",
 			"width": 120
+		},
+		{
+			"fieldname": "against",
+			"label": _("Against"),
+			"fieldtype": "text",
+			"width": 200
 		},
 		{
 			"fieldname": "against_account",
@@ -96,11 +109,41 @@ def get_columns():
 			"width": 110
 		},
 		{
+			"fieldname": "receipt_date",
+			"label": _("Receipt/Voucher Date"),
+			"fieldtype": "Date",
+			"width": 110
+		},
+		{
+			"fieldname": "deposited_date",
+			"label": _("Deposited Date"),
+			"fieldtype": "Date",
+			"width": 110
+		},
+		{
+			"fieldname": "deposited_to",
+			"label": _("Deposited To"),
+			"fieldtype": "Data",
+			"width": 110
+		},
+		{
+			"fieldname": "deposit_status",
+			"label": _("Cheque Status"),
+			"fieldtype": "Select",
+			"width": 110
+		},
+		{
 			"fieldname": "clearance_date",
 			"label": _("Clearance Date"),
 			"fieldtype": "Date",
 			"width": 110
-		},		
+		},
+		{
+			"fieldname": "return_date",
+			"label": _("Return Date"),
+			"fieldtype": "Date",
+			"width": 110
+		},				
 		{
 			"fieldname": "account_currency",
 			"label": _("Currency"),
@@ -126,7 +169,7 @@ def get_entries(filters):
 	payment_entries = frappe.db.sql("""
 		select 
 			"Payment Entry" as payment_document, name as payment_entry, 
-			reference_no, reference_date as ref_date, 
+			reference_no, reference_date as ref_date,receipt_date,deposited_date,deposited_to,deposit_status,return_date,
 			if(paid_to=%(account)s, received_amount, 0) as debit, 
 			if(paid_from=%(account)s, paid_amount, 0) as credit, 
 			posting_date, ifnull(party,if(paid_from=%(account)s,paid_to,paid_from)) as against_account, clearance_date,
@@ -137,8 +180,15 @@ def get_entries(filters):
 			and posting_date <= %(report_date)s
 			and ifnull(clearance_date, '4000-01-01') > %(report_date)s
 	""", filters, as_dict=1)
-
-	return sorted(list(payment_entries)+list(journal_entries), 
+	
+	gl_entries = frappe.db.sql("""
+		select *
+		from `tabGL Entry`
+		where 
+		return_date is not null and credit > 0.0 
+	""", filters, as_dict=1)
+	
+	return sorted(list(payment_entries)+list(journal_entries)+list(gl_entries),
 			key=lambda k: k['posting_date'] or getdate(nowdate()))
 			
 def get_amounts_not_reflected_in_system(filters):
@@ -156,7 +206,7 @@ def get_amounts_not_reflected_in_system(filters):
 		from `tabPayment Entry`
 		where (paid_from=%(account)s or paid_to=%(account)s) and docstatus=1 
 		and posting_date > %(report_date)s and clearance_date <= %(report_date)s""", filters)
-
+	
 	pe_amount = flt(pe_amount[0][0]) if pe_amount else 0.0
 	
 	return je_amount + pe_amount

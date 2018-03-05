@@ -406,18 +406,19 @@ class PaymentEntry(AccountsController):
 
 		gl_entries = []
 		self.add_party_gl_entries(gl_entries)
+		
 		self.add_bank_gl_entries(gl_entries)
+		
 		self.add_deductions_gl_entries(gl_entries)
-
+		
 		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
-
+		
 	def add_party_gl_entries(self, gl_entries):
 		if self.party_account:
 			if self.payment_type=="Receive":
 				against_account = self.paid_to
 			else:
 				against_account = self.paid_from
-
 
 			party_gl_dict = self.get_gl_dict({
 				"account": self.party_account,
@@ -428,7 +429,7 @@ class PaymentEntry(AccountsController):
 			})
 
 			dr_or_cr = "credit" if self.party_type in ["Customer", "Student"] else "debit"
-
+			
 			for d in self.get("references"):
 				gle = party_gl_dict.copy()
 				gle.update({
@@ -443,9 +444,9 @@ class PaymentEntry(AccountsController):
 					dr_or_cr + "_in_account_currency": d.allocated_amount,
 					dr_or_cr: allocated_amount_in_company_currency
 				})
-
+				
 				gl_entries.append(gle)
-
+				
 			if self.unallocated_amount:
 				base_unallocated_amount = base_unallocated_amount = self.unallocated_amount * \
 					(self.source_exchange_rate if self.payment_type=="Receive" else self.target_exchange_rate)
@@ -498,21 +499,21 @@ class PaymentEntry(AccountsController):
 						"cost_center": d.cost_center
 					})
 				)
-
+				
 	def update_advance_paid(self):
 		if self.payment_type in ("Receive", "Pay") and self.party:
 			for d in self.get("references"):
 				if d.allocated_amount \
 					and d.reference_doctype in ("Sales Order", "Purchase Order", "Employee Advance"):
 						frappe.get_doc(d.reference_doctype, d.reference_name).set_total_advance_paid()
-
+		
 	def update_expense_claim(self):
 		if self.payment_type in ("Pay") and self.party:
 			for d in self.get("references"):
 				if d.reference_doctype=="Expense Claim" and d.reference_name:
 					doc = frappe.get_doc("Expense Claim", d.reference_name)
 					update_reimbursed_amount(doc)
-
+		
 	def on_recurring(self, reference_doc, subscription_doc):
 		self.reference_no = reference_doc.name
 		self.reference_date = nowdate()
@@ -633,7 +634,6 @@ def get_negative_outstanding_invoices(party_type, party, party_account, party_ac
 			"party_account": "debit_to" if party_type == "Customer" else "credit_to"
 		}), (party, party_account), as_dict=True)
 
-
 @frappe.whitelist()
 def get_party_details(company, party_type, party, date):
 	if not frappe.db.exists(party_type, party):
@@ -655,7 +655,6 @@ def get_party_details(company, party_type, party, date):
 		"account_balance": account_balance
 	}
 
-
 @frappe.whitelist()
 def get_account_details(account, date):
 	frappe.has_permission('Payment Entry', throw=True)
@@ -664,7 +663,6 @@ def get_account_details(account, date):
 		"account_balance": get_balance_on(account, date),
 		"account_type": frappe.db.get_value("Account", account, "account_type")
 	})
-
 
 @frappe.whitelist()
 def get_company_defaults(company):
@@ -677,7 +675,6 @@ def get_company_defaults(company):
 				.format(frappe.get_meta("Company").get_label(fieldname), company))
 
 	return ret
-
 
 @frappe.whitelist()
 def get_reference_details(reference_doctype, reference_name, party_account_currency):
@@ -724,7 +721,6 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		"exchange_rate": exchange_rate
 	})
 
-
 @frappe.whitelist()
 def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=None):
 	doc = frappe.get_doc(dt, dn)
@@ -740,7 +736,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		party_type = "Employee"
 	elif dt in ("Fees"):
 		party_type = "Student"
-
+	
 	# party account
 	if dt == "Sales Invoice":
 		party_account = doc.debit_to
@@ -761,7 +757,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 			payment_type = "Receive"
 	else:
 		payment_type = "Pay"
-
+	
 	# amounts
 	grand_total = outstanding_amount = 0
 	if party_amount:
@@ -839,7 +835,6 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		pe.set_amounts()
 	return pe
 
-
 def get_paid_amount(dt, dn, party_type, party, account, due_date):
 	if party_type=="Customer":
 		dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
@@ -859,3 +854,7 @@ def get_paid_amount(dt, dn, party_type, party, account, due_date):
 	""".format(dr_or_cr=dr_or_cr), (dt, dn, party_type, party, account, due_date))
 
 	return paid_amount[0][0] if paid_amount else 0
+
+
+
+	
