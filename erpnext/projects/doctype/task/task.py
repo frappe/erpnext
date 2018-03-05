@@ -69,6 +69,7 @@ class Task(NestedSet):
 		self.reschedule_dependent_tasks()
 		self.update_project()
 		self.unassign_todo()
+		self.populate_depends_on()
 
 	def unassign_todo(self):
 		if self.status == "Closed" or self.status == "Cancelled":
@@ -136,6 +137,16 @@ class Task(NestedSet):
 		project_user = frappe.db.get_value("Project User", {"parent": doc.project, "user":frappe.session.user} , "user")
 		if project_user:
 			return True
+
+	def populate_depends_on(self):
+		if self.parent_task:
+			parent = frappe.get_doc('Task', self.parent_task)
+			parent.append("depends_on", {
+				"doctype": "Task Depends On",
+				"task": self.name,
+				"subject": self.subject
+			})
+			parent.save()
 
 	def on_trash(self):
 		if check_if_child_exists(self.name):
@@ -216,12 +227,12 @@ def add_node():
 
 @frappe.whitelist()
 def add_multiple_tasks(data, parent):
-	data = json.loads(data)['tasks']
-	tasks = data.split('\n')
-	new_doc = {'doctype': 'Task', 'parent_task': parent}
-	new_doc['project'] = frappe.db.get_value('Task', {"name": parent}, 'project')
+	data = json.loads(data)
+	new_doc = {'doctype': 'Task', 'parent_task': parent if parent!="All Tasks" else ""}
+	new_doc['project'] = frappe.db.get_value('Task', {"name": parent}, 'project') or ""
 
-	for d in tasks:
-		new_doc['subject'] = d
+	for d in data:
+		if not d.get("subject"): continue
+		new_doc['subject'] = d.get("subject")
 		new_task = frappe.get_doc(new_doc)
 		new_task.insert()
