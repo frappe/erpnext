@@ -141,7 +141,6 @@ class TestPaymentEntry(unittest.TestCase):
 	def test_payment_entry_retrieves_last_exchange_rate(self):
 		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import test_records, save_new_records
 
-		test_records = test_records
 		save_new_records(test_records)
 
 		pe = frappe.new_doc("Payment Entry")
@@ -151,6 +150,7 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.paid_from = "_Test Bank USD - _TC"
 		pe.paid_to = "_Test Bank - _TC"
 		pe.paid_amount = 100
+		pe.received_amount = 100
 		pe.reference_no = "3"
 		pe.reference_date = "2016-01-10"
 		pe.party_type = "Supplier"

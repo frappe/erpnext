@@ -60,5 +60,14 @@ frappe.treeview_settings["BOM"] = {
 			condition: 'frappe.boot.user.can_create.indexOf("BOM") !== -1'
 		}
 	],
+	onrender: function(node) {
+		if(node.is_root && node.data.value!="BOM") {
+			frappe.model.with_doc("BOM", node.data.value, function() {
+				var bom = frappe.model.get_doc("BOM", node.data.value);
+				node.data.image = bom.image || "";
+				node.data.description = bom.description || "";
+			});
+		}
+	},
 	view_template: 'bom_item_preview'
 }
