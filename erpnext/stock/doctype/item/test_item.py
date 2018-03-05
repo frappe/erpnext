@@ -80,7 +80,6 @@ class TestItem(unittest.TestCase):
 		}
 
 		make_test_objects("Item Price")
-		print(frappe.get_all("Item Price"))
 
 		details = get_item_details({
 			"item_code": "_Test Item",

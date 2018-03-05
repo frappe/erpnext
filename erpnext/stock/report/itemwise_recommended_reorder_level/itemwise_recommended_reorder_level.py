@@ -24,9 +24,8 @@ def execute(filters=None):
 
 	data = []
 	for item in items:
-
-		total_outgoing = consumed_item_map.get(item.name, 0)+delivered_item_map.get(item.name,0)
-		avg_daily_outgoing = flt(total_outgoing/diff, float_preceision)
+		total_outgoing = consumed_item_map.get(item.name, 0) + delivered_item_map.get(item.name,0)
+		avg_daily_outgoing = flt(total_outgoing / diff, float_preceision)
 		reorder_level = (avg_daily_outgoing * flt(item.lead_time_days)) + flt(item.safety_stock)
 
 		data.append([item.name, item.item_name, item.description, item.safety_stock, item.lead_time_days,
@@ -45,12 +44,11 @@ def get_columns():
 
 def get_item_info():
 	return frappe.db.sql("""select name, item_name, description, safety_stock,
-		lead_time_days	from tabItem""", as_dict=1)
+		lead_time_days from tabItem""", as_dict=1)
 
 def get_consumed_items(condition):
-
 	cn_items = frappe.db.sql("""select se_item.item_code,
-				sum(se_item.actual_qty) as 'consume_qty'
+			sum(se_item.transfer_qty) as 'consume_qty'
 		from `tabStock Entry` se, `tabStock Entry Detail` se_item
 		where se.name = se_item.parent and se.docstatus = 1
 		and ifnull(se_item.t_warehouse, '') = '' %s
@@ -63,17 +61,16 @@ def get_consumed_items(condition):
 	return cn_items_map
 
 def get_delivered_items(condition):
-
-	dn_items = frappe.db.sql("""select dn_item.item_code, sum(dn_item.qty) as dn_qty
+	dn_items = frappe.db.sql("""select dn_item.item_code, sum(dn_item.stock_qty) as dn_qty
 		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
 		where dn.name = dn_item.parent and dn.docstatus = 1 %s
 		group by dn_item.item_code""" % (condition), as_dict=1)
 
-	si_items = frappe.db.sql("""select si_item.item_name, sum(si_item.qty) as si_qty
+	si_items = frappe.db.sql("""select si_item.item_code, sum(si_item.stock_qty) as si_qty
 		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
 		where si.name = si_item.parent and si.docstatus = 1 and
-		si.update_stock = 1 and si.is_pos = 1 %s
-		group by si_item.item_name""" % (condition), as_dict=1)
+		si.update_stock = 1 %s
+		group by si_item.item_code""" % (condition), as_dict=1)
 
 	dn_item_map = {}
 	for item in dn_items:

@@ -5,7 +5,10 @@ var in_progress = false;
 
 frappe.ui.form.on('Payroll Entry', {
 	onload: function (frm) {
-		frm.doc.posting_date = frappe.datetime.nowdate();
+		if (!frm.doc.posting_date) {
+			frm.doc.posting_date = frappe.datetime.nowdate();
+		}
+
 		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet);
 	},
 

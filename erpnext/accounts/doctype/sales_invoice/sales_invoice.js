@@ -106,7 +106,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	on_submit: function(doc, dt, dn) {
 		var me = this;
 
-		if (frappe.get_route()[0] != 'Sales Invoice') {
+		if (frappe.get_route()[0] != 'Form') {
 			return
 		}
 

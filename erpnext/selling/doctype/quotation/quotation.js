@@ -41,7 +41,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 		var me = this;
 
-		if (doc.__islocal) {
+		if (doc.__islocal && !doc.valid_till) {
 			this.frm.set_value('valid_till', frappe.datetime.add_months(doc.transaction_date, 1))
 		}
 

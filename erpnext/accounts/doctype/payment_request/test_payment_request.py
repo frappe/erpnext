@@ -61,13 +61,11 @@ class TestPaymentRequest(unittest.TestCase):
 		self.assertEquals(pr.currency, "USD")
 
 	def test_payment_entry(self):
-		frappe.db.set_value("Company", "_Test Company", 
+		frappe.db.set_value("Company", "_Test Company",
 			"exchange_gain_loss_account", "_Test Exchange Gain/Loss - _TC")
-		frappe.db.set_value("Company", "_Test Company", 
-			"write_off_account", "_Test Write Off - _TC")
-		frappe.db.set_value("Company", "_Test Company", 
-			"cost_center", "_Test Cost Center - _TC")
-		
+		frappe.db.set_value("Company", "_Test Company", "write_off_account", "_Test Write Off - _TC")
+		frappe.db.set_value("Company", "_Test Company", "cost_center", "_Test Cost Center - _TC")
+
 		so_inr = make_sales_order(currency="INR")
 		pr = make_payment_request(dt="Sales Order", dn=so_inr.name, recipient_id="saurabh@erpnext.com",
 			mute_email=1, submit_doc=1, return_doc=1)
@@ -82,15 +80,15 @@ class TestPaymentRequest(unittest.TestCase):
 
 		pr = make_payment_request(dt="Sales Invoice", dn=si_usd.name, recipient_id="saurabh@erpnext.com",
 			mute_email=1, payment_gateway="_Test Gateway - USD", submit_doc=1, return_doc=1)
-		
+
 		pe = pr.set_as_paid()
-		
+
 		expected_gle = dict((d[0], d) for d in [
 			["_Test Receivable USD - _TC", 0, 5000, si_usd.name],
 			[pr.payment_account, 6290.0, 0, None],
 			["_Test Exchange Gain/Loss - _TC", 0, 1290, None]
 		])
-		
+
 		gl_entries = frappe.db.sql("""select account, debit, credit, against_voucher
 			from `tabGL Entry` where voucher_type='Payment Entry' and voucher_no=%s
 			order by account asc""", pe.name, as_dict=1)

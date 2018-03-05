@@ -53,8 +53,9 @@ def validate_returned_items(doc):
 
 	valid_items = frappe._dict()
 
-	select_fields = "item_code, qty, rate, parenttype" if doc.doctype=="Purchase Invoice" \
-		else "item_code, qty, rate, serial_no, batch_no, parenttype"
+	select_fields = "item_code, qty, stock_qty, rate, parenttype, conversion_factor"
+	if doc.doctype != 'Purchase Invoice':
+		select_fields += ",serial_no, batch_no"
 
 	if doc.doctype in ['Purchase Invoice', 'Purchase Receipt']:
 		select_fields += ",rejected_qty, received_qty"
@@ -111,7 +112,7 @@ def validate_returned_items(doc):
 		frappe.throw(_("Atleast one item should be entered with negative quantity in return document"))
 
 def validate_quantity(doc, args, ref, valid_items, already_returned_items):
-	fields = ['qty']
+	fields = ['stock_qty']
 	if doc.doctype in ['Purchase Receipt', 'Purchase Invoice']:
 		fields.extend(['received_qty', 'rejected_qty'])
 
@@ -119,16 +120,19 @@ def validate_quantity(doc, args, ref, valid_items, already_returned_items):
 
 	for column in fields:
 		returned_qty = flt(already_returned_data.get(column, 0)) if len(already_returned_data) > 0 else 0
-		reference_qty = ref.get(column)
+		reference_qty = (ref.get(column) if column == 'stock_qty'
+			else ref.get(column) * ref.get("conversion_factor", 1.0))
+
 		max_returnable_qty = flt(reference_qty) - returned_qty
 		label = column.replace('_', ' ').title()
+
 		if reference_qty:	
 			if flt(args.get(column)) > 0:
 				frappe.throw(_("{0} must be negative in return document").format(label))
 			elif returned_qty >= reference_qty and args.get(column):
 				frappe.throw(_("Item {0} has already been returned")
 					.format(args.item_code), StockOverReturnError)
-			elif abs(args.get(column)) > max_returnable_qty:
+			elif (abs(args.get(column)) * args.get("conversion_factor", 1.0)) > max_returnable_qty:
 				frappe.throw(_("Row # {0}: Cannot return more than {1} for Item {2}")
 					.format(args.idx, reference_qty, args.item_code), StockOverReturnError)
 
@@ -138,6 +142,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 	valid_items.setdefault(ref_item_row.item_code, frappe._dict({
 		"qty": 0,
 		"rate": 0,
+		"stock_qty": 0,
 		"rejected_qty": 0,
 		"received_qty": 0,
 		"serial_no": [],
@@ -145,6 +150,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 	}))
 	item_dict = valid_items[ref_item_row.item_code]
 	item_dict["qty"] += ref_item_row.qty
+	item_dict["stock_qty"] += ref_item_row.get('stock_qty', 0)
 	if ref_item_row.get("rate", 0) > item_dict["rate"]:
 		item_dict["rate"] = ref_item_row.get("rate", 0)
 
@@ -161,9 +167,10 @@ def get_ref_item_dict(valid_items, ref_item_row):
 	return valid_items
 
 def get_already_returned_items(doc):
-	column = 'child.item_code, sum(abs(child.qty)) as qty'
+	column = 'child.item_code, sum(abs(child.qty)) as qty, sum(abs(child.stock_qty)) as stock_qty'
 	if doc.doctype in ['Purchase Invoice', 'Purchase Receipt']:
-		column += ', sum(abs(child.rejected_qty)) as rejected_qty, sum(abs(child.received_qty)) as received_qty'
+		column += """, sum(abs(child.rejected_qty) * child.conversion_factor) as rejected_qty,
+			sum(abs(child.received_qty) * child.conversion_factor) as received_qty"""
 
 	data = frappe.db.sql("""
 		select {0}
@@ -180,6 +187,7 @@ def get_already_returned_items(doc):
 	for d in data:
 		items.setdefault(d.item_code, frappe._dict({
 			"qty": d.get("qty"),
+			"stock_qty": d.get("stock_qty"),
 			"received_qty": d.get("received_qty"),
 			"rejected_qty": d.get("rejected_qty")
 		}))

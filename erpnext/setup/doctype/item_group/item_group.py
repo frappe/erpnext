@@ -102,7 +102,7 @@ def get_product_list_for_group(product_group=None, start=0, limit=10, search=Non
 				or I.name like %(search)s)"""
 		search = "%" + cstr(search) + "%"
 
-	query += """order by I.weightage desc, in_stock desc, I.item_name limit %s, %s""" % (start, limit)
+	query += """order by I.weightage desc, in_stock desc, I.modified desc limit %s, %s""" % (start, limit)
 
 	data = frappe.db.sql(query, {"product_group": product_group,"search": search, "today": nowdate()}, as_dict=1)
 
