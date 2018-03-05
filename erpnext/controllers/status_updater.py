@@ -250,7 +250,7 @@ class StatusUpdater(Document):
 
 			if args['detail_id']:
 				if not args.get("extra_cond"): args["extra_cond"] = ""
-
+				
 				frappe.db.sql("""update `tab%(target_dt)s`
 					set %(target_field)s = (
 						(select ifnull(sum(%(source_field)s), 0)
@@ -275,7 +275,7 @@ class StatusUpdater(Document):
 		"""Update percent field in parent transaction"""
 
 		self._update_modified(args, update_modified)
-
+		
 		if args.get('target_parent_field'):
 			frappe.db.sql("""update `tab%(target_parent_dt)s`
 				set %(target_parent_field)s = round(

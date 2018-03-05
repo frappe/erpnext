@@ -45,10 +45,11 @@ class ExpenseClaim(AccountsController):
 		}[cstr(self.docstatus or 0)]
 
 		paid_amount = flt(self.total_amount_reimbursed) + flt(self.total_advance_amount)
-		if self.total_sanctioned_amount > 0 and self.total_sanctioned_amount ==  paid_amount\
+		if (self.is_paid or (flt(self.total_sanctioned_amount) > 0
+			and flt(self.total_sanctioned_amount) ==  paid_amount)) \
 			and self.docstatus == 1 and self.approval_status == 'Approved':
-			self.status = "Paid"
-		elif self.total_sanctioned_amount > 0 and self.docstatus == 1 and self.approval_status == 'Approved':
+				self.status = "Paid"
+		elif flt(self.total_sanctioned_amount) > 0 and self.docstatus == 1 and self.approval_status == 'Approved':
 			self.status = "Unpaid"
 		elif self.docstatus == 1 and self.approval_status == 'Rejected':
 			self.status = 'Rejected'

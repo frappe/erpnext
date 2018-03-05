@@ -30,8 +30,7 @@ class PurchaseOrder(BuyingController):
 			'target_parent_field': 'per_ordered',
 			'target_ref_field': 'stock_qty',
 			'source_field': 'stock_qty',
-			'percent_join_field': 'material_request',
-			'overflow_type': 'order'
+			'percent_join_field': 'material_request'
 		}]
 
 	def onload(self):
@@ -232,12 +231,16 @@ class PurchaseOrder(BuyingController):
 		pass
 
 	def update_status_updater(self):
-		self.status_updater[0].update({
-			"target_parent_dt": "Sales Order",
-			"target_dt": "Sales Order Item",
+		self.status_updater.append({
+			'source_dt': 'Purchase Order Item',
+			'target_dt': 'Sales Order Item',
 			'target_field': 'ordered_qty',
-			"join_field": "sales_order_item",
-			"target_parent_field": ''
+			'target_parent_dt': 'Sales Order',
+			'target_parent_field': '',
+			'join_field': 'sales_order_item',
+			'source_dt': 'Purchase Order Item',
+			'target_ref_field': 'stock_qty',
+			'source_field': 'stock_qty'
 		})
 
 	def update_delivered_qty_in_sales_order(self):

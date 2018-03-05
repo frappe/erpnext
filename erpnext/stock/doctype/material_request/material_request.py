@@ -241,7 +241,8 @@ def make_purchase_order(source_name, target_doc=None):
 				["parent", "material_request"],
 				["uom", "stock_uom"],
 				["uom", "uom"],
-				["sales_order", "sales_order"]
+				["sales_order", "sales_order"],
+				["sales_order_item", "sales_order_item"]
 			],
 			"postprocess": update_item,
 			"condition": lambda doc: doc.ordered_qty < doc.stock_qty
