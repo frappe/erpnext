@@ -34,8 +34,6 @@ class ItemAttribute(Document):
 			if self.numeric_values:
 				validate_is_incremental(self, self.name, item.value, item.name)
 			else:
-				for x in xrange(1,10):
-					print("ss",attributes_list, self.name, item.value, item.name)
 				validate_item_attribute_value(attributes_list, self.name, item.value, item.name)
 
 	def validate_numeric(self):
