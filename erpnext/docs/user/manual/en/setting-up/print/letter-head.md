@@ -4,6 +4,11 @@ Each company has default Letter Head for their company. This Letter Head values 
 
 In the Letter Head master, you can track Header and Footer details of the company. These details will appear in the Print Format of the transactions like Sales Order, Sales Invoice, Salary Slip, Purchase Order etc.
 
+<div class="embed-container">
+  <iframe src="https://www.youtube.com/embed/cKZHcx1znMc?end=58&rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+  </iframe>
+</div>
+
 ####Step 1: Go to Setup
 
 `Explore > Setup > Printing > Letter Head > New Letter Head`

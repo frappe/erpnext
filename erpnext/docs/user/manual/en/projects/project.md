@@ -4,6 +4,11 @@ Project management in ERPNext is Task driven. You can create Project and assign 
 
 <img class="screenshot" alt="Project" src="{{docs_base_url}}/assets/img/project/project.png">
 
+<div class="embed-container">
+  <iframe src="https://www.youtube.com/embed/gCzShu9Niu4?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+  </iframe>
+</div>
+
 You can also track % Completion of a Project using different methods.
 
   1. Task Completion

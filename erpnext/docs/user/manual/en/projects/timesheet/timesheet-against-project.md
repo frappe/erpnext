@@ -4,6 +4,11 @@ Timesheets can be tracked against Project and Tasks so that you can get reports 
 
 <img class="screenshot" alt="Sales Invoice" src="{{docs_base_url}}/assets/img/project/timesheet/timesheet-project.gif">
 
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/IxY-rSJsA6U?start=126rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>
+
+
 ####Billable Timesheet
 
 To bill Customer based on Timesheet, check "Is Billable" in the Timesheet created against Project and Task. To learn more about billing Customer from Timesheet, click [here](/docs/user/manual/en/projects/timesheet/sales-invoice-from-timesheet.html).

@@ -666,6 +666,8 @@ class AccountsController(TransactionBase):
 			self.remove(item)
 
 	def set_payment_schedule(self):
+		if self.doctype == 'Sales Invoice' and self.is_pos: return
+
 		posting_date = self.get("bill_date") or self.get("posting_date") or self.get("transaction_date")
 		date = self.get("due_date")
 		due_date = date or posting_date
@@ -695,6 +697,8 @@ class AccountsController(TransactionBase):
 		dates = []
 		li = []
 
+		if self.doctype == 'Sales Invoice' and self.is_pos: return
+
 		for d in self.get("payment_schedule"):
 			if self.doctype == "Sales Order" and getdate(d.due_date) < getdate(self.transaction_date):
 				frappe.throw(_("Row {0}: Due Date cannot be before posting date").format(d.idx))
@@ -708,6 +712,8 @@ class AccountsController(TransactionBase):
 				.format(list=duplicates))
 
 	def validate_payment_schedule_amount(self):
+		if self.doctype == 'Sales Invoice' and self.is_pos: return
+
 		if self.get("payment_schedule"):
 			total = 0
 			for d in self.get("payment_schedule"):

@@ -59,4 +59,10 @@ advance in the advances table. The accounting will be adjusted accordingly.
 
 Save and submit the Sales Invoice.
 
+
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/J46-6qtyZ9U?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+    </iframe>
+</div>
+
 {next}

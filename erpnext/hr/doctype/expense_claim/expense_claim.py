@@ -41,10 +41,12 @@ class ExpenseClaim(AccountsController):
 		}[cstr(self.docstatus or 0)]
 
 		paid_amount = flt(self.total_amount_reimbursed) + flt(self.total_advance_amount)
-		if self.total_sanctioned_amount > 0 and self.total_sanctioned_amount ==  paid_amount\
+
+		if (self.is_paid or (flt(self.total_sanctioned_amount) > 0
+			and flt(self.total_sanctioned_amount) ==  paid_amount)) \
 			and self.docstatus == 1:
-			self.status = "Paid"
-		elif self.total_sanctioned_amount > 0 and self.docstatus == 1:
+				self.status = "Paid"
+		elif flt(self.total_sanctioned_amount) > 0 and self.docstatus == 1:
 			self.status = "Unpaid"
 
 	def set_payable_account(self):

@@ -52,5 +52,9 @@ To auto deduct the Loan repayment from Salary, check "Repay from Salary" in Empl
 
 <img class="screenshot" alt="Salary Slip" src="{{docs_base_url}}/assets/img/human-resources/loan-repayment-salary-slip.png">
 
+<div class="embed-container">
+  <iframe src="https://www.youtube.com/embed/IUM0t7t4zFU?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+  </iframe>
+</div>
 
- 
+{nex}

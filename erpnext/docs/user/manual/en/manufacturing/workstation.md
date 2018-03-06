@@ -18,4 +18,10 @@ While scheduling Production Order, system will check for the availability of the
 
 > Note : You can enable overtime for your workstation in [Manufacturing Settings](/docs/user/manual/en/manufacturing/setup/manufacturing-settings.html)
 
+
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/UVGfzwOOZC4?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+    </iframe>
+</div>
+
 {next}
