@@ -126,6 +126,11 @@ def get_data():
 					"link": "Tree/Sales Person",
 					"description": _("Manage Sales Person Tree."),
 				},
+				{
+					"type": "doctype",
+					"name": "Lead Source",
+					"description": _("Track Leads by Lead Source.")
+				},
 			]
 		},
 		{
