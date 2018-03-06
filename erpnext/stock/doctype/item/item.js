@@ -175,14 +175,30 @@ frappe.ui.form.on('Item Customer Detail', {
 		frappe.model.set_value(cdt, cdn, 'customer_group', "");
 	},
 	customer_name: function(frm, cdt, cdn) {
-		var row = frappe.get_doc(cdt, cdn);
-		if (!row.customer_name) return false;
-		frappe.model.with_doc("Customer", row.customer_name, function() {
-			var customer = frappe.model.get_doc("Customer", row.customer_name);
-			frappe.model.set_value(cdt, cdn, 'customer_group', customer.customer_group);
-		});
+		set_customer_group(frm, cdt, cdn);
+	},
+	customer_group: function(frm, cdt, cdn) {
+		if(set_customer_group(frm, cdt, cdn)){
+			frappe.msgprint(__("Changing Customer Group for the selected Customer is not allowed."));
+		}
 	}
 });
+
+var set_customer_group = function(frm, cdt, cdn) {
+	var row = frappe.get_doc(cdt, cdn);
+	var grid_row = cur_frm.fields_dict['customer_items'].grid.grid_rows_by_docname[row.name];
+
+	if (!row.customer_name) {
+		return false;
+	}
+
+	frappe.model.with_doc("Customer", row.customer_name, function() {
+		var customer = frappe.model.get_doc("Customer", row.customer_name);
+		row.customer_group = customer.customer_group;
+		grid_row.refresh_field("customer_group");
+	});
+	return true;
+}
 
 $.extend(erpnext.item, {
 	setup_queries: function(frm) {
