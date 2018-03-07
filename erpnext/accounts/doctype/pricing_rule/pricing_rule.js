@@ -14,7 +14,7 @@ frappe.ui.form.on("Pricing Rule", "refresh", function(frm) {
 						${__("Pricing Rule is made to overwrite Price List / define discount percentage, based on some criteria.")}
 					</li>
 					<li>
-						${__("If selected Pricing Rule is made for 'Price', it will overwrite Price List. Pricing Rule price is the final price, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field.")}
+						${__("If selected Pricing Rule is made for 'Rate', it will overwrite Price List. Pricing Rule rate is the final rate, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field.")}
 					</li>
 					<li>
 						${__('Discount Percentage can be applied either against a Price List or for all Price List.')}
@@ -97,8 +97,8 @@ cur_frm.cscript.margin_type = function(doc){
 	cur_frm.set_df_property('margin_rate_or_amount', 'description', doc.margin_type=='Percentage'?'In Percentage %':'In Amount')
 }
 
-frappe.ui.form.on('Pricing Rule', 'price_or_discount', function(frm){
-	if(frm.doc.price_or_discount == 'Price') {
+frappe.ui.form.on('Pricing Rule', 'rate_or_discount', function(frm){
+	if(frm.doc.rate_or_discount == 'Rate') {
 		frm.set_value('for_price_list', "")
 	}
 })

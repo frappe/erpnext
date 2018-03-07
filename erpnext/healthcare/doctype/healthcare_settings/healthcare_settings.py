@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
 import json
@@ -15,7 +16,7 @@ class HealthcareSettings(Document):
             frappe.db.set_default(key, self.get(key, ""))
         if(self.collect_registration_fee):
             if self.registration_fee <= 0 :
-                frappe.throw("Registration fee can not be Zero")
+                frappe.throw(_("Registration fee can not be Zero"))
 
 @frappe.whitelist()
 def get_sms_text(doc):

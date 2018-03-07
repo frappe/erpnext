@@ -8,6 +8,8 @@ from frappe import _
 from frappe.utils import cstr, now_datetime, cint, flt, get_time
 from erpnext.controllers.status_updater import StatusUpdater
 
+from six import string_types
+
 class UOMMustBeIntegerError(frappe.ValidationError): pass
 
 class TransactionBase(StatusUpdater):
@@ -43,7 +45,7 @@ class TransactionBase(StatusUpdater):
 		events = frappe.db.sql_list("""select name from `tabEvent`
 			where ref_type=%s and ref_name=%s""", (self.doctype, self.name))
 		if events:
-			frappe.db.sql("delete from `tabEvent` where name in (%s)"
+			frappe.db.sql("delete from `tabEvent` where name in ({0})"
 				.format(", ".join(['%s']*len(events))), tuple(events))
 
 	def _add_calendar_event(self, opts):
@@ -71,6 +73,8 @@ class TransactionBase(StatusUpdater):
 		validate_uom_is_integer(self, uom_field, qty_fields)
 
 	def validate_with_previous_doc(self, ref):
+		self.exclude_fields = ["conversion_factor", "uom"] if self.get('is_return') else []
+
 		for key, val in ref.items():
 			is_child = val.get("is_child_table")
 			ref_doc = {}
@@ -101,7 +105,7 @@ class TransactionBase(StatusUpdater):
 					frappe.throw(_("Invalid reference {0} {1}").format(reference_doctype, reference_name))
 
 				for field, condition in fields:
-					if prevdoc_values[field] is not None:
+					if prevdoc_values[field] is not None and field not in self.exclude_fields:
 						self.validate_value(field, condition, prevdoc_values[field], doc)
 
 
@@ -139,7 +143,7 @@ def delete_events(ref_type, ref_name):
 		where ref_type=%s and ref_name=%s""", (ref_type, ref_name)), for_reload=True)
 
 def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
-	if isinstance(qty_fields, basestring):
+	if isinstance(qty_fields, string_types):
 		qty_fields = [qty_fields]
 
 	distinct_uoms = list(set([d.get(uom_field) for d in doc.get_all_children()]))

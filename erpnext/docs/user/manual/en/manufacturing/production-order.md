@@ -15,6 +15,11 @@ by:
 
 <img class="screenshot" alt="Production Order" src="{{docs_base_url}}/assets/img/manufacturing/production-order.png">
 
+<div class-"embed-container">
+  <iframe src="https://www.youtube.com/embed/yv_KAIlHrO4?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+  </iframe>
+</div>
+
 ### Creating Production Orders
 
   * Select the Item to be produced.

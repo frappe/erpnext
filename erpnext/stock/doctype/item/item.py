@@ -19,6 +19,8 @@ from frappe.website.doctype.website_slideshow.website_slideshow import \
 from frappe.website.render import clear_cache
 from frappe.website.website_generator import WebsiteGenerator
 
+from six import iteritems
+
 
 class DuplicateReorderRows(frappe.ValidationError):
 	pass
@@ -481,6 +483,7 @@ class Item(WebsiteGenerator):
 		from stdnum import ean
 		if len(self.barcodes) > 0:
 			for item_barcode in self.barcodes:
+				options = frappe.get_meta("Item Barcode").get_options("barcode_type").split()
 				if item_barcode.barcode:
 					duplicate = frappe.db.sql(
 						"""select parent from `tabItem Barcode` where barcode = %s and parent != %s""", (item_barcode.barcode, self.name))
@@ -488,6 +491,7 @@ class Item(WebsiteGenerator):
 						frappe.throw(_("Barcode {0} already used in Item {1}").format(
 							item_barcode.barcode, duplicate[0][0]))
 
+					item_barcode.barcode_type = "" if item_barcode.barcode_type not in options else item_barcode.barcode_type
 					if item_barcode.barcode_type:
 						if not ean.is_valid(item_barcode.barcode):
 							frappe.throw(_("Barcode {0} is not a valid {1} code").format(
@@ -720,7 +724,7 @@ def get_timeline_data(doctype, name):
 			and posting_date > date_sub(curdate(), interval 1 year)
 			group by posting_date''', name))
 
-	for date, count in items.iteritems():
+	for date, count in iteritems(items):
 		timestamp = get_timestamp(date)
 		out.update({timestamp: count})
 

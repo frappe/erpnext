@@ -92,7 +92,7 @@ frappe.ui.form.on("Company", {
 			},
 			function(data) {
 				if(data.company_name !== frm.doc.name) {
-					frappe.msgprint("Company name not same");
+					frappe.msgprint(__("Company name not same"));
 					return;
 				}
 				frappe.call({

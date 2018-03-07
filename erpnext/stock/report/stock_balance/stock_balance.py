@@ -6,6 +6,8 @@ import frappe
 from frappe import _
 from frappe.utils import flt, cint, getdate
 
+from six import iteritems
+
 def execute(filters=None):
 	if not filters: filters = {}
 
@@ -57,8 +59,8 @@ def get_columns():
 	columns = [
 		_("Item")+":Link/Item:100",
 		_("Item Name")+"::150",
-		_("Item Group")+"::100",
-		_("Brand")+"::90",
+		_("Item Group")+":Link/Item Group:100",
+		_("Brand")+":Link/Brand:90",
 		_("Description")+"::140",
 		_("Warehouse")+":Link/Warehouse:100",
 		_("Stock UOM")+":Link/UOM:90",
@@ -208,7 +210,7 @@ def get_item_details(filters):
 
 	if filters.get('show_variant_attributes', 0) == 1:
 		variant_values = get_variant_values_for(item_details.keys())
-		item_details = {k: v.update(variant_values.get(k, {})) for k, v in item_details.iteritems()}
+		item_details = {k: v.update(variant_values.get(k, {})) for k, v in iteritems(item_details)}
 
 	return item_details
 

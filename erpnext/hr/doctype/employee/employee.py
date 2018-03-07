@@ -263,7 +263,7 @@ def deactivate_sales_person(status = None, employee = None):
 			frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
 
 @frappe.whitelist()
-def create_user(employee, user = None):
+def create_user(employee, user = None, email=None):
 	emp = frappe.get_doc("Employee", employee)
 
 	employee_name = emp.employee_name.split(" ")
@@ -276,6 +276,9 @@ def create_user(employee, user = None):
 		last_name = employee_name[1]
 
 	first_name = employee_name[0]
+
+	if email:
+		emp.prefered_email = email
 
 	user = frappe.new_doc("User")
 	user.update({

@@ -4,6 +4,13 @@ An Item is your companys' product or a service. The term Item is applicable to t
 
 ERPNext is optimised for itemised management of your sales and purchase. If you are in services, you can create an Item for each services that your offer. Completing the Item Master is very essential for successful implementation of ERPNext.
 
+<div>
+  <div class='embed-container'>
+    <iframe src='https://www.youtube.com/embed/FcOsV-e8ymE?end=192' frameborder='0' allowfullscreen>
+    </iframe>
+  </div>
+</div>
+
 ## Item Properties
 
   * **Item Name:** Item name is the actual name of your product or service.
@@ -83,15 +90,9 @@ Inspection Criteria: If a Quality Inspection is prepared for this Item, then thi
 
 * **Default Income Account:** Income account selected here will be fetched automatically in sales invoice for this item.
 
-<img class="screenshot" alt="Sales details" src="{{docs_base_url}}/assets/img/stock/item-sales.png)">
-
-<img class="screenshot" alt="Sales details" src="{{docs_base_url}}/assets/img/stock/item-sales.png">
-
 ***Cost Centre:** Cost center selected here will be fetched automatically in sales invoice for this item.
 
 ***Customer Codes:** Track Item Code assigned by the Customers for this Item. This will help you in searching item while creating Sales Order based on the Item Code in the Customer's Purchase Order.
-
-<img class="screenshot" alt="Sales details" src="{{docs_base_url}}/assets/img/stock/item-sales.png)">
 
 ### Manufacturing And Website
 

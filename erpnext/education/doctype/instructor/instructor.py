@@ -18,7 +18,7 @@ class Instructor(Document):
 				self.name = make_autoname(self.naming_series + '.####')
 			elif naming_method == 'Employee Number':
 				if not self.employee:
-					frappe.throw("Please select Employee")
+					frappe.throw(_("Please select Employee"))
 				self.name = self.employee
 			elif naming_method == 'Full Name':
 				self.name = self.instructor_name

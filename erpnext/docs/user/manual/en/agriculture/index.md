@@ -17,6 +17,10 @@ The Agriculture module in ERPNext helps you keep track of your farming operation
 
 <img class="screenshot" alt="Task" src="{{docs_base_url}}/assets/img/agriculture/agri_doctypes.png">
 
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/A14cnWwE0vQ?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>
+
 ### Topics
 
 {index}

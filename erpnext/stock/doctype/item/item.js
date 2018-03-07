@@ -110,7 +110,7 @@ frappe.ui.form.on("Item", {
 		const stock_exists = (frm.doc.__onload
 			&& frm.doc.__onload.stock_exists) ? 1 : 0;
 
-		['has_serial_no', 'has_batch_no'].forEach((fieldname) => {
+		['is_stock_item', 'has_serial_no', 'has_batch_no'].forEach((fieldname) => {
 			frm.set_df_property(fieldname, 'read_only', stock_exists);
 		});
 	},
@@ -427,7 +427,8 @@ $.extend(erpnext.item, {
 							["parent","=", attribute]
 						],
 						fields: ["attribute_value"],
-						limit_page_length: null
+						limit_start: 0,
+						limit_page_length: 500
 					}
 				}).then((r) => {
 					if(r.message) {

@@ -41,6 +41,12 @@ Among other things, ERPNext will help you to:
 
 And a lot lot lot more.
 
+<div>
+  <div class='embed-container'>
+    <iframe src='https://www.youtube.com/embed/vKjHRzMEei0' frameborder='0' allowfullscreen>
+    </iframe>
+  </div>
+</div>
 
 ### Topics
 

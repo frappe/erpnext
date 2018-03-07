@@ -14,12 +14,18 @@ from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.controllers.accounts_controller import AccountsController
 
+from six import string_types
 
 class InvalidPaymentEntry(ValidationError):
 	pass
 
 
 class PaymentEntry(AccountsController):
+	def __init__(self, *args, **kwargs):
+		super(PaymentEntry, self).__init__(*args, **kwargs)
+		if not self.is_new():
+			self.setup_party_account_field()
+
 	def setup_party_account_field(self):
 		self.party_account_field = None
 		self.party_account = None
@@ -58,15 +64,20 @@ class PaymentEntry(AccountsController):
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
 		self.make_gl_entries()
+		self.update_outstanding_amounts()
 		self.update_advance_paid()
 		self.update_expense_claim()
 
 	def on_cancel(self):
 		self.setup_party_account_field()
 		self.make_gl_entries(cancel=1)
+		self.update_outstanding_amounts()
 		self.update_advance_paid()
 		self.update_expense_claim()
 		self.delink_advance_entry_references()
+
+	def update_outstanding_amounts(self):
+		self.set_missing_ref_details(force=True)
 
 	def validate_duplicate_entry(self):
 		reference_names = []
@@ -129,14 +140,14 @@ class PaymentEntry(AccountsController):
 
 		self.set_missing_ref_details()
 
-	def set_missing_ref_details(self):
+	def set_missing_ref_details(self, force=False):
 		for d in self.get("references"):
 			if d.allocated_amount:
 				ref_details = get_reference_details(d.reference_doctype,
 					d.reference_name, self.party_account_currency)
 
 				for field, value in ref_details.items():
-					if not d.get(field):
+					if not d.get(field) or force:
 						d.set(field, value)
 
 	def validate_payment_type(self):
@@ -281,17 +292,31 @@ class PaymentEntry(AccountsController):
 		self.base_total_allocated_amount = abs(base_total_allocated_amount)
 
 	def set_unallocated_amount(self):
-		self.unallocated_amount = 0;
-		if self.party:
-			party_amount = self.paid_amount if self.payment_type=="Receive" else self.received_amount
+		self.unallocated_amount = 0
 
+		if self.party:
 			total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
 
-			if self.total_allocated_amount < party_amount:
-				if self.payment_type == "Receive":
-					self.unallocated_amount = party_amount - (self.total_allocated_amount - total_deductions)
-				else:
-					self.unallocated_amount = party_amount - (self.total_allocated_amount + total_deductions)
+			if self.party_account_currency == self.company_currency:
+				if self.payment_type == "Receive" \
+					and self.total_allocated_amount <= self.paid_amount + total_deductions:
+						self.unallocated_amount = self.paid_amount - \
+							(self.total_allocated_amount - total_deductions)
+				elif self.payment_type == "Pay" \
+					and self.total_allocated_amount <= self.received_amount - total_deductions:
+						self.unallocated_amount = self.received_amount - \
+							(self.total_allocated_amount + total_deductions)
+			else:
+				if self.payment_type == "Receive" \
+					and self.base_total_allocated_amount <= self.base_received_amount + total_deductions \
+					and self.total_allocated_amount < self.paid_amount:
+						self.unallocated_amount = (self.base_received_amount + total_deductions - 
+							self.base_total_allocated_amount) / self.source_exchange_rate
+				elif self.payment_type == "Pay" \
+					and self.base_total_allocated_amount < (self.base_paid_amount - total_deductions) \
+					and self.total_allocated_amount < self.received_amount:
+						self.unallocated_amount = (self.base_paid_amount - (total_deductions + 
+							self.base_total_allocated_amount)) / self.target_exchange_rate
 
 	def set_difference_amount(self):
 		base_unallocated_amount = flt(self.unallocated_amount) * (flt(self.source_exchange_rate)
@@ -500,7 +525,7 @@ class PaymentEntry(AccountsController):
 
 @frappe.whitelist()
 def get_outstanding_reference_documents(args):
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	party_account_currency = get_account_currency(args.get("party_account"))

@@ -141,6 +141,23 @@ def get_mode_of_payment_details(filters):
 			and b.reference_name in ({invoice_list_names})
 			group by a.owner, a.posting_date, mode_of_payment
 			""".format(invoice_list_names=invoice_list_names), as_dict=1)
+
+		inv_change_amount = frappe.db.sql("""select a.owner, a.posting_date,
+			ifnull(b.mode_of_payment, '') as mode_of_payment, sum(a.base_change_amount) as change_amount
+			from `tabSales Invoice` a, `tabSales Invoice Payment` b
+			where a.name = b.parent
+			and a.name in ({invoice_list_names})
+			and b.mode_of_payment = 'Cash'
+			and a.base_change_amount > 0
+			group by a.owner, a.posting_date, mode_of_payment""".format(invoice_list_names=invoice_list_names), as_dict=1)
+
+		for d in inv_change_amount:
+			for det in inv_mop_detail:
+				if det["owner"] == d["owner"] and det["posting_date"] == d["posting_date"] and det["mode_of_payment"] == d["mode_of_payment"]:
+					paid_amount = det["paid_amount"] - d["change_amount"]
+					det["paid_amount"] = paid_amount
+
 		for d in inv_mop_detail:
 			mode_of_payment_details.setdefault(d["owner"]+cstr(d["posting_date"]), []).append((d.mode_of_payment,d.paid_amount))
+
 	return mode_of_payment_details

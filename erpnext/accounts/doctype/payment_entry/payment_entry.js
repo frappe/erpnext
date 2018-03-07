@@ -96,7 +96,7 @@ frappe.ui.form.on('Payment Entry', {
 			}
 
 			if(child.reference_doctype == "Expense Claim") {
-				filters["status"] = "Approved";
+				filters["docstatus"] = 1;
 				filters["is_paid"] = 0;
 			}
 
@@ -145,13 +145,13 @@ frappe.ui.form.on('Payment Entry', {
 			frm.doc.paid_amount : frm.doc.received_amount;
 
 		frm.toggle_display("write_off_difference_amount", (frm.doc.difference_amount && frm.doc.party &&
-			(frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency) &&
 			(frm.doc.total_allocated_amount > party_amount)));
 
 		frm.toggle_display("set_exchange_gain_loss",
 			(frm.doc.paid_amount && frm.doc.received_amount && frm.doc.difference_amount &&
-				(frm.doc.paid_from_account_currency != company_currency ||
-					frm.doc.paid_to_account_currency != company_currency)));
+				((frm.doc.paid_from_account_currency != company_currency ||
+					frm.doc.paid_to_account_currency != company_currency) && 
+					frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency)));
 
 		frm.refresh_fields();
 	},
@@ -300,7 +300,15 @@ frappe.ui.form.on('Payment Entry', {
 				if(frm.doc.payment_type == "Pay") {
 					frm.events.get_outstanding_documents(frm);
 				} else if (frm.doc.payment_type == "Receive") {
-					frm.events.received_amount(frm);
+					if(frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency) {
+						if(frm.doc.source_exchange_rate) {
+							frm.set_value("target_exchange_rate", frm.doc.source_exchange_rate);
+						}
+						frm.set_value("received_amount", frm.doc.paid_amount);
+						
+					} else {
+						frm.events.received_amount(frm);
+					}
 				}
 			}
 		);
@@ -317,26 +325,31 @@ frappe.ui.form.on('Payment Entry', {
 				},
 				callback: function(r, rt) {
 					if(r.message) {
-						frm.set_value(currency_field, r.message['account_currency']);
-						frm.set_value(balance_field, r.message['account_balance']);
+						frappe.run_serially([
+							() => frm.set_value(currency_field, r.message['account_currency']),
+							() => {
+								frm.set_value(balance_field, r.message['account_balance']);
 
-						if(frm.doc.payment_type=="Receive" && currency_field=="paid_to_account_currency") {
-							frm.toggle_reqd(["reference_no", "reference_date"],
-								(r.message['account_type'] == "Bank" ? 1 : 0));
-							if(!frm.doc.received_amount && frm.doc.paid_amount)
-								frm.events.paid_amount(frm);
-						} else if(frm.doc.payment_type=="Pay" && currency_field=="paid_from_account_currency") {
-							frm.toggle_reqd(["reference_no", "reference_date"],
-								(r.message['account_type'] == "Bank" ? 1 : 0));
+								if(frm.doc.payment_type=="Receive" && currency_field=="paid_to_account_currency") {
+									frm.toggle_reqd(["reference_no", "reference_date"],
+										(r.message['account_type'] == "Bank" ? 1 : 0));
+									if(!frm.doc.received_amount && frm.doc.paid_amount)
+										frm.events.paid_amount(frm);
+								} else if(frm.doc.payment_type=="Pay" && currency_field=="paid_from_account_currency") {
+									frm.toggle_reqd(["reference_no", "reference_date"],
+										(r.message['account_type'] == "Bank" ? 1 : 0));
 
-							if(!frm.doc.paid_amount && frm.doc.received_amount)
-								frm.events.received_amount(frm);
-						}
+									if(!frm.doc.paid_amount && frm.doc.received_amount)
+										frm.events.received_amount(frm);
+								}
+							},
+							() => {
+								if(callback_function) callback_function(frm);
 
-						if(callback_function) callback_function(frm);
-
-						frm.events.hide_unhide_fields(frm);
-						frm.events.set_dynamic_labels(frm);
+								frm.events.hide_unhide_fields(frm);
+								frm.events.set_dynamic_labels(frm);
+							}
+						]);
 					}
 				}
 			});			
@@ -405,7 +418,7 @@ frappe.ui.form.on('Payment Entry', {
 				frm.set_value("base_received_amount", frm.doc.base_paid_amount);
 			}
 			
-			frm.events.set_difference_amount(frm);
+			frm.events.set_unallocated_amount(frm);
 		}
 
 		// Make read only if Accounts Settings doesn't allow stale rates
@@ -425,7 +438,7 @@ frappe.ui.form.on('Payment Entry', {
 				frm.set_value("base_paid_amount", frm.doc.base_received_amount);
 			}
 			
-			frm.events.set_difference_amount(frm);
+			frm.events.set_unallocated_amount(frm);
 		}
 		frm.set_paid_amount_based_on_received_amount = false;
 
@@ -456,7 +469,7 @@ frappe.ui.form.on('Payment Entry', {
 		if(frm.doc.payment_type == "Pay")
 			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.received_amount);
 		else
-			frm.events.set_difference_amount(frm);
+			frm.events.set_unallocated_amount(frm);
 		
 		frm.set_paid_amount_based_on_received_amount = false;
 	},
@@ -476,7 +489,7 @@ frappe.ui.form.on('Payment Entry', {
 		if(frm.doc.payment_type == "Receive")
 			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.paid_amount);
 		else
-			frm.events.set_difference_amount(frm);
+			frm.events.set_unallocated_amount(frm);
 	},
 
 	get_outstanding_documents: function(frm) {
@@ -565,8 +578,11 @@ frappe.ui.form.on('Payment Entry', {
 		if(frm.doc.references.length == 0){
 			frm.events.get_outstanding_documents(frm);
 		}
-
-		frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.received_amount);
+		if(frm.doc.payment_type == 'Internal Transfer') {
+			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.paid_amount);
+		} else {
+			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.received_amount);
+		}
 	},
 
 	allocate_party_amount_against_ref_docs: function(frm, paid_amount) {
@@ -651,10 +667,10 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_value("total_allocated_amount", Math.abs(total_allocated_amount));
 		frm.set_value("base_total_allocated_amount", Math.abs(base_total_allocated_amount));
 
-		frm.events.set_difference_amount(frm);
+		frm.events.set_unallocated_amount(frm);
 	},
 
-	set_difference_amount: function(frm) {
+	set_unallocated_amount: function(frm) {
 		var unallocated_amount = 0;
 		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
 			function(d) { return flt(d.amount) }));
@@ -662,17 +678,34 @@ frappe.ui.form.on('Payment Entry', {
 		if(frm.doc.party) {
 			var party_amount = frm.doc.payment_type=="Receive" ?
 				frm.doc.paid_amount : frm.doc.received_amount;
+			var company_currency = frm.doc.company? frappe.get_doc(":Company", frm.doc.company).default_currency: "";
 
-			if(frm.doc.total_allocated_amount < party_amount) {
-				if(frm.doc.payment_type == "Receive") {
+			if (frm.doc.party_account_currency == company_currency) {
+				if(frm.doc.payment_type == "Receive" && frm.doc.total_allocated_amount <= party_amount + total_deductions) {
 					unallocated_amount = party_amount - (frm.doc.total_allocated_amount - total_deductions);
-				} else {
+				} else if (frm.doc.payment_type == "Pay" && frm.doc.total_allocated_amount <= party_amount - total_deductions) {
 					unallocated_amount = party_amount - (frm.doc.total_allocated_amount + total_deductions);
 				}
+			} else {
+				if(frm.doc.payment_type == "Receive"
+					&& frm.doc.base_total_allocated_amount <= frm.doc.base_received_amount + total_deductions
+					&& frm.doc.total_allocated_amount < frm.doc.paid_amount) {
+						unallocated_amount = (frm.doc.base_received_amount + total_deductions
+							- frm.doc.base_total_allocated_amount) / frm.doc.source_exchange_rate;
+				} else if (frm.doc.payment_type == "Pay"
+					&& frm.doc.base_total_allocated_amount < frm.doc.base_paid_amount - total_deductions
+					&& frm.doc.total_allocated_amount < frm.doc.received_amount) {
+						unallocated_amount = (frm.doc.base_paid_amount - (total_deductions
+							+ frm.doc.base_total_allocated_amount)) / frm.doc.target_exchange_rate;
+				}
 			}
+			
 		}
 		frm.set_value("unallocated_amount", unallocated_amount);
-
+		frm.trigger("set_difference_amount");
+	},
+	
+	set_difference_amount: function(frm) {
 		var difference_amount = 0;
 		var base_unallocated_amount = flt(frm.doc.unallocated_amount) *
 			(frm.doc.payment_type=="Receive" ? frm.doc.source_exchange_rate : frm.doc.target_exchange_rate);
@@ -687,9 +720,16 @@ frappe.ui.form.on('Payment Entry', {
 			difference_amount = flt(frm.doc.base_paid_amount) - flt(frm.doc.base_received_amount);
 		}
 
+		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
+			function(d) { return flt(d.amount) }));
+
 		frm.set_value("difference_amount", difference_amount - total_deductions);
 
 		frm.events.hide_unhide_fields(frm);
+	},
+
+	unallocated_amount: function(frm) {
+		frm.trigger("set_difference_amount");
 	},
 
 	check_mandatory_to_fetch: function(frm) {
@@ -771,7 +811,7 @@ frappe.ui.form.on('Payment Entry', {
 						row.amount = flt(row.amount) + flt(frm.doc.difference_amount);
 						refresh_field("deductions");
 
-						frm.events.set_difference_amount(frm);
+						frm.events.set_unallocated_amount(frm);
 					}
 				}
 			})
@@ -818,10 +858,10 @@ frappe.ui.form.on('Payment Entry Reference', {
 
 frappe.ui.form.on('Payment Entry Deduction', {
 	amount: function(frm) {
-		frm.events.set_difference_amount(frm);
+		frm.events.set_unallocated_amount(frm);
 	},
 
 	deductions_remove: function(frm) {
-		frm.events.set_difference_amount(frm);
+		frm.events.set_unallocated_amount(frm);
 	}
 })

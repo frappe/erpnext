@@ -104,8 +104,8 @@ class SalesOrder(SellingController):
 	def validate_delivery_date(self):
 		if self.order_type == 'Sales':
 			if not self.delivery_date:
-				self.delivery_date = max([d.delivery_date for d in self.get("items") if d.delivery_date])
-
+				delivery_date_list = [d.delivery_date for d in self.get("items") if d.delivery_date]
+				self.delivery_date = max(delivery_date_list) if delivery_date_list else None
 			if self.delivery_date:
 				for d in self.get("items"):
 					if not d.delivery_date:
@@ -435,6 +435,7 @@ def make_material_request(source_name, target_doc=None):
 		"Sales Order Item": {
 			"doctype": "Material Request Item",
 			"field_map": {
+				"name": "sales_order_item",
 				"parent": "sales_order",
 				"stock_uom": "uom",
 				"stock_qty": "qty"

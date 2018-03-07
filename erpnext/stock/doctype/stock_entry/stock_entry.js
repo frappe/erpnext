@@ -57,7 +57,42 @@ frappe.ui.form.on('Stock Entry', {
 				}
 			}
 		});
+
+		frm.add_fetch("bom_no", "inspection_required", "inspection_required");
+		frm.trigger("setup_quality_inspection");
 	},
+
+	setup_quality_inspection: function(frm) {
+		if (!frm.doc.inspection_required) {
+			return;
+		}
+
+		let quality_inspection_field = frm.get_docfield("items", "quality_inspection");
+		quality_inspection_field.get_route_options_for_new_doc = function(row) {
+			if (frm.is_new()) return;
+			return {
+				"inspection_type": "Incoming",
+				"reference_type": frm.doc.doctype,
+				"reference_name": frm.doc.name,
+				"item_code": row.doc.item_code,
+				"description": row.doc.description,
+				"item_serial_no": row.doc.serial_no ? row.doc.serial_no.split("\n")[0] : null,
+				"batch_no": row.doc.batch_no
+			}
+		}
+
+		frm.set_query("quality_inspection", "items", function(doc, cdt, cdn) {
+			var d = locals[cdt][cdn];
+			return {
+				filters: {
+					docstatus: 1,
+					item_code: d.item_code,
+					reference_name: doc.name
+				}
+			}
+		});
+	},
+
 	refresh: function(frm) {
 		if(!frm.doc.docstatus) {
 			frm.add_custom_button(__('Make Material Request'), function() {
@@ -102,11 +137,11 @@ frappe.ui.form.on('Stock Entry', {
 			}, __("Get items from"));
 		}
 
-		if(frm.doc.company) {
+		if (frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
 		}
 
-		if(frm.doc.docstatus==1 && frm.doc.purpose == "Material Receipt") {
+		if (frm.doc.docstatus==1 && frm.doc.purpose == "Material Receipt") {
 			frm.add_custom_button(__('Make Retention Stock Entry'), function () {
 				frm.trigger("make_retention_stock_entry");
 			});
@@ -277,6 +312,14 @@ frappe.ui.form.on('Stock Entry', {
 
 		frm.set_value("total_additional_costs",
 			flt(total_additional_costs, precision("total_additional_costs")));
+	},
+
+	source_warehouse_address: function(frm) {
+		erpnext.utils.get_address_display(frm, 'source_warehouse_address', 'source_address_display', false);
+	},
+
+	target_warehouse_address: function(frm) {
+		erpnext.utils.get_address_display(frm, 'target_warehouse_address', 'target_address_display', false);
 	},
 })
 

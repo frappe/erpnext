@@ -11,7 +11,6 @@ def get_notification_config():
 			"Warranty Claim": {"status": "Open"},
 			"Task": {"status": ("in", ("Open", "Overdue"))},
 			"Project": {"status": "Open"},
-			"Item": {"total_projected_qty": ("<", 0)},
 			"Lead": {"status": "Open"},
 			"Contact": {"status": "Open"},
 			"Opportunity": {"status": "Open"},
@@ -31,7 +30,7 @@ def get_notification_config():
 			},
 			"Payment Entry": {"docstatus": 0},
 			"Leave Application": {"docstatus": 0},
-			"Expense Claim": {"approval_status": "Draft"},
+			"Expense Claim": {"docstatus": 0},
 			"Job Applicant": {"status": "Open"},
 			"Delivery Note": {
 				"status": ("not in", ("Completed", "Closed")),

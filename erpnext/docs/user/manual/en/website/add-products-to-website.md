@@ -5,6 +5,11 @@
 ERPNext will populate your website with products out of your Item Master. The html code will be
 generated automatically.
 
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/W31LBBNzbgc?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+    </iframe>
+</div>
+
 #### Step 1: Edit Item
 
 For this example we will add a rocking chair to our catalog to sell on our website.

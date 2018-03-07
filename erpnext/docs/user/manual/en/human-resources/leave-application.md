@@ -23,4 +23,10 @@ settings. See the earlier discussion on [Setting Up Permissions](/docs/user/manu
 for more info.
 
 You assign Leaves aginast an Employee check [Leave Allocation](/docs/user/manual/en/human-resources/leave.html)
+
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/fc0p_AXebc8?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+    </iframe>
+</div>
+
 {next}

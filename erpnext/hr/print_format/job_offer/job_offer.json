@@ -1,0 +1,21 @@
+{
+ "align_labels_right": 0, 
+ "creation": "2015-03-05 14:34:26.751210", 
+ "custom_format": 1, 
+ "disabled": 0, 
+ "doc_type": "Job Offer", 
+ "docstatus": 0, 
+ "doctype": "Print Format", 
+ "html": "{% set terms_exist = doc.terms and (doc.terms|striptags).strip() or \"\" %}\n\n{% if letter_head and not no_letterhead -%}\n    <div class=\"letter-head\">{{ letter_head }}</div>\n    <hr>\n{%- endif %}\n\n<div {% if terms_exist -%} class=\"page-break\" {%- endif %}>\n<p>\n\n<!-- job offer content starts here, <br> is used to create new lines -->\nDate: {{ doc.offer_date }}\n<br><br>\n\nDear {{ doc.applicant_name }}, \n\n<br><br>\n\nWe are pleased to appoint you in the services of {{ doc.company }} on the terms and conditions detailed in this letter.\n\n<br><br>\n\nYour designation shall be <b>{{ doc.designation }}</b>.\n\n<br><br>\n\n<!-- job offer terms and description from the table -->\n\n{%- if doc.offer_terms -%}\n    {%- for row in doc.offer_terms -%}\n        <b>{{ row.offer_term }}:</b> {{ row.value }}\n\n        <br>\n    {%- endfor -%}\n{%- endif -%}\n\n<br>\n\n<!-- job offer content continues -->\n\n\nPlease read the detailed terms as below. If you have any queries, feel free to get in touch with us.\nWe look forward to your long and fruitful career association with our organisation.\nIf you decide to join us, 'Welcome to {{ doc.company }} !'\n\n<br><br>\n\n<p class=\"strong\">\n\nYours truly,\n\n<br><br><br><br>\n\nAuthorized Signatory\n\n<br>\n\n{{ doc.company }}\n\n<!-- job offer content ends here -->\n\n</p>\n</div>\n\n<!-- job offer terms and conditions -->\n{% if terms_exist %}\n<div> {{ doc.terms }} </div>\n{% endif %}", 
+ "idx": 0, 
+ "line_breaks": 0, 
+ "modified": "2018-02-15 03:03:55.844085", 
+ "modified_by": "Administrator", 
+ "module": "HR", 
+ "name": "Job Offer", 
+ "owner": "Administrator", 
+ "print_format_builder": 0, 
+ "print_format_type": "Server", 
+ "show_section_headings": 0, 
+ "standard": "Yes"
+}

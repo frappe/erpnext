@@ -65,7 +65,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -151,7 +150,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -237,7 +235,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -323,7 +320,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -409,7 +405,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -495,7 +490,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -581,7 +575,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -667,7 +660,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -753,7 +745,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -839,7 +830,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -925,7 +915,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -1011,7 +1000,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -1097,7 +1085,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -1183,7 +1170,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -1269,7 +1255,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -1355,7 +1340,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -1441,7 +1425,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -1527,7 +1510,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -1613,7 +1595,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -1699,7 +1680,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -1785,7 +1765,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -1871,7 +1850,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -1957,7 +1935,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -2043,7 +2020,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -2129,7 +2105,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -2215,7 +2190,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -2301,7 +2275,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -2387,7 +2360,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -2473,7 +2445,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -2559,7 +2530,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -2645,7 +2615,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -2731,7 +2700,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -2817,7 +2785,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -2903,7 +2870,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -2989,7 +2955,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -3075,7 +3040,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -3161,7 +3125,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -3247,7 +3210,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -3333,7 +3295,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -3419,7 +3380,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -3505,7 +3465,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -3591,7 +3550,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -3677,7 +3635,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -3763,7 +3720,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -3849,7 +3805,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -3935,7 +3890,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -4021,7 +3975,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -4107,7 +4060,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -4193,7 +4145,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -4279,7 +4230,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -4365,7 +4315,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -4451,7 +4400,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -4537,7 +4485,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -4623,7 +4570,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -4709,7 +4655,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -4795,7 +4740,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -4881,7 +4825,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -4967,7 +4910,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -5053,7 +4995,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -5139,7 +5080,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -5225,7 +5165,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -5311,7 +5250,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,
@@ -5397,7 +5335,6 @@
   "taxes": [],
   "thumbnail": null,
   "tolerance": 0.0,
-  "total_projected_qty": 0.0,
   "uoms": [
    {
     "conversion_factor": 1.0,

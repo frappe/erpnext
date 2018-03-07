@@ -1,10 +1,15 @@
-<style>
-@media screen {
-  .print-format {
-    padding: 8mm;
-  }
-}
-</style>
+{% if(filters.show_pdc_in_print) { %}
+	<style>
+	@media screen {
+	  .print-format {
+	    padding: 8mm;
+		margin:4mm;
+		font-size:10px;
+		font-family: Tahoma, sans-serif;
+	  }
+	}
+	</style>
+{% } %}
 
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
 <h4 class="text-center">{%= filters.customer || filters.supplier %} </h4>
@@ -82,21 +87,24 @@
 		<tr>
 			{% if(report.report_name === "Accounts Receivable" || report.report_name === "Accounts Payable") { %}
 				<th style="width: 10%">{%= __("Date") %}</th>
-				<th style="width: 10%">{%= __("Ref") %}</th>
+				<th style="width: 15%">{%= __("Ref") %}</th>
+				{% if(!filters.show_pdc_in_print) { %}
 				<th style="width: 20%">{%= (filters.customer || filters.supplier) ? __("Remarks"): __("Party") %}</th>
+				{% } %}
 				<th style="width: 10%">{%= __("Invoiced Amount") %}</th>
 				{% if(!filters.show_pdc_in_print) { %}
 					<th style="width: 10%">{%= __("Paid Amount") %}</th>
 					<th style="width: 10%">{%= report.report_name === "Accounts Receivable" ? __('Credit Note') : __('Debit Note') %}</th>
 				{% } %}
-				<th style="width: 6%">{%= __("Outstanding Amount") %}</th>
+				<th style="width: 15%">{%= __("Outstanding Amount") %}</th>
 				{% if(filters.show_pdc_in_print) { %}
 					{% if(report.report_name === "Accounts Receivable") { %}
-						<th style="width: 6%">{%= __("Customer LPO No.") %}</th>
+						<th style="width: 10%">{%= __("Customer LPO No.") %}</th>
 					{% } %}
-					<th style="width: 6%">{%= __("PDC/LC Date") %}</th>
-					<th style="width: 6%">{%= __("PDC/LC Ref") %}</th>
-					<th style="width: 6%">{%= __("PDC/LC Amount") %}</th>
+					<th style="width: 10%">{%= __("PDC/LC Date") %}</th>
+					<th style="width: 10%">{%= __("PDC/LC Ref") %}</th>
+					<th style="width: 10%">{%= __("PDC/LC Amount") %}</th>
+					<th style="width: 10%">{%= __("Remaining Balance") %}</th>
 				{% } %}
 			{% } else { %}
 				<th style="width: 40%">{%= (filters.customer || filters.supplier) ? __("Remarks"): __("Party") %}</th>
@@ -115,6 +123,7 @@
 					<td>{%= dateutil.str_to_user(data[i][__("Posting Date")]) %}</td>
 					<td>{%= data[i][__("Voucher Type")] %}
 						<br>{%= data[i][__("Voucher No")] %}</td>
+					{% if(!filters.show_pdc_in_print) { %}	
 					<td>
 						{% if(!(filters.customer || filters.supplier)) { %}
 							{%= data[i][__("Customer")] || data[i][__("Supplier")] %}
@@ -127,6 +136,7 @@
 						<br>{%= __("Remarks") %}:
 						{%= data[i][__("Remarks")] %}
 					</td>
+					{% } %}
 					<td style="text-align: right">
 						{%= format_currency(data[i]["Invoiced Amount"], data[i]["currency"]) %}</td>
 
@@ -147,10 +157,13 @@
 						<td style="text-align: right">{%= frappe.datetime.str_to_user(data[i][__("PDC/LC Date")]) %}</td>
 						<td style="text-align: right">{%= data[i][__("PDC/LC Ref")] %}</td>
 						<td style="text-align: right">{%= format_currency(data[i][__("PDC/LC Amount")], data[i]["currency"]) %}</td>
+						<td style="text-align: right">{%= format_currency(data[i][__("Remaining Balance")], data[i]["currency"]) %}</td>
 					{% } %}
 				{% } else { %}
 					<td></td>
+					{% if(!filters.show_pdc_in_print) { %}
 					<td></td>
+					{% } %}
 					<td><b>{%= __("Total") %}</b></td>
 					<td style="text-align: right">
 						{%= format_currency(data[i]["Invoiced Amount"], data[i]["currency"] ) %}</td>
@@ -171,6 +184,7 @@
 						<td style="text-align: right">{%= frappe.datetime.str_to_user(data[i][__("PDC/LC Date")]) %}</td>
 						<td style="text-align: right">{%= data[i][__("PDC/LC Ref")] %}</td>
 						<td style="text-align: right">{%= format_currency(data[i][__("PDC/LC Amount")], data[i]["currency"]) %}</td>
+						<td style="text-align: right">{%= format_currency(data[i][__("Remaining Balance")], data[i]["currency"]) %}</td>
 					{% } %}
 				{% } %}
 			{% } else { %}

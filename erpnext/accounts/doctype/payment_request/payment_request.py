@@ -34,7 +34,7 @@ class PaymentRequest(Document):
 			frappe.throw(_("Transaction currency must be same as Payment Gateway currency"))
 
 	def on_submit(self):
-		send_mail = True
+		send_mail = self.payment_gateway_validation()
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 
 		if (hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") == "Shopping Cart") \
@@ -57,6 +57,16 @@ class PaymentRequest(Document):
 			si = make_sales_invoice(self.reference_name, ignore_permissions=True)
 			si = si.insert(ignore_permissions=True)
 			si.submit()
+
+	def payment_gateway_validation(self):
+		try:
+			controller = get_payment_gateway_controller(self.payment_gateway)
+			if hasattr(controller, 'on_payment_request_submission'):
+				return controller.on_payment_request_submission(self)
+			else:
+				return True
+		except Exception:
+			return False
 
 	def set_payment_request_url(self):
 		if self.payment_account:
