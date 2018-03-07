@@ -20,6 +20,8 @@ frappe.ui.form.on("Hub Settings", {
 			console.log('token', frappe.urllib.get_arg("access_token"));
 
 			get_user_details(frm, token, email);
+			let row = frappe.model.add_child(frm.doc, "Hub Users", "users");
+			row.user = frappe.session.user;
 		}
 
 		if(!frm.doc.country) {
@@ -27,6 +29,9 @@ frappe.ui.form.on("Hub Settings", {
 		}
 		if(!frm.doc.company) {
 			frm.set_value("company", frappe.defaults.get_default("Company"));
+		}
+		if(!frm.doc.user) {
+			frm.set_value("user", frappe.session.user);
 		}
 	},
 	onload_post_render: function(frm) {

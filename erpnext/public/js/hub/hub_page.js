@@ -59,6 +59,7 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 	}
 
 	freeze(toggle) {
+		if(!this.$freeze) return;
 		this.$freeze.toggle(toggle);
 		if (this.$freeze.find('.image-view-container').length) return;
 
@@ -145,6 +146,8 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 	}
 
 	get_filters_for_args() {
+		// console.log();
+		if(!this.filter_area) return;
 		let filters = {};
 		this.filter_area.get().forEach(f => {
 			let field = f[1] !== 'name' ? f[1] : 'item_name';
