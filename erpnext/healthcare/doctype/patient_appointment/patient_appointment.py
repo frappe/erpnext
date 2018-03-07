@@ -115,7 +115,6 @@ def get_availability_data(date, physician):
 				frappe.throw(_("Dr {0} on Leave on {1}").format(physician, date))
 
 	# get physicians schedule
-	physician_obj = frappe.get_doc("Physician", physician)
 	if physician_obj.physician_schedules:
 		for schedule in physician_obj.physician_schedules:
 			if schedule.schedule:
@@ -130,34 +129,42 @@ def get_availability_data(date, physician):
 						available_slots.append(t)
 
 				if available_slots:
+					appointments = []
 				 	if schedule.service_unit:
 						slot_name  = schedule.schedule+" - "+schedule.service_unit
+						allow_overlap = frappe.get_value('Patient Service Unit', schedule.service_unit, 'overlap_appointments')
+						if allow_overlap:
+							# fetch all appointments to physician by service unit
+							appointments = frappe.get_all(
+								"Patient Appointment",
+								filters={"physician": physician, "service_unit": schedule.service_unit, "appointment_date": date, "status": ["not in",["Cancelled"]]},
+								fields=["name", "appointment_time", "duration", "status"])
+						else:
+							# fetch all appointments to service unit
+							appointments = frappe.get_all(
+								"Patient Appointment",
+								filters={"service_unit": schedule.service_unit, "appointment_date": date, "status": ["not in",["Cancelled"]]},
+								fields=["name", "appointment_time", "duration", "status"])
 					else:
 						slot_name = schedule.schedule
-				 	slot_details.append({"slot_name":slot_name, "service_unit":schedule.service_unit, "avil_slot":available_slots})
+						# fetch all appointments to physician without service unit
+						appointments = frappe.get_all(
+							"Patient Appointment",
+							filters={"physician": physician, "service_unit": '', "appointment_date": date, "status": ["not in",["Cancelled"]]},
+							fields=["name", "appointment_time", "duration", "status"])
+
+					slot_details.append({"slot_name":slot_name, "service_unit":schedule.service_unit,
+						"avail_slot":available_slots, 'appointments': appointments})
 
 	else:
 		frappe.throw(_("Dr {0} does not have a Physician Schedule. Add it in Physician master".format(physician)))
 
-	# if physician not available return
 	if not available_slots and not slot_details:
 		# TODO: return available slots in nearby dates
 		frappe.throw(_("Physician not available on {0}").format(weekday))
 
-	# if physician on leave return
-
-	# if holiday return
-	# if is_holiday(weekday):
-
-	# get appointments on that day for physician
-	appointments = frappe.get_all(
-		"Patient Appointment",
-		filters={"physician": physician, "appointment_date": date},
-		fields=["name", "appointment_time", "status", "service_unit"])
-
 	return {
-		"slot_details": slot_details,
-		"appointments": appointments
+		"slot_details": slot_details
 	}
 
 

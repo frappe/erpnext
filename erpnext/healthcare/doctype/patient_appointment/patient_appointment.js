@@ -97,7 +97,6 @@ frappe.ui.form.on('Patient Appointment', {
 				date: appointment_date
 			},
 			callback: (r) => {
-				// console.log(r);
 				var data = r.message;
 				if(data.slot_details.length > 0){
 					show_availability(data);
@@ -122,19 +121,15 @@ frappe.ui.form.on('Patient Appointment', {
 				primary_action_label: __("Book"),
 				primary_action: function() {
 					// book slot
-					frm.set_value('appointment_time', selected_slot);
-					if(service_unit != 'null'){
-						frm.set_value('service_unit', service_unit);
-					}
-					frm.set_value('duration', duration);
+					var btn_selected = $wrapper.find('button.btn-selected-slot')
+					frm.set_value('appointment_time', btn_selected.attr('data-name'));
+					frm.set_value('service_unit', btn_selected.attr('data-service-unit') || '');
+					frm.set_value('duration', btn_selected.attr('data-duration'));
 					d.hide();
 					frm.save();
 				}
 			});
 			var $wrapper = d.fields_dict.available_slots.$wrapper;
-			var selected_slot = null;
-			var service_unit = null;
-			var duration = null;
 
 			// disable dialog action initially
 			d.get_primary_btn().attr('disabled', true);
@@ -143,13 +138,36 @@ frappe.ui.form.on('Patient Appointment', {
 			var slot_html = ""
 			$.each(slot_details, function(i, slot_detail){
 				slot_html = slot_html + `<label>${slot_detail['slot_name']}</label>`
-				slot_html = slot_html + `<br/>` + slot_detail['avil_slot'].map(slot => {
+				slot_html = slot_html + `<br/>` + slot_detail['avail_slot'].map(slot => {
+					let disabled = '';
+					let start_str = slot.from_time;
+					let start_time = moment(slot.from_time, 'HH:mm:ss');
+					let to_time = moment(slot.to_time, 'HH:mm:ss');
+					let interval = (to_time - start_time)/60000 | 0;
+					// iterate in all booked appointments, update the start time and duration
+					slot_detail['appointments'].forEach(function(booked) {
+						let booked_moment = moment(booked.appointment_time, 'HH:mm:ss');
+						if(booked_moment.isSame(start_time) || booked_moment.isBetween(start_time, to_time)){
+							if(booked.duration == 0){
+								disabled = 'disabled="disabled"';
+								return false;
+							}
+							start_time = booked_moment
+							let end_time = booked_moment.add(booked.duration, 'minutes');
+							if(end_time.isSameOrAfter(to_time)){
+								disabled = 'disabled="disabled"';
+								return false;
+							}else{
+								start_str = end_time.format('HH:mm:ss');
+							}
+						}
+					});
 					return `<button class="btn btn-default"
-						data-name=${slot.from_time}
-						data-to-time=${slot.to_time}
-						data-serviceunit="${slot_detail['service_unit']}"
-						style="margin: 0 10px 10px 0; width: 72px">
-						${slot.from_time.substring(0, slot.from_time.length - 3)}
+						data-name=${start_str}
+						data-duration=${interval}
+						data-service-unit="${slot_detail['service_unit'] || ''}"
+						style="margin: 0 10px 10px 0; width: 72px;" ${disabled}>
+						${start_str.substring(0, start_str.length - 3)}
 					</button>`;
 				}).join("");
 				slot_html = slot_html + `<br/>`
@@ -160,23 +178,13 @@ frappe.ui.form.on('Patient Appointment', {
 				.addClass('text-center')
 				.html(slot_html);
 
-			// disable buttons for which appointments are booked
-			data.appointments.map(slot => {
-				if(slot.status == "Scheduled" || slot.status == "Open" || slot.status == "Closed"){
-					$wrapper
-						.find(`button[data-name="${slot.appointment_time}"][data-serviceunit="${slot.service_unit}"]`)
-						.attr('disabled', true);
-				}
-			});
-
 			// blue button when clicked
 			$wrapper.on('click', 'button', function() {
 				var $btn = $(this);
 				$wrapper.find('button').removeClass('btn-primary');
+				$wrapper.find('button').removeClass('btn-selected-slot');
 				$btn.addClass('btn-primary');
-				selected_slot = $btn.attr('data-name');
-				service_unit = $btn.attr('data-serviceunit')
-				duration = (moment($btn.attr('data-to-time'), "HH:mm:ss")._d - moment($btn.attr('data-name'), "HH:mm:ss")._d)/60000;
+				$btn.addClass('btn-selected-slot')
 				// enable dialog action
 				d.get_primary_btn().attr('disabled', null);
 			});
