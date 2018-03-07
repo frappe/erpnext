@@ -127,6 +127,7 @@ frappe.ui.form.on('Patient Appointment', {
 					frm.set_value('duration', btn_selected.attr('data-duration'));
 					d.hide();
 					frm.save();
+					frm.enable_save();
 				}
 			});
 			var $wrapper = d.fields_dict.available_slots.$wrapper;
