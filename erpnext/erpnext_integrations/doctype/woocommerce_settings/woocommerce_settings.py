@@ -70,7 +70,6 @@ class WoocommerceSettings(Document):
 			email_names = ["Customer-woocommerce_email","Address-woocommerce_email"]
 			for name in names:
 				delete = frappe.delete_doc("Custom Field",name)
-				# delete.save()
 
 			for name in names_check_box:
 				delete = frappe.delete_doc("Custom Field",name)
@@ -96,7 +95,7 @@ class WoocommerceSettings(Document):
 				frappe.throw(_("Please enter API Consumer Secret"))
 
 	def create_webhook_url(self):
-		# self.create_order_webhooks_url()
+	
 		endpoint = "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.order"
 
 		server_url = '{uri.scheme}://{uri.netloc}'.format(
@@ -106,9 +105,6 @@ class WoocommerceSettings(Document):
 		delivery_url = server_url + endpoint
 		self.endpoint = delivery_url
 	
-	# def create_order_webhooks_url(self):
-
-
 	
 @frappe.whitelist()
 def generate_secret():
@@ -119,5 +115,3 @@ def generate_secret():
 @frappe.whitelist()
 def force_delete():
 	pass
-
-
