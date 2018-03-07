@@ -112,7 +112,7 @@ frappe.ui.form.on('Patient Appointment', {
 				message: __("Physician {0} not available on {1}", [physician.bold(), appointment_date.bold()]),
 				indicator: 'red'
 			});
-		};
+		}
 
 		function show_availability(data) {
 			var d = new frappe.ui.Dialog({
@@ -121,7 +121,7 @@ frappe.ui.form.on('Patient Appointment', {
 				primary_action_label: __("Book"),
 				primary_action: function() {
 					// book slot
-					var btn_selected = $wrapper.find('button.btn-selected-slot')
+					var btn_selected = $wrapper.find('button.btn-selected-slot');
 					frm.set_value('appointment_time', btn_selected.attr('data-name'));
 					frm.set_value('service_unit', btn_selected.attr('data-service-unit') || '');
 					frm.set_value('duration', btn_selected.attr('data-duration'));
@@ -135,10 +135,10 @@ frappe.ui.form.on('Patient Appointment', {
 			// disable dialog action initially
 			d.get_primary_btn().attr('disabled', true);
 
-			var slot_details = data.slot_details
-			var slot_html = ""
+			var slot_details = data.slot_details;
+			var slot_html = "";
 			$.each(slot_details, function(i, slot_detail){
-				slot_html = slot_html + `<label>${slot_detail['slot_name']}</label>`
+				slot_html = slot_html + `<label>${slot_detail['slot_name']}</label>`;
 				slot_html = slot_html + `<br/>` + slot_detail['avail_slot'].map(slot => {
 					let disabled = '';
 					let start_str = slot.from_time;
@@ -153,7 +153,7 @@ frappe.ui.form.on('Patient Appointment', {
 								disabled = 'disabled="disabled"';
 								return false;
 							}
-							start_time = booked_moment
+							start_time = booked_moment;
 							let end_time = booked_moment.add(booked.duration, 'minutes');
 							if(end_time.isSameOrAfter(to_time)){
 								disabled = 'disabled="disabled"';
@@ -171,7 +171,7 @@ frappe.ui.form.on('Patient Appointment', {
 						${start_str.substring(0, start_str.length - 3)}
 					</button>`;
 				}).join("");
-				slot_html = slot_html + `<br/>`
+				slot_html = slot_html + `<br/>`;
 			});
 
 			$wrapper
@@ -185,7 +185,7 @@ frappe.ui.form.on('Patient Appointment', {
 				$wrapper.find('button').removeClass('btn-primary');
 				$wrapper.find('button').removeClass('btn-selected-slot');
 				$btn.addClass('btn-primary');
-				$btn.addClass('btn-selected-slot')
+				$btn.addClass('btn-selected-slot');
 				// enable dialog action
 				d.get_primary_btn().attr('disabled', null);
 			});

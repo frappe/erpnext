@@ -10,4 +10,3 @@ def execute():
                 if _doc.physician_schedule:
                     _doc.append('physician_schedules', {'schedule': _doc.physician_schedule})
                     _doc.save()
-                
