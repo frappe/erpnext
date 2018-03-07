@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from dateutil.relativedelta import relativedelta
-from frappe.utils import cint, flt, nowdate, add_days, getdate, fmt_money, add_to_date, DATE_FORMAT
+from frappe.utils import cint, flt, nowdate, add_days, add_months, getdate, fmt_money, add_to_date, DATE_FORMAT
 from frappe import _
 from erpnext.accounts.utils import get_fiscal_year
 
@@ -365,20 +365,16 @@ class PayrollEntry(Document):
 def get_start_end_dates(payroll_frequency, start_date=None, company=None):
 	'''Returns dict of start and end dates for given payroll frequency based on start_date'''
 
-	if payroll_frequency == "Monthly" or payroll_frequency == "Bimonthly" or payroll_frequency == "":
-		fiscal_year = get_fiscal_year(start_date, company=company)[0]
-		month = "%02d" % getdate(start_date).month
-		m = get_month_details(fiscal_year, month)
-		if payroll_frequency == "Bimonthly":
-			if getdate(start_date).day <= 15:
-				start_date = m['month_start_date']
-				end_date = m['month_mid_end_date']
-			else:
-				start_date = m['month_mid_start_date']
-				end_date = m['month_end_date']
-		else:
-			start_date = m['month_start_date']
-			end_date = m['month_end_date']
+	if payroll_frequency == "":
+		end_date = None
+
+	if payroll_frequency == "Bimonthly":
+		end_date = add_months(start_date, 2)
+		end_date = add_days(end_date, -1)
+
+	if payroll_frequency == "Monthly":
+		end_date = add_months(start_date, 1)
+		end_date = add_days(end_date, -1)
 
 	if payroll_frequency == "Weekly":
 		end_date = add_days(start_date, 6)
