@@ -20,28 +20,49 @@ class WoocommerceSettings(Document):
 	def create_delete_custom_fields(self):
 		if self.enable_sync:
 			# create
-			names = ["Customer","Sales Order","Item","Address"]
-			for name in names:
-				custom = frappe.new_doc("Custom Field")
-				custom.dt = name
-				custom.label = "woocommerce_id"
-				custom.read_only = 1
-				custom.save()
+			create_custom_field_id_and_check_status = False
+			create_custom_field_email_check = False
+			names = ["Customer-woocommerce_id","Sales Order-woocommerce_id","Item-woocommerce_id","Address-woocommerce_id"]
+			names_check_box = ["Customer-woocommerce_check","Sales Order-woocommerce_check","Item-woocommerce_check","Address-woocommerce_check"]
+			email_names = ["Customer-woocommerce_email","Address-woocommerce_email"]
 
-				custom = frappe.new_doc("Custom Field")
-				custom.dt = name
-				custom.label = "woocommerce_check"
-				custom.fieldtype = "Check"
-				custom.read_only = 1
-				custom.save()
+			for i in zip(names,names_check_box):
 
-			names = ["Customer","Address"]
-			for name in names:
-				custom = frappe.new_doc("Custom Field")
-				custom.dt = name
-				custom.label = "woocommerce_email"
-				custom.read_only = 1
-				custom.save()
+				if not frappe.get_value("Custom Field",{"name":i[0]}) or not frappe.get_value("Custom Field",{"name":i[1]}):
+					create_custom_field_id_and_check_status = True
+					break;
+
+
+			if create_custom_field_id_and_check_status:
+				names = ["Customer","Sales Order","Item","Address"]
+				for name in names:
+					custom = frappe.new_doc("Custom Field")
+					custom.dt = name
+					custom.label = "woocommerce_id"
+					custom.read_only = 1
+					custom.save()
+
+					custom = frappe.new_doc("Custom Field")
+					custom.dt = name
+					custom.label = "woocommerce_check"
+					custom.fieldtype = "Check"
+					custom.read_only = 1
+					custom.save()
+
+			for i in email_names:
+
+				if not frappe.get_value("Custom Field",{"name":i}):
+					create_custom_field_email_check = True
+					break;
+
+			if create_custom_field_email_check:
+				names = ["Customer","Address"]
+				for name in names:
+					custom = frappe.new_doc("Custom Field")
+					custom.dt = name
+					custom.label = "woocommerce_email"
+					custom.read_only = 1
+					custom.save()
 
 		elif not self.enable_sync:
 			# delete
