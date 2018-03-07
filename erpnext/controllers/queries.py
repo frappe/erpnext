@@ -424,11 +424,3 @@ def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
 		query += " and item = '{item}'".format(item = frappe.db.escape(filters.get('item')))
 
 	return frappe.db.sql(query, filters)
-
-def get_alternative_items(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql(""" select alternative_item from `tabItem Alternative`
-		where item_code = %(item_code)s and alternative_item like %(txt)s
-		limit {0}, {1}""".format(start, page_len), {
-			"item_code": frappe.db.escape(filters.get('item_code')),
-			"txt": "%%%s%%" % frappe.db.escape(txt)
-		})

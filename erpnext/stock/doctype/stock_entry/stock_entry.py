@@ -704,9 +704,19 @@ class StockEntry(StockController):
 		item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=qty,
 			fetch_exploded = self.use_multi_level_bom)
 
+		used_alternative_items = get_used_alternative_items(production_order = self.production_order)
 		for item in item_dict.values():
 			# if source warehouse presents in BOM set from_warehouse as bom source_warehouse
 			item.from_warehouse = self.from_warehouse or item.source_warehouse or item.default_warehouse
+			if item.item_code in used_alternative_items:
+				alternative_item_data = used_alternative_items.get(item.item_code)
+				item.item_code = alternative_item_data.item_code
+				item.item_name = alternative_item_data.item_name
+				item.stock_uom = alternative_item_data.stock_uom
+				item.uom = alternative_item_data.uom
+				item.conversion_factor = alternative_item_data.conversion_factor
+				item.description = alternative_item_data.description
+
 		return item_dict
 
 	def get_bom_scrap_material(self, qty):
@@ -839,7 +849,7 @@ class StockEntry(StockController):
 			se_child = self.append('items')
 			se_child.s_warehouse = item_dict[d].get("from_warehouse")
 			se_child.t_warehouse = item_dict[d].get("to_warehouse")
-			se_child.item_code = cstr(d)
+			se_child.item_code = item_dict[d].get('item_code') or cstr(d)
 			se_child.item_name = item_dict[d]["item_name"]
 			se_child.description = item_dict[d]["description"]
 			se_child.uom = stock_uom
@@ -895,8 +905,9 @@ class StockEntry(StockController):
 
 		#Update reserved sub contracted quantity in bin based on Supplied Item Details
 		for d in self.get("items"):
-			reserve_warehouse = item_wh.get(d.item_code)
-			stock_bin = get_bin(d.item_code, reserve_warehouse)
+			item_code = d.get('original_item') or d.get('item_code')
+			reserve_warehouse = item_wh.get(item_code)
+			stock_bin = get_bin(item_code, reserve_warehouse)
 			stock_bin.update_reserved_qty_for_sub_contracting()
 	
 @frappe.whitelist()
@@ -988,6 +999,30 @@ def get_operating_cost_per_unit(work_order=None, bom_no=None):
 			operating_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
 
 	return operating_cost_per_unit
+
+def get_used_alternative_items(purchase_order=None, production_order=None):
+	cond = ""
+
+	if purchase_order:
+		cond = "and ste.purpose = 'Subcontract' and ste.purchase_order = '{0}'".format(purchase_order)
+	elif production_order:
+		cond = "and ste.purpose = 'Material Transfer for Manufacture' and ste.production_order = '{0}'".format(production_order)
+
+	if not cond: return {}
+
+	used_alternative_items = {}
+	data = frappe.db.sql(""" select sted.original_item, sted.uom, sted.conversion_factor,
+			sted.item_code, sted.item_name, sted.conversion_factor,sted.stock_uom, sted.description
+		from
+			`tabStock Entry` ste, `tabStock Entry Detail` sted
+		where
+			sted.parent = ste.name and ste.docstatus = 1 and sted.original_item !=  sted.item_code
+			{0} """.format(cond), as_dict=1)
+
+	for d in data:
+		used_alternative_items[d.original_item] = d
+
+	return used_alternative_items
 
 @frappe.whitelist()
 def get_uom_details(item_code, uom, qty):

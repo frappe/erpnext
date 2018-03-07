@@ -237,7 +237,7 @@ erpnext.utils.select_alternate_items = function(opts) {
 					},
 					get_query: (e) => {
 						return {
-							query: "erpnext.controllers.queries.get_alternative_items",
+							query: "erpnext.stock.doctype.item_alternative.item_alternative.get_alternative_items",
 							filters: {
 								item_code: e.item_code
 							}

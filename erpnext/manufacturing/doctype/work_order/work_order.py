@@ -504,14 +504,16 @@ class WorkOrder(Document):
 			transferred_qty = frappe.db.sql('''select sum(qty)
 				from `tabStock Entry` entry, `tabStock Entry Detail` detail
 				where
-					entry.work_order = %s
+					entry.work_order = %(name)s
 					and entry.purpose = "Material Transfer for Manufacture"
 					and entry.docstatus = 1
 					and detail.parent = entry.name
-					and detail.item_code = %s''', (self.name, d.item_code))[0][0]
+					and (detail.item_code = %(item)s or detail.original_item = %(item)s)''', {
+						'name': self.name,
+						'item': d.item_code
+					})[0][0]
 
 			d.db_set('transferred_qty', flt(transferred_qty), update_modified = False)
-
 
 @frappe.whitelist()
 def get_item_details(item, project = None):
@@ -588,7 +590,6 @@ def make_stock_entry(work_order_id, purpose, qty=None):
 	stock_entry.bom_no = work_order.bom_no
 	stock_entry.use_multi_level_bom = work_order.use_multi_level_bom
 	stock_entry.fg_completed_qty = qty or (flt(work_order.qty) - flt(work_order.produced_qty))
-	stock_entry.allow_alternative_item = work_order.allow_alternative_item
 	if work_order.bom_no:
 		stock_entry.inspection_required = frappe.db.get_value('BOM',
 			work_order.bom_no, 'inspection_required')
