@@ -210,7 +210,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		]
 
 		me.dialog = new frappe.ui.Dialog({
-			title: title,fields: fields
+			title: title, fields: fields
 			});
 
 		if (me.frm.doc['supplied_items']) {

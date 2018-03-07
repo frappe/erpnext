@@ -121,7 +121,6 @@ class PurchaseReceipt(BuyingController):
 		if self.per_billed < 100:
 			self.update_billing_status()
 
-		
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty, reserved_qty_for_subcontract in bin
 		# depends upon updated ordered qty in PO
