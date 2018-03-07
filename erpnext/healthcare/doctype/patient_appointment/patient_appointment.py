@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 import json
-from frappe.utils import getdate, cint
+from frappe.utils import getdate
 from frappe import _
 import datetime
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
@@ -75,7 +75,6 @@ def get_availability_data(date, physician):
 
 	available_slots = []
 	slot_details = []
-	physician_schedule_name = None
 	physician_schedule = None
 
 	employee = None

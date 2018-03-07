@@ -191,7 +191,7 @@ frappe.ui.form.on('Patient Appointment', {
 			});
 
 			d.show();
-		};
+		}
 	},
 	onload:function(frm){
 		if(frm.is_new()) {
@@ -245,7 +245,6 @@ var btn_update_status = function(frm, status){
 };
 
 var btn_invoice_consultation = function(frm){
-	var doc = frm.doc;
 	frappe.call({
 		doc: frm.doc,
 		method:"create_invoice",

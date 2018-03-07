@@ -12,4 +12,4 @@ cur_frm.fields_dict['parent_patient_service_unit'].get_query = function(doc) {
 			['Patient Service Unit', 'name', '!=', doc.patient_service_unit_name]
 		]
 	};
-}
+};
