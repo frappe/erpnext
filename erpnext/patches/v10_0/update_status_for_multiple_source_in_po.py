@@ -9,15 +9,17 @@ def execute():
 
 	# update the sales order item in the material request
 	frappe.reload_doc('stock', 'doctype', 'material_request_item')
-	frappe.db.sql('''update `tabMaterial Request Item` mri set sales_order_item = (select name from
-		`tabSales Order Item` soi where soi.parent=mri.sales_order and soi.item_code=mri.item_code) where docstatus = 1 and
-		ifnull(mri.sales_order, "")!="" 
+	frappe.db.sql('''update `tabMaterial Request Item` mri, `tabSales Order Item` soi
+		set mri.sales_order_item = soi.name
+		where ifnull(mri.sales_order, "")!="" and soi.parent=mri.sales_order
+		and soi.item_code=mri.item_code and mri.docstatus=1
 	''')
 
 	# update the sales order item in the purchase order
-	frappe.db.sql('''update `tabPurchase Order Item` poi set sales_order_item = (select name from
-		`tabSales Order Item` soi where soi.parent=poi.sales_order and soi.item_code=poi.item_code) where docstatus = 1 and
-		ifnull(poi.sales_order, "")!="" 
+	frappe.db.sql('''update `tabPurchase Order Item` poi, `tabSales Order Item` soi
+		set poi.sales_order_item = soi.name
+		where ifnull(poi.sales_order, "")!="" and soi.parent=poi.sales_order
+		and soi.item_code=poi.item_code and poi.docstatus = 1
 	''')
 
 	# Update the status in material request and sales order
