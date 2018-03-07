@@ -20,6 +20,11 @@ class InvalidPaymentEntry(ValidationError):
 
 
 class PaymentEntry(AccountsController):
+	def __init__(self, *args, **kwargs):
+		super(PaymentEntry, self).__init__(*args, **kwargs)
+		if not self.is_new():
+			self.setup_party_account_field()
+
 	def setup_party_account_field(self):
 		self.party_account_field = None
 		self.party_account = None
@@ -287,6 +292,7 @@ class PaymentEntry(AccountsController):
 
 	def set_unallocated_amount(self):
 		self.unallocated_amount = 0
+
 		if self.party:
 			total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
 
