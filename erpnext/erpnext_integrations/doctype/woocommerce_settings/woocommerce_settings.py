@@ -8,7 +8,6 @@ import frappe, requests
 from frappe import _
 from frappe.utils.password import get_decrypted_password
 from frappe.model.document import Document
-from woocommerce import API
 from six.moves.urllib.parse import urlparse
 
 class WoocommerceSettings(Document):

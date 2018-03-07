@@ -19,7 +19,7 @@ def verify_request():
 		frappe.get_request_header("X-Wc-Webhook-Signature") and \
 		not sig == frappe.get_request_header("X-Wc-Webhook-Signature"):
 			frappe.throw(_("Unverified Webhook Data"))
-	frappe.set_user("Administrator")
+	frappe.set_user(woocommerce_settings.modified_by)
 
 @frappe.whitelist(allow_guest=True)
 def order():
@@ -217,7 +217,7 @@ def add_tax_details(sales_order,price,desc,status):
 
 	if status == 0:
 		# Product taxes
-		account_head_type = "VAT 5% - W"
+		account_head_type = frappe.get_value("Account",{"account_name":"VAT 5%"},["name"])
 
 	if status == 1:
 		# Shipping taxes
