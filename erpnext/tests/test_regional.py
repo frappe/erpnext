@@ -10,7 +10,10 @@ class TestInit(unittest.TestCase):
 		self.assertEqual(test_method(), 'overridden')
 
 		frappe.flags.country = 'Nepal'
-		self.assertEqual(test_method(), 'original')
+		self.assertEqual(test_method(), 'overridden')
 
 		frappe.flags.country = 'France'
 		self.assertEqual(test_method(), 'overridden')
+
+		frappe.flags.country = 'Maldives'
+		self.assertEqual(test_method(), 'original')
