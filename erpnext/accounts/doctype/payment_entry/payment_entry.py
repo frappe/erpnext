@@ -684,6 +684,24 @@ def get_company_defaults(company):
 	return ret
 
 
+def get_outstanding_on_journal_entry(name):
+	res = frappe.db.sql(
+			'SELECT '
+			'CASE WHEN party_type IN ("Customer", "Student") '
+			'THEN ifnull(sum(debit_in_account_currency - credit_in_account_currency), 0) '
+			'ELSE ifnull(sum(credit_in_account_currency - debit_in_account_currency), 0) '
+			'END as outstanding_amount '
+			'FROM `tabGL Entry` WHERE (voucher_no=%s OR against_voucher=%s) '
+			'AND party_type IS NOT NULL '
+			'AND party_type != ""',
+			(name, name), as_dict=1
+		)
+
+	outstanding_amount = res[0].get('outstanding_amount', 0) if res else 0
+
+	return outstanding_amount
+
+
 @frappe.whitelist()
 def get_reference_details(reference_doctype, reference_name, party_account_currency):
 	total_amount = outstanding_amount = exchange_rate = None
@@ -694,6 +712,13 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		total_amount = ref_doc.get("grand_total")
 		exchange_rate = 1
 		outstanding_amount = ref_doc.get("outstanding_amount")
+	elif reference_doctype == "Journal Entry" and ref_doc.docstatus == 1:
+		total_amount = ref_doc.get("total_amount")
+		if ref_doc.multi_currency:
+			exchange_rate = get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
+		else:
+			exchange_rate = 1
+			outstanding_amount = get_outstanding_on_journal_entry(reference_name)
 	elif reference_doctype != "Journal Entry":
 		if party_account_currency == company_currency:
 			if ref_doc.doctype == "Expense Claim":
