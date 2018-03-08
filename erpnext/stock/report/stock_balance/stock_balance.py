@@ -215,7 +215,7 @@ def get_item_details(filters):
 		(uom.uom=it.stock_uom and it.purchase_uom is null or it.purchase_uom="")) '
 
 	items = frappe.db.sql("""
-		select it.name, it.item_name, it.stock_uom, it.item_group, it.brand, it.description, uom.conversion_factor
+		select it.name, it.item_name, uom.uom as stock_uom, it.item_group, it.brand, it.description, uom.conversion_factor
 		from `tabItem` it
 		{join}
 		{condition}
