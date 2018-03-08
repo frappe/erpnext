@@ -4,7 +4,6 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
 import json
@@ -18,10 +17,6 @@ class Consultation(Document):
 
 	def after_insert(self):
 		insert_consultation_to_medical_record(self)
-
-	def on_submit(self):
-		if not self.diagnosis or not self.symptoms:
-			frappe.throw(_("Diagnosis and Complaints cannot be left blank"))
 
 	def on_cancel(self):
 		if(self.appointment):

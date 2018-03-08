@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 import json
-from frappe.utils import getdate, cint
+from frappe.utils import getdate
 from frappe import _
 import datetime
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
@@ -40,13 +40,8 @@ class PatientAppointment(Document):
 				frappe.msgprint(_("{0} has fee validity till {1}").format(appointment.patient, fee_validity.valid_till))
 		confirm_sms(self)
 
-	def save(self, *args, **kwargs):
-		# duration is the only changeable field in the document
-		if not self.is_new():
-			self.db_set('duration', cint(self.duration))
-		else:
-			super(PatientAppointment, self).save(*args, **kwargs)
-
+	def create_invoice(self):
+		return invoice_appointment(self)
 
 def appointment_cancel(appointment_id):
 	appointment = frappe.get_doc("Patient Appointment", appointment_id)
@@ -79,9 +74,9 @@ def get_availability_data(date, physician):
 	weekday = date.strftime("%A")
 
 	available_slots = []
-	physician_schedule_name = None
+	slot_details = []
 	physician_schedule = None
-	time_per_appointment = None
+
 	employee = None
 
 	physician_obj = frappe.get_doc("Physician", physician)
@@ -112,43 +107,56 @@ def get_availability_data(date, physician):
 				frappe.throw(_("Dr {0} on Leave on {1}").format(physician, date))
 
 	# get physicians schedule
-	physician_schedule_name = frappe.db.get_value("Physician", physician, "physician_schedule")
-	if physician_schedule_name:
-		physician_schedule = frappe.get_doc("Physician Schedule", physician_schedule_name)
-		time_per_appointment = frappe.db.get_value("Physician", physician, "time_per_appointment")
+	if physician_obj.physician_schedules:
+		for schedule in physician_obj.physician_schedules:
+			if schedule.schedule:
+				physician_schedule = frappe.get_doc("Physician Schedule", schedule.schedule)
+			else:
+				frappe.throw(_("Dr {0} does not have a Physician Schedule. Add it in Physician master".format(physician)))
+
+			if physician_schedule:
+				available_slots = []
+				for t in physician_schedule.time_slots:
+					if weekday == t.day:
+						available_slots.append(t)
+
+				if available_slots:
+					appointments = []
+				 	if schedule.service_unit:
+						slot_name  = schedule.schedule+" - "+schedule.service_unit
+						allow_overlap = frappe.get_value('Patient Service Unit', schedule.service_unit, 'overlap_appointments')
+						if allow_overlap:
+							# fetch all appointments to physician by service unit
+							appointments = frappe.get_all(
+								"Patient Appointment",
+								filters={"physician": physician, "service_unit": schedule.service_unit, "appointment_date": date, "status": ["not in",["Cancelled"]]},
+								fields=["name", "appointment_time", "duration", "status"])
+						else:
+							# fetch all appointments to service unit
+							appointments = frappe.get_all(
+								"Patient Appointment",
+								filters={"service_unit": schedule.service_unit, "appointment_date": date, "status": ["not in",["Cancelled"]]},
+								fields=["name", "appointment_time", "duration", "status"])
+					else:
+						slot_name = schedule.schedule
+						# fetch all appointments to physician without service unit
+						appointments = frappe.get_all(
+							"Patient Appointment",
+							filters={"physician": physician, "service_unit": '', "appointment_date": date, "status": ["not in",["Cancelled"]]},
+							fields=["name", "appointment_time", "duration", "status"])
+
+					slot_details.append({"slot_name":slot_name, "service_unit":schedule.service_unit,
+						"avail_slot":available_slots, 'appointments': appointments})
+
 	else:
 		frappe.throw(_("Dr {0} does not have a Physician Schedule. Add it in Physician master".format(physician)))
 
-	if physician_schedule:
-		for t in physician_schedule.time_slots:
-			if weekday == t.day:
-				available_slots.append(t)
-
-	# `time_per_appointment` should never be None since validation in `Patient` is supposed to prevent
-	# that. However, it isn't impossible so we'll prepare for that.
-	if not time_per_appointment:
-		frappe.throw(_('"Time Per Appointment" hasn"t been set for Dr {0}. Add it in Physician master.').format(physician))
-
-	# if physician not available return
-	if not available_slots:
+	if not available_slots and not slot_details:
 		# TODO: return available slots in nearby dates
 		frappe.throw(_("Physician not available on {0}").format(weekday))
 
-	# if physician on leave return
-
-	# if holiday return
-	# if is_holiday(weekday):
-
-	# get appointments on that day for physician
-	appointments = frappe.get_all(
-		"Patient Appointment",
-		filters={"physician": physician, "appointment_date": date},
-		fields=["name", "appointment_time", "duration", "status"])
-
 	return {
-		"available_slots": available_slots,
-		"appointments": appointments,
-		"time_per_appointment": time_per_appointment
+		"slot_details": slot_details
 	}
 
 
@@ -182,25 +190,25 @@ def confirm_sms(doc):
 
 
 @frappe.whitelist()
-def create_invoice(company, physician, patient, appointment_id, appointment_date):
-	if not appointment_id:
+def invoice_appointment(appointment_doc):
+	if not appointment_doc.name:
 		return False
 	sales_invoice = frappe.new_doc("Sales Invoice")
-	sales_invoice.customer = frappe.get_value("Patient", patient, "customer")
-	sales_invoice.appointment = appointment_id
+	sales_invoice.customer = frappe.get_value("Patient", appointment_doc.patient, "customer")
+	sales_invoice.appointment = appointment_doc.name
 	sales_invoice.due_date = getdate()
 	sales_invoice.is_pos = '0'
-	sales_invoice.debit_to = get_receivable_account(company)
+	sales_invoice.debit_to = get_receivable_account(appointment_doc.company)
 
-	fee_validity = get_fee_validity(physician, patient, appointment_date)
-	create_invoice_items(appointment_id, physician, company, sales_invoice)
+	fee_validity = get_fee_validity(appointment_doc.physician, appointment_doc.patient, appointment_doc.appointment_date)
+	create_invoice_items(appointment_doc.physician, appointment_doc.company, sales_invoice)
 
 	sales_invoice.save(ignore_permissions=True)
-	frappe.db.sql("""update `tabPatient Appointment` set sales_invoice=%s where name=%s""", (sales_invoice.name, appointment_id))
+	frappe.db.sql("""update `tabPatient Appointment` set sales_invoice=%s where name=%s""", (sales_invoice.name, appointment_doc.name))
 	frappe.db.set_value("Fee Validity", fee_validity.name, "ref_invoice", sales_invoice.name)
 	consultation = frappe.db.exists({
 			"doctype": "Consultation",
-			"appointment": appointment_id})
+			"appointment": appointment_doc.name})
 	if consultation:
 		frappe.db.set_value("Consultation", consultation[0][0], "invoice", sales_invoice.name)
 	return sales_invoice.name
@@ -247,7 +255,7 @@ def create_fee_validity(physician, patient, date):
 	return fee_validity
 
 
-def create_invoice_items(appointment_id, physician, company, invoice):
+def create_invoice_items(physician, company, invoice):
 	item_line = invoice.append("items")
 	item_line.item_name = "Consulting Charges"
 	item_line.description = "Consulting Charges:  " + physician
