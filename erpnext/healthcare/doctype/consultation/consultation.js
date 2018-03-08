@@ -23,11 +23,6 @@ frappe.ui.form.on('Consultation', {
 					patient: frm.doc.patient
 				},
 				callback: function (data) {
-					var age = null;
-					if(data.message.dob){
-						age = calculate_age(data.message.dob);
-					}
-					frappe.model.set_value(frm.doctype,frm.docname, "patient_age", age);
 					show_details(data.message);
 				}
 			});
