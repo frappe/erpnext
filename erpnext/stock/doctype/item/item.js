@@ -186,7 +186,6 @@ frappe.ui.form.on('Item Customer Detail', {
 
 var set_customer_group = function(frm, cdt, cdn) {
 	var row = frappe.get_doc(cdt, cdn);
-	var grid_row = cur_frm.fields_dict['customer_items'].grid.grid_rows_by_docname[row.name];
 
 	if (!row.customer_name) {
 		return false;
@@ -195,7 +194,7 @@ var set_customer_group = function(frm, cdt, cdn) {
 	frappe.model.with_doc("Customer", row.customer_name, function() {
 		var customer = frappe.model.get_doc("Customer", row.customer_name);
 		row.customer_group = customer.customer_group;
-		grid_row.refresh_field("customer_group");
+		refresh_field("customer_group", cdn, "customer_items");
 	});
 	return true;
 }
