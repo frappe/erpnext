@@ -1,6 +1,11 @@
 frappe.provide('erpnext.hub');
 
 erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
+	constructor(opts) {
+		super(opts);
+		this.show();
+	}
+
 	setup_defaults() {
 		super.setup_defaults();
 		this.page_title = __('Hub');
@@ -75,16 +80,21 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 		this.render_image_view();
 	}
 
-	render_image_view() {
-		let data = this.data;
-		if (this.start === 0) {
-			this.$result.html('<div class="image-view-container small padding-top">');
-			data = this.data.slice(this.start);
-		}
 
-		var html = data.map(this.card_html.bind(this)).join("");
-		this.$result.find('.image-view-container').append(html);
-	}
+
+	// render_image_view() {
+	// 	let data = this.data;
+	// 	if (this.start === 0) {
+	// 		this.$result.html('<div class="image-view-container small padding-top">');
+	// 		data = this.data.slice(this.start);
+	// 	}
+
+	// 	var html = data.map(this.card_html.bind(this)).join("");
+
+
+
+	// 	this.$result.find('.image-view-container').append(html);
+	// }
 }
 
 erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
@@ -159,6 +169,117 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 		return filters;
 	}
 
+
+	render_image_view() {
+
+		// let data = this.data;
+		// if (this.start === 0) {
+		// 	this.$result.html('<div class="image-view-container small padding-top">');
+		// 	data = this.data.slice(this.start);
+		// }
+
+		// var html = data.map(this.card_html.bind(this)).join("");
+		// this.$result.find('.image-view-container').append(html);
+
+
+
+		var html = this.data.map(this.item_html.bind(this)).join("");
+
+		this.$result.html(`
+			${this.get_header_html()}
+			<div class="image-view-container small">
+				${html}
+			</div>
+		`);
+
+		this.setup_quick_view();
+	}
+
+	get_header_html_skeleton(left = '', right = '') {
+		return `
+			<header class="level list-row list-row-head text-muted small">
+				<div class="level-left list-header-subject">
+					${left}
+				</div>
+				<div class="level-left checkbox-actions">
+					<div class="level list-subject">
+						<input class="level-item list-check-all hidden-xs" type="checkbox" title="${__("Select All")}">
+						<span class="level-item list-header-meta"></span>
+					</div>
+				</div>
+				<div class="level-right">
+					${right}
+				</div>
+			</header>
+		`;
+	}
+
+	get_header_html() {
+		return this.get_header_html_skeleton(`
+			<div class="list-row-col list-subject level ">
+				<input class="level-item list-check-all hidden-xs" type="checkbox" title="Select All">
+				<span class="level-item list-liked-by-me">
+					<i class="octicon octicon-heart text-extra-muted" title="Likes"></i>
+				</span>
+				<span class="level-item"></span>
+			</div>
+		`);
+	}
+
+	item_html(item) {
+		function testImage(URL) {
+			var tester=new Image();
+			tester.onload=imageFound;
+			tester.onerror=imageNotFound;
+			tester.src=URL;
+		}
+
+		function imageFound() {
+			console.log('That image is found and loaded');
+		}
+
+		function imageNotFound() {
+			console.log('That image was not found.');
+		}
+
+		item._name = encodeURI(item.name);
+		const encoded_name = item._name;
+		const title = strip_html(item[this.meta.title_field || 'name']);
+		const _class = !item.image ? 'no-image' : '';
+
+		console.log(item.image, testImage(item.image));
+		const _html = item.image ?
+			`<img data-name="${encoded_name}" src="${ item.image }" alt="${ title }">` :
+			`<span class="placeholder-text">
+				${ frappe.get_abbr(title) }
+			</span>`;
+
+		return `
+			<div class="image-view-item">
+				<div class="image-view-header">
+					<div class="list-row-col list-subject ellipsis level">
+						Hello
+					</div>
+				</div>
+				<div class="image-view-body">
+					<a  data-name="${encoded_name}"
+						title="${encoded_name}"
+						href=""
+					>
+						<div class="image-field ${_class}"
+							data-name="${encoded_name}"
+						>
+							${_html}
+							<button class="btn btn-default zoom-view" data-name="${encoded_name}">
+								<i class="octicon octicon-eye"></i>
+							</button>
+						</div>
+					</a>
+				</div>
+			</div>
+		`;
+	}
+
 	card_html(item) {
 		item._name = encodeURI(item.name);
 		const encoded_name = item._name;
@@ -190,6 +311,22 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 				<a href="${'#Hub/Company/'+company_name}"><p>${ company_name }</p></a>
 			</div>
 		`;
+	}
+
+	setup_quick_view() {
+		var me = this;
+		this.quick_view = new frappe.ui.Dialog({
+			title: 'Quick View'
+		});
+		this.$result.on('click', '.btn.zoom-view', (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			var name = $(e.target).data().name;
+			name = decodeURIComponent(name);
+			console.log(name);
+			me.quick_view.show();
+			return false;
+		});
 	}
 };
 
