@@ -63,6 +63,13 @@ class WoocommerceSettings(Document):
 					custom.read_only = 1
 					custom.save()
 
+			if not frappe.get_value("Item Group",{"name": "WooCommerce Products"}):
+				item_group = frappe.new_doc("Item Group")
+				item_group.item_group_name = "WooCommerce Products"
+				item_group.parent_item_group = "All Item Groups"
+				item_group.save()
+
+
 		elif not self.enable_sync:
 			# delete
 			names = ["Customer-woocommerce_id","Sales Order-woocommerce_id","Item-woocommerce_id","Address-woocommerce_id"]
@@ -76,6 +83,8 @@ class WoocommerceSettings(Document):
 
 			for name in email_names:
 				delete = frappe.delete_doc("Custom Field",name)
+
+			frappe.delete_doc("Item Group","WooCommerce Products")
 
 				
 		frappe.db.commit()
