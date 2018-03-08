@@ -163,9 +163,6 @@ class Asset(Document):
 		if self.status not in ("Submitted", "Partially Depreciated", "Fully Depreciated"):
 			frappe.throw(_("Asset cannot be cancelled, as it is already {0}").format(self.status))
 
-		if self.purchase_invoice:
-			frappe.throw(_("Please cancel Purchase Invoice {0} first").format(self.purchase_invoice))
-
 	def delete_depreciation_entries(self):
 		for d in self.get("schedules"):
 			if d.journal_entry:
