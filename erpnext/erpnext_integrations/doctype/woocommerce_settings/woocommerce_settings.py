@@ -83,9 +83,6 @@ class WoocommerceSettings(Document):
 
 			for name in email_names:
 				delete = frappe.delete_doc("Custom Field",name)
-
-			frappe.delete_doc("Item Group","WooCommerce Products")
-
 				
 		frappe.db.commit()
 

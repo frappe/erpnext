@@ -38,33 +38,24 @@ def order():
 		raw_billing_data = fd.get("billing")
 		customer_woo_com_email = raw_billing_data.get("email")
 
-		try:
-			search_customer = frappe.get_doc("Customer",{"woocommerce_email": customer_woo_com_email})
+		if frappe.get_value("Customer",{"woocommerce_email": customer_woo_com_email}):
 			# Edit
 			link_customer_and_address(raw_billing_data,1)
-		except frappe.DoesNotExistError as e:
-			print("Error Found",e)
-			# create
+		else:
+			# Create
 			link_customer_and_address(raw_billing_data,0)
-
-		except Exception as e:
-			print("THis is different Error",e)
 
 
 		items_list = fd.get("line_items")
 		for item in items_list:
 
 			item_woo_com_id = item.get("product_id")
-			try:
-				search_item = frappe.get_doc("Item",{"woocommerce_id": item_woo_com_id})
+
+			if frappe.get_value("Item",{"woocommerce_id": item_woo_com_id}):
 				#Edit
 				link_item(item,1)
-			except frappe.DoesNotExistError as i:
-				print("Error found in items", i)
-				#Create
+			else:
 				link_item(item,0)
-			except Exception as i:
-				print("THis is different Item Error",i)
 
 
 		customer_name = raw_billing_data.get("first_name") + " " + raw_billing_data.get("last_name")
@@ -103,29 +94,17 @@ def order():
 				"rate": item.get("price")
 				})
 
-			try:
-				add_tax_details(new_sales_order,ordered_items_tax,"Ordered Item tax",0)
-			except Exception as s:
-				print("Error during tax inside ordered_items", s)
+			add_tax_details(new_sales_order,ordered_items_tax,"Ordered Item tax",0)
 			
 
-		try:
-			shipping_details = fd.get("shipping_lines")
-			shipping_total = fd.get("shipping_total")
-			shipping_tax = fd.get("shipping_tax")
+		shipping_details = fd.get("shipping_lines")
+		shipping_total = fd.get("shipping_total")
+		shipping_tax = fd.get("shipping_tax")
 
-			add_tax_details(new_sales_order,shipping_tax,"Shipping Tax",1)
-			add_tax_details(new_sales_order,shipping_total,"Shipping Total",1)
-			
-		except Exception as t:
-			print("Error during total taxing",t)
-				
+		add_tax_details(new_sales_order,shipping_tax,"Shipping Tax",1)
+		add_tax_details(new_sales_order,shipping_total,"Shipping Total",1)
 
-		try:
-			new_sales_order.submit()
-		except Exception as g:
-			for x in xrange(1,10):
-				print("SO.SAVE", g)
+		new_sales_order.submit()
 	
 		frappe.db.commit()
 
