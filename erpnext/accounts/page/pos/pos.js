@@ -393,7 +393,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.frm = {}
 		this.frm.doc = this.doc
 		this.set_transaction_defaults("Customer");
-		this.frm.doc["allow_user_to_edit_rate"] = this.pos_profile_data["allow_user_to_edit_rate"] ? true : false,
+		this.frm.doc["allow_user_to_edit_rate"] = this.pos_profile_data["allow_user_to_edit_rate"] ? true : false;
+		this.frm.doc["allow_user_to_edit_discount"] = this.pos_profile_data["allow_user_to_edit_discount"] ? true : false;
 		this.wrapper.html(frappe.render_template("pos", this.frm.doc));
 		this.make_search();
 		this.make_customer();
@@ -1256,6 +1257,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		$(this.wrapper).find('.selected-item').empty();
 		if(this.child_doc.length) {
 			this.child_doc[0]["allow_user_to_edit_rate"] = this.pos_profile_data["allow_user_to_edit_rate"] ? true : false,
+			this.child_doc[0]["allow_user_to_edit_discount"] = this.pos_profile_data["allow_user_to_edit_discount"] ? true : false;
 			this.selected_row = $(frappe.render_template("pos_selected_item", this.child_doc[0]))
 			$(this.wrapper).find('.selected-item').html(this.selected_row)
 		}
@@ -1683,7 +1685,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		setInterval(function () {
 			me.freeze_screen = false;
 			me.sync_sales_invoice()
-		}, 60000)
+		}, 180000)
 	},
 
 	sync_sales_invoice: function () {
