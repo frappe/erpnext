@@ -53,8 +53,8 @@ class Item(WebsiteGenerator):
 					template_item_name = frappe.db.get_value("Item", self.variant_of, "item_name")
 					self.item_code = make_variant_item_code(self.variant_of, template_item_name, self)
 			else:
-				from frappe.model.naming import make_autoname
-				self.item_code = make_autoname(self.naming_series + '.#####')
+				from frappe.model.naming import set_name_by_naming_series
+				set_name_by_naming_series(self)
 		elif not self.item_code:
 			msgprint(_("Item Code is mandatory because Item is not automatically numbered"), raise_exception=1)
 

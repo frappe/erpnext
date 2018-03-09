@@ -87,7 +87,7 @@ def get_payable_account(company):
 def make_expense_claim(payable_account,claim_amount, sanctioned_amount, company, account, project=None, task_name=None):
 	expense_claim = frappe.get_doc({
 		 "doctype": "Expense Claim",
-		 "employee": "_T-Employee-0001",
+		 "employee": "_T-Employee-00001",
 		 "payable_account": payable_account,
 		 "company": company,
 		 "expenses":
