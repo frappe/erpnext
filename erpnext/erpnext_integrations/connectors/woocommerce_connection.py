@@ -14,7 +14,7 @@ def verify_request():
 			hashlib.sha256
 		).digest()
 	)
-	print("verify_request", sig, frappe.get_request_header("X-Wc-Webhook-Signature"))
+
 	if frappe.request.data and \
 		frappe.get_request_header("X-Wc-Webhook-Signature") and \
 		not sig == frappe.get_request_header("X-Wc-Webhook-Signature"):
@@ -24,11 +24,7 @@ def verify_request():
 @frappe.whitelist(allow_guest=True)
 def order():
 
-	# print(frappe.request)
-	# print(frappe.request.__dict__)
 	verify_request()
-
-	print("Inside Order method")
 
 	if frappe.request.data:
 		fd = json.loads(frappe.request.data)
@@ -37,64 +33,28 @@ def order():
 
 	event = frappe.get_request_header("X-Wc-Webhook-Event")
 
-	print(event * 21)
-	print(fd)
-
 	if event == "created":
 
 		raw_billing_data = fd.get("billing")
 		customer_woo_com_email = raw_billing_data.get("email")
 
-		print(raw_billing_data)
-		print(customer_woo_com_email)
-		print("Inside Created")
-		# try:
-		# 	search_customer = frappe.get_doc("Customer",{"woocommerce_email": customer_woo_com_email})
-		# 	# Edit
-		# 	link_customer_and_address(raw_billing_data,1)
-		# except frappe.DoesNotExistError as e:
-		# 	print("Error Found",e)
-		# 	# create
-		# 	link_customer_and_address(raw_billing_data,0)
-
-		# except Exception as e:
-		# 	print("THis is different Error",e)
-
 		if frappe.get_value("Customer",{"woocommerce_email": customer_woo_com_email}):
-			print("Editing Existing Customer")
 			# Edit
 			link_customer_and_address(raw_billing_data,1)
 		else:
-			print("Creating new customer")
-			# create
+			# Create
 			link_customer_and_address(raw_billing_data,0)
 
 
-
-
 		items_list = fd.get("line_items")
-		print(items_list)
-
 		for item in items_list:
 
 			item_woo_com_id = item.get("product_id")
-			# try:
-			# 	search_item = frappe.get_doc("Item",{"woocommerce_id": item_woo_com_id})
-			# 	#Edit
-			# 	link_item(item,1)
-			# except frappe.DoesNotExistError as i:
-			# 	print("Error found in items", i)
-			# 	#Create
-			# 	link_item(item,0)
-			# except Exception as i:
-			# 	print("THis is different Item Error",i)
-
 
 			if frappe.get_value("Item",{"woocommerce_id": item_woo_com_id}):
-				# Edit
+				#Edit
 				link_item(item,1)
 			else:
-				# Create
 				link_item(item,0)
 
 
@@ -102,11 +62,6 @@ def order():
 
 		new_sales_order = frappe.new_doc("Sales Order")
 		new_sales_order.customer = customer_name
-
-		# default_system_setting = frappe.defaults.get_defaults()
-		# default_company = default_system_setting.get("company")
-		# print(default_company)
-		# new_sales_order.company = default_company
 
 		created_date = fd.get("date_created").split("T")
 		new_sales_order.transaction_date = created_date[0]
@@ -139,29 +94,17 @@ def order():
 				"rate": item.get("price")
 				})
 
-			try:
-				add_tax_details(new_sales_order,ordered_items_tax,"Ordered Item tax",0)
-			except Exception as s:
-				print("Error during tax inside ordered_items", s)
+			add_tax_details(new_sales_order,ordered_items_tax,"Ordered Item tax",0)
 			
 
-		try:
-			shipping_details = fd.get("shipping_lines")
-			shipping_total = fd.get("shipping_total")
-			shipping_tax = fd.get("shipping_tax")
+		shipping_details = fd.get("shipping_lines")
+		shipping_total = fd.get("shipping_total")
+		shipping_tax = fd.get("shipping_tax")
 
-			add_tax_details(new_sales_order,shipping_tax,"Shipping Tax",1)
-			add_tax_details(new_sales_order,shipping_total,"Shipping Total",1)
-			
-		except Exception as t:
-			print("Error during total taxing",t)
-				
+		add_tax_details(new_sales_order,shipping_tax,"Shipping Tax",1)
+		add_tax_details(new_sales_order,shipping_total,"Shipping Total",1)
 
-		try:
-			new_sales_order.submit()
-		except Exception as g:
-			for x in xrange(1,10):
-				print("SO.SAVE", g)
+		new_sales_order.submit()
 	
 		frappe.db.commit()
 
@@ -226,12 +169,10 @@ def link_item(item_data,item_status):
 
 	if item_status == 0:
 		#Create Item
-		print("Creating New Item")
 		item = frappe.new_doc("Item")
 
 	if item_status == 1:
 		#Edit Item
-		print("Editing existing Item")
 		item_woo_com_id = item_data.get("product_id")
 		item = frappe.get_doc("Item",{"woocommerce_id": item_woo_com_id})
 	
@@ -240,7 +181,6 @@ def link_item(item_data,item_status):
 	item.item_code = "woocommerce - " + str(item_data.get("product_id"))
 	item.woocommerce_id = str(item_data.get("product_id"))
 	item.item_group = "WooCommerce Products"
-	item.stock_uom = "Nos"
 	item.save()
 	frappe.db.commit()
 
@@ -258,6 +198,6 @@ def add_tax_details(sales_order,price,desc,status):
 	sales_order.append("taxes",{
 							"charge_type":"Actual",
 							"account_head": account_head_type,
-							"rate": price,
+							"tax_amount": price,
 							"description": desc
 							})
