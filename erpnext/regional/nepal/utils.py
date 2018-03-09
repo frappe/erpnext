@@ -11,8 +11,3 @@ def check_deletion_permission(doc, method):
 		return
 	else:
 		frappe.throw(_("Deletion is not permitted for country {0}".format(region)))
-
-# don't remove this function it is used in tests
-def test_method():
-	'''test function'''
-	return 'overridden'
