@@ -27,6 +27,10 @@ HTML / CSS or hire the services of a professional. The good part is that once
 this is setup, you can add and edit content, blogs and products directly from
 your ERP.
 
+<div class="embed-container">
+  <iframe src="https://www.youtube.com/embed/lyW6mfFBSNw?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>
+
 ### Topics
 
 {index}

@@ -5,6 +5,15 @@
 frappe.ui.form.on("Warehouse", {
 	refresh: function(frm) {
 		frm.toggle_display('warehouse_name', frm.doc.__islocal);
+		frm.toggle_display(['address_html','contact_html'], !frm.doc.__islocal);
+
+
+		if(!frm.doc.__islocal) {
+			frappe.contacts.render_address_and_contact(frm);
+
+		} else {
+			frappe.contacts.clear_address_and_contact(frm);
+		}
 
 		frm.add_custom_button(__("Stock Balance"), function() {
 			frappe.set_route("query-report", "Stock Balance", {"warehouse": frm.doc.name});

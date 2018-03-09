@@ -1,4 +1,4 @@
-#Opening Stock Balance Entry for the Serialized and Batch Item
+#Opening Stock Balance Entry for Serialized and Batch Item
 
 Items for which Serial No. and Batch No. is maintained, opening stock balance entry for them is update via Stock Entry. [Click here to learn how serialized inventory is managed in ERPNext](/docs/user/manual/en/stock/serial-no.html).
 
@@ -56,5 +56,12 @@ As per perpetual inventory valuation system, accounting entry is created for eve
 
 On submission of Stock Entry, stock ledger posting will be posted, and opening balance will be updated for the items on a given Posting Date.
 
+
+<div>
+    <div class="embed-container">
+        <iframe src="https://www.youtube.com/embed/nlHX0ZZ84Lw?start=120" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+        </iframe>
+    </div>
+<div>
 
 <!-- markdown -->

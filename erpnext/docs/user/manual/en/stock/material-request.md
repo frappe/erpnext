@@ -32,4 +32,10 @@ The User can also raise a [Request For Quotation](/docs/user/manual/en/buying/re
 > Info: Material Request is not mandatory. It is ideal if you have centralized
 buying so that you can collect this information from various departments.
 
+
+<div>
+  <iframe src="https://www.youtube.com/embed/55Gk2j7Q8Zw?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+  </iframe>
+</div>
+
 {next}
