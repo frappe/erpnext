@@ -175,7 +175,7 @@ def accumulate_values_into_parents(accounts, accounts_by_name):
 
 def prepare_data(accounts, filters, total_row, parent_children_map, company_currency):
 	data = []
-	tmpaccnt = sorted(accounts)
+	tmpaccnt = sorted(accounts, key = lambda account: account.name)
 	if not (accounts[0].account_number is None):
 		accounts = tmpaccnt
 	
