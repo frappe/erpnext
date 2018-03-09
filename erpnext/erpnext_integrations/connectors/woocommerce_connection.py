@@ -14,7 +14,7 @@ def verify_request():
 			hashlib.sha256
 		).digest()
 	)
-
+	print("verify_request", sig, frappe.get_request_header("X-Wc-Webhook-Signature"))
 	if frappe.request.data and \
 		frappe.get_request_header("X-Wc-Webhook-Signature") and \
 		not sig == frappe.get_request_header("X-Wc-Webhook-Signature"):
@@ -24,7 +24,11 @@ def verify_request():
 @frappe.whitelist(allow_guest=True)
 def order():
 
+	# print(frappe.request)
+	# print(frappe.request.__dict__)
 	verify_request()
+
+	print("Inside Order method")
 
 	if frappe.request.data:
 		fd = json.loads(frappe.request.data)
@@ -33,101 +37,118 @@ def order():
 
 	event = frappe.get_request_header("X-Wc-Webhook-Event")
 
+	print(event * 21)
+	print(fd)
+
 	if event == "created":
 
 		raw_billing_data = fd.get("billing")
 		customer_woo_com_email = raw_billing_data.get("email")
 
-		try:
-			search_customer = frappe.get_doc("Customer",{"woocommerce_email": customer_woo_com_email})
+		print(raw_billing_data)
+		print(customer_woo_com_email)
+		print("Inside Created")
+		# try:
+		# 	search_customer = frappe.get_doc("Customer",{"woocommerce_email": customer_woo_com_email})
+		# 	# Edit
+		# 	link_customer_and_address(raw_billing_data,1)
+		# except frappe.DoesNotExistError as e:
+		# 	print("Error Found",e)
+		# 	# create
+		# 	link_customer_and_address(raw_billing_data,0)
+
+		# except Exception as e:
+		# 	print("THis is different Error",e)
+
+		if frappe.get_value("Customer",{"woocommerce_email": customer_woo_com_email}):
+			print("Editing Existing Customer")
 			# Edit
 			link_customer_and_address(raw_billing_data,1)
-		except frappe.DoesNotExistError as e:
-			print("Error Found",e)
+		else:
+			print("Creating new customer")
 			# create
 			link_customer_and_address(raw_billing_data,0)
 
-		except Exception as e:
-			print("THis is different Error",e)
 
 
-		items_list = fd.get("line_items")
-		for item in items_list:
 
-			item_woo_com_id = item.get("product_id")
-			try:
-				search_item = frappe.get_doc("Item",{"woocommerce_id": item_woo_com_id})
-				#Edit
-				link_item(item,1)
-			except frappe.DoesNotExistError as i:
-				print("Error found in items", i)
-				#Create
-				link_item(item,0)
-			except Exception as i:
-				print("THis is different Item Error",i)
+		# items_list = fd.get("line_items")
+		# for item in items_list:
+
+		# 	item_woo_com_id = item.get("product_id")
+		# 	try:
+		# 		search_item = frappe.get_doc("Item",{"woocommerce_id": item_woo_com_id})
+		# 		#Edit
+		# 		link_item(item,1)
+		# 	except frappe.DoesNotExistError as i:
+		# 		print("Error found in items", i)
+		# 		#Create
+		# 		link_item(item,0)
+		# 	except Exception as i:
+		# 		print("THis is different Item Error",i)
 
 
-		customer_name = raw_billing_data.get("first_name") + " " + raw_billing_data.get("last_name")
+		# customer_name = raw_billing_data.get("first_name") + " " + raw_billing_data.get("last_name")
 
-		new_sales_order = frappe.new_doc("Sales Order")
-		new_sales_order.customer = customer_name
+		# new_sales_order = frappe.new_doc("Sales Order")
+		# new_sales_order.customer = customer_name
 
-		created_date = fd.get("date_created").split("T")
-		new_sales_order.transaction_date = created_date[0]
+		# created_date = fd.get("date_created").split("T")
+		# new_sales_order.transaction_date = created_date[0]
 
-		new_sales_order.po_no = fd.get("id")
-		new_sales_order.woocommerce_id = fd.get("id")
-		new_sales_order.naming_series = "SO-"
+		# new_sales_order.po_no = fd.get("id")
+		# new_sales_order.woocommerce_id = fd.get("id")
+		# new_sales_order.naming_series = "SO-"
 
-		placed_order_date = created_date[0]
-		raw_date = datetime.datetime.strptime(placed_order_date, "%Y-%m-%d")
-		raw_delivery_date = frappe.utils.add_to_date(raw_date,days = 7)
-		order_delivery_date_str = raw_delivery_date.strftime('%Y-%m-%d')
-		order_delivery_date = unicode(order_delivery_date_str, "utf-8")
+		# placed_order_date = created_date[0]
+		# raw_date = datetime.datetime.strptime(placed_order_date, "%Y-%m-%d")
+		# raw_delivery_date = frappe.utils.add_to_date(raw_date,days = 7)
+		# order_delivery_date_str = raw_delivery_date.strftime('%Y-%m-%d')
+		# order_delivery_date = unicode(order_delivery_date_str, "utf-8")
 
-		new_sales_order.delivery_date = order_delivery_date
+		# new_sales_order.delivery_date = order_delivery_date
 
-		for item in items_list:
-			woocomm_item_id = item.get("product_id")
-			found_item = frappe.get_doc("Item",{"woocommerce_id": woocomm_item_id})
+		# for item in items_list:
+		# 	woocomm_item_id = item.get("product_id")
+		# 	found_item = frappe.get_doc("Item",{"woocommerce_id": woocomm_item_id})
 
-			ordered_items_tax = item.get("total_tax")
+		# 	ordered_items_tax = item.get("total_tax")
 
-			new_sales_order.append("items",{
-				"item_code": found_item.item_code,
-				"item_name": found_item.item_name,
-				"description": found_item.item_name,
-				"delivery_date":order_delivery_date, 
-				"uom": "Nos",
-				"qty": item.get("quantity"),
-				"rate": item.get("price")
-				})
+		# 	new_sales_order.append("items",{
+		# 		"item_code": found_item.item_code,
+		# 		"item_name": found_item.item_name,
+		# 		"description": found_item.item_name,
+		# 		"delivery_date":order_delivery_date, 
+		# 		"uom": "Nos",
+		# 		"qty": item.get("quantity"),
+		# 		"rate": item.get("price")
+		# 		})
 
-			try:
-				add_tax_details(new_sales_order,ordered_items_tax,"Ordered Item tax",0)
-			except Exception as s:
-				print("Error during tax inside ordered_items", s)
+		# 	try:
+		# 		add_tax_details(new_sales_order,ordered_items_tax,"Ordered Item tax",0)
+		# 	except Exception as s:
+		# 		print("Error during tax inside ordered_items", s)
 			
 
-		try:
-			shipping_details = fd.get("shipping_lines")
-			shipping_total = fd.get("shipping_total")
-			shipping_tax = fd.get("shipping_tax")
+		# try:
+		# 	shipping_details = fd.get("shipping_lines")
+		# 	shipping_total = fd.get("shipping_total")
+		# 	shipping_tax = fd.get("shipping_tax")
 
-			add_tax_details(new_sales_order,shipping_tax,"Shipping Tax",1)
-			add_tax_details(new_sales_order,shipping_total,"Shipping Total",1)
+		# 	add_tax_details(new_sales_order,shipping_tax,"Shipping Tax",1)
+		# 	add_tax_details(new_sales_order,shipping_total,"Shipping Total",1)
 			
-		except Exception as t:
-			print("Error during total taxing",t)
+		# except Exception as t:
+		# 	print("Error during total taxing",t)
 				
 
-		try:
-			new_sales_order.submit()
-		except Exception as g:
-			for x in xrange(1,10):
-				print("SO.SAVE", g)
+		# try:
+		# 	new_sales_order.submit()
+		# except Exception as g:
+		# 	for x in xrange(1,10):
+		# 		print("SO.SAVE", g)
 	
-		frappe.db.commit()
+		# frappe.db.commit()
 
 
 def link_customer_and_address(raw_billing_data,customer_status):
@@ -186,39 +207,39 @@ def link_customer_and_address(raw_billing_data,customer_status):
 	frappe.db.commit()
 
 
-def link_item(item_data,item_status):
+# def link_item(item_data,item_status):
 
-	if item_status == 0:
-		#Create Item
-		item = frappe.new_doc("Item")
+# 	if item_status == 0:
+# 		#Create Item
+# 		item = frappe.new_doc("Item")
 
-	if item_status == 1:
-		#Edit Item
-		item_woo_com_id = item_data.get("product_id")
-		item = frappe.get_doc("Item",{"woocommerce_id": item_woo_com_id})
+# 	if item_status == 1:
+# 		#Edit Item
+# 		item_woo_com_id = item_data.get("product_id")
+# 		item = frappe.get_doc("Item",{"woocommerce_id": item_woo_com_id})
 	
 
-	item.item_name = str(item_data.get("name"))
-	item.item_code = "woocommerce - " + str(item_data.get("product_id"))
-	item.woocommerce_id = str(item_data.get("product_id"))
-	item.item_group = "WooCommerce Products"
-	item.save()
-	frappe.db.commit()
+# 	item.item_name = str(item_data.get("name"))
+# 	item.item_code = "woocommerce - " + str(item_data.get("product_id"))
+# 	item.woocommerce_id = str(item_data.get("product_id"))
+# 	item.item_group = "WooCommerce Products"
+# 	item.save()
+# 	frappe.db.commit()
 
 
-def add_tax_details(sales_order,price,desc,status):
+# def add_tax_details(sales_order,price,desc,status):
 
-	if status == 0:
-		# Product taxes
-		account_head_type = frappe.get_value("Account",{"account_name":"VAT 5%"},["name"])
+# 	if status == 0:
+# 		# Product taxes
+# 		account_head_type = frappe.get_value("Account",{"account_name":"VAT 5%"},["name"])
 
-	if status == 1:
-		# Shipping taxes
-		account_head_type = frappe.get_value("Account",{"account_name":"Freight and Forwarding Charges"},["name"])
+# 	if status == 1:
+# 		# Shipping taxes
+# 		account_head_type = frappe.get_value("Account",{"account_name":"Freight and Forwarding Charges"},["name"])
 
-	sales_order.append("taxes",{
-							"charge_type":"Actual",
-							"account_head": account_head_type,
-							"tax_amount": price,
-							"description": desc
-							})
+# 	sales_order.append("taxes",{
+# 							"charge_type":"Actual",
+# 							"account_head": account_head_type,
+# 							"tax_amount": price,
+# 							"description": desc
+# 							})
