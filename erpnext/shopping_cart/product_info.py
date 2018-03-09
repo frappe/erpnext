@@ -24,6 +24,7 @@ def get_product_info_for_website(item_code):
 		cart_settings.default_customer_group,
 		cart_settings.company
 	)
+
 	stock_status = get_qty_in_stock(item_code, "website_warehouse")
 
 	product_info = {
