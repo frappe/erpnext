@@ -72,20 +72,30 @@ def order():
 
 
 
-		# items_list = fd.get("line_items")
-		# for item in items_list:
+		items_list = fd.get("line_items")
+		print(items_list)
 
-		# 	item_woo_com_id = item.get("product_id")
-		# 	try:
-		# 		search_item = frappe.get_doc("Item",{"woocommerce_id": item_woo_com_id})
-		# 		#Edit
-		# 		link_item(item,1)
-		# 	except frappe.DoesNotExistError as i:
-		# 		print("Error found in items", i)
-		# 		#Create
-		# 		link_item(item,0)
-		# 	except Exception as i:
-		# 		print("THis is different Item Error",i)
+		for item in items_list:
+
+			item_woo_com_id = item.get("product_id")
+			# try:
+			# 	search_item = frappe.get_doc("Item",{"woocommerce_id": item_woo_com_id})
+			# 	#Edit
+			# 	link_item(item,1)
+			# except frappe.DoesNotExistError as i:
+			# 	print("Error found in items", i)
+			# 	#Create
+			# 	link_item(item,0)
+			# except Exception as i:
+			# 	print("THis is different Item Error",i)
+
+
+			if frappe.get_value("Item",{"woocommerce_id": item_woo_com_id}):
+				# Edit
+				link_item(item,1)
+			else:
+				# Create
+				link_item(item,0)
 
 
 		# customer_name = raw_billing_data.get("first_name") + " " + raw_billing_data.get("last_name")
@@ -207,24 +217,27 @@ def link_customer_and_address(raw_billing_data,customer_status):
 	frappe.db.commit()
 
 
-# def link_item(item_data,item_status):
+def link_item(item_data,item_status):
 
-# 	if item_status == 0:
-# 		#Create Item
-# 		item = frappe.new_doc("Item")
+	if item_status == 0:
+		#Create Item
+		print("Creating New Item")
+		item = frappe.new_doc("Item")
 
-# 	if item_status == 1:
-# 		#Edit Item
-# 		item_woo_com_id = item_data.get("product_id")
-# 		item = frappe.get_doc("Item",{"woocommerce_id": item_woo_com_id})
+	if item_status == 1:
+		#Edit Item
+		print("Editing existing Item")
+		item_woo_com_id = item_data.get("product_id")
+		item = frappe.get_doc("Item",{"woocommerce_id": item_woo_com_id})
 	
 
-# 	item.item_name = str(item_data.get("name"))
-# 	item.item_code = "woocommerce - " + str(item_data.get("product_id"))
-# 	item.woocommerce_id = str(item_data.get("product_id"))
-# 	item.item_group = "WooCommerce Products"
-# 	item.save()
-# 	frappe.db.commit()
+	item.item_name = str(item_data.get("name"))
+	item.item_code = "woocommerce - " + str(item_data.get("product_id"))
+	item.woocommerce_id = str(item_data.get("product_id"))
+	item.item_group = "WooCommerce Products"
+	item.stock_uom = "Nos"
+	item.save()
+	frappe.db.commit()
 
 
 # def add_tax_details(sales_order,price,desc,status):
