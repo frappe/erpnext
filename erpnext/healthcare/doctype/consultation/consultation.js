@@ -15,23 +15,7 @@ frappe.ui.form.on('Consultation', {
 			{fieldname: 'test_comment', columns: 4}
 		];
 	},
-	onload: function(frm){
-		if(frm.doc.patient){
-			frappe.call({
-				"method": "erpnext.healthcare.doctype.patient.patient.get_patient_detail",
-				args: {
-					patient: frm.doc.patient
-				},
-				callback: function (data) {
-					var age = null;
-					if(data.message.dob){
-						age = calculate_age(data.message.dob);
-					}
-					frappe.model.set_value(frm.doctype,frm.docname, "patient_age", age);
-				}
-			});
-		}
-	},
+
 	refresh: function(frm) {
 		refresh_field('drug_prescription');
 		refresh_field('test_prescription');
