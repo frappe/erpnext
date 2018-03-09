@@ -15,6 +15,7 @@ def verify_request():
 		).digest()
 	)
 
+	print("verify_request", sig, frappe.get_request_header("X-Wc-Webhook-Signature"))
 	if frappe.request.data and \
 		frappe.get_request_header("X-Wc-Webhook-Signature") and \
 		not sig == frappe.get_request_header("X-Wc-Webhook-Signature"):
@@ -88,14 +89,13 @@ def order():
 				"item_code": found_item.item_code,
 				"item_name": found_item.item_name,
 				"description": found_item.item_name,
-				"delivery_date":order_delivery_date, 
+				"delivery_date":order_delivery_date,
 				"uom": "Nos",
 				"qty": item.get("quantity"),
 				"rate": item.get("price")
 				})
 
 			add_tax_details(new_sales_order,ordered_items_tax,"Ordered Item tax",0)
-			
 
 		shipping_details = fd.get("shipping_lines")
 		shipping_total = fd.get("shipping_total")

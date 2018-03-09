@@ -76,13 +76,13 @@ class WoocommerceSettings(Document):
 			names_check_box = ["Customer-woocommerce_check","Sales Order-woocommerce_check","Item-woocommerce_check","Address-woocommerce_check"]
 			email_names = ["Customer-woocommerce_email","Address-woocommerce_email"]
 			for name in names:
-				delete = frappe.delete_doc("Custom Field",name)
+				frappe.delete_doc("Custom Field",name)
 
 			for name in names_check_box:
-				delete = frappe.delete_doc("Custom Field",name)
+				frappe.delete_doc("Custom Field",name)
 
 			for name in email_names:
-				delete = frappe.delete_doc("Custom Field",name)
+				frappe.delete_doc("Custom Field",name)
 
 			frappe.delete_doc("Item Group","WooCommerce Products")
 

@@ -1,4 +1,4 @@
-import unittest, frappe, erpnext, requests, os
+/import unittest, frappe, erpnext, requests, os, time
 
 class TestWoocommerce(unittest.TestCase):
 	def test_woocommerce_request(self):
@@ -26,5 +26,24 @@ class TestWoocommerce(unittest.TestCase):
 		url = "http://{site}:{port}/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.order".format(site=host, port=port)
 
 		r = requests.post(url=url, headers=headers, data=data)
+
+		time.sleep(2)
+
+		print(r.text, r.status_code)
+		print("port", port)
+		print("host", host)
+		print("This is url: "url)
+
+		if not frappe.get_value("Customer",{"woocommerce_email":"tony@gmail.com"}):
+			print("Customer not found")
+
+
+		if not frappe.get_value("Item",{"woocommerce_id": 56}):
+			print("Item not found")
+
+
+		if frappe.get_value("Sales Order",{"woocommerce_id":74}):
+			print("Sales Order not found")
+
 
 		self.assertTrue(r.status_code == 200)
