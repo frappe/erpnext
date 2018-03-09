@@ -8,6 +8,11 @@ In ERPNext, You can create Request for Quotation directly by going to:
 
 After creation of Request for Quotation, there are two ways to generate Supplier Quotation from Request for Quotation.
 
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/q85GFvWfZGI?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+    </iframe>
+</div>
+
 
 #### For User
 
@@ -52,3 +57,5 @@ __Step 4:__ On submission, system will create Supplier Quotation (draft mode) ag
 If a supplier indicates that they will not provide a quotation for the item, this can be indicated in the RFQ document by checking the 'No Quote' box after the Request for Quotation has been submitted.
 
 ![Request For Quotation]({{docs_base_url}}/assets/img/buying/request-for-quotation.gif)
+
+

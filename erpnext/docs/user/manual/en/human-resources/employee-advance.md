@@ -30,3 +30,7 @@ On submission of payment entry, the paid amount and status will be updated in Em
 ### Adjust advances on Expense Claim
 Later when employee claims the expense and advance record can be fetched in Expense Claim and linked to the claim record.
 <img class="screenshot" alt="Employee Advance Payment via Payment Entry" src="{{docs_base_url}}/assets/img/human-resources/expense_claim_advances.png">
+
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/7NYZ6zcWZ-E?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>

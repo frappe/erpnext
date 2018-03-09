@@ -96,6 +96,8 @@ def get_item_conditions(filters):
 def get_sle_conditions(filters):
 	conditions = []
 	if filters.get("warehouse"):
-		conditions.append("warehouse=%(warehouse)s")
+		lft, rgt = frappe.db.get_value('Warehouse', filters.get("warehouse"), ['lft', 'rgt'])
+		conditions.append("""warehouse in (select wh.name from `tabWarehouse` wh
+			where wh.lft >= {0} and rgt <= {1})""".format(lft, rgt))
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""

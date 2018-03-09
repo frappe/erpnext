@@ -54,16 +54,14 @@ class Customer(TransactionBase):
 		self.flags.old_lead = self.lead_name
 		validate_party_accounts(self)
 		self.validate_credit_limit_on_change()
-		self.check_customer_group_or_territory_change()
+		self.check_customer_group_change()
 
-	def check_customer_group_or_territory_change(self):
-		frappe.flags.customer_group_changed, frappe.flags.territory_changed = False, False
+	def check_customer_group_change(self):
+		frappe.flags.customer_group_changed = False
 
 		if not self.get('__islocal'):
 			if self.customer_group != frappe.db.get_value('Customer', self.name, 'customer_group'):
 				frappe.flags.customer_group_changed = True
-			if self.territory != frappe.db.get_value('Customer', self.name, 'territory'):
-				frappe.flags.territory_changed = True
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
@@ -76,12 +74,10 @@ class Customer(TransactionBase):
 		if self.flags.is_new_doc:
 			self.create_lead_address_contact()
 
-		self.update_territory_and_customer_groups()
+		self.update_customer_groups()
 
-	def update_territory_and_customer_groups(self):
+	def update_customer_groups(self):
 		ignore_doctypes = ["Lead", "Opportunity", "POS Profile", "Tax Rule", "Pricing Rule"]
-		if frappe.flags.territory_changed:
-			update_linked_doctypes('Customer', self.name, 'Territory', self.territory, ignore_doctypes)
 		if frappe.flags.customer_group_changed:
 			update_linked_doctypes('Customer', self.name, 'Customer Group',
 				self.customer_group, ignore_doctypes)

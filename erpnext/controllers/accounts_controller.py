@@ -11,6 +11,7 @@ from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.sales_and_purchase_return import validate_return
 from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled
 from erpnext.exceptions import InvalidCurrency
+from six import text_type
 
 force_item_fields = ("item_group", "brand", "stock_uom")
 
@@ -666,6 +667,8 @@ class AccountsController(TransactionBase):
 			self.remove(item)
 
 	def set_payment_schedule(self):
+		if self.doctype == 'Sales Invoice' and self.is_pos: return
+
 		posting_date = self.get("bill_date") or self.get("posting_date") or self.get("transaction_date")
 		date = self.get("due_date")
 		due_date = date or posting_date
@@ -695,6 +698,8 @@ class AccountsController(TransactionBase):
 		dates = []
 		li = []
 
+		if self.doctype == 'Sales Invoice' and self.is_pos: return
+
 		for d in self.get("payment_schedule"):
 			if self.doctype == "Sales Order" and getdate(d.due_date) < getdate(self.transaction_date):
 				frappe.throw(_("Row {0}: Due Date cannot be before posting date").format(d.idx))
@@ -708,6 +713,8 @@ class AccountsController(TransactionBase):
 				.format(list=duplicates))
 
 	def validate_payment_schedule_amount(self):
+		if self.doctype == 'Sales Invoice' and self.is_pos: return
+
 		if self.get("payment_schedule"):
 			total = 0
 			for d in self.get("payment_schedule"):
@@ -926,7 +933,7 @@ def get_payment_terms(terms_template, posting_date=None, grand_total=None, bill_
 @frappe.whitelist()
 def get_payment_term_details(term, posting_date=None, grand_total=None, bill_date=None):
 	term_details = frappe._dict()
-	if isinstance(term, unicode):
+	if isinstance(term, text_type):
 		term = frappe.get_doc("Payment Term", term)
 	else:
 		term_details.payment_term = term.payment_term

@@ -3,6 +3,11 @@
 Production Planning Tool helps you plan production and purchase of Items for a
 period (usually a week or a month).
 
+<div class-"embed-container">
+  <iframe src="https://www.youtube.com/embed/i0E_RcngliQ?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+  </iframe>
+</div>
+
 This list of Items can be generated from the open Sales Orders or pending Material Requests that can be Manufactured in the system
 and will generate:
 

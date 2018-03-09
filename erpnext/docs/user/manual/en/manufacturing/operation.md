@@ -10,4 +10,9 @@ You can also create a Operation by:
 
 <img class="screenshot" alt="Operation" src="{{docs_base_url}}/assets/img/manufacturing/operation.png">
 
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/UVGfzwOOZC4?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+    </iframe>
+</div>
+
 {next}
