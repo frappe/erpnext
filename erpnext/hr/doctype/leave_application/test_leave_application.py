@@ -14,7 +14,7 @@ _test_records = [
  {
   "company": "_Test Company",
   "doctype": "Leave Application",
-  "employee": "_T-Employee-0001",
+  "employee": "_T-Employee-00001",
   "from_date": "2013-05-01",
   "leave_type": "_Test Leave Type",
   "posting_date": "2013-01-02",
@@ -23,7 +23,7 @@ _test_records = [
  {
   "company": "_Test Company",
   "doctype": "Leave Application",
-  "employee": "_T-Employee-0002",
+  "employee": "_T-Employee-00002",
   "from_date": "2013-05-01",
   "leave_type": "_Test Leave Type",
   "posting_date": "2013-01-02",
@@ -32,7 +32,7 @@ _test_records = [
  {
   "company": "_Test Company",
   "doctype": "Leave Application",
-  "employee": "_T-Employee-0001",
+  "employee": "_T-Employee-00001",
   "from_date": "2013-01-15",
   "leave_type": "_Test Leave Type LWP",
   "posting_date": "2013-01-02",
@@ -188,7 +188,7 @@ class TestLeaveApplication(unittest.TestCase):
 		application.half_day_date = application.from_date
 
 		self.assertRaises(OverlapError, application.insert)
-		
+
 	def test_overlap_with_half_day_3(self):
 		self._clear_roles()
 		self._clear_applications()
@@ -206,14 +206,14 @@ class TestLeaveApplication(unittest.TestCase):
 		application.half_day = 1
 		application.half_day_date = "2013-01-05"
 		application.insert()
-		
+
 		# Apply leave from 4-7, half day on 5th
 		application = self.get_application(_test_records[0])
 		application.from_date = "2013-01-04"
 		application.to_date = "2013-01-07"
 		application.half_day = 1
 		application.half_day_date = "2013-01-05"
-		
+
 		self.assertRaises(OverlapError, application.insert)
 
 		# Apply leave from 5-7, half day on 5th
@@ -230,15 +230,15 @@ class TestLeaveApplication(unittest.TestCase):
 		from frappe.utils.user import add_role
 		add_role("test1@example.com", "Employee")
 		add_role("test@example.com", "Leave Approver")
-		self._add_employee_leave_approver("_T-Employee-0002", "test@example.com")
+		self._add_employee_leave_approver("_T-Employee-00002", "test@example.com")
 
-		make_allocation_record(employee="_T-Employee-0002")
+		make_allocation_record(employee="_T-Employee-00002")
 
 		application = self.get_application(_test_records[1])
 
 		frappe.db.set_value("Leave Block List", "_Test Leave Block List",
 			"applies_to_all_departments", 1)
-		frappe.db.set_value("Employee", "_T-Employee-0002", "department",
+		frappe.db.set_value("Employee", "_T-Employee-00002", "department",
 			"_Test Department")
 
 		frappe.set_user("test1@example.com")
@@ -255,7 +255,7 @@ def make_allocation_record(employee=None, leave_type=None):
 
 	allocation = frappe.get_doc({
 		"doctype": "Leave Allocation",
-		"employee": employee or "_T-Employee-0001",
+		"employee": employee or "_T-Employee-00001",
 		"leave_type": leave_type or "_Test Leave Type",
 		"from_date": "2013-01-01",
 		"to_date": "2015-12-31",
