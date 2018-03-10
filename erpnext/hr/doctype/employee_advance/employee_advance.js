@@ -81,5 +81,16 @@ frappe.ui.form.on('Employee Advance', {
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
 		});
-	}
+	},
+
+	employee: function (frm) {
+			return frappe.call({
+				method: "get_due_advance_amount",
+				doc: cur_frm.doc,
+				callback: function(r) {
+					frm.set_value("due_advance_amount",r.message);
+					refresh_field("due_advance_amount");
+				}
+			});
+		}
 });

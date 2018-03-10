@@ -53,6 +53,10 @@ class EmployeeAdvance(Document):
 		self.set_status()
 		frappe.db.set_value("Employee Advance", self.name , "status", self.status)
 
+	def get_due_advance_amount(self):
+		employee_due_amount = frappe.get_all("Employee Advance",filters={"employee":self.employee,"docstatus":1,"posting_date":("<=",self.posting_date)},fields=["advance_amount","paid_amount"])
+		return sum([(emp.advance_amount -emp.paid_amount) for emp in employee_due_amount])
+
 	def update_claimed_amount(self):
 		claimed_amount = frappe.db.sql("""
 			select sum(ifnull(allocated_amount, 0))
