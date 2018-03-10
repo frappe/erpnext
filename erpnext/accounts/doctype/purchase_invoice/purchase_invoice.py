@@ -316,17 +316,18 @@ class PurchaseInvoice(BuyingController):
 				if item.item_code == pr_item.item_code:
 					pr_item.valuation_rate = item.rate
 
-			# save will update landed_cost_voucher_amount and voucher_amount in PR,
-			# as those fields are allowed to edit after submit
+			# save will update item valuation rate in PR
 			pr_doc.save()
 
-			# update stock & gl entries for cancelled state of PR
+			# manually set state of PR to 'cancelled' in order to remove
+			# stock ledger and general ledger entries related to PR
 			pr_doc.docstatus = 2
 			pr_doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
 			pr_doc.make_gl_entries_on_cancel(repost_future_gle=False)
 
 
-			# update stock & gl entries for submit state of PR
+			# now we manually set state of PR to 'submitted' in order to add
+			# updated stock ledger and general ledger entries related to PR
 			pr_doc.docstatus = 1
 			pr_doc.update_stock_ledger(via_landed_cost_voucher=True)
 			pr_doc.make_gl_entries()
