@@ -372,6 +372,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 		doc.ignore_pricing_rule = 1
 		doc.run_method("set_missing_values")
 		doc.run_method("calculate_taxes_and_totals")
+		doc.run_method("set_pr_flag")
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)

@@ -100,6 +100,9 @@ class PurchaseInvoice(BuyingController):
 
 		super(PurchaseInvoice, self).set_missing_values(for_validate)
 
+	def set_pr_flag(self):
+    		self.has_purchase_receipt = 1
+
 	def check_conversion_rate(self):
 		default_currency = erpnext.get_company_currency(self.company)
 		if not default_currency:
