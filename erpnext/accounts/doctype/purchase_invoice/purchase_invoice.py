@@ -299,7 +299,7 @@ class PurchaseInvoice(BuyingController):
 			update_serial_nos_after_submit(self, "items")
 
 		if self.update_purchase_receipt == 1:
-  		self.update_sl_valuation()
+			self.update_sl_valuation()
 
 		# this sequence because outstanding may get -negative
 		self.make_gl_entries()
@@ -309,27 +309,27 @@ class PurchaseInvoice(BuyingController):
 
 	def update_sl_valuation(self):
 		for item in self.get("items"):
-		pr = item.purchase_receipt
-		pr_doc = frappe.get_doc("Purchase Receipt", pr)
+			pr = item.purchase_receipt
+			pr_doc = frappe.get_doc("Purchase Receipt", pr)
 		
-		for pr_item in pr_doc.get("items"):
-			if item.item_code == pr_item.item_code:
-				pr_item.valuation_rate = item.rate
+			for pr_item in pr_doc.get("items"):
+				if item.item_code == pr_item.item_code:
+					pr_item.valuation_rate = item.rate
 
-		# save will update landed_cost_voucher_amount and voucher_amount in PR,
-		# as those fields are allowed to edit after submit
-		pr_doc.save()
+			# save will update landed_cost_voucher_amount and voucher_amount in PR,
+			# as those fields are allowed to edit after submit
+			pr_doc.save()
 
-		# update stock & gl entries for cancelled state of PR
-		pr_doc.docstatus = 2
-		pr_doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
-		pr_doc.make_gl_entries_on_cancel(repost_future_gle=False)
+			# update stock & gl entries for cancelled state of PR
+			pr_doc.docstatus = 2
+			pr_doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
+			pr_doc.make_gl_entries_on_cancel(repost_future_gle=False)
 
 
-		# update stock & gl entries for submit state of PR
-		pr_doc.docstatus = 1
-		pr_doc.update_stock_ledger(via_landed_cost_voucher=True)
-		pr_doc.make_gl_entries()
+			# update stock & gl entries for submit state of PR
+			pr_doc.docstatus = 1
+			pr_doc.update_stock_ledger(via_landed_cost_voucher=True)
+			pr_doc.make_gl_entries()
 
 	def update_fixed_asset(self):
 		for d in self.get("items"):
