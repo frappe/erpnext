@@ -78,7 +78,7 @@ class Project(Document):
         self.onload()
 
 
-    def after_insert(self):
+    def on_update(self):
         self.validate_project_roles()
 
 
@@ -336,6 +336,47 @@ class Project(Document):
             btea_doc.flags.ignore_mandatory = True
             btea_doc.insert(ignore_permissions=True)
             return frappe.db.sql("select name from `tabProject Charter` where project='{0}'".format(self.name))[0][0]
+
+
+
+
+    def add_roles_responsibilities(self):
+        # roles_and_responsibilities = frappe.db.sql("select name1,party,project_role from `tabRoles And Responsibilities` where parent='{0}'".format(self.name))
+        lst=[]
+        for row in self.roles_and_responsibilities:
+            if row.name1:
+                lst.append(row)
+
+        return lst
+
+                # if row.party == 'Client':
+                #     if row.project_role == 'Steering Committee':
+                #         self.client_steering_name = row.name1
+                #     if row.project_role == 'Ownership level':
+                #         self.client_ownership_name = row.name1
+                #     if row.project_role == 'Project Management':
+                #         self.client_management_name = row.name1
+                #     if row.project_role == 'Technical management':
+                #         self.client_technical_name = row.name1
+                # if row.party == 'Tawari':
+                #     if row.project_role == 'Steering Committee':
+                #         self.tawari_steering_name = row.name1
+                #     if row.project_role == 'Ownership level':
+                #         self.tawari_ownership_name = row.name1
+                #     if row.project_role == 'Project Management':
+                #         self.tawari_management_name = row.name1
+                #     if row.project_role == 'Technical management':
+                #         self.tawari_technical_name = row.name1
+                # if row.party == 'Partner/Supplier':
+                #     if row.project_role == 'Steering Committee':
+                #         self.partner_steering_name = row.name1
+                #     if row.project_role == 'Ownership level':
+                #         self.partner_ownership_name = row.name1
+                #     if row.project_role == 'Project Management':
+                #         self.partner_management_name = row.name1
+                #     if row.project_role == 'Technical management':
+                #         self.partner_technical_name = row.name1
+
 
 
 

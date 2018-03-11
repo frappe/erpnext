@@ -91,13 +91,13 @@ frappe.ui.form.on('Business Trip', {
             get_current_user();
 
             cur_frm.set_query("requested_employee", function() {
-                    return {
-                        query: "erpnext.hr.doctype.business_trip.business_trip.get_approvers",
-                        filters: [
-                            ["Employee", "name", "!=", cur_frm.doc.employee],
-                        ]
-                    };
-                });
+                return {
+                    query: "erpnext.hr.doctype.business_trip.business_trip.get_approvers",
+                    filters: [
+                        ["Employee", "name", "!=", cur_frm.doc.employee],
+                    ]
+                };
+            });
 
 
 

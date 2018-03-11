@@ -422,5 +422,8 @@ def update_custom_field(doc, method):
 		allowed=""
 		
 		for j in workflow_transitions:
-			 if j.state == doc.workflow_state:
+			if j.state == doc.workflow_state:
 				doc.handled_by = j.allowed
+				break
+
+			doc.handled_by = "--"

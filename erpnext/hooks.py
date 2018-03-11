@@ -168,7 +168,10 @@ standard_queries = {
 
 doc_events = {
 	"*": {
-        "validate": "erpnext.controllers.queries.update_custom_field",
+		"validate": "erpnext.controllers.queries.update_custom_field",
+        "on_update": "erpnext.setup.doctype.user_notification.user_notification.hr_notifications",
+        "on_submit": "erpnext.setup.doctype.user_notification.user_notification.hr_notifications"
+
     },
 	"Stock Entry": {
 		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty",
@@ -207,7 +210,6 @@ scheduler_events = {
 		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.trigger_emails',
 		"erpnext.hr.doctype.governmental_documents.governmental_documents.hooked_validate_notification_message",
 		"erpnext.hr.doctype.employee.employee.hooked_validate_exp_dates",
-		"erpnext.hr.doctype.health_insurance_info.health_insurance_info.hooked_validate_exp_date",
 		'erpnext.hr.doctype.leave_application.leave_application.create_return_from_leave_statement_after_leave'
 	],
 	"daily": [
@@ -218,6 +220,7 @@ scheduler_events = {
 		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",
 		"erpnext.hr.doctype.employee.employee.send_birthday_reminders",
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
+		"erpnext.hr.doctype.health_insurance_info.health_insurance_info.hooked_validate_exp_date",
 		#~ "erpnext.accounts.doctype.asset.depreciation.post_depreciation_entries",
 		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary',
 		'erpnext.hr.doctype.attendance.attendance.validate_absence_and_notify',

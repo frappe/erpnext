@@ -96,7 +96,7 @@ class BusinessTrip(Document):
             elif u'Employee' in frappe.get_roles(frappe.session.user):
                 self.workflow_state = "Pending"
 
-            self.requested_department=self.department
+            # self.requested_department=self.department
 
 
     def validate_dates(self):

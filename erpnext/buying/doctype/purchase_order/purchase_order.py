@@ -111,7 +111,8 @@ class PurchaseOrder(BuyingController):
 	def on_update(self):
 		if hasattr(self,'workflow_state'):
 			if self.workflow_state == "Approved By Requester" and not self.project:
-				self.set("handled_by", "Budget Controller")
+				self.handled_by = "Budget Controller"
+				# self.set("handled_by", "Budget Controller")
 
 	def before_update_after_submit(self):
 		if hasattr(self,'workflow_state'):

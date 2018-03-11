@@ -1155,12 +1155,16 @@ def hooked_leave_allocation_builder():
 					if getdate(add_years(emp.date_of_joining,1)) > getdate(nowdate()):
 						allocation_from_date = emp.date_of_joining
 						allocation_to_date = add_days(add_years(emp.date_of_joining,1),-1)
+						if emp.name == "EMP/1007":
+							print("sssss"  "  " + allocation_from_date)
 					else:
 						day = "0" + str(getdate(emp.date_of_joining).day) if len(str(getdate(emp.date_of_joining).day)) == 1 else str(getdate(emp.date_of_joining).day)
 						month = "0" + str(getdate(emp.date_of_joining).month) if len(str(getdate(emp.date_of_joining).month)) == 1 else str(getdate(emp.date_of_joining).month)
 						year = str(getdate(nowdate()).year)
 						allocation_from_date = year + "-" + month + "-" + day
 						allocation_to_date = add_days(add_years(allocation_from_date,1),-1)
+						if emp.name == "EMP/1007":
+							print("mmmmm"+ "  " + allocation_from_date)
 
 					if lt.name == "Annual Leave - اجازة اعتيادية":
 						if getdate(nowdate()) > getdate(add_months(emp.date_of_joining,3)):
@@ -1175,7 +1179,9 @@ def hooked_leave_allocation_builder():
 								if prev_year_total_leaves_allocated == prev_year_applied_days:
 									new_leaves_allocated = 22
 								elif prev_year_total_leaves_allocated > prev_year_applied_days:
-									new_leaves_allocated = prev_year_total_leaves_allocated - prev_year_applied_days
+									remain_days = prev_year_total_leaves_allocated - prev_year_applied_days
+									new_leaves_allocated = remain_days + 22
+									print(new_leaves_allocated)
 									if new_leaves_allocated > 33:
 										new_leaves_allocated = 33
 							else:

@@ -199,8 +199,7 @@ class MaterialRequest(BuyingController):
 			doctype='User Permission',
 			user=user_emp[0].user_id,
 			allow="Material Request",
-			for_value=self.name,
-			apply_for_all_roles=apply
+			for_value=self.name
 			)).insert(ignore_permissions = True)
 			# user = frappe.get_doc("User", user_emp[0].user_id)
 			# frappe.permissions.add_user_permission("Material Request", self.name, user_emp[0].user_id, apply=False)
