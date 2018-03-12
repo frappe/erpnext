@@ -562,9 +562,8 @@ class TestStockEntry(unittest.TestCase):
 
 		rm_cost = 0
 		for d in stock_entry.get("items"):
-			if d.s_warehouse:
+			if d.item_code != "_Test FG Item 2":
 				rm_cost += flt(d.amount)
-
 		fg_cost = filter(lambda x: x.item_code=="_Test FG Item 2", stock_entry.get("items"))[0].amount
 		self.assertEqual(fg_cost,
 			flt(rm_cost + bom_operation_cost + production_order.additional_operating_cost, 2))
