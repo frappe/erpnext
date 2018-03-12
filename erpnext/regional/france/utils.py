@@ -9,9 +9,7 @@ def create_transaction_log(doc, method):
 	region = get_region()
 	if region not in ["France"]:
 		return
-
 	else:
-
 		data = str(doc.as_dict())
 
 		frappe.get_doc({
@@ -20,14 +18,6 @@ def create_transaction_log(doc, method):
 			"document_name": doc.name,
 			"data": data
 		}).insert(ignore_permissions=True)
-
-def check_deletion_permission(doc, method):
-	region = get_region()
-	if region not in ["France"]:
-		return
-
-	else:
-		frappe.throw(_("Deletion is not permitted for country {0}".format(region)))
 
 # don't remove this function it is used in tests
 def test_method():

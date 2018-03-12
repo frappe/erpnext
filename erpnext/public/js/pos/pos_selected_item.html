@@ -9,7 +9,7 @@
 	</div>
 	<div class="pos-list-row">
 		<div class="cell">{{ __("Discount") }}: %</div>
-		<input type="tel" class="form-control cell pos-item-disc" value="{%= discount_percentage %}">
+		<input type="tel" class="form-control cell pos-item-disc" {% if !allow_user_to_edit_discount %} disabled {% endif %} value="{%= discount_percentage %}">
 	</div>
 	<div class="pos-list-row">
 		<div class="cell">{{ __("Price") }}:</div>
