@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _, throw
-from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate, add_days, add_months, get_last_day
+from frappe.utils import today, flt, cint, fmt_money, formatdate, getdate, add_days, add_months, get_last_day, nowdate
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
@@ -36,9 +36,28 @@ class AccountsController(TransactionBase):
 			if self.doctype in relevant_docs:
 				self.set_payment_schedule()
 
+	def ensure_is_not_blocked(self):
+		is_supplier_payment = self.doctype == 'Payment Entry' and self.party_type == 'Supplier'
+		is_buying_invoice = self.doctype in ['Purchase Invoice', 'Purchase Order']
+		supplier = None
+		supplier_name = None
+
+		if is_buying_invoice or is_supplier_payment:
+			supplier_name = self.supplier if is_buying_invoice else self.party
+			supplier = frappe.get_doc('Supplier', supplier_name)
+
+		if supplier and supplier_name and supplier.on_hold:
+			if (is_buying_invoice and supplier.hold_type in ['All', 'Invoices']) or \
+					(is_supplier_payment and supplier.hold_type in ['All', 'Payments']):
+				if not supplier.release_date or getdate(nowdate()) <= supplier.release_date:
+					frappe.msgprint(
+						_('{0} is blocked so this transaction cannot proceed'.format(supplier_name)), raise_exception=1)
+
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
+
+		self.ensure_is_not_blocked()
 
 		self.validate_date_with_fiscal_year()
 

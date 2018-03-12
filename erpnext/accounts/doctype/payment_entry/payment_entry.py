@@ -58,6 +58,7 @@ class PaymentEntry(AccountsController):
 		self.set_remarks()
 		self.validate_duplicate_entry()
 		self.validate_allocated_amount()
+		self.ensure_is_not_blocked()
 
 	def on_submit(self):
 		self.setup_party_account_field()
