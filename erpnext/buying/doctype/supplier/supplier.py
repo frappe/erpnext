@@ -19,6 +19,12 @@ class Supplier(TransactionBase):
 		load_address_and_contact(self)
 		self.load_dashboard_info()
 
+	def before_save(self):
+		if not self.on_hold:
+			self.hold_type = ''
+		elif self.on_hold and not self.hold_type:
+			self.hold_type = 'All'
+
 	def load_dashboard_info(self):
 		info = get_dashboard_info(self.doctype, self.name)
 		self.set_onload('dashboard_info', info)
