@@ -39,8 +39,8 @@ def add_custom_fields():
 
 	custom_fields = {
 		'Address': [
-			dict(fieldname='gst_state_number', label='GST State Number',
-				fieldtype='Int', insert_after='gst_state'),
+			dict(fieldname='auto_repeat', label='Auto Repeat',
+				fieldtype='Link', insert_after='gst_state'),
 		],
 		'Sales Invoice': [
 			dict(fieldname='invoice_copy', label='Invoice Copy',
