@@ -51,7 +51,7 @@ def get_consumed_items(condition):
 			sum(se_item.transfer_qty) as 'consume_qty'
 		from `tabStock Entry` se, `tabStock Entry Detail` se_item
 		where se.name = se_item.parent and se.docstatus = 1
-		and ifnull(se_item.t_warehouse, '') = '' %s
+		and (ifnull(se_item.t_warehouse, '') = '' or se.purpose = 'Subcontract') %s
 		group by se_item.item_code""" % (condition), as_dict=1)
 
 	cn_items_map = {}

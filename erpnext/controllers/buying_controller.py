@@ -195,7 +195,11 @@ class BuyingController(StockController):
 			self.set('supplied_items', [])
 
 	def update_raw_materials_supplied(self, item, raw_material_table):
-		bom_items = self.get_items_from_bom(item.item_code, item.bom)
+		exploded_item = 1
+		if hasattr(item, 'include_exploded_items'):
+			exploded_item = item.get('include_exploded_items')
+
+		bom_items = get_items_from_bom(item.item_code, item.bom, exploded_item)
 		raw_materials_cost = 0
 		items = list(set([d.item_code for d in bom_items]))
 		item_wh = frappe._dict(frappe.db.sql("""select item_code, default_warehouse
@@ -275,20 +279,6 @@ class BuyingController(StockController):
 			for d in rm_supplied_details:
 				if d not in delete_list:
 					self.append(raw_material_table, d)
-
-	def get_items_from_bom(self, item_code, bom):
-		bom_items = frappe.db.sql("""select t2.item_code,
-			t2.stock_qty / ifnull(t1.quantity, 1) as qty_consumed_per_unit,
-			t2.rate, t2.stock_uom, t2.name, t2.description, t2.source_warehouse
-			from `tabBOM` t1, `tabBOM Item` t2, tabItem t3
-			where t2.parent = t1.name and t1.item = %s
-			and t1.docstatus = 1 and t1.is_active = 1 and t1.name = %s
-			and t2.item_code = t3.name and t3.is_stock_item = 1""", (item_code, bom), as_dict=1)
-
-		if not bom_items:
-			msgprint(_("Specified BOM {0} does not exist for Item {1}").format(bom, item_code), raise_exception=1)
-
-		return bom_items
 
 	@property
 	def sub_contracted_items(self):
@@ -456,3 +446,21 @@ class BuyingController(StockController):
 		else:
 			frappe.throw(_("Please enter Reqd by Date"))
 
+def get_items_from_bom(item_code, bom, exploded_item=1):
+	doctype = "BOM Item" if not exploded_item else "BOM Explosion Item"
+
+	bom_items = frappe.db.sql("""select t2.item_code, t2.name,
+			t2.rate, t2.stock_uom, t2.source_warehouse, t2.description,
+			t2.stock_qty / ifnull(t1.quantity, 1) as qty_consumed_per_unit
+		from
+			`tabBOM` t1, `tab{0}` t2, tabItem t3
+		where
+			t2.parent = t1.name and t1.item = %s
+			and t1.docstatus = 1 and t1.is_active = 1 and t1.name = %s
+			and t2.item_code = t3.name and t3.is_stock_item = 1""".format(doctype),
+			(item_code, bom), as_dict=1)
+
+	if not bom_items:
+		msgprint(_("Specified BOM {0} does not exist for Item {1}").format(bom, item_code), raise_exception=1)
+
+	return bom_items
