@@ -3,7 +3,8 @@
 
 frappe.ui.form.on('Physician Schedule', {
 	refresh: function(frm) {
-		frm.add_custom_button(__('Add Time Slots'), () => {
+		cur_frm.fields_dict["time_slots"].grid.wrapper.find('.grid-add-row').hide();
+		cur_frm.fields_dict["time_slots"].grid.add_custom_button(__('Add Time Slots'), () => {
 			var d = new frappe.ui.Dialog({
 				fields: [
 					{fieldname: 'day', label: __('Day'), fieldtype:'Select',
