@@ -12,10 +12,8 @@ class TestWoocommerce(unittest.TestCase):
 		woo_settings.save(ignore_permissions=True)
 		frappe.db.commit()
 
-		# reset data after custom fields are created
-		reset_test_data()
 		r = emulate_request()
-
+		print(r.text)
 		self.assertTrue(r.status_code == 200)
 		self.assertTrue(frappe.get_value("Customer",{"woocommerce_email":"tony@gmail.com"}))
 		self.assertTrue(frappe.get_value("Item",{"woocommerce_id": 56}))
@@ -28,17 +26,6 @@ class TestWoocommerce(unittest.TestCase):
 		r = emulate_request()
 		self.assertTrue(r.status_code == 200)
 		self.assertTrue(frappe.get_value("Sales Order",{"woocommerce_id":74}))
-
-def reset_test_data():
-	cancel_and_delete_order()
-	name = ["Customer","Item"]
-	for i in name:
-		v = frappe.get_all(i)
-		v_length = len(v)
-		for j in range(v_length):
-			frappe.delete_doc(i,v[j].name)
-
-	frappe.db.commit()
 
 def emulate_request():
 	# Emulate Woocommerce Request
