@@ -65,6 +65,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "May Concern Letter",
+					"label": _("May Concern Letter"),
 					"description":_("May Concern Letter"),
 					"hide_count": True
 				},
@@ -368,6 +369,14 @@ def get_data():
 					"type": "report",
 					"is_query_report": True,
 					"name": "Salary Output Report",
+					"label": _("Salary Output Report"),
+					"doctype": "Salary Slip"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Main Salary Structure",
+					"label": _("Main Salary Structure"),
 					"doctype": "Salary Slip"
 				},
 				{
