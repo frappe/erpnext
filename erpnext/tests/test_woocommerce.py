@@ -2,8 +2,6 @@ import unittest, frappe, erpnext, requests, os, time
 
 class TestWoocommerce(unittest.TestCase):
 	def test_woocommerce_request(self):
-		reset_test_data()
-
 		# Set Secret in Woocommerce Settings
 		woo_settings = frappe.get_doc("Woocommerce Settings")
 		woo_settings.secret = "ec434676aa1de0e502389f515c38f89f653119ab35e9117c7a79e576"
@@ -14,6 +12,8 @@ class TestWoocommerce(unittest.TestCase):
 		woo_settings.save(ignore_permissions=True)
 		frappe.db.commit()
 
+		# reset data after custom fields are created
+		reset_test_data()
 		r = emulate_request()
 
 		self.assertTrue(r.status_code == 200)
