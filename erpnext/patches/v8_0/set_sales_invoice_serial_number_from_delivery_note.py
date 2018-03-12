@@ -26,7 +26,7 @@ def execute():
 		if not sales_invoice or not serial_nos:
 			continue
 
-		serial_nos = ["'%s'"%no for no in serial_nos.split("\n")]
+		serial_nos = ["'%s'"%frappe.db.escape(no) for no in serial_nos.split("\n")]
 
 		frappe.db.sql("""
 			UPDATE 
@@ -36,7 +36,7 @@ def execute():
 			WHERE
 				name in ({serial_nos})
 			""".format(
-				sales_invoice=sales_invoice,
+				sales_invoice=frappe.db.escape(sales_invoice),
 				serial_nos=",".join(serial_nos)
 			)
 		)

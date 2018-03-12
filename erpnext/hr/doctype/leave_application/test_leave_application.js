@@ -1,7 +1,7 @@
 QUnit.module('hr');
 
 QUnit.test("Test: Leave application [HR]", function (assert) {
-	assert.expect(5);
+	assert.expect(4);
 	let done = assert.async();
 	let today_date = frappe.datetime.nowdate();
 	let leave_date = frappe.datetime.add_days(today_date, 1);	// leave for tomorrow
@@ -16,35 +16,27 @@ QUnit.test("Test: Leave application [HR]", function (assert) {
 				{to_date: leave_date},
 				{half_day: 1},
 				{employee: employee.message.name},
-				{leave_approver: "Administrator"},
 				{follow_via_email: 0}
 			]);
 		},
+
 		() => frappe.timeout(1),
-		// check calculated total leave days
-		() => assert.equal("0.5", cur_frm.doc.total_leave_days,
-			"leave application for half day"),
-		() => assert.ok(!cur_frm.doc.docstatus,
-			"leave application not submitted with status as open"),
-		() => cur_frm.set_value("status", "Approved"),	// approve the application [as administrator]
-		() => frappe.timeout(0.5),
-		// save form
-		() => cur_frm.save(),
-		() => frappe.timeout(1),
-		() => cur_frm.savesubmit(),
-		() => frappe.timeout(1),
+		() => frappe.click_button('Actions'),
+		() => frappe.click_link('Approve'), // approve the application [as administrator]
 		() => frappe.click_button('Yes'),
 		() => frappe.timeout(1),
 		() => assert.ok(cur_frm.doc.docstatus,
 			"leave application submitted after approval"),
+
 		// check auto filled posting date [today]
+
 		() => assert.equal(today_date, cur_frm.doc.posting_date,
 			"posting date correctly set"),
 		() => frappe.set_route("List", "Leave Application", "List"),
 		() => frappe.timeout(1),
-		// check approved application in list
-		() => assert.deepEqual(["Test Employee 1", "Approved"], [cur_list.data[0].employee_name, cur_list.data[0].status],
-			"leave for correct employee is approved"),
+		// // check approved application in list
+		() => assert.deepEqual(["Test Employee 1", 1], [cur_list.data[0].employee_name, cur_list.data[0].docstatus]),
+		// 	"leave for correct employee is submitted"),
 		() => done()
 	]);
 });

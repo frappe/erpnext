@@ -10,7 +10,7 @@ QUnit.test("test: warehouse", function (assert) {
 		() => frappe.tests.make(
 			"Warehouse", [
 				{warehouse_name: "Laptop Scrap Warehouse"},
-				{company: "Razer Blade"}
+				{company: "For Testing"}
 			]
 		),
 

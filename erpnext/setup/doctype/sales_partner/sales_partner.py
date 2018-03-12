@@ -16,7 +16,7 @@ class SalesPartner(WebsiteGenerator):
 
 	def onload(self):
 		"""Load address and contacts in `__onload`"""
-		load_address_and_contact(self, "sales_partner")
+		load_address_and_contact(self)
 
 	def autoname(self):
 		self.name = self.partner_name

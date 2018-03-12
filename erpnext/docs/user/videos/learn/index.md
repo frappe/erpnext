@@ -27,8 +27,8 @@
               ERPNext for Retailers</a>
             <span class="text-muted pull-right">39:21</span>
         </li>
-        <li><a href="/docs/user/videos/learn/schools.html">
-              ERPNext for Schools</a>
+        <li><a href="/docs/user/videos/learn/education.html">
+              ERPNext for Education</a>
             <span class="text-muted pull-right">39:21</span>
         </li>
     </ul>
@@ -240,10 +240,6 @@
         <li><a href="/docs/user/videos/learn/employee.html">
             Employees</a>
             <span class="text-muted pull-right">1:59</span>
-        </li>
-        <li><a href="/docs/user/videos/learn/processing-payroll.html">
-            Processing Payroll</a>
-              <span class="text-muted pull-right">4:00</span>
         </li>
         <li><a href="/docs/user/videos/learn/leave-management.html">
             Leave Management</a>

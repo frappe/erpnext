@@ -1,7 +1,7 @@
 QUnit.module('setup');
 
 QUnit.test("Test: Company [SetUp]", function (assert) {
-	assert.expect(1);
+	assert.expect(2);
 	let done = assert.async();
 
 	frappe.run_serially([
@@ -16,8 +16,10 @@ QUnit.test("Test: Company [SetUp]", function (assert) {
 		// save form
 		() => cur_frm.save(),
 		() => frappe.timeout(1),
-		() => assert.equal("Test Company", cur_frm.doc.company_name,
-			'name of company correctly saved'),
+		() => assert.equal("Debtors - TC", cur_frm.doc.default_receivable_account,
+			'chart of acounts created'),
+		() => assert.equal("Main - TC", cur_frm.doc.cost_center,
+			'chart of cost centers created'),
 		() => done()
 	]);
 });

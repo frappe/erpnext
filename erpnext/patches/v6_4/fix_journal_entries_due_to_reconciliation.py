@@ -1,7 +1,7 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 import frappe
 
 def execute():
@@ -44,7 +44,7 @@ def execute():
 				where name=%s""", d.name)
 
 	for d in journal_entries:
-		print d
+		print(d)
 		# delete existing gle
 		frappe.db.sql("delete from `tabGL Entry` where voucher_type='Journal Entry' and voucher_no=%s", d)
 

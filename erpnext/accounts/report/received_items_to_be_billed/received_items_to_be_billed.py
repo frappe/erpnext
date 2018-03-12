@@ -15,12 +15,12 @@ def execute(filters=None):
 def get_column():
 	return [
 		_("Purchase Receipt") + ":Link/Purchase Receipt:120", _("Date") + ":Date:100",
-		_("Suplier") + ":Link/Supplier:120", _("Suplier Name") + "::120",
-		_("Project") + ":Link/Project:120", _("Item Code") + ":Link/Item:120", 
+		_("Supplier") + ":Link/Supplier:120", _("Supplier Name") + "::120",
+		_("Project") + ":Link/Project:120", _("Item Code") + ":Link/Item:120",
 		_("Amount") + ":Currency:100", _("Billed Amount") + ":Currency:100", _("Amount to Bill") + ":Currency:100",
 		_("Item Name") + "::120", _("Description") + "::120", _("Company") + ":Link/Company:120",
 	]
 
 def get_args():
-	return {'doctype': 'Purchase Receipt', 'party': 'supplier', 
+	return {'doctype': 'Purchase Receipt', 'party': 'supplier',
 		'date': 'posting_date', 'order': 'name', 'order_by': 'desc'}

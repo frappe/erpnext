@@ -2,13 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
-test_ignore = ["Account", "Cost Center"]
-
 import frappe
 import unittest
 from frappe.utils import random_string
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import get_charts_for_country
 
+test_ignore = ["Account", "Cost Center", "Payment Terms Template"]
 test_records = frappe.get_test_records('Company')
 
 class TestCompany(unittest.TestCase):
@@ -46,7 +45,8 @@ class TestCompany(unittest.TestCase):
 
 	def test_coa_based_on_country_template(self):
 		countries = ["India", "Brazil", "United Arab Emirates", "Canada", "Germany", "France",
-			"Guatemala", "Indonesia", "Mexico", "Nicaragua", "Netherlands", "Singapore"]
+			"Guatemala", "Indonesia", "Mexico", "Nicaragua", "Netherlands", "Singapore",
+			"Brazil", "Argentina", "Hungary", "Taiwan"]
 		
 		for country in countries:
 			templates = get_charts_for_country(country)

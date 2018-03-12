@@ -11,13 +11,13 @@ You can either directly create your Customers via
 
 > Selling > Customer
 
-<img class="screenshot" alt="Create Customer" src="/docs/assets/img/crm/create-customer.gif">
+<img class="screenshot" alt="Create Customer" src="{{docs_base_url}}/assets/img/crm/create-customer.gif">
 
 or upload it via the [Data Import Tool](/docs/user/manual/en/setting-up/data/data-import-tool.html).
 
 A Customer can avail the features (operations) in the selling process. The general flow can be summarised as:
 
-<img class="screenshot" alt="Customer" src="/docs/assets/img/crm/customer-to selling-flowchart.jpeg">
+<img class="screenshot" alt="Customer" src="{{docs_base_url}}/assets/img/crm/customer-to selling-flowchart.jpeg">
 
 > Note: Customers are separate from Contacts and Addresses. A Customer can
 have multiple Contacts and Addresses.
@@ -68,6 +68,16 @@ Grouping will help you get better analysis of your data and
 identify which Customers are profitable and which are not. Territories will
 help you set sales targets for the respective territories.
 You can also mention [Sales Person](/docs/user/manual/en/CRM/setup/sales-person.html) against a customer.
+
+
+<div>
+    <style>.embed-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; } .embed-container iframe, .embed-container object, .embed-container embed { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    </style>
+    <div class='embed-container'>
+        <iframe src='https://www.youtube.com/embed//zsrrVDk6VBs?end=212' frameborder='0' allowfullscreen>
+        </iframe>
+    </div>
+</div>
 
 ### Sales Partner
 

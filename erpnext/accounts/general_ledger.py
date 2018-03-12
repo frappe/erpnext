@@ -65,6 +65,8 @@ def merge_similar_entries(gl_map):
 
 	# filter zero debit and credit entries
 	merged_gl_map = filter(lambda x: flt(x.debit, 9)!=0 or flt(x.credit, 9)!=0, merged_gl_map)
+	merged_gl_map = list(merged_gl_map)
+		
 	return merged_gl_map
 
 def check_if_in_list(gle, gl_map):
@@ -136,14 +138,7 @@ def round_off_debit_credit(gl_map):
 		make_round_off_gle(gl_map, debit_credit_diff)
 
 def make_round_off_gle(gl_map, debit_credit_diff):
-	round_off_account, round_off_cost_center = frappe.db.get_value("Company", gl_map[0].company,
-		["round_off_account", "round_off_cost_center"]) or [None, None]
-	if not round_off_account:
-		frappe.throw(_("Please mention Round Off Account in Company"))
-
-	if not round_off_cost_center:
-		frappe.throw(_("Please mention Round Off Cost Center in Company"))
-
+	round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(gl_map[0].company)
 
 	round_off_gle = frappe._dict()
 	for k in ["voucher_type", "voucher_no", "company",
@@ -164,6 +159,17 @@ def make_round_off_gle(gl_map, debit_credit_diff):
 	})
 
 	gl_map.append(round_off_gle)
+
+def get_round_off_account_and_cost_center(company):
+	round_off_account, round_off_cost_center = frappe.db.get_value("Company", company,
+		["round_off_account", "round_off_cost_center"]) or [None, None]
+	if not round_off_account:
+		frappe.throw(_("Please mention Round Off Account in Company"))
+
+	if not round_off_cost_center:
+		frappe.throw(_("Please mention Round Off Cost Center in Company"))
+
+	return round_off_account, round_off_cost_center
 
 def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		adv_adj=False, update_outstanding="Yes"):
@@ -187,8 +193,9 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 	for entry in gl_entries:
 		validate_frozen_account(entry["account"], adv_adj)
 		validate_balance_type(entry["account"], adv_adj)
-		validate_expense_against_budget(entry)
+		if not adv_adj:
+			validate_expense_against_budget(entry)
 		
-		if entry.get("against_voucher") and update_outstanding == 'Yes':
+		if entry.get("against_voucher") and update_outstanding == 'Yes' and not adv_adj:
 			update_outstanding_amt(entry["account"], entry.get("party_type"), entry.get("party"), entry.get("against_voucher_type"),
 				entry.get("against_voucher"), on_cancel=True)

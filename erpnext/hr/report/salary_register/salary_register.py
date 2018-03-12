@@ -19,6 +19,12 @@ def execute(filters=None):
 		row = [ss.name, ss.employee, ss.employee_name, ss.branch, ss.department, ss.designation,
 			ss.company, ss.start_date, ss.end_date, ss.leave_withut_pay, ss.payment_days]
 
+		if not ss.branch == None:columns[3] = columns[3].replace('-1','120')
+		if not ss.department  == None: columns[4] = columns[4].replace('-1','120')
+		if not ss.designation  == None: columns[5] = columns[5].replace('-1','120')
+		if not ss.leave_withut_pay  == None: columns[9] = columns[9].replace('-1','130')
+			
+
 		for e in earning_types:
 			row.append(ss_earning_map.get(ss.name, {}).get(e))
 
@@ -34,12 +40,20 @@ def execute(filters=None):
 	return columns, data
 
 def get_columns(salary_slips):
+	"""
 	columns = [
 		_("Salary Slip ID") + ":Link/Salary Slip:150",_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140", _("Branch") + ":Link/Branch:120",
 		_("Department") + ":Link/Department:120", _("Designation") + ":Link/Designation:120",
 		_("Company") + ":Link/Company:120", _("Start Date") + "::80", _("End Date") + "::80", _("Leave Without Pay") + ":Float:130",
 		_("Payment Days") + ":Float:120"
 	]
+	"""
+	columns = [
+		_("Salary Slip ID") + ":Link/Salary Slip:150",_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140", _("Branch") + ":Link/Branch:-1",
+		_("Department") + ":Link/Department:-1", _("Designation") + ":Link/Designation:-1",
+		_("Company") + ":Link/Company:120", _("Start Date") + "::80", _("End Date") + "::80", _("Leave Without Pay") + ":Float:-1",
+		_("Payment Days") + ":Float:120"
+	]	
 
 	salary_components = {_("Earning"): [], _("Deduction"): []}
 

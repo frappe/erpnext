@@ -103,6 +103,7 @@ def make_material_request(item_code, qty):
 		mr.material_request_type = "Purchase"
 
 	mr.transaction_date = frappe.flags.current_date
+	mr.schedule_date = frappe.utils.add_days(mr.transaction_date, 7)
 
 	mr.append("items", {
 		"doctype": "Material Request Item",
@@ -115,7 +116,7 @@ def make_material_request(item_code, qty):
 	return mr
 
 def add_suppliers(rfq):
-	for i in xrange(2):
+	for i in range(2):
 		supplier = get_random("Supplier")
 		if supplier not in [d.supplier for d in rfq.get('suppliers')]:
 			rfq.append("suppliers", { "supplier": supplier })
@@ -128,6 +129,7 @@ def make_subcontract():
 		po = frappe.new_doc("Purchase Order")
 		po.is_subcontracted = "Yes"
 		po.supplier = get_random("Supplier")
+		po.schedule_date = frappe.utils.add_days(frappe.flags.current_date, 7)
 
 		item_code = get_random("Item", {"is_sub_contracted_item": 1})
 

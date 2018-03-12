@@ -38,13 +38,8 @@ cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.add_fetch('employee','employee_name','employee_name');
 
 cur_frm.cscript.onload = function(doc) {
-	if(!doc.approval_status)
-		cur_frm.set_value("approval_status", "Draft");
-
 	if (doc.__islocal) {
 		cur_frm.set_value("posting_date", frappe.datetime.get_today());
-		if(doc.amended_from)
-			cur_frm.set_value("approval_status", "Draft");
 		cur_frm.cscript.clear_sanctioned(doc);
 	}
 
@@ -53,12 +48,6 @@ cur_frm.cscript.onload = function(doc) {
 			query: "erpnext.controllers.queries.employee_query"
 		};
 	};
-
-	cur_frm.set_query("exp_approver", function() {
-		return {
-			query: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_approver"
-		};
-	});
 };
 
 cur_frm.cscript.clear_sanctioned = function(doc) {
@@ -75,23 +64,29 @@ cur_frm.cscript.refresh = function(doc) {
 	cur_frm.cscript.set_help(doc);
 
 	if(!doc.__islocal) {
-		cur_frm.toggle_enable("exp_approver", doc.approval_status=="Draft");
-		cur_frm.toggle_enable("approval_status", (doc.exp_approver==frappe.session.user && doc.docstatus==0));
 
-		if (doc.docstatus==0 && doc.exp_approver==frappe.session.user && doc.approval_status=="Approved")
-			cur_frm.savesubmit();
-
-		if (doc.docstatus===1 && doc.approval_status=="Approved") {
+		if (doc.docstatus===1) {
 			/* eslint-disable */
-			// no idea how `me` works here 
-			if (cint(doc.total_amount_reimbursed) > 0 && frappe.model.can_read("Journal Entry")) {
+			// no idea how `me` works here
+			var entry_doctype, entry_reference_doctype, entry_reference_name;
+			if(doc.__onload.make_payment_via_journal_entry){
+				entry_doctype = "Journal Entry";
+				entry_reference_doctype = "Journal Entry Account.reference_type";
+				entry_reference_name = "Journal Entry.reference_name";
+			} else {
+				entry_doctype = "Payment Entry";
+				entry_reference_doctype = "Payment Entry Reference.reference_doctype";
+				entry_reference_name = "Payment Entry Reference.reference_name";
+			}
+
+			if (cint(doc.total_amount_reimbursed) > 0 && frappe.model.can_read(entry_doctype)) {
 				cur_frm.add_custom_button(__('Bank Entries'), function() {
 					frappe.route_options = {
-						"Journal Entry Account.reference_type": me.frm.doc.doctype,
-						"Journal Entry Account.reference_name": me.frm.doc.name,
+						entry_route_doctype: me.frm.doc.doctype,
+						entry_route_name: me.frm.doc.name,
 						company: me.frm.doc.company
 					};
-					frappe.set_route("List", "Journal Entry");
+					frappe.set_route("List", entry_doctype);
 				}, __("View"));
 			}
 			/* eslint-enable */
@@ -103,14 +98,6 @@ cur_frm.cscript.set_help = function(doc) {
 	cur_frm.set_intro("");
 	if(doc.__islocal && !in_list(frappe.user_roles, "HR User")) {
 		cur_frm.set_intro(__("Fill the form and save it"));
-	} else {
-		if(doc.docstatus==0 && doc.approval_status=="Draft") {
-			if(frappe.session.user==doc.exp_approver) {
-				cur_frm.set_intro(__("You are the Expense Approver for this record. Please Update the 'Status' and Save"));
-			} else {
-				cur_frm.set_intro(__("Expense Claim is pending approval. Only the Expense Approver can update status."));
-			}
-		}
 	}
 };
 
@@ -157,12 +144,22 @@ frappe.ui.form.on("Expense Claim", {
 		frm.trigger("set_query_for_payable_account");
 		frm.add_fetch("company", "cost_center", "cost_center");
 		frm.add_fetch("company", "default_payable_account", "payable_account");
+		frm.set_query("employee_advance", "advances", function(doc) {
+			return {
+				filters: [
+					['docstatus', '=', 1],
+					['employee', '=', doc.employee],
+					['paid_amount', '>', 0],
+					['paid_amount', '>', 'claimed_amount']
+				]
+			};
+		});
 	},
 
 	refresh: function(frm) {
 		frm.trigger("toggle_fields");
 
-		if(frm.doc.docstatus == 1 && frm.doc.approval_status == 'Approved') {
+		if(frm.doc.docstatus == 1) {
 			frm.add_custom_button(__('Accounting Ledger'), function() {
 				frappe.route_options = {
 					voucher_no: frm.doc.name,
@@ -173,7 +170,7 @@ frappe.ui.form.on("Expense Claim", {
 			}, __("View"));
 		}
 
-		if (frm.doc.docstatus===1 && frm.doc.approval_status=="Approved"
+		if (frm.doc.docstatus===1
 				&& (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total_sanctioned_amount))
 				&& frappe.model.can_create("Payment Entry")) {
 			frm.add_custom_button(__('Payment'),
@@ -234,6 +231,37 @@ frappe.ui.form.on("Expense Claim", {
 
 	task: function(frm) {
 		erpnext.expense_claim.set_title(frm);
+	},
+
+	employee: function(frm) {
+		frm.events.get_advances(frm);
+	},
+
+	get_advances: function(frm) {
+		frappe.model.clear_table(frm.doc, "advances");
+		if (frm.doc.employee) {
+			return frappe.call({
+				method: "erpnext.hr.doctype.expense_claim.expense_claim.get_advances",
+				args: {
+					employee: frm.doc.employee
+				},
+				callback: function(r, rt) {
+				
+					if(r.message) {
+						$.each(r.message, function(i, d) {
+							var row = frappe.model.add_child(frm.doc, "Expense Claim Advance", "advances");
+							row.employee_advance = d.name;
+							row.posting_date = d.posting_date;
+							row.advance_account = d.advance_account;
+							row.advance_paid = d.paid_amount;
+							row.unclaimed_amount = flt(d.paid_amount) - flt(d.claimed_amount);
+							row.allocated_amount = flt(d.paid_amount) - flt(d.claimed_amount);
+						});
+						refresh_field("advances");
+					}
+				}
+			});
+		}
 	}
 });
 
@@ -252,6 +280,37 @@ frappe.ui.form.on("Expense Claim Detail", {
 	sanctioned_amount: function(frm, cdt, cdn) {
 		var doc = frm.doc;
 		cur_frm.cscript.calculate_total(doc,cdt,cdn);
+	}
+});
+
+frappe.ui.form.on("Expense Claim Advance", {
+	employee_advance: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		if(!frm.doc.employee){
+			frappe.msgprint(__('Select an employee to get the employee advance.'));
+			frm.doc.advances = [];
+			refresh_field("advances");
+		}
+		else {
+			return frappe.call({
+				method: "erpnext.hr.doctype.expense_claim.expense_claim.get_advances",
+				args: {
+					employee: frm.doc.employee,
+					advance_id: child.employee_advance
+				},
+				callback: function(r, rt) {
+					if(r.message) {
+						child.employee_advance = r.message[0].name;
+						child.posting_date = r.message[0].posting_date;
+						child.advance_account = r.message[0].advance_account;
+						child.advance_paid = r.message[0].paid_amount;
+						child.unclaimed_amount = flt(r.message[0].paid_amount) - flt(r.message[0].claimed_amount);
+						child.allocated_amount = flt(r.message[0].paid_amount) - flt(r.message[0].claimed_amount);
+						refresh_field("advances");
+					}
+				}
+			});
+		}
 	}
 });
 

@@ -1,12 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 
 import frappe, random
 from frappe.desk import query_report
 from erpnext.stock.stock_ledger import NegativeStockError
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoRequiredError, SerialNoQtyError
+from erpnext.stock.doctype.batch.batch import UnableToSelectBatchError
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
 
@@ -36,7 +37,7 @@ def make_purchase_receipt():
 			try:
 				pr.submit()
 			except NegativeStockError:
-				print 'Negative stock for {0}'.format(po)
+				print('Negative stock for {0}'.format(po))
 				pass
 			frappe.db.commit()
 
@@ -59,7 +60,7 @@ def make_delivery_note():
 			try:
 				dn.submit()
 				frappe.db.commit()
-			except (NegativeStockError, SerialNoRequiredError, SerialNoQtyError):
+			except (NegativeStockError, SerialNoRequiredError, SerialNoQtyError, UnableToSelectBatchError):
 				frappe.db.rollback()
 
 def make_stock_reconciliation():

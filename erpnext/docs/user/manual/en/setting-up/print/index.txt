@@ -1,5 +1,6 @@
 print-settings
 print-format-builder
+print-style
 print-headings
 letter-head
 address-template

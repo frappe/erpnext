@@ -3,180 +3,151 @@
 
 from __future__ import unicode_literals, print_function
 import frappe
-import json
-from operator import itemgetter
 from frappe.utils import add_to_date
-from erpnext.accounts.party import get_dashboard_info
-from erpnext.accounts.utils import get_currency_precision
 
 @frappe.whitelist()
-def get_leaderboard(obj):
+def get_leaderboard(doctype, timespan, company, field):
 	"""return top 10 items for that doctype based on conditions"""
-	obj = frappe._dict(json.loads(obj))
-
-	doctype = obj.selected_doctype
-	timeline = obj.selected_timeline
-	filters = {"modified":(">=", get_date_from_string(timeline))}
-	items = []
+	from_date = get_from_date(timespan)
+	records = []
 	if doctype == "Customer":
-		items = get_all_customers(doctype, filters, [])
+		records = get_all_customers(from_date, company, field)
 	elif  doctype == "Item":
-		items = get_all_items(doctype, filters, [])
+		records = get_all_items(from_date, company, field)
 	elif  doctype == "Supplier":
-		items = get_all_suppliers(doctype, filters, [])
+		records = get_all_suppliers(from_date, company, field)
 	elif  doctype == "Sales Partner":
-		items = get_all_sales_partner(doctype, filters, [])
-	
-	if len(items) > 0:
-		return filter_leaderboard_items(obj, items)
-	return []
+		records = get_all_sales_partner(from_date, company, field)
+	elif doctype == "Sales Person":
+		records = get_all_sales_person(from_date, company)
 
+	return records
 
-# filters start
-def filter_leaderboard_items(obj, items):
-	"""return items based on seleted filters"""
-	
-	reverse = False if obj.selected_filter_item and obj.selected_filter_item["value"] == "ASC" else True
-	# key : (x[field1], x[field2]) while sorting on 2 values
-	filtered_list = []
-	selected_field = obj.selected_filter_item and obj.selected_filter_item["field"]
-	if selected_field:
-		filtered_list  = sorted(items, key=itemgetter(selected_field), reverse=reverse)
-		value = items[0].get(selected_field)
+def get_all_customers(from_date, company, field):
+	if field == "outstanding_amount":
+		return frappe.db.sql("""
+			select customer as name, sum(outstanding_amount) as value
+			FROM `tabSales Invoice`
+			where docstatus = 1 and posting_date >= %s and company = %s
+			group by customer
+			order by value DESC
+			limit 20
+		""", (from_date, company), as_dict=1)
+	else:
+		if field == "total_sales_amount":
+			select_field = "sum(so_item.base_net_amount)"
+		elif field == "total_qty_sold":
+			select_field = "sum(so_item.stock_qty)"
 
-		allowed = isinstance(value, unicode) or isinstance(value, str)
-		# now sort by length
-		if allowed and '$' in value:
-			filtered_list.sort(key= lambda x: len(x[selected_field]), reverse=reverse)
-	
-	# return only 10 items'
-	return filtered_list[:10]
+		return frappe.db.sql("""
+			select so.customer as name, {0} as value
+			FROM `tabSales Order` as so JOIN `tabSales Order Item` as so_item
+				ON so.name = so_item.parent
+			where so.docstatus = 1 and so.transaction_date >= %s and so.company = %s
+			group by so.customer
+			order by value DESC
+			limit 20
+		""".format(select_field), (from_date, company), as_dict=1)
 
-# filters end
+def get_all_items(from_date, company, field):
+	if field in ("available_stock_qty", "available_stock_value"):
+		return frappe.db.sql("""
+			select item_code as name, {0} as value
+			from tabBin
+			group by item_code
+			order by value desc
+			limit 20
+		""".format("sum(actual_qty)" if field=="available_stock_qty" else "sum(stock_value)"), as_dict=1)
+	else:
+		if field == "total_sales_amount":
+			select_field = "sum(order_item.base_net_amount)"
+			select_doctype = "Sales Order"
+		elif field == "total_purchase_amount":
+			select_field = "sum(order_item.base_net_amount)"
+			select_doctype = "Purchase Order"
+		elif field == "total_qty_sold":
+			select_field = "sum(order_item.stock_qty)"
+			select_doctype = "Sales Order"
+		elif field == "total_qty_purchased":
+			select_field = "sum(order_item.stock_qty)"
+			select_doctype = "Purchase Order"
 
+		return frappe.db.sql("""
+			select order_item.item_code as name, {0} as value
+			from `tab{1}` sales_order join `tab{1} Item` as order_item
+				on sales_order.name = order_item.parent
+			where sales_order.docstatus = 1
+				and sales_order.company = %s and sales_order.transaction_date >= %s
+			group by order_item.item_code
+			order by value desc
+			limit 20
+		""".format(select_field, select_doctype), (company, from_date), as_dict=1)
 
-# utils start
-def destructure_tuple_of_tuples(tup_of_tup):
-	"""return tuple(tuples) as list"""
-	return [y for x in tup_of_tup for y in x]
+def get_all_suppliers(from_date, company, field):
+	if field == "outstanding_amount":
+		return frappe.db.sql("""
+			select supplier as name, sum(outstanding_amount) as value
+			FROM `tabPurchase Invoice`
+			where docstatus = 1 and posting_date >= %s and company = %s
+			group by supplier
+			order by value DESC
+			limit 20""", (from_date, company), as_dict=1)
+	else:
+		if field == "total_purchase_amount":
+			select_field = "sum(purchase_order_item.base_net_amount)"
+		elif field == "total_qty_purchased":
+			select_field = "sum(purchase_order_item.stock_qty)"
 
-def get_date_from_string(seleted_timeline):
+		return frappe.db.sql("""
+			select purchase_order.supplier as name, {0} as value
+			FROM `tabPurchase Order` as purchase_order LEFT JOIN `tabPurchase Order Item`
+				as purchase_order_item ON purchase_order.name = purchase_order_item.parent
+			where purchase_order.docstatus = 1 and  purchase_order.modified >= %s
+				and  purchase_order.company = %s
+			group by purchase_order.supplier
+			order by value DESC
+			limit 20""".format(select_field), (from_date, company), as_dict=1)
+
+def get_all_sales_partner(from_date, company, field):
+	if field == "total_sales_amount":
+		select_field = "sum(base_net_total)"
+	elif field == "total_commission":
+		select_field = "sum(total_commission)"
+
+	return frappe.db.sql("""
+		select sales_partner as name, {0} as value
+		from `tabSales Order`
+	 	where ifnull(sales_partner, '') != '' and docstatus = 1
+			and transaction_date >= %s and company = %s
+	 	group by sales_partner
+	 	order by value DESC
+	 	limit 20
+	""".format(select_field), (from_date, company), as_dict=1)
+
+def get_all_sales_person(from_date, company):
+	return frappe.db.sql("""
+		select sales_team.sales_person as name, sum(sales_order.base_net_total) as value
+		from `tabSales Order` as sales_order join `tabSales Team` as sales_team
+			on sales_order.name = sales_team.parent and sales_team.parenttype = 'Sales Order'
+	 	where sales_order.docstatus = 1
+			and sales_order.transaction_date >= %s
+			and sales_order.company = %s
+	 	group by sales_team.sales_person
+	 	order by value DESC
+	 	limit 20
+	""", (from_date, company), as_dict=1)
+
+def get_from_date(seleted_timespan):
 	"""return string for ex:this week as date:string"""
 	days = months = years = 0
-	if "month" == seleted_timeline.lower():
+	if "month" == seleted_timespan.lower():
 		months = -1
-	elif "quarter" == seleted_timeline.lower():
+	elif "quarter" == seleted_timespan.lower():
 		months = -3
-	elif "year" == seleted_timeline.lower():
+	elif "year" == seleted_timespan.lower():
 		years = -1
 	else:
 		days = -7
 
-	return add_to_date(None, years=years, months=months, days=days, as_string=True, as_datetime=True)
-
-def get_filter_list(selected_filter):
-	"""return list of keys"""
-	return map((lambda y : y["field"]), filter(lambda x : not (x["field"] == "title" or x["field"] == "modified"), selected_filter))
-
-def get_avg(items):
-	"""return avg of list items"""
-	length = len(items)
-	if length > 0:
-		return sum(items) / length
-	return 0
-
-def get_formatted_value(value, add_symbol=True):
-	"""return formatted value"""
-	currency_precision = get_currency_precision() or 2
-	if not add_symbol:
-		return '{:.{pre}f}'.format(value, pre=currency_precision)
-	
-	company = frappe.db.get_default("company") or frappe.get_all("Company")[0].name
-	currency = frappe.get_doc("Company", company).default_currency or frappe.boot.sysdefaults.currency;
-	currency_symbol = frappe.db.get_value("Currency", currency, "symbol")
-	return  currency_symbol + ' ' + '{:.{pre}f}'.format(value, pre=currency_precision)
-
-# utils end
-
-
-# get data
-def get_all_customers(doctype, filters, items, start=0, limit=100):
-	"""return all customers"""
-
-	x = frappe.get_list(doctype, fields=["name", "modified"], filters=filters, limit_start=start, limit_page_length=limit)
-	
-	for val in x:
-		y = dict(frappe.db.sql('''select name, grand_total from `tabSales Invoice` where customer = %s''', (val.name)))
-		invoice_list = y.keys()
-		if len(invoice_list) > 0:
-			item_count = frappe.db.sql('''select count(name) from `tabSales Invoice Item` where parent in (%s)''' % ", ".join(
-				['%s'] * len(invoice_list)), tuple(invoice_list))
-			items.append({"title": val.name,
-				"total_amount": get_formatted_value(sum(y.values())),
-				"href":"#Form/Customer/" + val.name,
-				"total_item_purchased": sum(destructure_tuple_of_tuples(item_count)),
-				"modified": str(val.modified)})
-	if len(x) > 99:
-		start = start + 1
-		return get_all_customers(doctype, filters, items, start=start)
-	else:
-		return items
-
-def get_all_items(doctype, filters, items, start=0, limit=100):
-	"""return all items"""
-
-	x = frappe.get_list(doctype, fields=["name", "modified"], filters=filters, limit_start=start, limit_page_length=limit)
-	for val in x:
-		data = frappe.db.sql('''select item_code from `tabMaterial Request Item` where item_code = %s''', (val.name), as_list=1)
-		requests = destructure_tuple_of_tuples(data)
-		data = frappe.db.sql('''select price_list_rate from `tabItem Price` where item_code = %s''', (val.name), as_list=1)
-		avg_price = get_avg(destructure_tuple_of_tuples(data))
-		data = frappe.db.sql('''select item_code from `tabPurchase Invoice Item` where item_code = %s''', (val.name), as_list=1)
-		purchases = destructure_tuple_of_tuples(data)
-		
-		items.append({"title": val.name,
-			"total_request":len(requests),
-			"total_purchase": len(purchases), "href":"#Form/Item/" + val.name,
-			"avg_price": get_formatted_value(avg_price),
-			"modified": val.modified})
-	if len(x) > 99:
-		return get_all_items(doctype, filters, items, start=start)
-	else:
-		return items
-
-def get_all_suppliers(doctype, filters, items, start=0, limit=100):
-	"""return all suppliers"""
-
-	x = frappe.get_list(doctype, fields=["name", "modified"], filters=filters, limit_start=start, limit_page_length=limit)
-	
-	for val in x:
-		info = get_dashboard_info(doctype, val.name)
-		items.append({"title": val.name,
-		"annual_billing":  get_formatted_value(info["billing_this_year"]),
-		"total_unpaid": get_formatted_value(abs(info["total_unpaid"])),
-		"href":"#Form/Supplier/" + val.name,
-		"modified": val.modified})
-
-	if len(x) > 99:
-		return get_all_suppliers(doctype, filters, items, start=start)
-	else:
-		return items
-
-def get_all_sales_partner(doctype, filters, items, start=0, limit=100):
-	"""return all sales partner"""
-	
-	x = frappe.get_list(doctype, fields=["name", "commission_rate", "modified"], filters=filters, limit_start=start, limit_page_length=limit)
-	for val in x:
-		y = frappe.db.sql('''select target_qty, target_amount from `tabTarget Detail` where parent = %s''', (val.name), as_dict=1)
-		target_qty = sum([f["target_qty"] for f in y])
-		target_amount = sum([f["target_amount"] for f in y])
-		items.append({"title": val.name,
-			"commission_rate": get_formatted_value(val.commission_rate, False),
-			"target_qty": target_qty,
-			"target_amount": get_formatted_value(target_amount),
-			"href":"#Form/Sales Partner/" + val.name,
-			"modified": val.modified})
-	if len(x) > 99:
-		return get_all_sales_partner(doctype, filters, items, start=start)
-	else:
-		return items
+	return add_to_date(None, years=years, months=months, days=days,
+		as_string=True, as_datetime=True)

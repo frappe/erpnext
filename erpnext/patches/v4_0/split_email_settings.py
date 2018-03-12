@@ -1,11 +1,11 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 import frappe
 
 def execute():
-	print "WARNING!!!! Email Settings not migrated. Please setup your email again."
+	print("WARNING!!!! Email Settings not migrated. Please setup your email again.")
 
 	# this will happen if you are migrating very old accounts
 	# comment out this line below and remember to create new Email Accounts

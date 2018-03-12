@@ -18,13 +18,13 @@ Click [here](/docs/user/manual/en/accounts/setup/fiscal-year.html) to learn more
 
 After Fiscal Year is saved, you will find option to set that Fiscal year as Default.
 
-<img alt="Debit Credit Not Equal" class="screenshot" src="/docs/assets/img/articles/fiscal-year-error-1.png">
+<img alt="Debit Credit Not Equal" class="screenshot" src="{{docs_base_url}}/assets/img/articles/fiscal-year-error-1.png">
 
 Default Fiscal Year will be updated in the Global Default setting as well. You can manually update Default Fiscal Year from:
 
 `Setup > Settings > Global Default`
 
-<img alt="Debit Credit Not Equal" class="screenshot" src="/docs/assets/img/articles/fiscal-year-error-2.png">
+<img alt="Debit Credit Not Equal" class="screenshot" src="{{docs_base_url}}/assets/img/articles/fiscal-year-error-2.png">
 
 Save Global Default, and Reload your ERPNext account. Then, default Fiscal Year will be auto-updated in your transactions.
 

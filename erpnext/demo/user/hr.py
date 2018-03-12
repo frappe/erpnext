@@ -7,7 +7,7 @@ from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
 from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_sales_invoice
 from frappe.utils.make_random import get_random
 from erpnext.hr.doctype.expense_claim.test_expense_claim import get_payable_account
-from erpnext.hr.doctype.expense_claim.expense_claim import get_expense_approver, make_bank_entry
+from erpnext.hr.doctype.expense_claim.expense_claim import make_bank_entry
 from erpnext.hr.doctype.leave_application.leave_application import (get_leave_balance_on,
 	OverlapError, AttendanceAlreadyMarkedError)
 
@@ -17,32 +17,32 @@ def work():
 	mark_attendance()
 	make_leave_application()
 
-	# process payroll
+	# payroll entry
 	if not frappe.db.sql('select name from `tabSalary Slip` where month(adddate(start_date, interval 1 month))=month(curdate())'):
 		# process payroll for previous month
-		process_payroll = frappe.get_doc("Process Payroll", "Process Payroll")
-		process_payroll.company = frappe.flags.company
-		process_payroll.payroll_frequency = 'Monthly'
+		payroll_entry = frappe.new_doc("Payroll Entry")
+		payroll_entry.company = frappe.flags.company
+		payroll_entry.payroll_frequency = 'Monthly'
 
 		# select a posting date from the previous month
-		process_payroll.posting_date = get_last_day(getdate(frappe.flags.current_date) - datetime.timedelta(days=10))
-		process_payroll.payment_account = frappe.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
+		payroll_entry.posting_date = get_last_day(getdate(frappe.flags.current_date) - datetime.timedelta(days=10))
+		payroll_entry.payment_account = frappe.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
 
-		process_payroll.set_start_end_dates()
+		payroll_entry.set_start_end_dates()
 
 		# based on frequency
-		process_payroll.salary_slip_based_on_timesheet = 0
-		process_payroll.create_salary_slips()
-		process_payroll.submit_salary_slips()
-		process_payroll.make_accural_jv_entry()
-		# process_payroll.make_journal_entry(reference_date=frappe.flags.current_date,
+		payroll_entry.salary_slip_based_on_timesheet = 0
+		payroll_entry.create_salary_slips()
+		payroll_entry.submit_salary_slips()
+		payroll_entry.make_accural_jv_entry()
+		# payroll_entry.make_journal_entry(reference_date=frappe.flags.current_date,
 		# 	reference_number=random_string(10))
 
-		process_payroll.salary_slip_based_on_timesheet = 1
-		process_payroll.create_salary_slips()
-		process_payroll.submit_salary_slips()
-		process_payroll.make_accural_jv_entry()
-		# process_payroll.make_journal_entry(reference_date=frappe.flags.current_date,
+		payroll_entry.salary_slip_based_on_timesheet = 1
+		payroll_entry.create_salary_slips()
+		payroll_entry.submit_salary_slips()
+		payroll_entry.make_accural_jv_entry()
+		# payroll_entry.make_journal_entry(reference_date=frappe.flags.current_date,
 		# 	reference_number=random_string(10))
 
 	if frappe.db.get_global('demo_hr_user'):
@@ -55,13 +55,11 @@ def work():
 		expense_claim.company = frappe.flags.company
 		expense_claim.payable_account = get_payable_account(expense_claim.company)
 		expense_claim.posting_date = frappe.flags.current_date
-		expense_claim.exp_approver = filter((lambda x: x[0] != 'Administrator'), get_expense_approver(None, '', None, 0, 20, None))[0][0]
 		expense_claim.insert()
 
 		rand = random.random()
 
 		if rand < 0.4:
-			expense_claim.approval_status = "Approved"
 			update_sanctioned_amount(expense_claim)
 			expense_claim.submit()
 
@@ -73,10 +71,6 @@ def work():
 				je.cheque_date = frappe.flags.current_date
 				je.flags.ignore_permissions = 1
 				je.submit()
-
-		elif rand < 0.2:
-			expense_claim.approval_status = "Rejected"
-			expense_claim.submit()
 
 def get_expenses():
 	expenses = []
@@ -172,7 +166,6 @@ def make_leave_application():
 				"from_date": frappe.flags.current_date,
 				"to_date": to_date,
 				"leave_type": allocated_leave.leave_type,
-				"status": "Approved"
 			})
 			try:
 				leave_application.insert()
@@ -191,8 +184,9 @@ def mark_attendance():
 				"employee": employee.name,
 				"attendance_date": attendance_date
 			})
+
 			leave = frappe.db.sql("""select name from `tabLeave Application`
-				where employee = %s and %s between from_date and to_date and status = 'Approved'
+				where employee = %s and %s between from_date and to_date
 				and docstatus = 1""", (employee.name, attendance_date))
 
 			if leave:

@@ -12,21 +12,21 @@
 			{% } %}
 		</tr>
 	</thead>
-    <tbody>
+	<tbody>
 		{% for(var j=0, k=data.length; j<k; j++) { %}
-            {%
+			{%
 				var row = data[j];
 			%}
 			<tr>
 				{% for(var i=1, l=report.columns.length; i<l; i++) { %}
 					<td class="text-right">
 						{% var fieldname = report.columns[i].field; %}
-                        {% if (i > 10) { %}
-                            {%= format_currency(row[fieldname]) %}
-                        {% } else { %}
-						    {% if (!is_null(row[fieldname])) { %}
-							    {%= row[fieldname] %}
-                            {% } %}
+						{% if (report.columns[i].fieldtype=='Currency' && !isNaN(row[fieldname])) { %}
+							{%= format_currency(row[fieldname]) %}
+						{% } else { %}
+							{% if (!is_null(row[fieldname])) { %}
+								{%= row[fieldname] %}
+							{% } %}
 						{% } %}
 					</td>
 				{% } %}

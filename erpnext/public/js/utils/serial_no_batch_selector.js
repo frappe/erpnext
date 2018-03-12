@@ -1,15 +1,16 @@
 
 erpnext.SerialNoBatchSelector = Class.extend({
-	init: function(opts) {
+	init: function(opts, show_dialog) {
 		$.extend(this, opts);
+		this.show_dialog = show_dialog;
 		// frm, item, warehouse_details, has_batch, oldest
 		let d = this.item;
 
 		// Don't show dialog if batch no or serial no already set
-		if(d && d.has_batch_no && !d.batch_no) {
+		if(d && d.has_batch_no && (!d.batch_no || this.show_dialog)) {
 			this.has_batch = 1;
 			this.setup();
-		} else if(d && d.has_serial_no && !d.serial_no) {
+		} else if(d && d.has_serial_no && (!d.serial_no || this.show_dialog)) {
 			this.has_batch = 0;
 			this.setup();
 		}
@@ -19,6 +20,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		this.item_code = this.item.item_code;
 		this.qty = this.item.qty;
 		this.make_dialog();
+		this.on_close_dialog();
 	},
 
 	make_dialog: function() {
@@ -93,7 +95,31 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			}
 		});
 
+		if(this.show_dialog) {
+			let d = this.item;
+			if (d.has_serial_no && d.serial_no) {
+				this.dialog.set_value('serial_no', d.serial_no);
+			}
+
+			if (d.batch_no) {
+				this.dialog.fields_dict.batches.df.data.push({
+					'batch_no': d.batch_no,
+					'actual_qty': d.actual_qty,
+					'selected_qty': d.qty,
+					'available_qty': d.actual_batch_qty
+				});
+
+				this.dialog.fields_dict.batches.grid.refresh();
+			}
+		}
+
 		this.dialog.show();
+	},
+
+	on_close_dialog: function() {
+		this.dialog.get_close_btn().on('click', () => {
+			this.on_close && this.on_close(this.item);
+		});
 	},
 
 	validate: function() {
@@ -110,8 +136,10 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			}
 			values.batches.map((batch, i) => {
 				if(!batch.selected_qty || batch.selected_qty === 0 ) {
-					frappe.throw(__("Please select quantity on row " + (i+1)));
-					return false;
+					if (!this.show_dialog) {
+						frappe.throw(__("Please select quantity on row " + (i+1)));
+						return false;
+					}
 				}
 			});
 			return true;
@@ -119,9 +147,11 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		} else {
 			let serial_nos = values.serial_no || '';
 			if (!serial_nos || !serial_nos.replace(/\s/g, '').length) {
-				frappe.throw(__("Please enter serial numbers for serialized item "
-					+ values.item_code));
-				return false;
+				if (!this.show_dialog) {
+					frappe.throw(__("Please enter serial numbers for serialized item "
+						+ values.item_code));
+					return false;
+				}
 			}
 			return true;
 		}
@@ -140,6 +170,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			this.map_row_values(this.item, this.values, 'serial_no', 'qty');
 		}
 		refresh_field("items");
+		this.callback && this.callback(this.item);
 	},
 
 	map_row_values: function(row, values, number, qty_field, warehouse) {
@@ -183,7 +214,10 @@ erpnext.SerialNoBatchSelector = Class.extend({
 						label: __('Select Batch'),
 						in_list_view:1,
 						get_query: function() {
-							return {filters: {item: me.item_code }};
+							return {
+							    filters: {item: me.item_code },
+							    query: 'erpnext.controllers.queries.get_batch_numbers'
+					        };
 						},
 						onchange: function(e) {
 							let val = this.get_value();
@@ -280,7 +314,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				fieldtype: 'Link', fieldname: 'serial_no_select', options: 'Serial No',
 				label: __('Select'),
 				get_query: function() {
-					return { filters: {item_code: me.item_code}};
+					return { filters: {item_code: me.item_code, warehouse: me.warehouse_details.name}};
 				},
 				onchange: function(e) {
 					if(this.in_local_change) return;

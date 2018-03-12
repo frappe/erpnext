@@ -12,7 +12,7 @@ QUnit.test("test sales order", function(assert) {
 						{'delivery_date': frappe.datetime.add_days(frappe.defaults.get_default("year_end_date"), 1)},
 						{'qty': 5},
 						{'item_code': 'Test Product 4'},
-						{'uom': 'unit'},
+						{'uom': 'Unit'},
 					]
 				]},
 				{customer_address: 'Test1-Billing'},

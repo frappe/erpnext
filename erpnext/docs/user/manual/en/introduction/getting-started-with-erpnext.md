@@ -1,7 +1,3 @@
-# Getting Started With Erpnext
-
-<!-- Getting Started with ERPNext-->
-
 # Getting Started with ERPNext
 
 There are many ways to get started with ERPNext.

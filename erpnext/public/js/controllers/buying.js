@@ -18,6 +18,14 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this.setup_queries();
 		this._super();
 
+		this.frm.set_query('shipping_rule', function() {
+			return {
+				filters: {
+					"shipping_rule_type": "Buying"
+				}
+			};
+		});
+
 		/* eslint-disable */
 		// no idea where me is coming from
 		if(this.frm.get_field('shipping_address')) {
@@ -244,10 +252,12 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 							d.qty = d.qty  - my_qty;
 							cur_frm.doc.items[i].stock_qty = my_qty*cur_frm.doc.items[i].conversion_factor;
 							cur_frm.doc.items[i].qty = my_qty;
-
-							frappe.msgprint("Assigning " + d.mr_name + " to " + d.item_code + " (row " + cur_frm.doc.items[i].idx + ")");
+							
+							frappe.msgprint(__("Assigning {0} to {1} (row {2})", 
+								[d.mr_name, d.item_code, cur_frm.doc.items[i].idx]));
+							
 							if (qty > 0) {
-								frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
+								frappe.msgprint(__("Splitting {0} units of {1}", [qty, d.item_code]));
 								var newrow = frappe.model.add_child(cur_frm.doc, cur_frm.doc.items[i].doctype, "items");
 								item_length++;
 
@@ -346,7 +356,21 @@ erpnext.buying.get_items_from_product_bundle = function(frm) {
 			},
 			freeze: true,
 			callback: function(r) {
+				const first_row_is_empty = function(child_table){
+					if($.isArray(child_table) && child_table.length > 0) {
+						return !child_table[0].item_code;
+					}
+					return false;
+				};
+
+				const remove_empty_first_row = function(frm){
+				if (first_row_is_empty(frm.doc.items)){
+					frm.doc.items = frm.doc.items.splice(1);
+					}
+				};
+
 				if(!r.exc && r.message) {
+					remove_empty_first_row(frm);
 					for ( var i=0; i< r.message.length; i++ ) {
 						var d = frm.add_child("items");
 						var item = r.message[i];
@@ -366,3 +390,4 @@ erpnext.buying.get_items_from_product_bundle = function(frm) {
 	});
 	dialog.show();
 }
+

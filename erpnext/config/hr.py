@@ -46,7 +46,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Offer Letter",
+					"name": "Job Offer",
 					"description": _("Offer candidate a Job."),
 				},
 			]
@@ -99,8 +99,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Process Payroll",
-					"label": _("Process Payroll"),
+					"name": "Payroll Entry",
+					"label": _("Payroll Entry"),
 					"description":_("Generate Salary Slips"),
 					"hide_count": True
 				},
@@ -121,6 +121,11 @@ def get_data():
 		{
 			"label": _("Expense Claims"),
 			"items": [
+				{
+					"type": "doctype",
+					"name": "Employee Advance",
+					"description": _("Manage advance amount given to the Employee"),
+				},
 				{
 					"type": "doctype",
 					"name": "Expense Claim",
@@ -176,6 +181,10 @@ def get_data():
 		{
 			"label": _("Training"),
 			"items": [
+				{
+					"type": "doctype",
+					"name": "Training Program"
+				},
 				{
 					"type": "doctype",
 					"name": "Training Event"
@@ -235,8 +244,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Daily Work Summary Settings"
-				},
+					"name": "Daily Work Summary Group"
+				}
 			]
 		},
 		{
@@ -305,12 +314,7 @@ def get_data():
 					"type": "help",
 					"label": _("Expense Claims"),
 					"youtube_id": "5SZHJF--ZFY"
-				},
-				{
-					"type": "help",
-					"label": _("Processing Payroll"),
-					"youtube_id": "apgE-f25Rm0"
-				},
+				}
 			]
 		}
 	]

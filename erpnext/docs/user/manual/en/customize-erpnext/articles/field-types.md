@@ -1,5 +1,3 @@
-# Field Types
-
 #Field Types
 
 Following are the types of fields you can define while creating new ones, or while amend standard ones.
@@ -57,6 +55,17 @@ Integer field holds numeric value, without decimal place.
 - Link
 
 Link field is connected to another master from where it fetches data. For example, in the Quotation master, Customer is a Link field.
+
+- Geolocation
+
+Use Geolocation field to store GeoJSON <a href="https://tools.ietf.org/html/rfc7946#section-3.3">featurecollection</a>. Stores polygons, lines and points. Internally it uses following custom properties for identifying a circle.
+
+```
+{
+	"point_type": "circle",
+	"radius": 10.00
+}
+```
 
 - Password
 

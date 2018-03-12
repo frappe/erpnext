@@ -13,6 +13,12 @@ $.extend(erpnext, {
 			return frappe.boot.sysdefaults.currency;
 	},
 
+	get_presentation_currency_list: () => {
+		const docs = frappe.boot.docs;
+		const currency_list = docs.filter(d => d.doctype === ":Currency").map(d => d.name);
+		return currency_list;
+	},
+
 	toggle_naming_series: function() {
 		if(cur_frm.fields_dict.naming_series) {
 			cur_frm.toggle_display("naming_series", cur_frm.doc.__islocal?true:false);
@@ -35,6 +41,10 @@ $.extend(erpnext, {
 		if(company) {
 			return frappe.get_doc(":Company", company).enable_perpetual_inventory
 		}
+	},
+
+	stale_rate_allowed: () => {
+		return cint(frappe.boot.sysdefaults.allow_stale);
 	},
 
 	setup_serial_no: function() {
@@ -125,7 +135,47 @@ $.extend(erpnext.utils, {
 				}
 			});
 		}
-	}
+	},
+
+	make_subscription: function(doctype, docname) {
+		frappe.call({
+			method: "erpnext.accounts.doctype.subscription.subscription.make_subscription",
+			args: {
+				doctype: doctype,
+				docname: docname
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		})
+	},
+
+	/**
+	* Checks if the first row of a given child table is empty
+	* @param child_table - Child table Doctype
+	* @return {Boolean}
+	**/
+	first_row_is_empty: function(child_table){
+		if($.isArray(child_table) && child_table.length > 0) {
+			return !child_table[0].item_code;
+		}
+		return false;
+	},
+
+	/**
+	* Removes the first row of a child table if it is empty
+	* @param {_Frm} frm - The current form
+	* @param {String} child_table_name - The child table field name
+	* @return {Boolean}
+	**/
+	remove_empty_first_row: function(frm, child_table_name){
+		const rows = frm['doc'][child_table_name];
+		if (this.first_row_is_empty(rows)){
+			frm['doc'][child_table_name] = rows.splice(1);
+		}
+		return rows;
+	},
 });
 
 erpnext.utils.map_current_doc = function(opts) {
@@ -201,6 +251,7 @@ erpnext.utils.map_current_doc = function(opts) {
 			callback: function(r) {
 				if(!r.exc) {
 					var doc = frappe.model.sync(r.message);
+					cur_frm.dirty();
 					cur_frm.refresh();
 				}
 			}
@@ -216,7 +267,7 @@ erpnext.utils.map_current_doc = function(opts) {
 			action: function(selections, args) {
 				let values = selections;
 				if(values.length === 0){
-					frappe.msgprint(__("Please select Quotations"))
+					frappe.msgprint(__("Please select {0}", [opts.source_doctype]))
 					return;
 				}
 				opts.source_name = values;

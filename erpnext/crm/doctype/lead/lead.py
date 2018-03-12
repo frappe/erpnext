@@ -20,9 +20,10 @@ class Lead(SellingController):
 	def onload(self):
 		customer = frappe.db.get_value("Customer", {"lead_name": self.name})
 		self.get("__onload").is_customer = customer
-		load_address_and_contact(self, "lead")
+		load_address_and_contact(self)
 
 	def validate(self):
+		self.set_lead_name()
 		self._prev = frappe._dict({
 			"contact_date": frappe.db.get_value("Lead", self.name, "contact_date") if \
 				(not cint(self.get("__islocal"))) else None,
@@ -98,6 +99,10 @@ class Lead(SellingController):
 			"status": "Lost"
 		})
 
+	def set_lead_name(self):
+		if not self.lead_name:
+			frappe.db.set_value("Lead", self.name, "lead_name", self.company_name)
+
 @frappe.whitelist()
 def make_customer(source_name, target_doc=None):
 	return _make_customer(source_name, target_doc)
@@ -128,7 +133,7 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 
 @frappe.whitelist()
 def make_opportunity(source_name, target_doc=None):
-	target_doc = get_mapped_doc("Lead", source_name, 
+	target_doc = get_mapped_doc("Lead", source_name,
 		{"Lead": {
 			"doctype": "Opportunity",
 			"field_map": {

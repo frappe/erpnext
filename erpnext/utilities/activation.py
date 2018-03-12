@@ -1,3 +1,6 @@
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# License: GNU General Public License v3. See license.txt
+
 import frappe, erpnext
 
 from frappe import _
@@ -51,9 +54,8 @@ def get_help_messages():
 	if get_level() > 6:
 		return []
 
-	messages = []
-
 	domain = frappe.db.get_value('Company', erpnext.get_default_company(), 'domain')
+	messages = []
 
 	message_settings = [
 		frappe._dict(
@@ -137,7 +139,6 @@ def get_help_messages():
 			target=3
 		)
 	]
-
 
 	for m in message_settings:
 		if not m.domain or domain in m.domain:

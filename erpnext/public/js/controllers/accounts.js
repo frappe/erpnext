@@ -20,7 +20,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 				if(frm.cscript.tax_table == "Sales Taxes and Charges") {
 					var account_type = ["Tax", "Chargeable", "Expense Account"];
 				} else {
-					var account_type = ["Tax", "Chargeable", "Income Account"];
+					var account_type = ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation"];
 				}
 
 				return {
@@ -62,15 +62,32 @@ frappe.ui.form.on('Sales Invoice Payment', {
 			frappe.model.set_value(cdt, cdn, 'account', account)
 		})
 	}
-})
+});
+
+frappe.ui.form.on("Sales Invoice", {
+	payment_terms_template: function() {
+		cur_frm.trigger("disable_due_date");
+	}
+});
 
 frappe.ui.form.on('Purchase Invoice', {
 	mode_of_payment: function(frm) {
 		get_payment_mode_account(frm, frm.doc.mode_of_payment, function(account){
 			frm.set_value('cash_bank_account', account);
 		})
+	},
+
+	payment_terms_template: function() {
+		cur_frm.trigger("disable_due_date");
 	}
-})
+});
+
+frappe.ui.form.on("Payment Schedule", {
+	payment_schedule_remove: function() {
+		cur_frm.trigger("disable_due_date");
+	},
+
+});
 
 frappe.ui.form.on('Payment Entry', {
 	mode_of_payment: function(frm) {
@@ -116,7 +133,7 @@ var get_payment_mode_account = function(frm, mode_of_payment, callback) {
 cur_frm.cscript.account_head = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(!d.charge_type && d.account_head){
-		frappe.msgprint("Please select Charge Type first");
+		frappe.msgprint(__("Please select Charge Type first"));
 		frappe.model.set_value(cdt, cdn, "account_head", "");
 	} else if(d.account_head && d.charge_type!=="Actual") {
 		frappe.call({

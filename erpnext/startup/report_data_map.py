@@ -269,7 +269,7 @@ data_map = {
 	},
 	"Purchase Receipt": {
 		"columns": ["name", "supplier", "posting_date", "company"],
-		"conditions": ["docstatus=1"], 
+		"conditions": ["docstatus=1"],
 		"order_by": "posting_date",
 		"links": {
 			"supplier": ["Supplier", "name"],
@@ -278,7 +278,7 @@ data_map = {
 	},
 	"Purchase Receipt Item[Purchase Analytics]": {
 		"columns": ["name", "parent", "item_code", "stock_qty as qty", "base_net_amount"],
-		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"], 
+		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
 			"parent": ["Purchase Receipt", "name"],
@@ -297,5 +297,39 @@ data_map = {
 		"columns": ["name","status","creation","planned_start_date","planned_end_date","status","actual_start_date","actual_end_date", "modified"],
 		"conditions": ["docstatus = 1"],
 		"order_by": "creation"
+	},
+
+	#Medical
+	"Patient": {
+		"columns": ["name", "creation", "owner", "if(patient_name=name, '', patient_name) as patient_name"],
+		"conditions": ["docstatus < 2"],
+		"order_by": "name",
+		"links": {
+			"owner" : ["User", "name"]
+		}
+	},
+	"Patient Appointment": {
+		"columns": ["name", "appointment_type", "patient", "physician", "appointment_date", "department", "status", "company"],
+		"order_by": "name",
+		"links": {
+			"physician": ["Physician", "name"],
+			"appointment_type": ["Appointment Type", "name"]
+		}
+	},
+	"Physician": {
+		"columns": ["name", "department"],
+		"order_by": "name",
+		"links": {
+			"department": ["Department", "name"],
+		}
+
+	},
+	"Appointment Type": {
+		"columns": ["name"],
+		"order_by": "name"
+	},
+	"Medical Department": {
+		"columns": ["name"],
+		"order_by": "name"
 	}
 }

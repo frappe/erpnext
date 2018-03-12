@@ -15,9 +15,6 @@ class Bin(Document):
 		self.validate_mandatory()
 		self.set_projected_qty()
 
-	def on_update(self):
-		update_item_projected_qty(self.item_code)
-
 	def validate_mandatory(self):
 		qf = ['actual_qty', 'reserved_qty', 'ordered_qty', 'indented_qty']
 		for f in qf:
@@ -64,7 +61,7 @@ class Bin(Document):
 	def set_projected_qty(self):
 		self.projected_qty = (flt(self.actual_qty) + flt(self.ordered_qty)
 			+ flt(self.indented_qty) + flt(self.planned_qty) - flt(self.reserved_qty)
-			- flt(self.reserved_qty_for_production))
+			- flt(self.reserved_qty_for_production) - flt(self.reserved_qty_for_sub_contract))
 
 	def get_first_sle(self):
 		sle = frappe.db.sql("""
@@ -90,15 +87,45 @@ class Bin(Document):
 
 		self.set_projected_qty()
 
-		self.db_set('reserved_qty_for_production', self.reserved_qty_for_production)
+		self.db_set('reserved_qty_for_production', flt(self.reserved_qty_for_production))
 		self.db_set('projected_qty', self.projected_qty)
 
+	def update_reserved_qty_for_sub_contracting(self):
+		#reserved qty
+		reserved_qty_for_sub_contract = frappe.db.sql('''
+			select ifnull(sum(itemsup.required_qty),0)
+			from `tabPurchase Order` po, `tabPurchase Order Item Supplied` itemsup
+			where
+				itemsup.rm_item_code = %s
+				and itemsup.parent = po.name
+				and po.docstatus = 1
+				and po.is_subcontracted = 'Yes'
+				and po.status != 'Closed'
+				and po.per_received < 100
+				and itemsup.reserve_warehouse = %s''', (self.item_code, self.warehouse))[0][0]
 
-def update_item_projected_qty(item_code):
-	'''Set total_projected_qty in Item as sum of projected qty in all warehouses'''
-	frappe.db.sql('''update tabItem set
-		total_projected_qty = ifnull((select sum(projected_qty) from tabBin where item_code=%s), 0)
-		where name=%s''', (item_code, item_code))
+		#Get Transferred Entries
+		materials_transferred = frappe.db.sql("""
+			select
+				ifnull(sum(transfer_qty),0)
+			from
+				`tabStock Entry` se, `tabStock Entry Detail` sed, `tabPurchase Order` po
+			where
+				se.docstatus=1
+				and se.purpose='Subcontract'
+				and ifnull(se.purchase_order, '') !=''
+				and sed.item_code = %s
+				and se.name = sed.parent
+				and se.purchase_order = po.name
+				and po.docstatus = 1
+				and po.is_subcontracted = 'Yes'
+				and po.status != 'Closed'
+				and po.per_received < 100
+		""", (self.item_code))[0][0]
+
+		self.db_set('reserved_qty_for_sub_contract', (reserved_qty_for_sub_contract - materials_transferred))
+		self.set_projected_qty()
+		self.db_set('projected_qty', self.projected_qty)
 
 def on_doctype_update():
 	frappe.db.add_index("Bin", ["item_code", "warehouse"])

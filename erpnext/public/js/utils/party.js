@@ -18,6 +18,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 			args = {
 				party: frm.doc.supplier,
 				party_type: "Supplier",
+				bill_date: frm.doc.bill_date,
 				price_list: frm.doc.buying_price_list
 			};
 		}
@@ -171,7 +172,10 @@ erpnext.utils.validate_mandatory = function(frm, label, value, trigger_on) {
 erpnext.utils.get_shipping_address = function(frm, callback){
 	frappe.call({
 		method: "frappe.contacts.doctype.address.address.get_shipping_address",
-		args: {company: frm.doc.company},
+		args: {
+			company: frm.doc.company,
+			address: frm.doc.shipping_address
+		},
 		callback: function(r){
 			if(r.message){
 				frm.set_value("shipping_address", r.message[0]) //Address title or name

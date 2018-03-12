@@ -1,5 +1,3 @@
-# Production Planning Subassembly
-
 #Production Planning & Subassembly
 
 if you need Production Planning Tool to consider raw-materials required for the manufacturing of sub-assembly items selected in the BOM, please check following instructions to achieve the same.

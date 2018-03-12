@@ -1,5 +1,3 @@
-# Duplicate Record
-
 #Duplicate a Record
 
 Duplicate feature helps you to copy values of existing document into new document.
@@ -12,6 +10,6 @@ You will find Copy option under:
 
 `Menu > Copy`
 
-<img alt="Duplicate" class="screenshot" src="/docs/assets/img/articles/duplicate.gif">
+<img alt="Duplicate" class="screenshot" src="{{docs_base_url}}/assets/img/articles/duplicate.gif">
 
 <!-- markdown -->

@@ -152,7 +152,7 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	conditions = []
 
-	return frappe.db.sql("""select tabItem.name, tabItem.item_group, tabItem.image,
+	return frappe.db.sql("""select tabItem.name, tabItem.item_group,
 		if(length(tabItem.item_name) > 40,
 			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name,
 		if(length(tabItem.description) > 40, \
@@ -166,13 +166,15 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				or tabItem.item_group LIKE %(txt)s
 				or tabItem.item_name LIKE %(txt)s
 				or tabItem.description LIKE %(txt)s)
+                or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
 			{fcond} {mcond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
 			idx desc,
 			name, item_name
-		limit %(start)s, %(page_len)s """.format(key=searchfield,
+		limit %(start)s, %(page_len)s """.format(
+			key=searchfield,
 			fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
 			mcond=get_match_cond(doctype).replace('%', '%%')),
 			{
@@ -202,8 +204,8 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 		{
 			'txt': "%%%s%%" % frappe.db.escape(txt),
 			'_txt': txt.replace("%", ""),
-			'start': start,
-			'page_len': page_len
+			'start': start or 0,
+			'page_len': page_len or 20
 		})
 
 def get_project_name(doctype, txt, searchfield, start, page_len, filters):
@@ -227,26 +229,35 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 				"_txt": txt.replace('%', '')
 			})
 
+
 def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters, as_dict):
 	return frappe.db.sql("""
 		select `tabDelivery Note`.name, `tabDelivery Note`.customer, `tabDelivery Note`.posting_date
 		from `tabDelivery Note`
 		where `tabDelivery Note`.`%(key)s` like %(txt)s and
-			`tabDelivery Note`.docstatus = 1 and `tabDelivery Note`.is_return = 0 
+			`tabDelivery Note`.docstatus = 1
 			and status not in ("Stopped", "Closed") %(fcond)s
-			and (`tabDelivery Note`.per_billed < 100 or `tabDelivery Note`.grand_total = 0)
+			and (
+				(`tabDelivery Note`.is_return = 0 and `tabDelivery Note`.per_billed < 100)
+				or `tabDelivery Note`.grand_total = 0
+				or (
+					`tabDelivery Note`.is_return = 1
+					and return_against in (select name from `tabDelivery Note` where per_billed < 100)
+				)
+			)
 			%(mcond)s order by `tabDelivery Note`.`%(key)s` asc
 	""" % {
 		"key": searchfield,
 		"fcond": get_filters_cond(doctype, filters, []),
 		"mcond": get_match_cond(doctype),
 		"txt": "%(txt)s"
-	}, { "txt": ("%%%s%%" % txt) }, as_dict=as_dict)
+	}, {"txt": ("%%%s%%" % txt)}, as_dict=as_dict)
+
 
 def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	cond = ""
 	if filters.get("posting_date"):
-		cond = "and (ifnull(batch.expiry_date, '')='' or batch.expiry_date >= %(posting_date)s)"
+		cond = "and (batch.expiry_date is null or batch.expiry_date >= %(posting_date)s)"
 
 	batch_nos = None
 	args = {
@@ -259,13 +270,14 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	}
 
 	if args.get('warehouse'):
-		batch_nos = frappe.db.sql("""select sle.batch_no, round(sum(sle.actual_qty),2), sle.stock_uom, batch.expiry_date
+		batch_nos = frappe.db.sql("""select sle.batch_no, round(sum(sle.actual_qty),2), sle.stock_uom, concat('MFG-',batch.manufacturing_date), concat('EXP-',batch.expiry_date)
 				from `tabStock Ledger Entry` sle
 				    INNER JOIN `tabBatch` batch on sle.batch_no = batch.name
 				where
 					sle.item_code = %(item_code)s
 					and sle.warehouse = %(warehouse)s
-					and sle.batch_no like %(txt)s
+					and (sle.batch_no like %(txt)s
+					or batch.manufacturing_date like %(txt)s)
 					and batch.docstatus < 2
 					{0}
 					{match_conditions}
@@ -276,9 +288,10 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	if batch_nos:
 		return batch_nos
 	else:
-		return frappe.db.sql("""select name, expiry_date from `tabBatch` batch
+		return frappe.db.sql("""select name, concat('MFG-', manufacturing_date), concat('EXP-',expiry_date) from `tabBatch` batch
 			where item = %(item_code)s
-			and name like %(txt)s
+			and (name like %(txt)s
+			or manufacturing_date like %(txt)s)
 			and docstatus < 2
 			{0}
 			{match_conditions}
@@ -367,31 +380,30 @@ def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
 	sub_query = """ select round(`tabBin`.actual_qty, 2) from `tabBin`
 		where `tabBin`.warehouse = `tabWarehouse`.name
 		{bin_conditions} """.format(
-		bin_conditions=get_filters_cond(doctype, filter_dict.get("Bin"), 
+		bin_conditions=get_filters_cond(doctype, filter_dict.get("Bin"),
 			bin_conditions, ignore_permissions=True))
 
-	response = frappe.db.sql("""select `tabWarehouse`.name,
+	query = """select `tabWarehouse`.name,
 		CONCAT_WS(" : ", "Actual Qty", ifnull( ({sub_query}), 0) ) as actual_qty
 		from `tabWarehouse`
 		where
-		   `tabWarehouse`.`{key}` like %(txt)s
+		   `tabWarehouse`.`{key}` like '{txt}'
 			{fcond} {mcond}
 		order by
 			`tabWarehouse`.name desc
 		limit
-			%(start)s, %(page_len)s
+			{start}, {page_len}
 		""".format(
 			sub_query=sub_query,
 			key=frappe.db.escape(searchfield),
 			fcond=get_filters_cond(doctype, filter_dict.get("Warehouse"), conditions),
-			mcond=get_match_cond(doctype)
-		),
-		{
-			"txt": "%%%s%%" % frappe.db.escape(txt),
-			"start": start,
-			"page_len": page_len
-		})
-	return response
+			mcond=get_match_cond(doctype),
+			start=start,
+			page_len=page_len,
+			txt=frappe.db.escape('%{0}%'.format(txt))
+		)
+
+	return frappe.db.sql(query)
 
 
 def get_doctype_wise_filters(filters):
@@ -400,3 +412,15 @@ def get_doctype_wise_filters(filters):
 	for row in filters:
 		filter_dict[row[0]].append(row)
 	return filter_dict
+
+
+@frappe.whitelist()
+def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
+	query = """select batch_id from `tabBatch`
+			where (expiry_date >= CURDATE() or expiry_date IS NULL)
+			and name like '{txt}'""".format(txt = frappe.db.escape('%{0}%'.format(txt)))
+
+	if filters and filters.get('item'):
+		query += " and item = '{item}'".format(item = frappe.db.escape(filters.get('item')))
+
+	return frappe.db.sql(query, filters)

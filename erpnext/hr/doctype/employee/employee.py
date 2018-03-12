@@ -5,25 +5,26 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import getdate, validate_email_add, today, add_years
-from frappe.model.naming import make_autoname
+from frappe.model.naming import set_name_by_naming_series
 from frappe import throw, _, scrub
 import frappe.permissions
 from frappe.model.document import Document
 from erpnext.utilities.transaction_base import delete_events
-
+from frappe.utils.nestedset import NestedSet
 
 class EmployeeUserDisabledError(frappe.ValidationError):
 	pass
 
+class Employee(NestedSet):
+	nsm_parent_field = 'reports_to'
 
-class Employee(Document):
 	def autoname(self):
 		naming_method = frappe.db.get_value("HR Settings", None, "emp_created_by")
 		if not naming_method:
 			throw(_("Please setup Employee Naming System in Human Resource > HR Settings"))
 		else:
 			if naming_method == 'Naming Series':
-				self.name = make_autoname(self.naming_series + '.####')
+				set_name_by_naming_series(self)
 			elif naming_method == 'Employee Number':
 				self.name = self.employee_number
 			elif naming_method == 'Full Name':
@@ -52,7 +53,11 @@ class Employee(Document):
 				frappe.permissions.remove_user_permission(
 					"Employee", self.name, existing_user_id)
 
+	def update_nsm_model(self):
+		frappe.utils.nestedset.update_nsm(self)
+
 	def on_update(self):
+		self.update_nsm_model()
 		if self.user_id:
 			self.update_user()
 			self.update_user_permissions()
@@ -154,12 +159,12 @@ class Employee(Document):
 			throw(_("Employee cannot report to himself."))
 
 	def on_trash(self):
+		self.update_nsm_model()
 		delete_events(self.doctype, self.name)
 
 	def validate_prefered_email(self):
 		if self.prefered_contact_email and not self.get(scrub(self.prefered_contact_email)):
 			frappe.msgprint(_("Please enter " + self.prefered_contact_email))
-
 
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
@@ -182,7 +187,6 @@ def get_retirement_date(date_of_birth=None):
 			ret = {}
 
 	return ret
-
 
 def validate_employee_role(doc, method):
 	# called via User hook
@@ -241,7 +245,6 @@ def get_holiday_list_for_employee(employee, raise_exception=True):
 
 def is_holiday(employee, date=None):
 	'''Returns True if given Employee has an holiday on the given date
-
 	:param employee: Employee `name`
 	:param date: Date to check. Will check for today if None'''
 
@@ -260,7 +263,7 @@ def deactivate_sales_person(status = None, employee = None):
 			frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
 
 @frappe.whitelist()
-def create_user(employee, user = None):
+def create_user(employee, user = None, email=None):
 	emp = frappe.get_doc("Employee", employee)
 
 	employee_name = emp.employee_name.split(" ")
@@ -273,6 +276,9 @@ def create_user(employee, user = None):
 		last_name = employee_name[1]
 
 	first_name = employee_name[0]
+
+	if email:
+		emp.prefered_email = email
 
 	user = frappe.new_doc("User")
 	user.update({
@@ -289,3 +295,38 @@ def create_user(employee, user = None):
 	})
 	user.insert()
 	return user.name
+
+def get_employee_emails(employee_list):
+	'''Returns list of employee emails either based on user_id or company_email'''
+	employee_emails = []
+	for employee in employee_list:
+		if not employee:
+			continue
+		user, email = frappe.db.get_value('Employee', employee, ['user_id', 'company_email'])
+		if user or email:
+			employee_emails.append(user or email)
+
+	return employee_emails
+
+@frappe.whitelist()
+def get_children(doctype, parent=None, company=None, is_root=False, is_tree=False):
+	condition = ''
+
+	if is_root:
+		parent = ""
+	if parent and company and parent!=company:
+		condition = ' and reports_to = "{0}"'.format(frappe.db.escape(parent))
+	else:
+		condition = ' and ifnull(reports_to, "")=""'
+
+	employee = frappe.db.sql("""
+		select
+			name as value, employee_name as title,
+			exists(select name from `tabEmployee` where reports_to=emp.name) as expandable
+		from
+			`tabEmployee` emp
+		where company='{company}' {condition} order by name"""
+		.format(company=company, condition=condition),  as_dict=1)
+
+	# return employee
+	return employee

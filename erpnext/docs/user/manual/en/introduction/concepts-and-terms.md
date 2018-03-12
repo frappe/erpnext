@@ -97,8 +97,8 @@ fiscal year.
 
 A Cost Center is like an Account, but the only difference is that its
 structure represents your business more closely than Accounts.
-For example, in your Chart of Accounts, you can separate your expenses by its type 
-(i.e., travel, marketing, etc.). In your Chart of Cost Centers, you can separate 
+For example, in your Chart of Accounts, you can separate your expenses by its type
+(i.e., travel, marketing, etc.). In your Chart of Cost Centers, you can separate
 them by product line or business group (e.g., online sales, retail sales, etc.).
 
 > Accounts > Chart of Cost Centers
@@ -302,11 +302,11 @@ A type of leave (e.g., Sick Leave, Maternity Leave, etc.).
 
 > Human Resource > Leave and Attendance > Leave Type
 
-#### Process Payroll
+#### Payroll Entry
 
 A tool that helps in creation of multiple Salary Slips for Employees.
 
-> Human Resource > Salary and Payroll > Process Payroll
+> Human Resource > Payroll Entry
 
 #### Salary Slip
 
@@ -316,7 +316,7 @@ A record of the monthly salary given to an Employee.
 
 #### Salary Structure
 
-A template identifying all the components of an Employees' salary (earnings), 
+A template identifying all the components of an Employees' salary (earnings),
 tax and other social security deductions.
 
 > Human Resource > Salary and Payroll > Salary Structure

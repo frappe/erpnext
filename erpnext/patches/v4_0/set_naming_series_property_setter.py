@@ -1,7 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 
 import frappe
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
@@ -91,7 +91,7 @@ def get_default_series(doctype, new_series):
 		(new_series, new_series))
 
 	if not (default_series and default_series[0][0]):
-		print "[Skipping] Cannot guess which naming series to use for", doctype
+		print("[Skipping] Cannot guess which naming series to use for", doctype)
 		return
 
 	return default_series[0][0]

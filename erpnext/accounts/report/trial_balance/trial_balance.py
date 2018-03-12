@@ -51,8 +51,8 @@ def validate_filters(filters):
 		filters.to_date = filters.year_end_date
 
 def get_data(filters):
-	accounts = frappe.db.sql("""select name, parent_account, account_name, root_type, report_type, lft, rgt
-		from `tabAccount` where company=%s order by lft""", filters.company, as_dict=True)
+	accounts = frappe.db.sql("""select name, parent_account, account_name, account_number, root_type, report_type, lft, rgt
+		from `tabAccount` where company=%s order by account_name, lft""", filters.company, as_dict=True)
 	company_currency = erpnext.get_company_currency(filters.company)
 
 	if not accounts:
@@ -134,8 +134,12 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 		"account": "'" + _("Total") + "'",
 		"account_name": "'" + _("Total") + "'",
 		"warn_if_negative": True,
+		"opening_debit": 0.0,
+		"opening_credit": 0.0,
 		"debit": 0.0,
 		"credit": 0.0,
+		"closing_debit": 0.0,
+		"closing_credit": 0.0,
 		"parent_account": None,
 		"indent": 0,
 		"has_value": True,
@@ -156,7 +160,10 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 
 		total_row["debit"] += d["debit"]
 		total_row["credit"] += d["credit"]
-
+		total_row["opening_debit"] += d["opening_debit"]
+		total_row["opening_credit"] += d["opening_credit"]
+		total_row["closing_debit"] += (d["opening_debit"] + d["debit"])
+		total_row["closing_credit"] += (d["opening_credit"] + d["credit"])
 
 	return total_row
 
@@ -168,6 +175,9 @@ def accumulate_values_into_parents(accounts, accounts_by_name):
 
 def prepare_data(accounts, filters, total_row, parent_children_map, company_currency):
 	data = []
+	tmpaccnt = sorted(accounts, key = lambda account: account.name)
+	if not (accounts[0].account_number is None):
+		accounts = tmpaccnt
 	
 	for d in accounts:
 		has_value = False

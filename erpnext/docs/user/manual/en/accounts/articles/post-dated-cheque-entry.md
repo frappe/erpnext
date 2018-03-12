@@ -1,5 +1,3 @@
-# Post Dated Cheque Entry
-
 #Post Dated Cheque Entry
 
 Post Dated Cheque is a cheque dated on future date. Party generally give post dated cheque, as advance payment. This cheque would be cleared only when cheque date arrives.
@@ -16,7 +14,7 @@ To open new journal voucher go to
 
 Assuming your Cheque Date is 31st December, 2016 (or any future date). As a result, this posting in your bank ledger will appear on Posting Date updated.
 
-<img alt="JE Posting Date" class="screenshot" src="/docs/assets/img/articles/post-dated-1.png">
+<img alt="JE Posting Date" class="screenshot" src="{{docs_base_url}}/assets/img/articles/post-dated-1.png">
 
 Note: Payment Entry Reference Date should equal to or less than Posting Date.
 

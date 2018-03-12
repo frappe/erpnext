@@ -1,5 +1,3 @@
-# Adding File As A Attachment
-
 #Adding File as a Attachment
 
 ERPNext allows to attach files with documents. User with a read permission on particular document will also be able to access files attached with it.
@@ -10,11 +8,11 @@ There are several ways to attach file to the document.
 
 ####From Browser
 
-<img alt="Sales Order File Attachment" class="screenshot" src="/docs/assets/img/articles/attach-file-1.gif">
+<img alt="Sales Order File Attachment" class="screenshot" src="{{docs_base_url}}/assets/img/articles/attach-file-1.gif">
 
 ####By drag and drop
 
-<img alt="Sales Order File Attachment" class="screenshot" src="/docs/assets/img/articles/attach-file-2.gif">
+<img alt="Sales Order File Attachment" class="screenshot" src="{{docs_base_url}}/assets/img/articles/attach-file-2.gif">
 
 Click on Attach to browse and select the file.
 
@@ -22,7 +20,7 @@ Click on Attach to browse and select the file.
 
 If you use separate server for files, or use online service like Dropbox, you can attach file by providing link of a particular file.
 
-<img alt="Sales Order Select File" class="screenshot" src="/docs/assets/img/articles/attach-file-3.gif">
+<img alt="Sales Order Select File" class="screenshot" src="{{docs_base_url}}/assets/img/articles/attach-file-3.gif">
 
 `For hosted users, limit of 5 MB is applied on file size.`
 

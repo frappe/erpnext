@@ -17,6 +17,7 @@ class SalaryStructure(Document):
 		for e in self.get('employees'):
 			set_employee_name(e)
 		self.validate_date()
+		self.strip_condition_and_formula_fields()
 
 	def get_ss_values(self,employee):
 		basic_info = frappe.db.sql("""select bank_name, bank_ac_no
@@ -61,6 +62,16 @@ class SalaryStructure(Document):
 		if st_name:
 			frappe.throw(_("Active Salary Structure {0} found for employee {1} for the given dates")
 				.format(st_name[0][0], employee.employee))
+
+	def strip_condition_and_formula_fields(self):
+		# remove whitespaces from condition and formula fields
+		for row in self.earnings:
+			row.condition = row.condition.strip() if row.condition else ""
+			row.formula = row.formula.strip() if row.formula else ""
+
+		for row in self.deductions:
+			row.condition = row.condition.strip() if row.condition else ""
+			row.formula = row.formula.strip() if row.formula else ""
 
 @frappe.whitelist()
 def make_salary_slip(source_name, target_doc = None, employee = None, as_print = False, print_format = None):

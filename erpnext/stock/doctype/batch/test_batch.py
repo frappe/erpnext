@@ -6,7 +6,9 @@ import frappe
 from frappe.exceptions import ValidationError
 import unittest
 
-from erpnext.stock.doctype.batch.batch import get_batch_qty, UnableToSelectBatchError
+from erpnext.stock.doctype.batch.batch import get_batch_qty, UnableToSelectBatchError, get_batch_no
+from frappe.utils import cint
+
 
 class TestBatch(unittest.TestCase):
 
@@ -21,27 +23,27 @@ class TestBatch(unittest.TestCase):
 	def make_batch_item(cls, item_name):
 		from erpnext.stock.doctype.item.test_item import make_item
 		if not frappe.db.exists(item_name):
-			make_item(item_name, dict(has_batch_no = 1, create_new_batch = 1))
+			return make_item(item_name, dict(has_batch_no = 1, create_new_batch = 1))
 
 	def test_purchase_receipt(self, batch_qty = 100):
 		'''Test automated batch creation from Purchase Receipt'''
 		self.make_batch_item('ITEM-BATCH-1')
 
 		receipt = frappe.get_doc(dict(
-			doctype = 'Purchase Receipt',
-			supplier = '_Test Supplier',
-			items = [
+			doctype='Purchase Receipt',
+			supplier='_Test Supplier',
+			items=[
 				dict(
-					item_code = 'ITEM-BATCH-1',
-					qty = batch_qty,
-					rate = 10
+					item_code='ITEM-BATCH-1',
+					qty=batch_qty,
+					rate=10
 				)
 			]
 		)).insert()
 		receipt.submit()
 
 		self.assertTrue(receipt.items[0].batch_no)
-		self.assertEquals(get_batch_qty(receipt.items[0].batch_no,
+		self.assertEqual(get_batch_qty(receipt.items[0].batch_no,
 			receipt.items[0].warehouse), batch_qty)
 
 		return receipt
@@ -68,34 +70,34 @@ class TestBatch(unittest.TestCase):
 		stock_entry.submit()
 
 		self.assertTrue(stock_entry.items[0].batch_no)
-		self.assertEquals(get_batch_qty(stock_entry.items[0].batch_no, stock_entry.items[0].t_warehouse), 90)
+		self.assertEqual(get_batch_qty(stock_entry.items[0].batch_no, stock_entry.items[0].t_warehouse), 90)
 
 	def test_delivery_note(self):
 		'''Test automatic batch selection for outgoing items'''
 		batch_qty = 15
 		receipt = self.test_purchase_receipt(batch_qty)
+		item_code = 'ITEM-BATCH-1'
 
 		delivery_note = frappe.get_doc(dict(
-			doctype = 'Delivery Note',
-			customer = '_Test Customer',
-			company = receipt.company,
-			items = [
+			doctype='Delivery Note',
+			customer='_Test Customer',
+			company=receipt.company,
+			items=[
 				dict(
-					item_code = 'ITEM-BATCH-1',
-					qty = batch_qty,
-					rate = 10,
-					warehouse = receipt.items[0].warehouse
+					item_code=item_code,
+					qty=batch_qty,
+					rate=10,
+					warehouse=receipt.items[0].warehouse
 				)
 			]
 		)).insert()
 		delivery_note.submit()
 
-		# shipped with same batch
-		self.assertEquals(delivery_note.items[0].batch_no, receipt.items[0].batch_no)
-
-		# balance is 0
-		self.assertEquals(get_batch_qty(receipt.items[0].batch_no,
-			receipt.items[0].warehouse), 0)
+		# shipped from FEFO batch
+		self.assertEqual(
+			delivery_note.items[0].batch_no,
+			get_batch_no(item_code, receipt.items[0].warehouse, batch_qty)
+		)
 
 	def test_delivery_note_fail(self):
 		'''Test automatic batch selection for outgoing items'''
@@ -120,27 +122,27 @@ class TestBatch(unittest.TestCase):
 
 		batch_qty = 16
 		receipt = self.test_purchase_receipt(batch_qty)
+		item_code = 'ITEM-BATCH-1'
 
 		stock_entry = frappe.get_doc(dict(
-			doctype = 'Stock Entry',
-			purpose = 'Material Issue',
-			company = receipt.company,
-			items = [
+			doctype='Stock Entry',
+			purpose='Material Issue',
+			company=receipt.company,
+			items=[
 				dict(
-					item_code = 'ITEM-BATCH-1',
-					qty = batch_qty,
-					s_warehouse = receipt.items[0].warehouse,
+					item_code=item_code,
+					qty=batch_qty,
+					s_warehouse=receipt.items[0].warehouse,
 				)
 			]
 		)).insert()
 		stock_entry.submit()
 
 		# assert same batch is selected
-		self.assertEqual(stock_entry.items[0].batch_no, receipt.items[0].batch_no)
-
-		# balance is 0
-		self.assertEquals(get_batch_qty(receipt.items[0].batch_no,
-			receipt.items[0].warehouse), 0)
+		self.assertEqual(
+			stock_entry.items[0].batch_no,
+			get_batch_no(item_code, receipt.items[0].warehouse, batch_qty)
+		)
 
 	def test_batch_split(self):
 		'''Test batch splitting'''
@@ -149,8 +151,8 @@ class TestBatch(unittest.TestCase):
 
 		new_batch = split_batch(receipt.items[0].batch_no, 'ITEM-BATCH-1', receipt.items[0].warehouse, 22)
 
-		self.assertEquals(get_batch_qty(receipt.items[0].batch_no, receipt.items[0].warehouse), 78)
-		self.assertEquals(get_batch_qty(new_batch, receipt.items[0].warehouse), 22)
+		self.assertEqual(get_batch_qty(receipt.items[0].batch_no, receipt.items[0].warehouse), 78)
+		self.assertEqual(get_batch_qty(new_batch, receipt.items[0].warehouse), 22)
 
 	def test_get_batch_qty(self):
 		'''Test getting batch quantities by batch_numbers, item_code or warehouse'''
@@ -158,10 +160,10 @@ class TestBatch(unittest.TestCase):
 		self.make_new_batch_and_entry('ITEM-BATCH-2', 'batch a', '_Test Warehouse - _TC')
 		self.make_new_batch_and_entry('ITEM-BATCH-2', 'batch b', '_Test Warehouse - _TC')
 
-		self.assertEquals(get_batch_qty(item_code = 'ITEM-BATCH-2', warehouse = '_Test Warehouse - _TC'),
+		self.assertEqual(get_batch_qty(item_code = 'ITEM-BATCH-2', warehouse = '_Test Warehouse - _TC'),
 			[{'batch_no': u'batch a', 'qty': 90.0}, {'batch_no': u'batch b', 'qty': 90.0}])
 
-		self.assertEquals(get_batch_qty('batch a', '_Test Warehouse - _TC'), 90)
+		self.assertEqual(get_batch_qty('batch a', '_Test Warehouse - _TC'), 90)
 
 	@classmethod
 	def make_new_batch_and_entry(cls, item_name, batch_name, warehouse):
@@ -192,3 +194,37 @@ class TestBatch(unittest.TestCase):
 			]
 		)).insert()
 		stock_entry.submit()
+
+	def test_batch_name_with_naming_series(self):
+		stock_settings = frappe.get_single('Stock Settings')
+		use_naming_series = cint(stock_settings.use_naming_series)
+
+		if not use_naming_series:
+			frappe.set_value('Stock Settings', 'Stock Settings', 'use_naming_series', 1)
+
+		batch = self.make_new_batch('_Test Stock Item For Batch Test1')
+		batch_name = batch.name
+
+		self.assertTrue(batch_name.startswith('BATCH-'))
+
+		batch.delete()
+		batch = self.make_new_batch('_Test Stock Item For Batch Test2')
+
+		self.assertEqual(batch_name, batch.name)
+
+		# reset Stock Settings
+		if not use_naming_series:
+			frappe.set_value('Stock Settings', 'Stock Settings', 'use_naming_series', 0)
+
+	def make_new_batch(self, item_name, batch_id=None, do_not_insert=0):
+		batch = frappe.new_doc('Batch')
+		item = self.make_batch_item(item_name)
+		batch.item = item.name
+
+		if batch_id:
+			batch.batch_id = batch_id
+
+		if not do_not_insert:
+			batch.insert()
+
+		return batch

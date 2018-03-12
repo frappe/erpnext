@@ -10,8 +10,11 @@ from frappe.contacts.doctype.address.address import get_address_display
 from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import get_shopping_cart_settings
 from frappe.utils.nestedset import get_root_of
 from erpnext.accounts.utils import get_account_name
+from erpnext.utilities.product import get_qty_in_stock
 
-class WebsitePriceListMissingError(frappe.ValidationError): pass
+
+class WebsitePriceListMissingError(frappe.ValidationError):
+	pass
 
 def set_cart_count(quotation=None):
 	if cint(frappe.db.get_singles_value("Shopping Cart Settings", "enabled")):
@@ -33,12 +36,15 @@ def get_cart_quotation(doc=None):
 
 	addresses = get_address_docs(party=party)
 
+	if not doc.customer_address and addresses:
+		update_cart_address("customer_address", addresses[0].name)
+
 	return {
 		"doc": decorate_quotation_doc(doc),
 		"shipping_addresses": [{"name": address.name, "display": address.display}
-			for address in addresses if address.address_type == "Shipping"],
+			for address in addresses],
 		"billing_addresses": [{"name": address.name, "display": address.display}
-			for address in addresses if address.address_type == "Billing"],
+			for address in addresses],
 		"shipping_rules": get_applicable_shipping_rules(party)
 	}
 
@@ -46,9 +52,8 @@ def get_cart_quotation(doc=None):
 def place_order():
 	quotation = _get_cart_quotation()
 	quotation.company = frappe.db.get_value("Shopping Cart Settings", None, "company")
-	for fieldname in ["customer_address", "shipping_address_name"]:
-		if not quotation.get(fieldname):
-			throw(_("{0} is required").format(quotation.meta.get_label(fieldname)))
+	if not quotation.get("customer_address"):
+		throw(_("{0} is required").format(_(quotation.meta.get_label("customer_address"))))
 
 	quotation.flags.ignore_permissions = True
 	quotation.submit()
@@ -60,7 +65,13 @@ def place_order():
 	from erpnext.selling.doctype.quotation.quotation import _make_sales_order
 	sales_order = frappe.get_doc(_make_sales_order(quotation.name, ignore_permissions=True))
 	for item in sales_order.get("items"):
-		item.reserved_warehouse = frappe.db.get_value("Item", item.item_code, "website_warehouse") or None
+		item.reserved_warehouse, is_stock_item = frappe.db.get_value("Item",
+			item.item_code, ["website_warehouse", "is_stock_item"]) or None, None
+
+		if is_stock_item:
+			item_stock = get_qty_in_stock(item.item_code, "website_warehouse")
+			if item.qty > item_stock.stock_qty[0][0]:
+				throw(_("Only {0} in stock for item {1}").format(item_stock.stock_qty[0][0], item.item_code))
 
 	sales_order.flags.ignore_permissions = True
 	sales_order.insert()
@@ -98,6 +109,7 @@ def update_cart(item_code, qty, with_items=False):
 	apply_cart_settings(quotation=quotation)
 
 	quotation.flags.ignore_permissions = True
+	quotation.payment_schedule = []
 	if not empty_card:
 		quotation.save()
 	else:
@@ -172,6 +184,7 @@ def decorate_quotation_doc(doc):
 			["thumbnail", "website_image", "description", "route"], as_dict=True))
 
 	return doc
+
 
 def _get_cart_quotation(party=None):
 	'''Return the open Quotation of type "Shopping Cart" or make a new one'''

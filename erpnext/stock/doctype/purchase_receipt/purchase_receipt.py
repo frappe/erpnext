@@ -12,15 +12,15 @@ from frappe.utils import getdate
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
-from erpnext.buying.utils import check_for_closed_status, update_last_purchase_rate
+from erpnext.buying.utils import check_for_closed_status
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
 
 class PurchaseReceipt(BuyingController):
-	def __init__(self, arg1, arg2=None):
-		super(PurchaseReceipt, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(PurchaseReceipt, self).__init__(*args, **kwargs)
 		self.status_updater = [{
 			'source_dt': 'Purchase Receipt Item',
 			'target_dt': 'Purchase Order Item',
@@ -84,9 +84,9 @@ class PurchaseReceipt(BuyingController):
 
 	def po_required(self):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
-			 for d in self.get('items'):
-				 if not d.purchase_order:
-					 frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
+			for d in self.get('items'):
+				if not d.purchase_order:
+					frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
 
 	def get_already_received_qty(self, po, po_detail):
 		qty = frappe.db.sql("""select sum(qty) from `tabPurchase Receipt Item`
@@ -111,22 +111,20 @@ class PurchaseReceipt(BuyingController):
 
 	# on submit
 	def on_submit(self):
+		super(PurchaseReceipt, self).on_submit()
+
 		# Check for Approving Authority
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
-
-		# Set status as Submitted
-		frappe.db.set(self, 'status', 'Submitted')
 
 		self.update_prevdoc_status()
 		if self.per_billed < 100:
 			self.update_billing_status()
 
-		if not self.is_return:
-			update_last_purchase_rate(self, 1)
-
+		
 		# Updating stock ledger should always be called after updating prevdoc status,
-		# because updating ordered qty in bin depends upon updated ordered qty in PO
+		# because updating ordered qty, reserved_qty_for_subcontract in bin
+		# depends upon updated ordered qty in PO
 		self.update_stock_ledger()
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
@@ -143,6 +141,8 @@ class PurchaseReceipt(BuyingController):
 			frappe.throw(_("Purchase Invoice {0} is already submitted").format(self.submit_rv[0][0]))
 
 	def on_cancel(self):
+		super(PurchaseReceipt, self).on_cancel()
+
 		self.check_for_closed_status()
 		# Check if Purchase Invoice has been submitted against current Purchase Order
 		submitted = frappe.db.sql("""select t1.name
@@ -152,13 +152,8 @@ class PurchaseReceipt(BuyingController):
 		if submitted:
 			frappe.throw(_("Purchase Invoice {0} is already submitted").format(submitted[0][0]))
 
-		frappe.db.set(self,'status','Cancelled')
-
 		self.update_prevdoc_status()
 		self.update_billing_status()
-
-		if not self.is_return:
-			update_last_purchase_rate(self, 0)
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
@@ -384,6 +379,9 @@ def make_purchase_invoice(source_name, target_doc=None):
 	doclist = get_mapped_doc("Purchase Receipt", source_name,	{
 		"Purchase Receipt": {
 			"doctype": "Purchase Invoice",
+			"field_map": {
+				"supplier_warehouse":"supplier_warehouse"
+			},
 			"validation": {
 				"docstatus": ["=", 1],
 			},

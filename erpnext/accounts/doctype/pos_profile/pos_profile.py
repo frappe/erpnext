@@ -4,30 +4,35 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _
-from frappe.utils import cint
+from frappe.utils import cint, now
+from erpnext.accounts.doctype.sales_invoice.pos import get_child_nodes
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import set_account_for_mode_of_payment
 
 from frappe.model.document import Document
 
 class POSProfile(Document):
 	def validate(self):
-		self.check_for_duplicate()
+		self.validate_default_profile()
 		self.validate_all_link_fields()
 		self.validate_duplicate_groups()
 		self.check_default_payment()
 		self.validate_customer_territory_group()
 
-	def check_for_duplicate(self):
-		res = frappe.db.sql("""select name, user from `tabPOS Profile`
-			where ifnull(user, '') = %s and name != %s and company = %s""",
-			(self.user, self.name, self.company))
-		if res:
-			if res[0][1]:
-				msgprint(_("POS Profile {0} already created for user: {1} and company {2}").format(res[0][0],
-					res[0][1], self.company), raise_exception=1)
-			else:
-				msgprint(_("Global POS Profile {0} already created for company {1}").format(res[0][0],
-					self.company), raise_exception=1)
+	def validate_default_profile(self):
+		for row in self.applicable_for_users:
+			res = frappe.db.sql("""select pf.name
+				from
+					`tabPOS Profile User` pfu, `tabPOS Profile` pf
+				where
+					pf.name = pfu.parent and pfu.user = %s and pf.name != %s and pf.company = %s
+					and pfu.default=1 and pf.disabled = 0""", (row.user, self.name, self.company))
+
+			if row.default and res:
+				msgprint(_("Already set default in pos profile {0} for user {1}, kindly disabled default")
+					.format(res[0][0], row.user), raise_exception=1)
+			elif not row.default and not res:
+				msgprint(_("User {0} doesn't have any default POS Profile. Check Default at Row {1} for this User.")
+					.format(row.user, row.idx))
 
 	def validate_all_link_fields(self):
 		accounts = {"Account": [self.income_account,
@@ -58,7 +63,11 @@ class POSProfile(Document):
 
 			if len(default_mode_of_payment) > 1:
 				frappe.throw(_("Multiple default mode of payment is not allowed"))
+
 	def validate_customer_territory_group(self):
+		if not frappe.db.get_single_value('POS Settings', 'use_pos_in_offline_mode'):
+			return
+
 		if not self.territory:
 			frappe.throw(_("Territory is Required in POS Profile"), title="Mandatory Field")
 
@@ -78,12 +87,12 @@ class POSProfile(Document):
 		frappe.defaults.clear_default("is_pos")
 
 		if not include_current_pos:
-			condition = " where name != '%s'" % self.name.replace("'", "\'")
+			condition = " where pfu.name != '%s' and pfu.default = 1 " % self.name.replace("'", "\'")
 		else:
-			condition = ""
+			condition = " where pfu.default = 1 "
 
-		pos_view_users = frappe.db.sql_list("""select user
-			from `tabPOS Profile` {0}""".format(condition))
+		pos_view_users = frappe.db.sql_list("""select pfu.user
+			from `tabPOS Profile User` as pfu {0}""".format(condition))
 
 		for user in pos_view_users:
 			if user:
@@ -91,6 +100,73 @@ class POSProfile(Document):
 			else:
 				frappe.defaults.set_global_default("is_pos", 1)
 
+def get_item_groups(pos_profile):
+	item_groups = []
+	pos_profile = frappe.get_doc('POS Profile', pos_profile)
+
+	if pos_profile.get('item_groups'):
+		# Get items based on the item groups defined in the POS profile
+		for data in pos_profile.get('item_groups'):
+			item_groups.extend(["'%s'" % frappe.db.escape(d.name) for d in get_child_nodes('Item Group', data.item_group)])
+
+	return list(set(item_groups))
+
 @frappe.whitelist()
 def get_series():
 	return frappe.get_meta("Sales Invoice").get_field("naming_series").options or ""
+
+def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
+	user = frappe.session['user']
+	company = filters.get('company') or frappe.defaults.get_user_default('company')
+
+	args = {
+		'user': user,
+		'start': start,
+		'company': company,
+		'page_len': page_len,
+		'txt': '%%%s%%' % txt
+	}
+
+	pos_profile = frappe.db.sql("""select pf.name, pf.pos_profile_name
+		from
+			`tabPOS Profile` pf, `tabPOS Profile User` pfu
+		where
+			pfu.parent = pf.name and pfu.user = %(user)s and pf.company = %(company)s
+			and (pf.name like %(txt)s or pf.pos_profile_name like %(txt)s)
+			and pf.disabled = 0 limit %(start)s, %(page_len)s""", args)
+
+	if not pos_profile:
+		del args['user']
+
+		pos_profile = frappe.db.sql("""select pf.name, pf.pos_profile_name
+			from
+				`tabPOS Profile` pf left join `tabPOS Profile User` pfu
+			on
+				pf.name = pfu.parent
+			where
+				ifnull(pfu.user, '') = '' and pf.company = %(company)s and
+				(pf.name like %(txt)s or pf.pos_profile_name like %(txt)s)
+				and pf.disabled = 0""", args)
+
+	return pos_profile
+
+@frappe.whitelist()
+def set_default_profile(pos_profile, company):
+	modified = now()
+	user = frappe.session.user
+	company = frappe.db.escape(company)
+
+	if pos_profile and company:
+		frappe.db.sql(""" update `tabPOS Profile User` pfu, `tabPOS Profile` pf
+			set
+				pfu.default = 0, pf.modified = %s, pf.modified_by = %s
+			where
+				pfu.user = %s and pf.name = pfu.parent and pf.company = %s
+				and pfu.default = 1""", (modified, user, user, company), auto_commit=1)
+
+		frappe.db.sql(""" update `tabPOS Profile User` pfu, `tabPOS Profile` pf
+			set
+				pfu.default = 1, pf.modified = %s, pf.modified_by = %s
+			where
+				pfu.user = %s and pf.name = pfu.parent and pf.company = %s and pf.name = %s
+			""", (modified, user, user, company, pos_profile), auto_commit=1)

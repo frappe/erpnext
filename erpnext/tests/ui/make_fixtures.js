@@ -38,6 +38,7 @@ $.extend(frappe.test_data, {
 			{is_stock_item: 1},
 			{standard_rate: 250},
 			{opening_stock: 100},
+			{stock_uom:'Kg'}
 		],
 		"Test Service 1": [
 			{item_code: "Test Service 1"},
@@ -205,6 +206,37 @@ $.extend(frappe.test_data, {
 			{title: "Test Term 2"}
 		]
 	},
+	"Item Price": {
+		"ITEM-PRICE-00001": [
+			{item_code: 'Test Product 1'},
+			{price_list: '_Test Price List'},
+			{price_list_rate: 100}
+		],
+		"ITEM-PRICE-00002": [
+			{item_code: 'Test Product 2'},
+			{price_list: '_Test Price List'},
+			{price_list_rate: 200}
+		]
+	},
+	"Payment Term": {
+		"_Test Payment Term": [
+			{payment_term_name: '_Test Payment Term'},
+			{due_date_based_on: 'Day(s) after invoice date'},
+			{invoice_portion: 100},
+			{credit_days: 0}
+		]
+	},
+	"Payment Terms Template": {
+		"_Test Payment Term Template UI": [
+			{template_name: "_Test Payment Term Template UI"},
+			{terms: [
+				[
+					{payment_term: '_Test Payment Term'},
+					{invoice_portion: 100}
+				]
+			]}
+		]
+	}
 });
 
 
@@ -218,7 +250,9 @@ QUnit.test('Make fixtures', assert => {
 	let done = assert.async();
 	let tasks = [];
 	Object.keys(frappe.test_data).forEach(function(doctype) {
-		tasks.push(function() { return frappe.tests.setup_doctype(doctype); });
+		tasks.push(function() {
+			return frappe.tests.setup_doctype(doctype, frappe.test_data[doctype]);
+		});
 	});
 	frappe.run_serially(tasks).then(() => done());
 });

@@ -9,7 +9,8 @@ QUnit.test("Test: Designation [HR]", function (assert) {
 		() => frappe.set_route("List", "Designation", "List"),
 		() => frappe.new_doc("Designation"),
 		() => frappe.timeout(1),
-		() => frappe.click_link('Edit in full page'),
+		() => frappe.quick_entry.dialog.$wrapper.find('.edit-full').click(),
+		() => frappe.timeout(1),
 		() => cur_frm.set_value("designation_name", "Test Designation"),
 		() => cur_frm.set_value("description", "This designation is just for testing."),
 		// save form

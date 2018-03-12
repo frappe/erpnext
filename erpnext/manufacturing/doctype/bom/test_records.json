@@ -6,8 +6,9 @@
     "doctype": "BOM Item",
     "item_code": "_Test Serialized Item With Series",
     "parentfield": "items",
-    "stock_qty": 1.0,
+    "qty": 1.0,
     "rate": 5000.0,
+    "uom": "_Test UOM",
     "stock_uom": "_Test UOM",
 	"source_warehouse": "_Test Warehouse - _TC"
    },
@@ -16,8 +17,9 @@
     "doctype": "BOM Item",
     "item_code": "_Test Item 2",
     "parentfield": "items",
-    "stock_qty": 2.0,
+    "qty": 2.0,
     "rate": 1000.0,
+    "uom": "_Test UOM",
     "stock_uom": "_Test UOM",
 	"source_warehouse": "_Test Warehouse - _TC"
    }
@@ -34,9 +36,9 @@
   "scrap_items":[
   {
    "amount": 2000.0,
-   "doctype": "BOM Item",
+   "doctype": "BOM Scrap Item",
    "item_code": "_Test Item Home Desktop 100",
-   "parentfield": "items",
+   "parentfield": "scrap_items",
    "stock_qty": 1.0,
    "rate": 2000.0,
    "stock_uom": "_Test UOM"
@@ -48,8 +50,9 @@
     "doctype": "BOM Item",
     "item_code": "_Test Item",
     "parentfield": "items",
-    "stock_qty": 1.0,
+    "qty": 1.0,
     "rate": 5000.0,
+    "uom": "_Test UOM",
     "stock_uom": "_Test UOM",
 	"source_warehouse": "_Test Warehouse - _TC"
    },
@@ -58,8 +61,9 @@
     "doctype": "BOM Item",
     "item_code": "_Test Item Home Desktop 100",
     "parentfield": "items",
-    "stock_qty": 2.0,
+    "qty": 2.0,
     "rate": 1000.0,
+    "uom": "_Test UOM",
     "stock_uom": "_Test UOM",
 	"source_warehouse": "_Test Warehouse - _TC"
    }
@@ -78,6 +82,7 @@
     "operation": "_Test Operation 1",
     "description": "_Test",
     "workstation": "_Test Workstation 1",
+    "hour_rate": 100,
     "time_in_mins": 60,
     "operating_cost": 100
    }
@@ -88,19 +93,21 @@
     "doctype": "BOM Item",
     "item_code": "_Test Item",
     "parentfield": "items",
-    "stock_qty": 1.0,
+    "qty": 1.0,
     "rate": 5000.0,
+    "uom": "_Test UOM",
     "stock_uom": "_Test UOM",
 	"source_warehouse": "_Test Warehouse - _TC"
    },
    {
-    "amount": 2000.0,
+    "amount": 3000.0,
     "bom_no": "BOM-_Test Item Home Desktop Manufactured-001",
     "doctype": "BOM Item",
     "item_code": "_Test Item Home Desktop Manufactured",
     "parentfield": "items",
-    "stock_qty": 3.0,
+    "qty": 3.0,
     "rate": 1000.0,
+    "uom": "_Test UOM",
     "stock_uom": "_Test UOM",
 	"source_warehouse": "_Test Warehouse - _TC"
    }
@@ -110,6 +117,8 @@
   "is_active": 1,
   "is_default": 1,
   "currency": "USD",
+  "conversion_rate": 60,
+  "company": "_Test Company",
   "item": "_Test FG Item 2",
   "quantity": 1.0,
   "with_operations": 1
@@ -130,8 +139,9 @@
     "doctype": "BOM Item",
     "item_code": "_Test Item",
     "parentfield": "items",
-    "stock_qty": 2.0,
+    "qty": 2.0,
     "rate": 3000.0,
+    "uom": "_Test UOM",
     "stock_uom": "_Test UOM",
 	"source_warehouse": "_Test Warehouse - _TC"
    }

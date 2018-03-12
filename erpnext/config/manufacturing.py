@@ -14,7 +14,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Production Planning Tool",
+					"name": "Production Plan",
 					"description": _("Generate Material Requests (MRP) and Production Orders."),
 				},
 				{
@@ -70,8 +70,8 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "BOM Replace Tool",
-					"description": _("Replace Item / BOM in all BOMs"),
+					"name": "BOM Update Tool",
+					"description": _("Replace BOM and update latest price in all BOMs"),
 				},
 			]
 		},
@@ -123,6 +123,12 @@ def get_data():
 					"is_query_report": True,
 					"name": "BOM Search",
 					"doctype": "BOM"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "BOM Stock Report",
+					"doctype": "BOM"
 				}
 			]
 		},
@@ -134,11 +140,6 @@ def get_data():
 					"type": "help",
 					"label": _("Bill of Materials"),
 					"youtube_id": "hDV0c1OeWLo"
-				},
-				{
-					"type": "help",
-					"label": _("Production Planning Tool"),
-					"youtube_id": "CzatSl4zJ2Y"
 				},
 				{
 					"type": "help",

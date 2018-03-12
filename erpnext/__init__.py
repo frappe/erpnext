@@ -3,8 +3,9 @@ from __future__ import unicode_literals
 import inspect
 import frappe
 from erpnext.hooks import regional_overrides
+from frappe.utils import getdate
 
-__version__ = '8.6.5'
+__version__ = '10.1.8'
 
 def get_default_company(user=None):
 	'''Get default company for user'''
@@ -28,6 +29,16 @@ def get_default_currency():
 	if company:
 		return frappe.db.get_value('Company', company, 'default_currency')
 
+def get_default_cost_center(company):
+	'''Returns the default cost center of the company'''
+	if not company:
+		return None
+
+	if not frappe.flags.company_cost_center:
+		frappe.flags.company_cost_center = {}
+	if not company in frappe.flags.company_cost_center:
+		frappe.flags.company_cost_center[company] = frappe.db.get_value('Company', company, 'cost_center')
+	return frappe.flags.company_cost_center[company]
 
 def get_company_currency(company):
 	'''Returns the default company currency'''
@@ -98,3 +109,16 @@ def allow_regional(fn):
 
 	return caller
 
+def get_last_membership():
+	'''Returns last membership if exists'''
+	last_membership = frappe.get_all('Membership', 'name,to_date,membership_type',
+		dict(member=frappe.session.user, paid=1), order_by='to_date desc', limit=1)
+
+	return last_membership and last_membership[0]
+
+def is_member():
+	'''Returns true if the user is still a member'''
+	last_membership = get_last_membership()
+	if last_membership and getdate(last_membership.to_date) > getdate():
+		return True
+	return False

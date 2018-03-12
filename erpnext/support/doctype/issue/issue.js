@@ -4,7 +4,7 @@ frappe.ui.form.on("Issue", {
 	},
 
 	"refresh": function(frm) {
-		if(frm.doc.status==="Open") {
+		if(frm.doc.status!=="Closed") {
 			frm.add_custom_button(__("Close"), function() {
 				frm.set_value("status", "Closed");
 				frm.save();
@@ -18,13 +18,13 @@ frappe.ui.form.on("Issue", {
 	},
 
 	timeline_refresh: function(frm) {
-		// create button for "Add to Knowledge Base"
+		// create button for "Help Article"
 		if(frappe.model.can_create('Help Article')) {
-			// Removing Knowledge Base button if exists to avoid multiple occurance
+			// Removing Help Article button if exists to avoid multiple occurance
 			frm.timeline.wrapper.find('.comment-header .asset-details .btn-add-to-kb').remove();
-			$('<button class="btn btn-xs btn-default btn-add-to-kb hidden-xs pull-right" style="margin-top: -2px">'+
-				__('Add to Knowledge Base') + '</button>')
-				.appendTo(frm.timeline.wrapper.find('.comment-header .asset-details'))
+			$('<button class="btn btn-xs btn-link btn-add-to-kb text-muted hidden-xs pull-right">'+
+				__('Help Article') + '</button>')
+				.appendTo(frm.timeline.wrapper.find('.comment-header .asset-details:not([data-communication-type="Comment"])'))
 				.on('click', function() {
 					var content = $(this).parents('.timeline-item:first').find('.timeline-item-content').html();
 					var doc = frappe.model.get_new_doc('Help Article');

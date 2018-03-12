@@ -4,7 +4,7 @@
  "docstatus": 0, 
  "doctype": "Page", 
  "idx": 0, 
- "modified": "2017-06-06 02:54:27.504048", 
+ "modified": "2017-09-12 14:05:26.422064", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "leaderboard", 
@@ -15,5 +15,5 @@
  "standard": "Yes", 
  "style": null, 
  "system_page": 0, 
- "title": "LeaderBoard"
+ "title": "Leaderboard"
 }

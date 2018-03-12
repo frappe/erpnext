@@ -103,6 +103,11 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 					me.make_sales_return() }, __("Make"));
 			}
 
+			if (doc.docstatus==1) {
+				this.frm.add_custom_button(__('Delivery Trip'), function() {
+					me.make_delivery_trip() }, __("Make"));
+			}
+
 			if(doc.docstatus==0 && !doc.__islocal) {
 				this.frm.add_custom_button(__('Packing Slip'), function() {
 					frappe.model.open_mapped_doc({
@@ -166,6 +171,12 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 				__("Status"))
 		}
 		erpnext.stock.delivery_note.set_print_hide(doc, dt, dn);
+
+		if(doc.docstatus==1 && !doc.subscription) {
+			cur_frm.add_custom_button(__('Subscription'), function() {
+				erpnext.utils.make_subscription(doc.doctype, doc.name)
+			}, __("Make"))
+		}
 	},
 
 	make_sales_invoice: function() {
@@ -185,6 +196,13 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	make_sales_return: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_return",
+			frm: this.frm
+		})
+	},
+
+	make_delivery_trip: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_delivery_trip",
 			frm: this.frm
 		})
 	},

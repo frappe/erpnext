@@ -2,10 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
 import json
 from frappe.utils import flt, cstr, nowdate, nowtime
+
+from six import string_types
 
 class InvalidWarehouseCompany(frappe.ValidationError): pass
 
@@ -41,7 +43,7 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 
 	sle_map = {}
 	for sle in stock_ledger_entries:
-		if not sle_map.has_key((sle.item_code, sle.warehouse)):
+		if not (sle.item_code, sle.warehouse) in sle_map:
 			sle_map[(sle.item_code, sle.warehouse)] = flt(sle.stock_value)
 		
 	return sum(sle_map.values())
@@ -123,11 +125,10 @@ def update_bin(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 		frappe.msgprint(_("Item {0} ignored since it is not a stock item").format(args.get("item_code")))
 
 @frappe.whitelist()
-def get_incoming_rate(args):
+def get_incoming_rate(args, raise_error_if_no_rate=True):
 	"""Get Incoming Rate based on valuation method"""
-	from erpnext.stock.stock_ledger import get_previous_sle
-	
-	if isinstance(args, basestring):
+	from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	in_rate = 0
@@ -137,12 +138,18 @@ def get_incoming_rate(args):
 		valuation_method = get_valuation_method(args.get("item_code"))
 		previous_sle = get_previous_sle(args)
 		if valuation_method == 'FIFO':
-			if not previous_sle:
-				return 0.0
-			previous_stock_queue = json.loads(previous_sle.get('stock_queue', '[]') or '[]')
-			in_rate = get_fifo_rate(previous_stock_queue, args.get("qty") or 0) if previous_stock_queue else 0
+			if previous_sle:
+				previous_stock_queue = json.loads(previous_sle.get('stock_queue', '[]') or '[]')
+				in_rate = get_fifo_rate(previous_stock_queue, args.get("qty") or 0) if previous_stock_queue else 0
 		elif valuation_method == 'Moving Average':
 			in_rate = previous_sle.get('valuation_rate') or 0
+
+	if not in_rate:
+		voucher_no = args.get('voucher_no') or args.get('name')
+		in_rate = get_valuation_rate(args.get('item_code'), args.get('warehouse'),
+			args.get('voucher_type'), voucher_no, args.get('allow_zero_valuation'),
+			currency=erpnext.get_company_currency(args.get('company')), company=args.get('company'),
+			raise_error_if_no_rate=True)
 
 	return in_rate
 

@@ -3,11 +3,16 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+from past.builtins import cmp
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cstr, cint
 from frappe.contacts.doctype.address.address import get_default_address
+from frappe.utils.nestedset import get_root_of
+from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
+
+from six import iteritems
 
 class IncorrectCustomerGroup(frappe.ValidationError): pass
 class IncorrectSupplierType(frappe.ValidationError): pass
@@ -128,12 +133,16 @@ def get_party_details(party, party_type, args=None):
 def get_tax_template(posting_date, args):
 	"""Get matching tax rule"""
 	args = frappe._dict(args)
-	conditions = ["""(from_date is null  or from_date = '' or from_date <= '{0}')
-		and (to_date is null  or to_date = '' or to_date >= '{0}')""".format(posting_date)]
+	conditions = ["""(from_date is null or from_date <= '{0}')
+		and (to_date is null or to_date >= '{0}')""".format(posting_date)]
 
-	for key, value in args.iteritems():
+	for key, value in iteritems(args):
 		if key=="use_for_shopping_cart":
 			conditions.append("use_for_shopping_cart = {0}".format(1 if value else 0))
+		if key == 'customer_group':
+			if not value: value = get_root_of("Customer Group")
+			customer_group_condition = get_customer_group_condition(value)
+			conditions.append("ifnull({0}, '') in ('', {1})".format(key, customer_group_condition))
 		else:
 			conditions.append("ifnull({0}, '') in ('', '{1}')".format(key, frappe.db.escape(cstr(value))))
 
@@ -157,3 +166,10 @@ def get_tax_template(posting_date, args):
 		return None
 
 	return tax_template
+
+def get_customer_group_condition(customer_group):
+	condition = ""
+	customer_groups = ["'%s'"%(frappe.db.escape(d.name)) for d in get_parent_customer_groups(customer_group)]
+	if customer_groups:
+		condition = ",".join(['%s'] * len(customer_groups))%(tuple(customer_groups))
+	return condition

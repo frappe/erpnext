@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Daily Work Summary', {
-	refresh: function(frm) {
+	refresh: function (frm) {
 
 	}
 });

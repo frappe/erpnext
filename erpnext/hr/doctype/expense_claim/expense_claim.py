@@ -14,19 +14,16 @@ from erpnext.controllers.accounts_controller import AccountsController
 from frappe.utils.csvutils import getlink
 
 class InvalidExpenseApproverError(frappe.ValidationError): pass
+class ExpenseApproverIdentityError(frappe.ValidationError): pass
 
 class ExpenseClaim(AccountsController):
 	def onload(self):
 		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings', 
 			'make_payment_via_journal_entry')
 
-	def get_feed(self):
-		return _("{0}: From {0} for {1}").format(self.approval_status,
-			self.employee_name, self.total_claimed_amount)
-
 	def validate(self):
+		self.validate_advances()
 		self.validate_sanctioned_amount()
-		self.validate_expense_approver()
 		self.calculate_total_amount()
 		set_employee_name(self)
 		self.set_expense_account()
@@ -43,13 +40,14 @@ class ExpenseClaim(AccountsController):
 			"2": "Cancelled"
 		}[cstr(self.docstatus or 0)]
 
-		if self.total_sanctioned_amount > 0 and self.total_sanctioned_amount == self.total_amount_reimbursed \
-			and self.docstatus == 1 and self.approval_status == 'Approved':
-			self.status = "Paid"
-		elif self.total_sanctioned_amount > 0 and self.docstatus == 1 and self.approval_status == 'Approved':
+		paid_amount = flt(self.total_amount_reimbursed) + flt(self.total_advance_amount)
+
+		if (self.is_paid or (flt(self.total_sanctioned_amount) > 0
+			and flt(self.total_sanctioned_amount) ==  paid_amount)) \
+			and self.docstatus == 1:
+				self.status = "Paid"
+		elif flt(self.total_sanctioned_amount) > 0 and self.docstatus == 1:
 			self.status = "Unpaid"
-		elif self.docstatus == 1 and self.approval_status == 'Rejected':
-			self.status = 'Rejected'
 
 	def set_payable_account(self):
 		if not self.payable_account and not self.is_paid:
@@ -60,8 +58,6 @@ class ExpenseClaim(AccountsController):
 			self.cost_center = frappe.db.get_value('Company', self.company, 'cost_center')
 
 	def on_submit(self):
-		if self.approval_status=="Draft":
-			frappe.throw(_("""Approval Status must be 'Approved' or 'Rejected'"""))
 
 		self.update_task_and_project()
 		self.make_gl_entries()
@@ -70,6 +66,7 @@ class ExpenseClaim(AccountsController):
 			update_reimbursed_amount(self)
 
 		self.set_status()
+		self.update_claimed_amount_in_employee_advance()
 
 	def on_cancel(self):
 		self.update_task_and_project()
@@ -80,6 +77,11 @@ class ExpenseClaim(AccountsController):
 			update_reimbursed_amount(self)
 
 		self.set_status()
+		self.update_claimed_amount_in_employee_advance()
+
+	def update_claimed_amount_in_employee_advance(self):
+		for d in self.get("advances"):
+			frappe.get_doc("Employee Advance", d.employee_advance).update_claimed_amount()
 
 	def update_task_and_project(self):
 		if self.task:
@@ -95,20 +97,23 @@ class ExpenseClaim(AccountsController):
 	def get_gl_entries(self):
 		gl_entry = []
 		self.validate_account_details()
+
+		payable_amount = flt(self.total_sanctioned_amount) - flt(self.total_advance_amount)
 		
 		# payable entry
-		gl_entry.append(
-			self.get_gl_dict({
-				"account": self.payable_account,
-				"credit": self.total_sanctioned_amount,
-				"credit_in_account_currency": self.total_sanctioned_amount,
-				"against": ",".join([d.default_account for d in self.expenses]),
-				"party_type": "Employee",
-				"party": self.employee,
-				"against_voucher_type": self.doctype,
-				"against_voucher": self.name
-			})
-		)
+		if payable_amount:
+			gl_entry.append(
+				self.get_gl_dict({
+					"account": self.payable_account,
+					"credit": payable_amount,
+					"credit_in_account_currency": payable_amount,
+					"against": ",".join([d.default_account for d in self.expenses]),
+					"party_type": "Employee",
+					"party": self.employee,
+					"against_voucher_type": self.doctype,
+					"against_voucher": self.name
+				})
+			)
 
 		# expense entries
 		for data in self.expenses:
@@ -122,14 +127,28 @@ class ExpenseClaim(AccountsController):
 				})
 			)
 
-		if self.is_paid:
+		for data in self.advances:
+			gl_entry.append(
+				self.get_gl_dict({
+					"account": data.advance_account,
+					"credit": data.allocated_amount,
+					"credit_in_account_currency": data.allocated_amount,
+					"against": ",".join([d.default_account for d in self.expenses]),
+					"party_type": "Employee",
+					"party": self.employee,
+					"against_voucher_type": self.doctype,
+					"against_voucher": self.name
+				})
+			)
+
+		if self.is_paid and payable_amount:
 			# payment entry
 			payment_account = get_bank_cash_account(self.mode_of_payment, self.company).get("account")
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": payment_account,
-					"credit": self.total_sanctioned_amount,
-					"credit_in_account_currency": self.total_sanctioned_amount,
+					"credit": payable_amount,
+					"credit_in_account_currency": payable_amount,
 					"against": self.employee
 				})
 			)
@@ -140,8 +159,8 @@ class ExpenseClaim(AccountsController):
 					"party_type": "Employee",
 					"party": self.employee,
 					"against": payment_account,
-					"debit": self.total_sanctioned_amount,
-					"debit_in_account_currency": self.total_sanctioned_amount,
+					"debit": payable_amount,
+					"debit_in_account_currency": payable_amount,
 					"against_voucher": self.name,
 					"against_voucher_type": self.doctype,
 				})
@@ -164,21 +183,36 @@ class ExpenseClaim(AccountsController):
 		self.total_claimed_amount = 0
 		self.total_sanctioned_amount = 0
 		for d in self.get('expenses'):
-			if self.approval_status == 'Rejected':
-				d.sanctioned_amount = 0.0
-
 			self.total_claimed_amount += flt(d.claim_amount)
 			self.total_sanctioned_amount += flt(d.sanctioned_amount)
-
-	def validate_expense_approver(self):
-		if self.exp_approver and "Expense Approver" not in frappe.get_roles(self.exp_approver):
-			frappe.throw(_("{0} ({1}) must have role 'Expense Approver'")\
-				.format(get_fullname(self.exp_approver), self.exp_approver), InvalidExpenseApproverError)
 
 	def update_task(self):
 		task = frappe.get_doc("Task", self.task)
 		task.update_total_expense_claim()
 		task.save()
+
+	def validate_advances(self):
+		self.total_advance_amount = 0
+		for d in self.get("advances"):
+			ref_doc = frappe.db.get_value("Employee Advance", d.employee_advance,
+				["posting_date", "paid_amount", "claimed_amount", "advance_account"], as_dict=1)
+			d.posting_date = ref_doc.posting_date
+			d.advance_account = ref_doc.advance_account
+			d.advance_paid = ref_doc.paid_amount
+			d.unclaimed_amount = flt(ref_doc.paid_amount) - flt(ref_doc.claimed_amount)
+
+			if d.allocated_amount and flt(d.allocated_amount) > flt(d.unclaimed_amount):
+				frappe.throw(_("Row {0}# Allocated amount {1} cannot be greater than unclaimed amount {2}")
+					.format(d.idx, d.allocated_amount, d.unclaimed_amount))
+
+			self.total_advance_amount += flt(d.allocated_amount)
+
+		if self.total_advance_amount:
+			if flt(self.total_advance_amount) > flt(self.total_claimed_amount):
+				frappe.throw(_("Total advance amount cannot be greater than total claimed amount"))
+			if self.total_sanctioned_amount \
+					and flt(self.total_advance_amount) > flt(self.total_sanctioned_amount):
+				frappe.throw(_("Total advance amount cannot be greater than total sanctioned amount"))
 
 	def validate_sanctioned_amount(self):
 		for d in self.get('expenses'):
@@ -202,15 +236,6 @@ def update_reimbursed_amount(doc):
 	frappe.db.set_value("Expense Claim", doc.name , "status", doc.status)
 
 @frappe.whitelist()
-def get_expense_approver(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql("""
-		select u.name, concat(u.first_name, ' ', u.last_name)
-		from tabUser u, `tabHas Role` r
-		where u.name = r.parent and r.role = 'Expense Approver' 
-		and u.enabled = 1 and u.name like %s
-	""", ("%" + txt + "%"))
-
-@frappe.whitelist()
 def make_bank_entry(dt, dn):
 	from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 
@@ -219,6 +244,9 @@ def make_bank_entry(dt, dn):
 	if not default_bank_cash_account:
 		default_bank_cash_account = get_default_bank_cash_account(expense_claim.company, "Cash")
 
+	payable_amount = flt(expense_claim.total_sanctioned_amount) \
+		- flt(expense_claim.total_amount_reimbursed) - flt(expense_claim.total_advance_amount)
+
 	je = frappe.new_doc("Journal Entry")
 	je.voucher_type = 'Bank Entry'
 	je.company = expense_claim.company
@@ -226,7 +254,7 @@ def make_bank_entry(dt, dn):
 
 	je.append("accounts", {
 		"account": expense_claim.payable_account,
-		"debit_in_account_currency": flt(expense_claim.total_sanctioned_amount - expense_claim.total_amount_reimbursed),
+		"debit_in_account_currency": payable_amount,
 		"reference_type": "Expense Claim",
 		"party_type": "Employee",
 		"party": expense_claim.employee,
@@ -235,7 +263,7 @@ def make_bank_entry(dt, dn):
 
 	je.append("accounts", {
 		"account": default_bank_cash_account.account,
-		"credit_in_account_currency": flt(expense_claim.total_sanctioned_amount - expense_claim.total_amount_reimbursed),
+		"credit_in_account_currency": payable_amount,
 		"reference_type": "Expense Claim",
 		"reference_name": expense_claim.name,
 		"balance": default_bank_cash_account.balance,
@@ -257,3 +285,44 @@ def get_expense_claim_account(expense_claim_type, company):
 	return {
 		"account": account
 	}
+
+@frappe.whitelist()
+def get_advances(employee, advance_id=None):
+	if not advance_id:
+		condition = 'docstatus=1 and employee="{0}" and paid_amount > 0 and paid_amount > claimed_amount'.format(frappe.db.escape(employee))
+	else:
+		condition = 'name="{0}"'.format(frappe.db.escape(advance_id))
+
+	return frappe.db.sql("""
+		select 
+			name, posting_date, paid_amount, claimed_amount, advance_account
+		from 
+			`tabEmployee Advance`
+		where {0}
+	""".format(condition), as_dict=1)
+
+
+@frappe.whitelist()
+def get_expense_claim(
+	employee_name, company, employee_advance_name, posting_date, paid_amount, claimed_amount):
+	default_payable_account = frappe.db.get_value("Company", company, "default_payable_account")
+	default_cost_center = frappe.db.get_value('Company', company, 'cost_center')
+
+	expense_claim = frappe.new_doc('Expense Claim')
+	expense_claim.company = company
+	expense_claim.employee = employee_name
+	expense_claim.payable_account = default_payable_account
+	expense_claim.cost_center = default_cost_center
+	expense_claim.is_paid = 1 if flt(paid_amount) else 0
+	expense_claim.append(
+		'advances',
+		{
+			'employee_advance': employee_advance_name,
+			'posting_date': posting_date,
+			'advance_paid': flt(paid_amount),
+			'unclaimed_amount': flt(paid_amount) - flt(claimed_amount),
+			'allocated_amount': flt(paid_amount) - flt(claimed_amount)
+		}
+	)
+
+	return expense_claim

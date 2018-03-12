@@ -15,3 +15,5 @@ set-language
 set-precision
 user-restriction
 maximum-numbers-of-fields-in-a-form
+child-table
+fetching-data-from-a-document

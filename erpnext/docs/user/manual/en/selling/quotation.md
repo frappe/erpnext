@@ -7,7 +7,7 @@ Invoice”or a **Quotation**.
 
 A typical Selling flow looks like:
 
-<img class="screenshot" alt="Make Quotation from Opportunity" src="/docs/assets/img/selling/selling-flow.png">
+<img class="screenshot" alt="Make Quotation from Opportunity" src="{{docs_base_url}}/assets/img/selling/selling-flow.png">
 
 To create a new Quotation navigate to:
 
@@ -17,7 +17,7 @@ To create a new Quotation navigate to:
 
 You can also create a Quotation from an Opportunity.
 
-<img class="screenshot" alt="Make Quotation from Opportunity" src="/docs/assets/img/selling/make-quote-from-opp.png">
+<img class="screenshot" alt="Make Quotation from Opportunity" src="{{docs_base_url}}/assets/img/selling/make-quote-from-opp.png">
 
 A Quotation contains details about:
 
@@ -46,7 +46,7 @@ To add taxes to your Quotation, you can select a **Sales Taxes and Charges Templ
 
 For e.g
 
-<img class="screenshot" alt="Taxes and Charges" src="/docs/assets/img/selling/taxes-and-charges.gif">
+<img class="screenshot" alt="Taxes and Charges" src="{{docs_base_url}}/assets/img/selling/taxes-and-charges.gif">
 
 To understand taxes in detail visit [Taxes](/docs/user/manual/en/setting-up/setting-up-taxes.html).
 

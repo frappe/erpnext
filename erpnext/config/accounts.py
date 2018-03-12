@@ -33,6 +33,12 @@ def get_data():
 					"description": _("Point of Sale")
 				},
 				{
+					"type": "doctype",
+					"name": "Subscription",
+					"label": _("Subscription"),
+					"description": _("To make recurring documents")
+				},
+				{
 					"type": "report",
 					"name": "Accounts Receivable",
 					"doctype": "Sales Invoice",
@@ -92,14 +98,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Item",
-				},
-				{
-					"type": "doctype",
-					"name": "Asset",
-				},
-				{
-					"type": "doctype",
-					"name": "Asset Category",
 				}
 			]
 		},
@@ -270,13 +268,13 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Asset Movement",
-					"description": _("Transfer an asset from one warehouse to another")
+					"name": "Cheque Print Template",
+					"description": _("Setup cheque dimensions for printing")
 				},
 				{
 					"type": "doctype",
-					"name": "Cheque Print Template",
-					"description": _("Setup cheque dimensions for printing")
+					"name": "Opening Invoice Creation Tool",
+					"description": _("Make Opening Sales and Purchase Invoices")
 				},
 			]
 		},
@@ -311,9 +309,14 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "POS Settings",
+					"description": _("Setup mode of POS (Online / Offline)")
+				},
+				{
+					"type": "doctype",
 					"name": "POS Profile",
 					"label": _("Point-of-Sale Profile"),
-					"description": _("Rules to calculate shipping amount for a sale")
+					"description": _("Setup default values for POS Invoices")
 				},
 				{
 					"type": "doctype",
@@ -393,18 +396,6 @@ def get_data():
 			"items": [
 				{
 					"type": "report",
-					"name": "Asset Depreciation Ledger",
-					"doctype": "Asset",
-					"is_query_report": True,
-				},
-				{
-					"type": "report",
-					"name": "Asset Depreciations and Balances",
-					"doctype": "Asset",
-					"is_query_report": True,
-				},
-				{
-					"type": "report",
 					"name": "Trial Balance for Party",
 					"doctype": "GL Entry",
 					"is_query_report": True,
@@ -457,6 +448,40 @@ def get_data():
 					"name": "Customer Credit Balance",
 					"doctype": "Customer"
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales Payment Summary",
+					"doctype": "Sales Invoice"
+				}
+			]
+		},
+		{
+			"label": _("Share Management"),
+			"icon": "fa fa-microchip ",
+			"items": [
+				{
+					"type": "doctype",
+					"name":"Shareholder",
+					"description": _("List of available Shareholders with folio numbers")
+				},
+				{
+					"type": "doctype",
+					"name":"Share Transfer",
+					"description": _("List of all share transactions"),
+				},
+				{
+					"type": "report",
+					"name": "Share Ledger",
+					"doctype": "Share Transfer",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Share Balance",
+					"doctype": "Share Transfer",
+					"is_query_report": True
+				}
 			]
 		},
 		{

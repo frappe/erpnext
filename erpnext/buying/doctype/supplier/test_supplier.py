@@ -5,56 +5,62 @@ from __future__ import unicode_literals
 
 import frappe, unittest
 from erpnext.accounts.party import get_due_date
-from erpnext.exceptions import PartyFrozen, PartyDisabled
+from erpnext.exceptions import PartyDisabled
 from frappe.test_runner import make_test_records
 
+test_dependencies = ['Payment Term', 'Payment Terms Template']
 test_records = frappe.get_test_records('Supplier')
 
+
 class TestSupplier(unittest.TestCase):
-    def test_supplier_due_date_against_supplier_credit_limit(self):
-        # Set Credit Limit based on Fixed days
-        frappe.db.set_value("Supplier", "_Test Supplier", "credit_days_based_on", "Fixed Days")
-        frappe.db.set_value("Supplier", "_Test Supplier", "credit_days", 10)
+    def test_supplier_default_payment_terms(self):
+        # Payment Term based on Days after invoice date
+        frappe.db.set_value(
+            "Supplier", "_Test Supplier With Template 1", "payment_terms", "_Test Payment Term Template 3")
 
-        due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier", "_Test Company")
-        self.assertEqual(due_date, "2016-02-01")
+        due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier With Template 1")
+        self.assertEqual(due_date, "2016-02-21")
 
-        # Set Credit Limit based on Last day next month
-        frappe.db.set_value("Supplier", "_Test Supplier", "credit_days", 0)
-        frappe.db.set_value("Supplier", "_Test Supplier", "credit_days_based_on",
-                            "Last Day of the Next Month")
+        due_date = get_due_date("2017-01-22", "Supplier", "_Test Supplier With Template 1")
+        self.assertEqual(due_date, "2017-02-21")
 
-        # Leap year
-        due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier", "_Test Company")
+        # Payment Term based on last day of month
+        frappe.db.set_value(
+            "Supplier", "_Test Supplier With Template 1", "payment_terms", "_Test Payment Term Template 1")
+
+        due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier With Template 1")
         self.assertEqual(due_date, "2016-02-29")
-        # Non Leap year
-        due_date = get_due_date("2017-01-22", "Supplier", "_Test Supplier", "_Test Company")
+
+        due_date = get_due_date("2017-01-22", "Supplier", "_Test Supplier With Template 1")
         self.assertEqual(due_date, "2017-02-28")
 
-        frappe.db.set_value("Supplier", "_Test Supplier", "credit_days_based_on", "")
+        frappe.db.set_value("Supplier", "_Test Supplier With Template 1", "payment_terms", "")
 
         # Set credit limit for the supplier type instead of supplier and evaluate the due date
-        # based on Fixed days
-        frappe.db.set_value("Supplier Type", "_Test Supplier Type", "credit_days_based_on",
-                            "Fixed Days")
-        frappe.db.set_value("Supplier Type", "_Test Supplier Type", "credit_days", 10)
+        frappe.db.set_value("Supplier Type", "_Test Supplier Type", "payment_terms", "_Test Payment Term Template 3")
 
-        due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier", "_Test Company")
-        self.assertEqual(due_date, "2016-02-01")
+        due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier With Template 1")
+        self.assertEqual(due_date, "2016-02-21")
 
-        # Set credit limit for the supplier type instead of supplier and evaluate the due date
-        # based on Last day of next month
-        frappe.db.set_value("Supplier", "_Test Supplier Type", "credit_days", 0)
-        frappe.db.set_value("Supplier Type", "_Test Supplier Type", "credit_days_based_on",
-                            "Last Day of the Next Month")
+        # Payment terms for Supplier Type instead of supplier and evaluate the due date
+        frappe.db.set_value("Supplier Type", "_Test Supplier Type", "payment_terms", "_Test Payment Term Template 1")
 
         # Leap year
-        due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier", "_Test Company")
+        due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier With Template 1")
         self.assertEqual(due_date, "2016-02-29")
-        # Non Leap year
-        due_date = get_due_date("2017-01-22", "Supplier", "_Test Supplier", "_Test Company")
+        # # Non Leap year
+        due_date = get_due_date("2017-01-22", "Supplier", "_Test Supplier With Template 1")
         self.assertEqual(due_date, "2017-02-28")
 
+        # Supplier with no default Payment Terms Template
+        frappe.db.set_value("Supplier Type", "_Test Supplier Type", "payment_terms", "")
+        frappe.db.set_value("Supplier", "_Test Supplier", "payment_terms", "")
+
+        due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier")
+        self.assertEqual(due_date, "2016-01-22")
+        # # Non Leap year
+        due_date = get_due_date("2017-01-22", "Supplier", "_Test Supplier")
+        self.assertEqual(due_date, "2017-01-22")
 
     def test_supplier_disabled(self):
         make_test_records("Item")
@@ -70,7 +76,6 @@ class TestSupplier(unittest.TestCase):
         frappe.db.set_value("Supplier", "_Test Supplier", "disabled", 0)
 
         po.save()
-
 
     def test_supplier_country(self):
         # Test that country field exists in Supplier DocType

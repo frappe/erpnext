@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe, os
 from frappe import _
 
-from frappe.utils import cint
+from frappe.utils import cint, today, formatdate
 import frappe.defaults
 
 
@@ -34,6 +34,7 @@ class Company(Document):
 		self.validate_currency()
 		self.validate_coa_input()
 		self.validate_perpetual_inventory()
+		self.check_country_change()
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -49,6 +50,13 @@ class Company(Document):
 
 		if frappe.db.sql("select abbr from tabCompany where name!=%s and abbr=%s", (self.name, self.abbr)):
 			frappe.throw(_("Abbreviation already used for another company"))
+
+	def create_default_tax_template(self):
+		from erpnext.setup.setup_wizard.operations.taxes_setup import create_sales_tax
+		create_sales_tax({
+			'country': self.country,
+			'company_name': self.name
+		})
 
 	def validate_default_accounts(self):
 		for field in ["default_bank_account", "default_cash_account",
@@ -73,10 +81,12 @@ class Company(Document):
 		if not frappe.db.sql("""select name from tabAccount
 				where company=%s and docstatus<2 limit 1""", self.name):
 			if not frappe.local.flags.ignore_chart_of_accounts:
+				frappe.flags.country_change = True
 				self.create_default_accounts()
 				self.create_default_warehouses()
 
-				self.install_country_fixtures()
+		if frappe.flags.country_change:
+			install_country_fixtures(self.name)
 
 		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
 			self.create_default_cost_center()
@@ -95,12 +105,6 @@ class Company(Document):
 
 		frappe.clear_cache()
 
-	def install_country_fixtures(self):
-		path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(self.country))
-		if os.path.exists(path.encode("utf-8")):
-			frappe.get_attr("erpnext.regional.{0}.setup.setup"
-				.format(self.country.lower()))(self)
-
 	def create_default_warehouses(self):
 		for wh_detail in [
 			{"warehouse_name": _("All Warehouses"), "is_group": 1},
@@ -109,19 +113,16 @@ class Company(Document):
 			{"warehouse_name": _("Finished Goods"), "is_group": 0}]:
 
 			if not frappe.db.exists("Warehouse", "{0} - {1}".format(wh_detail["warehouse_name"], self.abbr)):
-				stock_group = frappe.db.get_value("Account", {"account_type": "Stock",
-					"is_group": 1, "company": self.name})
-				if stock_group:
-					warehouse = frappe.get_doc({
-						"doctype":"Warehouse",
-						"warehouse_name": wh_detail["warehouse_name"],
-						"is_group": wh_detail["is_group"],
-						"company": self.name,
-						"parent_warehouse": "{0} - {1}".format(_("All Warehouses"), self.abbr) \
-							if not wh_detail["is_group"] else ""
-					})
-					warehouse.flags.ignore_permissions = True
-					warehouse.insert()
+				warehouse = frappe.get_doc({
+					"doctype":"Warehouse",
+					"warehouse_name": wh_detail["warehouse_name"],
+					"is_group": wh_detail["is_group"],
+					"company": self.name,
+					"parent_warehouse": "{0} - {1}".format(_("All Warehouses"), self.abbr) \
+						if not wh_detail["is_group"] else ""
+				})
+				warehouse.flags.ignore_permissions = True
+				warehouse.insert()
 
 	def create_default_accounts(self):
 		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
@@ -150,6 +151,13 @@ class Company(Document):
 				frappe.msgprint(_("Set default inventory account for perpetual inventory"),
 					alert=True, indicator='orange')
 
+	def check_country_change(self):
+		frappe.flags.country_change = False
+
+		if not self.get('__islocal') and \
+			self.country != frappe.db.get_value('Company', self.name, 'country'):
+			frappe.flags.country_change = True
+
 	def set_default_accounts(self):
 		self._set_default_account("default_cash_account", "Cash")
 		self._set_default_account("default_bank_account", "Bank")
@@ -165,8 +173,14 @@ class Company(Document):
 			self._set_default_account("default_expense_account", "Cost of Goods Sold")
 
 		if not self.default_income_account:
-			self.db_set("default_income_account", frappe.db.get_value("Account",
-				{"account_name": _("Sales"), "company": self.name}))
+			income_account = frappe.db.get_value("Account",
+				{"account_name": _("Sales"), "company": self.name, "is_group": 0})
+
+			if not income_account:
+				income_account = frappe.db.get_value("Account",
+					{"account_name": _("Sales Account"), "company": self.name})
+
+			self.db_set("default_income_account", income_account)
 
 		if not self.default_payable_account:
 			self.db_set("default_payable_account", self.default_payable_account)
@@ -220,10 +234,6 @@ class Company(Document):
 		frappe.db.set(self, "round_off_cost_center", _("Main") + " - " + self.abbr)
 		frappe.db.set(self, "depreciation_cost_center", _("Main") + " - " + self.abbr)
 
-	def before_rename(self, olddn, newdn, merge=False):
-		if merge:
-			frappe.throw(_("Sorry, companies cannot be merged"))
-
 	def after_rename(self, olddn, newdn, merge=False):
 		frappe.db.set(self, "company_name", newdn)
 
@@ -256,10 +266,10 @@ class Company(Document):
 			frappe.db.sql("""delete from `tabWarehouse` where company=%s""", self.name)
 
 		frappe.defaults.clear_default("company", value=self.name)
+		frappe.db.sql("delete from `tabMode of Payment Account` where company=%s", self.name)
 
 		# clear default accounts, warehouses from item
 		if warehouses:
-
 			for f in ["default_warehouse", "website_warehouse"]:
 				frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
 					% (f, f, ', '.join(['%s']*len(warehouses))), tuple(warehouses))
@@ -281,6 +291,24 @@ class Company(Document):
 		frappe.db.sql("""update `tabSingles` set value=""
 			where doctype='Global Defaults' and field='default_company'
 			and value=%s""", self.name)
+		# delete mode of payment account
+		frappe.db.sql("delete from `tabMode of Payment Account` where company=%s", self.name)
+
+		# delete BOMs
+		boms = frappe.db.sql_list("select name from tabBOM where company=%s", self.name)
+		if boms:
+			frappe.db.sql("delete from tabBOM where company=%s", self.name)
+			for dt in ("BOM Operation", "BOM Item", "BOM Scrap Item", "BOM Explosion Item"):
+				frappe.db.sql("delete from `tab%s` where parent in (%s)"""
+					% (dt, ', '.join(['%s']*len(boms))), tuple(boms))
+
+		frappe.db.sql("delete from tabEmployee where company=%s", self.name)
+
+@frappe.whitelist()
+def enqueue_replace_abbr(company, old, new):
+	kwargs = dict(company=company, old=old, new=new)
+	frappe.enqueue('erpnext.setup.doctype.company.company.replace_abbr', **kwargs)
+
 
 @frappe.whitelist()
 def replace_abbr(company, old, new):
@@ -292,15 +320,21 @@ def replace_abbr(company, old, new):
 
 	frappe.db.set_value("Company", company, "abbr", new)
 
-	def _rename_record(dt):
-		for d in frappe.db.sql("select name from `tab%s` where company=%s" % (dt, '%s'), company):
-			parts = d[0].rsplit(" - ", 1)
-			if len(parts) == 1 or parts[1].lower() == old.lower():
-				frappe.rename_doc(dt, d[0], parts[0] + " - " + new)
+	def _rename_record(doc):
+		parts = doc[0].rsplit(" - ", 1)
+		if len(parts) == 1 or parts[1].lower() == old.lower():
+			frappe.rename_doc(dt, doc[0], parts[0] + " - " + new)
+
+	def _rename_records(dt):
+		# rename is expensive so let's be economical with memory usage
+		doc = (d for d in frappe.db.sql("select name from `tab%s` where company=%s" % (dt, '%s'), company))
+		for d in doc:
+			_rename_record(d)
 
 	for dt in ["Warehouse", "Account", "Cost Center"]:
-		_rename_record(dt)
+		_rename_records(dt)
 		frappe.db.commit()
+
 
 def get_name_with_abbr(name, company):
 	company_abbr = frappe.db.get_value("Company", company, "abbr")
@@ -311,41 +345,42 @@ def get_name_with_abbr(name, company):
 
 	return " - ".join(parts)
 
+def install_country_fixtures(company):
+	company_doc = frappe.get_doc("Company", company)
+	path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(company_doc.country))
+	if os.path.exists(path.encode("utf-8")):
+		frappe.get_attr("erpnext.regional.{0}.setup.setup"
+			.format(frappe.scrub(company_doc.country)))(company_doc)
+
 def update_company_current_month_sales(company):
-	from frappe.utils import today, formatdate
 	current_month_year = formatdate(today(), "MM-yyyy")
 
-	results = frappe.db.sql(('''
+	results = frappe.db.sql('''
 		select
 			sum(base_grand_total) as total, date_format(posting_date, '%m-%Y') as month_year
 		from
 			`tabSales Invoice`
 		where
-			date_format(posting_date, '%m-%Y')="{0}" and
-			company = "{1}"
+			date_format(posting_date, '%m-%Y')="{0}"
+			and docstatus = 1
+			and company = "{1}"
 		group by
-			month_year;
-	''').format(current_month_year, frappe.db.escape(company)), as_dict = True)
+			month_year
+	'''.format(current_month_year, frappe.db.escape(company)), as_dict = True)
 
 	monthly_total = results[0]['total'] if len(results) > 0 else 0
 
-	frappe.db.sql(('''
-		update tabCompany set total_monthly_sales = %s where name=%s
-	'''), (monthly_total, frappe.db.escape(company)))
-	frappe.db.commit()
-
+	frappe.db.set_value("Company", company, "total_monthly_sales", monthly_total)
 
 def update_company_monthly_sales(company):
 	'''Cache past year monthly sales of every company based on sales invoices'''
 	from frappe.utils.goal import get_monthly_results
 	import json
-	filter_str = "company = '{0}' and status != 'Draft'".format(frappe.db.escape(company))
-	month_to_value_dict = get_monthly_results("Sales Invoice", "base_grand_total", "posting_date", filter_str, "sum")
+	filter_str = "company = '{0}' and status != 'Draft' and docstatus=1".format(frappe.db.escape(company))
+	month_to_value_dict = get_monthly_results("Sales Invoice", "base_grand_total",
+		"posting_date", filter_str, "sum")
 
-	frappe.db.sql(('''
-		update tabCompany set sales_monthly_history = %s where name=%s
-	'''), (json.dumps(month_to_value_dict), frappe.db.escape(company)))
-	frappe.db.commit()
+	frappe.db.set_value("Company", company, "sales_monthly_history", json.dumps(month_to_value_dict))
 
 def cache_companies_monthly_sales_history():
 	companies = [d['name'] for d in frappe.get_list("Company")]

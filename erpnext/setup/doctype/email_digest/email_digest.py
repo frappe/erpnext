@@ -16,14 +16,13 @@ user_specific_content = ["calendar_events", "todo_list"]
 
 from frappe.model.document import Document
 class EmailDigest(Document):
-	def __init__(self, arg1, arg2=None):
-		super(EmailDigest, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(EmailDigest, self).__init__(*args, **kwargs)
 
 		self.from_date, self.to_date = self.get_from_to_date()
 		self.set_dates()
 		self._accounts = {}
-		self.currency = frappe.db.get_value("Company", self.company,
-			"default_currency")
+		self.currency = frappe.db.get_value("Company", self.company, "default_currency")
 
 	def get_users(self):
 		"""get list of users"""
@@ -233,7 +232,7 @@ class EmailDigest(Document):
 			 "new_quotations","pending_quotations","sales_order","purchase_order","pending_sales_orders","pending_purchase_orders",
 			"invoiced_amount", "payables", "bank_balance", "credit_balance"):
 			if self.get(key):
-				cache_key = "email_digest:card:{0}:{1}:{2}".format(self.company, self.frequency, key)
+				cache_key = "email_digest:card:{0}:{1}:{2}:{3}".format(self.company, self.frequency, key, self.from_date)
 				card = cache.get(cache_key)
 
 				if card:

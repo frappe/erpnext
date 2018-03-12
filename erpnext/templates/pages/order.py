@@ -15,7 +15,7 @@ def get_context(context):
 		context.doc.set_indicator()
 
 	if show_attachments():
-                context.attachments = get_attachments(frappe.form_dict.doctype, frappe.form_dict.name)
+		context.attachments = get_attachments(frappe.form_dict.doctype, frappe.form_dict.name)
 
 	context.parents = frappe.form_dict.parents
 	context.title = frappe.form_dict.name
@@ -24,9 +24,16 @@ def get_context(context):
 
 	context.enabled_checkout = frappe.get_doc("Shopping Cart Settings").enable_checkout
 
+	default_print_format = frappe.db.get_value('Property Setter', dict(property='default_print_format', doc_type=frappe.form_dict.doctype), "value")
+	if default_print_format:
+		context.print_format = default_print_format
+	else:
+		context.print_format = "Standard"
+
 	if not frappe.has_website_permission(context.doc):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
 
 def get_attachments(dt, dn):
-        return frappe.get_all("File", fields=["name", "file_name", "file_url", "is_private"],
-                              filters = {"attached_to_name": dn, "attached_to_doctype": dt, "is_private":0})
+        return frappe.get_all("File",
+			fields=["name", "file_name", "file_url", "is_private"],
+			filters = {"attached_to_name": dn, "attached_to_doctype": dt, "is_private":0})

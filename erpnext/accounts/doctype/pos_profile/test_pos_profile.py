@@ -25,8 +25,8 @@ class TestPOSProfile(unittest.TestCase):
 			products_count = frappe.db.sql(""" select count(name) from tabItem where item_group = '_Test Item Group'""", as_list=1)
 			customers_count = frappe.db.sql(""" select count(name) from tabCustomer where customer_group = '_Test Customer Group'""")
 
-			self.assertEquals(len(items), products_count[0][0])
-			self.assertEquals(len(customers), customers_count[0][0])
+			self.assertEqual(len(items), products_count[0][0])
+			self.assertEqual(len(customers), customers_count[0][0])
 
 		frappe.db.sql("delete from `tabPOS Profile`")
 
@@ -41,6 +41,7 @@ def make_pos_profile():
 		"expense_account": "_Test Account Cost for Goods Sold - _TC",
 		"income_account": "Sales - _TC",
 		"name": "_Test POS Profile",
+		"pos_profile_name": "_Test POS Profile",
 		"naming_series": "_T-POS Profile-",
 		"selling_price_list": "_Test Price List",
 		"territory": "_Test Territory",

@@ -6,7 +6,6 @@ import frappe
 from frappe import _, scrub
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.controllers.queries import get_match_cond
-from erpnext.stock.stock_ledger import get_valuation_rate
 from frappe.utils import flt
 
 
@@ -17,7 +16,6 @@ def execute(filters=None):
 	gross_profit_data = GrossProfitGenerator(filters)
 
 	data = []
-	source = gross_profit_data.grouped_data if filters.get("group_by") != "Invoice" else gross_profit_data.data
 
 	group_wise_columns = frappe._dict({
 		"invoice": ["parent", "customer", "customer_group", "posting_date","item_code", "item_name","item_group", "brand", "description", \
@@ -45,7 +43,7 @@ def execute(filters=None):
 
 	columns = get_columns(group_wise_columns, filters)
 
-	for src in source:
+	for src in gross_profit_data.grouped_data:
 		row = []
 		for col in group_wise_columns.get(scrub(filters.group_by)):
 			row.append(src.get(col))
@@ -103,10 +101,13 @@ class GrossProfitGenerator(object):
 		self.load_stock_ledger_entries()
 		self.load_product_bundle()
 		self.load_non_stock_items()
+		self.get_returned_invoice_items()
 		self.process()
 
 	def process(self):
 		self.grouped = {}
+		self.grouped_data = []
+
 		for row in self.si_list:
 			if self.skip_row(row, self.product_bundles):
 				continue
@@ -143,40 +144,67 @@ class GrossProfitGenerator(object):
 				row.gross_profit_percent = 0.0
 
 			# add to grouped
-			if self.filters.group_by != "Invoice":
-				self.grouped.setdefault(row.get(scrub(self.filters.group_by)), []).append(row)
-
-			self.data.append(row)
+			self.grouped.setdefault(row.get(scrub(self.filters.group_by)), []).append(row)
 
 		if self.grouped:
 			self.get_average_rate_based_on_group_by()
-		else:
-			self.grouped_data = []
 
 	def get_average_rate_based_on_group_by(self):
 		# sum buying / selling totals for group
-		self.grouped_data = []
 		for key in self.grouped.keys():
-			for i, row in enumerate(self.grouped[key]):
-				if i==0:
-					new_row = row
-				else:
-					new_row.qty += row.qty
-					new_row.buying_amount += row.buying_amount
-					new_row.base_amount += row.base_amount
+			if self.filters.get("group_by") != "Invoice":
+				for i, row in enumerate(self.grouped[key]):
+					if i==0:
+						new_row = row
+					else:
+						new_row.qty += row.qty
+						new_row.buying_amount += row.buying_amount
+						new_row.base_amount += row.base_amount
+				new_row = self.set_average_rate(new_row)
+				self.grouped_data.append(new_row)
+			else:
+				for i, row in enumerate(self.grouped[key]):
+					if row.parent in self.returned_invoices \
+							and row.item_code in self.returned_invoices[row.parent]:
+						returned_item_rows = self.returned_invoices[row.parent][row.item_code]
+						for returned_item_row in returned_item_rows:
+							row.qty += returned_item_row.qty
+							row.base_amount += returned_item_row.base_amount
+						row.buying_amount = row.qty * row.buying_rate
+					if row.qty:
+						row = self.set_average_rate(row)
+						self.grouped_data.append(row)
 
-			new_row.gross_profit = new_row.base_amount - new_row.buying_amount
-			new_row.gross_profit_percent = ((new_row.gross_profit / new_row.base_amount) * 100.0) \
-				if new_row.base_amount else 0
-			new_row.buying_rate = (new_row.buying_amount / new_row.qty) \
-				if new_row.qty else 0
-			new_row.base_rate = (new_row.base_amount / new_row.qty) \
-				if new_row.qty else 0
+	def set_average_rate(self, new_row):
+		new_row.gross_profit = new_row.base_amount - new_row.buying_amount
+		new_row.gross_profit_percent = ((new_row.gross_profit / new_row.base_amount) * 100.0) \
+			if new_row.base_amount else 0
+		new_row.buying_rate = (new_row.buying_amount / new_row.qty) if new_row.qty else 0
+		new_row.base_rate = (new_row.base_amount / new_row.qty) if new_row.qty else 0
+		return new_row
 
-			self.grouped_data.append(new_row)
+	def get_returned_invoice_items(self):
+		returned_invoices = frappe.db.sql("""
+			select
+				si.name, si_item.item_code, si_item.qty, si_item.base_amount, si.return_against
+			from
+				`tabSales Invoice` si, `tabSales Invoice Item` si_item
+			where
+				si.name = si_item.parent
+				and si.docstatus = 1
+				and si.is_return = 1
+		""", as_dict=1)
+
+		self.returned_invoices = frappe._dict()
+		for inv in returned_invoices:
+			self.returned_invoices.setdefault(inv.return_against, frappe._dict())\
+				.setdefault(inv.item_code, []).append(inv)
 
 	def skip_row(self, row, product_bundles):
-		if self.filters.get("group_by") != "Invoice" and not row.get(scrub(self.filters.get("group_by"))):
+		if self.filters.get("group_by") != "Invoice":
+			if not row.get(scrub(self.filters.get("group_by"))):
+				return True
+		elif row.get("is_return") == 1:
 			return True
 
 	def get_buying_amount_from_product_bundle(self, row, product_bundle):
@@ -219,6 +247,7 @@ class GrossProfitGenerator(object):
 		return 0.0
 
 	def get_average_buying_rate(self, row, item_code):
+		args = row
 		if not item_code in self.average_buying_rate:
 			if item_code in self.non_stock_items:
 				self.average_buying_rate[item_code] = flt(frappe.db.sql("""
@@ -226,12 +255,14 @@ class GrossProfitGenerator(object):
 					from `tabPurchase Invoice Item`
 					where item_code = %s and docstatus=1""", item_code)[0][0])
 			else:
-				average_buying_rate = get_incoming_rate(row)
-				if not average_buying_rate:
-					average_buying_rate = get_valuation_rate(item_code, row.warehouse,
-						row.parenttype, row.parent, allow_zero_rate=True, 
-						currency=self.filters.currency, company=self.filters.company)
+				args.update({
+					'voucher_type': row.parenttype,
+					'voucher_no': row.parent,
+					'allow_zero_valuation': True,
+					'company': self.filters.company
+				})
 
+				average_buying_rate = get_incoming_rate(args)
 				self.average_buying_rate[item_code] =  flt(average_buying_rate)
 
 		return self.average_buying_rate[item_code]
@@ -268,20 +299,26 @@ class GrossProfitGenerator(object):
 			sales_person_cols = ""
 			sales_team_table = ""
 
-		self.si_list = frappe.db.sql("""select `tabSales Invoice Item`.parenttype, `tabSales Invoice Item`.parent,
-				`tabSales Invoice`.posting_date, `tabSales Invoice`.posting_time, `tabSales Invoice`.project, `tabSales Invoice`.update_stock,
-				`tabSales Invoice`.customer, `tabSales Invoice`.customer_group, `tabSales Invoice`.territory,
-				`tabSales Invoice Item`.item_code, `tabSales Invoice Item`.item_name, `tabSales Invoice Item`.description,
-				`tabSales Invoice Item`.warehouse, `tabSales Invoice Item`.item_group, `tabSales Invoice Item`.brand,
-				`tabSales Invoice Item`.dn_detail, `tabSales Invoice Item`.delivery_note, `tabSales Invoice Item`.stock_qty as qty,
-				`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount, `tabSales Invoice Item`.name as "item_row"
+		self.si_list = frappe.db.sql("""
+			select
+				`tabSales Invoice Item`.parenttype, `tabSales Invoice Item`.parent,
+				`tabSales Invoice`.posting_date, `tabSales Invoice`.posting_time,
+				`tabSales Invoice`.project, `tabSales Invoice`.update_stock,
+				`tabSales Invoice`.customer, `tabSales Invoice`.customer_group,
+				`tabSales Invoice`.territory, `tabSales Invoice Item`.item_code,
+				`tabSales Invoice Item`.item_name, `tabSales Invoice Item`.description,
+				`tabSales Invoice Item`.warehouse, `tabSales Invoice Item`.item_group,
+				`tabSales Invoice Item`.brand, `tabSales Invoice Item`.dn_detail,
+				`tabSales Invoice Item`.delivery_note, `tabSales Invoice Item`.stock_qty as qty,
+				`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount,
+				`tabSales Invoice Item`.name as "item_row", `tabSales Invoice`.is_return
 				{sales_person_cols}
 			from
-				`tabSales Invoice`
-				inner join `tabSales Invoice Item` on `tabSales Invoice Item`.parent = `tabSales Invoice`.name
+				`tabSales Invoice` inner join `tabSales Invoice Item`
+					on `tabSales Invoice Item`.parent = `tabSales Invoice`.name
 				{sales_team_table}
 			where
-				`tabSales Invoice`.docstatus = 1 {conditions} {match_cond}
+				`tabSales Invoice`.docstatus=1 {conditions} {match_cond}
 			order by
 				`tabSales Invoice`.posting_date desc, `tabSales Invoice`.posting_time desc"""
 			.format(conditions=conditions, sales_person_cols=sales_person_cols,

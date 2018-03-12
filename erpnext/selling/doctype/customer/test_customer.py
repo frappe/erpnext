@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 
+from erpnext.accounts.party import get_due_date
 from frappe.test_runner import make_test_records
 from erpnext.exceptions import PartyFrozen, PartyDisabled
 from frappe.utils import flt
@@ -13,8 +14,10 @@ from erpnext.selling.doctype.customer.customer import get_credit_limit, get_cust
 from erpnext.tests.utils import create_test_contact_and_address
 
 test_ignore = ["Price List"]
-
+test_dependencies = ['Payment Term', 'Payment Terms Template']
 test_records = frappe.get_test_records('Customer')
+
+from six import iteritems
 
 class TestCustomer(unittest.TestCase):
 	def setUp(self):
@@ -50,8 +53,8 @@ class TestCustomer(unittest.TestCase):
 
 		details = get_party_details("_Test Customer")
 
-		for key, value in to_check.iteritems():
-			self.assertEquals(value, details.get(key))
+		for key, value in iteritems(to_check):
+			self.assertEqual(value, details.get(key))
 
 	def test_rename(self):
 		# delete communication linked to these 2 customers
@@ -71,7 +74,7 @@ class TestCustomer(unittest.TestCase):
 		self.assertFalse(frappe.db.exists("Customer", "_Test Customer 1"))
 
 		# test that comment gets linked to renamed doc
-		self.assertEquals(frappe.db.get_value("Communication", {
+		self.assertEqual(frappe.db.get_value("Communication", {
 			"communication_type": "Comment",
 			"reference_doctype": "Customer",
 			"reference_name": "_Test Customer 1 Renamed"
@@ -122,9 +125,9 @@ class TestCustomer(unittest.TestCase):
 		duplicate_customer = frappe.get_doc(
 			get_customer_dict('_Test Customer 1')).insert(ignore_permissions=True)
 
-		self.assertEquals("_Test Customer 1", test_customer_1.name)
-		self.assertEquals("_Test Customer 1 - 1", duplicate_customer.name)
-		self.assertEquals(test_customer_1.customer_name, duplicate_customer.customer_name)
+		self.assertEqual("_Test Customer 1", test_customer_1.name)
+		self.assertEqual("_Test Customer 1 - 1", duplicate_customer.name)
+		self.assertEqual(test_customer_1.customer_name, duplicate_customer.customer_name)
 
 	def get_customer_outstanding_amount(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -180,6 +183,35 @@ class TestCustomer(unittest.TestCase):
 		customer = frappe.get_doc("Customer", '_Test Customer')
 		customer.credit_limit = flt(outstanding_amt - 100)
 		self.assertRaises(frappe.ValidationError, customer.save)
+
+	def test_customer_payment_terms(self):
+		frappe.db.set_value(
+			"Customer", "_Test Customer With Template", "payment_terms", "_Test Payment Term Template 3")
+
+		due_date = get_due_date("2016-01-22", "Customer", "_Test Customer With Template")
+		self.assertEqual(due_date, "2016-02-21")
+
+		due_date = get_due_date("2017-01-22", "Customer", "_Test Customer With Template")
+		self.assertEqual(due_date, "2017-02-21")
+
+		frappe.db.set_value(
+			"Customer", "_Test Customer With Template", "payment_terms", "_Test Payment Term Template 1")
+
+		due_date = get_due_date("2016-01-22", "Customer", "_Test Customer With Template")
+		self.assertEqual(due_date, "2016-02-29")
+
+		due_date = get_due_date("2017-01-22", "Customer", "_Test Customer With Template")
+		self.assertEqual(due_date, "2017-02-28")
+
+		frappe.db.set_value("Customer", "_Test Customer With Template", "payment_terms", "")
+
+		# No default payment term template attached
+		due_date = get_due_date("2016-01-22", "Customer", "_Test Customer")
+		self.assertEqual(due_date, "2016-01-22")
+
+		due_date = get_due_date("2017-01-22", "Customer", "_Test Customer")
+		self.assertEqual(due_date, "2017-01-22")
+
 
 def get_customer_dict(customer_name):
 	return {

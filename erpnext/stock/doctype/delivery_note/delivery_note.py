@@ -21,8 +21,8 @@ form_grid_templates = {
 }
 
 class DeliveryNote(SellingController):
-	def __init__(self, arg1, arg2=None):
-		super(DeliveryNote, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(DeliveryNote, self).__init__(*args, **kwargs)
 		self.status_updater = [{
 			'source_dt': 'Delivery Note Item',
 			'target_dt': 'Sales Order Item',
@@ -92,9 +92,9 @@ class DeliveryNote(SellingController):
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
 		if frappe.db.get_value("Selling Settings", None, 'so_required') == 'Yes':
-			 for d in self.get('items'):
-				 if not d.against_sales_order:
-					 frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
+			for d in self.get('items'):
+				if not d.against_sales_order:
+					frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
 
 	def validate(self):
 		self.validate_posting_time()
@@ -235,13 +235,22 @@ class DeliveryNote(SellingController):
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
 
+		extra_amount = 0
 		validate_against_credit_limit = False
-		for d in self.get("items"):
-			if not (d.against_sales_order or d.against_sales_invoice):
-				validate_against_credit_limit = True
-				break
+		bypass_credit_limit_check_at_sales_order = cint(frappe.db.get_value("Customer", self.customer,
+			"bypass_credit_limit_check_at_sales_order"))
+		if bypass_credit_limit_check_at_sales_order:
+			validate_against_credit_limit = True
+			extra_amount = self.base_grand_total
+		else:
+			for d in self.get("items"):
+				if not (d.against_sales_order or d.against_sales_invoice):
+					validate_against_credit_limit = True
+					break
+
 		if validate_against_credit_limit:
-			check_credit_limit(self.customer, self.company)
+			check_credit_limit(self.customer, self.company,
+				bypass_credit_limit_check_at_sales_order, extra_amount)
 
 	def validate_packed_qty(self):
 		"""
@@ -429,6 +438,33 @@ def make_sales_invoice(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doc
+
+@frappe.whitelist()
+def make_delivery_trip(source_name, target_doc=None):
+	def update_stop_details(source_doc, target_doc, source_parent):
+		target_doc.customer = source_parent.customer
+		target_doc.address = source_parent.shipping_address_name
+		target_doc.customer_address = source_parent.shipping_address
+		target_doc.contact = source_parent.contact_person
+		target_doc.customer_contact = source_parent.contact_display
+
+	doclist = get_mapped_doc("Delivery Note", source_name, {
+		"Delivery Note": {
+			"doctype": "Delivery Trip",
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Delivery Note Item": {
+			"doctype": "Delivery Stop",
+			"field_map": {
+				"parent": "delivery_note"
+			},
+			"postprocess": update_stop_details,
+		}
+	}, target_doc)
+
+	return doclist
 
 @frappe.whitelist()
 def make_installation_note(source_name, target_doc=None):

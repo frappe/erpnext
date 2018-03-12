@@ -11,7 +11,6 @@ def get_notification_config():
 			"Warranty Claim": {"status": "Open"},
 			"Task": {"status": ("in", ("Open", "Overdue"))},
 			"Project": {"status": "Open"},
-			"Item": {"total_projected_qty": ("<", 0)},
 			"Lead": {"status": "Open"},
 			"Contact": {"status": "Open"},
 			"Opportunity": {"status": "Open"},
@@ -30,8 +29,8 @@ def get_notification_config():
 				"docstatus": ("<", 2)
 			},
 			"Payment Entry": {"docstatus": 0},
-			"Leave Application": {"status": "Open"},
-			"Expense Claim": {"approval_status": "Draft"},
+			"Leave Application": {"docstatus": 0},
+			"Expense Claim": {"docstatus": 0},
 			"Job Applicant": {"status": "Open"},
 			"Delivery Note": {
 				"status": ("not in", ("Completed", "Closed")),
@@ -55,13 +54,19 @@ def get_notification_config():
 			},
 			"Production Order": { "status": ("in", ("Draft", "Not Started", "In Process")) },
 			"BOM": {"docstatus": 0},
-			"Timesheet": {"status": "Draft"}
+
+			"Timesheet": {"status": "Draft"},
+
+			"Lab Test": {"docstatus": 0},
+			"Sample Collection": {"docstatus": 0},
+			"Patient Appointment": {"status": "Open"},
+			"Consultation": {"docstatus": 0}
 		},
 
 		"targets": {
 			"Company": {
-				"filters" : { "sales_target": ( ">", 0 ) },
-				"target_field" : "sales_target",
+				"filters" : { "monthly_sales_target": ( ">", 0 ) },
+				"target_field" : "monthly_sales_target",
 				"value_field" : "total_monthly_sales"
 			}
 		}

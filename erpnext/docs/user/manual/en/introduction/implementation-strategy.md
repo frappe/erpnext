@@ -24,7 +24,7 @@ Once you are familiar with ERPNext, start entering your live data!
 
   * Clean up the account of test data or better, start a fresh install.
   * If you just want to clear your transactions and not your master data like Item, Customer, Supplier, BOM etc, you can click delete the transactions of your Company and start fresh. To do so, open the Company Record via Setup > Masters > Company and delete your Company's transactions by clicking on the **Delete Company Transactions** button at the bottom of the Company Form.
-  * You can also setup a new account at [https://erpnext.com](https://erpnext.com), and use the 30-day free trial. [Find out more ways of deploying ERPNext](/introduction/getting-started-with-erpnext)
+  * You can also setup a new account at [https://erpnext.com](https://erpnext.com), and use the 30-day free trial. [Find out more ways of deploying ERPNext](docs/user/manual/en/introduction/getting-started-with-erpnext)
   * Setup all the modules with Customer Groups, Item Groups, Warehouses, BOMs etc.
   * Import Customers, Suppliers, Items, Contacts and Addresses using Data Import Tool.
   * Import opening stock using Stock Reconciliation Tool.
