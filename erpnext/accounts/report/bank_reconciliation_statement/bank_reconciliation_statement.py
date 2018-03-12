@@ -138,7 +138,23 @@ def get_entries(filters):
 			and ifnull(clearance_date, '4000-01-01') > %(report_date)s
 	""", filters, as_dict=1)
 
-	return sorted(list(payment_entries)+list(journal_entries), 
+	pos_entries = []
+	if filters.include_pos_transactions:
+		pos_entries = frappe.db.sql("""
+			select
+				"Sales Invoice Payment" as payment_document, sip.name as payment_entry, sip.amount as debit,
+				si.posting_date, si.debit_to as against_account, sip.clearance_date,
+				account.account_currency, 0 as credit
+			from `tabSales Invoice Payment` sip, `tabSales Invoice` si, `tabAccount` account
+			where
+				sip.account=%(account)s and si.docstatus=1 and sip.parent = si.name
+				and account.name = sip.account and si.posting_date <= %(report_date)s and
+				ifnull(sip.clearance_date, '4000-01-01') > %(report_date)s
+			order by
+				si.posting_date ASC, si.name DESC
+		""", filters, as_dict=1)
+
+	return sorted(list(payment_entries)+list(journal_entries+list(pos_entries)),
 			key=lambda k: k['posting_date'] or getdate(nowdate()))
 			
 def get_amounts_not_reflected_in_system(filters):
