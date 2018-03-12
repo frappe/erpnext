@@ -6,6 +6,7 @@ import frappe, erpnext
 from frappe import _
 from frappe.utils import cint, flt, cstr, now
 from erpnext.stock.utils import get_valuation_method
+from erpnext.stock.get_item_details import get_bin_details
 import json
 
 # future reposting
@@ -334,7 +335,9 @@ class update_entries_after(object):
 					if not self.stock_queue and qty_to_pop:
 						# stock finished, qty still remains to be withdrawn
 						# negative stock, keep in as a negative batch
-						self.stock_queue.append([-qty_to_pop, outgoing_rate or batch[1]])
+						bin_data = get_bin_details(self.item_code, self.warehouse)
+						qty = (bin_data.get('actual_qty', 0) if bin_data and bin_data.get('actual_qty', 0) > 0 else qty_to_pop * -1)
+						self.stock_queue.append([qty, outgoing_rate or batch[1]])
 						break
 
 				else:
