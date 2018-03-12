@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from frappe.utils import cstr, flt, cint, nowdate, add_days, comma_and, now_datetime
 from erpnext.manufacturing.doctype.production_order.production_order import get_item_details
+from six import string_types
 
 class ProductionPlan(Document):
 	def validate(self):
@@ -483,7 +484,7 @@ class ProductionPlan(Document):
 
 @frappe.whitelist()
 def get_bin_details(row):
-	if isinstance(row, basestring):
+	if isinstance(row, string_types):
 		row = frappe._dict(json.loads(row))
 
 	conditions = ""
