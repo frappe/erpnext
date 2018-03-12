@@ -39,6 +39,16 @@ frappe.ui.form.on("Bank Reconciliation", {
 			}
 		});
 	},
+	update_return_date: function(frm) {
+		return frappe.call({
+			method: "update_return_date",
+			doc: frm.doc,
+			callback: function(r, rt) {
+				frm.refresh_field("payment_entries");
+				frm.refresh_fields();
+			}
+		});
+	},
 	get_payment_entries: function(frm) {
 		return frappe.call({
 			method: "get_payment_entries",

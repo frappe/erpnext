@@ -21,7 +21,6 @@ class BankReconciliation(Document):
 		if not self.include_reconciled_entries:
 			condition = "and (clearance_date is null or clearance_date='0000-00-00')"
 
-
 		journal_entries = frappe.db.sql("""
 			select 
 				"Journal Entry" as payment_document, t1.name as payment_entry, 
@@ -36,7 +35,7 @@ class BankReconciliation(Document):
 				and ifnull(t1.is_opening, 'No') = 'No' {0}
 			order by t1.posting_date ASC, t1.name DESC
 		""".format(condition), (self.bank_account, self.from_date, self.to_date), as_dict=1)
-
+		condition += "and (return_date is null or return_date='0000-00-00')"
 		payment_entries = frappe.db.sql("""
 			select 
 				"Payment Entry" as payment_document, name as payment_entry, 
@@ -106,6 +105,9 @@ class BankReconciliation(Document):
 					where name=%s""".format(d.payment_document), 
 				(d.clearance_date, nowdate(), d.payment_entry))
 				
+				deposit_status = "Done"
+				frappe.db.sql("update `tabPayment Entry` set deposit_status=%s where clearance_date=%s",
+							(deposit_status, d.clearance_date))
 				clearance_date_updated = True
 
 		if clearance_date_updated:
@@ -113,3 +115,71 @@ class BankReconciliation(Document):
 			msgprint(_("Clearance Date updated"))
 		else:
 			msgprint(_("Clearance Date not mentioned"))
+	
+	
+	def update_return_date(self):
+		return_date_updated = False
+		for d in self.get('payment_entries'):
+			if d.return_date:
+				if not d.payment_document:
+					frappe.throw(_("Row #{0}: Payment document is required to complete the trasaction"))
+				
+				if d.cheque_date and getdate(d.return_date) < getdate(d.cheque_date):
+					frappe.throw(_("Row #{0}: Return date {1} cannot be before Cheque Date {2}")
+						.format(d.idx, d.return_date, d.cheque_date))
+				
+			if d.return_date or self.include_reconciled_entries:
+				if not d.return_date:
+					d.return_date = None
+				
+				frappe.db.set_value(d.payment_document, d.payment_entry, "return_date", d.return_date)
+				frappe.db.sql("""update `tab{0}` set return_date=%s, modified=%s
+					where name=%s""".format(d.payment_document),
+				(d.return_date, nowdate(), d.payment_entry))
+				
+				return_date_updated = True
+			
+			if d.return_date:
+				payment_ref = frappe.get_doc(d.payment_document, d.payment_entry)
+				
+				deposit_status = "Return"
+				frappe.db.sql("update `tabPayment Entry` set deposit_status=%s where name=%s",
+							(deposit_status, payment_ref.name))
+				
+				gl_entries=frappe.db.sql("select *, debit,credit,debit_in_account_currency,credit_in_account_currency from `tabGL Entry` where voucher_no=%s",
+						(payment_ref.name), as_dict=1)
+				
+				for i in gl_entries:
+					gl_entry_reverse = frappe.get_doc({
+						"doctype": "GL Entry",
+						"posting_date": d.return_date,
+						"reference_date": i.get('reference_date'),
+						"fiscal_year": i.get('fiscal_year'),
+						"voucher_type": i.get('voucher_type'),
+						"voucher_no": i.get('voucher_no'),
+						"debit": i.get('credit'),
+						"credit": i.get('debit'),
+						"against": i.get('against'),
+						"party": i.get('party'),
+						"against_voucher": i.get('against_voucher'),
+						"against_voucher_type": i.get('against_voucher_type'),
+						"account": i.get('account'),
+						"name": i.get('name'),
+						"party_type": i.get('party_type'),
+						"_assign": i.get('_assign'),
+						"is_advance": i.get('is_advance'),
+						"remarks": 'RETURN CHEQUE ENTRY',
+						'debit_in_account_currency': i.get('credit_in_account_currency'),
+						'credit_in_account_currency':i.get('debit_in_account_currency'),
+						'return_date':d.return_date,
+					})
+					gl_entry_reverse.insert()
+		
+		if return_date_updated:
+			self.get_payment_entries()
+			
+			msgprint(_("Return Date updated"))
+			
+		else:
+			msgprint(_("Return Date not mentioned"))
+			
