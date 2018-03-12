@@ -75,6 +75,14 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		if (this.frm.doc.organization_lead == 1) {
 			this.frm.set_value("lead_name", this.frm.doc.company_name);
 		}
+	},
+
+	contact_date: function() {
+		if (this.frm.doc.contact_date) {
+			let d = moment(this.frm.doc.contact_date);
+			d.add(1, "hours");
+			this.frm.set_value("ends_on", d.format(moment.defaultDatetimeFormat));
+		}
 	}
 });
 
