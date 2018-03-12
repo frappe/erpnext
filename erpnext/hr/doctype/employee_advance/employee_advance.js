@@ -85,8 +85,11 @@ frappe.ui.form.on('Employee Advance', {
 
 	employee: function (frm) {
 		return frappe.call({
-			method: "get_due_advance_amount",
-			doc: cur_frm.doc,
+			method: "erpnext.hr.doctype.employee_advance.employee_advance.get_due_advance_amount",
+			args: {
+				"employee": frm.doc.employee,
+				"posting_date": frm.doc.posting_date
+			},
 			callback: function(r) {
 				frm.set_value("due_advance_amount",r.message);
 				refresh_field("due_advance_amount");
