@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, requests
+import frappe, requests, os
 
 from frappe import _
 from frappe.utils.password import get_decrypted_password
@@ -76,13 +76,16 @@ class WoocommerceSettings(Document):
 			names_check_box = ["Customer-woocommerce_check","Sales Order-woocommerce_check","Item-woocommerce_check","Address-woocommerce_check"]
 			email_names = ["Customer-woocommerce_email","Address-woocommerce_email"]
 			for name in names:
-				delete = frappe.delete_doc("Custom Field",name)
+				frappe.delete_doc("Custom Field",name)
 
 			for name in names_check_box:
-				delete = frappe.delete_doc("Custom Field",name)
+				frappe.delete_doc("Custom Field",name)
 
 			for name in email_names:
-				delete = frappe.delete_doc("Custom Field",name)
+				frappe.delete_doc("Custom Field",name)
+
+			frappe.delete_doc("Item Group","WooCommerce Products")
+
 				
 		frappe.db.commit()
 
@@ -104,8 +107,14 @@ class WoocommerceSettings(Document):
 	
 		endpoint = "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.order"
 
+		try:
+			url = frappe.request.url
+		except RuntimeError:
+			# for CI Test to work
+			url = "http://localhost:8000"
+
 		server_url = '{uri.scheme}://{uri.netloc}'.format(
-			uri=urlparse(frappe.request.url)
+			uri=urlparse(url)
 		)
 
 		delivery_url = server_url + endpoint
