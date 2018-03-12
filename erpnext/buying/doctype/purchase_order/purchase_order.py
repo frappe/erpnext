@@ -12,7 +12,7 @@ from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
 from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import validate_for_items, check_for_closed_status
-
+from erpnext.stock.utils import get_bin
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -80,8 +80,10 @@ class PurchaseOrder(BuyingController):
 	def validate_supplier(self):
 		prevent_po = frappe.db.get_value("Supplier", self.supplier, 'prevent_pos')
 		if prevent_po:
-			standing = frappe.db.get_value("Supplier Scorecard",self.supplier, 'status')
-			frappe.throw(_("Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.").format(self.supplier, standing))
+			standing = frappe.db.get_value("Supplier Scorecard", self.supplier, 'status')
+			if standing:
+				frappe.throw(_("Purchase Orders are not allowed for {0} due to a scorecard standing of {1}.")
+					.format(self.supplier, standing))
 
 		warn_po = frappe.db.get_value("Supplier", self.supplier, 'warn_pos')
 		if warn_po:
@@ -192,6 +194,9 @@ class PurchaseOrder(BuyingController):
 		self.set_status(update=True, status=status)
 		self.update_requested_qty()
 		self.update_ordered_qty()
+		if self.is_subcontracted == "Yes":
+			self.update_reserved_qty_for_subcontract()
+
 		self.notify_update()
 		clear_doctype_notifications(self)
 
@@ -204,6 +209,8 @@ class PurchaseOrder(BuyingController):
 		self.update_prevdoc_status()
 		self.update_requested_qty()
 		self.update_ordered_qty()
+		if self.is_subcontracted == "Yes":
+			self.update_reserved_qty_for_subcontract()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
@@ -216,6 +223,9 @@ class PurchaseOrder(BuyingController):
 
 		if self.has_drop_ship_item():
 			self.update_delivered_qty_in_sales_order()
+
+		if self.is_subcontracted == "Yes":
+			self.update_reserved_qty_for_subcontract()
 
 		self.check_for_closed_status()
 
@@ -267,6 +277,12 @@ class PurchaseOrder(BuyingController):
 		for item in self.items:
 			if item.delivered_by_supplier == 1:
 				item.received_qty = item.qty
+
+	def update_reserved_qty_for_subcontract(self):
+		for d in self.supplied_items:
+			if d.rm_item_code:
+				stock_bin = get_bin(d.rm_item_code, d.reserve_warehouse)
+				stock_bin.update_reserved_qty_for_sub_contracting()
 
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor= 1.0):
 	"""get last purchase rate for an item"""
@@ -388,23 +404,52 @@ def make_purchase_invoice(source_name, target_doc=None):
 	return doc
 
 @frappe.whitelist()
-def make_stock_entry(purchase_order, item_code):
-	purchase_order = frappe.get_doc("Purchase Order", purchase_order)
+def make_rm_stock_entry(purchase_order, rm_items):
+	if isinstance(rm_items, basestring):
+		rm_items_list = json.loads(rm_items)
+	else:
+		frappe.throw(_("No Items available for transfer"))
 
-	stock_entry = frappe.new_doc("Stock Entry")
-	stock_entry.purpose = "Subcontract"
-	stock_entry.purchase_order = purchase_order.name
-	stock_entry.supplier = purchase_order.supplier
-	stock_entry.supplier_name = purchase_order.supplier_name
-	stock_entry.supplier_address = purchase_order.supplier_address
-	stock_entry.address_display = purchase_order.address_display
-	stock_entry.company = purchase_order.company
-	stock_entry.from_bom = 1
-	po_item = [d for d in purchase_order.items if d.item_code == item_code][0]
-	stock_entry.fg_completed_qty = po_item.qty
-	stock_entry.bom_no = po_item.bom
-	stock_entry.get_items()
-	return stock_entry.as_dict()
+	if rm_items_list:
+		fg_items = list(set(d["item_code"] for d in rm_items_list))
+	else:
+		frappe.throw(_("No Items selected for transfer"))
+
+	if purchase_order:
+		purchase_order = frappe.get_doc("Purchase Order", purchase_order)
+
+	if fg_items:
+		items = tuple(set(d["rm_item_code"] for d in rm_items_list))
+		item_wh = frappe._dict(frappe.db.sql("""
+			select item_code, description
+			from `tabItem` where name in ({0})
+		""".format(", ".join(["%s"] * len(items))), items))
+
+		stock_entry = frappe.new_doc("Stock Entry")
+		stock_entry.purpose = "Subcontract"
+		stock_entry.purchase_order = purchase_order.name
+		stock_entry.supplier = purchase_order.supplier
+		stock_entry.supplier_name = purchase_order.supplier_name
+		stock_entry.supplier_address = purchase_order.supplier_address
+		stock_entry.address_display = purchase_order.address_display
+		stock_entry.company = purchase_order.company
+		for item_code in fg_items:
+			for rm_item_data in rm_items_list:
+				if rm_item_data["item_code"] == item_code:
+					items_dict = {
+						rm_item_data["rm_item_code"]: {
+							"item_name":rm_item_data["item_name"],
+							"description":item_wh.get(rm_item_data["rm_item_code"]),
+							'qty':rm_item_data["qty"],
+							'from_warehouse':rm_item_data["warehouse"],
+							'stock_uom':rm_item_data["stock_uom"]
+						}
+					}
+					stock_entry.add_to_stock_entry_detail(items_dict)
+		return stock_entry.as_dict()
+	else:
+		frappe.throw(_("No Items selected for transfer"))
+	return purchase_order.name
 
 @frappe.whitelist()
 def update_status(status, name):
