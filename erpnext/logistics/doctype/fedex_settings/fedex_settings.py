@@ -7,9 +7,8 @@ import frappe
 from frappe.model.document import Document
 from erpnext.logistics.utils import create_shipper
 
+
 class FedExSettings(Document):
-	def validate_creadentials(self):
-		pass
 
 	def on_update(self):
 		create_shipper("FedEx")
