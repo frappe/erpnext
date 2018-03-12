@@ -156,6 +156,9 @@ class StatusUpdater(Document):
 
 			# get unique transactions to update
 			for d in self.get_all_children():
+				if hasattr(d, 'qty') and d.qty < 0 and not self.get('is_return'):
+					frappe.throw(_("For an item {0}, quantity must be positive number").format(d.item_code))
+
 				if d.doctype == args['source_dt'] and d.get(args["join_field"]):
 					args['name'] = d.get(args['join_field'])
 
