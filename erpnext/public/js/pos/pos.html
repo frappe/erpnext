@@ -37,20 +37,22 @@
 					<div class="cell price-cell text-right tax-table">
 					</div>
 				</div>
-				<div class="pos-list-row discount-amount-area">
-					<div class="cell"></div>
-					<div class="cell text-right">{%= __("Discount") %}</div>
-					<div class="cell price-cell discount-field-col">
-						<div class="input-group input-group-sm">
-							<span class="input-group-addon">%</span>
-							<input type="text" class="form-control discount-percentage text-right">
-						</div>
-						<div class="input-group input-group-sm">
-							<span class="input-group-addon">{%= get_currency_symbol(currency) %}</span>
-							<input type="text" class="form-control discount-amount text-right" placeholder="{%= 0.00 %}">
+				{% if(allow_user_to_edit_discount) { %}
+					<div class="pos-list-row discount-amount-area">
+						<div class="cell"></div>
+						<div class="cell text-right">{%= __("Discount") %}</div>
+						<div class="cell price-cell discount-field-col">
+							<div class="input-group input-group-sm">
+								<span class="input-group-addon">%</span>
+								<input type="text" class="form-control discount-percentage text-right">
+							</div>
+							<div class="input-group input-group-sm">
+								<span class="input-group-addon">{%= get_currency_symbol(currency) %}</span>
+								<input type="text" class="form-control discount-amount text-right" placeholder="{%= 0.00 %}">
+							</div>
 						</div>
 					</div>
-				</div>
+				{% } %}
 				<div class="pos-list-row grand-total-area collapse-btn" style="border-bottom:1px solid #d1d8dd;">
 					<div class="cell">
 						<a class="">
@@ -71,7 +73,7 @@
 						{% for(var j=i*3; j
 						<(i+1)*3; j++) { %} <button type="button" class="btn btn-default numeric-keypad" val="{{j+1}}">{{j+1}}</button>
 							{% } %}
-							<button type="button" {% if(!allow_user_to_edit_rate && chartData[i] == __("Price")) { %} disabled {% } %} id="pos-item-{{ chartData[i].toLowerCase() }}" class="btn text-center btn-default numeric-keypad pos-operation">{{ __(chartData[i]) }}</button>
+							<button type="button" {% if((!allow_user_to_edit_rate && chartData[i] == __("Price")) || (!allow_user_to_edit_discount && chartData[i] == __("Disc"))) { %} disabled {% } %} id="pos-item-{{ chartData[i].toLowerCase() }}" class="btn text-center btn-default numeric-keypad pos-operation">{{ __(chartData[i]) }}</button>
 				</div>
 				{% } %}
 				<div class="row text-right">
