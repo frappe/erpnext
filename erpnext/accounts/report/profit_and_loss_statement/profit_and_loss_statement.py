@@ -75,11 +75,11 @@ def get_chart_data(filters, columns, income, expense, net_profit_loss):
 
 	datasets = []
 	if income_data:
-		datasets.append({'title': 'Income', 'values': income_data})
+		datasets.append({'name': 'Income', 'values': income_data})
 	if expense_data:
-		datasets.append({'title': 'Expense', 'values': expense_data})
+		datasets.append({'name': 'Expense', 'values': expense_data})
 	if net_profit:
-		datasets.append({'title': 'Net Profit/Loss', 'values': net_profit})
+		datasets.append({'name': 'Net Profit/Loss', 'values': net_profit})
 
 	chart = {
 		"data": {
