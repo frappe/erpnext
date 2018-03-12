@@ -1,0 +1,82 @@
+<style>
+	.whole-report {
+		font-size: 9pt;
+		font-family: 'Helvetica Neue', Helvetica, Arial, 'Open Sans', 'sans-serif';
+		-webkit-print-color-adjust: exact;
+	}
+
+	h2 {
+		text-align: center;
+	}
+
+	span {
+		padding-bottom: 5px;
+	}
+
+	thead {
+		background-color: #eee !important;
+		font-weight: bold;
+	}
+
+	td {
+		vertical-align: top !important;
+		padding: 6px !important;
+		text-align: left;
+	}
+
+	.doc-field {
+		margin-bottom: 5px;
+	}
+</style>
+
+<div class="whole-report">
+<h2>{{ _("Student Report Card") }}</h2>
+<hr>
+<span class="doc-field"> {{ _("Student: ") }} <b> {{ frappe.db.get_value("Student", doc.students[0], "title") }} </b> </span> <br>
+<span class="doc-field"> {{ _("Program: ") }} <b> {{ doc.program }} </b> </span> <br>
+<span class="doc-field"> {{ _("Assessment Group: ") }} <b> {{ doc.assessment_group }} </b> </span>
+<hr>
+
+{% for course in courses %}
+	<br>
+	<div class="doc-field">
+		Course: <b>{{ course }} ({{ frappe.db.get_value("Course", course, "course_name") }}) </b>
+	</div>
+	<table class="table table-bordered table-condensed">
+		<thead>
+			<tr>
+				<td>Assessment Criteria</td>
+				{% for assessment_group in assessment_groups %}
+				<td> {{ assessment_group }}</td>
+				{% endfor %}
+			</tr>
+		</thead>
+		<tbody>
+			{% for criteria in course_criteria[course] %}
+			<tr>
+				<td>{{ criteria }}</td>
+				{% for assessment_group in assessment_groups %}
+					{% if (assessment_result.get(course) and assessment_result.get(course).get(assessment_group) and assessment_result.get(course).get(assessment_group).get(criteria)) %}
+						<td> {{ assessment_result.get(course).get(assessment_group).get(criteria).get("grade") }} </td>
+					{% else %}
+						<td></td>
+					{% endif %}
+				{% endfor %}
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endfor %}
+
+<hr>
+<h4>{{ _("Attendance")}}</h4> <br>
+<div>
+	Present {{ doc.present_days }} out of {{ doc.max_days }}
+</div>
+
+<hr>
+<h4>{{ _("Parents Meeting Attendance")}}</h4> <br>
+<div>
+	Present {{ doc.parents_attendance }} out of {{ doc.parents_meeting }}
+</div>
+</div>
