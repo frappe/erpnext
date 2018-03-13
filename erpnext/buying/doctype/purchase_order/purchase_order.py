@@ -13,6 +13,7 @@ from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
 from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import validate_for_items, check_for_closed_status
 from erpnext.stock.utils import get_bin
+from six import string_types
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -407,7 +408,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_rm_stock_entry(purchase_order, rm_items):
-	if isinstance(rm_items, basestring):
+	if isinstance(rm_items, string_types):
 		rm_items_list = json.loads(rm_items)
 	else:
 		frappe.throw(_("No Items available for transfer"))
