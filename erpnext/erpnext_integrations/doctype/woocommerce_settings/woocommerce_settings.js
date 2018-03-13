@@ -5,6 +5,14 @@ frappe.ui.form.on('Woocommerce Settings', {
 	refresh (frm) {
 		frm.trigger("add_button_generate_secret");
 		frm.trigger("check_enabled");
+		frm.set_query("tax_account", ()=>{
+			return {
+				"filters": {
+					"company": frappe.defaults.get_default("company"),
+					"is_group": 0
+				}
+			}
+		});
 	},
 
 	enable_sync (frm) {
