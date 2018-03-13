@@ -60,7 +60,38 @@ class TestPaymentEntry(unittest.TestCase):
 		pi = make_purchase_invoice()
 
 		self.assertRaises(
-			frappe.ValidationError, get_payment_entry, dt='Purchase Invoice', dn=pi.name, bank_account="_Test Bank - _TC")
+			frappe.ValidationError, get_payment_entry, dt='Purchase Invoice', dn=pi.name,
+			bank_account="_Test Bank - _TC")
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_payment_entry_for_blocked_supplier_payments_today_date(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Payments'
+		supplier.release_date = nowdate()
+		supplier.save()
+
+		pi = make_purchase_invoice()
+
+		self.assertRaises(
+			frappe.ValidationError, get_payment_entry, dt='Purchase Invoice', dn=pi.name,
+			bank_account="_Test Bank - _TC")
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_payment_entry_for_blocked_supplier_payments_past_date(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Payments'
+		supplier.release_date = '2018-03-01'
+		supplier.save()
+
+		pi = make_purchase_invoice()
+
+		get_payment_entry('Purchase Invoice', pi.name, bank_account="_Test Bank - _TC")
 
 		supplier.on_hold = 0
 		supplier.save()

@@ -127,6 +127,36 @@ class TestPurchaseInvoice(unittest.TestCase):
 		supplier.on_hold = 0
 		supplier.save()
 
+	def test_purchase_invoice_for_blocked_supplier_payment_today_date(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Payments'
+		supplier.release_date = nowdate()
+		supplier.save()
+
+		pi = make_purchase_invoice()
+
+		self.assertRaises(
+			frappe.ValidationError, get_payment_entry, dt='Purchase Invoice', dn=pi.name,
+			bank_account="_Test Bank - _TC")
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_purchase_invoice_for_blocked_supplier_payment_past_date(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Payments'
+		supplier.release_date = '2018-03-01'
+		supplier.save()
+
+		pi = make_purchase_invoice()
+
+		get_payment_entry('Purchase Invoice', dn=pi.name, bank_account="_Test Bank - _TC")
+
+		supplier.on_hold = 0
+		supplier.save()
+
 	def test_gl_entries_with_perpetual_inventory_against_pr(self):
 		pr = frappe.copy_doc(pr_test_records[0])
 		set_perpetual_inventory(1, pr.company)
