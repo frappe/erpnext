@@ -4,12 +4,11 @@
 from __future__ import unicode_literals
 
 import frappe
-import datetime
 from frappe import _, msgprint, scrub
 from frappe.defaults import get_user_permissions
 from frappe.model.utils import get_fetch_values
-from frappe.utils import (add_days, getdate, formatdate, get_first_day, date_diff,
-                          add_years, get_timestamp, nowdate, flt, add_months, get_last_day)
+from frappe.utils import (add_days, getdate, formatdate, date_diff,
+	add_years, get_timestamp, nowdate, flt, add_months, get_last_day)
 from frappe.contacts.doctype.address.address import (get_address_display,
 	get_default_address, get_company_address)
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
@@ -141,10 +140,7 @@ def set_price_list(out, party, party_type, given_price_list):
 		price_list = get_default_price_list(party)
 
 	if not price_list:
-		if party.doctype == "Customer":
-			price_list = frappe.db.get_single_value('Selling Settings', 'selling_price_list')
-		else:
-			price_list = frappe.db.get_single_value('Buying Settings', 'buying_price_list')
+		price_list = given_price_list
 
 	if price_list:
 		out.price_list_currency = frappe.db.get_value("Price List", price_list, "currency")
