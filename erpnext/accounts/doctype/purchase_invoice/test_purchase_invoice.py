@@ -157,6 +157,24 @@ class TestPurchaseInvoice(unittest.TestCase):
 		supplier.on_hold = 0
 		supplier.save()
 
+	def test_purchase_invoice_blocked_invoice_must_be_in_future(self):
+		pi = make_purchase_invoice(do_not_save=True)
+		pi.release_date = nowdate()
+
+		self.assertRaises(frappe.ValidationError, pi.save)
+		pi.release_date = ''
+		pi.save()
+
+	def test_purchase_invoice_blocked(self):
+		pi = make_purchase_invoice(do_not_save=True)
+		pi.release_date = add_days(nowdate(), 10)
+		pi.save()
+		pi.submit()
+
+		pe = get_payment_entry('Purchase Invoice', dn=pi.name, bank_account="_Test Bank - _TC")
+
+		self.assertRaises(frappe.ValidationError, pe.save)
+
 	def test_gl_entries_with_perpetual_inventory_against_pr(self):
 		pr = frappe.copy_doc(pr_test_records[0])
 		set_perpetual_inventory(1, pr.company)

@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
-from frappe.utils import cint, formatdate, flt, getdate
+from frappe.utils import cint, formatdate, flt, getdate, nowdate
 from frappe import _, throw
 import frappe.defaults
 
@@ -38,6 +38,9 @@ class PurchaseInvoice(BuyingController):
 			'overflow_type': 'billing'
 		}]
 
+	def invoice_is_blocked(self):
+		return self.release_date and self.release_date > getdate(nowdate())
+
 	def validate(self):
 		if not self.is_opening:
 			self.is_opening = 'No'
@@ -58,6 +61,7 @@ class PurchaseInvoice(BuyingController):
 		if self._action=="submit" and self.update_stock:
 			self.make_batches('warehouse')
 
+		self.validate_release_date()
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advances")
@@ -73,6 +77,10 @@ class PurchaseInvoice(BuyingController):
 		self.validate_fixed_asset_account()
 		self.create_remarks()
 		self.set_status()
+
+	def validate_release_date(self):
+		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):
+			frappe.msgprint('Release date must be in the future', raise_exception=True)
 
 	def validate_cash(self):
 		if not self.cash_bank_account and flt(self.paid_amount):

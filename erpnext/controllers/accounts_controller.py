@@ -53,9 +53,6 @@ class AccountsController(TransactionBase):
 					frappe.msgprint(
 						_('{0} is blocked so this transaction cannot proceed'.format(supplier_name)), raise_exception=1)
 
-	def invoice_is_blocked(self):
-		return self.doctype == 'Purchase Invoice' and self.release_date and self.release_date > getdate(nowdate())
-
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
