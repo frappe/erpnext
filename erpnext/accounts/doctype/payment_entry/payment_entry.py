@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe, erpnext, json
 from frappe import _, scrub, ValidationError
 from frappe.utils import flt, comma_or, nowdate, getdate
-from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on
+from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on, get_held_invoices
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 from erpnext.setup.utils import get_exchange_rate
@@ -58,7 +58,7 @@ class PaymentEntry(AccountsController):
 		self.set_remarks()
 		self.validate_duplicate_entry()
 		self.validate_allocated_amount()
-		self.ensure_is_not_blocked()
+		self.ensure_supplier_is_not_blocked()
 
 	def on_submit(self):
 		self.setup_party_account_field()
@@ -623,6 +623,9 @@ def get_orders_to_be_billed(posting_date, party_type, party, party_account_curre
 
 def get_negative_outstanding_invoices(party_type, party, party_account, party_account_currency, company_currency):
 	voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
+	supplier_condition = ""
+	if voucher_type == "Purchase Invoice":
+		supplier_condition = "and (release_date is null or release_date <= CURDATE())"
 	if party_account_currency == company_currency:
 		grand_total_field = "base_grand_total"
 		rounded_total_field = "base_rounded_total"
@@ -640,9 +643,11 @@ def get_negative_outstanding_invoices(party_type, party, party_account, party_ac
 			`tab{voucher_type}`
 		where
 			{party_type} = %s and {party_account} = %s and docstatus = 1 and outstanding_amount < 0
+			{supplier_condition}
 		order by
 			posting_date, name
 		""".format(**{
+			"supplier_condition": supplier_condition,
 			"rounded_total_field": rounded_total_field,
 			"grand_total_field": grand_total_field,
 			"voucher_type": voucher_type,
@@ -854,7 +859,9 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.mode_of_payment = doc.get("mode_of_payment")
 	pe.party_type = party_type
 	pe.party = doc.get(scrub(party_type))
-	pe.ensure_is_not_blocked()
+
+	pe.ensure_supplier_is_not_blocked()
+
 	pe.paid_from = party_account if payment_type=="Receive" else bank.account
 	pe.paid_to = party_account if payment_type=="Pay" else bank.account
 	pe.paid_from_account_currency = party_account_currency \
@@ -865,15 +872,18 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.allocate_payment_amount = 1
 	pe.letter_head = doc.get("letter_head")
 
-	pe.append("references", {
-		'reference_doctype': dt,
-		'reference_name': dn,
-		"bill_no": doc.get("bill_no"),
-		"due_date": doc.get("due_date"),
-		'total_amount': grand_total,
-		'outstanding_amount': outstanding_amount,
-		'allocated_amount': outstanding_amount
-	})
+	if doc.invoice_is_blocked():
+		frappe.msgprint(_('{0} is on hold till {1}'.format(doc.name, doc.release_date)))
+	else:
+		pe.append("references", {
+			'reference_doctype': dt,
+			'reference_name': dn,
+			"bill_no": doc.get("bill_no"),
+			"due_date": doc.get("due_date"),
+			'total_amount': grand_total,
+			'outstanding_amount': outstanding_amount,
+			'allocated_amount': outstanding_amount
+		})
 
 	pe.setup_party_account_field()
 	pe.set_missing_values()

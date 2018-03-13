@@ -36,7 +36,7 @@ class AccountsController(TransactionBase):
 			if self.doctype in relevant_docs:
 				self.set_payment_schedule()
 
-	def ensure_is_not_blocked(self):
+	def ensure_supplier_is_not_blocked(self):
 		is_supplier_payment = self.doctype == 'Payment Entry' and self.party_type == 'Supplier'
 		is_buying_invoice = self.doctype in ['Purchase Invoice', 'Purchase Order']
 		supplier = None
@@ -53,11 +53,14 @@ class AccountsController(TransactionBase):
 					frappe.msgprint(
 						_('{0} is blocked so this transaction cannot proceed'.format(supplier_name)), raise_exception=1)
 
+	def invoice_is_blocked(self):
+		return self.doctype == 'Purchase Invoice' and self.release_date and self.release_date > getdate(nowdate())
+
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
 
-		self.ensure_is_not_blocked()
+		self.ensure_supplier_is_not_blocked()
 
 		self.validate_date_with_fiscal_year()
 
