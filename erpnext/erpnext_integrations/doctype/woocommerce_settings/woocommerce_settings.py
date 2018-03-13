@@ -102,7 +102,6 @@ class WoocommerceSettings(Document):
 				frappe.throw(_("Please enter API Consumer Secret"))
 
 	def create_webhook_url(self):
-	
 		endpoint = "/api/method/erpnext.erpnext_integrations.connectors.woocommerce_connection.order"
 
 		try:

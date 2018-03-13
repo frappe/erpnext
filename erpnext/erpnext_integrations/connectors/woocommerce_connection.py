@@ -173,7 +173,6 @@ def link_item(item_data,item_status):
 		#Edit Item
 		item_woo_com_id = item_data.get("product_id")
 		item = frappe.get_doc("Item",{"woocommerce_id": item_woo_com_id})
-	
 
 	item.item_name = str(item_data.get("name"))
 	item.item_code = "woocommerce - " + str(item_data.get("product_id"))

@@ -10,7 +10,20 @@ class TestWoocommerce(unittest.TestCase):
 		woo_settings.api_consumer_secret = "cs_94360a1ad7bef7fa420a40cf284f7b3e0788454e"
 		woo_settings.enable_sync = 1
 		woo_settings.save(ignore_permissions=True)
+
+		# company = frappe.new_doc("Company")
+		# company.company_name = "Woocommerce"
+		# company.abbr = "W"
+		# company.default_currency = "INR"
+		# company.save()
+
 		frappe.db.commit()
+
+		# default = frappe.get_doc("Global Defaults")
+		# default.default_company = "Woocommerce"
+		# default.save()
+
+		# frappe.db.commit()
 
 		r = emulate_request()
 		print(r.text)
@@ -20,12 +33,12 @@ class TestWoocommerce(unittest.TestCase):
 		self.assertTrue(frappe.get_value("Sales Order",{"woocommerce_id":74}))
 
 		# cancel & delete order
-		cancel_and_delete_order()
+		# cancel_and_delete_order()
 
-		# Emulate Request when Customer, Address, Item data exists
-		r = emulate_request()
-		self.assertTrue(r.status_code == 200)
-		self.assertTrue(frappe.get_value("Sales Order",{"woocommerce_id":74}))
+		# # Emulate Request when Customer, Address, Item data exists
+		# r = emulate_request()
+		# self.assertTrue(r.status_code == 200)
+		# self.assertTrue(frappe.get_value("Sales Order",{"woocommerce_id":74}))
 
 def emulate_request():
 	# Emulate Woocommerce Request
@@ -51,13 +64,13 @@ def emulate_request():
 	time.sleep(2)
 	return r
 
-def cancel_and_delete_order():
-	# cancel & delete order
-	try:
-		so = frappe.get_doc("Sales Order",{"woocommerce_id":74})
-		if isinstance(so, erpnext.selling.doctype.sales_order.sales_order.SalesOrder):
-			so.cancel()
-			so.delete()
-		frappe.db.commit()
-	except frappe.DoesNotExistError:
-		pass
+# def cancel_and_delete_order():
+# 	# cancel & delete order
+# 	try:
+# 		so = frappe.get_doc("Sales Order",{"woocommerce_id":74})
+# 		if isinstance(so, erpnext.selling.doctype.sales_order.sales_order.SalesOrder):
+# 			so.cancel()
+# 			so.delete()
+# 		frappe.db.commit()
+# 	except frappe.DoesNotExistError:
+# 		pass
