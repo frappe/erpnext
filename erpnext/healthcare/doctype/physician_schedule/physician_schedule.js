@@ -3,10 +3,11 @@
 
 frappe.ui.form.on('Physician Schedule', {
 	refresh: function(frm) {
-		frm.add_custom_button(__('Add Time Slots'), () => {
+		cur_frm.fields_dict["time_slots"].grid.wrapper.find('.grid-add-row').hide();
+		cur_frm.fields_dict["time_slots"].grid.add_custom_button(__('Add Time Slots'), () => {
 			var d = new frappe.ui.Dialog({
 				fields: [
-					{fieldname: 'day', label: __('Day'), fieldtype:'Select',
+					{fieldname: 'days', label: __('Select Days'), fieldtype:'MultiSelect',
 						options:[
 							{value:'Sunday', label:__('Sunday')},
 							{value:'Monday', label:__('Monday')},
@@ -15,7 +16,7 @@ frappe.ui.form.on('Physician Schedule', {
 							{value:'Thursday', label:__('Thursday')},
 							{value:'Friday', label:__('Friday')},
 							{value:'Saturday', label:__('Saturday')},
-						], reqd: 1, 'default': 'Monday'},
+						], reqd: 1},
 					{fieldname: 'from_time', label:__('From'), fieldtype:'Time',
 						'default': '09:00:00', reqd: 1},
 					{fieldname: 'to_time', label:__('To'), fieldtype:'Time',
@@ -27,24 +28,29 @@ frappe.ui.form.on('Physician Schedule', {
 				primary_action: () => {
 					var values = d.get_values();
 					if(values) {
-						let cur_time = moment(values.from_time, 'HH:mm:ss');
-						let end_time = moment(values.to_time, 'HH:mm:ss');
-
-
-						while(cur_time < end_time) {
-							let to_time = cur_time.clone().add(values.duration, 'minutes');
-							if(to_time <= end_time) {
-
-								// add a new timeslot
-								frm.add_child('time_slots', {
-									from_time: cur_time.format('HH:mm:ss'),
-									to_time: to_time.format('HH:mm:ss'),
-									day: values.day
-								});
+						values.days.split(',').forEach(function(day){
+							day = $.trim(day);
+							if(['Sunday', 'Monday', 'Tuesday', 'Wednesday',
+							'Thursday', 'Friday', 'Saturday'].includes(day)){
+								add_slots(day);
 							}
-							cur_time = to_time;
+						});
+						function add_slots(week_day){
+							let cur_time = moment(values.from_time, 'HH:mm:ss');
+							let end_time = moment(values.to_time, 'HH:mm:ss');
+							while(cur_time < end_time) {
+								let to_time = cur_time.clone().add(values.duration, 'minutes');
+								if(to_time <= end_time) {
+									// add a new timeslot
+									frm.add_child('time_slots', {
+										from_time: cur_time.format('HH:mm:ss'),
+										to_time: to_time.format('HH:mm:ss'),
+										day: week_day
+									});
+								}
+								cur_time = to_time;
+							}
 						}
-
 						frm.refresh_field('time_slots');
 						frappe.show_alert({
 							message:__('Time slots added'),

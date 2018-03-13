@@ -53,7 +53,7 @@ frappe.ui.form.on("Sales Order Item", {
 		if (frm.doc.delivery_date) {
 			row.delivery_date = frm.doc.delivery_date;
 			refresh_field("delivery_date", cdn, "items");
-		} else {
+		} else if((frm.doc.items || []).length > 1) {
 			this.frm.script_manager.copy_from_first_row("items", row, ["delivery_date"]);
 		}
 	},

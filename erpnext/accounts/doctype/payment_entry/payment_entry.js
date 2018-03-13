@@ -676,30 +676,17 @@ frappe.ui.form.on('Payment Entry', {
 			function(d) { return flt(d.amount) }));
 
 		if(frm.doc.party) {
-			var party_amount = frm.doc.payment_type=="Receive" ?
-				frm.doc.paid_amount : frm.doc.received_amount;
-			var company_currency = frm.doc.company? frappe.get_doc(":Company", frm.doc.company).default_currency: "";
-
-			if (frm.doc.party_account_currency == company_currency) {
-				if(frm.doc.payment_type == "Receive" && frm.doc.total_allocated_amount <= party_amount + total_deductions) {
-					unallocated_amount = party_amount - (frm.doc.total_allocated_amount - total_deductions);
-				} else if (frm.doc.payment_type == "Pay" && frm.doc.total_allocated_amount <= party_amount - total_deductions) {
-					unallocated_amount = party_amount - (frm.doc.total_allocated_amount + total_deductions);
-				}
-			} else {
-				if(frm.doc.payment_type == "Receive"
-					&& frm.doc.base_total_allocated_amount <= frm.doc.base_received_amount + total_deductions
-					&& frm.doc.total_allocated_amount < frm.doc.paid_amount) {
-						unallocated_amount = (frm.doc.base_received_amount + total_deductions
-							- frm.doc.base_total_allocated_amount) / frm.doc.source_exchange_rate;
-				} else if (frm.doc.payment_type == "Pay"
-					&& frm.doc.base_total_allocated_amount < frm.doc.base_paid_amount - total_deductions
-					&& frm.doc.total_allocated_amount < frm.doc.received_amount) {
-						unallocated_amount = (frm.doc.base_paid_amount - (total_deductions
-							+ frm.doc.base_total_allocated_amount)) / frm.doc.target_exchange_rate;
-				}
+			if(frm.doc.payment_type == "Receive"
+				&& frm.doc.base_total_allocated_amount < frm.doc.base_received_amount + total_deductions
+				&& frm.doc.total_allocated_amount < frm.doc.paid_amount + (total_deductions / frm.doc.source_exchange_rate)) {
+					unallocated_amount = (frm.doc.base_received_amount + total_deductions
+						- frm.doc.base_total_allocated_amount) / frm.doc.source_exchange_rate;
+			} else if (frm.doc.payment_type == "Pay"
+				&& frm.doc.base_total_allocated_amount < frm.doc.base_paid_amount - total_deductions
+				&& frm.doc.total_allocated_amount < frm.doc.received_amount + (total_deductions / frm.doc.target_exchange_rate)) {
+					unallocated_amount = (frm.doc.base_paid_amount - (total_deductions
+						+ frm.doc.base_total_allocated_amount)) / frm.doc.target_exchange_rate;
 			}
-			
 		}
 		frm.set_value("unallocated_amount", unallocated_amount);
 		frm.trigger("set_difference_amount");
