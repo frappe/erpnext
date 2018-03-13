@@ -92,4 +92,25 @@ every transaction.
 
 For more help, please contact your Accountant!
 
+#### Hold Payments For A Purchase Invoice
+If you need to place a purchase invoice on hold like when a dispute arises, 
+simply add the date when the invoice would be released in the Release Date 
+field.
+
+After the invoice has been saved, you can change the release date by clicking 
+on the "Hold Invoice" drop down button and then "Change Release Date". This 
+action will cause a dialog to appear. 
+
+<img class="screenshot" alt="Purchase Invoice on hold" src="{{docs_base_url}}/assets/img/accounts/purchase-invoice-hold.png">
+
+Select the new release date and click "Save". You should also enter a comment 
+in the "Reason For Putting On Hold" field.
+
+Take note of the following:
+- The only action required to place the invoice on hold is to add a date in 
+the Release Date field.
+- The release date cannot be in the past.
+- You can only change the release date if the invoice is unpaid.
+ 
+
 {next}
