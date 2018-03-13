@@ -980,3 +980,18 @@ def get_due_date(term, posting_date=None, bill_date=None):
 	elif term.due_date_based_on == "Month(s) after the end of the invoice month":
 		due_date = add_months(get_last_day(date), term.credit_months)
 	return due_date
+
+
+def get_supplier_block_status(party_name):
+	"""
+	Returns a dict containing the values of `on_hold`, `release_date` and `hold_type` of
+	a `Supplier`
+	"""
+	supplier = frappe.get_doc('Supplier', party_name)
+	info = {
+		'on_hold': supplier.on_hold,
+		'release_date': supplier.release_date,
+		'hold_type': supplier.hold_type
+	}
+	return info
+

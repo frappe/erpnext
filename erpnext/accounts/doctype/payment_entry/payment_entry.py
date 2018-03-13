@@ -5,14 +5,14 @@
 from __future__ import unicode_literals
 import frappe, erpnext, json
 from frappe import _, scrub, ValidationError
-from frappe.utils import flt, comma_or, nowdate
+from frappe.utils import flt, comma_or, nowdate, getdate
 from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
-from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.controllers.accounts_controller import AccountsController, get_supplier_block_status
 
 from six import string_types
 
@@ -528,6 +528,16 @@ class PaymentEntry(AccountsController):
 def get_outstanding_reference_documents(args):
 	if isinstance(args, string_types):
 		args = json.loads(args)
+
+	# confirm that Supplier is not blocked
+	if args.get('party_type') == 'Supplier':
+		supplier_status = get_supplier_block_status(args['party'])
+		if supplier_status['on_hold']:
+			if supplier_status['hold_type'] == 'All':
+				return []
+			elif supplier_status['hold_type'] == 'Payments':
+				if not supplier_status['release_date'] or getdate(nowdate()) <= supplier_status['release_date']:
+					return []
 
 	party_account_currency = get_account_currency(args.get("party_account"))
 	company_currency = frappe.db.get_value("Company", args.get("company"), "default_currency")
