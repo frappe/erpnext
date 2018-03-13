@@ -704,7 +704,7 @@ class StockEntry(StockController):
 		item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=qty,
 			fetch_exploded = self.use_multi_level_bom)
 
-		used_alternative_items = get_used_alternative_items(production_order = self.production_order)
+		used_alternative_items = get_used_alternative_items(work_order = self.work_order)
 		for item in item_dict.values():
 			# if source warehouse presents in BOM set from_warehouse as bom source_warehouse
 			item.from_warehouse = self.from_warehouse or item.source_warehouse or item.default_warehouse
@@ -1000,13 +1000,13 @@ def get_operating_cost_per_unit(work_order=None, bom_no=None):
 
 	return operating_cost_per_unit
 
-def get_used_alternative_items(purchase_order=None, production_order=None):
+def get_used_alternative_items(purchase_order=None, work_order=None):
 	cond = ""
 
 	if purchase_order:
 		cond = "and ste.purpose = 'Subcontract' and ste.purchase_order = '{0}'".format(purchase_order)
-	elif production_order:
-		cond = "and ste.purpose = 'Material Transfer for Manufacture' and ste.production_order = '{0}'".format(production_order)
+	elif work_order:
+		cond = "and ste.purpose = 'Material Transfer for Manufacture' and ste.work_order = '{0}'".format(work_order)
 
 	if not cond: return {}
 

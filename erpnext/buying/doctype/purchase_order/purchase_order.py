@@ -458,7 +458,7 @@ def make_rm_stock_entry(purchase_order, rm_items):
 def get_item_details(items):
 	item_details = {}
 	for d in frappe.db.sql("""select item_code, description, allow_alternative_item from `tabItem`
-		where name in ({0})""".format(", ".join(["%s"] * len(items))), items):
+		where name in ({0})""".format(", ".join(["%s"] * len(items))), items, as_dict=1):
 		item_details[d.item_code] = d
 
 	return item_details
