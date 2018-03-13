@@ -1,11 +1,6 @@
 frappe.provide('erpnext.hub');
 
 erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
-	constructor(opts) {
-		super(opts);
-		this.show();
-	}
-
 	setup_defaults() {
 		super.setup_defaults();
 		this.page_title = __('Hub');
@@ -64,40 +59,67 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 	}
 
 	freeze(toggle) {
-		if(!this.$freeze) return;
-		this.$freeze.toggle(toggle);
-		if (this.$freeze.find('.image-view-container').length) return;
+		// if(!this.$freeze) return;
+		// this.$freeze.toggle(toggle);
+		// if (this.$freeze.find('.image-view-container').length) return;
 
-		const html = Array.from(new Array(4)).map(d => this.card_html({
-			name: 'Loading...',
-			item_name: 'Loading...'
-		})).join('');
+		// const html = Array.from(new Array(4)).map(d => this.card_html({
+		// 	name: 'Loading...',
+		// 	item_name: 'Loading...'
+		// })).join('');
 
-		this.$freeze.html(`<div class="image-view-container border-top">${html}</div>`);
+		// this.$freeze.html(`<div class="image-view-container border-top">${html}</div>`);
 	}
 
 	render() {
 		this.render_image_view();
 	}
 
+	render_image_view() {
+		let data = this.data;
+		if (this.start === 0) {
+			this.$result.html('<div class="image-view-container small padding-top">');
+			data = this.data.slice(this.start);
+		}
 
+		var html = data.map(this.card_html.bind(this)).join("");
 
-	// render_image_view() {
-	// 	let data = this.data;
-	// 	if (this.start === 0) {
-	// 		this.$result.html('<div class="image-view-container small padding-top">');
-	// 		data = this.data.slice(this.start);
-	// 	}
+		this.$result.find('.image-view-container').append(html);
+	}
 
-	// 	var html = data.map(this.card_html.bind(this)).join("");
+	render_offline_card() {
+		let html = `<div class='page-card'>
+			<div class='page-card-head'>
+				<span class='indicator red'>
+					{{ _("Payment Cancelled") }}</span>
+			</div>
+			<p>${ __("Your payment is cancelled.") }</p>
+			<div><a href='' class='btn btn-primary btn-sm'>
+				${ __("Continue") }</a></div>
+		</div>`;
 
+		let page = this.page.wrapper.find('.layout-side-section')
+		page.append(html);
 
-
-	// 	this.$result.find('.image-view-container').append(html);
-	// }
+		return;
+	}
 }
 
+// erpnext.hub.OfflineView = class OfflineView extends erpnext.hub.HubListing {
+// 	constructor(opts) {
+// 		super(opts);
+
+
+// 	}
+// }
+
 erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
+	constructor(opts) {
+		super(opts);
+
+		this.show();
+	}
+
 	setup_defaults() {
 		super.setup_defaults();
 		this.doctype = 'Hub Item';
@@ -118,6 +140,8 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 				fieldname: 'country'
 			}
 		];
+
+		this.items_cache = {};
 	}
 
 	setup_side_bar() {
@@ -156,7 +180,6 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 	}
 
 	get_filters_for_args() {
-		// console.log();
 		if(!this.filter_area) return;
 		let filters = {};
 		this.filter_area.get().forEach(f => {
@@ -171,19 +194,8 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 
 
 	render_image_view() {
-
-		// let data = this.data;
-		// if (this.start === 0) {
-		// 	this.$result.html('<div class="image-view-container small padding-top">');
-		// 	data = this.data.slice(this.start);
-		// }
-
-		// var html = data.map(this.card_html.bind(this)).join("");
-		// this.$result.find('.image-view-container').append(html);
-
-
-
 		var html = this.data.map(this.item_html.bind(this)).join("");
+		let $header_html = $(this.get_header_html());
 
 		this.$result.html(`
 			${this.get_header_html()}
@@ -191,6 +203,8 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 				${html}
 			</div>
 		`);
+
+		this.data.map(this.load_image.bind(this));
 
 		this.setup_quick_view();
 	}
@@ -226,91 +240,88 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 		`);
 	}
 
-	item_html(item) {
-		function testImage(URL) {
-			var tester=new Image();
-			tester.onload=imageFound;
-			tester.onerror=imageNotFound;
-			tester.src=URL;
-		}
+	get_image_html(encoded_name, src, alt_text) {
+		return `<img data-name="${encoded_name}" src="${ src }" alt="${ alt_text }">`;
+	}
 
-		function imageFound() {
-			console.log('That image is found and loaded');
-		}
+	get_image_placeholder(title) {
+		return `<span class="placeholder-text">${ frappe.get_abbr(title) }</span>`;
+	}
 
-		function imageNotFound() {
-			console.log('That image was not found.');
-		}
-
+	load_image(item) {
 		item._name = encodeURI(item.name);
 		const encoded_name = item._name;
 		const title = strip_html(item[this.meta.title_field || 'name']);
 		const _class = !item.image ? 'no-image' : '';
 
-		console.log(item.image, testImage(item.image));
-		const _html = item.image ?
-			`<img data-name="${encoded_name}" src="${ item.image }" alt="${ title }">` :
-			`<span class="placeholder-text">
-				${ frappe.get_abbr(title) }
-			</span>`;
+		let placeholder = this.get_image_placeholder(title);
+		let $container = this.$result.find(`.image-field[data-name="${encoded_name}"]`);
 
-		return `
+		if(!item.image) {
+			$container.prepend(placeholder);
+			// this.append_to_container(placeholder, );
+		}
+
+		this.isImageLoaded(item.image, title, encoded_name, this.append_to_container)
+	}
+
+	isImageLoaded(src, alt_text, encoded_name, onload, onerror) {
+		var me = this;
+		let $container = this.$result.find(`.image-field[data-name="${encoded_name}"]`);
+		var tester = new Image();
+		tester.onload = function() {
+			$container.prepend(this);
+		};
+		tester.onerror= function() {
+			let placeholder = me.get_image_placeholder(alt_text);
+			$container.prepend(placeholder);
+			$container.addClass('no-image');
+		};
+		tester.encoded_name = encoded_name;
+		tester.alt_text = alt_text;
+		tester.src = src;
+	}
+
+	item_html(item) {
+		item._name = encodeURI(item.name);
+		const encoded_name = item._name;
+		const title = strip_html(item[this.meta.title_field || 'name']);
+		const _class = !item.image ? 'no-image' : '';
+		const route = `#Hub/Item/${item.hub_item_code}`;
+		const company_name = item['company_name'];
+
+		let item_html = `
 			<div class="image-view-item">
+
 				<div class="image-view-header">
 					<div class="list-row-col list-subject ellipsis level">
-						Hello
+						<span class="level-item bold ellipsis" title="McGuffin">
+							<a href="${route}">${title}</a>
+						</span>
+					</div>
+					<div class="list-row-col">
+						<a href="${'#Hub/Company/'+company_name}"><p>${ company_name }</p></a>
 					</div>
 				</div>
 				<div class="image-view-body">
 					<a  data-name="${encoded_name}"
 						title="${encoded_name}"
-						href=""
+						href="${route}"
 					>
 						<div class="image-field ${_class}"
 							data-name="${encoded_name}"
 						>
-							${_html}
 							<button class="btn btn-default zoom-view" data-name="${encoded_name}">
 								<i class="octicon octicon-eye"></i>
 							</button>
 						</div>
 					</a>
 				</div>
+
 			</div>
 		`;
-	}
 
-	card_html(item) {
-		item._name = encodeURI(item.name);
-		const encoded_name = item._name;
-		const title = strip_html(item['item_name' || 'item_code']);
-		const company_name = item['company_name'];
-
-		const route = `#Hub/Item/${item.hub_item_code}`;
-
-		const image_html = item.image ?
-			`<img src="${item.image}">
-			<span class="helper"></span>` :
-			`<div class="standard-image">${frappe.get_abbr(title)}</div>`;
-
-		return `
-			<div class="hub-item-wrapper margin-bottom" style="width: 200px;">
-				<a href="${route}">
-					<div class="hub-item-image">
-						<div class="img-wrapper" style="height: 200px; width: 200px">
-							${ image_html }
-						</div>
-					</div>
-					<div class="hub-item-title">
-						<h5 class="bold">
-							${ title }
-						</h5>
-
-					</div>
-				</a>
-				<a href="${'#Hub/Company/'+company_name}"><p>${ company_name }</p></a>
-			</div>
-		`;
+		return item_html;
 	}
 
 	setup_quick_view() {
@@ -331,6 +342,11 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 };
 
 erpnext.hub.CompanyListing = class CompanyListing extends erpnext.hub.HubListing {
+	constructor(opts) {
+		super(opts);
+		this.show();
+	}
+
 	setup_defaults() {
 		super.setup_defaults();
 		this.doctype = 'Hub Company';

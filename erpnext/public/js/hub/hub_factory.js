@@ -17,11 +17,9 @@ frappe.views.HubFactory = frappe.views.Factory.extend({
 		};
 		frappe.model.with_doc('Hub Settings', 'Hub Settings', () => {
 			this.hub_settings = frappe.get_doc('Hub Settings');
-			console.log('We?', frappe.is_online(false));
 
 			if (!erpnext.hub.pages[page_name]) {
 				if(!frappe.is_online(false)) {
-					console.log('Well?');
 					this.render_offline_card();
 					return;
 				}
@@ -41,6 +39,7 @@ frappe.views.HubFactory = frappe.views.Factory.extend({
 							parent: this.make_page(true, page_name),
 							hub_settings: this.hub_settings
 						});
+						console.log(page_name, erpnext.hub.pages[page_name]);
 						window.hub_page = erpnext.hub.pages[page_name];
 					});
 				}
@@ -52,18 +51,16 @@ frappe.views.HubFactory = frappe.views.Factory.extend({
 	},
 
 	render_offline_card() {
-		let html = `<div class='page-card'>
+		let html = `<div class='page-card' style='margin: 140px auto;'>
 			<div class='page-card-head'>
-				<span class='indicator red'>
-					{{ _("Payment Cancelled") }}</span>
+				<span class='indicator red'>${'Failed to connect'}</span>
 			</div>
-			<p>${ __("Your payment is cancelled.") }</p>
-			<div><a href='' class='btn btn-primary btn-sm'>
-				${ __("Continue") }</a></div>
+			<p>${ __("Please check your network connection.") }</p>
+			<div><a href='#Hub/Item' class='btn btn-primary btn-sm'>
+				${ __("Reload") }</a></div>
 		</div>`;
 
-		let page = $('.layout-main-section');
-		console.log(page);
+		let page = $('#body_div');
 		page.append(html);
 
 		return;
