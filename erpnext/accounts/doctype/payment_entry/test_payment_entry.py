@@ -40,6 +40,39 @@ class TestPaymentEntry(unittest.TestCase):
 		so_advance_paid = frappe.db.get_value("Sales Order", so.name, "advance_paid")
 		self.assertEqual(so_advance_paid, 0)
 
+	def test_payment_entry_for_blocked_customer_invoice(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Invoices'
+		supplier.save()
+
+		self.assertRaises(frappe.ValidationError, make_purchase_invoice)
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_payment_entry_for_blocked_customer_payments(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Payments'
+		supplier.save()
+
+		pi = make_purchase_invoice()
+
+		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_from_account_currency = pi.currency
+		pe.paid_to_account_currency = pi.currency
+		pe.source_exchange_rate = 1
+		pe.target_exchange_rate = 1
+		pe.paid_amount = pi.grand_total
+
+		self.assertRaises(frappe.ValidationError, pe.insert)
+
+		supplier.on_hold = 0
+		supplier.save()
+
 	def test_payment_entry_against_si_usd_to_usd(self):
 		si = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
 			currency="USD", conversion_rate=50)

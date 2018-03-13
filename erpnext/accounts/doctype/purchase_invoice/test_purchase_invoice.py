@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe, erpnext
 import frappe.model
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from frappe.utils import cint, flt, today, nowdate, add_days
 import frappe.defaults
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory, \
@@ -90,6 +91,49 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi_doc = frappe.get_doc('Purchase Invoice', pi_doc.name)
 
 		self.assertRaises(frappe.LinkExistsError, pi_doc.cancel)
+
+	def test_purchase_invoice_for_blocked_supplier(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.save()
+
+		self.assertRaises(frappe.ValidationError, make_purchase_invoice)
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_purchase_invoice_for_blocked_supplier_invoice(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Invoices'
+		supplier.save()
+
+		self.assertRaises(frappe.ValidationError, make_purchase_invoice)
+
+		supplier.on_hold = 0
+		supplier.save()
+
+	def test_purchase_invoice_for_blocked_supplier_payment(self):
+		supplier = frappe.get_doc('Supplier', '_Test Supplier')
+		supplier.on_hold = 1
+		supplier.hold_type = 'Payments'
+		supplier.save()
+
+		pi = make_purchase_invoice()
+
+		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_from_account_currency = pi.currency
+		pe.paid_to_account_currency = pi.currency
+		pe.source_exchange_rate = 1
+		pe.target_exchange_rate = 1
+		pe.paid_amount = pi.grand_total
+
+		self.assertRaises(frappe.ValidationError, pe.save, ignore_permissions=True)
+
+		supplier.on_hold = 0
+		supplier.save()
 
 	def test_gl_entries_with_perpetual_inventory_against_pr(self):
 		pr = frappe.copy_doc(pr_test_records[0])
