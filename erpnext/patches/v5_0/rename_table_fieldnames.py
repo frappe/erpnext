@@ -52,7 +52,7 @@ rename_map = {
 		["advance_allocation_details", "advances"]
 	],
 	"Work Order": [
-		["work_order_operations", "operations"]
+		["production_order_operations", "operations"]
 	],
 	"BOM": [
 		["bom_operations", "operations"],

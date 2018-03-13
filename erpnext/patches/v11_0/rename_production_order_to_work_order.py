@@ -2,28 +2,34 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-from frappe.model.rename_doc import rename_doc, get_link_fields
+from frappe.model.rename_doc import rename_doc
 from frappe.model.utils.rename_field import rename_field
 import frappe
 
 def execute():
-    rename_doc('DocType', 'Production Order', 'Work Order', force=True)
-    frappe.reload_doc('manufacturing', 'doctype', 'work_order')
+	rename_doc('DocType', 'Production Order', 'Work Order', force=True)
+	frappe.reload_doc('manufacturing', 'doctype', 'work_order')
 
-    rename_doc('DocType', 'Production Order Item', 'Work Order Item', force=True)
-    frappe.reload_doc('manufacturing', 'doctype', 'work_order_item')
+	rename_doc('DocType', 'Production Order Item', 'Work Order Item', force=True)
+	frappe.reload_doc('manufacturing', 'doctype', 'work_order_item')
 
-    rename_doc('DocType', 'Production Order Operation', 'Work Order Operation', force=True)
-    frappe.reload_doc('manufacturing', 'doctype', 'work_order_operation')
+	rename_doc('DocType', 'Production Order Operation', 'Work Order Operation', force=True)
+	frappe.reload_doc('manufacturing', 'doctype', 'work_order_operation')
 
-    frappe.reload_doc('projects', 'doctype', 'timesheet')
-    frappe.reload_doc('stock', 'doctype', 'stock_entry')
+	frappe.reload_doc('projects', 'doctype', 'timesheet')
+	frappe.reload_doc('stock', 'doctype', 'stock_entry')
+	rename_field("Timesheet", "production_order", "work_order")
+	rename_field("Stock Entry", "production_order", "work_order")
 
-    # fetch all linked fields
-    old, new = 'Production Order', 'Work Order'
-    link_fields = get_link_fields(old)
-    link_fields.extend(get_link_fields(new))
+	frappe.rename_doc("Report", "Production Orders in Progress", "Work Orders in Progress", force=True)
+	frappe.rename_doc("Report", "Completed Production Orders", "Completed Work Orders", force=True)
+	frappe.rename_doc("Report", "Open Production Orders", "Open Work Orders", force=True)
+	frappe.rename_doc("Report", "Issued Items Against Production Order", "Issued Items Against Work Order", force=True)
+	frappe.rename_doc("Report", "Production Order Stock Report", "Work Order Stock Report", force=True)
 
-    for d in link_fields:
-        if d['parent'] not in [old, new]:
-            rename_field(d['parent'], frappe.scrub(old), frappe.scrub(new))
+	frappe.db.sql("""update `tabDesktop Icon` \
+		set label='Work Order', module_name='Work Order' \
+		where label='Production Order'""")
+	frappe.db.sql("""update `tabDesktop Icon` \
+		set link='List/Work Order' \
+		where link='List/Production Order'""")
