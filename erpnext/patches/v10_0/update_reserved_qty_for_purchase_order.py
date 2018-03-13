@@ -37,8 +37,11 @@ def execute():
 			and po.is_subcontracted = "Yes"
 			and po.docstatus = 1"""), as_dict=1)
 	for d in item_wh_bin:
-		stock_bin = get_bin(d["rm_item_code"], d["reserve_warehouse"])
-		stock_bin.update_reserved_qty_for_sub_contracting()
+		try:
+			stock_bin = get_bin(d["rm_item_code"], d["reserve_warehouse"])
+			stock_bin.update_reserved_qty_for_sub_contracting()
+		except:
+			pass
 
 def get_warehouse(item_code, company, company_warehouse, item_wh):
 	reserve_warehouse = item_wh.get(item_code)
