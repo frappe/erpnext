@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 import frappe.utils
-from frappe.utils import cstr, flt, getdate, comma_and, cint, nowdate, add_days
+from frappe.utils import cstr, flt, getdate, comma_and, cint
 from frappe import _
 from frappe.model.utils import get_fetch_values
 from frappe.model.mapper import get_mapped_doc
@@ -477,13 +477,9 @@ def make_project(source_name, target_doc=None):
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		so = [d.against_sales_order for d in target.items]
-		if so:
-			po_no_list = frappe.get_all('Sales Order', 'po_no', filters = {'name': ('in', so)})
-			target.po_no = ', '.join(d.po_no for d in po_no_list if d.po_no)
-
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
+		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
 
 		# set company address
@@ -544,6 +540,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = True
 		target.run_method("set_missing_values")
+		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
 
 		# set company address
