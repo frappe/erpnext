@@ -34,13 +34,12 @@ class LeaveApplication(Document):
 		self.validate_salary_processed_days()
 		self.validate_attendance()
 
+		if hasattr(self, "workflow_state") and self.workflow_state == "Rejected":
+			# notify leave applier about rejection
+			self.notify_employee()
+
 	def on_submit(self):
-
 		self.validate_back_dated_application()
-
-	def on_cancel(self):
-		# notify leave applier about cancellation
-		self.notify_employee("cancelled")
 
 	def validate_dates(self):
 		if self.from_date and self.to_date and (getdate(self.to_date) < getdate(self.from_date)):
@@ -217,7 +216,8 @@ class LeaveApplication(Document):
 			# for post in messages
 			"message": _get_message(url=True),
 			"message_to": employee.user_id,
-			"subject": (_("Leave Application") + ": %s - %s") % (self.name)
+			"subject": (_("Leave Application") + ": %s - %s") % (self.name,
+				self.workflow_state if hasattr(self, "workflow_state") else "")
 		})
 
 		def _get_message(url=False):

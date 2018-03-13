@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import getdate, validate_email_add, today, add_years
-from frappe.model.naming import make_autoname
+from frappe.model.naming import set_name_by_naming_series
 from frappe import throw, _, scrub
 import frappe.permissions
 from frappe.model.document import Document
@@ -24,7 +24,7 @@ class Employee(NestedSet):
 			throw(_("Please setup Employee Naming System in Human Resource > HR Settings"))
 		else:
 			if naming_method == 'Naming Series':
-				self.name = make_autoname(self.naming_series + '.####')
+				set_name_by_naming_series(self)
 			elif naming_method == 'Employee Number':
 				self.name = self.employee_number
 			elif naming_method == 'Full Name':
@@ -263,7 +263,7 @@ def deactivate_sales_person(status = None, employee = None):
 			frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
 
 @frappe.whitelist()
-def create_user(employee, user = None):
+def create_user(employee, user = None, email=None):
 	emp = frappe.get_doc("Employee", employee)
 
 	employee_name = emp.employee_name.split(" ")
@@ -276,6 +276,9 @@ def create_user(employee, user = None):
 		last_name = employee_name[1]
 
 	first_name = employee_name[0]
+
+	if email:
+		emp.prefered_email = email
 
 	user = frappe.new_doc("User")
 	user.update({

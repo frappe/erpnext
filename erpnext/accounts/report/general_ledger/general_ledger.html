@@ -9,9 +9,9 @@
 	{% } %}
 </h4>
 <h5 class="text-center">
-	{%= dateutil.str_to_user(filters.from_date) %}
+	{%= frappe.datetime.str_to_user(filters.from_date) %}
 	{%= __("to") %}
-	{%= dateutil.str_to_user(filters.to_date) %}
+	{%= frappe.datetime.str_to_user(filters.to_date) %}
 </h5>
 <hr>
 <table class="table table-bordered">
@@ -29,7 +29,7 @@
 		{% for(var i=0, l=data.length; i<l; i++) { %}
 			<tr>
 			{% if(data[i].posting_date) { %}
-				<td>{%= dateutil.str_to_user(data[i].posting_date) %}</td>
+				<td>{%= frappe.datetime.str_to_user(data[i].posting_date) %}</td>
 				<td>{%= data[i].voucher_type %}
 					<br>{%= data[i].voucher_no %}</td>
 				<td>
@@ -58,7 +58,7 @@
 				<td style="text-align: right">
 					{%= data[i].account && format_currency(data[i].credit, filters.presentation_currency) %}
 				</td>
-			{% } %}			
+			{% } %}
 				<td style="text-align: right">
 					{%= format_currency(data[i].balance, filters.presentation_currency) %}
 				</td>
@@ -66,4 +66,4 @@
 		{% } %}
 	</tbody>
 </table>
-<p class="text-right text-muted">Printed On {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>
+<p class="text-right text-muted">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>

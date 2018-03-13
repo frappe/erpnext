@@ -55,4 +55,9 @@ Accounts > Budget and Cost Center > Budget Variance Report
 
 <img class="screenshot" alt="Budget Variance Report" src="{{docs_base_url}}/assets/img/accounts/budget-variance-report.png">
 
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/wWHkB0jlXNk?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+    </iframe>
+</div>
+
 {next}

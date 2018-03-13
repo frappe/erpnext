@@ -13,6 +13,7 @@ from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
 from frappe.desk.notifications import clear_doctype_notifications
 from erpnext.buying.utils import validate_for_items, check_for_closed_status
 from erpnext.stock.utils import get_bin
+from six import string_types
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -30,8 +31,7 @@ class PurchaseOrder(BuyingController):
 			'target_parent_field': 'per_ordered',
 			'target_ref_field': 'stock_qty',
 			'source_field': 'stock_qty',
-			'percent_join_field': 'material_request',
-			'overflow_type': 'order'
+			'percent_join_field': 'material_request'
 		}]
 
 	def onload(self):
@@ -242,12 +242,16 @@ class PurchaseOrder(BuyingController):
 		pass
 
 	def update_status_updater(self):
-		self.status_updater[0].update({
-			"target_parent_dt": "Sales Order",
-			"target_dt": "Sales Order Item",
+		self.status_updater.append({
+			'source_dt': 'Purchase Order Item',
+			'target_dt': 'Sales Order Item',
 			'target_field': 'ordered_qty',
-			"join_field": "sales_order_item",
-			"target_parent_field": ''
+			'target_parent_dt': 'Sales Order',
+			'target_parent_field': '',
+			'join_field': 'sales_order_item',
+			'source_dt': 'Purchase Order Item',
+			'target_ref_field': 'stock_qty',
+			'source_field': 'stock_qty'
 		})
 
 	def update_delivered_qty_in_sales_order(self):
@@ -332,7 +336,8 @@ def make_purchase_receipt(source_name, target_doc=None):
 		"Purchase Order": {
 			"doctype": "Purchase Receipt",
 			"field_map": {
-				"per_billed": "per_billed"
+				"per_billed": "per_billed",
+				"supplier_warehouse":"supplier_warehouse"
 			},
 			"validation": {
 				"docstatus": ["=", 1],
@@ -377,7 +382,8 @@ def make_purchase_invoice(source_name, target_doc=None):
 		"Purchase Order": {
 			"doctype": "Purchase Invoice",
 			"field_map": {
-				"party_account_currency": "party_account_currency"
+				"party_account_currency": "party_account_currency",
+				"supplier_warehouse":"supplier_warehouse"
 			},
 			"validation": {
 				"docstatus": ["=", 1],
@@ -402,24 +408,26 @@ def make_purchase_invoice(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_rm_stock_entry(purchase_order, rm_items):
-
-	if isinstance(rm_items, basestring):
+	if isinstance(rm_items, string_types):
 		rm_items_list = json.loads(rm_items)
 	else:
 		frappe.throw(_("No Items available for transfer"))
 
 	if rm_items_list:
-		item_code_list = list(set(d["item_code"] for d in rm_items_list))
+		fg_items = list(set(d["item_code"] for d in rm_items_list))
 	else:
 		frappe.throw(_("No Items selected for transfer"))
 
 	if purchase_order:
 		purchase_order = frappe.get_doc("Purchase Order", purchase_order)
 
-	if item_code_list:
-		item_wh = frappe._dict(frappe.db.sql("""select item_code, description
-										from `tabItem` where name in ({0})""".
-										format(", ".join(["%s"] * len(item_code_list))), item_code_list))
+	if fg_items:
+		items = tuple(set(d["rm_item_code"] for d in rm_items_list))
+		item_wh = frappe._dict(frappe.db.sql("""
+			select item_code, description
+			from `tabItem` where name in ({0})
+		""".format(", ".join(["%s"] * len(items))), items))
+
 		stock_entry = frappe.new_doc("Stock Entry")
 		stock_entry.purpose = "Subcontract"
 		stock_entry.purchase_order = purchase_order.name
@@ -428,20 +436,21 @@ def make_rm_stock_entry(purchase_order, rm_items):
 		stock_entry.supplier_address = purchase_order.supplier_address
 		stock_entry.address_display = purchase_order.address_display
 		stock_entry.company = purchase_order.company
-		stock_entry.from_bom = 1
-		for item_code in item_code_list:
-			po_item = [d for d in purchase_order.items if d.item_code == item_code][0]
-			bom_no = po_item.bom
+		stock_entry.to_warehouse = purchase_order.supplier_warehouse
+
+		for item_code in fg_items:
 			for rm_item_data in rm_items_list:
 				if rm_item_data["item_code"] == item_code:
-					items_dict = {rm_item_data["rm_item_code"]:
-								{"item_name":rm_item_data["item_name"],
-								"description":item_wh.get(rm_item_data["rm_item_code"]),
-								'qty':rm_item_data["qty"],
-								'from_warehouse':rm_item_data["warehouse"],
-								'stock_uom':rm_item_data["stock_uom"],
-								'bom_no':bom_no}}
-					stock_entry.add_to_stock_entry_detail(items_dict, bom_no)
+					items_dict = {
+						rm_item_data["rm_item_code"]: {
+							"item_name": rm_item_data["item_name"],
+							"description": item_wh.get(rm_item_data["rm_item_code"]),
+							'qty': rm_item_data["qty"],
+							'from_warehouse': rm_item_data["warehouse"],
+							'stock_uom': rm_item_data["stock_uom"]
+						}
+					}
+					stock_entry.add_to_stock_entry_detail(items_dict)
 		return stock_entry.as_dict()
 	else:
 		frappe.throw(_("No Items selected for transfer"))

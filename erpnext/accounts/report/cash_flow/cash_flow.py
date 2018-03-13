@@ -4,12 +4,17 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import cint
 from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data)
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import get_net_profit_loss
 from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):
+	if cint(frappe.db.get_single_value('Accounts Settings', 'use_custom_cash_flow')):
+		from erpnext.accounts.report.cash_flow.custom_cash_flow import execute as execute_custom
+		return execute_custom(filters=filters)
+		
 	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, 
 		filters.periodicity, filters.accumulated_values, filters.company)
 
@@ -44,10 +49,7 @@ def execute(filters=None):
 	}
 
 	# combine all cash flow accounts for iteration
-	cash_flow_accounts = []
-	cash_flow_accounts.append(operation_accounts)
-	cash_flow_accounts.append(investing_accounts)
-	cash_flow_accounts.append(financing_accounts)
+	cash_flow_accounts = [operation_accounts, investing_accounts, financing_accounts]
 
 	# compute net profit / loss
 	income = get_data(filters.company, "Income", "Credit", period_list, 
@@ -100,6 +102,7 @@ def execute(filters=None):
 
 	return columns, data
 
+
 def get_account_type_based_data(company, account_type, period_list, accumulated_values):
 	data = {}
 	total = 0
@@ -127,12 +130,14 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 	data["total"] = total
 	return data
 
+
 def get_start_date(period, accumulated_values, company):
 	start_date = period["year_start_date"]
 	if accumulated_values:
 		start_date = get_fiscal_year(period.to_date, company=company)[1]
 
 	return start_date
+
 
 def add_total_row_account(out, data, label, period_list, currency):
 	total_row = {

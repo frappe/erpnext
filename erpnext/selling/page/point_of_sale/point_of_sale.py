@@ -90,23 +90,6 @@ def get_conditions(item_code, serial_no, batch_no, barcode):
 
 	return '%%%s%%'%(frappe.db.escape(item_code)), condition
 
-@frappe.whitelist()
-def submit_invoice(doc,is_saved):
-	if isinstance(doc, string_types):
-		args = json.loads(doc)
-
-	if(cint(is_saved) == 1):
-		doc = frappe.get_doc('Sales Invoice',args["name"])
-	else:
-		doc = frappe.new_doc('Sales Invoice')
-
-	doc.update(args)
-	doc.run_method("set_missing_values")
-	doc.run_method("calculate_taxes_and_totals")
-	doc.submit()
-
-	return doc
-
 def get_item_group_condition(pos_profile):
 	cond = "and 1=1"
 	item_groups = get_item_groups(pos_profile)

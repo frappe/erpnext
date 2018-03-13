@@ -2,7 +2,7 @@ DocType: Timesheet,Total Costing Amount,Monto Total Calculado
 DocType: Student Group Student,Student Group Student,Alumno de Grupo de Estudiantes
 DocType: Delivery Note,% Installed,% Instalado
 DocType: Company,Gain/Loss Account on Asset Disposal,Cuenta de ganancia/pérdida en la disposición de activos
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +465,Please enter Account for Change Amount,"Por favor, introduzca la Vuenta para el Cambio Monto"
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +478,Please enter Account for Change Amount,"Por favor, introduzca la Vuenta para el Cambio Monto"
 DocType: Sales Order,SO-,OV-
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +246,Please set the Item Code first,"Por favor, primero define el Código del Artículo"
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.js +60,Show unclosed fiscal year's P&L balances,Mostrar saldos de Ganancias y Perdidas de año fiscal sin cerrar
@@ -57,17 +57,16 @@ apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +123,Leave 
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py +252,Accural Journal Entry for salaries from {0} to {1},Entrada de Diario de Cuentas por Pagar para salarios de {0} a {1}
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +123,Gain/Loss on Asset Disposal,Ganancia/Pérdida por la venta de activos
 DocType: Currency Exchange,Specify Exchange Rate to convert one currency into another,Especificar el Tipo de Cambio para convertir de una divisa a otra
-apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +52,Only Leave Applications with status 'Approved' and 'Rejected' can be submitted,"Sólo Solicitudes de Permiso con estado ""Aprobado"" y ""Rechazado"" puede ser presentado"
-apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +155,Source and target warehouse must be different,El almacén de origen y el de destino deben ser diferentes
+apps/erpnext/erpnext/stock/dashboard/item_dashboard.js +163,Source and target warehouse must be different,El almacén de origen y el de destino deben ser diferentes
 apps/erpnext/erpnext/hr/doctype/vehicle_log/vehicle_log.py +20,"Service Item,Type,frequency and expense amount are required","El Artículo de Servico, el Tipo, la Frecuencia y la Cantidad de Gasto son requeridos"
 apps/erpnext/erpnext/assets/doctype/asset/asset.py +59,Gross Purchase Amount is mandatory,El Importe Bruto de Compra es obligatorio
 DocType: Stock Entry,Customer or Supplier Details,Detalle de cliente o proveedor
 DocType: Lab Test Template,Standard Selling Rate,Tarifa de Venta Estándar
 DocType: Program Enrollment,School House,Casa Escuela
-apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +305,Please set default account in Expense Claim Type {0},"Por favor, establezca la Cuenta predeterminada en el Tipo de Reembolso de Gastos {0}"
+apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +280,Please set default account in Expense Claim Type {0},"Por favor, establezca la Cuenta predeterminada en el Tipo de Reembolso de Gastos {0}"
 apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.js +54,Score cannot be greater than Maximum Score,Los resultados no puede ser mayor que la Puntuación Máxima
 apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py +60,Please set Company filter blank if Group By is 'Company',"Por favor, establezca el filtro de Compañía en blanco si Agrupar Por es 'Compañía'"
 DocType: Education Settings,"For Course based Student Group, the Course will be validated for every Student from the enrolled Courses in Program Enrollment.","Para Grupo de Estudiantes por Curso, el Curso será validado para cada Estudiante de los Cursos inscritos en la Inscripción del Programa."
 DocType: Education Settings,"For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.","Para grupo de estudiantes por lotes, el lote de estudiantes se validará para cada estudiante de la inscripción del programa."
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +75,Leave Encashment,Cobro de Permiso
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1041,Select Items based on Delivery Date,Seleccionar Artículos según la fecha de entrega
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +1043,Select Items based on Delivery Date,Seleccionar Artículos según la fecha de entrega

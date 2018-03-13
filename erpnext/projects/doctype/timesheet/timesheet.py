@@ -180,14 +180,16 @@ class Timesheet(Document):
 			self.validate_overlap(data)
 
 	def validate_overlap(self, data):
+		settings = frappe.get_single('Projects Settings')
 		if self.production_order:
-			self.validate_overlap_for("workstation", data, data.workstation)
+			self.validate_overlap_for("workstation", data, data.workstation, settings.ignore_workstation_time_overlap)
 		else:
-			self.validate_overlap_for("user", data, self.user)
-			self.validate_overlap_for("employee", data, self.employee)
+			self.validate_overlap_for("user", data, self.user, settings.ignore_user_time_overlap)
+			self.validate_overlap_for("employee", data, self.employee, settings.ignore_employee_time_overlap)
 
-	def validate_overlap_for(self, fieldname, args, value):
-		if not value: return
+	def validate_overlap_for(self, fieldname, args, value, ignore_validation=False):
+		if not value or ignore_validation:
+			return
 
 		existing = self.get_overlap_for(fieldname, args, value)
 		if existing:
@@ -290,7 +292,7 @@ def get_projectwise_timesheet_data(project, parent=None):
 		cond = "and parent = %(parent)s"
 
 	return frappe.db.sql("""select name, parent, billing_hours, billing_amount as billing_amt
-			from `tabTimesheet Detail` where docstatus=1 and project = %(project)s {0} and billable = 1
+			from `tabTimesheet Detail` where parenttype = 'Timesheet' and docstatus=1 and project = %(project)s {0} and billable = 1
 			and sales_invoice is null""".format(cond), {'project': project, 'parent': parent}, as_dict=1)
 
 @frappe.whitelist()

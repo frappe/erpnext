@@ -10,6 +10,10 @@ The documents you can attach Payment Terms to are:
 
 Note that the introduction of Payment Terms removes "Credit Days" and "Credit Days Based On" fields in Customer/Supplier master. Payment Term contains the same information and makes it more flexible to use.
 
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/Z91oWYJx6yA?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>
+
 ## Payment Terms
 Navigate to the Payment Term list page and click "New".
 > Accounts > Payment Term > New Payment Term

@@ -50,9 +50,11 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		row += [
 			d.customer_group, d.debit_to, ", ".join(mode_of_payments.get(d.parent, [])),
 			d.territory, d.project, d.company, d.sales_order,
-			delivery_note, d.income_account, d.cost_center, d.stock_qty, d.stock_uom,
-			d.base_net_rate, d.base_net_amount
+			delivery_note, d.income_account, d.cost_center, d.stock_qty, d.stock_uom
 		]
+
+		row += [d.base_net_rate/d.stock_qty, d.base_net_amount] \
+			if d.stock_uom != d.uom else [d.base_net_rate, d.base_net_amount]
 
 		total_tax = 0
 		for tax in tax_columns:
@@ -103,7 +105,7 @@ def get_conditions(filters):
 
 	if filters.get("mode_of_payment"):
 		conditions += """ and exists(select name from `tabSales Invoice Payment`
-			where parent=si.name
+			where parent=`tabSales Invoice`.name
 				and ifnull(`tabSales Invoice Payment`.mode_of_payment, '') = %(mode_of_payment)s)"""
 
 	return conditions
@@ -131,7 +133,7 @@ def get_items(filters, additional_query_columns):
 			`tabSales Invoice Item`.stock_uom, `tabSales Invoice Item`.base_net_rate,
 			`tabSales Invoice Item`.base_net_amount, `tabSales Invoice`.customer_name,
 			`tabSales Invoice`.customer_group, `tabSales Invoice Item`.so_detail,
-			`tabSales Invoice`.update_stock {0}
+			`tabSales Invoice`.update_stock, `tabSales Invoice Item`.uom {0}
 		from `tabSales Invoice`, `tabSales Invoice Item`
 		where `tabSales Invoice`.name = `tabSales Invoice Item`.parent
 			and `tabSales Invoice`.docstatus = 1 %s %s

@@ -1,4 +1,4 @@
-DocType: Sales Order Item,Ordered Qty,Quantité commandée
+DocType: Production Plan Item,Ordered Qty,Quantité commandée
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +111,{0} {1}: Cost Center {2} does not belong to Company {3},{0} {1}: Le Centre de Coûts {2} ne fait pas partie de la Société {3}
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +61,{0} {1}: Either debit or credit amount is required for {2},{0} {1}: Soit un montant au débit ou crédit est nécessaire pour {2}
 DocType: Purchase Invoice Item,Price List Rate (Company Currency),Taux de la Liste de Prix (Devise de la Compagnie)

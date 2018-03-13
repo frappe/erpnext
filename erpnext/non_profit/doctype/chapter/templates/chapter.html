@@ -46,17 +46,18 @@
 
 <h3>Chapter Head</h3>
 <table class="table table-bordered small" style="max-width: 500px;">
+	{% set doc = frappe.get_doc('Member',chapter_head) %}
 	<tr>
 		<td style='width: 15%'>Name</td>
-		<td>{{ frappe.db.get_value('User', chapter_head, 'full_name') }}</td>
+		<td>{{ doc.member_name }}</td>
 	</tr>
 	<tr>
 		<td>Email</td>
-		<td>{{ frappe.db.get_value('User', chapter_head, 'email') or '' }}</td>
+		<td>{{ frappe.db.get_value('User', doc.email, 'email') or '' }}</td>
 	</tr>
 	<tr>
 		<td>Phone</td>
-		<td>{{ frappe.db.get_value('User', chapter_head, 'phone') or '' }}</td>
+		<td>{{ frappe.db.get_value('User', doc.email, 'phone') or '' }}</td>
 	</tr>
 </table>
 <h3>Address</h3>
@@ -65,7 +66,4 @@
 <p style="margin: 20px 0 30px;"><a href="/non_profit/join-chapter?name={{ name }}" class='btn btn-primary'>Join this Chapter</a></p>
 <p style="margin: 20px 0 30px;"><a href="/non_profit/leave-chapter?name={{ name }}" class=''>Leave this Chapter</a></p>
 
-
 {% endblock %}
-
-<!-- this is a sample default web page template -->

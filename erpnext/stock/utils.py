@@ -43,7 +43,7 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 
 	sle_map = {}
 	for sle in stock_ledger_entries:
-		if not sle_map.has_key((sle.item_code, sle.warehouse)):
+		if not (sle.item_code, sle.warehouse) in sle_map:
 			sle_map[(sle.item_code, sle.warehouse)] = flt(sle.stock_value)
 		
 	return sum(sle_map.values())

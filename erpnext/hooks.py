@@ -11,7 +11,7 @@ app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
-develop_version = '9.x.x-develop'
+develop_version = '11.x.x-develop'
 
 error_report_email = "support@erpnext.com"
 
@@ -198,13 +198,19 @@ doc_events = {
 	"Website Settings": {
 		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
 	},
+	"Sales Invoice": {
+		'validate': 'erpnext.regional.india.utils.set_place_of_supply',
+		"on_submit": "erpnext.regional.france.utils.create_transaction_log",
+		"on_trash": "erpnext.regional.check_deletion_permission"
+	},
 	"Payment Entry": {
-		"on_submit": "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"
+		"on_submit": ["erpnext.regional.france.utils.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"],
+		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	'Address': {
 		'validate': 'erpnext.regional.india.utils.validate_gstin_for_india'
 	},
-	('Sales Invoice', 'Purchase Invoice'): {
+	'Purchase Invoice': {
 		'validate': 'erpnext.regional.india.utils.set_place_of_supply'
 	}
 }
@@ -212,7 +218,7 @@ doc_events = {
 scheduler_events = {
 	"hourly": [
 		"erpnext.accounts.doctype.subscription.subscription.make_subscription_entry",
-		'erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.trigger_emails'
+		'erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails'
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
@@ -224,7 +230,7 @@ scheduler_events = {
 		"erpnext.hr.doctype.employee.employee.send_birthday_reminders",
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
 		"erpnext.assets.doctype.asset.depreciation.post_depreciation_entries",
-		"erpnext.hr.doctype.daily_work_summary_settings.daily_work_summary_settings.send_summary",
+		"erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.send_summary",
 		"erpnext.stock.doctype.serial_no.serial_no.update_maintenance_status",
 		"erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.refresh_scorecards",
 		"erpnext.setup.doctype.company.company.cache_companies_monthly_sales_history",
@@ -257,6 +263,9 @@ get_site_info = 'erpnext.utilities.get_site_info'
 payment_gateway_enabled = "erpnext.accounts.utils.create_payment_gateway_account"
 
 regional_overrides = {
+	'France': {
+		'erpnext.tests.test_regional.test_method': 'erpnext.regional.france.utils.test_method'
+	},
 	'India': {
 		'erpnext.tests.test_regional.test_method': 'erpnext.regional.india.utils.test_method',
 		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_header': 'erpnext.regional.india.utils.get_itemised_tax_breakup_header',
