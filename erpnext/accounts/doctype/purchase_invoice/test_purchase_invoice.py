@@ -121,16 +121,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi = make_purchase_invoice()
 
-		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank - _TC")
-		pe.reference_no = "1"
-		pe.reference_date = nowdate()
-		pe.paid_from_account_currency = pi.currency
-		pe.paid_to_account_currency = pi.currency
-		pe.source_exchange_rate = 1
-		pe.target_exchange_rate = 1
-		pe.paid_amount = pi.grand_total
-
-		self.assertRaises(frappe.ValidationError, pe.save, ignore_permissions=True)
+		self.assertRaises(
+			frappe.ValidationError, get_payment_entry, dt='Purchase Invoice', dn=pi.name, bank_account="_Test Bank - _TC")
 
 		supplier.on_hold = 0
 		supplier.save()

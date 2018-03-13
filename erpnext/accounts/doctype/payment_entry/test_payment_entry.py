@@ -40,7 +40,7 @@ class TestPaymentEntry(unittest.TestCase):
 		so_advance_paid = frappe.db.get_value("Sales Order", so.name, "advance_paid")
 		self.assertEqual(so_advance_paid, 0)
 
-	def test_payment_entry_for_blocked_customer_invoice(self):
+	def test_payment_entry_for_blocked_supplier_invoice(self):
 		supplier = frappe.get_doc('Supplier', '_Test Supplier')
 		supplier.on_hold = 1
 		supplier.hold_type = 'Invoices'
@@ -51,7 +51,7 @@ class TestPaymentEntry(unittest.TestCase):
 		supplier.on_hold = 0
 		supplier.save()
 
-	def test_payment_entry_for_blocked_customer_payments(self):
+	def test_payment_entry_for_blocked_supplier_payments(self):
 		supplier = frappe.get_doc('Supplier', '_Test Supplier')
 		supplier.on_hold = 1
 		supplier.hold_type = 'Payments'
@@ -59,16 +59,8 @@ class TestPaymentEntry(unittest.TestCase):
 
 		pi = make_purchase_invoice()
 
-		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank - _TC")
-		pe.reference_no = "1"
-		pe.reference_date = nowdate()
-		pe.paid_from_account_currency = pi.currency
-		pe.paid_to_account_currency = pi.currency
-		pe.source_exchange_rate = 1
-		pe.target_exchange_rate = 1
-		pe.paid_amount = pi.grand_total
-
-		self.assertRaises(frappe.ValidationError, pe.insert)
+		self.assertRaises(
+			frappe.ValidationError, get_payment_entry, dt='Purchase Invoice', dn=pi.name, bank_account="_Test Bank - _TC")
 
 		supplier.on_hold = 0
 		supplier.save()

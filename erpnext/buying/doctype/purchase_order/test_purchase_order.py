@@ -193,16 +193,9 @@ class TestPurchaseOrder(unittest.TestCase):
 		supplier.save()
 
 		po = create_purchase_order()
-		pe = get_payment_entry('Purchase Order', po.name, bank_account="_Test Bank - _TC")
-		pe.reference_no = "1"
-		pe.reference_date = nowdate()
-		pe.paid_from_account_currency = po.currency
-		pe.paid_to_account_currency = po.currency
-		pe.source_exchange_rate = 1
-		pe.target_exchange_rate = 1
-		pe.paid_amount = po.grand_total
 
-		self.assertRaises(frappe.ValidationError, pe.save)
+		self.assertRaises(
+			frappe.ValidationError, get_payment_entry, dt='Purchase Order', dn=po.name, bank_account="_Test Bank - _TC")
 
 		supplier.on_hold = 0
 		supplier.save()
