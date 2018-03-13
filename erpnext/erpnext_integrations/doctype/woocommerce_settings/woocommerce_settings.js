@@ -25,7 +25,7 @@ frappe.ui.form.on('Woocommerce Settings', {
 						frappe.msgprint(__("Could not generate Secret"));
 					});
 				}
-			)
+			);
 		});
 	},
 
