@@ -9,8 +9,8 @@ def verify_request():
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
 	sig = base64.b64encode(
 		hmac.new(
-			woocommerce_settings.secret.encode(),
-			str(frappe.request.data),
+			woocommerce_settings.secret.encode('utf8'),
+			frappe.request.data,
 			hashlib.sha256
 		).digest()
 	)
@@ -18,7 +18,7 @@ def verify_request():
 	print("verify_request", sig, frappe.get_request_header("X-Wc-Webhook-Signature"))
 	if frappe.request.data and \
 		frappe.get_request_header("X-Wc-Webhook-Signature") and \
-		not sig == frappe.get_request_header("X-Wc-Webhook-Signature"):
+		not sig == bytes(frappe.get_request_header("X-Wc-Webhook-Signature").encode()):
 			frappe.throw(_("Unverified Webhook Data"))
 	frappe.set_user(woocommerce_settings.modified_by)
 
@@ -75,7 +75,7 @@ def order():
 		raw_date = datetime.datetime.strptime(placed_order_date, "%Y-%m-%d")
 		raw_delivery_date = frappe.utils.add_to_date(raw_date,days = 7)
 		order_delivery_date_str = raw_delivery_date.strftime('%Y-%m-%d')
-		order_delivery_date = unicode(order_delivery_date_str, "utf-8")
+		order_delivery_date = str(order_delivery_date_str)
 
 		new_sales_order.delivery_date = order_delivery_date
 
