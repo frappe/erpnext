@@ -19,13 +19,15 @@ frappe.ui.form.on('Woocommerce Settings', {
 					frappe.call({
 						type:"POST",
 						method:"erpnext.erpnext_integrations.doctype.woocommerce_settings.woocommerce_settings.generate_secret",
-					}).done(r=>frm.reload_doc())
-					.fail(r=>frappe.msgprint(__("Could not generate Secret")));
+					}).done(() => {
+						frm.reload_doc();
+					}).fail(() => {
+						frappe.msgprint(__("Could not generate Secret"));
+					});
 				}
 			)
 		});
 	},
-
 
 	check_enabled (frm) {
 		frm.set_df_property("woocommerce_server_url", "reqd", frm.doc.enable_sync);

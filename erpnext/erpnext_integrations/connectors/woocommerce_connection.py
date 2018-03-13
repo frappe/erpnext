@@ -97,7 +97,7 @@ def order():
 
 			add_tax_details(new_sales_order,ordered_items_tax,"Ordered Item tax",0)
 
-		shipping_details = fd.get("shipping_lines")
+		# shipping_details = fd.get("shipping_lines") # used for detailed order
 		shipping_total = fd.get("shipping_total")
 		shipping_tax = fd.get("shipping_tax")
 
@@ -105,9 +105,8 @@ def order():
 		add_tax_details(new_sales_order,shipping_total,"Shipping Total",1)
 
 		new_sales_order.submit()
-	
-		frappe.db.commit()
 
+		frappe.db.commit()
 
 def link_customer_and_address(raw_billing_data,customer_status):
 
@@ -164,7 +163,6 @@ def link_customer_and_address(raw_billing_data,customer_status):
 
 	frappe.db.commit()
 
-
 def link_item(item_data,item_status):
 
 	if item_status == 0:
@@ -183,7 +181,6 @@ def link_item(item_data,item_status):
 	item.item_group = "WooCommerce Products"
 	item.save()
 	frappe.db.commit()
-
 
 def add_tax_details(sales_order,price,desc,status):
 

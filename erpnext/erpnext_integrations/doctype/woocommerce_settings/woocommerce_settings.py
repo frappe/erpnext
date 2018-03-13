@@ -3,10 +3,9 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, requests, os
+import frappe
 
 from frappe import _
-from frappe.utils.password import get_decrypted_password
 from frappe.model.document import Document
 from six.moves.urllib.parse import urlparse
 
@@ -86,7 +85,6 @@ class WoocommerceSettings(Document):
 
 			frappe.delete_doc("Item Group","WooCommerce Products")
 
-				
 		frappe.db.commit()
 
 	def validate_settings(self):
