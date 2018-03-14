@@ -331,7 +331,7 @@ def get_events(start, end, filters=None):
 		duration, timestamp(appointment_date, appointment_time) as 'start', type.color as 'color'
     	from `tabPatient Appointment`
     	left join `tabAppointment Type` as type on `tabPatient Appointment`.appointment_type=type.name
-    	where (appointment_date between '2018-03-13' and '2018-03-13' )
+    	where (appointment_date between %(start)s and %(end)s )
 		and `tabPatient Appointment`.docstatus < 2 {conditions}""".format(conditions=conditions),
 		{"start": start, "end": end}, as_dict=True, update={"allDay": 0})
 	for item in data:
