@@ -860,7 +860,8 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.allocate_payment_amount = 1
 	pe.letter_head = doc.get("letter_head")
 
-	if doc.invoice_is_blocked():
+	# only Purchase Invoice can be blocked individually
+	if doc.doctype == "Purchase Invoice" and doc.invoice_is_blocked():
 		frappe.msgprint(_('{0} is on hold till {1}'.format(doc.name, doc.release_date)))
 	else:
 		pe.append("references", {

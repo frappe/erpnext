@@ -38,8 +38,12 @@ class PurchaseInvoice(BuyingController):
 			'overflow_type': 'billing'
 		}]
 
+	def before_save(self):
+		if not self.on_hold:
+			self.release_date = ''
+
 	def invoice_is_blocked(self):
-		return self.release_date and self.release_date > getdate(nowdate())
+		return self.on_hold and (not self.release_date or self.release_date > getdate(nowdate()))
 
 	def validate(self):
 		if not self.is_opening:
@@ -705,6 +709,13 @@ class PurchaseInvoice(BuyingController):
 	def on_recurring(self, reference_doc, subscription_doc):
 		self.due_date = None
 
+	def block_invoice(self):
+		self.db_set('on_hold', 1)
+
+	def unblock_invoice(self):
+		self.db_set('on_hold', 0)
+		self.db_set('release_date', None)
+
 @frappe.whitelist()
 def make_debit_note(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
@@ -745,7 +756,21 @@ def make_stock_entry(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def change_release_date(name, release_date=nowdate()):
+def change_release_date(name, release_date=None):
 	if frappe.db.exists('Purchase Invoice', name):
 		pi = frappe.get_doc('Purchase Invoice', name)
 		pi.db_set('release_date', release_date)
+
+
+@frappe.whitelist()
+def unblock_invoice(name):
+	if frappe.db.exists('Purchase Invoice', name):
+		pi = frappe.get_doc('Purchase Invoice', name)
+		pi.unblock_invoice()
+
+
+@frappe.whitelist()
+def block_invoice(name):
+	if frappe.db.exists('Purchase Invoice', name):
+		pi = frappe.get_doc('Purchase Invoice', name)
+		pi.block_invoice()

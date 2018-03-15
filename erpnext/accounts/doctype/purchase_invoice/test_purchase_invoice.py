@@ -165,7 +165,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.release_date = ''
 		pi.save()
 
-	def test_purchase_invoice_blocked(self):
+	def test_purchase_invoice_temporary_blocked(self):
 		pi = make_purchase_invoice(do_not_save=True)
 		pi.release_date = add_days(nowdate(), 10)
 		pi.save()
@@ -174,6 +174,16 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pe = get_payment_entry('Purchase Invoice', dn=pi.name, bank_account="_Test Bank - _TC")
 
 		self.assertRaises(frappe.ValidationError, pe.save)
+
+	def test_purchase_invoice_explicit_block(self):
+		pi = make_purchase_invoice()
+		pi.block_invoice()
+
+		self.assertEqual(pi.on_hold, 1)
+
+		pi.unblock_invoice()
+
+		self.assertEqual(pi.on_hold, 0)
 
 	def test_gl_entries_with_perpetual_inventory_against_pr(self):
 		pr = frappe.copy_doc(pr_test_records[0])

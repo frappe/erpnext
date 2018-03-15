@@ -38,12 +38,23 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			this.show_stock_ledger();
 		}
 
-		if(!doc.is_return && doc.docstatus==1) {
-			if(doc.outstanding_amount != 0) {
+		if(!doc.is_return && doc.docstatus == 1 && doc.outstanding_amount != 0){
+			if(doc.on_hold) {
 				this.frm.add_custom_button(
 					__('Change Release Date'),
 					function() {me.change_release_date()},
 					__('Hold Invoice')
+				);
+				this.frm.add_custom_button(
+					__('Unblock Invoice'),
+					function() {me.unblock_invoice()},
+					__('Make')
+				);
+			} else if (!doc.on_hold) {
+				this.frm.add_custom_button(
+					__('Block Invoice'),
+					function() {me.block_invoice()},
+					__('Make')
 				);
 			}
 		}
@@ -104,6 +115,24 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		}
 
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
+	},
+
+	unblock_invoice: function() {
+		const me = this;
+		frappe.call({
+			'method': 'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.unblock_invoice',
+			'args': {'name': this.frm.doc.name},
+			'callback': (r) => this.frm.reload_doc()
+		});
+	},
+
+	block_invoice: function() {
+		const me = this;
+		frappe.call({
+			'method': 'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.block_invoice',
+			'args': {'name': this.frm.doc.name},
+			'callback': (r) => this.frm.reload_doc()
+		});
 	},
 
 	change_release_date: function() {
