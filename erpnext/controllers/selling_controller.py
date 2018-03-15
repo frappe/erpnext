@@ -332,7 +332,7 @@ class SellingController(StockController):
 	def set_po_nos(self):
 		if self.doctype in ("Delivery Note", "Sales Invoice"):
 			ref_fieldname = "against_sales_order" if self.doctype == "Delivery Note" else "sales_order"
-			sales_orders = list(set([d.get(ref_fieldname) for d in self.items]))
+			sales_orders = list(set([d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)]))
 			if sales_orders:
 				po_nos = frappe.get_all('Sales Order', 'po_no', filters = {'name': ('in', sales_orders)})
 				self.po_no = ', '.join(list(set([d.po_no for d in po_nos if d.po_no])))

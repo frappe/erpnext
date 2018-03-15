@@ -25,8 +25,6 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 	#Cost Center & Warehouse Map
 	invoice_cc_wh_map = get_invoice_cc_wh_map(invoice_list)
 	invoice_so_dn_map = get_invoice_so_dn_map(invoice_list)
-	customers = list(set([inv.customer for inv in invoice_list]))
-	customer_map = get_customer_details(customers)
 	company_currency = frappe.db.get_value("Company", filters.get("company"), "default_currency")
 	mode_of_payments = get_mode_of_payments([inv.name for inv in invoice_list])
 
@@ -38,7 +36,6 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 		cost_center = list(set(invoice_cc_wh_map.get(inv.name, {}).get("cost_center", [])))
 		warehouse = list(set(invoice_cc_wh_map.get(inv.name, {}).get("warehouse", [])))
 
-		customer_details = customer_map.get(inv.customer, {})
 		row = [
 			inv.name, inv.posting_date, inv.customer, inv.customer_name
 		]
@@ -48,8 +45,8 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 				row.append(inv.get(col))
 
 		row +=[
-			customer_details.get("customer_group"),
-			customer_details.get("territory"),
+			inv.get("customer_group"),
+			inv.get("territory"),
 			inv.debit_to, ", ".join(mode_of_payments.get(inv.name, [])),
 			inv.project, inv.owner, inv.remarks,
 			", ".join(sales_order), ", ".join(delivery_note),", ".join(cost_center),
@@ -162,7 +159,9 @@ def get_invoices(filters, additional_query_columns):
 		additional_query_columns = ', ' + ', '.join(additional_query_columns)
 
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select name, posting_date, debit_to, project, customer, customer_name, owner, remarks,
+	return frappe.db.sql("""
+		select name, posting_date, debit_to, project, customer, 
+		customer_name, owner, remarks, territory, customer_group,
 		base_net_total, base_grand_total, base_rounded_total, outstanding_amount {0}
 		from `tabSales Invoice`
 		where docstatus = 1 %s order by posting_date desc, name desc""".format(additional_query_columns or '') %
@@ -240,15 +239,6 @@ def get_invoice_cc_wh_map(invoice_list):
 				"warehouse", []).append(d.warehouse)
 
 	return invoice_cc_wh_map
-
-def get_customer_details(customers):
-	customer_map = {}
-	for cust in frappe.db.sql("""select name, territory, customer_group from `tabCustomer`
-		where name in (%s)""" % ", ".join(["%s"]*len(customers)), tuple(customers), as_dict=1):
-			customer_map.setdefault(cust.name, cust)
-
-	return customer_map
-
 
 def get_mode_of_payments(invoice_list):
 	mode_of_payments = {}
