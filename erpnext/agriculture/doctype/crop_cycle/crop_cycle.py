@@ -50,6 +50,7 @@ class CropCycle(Document):
 		project.expected_start_date = self.start_date
 		project.expected_end_date = frappe.utils.data.add_days(self.start_date, period-1)
 		project.insert()
+		print(project)
 		self.create_task(crop_tasks, project.as_dict.im_self.name, self.start_date)
 		return project.as_dict.im_self.name
 
