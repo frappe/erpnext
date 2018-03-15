@@ -1,4 +1,4 @@
-import unittest, frappe, erpnext, requests, os, time
+import unittest, frappe, requests, os, time
 
 class TestWoocommerce(unittest.TestCase):
 	def test_woocommerce_request(self):
