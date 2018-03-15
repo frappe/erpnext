@@ -3,27 +3,33 @@ import unittest, frappe, requests, os, time
 class TestWoocommerce(unittest.TestCase):
 	def test_woocommerce_request(self):
 		# Set Secret in Woocommerce Settings
+		company = frappe.new_doc("Company")
+		company.company_name = "Woocommerce"
+		company.abbr = "W"
+		company.default_currency = "INR"
+		company.save()
+		frappe.db.commit()
+
+		default = frappe.get_doc("Global Defaults")
+		default.default_company = "Woocommerce"
+		default.save()
+
+		frappe.db.commit()
+
+		time.sleep(5)
+
 		woo_settings = frappe.get_doc("Woocommerce Settings")
 		woo_settings.secret = "ec434676aa1de0e502389f515c38f89f653119ab35e9117c7a79e576"
 		woo_settings.woocommerce_server_url = "https://woocommerce.mntechnique.com/"
 		woo_settings.api_consumer_key = "ck_fd43ff5756a6abafd95fadb6677100ce95a758a1"
 		woo_settings.api_consumer_secret = "cs_94360a1ad7bef7fa420a40cf284f7b3e0788454e"
 		woo_settings.enable_sync = 1
+		woo_settings.tax_account = "Sales Expenses - W"
+		woo_settings.f_n_f_account = "Expenses - W"
 		woo_settings.save(ignore_permissions=True)
-
-		# company = frappe.new_doc("Company")
-		# company.company_name = "Woocommerce"
-		# company.abbr = "W"
-		# company.default_currency = "INR"
-		# company.save()
 
 		frappe.db.commit()
 
-		# default = frappe.get_doc("Global Defaults")
-		# default.default_company = "Woocommerce"
-		# default.save()
-
-		# frappe.db.commit()
 
 		r = emulate_request()
 		print(r.text)

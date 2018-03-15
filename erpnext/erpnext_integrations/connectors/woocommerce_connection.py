@@ -183,13 +183,15 @@ def link_item(item_data,item_status):
 
 def add_tax_details(sales_order,price,desc,status):
 
+	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
+
 	if status == 0:
 		# Product taxes
-		account_head_type = frappe.get_value("Account",{"account_name":"VAT 5%"},["name"])
+		account_head_type = woocommerce_settings.tax_account
 
 	if status == 1:
 		# Shipping taxes
-		account_head_type = frappe.get_value("Account",{"account_name":"Freight and Forwarding Charges"},["name"])
+		account_head_type = woocommerce_settings.f_n_f_account
 
 	sales_order.append("taxes",{
 							"charge_type":"Actual",
