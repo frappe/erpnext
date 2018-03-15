@@ -709,7 +709,7 @@ class PurchaseInvoice(BuyingController):
 	def on_recurring(self, reference_doc, subscription_doc):
 		self.due_date = None
 
-	def block_invoice(self, hold_comment):
+	def block_invoice(self, hold_comment=None):
 		self.db_set('on_hold', 1)
 		self.db_set('hold_comment', cstr(hold_comment))
 

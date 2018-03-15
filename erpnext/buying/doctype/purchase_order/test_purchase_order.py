@@ -216,17 +216,24 @@ class TestPurchaseOrder(unittest.TestCase):
 		supplier.save()
 
 	def test_po_for_blocked_supplier_payments_past_date(self):
-		supplier = frappe.get_doc('Supplier', '_Test Supplier')
-		supplier.on_hold = 1
-		supplier.hold_type = 'Payments'
-		supplier.release_date = '2018-03-01'
-		supplier.save()
+		# this test is meant to fail only if something fails in the try block
+		with self.assertRaises(Exception):
+			try:
+				supplier = frappe.get_doc('Supplier', '_Test Supplier')
+				supplier.on_hold = 1
+				supplier.hold_type = 'Payments'
+				supplier.release_date = '2018-03-01'
+				supplier.save()
 
-		po = create_purchase_order()
-		get_payment_entry('Purchase Order', po.name, bank_account='_Test Bank - _TC')
+				po = create_purchase_order()
+				get_payment_entry('Purchase Order', po.name, bank_account='_Test Bank - _TC')
 
-		supplier.on_hold = 0
-		supplier.save()
+				supplier.on_hold = 0
+				supplier.save()
+			except:
+				pass
+			else:
+				raise Exception
 
 	def test_terms_does_not_copy(self):
 		po = create_purchase_order()
