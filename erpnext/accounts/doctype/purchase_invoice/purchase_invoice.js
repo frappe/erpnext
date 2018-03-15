@@ -121,19 +121,13 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		const me = this;
 		frappe.call({
 			'method': 'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.unblock_invoice',
-			'args': {'name': this.frm.doc.name},
-			'callback': (r) => this.frm.reload_doc()
+			'args': {'name': me.frm.doc.name},
+			'callback': (r) => me.frm.reload_doc()
 		});
 	},
 
 	block_invoice: function() {
-		this.make_comment_dialog();
-		const me = this;
-		frappe.call({
-			'method': 'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.block_invoice',
-			'args': {'name': this.frm.doc.name, 'hold_comment': me.dialog_data.hold_comment},
-			'callback': (r) => this.frm.reload_doc()
-		});
+		this.make_comment_dialog_and_block_invoice();
 	},
 
 	change_release_date: function() {
@@ -150,7 +144,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		}
 	},
 
-	make_comment_dialog: function(){
+	make_comment_dialog_and_block_invoice: function(){
 		const me = this;
 
 		const title = __('Add Comment');
@@ -170,7 +164,12 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		});
 
 		this.dialog.set_primary_action(__('Save'), function() {
-			me.dialog_data = me.dialog.get_values();
+			const dialog_data = me.dialog.get_values();
+			frappe.call({
+				'method': 'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.block_invoice',
+				'args': {'name': me.frm.doc.name, 'hold_comment': dialog_data.hold_comment},
+				'callback': (r) => me.frm.reload_doc()
+			});
 			me.dialog.hide();
 		});
 

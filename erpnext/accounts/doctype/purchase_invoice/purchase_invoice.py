@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
-from frappe.utils import cint, cstr formatdate, flt, getdate, nowdate
+from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate
 from frappe import _, throw
 import frappe.defaults
 
@@ -711,7 +711,7 @@ class PurchaseInvoice(BuyingController):
 
 	def block_invoice(self, hold_comment):
 		self.db_set('on_hold', 1)
-		self.db_set('hold_comment', cstr(comment))
+		self.db_set('hold_comment', cstr(hold_comment))
 
 	def unblock_invoice(self):
 		self.db_set('on_hold', 0)
