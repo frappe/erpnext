@@ -7,7 +7,7 @@ frappe.views.HubFactory = frappe.views.Factory.extend({
 
 		const assets = {
 			'List': [
-				'/assets/erpnext/js/hub/hub_page.js',
+				'/assets/erpnext/js/hub/hub_listing.js',
 				'/assets/erpnext/css/hub.css',
 			],
 			'Form': [

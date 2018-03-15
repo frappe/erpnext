@@ -36,6 +36,30 @@ body[data-route^="Hub/"] {
 	}
 }
 
+.image-view-container {
+	.image-view-body {
+		&:hover .like-button {
+			opacity: 0.7;
+		}
+	}
+
+	.like-button {
+		bottom: 10px !important;
+		left: 10px !important;
+		width: 36px;
+		height: 36px;
+		opacity: 0;
+		font-size: 16px;
+		color: @text-color;
+		position: absolute;
+
+		// show zoom button on mobile devices
+		@media (max-width: @screen-xs) {
+			opacity: 0.5
+		}
+	}
+}
+
 /* hub */
 div[data-page-route="hub"] {
 	.page-head {

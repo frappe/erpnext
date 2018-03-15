@@ -1,8 +1,7 @@
 frappe.provide('erpnext.hub');
 
-erpnext.hub.HubForm = class HubForm extends frappe.views.BaseList {
+erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList {
 	setup_defaults() {
-		console.log('form?');
 		super.setup_defaults();
 		this.method = 'erpnext.hub_node.get_details';
 		const route = frappe.get_route();
@@ -75,7 +74,7 @@ erpnext.hub.HubForm = class HubForm extends frappe.views.BaseList {
 	}
 };
 
-erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubForm {
+erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubDetailsPage {
 	constructor(opts) {
 		super(opts);
 
@@ -135,7 +134,7 @@ erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubForm {
 	}
 }
 
-erpnext.hub.CompanyPage = class CompanyPage extends erpnext.hub.HubForm {
+erpnext.hub.CompanyPage = class CompanyPage extends erpnext.hub.HubDetailsPage {
 	constructor(opts) {
 		super(opts);
 

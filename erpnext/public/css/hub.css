@@ -24,6 +24,19 @@ body[data-route^="Hub/"] .image-view-container {
   display: inline-block;
   vertical-align: middle;
 }
+.image-view-container .image-view-body:hover .like-button {
+  opacity: 0.7;
+}
+.image-view-container .like-button {
+  bottom: 10px !important;
+  right: 10px !important;
+  width: 36px;
+  height: 36px;
+  opacity: 0;
+  font-size: 16px;
+  color: #36414C;
+  position: absolute;
+}
 /* hub */
 div[data-page-route="hub"] .page-head {
   height: 80px;

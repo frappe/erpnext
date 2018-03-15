@@ -116,7 +116,6 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 	constructor(opts) {
 		super(opts);
-
 		this.show();
 	}
 
@@ -312,7 +311,10 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 							data-name="${encoded_name}"
 						>
 							<button class="btn btn-default zoom-view" data-name="${encoded_name}">
-								<i class="octicon octicon-eye"></i>
+								<i class="octicon octicon-eye" data-name="${encoded_name}"></i>
+							</button>
+							<button class="btn btn-default like-button" data-name="${encoded_name}">
+								<i class="octicon octicon-heart" data-name="${encoded_name}"></i>
 							</button>
 						</div>
 					</a>
@@ -332,9 +334,15 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 		this.$result.on('click', '.btn.zoom-view', (e) => {
 			e.preventDefault();
 			e.stopPropagation();
-			var name = $(e.target).data().name;
+			console.log($(e.target), $(e.target).attr('data-name'));
+			var name = $(e.target).attr('data-name');
 			name = decodeURIComponent(name);
-			console.log(name);
+
+			this.quick_view.set_title(name);
+			console.log(this.meta);
+
+			let fields = [];
+			// this.quick_view.add_fields();
 			me.quick_view.show();
 			return false;
 		});
