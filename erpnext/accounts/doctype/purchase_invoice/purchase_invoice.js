@@ -127,10 +127,11 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	},
 
 	block_invoice: function() {
+		this.make_comment_dialog();
 		const me = this;
 		frappe.call({
 			'method': 'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.block_invoice',
-			'args': {'name': this.frm.doc.name},
+			'args': {'name': this.frm.doc.name, 'hold_comment': me.dialog_data.hold_comment},
 			'callback': (r) => this.frm.reload_doc()
 		});
 	},
@@ -149,11 +150,38 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		}
 	},
 
-	make_dialog_and_set_release_date: function() {
-		var me = this;
+	make_comment_dialog: function(){
+		const me = this;
 
-		let title = __('Set New Release Date');
-		let fields = [
+		const title = __('Add Comment');
+		const fields = [
+			{
+				fieldname: 'hold_comment',
+				read_only: 0,
+				fieldtype:'Small Text',
+				label: __('Reason For Putting On Hold'),
+				default: ""
+			},
+		];
+
+		this.dialog = new frappe.ui.Dialog({
+			title: title,
+			fields: fields
+		});
+
+		this.dialog.set_primary_action(__('Save'), function() {
+			me.dialog_data = me.dialog.get_values();
+			me.dialog.hide();
+		});
+
+		this.dialog.show();
+	},
+
+	make_dialog_and_set_release_date: function() {
+		const me = this;
+
+		const title = __('Set New Release Date');
+		const fields = [
 			{
 				fieldname: 'release_date',
 				read_only: 0,

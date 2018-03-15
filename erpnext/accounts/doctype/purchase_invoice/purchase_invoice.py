@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
-from frappe.utils import cint, formatdate, flt, getdate, nowdate
+from frappe.utils import cint, cstr formatdate, flt, getdate, nowdate
 from frappe import _, throw
 import frappe.defaults
 
@@ -709,8 +709,9 @@ class PurchaseInvoice(BuyingController):
 	def on_recurring(self, reference_doc, subscription_doc):
 		self.due_date = None
 
-	def block_invoice(self):
+	def block_invoice(self, hold_comment):
 		self.db_set('on_hold', 1)
+		self.db_set('hold_comment', cstr(comment))
 
 	def unblock_invoice(self):
 		self.db_set('on_hold', 0)
@@ -770,7 +771,7 @@ def unblock_invoice(name):
 
 
 @frappe.whitelist()
-def block_invoice(name):
+def block_invoice(name, hold_comment):
 	if frappe.db.exists('Purchase Invoice', name):
 		pi = frappe.get_doc('Purchase Invoice', name)
-		pi.block_invoice()
+		pi.block_invoice(hold_comment)
