@@ -85,6 +85,11 @@ def order():
 
 			ordered_items_tax = item.get("total_tax")
 
+			default_set_company = frappe.get_doc("Global Defaults")
+			company = default_set_company.default_company
+			found_company = frappe.get_doc("Company",{"name":company})
+			company_abbr = found_company.abbr
+
 			new_sales_order.append("items",{
 				"item_code": found_item.item_code,
 				"item_name": found_item.item_name,
@@ -92,7 +97,8 @@ def order():
 				"delivery_date":order_delivery_date,
 				"uom": "Nos",
 				"qty": item.get("quantity"),
-				"rate": item.get("price")
+				"rate": item.get("price"),
+				"warehouse": "Stores" + " - " + company_abbr
 				})
 
 			add_tax_details(new_sales_order,ordered_items_tax,"Ordered Item tax",0)
