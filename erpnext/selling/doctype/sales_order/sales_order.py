@@ -708,6 +708,7 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 		target.schedule_date = source.delivery_date
 		target.qty = flt(source.qty) - flt(source.ordered_qty)
 		target.stock_qty = (flt(source.qty) - flt(source.ordered_qty)) * flt(source.conversion_factor)
+		target.project = source_parent.project
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
