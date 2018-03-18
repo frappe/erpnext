@@ -47,6 +47,12 @@ cur_frm.add_fetch('employee', 'employment_type', 'new_employment_type');
 
 frappe.ui.form.on('Promotion and Merit Increase', {
   refresh: function(frm) {
+        if(!frm.doc.__islocal){
+            frm.disable_save();
+        }else{
+            frm.enable_save();
+        }
+        
 		// cur_frm.set_df_property("accomodation_percentage", "read_only", frm.doc.accommodation_from_company);
 		// cur_frm.set_df_property("accommodation_value", "read_only", frm.doc.accommodation_from_company);
 	},

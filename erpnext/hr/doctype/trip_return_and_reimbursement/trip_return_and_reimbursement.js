@@ -5,6 +5,12 @@ cur_frm.add_fetch('employee', 'department', 'department');
 
 frappe.ui.form.on('Trip Return and Reimbursement', {
 	refresh: function(frm) {
+		if(!frm.doc.__islocal){
+            frm.disable_save();
+        }else{
+            frm.enable_save();
+        }
+        
 		cur_frm.doc.trip_no=""
 	},
 	workflow_state: function(frm){

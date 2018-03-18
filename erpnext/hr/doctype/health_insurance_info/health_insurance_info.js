@@ -3,6 +3,13 @@
 
 //cur_frm.add_fetch('employee', 'grade', 'grade');
 frappe.ui.form.on('Health Insurance Info', {
+    refresh: function(frm) {
+        if(!frm.doc.__islocal){
+            frm.disable_save();
+        }else{
+            frm.enable_save();
+        }
+    },
     employee: function (frm) {
         frappe.call({
             method: "frappe.client.get_list",

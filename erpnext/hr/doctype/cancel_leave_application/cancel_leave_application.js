@@ -13,6 +13,12 @@ frappe.ui.form.on('Cancel Leave Application', {
 
 
     refresh: function(frm) {
+        if(!frm.doc.__islocal){
+            frm.disable_save();
+        }else{
+            frm.enable_save();
+        }
+        
         // frm.add_custom_button(__("Cancel Leave Application"), function() {
         //     // When this button is clicked, do this
 

@@ -23,6 +23,12 @@ cur_frm.add_fetch('leave_application', 'to_date', 'to_date');
 
 frappe.ui.form.on('Return From Leave Statement', {
 	refresh: function(frm) {
+		if(!frm.doc.__islocal){
+            frm.disable_save();
+        }else{
+            frm.enable_save();
+        }
+        
 		cur_frm.refresh_fields(['employee','leave_application']);
     if (!cur_frm.doc.__islocal) {
         	for (var key in cur_frm.fields_dict){

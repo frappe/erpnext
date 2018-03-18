@@ -78,6 +78,12 @@ frappe.ui.form.on("Leave Application", {
     },
 
     refresh: function(frm) {
+        if(!frm.doc.__islocal){
+            frm.disable_save();
+        }else{
+            frm.enable_save();
+        }
+        
         frappe.call({
             method: "unallowed_actions",
             doc: frm.doc,

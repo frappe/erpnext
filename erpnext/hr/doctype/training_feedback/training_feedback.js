@@ -3,6 +3,13 @@
 cur_frm.add_fetch('employee','department','department');
 
 frappe.ui.form.on('Training Feedback', {
+	refresh: function(frm) {
+        if(!frm.doc.__islocal){
+            frm.disable_save();
+        }else{
+            frm.enable_save();
+        }
+    },
 	onload: function(frm) {
 		frm.add_fetch("training_event", "course", "course");
 		frm.add_fetch("training_event", "event_name", "event_name");

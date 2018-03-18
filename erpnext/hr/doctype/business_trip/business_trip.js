@@ -25,6 +25,12 @@ cur_frm.cscript.custom_grade = function(doc, cdt, cd) {
 };
 frappe.ui.form.on('Business Trip', {
     refresh: function(frm) {
+        if(!frm.doc.__islocal){
+            frm.disable_save();
+        }else{
+            frm.enable_save();
+        }
+        
     	if (cur_frm.doc.workflow_state=="Pending"){
         get_current_user();
         }

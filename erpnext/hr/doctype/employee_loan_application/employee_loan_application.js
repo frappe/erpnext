@@ -3,6 +3,12 @@
 cur_frm.add_fetch('employee','department','department');
 frappe.ui.form.on('Employee Loan Application', {
 	refresh: function(frm) {
+		if(!frm.doc.__islocal){
+			frm.disable_save();
+		}else{
+			frm.enable_save();
+		}
+
 		frm.trigger("toggle_fields")
 		frm.trigger("add_toolbar_buttons")
 	},
