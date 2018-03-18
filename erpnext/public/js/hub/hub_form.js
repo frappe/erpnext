@@ -179,8 +179,6 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 			</div>`
 			: '';
 
-		// let liked = d
-
 		$(this.getTimelineItem(data, imageHtml, editHtml))
 			.appendTo(this.$timelineList);
 

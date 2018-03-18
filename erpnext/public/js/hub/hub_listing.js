@@ -6,6 +6,8 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 		this.page_title = __('Hub');
 		this.method = 'erpnext.hub_node.get_list';
 
+		this.cache = {};
+
 		const route = frappe.get_route();
 		this.page_name = route[1];
 	}
@@ -15,6 +17,8 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 			.then(r => {
 				this.meta = r.message || this.meta;
 				frappe.model.sync(this.meta);
+
+				this.prepareFormFields();
 			});
 	}
 
@@ -84,6 +88,10 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 
 		var html = data.map(this.card_html.bind(this)).join("");
 
+		if(data.length) {
+			this.doc = data[0];
+		}
+
 		this.$result.find('.image-view-container').append(html);
 	}
 
@@ -141,6 +149,27 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 		];
 
 		this.items_cache = {};
+	}
+
+	prepareFormFields() {
+		let fieldnames = ['hub_item_code', 'item_name', 'item_code', 'description',
+			'seller', 'company_name', 'country'];
+		this.formFields = this.meta.fields
+			.filter(field => fieldnames.includes(field.fieldname))
+			.map(field => {
+				let {
+					label,
+					fieldname,
+					fieldtype,
+				} = field;
+				let read_only = 1;
+				return {
+					label,
+					fieldname,
+					fieldtype,
+					read_only,
+				};
+			});
 	}
 
 	setup_side_bar() {
@@ -204,6 +233,8 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 		`);
 
 		this.data.map(this.load_image.bind(this));
+
+		console.log('data', this.data);
 
 		this.setup_quick_view();
 	}
@@ -329,7 +360,8 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 	setup_quick_view() {
 		var me = this;
 		this.quick_view = new frappe.ui.Dialog({
-			title: 'Quick View'
+			title: 'Quick View',
+			fields: this.formFields
 		});
 		this.$result.on('click', '.btn.zoom-view', (e) => {
 			e.preventDefault();
@@ -339,7 +371,9 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 			name = decodeURIComponent(name);
 
 			this.quick_view.set_title(name);
-			console.log(this.meta);
+			console.log(this.doc);
+
+			this.quick_view.set_values(this.data[0]);
 
 			let fields = [];
 			// this.quick_view.add_fields();
