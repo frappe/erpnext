@@ -28,7 +28,12 @@ def get_list(doctype, start=0, limit=20, fields=["*"], filters="{}", order_by=No
 def get_meta(doctype):
 	connection = get_client_connection()
 	meta = connection.get_doc('DocType', doctype)
-	return meta
+	return {
+		'meta': meta,
+		'companies': connection.get_list('Hub Company',
+			limit_start=0, limit_page_length=300,
+			filters={}, fields=['name'])
+	}
 
 @frappe.whitelist()
 def get_categories(parent='All Categories'):
@@ -40,12 +45,21 @@ def get_categories(parent='All Categories'):
 	return response
 
 @frappe.whitelist()
-def update_category(item_name, category):
+def update_category(hub_item_code, category):
 	connection = get_hub_connection()
-	response = connection.update('Hub Item', dict(
+
+	# args = frappe._dict(dict(
+	# 	doctype='Hub Category',
+	# 	hub_category_name=category
+	# ))
+	# response = connection.insert('Hub Category', args)
+
+	response = connection.update('Hub Item', frappe._dict(dict(
+		doctype='Hub Item',
 		hub_category = category
-	), item_name)
-	return response.ok
+	)), hub_item_code)
+
+	return response
 
 @frappe.whitelist()
 def get_details(hub_sync_id=None, doctype='Hub Item'):

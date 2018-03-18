@@ -86,6 +86,26 @@ def get_slide_settings():
 		),
 
 		frappe._dict(
+			action_name='enable_hub_market',
+			domains=('Manufacturing', 'Services', 'Retail', 'Distribution'),
+			title=_("Enable Hub Market"),
+			help=_("Enable Hub to begin discovering products."),
+			fields=[
+				{"fieldtype":"Section Break"},
+				{"fieldtype":"Button", "fieldname":"enable_hub", "label":_("Enable Hub")},
+			],
+			submit_method="erpnext.utilities.user_progress_utils.enable_hub",
+			done_state_title=_("Go to Hub Market"),
+			done_state_title_route=["Hub", "Item"],
+			help_links=[
+				{
+					"label": _('Learn More'),
+					"url": ["https://hubmarket.org"]
+				}
+			]
+		),
+
+		frappe._dict(
 			action_name='Add Letterhead',
 			domains=('Manufacturing', 'Services', 'Retail', 'Distribution', 'Education'),
 			title=_("Add Letterhead"),

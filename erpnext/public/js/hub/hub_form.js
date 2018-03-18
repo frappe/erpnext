@@ -136,9 +136,6 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 				<button class="btn btn-default btn-reply-email btn-xs">
 					${ __("Reply") }
 				</button>
-				<button class="btn btn-default btn-new-email btn-xs">
-					${ __("New Email") }
-				</button>
 			</div>
 			<div class="timeline-items"></div>
 		</div>`;
@@ -159,8 +156,14 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 
 	addTimelineItem(data) {
 		data = {
-			username: 'Pratu',
-			own: 1
+			username: frappe.session.user_fullname,
+			own: 0,
+			subject: __('Genuinely good product'),
+			rating: 4,
+			content: `my saw , drill, hammer all went in the trash after getting this .
+				it does every thing and yes it’s giant . I used it to fix my sink yesterday
+				and today to install a range oven hood. Next i’m going to build a bomb shelter
+				for 2012 with this giant swiss army knife.`
 		};
 		let imageHtml = data.user_image
 			? `<div class="avatar-frame" style="background-image: url(${data.user_image})"></div>`
@@ -179,12 +182,21 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 			</div>`
 			: '';
 
-		$(this.getTimelineItem(data, imageHtml, editHtml))
-			.appendTo(this.$timelineList);
+		let ratingHtml = '';
 
+		for(var i = 0; i < 5; i++) {
+			let starIcon = 'fa-star-o'
+			if(i < data.rating) {
+				starIcon = 'fa-star';
+			}
+			ratingHtml += `<i class="fa fa-fw ${starIcon} star-icon" data-idx='${i}'></i>`;
+		}
+
+		$(this.getTimelineItem(data, imageHtml, editHtml, ratingHtml))
+			.appendTo(this.$timelineList);
 	}
 
-	getTimelineItem(data, imageHtml, editHtml) {
+	getTimelineItem(data, imageHtml, editHtml, ratingHtml) {
 		return `<div class="media timeline-item user-content" data-doctype="${''}" data-name="${''}">
 			<span class="pull-left avatar avatar-medium hidden-xs" style="margin-top: 1px">
 				${imageHtml}
@@ -199,17 +211,10 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 							${imageHtml}
 						</span>
 
-
-
 						<div class="asset-details">
 							<span class="author-wrap">
-								<i class="octicon octicon-circle hidden-xs fa-fw"></i>
+								<i class="octicon octicon-quote hidden-xs fa-fw"></i>
 								<span>${data.username}</span>
-							</span>
-							<span>
-								<a href="#Form/${''}" class="text-muted">
-									<strong>link</strong>link
-								</a>
 							</span>
 								<a href="#Form/${''}" class="text-muted">
 									<span class="text-muted hidden-xs">&ndash;</span>
@@ -217,18 +222,12 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 										delivery-status-indicator">
 										<span class="hidden-xs">${__('Sent')}</span>
 									</span>
-									<span class="text-muted n-dash">&ndash;</span>
-									${__("Details")}
 								</a>
 
 								<a class="text-muted reply-link pull-right timeline-content-show"
 								title="${__('Reply')}">
 									${__('Reply')}
 								</a>
-							<span class="text-muted commented-on hidden-xs">
-								&ndash; ${'data.comment_on'}</span>
-							<span class="text-muted commented-on-small">
-								&ndash; ${'data.comment_on_small'}</span>
 							<span class="comment-likes hidden-xs">
 								<i class="octicon octicon-heart like-action text-extra-muted not-liked fa-fw">
 								</i>
@@ -239,18 +238,19 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 					<div class="reply timeline-content-show">
 						<div class="timeline-item-content">
 								<p class="text-muted small">
-									<b>${__("Subject")}:</b>
-									${'data.subject'}
+									<b>${data.subject}</b>
 								</p>
 
 								<hr>
 
 								<p class="text-muted small">
-									<i class="fa fa-fw fa-star star-icon" data-idx='0'></i>
-									<i class="fa fa-fw fa-star-o star-icon" data-idx='1'></i>
+									${ratingHtml}
 								</p>
 
 								<hr>
+								<p>
+									${data.content}
+								</p>
 						</div>
 					</div>
 				</div>

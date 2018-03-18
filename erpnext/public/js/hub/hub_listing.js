@@ -15,8 +15,9 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 	setup_fields() {
 		return this.get_meta()
 			.then(r => {
-				this.meta = r.message || this.meta;
+				this.meta = r.message.meta || this.meta;
 				frappe.model.sync(this.meta);
+				this.bootstrap_data(r.message);
 
 				this.prepareFormFields();
 			});
@@ -28,6 +29,8 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 	}
 
 	set_breadcrumbs() { }
+
+	bootstrap_data() { }
 
 	setup_side_bar() {
 		this.sidebar = new frappe.ui.Sidebar({
@@ -60,6 +63,7 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 			this.data = this.data.concat(data);
 		}
 
+		this.data_dict = {};
 	}
 
 	freeze(toggle) {
@@ -76,7 +80,10 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 	}
 
 	render() {
+		this.data_dict = {};
 		this.render_image_view();
+
+		this.setup_quick_view();
 	}
 
 	render_image_view() {
@@ -94,6 +101,8 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 
 		this.$result.find('.image-view-container').append(html);
 	}
+
+	setup_quick_view() { }
 
 	render_offline_card() {
 		let html = `<div class='page-card'>
@@ -113,14 +122,6 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 	}
 }
 
-// erpnext.hub.OfflineView = class OfflineView extends erpnext.hub.HubListing {
-// 	constructor(opts) {
-// 		super(opts);
-
-
-// 	}
-// }
-
 erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 	constructor(opts) {
 		super(opts);
@@ -132,23 +133,30 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 		this.doctype = 'Hub Item';
 		this.fields = ['name', 'hub_item_code', 'image', 'item_name', 'item_code', 'company_name'];
 		this.filters = [];
+	}
+
+	setup_sort_selector() {
+		//
+	}
+
+	bootstrap_data(response) {
+		let companies = response.companies.map(d => d.name);
 		this.custom_filter_configs = [
 			{
-				fieldtype: 'Data',
-				label: 'Company',
+				fieldtype: 'Autocomplete',
+				label: __('Select Company'),
 				condition: 'like',
 				fieldname: 'company_name',
+				options: companies
 			},
 			{
 				fieldtype: 'Link',
-				label: 'Country',
+				label: __('Select Country'),
 				options: 'Country',
 				condition: 'like',
 				fieldname: 'country'
 			}
 		];
-
-		this.items_cache = {};
 	}
 
 	prepareFormFields() {
@@ -170,6 +178,18 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 					read_only,
 				};
 			});
+
+		this.formFields.unshift({
+			label: 'Category',
+			fieldname: 'hub_category',
+			fieldtype: 'Data'
+		});
+
+		this.formFields.unshift({
+			label: 'image',
+			fieldname: 'image',
+			fieldtype: 'Attach Image'
+		});
 	}
 
 	setup_side_bar() {
@@ -220,6 +240,14 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 		return filters;
 	}
 
+	update_data(r) {
+		super.update_data(r);
+
+		this.data_dict = {};
+		this.data.map(d => {
+			this.data_dict[d.hub_item_code] = d;
+		});
+	}
 
 	render_image_view() {
 		var html = this.data.map(this.item_html.bind(this)).join("");
@@ -234,9 +262,10 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 
 		this.data.map(this.load_image.bind(this));
 
-		console.log('data', this.data);
-
-		this.setup_quick_view();
+		this.data_dict = {};
+		this.data.map(d => {
+			this.data_dict[d.hub_item_code] = d;
+		});
 	}
 
 	get_header_html_skeleton(left = '', right = '') {
@@ -358,7 +387,8 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 	}
 
 	setup_quick_view() {
-		var me = this;
+		if(this.quick_view) return;
+
 		this.quick_view = new frappe.ui.Dialog({
 			title: 'Quick View',
 			fields: this.formFields
@@ -366,18 +396,33 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 		this.$result.on('click', '.btn.zoom-view', (e) => {
 			e.preventDefault();
 			e.stopPropagation();
-			console.log($(e.target), $(e.target).attr('data-name'));
 			var name = $(e.target).attr('data-name');
 			name = decodeURIComponent(name);
 
 			this.quick_view.set_title(name);
-			console.log(this.doc);
-
-			this.quick_view.set_values(this.data[0]);
+			let values = this.data_dict[name];
+			this.quick_view.set_values(values);
 
 			let fields = [];
-			// this.quick_view.add_fields();
-			me.quick_view.show();
+
+			this.quick_view.set_primary_action('Send', () => {
+				let category = this.quick_view.get_values().hub_category;
+				return new Promise((resolve, reject) => {
+					frappe.call({
+						method: 'erpnext.hub_node.update_category',
+						args: {
+							hub_item_code: values.hub_item_code,
+							category: category,
+						},
+						callback: (r) => {
+							resolve();
+						},
+						freeze: true
+					}).fail(reject);
+				});
+			});
+			this.quick_view.show();
+
 			return false;
 		});
 	}
