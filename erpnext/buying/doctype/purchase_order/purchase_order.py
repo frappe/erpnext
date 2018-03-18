@@ -128,11 +128,11 @@ class PurchaseOrder(BuyingController):
 		if hasattr(self,'workflow_state'):
 			self.flags.ignore_validate_update_after_submit = True
 			if self.workflow_state == "Rejected By CEO(tc)":
-				frappe.db.set_value("Purchase Order", self.name, "tc_name", self.old_tc_name)
-				frappe.db.set_value("Purchase Order", self.name,"terms", self.old_terms)
-				frappe.db.set_value("Purchase Order", self.name,"payment_plan", self.old_payment_plan)
-				frappe.db.set_value("Purchase Order", self.name,"shipment_terms", self.old_shipment_terms)
-				frappe.db.set_value("Purchase Order", self.name,"definitions", self.old_definitions)
+				frappe.db.set_value("Purchase Order", self.name, "tc_name", self.old_tc_name, update_modified=False)
+				frappe.db.set_value("Purchase Order", self.name,"terms", self.old_terms, update_modified=False)
+				frappe.db.set_value("Purchase Order", self.name,"payment_plan", self.old_payment_plan, update_modified=False)
+				frappe.db.set_value("Purchase Order", self.name,"shipment_terms", self.old_shipment_terms, update_modified=False)
+				frappe.db.set_value("Purchase Order", self.name,"definitions", self.old_definitions, update_modified=False)
 			
 
 	def vallidate_workflow_transition(self):

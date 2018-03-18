@@ -68,8 +68,8 @@ class LeaveApplication(Document):
 	def validate_leave_submission_dates(self):
 		if u'HR User' not in frappe.get_roles(frappe.session.user) and self.get('__islocal'):
 			if self.leave_type == "Annual Leave - اجازة اعتيادية":
-				if getdate(self.from_date) <=  getdate(nowdate()):
-					frappe.throw(_("The submission date must be before from date"))
+				if date_diff(nowdate(), self.from_date) > 3:
+					frappe.throw(_("Cannot apply for annual leave in same day"))
 			if self.leave_type == "emergency -اضطرارية":
 				if date_diff(nowdate(), self.from_date) > 3:
 					frappe.throw(_("The submission date must be less than or equal 3 days after leave start"))

@@ -56,32 +56,42 @@ def get_role_users(role):
 
     return users
 
-def save_user_notification(doc, user, status="Active", message="An Action should be taken"):
+def save_user_notification(doc, user, status="Active", message= None):
+	if not message : 
+		if hasattr(doc, 'workflow_state'):
+			message = "Workflow Status : %s"%(doc.workflow_state)
+		else:
+			message = "An Action should be taken"
+	frappe.get_doc({
+		"doctype": "User Notification",
+		"target_doctype": doc.doctype,
+		"target_docname": doc.name,
+		"status": status,
+		"user": user,
+		"message": message
+	}).save(ignore_permissions = True)
 
-    frappe.get_doc({
-        "doctype": "User Notification",
-        "target_doctype": doc.doctype,
-        "target_docname": doc.name,
-        "status": status,
-        "user": user,
-        "message": message
-    }).save(ignore_permissions = True)
-
-def add_message(doc, user, message="An Action should be taken by "):
+def add_message(doc, user, message=None):
     meta = frappe.get_meta(doc.doctype)
+    if not message : 
+		if hasattr(doc, 'workflow_state'):
+			message = "Workflow Status : %s"%(doc.workflow_state)
+		else:
+			message = "An Action should be taken"
     if not meta.get_field('notification_message'):
-            # create custom field
-        frappe.get_doc({
-            "doctype":"Custom Field",
-            "dt": doc.doctype,
-            "__islocal": 1,
-            "fieldname": "notification_message",
-            "bold": 1,
-            "label": "Message",
-            "read_only": 1,
-            "allow_on_submit": 1,
-            "fieldtype": "Text",
-        }).save(ignore_permissions = True)
-        frappe.db.commit()
+		frappe.get_doc({
+			"doctype":"Custom Field",
+			"dt": doc.doctype,
+			"__islocal": 1,
+			"fieldname": "notification_message",
+			"bold": 1,
+			"label": "Message",
+			"read_only": 1,
+			"allow_on_submit": 1,
+			"fieldtype": "Text"
+				}).save(ignore_permissions = True)
+		frappe.db.commit()
 
-    doc.notification_message = message
+    # doc.notification_message = message
+    frappe.db.set_value(doc.doctype, doc.name, "notification_message", message, update_modified=False)
+    doc.set("notification_message", message)
