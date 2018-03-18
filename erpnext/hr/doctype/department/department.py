@@ -30,6 +30,10 @@ class Department(Document):
 		pass
 
 	def add_roles_and_permissions(self):
+		# if self.director:
+		# 	user_emp = frappe.db.sql("select user_id from `tabEmployee` where name = '{0}'".format(self.director), as_dict = 1)
+		# 	ups = frappe.get_list("User permission", filters = {user: user_emp, allow: 'Department'}, fields=[self.name], ignore_permissions=True)
+		# 	for up in ups:
 		if self.director:
 			user_emp = frappe.db.sql("select user_id from `tabEmployee` where name = '{0}'".format(self.director), as_dict = 1)
 			user = frappe.get_doc("User", user_emp[0].user_id)
@@ -56,6 +60,12 @@ class Department(Document):
 			user = frappe.get_doc("User", user_emp[0].user_id)
 			user.add_roles("Line Manager")
 			frappe.permissions.add_user_permission ("Department", self.name, user_emp[0].user_id)
+
+	def get_departments(lft, rgt):
+		return frappe.db.sql("""
+			select name from `tabDepartment` where lft >= '{0}' and rgt <= '{1}'
+			""".format(lft, rgt))
+
 
 def add_departments():
 	dps = frappe.db.sql("select name from `tabDepartment` where parent_department = 'الادارة العليا'", as_dict = 1)

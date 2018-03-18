@@ -44,7 +44,8 @@ def get_sal_slip(employee,arabic_name):
 	for deductions in doc.deductions:
 		if deductions.salary_component =='GOSI':
 			gosi = [{'salary_component': 'GOSI', 'amount': deductions.amount }]
-
+		else:
+			gosi = []
 	doc.delete()
 
 	list_earning=[basic,housing,transportation,communication]

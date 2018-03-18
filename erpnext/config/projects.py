@@ -12,6 +12,11 @@ def get_data():
 					"name": "Project",
 					"description": _("Project master."),
 				},
+				# {
+				# 	"type": "doctype",
+				# 	"name": "Planning",
+				# 	"description": _("Project Planning."),
+				# },
 				{
 					"type": "doctype",
 					"name": "Task",

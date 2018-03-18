@@ -240,6 +240,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 
+		// console.log(item);
+
 		// clear barcode if setting item (else barcode will take priority)
 		if(!from_barcode) {
 			item.barcode = null;
@@ -261,8 +263,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							supplier: me.frm.doc.supplier,
 							currency: me.frm.doc.currency,
 							conversion_rate: me.frm.doc.conversion_rate,
-							price_list: me.frm.doc.selling_price_list ||
-								 me.frm.doc.buying_price_list,
+							price_list: me.frm.doc.selling_price_list || me.frm.doc.buying_price_list,
 							price_list_currency: me.frm.doc.price_list_currency,
 							plc_conversion_rate: me.frm.doc.plc_conversion_rate,
 							company: me.frm.doc.company,
@@ -281,6 +282,40 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					callback: function(r) {
 						if(!r.exc) {
 							me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
+							if(r.message){
+								var df = frappe.meta.get_docfield(r.message.doctype + " Item", "warehouse", r.message.name);
+								if (r.message.is_fixed_asset === 1){
+									df.hidden = 1;
+									me.frm.refresh_field("items");
+								}
+								else{
+									df.hidden = 0;
+									me.frm.refresh_field("items");
+								}
+								if (r.message.expense_account || r.message.income_account){
+									// console.log(r.message.expense_account + " --- " + r.message.income_account);
+									var account = r.message.expense_account || r.message.income_account;
+									frappe.call({
+								        "method": "frappe.client.get_value",
+								        "args": {
+								            "doctype": "Account",
+								            "filters":{"name": account},
+								            "fieldname": "account_type"
+								        },
+								        callback: function(r){
+								            // console.log(r.message);
+								            if (!r.exc) {
+								                if (r.message){
+								                    me.frm.fields_dict.items.grid.toggle_reqd("cost_center", (r.message.account_type == "Expense Account") || (r.message.account_type == "Income Account"));
+								                }
+								                else{
+								                    me.frm.fields_dict.items.grid.toggle_reqd("cost_center", false);
+								                }
+								            }
+								        }
+    								}); 
+								}
+							}
 						}
 					}
 				});

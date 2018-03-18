@@ -79,15 +79,28 @@ class MaterialRequest(BuyingController):
 		self.validate_emp_requester()
 		self.validate_project_manager()
 		self.validate_project()
+		self.validate_project_items()
 		# self.set_title()
 		if self.get("__islocal") :
 				self.title = self.get_title()
 				self.set_user_emp()
-				
+	
+	def validate_project_items(self):
+		if self.project : 
+			warehouse = frappe.db.get_value("Project", self.project, "default_warehouse")
+			if not warehouse :
+				frappe.throw(_("Set Default Warehouse in Project %s"%self.project))
+			else:
+				for row in self.get("items"):
+					if not row.warehouse :
+						row.warehouse = warehouse
+					elif row.warehouse !=warehouse : 
+						frappe.throw(_("Bad Warehouse in row  %s default warehouse is %s"%(row.idx,warehouse)))
+					
 	def get_title(self):
 		from frappe.utils import getdate
 		
-		namming =frappe.get_list("Enhanced Nameing Doc", fields=["name","name_of_doc", "index_value","year"],filters={"year": str(getdate(self.posting_date).year),"name_of_doc":self.doctype},ignore_permissions=True)
+		namming =frappe.get_list("Enhanced Nameing Doc", fields=["name","name_of_doc", "index_value","year"],filters={"year": str(getdate(self.posting_date).year),"name_of_doc":self.doctype,"naming_series":self.naming_series},ignore_permissions=True)
 		if namming :
 			#~ title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ self.name[len(self.naming_series):]
 			title =self.name[:len(self.naming_series)] + str(getdate(self.posting_date).year) +"-"+ str(namming[0]["index_value"]+1).zfill(5)
@@ -105,6 +118,7 @@ class MaterialRequest(BuyingController):
 			nammeing_doc.index_value = 1
 			nammeing_doc.year = str(getdate(self.posting_date).year)
 			nammeing_doc.name_of_doc = self.doctype
+			nammeing_doc.naming_series = self.naming_series
 			nammeing_doc.save()
 			return title
 
@@ -122,7 +136,7 @@ class MaterialRequest(BuyingController):
 					self.workflow_state = "Pending"
 
 	def unallowed_actions(self):
-		if self.state == "Rejected":
+		if self.state == "To Modify" or self.state == "Rejected":	
 			employee_user = frappe.get_value("Employee", filters = {"name": self.material_requester}, fieldname="user_id")
 			if employee_user != frappe.session.user:
 				return True
@@ -139,8 +153,12 @@ class MaterialRequest(BuyingController):
 	# 	if self.workflow_state:
 	# 		if self.workflow_state == "Pending" or self.workflow_state == "Modified":
 	# 			if u'Director' in frappe.get_roles(frappe.session.user):
-	def validate_director(self):
-		pass
+	def validate_director_actions(self):
+		if hasattr(self,'workflow_state'):
+			if "Director" in frappe.get_roles(frappe.session.user) and not self.project:
+				pu = frappe.get_value("User Permission", filters = {"allow": "Department", "for_value": self.department}, fieldname = "user")
+				if pu != frappe.session.user:
+					return True
 
 		# if u'Director' in frappe.get_roles(frappe.session.user) and self.purchase_workflow != "Project" and self.workflow_state == "Approved By Project Budget Controller":
 		# 	if frappe.permissions.has_permission("Department", ptype='read', doc=self.department, verbose=False, user=frappe.session.user):
@@ -181,8 +199,7 @@ class MaterialRequest(BuyingController):
 			doctype='User Permission',
 			user=user_emp[0].user_id,
 			allow="Material Request",
-			for_value=self.name,
-			apply_for_all_roles=apply
+			for_value=self.name
 			)).insert(ignore_permissions = True)
 			# user = frappe.get_doc("User", user_emp[0].user_id)
 			# frappe.permissions.add_user_permission("Material Request", self.name, user_emp[0].user_id, apply=False)

@@ -3,12 +3,12 @@
 
 {% include 'erpnext/buying/doctype/purchase_common/purchase_common.js' %};
 cur_frm.add_fetch("material_requester", "department", "department");
-// cur_frm.add_fetch("material_requester", "user_id", "user_id");
+cur_frm.add_fetch("project", "default_warehouse", "default_warehouse");
 frappe.ui.form.on('Material Request', {
 
     refresh: function(frm) {
 
-        if (cur_frm.doc.__islocal || (cur_frm.doc.state == "Modified" && cur_frm.doc.user_id == frappe.session.user)) {
+        if (cur_frm.doc.__islocal || (cur_frm.doc.state == "To Modify" && cur_frm.doc.user_id == frappe.session.user)) {
             for (var key in cur_frm.fields_dict) {
                 cur_frm.set_df_property(key, "read_only", 0);
                 // cur_frm.fields_dict[key].df.read_only = 0;
@@ -18,6 +18,7 @@ frappe.ui.form.on('Material Request', {
             cur_frm.set_df_property("state", "read_only", 1);
             cur_frm.set_df_property("suggested_grand_total", "read_only", 1);
             cur_frm.set_df_property("handled_by", "read_only", 1);
+            cur_frm.set_df_property("rejection_reason", "read_only", 1);
         }
         else {
             for (var key in cur_frm.fields_dict) {
@@ -26,19 +27,36 @@ frappe.ui.form.on('Material Request', {
             }
             // cur_frm.save();
             cur_frm.disable_save();
+            // cur_frm.reload_doc();
         }
         cur_frm.toggle_display("project", cur_frm.doc.purchase_workflow == "Project");
+        cur_frm.toggle_display("default_warehouse", cur_frm.doc.purchase_workflow == "Project");
+
         frappe.call({
             method: "unallowed_actions",
             doc: cur_frm.doc,
             freeze: true,
             callback: function(r) {
+                // console.log(r.message);
                 if (r.message && frappe.session.user != "Administrator") {
                     cur_frm.page.clear_actions_menu();
                 }
             }
         });
-       },
+        if(cur_frm.doc.workflow_state && (cur_frm.doc.workflow_state == "Pending" || cur_frm.doc.workflow_state == "Modified")){
+            frappe.call({
+                method: "validate_director_actions",
+                doc: cur_frm.doc,
+                freeze: true,
+                callback: function(r) {
+                    // console.log(r.message);
+                    if (r.message && frappe.session.user != "Administrator") {
+                        cur_frm.page.clear_actions_menu();
+                    }
+                }
+            });
+        }
+    },
     setup: function(frm) {
         // if ((cur_frm.doc.state == "Initiated" || cur_frm.doc.state == "Rejected") && (!cur_frm.doc.__islocal)){
         //     frappe.call({
@@ -82,9 +100,16 @@ frappe.ui.form.on('Material Request', {
         frm.clear_table("items");
         refresh_many(['items']);
         frm.set_value("project", undefined);
+        frm.set_value("default_warehouse", undefined);
         frm.toggle_display("project", frm.doc.purchase_workflow == "Project");
+        frm.toggle_display("default_warehouse", frm.doc.purchase_workflow == "Project");
         frm.toggle_reqd("project", frm.doc.purchase_workflow == "Project");
+        frm.toggle_reqd("default_warehouse", frm.doc.purchase_workflow == "Project");
+        
         frm.refresh_field('project');
+        frm.refresh_field('warehouse');
+        frm.refresh_field('default_warehouse');
+        frm.set_df_property("default_warehouse", "read_only", 1);
         if (frm.doc.purchase_workflow == "Project") {
             frappe.call({
                 method: "get_project_manager",
@@ -127,8 +152,8 @@ frappe.ui.form.on('Material Request', {
             }
             return {
                 filters: {
-                    "project_manager": frm.doc.material_requester,
-                    "status": "Open"
+                    "project_manager": frm.doc.material_requester
+                    // "status": "Open"
                 }
 
             }
@@ -145,7 +170,76 @@ frappe.ui.form.on('Material Request', {
                     filters: { 'company': cur_frm.doc.company }
                 }
             }
+    },
+
+    after_save: function(frm, cdt, cdn){
+        if (frm.doc.workflow_state && frm.doc.workflow_state.indexOf("Rejected") != -1){
+
+            frappe.prompt([
+                {
+                    fieldtype: 'Small Text',
+                    reqd: true,
+                    fieldname: 'reason'
+                }],
+                function(args){
+                    validated = true;
+                    frappe.call({
+                        method: 'frappe.core.doctype.communication.email.make',
+                        args: {
+                            doctype: frm.doctype,
+                            name: frm.docname,
+                            subject: format(__('Reason for {0}'), [frm.doc.workflow_state]),
+                            content: args.reason,
+                            send_mail: false,
+                            send_me_a_copy: false,
+                            communication_medium: 'Other',
+                            sent_or_received: 'Sent'
+                        },
+                        callback: function(res){
+                            if (res && !res.exc){
+                                frappe.call({
+                                    method: 'frappe.client.set_value',
+                                    args: {
+                                        doctype: frm.doctype,
+                                        name: frm.docname,
+                                        fieldname: 'rejection_reason',
+                                        value: args.reason
+                                    },
+                                    callback: function(res){
+                                        if (res && !res.exc){
+                                            // if (cur_frm.doc.workflow_state == "Rejected By CEO(tc)"){
+                                            //  cur_frm.set_value("tc_name", cur_frm.doc.old_tc_name);
+                                            //  cur_frm.set_value("terms", cur_frm.doc.old_terms);
+                                            //  cur_frm.set_value("payment_plan", cur_frm.doc.old_payment_plan);
+                                            //  cur_frm.set_value("shipment_terms", cur_frm.doc.old_shipment_terms);
+                                            //  cur_frm.set_value("definitions", cur_frm.doc.old_definitions);
+                                            // }
+                                            frm.reload_doc();
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                },
+                __('Reason for ') + __(frm.doc.workflow_state),
+                __('End as Rejected')
+            )
+        }
+
+        frappe.call({
+            method: "unallowed_actions",
+            doc: cur_frm.doc,
+            freeze: true,
+            callback: function(r) {
+                // console.log(r.message);
+                if (r.message && frappe.session.user != "Administrator") {
+                    cur_frm.page.clear_actions_menu();
+                }
+            }
+        });
     }
+
 });
 
 frappe.ui.form.on("Material Request Item", {
@@ -154,7 +248,24 @@ frappe.ui.form.on("Material Request Item", {
         if (flt(d.qty) < flt(d.min_order_qty)) {
             alert(__("Warning: Material Requested Qty is less than Minimum Order Qty"));
         }
-    }
+    },
+    items_add: function(frm, doctype, name) {
+		var row = locals[doctype][name];
+		console.log("ASD",frm.doc.default_warehouse)
+		if(frm.doc.default_warehouse) {
+			row.warehouse = frm.doc.default_warehouse;
+			frm.refresh_field("warehouse", name, "items");
+		} else {
+			frm.script_manager.copy_from_first_row("items", row, ["default_warehouse"]);
+		}
+		console.log("ASD2",frm.doc.project)
+		if(frm.doc.project) {
+			row.project = frm.doc.project;
+			frm.refresh_field("project", name, "items");
+		} else {
+			frm.script_manager.copy_from_first_row("items", row, ["project"]);
+		}
+   },
 });
 
 erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.extend({
@@ -406,24 +517,23 @@ cur_frm.cscript.custom_qty = cur_frm.cscript.custom_suggested_price_per_unit = f
     cur_frm.set_value("suggested_grand_total", val);
 }
 cur_frm.cscript.custom_item_code = function(doc, cdt, cdn){
-    var d = locals[cdt][cdn];
-    if (cur_frm.doc.project){
-        frappe.call({
-            method: "frappe.client.get_list",
-            args: {
-                doctype: "Project",
-                fields: ["name", "default_warehouse"],
-                filters: { "name": cur_frm.doc.project }
-            },
-            callback: function(r, rt) {
-                console.log(r.message);
-                if (r.message) {
-                    frappe.model.set_value(d.doctype, d.name, "project", r.message[0].name);
-                    frappe.model.set_value(d.doctype, d.name, "warehouse", r.message[0].default_warehouse);
-                }
-            }
-        });
-    }
+     var d = locals[cdt][cdn];
+     if (cur_frm.doc.project){
+         frappe.call({
+             method: "frappe.client.get_list",
+             args: {
+                 doctype: "Project",
+                 fields: ["name", "default_warehouse"],
+                 filters: { "name": cur_frm.doc.project }
+             },
+             callback: function(r, rt) {
+                 if (r.message) {
+                     frappe.model.set_value(d.doctype, d.name, "project", r.message[0].name);
+                     frappe.model.set_value(d.doctype, d.name, "warehouse", r.message[0].default_warehouse);
+                 }
+             }
+         });
+     }
 }
 
 // frappe.ui.form.on("Material Request", "validate", function (frm) {

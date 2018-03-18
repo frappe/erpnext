@@ -173,7 +173,7 @@ class Item(WebsiteGenerator):
 
 		if default_warehouse:
 			stock_entry = make_stock_entry(item_code=self.name, target=default_warehouse,
-				qty=self.opening_stock, rate=self.valuation_rate)
+				qty=self.opening_stock, rate=self.valuation_rate , cost_center = self.cost_center)
 
 			stock_entry.add_comment("Comment", _("Opening Stock"))
 

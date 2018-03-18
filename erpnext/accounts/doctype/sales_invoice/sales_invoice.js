@@ -454,7 +454,9 @@ cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function(
 }
 
 cur_frm.cscript.income_account = function(doc, cdt, cdn) {
+	var d = locals[cdt][cdn];
 	erpnext.utils.copy_value_in_all_row(doc, cdt, cdn, "items", "income_account");
+	check_account_type_for_mandatory(d);
 }
 
 cur_frm.cscript.expense_account = function(doc, cdt, cdn) {
@@ -480,6 +482,28 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	} else if(cint(frappe.boot.notification_settings.sales_invoice)) {
 		cur_frm.email_doc(frappe.boot.notification_settings.sales_invoice_message);
 	}
+}
+
+function check_account_type_for_mandatory(d){
+    frappe.call({
+        "method": "frappe.client.get_value",
+        "args": {
+            "doctype": "Account",
+            "filters":{"name": d.income_account},
+            "fieldname": "account_type"
+        },
+        callback: function(r){
+            console.log(r.message);
+            if (!r.exc) {
+                if (r.message){
+                    cur_frm.fields_dict.items.grid.toggle_reqd("cost_center", r.message.account_type == "Income Account");
+                }
+                else{
+                    cur_frm.fields_dict.items.grid.toggle_reqd("cost_center", false);
+                }
+            }
+        }
+    }); 
 }
 
 cur_frm.set_query("debit_to", function(doc) {

@@ -181,7 +181,16 @@ $.extend(erpnext.item, {
 		frm.fields_dict['item_group'].get_query = function(doc, cdt, cdn) {
 			return {
 				filters: [
-					['Item Group', 'docstatus', '!=', 2]
+					['Item Group', 'docstatus', '!=', 2],
+					['Item Group', 'is_group', '=', 0],
+				]
+			}
+		}
+		
+		frm.fields_dict['cost_center'].get_query = function(doc, cdt, cdn) {
+			return {
+				filters: [
+					['Cost Center', 'is_group', '=', 0],
 				]
 			}
 		}

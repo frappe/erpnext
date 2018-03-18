@@ -254,7 +254,7 @@ frappe.ui.form.on("Leave Application", {
                     callback: function(r) {
                         if (frm.doc.docstatus != 1) {
                             frm.set_value('monthly_accumulated_leave_balance', r.message);
-                            console.log(r);
+                            // console.log(r);
                         }
                     }
                 });

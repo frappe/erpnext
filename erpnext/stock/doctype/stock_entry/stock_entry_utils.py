@@ -59,6 +59,8 @@ def make_stock_entry(**args):
 	s.sales_invoice_no = args.sales_invoice_no
 	if not args.cost_center:
 		args.cost_center = frappe.get_value('Company', s.company, 'cost_center')
+		if not args.cost_center:
+			frappe.throw("Please Add Default Cost Center to Company")
 
 	s.append("items", {
 		"item_code": args.item,
