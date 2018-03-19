@@ -122,7 +122,7 @@ def get_availability_data(date, physician):
 
 				if available_slots:
 					appointments = []
-					
+
 					if schedule.service_unit:
 						slot_name  = schedule.schedule+" - "+schedule.service_unit
 						allow_overlap = frappe.get_value('Patient Service Unit', schedule.service_unit, 'overlap_appointments')
@@ -202,7 +202,10 @@ def invoice_appointment(appointment_doc):
 	sales_invoice.debit_to = get_receivable_account(appointment_doc.company)
 
 	fee_validity = get_fee_validity(appointment_doc.physician, appointment_doc.patient, appointment_doc.appointment_date)
-	create_invoice_items(appointment_doc.physician, appointment_doc.company, sales_invoice)
+	procedure_template = False
+	if appointment_doc.procedure_template:
+		procedure_template = appointment_doc.procedure_template
+	create_invoice_items(appointment_doc.physician, appointment_doc.company, sales_invoice, procedure_template)
 
 	sales_invoice.save(ignore_permissions=True)
 	frappe.db.sql("""update `tabPatient Appointment` set sales_invoice=%s where name=%s""", (sales_invoice.name, appointment_doc.name))
@@ -256,18 +259,26 @@ def create_fee_validity(physician, patient, date):
 	return fee_validity
 
 
-def create_invoice_items(physician, company, invoice):
+def create_invoice_items(physician, company, invoice, procedure_template):
 	item_line = invoice.append("items")
-	item_line.item_name = "Consulting Charges"
-	item_line.description = "Consulting Charges:  " + physician
+	if procedure_template:
+		procedure_template_obj = frappe.get_doc("Clinical Procedure Template", procedure_template)
+		item_line.item_code = procedure_template_obj.item_code
+		item_line.item_name = procedure_template_obj.template
+		item_line.description = procedure_template_obj.description
+	else:
+		item_line.item_name = "Consulting Charges"
+		item_line.description = "Consulting Charges:  " + physician
+		item_line.uom = "Nos"
+		item_line.conversion_factor = 1
+		item_line.income_account = get_income_account(physician, company)
+		op_consulting_charge = frappe.db.get_value("Physician", physician, "op_consulting_charge")
+		if op_consulting_charge:
+			item_line.rate = op_consulting_charge
+			item_line.amount = op_consulting_charge
 	item_line.qty = 1
-	item_line.uom = "Nos"
-	item_line.conversion_factor = 1
-	item_line.income_account = get_income_account(physician, company)
-	op_consulting_charge = frappe.db.get_value("Physician", physician, "op_consulting_charge")
-	if op_consulting_charge:
-		item_line.rate = op_consulting_charge
-		item_line.amount = op_consulting_charge
+
+
 	return invoice
 
 
