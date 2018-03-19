@@ -30,6 +30,8 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 
 	set_breadcrumbs() { }
 
+	prepareFormFields() { }
+
 	bootstrap_data() { }
 
 	setup_side_bar() {
@@ -119,134 +121,6 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 		page.append(html);
 
 		return;
-	}
-}
-
-erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
-	constructor(opts) {
-		super(opts);
-		this.show();
-	}
-
-	setup_defaults() {
-		super.setup_defaults();
-		this.doctype = 'Hub Item';
-		this.fields = ['name', 'hub_item_code', 'image', 'item_name', 'item_code', 'company_name'];
-		this.filters = [];
-	}
-
-	setup_sort_selector() {
-		//
-	}
-
-	bootstrap_data(response) {
-		let companies = response.companies.map(d => d.name);
-		this.custom_filter_configs = [
-			{
-				fieldtype: 'Autocomplete',
-				label: __('Select Company'),
-				condition: 'like',
-				fieldname: 'company_name',
-				options: companies
-			},
-			{
-				fieldtype: 'Link',
-				label: __('Select Country'),
-				options: 'Country',
-				condition: 'like',
-				fieldname: 'country'
-			}
-		];
-	}
-
-	prepareFormFields() {
-		let fieldnames = ['hub_item_code', 'item_name', 'item_code', 'description',
-			'seller', 'company_name', 'country'];
-		this.formFields = this.meta.fields
-			.filter(field => fieldnames.includes(field.fieldname))
-			.map(field => {
-				let {
-					label,
-					fieldname,
-					fieldtype,
-				} = field;
-				let read_only = 1;
-				return {
-					label,
-					fieldname,
-					fieldtype,
-					read_only,
-				};
-			});
-
-		this.formFields.unshift({
-			label: 'Category',
-			fieldname: 'hub_category',
-			fieldtype: 'Data'
-		});
-
-		this.formFields.unshift({
-			label: 'image',
-			fieldname: 'image',
-			fieldtype: 'Attach Image'
-		});
-	}
-
-	setup_side_bar() {
-		super.setup_side_bar();
-		this.category_tree = new frappe.ui.Tree({
-			parent: this.sidebar.$sidebar,
-			label: 'All Categories',
-			expandable: true,
-
-			args: {parent: this.current_category},
-			method: 'erpnext.hub_node.get_categories',
-			on_click: (node) => {
-				this.update_category(node.label);
-			}
-		});
-
-		this.sidebar.add_item({
-			label: __('Companies'),
-			on_click: () => frappe.set_route('Hub', 'Company')
-		});
-
-		this.sidebar.add_item({
-			label: this.hub_settings.company,
-			on_click: () => frappe.set_route('Form', 'Company', this.hub_settings.company)
-		}, __("Account"));
-
-		this.sidebar.add_item({
-			label: __("My Orders"),
-			on_click: () => frappe.set_route('List', 'Request for Quotation')
-		}, __("Account"));
-	}
-
-	update_category(label) {
-		this.current_category = (label=='All Categories') ? undefined : label;
-		this.refresh();
-	}
-
-	get_filters_for_args() {
-		if(!this.filter_area) return;
-		let filters = {};
-		this.filter_area.get().forEach(f => {
-			let field = f[1] !== 'name' ? f[1] : 'item_name';
-			filters[field] = [f[2], f[3]];
-		});
-		if(this.current_category) {
-			filters['hub_category'] = this.current_category;
-		}
-		return filters;
-	}
-
-	update_data(r) {
-		super.update_data(r);
-
-		this.data_dict = {};
-		this.data.map(d => {
-			this.data_dict[d.hub_item_code] = d;
-		});
 	}
 
 	render_image_view() {
@@ -385,6 +259,136 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 
 		return item_html;
 	}
+
+}
+
+erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
+	constructor(opts) {
+		super(opts);
+		this.show();
+	}
+
+	setup_defaults() {
+		super.setup_defaults();
+		this.doctype = 'Hub Item';
+		this.fields = ['name', 'hub_item_code', 'image', 'item_name', 'item_code', 'company_name'];
+		this.filters = [];
+	}
+
+	setup_sort_selector() {
+		//
+	}
+
+	bootstrap_data(response) {
+		let companies = response.companies.map(d => d.name);
+		this.custom_filter_configs = [
+			{
+				fieldtype: 'Autocomplete',
+				label: __('Select Company'),
+				condition: 'like',
+				fieldname: 'company_name',
+				options: companies
+			},
+			{
+				fieldtype: 'Link',
+				label: __('Select Country'),
+				options: 'Country',
+				condition: 'like',
+				fieldname: 'country'
+			}
+		];
+	}
+
+	prepareFormFields() {
+		let fieldnames = ['hub_item_code', 'item_name', 'item_code', 'description',
+			'seller', 'company_name', 'country'];
+		this.formFields = this.meta.fields
+			.filter(field => fieldnames.includes(field.fieldname))
+			.map(field => {
+				let {
+					label,
+					fieldname,
+					fieldtype,
+				} = field;
+				let read_only = 1;
+				return {
+					label,
+					fieldname,
+					fieldtype,
+					read_only,
+				};
+			});
+
+		this.formFields.unshift({
+			label: 'Category',
+			fieldname: 'hub_category',
+			fieldtype: 'Data'
+		});
+
+		this.formFields.unshift({
+			label: 'image',
+			fieldname: 'image',
+			fieldtype: 'Attach Image'
+		});
+	}
+
+	setup_side_bar() {
+		super.setup_side_bar();
+		this.category_tree = new frappe.ui.Tree({
+			parent: this.sidebar.$sidebar,
+			label: 'All Categories',
+			expandable: true,
+
+			args: {parent: this.current_category},
+			method: 'erpnext.hub_node.get_categories',
+			on_click: (node) => {
+				this.update_category(node.label);
+			}
+		});
+
+		this.sidebar.add_item({
+			label: __('Companies'),
+			on_click: () => frappe.set_route('Hub', 'Company')
+		});
+
+		this.sidebar.add_item({
+			label: this.hub_settings.company,
+			on_click: () => frappe.set_route('Form', 'Company', this.hub_settings.company)
+		}, __("Account"));
+
+		this.sidebar.add_item({
+			label: __("My Orders"),
+			on_click: () => frappe.set_route('List', 'Request for Quotation')
+		}, __("Account"));
+	}
+
+	update_category(label) {
+		this.current_category = (label=='All Categories') ? undefined : label;
+		this.refresh();
+	}
+
+	get_filters_for_args() {
+		if(!this.filter_area) return;
+		let filters = {};
+		this.filter_area.get().forEach(f => {
+			let field = f[1] !== 'name' ? f[1] : 'item_name';
+			filters[field] = [f[2], f[3]];
+		});
+		if(this.current_category) {
+			filters['hub_category'] = this.current_category;
+		}
+		return filters;
+	}
+
+	update_data(r) {
+		super.update_data(r);
+
+		this.data_dict = {};
+		this.data.map(d => {
+			this.data_dict[d.hub_item_code] = d;
+		});
+	}
+
 
 	setup_quick_view() {
 		if(this.quick_view) return;
