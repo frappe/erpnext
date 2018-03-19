@@ -50,7 +50,7 @@ frappe.ui.form.on("Timesheet", {
 			}
 		}
 
-		if (frm.doc.total_hours) {
+		if (frm.doc.total_hours && frm.doc.docstatus < 2) {
 			frm.add_custom_button(__('Start Timer'), function() {
 				frm.trigger("timer")
 			}).addClass("btn-primary");
@@ -78,7 +78,6 @@ frappe.ui.form.on("Timesheet", {
 					"options": frm.doc.time_logs.map(d => d.hours)}
 			]
 		});
-
 		dialog.wrapper.append(frappe.render_template("timesheet"));
 		frm.trigger("control_timer");
 		dialog.show();
@@ -93,6 +92,10 @@ frappe.ui.form.on("Timesheet", {
 		var paused_time = 0;
 
 		$(".playpause").click(function(e) {
+			if (!cur_dialog.get_value('activity')) {
+				frappe.msgprint(__("Please select Activity"));
+				return false;
+			}
 			if (clicked) {
 				e.preventDefault();
 				return false;
@@ -120,6 +123,7 @@ frappe.ui.form.on("Timesheet", {
 		});
 
 		$(".stop").click(function() {
+			console.log(currentIncrement);
 			reset();
 		});
 
@@ -146,6 +150,7 @@ frappe.ui.form.on("Timesheet", {
 			if(cur_dialog && cur_dialog.get_value('hours') == hours) {
 				isPaused = true;
 				initialised = false;
+				frappe.utils.play_sound("alert");
 				frappe.msgprint(__("Timer exceeded the given hours"));
 			}
 			$(".hours").text(hours < 10 ? ("0" + hours.toString()) : hours.toString());
