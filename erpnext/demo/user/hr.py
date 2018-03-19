@@ -7,7 +7,7 @@ from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
 from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_sales_invoice
 from frappe.utils.make_random import get_random
 from erpnext.hr.doctype.expense_claim.test_expense_claim import get_payable_account
-from erpnext.hr.doctype.expense_claim.expense_claim import get_expense_approver, make_bank_entry
+from erpnext.hr.doctype.expense_claim.expense_claim import make_bank_entry
 from erpnext.hr.doctype.leave_application.leave_application import (get_leave_balance_on,
 	OverlapError, AttendanceAlreadyMarkedError)
 
@@ -55,13 +55,11 @@ def work():
 		expense_claim.company = frappe.flags.company
 		expense_claim.payable_account = get_payable_account(expense_claim.company)
 		expense_claim.posting_date = frappe.flags.current_date
-		expense_claim.exp_approver = filter((lambda x: x[0] != 'Administrator'), get_expense_approver(None, '', None, 0, 20, None))[0][0]
 		expense_claim.insert()
 
 		rand = random.random()
 
 		if rand < 0.4:
-			expense_claim.approval_status = "Approved"
 			update_sanctioned_amount(expense_claim)
 			expense_claim.submit()
 
@@ -73,10 +71,6 @@ def work():
 				je.cheque_date = frappe.flags.current_date
 				je.flags.ignore_permissions = 1
 				je.submit()
-
-		elif rand < 0.2:
-			expense_claim.approval_status = "Rejected"
-			expense_claim.submit()
 
 def get_expenses():
 	expenses = []
@@ -172,7 +166,6 @@ def make_leave_application():
 				"from_date": frappe.flags.current_date,
 				"to_date": to_date,
 				"leave_type": allocated_leave.leave_type,
-				"status": "Approved"
 			})
 			try:
 				leave_application.insert()
@@ -191,8 +184,9 @@ def mark_attendance():
 				"employee": employee.name,
 				"attendance_date": attendance_date
 			})
+
 			leave = frappe.db.sql("""select name from `tabLeave Application`
-				where employee = %s and %s between from_date and to_date and workflow_state = 'Approved'
+				where employee = %s and %s between from_date and to_date
 				and docstatus = 1""", (employee.name, attendance_date))
 
 			if leave:

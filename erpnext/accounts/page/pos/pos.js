@@ -301,6 +301,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.customers = r.message.customers;
 		this.serial_no_data = r.message.serial_no_data;
 		this.batch_no_data = r.message.batch_no_data;
+		this.barcode_data = r.message.barcode_data;
 		this.tax_data = r.message.tax_data;
 		this.contacts = r.message.contacts;
 		this.address = r.message.address || {};
@@ -393,7 +394,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.frm = {}
 		this.frm.doc = this.doc
 		this.set_transaction_defaults("Customer");
-		this.frm.doc["allow_user_to_edit_rate"] = this.pos_profile_data["allow_user_to_edit_rate"] ? true : false,
+		this.frm.doc["allow_user_to_edit_rate"] = this.pos_profile_data["allow_user_to_edit_rate"] ? true : false;
+		this.frm.doc["allow_user_to_edit_discount"] = this.pos_profile_data["allow_user_to_edit_discount"] ? true : false;
 		this.wrapper.html(frappe.render_template("pos", this.frm.doc));
 		this.make_search();
 		this.make_customer();
@@ -415,7 +417,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		});
 
 		this.serach_item.make_input();
-		
+
 		this.serach_item.$input.on("keypress", function (event) {
 
 			clearTimeout(me.last_search_timeout);
@@ -423,7 +425,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				if((me.serach_item.$input.val() != "") || (event.which == 13)) {
 					me.items = me.get_items();
 					me.make_item_list();
-				}				
+				}
 			}, 400);
 		});
 
@@ -1110,9 +1112,9 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 						search_status = false;
 						me.item_serial_no[item.item_code] = [me.serach_item.$input.val(), me.serial_no_data[item.item_code][me.serach_item.$input.val()]]
 						return true
-					} else if (item.barcode == me.serach_item.$input.val()) {
+					} else if (in_list(me.barcode_data[item.item_code], me.serach_item.$input.val())) {
 						search_status = false;
-						return item.barcode == me.serach_item.$input.val();
+						return true;
 					} else if (reg.test(item.item_code.toLowerCase()) || (item.description && reg.test(item.description.toLowerCase())) ||
 						reg.test(item.item_name.toLowerCase()) || reg.test(item.item_group.toLowerCase())) {
 						return true
@@ -1256,6 +1258,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		$(this.wrapper).find('.selected-item').empty();
 		if(this.child_doc.length) {
 			this.child_doc[0]["allow_user_to_edit_rate"] = this.pos_profile_data["allow_user_to_edit_rate"] ? true : false,
+			this.child_doc[0]["allow_user_to_edit_discount"] = this.pos_profile_data["allow_user_to_edit_discount"] ? true : false;
 			this.selected_row = $(frappe.render_template("pos_selected_item", this.child_doc[0]))
 			$(this.wrapper).find('.selected-item').html(this.selected_row)
 		}
@@ -1526,8 +1529,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				me.print_document(html)
 			})
 		}
-		
-		if (this.frm.doc.docstatus == 1) {	
+
+		if (this.frm.doc.docstatus == 1) {
 			this.page.add_menu_item(__("Email"), function () {
 				me.email_prompt()
 			})
@@ -1691,7 +1694,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		setInterval(function () {
 			me.freeze_screen = false;
 			me.sync_sales_invoice()
-		}, 60000)
+		}, 180000)
 	},
 
 	sync_sales_invoice: function () {

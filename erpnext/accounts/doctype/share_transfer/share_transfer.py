@@ -4,8 +4,12 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming   import make_autoname
+from frappe.exceptions import ValidationError
+
+class ShareDontExists(ValidationError): pass
 
 class ShareTransfer(Document):
 	def before_save(self):
@@ -66,44 +70,45 @@ class ShareTransfer(Document):
 			# validate share doesnt exist in company
 			ret_val = self.share_exists(self.get_shareholder_doc(self.company).name)
 			if ret_val != False:
-				frappe.throw('The shares already exist')
+				frappe.throw(_('The shares already exist'), frappe.DuplicateEntryError)
 		else:
 			# validate share exists with from_shareholder
 			ret_val = self.share_exists(self.from_shareholder)
 			if ret_val != True:
-				frappe.throw('The shares don\'t exist with the {0}'.format(self.from_shareholder))
+				frappe.throw(_("The shares don't exist with the {0}")
+					.format(self.from_shareholder), ShareDontExists)
 
 	def basic_validations(self):
 		if self.transfer_type == 'Purchase':
 			self.to_shareholder = ''
 			if self.from_shareholder is None or self.from_shareholder is '':
-				frappe.throw('The field \'From Shareholder\' cannot be blank')
+				frappe.throw(_('The field From Shareholder cannot be blank'))
 			if self.from_folio_no is None or self.from_folio_no is '':
 				self.to_folio_no = self.autoname_folio(self.to_shareholder)
 		elif (self.transfer_type == 'Issue'):
 			self.from_shareholder = ''
 			if self.to_shareholder is None or self.to_shareholder == '':
-				frappe.throw('The field \'To Shareholder\' cannot be blank')
+				frappe.throw(_('The field To Shareholder cannot be blank'))
 			if self.to_folio_no is None or self.to_folio_no is '':
 				self.to_folio_no = self.autoname_folio(self.to_shareholder)
 		else:
 			if self.from_shareholder is None or self.to_shareholder is None:
-				frappe.throw('The fields \'From Shareholder\' and \'To Shareholder\' cannot be blank')
+				frappe.throw(_('The fields From Shareholder and To Shareholder cannot be blank'))
 			if self.to_folio_no is None or self.to_folio_no is '':
 				self.to_folio_no = self.autoname_folio(self.to_shareholder)
 		if self.from_shareholder == self.to_shareholder:
-			frappe.throw('The seller and the buyer cannot be the same')
+			frappe.throw(_('The seller and the buyer cannot be the same'))
 		if self.no_of_shares != self.to_no - self.from_no + 1:
-			frappe.throw('The number of shares and the share numbers are inconsistent!')
+			frappe.throw(_('The number of shares and the share numbers are inconsistent'))
 		if self.amount is None:
 			self.amount = self.rate * self.no_of_shares
 		if self.amount != self.rate * self.no_of_shares:
-			frappe.throw('There\'s inconsistency between the rate, no of shares and the amount calculated')
+			frappe.throw(_('There are inconsistencies between the rate, no of shares and the amount calculated'))
 
 	def share_exists(self, shareholder):
-		# return True				if exits,
-		# 		 False	 			if completely doesn't exist,
-		#		 'partially exists' if partailly doesn't exist
+		# return True if exits,
+		# False if completely doesn't exist,
+		# 'partially exists' if partailly doesn't exist
 		ret_val = self.recursive_share_check(shareholder, self.share_type,
 			query = {
 				'from_no': self.from_no,
@@ -177,13 +182,14 @@ class ShareTransfer(Document):
 		for shareholder in shareholders:
 			doc = frappe.get_doc('Shareholder', self.get(shareholder))
 			if doc.company != self.company:
-				frappe.throw('The shareholder doesn\'t belong to this company')
+				frappe.throw(_('The shareholder does not belong to this company'))
 			if doc.folio_no is '' or doc.folio_no is None:
-				doc.folio_no = self.from_folio_no if (shareholder == 'from_shareholder') else self.to_folio_no;
+				doc.folio_no = self.from_folio_no \
+					if (shareholder == 'from_shareholder') else self.to_folio_no;
 				doc.save()
 			else:
 				if doc.folio_no != (self.from_folio_no if (shareholder == 'from_shareholder') else self.to_folio_no):
-					frappe.throw('The folio numbers are not matching')
+					frappe.throw(_('The folio numbers are not matching'))
 
 	def autoname_folio(self, shareholder, is_company=False):
 		if is_company:
@@ -200,8 +206,8 @@ class ShareTransfer(Document):
 				'from_no': self.from_no,
 				'to_no'  : self.to_no
 			},
-			rate       = self.rate,
-			amount	   = self.amount
+			rate = self.rate,
+			amount = self.amount
 		)
 
 	def iterative_share_removal(self, shareholder, share_type, query, rate, amount):

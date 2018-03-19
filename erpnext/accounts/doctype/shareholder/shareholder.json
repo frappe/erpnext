@@ -42,7 +42,7 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
-   "unique": 1
+   "unique": 0
   }, 
   {
    "allow_bulk_edit": 0, 
@@ -79,6 +79,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
+   "default": "SH-", 
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -477,7 +478,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-01-23 17:49:02.941363", 
+ "modified": "2018-02-13 06:43:36.319549", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Shareholder", 

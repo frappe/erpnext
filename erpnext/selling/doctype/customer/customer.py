@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.model.naming import make_autoname
+from frappe.model.naming import set_name_by_naming_series
 from frappe import _, msgprint, throw
 import frappe.defaults
 from frappe.utils import flt, cint, cstr
@@ -11,6 +11,7 @@ from frappe.desk.reportview import build_match_conditions
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
+from frappe.model.rename_doc import update_linked_doctypes
 
 class Customer(TransactionBase):
 	def get_feed(self):
@@ -30,10 +31,7 @@ class Customer(TransactionBase):
 		if cust_master_name == 'Customer Name':
 			self.name = self.get_customer_name()
 		else:
-			if not self.naming_series:
-				frappe.throw(_("Series is mandatory"), frappe.MandatoryError)
-
-			self.name = make_autoname(self.naming_series+'.#####')
+			set_name_by_naming_series(self)
 
 	def get_customer_name(self):
 		if frappe.db.get_value("Customer", self.customer_name):
@@ -53,6 +51,14 @@ class Customer(TransactionBase):
 		self.flags.old_lead = self.lead_name
 		validate_party_accounts(self)
 		self.validate_credit_limit_on_change()
+		self.check_customer_group_change()
+
+	def check_customer_group_change(self):
+		frappe.flags.customer_group_changed = False
+
+		if not self.get('__islocal'):
+			if self.customer_group != frappe.db.get_value('Customer', self.name, 'customer_group'):
+				frappe.flags.customer_group_changed = True
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
@@ -64,6 +70,14 @@ class Customer(TransactionBase):
 
 		if self.flags.is_new_doc:
 			self.create_lead_address_contact()
+
+		self.update_customer_groups()
+
+	def update_customer_groups(self):
+		ignore_doctypes = ["Lead", "Opportunity", "POS Profile", "Tax Rule", "Pricing Rule"]
+		if frappe.flags.customer_group_changed:
+			update_linked_doctypes('Customer', self.name, 'Customer Group',
+				self.customer_group, ignore_doctypes)
 
 	def create_primary_contact(self):
 		if not self.customer_primary_contact and not self.lead_name:
@@ -305,6 +319,18 @@ def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, fil
 			where `tabContact`.name = `tabDynamic Link`.parent and `tabDynamic Link`.link_name = %(customer)s
 			and `tabDynamic Link`.link_doctype = 'Customer' and `tabContact`.is_primary_contact = 1
 			and `tabContact`.name like %(txt)s
+		""", {
+			'customer': customer,
+			'txt': '%%%s%%' % txt
+		})
+
+def get_customer_primary_address(doctype, txt, searchfield, start, page_len, filters):
+	customer = frappe.db.escape(filters.get('customer'))
+	return frappe.db.sql("""
+		select `tabAddress`.name from `tabAddress`, `tabDynamic Link`
+			where `tabAddress`.name = `tabDynamic Link`.parent and `tabDynamic Link`.link_name = %(customer)s
+			and `tabDynamic Link`.link_doctype = 'Customer' and `tabAddress`.is_primary_address = 1
+			and `tabAddress`.name like %(txt)s
 		""", {
 			'customer': customer,
 			'txt': '%%%s%%' % txt

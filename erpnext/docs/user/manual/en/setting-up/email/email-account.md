@@ -42,4 +42,9 @@ If you would like ERPNext to notify you if an email is unreplied for a certain a
 
 <img class="screenshot" alt="Incoming EMail" src="{{docs_base_url}}/assets/img/setup/email/email-account-unreplied.png">
 
+
+<div>
+    <iframe src="https://www.youtube.com/embed/YFYe0DrB95o?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>
+
 {next}

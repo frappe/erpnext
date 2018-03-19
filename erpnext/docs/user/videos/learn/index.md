@@ -241,10 +241,6 @@
             Employees</a>
             <span class="text-muted pull-right">1:59</span>
         </li>
-        <li><a href="/docs/user/videos/learn/processing-payroll.html">
-            Processing Payroll</a>
-              <span class="text-muted pull-right">4:00</span>
-        </li>
         <li><a href="/docs/user/videos/learn/leave-management.html">
             Leave Management</a>
             <span class="text-muted pull-right">2:50</span>

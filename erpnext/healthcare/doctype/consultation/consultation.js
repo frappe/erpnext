@@ -15,23 +15,7 @@ frappe.ui.form.on('Consultation', {
 			{fieldname: 'test_comment', columns: 4}
 		];
 	},
-	onload: function(frm){
-		if(frm.doc.patient){
-			frappe.call({
-				"method": "erpnext.healthcare.doctype.patient.patient.get_patient_detail",
-				args: {
-					patient: frm.doc.patient
-				},
-				callback: function (data) {
-					var age = null;
-					if(data.message.dob){
-						age = calculate_age(data.message.dob);
-					}
-					frappe.model.set_value(frm.doctype,frm.docname, "patient_age", age);
-				}
-			});
-		}
-	},
+
 	refresh: function(frm) {
 		refresh_field('drug_prescription');
 		refresh_field('test_prescription');
@@ -41,7 +25,7 @@ frappe.ui.form.on('Consultation', {
 				frappe.route_options = {"patient": frm.doc.patient};
 				frappe.set_route("medical_record");
 			} else {
-				frappe.msgprint("Please select Patient");
+				frappe.msgprint(__("Please select Patient"));
 			}
 		},"View");
 		frm.add_custom_button(__('Vital Signs'), function() {
@@ -121,7 +105,7 @@ var btn_invoice_consultation = function(frm){
 
 var create_medical_record = function (frm) {
 	if(!frm.doc.patient){
-		frappe.throw("Please select patient");
+		frappe.throw(__("Please select patient"));
 	}
 	frappe.route_options = {
 		"patient": frm.doc.patient,
@@ -134,7 +118,7 @@ var create_medical_record = function (frm) {
 
 var btn_create_vital_signs = function (frm) {
 	if(!frm.doc.patient){
-		frappe.throw("Please select patient");
+		frappe.throw(__("Please select patient"));
 	}
 	frappe.route_options = {
 		"patient": frm.doc.patient,

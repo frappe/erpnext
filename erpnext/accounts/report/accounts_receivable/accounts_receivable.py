@@ -159,7 +159,7 @@ class ReceivablePayableReport(object):
 					else:
 						row.append(company_currency)
 
-					pdc = pdc_details.get(gle.voucher_no, {})
+					pdc = pdc_details.get((gle.voucher_no, gle.party), {})
 					remaining_balance = outstanding_amount - flt(pdc.get("pdc_amount"))
 					row += [pdc.get("pdc_date"), pdc.get("pdc_ref"),
 						flt(pdc.get("pdc_amount")), remaining_balance]
@@ -405,10 +405,33 @@ def get_pdc_details(party_type):
 		on
 			(pref.parent = pent.name)
 		where
-			pent.docstatus = 0 and pent.reference_date > pent.posting_date
+			pent.docstatus < 2 and pent.reference_date >= pent.posting_date
 			and pent.party_type = %s
-			group by pref.reference_name""", party_type, as_dict=1):
-			pdc_details.setdefault(pdc.invoice_no, pdc)
+			group by pent.party, pref.reference_name""", party_type, as_dict=1):
+			pdc_details.setdefault((pdc.invoice_no, pdc.party), pdc)
+
+	if scrub(party_type):
+		amount_field = "jea.debit_in_account_currency + jea.credit_in_account_currency"
+	else:
+		amount_field = "jea.debit + jea.credit"
+
+	for pdc in frappe.db.sql("""
+		select
+			jea.reference_name as invoice_no, jea.party, jea.party_type,
+			max(je.cheque_date) as pdc_date, sum(ifnull({0},0)) as pdc_amount,
+			GROUP_CONCAT(je.cheque_no SEPARATOR ', ') as pdc_ref
+		from
+			`tabJournal Entry` as je inner join `tabJournal Entry Account` as jea
+		on
+			(jea.parent = je.name)
+		where
+			je.docstatus < 2 and je.cheque_date >= je.posting_date
+			and jea.party_type = %s
+			group by jea.party, jea.reference_name""".format(amount_field), party_type, as_dict=1):
+			if (pdc.invoice_no, pdc.party) in pdc_details:
+				pdc_details[(pdc.invoice_no, pdc.party)]["pdc_amount"] += pdc.pdc_amount
+			else:
+				pdc_details.setdefault((pdc.invoice_no, pdc.party), pdc)
 
 	return pdc_details
 

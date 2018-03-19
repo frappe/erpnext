@@ -14,6 +14,8 @@ from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from erpnext.stock.utils import get_bin
 import json
 
+from six import string_types
+
 class IncorrectValuationRateError(frappe.ValidationError): pass
 class DuplicateEntryForProductionOrderError(frappe.ValidationError): pass
 class OperationsNotCompleteError(frappe.ValidationError): pass
@@ -50,6 +52,7 @@ class StockEntry(StockController):
 		self.validate_finished_goods()
 		self.validate_with_material_request()
 		self.validate_batch()
+		self.validate_inspection()
 
 		if not self.from_bom:
 			self.fg_completed_qty = 0.0
@@ -64,6 +67,7 @@ class StockEntry(StockController):
 		self.calculate_rate_and_amount(update_finished_item_rate=False)
 
 	def on_submit(self):
+
 		self.update_stock_ledger()
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
@@ -410,7 +414,7 @@ class StockEntry(StockController):
 		"""validation: finished good quantity should be same as manufacturing quantity"""
 		items_with_target_warehouse = []
 		for d in self.get('items'):
-			if d.bom_no and flt(d.transfer_qty) != flt(self.fg_completed_qty) and (d.t_warehouse != getattr(self, "pro_doc", frappe._dict()).scrap_warehouse):
+			if self.purpose != "Subcontract" and d.bom_no and flt(d.transfer_qty) != flt(self.fg_completed_qty) and (d.t_warehouse != getattr(self, "pro_doc", frappe._dict()).scrap_warehouse):
 				frappe.throw(_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}"). \
 					format(d.idx, d.transfer_qty, self.fg_completed_qty))
 
@@ -802,7 +806,7 @@ class StockEntry(StockController):
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None):
 		expense_account, cost_center = frappe.db.get_values("Company", self.company, \
 			["default_expense_account", "cost_center"])[0]
-				
+
 		for d in item_dict:
 			stock_uom = item_dict[d].get("stock_uom") or frappe.db.get_value("Item", d, "stock_uom")
 			
@@ -870,7 +874,7 @@ class StockEntry(StockController):
 	
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):
-	if isinstance(items, basestring):
+	if isinstance(items, string_types):
 		items = json.loads(items)
 	retention_warehouse = frappe.db.get_single_value('Stock Settings', 'sample_retention_warehouse')
 	stock_entry = frappe.new_doc("Stock Entry")
@@ -978,7 +982,7 @@ def get_uom_details(item_code, uom, qty):
 
 @frappe.whitelist()
 def get_warehouse_details(args):
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	args = frappe._dict(args)

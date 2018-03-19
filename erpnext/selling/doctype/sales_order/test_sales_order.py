@@ -5,7 +5,6 @@ import frappe
 from frappe.utils import flt, add_days
 import frappe.permissions
 import unittest
-from erpnext.stock.doctype.item.test_item import get_total_projected_qty
 from erpnext.selling.doctype.sales_order.sales_order \
 	import make_material_request, make_delivery_note, make_sales_invoice, WarehouseRequired
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -30,8 +29,8 @@ class TestSalesOrder(unittest.TestCase):
 		so.submit()
 		mr = make_material_request(so.name)
 
-		self.assertEquals(mr.material_request_type, "Purchase")
-		self.assertEquals(len(mr.get("items")), len(so.get("items")))
+		self.assertEqual(mr.material_request_type, "Purchase")
+		self.assertEqual(len(mr.get("items")), len(so.get("items")))
 
 	def test_make_delivery_note(self):
 		so = make_sales_order(do_not_submit=True)
@@ -41,8 +40,8 @@ class TestSalesOrder(unittest.TestCase):
 		so.submit()
 		dn = make_delivery_note(so.name)
 
-		self.assertEquals(dn.doctype, "Delivery Note")
-		self.assertEquals(len(dn.get("items")), len(so.get("items")))
+		self.assertEqual(dn.doctype, "Delivery Note")
+		self.assertEqual(len(dn.get("items")), len(so.get("items")))
 
 	def test_make_sales_invoice(self):
 		so = make_sales_order(do_not_submit=True)
@@ -52,14 +51,14 @@ class TestSalesOrder(unittest.TestCase):
 		so.submit()
 		si = make_sales_invoice(so.name)
 
-		self.assertEquals(len(si.get("items")), len(so.get("items")))
-		self.assertEquals(len(si.get("items")), 1)
+		self.assertEqual(len(si.get("items")), len(so.get("items")))
+		self.assertEqual(len(si.get("items")), 1)
 
 		si.insert()
 		si.submit()
 
 		si1 = make_sales_invoice(so.name)
-		self.assertEquals(len(si1.get("items")), 0)
+		self.assertEqual(len(si1.get("items")), 0)
 
 	def test_make_sales_invoice_with_terms(self):
 		so = make_sales_order(do_not_submit=True)
@@ -72,8 +71,8 @@ class TestSalesOrder(unittest.TestCase):
 		so.submit()
 		si = make_sales_invoice(so.name)
 
-		self.assertEquals(len(si.get("items")), len(so.get("items")))
-		self.assertEquals(len(si.get("items")), 1)
+		self.assertEqual(len(si.get("items")), len(so.get("items")))
+		self.assertEqual(len(si.get("items")), 1)
 
 		si.insert()
 
@@ -85,7 +84,7 @@ class TestSalesOrder(unittest.TestCase):
 		si.submit()
 
 		si1 = make_sales_invoice(so.name)
-		self.assertEquals(len(si1.get("items")), 0)
+		self.assertEqual(len(si1.get("items")), 0)
 
 	def test_update_qty(self):
 		so = make_sales_order()
@@ -93,7 +92,7 @@ class TestSalesOrder(unittest.TestCase):
 		create_dn_against_so(so.name, 6)
 
 		so.load_from_db()
-		self.assertEquals(so.get("items")[0].delivered_qty, 6)
+		self.assertEqual(so.get("items")[0].delivered_qty, 6)
 
 		# Check delivered_qty after make_sales_invoice without update_stock checked
 		si1 = make_sales_invoice(so.name)
@@ -102,7 +101,7 @@ class TestSalesOrder(unittest.TestCase):
 		si1.submit()
 
 		so.load_from_db()
-		self.assertEquals(so.get("items")[0].delivered_qty, 6)
+		self.assertEqual(so.get("items")[0].delivered_qty, 6)
 
 		# Check delivered_qty after make_sales_invoice with update_stock checked
 		si2 = make_sales_invoice(so.name)
@@ -112,7 +111,7 @@ class TestSalesOrder(unittest.TestCase):
 		si2.submit()
 
 		so.load_from_db()
-		self.assertEquals(so.get("items")[0].delivered_qty, 9)
+		self.assertEqual(so.get("items")[0].delivered_qty, 9)
 
 	def test_reserved_qty_for_partial_delivery(self):
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
@@ -155,16 +154,8 @@ class TestSalesOrder(unittest.TestCase):
 		dn = create_dn_against_so(so.name, 15)
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty)
 
-		total_projected_qty = get_total_projected_qty('_Test Item')
-		item_doc_before_cancel = frappe.get_doc('Item', '_Test Item')
-		self.assertEqual(total_projected_qty,  item_doc_before_cancel.total_projected_qty)
-
 		dn.cancel()
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty + 10)
-
-		total_projected_qty = get_total_projected_qty('_Test Item')
-		item_doc_after_cancel = frappe.get_doc('Item', '_Test Item')
-		self.assertEqual(total_projected_qty,  item_doc_after_cancel.total_projected_qty)
 
 	def test_reserved_qty_for_over_delivery_via_sales_invoice(self):
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
@@ -183,10 +174,6 @@ class TestSalesOrder(unittest.TestCase):
 		si.insert()
 		si.submit()
 
-		total_projected_qty = get_total_projected_qty('_Test Item')
-		item_doc = frappe.get_doc('Item', '_Test Item')
-		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
-
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty)
 
 		so.load_from_db()
@@ -195,9 +182,6 @@ class TestSalesOrder(unittest.TestCase):
 
 		si.cancel()
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty + 10)
-		total_projected_qty = get_total_projected_qty('_Test Item')
-		item_doc = frappe.get_doc('Item', '_Test Item')
-		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
 
 		so.load_from_db()
 		self.assertEqual(so.get("items")[0].delivered_qty, 0)
@@ -228,10 +212,6 @@ class TestSalesOrder(unittest.TestCase):
 
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1)
 		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"), existing_reserved_qty_item2)
-
-		total_projected_qty = get_total_projected_qty('_Test Item')
-		item_doc = frappe.get_doc('Item', '_Test Item')
-		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
 
 		# unclose so
 		so.load_from_db()
@@ -268,10 +248,6 @@ class TestSalesOrder(unittest.TestCase):
 			existing_reserved_qty_item2 + 20)
 
 		dn = create_dn_against_so(so.name, 15)
-
-		total_projected_qty = get_total_projected_qty('_Test Item')
-		item_doc = frappe.get_doc('Item', '_Test Item')
-		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
 
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1)
 		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"),
@@ -366,7 +342,7 @@ class TestSalesOrder(unittest.TestCase):
 
 		make_sales_order(item_code = "_Test Item for Auto Price List", selling_price_list="_Test Price List", rate=100)
 
-		self.assertEquals(frappe.db.get_value("Item Price",
+		self.assertEqual(frappe.db.get_value("Item Price",
 			{"price_list": "_Test Price List", "item_code": "_Test Item for Auto Price List"}, "price_list_rate"), 100)
 
 
@@ -380,7 +356,7 @@ class TestSalesOrder(unittest.TestCase):
 
 		make_sales_order(item_code = "_Test Item for Auto Price List", selling_price_list="_Test Price List", rate=100)
 
-		self.assertEquals(frappe.db.get_value("Item Price",
+		self.assertEqual(frappe.db.get_value("Item Price",
 			{"price_list": "_Test Price List", "item_code": "_Test Item for Auto Price List"}, "price_list_rate"), None)
 
 		frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 1)
@@ -443,10 +419,10 @@ class TestSalesOrder(unittest.TestCase):
 
 		dn = create_dn_against_so(so.name, delivered_qty=1)
 
-		self.assertEquals(so.customer, po.customer)
-		self.assertEquals(po.items[0].sales_order, so.name)
-		self.assertEquals(po.items[0].item_code, po_item.item_code)
-		self.assertEquals(dn.items[0].item_code, dn_item.item_code)
+		self.assertEqual(so.customer, po.customer)
+		self.assertEqual(po.items[0].sales_order, so.name)
+		self.assertEqual(po.items[0].item_code, po_item.item_code)
+		self.assertEqual(dn.items[0].item_code, dn_item.item_code)
 
 		#test ordered_qty and reserved_qty
 		bin = frappe.get_all("Bin", filters={"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"},
@@ -455,27 +431,27 @@ class TestSalesOrder(unittest.TestCase):
 		ordered_qty = bin[0].ordered_qty if bin else 0.0
 		reserved_qty = bin[0].reserved_qty if bin else 0.0
 
-		self.assertEquals(abs(flt(ordered_qty)), existing_ordered_qty)
-		self.assertEquals(abs(flt(reserved_qty)), existing_reserved_qty)
+		self.assertEqual(abs(flt(ordered_qty)), existing_ordered_qty)
+		self.assertEqual(abs(flt(reserved_qty)), existing_reserved_qty)
 
 		reserved_qty = frappe.db.get_value("Bin",
 					{"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty")
 
-		self.assertEquals(abs(flt(reserved_qty)), existing_reserved_qty_for_dn_item + 1)
+		self.assertEqual(abs(flt(reserved_qty)), existing_reserved_qty_for_dn_item + 1)
 
 		#test po_item length
-		self.assertEquals(len(po.items), 1)
+		self.assertEqual(len(po.items), 1)
 
 		#test per_delivered status
 		update_status("Delivered", po.name)
-		self.assertEquals(flt(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 2), 75.00)
+		self.assertEqual(flt(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 2), 75.00)
 
 		#test reserved qty after complete delivery
 		dn = create_dn_against_so(so.name, delivered_qty=1)
 		reserved_qty = frappe.db.get_value("Bin",
 			{"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty")
 
-		self.assertEquals(abs(flt(reserved_qty)), existing_reserved_qty_for_dn_item)
+		self.assertEqual(abs(flt(reserved_qty)), existing_reserved_qty_for_dn_item)
 
 		#test after closing so
 		so.db_set('status', "Closed")
@@ -487,20 +463,13 @@ class TestSalesOrder(unittest.TestCase):
 		ordered_qty = bin[0].ordered_qty if bin else 0.0
 		reserved_qty = bin[0].reserved_qty if bin else 0.0
 
-		self.assertEquals(abs(flt(ordered_qty)), existing_ordered_qty)
-		self.assertEquals(abs(flt(reserved_qty)), existing_reserved_qty)
+		self.assertEqual(abs(flt(ordered_qty)), existing_ordered_qty)
+		self.assertEqual(abs(flt(reserved_qty)), existing_reserved_qty)
 
 		reserved_qty = frappe.db.get_value("Bin",
 			{"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty")
 
-		self.assertEquals(abs(flt(reserved_qty)), existing_reserved_qty_for_dn_item)
-
-	def test_total_projected_qty_against_sales_order(self):
-		so = make_sales_order(item = '_Test Item')
-		total_projected_qty = get_total_projected_qty('_Test Item')
-
-		item_doc = frappe.get_doc('Item', '_Test Item')
-		self.assertEqual(total_projected_qty,  item_doc.total_projected_qty)
+		self.assertEqual(abs(flt(reserved_qty)), existing_reserved_qty_for_dn_item)
 
 	def test_reserved_qty_for_closing_so(self):
 		bin = frappe.get_all("Bin", filters={"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},
@@ -510,11 +479,11 @@ class TestSalesOrder(unittest.TestCase):
 
 		so = make_sales_order(item_code="_Test Item", qty=1)
 
-		self.assertEquals(get_reserved_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"), existing_reserved_qty+1)
+		self.assertEqual(get_reserved_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"), existing_reserved_qty+1)
 
 		so.update_status("Closed")
 
-		self.assertEquals(get_reserved_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"), existing_reserved_qty)
+		self.assertEqual(get_reserved_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"), existing_reserved_qty)
 
 	def test_create_so_with_margin(self):
 		so = make_sales_order(item_code="_Test Item", qty=1, do_not_submit=True)
@@ -526,13 +495,13 @@ class TestSalesOrder(unittest.TestCase):
 		new_so = frappe.copy_doc(so)
 		new_so.save(ignore_permissions=True)
 
-		self.assertEquals(new_so.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
+		self.assertEqual(new_so.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
 		new_so.items[0].margin_rate_or_amount = 25
 		new_so.payment_schedule = []
 		new_so.save()
 		new_so.submit()
 
-		self.assertEquals(new_so.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
+		self.assertEqual(new_so.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
 
 	def test_terms_auto_added(self):
 		so = make_sales_order(do_not_save=1)
@@ -567,12 +536,12 @@ class TestSalesOrder(unittest.TestCase):
 			"item_list": [{
 				"item_code": "_Test FG Item",
 				"qty": 10,
-				"rate":100	
+				"rate":100
 			},
 			{
 				"item_code": "_Test FG Item",
 				"qty": 20,
-				"rate":200	
+				"rate":200
 			}]
 		})
 
@@ -589,11 +558,11 @@ class TestSalesOrder(unittest.TestCase):
 			})
 			so_item_name[item.get("sales_order_item")]= item.get("pending_qty")
 		make_production_orders(json.dumps({"items":po_items}), so.name, so.company)
-		
+
 		# Check if Production Orders were raised
 		for item in so_item_name:
 			po_qty = frappe.db.sql("select sum(qty) from `tabProduction Order` where sales_order=%s and sales_order_item=%s", (so.name, item))
-			self.assertEquals(po_qty[0][0], so_item_name.get(item))
+			self.assertEqual(po_qty[0][0], so_item_name.get(item))
 
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")

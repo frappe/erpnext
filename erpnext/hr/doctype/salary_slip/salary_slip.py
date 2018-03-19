@@ -156,9 +156,10 @@ class SalarySlip(TransactionBase):
 				})
 
 	def get_date_details(self):
-		date_details = get_start_end_dates(self.payroll_frequency, self.start_date or self.posting_date)
-		self.start_date = date_details.start_date
-		self.end_date = date_details.end_date
+		if not self.end_date:
+			date_details = get_start_end_dates(self.payroll_frequency, self.start_date or self.posting_date)
+			self.start_date = date_details.start_date
+			self.end_date = date_details.end_date
 
 	def check_sal_struct(self, joining_date, relieving_date):
 		cond = ''
@@ -300,7 +301,6 @@ class SalarySlip(TransactionBase):
 				where t2.name = t1.leave_type
 				and t2.is_lwp = 1
 				and t1.docstatus = 1
-				and t1.workflow_state = 'Approved'
 				and t1.employee = %(employee)s
 				and CASE WHEN t2.include_holiday != 1 THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date
 				WHEN t2.include_holiday THEN %(dt)s between from_date and to_date

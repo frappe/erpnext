@@ -23,5 +23,5 @@ class TestStudentGroup(unittest.TestCase):
 
 		doc.extend("students", [{"student":d} for d in student_list])
 		doc.save()
-		self.assertEquals(max([d.group_roll_number for d in doc.students]), 3)
+		self.assertEqual(max([d.group_roll_number for d in doc.students]), 3)
 

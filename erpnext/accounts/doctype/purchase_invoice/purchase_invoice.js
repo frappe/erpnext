@@ -8,6 +8,10 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	setup: function(doc) {
 		this.setup_posting_date_time_check();
 		this._super(doc);
+
+		// formatter for material request item
+		this.frm.set_indicator_formatter('item_code',
+			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
 	},
 	onload: function() {
 		this._super();
@@ -20,10 +24,6 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		} else {
 			this.frm.set_value("disable_rounded_total", cint(frappe.sys_defaults.disable_rounded_total));
 		}
-
-		// formatter for material request item
-		this.frm.set_indicator_formatter('item_code',
-			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
 	},
 
 	refresh: function(doc) {
@@ -103,10 +103,11 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		erpnext.utils.get_party_details(this.frm, "erpnext.accounts.party.get_party_details",
 			{
 				posting_date: this.frm.doc.posting_date,
+				bill_date: this.frm.doc.bill_date,
 				party: this.frm.doc.supplier,
 				party_type: "Supplier",
 				account: this.frm.doc.credit_to,
-				price_list: this.frm.doc.buying_price_list,
+				price_list: this.frm.doc.buying_price_list
 			}, function() {
 				me.apply_pricing_rule();
 			})

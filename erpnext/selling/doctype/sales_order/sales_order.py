@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 import frappe.utils
-from frappe.utils import cstr, flt, getdate, comma_and, cint, nowdate, add_days
+from frappe.utils import cstr, flt, getdate, comma_and, cint
 from frappe import _
 from frappe.model.utils import get_fetch_values
 from frappe.model.mapper import get_mapped_doc
@@ -104,8 +104,8 @@ class SalesOrder(SellingController):
 	def validate_delivery_date(self):
 		if self.order_type == 'Sales':
 			if not self.delivery_date:
-				self.delivery_date = max([d.delivery_date for d in self.get("items") if d.delivery_date])
-
+				delivery_date_list = [d.delivery_date for d in self.get("items") if d.delivery_date]
+				self.delivery_date = max(delivery_date_list) if delivery_date_list else None
 			if self.delivery_date:
 				for d in self.get("items"):
 					if not d.delivery_date:
@@ -435,6 +435,7 @@ def make_material_request(source_name, target_doc=None):
 		"Sales Order Item": {
 			"doctype": "Material Request Item",
 			"field_map": {
+				"name": "sales_order_item",
 				"parent": "sales_order",
 				"stock_uom": "uom",
 				"stock_qty": "qty"
@@ -476,13 +477,9 @@ def make_project(source_name, target_doc=None):
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		so = [d.against_sales_order for d in target.items]
-		if so:
-			po_no_list = frappe.get_all('Sales Order', 'po_no', filters = {'name': ('in', so)})
-			target.po_no = ', '.join(d.po_no for d in po_no_list if d.po_no)
-
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
+		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
 
 		# set company address
@@ -543,6 +540,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = True
 		target.run_method("set_missing_values")
+		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
 
 		# set company address

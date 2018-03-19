@@ -165,6 +165,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Quality Inspection Template",
+				},
+				{
+					"type": "doctype",
 					"name": "Landed Cost Voucher",
 				}
 			]

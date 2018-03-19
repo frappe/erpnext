@@ -86,6 +86,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Medical Code",
 					"label": _("Medical Code"),
+				},
+				{
+					"type": "doctype",
+					"name": "Patient Service Unit",
+					"label": _("Patient Service Unit")
 				}
 			]
 		},
