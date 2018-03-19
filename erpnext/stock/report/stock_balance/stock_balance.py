@@ -13,11 +13,11 @@ def execute(filters=None):
 
 	validate_filters(filters)
 
-	columns = get_columns()
+	columns = get_columns(filters)
 	item_map = get_item_details(filters)
 	item_reorder_detail_map = get_item_reorder_details(filters)
 	iwb_map = get_item_warehouse_map(filters)
-	
+
 
 	data = []
 	for (company, item, warehouse) in sorted(iwb_map):
@@ -32,10 +32,11 @@ def execute(filters=None):
 			item_map[item]["item_group"],
 			item_map[item]["brand"],
 			item_map[item]["description"], warehouse,
-			item_map[item]["stock_uom"], qty_dict.opening_qty,
-			qty_dict.opening_val, qty_dict.in_qty,
-			qty_dict.in_val, qty_dict.out_qty,
-			qty_dict.out_val, qty_dict.bal_qty,
+			item_map[item]["stock_uom"],
+			qty_dict.opening_qty/flt(item_map[item]["conversion_factor"]),
+			qty_dict.opening_val, qty_dict.in_qty/flt(item_map[item]["conversion_factor"]),
+			qty_dict.in_val, qty_dict.out_qty/flt(item_map[item]["conversion_factor"]),
+			qty_dict.out_val, qty_dict.bal_qty/flt(item_map[item]["conversion_factor"]),
 			qty_dict.bal_val, qty_dict.val_rate,
 			item_reorder_level,
 			item_reorder_qty,
@@ -53,9 +54,10 @@ def execute(filters=None):
 
 	return columns, data
 
-def get_columns():
+def get_columns(filters=None):
 	"""return columns"""
 
+	uom = filters.get('by_uom') or 'Stock UOM'
 	columns = [
 		_("Item")+":Link/Item:100",
 		_("Item Name")+"::150",
@@ -63,7 +65,7 @@ def get_columns():
 		_("Brand")+":Link/Brand:90",
 		_("Description")+"::140",
 		_("Warehouse")+":Link/Warehouse:100",
-		_("Stock UOM")+":Link/UOM:90",
+		uom + ":Link/UOM:90",
 		_("Opening Qty")+":Float:100",
 		_("Opening Value")+":Float:110",
 		_("In Qty")+":Float:80",
@@ -90,16 +92,16 @@ def get_conditions(filters):
 	else:
 		frappe.throw(_("'To Date' is required"))
 
-	if filters.get("item_group"):		
-		ig_details = frappe.db.get_value("Item Group", filters.get("item_group"), 
+	if filters.get("item_group"):
+		ig_details = frappe.db.get_value("Item Group", filters.get("item_group"),
 			["lft", "rgt"], as_dict=1)
-			
+
 		if ig_details:
-			conditions += """ 
-				and exists (select name from `tabItem Group` ig 
+			conditions += """
+				and exists (select name from `tabItem Group` ig
 				where ig.lft >= %s and ig.rgt <= %s and item.item_group = ig.name)
 			""" % (ig_details.lft, ig_details.rgt)
-		
+
 	if filters.get("item_code"):
 		conditions += " and sle.item_code = '%s'" % frappe.db.escape(filters.get("item_code"), percent=False)
 
@@ -114,18 +116,18 @@ def get_conditions(filters):
 
 def get_stock_ledger_entries(filters):
 	conditions = get_conditions(filters)
-	
+
 	join_table_query = ""
 	if filters.get("item_group"):
 		join_table_query = "inner join `tabItem` item on item.name = sle.item_code"
-	
+
 	return frappe.db.sql("""
 		select
 			sle.item_code, warehouse, sle.posting_date, sle.actual_qty, sle.valuation_rate,
 			sle.company, sle.voucher_type, sle.qty_after_transaction, sle.stock_value_difference
 		from
 			`tabStock Ledger Entry` sle force index (posting_sort_index) %s
-		where sle.docstatus < 2 %s 
+		where sle.docstatus < 2 %s
 		order by sle.posting_date, sle.posting_time, sle.name""" %
 		(join_table_query, conditions), as_dict=1)
 
@@ -171,15 +173,15 @@ def get_item_warehouse_map(filters):
 		qty_dict.val_rate = d.valuation_rate
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
-		
+
 	iwb_map = filter_items_with_no_transactions(iwb_map)
 
 	return iwb_map
-	
+
 def filter_items_with_no_transactions(iwb_map):
 	for (company, item, warehouse) in sorted(iwb_map):
 		qty_dict = iwb_map[(company, item, warehouse)]
-		
+
 		no_transactions = True
 		float_precision = cint(frappe.db.get_default("float_precision")) or 3
 		for key, val in qty_dict.items():
@@ -187,7 +189,7 @@ def filter_items_with_no_transactions(iwb_map):
 			qty_dict[key] = val
 			if key != "val_rate" and val:
 				no_transactions = False
-		
+
 		if no_transactions:
 			iwb_map.pop((company, item, warehouse))
 
@@ -196,15 +198,30 @@ def filter_items_with_no_transactions(iwb_map):
 def get_item_details(filters):
 	condition = ''
 	value = ()
+	join = ''
 	if filters.get("item_code"):
 		condition = "where item_code=%s"
 		value = (filters.get("item_code"),)
 
+	if filters.get('by_uom') == 'Stock UOM':
+		join = 'inner join `tabUOM Conversion Detail` uom on uom.parent=it.name and uom.uom=it.stock_uom '
+
+	if filters.get('by_uom') == 'Sales UOM':
+		join = 'inner join `tabUOM Conversion Detail` uom on uom.parent=it.name and \
+		((uom.uom=it.sales_uom and it.sales_uom is not null) or \
+		(uom.uom=it.stock_uom and it.sales_uom is null)) '
+
+	if filters.get('by_uom') == 'Purchase UOM':
+		join = 'inner join `tabUOM Conversion Detail` uom on uom.parent=it.name and \
+		((uom.uom=it.purchase_uom and it.purchase_uom is not null) or \
+		(uom.uom=it.stock_uom and it.purchase_uom is null or it.purchase_uom="")) '
+
 	items = frappe.db.sql("""
-		select name, item_name, stock_uom, item_group, brand, description
-		from tabItem
+		select it.name, it.item_name, uom.uom as stock_uom, it.item_group, it.brand, it.description, uom.conversion_factor
+		from `tabItem` it
+		{join}
 		{condition}
-	""".format(condition=condition), value, as_dict=1)
+	""".format(join=join, condition=condition), value, as_dict=1)
 
 	item_details = dict((d.name , d) for d in items)
 
