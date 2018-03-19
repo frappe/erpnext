@@ -1,5 +1,5 @@
 @import 'https://fonts.googleapis.com/css?family=Open+Sans:300,600,800';
-/*html,
+/* html,
 body {
   background-color: #000;
   color: #fff;
@@ -13,7 +13,7 @@ body {
   -o-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-}*/
+} */ 
 
 .stopwatch {
   height: 50%;
