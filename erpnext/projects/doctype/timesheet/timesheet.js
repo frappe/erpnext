@@ -69,13 +69,19 @@ frappe.ui.form.on("Timesheet", {
 				{"fieldtype": "Select", "label": __("Activity"),
 					"fieldname": "activity",
 					"options": frm.doc.time_logs.map(d => d.activity_type),
-					"reqd": 1 },
-				{"fieldtype": "Select", "label": __("Project"),
-					"fieldname": "project",
-					"options": frm.doc.time_logs.map(d => d.project)},
-				{"fieldtype": "Select", "label": __("Hours"),
-					"fieldname": "hours",
-					"options": frm.doc.time_logs.map(d => d.hours)}
+					"reqd": 1,
+					onchange: () =>  {
+						const activity = dialog.get_value("activity")
+						const hours = frm.doc.time_logs.filter(d => d.activity_type == activity).map(d => d.hours);
+						const project = frm.doc.time_logs.filter(d => d.activity_type == activity).map(d => d.project)
+
+						dialog.set_value("hours", hours)
+						dialog.set_value("project", project)
+					}},
+				{"fieldtype": "Read Only", "label": __("Project"),
+					"fieldname": "project"},
+				{"fieldtype": "Read Only", "label": __("Hours"),
+					"fieldname": "hours"}
 			]
 		});
 		dialog.wrapper.append(frappe.render_template("timesheet"));
@@ -96,6 +102,7 @@ frappe.ui.form.on("Timesheet", {
 				frappe.msgprint(__("Please select Activity"));
 				return false;
 			}
+
 			if (clicked) {
 				e.preventDefault();
 				return false;
