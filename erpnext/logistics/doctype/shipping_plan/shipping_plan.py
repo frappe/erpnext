@@ -83,7 +83,7 @@ class ShippingPlan(Document):
 		"""
 			Update Item & Package Details
 		"""
-		item_packing_dict, item_package_ids, package_wt, no_of_pieces, total_qty = get_item_packing_dict(doc)
+		item_packing_dict, item_package_ids, package_wt, no_of_pieces, total_qty = self.get_item_packing_details()
 		self.total_handling_units = cint(total_qty)
 		for row in self.items:
 			row.no_of_pieces = len(no_of_pieces.get(row.item_code))
