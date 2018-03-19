@@ -3,9 +3,16 @@ dist: trusty
 
 python:
   - "2.7"
+  - "3.5"
+  - "3.6"
 
 services:
   - mysql
+  
+matrix:
+  allow_failures:
+    - python: "3.5"
+    - python: "3.6"
 
 install:
   # fix mongodb travis error
