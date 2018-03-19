@@ -123,5 +123,7 @@ def set_subject_field(consultation):
 		subject +="\nDrug(s) Prescribed. "
 	if(consultation.test_prescription):
 		subject += "\nTest(s) Prescribed."
+	if(consultation.procedure_prescription):
+		subject += "\nProcedure(s) Prescribed."
 
 	return subject
