@@ -9,7 +9,7 @@ from frappe.utils.nestedset import NestedSet
 from frappe.website.website_generator import WebsiteGenerator
 from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
-from erpnext.shopping_cart.product_info import get_product_info_for_website
+from erpnext.shopping_cart.product_info import set_product_info_for_website
 
 class ItemGroup(NestedSet, WebsiteGenerator):
 	nsm_parent_field = 'parent_item_group'
@@ -105,16 +105,7 @@ def get_product_list_for_group(product_group=None, start=0, limit=10, search=Non
 	data = frappe.db.sql(query, {"product_group": product_group,"search": search, "today": nowdate()}, as_dict=1)
 
 	for item in data:
-		product_info = get_product_info_for_website(item.item_code)
-		if product_info:
-			item["stock_uom"] = product_info.get("uom")
-			item["sales_uom"] = product_info.get("sales_uom")
-			if product_info.get("price"):
-				item["price_stock_uom"] = product_info.get("price").get("formatted_price")
-				item["price_sales_uom"] = product_info.get("price").get("formatted_price_sales_uom")
-			else:
-				item["price_stock_uom"] = ""
-				item["price_sales_uom"] = ""
+		set_product_info_for_website(item)
 
 	return [get_item_for_list_in_html(r) for r in data]
 

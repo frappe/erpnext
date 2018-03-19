@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, nowdate, cint
 from erpnext.setup.doctype.item_group.item_group import get_item_for_list_in_html
-from erpnext.shopping_cart.product_info import get_product_info_for_website
+from erpnext.shopping_cart.product_info import set_product_info_for_website
 
 no_cache = 1
 no_sitemap = 1
@@ -44,16 +44,7 @@ def get_product_list(search=None, start=0, limit=12):
 	}, as_dict=1)
 
 	for item in data:
-		product_info = get_product_info_for_website(item.item_code)
-		if product_info:
-			item["stock_uom"] = product_info.get("uom")
-			item["sales_uom"] = product_info.get("sales_uom")
-			if product_info.get("price"):
-				item["price_stock_uom"] = product_info.get("price").get("formatted_price")
-				item["price_sales_uom"] = product_info.get("price").get("formatted_price_sales_uom")
-			else:
-				item["price_stock_uom"] = ""
-				item["price_sales_uom"] = ""
+		set_product_info_for_website(item)
 
 	return [get_item_for_list_in_html(r) for r in data]
 

@@ -44,3 +44,17 @@ def get_product_info_for_website(item_code):
 				product_info["qty"] = item[0].qty
 
 	return product_info
+
+def set_product_info_for_website(item):
+	"""set product price uom for website"""
+	product_info = get_product_info_for_website(item.item_code)
+
+	if product_info:
+		item["stock_uom"] = product_info.get("uom")
+		item["sales_uom"] = product_info.get("sales_uom")
+		if product_info.get("price"):
+			item["price_stock_uom"] = product_info.get("price").get("formatted_price")
+			item["price_sales_uom"] = product_info.get("price").get("formatted_price_sales_uom")
+		else:
+			item["price_stock_uom"] = ""
+			item["price_sales_uom"] = ""
