@@ -245,5 +245,5 @@ def get_child_assessment_groups(assessment_group):
 		assessment_groups = [d.get("value") for d in get_children("Assessment Group",
 			assessment_group) if d.get("value") and not d.get("expandable")]
 	else:
-		assessment_groups = [args.assessment_group]
+		assessment_groups = [assessment_group]
 	return assessment_groups
