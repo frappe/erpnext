@@ -12,10 +12,13 @@ def get_slide_settings():
 	currency = defaults.get("currency") or ''
 
 	doc = frappe.get_doc("Setup Progress")
-	item = [d for d in doc.get("actions") if d.action_name == "Set Sales Target"][0]
-	if not item.action_document:
-		item.action_document = company
-		doc.save()
+	item = [d for d in doc.get("actions") if d.action_name == "Set Sales Target"]
+	
+	if len(item):
+		item = item[0]
+		if not item.action_document:
+			item.action_document = company
+			doc.save()
 
 	# Initial state of slides
 	return [
