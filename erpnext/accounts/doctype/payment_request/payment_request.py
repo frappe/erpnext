@@ -78,6 +78,9 @@ class PaymentRequest(Document):
 		controller = get_payment_gateway_controller(self.payment_gateway)
 		controller.validate_transaction_currency(self.currency)
 
+		if hasattr(controller, 'validate_minimum_transaction_amount'):
+			controller.validate_minimum_transaction_amount(self.currency, self.grand_total)
+
 		return controller.get_payment_url(**{
 			"amount": flt(self.grand_total, self.precision("grand_total")),
 			"title": data.company.encode("utf-8"),
