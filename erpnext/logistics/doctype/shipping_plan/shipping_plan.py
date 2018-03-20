@@ -6,7 +6,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
-from frappe.utils import cint, flt
+import json
+from frappe.utils import cint, flt, cstr
 from collections import defaultdict
 from erpnext.logistics.controller.fedex_controller import FedExController
 
@@ -120,3 +121,14 @@ class ShippingPlan(Document):
 			item_package_ids.add(row.package_no)
 			total_qty += row.qty
 		return item_packing_dict, item_package_ids, package_wt, no_of_pieces, total_qty
+
+@frappe.whitelist()
+def schedule_pickup(request_data):
+	"""Schedule Pickup API Call"""
+	request_data = json.loads(request_data)
+	try:
+		fedex = FedExController(request_data.get("fedex_account"))
+		response = fedex.schedule_pickup(request_data)
+		return response
+	except Exception,e:
+		frappe.throw(_(cstr(e)))

@@ -11,3 +11,4 @@ def fedex_config():
 		meter_number=settings.get("fedex_meter_no"),
 		freight_account_number=settings.get("fedex_meter_no"),
 		use_test_server=True if settings.get('is_sandbox') else False)
+	return config_obj
