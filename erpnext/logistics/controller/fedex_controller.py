@@ -54,13 +54,13 @@ class FedExController():
 				  "location_no": pickup_service.response.Location
 				}
 
+	def show_notification(self, shipment):
+		for notification in shipment.response.Notifications:
+			frappe.msgprint(_('Code: %s, %s' % (notification.Code, notification.Message)))
+
 	@staticmethod
 	def get_company_data(request_data):
 		shipper_details = frappe.db.get_value("Address", request_data.get("shipper_id"), "*", as_dict=True)
 		company = frappe.db.get_value("Delivery Note", request_data.get("delivery_note"), "company")
 		closing_time = frappe.db.get_value("Company", shipper_details.get("company"), "closing_time")
 		return shipper_details, closing_time, company
-
-	def show_notification(self, shipment):
-		for notification in shipment.response.Notifications:
-			frappe.msgprint(_('Code: %s, %s' % (notification.Code, notification.Message)))

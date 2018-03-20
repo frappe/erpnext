@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('FedEx Package', {
-	refresh: function(frm) {
+	refresh: function() {
 
 	}
 });
