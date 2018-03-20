@@ -55,6 +55,7 @@ class Item(WebsiteGenerator):
 			else:
 				from frappe.model.naming import set_name_by_naming_series
 				set_name_by_naming_series(self)
+				self.item_code = self.name
 		elif not self.item_code:
 			msgprint(_("Item Code is mandatory because Item is not automatically numbered"), raise_exception=1)
 
