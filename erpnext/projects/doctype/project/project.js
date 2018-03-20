@@ -49,6 +49,23 @@ frappe.ui.form.on("Project", {
 				filters: filters
 			}
 		});
+
+		if (frappe.model.can_read("Task")) {
+			frm.add_custom_button(__("Gantt Chart"), function () {
+				frappe.route_options = {
+					"project": frm.doc.name
+				};
+				frappe.set_route("List", "Task", "Gantt");
+			});
+
+			frm.add_custom_button(__("Kanban Board"), () => {
+				frappe.call('erpnext.projects.doctype.project.project.create_kanban_board_if_not_exists', {
+					project: frm.doc.project_name
+				}).then(() => {
+					frappe.set_route('List', 'Task', 'Kanban', frm.doc.project_name);
+				});
+			});
+		}
 	},
 
 	refresh: function (frm) {
@@ -56,15 +73,6 @@ frappe.ui.form.on("Project", {
 			frm.web_link && frm.web_link.remove();
 		} else {
 			frm.add_web_link("/projects?project=" + encodeURIComponent(frm.doc.name));
-
-			if (frappe.model.can_read("Task")) {
-				frm.add_custom_button(__("Gantt Chart"), function () {
-					frappe.route_options = {
-						"project": frm.doc.name
-					};
-					frappe.set_route("List", "Task", "Gantt");
-				});
-			}
 
 			frm.trigger('show_dashboard');
 		}
