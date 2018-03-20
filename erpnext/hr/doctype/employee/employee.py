@@ -72,7 +72,7 @@ class Employee(NestedSet):
 		user.flags.ignore_permissions = True
 
 		if "Employee" not in user.get("roles"):
-			user.add_roles("Employee")
+			user.append_roles("Employee")
 
 		# copy details like Fullname, DOB and Image to User
 		if self.employee_name and not (user.first_name and user.last_name):

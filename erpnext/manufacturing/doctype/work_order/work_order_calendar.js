@@ -1,7 +1,7 @@
-// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
-// License: GNU General Public License v3. See license.txt
+// Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
+// For license information, please see license.txt
 
-frappe.views.calendar["Production Order"] = {
+frappe.views.calendar["Work Order"] = {
 	field_map: {
 		"start": "planned_start_date",
 		"end": "planned_end_date",

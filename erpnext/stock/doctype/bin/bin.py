@@ -75,9 +75,9 @@ class Bin(Document):
 
 	def update_reserved_qty_for_production(self):
 		'''Update qty reserved for production from Production Item tables
-			in open production orders'''
+			in open work orders'''
 		self.reserved_qty_for_production = frappe.db.sql('''select sum(required_qty - transferred_qty)
-			from `tabProduction Order` pro, `tabProduction Order Item` item
+			from `tabWork Order` pro, `tabWork Order Item` item
 			where
 				item.item_code = %s
 				and item.parent = pro.name

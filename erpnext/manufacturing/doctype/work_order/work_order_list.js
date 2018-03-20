@@ -1,4 +1,4 @@
-frappe.listview_settings['Production Order'] = {
+frappe.listview_settings['Work Order'] = {
 	add_fields: ["bom_no", "status", "sales_order", "qty",
 		"produced_qty", "expected_delivery_date", "planned_start_date", "planned_end_date"],
 	filters: [["status", "!=", "Stopped"]],

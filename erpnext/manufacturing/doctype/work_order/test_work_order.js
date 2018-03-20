@@ -1,4 +1,4 @@
-QUnit.test("test: production order", function (assert) {
+QUnit.test("test: work order", function (assert) {
 	assert.expect(25);
 	let done = assert.async();
 	let laptop_quantity = 5;
@@ -14,13 +14,13 @@ QUnit.test("test: production order", function (assert) {
 	};
 
 	frappe.run_serially([
-		// test production order
-		() => frappe.set_route("List", "Production Order", "List"),
+		// test work order
+		() => frappe.set_route("List", "Work Order", "List"),
 		() => frappe.timeout(3),
 
-		// Create a laptop production order
+		// Create a laptop work order
 		() => {
-			return frappe.tests.make('Production Order', [
+			return frappe.tests.make('Work Order', [
 				{production_item: 'Laptop'},
 				{company: 'For Testing'},
 				{qty: laptop_quantity},
@@ -50,13 +50,13 @@ QUnit.test("test: production order", function (assert) {
 			});
 		},
 
-		// Submit the production order
+		// Submit the work order
 		() => cur_frm.savesubmit(),
 		() => frappe.timeout(1),
 		() => frappe.click_button('Yes'),
 		() => frappe.timeout(2.5),
 
-		// Confirm the production order timesheet, save and submit it
+		// Confirm the work order timesheet, save and submit it
 		() => frappe.click_link("TS-00"),
 		() => frappe.timeout(1),
 		() => frappe.click_button("Submit"),
@@ -64,8 +64,8 @@ QUnit.test("test: production order", function (assert) {
 		() => frappe.click_button("Yes"),
 		() => frappe.timeout(2.5),
 
-		// Start the production order process
-		() => frappe.set_route("List", "Production Order", "List"),
+		// Start the work order process
+		() => frappe.set_route("List", "Work Order", "List"),
 		() => frappe.timeout(2),
 		() => frappe.click_link("Laptop"),
 		() => frappe.timeout(1),
@@ -82,20 +82,20 @@ QUnit.test("test: production order", function (assert) {
 			assert.equal(cur_frm.doc.total_outgoing_value, "99000",
 				"Outgoing cost is correct"); // Price of each item x5
 		},
-		// Submit for production
+		// Submit for work
 		() => frappe.click_button("Submit"),
 		() => frappe.timeout(0.5),
 		() => frappe.click_button("Yes"),
 		() => frappe.timeout(0.5),
 
-		// Finish the production order by sending for manufacturing
-		() => frappe.set_route("List", "Production Order"),
+		// Finish the work order by sending for manufacturing
+		() => frappe.set_route("List", "Work Order"),
 		() => frappe.timeout(1),
 		() => frappe.click_link("Laptop"),
 		() => frappe.timeout(1),
 
 		() => {
-			assert.ok(frappe.tests.is_visible("5 items in progress", 'p'), "Production order initiated");
+			assert.ok(frappe.tests.is_visible("5 items in progress", 'p'), "Work order initiated");
 			assert.ok(frappe.tests.is_visible("Finish"), "Finish button visible");
 		},
 
@@ -118,12 +118,12 @@ QUnit.test("test: production order", function (assert) {
 		() => frappe.timeout(1),
 
 		// Manufacturing finished
-		() => frappe.set_route("List", "Production Order", "List"),
+		() => frappe.set_route("List", "Work Order", "List"),
 		() => frappe.timeout(1),
 		() => frappe.click_link("Laptop"),
 		() => frappe.timeout(1),
 
-		() => assert.ok(frappe.tests.is_visible("5 items produced", 'p'), "Production order completed"),
+		() => assert.ok(frappe.tests.is_visible("5 items produced", 'p'), "Work order completed"),
 
 		() => done()
 	]);
