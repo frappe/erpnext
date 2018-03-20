@@ -407,3 +407,12 @@ def create_project_update(project):
 				message= project_update_url
 			)
 	return data
+
+@frappe.whitelist()
+def create_kanban_board_if_not_exists(project):
+	from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
+
+	if not frappe.db.exists('Kanban Board', project):
+		quick_kanban_board('Task', project, 'status')
+
+	return True
