@@ -6,20 +6,20 @@ from frappe.utils import cint
 import frappe
 
 def execute(filters=None):
-	prod_list = get_production_orders()
-	data = get_item_list(prod_list, filters)
+	wo_list = get_work_orders()
+	data = get_item_list(wo_list, filters)
 	columns = get_columns()
 	return columns, data
 	
-def get_item_list(prod_list, filters):
+def get_item_list(wo_list, filters):
 	out = []
 	
 	#Add a row for each item/qty
-	for prod_details in prod_list:
-		desc = frappe.db.get_value("BOM", prod_details.bom_no, "description")
+	for wo_details in wo_list:
+		desc = frappe.db.get_value("BOM", wo_details.bom_no, "description")
 
-		for prod_item_details in frappe.db.get_values("Production Order Item",
-			{"parent": prod_details.name}, ["item_code", "source_warehouse"], as_dict=1):
+		for wo_item_details in frappe.db.get_values("Work Order Item",
+			{"parent": wo_details.name}, ["item_code", "source_warehouse"], as_dict=1):
 
 			item_list = frappe.db.sql("""SELECT
 					bom_item.item_code as item_code,
@@ -35,15 +35,15 @@ def get_item_list(prod_list, filters):
 					and bom.name = %(bom)s
 				GROUP BY
 					bom_item.item_code""",
-			{"bom": prod_details.bom_no, "warehouse": prod_item_details.source_warehouse,
-				"filterhouse": filters.warehouse, "item_code": prod_item_details.item_code}, as_dict=1)
+			{"bom": wo_details.bom_no, "warehouse": wo_item_details.source_warehouse,
+				"filterhouse": filters.warehouse, "item_code": wo_item_details.item_code}, as_dict=1)
 
 			stock_qty = 0
 			count = 0
-			buildable_qty = prod_details.qty
+			buildable_qty = wo_details.qty
 			for item in item_list:
 				count = count + 1
-				if item.build_qty >= (prod_details.qty - prod_details.produced_qty):
+				if item.build_qty >= (wo_details.qty - wo_details.produced_qty):
 					stock_qty = stock_qty + 1
 				elif buildable_qty >= item.build_qty:
 					buildable_qty = item.build_qty
@@ -54,15 +54,15 @@ def get_item_list(prod_list, filters):
 				build = "N"
 
 			row = frappe._dict({
-				"production_order": prod_details.name,
-				"status": prod_details.status,
+				"work_order": wo_details.name,
+				"status": wo_details.status,
 				"req_items": cint(count),
 				"instock": stock_qty,
 				"description": desc,
-				"source_warehouse": prod_item_details.source_warehouse,
-				"item_code": prod_item_details.item_code,
-				"bom_no": prod_details.bom_no,
-				"qty": prod_details.qty,
+				"source_warehouse": wo_item_details.source_warehouse,
+				"item_code": wo_item_details.item_code,
+				"bom_no": wo_details.bom_no,
+				"qty": wo_details.qty,
 				"buildable_qty": buildable_qty,
 				"ready_to_build": build
 			})
@@ -71,18 +71,18 @@ def get_item_list(prod_list, filters):
 
 	return out
 	
-def get_production_orders():
-	out =  frappe.get_all("Production Order", filters={"docstatus": 1, "status": ( "!=","Completed")},
+def get_work_orders():
+	out =  frappe.get_all("Work Order", filters={"docstatus": 1, "status": ( "!=","Completed")},
 		fields=["name","status", "bom_no", "qty", "produced_qty"], order_by='name')
 
 	return out
 	
 def get_columns():
 	columns = [{
-		"fieldname": "production_order",
-		"label": "Production Order",
+		"fieldname": "work_order",
+		"label": "Work Order",
 		"fieldtype": "Link",
-		"options": "Production Order",
+		"options": "Work Order",
 		"width": 110
 	}, {
 		"fieldname": "bom_no",

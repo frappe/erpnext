@@ -5,5 +5,5 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 
-class ProductionOrderOperation(Document):
+class WorkOrderOperation(Document):
 	pass
