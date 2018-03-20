@@ -36,7 +36,7 @@ def email_sending(project_name,frequency,date_start,date_end,progress,number_of_
     msg += "</table>"
     if len(holiday) == 0:
         email = frappe.db.sql("""SELECT user from `tabProject User` WHERE parent = %s;""", project_name)
-    	for emails in email:
-    		frappe.sendmail(recipients=emails,subject=frappe._(project_name + ' ' + 'Summary'),message = msg)
+        for emails in email:
+            frappe.sendmail(recipients=emails,subject=frappe._(project_name + ' ' + 'Summary'),message = msg)
     else:
     	pass
