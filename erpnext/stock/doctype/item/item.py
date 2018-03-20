@@ -58,8 +58,7 @@ class Item(WebsiteGenerator):
 		elif not self.item_code:
 			msgprint(_("Item Code is mandatory because Item is not automatically numbered"), raise_exception=1)
 
-		self.item_code = strip(self.item_code)
-		self.name = self.item_code
+		self.item_code = self.name
 
 	def before_insert(self):
 		if not self.description:
