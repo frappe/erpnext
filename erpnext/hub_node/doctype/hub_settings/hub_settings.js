@@ -46,7 +46,7 @@ frappe.ui.form.on("Hub Settings", {
 	set_enable_hub_primary_button: (frm) => {
 		frm.page.set_primary_action(__("Enable Hub"), () => {
 			if(frappe.session.user === "Administrator") {
-				frappe.msgprint("Please login as another user.")
+				frappe.msgprint(__("Please login as another user."))
 			} else {
 				frappe.verify_password(() => {
 					this.frm.call({

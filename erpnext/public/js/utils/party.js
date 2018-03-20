@@ -18,6 +18,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 			args = {
 				party: frm.doc.supplier,
 				party_type: "Supplier",
+				bill_date: frm.doc.bill_date,
 				price_list: frm.doc.buying_price_list
 			};
 		}

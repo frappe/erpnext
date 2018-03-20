@@ -163,6 +163,11 @@ class BuyingController(StockController):
 				if item in self.sub_contracted_items and not item.bom:
 					frappe.throw(_("Please select BOM in BOM field for Item {0}").format(item.item_code))
 
+			if self.doctype == "Purchase Order":
+				for supplied_item in self.get("supplied_items"):
+					if not supplied_item.reserve_warehouse:
+						frappe.throw(_("Reserved Warehouse is mandatory for Item {0} in Raw Materials supplied").format(frappe.bold(supplied_item.rm_item_code)))
+
 		else:
 			for item in self.get("items"):
 				if item.bom:
@@ -190,10 +195,22 @@ class BuyingController(StockController):
 			self.set('supplied_items', [])
 
 	def update_raw_materials_supplied(self, item, raw_material_table):
-		bom_items = self.get_items_from_bom(item.item_code, item.bom)
+		exploded_item = 1
+		if hasattr(item, 'include_exploded_items'):
+			exploded_item = item.get('include_exploded_items')
+
+		bom_items = get_items_from_bom(item.item_code, item.bom, exploded_item)
 		raw_materials_cost = 0
+		items = list(set([d.item_code for d in bom_items]))
+		item_wh = frappe._dict(frappe.db.sql("""select item_code, default_warehouse
+			from `tabItem` where name in ({0})""".format(", ".join(["%s"] * len(items))), items))
 
 		for bom_item in bom_items:
+			if self.doctype == "Purchase Order":
+				reserve_warehouse = bom_item.source_warehouse or item_wh.get(bom_item.item_code)
+				if frappe.db.get_value("Warehouse", reserve_warehouse, "company") != self.company:
+					reserve_warehouse = None
+
 			# check if exists
 			exists = 0
 			for d in self.get(raw_material_table):
@@ -205,7 +222,7 @@ class BuyingController(StockController):
 			if not exists:
 				rm = self.append(raw_material_table, {})
 
-			required_qty = flt(flt(bom_item.qty_consumed_per_unit) * flt(item.qty) *
+			required_qty = flt(flt(bom_item.qty_consumed_per_unit) * (flt(item.qty) + getattr(item, 'rejected_qty', 0)) *
 				flt(item.conversion_factor), rm.precision("required_qty"))
 			rm.reference_name = item.name
 			rm.bom_detail_no = bom_item.name
@@ -213,6 +230,8 @@ class BuyingController(StockController):
 			rm.rm_item_code = bom_item.item_code
 			rm.stock_uom = bom_item.stock_uom
 			rm.required_qty = required_qty
+			if self.doctype == "Purchase Order" and not rm.reserve_warehouse:
+				rm.reserve_warehouse = reserve_warehouse
 
 			rm.conversion_factor = item.conversion_factor
 
@@ -260,20 +279,6 @@ class BuyingController(StockController):
 			for d in rm_supplied_details:
 				if d not in delete_list:
 					self.append(raw_material_table, d)
-
-	def get_items_from_bom(self, item_code, bom):
-		bom_items = frappe.db.sql("""select t2.item_code,
-			t2.stock_qty / ifnull(t1.quantity, 1) as qty_consumed_per_unit,
-			t2.rate, t2.stock_uom, t2.name, t2.description
-			from `tabBOM` t1, `tabBOM Item` t2, tabItem t3
-			where t2.parent = t1.name and t1.item = %s
-			and t1.docstatus = 1 and t1.is_active = 1 and t1.name = %s
-			and t2.item_code = t3.name and t3.is_stock_item = 1""", (item_code, bom), as_dict=1)
-
-		if not bom_items:
-			msgprint(_("Specified BOM {0} does not exist for Item {1}").format(bom, item_code), raise_exception=1)
-
-		return bom_items
 
 	@property
 	def sub_contracted_items(self):
@@ -339,7 +344,7 @@ class BuyingController(StockController):
 					frappe.get_meta(item_row.doctype).get_label(fieldname), item_row['item_code'])))
 
 	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
-		self.update_ordered_qty()
+		self.update_ordered_and_reserved_qty()
 
 		sl_entries = []
 		stock_items = self.get_stock_items()
@@ -381,7 +386,7 @@ class BuyingController(StockController):
 		self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock,
 			via_landed_cost_voucher=via_landed_cost_voucher)
 
-	def update_ordered_qty(self):
+	def update_ordered_and_reserved_qty(self):
 		po_map = {}
 		for d in self.get("items"):
 			if self.doctype=="Purchase Receipt" \
@@ -400,6 +405,8 @@ class BuyingController(StockController):
 						frappe.InvalidStatusError)
 
 				po_obj.update_ordered_qty(po_item_rows)
+				if self.is_subcontracted:
+					po_obj.update_reserved_qty_for_subcontract()
 
 	def make_sl_entries_for_supplier_warehouse(self, sl_entries):
 		if hasattr(self, 'supplied_items'):
@@ -439,3 +446,21 @@ class BuyingController(StockController):
 		else:
 			frappe.throw(_("Please enter Reqd by Date"))
 
+def get_items_from_bom(item_code, bom, exploded_item=1):
+	doctype = "BOM Item" if not exploded_item else "BOM Explosion Item"
+
+	bom_items = frappe.db.sql("""select t2.item_code, t2.name,
+			t2.rate, t2.stock_uom, t2.source_warehouse, t2.description,
+			t2.stock_qty / ifnull(t1.quantity, 1) as qty_consumed_per_unit
+		from
+			`tabBOM` t1, `tab{0}` t2, tabItem t3
+		where
+			t2.parent = t1.name and t1.item = %s
+			and t1.docstatus = 1 and t1.is_active = 1 and t1.name = %s
+			and t2.item_code = t3.name and t3.is_stock_item = 1""".format(doctype),
+			(item_code, bom), as_dict=1)
+
+	if not bom_items:
+		msgprint(_("Specified BOM {0} does not exist for Item {1}").format(bom, item_code), raise_exception=1)
+
+	return bom_items

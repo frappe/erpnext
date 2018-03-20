@@ -1,6 +1,7 @@
 introduction
 setting-up
 accounts
+asset
 stock
 CRM
 selling

@@ -11,11 +11,11 @@ test_dependencies = ["Crop", "Fertilizer", "Land Unit", "Disease"]
 class TestCropCycle(unittest.TestCase):
 	def test_crop_cycle_creation(self):
 		cycle = frappe.get_doc('Crop Cycle', 'Basil from seed 2017')
-		self.assertEquals(frappe.db.exists('Crop Cycle', 'Basil from seed 2017'), 'Basil from seed 2017')
+		self.assertEqual(frappe.db.exists('Crop Cycle', 'Basil from seed 2017'), 'Basil from seed 2017')
 
 		# check if the tasks were created 
-		self.assertEquals(check_task_creation(), True)
-		self.assertEquals(check_project_creation(), True)
+		self.assertEqual(check_task_creation(), True)
+		self.assertEqual(check_project_creation(), True)
 
 def check_task_creation():
 	all_task_dict = {

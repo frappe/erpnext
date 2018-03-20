@@ -3,11 +3,11 @@ The maintenance of complete and accurate medical records is a requirement of hea
 
 Medical Record automatically keeps track of all Consultations, recorded Vital Signs, Lab Investigations etc. Complaints, Diagnosis etc. captured as part of consultation are easily viewable but to look at the details of other documents, links are provided.
 
-<img class="screenshot" alt="ERPNext Healthcare" src="/docs/assets/img/healthcare/medical_record_1.png">
+<img class="screenshot" alt="ERPNext Healthcare" src="{{docs_base_url}}/assets/img/healthcare/medical_record_1.png">
 
 ##### Adding notes manually to Medical Record
 In the Patient screen Create > Medical Record will allow you to record notes to the Medical Record manually. You can also attach files when doing this, and the Medical Record will display links to the attached file along side the notes. Create > Medical Record button is also made available in the Consultation screen
 
-<img class="screenshot" alt="ERPNext Healthcare" src="/docs/assets/img/healthcare/medical_record_2.png">
+<img class="screenshot" alt="ERPNext Healthcare" src="{{docs_base_url}}/assets/img/healthcare/medical_record_2.png">
 
 {next}

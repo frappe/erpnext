@@ -10,6 +10,7 @@ from frappe.website.website_generator import WebsiteGenerator
 from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from erpnext.shopping_cart.product_info import set_product_info_for_website
+from erpnext.utilities.product import get_qty_in_stock
 
 class ItemGroup(NestedSet, WebsiteGenerator):
 	nsm_parent_field = 'parent_item_group'
@@ -83,7 +84,8 @@ def get_product_list_for_group(product_group=None, start=0, limit=10, search=Non
 	# base query
 	query = """select I.name, I.item_name, I.item_code, I.route, I.image, I.website_image, I.thumbnail, I.item_group,
 			I.description, I.web_long_description as website_description, I.is_stock_item,
-			case when (S.actual_qty - S.reserved_qty) > 0 then 1 else 0 end as in_stock
+			case when (S.actual_qty - S.reserved_qty) > 0 then 1 else 0 end as in_stock, I.website_warehouse,
+			I.has_batch_no
 		from `tabItem` I
 		left join tabBin S on I.item_code = S.item_code and I.website_warehouse = S.warehouse
 		where I.show_in_website = 1
@@ -100,14 +102,31 @@ def get_product_list_for_group(product_group=None, start=0, limit=10, search=Non
 				or I.name like %(search)s)"""
 		search = "%" + cstr(search) + "%"
 
-	query += """order by I.weightage desc, in_stock desc, I.item_name limit %s, %s""" % (start, limit)
+	query += """order by I.weightage desc, in_stock desc, I.modified desc limit %s, %s""" % (start, limit)
 
 	data = frappe.db.sql(query, {"product_group": product_group,"search": search, "today": nowdate()}, as_dict=1)
+	data = adjust_qty_for_expired_items(data)
 
-	for item in data:
+  for item in data:
 		set_product_info_for_website(item)
 
 	return [get_item_for_list_in_html(r) for r in data]
+
+
+def adjust_qty_for_expired_items(data):
+	adjusted_data = []
+
+	for item in data:
+		if item.get('has_batch_no') and item.get('website_warehouse'):
+			stock_qty_dict = get_qty_in_stock(
+				item.get('name'), 'website_warehouse', item.get('website_warehouse'))
+			qty = stock_qty_dict.stock_qty[0][0]
+			item['in_stock'] = 1 if qty else 0
+		adjusted_data.append(item)
+
+	return adjusted_data
+
+
 
 def get_child_groups(item_group_name):
 	item_group = frappe.get_doc("Item Group", item_group_name)

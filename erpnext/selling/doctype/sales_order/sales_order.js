@@ -13,6 +13,10 @@ frappe.ui.form.on("Sales Order", {
 			'Project': 'Project'
 		}
 		frm.add_fetch('customer', 'tax_id', 'tax_id');
+
+		// formatter for material request item
+		frm.set_indicator_formatter('item_code',
+			function(doc) { return (doc.stock_qty<=doc.delivered_qty) ? "green" : "orange" })
 	},
 	onload: function(frm) {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
@@ -27,10 +31,6 @@ frappe.ui.form.on("Sales Order", {
 				}
 			}
 		});
-
-		// formatter for material request item
-		frm.set_indicator_formatter('item_code',
-			function(doc) { return (doc.stock_qty<=doc.delivered_qty) ? "green" : "orange" })
 
 		erpnext.queries.setup_warehouse_query(frm);
 	},
@@ -48,6 +48,15 @@ frappe.ui.form.on("Sales Order", {
 });
 
 frappe.ui.form.on("Sales Order Item", {
+	item_code: function(frm,cdt,cdn) {
+		var row = locals[cdt][cdn];
+		if (frm.doc.delivery_date) {
+			row.delivery_date = frm.doc.delivery_date;
+			refresh_field("delivery_date", cdn, "items");
+		} else {
+			frm.script_manager.copy_from_first_row("items", row, ["delivery_date"]);
+		}
+	},
 	delivery_date: function(frm, cdt, cdn) {
 		if(!frm.doc.delivery_date) {
 			erpnext.utils.copy_value_in_all_row(frm.doc, cdt, cdn, "items", "delivery_date");
@@ -97,8 +106,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
 					this.frm.add_custom_button(__('Delivery'),
 						function() { me.make_delivery_note_based_on_delivery_date(); }, __("Make"));
-					this.frm.add_custom_button(__('Production Order'),
-						function() { me.make_production_order() }, __("Make"));
+					this.frm.add_custom_button(__('Work Order'),
+						function() { me.make_work_order() }, __("Make"));
 
 					this.frm.page.set_inner_btn_group_as_primary(__("Make"));
 				}
@@ -183,15 +192,15 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		this.order_type(doc);
 	},
 
-	make_production_order() {
+	make_work_order() {
 		var me = this;
 		this.frm.call({
 			doc: this.frm.doc,
-			method: 'get_production_order_items',
+			method: 'get_work_order_items',
 			callback: function(r) {
 				if(!r.message) {
 					frappe.msgprint({
-						title: __('Production Order not created'),
+						title: __('Work Order not created'),
 						message: __('No Items with Bill of Materials to Manufacture'),
 						indicator: 'orange'
 					});
@@ -199,8 +208,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				}
 				else if(!r.message) {
 					frappe.msgprint({
-						title: __('Production Order not created'),
-						message: __('Production Order already created for all items with BOM'),
+						title: __('Work Order not created'),
+						message: __('Work Order already created for all items with BOM'),
 						indicator: 'orange'
 					});
 					return;
@@ -231,7 +240,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						primary_action: function() {
 							var data = d.get_values();
 							me.frm.call({
-								method: 'make_production_orders',
+								method: 'make_work_orders',
 								args: {
 									items: data,
 									company: me.frm.doc.company,
@@ -242,9 +251,9 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 								callback: function(r) {
 									if(r.message) {
 										frappe.msgprint({
-											message: __('Production Orders Created: {0}',
+											message: __('Work Orders Created: {0}',
 												[r.message.map(function(d) {
-													return repl('<a href="#Form/Production Order/%(name)s">%(name)s</a>', {name:d})
+													return repl('<a href="#Form/Work Order/%(name)s">%(name)s</a>', {name:d})
 												}).join(', ')]),
 											indicator: 'green'
 										})
@@ -433,17 +442,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		if(cint(frappe.boot.notification_settings.sales_order)) {
 			this.frm.email_doc(frappe.boot.notification_settings.sales_order_message);
 		}
-	},
-
-	items_add: function(doc, cdt, cdn) {
-		var row = frappe.get_doc(cdt, cdn);
-		if(doc.delivery_date) {
-			row.delivery_date = doc.delivery_date;
-			refresh_field("delivery_date", cdn, "items");
-		} else {
-			this.frm.script_manager.copy_from_first_row("items", row, ["delivery_date"]);
-		}
 	}
 });
-
 $.extend(cur_frm.cscript, new erpnext.selling.SalesOrderController({frm: cur_frm}));

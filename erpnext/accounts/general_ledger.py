@@ -65,6 +65,8 @@ def merge_similar_entries(gl_map):
 
 	# filter zero debit and credit entries
 	merged_gl_map = filter(lambda x: flt(x.debit, 9)!=0 or flt(x.credit, 9)!=0, merged_gl_map)
+	merged_gl_map = list(merged_gl_map)
+		
 	return merged_gl_map
 
 def check_if_in_list(gle, gl_map):
@@ -191,8 +193,9 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 	for entry in gl_entries:
 		validate_frozen_account(entry["account"], adv_adj)
 		validate_balance_type(entry["account"], adv_adj)
-		validate_expense_against_budget(entry)
+		if not adv_adj:
+			validate_expense_against_budget(entry)
 		
-		if entry.get("against_voucher") and update_outstanding == 'Yes':
+		if entry.get("against_voucher") and update_outstanding == 'Yes' and not adv_adj:
 			update_outstanding_amt(entry["account"], entry.get("party_type"), entry.get("party"), entry.get("against_voucher_type"),
 				entry.get("against_voucher"), on_cancel=True)

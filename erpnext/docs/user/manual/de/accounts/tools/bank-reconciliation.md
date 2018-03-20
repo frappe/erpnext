@@ -33,7 +33,7 @@ Jetzt werden alle Buchungen im angegebenen Zeitraum in der Tabelle darunter ange
 
 #### Abbildung 2: Werkzeug zum Kontenabgleich
 
-<img class="screenshot" alt="Kontenabgleich" src="/docs/assets/img/accounts/bank-reconciliation.png">
+<img class="screenshot" alt="Kontenabgleich" src="{{docs_base_url}}/assets/img/accounts/bank-reconciliation.png">
 
 **Schritt 5:** Klicken Sie auf die Schaltfläche "Abwicklungsdatum aktualisieren"
 

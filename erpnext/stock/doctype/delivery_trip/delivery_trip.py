@@ -82,15 +82,6 @@ def get_contact_display(contact):
 	}
 	return contact_info.html
 
-
-@frappe.whitelist()
-def get_delivery_notes(customer):
-	return frappe.db.get_all("Delivery Note", filters={
-		'customer': customer,
-		'docstatus': 1,
-		'status': ('!=', 'Completed')
-	})
-
 @frappe.whitelist()
 def calculate_time_matrix(name):
 	"""Calucation and round in closest 15 minutes, delivery stops"""
@@ -157,21 +148,17 @@ def notify_customers(docname, date, driver, vehicle, sender_email, delivery_noti
 		delivery_stop_info = frappe.db.get_value(
 			"Delivery Stop",
 			delivery_stop.name,
-			["notified_by_email", "estimated_arrival", "details", "contact", "delivery_notes"],
+			["notified_by_email", "estimated_arrival", "details", "contact", "delivery_note"],
 		as_dict=1)
 		contact_info = frappe.db.get_value("Contact", delivery_stop_info.contact,
 			["first_name", "last_name", "email_id", "gender"], as_dict=1)
 
-		if delivery_stop_info.delivery_notes:
-			delivery_notes = (delivery_stop_info.delivery_notes).split(",")
-			attachments = []
-			for delivery_note in delivery_notes:
-				default_print_format = frappe.get_value('Delivery Note', delivery_note, 'default_print_format')
-				attachments.append(
-					frappe.attach_print('Delivery Note',
-	 					 delivery_note,
-						 file_name="Delivery Note",
-						 print_format=default_print_format or "Standard"))
+		if delivery_stop_info.delivery_note:
+			default_print_format = frappe.get_meta('Delivery Note').default_print_format
+			attachments = frappe.attach_print('Delivery Note',
+				delivery_stop_info.delivery_note,
+				file_name="Delivery Note",
+				print_format=default_print_format or "Standard")
 
 		if not delivery_stop_info.notified_by_email and contact_info.email_id:
 			driver_info = frappe.db.get_value("Driver", driver, ["full_name", "cell_number"], as_dict=1)

@@ -4,14 +4,14 @@
 /* global frappe, refresh_field */
 
 frappe.ui.form.on("Supplier Scorecard", {
-
-	onload: function(frm) {
-
+	setup: function(frm) {
 		if (frm.doc.indicator_color !== "")	{
 			frm.set_indicator_formatter("status", function(doc) {
 				return doc.indicator_color.toLowerCase();
 			});
 		}
+	},
+	onload: function(frm) {
 		if (frm.doc.__unsaved == 1)	{
 			loadAllCriteria(frm);
 			loadAllStandings(frm);

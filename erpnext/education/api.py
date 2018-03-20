@@ -269,7 +269,10 @@ def get_grade(grading_scale, percentage):
 	:param Percentage: Score Percentage Percentage
 	"""
 	grading_scale_intervals = {}
-	for d in frappe.get_all("Grading Scale Interval", fields=["grade_code", "threshold"], filters={"parent": grading_scale}):
+	if not hasattr(frappe.local, 'grading_scale'):
+		grading_scale = frappe.get_all("Grading Scale Interval", fields=["grade_code", "threshold"], filters={"parent": grading_scale})
+		frappe.local.grading_scale = grading_scale
+	for d in frappe.local.grading_scale:
 		grading_scale_intervals.update({d.threshold:d.grade_code})
 	intervals = sorted(grading_scale_intervals.keys(), key=float, reverse=True)
 	for interval in intervals:
@@ -332,7 +335,7 @@ def get_assessment_result_doc(student, assessment_plan):
 		if doc.docstatus == 0:
 			return doc
 		elif doc.docstatus == 1:
-			frappe.msgprint("Result already Submitted")
+			frappe.msgprint(_("Result already Submitted"))
 			return None
 	else:
 		return frappe.new_doc("Assessment Result")

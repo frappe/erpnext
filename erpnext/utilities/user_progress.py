@@ -12,10 +12,13 @@ def get_slide_settings():
 	currency = defaults.get("currency") or ''
 
 	doc = frappe.get_doc("Setup Progress")
-	item = [d for d in doc.get("actions") if d.action_name == "Set Sales Target"][0]
-	item.action_document = company
-	item.save()
-	doc.save()
+	item = [d for d in doc.get("actions") if d.action_name == "Set Sales Target"]
+	
+	if len(item):
+		item = item[0]
+		if not item.action_document:
+			item.action_document = company
+			doc.save()
 
 	# Initial state of slides
 	return [
@@ -45,7 +48,7 @@ def get_slide_settings():
 			help=_("Set a sales goal you'd like to achieve for your company."),
 			fields=[
 				{"fieldtype":"Currency", "fieldname":"monthly_sales_target",
-					"label":_("Monthly Sales Target (" + currency + ")")},
+					"label":_("Monthly Sales Target (" + currency + ")"), "reqd":1},
 			],
 			submit_method="erpnext.utilities.user_progress_utils.set_sales_target",
 			done_state_title=_("Go to " + company),

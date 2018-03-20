@@ -82,8 +82,8 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			$.each(this.frm.doc.accounts || [], function(i, jvd) {
 				frappe.model.set_default_values(jvd);
 			});
-
-			if(!this.frm.doc.amended_from) this.frm.doc.posting_date = this.frm.posting_date || frappe.datetime.get_today();
+			var posting_date = this.frm.posting_date;
+			if(!this.frm.doc.amended_from) this.frm.set_value('posting_date', posting_date || frappe.datetime.get_today());
 		}
 	},
 
@@ -116,7 +116,6 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			if(jvd.reference_type==="Expense Claim") {
 				return {
 					filters: {
-						'approval_status': 'Approved',
 						'total_sanctioned_amount': ['>', 0],
 						'status': ['!=', 'Paid'],
 						'docstatus': 1

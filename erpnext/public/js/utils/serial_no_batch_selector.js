@@ -314,7 +314,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				fieldtype: 'Link', fieldname: 'serial_no_select', options: 'Serial No',
 				label: __('Select'),
 				get_query: function() {
-					return { filters: {item_code: me.item_code}};
+					return { filters: {item_code: me.item_code, warehouse: me.warehouse_details.name}};
 				},
 				onchange: function(e) {
 					if(this.in_local_change) return;

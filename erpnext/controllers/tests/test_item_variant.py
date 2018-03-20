@@ -7,26 +7,24 @@ import unittest
 from erpnext.stock.doctype.item.test_item import set_item_variant_settings
 from erpnext.controllers.item_variant import copy_attributes_to_variant, make_variant_item_code
 
-# python 3 compatibility stuff
-try:
-	unicode = unicode
-except NameError:
-	# Python 3
-	basestring = (str, bytes)
-else:
-	# Python 2
-	basestring = basestring
+from six import string_types
 
+class TestItemVariant(unittest.TestCase):
+	def test_tables_in_template_copied_to_variant(self):
+		fields = [{'field_name': 'quality_inspection_template'}]
+		set_item_variant_settings(fields)
+		variant = make_item_variant()
+		self.assertEqual(variant.get("quality_inspection_template"), "_Test QC Template")
 
 def create_variant_with_tables(item, args):
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
+	qc_name = make_quality_inspection_template()
 	template = frappe.get_doc("Item", item)
-	template.quality_parameters.append({
-		"specification": "Moisture",
-		"value": "&lt; 5%",
-	})
+	template.quality_inspection_template = qc_name
+	template.save()
+
 	variant = frappe.new_doc("Item")
 	variant.variant_based_on = 'Item Attribute'
 	variant_attributes = []
@@ -43,7 +41,6 @@ def create_variant_with_tables(item, args):
 
 	return variant
 
-
 def make_item_variant():
 	frappe.delete_doc_if_exists("Item", "_Test Variant Item-S", force=1)
 	variant = create_variant_with_tables("_Test Variant Item", '{"Test Size": "Small"}')
@@ -52,10 +49,17 @@ def make_item_variant():
 	variant.save()
 	return variant
 
+def make_quality_inspection_template():
+	qc_template = "_Test QC Template"
+	if frappe.db.exists("Quality Inspection Template", qc_template):
+		return qc_template
 
-class TestItemVariant(unittest.TestCase):
-	def test_tables_in_template_copied_to_variant(self):
-		fields = [{'field_name': 'quality_parameters'}]
-		set_item_variant_settings(fields)
-		variant = make_item_variant()
-		self.assertNotEqual(variant.get("quality_parameters"), [])
+	qc = frappe.new_doc("Quality Inspection Template")
+	qc.quality_inspection_template_name = qc_template
+	qc.append('item_quality_inspection_parameter', {
+		"specification": "Moisture",
+		"value": "&lt; 5%",
+	})
+
+	qc.insert()
+	return qc.name

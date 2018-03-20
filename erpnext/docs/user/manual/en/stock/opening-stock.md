@@ -12,4 +12,12 @@ If you are not making opening Stock Entry, you can select "Stock Adjustment" acc
 
 To understand Opening Stock for serialized Items visit [Stock Reconciliation](/docs/user/manual/en/setting-up/stock-reconciliation-for-non-serialized-item.html)
 
+
+<div>
+    <div class="embed-container">
+        <iframe src="https://www.youtube.com/embed/nlHX0ZZ84Lw?end=120" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+        </iframe>
+    </div>
+</div>
+
 {next}

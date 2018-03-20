@@ -7,7 +7,7 @@ If the student has applied online for the admission in a particular **Program** 
 Else, to create the new Program Enrollment manually, go to:
 > Education > Program Enrollment > New
 
-<img class="screenshot" alt="Student Applicant Enrollment" src="/docs/assets/img/education/admission/program-enrollment.gif">
+<img class="screenshot" alt="Student Applicant Enrollment" src="{{docs_base_url}}/assets/img/education/admission/program-enrollment.gif">
 
 If any institution has skipped the online admission process then Program Enrollment can also be considered as the confirmation of the admission in a particular Program.
 
@@ -17,5 +17,14 @@ Student Batch: To categorize student into different sections/batches, you can as
 
 Student Category: For the Institutions having multiple Fees Structure, this field can be used to differentiate the student enrollment in a given fee category. 
 
+#### Video Tutorial For Program Enrollment
+
+
+<div>
+    <div class='embed-container'>
+        <iframe src='https://www.youtube.com/embed//5nxWYBRHY_o?start=0&end=88' frameborder='0' allowfullscreen>
+        </iframe>
+    </div>
+</div>
 
 {next}

@@ -38,6 +38,7 @@ class SellingController(StockController):
 		self.validate_max_discount()
 		self.validate_selling_price()
 		self.set_qty_as_per_stock_uom()
+		self.set_po_nos()
 		check_active_sales_items(self)
 
 	def set_missing_values(self, for_validate=False):
@@ -148,6 +149,9 @@ class SellingController(StockController):
 				.format(item_name, ref_rate_field, rate))
 
 		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
+			return
+
+		if hasattr(self, "is_return") and self.is_return:
 			return
 
 		for it in self.get("items"):
@@ -323,8 +327,15 @@ class SellingController(StockController):
 							"actual_qty": -1*flt(d.qty),
 							"incoming_rate": return_rate
 						}))
-
 		self.make_sl_entries(sl_entries)
+
+	def set_po_nos(self):
+		if self.doctype in ("Delivery Note", "Sales Invoice") and hasattr(self, "items"):
+			ref_fieldname = "against_sales_order" if self.doctype == "Delivery Note" else "sales_order"
+			sales_orders = list(set([d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)]))
+			if sales_orders:
+				po_nos = frappe.get_all('Sales Order', 'po_no', filters = {'name': ('in', sales_orders)})
+				self.po_no = ', '.join(list(set([d.po_no for d in po_nos if d.po_no])))
 
 def check_active_sales_items(obj):
 	for d in obj.get("items"):

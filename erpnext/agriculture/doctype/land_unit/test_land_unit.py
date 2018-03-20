@@ -22,5 +22,5 @@ class TestLandUnit(unittest.TestCase):
 			formatted_land_units.extend(temp['features'])
 		formatted_land_unit_string = str(formatted_land_units)
 		test_land = frappe.get_doc('Land Unit', 'Test Land')
-		self.assertEquals(formatted_land_unit_string, str(json.loads(test_land.get('location'))['features']))
-		self.assertEquals(area, test_land.get('area'))
+		self.assertEqual(formatted_land_unit_string, str(json.loads(test_land.get('location'))['features']))
+		self.assertEqual(area, test_land.get('area'))
