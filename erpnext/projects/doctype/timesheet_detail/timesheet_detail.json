@@ -166,8 +166,6 @@
   }, 
   {
    "allow_bulk_edit": 0, 
-<<<<<<< HEAD
-=======
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -200,7 +198,6 @@
   }, 
   {
    "allow_bulk_edit": 0, 
->>>>>>> added status field/
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -965,11 +962,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
-<<<<<<< HEAD
- "modified": "2018-01-07 11:46:04.045313", 
-=======
  "modified": "2018-03-19 09:50:53.116469", 
->>>>>>> added status field/
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Timesheet Detail", 
