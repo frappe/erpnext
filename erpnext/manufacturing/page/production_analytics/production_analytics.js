@@ -26,9 +26,7 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 	setup_columns: function() {
 
 		var std_columns = [
-			{id: "_check", name: __("Plot"), field: "_check", width: 30,
-				formatter: this.check_formatter},
-			{id: "name", name: __("Status"), field: "name", width: 100},
+			{id: "name", name: __("Status"), field: "name", width: 100}
 		];
 
 		this.make_date_range_columns();
@@ -51,8 +49,7 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 		this.trigger_refresh_on_change(["company"]);
 		this.trigger_refresh_on_change(["range"]);
 
-		this.show_zero_check()
-		this.setup_chart_check();
+		this.show_zero_check();
 
 	},
 	init_filter_values: function() {
@@ -64,7 +61,9 @@ erpnext.ProductionAnalytics = frappe.views.GridReportWithPlot.extend({
 
 		var chart_data = this.get_chart_data ? this.get_chart_data() : null;
 
-		this.chart = new Chart(".chart", {
+		const parent = this.wrapper.find('.chart')[0];
+		this.chart = new Chart(parent, {
+			height: 200,
 			data: chart_data,
 			type: 'line'
 		});

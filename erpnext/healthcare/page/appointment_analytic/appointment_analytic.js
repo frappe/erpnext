@@ -42,10 +42,7 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 		this.tree_grid = this.tree_grids[this.tree_type];
 
 		var std_columns = [
-			{id: "_check", name: __("Plot"), field: "_check", width: 40,
-				formatter: this.check_formatter},
-			{id: "name", name: this.tree_grid.label, field: "name", width: 300,
-				formatter: this.tree_formatter},
+			{id: "name", name: this.tree_grid.label, field: "name", width: 300},
 			{id: "total", name: "Total", field: "total", plot: false,
 				formatter: this.currency_formatter}
 		];
@@ -87,7 +84,6 @@ erpnext.AppointmentAnalytics = frappe.views.TreeGridReport.extend({
 		this.trigger_refresh_on_change(["tree_type", "physician", "department", "status", "type"]);
 
 		//	this.show_zero_check()
-		this.setup_chart_check();
 	},
 	init_filter_values: function() {
 		this._super();
