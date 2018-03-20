@@ -243,7 +243,7 @@
 					<label>{{ _("Batch: ") }}</label>
 				</div>
 				<div class="col-xs-7">
-					{{ doc.batch }}
+					{{ doc.student_batch }}
 				</div>
 			</div>
 		</div>
@@ -353,7 +353,7 @@
 	</div>
 
 	<div class="col-xs-6 column-break">	
-		<h4>{{ _("Parent Teacher Meeting Attendance")}}</h4> <br>
+		<h4>{{ _("Parents Teacher Meeting Attendance")}}</h4> <br>
 		<div>
 			Present {{ doc.parents_attendance if doc.parents_attendance != None else '0' }}
 			out of {{ doc.parents_meeting if doc.parents_meeting != None else '0' }}

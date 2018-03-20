@@ -22,12 +22,10 @@ frappe.ui.form.on('Student Report Generation Tool', {
 	refresh: function(frm) {
 		frm.disable_save();
 		frm.page.clear_indicator();
-		frm.fields_dict.preview_report_card.$input.addClass("btn-primary");
-	},
-
-	preview_report_card: function(frm) {
-		let url = "/api/method/erpnext.education.doctype.student_report_generation_tool.student_report_generation_tool.preview_report_card";
-		open_url_post(url, frm.doc);
+		frm.page.set_primary_action(__('Print Report Card'), () => {
+			let url = "/api/method/erpnext.education.doctype.student_report_generation_tool.student_report_generation_tool.preview_report_card";
+			open_url_post(url, frm.doc, true);
+		});
 	},
 
 	student: function(frm) {
