@@ -92,7 +92,6 @@ frappe.ui.form.on('Employee Advance', {
 			},
 			callback: function(r) {
 				frm.set_value("due_advance_amount",r.message);
-				refresh_field("due_advance_amount");
 			}
 		});
 	}
