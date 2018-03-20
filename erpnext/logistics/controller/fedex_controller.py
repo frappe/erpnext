@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 from fedex_config import fedex_config
 from frappe.utils import get_datetime
 from fedex.services.pickup_service import FedexCreatePickupRequest
