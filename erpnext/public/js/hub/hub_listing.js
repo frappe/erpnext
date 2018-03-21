@@ -41,7 +41,14 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 		});
 	}
 
-	setup_sort_selector() { }
+	setup_sort_selector() {
+		this.sort_selector = new frappe.ui.SortSelector({
+			parent: this.filter_area.$filter_list_wrapper,
+			doctype: this.doctype,
+			args: this.order_by,
+			onchange: () => this.refresh(true)
+		});
+	}
 
 	setup_view() { }
 
@@ -195,10 +202,14 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 			// this.append_to_container(placeholder, );
 		}
 
-		this.isImageLoaded(item.image, title, encoded_name, this.append_to_container)
+		let $container = this.$result.find(`.image-field[data-name="${encoded_name}"]`)
+
+		let placeholder = this.get_image_placeholder(title);
+
+		this.is_image_loaded(item.image, title, encoded_name, this.append_to_container)
 	}
 
-	isImageLoaded(src, alt_text, encoded_name, onload, onerror) {
+	is_image_loaded(src, alt_text, encoded_name, onload, onerror) {
 		var me = this;
 		let $container = this.$result.find(`.image-field[data-name="${encoded_name}"]`);
 		var tester = new Image();
