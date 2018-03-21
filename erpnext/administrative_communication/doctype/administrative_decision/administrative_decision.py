@@ -178,3 +178,8 @@ class AdministrativeDecision(Document):
             administrative_board.set("decision",decision)
             administrative_board.save()
         return administrative_board
+
+def get_emp(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql(""" select name,employee_name from `tabEmployee` """)
+
+    

@@ -57,11 +57,21 @@ frappe.ui.form.on('Administrative Decision', {
 				});
 
 			});
+		}
 	}
-}
-},
+	},
+	onload: function(frm){
 
+		cur_frm.set_query("employee", function() {
+	                return {
+	                    query: "erpnext.administrative_communication.doctype.administrative_decision.administrative_decision.get_emp",
+	                    filters: [
+	                        // ["Employee", "name", "!=", cur_frm.doc.employee],
+	                    ]
+	                };
+	            });
 
+	},
 	type: function(frm) {
 		if (frm.doc.type == "Received Document"){
 			frm.set_value('naming_series', "AD-IN-")
