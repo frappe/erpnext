@@ -15,15 +15,17 @@ Steps:-
 
 5. Make sure "Enable Sync" is checked.
 
-6. Click Save.
+6. Select Account type from Account Details Section.
 
-7. After saving, "Secret" and "Endpoint" are generated automatically and can be seen on "Woocommerce Settings" doctype.
+7. Click Save.
 
-8. Now from your woocommerce site, click on webhooks option and click on "Add Webhook".
+8. After saving, "Secret" and "Endpoint" are generated automatically and can be seen on "Woocommerce Settings" doctype.
 
-9. Give name to the webhook of your choice. Click on Status dropdown and select "Active". Select Topic as "Order Created". Copy the "Endpoint" from "Woocommerce Settings" doctype and paste it in "Delivery URL" field. Copy "Secret" from "Woocommerce Settings" doctype and paste it in "Secret" field. Keep API VERSION as it is and click on Save Webhook.
+9. Now from your woocommerce site, click on webhooks option and click on "Add Webhook".
 
-10. Now the WooCommerce is successful setup on your system.
+10. Give name to the webhook of your choice. Click on Status dropdown and select "Active". Select Topic as "Order Created". Copy the "Endpoint" from "Woocommerce Settings" doctype and paste it in "Delivery URL" field. Copy "Secret" from "Woocommerce Settings" doctype and paste it in "Secret" field. Keep API VERSION as it is and click on Save Webhook.
+
+11. Now the WooCommerce is successful setup on your system.
 
 <img class="screenshot" alt="Woocommerce Integration" src="{{docs_base_url}}/assets/img/erpnext-integrations/woo_setting_config.gif">
 
