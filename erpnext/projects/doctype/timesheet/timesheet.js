@@ -50,51 +50,65 @@ frappe.ui.form.on("Timesheet", {
 			}
 		}
 
+		$.each(frm.doc.time_logs || [], function(i, row) {
+			if(row.from_time  && row.status != 'Completed') {
+				if (frappe.datetime.now_datetime < row.from_time) {
+					row.status = 'Not Started';
+				}
+				else if (row.to_time && frappe.datetime.now_datetime > row.to_time) {
+					row.status = 'Overdue';
+					frappe.utils.play_sound("alert");
+					frappe.msgprint(__(`Timer exceeded the given hours for activity ${row.activity_type} in row ${row.idx}.`));
+				}
+				else {
+					row.status = 'Pending';
+				}
+			}
+			frm.refresh_fields();
+		});
+
 		if (frm.doc.docstatus < 2) {
 
 			frm.add_custom_button(__('Start Timer'), function() {
 				var flag = true;
-
+				var disabled = 1;
 				// Fetch the row for timer where status = Pending i.e in progress
 				$.each(frm.doc.time_logs || [], function(i, row) {
-					if(row.status == 'Pending') {
-						timer(frm, row);
+					if(flag && (row.status == 'Pending' || row.status == 'Overdue')) {
+						if (row.timer_timestamp) {
+							let timestamp = moment(frappe.datetime.now_datetime()).diff(moment(row.timer_timestamp),"seconds");
+							timer(frm, disabled, row, timestamp);
+						}
+						else {
+							row.timer_timestamp = frappe.datetime.now_datetime();
+							timer(frm, disabled, row);
+						}
 						flag = false;
 					}
 				})
-
 				// Fetch the row for timer where status = Not Started
 				if (flag) {
 					$.each(frm.doc.time_logs || [], function(i, row) {
 						if(row.status == 'Not Started') {
-							timer(frm, row);
+							row.timer_timestamp = frappe.datetime.now_datetime();
+							timer(frm, disabled, row, timestamp);
 							flag = false;
 						}
 					})
 				}
 				// If no activities found to start a timer
 				if (flag) {
-					frappe.msgprint(__("No activities remaining."));
+					disabled = 0;
+					timer(frm,disabled);
 				}
 			}).addClass("btn-primary");
-
-			frm.add_custom_button(__("Create Activity"), function() {
-				create_activity(frm);
-			})
 		}
 		if(frm.doc.per_billed > 0) {
 			frm.fields_dict["time_logs"].grid.toggle_enable("billing_hours", false);
 			frm.fields_dict["time_logs"].grid.toggle_enable("billable", false);
 		}
-	},		
+	},
 
-			// var $trigger = $('.form-grid').find('.grid-row').find('.btn-open-row');
-			// $trigger.on('click', () => {
-			// 	$('.form-grid')
-			// 		.find('[data-fieldname="timer"]')
-			// 		.append(frappe.render_template("timesheet"));
-			// 		frm.trigger("control_timer");
-			// })
 	make_invoice: function(frm) {
 		let dialog = new frappe.ui.Dialog({
 			title: __("Select Item (optional)"),
@@ -205,45 +219,38 @@ frappe.ui.form.on("Timesheet Detail", {
 });
 
 // Spawn dialog for timer when clicked on 'Start RTimer' button
-var timer = function(frm, row) {
+var timer = function(frm, disabled, row, timestamp=0) {
 	let dialog = new frappe.ui.Dialog({
 		title: __("Timer"),
-		fields: [
-			{"fieldtype": "Read Only", "label": __("Activity"),
-				"fieldname": "activity"
-				// onchange: () =>  {
-				// 	const activity = dialog.get_value("activity")
-				// 	const hours = frm.doc.time_logs.filter(d => d.activity_type == activity).map(d => d.hours);
-				// 	const project = frm.doc.time_logs.filter(d => d.activity_type == activity).map(d => d.project)
-
-				// 	dialog.set_value("hours", hours)
-				// 	dialog.set_value("project", project)
-				// }
-			},
-			{"fieldtype": "Read Only", "label": __("Project"),
-				"fieldname": "project"},
-			{"fieldtype": "Read Only", "label": __("Hours"),
-				"fieldname": "hours"}
+		fields:
+		[
+			{"fieldtype": "Link", "label": __("Activity Type"), "fieldname": "activity_type",
+				"reqd": 1, "options": "Activity Type", "read_only": disabled},
+			{"fieldtype": "Float", "label": __("Hrs"), "fieldname": "hours", "read_only": disabled},
+			{"fieldtype": "Link", "label": __("Project"), "fieldname": "project", "read_only": disabled,
+				"options": "Project"}
 		]
+		
 	});
-	dialog.set_values({
-		'activity': row.activity_type,
-		'project': row.project,
-		'hours': row.hours
-	});
+	if (row) {
+		dialog.set_values({
+			'activity_type': row.activity_type,
+			'project': row.project,
+			'hours': row.hours
+		});
+	}
 	dialog.wrapper.append(frappe.render_template("timesheet"));
-	control_timer(frm, row, dialog);
+	control_timer(frm, dialog, row, timestamp);
 	dialog.show();
 }
 
-var control_timer = function(frm, row, dialog) {
+var control_timer = function(frm, dialog, row, timestamp=0) {
 	var interval = null;
-	var currentIncrement = 0;
+	var currentIncrement = timestamp
 	var isPaused = false;
 	var initialised = row ? true : false;
 	var clicked = false;
 	var paused_time = 0;
-
 	// If row with status = Pending/ Not Completed found, initialize timer on click of 'Start Timer'
 	if (row) {
 		initialised = true;
@@ -253,6 +260,8 @@ var control_timer = function(frm, row, dialog) {
 	}
 
 	$(".playpause").click(function(e) {
+		if (!initialised) {
+			
 		if (clicked) {
 			e.preventDefault();
 			return false;
@@ -286,9 +295,8 @@ var control_timer = function(frm, row, dialog) {
 	// Stop the timer and save the time logged by the timer on click of 'Complete' button
 	dialog.set_primary_action(__("Complete"), function() {
 		var grid_row = cur_frm.fields_dict['time_logs'].grid.grid_rows_by_docname[row.name];
-		// console.log(grid_row);
-		grid_row.doc.timer_timestamp = currentIncrement;
 		grid_row.doc.status = "Completed";
+		grid_row.doc.actual_end_time = frappe.datetime.now_datetime();
 		grid_row.refresh();
 		// Save the form
 		frm.save();
@@ -342,33 +350,6 @@ var control_timer = function(frm, row, dialog) {
 		$(".playpause span").removeClass();
 		$(".playpause span").addClass("play");
 	}
-}
-
-var create_activity = function(frm) {
-	let dialog = new frappe.ui.Dialog({
-		title: __("New Activity"),
-		fields: [
-			{"fieldtype": "Link", "label": __("Activity Type"), "fieldname": "activity_type",
-				"options": "Activity Type", "reqd": 1},
-			{"fieldtype": "Float", "label": __("Hrs"), "fieldname": "hours"},
-			{"fieldtype": "Link", "label": __("Project"), "fieldname": "project",
-				"options": "Project"}
-		]
-	})	
-	dialog.set_primary_action(__("Add Activity"), () => {
-		var args = dialog.get_values();
-		if(!args) return;
-		var row = frappe.model.add_child(frm.doc, "Timesheet Detail", "time_logs");
-		row.activity_type = args.activity_type;
-		row.hours = args.hours;
-		row.from_time = frappe.datetime.now_datetime();
-		row.project = args.project;
-		frm.refresh_field("time_logs");
-		dialog.hide();
-		timer(frm, row);
-	})
-
-	dialog.show();	
 }
 
 var calculate_end_time = function(frm, cdt, cdn) {
