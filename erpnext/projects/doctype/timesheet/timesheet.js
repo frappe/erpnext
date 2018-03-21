@@ -155,7 +155,7 @@ frappe.ui.form.on("Timesheet Detail", {
 			$('.form-grid')
 				.find('[data-fieldname="timer"]')
 				.append(frappe.render_template("timesheet"));
-				frm.trigger("control_timer");
+			frm.trigger("control_timer");
 		})
 	},
 	hours: function(frm, cdt, cdn) {
