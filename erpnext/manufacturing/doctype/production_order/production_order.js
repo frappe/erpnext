@@ -384,57 +384,39 @@ erpnext.production_order = {
 				"fieldname":"over_production_allowance_percentage"
 			},
 			callback:function(r){
-				if(r.message.over_production_allowance_percentage > 0)
-				{
-					frappe.prompt({fieldtype:"Float", label: __("Qty for {0}", [purpose]), fieldname:"qty",
-						description: __("Max: {0}", [max]), 'default': max },
-						function(data) {
-							allow_qty=Math.round(max + (r.message.over_production_allowance_percentage/100 * data.qty))
-							if(data.qty >= allow_qty) {
-								frappe.msgprint(__("Quantity must not be more than {0}", [allow_qty]));
-								return;
-							}
-							frappe.call({
-								method:"erpnext.manufacturing.doctype.production_order.production_order.make_stock_entry",
-								args: {
-									"production_order_id": frm.doc.name,
-									"purpose": purpose,
-									"qty": data.qty
-								},
-								callback: function(r) {
-									var doclist = frappe.model.sync(r.message);
-									frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-								}
-							});
-						}, __("Select Quantity"), __("Make"));
-				}
-				else
-				{
-					frappe.prompt({fieldtype:"Float", label: __("Qty for {0}", [purpose]), fieldname:"qty",
-						description: __("Max: {0}", [max]), 'default': max },
-						function(data) {
-							if(data.qty > max) {
-								frappe.msgprint(__("Quantity must not be more than {0}", [max]));
-								return;
-							}
-							frappe.call({
-								method:"erpnext.manufacturing.doctype.production_order.production_order.make_stock_entry",
-								args: {
-									"production_order_id": frm.doc.name,
-									"purpose": purpose,
-									"qty": data.qty
-								},
-								callback: function(r) {
-									var doclist = frappe.model.sync(r.message);
-									frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-								}
-							});
-						}, __("Select Quantity"), __("Make"));
-				}
+				frappe.prompt({fieldtype:"Float", label: __("Qty for {0}", [purpose]), fieldname:"qty",
+					description: __("Max: {0}", [max]), 'default': max },
+					function(data) {
+					allow_qty=Math.round(max + (r.message.over_production_allowance_percentage/100 * data.qty))
+					if(r.message.over_production_allowance_percentage > 0)
+					{
+						if(data.qty >= allow_qty) {
+							frappe.msgprint(__("Quantity must not be more than {0}", [allow_qty]));
+							return;
+						}
+					}else
+					{
+						if(data.qty > max) {
+							frappe.msgprint(__("Quantity must not be more than {0}", [max]));
+							return;
+						}
+					}
+					frappe.call({
+						method:"erpnext.manufacturing.doctype.production_order.production_order.make_stock_entry",
+						args: {
+							"production_order_id": frm.doc.name,
+							"purpose": purpose,
+							"qty": data.qty
+						},
+						callback: function(r) {
+							var doclist = frappe.model.sync(r.message);
+							frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+						}
+					});
+				}, __("Select Quantity"), __("Make"));
 			}
 		});
 	},
-	
 	stop_production_order: function(frm, status) {
 		frappe.call({
 			method: "erpnext.manufacturing.doctype.production_order.production_order.stop_unstop",
