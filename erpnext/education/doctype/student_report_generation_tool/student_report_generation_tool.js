@@ -61,6 +61,6 @@ frappe.ui.form.on('Student Report Generation Tool', {
 					frm.set_value("assessment_terms", r.message);
 				}
 			});
-		}	
+		}
 	}
 });
