@@ -78,6 +78,7 @@ frappe.ui.form.on("Timesheet", {
 						if (row.timer_timestamp) {
 							let timestamp = moment(frappe.datetime.now_datetime()).diff(moment(row.timer_timestamp),"seconds");
 							timer(frm, disabled, row, timestamp);
+							
 						}
 						else {
 							row.timer_timestamp = frappe.datetime.now_datetime();
@@ -261,7 +262,25 @@ var control_timer = function(frm, dialog, row, timestamp=0) {
 
 	$(".playpause").click(function(e) {
 		if (!initialised) {
-			
+			var args = dialog.get_values();
+			if(!args) return;
+			if (!frm.doc.time_logs[0].activity_type) {
+				frm.doc.time_logs = [];
+			}
+			row = frappe.model.add_child(frm.doc, "Timesheet Detail", "time_logs");
+			row.activity_type = args.activity_type;
+			row.from_time = frappe.datetime.get_datetime_as_string();
+			row.hours = args.hours;
+			row.project = args.project;
+			row.timer_timestamp = frappe.datetime.now_datetime();
+			let d = moment(row.from_time)
+			if(row.hours) {
+				d.add(row.hours, "hours");
+				row.to_time = d.format(moment.defaultDatetimeFormat);
+			}
+			row.status = 'Pending';
+			frm.refresh_field("time_logs");
+		}
 		if (clicked) {
 			e.preventDefault();
 			return false;
