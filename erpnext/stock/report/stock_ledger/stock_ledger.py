@@ -24,7 +24,7 @@ def execute(filters=None):
 			item_detail.stock_uom, sle.actual_qty, sle.qty_after_transaction,
 			(sle.incoming_rate if sle.actual_qty > 0 else 0.0),
 			sle.valuation_rate, sle.stock_value, sle.voucher_type, sle.voucher_no,
-			sle.batch_no, sle.serial_no, sle.company])
+			sle.batch_no, sle.serial_no, sle.project, sle.company])
 
 	return columns, data
 
@@ -45,6 +45,7 @@ def get_columns():
 		_("Voucher #") + ":Dynamic Link/" + _("Voucher Type") + ":100",
 		_("Batch") + ":Link/Batch:100",
 		_("Serial #") + ":Link/Serial No:100",
+		_("Project") + ":Link/Project:100",
 		{"label": _("Company"), "fieldtype": "Link", "width": 110,
 			"options": "company", "fieldname": "company"}
 	]
@@ -54,7 +55,7 @@ def get_columns():
 def get_stock_ledger_entries(filters):
 	return frappe.db.sql("""select concat_ws(" ", posting_date, posting_time) as date,
 			item_code, warehouse, actual_qty, qty_after_transaction, incoming_rate, valuation_rate,
-			stock_value, voucher_type, voucher_no, batch_no, serial_no, company
+			stock_value, voucher_type, voucher_no, batch_no, serial_no, company, project
 		from `tabStock Ledger Entry` sle
 		where company = %(company)s and
 			posting_date between %(from_date)s and %(to_date)s
@@ -96,6 +97,8 @@ def get_sle_conditions(filters):
 		conditions.append("voucher_no=%(voucher_no)s")
 	if filters.get("batch_no"):
 		conditions.append("batch_no=%(batch_no)s")
+	if filters.get("project"):
+		conditions.append("project=%(project)s")
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
