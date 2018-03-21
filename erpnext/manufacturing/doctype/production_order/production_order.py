@@ -189,6 +189,13 @@ class ProductionOrder(Document):
 
 			self.db_set(fieldname, qty)
 
+		if self.production_plan:
+			self.update_production_plan_status()
+
+	def update_production_plan_status(self):
+		production_plan = frappe.get_doc('Production Plan', self.production_plan)
+		production_plan.run_method("update_produced_qty", self.produced_qty, self.production_plan_item)
+
 	def before_submit(self):
 		self.make_time_logs()
 
@@ -201,6 +208,7 @@ class ProductionOrder(Document):
 		self.update_reserved_qty_for_production()
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
+		self.update_ordered_qty()
 
 	def on_cancel(self):
 		self.validate_cancel()
@@ -209,6 +217,7 @@ class ProductionOrder(Document):
 		self.delete_timesheet()
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
+		self.update_ordered_qty()
 		self.update_reserved_qty_for_production()
 
 	def validate_cancel(self):
@@ -229,6 +238,16 @@ class ProductionOrder(Document):
 		if self.material_request:
 			mr_obj = frappe.get_doc("Material Request", self.material_request)
 			mr_obj.update_requested_qty([self.material_request_item])
+
+	def update_ordered_qty(self):
+		if self.production_plan and self.production_plan_item:
+			qty = self.qty if self.docstatus == 1 else 0
+			frappe.db.set_value('Production Plan Item',
+				self.production_plan_item, 'ordered_qty', qty)
+
+			doc = frappe.get_doc('Production Plan', self.production_plan)
+			doc.set_status()
+			doc.db_set('status', doc.status)
 
 	def update_completed_qty_in_material_request(self):
 		if self.material_request:
@@ -567,6 +586,9 @@ def make_stock_entry(production_order_id, purpose, qty=None):
 	stock_entry.bom_no = production_order.bom_no
 	stock_entry.use_multi_level_bom = production_order.use_multi_level_bom
 	stock_entry.fg_completed_qty = qty or (flt(production_order.qty) - flt(production_order.produced_qty))
+	if production_order.bom_no:
+		stock_entry.inspection_required = frappe.db.get_value('BOM',
+			production_order.bom_no, 'inspection_required')
 
 	if purpose=="Material Transfer for Manufacture":
 		stock_entry.to_warehouse = wip_warehouse

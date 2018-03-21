@@ -14,7 +14,7 @@ form_grid_templates = {
 class BankReconciliation(Document):
 	def get_payment_entries(self):
 		if not (self.bank_account and self.from_date and self.to_date):
-			msgprint("Bank Account, From Date and To Date are Mandatory")
+			msgprint(_("Bank Account, From Date and To Date are Mandatory"))
 			return
 
 		condition = ""
@@ -53,10 +53,26 @@ class BankReconciliation(Document):
 				posting_date ASC, name DESC
 		""".format(condition), 
 		        {"account":self.bank_account, "from":self.from_date, "to":self.to_date}, as_dict=1)
-		
-		entries = sorted(list(payment_entries)+list(journal_entries), 
+
+		pos_entries = []
+		if self.include_pos_transactions:
+			pos_entries = frappe.db.sql("""
+				select
+					"Sales Invoice Payment" as payment_document, sip.name as payment_entry, sip.amount as debit,
+					si.posting_date, si.debit_to as against_account, sip.clearance_date,
+					account.account_currency, 0 as credit
+				from `tabSales Invoice Payment` sip, `tabSales Invoice` si, `tabAccount` account
+				where
+					sip.account=%(account)s and si.docstatus=1 and sip.parent = si.name
+					and account.name = sip.account and si.posting_date >= %(from)s and si.posting_date <= %(to)s {0}
+				order by
+					si.posting_date ASC, si.name DESC
+			""".format(condition),
+			        {"account":self.bank_account, "from":self.from_date, "to":self.to_date}, as_dict=1)
+
+		entries = sorted(list(payment_entries)+list(journal_entries+list(pos_entries)),
 			key=lambda k: k['posting_date'] or getdate(nowdate()))
-				
+
 		self.set('payment_entries', [])
 		self.total_amount = 0.0
 

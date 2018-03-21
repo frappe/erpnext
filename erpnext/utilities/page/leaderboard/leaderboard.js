@@ -17,14 +17,15 @@ frappe.Leaderboard = Class.extend({
 		this.$sidebar_list = this.page.sidebar.find('ul');
 
 		// const list of doctypes
-		this.doctypes = ["Customer", "Item", "Supplier", "Sales Partner"];
+		this.doctypes = ["Customer", "Item", "Supplier", "Sales Partner","Sales Person"];
 		this.timespans = ["Week", "Month", "Quarter", "Year"];
-		this.desc_fields = ["total_amount", "total_request", "annual_billing", "commission_rate"];
 		this.filters = {
-			"Customer": ["total_amount", "total_item_purchased"],
-			"Item": ["total_request", "total_purchase", "avg_price"],
-			"Supplier": ["annual_billing", "total_unpaid"],
-			"Sales Partner": ["commission_rate", "target_qty", "target_amount"],
+			"Customer": ["total_sales_amount", "total_qty_sold", "outstanding_amount", ],
+			"Item": ["total_sales_amount", "total_qty_sold", "total_purchase_amount",
+				"total_qty_purchased", "available_stock_qty", "available_stock_value"],
+			"Supplier": ["total_purchase_amount", "total_qty_purchased", "outstanding_amount"],
+			"Sales Partner": ["total_sales_amount", "total_commision"],
+			"Sales Person": ["total_sales_amount"],
 		};
 
 		// for saving current selected filters
@@ -58,13 +59,23 @@ frappe.Leaderboard = Class.extend({
 			this.get_sidebar_item(doctype).appendTo(this.$sidebar_list);
 		});
 
+		this.company_select = this.page.add_field({
+			fieldname: 'company',
+			label: __('Company'),
+			fieldtype:'Link',
+			options:'Company',
+			default:frappe.defaults.get_default('company'),
+			reqd: 1,
+			change: function() {
+				me.options.selected_company = this.value;
+				me.make_request($container);
+			}
+		});
 		this.timespan_select = this.page.add_select(__("Timespan"),
 			this.timespans.map(d => {
 				return {"label": __(d), value: d }
 			})
 		);
-
-		// this.timespan_select.val(this.timespans[1]);
 
 		this.type_select = this.page.add_select(__("Type"),
 			me.options.selected_filter.map(d => {
@@ -76,6 +87,7 @@ frappe.Leaderboard = Class.extend({
 			let $li = $(this);
 			let doctype = $li.find('span').html();
 
+			me.options.selected_company = frappe.defaults.get_default('company');
 			me.options.selected_doctype = doctype;
 			me.options.selected_filter = me.filters[doctype];
 			me.options.selected_filter_item = me.filters[doctype][0];
@@ -114,16 +126,18 @@ frappe.Leaderboard = Class.extend({
 		});
 	},
 
-	get_leaderboard: function (notify, $container, start=0) {
+	get_leaderboard: function (notify, $container) {
 		var me = this;
-
+		if(!me.options.selected_company) {
+			frappe.throw(__("Please select Company"));
+		}
 		frappe.call({
 			method: "erpnext.utilities.page.leaderboard.leaderboard.get_leaderboard",
 			args: {
 				doctype: me.options.selected_doctype,
 				timespan: me.options.selected_timespan,
+				company: me.options.selected_company,
 				field: me.options.selected_filter_item,
-				start: start
 			},
 			callback: function (r) {
 				let results = r.message || [];
@@ -132,7 +146,6 @@ frappe.Leaderboard = Class.extend({
 
 				me.$graph_area.show().empty();
 				let args = {
-					parent: '.leaderboard-graph',
 					data: {
 						datasets: [
 							{
@@ -146,7 +159,7 @@ frappe.Leaderboard = Class.extend({
 					type: 'bar',
 					height: 140
 				};
-				new Chart(args);
+				new Chart('.leaderboard-graph', args);
 
 				notify(me, r, $container);
 			}
@@ -256,28 +269,27 @@ frappe.Leaderboard = Class.extend({
 
 	get_item_html: function (item) {
 		var me = this;
-		const _selected_filter = me.options.selected_filter
-			.map(i => frappe.model.unscrub(i));
-		const fields = ['name', me.options.selected_filter_item];
+		const company = me.options.selected_company;
+		const currency = frappe.get_doc(":Company", company).default_currency;
+		const fields = ['name','value'];
 
 		const html =
 			`<div class="list-item">
 				${
-			fields.map(filter => {
-					const col = frappe.model.unscrub(filter);
-					let val = item[filter];
-					if (col === "Modified") {
-						val = comment_when(val);
+			fields.map(col => {
+					let val = item[col];
+					if(col=="name") {
+						var formatted_value = `<a class="grey list-id ellipsis"
+							href="#Form/${me.options.selected_doctype}/${item["name"]}"> ${val} </a>`
+					} else {
+						var formatted_value = `<span class="text-muted ellipsis">
+							${(me.options.selected_filter_item.indexOf('qty') == -1) ? format_currency(val, currency) : val}</span>`
 					}
+
 					return (
 						`<div class="list-item_content ellipsis list-item__content--flex-2
-							${(col !== "Name" && col !== "Modified") ? "hidden-xs" : ""}
-							${(col && _selected_filter.indexOf(col) !== -1) ? "text-right" : ""}">
-							${
-								col === "Name"
-									? `<a class="grey list-id ellipsis" href="${item["href"]}"> ${val} </a>`
-									: `<span class="text-muted ellipsis"> ${val}</span>`
-							}
+							${(col == "value") ? "text-right" : ""}">
+							${formatted_value}
 						</div>`);
 					}).join("")
 				}

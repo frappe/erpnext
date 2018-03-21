@@ -109,9 +109,9 @@ class LandedCostVoucher(Document):
 			# set valuation amount in pr item
 			doc.update_valuation_rate("items")
 
-			# save will update landed_cost_voucher_amount and voucher_amount in PR,
-			# as those fields are allowed to edit after submit
-			doc.save()
+			# db_update will update and save landed_cost_voucher_amount and voucher_amount in PR
+			for item in doc.get("items"):
+				item.db_update()
 
 			# update latest valuation rate in serial no
 			self.update_rate_in_serial_no(doc)

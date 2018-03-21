@@ -169,6 +169,9 @@ created.
 
 <img class="screenshot" alt="Process Payroll" src="{{docs_base_url}}/assets/img/human-resources/bank-entry.png">
 
-
+<div class="embed-container">
+  <iframe  src="https://www.youtube.com/embed/IDPNnyjmavQ?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+  </iframe>
+</div>
 
 {next}

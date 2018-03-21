@@ -8,6 +8,13 @@ You can create a new Supplier from:
 
 <img class="screenshot" alt="Supplier Master" src="{{docs_base_url}}/assets/img/buying/supplier-master.png">
 
+<div>
+    <div class='embed-container'>
+        <iframe src='https://www.youtube.com/embed//zsrrVDk6VBs?start=213' frameborder='0' allowfullscreen>
+        </iframe>
+    </div>
+</div>
+
 ### Contacts and Addresses
 
 Contacts and Addresses in ERPNext are stored separately so that you can create multiple Contacts and Addresses for a Suppliers. Once Supplier is saved, you will find option to create Contact and Address for that Supplier.

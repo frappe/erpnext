@@ -335,7 +335,7 @@ def get_assessment_result_doc(student, assessment_plan):
 		if doc.docstatus == 0:
 			return doc
 		elif doc.docstatus == 1:
-			frappe.msgprint("Result already Submitted")
+			frappe.msgprint(_("Result already Submitted"))
 			return None
 	else:
 		return frappe.new_doc("Assessment Result")

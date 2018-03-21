@@ -7,6 +7,8 @@ from frappe import _
 from frappe.utils import cstr, flt
 import json, copy
 
+from six import string_types
+
 class ItemVariantExistsError(frappe.ValidationError): pass
 class InvalidItemAttributeValueError(frappe.ValidationError): pass
 class ItemTemplateCannotHaveStock(frappe.ValidationError): pass
@@ -26,7 +28,7 @@ def get_variant(template, args=None, variant=None, manufacturer=None,
 		return make_variant_based_on_manufacturer(item_template, manufacturer,
 			manufacturer_part_no)
 	else:
-		if isinstance(args, basestring):
+		if isinstance(args, string_types):
 			args = json.loads(args)
 
 		if not args:
@@ -50,7 +52,7 @@ def make_variant_based_on_manufacturer(template, manufacturer, manufacturer_part
 	return variant
 
 def validate_item_variant_attributes(item, args=None):
-	if isinstance(item, basestring):
+	if isinstance(item, string_types):
 		item = frappe.get_doc('Item', item)
 
 	if not args:
@@ -92,7 +94,10 @@ def validate_is_incremental(numeric_attribute, attribute, value, item):
 			InvalidItemAttributeValueError, title=_('Invalid Attribute'))
 
 def validate_item_attribute_value(attributes_list, attribute, attribute_value, item):
-	if attribute_value not in attributes_list:
+	allow_rename_attribute_value = frappe.db.get_single_value('Item Variant Settings', 'allow_rename_attribute_value')
+	if allow_rename_attribute_value:
+		pass
+	elif attribute_value not in attributes_list:
 		frappe.throw(_("Value {0} for Attribute {1} does not exist in the list of valid Item Attribute Values for Item {2}").format(
 			attribute_value, attribute, item), InvalidItemAttributeValueError, title=_('Invalid Attribute'))
 
@@ -150,7 +155,7 @@ def find_variant(template, args, variant_item_code=None):
 
 @frappe.whitelist()
 def create_variant(item, args):
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	template = frappe.get_doc("Item", item)
@@ -177,7 +182,7 @@ def enqueue_multiple_variant_creation(item, args):
 		item=item, args=args, now=frappe.flags.in_test);
 
 def create_multiple_variants(item, args):
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	args_set = generate_keyed_value_combinations(args)

@@ -13,7 +13,7 @@ letters assigned to an individual Item. Serialized items are generally high valu
 
 Non Serialized items are generally fast moving and low value item, hence doesn't need tracking for each unit. Items like screw, cotton waste, other consumables, stationary products can be categorized as non-serialized.
 
-> Stock Reconciliation option is available for the non serialized Items only. For serialized and batch items, you should create Material Receipt entry in Stock Entry form.
+> Stock Reconciliation option is available for the non serialized Items only. For serialized and batch items, you should create Material Receipt (to increase stock) or Material Issue (to decrease stock) via Stock Entry.
 
 ### Opening Stocks
 

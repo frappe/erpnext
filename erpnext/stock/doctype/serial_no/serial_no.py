@@ -191,7 +191,7 @@ def validate_serial_no(sle, item_det):
 		if sle.serial_no:
 			frappe.throw(_("Item {0} is not setup for Serial Nos. Column must be blank").format(sle.item_code),
 				SerialNoNotRequiredError)
-	else:
+	elif sle.is_cancelled == "No":
 		if sle.serial_no:
 			serial_nos = get_serial_nos(sle.serial_no)
 			if cint(sle.actual_qty) != flt(sle.actual_qty):
@@ -272,7 +272,7 @@ def update_serial_nos(sle, item_det):
 			and item_det.has_serial_no == 1 and item_det.serial_no_series:
 		from frappe.model.naming import make_autoname
 		serial_nos = []
-		for i in xrange(cint(sle.actual_qty)):
+		for i in range(cint(sle.actual_qty)):
 			serial_nos.append(make_autoname(item_det.serial_no_series, "Serial No"))
 		frappe.db.set(sle, "serial_no", "\n".join(serial_nos))
 		validate_serial_no(sle, item_det)
@@ -326,11 +326,16 @@ def update_serial_nos_after_submit(controller, parentfield):
 		update_rejected_serial_nos = True if (controller.doctype in ("Purchase Receipt", "Purchase Invoice") 
 			and d.rejected_qty) else False
 		accepted_serial_nos_updated = False
-		warehouse = d.t_warehouse if controller.doctype == "Stock Entry" else d.warehouse
+		if controller.doctype == "Stock Entry":
+			warehouse = d.t_warehouse
+			qty = d.transfer_qty
+		else:
+			warehouse = d.warehouse
+			qty = d.stock_qty
 
 		for sle in stock_ledger_entries:
 			if sle.voucher_detail_no==d.name:
-				if not accepted_serial_nos_updated and d.qty and abs(sle.actual_qty)==d.qty \
+				if not accepted_serial_nos_updated and qty and abs(sle.actual_qty)==qty \
 					and sle.warehouse == warehouse and sle.serial_no != d.serial_no:
 						d.serial_no = sle.serial_no
 						frappe.db.set_value(d.doctype, d.name, "serial_no", sle.serial_no)

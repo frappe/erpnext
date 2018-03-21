@@ -5,7 +5,7 @@ maintain-stock-field-frozen-in-item-master
 manage-rejected-finished-goods-items
 managing-batch-wise-inventory
 managing-fractions-in-uom
-opening-stock-balance-entry-for-the-serialized-and-batch-item
+opening-stock-balance-entry-for-serialized-and-batch-item
 repack-entry
 serial-no-naming
 stock-entry-purpose

@@ -21,7 +21,7 @@ Pricing Rule master has two sections:
 
 ### 1. Applicability Section:
 
-In this section, conditions are set for the application of Pricing Rule. When transaction meets condition as specified in this section, Price or Discount as specified in the Pricing Rule will be applied. You can set condition on following values.
+In this section, conditions are set for the application of Pricing Rule. When transaction meets condition as specified in this section, Rate or Discount as specified in the Pricing Rule will be applied. You can set condition on following values.
 
 ####1.1 Applicable On:
 
@@ -43,15 +43,15 @@ Specify minimum and maximum qty of an item when this Pricing Rule should be appl
 
 ###2. Application:
 
-Using Price List Rule, you can ultimately define price or %discount to be applied on an item.
+Using Price List Rule, you can ultimately define rate or %discount to be applied on an item.
 
 <img alt="Applicable" class="screenshot" src="{{docs_base_url}}/assets/img/articles/pricing-rule-application.png">
 
-####2.1 Price
+####2.1 Rate
 
-Price or Discount specified in the Pricing Rule will be applied only if above applicability rules are matched with values in the transaction. Price mentioned in Pricing Rule will be given priority over item's Price List rate.
+Rate or Discount specified in the Pricing Rule will be applied only if above applicability rules are matched with values in the transaction. Rate mentioned in Pricing Rule will be given priority over item's Price List rate.
 
-<img alt="Applicable Price" class="screenshot" src="{{docs_base_url}}/assets/img/articles/pricing-rule-price.png">
+<img alt="Applicable Rate" class="screenshot" src="/docs/assets/img/articles/pricing-rule-price.png">
 
 #### 2.2 Discount Percentage
 

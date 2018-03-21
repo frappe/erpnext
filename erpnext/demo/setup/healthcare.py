@@ -65,7 +65,7 @@ def make_appointment():
 		i += 1
 
 def make_consulation():
-	for i in xrange(3):
+	for i in range(3):
 		physician = get_random("Physician")
 		department = frappe.get_value("Physician", physician, "department")
 		patient = get_random("Patient")
@@ -74,7 +74,7 @@ def make_consulation():
 		consultation.save(ignore_permissions=True)
 
 def consulation_on_appointment():
-	for i in xrange(3):
+	for i in range(3):
 		appointment = get_random("Patient Appointment")
 		appointment = frappe.get_doc("Patient Appointment",appointment)
 		consultation = set_consultation(appointment.patient, appointment.patient_sex, appointment.physician, appointment.department, appointment.appointment_date, i)

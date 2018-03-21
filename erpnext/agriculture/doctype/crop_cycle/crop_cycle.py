@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 import ast
 
@@ -31,7 +32,7 @@ class CropCycle(Document):
 				old_disease.append(detected_disease.name)
 			if list(set(new_disease)-set(old_disease)) != []:
 				self.update_disease(list(set(new_disease)-set(old_disease)))
-				frappe.msgprint("All tasks for the detected diseases were imported")
+				frappe.msgprint(_("All tasks for the detected diseases were imported"))
 
 	def update_disease(self, disease_hashes):
 		new_disease = []

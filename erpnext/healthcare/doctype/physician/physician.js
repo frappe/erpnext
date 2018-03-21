@@ -19,6 +19,13 @@ frappe.ui.form.on('Physician', {
 		if(!frm.is_new()) {
 			frappe.contacts.render_address_and_contact(frm);
 		}
+		frm.set_query("service_unit", "physician_schedules", function(){
+			return {
+				filters: {
+					"is_group": false,
+				}
+			};
+		});
 	}
 });
 

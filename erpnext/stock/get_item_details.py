@@ -10,7 +10,9 @@ from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_
 from erpnext.setup.utils import get_exchange_rate
 from frappe.model.meta import get_field_precision
 from erpnext.stock.doctype.batch.batch import get_batch_no
+from erpnext import get_company_currency
 
+from six import string_types, iteritems
 
 @frappe.whitelist()
 def get_item_details(args):
@@ -69,7 +71,7 @@ def get_item_details(args):
 		out.update(get_bin_details(args.item_code, out.warehouse))
 
 	# update args with out, if key or value not exists
-	for key, value in out.iteritems():
+	for key, value in iteritems(out):
 		if args.get(key) is None:
 			args[key] = value
 
@@ -100,7 +102,7 @@ def get_item_details(args):
 	return out
 
 def process_args(args):
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	args = frappe._dict(args)
@@ -120,7 +122,7 @@ def process_args(args):
 @frappe.whitelist()
 def get_item_code(barcode=None, serial_no=None):
 	if barcode:
-		item_code = frappe.db.get_value("Item", {"barcode": barcode})
+		item_code = frappe.db.get_value("Item Barcode", {"barcode": barcode}, fieldname=["parent"])
 		if not item_code:
 			frappe.throw(_("No Item with Barcode {0}").format(barcode))
 	elif serial_no:
@@ -273,7 +275,7 @@ def get_basic_details(args, item):
 			if not out[d[1]] or (company and args.company != company):
 				out[d[1]] = frappe.db.get_value("Company", args.company, d[2]) if d[2] else None
 
-	for fieldname in ("item_name", "item_group", "barcode", "brand", "stock_uom"):
+	for fieldname in ("item_name", "item_group", "barcodes", "brand", "stock_uom"):
 		out[fieldname] = item.get(fieldname)
 
 	return out
@@ -394,8 +396,16 @@ def validate_conversion_rate(args, meta):
 
 def get_party_item_code(args, item_doc, out):
 	if args.transaction_type=="selling" and args.customer:
+		out.customer_item_code = None
 		customer_item_code = item_doc.get("customer_items", {"customer_name": args.customer})
-		out.customer_item_code = customer_item_code[0].ref_code if customer_item_code else None
+
+		if customer_item_code:
+			out.customer_item_code = customer_item_code[0].ref_code
+		else:
+			customer_group = frappe.db.get_value("Customer", args.customer, "customer_group")
+			customer_group_item_code = item_doc.get("customer_items", {"customer_group": customer_group})
+			if customer_group_item_code and not customer_group_item_code[0].customer_name:
+				out.customer_item_code = customer_group_item_code[0].ref_code
 
 	if args.transaction_type=="buying" and args.supplier:
 		item_supplier = item_doc.get("supplier_items", {"supplier": args.supplier})
@@ -472,8 +482,8 @@ def get_projected_qty(item_code, warehouse):
 @frappe.whitelist()
 def get_bin_details(item_code, warehouse):
 	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
-			["projected_qty", "actual_qty", "ordered_qty"], as_dict=True) \
-			or {"projected_qty": 0, "actual_qty": 0, "ordered_qty": 0}
+			["projected_qty", "actual_qty"], as_dict=True) \
+			or {"projected_qty": 0, "actual_qty": 0}
 
 @frappe.whitelist()
 def get_serial_no_details(item_code, warehouse, stock_qty, serial_no):
@@ -590,11 +600,12 @@ def get_price_list_currency_and_exchange_rate(args):
 	price_list_currency = get_price_list_currency(args.price_list)
 	price_list_uom_dependant = get_price_list_uom_dependant(args.price_list)
 	plc_conversion_rate = args.plc_conversion_rate
+	company_currency = get_company_currency(args.company)
 
 	if (not plc_conversion_rate) or (price_list_currency and args.price_list_currency \
 		and price_list_currency != args.price_list_currency):
 			# cksgb 19/09/2016: added args.transaction_date as posting_date argument for get_exchange_rate
-			plc_conversion_rate = get_exchange_rate(price_list_currency, args.currency,
+			plc_conversion_rate = get_exchange_rate(price_list_currency, company_currency,
 				args.transaction_date) or plc_conversion_rate
 
 	return frappe._dict({
@@ -640,7 +651,7 @@ def get_gross_profit(out):
 @frappe.whitelist()
 def get_serial_no(args, serial_nos=None):
 	serial_no = None
-	if isinstance(args, basestring):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 		args = frappe._dict(args)
 

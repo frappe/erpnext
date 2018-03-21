@@ -8,6 +8,11 @@ the items you intend to buy.
 This software displays the price of the product . It also displays shipping
 and handling charges, along with taxes, if applicable.
 
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/xkrYO-KFukM?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+    </iframe>
+</div>
+
 ### Shopping Cart Setup
 
 To set up a shopping cart, go to the website module.
@@ -52,5 +57,11 @@ Change quantity, select Shipping and Billing Address and click
 on "Place Order" to place the order.
 
 <img class="screenshot" alt="Website Specifications" src="{{docs_base_url}}/assets/img/website/place-order.png">
+
+
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/yNWsNzPqK7E?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+    </iframe>
+</div>
 
 {next}

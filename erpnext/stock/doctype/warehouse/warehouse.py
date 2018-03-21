@@ -7,6 +7,7 @@ from frappe.utils import cint, validate_email_add
 from frappe import throw, _
 from frappe.utils.nestedset import NestedSet
 from erpnext.stock import get_warehouse_account
+from frappe.contacts.address_and_contact import load_address_and_contact
 
 class Warehouse(NestedSet):
 	nsm_parent_field = 'parent_warehouse'
@@ -25,10 +26,8 @@ class Warehouse(NestedSet):
 
 		if account:
 			self.set_onload('account', account)
+		load_address_and_contact(self)
 
-	def validate(self):
-		if self.email_id:
-			validate_email_add(self.email_id, True)
 
 	def on_update(self):
 		self.update_nsm_model()

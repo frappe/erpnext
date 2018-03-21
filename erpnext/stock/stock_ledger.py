@@ -8,6 +8,8 @@ from frappe.utils import cint, flt, cstr, now
 from erpnext.stock.utils import get_valuation_method
 import json
 
+from six import iteritems
+
 # future reposting
 class NegativeStockError(frappe.ValidationError): pass
 
@@ -87,7 +89,7 @@ class update_entries_after(object):
 				"allow_negative_stock"))
 
 		self.args = args
-		for key, value in args.iteritems():
+		for key, value in iteritems(args):
 			setattr(self, key, value)
 
 		self.previous_sle = self.get_sle_before_datetime()
@@ -452,22 +454,22 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 			where item_code = %s and valuation_rate > 0
 			order by posting_date desc, posting_time desc, name desc limit 1""", item_code)
 
-	valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
+	if last_valuation_rate:
+		return flt(last_valuation_rate[0][0]) # as there is previous records, it might come with zero rate
+
+	# If negative stock allowed, and item delivered without any incoming entry,
+	# system does not found any SLE, then take valuation rate from Item
+	valuation_rate = frappe.db.get_value("Item", item_code, "valuation_rate")
 
 	if not valuation_rate:
-		# If negative stock allowed, and item delivered without any incoming entry,
-		# syste does not found any SLE, then take valuation rate from Item
-		valuation_rate = frappe.db.get_value("Item", item_code, "valuation_rate")
+		# try Item Standard rate
+		valuation_rate = frappe.db.get_value("Item", item_code, "standard_rate")
 
 		if not valuation_rate:
-			# try Item Standard rate
-			valuation_rate = frappe.db.get_value("Item", item_code, "standard_rate")
-
-			if not valuation_rate:
-				# try in price list
-				valuation_rate = frappe.db.get_value('Item Price',
-					dict(item_code=item_code, buying=1, currency=currency),
-					'price_list_rate')
+			# try in price list
+			valuation_rate = frappe.db.get_value('Item Price',
+				dict(item_code=item_code, buying=1, currency=currency),
+				'price_list_rate')
 
 	if not allow_zero_rate and not valuation_rate and raise_error_if_no_rate \
 			and cint(erpnext.is_perpetual_inventory_enabled(company)):
