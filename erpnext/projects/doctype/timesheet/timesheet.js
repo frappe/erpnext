@@ -63,30 +63,26 @@ frappe.ui.form.on("Timesheet", {
 				frm.refresh_fields();
 			});
 
-			let button;
+			let button = 'Start Timer';
 			$.each(frm.doc.time_logs || [], function(i, row) {
-				if (row.from_time <= frappe.datetime.now_datetime() && row.completed == 0) {
+				if ((row.from_time <= frappe.datetime.now_datetime()) && !row.completed) {
 					button = 'Resume Timer';
 				}
-				else {
-					button = 'Start Timer';
-				}
 			})
+
 			frm.add_custom_button(__(button), function() {
 				var flag = true;
-				var disabled = 1;
 				// Fetch the row for timer where activity is not completed and from_time is not <= now_time
 				$.each(frm.doc.time_logs || [], function(i, row) {
-					if (flag && row.from_time <= frappe.datetime.now_datetime() && row.completed == 0) {
+					if (flag && row.from_time <= frappe.datetime.now_datetime() && !row.completed) {
 						let timestamp = moment(frappe.datetime.now_datetime()).diff(moment(row.from_time),"seconds");
-						erpnext.timesheet.timer(frm, disabled, row, timestamp);
+						erpnext.timesheet.timer(frm, row, timestamp);
 						flag = false;
 					}
 				})
 				// If no activities found to start a timer, create new
 				if (flag) {
-					disabled = 0;
-					erpnext.timesheet.timer(frm, disabled);
+					erpnext.timesheet.timer(frm);
 				}
 			}).addClass("btn-primary");
 		}
