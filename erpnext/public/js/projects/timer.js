@@ -1,4 +1,4 @@
-frappe.provide("erpnext.timesheet")
+frappe.provide("erpnext.timesheet");
 
 erpnext.timesheet.timer = function(frm, row, timestamp=0) {
 	let dialog = new frappe.ui.Dialog({
@@ -24,17 +24,15 @@ erpnext.timesheet.timer = function(frm, row, timestamp=0) {
 	dialog.get_field("timer_html").$wrapper.append(frappe.render_template("timesheet"));
 	control_timer(frm, dialog, row, timestamp);
 	dialog.show();
-}
+};
 
 var control_timer = function(frm, dialog, row, timestamp=0) {
 	var $btn_start = $(".playpause .btn-start");
 	var $btn_complete = $(".playpause .btn-complete");
 	var interval = null;
-	var currentIncrement = timestamp
-	var isPaused = false;
+	var currentIncrement = timestamp;
 	var initialised = row ? true : false;
 	var clicked = false;
-	var paused_time = 0;
 
 	// If row with not completed status, initialize timer with the time elapsed on click of 'Start Timer'.
 	if (row) {
@@ -59,7 +57,7 @@ var control_timer = function(frm, dialog, row, timestamp=0) {
 			row.from_time = frappe.datetime.get_datetime_as_string();
 			row.expected_hours = args.expected_hours;
 			row.completed = 0;
-			let d = moment(row.from_time)
+			let d = moment(row.from_time);
 			if(row.expected_hours) {
 				d.add(row.expected_hours, "hours");
 				row.to_time = d.format(moment.defaultDatetimeFormat);
@@ -75,7 +73,6 @@ var control_timer = function(frm, dialog, row, timestamp=0) {
 
 		if (!initialised) {
 			initialised = true;
-			isPaused = false;
 			$btn_start.hide();
 			$btn_complete.show();
 			initialiseTimer();
@@ -96,10 +93,9 @@ var control_timer = function(frm, dialog, row, timestamp=0) {
 		frm.save();
 		reset();
 		dialog.hide();
-	})
+	});
 	function initialiseTimer() {
 		interval = setInterval(function() {
-			if (isPaused) return;
 			var current = setCurrentIncrement();
 			updateStopwatch(current);
 		}, 1000);
@@ -115,7 +111,7 @@ var control_timer = function(frm, dialog, row, timestamp=0) {
 			reset();
 		}
 		if(hours > 99)
-		reset();
+			reset();
 		$(".hours").text(hours < 10 ? ("0" + hours.toString()) : hours.toString());
 		$(".minutes").text(minutes < 10 ? ("0" + minutes.toString()) : minutes.toString());
 		$(".seconds").text(seconds < 10 ? ("0" + seconds.toString()) : seconds.toString());
@@ -128,7 +124,6 @@ var control_timer = function(frm, dialog, row, timestamp=0) {
 
 	function reset() {
 		currentIncrement = 0;
-		isPaused = true;
 		initialised = false;
 		clearInterval(interval);
 		$(".hours").text("00");
@@ -137,4 +132,4 @@ var control_timer = function(frm, dialog, row, timestamp=0) {
 		$btn_complete.hide();
 		$btn_start.show();
 	}
-}
+};
