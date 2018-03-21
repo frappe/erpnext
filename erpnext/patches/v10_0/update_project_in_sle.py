@@ -12,4 +12,4 @@ def execute():
 				sle.project = parent_doc.project
 			where
 				sle.voucher_no = parent_doc.name and sle.voucher_type = %s and sle.project is null
-				and parent_doc.project is not null and parent_doc.project != ''""".format(doctype), doctype, debug=1)
+				and parent_doc.project is not null and parent_doc.project != ''""".format(doctype), doctype)
