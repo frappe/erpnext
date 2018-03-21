@@ -1,19 +1,19 @@
 frappe.provide("erpnext.timesheet")
 
-erpnext.timesheet.timer = function(frm, disabled, row, timestamp=0) {
+erpnext.timesheet.timer = function(frm, row, timestamp=0) {
 	let dialog = new frappe.ui.Dialog({
 		title: __("Timer"),
 		fields:
 		[
 			{"fieldtype": "Link", "label": __("Activity Type"), "fieldname": "activity_type",
-				"reqd": 1, "options": "Activity Type", "read_only": disabled},
-			{"fieldtype": "Link", "label": __("Project"), "fieldname": "project", "read_only": disabled},
+				"reqd": 1, "options": "Activity Type"},
+			{"fieldtype": "Link", "label": __("Project"), "fieldname": "project", "options": "Project"},
 			{"fieldtype": "Float", "label": __("Expected Hrs"), "fieldname": "expected_hours"},
 			{"fieldtype": "Section Break"},
 			{"fieldtype": "HTML", "fieldname": "timer_html"}
 		]
-		
 	});
+
 	if (row) {
 		dialog.set_values({
 			'activity_type': row.activity_type,
@@ -28,19 +28,24 @@ erpnext.timesheet.timer = function(frm, disabled, row, timestamp=0) {
 
 var control_timer = function(frm, dialog, row, timestamp=0) {
 	var $btn_start = $(".playpause .btn-start");
+	var $btn_complete = $(".playpause .btn-complete");
 	var interval = null;
 	var currentIncrement = timestamp
 	var isPaused = false;
 	var initialised = row ? true : false;
 	var clicked = false;
 	var paused_time = 0;
+
 	// If row with not completed status, initialize timer with the time elapsed on click of 'Start Timer'.
 	if (row) {
 		initialised = true;
-		$btn_start.attr("disabled", true);
+		$btn_start.hide();
+		$btn_complete.show();
 		initialiseTimer();
 	}
-
+	if (!initialised) {
+		$btn_complete.hide();
+	}
 	$btn_start.click(function(e) {
 		if (!initialised) {
 			// New activity if no activities found
@@ -60,7 +65,9 @@ var control_timer = function(frm, dialog, row, timestamp=0) {
 				row.to_time = d.format(moment.defaultDatetimeFormat);
 			}
 			frm.refresh_field("time_logs");
+			frm.save();
 		}
+
 		if (clicked) {
 			e.preventDefault();
 			return false;
@@ -69,31 +76,23 @@ var control_timer = function(frm, dialog, row, timestamp=0) {
 		if (!initialised) {
 			initialised = true;
 			isPaused = false;
-			$btn_start.attr("disabled", true);
+			$btn_start.hide();
+			$btn_complete.show();
 			initialiseTimer();
-		}
-		else {
-			if (isPaused) {
-				isPaused = false;
-				$btn_start.attr("disabled", true);
-			}
-			else {
-				isPaused = true;
-				$btn_start.attr("disabled", false);
-				paused_time = currentIncrement;
-			}
 		}
 	});
 
-	// Stop the timer and save the time logged by the timer on click of 'Complete' button
-	dialog.set_primary_action(__("Complete"), function() {
+	// Stop the timer and update the time logged by the timer on click of 'Complete' button
+	$btn_complete.click(function() {
 		var grid_row = cur_frm.fields_dict['time_logs'].grid.grid_rows_by_docname[row.name];
+		var args = dialog.get_values();
 		grid_row.doc.completed = 1;
-		// grid_row.doc.expected_hours = args.expected_hours;
+		grid_row.doc.activity_type = args.activity_type;
+		grid_row.doc.project = args.project;
+		grid_row.doc.expected_hours = args.expected_hours;
 		grid_row.doc.hours = currentIncrement / 3600;
 		grid_row.doc.to_time = frappe.datetime.now_datetime();
 		grid_row.refresh();
-		// Save the form
 		frm.save();
 		reset();
 		dialog.hide();
@@ -111,7 +110,7 @@ var control_timer = function(frm, dialog, row, timestamp=0) {
 		var minutes = Math.floor((increment - (hours * 3600)) / 60);
 		var seconds = increment - (hours * 3600) - (minutes * 60);
 
-		// If modal is closed by clicking outside anywhere the modal, reset the timer
+		// If modal is closed by clicking anywhere outside, reset the timer
 		if (!$('.modal-dialog').is(':visible')) {
 			reset();
 		}
@@ -135,6 +134,7 @@ var control_timer = function(frm, dialog, row, timestamp=0) {
 		$(".hours").text("00");
 		$(".minutes").text("00");
 		$(".seconds").text("00");
-		$btn_start.attr("disabled", false);
+		$btn_complete.hide();
+		$btn_start.show();
 	}
 }
