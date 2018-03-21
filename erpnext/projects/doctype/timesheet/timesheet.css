@@ -1,23 +1,8 @@
 @import 'https://fonts.googleapis.com/css?family=Open+Sans:300,600,800';
-/* html,
-body {
-  background-color: #000;
-  color: #fff;
-  height: 100%;
-  width: 100%;
-  margin: 0;
-  box-sizing: border-box;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -o-user-select: none;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-} */ 
 
 .stopwatch {
-  height: 20%;
-  width: 50%;
+  height: 50%;
+  width: 100%;
   display: inline-flex;
   transition: all .5s ease;
   -moz-transition: all .5s ease;
@@ -54,7 +39,7 @@ body {
 
 .stopcontrols {
   height: 50%;
-  width: 100%;
+  width: 99%;
   display: table;
   transition: all .5s ease;
   -moz-transition: all .5s ease;
@@ -65,7 +50,7 @@ body {
 
 .stopcontrols div {
   display: table-cell;
-  width: 50%;
+  /* width: 50%; */
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
@@ -78,16 +63,16 @@ body {
 
 .playpause .play {
   display: inline-block;
-  border-top: 28px solid transparent;
-  border-left: 37px solid #000;
-  border-bottom: 28px solid transparent;
+  border-top: 19px solid transparent;
+  border-left: 28px solid #000;
+  border-bottom: 19px solid transparent;
 }
 
 .playpause .pause {
   display: inline-block;
-  border-right: 5px solid #000;
-  border-left: 5px solid #000;
-  padding: 20px 10px;
+  border-right: 3px solid #000;
+  border-left: 3px solid #000;
+  padding: 20px 11px;
 }
 
 /* 
