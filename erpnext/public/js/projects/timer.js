@@ -36,7 +36,7 @@ erpnext.timesheet.timer = function(frm, row, timestamp=0) {
 				<button class= "btn btn-primary btn-complete"> ${ __("Complete") } </button>
 			</div>
 		`;
-	};
+	}
 	erpnext.timesheet.control_timer(frm, dialog, row, timestamp);
 	dialog.show();
 };
@@ -96,7 +96,7 @@ erpnext.timesheet.control_timer = function(frm, dialog, row, timestamp=0) {
 
 	// Stop the timer and update the time logged by the timer on click of 'Complete' button
 	$btn_complete.click(function() {
-		var grid_row = cur_frm.fields_dict['time_logs'].grid.grid_rows_by_docname[row.name];
+		var grid_row = cur_frm.fields_dict['time_logs'].grid.get_row(row.idx - 1);
 		var args = dialog.get_values();
 		grid_row.doc.completed = 1;
 		grid_row.doc.activity_type = args.activity_type;
