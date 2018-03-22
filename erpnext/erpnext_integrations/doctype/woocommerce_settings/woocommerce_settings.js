@@ -11,7 +11,7 @@ frappe.ui.form.on('Woocommerce Settings', {
 					"company": frappe.defaults.get_default("company"),
 					"is_group": 0
 				}
-			}
+			};
 		});
 	},
 
