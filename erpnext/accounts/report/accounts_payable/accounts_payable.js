@@ -15,7 +15,7 @@ frappe.query_reports["Accounts Payable"] = {
 			"label": __("Supplier"),
 			"fieldtype": "Link",
 			"options": "Supplier",
-			onchange: function() {
+			on_change: () => {
 				var supplier = frappe.query_report_filters_by_name.supplier.get_value();
 				frappe.db.get_value('Supplier', supplier, "tax_id", function(value) {
 					frappe.query_report_filters_by_name.tax_id.set_value(value["tax_id"]);
