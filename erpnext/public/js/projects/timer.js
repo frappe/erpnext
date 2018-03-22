@@ -21,12 +21,27 @@ erpnext.timesheet.timer = function(frm, row, timestamp=0) {
 			'expected_hours': row.expected_hours
 		});
 	}
-	dialog.get_field("timer_html").$wrapper.append(frappe.render_template("timesheet"));
-	control_timer(frm, dialog, row, timestamp);
+	dialog.get_field("timer_html").$wrapper.append(get_timer_html());
+	function get_timer_html() {
+		return `
+			<div class="stopwatch">
+				<span class="hours">00</span>
+				<span class="colon">:</span>
+				<span class="minutes">00</span>
+				<span class="colon">:</span>
+				<span class="seconds">00</span>
+			</div>
+			<div class="playpause text-center">
+				<button class= "btn btn-primary btn-start"> ${ __("Start") } </button>
+				<button class= "btn btn-primary btn-complete"> ${ __("Complete") } </button>
+			</div>
+		`;
+	};
+	erpnext.timesheet.control_timer(frm, dialog, row, timestamp);
 	dialog.show();
 };
 
-var control_timer = function(frm, dialog, row, timestamp=0) {
+erpnext.timesheet.control_timer = function(frm, dialog, row, timestamp=0) {
 	var $btn_start = $(".playpause .btn-start");
 	var $btn_complete = $(".playpause .btn-complete");
 	var interval = null;
