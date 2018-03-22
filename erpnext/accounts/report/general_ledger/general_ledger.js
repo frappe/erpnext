@@ -82,11 +82,12 @@ frappe.query_reports["General Ledger"] = {
 					frappe.query_report_filters_by_name.party_name.set_value("");
 					return;
 				}
-
-				var fieldname = frappe.scrub(party_type) + "_name";
-				frappe.db.get_value(party_type, party, fieldname, function(value) {
-					frappe.query_report_filters_by_name.party_name.set_value(value[fieldname]);
-				});
+				if (party_type != "Student" && party_type != "Shareholder") {
+					var fieldname = frappe.scrub(party_type) + "_name";
+					frappe.db.get_value(party_type, party, fieldname, function(value) {
+						frappe.query_report_filters_by_name.party_name.set_value(value[fieldname]);
+					});
+				}
 			}
 		},
 		{
