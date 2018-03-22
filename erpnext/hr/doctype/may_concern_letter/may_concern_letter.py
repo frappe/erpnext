@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from umalqurra.hijri_date import HijriDate
 import datetime
+from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words, get_first_day, get_last_day, nowdate
 import json
 
 class MayConcernLetter(Document):
@@ -25,10 +26,11 @@ class MayConcernLetter(Document):
 		self.fieldsvalidate()
 		self.hijry=self.get_hijry()
 		self.salary=self.get_salary()
-		if self.workflow_state:
-			if "Rejected" in self.workflow_state:
-			    self.docstatus = 1
-			    self.docstatus = 2
+		if hasattr(self,"workflow_state"):
+			if self.workflow_state:
+				if "Rejected" in self.workflow_state:
+				    self.docstatus = 1
+				    self.docstatus = 2
 
 	def fieldsvalidate(self):
 		if not self.employee_name:
@@ -69,12 +71,12 @@ class MayConcernLetter(Document):
 			doc.salary_slip_based_on_timesheet="0"
 
 			doc.payroll_frequency= "Monthly"
-			doc.start_date="2017-11-01"
-			doc.end_date="2017-11-29"
+			doc.start_date=get_first_day(getdate(nowdate()))
+			doc.end_date=get_last_day(getdate(nowdate()))
 			doc.employee= str(self.employee)
 			doc.employee_name=str(self.employee_name)
 			doc.company= "Tawari"
-			doc.posting_date= "2017-10-01"
+			doc.posting_date= nowdate()
 			
 			doc.insert(ignore_permissions=True)
 

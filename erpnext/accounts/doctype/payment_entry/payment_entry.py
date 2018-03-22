@@ -356,7 +356,7 @@ class PaymentEntry(AccountsController):
 			party_amount = self.paid_amount if self.payment_type=="Receive" else self.received_amount
 
 			if not total_negative_outstanding:
-				if self.party_type != "Employee" and self.party_type != "Imprest Temporary" and self.party_type != "Imprest Permanent":
+				if self.party_type != "Employee" and self.party_type != "Imprest Temporary" and self.party_type != "Imprest Permanent" and self.is_reverse !=1:
 					frappe.throw(_("Cannot {0} {1} {2} without any negative outstanding invoice")
 						.format(self.payment_type, ("to" if self.party_type=="Customer" else "from"), 
 							self.party_type), InvalidPaymentEntry)
@@ -814,6 +814,7 @@ def make_reverse(source_name, target_doc=None):
 		target.allocate_payment_amount = 0
 		target.references =[]
 		target.title =""
+		target.naming_series ="RPE-"
 		if source.payment_type == "Pay":
 			target.payment_type = "Receive"
 		elif source.payment_type == "Receive":
