@@ -15,7 +15,6 @@ def verify_request():
 		).digest()
 	)
 
-	print("verify_request", sig, frappe.get_request_header("X-Wc-Webhook-Signature"))
 	if frappe.request.data and \
 		frappe.get_request_header("X-Wc-Webhook-Signature") and \
 		not sig == bytes(frappe.get_request_header("X-Wc-Webhook-Signature").encode()):
