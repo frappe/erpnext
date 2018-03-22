@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils import today
 
 class LoyaltyProgram(Document):
 	pass
@@ -13,8 +14,8 @@ class LoyaltyProgram(Document):
 def get_loyalty_details(customer, loyalty_program):
 	return frappe.db.sql('''select sum(points_earned) as loyalty_point,
 		sum(purchase_amount) as total_spent from `tabLoyalty Point Entry`
-		where customer=%s and loyalty_program=%s group by customer''',
-		(customer, loyalty_program), as_dict=1)[0]
+		where customer=%s and loyalty_program=%s and expiry_date>=%s group by customer''',
+		(customer, loyalty_program, today()), as_dict=1)[0]
 
 def get_loyalty_program_tier(customer, loyalty_program):
 	tier = frappe._dict()

@@ -35,10 +35,31 @@ frappe.ui.form.on('Loyalty Program', {
 		set_field_options("loyalty_program_help", help_content);
 	},
 
+	onload: function(frm) {
+		frm.set_query("expense_account", function(doc) {
+			return {
+				filters: {
+					"root_type": "Expense",
+					'is_group': 0,
+					'company': doc.company
+				}
+			};
+		});
+
+		frm.set_query("cost_center", function() {
+			return {
+				filters: {
+					company: frm.doc.company
+				}
+			};
+		});
+
+		frm.set_value("company", frappe.defaults.get_user_default("Company"));
+	},
+
 	refresh: function(frm) {
 		if (frm.doc.loyalty_program_type === "Single Tier Program" && frm.doc.collection_rules.length > 1) {
 			frappe.throw(__("Please select the Multiple Tier Program type for more than one collection rules."));
 		}
-
 	}
 });

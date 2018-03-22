@@ -917,7 +917,6 @@ class SalesInvoice(SellingController):
 
 	def make_loyalty_point_entry(self):
 		loyalty_program = frappe.db.get_value("Customer", self.customer, "loyalty_program")
-		print (loyalty_program)
 		if loyalty_program:
 			from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_program_tier
 			loyalty_program_details = get_loyalty_program_tier(self.customer, loyalty_program)
@@ -929,13 +928,19 @@ class SalesInvoice(SellingController):
 				"sales_invoice": self.name,
 				"points_earned": int(self.grand_total/loyalty_program_details.collection_factor),
 				"purchase_amount": self.grand_total,
-				"expiry_date": add_days(self.posting_date, loyalty_program_details.expiry_duration)
+				"expiry_date": add_days(self.posting_date, loyalty_program_details.expiry_duration),
+				"posting_date": self.posting_date
 			})
 			doc.save()
 			frappe.db.set_value("Customer", self.customer, "loyalty_program_tier", loyalty_program_details.tier_name)
 	
 	def delete_loyalty_point_entry(self):
-		frappe.db.sql('''delete from `tabLoyalty Point Entry` where customer=%s and sales_invoice=%s''', (self.customer, self.name))
+		lp_entry = frappe.db.sql('''select points_earned, redeemed_points, redeemed_on_sales_invoice
+			from `tabLoyalty Point Entry` where customer=%s and sales_invoice=%s''', (self.customer, self.name), as_dict=1)
+		if lp_entry and lp_entry[0].redeemed_points>0:
+			frappe.throw(_("Can't cancel the invoice since the loyalty points earned is already redeemed"))
+		else:
+			frappe.db.sql('''delete from `tabLoyalty Point Entry` where customer=%s and sales_invoice=%s''', (self.customer, self.name))
 
 
 def get_list_context(context=None):
