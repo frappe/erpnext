@@ -74,6 +74,7 @@ class StockEntry(StockController):
 		if self.purchase_order and self.purpose == "Subcontract":
 			self.update_purchase_order_supplied_items()
 		self.make_gl_entries()
+		self.update_cost_in_project()
 
 	def on_cancel(self):
 		self.update_stock_ledger()
@@ -96,6 +97,18 @@ class StockEntry(StockController):
 				frappe.throw(_("Row {0}: UOM Conversion Factor is mandatory").format(item.idx))
 			item.transfer_qty = flt(flt(item.qty) * flt(item.conversion_factor),
 				self.precision("transfer_qty", item))
+
+	def update_cost_in_project(self):
+		if self.project:
+			amount = frappe.db.sql(""" select ifnull(sum(sed.amount), 0)
+				from
+					`tabStock Entry` se, `tabStock Entry Detail` sed
+				where
+					se.docstatus = 1 and se.project = %s and sed.parent = se.name
+					and (sed.t_warehouse is null or sed.t_warehouse = '')""", self.project, as_list=1)
+
+			if amount:
+				frappe.db.set_value('Project', self.project, 'total_consumed_material_cost', amount[0][0])
 
 	def validate_item(self):
 		stock_items = self.get_stock_items()
