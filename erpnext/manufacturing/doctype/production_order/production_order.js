@@ -384,15 +384,12 @@ erpnext.production_order = {
 				"fieldname":"over_production_allowance_percentage"
 			},
 			callback:function(r){
+				allow_qty = Math.round(max + (r.message.over_production_allowance_percentage/100 * max))
 				frappe.prompt({fieldtype:"Float", label: __("Qty for {0}", [purpose]), fieldname:"qty",
-					description: __("Max: {0}", [max]), 'default': max },
+					description: __("Max: {0}", [allow_qty]), 'default': max },
 					function(data) {
-					allow_qty = Math.round(max + (r.message.over_production_allowance_percentage/100 * max))
-					if(r.message.over_production_allowance_percentage > 0 && data.qty >= allow_qty) {
+					if(data.qty >= allow_qty) {
 							frappe.msgprint(__("Quantity must not be more than {0}", [allow_qty]));
-							return;
-					}else if(data.qty > max) {
-							frappe.msgprint(__("Quantity must not be more than {0}", [max]));
 							return;
 					}
 					frappe.call({
@@ -411,6 +408,7 @@ erpnext.production_order = {
 			}
 		});
 	},
+
 	stop_production_order: function(frm, status) {
 		frappe.call({
 			method: "erpnext.manufacturing.doctype.production_order.production_order.stop_unstop",
