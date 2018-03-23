@@ -8,6 +8,25 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 		this.page_name = route[2];
 	}
 
+	setup_fields() {
+		return this.get_meta()
+			.then(r => {
+				this.meta = r.message.meta || this.meta;
+				console.log(r.message, this.doctype);
+				this.bootstrap_data(r.message);
+
+				this.prepareFormFields();
+			});
+	}
+
+	bootstrap_data() { }
+
+	get_meta() {
+		return new Promise(resolve =>
+			frappe.call('erpnext.hub_node.get_meta', {doctype: 'Hub ' + this.doctype}, resolve));
+	}
+
+
 	set_breadcrumbs() {
 		frappe.breadcrumbs.add({
 			label: __('Hub'),
@@ -95,7 +114,7 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 			label: image_html
 		});
 
-		let fields = this.get_field_configs();
+		let fields = this.formFields;
 
 		this.form = new frappe.ui.FieldGroup({
 			parent: this.$result,
@@ -315,36 +334,6 @@ erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubDetailsPage {
 		this.image_field_name = 'image';
 	}
 
-	get_field_configs() {
-		let fields = [];
-		this.fields.map(fieldname => {
-			fields.push({
-				label: toTitle(frappe.model.unscrub(fieldname)),
-				fieldname,
-				fieldtype: 'Data',
-				read_only: 1
-			});
-		});
-
-		let category_field = {
-			label: 'Hub Category',
-			fieldname: 'hub_category',
-			fieldtype: 'Data'
-		}
-
-		if(this.data.company_name === this.hub_settings.company) {
-			this.page.set_primary_action(__('Update'), () => {
-				this.update_on_hub();
-			}, 'octicon octicon-plus');
-		} else {
-			category_field.read_only = 1;
-		}
-
-		fields.unshift(category_field);
-
-		return fields;
-	}
-
 	update_on_hub() {
 		return new Promise((resolve, reject) => {
 			frappe.call({
@@ -356,9 +345,26 @@ erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubDetailsPage {
 		});
 	}
 
-	setup_fields() {
-		this.fields = ['hub_item_code', 'item_name', 'item_code', 'description',
+	prepareFormFields() {
+		let fieldnames = ['hub_item_code', 'item_name', 'item_code', 'description',
 			'seller', 'company_name', 'country'];
+		this.formFields = this.meta.fields
+			.filter(field => fieldnames.includes(field.fieldname))
+			.map(field => {
+				let {
+					label,
+					fieldname,
+					fieldtype,
+				} = field;
+				let read_only = 1;
+				return {
+					label,
+					fieldname,
+					fieldtype,
+					read_only,
+				};
+			});
+
 	}
 }
 
@@ -375,21 +381,23 @@ erpnext.hub.CompanyPage = class CompanyPage extends erpnext.hub.HubDetailsPage {
 		this.image_field_name = 'company_logo';
 	}
 
-	get_field_configs() {
-		let fields = [];
-		this.fields.map(fieldname => {
-			fields.push({
-				label: toTitle(frappe.model.unscrub(fieldname)),
-				fieldname,
-				fieldtype: 'Data',
-				read_only: 1
+	prepareFormFields() {
+		let fieldnames = ['company_name', 'description', 'route', 'country', 'seller', 'site_name'];;
+		this.formFields = this.meta.fields
+			.filter(field => fieldnames.includes(field.fieldname))
+			.map(field => {
+				let {
+					label,
+					fieldname,
+					fieldtype,
+				} = field;
+				let read_only = 1;
+				return {
+					label,
+					fieldname,
+					fieldtype,
+					read_only,
+				};
 			});
-		});
-
-		return fields;
-	}
-
-	setup_fields() {
-		this.fields = ['company_name', 'description', 'route', 'country', 'seller', 'site_name'];
 	}
 }

@@ -32,6 +32,9 @@ def get_meta(doctype):
 		'meta': meta,
 		'companies': connection.get_list('Hub Company',
 			limit_start=0, limit_page_length=300,
+			filters={}, fields=['name']),
+		'categories': connection.get_list('Hub Category',
+			limit_start=0, limit_page_length=300,
 			filters={}, fields=['name'])
 	}
 

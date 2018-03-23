@@ -37,6 +37,12 @@ body[data-route^="Hub/"] .image-view-container {
   color: #36414C;
   position: absolute;
 }
+.tree {
+  padding: 15px 0px;
+}
+.tree.with-skeleton.opened::before {
+  left: 9px;
+}
 /* hub */
 div[data-page-route="hub"] .page-head {
   height: 80px;
