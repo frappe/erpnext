@@ -8,6 +8,7 @@ erpnext.timesheet.timer = function(frm, row, timestamp=0) {
 			{"fieldtype": "Link", "label": __("Activity Type"), "fieldname": "activity_type",
 				"reqd": 1, "options": "Activity Type"},
 			{"fieldtype": "Link", "label": __("Project"), "fieldname": "project", "options": "Project"},
+			{"fieldtype": "Link", "label": __("Task"), "fieldname": "task", "options": "Task"},
 			{"fieldtype": "Float", "label": __("Expected Hrs"), "fieldname": "expected_hours"},
 			{"fieldtype": "Section Break"},
 			{"fieldtype": "HTML", "fieldname": "timer_html"}
@@ -18,6 +19,7 @@ erpnext.timesheet.timer = function(frm, row, timestamp=0) {
 		dialog.set_values({
 			'activity_type': row.activity_type,
 			'project': row.project,
+			'task': row.task,
 			'expected_hours': row.expected_hours
 		});
 	}
@@ -70,6 +72,8 @@ erpnext.timesheet.control_timer = function(frm, dialog, row, timestamp=0) {
 			row = frappe.model.add_child(frm.doc, "Timesheet Detail", "time_logs");
 			row.activity_type = args.activity_type;
 			row.from_time = frappe.datetime.get_datetime_as_string();
+			row.project = args.project;
+			row.task = args.task;
 			row.expected_hours = args.expected_hours;
 			row.completed = 0;
 			let d = moment(row.from_time);
@@ -101,6 +105,7 @@ erpnext.timesheet.control_timer = function(frm, dialog, row, timestamp=0) {
 		grid_row.doc.completed = 1;
 		grid_row.doc.activity_type = args.activity_type;
 		grid_row.doc.project = args.project;
+		grid_row.doc.task = args.task;
 		grid_row.doc.expected_hours = args.expected_hours;
 		grid_row.doc.hours = currentIncrement / 3600;
 		grid_row.doc.to_time = frappe.datetime.now_datetime();
