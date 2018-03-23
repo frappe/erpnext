@@ -27,7 +27,7 @@ Steps:-
 
 11. Now the WooCommerce is successful setup on your system.
 
-<img class="screenshot" alt="Woocommerce Integration" src="{{docs_base_url}}/assets/img/erpnext-integrations/Woocommerce_Setting_Config.gif">
+<img class="screenshot" alt="Woocommerce Integration" src="{{docs_base_url}}/assets/img/erpnext_integrations/woocommerce_setting_config.gif">
 
 
 ### Note:-  In above gif, inplace of delivery url on woocommerce website, you need to paste the url you will obtain after saving the "Woocommerce Settings" page (i.e. Endpoint from "Woocommerce Settings"). I pasted other url because I was using localhost. Please paste your endpoint in place of Delivery URL.
@@ -54,4 +54,4 @@ Steps:-
 
 8. Now on system where ERPNEXT is installed check the following doctypes: Customer, Address, Item, Sales Order.
 
-<img class="screenshot" alt="Woocommerce Integration" src="{{docs_base_url}}/assets/img/erpnext-integrations/Working_demo.gif">
+<img class="screenshot" alt="Woocommerce Integration" src="{{docs_base_url}}/assets/img/erpnext_integrations/woocommerce_demo.gif">
