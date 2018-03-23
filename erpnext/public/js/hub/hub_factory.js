@@ -19,7 +19,7 @@ frappe.views.HubFactory = frappe.views.Factory.extend({
 			this.hub_settings = frappe.get_doc('Hub Settings');
 
 			if (!erpnext.hub.pages[page_name]) {
-				if(!frappe.is_online(false)) {
+				if(!frappe.is_online()) {
 					this.render_offline_card();
 					return;
 				}

@@ -161,17 +161,6 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 	}
 
 	addTimelineItem(data) {
-		// data = {
-		// 	username: frappe.session.user_fullname,
-		// 	own: 0,
-		// 	subject: __('Genuinely good product'),
-		// 	rating: 4,
-		// 	content: `my saw , drill, hammer all went in the trash after getting this .
-		// 		it does every thing and yes it’s giant . I used it to fix my sink yesterday
-		// 		and today to install a range oven hood. Next i’m going to build a bomb shelter
-		// 		for 2012 with this giant swiss army knife.`
-		// };
-
 		let username = data.username || data.user || __("Anonymous")
 		let imageHtml = data.user_image
 			? `<div class="avatar-frame" style="background-image: url(${data.user_image})"></div>`
@@ -297,7 +286,10 @@ erpnext.hub.ReviewArea = class ReviewArea extends frappe.ui.CommentArea {
 				${ header }
 				<div class="comment-input-container">
 					${ ratingArea }
-					<input class="form-control review-subject" type="text" placeholder="${__('Subject')}"></input>
+					<input class="form-control review-subject" type="text"
+						placeholder="${__('Subject')}"
+						style="border-radius: 3px; border-color: #ebeff2">
+					</input>
 					<div class="form-control comment-input"></div>
 					${ footer }
 				</div>

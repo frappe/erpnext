@@ -176,20 +176,3 @@ function get_user_details(frm, token, email) {
         });
     }
 }
-
-function check_connection(token) {
-    var ping_call = {
-        "async": true,
-        "crossDomain": true,
-        "url": "/api/method/frappe.integrations.oauth2.openid_profile",
-		"method": "GET",
-        "xhrFields": { withCredentials:true }
-    }
-    $.ajax(ping_call).done(function (response) {
-        // display openid profile
-        console.log("Success", response.message);
-    }).fail(function() {
-        console.log("Login to Hub First");
-    });
-}
-

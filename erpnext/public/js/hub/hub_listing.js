@@ -10,6 +10,8 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 
 		const route = frappe.get_route();
 		this.page_name = route[1];
+
+		this.imageFieldName = 'image';
 	}
 
 	setup_fields() {
@@ -115,11 +117,10 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 
 	render_image_view() {
 		var html = this.data.map(this.item_html.bind(this)).join("");
-		let $header_html = $(this.get_header_html());
 
 		if (this.start === 0) {
 			this.$result.html(`
-				${this.get_header_html()}
+				${this.getHeaderHtml()}
 				<div class="image-view-container small">
 					${html}
 				</div>
@@ -130,7 +131,7 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 			this.doc = this.data[0];
 		}
 
-		this.data.map(this.load_image.bind(this));
+		this.data.map(this.loadImage.bind(this));
 
 		this.data_dict = {};
 		this.data.map(d => {
@@ -138,11 +139,14 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 		});
 	}
 
-	get_header_html_skeleton(left = '', right = '') {
+	getHeaderHtml() {
 		return `
-			<header class="level list-row list-row-head text-muted small">
+			<header class="level list-row-head text-muted small">
 				<div class="level-left list-header-subject">
-					${left}
+					<div class="list-row-col list-subject level ">
+						<img title="Riadco%20Group" alt="Riadco Group" src="https://cdn.pbrd.co/images/HdaPxcg.png">
+						<span class="level-item">Products by Blah blah</span>
+					</div>
 				</div>
 				<div class="level-left checkbox-actions">
 					<div class="level list-subject">
@@ -151,22 +155,14 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 					</div>
 				</div>
 				<div class="level-right">
-					${right}
+					${''}
 				</div>
 			</header>
 		`;
 	}
 
-	get_header_html() {
-		return this.get_header_html_skeleton(`
-			<div class="list-row-col list-subject level ">
-				<input class="level-item list-check-all hidden-xs" type="checkbox" title="Select All">
-				<span class="level-item list-liked-by-me">
-					<i class="octicon octicon-heart text-extra-muted" title="Likes"></i>
-				</span>
-				<span class="level-item"></span>
-			</div>
-		`);
+	renderHeader() {
+
 	}
 
 	get_image_html(encoded_name, src, alt_text) {
@@ -177,45 +173,39 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 		return `<span class="placeholder-text">${ frappe.get_abbr(title) }</span>`;
 	}
 
-	load_image(item) {
+	loadImage(item) {
 		item._name = encodeURI(item.name);
 		const encoded_name = item._name;
 		const title = strip_html(item[this.meta.title_field || 'name']);
-		const _class = !item.image ? 'no-image' : '';
 
 		let placeholder = this.get_image_placeholder(title);
 		let $container = this.$result.find(`.image-field[data-name="${encoded_name}"]`);
 
-		if(!item.image) {
-			$container.prepend(placeholder);
-			// this.append_to_container(placeholder, );
-		}
-
-		this.is_image_loaded(item.image, title, encoded_name, this.append_to_container)
-	}
-
-	is_image_loaded(src, alt_text, encoded_name, onload, onerror) {
-		var me = this;
-		let $container = this.$result.find(`.image-field[data-name="${encoded_name}"]`);
-		var tester = new Image();
-		tester.onload = function() {
-			$container.prepend(this);
-		};
-		tester.onerror= function() {
-			let placeholder = me.get_image_placeholder(alt_text);
+		if(!item[this.imageFieldName]) {
 			$container.prepend(placeholder);
 			$container.addClass('no-image');
-		};
-		tester.encoded_name = encoded_name;
-		tester.alt_text = alt_text;
-		tester.src = src;
+		}
+
+		frappe.load_image(item[this.imageFieldName],
+			(imageObj) => {
+				$container.prepend(imageObj)
+			},
+			() => {
+				$container.prepend(placeholder);
+				$container.addClass('no-image');
+			},
+			(imageObj) => {
+				imageObj.title = encoded_name;
+				imageObj.alt = title;
+			}
+		)
 	}
 
 	item_html(item) {
 		item._name = encodeURI(item.name);
 		const encoded_name = item._name;
 		const title = strip_html(item[this.meta.title_field || 'name']);
-		const _class = !item.image ? 'no-image' : '';
+		const _class = !item[this.imageFieldName] ? 'no-image' : '';
 		const route = `#Hub/Item/${item.hub_item_code}`;
 		const company_name = item['company_name'];
 
@@ -283,7 +273,6 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 
 	setup_like() {
 		this.$result.on('click', '.btn.like-button', (e) => {
-			console.log('like clicked');
 			if($(e.target).hasClass('disabled')) return;
 
 			$(e.target).addClass('disabled');
@@ -294,8 +283,6 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 			var name = $(e.target).attr('data-name');
 			name = decodeURIComponent(name);
 			let values = this.data_dict[name];
-
-			console.log('values', values);
 
 			return false;
 		});
@@ -314,10 +301,6 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 		this.doctype = 'Hub Item';
 		this.fields = ['name', 'hub_item_code', 'image', 'item_name', 'item_code', 'company_name', 'description', 'country'];
 		this.filters = [];
-	}
-
-	setup_sort_selector() {
-		//
 	}
 
 	bootstrap_data(response) {
@@ -444,6 +427,7 @@ erpnext.hub.CompanyListing = class CompanyListing extends erpnext.hub.HubListing
 				fieldname: 'country'
 			}
 		];
+		this.imageFieldName = 'company_logo';
 	}
 
 	get_filters_for_args() {

@@ -13,7 +13,7 @@ def get_slide_settings():
 
 	doc = frappe.get_doc("Setup Progress")
 	item = [d for d in doc.get("actions") if d.action_name == "Set Sales Target"]
-	
+
 	if len(item):
 		item = item[0]
 		if not item.action_document:
@@ -81,26 +81,6 @@ def get_slide_settings():
 				{
 					"label": _('Learn More'),
 					"url": ["https://erpnext.org/docs/user/manual/en/CRM/customer.html"]
-				}
-			]
-		),
-
-		frappe._dict(
-			action_name='enable_hub_market',
-			domains=('Manufacturing', 'Services', 'Retail', 'Distribution'),
-			title=_("Enable Hub Market"),
-			help=_("Enable Hub to begin discovering products."),
-			fields=[
-				{"fieldtype":"Section Break"},
-				{"fieldtype":"Button", "fieldname":"enable_hub", "label":_("Enable Hub")},
-			],
-			submit_method="erpnext.utilities.user_progress_utils.enable_hub",
-			done_state_title=_("Go to Hub Market"),
-			done_state_title_route=["Hub", "Item"],
-			help_links=[
-				{
-					"label": _('Learn More'),
-					"url": ["https://hubmarket.org"]
 				}
 			]
 		),
