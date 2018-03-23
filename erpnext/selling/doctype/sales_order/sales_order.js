@@ -229,6 +229,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 								{fieldtype:'Data', fieldname:'sales_order_item', reqd: 1,
 									label: __('Sales Order Item'), hidden:1}
 							],
+							data: r.message,
 							get_data: function() {
 								return r.message
 							}
