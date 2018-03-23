@@ -170,6 +170,35 @@ frappe.ui.form.on('Item Reorder', {
 	}
 })
 
+frappe.ui.form.on('Item Customer Detail', {
+	customer_items_add: function(frm, cdt, cdn) {
+		frappe.model.set_value(cdt, cdn, 'customer_group', "");
+	},
+	customer_name: function(frm, cdt, cdn) {
+		set_customer_group(frm, cdt, cdn);
+	},
+	customer_group: function(frm, cdt, cdn) {
+		if(set_customer_group(frm, cdt, cdn)){
+			frappe.msgprint(__("Changing Customer Group for the selected Customer is not allowed."));
+		}
+	}
+});
+
+var set_customer_group = function(frm, cdt, cdn) {
+	var row = frappe.get_doc(cdt, cdn);
+
+	if (!row.customer_name) {
+		return false;
+	}
+
+	frappe.model.with_doc("Customer", row.customer_name, function() {
+		var customer = frappe.model.get_doc("Customer", row.customer_name);
+		row.customer_group = customer.customer_group;
+		refresh_field("customer_group", cdn, "customer_items");
+	});
+	return true;
+}
+
 $.extend(erpnext.item, {
 	setup_queries: function(frm) {
 		frm.fields_dict['expense_account'].get_query = function(doc) {

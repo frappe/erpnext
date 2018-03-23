@@ -495,3 +495,6 @@ erpnext.patches.v10_0.set_auto_created_serial_no_in_stock_entry
 erpnext.patches.v10_0.update_territory_and_customer_group
 erpnext.patches.v10_0.update_warehouse_address_details
 erpnext.patches.v10_0.update_reserved_qty_for_purchase_order
+erpnext.patches.v10_0.update_hub_connector_domain
+erpnext.patches.v10_0.set_student_party_type
+erpnext.patches.v10_0.update_project_in_sle
