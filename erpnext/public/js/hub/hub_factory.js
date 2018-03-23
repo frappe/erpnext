@@ -39,7 +39,6 @@ frappe.views.HubFactory = frappe.views.Factory.extend({
 							parent: this.make_page(true, page_name),
 							hub_settings: this.hub_settings
 						});
-						console.log(page_name, erpnext.hub.pages[page_name]);
 						window.hub_page = erpnext.hub.pages[page_name];
 					});
 				}

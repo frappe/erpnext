@@ -25,26 +25,26 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 		this.attachFooter();
 		this.attachTimeline();
 		this.attachCommentArea();
-		this.addTimelineItem();
 	}
 
 	setup_filter_area() { }
 
 	setup_sort_selector() { }
 
-	setup_timeline() {
-
-		// this.timeline = new frappe.ui.form.Timeline({
-		// 	parent: this.wrapper.find(".form-comments"),
-		// 	frm: this.frm
-		// });
-
-
-		// this.footer = new frappe.ui.form.Footer({
-		// 	frm: this,
-		// 	parent: $('<div>').appendTo(this.page.main.parent())
-		// });
-	}
+	// let category = this.quick_view.get_values().hub_category;
+	// return new Promise((resolve, reject) => {
+	// 	frappe.call({
+	// 		method: 'erpnext.hub_node.update_category',
+	// 		args: {
+	// 			hub_item_code: values.hub_item_code,
+	// 			category: category,
+	// 		},
+	// 		callback: (r) => {
+	// 			resolve();
+	// 		},
+	// 		freeze: true
+	// 	}).fail(reject);
+	// });
 
 	get_timeline() {
 		return `<div class="timeline">
@@ -104,6 +104,12 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 
 		this.form.make();
 		this.form.set_values(this.data);
+
+		if(this.data.reviews.length) {
+			this.data.reviews.map(review => {
+				this.addTimelineItem(review);
+			})
+		}
 	}
 
 	toggle_result_area() {
@@ -147,27 +153,29 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 	}
 
 	attachCommentArea() {
-		this.comment_area = new frappe.ui.CommentArea({
+		this.comment_area = new erpnext.hub.ReviewArea({
 			parent: this.$footer.find('.timeline-head'),
-			mentions: ['Administrator', 'Guest'],
+			mentions: [],
 			on_submit: (val) => {return val;}
 		});
 	}
 
 	addTimelineItem(data) {
-		data = {
-			username: frappe.session.user_fullname,
-			own: 0,
-			subject: __('Genuinely good product'),
-			rating: 4,
-			content: `my saw , drill, hammer all went in the trash after getting this .
-				it does every thing and yes it’s giant . I used it to fix my sink yesterday
-				and today to install a range oven hood. Next i’m going to build a bomb shelter
-				for 2012 with this giant swiss army knife.`
-		};
+		// data = {
+		// 	username: frappe.session.user_fullname,
+		// 	own: 0,
+		// 	subject: __('Genuinely good product'),
+		// 	rating: 4,
+		// 	content: `my saw , drill, hammer all went in the trash after getting this .
+		// 		it does every thing and yes it’s giant . I used it to fix my sink yesterday
+		// 		and today to install a range oven hood. Next i’m going to build a bomb shelter
+		// 		for 2012 with this giant swiss army knife.`
+		// };
+
+		let username = data.username || data.user || __("Anonymous")
 		let imageHtml = data.user_image
 			? `<div class="avatar-frame" style="background-image: url(${data.user_image})"></div>`
-			: `<div class="standard-image" style="background-color: #fafbfc">${frappe.get_abbr(data.username)}</div>`
+			: `<div class="standard-image" style="background-color: #fafbfc">${frappe.get_abbr(username)}</div>`
 
 		let editHtml = data.own
 			? `<div class="pull-right hidden-xs close-btn-container">
@@ -258,6 +266,49 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 		</div>`;
 	}
 };
+
+erpnext.hub.ReviewArea = class ReviewArea extends frappe.ui.CommentArea {
+	setup_dom() {
+		const header = !this.no_wrapper ?
+			`<div class="comment-input-header">
+				<span class="small text-muted">${__("Add a review")}</span>
+				<button class="btn btn-default btn-comment btn-xs pull-right">
+					${__("Submit Review")}
+				</button>
+			</div>` : '';
+
+		const footer = !this.no_wrapper ?
+			`<div class="text-muted small">
+				${__("Ctrl+Enter to submit")}
+			</div>` : '';
+
+		const ratingArea = !this.no_wrapper ?
+			`<div class="text-muted small" style="margin-bottom: 5px">
+				${ __("Your rating: ") }
+				<i class='fa fa-fw fa-star-o star-icon' data-idx=1></i>
+				<i class='fa fa-fw fa-star-o star-icon' data-idx=2></i>
+				<i class='fa fa-fw fa-star-o star-icon' data-idx=3></i>
+				<i class='fa fa-fw fa-star-o star-icon' data-idx=4></i>
+				<i class='fa fa-fw fa-star-o star-icon' data-idx=5></i>
+			</div>` : '';
+
+		this.wrapper = $(`
+			<div class="comment-input-wrapper">
+				${ header }
+				<div class="comment-input-container">
+					${ ratingArea }
+					<input class="form-control review-subject" type="text" placeholder="${__('Subject')}"></input>
+					<div class="form-control comment-input"></div>
+					${ footer }
+				</div>
+			</div>
+		`);
+		this.wrapper.appendTo(this.parent);
+		this.input = this.parent.find('.comment-input');
+		this.subject = this.parent.find('.review-subject');
+		this.button = this.parent.find('.btn-comment');
+	}
+}
 
 erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubDetailsPage {
 	constructor(opts) {
