@@ -1,7 +1,7 @@
 
-#WooCommerce Integration 
+# WooCommerce Integration 
 
-####Setting Up WooCommerce on ERPNEXT:-
+#### Setting Up WooCommerce on ERPNEXT:-
 
 Steps:- 
 
@@ -34,7 +34,7 @@ Steps:-
 	
 
 
-####WooCommerce Integration Working:- 
+#### WooCommerce Integration Working:- 
 
 Steps:- 
 
