@@ -8,6 +8,13 @@
 		{%= filters.account %}
 	{% } %}
 </h4>
+
+<h6 class="text-center">
+	{% if (filters.tax_id) { %}
+	{%= __("Tax Id: ")%}	{%= filters.tax_id %}
+	{% } %}
+</h6>
+
 <h5 class="text-center">
 	{%= dateutil.str_to_user(filters.from_date) %}
 	{%= __("to") %}
