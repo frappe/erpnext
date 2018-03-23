@@ -1,7 +1,8 @@
-import unittest, frappe, requests, os, time
+import unittest, frappe, requests, os, time, erpnext
 
 class TestWoocommerce(unittest.TestCase):
-	def test_woocommerce_request(self):
+
+	def setUp(self):
 		# Set Secret in Woocommerce Settings
 		company = frappe.new_doc("Company")
 		company.company_name = "Woocommerce"
@@ -11,6 +12,7 @@ class TestWoocommerce(unittest.TestCase):
 		frappe.db.commit()
 
 		default = frappe.get_doc("Global Defaults")
+		self.old_default_company = default.default_company
 		default.default_company = "Woocommerce"
 		default.save()
 
@@ -30,21 +32,28 @@ class TestWoocommerce(unittest.TestCase):
 
 		frappe.db.commit()
 
-
+	def test_woocommerce_request(self):
 		r = emulate_request()
-		print(r.text)
 		self.assertTrue(r.status_code == 200)
 		self.assertTrue(frappe.get_value("Customer",{"woocommerce_email":"tony@gmail.com"}))
 		self.assertTrue(frappe.get_value("Item",{"woocommerce_id": 56}))
 		self.assertTrue(frappe.get_value("Sales Order",{"woocommerce_id":74}))
 
 		# cancel & delete order
-		# cancel_and_delete_order()
+		cancel_and_delete_order()
 
-		# # Emulate Request when Customer, Address, Item data exists
-		# r = emulate_request()
-		# self.assertTrue(r.status_code == 200)
-		# self.assertTrue(frappe.get_value("Sales Order",{"woocommerce_id":74}))
+		# Emulate Request when Customer, Address, Item data exists
+		r = emulate_request()
+		self.assertTrue(r.status_code == 200)
+		self.assertTrue(frappe.get_value("Sales Order",{"woocommerce_id":74}))
+
+	def tearDown(self):
+		default = frappe.get_doc("Global Defaults")
+		default.default_company = self.old_default_company
+		default.save()
+		frappe.db.commit()
+
+
 
 def emulate_request():
 	# Emulate Woocommerce Request
@@ -70,13 +79,13 @@ def emulate_request():
 	time.sleep(2)
 	return r
 
-# def cancel_and_delete_order():
-# 	# cancel & delete order
-# 	try:
-# 		so = frappe.get_doc("Sales Order",{"woocommerce_id":74})
-# 		if isinstance(so, erpnext.selling.doctype.sales_order.sales_order.SalesOrder):
-# 			so.cancel()
-# 			so.delete()
-# 		frappe.db.commit()
-# 	except frappe.DoesNotExistError:
-# 		pass
+def cancel_and_delete_order():
+	# cancel & delete order
+	try:
+		so = frappe.get_doc("Sales Order",{"woocommerce_id":74})
+		if isinstance(so, erpnext.selling.doctype.sales_order.sales_order.SalesOrder):
+			so.cancel()
+			so.delete()
+		frappe.db.commit()
+	except frappe.DoesNotExistError:
+		pass
