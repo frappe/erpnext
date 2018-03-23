@@ -217,6 +217,12 @@ def validate_serial_no(sle, item_det):
 						frappe.throw(_("Serial No {0} has already been received").format(serial_no),
 							SerialNoDuplicateError)
 
+					if (sr.delivery_document_no and sle.voucher_type != 'Stock Entry'
+						and sle.voucher_type == sr.delivery_document_type):
+						return_against = frappe.db.get_value(sle.voucher_type, sle.voucher_no, 'return_against')
+						if return_against and return_against != sr.delivery_document_no:
+							frappe.throw(_("Serial no {0} has been already returned").format(sr.name))
+
 					if sle.actual_qty < 0:
 						if sr.warehouse!=sle.warehouse:
 							frappe.throw(_("Serial No {0} does not belong to Warehouse {1}").format(serial_no,
