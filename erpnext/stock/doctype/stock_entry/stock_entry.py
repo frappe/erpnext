@@ -32,15 +32,8 @@ class StockEntry(StockController):
 		return _("From {0} to {1}").format(self.from_warehouse, self.to_warehouse)
 
 	def onload(self):
-		self.set_onload("allow_alternative_item", self.check_alternative_item())
 		for item in self.get("items"):
 			item.update(get_bin_details(item.item_code, item.s_warehouse))
-
-	def check_alternative_item(self):
-		if not self.items: return False
-
-		for d in self.items:
-			if d.allow_alternative_item: return True
 
 	def validate(self):
 		self.pro_doc = frappe._dict()
@@ -617,7 +610,6 @@ class StockEntry(StockController):
 					item_dict = self.get_bom_raw_materials(self.fg_completed_qty)
 
 					#Get PO Supplied Items Details
-					print('Purchase Order', self.purchase_order, self.purpose)
 					if self.purchase_order and self.purpose == "Subcontract":
 						#Get PO Supplied Items Details
 						item_wh = frappe._dict(frappe.db.sql("""
@@ -707,6 +699,10 @@ class StockEntry(StockController):
 		used_alternative_items = get_used_alternative_items(work_order = self.work_order)
 		for item in item_dict.values():
 			# if source warehouse presents in BOM set from_warehouse as bom source_warehouse
+			if item["allow_alternative_item"]:
+				item["allow_alternative_item"] = frappe.db.get_value('Work Order',
+					self.work_order, "allow_alternative_item")
+
 			item.from_warehouse = self.from_warehouse or item.source_warehouse or item.default_warehouse
 			if item.item_code in used_alternative_items:
 				alternative_item_data = used_alternative_items.get(item.item_code)
