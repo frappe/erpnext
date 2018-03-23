@@ -43,6 +43,7 @@ class StockEntry(StockController):
 		self.validate_posting_time()
 		self.validate_purpose()
 		self.validate_item()
+		self.validate_qty()
 		self.set_transfer_qty()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
@@ -80,15 +81,26 @@ class StockEntry(StockController):
 		self.update_cost_in_project()
 
 	def on_cancel(self):
-		self.update_stock_ledger()
-		self.update_work_order()
+
 		if self.purchase_order and self.purpose == "Subcontract":
 			self.update_purchase_order_supplied_items()
+
+		if self.work_order and self.purpose == "Material Consumption for Manufacture":
+			self.validate_work_order_status()
+		else:
+			self.update_stock_ledger()
+			self.update_work_order()
+
 		self.make_gl_entries_on_cancel()
+
+	def validate_work_order_status(self):
+		pro_doc = frappe.get_doc("Work Order", self.work_order)
+		if pro_doc.status == 'Completed':
+			frappe.throw(_("Cannot cancel transaction for Completed Work Order."))
 
 	def validate_purpose(self):
 		valid_purposes = ["Material Issue", "Material Receipt", "Material Transfer", "Material Transfer for Manufacture",
-			"Manufacture", "Repack", "Subcontract"]
+			"Manufacture", "Repack", "Subcontract", "Material Consumption for Manufacture"]
 		if self.purpose not in valid_purposes:
 			frappe.throw(_("Purpose must be one of {0}").format(comma_or(valid_purposes)))
 
@@ -139,11 +151,45 @@ class StockEntry(StockController):
 				frappe.throw(_("Row #{0}: Please specify Serial No for Item {1}").format(item.idx, item.item_code),
 					frappe.MandatoryError)
 
+	def validate_qty(self):
+
+		manufacture_purpose = ["Manufacture", "Material Consumption for Manufacture"]
+
+		if self.purpose in manufacture_purpose:
+			if self.work_order:
+				item_code = []
+				for item in self.items:
+					req_items = frappe.get_all('Work Order Item',
+											   filters={'parent': self.work_order, 'item_code': item.item_code},
+											   fields=["item_code"]
+								)
+
+					transferred_materials = frappe.db.sql("""
+								select
+									sum(qty) as qty
+								from `tabStock Entry` se,`tabStock Entry Detail` sed
+								where
+									se.name = sed.parent and se.docstatus=1 and se.purpose='Material Transfer for Manufacture'
+									and sed.item_code=%s and se.work_order= %s and ifnull(sed.t_warehouse, '') != ''
+							""", (item.item_code,self.work_order), as_dict=1)
+
+					stock_qty = flt(item.qty)
+					trans_qty = flt(transferred_materials[0].qty)
+
+					if req_items:
+						if stock_qty > trans_qty:
+							item_code.append(item.item_code)
+
+				if item_code:
+					frappe.throw(_("Transaction quantity cannot be more than transferred quantity for item/s {0}.").format(', '.join(item_code)))
+
+
 	def validate_warehouse(self):
 		"""perform various (sometimes conditional) validations on warehouse"""
 
-		source_mandatory = ["Material Issue", "Material Transfer", "Subcontract", "Material Transfer for Manufacture"]
-		target_mandatory = ["Material Receipt", "Material Transfer", "Subcontract", "Material Transfer for Manufacture"]
+		source_mandatory = ["Material Issue", "Material Transfer", "Subcontract", "Material Transfer for Manufacture",
+							"Material Consumption for Manufacture"]
+		target_mandatory = ["Material Receipt", "Material Transfer", "Subcontract", "Material Transfer for Manufacture",]
 
 		validate_for_manufacture_repack = any([d.bom_no for d in self.get("items")])
 
@@ -196,10 +242,11 @@ class StockEntry(StockController):
 				frappe.throw(_("Source and target warehouse cannot be same for row {0}").format(d.idx))
 
 	def validate_work_order(self):
-		if self.purpose in ("Manufacture", "Material Transfer for Manufacture"):
+		if self.purpose in ("Manufacture", "Material Transfer for Manufacture", "Material Consumption for Manufacture"):
 			# check if work order is entered
 
-			if self.purpose=="Manufacture" and self.work_order:
+			if (self.purpose=="Manufacture" or self.purpose=="Material Consumption for Manufacture") \
+					and self.work_order:
 				if not self.fg_completed_qty:
 					frappe.throw(_("For Quantity (Manufactured Qty) is mandatory"))
 				self.check_if_operations_completed()
@@ -234,10 +281,9 @@ class StockEntry(StockController):
 				where parent in (%s)
 					and item_code = %s
 					and ifnull(s_warehouse,'')='' """ % (", ".join(["%s" * len(other_ste)]), "%s"), args)[0][0]
-
-			if fg_qty_already_entered >= qty:
-				frappe.throw(_("Stock Entries already created for Work Order ")
-					+ self.work_order + ":" + ", ".join(other_ste), DuplicateEntryForWorkOrderError)
+		if fg_qty_already_entered and fg_qty_already_entered >= qty:
+			frappe.throw(_("Stock Entries already created for Work Order ")
+				+ self.work_order + ":" + ", ".join(other_ste), DuplicateEntryForWorkOrderError)
 
 	def set_incoming_rate(self):
 		for d in self.items:
@@ -521,6 +567,18 @@ class StockEntry(StockController):
 				if self.purpose == "Manufacture":
 					pro_doc.run_method("update_planned_qty")
 
+			if (self.purpose == "Material Consumption for Manufacture" or self.purpose == "Manufacture"):
+				for items in self.items:
+					if self.docstatus == 1:
+						frappe.db.sql("""Update `tabWork Order Item` set consumed_qty = consumed_qty + %s
+								where item_code = %s and parent = %s""",
+								(items.qty, items.item_code, self.work_order))
+					else:
+						frappe.db.sql("""Update `tabWork Order Item` set consumed_qty = consumed_qty - %s
+					    		where item_code = %s and parent = %s""",
+								(items.qty, items.item_code, self.work_order))
+					frappe.db.commit()
+
 	def get_item_details(self, args=None, for_update=False):
 		item = frappe.db.sql("""select stock_uom, description, image, item_name,
 				expense_account, buying_cost_center, item_group, has_serial_no,
@@ -590,8 +648,10 @@ class StockEntry(StockController):
 		self.set_work_order_details()
 
 		if self.bom_no:
+
 			if self.purpose in ["Material Issue", "Material Transfer", "Manufacture", "Repack",
-					"Subcontract", "Material Transfer for Manufacture"]:
+					"Subcontract", "Material Transfer for Manufacture", "Material Consumption for Manufacture"]:
+
 				if self.work_order and self.purpose == "Material Transfer for Manufacture":
 					item_dict = self.get_pending_raw_materials()
 					if self.to_warehouse and self.pro_doc:
@@ -599,7 +659,7 @@ class StockEntry(StockController):
 							item["to_warehouse"] = self.pro_doc.wip_warehouse
 					self.add_to_stock_entry_detail(item_dict)
 
-				elif self.work_order and self.purpose == "Manufacture" and \
+				elif self.work_order and (self.purpose == "Manufacture" or self.purpose == "Material Consumption for Manufacture") and \
 					frappe.db.get_single_value("Manufacturing Settings", "backflush_raw_materials_based_on")== "Material Transferred for Manufacture":
 					self.get_transfered_raw_materials()
 
@@ -744,7 +804,8 @@ class StockEntry(StockController):
 			from
 				`tabStock Entry` se, `tabStock Entry Detail` sed
 			where
-				se.name = sed.parent and se.docstatus=1 and se.purpose='Manufacture'
+				se.name = sed.parent and se.docstatus=1 
+				and (se.purpose='Manufacture' or se.purpose='Material Consumption for Manufacture')
 				and se.work_order= %s and ifnull(sed.s_warehouse, '') != ''
 			group by sed.item_code, sed.s_warehouse
 		""", self.work_order, as_dict=1)
@@ -755,20 +816,48 @@ class StockEntry(StockController):
 
 		po_qty = frappe.db.sql("""select qty, produced_qty, material_transferred_for_manufacturing from
 			`tabWork Order` where name=%s""", self.work_order, as_dict=1)[0]
+
 		manufacturing_qty = flt(po_qty.qty)
 		produced_qty = flt(po_qty.produced_qty)
 		trans_qty = flt(po_qty.material_transferred_for_manufacturing)
 
 		for item in transferred_materials:
 			qty= item.qty
+			req_items = frappe.get_all('Work Order Item',
+				filters={'parent': self.work_order, 'item_code': item.item_code},
+				fields=["required_qty", "consumed_qty"]
+			    )
+			req_qty = flt(req_items[0].required_qty)
+			req_qty_each = flt(req_qty / manufacturing_qty)
+			consumed_qty = flt(req_items[0].consumed_qty)
 
-			if trans_qty and manufacturing_qty > (produced_qty + flt(self.fg_completed_qty)):
-				qty = (qty/trans_qty) * flt(self.fg_completed_qty)
+			if trans_qty and manufacturing_qty >= (produced_qty + flt(self.fg_completed_qty)):
+				if qty >= req_qty:
+					qty = (req_qty/trans_qty) * flt(self.fg_completed_qty)
+				else:
+					qty = qty - consumed_qty
+
+				if self.purpose == 'Manufacture':
+					if consumed_qty != 0:
+						remaining_qty = consumed_qty - (produced_qty * req_qty_each)
+						exhaust_qty = req_qty_each * produced_qty
+						if remaining_qty > exhaust_qty :
+							if (remaining_qty/(req_qty_each * flt(self.fg_completed_qty))) >= 1:
+								qty =0
+							else:
+								qty = (req_qty_each * flt(self.fg_completed_qty)) - remaining_qty
+						else:
+							qty = (req_qty_each - abs(remaining_qty)) * flt(self.fg_completed_qty)
+					else:
+						qty = req_qty_each * flt(self.fg_completed_qty)
+
 
 			elif backflushed_materials.get(item.item_code):
 				for d in backflushed_materials.get(item.item_code):
 					if d.get(item.warehouse):
-						qty-= d.get(item.warehouse)
+						if (qty > req_qty):
+							qty = req_qty
+							qty-= d.get(item.warehouse)
 
 			if qty > 0:
 				self.add_to_stock_entry_detail({

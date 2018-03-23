@@ -600,9 +600,10 @@ def make_stock_entry(work_order_id, purpose, qty=None):
 	else:
 		stock_entry.from_warehouse = wip_warehouse
 		stock_entry.to_warehouse = work_order.fg_warehouse
-		additional_costs = get_additional_costs(work_order, fg_qty=stock_entry.fg_completed_qty)
 		stock_entry.project = work_order.project
-		stock_entry.set("additional_costs", additional_costs)
+		if purpose=="Manufacture":
+			additional_costs = get_additional_costs(work_order, fg_qty=stock_entry.fg_completed_qty)
+			stock_entry.set("additional_costs", additional_costs)
 
 	stock_entry.get_items()
 	return stock_entry.as_dict()

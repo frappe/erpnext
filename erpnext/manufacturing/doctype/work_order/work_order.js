@@ -313,6 +313,11 @@ erpnext.work_order = {
 				if ((flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing))
 						&& frm.doc.status != 'Stopped') {
 					frm.has_finish_btn = true;
+
+					var mat_consumption_btn = frm.add_custom_button(__('Material Consumption'), function() {
+						erpnext.work_order.make_consumption_se(frm, 'Material Consumption for Manufacture');
+					});
+
 					var finish_btn = frm.add_custom_button(__('Finish'), function() {
 						erpnext.work_order.make_se(frm, 'Manufacture');
 					});
@@ -325,6 +330,10 @@ erpnext.work_order = {
 			} else {
 				if ((flt(doc.produced_qty) < flt(doc.qty)) && frm.doc.status != 'Stopped') {
 					frm.has_finish_btn = true;
+					var mat_consumption_btn = frm.add_custom_button(__('Material Consumption'), function() {
+						erpnext.work_order.make_consumption_se(frm, 'Material Consumption for Manufacture');
+					});
+
 					var finish_btn = frm.add_custom_button(__('Finish'), function() {
 						erpnext.work_order.make_se(frm, 'Manufacture');
 					});
@@ -398,6 +407,30 @@ erpnext.work_order = {
 				}
 			});
 		}, __("Select Quantity"), __("Make"));
+	},
+
+	make_consumption_se: function(frm, purpose) {
+		if(!frm.doc.skip_transfer){
+			var max = (purpose === "Material Consumption for Manufacture") ?
+				flt(frm.doc.material_transferred_for_manufacturing) - flt(frm.doc.produced_qty) :
+				flt(frm.doc.qty) - flt(frm.doc.material_transferred_for_manufacturing);
+		} else {
+			var max = flt(frm.doc.qty) - flt(frm.doc.produced_qty);
+		}
+
+		max = flt(max, precision("qty"));
+		frappe.call({
+			method:"erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry",
+			args: {
+				"work_order_id": frm.doc.name,
+				"purpose": purpose,
+				"qty": max
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
 	},
 	
 	stop_work_order: function(frm, status) {

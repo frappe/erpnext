@@ -592,7 +592,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	clean_up: function() {
 		// Clear Work Order record from locals, because it is updated via Stock Entry
 		if(this.frm.doc.work_order &&
-				in_list(["Manufacture", "Material Transfer for Manufacture"], this.frm.doc.purpose)) {
+				in_list(["Manufacture", "Material Transfer for Manufacture", "Material Consumption for Manufacture"],
+				this.frm.doc.purpose)) {
 			frappe.model.remove_from_locals("Work Order",
 				this.frm.doc.work_order);
 		}
@@ -637,16 +638,18 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 						me.frm.set_value("to_warehouse", r.message["wip_warehouse"]);
 
 
-					if (me.frm.doc.purpose == "Manufacture") {
-						if(r.message["additional_costs"].length) {
-							$.each(r.message["additional_costs"], function(i, row) {
-								me.frm.add_child("additional_costs", row);
-							})
-							refresh_field("additional_costs");
-						}
+					if (me.frm.doc.purpose == "Manufacture" || me.frm.doc.purpose == "Material Consumption for Manufacture" ) {
+						if (me.frm.doc.purpose == "Manufacture") {
+						    if (!me.frm.doc.to_warehouse) me.frm.set_value("to_warehouse", r.message["fg_warehouse"]);
+                            if(r.message["additional_costs"].length) {
+                                $.each(r.message["additional_costs"], function(i, row) {
+                                    me.frm.add_child("additional_costs", row);
+                                })
+                                refresh_field("additional_costs");
+                            }
+                        }
 
 						if (!me.frm.doc.from_warehouse) me.frm.set_value("from_warehouse", r.message["wip_warehouse"]);
-						if (!me.frm.doc.to_warehouse) me.frm.set_value("to_warehouse", r.message["fg_warehouse"]);
 					}
 					me.get_items()
 				}
