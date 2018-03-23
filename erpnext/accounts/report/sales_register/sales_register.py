@@ -47,6 +47,7 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 		row +=[
 			inv.get("customer_group"),
 			inv.get("territory"),
+			inv.get("tax_id"),
 			inv.debit_to, ", ".join(mode_of_payments.get(inv.name, [])),
 			inv.project, inv.owner, inv.remarks,
 			", ".join(sales_order), ", ".join(delivery_note),", ".join(cost_center),
@@ -89,7 +90,7 @@ def get_columns(invoice_list, additional_table_columns):
 
 	columns +=[
 		_("Customer Group") + ":Link/Customer Group:120", _("Territory") + ":Link/Territory:80",
-		_("Receivable Account") + ":Link/Account:120", _("Mode of Payment") + "::120",
+		_("Tax Id") + "::80", _("Receivable Account") + ":Link/Account:120", _("Mode of Payment") + "::120",
 		_("Project") +":Link/Project:80", _("Owner") + "::150", _("Remarks") + "::150",
 		_("Sales Order") + ":Link/Sales Order:100", _("Delivery Note") + ":Link/Delivery Note:100",
 		_("Cost Center") + ":Link/Cost Center:100", _("Warehouse") + ":Link/Warehouse:100",
@@ -161,7 +162,7 @@ def get_invoices(filters, additional_query_columns):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
 		select name, posting_date, debit_to, project, customer, 
-		customer_name, owner, remarks, territory, customer_group,
+		customer_name, owner, remarks, territory, tax_id, customer_group,
 		base_net_total, base_grand_total, base_rounded_total, outstanding_amount {0}
 		from `tabSales Invoice`
 		where docstatus = 1 %s order by posting_date desc, name desc""".format(additional_query_columns or '') %

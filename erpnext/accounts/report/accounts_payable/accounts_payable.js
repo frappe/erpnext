@@ -14,7 +14,13 @@ frappe.query_reports["Accounts Payable"] = {
 			"fieldname":"supplier",
 			"label": __("Supplier"),
 			"fieldtype": "Link",
-			"options": "Supplier"
+			"options": "Supplier",
+			on_change: () => {
+				var supplier = frappe.query_report_filters_by_name.supplier.get_value();
+				frappe.db.get_value('Supplier', supplier, "tax_id", function(value) {
+					frappe.query_report_filters_by_name.tax_id.set_value(value["tax_id"]);
+				});
+			}
 		},
 		{
 			"fieldname":"report_date",
@@ -52,6 +58,12 @@ frappe.query_reports["Accounts Payable"] = {
 			"fieldtype": "Int",
 			"default": "90",
 			"reqd": 1
+		},
+		{
+			"fieldname":"tax_id",
+			"label": __("Tax Id"),
+			"fieldtype": "Data",
+			"hidden": 1
 		}
 	],
 	onload: function(report) {

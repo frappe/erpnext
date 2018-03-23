@@ -395,8 +395,16 @@ def validate_conversion_rate(args, meta):
 
 def get_party_item_code(args, item_doc, out):
 	if args.transaction_type=="selling" and args.customer:
+		out.customer_item_code = None
 		customer_item_code = item_doc.get("customer_items", {"customer_name": args.customer})
-		out.customer_item_code = customer_item_code[0].ref_code if customer_item_code else None
+
+		if customer_item_code:
+			out.customer_item_code = customer_item_code[0].ref_code
+		else:
+			customer_group = frappe.db.get_value("Customer", args.customer, "customer_group")
+			customer_group_item_code = item_doc.get("customer_items", {"customer_group": customer_group})
+			if customer_group_item_code and not customer_group_item_code[0].customer_name:
+				out.customer_item_code = customer_group_item_code[0].ref_code
 
 	if args.transaction_type=="buying" and args.supplier:
 		item_supplier = item_doc.get("supplier_items", {"supplier": args.supplier})
