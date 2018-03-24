@@ -21,6 +21,6 @@ with the Projects module..
 You can track work-in-progress by creating work-in-progress Warehouses.
 
 ERPNext will help you track material movement by automatically creating Stock
-Entries from your Production Orders by building from Bill of Materials.
+Entries from your Work Orders by building from Bill of Materials.
 
 {next}

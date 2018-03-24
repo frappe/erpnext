@@ -34,7 +34,7 @@ You can also split the batch into smaller one by clicking on "Split". This will 
 ### Transacting Items with Batches
 
 Batch master is created before creation of Purchase Receipt.
-Hence eveytime there is Purchase Receipt or Production Order being made for a batch item,
+Hence eveytime there is Purchase Receipt or Work Order being made for a batch item,
 you will first create its Batch No, and then select it in Purchase order or Production Entry.
 
 On every stock transaction (Purchase Receipt, Delivery Note, POS Invoice) made for batch item,

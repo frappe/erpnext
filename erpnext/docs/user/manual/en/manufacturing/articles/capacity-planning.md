@@ -1,4 +1,4 @@
-# Capacity Planning based on Production Order
+# Capacity Planning based on Work Order
 
 Capacity Planning functionality helps you in tracking production jobs allocated on each Workstation.
 
@@ -24,19 +24,19 @@ Follow are the steps to use Capacity Planning Feature in your ERPNext account.
 
     In a BOM, with the list of raw material needed, for manufacturing, you can also list operation and workstations through which those raw materials will be processed.  
 
-4.  Production Order:  
+4.  Work Order:  
 
-    On submission of Production Order, Timesheet for Operations. This helps you allocate production jobs on each Workstation, as well as you can update actual time taken for each Operation.  
+    On submission of Work Order, Timesheet for Operations. This helps you allocate production jobs on each Workstation, as well as you can update actual time taken for each Operation.  
 
 ### Error due to Capacity Planning
 
-**Question:** On Submission of Production Order, we are getting following error message.
+**Question:** On Submission of Work Order, we are getting following error message.
 
 <img alt="Role Desk Permission" class="screenshot" src="{{docs_base_url}}/assets/img/articles/capacity-2.png">
 
-**Answer: **Please check if you have updated Working Hours in the Workstation master? If not, then please update it and then try to submit Production Order.
+**Answer: **Please check if you have updated Working Hours in the Workstation master? If not, then please update it and then try to submit Work Order.
 
-On submission of Production Order, Operations (as added in the BOM) are allocated on the workstation. Each operation should start and end on the same day. If a system is not able to schedule that operation in a day, then system request you to divide that Project, so that system can allocate smaller operations in a day.
+On submission of Work Order, Operations (as added in the BOM) are allocated on the workstation. Each operation should start and end on the same day. If a system is not able to schedule that operation in a day, then system request you to divide that Project, so that system can allocate smaller operations in a day.
 
 If you have update working hours in the Workstation, but still getting this issue, that because one of your operation is taking too long, and cannot be completed in a day. Please divide that operation into smaller operations, so that it can be allocated on Workstation and completed on the same day.
 

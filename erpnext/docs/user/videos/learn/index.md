@@ -220,7 +220,7 @@
               <span class="text-muted pull-right">1:41</span>
         </li>
         <li><a href="/docs/user/videos/learn/production-order.html">
-            Production Order</a>
+            Work Order</a>
             <span class="text-muted pull-right">2:24</span>
         </li>
         <li>

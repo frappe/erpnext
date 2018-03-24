@@ -20,7 +20,7 @@ To use the Production Plan, go to:
 
 <img class="screenshot" alt="Sales Orders" src="/docs/assets/img/manufacturing/sales_orders.png">
 
-* Click on Get Items for Production Order to fetch the items from the above sales orders.
+* Click on Get Items for Work Order to fetch the items from the above sales orders.
 
 <img class="screenshot" alt="Sales Order Item" src="/docs/assets/img/manufacturing/sales_order_items.png">
 	* Include Exploded Items :- To include subassembly items of raw materials in the production.
@@ -35,7 +35,7 @@ To use the Production Plan, go to:
 
 <img class="screenshot" alt="Material Requests" src="/docs/assets/img/manufacturing/material_requests.png">
 
-* Click on Get Items for Production Order to fetch the items from the above material requests.
+* Click on Get Items for Work Order to fetch the items from the above material requests.
 
 <img class="screenshot" alt="Material Request Item" src="/docs/assets/img/manufacturing/material_request_items.png">
 
@@ -48,6 +48,6 @@ To use the Production Plan, go to:
   * Include Subcontracted Items :- To add subcontracted item's raw materials if include exploded items is disabled
   * Ignore Existing Ordered Quantity :- If enabled then system will not check the projected quantity to make material request.
 
-# Options To Make Production Order and Material Request
+# Options To Make Work Order and Material Request
 
 <img class="screenshot" alt="Make PO or MR" src="/docs/assets/img/manufacturing/make_po_mr.png">
