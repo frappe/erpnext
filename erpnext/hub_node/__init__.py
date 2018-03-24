@@ -65,11 +65,37 @@ def update_category(hub_item_code, category):
 	return response
 
 @frappe.whitelist()
+def send_review(hub_item_code, review):
+	review = json.loads(review)
+	hub_connection = get_hub_connection()
+
+	item_doc = hub_connection.connection.get_doc('Hub Item', hub_item_code)
+	existing_reviews = item_doc.get('reviews')
+
+	reviews = [review]
+	review.setdefault('idx', 0)
+	for r in existing_reviews:
+		if r.get('user') != review.get('user'):
+			reviews.append(r)
+
+	response = hub_connection.update('Hub Item', dict(
+		doctype='Hub Item',
+		reviews = reviews
+	), hub_item_code)
+
+	return response
+
+@frappe.whitelist()
 def get_details(hub_sync_id=None, doctype='Hub Item'):
 	if not hub_sync_id:
 		return
 	connection = get_client_connection()
 	details = connection.get_doc(doctype, hub_sync_id)
+	reviews = details.get('reviews')
+	if len(reviews):
+		for r in reviews:
+			r.setdefault('pretty_date', frappe.utils.pretty_date(r.get('modified')))
+		details.setdefault('reviews', reviews)
 	return details
 
 def get_client_connection():

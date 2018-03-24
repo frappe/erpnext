@@ -12,7 +12,6 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 		return this.get_meta()
 			.then(r => {
 				this.meta = r.message.meta || this.meta;
-				console.log(r.message, this.doctype);
 				this.bootstrap_data(r.message);
 
 				this.prepareFormFields();
@@ -43,7 +42,7 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 
 		this.attachFooter();
 		this.attachTimeline();
-		this.attachCommentArea();
+		this.attachReviewArea();
 	}
 
 	setup_filter_area() { }
@@ -110,35 +109,30 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 			<span class="helper"></span>` :
 			`<div class="standard-image">${frappe.get_abbr(this.page_title)}</div>`;
 
+		this.sidebar.remove_item('image');
 		this.sidebar.add_item({
+			name: 'image',
 			label: image_html
 		});
 
-		let fields = this.formFields;
+		if(!this.form) {
+			let fields = this.formFields;
+			this.form = new frappe.ui.FieldGroup({
+				parent: this.$result,
+				fields
+			});
+			this.form.make();
+		}
 
-		this.form = new frappe.ui.FieldGroup({
-			parent: this.$result,
-			fields
-		});
-
-		this.form.make();
 		this.form.set_values(this.data);
+		this.$result.show();
 
+		this.$timelineList.empty();
 		if(this.data.reviews.length) {
 			this.data.reviews.map(review => {
-				this.addTimelineItem(review);
+				this.addReviewToTimeline(review);
 			})
 		}
-	}
-
-	toggle_result_area() {
-		this.$result.toggle(this.unique_id);
-		this.$paging_area.toggle(this.data.length > 0);
-		this.$no_result.toggle(this.data.length == 0);
-
-		const show_more = (this.start + this.page_length) <= this.data.length;
-		this.$paging_area.find('.btn-more')
-			.toggle(show_more);
 	}
 
 	attachFooter() {
@@ -171,15 +165,30 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 		this.$timelineList = this.$timeline.find(".timeline-items");
 	}
 
-	attachCommentArea() {
+	attachReviewArea() {
 		this.comment_area = new erpnext.hub.ReviewArea({
 			parent: this.$footer.find('.timeline-head'),
 			mentions: [],
-			on_submit: (val) => {return val;}
+			on_submit: (val) => {
+				val.user = frappe.session.user;
+				val.username = frappe.session.user_fullname;
+				frappe.call({
+					method: 'erpnext.hub_node.send_review',
+					args: {
+						hub_item_code: this.data.hub_item_code,
+						review: val
+					},
+					callback: (r) => {
+						this.refresh();
+						this.comment_area.reset();
+					},
+					freeze: true
+				});
+			}
 		});
 	}
 
-	addTimelineItem(data) {
+	addReviewToTimeline(data) {
 		let username = data.username || data.user || __("Anonymous")
 		let imageHtml = data.user_image
 			? `<div class="avatar-frame" style="background-image: url(${data.user_image})"></div>`
@@ -236,14 +245,12 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 									<span class="text-muted hidden-xs">&ndash;</span>
 									<span class="indicator-right ${'green'}
 										delivery-status-indicator">
-										<span class="hidden-xs">${__('Sent')}</span>
+										<span class="hidden-xs">${data.pretty_date}</span>
 									</span>
 								</a>
 
 								<a class="text-muted reply-link pull-right timeline-content-show"
-								title="${__('Reply')}">
-									${__('Reply')}
-								</a>
+								title="${__('Reply')}"> ${''} </a>
 							<span class="comment-likes hidden-xs">
 								<i class="octicon octicon-heart like-action text-extra-muted not-liked fa-fw">
 								</i>
@@ -280,7 +287,7 @@ erpnext.hub.ReviewArea = class ReviewArea extends frappe.ui.CommentArea {
 		const header = !this.no_wrapper ?
 			`<div class="comment-input-header">
 				<span class="small text-muted">${__("Add a review")}</span>
-				<button class="btn btn-default btn-comment btn-xs pull-right">
+				<button class="btn btn-default btn-comment btn-xs disabled pull-right">
 					${__("Submit Review")}
 				</button>
 			</div>` : '';
@@ -291,13 +298,13 @@ erpnext.hub.ReviewArea = class ReviewArea extends frappe.ui.CommentArea {
 			</div>` : '';
 
 		const ratingArea = !this.no_wrapper ?
-			`<div class="text-muted small" style="margin-bottom: 5px">
+			`<div class="rating-area text-muted small" style="margin-bottom: 5px">
 				${ __("Your rating: ") }
-				<i class='fa fa-fw fa-star-o star-icon' data-idx=1></i>
-				<i class='fa fa-fw fa-star-o star-icon' data-idx=2></i>
-				<i class='fa fa-fw fa-star-o star-icon' data-idx=3></i>
-				<i class='fa fa-fw fa-star-o star-icon' data-idx=4></i>
-				<i class='fa fa-fw fa-star-o star-icon' data-idx=5></i>
+				<i class='fa fa-fw fa-star-o star-icon' data-index=0></i>
+				<i class='fa fa-fw fa-star-o star-icon' data-index=1></i>
+				<i class='fa fa-fw fa-star-o star-icon' data-index=2></i>
+				<i class='fa fa-fw fa-star-o star-icon' data-index=3></i>
+				<i class='fa fa-fw fa-star-o star-icon' data-index=4></i>
 			</div>` : '';
 
 		this.wrapper = $(`
@@ -318,6 +325,72 @@ erpnext.hub.ReviewArea = class ReviewArea extends frappe.ui.CommentArea {
 		this.input = this.parent.find('.comment-input');
 		this.subject = this.parent.find('.review-subject');
 		this.button = this.parent.find('.btn-comment');
+		this.ratingArea = this.parent.find('.rating-area');
+
+		this.rating = 0;
+	}
+
+	check_state() {
+		return !(this.input.summernote('isEmpty') ||
+			this.rating === 0 || !this.subject.val().length);
+	}
+
+	set_state() {
+		if(this.check_state()) {
+			this.button
+				.removeClass('btn-default disabled')
+				.addClass('btn-primary');
+		} else {
+			this.button
+				.removeClass('btn-primary')
+				.addClass('btn-default disabled');
+		}
+	}
+
+	reset() {
+		this.set_rating(0);
+		this.subject.val('');
+		this.input.summernote('code', '');
+	}
+
+	bind_events() {
+		super.bind_events();
+		this.ratingArea.on('click', '.star-icon', (e) => {
+			let index = $(e.target).attr('data-index');
+			this.set_rating(parseInt(index) + 1);
+		})
+
+		this.subject.on('change', () => {
+			this.set_state();
+		})
+	}
+
+	set_rating(rating) {
+		this.ratingArea.find('.star-icon').each((i, icon) => {
+			let star = $(icon);
+			if(i < rating) {
+				star.removeClass('fa-star-o');
+				star.addClass('fa-star');
+			} else {
+				star.removeClass('fa-star');
+				star.addClass('fa-star-o');
+			}
+		})
+
+		this.rating = rating;
+		this.set_state();
+	}
+
+	val(value) {
+		if(value === undefined) {
+			return {
+				rating: this.rating,
+				subject: this.subject.val(),
+				content: this.input.summernote('code')
+			}
+		}
+		// Set html if value is specified
+		this.input.summernote('code', value);
 	}
 }
 
