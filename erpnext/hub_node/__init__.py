@@ -28,14 +28,17 @@ def get_list(doctype, start=0, limit=20, fields=["*"], filters="{}", order_by=No
 def get_meta(doctype):
 	connection = get_client_connection()
 	meta = connection.get_doc('DocType', doctype)
+	categories = connection.get_list('Hub Category',
+		limit_start=0, limit_page_length=300,
+		filters={}, fields=['name'])
+
+	categories = [d.get('name') for d in categories]
 	return {
 		'meta': meta,
 		'companies': connection.get_list('Hub Company',
 			limit_start=0, limit_page_length=300,
 			filters={}, fields=['name']),
-		'categories': connection.get_list('Hub Category',
-			limit_start=0, limit_page_length=300,
-			filters={}, fields=['name'])
+		'categories': categories
 	}
 
 @frappe.whitelist()

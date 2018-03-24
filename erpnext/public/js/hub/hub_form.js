@@ -12,9 +12,10 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 		return this.get_meta()
 			.then(r => {
 				this.meta = r.message.meta || this.meta;
+				this.categories = r.message.categories || [];
 				this.bootstrap_data(r.message);
 
-				this.prepareFormFields();
+				this.getFormFields();
 			});
 	}
 
@@ -124,6 +125,10 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 			this.form.make();
 		}
 
+		if(this.data.hub_category) {
+			this.form.fields_dict.set_category.hide();
+		}
+
 		this.form.set_values(this.data);
 		this.$result.show();
 
@@ -133,7 +138,11 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 				this.addReviewToTimeline(review);
 			})
 		}
+
+		this.postRender()
 	}
+
+	postRender() {}
 
 	attachFooter() {
 		let footerHtml = `<div class="form-footer">
@@ -166,7 +175,7 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 	}
 
 	attachReviewArea() {
-		this.comment_area = new erpnext.hub.ReviewArea({
+		this.comment_area = new frappe.ui.ReviewArea({
 			parent: this.$footer.find('.timeline-head'),
 			mentions: [],
 			on_submit: (val) => {
@@ -280,119 +289,26 @@ erpnext.hub.HubDetailsPage = class HubDetailsPage extends frappe.views.BaseList 
 			</div>
 		</div>`;
 	}
-};
 
-erpnext.hub.ReviewArea = class ReviewArea extends frappe.ui.CommentArea {
-	setup_dom() {
-		const header = !this.no_wrapper ?
-			`<div class="comment-input-header">
-				<span class="small text-muted">${__("Add a review")}</span>
-				<button class="btn btn-default btn-comment btn-xs disabled pull-right">
-					${__("Submit Review")}
-				</button>
-			</div>` : '';
-
-		const footer = !this.no_wrapper ?
-			`<div class="text-muted small">
-				${__("Ctrl+Enter to submit")}
-			</div>` : '';
-
-		const ratingArea = !this.no_wrapper ?
-			`<div class="rating-area text-muted small" style="margin-bottom: 5px">
-				${ __("Your rating: ") }
-				<i class='fa fa-fw fa-star-o star-icon' data-index=0></i>
-				<i class='fa fa-fw fa-star-o star-icon' data-index=1></i>
-				<i class='fa fa-fw fa-star-o star-icon' data-index=2></i>
-				<i class='fa fa-fw fa-star-o star-icon' data-index=3></i>
-				<i class='fa fa-fw fa-star-o star-icon' data-index=4></i>
-			</div>` : '';
-
-		this.wrapper = $(`
-			<div class="comment-input-wrapper">
-				${ header }
-				<div class="comment-input-container">
-					${ ratingArea }
-					<input class="form-control review-subject" type="text"
-						placeholder="${__('Subject')}"
-						style="border-radius: 3px; border-color: #ebeff2">
-					</input>
-					<div class="form-control comment-input"></div>
-					${ footer }
-				</div>
-			</div>
-		`);
-		this.wrapper.appendTo(this.parent);
-		this.input = this.parent.find('.comment-input');
-		this.subject = this.parent.find('.review-subject');
-		this.button = this.parent.find('.btn-comment');
-		this.ratingArea = this.parent.find('.rating-area');
-
-		this.rating = 0;
-	}
-
-	check_state() {
-		return !(this.input.summernote('isEmpty') ||
-			this.rating === 0 || !this.subject.val().length);
-	}
-
-	set_state() {
-		if(this.check_state()) {
-			this.button
-				.removeClass('btn-default disabled')
-				.addClass('btn-primary');
-		} else {
-			this.button
-				.removeClass('btn-primary')
-				.addClass('btn-default disabled');
-		}
-	}
-
-	reset() {
-		this.set_rating(0);
-		this.subject.val('');
-		this.input.summernote('code', '');
-	}
-
-	bind_events() {
-		super.bind_events();
-		this.ratingArea.on('click', '.star-icon', (e) => {
-			let index = $(e.target).attr('data-index');
-			this.set_rating(parseInt(index) + 1);
-		})
-
-		this.subject.on('change', () => {
-			this.set_state();
-		})
-	}
-
-	set_rating(rating) {
-		this.ratingArea.find('.star-icon').each((i, icon) => {
-			let star = $(icon);
-			if(i < rating) {
-				star.removeClass('fa-star-o');
-				star.addClass('fa-star');
-			} else {
-				star.removeClass('fa-star');
-				star.addClass('fa-star-o');
-			}
-		})
-
-		this.rating = rating;
-		this.set_state();
-	}
-
-	val(value) {
-		if(value === undefined) {
+	prepareFormFields(fields, fieldnames) {
+		return fields
+		.filter(field => fieldnames.includes(field.fieldname))
+		.map(field => {
+			let {
+				label,
+				fieldname,
+				fieldtype,
+			} = field;
+			let read_only = 1;
 			return {
-				rating: this.rating,
-				subject: this.subject.val(),
-				content: this.input.summernote('code')
-			}
-		}
-		// Set html if value is specified
-		this.input.summernote('code', value);
+				label,
+				fieldname,
+				fieldtype,
+				read_only,
+			};
+		});
 	}
-}
+};
 
 erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubDetailsPage {
 	constructor(opts) {
@@ -407,37 +323,65 @@ erpnext.hub.ItemPage = class ItemPage extends erpnext.hub.HubDetailsPage {
 		this.image_field_name = 'image';
 	}
 
-	update_on_hub() {
-		return new Promise((resolve, reject) => {
-			frappe.call({
-				method: 'erpnext.hub_node.update_category',
-				args: { item: this.unique_id, category: this.form.get_value('hub_category') },
-				callback: resolve,
-				freeze: true
-			}).fail(reject);
+	postRender() {
+		this.categoryDialog = new frappe.ui.Dialog({
+			title: __('Suggest Category'),
+			fields: [
+				{
+					label: __('Category'),
+					fieldname: 'category',
+					fieldtype: 'Autocomplete',
+					options: this.categories,
+					reqd: 1
+				}
+			],
+			primary_action_label: __("Send"),
+			primary_action: () => {
+				let values = this.categoryDialog.get_values();
+				frappe.call({
+					method: 'erpnext.hub_node.update_category',
+					args: {
+						hub_item_code: this.data.hub_item_code,
+						category: values.category
+					},
+					callback: () => {
+						this.refresh();
+					},
+					freeze: true
+				}).fail(() => {});
+			}
 		});
 	}
 
-	prepareFormFields() {
-		let fieldnames = ['hub_item_code', 'item_name', 'item_code', 'description',
-			'seller', 'company_name', 'country'];
-		this.formFields = this.meta.fields
-			.filter(field => fieldnames.includes(field.fieldname))
-			.map(field => {
-				let {
-					label,
-					fieldname,
-					fieldtype,
-				} = field;
-				let read_only = 1;
-				return {
-					label,
-					fieldname,
-					fieldtype,
-					read_only,
-				};
-			});
+	getFormFields() {
+		let colOneFieldnames = ['item_name', 'item_code', 'description'];
+		let colTwoFieldnames = ['seller', 'company_name', 'country'];
+		let colOneFields = this.prepareFormFields(this.meta.fields, colOneFieldnames);
+		let colTwoFields = this.prepareFormFields(this.meta.fields, colTwoFieldnames);
 
+		let miscFields = [
+			{
+				label: __('Category'),
+				fieldname: 'hub_category',
+				fieldtype: 'Data',
+				read_only: 1
+			},
+
+			{
+				label: __('Suggest Category?'),
+				fieldname: 'set_category',
+				fieldtype: 'Button',
+				click: () => {
+					this.categoryDialog.show();
+				}
+			},
+
+			{
+				fieldname: 'cb1',
+				fieldtype: 'Column Break'
+			}
+		];
+		this.formFields = colOneFields.concat(miscFields, colTwoFields);
 	}
 }
 
@@ -454,23 +398,8 @@ erpnext.hub.CompanyPage = class CompanyPage extends erpnext.hub.HubDetailsPage {
 		this.image_field_name = 'company_logo';
 	}
 
-	prepareFormFields() {
+	getFormFields() {
 		let fieldnames = ['company_name', 'description', 'route', 'country', 'seller', 'site_name'];;
-		this.formFields = this.meta.fields
-			.filter(field => fieldnames.includes(field.fieldname))
-			.map(field => {
-				let {
-					label,
-					fieldname,
-					fieldtype,
-				} = field;
-				let read_only = 1;
-				return {
-					label,
-					fieldname,
-					fieldtype,
-					read_only,
-				};
-			});
+		this.formFields = this.prepareFormFields(this.meta.fields, fieldnames);
 	}
 }
