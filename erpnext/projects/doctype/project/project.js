@@ -103,6 +103,21 @@ frappe.ui.form.on("Project", {
         	frm.set_value("expected_end_date", cur_frm.doc.end_date );
         }
 	},
+    employee : function (frm){
+        if (cur_frm.doc.employee ){
+            frm.set_value("employee_ch", cur_frm.doc.employee );
+        }
+    },
+    end_users : function (frm){
+        if (cur_frm.doc.end_users ){
+            frm.set_value("end_users_ch", cur_frm.doc.end_users );
+        }
+    },
+    concerned_department : function (frm){
+        if (cur_frm.doc.concerned_department ){
+            frm.set_value("concerned_department_ch", cur_frm.doc.concerned_department );
+        }
+    },
 	total_cost_price: function(frm) {
 
     	total_overall_profit = flt(cur_frm.doc.total_final_selling_price) - flt(cur_frm.doc.total_cost_price) ;
@@ -187,6 +202,7 @@ frappe.ui.form.on("Project", {
             frm.toggle_display("project_information", false);
             frm.toggle_display("customer_decision", false);
             frm.toggle_display("approvals", false);
+            frm.toggle_display("section_break_133", false);
 
             frm.toggle_display("project_initiation", true);
             frm.toggle_display("customer_details", true);
@@ -194,13 +210,7 @@ frappe.ui.form.on("Project", {
             frm.toggle_display("section_7", true);
             frm.toggle_display("section_8", true);
             frm.toggle_display("charter", true);
-            frm.toggle_display("section_break_55", true);
-            frm.toggle_display("section_break_79", true);
-            frm.toggle_display("stakeholder_ch", true);
-            frm.toggle_display("project_purpose_ch", true);
-            frm.toggle_display("major_deliverables_ch", true);
-            frm.toggle_display("section_break_23", true);
-            frm.toggle_display("project_details_ch", true);
+            frm.toggle_display("project_initiation_header", true);
 
         });
 
@@ -218,13 +228,7 @@ frappe.ui.form.on("Project", {
             frm.toggle_display("section_7", false);
             frm.toggle_display("section_8", false);
             frm.toggle_display("charter", false);
-            frm.toggle_display("section_break_55", false);
-            frm.toggle_display("section_break_79", false);
-            frm.toggle_display("stakeholder_ch", false);
-            frm.toggle_display("project_purpose_ch", false);
-            frm.toggle_display("major_deliverables_ch", false);
-            frm.toggle_display("section_break_23", false);
-            frm.toggle_display("project_details_ch", false);
+            frm.toggle_display("project_initiation_header", false);
 
             frm.toggle_display("planning", true);
             frm.toggle_display("communication_management_plan", true);
@@ -234,6 +238,7 @@ frappe.ui.form.on("Project", {
             frm.toggle_display("quality_management_plan", true);
             frm.toggle_display("risk_register_section", true);
             frm.toggle_display("responsibilities", true);
+            frm.toggle_display("section_break_133", true);
 
         });
 
@@ -256,13 +261,8 @@ frappe.ui.form.on("Project", {
             frm.toggle_display("section_7", false);
             frm.toggle_display("section_8", false);
             frm.toggle_display("charter", false);
-            frm.toggle_display("section_break_55", false);
-            frm.toggle_display("section_break_79", false);
-            frm.toggle_display("stakeholder_ch", false);
-            frm.toggle_display("project_purpose_ch", false);
-            frm.toggle_display("major_deliverables_ch", false);
-            frm.toggle_display("section_break_23", false);
-            frm.toggle_display("project_details_ch", false);
+            frm.toggle_display("project_initiation_header", false);
+            frm.toggle_display("section_break_133", false);
             
             frm.toggle_display("control", true);
             frm.toggle_display("hd_cheanging_request", true);
@@ -288,13 +288,8 @@ frappe.ui.form.on("Project", {
             frm.toggle_display("section_7", false);
             frm.toggle_display("section_8", false);
             frm.toggle_display("charter", false);
-            frm.toggle_display("section_break_55", false);
-            frm.toggle_display("section_break_79", false);
-            frm.toggle_display("stakeholder_ch", false);
-            frm.toggle_display("project_purpose_ch", false);
-            frm.toggle_display("major_deliverables_ch", false);
-            frm.toggle_display("section_break_23", false);
-            frm.toggle_display("project_details_ch", false);
+            frm.toggle_display("project_initiation_header", false);
+            frm.toggle_display("section_break_133", false);
 
             frm.toggle_display("closure", true);
             frm.toggle_display("project_information", true);

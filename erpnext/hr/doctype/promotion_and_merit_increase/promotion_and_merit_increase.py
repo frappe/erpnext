@@ -28,7 +28,7 @@ class PromotionandMeritIncrease(Document):
     def validate_emp(self):
         if self.employee:
             user = frappe.get_value("Employee", filters = {"name": self.employee}, fieldname = "user_id")
-            if self.get('__islocal') and user:
+            if self.get('__islocal'):
                 if u'CEO' in frappe.get_roles(user):
                     self.workflow_state = "Created By CEO"
                 elif u'Director' in frappe.get_roles(user):
@@ -39,8 +39,9 @@ class PromotionandMeritIncrease(Document):
                     self.workflow_state = "Created By Line Manager"
                 elif u'Employee' in frappe.get_roles(user):
                     self.workflow_state = "Pending"
-            else:
-                self.workflow_state = "Pending"
+                    
+            if not user and self.get('__islocal'):
+                self.workflow_state = "Pending" 
 
     def get_basic_salary(self):
         components_data = self.get_salary_slip_data()
@@ -280,7 +281,7 @@ class PromotionandMeritIncrease(Document):
                 "designation":self.designation,
                 "grade": self.grade,
                 "employment_type":self.employment_type,
-                "level": self.level,
+                "level": str(self.level),
                 "from_date": from_date,
                 "to_date": add_days(self.due_date,-1)
             }
