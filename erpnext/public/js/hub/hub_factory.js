@@ -8,11 +8,9 @@ frappe.views.HubFactory = frappe.views.Factory.extend({
 		const assets = {
 			'List': [
 				'/assets/erpnext/js/hub/hub_listing.js',
-				'/assets/erpnext/css/hub.css',
 			],
 			'Form': [
-				'/assets/erpnext/js/hub/hub_form.js',
-				'/assets/erpnext/css/hub.css',
+				'/assets/erpnext/js/hub/hub_form.js'
 			]
 		};
 		frappe.model.with_doc('Hub Settings', 'Hub Settings', () => {
@@ -25,11 +23,17 @@ frappe.views.HubFactory = frappe.views.Factory.extend({
 				}
 				if (!route[2]) {
 					frappe.require(assets['List'], () => {
-						erpnext.hub.pages[page_name] = new erpnext.hub[page+'Listing']({
-							parent: this.make_page(true, page_name),
-							hub_settings: this.hub_settings
-						});
-						window.hub_page = erpnext.hub.pages[page_name];
+						if(page === 'Favourites') {
+							erpnext.hub.pages[page_name] = new erpnext.hub['Favourites']({
+								parent: this.make_page(true, page_name),
+								hub_settings: this.hub_settings
+							});
+						} else {
+							erpnext.hub.pages[page_name] = new erpnext.hub[page+'Listing']({
+								parent: this.make_page(true, page_name),
+								hub_settings: this.hub_settings
+							});
+						}
 					});
 				} else {
 					frappe.require(assets['Form'], () => {
@@ -39,9 +43,9 @@ frappe.views.HubFactory = frappe.views.Factory.extend({
 							parent: this.make_page(true, page_name),
 							hub_settings: this.hub_settings
 						});
-						window.hub_page = erpnext.hub.pages[page_name];
 					});
 				}
+				window.hub_page = erpnext.hub.pages[page_name];
 			} else {
 				frappe.container.change_to(page_name);
 				window.hub_page = erpnext.hub.pages[page_name];

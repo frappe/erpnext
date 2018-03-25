@@ -3,7 +3,7 @@ frappe.provide('erpnext.hub');
 erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 	setup_defaults() {
 		super.setup_defaults();
-		this.page_title = __('Hub');
+		this.page_title = __('Hello');
 		this.method = 'erpnext.hub_node.get_list';
 
 		this.cache = {};
@@ -11,7 +11,18 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 		const route = frappe.get_route();
 		this.page_name = route[1];
 
+		this.menu_items = this.menu_items.concat(this.get_menu_items());
+
 		this.imageFieldName = 'image';
+
+		this.show_filters = 0;
+	}
+
+	set_title() {
+		const title = this.page_title;
+		let iconHtml = `<img class="hub-icon" src="assets/erpnext/images/hub_logo.svg">`;
+		let titleHtml = `<span class="hub-page-title">${title}</span>`;
+		this.page.set_title(iconHtml + titleHtml, '', false, title);
 	}
 
 	setup_fields() {
@@ -35,6 +46,28 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 	prepareFormFields() { }
 
 	bootstrap_data() { }
+
+	get_menu_items() {
+		const items = [
+			{
+				label: __('Hub Settings'),
+				action: () => frappe.set_route('Form', 'Hub Settings'),
+				standard: true
+			},
+			{
+				label: __('Favourites'),
+				action: () => frappe.set_route('Hub', 'Favourites'),
+				standard: true
+			},
+			// {
+			// 	label: __('Toggle Sidebar'),
+			// 	action: () => this.toggle_side_bar(),
+			// 	standard: true
+			// }
+		];
+
+		return items;
+	}
 
 	setup_side_bar() {
 		this.sidebar = new frappe.ui.Sidebar({
@@ -119,6 +152,7 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 		var html = this.data.map(this.item_html.bind(this)).join("");
 
 		if (this.start === 0) {
+			// this.renderHeader();
 			this.$result.html(`
 				${this.getHeaderHtml()}
 				<div class="image-view-container small">
@@ -140,29 +174,40 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 	}
 
 	getHeaderHtml() {
+		// let company_html =
 		return `
-			<header class="level list-row-head text-muted small">
-				<div class="level-left list-header-subject">
-					<div class="list-row-col list-subject level ">
+			<header class="list-row-head text-muted small">
+				<div style="display: flex;">
+					<div class="list-header-icon">
 						<img title="Riadco%20Group" alt="Riadco Group" src="https://cdn.pbrd.co/images/HdaPxcg.png">
-						<span class="level-item">Products by Blah blah</span>
 					</div>
-				</div>
-				<div class="level-left checkbox-actions">
-					<div class="level list-subject">
-						<input class="level-item list-check-all hidden-xs" type="checkbox" title="${__("Select All")}">
-						<span class="level-item list-header-meta"></span>
+					<div class="list-header-info">
+						<h5>Riadco Group</h5>
+						<span class="margin-vertical-10 level-item">Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam</span>
 					</div>
-				</div>
-				<div class="level-right">
-					${''}
 				</div>
 			</header>
 		`;
 	}
 
 	renderHeader() {
-
+		return `<header class="level list-row-head text-muted small">
+			<div class="level-left list-header-subject">
+				<div class="list-row-col list-subject level ">
+					<img title="Riadco%20Group" alt="Riadco Group" src="https://cdn.pbrd.co/images/HdaPxcg.png">
+					<span class="level-item">Products by Blah blah</span>
+				</div>
+			</div>
+			<div class="level-left checkbox-actions">
+				<div class="level list-subject">
+					<input class="level-item list-check-all hidden-xs" type="checkbox" title="${__("Select All")}">
+					<span class="level-item list-header-meta"></span>
+				</div>
+			</div>
+			<div class="level-right">
+				${''}
+			</div>
+		</header>`;
 	}
 
 	get_image_html(encoded_name, src, alt_text) {
@@ -287,7 +332,6 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 			return false;
 		});
 	}
-
 }
 
 erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
@@ -351,6 +395,18 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 
 	setup_side_bar() {
 		super.setup_side_bar();
+
+		let $pitch = $(`<div class="border" style="
+				margin-top: 10px;
+				padding: 0px 10px;
+				border-radius: 3px;
+			">
+			<h5>Sell on HubMarket</h5>
+			<p>Over 2000 products listed. Register your company to start selling.</p>
+		</div>`);
+
+		this.sidebar.$sidebar.append($pitch);
+
 		this.category_tree = new frappe.ui.Tree({
 			parent: this.sidebar.$sidebar,
 			label: 'All Categories',
@@ -366,7 +422,7 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 		this.sidebar.add_item({
 			label: __('Companies'),
 			on_click: () => frappe.set_route('Hub', 'Company')
-		});
+		}, undefined, true);
 
 		this.sidebar.add_item({
 			label: this.hub_settings.company,
@@ -374,9 +430,96 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 		}, __("Account"));
 
 		this.sidebar.add_item({
-			label: __("My Orders"),
-			on_click: () => frappe.set_route('List', 'Request for Quotation')
+			label: __("Favourites"),
+			on_click: () => frappe.set_route('Hub', 'Favourites')
 		}, __("Account"));
+	}
+
+	update_category(label) {
+		this.current_category = (label=='All Categories') ? undefined : label;
+		this.refresh();
+	}
+
+	get_filters_for_args() {
+		if(!this.filter_area) return;
+		let filters = {};
+		this.filter_area.get().forEach(f => {
+			let field = f[1] !== 'name' ? f[1] : 'item_name';
+			filters[field] = [f[2], f[3]];
+		});
+		if(this.current_category) {
+			filters['hub_category'] = this.current_category;
+		}
+		return filters;
+	}
+
+	update_data(r) {
+		super.update_data(r);
+
+		this.data_dict = {};
+		this.data.map(d => {
+			this.data_dict[d.hub_item_code] = d;
+		});
+	}
+};
+
+erpnext.hub.Favourites = class Favourites extends erpnext.hub.ItemListing {
+	constructor(opts) {
+		super(opts);
+		this.show();
+	}
+
+	setup_defaults() {
+		super.setup_defaults();
+		this.doctype = 'Hub Item';
+		this.fields = ['name', 'hub_item_code', 'image', 'item_name', 'item_code', 'company_name', 'description', 'country'];
+		this.filters = [];
+		this.method = 'erpnext.hub_node.get_item_favourites';
+	}
+
+	setup_filter_area() { }
+
+	setup_sort_selector() { }
+
+	// setupHe
+
+	getHeaderHtml() {
+		return '';
+	}
+
+	get_args() {
+		return {
+			start: this.start,
+			limit: this.page_length,
+			order_by: this.order_by,
+			fields: this.fields
+		};
+	}
+
+	bootstrap_data(response) { }
+
+	prepareFormFields() { }
+
+	setup_side_bar() {
+		this.sidebar = new frappe.ui.Sidebar({
+			wrapper: this.page.wrapper.find('.layout-side-section'),
+			css_class: 'hub-sidebar'
+		});
+
+		this.sidebar.add_item({
+			label: __('Back to Products'),
+			on_click: () => frappe.set_route('Hub', 'Item')
+		});
+
+		// this.sidebar.add_item({
+		// 	label: this.hub_settings.company,
+		// 	on_click: () => frappe.set_route('Form', 'Company', this.hub_settings.company)
+		// }, __("Account"));
+
+		// this.sidebar.add_item({
+		// 	label: __("My Orders"),
+		// 	on_click: () => frappe.set_route('List', 'Request for Quotation')
+		// }, __("Account"));
 	}
 
 	update_category(label) {

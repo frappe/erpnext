@@ -25,6 +25,17 @@ def get_list(doctype, start=0, limit=20, fields=["*"], filters="{}", order_by=No
 	return response
 
 @frappe.whitelist()
+def get_item_favourites(start=0, limit=20, fields=["*"], order_by=None):
+	doctype = 'Hub Item'
+	hub_settings = frappe.get_doc('Hub Settings')
+	item_names_str = hub_settings.get('custom_data') or []
+	item_names = json.loads(item_names_str)
+	filters = json.dumps({
+		'hub_item_code': ['in', item_names]
+	})
+	return get_list(doctype, start, limit, fields, filters, order_by)
+
+@frappe.whitelist()
 def get_meta(doctype):
 	connection = get_client_connection()
 	meta = connection.get_doc('DocType', doctype)
