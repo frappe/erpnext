@@ -1,7 +1,7 @@
 # Work Order
 
 <img class="screenshot" alt="Work Order" src="{{docs_base_url}}/assets/img/manufacturing/manufacturing-flow.png">
-A Work Order (also known as a Work Order) is a document that is given to
+A Work Order is a document that is given to
 the manufacturing shop floor by the Production Planner as a signal to produce
 a certain quantity of a certain Item. The Work Order also helps to generate
 the material requirements (Stock Entry) for the Item to be produced from its
@@ -13,7 +13,7 @@ by:
 
 > Manufacturing > Documents > Work Order > New
 
-<img class="screenshot" alt="Work Order" src="{{docs_base_url}}/assets/img/manufacturing/production-order.png">
+<img class="screenshot" alt="Work Order" src="{{docs_base_url}}/assets/img/manufacturing/work-order.png">
 
 <div class-"embed-container">
   <iframe src="https://www.youtube.com/embed/yv_KAIlHrO4?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
