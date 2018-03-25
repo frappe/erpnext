@@ -61,10 +61,50 @@ class Department(Document):
 			user.add_roles("Line Manager")
 			frappe.permissions.add_user_permission ("Department", self.name, user_emp[0].user_id)
 
-	def get_departments(lft, rgt):
-		return frappe.db.sql("""
-			select name from `tabDepartment` where lft >= '{0}' and rgt <= '{1}'
-			""".format(lft, rgt))
+	# def update_department_permissions(self):
+	# 	pass
+	# 	deps = get_departments(self.lft, self.rgt)
+
+	# 	for dep in deps:
+	# 		if self.director:
+	# 			emp_user = get_employee_user(self.director)
+	# 			prev_permitted_user = get_permitted_user(self.name, "director")
+	# 			if emp_user:
+	# 				up_dict = {
+	# 					"user": emp_user,
+	# 					"allow": "Department",
+	# 					"for_value": dep[0]
+	# 				}
+
+	# 				if prev_permitted_user:
+	# 					permission_dn = get_user_permission_dn(prev_permitted_user, "Department", dep[0])
+	# 					if permission_dn:
+	# 						perm_doc = frappe.get_doc("User Permission", permission_dn)
+	# 						perm_doc.user = emp_user
+	# 						perm_doc.save(ignore_permissions=True)
+	# 					else:
+	# 						perm_new_doc = frappe.new_doc("User Permission")
+	# 						perm_new_doc.update(up_dict)
+	# 				else: 
+	# 					perm_new_doc = frappe.new_doc("User Permission")
+	# 					perm_new_doc.update(up_dict)
+
+def get_permitted_user(department_dn, role_fn):
+	if role_fn in ["director", "department_manager", "line_manager"]:
+		dep_role_emp = frappe.db.get_value("Department", filters = {name: department_dn}, fieldname = role_fn)
+		if dep_role_emp:
+			return get_employee_user(dep_role_emp)
+
+def get_user_permission_dn(user, allow, for_value):
+	return frappe.get_value("Employee", filters = {"user": user, "allow": allow, "for_value": for_value}, fieldname = "name")
+
+def get_employee_user(employee):
+	return frappe.get_value("Employee", filters = {"name": employee}, fieldname = "user_id")
+
+def get_departments(lft, rgt):
+	return frappe.db.sql("""
+		select name from `tabDepartment` where lft >= '{0}' and rgt <= '{1}'
+		""".format(lft, rgt))
 
 
 def add_departments():

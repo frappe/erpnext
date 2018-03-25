@@ -3,7 +3,11 @@
 
 frappe.ui.form.on('Business Trip Exceptional Approval', {
 	refresh: function(frm) {
-
+        if(!frm.doc.__islocal){
+            frm.disable_save();
+        }else{
+            frm.enable_save();
+        }
 	},
 	onload: function(frm) {
 

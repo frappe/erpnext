@@ -20,6 +20,12 @@ frappe.ui.form.on('Permission Application', {
 
 	},
 	refresh: function(frm) {
+		if(!frm.doc.__islocal){
+            frm.disable_save();
+        }else{
+            frm.enable_save();
+        }
+        
 		if (frm.doc.__islocal) {
 			get_employee(frm);
 		}

@@ -8,6 +8,12 @@ cur_frm.add_fetch("employee", "date_of_joining", "work_start_date");
 
 frappe.ui.form.on('End of Service Award', {
     refresh: function(frm) {
+        if(!frm.doc.__islocal){
+            frm.disable_save();
+        }else{
+            frm.enable_save();
+        }
+        
         if (!cur_frm.doc.__islocal) {
             for (var key in cur_frm.fields_dict) {
                 cur_frm.fields_dict[key].df.read_only = 1;

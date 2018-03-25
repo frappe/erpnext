@@ -4,6 +4,11 @@ cur_frm.add_fetch("employee", "employee_name", "employee_name");
 
 frappe.ui.form.on('Outside Job', {
 	refresh: function(frm) {
+		if(!frm.doc.__islocal){
+            frm.disable_save();
+        }else{
+            frm.enable_save();
+        }
 		cur_frm.cscript.type(cur_frm.doc);
 		frm.set_query("employee", erpnext.queries.employee);
 		frm.set_query("reports_to", function() {

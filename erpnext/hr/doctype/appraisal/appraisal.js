@@ -6,7 +6,13 @@ cur_frm.add_fetch('employee', 'employee_name', 'employee_name');
 cur_frm.add_fetch('employee', 'department', 'department');
 
 frappe.ui.form.on('Appraisal', {
-    refresh: function(frm) {},
+    refresh: function(frm) {
+    	if(!frm.doc.__islocal){
+			frm.disable_save();
+		}else{
+			frm.enable_save();
+		}
+    },
     workflow_state: function(frm){
         cur_frm.refresh_fields(["workflow_state"]);
     },

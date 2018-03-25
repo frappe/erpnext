@@ -292,7 +292,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 									df.hidden = 0;
 									me.frm.refresh_field("items");
 								}
-								if (r.message.expense_account || r.message.income_account){
+								if ((r.message.expense_account || r.message.income_account)&&(r.message.doctype == "Purchase Invoice" || r.message.doctype == "Sales Invoice")){
+									console.log(r.message);
 									// console.log(r.message.expense_account + " --- " + r.message.income_account);
 									var account = r.message.expense_account || r.message.income_account;
 									frappe.call({

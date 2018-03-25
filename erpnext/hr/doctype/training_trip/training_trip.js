@@ -30,7 +30,13 @@ cur_frm.cscript.custom_grade = function(doc, cdt, cd) {
 
 };
 frappe.ui.form.on('Training Trip', {
-    refresh: function(frm) {},
+    refresh: function(frm) {
+        if(!frm.doc.__islocal){
+            frm.disable_save();
+        }else{
+            frm.enable_save();
+        }
+    },
     workflow_state: function(frm){
         cur_frm.refresh_fields(["workflow_state"]);
     },

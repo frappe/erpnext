@@ -18,25 +18,30 @@ class PromotionandMeritIncrease(Document):
         self.check_total_points()
         self.validate_dates()
         self.validate_contest()
-        self.validate_emp()
         if hasattr(self,"workflow_state"):
+            self.validate_emp()
             if self.workflow_state:
                 if "Rejected" in self.workflow_state:
                     self.docstatus = 1
                     self.docstatus = 2
 
     def validate_emp(self):
-        if self.get('__islocal'):
-            if u'CEO' in frappe.get_roles(frappe.session.user):
-                self.workflow_state = "Created By CEO"
-            elif u'Director' in frappe.get_roles(frappe.session.user):
-                self.workflow_state = "Created By Director"
-            elif u'Manager' in frappe.get_roles(frappe.session.user):
-                self.workflow_state = "Created By Manager"
-            elif u'Line Manager' in frappe.get_roles(frappe.session.user):
-                self.workflow_state = "Created By Line Manager"
-            elif u'Employee' in frappe.get_roles(frappe.session.user):
-                self.workflow_state = "Pending"
+        if self.employee:
+            user = frappe.get_value("Employee", filters = {"name": self.employee}, fieldname = "user_id")
+            if self.get('__islocal'):
+                if u'CEO' in frappe.get_roles(user):
+                    self.workflow_state = "Created By CEO"
+                elif u'Director' in frappe.get_roles(user):
+                    self.workflow_state = "Created By Director"
+                elif u'Manager' in frappe.get_roles(user):
+                    self.workflow_state = "Created By Manager"
+                elif u'Line Manager' in frappe.get_roles(user):
+                    self.workflow_state = "Created By Line Manager"
+                elif u'Employee' in frappe.get_roles(user):
+                    self.workflow_state = "Pending"
+                    
+            if not user and self.get('__islocal'):
+                self.workflow_state = "Pending" 
 
     def get_basic_salary(self):
         components_data = self.get_salary_slip_data()
@@ -276,7 +281,7 @@ class PromotionandMeritIncrease(Document):
                 "designation":self.designation,
                 "grade": self.grade,
                 "employment_type":self.employment_type,
-                "level": self.level,
+                "level": str(self.level),
                 "from_date": from_date,
                 "to_date": add_days(self.due_date,-1)
             }

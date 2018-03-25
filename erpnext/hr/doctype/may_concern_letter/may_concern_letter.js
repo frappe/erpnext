@@ -9,6 +9,12 @@ cur_frm.add_fetch('employee', 'designation', 'designation');
 
 frappe.ui.form.on('May Concern Letter', {
 	refresh: function(frm) {
+        if(!frm.doc.__islocal){
+            frm.disable_save();
+        }else{
+            frm.enable_save();
+        }
+        
     if (!cur_frm.doc.__islocal) {
         	for (var key in cur_frm.fields_dict){
         		cur_frm.fields_dict[key].df.read_only =1; 
