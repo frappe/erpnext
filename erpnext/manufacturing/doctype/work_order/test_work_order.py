@@ -60,7 +60,7 @@ class TestWorkOrder(unittest.TestCase):
 
 	def test_over_production(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import StockOverProductionError
-		
+
 		wo_doc = self.check_planned_qty()
 
 		test_stock_entry.make_stock_entry(item_code="_Test Item",

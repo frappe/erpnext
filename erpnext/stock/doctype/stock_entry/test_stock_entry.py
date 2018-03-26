@@ -693,7 +693,7 @@ class TestStockEntry(unittest.TestCase):
 	def test_material_consumption(self):
 		from erpnext.manufacturing.doctype.work_order.work_order \
 			import make_stock_entry as _make_stock_entry
-		bom_no, bom_operation_cost = frappe.db.get_value("BOM", {"item": "_Test FG Item 2",
+		bom_no = frappe.db.get_value("BOM", {"item": "_Test FG Item 2",
 			"is_default": 1, "docstatus": 1}, ["name", "operating_cost"])
 
 		work_order = frappe.new_doc("Work Order")
@@ -714,7 +714,7 @@ class TestStockEntry(unittest.TestCase):
 		make_stock_entry(item_code="_Test Item 2", target="_Test Warehouse - _TC", qty=50, basic_rate=20)
 
 		stock_entry = frappe.get_doc(_make_stock_entry(work_order.name, "Material Consumption for Manufacture", 2))
-		self.assertEqual(stock_entry.get("items")[0].qty, 2)
+		self.assertEqual(stock_entry.get("items")[0].qty, 10)
 		self.assertEqual(stock_entry.get("items")[1].qty, 6)
 
 
