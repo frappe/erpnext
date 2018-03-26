@@ -22,7 +22,14 @@ def get_list(doctype, start=0, limit=20, fields=["*"], filters="{}", order_by=No
 	response = connection.get_list(doctype,
 		limit_start=start, limit_page_length=limit,
 		filters=filters, fields=fields)
-	return response
+
+	# Bad, need child tables in response
+	listing = []
+	for obj in response:
+		doc = connection.get_doc(doctype, obj['name'])
+		listing.append(doc)
+
+	return listing
 
 @frappe.whitelist()
 def get_item_favourites(start=0, limit=20, fields=["*"], order_by=None):

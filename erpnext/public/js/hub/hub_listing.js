@@ -3,7 +3,7 @@ frappe.provide('erpnext.hub');
 erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 	setup_defaults() {
 		super.setup_defaults();
-		this.page_title = __('Hello');
+		this.page_title = __('');
 		this.method = 'erpnext.hub_node.get_list';
 
 		this.cache = {};
@@ -93,7 +93,7 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 			start: this.start,
 			limit: this.page_length,
 			order_by: this.order_by,
-			fields: this.fields,
+			// fields: this.fields,
 			filters: this.get_filters_for_args()
 		};
 	}
@@ -254,14 +254,32 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 		const route = `#Hub/Item/${item.hub_item_code}`;
 		const company_name = item['company_name'];
 
+		const reviewLength = (item.reviews || []).length;
+		const ratingAverage = reviewLength
+			? item.reviews
+				.map(r => r.rating)
+				.reduce((a, b) => (a + b, 0))/reviewLength
+			: -1;
+
+		let ratingHtml = ``;
+
+		for(var i = 0; i < 5; i++) {
+			let starClass = 'fa-star';
+			if(i >= ratingAverage) starClass = 'fa-star-o';
+			ratingHtml += `<i class='fa fa-fw ${starClass} star-icon' data-index=${i}></i>`;
+		}
+
 		let item_html = `
 			<div class="image-view-item">
-
 				<div class="image-view-header">
 					<div class="list-row-col list-subject ellipsis level">
 						<span class="level-item bold ellipsis" title="McGuffin">
 							<a href="${route}">${title}</a>
 						</span>
+					</div>
+					<div class="text-muted small" style="margin: 5px 0px;">
+						${ratingHtml}
+						(${reviewLength})
 					</div>
 					<div class="list-row-col">
 						<a href="${'#Hub/Company/'+company_name}"><p>${ company_name }</p></a>
@@ -377,6 +395,7 @@ erpnext.hub.ItemListing = class ItemListing extends erpnext.hub.HubListing {
 	setup_defaults() {
 		super.setup_defaults();
 		this.doctype = 'Hub Item';
+		this.page_title = __('Products');
 		this.fields = ['name', 'hub_item_code', 'image', 'item_name', 'item_code', 'company_name', 'description', 'country'];
 		this.filters = [];
 	}
@@ -506,6 +525,7 @@ erpnext.hub.Favourites = class Favourites extends erpnext.hub.ItemListing {
 	setup_defaults() {
 		super.setup_defaults();
 		this.doctype = 'Hub Item';
+		this.page_title = __('Favourites');
 		this.fields = ['name', 'hub_item_code', 'image', 'item_name', 'item_code', 'company_name', 'description', 'country'];
 		this.filters = [];
 		this.method = 'erpnext.hub_node.get_item_favourites';
@@ -593,6 +613,7 @@ erpnext.hub.CompanyListing = class CompanyListing extends erpnext.hub.HubListing
 	setup_defaults() {
 		super.setup_defaults();
 		this.doctype = 'Hub Company';
+		this.page_title = __('Companies');
 		this.fields = ['company_logo', 'name', 'site_name', 'seller_city', 'seller_description', 'seller', 'country', 'company_name'];
 		this.filters = [];
 		this.custom_filter_configs = [
