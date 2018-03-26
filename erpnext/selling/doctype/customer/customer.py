@@ -26,7 +26,7 @@ class Customer(TransactionBase):
 		info = get_dashboard_info(self.doctype, self.name)
 		loyalty_point_details = self.get_loyalty_points()
 		if loyalty_point_details:
-			info["loyalty_point"] = loyalty_point_details.loyalty_point
+			info["loyalty_point"] = loyalty_point_details.loyalty_points
 		self.set_onload('dashboard_info', info)
 
 	def autoname(self):

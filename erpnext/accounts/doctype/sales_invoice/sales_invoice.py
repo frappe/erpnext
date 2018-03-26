@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
-from frappe.utils import cint, flt, add_days
+from frappe.utils import cint, flt, add_days, cstr
 from frappe import _, msgprint, throw
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.controllers.stock_controller import update_gl_entries_after
@@ -21,6 +21,8 @@ from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_delivery_note_serial_no
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
+from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
+	get_loyalty_program_details, get_loyalty_details
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -103,6 +105,9 @@ class SalesInvoice(SellingController):
 		self.set_status()
 		if self.is_pos and not self.is_return:
 			self.verify_payment_amount_is_positive()
+		if self.redeem_loyalty_points:
+			self.validate_loyalty_points()
+
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
@@ -148,6 +153,8 @@ class SalesInvoice(SellingController):
 		self.update_project()
 		if not self.is_return:
 			self.make_loyalty_point_entry()
+		if self.redeem_loyalty_points:
+			self.apply_loyalty_points()
 
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:
@@ -603,7 +610,8 @@ class SalesInvoice(SellingController):
 			from erpnext.accounts.general_ledger import make_gl_entries
 
 			# if POS and amount is written off, updating outstanding amt after posting all gl entries
-			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account) else "Yes"
+			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account or
+				cint(self.redeem_loyalty_points)) else "Yes"
 
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
 				update_outstanding=update_outstanding, merge_entries=False)
@@ -636,6 +644,7 @@ class SalesInvoice(SellingController):
 		# merge gl entries before adding pos entries
 		gl_entries = merge_similar_entries(gl_entries)
 
+		self.make_loyalty_point_redemption_gle(gl_entries)
 		self.make_pos_gl_entries(gl_entries)
 		self.make_gle_for_change_amount(gl_entries)
 
@@ -711,6 +720,30 @@ class SalesInvoice(SellingController):
 		if cint(self.update_stock) and \
 			erpnext.is_perpetual_inventory_enabled(self.company):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
+
+	def make_loyalty_point_redemption_gle(self, gl_entries):
+		print ("=== gl entries", gl_entries)
+		if cint(self.redeem_loyalty_points):
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.debit_to,
+					"party_type": "Customer",
+					"party": self.customer,
+					"against": "Expense account - " + cstr(self.loyalty_redemption_account) + " for the Loyalty Program",
+					"credit": self.loyalty_amount,
+					"against_voucher": self.return_against if cint(self.is_return) else self.name,
+					"against_voucher_type": self.doctype
+				})
+			)
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.loyalty_redemption_account,
+					"cost_center": self.loyalty_redemption_cost_center,
+					"against": self.customer,
+					"debit": self.loyalty_amount,
+					"remark": "Loyalty Points redeemed by the customer"
+				})
+			)
 
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.is_pos):
@@ -915,25 +948,29 @@ class SalesInvoice(SellingController):
 			if entry.amount < 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be positive").format(entry.idx))
 
+	# collection of the loyalty points, create the ledger entry for that.
 	def make_loyalty_point_entry(self):
-		loyalty_program = frappe.db.get_value("Customer", self.customer, "loyalty_program")
-		if loyalty_program:
-			from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_program_tier
-			loyalty_program_details = get_loyalty_program_tier(self.customer, loyalty_program)
+		loyalty_program_details = get_loyalty_program_details(self.customer, company=self.company)
+		if loyalty_program_details:
+			points_earned = int(self.grand_total/loyalty_program_details.collection_factor)
 			doc = frappe.get_doc({
 				"doctype": "Loyalty Point Entry",
-				"loyalty_program": loyalty_program,
+				"company": self.company,
+				"loyalty_program": loyalty_program_details.loyalty_program,
 				"loyalty_program_tier": loyalty_program_details.tier_name,
 				"customer": self.customer,
 				"sales_invoice": self.name,
-				"points_earned": int(self.grand_total/loyalty_program_details.collection_factor),
+				"points_earned": points_earned,
 				"purchase_amount": self.grand_total,
 				"expiry_date": add_days(self.posting_date, loyalty_program_details.expiry_duration),
-				"posting_date": self.posting_date
+				"posting_date": self.posting_date,
+				"remaining_points": points_earned
 			})
+			doc.flags.ignore_permissions = 1
 			doc.save()
 			frappe.db.set_value("Customer", self.customer, "loyalty_program_tier", loyalty_program_details.tier_name)
-	
+
+	# delete the loyalty points earned on cancel of the invoice
 	def delete_loyalty_point_entry(self):
 		lp_entry = frappe.db.sql('''select points_earned, redeemed_points, redeemed_on_sales_invoice
 			from `tabLoyalty Point Entry` where customer=%s and sales_invoice=%s''', (self.customer, self.name), as_dict=1)
@@ -941,6 +978,54 @@ class SalesInvoice(SellingController):
 			frappe.throw(_("Can't cancel the invoice since the loyalty points earned is already redeemed"))
 		else:
 			frappe.db.sql('''delete from `tabLoyalty Point Entry` where customer=%s and sales_invoice=%s''', (self.customer, self.name))
+
+
+	# validate the loyalty points, equivalent amount, account, cost center and company
+	def validate_loyalty_points(self):
+		if not self.loyalty_program:
+			self.loyalty_program = frappe.db.get_value("Customer", self.customer, ["loyalty_program"])
+
+		if self.loyalty_program and frappe.db.get_value("Loyalty Program", self.loyalty_program, ["company"]) != \
+			self.company:
+			frappe.throw(_("The Loyalty Program isn't valid for the selected company"))
+
+		if self.loyalty_program and self.loyalty_points:
+			loyalty_program_details = get_loyalty_program_details(self.customer, self.loyalty_program,
+				self.posting_date, self.company)
+
+			if not self.loyalty_redemption_account:
+				self.loyalty_redemption_account = loyalty_program_details.expense_account
+
+			if not self.loyalty_redemption_cost_center:
+				self.loyalty_redemption_cost_center = loyalty_program_details.cost_center
+
+			if self.loyalty_points > loyalty_program_details.loyalty_points:
+				frappe.throw("You don't have enought points to redeem")
+
+			loyalty_amount = flt(self.loyalty_points * loyalty_program_details.conversion_factor)
+			if not self.loyalty_amount and self.loyalty_amount != loyalty_amount:
+				self.loyalty_amount = loyalty_amount
+
+			if not self.is_pos and self.paid_amount != self.loyalty_amount:
+				self.paid_amount = self.loyalty_amount
+				self.outstanding_amount = flt(self.grand_total - self.paid_amount)
+
+	# redeem the loyalty points and create the accounting entry for that.
+	def apply_loyalty_points(self):
+		# redeem the loyalty points on the FIFO style
+		# set the Redeemed Points, date of redeemtion and invoice for the redeemption
+		# self.redeem_loyalty_entry(loyalty_points, loyalty_program)
+		from erpnext.accounts.doctype.loyalty_point_entry.loyalty_point_entry \
+			import redeem_loyalty_points
+		redeem_loyalty_points(self.customer, self.loyalty_points, self.loyalty_program, self.posting_date,
+			self.company, self.name)
+
+
+		# create the accounting entry for the same
+		# debtors account will be credited and expense account will be debited
+		# self.create_redmeeption_accounting_entry(loyalty_amount, loyalty_redemption_account,
+		# 	loyalty_redemption_cost_center, company, loyalty_program)
+		# frappe.throw(self.grand_total, self.paid_amount, self.outstanding_amount)
 
 
 def get_list_context(context=None):

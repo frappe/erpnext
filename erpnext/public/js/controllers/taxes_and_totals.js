@@ -564,9 +564,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	calculate_outstanding_amount: function(update_paid_amount) {
 		// NOTE:
-		// paid_amount and write_off_amount is only for POS Invoice
+		// paid_amount and write_off_amount is only for POS/Loyalty Point Redemption Invoice
 		// total_advance is only for non POS Invoice
-
+		debugger;
 		if(this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.is_return){
 			this.calculate_paid_amount();
 		}
@@ -605,7 +605,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 			var paid_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
 				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
-
+			console.log("paid amount", paid_amount);
 			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
 				flt(this.frm.doc.change_amount * this.frm.doc.conversion_rate), precision("outstanding_amount"));
 		}
@@ -628,6 +628,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	calculate_paid_amount: function(){
+		console.log("calcaulting the paid amount");
+		console.log(this.frm.doc.redeem_loyalty_points);
+		if (this.frm.doc.redeem_loyalty_points) return;
 		var me = this;
 		var paid_amount = 0.0;
 		var base_paid_amount = 0.0;

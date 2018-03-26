@@ -227,7 +227,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				price_list: this.frm.doc.selling_price_list,
 			}, function() {
 				me.apply_pricing_rule();
-			})
+			});
 	},
 
 	debit_to: function() {
@@ -346,7 +346,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				});
 			}
 		}
-		else this.frm.trigger("refresh")
+		else this.frm.trigger("refresh");
 	},
 
 	amount: function(){
@@ -355,14 +355,14 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 	change_amount: function(){
 		if(this.frm.doc.paid_amount > this.frm.doc.grand_total){
-			this.calculate_write_off_amount()
+			this.calculate_write_off_amount();
 		}else {
-			this.frm.set_value("change_amount", 0.0)
-			this.frm.set_value("base_change_amount", 0.0)
+			this.frm.set_value("change_amount", 0.0);
+			this.frm.set_value("base_change_amount", 0.0);
 		}
 
 		this.frm.refresh_fields();
-	}
+	},
 });
 
 // for backward compatibility: combine new and previous states
@@ -593,7 +593,74 @@ frappe.ui.form.on('Sales Invoice', {
 				refresh_field(['timesheets'])
 			}
 		})
+	},
+
+	onload: function(frm) {
+		frm.applying_loyalty_points = false;
+	},
+
+	redeem_loyalty_points: function(frm) {
+		frm.events.get_loyalty_details(frm);
+	},
+
+	loyalty_points: function(frm) {
+		if (frm.doc.loyalty_points && !frm.apply_loyalty_points) {
+			frm.applying_loyalty_points = true
+			frappe.call({
+				method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_redeemption_factor",
+				args: {
+					"loyalty_program": frm.doc.loyalty_program
+				},
+				callback: function(r) {
+					if (r) {
+						let loyalty_amount = flt(r.message*frm.doc.loyalty_points, precision("loyalty_amount"));
+						frm.set_value("loyalty_amount", loyalty_amount);
+						if (frm.doc.grand_total && frm.doc.grand_total < loyalty_amount) {
+							let redeemable_amount = parseInt(frm.doc.grand_total/r.message);
+							frappe.throw(__("You can only redeem max {0} points in this order.",[redeemable_amount]));
+						} else {
+							frm.events.apply_loyalty_points(frm);
+						}
+					}
+					frm.applying_loyalty_points = false
+				}
+			})
+		}
+	},
+
+	get_loyalty_details: function(frm) {
+		if (frm.doc.customer && frm.doc.redeem_loyalty_points) {
+			frappe.call({
+				method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details",
+				args: {
+					"customer": frm.doc.customer,
+					"till_date": frm.doc.posting_date,
+					"company": frm.doc.company
+				},
+				callback: function(r) {
+					if (r) {
+						frm.set_value("loyalty_program", r.message.loyalty_program);
+						frm.set_value("loyalty_redemption_account", r.message.expense_account);
+						frm.set_value("loyalty_redemption_cost_center", r.message.cost_center);
+						frm.set_value("loyalty_points", r.message.loyalty_points);
+						frm.events.apply_loyalty_points(frm);
+					}
+				}
+			});
+		}
+	},
+
+	apply_loyalty_points: function(frm) {
+		if (frm.doc.grand_total && frm.doc.loyalty_amount) {
+			frm.set_value("paid_amount", frm.doc.loyalty_amount);
+			frm.set_value("outstanding_amount", flt(frm.doc.grand_total - frm.doc.loyalty_amount));
+		}
+	},
+
+	check_loyalty_points: function(frm) {
+		console.log("wait");
 	}
+
 })
 
 frappe.ui.form.on('Sales Invoice Timesheet', {

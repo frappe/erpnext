@@ -472,6 +472,8 @@ class calculate_taxes_and_totals(object):
 				self.doc.precision("outstanding_amount"))
 
 	def calculate_paid_amount(self):
+		if self.doc.redeem_loyalty_points: return
+
 		paid_amount = base_paid_amount = 0.0
 
 		if self.doc.is_pos:
