@@ -28,12 +28,34 @@ def get_list(doctype, start=0, limit=20, fields=["*"], filters="{}", order_by=No
 def get_item_favourites(start=0, limit=20, fields=["*"], order_by=None):
 	doctype = 'Hub Item'
 	hub_settings = frappe.get_doc('Hub Settings')
-	item_names_str = hub_settings.get('custom_data') or []
+	item_names_str = hub_settings.get('custom_data') or '[]'
 	item_names = json.loads(item_names_str)
 	filters = json.dumps({
 		'hub_item_code': ['in', item_names]
 	})
 	return get_list(doctype, start, limit, fields, filters, order_by)
+
+@frappe.whitelist()
+def update_wishlist_item(item_name, remove=0):
+	remove = int(remove)
+	hub_settings = frappe.get_doc('Hub Settings')
+	data = hub_settings.get('custom_data')
+	if not data or not json.loads(data):
+		data = '[]'
+		hub_settings.custom_data = data
+		hub_settings.save()
+
+	item_names_str = data
+	item_names = json.loads(item_names_str)
+	if not remove and item_name not in item_names:
+		item_names.append(item_name)
+	if remove and item_name in item_names:
+		item_names.remove(item_name)
+
+	item_names_str = json.dumps(item_names)
+
+	hub_settings.custom_data = item_names_str
+	hub_settings.save()
 
 @frappe.whitelist()
 def get_meta(doctype):

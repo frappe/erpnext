@@ -8,7 +8,7 @@ frappe.ui.form.on("Hub Settings", {
 		frm.trigger("enabled");
 		if (frm.doc.enabled) {
 			frm.add_custom_button(__('View Hub'),
-				() => frappe.set_route('hub'));
+				() => frappe.set_route('Hub', 'Item'));
 			frm.add_custom_button(__('Sync'),
 				() => frm.call('sync'));
 		}
@@ -118,7 +118,6 @@ let hub_url = 'http://159.89.175.122'
 // let hub_url = 'http://erpnext.hub:8000'
 
 function authorize(frm, client_id, redirect_uri) {
-    console.log("Fetching...", redirect_uri);
 
     // queryStringData is details of OAuth Client (Implicit Grant) on Custom App
 	var queryStringData = {
@@ -139,6 +138,7 @@ function authorize(frm, client_id, redirect_uri) {
 }
 
 function get_user_details(frm, token, email) {
+	console.log('user_details');
     var route = localStorage.getItem("route");
     if (token && route) {
         // Clean up access token from route

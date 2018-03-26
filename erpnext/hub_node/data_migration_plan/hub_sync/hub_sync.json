@@ -6,10 +6,6 @@
  "mappings": [
   {
    "enabled": 1,
-   "mapping": "Company to Hub Company"
-  },
-  {
-   "enabled": 1,
    "mapping": "Item to Hub Item"
   },
   {

@@ -33,17 +33,13 @@ body[data-route^="Hub/"] {
 		height: calc(~"100% - 32px");
 	}
 
-	.star-icon.fa-star {
-		color: #ffa00a;
-	}
-
 	.list-header-icon {
 		width: 72px;
 		border-radius: 4px;
 		flex-shrink: 0;
 		margin: 10px;
 		padding: 1px;
-		border: 1px solid #b3abab;
+		border: 1px solid @border-color;
 		height: 72px;
 		display: flex;
 		align-items: center;
@@ -52,6 +48,14 @@ body[data-route^="Hub/"] {
 		img {
 			border-radius: 4px;
 		}
+	}
+
+	.star-icon.fa-star {
+		color: @indicator-orange;
+	}
+
+	.octicon-heart.liked {
+		color: @indicator-red;
 	}
 
 	.margin-vertical-10 {

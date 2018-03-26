@@ -11,8 +11,8 @@ from erpnext.utilities.product import get_price, get_qty_in_stock
 from six import string_types
 
 # hub_url = "https://hubmarket.org"
-# hub_url = "http://159.89.175.122"
-hub_url = "http://erpnext.hub:8000"
+hub_url = "http://159.89.175.122"
+# hub_url = "http://erpnext.hub:8000"
 
 # test_hub_url = "https://hubmarket.org"
 
@@ -53,7 +53,6 @@ class HubSettings(Document):
 		doc.run()
 
 	def pre_reg(self):
-		""" Create a User on hub.erpnext.org and return username/password """
 		site_name = frappe.local.site + ':' + str(frappe.conf.webserver_port)
 		protocol = 'http://'
 		route = '/token'
@@ -90,15 +89,13 @@ class HubSettings(Document):
 		response = requests.post(post_url, data=data)
 		response.raise_for_status()
 		message = response.json().get('message')
-		print("==================")
-		print(message)
 
-		# if message and message.get('password'):
-		# 	self.user = frappe.session.user
-		# 	self.create_hub_connector(message)
-		# 	self.company = frappe.defaults.get_user_default('company')
-		# 	self.enabled = 1
-		# 	self.save()
+		if message and message.get('password'):
+			self.user = frappe.session.user
+			self.create_hub_connector(message)
+			self.company = frappe.defaults.get_user_default('company')
+			self.enabled = 1
+			self.save()
 
 	def unregister(self):
 		""" Disable the User on hub.erpnext.org"""

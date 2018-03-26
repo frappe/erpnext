@@ -317,10 +317,11 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 	}
 
 	setup_like() {
+		if(this.setup_like_done) return;
+		this.setup_like_done = 1;
 		this.$result.on('click', '.btn.like-button', (e) => {
-			if($(e.target).hasClass('disabled')) return;
-
-			$(e.target).addClass('disabled');
+			if($(e.target).hasClass('changing')) return;
+			$(e.target).addClass('changing');
 
 			e.preventDefault();
 			e.stopPropagation();
@@ -329,6 +330,39 @@ erpnext.hub.HubListing = class HubListing extends frappe.views.BaseList {
 			name = decodeURIComponent(name);
 			let values = this.data_dict[name];
 
+			let heart = $(e.target);
+			if(heart.hasClass('like-button')) {
+				heart = $(e.target).find('.octicon');
+			}
+
+			let remove = 1;
+
+			if(heart.hasClass('liked')) {
+				// unlike
+				heart.removeClass('liked');
+			} else {
+				// like
+				remove = 0;
+				heart.addClass('liked');
+			}
+
+			frappe.call({
+				method: 'erpnext.hub_node.update_wishlist_item',
+				args: {
+					item_name: values.hub_item_code,
+					remove: remove
+				},
+				callback: (r) => {
+					let message = __("Added to Favourites");
+					if(remove) {
+						message = __("Removed from Favourites");
+					}
+					frappe.show_alert(message);
+				},
+				freeze: true
+			});
+
+			$(e.target).removeClass('changing');
 			return false;
 		});
 	}
