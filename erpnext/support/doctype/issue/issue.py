@@ -20,13 +20,13 @@ class Issue(Document):
 		if not self.raised_by:
 			self.raised_by = frappe.session.user
 		self.update_status()
-		self.set_lead_contact(self.raised_by)
+		self.set_lead_contact(self.raised_by, self.raised_by_phone)
 
 		if self.status == "Closed":
 			from frappe.desk.form.assign_to import clear
 			clear(self.doctype, self.name)
 
-	def set_lead_contact(self, email_id):
+	def set_lead_contact(self, email_id, contact_number=None):
 		import email.utils
 		email_id = email.utils.parseaddr(email_id)[1]
 		if email_id:
@@ -39,9 +39,19 @@ class Issue(Document):
 					contact = frappe.get_doc('Contact', self.contact)
 					self.customer = contact.get_link_for('Customer')
 
-			if not self.company:
-				self.company = frappe.db.get_value("Lead", self.lead, "company") or \
-					frappe.db.get_default("Company")
+		if contact_number:
+			if not self.lead:
+				self.lead = frappe.db.get_value("Lead", {"mobile_no": contact_number})
+			if not self.contact and not self.customer:
+				self.contact = frappe.db.get_value("Contact", {"mobile_no": contact_number})
+
+				if self.contact:
+					contact = frappe.get_doc('Contact', self.contact)
+					self.customer = contact.get_link_for('Customer')
+
+		if not self.company:
+			self.company = frappe.db.get_value("Lead", self.lead, "company") or \
+				frappe.db.get_default("Company")
 
 	def update_status(self):
 		status = frappe.db.get_value("Issue", self.name, "status")
