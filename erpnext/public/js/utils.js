@@ -104,7 +104,10 @@ $.extend(erpnext.utils, {
 				info.total_unpaid ? 'orange' : 'green');
 		}
 	},
-
+	get_party_name: function(party_type) {
+		var dict = {'Customer': 'customer_name', 'Supplier': 'supplier_name', 'Employee': 'employee_name'};
+		return dict[party_type];
+	},
 	copy_value_in_all_row: function(doc, dt, dn, table_fieldname, fieldname) {
 		var d = locals[dt][dn];
 		if(d[fieldname]){
@@ -115,7 +118,7 @@ $.extend(erpnext.utils, {
 		}
 		refresh_field(table_fieldname);
 	},
-
+ 
 	get_terms: function(tc_name, doc, callback) {
 		if(tc_name) {
 			return frappe.call({
