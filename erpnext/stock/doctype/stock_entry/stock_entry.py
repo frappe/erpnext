@@ -20,6 +20,7 @@ class IncorrectValuationRateError(frappe.ValidationError): pass
 class DuplicateEntryForWorkOrderError(frappe.ValidationError): pass
 class OperationsNotCompleteError(frappe.ValidationError): pass
 class MaxSampleAlreadyRetainedError(frappe.ValidationError): pass
+class OverConsumptionError(frappe.ValidationError): pass
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -152,36 +153,32 @@ class StockEntry(StockController):
 					frappe.MandatoryError)
 
 	def validate_qty(self):
-
 		manufacture_purpose = ["Manufacture", "Material Consumption for Manufacture"]
 
-		if self.purpose in manufacture_purpose:
-			if self.work_order:
+		if self.purpose in manufacture_purpose and self.work_order:
+			if not frappe.get_value('Work Order', self.work_order, 'skip_transfer'):
 				item_code = []
 				for item in self.items:
 					req_items = frappe.get_all('Work Order Item',
-											   filters={'parent': self.work_order, 'item_code': item.item_code},
-											   fields=["item_code"]
-								)
+									filters={'parent': self.work_order, 'item_code': item.item_code}, fields=["item_code"])
 
 					transferred_materials = frappe.db.sql("""
 								select
 									sum(qty) as qty
 								from `tabStock Entry` se,`tabStock Entry Detail` sed
 								where
-									se.name = sed.parent and se.docstatus=1 and se.purpose='Material Transfer for Manufacture'
+									se.name = sed.parent and se.docstatus=1 and
+									(se.purpose='Material Transfer for Manufacture' or se.purpose='Manufacture')
 									and sed.item_code=%s and se.work_order= %s and ifnull(sed.t_warehouse, '') != ''
-							""", (item.item_code,self.work_order), as_dict=1)
+							""", (item.item_code, self.work_order), as_dict=1)
 
 					stock_qty = flt(item.qty)
 					trans_qty = flt(transferred_materials[0].qty)
-
 					if req_items:
 						if stock_qty > trans_qty:
 							item_code.append(item.item_code)
-
 				if item_code:
-					frappe.throw(_("Transaction quantity cannot be more than transferred quantity for item/s {0}.").format(', '.join(item_code)))
+					frappe.throw(_("Consumption quantity cannot be more than transferred quantity for item/s {0}.").format(', '.join(item_code)), OverConsumptionError)
 
 
 	def validate_warehouse(self):

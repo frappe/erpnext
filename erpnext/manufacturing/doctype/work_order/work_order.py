@@ -184,7 +184,7 @@ class WorkOrder(Document):
 				and purpose=%s""", (self.name, purpose))[0][0])
 
 			if qty > self.qty:
-				frappe.throw(_("{0} ({1}) cannot be greater than planned quanitity ({2}) in Work Order {3}").format(\
+				frappe.throw(_("{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}").format(\
 					self.meta.get_label(fieldname), qty, self.qty, self.name), StockOverProductionError)
 
 			self.db_set(fieldname, qty)
