@@ -67,7 +67,7 @@ class TestWorkOrder(unittest.TestCase):
 			target="_Test Warehouse - _TC", qty=100, basic_rate=100)
 		test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
 			target="_Test Warehouse - _TC", qty=100, basic_rate=100)
-	
+
 		s = frappe.get_doc(make_stock_entry(wo_doc.name, "Manufacture", 7))
 		s.insert()
 

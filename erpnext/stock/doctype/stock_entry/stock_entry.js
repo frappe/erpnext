@@ -95,6 +95,7 @@ frappe.ui.form.on('Stock Entry', {
 
 	refresh: function(frm) {
 		if(!frm.doc.docstatus) {
+			frm.trigger('validate_purpose_consumption');
 			frm.add_custom_button(__('Make Material Request'), function() {
 				frappe.model.with_doctype('Material Request', function() {
 					var mr = frappe.model.get_new_doc('Material Request');
@@ -168,8 +169,18 @@ frappe.ui.form.on('Stock Entry', {
 	},
 
 	purpose: function(frm) {
+		frm.trigger('validate_purpose_consumption');
 		frm.fields_dict.items.grid.refresh();
 		frm.cscript.toggle_related_fields(frm.doc);
+	},
+
+	validate_purpose_consumption: function(frm) {
+		frappe.model.get_value('Manufacturing Settings', {'name': 'Manufacturing Settings'}, 'material_consumption', function(d) {
+			if (d.material_consumption==0 && frm.doc.purpose=="Material Consumption for Manufacture") {
+				frm.set_value("purpose", 'Manufacture');
+				frappe.throw(__('Material Consumption is not set in Manufacturing Settings.'));
+			}
+		})
 	},
 
 	company: function(frm) {
@@ -519,11 +530,11 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		}
 
 		this.frm.set_indicator_formatter('item_code',
-			function(doc) { 
+			function(doc) {
 				if (!doc.s_warehouse) {
 					return 'blue';
 				} else {
-					return (doc.qty<=doc.actual_qty) ? "green" : "orange" 
+					return (doc.qty<=doc.actual_qty) ? "green" : "orange"
 				}
 			})
 
