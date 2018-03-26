@@ -281,9 +281,9 @@ class StockEntry(StockController):
 				where parent in (%s)
 					and item_code = %s
 					and ifnull(s_warehouse,'')='' """ % (", ".join(["%s" * len(other_ste)]), "%s"), args)[0][0]
-		if fg_qty_already_entered and fg_qty_already_entered >= qty:
-			frappe.throw(_("Stock Entries already created for Work Order ")
-				+ self.work_order + ":" + ", ".join(other_ste), DuplicateEntryForWorkOrderError)
+			if fg_qty_already_entered and fg_qty_already_entered >= qty:
+				frappe.throw(_("Stock Entries already created for Work Order ")
+					+ self.work_order + ":" + ", ".join(other_ste), DuplicateEntryForWorkOrderError)
 
 	def set_incoming_rate(self):
 		for d in self.items:

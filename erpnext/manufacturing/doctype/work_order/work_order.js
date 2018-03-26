@@ -314,7 +314,7 @@ erpnext.work_order = {
 						&& frm.doc.status != 'Stopped') {
 					frm.has_finish_btn = true;
 
-					var mat_consumption_btn = frm.add_custom_button(__('Material Consumption'), function() {
+					frm.add_custom_button(__('Material Consumption'), function() {
 						erpnext.work_order.make_consumption_se(frm, 'Material Consumption for Manufacture');
 					});
 
@@ -330,7 +330,7 @@ erpnext.work_order = {
 			} else {
 				if ((flt(doc.produced_qty) < flt(doc.qty)) && frm.doc.status != 'Stopped') {
 					frm.has_finish_btn = true;
-					var mat_consumption_btn = frm.add_custom_button(__('Material Consumption'), function() {
+					frm.add_custom_button(__('Material Consumption'), function() {
 						erpnext.work_order.make_consumption_se(frm, 'Material Consumption for Manufacture');
 					});
 
