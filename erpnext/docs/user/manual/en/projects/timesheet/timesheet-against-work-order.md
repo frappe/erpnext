@@ -12,28 +12,28 @@ Let's assume we are manufacturing a mobile phone. As per the Bill of Material, t
 
 As per the Bill of Materials of manufacturing item, following are the Operations and Workstation through which raw-material items are processed.
 
-<img class="screenshot" alt="Sales Invoice" src="{{docs_base_url}}/assets/img/project/timesheet/timesheet-production-order-1.png">
+<img class="screenshot" alt="Sales Invoice" src="{{docs_base_url}}/assets/img/project/timesheet/timesheet-work-order-1.png">
 
 On submission on Work Order, Timesheet will be created automatically.
 
-<img class="screenshot" alt="Sales Invoice" src="{{docs_base_url}}/assets/img/project/timesheet/timesheet-production-order-2.png">
+<img class="screenshot" alt="Sales Invoice" src="{{docs_base_url}}/assets/img/project/timesheet/timesheet-work-order-2.png">
 
 ####Time Sheet created from Work Order
 
 In the Timesheet, unique row will be added for each Operation - Workstation. This allows operator/supervisor at the workstation to enter actual From Time and To Time taken for each Operation.
 
-<img class="screenshot" alt="Sales Invoice" src="{{docs_base_url}}/assets/img/project/timesheet/timesheet-production-order-3.gif">
+<img class="screenshot" alt="Sales Invoice" src="{{docs_base_url}}/assets/img/project/timesheet/timesheet-work-order-3.gif">
 
 After enter From Time and To Time for all the Operations, Total Hours will be calculated.
 
-<img class="screenshot" alt="Sales Invoice" src="{{docs_base_url}}/assets/img/project/timesheet/timesheet-production-order-6.png">
+<img class="screenshot" alt="Sales Invoice" src="{{docs_base_url}}/assets/img/project/timesheet/timesheet-work-order-6.png">
 
 With updating actual time, you can also enter "Completed Qty". If all the items are not processed in the same Timesheet, you can create another Timesheet from the Work Order.
 
-<img class="screenshot" alt="Sales Invoice" src="{{docs_base_url}}/assets/img/project/timesheet/timesheet-production-order-4.png">
+<img class="screenshot" alt="Sales Invoice" src="{{docs_base_url}}/assets/img/project/timesheet/timesheet-work-order-4.png">
 
 ####Save and Submit Timesheet
 
 On the submission of Timesheet, Total Hours is calculated. Also, in the Work Order, for each Operation, actual Start and End Time is updated.
 
-<img class="screenshot" alt="Sales Invoice" src="{{docs_base_url}}/assets/img/project/timesheet/timesheet-production-order-5.png">
+<img class="screenshot" alt="Sales Invoice" src="{{docs_base_url}}/assets/img/project/timesheet/timesheet-work-order-5.png">

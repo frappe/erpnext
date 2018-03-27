@@ -84,7 +84,7 @@ If this is the case, you can select the Skip Material Transfer check box, which 
 
 ### Making Time Logs
 
-* Progress in the Work Order can be tracked using [Timesheet](/docs/user/manual/en/projects/timesheet/timesheet-against-production-order.html)
+* Progress in the Work Order can be tracked using [Timesheet](/docs/user/manual/en/projects/timesheet/timesheet-against-work-order.html)
 * Timesheet's time slots are created against Work Order Operations.
 * Drafts of Timesheet are created based on the scheduled operations when an Work Order is Submitted.
 * To create more Timesheets against an operation click 'Make Timesheet' button.

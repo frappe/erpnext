@@ -20,7 +20,7 @@ opening-stock
 point-of-sale
 printing-and-branding
 product-bundle
-production-order
+work-order
 production-planning
 project-and-task
 purchase-cycle
