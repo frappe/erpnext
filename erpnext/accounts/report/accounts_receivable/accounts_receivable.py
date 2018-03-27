@@ -22,13 +22,35 @@ class ReceivablePayableReport(object):
 		return columns, data, None, chart
 
 	def get_columns(self, party_naming_by, args):
-		columns = [_("Posting Date") + ":Date:80", _(args.get("party_type")) + ":Link/" + args.get("party_type") + ":200"]
+		columns = []
+		columns.append({
+			"label": _("Posting Date"),
+			"fieldtype": "Date",
+			"fieldname": "posting_date",
+			"width": 90
+		})
+
+		columns += [_(args.get("party_type")) + ":Link/" + args.get("party_type") + ":200"]
 
 		if party_naming_by == "Naming Series":
 			columns += [args.get("party_type") + " Name::110"]
 
-		columns += [_("Voucher Type") + "::110", _("Voucher No") + ":Dynamic Link/"+_("Voucher Type")+":120",
-			_("Due Date") + ":Date:80"]
+		columns.append({
+			"label": _("Voucher Type"),
+			"fieldtype": "Data",
+			"fieldname": "voucher_type",
+			"width": 110
+		})
+
+		columns.append({
+			"label": _("Voucher No"),
+			"fieldtype": "Dynamic Link",
+			"fieldname": "voucher_no",
+			"width": 110,
+			"options": "voucher_type",
+		})
+
+		columns += [_("Due Date") + ":Date:80"]
 
 		if args.get("party_type") == "Supplier":
 			columns += [_("Bill No") + "::80", _("Bill Date") + ":Date:80"]
