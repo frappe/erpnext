@@ -217,7 +217,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			me.frm.doc['supplied_items'].forEach((item, index) => {
 			if (item.rm_item_code && item.main_item_code) {
 					me.raw_material_data.push ({
-						'name':index,
+						'name':item.name,
 						'item_code': item.main_item_code,
 						'rm_item_code': item.rm_item_code,
 						'item_name': item.rm_item_code,

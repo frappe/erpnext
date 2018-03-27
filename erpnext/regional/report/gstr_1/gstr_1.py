@@ -109,8 +109,8 @@ class Gstr1Report(object):
 		customers = frappe.get_all("Customer", filters={"customer_type": self.customer_type})
 
 		if self.filters.get("type_of_business") ==  "B2B":
-			conditions += " and invoice_type != 'Export' and is_return != 1 and customer in ('{0}')".\
-				format("', '".join([frappe.db.escape(c.name) for c in customers]))
+			conditions += """ and ifnull(invoice_type, '') != 'Export' and is_return != 1
+				and customer in ('{0}')""".format("', '".join([frappe.db.escape(c.name) for c in customers]))
 
 		if self.filters.get("type_of_business") in ("B2C Large", "B2C Small"):
 			b2c_limit = frappe.db.get_single_value('GSt Settings', 'b2c_limit')
