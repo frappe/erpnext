@@ -44,9 +44,8 @@ See how to set the naming series
 
 <img class="screenshot" alt="Naming Series" src="{{docs_base_url}}/assets/img/setup/settings/naming-series.gif">
 
-{next}
-
 ### 4. Custom Field in Naming Series
+
  Some companies prefers to make use of "short-codes" for suppliers, i.e. WN for company "Web Notes" that later can be used in naming series for quick identification.
  
 #### Example:
@@ -55,3 +54,14 @@ See how to set the naming series
     Then under Naming Series, we should allow something like
         PO-.YY.MM.-.vendor_id.-.#####
         Resulting in "PO-1503-WN-00001"
+
+
+<div>
+  <div class='embed-container'>
+    <iframe src='https://www.youtube.com/embed//IGyISSfI1qU' frameborder='0' allowfullscreen>
+    </iframe>
+  </div>
+</div>
+
+
+{next}

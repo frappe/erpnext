@@ -8,7 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, cstr, getdate
 import dateutil
-from frappe.model.naming import make_autoname
+from frappe.model.naming import set_name_by_naming_series
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account,send_registration_sms
 
 class Patient(Document):
@@ -42,10 +42,7 @@ class Patient(Document):
 		if patient_master_name == 'Patient Name':
 			self.name = self.get_patient_name()
 		else:
-			if not self.naming_series:
-				frappe.throw(_("Series is mandatory"), frappe.MandatoryError)
-
-			self.name = make_autoname(self.naming_series+'.#####')
+			set_name_by_naming_series(self)
 
 	def get_patient_name(self):
 		name = self.patient_name

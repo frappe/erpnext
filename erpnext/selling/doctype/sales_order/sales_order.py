@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 import frappe.utils
-from frappe.utils import cstr, flt, getdate, comma_and, cint, nowdate, add_days
+from frappe.utils import cstr, flt, getdate, comma_and, cint
 from frappe import _
 from frappe.model.utils import get_fetch_values
 from frappe.model.mapper import get_mapped_doc
@@ -104,8 +104,8 @@ class SalesOrder(SellingController):
 	def validate_delivery_date(self):
 		if self.order_type == 'Sales':
 			if not self.delivery_date:
-				self.delivery_date = max([d.delivery_date for d in self.get("items") if d.delivery_date])
-
+				delivery_date_list = [d.delivery_date for d in self.get("items") if d.delivery_date]
+				self.delivery_date = max(delivery_date_list) if delivery_date_list else None
 			if self.delivery_date:
 				for d in self.get("items"):
 					if not d.delivery_date:
@@ -242,14 +242,14 @@ class SalesOrder(SellingController):
 			frappe.throw(_("Maintenance Visit {0} must be cancelled before cancelling this Sales Order")
 				.format(comma_and(submit_mv)))
 
-		# check production order
+		# check work order
 		pro_order = frappe.db.sql_list("""
 			select name
-			from `tabProduction Order`
+			from `tabWork Order`
 			where sales_order = %s and docstatus = 1""", self.name)
 
 		if pro_order:
-			frappe.throw(_("Production Order {0} must be cancelled before cancelling this Sales Order")
+			frappe.throw(_("Work Order {0} must be cancelled before cancelling this Sales Order")
 				.format(comma_and(pro_order)))
 
 	def check_modified_date(self):
@@ -347,8 +347,8 @@ class SalesOrder(SellingController):
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
 
-	def get_production_order_items(self):
-		'''Returns items with BOM that already do not have a linked production order'''
+	def get_work_order_items(self):
+		'''Returns items with BOM that already do not have a linked work order'''
 		items = []
 
 		for table in [self.items, self.packed_items]:
@@ -356,7 +356,7 @@ class SalesOrder(SellingController):
 				bom = get_default_bom_item(i.item_code)
 				if bom:
 					stock_qty = i.qty if i.doctype == 'Packed Item' else i.stock_qty
-					pending_qty= stock_qty - flt(frappe.db.sql('''select sum(qty) from `tabProduction Order`
+					pending_qty= stock_qty - flt(frappe.db.sql('''select sum(qty) from `tabWork Order`
 							where production_item=%s and sales_order=%s and sales_order_item = %s and docstatus<2''', (i.item_code, self.name, i.name))[0][0])
 					if pending_qty:
 						items.append(dict(
@@ -435,6 +435,7 @@ def make_material_request(source_name, target_doc=None):
 		"Sales Order Item": {
 			"doctype": "Material Request Item",
 			"field_map": {
+				"name": "sales_order_item",
 				"parent": "sales_order",
 				"stock_uom": "uom",
 				"stock_qty": "qty"
@@ -476,13 +477,9 @@ def make_project(source_name, target_doc=None):
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		so = [d.against_sales_order for d in target.items]
-		if so:
-			po_no_list = frappe.get_all('Sales Order', 'po_no', filters = {'name': ('in', so)})
-			target.po_no = ', '.join(d.po_no for d in po_no_list if d.po_no)
-
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
+		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
 
 		# set company address
@@ -543,6 +540,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = True
 		target.run_method("set_missing_values")
+		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
 
 		# set company address
@@ -710,6 +708,7 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 		target.schedule_date = source.delivery_date
 		target.qty = flt(source.qty) - flt(source.ordered_qty)
 		target.stock_qty = (flt(source.qty) - flt(source.ordered_qty)) * flt(source.conversion_factor)
+		target.project = source_parent.project
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -777,8 +776,8 @@ def get_supplier(doctype, txt, searchfield, start, page_len, filters):
 		})
 
 @frappe.whitelist()
-def make_production_orders(items, sales_order, company, project=None):
-	'''Make Production Orders against the given Sales Order for the given `items`'''
+def make_work_orders(items, sales_order, company, project=None):
+	'''Make Work Orders against the given Sales Order for the given `items`'''
 	items = json.loads(items).get('items')
 	out = []
 
@@ -788,8 +787,8 @@ def make_production_orders(items, sales_order, company, project=None):
 		if not i.get("pending_qty"):
 			frappe.throw(_("Please select Qty against item {0}").format(i.get("item_code")))
 
-		production_order = frappe.get_doc(dict(
-			doctype='Production Order',
+		work_order = frappe.get_doc(dict(
+			doctype='Work Order',
 			production_item=i['item_code'],
 			bom_no=i.get('bom'),
 			qty=i['pending_qty'],
@@ -799,9 +798,9 @@ def make_production_orders(items, sales_order, company, project=None):
 			project=project,
 			fg_warehouse=i['warehouse']
 		)).insert()
-		production_order.set_production_order_operations()
-		production_order.save()
-		out.append(production_order)
+		work_order.set_work_order_operations()
+		work_order.save()
+		out.append(work_order)
 
 	return [p.name for p in out]
 

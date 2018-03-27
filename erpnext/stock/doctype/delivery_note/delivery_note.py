@@ -387,6 +387,7 @@ def make_sales_invoice(source_name, target_doc=None):
 		target.is_pos = 0
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
+		target.run_method("set_po_nos")
 
 		if len(target.get("items")) == 0:
 			frappe.throw(_("All these items have already been invoiced"))
@@ -438,6 +439,33 @@ def make_sales_invoice(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doc
+
+@frappe.whitelist()
+def make_delivery_trip(source_name, target_doc=None):
+	def update_stop_details(source_doc, target_doc, source_parent):
+		target_doc.customer = source_parent.customer
+		target_doc.address = source_parent.shipping_address_name
+		target_doc.customer_address = source_parent.shipping_address
+		target_doc.contact = source_parent.contact_person
+		target_doc.customer_contact = source_parent.contact_display
+
+	doclist = get_mapped_doc("Delivery Note", source_name, {
+		"Delivery Note": {
+			"doctype": "Delivery Trip",
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Delivery Note Item": {
+			"doctype": "Delivery Stop",
+			"field_map": {
+				"parent": "delivery_note"
+			},
+			"postprocess": update_stop_details,
+		}
+	}, target_doc)
+
+	return doclist
 
 @frappe.whitelist()
 def make_installation_note(source_name, target_doc=None):

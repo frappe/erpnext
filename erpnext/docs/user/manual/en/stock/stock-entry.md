@@ -23,6 +23,11 @@ In the Stock Entry you have to update the Items table with all your
 transactions. For each row, you must enter a “Source Warehouse” or a “Target
 Warehouse” or both (if you are recording a movement).
 
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/Njt107hlY3I?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+    </iframe>
+</div>
+
 **Additional Costs:**
 
 If the stock entry is an incoming entry i.e any item is receiving at a target warehouse, you can add related additional costs (like Shipping Charges, Customs Duty, Operating Costs etc) associated with the process. The additional costs will be considered to calculate valuation rate of the items.

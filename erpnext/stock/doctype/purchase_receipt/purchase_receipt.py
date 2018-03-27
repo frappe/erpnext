@@ -379,6 +379,9 @@ def make_purchase_invoice(source_name, target_doc=None):
 	doclist = get_mapped_doc("Purchase Receipt", source_name,	{
 		"Purchase Receipt": {
 			"doctype": "Purchase Invoice",
+			"field_map": {
+				"supplier_warehouse":"supplier_warehouse"
+			},
 			"validation": {
 				"docstatus": ["=", 1],
 			},

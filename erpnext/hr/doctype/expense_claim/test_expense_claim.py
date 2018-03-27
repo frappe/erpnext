@@ -77,9 +77,9 @@ class TestExpenseClaim(unittest.TestCase):
 		])
 
 		for gle in gl_entries:
-			self.assertEquals(expected_values[gle.account][0], gle.account)
-			self.assertEquals(expected_values[gle.account][1], gle.debit)
-			self.assertEquals(expected_values[gle.account][2], gle.credit)
+			self.assertEqual(expected_values[gle.account][0], gle.account)
+			self.assertEqual(expected_values[gle.account][1], gle.debit)
+			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 def get_payable_account(company):
 	return frappe.db.get_value('Company', company, 'default_payable_account')
@@ -87,7 +87,7 @@ def get_payable_account(company):
 def make_expense_claim(payable_account,claim_amount, sanctioned_amount, company, account, project=None, task_name=None):
 	expense_claim = frappe.get_doc({
 		 "doctype": "Expense Claim",
-		 "employee": "_T-Employee-0001",
+		 "employee": "_T-Employee-00001",
 		 "payable_account": payable_account,
 		 "company": company,
 		 "expenses":

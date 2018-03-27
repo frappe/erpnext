@@ -33,3 +33,10 @@ To check batch-wise stock balance report, go to:
 Stock > Standard Reports > Batch-wise Balance History
 
 <img alt="Batchwise Stock Balance" class="screenshot" src="{{docs_base_url}}/assets/img/articles/batchwise-stock-4.png">
+
+<div class="embed-container">
+    <iframe src="https://www.youtube.com/embed/J0QKl7ABPKM?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+    </iframe>
+</div>
+
+{next}

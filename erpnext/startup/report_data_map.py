@@ -97,7 +97,7 @@ data_map = {
 		"conditions": ["docstatus=1"],
 		"order_by": "posting_date, posting_time, name",
 	},
-	"Production Order": {
+	"Work Order": {
 		"columns": ["name", "production_item as item_code",
 			"(qty - produced_qty) as qty",
 			"fg_warehouse as warehouse"],
@@ -293,7 +293,7 @@ data_map = {
 	},
 
 	# Manufacturing
-	"Production Order": {
+	"Work Order": {
 		"columns": ["name","status","creation","planned_start_date","planned_end_date","status","actual_start_date","actual_end_date", "modified"],
 		"conditions": ["docstatus = 1"],
 		"order_by": "creation"

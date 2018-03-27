@@ -1,6 +1,6 @@
 {
     "css/erpnext.css": [
-        "public/css/erpnext.css"
+        "public/less/erpnext.less"
     ],
     "js/erpnext-web.min.js": [
         "public/js/website_utils.js",

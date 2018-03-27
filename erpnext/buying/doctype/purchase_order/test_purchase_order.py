@@ -17,7 +17,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.submit()
 
 		pr = create_pr_against_po(po.name)
-		self.assertEquals(len(pr.get("items")), 1)
+		self.assertEqual(len(pr.get("items")), 1)
 
 	def test_ordered_qty(self):
 		existing_ordered_qty = get_ordered_qty()
@@ -32,7 +32,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 6)
 
 		po.load_from_db()
-		self.assertEquals(po.get("items")[0].received_qty, 4)
+		self.assertEqual(po.get("items")[0].received_qty, 4)
 
 		frappe.db.set_value('Item', '_Test Item', 'tolerance', 50)
 
@@ -40,13 +40,13 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
 
 		po.load_from_db()
-		self.assertEquals(po.get("items")[0].received_qty, 12)
+		self.assertEqual(po.get("items")[0].received_qty, 12)
 
 		pr.cancel()
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 6)
 
 		po.load_from_db()
-		self.assertEquals(po.get("items")[0].received_qty, 4)
+		self.assertEqual(po.get("items")[0].received_qty, 4)
 		
 	def test_ordered_qty_against_pi_with_update_stock(self):
 		existing_ordered_qty = get_ordered_qty()
@@ -66,13 +66,13 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
 
 		po.load_from_db()
-		self.assertEquals(po.get("items")[0].received_qty, 12)
+		self.assertEqual(po.get("items")[0].received_qty, 12)
 
 		pi.cancel()
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 10)
 
 		po.load_from_db()
-		self.assertEquals(po.get("items")[0].received_qty, 0)
+		self.assertEqual(po.get("items")[0].received_qty, 0)
 
 	def test_make_purchase_invoice(self):
 		po = create_purchase_order(do_not_submit=True)
@@ -82,8 +82,8 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.submit()
 		pi = make_purchase_invoice(po.name)
 
-		self.assertEquals(pi.doctype, "Purchase Invoice")
-		self.assertEquals(len(pi.get("items", [])), 1)
+		self.assertEqual(pi.doctype, "Purchase Invoice")
+		self.assertEqual(len(pi.get("items", [])), 1)
 
 	def test_make_purchase_invoice_with_terms(self):
 		po = create_purchase_order(do_not_save=True)
@@ -104,8 +104,8 @@ class TestPurchaseOrder(unittest.TestCase):
 		pi = make_purchase_invoice(po.name)
 		pi.save()
 
-		self.assertEquals(pi.doctype, "Purchase Invoice")
-		self.assertEquals(len(pi.get("items", [])), 1)
+		self.assertEqual(pi.doctype, "Purchase Invoice")
+		self.assertEqual(len(pi.get("items", [])), 1)
 
 		self.assertEqual(pi.payment_schedule[0].payment_amount, 2500.0)
 		self.assertEqual(pi.payment_schedule[0].due_date, po.transaction_date)
@@ -114,7 +114,7 @@ class TestPurchaseOrder(unittest.TestCase):
 
 	def test_subcontracting(self):
 		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")
-		self.assertEquals(len(po.get("supplied_items")), 2)
+		self.assertEqual(len(po.get("supplied_items")), 2)
 
 	def test_warehouse_company_validation(self):
 		from erpnext.stock.utils import InvalidWarehouseCompany
@@ -134,11 +134,11 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		po = create_purchase_order(item_code= "_Test Item", qty=1)
 
-		self.assertEquals(get_ordered_qty(item_code= "_Test Item", warehouse="_Test Warehouse - _TC"), existing_ordered_qty+1)
+		self.assertEqual(get_ordered_qty(item_code= "_Test Item", warehouse="_Test Warehouse - _TC"), existing_ordered_qty+1)
 
 		po.update_status("Closed")
 
-		self.assertEquals(get_ordered_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"), existing_ordered_qty)
+		self.assertEqual(get_ordered_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"), existing_ordered_qty)
 		
 	def test_group_same_items(self):
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
@@ -199,6 +199,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		bin2 = frappe.db.get_value("Bin",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname=["reserved_qty_for_sub_contract", "projected_qty"], as_dict=1)
+
 		self.assertEquals(bin2.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract + 10)
 		self.assertEquals(bin2.projected_qty, bin1.projected_qty - 10)
 
@@ -278,6 +279,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		bin10 = frappe.db.get_value("Bin",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname="reserved_qty_for_sub_contract", as_dict=1)
+
 		self.assertEquals(bin10.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract + 10)
 
 		# Cancel PO

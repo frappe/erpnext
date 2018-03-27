@@ -106,6 +106,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	on_submit: function(doc, dt, dn) {
 		var me = this;
 
+		if (frappe.get_route()[0] != 'Form') {
+			return
+		}
+
 		$.each(doc["items"], function(i, row) {
 			if(row.delivery_note) frappe.model.clear_doc("Delivery Note", row.delivery_note)
 		})

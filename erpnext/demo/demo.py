@@ -63,7 +63,7 @@ def simulate(domain='Manufacturing', days=100):
 		# runs_for = 100
 
 	fixed_asset.work()
-	for i in xrange(runs_for):
+	for i in range(runs_for):
 		sys.stdout.write("\rSimulating {0}: Day {1}".format(
 			current_date.strftime("%Y-%m-%d"), i))
 		sys.stdout.flush()

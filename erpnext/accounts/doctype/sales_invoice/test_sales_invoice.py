@@ -78,17 +78,17 @@ class TestSalesInvoice(unittest.TestCase):
 		}
 
 		# check if children are saved
-		self.assertEquals(len(si.get("items")),
+		self.assertEqual(len(si.get("items")),
 			len(expected_values)-1)
 
 		# check if item values are calculated
 		for d in si.get("items"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.get(k), expected_values[d.item_code][i])
+				self.assertEqual(d.get(k), expected_values[d.item_code][i])
 
 		# check net total
-		self.assertEquals(si.base_net_total, 1250)
-		self.assertEquals(si.net_total, 1250)
+		self.assertEqual(si.base_net_total, 1250)
+		self.assertEqual(si.net_total, 1250)
 
 		# check tax calculation
 		expected_values = {
@@ -105,10 +105,10 @@ class TestSalesInvoice(unittest.TestCase):
 
 		for d in si.get("taxes"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.get(k), expected_values[d.account_head][i])
+				self.assertEqual(d.get(k), expected_values[d.account_head][i])
 
-		self.assertEquals(si.base_grand_total, 1627.05)
-		self.assertEquals(si.grand_total, 1627.05)
+		self.assertEqual(si.base_grand_total, 1627.05)
+		self.assertEqual(si.grand_total, 1627.05)
 
 	def test_payment_entry_unlink_against_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
@@ -153,18 +153,18 @@ class TestSalesInvoice(unittest.TestCase):
 		}
 
 		# check if children are saved
-		self.assertEquals(len(si.get("items")), len(expected_values)-1)
+		self.assertEqual(len(si.get("items")), len(expected_values)-1)
 
 		# check if item values are calculated
 		for d in si.get("items"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.get(k), expected_values[d.item_code][i])
+				self.assertEqual(d.get(k), expected_values[d.item_code][i])
 
 		# check net total
-		self.assertEquals(si.total, 25)
-		self.assertEquals(si.base_total, 1250)
-		self.assertEquals(si.net_total, 25)
-		self.assertEquals(si.base_net_total, 1250)
+		self.assertEqual(si.total, 25)
+		self.assertEqual(si.base_total, 1250)
+		self.assertEqual(si.net_total, 25)
+		self.assertEqual(si.base_net_total, 1250)
 
 		# check tax calculation
 		expected_values = {
@@ -181,10 +181,10 @@ class TestSalesInvoice(unittest.TestCase):
 
 		for d in si.get("taxes"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.get(k), expected_values[d.account_head][i])
+				self.assertEqual(d.get(k), expected_values[d.account_head][i])
 
-		self.assertEquals(si.base_grand_total, 1627.5)
-		self.assertEquals(si.grand_total, 32.55)
+		self.assertEqual(si.base_grand_total, 1627.5)
+		self.assertEqual(si.grand_total, 32.55)
 
 	def test_sales_invoice_with_discount_and_inclusive_tax(self):
 		si = create_sales_invoice(qty=100, rate=50, do_not_save=True)
@@ -199,8 +199,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 
 		# with inclusive tax
-		self.assertEquals(si.net_total, 4385.96)
-		self.assertEquals(si.grand_total, 5000)
+		self.assertEqual(si.net_total, 4385.96)
+		self.assertEqual(si.grand_total, 5000)
 
 		si.reload()
 
@@ -212,8 +212,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.save()
 
 		# with inclusive tax and additional discount
-		self.assertEquals(si.net_total, 4285.96)
-		self.assertEquals(si.grand_total, 4885.99)
+		self.assertEqual(si.net_total, 4285.96)
+		self.assertEqual(si.grand_total, 4885.99)
 
 		si.reload()
 
@@ -225,8 +225,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.save()
 
 		# with inclusive tax and additional discount
-		self.assertEquals(si.net_total, 4298.25)
-		self.assertEquals(si.grand_total, 4900.00)
+		self.assertEqual(si.net_total, 4298.25)
+		self.assertEqual(si.grand_total, 4900.00)
 
 	def test_sales_invoice_discount_amount(self):
 		si = frappe.copy_doc(test_records[3])
@@ -273,16 +273,16 @@ class TestSalesInvoice(unittest.TestCase):
 		]
 
 		# check if children are saved
-		self.assertEquals(len(si.get("items")),	len(expected_values))
+		self.assertEqual(len(si.get("items")),	len(expected_values))
 
 		# check if item values are calculated
 		for i, d in enumerate(si.get("items")):
 			for k, v in expected_values[i].items():
-				self.assertEquals(d.get(k), v)
+				self.assertEqual(d.get(k), v)
 
 		# check net total
-		self.assertEquals(si.base_net_total, 1163.45)
-		self.assertEquals(si.total, 1578.3)
+		self.assertEqual(si.base_net_total, 1163.45)
+		self.assertEqual(si.total, 1578.3)
 
 		# check tax calculation
 		expected_values = {
@@ -300,11 +300,11 @@ class TestSalesInvoice(unittest.TestCase):
 
 		for d in si.get("taxes"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.get(k), expected_values[d.account_head][i])
+				self.assertEqual(d.get(k), expected_values[d.account_head][i])
 
-		self.assertEquals(si.base_grand_total, 1500)
-		self.assertEquals(si.grand_total, 1500)
-		self.assertEquals(si.rounding_adjustment, -0.01)
+		self.assertEqual(si.base_grand_total, 1500)
+		self.assertEqual(si.grand_total, 1500)
+		self.assertEqual(si.rounding_adjustment, -0.01)
 
 	def test_discount_amount_gl_entry(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
@@ -344,9 +344,9 @@ class TestSalesInvoice(unittest.TestCase):
 		])
 
 		for gle in gl_entries:
-			self.assertEquals(expected_values[gle.account][0], gle.account)
-			self.assertEquals(expected_values[gle.account][1], gle.debit)
-			self.assertEquals(expected_values[gle.account][2], gle.credit)
+			self.assertEqual(expected_values[gle.account][0], gle.account)
+			self.assertEqual(expected_values[gle.account][1], gle.debit)
+			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 		# cancel
 		si.cancel()
@@ -374,12 +374,12 @@ class TestSalesInvoice(unittest.TestCase):
 		})
 		si.insert()
 
-		self.assertEquals(si.net_total, 4600)
+		self.assertEqual(si.net_total, 4600)
 		
-		self.assertEquals(si.get("taxes")[0].tax_amount, 874.0)
-		self.assertEquals(si.get("taxes")[0].total, 5474.0)
+		self.assertEqual(si.get("taxes")[0].tax_amount, 874.0)
+		self.assertEqual(si.get("taxes")[0].total, 5474.0)
 
-		self.assertEquals(si.grand_total, 5474.0)
+		self.assertEqual(si.grand_total, 5474.0)
 
 	def test_tax_calculation_with_multiple_items_and_discount(self):
 		si = create_sales_invoice(qty=1, rate=75, do_not_save=True)
@@ -403,13 +403,13 @@ class TestSalesInvoice(unittest.TestCase):
 		})
 		si.insert()
 
-		self.assertEquals(si.total, 975)
-		self.assertEquals(si.net_total, 900)
+		self.assertEqual(si.total, 975)
+		self.assertEqual(si.net_total, 900)
 		
-		self.assertEquals(si.get("taxes")[0].tax_amount, 216.0)
-		self.assertEquals(si.get("taxes")[0].total, 1116.0)
+		self.assertEqual(si.get("taxes")[0].tax_amount, 216.0)
+		self.assertEqual(si.get("taxes")[0].total, 1116.0)
 
-		self.assertEquals(si.grand_total, 1116.0)
+		self.assertEqual(si.grand_total, 1116.0)
 		
 	def test_inclusive_rate_validations(self):
 		si = frappe.copy_doc(test_records[2])
@@ -418,7 +418,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		si.get("items")[0].price_list_rate = 62.5
 		si.get("items")[0].price_list_rate = 191
-		for i in xrange(6):
+		for i in range(6):
 			si.get("taxes")[i].included_in_print_rate = 1
 
 		# tax type "Actual" cannot be inclusive
@@ -441,16 +441,16 @@ class TestSalesInvoice(unittest.TestCase):
 		}
 
 		# check if children are saved
-		self.assertEquals(len(si.get("items")), len(expected_values)-1)
+		self.assertEqual(len(si.get("items")), len(expected_values)-1)
 
 		# check if item values are calculated
 		for d in si.get("items"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.get(k), expected_values[d.item_code][i])
+				self.assertEqual(d.get(k), expected_values[d.item_code][i])
 
 		# check net total
-		self.assertEquals(si.net_total, 1249.97)
-		self.assertEquals(si.total, 1578.3)
+		self.assertEqual(si.net_total, 1249.97)
+		self.assertEqual(si.total, 1578.3)
 
 		# check tax calculation
 		expected_values = {
@@ -467,10 +467,10 @@ class TestSalesInvoice(unittest.TestCase):
 
 		for d in si.get("taxes"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.get(k), expected_values[d.account_head][i])
+				self.assertEqual(d.get(k), expected_values[d.account_head][i])
 
-		self.assertEquals(si.base_grand_total, 1622.97)
-		self.assertEquals(si.grand_total, 1622.97)
+		self.assertEqual(si.base_grand_total, 1622.97)
+		self.assertEqual(si.grand_total, 1622.97)
 
 	def test_sales_invoice_calculation_export_currency_with_tax_inclusive_price(self):
 		# prepare
@@ -519,17 +519,17 @@ class TestSalesInvoice(unittest.TestCase):
 		]
 
 		# check if children are saved
-		self.assertEquals(len(si.get("items")), len(expected_values))
+		self.assertEqual(len(si.get("items")), len(expected_values))
 
 		# check if item values are calculated
 		for i, d in enumerate(si.get("items")):
 			for key, val in expected_values[i].items():
-				self.assertEquals(d.get(key), val)
+				self.assertEqual(d.get(key), val)
 
 		# check net total
-		self.assertEquals(si.base_net_total, 49501.5)
-		self.assertEquals(si.net_total, 990.03)
-		self.assertEquals(si.total, 1250)
+		self.assertEqual(si.base_net_total, 49501.5)
+		self.assertEqual(si.net_total, 990.03)
+		self.assertEqual(si.total, 1250)
 
 		# check tax calculation
 		expected_values = {
@@ -546,17 +546,17 @@ class TestSalesInvoice(unittest.TestCase):
 
 		for d in si.get("taxes"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.get(k), expected_values[d.account_head][i])
+				self.assertEqual(d.get(k), expected_values[d.account_head][i])
 
-		self.assertEquals(si.base_grand_total, 60795)
-		self.assertEquals(si.grand_total, 1215.90)
-		self.assertEquals(si.rounding_adjustment, 0.01)
-		self.assertEquals(si.base_rounding_adjustment, 0.50)
+		self.assertEqual(si.base_grand_total, 60795)
+		self.assertEqual(si.grand_total, 1215.90)
+		self.assertEqual(si.rounding_adjustment, 0.01)
+		self.assertEqual(si.base_rounding_adjustment, 0.50)
 		
 
 	def test_outstanding(self):
 		w = self.make()
-		self.assertEquals(w.outstanding_amount, w.base_rounded_total)
+		self.assertEqual(w.outstanding_amount, w.base_rounded_total)
 
 	def test_payment(self):
 		w = self.make()
@@ -570,7 +570,7 @@ class TestSalesInvoice(unittest.TestCase):
 		jv.insert()
 		jv.submit()
 
-		self.assertEquals(frappe.db.get_value("Sales Invoice", w.name, "outstanding_amount"), 162.0)
+		self.assertEqual(frappe.db.get_value("Sales Invoice", w.name, "outstanding_amount"), 162.0)
 
 		link_data = get_dynamic_link_map().get('Sales Invoice', [])
 		link_doctypes = [d.parent for d in link_data]
@@ -579,7 +579,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertTrue(link_doctypes.index('GL Entry') > link_doctypes.index('Journal Entry Account'))
 
 		jv.cancel()
-		self.assertEquals(frappe.db.get_value("Sales Invoice", w.name, "outstanding_amount"), 562.0)
+		self.assertEqual(frappe.db.get_value("Sales Invoice", w.name, "outstanding_amount"), 562.0)
 
 	def test_sales_invoice_gl_entry_without_perpetual_inventory(self):
 		si = frappe.copy_doc(test_records[1])
@@ -601,9 +601,9 @@ class TestSalesInvoice(unittest.TestCase):
 		])
 
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_values[gle.account][0], gle.account)
-			self.assertEquals(expected_values[gle.account][1], gle.debit)
-			self.assertEquals(expected_values[gle.account][2], gle.credit)
+			self.assertEqual(expected_values[gle.account][0], gle.account)
+			self.assertEqual(expected_values[gle.account][1], gle.debit)
+			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 		# cancel
 		si.cancel()
@@ -628,7 +628,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		si.submit()
 
-		self.assertEquals(si.paid_amount, 600.0)
+		self.assertEqual(si.paid_amount, 600.0)
 
 		self.pos_gl_entry(si, pos, 300)
 
@@ -648,8 +648,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		si.submit()
 
-		self.assertEquals(si.grand_total, 630.0)
-		self.assertEquals(si.write_off_amount, -5)
+		self.assertEqual(si.grand_total, 630.0)
+		self.assertEqual(si.write_off_amount, -5)
 
 	def test_make_pos_invoice(self):
 		from erpnext.accounts.doctype.sales_invoice.pos import make_invoice
@@ -667,11 +667,11 @@ class TestSalesInvoice(unittest.TestCase):
 
 		invoice_data = [{'09052016142': pos}]
 		si = make_invoice(invoice_data).get('invoice')
-		self.assertEquals(si[0], '09052016142')
+		self.assertEqual(si[0], '09052016142')
 
 		sales_invoice = frappe.get_all('Sales Invoice', fields =["*"], filters = {'offline_pos_name': '09052016142', 'docstatus': 1})
 		si = frappe.get_doc('Sales Invoice', sales_invoice[0].name)
-		self.assertEquals(si.grand_total, 630.0)
+		self.assertEqual(si.grand_total, 630.0)
 
 		self.pos_gl_entry(si, pos, 330)
 
@@ -699,19 +699,19 @@ class TestSalesInvoice(unittest.TestCase):
 
 		invoice_data = [{timestamp: pos}]
 		si = make_invoice(invoice_data).get('invoice')
-		self.assertEquals(si[0], timestamp)
+		self.assertEqual(si[0], timestamp)
 
 		sales_invoice = frappe.get_all('Sales Invoice', fields =["*"], filters = {'offline_pos_name': timestamp})
-		self.assertEquals(sales_invoice[0].docstatus, 0)
+		self.assertEqual(sales_invoice[0].docstatus, 0)
 
 		timestamp = cint(time.time())
 		pos["offline_pos_name"] = timestamp
 		invoice_data = [{timestamp: pos}]
 		si1 = make_invoice(invoice_data).get('invoice')
-		self.assertEquals(si1[0], timestamp)
+		self.assertEqual(si1[0], timestamp)
 
 		sales_invoice1 = frappe.get_all('Sales Invoice', fields =["*"], filters = {'offline_pos_name': timestamp})
-		self.assertEquals(sales_invoice1[0].docstatus, 0)
+		self.assertEqual(sales_invoice1[0].docstatus, 0)
 
 		if allow_negative_stock:
 			frappe.db.set_value('Stock Settings', None, 'allow_negative_stock', 1)
@@ -722,7 +722,7 @@ class TestSalesInvoice(unittest.TestCase):
 			where voucher_type = 'Sales Invoice' and voucher_no = %s""",
 			si.name, as_dict=1)[0]
 		self.assertTrue(sle)
-		self.assertEquals([sle.item_code, sle.warehouse, sle.actual_qty],
+		self.assertEqual([sle.item_code, sle.warehouse, sle.actual_qty],
 			["_Test Item", "_Test Warehouse - _TC", -1.0])
 
 		# check gl entries
@@ -747,9 +747,9 @@ class TestSalesInvoice(unittest.TestCase):
 		])
 
 		for i, gle in enumerate(sorted(gl_entries, key=lambda gle: gle.account)):
-			self.assertEquals(expected_gl_entries[i][0], gle.account)
-			self.assertEquals(expected_gl_entries[i][1], gle.debit)
-			self.assertEquals(expected_gl_entries[i][2], gle.credit)
+			self.assertEqual(expected_gl_entries[i][0], gle.account)
+			self.assertEqual(expected_gl_entries[i][1], gle.debit)
+			self.assertEqual(expected_gl_entries[i][2], gle.credit)
 
 		si.cancel()
 		frappe.delete_doc('Sales Invoice', si.name)
@@ -782,9 +782,9 @@ class TestSalesInvoice(unittest.TestCase):
 			[test_records[1]["taxes"][1]["account_head"], 0.0, 50.0],
 		])
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_values[gle.account][0], gle.account)
-			self.assertEquals(expected_values[gle.account][1], gle.debit)
-			self.assertEquals(expected_values[gle.account][2], gle.credit)
+			self.assertEqual(expected_values[gle.account][0], gle.account)
+			self.assertEqual(expected_values[gle.account][1], gle.debit)
+			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 		set_perpetual_inventory(0)
 
@@ -807,9 +807,9 @@ class TestSalesInvoice(unittest.TestCase):
 			[test_records[1]["taxes"][1]["account_head"], 0.0, 50.0],
 		])
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_values[gle.account][0], gle.account)
-			self.assertEquals(expected_values[gle.account][1], gle.debit)
-			self.assertEquals(expected_values[gle.account][2], gle.credit)
+			self.assertEqual(expected_values[gle.account][0], gle.account)
+			self.assertEqual(expected_values[gle.account][1], gle.debit)
+			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 		set_perpetual_inventory(0)
 
@@ -881,9 +881,9 @@ class TestSalesInvoice(unittest.TestCase):
 		si.submit()
 
 		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"))
-		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0],
+		self.assertEqual(frappe.db.get_value("Serial No", serial_nos[0],
 			"delivery_document_no"), si.name)
-		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "sales_invoice"),
+		self.assertEqual(frappe.db.get_value("Serial No", serial_nos[0], "sales_invoice"),
 			si.name)
 
 		# check if the serial number is already linked with any other Sales Invoice
@@ -899,7 +899,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		serial_nos = get_serial_nos(si.get("items")[0].serial_no)
 
-		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC")
+		self.assertEqual(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC")
 		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0],
 			"delivery_document_no"))
 		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], "sales_invoice"))
@@ -940,7 +940,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si = make_sales_invoice(dn.name)
 		si.save()
 
-		self.assertEquals(si.get("items")[0].serial_no, dn.get("items")[0].serial_no)
+		self.assertEqual(si.get("items")[0].serial_no, dn.get("items")[0].serial_no)
 
 	def test_return_sales_invoice(self):
 		set_perpetual_inventory()
@@ -951,7 +951,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si = create_sales_invoice(qty=5, rate=500, update_stock=1)
 
 		actual_qty_1 = get_qty_after_transaction()
-		self.assertEquals(actual_qty_0 - 5, actual_qty_1)
+		self.assertEqual(actual_qty_0 - 5, actual_qty_1)
 
 		# outgoing_rate
 		outgoing_rate = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Sales Invoice",
@@ -962,20 +962,20 @@ class TestSalesInvoice(unittest.TestCase):
 
 		actual_qty_2 = get_qty_after_transaction()
 
-		self.assertEquals(actual_qty_1 + 2, actual_qty_2)
+		self.assertEqual(actual_qty_1 + 2, actual_qty_2)
 
 		incoming_rate, stock_value_difference = frappe.db.get_value("Stock Ledger Entry",
 			{"voucher_type": "Sales Invoice", "voucher_no": si1.name},
 			["incoming_rate", "stock_value_difference"])
 
-		self.assertEquals(flt(incoming_rate, 3), abs(flt(outgoing_rate, 3)))
+		self.assertEqual(flt(incoming_rate, 3), abs(flt(outgoing_rate, 3)))
 		stock_in_hand_account = get_inventory_account('_Test Company', si1.items[0].warehouse)
 
 		# Check gl entry
 		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Sales Invoice",
 			"voucher_no": si1.name, "account": stock_in_hand_account}, "debit")
 
-		self.assertEquals(gle_warehouse_amount, stock_value_difference)
+		self.assertEqual(gle_warehouse_amount, stock_value_difference)
 
 		party_credited = frappe.db.get_value("GL Entry", {"voucher_type": "Sales Invoice",
 			"voucher_no": si1.name, "account": "Debtors - _TC", "party": "_Test Customer"}, "credit")
@@ -1003,19 +1003,19 @@ class TestSalesInvoice(unittest.TestCase):
 		}
 
 		# check if children are saved
-		self.assertEquals(len(si.get("items")),
+		self.assertEqual(len(si.get("items")),
 			len(expected_values)-1)
 
 		# check if item values are calculated
 		for d in si.get("items"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.get(k), expected_values[d.item_code][i])
+				self.assertEqual(d.get(k), expected_values[d.item_code][i])
 
 		# check net total
-		self.assertEquals(si.base_total, 1250)
-		self.assertEquals(si.total, 1250)
-		self.assertEquals(si.base_net_total, 625)
-		self.assertEquals(si.net_total, 625)
+		self.assertEqual(si.base_total, 1250)
+		self.assertEqual(si.total, 1250)
+		self.assertEqual(si.base_net_total, 625)
+		self.assertEqual(si.net_total, 625)
 
 		# check tax calculation
 		expected_values = {
@@ -1034,12 +1034,12 @@ class TestSalesInvoice(unittest.TestCase):
 		for d in si.get("taxes"):
 			for i, k in enumerate(expected_values["keys"]):
 				if expected_values.get(d.account_head):
-					self.assertEquals(d.get(k), expected_values[d.account_head][i])
+					self.assertEqual(d.get(k), expected_values[d.account_head][i])
 
 
-		self.assertEquals(si.total_taxes_and_charges, 234.43)
-		self.assertEquals(si.base_grand_total, 859.43)
-		self.assertEquals(si.grand_total, 859.43)
+		self.assertEqual(si.total_taxes_and_charges, 234.43)
+		self.assertEqual(si.base_grand_total, 859.43)
+		self.assertEqual(si.grand_total, 859.43)
 
 	def test_multi_currency_gle(self):
 		set_perpetual_inventory(0)
@@ -1072,7 +1072,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		for field in ("account_currency", "debit", "debit_in_account_currency", "credit", "credit_in_account_currency"):
 			for i, gle in enumerate(gl_entries):
-				self.assertEquals(expected_values[gle.account][field], gle[field])
+				self.assertEqual(expected_values[gle.account][field], gle[field])
 
 		# cancel
 		si.cancel()
@@ -1233,7 +1233,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# check if the conversion_factor and price_list_rate is calculated according to uom
 		for d in si.get("items"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.get(k), expected_values[d.item_code][i])
+				self.assertEqual(d.get(k), expected_values[d.item_code][i])
 
 	def test_item_wise_tax_breakup_india(self):
 		frappe.flags.country = "India"
@@ -1363,9 +1363,9 @@ class TestSalesInvoice(unittest.TestCase):
 			order by account asc""", si.name, as_dict=1)
 
 		for gle in gl_entries:
-			self.assertEquals(expected_values[gle.account][0], gle.account)
-			self.assertEquals(expected_values[gle.account][1], gle.debit)
-			self.assertEquals(expected_values[gle.account][2], gle.credit)
+			self.assertEqual(expected_values[gle.account][0], gle.account)
+			self.assertEqual(expected_values[gle.account][1], gle.debit)
+			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 	def test_sales_invoice_with_shipping_rule(self):
 		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule \
@@ -1395,10 +1395,10 @@ class TestSalesInvoice(unittest.TestCase):
 		si.append("taxes", shipping_charge)
 		si.save()
 
-		self.assertEquals(si.net_total, 1250)
+		self.assertEqual(si.net_total, 1250)
 
-		self.assertEquals(si.total_taxes_and_charges, 577.05)
-		self.assertEquals(si.grand_total, 1827.05)		
+		self.assertEqual(si.total_taxes_and_charges, 577.05)
+		self.assertEqual(si.grand_total, 1827.05)		
 
 	def test_create_invoice_without_terms(self):
 		si = create_sales_invoice(do_not_save=1)

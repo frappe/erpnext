@@ -4,12 +4,12 @@ frappe.provide("erpnext.stock");
 
 frappe.ui.form.on('Stock Entry', {
 	setup: function(frm) {
-		frm.set_query('production_order', function() {
+		frm.set_query('work_order', function() {
 			return {
 				filters: [
-					['Production Order', 'docstatus', '=', 1],
-					['Production Order', 'qty', '>','`tabProduction Order`.produced_qty'],
-					['Production Order', 'company', '=', frm.doc.company]
+					['Work Order', 'docstatus', '=', 1],
+					['Work Order', 'qty', '>','`tabWork Order`.produced_qty'],
+					['Work Order', 'company', '=', frm.doc.company]
 				]
 			}
 		});
@@ -57,7 +57,42 @@ frappe.ui.form.on('Stock Entry', {
 				}
 			}
 		});
+
+		frm.add_fetch("bom_no", "inspection_required", "inspection_required");
+		frm.trigger("setup_quality_inspection");
 	},
+
+	setup_quality_inspection: function(frm) {
+		if (!frm.doc.inspection_required) {
+			return;
+		}
+
+		let quality_inspection_field = frm.get_docfield("items", "quality_inspection");
+		quality_inspection_field.get_route_options_for_new_doc = function(row) {
+			if (frm.is_new()) return;
+			return {
+				"inspection_type": "Incoming",
+				"reference_type": frm.doc.doctype,
+				"reference_name": frm.doc.name,
+				"item_code": row.doc.item_code,
+				"description": row.doc.description,
+				"item_serial_no": row.doc.serial_no ? row.doc.serial_no.split("\n")[0] : null,
+				"batch_no": row.doc.batch_no
+			}
+		}
+
+		frm.set_query("quality_inspection", "items", function(doc, cdt, cdn) {
+			var d = locals[cdt][cdn];
+			return {
+				filters: {
+					docstatus: 1,
+					item_code: d.item_code,
+					reference_name: doc.name
+				}
+			}
+		});
+	},
+
 	refresh: function(frm) {
 		if(!frm.doc.docstatus) {
 			frm.add_custom_button(__('Make Material Request'), function() {
@@ -102,11 +137,11 @@ frappe.ui.form.on('Stock Entry', {
 			}, __("Get items from"));
 		}
 
-		if(frm.doc.company) {
+		if (frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
 		}
 
-		if(frm.doc.docstatus==1 && frm.doc.purpose == "Material Receipt") {
+		if (frm.doc.docstatus==1 && frm.doc.purpose == "Material Receipt") {
 			frm.add_custom_button(__('Make Retention Stock Entry'), function () {
 				frm.trigger("make_retention_stock_entry");
 			});
@@ -277,6 +312,14 @@ frappe.ui.form.on('Stock Entry', {
 
 		frm.set_value("total_additional_costs",
 			flt(total_additional_costs, precision("total_additional_costs")));
+	},
+
+	source_warehouse_address: function(frm) {
+		erpnext.utils.get_address_display(frm, 'source_warehouse_address', 'source_address_display', false);
+	},
+
+	target_warehouse_address: function(frm) {
+		erpnext.utils.get_address_display(frm, 'target_warehouse_address', 'target_address_display', false);
 	},
 })
 
@@ -522,11 +565,11 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	clean_up: function() {
-		// Clear Production Order record from locals, because it is updated via Stock Entry
-		if(this.frm.doc.production_order &&
+		// Clear Work Order record from locals, because it is updated via Stock Entry
+		if(this.frm.doc.work_order &&
 				in_list(["Manufacture", "Material Transfer for Manufacture"], this.frm.doc.purpose)) {
-			frappe.model.remove_from_locals("Production Order",
-				this.frm.doc.production_order);
+			frappe.model.remove_from_locals("Work Order",
+				this.frm.doc.work_order);
 		}
 	},
 
@@ -535,8 +578,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(!this.frm.doc.fg_completed_qty || !this.frm.doc.bom_no)
 			frappe.throw(__("BOM and Manufacturing Quantity are required"));
 
-		if(this.frm.doc.production_order || this.frm.doc.bom_no) {
-			// if production order / bom is mentioned, get items
+		if(this.frm.doc.work_order || this.frm.doc.bom_no) {
+			// if work order / bom is mentioned, get items
 			return this.frm.call({
 				doc: me.frm.doc,
 				method: "get_items",
@@ -547,17 +590,17 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		}
 	},
 
-	production_order: function() {
+	work_order: function() {
 		var me = this;
 		this.toggle_enable_bom();
-		if(!me.frm.doc.production_order) {
+		if(!me.frm.doc.work_order) {
 			return;
 		}
 
 		return frappe.call({
-			method: "erpnext.stock.doctype.stock_entry.stock_entry.get_production_order_details",
+			method: "erpnext.stock.doctype.stock_entry.stock_entry.get_work_order_details",
 			args: {
-				production_order: me.frm.doc.production_order
+				work_order: me.frm.doc.work_order
 			},
 			callback: function(r) {
 				if (!r.exc) {
@@ -587,7 +630,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	toggle_enable_bom: function() {
-		this.frm.toggle_enable("bom_no", !!!this.frm.doc.production_order);
+		this.frm.toggle_enable("bom_no", !!!this.frm.doc.work_order);
 	},
 
 	add_excise_button: function() {

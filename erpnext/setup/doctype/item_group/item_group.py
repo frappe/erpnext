@@ -9,8 +9,8 @@ from frappe.utils.nestedset import NestedSet
 from frappe.website.website_generator import WebsiteGenerator
 from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
+from erpnext.shopping_cart.product_info import set_product_info_for_website
 from erpnext.utilities.product import get_qty_in_stock
-
 
 class ItemGroup(NestedSet, WebsiteGenerator):
 	nsm_parent_field = 'parent_item_group'
@@ -102,11 +102,13 @@ def get_product_list_for_group(product_group=None, start=0, limit=10, search=Non
 				or I.name like %(search)s)"""
 		search = "%" + cstr(search) + "%"
 
-	query += """order by I.weightage desc, in_stock desc, I.item_name limit %s, %s""" % (start, limit)
+	query += """order by I.weightage desc, in_stock desc, I.modified desc limit %s, %s""" % (start, limit)
 
 	data = frappe.db.sql(query, {"product_group": product_group,"search": search, "today": nowdate()}, as_dict=1)
-
 	data = adjust_qty_for_expired_items(data)
+
+	for item in data:
+		set_product_info_for_website(item)
 
 	return [get_item_for_list_in_html(r) for r in data]
 
