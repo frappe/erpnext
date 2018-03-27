@@ -11,7 +11,7 @@ period (usually a week or a month).
 This list of Items can be generated from the open Sales Orders or pending Material Requests that can be Manufactured in the system
 and will generate:
 
-  * Production Orders for each Item.
+  * Work Orders for each Item.
   * Purchase Requests for Items whose Projected Quantity is likely to fall below zero.
 
 To use the Production Planning Tool, go to:
@@ -43,7 +43,7 @@ To use the Production Planning Tool, go to:
 
 <img class="screenshot" alt="Production Planing Tool" src="{{docs_base_url}}/assets/img/manufacturing/ppt-get-item.png">
 
-#### Step 4: Create Production Orders
+#### Step 4: Create Work Orders
 
 <img class="screenshot" alt="Production Planing Tool" src="{{docs_base_url}}/assets/img/manufacturing/ppt-create-production-order.png">
 
@@ -69,7 +69,7 @@ You can always edit the Item list and increase / reduce quantities to plan
 your production.
 
 > Note: How do you change a Production Plan? The output of the Production
-Planning Tool is the Production Order. Once your orders are created, you can
-change them by amending the Production Orders.
+Planning Tool is the Work Order. Once your orders are created, you can
+change them by amending the Work Orders.
 
 {next}

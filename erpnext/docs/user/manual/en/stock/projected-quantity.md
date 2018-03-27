@@ -20,7 +20,7 @@ shortages and to calculate the right order quantity.
 Reserved Qty
 
   * Actual Qty: Quantity available in the warehouse.
-  * Planned Qty: Quantity, for which, Production Order has been raised, but is pending to be manufactured.
+  * Planned Qty: Quantity, for which, Work Order has been raised, but is pending to be manufactured.
   * Requested Qty: Quantity requested for purchase, but not ordered.
   * Ordered Qty: Quantity ordered for purchase, but not received.
   * Reserved Qty: Quantity ordered for sale, but not delivered.
