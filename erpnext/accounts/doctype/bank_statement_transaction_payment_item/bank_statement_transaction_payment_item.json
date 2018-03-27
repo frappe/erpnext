@@ -479,7 +479,7 @@
  "modified": "2017-11-15 19:18:52.876221", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
- "name": "Bank Statement Transaction Payment Entry", 
+ "name": "Bank Statement Transaction Payment Item", 
  "name_case": "", 
  "owner": "Administrator", 
  "permissions": [], 
