@@ -493,7 +493,7 @@ frappe.help.help_links['Form/BOM'] = [
 ]
 
 frappe.help.help_links['Form/Work Order'] = [
-	{ label: 'Work Order', url: 'https://frappe.github.io/erpnext/user/manual/en/manufacturing/production-order' },
+	{ label: 'Work Order', url: 'https://frappe.github.io/erpnext/user/manual/en/manufacturing/work-order' },
 ]
 
 frappe.help.help_links['Form/Workstation'] = [
