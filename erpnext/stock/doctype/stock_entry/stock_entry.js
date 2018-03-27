@@ -106,8 +106,8 @@ frappe.ui.form.on('Stock Entry', {
 			frm.trigger("toggle_display_account_head");
 		}
 
-		if(frm.doc.docstatus==1 && frm.doc.purpose == "Material Receipt") {
-			frm.add_custom_button(__('Make Retention Stock Entry'), function () {
+		if(frm.doc.docstatus==1 && frm.doc.purpose == "Material Receipt" && frm.get_sum('items', 			'sample_quantity')) {
+			frm.add_custom_button(__('Make Sample Retention Stock Entry'), function () {
 				frm.trigger("make_retention_stock_entry");
 			});
 		}
@@ -465,7 +465,13 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		}
 
 		this.frm.set_indicator_formatter('item_code',
-			function(doc) { return (doc.qty<=doc.actual_qty) ? "green" : "orange" })
+			function(doc) { 
+				if (!doc.s_warehouse) {
+					return 'blue';
+				} else {
+					return (doc.qty<=doc.actual_qty) ? "green" : "orange" 
+				}
+			})
 
 		this.frm.add_fetch("purchase_order", "supplier", "supplier");
 
