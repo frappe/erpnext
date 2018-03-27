@@ -26,13 +26,13 @@ Material Transfer entry is created for the inter-warehouse Material Transfer.
  
 #### 4.Purpose: Material Transfer for Manufacture 
 
-In the manufacturing process, raw-materials are issued from the stores to the production department (generally WIP warehouse). This Material Transfer entry is created from Production Order. Items in this entry are fetched from the BOM of production Item, as selected in Production Order.
+In the manufacturing process, raw-materials are issued from the stores to the production department (generally WIP warehouse). This Material Transfer entry is created from Work Order. Items in this entry are fetched from the BOM of production Item, as selected in Work Order.
 
 <img alt="Transfer for Manufacture" class="screenshot" src="{{docs_base_url}}/assets/img/articles/stock-entry-manufacture-transfer.gif">
 
 #### 4.Purpose: Manufacture
 
-Manufacture is created from Production Order. In this entry, both raw-material item as well as production item are fetched from the BOM, selected in the Production Order. For the raw-material items, only Source Warehouse (generally WIP warehouse) is mentioned. For the production item, only target warehouse as mentioned in the Production Order is updated. On submission, stock of raw-material items are deducted from Source Warehouse, which indicates that raw-material items were consumed in the manufacturing process. Production Item is added to the Target Warehouse marking the completion of production cycle.
+Manufacture is created from Work Order. In this entry, both raw-material item as well as production item are fetched from the BOM, selected in the Work Order. For the raw-material items, only Source Warehouse (generally WIP warehouse) is mentioned. For the production item, only target warehouse as mentioned in the Work Order is updated. On submission, stock of raw-material items are deducted from Source Warehouse, which indicates that raw-material items were consumed in the manufacturing process. Production Item is added to the Target Warehouse marking the completion of production cycle.
 
 <img alt="Manufacture" class="screenshot" src="{{docs_base_url}}/assets/img/articles/stock-entry-manufacture.gif">
 

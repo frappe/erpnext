@@ -1,7 +1,7 @@
 # Custom Doctype
 
 DocType or a Document Type is a tool to insert form in ERPNext. The forms like Sales Order,
-Sales Invoices, Production Order are added as Doctype in the backend. Let's assume we are
+Sales Invoices, Work Order are added as Doctype in the backend. Let's assume we are
 creating a Custom Doctype for a Book.
 
 Custom Doctype allows you to insert custom forms in ERPNext as per your requirement.

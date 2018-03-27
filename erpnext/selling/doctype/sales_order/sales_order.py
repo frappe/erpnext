@@ -360,6 +360,7 @@ class SalesOrder(SellingController):
 							where production_item=%s and sales_order=%s and sales_order_item = %s and docstatus<2''', (i.item_code, self.name, i.name))[0][0])
 					if pending_qty:
 						items.append(dict(
+							name= i.name,
 							item_code= i.item_code,
 							bom = bom,
 							warehouse = i.warehouse,

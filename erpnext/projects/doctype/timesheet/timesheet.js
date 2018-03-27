@@ -3,6 +3,7 @@
 
 frappe.ui.form.on("Timesheet", {
 	setup: function(frm) {
+		frappe.require("/assets/erpnext/js/projects/timer.js");
 		frm.add_fetch('employee', 'employee_name', 'employee_name');
 		frm.fields_dict.employee.get_query = function() {
 			return {
@@ -50,6 +51,41 @@ frappe.ui.form.on("Timesheet", {
 			}
 		}
 
+		if (frm.doc.docstatus < 1) {
+
+			$.each(frm.doc.time_logs || [], function(i, row) {
+				if(row.from_time  && !row.completed) {
+					if (row.to_time && frappe.datetime.now_datetime() > row.to_time) {
+						frappe.utils.play_sound("alert");
+						frappe.msgprint(__(`Timer exceeded the expected hours for activity ${row.activity_type} in row ${row.idx}.`));
+					}
+				}
+				frm.refresh_fields();
+			});
+
+			let button = 'Start Timer';
+			$.each(frm.doc.time_logs || [], function(i, row) {
+				if ((row.from_time <= frappe.datetime.now_datetime()) && !row.completed) {
+					button = 'Resume Timer';
+				}
+			})
+
+			frm.add_custom_button(__(button), function() {
+				var flag = true;
+				// Fetch the row for timer where activity is not completed and from_time is not <= now_time
+				$.each(frm.doc.time_logs || [], function(i, row) {
+					if (flag && row.from_time <= frappe.datetime.now_datetime() && !row.completed) {
+						let timestamp = moment(frappe.datetime.now_datetime()).diff(moment(row.from_time),"seconds");
+						erpnext.timesheet.timer(frm, row, timestamp);
+						flag = false;
+					}
+				})
+				// If no activities found to start a timer, create new
+				if (flag) {
+					erpnext.timesheet.timer(frm);
+				}
+			}).addClass("btn-primary");
+		}
 		if(frm.doc.per_billed > 0) {
 			frm.fields_dict["time_logs"].grid.toggle_enable("billing_hours", false);
 			frm.fields_dict["time_logs"].grid.toggle_enable("billable", false);
@@ -86,7 +122,6 @@ frappe.ui.form.on("Timesheet", {
 				}
 			})
 		})
-
 		dialog.show();
 	},
 
@@ -114,7 +149,15 @@ frappe.ui.form.on("Timesheet Detail", {
 		frappe.model.set_value(cdt, cdn, "hours", moment(child.to_time).diff(moment(child.from_time),
 			"seconds") / 3600);
 	},
-
+	time_logs_add: function(frm) {
+		var $trigger_again = $('.form-grid').find('.grid-row').find('.btn-open-row');
+		$trigger_again.on('click', () => {
+			$('.form-grid')
+				.find('[data-fieldname="timer"]')
+				.append(frappe.render_template("timesheet"));
+			frm.trigger("control_timer");
+		})
+	},
 	hours: function(frm, cdt, cdn) {
 		calculate_end_time(frm, cdt, cdn)
 	},

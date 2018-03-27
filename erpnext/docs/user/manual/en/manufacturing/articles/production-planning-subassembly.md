@@ -6,4 +6,4 @@ Production Planning Tool has field called "Use Multi-Level BOM", checking which 
 
 <img src="{{docs_base_path}}/assets/img/articles/$SGrab_203.png">
 
-`Use Multi-Level BOM` field is also there in the Production Order and Stock Entry. If checked, raw-materials of sub-assembly item will be consumed in the manufacturing process, and not the sub-assembly item itself.
+`Use Multi-Level BOM` field is also there in the Work Order and Stock Entry. If checked, raw-materials of sub-assembly item will be consumed in the manufacturing process, and not the sub-assembly item itself.
