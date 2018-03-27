@@ -105,6 +105,12 @@ $.extend(erpnext.utils, {
 		}
 	},
 
+	get_party_name: function(party_type) {
+		var dict = {'Customer': 'customer_name', 'Supplier': 'supplier_name', 'Employee': 'employee_name',
+			'Member': 'member_name'};
+		return dict[party_type];
+	},
+
 	copy_value_in_all_row: function(doc, dt, dn, table_fieldname, fieldname) {
 		var d = locals[dt][dn];
 		if(d[fieldname]){
