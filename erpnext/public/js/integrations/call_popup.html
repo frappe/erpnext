@@ -1,0 +1,15 @@
+<h3>Incoming Call</h3>
+<ul style="list-style: none">
+	<li><h3><i class="fa fa-phone" style="margin-right: 20px"></i>{{ number }}</h3></li>
+	<li>
+		<h3>
+			<i class="fa fa-user" style="margin-right: 20px"></i>
+			{{ name }}
+			<span class="label label-info">New</span>
+		</h3>
+	</li>
+	<li>
+		<a class="btn btn-sm btn-primary" href="/desk#telephony-dashboard/{{number}}">Go To Console</a>
+	</li>
+</ul>
+<br><span class="small text-muted">Call received at {{ call_timestamp }}</span>
