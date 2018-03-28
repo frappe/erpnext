@@ -28,7 +28,7 @@ def make_popup(caller_no):
 			customer_name = frappe.db.get_value("Dynamic Link", {"parent":contact_doc.get("name")}, "link_name")
 			customer_full_name = frappe.db.get_value("Customer", customer_name, "customer_name")
 			popup_data = {
-				"title": "Customer", 
+				"title": "Customer",
 				"number": caller_no,
 				"name": customer_full_name,
 				"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
@@ -40,7 +40,7 @@ def make_popup(caller_no):
 		elif(contact_doc.get_link_for('Lead')):
 			lead_full_name = frappe.get_doc("Lead",contact_doc.get_link_for('Lead')).lead_name
 			popup_data = {
-				"title": "Lead", 
+				"title": "Lead",
 				"number": caller_no,
 				"name": lead_full_name,
 				"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
@@ -67,13 +67,13 @@ def display_popup():
 
 	try:
 		popup_html = make_popup(caller_no)
-		# if agent_id:	
+		# if agent_id:
 		# 	frappe.async.publish_realtime(event="msgprint", message=popup_html, user=agent_id)
 		# else:
 		users = frappe.get_all("Has Role", filters={"parenttype":"User","role":"Support Team"}, fields=["parent"])
 		agents = [user.get("parent") for user in users]
 		for agent in agents:
-			frappe.async.publish_realtime(event="msgprint", message=popup_html, user=agent)	
+			frappe.async.publish_realtime(event="msgprint", message=popup_html, user=agent)
 
 	except Exception as e:
 		frappe.log_error(message=frappe.get_traceback(), title="Error in popup display")
@@ -132,14 +132,14 @@ def capture_call_details(*args, **kwargs):
 				frappe.db.commit()
 				return comm
 			else:
-				frappe.msgprint(_("Authenication error. Invalid exotel credentials."))	
+				frappe.msgprint(_("Authenication error. Invalid exotel credentials."))
 	except Exception as e:
 		frappe.log_error(message=frappe.get_traceback(), title="Error in capturing call details")
 
 @frappe.whitelist()
 def handle_outgoing_call(To, CallerId,reference_doctype,reference_name):
 	"""Handles outgoing calls in telephony service.
-	
+
 	:param From: Number of user
 	:param To: Number of customer
 	:param CallerId: Exophone number
@@ -149,7 +149,7 @@ def handle_outgoing_call(To, CallerId,reference_doctype,reference_name):
 	"""
 	r = frappe.request
 	try:
-		credentials = frappe.get_doc("Exotel Settings")	
+		credentials = frappe.get_doc("Exotel Settings")
 		
 		endpoint = "/api/method/frappe.integrations.doctype.exotel_settings.exotel_settings.capture_call_details"
 		url = frappe.request.url
