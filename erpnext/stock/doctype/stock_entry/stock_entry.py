@@ -400,9 +400,10 @@ class StockEntry(StockController):
 		if self.purpose == "Subcontract" and self.purchase_order:
 			purchase_order = frappe.get_doc("Purchase Order", self.purchase_order)
 			for se_item in self.items:
+				item_code = se_item.original_item or se_item.item_code
 				precision = cint(frappe.db.get_default("float_precision")) or 3
 				total_allowed = sum([flt(d.required_qty) for d in purchase_order.supplied_items \
-					if d.rm_item_code == se_item.item_code])
+					if d.rm_item_code == item_code])
 				if not total_allowed:
 					frappe.throw(_("Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1}")
 						.format(se_item.item_code, self.purchase_order))
@@ -421,7 +422,8 @@ class StockEntry(StockController):
 	def validate_bom(self):
 		for d in self.get('items'):
 			if d.bom_no and (d.t_warehouse != getattr(self, "pro_doc", frappe._dict()).scrap_warehouse):
-				validate_bom_no(d.item_code, d.bom_no)
+				item_code = d.original_item or d.item_code
+				validate_bom_no(item_code, d.bom_no)
 
 	def validate_finished_goods(self):
 		"""validation: finished good quantity should be same as manufacturing quantity"""
@@ -608,7 +610,6 @@ class StockEntry(StockController):
 					item_dict = self.get_bom_raw_materials(self.fg_completed_qty)
 
 					#Get PO Supplied Items Details
-					print('Purchase Order', self.purchase_order, self.purpose)
 					if self.purchase_order and self.purpose == "Subcontract":
 						#Get PO Supplied Items Details
 						item_wh = frappe._dict(frappe.db.sql("""
@@ -695,9 +696,23 @@ class StockEntry(StockController):
 		item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=qty,
 			fetch_exploded = self.use_multi_level_bom)
 
+		used_alternative_items = get_used_alternative_items(work_order = self.work_order)
 		for item in item_dict.values():
 			# if source warehouse presents in BOM set from_warehouse as bom source_warehouse
+			if item["allow_alternative_item"]:
+				item["allow_alternative_item"] = frappe.db.get_value('Work Order',
+					self.work_order, "allow_alternative_item")
+
 			item.from_warehouse = self.from_warehouse or item.source_warehouse or item.default_warehouse
+			if item.item_code in used_alternative_items:
+				alternative_item_data = used_alternative_items.get(item.item_code)
+				item.item_code = alternative_item_data.item_code
+				item.item_name = alternative_item_data.item_name
+				item.stock_uom = alternative_item_data.stock_uom
+				item.uom = alternative_item_data.uom
+				item.conversion_factor = alternative_item_data.conversion_factor
+				item.description = alternative_item_data.description
+
 		return item_dict
 
 	def get_bom_scrap_material(self, qty):
@@ -805,16 +820,19 @@ class StockEntry(StockController):
 			wip_warehouse = pro_order.wip_warehouse
 		else:
 			wip_warehouse = None
-			
+
 		for d in pro_order.get("required_items"):
 			if flt(d.required_qty) > flt(d.transferred_qty):
 				item_row = d.as_dict()
 				if d.source_warehouse and not frappe.db.get_value("Warehouse", d.source_warehouse, "is_group"):
 					item_row["from_warehouse"] = d.source_warehouse
-				
+
 				item_row["to_warehouse"] = wip_warehouse
+				if item_row["allow_alternative_item"]:
+					item_row["allow_alternative_item"] = pro_order.allow_alternative_item
+
 				item_dict.setdefault(d.item_code, item_row)
-			
+
 		return item_dict
 
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None):
@@ -827,7 +845,7 @@ class StockEntry(StockController):
 			se_child = self.append('items')
 			se_child.s_warehouse = item_dict[d].get("from_warehouse")
 			se_child.t_warehouse = item_dict[d].get("to_warehouse")
-			se_child.item_code = cstr(d)
+			se_child.item_code = item_dict[d].get('item_code') or cstr(d)
 			se_child.item_name = item_dict[d]["item_name"]
 			se_child.description = item_dict[d]["description"]
 			se_child.uom = stock_uom
@@ -835,6 +853,7 @@ class StockEntry(StockController):
 			se_child.qty = flt(item_dict[d]["qty"], se_child.precision("qty"))
 			se_child.expense_account = item_dict[d].get("expense_account") or expense_account
 			se_child.cost_center = item_dict[d].get("cost_center") or cost_center
+			se_child.allow_alternative_item = item_dict[d].get("allow_alternative_item", 0)
 
 			if item_dict[d].get("idx"):
 				se_child.idx = item_dict[d].get("idx")
@@ -882,8 +901,9 @@ class StockEntry(StockController):
 
 		#Update reserved sub contracted quantity in bin based on Supplied Item Details
 		for d in self.get("items"):
-			reserve_warehouse = item_wh.get(d.item_code)
-			stock_bin = get_bin(d.item_code, reserve_warehouse)
+			item_code = d.get('original_item') or d.get('item_code')
+			reserve_warehouse = item_wh.get(item_code)
+			stock_bin = get_bin(item_code, reserve_warehouse)
 			stock_bin.update_reserved_qty_for_sub_contracting()
 	
 @frappe.whitelist()
@@ -975,6 +995,30 @@ def get_operating_cost_per_unit(work_order=None, bom_no=None):
 			operating_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
 
 	return operating_cost_per_unit
+
+def get_used_alternative_items(purchase_order=None, work_order=None):
+	cond = ""
+
+	if purchase_order:
+		cond = "and ste.purpose = 'Subcontract' and ste.purchase_order = '{0}'".format(purchase_order)
+	elif work_order:
+		cond = "and ste.purpose = 'Material Transfer for Manufacture' and ste.work_order = '{0}'".format(work_order)
+
+	if not cond: return {}
+
+	used_alternative_items = {}
+	data = frappe.db.sql(""" select sted.original_item, sted.uom, sted.conversion_factor,
+			sted.item_code, sted.item_name, sted.conversion_factor,sted.stock_uom, sted.description
+		from
+			`tabStock Entry` ste, `tabStock Entry Detail` sted
+		where
+			sted.parent = ste.name and ste.docstatus = 1 and sted.original_item !=  sted.item_code
+			{0} """.format(cond), as_dict=1)
+
+	for d in data:
+		used_alternative_items[d.original_item] = d
+
+	return used_alternative_items
 
 @frappe.whitelist()
 def get_uom_details(item_code, uom, qty):

@@ -171,7 +171,7 @@ frappe.ui.form.on("Work Order", {
 						frm.set_value('sales_order', "");
 						frm.trigger('set_sales_order');
 						erpnext.in_production_item_onchange = true;
-						$.each(["description", "stock_uom", "project", "bom_no"], function(i, field) {
+						$.each(["description", "stock_uom", "project", "bom_no", "allow_alternative_item"], function(i, field) {
 							frm.set_value(field, r.message[field]);
 						});
 
