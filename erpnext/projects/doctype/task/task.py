@@ -236,3 +236,6 @@ def add_multiple_tasks(data, parent):
 		new_doc['subject'] = d.get("subject")
 		new_task = frappe.get_doc(new_doc)
 		new_task.insert()
+
+def on_doctype_update():
+	frappe.db.add_index("Task", ["lft", "rgt"])
