@@ -11,7 +11,7 @@ You can access this report from `Stock > Main Report > Stock Projected Quantity`
 This report list item wise - warehouse wise stock level of an item considering all the stock transactions. With Actual Quantity of an item, it also provide other details like:
 
 1. Actual Qty: Quantity available in the warehouse.
-2. Planned Qty: Quantity, for which, Production Order has been raised, but is pending to be manufactured.
+2. Planned Qty: Quantity, for which, Work Order has been raised, but is pending to be manufactured.
 3. Requested Qty: Quantity requested for purchase, but not ordered.
 4. Ordered Qty: Quantity ordered for purchase, but not received.
 5. Reserved Qty: Quantity ordered for sale, but not delivered.

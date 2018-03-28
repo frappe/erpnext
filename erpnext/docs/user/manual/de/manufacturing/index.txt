@@ -1,6 +1,6 @@
 introduction
 bill-of-materials
-production-order
+work-order
 workstation
 operation
 subcontracting

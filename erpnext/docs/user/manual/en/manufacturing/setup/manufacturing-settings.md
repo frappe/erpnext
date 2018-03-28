@@ -8,7 +8,7 @@ Manufacturing Settings can be found at:
 
 ####Disable Capacity Planning and Time Tracking
 
-As per Capacity Planning feature, when Production Order is created for an item, for each Operation, Time Log is created. Based on actual Operation Time, Time Logs is updated. This also provides total Operations Cost against Production Order.
+As per Capacity Planning feature, when Work Order is created for an item, for each Operation, Time Log is created. Based on actual Operation Time, Time Logs is updated. This also provides total Operations Cost against Work Order.
 
 If you don't track actual operations time, and want to disable creation of Time Log based on Operations, you should check "Disable Capacity Planning and Time Tracking" in the Manufacturing Settings.
 
@@ -28,11 +28,11 @@ Holiday of a company can be recorded in the [Holiday List](/docs/user/manual/en/
 
 ####Over Production Allowance Percentage
 
-While making Production Orders against a Sales Order, the system will only allow production item quantity to be lesser than or equal to the quantity in the Sales Order. In case you wish to allow Production Orders to be raised with greater quantity, you can mention the Over Production Allowance Percentage here.
+While making Work Orders against a Sales Order, the system will only allow production item quantity to be lesser than or equal to the quantity in the Sales Order. In case you wish to allow Work Orders to be raised with greater quantity, you can mention the Over Production Allowance Percentage here.
 
 ####Back-flush Raw Materials Based On
 
-When creating Manufacture Entry, raw-material items are back-flush based on BOM of production item. If you want raw-material items to be back-flushed based on Material Transfer entry made against that Production Order instead, then you should set Back-flush Raw Materials Based On "Material Transferred for Manufacture".
+When creating Manufacture Entry, raw-material items are back-flush based on BOM of production item. If you want raw-material items to be back-flushed based on Material Transfer entry made against that Work Order instead, then you should set Back-flush Raw Materials Based On "Material Transferred for Manufacture".
 
 <img class="screenshot" alt="Manufacturing Settings" src="{{docs_base_url}}/assets/img/articles/manufacturing-settings-4.png">
 
@@ -46,8 +46,8 @@ Time gap between two production operations.
 
 ####Default Work In Progress Warehouse
 
-This Warehouse will be auto-updated in the Work In Progress Warehouse field of Production Order.
+This Warehouse will be auto-updated in the Work In Progress Warehouse field of Work Order.
 
 ####Default Finished Goods Warehouse
 
-This Warehouse will be auto-updated in the Work In Progress Warehouse field of Production Order.
+This Warehouse will be auto-updated in the Work In Progress Warehouse field of Work Order.

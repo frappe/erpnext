@@ -15,7 +15,7 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Groups'),
-				'items': ['BOM', 'Product Bundle']
+				'items': ['BOM', 'Product Bundle', 'Item Alternative']
 			},
 			{
 				'label': _('Pricing'),

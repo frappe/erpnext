@@ -14,7 +14,7 @@ implementation should happen in two phases.
   * Create Customer Groups, Item Groups, Warehouses, Supplier Groups, so that you can classify your Items.
   * Complete a standard sales cycle - Lead > Opportunity > Quotation > Sales Order > Delivery Note > Sales Invoice > Payment (Journal Entry)
   * Complete a standard purchase cycle - Material Request > Purchase Order > Purchase Receipt > Payment (Journal Entry).
-  * Complete a manufacturing cycle (if applicable) - BOM > Production Planning Tool > Production Order > Material Issue
+  * Complete a manufacturing cycle (if applicable) - BOM > Production Planning Tool > Work Order > Material Issue
   * Replicate a real life scenario into the system.
   * Create custom fields, print formats etc as required.
 
