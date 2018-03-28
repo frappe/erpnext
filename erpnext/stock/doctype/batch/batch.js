@@ -62,10 +62,6 @@ frappe.ui.form.on('Batch', {
 								<div class='col-sm-3 small' style='padding-top: 3px;'>${d.warehouse}</div>
 								<div class='col-sm-3 small text-right' style='padding-top: 3px;'>${d.qty}</div>
 								<div class='col-sm-6'>
-									<button class='btn btn-default btn-xs btn-move' style='margin-right: 7px;'
-										data-qty = "${d.qty}"
-										data-warehouse = "${d.warehouse}">
-										${__('Move')}</button>
 									<button class='btn btn-default btn-xs btn-split'
 										data-qty = "${d.qty}"
 										data-warehouse = "${d.warehouse}">
