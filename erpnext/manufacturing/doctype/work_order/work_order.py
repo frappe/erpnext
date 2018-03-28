@@ -489,6 +489,7 @@ class WorkOrder(Document):
 						'item_code': item.item_code,
 						'item_name': item.item_name,
 						'description': item.description,
+						'allow_alternative_item': item.allow_alternative_item,
 						'required_qty': item.qty,
 						'source_warehouse': item.source_warehouse or item.default_warehouse
 					})
@@ -503,14 +504,16 @@ class WorkOrder(Document):
 			transferred_qty = frappe.db.sql('''select sum(qty)
 				from `tabStock Entry` entry, `tabStock Entry Detail` detail
 				where
-					entry.work_order = %s
+					entry.work_order = %(name)s
 					and entry.purpose = "Material Transfer for Manufacture"
 					and entry.docstatus = 1
 					and detail.parent = entry.name
-					and detail.item_code = %s''', (self.name, d.item_code))[0][0]
+					and (detail.item_code = %(item)s or detail.original_item = %(item)s)''', {
+						'name': self.name,
+						'item': d.item_code
+					})[0][0]
 
 			d.db_set('transferred_qty', flt(transferred_qty), update_modified = False)
-
 
 @frappe.whitelist()
 def get_item_details(item, project = None):
@@ -548,6 +551,7 @@ def get_item_details(item, project = None):
 			frappe.throw(_("Default BOM for {0} not found").format(item))
 
 	res['project'] = project or frappe.db.get_value('BOM', res['bom_no'], 'project')
+	res['allow_alternative_item'] = frappe.db.get_value('BOM', res['bom_no'], 'allow_alternative_item')
 	res.update(check_if_scrap_warehouse_mandatory(res["bom_no"]))
 
 	return res
