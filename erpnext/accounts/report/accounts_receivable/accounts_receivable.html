@@ -91,8 +91,8 @@
 	<thead>
 		<tr>
 			{% if(report.report_name === "Accounts Receivable" || report.report_name === "Accounts Payable") { %}
-				<th style="width: 10%">{%= __("Date") %}</th>
-				<th style="width: 15%">{%= __("Ref") %}</th>
+				<th style="width: 15%">{%= __("Date") %}</th>
+				<th style="width: 20%">{%= __("Reference") %}</th>
 				{% if(!filters.show_pdc_in_print) { %}
 				<th style="width: 20%">{%= (filters.customer || filters.supplier) ? __("Remarks"): __("Party") %}</th>
 				{% } %}
@@ -125,9 +125,9 @@
 			<tr>
 			{% if(report.report_name === "Accounts Receivable" || report.report_name === "Accounts Payable") { %}
 				{% if(data[i][__("Customer")] || data[i][__("Supplier")]) { %}
-					<td>{%= dateutil.str_to_user(data[i][__("Posting Date")]) %}</td>
-					<td>{%= data[i][__("Voucher Type")] %}
-						<br>{%= data[i][__("Voucher No")] %}</td>
+					<td>{%= dateutil.str_to_user(data[i]["posting_date"]) %}</td>
+					<td>{%= data[i]["voucher_type"] %}
+						<br>{%= data[i]["voucher_no"] %}</td>
 					{% if(!filters.show_pdc_in_print) { %}	
 					<td>
 						{% if(!(filters.customer || filters.supplier)) { %}
