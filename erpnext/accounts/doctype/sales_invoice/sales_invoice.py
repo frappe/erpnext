@@ -22,7 +22,7 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_delive
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
-	get_loyalty_program_details, get_loyalty_details
+	get_loyalty_program_details, get_loyalty_details, validate_loyalty_points
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -106,7 +106,7 @@ class SalesInvoice(SellingController):
 		if self.is_pos and not self.is_return:
 			self.verify_payment_amount_is_positive()
 		if self.redeem_loyalty_points:
-			self.validate_loyalty_points()
+			validate_loyalty_points(self, self.loyalty_points)
 
 
 	def before_save(self):
@@ -151,8 +151,13 @@ class SalesInvoice(SellingController):
 
 		update_company_current_month_sales(self.company)
 		self.update_project()
+
+		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program 
 		if not self.is_return:
 			self.make_loyalty_point_entry()
+		else:
+			against_si_doc = frappe.get_doc("Sales Invoice", self.return_against)
+			against_si_doc.delete_loyalty_point_entry()
 		if self.redeem_loyalty_points:
 			self.apply_loyalty_points()
 
@@ -194,7 +199,11 @@ class SalesInvoice(SellingController):
 
 		update_company_current_month_sales(self.company)
 		self.update_project()
-		self.delete_loyalty_point_entry()
+		if not self.is_return:
+			self.delete_loyalty_point_entry()
+		else:
+			against_si_doc = frappe.get_doc("Sales Invoice", self.return_against)
+			against_si_doc.make_loyalty_point_entry()
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
@@ -722,7 +731,6 @@ class SalesInvoice(SellingController):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
 
 	def make_loyalty_point_redemption_gle(self, gl_entries):
-		print ("=== gl entries", gl_entries)
 		if cint(self.redeem_loyalty_points):
 			gl_entries.append(
 				self.get_gl_dict({
@@ -949,7 +957,7 @@ class SalesInvoice(SellingController):
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be positive").format(entry.idx))
 
 	# collection of the loyalty points, create the ledger entry for that.
-	def make_loyalty_point_entry(self):
+	def make_loyalty_point_entry(self):		
 		loyalty_program_details = get_loyalty_program_details(self.customer, company=self.company)
 		if loyalty_program_details:
 			points_earned = int(self.grand_total/loyalty_program_details.collection_factor)
@@ -960,72 +968,93 @@ class SalesInvoice(SellingController):
 				"loyalty_program_tier": loyalty_program_details.tier_name,
 				"customer": self.customer,
 				"sales_invoice": self.name,
-				"points_earned": points_earned,
+				"loyalty_points": points_earned,
 				"purchase_amount": self.grand_total,
 				"expiry_date": add_days(self.posting_date, loyalty_program_details.expiry_duration),
-				"posting_date": self.posting_date,
-				"remaining_points": points_earned
+				"posting_date": self.posting_date
 			})
 			doc.flags.ignore_permissions = 1
 			doc.save()
-			frappe.db.set_value("Customer", self.customer, "loyalty_program_tier", loyalty_program_details.tier_name)
+			# frappe.db.set_value("Customer", self.customer, "loyalty_program_tier", loyalty_program_details.tier_name)
 
-	# delete the loyalty points earned on cancel of the invoice
+	# valdite the redemption and then delete the loyalty points earned on cancel of the invoice
 	def delete_loyalty_point_entry(self):
-		lp_entry = frappe.db.sql('''select points_earned, redeemed_points, redeemed_on_sales_invoice
-			from `tabLoyalty Point Entry` where customer=%s and sales_invoice=%s''', (self.customer, self.name), as_dict=1)
-		if lp_entry and lp_entry[0].redeemed_points>0:
-			frappe.throw(_("Can't cancel the invoice since the loyalty points earned is already redeemed"))
+		lp_entry = frappe.db.sql("select name from `tabLoyalty Point Entry` where sales_invoice=%s",
+			(self.name), as_dict=1)[0]
+		against_lp_entry = frappe.db.sql('''select name, sales_invoice from `tabLoyalty Point Entry`
+			where redeem_against=%s''', (lp_entry.name), as_dict=1)
+		if against_lp_entry:
+			invoice_list = ", ".join([d.sales_invoice for d in against_lp_entry])
+			frappe.throw(_('''Sales Invoice can't be cancelled since the Loyalty Points earned has been redeemed. 
+				First cancel the Sales Invoice No {0}''').format(invoice_list))
 		else:
-			frappe.db.sql('''delete from `tabLoyalty Point Entry` where customer=%s and sales_invoice=%s''', (self.customer, self.name))
+			frappe.db.sql('''delete from `tabLoyalty Point Entry` where sales_invoice=%s''', (self.name))
 
 
 	# validate the loyalty points, equivalent amount, account, cost center and company
-	def validate_loyalty_points(self):
-		if not self.loyalty_program:
-			self.loyalty_program = frappe.db.get_value("Customer", self.customer, ["loyalty_program"])
+	# def validate_loyalty_points(self):
+	# 	if not self.loyalty_program:
+	# 		self.loyalty_program = frappe.db.get_value("Customer", self.customer, ["loyalty_program"])
 
-		if self.loyalty_program and frappe.db.get_value("Loyalty Program", self.loyalty_program, ["company"]) != \
-			self.company:
-			frappe.throw(_("The Loyalty Program isn't valid for the selected company"))
+	# 	if self.loyalty_program and frappe.db.get_value("Loyalty Program", self.loyalty_program, ["company"]) != \
+	# 		self.company:
+	# 		frappe.throw(_("The Loyalty Program isn't valid for the selected company"))
 
-		if self.loyalty_program and self.loyalty_points:
-			loyalty_program_details = get_loyalty_program_details(self.customer, self.loyalty_program,
-				self.posting_date, self.company)
+	# 	if self.loyalty_program and self.loyalty_points:
+	# 		loyalty_program_details = get_loyalty_program_details(self.customer, self.loyalty_program,
+	# 			self.posting_date, self.company)
 
-			if not self.loyalty_redemption_account:
-				self.loyalty_redemption_account = loyalty_program_details.expense_account
+	# 		if not self.loyalty_redemption_account:
+	# 			self.loyalty_redemption_account = loyalty_program_details.expense_account
 
-			if not self.loyalty_redemption_cost_center:
-				self.loyalty_redemption_cost_center = loyalty_program_details.cost_center
+	# 		if not self.loyalty_redemption_cost_center:
+	# 			self.loyalty_redemption_cost_center = loyalty_program_details.cost_center
 
-			if self.loyalty_points > loyalty_program_details.loyalty_points:
-				frappe.throw("You don't have enought points to redeem")
+	# 		if self.loyalty_points > loyalty_program_details.loyalty_points:
+	# 			frappe.throw(_("You don't have enought Loyalty Points to redeem"))
 
-			loyalty_amount = flt(self.loyalty_points * loyalty_program_details.conversion_factor)
-			if not self.loyalty_amount and self.loyalty_amount != loyalty_amount:
-				self.loyalty_amount = loyalty_amount
 
-			if not self.is_pos and self.paid_amount != self.loyalty_amount:
-				self.paid_amount = self.loyalty_amount
-				self.outstanding_amount = flt(self.grand_total - self.paid_amount)
+	# 		loyalty_amount = flt(self.loyalty_points * loyalty_program_details.conversion_factor)
+	# 		if not self.loyalty_amount and self.loyalty_amount != loyalty_amount:
+	# 			self.loyalty_amount = loyalty_amount
 
-	# redeem the loyalty points and create the accounting entry for that.
+	# 		if self.loyalty_amount > self.grand_total:
+	# 			frappe.throw(_("You can't redeem Loyalty Points having more value than the Grand Total."))
+
+	# 		if not self.is_pos and self.paid_amount != self.loyalty_amount:
+	# 			self.paid_amount = self.loyalty_amount
+	# 			self.outstanding_amount = flt(self.grand_total - self.paid_amount)
+
+	# redeem the loyalty points.
 	def apply_loyalty_points(self):
-		# redeem the loyalty points on the FIFO style
-		# set the Redeemed Points, date of redeemtion and invoice for the redeemption
-		# self.redeem_loyalty_entry(loyalty_points, loyalty_program)
 		from erpnext.accounts.doctype.loyalty_point_entry.loyalty_point_entry \
-			import redeem_loyalty_points
-		redeem_loyalty_points(self.customer, self.loyalty_points, self.loyalty_program, self.posting_date,
-			self.company, self.name)
+			import get_loyalty_point_entries
+		loyalty_point_entries = get_loyalty_point_entries(self.customer, self.loyalty_program, self.posting_date, self.company)
 
-
-		# create the accounting entry for the same
-		# debtors account will be credited and expense account will be debited
-		# self.create_redmeeption_accounting_entry(loyalty_amount, loyalty_redemption_account,
-		# 	loyalty_redemption_cost_center, company, loyalty_program)
-		# frappe.throw(self.grand_total, self.paid_amount, self.outstanding_amount)
+		points_to_redeem = self.loyalty_amount
+		for lp_entry in loyalty_point_entries:
+			if lp_entry.loyalty_points > points_to_redeem:
+				redeemed_points = points_to_redeem
+			else:
+				redeemed_points = lp_entry.loyalty_points
+			doc = frappe.get_doc({
+				"doctype": "Loyalty Point Entry",
+				"company": self.company,
+				"loyalty_program": self.loyalty_program,
+				"loyalty_program_tier": lp_entry.loyalty_program_tier,
+				"customer": self.customer,
+				"sales_invoice": self.name,
+				"redeem_against": lp_entry.name,
+				"loyalty_points": -(redeemed_points),
+				"purchase_amount": self.grand_total,
+				"expiry_date": lp_entry.expiry_date,
+				"posting_date": self.posting_date
+			})
+			doc.flags.ignore_permissions = 1
+			doc.save()
+			points_to_redeem -= redeemed_points
+			if points_to_redeem < 1: # since points_to_redeem is integer
+				break
 
 
 def get_list_context(context=None):

@@ -240,14 +240,23 @@ def make_payment_request(**args):
 	"""Make payment request"""
 
 	args = frappe._dict(args)
+
+	print ("=================", args)
 	ref_doc = frappe.get_doc(args.dt, args.dn)
 	grand_total = get_amount(ref_doc, args.dt)
+	if args.loyalty_points:
+		from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
+		redeemed_amount = validate_loyalty_points(ref_doc, int(args.loyalty_points))
+		print ("=====", redeemed_amount)
+		grand_total = grand_total - redeemed_amount
+
 	gateway_account = get_gateway_details(args) or frappe._dict()
 
 	existing_payment_request = frappe.db.get_value("Payment Request",
 		{"reference_doctype": args.dt, "reference_name": args.dn, "docstatus": ["!=", 2]})
 
 	if existing_payment_request:
+		fappe.db.set_value("Payment Request", existing_payment_request, "grand_total", grand_total, update_modified=False)
 		pr = frappe.get_doc("Payment Request", existing_payment_request)
 
 	else:
