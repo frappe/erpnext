@@ -330,7 +330,7 @@ class SellingController(StockController):
 		self.make_sl_entries(sl_entries)
 
 	def set_po_nos(self):
-		if self.doctype in ("Delivery Note", "Sales Invoice"):
+		if self.doctype in ("Delivery Note", "Sales Invoice") and hasattr(self, "items"):
 			ref_fieldname = "against_sales_order" if self.doctype == "Delivery Note" else "sales_order"
 			sales_orders = list(set([d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)]))
 			if sales_orders:

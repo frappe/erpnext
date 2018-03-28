@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
 
 class AccountsReceivableSummary(ReceivablePayableReport):
@@ -88,7 +89,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 				})
 			)
 			for k in party_total[d.party].keys():
-				party_total[d.party][k] += d.get(k, 0)
+				if k != "currency":
+					party_total[d.party][k] += flt(d.get(k, 0))
 				
 			party_total[d.party].currency = d.currency
 

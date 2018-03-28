@@ -137,6 +137,7 @@ frappe.ui.form.on('Patient Appointment', {
 
 			var slot_details = data.slot_details;
 			var slot_html = "";
+			var duration = frm.doc.duration | 0;
 			$.each(slot_details, function(i, slot_detail){
 				slot_html = slot_html + `<label>${slot_detail['slot_name']}</label>`;
 				slot_html = slot_html + `<br/>` + slot_detail['avail_slot'].map(slot => {
@@ -155,7 +156,7 @@ frappe.ui.form.on('Patient Appointment', {
 							}
 							start_time = booked_moment;
 							let end_time = booked_moment.add(booked.duration, 'minutes');
-							if(end_time.isSameOrAfter(to_time)){
+							if(end_time.isSameOrAfter(to_time) || end_time.add(duration).isAfter(to_time)){
 								disabled = 'disabled="disabled"';
 								return false;
 							}else{
@@ -163,9 +164,10 @@ frappe.ui.form.on('Patient Appointment', {
 							}
 						}
 					});
+
 					return `<button class="btn btn-default"
 						data-name=${start_str}
-						data-duration=${interval}
+						data-duration=${duration || interval}
 						data-service-unit="${slot_detail['service_unit'] || ''}"
 						style="margin: 0 10px 10px 0; width: 72px;" ${disabled}>
 						${start_str.substring(0, start_str.length - 3)}
@@ -288,6 +290,21 @@ frappe.ui.form.on("Patient Appointment", "patient", function(frm) {
 					age = calculate_age(data.message.dob);
 				}
 				frappe.model.set_value(frm.doctype,frm.docname, "patient_age", age);
+			}
+		});
+	}
+});
+
+frappe.ui.form.on("Patient Appointment", "appointment_type", function(frm) {
+	if(frm.doc.appointment_type) {
+		frappe.call({
+			"method": "frappe.client.get",
+			args: {
+				doctype: "Appointment Type",
+				name: frm.doc.appointment_type
+			},
+			callback: function (data) {
+				frappe.model.set_value(frm.doctype,frm.docname, "duration",data.message.default_duration);
 			}
 		});
 	}

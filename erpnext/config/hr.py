@@ -244,7 +244,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Daily Work Summary Group"
+					"name": "Daily Work Summary Settings"
+				},
+				{
+					"type": "doctype",
+					"name": "Health Insurance"
 				}
 			]
 		},

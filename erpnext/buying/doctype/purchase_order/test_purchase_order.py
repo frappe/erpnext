@@ -321,6 +321,7 @@ def create_purchase_order(**args):
 	po.is_subcontracted = args.is_subcontracted or "No"
 	po.currency = args.currency or frappe.db.get_value("Company", po.company, "default_currency")
 	po.conversion_factor = args.conversion_factor or 1
+	po.supplier_warehouse = args.supplier_warehouse or None
 
 	po.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",

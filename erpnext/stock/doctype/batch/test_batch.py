@@ -49,7 +49,7 @@ class TestBatch(unittest.TestCase):
 		return receipt
 
 	def test_stock_entry_incoming(self):
-		'''Test batch creation via Stock Entry (Production Order)'''
+		'''Test batch creation via Stock Entry (Work Order)'''
 
 		self.make_batch_item('ITEM-BATCH-1')
 

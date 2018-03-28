@@ -52,7 +52,7 @@ def get_notification_config():
 				"status": ("not in", ("Completed", "Closed")),
 				"docstatus": ("<", 2)
 			},
-			"Production Order": { "status": ("in", ("Draft", "Not Started", "In Process")) },
+			"Work Order": { "status": ("in", ("Draft", "Not Started", "In Process")) },
 			"BOM": {"docstatus": 0},
 
 			"Timesheet": {"status": "Draft"},

@@ -9,7 +9,7 @@ from erpnext.selling.doctype.sales_order.sales_order \
 	import make_material_request, make_delivery_note, make_sales_invoice, WarehouseRequired
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from frappe.tests.test_permissions import set_user_permission_doctypes
-from erpnext.selling.doctype.sales_order.sales_order import make_production_orders
+from erpnext.selling.doctype.sales_order.sales_order import make_work_orders
 import json
 
 
@@ -530,7 +530,7 @@ class TestSalesOrder(unittest.TestCase):
 		si.insert()
 		self.assertTrue(si.get('payment_schedule'))
 
-	def test_make_production_order(self):
+	def test_make_work_order(self):
 		# Make a new Sales Order
 		so = make_sales_order(**{
 			"item_list": [{
@@ -545,10 +545,10 @@ class TestSalesOrder(unittest.TestCase):
 			}]
 		})
 
-		# Raise Production Orders
+		# Raise Work Orders
 		po_items= []
 		so_item_name= {}
-		for item in so.get_production_order_items():
+		for item in so.get_work_order_items():
 			po_items.append({
 				"warehouse": item.get("warehouse"),
 				"item_code": item.get("item_code"),
@@ -557,12 +557,12 @@ class TestSalesOrder(unittest.TestCase):
 				"bom": item.get("bom")
 			})
 			so_item_name[item.get("sales_order_item")]= item.get("pending_qty")
-		make_production_orders(json.dumps({"items":po_items}), so.name, so.company)
+		make_work_orders(json.dumps({"items":po_items}), so.name, so.company)
 
-		# Check if Production Orders were raised
+		# Check if Work Orders were raised
 		for item in so_item_name:
-			po_qty = frappe.db.sql("select sum(qty) from `tabProduction Order` where sales_order=%s and sales_order_item=%s", (so.name, item))
-			self.assertEqual(po_qty[0][0], so_item_name.get(item))
+			wo_qty = frappe.db.sql("select sum(qty) from `tabWork Order` where sales_order=%s and sales_order_item=%s", (so.name, item))
+			self.assertEquals(wo_qty[0][0], so_item_name.get(item))
 
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")

@@ -28,7 +28,7 @@ def get_data():
 			},
 			{
 				'label': _('Manufacturing'),
-				'items': ['Production Order']
+				'items': ['Work Order']
 			},
 			{
 				'label': _('Reference'),

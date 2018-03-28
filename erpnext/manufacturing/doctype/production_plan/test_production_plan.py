@@ -41,18 +41,18 @@ class TestProductionPlan(unittest.TestCase):
 
 		self.assertTrue(len(material_requests), 2)
 
-		pln.make_production_order()
-		production_orders = frappe.get_all('Production Order', fields = ['name'],
+		pln.make_work_order()
+		work_orders = frappe.get_all('Work Order', fields = ['name'],
 			filters = {'production_plan': pln.name}, as_list=1)
 
-		self.assertTrue(len(production_orders), len(pln.po_items))
+		self.assertTrue(len(work_orders), len(pln.po_items))
 		
 		for name in material_requests:
 			mr = frappe.get_doc('Material Request', name[0])
 			mr.cancel()
 
-		for name in production_orders:
-			mr = frappe.delete_doc('Production Order', name[0])
+		for name in work_orders:
+			mr = frappe.delete_doc('Work Order', name[0])
 
 		pln = frappe.get_doc('Production Plan', pln.name)
 		pln.cancel()

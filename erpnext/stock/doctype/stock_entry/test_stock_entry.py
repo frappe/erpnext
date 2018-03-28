@@ -538,14 +538,14 @@ class TestStockEntry(unittest.TestCase):
 		self.assertRaises(StockFreezeError, se.submit)
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", 0)
 
-	def test_production_order(self):
-		from erpnext.manufacturing.doctype.production_order.production_order \
+	def test_work_order(self):
+		from erpnext.manufacturing.doctype.work_order.work_order \
 			import make_stock_entry as _make_stock_entry
 		bom_no, bom_operation_cost = frappe.db.get_value("BOM", {"item": "_Test FG Item 2",
 			"is_default": 1, "docstatus": 1}, ["name", "operating_cost"])
 
-		production_order = frappe.new_doc("Production Order")
-		production_order.update({
+		work_order = frappe.new_doc("Work Order")
+		work_order.update({
 			"company": "_Test Company",
 			"fg_warehouse": "_Test Warehouse 1 - _TC",
 			"production_item": "_Test FG Item 2",
@@ -555,13 +555,13 @@ class TestStockEntry(unittest.TestCase):
 			"wip_warehouse": "_Test Warehouse - _TC",
 			"additional_operating_cost": 1000
 		})
-		production_order.insert()
-		production_order.submit()
+		work_order.insert()
+		work_order.submit()
 
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
 		make_stock_entry(item_code="_Test Item 2", target="_Test Warehouse - _TC", qty=50, basic_rate=20)
 
-		stock_entry = _make_stock_entry(production_order.name, "Manufacture", 1)
+		stock_entry = _make_stock_entry(work_order.name, "Manufacture", 1)
 
 		rm_cost = 0
 		for d in stock_entry.get("items"):
@@ -569,15 +569,15 @@ class TestStockEntry(unittest.TestCase):
 				rm_cost += flt(d.amount)
 		fg_cost = filter(lambda x: x.item_code=="_Test FG Item 2", stock_entry.get("items"))[0].amount
 		self.assertEqual(fg_cost,
-			flt(rm_cost + bom_operation_cost + production_order.additional_operating_cost, 2))
+			flt(rm_cost + bom_operation_cost + work_order.additional_operating_cost, 2))
 
 
-	def test_variant_production_order(self):
+	def test_variant_work_order(self):
 		bom_no = frappe.db.get_value("BOM", {"item": "_Test Variant Item",
 			"is_default": 1, "docstatus": 1})
 
-		production_order = frappe.new_doc("Production Order")
-		production_order.update({
+		work_order = frappe.new_doc("Work Order")
+		work_order.update({
 			"company": "_Test Company",
 			"fg_warehouse": "_Test Warehouse 1 - _TC",
 			"production_item": "_Test Variant Item-S",
@@ -586,12 +586,12 @@ class TestStockEntry(unittest.TestCase):
 			"stock_uom": "_Test UOM",
 			"wip_warehouse": "_Test Warehouse - _TC"
 		})
-		production_order.insert()
-		production_order.submit()
+		work_order.insert()
+		work_order.submit()
 
-		from erpnext.manufacturing.doctype.production_order.production_order import make_stock_entry
+		from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
 
-		stock_entry = frappe.get_doc(make_stock_entry(production_order.name, "Manufacture", 1))
+		stock_entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
 		stock_entry.insert()
 		self.assertTrue("_Test Variant Item-S" in [d.item_code for d in stock_entry.items])
 
