@@ -129,6 +129,8 @@ def set_stock_items(doc, stock_detail_parent, parenttype):
 		# in stock uom
 		se_child.transfer_qty = flt(d["transfer_qty"])
 		se_child.conversion_factor = flt(d["conversion_factor"])
+		if d["batch_no"]:
+			se_child.batch_no = d["batch_no"]
 
 	return doc
 
