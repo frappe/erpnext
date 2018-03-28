@@ -27,6 +27,7 @@ frappe.ui.form.on('Clinical Procedure Template', {
 	},
 	refresh: function(frm) {
 		frm.fields_dict["items"].grid.set_column_disp("barcode", false);
+		frm.fields_dict["items"].grid.set_column_disp("batch_no", false);
 		cur_frm.set_df_property("item_code", "read_only", frm.doc.__islocal ? 0 : 1);
 		if(!frm.doc.__islocal) {
 			cur_frm.add_custom_button(__('Change Item Code'), function() {
