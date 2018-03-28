@@ -23,7 +23,7 @@ frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 
 frappe.pages['point-of-sale'].refresh = function(wrapper) {
 	if (wrapper.pos) {
-		cur_frm = wrapper.pos.frm;
+		wrapper.pos.make_new_invoice();
 	}
 
 	if (frappe.flags.is_offline) {
@@ -96,8 +96,8 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			wrapper: this.wrapper.find('.cart-container'),
 			events: {
 				on_customer_change: (customer) => this.frm.set_value('customer', customer),
-				on_field_change: (item_code, field, value) => {
-					this.update_item_in_cart(item_code, field, value);
+				on_field_change: (item_code, field, value, batch_no) => {
+					this.update_item_in_cart(item_code, field, value, batch_no);
 				},
 				on_numpad: (value) => {
 					if (value == 'Pay') {
@@ -158,10 +158,12 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		});
 	}
 
-	update_item_in_cart(item_code, field='qty', value=1) {
+	update_item_in_cart(item_code, field='qty', value=1, batch_no) {
 		frappe.dom.freeze();
-		if(this.cart.exists(item_code)) {
-			const item = this.frm.doc.items.find(i => i.item_code === item_code);
+		if(this.cart.exists(item_code, batch_no)) {
+			const search_field = batch_no ? 'batch_no' : 'item_code';
+			const search_value = batch_no || item_code;
+			const item = this.frm.doc.items.find(i => i[search_field] === search_value);
 			frappe.flags.hide_serial_batch_dialog = false;
 
 			if (typeof value === 'string' && !in_list(['serial_no', 'batch_no'], field)) {
@@ -219,29 +221,31 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		]);
 	}
 
-	select_batch_and_serial_no(item) {
+	select_batch_and_serial_no(row) {
 		frappe.dom.unfreeze();
 
-		erpnext.show_serial_batch_selector(this.frm, item, () => {
-			this.update_item_in_frm(item, 'qty', item.qty)
-				.then(() => {
-					// update cart
-					frappe.run_serially([
-						() => {
-							if (item.qty === 0) {
-								frappe.model.clear_doc(item.doctype, item.name);
-							}
-						},
-						() => this.update_cart_data(item)
-					]);
-				});
+		erpnext.show_serial_batch_selector(this.frm, row, () => {
+			this.frm.doc.items.forEach(item => {
+				this.update_item_in_frm(item, 'qty', item.qty)
+					.then(() => {
+						// update cart
+						frappe.run_serially([
+							() => {
+								if (item.qty === 0) {
+									frappe.model.clear_doc(item.doctype, item.name);
+								}
+							},
+							() => this.update_cart_data(item)
+						]);
+					});
+			})
 		}, () => {
-			this.on_close(item);
+			this.on_close(row);
 		}, true);
 	}
 
 	on_close(item) {
-		if (!this.cart.exists(item.item_code) && item.qty) {
+		if (!this.cart.exists(item.item_code, item.batch_no) && item.qty) {
 			frappe.model.clear_doc(item.doctype, item.name);
 		}
 	}
@@ -492,6 +496,11 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		//
 		// }).addClass('visible-xs');
 
+		this.page.add_menu_item(__("Form View"), function () {
+			frappe.model.sync(me.frm.doc);
+			frappe.set_route("Form", me.frm.doc.doctype, me.frm.doc.name);
+		});
+
 		this.page.add_menu_item(__("POS Profile"), function () {
 			frappe.set_route('List', 'POS Profile');
 		});
@@ -602,11 +611,15 @@ class POSCart {
 		this.customer_field.set_value("");
 		this.frm.msgbox = "";
 
+		let total_item_qty = 0.0;
+		this.frm.set_value("pos_total_qty",total_item_qty);
+
 		this.$discount_amount.find('input:text').val('');
 		this.wrapper.find('.grand-total-value').text(
 			format_currency(this.frm.doc.grand_total, this.frm.currency));
 		this.wrapper.find('.rounded-total-value').text(
 			format_currency(this.frm.doc.rounded_total, this.frm.currency));
+		this.$qty_total.find(".quantity-total").text(total_item_qty);
 
 		const customer = this.frm.doc.customer;
 		this.customer_field.set_value(customer);
@@ -721,7 +734,7 @@ class POSCart {
 					total_item_qty += d.qty;
 				}
 		});
-		this.$qty_total.find('.quantity-total').text(total_item_qty)
+		this.$qty_total.find('.quantity-total').text(total_item_qty);
 		this.frm.set_value("pos_total_qty",total_item_qty);
 	}
 
@@ -804,10 +817,11 @@ class POSCart {
 						this.numpad.reset_value();
 					} else {
 						const item_code = this.selected_item.attr('data-item-code');
+						const batch_no = this.selected_item.attr('data-batch-no');
 						const field = this.selected_item.active_field;
 						const value = this.numpad.get_value();
 
-						this.events.on_field_change(item_code, field, value);
+						this.events.on_field_change(item_code, field, value, batch_no);
 					}
 				}
 
@@ -835,7 +849,7 @@ class POSCart {
 	add_item(item) {
 		this.$empty_state.hide();
 
-		if (this.exists(item.item_code)) {
+		if (this.exists(item.item_code, item.batch_no)) {
 			// update quantity
 			this.update_item(item);
 		} else if (flt(item.qty) > 0.0) {
@@ -848,7 +862,10 @@ class POSCart {
 	}
 
 	update_item(item) {
-		const $item = this.$cart_items.find(`[data-item-code="${item.item_code}"]`);
+		const item_selector = item.batch_no ?
+			`[data-batch-no="${item.batch_no}"]` : `[data-item-code="${item.item_code}"]`;
+
+		const $item = this.$cart_items.find(item_selector);
 
 		if(item.qty > 0) {
 			const is_stock_item = this.get_item_details(item.item_code).is_stock_item;
@@ -870,7 +887,8 @@ class POSCart {
 		const rate = format_currency(item.rate, this.frm.doc.currency);
 		const indicator_class = (!is_stock_item || item.actual_qty >= item.qty) ? 'green' : 'red';
 		return `
-			<div class="list-item indicator ${indicator_class}" data-item-code="${item.item_code}" title="Item: ${item.item_name}  Available Qty: ${item.actual_qty}">
+			<div class="list-item indicator ${indicator_class}" data-item-code="${item.item_code}"
+				data-batch-no="${item.batch_no}" title="Item: ${item.item_name}  Available Qty: ${item.actual_qty}">
 				<div class="item-name list-item__content list-item__content--flex-1.5 ellipsis">
 					${item.item_name}
 				</div>
@@ -911,8 +929,11 @@ class POSCart {
 		return this.item_data[item_code];
 	}
 
-	exists(item_code) {
-		let $item = this.$cart_items.find(`[data-item-code="${item_code}"]`);
+	exists(item_code, batch_no) {
+		const is_exists = batch_no ?
+			`[data-batch-no="${batch_no}"]` : `[data-item-code="${item_code}"]`;
+
+		let $item = this.$cart_items.find(is_exists);
 		return $item.length > 0;
 	}
 
