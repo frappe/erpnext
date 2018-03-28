@@ -18,5 +18,15 @@ def get_data():
 					"description": _("GoCardless SEPA Mandate"),
 				}
 			]
-		}
+		},
+		{
+			"label": _("Telephony Services"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Exotel Settings",
+					"description": _("Exotel cloud telephony service"),
+				}
+			]
+		},
 	]
