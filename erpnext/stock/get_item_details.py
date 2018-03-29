@@ -319,7 +319,7 @@ def get_price_list_rate(args, item_doc, out):
 		out.price_list_rate = flt(price_list_rate) * flt(args.plc_conversion_rate) \
 			/ flt(args.conversion_rate)
 		if not args.price_list_uom_dependant:
-			out.price_list_rate = flt(out.price_list_rate * (args.conversion_factor or 1.0))
+			out.price_list_rate = flt(out.price_list_rate * (flt(args.conversion_factor) or 1.0))
 
 		if not out.price_list_rate and args.transaction_type=="buying":
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
