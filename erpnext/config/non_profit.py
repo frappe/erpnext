@@ -65,6 +65,26 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Loan Management"),
+			"icon": "icon-list",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Loan Type",
+					"description": _("Define various loan types")
+				},
+				{
+					"type": "doctype",
+					"name": "Loan Application",
+					"description": _("Loan Application")
+				},
+				{
+					"type": "doctype",
+					"name": "Loan"
+				},
+			]
+		},
+		{
 			"label": _("Grant Application"),
 			"items": [
 				{
