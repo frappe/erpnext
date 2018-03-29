@@ -22,7 +22,7 @@ frappe.ui.form.on('Share Transfer', {
 					"root_type":"Equity",
 					"company": frm.doc.company
 				}
-			}
+			};
 		});
 		frm.set_query("asset_account", function() {
 			return {
@@ -30,7 +30,7 @@ frappe.ui.form.on('Share Transfer', {
 					"root_type":"Asset",
 					"company": frm.doc.company
 				}
-			}
+			};
 		});
 	},
 	no_of_shares: (frm) => {
