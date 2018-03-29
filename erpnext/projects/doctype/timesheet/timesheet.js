@@ -53,16 +53,6 @@ frappe.ui.form.on("Timesheet", {
 
 		if (frm.doc.docstatus < 1) {
 
-			$.each(frm.doc.time_logs || [], function(i, row) {
-				if(row.from_time  && !row.completed) {
-					if (row.to_time && frappe.datetime.now_datetime() > row.to_time) {
-						frappe.utils.play_sound("alert");
-						frappe.msgprint(__(`Timer exceeded the expected hours for activity ${row.activity_type} in row ${row.idx}.`));
-					}
-				}
-				frm.refresh_fields();
-			});
-
 			let button = 'Start Timer';
 			$.each(frm.doc.time_logs || [], function(i, row) {
 				if ((row.from_time <= frappe.datetime.now_datetime()) && !row.completed) {

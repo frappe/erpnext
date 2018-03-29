@@ -132,6 +132,11 @@ erpnext.timesheet.control_timer = function(frm, dialog, row, timestamp=0) {
 		}
 		if(hours > 99)
 			reset();
+
+		if(cur_dialog && cur_dialog.get_value('expected_hours') == currentIncrement / 3600) {
+			frappe.utils.play_sound("alert");
+			frappe.msgprint(__("Timer exceeded the given hours"));
+		}
 		$(".hours").text(hours < 10 ? ("0" + hours.toString()) : hours.toString());
 		$(".minutes").text(minutes < 10 ? ("0" + minutes.toString()) : minutes.toString());
 		$(".seconds").text(seconds < 10 ? ("0" + seconds.toString()) : seconds.toString());
