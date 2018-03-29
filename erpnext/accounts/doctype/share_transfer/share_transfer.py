@@ -12,7 +12,7 @@ from frappe.exceptions import ValidationError
 class ShareDontExists(ValidationError): pass
 
 class ShareTransfer(Document):
-	def before_save(self):
+	def before_submit(self):
 		if self.transfer_type == 'Issue':
 			company_doc = self.get_shareholder_doc(self.company)
 			company_doc.append('share_balance', {

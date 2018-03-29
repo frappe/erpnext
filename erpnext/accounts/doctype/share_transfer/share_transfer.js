@@ -16,6 +16,22 @@ frappe.ui.form.on('Share Transfer', {
 				};
 			};
 		});
+		frm.set_query("equity_account", function() {
+			return {
+				filters: {
+					"root_type":"Equity",
+					"company": frm.doc.company
+				}
+			}
+		});
+		frm.set_query("asset_account", function() {
+			return {
+				filters: {
+					"root_type":"Asset",
+					"company": frm.doc.company
+				}
+			}
+		});
 	},
 	no_of_shares: (frm) => {
 		if (frm.doc.rate != undefined || frm.doc.rate != null){
