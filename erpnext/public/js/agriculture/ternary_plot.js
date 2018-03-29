@@ -172,17 +172,17 @@ agriculture.TernaryPlot = class TernaryPlot {
 	make_plot_marking() {
 		let { triangle_side: t, spacing: s, scaling_factor: p } = this.config;
 
-		let clay = this.paper.text(t * Snap.cos(60) / 2, s + t * Snap.cos(30) / 2, "Clay").attr({
+		let clay = this.paper.text(t * Snap.cos(60) / 2, s + t * Snap.cos(30) / 2, __("Clay")).attr({
 			fill: frappe.ui.color.get('black')
 		});
 		clay.transform("r300");
 
-		let silt = this.paper.text(t, s + t * Snap.cos(30) / 2, "Silt").attr({
+		let silt = this.paper.text(t, s + t * Snap.cos(30) / 2, __("Silt")).attr({
 			fill: frappe.ui.color.get('black')
 		});
 		silt.transform("r60");
 
-		let sand = this.paper.text(35 + t * Snap.cos(60), 90 + t * Snap.cos(30), "Sand").attr({
+		let sand = this.paper.text(35 + t * Snap.cos(60), 90 + t * Snap.cos(30), __("Sand")).attr({
 			fill: frappe.ui.color.get('black')
 		});
 		sand.transform("r0");
@@ -203,7 +203,7 @@ agriculture.TernaryPlot = class TernaryPlot {
 				fill: this.get_color(soil_type),
 				stroke: frappe.ui.color.get('black')
 			});
-			let text = this.paper.text(5+offset, 16+index*20, soil_type).attr({
+			let text = this.paper.text(5+offset, 16+index*20, __(soil_type)).attr({
 				fill: frappe.ui.color.get('black'),
 				'font-size': 12
 			});
