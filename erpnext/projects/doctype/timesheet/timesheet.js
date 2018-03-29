@@ -62,8 +62,16 @@ frappe.ui.form.on("Timesheet", {
 
 			frm.add_custom_button(__(button), function() {
 				var flag = true;
-				// Fetch the row for timer where activity is not completed and from_time is not <= now_time
 				$.each(frm.doc.time_logs || [], function(i, row) {
+					// Fetch the row for which from_time is not present
+					if (flag && row.activity_type && !row.from_time){
+						erpnext.timesheet.timer(frm, row);
+						row.from_time = frappe.datetime.now_datetime();
+						frm.refresh_fields("time_logs");
+						frm.save();
+						flag = false;
+					}
+					// Fetch the row for timer where activity is not completed and from_time is before now_time
 					if (flag && row.from_time <= frappe.datetime.now_datetime() && !row.completed) {
 						let timestamp = moment(frappe.datetime.now_datetime()).diff(moment(row.from_time),"seconds");
 						erpnext.timesheet.timer(frm, row, timestamp);
