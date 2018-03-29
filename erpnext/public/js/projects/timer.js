@@ -130,7 +130,7 @@ erpnext.timesheet.control_timer = function(frm, dialog, row, timestamp=0) {
 		if (!$('.modal-dialog').is(':visible')) {
 			reset();
 		}
-		if(hours > 99)
+		if(hours > 99999)
 			reset();
 		if(cur_dialog && cur_dialog.get_value('expected_hours') > 0) {
 			if(flag && (currentIncrement >= (cur_dialog.get_value('expected_hours') * 3600))) {
