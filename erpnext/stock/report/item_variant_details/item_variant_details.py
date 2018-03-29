@@ -14,10 +14,15 @@ def get_data(item):
 	if not item:
 		return []
 	item_dicts = []
+	variants = None
 
 	variant_results = frappe.db.sql("""select name from `tabItem`
 		where variant_of = %s""", item, as_dict=1)
-	variants = ",".join(['"' + frappe.db.escape(variant['name']) + '"' for variant in variant_results])
+	if not variant_results:
+		frappe.msgprint(_("There isn't any item variant for the selected item"))
+		return []
+	else:
+		variants = ",".join(['"' + frappe.db.escape(variant['name']) + '"' for variant in variant_results])
 
 	order_count_map = get_open_sales_orders_map(variants)
 	stock_details_map = get_stock_details_map(variants)

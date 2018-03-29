@@ -602,6 +602,9 @@ def validate_bom_no(item, bom_no):
 		for d in bom.items:
 			if (d.item_code.lower() == item.lower()):
 				rm_item_exists = True
+		for d in bom.scrap_items:
+			if (d.item_code.lower() == item.lower()):
+				rm_item_exists = True
 		if bom.item.lower() == item.lower() or \
 			bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower():
  				rm_item_exists = True

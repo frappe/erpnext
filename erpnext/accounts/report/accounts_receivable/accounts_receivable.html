@@ -4,12 +4,21 @@
 	  .print-format {
 	    padding: 8mm;
 		margin:4mm;
-		font-size:10px;
+		font-size: 10.0pt !important;
 		font-family: Tahoma, sans-serif;
 	  }
 	}
 	</style>
 {% } %}
+<style>
+	.print-format {
+		padding: 8mm;
+		margin:4mm;
+		font-size: 10.0pt !important;
+		font-family: Tahoma, sans-serif;
+	}
+</style>
+
 
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
 <h4 class="text-center">{%= filters.customer || filters.supplier %} </h4>
@@ -126,9 +135,14 @@
 			{% if(report.report_name === "Accounts Receivable" || report.report_name === "Accounts Payable") { %}
 				{% if(data[i][__("Customer")] || data[i][__("Supplier")]) { %}
 					<td>{%= dateutil.str_to_user(data[i]["posting_date"]) %}</td>
-					<td>{%= data[i]["voucher_type"] %}
-						<br>{%= data[i]["voucher_no"] %}</td>
-					{% if(!filters.show_pdc_in_print) { %}	
+					<td>
+						{% if(!filters.show_pdc_in_print) { %}
+							{%= data[i]["voucher_type"] %}
+							<br>
+						{% } %}
+						{%= data[i]["voucher_no"] %}
+					</td>
+					{% if(!filters.show_pdc_in_print) { %}
 					<td>
 						{% if(!(filters.customer || filters.supplier)) { %}
 							{%= data[i][__("Customer")] || data[i][__("Supplier")] %}
