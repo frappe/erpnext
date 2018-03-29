@@ -16,5 +16,12 @@ def execute():
 		if frappe.db.has_column(doctype, 'employee_loan_account'):
 			rename_field(doctype, "employee_loan_account", "loan_account")
 
-	for doctype in ['Employee Loan Application', 'Employee Loan']:
+	columns = {'employee': 'applicant', 'employee_name': 'applicant_name'}
+	for doctype in ['Loan Application', 'Loan']:
+		frappe.db.sql(""" update `tab{doctype}` set applicant_type = 'Employee' """
+			.format(doctype=doctype))
+		for column, new_column in columns.items():
+			if frappe.db.has_column(doctype, column):
+				rename_field(doctype, column, new_column)
+
 		frappe.delete_doc('DocType', doctype)
