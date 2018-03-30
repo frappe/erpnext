@@ -658,7 +658,7 @@
  "max_attachments": 0, 
  "modified": "2017-11-15 20:00:43.389008", 
  "modified_by": "Administrator", 
- "module": "AccountAccountss", 
+ "module": "Accounts", 
  "name": "Bank Statement Transaction Entry", 
  "name_case": "", 
  "owner": "Administrator", 
