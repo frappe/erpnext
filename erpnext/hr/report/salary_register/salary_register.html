@@ -1,0 +1,37 @@
+<div style="margin-bottom: 7px;" class="text-center">
+	{%= frappe.boot.letter_heads[filters.letter_head || frappe.defaults.get_default("letter_head")] %}
+</div>
+<h2 class="text-center">{%= __(report.report_name) %}</h2>
+<h5 class="text-center">{{ __("From") }} {%= filters.date_range[0] %} {{ __("to") }} {%= filters.date_range[1] %}</h5>
+<hr>
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			{% for(var i=1, l=report.columns.length; i<l; i++) { %}
+				<th class="text-right">{%= report.columns[i].label %}</th>
+			{% } %}
+		</tr>
+	</thead>
+	<tbody>
+		{% for(var j=0, k=data.length; j<k; j++) { %}
+			{%
+				var row = data[j];
+			%}
+			<tr>
+				{% for(var i=1, l=report.columns.length; i<l; i++) { %}
+					<td class="text-right">
+						{% var fieldname = report.columns[i].field; %}
+						{% if (report.columns[i].fieldtype=='Currency' && !isNaN(row[fieldname])) { %}
+							{%= format_currency(row[fieldname]) %}
+						{% } else { %}
+							{% if (!is_null(row[fieldname])) { %}
+								{%= row[fieldname] %}
+							{% } %}
+						{% } %}
+					</td>
+				{% } %}
+			</tr>
+		{% } %}
+	</tbody>
+</table>
+<p class="text-right text-muted">{{ __("Printed On") }} {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>

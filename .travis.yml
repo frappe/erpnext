@@ -1,0 +1,52 @@
+language: python
+dist: trusty
+
+python:
+  - "2.7"
+
+services:
+  - mysql
+
+install:
+  # fix mongodb travis error
+  - sudo rm /etc/apt/sources.list.d/mongodb*.list
+  - pip install flake8==3.3.0
+  - flake8 . --count --select=E901,E999,F821,F822,F823 --show-source --statistics
+  - sudo rm /etc/apt/sources.list.d/docker.list
+  - sudo apt-get purge -y mysql-common mysql-server mysql-client
+  - nvm install v7.10.0
+  - wget https://raw.githubusercontent.com/frappe/bench/master/playbooks/install.py
+  - sudo python install.py --develop --user travis --without-bench-setup
+  - sudo pip install -e ~/bench
+
+  - rm $TRAVIS_BUILD_DIR/.git/shallow
+  - bash $TRAVIS_BUILD_DIR/travis/bench_init.sh
+  - cp -r $TRAVIS_BUILD_DIR/test_sites/test_site ~/frappe-bench/sites/
+
+before_script:
+  - mysql -u root -ptravis -e 'create database test_frappe'
+  - echo "USE mysql;\nCREATE USER 'test_frappe'@'localhost' IDENTIFIED BY 'test_frappe';\nFLUSH PRIVILEGES;\n" | mysql -u root -ptravis
+  - echo "USE mysql;\nGRANT ALL PRIVILEGES ON \`test_frappe\`.* TO 'test_frappe'@'localhost';\n" | mysql -u root -ptravis
+
+  - cd ~/frappe-bench
+  - bench get-app erpnext $TRAVIS_BUILD_DIR
+  - bench use test_site
+  - bench reinstall --yes
+  - bench build
+  - bench scheduler disable
+  - bench start &
+  - sleep 10
+
+jobs:
+  include:
+    - stage: test
+      script:
+        - set -e
+        - bench run-tests
+      env: Server Side Test
+    - # stage
+      script:
+        - wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz
+        - bench --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz --mariadb-root-password travis
+        - bench migrate
+      env: Patch Testing

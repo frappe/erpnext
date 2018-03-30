@@ -1,0 +1,33 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2013-08-09 12:20:58", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 3, 
+ "is_standard": "Yes", 
+ "modified": "2017-02-24 20:05:31.066151", 
+ "modified_by": "Administrator", 
+ "module": "Stock", 
+ "name": "Material Requests for which Supplier Quotations are not created", 
+ "owner": "Administrator", 
+ "query": "select \n    mr.name as \"Material Request:Link/Material Request:120\",\n    mr.transaction_date as \"Date:Date:100\",\n\tmr_item.item_code as \"Item Code:Link/Item:120\",\n\tmr_item.qty as \"Qty:Float:100\",\n\tmr_item.item_name as \"Item Name::150\",\n\tmr_item.description as \"Description::200\",\n\tmr.company as \"Company:Link/Company:\"\nfrom\n\t`tabMaterial Request` mr, `tabMaterial Request Item` mr_item\nwhere\n\tmr_item.parent = mr.name\n\tand mr.material_request_type = \"Purchase\"\n\tand mr.docstatus = 1\n\tand mr.status != \"Stopped\"\n\tand not exists(select name from `tabSupplier Quotation Item` where material_request=mr.name)\norder by mr.transaction_date asc", 
+ "ref_doctype": "Material Request", 
+ "report_name": "Material Requests for which Supplier Quotations are not created", 
+ "report_type": "Query Report", 
+ "roles": [
+  {
+   "role": "Purchase Manager"
+  }, 
+  {
+   "role": "Stock Manager"
+  }, 
+  {
+   "role": "Stock User"
+  }, 
+  {
+   "role": "Purchase User"
+  }
+ ]
+}

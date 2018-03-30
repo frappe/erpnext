@@ -1,0 +1,5 @@
+restaurant
+restaurant-menu
+reservations
+order-entry
+hotel-room

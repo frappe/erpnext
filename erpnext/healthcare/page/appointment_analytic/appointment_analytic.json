@@ -1,0 +1,22 @@
+{
+ "content": null,
+ "creation": "2016-08-18 12:29:52.497819",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2016-08-18 12:29:52.497819",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "appointment-analytic",
+ "owner": "Administrator",
+ "page_name": "Appointment Analytics",
+ "roles": [
+  {
+   "role": "Physician"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "title": "Appointment Analytics"
+}

@@ -1,0 +1,15 @@
+<div class="row activity-row" data-creation="{%= creation.split(" ")[0] + " 00:00:00" %}">
+	<div class="col-xs-3 text-right activity-date"><span class="{%= date_class %}">
+		{%= date_sep || "" %}</span></div>
+	<div class="col-xs-9 activity-message"
+		title="{%= by %} / {%= dateutil.str_to_user(creation) %}">
+		<div class="row">
+			<div class="col-xs-2 col-sm-1">
+				{{ avatar }}
+			</div>
+			<div class="col-xs-10 col-sm-11 small content">
+				{{ content }}
+			</div>
+		</div>
+	</div>
+</div>

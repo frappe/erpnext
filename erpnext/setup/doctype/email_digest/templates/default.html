@@ -1,0 +1,184 @@
+{% macro show_card(card) %}
+<div style="width: 50%; float:left; min-height: 80px; padding-top: 20px;">
+    <h6 style="color: {{ text_muted }}; font-size: 12px; margin-bottom: 0px; margin-top: 0px;">{{ _(card.label) }}
+    {% if card.count %}
+    <span class="badge">({{ card.count }})</span>
+    {% endif %}</h6>
+    <h4 style="margin-top: 7px; font-size: 16px; margin-botom: 5px;">{{ card.value }}</h4>
+    {% if card.diff %}
+    <p style="color: {{ text_muted }}; font-size: 12px; margin-top: 0px;">{{ card.diff }}%</p>
+    {% endif %}
+    {% if card.billed %}
+    <p style="color: {{ text_muted }}; font-size: 12px; margin-top: 0px;">{{ card.billed }}%</p>
+    {% endif %}
+    {% if card.delivered %}
+    <p style="color: {{ text_muted }}; font-size: 12px; margin-top: 0px;">{{ card.delivered }}%</p>
+    {% endif %}
+
+</div>
+{% endmacro %}
+
+<div style="max-width: 500px; margin: auto; padding: 20px 0 40px 0">
+
+<h1 style="{{ h1 }}">{{ title }}</h1>
+<h2 style="{{ h2 }}">{{ company }}</h2>
+<h4 style="font-weight: normal; color: {{ text_muted }}; margin-top: 7px; font-size: 16px; margin-top: 7px;">
+    <p>{% if frequency == "Daily" %}
+        {{ frappe.format_date(future_from_date) }}
+    {% else %}
+        {{ frappe.format_date(future_from_date) }} - {{ frappe.format_date(future_to_date) }}
+    {% endif %}</p>
+</h4>
+
+{% if cards %}
+<!-- cards -->
+<div>
+{% for card in cards %}
+{{ show_card(card) }}
+{% endfor %}
+</div>
+
+<div style="clear: both"></div>
+{% endif %}
+
+<!-- issue list -->
+{% if issue_list %}
+<h4 style="{{ section_head }}">{{ _("Open Issues ") }}
+	<span class="badge">({{ issue_count }})</span></h4>
+<div>
+{% for t in issue_list %}
+    <div style="{{ line_item }}">
+        <table style="width: 100%;">
+            <tr>
+                <td>
+                    <a style="{{ link_css }}" href="{{ t.link }}">{{ _(t.subject) }}</a>
+                </td>
+                <td style="width: 25%; text-align: right">
+                    <span style="{{ label_css }}">
+                        {{ _(t.status) }}
+                    </span>
+                </td>
+            </tr>
+        </table>
+    </div>
+{% endfor %}
+</div>
+{% endif %}
+
+<!-- project list -->
+{% if project_list %}
+<h4 style="{{ section_head }}">{{ _("Open Projects ") }}
+	<span class="badge">({{ project_count }})</span></h4>
+<div>
+{% for t in project_list %}
+    <div style="{{ line_item }}">
+        <table style="width: 100%;">
+            <tr>
+                <td>
+                    <a style="{{ link_css }}" href="{{ t.link }}">{{ _(t.project_name) }}</a>
+                </td>
+                <td style="width: 25%; text-align: right">
+                    <span style="{{ label_css }}">
+                        {{ _(t.status) }}
+                    </span>
+                </td>
+            </tr>
+        </table>
+    </div>
+{% endfor %}
+</div>
+{% endif %}
+
+{% if events or todo_list or notifications %}
+<h1 style="{{ h1 }}">{{ _("Pending Activities") }}</h1>
+
+<!-- events -->
+{% if events %}
+<h4 style="{{ section_head }}">{{ _("Upcoming Calendar Events ") }}
+	<span class="badge">({{ event_count }})</span></h4>
+<div>
+{% for e in events %}
+    {% if loop.index==1 or events[loop.index-1].date != e.date %}
+    <p style="margin-top: 25px;"><b>{{ e.date }}</b></p>
+    {% endif %}
+    <div style="{{ line_item }}">
+        <table style="width: 100%;">
+            <tr>
+                <td>
+                    <a style="{{ link_css }}" href="{{ e.link }}">{{ e.subject }}</a>
+                </td>
+                <td style="width: 40%; text-align: right">
+                    <span style="{{ label_css }}">
+                    {% if e.all_day %}
+                        {{ _("All Day") }}
+                    {% elif (not e.ends_on_label or e.starts_on_label == e.ends_on_label)%}
+                        {{ e.starts_on_label }}
+                    {% else %}
+                        {{ e.starts_on_label }} - {{ e.ends_on_label }}
+                    {% endif %}
+                    </span>
+                </td>
+            </tr>
+        </table>
+    </div>
+{% endfor %}
+</div>
+{% endif %}
+
+<!-- todo list -->
+{% if todo_list %}
+<h4 style="{{ section_head }}">{{ _("Open To Do ") }}
+	<span class="badge">({{ todo_count }})</span></h4>
+<div>
+{% for t in todo_list %}
+    <div style="{{ line_item }}">
+        <table style="width: 100%;">
+            <tr>
+                <td>
+                    <a style="{{ link_css }}" href="{{ t.link }}">{{ _(t.description) }}</a>
+                </td>
+                <td style="width: 25%; text-align: right">
+                    <span style="{{ label_css }}">
+                        {{ _(t.status) }}
+                    </span>
+                </td>
+            </tr>
+        </table>
+    </div>
+{% endfor %}
+</div>
+{% endif %}
+
+<!-- notifications -->
+{% if notifications %}
+<h4 style="{{ section_head }}">{{ _("Open Notifications") }}</h4>
+<div>
+{% for n in notifications %}
+    <div style="{{ line_item }}">
+        <table style="width: 100%;">
+            <tr>
+                <td>
+                    <a style="{{ link_css }}" href="{{ n.link }}">{{ _(n.key) }}</a>
+                </td>
+                <td style="width: 25%; text-align: right">
+                    <span style="{{ label_css }}">
+                        {{ n.value }}
+                    </span>
+                </td>
+            </tr>
+        </table>
+    </div>
+{% endfor %}
+</div>
+{% endif %}
+
+{% endif %}
+
+{% if add_quote %}
+<div style="text-align: center; margin: 50px; line-height: 1.5">
+    {{ quote.text }}<br><i>- {{ quote.author }}</i>
+    <br>
+</div>
+{% endif %}
+
+</div>

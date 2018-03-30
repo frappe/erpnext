@@ -1,0 +1,4 @@
+{% if (doc.stock_uom and not doc.is_print_hide("stock_uom")) or (doc.uom and not doc.is_print_hide("uom")) -%}
+<small class="pull-left">{{ _(doc.uom or doc.stock_uom) }}</small>
+{%- endif %}
+{{ doc.get_formatted("qty", doc) }}

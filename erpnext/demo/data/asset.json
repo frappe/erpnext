@@ -1,0 +1,44 @@
+[
+	{
+		"asset_name": "Macbook Pro - 1",
+		"item_code": "Computer",
+		"gross_purchase_amount": 100000,
+		"asset_owner": "Company"
+	},
+	{
+		"asset_name": "Macbook Air - 1",
+		"item_code": "Computer",
+		"gross_purchase_amount": 60000,
+		"asset_owner": "Company"
+	},
+	{
+		"asset_name": "Conferrence Table",
+		"item_code": "Table",
+		"gross_purchase_amount": 30000,
+		"asset_owner": "Company"
+	},
+	{
+		"asset_name": "Lunch Table",
+		"item_code": "Table",
+		"gross_purchase_amount": 20000,
+		"asset_owner": "Company"
+	},
+	{
+		"asset_name": "ERPNext",
+		"item_code": "ERP",
+		"gross_purchase_amount": 100000,
+		"asset_owner": "Company"
+	},
+	{
+		"asset_name": "Chair 1",
+		"item_code": "Chair",
+		"gross_purchase_amount": 10000,
+		"asset_owner": "Company"
+	},
+	{
+		"asset_name": "Chair 2",
+		"item_code": "Chair",
+		"gross_purchase_amount": 10000,
+		"asset_owner": "Company"
+	}
+]

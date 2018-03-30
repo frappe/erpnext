@@ -1,0 +1,1 @@
+Order / Contract terms that can be attached to any sale or purchase transaction.

@@ -1,0 +1,84 @@
+{
+ "allow_comments": 1, 
+ "allow_delete": 1, 
+ "allow_edit": 1, 
+ "allow_multiple": 1, 
+ "breadcrumbs": "[{\"title\":\"Tasks\", \"name\":\"tasks\"}]", 
+ "creation": "2016-06-24 15:50:33.091287", 
+ "doc_type": "Task", 
+ "docstatus": 0, 
+ "doctype": "Web Form", 
+ "idx": 0, 
+ "is_standard": 1, 
+ "login_required": 1, 
+ "modified": "2016-08-06 11:59:21.494549", 
+ "modified_by": "Administrator", 
+ "module": "Projects", 
+ "name": "tasks", 
+ "owner": "Administrator", 
+ "published": 1, 
+ "route": "tasks", 
+ "success_url": "", 
+ "title": "Task", 
+ "web_form_fields": [
+  {
+   "fieldname": "project", 
+   "fieldtype": "Link", 
+   "hidden": 0, 
+   "label": "Project", 
+   "options": "Project", 
+   "read_only": 1, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "subject", 
+   "fieldtype": "Data", 
+   "hidden": 0, 
+   "label": "Subject", 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "status", 
+   "fieldtype": "Select", 
+   "hidden": 0, 
+   "label": "Status", 
+   "options": "Open\nClosed\nCancelled", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "description", 
+   "fieldtype": "Text", 
+   "hidden": 0, 
+   "label": "Details", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "priority", 
+   "fieldtype": "Select", 
+   "hidden": 0, 
+   "label": "Priority", 
+   "options": "Low\nMedium\nHigh\nUrgent", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "exp_start_date", 
+   "fieldtype": "Date", 
+   "hidden": 0, 
+   "label": "Expected Start Date", 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "exp_end_date", 
+   "fieldtype": "Date", 
+   "hidden": 0, 
+   "label": "Expected End Date", 
+   "read_only": 0, 
+   "reqd": 0
+  }
+ ]
+}

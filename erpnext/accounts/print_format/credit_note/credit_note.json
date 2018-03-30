@@ -1,0 +1,19 @@
+{
+ "creation": "2014-08-28 11:11:39.796473", 
+ "custom_format": 0, 
+ "disabled": 0, 
+ "doc_type": "Journal Entry", 
+ "docstatus": 0, 
+ "doctype": "Print Format", 
+ "html": "{%- from \"templates/print_formats/standard_macros.html\" import add_header -%}\n\n<div class=\"page-break\">\n    {%- if not doc.get(\"print_heading\") and not doc.get(\"select_print_heading\") \n        and doc.set(\"select_print_heading\", _(\"Credit Note\")) -%}{%- endif -%}\n    {{ add_header(0, 1, doc, letter_head, no_letterhead) }}\n\n    {%- for label, value in (\n        (_(\"Credit To\"), doc.pay_to_recd_from),\n        (_(\"Date\"), frappe.utils.formatdate(doc.voucher_date)),\n        (_(\"Amount\"), \"<strong>\" + doc.get_formatted(\"total_amount\") + \"</strong><br>\" + (doc.total_amount_in_words or \"\") + \"<br>\"),\n        (_(\"Remarks\"), doc.remark)\n    ) -%}\n\n    <div class=\"row\">\n        <div class=\"col-xs-3\"><label class=\"text-right\">{{ label }}</label></div>\n        <div class=\"col-xs-9\">{{ value }}</div>\n    </div>\n\n    {%- endfor -%}\n\n    <hr>\n    <br>\n    <p class=\"strong\">\n        {{ _(\"For\") }} {{ doc.company }},<br>\n        <br>\n        <br>\n        <br>\n        {{ _(\"Authorized Signatory\") }}\n    </p>\n</div>\n\n\n", 
+ "idx": 2, 
+ "modified": "2015-07-22 17:42:01.560817", 
+ "modified_by": "Administrator", 
+ "name": "Credit Note", 
+ "owner": "Administrator", 
+ "parent": "Journal Entry", 
+ "parentfield": "__print_formats", 
+ "parenttype": "DocType", 
+ "print_format_type": "Server", 
+ "standard": "Yes"
+}

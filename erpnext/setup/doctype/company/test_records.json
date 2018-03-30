@@ -1,0 +1,32 @@
+[
+ {
+  "abbr": "_TC",
+  "company_name": "_Test Company",
+  "country": "India",
+  "default_currency": "INR",
+  "doctype": "Company",
+  "domain": "Manufacturing",
+  "chart_of_accounts": "Standard",
+  "default_holiday_list": "_Test Holiday List"
+ },
+ {
+  "abbr": "_TC1",
+  "company_name": "_Test Company 1",
+  "country": "United States",
+  "default_currency": "USD",
+  "doctype": "Company",
+  "domain": "Retail",
+  "chart_of_accounts": "Standard",
+  "default_holiday_list": "_Test Holiday List"
+ },
+ {
+  "abbr": "_TC2",
+  "company_name": "_Test Company 2",
+  "default_currency": "EUR",
+  "country": "Germany",
+  "doctype": "Company",
+  "domain": "Retail",
+  "chart_of_accounts": "Standard",
+  "default_holiday_list": "_Test Holiday List"
+ }
+]

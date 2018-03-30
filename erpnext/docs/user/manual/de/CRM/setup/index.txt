@@ -1,0 +1,3 @@
+campaign
+customer-group
+sales-person

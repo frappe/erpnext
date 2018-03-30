@@ -1,0 +1,33 @@
+{
+ "content": null, 
+ "creation": "2017-08-07 17:08:56.737947", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "idx": 0, 
+ "modified": "2017-09-11 13:49:05.415211", 
+ "modified_by": "Administrator", 
+ "module": "Selling", 
+ "name": "point-of-sale", 
+ "owner": "Administrator", 
+ "page_name": "Point of Sale", 
+ "restrict_to_domain": "Retail", 
+ "roles": [
+  {
+   "role": "Accounts User"
+  }, 
+  {
+   "role": "Accounts Manager"
+  }, 
+  {
+   "role": "Sales User"
+  }, 
+  {
+   "role": "Sales Manager"
+  }
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "system_page": 0, 
+ "title": "Point of Sale"
+}

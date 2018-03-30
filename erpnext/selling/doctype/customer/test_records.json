@@ -1,0 +1,55 @@
+[
+ {
+  "customer_group": "_Test Customer Group",
+  "customer_name": "_Test Customer With Template",
+  "customer_type": "Individual",
+  "doctype": "Customer",
+  "territory": "_Test Territory"
+ },
+ {
+  "customer_group": "_Test Customer Group",
+  "customer_name": "_Test Customer P",
+  "customer_type": "Individual",
+  "doctype": "Customer",
+  "territory": "_Test Territory"
+ },
+ {
+  "customer_group": "_Test Customer Group",
+  "customer_name": "_Test Customer",
+  "customer_type": "Individual",
+  "doctype": "Customer",
+  "territory": "_Test Territory"
+ },
+ {
+  "customer_group": "_Test Customer Group",
+  "customer_name": "_Test Customer 1",
+  "customer_type": "Individual",
+  "doctype": "Customer",
+  "territory": "_Test Territory"
+ },
+ {
+  "customer_group": "_Test Customer Group",
+  "customer_name": "_Test Customer 2",
+  "customer_type": "Individual",
+  "doctype": "Customer",
+  "territory": "_Test Territory"
+ },
+ {
+  "customer_group": "_Test Customer Group",
+  "customer_name": "_Test Customer 3",
+  "customer_type": "Individual",
+  "doctype": "Customer",
+  "territory": "_Test Territory"
+ },
+ {
+  "customer_group": "_Test Customer Group",
+  "customer_name": "_Test Customer USD",
+  "customer_type": "Individual",
+  "doctype": "Customer",
+  "territory": "_Test Territory",
+  "accounts": [{
+	  "company": "_Test Company",
+	  "account": "_Test Receivable USD - _TC"
+  }]
+ }
+]

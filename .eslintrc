@@ -1,0 +1,139 @@
+{
+	"env": {
+		"browser": true,
+		"node": true,
+		"es6": true
+	},
+	"extends": "eslint:recommended",
+	"rules": {
+		"indent": [
+			"error",
+			"tab",
+			{ "SwitchCase": 1 }
+		],
+		"linebreak-style": [
+			"error",
+			"unix"
+		],
+		"quotes": [
+			"off"
+		],
+		"semi": [
+			"warn",
+			"always"
+		],
+		"camelcase": [
+			"off"
+		],
+		"no-unused-vars": [
+			"warn"
+		],
+		"no-redeclare": [
+			"warn"
+		],
+		"no-console": [
+			"warn"
+		],
+		"no-extra-boolean-cast": [
+			"off"
+		],
+		"no-control-regex": [
+			"off"
+		],
+		"spaced-comment": [
+			"warn"
+		],
+		"no-trailing-spaces": [
+			"warn"
+		]
+	},
+	"root": true,
+	"globals": {
+		"frappe": true,
+		"erpnext": true,
+		"schools": true,
+		"education": true,
+
+		"$": true,
+		"jQuery": true,
+		"moment": true,
+		"hljs": true,
+		"Awesomplete": true,
+		"CalHeatMap": true,
+		"Sortable": true,
+		"Showdown": true,
+		"Taggle": true,
+		"Gantt": true,
+		"Slick": true,
+		"PhotoSwipe": true,
+		"PhotoSwipeUI_Default": true,
+		"fluxify": true,
+		"io": true,
+		"c3": true,
+		"__": true,
+		"_p": true,
+		"_f": true,
+		"repl": true,
+		"Class": true,
+		"locals": true,
+		"cint": true,
+		"cstr": true,
+		"cur_frm": true,
+		"cur_dialog": true,
+		"cur_page": true,
+		"cur_list": true,
+		"cur_tree": true,
+		"msg_dialog": true,
+		"is_null": true,
+		"in_list": true,
+		"has_common": true,
+		"has_words": true,
+		"validate_email": true,
+		"get_number_format": true,
+		"format_number": true,
+		"format_currency": true,
+		"round_based_on_smallest_currency_fraction": true,
+		"roundNumber": true,
+		"comment_when": true,
+		"replace_newlines": true,
+		"open_url_post": true,
+		"toTitle": true,
+		"lstrip": true,
+		"strip": true,
+		"strip_html": true,
+		"replace_all": true,
+		"flt": true,
+		"precision": true,
+		"md5": true,
+		"CREATE": true,
+		"AMEND": true,
+		"CANCEL": true,
+		"copy_dict": true,
+		"get_number_format_info": true,
+		"print_table": true,
+		"Layout": true,
+		"web_form_settings": true,
+		"$c": true,
+		"$a": true,
+		"$i": true,
+		"$bg": true,
+		"$y": true,
+		"$c_obj": true,
+		"$c_obj_csv": true,
+		"refresh_many": true,
+		"refresh_field": true,
+		"toggle_field": true,
+		"get_field_obj": true,
+		"get_query_params": true,
+		"unhide_field": true,
+		"hide_field": true,
+		"set_field_options": true,
+		"getCookie": true,
+		"getCookies": true,
+		"get_url_arg": true,
+		"get_server_fields": true,
+		"set_multiple": true,
+		"QUnit": true,
+		"Chart": true
+	}
+}

@@ -1,0 +1,237 @@
+{% if(filters.show_pdc_in_print) { %}
+	<style>
+	@media screen {
+	  .print-format {
+	    padding: 8mm;
+		margin:4mm;
+		font-size: 10.0pt !important;
+		font-family: Tahoma, sans-serif;
+	  }
+	}
+	</style>
+{% } %}
+<style>
+	.print-format {
+		padding: 8mm;
+		margin:4mm;
+		font-size: 10.0pt !important;
+		font-family: Tahoma, sans-serif;
+	}
+</style>
+
+
+<h2 class="text-center">{%= __(report.report_name) %}</h2>
+<h4 class="text-center">{%= filters.customer || filters.supplier %} </h4>
+<h6 class="text-center">
+		{% if (filters.tax_id) { %}
+		{%= __("Tax Id: ")%}	{%= filters.tax_id %}
+		{% } %}
+</h6>
+<h5 class="text-center">
+	{%= __(filters.ageing_based_on) %}
+	{%= __("Until") %}
+	{%= dateutil.str_to_user(filters.report_date) %}
+</h5>
+<hr>
+{% if(filters.show_pdc_in_print) { %}
+	{% var balance_row = data.slice(-1).pop();
+		   var range1 = report.columns[11].label;
+		   var range2 = report.columns[12].label;
+		   var range3 = report.columns[13].label;
+		   var range4 = report.columns[14].label;
+	%}
+	{% if(balance_row) { %}
+	<table class="table table-bordered table-condensed table-sm small">
+		<caption class="text-right">(Amount in {%= data[0][__("currency")] || "" %})</caption>
+	        <colgroup>
+	            <col style="width: 30mm;">
+	            <col style="width: 18mm;">
+	            <col style="width: 18mm;">
+	            <col style="width: 18mm;">
+	            <col style="width: 18mm;">
+	            <col style="width: 18mm;">
+	            <col style="width: 18mm;">
+	        </colgroup>
+
+		<thead>
+			<tr>
+				<th>{%= __(" ") %}</th>
+				<th>{%= __(range1) %}</th>
+				<th>{%= __(range2) %}</th>
+				<th>{%= __(range3) %}</th>
+				<th>{%= __(range4) %}</th>
+				<th>{%= __("Total") %}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>{%= __("Total Outstanding") %}</td>
+				<td class="text-right">{%= format_currency(balance_row[range1]) %}</td>
+				<td class="text-right">{%= format_currency(balance_row[range2]) %}</td>
+				<td class="text-right">{%= format_currency(balance_row[range3]) %}</td>
+				<td class="text-right">{%= format_currency(balance_row[range4]) %}</td>
+				<td class="text-right">
+					{%= format_currency(flt(balance_row[__("Outstanding Amount")]), data[data.length-1]["currency"]) %}
+					</td>
+			</tr>
+				<td>{%= __("PDC/LC") %}</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="text-right">
+					{%= format_currency(flt(balance_row[__("PDC/LC Amount")]), data[data.length-1]["currency"]) %}
+				</td>
+			<tr class="cvs-footer">
+				<th class="text-left">{%= __("Cheques Required") %}</th>
+				<th></th>
+				<th></th>
+				<th></th>
+				<th></th>
+				<th class="text-right">
+					{%= format_currency(flt(balance_row[__("Outstanding Amount")]-balance_row[__("PDC/LC Amount")]), data[data.length-1]["currency"]) %}</th>
+			</tr>
+		</tbody>
+
+	</table>
+	{% } %}
+{% } %}
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			{% if(report.report_name === "Accounts Receivable" || report.report_name === "Accounts Payable") { %}
+				<th style="width: 15%">{%= __("Date") %}</th>
+				<th style="width: 20%">{%= __("Reference") %}</th>
+				{% if(!filters.show_pdc_in_print) { %}
+				<th style="width: 20%">{%= (filters.customer || filters.supplier) ? __("Remarks"): __("Party") %}</th>
+				{% } %}
+				<th style="width: 10%">{%= __("Invoiced Amount") %}</th>
+				{% if(!filters.show_pdc_in_print) { %}
+					<th style="width: 10%">{%= __("Paid Amount") %}</th>
+					<th style="width: 10%">{%= report.report_name === "Accounts Receivable" ? __('Credit Note') : __('Debit Note') %}</th>
+				{% } %}
+				<th style="width: 15%">{%= __("Outstanding Amount") %}</th>
+				{% if(filters.show_pdc_in_print) { %}
+					{% if(report.report_name === "Accounts Receivable") { %}
+						<th style="width: 10%">{%= __("Customer LPO No.") %}</th>
+					{% } %}
+					<th style="width: 10%">{%= __("PDC/LC Date") %}</th>
+					<th style="width: 10%">{%= __("PDC/LC Ref") %}</th>
+					<th style="width: 10%">{%= __("PDC/LC Amount") %}</th>
+					<th style="width: 10%">{%= __("Remaining Balance") %}</th>
+				{% } %}
+			{% } else { %}
+				<th style="width: 40%">{%= (filters.customer || filters.supplier) ? __("Remarks"): __("Party") %}</th>
+				<th style="width: 15%">{%= __("Total Invoiced Amount") %}</th>
+				<th style="width: 15%">{%= __("Total Paid Amount") %}</th>
+				<th style="width: 15%">{%= report.report_name === "Accounts Receivable Summary" ? __('Credit Note Amount') : __('Debit Note Amount') %}</th>
+				<th style="width: 15%">{%= __("Total Outstanding Amount") %}</th>
+			{% } %}
+		</tr>
+	</thead>
+	<tbody>
+		{% for(var i=0, l=data.length; i<l; i++) { %}
+			<tr>
+			{% if(report.report_name === "Accounts Receivable" || report.report_name === "Accounts Payable") { %}
+				{% if(data[i][__("Customer")] || data[i][__("Supplier")]) { %}
+					<td>{%= dateutil.str_to_user(data[i]["posting_date"]) %}</td>
+					<td>
+						{% if(!filters.show_pdc_in_print) { %}
+							{%= data[i]["voucher_type"] %}
+							<br>
+						{% } %}
+						{%= data[i]["voucher_no"] %}
+					</td>
+					{% if(!filters.show_pdc_in_print) { %}
+					<td>
+						{% if(!(filters.customer || filters.supplier)) { %}
+							{%= data[i][__("Customer")] || data[i][__("Supplier")] %}
+							{% if(data[i][__("Customer Name")] && data[i][__("Customer Name")] != data[i][__("Customer")]) { %}
+								<br> {%= data[i][__("Customer Name")] %}
+							{% } else if(data[i][__("Supplier Name")] != data[i][__("Supplier")]) { %}
+								<br> {%= data[i][__("Supplier Name")] %}
+							{% } %}
+						{% } %}
+						<br>{%= __("Remarks") %}:
+						{%= data[i][__("Remarks")] %}
+					</td>
+					{% } %}
+					<td style="text-align: right">
+						{%= format_currency(data[i]["Invoiced Amount"], data[i]["currency"]) %}</td>
+
+					{% if(!filters.show_pdc_in_print) { %}
+						<td style="text-align: right">
+							{%= format_currency(data[i]["Paid Amount"], data[i]["currency"]) %}</td>
+						<td style="text-align: right">
+							{%= report.report_name === "Accounts Receivable" ? format_currency(data[i]["Credit Note"], data[i]["currency"]) : format_currency(data[i]["Debit Note"], data[i]["currency"])  %}</td>
+					{% } %}
+					<td style="text-align: right">
+						{%= format_currency(data[i]["Outstanding Amount"], data[i]["currency"]) %}</td>
+
+					{% if(filters.show_pdc_in_print) { %}
+						{% if(report.report_name === "Accounts Receivable") { %}
+							<td style="text-align: right">
+								{%= data[i][__("Customer LPO")] %}</td>
+						{% } %}
+						<td style="text-align: right">{%= frappe.datetime.str_to_user(data[i][__("PDC/LC Date")]) %}</td>
+						<td style="text-align: right">{%= data[i][__("PDC/LC Ref")] %}</td>
+						<td style="text-align: right">{%= format_currency(data[i][__("PDC/LC Amount")], data[i]["currency"]) %}</td>
+						<td style="text-align: right">{%= format_currency(data[i][__("Remaining Balance")], data[i]["currency"]) %}</td>
+					{% } %}
+				{% } else { %}
+					<td></td>
+					{% if(!filters.show_pdc_in_print) { %}
+					<td></td>
+					{% } %}
+					<td><b>{%= __("Total") %}</b></td>
+					<td style="text-align: right">
+						{%= format_currency(data[i]["Invoiced Amount"], data[i]["currency"] ) %}</td>
+
+					{% if(!filters.show_pdc_in_print) { %}
+						<td style="text-align: right">
+							{%= format_currency(data[i]["Paid Amount"], data[i]["currency"]) %}</td>
+						<td style="text-align: right">{%= report.report_name === "Accounts Receivable" ? format_currency(data[i]["Credit Note"], data[i]["currency"])  : format_currency(data[i]["Debit Note"], data[i]["currency"])  %} </td>
+					{% } %}
+					<td style="text-align: right">
+						{%= format_currency(data[i]["Outstanding Amount"], data[i]["currency"]) %}</td>
+
+					{% if(filters.show_pdc_in_print) { %}
+						{% if(report.report_name === "Accounts Receivable") { %}
+							<td style="text-align: right">
+								{%= data[i][__("Customer LPO")] %}</td>
+						{% } %}
+						<td style="text-align: right">{%= frappe.datetime.str_to_user(data[i][__("PDC/LC Date")]) %}</td>
+						<td style="text-align: right">{%= data[i][__("PDC/LC Ref")] %}</td>
+						<td style="text-align: right">{%= format_currency(data[i][__("PDC/LC Amount")], data[i]["currency"]) %}</td>
+						<td style="text-align: right">{%= format_currency(data[i][__("Remaining Balance")], data[i]["currency"]) %}</td>
+					{% } %}
+				{% } %}
+			{% } else { %}
+				{% if(data[i][__("Customer")] || data[i][__("Supplier")]|| "&nbsp;") { %}
+					{% if((data[i][__("Customer")] || data[i][__("Supplier")]) != __("'Total'")) { %}
+						<td>
+							{% if(!(filters.customer || filters.supplier)) { %}
+								{%= data[i][__("Customer")] || data[i][__("Supplier")] %}
+								{% if(data[i][__("Customer Name")] && data[i][__("Customer Name")] != data[i][__("Customer")]) { %}
+									<br> {%= data[i][__("Customer Name")] %}
+								{% } else if(data[i][__("Supplier Name")] != data[i][__("Supplier")]) { %}
+									<br> {%= data[i][__("Supplier Name")] %}
+								{% } %} 
+							{% } %}
+							<br>{%= __("Remarks") %}:
+							{%= data[i][__("Remarks")] %}
+						</td>
+					{% } else { %}
+						<td><b>{%= __("Total") %}</b></td>
+					{% } %}
+					<td style="text-align: right">{%= format_currency(data[i][__("Total Invoiced Amt")], data[i]["currency"]) %}</td>
+					<td style="text-align: right">{%= format_currency(data[i][__("Total Paid Amt")], data[i]["currency"]) %}</td>
+					<td style="text-align: right">{%= report.report_name === "Accounts Receivable Summary" ? format_currency(data[i][__("Credit Note Amt")], data[i]["currency"]) : format_currency(data[i][__("Debit Note Amt")], data[i]["currency"]) %}</td>
+					<td style="text-align: right">{%= format_currency(data[i][__("Total Outstanding Amt")], data[i]["currency"]) %}</td>
+				{% } %}
+			{% } %}
+			</tr>
+		{% } %}
+	</tbody>
+</table>
+<p class="text-right text-muted">{{ __("Printed On") }}{%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>

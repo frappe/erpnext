@@ -1,0 +1,26 @@
+{
+ "creation": "2012-09-21 20:15:12.000000", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "icon": "fa fa-bar-chart", 
+ "idx": 1, 
+ "modified": "2013-07-11 14:43:59.000000", 
+ "modified_by": "Administrator", 
+ "module": "Selling", 
+ "name": "sales-analytics", 
+ "owner": "Administrator", 
+ "page_name": "sales-analytics", 
+ "roles": [
+  {
+   "role": "Analytics"
+  }, 
+  {
+   "role": "Sales Manager"
+  }, 
+  {
+   "role": "Maintenance Manager"
+  }
+ ], 
+ "standard": "Yes", 
+ "title": "Sales Analytics"
+}

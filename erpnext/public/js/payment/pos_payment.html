@@ -1,0 +1,42 @@
+<div class="pos_payment row">
+	<div class="row" style="padding: 0px 30px;">
+		<h3>{{ __("Total Amount") }}: <span class="label label-default" style="font-size:20px;padding:5px">{%= format_currency(grand_total, currency) %}</span></h3>
+	</div>
+	<div class="row amount-row">
+		<div class="col-xs-6 col-sm-3 text-center">
+			<p class="amount-label"> {{ __("Paid") }} <h3 class="paid_amount">{%= format_currency(paid_amount, currency) %}</h3></p>
+		</div>
+		<div class="col-xs-6 col-sm-3 text-center">
+			<p class="amount-label"> {{ __("Outstanding") }} <h3 class="outstanding_amount">{%= format_currency(outstanding_amount, currency) %} </h3></p>
+		</div>
+		<div class="col-xs-6 col-sm-3 text-center">
+			<p class="amount-label"> {{ __("Change") }} <input class="form-control text-right change_amount bold" type="text" idx="change_amount" value="{{format_number(change_amount, null, 2)}}">
+			</p>
+		</div>
+		<div class="col-xs-6 col-sm-3 text-center">
+			<p class="amount-label"> {{ __("Write off") }} <input class="form-control text-right write_off_amount bold" type="text" idx="write_off_amount" value="{{format_number(write_off_amount, null, 2)}}">
+			</p>
+		</div>
+	</div>
+	<hr>
+	<div class="row">
+		<div class="col-sm-6 ">
+			<div class ="row multimode-payments">
+			</div>
+		</div>
+		<div class="col-sm-6 payment-toolbar">
+			{% for(var i=0; i<3; i++) { %}
+				<div class="row">
+					{% for(var j=i*3; j<(i+1)*3; j++) { %}
+						<button type="button"  class="btn btn-default pos-keyboard-key">{{j+1}}</button>
+					{% } %}
+				</div>
+			{% } %}
+			<div class="row">
+				<button type="button"  class="btn btn-default delete-btn">{{ __("Del") }}</button>
+				<button type="button"  class="btn btn-default pos-keyboard-key">0</button>
+				<button type="button"  class="btn btn-default pos-keyboard-key">.</button>
+			</div>
+        </div>
+	</div>
+</div>

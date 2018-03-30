@@ -1,0 +1,1 @@
+Itemized invoice raised by Supplier.

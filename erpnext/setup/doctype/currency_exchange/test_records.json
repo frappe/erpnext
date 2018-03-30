@@ -1,0 +1,44 @@
+[
+ {
+  "doctype": "Currency Exchange", 
+  "date": "2016-01-01",
+  "exchange_rate": 60.0, 
+  "from_currency": "USD", 
+  "to_currency": "INR"
+ }, 
+ {
+  "doctype": "Currency Exchange", 
+  "date": "2016-01-01",
+  "exchange_rate": 0.773, 
+  "from_currency": "USD", 
+  "to_currency": "EUR"
+ }, 
+ {
+  "doctype": "Currency Exchange", 
+  "date": "2016-01-01",
+  "exchange_rate": 0.0167, 
+  "from_currency": "INR", 
+  "to_currency": "USD"
+ },
+ {
+  "doctype": "Currency Exchange",
+  "date": "2016-01-10",
+  "exchange_rate": 65.1,
+  "from_currency": "USD",
+  "to_currency": "INR"
+ },
+  {
+  "doctype": "Currency Exchange",
+  "date": "2016-01-30",
+  "exchange_rate": 62.9,
+  "from_currency": "USD",
+  "to_currency": "INR"
+ },
+ {
+  "doctype": "Currency Exchange",
+  "date": "2016-01-10",
+  "exchange_rate": 65.1,
+  "from_currency": "INR",
+  "to_currency": "NGN"
+ }
+]

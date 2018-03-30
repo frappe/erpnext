@@ -1,0 +1,31 @@
+{
+ "condition": "{'reference_doctype': 'Lead', 'user': frappe.db.get_single_value('Hub Settings', 'user'), 'status': 'Pending'}",
+ "creation": "2017-09-20 15:06:40.279930",
+ "docstatus": 0,
+ "doctype": "Data Migration Mapping",
+ "fields": [
+  {
+   "is_child_table": 0,
+   "local_fieldname": "email_id",
+   "remote_fieldname": "email_id"
+  },
+  {
+   "is_child_table": 0,
+   "local_fieldname": "lead_name",
+   "remote_fieldname": "lead_name"
+  }
+ ],
+ "idx": 0,
+ "local_doctype": "Lead",
+ "local_primary_key": "email_id",
+ "mapping_name": "Hub Message to Lead",
+ "mapping_type": "Pull",
+ "migration_id_field": "hub_sync_id",
+ "modified": "2018-02-14 15:57:05.606597",
+ "modified_by": "achilles@erpnext.com",
+ "name": "Hub Message to Lead",
+ "owner": "frappetest@gmail.com",
+ "page_length": 10,
+ "remote_objectname": "Hub Message",
+ "remote_primary_key": "name"
+}

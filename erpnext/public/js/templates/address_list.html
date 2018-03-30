@@ -1,0 +1,23 @@
+<div class="clearfix"></div>
+{% for(var i=0, l=addr_list.length; i<l; i++) { %}
+    <div class="address-box">
+    <p class="h6">
+        {%= i+1 %}. {%= addr_list[i].address_type!="Other" ? __(addr_list[i].address_type) : addr_list[i].address_title %}
+        {% if(addr_list[i].is_primary_address) { %}
+            <span class="text-muted">({%= __("Primary") %})</span>{% } %}
+        {% if(addr_list[i].is_shipping_address) { %}
+            <span class="text-muted">({%= __("Shipping") %})</span>{% } %}
+
+        <a href="#Form/Address/{%= encodeURIComponent(addr_list[i].name) %}"
+            class="btn btn-default btn-xs pull-right"
+				style="margin-top:-3px; margin-right: -5px;">
+            {%= __("Edit") %}</a>
+    </p>
+        <p>{%= addr_list[i].display %}</p>
+    </div>
+{% } %}
+{% if(!addr_list.length) { %}
+<p class="text-muted small">{%= __("No address added yet.") %}</p>
+{% } %}
+<p><button class="btn btn-xs btn-default btn-address">{{ __("New Address") }}</button></p>
+

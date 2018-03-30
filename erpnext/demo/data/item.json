@@ -1,0 +1,293 @@
+[
+ {
+  "default_supplier": "Asiatic Solutions",
+  "default_warehouse": "Stores",
+  "description": "For Upper Bearing",
+  "image": "/assets/erpnext_demo/images/disc.png",
+  "item_code": "Disc Collars",
+  "item_group": "Raw Material",
+  "item_name": "Disc Collars"
+ },
+ {
+  "default_supplier": "Nan Duskin",
+  "default_warehouse": "Stores",
+  "description": "CAST IRON, MCMASTER PART NO. 3710T13",
+  "image": "/assets/erpnext_demo/images/bearing.jpg",
+  "item_code": "Bearing Block",
+  "item_group": "Raw Material",
+  "item_name": "Bearing Block"
+ },
+ {
+  "default_supplier": null,
+  "default_warehouse": "Finished Goods",
+  "description": "Wind Mill C Series for Commercial Use 18ft",
+  "image": "/assets/erpnext_demo/images/wind-turbine-2.png",
+  "item_code": "Wind MIll C Series",
+  "item_group": "Products",
+  "item_name": "Wind MIll C Series"
+ },
+ {
+  "default_supplier": null,
+  "default_warehouse": "Finished Goods",
+  "description": "Wind Mill A Series for Home Use 9ft",
+  "image": "/assets/erpnext_demo/images/wind-turbine.png",
+  "item_code": "Wind Mill A Series",
+  "item_group": "Products",
+  "item_name": "Wind Mill A Series"
+ },
+ {
+  "default_supplier": null,
+  "default_warehouse": "Finished Goods",
+  "description": "Small Wind Turbine for Home Use\n\n\n<!-- html -->",
+  "image": "/assets/erpnext_demo/images/wind-turbine-1.jpg",
+  "item_code": "Wind Turbine",
+  "item_group": "Products",
+  "item_name": "Wind Turbine",
+  "has_variants": 1,
+  "has_serial_no": 1,
+  "attributes":[
+      { "attribute": "Size" }
+  ]
+ },
+ {
+  "default_supplier": "HomeBase",
+  "default_warehouse": "Stores",
+  "description": "1.5 in. Diameter x 36 in. Mild Steel Tubing",
+  "image": null,
+  "item_code": "Bearing Pipe",
+  "item_group": "Raw Material",
+  "item_name": "Bearing Pipe"
+ },
+ {
+  "default_supplier": "New World Realty",
+  "default_warehouse": "Stores",
+  "description": "1/32 in. x 24 in. x 47 in. HDPE Opaque Sheet",
+  "image": null,
+  "item_code": "Wing Sheet",
+  "item_group": "Raw Material",
+  "item_name": "Wing Sheet"
+ },
+ {
+  "default_supplier": "Eagle Hardware",
+  "default_warehouse": "Stores",
+  "description": "3/16 in. x 6 in. x 6 in. Low Carbon Steel Plate",
+  "image": null,
+  "item_code": "Upper Bearing Plate",
+  "item_group": "Raw Material",
+  "item_name": "Upper Bearing Plate"
+ },
+ {
+  "default_supplier": "Asiatic Solutions",
+  "default_warehouse": "Stores",
+  "description": "Bearing Assembly",
+  "image": null,
+  "item_code": "Bearing Assembly",
+  "item_group": "Sub Assemblies",
+  "item_name": "Bearing Assembly"
+ },
+ {
+  "default_supplier": "HomeBase",
+  "default_warehouse": "Stores",
+  "description": "3/4 in. x 2 ft. x 4 ft. Pine Plywood",
+  "image": null,
+  "item_code": "Base Plate",
+  "item_group": "Raw Material",
+  "item_name": "Base Plate",
+  "is_sub_contracted_item": 1
+ },
+ {
+  "default_supplier": "Scott Ties",
+  "default_warehouse": "Stores",
+  "description": "N/A",
+  "image": null,
+  "item_code": "Stand",
+  "item_group": "Raw Material",
+  "item_name": "Stand"
+ },
+ {
+  "default_supplier": "Eagle Hardware",
+  "default_warehouse": "Stores",
+  "description": "1 in. x 3 in. x 1 ft. Multipurpose Al Alloy Bar",
+  "image": null,
+  "item_code": "Bearing Collar",
+  "item_group": "Raw Material",
+  "item_name": "Bearing Collar"
+ },
+ {
+  "default_supplier": "Eagle Hardware",
+  "default_warehouse": "Stores",
+  "description": "1/4 in. x 6 in. x 6 in. Mild Steel Plate",
+  "image": null,
+  "item_code": "Base Bearing Plate",
+  "item_group": "Raw Material",
+  "item_name": "Base Bearing Plate"
+ },
+ {
+  "default_supplier": "HomeBase",
+  "default_warehouse": "Stores",
+  "description": "15/32 in. x 4 ft. x 8 ft. 3-Ply Rtd Sheathing",
+  "image": null,
+  "item_code": "External Disc",
+  "item_group": "Raw Material",
+  "item_name": "External Disc"
+ },
+ {
+  "default_supplier": "Eagle Hardware",
+  "default_warehouse": "Stores",
+  "description": "1.25 in. Diameter x 6 ft. Mild Steel Tubing",
+  "image": null,
+  "item_code": "Shaft",
+  "item_group": "Raw Material",
+  "item_name": "Shaft"
+ },
+ {
+  "default_supplier": "Ks Merchandise",
+  "default_warehouse": "Stores",
+  "description": "1/2 in. x 2 ft. x 4 ft. Pine Plywood",
+  "image": null,
+  "item_code": "Blade Rib",
+  "item_group": "Raw Material",
+  "item_name": "Blade Rib"
+ },
+ {
+  "default_supplier": "HomeBase",
+  "default_warehouse": "Stores",
+  "description": "For Bearing Collar",
+  "image": null,
+  "item_code": "Internal Disc",
+  "item_group": "Raw Material",
+  "item_name": "Internal Disc"
+ },
+ {
+  "default_supplier": null,
+  "default_warehouse": "Finished Goods",
+  "description": "Small Wind Turbine for Home Use\n\n\n<!-- html -->\n<p>Size: Small</p>",
+  "image": "/assets/erpnext_demo/images/wind-turbine-1.jpg",
+  "item_code": "Wind Turbine-S",
+  "item_group": "Products",
+  "item_name": "Wind Turbine-S",
+  "variant_of": "Wind Turbine",
+  "valuation_rate": 300,
+  "attributes":[
+      {
+       "attribute": "Size",
+       "attribute_value": "Small"
+      }
+  ]
+ },
+ {
+  "default_supplier": null,
+  "default_warehouse": "Finished Goods",
+  "description": "Small Wind Turbine for Home Use\n\n\n<!-- html -->\n<p>Size: Medium</p>",
+  "image": "/assets/erpnext_demo/images/wind-turbine-1.jpg",
+  "item_code": "Wind Turbine-M",
+  "item_group": "Products",
+  "item_name": "Wind Turbine-M",
+  "variant_of": "Wind Turbine",
+  "valuation_rate": 300,
+  "attributes":[
+      {
+       "attribute": "Size",
+       "attribute_value": "Medium"
+      }
+  ]
+ },
+ {
+  "default_supplier": null,
+  "default_warehouse": "Finished Goods",
+  "description": "Small Wind Turbine for Home Use\n\n\n<!-- html -->\n<p>Size: Large</p>",
+  "image": "/assets/erpnext_demo/images/wind-turbine-1.jpg",
+  "item_code": "Wind Turbine-L",
+  "item_group": "Products",
+  "item_name": "Wind Turbine-L",
+  "variant_of": "Wind Turbine",
+  "valuation_rate": 300,
+  "attributes":[
+      {
+       "attribute": "Size",
+       "attribute_value": "Large"
+      }
+  ]
+ },
+ {
+  "is_stock_item": 0,
+  "description": "Wind Mill A Series with Spare Bearing",
+  "item_code": "Wind Mill A Series with Spare Bearing",
+  "item_group": "Products",
+  "item_name": "Wind Mill A Series with Spare Bearing"
+ },
+ {
+  "default_supplier": "HomeBase",
+  "default_warehouse": "Stores",
+  "description": "3/4 in. x 2 ft. x 4 ft. Pine Plywood",
+  "image": null,
+  "item_code": "Base Plate Un Painted",
+  "item_group": "Raw Material",
+  "item_name": "Base Plate Un Painted"
+ },
+ {
+  "is_fixed_asset": 1,
+  "asset_category": "Furnitures",
+  "is_stock_item": 0,
+  "description": "Table",
+  "item_code": "Table",
+  "item_name": "Table",
+  "item_group": "Products"
+ },
+ {
+  "is_fixed_asset": 1,
+  "asset_category": "Furnitures",
+  "is_stock_item": 0,
+  "description": "Chair",
+  "item_code": "Chair",
+  "item_name": "Chair",
+  "item_group": "Products"
+ },
+ {
+  "is_fixed_asset": 1,
+  "asset_category": "Electronic Equipments",
+  "is_stock_item": 0,
+  "description": "Computer",
+  "item_code": "Computer",
+  "item_name": "Computer",
+  "item_group": "Products"
+ },
+ {
+  "is_fixed_asset": 1,
+  "asset_category": "Electronic Equipments",
+  "is_stock_item": 0,
+  "description": "Mobile",
+  "item_code": "Mobile",
+  "item_name": "Mobile",
+  "item_group": "Products"
+ },
+ {
+  "is_fixed_asset": 1,
+  "asset_category": "Softwares",
+  "is_stock_item": 0,
+  "description": "ERP",
+  "item_code": "ERP",
+  "item_name": "ERP",
+  "item_group": "All Item Groups"
+ },
+ {
+  "is_fixed_asset": 1,
+  "asset_category": "Softwares",
+  "is_stock_item": 0,
+  "description": "Autocad",
+  "item_code": "Autocad",
+  "item_name": "Autocad",
+  "item_group": "All Item Groups"
+ },
+ {
+  "is_stock_item": 1,
+  "has_batch_no": 1,
+  "create_new_batch": 1,
+  "valuation_rate": 200,
+  "default_warehouse": "Stores",
+  "description": "Corrugated Box",
+  "item_code": "Corrugated Box",
+  "item_name": "Corrugated Box",
+  "item_group": "All Item Groups"
+ }
+]

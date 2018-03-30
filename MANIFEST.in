@@ -1,0 +1,20 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+include .travis.yml
+recursive-include erpnext *.txt
+recursive-include erpnext *.css
+recursive-include erpnext *.csv
+recursive-include erpnext *.html
+recursive-include erpnext *.ico
+recursive-include erpnext *.js
+recursive-include erpnext *.json
+recursive-include erpnext *.md
+recursive-include erpnext *.png
+recursive-include erpnext *.py
+recursive-include erpnext *.svg
+recursive-include erpnext/public *
+recursive-exclude * *.pyc

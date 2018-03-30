@@ -1,0 +1,47 @@
+{%- set compact = doc.flags.compact_item_print -%}
+{%- set compact_fields = doc.flags.compact_item_fields -%}
+{%- set display_columns = visible_columns|map(attribute="fieldname")| list -%}
+{%- set columns = doc.flags.format_columns(display_columns, compact_fields) -%}
+
+{% if doc.in_format_data("image") and doc.get("image") and "image" in display_columns -%}
+<div class="pull-left" style="max-width: 40%; margin-right: 10px;">
+	<img class="print-item-image" src="{{ doc.image }}" alt="">
+</div>
+{%- endif %}
+
+<div>
+	{% if doc.in_format_data("item_code") and "item_code" in display_columns -%}
+		<div class="primary">
+			{% if compact %}<strong>{% endif %}
+				{{ _(doc.item_code) }}
+			{% if compact %}</strong>{% endif %}
+		</div>
+	{%- endif %}
+
+	{%- if doc.in_format_data("item_name") and "item_name" in display_columns and
+		not (doc.in_format_data("item_code") and doc.item_code == doc.item_name) -%}
+		<div class="primary">{{ doc.get_formatted("item_name", translated=True) }}</div>
+	{%- endif %}
+
+	{% if (doc.in_format_data("description") and doc.description and
+		(
+			(
+				(not doc.in_format_data("item_code") or doc.is_print_hide("item_code")) and
+				(not doc.in_format_data("item_name") or doc.is_print_hide("item_name"))
+			) or not (doc.item_code == doc.item_name == doc.description)
+		))
+	-%}
+	<p>{{ doc.get_formatted("description", translated=True) }}</p>
+	{%- endif %}
+
+	{% if compact -%}
+		{%- for fieldname in columns -%}
+			{% if doc.get(fieldname) and doc.in_format_data(fieldname) -%}
+			<p>
+				<strong>{{ _(doc.meta.get_label(fieldname)) }}:</strong>
+				{{ doc.get_formatted(fieldname, translated=True)  }}
+			</p>
+			{% endif %}
+		{%- endfor -%}
+	{%- endif %}
+</div>

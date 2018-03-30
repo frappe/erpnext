@@ -1,0 +1,12 @@
+step-01-language
+step-02-currency-and-timezone
+step-03-user-details
+step-04-select-domain
+step-05-the-brand
+step-06-your-organization
+step-07-setup-company-complete
+step-08-set-sales-target
+step-09-customers
+step-10-letterhead
+step-11-suppliers
+step-12-users

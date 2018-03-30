@@ -1,0 +1,13 @@
+[
+ {
+  "doctype": "Leave Type", 
+  "leave_type_name": "_Test Leave Type",
+  "include_holiday": 1
+ }, 
+ {
+  "doctype": "Leave Type", 
+  "is_lwp": 1, 
+  "leave_type_name": "_Test Leave Type LWP",
+  "include_holiday": 1
+ }
+]

@@ -1,0 +1,41 @@
+{
+ "add_total_row": 1, 
+ "apply_user_permissions": 1, 
+ "creation": "2013-11-28 14:58:06", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 3, 
+ "is_standard": "Yes", 
+ "modified": "2017-02-24 20:18:54.950255", 
+ "modified_by": "Administrator", 
+ "module": "Selling", 
+ "name": "Customer Acquisition and Loyalty", 
+ "owner": "Administrator", 
+ "ref_doctype": "Customer", 
+ "report_name": "Customer Acquisition and Loyalty", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Sales User"
+  }, 
+  {
+   "role": "Sales Manager"
+  }, 
+  {
+   "role": "Sales Master Manager"
+  }, 
+  {
+   "role": "Stock User"
+  }, 
+  {
+   "role": "Stock Manager"
+  }, 
+  {
+   "role": "Accounts User"
+  }, 
+  {
+   "role": "Accounts Manager"
+  }
+ ]
+}

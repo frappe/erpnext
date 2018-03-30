@@ -1,0 +1,43 @@
+[
+ {
+  "doctype": "Supplier",
+  "supplier_name": "_Test Supplier With Template 1",
+  "supplier_type": "_Test Supplier Type",
+  "payment_terms": "_Test Payment Term Template 3"
+ },
+ {
+  "doctype": "Supplier",
+  "supplier_name": "_Test Supplier P",
+  "supplier_type": "_Test Supplier Type"
+ },
+ {
+  "doctype": "Supplier",
+  "supplier_name": "_Test Supplier with Country",
+  "supplier_type": "_Test Supplier Type",
+  "country": "Greece"
+ },
+ {
+  "doctype": "Supplier",
+  "supplier_name": "_Test Supplier",
+  "supplier_type": "_Test Supplier Type"
+ },
+ {
+  "doctype": "Supplier",
+  "supplier_name": "_Test Supplier 1",
+  "supplier_type": "_Test Supplier Type"
+ },
+ {
+  "doctype": "Supplier",
+  "supplier_name": "_Test Supplier 2",
+  "supplier_type": "_Test Supplier Type"
+ },
+ {
+  "doctype": "Supplier",
+  "supplier_name": "_Test Supplier USD",
+  "supplier_type": "_Test Supplier Type",
+  "accounts": [{
+    "company": "_Test Company",
+    "account": "_Test Payable USD - _TC"
+  }]
+ }
+]

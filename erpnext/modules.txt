@@ -1,0 +1,24 @@
+Accounts
+CRM
+Buying
+Projects
+Selling
+Setup
+HR
+Manufacturing
+Stock
+Support
+Utilities
+Shopping Cart
+Assets
+Hub Node
+Portal
+Maintenance
+Education
+Regional
+Healthcare
+Restaurant
+Agriculture
+ERPNext Integrations
+Non Profit
+Hotels

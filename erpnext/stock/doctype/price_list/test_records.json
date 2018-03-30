@@ -1,0 +1,34 @@
+[
+ {
+  "buying": 1,
+  "currency": "INR",
+  "doctype": "Price List",
+  "enabled": 1,
+  "price_list_name": "_Test Price List",
+  "selling": 1
+ },
+ {
+  "buying": 1,
+  "currency": "INR",
+  "doctype": "Price List",
+  "enabled": 1,
+  "price_list_name": "_Test Price List 2",
+  "selling": 1
+ },
+ {
+  "buying": 1,
+  "currency": "INR",
+  "doctype": "Price List",
+  "enabled": 1,
+  "price_list_name": "_Test Price List India",
+  "selling": 1
+ },
+ {
+  "buying": 1,
+  "currency": "USD",
+  "doctype": "Price List",
+  "enabled": 1,
+  "price_list_name": "_Test Price List Rest of the World",
+  "selling": 1
+ }
+]

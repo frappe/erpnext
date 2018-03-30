@@ -1,0 +1,14 @@
+[
+	{
+		"doctype": "Opportunity",
+		"name": "_Test Opportunity 1",
+		"enquiry_from": "Lead",
+		"enquiry_type": "Sales",
+		"lead": "_T-Lead-00001",
+		"transaction_date": "2013-12-12",
+		"items": [{
+			"item_name": "Test Item",
+			"description": "Some description"
+		}]
+	}
+]

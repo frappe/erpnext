@@ -1,0 +1,57 @@
+.date-indicator {
+    background:none;
+    font-size:12px;
+    vertical-align:middle;
+    font-weight:bold;
+    color:#6c7680;
+}
+.date-indicator::after {
+    margin:0 -4px 0 12px;
+    content:'';
+    display:inline-block;
+    height:8px;
+    width:8px;
+    border-radius:8px;
+	background: #d1d8dd;
+}
+
+.date-indicator.blue {
+	color: #5e64ff;
+}
+
+.date-indicator.blue::after {
+	background: #5e64ff;
+}
+
+.activity-row {
+}
+
+.activity-message {
+	border-left: 1px solid #d1d8dd;
+}
+
+.activity-message .row {
+	padding: 15px;
+	margin-right: 0px;
+	border-bottom: 1px solid #d1d8dd;
+}
+
+.activity-row:last-child .activity-message .row {
+	border-bottom: none;
+}
+
+.activity-row .content {
+	padding-left: 0px;
+	padding-right: 30px;
+}
+
+.activity-date {
+	padding: 15px;
+	padding-right: 0px;
+	z-index: 1;
+}
+
+.for-more {
+	border-top: 1px solid #d1d8dd;
+	padding: 10px;
+}

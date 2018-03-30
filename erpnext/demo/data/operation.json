@@ -1,0 +1,32 @@
+[
+ {
+  "description": "Setup Fixtures for Assembly", 
+  "name": "Setup Fixtures", 
+  "workstation": "Assembly Station 1"
+ }, 
+ {
+  "description": "Assemble Unit as per Standard Operating Procedures", 
+  "name": "Assembly Operation", 
+  "workstation": "Assembly Station 1"
+ }, 
+ {
+  "description": "Final Testing Checklist", 
+  "name": "Testing", 
+  "workstation": "Packing and Testing Station"
+ }, 
+ {
+  "description": "Final Packing and add Instructions", 
+  "name": "Packing", 
+  "workstation": "Packing and Testing Station"
+ }, 
+ {
+  "description": "Prepare frame for assembly", 
+  "name": "Prepare Frame", 
+  "workstation": "Drilling Machine 1"
+ }, 
+ {
+  "description": "Connect wires", 
+  "name": "Wiring", 
+  "workstation": "Assembly Station 1"
+ }
+]

@@ -1,0 +1,79 @@
+{% extends "templates/web.html" %}
+
+{% block title %} {{ _("Shopping Cart") }} {% endblock %}
+
+{% block header %}<h2>{{ _("My Cart") }}</h2>{% endblock %}
+
+{% block script %}
+<script>{% include "templates/includes/cart.js" %}</script>
+{% endblock %}
+
+
+{% block header_actions %}
+{% if doc.items %}
+<button class="btn btn-primary btn-place-order btn-sm"
+    type="button">
+    {{ _("Place Order") }}</button>
+{% endif %}
+{% endblock %}
+
+{% block page_content %}
+
+{% from "templates/includes/macros.html" import item_name_and_description %}
+
+<div class="cart-container">
+	<div id="cart-container">
+			<div id="cart-error" class="alert alert-danger"
+		style="display: none;"></div>
+		<div id="cart-items">
+			<div class="row cart-item-header text-muted">
+				<div class="col-sm-8 col-xs-6 h6 text-uppercase">
+				{{ _("Item") }}
+				</div>
+				<div class="col-sm-2 col-xs-3 text-center h6 text-uppercase">
+				{{ _("Qty") }}
+				</div>
+				<div class="col-sm-2 col-xs-3 text-right h6 text-uppercase">
+				{{ _("Subtotal") }}
+				</div>
+			</div>
+			{% if doc.items %}
+				<div class="cart-items">
+					{% include "templates/includes/cart/cart_items.html" %}
+				</div>
+			{% else %}
+				<p class="empty-cart">{{ _("Cart is Empty") }}</p>
+			{% endif %}
+		</div>
+		{% if doc.items %}
+		<!-- taxes -->
+		<div class="row cart-taxes">
+			<div class="col-sm-6"><!-- empty --></div>
+			<div class="col-sm-6 text-right cart-tax-items">
+			{% include "templates/includes/order/order_taxes.html" %}
+			</div>
+		</div>
+
+		{% if doc.tc_name %}
+			<div class="cart-terms" style="display: none;" title={{doc.tc_name}}>
+				{{doc.tc_name}}
+				{{doc.terms}}
+			</div>
+			<div class="cart-link">
+				<a href="#" onclick="show_terms();return false;">*{{ __("Terms and Conditions") }}</a>
+			</div>
+		{% endif %}
+
+		<div class="cart-addresses">
+		{% include "templates/includes/cart/cart_address.html" %}
+		</div>
+
+		<p class="cart-footer text-right">
+		<button class="btn btn-primary btn-place-order btn-sm" type="button">
+		{{ _("Place Order") }}</button></p>
+		{% endif %}
+	</div>
+</div>
+
+
+{% endblock %}

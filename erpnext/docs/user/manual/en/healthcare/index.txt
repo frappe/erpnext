@@ -1,0 +1,12 @@
+patient
+appointment
+vital_signs
+consultation
+medical_record
+sample_collection
+lab_test
+invoicing
+physician
+physician_schedule
+medical_codes
+setup

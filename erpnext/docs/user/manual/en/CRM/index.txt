@@ -1,0 +1,7 @@
+lead
+customer
+opportunity
+contact
+newsletter
+crm_reports
+setup

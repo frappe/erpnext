@@ -1,0 +1,11 @@
+{{ title }}
+
+{% for reply in replies %}
+{{ reply.sender_name }}:
+{{ reply.content }}
+
+
+{% endfor %}
+{% if did_not_reply %}
+{{ did_not_reply_title }}: {{ did_not_reply }}
+{% endif %}

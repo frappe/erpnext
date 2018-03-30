@@ -1,0 +1,27 @@
+{
+ "add_total_row": 1, 
+ "apply_user_permissions": 1, 
+ "creation": "2013-02-21 14:26:44", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 3, 
+ "is_standard": "Yes", 
+ "modified": "2017-11-06 13:04:51.559061", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "Ordered Items To Be Billed", 
+ "owner": "Administrator", 
+ "query": "select \n `tabSales Order`.`name` as \"Sales Order:Link/Sales Order:120\",\n `tabSales Order`.`customer` as \"Customer:Link/Customer:120\",\n  `tabSales Order`.`customer_name` as \"Customer Name:150\",\n`tabSales Order`.`status` as \"Status\",\n `tabSales Order`.`transaction_date` as \"Date:Date\",\n `tabSales Order`.`project` as \"Project\",\n `tabSales Order Item`.item_code as \"Item:Link/Item:120\",\n `tabSales Order Item`.base_amount as \"Amount:Currency:110\",\n (`tabSales Order Item`.billed_amt * ifnull(`tabSales Order`.conversion_rate, 1)) as \"Billed Amount:Currency:110\",\n (`tabSales Order Item`.base_amount - (`tabSales Order Item`.billed_amt * ifnull(`tabSales Order`.conversion_rate, 1))) as \"Pending Amount:Currency:120\",\n `tabSales Order Item`.item_name as \"Item Name::150\",\n `tabSales Order Item`.description as \"Description::200\",\n `tabSales Order`.`company` as \"Company:Link/Company:\"\nfrom\n `tabSales Order`, `tabSales Order Item`\nwhere\n `tabSales Order Item`.`parent` = `tabSales Order`.`name`\n and `tabSales Order`.docstatus = 1\n and `tabSales Order`.status != \"Closed\"\n and `tabSales Order Item`.amount > 0\n and `tabSales Order Item`.billed_amt < `tabSales Order Item`.amount\norder by `tabSales Order`.transaction_date asc", 
+ "ref_doctype": "Sales Invoice", 
+ "report_name": "Ordered Items To Be Billed", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Accounts Manager"
+  }, 
+  {
+   "role": "Accounts User"
+  }
+ ]
+}

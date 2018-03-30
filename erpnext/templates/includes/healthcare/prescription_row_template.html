@@ -1,0 +1,15 @@
+<div class="web-list-item transaction-list-item">
+  <a href="/prescription?name={{ doc.name }}">
+    <div class="row">
+        <div class="col-xs-4">
+            {{ doc.name }}
+        </div>
+        <div class="col-xs-4">
+          {{ doc.physician }}
+        </div>
+        <div class="col-xs-4 text-right small text-muted">
+          {{ frappe.format_date(doc.consultation_date) }}
+        </div>
+    </div>
+  </a>
+</div>

@@ -1,0 +1,18 @@
+{
+ "creation": "2016-07-07 11:45:14.872204", 
+ "custom_format": 0, 
+ "disabled": 0, 
+ "doc_type": "Salary Slip", 
+ "docstatus": 0, 
+ "doctype": "Print Format", 
+ "font": "Default", 
+ "format_data": "[{\"fieldname\": \"print_heading_template\", \"fieldtype\": \"HTML\", \"options\": \"   <h3 style=\\\"text-align: right;\\\"><span style=\\\"line-height: 1.42857;\\\">{{doc.name}}</span></h3>\\n<div>\\n    <hr style=\\\"text-align: center;\\\">\\n</div>   \"}, {\"fieldtype\": \"Section Break\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"employee\"}, {\"print_hide\": 0, \"fieldname\": \"company\"}, {\"print_hide\": 0, \"fieldname\": \"employee_name\"}, {\"print_hide\": 0, \"fieldname\": \"department\"}, {\"print_hide\": 0, \"fieldname\": \"designation\"}, {\"print_hide\": 0, \"fieldname\": \"branch\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"start_date\"}, {\"print_hide\": 0, \"fieldname\": \"end_date\"}, {\"print_hide\": 0, \"fieldname\": \"total_working_days\"}, {\"print_hide\": 0, \"fieldname\": \"leave_without_pay\"}, {\"print_hide\": 0, \"fieldname\": \"payment_days\"}, {\"fieldtype\": \"Section Break\"}, {\"fieldtype\": \"Column Break\"}, {\"visible_columns\": [{\"print_hide\": 0, \"fieldname\": \"salary_component\", \"print_width\": \"\"}, {\"print_hide\": 0, \"fieldname\": \"amount\", \"print_width\": \"\"}, {\"print_hide\": 0, \"fieldname\": \"depends_on_lwp\", \"print_width\": \"\"}], \"print_hide\": 0, \"fieldname\": \"earnings\"}, {\"fieldtype\": \"Column Break\"}, {\"visible_columns\": [{\"print_hide\": 0, \"fieldname\": \"salary_component\", \"print_width\": \"\"}, {\"print_hide\": 0, \"fieldname\": \"amount\", \"print_width\": \"\"}, {\"print_hide\": 0, \"fieldname\": \"depends_on_lwp\", \"print_width\": \"\"}], \"print_hide\": 0, \"fieldname\": \"deductions\"}, {\"fieldtype\": \"Section Break\"}, {\"fieldtype\": \"Column Break\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"gross_pay\"}, {\"print_hide\": 0, \"fieldname\": \"total_deduction\"}, {\"print_hide\": 0, \"fieldname\": \"net_pay\"}, {\"print_hide\": 0, \"fieldname\": \"rounded_total\"}, {\"print_hide\": 0, \"fieldname\": \"total_in_words\"}]", 
+ "idx": 0, 
+ "modified": "2016-08-22 00:21:42.600548", 
+ "modified_by": "Administrator", 
+ "name": "Salary Slip Standard", 
+ "owner": "Administrator", 
+ "print_format_builder": 1, 
+ "print_format_type": "Server", 
+ "standard": "Yes"
+}
