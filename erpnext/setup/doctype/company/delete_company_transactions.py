@@ -85,7 +85,7 @@ def delete_lead_addresses(company_name):
 			in ({leads})""".format(leads=",".join(leads)))
 
 		if addresses:
-			addresses = ["'%s'"%addr for addr in addresses]
+			addresses = ["'%s'"%frappe.db.escape(addr) for addr in addresses]
 
 			frappe.db.sql("""delete from tabAddress where name in ({addresses}) and 
 				name not in (select distinct dl1.parent from `tabDynamic Link` dl1 
