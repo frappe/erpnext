@@ -10,6 +10,7 @@ from erpnext.accounts.party import get_party_details
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.buying.utils import validate_for_items, update_last_purchase_rate
 from erpnext.stock.stock_ledger import get_valuation_rate
+from erpnext.stock.doctype.stock_entry.stock_entry import get_used_alternative_items
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -200,6 +201,11 @@ class BuyingController(StockController):
 			exploded_item = item.get('include_exploded_items')
 
 		bom_items = get_items_from_bom(item.item_code, item.bom, exploded_item)
+
+		used_alternative_items = []
+		if self.doctype == 'Purchase Receipt' and item.purchase_order:
+			used_alternative_items = get_used_alternative_items(purchase_order = item.purchase_order)
+
 		raw_materials_cost = 0
 		items = list(set([d.item_code for d in bom_items]))
 		item_wh = frappe._dict(frappe.db.sql("""select item_code, default_warehouse
@@ -210,6 +216,16 @@ class BuyingController(StockController):
 				reserve_warehouse = bom_item.source_warehouse or item_wh.get(bom_item.item_code)
 				if frappe.db.get_value("Warehouse", reserve_warehouse, "company") != self.company:
 					reserve_warehouse = None
+
+			conversion_factor = item.conversion_factor
+			if (self.doctype == 'Purchase Receipt' and item.purchase_order and
+				bom_item.item_code in used_alternative_items):
+				alternative_item_data = used_alternative_items.get(bom_item.item_code)
+				bom_item.item_code = alternative_item_data.item_code
+				bom_item.item_name = alternative_item_data.item_name
+				bom_item.stock_uom = alternative_item_data.stock_uom
+				conversion_factor = alternative_item_data.conversion_factor
+				bom_item.description = alternative_item_data.description
 
 			# check if exists
 			exists = 0
@@ -223,7 +239,7 @@ class BuyingController(StockController):
 				rm = self.append(raw_material_table, {})
 
 			required_qty = flt(flt(bom_item.qty_consumed_per_unit) * (flt(item.qty) + getattr(item, 'rejected_qty', 0)) *
-				flt(item.conversion_factor), rm.precision("required_qty"))
+				flt(conversion_factor), rm.precision("required_qty"))
 			rm.reference_name = item.name
 			rm.bom_detail_no = bom_item.name
 			rm.main_item_code = item.item_code
@@ -233,7 +249,7 @@ class BuyingController(StockController):
 			if self.doctype == "Purchase Order" and not rm.reserve_warehouse:
 				rm.reserve_warehouse = reserve_warehouse
 
-			rm.conversion_factor = item.conversion_factor
+			rm.conversion_factor = conversion_factor
 
 			if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 				rm.consumed_qty = required_qty

@@ -6,6 +6,8 @@ import frappe
 from erpnext.stock.utils import get_bin
 
 def execute():
+	frappe.reload_doc("stock", "doctype", "bin")
+	frappe.reload_doc("buying", "doctype", "purchase_order_item_supplied")
 	for d in frappe.db.sql("""
 		select distinct rm_item_code, reserve_warehouse
 		from `tabPurchase Order Item Supplied`

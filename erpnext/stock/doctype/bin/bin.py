@@ -116,14 +116,14 @@ class Bin(Document):
 				se.docstatus=1
 				and se.purpose='Subcontract'
 				and ifnull(se.purchase_order, '') !=''
-				and sed.item_code = %s
+				and (sed.item_code = %(item)s or sed.original_item = %(item)s)
 				and se.name = sed.parent
 				and se.purchase_order = po.name
 				and po.docstatus = 1
 				and po.is_subcontracted = 'Yes'
 				and po.status != 'Closed'
 				and po.per_received < 100
-		""", (self.item_code))[0][0]
+		""", {'item': self.item_code})[0][0]
 
 		if reserved_qty_for_sub_contract > materials_transferred:
 			reserved_qty_for_sub_contract = reserved_qty_for_sub_contract - materials_transferred
