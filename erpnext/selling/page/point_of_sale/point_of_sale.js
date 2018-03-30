@@ -9,7 +9,7 @@ frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 	});
 
 	frappe.db.get_value('POS Settings', {name: 'POS Settings'}, 'is_online', (r) => {
-		if (r && r.use_pos_in_offline_mode && !cint(r.use_pos_in_offline_mode)) {
+		if (r && !cint(r.use_pos_in_offline_mode)) {
 			// online
 			wrapper.pos = new erpnext.pos.PointOfSale(wrapper);
 			window.cur_pos = wrapper.pos;
