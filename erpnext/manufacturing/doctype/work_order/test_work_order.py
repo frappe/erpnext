@@ -95,7 +95,8 @@ class TestWorkOrder(unittest.TestCase):
 
 		manufacturing_settings = frappe.get_doc({
 			"doctype": "Manufacturing Settings",
-			"allow_production_on_holidays": 0
+			"allow_production_on_holidays": 0,
+			"allow_overtime": 1
 		})
 
 		manufacturing_settings.save()

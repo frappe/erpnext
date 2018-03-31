@@ -5,13 +5,13 @@ from __future__ import unicode_literals
 import frappe
 import json
 from frappe import _
-from frappe.utils import flt, get_datetime, getdate, date_diff, cint, nowdate
+from frappe.utils import flt, get_datetime, getdate, date_diff, cint, nowdate, time_diff_in_hours
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_bom_items_as_dict
 from dateutil.relativedelta import relativedelta
 from erpnext.stock.doctype.item.item import validate_end_of_life
 from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
-from erpnext.projects.doctype.timesheet.timesheet import OverlapError
+from erpnext.projects.doctype.timesheet.timesheet import get_data_for_scheduling
 from erpnext.stock.doctype.stock_entry.stock_entry import get_additional_costs
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
@@ -311,32 +311,25 @@ class WorkOrder(Document):
 
 		timesheets = []
 		plan_days = frappe.db.get_single_value("Manufacturing Settings", "capacity_planning_for_days") or 30
+		allow_overtime = frappe.db.get_single_value("Manufacturing Settings", "allow_overtime")
 
 		timesheet = make_timesheet(self.name, self.company)
 		timesheet.set('time_logs', [])
 
+		workstations = []
 		for i, d in enumerate(self.operations):
-
 			if d.status != 'Completed':
-				self.set_start_end_time_for_workstation(d, i)
+				operation_time = d.time_in_mins
 
-				args = self.get_operations_data(d)
+				while (cint(d.time_in_mins) > 0):
+					self.set_start_end_time_for_workstation(i, d, timesheet, workstations, allow_overtime)
 
-				add_timesheet_detail(timesheet, args)
-				original_start_time = d.planned_start_time
-
-				# validate operating hours if workstation [not mandatory] is specified
-				try:
-					timesheet.validate_time_logs()
-				except OverlapError:
-					if frappe.message_log: frappe.message_log.pop()
-					timesheet.schedule_for_work_order(d.idx)
-				except WorkstationHolidayError:
-					if frappe.message_log: frappe.message_log.pop()
-					timesheet.schedule_for_work_order(d.idx)
+					args = self.get_operations_data(d)
+					add_timesheet_detail(timesheet, args)
+					original_start_time = d.planned_start_time
 
 				from_time, to_time = self.get_start_end_time(timesheet, d.name)
-
+				d.time_in_mins = operation_time
 				if date_diff(from_time, original_start_time) > plan_days:
 					frappe.throw(_("Unable to find Time Slot in the next {0} days for Operation {1}").format(plan_days, d.operation))
 					break
@@ -360,7 +353,7 @@ class WorkOrder(Document):
 	def get_operations_data(self, data):
 		return {
 			'from_time': get_datetime(data.planned_start_time),
-			'hours': data.time_in_mins / 60.0,
+			'hours': data.hours,
 			'to_time': get_datetime(data.planned_end_time),
 			'project': self.project,
 			'operation': data.operation,
@@ -369,25 +362,40 @@ class WorkOrder(Document):
 			'completed_qty': flt(self.qty) - flt(data.completed_qty)
 		}
 
-	def set_start_end_time_for_workstation(self, data, index):
+	def set_start_end_time_for_workstation(self, index, data, timesheets, workstations, allow_overtime):
 		"""Set start and end time for given operation. If first operation, set start as
 		`planned_start_date`, else add time diff to end time of earlier operation."""
 
-		if index == 0:
-			data.planned_start_time = self.planned_start_date
-		else:
-			data.planned_start_time = get_datetime(self.operations[index-1].planned_end_time)\
-								+ get_mins_between_operations()
+		if data.workstation not in workstations:
+			last_working_slot = frappe.get_all('Timesheet Detail', fields = ["to_time"],
+				filters= {'workstation': data.workstation}, order_by = "to_time desc", limit_page_length=1)
 
-		data.planned_end_time = get_datetime(data.planned_start_time) + relativedelta(minutes = data.time_in_mins)
+			data.planned_start_time = (get_datetime(last_working_slot[0].to_time) + get_mins_between_operations()
+				if last_working_slot else data.planned_start_time or get_datetime(self.planned_start_date))
+
+			workstations.append(data.workstation)
+		else:
+			idx = [d.idx for d in timesheets.time_logs if d.workstation == data.workstation]
+			data.planned_start_time = (get_datetime(timesheets.time_logs[idx[-1] - 1].to_time)
+				+ get_mins_between_operations()) if idx else data.planned_start_time
+
+		data.planned_end_time = (get_datetime(data.planned_start_time)
+			+ relativedelta(minutes = data.time_in_mins))
+
+		if allow_overtime:
+			data.time_in_mins = 0
+			data.hours = time_diff_in_hours(data.planned_end_time, data.planned_start_time)
+		else:
+			data = get_data_for_scheduling(data)
 
 		if data.planned_start_time == data.planned_end_time:
 			frappe.throw(_("Capacity Planning Error"))
 
 	def get_start_end_time(self, timesheet, operation_id):
-		for data in timesheet.time_logs:
-			if data.operation_id == operation_id:
-				return data.from_time, data.to_time
+		from_time = min([d.from_time for d in timesheet.time_logs if d.operation_id == operation_id])
+		to_time = min([d.to_time for d in timesheet.time_logs if d.operation_id == operation_id])
+
+		return from_time, to_time
 
 	def check_operation_fits_in_working_hours(self, d):
 		"""Raises expection if operation is longer than working hours in the given workstation."""

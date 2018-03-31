@@ -9,7 +9,8 @@ from frappe import _
 import json
 from datetime import timedelta
 from erpnext.controllers.queries import get_match_cond
-from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint
+from frappe.utils import flt, time_diff_in_hours, get_datetime, getdate, cint, add_days
+from dateutil.relativedelta import relativedelta
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.workstation.workstation import (check_if_within_operating_hours,
 	WorkstationHolidayError)
@@ -150,7 +151,7 @@ class Timesheet(Document):
 	def get_actual_timesheet_summary(self, operation_id):
 		"""Returns 'Actual Operating Time'. """
 		return frappe.db.sql("""select
-			sum(tsd.hours*60) as mins, sum(tsd.completed_qty) as completed_qty, min(tsd.from_time) as from_time,
+			sum(tsd.hours*60) as mins, Avg(tsd.completed_qty) as completed_qty, min(tsd.from_time) as from_time,
 			max(tsd.to_time) as to_time from `tabTimesheet Detail` as tsd, `tabTimesheet` as ts where
 			ts.work_order = %s and tsd.operation_id = %s and ts.docstatus=1 and ts.name = tsd.parent""",
 			(self.work_order, operation_id), as_dict=1)[0]
@@ -176,7 +177,8 @@ class Timesheet(Document):
 
 	def validate_time_logs(self):
 		for data in self.get('time_logs'):
-			self.check_workstation_timings(data)
+			check_workstation_timings(data.workstation,
+				data.operation, data.from_time, data.to_time)
 			self.validate_overlap(data)
 
 	def validate_overlap(self, data):
@@ -217,6 +219,7 @@ class Timesheet(Document):
 				"name": args.name or "No Name",
 				"parent": args.parent or "No Name"
 			}, as_dict=True)
+
 		# check internal overlap
 		for time_log in self.time_logs:
 			if (fieldname != 'workstation' or args.get(fieldname) == time_log.get(fieldname)) and \
@@ -227,47 +230,10 @@ class Timesheet(Document):
 
 		return existing[0] if existing else None
 
-	def check_workstation_timings(self, args):
-		"""Checks if **Time Log** is between operating hours of the **Workstation**."""
-		if args.workstation and args.from_time and args.to_time:
-			check_if_within_operating_hours(args.workstation, args.operation, args.from_time, args.to_time)
-
-	def schedule_for_work_order(self, index):
-		for data in self.time_logs:
-			if data.idx == index:
-				self.move_to_next_day(data) #check for workstation holiday
-				self.move_to_next_non_overlapping_slot(data) #check for overlap
-				break
-
-	def move_to_next_non_overlapping_slot(self, data):
-		overlapping = self.get_overlap_for("workstation", data, data.workstation)
-		if overlapping:
-			time_sheet = self.get_last_working_slot(overlapping.name, data.workstation)
-			data.from_time = get_datetime(time_sheet.to_time) + get_mins_between_operations()
-			data.to_time = self.get_to_time(data)
-			self.check_workstation_working_day(data)
-
 	def get_last_working_slot(self, time_sheet, workstation):
 		return frappe.db.sql(""" select max(from_time) as from_time, max(to_time) as to_time
 			from `tabTimesheet Detail` where workstation = %(workstation)s""",
 			{'workstation': workstation}, as_dict=True)[0]
-
-	def move_to_next_day(self, data):
-		"""Move start and end time one day forward"""
-		self.check_workstation_working_day(data)
-
-	def check_workstation_working_day(self, data):
-		while True:
-			try:
-				self.check_workstation_timings(data)
-				break
-			except WorkstationHolidayError:
-				if frappe.message_log: frappe.message_log.pop()
-				data.from_time = get_datetime(data.from_time) + timedelta(hours=24)
-				data.to_time = self.get_to_time(data)
-
-	def get_to_time(self, data):
-		return get_datetime(data.from_time) + timedelta(hours=data.hours)
 
 	def update_cost(self):
 		for data in self.time_logs:
@@ -440,3 +406,68 @@ def get_list_context(context=None):
 		"get_list": get_timesheets_list,
 		"row_template": "templates/includes/timesheet/timesheet_row.html"
 	}
+
+def get_data_for_scheduling(data):
+	workstation_timings = frappe.get_all('Workstation Working Hour',
+		filters = {'parent': data.workstation, 'enabled': 1}, fields = ["start_time", "end_time"],
+		order_by = "idx asc")
+
+	if not workstation_timings: return data
+
+	within_working_hours = False
+	for i, timestamp in enumerate(workstation_timings):
+		within_working_hours = check_within_working_hours(data, timestamp)
+		if within_working_hours: return data
+
+	if (not within_working_hours and len(workstation_timings) - 1 == i):
+		move_to_next_day(data, workstation_timings[0])
+		check_within_working_hours(data, workstation_timings[0], True)
+
+	return data
+
+def check_within_working_hours(data, timestamp, check_workstation=False):
+	"""Checks if **Time Log** is between operating hours of the **Workstation**."""
+
+	within_working_hours = False
+	start_datetime = concate_datetime(data.planned_start_time, timestamp.start_time)
+	end_datetime = concate_datetime(data.planned_start_time, timestamp.end_time)
+
+	if start_datetime <= data.planned_start_time and data.planned_start_time < end_datetime:
+		time_in_mins = time_diff_in_hours(end_datetime, data.planned_start_time) * 60
+		time_in_mins = (data.time_in_mins
+			if time_in_mins > data.time_in_mins else time_in_mins)
+
+		within_working_hours = True
+
+	if within_working_hours:
+		data.planned_end_time = (get_datetime(data.planned_start_time) +
+			relativedelta(minutes = time_in_mins))
+		data.hours = time_in_mins / 60
+		data.time_in_mins -= time_in_mins
+
+	if within_working_hours and check_workstation:
+		check_workstation_working_day(data)
+
+	return within_working_hours
+
+def move_to_next_day(data, timestamp):
+	next_date =  get_datetime(data.planned_start_time) + timedelta(hours=24)
+	data.planned_start_time = concate_datetime(next_date, timestamp.start_time)
+
+def check_workstation_working_day(args):
+	while True:
+		try:
+			check_workstation_timings(args.workstation,
+				args.operation, args.planned_start_time, args.planned_end_time)
+			break
+		except WorkstationHolidayError:
+			hours = args.time_in_mins/60
+			args.planned_start_time = get_datetime(args.planned_start_time) + timedelta(hours=24)
+			args.planned_end_time = get_datetime(args.planned_start_time) + timedelta(hours=hours)
+
+def check_workstation_timings(workstation, operating, from_time, to_time):
+	if workstation and from_time and to_time:
+		check_if_within_operating_hours(workstation, operating, from_time, to_time)
+
+def concate_datetime(date, time):
+	return get_datetime('{0} {1}'.format(date, time))
