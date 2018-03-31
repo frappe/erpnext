@@ -1,28 +1,19 @@
 language: python
 dist: trusty
 
-matrix:
-  include:
-    - python:
-      - "2.7"
-      - "3.6"
-      - pypy
-    - env: Server Side Test
-      script:
-        - set -e
-        - bench run-tests
-    - env: Patch Testing
-      script:
-        - wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz
-        - bench --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz --mariadb-root-password travis
-        - bench migrate
-  allow_failures:
+python:
+  - "2.7"
+  - "3.6"
+  
+ matrix:
+  - allow_failures:
     - python: "3.6"
 
 services:
   - mysql
 
 install:
+  # fix mongodb travis error
   - sudo rm /etc/apt/sources.list.d/mongodb*.list
   - pip install flake8==3.3.0
   - flake8 . --count --select=E901,E999,F821,F822,F823 --show-source --statistics
@@ -50,3 +41,17 @@ before_script:
   - bench scheduler disable
   - bench start &
   - sleep 10
+
+jobs:
+  include:
+    - stage: test
+      script:
+        - set -e
+        - bench run-tests
+      env: Server Side Test
+    - # stage
+      script:
+        - wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz
+        - bench --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz --mariadb-root-password travis
+        - bench migrate
+      env: Patch Testing
