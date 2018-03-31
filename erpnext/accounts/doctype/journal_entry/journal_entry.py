@@ -187,7 +187,7 @@ class JournalEntry(AccountsController):
 				d.reference_name = None
 			if not d.reference_name:
 				d.reference_type = None
-			if d.reference_type and d.reference_name and (d.reference_type in field_dict.keys()):
+			if d.reference_type and d.reference_name and (d.reference_type in list(field_dict)):
 				dr_or_cr = "credit_in_account_currency" \
 					if d.reference_type in ("Sales Order", "Sales Invoice") else "debit_in_account_currency"
 

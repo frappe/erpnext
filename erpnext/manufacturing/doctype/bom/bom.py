@@ -501,7 +501,7 @@ class BOM(WebsiteGenerator):
 
 		for d in sorted(self.cur_exploded_items, key=itemgetter(0)):
 			ch = self.append('exploded_items', {})
-			for i in self.cur_exploded_items[d].keys():
+			for i in list(self.cur_exploded_items[d]):
 				ch.set(i, self.cur_exploded_items[d][i])
 			ch.amount = flt(ch.stock_qty) * flt(ch.rate)
 			ch.qty_consumed_per_unit = flt(ch.stock_qty) / flt(self.quantity)

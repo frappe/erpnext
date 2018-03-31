@@ -272,7 +272,7 @@ def calculate_adjustment(filters, non_expense_mapper, expense_mapper, use_accumu
 
 def _calculate_adjustment(non_expense_closing, non_expense_opening, expense_data):
 	account_data = {}
-	for month in non_expense_opening.keys():
+	for month in list(non_expense_opening):
 		if non_expense_opening[month] and non_expense_closing[month]:
 			account_data[month] = non_expense_opening[month] - expense_data[month] + non_expense_closing[month]
 		elif expense_data[month]:

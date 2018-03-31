@@ -40,8 +40,8 @@ class MaterialRequest(BuyingController):
 					else:
 						so_items[d.sales_order][d.item_code] += flt(d.qty)
 
-		for so_no in so_items.keys():
-			for item in so_items[so_no].keys():
+		for so_no in list(so_items):
+			for item in list(so_items[so_no]):
 				already_indented = frappe.db.sql("""select sum(qty)
 					from `tabMaterial Request Item`
 					where item_code = %s and sales_order = %s and
