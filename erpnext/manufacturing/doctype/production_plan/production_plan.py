@@ -8,11 +8,7 @@ from frappe import msgprint, _
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from frappe.utils import cstr, flt, cint, nowdate, add_days, comma_and, now_datetime
-<<<<<<< Updated upstream
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
-=======
-from erpnext.manufacturing.doctype.production_order.production_order import get_item_details
->>>>>>> Stashed changes
 from six import string_types
 
 class ProductionPlan(Document):
