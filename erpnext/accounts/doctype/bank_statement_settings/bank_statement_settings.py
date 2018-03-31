@@ -8,4 +8,4 @@ from frappe.model.document import Document
 
 class BankStatementSettings(Document):
 	def autoname(self):
-		self.name = self.bank_account + "-Mappings"
+		self.name = self.bank + "-Statement-Settings"
