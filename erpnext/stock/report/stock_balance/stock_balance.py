@@ -209,7 +209,7 @@ def get_item_details(filters):
 	item_details = dict((d.name , d) for d in items)
 
 	if filters.get('show_variant_attributes', 0) == 1:
-		variant_values = get_variant_values_for(item_details.keys())
+		variant_values = get_variant_values_for(list(item_details))
 		item_details = {k: v.update(variant_values.get(k, {})) for k, v in iteritems(item_details)}
 
 	return item_details

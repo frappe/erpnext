@@ -94,7 +94,7 @@ def migrate_item_variants():
 def save_attributes_in_template(item, attribute_value_options):
 	# store attribute in Item Variant Attribute table for template
 	template = frappe.get_doc("Item", item)
-	template.set("attributes", [{"attribute": attribute} for attribute in attribute_value_options.keys()])
+	template.set("attributes", [{"attribute": attribute} for attribute in list(attribute_value_options)])
 	template.save()
 
 def get_possible_combinations(attribute_value_options):

@@ -274,7 +274,7 @@ def get_grade(grading_scale, percentage):
 		frappe.local.grading_scale = grading_scale
 	for d in frappe.local.grading_scale:
 		grading_scale_intervals.update({d.threshold:d.grade_code})
-	intervals = sorted(grading_scale_intervals.keys(), key=float, reverse=True)
+	intervals = sorted(list(grading_scale_intervals), key=float, reverse=True)
 	for interval in intervals:
 		if flt(percentage) >= interval:
 			grade = grading_scale_intervals.get(interval)

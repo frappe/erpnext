@@ -88,9 +88,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 					"range4": 0
 				})
 			)
-			for k in party_total[d.party].keys():
-				if k != "currency":
-					party_total[d.party][k] += flt(d.get(k, 0))
+			for k in list(party_total[d.party]):
+				party_total[d.party][k] += d.get(k, 0)
 				
 			party_total[d.party].currency = d.currency
 

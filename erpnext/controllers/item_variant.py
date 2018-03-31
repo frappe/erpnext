@@ -138,7 +138,7 @@ def find_variant(template, args, variant_item_code=None):
 	for variant in possible_variants:
 		variant = frappe.get_doc("Item", variant)
 
-		if len(args.keys()) == len(variant.get("attributes")):
+		if len(list(args)) == len(variant.get("attributes")):
 			# has the same number of attributes and values
 			# assuming no duplication as per the validation in Item
 			match_count = 0
@@ -150,7 +150,7 @@ def find_variant(template, args, variant_item_code=None):
 						match_count += 1
 						break
 
-			if match_count == len(args.keys()):
+			if match_count == len(list(args)):
 				return variant.name
 
 @frappe.whitelist()
@@ -220,7 +220,7 @@ def generate_keyed_value_combinations(args):
 	# 	[(u'attr3', u'A')],
 	# 	[(u'attr1', u'a'), (u'attr1', u'b'), (u'attr1', u'c')]
 	# ]
-	key_value_lists = [[(key, val) for val in args[key]] for key in args.keys()]
+	key_value_lists = [[(key, val) for val in args[key]] for key in list(args)]
 
 	# Store the first, but as objects
 	# [{u'attr2': u'1'}, {u'attr2': u'2'}]

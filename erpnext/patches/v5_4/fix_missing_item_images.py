@@ -24,7 +24,7 @@ def fix_files_for_item(files_path, unlinked_files):
 	fixed_files = []
 
 	# make a list of files/something and /files/something to check in child table's image column
-	file_urls = [key for key in unlinked_files.keys()] + ["/" + key for key in unlinked_files.keys()]
+	file_urls = [key for key in list(unlinked_files)] + ["/" + key for key in list(unlinked_files)]
 	file_item_code = get_file_item_code(file_urls)
 
 	for (file_url, item_code), children in file_item_code.items():

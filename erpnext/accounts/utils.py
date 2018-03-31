@@ -426,7 +426,7 @@ def update_reference_in_payment_entry(d, payment_entry):
 		if d.allocated_amount < original_row.allocated_amount:
 			new_row = payment_entry.append("references")
 			new_row.docstatus = 1
-			for field in reference_details.keys():
+			for field in list(reference_details):
 				new_row.set(field, original_row[field])
 
 			new_row.allocated_amount = original_row.allocated_amount - d.allocated_amount

@@ -204,7 +204,7 @@ def make_maps_for_csv(csv_content, account_types, country_dir):
 
 def make_account_trees():
 	"""build tree hierarchy"""
-	for id in accounts.keys():
+	for id in list(accounts):
 		account = accounts[id]
 
 		if account.get("parent_id"):
@@ -215,7 +215,7 @@ def make_account_trees():
 			del account["name"]
 
 	# remove empty children
-	for id in accounts.keys():
+	for id in list(accounts):
 		if "children" in accounts[id] and not accounts[id].get("children"):
 			del accounts[id]["children"]
 
@@ -254,7 +254,7 @@ def make_charts():
 					with open(fpath, "w") as chartfile:
 						chartfile.write(json.dumps(chart, indent=4, sort_keys=True))
 
-					all_roots.setdefault(filename, chart["tree"].keys())
+					all_roots.setdefault(filename, list(chart["tree"]))
 
 def create_all_roots_file():
 	with open('all_roots.txt', 'w') as f:
