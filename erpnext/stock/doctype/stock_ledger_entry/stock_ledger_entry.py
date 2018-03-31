@@ -87,7 +87,8 @@ class StockLedgerEntry(Document):
 		self.stock_uom = item_det.stock_uom
 
 	def check_stock_frozen_date(self):
-		stock_frozen_upto = frappe.db.get_value('Stock Settings', None, 'stock_frozen_upto') or ''
+        # Hard coded
+		stock_frozen_upto = frappe.utils.get_datetime('2000-01-01').date()
 		if stock_frozen_upto:
 			stock_auth_role = frappe.db.get_value('Stock Settings', None,'stock_auth_role')
 			if getdate(self.posting_date) <= getdate(stock_frozen_upto) and not stock_auth_role in frappe.get_roles():
