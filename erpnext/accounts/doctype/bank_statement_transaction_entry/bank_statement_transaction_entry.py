@@ -16,16 +16,19 @@ import copy
 class BankStatementTransactionEntry(Document):
 	def autoname(self):
 		self.name = self.bank_account + "-" + self.from_date + "-" + self.to_date
-		mapper_name = self.bank_account + "-Mappings"
+		mapper_name = self.bank + "-Statement-Settings"
 		if not frappe.db.exists("Bank Statement Settings", mapper_name):
-			mapper = frappe.new_doc("Bank Statement Settings")
-			mapper.bank_account = self.bank_account
-			mapper.date_format = "%Y-%m-%d"
-			for header in ["Date", "Particulars", "Withdrawals", "Deposits", "Balance"]:
-				header_item = mapper.append("header_items", {})
-				header_item.mapped_header = header_item.stmt_header = header
-			mapper.save()
-		self.bank_data_mapper = mapper_name
+			self.create_settings(self.bank)
+		self.bank_settings = mapper_name
+
+	def create_settings(self, bank):
+		mapper = frappe.new_doc("Bank Statement Settings")
+		mapper.bank = bank
+		mapper.date_format = "%Y-%m-%d"
+		for header in ["Date", "Particulars", "Withdrawals", "Deposits", "Balance"]:
+			header_item = mapper.append("header_items", {})
+			header_item.mapped_header = header_item.stmt_header = header
+		mapper.save()
 
 	def on_update(self):
 		if (not self.bank_statement):
@@ -38,9 +41,9 @@ class BankStatementTransactionEntry(Document):
 			self.match_invoice_to_payment()
 
 	def get_statement_headers(self):
-		if not self.bank_data_mapper:
+		if not self.bank_settings:
 			frappe.throw("Bank Data mapper doesn't exist")
-		mapper_doc = frappe.get_doc("Bank Statement Settings", self.bank_data_mapper)
+		mapper_doc = frappe.get_doc("Bank Statement Settings", self.bank_settings)
 		headers = [entry.stmt_header for entry in mapper_doc.header_items]
 		return headers
 
@@ -50,11 +53,11 @@ class BankStatementTransactionEntry(Document):
 		if (len(self.new_transaction_items + self.reconciled_transaction_items) > 0):
 			frappe.throw("Transactions already retreived from the statement")
 
-		date_format = frappe.get_value("Bank Statement Settings", self.bank_data_mapper, "date_format")
+		date_format = frappe.get_value("Bank Statement Settings", self.bank_settings, "date_format")
 		if (date_format is None):
 			date_format = '%Y-%m-%d'
-		if self.bank_data_mapper:
-			mapped_items = frappe.get_doc("Bank Statement Settings", self.bank_data_mapper).mapped_items
+		if self.bank_settings:
+			mapped_items = frappe.get_doc("Bank Statement Settings", self.bank_settings).mapped_items
 		transactions = get_transaction_entries(filename, self.get_statement_headers())
 		for entry in transactions:
 			date = entry["Date"].strip()
