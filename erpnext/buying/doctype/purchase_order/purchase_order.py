@@ -91,21 +91,22 @@ class PurchaseOrder(BuyingController):
 			standing = frappe.db.get_value("Supplier Scorecard",self.supplier, 'status')
 			frappe.msgprint(_("{0} currently has a {1} Supplier Scorecard standing, and Purchase Orders to this supplier should be issued with caution.").format(self.supplier, standing), title=_("Caution"), indicator='orange')
 
-	# def validate_minimum_order_qty(self):
-	# 	items = list(set([d.item_code for d in self.get("items")]))
-    #
-	# 	itemwise_min_order_qty = frappe._dict(frappe.db.sql("""select name, min_order_qty
-	# 		from tabItem where name in ({0})""".format(", ".join(["%s"] * len(items))), items))
-    #
-	# 	itemwise_qty = frappe._dict()
-	# 	for d in self.get("items"):
-	# 		itemwise_qty.setdefault(d.item_code, 0)
-	# 		itemwise_qty[d.item_code] += flt(d.stock_qty)
-    #
-	# 	for item_code, qty in itemwise_qty.items():
-	# 		if flt(qty) < flt(itemwise_min_order_qty.get(item_code)):
-	# 			frappe.throw(_("Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item).").format(item_code,
-	# 				qty, itemwise_min_order_qty.get(item_code)))
+	def validate_minimum_order_qty(self):
+        return
+		items = list(set([d.item_code for d in self.get("items")]))
+
+		itemwise_min_order_qty = frappe._dict(frappe.db.sql("""select name, min_order_qty
+			from tabItem where name in ({0})""".format(", ".join(["%s"] * len(items))), items))
+
+		itemwise_qty = frappe._dict()
+		for d in self.get("items"):
+			itemwise_qty.setdefault(d.item_code, 0)
+			itemwise_qty[d.item_code] += flt(d.stock_qty)
+
+		for item_code, qty in itemwise_qty.items():
+			if flt(qty) < flt(itemwise_min_order_qty.get(item_code)):
+				frappe.throw(_("Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item).").format(item_code,
+					qty, itemwise_min_order_qty.get(item_code)))
 
 	def validate_bom_for_subcontracting_items(self):
 		if self.is_subcontracted == "Yes":
