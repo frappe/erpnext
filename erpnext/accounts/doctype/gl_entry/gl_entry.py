@@ -151,6 +151,7 @@ def check_freezing_date(posting_date, adv_adj=False):
 		Nobody can do GL Entries where posting date is before freezing date
 		except authorized person
 	"""
+	return
 	if not adv_adj:
 		acc_frozen_upto = frappe.db.get_value('Accounts Settings', None, 'acc_frozen_upto')
 		if acc_frozen_upto:
