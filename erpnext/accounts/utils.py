@@ -252,16 +252,11 @@ def add_ac(args=None):
 	if not ac.parent_account:
 		ac.parent_account = args.get("parent")
 
-	if getattr(ac, 'is_root', None):
-		ac.parent_account=''
-
 	ac.old_parent = ""
 	ac.freeze_account = "No"
 	if cint(ac.get("is_root")):
 		ac.parent_account = None
 		ac.flags.ignore_mandatory = True
-	else:
-		ac.root_type = None
 
 	ac.insert()
 
