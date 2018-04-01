@@ -426,7 +426,7 @@ class SalarySlip(TransactionBase):
 				"recipients": [receiver],
 				"message": _("Please see attachment"),
 				"subject": 'Salary Slip - from {0} to {1}'.format(self.start_date, self.end_date),
-				"attachments": [frappe.attach_print(self.doctype, self.name, file_name=self.name)],
+				"attachments": [frappe.attach_print(self.doctype, self.name, file_name=self.name, print_letterhead=True)],
 				"reference_doctype": self.doctype,
 				"reference_name": self.name
 				}
