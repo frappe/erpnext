@@ -155,7 +155,7 @@ class RequestforQuotation(BuyingController):
 
 	def get_attachments(self):
 		attachments = [d.name for d in get_attachments(self.doctype, self.name)]
-		attachments.append(frappe.attach_print(self.doctype, self.name, doc=self))
+		attachments.append(frappe.attach_print(self.doctype, self.name, doc=self, print_letterhead=True))
 		return attachments
 
 	def update_rfq_supplier_status(self, sup_name=None):
